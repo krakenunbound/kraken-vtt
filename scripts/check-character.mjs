@@ -97,11 +97,28 @@ try {
   const wisdom = await tool("kraken_siege_check", { id: built.id, attribute: "wisdom", cl: 0 });
   assert(wisdom.total === 24 && wisdom.cc === 12 && wisdom.success === true, `wisdom ${JSON.stringify(wisdom)}`);
 
+  // Level up: Divine Knight 3 -> 4, its hit die fixed at 6. The gain is the
+  // die plus Constitution 16 (+2); BtH, hit dice and XP to next level come
+  // from the package's level 4 and 5 rows.
+  const { readModule } = require("../electron/importers/fgModule.cjs");
+  const knight = readModule("C&C Adventurer's Backpack").records.find((r) => r.type === "siegepackage" && r.name === "Divine Knight").data;
+  const row4 = Object.values(knight.levels).find((row) => row.level === 4);
+  const row5 = Object.values(knight.levels).find((row) => row.level === 5);
+  await tool("kraken_dice_force", { values: [6] });
+  const levelled = await tool("kraken_level_up", { id: built.id });
+  const after = (await tool("kraken_record_get", { id: built.id })).data;
+  assert(levelled.level === 4 && after.level === 4, `level ${after.level}`);
+  assert(levelled.gain === 8 && after.hp.total === want.check.hp + 8, `hp ${after.hp.total} gain ${levelled.gain}`);
+  assert(after.bth === row4.bth && after.hitdice === row4.hd && after.expnext === row5.xp, `bth ${after.bth} hd ${after.hitdice} next ${after.expnext}`);
+  assert(Object.values(after.packages).some((pkg) => pkg.name === "Divine Knight" && pkg.hplog.l4 === 8), "hit points logged for level 4");
+  assert((await tool("kraken_chat_log", { count: 5 })).some((line) => line.text?.startsWith("[LEVEL UP] Sir Aldric Fane is now Divine Knight 4")), "level up in chat");
+
   // The sheet in the GM's window, and its Check button.
   await page.getByRole("tab", { name: "Characters" }).click();
   await page.waitForSelector(`[data-character="${built.id}"]`);
-  assert((await page.locator('[data-stat="ac"]').textContent()) === String(want.check.ac), "sheet AC");
-  assert((await page.locator('[data-stat="bth"]').textContent()) === `+${want.check.bth}`, "sheet BtH");
+  assert((await page.locator('[data-stat="ac"]').textContent()) === String(after.ac.total), "sheet AC");
+  assert((await page.locator('[data-stat="bth"]').textContent()) === `+${after.bth}`, "sheet BtH");
+  assert((await page.locator('[data-stat="level"]').textContent()) === "4", "sheet level");
   await tool("kraken_dice_force", { values: [7] });
   await page.getByRole("button", { name: "constitution check" }).click();
   const start = Date.now();
@@ -110,8 +127,8 @@ try {
     line = (await tool("kraken_chat_log", { count: 5 })).find((entry) => entry.roll?.label?.includes("Constitution check"));
     if (!line) await new Promise((resolve) => setTimeout(resolve, 100));
   }
-  // Constitution 16 (+2) + level 3 = +5, d20 7: 12.
-  assert(line && line.roll.total === 12, `sheet check ${JSON.stringify(line)}`);
+  // Constitution 16 (+2) + level 4 = +6, d20 7: 13.
+  assert(line && line.roll.total === 13, `sheet check ${JSON.stringify(line)}`);
 
   // Ann owns the character and sees it; Bob does not.
   const ann = await joinAs(port, "Ann");

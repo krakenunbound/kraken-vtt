@@ -6,7 +6,7 @@ const os = require("os");
 const { WebSocketServer } = require("ws");
 const { createRecordStore, canSee } = require("./records.cjs");
 const { createDice } = require("./dice.cjs");
-const { siege, siegeLibrary, siegeCheck } = require("./siege.cjs");
+const { siege, siegeLibrary, siegeCheck, levelUp } = require("./siege.cjs");
 
 const PALETTE = ["#d2a15a", "#6cb6ff", "#e07a6a", "#81b90c", "#ca81ff", "#77e7e8", "#ffb347", "#f4f1ea"];
 const MAX_CLIENTS = 16;
@@ -434,6 +434,19 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
             answer({ ok: true, id: record.id, problems: report.problems });
           })
           .catch((error) => answer({ ok: false, error: error instanceof Error ? error.message : "Could not build that character." }));
+        return;
+      }
+
+      // Level up from a sheet: the owner or the GM.
+      if (msg.type === "level-up") {
+        const record = records.get(msg.id, seatOf(client));
+        if (!record || (client.role !== "dm" && record.owner !== client.name)) {
+          send(ws, { type: "error", reason: "You cannot level up that character." });
+          return;
+        }
+        levelUp(agentHandle, record, msg.package, client.role === "dm" ? record.name : client.name).catch((error) =>
+          send(ws, { type: "error", reason: error instanceof Error ? error.message : "Could not level up." }),
+        );
         return;
       }
 

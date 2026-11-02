@@ -442,3 +442,42 @@ export function check({ d20, score, prime, level = 0, addLevel, cl = 0, bonus = 
   }
   return { total, modifier, cb, cc, success };
 }
+
+// The class package a level-up raises: the one named, else the only package
+// with a progression table, else the one with the lowest XP to its next row.
+export function levelUpPackage(character, packageKey) {
+  const classes = list(character.packages).filter(([, pkg]) => rows(pkg).length > 0);
+  if (packageKey) return classes.find(([key]) => key === packageKey) ?? null;
+  if (classes.length <= 1) return classes[0] ?? null;
+  const nextXP = (pkg) => Number(exactRow(pkg, (Number(pkg.level) || 1) + 1)?.xp) || Infinity;
+  return classes.sort(([, a], [, b]) => nextXP(a) - nextXP(b))[0];
+}
+
+// The roll for a package's next level: its new hit dice and flat bonus, and
+// the Constitution modifier when dice are rolled (SIEGE_HP_CON).
+export function levelUpRoll(character, pkg, game) {
+  const options = gameOptions(game);
+  const next = (Number(pkg.level) || 1) + 1;
+  if (!exactRow(pkg, next)) return null;
+  const { dice, flat } = levelGain(pkg, next);
+  const con = dice.length > 0 && isOn(options, "SIEGE_HP_CON") ? abilityBonus(character.attributes?.constitution?.score ?? 10, game) : 0;
+  const counts = new Map();
+  for (const die of dice) counts.set(die, (counts.get(die) ?? 0) + 1);
+  const bonus = flat + con;
+  const dicePart = [...counts].map(([die, count]) => `${count}${die}`).join("+");
+  const formula = dice.length > 0 ? dicePart + (bonus > 0 ? `+${bonus}` : bonus < 0 ? `${bonus}` : "") : "";
+  return { level: next, formula, flat, con, minimum: dice.length > 0 && isOn(options, "SIEGE_HP_MIN1") ? 1 : 0 };
+}
+
+// Raises a package one level and adds the hit points gained (logged in
+// hplog, so lowering the level takes them off again). Returns the new character.
+export function applyLevelUp(input, packageKey, gain, game) {
+  const character = structuredClone(input);
+  const pkg = character.packages[packageKey];
+  const next = (Number(pkg.level) || 1) + 1;
+  pkg.level = next;
+  pkg.hproll = next;
+  pkg.hplog = { ...(pkg.hplog ?? {}), [`l${next}`]: gain };
+  character.hp = { ...(character.hp ?? {}), total: (Number(character.hp?.total) || 0) + gain };
+  return derive(character, game);
+}

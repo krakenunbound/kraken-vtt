@@ -44,4 +44,27 @@ async function siegeCheck(table, record, { attribute, cl = 0, bonus = 0, addLeve
   return { d20, ...result };
 }
 
-module.exports = { siege, siegeLibrary, siegeCheck, ATTRIBUTES };
+// Raises a character one level in front of the table: the host rolls the new
+// level's hit points (or adds the flat gain), the sheet is rebuilt, and chat
+// says so.
+async function levelUp(table, record, packageKey, from) {
+  const { engine } = await siege();
+  const game = siegeLibrary(table.records).game;
+  const found = engine.levelUpPackage(record.data, packageKey);
+  if (!found) throw new Error("That character has no class to level up.");
+  const [key, pkg] = found;
+  const plan = engine.levelUpRoll(record.data, pkg, game);
+  if (!plan) throw new Error(`${pkg.name} has no level ${(Number(pkg.level) || 1) + 1}.`);
+  let gain = plan.flat;
+  if (plan.formula) {
+    const roll = table.roll(plan.formula, `${record.name}: ${pkg.name} ${plan.level} hit points`, from || record.name);
+    gain = Math.max(plan.minimum, roll.total);
+  }
+  const data = engine.applyLevelUp(record.data, key, gain, game);
+  const updated = table.records.update(record.id, { data }, table.seat, { replace: true });
+  const bth = data.bth >= 0 ? `+${data.bth}` : `${data.bth}`;
+  table.say(`[LEVEL UP] ${record.name} is now ${pkg.name} ${plan.level}: +${gain} hit points (${data.hp.total}), BtH ${bth}.`, from || record.name);
+  return { record: updated, gain, level: plan.level };
+}
+
+module.exports = { siege, siegeLibrary, siegeCheck, levelUp, ATTRIBUTES };
