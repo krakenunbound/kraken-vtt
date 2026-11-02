@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "kraken": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["electron/agent/mcp-stdio.cjs"]
+    }
+  }
+}

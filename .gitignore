@@ -1,0 +1,15 @@
+node_modules
+dist
+release
+*.local
+.DS_Store
+
+# Reference clone of Khazlor/Open-VTT (MIT); it has its own repository.
+open-vtt/
+
+# Licensed game content stays local, never in the repository.
+content/
+*.mod
+
+# Machine-specific agent bridge info (token).
+agent.json
