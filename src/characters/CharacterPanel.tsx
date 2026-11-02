@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { Session, TableRecord } from "../session/useSession";
+import { Wizard } from "./Wizard";
 
 // SIEGE character sheet (Castles & Crusades on the SIEGE engine). The host
 // derives every number (shared/siege/engine.mjs); the sheet shows them and
@@ -153,13 +154,17 @@ export function CharacterPanel({ session }: { session: Session }) {
     .filter((record) => record.type === "character")
     .sort((a, b) => a.name.localeCompare(b.name));
   const [selected, setSelected] = useState<string | null>(null);
+  const [creating, setCreating] = useState(false);
   const current = characters.find((record) => record.id === selected) ?? characters[0] ?? null;
 
   return (
     <section className="characters" role="tabpanel">
       <aside className="character-list">
         <h1>Characters</h1>
-        {characters.length === 0 ? <p className="hint">No characters yet. The agent can build one with kraken_build_character.</p> : null}
+        <button type="button" className="play-button" onClick={() => setCreating(true)} data-action="new-character">
+          New character
+        </button>
+        {characters.length === 0 ? <p className="hint">No characters yet.</p> : null}
         <ul>
           {characters.map((record) => (
             <li key={record.id}>
@@ -171,7 +176,17 @@ export function CharacterPanel({ session }: { session: Session }) {
           ))}
         </ul>
       </aside>
-      {current ? <Sheet record={current} session={session} /> : null}
+      {creating ? (
+        <Wizard
+          session={session}
+          onDone={(id) => {
+            setCreating(false);
+            if (id) setSelected(id);
+          }}
+        />
+      ) : current ? (
+        <Sheet record={current} session={session} />
+      ) : null}
     </section>
   );
 }

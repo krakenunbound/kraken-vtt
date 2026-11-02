@@ -147,6 +147,13 @@ try {
   await page.getByRole("tab", { name: "Party" }).click();
   await page.waitForSelector('.roll-card[data-total="13"]');
 
+  // Players open the host's address in a browser: the page and its script come from the host.
+  const pageHtml = await (await fetch(`http://127.0.0.1:${port}/`)).text();
+  assert(pageHtml.includes("<title>Kraken VTT</title>"), "host serves the web client");
+  const script = /src="\.?\/?(assets\/[^"]+\.js)"/.exec(pageHtml)?.[1];
+  assert(script && (await fetch(`http://127.0.0.1:${port}/${script}`)).ok, `host serves ${script}`);
+  assert((await fetch(`http://127.0.0.1:${port}/../package.json`)).status === 404, "no files outside the web client");
+
   // A player joins over the table's WebSocket.
   const player = new WebSocket(`ws://127.0.0.1:${port}`);
   const inbox = [];

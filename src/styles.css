@@ -624,3 +624,35 @@ select {
 .sheet-columns h3 { margin: 0 0 6px; color: #d2a15a; font-size: 1em; }
 .sheet-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 2px; }
 .sheet-list li { display: flex; justify-content: space-between; gap: 8px; padding: 3px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.06); }
+
+.wizard { display: grid; gap: 12px; align-content: start; min-width: 0; }
+.wizard-head { display: flex; justify-content: space-between; align-items: center; }
+.wizard-head h2 { margin: 0; color: #d2a15a; font-family: Georgia, serif; }
+.wizard-tabs { display: flex; flex-wrap: wrap; gap: 4px; border-bottom: 1px solid rgba(210, 161, 90, 0.4); padding-bottom: 6px; }
+.wizard-tabs button[aria-selected="true"] { border-color: #d2a15a; background: rgba(210, 161, 90, 0.15); }
+.badge { margin-left: 6px; font-size: 0.75em; padding: 0 5px; border-radius: 8px; }
+.badge.todo { background: #a8513f; color: #fff; }
+.badge.done { background: #4f7d3a; color: #fff; }
+.wizard-page { display: grid; gap: 10px; align-content: start; }
+.wizard-stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; }
+.wizard-stats .stat { display: grid; gap: 2px; padding: 8px; text-align: left; border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 6px; }
+.wizard-stats .stat b { font-size: 1.5em; }
+.wizard-stats .stat.picked { border-color: #d2a15a; background: rgba(210, 161, 90, 0.12); }
+.pick-list { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 6px; }
+.pick-list button { width: 100%; display: grid; gap: 2px; text-align: left; }
+.pick-list button.selected { border-color: #d2a15a; background: rgba(210, 161, 90, 0.15); }
+.pick-list button:disabled { opacity: 0.45; }
+.level-box input { width: 4em; }
+.equipment { grid-template-columns: 1fr 1.4fr; }
+.shop-filters { display: flex; gap: 6px; margin-bottom: 6px; }
+.sheet-list.shop { max-height: 420px; overflow: auto; }
+.sheet-list.shop li { display: grid; grid-template-columns: 1fr auto auto; align-items: center; }
+.spell-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 4px; }
+.spell { display: flex; gap: 6px; align-items: center; padding: 3px 6px; border-radius: 4px; }
+.spell.picked { background: rgba(210, 161, 90, 0.15); }
+.finish { grid-template-columns: 1fr 1fr; }
+.details { display: grid; gap: 6px; }
+.details label { display: grid; grid-template-columns: 110px 1fr; gap: 8px; align-items: center; }
+.details textarea { min-height: 60px; }
+.warnings { margin: 0; padding-left: 18px; color: #e0a08f; }
+.wizard-foot { display: flex; justify-content: space-between; }

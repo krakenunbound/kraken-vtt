@@ -6,7 +6,7 @@ export type Pawn = { id: string; name: string; color: string; x: number; y: numb
 export type RollTerm =
   | { kind: "number"; sign: number; value: number }
   | { kind: "dice"; sign: number; count: number; sides: number; rolls: number[]; kept: boolean[]; sum: number };
-export type RollResult = { formula: string; label: string; total: number; terms: RollTerm[] };
+export type RollResult = { formula: string; label: string; total: number; terms: RollTerm[]; tag?: string };
 export type ChatLine = { id: string; from: string; text: string; at: number; roll?: RollResult };
 export type TableRecord = {
   id: string;
@@ -415,10 +415,22 @@ export function useSession() {
     );
   }, []);
 
-  const roll = useCallback((formula: string, label = "") => {
+  // tag comes back on the roll in chat, so a caller can wait for its own roll.
+  const roll = useCallback((formula: string, label = "", tag = "") => {
     const socket = socketRef.current;
     if (!formula.trim() || !socket || socket.readyState !== WebSocket.OPEN) return;
-    socket.send(JSON.stringify({ type: "roll", formula: formula.trim().slice(0, 200), label: label.slice(0, 120) }));
+    socket.send(JSON.stringify({ type: "roll", formula: formula.trim().slice(0, 200), label: label.slice(0, 120), ...(tag ? { tag } : {}) }));
+  }, []);
+
+  // The creation wizard's character: the host builds it and answers with its id.
+  const buildCharacter = useCallback((spec: unknown, owner = "") => {
+    const socket = socketRef.current;
+    if (!socket || socket.readyState !== WebSocket.OPEN) return Promise.reject(new Error("Not connected."));
+    const req = ++opCounter.current;
+    return new Promise<string>((resolve, reject) => {
+      opWaits.current.set(req, { resolve, reject });
+      socket.send(JSON.stringify({ type: "build-character", req, spec, owner }));
+    });
   }, []);
 
   // Record changes go to the host, which answers with the record's id or why not.
@@ -510,6 +522,7 @@ export function useSession() {
     roll,
     op,
     siegeCheck,
+    buildCharacter,
   };
 }
 

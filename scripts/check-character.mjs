@@ -118,6 +118,22 @@ try {
   const bob = await joinAs(port, "Bob");
   assert(ann.ok.records.some((record) => record.id === built.id), "Ann sees her character");
   assert(!bob.ok.records.some((record) => record.id === built.id), "Bob does not see Ann's character");
+
+  // Bob makes his own character from the browser wizard: it is his, and Ann cannot see it.
+  const garrick = JSON.parse(readFileSync(path.join(pregens, "specs", "garrick-1.json"), "utf8"));
+  const replies = [];
+  bob.ws.on("message", (raw) => replies.push(JSON.parse(raw.toString())));
+  bob.ws.send(JSON.stringify({ type: "build-character", req: 7, spec: garrick, owner: "Ann" }));
+  const waitStart = Date.now();
+  let answer = null;
+  while (!answer && Date.now() - waitStart < 15000) {
+    answer = replies.find((m) => m.type === "op-result" && m.req === 7);
+    if (!answer) await new Promise((resolve) => setTimeout(resolve, 50));
+  }
+  assert(answer?.ok, `Bob's build ${JSON.stringify(answer)}`);
+  const bobs = await tool("kraken_record_get", { id: answer.id });
+  assert(bobs.owner === "Bob" && bobs.visibility === "owner", `Bob's character owner ${bobs.owner}`);
+  assert(bobs.data.hp.total === 11 && bobs.data.ac.total === 16, `Bob's Garrick hp ${bobs.data.hp.total} ac ${bobs.data.ac.total}`);
   ann.ws.close();
   bob.ws.close();
 
