@@ -85,6 +85,23 @@ function Sheet({ record, session }: { record: TableRecord; session: Session }) {
               {num(data.exp)} / {num(data.expnext) || "—"}
             </dd>
           </div>
+          {canRoll && num(data.expnext) > 0 ? (
+            <div>
+              <dt>{num(data.exp) >= num(data.expnext) ? "Ready" : "\u00a0"}</dt>
+              <dd>
+                <button
+                  type="button"
+                  data-action="level-up"
+                  className={num(data.exp) >= num(data.expnext) ? "play-button" : ""}
+                  disabled={session.role !== "dm" && num(data.exp) < num(data.expnext)}
+                  title={num(data.exp) >= num(data.expnext) ? "Enough experience for the next level" : "The GM can level a character early"}
+                  onClick={() => session.levelUp(record.id)}
+                >
+                  Level up
+                </button>
+              </dd>
+            </div>
+          ) : null}
         </dl>
       </header>
 

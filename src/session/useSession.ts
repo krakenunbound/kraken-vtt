@@ -454,6 +454,12 @@ export function useSession() {
     socket.send(JSON.stringify({ type: "siege-check", id, attribute, cl }));
   }, []);
 
+  const levelUp = useCallback((id: string) => {
+    const socket = socketRef.current;
+    if (!socket || socket.readyState !== WebSocket.OPEN) return;
+    socket.send(JSON.stringify({ type: "level-up", id }));
+  }, []);
+
   const sendChat = useCallback((text: string) => {
     const socket = socketRef.current;
     const line = text.trim();
@@ -523,6 +529,7 @@ export function useSession() {
     op,
     siegeCheck,
     buildCharacter,
+    levelUp,
   };
 }
 

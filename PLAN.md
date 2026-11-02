@@ -215,7 +215,8 @@ Each step is tested before the next one starts. Where FG or Foundry does the sam
 | 2 Sheet + agent tools | Done | `character`: `kraken_build_character`, `kraken_siege_check`, Characters tab, player visibility |
 | 2 Creation wizard UI | Done | `wizard`: every page driven with fixed dice; result equals the builder; host rolls every die |
 | Players in a browser | Done | The host serves the web client; `agent` checks it; manual Chrome pass as a player (join, map, own sheet only, check, chat) |
-| 2 Multi-class, enhanced, class plus, level up | Next | Port from `KrakenCharWizardCC` (CCClassRules, CCCombine, CCLevelUp) |
+| 2 Level up (single class) | Done | `character`: host-rolled HP, BtH, hit dice and next XP from the package rows, [LEVEL UP] in chat, sheet button |
+| 2 Multi-class, enhanced, class plus; dual class and reclass | Next | Port from `KrakenCharWizardCC` (CCClassRules, CCCombine, CCLevelUp) |
 | 3–6 | Not started | |
 
 Where things are:

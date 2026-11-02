@@ -9,7 +9,7 @@
 //   window()         the main BrowserWindow, for screenshots and page text
 
 const fgModule = require("../importers/fgModule.cjs");
-const { siege, siegeLibrary, siegeCheck } = require("../siege.cjs");
+const { siege, siegeLibrary, siegeCheck, levelUp } = require("../siege.cjs");
 
 function out(value) {
   return { content: [{ type: "text", text: typeof value === "string" ? value : JSON.stringify(value, null, 2) }] };
@@ -209,6 +209,18 @@ const TOOLS = [
       const derived = engine.derive(record.data, siegeLibrary(agent.records).game);
       const updated = agent.records.update(args.id, { data: derived }, agent.seat, { replace: true });
       return out({ id: updated.id, level: derived.level, bth: derived.bth, hp: derived.hp?.total, ac: derived.ac?.total, expnext: derived.expnext });
+    },
+  },
+  {
+    name: "kraken_level_up",
+    description: "Raise a character one level in its class. The host rolls the new level's hit points in front of the table, then the sheet is rebuilt (BtH, hit dice, XP to next level, slots, class abilities). Experience is not checked: the GM may level a character early.",
+    inputSchema: object({ id: string("Character record id"), package: string("Package key under packages, when the character has more than one class") }, ["id"]),
+    async run(args, ctx) {
+      const agent = needTable(ctx);
+      const record = agent.records.get(args.id);
+      if (!record) throw new Error(`No record ${args.id}.`);
+      const { record: updated, gain, level } = await levelUp(agent, record, args.package);
+      return out({ id: updated.id, level, gain, hp: updated.data.hp.total, bth: updated.data.bth, expnext: updated.data.expnext });
     },
   },
   {
