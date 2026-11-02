@@ -1,10 +1,12 @@
 const http = require("http");
+const fs = require("fs");
+const path = require("path");
 const crypto = require("crypto");
 const os = require("os");
 const { WebSocketServer } = require("ws");
 const { createRecordStore, canSee } = require("./records.cjs");
 const { createDice } = require("./dice.cjs");
-const { siegeCheck } = require("./siege.cjs");
+const { siege, siegeLibrary, siegeCheck } = require("./siege.cjs");
 
 const PALETTE = ["#d2a15a", "#6cb6ff", "#e07a6a", "#81b90c", "#ca81ff", "#77e7e8", "#ffb347", "#f4f1ea"];
 const MAX_CLIENTS = 16;
@@ -167,7 +169,43 @@ function savedSpots(value) {
 // named pawn stood on each scene, so a player who rejoins lands where they left.
 // onChange(kind) fires whenever something to save changes: kind is "records"
 // for record changes and "table" for chat, pawns and dice.
-function createTableServer({ saved = {}, onChange = () => undefined } = {}) {
+// The web client players open in a browser: the built app (dist/).
+const WEB_ROOT = path.join(__dirname, "..", "dist");
+const WEB_TYPES = {
+  ".html": "text/html; charset=utf-8",
+  ".js": "text/javascript; charset=utf-8",
+  ".css": "text/css; charset=utf-8",
+  ".svg": "image/svg+xml",
+  ".png": "image/png",
+  ".webp": "image/webp",
+  ".jpg": "image/jpeg",
+  ".ico": "image/x-icon",
+  ".woff2": "font/woff2",
+};
+
+function serveWeb(url, res, root) {
+  const wanted = url.pathname === "/" ? "/index.html" : decodeURIComponent(url.pathname);
+  const file = path.normalize(path.join(root, wanted));
+  if (!file.startsWith(root + path.sep) && file !== path.join(root, "index.html")) return false;
+  let bytes;
+  try {
+    bytes = fs.readFileSync(file);
+  } catch {
+    return false;
+  }
+  const ext = path.extname(file).toLowerCase();
+  res.writeHead(200, {
+    "Content-Type": WEB_TYPES[ext] ?? "application/octet-stream",
+    "Content-Length": bytes.length,
+    // Built assets carry a content hash in their names; the page itself does not.
+    "Cache-Control": ext === ".html" ? "no-cache" : "public, max-age=31536000, immutable",
+    "X-Content-Type-Options": "nosniff",
+  });
+  res.end(bytes);
+  return true;
+}
+
+function createTableServer({ saved = {}, onChange = () => undefined, webRoot = WEB_ROOT } = {}) {
   let password = "";
   let hostToken = "";
   let image = null;
@@ -194,9 +232,10 @@ function createTableServer({ saved = {}, onChange = () => undefined } = {}) {
   }
 
   // label: what the roll is for ("Strength check"). from: who rolled.
-  function rollDice(formula, label, from, id) {
+  // tag: the asker's own marker (a wizard waiting for its roll), echoed back.
+  function rollDice(formula, label, from, id, tag) {
     const result = dice.roll(formula);
-    const roll = { ...result, label: text(label, "").slice(0, 120) };
+    const roll = { ...result, label: text(label, "").slice(0, 120), ...(tag ? { tag: text(tag, "").slice(0, 80) } : {}) };
     addChat({ id, from, text: "", roll, at: Date.now() });
     return roll;
   }
@@ -243,6 +282,7 @@ function createTableServer({ saved = {}, onChange = () => undefined } = {}) {
       res.end(image.bytes);
       return;
     }
+    if (req.method === "GET" && serveWeb(url, res, webRoot)) return;
     res.writeHead(404, { "Access-Control-Allow-Origin": "*" });
     res.end();
   });
@@ -369,10 +409,31 @@ function createTableServer({ saved = {}, onChange = () => undefined } = {}) {
 
       if (msg.type === "roll") {
         try {
-          rollDice(msg.formula, msg.label, client.name, client.id);
+          rollDice(msg.formula, msg.label, client.name, client.id, msg.tag);
         } catch (error) {
           send(ws, { type: "error", reason: error instanceof Error ? error.message : "Could not roll that." });
         }
+        return;
+      }
+
+      // The creation wizard's finished character: the host builds it from the
+      // spec with the campaign's books. A player's character is theirs.
+      if (msg.type === "build-character") {
+        const answer = (body) => send(ws, { type: "op-result", req: msg.req ?? null, ...body });
+        siege()
+          .then(({ builder }) => {
+            const library = siegeLibrary(records);
+            const { character, report } = builder.buildFromSpec(msg.spec ?? {}, library);
+            if (!character) throw new Error(report.problems.join("; ") || "Could not build that character.");
+            const owner = client.role === "dm" ? text(msg.owner, "").slice(0, 24) : client.name;
+            const record = records.create(
+              { type: "character", name: character.name || "Unnamed character", owner, visibility: owner ? "owner" : "gm", data: character },
+              client.role === "dm" ? seatOf(client) : { role: "dm", name: client.name },
+            );
+            addChat({ id: client.id, from: client.name, text: `Created ${record.name}: ${character.race ?? ""} ${msg.spec?.class ?? ""} ${character.level ?? 1}.`, at: Date.now() });
+            answer({ ok: true, id: record.id, problems: report.problems });
+          })
+          .catch((error) => answer({ ok: false, error: error instanceof Error ? error.message : "Could not build that character." }));
         return;
       }
 

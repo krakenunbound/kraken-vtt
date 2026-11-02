@@ -213,8 +213,9 @@ Each step is tested before the next one starts. Where FG or Foundry does the sam
 | 1 C&C import | Done | `import-check`: PHB, M&T, CKG, Backpack counts and fields equal live FG |
 | 2 Character engine | Done for single-class characters | `pregens`: all 132 Common Room pregens equal FG's sheets field for field (4 against a live FG build) |
 | 2 Sheet + agent tools | Done | `character`: `kraken_build_character`, `kraken_siege_check`, Characters tab, player visibility |
-| 2 Creation wizard UI | Next | Wizard pages over `shared/siege/builder.mjs` |
-| 2 Multi-class, enhanced, class plus, level up | Not started | Port from `KrakenCharWizardCC` (CCClassRules, CCCombine, CCLevelUp) |
+| 2 Creation wizard UI | Done | `wizard`: every page driven with fixed dice; result equals the builder; host rolls every die |
+| Players in a browser | Done | The host serves the web client; `agent` checks it; manual Chrome pass as a player (join, map, own sheet only, check, chat) |
+| 2 Multi-class, enhanced, class plus, level up | Next | Port from `KrakenCharWizardCC` (CCClassRules, CCCombine, CCLevelUp) |
 | 3–6 | Not started | |
 
 Where things are:

@@ -16,6 +16,8 @@
     "import-check": "node scripts/check-import.mjs",
     "pregens": "node scripts/check-pregens.mjs",
     "character": "node scripts/check-character.mjs",
+    "wizard": "node scripts/check-wizard.mjs",
+    "demo": "node scripts/demo-host.mjs",
     "start": "electron .",
     "exe": "npm run build && electron-builder --win portable"
   },

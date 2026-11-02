@@ -55,7 +55,9 @@ export function SetupScreen({
   onHost: (input: HostInput) => Promise<unknown>;
   onJoin: (input: JoinInput) => Promise<void>;
 }) {
-  const [mode, setMode] = useState<"campaigns" | "join">("campaigns");
+  // Opened in a browser from the host's address: this page is a player's way in.
+  const inBrowser = !window.kraken && window.location.protocol.startsWith("http");
+  const [mode, setMode] = useState<"campaigns" | "join">(inBrowser ? "join" : "campaigns");
   const [rows, setRows] = useState<KrakenCampaign[]>([]);
   const [network, setNetwork] = useState<KrakenNetwork>(EMPTY_NET);
   const [query, setQuery] = useState("");
@@ -146,27 +148,44 @@ export function SetupScreen({
     <div className="setup">
       <header className="topbar">
         <div className="brand">Kraken</div>
-        <button type="button" className="join-toggle" data-action="join-mode" onClick={() => setMode(mode === "join" ? "campaigns" : "join")}>
-          {mode === "join" ? "My campaigns" : "Join a game"}
-        </button>
+        {inBrowser ? null : (
+          <button type="button" className="join-toggle" data-action="join-mode" onClick={() => setMode(mode === "join" ? "campaigns" : "join")}>
+            {mode === "join" ? "My campaigns" : "Join a game"}
+          </button>
+        )}
       </header>
 
       {mode === "join" ? (
         <form className="join-panel" data-form="join" onSubmit={submitJoin}>
           <h1>Join a game</h1>
-          <p>Use the address and port from the DM. Leave the password blank when the game is public.</p>
+          {inBrowser ? (
+            <p>
+              Joining the table at <span className="secret">{window.location.host}</span>. Leave the password blank when the game is public.
+            </p>
+          ) : (
+            <p>Use the address and port from the DM. Leave the password blank when the game is public.</p>
+          )}
           <label>
             Your name
-            <input name="name" defaultValue="Player" maxLength={24} autoComplete="nickname" />
+            <input name="name" defaultValue={inBrowser ? "" : "Player"} placeholder="Your name" maxLength={24} autoComplete="nickname" required={inBrowser} />
           </label>
-          <label>
-            Address
-            <input name="address" placeholder="192.168.1.20" required autoComplete="off" />
-          </label>
-          <label>
-            Port
-            <input name="port" type="number" min={1} max={65535} defaultValue={47300} required />
-          </label>
+          {inBrowser ? (
+            <>
+              <input type="hidden" name="address" value={window.location.hostname} />
+              <input type="hidden" name="port" value={window.location.port || (window.location.protocol === "https:" ? "443" : "80")} />
+            </>
+          ) : (
+            <>
+              <label>
+                Address
+                <input name="address" placeholder="192.168.1.20" required autoComplete="off" />
+              </label>
+              <label>
+                Port
+                <input name="port" type="number" min={1} max={65535} defaultValue={47300} required />
+              </label>
+            </>
+          )}
           <label>
             Password
             <input name="password" type="text" placeholder="Blank if the game is public" autoComplete="off" />

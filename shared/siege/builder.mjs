@@ -133,6 +133,8 @@ export function buildFromSpec(spec, library) {
       }
       gain = Math.max(1, gain + con);
     }
+    // Hit points the wizard rolled for this level replace the pregen rule.
+    if (Array.isArray(spec.hp) && Number.isFinite(Number(spec.hp[n - 1]))) gain = Number(spec.hp[n - 1]);
     hplog[`l${n}`] = gain;
     hpTotal += gain;
   }
