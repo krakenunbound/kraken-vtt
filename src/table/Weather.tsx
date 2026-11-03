@@ -1,22 +1,9 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 
-export type WeatherType = "none" | "rain" | "storm" | "snow" | "blizzard" | "fog" | "clouds" | "sandstorm" | "embers" | "ash" | "leaves" | "water";
+import type { WeatherType } from "./weatherTypes";
 
-export const WEATHER_TYPES: { id: WeatherType; label: string }[] = [
-  { id: "none", label: "None" },
-  { id: "rain", label: "Rain" },
-  { id: "storm", label: "Thunderstorm" },
-  { id: "snow", label: "Snow" },
-  { id: "blizzard", label: "Blizzard" },
-  { id: "fog", label: "Fog" },
-  { id: "clouds", label: "Cloud shadows" },
-  { id: "sandstorm", label: "Sand storm" },
-  { id: "embers", label: "Embers" },
-  { id: "ash", label: "Falling ash" },
-  { id: "leaves", label: "Falling leaves" },
-  { id: "water", label: "Water shimmer" },
-];
+export type { WeatherType };
 
 type Camera = { x: number; y: number; scale: number };
 

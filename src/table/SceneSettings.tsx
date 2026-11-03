@@ -1,5 +1,5 @@
 import type { TableMap } from "../session/useSession";
-import { WEATHER_TYPES, type WeatherType } from "./Weather";
+import { WEATHER_TYPES, type WeatherType } from "./weatherTypes";
 
 export type SceneSettingsPatch = {
   darkness?: number | null;

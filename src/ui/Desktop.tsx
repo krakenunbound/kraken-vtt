@@ -5,7 +5,7 @@ import { CombatTracker } from "../combat/CombatTracker";
 import { PartySheet } from "../party/PartySheet";
 import type { Session } from "../session/useSession";
 import { ChatDock } from "./ChatDock";
-import { Emblem } from "./Emblem";
+import { Emblem, Mark } from "./Emblem";
 import { Icon } from "./icons";
 import { FloatingWindow, useWindows, type WindowKind } from "./Windows";
 
@@ -96,7 +96,7 @@ export function Desktop({
     <div className="shell desktop-shell" data-session={session.role}>
       <header className="menubar">
         <div className="brand">
-          <Icon name="sparkle" size={16} /> Kraken
+          <Mark /> Kraken
         </div>
         <div className="portrait-strip" aria-label={gm ? "The party" : "Your characters"}>
           {portraits.map((record) => {

@@ -699,6 +699,15 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
               const already = source.targets.includes(target.id);
               return combat.target(source.id, target.id, msg.on ?? !already, seat);
             }
+            case "save": {
+              // The GM asks any creature for a save; a player rolls their own.
+              const entry = combat.entries().find((item) => item.id === msg.id);
+              if (!entry) throw new Error("No one like that is in the fight.");
+              if (client.role !== "dm" && !combat.viewFor(seat).entries.find((item) => item.id === entry.id)?.mine) throw new Error("You can roll saves for your own character.");
+              return combat.save(entry.id, String(msg.attribute), msg.cl, client.role === "dm" ? entry.name : client.name);
+            }
+            case "cast":
+              return combat.cast(String(msg.recordId), String(msg.power), msg.action ? String(msg.action) : "", seat, client.role === "dm" ? "Combat" : client.name);
             case "clear-targets":
               return combat.clearTargets(String(msg.id), seat);
             case "attack":

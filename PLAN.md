@@ -227,7 +227,10 @@ Each step is tested before the next one starts. Where FG or Foundry does the sam
 | 4 Combat tracker | Done | `combat`: SiegeCore's initiative (d10 + attribute + bonus), FG's order, turns and rounds with "[TURN]" / "[ROUND n]", hidden entries GM-only, effect durations at their initiative, NPC hit dice and "Orc 1/Orc 2" numbering, damage and healing with the heal cap, no healing the dead, stabilising, bleeding, unconscious enemies skipped; players roll their own initiative and end their own turn |
 | Interface | Done (first pass) | FG-style desktop: menu bar with portraits, map or emblem, sidebar launchers, floating windows (Characters, sheets, Party, Combat, Players), chat with dice tray, modifier box and dice tower; redesigned sheet and join screen. Chrome passes as GM and player |
 | 4 Attacks and targets | Done | `attack`: SiegeCore's attack (d20 + attack bonus + ATK effects against AC + AC effects, equal hits, one roll per target, FG's "[ATTACK] (M) ... [HIT 13 vs 13] -> [at Orc]"), damage with the damage attribute and DMG effects put on every target, NPC attacks from their records, Ctrl+click targeting with reticles, NPC pictures from their modules. Chrome pass as Ann |
-| 4 Still to do | Next | Saving throws by C&C's rules from the tracker, spell and power actions, critical hits by option, ammunition |
+| 4 Saves and spells | Done | `spells`: SiegeCore's save (d20 + attribute + level + SAVE effects against CB 12/18 + CL; an NPC's level is its hit dice, its primes its primeset; FG's "[SAVE] ... [CB 18 CL 3 CC 21] [SUCCESS 21 vs 21]"), casting spends a slot of the spell's level, Magic Missile's repeating missiles, Hold Person's Wisdom save negating a 1 round per level effect, half or no damage on a save, healing, CL dice ("CLd2+CL") for powers with no actions. Sheet Check/Save switch, spell slot pips, GM rest; tracker save prompt |
+| Look | Done | The user's Kraken logo as the emblem, menu mark, favicon and app icon; three.js loads only when a scene has weather |
+| 4 Still to do | Next | Critical hits by option, ammunition, spell resistance, NPC spellcasting |
+| UI Pop-out windows | Next | Every floating window can be dragged out of the main window onto another monitor |
 | 6 | Not started | In-app DM assistant |
 
 Where things are:

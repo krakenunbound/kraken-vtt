@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { backgroundRect, colorWithAlpha, gridStops, sceneFrame, type BackgroundFit, type SceneFrame } from "../foundry/geometry";
 import { type SceneLight, type SceneMarker, type SceneRegion, type SceneWall } from "../foundry/sceneObjects";
 import { gridDistance, LIGHT_PRESETS, snapCenter } from "../../shared/map/geometry.mjs";
@@ -6,7 +6,8 @@ import type { MapToken, Ping, SceneLightRecord, TableMap, TableRecord } from "..
 import { Lighting } from "./Lighting";
 import { SceneGraphics, SceneLegend, type OverlayToken } from "./SceneOverlay";
 import { SceneSettings, type SceneSettingsPatch } from "./SceneSettings";
-import { Weather } from "./Weather";
+// three.js only loads when a scene has weather.
+const Weather = lazy(() => import("./Weather").then((module) => ({ default: module.Weather })));
 
 export type MapScene = {
   id: string;
@@ -686,7 +687,9 @@ export function MapView({
       </div>
 
       {map.sceneId === scene.id && map.settings.weather.type !== "none" ? (
-        <Weather type={map.settings.weather.type} intensity={map.settings.weather.intensity} direction={map.settings.weather.direction} camera={camera} />
+        <Suspense fallback={null}>
+          <Weather type={map.settings.weather.type} intensity={map.settings.weather.intensity} direction={map.settings.weather.direction} camera={camera} />
+        </Suspense>
       ) : null}
 
       {menu

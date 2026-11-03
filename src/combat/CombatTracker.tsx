@@ -17,6 +17,8 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
   const [effect, setEffect] = useState("");
   const [rounds, setRounds] = useState("");
   const [open, setOpen] = useState(false);
+  const [saveStat, setSaveStat] = useState("wisdom");
+  const [saveCl, setSaveCl] = useState("0");
   const record = entry.recordId ? session.records[entry.recordId] : null;
   const portrait = typeof record?.data?.portrait === "string" ? (record.data.portrait as string) : null;
   const tokenArt = session.map.tokens.find((token) => token.id === entry.tokenId || (entry.recordId && token.recordId === entry.recordId))?.art;
@@ -178,6 +180,22 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
             <input aria-label="Rounds" type="number" min={0} value={rounds} placeholder="rnds" onChange={(event) => setRounds(event.target.value)} style={{ width: "4.2rem" }} />
             <button type="submit">Add effect</button>
           </form>
+          <div className="ct-adjust">
+            <select aria-label="Save" value={saveStat} onChange={(event) => setSaveStat(event.target.value)}>
+              {["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"].map((stat) => (
+                <option key={stat} value={stat}>
+                  {stat[0].toUpperCase() + stat.slice(1)} save
+                </option>
+              ))}
+            </select>
+            <label>
+              CL
+              <input type="number" value={saveCl} onChange={(event) => setSaveCl(event.target.value)} style={{ width: "3.6rem" }} />
+            </label>
+            <button type="button" onClick={() => session.ct("save", { id: entry.id, attribute: saveStat, cl: Number(saveCl) || 0 })}>
+              Roll save
+            </button>
+          </div>
           <div className="ct-adjust">
             <label>
               Bonus
