@@ -545,8 +545,10 @@ export function useSession() {
           `${address}:${input.port}`,
           endpoint(address, input.port, "http"),
         );
+        return true;
       } catch (caught) {
         setError(plainError(caught, "Could not join."));
+        return false;
       } finally {
         setConnecting(false);
       }

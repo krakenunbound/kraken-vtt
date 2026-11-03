@@ -17,6 +17,7 @@ await app.evaluate(({ BrowserWindow }) => {
   win.show();
 });
 await page.waitForSelector("text=My Campaigns");
+await page.click('[data-action="campaigns-mode"]');
 await page.fill('input[name="new-campaign"]', "Shot");
 await page.locator('form[data-form="create"]').evaluate((form) => form.requestSubmit());
 await page.waitForSelector('form[data-form="play"]');
