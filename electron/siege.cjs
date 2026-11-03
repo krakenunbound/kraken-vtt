@@ -9,9 +9,7 @@ let loaded = null;
 function siege() {
   if (!loaded) {
     const base = path.join(__dirname, "..", "shared", "siege");
-    loaded = Promise.all([import(pathToFileURL(path.join(base, "engine.mjs")).href), import(pathToFileURL(path.join(base, "builder.mjs")).href)]).then(
-      ([engine, builder]) => ({ engine, builder }),
-    );
+    loaded = Promise.all(["engine.mjs", "builder.mjs", "interchange.mjs"].map((file) => import(pathToFileURL(path.join(base, file)).href))).then(([engine, builder, interchange]) => ({ engine, builder, interchange }));
   }
   return loaded;
 }
@@ -124,4 +122,30 @@ async function editCharacter(table, record, changes, seat) {
   return table.records.update(record.id, { name, data: derived }, table.seat, { replace: true });
 }
 
-module.exports = { siege, siegeLibrary, siegeCheck, levelUp, editCharacter, ATTRIBUTES };
+// A character file from another table (Kraken, Fantasy Grounds, Foundry,
+// Roll20) made into a character of this campaign. owner: the player it is
+// for ("" for the GM's own); seat: who asks (a player imports their own).
+const MAX_IMPORT = 8 * 1024 * 1024;
+async function importCharacter(table, fileText, { owner = "", seat } = {}) {
+  const body = String(fileText ?? "");
+  if (!body.trim()) throw new Error("That file is empty.");
+  if (body.length > MAX_IMPORT) throw new Error("That file is too big for a character (8 MB at most).");
+  const { interchange } = await siege();
+  const { convertXml } = require("./importers/fgModule.cjs");
+  const library = siegeLibrary(table.records);
+  const { format, character, report } = interchange.readCharacterFile(body, library, { fgXml: convertXml });
+  // A portrait or token from another collection may not be in this GM's.
+  for (const field of ["portrait", "token"]) if (typeof character[field] === "string" && /^data:|^https?:/.test(character[field])) delete character[field];
+  const name = String(character.name || "Imported character").slice(0, 80);
+  const record = table.records.create({ type: "character", name, owner, visibility: owner ? "owner" : "gm", data: { ...character, name } }, seat ?? table.seat);
+  return { record, format, report };
+}
+
+// A character as a file: "kraken" (JSON, the whole sheet) or "fg" (FG's character XML).
+async function exportCharacter(record, format = "kraken") {
+  const { interchange } = await siege();
+  if (format === "fg") return { text: interchange.toFgXml(record), file: `${record.name}.xml`, type: "application/xml" };
+  return { text: interchange.toKrakenFile(record), file: `${record.name}.kraken.json`, type: "application/json" };
+}
+
+module.exports = { siege, siegeLibrary, siegeCheck, levelUp, editCharacter, importCharacter, exportCharacter, ATTRIBUTES };

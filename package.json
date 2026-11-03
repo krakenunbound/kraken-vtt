@@ -40,6 +40,7 @@
     "pregens": "node scripts/check-pregens.mjs",
     "character": "node scripts/check-character.mjs",
     "wizard": "node scripts/check-wizard.mjs",
+    "interchange": "node scripts/check-interchange.mjs",
     "demo": "node scripts/demo-host.mjs",
     "start": "electron .",
     "launch": "node scripts/launch.mjs",

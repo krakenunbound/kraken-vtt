@@ -1003,3 +1003,13 @@ textarea.cc-field.tall { min-height: 220px; }
 .ccw-details label.wide { grid-column: 1 / -1; align-items: flex-start; }
 .ccw-details input.short { width: 70px; flex: none; }
 .ccw .ccw-create { font-size: 1rem; font-weight: 700; padding: 6px 20px; }
+
+/* Characters in and out: import and export beside the new character button. */
+.character-list-buttons { display: flex; align-items: center; gap: 6px; }
+.character-files { position: relative; display: inline-flex; gap: 4px; }
+.character-file-button { width: 34px; height: 34px; padding: 0; border-radius: 50%; display: grid; place-items: center; color: var(--brass); background: transparent; border: 1px solid var(--brass-dim); }
+.character-file-button:hover:not(:disabled) { color: #1a1408; background: var(--brass); border-color: var(--brass); }
+.character-export-menu { position: absolute; top: 38px; left: 0; z-index: 20; display: flex; flex-direction: column; min-width: 190px; padding: 4px; background: #1b222c; border: 1px solid var(--brass-dim); border-radius: 6px; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45); }
+.character-export-menu button { text-align: left; border: none; background: transparent; padding: 6px 10px; }
+.character-export-menu button:hover { background: var(--brass-soft); }
+.character-file-status { margin: 6px 0; cursor: pointer; }
