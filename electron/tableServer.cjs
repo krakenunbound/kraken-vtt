@@ -202,7 +202,8 @@ function serveWeb(url, res, root) {
   return true;
 }
 
-function createTableServer({ saved = {}, onChange = () => undefined, webRoot = WEB_ROOT } = {}) {
+// art: the GM's portraits and tokens (artLibrary.cjs), served to the table.
+function createTableServer({ saved = {}, onChange = () => undefined, webRoot = WEB_ROOT, art = null } = {}) {
   let password = "";
   let hostToken = "";
   let image = null;
@@ -221,6 +222,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       sendMaps();
     },
     hasArt: (id) => tokenArt.has(id),
+    hasPicture: (id) => Boolean(art && art.has(id)),
   });
 
   // Each seat is sent its own view of the map (mapState viewFor), once per
@@ -286,6 +288,39 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         "Access-Control-Allow-Origin": "*",
       });
       res.end(image.bytes);
+      return;
+    }
+    // The art library: a list for the pickers, and the files themselves.
+    if (req.method === "GET" && (url.pathname === "/art/list" || url.pathname === "/art/file")) {
+      const token = url.searchParams.get("token") || "";
+      const allowed = token.length > 0 && [...clients.values()].some((client) => client.assetToken === token);
+      if (!allowed || !art) {
+        res.writeHead(404, { "Cache-Control": "no-store" });
+        res.end();
+        return;
+      }
+      if (url.pathname === "/art/list") {
+        const kind = url.searchParams.get("kind");
+        const body = JSON.stringify(art.list(kind === "portrait" || kind === "token" ? kind : undefined));
+        res.writeHead(200, { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" });
+        res.end(body);
+        return;
+      }
+      const found = art.file(url.searchParams.get("id") || "");
+      if (!found) {
+        res.writeHead(404, { "Cache-Control": "no-store" });
+        res.end();
+        return;
+      }
+      fs.stat(found.path, (error, stat) => {
+        if (error) {
+          res.writeHead(404);
+          res.end();
+          return;
+        }
+        res.writeHead(200, { "Content-Type": found.mime, "Content-Length": stat.size, "Cache-Control": "private, max-age=3600", "X-Content-Type-Options": "nosniff" });
+        fs.createReadStream(found.path).pipe(res);
+      });
       return;
     }
     if (req.method === "GET" && url.pathname === "/table/token") {
@@ -395,7 +430,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         clients.set(ws, client);
         send(ws, {
           type: "ok",
-          you: { id: client.id, name: client.name, role: client.role },
+          you: { id: client.id, name: client.name, role: client.role, assetToken: client.assetToken },
           players: playerList(),
           map: map.viewFor(seatOf(client), client.assetToken),
           chat,

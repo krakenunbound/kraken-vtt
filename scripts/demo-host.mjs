@@ -58,6 +58,6 @@ if (await scene.count()) {
   const value = await scene.locator("option", { hasText: sceneName }).first().getAttribute("value");
   if (value) await scene.selectOption(value);
 }
-await tool("kraken_chat_send", { text: "Welcome to the Keep. Ann, your paladin is on the Characters tab." });
+await tool("kraken_chat_send", { text: "Welcome to the table. Ann: your paladin is under Character in the side panel; put your token on the map from the Tokens tray." });
 console.log(`DEMO_READY http://127.0.0.1:${PORT}/ password pw; Ann owns ${built.id}; agent file ${env.KRAKEN_AGENT_FILE}`);
 await new Promise(() => undefined);

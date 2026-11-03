@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Session, TableRecord } from "../session/useSession";
+import { ArtPicker, Picture } from "./ArtPicker";
 import { Wizard } from "./Wizard";
 
 // SIEGE character sheet (Castles & Crusades on the SIEGE engine). The host
@@ -38,6 +39,7 @@ function field(data: Row, path: string): unknown {
 
 function Sheet({ record, session }: { record: TableRecord; session: Session }) {
   const [cl, setCl] = useState(0);
+  const [picking, setPicking] = useState<"portrait" | "token" | null>(null);
   const data = record.data as Row;
   const canRoll = session.role === "dm" || record.owner === session.players.find((seat) => seat.id === session.selfId)?.name;
   const packages = rows(data.packages);
@@ -53,7 +55,47 @@ function Sheet({ record, session }: { record: TableRecord; session: Session }) {
   return (
     <article className="sheet" data-character={record.id}>
       <header className="sheet-head">
-        <div>
+        <div className="portrait-frames">
+          <button
+            type="button"
+            className="portrait-frame"
+            data-action="pick-portrait"
+            disabled={!canRoll}
+            title={canRoll ? "Click to choose a portrait" : record.name}
+            onClick={() => setPicking("portrait")}
+          >
+            {typeof data.portrait === "string" && data.portrait ? <Picture session={session} id={data.portrait} alt={record.name} /> : <span>{record.name.slice(0, 1)}</span>}
+          </button>
+          <button
+            type="button"
+            className="token-frame"
+            data-action="pick-token"
+            disabled={!canRoll}
+            title={canRoll ? "Click to choose a token (the portrait is used without one)" : "Token"}
+            onClick={() => setPicking("token")}
+          >
+            {typeof data.token === "string" && data.token ? (
+              <Picture session={session} id={data.token} alt="Token" />
+            ) : typeof data.portrait === "string" && data.portrait ? (
+              <Picture session={session} id={data.portrait} alt="Token" />
+            ) : (
+              <span>Token</span>
+            )}
+          </button>
+        </div>
+        {picking ? (
+          <ArtPicker
+            session={session}
+            kind={picking}
+            current={typeof data[picking] === "string" ? String(data[picking]) : undefined}
+            onClose={() => setPicking(null)}
+            onPick={(id) => {
+              void session.op({ op: "update", id: record.id, patch: { data: { [picking]: id } } });
+              setPicking(null);
+            }}
+          />
+        ) : null}
+        <div className="sheet-title">
           <h2>{record.name}</h2>
           <p>
             {String(data.race ?? "")} {classes.map((pkg) => `${String(pkg.name)} ${num(pkg.level)}`).join(" / ")}
@@ -166,13 +208,51 @@ function Sheet({ record, session }: { record: TableRecord; session: Session }) {
   );
 }
 
-export function CharacterPanel({ session }: { session: Session }) {
+// dock: the player's side panel beside the map, with a picker in place of the list.
+export function CharacterPanel({ session, dock = false, selected: chosen }: { session: Session; dock?: boolean; selected?: string | null }) {
   const characters = Object.values(session.records)
     .filter((record) => record.type === "character")
     .sort((a, b) => a.name.localeCompare(b.name));
   const [selected, setSelected] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
+  useEffect(() => {
+    if (chosen) setSelected(chosen);
+  }, [chosen]);
   const current = characters.find((record) => record.id === selected) ?? characters[0] ?? null;
+
+  if (dock) {
+    return (
+      <section className="characters dock-characters" role="tabpanel">
+        <div className="dock-picker">
+          {characters.length > 1 ? (
+            <select aria-label="Character" value={current?.id ?? ""} onChange={(event) => setSelected(event.target.value)}>
+              {characters.map((record) => (
+                <option key={record.id} value={record.id}>
+                  {record.name}
+                </option>
+              ))}
+            </select>
+          ) : null}
+          <button type="button" onClick={() => setCreating(true)} data-action="new-character">
+            New character
+          </button>
+        </div>
+        {creating ? (
+          <Wizard
+            session={session}
+            onDone={(id) => {
+              setCreating(false);
+              if (id) setSelected(id);
+            }}
+          />
+        ) : current ? (
+          <Sheet record={current} session={session} />
+        ) : (
+          <p className="hint">You have no character yet. Make one with New character.</p>
+        )}
+      </section>
+    );
+  }
 
   return (
     <section className="characters" role="tabpanel">

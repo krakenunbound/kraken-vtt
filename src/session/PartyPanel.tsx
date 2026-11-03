@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { RollResult, Session } from "./useSession";
 
 function RollCard({ roll }: { roll: RollResult }) {
@@ -35,7 +35,6 @@ function submitLine(session: Session, draft: string) {
 }
 
 export function PartyPanel({ session }: { session: Session }) {
-  const [draft, setDraft] = useState("");
 
   return (
     <section className="party" role="tabpanel">
@@ -87,33 +86,46 @@ export function PartyPanel({ session }: { session: Session }) {
           })}
         </ul>
       </aside>
-      <div className="chat-pane">
-        <div className="chat-log" aria-live="polite">
-          {session.chat.length === 0 ? <p className="hint">No messages yet.</p> : null}
-          {session.chat.map((line, index) => (
-            <p key={`${line.at}-${index}`} className="chat-line">
-              <b>{line.from}</b> {line.roll ? <RollCard roll={line.roll} /> : line.text}
-            </p>
-          ))}
-        </div>
-        <form
-          className="chat-form"
-          onSubmit={(event) => {
-            event.preventDefault();
-            submitLine(session, draft);
-            setDraft("");
-          }}
-        >
-          <input
-            aria-label="Message"
-            value={draft}
-            maxLength={500}
-            onChange={(event) => setDraft(event.target.value)}
-            placeholder="Message the table, or /r 1d20+2 to roll"
-          />
-          <button type="submit">Send</button>
-        </form>
-      </div>
+      <ChatPane session={session} />
     </section>
+  );
+}
+
+// The chat log and line, shared by the Party tab and the docks beside the map.
+export function ChatPane({ session }: { session: Session }) {
+  const [draft, setDraft] = useState("");
+  const log = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    log.current?.scrollTo({ top: log.current.scrollHeight });
+  }, [session.chat.length]);
+
+  return (
+    <div className="chat-pane">
+      <div className="chat-log" aria-live="polite" ref={log}>
+        {session.chat.length === 0 ? <p className="hint">No messages yet.</p> : null}
+        {session.chat.map((line, index) => (
+          <p key={`${line.at}-${index}`} className="chat-line">
+            <b>{line.from}</b> {line.roll ? <RollCard roll={line.roll} /> : line.text}
+          </p>
+        ))}
+      </div>
+      <form
+        className="chat-form"
+        onSubmit={(event) => {
+          event.preventDefault();
+          submitLine(session, draft);
+          setDraft("");
+        }}
+      >
+        <input
+          aria-label="Message"
+          value={draft}
+          maxLength={500}
+          onChange={(event) => setDraft(event.target.value)}
+          placeholder="Message the table, or /r 1d20+2 to roll"
+        />
+        <button type="submit">Send</button>
+      </form>
+    </div>
   );
 }

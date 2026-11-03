@@ -145,7 +145,7 @@ try {
   const log = await tool("kraken_chat_log", { count: 5 });
   assert(log.some((line) => line.roll?.total === 13 && line.roll.label === "Strength"), "roll in chat");
   await page.getByRole("tab", { name: "Party" }).click();
-  await page.waitForSelector('.roll-card[data-total="13"]');
+  await page.waitForSelector('.party .roll-card[data-total="13"]');
 
   // Players open the host's address in a browser: the page and its script come from the host.
   const pageHtml = await (await fetch(`http://127.0.0.1:${port}/`)).text();

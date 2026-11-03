@@ -450,7 +450,7 @@ export function MapView({
           doorStates={doorStates}
           onToggleDoor={(wallId) => actions.setDoor(wallId)}
         />
-        {!gm ? (
+        {!gm && (mine.length > 0 || !map.sight) ? (
           <svg className="overlay doors" width={frame.worldWidth} height={frame.worldHeight} viewBox={`0 0 ${frame.worldWidth} ${frame.worldHeight}`}>
             {map.doors.map((door) => {
               const cx = (door.x1 + door.x2) / 2;
@@ -528,7 +528,13 @@ export function MapView({
                   fontSize: span * TOKEN_FILL * 0.38,
                 }}
               >
-                {token.art ? <img src={token.art} alt="" draggable={false} /> : <span>{initials(token.name)}</span>}
+                {token.art && token.video ? (
+                  <video src={token.art} autoPlay loop muted playsInline />
+                ) : token.art ? (
+                  <img src={token.art} alt="" draggable={false} />
+                ) : (
+                  <span>{initials(token.name)}</span>
+                )}
               </div>
               {token.health ? (
                 <i
