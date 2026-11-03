@@ -761,3 +761,20 @@ span.ct-init { display: inline-block; }
 .context-menu button:hover { background: var(--brass-soft); color: var(--brass); }
 .context-menu-gap { width: 14px; }
 .picture-window .images-view { height: 100%; }
+
+/* The map toolbar, along the top (FG's image toolbar) */
+.map-toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.map-toolbar .tool-group { display: flex; align-items: center; gap: 4px; padding: 3px 6px; border-radius: 999px; background: rgba(12, 16, 22, 0.85); border: 1px solid var(--brass-dim); box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45); }
+.map-toolbar .tool { width: 34px; height: 34px; padding: 0; display: grid; place-items: center; border-radius: 50%; border: 1px solid transparent; background: transparent; color: #e8d9b5; }
+.map-toolbar .tool:hover { background: var(--brass-soft); border-color: var(--brass-dim); }
+.map-toolbar .tool.on { background: var(--brass); color: #1a1408; }
+.map-toolbar .tool.find { color: #7cc4ef; }
+.map-toolbar .zoom-readout { min-width: 42px; text-align: center; font-size: 0.78rem; color: var(--muted); }
+.draw-colors { display: inline-flex; gap: 3px; margin-left: 4px; }
+.draw-colors .swatch { width: 20px; height: 20px; padding: 0; border-radius: 50%; border: 2px solid rgba(255, 255, 255, 0.25); }
+.draw-colors .swatch.on { border-color: #fff; box-shadow: 0 0 0 2px var(--brass); }
+.draw-colors .swatch.mine { background: transparent; color: #ffcc33; font-size: 14px; line-height: 1; }
+.overlay.drawings { position: absolute; left: 0; top: 0; pointer-events: none; }
+.found-ring { position: absolute; transform: translate(-50%, -50%); border-radius: 50%; border: 6px solid #7cc4ef; pointer-events: none; animation: found-pulse 0.65s ease-out 3; }
+@keyframes found-pulse { from { opacity: 1; transform: translate(-50%, -50%) scale(1.6); } to { opacity: 0; transform: translate(-50%, -50%) scale(0.5); } }
+.map-controls.map-toolbar { top: 10px; bottom: auto; left: 50%; right: auto; transform: translateX(-50%); padding: 0; background: transparent; border: none; box-shadow: none; backdrop-filter: none; }

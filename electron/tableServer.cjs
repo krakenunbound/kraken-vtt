@@ -1070,7 +1070,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
 
       // The map: tokens, doors, line of sight and pings (mapState.cjs decides
       // who may do what).
-      if (["token-place", "token-move", "token-remove", "token-update", "door", "sight", "lock", "scene-settings", "light-place", "light-update", "light-remove"].includes(msg.type)) {
+      if (["token-place", "token-move", "token-remove", "token-update", "door", "sight", "lock", "scene-settings", "light-place", "light-update", "light-remove", "draw", "draw-erase", "draw-clear"].includes(msg.type)) {
         const seat = seatOf(client);
         try {
           if (msg.type === "token-place") {
@@ -1091,6 +1091,12 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
             map.setSight(Boolean(msg.on));
           } else if (msg.type === "scene-settings") {
             map.updateSettings(msg.patch ?? {}, seat);
+          } else if (msg.type === "draw") {
+            map.draw({ points: msg.points, color: msg.color, width: msg.width }, seat);
+          } else if (msg.type === "draw-erase") {
+            map.erase(String(msg.id ?? ""), seat);
+          } else if (msg.type === "draw-clear") {
+            map.clearDrawings(seat);
           } else if (msg.type === "light-place") {
             map.placeLight(msg.light ?? {}, seat);
           } else if (msg.type === "light-update") {

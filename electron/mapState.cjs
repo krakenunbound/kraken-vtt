@@ -108,6 +108,16 @@ function cleanSettings(raw) {
   };
 }
 
+// A line drawn on a scene, for everyone: who drew it, its colour and width
+// (scene pixels), and its points (x, y, x, y, ...).
+function cleanDrawing(raw) {
+  if (!raw || typeof raw !== "object" || !Array.isArray(raw.points)) return null;
+  const points = raw.points.slice(0, 4000).map(Number);
+  if (points.length < 4 || points.length % 2 || !points.every((value) => Number.isFinite(value) && Math.abs(value) < 1e7)) return null;
+  const color = /^#[0-9a-f]{6}$/i.test(String(raw.color)) ? String(raw.color) : "#ffcc33";
+  return { id: text(raw.id, "") || crypto.randomBytes(6).toString("hex"), by: text(raw.by, "").slice(0, 24), color, width: Math.min(80, Math.max(1, num(raw.width, 6))), points: points.map((value) => Math.round(value * 10) / 10) };
+}
+
 function savedMap(value) {
   const tokens = {};
   const doors = {};
@@ -115,7 +125,8 @@ function savedMap(value) {
   const locked = {};
   const settings = {};
   const lights = {};
-  if (!value || typeof value !== "object") return { tokens, doors, sight, locked, settings, lights };
+  const drawings = {};
+  if (!value || typeof value !== "object") return { tokens, doors, sight, locked, settings, lights, drawings };
   for (const [sceneId, list] of Object.entries(value.tokens ?? {}).slice(0, 500)) {
     if (!Array.isArray(list)) continue;
     tokens[sceneId.slice(0, 80)] = list.map(cleanToken).filter(Boolean).slice(0, MAX_TOKENS);
@@ -134,8 +145,12 @@ function savedMap(value) {
   for (const [sceneId, list] of Object.entries(value.lights ?? {}).slice(0, 500)) {
     if (Array.isArray(list)) lights[sceneId.slice(0, 80)] = list.map(cleanLight).filter(Boolean).slice(0, 500);
   }
-  return { tokens, doors, sight, locked, settings, lights };
+  for (const [sceneId, list] of Object.entries(value.drawings ?? {}).slice(0, 500)) {
+    if (Array.isArray(list)) drawings[sceneId.slice(0, 80)] = list.map(cleanDrawing).filter(Boolean).slice(-MAX_DRAWINGS);
+  }
+  return { tokens, doors, sight, locked, settings, lights, drawings };
 }
+const MAX_DRAWINGS = 400;
 
 // A light from CoreRPG's presets (squares), in feet at 5 ft a square, or the
 // game's own light profiles by name (SiegeCore: radius r is bright r, dim 2r).
@@ -175,6 +190,12 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
   function darkness() {
     const set = settingsHere().darkness;
     return set == null ? (scene?.darkness ?? 0) : set;
+  }
+
+  function drawingsHere() {
+    if (!scene) return [];
+    state.drawings[scene.id] = state.drawings[scene.id] ?? [];
+    return state.drawings[scene.id];
   }
 
   function lightsHere() {
@@ -347,7 +368,7 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
     const doorList = scene.walls
       .filter((wall) => wall.door > 0)
       .map((wall) => ({ id: wall.id, x1: wall.x1, y1: wall.y1, x2: wall.x2, y2: wall.y2, secret: wall.door === 2, state: wall.id in doors ? doors[wall.id] : wall.ds }));
-    const shared = { sceneId: scene.id, sight: sightOn(), locked, darkness: dark, settings: { grid: settings.grid, weather: settings.weather, darkness: settings.darkness } };
+    const shared = { sceneId: scene.id, sight: sightOn(), locked, darkness: dark, settings: { grid: settings.grid, weather: settings.weather, darkness: settings.darkness }, drawings: drawingsHere() };
     const lightOut = (list) => list.map(({ id, x, y, brightPx, dimPx, color, polygon }) => ({ id, x, y, brightPx, dimPx, color, polygon }));
     if (seat.role === "dm") {
       return {
@@ -554,6 +575,33 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       });
       changed();
       return state.settings[scene.id];
+    },
+    // Drawing on the map, for everyone: anyone draws; a player rubs out
+    // their own lines, the GM anyone's, or clears them all.
+    drawings: () => drawingsHere(),
+    draw(input, seat) {
+      if (!scene) throw new Error("No scene is open.");
+      const line = cleanDrawing({ ...input, id: undefined, by: seat.role === "dm" ? "" : seat.name, color: input?.color ?? playerColor(seat.name) });
+      if (!line) throw new Error("A line needs two points or more.");
+      const list = drawingsHere();
+      list.push(line);
+      if (list.length > MAX_DRAWINGS) list.splice(0, list.length - MAX_DRAWINGS);
+      changed();
+      return line;
+    },
+    erase(id, seat) {
+      const list = drawingsHere();
+      const at = list.findIndex((line) => line.id === id);
+      if (at < 0) throw new Error("That line is gone.");
+      if (seat.role !== "dm" && list[at].by !== seat.name) throw new Error("You can only rub out your own lines.");
+      list.splice(at, 1);
+      changed();
+    },
+    clearDrawings(seat, who = null) {
+      if (seat.role !== "dm") throw new Error("Only the GM can clear the drawings.");
+      if (!scene) return;
+      state.drawings[scene.id] = who === null ? [] : drawingsHere().filter((line) => line.by !== who);
+      changed();
     },
     placeLight(input, seat) {
       if (seat.role !== "dm") throw new Error("Only the GM can place lights.");

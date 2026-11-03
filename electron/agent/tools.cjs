@@ -352,6 +352,33 @@ const TOOLS = [
     },
   },
   {
+    name: "kraken_draw",
+    description: "Drawing on the open scene, for everyone, as the map toolbar's pen: action list (the lines: id, who drew it, colour, width, points), draw (points: [x, y, x, y, ...] in scene pixels, colour #rrggbb, width), erase (id), clear (every line).",
+    inputSchema: object(
+      {
+        action: { type: "string", enum: ["list", "draw", "erase", "clear"] },
+        points: { type: "array", items: { type: "number" }, description: "x, y, x, y, ... in scene pixels" },
+        color: string("#rrggbb"),
+        width: number("Line width in scene pixels"),
+        id: string("A line's id (erase)"),
+      },
+      ["action"],
+    ),
+    run(args, ctx) {
+      const table = needTable(ctx);
+      if (args.action === "draw") return out(table.map.draw({ points: args.points, color: args.color, width: args.width }, table.seat));
+      if (args.action === "erase") {
+        table.map.erase(String(args.id ?? ""), table.seat);
+        return out({ erased: args.id });
+      }
+      if (args.action === "clear") {
+        table.map.clearDrawings(table.seat);
+        return out({ cleared: true });
+      }
+      return out(table.map.drawings());
+    },
+  },
+  {
     name: "kraken_sound",
     description:
       "Sound for the table, as Syrinscape in FG, from the GM's sounds (assets/sounds: oneshots, sfx, ambience, music; a folder plays one of its sounds at random). Every seat hears it, each at its own volumes. action list (kind, search: what there is, by folder); play (id or folder, e.g. \"oneshots/Doors/Wooden Door\" or \"sfx/Weapons/Sword/Hit\"); stop (stops one-shots and effects); ambience (add, remove, volume or clear loops; id, volume 0..1); music (play an id or a folder, next, stop, volume); triggers (the chat's sound triggers: read them, or set triggers to a list, or \"default\"); scape (what is playing now).",
