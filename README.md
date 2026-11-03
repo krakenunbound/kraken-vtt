@@ -18,7 +18,7 @@ Players open the address shown in the app's Players window in Chrome. In chat, t
 
 ## Sounds
 
-Kraken plays sounds in every player's browser: the GM's one-shots, sound effects the chat triggers (a Longsword hit, a fireball, a death), ambience loops and music, each with its own volume per player (the Sound button in the sidebar). The sounds are your own, in `%APPDATA%\kraken-vttssets\sounds`, in folders by kind: `oneshots`, `sfx`, `ambience`, `music`.
+Kraken plays sounds in every player's browser: the GM's one-shots, sound effects the chat triggers (a Longsword hit, a fireball, a death), ambience loops and music, each with its own volume per player (the Sound button in the sidebar). The sounds are your own, in `%APPDATA%\kraken-vttssets\sounds`, in folders by kind, as Syrinscape's: `oneshots` (voices: spoken lines), `sfx` (sound effects, which the chat triggers play), `ambience` (moods, loops) and `music`. As Syrinscape in Fantasy Grounds, an attack plays its weapon's swing and the damage roll its hit.
 
 Kraken's own set (about 500: every weapon's hit, miss, crit and fumble, spells by element, injuries, deaths, healing, potions, animals, monsters, one-shots and 32 ambience loops) is made with your ElevenLabs account:
 

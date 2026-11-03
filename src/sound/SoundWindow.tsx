@@ -9,7 +9,7 @@ import { KINDS, sound, type SoundKind } from "./soundEngine";
 
 type Tab = SoundKind | "triggers" | "volume";
 const TABS: { id: Tab; name: string; gm: boolean }[] = [
-  { id: "oneshots", name: "One-shots", gm: true },
+  { id: "oneshots", name: "Voices", gm: true },
   { id: "sfx", name: "Sound effects", gm: true },
   { id: "ambience", name: "Ambience", gm: true },
   { id: "music", name: "Music", gm: true },
@@ -104,7 +104,7 @@ function Browser({ session, kind, library, reload }: { session: Session; kind: S
       ) : null}
       <input type="search" placeholder="Search" aria-label="Search sounds" value={search} onChange={(event) => setSearch(event.target.value)} />
       <div className="sound-groups">
-        {groups.length === 0 ? <p className="hint">No {KINDS.find((item) => item.id === kind)?.name.toLowerCase()} yet.</p> : null}
+        {groups.length === 0 ? <p className="hint">No {KINDS.find((item) => item.id === kind)?.name.toLowerCase()} yet.{kind === "oneshots" ? " Voices are spoken lines (Syrinscape's one-shots): a guard's \"Halt!\", an innkeeper's welcome." : ""}</p> : null}
         {groups.map((group) => (
           <div key={group.id} className={open === group.id ? "sound-group open" : "sound-group"}>
             <div className="sound-group-row">
@@ -146,6 +146,7 @@ function Browser({ session, kind, library, reload }: { session: Session; kind: S
 function Triggers({ session, library }: { session: Session; library: SoundLibrary }) {
   const [list, setList] = useState<SoundTrigger[]>(session.soundTriggers);
   const [search, setSearch] = useState("");
+  const [note, setNote] = useState("");
   useEffect(() => setList(session.soundTriggers), [session.soundTriggers]);
   const count = (folder: string) => library.groups.filter((group) => group.id === folder || group.id.startsWith(`${folder}/`)).reduce((sum, group) => sum + group.count, 0);
   const save = (next: SoundTrigger[]) => {
@@ -155,13 +156,34 @@ function Triggers({ session, library }: { session: Session; library: SoundLibrar
   const shown = list.filter((item) => !search || `${item.name} ${item.on} ${item.result} ${item.sound}`.toLowerCase().includes(search.toLowerCase()));
   return (
     <div className="sound-triggers">
-      <p className="hint">When a chat line fits a trigger, its sound plays for everyone who sees the line, as its result shows. The first trigger that fits, and has sounds, plays.</p>
+      <p className="hint">As Syrinscape in FG: an attack plays its weapon's swing, the damage roll its hit, a natural 20 its crit and a natural 1 its fumble. The first trigger that fits, and has sounds, plays for everyone who sees the line, as its result shows. ▶ plays a trigger's sound on your screen only.</p>
+      <div className="sound-trigger-options">
+        <label>
+          The GM's hidden rolls
+          <select value={session.options.soundHidden} onChange={(event) => session.setTableOptions({ soundHidden: event.target.value as "off" | "combat" | "all" })}>
+            <option value="off">Silent</option>
+            <option value="combat">Combat only</option>
+            <option value="all">All</option>
+          </select>
+        </label>
+        <label>
+          Same sound again after
+          <select value={session.options.soundRepeat} onChange={(event) => session.setTableOptions({ soundRepeat: Number(event.target.value) })}>
+            {[0, 1, 3, 5, 10].map((seconds) => (
+              <option key={seconds} value={seconds}>
+                {seconds} s
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
       <div className="sound-add">
         <input type="search" placeholder="Search triggers" aria-label="Search triggers" value={search} onChange={(event) => setSearch(event.target.value)} />
         <button type="button" onClick={() => session.soundCommand({ type: "sound-triggers", triggers: "default" })}>
           Kraken's triggers
         </button>
       </div>
+      {note ? <p className="hint sound-note">{note}</p> : null}
       <div className="sound-trigger-list">
         {shown.map((item) => {
           const sounds = count(item.sound);
@@ -177,8 +199,22 @@ function Triggers({ session, library }: { session: Session; library: SoundLibrar
               </span>
               <input className="sound-trigger-sound" value={item.sound} aria-label={`${item.name} sound`} onChange={(event) => setList(list.map((other) => (other.id === item.id ? { ...other, sound: event.target.value } : other)))} onBlur={() => save(list)} />
               <small className={sounds ? "has" : "none"}>{sounds ? `${sounds} sound${sounds === 1 ? "" : "s"}` : "no sounds yet"}</small>
-              <button type="button" className="sound-play" aria-label={`Hear ${item.name}`} disabled={!sounds} onClick={() => session.soundCommand({ type: "sound-play", id: item.sound })}>
-                <Icon name="sound" size={13} />
+              <button
+                type="button"
+                className="sound-play"
+                title={sounds ? "Hear it (on your screen only)" : "No sounds in this folder yet"}
+                aria-label={`Hear ${item.name}`}
+                data-try={item.id}
+                onClick={() => {
+                  const found = library.sounds.filter((one) => `${one.kind}/${one.group}` === item.sound || `${one.kind}/${one.group}`.startsWith(`${item.sound}/`));
+                  if (found.length === 0) setNote(`${item.name}: no sounds in ${item.sound} yet.`);
+                  else {
+                    setNote("");
+                    void sound.play(found[Math.floor(Math.random() * found.length)].id, item.sound.startsWith("oneshots/") ? "oneshots" : "sfx");
+                  }
+                }}
+              >
+                ▶
               </button>
             </div>
           );

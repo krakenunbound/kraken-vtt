@@ -1,4 +1,6 @@
-// Makes Kraken's sound set with your ElevenLabs account, into the sounds
+// Makes Kraken's sound set with your ElevenLabs account (sound effects,
+// ambience loops, voices spoken by ElevenLabs voices that fit each character,
+// and music if your plan has it), into the sounds
 // folder Kraken plays from (and the chat's triggers point at):
 //   %APPDATA%\kraken-vtt\assets\sounds\<oneshots|sfx|ambience|music>\<folder>\
 //
@@ -46,7 +48,7 @@ const todo = jobs.slice(0, limit);
 const seconds = todo.reduce((sum, job) => sum + job.seconds, 0);
 console.log(`${todo.length} sounds to make (${Math.round(seconds)} s of audio) into ${out}`);
 if (flag("dry")) {
-  for (const job of todo.slice(0, 40)) console.log(`  ${job.group}  (${job.seconds}s${job.loop ? ", loop" : ""})  ${job.prompt}`);
+  for (const job of todo.slice(0, 40)) console.log(job.say ? `  ${job.group}  (voice: ${job.voice})  "${job.say}"` : `  ${job.group}  (${job.seconds}s${job.loop ? ", loop" : ""})  ${job.prompt}`);
   if (todo.length > 40) console.log(`  ... and ${todo.length - 40} more`);
   process.exit(0);
 }
@@ -74,6 +76,42 @@ async function effect(job) {
   return response;
 }
 
+// One ElevenLabs voice per character, chosen from your account's voices by
+// how they are described (gender, age, accent, tone), the same for all its lines.
+let voices = null;
+const chosen = new Map();
+async function voiceFor(job) {
+  const who = job.group;
+  if (chosen.has(who)) return chosen.get(who);
+  if (!voices) {
+    const response = await fetch("https://api.elevenlabs.io/v1/voices", { headers: { "xi-api-key": key } });
+    voices = response.ok ? ((await response.json()).voices ?? []) : [];
+  }
+  const wanted = job.voice.toLowerCase().split(/\s+/);
+  const taken = new Set(chosen.values());
+  const gender = wanted.includes("female") ? "female" : wanted.includes("male") ? "male" : "";
+  const score = (voice) => {
+    const words = new Set(`${Object.values(voice.labels ?? {}).join(" ")} ${voice.description ?? ""}`.toLowerCase().split(/[^a-z]+/));
+    const theirs = String(voice.labels?.gender ?? "").toLowerCase();
+    const fit = wanted.filter((word) => word !== gender && words.has(word)).length;
+    return fit + (gender && theirs === gender ? 5 : gender && theirs ? -5 : 0) - (taken.has(voice.voice_id) ? 0.5 : 0);
+  };
+  const best = [...voices].sort((a, b) => score(b) - score(a))[0];
+  const id = best?.voice_id ?? "21m00Tcm4TlvDq8ikWAM";
+  chosen.set(who, id);
+  console.log(`  ${who.split("/").pop()}: ${best?.name ?? "default voice"}`);
+  return id;
+}
+
+async function speak(job) {
+  const voice = await voiceFor(job);
+  return fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voice}?output_format=mp3_44100_128`, {
+    method: "POST",
+    headers: { "xi-api-key": key, "Content-Type": "application/json", Accept: "audio/mpeg" },
+    body: JSON.stringify({ text: job.say, model_id: "eleven_multilingual_v2", voice_settings: { stability: 0.45, similarity_boost: 0.75, style: 0.4 } }),
+  });
+}
+
 async function song(job) {
   return fetch("https://api.elevenlabs.io/v1/music?output_format=mp3_44100_128", {
     method: "POST",
@@ -92,7 +130,7 @@ async function worker() {
     if (job.music && stopMusic) continue;
     for (let attempt = 1; attempt <= 4; attempt++) {
       try {
-        const response = job.music ? await song(job) : await effect(job);
+        const response = job.music ? await song(job) : job.say ? await speak(job) : await effect(job);
         if (response.status === 429 || response.status >= 500) {
           await pause(2000 * attempt);
           continue;
@@ -118,7 +156,7 @@ async function worker() {
         }
         mkdirSync(path.dirname(job.path), { recursive: true });
         writeFileSync(job.path, Buffer.from(await response.arrayBuffer()));
-        made.push({ group: job.group, file: path.basename(job.path), prompt: job.prompt, at: new Date().toISOString() });
+        made.push({ group: job.group, file: path.basename(job.path), prompt: job.prompt ?? job.say, at: new Date().toISOString() });
         console.log(`  ✓ ${made.length}/${todo.length}  ${job.group}/${path.basename(job.path)}`);
         break;
       } catch (error) {

@@ -13,7 +13,7 @@ export type Soundscape = { ambience: { id: string; volume: number }[]; music: { 
 
 const DEFAULTS: Volumes = { master: 0.8, oneshots: 0.9, sfx: 0.8, ambience: 0.5, music: 0.45, muted: false };
 export const KINDS: { id: SoundKind; name: string }[] = [
-  { id: "oneshots", name: "One-shots" },
+  { id: "oneshots", name: "Voices" },
   { id: "sfx", name: "Sound effects" },
   { id: "ambience", name: "Ambience" },
   { id: "music", name: "Music" },
