@@ -4,6 +4,8 @@ const https = require("https");
 const os = require("os");
 const path = require("path");
 const { createTableServer, eachAddress } = require("./tableServer.cjs");
+const { createArtLibrary, defaultRoots } = require("./artLibrary.cjs");
+const { fgDataFolder } = require("./importers/fgModule.cjs");
 const campaigns = require("./campaigns.cjs");
 const { startAgentServer } = require("./agent/mcpServer.cjs");
 
@@ -156,7 +158,8 @@ ipcMain.handle("start-host", async (_event, options) => {
   await stopTable();
   const campaignId = typeof options?.campaignId === "string" ? options.campaignId : "";
   const saved = openCampaign(campaignId) ?? {};
-  const next = createTableServer({ saved, onChange: markDirty });
+  const dataFolder = fgDataFolder();
+  const next = createTableServer({ saved, onChange: markDirty, art: createArtLibrary({ base: dataFolder, roots: defaultRoots(dataFolder) }) });
   try {
     const info = await next.listen({ port, password });
     table = next;

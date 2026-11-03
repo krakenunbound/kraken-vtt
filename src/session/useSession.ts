@@ -18,6 +18,7 @@ export type MapToken = {
   mine: boolean;
   health: TokenHealth | null;
   art?: string;
+  video?: boolean;
 };
 export type MapDoor = { id: string; x1: number; y1: number; x2: number; y2: number; state: number; secret?: boolean };
 export type TableMap = { sceneId: string | null; tokens: MapToken[]; doors: MapDoor[]; vision: number[][] | null; sight: boolean; locked: boolean };
@@ -144,6 +145,7 @@ export function useSession() {
   const roleRef = useRef(role);
   const playersRef = useRef(players);
   const pingCounter = useRef(0);
+  const assetRef = useRef("");
   const originRef = useRef("");
   const intentional = useRef(false);
   const stateRef = useRef({ role, selfId, players, map, chat, playerScene, records });
@@ -219,7 +221,8 @@ export function useSession() {
           if (msg.type === "ok" && !settled) {
             settled = true;
             window.clearTimeout(timer);
-            const you = msg.you as Seat;
+            const you = msg.you as Seat & { assetToken?: string };
+            assetRef.current = you.assetToken ?? "";
             roleRef.current = you.role;
             setRole(you.role);
             setSelfId(you.id);
@@ -498,6 +501,14 @@ export function useSession() {
     socket.send(JSON.stringify({ type: "chat", text: line.slice(0, 500) }));
   }, []);
 
+  // The GM's art library (portraits and tokens), served by the host to this seat.
+  const artUrl = useCallback((id: string) => (id && assetRef.current ? `${originRef.current}/art/file?token=${assetRef.current}&id=${encodeURIComponent(id)}` : ""), []);
+  const artList = useCallback(async (kind: "portrait" | "token") => {
+    const response = await fetch(`${originRef.current}/art/list?token=${assetRef.current}&kind=${kind}`);
+    if (!response.ok) throw new Error("No art library.");
+    return (await response.json()) as import("../characters/ArtPicker").ArtItem[];
+  }, []);
+
   const send = useCallback((message: Record<string, unknown>) => {
     const socket = socketRef.current;
     if (!socket || socket.readyState !== WebSocket.OPEN) return false;
@@ -574,6 +585,8 @@ export function useSession() {
     setSight,
     setLocked,
     ping,
+    artUrl,
+    artList,
     roll,
     op,
     siegeCheck,

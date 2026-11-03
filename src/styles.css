@@ -96,6 +96,93 @@ select {
 
 .table[hidden] { display: none; }
 
+/* The map with its side dock (chat; a player's character and party). */
+.stage {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+
+.stage[hidden] { display: none; }
+.stage > .table { flex: 1; min-width: 0; }
+
+.dock {
+  width: 380px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--bar);
+  border-left: 1px solid var(--line);
+}
+
+.dock.closed { width: 40px; }
+
+.dock-tabs {
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid var(--line);
+}
+
+.dock.closed .dock-tabs { border-bottom: none; }
+
+.dock-toggle {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  color: var(--muted);
+  padding: 0.55rem 0.7rem;
+}
+
+.dock-tab {
+  flex: 1;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  color: var(--muted);
+  padding: 0.6rem 0.5rem;
+}
+
+.dock-tab[aria-selected="true"] { color: var(--text); box-shadow: inset 0 -2px 0 var(--brass); }
+.dock > .chat-pane { flex: 1; padding: 0.75rem; }
+.dock-characters { display: flex; flex-direction: column; gap: 10px; padding: 10px; overflow: auto; flex: 1; }
+.dock-characters .sheet { font-size: 0.92rem; }
+.dock-picker { display: flex; gap: 6px; }
+.dock-picker select { flex: 1; }
+.dock-party { padding: 0.75rem 1rem; overflow: auto; }
+.dock-party h2 { margin: 0; font-size: 1rem; color: var(--muted); font-weight: 600; }
+
+.portrait-strip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 0.5rem;
+  overflow-x: auto;
+}
+
+.portrait-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px 3px 3px;
+  border-radius: 999px;
+}
+
+.chip-face {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  overflow: hidden;
+  border-radius: 50%;
+  background: var(--brass);
+  color: #121418;
+  font-weight: 700;
+}
+
+.chip-face img { width: 100%; height: 100%; object-fit: cover; }
+.player-shell .session-status { margin-left: auto; }
+
 .toolbar {
   display: flex;
   align-items: center;
@@ -137,7 +224,7 @@ select {
   transform-origin: 0 0;
 }
 
-.world img {
+.world > img {
   position: absolute;
   display: block;
   user-select: none;
@@ -789,6 +876,92 @@ select {
 .sheet { display: grid; gap: 16px; align-content: start; }
 .sheet-head { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; align-items: flex-end; border-bottom: 1px solid rgba(210, 161, 90, 0.4); padding-bottom: 8px; }
 .sheet-head h2 { margin: 0; color: #d2a15a; font-family: Georgia, serif; }
+.sheet-title { flex: 1; min-width: 10rem; }
+
+/* The portrait frame (click to choose, as in FG) with the token beside it. */
+.portrait-frames { position: relative; flex: none; }
+
+.portrait-frame {
+  display: grid;
+  place-items: center;
+  width: 96px;
+  height: 96px;
+  padding: 0;
+  overflow: hidden;
+  border: 2px solid var(--brass-dim);
+  border-radius: 10px;
+  background: #0c0e11;
+  color: var(--brass);
+  font: 600 2rem Georgia, serif;
+}
+
+.portrait-frame:not(:disabled):hover { border-color: var(--brass); }
+.portrait-frame img, .portrait-frame video, .token-frame img, .token-frame video { width: 100%; height: 100%; object-fit: cover; }
+
+.token-frame {
+  position: absolute;
+  right: -10px;
+  bottom: -10px;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  overflow: hidden;
+  border: 2px solid var(--brass);
+  border-radius: 50%;
+  background: #1a1e24;
+  color: var(--muted);
+  font-size: 0.6rem;
+}
+
+.art-picker-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.art-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: min(960px, 94vw);
+  max-height: 88vh;
+  padding: 14px;
+  background: var(--bar);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.art-picker header { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.art-picker h2 { margin: 0 auto 0 0; font: 500 1.2rem Georgia, serif; color: var(--brass); }
+
+.art-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+  gap: 8px;
+  overflow: auto;
+  min-height: 0;
+}
+
+.art-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 8px;
+  font-size: 0.72rem;
+  text-align: center;
+}
+
+.art-cell img, .art-cell video { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 6px; background: #0c0e11; }
+.art-cell span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.art-cell.selected { border-color: var(--brass); }
+.art-clear { justify-content: center; color: var(--muted); }
+.art-more { align-self: center; }
 .sheet-head p { margin: 4px 0 0; opacity: 0.8; }
 .sheet-stats { display: flex; gap: 18px; margin: 0; }
 .sheet-stats div { text-align: center; }
@@ -840,3 +1013,11 @@ select {
 .details textarea { min-height: 60px; }
 .warnings { margin: 0; padding-left: 18px; color: #e0a08f; }
 .wizard-foot { display: flex; justify-content: space-between; }
+
+/* The sheet in the player's side panel: one narrow column. */
+.dock .dock-characters { display: flex; flex-direction: column; grid-template-columns: none; gap: 10px; padding: 10px; overflow: auto; flex: 1; min-height: 0; }
+.dock .sheet-head { align-items: flex-start; }
+.dock .sheet-stats { gap: 12px; flex-wrap: wrap; }
+.dock .sheet-attributes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.dock .sheet-columns { grid-template-columns: 1fr; }
+.dock .portrait-frame { width: 84px; height: 84px; }

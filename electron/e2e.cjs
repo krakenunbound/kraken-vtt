@@ -111,7 +111,9 @@ async function run(hostWindow, createWindow) {
     5000,
     "Player did not receive chat",
   );
-  await player.webContents.executeJavaScript('[...document.querySelectorAll("button.tab")].find((button) => button.textContent === "Party").click()');
+  // A player has no GM tabs: chat is in the dock beside the map.
+  const playerTabs = await player.webContents.executeJavaScript('document.querySelectorAll("button.tab").length');
+  if (playerTabs !== 0) throw new Error(`Player saw ${playerTabs} GM tabs`);
   await waitForText(player, "The troll is at the door");
   const playerParty = await bodyText(player);
   if (playerParty.includes(PASSWORD)) throw new Error("Player party showed the table password");
@@ -126,7 +128,6 @@ async function run(hostWindow, createWindow) {
   );
   const dmWalls = await hostWindow.webContents.executeJavaScript('document.querySelector(".legend").getAttribute("data-walls")');
   const sceneName = await hostWindow.webContents.executeJavaScript('document.querySelector("[data-scene]")?.getAttribute("data-scene") || ""');
-  await player.webContents.executeJavaScript('[...document.querySelectorAll("button.tab")].find((button) => button.textContent === "Table").click()');
   await waitFor(
     player,
     `(() => {

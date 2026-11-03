@@ -79,7 +79,7 @@ function savedMap(value) {
   return { tokens, doors, sight, locked };
 }
 
-function createMapState({ saved, records, onChange = () => undefined, hasArt = () => false }) {
+function createMapState({ saved, records, onChange = () => undefined, hasArt = () => false, hasPicture = () => false }) {
   const state = savedMap(saved);
   let scene = null;
   const visionCache = new Map();
@@ -176,7 +176,13 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       mine: seat.role === "player" && token.owner === seat.name,
       health: health(token),
     };
-    if (token.sourceId && hasArt(token.sourceId)) out.art = `/table/token?token=${assetToken}&id=${encodeURIComponent(token.sourceId)}`;
+    // A character's token picture, else its portrait (FG's token from the sheet).
+    const data = token.recordId ? records.get(token.recordId)?.data : null;
+    const picture = [data?.token, data?.portrait].find((id) => typeof id === "string" && hasPicture(id));
+    if (picture) {
+      out.art = `/art/file?token=${assetToken}&id=${encodeURIComponent(picture)}`;
+      out.video = picture.toLowerCase().endsWith(".webm");
+    } else if (token.sourceId && hasArt(token.sourceId)) out.art = `/table/token?token=${assetToken}&id=${encodeURIComponent(token.sourceId)}`;
     return out;
   }
 

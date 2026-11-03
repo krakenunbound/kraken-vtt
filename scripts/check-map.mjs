@@ -10,6 +10,18 @@ import * as geometry from "../shared/map/geometry.mjs";
 const require = createRequire(import.meta.url);
 const { createTableServer } = require("../electron/tableServer.cjs");
 const { callTool } = require("../electron/agent/tools.cjs");
+const { createArtLibrary, defaultRoots } = require("../electron/artLibrary.cjs");
+const { mkdtempSync, mkdirSync, writeFileSync } = require("node:fs");
+const { tmpdir } = require("node:os");
+const path = require("node:path");
+
+// A stand-in FG data folder: one portrait, one campaign token.
+const fgData = mkdtempSync(path.join(tmpdir(), "kraken-art-"));
+mkdirSync(path.join(fgData, "portraits"));
+mkdirSync(path.join(fgData, "campaigns", "Keep", "tokens"), { recursive: true });
+writeFileSync(path.join(fgData, "portraits", "Ann Fighter.png"), Buffer.from("portrait-bytes"));
+writeFileSync(path.join(fgData, "campaigns", "Keep", "tokens", "Orc.webp"), Buffer.from("token-bytes"));
+writeFileSync(path.join(fgData, "secret.txt"), "not art");
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -89,7 +101,7 @@ async function latest(seat, type, test = () => true, label = type) {
   throw new Error(`waiting for ${label}`);
 }
 
-const server = createTableServer();
+const server = createTableServer({ art: createArtLibrary({ base: fgData, roots: defaultRoots(fgData) }) });
 const sockets = [];
 try {
   const info = await server.listen({ port: 0, password: "" });
@@ -172,6 +184,22 @@ try {
   reopened.agent.map.setScene(JSON.parse(JSON.stringify({ ...scene, tokens: [] })));
   assert(reopened.agent.map.tokens().length === 2 && reopened.agent.map.sightOn() === false, "the map comes back on reopen");
   await reopened.stop();
+
+  // The art library: players list and fetch the GM's portraits and tokens by
+  // id; nothing else in the data folder is served; a portrait shows on the token.
+  const asset = ann.ok.you.assetToken;
+  const base = `http://127.0.0.1:${info.port}`;
+  const portraits = await (await fetch(`${base}/art/list?token=${asset}&kind=portrait`)).json();
+  const tokens = await (await fetch(`${base}/art/list?token=${asset}&kind=token`)).json();
+  assert(portraits.length === 1 && portraits[0].id === "portraits/Ann Fighter.png" && tokens[0].group === "Keep", `art lists ${JSON.stringify([portraits, tokens])}`);
+  const file = await fetch(`${base}/art/file?token=${asset}&id=${encodeURIComponent(portraits[0].id)}`);
+  assert(file.ok && (await file.text()) === "portrait-bytes" && file.headers.get("content-type") === "image/png", "portrait served");
+  assert((await fetch(`${base}/art/file?token=${asset}&id=secret.txt`)).status === 404, "only indexed art is served");
+  assert((await fetch(`${base}/art/file?token=${asset}&id=..%2F..%2Fsecret.txt`)).status === 404, "no paths outside the library");
+  assert((await fetch(`${base}/art/list?token=nope`)).status === 404, "the library needs a seat's asset token");
+  server.agent.records.update(annRecord.id, { data: { portrait: portraits[0].id } }, server.agent.seat);
+  const withArt = await latest(ann, "map", (m) => m.tokens.some((t) => t.id === placed.id && t.art), "token shows the portrait");
+  assert(withArt.tokens.find((t) => t.id === placed.id).art.includes(encodeURIComponent(portraits[0].id)), "token art is the portrait");
 
   await tool("kraken_token_remove", { id: placed.id });
   assert(!server.snapshot().tokens.some((t) => t.id === placed.id), "token removed");
