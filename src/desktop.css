@@ -446,8 +446,6 @@ span.ct-init { display: inline-block; }
 .tower.drop { border-color: var(--brass); box-shadow: 0 0 0 2px rgba(210, 161, 90, 0.45), 0 0 14px rgba(210, 161, 90, 0.55); }
 .tray-die { touch-action: none; cursor: grab; }
 .tray-die:active { cursor: grabbing; }
-.dice-settings-button { padding: 4px; background: transparent; border-color: transparent; color: var(--muted); }
-.dice-settings-button:hover, .dice-settings-button[aria-expanded="true"] { color: var(--text); border-color: var(--panel-edge); }
 .dice-settings { position: absolute; left: 10px; right: 10px; bottom: 86px; max-height: calc(100% - 96px); overflow: auto; z-index: 5; display: flex; flex-direction: column; gap: 8px; padding: 10px 12px 12px; background: var(--panel); border: 1px solid var(--panel-edge); border-radius: 10px; box-shadow: var(--shadow); }
 .dice-settings header { display: flex; align-items: center; justify-content: space-between; color: var(--brass); font-family: var(--serif); letter-spacing: 0.06em; }
 .dice-settings .check { display: flex; align-items: center; gap: 8px; font-size: 0.86rem; }

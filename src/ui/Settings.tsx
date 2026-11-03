@@ -3,24 +3,32 @@ import type { DecalItem, PictureKind, Session } from "../session/useSession";
 import { Emblem } from "./Emblem";
 import { useWindows } from "./Windows";
 
-// The GM's settings, as FG's campaign settings cog: a button for each thing
-// the GM sets for the whole table.
+// Settings, as FG's settings cog: a button for each thing to set. Everyone
+// sets their own dice; the GM also sets what the whole table sees.
 export function SettingsWindow({ session }: { session: Session }) {
   const windows = useWindows();
+  const gm = session.role === "dm";
   return (
     <div className="settings-window">
       <div className="settings-grid">
-        <button type="button" className="settings-button" data-setting="decal" onClick={() => windows.open("decals", "Background Decal")}>
-          Background Decal
+        <button type="button" className="settings-button" data-setting="dice" onClick={() => windows.open("dice", "Dice")}>
+          Dice
         </button>
-        <button type="button" className="settings-button" data-setting="wallpaper" onClick={() => windows.open("wallpapers", "Desktop Wallpaper")}>
-          Desktop Wallpaper
-        </button>
+        {gm ? (
+          <>
+            <button type="button" className="settings-button" data-setting="decal" onClick={() => windows.open("decals", "Background Decal")}>
+              Background Decal
+            </button>
+            <button type="button" className="settings-button" data-setting="wallpaper" onClick={() => windows.open("wallpapers", "Desktop Wallpaper")}>
+              Desktop Wallpaper
+            </button>
+          </>
+        ) : null}
       </div>
-      <label className="settings-check">
+      {gm ? <label className="settings-check">
         <input type="checkbox" checked={session.options.towerReveal} onChange={(event) => session.setTableOptions({ towerReveal: event.target.checked })} />
         Let players see their own dice-tower rolls (unticked: only the GM sees them, as in FG)
-      </label>
+      </label> : null}
     </div>
   );
 }
