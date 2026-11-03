@@ -290,6 +290,40 @@ const TOOLS = [
       ),
   },
   {
+    name: "kraken_sound",
+    description:
+      "Sound for the table, as Syrinscape in FG, from the GM's sounds (assets/sounds: oneshots, sfx, ambience, music; a folder plays one of its sounds at random). Every seat hears it, each at its own volumes. action list (kind, search: what there is, by folder); play (id or folder, e.g. \"oneshots/Doors/Wooden Door\" or \"sfx/Weapons/Sword/Hit\"); stop (stops one-shots and effects); ambience (add, remove, volume or clear loops; id, volume 0..1); music (play an id or a folder, next, stop, volume); triggers (the chat's sound triggers: read them, or set triggers to a list, or \"default\"); scape (what is playing now).",
+    inputSchema: object({
+      action: { type: "string", enum: ["list", "play", "stop", "ambience", "music", "triggers", "scape"] },
+      kind: { type: "string", enum: ["oneshots", "sfx", "ambience", "music"] },
+      search: string("Part of a name or folder (list)"),
+      id: string("A sound's id, or a folder"),
+      volume: number("0 to 1"),
+      do: { type: "string", enum: ["add", "remove", "volume", "clear", "play", "next", "stop"], description: "For ambience and music" },
+      loop: { type: "boolean", description: "Music: loop the track (default true)" },
+      triggers: { description: "A list of { name, on: attack|spellattack|save|cast|heal|damage|roll|text, match, result: any|hit|miss|crit|fumble|success|failure, sound, enabled }, or \"default\"" },
+    }),
+    run(args, ctx) {
+      const agent = needTable(ctx);
+      const library = agent.sounds();
+      const action = args.action ?? "scape";
+      if (action === "list") {
+        if (!library) return out({ sounds: [], note: "This table has no sound library." });
+        const wanted = String(args.search ?? "").toLowerCase();
+        const groups = library.groups(args.kind).filter((group) => !wanted || group.id.toLowerCase().includes(wanted));
+        return out({ folder: library.folder, groups, sounds: library.list(args.kind).filter((item) => !wanted || item.id.toLowerCase().includes(wanted)).slice(0, 200) });
+      }
+      if (action === "play") return out({ playing: agent.playSound(String(args.id ?? ""), args.volume) });
+      if (action === "stop") {
+        return out({ stopped: true, ...(agent.stopSounds ? agent.stopSounds() : {}) });
+      }
+      if (action === "ambience") return out(agent.ambience(args.do ?? "add", args.id, args.volume));
+      if (action === "music") return out(agent.music(args.do ?? "play", args.id, { volume: args.volume, loop: args.loop }));
+      if (action === "triggers") return out({ triggers: args.triggers !== undefined ? agent.setTriggers(args.triggers) : agent.triggers() });
+      return out(agent.soundscape());
+    },
+  },
+  {
     name: "kraken_kick",
     description: "FG's /kick: send a player away from the table (they can join again).",
     inputSchema: object({ name: string("The player's name") }, ["name"]),
@@ -708,10 +742,10 @@ const TOOLS = [
   {
     name: "kraken_windows",
     description:
-      "The GM's windows: list them, or open, close, pop out (to a window of its own, for another monitor) or dock back a window. Kinds: characters, party, combat, players, settings, decals (the background decal picker), wallpapers (the desktop wallpaper picker), gmicons (the GM icon picker), dice (this seat's dice: sets, colours, design, material, effects), sheet (a character's sheet: give record, its id or name).",
+      "The GM's windows: list them, or open, close, pop out (to a window of its own, for another monitor) or dock back a window. Kinds: characters, party, combat, players, settings, decals (the background decal picker), wallpapers (the desktop wallpaper picker), gmicons (the GM icon picker), dice (this seat's dice: sets, colours, design, material, effects), sound (one-shots, effects, ambience, music, chat triggers, volumes), sheet (a character's sheet: give record, its id or name).",
     inputSchema: object({
       action: { type: "string", enum: ["list", "open", "close", "popout", "dock"] },
-      kind: { type: "string", enum: ["characters", "party", "combat", "players", "settings", "decals", "wallpapers", "gmicons", "dice", "sheet"] },
+      kind: { type: "string", enum: ["characters", "party", "combat", "players", "settings", "decals", "wallpapers", "gmicons", "dice", "sound", "sheet"] },
       record: string("For a sheet: the character's record id or name"),
     }),
     run: async (args, ctx) => out(await ctx.ui({ kind: "windows", action: args.action ?? "list", window: args.kind, record: args.record })),

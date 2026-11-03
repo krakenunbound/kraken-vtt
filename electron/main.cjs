@@ -6,9 +6,15 @@ const path = require("path");
 const { createTableServer, eachAddress } = require("./tableServer.cjs");
 const { createArtLibrary, defaultRoots } = require("./artLibrary.cjs");
 const { createDecalLibrary } = require("./decals.cjs");
+const { createSoundLibrary } = require("./sounds.cjs");
 const { fgDataFolder } = require("./importers/fgModule.cjs");
 const campaigns = require("./campaigns.cjs");
 const { startAgentServer } = require("./agent/mcpServer.cjs");
+
+// The development copy (Kraken VTT.bat) and the installed app keep their
+// campaigns and assets in one place, whichever is opened.
+// (Tests and demos pass a throwaway folder of their own: theirs is kept.)
+if (!app.commandLine.hasSwitch("user-data-dir")) app.setPath("userData", path.join(app.getPath("appData"), "kraken-vtt"));
 
 if (process.env.KRAKEN_E2E === "1" || process.env.KRAKEN_SMOKE === "1") {
   app.setPath("userData", fs.mkdtempSync(path.join(os.tmpdir(), "kraken-vtt-")));
@@ -80,6 +86,12 @@ let quitting = false;
 let decalLibrary = null;
 let wallpaperLibrary = null;
 let gmIconLibrary = null;
+let soundLibrary = null;
+// The GM's sounds (one-shots, effects, ambience, music), shared by every campaign.
+function sounds() {
+  if (!soundLibrary) soundLibrary = createSoundLibrary({ folder: path.join(app.getPath("userData"), "assets", "sounds") });
+  return soundLibrary;
+}
 // The GM's chat pictures: the Kraken GM Icon set and the GM's own.
 function gmIcons() {
   if (!gmIconLibrary) {
@@ -233,7 +245,7 @@ ipcMain.handle("start-host", async (_event, options) => {
   const remembered = preferences().gmIcon;
   if (typeof remembered === "string" && !(saved.options && "gmIcon" in saved.options)) saved.options = { ...(saved.options ?? {}), gmIcon: remembered };
   const dataFolder = fgDataFolder();
-  const next = createTableServer({ saved, onChange: markDirty, art: createArtLibrary({ base: dataFolder, roots: defaultRoots(dataFolder) }), decals: decals(), wallpapers: wallpapers(), gmIcons: gmIcons() });
+  const next = createTableServer({ saved, onChange: markDirty, art: createArtLibrary({ base: dataFolder, roots: defaultRoots(dataFolder) }), decals: decals(), wallpapers: wallpapers(), gmIcons: gmIcons(), sounds: sounds() });
   try {
     const info = await next.listen({ port, password });
     table = next;
@@ -295,6 +307,21 @@ ipcMain.handle("decal-pick", async (_event, kind) => {
 });
 // A picture dropped on the picker.
 ipcMain.handle("decal-add", (_event, name, bytes, kind) => libraryOf(kind).add(String(name ?? ""), Buffer.from(bytes ?? [])));
+// Sounds from anywhere, copied into a kind and folder of the sounds library.
+ipcMain.handle("sound-pick", async (_event, kind, group) => {
+  const picked = await dialog.showOpenDialog(mainWindow, {
+    title: "Add sounds",
+    properties: ["openFile", "multiSelections"],
+    filters: [{ name: "Sounds", extensions: ["mp3", "ogg", "wav", "m4a", "webm", "flac", "opus"] }],
+  });
+  if (picked.canceled) return [];
+  return picked.filePaths.map((file) => sounds().addFile(String(kind), String(group ?? ""), file));
+});
+ipcMain.handle("sound-add", (_event, kind, group, name, bytes) => sounds().add(String(kind), String(group ?? ""), String(name ?? ""), Buffer.from(bytes ?? [])));
+ipcMain.handle("sound-folder", async () => {
+  fs.mkdirSync(sounds().folder, { recursive: true });
+  return shell.openPath(sounds().folder);
+});
 ipcMain.handle("decal-folder", async (_event, kind) => {
   const folder = libraryOf(kind).folder;
   fs.mkdirSync(folder, { recursive: true });

@@ -43,6 +43,9 @@ export type KrakenApi = {
   pickDecal: (kind?: "decal" | "wallpaper" | "gmicon") => Promise<KrakenDecal | null>;
   addDecal: (name: string, bytes: Uint8Array, kind?: "decal" | "wallpaper" | "gmicon") => Promise<KrakenDecal>;
   openDecalFolder: (kind?: "decal" | "wallpaper" | "gmicon") => Promise<string>;
+  pickSounds: (kind: string, group: string) => Promise<KrakenSound[]>;
+  addSound: (kind: string, group: string, name: string, bytes: Uint8Array) => Promise<KrakenSound>;
+  openSoundFolder: () => Promise<string>;
   onAgentCommand: (handler: (command: KrakenAgentCommand) => Promise<unknown>) => () => void;
 };
 
@@ -55,6 +58,8 @@ export type KrakenAgentCommand =
   | { kind: "dice-settings"; patch: DiceSettingsPatch };
 
 export type DiceSettingsPatch = { show?: boolean; sound?: boolean; volume?: number; preset?: string; body?: string; accent?: string; ink?: string; design?: string; material?: string; font?: string; effect?: string; crit?: boolean };
+
+export type KrakenSound = { id: string; kind: string; group: string; name: string };
 
 export type KrakenDecal = { id: string; name: string; group: string; ruleset?: string };
 

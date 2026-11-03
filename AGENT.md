@@ -51,6 +51,8 @@ The app starts the MCP server when it opens. `electron/agent/mcp-stdio.cjs` is t
 | Chat commands: `/w` whispers, `/me` `/action` `/ooc` `/mood`, the GM's `/story` and `/id` | `kraken_chat_send` (`kind`, `to`, `as`, `mood`) |
 | `/gmroll`, `/blindroll` | `kraken_roll` with `secret` |
 | `/kick`, `/vote`, `/save` | `kraken_kick`, `kraken_vote`, `kraken_save` |
+| **Sound** | |
+| The Sound window: one-shots and effects for the table, ambience loops, music, the chat's sound triggers | `kraken_sound` (list, play, stop, ambience, music, triggers, scape) |
 | GM-only roll (the GM's dice tower) | `kraken_roll` with `secret` |
 | Dice tower: players see their own result | `kraken_table_options` |
 | Settings: Background Decal, Desktop Wallpaper and GM Icon (pick, a set for each game, Browse to import a picture, none) | `kraken_decal` (`kind` decal, wallpaper or gmicon) |

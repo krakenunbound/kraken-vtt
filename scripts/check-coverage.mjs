@@ -40,6 +40,11 @@ const MESSAGES = {
   vote: "kraken_vote",
   "vote-cast": "kraken_vote",
   save: "kraken_save",
+  "sound-play": "kraken_sound",
+  "sound-stop": "kraken_sound",
+  ambience: "kraken_sound",
+  music: "kraken_sound",
+  "sound-triggers": "kraken_sound",
 };
 // Messages that are the connection itself, not something a person does.
 const PLUMBING = new Set(["join"]);

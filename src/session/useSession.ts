@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { MapScene } from "../table/MapView";
+import { sound, type Soundscape } from "../sound/soundEngine";
 import { rolling, throwIntent } from "../dice/diceStore";
 
 export type Seat = { id: string; name: string; role: "dm" | "player" };
@@ -91,6 +92,9 @@ export type ChatLine = {
 export type RollMode = "public" | "gm" | "blind" | "self";
 export type ChatSend = { kind?: ChatKind; mood?: string; to?: string[]; as?: string };
 // The table's own options, set by the GM (electron/tableServer.cjs savedOptions).
+export type SoundTrigger = { id: string; name: string; on: string; match: string; result: string; sound: string; enabled: boolean };
+export type SoundItem = { id: string; kind: string; group: string; name: string };
+export type SoundLibrary = { sounds: SoundItem[]; groups: { id: string; count: number }[]; folder: string; triggers?: SoundTrigger[] };
 export type TableOptions = { towerReveal: boolean; decal: string; wallpaper: string; gmIcon: string };
 export type DecalItem = { id: string; name: string; group: string; ruleset?: string };
 export type PictureKind = "decal" | "wallpaper" | "gmicon";
@@ -221,6 +225,8 @@ export function useSession() {
   const [map, setMap] = useState<TableMap>(EMPTY_MAP);
   const [party, setParty] = useState<import("../party/PartySheet").PartyView | null>(null);
   const [combat, setCombat] = useState<CombatView>({ round: 0, active: null, entries: [] });
+  const [soundscape, setSoundscape] = useState<Soundscape>({ ambience: [], music: null });
+  const [soundTriggers, setSoundTriggers] = useState<SoundTrigger[]>([]);
   const [options, setOptions] = useState<TableOptions>({ towerReveal: false, decal: "kraken", wallpaper: "", gmIcon: "" });
   const [pings, setPings] = useState<Ping[]>([]);
   const [notice, setNotice] = useState<string | null>(null);
@@ -315,6 +321,12 @@ export function useSession() {
             window.clearTimeout(timer);
             const you = msg.you as Seat & { assetToken?: string };
             assetRef.current = you.assetToken ?? "";
+            // Sounds come from the host, for this seat.
+            sound.setSource((id) => `${originRef.current}/sound/file?token=${assetRef.current}&id=${encodeURIComponent(id)}`);
+            if (msg.soundscape) {
+              setSoundscape(msg.soundscape as Soundscape);
+              void sound.setScape(msg.soundscape as Soundscape);
+            }
             roleRef.current = you.role;
             setRole(you.role);
             setSelfId(you.id);
@@ -350,11 +362,20 @@ export function useSession() {
             const id = msg.id;
             setChat((current) => current.map((line) => (line.vote?.id === id ? { ...line, vote: { ...line.vote, yes: (msg.yes as string[]) ?? [], no: (msg.no as string[]) ?? [] } } : line)));
           }
+          if (msg.type === "sound" && typeof msg.id === "string") void sound.play(msg.id, (msg.kind as "oneshots" | "sfx") ?? "sfx", Number(msg.volume ?? 1));
+          if (msg.type === "sound-stop") sound.stopAll();
+          if (msg.type === "soundscape" && msg.soundscape) {
+            setSoundscape(msg.soundscape as Soundscape);
+            void sound.setScape(msg.soundscape as Soundscape);
+          }
+          if (msg.type === "sound-triggers" && Array.isArray(msg.triggers)) setSoundTriggers(msg.triggers as SoundTrigger[]);
           if (msg.type === "kicked") setError(String(msg.reason ?? "The GM has asked you to leave the table."));
           if (msg.type === "chat") {
             const line = msg as unknown as ChatLine;
             // Its dice are thrown first; its card waits for them to land.
             rolling.arrived(line);
+            // Its triggered sound plays as its result shows.
+            sound.lineArrived(line);
             setChat((current) => [...current, line].slice(-100));
           }
           if (msg.type === "record" && msg.record) {
@@ -625,6 +646,18 @@ export function useSession() {
   // A line on this screen only (/help, /info), and /clear.
   const note = useCallback((text: string, from = "Kraken") => setChat((current) => [...current, { id: "local", from, text, at: Date.now(), local: true }].slice(-100)), []);
   const clearChat = useCallback(() => setChat([]), []);
+  // Sound, the GM's: the library, playing for the table, ambience, music, the chat's triggers.
+  const soundList = useCallback(async (): Promise<SoundLibrary> => {
+    const response = await fetch(`${originRef.current}/sound/list?token=${assetRef.current}`);
+    if (!response.ok) throw new Error("No sounds.");
+    const library = (await response.json()) as SoundLibrary;
+    if (library.triggers) setSoundTriggers(library.triggers);
+    return library;
+  }, []);
+  const soundCommand = useCallback((body: Record<string, unknown>) => {
+    const socket = socketRef.current;
+    if (socket && socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify(body));
+  }, []);
 
   // The GM's art library (portraits and tokens), served by the host to this seat.
   const artUrl = useCallback((id: string) => (id && assetRef.current ? `${originRef.current}/art/file?token=${assetRef.current}&id=${encodeURIComponent(id)}` : ""), []);
@@ -758,6 +791,10 @@ export function useSession() {
     artUrl,
     artList,
     tableCommand,
+    soundscape,
+    soundTriggers,
+    soundList,
+    soundCommand,
     note,
     clearChat,
     decalUrl,
