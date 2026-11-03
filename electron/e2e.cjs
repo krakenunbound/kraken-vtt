@@ -72,6 +72,8 @@ async function chooseBundle(win, filePath) {
 async function run(hostWindow, createWindow) {
   await whenLoaded(hostWindow);
   await waitForText(hostWindow, "My Campaigns");
+  await hostWindow.webContents.executeJavaScript('document.querySelector(\'[data-action="campaigns-mode"]\').click()');
+  await waitForText(hostWindow, "Begin a new campaign");
   await fill(hostWindow, 'form[data-form="create"] input[name="new-campaign"]', "E2E Table");
   await hostWindow.webContents.executeJavaScript('document.querySelector(\'form[data-form="create"]\').requestSubmit()');
   await waitForText(hostWindow, "public game");
@@ -85,7 +87,7 @@ async function run(hostWindow, createWindow) {
   const player = createWindow();
   await whenLoaded(player);
   await waitForText(player, "My Campaigns");
-  await player.webContents.executeJavaScript('document.querySelector(\'button[data-action="join-mode"]\').click()');
+  await player.webContents.executeJavaScript('document.querySelector(\'[data-action="join-mode"]\').click()');
   await waitForText(player, "Take your seat");
   await fill(player, 'form[data-form="join"] input[name="name"]', "Player");
   await fill(player, 'form[data-form="join"] input[name="address"]', "127.0.0.1");
@@ -170,6 +172,8 @@ async function run(hostWindow, createWindow) {
   await waitFor(hostWindow, 'window.__kraken.snapshot().players.length === 1', 5000, "Player seat did not close");
   await hostWindow.webContents.executeJavaScript('[...document.querySelectorAll(".session-status button")].find((b) => b.textContent.trim() === "Leave").click()');
   await waitForText(hostWindow, "My Campaigns", 10000);
+  await hostWindow.webContents.executeJavaScript('document.querySelector(\'[data-action="campaigns-mode"]\').click()');
+  await waitFor(hostWindow, 'Boolean(document.querySelector(\'button[data-campaign="E2E Table"]\'))', 5000, "The campaign list did not open");
   await hostWindow.webContents.executeJavaScript('document.querySelector(\'button[data-campaign="E2E Table"]\').click()');
   await waitForText(hostWindow, "public game");
   await fill(hostWindow, 'form[data-form="play"] input[name="port"]', String(PORT));
@@ -192,12 +196,9 @@ async function run(hostWindow, createWindow) {
   const again = createWindow();
   await whenLoaded(again);
   await waitForText(again, "My Campaigns");
-  await again.webContents.executeJavaScript('document.querySelector(\'button[data-action="join-mode"]\').click()');
-  await fill(again, 'form[data-form="join"] input[name="name"]', "Player");
-  await fill(again, 'form[data-form="join"] input[name="address"]', "127.0.0.1");
-  await fill(again, 'form[data-form="join"] input[name="port"]', String(PORT));
-  await fill(again, 'form[data-form="join"] input[name="password"]', PASSWORD);
-  await again.webContents.executeJavaScript('document.querySelector(\'form[data-form="join"]\').requestSubmit()');
+  // The game joined before is on the home screen's Join card: one click back in.
+  await waitFor(again, `Boolean(document.querySelector('[data-recent="127.0.0.1:${PORT}"] .recent-join'))`, 5000, "The game joined before is not on the home screen");
+  await again.webContents.executeJavaScript(`document.querySelector('[data-recent="127.0.0.1:${PORT}"] .recent-join').click()`);
   await waitFor(again, "Boolean(window.__kraken && window.__kraken.snapshot().role === 'player')", 10000, "Player could not rejoin");
   await waitFor(
     again,

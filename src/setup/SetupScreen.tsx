@@ -12,6 +12,28 @@ type JoinInput = { name: string; address: string; port: number; password: string
 
 const EMPTY_NET: KrakenNetwork = { v4: [], v6: [], externalV4: "", externalV6: "" };
 
+// The games this screen has joined, newest first, for a quick way back in.
+type RecentGame = { name: string; address: string; port: number; password: string; at: number };
+const RECENT_KEY = "kraken-recent-games";
+function recentGames(): RecentGame[] {
+  try {
+    const list = JSON.parse(window.localStorage.getItem(RECENT_KEY) ?? "[]");
+    return Array.isArray(list) ? list.filter((game) => game && typeof game.address === "string" && Number.isInteger(game.port)).slice(0, 8) : [];
+  } catch {
+    return [];
+  }
+}
+function saveRecentGames(list: RecentGame[]) {
+  try {
+    window.localStorage.setItem(RECENT_KEY, JSON.stringify(list.slice(0, 8)));
+  } catch {
+    /* this screen only */
+  }
+}
+function rememberGame(game: RecentGame) {
+  saveRecentGames([game, ...recentGames().filter((other) => !(other.address === game.address && other.port === game.port))]);
+}
+
 // The rulesets a campaign can be made with.
 const RULESETS = [
   { name: "Castles & Crusades", blurb: "SiegeCore rules: character sheets, the SIEGE engine, combat and spells." },
@@ -99,11 +121,14 @@ export function SetupScreen({
   error: string | null;
   canHost: boolean;
   onHost: (input: HostInput) => Promise<unknown>;
-  onJoin: (input: JoinInput) => Promise<void>;
+  onJoin: (input: JoinInput) => Promise<boolean | void>;
 }) {
   // Opened in a browser from the host's address: this page is a player's way in.
   const inBrowser = !window.kraken && window.location.protocol.startsWith("http");
-  const [mode, setMode] = useState<"campaigns" | "join">(inBrowser ? "join" : "campaigns");
+  // Home: the two ways in, side by side; then a campaign to run, or a game to join.
+  const [mode, setMode] = useState<"home" | "campaigns" | "join">(inBrowser ? "join" : "home");
+  const [recent, setRecent] = useState<RecentGame[]>(() => recentGames());
+  const [joinFill, setJoinFill] = useState<RecentGame | null>(null);
   const [rows, setRows] = useState<KrakenCampaign[]>([]);
   const [network, setNetwork] = useState<KrakenNetwork>(EMPTY_NET);
   const [query, setQuery] = useState("");
@@ -191,17 +216,68 @@ export function SetupScreen({
     await onHost({ name, port, password, lan: lanOn, cloud: cloudOn, campaignId: campaign.id });
   }
 
+  // Joining; a game joined is kept for a quick way back.
+  async function join(game: { name: string; address: string; port: number; password: string }) {
+    setLocalError(null);
+    try {
+      // Only a game that let us in is kept.
+      if ((await onJoin(game)) === false) return;
+      rememberGame({ ...game, at: Date.now() });
+      setRecent(recentGames());
+    } catch {
+      /* the error shows */
+    }
+  }
   function submitJoin(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    setLocalError(null);
-    void onJoin({
+    void join({
       name: String(data.get("name") || "Player"),
       address: String(data.get("address") || ""),
       port: Number(data.get("port")),
       password: String(data.get("password") || ""),
     });
   }
+  function forget(game: RecentGame) {
+    saveRecentGames(recentGames().filter((other) => !(other.address === game.address && other.port === game.port)));
+    setRecent(recentGames());
+  }
+  const recentList = (compact: boolean) =>
+    recent.length > 0 ? (
+      <div className={compact ? "recent-games compact" : "recent-games"}>
+        {compact ? null : <h2>Recent games</h2>}
+        {recent.slice(0, compact ? 3 : 8).map((game) => (
+          <div key={`${game.address}:${game.port}`} className="recent-game" data-recent={`${game.address}:${game.port}`}>
+            <button
+              type="button"
+              className="recent-join"
+              disabled={busy}
+              title={`Join ${game.address}:${game.port} as ${game.name}`}
+              onClick={(event) => {
+                event.stopPropagation();
+                void join(game);
+              }}
+            >
+              <b>{game.name}</b>
+              <small>
+                {game.address}:{game.port}
+                {game.password ? " · password" : ""} · {ago(game.at)}
+              </small>
+            </button>
+            {compact ? null : (
+              <>
+                <button type="button" className="ghost recent-fill" title="Fill the form with it, to change something first" onClick={() => setJoinFill(game)}>
+                  Edit
+                </button>
+                <button type="button" className="ghost recent-forget" aria-label={`Forget ${game.address}:${game.port}`} title="Forget it" onClick={() => forget(game)}>
+                  ×
+                </button>
+              </>
+            )}
+          </div>
+        ))}
+      </div>
+    ) : null;
 
   const alertLine = alert ? (
     <p className="error" role="alert">
@@ -216,16 +292,48 @@ export function SetupScreen({
         <div className="brand">
           <Mark /> Kraken <span className="brand-sub">VTT</span>
         </div>
-        {inBrowser ? null : (
-          <button type="button" className="join-toggle" data-action="join-mode" onClick={() => setMode(mode === "join" ? "campaigns" : "join")}>
-            {mode === "join" ? "My campaigns" : "Join a game"}
+        {inBrowser || mode === "home" ? null : (
+          <button type="button" className="join-toggle" data-action="home" onClick={() => setMode("home")}>
+            ‹ Home
           </button>
         )}
       </header>
 
-      {mode === "join" ? (
+      {mode === "home" ? (
+        <main className="home-stage">
+          <div className="home-hero rise">
+            <LivingEmblem size={170} />
+            <div>
+              <p className="hero-kicker">Virtual tabletop</p>
+              <h1 className="hero-title">Kraken</h1>
+              <p className="hero-tag">Gather your party. The tide is turning.</p>
+            </div>
+          </div>
+          <div className="home-cards">
+            <button type="button" className="home-card glass rise" data-action="campaigns-mode" onClick={() => setMode("campaigns")}>
+              <span className="home-card-icon" aria-hidden>
+                <Mark />
+              </span>
+              <h2>My Campaigns</h2>
+              <p>Run a game: create a campaign, or load one, and host it for your players.</p>
+              <span className="home-card-meta">{rows.length === 0 ? "No campaigns yet" : `${rows.length} campaign${rows.length === 1 ? "" : "s"}${shown[0] ? ` · last: ${shown[0].name}` : ""}`}</span>
+              <span className="home-card-go">Create or load ›</span>
+            </button>
+            <div className="home-card glass rise" role="button" tabIndex={0} data-action="join-mode" onClick={() => setMode("join")} onKeyDown={(event) => (event.key === "Enter" || event.key === " ") && setMode("join")}>
+              <span className="home-card-icon join" aria-hidden>
+                ⚔
+              </span>
+              <h2>Join a Game</h2>
+              <p>Sit at someone's table: the address and port your GM gives you, and the password if there is one.</p>
+              {recentList(true) ?? <span className="home-card-meta">Games you join are kept here</span>}
+              <span className="home-card-go">Connect ›</span>
+            </div>
+          </div>
+          {alertLine}
+        </main>
+      ) : mode === "join" ? (
         <main className="join-stage">
-          <form className="join-panel glass" data-form="join" onSubmit={submitJoin}>
+          <form key={joinFill ? `${joinFill.address}:${joinFill.port}` : "new"} className="join-panel glass" data-form="join" onSubmit={submitJoin}>
             <LivingEmblem size={170} />
             <h1>Take your seat</h1>
             {inBrowser ? (
@@ -237,7 +345,7 @@ export function SetupScreen({
             )}
             <label className="field">
               <span>Your name</span>
-              <input name="name" defaultValue={inBrowser ? "" : "Player"} placeholder="What does the table call you?" maxLength={24} autoComplete="nickname" required={inBrowser} />
+              <input name="name" defaultValue={joinFill?.name ?? (inBrowser ? recent.find((game) => game.address === window.location.hostname)?.name ?? "" : "Player")} placeholder="What does the table call you?" maxLength={24} autoComplete="nickname" required={inBrowser} />
             </label>
             {inBrowser ? (
               <>
@@ -248,23 +356,24 @@ export function SetupScreen({
               <div className="field-pair">
                 <label className="field">
                   <span>Address</span>
-                  <input name="address" placeholder="192.168.1.20" required autoComplete="off" />
+                  <input name="address" placeholder="192.168.1.20" required autoComplete="off" defaultValue={joinFill?.address ?? ""} />
                 </label>
                 <label className="field port">
                   <span>Port</span>
-                  <input name="port" type="number" min={1} max={65535} defaultValue={47300} required />
+                  <input name="port" type="number" min={1} max={65535} defaultValue={joinFill?.port ?? 47300} required />
                 </label>
               </div>
             )}
             <label className="field">
               <span>Password</span>
-              <input name="password" type="text" placeholder="Blank if the game is public" autoComplete="off" />
+              <input name="password" type="text" placeholder="Blank if the game is public" autoComplete="off" defaultValue={joinFill?.password ?? ""} />
             </label>
             <button type="submit" className="play-button grand" disabled={busy}>
               {busy ? "Joining…" : "Take your seat"}
             </button>
             {alertLine}
           </form>
+          {inBrowser ? null : recentList(false)}
         </main>
       ) : (
         <main className="campaign-stage">

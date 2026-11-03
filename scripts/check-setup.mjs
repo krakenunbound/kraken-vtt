@@ -17,6 +17,7 @@ const app = await electron.launch({ args: [".", "--mute-audio", `--user-data-dir
 try {
   const page = await app.firstWindow();
   await page.waitForSelector("text=My Campaigns");
+  await page.click('[data-action="campaigns-mode"]');
   for (const name of ["Castles & Crusades", "Night Below", "Saltmarsh"]) {
     if (await page.$('form[data-form="play"]')) await page.click('[data-action="new-campaign"]');
     await page.fill('input[name="new-campaign"]', name);

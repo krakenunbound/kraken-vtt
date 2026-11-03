@@ -1,4 +1,4 @@
-// Screenshots of the front screens (campaigns, hosting, joining) in the real app:
+// Screenshots of the front screens (home, campaigns, hosting, joining) in the real app:
 // node scripts/shot-setup.mjs <folder>
 import "./loopback.mjs";
 import { mkdtempSync } from "node:fs";
@@ -12,6 +12,9 @@ const app = await electron.launch({ args: [".", "--mute-audio", `--user-data-dir
 const page = await app.firstWindow();
 await page.setViewportSize({ width: 1425, height: 860 });
 await page.waitForSelector("text=My Campaigns");
+await page.waitForTimeout(2000);
+await page.screenshot({ path: `${out}/home.png` });
+await page.click('[data-action="campaigns-mode"]');
 for (const name of ["Castles & Crusades", "The Keep on the Borderlands", "Shadows over Saltmarsh"]) {
   await page.fill('input[name="new-campaign"]', name);
   await page.locator('form[data-form="create"]').evaluate((form) => form.requestSubmit());
@@ -23,6 +26,7 @@ await page.screenshot({ path: `${out}/campaigns.png` });
 await page.click('button[data-campaign="The Keep on the Borderlands"]');
 await page.waitForTimeout(900);
 await page.screenshot({ path: `${out}/host.png` });
+await page.click('[data-action="home"]');
 await page.click('[data-action="join-mode"]');
 await page.waitForTimeout(2500);
 await page.screenshot({ path: `${out}/join.png` });
