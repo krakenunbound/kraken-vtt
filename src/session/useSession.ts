@@ -652,6 +652,17 @@ export function useSession() {
     });
   }, []);
 
+  // A character file from another table (Kraken, FG, Foundry, Roll20): the host reads it.
+  const importCharacter = useCallback((text: string, owner = "") => {
+    const socket = socketRef.current;
+    if (!socket || socket.readyState !== WebSocket.OPEN) return Promise.reject(new Error("Not connected."));
+    const req = ++opCounter.current;
+    return new Promise<string>((resolve, reject) => {
+      opWaits.current.set(req, { resolve, reject });
+      socket.send(JSON.stringify({ type: "character-import", req, text, owner }));
+    });
+  }, []);
+
   // Record changes go to the host, which answers with the record's id or why not.
   const op = useCallback(
     (message: { op: "create"; input: RecordInput } | { op: "update"; id: string; patch: RecordPatch; replace?: boolean } | { op: "delete"; id: string }) => {
@@ -876,6 +887,7 @@ export function useSession() {
     bookUrl,
     // The GM's: share a book with the players (or stop), show them a picture, take it back.
     // The character sheet: fields typed on it (the host works the numbers out again).
+    importCharacter,
     editCharacter: (id: string, changes: { path: string; value: unknown }[]) => send({ type: "character-edit", id, changes }),
     activateBook: (book: string, active: boolean) => send({ type: "book-activate", book, active }),
     // The party's watch order and formation (a player moves their own characters).

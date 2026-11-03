@@ -11,7 +11,8 @@
 const fgModule = require("../importers/fgModule.cjs");
 const { siege, siegeLibrary, siegeCheck, levelUp } = require("../siege.cjs");
 const party = require("../party.cjs");
-const { editCharacter: siegeEdit } = require("../siege.cjs");
+const { editCharacter: siegeEdit, importCharacter, exportCharacter } = require("../siege.cjs");
+const fs = require("fs");
 
 function out(value) {
   return { content: [{ type: "text", text: typeof value === "string" ? value : JSON.stringify(value, null, 2) }] };
@@ -405,6 +406,34 @@ const TOOLS = [
       if (!record || record.type !== "character") throw new Error(`No character "${args.id}".`);
       const updated = await siegeEdit(table, record, args.changes, table.seat);
       return out({ id: updated.id, name: updated.name, level: updated.data.level, hp: updated.data.hp, ac: updated.data.ac?.total, attributes: updated.data.attributes });
+    },
+  },
+  {
+    name: "kraken_character_import",
+    description:
+      "Bring a character in from another table: a Kraken export (.kraken.json), a Fantasy Grounds character XML (an SC C&C character comes over whole; another ruleset's is mapped), a Foundry VTT actor's Export Data JSON or a Roll20 character JSON. A character from another game becomes a C&C character with this campaign's books (race, class, level, scores, hit points and spells through the builder; gear and coin as they were); what did not match is listed in its notes. Give path (a file on this computer) or text (its contents). owner: the player it is for (empty for the GM).",
+    inputSchema: object({ path: string("A character file on this computer"), text: string("The file's contents, instead of path"), owner: string("The player's name it is for") }),
+    async run(args, ctx) {
+      const table = needTable(ctx);
+      const body = args.text ?? (args.path ? fs.readFileSync(String(args.path), "utf8") : "");
+      const { record, format, report } = await importCharacter(table, body, { owner: String(args.owner ?? "").slice(0, 24) });
+      return out({ id: record.id, name: record.name, format, report, level: record.data.level, race: record.data.race, hp: record.data.hp, ac: record.data.ac?.total });
+    },
+  },
+  {
+    name: "kraken_character_export",
+    description: "A character as a file to take to another table: format kraken (JSON, the whole sheet; Kraken imports it back as it was) or fg (a Fantasy Grounds character XML, for FG's SC C&C sheet). Give path to write it there; otherwise the text comes back.",
+    inputSchema: object({ id: string("The character's record id"), format: { type: "string", enum: ["kraken", "fg"] }, path: string("Where to write the file") }, ["id"]),
+    async run(args, ctx) {
+      const table = needTable(ctx);
+      const record = table.records.get(args.id);
+      if (!record || record.type !== "character") throw new Error(`No character "${args.id}".`);
+      const file = await exportCharacter(record, args.format === "fg" ? "fg" : "kraken");
+      if (args.path) {
+        fs.writeFileSync(String(args.path), file.text, "utf8");
+        return out({ path: String(args.path), bytes: file.text.length, format: args.format ?? "kraken" });
+      }
+      return out({ file: file.file, format: args.format ?? "kraken", text: file.text });
     },
   },
   {

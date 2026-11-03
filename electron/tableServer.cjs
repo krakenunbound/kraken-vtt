@@ -8,7 +8,7 @@ const { createRecordStore, canSee } = require("./records.cjs");
 const { soundFor, cleanTriggers } = require("./soundTriggers.cjs");
 const { defaultTriggers, TRIGGERS_VERSION } = require("./soundCatalog.cjs");
 const { createDice } = require("./dice.cjs");
-const { siege, siegeLibrary, siegeCheck, levelUp, editCharacter } = require("./siege.cjs");
+const { siege, siegeLibrary, siegeCheck, levelUp, editCharacter, importCharacter } = require("./siege.cjs");
 const { createMapState, playerColor } = require("./mapState.cjs");
 const party = require("./party.cjs");
 const { createCombat } = require("./combat.cjs");
@@ -1060,6 +1060,20 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
             answer({ ok: true, id: record.id, problems: report.problems });
           })
           .catch((error) => answer({ ok: false, error: error instanceof Error ? error.message : "Could not build that character." }));
+        return;
+      }
+
+      // A character file from another table. A player's import is theirs;
+      // the GM's is for the player named (or the GM's own).
+      if (msg.type === "character-import") {
+        const answer = (body) => send(ws, { type: "op-result", req: msg.req ?? null, ...body });
+        const owner = client.role === "dm" ? text(msg.owner, "").slice(0, 24) : client.name;
+        importCharacter(agentHandle, msg.text, { owner, seat: client.role === "dm" ? seatOf(client) : { role: "dm", name: client.name } })
+          .then(({ record, format, report }) => {
+            addChat({ id: client.id, from: client.name, text: `Imported ${record.name} (${format === "fg" ? "Fantasy Grounds" : format === "foundry" ? "Foundry VTT" : format === "roll20" ? "Roll20" : format === "kraken" ? "Kraken" : "a file"}).`, at: Date.now() });
+            answer({ ok: true, id: record.id, report });
+          })
+          .catch((error) => answer({ ok: false, error: error instanceof Error ? error.message : "Could not import that character." }));
         return;
       }
 

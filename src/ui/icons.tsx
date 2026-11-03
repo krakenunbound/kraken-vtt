@@ -16,6 +16,9 @@ const PATHS: Record<string, string> = {
   music: "M9 18V5.5l11-2.5v12.5M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm11-2.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z",
   sound: "M4 9.5h4l5-4.5v14l-5-4.5H4ZM16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12",
   warning: "M12 3.5 21.5 20h-19ZM12 9.5v5M12 17.5h.01",
+  // Into and out of a tray: a file brought in, a file taken away.
+  import: "M12 3v12M7 10l5 5 5-5M4 15v5h16v-5",
+  export: "M12 15V3M7 8l5-5 5 5M4 15v5h16v-5",
   // A person and a plus: a new character.
   "add-character": "M10 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Zm-6 9c0-3.3 2.7-6 6-6s6 2.7 6 6M19 7v6M16 10h6",
   character: "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-7 8c0-3.3 3.1-6 7-6s7 2.7 7 6",

@@ -272,8 +272,35 @@ try {
   const unfinished = (await tool("kraken_record_get", { id: rest.records.find((record) => record.name === "Unfinished Paladin").id })).data;
   assert(String(unfinished.notes).includes("Unfinished in the character wizard (finish with your Castle Keeper): Abilities, Primes, Hit Points, Equipment, Alignment."), `notes: ${unfinished.notes}`);
 
+  // Out and back in: Borin exported as Kraken's file and as FG's XML, then
+  // both imported through the Characters window's Import button.
+  const { writeFileSync } = await import("node:fs");
+  const borinId = rest.records.find((record) => record.name === "Borin Stonefist").id;
+  const krakenFile = path.join(profile, "Borin.kraken.json");
+  const fgFile = path.join(profile, "Borin.xml");
+  await tool("kraken_character_export", { id: borinId, format: "kraken", path: krakenFile });
+  await tool("kraken_character_export", { id: borinId, format: "fg", path: fgFile });
+  const foundryFile = path.join(profile, "thorin.json");
+  writeFileSync(foundryFile, JSON.stringify({ name: "Thorin Ashbeard", type: "character", system: { abilities: { str: { value: 16 }, dex: { value: 12 }, con: { value: 15 }, int: { value: 10 }, wis: { value: 13 }, cha: { value: 8 } }, attributes: { hp: { value: 31, max: 31 } }, details: { race: "Hill Dwarf" }, currency: { gp: 15 } }, items: [{ name: "Fighter", type: "class", system: { levels: 3 } }, { name: "Longsword", type: "weapon", system: { quantity: 1, equipped: true } }] }));
+  for (const [file, name] of [[krakenFile, "Borin Stonefist"], [fgFile, "Borin Stonefist"], [foundryFile, "Thorin Ashbeard"]]) {
+    const before = (await tool("kraken_records_list", { type: "character" })).total;
+    await page.locator('[data-action="import-character-file"]').first().setInputFiles(file);
+    await page.waitForSelector(".character-file-status:has-text('Imported')", { timeout: 30000 });
+    const after = await tool("kraken_records_list", { type: "character" });
+    assert(after.total === before + 1, `imported ${path.basename(file)}`);
+    const newest = after.records.filter((record) => record.name === name).map((record) => record.id);
+    const copy = (await tool("kraken_record_get", { id: newest[newest.length - 1] })).data;
+    if (name === "Borin Stonefist") {
+      for (const field of ["hp", "ac", "bth"]) assert(JSON.stringify(field === "hp" ? copy.hp.total : field === "ac" ? copy.ac.total : copy.bth) === JSON.stringify(field === "hp" ? made.hp.total : field === "ac" ? made.ac.total : made.bth), `${path.basename(file)} ${field}`);
+      assert(Object.values(copy.inventorylist).map((i) => i.name).sort().join() === Object.values(made.inventorylist).map((i) => i.name).sort().join(), `${path.basename(file)} inventory`);
+    } else assert(copy.level === 3 && copy.hp.total === 31 && copy.race === "Dwarf", `Thorin ${copy.race} ${copy.level} ${copy.hp.total}`);
+  }
+  await page.click('[data-action="export-character"]');
+  await page.waitForSelector('[data-export="fg"]');
+  await page.click('[data-action="export-character"]');
+
   await tool("kraken_leave");
-  console.log(`ok wizard: Borin Stonefist (HP ${made.hp.total}, AC ${made.ac.total}, BtH ${made.bth}) and Ilyana Starweave (level ${elf.level}, HP ${elf.hp.total}, spells ${kept.length}) equal to the builder; spells trimmed on a level change; paladin alignment; an unfinished character lists what is left. ${path.join(profile, "wizard-result.png")}`);
+  console.log(`ok wizard: Borin Stonefist (HP ${made.hp.total}, AC ${made.ac.total}, BtH ${made.bth}) and Ilyana Starweave (level ${elf.level}, HP ${elf.hp.total}, spells ${kept.length}) equal to the builder; spells trimmed on a level change; paladin alignment; an unfinished character lists what is left; exported (Kraken, FG) and imported back with Foundry's. ${path.join(profile, "wizard-result.png")}`);
 } catch (error) {
   await page.screenshot({ path: path.join(profile, "wizard-failed.png") }).catch(() => undefined);
   console.log("failed:", path.join(profile, "wizard-failed.png"));
