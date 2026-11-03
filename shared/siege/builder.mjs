@@ -196,6 +196,7 @@ export function buildFromSpec(spec, library) {
     character.race = race.name;
     if (race.size) character.size = race.size;
     if (race.speed) character.speed = race.speed;
+    if (race.senses) character.senses = race.senses;
   }
   character.packages[id(next++)] = { ...structuredClone(cls), level, hproll: level, hplog };
   character.exp = Number(exactRow(cls, level)?.xp) || 0;

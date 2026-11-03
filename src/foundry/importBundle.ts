@@ -30,6 +30,8 @@ export type ParsedScene = {
   anchorY: number;
   fit: BackgroundFit;
   image: Uint8Array | null;
+  // Foundry's darkness level (0 day .. 1 night); 0 when global light is on.
+  darkness: number;
   walls: SceneWall[];
   lights: SceneLight[];
   tokens: SceneToken[];
@@ -151,6 +153,12 @@ function parseScenes(adventure: Record<string, unknown>): Omit<ParsedScene, "ima
       anchorY: asNumber(background.anchorY, 0),
       fit: asFit(background.fit),
       walls: readWalls(scene.walls),
+      darkness: (() => {
+        const environment = asRecord(scene.environment);
+        const globalLight = asRecord(environment?.globalLight);
+        if (globalLight?.enabled === true || scene.globalLight === true) return 0;
+        return Math.min(1, Math.max(0, asNumber(environment?.darknessLevel ?? scene.darkness, 0)));
+      })(),
       lights: readLights(scene.lights, {
         size: asNumber(grid.size, 100),
         distance: asNumber(grid.distance, 5),

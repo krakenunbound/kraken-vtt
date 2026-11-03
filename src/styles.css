@@ -1021,3 +1021,78 @@ select {
 .dock .sheet-attributes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .dock .sheet-columns { grid-template-columns: 1fr; }
 .dock .portrait-frame { width: 84px; height: 84px; }
+
+/* Light and darkness: a glow, never an outline. Under tokens, over the map. */
+.overlay.lighting { z-index: 2; }
+.overlay.lighting .light-glow { mix-blend-mode: overlay; }
+
+/* The GM's light handles: a small sun; its reach shows as a faint ring for the GM only. */
+.light-handle {
+  position: absolute;
+  z-index: 4;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff6d8 0 35%, #ffb347 36% 60%, rgba(255, 179, 71, 0) 62%);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.6);
+  cursor: grab;
+}
+
+.light-handle::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--reach);
+  height: var(--reach);
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1px dashed rgba(255, 179, 71, 0.35);
+  pointer-events: none;
+}
+
+.light-handle.off { filter: grayscale(1) brightness(0.6); }
+
+/* Players' doors: nothing drawn; a door icon shows when the pointer is over the doorway. */
+.overlay.doors .player-door { pointer-events: auto; cursor: pointer; }
+.overlay.doors .door-hit { stroke: transparent; pointer-events: stroke; }
+.overlay.doors .door-icon { opacity: 0; transition: opacity 0.12s; pointer-events: none; }
+.overlay.doors .player-door:hover .door-icon { opacity: 1; }
+
+.weather {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  pointer-events: none;
+  transition: background-color 0.08s;
+}
+
+.weather canvas { width: 100%; height: 100%; display: block; }
+.map-controls, .legend, .token-tray, .token-menu, .scene-settings, .map-toast { z-index: 9; }
+
+.scene-settings {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: grid;
+  gap: 10px;
+  width: 19rem;
+  max-height: calc(100% - 90px);
+  overflow: auto;
+  padding: 10px 12px;
+  background: rgba(18, 20, 24, 0.97);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+
+.scene-settings header { display: flex; justify-content: space-between; align-items: center; }
+.scene-settings h2 { margin: 0; font: 500 1.1rem Georgia, serif; color: var(--brass); }
+.scene-settings fieldset { display: grid; gap: 6px; margin: 0; padding: 8px; border: 1px solid var(--line); border-radius: 6px; }
+.scene-settings legend { padding: 0 4px; color: var(--muted); }
+.scene-settings label { display: grid; gap: 2px; }
+.scene-settings label.check { display: flex; align-items: center; gap: 6px; }
+.scene-settings .hint { margin: 0; color: var(--muted); font-size: 0.75rem; }
+.segmented { display: flex; gap: 4px; flex-wrap: wrap; }
+.segmented button { padding: 3px 8px; }
+.segmented button[aria-pressed="true"] { border-color: var(--brass); color: var(--brass); }
+button.link { background: none; border: none; color: var(--brass); padding: 0; text-align: left; }

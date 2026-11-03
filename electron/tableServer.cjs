@@ -68,7 +68,8 @@ function sanitizeScene(input) {
   const grid = input.grid && typeof input.grid === "object" ? input.grid : {};
   const lights = [];
   for (const [index, light] of (Array.isArray(input.lights) ? input.lights : []).entries()) {
-    if (!light || typeof light !== "object" || light.hidden) continue;
+    // Foundry's hidden lights are switched off; the GM can turn them on.
+    if (!light || typeof light !== "object") continue;
     if (lights.length >= 500) break;
     lights.push({
       id: text(light.id, `light-${index}`).slice(0, 80),
@@ -80,7 +81,7 @@ function sanitizeScene(input) {
       dim: num(light.dim, 0),
       units: text(light.units, "ft").slice(0, 12),
       color: text(light.color, "#ffb347").slice(0, 32),
-      hidden: false,
+      hidden: Boolean(light.hidden),
     });
   }
   const tokens = [];
@@ -116,6 +117,7 @@ function sanitizeScene(input) {
       door: num(wall.door, 0),
       ds: num(wall.ds, 0),
       dir: num(wall.dir, 0),
+      light: num(wall.light, 20),
       threshold: num(wall.threshold, 0) > 0 ? num(wall.threshold, 0) : null,
     });
   }
@@ -144,6 +146,7 @@ function sanitizeScene(input) {
     lights,
     tokens,
     walls,
+    darkness: Math.min(1, Math.max(0, num(input.darkness, 0))),
   };
 }
 
@@ -362,7 +365,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
   // and tokens come with the player's map view.
   function sceneFor(client) {
     if (!scene) return null;
-    const { walls, tokens, ...shown } = scene;
+    const { walls, tokens, lights, ...shown } = scene;
     return {
       ...shown,
       image: image ? `/table/image?token=${client.assetToken}&v=${imageVersion}` : null,
@@ -523,7 +526,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
 
       // The map: tokens, doors, line of sight and pings (mapState.cjs decides
       // who may do what).
-      if (["token-place", "token-move", "token-remove", "token-update", "door", "sight", "lock"].includes(msg.type)) {
+      if (["token-place", "token-move", "token-remove", "token-update", "door", "sight", "lock", "scene-settings", "light-place", "light-update", "light-remove"].includes(msg.type)) {
         const seat = seatOf(client);
         try {
           if (msg.type === "token-place") {
@@ -542,6 +545,14 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
           } else if (msg.type === "sight") {
             if (client.role !== "dm") throw new Error("Only the GM can change line of sight.");
             map.setSight(Boolean(msg.on));
+          } else if (msg.type === "scene-settings") {
+            map.updateSettings(msg.patch ?? {}, seat);
+          } else if (msg.type === "light-place") {
+            map.placeLight(msg.light ?? {}, seat);
+          } else if (msg.type === "light-update") {
+            map.updateLight(String(msg.id ?? ""), msg.patch ?? {}, seat);
+          } else if (msg.type === "light-remove") {
+            map.removeLight(String(msg.id ?? ""), seat);
           } else if (msg.type === "lock") {
             if (client.role !== "dm") throw new Error("Only the GM can lock token movement.");
             map.setLocked(Boolean(msg.on));

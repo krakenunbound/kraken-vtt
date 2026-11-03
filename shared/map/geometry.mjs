@@ -265,3 +265,42 @@ function healthColor(status, percent) {
   const channel = (i) => Math.floor(to[i] * grade + from[i] * (1 - grade) + 0.5);
   return `#${[0, 1, 2].map((i) => channel(i).toString(16).padStart(2, "0")).join("").toUpperCase()}`;
 }
+
+// --- Light and darkness -------------------------------------------------------
+// Darkness at or above this level (0 day .. 1 pitch black), players see only
+// lit areas and what their darkvision reaches.
+export const NEEDS_LIGHT = 0.5;
+
+// CoreRPG's token light presets (VisionManager), bright and dim in squares.
+// Colours are warmer than CoreRPG's near-white so flame reads as flame.
+export const LIGHT_PRESETS = {
+  candle: { name: "Candle", bright: 1, dim: 2, color: "#FFC46B" },
+  lamp: { name: "Lamp", bright: 3, dim: 9, color: "#FFB45C" },
+  torch: { name: "Torch", bright: 4, dim: 8, color: "#FF9E3D" },
+  lantern: { name: "Lantern", bright: 6, dim: 12, color: "#FFD08A" },
+  light: { name: "Light spell", bright: 4, dim: 8, color: "#F2F5FF" },
+};
+
+// How far a C&C character sees in complete darkness, in feet, from its
+// senses line: Deepvision and Darkvision ("in shades of gray", PHB). 0 for none.
+export function sensesRange(senses) {
+  const text = String(senses ?? "").toLowerCase();
+  let best = 0;
+  for (const match of text.matchAll(/(darkvision|deepvision)\s*(\d+)/g)) best = Math.max(best, Number(match[2]));
+  return best;
+}
+
+// Twilight Vision (elves, PHB): colour and detail under starlight, moonlight
+// or torchlight, but no sight in complete darkness.
+export function hasTwilightVision(senses) {
+  return /twilight vision|low-light vision/i.test(String(senses ?? ""));
+}
+
+// Whether any light reaches point: inside its dim radius and its own line of sight.
+export function lit(x, y, lights) {
+  for (const light of lights) {
+    if (Math.hypot(x - light.x, y - light.y) > light.dimPx) continue;
+    if (!light.polygon || pointInPolygon(x, y, light.polygon)) return true;
+  }
+  return false;
+}

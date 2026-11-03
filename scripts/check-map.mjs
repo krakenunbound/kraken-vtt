@@ -176,6 +176,32 @@ try {
   await tool("kraken_token_update", { id: orcMap.id, hidden: false });
   assert((await tool("kraken_line_of_sight", { player: "Ann" })).sees.includes("Orc"), "sight off: Ann sees the orc");
 
+  // Darkness: from 0.5 a player sees only lit places and their darkvision.
+  const sees = async () => (await tool("kraken_line_of_sight", { player: "Ann" })).sees;
+  await tool("kraken_scene_settings", { darkness: 1 });
+  assert(!(await sees()).includes("Orc"), "in the dark Ann cannot see the orc");
+  const torch = await tool("kraken_light", { action: "place", col: 1, row: 1, preset: "torch" });
+  assert(torch.bright === 20 && torch.dim === 40, `a torch is CoreRPG's 4/8 squares: ${JSON.stringify(torch)}`);
+  assert((await sees()).includes("Orc"), "the torch lights the orc");
+  await tool("kraken_light", { action: "update", id: torch.id, on: false });
+  assert(!(await sees()).includes("Orc"), "torch out, orc gone");
+  await tool("kraken_token_update", { id: placed.id, vision: 60 });
+  assert((await sees()).includes("Orc"), "60 ft of darkvision reaches the orc");
+  await tool("kraken_token_update", { id: placed.id, vision: null });
+  // C&C senses from the character: deepvision sees in darkness, twilight vision only by night light.
+  server.agent.records.update(annRecord.id, { data: { senses: "Deepvision 120 ft" } }, server.agent.seat);
+  const deep = server.agent.viewFor("Ann");
+  assert(deep.seeing.length === 1 && deep.seeing[0].radiusPx === 1200 && deep.tokens.some((t) => t.name === "Orc"), `deepvision 120 ft: ${JSON.stringify(deep.seeing.map((v) => v.radiusPx))}`);
+  server.agent.records.update(annRecord.id, { data: { senses: "Twilight Vision 60 ft" } }, server.agent.seat);
+  assert(!(await sees()).includes("Orc"), "twilight vision sees nothing in pitch black");
+  await tool("kraken_scene_settings", { darkness: 0.75 });
+  assert((await sees()).includes("Orc") && server.agent.viewFor("Ann").twilight === true, "twilight vision sees by night");
+  const weather = await tool("kraken_scene_settings", { darkness: null, weather: { type: "rain", intensity: 0.7 }, grid: { show: false } });
+  assert(weather.weather.type === "rain" && weather.grid.show === false && weather.darknessNow === 0, `settings ${JSON.stringify(weather)}`);
+  const annMap = await latest(ann, "map", (m) => m.settings.weather.type === "rain", "rain reaches the player");
+  assert(annMap.settings.grid.show === false && !("sceneLights" in annMap && annMap.sceneLights.length), "players get the settings, not the GM's light list");
+  await tool("kraken_light", { action: "remove", id: torch.id });
+
   // Tokens, doors and the sight setting are saved with the table.
   const saved = server.persisted().map;
   assert(saved.doors.keep.door === 2 && saved.sight.keep === false && saved.tokens.keep.length === 2, `saved map ${JSON.stringify(saved)}`);

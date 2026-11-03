@@ -139,8 +139,9 @@ try {
   const shownToo = await otherScene;
   assert(shown.scene.id === "morning", "player received the scene");
   assert(shown.scene.walls === undefined && shownToo.scene.walls === undefined, "players did not receive walls");
-  assert(shown.scene.lights.length === 1, "player received the light");
+
   const firstMap = await playerMap;
+  assert(shown.scene.lights === undefined && firstMap.lights.length === 1 && firstMap.lights[0].dimPx === 100, `the lamp comes with the map view: ${JSON.stringify(firstMap.lights)}`);
   assert(shown.scene.tokens === undefined, "tokens come with the map view, not the scene");
   assert(firstMap.tokens.length === 1 && firstMap.tokens[0].name === "Orc", `hidden and secret tokens stayed off the player map: ${firstMap.tokens.map((t) => t.name)}`);
   assert(typeof shown.scene.image === "string" && shown.scene.image.includes("token="), "scene points at the image");
