@@ -63,6 +63,8 @@ function facts(sheet) {
     .map((language) => language.name)
     .sort()
     .join(", ");
+  // The load (SiegeLoad): encumbrance value, rating and band.
+  if (sheet.load && sheet.load.er !== undefined && sheet.load.er !== true) out.load = `EV ${num(sheet.load.ev)} ER ${num(sheet.load.er)} ${sheet.load.category || "none"}`;
   return out;
 }
 
@@ -123,6 +125,8 @@ for (const key of keys) {
       const ours = facts(character);
       const theirs = facts(fgSheet);
       for (const field of new Set([...Object.keys(ours), ...Object.keys(theirs)])) {
+        // Older exports have no load: compared where FG's sheet has one.
+        if (field === "load" && theirs.load === undefined) continue;
         if (ours[field] !== theirs[field]) {
           wrong.push(`${field}: ${JSON.stringify(ours[field])} want ${JSON.stringify(theirs[field])}`);
           byField[field] = (byField[field] ?? 0) + 1;

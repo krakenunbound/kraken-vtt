@@ -667,10 +667,10 @@ export function useSession() {
   );
 
   // A SIEGE check for a character; the host rolls it and posts the result.
-  const siegeCheck = useCallback((id: string, attribute: string, cl = 0, save = false) => {
+  const siegeCheck = useCallback((id: string, attribute: string, cl = 0, save = false, extra?: { label?: string; bonus?: number; addLevel?: boolean }) => {
     const socket = socketRef.current;
     if (!socket || socket.readyState !== WebSocket.OPEN) return;
-    socket.send(JSON.stringify({ type: "siege-check", id, attribute, cl, ...(save ? { label: `${attribute[0].toUpperCase()}${attribute.slice(1)} save` } : {}), ...throwIntent() }));
+    socket.send(JSON.stringify({ type: "siege-check", id, attribute, cl, ...(save ? { label: `${attribute[0].toUpperCase()}${attribute.slice(1)} save` } : {}), ...(extra ?? {}), ...throwIntent() }));
   }, []);
 
   const levelUp = useCallback((id: string) => {
@@ -875,6 +875,8 @@ export function useSession() {
     bookFetch,
     bookUrl,
     // The GM's: share a book with the players (or stop), show them a picture, take it back.
+    // The character sheet: fields typed on it (the host works the numbers out again).
+    editCharacter: (id: string, changes: { path: string; value: unknown }[]) => send({ type: "character-edit", id, changes }),
     activateBook: (book: string, active: boolean) => send({ type: "book-activate", book, active }),
     // The party's watch order and formation (a player moves their own characters).
     partyOrder: (change: { action: "place" | "remove" | "watch" | "fill" | "rotate" | "clear"; id?: string; x?: number; y?: number; watch?: number; columns?: number; direction?: "left" | "right" }) => send({ type: "party-order", ...change }),

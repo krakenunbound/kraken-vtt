@@ -11,6 +11,7 @@
 const fgModule = require("../importers/fgModule.cjs");
 const { siege, siegeLibrary, siegeCheck, levelUp } = require("../siege.cjs");
 const party = require("../party.cjs");
+const { editCharacter: siegeEdit } = require("../siege.cjs");
 
 function out(value) {
   return { content: [{ type: "text", text: typeof value === "string" ? value : JSON.stringify(value, null, 2) }] };
@@ -391,6 +392,19 @@ const TOOLS = [
     inputSchema: object({ seat: string("A player's name; empty for the GM"), slots: { type: "array", description: "Ten slots, or leave out to read" } }),
     run(args, ctx) {
       return out(needTable(ctx).quickSlots(args.seat || "@gm", args.slots));
+    },
+  },
+  {
+    name: "kraken_character_edit",
+    description:
+      "Change a character as typed on its sheet (FG's C&C sheet), then every number is worked out again by the rules. changes: [{ path, value }], path one of: name; playername, gender, age, height, weight, size, alignment, deity, origin, appearance, notes, specialdefenses, specialmovement, senses, speed (text); attributes.<strength|dexterity|...>.score or .prime (0/1); hp.wounds, hp.temp, hp.nonlethal; exp; initiative.misc; attack.<melee|ranged|grapple|...>.misc; ac.misc, ac.natural, ac.deflection, ac.size; coins.<id>.amount; inventorylist.<id>.count, .location, .carried (0 left behind, 1 carried, 2 worn or in hand); inventorylist.<id> = null drops it; languages.add = a language; languagelist.<id> = null removes one.",
+    inputSchema: object({ id: string("The character's record id"), changes: { type: "array", items: { type: "object" } } }, ["id", "changes"]),
+    async run(args, ctx) {
+      const table = needTable(ctx);
+      const record = table.records.get(args.id);
+      if (!record || record.type !== "character") throw new Error(`No character "${args.id}".`);
+      const updated = await siegeEdit(table, record, args.changes, table.seat);
+      return out({ id: updated.id, name: updated.name, level: updated.data.level, hp: updated.data.hp, ac: updated.data.ac?.total, attributes: updated.data.attributes });
     },
   },
   {

@@ -13,8 +13,8 @@ type Placement = { x: number; y: number; w: number; h: number; out?: ScreenPlace
 export type OpenWindow = { key: string; kind: WindowKind; title: string; payload?: string; z: number; popped: boolean } & Placement;
 
 const DEFAULTS: Record<WindowKind, Placement> = {
-  characters: { x: 120, y: 70, w: 760, h: 620 },
-  sheet: { x: 160, y: 90, w: 640, h: 620 },
+  characters: { x: 120, y: 50, w: 940, h: 800 },
+  sheet: { x: 160, y: 50, w: 660, h: 820 },
   party: { x: 180, y: 60, w: 760, h: 720 },
   combat: { x: 260, y: 70, w: 640, h: 520 },
   players: { x: 300, y: 120, w: 420, h: 360 },

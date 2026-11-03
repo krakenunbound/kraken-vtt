@@ -30,6 +30,7 @@ const MESSAGES = {
   "party-distribute": "kraken_party_distribute",
   "party-group": "kraken_party_group_check",
   "party-order": "kraken_party_order",
+  "character-edit": "kraken_character_edit",
   "token-place": "kraken_token_place",
   "token-move": "kraken_token_move",
   "token-update": "kraken_token_update",
