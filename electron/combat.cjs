@@ -70,8 +70,25 @@ function cleanEntry(raw) {
     stabilized: Boolean(raw.stabilized),
     bleedRound: Math.round(num(raw.bleedRound, -1)),
     effects: (Array.isArray(raw.effects) ? raw.effects : []).map(cleanEffect).filter(Boolean).slice(0, 50),
+    // Who this creature has targeted (FG's targets on the tracker).
+    targets: (Array.isArray(raw.targets) ? raw.targets : []).map((id) => text(id, "")).filter(Boolean).slice(0, 20),
   };
 }
+
+// The number an effect's components add for a tag: "Bless; ATK: 1; AC: -2"
+// gives ATK 1, AC -2 (CoreRPG effect components, numeric ones only).
+function effectBonus(entry, tag) {
+  let total = 0;
+  for (const effect of entry?.effects ?? []) {
+    for (const part of effect.label.split(";")) {
+      const match = /^\s*([A-Z]+)\s*:\s*([+-]?\d+)\s*$/i.exec(part);
+      if (match && match[1].toUpperCase() === tag) total += Number(match[2]);
+    }
+  }
+  return total;
+}
+
+const SHORT_TYPE = { melee: "M", ranged: "R" };
 
 function savedCombat(value) {
   const raw = value && typeof value === "object" ? value : {};
@@ -219,6 +236,11 @@ function createCombat({ saved, table, onChange = () => undefined }) {
             health: status,
             ...(numbers ? { hp, wounds, ac } : {}),
             effects: entry.effects.filter((effect) => seat.role === "dm" || !effect.gmOnly).map(({ id, label, duration }) => ({ id, label, duration })),
+            targets: seat.role === "dm" || owner(entry) === seat.name ? entry.targets.filter((id) => shown.some((item) => item.id === id)) : [],
+            attacks:
+              seat.role === "dm" && record(entry)?.type === "npc"
+                ? Object.entries(record(entry).data?.attacks ?? {}).map(([key, attack]) => ({ key, name: String(attack.name ?? "Attack"), bonus: num(record(entry).data?.bth, 0) + num(attack.bth, 0), damage: String(attack.damage ?? "") }))
+                : undefined,
           };
         }),
       };
@@ -296,6 +318,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       if (index < 0) throw new Error(`No one on the tracker is ${id}.`);
       const [gone] = state.entries.splice(index, 1);
       if (state.active === gone.id) state.active = null;
+      for (const entry of state.entries) entry.targets = entry.targets.filter((id) => id !== gone.id);
       changed();
     },
     // Rolls initiative: one entry ("a player may roll their own"), every NPC, or everyone.
@@ -422,6 +445,105 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       }
       await applyWounds(entry, -value, "[HEAL]", opts);
       if (vitals(entry).wounds <= 0) entry.stabilized = false;
+    },
+    // Targets: the GM sets any entry's; a player sets their own character's.
+    target(sourceId, targetId, on, seat) {
+      const source = find(sourceId);
+      if (seat.role !== "dm" && owner(source) !== seat.name) throw new Error("You can target only with your own character.");
+      find(targetId);
+      source.targets = source.targets.filter((id) => id !== targetId);
+      if (on) source.targets.push(targetId);
+      changed();
+      return source.targets;
+    },
+    clearTargets(sourceId, seat) {
+      const source = find(sourceId);
+      if (seat.role !== "dm" && owner(source) !== seat.name) throw new Error("You can clear only your own targets.");
+      source.targets = [];
+      changed();
+    },
+    // An attack (SiegeCore ActionAttack): d20 + the attack's bonus + ATK effects,
+    // one roll per target against its AC + AC effects; equal hits.
+    // who: { recordId } for a character (weapon: inventory key), or { entryId }
+    // for an NPC (weapon: its attacks key).
+    async attack(who, weaponKey, seat, from) {
+      const { engine, game, options: opts } = await options();
+      const plan = this.weapon(who, weaponKey, engine, game, opts, seat);
+      const source = plan.entry;
+      const atk = plan.bonus + effectBonus(source, "ATK");
+      const formula = `1d20${atk >= 0 ? "+" : ""}${atk}`;
+      const kind = SHORT_TYPE[plan.type] ? ` (${SHORT_TYPE[plan.type]})` : "";
+      const targets = (source?.targets ?? []).map((id) => state.entries.find((entry) => entry.id === id)).filter(Boolean);
+      const results = [];
+      if (targets.length === 0) {
+        const roll = table().roll(formula, `[ATTACK]${kind} ${plan.name}`, from, false, { result: "NO TARGET", by: plan.actor });
+        results.push({ total: roll.total, hit: null });
+      }
+      for (const target of targets) {
+        const ac = vitals(target).ac + effectBonus(target, "AC");
+        const rolled = table().dice.roll(formula);
+        const hit = rolled.total >= ac;
+        const label = `[ATTACK]${kind} ${plan.name} [AC ${ac}] [${hit ? "HIT" : "MISS"} ${rolled.total} vs ${ac}] -> [at ${target.name}]`;
+        table().postRoll(rolled, label, from, Boolean(target.hidden), { result: hit ? "HIT" : "MISS", by: plan.actor, against: ac, target: target.name });
+        results.push({ target: target.name, total: rolled.total, ac, hit });
+      }
+      return results;
+    },
+    // Damage (CoreRPG ActionDamage): the weapon's dice + its damage bonus + the
+    // damage attribute (SIEGE_MELEE_DMG_STAT / SIEGE_RANGED_DMG_STAT) + DMG
+    // effects, rolled once and applied to every target.
+    async damageRoll(who, weaponKey, seat, from) {
+      const { engine, game, options: opts } = await options();
+      cachedThresholds = thresholds(opts);
+      const plan = this.weapon(who, weaponKey, engine, game, opts, seat);
+      if (!plan.damage) throw new Error(`${plan.name} has no damage.`);
+      const bonus = plan.damageBonus + effectBonus(plan.entry, "DMG");
+      const formula = `${plan.damage.replace(/\s+/g, "")}${bonus ? `${bonus > 0 ? "+" : ""}${bonus}` : ""}`;
+      const kind = SHORT_TYPE[plan.type] ? ` (${SHORT_TYPE[plan.type]})` : "";
+      const targets = (plan.entry?.targets ?? []).map((id) => state.entries.find((entry) => entry.id === id)).filter(Boolean);
+      const roll = table().roll(formula, `[DAMAGE]${kind} ${plan.name}${plan.dmgtype ? ` [TYPE: ${plan.dmgtype}]` : ""}`, from, false, { by: plan.actor });
+      // CoreRPG: damage is at least 1 when dice were rolled.
+      const amount = Math.max(1, roll.total);
+      for (const target of targets) await applyWounds(target, amount, `[DAMAGE] ${plan.name}`, opts);
+      return { total: amount, targets: targets.map((target) => target.name) };
+    },
+    // What a creature attacks with, and its numbers.
+    weapon(who, weaponKey, engine, game, opts, seat) {
+      if (who.recordId) {
+        const record = table().records.get(who.recordId);
+        if (!record || record.type !== "character") throw new Error("No such character.");
+        if (seat.role !== "dm" && record.owner !== seat.name) throw new Error("That is not your character.");
+        const item = record.data.inventorylist?.[weaponKey];
+        if (!item || !String(item.damage ?? "").trim()) throw new Error("No such weapon.");
+        const type = String(item.attacktype ?? "melee").toLowerCase() === "ranged" ? "ranged" : "melee";
+        const stat = String(opts[type === "ranged" ? "SIEGE_RANGED_DMG_STAT" : "SIEGE_MELEE_DMG_STAT"] ?? "none").toLowerCase();
+        const score = record.data.attributes?.[stat]?.score;
+        return {
+          actor: record.name,
+          name: String(item.name),
+          type,
+          bonus: num(record.data.attack?.[type]?.total, num(record.data.bth, 0)) + num(item.bthbonus, 0),
+          damage: String(item.damage),
+          damageBonus: num(item.dmgbonus, 0) + (score != null ? engine.abilityBonus(score, game) : 0),
+          dmgtype: String(item.dmgtype ?? ""),
+          entry: state.entries.find((entry) => entry.recordId === record.id) ?? null,
+        };
+      }
+      mustGM(seat);
+      const entry = find(who.entryId);
+      const record = entry.recordId ? table().records.get(entry.recordId) : null;
+      const attack = record?.data?.attacks?.[weaponKey];
+      if (!attack) throw new Error("No such attack.");
+      return {
+        actor: entry.name,
+        name: String(attack.name ?? "Attack"),
+        type: String(attack.attacktype ?? "melee").toLowerCase() === "ranged" ? "ranged" : "melee",
+        bonus: num(record.data.bth, 0) + num(attack.bth, 0),
+        damage: String(attack.damage ?? ""),
+        damageBonus: num(attack.dmgbonus, 0),
+        dmgtype: String(attack.dmgtype ?? ""),
+        entry,
+      };
     },
     round: () => state.round,
     active: () => state.active,

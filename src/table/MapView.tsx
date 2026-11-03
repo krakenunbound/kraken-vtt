@@ -133,6 +133,7 @@ export function MapView({
   pings = [],
   notice = null,
   actions,
+  targeted = [],
 }: {
   scene: MapScene;
   gm?: boolean;
@@ -141,6 +142,8 @@ export function MapView({
   pings?: Ping[];
   notice?: string | null;
   actions: MapActions;
+  // Tokens this seat's creatures have targeted (a reticle shows on them).
+  targeted?: string[];
 }) {
   const viewport = useRef<HTMLDivElement>(null);
   const pan = useRef<{ id: number; x: number; y: number } | null>(null);
@@ -558,7 +561,7 @@ export function MapView({
           return (
             <div
               key={token.id}
-              className={["token", canDrag ? "token-draggable" : "", token.mine ? "token-mine" : "", token.active ? "token-active" : "", selected === token.id ? "token-selected" : "", token.hidden ? "token-hidden" : "", isDragged ? "token-lifted" : ""]
+              className={["token", canDrag ? "token-draggable" : "", token.mine ? "token-mine" : "", token.active ? "token-active" : "", targeted.includes(token.id) ? "token-targeted" : "", selected === token.id ? "token-selected" : "", token.hidden ? "token-hidden" : "", isDragged ? "token-lifted" : ""]
                 .filter(Boolean)
                 .join(" ")}
               data-token={token.id}
@@ -570,6 +573,11 @@ export function MapView({
                 if (event.button === 2) return;
                 event.stopPropagation();
                 setMenu(null);
+                // Ctrl+click targets (FG): with your character, or for the GM the creature whose turn it is.
+                if (event.button === 0 && (event.ctrlKey || event.metaKey)) {
+                  actions.ct("target", { tokenId: token.id });
+                  return;
+                }
                 setSelected(token.id);
                 if (event.button !== 0 || !canDrag) return;
                 const point = worldAt(event.clientX, event.clientY);
@@ -605,6 +613,12 @@ export function MapView({
                   <span>{initials(token.name)}</span>
                 )}
               </div>
+              {targeted.includes(token.id) ? (
+                <svg className="target-reticle" viewBox="0 0 100 100" aria-label="Targeted">
+                  <circle cx="50" cy="50" r="44" />
+                  <path d="M50 0v18M50 82v18M0 50h18M82 50h18" />
+                </svg>
+              ) : null}
               {token.health ? (
                 <i
                   className="health-dot"
@@ -723,6 +737,16 @@ export function MapView({
                     Add to combat
                   </button>
                 ) : null}
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => {
+                    actions.ct("target", { tokenId: token.id });
+                    setMenu(null);
+                  }}
+                >
+                  {targeted.includes(token.id) ? "Drop target" : "Target (Ctrl+click)"}
+                </button>
                 {gm ? (
                   <button type="button" role="menuitem" onClick={() => actions.updateToken(token.id, { hidden: !token.hidden })}>
                     {token.hidden ? "Show to players" : "Hide from players"}
@@ -948,7 +972,7 @@ export function MapView({
           {notice}
         </p>
       ) : null}
-      <p className="map-hint">Drag to pan · wheel to zoom · right-drag to measure · double-click to ping{gm || mine.length > 0 ? " · arrows move the selected token" : ""}</p>
+      <p className="map-hint">Drag to pan · wheel to zoom · right-drag to measure · double-click to ping · Ctrl+click a token to target it{gm || mine.length > 0 ? " · arrows move the selected token" : ""}</p>
       {scene.grid.type > 1 ? <p className="map-note">Hex grids are not drawn yet.</p> : null}
       {imageFailed || !scene.imageUrl ? <p className="map-note">This scene has no background image.</p> : null}
     </div>
