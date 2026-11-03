@@ -171,9 +171,15 @@ function diceLook(value) {
 }
 
 // The table's own options. towerReveal: a roll in the dice tower is shown to
-// whoever rolled it too (FG shows it to the GM only).
+// whoever rolled it too (FG shows it to the GM only). decal: the picture on
+// the table's background, as FG's Background Decal: "kraken" (the emblem),
+// "" (none) or a decal id (decals.cjs).
 function savedOptions(value) {
-  return { towerReveal: Boolean(value && typeof value === "object" && value.towerReveal) };
+  const options = value && typeof value === "object" ? value : {};
+  return {
+    towerReveal: Boolean(options.towerReveal),
+    decal: typeof options.decal === "string" && options.decal.length <= 400 ? options.decal : "kraken",
+  };
 }
 
 function savedChat(value) {
@@ -235,7 +241,8 @@ function serveWeb(url, res, root) {
 }
 
 // art: the GM's portraits and tokens (artLibrary.cjs), served to the table.
-function createTableServer({ saved = {}, onChange = () => undefined, webRoot = WEB_ROOT, art = null } = {}) {
+// decals: the background decals the GM can choose from (decals.cjs).
+function createTableServer({ saved = {}, onChange = () => undefined, webRoot = WEB_ROOT, art = null, decals = null } = {}) {
   let password = "";
   let hostToken = "";
   let image = null;
@@ -246,7 +253,9 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
   const chat = savedChat(saved.chat);
   let options = savedOptions(saved.options);
   function setOptions(patch) {
-    options = savedOptions({ ...options, ...(patch && typeof patch === "object" ? patch : {}) });
+    const next = patch && typeof patch === "object" ? patch : {};
+    if (next.decal !== undefined && !(next.decal === "" || next.decal === "kraken" || (decals && decals.has(String(next.decal))))) throw new Error(`No decal "${next.decal}".`);
+    options = savedOptions({ ...options, ...next });
     broadcast({ type: "options", options });
     onChange("table");
     return options;
@@ -426,6 +435,25 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       });
       return;
     }
+    // Background decals: the list for the GM's picker, and the pictures for every seat.
+    if (req.method === "GET" && (url.pathname === "/decal/list" || url.pathname === "/decal/file")) {
+      const token = url.searchParams.get("token") || "";
+      const client = token ? [...clients.values()].find((item) => item.assetToken === token) : null;
+      const found = client && decals ? (url.pathname === "/decal/list" ? (client.role === "dm" ? { list: decals.list() } : null) : decals.file(url.searchParams.get("id") || "")) : null;
+      if (!found) {
+        res.writeHead(404, { "Cache-Control": "no-store" });
+        res.end();
+        return;
+      }
+      if (found.list) {
+        res.writeHead(200, { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" });
+        res.end(JSON.stringify(found.list));
+        return;
+      }
+      res.writeHead(200, { "Content-Type": found.mime, "Content-Length": found.bytes.length, "Cache-Control": "private, max-age=3600", "X-Content-Type-Options": "nosniff" });
+      res.end(found.bytes);
+      return;
+    }
     // A creature's picture from its module (an NPC's token or portrait). A seat
     // may have it when it can see the record or a visible token of it.
     if (req.method === "GET" && url.pathname === "/table/record-art") {
@@ -587,7 +615,11 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
 
       if (msg.type === "table-options") {
         if (client.role !== "dm") return;
-        setOptions(msg.options);
+        try {
+          setOptions(msg.options);
+        } catch (error) {
+          send(ws, { type: "error", reason: error instanceof Error ? error.message : "Not allowed." });
+        }
         return;
       }
 
@@ -858,6 +890,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     map,
     combat,
     viewFor: (name) => map.viewFor({ role: "player", name }, ""),
+    decals: () => decals,
     // The GM's portraits and tokens (artLibrary.cjs), as the pickers show them.
     art: (kind) => (art ? art.list(kind) : []),
     // A ping on the map at a square, as a GM's click would make.
