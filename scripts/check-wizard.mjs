@@ -70,6 +70,7 @@ try {
   // Race and class.
   await page.click('[data-wizard-tab="race"]');
   await page.click('[data-race="Dwarf"]');
+  await page.waitForSelector('[data-action="change-race"]');
   await page.click('[data-wizard-tab="class"]');
   assert(await page.locator('[data-class="Fighter"]').isEnabled(), "Fighter open to a dwarf");
   await page.click('[data-class="Fighter"]');
@@ -77,7 +78,10 @@ try {
   // Primes: strength from the class, constitution from the dwarf's extra prime.
   await page.click('[data-wizard-tab="primes"]');
   await page.getByLabel("constitution prime").check();
-  assert(await page.getByLabel("wisdom prime").isDisabled(), "no third prime");
+  // A third prime is refused with a message, as FG's wizard does.
+  await page.getByLabel("wisdom prime").click();
+  assert(!(await page.getByLabel("wisdom prime").isChecked()), "no third prime");
+  await page.waitForSelector(".ccw-note:has-text('2 primes in total')");
 
   // Hit points: d10 fixed 8, + Constitution 16 (+2) = 10.
   await page.click('[data-wizard-tab="hp"]');
@@ -96,17 +100,16 @@ try {
     await page.getByRole("button", { name: `Buy ${item}`, exact: true }).click();
   }
   await page.getByLabel("Shop search").fill("");
-  await page.click('[data-wizard-tab="spells"]');
-  await page.waitForSelector("text=This class casts no spells");
+  assert((await page.locator('[data-wizard-tab="spells"]').count()) === 0, "no Spells page for a fighter");
 
   // Finish.
   await page.click('[data-wizard-tab="finish"]');
   await page.getByLabel("Character name").fill("Borin Stonefist");
-  await page.getByLabel("alignment").fill("Lawful Neutral");
+  await page.getByLabel("alignment").selectOption("Lawful Neutral");
   await page.getByLabel("deity").fill("Moradin");
-  assert((await page.locator(".warnings li").count()) === 0, "nothing left to choose");
+  assert((await page.locator(".ccw-warning").count()) === 0, "nothing left to choose");
   await page.click('[data-action="create-character"]');
-  await page.waitForSelector('[data-character] h2:has-text("Borin Stonefist")', { timeout: 30000 });
+  await page.waitForFunction(() => document.querySelector('[data-character] .cc-name')?.value === "Borin Stonefist", null, { timeout: 30000 });
 
   const listed = await tool("kraken_records_list", { type: "character" });
   assert(listed.total === 1, `characters ${listed.total}`);
@@ -152,8 +155,129 @@ try {
   const rolls = (await tool("kraken_chat_log", { count: 30 })).filter((line) => line.roll?.label?.startsWith("Wizard:"));
   assert(rolls.length === 8, `host rolled ${rolls.length} wizard rolls`);
   await page.screenshot({ path: path.join(profile, "wizard-result.png") });
+
+  // A second character: an Elf Wizard started at level 3, so the class sets
+  // three hit point rolls and spells, then dropped to level 2 to see the
+  // spells trimmed, as FG's wizard does.
+  await page.click('[data-action="new-character"]');
+  await page.waitForSelector(".ccw");
+  // STR 9, DEX 14, CON 13, INT 17, WIS 10, CHA 11.
+  await tool("kraken_dice_clear");
+  await tool("kraken_dice_force", { values: [3, 3, 3, 5, 5, 4, 5, 4, 4, 6, 6, 5, 4, 3, 3, 4, 4, 3] });
+  await page.click('[data-action="roll-abilities"]');
+  await page.waitForFunction(() => document.querySelector('[data-final="charisma"]')?.textContent === "11");
+  await page.click('[data-wizard-tab="race"]');
+  await page.click('[data-race="Elf"]');
+  await page.waitForSelector('[data-action="change-race"]');
+  await page.click('[data-wizard-tab="class"]');
+  await page.click('[data-class="Wizard"]');
+  for (let i = 0; i < 2; i++) await page.getByLabel("Higher starting level").click();
+  assert((await page.locator("[data-start-level]").textContent()) === "3", "starting level 3");
+  await page.click('[data-wizard-tab="primes"]');
+  await page.getByLabel("dexterity prime").check();
+  await page.click('[data-wizard-tab="hp"]');
+  await tool("kraken_dice_force", { values: [3, 4, 2] });
+  await page.click('[data-action="roll-hp"]');
+  await page.waitForSelector('[data-hp-total="9"]');
+  await page.click('[data-wizard-tab="equipment"]');
+  await tool("kraken_dice_force", { values: [5] });
+  await page.click('[data-action="roll-gold"]');
+  await page.waitForSelector('[data-coin-left="5000"]');
+  for (const item of ["Dagger", "Backpack"]) {
+    await page.getByLabel("Shop search").fill(item);
+    await page.getByRole("button", { name: `Buy ${item}`, exact: true }).click();
+  }
+  assert((await page.getByRole("button", { name: "Buy Sword, Long", exact: true }).count()) === 0, "no long sword for a wizard");
+  await page.click('[data-wizard-tab="spells"]');
+  // Tick every spell the wizard may: the first ones at each level.
+  const levels = await page.$$eval('[aria-label="Spell level"] option', (options) => options.map((option) => option.value).filter((value) => value !== "all"));
+  const picked = [];
+  for (const level of levels) {
+    await page.getByLabel("Spell level").selectOption(level);
+    const plan = await page.locator(`.ccw-plan`).allTextContents();
+    const allowed = Number(/of (\d+)/.exec(plan.find((line) => line.startsWith(level === "0" ? "0-level" : `Level ${level}`)) ?? "")?.[1]);
+    const boxes = page.locator('.ccw-spell input[type="checkbox"]');
+    for (let i = 0; i < allowed; i++) {
+      await boxes.nth(i).check();
+      picked.push((await page.locator(".ccw-spell .ccw-pick-name").nth(i).textContent()).trim());
+    }
+  }
+  assert(picked.length > 0, "the wizard offers spells");
+  await page.getByLabel("Spell level").selectOption("all");
+  await page.waitForSelector('[data-wizard-tab="spells"] .ccw-tab-badge.done');
+  // Down to level 2: the hit points go and the level-2 spell is trimmed.
+  await page.click('[data-wizard-tab="class"]');
+  await page.getByLabel("Lower starting level").click();
+  await page.waitForSelector(".ccw-note:has-text('Spell choices exceeding')");
+  await page.click('[data-wizard-tab="hp"]');
+  await page.waitForSelector("text=Your previous HP roll was cleared");
+  await tool("kraken_dice_force", { values: [3, 4] });
+  await page.click('[data-action="roll-hp"]');
+  await page.waitForSelector('[data-hp-total="7"]');
+  await page.click('[data-wizard-tab="spells"]');
+  const kept = await page.$$eval(".ccw-spell", (rows) => rows.filter((row) => row.querySelector("input")?.checked).map((row) => row.querySelector(".ccw-pick-name")?.textContent?.trim()));
+  assert(kept.length < picked.length && kept.every((name) => picked.includes(name)), `spells after the level change: ${kept.join(", ")}`);
+  await page.click('[data-wizard-tab="finish"]');
+  // A wizard may take any alignment; a paladin only one (checked below).
+  assert((await page.locator('[aria-label="alignment"] option').count()) === 10, "a wizard's alignments");
+  await page.getByLabel("Character name").fill("Ilyana Starweave");
+  await page.getByLabel("alignment").selectOption("Chaotic Good");
+  await page.click('[data-action="create-character"]');
+  await page.waitForFunction(() => document.querySelector('[data-character] .cc-name')?.value === "Ilyana Starweave", null, { timeout: 30000 });
+  const all = await tool("kraken_records_list", { type: "character" });
+  const elfId = all.records.find((record) => record.name === "Ilyana Starweave")?.id;
+  const elf = (await tool("kraken_record_get", { id: elfId })).data;
+  const elfExpected = buildFromSpec(
+    {
+      name: "Ilyana Starweave",
+      race: "Elf",
+      class: "Wizard",
+      level: 2,
+      scores: { strength: 9, dexterity: 15, constitution: 12, intelligence: 17, wisdom: 10, charisma: 11 },
+      primes: ["intelligence", "dexterity"],
+      hp: [3, 4],
+      gold: 50,
+      gear: [["Dagger", 1], ["Backpack", 1]],
+      spells: kept,
+    },
+    library,
+  ).character;
+  const spellNames = (character) => Object.values(character.powers ?? {}).map((power) => power.name).sort().join(",");
+  for (const [field, got, want] of [
+    ["level", elf.level, elfExpected.level],
+    ["hp", elf.hp.total, elfExpected.hp.total],
+    ["ac", elf.ac.total, elfExpected.ac.total],
+    ["dexterity prime", elf.attributes.dexterity.prime, 1],
+    ["spells", spellNames(elf), spellNames(elfExpected)],
+    ["coins", JSON.stringify(elf.coins), JSON.stringify(elfExpected.coins)],
+    ["alignment", elf.alignment, "Chaotic Good"],
+  ]) {
+    assert(got === want, `elf ${field}: ${got} want ${want}`);
+  }
+
+  // A paladin: only lawful good.
+  await page.click('[data-action="new-character"]');
+  await page.click('[data-wizard-tab="race"]');
+  await page.click('[data-race="Human"]');
+  await page.click('[data-wizard-tab="class"]');
+  await page.click('[data-class="Paladin"]');
+  await page.click('[data-wizard-tab="finish"]');
+  const paladin = await page.$$eval('[aria-label="alignment"] option', (options) => options.map((option) => option.textContent));
+  assert(paladin.join("|") === "—|Lawful Good", `paladin alignments ${paladin.join("|")}`);
+  // Created unfinished: what is left goes in the notes.
+  await page.getByLabel("Character name").fill("Unfinished Paladin");
+  await page.click('[data-action="create-character"]');
+  await page.waitForFunction(() => document.querySelector('[data-character] .cc-name')?.value === "Unfinished Paladin", null, { timeout: 30000 });
+  const rest = await tool("kraken_records_list", { type: "character" });
+  const unfinished = (await tool("kraken_record_get", { id: rest.records.find((record) => record.name === "Unfinished Paladin").id })).data;
+  assert(String(unfinished.notes).includes("Unfinished in the character wizard (finish with your Castle Keeper): Abilities, Primes, Hit Points, Equipment, Alignment."), `notes: ${unfinished.notes}`);
+
   await tool("kraken_leave");
-  console.log(`ok wizard: created Borin Stonefist (HP ${made.hp.total}, AC ${made.ac.total}, BtH ${made.bth}) equal to the builder; 8 host rolls. ${path.join(profile, "wizard-result.png")}`);
+  console.log(`ok wizard: Borin Stonefist (HP ${made.hp.total}, AC ${made.ac.total}, BtH ${made.bth}) and Ilyana Starweave (level ${elf.level}, HP ${elf.hp.total}, spells ${kept.length}) equal to the builder; spells trimmed on a level change; paladin alignment; an unfinished character lists what is left. ${path.join(profile, "wizard-result.png")}`);
+} catch (error) {
+  await page.screenshot({ path: path.join(profile, "wizard-failed.png") }).catch(() => undefined);
+  console.log("failed:", path.join(profile, "wizard-failed.png"));
+  throw error;
 } finally {
   child.stdin.end();
   await app.close();

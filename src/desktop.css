@@ -913,3 +913,93 @@ textarea.cc-field.tall { min-height: 220px; }
 .cc-load-band.moderate { color: #e7c07a; }
 .cc-load-band.heavy, .cc-load-band.overburdened, .cc-load-band.overcapacity { color: #e07a6a; }
 .hint.warn { color: #e7c07a; }
+
+/* The C&C character creation wizard, as FG's SC C&C wizard: a parchment
+   utility window, tabs with badges on top, the page art faint behind it,
+   metal-plate section headers and groupbox panels. */
+.ccw { display: flex; flex-direction: column; height: 100%; min-height: 0; gap: 6px; color: #2b1d10; background: linear-gradient(180deg, #efe3c8, #e3d2ad); border: 1px solid #8a6a3c; border-radius: 6px; padding: 8px; font-size: 0.9rem; }
+.ccw h2 { margin: 0; font-family: Cinzel, Georgia, serif; font-size: 1.05rem; color: #4a2a12; }
+.ccw h3 { margin: 0; font-family: Cinzel, Georgia, serif; font-size: 1.2rem; color: #3a2010; }
+.ccw .hint { color: #6b5536; font-size: 0.82rem; }
+.ccw button { color: #2b1d10; background: linear-gradient(180deg, #f6ecd6, #d9c49a); border: 1px solid #8a6a3c; border-radius: 4px; padding: 3px 10px; cursor: pointer; }
+.ccw button:hover:not(:disabled) { background: linear-gradient(180deg, #fff6e2, #e6d2a6); }
+.ccw button:disabled { opacity: 0.45; cursor: default; }
+.ccw input, .ccw select, .ccw textarea { color: #2b1d10; background: rgba(255, 252, 240, 0.85); border: 1px solid #a2855a; border-radius: 3px; padding: 3px 6px; font: inherit; }
+.ccw textarea { width: 100%; min-height: 70px; resize: vertical; }
+.ccw-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.ccw-head-buttons { display: flex; gap: 6px; }
+.ccw-head .wizard-next { font-weight: 700; border-color: #6b3d12; }
+.ccw-tabs { display: flex; flex-wrap: wrap; gap: 3px; }
+.ccw-tabs button { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 5px 5px 0 0; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6); }
+.ccw-tabs button[aria-selected="true"] { background: linear-gradient(180deg, #c9b07e, #e9dab8); box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.25); font-weight: 700; }
+.ccw-tab-badge { display: inline-grid; place-items: center; width: 16px; height: 16px; font-size: 0.75rem; }
+.ccw-tab-badge img { width: 16px; height: 16px; }
+.ccw-tab-badge.done { color: #2f7a2f; font-weight: 700; }
+.ccw-note { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: 0; padding: 4px 8px; background: #fff3c9; border: 1px solid #c8a24a; border-radius: 4px; }
+.ccw-note button { padding: 0 6px; }
+.ccw-page { position: relative; flex: 1; min-height: 0; overflow: auto; padding: 8px 10px 16px; border: 1px solid #8a6a3c; border-radius: 4px; background: rgba(255, 250, 236, 0.35); isolation: isolate; }
+.ccw-page::after { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--ccw-art) center 40px / min(92%, 640px) no-repeat; opacity: 0.28; mix-blend-mode: multiply; pointer-events: none; }
+.ccw-plate { display: flex; align-items: center; justify-content: center; position: relative; margin: 10px 0 6px; padding: 4px 10px; min-height: 26px; width: 100%; box-sizing: border-box; color: #f6ecd6; font-family: Cinzel, Georgia, serif; font-weight: 700; letter-spacing: 0.06em; text-shadow: 0 1px 1px rgba(0, 0, 0, 0.6); background: linear-gradient(180deg, #8d8d8d, #5a5a5a 50%, #444 51%, #6a6a6a); border: 1px solid #333; border-radius: 3px; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35); }
+.ccw button.ccw-plate { cursor: pointer; gap: 8px; color: #f6ecd6; background: linear-gradient(180deg, #8d8d8d, #5a5a5a 50%, #444 51%, #6a6a6a); border: 1px solid #333; }
+.ccw-plate .ccw-change { position: absolute; left: 6px; top: 50%; transform: translateY(-50%); padding: 1px 8px; font-family: inherit; font-size: 0.75rem; text-shadow: none; letter-spacing: 0; }
+.ccw-instructions .ccw-plate { margin-top: 0; }
+.ccw-lore { padding: 6px 12px; background: rgba(255, 250, 236, 0.75); border: 1px solid #b89a6a; border-radius: 4px; line-height: 1.45; }
+.ccw-lore p { margin: 0 0 6px; }
+.ccw-lore ol { margin: 4px 0; padding-left: 22px; }
+.ccw-panel { padding: 8px 10px; background: rgba(255, 250, 236, 0.55); border: 1px solid #b89a6a; border-radius: 4px; }
+.ccw-panel p { margin: 4px 0; }
+.ccw-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.ccw .ccw-button { font-weight: 700; padding: 4px 14px; }
+.ccw-warn { color: #8a2b12; font-weight: 600; }
+.ccw-badges { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; margin: 8px 0; }
+.ccw-badge { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.ccw-badge-label { font-family: Cinzel, Georgia, serif; font-weight: 700; color: #4a2a12; }
+.ccw-badge-total { position: relative; display: grid; place-items: center; width: 86px; max-width: 100%; height: 40px; font-size: 1.5rem; background: rgba(255, 252, 240, 0.9); border: 1px solid #8a6a3c; border-radius: 4px; }
+.ccw-prime-mark { position: absolute; right: 4px; top: 2px; font-size: 0.8rem; color: #2f7a2f; font-style: normal; }
+.ccw-badge-mod { min-width: 50px; min-height: 1.2em; text-align: center; font-size: 0.82rem; background: #f3e7cb; border: 1px solid #b89a6a; border-radius: 9px; }
+.ccw-slots { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
+.ccw-slot { display: grid; place-items: center; height: 36px; font-size: 1.2rem; font-weight: 700; background: linear-gradient(180deg, #fffaf0, #eadbb8); border: 1px solid #8a6a3c; border-radius: 4px; cursor: grab; user-select: none; }
+.ccw-slot.readonly { cursor: default; background: rgba(255, 252, 240, 0.6); font-weight: 400; color: #6b3d12; }
+.ccw-slot.target { outline: 2px dashed #a8742a; outline-offset: 1px; }
+.ccw-slot.picked { background: #f2d58a; border-color: #6b3d12; }
+.ccw-picklist { display: flex; flex-direction: column; gap: 2px; padding: 6px 8px; background: rgba(255, 250, 236, 0.55); border: 1px solid #b89a6a; border-radius: 4px; }
+.ccw-filter { display: flex; gap: 12px; margin-bottom: 6px; }
+.ccw-filter label { display: flex; align-items: center; gap: 6px; }
+.ccw-pick { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; align-items: center; gap: 8px; padding: 2px 0; border-bottom: 1px solid rgba(138, 106, 60, 0.2); }
+.ccw-pick.on { background: rgba(242, 213, 138, 0.4); }
+.ccw-pick.blocked .ccw-pick-name { color: #8a7a62; }
+.ccw .ccw-add { width: 24px; height: 24px; padding: 0; display: grid; place-items: center; font-weight: 700; color: #1f5a1f; border-radius: 50%; }
+.ccw .ccw-pick-name { padding: 2px 4px; text-align: left; background: transparent; border: none; font-weight: 700; }
+.ccw .ccw-pick-name:hover { text-decoration: underline; background: transparent; }
+.ccw-pick-source { color: #6b5536; font-size: 0.78rem; }
+.ccw-reading { grid-column: 1 / -1; margin: 2px 0 6px 36px; white-space: pre-wrap; line-height: 1.4; font-size: 0.85rem; max-height: 260px; overflow: auto; }
+.ccw-chosen { display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 12px; padding: 8px 10px; background: rgba(255, 250, 236, 0.55); border: 1px solid #b89a6a; border-radius: 4px; }
+.ccw-portrait { width: 170px; height: 170px; object-fit: cover; border: 2px solid #8a6a3c; border-radius: 4px; background: #efe3c8; }
+.ccw-chosen-info p { margin: 3px 0; }
+.ccw-level { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.ccw-level span { display: inline-flex; align-items: center; gap: 4px; }
+.ccw-level b { min-width: 28px; text-align: center; padding: 1px 6px; background: #fffaf0; border: 1px solid #8a6a3c; border-radius: 3px; }
+.ccw .ccw-level button { padding: 0 6px; font-size: 0.7rem; }
+.ccw-card { margin: 3px 0; background: rgba(255, 250, 236, 0.85); border: 1px solid #b89a6a; border-radius: 4px; }
+.ccw .ccw-card-title { width: 100%; display: flex; justify-content: space-between; text-align: left; background: transparent; border: none; padding: 4px 8px; }
+.ccw-card-text { margin: 0; padding: 0 10px 8px; white-space: pre-wrap; line-height: 1.4; font-size: 0.86rem; }
+.ccw-prime-row { display: grid; grid-template-columns: 22px 120px 40px minmax(0, 1fr); align-items: center; gap: 8px; padding: 3px 0; }
+.ccw-plan { font-family: Georgia, serif; }
+.ccw-box { display: inline-block; min-width: 70px; padding: 1px 8px; text-align: center; background: #fffaf0; border: 1px solid #8a6a3c; border-radius: 3px; }
+.ccw-cart-row, .ccw-shop-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 8px; padding: 2px 0; border-bottom: 1px solid rgba(138, 106, 60, 0.18); }
+.ccw .ccw-cart-row button { padding: 0 8px; font-size: 0.78rem; }
+.ccw-shop { columns: 2 300px; column-gap: 18px; margin-top: 6px; }
+.ccw-shop-row { break-inside: avoid; }
+.ccw-spells { columns: 2 280px; column-gap: 18px; margin-top: 6px; }
+.ccw-spell { display: grid; grid-template-columns: 20px 20px minmax(0, 1fr); align-items: center; gap: 6px; break-inside: avoid; padding: 1px 0; }
+.ccw-spell .ccw-reading { margin-left: 46px; }
+.ccw-spell-level { text-align: center; font-weight: 700; color: #6b3d12; }
+.ccw-warning { display: flex; align-items: center; gap: 6px; }
+.ccw-warning img { width: 18px; height: 18px; }
+.ccw-warning b { color: #8a2b12; }
+.ccw-details { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 14px; }
+.ccw-details label { display: flex; align-items: center; gap: 6px; }
+.ccw-details label input, .ccw-details label select { flex: 1; min-width: 0; }
+.ccw-details label.wide { grid-column: 1 / -1; align-items: flex-start; }
+.ccw-details input.short { width: 70px; flex: none; }
+.ccw .ccw-create { font-size: 1rem; font-weight: 700; padding: 6px 20px; }

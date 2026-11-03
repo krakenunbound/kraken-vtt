@@ -40,15 +40,42 @@ try {
   await page.waitForSelector('[data-action="new-character"]');
   await shot("list");
   await page.click('[data-action="new-character"]');
-  await page.waitForTimeout(1000);
-  await shot("step1");
-  const next = await page.$("text=Next");
-  if (next) {
-    await next.click().catch(() => undefined);
-    await page.waitForTimeout(800);
-    await shot("step2");
-  }
-  console.log("saved", ["list", "step1", "step2"].map((name) => path.join(tmpdir(), `kraken-wizard-${name}.png`)).join(", "));
+  await page.waitForSelector(".ccw");
+  const saved = [];
+  const snap = async (name) => {
+    await page.waitForTimeout(400);
+    await page.locator(".ccw").screenshot({ path: path.join(tmpdir(), `kraken-wizard-${name}.png`) });
+    saved.push(path.join(tmpdir(), `kraken-wizard-${name}.png`));
+  };
+  await page.click('[data-action="roll-abilities"]');
+  await page.waitForFunction(() => document.querySelector('[data-final="charisma"]')?.textContent !== "", null, { timeout: 30000 });
+  await snap("abilities");
+  await page.click('[data-wizard-tab="race"]');
+  await snap("race-list");
+  await page.click('[data-race="Elf"]');
+  await snap("race");
+  await page.click('[data-wizard-tab="class"]');
+  await snap("class-list");
+  await page.click('[data-class="Wizard"]');
+  await page.getByLabel("Higher starting level").click();
+  await page.getByLabel("Higher starting level").click();
+  await snap("class");
+  await page.click('[data-wizard-tab="primes"]');
+  await snap("primes");
+  await page.click('[data-wizard-tab="hp"]');
+  await page.click('[data-action="roll-hp"]');
+  await page.waitForFunction(() => Number(document.querySelector("[data-hp-total]")?.getAttribute("data-hp-total")) > 0, null, { timeout: 30000 });
+  await snap("hp");
+  await page.click('[data-wizard-tab="equipment"]');
+  await page.click('[data-action="roll-gold"]');
+  await page.waitForFunction(() => Number(document.querySelector("[data-coin-left]")?.getAttribute("data-coin-left")) > 0, null, { timeout: 30000 });
+  await page.getByRole("button", { name: "Buy Dagger", exact: true }).click().catch((error) => console.log("dagger", error.message));
+  await snap("equipment");
+  await page.click('[data-wizard-tab="spells"]');
+  await snap("spells");
+  await page.click('[data-wizard-tab="finish"]');
+  await snap("finish");
+  console.log("saved", saved.join(", "));
 } finally {
   child.kill();
   await app.close();
