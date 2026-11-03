@@ -55,7 +55,7 @@ try {
   await tool("kraken_host", { campaignId: campaign.id, port: 47392, password: "" });
   await tool("kraken_import_fg_module", { module: "C&C Player's Handbook" });
 
-  await page.getByRole("tab", { name: "Characters" }).click();
+  await page.click('[data-launch="characters"]');
   await page.click('[data-action="new-character"]');
 
   // Abilities: 3d6 x 6, fixed: 15, 12, 16, 9, 13, 6; then swap STR and CON.

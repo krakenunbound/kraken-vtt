@@ -148,7 +148,7 @@ function presetLight(name, profiles = []) {
   return preset ? cleanCarried({ name: preset.name, bright: preset.bright * 5, dim: preset.dim * 5, color: preset.color }) : null;
 }
 
-function createMapState({ saved, records, onChange = () => undefined, hasArt = () => false, hasPicture = () => false }) {
+function createMapState({ saved, records, onChange = () => undefined, hasArt = () => false, hasPicture = () => false, combatFor = () => null, activeRecord = () => null }) {
   const state = savedMap(saved);
   let scene = null;
   const visionCache = new Map();
@@ -278,6 +278,8 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
 
   // Health for the token's dot, from its record (FG's token health dot).
   function health(token) {
+    const tracked = combatFor(token.id);
+    if (tracked) return tracked.health;
     if (!token.recordId) return null;
     const record = records.get(token.recordId);
     const hp = record?.data?.hp;
@@ -299,6 +301,8 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       hidden: token.hidden,
       mine: seat.role === "player" && token.owner === seat.name,
       health: health(token),
+      // Whose turn it is on the combat tracker.
+      active: Boolean(combatFor(token.id)?.active) || (token.recordId != null && token.recordId === activeRecord()),
       light: token.light,
       vision: token.vision,
       seesFt: visionRange(token),
@@ -445,7 +449,7 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       if (input.recordId && !record) throw new Error("You cannot place that.");
       if (seat.role !== "dm" && (!record || record.owner !== seat.name)) throw new Error("You can place only your own character.");
       const pc = record && record.type === "character";
-      if (pc) {
+      if (pc && !input.allowSecond) {
         const existing = tokensHere().find((token) => token.recordId === record.id);
         if (existing) return existing;
       }

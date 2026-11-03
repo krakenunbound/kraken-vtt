@@ -16,6 +16,7 @@ export type MapToken = {
   color: string;
   hidden: boolean;
   mine: boolean;
+  active?: boolean;
   health: TokenHealth | null;
   art?: string;
   video?: boolean;
@@ -64,7 +65,26 @@ export type RollTerm =
   | { kind: "number"; sign: number; value: number }
   | { kind: "dice"; sign: number; count: number; sides: number; rolls: number[]; kept: boolean[]; sum: number };
 export type RollResult = { formula: string; label: string; total: number; terms: RollTerm[]; tag?: string };
-export type ChatLine = { id: string; from: string; text: string; at: number; roll?: RollResult };
+export type ChatLine = { id: string; from: string; text: string; at: number; roll?: RollResult; secret?: boolean };
+// The combat tracker as the host shows it to this seat (electron/combat.cjs viewFor).
+export type CombatEntry = {
+  id: string;
+  recordId: string | null;
+  tokenId: string | null;
+  name: string;
+  faction: "friend" | "neutral" | "foe";
+  initresult: number;
+  init?: number;
+  hidden: boolean;
+  owner: string;
+  mine: boolean;
+  health: TokenHealth;
+  hp?: number;
+  wounds?: number;
+  ac?: number;
+  effects: { id: string; label: string; duration: number }[];
+};
+export type CombatView = { round: number; active: string | null; entries: CombatEntry[] };
 export type TableRecord = {
   id: string;
   type: string;
@@ -170,6 +190,7 @@ export function useSession() {
   const [players, setPlayers] = useState<Seat[]>([]);
   const [map, setMap] = useState<TableMap>(EMPTY_MAP);
   const [party, setParty] = useState<import("../party/PartySheet").PartyView | null>(null);
+  const [combat, setCombat] = useState<CombatView>({ round: 0, active: null, entries: [] });
   const [pings, setPings] = useState<Ping[]>([]);
   const [notice, setNotice] = useState<string | null>(null);
   const [chat, setChat] = useState<ChatLine[]>([]);
@@ -209,6 +230,7 @@ export function useSession() {
     setPlayers([]);
     setMap(EMPTY_MAP);
     setParty(null);
+    setCombat({ round: 0, active: null, entries: [] });
     setPings([]);
     setChat([]);
     setPlayerScene(null);
@@ -267,6 +289,7 @@ export function useSession() {
             setSelfId(you.id);
             setPlayers((msg.players as Seat[]) ?? []);
             applyMap(msg.map as TableMap);
+            if (msg.combat) setCombat(msg.combat as CombatView);
             setChat((msg.chat as ChatLine[]) ?? []);
             setRecords(Object.fromEntries(((msg.records as TableRecord[]) ?? []).map((record) => [record.id, record])));
             setRemoteLabel(label);
@@ -279,6 +302,7 @@ export function useSession() {
           if (msg.type === "players") setPlayers((msg.players as Seat[]) ?? []);
           if (msg.type === "map") applyMap(msg as unknown as TableMap);
           if (msg.type === "party" && msg.party) setParty(msg.party as import("../party/PartySheet").PartyView);
+          if (msg.type === "combat" && msg.combat) setCombat(msg.combat as CombatView);
           if (msg.type === "ping") {
             const ping = { id: ++pingCounter.current, x: Number(msg.x), y: Number(msg.y), from: String(msg.from ?? ""), color: String(msg.color ?? "#fff") };
             setPings((current) => [...current, ping].slice(-12));
@@ -491,10 +515,11 @@ export function useSession() {
   }, []);
 
   // tag comes back on the roll in chat, so a caller can wait for its own roll.
-  const roll = useCallback((formula: string, label = "", tag = "") => {
+  // tower: FG's dice tower, a roll only the GM sees.
+  const roll = useCallback((formula: string, label = "", tag = "", tower = false) => {
     const socket = socketRef.current;
     if (!formula.trim() || !socket || socket.readyState !== WebSocket.OPEN) return;
-    socket.send(JSON.stringify({ type: "roll", formula: formula.trim().slice(0, 200), label: label.slice(0, 120), ...(tag ? { tag } : {}) }));
+    socket.send(JSON.stringify({ type: "roll", formula: formula.trim().slice(0, 200), label: label.slice(0, 120), ...(tag ? { tag } : {}), ...(tower ? { tower: true } : {}) }));
   }, []);
 
   // The creation wizard's character: the host builds it and answers with its id.
@@ -576,6 +601,8 @@ export function useSession() {
   const updateLight = useCallback((id: string, patch: Partial<SceneLightRecord>) => send({ type: "light-update", id, patch }), [send]);
   const removeLight = useCallback((id: string) => send({ type: "light-remove", id }), [send]);
   // The party sheet's GM actions; the host splits and posts them as FG does.
+  // The combat tracker: every action goes to the host, which applies FG's rules.
+  const ct = useCallback((action: string, payload: Record<string, unknown> = {}) => send({ type: "ct", action, ...payload }), [send]);
   const partyAwardXP = useCallback((xp: number) => send({ type: "party-award-xp", xp }), [send]);
   const partyAward = useCallback((kind: "quests" | "encounters", id?: string) => send({ type: "party-award", kind, id }), [send]);
   const partyDistribute = useCallback(() => send({ type: "party-distribute" }), [send]);
@@ -620,6 +647,7 @@ export function useSession() {
     players,
     map,
     party,
+    combat,
     pings,
     notice,
     chat,
@@ -643,6 +671,7 @@ export function useSession() {
     placeLight,
     updateLight,
     removeLight,
+    ct,
     partyAwardXP,
     partyAward,
     partyDistribute,

@@ -92,11 +92,11 @@ async function run(hostWindow, createWindow) {
   await fill(player, 'form[data-form="join"] input[name="port"]', String(PORT));
   await fill(player, 'form[data-form="join"] input[name="password"]', PASSWORD);
   await player.webContents.executeJavaScript('document.querySelector(\'form[data-form="join"]\').requestSubmit()');
-  await waitForText(player, "Connected to 127.0.0.1:47321", 10000);
+  await waitForText(player, "At 127.0.0.1:47321", 10000);
   await waitFor(player, "Boolean(window.__kraken && window.__kraken.snapshot().role === 'player')", 5000, "Player handle missing");
 
   await hostWindow.webContents.executeJavaScript(
-    '[...document.querySelectorAll("button.tab")].find((button) => button.textContent === "Party").click()',
+    'document.querySelector("[data-launch=players]").click()',
   );
   await waitFor(hostWindow, 'document.querySelectorAll("[data-player]").length === 2', 5000, "Roster did not list both seats");
   const roles = await hostWindow.webContents.executeJavaScript(
@@ -112,8 +112,9 @@ async function run(hostWindow, createWindow) {
     "Player did not receive chat",
   );
   // A player has no GM tabs: chat is in the dock beside the map.
-  const playerTabs = await player.webContents.executeJavaScript('document.querySelectorAll("button.tab").length');
-  if (playerTabs !== 0) throw new Error(`Player saw ${playerTabs} GM tabs`);
+  // A player's sidebar has no GM launchers (players, open map).
+  const playerLaunchers = await player.webContents.executeJavaScript('[...document.querySelectorAll("[data-launch]")].map((b) => b.dataset.launch).join()');
+  if (playerLaunchers.includes("players") || playerLaunchers.includes("adventure")) throw new Error(`Player saw GM launchers: ${playerLaunchers}`);
   await waitForText(player, "The troll is at the door");
   const playerParty = await bodyText(player);
   if (playerParty.includes(PASSWORD)) throw new Error("Player party showed the table password");

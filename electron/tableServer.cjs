@@ -9,6 +9,7 @@ const { createDice } = require("./dice.cjs");
 const { siege, siegeLibrary, siegeCheck, levelUp } = require("./siege.cjs");
 const { createMapState, playerColor } = require("./mapState.cjs");
 const party = require("./party.cjs");
+const { createCombat } = require("./combat.cjs");
 
 const MAX_CLIENTS = 16;
 
@@ -162,6 +163,7 @@ function savedChat(value) {
       text: text(line.text, "").slice(0, 500),
       at: num(line.at, 0),
       ...(line.roll && typeof line.roll === "object" ? { roll: line.roll } : {}),
+      ...(line.secret ? { secret: true } : {}),
     }))
     .filter((line) => line.text || line.roll);
 }
@@ -227,7 +229,33 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     },
     hasArt: (id) => tokenArt.has(id),
     hasPicture: (id) => Boolean(art && art.has(id)),
+    // An NPC token's health and the active turn come from the tracker.
+    combatFor: (tokenId) => {
+      const entry = combat.entries().find((item) => item.tokenId === tokenId);
+      return entry ? { health: combat.health(entry), active: combat.active() === entry.id } : null;
+    },
+    activeRecord: () => combat.entries().find((item) => item.id === combat.active())?.recordId ?? null,
   });
+
+  // The combat tracker: each seat is sent its own view (combat.cjs viewFor).
+  const combat = createCombat({
+    saved: saved.combat,
+    table: () => agentHandle,
+    onChange: () => {
+      onChange("table");
+      sendCombat();
+      sendMaps();
+    },
+  });
+  let combatPending = false;
+  function sendCombat() {
+    if (combatPending) return;
+    combatPending = true;
+    setImmediate(() => {
+      combatPending = false;
+      for (const [ws, client] of clients) send(ws, { type: "combat", combat: combat.viewFor(seatOf(client)) });
+    });
+  }
 
   // The party sheet summary goes to everyone when the party or a member changes.
   let partyPending = false;
@@ -259,20 +287,27 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     return { role: client.role, name: client.name };
   }
 
+  // A secret line (FG's GM-only message: a hidden creature's turn) reaches the GM only.
   function addChat(entry) {
     chat.push(entry);
     if (chat.length > 100) chat.shift();
-    broadcast({ type: "chat", ...entry });
+    if (entry.secret) {
+      for (const [ws, client] of clients) if (client.role === "dm") send(ws, { type: "chat", ...entry });
+    } else broadcast({ type: "chat", ...entry });
     onChange("table");
     return entry;
   }
 
+  function chatFor(client) {
+    return client.role === "dm" ? chat : chat.filter((line) => !line.secret);
+  }
+
   // label: what the roll is for ("Strength check"). from: who rolled.
   // tag: the asker's own marker (a wizard waiting for its roll), echoed back.
-  function rollDice(formula, label, from, id, tag) {
+  function rollDice(formula, label, from, id, tag, secret = false) {
     const result = dice.roll(formula);
     const roll = { ...result, label: text(label, "").slice(0, 120), ...(tag ? { tag: text(tag, "").slice(0, 80) } : {}) };
-    addChat({ id, from, text: "", roll, at: Date.now() });
+    addChat({ id, from, text: "", roll, at: Date.now(), ...(secret ? { secret: true } : {}) });
     return roll;
   }
 
@@ -288,6 +323,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     // A token's health dot follows its record.
     if (map.tokens().some((token) => token.recordId === record.id)) sendMaps();
     if (record.id === party.PARTY_ID || record.type === "character") sendParty();
+    if (combat.entries().some((entry) => entry.recordId === record.id)) sendCombat();
   });
 
   const server = http.createServer((req, res) => {
@@ -452,7 +488,8 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
           you: { id: client.id, name: client.name, role: client.role, assetToken: client.assetToken },
           players: playerList(),
           map: map.viewFor(seatOf(client), client.assetToken),
-          chat,
+          combat: combat.viewFor(seatOf(client)),
+          chat: chatFor(client),
           records: records.list({ seat: seatOf(client) }),
           scene: client.role === "player" ? sceneFor(client) : null,
         });
@@ -473,7 +510,11 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
 
       if (msg.type === "roll") {
         try {
-          rollDice(msg.formula, msg.label, client.name, client.id, msg.tag);
+          // The dice tower: the roll goes to the GM only; the table hears that it happened.
+          if (msg.tower) {
+            rollDice(msg.formula, msg.label, client.name, client.id, msg.tag, true);
+            if (client.role !== "dm") addChat({ id: client.id, from: client.name, text: "rolls in the dice tower.", at: Date.now() });
+          } else rollDice(msg.formula, msg.label, client.name, client.id, msg.tag);
         } catch (error) {
           send(ws, { type: "error", reason: error instanceof Error ? error.message : "Could not roll that." });
         }
@@ -584,6 +625,52 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         return;
       }
 
+      // The combat tracker. Players may roll their own initiative and end their own turn.
+      if (msg.type === "ct") {
+        const seat = seatOf(client);
+        const run = async () => {
+          switch (msg.action) {
+            case "add":
+              if (msg.place && msg.recordId) {
+                const added = await combat.add({ recordId: msg.recordId, count: msg.count, hidden: msg.hidden }, seat);
+                for (const entry of Array.isArray(added) ? added : [added]) {
+                  if (entry.tokenId || !map.scene()) continue;
+                  const token = map.place({ recordId: msg.recordId, name: entry.name, hidden: entry.hidden, faction: entry.faction }, seat);
+                  combat.update(entry.id, { tokenId: token.id }, seat);
+                }
+              } else await combat.add(msg.entry ?? { recordId: msg.recordId, count: msg.count, tokenId: msg.tokenId, name: msg.name, faction: msg.faction }, seat);
+              return;
+            case "add-party":
+              for (const record of (await party.partyView(agentHandle)).members) await combat.add({ recordId: record.id }, seat);
+              return;
+            case "update":
+              return combat.update(String(msg.id), msg.patch ?? {}, seat);
+            case "remove":
+              return combat.remove(String(msg.id), seat);
+            case "init":
+              return combat.rollInit(String(msg.which ?? ""), seat);
+            case "next":
+              return combat.next(seat);
+            case "round":
+              return combat.nextRound(seat);
+            case "end":
+              return combat.end(seat, { removeNpcs: Boolean(msg.removeNpcs) });
+            case "effect":
+              return combat.addEffect(String(msg.id), msg.effect ?? {}, seat);
+            case "effect-remove":
+              return combat.removeEffect(String(msg.id), String(msg.effectId), seat);
+            case "damage":
+              return combat.damage(String(msg.id), msg.amount, seat);
+            case "heal":
+              return combat.heal(String(msg.id), msg.amount, seat);
+            default:
+              throw new Error("Unknown tracker action.");
+          }
+        };
+        run().catch((error) => send(ws, { type: "error", reason: error instanceof Error ? error.message : "Could not do that." }));
+        return;
+      }
+
       // The party sheet's actions (the GM's): award XP, hand out the parcel,
       // group checks and saves.
       if (["party-award-xp", "party-award", "party-distribute", "party-group"].includes(msg.type)) {
@@ -637,12 +724,14 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     seat: { role: "dm", name: "Agent" },
     records,
     dice,
-    roll: (formula, label, from = "Agent") => rollDice(formula, label, from, "agent"),
-    say: (line, from = "Agent") => addChat({ id: "agent", from: text(from, "Agent").slice(0, 24), text: text(line, "").slice(0, 500), at: Date.now() }),
+    roll: (formula, label, from = "Agent", secret = false) => rollDice(formula, label, from, "agent", undefined, secret),
+    say: (line, from = "Agent", secret = false) =>
+      addChat({ id: "agent", from: text(from, "Agent").slice(0, 24), text: text(line, "").slice(0, 500), at: Date.now(), ...(secret ? { secret: true } : {}) }),
     chatLog: (count = 20) => chat.slice(-Math.max(1, Math.min(100, Number(count) || 20))),
     players: () => playerList(),
     scene: () => scene,
     map,
+    combat,
     viewFor: (name) => map.viewFor({ role: "player", name }, ""),
   };
 
@@ -654,7 +743,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     listen({ port, password: nextPassword }) {
       password = String(nextPassword ?? "").trim();
       hostToken = crypto.randomBytes(24).toString("hex");
-      return map.ready.then(() => new Promise((resolve, reject) => {
+      return Promise.all([map.ready, combat.ready]).then(() => new Promise((resolve, reject) => {
         const onError = (error) => reject(error);
         server.once("error", onError);
         server.listen(port, "0.0.0.0", () => {
@@ -691,6 +780,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       return {
         chat: chat.slice(),
         map: map.persisted(),
+        combat: combat.persisted(),
         records: records.toJSON(),
         dice: dice.toJSON(),
       };
