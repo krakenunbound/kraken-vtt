@@ -224,13 +224,18 @@ Each step is tested before the next one starts. Where FG or Foundry does the sam
 | Portraits and tokens | Done | The GM's FG portraits/ and tokens/ folders (and each campaign's) served to the table; the sheet's portrait frame picks one; tokens show it |
 | 3 Party sheet | Done | `party`: CoreRPG's XP split (last member gets the remainder), quests and encounters awarded once, coin and item distribution, SiegeCore's group check and save; players read only. (FG's PartyXPManager is not reachable through the bridge, so the split is tested against its source, not live.) |
 | 5 Still to do | Later | Multi-select and group moves, facing, light animation (flicker), bright lights spoiling darkvision, an FG player client side by side with Kraken's player view |
-| 4, 6 | Not started | Combat tracker next |
+| 4 Combat tracker | Done | `combat`: SiegeCore's initiative (d10 + attribute + bonus), FG's order, turns and rounds with "[TURN]" / "[ROUND n]", hidden entries GM-only, effect durations at their initiative, NPC hit dice and "Orc 1/Orc 2" numbering, damage and healing with the heal cap, no healing the dead, stabilising, bleeding, unconscious enemies skipped; players roll their own initiative and end their own turn |
+| Interface | Done (first pass) | FG-style desktop: menu bar with portraits, map or emblem, sidebar launchers, floating windows (Characters, sheets, Party, Combat, Players), chat with dice tray, modifier box and dice tower; redesigned sheet and join screen. Chrome passes as GM and player |
+| 4 Still to do | Next | Attacks against targets with automatic damage, targeting on the map, NPC pictures from modules, saving throws by C&C's rules on the tracker |
+| 6 | Not started | In-app DM assistant |
 
 Where things are:
 - `electron/records.cjs`, `dice.cjs`, `tableServer.cjs`, `mapState.cjs` (tokens, doors, what each player sees)
 - `shared/map/geometry.mjs`: grid snapping, distance, wall collision, line of sight (Foundry's rules), light, senses, token health colours
 - `electron/artLibrary.cjs` (portraits and tokens), `electron/party.cjs` and `shared/party/party.mjs` (party sheet)
 - `src/table/Lighting.tsx`, `Weather.tsx` (three.js), `SceneSettings.tsx`; `src/party/PartySheet.tsx`
+- `electron/combat.cjs` (tracker) and `src/combat/CombatTracker.tsx`
+- `src/ui/`: `Desktop.tsx` (the table's layout), `Windows.tsx` (floating windows), `ChatDock.tsx` (chat and dice), `icons.tsx`, `Emblem.tsx`
 - `electron/agent/`: `tools.cjs`, `mcpServer.cjs`, `mcp-stdio.cjs`. `.mcp.json` registers it for Claude Code.
 - `electron/importers/fgModule.cjs`
 - `shared/siege/engine.mjs` (rules) and `builder.mjs` (characters)
