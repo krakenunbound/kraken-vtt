@@ -107,6 +107,12 @@ try {
   // The agent reads and sets the option too, and it is saved with the campaign.
   const tool = JSON.parse((await callTool("kraken_table_options", { towerReveal: false }, { table: () => server })).content[0].text);
   assert(tool.towerReveal === false && server.persisted().options.towerReveal === false, "agent tool and saved campaign");
+  // The agent's secret roll is the GM's alone.
+  const quiet = { gm: gm.lines.length, bob: bobAgain.lines.length };
+  await callTool("kraken_roll", { formula: "1d20", label: "Wandering monster", secret: true }, { table: () => server });
+  await settle();
+  assert(gm.lines.slice(quiet.gm).some((line) => line.secret && line.roll?.label === "Wandering monster"), "the GM sees the agent's secret roll");
+  assert(bobAgain.lines.length === quiet.bob, "a player does not");
   for (const seat of [gm, bob, again, bobAgain]) seat.ws.close();
   console.log("DICE_OK");
 } finally {

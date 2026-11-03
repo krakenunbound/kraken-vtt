@@ -1,10 +1,11 @@
-import { lazy, Suspense, useSyncExternalStore, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, useRef, useSyncExternalStore, type ReactNode } from "react";
 import { Picture } from "../characters/ArtPicker";
 import { CharacterPanel } from "../characters/CharacterPanel";
 import { CombatTracker } from "../combat/CombatTracker";
 import { PartySheet } from "../party/PartySheet";
 import type { Session } from "../session/useSession";
 import { diceStore } from "../dice/diceStore";
+import { agentCommands } from "./agentCommands";
 import { ChatDock } from "./ChatDock";
 import { Emblem, Mark } from "./Emblem";
 import { Icon } from "./icons";
@@ -95,6 +96,38 @@ export function Desktop({
         { kind: "combat", label: "Combat", icon: "combat", title: "Combat Tracker" },
       ];
   const dice = useSyncExternalStore(diceStore.subscribe, diceStore.settings);
+
+  // The agent opens, closes, pops out and docks windows as the GM's clicks do.
+  const live = useRef({ windows, launchers, characters });
+  live.current = { windows, launchers, characters };
+  useEffect(
+    () =>
+      agentCommands.register("windows", (command) => {
+        if (command.kind !== "windows") return null;
+        const { windows: manager, launchers: kinds, characters: sheets } = live.current;
+        const list = () => manager.windows.map((item) => ({ key: item.key, kind: item.kind, title: item.title, poppedOut: item.popped }));
+        if (command.action === "list") return { open: list(), kinds: [...kinds.map((item) => item.kind), "sheet"] };
+        let key: string = command.window ?? "";
+        if (command.window === "sheet") {
+          const wanted = String(command.record ?? "").toLowerCase();
+          const record = sheets.find((item) => item.id === command.record || item.name.toLowerCase() === wanted);
+          if (!record) throw new Error(`No character "${command.record ?? ""}".`);
+          if (command.action === "open") manager.open("sheet", record.name, record.id);
+          key = `sheet:${record.id}`;
+        } else {
+          const launcher = kinds.find((item) => item.kind === command.window);
+          if (!launcher) throw new Error(`No window "${command.window ?? ""}". Kinds: ${kinds.map((item) => item.kind).join(", ")}, sheet.`);
+          if (command.action === "open") manager.open(launcher.kind, launcher.title);
+        }
+        if (command.action === "open") return { opened: key };
+        if (!manager.windows.some((item) => item.key === key)) throw new Error(`${key} is not open.`);
+        if (command.action === "close") manager.close(key);
+        if (command.action === "dock") manager.dockBack(key);
+        if (command.action === "popout" && !manager.popOut(key)) throw new Error("The window could not pop out.");
+        return { [command.action]: key };
+      }),
+    [],
+  );
   const myTurn = session.combat.entries.some((entry) => entry.mine && entry.id === session.combat.active);
 
   return (

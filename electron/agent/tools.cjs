@@ -247,9 +247,9 @@ const TOOLS = [
   },
   {
     name: "kraken_roll",
-    description: "Roll dice in front of the table (the result goes to chat). Formulas: 1d20+3, 3d6, 4d6dl1 (drop lowest), 2d20kh1 (keep highest), d%.",
-    inputSchema: object({ formula: string("Dice formula"), label: string("What the roll is for"), as: string("Name shown in chat, default Agent") }, ["formula"]),
-    run: (args, ctx) => out(needTable(ctx).roll(args.formula, args.label, args.as || "Agent")),
+    description: "Roll dice in front of the table (the result goes to chat), or for the GM's eyes only (secret, as the GM's dice tower). Formulas: 1d20+3, 3d6, 4d6dl1 (drop lowest), 2d20kh1 (keep highest), d%.",
+    inputSchema: object({ formula: string("Dice formula"), label: string("What the roll is for"), as: string("Name shown in chat, default Agent"), secret: { type: "boolean", description: "Only the GM sees it" } }, ["formula"]),
+    run: (args, ctx) => out(needTable(ctx).roll(args.formula, args.label, args.as || "Agent", args.secret === true)),
   },
   {
     name: "kraken_dice_force",
@@ -587,6 +587,69 @@ const TOOLS = [
         ...(view ? { player: args.player, sees: view.tokens.map((token) => token.name), doors: view.doors.map((door) => door.id), limited: Boolean(view.vision) } : {}),
       });
     },
+  },
+  {
+    name: "kraken_ping",
+    description: "Ping a square on the map, as the GM clicking to point something out: everyone at the table sees it flash there.",
+    inputSchema: object({ col: number("Square across, from the left"), row: number("Square down, from the top") }, ["col", "row"]),
+    run(args, ctx) {
+      const at = needTable(ctx).ping(Number(args.col), Number(args.row));
+      return out({ pinged: { col: args.col, row: args.row }, x: at.x, y: at.y });
+    },
+  },
+  {
+    name: "kraken_open_adventure",
+    description: "Open a Foundry adventure bundle (a .zip on this computer) on the table, as the GM's Open map button. It is saved with the campaign; kraken_scenes lists and switches its scenes.",
+    inputSchema: object({ path: string("Full path of the .zip") }, ["path"]),
+    async run(args, ctx) {
+      needTable(ctx);
+      const fs = require("fs");
+      const file = String(args.path ?? "");
+      if (!/\.zip$/i.test(file) || !fs.existsSync(file)) throw new Error("No .zip at that path.");
+      return out(await ctx.ui({ kind: "open-adventure", name: require("path").basename(file), bytes: new Uint8Array(fs.readFileSync(file)) }, 60000));
+    },
+  },
+  {
+    name: "kraken_scenes",
+    description: "The adventures and scenes the GM has open, and which is on the table. Give adventure and/or scene (name or id) to put another on the table for everyone.",
+    inputSchema: object({ adventure: string("Adventure name"), scene: string("Scene name or id") }),
+    run: async (args, ctx) => out(await ctx.ui({ kind: "scenes", adventure: args.adventure, scene: args.scene })),
+  },
+  {
+    name: "kraken_art",
+    description:
+      "The GM's art library (portraits and tokens found in the FG data folder), as the art pickers show it. Filter by kind and part of the name or group. A character's picture is its record's data.portrait (an id from here; kraken_record_update), a token's its data.token.",
+    inputSchema: object({ kind: { type: "string", enum: ["portrait", "token"] }, search: string("Part of the name or group"), limit: number("At most this many, default 50") }),
+    run(args, ctx) {
+      const wanted = String(args.search ?? "").toLowerCase();
+      const found = needTable(ctx).art(args.kind).filter((item) => !wanted || `${item.group} ${item.name}`.toLowerCase().includes(wanted));
+      return out({ total: found.length, art: found.slice(0, Math.max(1, Math.min(500, Number(args.limit) || 50))) });
+    },
+  },
+  {
+    name: "kraken_windows",
+    description:
+      "The GM's windows: list them, or open, close, pop out (to a window of its own, for another monitor) or dock back a window. Kinds: characters, party, combat, players, sheet (a character's sheet: give record, its id or name).",
+    inputSchema: object({
+      action: { type: "string", enum: ["list", "open", "close", "popout", "dock"] },
+      kind: { type: "string", enum: ["characters", "party", "combat", "players", "sheet"] },
+      record: string("For a sheet: the character's record id or name"),
+    }),
+    run: async (args, ctx) => out(await ctx.ui({ kind: "windows", action: args.action ?? "list", window: args.kind, record: args.record })),
+  },
+  {
+    name: "kraken_dice_settings",
+    description:
+      "The GM's own 3D dice settings: show the dice rolling on the table, sound and volume (0..1), and the dice look (preset: Classic Ruby, Dragonhide, Starfall, Ancient Bone, Magma Vein, Leviathan; or body and ink colours as #rrggbb). Without arguments, reads them. Who sees a dice-tower result is kraken_table_options.",
+    inputSchema: object({
+      show: { type: "boolean" },
+      sound: { type: "boolean" },
+      volume: number("0 to 1"),
+      preset: string("Preset name"),
+      body: string("Dice colour, #rrggbb"),
+      ink: string("Numbers colour, #rrggbb"),
+    }),
+    run: async (args, ctx) => out(await ctx.ui({ kind: "dice-settings", patch: args })),
   },
   {
     name: "kraken_ui_screenshot",

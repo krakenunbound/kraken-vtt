@@ -45,7 +45,11 @@ export type KrakenApi = {
 
 export type KrakenAgentCommand =
   | { kind: "host"; campaignId: string; port: number; password: string }
-  | { kind: "leave" };
+  | { kind: "leave" }
+  | { kind: "open-adventure"; name: string; bytes: Uint8Array }
+  | { kind: "scenes"; adventure?: string; scene?: string }
+  | { kind: "windows"; action: "list" | "open" | "close" | "popout" | "dock"; window?: string; record?: string }
+  | { kind: "dice-settings"; patch: { show?: boolean; sound?: boolean; volume?: number; preset?: string; body?: string; ink?: string } };
 
 export type KrakenView = { adventure: string; sceneId: string };
 

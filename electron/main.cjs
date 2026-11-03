@@ -258,7 +258,7 @@ const agentContext = {
     list: () => campaigns.read(campaignFile()),
     create: (input) => campaigns.create(campaignFile(), input),
   },
-  ui: (command) => askWindow(command),
+  ui: (command, timeout) => askWindow(command, timeout),
   window: () => (mainWindow && !mainWindow.isDestroyed() ? mainWindow : null),
 };
 

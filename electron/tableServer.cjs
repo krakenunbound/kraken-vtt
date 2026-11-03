@@ -858,6 +858,15 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     map,
     combat,
     viewFor: (name) => map.viewFor({ role: "player", name }, ""),
+    // The GM's portraits and tokens (artLibrary.cjs), as the pickers show them.
+    art: (kind) => (art ? art.list(kind) : []),
+    // A ping on the map at a square, as a GM's click would make.
+    ping(col, row, from = "Agent") {
+      if (!scene) throw new Error("No scene is on the table.");
+      const at = map.squareCenter(col, row, 1);
+      broadcast({ type: "ping", x: at.x, y: at.y, from: text(from, "Agent").slice(0, 24), color: "#f4f1ea" });
+      return at;
+    },
   };
 
   function playerColorOf(client) {
