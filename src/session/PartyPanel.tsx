@@ -69,17 +69,17 @@ export function PartyPanel({ session }: { session: Session }) {
                 Password <span className="secret">{session.hostInfo.password}</span>
               </p>
             )}
-            <p className="hint">Walls, doors, and traps stay on your table. Players see the map, lights, and pawns.</p>
+            <p className="hint">Walls, doors, and traps stay on your table. Players see the map, lights, and the tokens their characters can see.</p>
           </div>
         ) : (
           <p className="hint">Connected to {session.remoteLabel}.</p>
         )}
         <ul className="roster-list">
           {session.players.map((seat) => {
-            const pawn = session.pawns.find((item) => item.id === seat.id);
+            const token = session.map.tokens.find((item) => item.owner === seat.name);
             return (
               <li key={seat.id} data-player={seat.id} data-role={seat.role}>
-                <span className="seat-dot" style={{ background: pawn?.color ?? "#888" }} />
+                <span className="seat-dot" style={{ background: token?.color ?? "#888" }} />
                 <span>{seat.name}</span>
                 <span className="seat-role">{seat.role === "dm" ? "DM" : "Player"}</span>
               </li>

@@ -2,7 +2,27 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { MapScene } from "../table/MapView";
 
 export type Seat = { id: string; name: string; role: "dm" | "player" };
-export type Pawn = { id: string; name: string; color: string; x: number; y: number };
+// The map as the host shows it to this seat (electron/mapState.cjs viewFor).
+export type TokenHealth = { status: string; percent: number; color: string };
+export type MapToken = {
+  id: string;
+  recordId: string | null;
+  name: string;
+  x: number;
+  y: number;
+  squares: number;
+  owner: string;
+  faction: "friend" | "neutral" | "foe" | "none";
+  color: string;
+  hidden: boolean;
+  mine: boolean;
+  health: TokenHealth | null;
+  art?: string;
+};
+export type MapDoor = { id: string; x1: number; y1: number; x2: number; y2: number; state: number; secret?: boolean };
+export type TableMap = { sceneId: string | null; tokens: MapToken[]; doors: MapDoor[]; vision: number[][] | null; sight: boolean; locked: boolean };
+export type Ping = { id: number; x: number; y: number; from: string; color: string };
+const EMPTY_MAP: TableMap = { sceneId: null, tokens: [], doors: [], vision: null, sight: false, locked: false };
 export type RollTerm =
   | { kind: "number"; sign: number; value: number }
   | { kind: "dice"; sign: number; count: number; sides: number; rolls: number[]; kept: boolean[]; sum: number };
@@ -48,16 +68,6 @@ type NetScene = {
   anchorY?: number;
   fit?: MapScene["fit"];
   lights: MapScene["lights"];
-  tokens: {
-    id: string;
-    name: string;
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-    disposition: number;
-    hidden: boolean;
-  }[];
   image: string | null;
 };
 
@@ -98,7 +108,7 @@ function toPlayerScene(payload: NetScene, origin: string): MapScene {
     lights: payload.lights ?? [],
     markers: [],
     regions: [],
-    tokens: (payload.tokens ?? []).map((token) => ({ ...token, image: null, imageName: null, imageUrl: null })),
+    tokens: [],
   };
 }
 
@@ -120,7 +130,9 @@ export function useSession() {
   const [hostInfo, setHostInfo] = useState<HostInfo | null>(null);
   const [remoteLabel, setRemoteLabel] = useState("");
   const [players, setPlayers] = useState<Seat[]>([]);
-  const [pawns, setPawns] = useState<Pawn[]>([]);
+  const [map, setMap] = useState<TableMap>(EMPTY_MAP);
+  const [pings, setPings] = useState<Ping[]>([]);
+  const [notice, setNotice] = useState<string | null>(null);
   const [chat, setChat] = useState<ChatLine[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [playerScene, setPlayerScene] = useState<MapScene | null>(null);
@@ -131,23 +143,22 @@ export function useSession() {
   const generation = useRef(0);
   const roleRef = useRef(role);
   const playersRef = useRef(players);
-  const dragRef = useRef<string | null>(null);
-  const seqs = useRef<Record<string, number>>({});
+  const pingCounter = useRef(0);
   const originRef = useRef("");
   const intentional = useRef(false);
-  const stateRef = useRef({ role, selfId, players, pawns, chat, playerScene, records });
+  const stateRef = useRef({ role, selfId, players, map, chat, playerScene, records });
   roleRef.current = role;
   playersRef.current = players;
-  stateRef.current = { role, selfId, players, pawns, chat, playerScene, records };
+  stateRef.current = { role, selfId, players, map, chat, playerScene, records };
 
-  const applyPawns = useCallback((list: Pawn[]) => {
-    setPawns((current) =>
-      list.map((pawn) => {
-        if (pawn.id !== dragRef.current) return pawn;
-        const local = current.find((item) => item.id === pawn.id);
-        return local ? { ...pawn, x: local.x, y: local.y } : pawn;
-      }),
-    );
+  const applyMap = useCallback((next: TableMap | undefined) => {
+    if (!next || typeof next !== "object") {
+      setMap(EMPTY_MAP);
+      return;
+    }
+    // Token pictures are served by the host, under this seat's asset token.
+    const tokens = (next.tokens ?? []).map((token) => (token.art && token.art.startsWith("/") ? { ...token, art: `${originRef.current}${token.art}` } : token));
+    setMap({ ...EMPTY_MAP, ...next, tokens });
   }, []);
 
   const reset = useCallback(() => {
@@ -156,7 +167,8 @@ export function useSession() {
     setRole(null);
     setSelfId(null);
     setPlayers([]);
-    setPawns([]);
+    setMap(EMPTY_MAP);
+    setPings([]);
     setChat([]);
     setPlayerScene(null);
     setRecords({});
@@ -165,7 +177,6 @@ export function useSession() {
     setHostInfo(null);
     setRemoteLabel("");
     roleRef.current = null;
-    dragRef.current = null;
   }, []);
 
   const connect = useCallback(
@@ -213,7 +224,7 @@ export function useSession() {
             setRole(you.role);
             setSelfId(you.id);
             setPlayers((msg.players as Seat[]) ?? []);
-            applyPawns((msg.pawns as Pawn[]) ?? []);
+            applyMap(msg.map as TableMap);
             setChat((msg.chat as ChatLine[]) ?? []);
             setRecords(Object.fromEntries(((msg.records as TableRecord[]) ?? []).map((record) => [record.id, record])));
             setRemoteLabel(label);
@@ -224,7 +235,17 @@ export function useSession() {
             return;
           }
           if (msg.type === "players") setPlayers((msg.players as Seat[]) ?? []);
-          if (msg.type === "pawns") applyPawns((msg.pawns as Pawn[]) ?? []);
+          if (msg.type === "map") applyMap(msg as unknown as TableMap);
+          if (msg.type === "ping") {
+            const ping = { id: ++pingCounter.current, x: Number(msg.x), y: Number(msg.y), from: String(msg.from ?? ""), color: String(msg.color ?? "#fff") };
+            setPings((current) => [...current, ping].slice(-12));
+            window.setTimeout(() => setPings((current) => current.filter((item) => item.id !== ping.id)), 2600);
+          }
+          if (msg.type === "notice" && typeof msg.text === "string") {
+            const text = msg.text;
+            setNotice(text);
+            window.setTimeout(() => setNotice((current) => (current === text ? null : current)), 2500);
+          }
           if (msg.type === "chat") {
             const line = msg as unknown as ChatLine;
             setChat((current) => [...current, line].slice(-100));
@@ -268,7 +289,7 @@ export function useSession() {
         };
       });
     },
-    [applyPawns, reset],
+    [applyMap, reset],
   );
 
   const leave = useCallback((force = false) => {
@@ -378,18 +399,27 @@ export function useSession() {
     } catch (caught) {
       throw new Error(plainError(caught, "Could not share the map image."));
     }
-    const tokens = scene.tokens
-      .filter((token) => !token.hidden && token.disposition !== -2)
-      .map((token) => ({
-        id: token.id,
-        name: token.name,
-        x: token.x,
-        y: token.y,
-        width: token.width,
-        height: token.height,
-        disposition: token.disposition,
-        hidden: false,
-      }));
+    const tokens = scene.tokens.map((token) => ({
+      id: token.id,
+      name: token.name,
+      x: token.x,
+      y: token.y,
+      width: token.width,
+      height: token.height,
+      disposition: token.disposition,
+      hidden: token.hidden,
+    }));
+    try {
+      const art: { id: string; bytes: ArrayBuffer; mime: string }[] = [];
+      for (const token of scene.tokens) {
+        if (!token.imageUrl) continue;
+        const response = await fetch(token.imageUrl);
+        if (response.ok) art.push({ id: token.id, bytes: await response.arrayBuffer(), mime: response.headers.get("content-type")?.split(";")[0] || "image/png" });
+      }
+      await window.kraken.setTokenArt(art);
+    } catch {
+      /* Token pictures are optional: players then see initials. */
+    }
     socket.send(
       JSON.stringify({
         type: "scene",
@@ -410,6 +440,7 @@ export function useSession() {
           fit: scene.fit,
           lights: scene.lights,
           tokens,
+          walls: scene.walls,
         },
       }),
     );
@@ -467,34 +498,43 @@ export function useSession() {
     socket.send(JSON.stringify({ type: "chat", text: line.slice(0, 500) }));
   }, []);
 
-  const movePawn = useCallback((id: string, x: number, y: number, done: boolean) => {
-    if (roleRef.current !== "dm" && id !== stateRef.current.selfId) return;
-    if (!Number.isFinite(x) || !Number.isFinite(y)) return;
-    dragRef.current = done ? null : id;
-    setPawns((current) => current.map((pawn) => (pawn.id === id ? { ...pawn, x, y } : pawn)));
+  const send = useCallback((message: Record<string, unknown>) => {
     const socket = socketRef.current;
-    if (!socket || socket.readyState !== WebSocket.OPEN) return;
-    const seq = (seqs.current[id] ?? 0) + 1;
-    seqs.current[id] = seq;
-    const now = Date.now();
-    const last = seqs.current[`${id}:t`] ?? 0;
-    if (!done && now - last < 70) return;
-    seqs.current[`${id}:t`] = now;
-    socket.send(JSON.stringify({ type: "pawn", id, x, y, seq, done }));
+    if (!socket || socket.readyState !== WebSocket.OPEN) return false;
+    socket.send(JSON.stringify(message));
+    return true;
   }, []);
+
+  // Map actions. The host decides (walls, ownership) and sends everyone their view.
+  const placeToken = useCallback((recordId: string | null, x?: number, y?: number, name?: string) => {
+    send({ type: "token-place", recordId, x, y, name });
+  }, [send]);
+  const moveToken = useCallback((id: string, x: number, y: number, snap = true) => {
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+    setMap((current) => ({ ...current, tokens: current.tokens.map((token) => (token.id === id ? { ...token, x, y } : token)) }));
+    send({ type: "token-move", id, x, y, snap });
+  }, [send]);
+  const removeToken = useCallback((id: string) => send({ type: "token-remove", id }), [send]);
+  const updateToken = useCallback((id: string, patch: Partial<Pick<MapToken, "name" | "hidden" | "squares" | "faction" | "owner">>) => send({ type: "token-update", id, patch }), [send]);
+  const setDoor = useCallback((id: string, state?: number) => send({ type: "door", id, state }), [send]);
+  const setSight = useCallback((on: boolean) => send({ type: "sight", on }), [send]);
+  const setLocked = useCallback((on: boolean) => send({ type: "lock", on }), [send]);
+  const ping = useCallback((x: number, y: number) => send({ type: "ping", x, y }), [send]);
 
   useEffect(() => {
     window.__kraken = {
       publish,
       sendChat,
-      movePawn,
+      moveToken,
+      placeToken,
+      setDoor,
       roll,
       op,
       snapshot: () => ({
         role: stateRef.current.role,
         selfId: stateRef.current.selfId,
         players: stateRef.current.players,
-        pawns: stateRef.current.pawns,
+        map: stateRef.current.map,
         chat: stateRef.current.chat,
         sceneName: stateRef.current.playerScene?.name ?? null,
         records: Object.values(stateRef.current.records),
@@ -503,7 +543,7 @@ export function useSession() {
     return () => {
       delete window.__kraken;
     };
-  }, [publish, sendChat, movePawn, roll, op]);
+  }, [publish, sendChat, moveToken, placeToken, setDoor, roll, op]);
 
   return {
     connected,
@@ -514,7 +554,9 @@ export function useSession() {
     hostInfo,
     remoteLabel,
     players,
-    pawns,
+    map,
+    pings,
+    notice,
     chat,
     records,
     error,
@@ -524,7 +566,14 @@ export function useSession() {
     leave,
     publish,
     sendChat,
-    movePawn,
+    placeToken,
+    moveToken,
+    removeToken,
+    updateToken,
+    setDoor,
+    setSight,
+    setLocked,
+    ping,
     roll,
     op,
     siegeCheck,

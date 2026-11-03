@@ -217,10 +217,13 @@ Each step is tested before the next one starts. Where FG or Foundry does the sam
 | Players in a browser | Done | The host serves the web client; `agent` checks it; manual Chrome pass as a player (join, map, own sheet only, check, chat) |
 | 2 Level up (single class) | Done | `character`: host-rolled HP, BtH, hit dice and next XP from the package rows, [LEVEL UP] in chat, sheet button |
 | 2 Multi-class, enhanced, class plus; dual class and reclass | Next | Port from `KrakenCharWizardCC` (CCClassRules, CCCombine, CCLevelUp) |
-| 3–6 | Not started | |
+| 5 Tokens and line of sight (first pass, ahead of 3–4) | Done | `map`: snapping, distance, walls stop players, doors (open, locked, secret), per-player line of sight, hidden tokens, movement lock, agent map tools, save/reopen. `session` and E2E: a player places and moves their own character's token. Chrome passes on Cragmaw Hideout and Cragmaw Castle |
+| 5 Still to do | Next after 3–4 | Light and vision ranges (darkvision, torches; today sight is unlimited), multi-select and group moves, character portraits as token art, facing, side-by-side check against Foundry's visible area |
+| 3–4, 6 | Not started | |
 
 Where things are:
-- `electron/records.cjs`, `dice.cjs`, `tableServer.cjs`
+- `electron/records.cjs`, `dice.cjs`, `tableServer.cjs`, `mapState.cjs` (tokens, doors, what each player sees)
+- `shared/map/geometry.mjs`: grid snapping, distance, wall collision, line of sight, token health colours
 - `electron/agent/`: `tools.cjs`, `mcpServer.cjs`, `mcp-stdio.cjs`. `.mcp.json` registers it for Claude Code.
 - `electron/importers/fgModule.cjs`
 - `shared/siege/engine.mjs` (rules) and `builder.mjs` (characters)

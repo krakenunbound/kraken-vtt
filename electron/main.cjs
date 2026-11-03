@@ -70,7 +70,7 @@ async function networkSnapshot() {
 let table = null;
 let quitting = false;
 
-// The campaign being hosted. Its table (view, chat, pawn spots) is saved to disk
+// The campaign being hosted. Its table (view, chat, tokens and doors) is saved to disk
 // when something changes (after a short pause), every 30 seconds while dirty,
 // when the DM leaves, and when the app quits.
 const SAVE_EVERY_MS = 30000;
@@ -195,6 +195,13 @@ ipcMain.handle("save-view", (_event, id, view) => {
   const sceneId = typeof view?.sceneId === "string" ? view.sceneId.slice(0, 80) : "";
   current.state.view = adventure ? { adventure, sceneId } : null;
   markDirty();
+});
+
+ipcMain.handle("set-token-art", (_event, list) => {
+  if (!table) throw new Error("Not hosting.");
+  table.setTokenArt(
+    (Array.isArray(list) ? list : []).map((item) => ({ id: item?.id, mime: item?.mime, bytes: item?.bytes ? Buffer.from(item.bytes) : null })),
+  );
 });
 
 ipcMain.handle("set-scene-image", (_event, bytes, mime) => {

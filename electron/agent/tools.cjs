@@ -279,11 +279,114 @@ const TOOLS = [
   },
   {
     name: "kraken_players",
-    description: "Who is connected: id, name, role (dm or player), and where each pawn stands.",
+    description: "Who is connected: id, name, role (dm or player).",
     inputSchema: object({}),
     run(_args, ctx) {
+      return out({ players: needTable(ctx).players() });
+    },
+  },
+  {
+    name: "kraken_map",
+    description:
+      "The scene on the table: its grid, whether line of sight is on, every token (id, name, square col/row, size in squares, owner, faction, hidden, health) and every door (id, state 0 closed / 1 open / 2 locked, secret). Squares count from the top-left of the map, col across and row down.",
+    inputSchema: object({}),
+    run(_args, ctx) {
+      const { map } = needTable(ctx);
+      const scene = map.scene();
+      if (!scene) return out({ scene: null });
+      const view = map.viewFor({ role: "dm", name: "Agent" }, "");
+      return out({
+        scene: { id: scene.id, name: scene.name, grid: scene.grid, cols: Math.round(scene.width / scene.grid.size), rows: Math.round(scene.height / scene.grid.size) },
+        sight: view.sight,
+        tokens: view.tokens.map((token) => ({ ...token, ...map.squareOf(token), color: undefined, mine: undefined })),
+        doors: view.doors.map(({ id, state, secret }) => ({ id, state, secret })),
+      });
+    },
+  },
+  {
+    name: "kraken_token_place",
+    description:
+      "Put a token on the scene: a character or NPC record (recordId), or a plain token by name. A character gets one token per scene (placing it again returns the one there). col/row is its top-left square; without them it goes near the middle, on the nearest free square.",
+    inputSchema: object({
+      recordId: string("Record id (character or npc)"),
+      name: string("Name, for a token with no record"),
+      col: number("Square across, from 0"),
+      row: number("Square down, from 0"),
+      squares: number("Size in squares (default from the record's space, else 1)"),
+      faction: { type: "string", enum: ["friend", "neutral", "foe", "none"] },
+      hidden: { type: "boolean", description: "Hidden from players" },
+    }),
+    run(args, ctx) {
       const agent = needTable(ctx);
-      return out({ players: agent.players(), pawns: agent.pawns() });
+      const token = agent.map.place(args, agent.seat);
+      return out({ ...token, ...agent.map.squareOf(token) });
+    },
+  },
+  {
+    name: "kraken_token_move",
+    description:
+      "Move a token to a square (col/row, its top-left square). asPlayer: move it the way its owner would, stopped by walls and closed doors when line of sight is on; the answer says whether a wall stopped it.",
+    inputSchema: object({ id: string("Token id"), col: number("Square across"), row: number("Square down"), asPlayer: { type: "boolean" } }, ["id", "col", "row"]),
+    run(args, ctx) {
+      const { map, seat } = needTable(ctx);
+      const token = map.tokens().find((item) => item.id === args.id);
+      if (!token) throw new Error(`No token ${args.id}.`);
+      const to = map.squareCenter(args.col, args.row, token.squares);
+      const moved = map.move(args.id, to, seat, { collide: args.asPlayer ? map.sightOn() : false });
+      return out({ id: moved.token.id, ...map.squareOf(moved.token), blocked: moved.blocked });
+    },
+  },
+  {
+    name: "kraken_token_update",
+    description: "Change a token: name, hidden from players, size in squares, faction, owner (player name).",
+    inputSchema: object({
+      id: string("Token id"),
+      name: string("Name"),
+      hidden: { type: "boolean" },
+      squares: number("Size in squares"),
+      faction: { type: "string", enum: ["friend", "neutral", "foe", "none"] },
+      owner: string("Player who may move it"),
+    }, ["id"]),
+    run(args, ctx) {
+      const { map, seat } = needTable(ctx);
+      const { id, ...patch } = args;
+      return out(map.update(id, patch, seat));
+    },
+  },
+  {
+    name: "kraken_token_remove",
+    description: "Take a token off the scene.",
+    inputSchema: object({ id: string("Token id") }, ["id"]),
+    run(args, ctx) {
+      const { map, seat } = needTable(ctx);
+      return out({ removed: map.remove(args.id, seat).id });
+    },
+  },
+  {
+    name: "kraken_door",
+    description: "Open, close or lock a door on the scene (ids from kraken_map).",
+    inputSchema: object({ id: string("Door (wall) id"), state: { type: "string", enum: ["open", "closed", "locked"] } }, ["id", "state"]),
+    run(args, ctx) {
+      const { map, seat } = needTable(ctx);
+      const state = map.setDoor(args.id, { closed: 0, open: 1, locked: 2 }[args.state], seat);
+      return out({ id: args.id, state });
+    },
+  },
+  {
+    name: "kraken_line_of_sight",
+    description:
+      "Turn line of sight on or off for the scene (on: players see only what their tokens see, and walls stop their tokens), lock or unlock player token movement, and report what a player sees now: the tokens and doors shown to them.",
+    inputSchema: object({ on: { type: "boolean" }, lockMovement: { type: "boolean", description: "Stop players moving their tokens (FG's token lock)" }, player: string("Player name to look through") }),
+    run(args, ctx) {
+      const agent = needTable(ctx);
+      if (args.on !== undefined) agent.map.setSight(args.on);
+      if (args.lockMovement !== undefined) agent.map.setLocked(args.lockMovement);
+      const view = args.player ? agent.viewFor(args.player) : null;
+      return out({
+        sight: agent.map.sightOn(),
+        lockMovement: agent.map.lockedNow(),
+        ...(view ? { player: args.player, sees: view.tokens.map((token) => token.name), doors: view.doors.map((door) => door.id), limited: Boolean(view.vision) } : {}),
+      });
     },
   },
   {

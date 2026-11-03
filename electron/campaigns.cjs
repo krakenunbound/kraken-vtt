@@ -70,7 +70,7 @@ function touch(file, input) {
 }
 
 // Each campaign keeps its table in <userData>/campaigns/<id>/:
-// state.json (view, chat, pawn spots) and bundle.zip (the opened adventure).
+// state.json (view, chat, tokens and doors) and bundle.zip (the opened adventure).
 function folder(file, id) {
   const safe = String(id ?? "").replace(/[^a-f0-9]/gi, "").slice(0, 32);
   if (!safe) throw new Error("Unknown campaign.");

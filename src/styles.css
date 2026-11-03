@@ -540,34 +540,218 @@ select {
 
 .chat-form input { flex: 1; }
 
-.pawn {
+/* Tokens fill their grid squares (drawn at 80% of their space, as FG's TASG 80). */
+.token {
   position: absolute;
   display: grid;
   place-items: center;
-  border-radius: 50%;
-  color: #121418;
-  font-weight: 700;
-  transform: translate(-50%, -50%);
-  box-shadow: 0 0 0 0.08em #000;
   z-index: 3;
   pointer-events: auto;
   user-select: none;
 }
 
-.pawn span {
-  position: absolute;
-  top: 108%;
-  left: 50%;
-  transform: translateX(-50%);
-  color: #fff;
-  font-size: 0.72em;
-  font-weight: 650;
-  white-space: nowrap;
-  text-shadow: 0 1px 2px #000;
+.token-disc {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 50%;
+  border-style: solid;
+  box-shadow: 0 0 0 1px #000, 0 2px 6px rgba(0, 0, 0, 0.6);
+  color: #121418;
+  font-weight: 750;
+  letter-spacing: 0.02em;
+}
+
+.token-disc img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   pointer-events: none;
 }
 
-.pawn-draggable { cursor: grab; }
+.token-draggable { cursor: grab; }
+/* A player's own tokens stay above the darkness of line of sight. */
+.token-mine { z-index: 6; }
+.token-lifted { opacity: 0.45; }
+.token-hidden .token-disc { opacity: 0.5; outline: 2px dashed #a612d4; outline-offset: 2px; }
+
+.token-selected .token-disc {
+  box-shadow: 0 0 0 3px #ffd36b, 0 0 14px rgba(255, 211, 107, 0.8);
+}
+
+.health-dot {
+  position: absolute;
+  right: 6%;
+  bottom: 6%;
+  border-radius: 50%;
+  border: 1px solid #000;
+  pointer-events: auto;
+}
+
+/* Names show on hover or selection (FG's TNAM "tooltip" default). */
+.token-name {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0 0.35em;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.12s;
+}
+
+.token:hover .token-name,
+.token-selected .token-name { opacity: 1; }
+
+.token-ghost {
+  position: absolute;
+  z-index: 4;
+  border: 2px dashed #ffd36b;
+  border-radius: 8%;
+  background: rgba(255, 211, 107, 0.15);
+  pointer-events: none;
+}
+
+.overlay.measure { z-index: 4; }
+.overlay.doors { z-index: 2; }
+.overlay.sight { z-index: 5; }
+.overlay.sight rect { pointer-events: none; }
+.overlay .player-door .door { pointer-events: auto; cursor: pointer; }
+
+.measure-label {
+  position: absolute;
+  z-index: 6;
+  transform: translate(-50%, -130%);
+  padding: 0.1em 0.45em;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #ffd36b;
+  font-weight: 700;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.ping {
+  position: absolute;
+  z-index: 6;
+  transform: translate(-50%, -50%);
+  border: 4px solid;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: ping 1.3s ease-out 2;
+}
+
+.ping span {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #fff;
+  text-shadow: 0 1px 2px #000;
+  white-space: nowrap;
+}
+
+@keyframes ping {
+  from { transform: translate(-50%, -50%) scale(0.2); opacity: 1; }
+  to { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+}
+
+.token-tray {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 8;
+  width: 14rem;
+  max-height: calc(100% - 90px);
+  overflow: auto;
+  padding: 6px;
+  background: rgba(18, 20, 24, 0.94);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+
+.token-tray.closed { width: auto; }
+.tray-toggle { width: 100%; text-align: left; }
+.token-tray ul { list-style: none; margin: 6px 0; padding: 0; display: grid; gap: 4px; }
+
+.token-tray li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.token-tray li:hover { background: rgba(210, 161, 90, 0.12); }
+.token-tray li[draggable="true"] { cursor: grab; }
+
+.tray-chip {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--brass);
+  color: #121418;
+  font-weight: 700;
+  font-size: 0.7rem;
+}
+
+.tray-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tray-state { color: var(--muted); font-size: 0.75rem; }
+.tray-add { width: 100%; }
+
+.token-menu {
+  position: absolute;
+  z-index: 9;
+  display: grid;
+  gap: 4px;
+  min-width: 11rem;
+  padding: 8px;
+  background: rgba(18, 20, 24, 0.97);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+
+.token-menu-row { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.token-menu-row button { padding: 2px 6px; }
+.token-menu button[aria-pressed="true"],
+.map-controls button[aria-pressed="true"] { border-color: var(--brass); color: var(--brass); }
+
+.map-toast {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  z-index: 9;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 0.45rem 0.8rem;
+  background: rgba(18, 20, 24, 0.95);
+  border: 1px solid var(--danger);
+  border-radius: 8px;
+}
+
+.lock-note { color: var(--danger); font-size: 0.85rem; padding: 0 6px; }
+
+.map-hint {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+  text-shadow: 0 1px 2px #000;
+  pointer-events: none;
+}
 
 @media (max-width: 800px) {
   .setup-grid, .party { grid-template-columns: 1fr; }

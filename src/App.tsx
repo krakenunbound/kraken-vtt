@@ -344,13 +344,7 @@ export function App() {
                 </button>
               ) : null}
             </div>
-            <MapView
-              scene={scene}
-              gm={dm}
-              pawns={session.pawns}
-              selfId={session.selfId ?? ""}
-              onMovePawn={session.movePawn}
-            />
+            <MapView scene={scene} gm={dm} map={session.map} records={Object.values(session.records)} pings={session.pings} notice={session.notice} actions={session} />
           </>
         ) : dm ? (
           <div className="import">
@@ -369,7 +363,7 @@ export function App() {
         ) : (
           <div className="import">
             <h1>Waiting for the map</h1>
-            <p>The DM has not opened a scene yet. Your pawn is on the table as soon as they do.</p>
+            <p>The DM has not opened a scene yet. Your character's token goes on it from the Tokens tray.</p>
           </div>
         )}
       </section>
