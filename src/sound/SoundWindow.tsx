@@ -73,6 +73,8 @@ function soundDrag(ref: { sound: string; kind: string; label: string }) {
     title: "Drag into a book to keep it in the story",
     onDragStart: (event: React.DragEvent) => {
       event.dataTransfer.setData(SOUND_DRAG, JSON.stringify(ref));
+      // The same link as everything else, for a quick slot or a note.
+      event.dataTransfer.setData("text/kraken-slot", JSON.stringify({ kind: "sound", sound: ref.sound, soundKind: ref.kind, label: ref.label }));
       event.dataTransfer.effectAllowed = "copy";
     },
   };

@@ -357,6 +357,8 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     if (raw.kind === "book" && typeof raw.book === "string") return { kind: "book", book: raw.book.slice(0, 200), page: text(raw.page, "").slice(0, 120), label: label || raw.book.slice(0, 80) };
     if (raw.kind === "picture" && typeof raw.book === "string" && typeof raw.file === "string") return { kind: "picture", book: raw.book.slice(0, 200), file: raw.file.slice(0, 300), label: label || "Picture" };
     if (raw.kind === "sheet" && typeof raw.record === "string") return { kind: "sheet", record: raw.record.slice(0, 80), label: label || "Character" };
+    if (raw.kind === "note" && typeof raw.record === "string") return { kind: "note", record: raw.record.slice(0, 80), label: label || "Note" };
+    if (raw.kind === "sound" && typeof raw.sound === "string" && ["oneshots", "sfx", "ambience", "music"].includes(raw.soundKind)) return { kind: "sound", sound: raw.sound.slice(0, 300), soundKind: raw.soundKind, label: label || "Sound" };
     return null;
   };
   const cleanSlots = (list) => Array.from({ length: SLOTS }, (_, index) => (Array.isArray(list) ? cleanSlot(list[index]) : null));

@@ -187,7 +187,7 @@ function BookSound({ session, item, onRemove }: { session: Session; item: BookSo
   useSyncExternalStore(sound.subscribe, sound.playingNow);
   const on = sound.isPlaying(item.sound);
   return (
-    <span className={on ? "book-sound playing" : "book-sound"} data-book-sound={item.sound}>
+    <span className={on ? "book-sound playing" : "book-sound"} data-book-sound={item.sound} {...slotDrag({ kind: "sound", sound: item.sound, soundKind: item.kind, label: item.label })}>
       <button type="button" className="book-sound-play" aria-label={on ? `Stop ${item.label}` : `Play ${item.label}`} aria-pressed={on} title={on ? "Stop it" : "Play it for the table"} onClick={() => (on ? stopForTable(session, item) : playForTable(session, item))}>
         {on ? "\u25a0" : "\u25b6"}
       </button>
