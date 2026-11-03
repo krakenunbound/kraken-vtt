@@ -1,7 +1,8 @@
 // The 3D dice land on the number the host rolled: for every kind of die
 // (d100 as a tens and a ones die), a throw is simulated and the die is
 // labelled so that the face it rests on carries that number. The dice come to
-// rest, on the table, inside the window's edges.
+// rest, on the table, inside the window's edges, from a gentle toss or a hard
+// flick (which carries the hand's speed and bounces off the rails).
 import * as THREE from "three";
 import { bottomFace, model, topFace } from "../src/dice/models";
 import { diceOf, labelsFor, simulate } from "../src/dice/throw";
@@ -23,7 +24,10 @@ for (const side of sides) {
     const line = { id: "x", from: "Ann", text: "", at: 0, roll: { formula: `${rolls.length}d${side}`, label: "", total: 0, terms } } as ChatLine;
     const dice = diceOf(line);
     assert(dice.length === (side === 100 ? 6 : 3), `d${side}: dice ${dice.length}`);
-    const thrown = { x: Math.random(), y: Math.random(), vx: Math.random() * 2 - 1, vy: Math.random() * 2 - 1 };
+    // Every other throw a hard flick (as fast as a hand goes), the rest gentle to brisk.
+    const hard = round % 2 === 1;
+    const angle = Math.random() * Math.PI * 2;
+    const thrown = hard ? { x: Math.random(), y: Math.random(), vx: Math.cos(angle) * 3, vy: Math.sin(angle) * 3 } : { x: Math.random(), y: Math.random(), vx: Math.random() * 2 - 1, vy: Math.random() * 2 - 1 };
     const result = simulate(dice, thrown, width, depth);
     throws += 1;
     if (result.count < 6 * 60) still += 1;

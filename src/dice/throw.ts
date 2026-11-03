@@ -43,15 +43,22 @@ export type Area = { left: number; top: number; right: number; bottom: number };
 // The throw in its own physics world, recorded frame by frame. width, depth:
 // the whole window (the throw is in fractions of it); area: the table's rails.
 export function simulate(dice: Die[], thrown: DiceThrow, width: number, depth: number, area: Area = { left: 0, top: 0, right: width, bottom: depth }) {
-  const world = new CANNON.World({ gravity: new CANNON.Vec3(0, -24, 0), allowSleep: true });
-  world.defaultContactMaterial.friction = 0.4;
-  world.defaultContactMaterial.restitution = 0.32;
-  const floor = new CANNON.Body({ type: CANNON.Body.STATIC, shape: new CANNON.Plane() });
+  // A die is a little over a unit across, so gravity this strong makes it fall
+  // as a real one does, not drift down as through water. The felt takes some
+  // of a bounce, the rails throw the dice back, and the dice clack off each other.
+  const world = new CANNON.World({ gravity: new CANNON.Vec3(0, -58, 0), allowSleep: true });
+  const diceStuff = new CANNON.Material("dice");
+  const felt = new CANNON.Material("felt");
+  const wood = new CANNON.Material("rail");
+  world.addContactMaterial(new CANNON.ContactMaterial(diceStuff, felt, { friction: 0.3, restitution: 0.4 }));
+  world.addContactMaterial(new CANNON.ContactMaterial(diceStuff, wood, { friction: 0.08, restitution: 0.68 }));
+  world.addContactMaterial(new CANNON.ContactMaterial(diceStuff, diceStuff, { friction: 0.18, restitution: 0.5 }));
+  const floor = new CANNON.Body({ type: CANNON.Body.STATIC, shape: new CANNON.Plane(), material: felt });
   floor.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
   world.addBody(floor);
   // The edges of the table are its rails.
   const rail = (x: number, z: number, hx: number, hz: number) => {
-    const body = new CANNON.Body({ type: CANNON.Body.STATIC, shape: new CANNON.Box(new CANNON.Vec3(hx, 4, hz)) });
+    const body = new CANNON.Body({ type: CANNON.Body.STATIC, shape: new CANNON.Box(new CANNON.Vec3(hx, 4, hz)), material: wood });
     body.position.set(x, 4, z);
     world.addBody(body);
   };
@@ -62,22 +69,26 @@ export function simulate(dice: Die[], thrown: DiceThrow, width: number, depth: n
   rail(area.left + across / 2, area.top - 1, across, 1);
   rail(area.left + across / 2, area.bottom + 1, across, 1);
 
+  // The dice leave the hand as fast as it moved (world units a second), from
+  // a gentle toss to a hard flick across the table.
   const speed = Math.hypot(thrown.vx * width, thrown.vy * depth);
-  const scale = speed < 1e-3 ? 0 : Math.min(14, Math.max(6, speed)) / speed;
+  const scale = speed < 1e-3 ? 0 : Math.min(56, Math.max(5, speed)) / speed;
   const heading = Math.atan2(thrown.vy * depth, thrown.vx * width);
   const startX = Math.min(area.right - 1.2, Math.max(area.left + 1.2, thrown.x * width));
   const startZ = Math.min(area.bottom - 1.2, Math.max(area.top + 1.2, thrown.y * depth));
   const columns = Math.ceil(Math.sqrt(dice.length));
   const bodies = dice.map((die, index) => {
-    const body = new CANNON.Body({ mass: 1, shape: collider(die.kind), linearDamping: 0.15, angularDamping: 0.2, sleepSpeedLimit: 0.3, sleepTimeLimit: 0.3 });
+    const body = new CANNON.Body({ mass: 1, shape: collider(die.kind), material: diceStuff, linearDamping: 0.03, angularDamping: 0.06, sleepSpeedLimit: 0.3, sleepTimeLimit: 0.3 });
     const column = index % columns;
     const row = Math.floor(index / columns);
     body.position.set(startX + (column - (columns - 1) / 2) * 1.05, 1.8 + row * 0.6 + Math.random() * 0.3, startZ + (row - (columns - 1) / 2) * 1.05);
     body.quaternion.setFromEuler(Math.random() * Math.PI * 2, Math.random() * Math.PI * 2, Math.random() * Math.PI * 2);
     const turn = heading + (Math.random() - 0.5) * 0.35;
     const push = speed * scale * (0.85 + Math.random() * 0.3);
-    body.velocity.set(Math.cos(turn) * push, 2 + Math.random() * 2, Math.sin(turn) * push);
-    body.angularVelocity.set((Math.random() - 0.5) * 30, (Math.random() - 0.5) * 30, (Math.random() - 0.5) * 30);
+    body.velocity.set(Math.cos(turn) * push, 3 + Math.random() * 3 + push * 0.08, Math.sin(turn) * push);
+    // A harder throw spins the dice harder.
+    const spin = 18 + push * 1.1;
+    body.angularVelocity.set((Math.random() - 0.5) * spin, (Math.random() - 0.5) * spin, (Math.random() - 0.5) * spin);
     world.addBody(body);
     return body;
   });
