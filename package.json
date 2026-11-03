@@ -17,6 +17,7 @@
     "attack": "node scripts/check-attack.mjs",
     "spells": "node scripts/check-spells.mjs",
     "popout": "node scripts/check-popout.mjs",
+    "dice": "node scripts/check-dice.mjs && tsx scripts/check-dice-throw.ts",
     "sight-parity": "node scripts/check-sight-parity.mjs",
     "session": "node scripts/check-session.mjs",
     "agent": "node scripts/check-agent.mjs",
@@ -30,6 +31,7 @@
   },
   "dependencies": {
     "@xmldom/xmldom": "^0.8.10",
+    "cannon-es": "^0.20.0",
     "fflate": "^0.8.2",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",

@@ -513,6 +513,16 @@ const TOOLS = [
     },
   },
   {
+    name: "kraken_table_options",
+    description:
+      "The table's own options. towerReveal: a roll a player drops in the dice tower is shown to that player too (as FG, it is otherwise the GM's alone; the player sees only what went in). Call with nothing to read them.",
+    inputSchema: object({ towerReveal: { type: "boolean" } }),
+    run(args, ctx) {
+      const agent = needTable(ctx);
+      return out(Object.keys(args).length > 0 ? agent.setOptions(args) : agent.options());
+    },
+  },
+  {
     name: "kraken_light",
     description:
       "Lights on the scene. action list; place (x, y in scene pixels or col/row, bright and dim in feet, color, or a preset: candle, lamp, torch, lantern, light); update (id and any of x, y, bright, dim, color, on, hidden); remove (id).",
