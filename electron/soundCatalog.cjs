@@ -32,18 +32,21 @@ const WEAPONS = [
   ["Claws", "claw|talon|rake|slam|gore|tail", "a monster's claws"],
   ["Bite", "bite|fang|jaws", "a beast's bite"],
 ];
+// A weapon's sounds are the weapon alone: no voice (a grunt or a cry is the
+// wound lines' and the creatures' Hurt sounds, which play on their own).
+const NO_VOICE = "impact sound only, no voice, no vocals, no grunt, no scream";
 const WEAPON_SOUND = {
-  Hit: (what) => `${what} striking an armoured opponent, a solid hit with a grunt of pain, fantasy combat sound effect`,
+  Hit: (what) => `${what} striking an armoured opponent, a solid impact of steel on armour and flesh, ${NO_VOICE}, fantasy combat sound effect`,
   Attack: (what) => `${what} swung hard, a fast whoosh through the air, fantasy combat sound effect`,
-  Crit: (what) => `a devastating critical hit with ${what}, a brutal crunching impact and a cry of pain, fantasy combat sound effect`,
-  Fumble: (what) => `a clumsy fumble with ${what}, the weapon clattering and slipping, an embarrassed grunt, fantasy combat sound effect`,
+  Crit: (what) => `a devastating critical hit with ${what}, a brutal crunching impact with a heavy ringing clang, ${NO_VOICE}, fantasy combat sound effect`,
+  Fumble: (what) => `a clumsy fumble with ${what}, the weapon slipping from the hand and clattering onto stone, ${NO_VOICE}, fantasy combat sound effect`,
 };
 const RANGED = new Set(["Bow", "Crossbow", "Sling", "Thrown"]);
 const RANGED_SOUND = {
-  Hit: (what) => `${what} thudding hard into its target, fantasy combat sound effect`,
+  Hit: (what) => `${what} thudding hard into its target, ${NO_VOICE}, fantasy combat sound effect`,
   Attack: (what) => `${what} loosed, the string twanging and the shot whistling away, fantasy combat sound effect`,
-  Crit: (what) => `${what} loosed, a perfect shot punching deep into its target with a scream, fantasy combat sound effect`,
-  Fumble: (what) => `${what} misfired, the string snapping or the shot dropping to the ground, fantasy combat sound effect`,
+  Crit: (what) => `${what} loosed, a perfect shot punching deep into its target with a heavy thud, ${NO_VOICE}, fantasy combat sound effect`,
+  Fumble: (what) => `${what} misfired, the string snapping or the shot dropping to the ground, ${NO_VOICE}, fantasy combat sound effect`,
 };
 
 // Spells by kind: [folder, keys, what the magic is].

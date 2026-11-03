@@ -10,6 +10,7 @@
 //   npm run sounds              make everything not made yet
 //   npm run sounds -- --only sfx/Weapons --limit 20
 //   npm run sounds -- --only ambience/Forest --force   make these again
+//   npm run sounds -- --only sfx/Weapons --leaf Hit,Crit --force   only folders ending so
 //
 // Sounds already there are kept, so it can be run again and again: delete the
 // ones you do not like and run it once more to make them again. Your key stays
@@ -31,6 +32,7 @@ const value = (name) => {
 };
 const out = value("out") ?? path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "sounds");
 const only = value("only");
+const leaves = (value("leaf") ?? "").split(",").map((leaf) => leaf.trim().toLowerCase()).filter(Boolean);
 const limit = Number(value("limit") ?? Infinity);
 const key = process.env.ELEVENLABS_API_KEY ?? "";
 
@@ -38,6 +40,7 @@ const jobs = [];
 for (const item of catalog()) {
   if (item.music) continue; // music is made locally
   if (only && !item.group.toLowerCase().startsWith(only.toLowerCase())) continue;
+  if (leaves.length && !leaves.includes(item.group.split("/").pop().toLowerCase())) continue;
   for (let variant = 1; variant <= (Number(value("variants")) || item.variants); variant++) {
     const file = path.join(out, ...item.group.split("/"), `${item.file}-${variant}.mp3`);
     if (existsSync(file) && !flag("force")) continue;

@@ -3574,5 +3574,617 @@
   "file": "effects-level-up-2.mp3",
   "prompt": "a triumphant short fantasy fanfare of achievement, fantasy sound effect",
   "at": "2026-11-03T19:43:37.902Z"
+ },
+ {
+  "group": "sfx/Weapons/Sword/Hit",
+  "file": "weapons-sword-hit-1.mp3",
+  "prompt": "a steel sword striking an armoured opponent, a solid impact of steel on armour and flesh, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:31:38.258Z"
+ },
+ {
+  "group": "sfx/Weapons/Sword/Hit",
+  "file": "weapons-sword-hit-2.mp3",
+  "prompt": "a steel sword striking an armoured opponent, a solid impact of steel on armour and flesh, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:31:38.605Z"
+ },
+ {
+  "group": "sfx/Weapons/Sword/Crit",
+  "file": "weapons-sword-crit-1.mp3",
+  "prompt": "a devastating critical hit with a steel sword, a brutal crunching impact with a heavy ringing clang, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:31:39.238Z"
+ },
+ {
+  "group": "sfx/Weapons/Sword/Crit",
+  "file": "weapons-sword-crit-2.mp3",
+  "prompt": "a devastating critical hit with a steel sword, a brutal crunching impact with a heavy ringing clang, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:31:40.261Z"
+ },
+ {
+  "group": "sfx/Weapons/Sword/Fumble",
+  "file": "weapons-sword-fumble-1.mp3",
+  "prompt": "a clumsy fumble with a steel sword, the weapon slipping from the hand and clattering onto stone, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:31:40.298Z"
+ },
+ {
+  "group": "sfx/Weapons/Sword/Fumble",
+  "file": "weapons-sword-fumble-2.mp3",
+  "prompt": "a clumsy fumble with a steel sword, the weapon slipping from the hand and clattering onto stone, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:31:40.928Z"
+ },
+ {
+  "group": "sfx/Weapons/Greatsword/Hit",
+  "file": "weapons-greatsword-hit-1.mp3",
+  "prompt": "a huge two-handed greatsword striking an armoured opponent, a solid impact of steel on armour and flesh, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:31:42.005Z"
+ },
+ {
+  "group": "sfx/Weapons/Greatsword/Hit",
+  "file": "weapons-greatsword-hit-2.mp3",
+  "prompt": "a huge two-handed greatsword striking an armoured opponent, a solid impact of steel on armour and flesh, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:31:42.123Z"
+ },
+ {
+  "group": "sfx/Weapons/Greatsword/Crit",
+  "file": "weapons-greatsword-crit-1.mp3",
+  "prompt": "a devastating critical hit with a huge two-handed greatsword, a brutal crunching impact with a heavy ringing clang, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:31:42.944Z"
+ },
+ {
+  "group": "sfx/Weapons/Greatsword/Fumble",
+  "file": "weapons-greatsword-fumble-1.mp3",
+  "prompt": "a clumsy fumble with a huge two-handed greatsword, the weapon slipping from the hand and clattering onto stone, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:31:43.903Z"
+ },
+ {
+  "group": "sfx/Weapons/Greatsword/Fumble",
+  "file": "weapons-greatsword-fumble-2.mp3",
+  "prompt": "a clumsy fumble with a huge two-handed greatsword, the weapon slipping from the hand and clattering onto stone, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:31:44.598Z"
+ },
+ {
+  "group": "sfx/Weapons/Greatsword/Crit",
+  "file": "weapons-greatsword-crit-2.mp3",
+  "prompt": "a devastating critical hit with a huge two-handed greatsword, a brutal crunching impact with a heavy ringing clang, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:31:44.902Z"
+ },
+ {
+  "group": "sfx/Weapons/Axe/Hit",
+  "file": "weapons-axe-hit-1.mp3",
+  "prompt": "a battle axe striking an armoured opponent, a solid impact of steel on armour and flesh, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:31:45.255Z"
+ },
+ {
+  "group": "sfx/Weapons/Axe/Hit",
+  "file": "weapons-axe-hit-2.mp3",
+  "prompt": "a battle axe striking an armoured opponent, a solid impact of steel on armour and flesh, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:31:46.094Z"
+ },
+ {
+  "group": "sfx/Weapons/Axe/Crit",
+  "file": "weapons-axe-crit-1.mp3",
+  "prompt": "a devastating critical hit with a battle axe, a brutal crunching impact with a heavy ringing clang, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:31:46.941Z"
+ },
+ {
+  "group": "sfx/Weapons/Axe/Crit",
+  "file": "weapons-axe-crit-2.mp3",
+  "prompt": "a devastating critical hit with a battle axe, a brutal crunching impact with a heavy ringing clang, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:31:47.155Z"
+ },
+ {
+  "group": "sfx/Weapons/Axe/Fumble",
+  "file": "weapons-axe-fumble-1.mp3",
+  "prompt": "a clumsy fumble with a battle axe, the weapon slipping from the hand and clattering onto stone, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:31:47.856Z"
+ },
+ {
+  "group": "sfx/Weapons/Axe/Fumble",
+  "file": "weapons-axe-fumble-2.mp3",
+  "prompt": "a clumsy fumble with a battle axe, the weapon slipping from the hand and clattering onto stone, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:31:48.512Z"
+ },
+ {
+  "group": "sfx/Weapons/Mace/Hit",
+  "file": "weapons-mace-hit-1.mp3",
+  "prompt": "a heavy iron mace striking an armoured opponent, a solid impact of steel on armour and flesh, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:31:49.365Z"
+ },
+ {
+  "group": "sfx/Weapons/Mace/Hit",
+  "file": "weapons-mace-hit-2.mp3",
+  "prompt": "a heavy iron mace striking an armoured opponent, a solid impact of steel on armour and flesh, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:31:49.461Z"
+ },
+ {
+  "group": "sfx/Weapons/Mace/Crit",
+  "file": "weapons-mace-crit-1.mp3",
+  "prompt": "a devastating critical hit with a heavy iron mace, a brutal crunching impact with a heavy ringing clang, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:31:50.578Z"
+ },
+ {
+  "group": "sfx/Weapons/Mace/Fumble",
+  "file": "weapons-mace-fumble-1.mp3",
+  "prompt": "a clumsy fumble with a heavy iron mace, the weapon slipping from the hand and clattering onto stone, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:31:51.028Z"
+ },
+ {
+  "group": "sfx/Weapons/Mace/Crit",
+  "file": "weapons-mace-crit-2.mp3",
+  "prompt": "a devastating critical hit with a heavy iron mace, a brutal crunching impact with a heavy ringing clang, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:31:51.418Z"
+ },
+ {
+  "group": "sfx/Weapons/Mace/Fumble",
+  "file": "weapons-mace-fumble-2.mp3",
+  "prompt": "a clumsy fumble with a heavy iron mace, the weapon slipping from the hand and clattering onto stone, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:31:52.076Z"
+ },
+ {
+  "group": "sfx/Weapons/Warhammer/Hit",
+  "file": "weapons-warhammer-hit-1.mp3",
+  "prompt": "a warhammer striking an armoured opponent, a solid impact of steel on armour and flesh, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:31:52.397Z"
+ },
+ {
+  "group": "sfx/Weapons/Warhammer/Hit",
+  "file": "weapons-warhammer-hit-2.mp3",
+  "prompt": "a warhammer striking an armoured opponent, a solid impact of steel on armour and flesh, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:31:53.037Z"
+ },
+ {
+  "group": "sfx/Weapons/Warhammer/Crit",
+  "file": "weapons-warhammer-crit-1.mp3",
+  "prompt": "a devastating critical hit with a warhammer, a brutal crunching impact with a heavy ringing clang, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:31:54.206Z"
+ },
+ {
+  "group": "sfx/Weapons/Warhammer/Fumble",
+  "file": "weapons-warhammer-fumble-1.mp3",
+  "prompt": "a clumsy fumble with a warhammer, the weapon slipping from the hand and clattering onto stone, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:31:54.465Z"
+ },
+ {
+  "group": "sfx/Weapons/Warhammer/Crit",
+  "file": "weapons-warhammer-crit-2.mp3",
+  "prompt": "a devastating critical hit with a warhammer, a brutal crunching impact with a heavy ringing clang, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:31:54.510Z"
+ },
+ {
+  "group": "sfx/Weapons/Warhammer/Fumble",
+  "file": "weapons-warhammer-fumble-2.mp3",
+  "prompt": "a clumsy fumble with a warhammer, the weapon slipping from the hand and clattering onto stone, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:31:55.819Z"
+ },
+ {
+  "group": "sfx/Weapons/Flail/Hit",
+  "file": "weapons-flail-hit-2.mp3",
+  "prompt": "a spiked chain flail striking an armoured opponent, a solid impact of steel on armour and flesh, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:31:55.970Z"
+ },
+ {
+  "group": "sfx/Weapons/Flail/Hit",
+  "file": "weapons-flail-hit-1.mp3",
+  "prompt": "a spiked chain flail striking an armoured opponent, a solid impact of steel on armour and flesh, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:31:56.016Z"
+ },
+ {
+  "group": "sfx/Weapons/Flail/Fumble",
+  "file": "weapons-flail-fumble-1.mp3",
+  "prompt": "a clumsy fumble with a spiked chain flail, the weapon slipping from the hand and clattering onto stone, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:31:57.627Z"
+ },
+ {
+  "group": "sfx/Weapons/Flail/Crit",
+  "file": "weapons-flail-crit-1.mp3",
+  "prompt": "a devastating critical hit with a spiked chain flail, a brutal crunching impact with a heavy ringing clang, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:31:57.824Z"
+ },
+ {
+  "group": "sfx/Weapons/Flail/Crit",
+  "file": "weapons-flail-crit-2.mp3",
+  "prompt": "a devastating critical hit with a spiked chain flail, a brutal crunching impact with a heavy ringing clang, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:31:58.016Z"
+ },
+ {
+  "group": "sfx/Weapons/Dagger/Hit",
+  "file": "weapons-dagger-hit-1.mp3",
+  "prompt": "a small dagger striking an armoured opponent, a solid impact of steel on armour and flesh, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:31:59.329Z"
+ },
+ {
+  "group": "sfx/Weapons/Dagger/Hit",
+  "file": "weapons-dagger-hit-2.mp3",
+  "prompt": "a small dagger striking an armoured opponent, a solid impact of steel on armour and flesh, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:31:59.503Z"
+ },
+ {
+  "group": "sfx/Weapons/Flail/Fumble",
+  "file": "weapons-flail-fumble-2.mp3",
+  "prompt": "a clumsy fumble with a spiked chain flail, the weapon slipping from the hand and clattering onto stone, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:31:59.596Z"
+ },
+ {
+  "group": "sfx/Weapons/Dagger/Crit",
+  "file": "weapons-dagger-crit-2.mp3",
+  "prompt": "a devastating critical hit with a small dagger, a brutal crunching impact with a heavy ringing clang, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:01.272Z"
+ },
+ {
+  "group": "sfx/Weapons/Dagger/Crit",
+  "file": "weapons-dagger-crit-1.mp3",
+  "prompt": "a devastating critical hit with a small dagger, a brutal crunching impact with a heavy ringing clang, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:01.390Z"
+ },
+ {
+  "group": "sfx/Weapons/Dagger/Fumble",
+  "file": "weapons-dagger-fumble-1.mp3",
+  "prompt": "a clumsy fumble with a small dagger, the weapon slipping from the hand and clattering onto stone, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:01.459Z"
+ },
+ {
+  "group": "sfx/Weapons/Spear/Hit",
+  "file": "weapons-spear-hit-1.mp3",
+  "prompt": "a long spear striking an armoured opponent, a solid impact of steel on armour and flesh, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:02.903Z"
+ },
+ {
+  "group": "sfx/Weapons/Spear/Hit",
+  "file": "weapons-spear-hit-2.mp3",
+  "prompt": "a long spear striking an armoured opponent, a solid impact of steel on armour and flesh, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:03.172Z"
+ },
+ {
+  "group": "sfx/Weapons/Dagger/Fumble",
+  "file": "weapons-dagger-fumble-2.mp3",
+  "prompt": "a clumsy fumble with a small dagger, the weapon slipping from the hand and clattering onto stone, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:03.257Z"
+ },
+ {
+  "group": "sfx/Weapons/Spear/Fumble",
+  "file": "weapons-spear-fumble-1.mp3",
+  "prompt": "a clumsy fumble with a long spear, the weapon slipping from the hand and clattering onto stone, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:04.769Z"
+ },
+ {
+  "group": "sfx/Weapons/Spear/Crit",
+  "file": "weapons-spear-crit-1.mp3",
+  "prompt": "a devastating critical hit with a long spear, a brutal crunching impact with a heavy ringing clang, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:04.899Z"
+ },
+ {
+  "group": "sfx/Weapons/Spear/Crit",
+  "file": "weapons-spear-crit-2.mp3",
+  "prompt": "a devastating critical hit with a long spear, a brutal crunching impact with a heavy ringing clang, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:05.096Z"
+ },
+ {
+  "group": "sfx/Weapons/Spear/Fumble",
+  "file": "weapons-spear-fumble-2.mp3",
+  "prompt": "a clumsy fumble with a long spear, the weapon slipping from the hand and clattering onto stone, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:06.334Z"
+ },
+ {
+  "group": "sfx/Weapons/Staff/Hit",
+  "file": "weapons-staff-hit-1.mp3",
+  "prompt": "a wooden quarterstaff striking an armoured opponent, a solid impact of steel on armour and flesh, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:06.456Z"
+ },
+ {
+  "group": "sfx/Weapons/Staff/Hit",
+  "file": "weapons-staff-hit-2.mp3",
+  "prompt": "a wooden quarterstaff striking an armoured opponent, a solid impact of steel on armour and flesh, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:06.658Z"
+ },
+ {
+  "group": "sfx/Weapons/Staff/Fumble",
+  "file": "weapons-staff-fumble-1.mp3",
+  "prompt": "a clumsy fumble with a wooden quarterstaff, the weapon slipping from the hand and clattering onto stone, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:08.169Z"
+ },
+ {
+  "group": "sfx/Weapons/Staff/Crit",
+  "file": "weapons-staff-crit-1.mp3",
+  "prompt": "a devastating critical hit with a wooden quarterstaff, a brutal crunching impact with a heavy ringing clang, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:08.465Z"
+ },
+ {
+  "group": "sfx/Weapons/Staff/Crit",
+  "file": "weapons-staff-crit-2.mp3",
+  "prompt": "a devastating critical hit with a wooden quarterstaff, a brutal crunching impact with a heavy ringing clang, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:09.068Z"
+ },
+ {
+  "group": "sfx/Weapons/Staff/Fumble",
+  "file": "weapons-staff-fumble-2.mp3",
+  "prompt": "a clumsy fumble with a wooden quarterstaff, the weapon slipping from the hand and clattering onto stone, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:09.695Z"
+ },
+ {
+  "group": "sfx/Weapons/Whip/Hit",
+  "file": "weapons-whip-hit-1.mp3",
+  "prompt": "a leather whip striking an armoured opponent, a solid impact of steel on armour and flesh, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:10.109Z"
+ },
+ {
+  "group": "sfx/Weapons/Whip/Hit",
+  "file": "weapons-whip-hit-2.mp3",
+  "prompt": "a leather whip striking an armoured opponent, a solid impact of steel on armour and flesh, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:11.215Z"
+ },
+ {
+  "group": "sfx/Weapons/Whip/Crit",
+  "file": "weapons-whip-crit-1.mp3",
+  "prompt": "a devastating critical hit with a leather whip, a brutal crunching impact with a heavy ringing clang, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:11.808Z"
+ },
+ {
+  "group": "sfx/Weapons/Whip/Crit",
+  "file": "weapons-whip-crit-2.mp3",
+  "prompt": "a devastating critical hit with a leather whip, a brutal crunching impact with a heavy ringing clang, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:12.285Z"
+ },
+ {
+  "group": "sfx/Weapons/Whip/Fumble",
+  "file": "weapons-whip-fumble-1.mp3",
+  "prompt": "a clumsy fumble with a leather whip, the weapon slipping from the hand and clattering onto stone, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:12.857Z"
+ },
+ {
+  "group": "sfx/Weapons/Whip/Fumble",
+  "file": "weapons-whip-fumble-2.mp3",
+  "prompt": "a clumsy fumble with a leather whip, the weapon slipping from the hand and clattering onto stone, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:13.252Z"
+ },
+ {
+  "group": "sfx/Weapons/Bow/Hit",
+  "file": "weapons-bow-hit-1.mp3",
+  "prompt": "a bow and arrow thudding hard into its target, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:13.885Z"
+ },
+ {
+  "group": "sfx/Weapons/Bow/Hit",
+  "file": "weapons-bow-hit-2.mp3",
+  "prompt": "a bow and arrow thudding hard into its target, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:14.368Z"
+ },
+ {
+  "group": "sfx/Weapons/Bow/Crit",
+  "file": "weapons-bow-crit-1.mp3",
+  "prompt": "a bow and arrow loosed, a perfect shot punching deep into its target with a heavy thud, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:15.226Z"
+ },
+ {
+  "group": "sfx/Weapons/Bow/Crit",
+  "file": "weapons-bow-crit-2.mp3",
+  "prompt": "a bow and arrow loosed, a perfect shot punching deep into its target with a heavy thud, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:15.706Z"
+ },
+ {
+  "group": "sfx/Weapons/Bow/Fumble",
+  "file": "weapons-bow-fumble-1.mp3",
+  "prompt": "a bow and arrow misfired, the string snapping or the shot dropping to the ground, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:15.891Z"
+ },
+ {
+  "group": "sfx/Weapons/Bow/Fumble",
+  "file": "weapons-bow-fumble-2.mp3",
+  "prompt": "a bow and arrow misfired, the string snapping or the shot dropping to the ground, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:16.823Z"
+ },
+ {
+  "group": "sfx/Weapons/Crossbow/Hit",
+  "file": "weapons-crossbow-hit-1.mp3",
+  "prompt": "a crossbow bolt thudding hard into its target, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:17.148Z"
+ },
+ {
+  "group": "sfx/Weapons/Crossbow/Hit",
+  "file": "weapons-crossbow-hit-2.mp3",
+  "prompt": "a crossbow bolt thudding hard into its target, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:17.239Z"
+ },
+ {
+  "group": "sfx/Weapons/Crossbow/Crit",
+  "file": "weapons-crossbow-crit-1.mp3",
+  "prompt": "a crossbow bolt loosed, a perfect shot punching deep into its target with a heavy thud, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:18.537Z"
+ },
+ {
+  "group": "sfx/Weapons/Crossbow/Fumble",
+  "file": "weapons-crossbow-fumble-1.mp3",
+  "prompt": "a crossbow bolt misfired, the string snapping or the shot dropping to the ground, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:18.774Z"
+ },
+ {
+  "group": "sfx/Weapons/Crossbow/Crit",
+  "file": "weapons-crossbow-crit-2.mp3",
+  "prompt": "a crossbow bolt loosed, a perfect shot punching deep into its target with a heavy thud, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:18.944Z"
+ },
+ {
+  "group": "sfx/Weapons/Crossbow/Fumble",
+  "file": "weapons-crossbow-fumble-2.mp3",
+  "prompt": "a crossbow bolt misfired, the string snapping or the shot dropping to the ground, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:20.145Z"
+ },
+ {
+  "group": "sfx/Weapons/Sling/Hit",
+  "file": "weapons-sling-hit-1.mp3",
+  "prompt": "a sling stone thudding hard into its target, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:20.217Z"
+ },
+ {
+  "group": "sfx/Weapons/Sling/Hit",
+  "file": "weapons-sling-hit-2.mp3",
+  "prompt": "a sling stone thudding hard into its target, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:20.442Z"
+ },
+ {
+  "group": "sfx/Weapons/Sling/Crit",
+  "file": "weapons-sling-crit-2.mp3",
+  "prompt": "a sling stone loosed, a perfect shot punching deep into its target with a heavy thud, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:22.019Z"
+ },
+ {
+  "group": "sfx/Weapons/Sling/Fumble",
+  "file": "weapons-sling-fumble-1.mp3",
+  "prompt": "a sling stone misfired, the string snapping or the shot dropping to the ground, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:22.103Z"
+ },
+ {
+  "group": "sfx/Weapons/Sling/Crit",
+  "file": "weapons-sling-crit-1.mp3",
+  "prompt": "a sling stone loosed, a perfect shot punching deep into its target with a heavy thud, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:22.237Z"
+ },
+ {
+  "group": "sfx/Weapons/Thrown/Hit",
+  "file": "weapons-thrown-hit-1.mp3",
+  "prompt": "a thrown javelin thudding hard into its target, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:23.574Z"
+ },
+ {
+  "group": "sfx/Weapons/Sling/Fumble",
+  "file": "weapons-sling-fumble-2.mp3",
+  "prompt": "a sling stone misfired, the string snapping or the shot dropping to the ground, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:23.672Z"
+ },
+ {
+  "group": "sfx/Weapons/Thrown/Hit",
+  "file": "weapons-thrown-hit-2.mp3",
+  "prompt": "a thrown javelin thudding hard into its target, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:24.249Z"
+ },
+ {
+  "group": "sfx/Weapons/Thrown/Crit",
+  "file": "weapons-thrown-crit-2.mp3",
+  "prompt": "a thrown javelin loosed, a perfect shot punching deep into its target with a heavy thud, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:25.403Z"
+ },
+ {
+  "group": "sfx/Weapons/Thrown/Crit",
+  "file": "weapons-thrown-crit-1.mp3",
+  "prompt": "a thrown javelin loosed, a perfect shot punching deep into its target with a heavy thud, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:25.724Z"
+ },
+ {
+  "group": "sfx/Weapons/Thrown/Fumble",
+  "file": "weapons-thrown-fumble-1.mp3",
+  "prompt": "a thrown javelin misfired, the string snapping or the shot dropping to the ground, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:25.969Z"
+ },
+ {
+  "group": "sfx/Weapons/Thrown/Fumble",
+  "file": "weapons-thrown-fumble-2.mp3",
+  "prompt": "a thrown javelin misfired, the string snapping or the shot dropping to the ground, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:26.898Z"
+ },
+ {
+  "group": "sfx/Weapons/Unarmed/Hit",
+  "file": "weapons-unarmed-hit-1.mp3",
+  "prompt": "a bare-fisted punch striking an armoured opponent, a solid impact of steel on armour and flesh, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:27.181Z"
+ },
+ {
+  "group": "sfx/Weapons/Unarmed/Hit",
+  "file": "weapons-unarmed-hit-2.mp3",
+  "prompt": "a bare-fisted punch striking an armoured opponent, a solid impact of steel on armour and flesh, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:27.728Z"
+ },
+ {
+  "group": "sfx/Weapons/Unarmed/Crit",
+  "file": "weapons-unarmed-crit-1.mp3",
+  "prompt": "a devastating critical hit with a bare-fisted punch, a brutal crunching impact with a heavy ringing clang, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:28.807Z"
+ },
+ {
+  "group": "sfx/Weapons/Unarmed/Fumble",
+  "file": "weapons-unarmed-fumble-1.mp3",
+  "prompt": "a clumsy fumble with a bare-fisted punch, the weapon slipping from the hand and clattering onto stone, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:29.193Z"
+ },
+ {
+  "group": "sfx/Weapons/Unarmed/Crit",
+  "file": "weapons-unarmed-crit-2.mp3",
+  "prompt": "a devastating critical hit with a bare-fisted punch, a brutal crunching impact with a heavy ringing clang, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:29.690Z"
+ },
+ {
+  "group": "sfx/Weapons/Unarmed/Fumble",
+  "file": "weapons-unarmed-fumble-2.mp3",
+  "prompt": "a clumsy fumble with a bare-fisted punch, the weapon slipping from the hand and clattering onto stone, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:30.310Z"
+ },
+ {
+  "group": "sfx/Weapons/Claws/Hit",
+  "file": "weapons-claws-hit-1.mp3",
+  "prompt": "a monster's claws striking an armoured opponent, a solid impact of steel on armour and flesh, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:30.926Z"
+ },
+ {
+  "group": "sfx/Weapons/Claws/Hit",
+  "file": "weapons-claws-hit-2.mp3",
+  "prompt": "a monster's claws striking an armoured opponent, a solid impact of steel on armour and flesh, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:31.335Z"
+ },
+ {
+  "group": "sfx/Weapons/Claws/Crit",
+  "file": "weapons-claws-crit-1.mp3",
+  "prompt": "a devastating critical hit with a monster's claws, a brutal crunching impact with a heavy ringing clang, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:32.408Z"
+ },
+ {
+  "group": "sfx/Weapons/Claws/Crit",
+  "file": "weapons-claws-crit-2.mp3",
+  "prompt": "a devastating critical hit with a monster's claws, a brutal crunching impact with a heavy ringing clang, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:33.007Z"
+ },
+ {
+  "group": "sfx/Weapons/Claws/Fumble",
+  "file": "weapons-claws-fumble-1.mp3",
+  "prompt": "a clumsy fumble with a monster's claws, the weapon slipping from the hand and clattering onto stone, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:33.550Z"
+ },
+ {
+  "group": "sfx/Weapons/Claws/Fumble",
+  "file": "weapons-claws-fumble-2.mp3",
+  "prompt": "a clumsy fumble with a monster's claws, the weapon slipping from the hand and clattering onto stone, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:33.944Z"
+ },
+ {
+  "group": "sfx/Weapons/Bite/Hit",
+  "file": "weapons-bite-hit-1.mp3",
+  "prompt": "a beast's bite striking an armoured opponent, a solid impact of steel on armour and flesh, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:34.840Z"
+ },
+ {
+  "group": "sfx/Weapons/Bite/Hit",
+  "file": "weapons-bite-hit-2.mp3",
+  "prompt": "a beast's bite striking an armoured opponent, a solid impact of steel on armour and flesh, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:35.217Z"
+ },
+ {
+  "group": "sfx/Weapons/Bite/Crit",
+  "file": "weapons-bite-crit-1.mp3",
+  "prompt": "a devastating critical hit with a beast's bite, a brutal crunching impact with a heavy ringing clang, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:35.818Z"
+ },
+ {
+  "group": "sfx/Weapons/Bite/Crit",
+  "file": "weapons-bite-crit-2.mp3",
+  "prompt": "a devastating critical hit with a beast's bite, a brutal crunching impact with a heavy ringing clang, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:36.767Z"
+ },
+ {
+  "group": "sfx/Weapons/Bite/Fumble",
+  "file": "weapons-bite-fumble-1.mp3",
+  "prompt": "a clumsy fumble with a beast's bite, the weapon slipping from the hand and clattering onto stone, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:36.977Z"
+ },
+ {
+  "group": "sfx/Weapons/Bite/Fumble",
+  "file": "weapons-bite-fumble-2.mp3",
+  "prompt": "a clumsy fumble with a beast's bite, the weapon slipping from the hand and clattering onto stone, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
+  "at": "2026-11-03T21:32:37.430Z"
  }
 ]
