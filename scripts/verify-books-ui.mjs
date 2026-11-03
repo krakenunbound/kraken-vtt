@@ -116,6 +116,29 @@ try {
   await page.waitForSelector('.images-window [data-image="images/keep.png"]');
   assert((await page.textContent(".images-share span")) === "Not shared", "a picture the GM opens is not shared until shared");
 
+  // Right-click on a map: out on its own, so the map stays up beside the book;
+  // back in; shared and unshared from the menu.
+  await page.click('[data-book-view="book"]');
+  await page.click('.book-toc [data-page="gate"]');
+  await page.waitForSelector(".book-figure");
+  await page.click(".book-figure", { button: "right" });
+  await page.waitForSelector('.context-menu [data-menu="Out on its own"]');
+  assert(await page.$('.context-menu [data-menu="Share with the players"]'), "the GM's menu shares");
+  await page.click('.context-menu [data-menu="Out on its own"]');
+  await page.waitForSelector('.picture-window [data-image="images/keep.png"]');
+  assert(await page.$(".book-window .book-page h2"), "the book stays open beside the map");
+  assert((await page.$('.images-window:not(.picture-window) [data-image="images/keep.png"]')) === null, "out on its own, it leaves the Pictures tabs");
+  await page.click(".picture-window .images-view", { button: "right" });
+  await page.click('.context-menu [data-menu="Back in"]');
+  await page.waitForSelector('.images-window:not(.picture-window) [data-image="images/keep.png"]');
+  assert((await page.$(".picture-window")) === null, "back in, its own window closes");
+  await page.click(".images-tab", { button: "right" });
+  await page.click('.context-menu [data-menu="Share with the players"]');
+  await page.waitForFunction(() => document.querySelector(".images-share span")?.textContent === "Shown to the players");
+  await page.click(".images-tab", { button: "right" });
+  await page.click('.context-menu [data-menu="Stop sharing"]');
+  await page.waitForFunction(() => document.querySelector(".images-share span")?.textContent === "Not shared");
+
   // A player in Chrome: the shared book on the shelf, readable.
   browser = await chromium.launch({ executablePath: String.raw`C:\Program Files\Google\Chrome\Application\chrome.exe`, headless: true });
   const seat = await browser.newPage({ viewport: { width: 1400, height: 900 } });

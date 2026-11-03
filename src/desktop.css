@@ -756,3 +756,8 @@ span.ct-init { display: inline-block; }
 .formation-clear { margin-left: 16px; }
 .order-marching { text-align: center; }
 .sound-play.playing, .sound-hear.playing, .sound-file .ghost.playing { color: #10263a; background: #e7c07a; border-color: #e7c07a; }
+.context-menu { position: fixed; z-index: 9999; min-width: 200px; padding: 4px; border: 1px solid var(--brass-dim); border-radius: 8px; background: #161b22; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6); display: flex; flex-direction: column; }
+.context-menu button { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border: none; border-radius: 5px; background: transparent; text-align: left; font-size: 0.86rem; }
+.context-menu button:hover { background: var(--brass-soft); color: var(--brass); }
+.context-menu-gap { width: 14px; }
+.picture-window .images-view { height: 100%; }

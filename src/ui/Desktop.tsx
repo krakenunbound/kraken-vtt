@@ -11,7 +11,7 @@ import { Mark } from "./Emblem";
 import { DecalPicker, SettingsWindow, TableDecal } from "./Settings";
 import { DiceWindow } from "../dice/DiceWindow";
 import { SoundWindow } from "../sound/SoundWindow";
-import { BooksWindow, BookWindow, ImagesWindow } from "../books/Books";
+import { BooksWindow, BookWindow, ImagesWindow, PictureWindow } from "../books/Books";
 import { Icon } from "./icons";
 import { FloatingWindow, useWindows, type WindowKind } from "./Windows";
 
@@ -126,9 +126,15 @@ export function Desktop({
         if (command.kind !== "windows") return null;
         const { windows: manager, launchers: kinds, characters: sheets } = live.current;
         const list = () => manager.windows.map((item) => ({ key: item.key, kind: item.kind, title: item.title, poppedOut: item.popped }));
-        if (command.action === "list") return { open: list(), kinds: [...kinds.map((item) => item.kind), "sheet", "book", "images", "decals", "wallpapers", "gmicons", "dice"] };
+        if (command.action === "list") return { open: list(), kinds: [...kinds.map((item) => item.kind), "sheet", "book", "images", "picture", "decals", "wallpapers", "gmicons", "dice"] };
         let key: string = command.window ?? "";
-        if (command.window === "book") {
+        if (command.window === "picture") {
+          // record: "<book>|<file>", a picture out on its own.
+          const picture = String(command.record ?? "");
+          if (!picture.includes("|")) throw new Error('Which picture? record is "<book id>|<file>" (kraken_books contents).');
+          if (command.action === "open") manager.open("picture", picture.split("|")[1].split("/").pop() ?? picture, picture);
+          key = `picture:${picture}`;
+        } else if (command.window === "book") {
           const book = String(command.record ?? "");
           if (!book) throw new Error("Which book? Give its id (kraken_books list).");
           if (command.action === "open") manager.open("book", book, book);
@@ -242,6 +248,7 @@ export function Desktop({
               {item.kind === "books" ? <BooksWindow session={session} onOpenAdventure={gm ? onOpenAdventure : undefined} /> : null}
               {item.kind === "book" && item.payload ? <BookWindow session={session} book={item.payload} /> : null}
               {item.kind === "images" ? <ImagesWindow session={session} /> : null}
+              {item.kind === "picture" && item.payload ? <PictureWindow session={session} payload={item.payload} /> : null}
               {item.kind === "decals" ? <DecalPicker session={session} onClose={() => windows.close(item.key)} /> : null}
               {item.kind === "wallpapers" ? <DecalPicker session={session} kind="wallpaper" onClose={() => windows.close(item.key)} /> : null}
               {item.kind === "gmicons" ? <DecalPicker session={session} kind="gmicon" onClose={() => windows.close(item.key)} /> : null}
