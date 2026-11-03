@@ -494,25 +494,68 @@ span.ct-init { display: inline-block; }
 .decal-thumb.wall { background-size: 96px 96px; background-repeat: repeat; }
 .decal-group { font-size: 0.7rem; color: var(--muted); margin-top: -4px; }
 
-/* --- The Dice window -------------------------------------------------------- */
-.dice-window { display: grid; grid-template-columns: minmax(200px, 270px) minmax(0, 1fr); gap: 16px; padding: 14px; height: 100%; min-height: 0; }
-.dice-window-preview { display: flex; flex-direction: column; gap: 8px; align-self: start; position: sticky; top: 0; }
-.dice-preview { width: 100%; aspect-ratio: 1; border-radius: 14px; background: radial-gradient(ellipse at 50% 60%, #22303a, #0b0f13 75%); border: 1px solid var(--panel-edge); overflow: hidden; }
+/* --- The Dice window, laid out as FG's ---------------------------------------- */
+.dice-window { display: flex; flex-direction: column; gap: 10px; padding: 12px; height: 100%; min-height: 0; overflow: auto; }
+.dice-panel { display: flex; flex-direction: column; gap: 10px; padding: 10px 12px 12px; border: 1px solid var(--panel-edge); border-radius: 10px; background: linear-gradient(180deg, rgba(255, 255, 255, 0.025), rgba(0, 0, 0, 0.15)); }
+.dice-panel h3 { margin: 0; padding-bottom: 6px; border-bottom: 1px solid var(--panel-edge); font: 600 0.78rem var(--serif); letter-spacing: 0.14em; text-transform: uppercase; color: var(--brass); text-align: center; }
+.active-body { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 14px; align-items: center; }
+.dice-preview { width: 100%; aspect-ratio: 1; border-radius: 12px; background: radial-gradient(ellipse at 50% 60%, #22303a, #0b0f13 75%); border: 1px solid var(--panel-edge); overflow: hidden; }
 .dice-preview canvas { display: block; width: 100%; height: 100%; }
-.dice-window-controls { display: flex; flex-direction: column; gap: 12px; overflow: auto; min-height: 0; padding-right: 4px; }
-.dice-window .check { display: flex; align-items: center; gap: 8px; font-size: 0.86rem; }
-.dice-field { display: flex; flex-direction: column; gap: 6px; }
+.active-words { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.active-words strong { font: 600 1.15rem var(--serif); color: var(--text); }
+.active-words > span { color: var(--muted); font-size: 0.84rem; }
+.dice-window .dice-colors { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 4px; }
+.dice-window .dice-colors label { display: flex; align-items: center; gap: 6px; font-size: 0.84rem; color: var(--muted); }
+.dice-window .dice-colors input { width: 30px; height: 24px; padding: 0; border: 0; background: none; }
+.dice-display { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.dice-display-die { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 10px; border: 1px solid var(--line); background: radial-gradient(circle, color-mix(in srgb, var(--tray-glow) 28%, transparent) 0%, transparent 70%), #0f1418; }
+.dice-display-die img { width: 46px; height: 46px; }
+.dice-sizes { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.dice-stepper { display: inline-flex; align-items: center; gap: 6px; }
+.dice-stepper b { font: 600 0.74rem var(--serif); letter-spacing: 0.12em; text-transform: uppercase; color: var(--brass); margin-right: 4px; }
+.dice-stepper button { width: 26px; height: 26px; padding: 0; border-radius: 6px; font-weight: 700; background: #1d3a44; border-color: var(--brass-dim); }
+.dice-stepper span { min-width: 3.2rem; text-align: center; font-variant-numeric: tabular-nums; }
+.dice-groups { display: flex; flex-wrap: wrap; gap: 6px; }
+.dice-sets { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 8px; }
+.dice-set { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 6px 4px 6px; border-radius: 10px; border: 1px solid var(--line); background: radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--set-glow) 30%, transparent) 0%, transparent 62%), #0f1418; transition: border-color 0.15s, transform 0.15s; }
+.dice-set:hover { border-color: var(--brass-dim); transform: translateY(-1px); }
+.dice-set.on { border-color: #e0574a; box-shadow: 0 0 0 1px #e0574a, 0 0 16px color-mix(in srgb, var(--set-glow) 45%, transparent); }
+.dice-set img { width: 62px; height: 62px; filter: drop-shadow(0 0 8px color-mix(in srgb, var(--set-glow) 70%, transparent)); }
+.dice-set > span { font-size: 0.72rem; color: var(--muted); text-align: center; line-height: 1.2; }
+.dice-set-blank { display: grid; place-items: center; width: 52px; height: 52px; margin: 5px; border-radius: 12px; }
 .dice-chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .dice-chip { padding: 4px 11px; border-radius: 999px; font-size: 0.82rem; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--line); color: var(--muted); }
 .dice-chip:hover { border-color: var(--brass-dim); color: var(--text); }
 .dice-chip.on { border-color: var(--brass); color: var(--text); background: rgba(210, 161, 90, 0.16); }
-.dice-window .dice-swatches button { width: 40px; height: 40px; border-radius: 10px; font-size: 0.95rem; }
-.dice-window .dice-colors { display: flex; gap: 14px; }
-.dice-window .dice-colors label { display: flex; align-items: center; gap: 6px; font-size: 0.86rem; color: var(--muted); }
-.dice-window .table-part { padding-top: 8px; border-top: 1px solid var(--panel-edge); }
+.dice-field { display: flex; flex-direction: column; gap: 6px; }
+.dice-window .check { display: flex; align-items: center; gap: 8px; font-size: 0.86rem; }
+.dice-sound { display: flex; align-items: center; gap: 12px; }
+.dice-sound input[type="range"] { flex: 1; }
 .dice-window .gm-option { padding-top: 8px; border-top: 1px solid var(--panel-edge); color: var(--brass); }
-@media (max-width: 700px) { .dice-window { grid-template-columns: 1fr; } .dice-window-preview { position: static; max-width: 260px; } }
+
+/* --- The tray's 3D dice and its menus ------------------------------------------ */
+.tray-die .tray-die-3d { display: block; filter: drop-shadow(0 0 5px color-mix(in srgb, var(--tray-glow) 75%, transparent)) drop-shadow(0 2px 2px rgba(0, 0, 0, 0.6)); transition: transform 0.15s, filter 0.15s; }
+.tray-die:hover .tray-die-3d { transform: translateY(-3px) rotate(-6deg) scale(1.08); filter: drop-shadow(0 0 9px var(--tray-glow)) drop-shadow(0 4px 3px rgba(0, 0, 0, 0.6)); }
+.tray-die:hover { background: transparent; border-color: transparent; }
+.dice-ghost img { width: 46px; height: 46px; filter: drop-shadow(0 6px 6px rgba(0, 0, 0, 0.6)); }
+.tray-menu { position: fixed; z-index: 1000; transform: translate(-10px, -100%); display: flex; flex-direction: column; min-width: 190px; padding: 4px; border: 1px solid var(--brass-dim); border-radius: 8px; background: #121619; box-shadow: var(--shadow); }
+.tray-menu button { display: flex; align-items: center; gap: 10px; padding: 6px 10px; border: none; border-radius: 5px; background: transparent; text-align: left; font-size: 0.88rem; }
+.tray-menu button:hover { background: var(--brass-soft); }
+.tray-menu button b { min-width: 2.2rem; color: var(--brass); }
+.tray-menu .tray-menu-head { font-weight: 700; border-bottom: 1px solid var(--panel-edge); border-radius: 5px 5px 0 0; margin-bottom: 2px; }
+.modifier-box .modifier-value { display: flex; flex-direction: column; align-items: center; background: #0f1115; padding: 0 2px; }
+.modifier-box .modifier-value input { height: 1.25rem; font-weight: 700; }
+.modifier-box .modifier-value small { font-size: 0.56rem; color: var(--muted); letter-spacing: 0.06em; margin-top: -2px; }
+.modifier-box.set { border-color: var(--brass); box-shadow: 0 0 8px rgba(210, 161, 90, 0.35); }
+.modifier-box.set input { color: var(--brass); }
 /* A die in its owner's set (tray, pool, roll cards). */
 .die-shape.set polygon { stroke: rgba(255, 255, 255, 0.42); stroke-width: 1.1; stroke-linejoin: round; filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.55)); }
 .die-shape.set text { paint-order: stroke; stroke: rgba(0, 0, 0, 0.5); stroke-width: 1.5px; stroke-linejoin: round; }
 .die.dropped .die-shape.set { opacity: 0.45; filter: grayscale(0.6); }
+
+.dice-tray .tray-die { padding: 0; }
+.chat-dock .dice-tray { flex-wrap: nowrap; gap: 1px; padding: 4px 6px 8px; }
+.chat-dock .dice-tray .modifier-box { flex: none; }
+.chat-dock .dice-tray .modifier-box button { padding: 2px 5px; }
+.chat-dock .dice-tray .modifier-box input { width: 2.4rem; padding: 0; }
+.chat-dock .dice-tray .tower { flex: none; margin-left: 3px; }

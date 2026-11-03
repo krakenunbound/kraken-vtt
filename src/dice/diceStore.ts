@@ -63,7 +63,11 @@ const set = (name: string, look: Partial<DiceLook> & Pick<DiceLook, "theme" | "b
   ...look,
 });
 
-// Ready-made sets: the Gilded Die's six, and Kraken's own.
+// Ready-made sets: the Gilded Die's six, and Kraken's own (SET_GROUPS says which).
+export const SET_GROUPS: { name: string; sets: string[] }[] = [
+  { name: "The Gilded Die", sets: ["Classic Ruby", "Dragonhide", "Starfall", "Ancient Bone", "Magma Vein", "Leviathan"] },
+  { name: "Kraken", sets: ["Frost Glass", "Molten Gold", "Arcane Pearl", "Obsidian", "Carrara", "Oak and Iron", "Rune Steel", "Kraken Deep"] },
+];
 export const PRESETS: ({ name: string } & DiceLook)[] = [
   set("Classic Ruby", { theme: "classic", body: "#9d2136", ink: "#f9e7c1" }),
   set("Dragonhide", { theme: "dragonhide", body: "#245b3b", ink: "#f5d99d" }),
@@ -81,10 +85,11 @@ export const PRESETS: ({ name: string } & DiceLook)[] = [
   set("Kraken Deep", { theme: "speckle", body: "#0f3b44", accent: "#4fd6d0", ink: "#f2d08d", effect: "sparkles" }),
 ];
 
-export type DiceSettings = { show: boolean; sound: boolean; volume: number; look: DiceLook };
+// tray, roll: how big the tray's dice and the dice on the table are (FG's Tray and Roll sizes), 1 = 100%.
+export type DiceSettings = { show: boolean; sound: boolean; volume: number; tray: number; roll: number; look: DiceLook };
 type SettingsPatch = Partial<Omit<DiceSettings, "look">> & { look?: Partial<DiceLook> };
 const { name: _first, ...firstLook } = PRESETS[0];
-const DEFAULTS: DiceSettings = { show: true, sound: true, volume: 0.7, look: firstLook };
+const DEFAULTS: DiceSettings = { show: true, sound: true, volume: 0.7, tray: 1, roll: 1, look: firstLook };
 
 // A look from another seat (or an older one) with whatever it leaves out filled in.
 export function fullLook(look: Partial<DiceLook>): DiceLook {

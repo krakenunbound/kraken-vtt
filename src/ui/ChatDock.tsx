@@ -24,6 +24,31 @@ function rememberChat(place: ScreenPlace | null) {
 }
 
 const TRAY = [4, 6, 8, 10, 12, 20, 100];
+// FG's right-click on a tray die: roll that many of it at once.
+const MANY = [20, 15, 10, 5, 4, 3, 2];
+// Dice with no shape of their own (FG's Custom Dice): rolled in chat.
+const CUSTOM = [2, 3, 16, 30];
+// FG's modifier box: quick values on a right-click.
+const QUICK = [10, 5, 4, 3, 2, 1, -1, -2, -3, -4, -5, -10];
+
+// The tray's dice drawn in 3D in this seat's set (three.js loads for it).
+function useTrayArt(look: DiceLook) {
+  const [art, setArt] = useState<Record<number, string>>({});
+  const key = JSON.stringify(look);
+  useEffect(() => {
+    let live = true;
+    import("../dice/trayArt")
+      .then(({ renderTray }) => renderTray(look))
+      .then((pictures) => live && setArt(pictures))
+      .catch(() => live && setArt({}));
+    return () => {
+      live = false;
+    };
+    // The look is compared by value.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key]);
+  return art;
+}
 
 // A roll as FG shows it in chat: what it was for, each die (dropped dice
 // faded), the modifier, and the total. While its dice are still rolling on
@@ -117,9 +142,34 @@ export function ChatDock({ session }: { session: Session }) {
   const [modifier, setModifier] = useState(0);
   const [tower, setTower] = useState(false);
   const windows = useWindows();
+  // A right-click menu over the tray: how many of a die to roll, or the modifier's quick values.
+  const [menu, setMenu] = useState<{ x: number; y: number; sides: number | null; custom?: boolean } | null>(null);
   // This seat's own set, on the tray's dice (the GM's too).
-  const mine = useSyncExternalStore(diceStore.subscribe, diceStore.settings).look;
-  // A die being dragged from the tray, to throw or to drop in the tower.
+  const diceSettings = useSyncExternalStore(diceStore.subscribe, diceStore.settings);
+  const mine = diceSettings.look;
+  const traySize = Math.round(29 * Math.min(1.6, Math.max(0.6, diceSettings.tray ?? 1)));
+  const trayArt = useTrayArt(mine);
+  const trayDie = (sides: number, size: number) =>
+    trayArt[sides] ? (
+      <img className="tray-die-3d" src={trayArt[sides]} width={size} height={size} alt="" draggable={false} />
+    ) : (
+      <DieShape sides={sides === 100 ? 10 : sides} size={size - 8} label={sides === 100 ? "%" : sides} look={mine} />
+    );
+  useEffect(() => {
+    if (!menu) return;
+    const view = dock.current?.ownerDocument.defaultView ?? window;
+    const close = (event: Event) => {
+      if (event instanceof KeyboardEvent && event.key !== "Escape") return;
+      if (event.target instanceof Element && event.target.closest(".tray-menu")) return;
+      setMenu(null);
+    };
+    view.addEventListener("pointerdown", close, true);
+    view.addEventListener("keydown", close);
+    return () => {
+      view.removeEventListener("pointerdown", close, true);
+      view.removeEventListener("keydown", close);
+    };
+  }, [menu]);  // A die being dragged from the tray, to throw or to drop in the tower.
   const [ghost, setGhost] = useState<{ x: number; y: number; sides: number | null; overTower: boolean } | null>(null);
   const dragged = useRef(false);
   const towerButton = useRef<HTMLButtonElement>(null);
@@ -276,13 +326,13 @@ export function ChatDock({ session }: { session: Session }) {
           <Icon name="settings" size={18} />
         </button>
       </form>
-      <div className="dice-tray" aria-label="Dice tray">
+      <div className="dice-tray" aria-label="Dice tray" style={{ ["--tray-glow" as string]: mine.accent ?? mine.body }}>
         {TRAY.map((sides) => (
           <button
             key={sides}
             type="button"
             className="tray-die"
-            title={`Drag out and let go to throw a d${sides}, or drop it on the dice tower. Click adds it to the pool; right-click rolls one now.`}
+            title={`Pick up a d${sides} and throw it: drag out and let go, or drop it on the dice tower. Click adds it to the pool; right-click rolls several.`}
             aria-label={`d${sides}`}
             onPointerDown={(event) => startDrag(event, sides)}
             onClick={() => {
@@ -290,17 +340,28 @@ export function ChatDock({ session }: { session: Session }) {
             }}
             onContextMenu={(event) => {
               event.preventDefault();
-              rollDice([sides], tower);
+              setMenu({ x: event.clientX, y: event.clientY, sides });
             }}
           >
-            <DieShape sides={sides === 100 ? 10 : sides} size={30} label={sides === 100 ? "%" : sides} look={mine} />
+            {trayDie(sides, traySize)}
           </button>
         ))}
-        <div className="modifier-box" title="Modifier for the next roll (FG's modifier box)">
+        <div
+          className={modifier ? "modifier-box set" : "modifier-box"}
+          title="Modifier for the next roll (FG's modifier box): the wheel or the buttons change it, a right-click picks one"
+          onWheel={(event) => setModifier(modifier + (event.deltaY < 0 ? 1 : -1))}
+          onContextMenu={(event) => {
+            event.preventDefault();
+            setMenu({ x: event.clientX, y: event.clientY, sides: null });
+          }}
+        >
           <button type="button" aria-label="Modifier down" onClick={() => setModifier(modifier - 1)}>
             −
           </button>
-          <input aria-label="Modifier" type="number" value={modifier} onChange={(event) => setModifier(Number(event.target.value) || 0)} />
+          <span className="modifier-value">
+            <input aria-label="Modifier" type="number" value={modifier} onChange={(event) => setModifier(Number(event.target.value) || 0)} />
+            <small>Modifier</small>
+          </span>
           <button type="button" aria-label="Modifier up" onClick={() => setModifier(modifier + 1)}>
             +
           </button>
@@ -325,9 +386,47 @@ export function ChatDock({ session }: { session: Session }) {
       {ghost ? (
         <span className={ghost.overTower ? "dice-ghost over-tower" : "dice-ghost"} style={{ left: ghost.x, top: ghost.y }} aria-hidden="true">
           {(ghost.sides ? [...pool, ghost.sides] : pool).slice(-6).map((sides, index) => (
-            <DieShape key={index} sides={sides === 100 ? 10 : sides} size={34} label={sides === 100 ? "%" : sides} look={mine} />
+            <span key={index}>{trayDie(sides, 46)}</span>
           ))}
         </span>
+      ) : null}
+      {menu ? (
+        <div className="tray-menu" role="menu" style={{ left: menu.x, top: menu.y }}>
+          {menu.sides === null ? (
+            <>
+              {QUICK.map((value) => (
+                <button key={value} type="button" role="menuitem" onClick={() => (setModifier(modifier + value), setMenu(null))}>
+                  {value > 0 ? `+${value}` : `−${-value}`}
+                </button>
+              ))}
+              <button type="button" role="menuitem" onClick={() => (setModifier(0), setMenu(null))}>
+                Clear
+              </button>
+            </>
+          ) : menu.custom ? (
+            <>
+              <button type="button" role="menuitem" className="tray-menu-head" onClick={() => setMenu({ ...menu, custom: false })}>
+                ‹ Custom Dice
+              </button>
+              {CUSTOM.map((sides) => (
+                <button key={sides} type="button" role="menuitem" onClick={() => (rollDice([sides], tower), setMenu(null))}>
+                  Roll a d{sides}
+                </button>
+              ))}
+            </>
+          ) : (
+            <>
+              <button type="button" role="menuitem" className="tray-menu-head" onClick={() => setMenu({ ...menu, custom: true })}>
+                Custom Dice ›
+              </button>
+              {MANY.map((count) => (
+                <button key={count} type="button" role="menuitem" data-many={count} onClick={() => (rollDice(Array(count).fill(menu.sides), tower), setMenu(null))}>
+                  <b>{count}×</b> Roll {count} d{menu.sides === 100 ? "%" : menu.sides}
+                </button>
+              ))}
+            </>
+          )}
+        </div>
       ) : null}
       {pool.length > 0 ? (
         <div className="dice-pool">

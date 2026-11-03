@@ -19,7 +19,7 @@ export function SettingsWindow({ session }: { session: Session }) {
       </div>
       <label className="settings-check">
         <input type="checkbox" checked={session.options.towerReveal} onChange={(event) => session.setTableOptions({ towerReveal: event.target.checked })} />
-        Dice tower: players see their own result
+        Let players see their own dice-tower rolls (unticked: only the GM sees them, as in FG)
       </label>
     </div>
   );

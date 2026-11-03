@@ -71,7 +71,7 @@ function createEngine(host: HTMLDivElement) {
   const resize = () => {
     const w = Math.max(1, window.innerWidth);
     const h = Math.max(1, window.innerHeight);
-    unit = Math.min(66, Math.max(38, Math.min(w, h) / 17));
+    unit = Math.min(66, Math.max(38, Math.min(w, h) / 17)) * Math.min(2.5, Math.max(0.5, diceStore.settings().roll ?? 1));
     width = w / unit;
     depth = h / unit;
     renderer.setSize(w, h, false);
@@ -90,6 +90,14 @@ function createEngine(host: HTMLDivElement) {
   };
   resize();
   window.addEventListener("resize", resize);
+  // The Roll size: bigger dice on the table.
+  let rollSize = diceStore.settings().roll;
+  const stopSize = diceStore.subscribe(() => {
+    if (diceStore.settings().roll !== rollSize) {
+      rollSize = diceStore.settings().roll;
+      resize();
+    }
+  });
 
   const throws: Throwing[] = [];
   const flights: Flight[] = [];
@@ -222,6 +230,7 @@ function createEngine(host: HTMLDivElement) {
     dispose() {
       cancelAnimationFrame(frame);
       window.removeEventListener("resize", resize);
+      stopSize();
       throws.forEach((item) => {
         removeGroups(item.groups);
         if (item.line) rolling.landed(item.line);
