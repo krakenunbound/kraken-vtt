@@ -13,5 +13,5 @@ Players open the address shown in the app's Players window in Chrome.
 ## Development
 
 - `npm run dev` runs the interface in a browser, `npm start` opens the app on the last build.
-- Tests: `npm run coverage`, `agent`, `agent-ui`, `dice`, `spells`, `attack`, `combat`, `map`, `party`, `session`, `character`, `wizard`, `pregens`, `popout`, `setup`.
+- Tests: `npm run coverage`, `agent`, `agent-ui`, `dice`, `spells`, `attack`, `combat`, `map`, `party`, `session`, `character`, `wizard`, `pregens`, `popout`, `setup`, `decal`.
 - [PLAN.md](PLAN.md) holds the plan and the progress log.

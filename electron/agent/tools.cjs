@@ -515,11 +515,40 @@ const TOOLS = [
   {
     name: "kraken_table_options",
     description:
-      "The table's own options. towerReveal: a roll a player drops in the dice tower is shown to that player too (as FG, it is otherwise the GM's alone; the player sees only what went in). Call with nothing to read them.",
+      "The table's own options. towerReveal: a roll a player drops in the dice tower is shown to that player too (as FG, it is otherwise the GM's alone; the player sees only what went in). decal: the background decal (kraken_decal chooses one). Call with nothing to read them.",
     inputSchema: object({ towerReveal: { type: "boolean" } }),
     run(args, ctx) {
       const agent = needTable(ctx);
       return out(Object.keys(args).length > 0 ? agent.setOptions(args) : agent.options());
+    },
+  },
+  {
+    name: "kraken_decal",
+    description:
+      "The table's background decal, as FG's Background Decal (shown behind everything when no map is up, to every seat). action view (default): the decal now; list: the decals to choose from (Kraken's own, the GM's assets folder, FG's), filtered by search; set: put one up (id from list, \"kraken\" for the Kraken emblem, \"\" for none); import: copy a picture from this computer (path) into the GM's assets folder, so every campaign can use it, and put it up.",
+    inputSchema: object({
+      action: { type: "string", enum: ["view", "list", "set", "import"] },
+      id: string("Decal id (set)"),
+      path: string("Full path of a .png, .webp, .jpg or .gif (import)"),
+      search: string("Part of the name or group (list)"),
+    }),
+    run(args, ctx) {
+      const agent = needTable(ctx);
+      const library = agent.decals();
+      const action = args.action ?? "view";
+      if (action === "list") {
+        const wanted = String(args.search ?? "").toLowerCase();
+        const all = library ? library.list() : [];
+        return out({ decals: [{ id: "kraken", name: "Kraken", group: "Kraken" }, ...all].filter((item) => !wanted || `${item.group} ${item.name}`.toLowerCase().includes(wanted)), folder: library?.folder ?? null });
+      }
+      if (action === "set") return out({ decal: agent.setOptions({ decal: String(args.id ?? "") }).decal });
+      if (action === "import") {
+        if (!library) throw new Error("This table has no decal library.");
+        const item = library.addFile(String(args.path ?? ""));
+        agent.setOptions({ decal: item.id });
+        return out({ imported: item, decal: item.id });
+      }
+      return out({ decal: agent.options().decal });
     },
   },
   {
@@ -629,10 +658,10 @@ const TOOLS = [
   {
     name: "kraken_windows",
     description:
-      "The GM's windows: list them, or open, close, pop out (to a window of its own, for another monitor) or dock back a window. Kinds: characters, party, combat, players, sheet (a character's sheet: give record, its id or name).",
+      "The GM's windows: list them, or open, close, pop out (to a window of its own, for another monitor) or dock back a window. Kinds: characters, party, combat, players, settings, decals (the background decal picker), sheet (a character's sheet: give record, its id or name).",
     inputSchema: object({
       action: { type: "string", enum: ["list", "open", "close", "popout", "dock"] },
-      kind: { type: "string", enum: ["characters", "party", "combat", "players", "sheet"] },
+      kind: { type: "string", enum: ["characters", "party", "combat", "players", "settings", "decals", "sheet"] },
       record: string("For a sheet: the character's record id or name"),
     }),
     run: async (args, ctx) => out(await ctx.ui({ kind: "windows", action: args.action ?? "list", window: args.kind, record: args.record })),

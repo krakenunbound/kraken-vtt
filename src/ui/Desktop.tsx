@@ -7,7 +7,8 @@ import type { Session } from "../session/useSession";
 import { diceStore } from "../dice/diceStore";
 import { agentCommands } from "./agentCommands";
 import { ChatDock } from "./ChatDock";
-import { Emblem, Mark } from "./Emblem";
+import { Mark } from "./Emblem";
+import { DecalPicker, SettingsWindow, TableDecal } from "./Settings";
 import { Icon } from "./icons";
 import { FloatingWindow, useWindows, type WindowKind } from "./Windows";
 
@@ -89,6 +90,7 @@ export function Desktop({
         { kind: "party", label: "Party", icon: "party", title: "Party Sheet" },
         { kind: "combat", label: "Combat", icon: "combat", title: "Combat Tracker" },
         { kind: "players", label: "Players", icon: "players", title: "Players" },
+        { kind: "settings", label: "Settings", icon: "settings", title: "Settings" },
       ]
     : [
         { kind: "characters", label: characters.length === 1 ? "Character" : "Characters", icon: "character", title: characters.length === 1 ? characters[0].name : "My characters" },
@@ -106,7 +108,7 @@ export function Desktop({
         if (command.kind !== "windows") return null;
         const { windows: manager, launchers: kinds, characters: sheets } = live.current;
         const list = () => manager.windows.map((item) => ({ key: item.key, kind: item.kind, title: item.title, poppedOut: item.popped }));
-        if (command.action === "list") return { open: list(), kinds: [...kinds.map((item) => item.kind), "sheet"] };
+        if (command.action === "list") return { open: list(), kinds: [...kinds.map((item) => item.kind), "sheet", "decals"] };
         let key: string = command.window ?? "";
         if (command.window === "sheet") {
           const wanted = String(command.record ?? "").toLowerCase();
@@ -115,7 +117,7 @@ export function Desktop({
           if (command.action === "open") manager.open("sheet", record.name, record.id);
           key = `sheet:${record.id}`;
         } else {
-          const launcher = kinds.find((item) => item.kind === command.window);
+          const launcher = command.window === "decals" ? { kind: "decals" as const, title: "Background Decal" } : kinds.find((item) => item.kind === command.window);
           if (!launcher) throw new Error(`No window "${command.window ?? ""}". Kinds: ${kinds.map((item) => item.kind).join(", ")}, sheet.`);
           if (command.action === "open") manager.open(launcher.kind, launcher.title);
         }
@@ -169,7 +171,7 @@ export function Desktop({
         <div className="desktop-surface">
           {scene ?? (
             <div className="desktop-empty">
-              <Emblem />
+              <TableDecal session={session} />
               {gm ? emptyGM : <p className="desktop-hint">The GM has not opened a map yet.</p>}
             </div>
           )}
@@ -208,6 +210,8 @@ export function Desktop({
               {item.kind === "party" ? <PartySheet session={session} /> : null}
               {item.kind === "combat" ? <CombatTracker session={session} /> : null}
               {item.kind === "players" ? <PlayersWindow session={session} /> : null}
+              {item.kind === "settings" ? <SettingsWindow session={session} /> : null}
+              {item.kind === "decals" ? <DecalPicker session={session} onClose={() => windows.close(item.key)} /> : null}
             </FloatingWindow>
           ))}
         </div>

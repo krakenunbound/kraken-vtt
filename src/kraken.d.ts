@@ -40,6 +40,9 @@ export type KrakenApi = {
   campaignBundle: (id: string) => Promise<Uint8Array | null>;
   saveBundle: (id: string, bytes: Uint8Array) => Promise<void>;
   saveView: (id: string, view: KrakenView | null) => Promise<void>;
+  pickDecal: () => Promise<KrakenDecal | null>;
+  addDecal: (name: string, bytes: Uint8Array) => Promise<KrakenDecal>;
+  openDecalFolder: () => Promise<string>;
   onAgentCommand: (handler: (command: KrakenAgentCommand) => Promise<unknown>) => () => void;
 };
 
@@ -50,6 +53,8 @@ export type KrakenAgentCommand =
   | { kind: "scenes"; adventure?: string; scene?: string }
   | { kind: "windows"; action: "list" | "open" | "close" | "popout" | "dock"; window?: string; record?: string }
   | { kind: "dice-settings"; patch: { show?: boolean; sound?: boolean; volume?: number; preset?: string; body?: string; ink?: string } };
+
+export type KrakenDecal = { id: string; name: string; group: string };
 
 export type KrakenView = { adventure: string; sceneId: string };
 

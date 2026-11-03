@@ -1,10 +1,11 @@
-const { app, BrowserWindow, Menu, ipcMain, clipboard } = require("electron");
+const { app, BrowserWindow, Menu, ipcMain, clipboard, dialog, shell } = require("electron");
 const fs = require("fs");
 const https = require("https");
 const os = require("os");
 const path = require("path");
 const { createTableServer, eachAddress } = require("./tableServer.cjs");
 const { createArtLibrary, defaultRoots } = require("./artLibrary.cjs");
+const { createDecalLibrary } = require("./decals.cjs");
 const { fgDataFolder } = require("./importers/fgModule.cjs");
 const campaigns = require("./campaigns.cjs");
 const { startAgentServer } = require("./agent/mcpServer.cjs");
@@ -73,6 +74,20 @@ async function networkSnapshot() {
 
 let table = null;
 let quitting = false;
+
+// Background decals: Kraken's own, the GM's assets folder (shared by every
+// campaign; a picture the GM picks is copied in), and FG's decals.
+let decalLibrary = null;
+function decals() {
+  if (!decalLibrary) {
+    decalLibrary = createDecalLibrary({
+      folder: path.join(app.getPath("userData"), "assets", "decals"),
+      builtin: path.join(__dirname, "..", "dist", "decals"),
+      fgData: fgDataFolder(),
+    });
+  }
+  return decalLibrary;
+}
 
 // The campaign being hosted. Its table (view, chat, tokens and doors) is saved to disk
 // when something changes (after a short pause), every 30 seconds while dirty,
@@ -161,7 +176,7 @@ ipcMain.handle("start-host", async (_event, options) => {
   const campaignId = typeof options?.campaignId === "string" ? options.campaignId : "";
   const saved = openCampaign(campaignId) ?? {};
   const dataFolder = fgDataFolder();
-  const next = createTableServer({ saved, onChange: markDirty, art: createArtLibrary({ base: dataFolder, roots: defaultRoots(dataFolder) }) });
+  const next = createTableServer({ saved, onChange: markDirty, art: createArtLibrary({ base: dataFolder, roots: defaultRoots(dataFolder) }), decals: decals() });
   try {
     const info = await next.listen({ port, password });
     table = next;
@@ -207,6 +222,23 @@ ipcMain.handle("set-token-art", (_event, list) => {
   table.setTokenArt(
     (Array.isArray(list) ? list : []).map((item) => ({ id: item?.id, mime: item?.mime, bytes: item?.bytes ? Buffer.from(item.bytes) : null })),
   );
+});
+
+// The decal picker's Browse: a picture from anywhere, copied into the assets folder.
+ipcMain.handle("decal-pick", async () => {
+  const picked = await dialog.showOpenDialog(mainWindow, {
+    title: "Choose a background decal",
+    properties: ["openFile"],
+    filters: [{ name: "Pictures", extensions: ["png", "webp", "jpg", "jpeg", "gif"] }],
+  });
+  if (picked.canceled || picked.filePaths.length === 0) return null;
+  return decals().addFile(picked.filePaths[0]);
+});
+// A picture dropped on the picker.
+ipcMain.handle("decal-add", (_event, name, bytes) => decals().add(String(name ?? ""), Buffer.from(bytes ?? [])));
+ipcMain.handle("decal-folder", async () => {
+  fs.mkdirSync(decals().folder, { recursive: true });
+  return shell.openPath(decals().folder);
 });
 
 ipcMain.handle("set-scene-image", (_event, bytes, mime) => {

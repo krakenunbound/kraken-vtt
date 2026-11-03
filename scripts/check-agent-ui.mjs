@@ -105,6 +105,22 @@ try {
   assert((await refused("kraken_windows", { action: "close", kind: "party" })).includes("not open"), "closing a window that is not open is refused");
   assert((await refused("kraken_windows", { action: "open", kind: "sheet", record: "Nobody" })).includes("No character"), "an unknown character is refused");
 
+  // The background decal: Settings and the picker are windows; the decal shows on the empty desktop.
+  await tool("kraken_windows", { action: "open", kind: "settings" });
+  await page.waitForSelector('[data-setting="decal"]');
+  await page.click('[data-setting="decal"]');
+  await page.waitForSelector('.decal-tile[data-decal="kraken/Floating Keep.webp"]');
+  await page.click('.decal-tile[data-decal="kraken/Floating Keep.webp"]');
+  await page.click('[data-action="decal-ok"]');
+  await page.waitForSelector('img.decal[src*="Floating%20Keep"]');
+  assert(!(await tool("kraken_windows")).open.some((item) => item.kind === "decals"), "OK closes the picker");
+  assert((await tool("kraken_decal")).decal === "kraken/Floating Keep.webp", "the GM's pick is the table's decal");
+  await tool("kraken_decal", { action: "set", id: "" });
+  await page.waitForFunction(() => !document.querySelector(".desktop-empty img"));
+  await tool("kraken_decal", { action: "set", id: "kraken" });
+  await page.waitForSelector(".desktop-empty img.emblem");
+  await tool("kraken_windows", { action: "close", kind: "settings" });
+
   // No map yet: nothing to ping or switch.
   assert((await refused("kraken_ping", { col: 1, row: 1 })).includes("No scene"), "no ping without a scene");
   assert((await refused("kraken_scenes", {})).includes("No adventure"), "no scenes without an adventure");
