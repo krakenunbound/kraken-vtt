@@ -1,6 +1,25 @@
 import { useEffect, useRef, useState } from "react";
 import type { ChatLine, RollResult, Session } from "../session/useSession";
 import { DieShape, Icon } from "./icons";
+import { openPopOut, PopOutWindow, screenOffset, type ScreenPlace } from "./PopOut";
+
+// Where chat last was in a window of its own (in this browser).
+function chatPlace(): ScreenPlace | null {
+  try {
+    const saved = JSON.parse(window.localStorage.getItem("kraken-window:chat") ?? "null");
+    return saved && Number.isFinite(saved.sx) ? saved : null;
+  } catch {
+    return null;
+  }
+}
+
+function rememberChat(place: ScreenPlace | null) {
+  try {
+    window.localStorage.setItem("kraken-window:chat", JSON.stringify(place));
+  } catch {
+    /* only the place is lost */
+  }
+}
 
 const TRAY = [4, 6, 8, 10, 12, 20, 100];
 
@@ -66,9 +85,44 @@ export function ChatDock({ session }: { session: Session }) {
   const [modifier, setModifier] = useState(0);
   const [tower, setTower] = useState(false);
   const log = useRef<HTMLDivElement>(null);
+  const dock = useRef<HTMLElement>(null);
+  // Chat in a window of its own, for another monitor.
+  const [out, setOut] = useState<Window | null>(null);
   useEffect(() => {
     log.current?.scrollTo({ top: log.current.scrollHeight });
-  }, [session.chat.length]);
+  }, [session.chat.length, out]);
+  // Left out last time: out again (the app allows it; a browser may not).
+  useEffect(() => {
+    const place = chatPlace();
+    if (!place) return;
+    const child = openPopOut("Chat", place);
+    if (child) setOut(child);
+    return () => child?.close();
+  }, []);
+  // It goes when the table does.
+  useEffect(() => {
+    if (!out) return;
+    const close = () => out.close();
+    window.addEventListener("pagehide", close);
+    return () => {
+      window.removeEventListener("pagehide", close);
+      close();
+    };
+  }, [out]);
+  const popOut = () => {
+    const rect = dock.current?.getBoundingClientRect();
+    const offset = screenOffset();
+    const place = { sx: offset.x + (rect?.left ?? 12), sy: offset.y + (rect?.top ?? 200), w: rect?.width ?? 380, h: rect?.height ?? 460 };
+    const child = openPopOut("Chat", place);
+    if (!child) return;
+    rememberChat(place);
+    setOut(child);
+  };
+  const bringBack = () => {
+    out?.close();
+    rememberChat(null);
+    setOut(null);
+  };
 
   const poolFormula = () => {
     const counts = new Map<number, number>();
@@ -82,8 +136,17 @@ export function ChatDock({ session }: { session: Session }) {
     setModifier(0);
   };
 
-  return (
-    <section className="chat-dock" aria-label="Chat">
+  const body = (
+    <section className={out ? "chat-dock popped" : "chat-dock"} aria-label="Chat" ref={dock}>
+      <button
+        type="button"
+        className="chat-popout"
+        title={out ? "Back into the main window" : "Out to a window of its own (for another monitor)"}
+        aria-label={out ? "Put chat back in the main window" : "Pop out chat"}
+        onClick={out ? bringBack : popOut}
+      >
+        <Icon name={out ? "dock" : "popout"} size={15} />
+      </button>
       <div className="chat-log" aria-live="polite" ref={log}>
         {session.chat.length === 0 ? <p className="hint">The table is quiet.</p> : null}
         {session.chat.map((line, index) => (
@@ -157,5 +220,20 @@ export function ChatDock({ session }: { session: Session }) {
         </div>
       ) : null}
     </section>
+  );
+
+  if (!out) return body;
+  return (
+    <PopOutWindow
+      child={out}
+      title="Chat · Kraken"
+      onClosed={() => {
+        rememberChat(null);
+        setOut(null);
+      }}
+      onPlaced={(place) => rememberChat(place)}
+    >
+      {body}
+    </PopOutWindow>
   );
 }
