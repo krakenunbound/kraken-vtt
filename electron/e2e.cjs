@@ -86,7 +86,7 @@ async function run(hostWindow, createWindow) {
   await whenLoaded(player);
   await waitForText(player, "My Campaigns");
   await player.webContents.executeJavaScript('document.querySelector(\'button[data-action="join-mode"]\').click()');
-  await waitForText(player, "Join a game");
+  await waitForText(player, "Join the table");
   await fill(player, 'form[data-form="join"] input[name="name"]', "Player");
   await fill(player, 'form[data-form="join"] input[name="address"]', "127.0.0.1");
   await fill(player, 'form[data-form="join"] input[name="port"]', String(PORT));

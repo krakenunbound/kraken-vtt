@@ -37,8 +37,14 @@ function field(data: Row, path: string): unknown {
   return path.split(".").reduce<unknown>((node, key) => (node && typeof node === "object" ? (node as Row)[key] : undefined), data);
 }
 
+const RANGED = /\b(bow|crossbow|sling|dart|javelin|blowgun)\b/i;
+
+// The character sheet, as FG lays one out: the portrait and who they are,
+// a ribbon of vitals, the attributes as tiles that roll a check, and tabs for
+// combat, gear and powers.
 function Sheet({ record, session }: { record: TableRecord; session: Session }) {
   const [cl, setCl] = useState(0);
+  const [tab, setTab] = useState<"main" | "gear" | "powers" | "notes">("main");
   const [picking, setPicking] = useState<"portrait" | "token" | null>(null);
   const data = record.data as Row;
   const canRoll = session.role === "dm" || record.owner === session.players.find((seat) => seat.id === session.selfId)?.name;
@@ -46,11 +52,15 @@ function Sheet({ record, session }: { record: TableRecord; session: Session }) {
   const classes = packages.filter((pkg) => String(pkg.packagetype).toLowerCase() === "class");
   const inventory = rows(data.inventorylist);
   const powers = rows(data.powers).sort((a, b) => num(a.level) - num(b.level) || String(a.name).localeCompare(String(b.name)));
-  const coins = rows(data.coins)
-    .filter((coin) => num(coin.amount) > 0)
-    .map((coin) => `${num(coin.amount)} ${String(coin.name)}`)
-    .join(", ");
-  const hp = num(field(data, "hp.total")) - num(field(data, "hp.wounds"));
+  const coins = rows(data.coins).filter((coin) => num(coin.amount) > 0);
+  const total = num(field(data, "hp.total"));
+  const current = total - num(field(data, "hp.wounds"));
+  const exp = num(data.exp);
+  const next = num(data.expnext);
+  const ready = next > 0 && exp >= next;
+  const weapons = inventory.filter((item) => num(item.carried) === 2 && String(item.damage ?? "").trim() !== "");
+  const health = current <= 0 ? "#6C2DC7" : current / Math.max(1, total) < 0.5 ? "#e07a6a" : "#56b33f";
+  const languages = rows(data.languagelist).map((row) => String(row.name));
 
   return (
     <article className="sheet" data-character={record.id}>
@@ -97,87 +107,156 @@ function Sheet({ record, session }: { record: TableRecord; session: Session }) {
         ) : null}
         <div className="sheet-title">
           <h2>{record.name}</h2>
-          <p>
+          <p className="sheet-who">
             {String(data.race ?? "")} {classes.map((pkg) => `${String(pkg.name)} ${num(pkg.level)}`).join(" / ")}
-            {data.alignment ? ` · ${String(data.alignment)}` : ""}
+          </p>
+          <p className="sheet-sub">
+            {[data.alignment, data.deity, data.size].filter(Boolean).map(String).join(" · ")}
+            {record.owner ? ` · played by ${record.owner}` : ""}
           </p>
         </div>
-        <dl className="sheet-stats">
-          <div>
-            <dt>HP</dt>
-            <dd data-stat="hp">
-              {hp}/{num(field(data, "hp.total"))}
-            </dd>
-          </div>
-          <div>
-            <dt>AC</dt>
-            <dd data-stat="ac">{num(field(data, "ac.total"))}</dd>
-          </div>
-          <div>
-            <dt>BtH</dt>
-            <dd data-stat="bth">{signed(num(data.bth))}</dd>
-          </div>
-          <div>
-            <dt>Level</dt>
-            <dd data-stat="level">{num(data.level)}</dd>
-          </div>
-          <div>
-            <dt>XP</dt>
-            <dd data-stat="exp">
-              {num(data.exp)} / {num(data.expnext) || "—"}
-            </dd>
-          </div>
-          {canRoll && num(data.expnext) > 0 ? (
-            <div>
-              <dt>{num(data.exp) >= num(data.expnext) ? "Ready" : "\u00a0"}</dt>
-              <dd>
-                <button
-                  type="button"
-                  data-action="level-up"
-                  className={num(data.exp) >= num(data.expnext) ? "play-button" : ""}
-                  disabled={session.role !== "dm" && num(data.exp) < num(data.expnext)}
-                  title={num(data.exp) >= num(data.expnext) ? "Enough experience for the next level" : "The GM can level a character early"}
-                  onClick={() => session.levelUp(record.id)}
-                >
-                  Level up
-                </button>
-              </dd>
-            </div>
-          ) : null}
-        </dl>
+        <div className="level-badge" title="Level">
+          <small>Level</small>
+          <b data-stat="level">{num(data.level)}</b>
+        </div>
       </header>
+
+      <dl className="sheet-stats vitals">
+        <div className="vital hp" title={`${current} of ${total} hit points`}>
+          <dt>Hit points</dt>
+          <dd data-stat="hp">
+            {current}/{total}
+          </dd>
+          <span className="bar">
+            <i style={{ width: `${Math.max(0, Math.min(100, (current / Math.max(1, total)) * 100))}%`, background: health }} />
+          </span>
+        </div>
+        <div className="vital">
+          <dt>Armour</dt>
+          <dd data-stat="ac">{num(field(data, "ac.total"))}</dd>
+        </div>
+        <div className="vital">
+          <dt>To hit</dt>
+          <dd data-stat="bth">{signed(num(data.bth))}</dd>
+        </div>
+        <div className="vital">
+          <dt>Speed</dt>
+          <dd>{String(data.speed ?? "—")}</dd>
+        </div>
+        <div className="vital xp" title={next ? `${exp} of ${next} XP for the next level` : `${exp} XP`}>
+          <dt>Experience</dt>
+          <dd data-stat="exp">
+            {exp} / {next || "—"}
+          </dd>
+          <span className="bar">
+            <i style={{ width: `${next ? Math.min(100, (exp / next) * 100) : 0}%` }} />
+          </span>
+        </div>
+        {canRoll && next > 0 ? (
+          <div className="vital">
+            <dt>{ready ? "Ready!" : "\u00a0"}</dt>
+            <dd>
+              <button
+                type="button"
+                data-action="level-up"
+                className={ready ? "play-button" : ""}
+                disabled={session.role !== "dm" && !ready}
+                title={ready ? "Enough experience for the next level" : "The GM can level a character early"}
+                onClick={() => session.levelUp(record.id)}
+              >
+                Level up
+              </button>
+            </dd>
+          </div>
+        ) : null}
+      </dl>
 
       <section className="sheet-attributes" aria-label="Attributes">
         {STATS.map((stat) => {
           const row = (field(data, `attributes.${stat}`) ?? {}) as Row;
           const prime = num(row.prime) === 1;
-          return (
-            <div key={stat} className={prime ? "attr prime" : "attr"} data-attr={stat}>
+          const body = (
+            <>
               <span className="attr-name">
                 {SHORT[stat]}
                 {prime ? <span className="prime-mark" title="Prime">P</span> : null}
               </span>
               <span className="attr-score">{num(row.score)}</span>
               <span className="attr-bonus">{signed(num(row.bonus))}</span>
-              {canRoll ? (
-                <button type="button" onClick={() => session.siegeCheck(record.id, stat, cl)} aria-label={`${stat} check`}>
-                  Check
-                </button>
-              ) : null}
+            </>
+          );
+          return canRoll ? (
+            <button
+              key={stat}
+              type="button"
+              className={prime ? "attr prime" : "attr"}
+              data-attr={stat}
+              onClick={() => session.siegeCheck(record.id, stat, cl)}
+              aria-label={`${stat} check`}
+              title={`Roll a ${stat} check against CL ${cl}`}
+            >
+              {body}
+            </button>
+          ) : (
+            <div key={stat} className={prime ? "attr prime" : "attr"} data-attr={stat}>
+              {body}
             </div>
           );
         })}
         {canRoll ? (
-          <label className="cl-box">
-            CL
+          <label className="cl-box" title="Challenge level for checks">
+            Checks at CL
             <input type="number" value={cl} min={-10} max={30} onChange={(event) => setCl(Number(event.target.value) || 0)} aria-label="Challenge level" />
           </label>
         ) : null}
       </section>
 
-      <div className="sheet-columns">
-        <section aria-label="Gear">
-          <h3>Gear</h3>
+      <nav className="sheet-tabs" role="tablist">
+        {(["main", "gear", "powers", "notes"] as const).map((id) => (
+          <button key={id} type="button" role="tab" aria-selected={tab === id} onClick={() => setTab(id)}>
+            {id === "main" ? "Combat" : id === "gear" ? "Gear" : id === "powers" ? "Spells & powers" : "Notes"}
+          </button>
+        ))}
+      </nav>
+
+      {tab === "main" ? (
+        <section aria-label="Combat" className="sheet-panel">
+          <ul className="sheet-list attacks">
+            {weapons.length === 0 ? <li className="hint">No weapon in hand.</li> : null}
+            {weapons.map((item, index) => {
+              const ranged = RANGED.test(String(item.name));
+              const bonus = num(field(data, `attack.${ranged ? "ranged" : "melee"}.total`)) + num(item.bonus);
+              return (
+                <li key={index}>
+                  <span className="attack-name">
+                    {String(item.name)}
+                    <small>{ranged ? "ranged" : "melee"}</small>
+                  </span>
+                  {canRoll ? (
+                    <>
+                      <button type="button" onClick={() => session.roll(`1d20${bonus >= 0 ? "+" : ""}${bonus}`, `${record.name}: Attack (${String(item.name)})`)}>
+                        Attack {signed(bonus)}
+                      </button>
+                      <button type="button" onClick={() => session.roll(String(item.damage).replace(/\s+/g, ""), `${record.name}: Damage (${String(item.name)})`)}>
+                        Damage {String(item.damage)}
+                      </button>
+                    </>
+                  ) : (
+                    <span className="hint">
+                      {signed(bonus)} · {String(item.damage)}
+                    </span>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+          <p className="hint">Other attacks: grapple {signed(num(field(data, "attack.grapple.total")))}, overbear {signed(num(field(data, "attack.overbear.total")))}, touch {signed(num(field(data, "attack.touch.total")))}.</p>
+          {data.senses ? <p className="hint">Senses: {String(data.senses)}</p> : null}
+        </section>
+      ) : null}
+
+      {tab === "gear" ? (
+        <section aria-label="Gear" className="sheet-panel">
           <ul className="sheet-list">
             {inventory.map((item, index) => (
               <li key={index} data-carried={num(item.carried)}>
@@ -185,25 +264,56 @@ function Sheet({ record, session }: { record: TableRecord; session: Session }) {
                   {num(item.count) > 1 ? `${num(item.count)} × ` : ""}
                   {String(item.name)}
                 </span>
-                <span className="hint">{num(item.carried) === 2 ? "equipped" : item.location ? `in ${String(item.location)}` : ""}</span>
+                <span className="hint">{num(item.carried) === 2 ? "equipped" : item.location ? `in ${String(item.location)}` : num(item.carried) === 0 ? "left behind" : ""}</span>
               </li>
             ))}
           </ul>
-          <p className="hint">Coin: {coins || "none"}</p>
+          <p className="coin-row">
+            {coins.length === 0 ? <span className="hint">No coin.</span> : null}
+            {coins.map((coin, index) => (
+              <span key={index} className="coin">
+                {num(coin.amount)} <small>{String(coin.name).toUpperCase()}</small>
+              </span>
+            ))}
+          </p>
         </section>
-        <section aria-label="Powers">
-          <h3>Spells and powers</h3>
+      ) : null}
+
+      {tab === "powers" ? (
+        <section aria-label="Powers" className="sheet-panel">
           {powers.length === 0 ? <p className="hint">None.</p> : null}
           <ul className="sheet-list">
             {powers.map((power, index) => (
               <li key={index}>
                 <span>{String(power.name)}</span>
-                <span className="hint">{power.packagesource ? "class" : `level ${num(power.level)}`}</span>
+                <span className="hint">{power.packagesource ? "class ability" : `level ${num(power.level)}`}</span>
               </li>
             ))}
           </ul>
         </section>
-      </div>
+      ) : null}
+
+      {tab === "notes" ? (
+        <section aria-label="Notes" className="sheet-panel notes">
+          <dl className="notes-list">
+            {[
+              ["Languages", languages.join(", ")],
+              ["Age", data.age],
+              ["Height", data.height],
+              ["Weight", data.weight],
+              ["Appearance", data.appearance],
+            ]
+              .filter(([, value]) => value)
+              .map(([label, value]) => (
+                <div key={String(label)}>
+                  <dt>{String(label)}</dt>
+                  <dd>{String(value)}</dd>
+                </div>
+              ))}
+          </dl>
+          {data.notes ? <p className="notes-text">{String(data.notes).replace(/<[^>]+>/g, " ")}</p> : null}
+        </section>
+      ) : null}
     </article>
   );
 }
@@ -257,7 +367,6 @@ export function CharacterPanel({ session, dock = false, selected: chosen }: { se
   return (
     <section className="characters" role="tabpanel">
       <aside className="character-list">
-        <h1>Characters</h1>
         <button type="button" className="play-button" onClick={() => setCreating(true)} data-action="new-character">
           New character
         </button>
@@ -266,8 +375,13 @@ export function CharacterPanel({ session, dock = false, selected: chosen }: { se
           {characters.map((record) => (
             <li key={record.id}>
               <button type="button" className={record.id === current?.id ? "selected" : ""} onClick={() => setSelected(record.id)}>
-                {record.name}
-                <span className="hint">{record.owner || "GM"}</span>
+                <span className="chip-face">
+                  {typeof record.data.portrait === "string" && record.data.portrait ? <Picture session={session} id={record.data.portrait} alt="" /> : record.name.slice(0, 1)}
+                </span>
+                <span className="list-name">
+                  {record.name}
+                  <small className="hint">{record.owner || "GM"}</small>
+                </span>
               </button>
             </li>
           ))}

@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
+import { Emblem } from "../ui/Emblem";
 import type { KrakenCampaign, KrakenNetwork } from "../kraken";
 
 type HostInput = { name: string; port: number; password: string; lan: boolean; cloud: boolean; campaignId: string };
@@ -157,7 +158,8 @@ export function SetupScreen({
 
       {mode === "join" ? (
         <form className="join-panel" data-form="join" onSubmit={submitJoin}>
-          <h1>Join a game</h1>
+          <Emblem className="join-emblem" />
+          <h1>Join the table</h1>
           {inBrowser ? (
             <p>
               Joining the table at <span className="secret">{window.location.host}</span>. Leave the password blank when the game is public.
@@ -190,8 +192,8 @@ export function SetupScreen({
             Password
             <input name="password" type="text" placeholder="Blank if the game is public" autoComplete="off" />
           </label>
-          <button type="submit" disabled={busy}>
-            {busy ? "Joining…" : "Join"}
+          <button type="submit" className="play-button" disabled={busy}>
+            {busy ? "Joining…" : "Take your seat"}
           </button>
           {alert ? (
             <p className="error" role="alert">
