@@ -101,6 +101,35 @@ try {
   await settle(600);
   const thrown = (await tool("kraken_chat_log", { count: 3 })).at(-1);
   assert(thrown.roll?.formula === "3d6+2", `right-click rolled 3d6 with the +2: ${JSON.stringify(thrown.roll?.formula)}`);
+  // Slash commands, as FG's: a list as you type, Tab to finish, and the commands themselves.
+  const say = async (line) => {
+    await page.fill("form.chat-entry input", line);
+    await page.press("form.chat-entry input", "Enter");
+    await settle(300);
+  };
+  await page.fill("form.chat-entry input", "/wh");
+  await page.waitForSelector('.chat-commands [data-command="w"]');
+  await page.press("form.chat-entry input", "Tab");
+  assert((await page.inputValue("form.chat-entry input")) === "/whisper ", "Tab finishes the command");
+  await page.fill("form.chat-entry input", "");
+  await say("/help");
+  await page.waitForSelector('.chat-commands [data-command="kick"]');
+  assert((await page.locator(".chat-commands button").count()) > 30, "/help lists every command, the GM's too");
+  await page.keyboard.press("Escape");
+  await say("/roll 4d6k3 Strength");
+  const strength = (await tool("kraken_chat_log", { count: 2 })).at(-1);
+  assert(strength.roll?.formula === "4d6k3" && strength.roll.label === "Strength", `/roll 4d6k3 Strength: ${JSON.stringify(strength.roll?.formula)}`);
+  await say("/me draws her sword");
+  assert((await tool("kraken_chat_log", { count: 2 })).at(-1).kind === "emote", "/me is an emote");
+  await page.waitForSelector('.chat-line[data-kind="emote"] .chat-kind');
+  await say("/scaleui 125");
+  assert((await page.evaluate(() => document.documentElement.style.zoom)) === "1.25", "/scaleui 125");
+  await say("/scaleui 100");
+  await say("/nonsense");
+  await page.waitForSelector(".chat-line.local");
+  await say("/clear");
+  assert((await page.locator(".chat-log .chat-line").count()) === 0, "/clear empties this screen's chat");
+
   // The chat stretches from its top-right grip, and keeps its size.
   const before = await page.locator(".chat-dock").boundingBox();
   const grip = await page.locator(".chat-grip").boundingBox();

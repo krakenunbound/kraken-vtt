@@ -66,7 +66,30 @@ export type RollTerm =
   | { kind: "number"; sign: number; value: number }
   | { kind: "dice"; sign: number; count: number; sides: number; rolls: number[]; kept: boolean[]; sum: number };
 export type RollResult = { formula: string; label: string; total: number; terms: RollTerm[]; tag?: string; result?: string; target?: string; against?: number; by?: string };
-export type ChatLine = { id: string; from: string; text: string; at: number; roll?: RollResult; secret?: boolean; shownTo?: string; tower?: boolean; gm?: boolean };
+// kind: what the line is (FG's chat commands): said, an emote, an action, out of character, the GM's story, a mood.
+export type ChatKind = "say" | "emote" | "action" | "ooc" | "story" | "mood";
+export type ChatVote = { id: string; question: string; yes: string[]; no: string[] };
+export type ChatLine = {
+  id: string;
+  from: string;
+  text: string;
+  at: number;
+  roll?: RollResult;
+  secret?: boolean;
+  shownTo?: string;
+  tower?: boolean;
+  gm?: boolean;
+  kind?: ChatKind;
+  mood?: string;
+  to?: string[];
+  self?: boolean;
+  vote?: ChatVote;
+  // Shown on this screen only (/help, /info): never sent.
+  local?: boolean;
+};
+// Who sees a roll (Foundry's roll modes): everyone, the GM and you, the GM alone, you alone.
+export type RollMode = "public" | "gm" | "blind" | "self";
+export type ChatSend = { kind?: ChatKind; mood?: string; to?: string[]; as?: string };
 // The table's own options, set by the GM (electron/tableServer.cjs savedOptions).
 export type TableOptions = { towerReveal: boolean; decal: string; wallpaper: string; gmIcon: string };
 export type DecalItem = { id: string; name: string; group: string; ruleset?: string };
@@ -323,6 +346,11 @@ export function useSession() {
             setNotice(text);
             window.setTimeout(() => setNotice((current) => (current === text ? null : current)), 2500);
           }
+          if (msg.type === "vote" && typeof msg.id === "string") {
+            const id = msg.id;
+            setChat((current) => current.map((line) => (line.vote?.id === id ? { ...line, vote: { ...line.vote, yes: (msg.yes as string[]) ?? [], no: (msg.no as string[]) ?? [] } } : line)));
+          }
+          if (msg.type === "kicked") setError(String(msg.reason ?? "The GM has asked you to leave the table."));
           if (msg.type === "chat") {
             const line = msg as unknown as ChatLine;
             // Its dice are thrown first; its card waits for them to land.
@@ -528,10 +556,21 @@ export function useSession() {
 
   // tag comes back on the roll in chat, so a caller can wait for its own roll.
   // tower: FG's dice tower, a roll only the GM sees.
-  const roll = useCallback((formula: string, label = "", tag = "", tower = false) => {
+  const roll = useCallback((formula: string, label = "", tag = "", tower = false, mode: RollMode = "public", as = "") => {
     const socket = socketRef.current;
     if (!formula.trim() || !socket || socket.readyState !== WebSocket.OPEN) return;
-    socket.send(JSON.stringify({ type: "roll", formula: formula.trim().slice(0, 200), label: label.slice(0, 120), ...(tag ? { tag } : {}), ...(tower ? { tower: true } : {}), ...throwIntent() }));
+    socket.send(
+      JSON.stringify({
+        type: "roll",
+        formula: formula.trim().slice(0, 200),
+        label: label.slice(0, 120),
+        ...(tag ? { tag } : {}),
+        ...(tower ? { tower: true } : {}),
+        ...(mode !== "public" ? { mode } : {}),
+        ...(as ? { as } : {}),
+        ...throwIntent(),
+      }),
+    );
   }, []);
 
   // The creation wizard's character: the host builds it and answers with its id.
@@ -572,12 +611,20 @@ export function useSession() {
     socket.send(JSON.stringify({ type: "level-up", id }));
   }, []);
 
-  const sendChat = useCallback((text: string) => {
+  const sendChat = useCallback((text: string, how: ChatSend = {}) => {
     const socket = socketRef.current;
     const line = text.trim();
     if (!line || !socket || socket.readyState !== WebSocket.OPEN) return;
-    socket.send(JSON.stringify({ type: "chat", text: line.slice(0, 500) }));
+    socket.send(JSON.stringify({ type: "chat", text: line.slice(0, 500), ...how }));
   }, []);
+  // The table's own commands (FG's): the GM's /kick and /save, anyone's /vote.
+  const tableCommand = useCallback((body: Record<string, unknown>) => {
+    const socket = socketRef.current;
+    if (socket && socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify(body));
+  }, []);
+  // A line on this screen only (/help, /info), and /clear.
+  const note = useCallback((text: string, from = "Kraken") => setChat((current) => [...current, { id: "local", from, text, at: Date.now(), local: true }].slice(-100)), []);
+  const clearChat = useCallback(() => setChat([]), []);
 
   // The GM's art library (portraits and tokens), served by the host to this seat.
   const artUrl = useCallback((id: string) => (id && assetRef.current ? `${originRef.current}/art/file?token=${assetRef.current}&id=${encodeURIComponent(id)}` : ""), []);
@@ -710,6 +757,9 @@ export function useSession() {
     partyGroup,
     artUrl,
     artList,
+    tableCommand,
+    note,
+    clearChat,
     decalUrl,
     decalList,
     recordArtUrl,

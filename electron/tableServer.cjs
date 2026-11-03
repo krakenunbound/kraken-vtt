@@ -201,6 +201,11 @@ function savedOptions(value) {
   };
 }
 
+// What a chat line is (FG's and Foundry's chat commands): said, an emote
+// (/emote, /me), an action (/action), out of character (/ooc), the GM's story
+// text (/story), a line with a mood (/mood); a whisper has `to`.
+const CHAT_KINDS = new Set(["say", "emote", "action", "ooc", "story", "mood"]);
+
 function savedChat(value) {
   if (!Array.isArray(value)) return [];
   return value
@@ -215,6 +220,11 @@ function savedChat(value) {
       ...(line.secret ? { secret: true } : {}),
       ...(typeof line.shownTo === "string" ? { shownTo: line.shownTo.slice(0, 24) } : {}),
       ...(line.gm ? { gm: true } : {}),
+      ...(CHAT_KINDS.has(line.kind) ? { kind: line.kind } : {}),
+      ...(Array.isArray(line.to) ? { to: line.to.filter((name) => typeof name === "string").slice(0, 12) } : {}),
+      ...(line.self ? { self: true } : {}),
+      ...(typeof line.mood === "string" ? { mood: line.mood.slice(0, 24) } : {}),
+      ...(line.vote && typeof line.vote === "object" ? { vote: line.vote } : {}),
       ...(line.secret ? { secret: true } : {}),
     }))
     .filter((line) => line.text || line.roll);
@@ -356,7 +366,14 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
 
   // A secret line (FG's GM-only message: a hidden creature's turn) reaches the
   // GM, and the one seat it is shown to (shownTo).
-  const seesLine = (client, line) => !line.secret || client.role === "dm" || (line.shownTo && line.shownTo === client.name);
+  const sameName = (a, b) => String(a ?? "").toLowerCase() === String(b ?? "").toLowerCase();
+  const seesLine = (client, line) => {
+    // A self roll (Foundry's /selfroll) is the roller's alone.
+    if (line.self) return client.id === line.id;
+    // A whisper: who sent it, who it is to, and the GM (as FG's GM sees every whisper).
+    if (line.to) return client.role === "dm" || client.id === line.id || line.to.some((name) => sameName(name, client.name) || (client.role === "dm" && /^(gm|dm)$/i.test(name)));
+    return !line.secret || client.role === "dm" || (line.shownTo && line.shownTo === client.name);
+  };
 
   function addChat(entry) {
     // A roll goes out with the throw its roller just made, for the 3D dice.
@@ -637,7 +654,23 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       if (msg.type === "chat") {
         const line = text(msg.text, "").slice(0, 500);
         if (!line) return;
-        addChat({ id: client.id, from: client.name, text: line, at: Date.now() });
+        const kind = CHAT_KINDS.has(msg.kind) ? msg.kind : "say";
+        // The GM's alone: story text, and speaking as someone else (/id, /gmid).
+        if (kind === "story" && client.role !== "dm") {
+          send(ws, { type: "error", reason: "Only the GM tells the story (/story)." });
+          return;
+        }
+        const as = client.role === "dm" ? text(msg.as, "").slice(0, 24) : "";
+        const to = Array.isArray(msg.to) ? msg.to.map((name) => text(name, "").slice(0, 24)).filter(Boolean).slice(0, 12) : null;
+        addChat({
+          id: client.id,
+          from: as || client.name,
+          text: line,
+          at: Date.now(),
+          ...(kind !== "say" ? { kind } : {}),
+          ...(kind === "mood" ? { mood: text(msg.mood, "").slice(0, 24) } : {}),
+          ...(to && to.length ? { to } : {}),
+        });
         return;
       }
 
@@ -663,7 +696,18 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
             if (client.role !== "dm" && !reveal) {
               send(ws, { type: "chat", id: client.id, from: client.name, text: `${label} [${roll.formula}]`, at: Date.now(), tower: true });
             }
-          } else rollDice(msg.formula, msg.label, client.name, client.id, msg.tag);
+          } else if (msg.mode === "blind") {
+            // Foundry's /blindroll: the GM sees it, the roller sees only that it was rolled.
+            const roll = rollDice(msg.formula, `[BLIND] ${text(msg.label, "")}`.trim(), client.name, client.id, msg.tag, true);
+            if (client.role !== "dm") send(ws, { type: "chat", id: client.id, from: client.name, text: `[BLIND] ${text(msg.label, "")} [${roll.formula}]`.replace(/\s+/g, " "), at: Date.now(), tower: true });
+          } else if (msg.mode === "gm") {
+            // Foundry's /gmroll: the GM and the roller.
+            rollDice(msg.formula, msg.label, client.name, client.id, msg.tag, client.role === "dm" ? true : client.name);
+          } else if (msg.mode === "self") {
+            // Foundry's /selfroll: the roller alone.
+            const result = dice.roll(msg.formula);
+            addChat({ id: client.id, from: client.name, text: "", roll: { ...result, label: text(msg.label, "").slice(0, 160) }, at: Date.now(), self: true });
+          } else rollDice(msg.formula, msg.label, client.role === "dm" && msg.as ? text(msg.as, "").slice(0, 24) : client.name, client.id, msg.tag);
         } catch (error) {
           send(ws, { type: "error", reason: error instanceof Error ? error.message : "Could not roll that." });
         }
@@ -731,6 +775,34 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         } catch (error) {
           send(ws, { type: "op-result", req: msg.req ?? null, ok: false, error: error instanceof Error ? error.message : "Not allowed." });
         }
+        return;
+      }
+
+      // FG's /kick: the GM sends a player away from the table.
+      if (msg.type === "kick") {
+        if (client.role !== "dm") {
+          send(ws, { type: "error", reason: "Only the GM can kick." });
+          return;
+        }
+        const gone = kick(msg.name);
+        if (!gone) send(ws, { type: "error", reason: `Nobody called ${text(msg.name, "")} is at the table.` });
+        return;
+      }
+      // FG's /vote: a question everyone answers yes or no; the counts show to all.
+      if (msg.type === "vote") {
+        const question = text(msg.question, "").slice(0, 200);
+        if (question) startVote(question, client);
+        return;
+      }
+      if (msg.type === "vote-cast") {
+        castVote(String(msg.id ?? ""), msg.choice, client.name);
+        return;
+      }
+      // FG's /save: the GM saves the campaign now.
+      if (msg.type === "save") {
+        if (client.role !== "dm") return;
+        onChange("save");
+        send(ws, { type: "notice", text: "Campaign saved." });
         return;
       }
 
@@ -910,8 +982,12 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     // Posts a roll already made (an attack decides HIT or MISS before its card goes out).
     postRoll: (result, label, from = "Agent", secret = false, extra = null) =>
       addChat({ id: "agent", from: text(from, "Agent").slice(0, 24), text: "", roll: { ...result, label: text(label, "").slice(0, 160), ...(extra ?? {}) }, at: Date.now(), ...(secret ? { secret: true } : {}) }),
-    say: (line, from = "Agent", secret = false) =>
-      addChat({ id: "agent", from: text(from, "Agent").slice(0, 24), text: text(line, "").slice(0, 500), at: Date.now(), ...(secret ? { secret: true } : {}) }),
+    say: (line, from = "Agent", secret = false, extra = {}) =>
+      addChat({ id: "agent", from: text(from, "Agent").slice(0, 24), text: text(line, "").slice(0, 500), at: Date.now(), ...(secret ? { secret: true } : {}), ...extra }),
+    kick: (name) => kick(name),
+    vote: (question, by = "Agent") => startVote(text(question, "").slice(0, 200), { id: "agent", name: by }),
+    votes: () => chat.filter((line) => line.vote).map((line) => line.vote),
+    save: () => onChange("save"),
     chatLog: (count = 20) => chat.slice(-Math.max(1, Math.min(100, Number(count) || 20))),
     players: () => playerList(),
     scene: () => scene,
@@ -931,6 +1007,32 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       return at;
     },
   };
+
+  function kick(name) {
+    const entry = [...clients.entries()].find(([, client]) => client.role !== "dm" && sameName(client.name, name));
+    if (!entry) return null;
+    const [ws, client] = entry;
+    send(ws, { type: "kicked", reason: "The GM has asked you to leave the table." });
+    setTimeout(() => ws.close(4001, "kicked"), 50);
+    addChat({ id: "table", from: "Table", text: `${client.name} has left the table.`, at: Date.now(), kind: "story" });
+    return client.name;
+  }
+  function startVote(question, client) {
+    const id = crypto.randomBytes(6).toString("hex");
+    addChat({ id: client?.id ?? "agent", from: client?.name ?? "Agent", text: question, at: Date.now(), vote: { id, question, yes: [], no: [] } });
+    return id;
+  }
+  function castVote(id, choice, name) {
+    const line = chat.find((item) => item.vote?.id === id);
+    if (!line || (choice !== "yes" && choice !== "no")) return null;
+    const vote = line.vote;
+    vote.yes = vote.yes.filter((who) => !sameName(who, name));
+    vote.no = vote.no.filter((who) => !sameName(who, name));
+    vote[choice].push(String(name).slice(0, 24));
+    broadcast({ type: "vote", id, yes: vote.yes, no: vote.no });
+    onChange("table");
+    return vote;
+  }
 
   function playerColorOf(client) {
     return client.role === "dm" ? "#f4f1ea" : playerColor(client.name);

@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import type { ChatLine, RollResult, Session } from "../session/useSession";
 import { diceStore, rolling, setThrow, tower as towerDrops, type DiceLook } from "../dice/diceStore";
+import { commandsFor, runChat, type Command } from "./chatCommands";
 import { DieShape, Icon } from "./icons";
+import { useWindows } from "./Windows";
 import { openPopOut, PopOutWindow, screenOffset, type ScreenPlace } from "./PopOut";
 
 // Where chat last was in a window of its own (in this browser).
@@ -111,17 +113,81 @@ export function RollCard({ roll, pending = false }: { roll: RollResult; pending?
   );
 }
 
-function Line({ line, gmIcon }: { line: ChatLine; gmIcon: string }) {
+// Each line's icon says what it is: from the tag the rules put on a roll
+// ([ATTACK], [SAVE]...) or the kind of line (a whisper, an emote, a vote...).
+const TAGGED: [RegExp, string, string][] = [
+  [/^\[ATTACK\]/, "combat", "attack"],
+  [/^\[DAMAGE\]/, "damage", "damage"],
+  [/^\[HEAL\]/, "heart", "heal"],
+  [/^\[SAVE\]|saving throw/i, "shield", "save"],
+  [/^\[RESIST\]|resist/i, "resist", "save"],
+  [/^\[DEFEN[CS]E\]|defend/i, "shield", "save"],
+  [/^\[CHECK\]|^\[SIEGE\]|check\b/i, "check", "check"],
+  [/^\[INIT\]|initiative/i, "hourglass", "init"],
+  [/^\[CAST\]|^\[SPELL\]|^\[POWER\]/, "sparkle", "spell"],
+  [/^\[EFFECT/, "flask", "effect"],
+  [/^\[(TURN|ROUND)/, "next", "turn"],
+  [/^\[LEVEL UP\]/, "levelup", "level"],
+  [/^\[TOWER\]|^\[BLIND\]/, "tower", "tower"],
+  [/^\[MUSIC\]/, "music", "music"],
+  [/^\[SOUND\]|^\[SFX\]/, "sound", "sound"],
+  [/^\[WARNING\]/, "warning", "warning"],
+];
+function iconOf(line: ChatLine): { icon: string; tone: string } | null {
+  const said = line.roll?.label || line.text || "";
+  for (const [pattern, icon, tone] of TAGGED) if (pattern.test(said)) return { icon, tone };
+  if (line.vote) return { icon: "vote", tone: "vote" };
+  if (line.to) return { icon: "whisper", tone: "whisper" };
+  if (line.kind === "emote" || line.kind === "action") return { icon: "emote", tone: "emote" };
+  if (line.kind === "mood") return { icon: "mood", tone: "emote" };
+  if (line.kind === "ooc") return { icon: "chat", tone: "ooc" };
+  if (line.kind === "story") return { icon: "book", tone: "story" };
+  if (line.roll) return { icon: "d20", tone: "roll" };
+  return null;
+}
+
+function Line({ line, gmIcon, session }: { line: ChatLine; gmIcon: string; session: Session }) {
   useSyncExternalStore(rolling.subscribe, rolling.version);
-  const system = line.from === "Combat";
-  const kind = system ? "chat-line system" : line.secret || line.tower ? "chat-line secret" : "chat-line";
+  const system = line.from === "Combat" || line.local;
+  const story = line.kind === "story";
+  const classes = ["chat-line", system ? "system" : "", line.secret || line.tower || line.self ? "secret" : "", line.to ? "whisper" : "", line.kind ? `kind-${line.kind}` : "", line.local ? "local" : ""].filter(Boolean).join(" ");
+  const mark = iconOf(line);
+  const me = session.players.find((seat) => seat.id === session.selfId)?.name ?? "";
+  const myVote = line.vote ? (line.vote.yes.includes(me) ? "yes" : line.vote.no.includes(me) ? "no" : "") : "";
   return (
-    <div className={kind} data-from={line.from}>
-      {line.gm && gmIcon ? <img className="chat-icon" src={gmIcon} alt="" draggable={false} /> : null}
-      {!system ? <b className="chat-from">{line.from}</b> : null}
+    <div className={classes} data-from={line.from} data-kind={line.kind ?? (line.roll ? "roll" : "say")}>
+      {mark ? (
+        <span className={`chat-kind tone-${mark.tone}`} aria-hidden="true">
+          <Icon name={mark.icon} size={13} />
+        </span>
+      ) : null}
+      {line.gm && gmIcon && !story ? <img className="chat-icon" src={gmIcon} alt="" draggable={false} /> : null}
+      {!system && !story && line.kind !== "emote" ? <b className="chat-from">{line.from}{line.kind === "mood" && line.mood ? <i className="chat-mood"> ({line.mood})</i> : null}</b> : null}
+      {line.to ? <span className="chat-tag whisper-tag">to {line.to.join(", ")}</span> : null}
+      {line.kind === "ooc" ? <span className="chat-tag">OOC</span> : null}
       {line.secret ? <span className="chat-tag">{line.shownTo ? "GM and you" : "GM only"}</span> : null}
+      {line.self ? <span className="chat-tag">Only you</span> : null}
       {line.tower ? <span className="chat-tag">To the GM</span> : null}
-      {line.roll ? <RollCard roll={line.roll} pending={rolling.has(line)} /> : <span className="chat-text">{line.text}</span>}
+      {line.roll ? (
+        <RollCard roll={line.roll} pending={rolling.has(line)} />
+      ) : line.kind === "emote" ? (
+        <span className="chat-text">
+          <b className="chat-from">{line.from}</b> {line.text}
+        </span>
+      ) : (
+        <span className="chat-text">{line.text}</span>
+      )}
+      {line.vote ? (
+        <span className="chat-vote">
+          <button type="button" className={myVote === "yes" ? "on" : ""} onClick={() => session.tableCommand({ type: "vote-cast", id: line.vote!.id, choice: "yes" })}>
+            Yes {line.vote.yes.length}
+          </button>
+          <button type="button" className={myVote === "no" ? "on" : ""} onClick={() => session.tableCommand({ type: "vote-cast", id: line.vote!.id, choice: "no" })}>
+            No {line.vote.no.length}
+          </button>
+          {line.vote.yes.length + line.vote.no.length > 0 ? <small>{[...line.vote.yes.map((who) => `${who} yes`), ...line.vote.no.map((who) => `${who} no`)].join(", ")}</small> : null}
+        </span>
+      ) : null}
     </div>
   );
 }
@@ -130,13 +196,6 @@ function formulaOf(dice: number[]) {
   const counts = new Map<number, number>();
   for (const sides of dice) counts.set(sides, (counts.get(sides) ?? 0) + 1);
   return [...counts].map(([sides, count]) => `${count}d${sides}`).join("+");
-}
-
-// "/r 1d20+3 Strength check" (or /roll) rolls; anything else is said.
-function submit(session: Session, draft: string, modifier: number, tower: boolean) {
-  const command = /^\/(?:r|roll)\s+(\S+)\s*(.*)$/i.exec(draft.trim());
-  if (command) session.roll(withModifier(command[1], modifier), command[2], "", tower);
-  else session.sendChat(draft);
 }
 
 function withModifier(formula: string, modifier: number) {
@@ -153,6 +212,25 @@ export function ChatDock({ session }: { session: Session }) {
   const [modifier, setModifier] = useState(0);
   const [tower, setTower] = useState(false);
   const [size, setSize] = useState<ChatSize>(chatSize);
+  const windows = useWindows();
+  // /id: who the GM speaks as for now; /gmid: the GM's own name, kept in this browser.
+  const [speakAs, setSpeakAs] = useState("");
+  const [gmName, setGmNameState] = useState(() => {
+    try {
+      return window.localStorage.getItem("kraken-gm-name") ?? "";
+    } catch {
+      return "";
+    }
+  });
+  const setGmName = (name: string) => {
+    setGmNameState(name);
+    try {
+      window.localStorage.setItem("kraken-gm-name", name);
+    } catch {
+      /* this time only */
+    }
+  };
+  const [helpOpen, setHelpOpen] = useState(false);
   // A right-click menu over the tray: how many of a die to roll, or the modifier's quick values.
   const [menu, setMenu] = useState<{ x: number; y: number; sides: number | null; custom?: boolean } | null>(null);
   // This seat's own set, on the tray's dice (the GM's too).
@@ -160,6 +238,12 @@ export function ChatDock({ session }: { session: Session }) {
   // The GM's chat picture, beside everything the GM says.
   const gmIconUrl = session.options.gmIcon ? session.decalUrl(session.options.gmIcon, "gmicon") : "";
   const mine = diceSettings.look;
+  const mineCommands = commandsFor(session.role === "dm");
+  const typedCommand = /^\/(\S*)$/.exec(draft);
+  const suggestions: Command[] = typedCommand ? mineCommands.filter((command) => command.names.some((name) => name.startsWith(typedCommand[1].toLowerCase()))) : [];
+  // The name being typed, finished: "/wh" is /whisper, "/w" stays /w.
+  const finish = (command: Command) => command.names.find((name) => typedCommand && name.startsWith(typedCommand[1].toLowerCase())) ?? command.names[0];
+  const lastWhisperFrom = [...session.chat].reverse().find((line) => line.to && line.id !== session.selfId)?.from ?? null;
   const traySize = Math.round(29 * Math.min(1.6, Math.max(0.6, diceSettings.tray ?? 1)));
   const trayArt = useTrayArt(mine);
   const trayDie = (sides: number, size: number) =>
@@ -350,7 +434,7 @@ export function ChatDock({ session }: { session: Session }) {
       <div className="chat-log" aria-live="polite" ref={log}>
         {session.chat.length === 0 ? <p className="hint">The table is quiet.</p> : null}
         {session.chat.map((line, index) => (
-          <Line key={`${line.at}-${index}`} line={line} gmIcon={gmIconUrl} />
+          <Line key={`${line.at}-${index}`} line={line} gmIcon={gmIconUrl} session={session} />
         ))}
       </div>
       <form
@@ -358,20 +442,83 @@ export function ChatDock({ session }: { session: Session }) {
         onSubmit={(event) => {
           event.preventDefault();
           if (!draft.trim()) return;
-          submit(session, draft, modifier, tower);
-          if (tower) {
-            const command = /^\/(?:r|roll)\s+(\S+)/i.exec(draft.trim());
-            if (command) dropInTower([...command[1].matchAll(/d(\d+|%)/gi)].map((match) => (match[1] === "%" ? 100 : Number(match[1]))));
+          // A first word that names a command finishes it, as Tab does.
+          const typed = /^\/(\S*)$/.exec(draft.trim());
+          if (typed && suggestions.length > 0 && !suggestions.some((command) => command.names.includes(typed[1].toLowerCase()))) {
+            setDraft(`/${finish(suggestions[0])} `);
+            return;
           }
+          runChat(draft, {
+            session,
+            openWindow: (kind, title) => windows.open(kind, title),
+            closeWindow: (kind) => windows.windows.filter((item) => item.kind === kind).forEach((item) => windows.close(item.key)),
+            modifier,
+            setModifier,
+            tower,
+            speakAs: speakAs || (session.role === "dm" ? gmName : ""),
+            setSpeakAs,
+            setGmName,
+            lastWhisperFrom,
+            showHelp: () => setHelpOpen(true),
+          });
+          // Dice into the tower, or a blind roll: they drop in, as from the tray.
+          const towerRoll = /^\/(?:(r|roll|die)|blindroll|br|tower)\s+(\S+)/i.exec(draft.trim());
+          if (towerRoll && (!towerRoll[1] || tower)) dropInTower([...towerRoll[2].matchAll(/d(\d+|%)/gi)].map((match) => (match[1] === "%" ? 100 : Number(match[1]))));
           setDraft("");
-          setModifier(0);
         }}
       >
-        <input aria-label="Message" value={draft} maxLength={500} onChange={(event) => setDraft(event.target.value)} placeholder="Say something, or /r 1d20+2 Strength" />
+        <input
+          aria-label="Message"
+          value={draft}
+          maxLength={500}
+          onChange={(event) => {
+            setDraft(event.target.value);
+            if (helpOpen && !event.target.value.startsWith("/")) setHelpOpen(false);
+          }}
+          onKeyDown={(event) => {
+            if (event.key === "Tab" && suggestions.length > 0 && /^\/\S*$/.test(draft)) {
+              event.preventDefault();
+              setDraft(`/${finish(suggestions[0])} `);
+            }
+            if (event.key === "Escape") setHelpOpen(false);
+          }}
+          placeholder={speakAs ? `Speaking as ${speakAs}: say something, or /help` : "Say something, /r 1d20+2 Strength, or /help"}
+        />
         <button type="submit" aria-label="Send">
           <Icon name="chat" />
         </button>
       </form>
+      {helpOpen || suggestions.length > 0 ? (
+        <div className="chat-commands" role="listbox" aria-label="Chat commands">
+          {helpOpen ? (
+            <header>
+              <b>Chat commands</b>
+              <button type="button" className="window-close" aria-label="Close the command list" onClick={() => setHelpOpen(false)}>
+                <Icon name="close" size={12} />
+              </button>
+            </header>
+          ) : null}
+          {(["Dice", "Talk", "GM", "Screen"] as const).map((group) => {
+            const items = (helpOpen && !draft.startsWith("/") ? mineCommands : suggestions).filter((command) => command.group === group);
+            return items.length === 0 ? null : (
+              <div key={group} className="chat-commands-group">
+                <span>{group === "GM" ? "GM only" : group === "Screen" ? "This screen" : group}</span>
+                {items.map((command) => (
+                  <button key={command.names[0]} type="button" role="option" data-command={command.names[0]} onClick={() => setDraft(`/${command.names[0]} `)}>
+                    <code>
+                      /{command.names[0]} <i>{command.args}</i>
+                    </code>
+                    <small>
+                      {command.help}
+                      {command.names.length > 1 ? <em> · also /{command.names.slice(1).join(", /")}</em> : null}
+                    </small>
+                  </button>
+                ))}
+              </div>
+            );
+          })}
+        </div>
+      ) : null}
       <div className="dice-tray" aria-label="Dice tray" style={{ ["--tray-glow" as string]: mine.accent ?? mine.body }}>
         {TRAY.map((sides) => (
           <button

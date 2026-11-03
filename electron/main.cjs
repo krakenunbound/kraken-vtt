@@ -161,6 +161,13 @@ function markDirty(kind) {
   if (typeof icon === "string" && icon !== preferences().gmIcon) savePreference("gmIcon", icon);
   hosted.dirty = true;
   if (kind === "records") hosted.recordsDirty = true;
+  // FG's /save: now, not after the usual pause.
+  if (kind === "save") {
+    hosted.recordsDirty = true;
+    clearTimeout(hosted.soon);
+    flushCampaign();
+    return;
+  }
   clearTimeout(hosted.soon);
   hosted.soon = setTimeout(flushCampaign, SAVE_AFTER_CHANGE_MS);
 }

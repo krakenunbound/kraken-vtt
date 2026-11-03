@@ -268,9 +268,55 @@ const TOOLS = [
   },
   {
     name: "kraken_chat_send",
-    description: "Post a chat message to the table.",
-    inputSchema: object({ text: string("Message"), as: string("Name shown, default Agent") }, ["text"]),
-    run: (args, ctx) => out(needTable(ctx).say(args.text, args.as || "Agent")),
+    description:
+      "Post a chat message to the table, as FG's chat commands do: kind say (default), emote (/emote: \"Agent nods\"), action (/action), ooc (/ooc), story (/story: the GM's narration, no name) or mood (/mood, with mood); to: whisper it to these players only (the GM sees every whisper, as FG's); as: the name shown (/id: an NPC speaking).",
+    inputSchema: object(
+      {
+        text: string("Message"),
+        as: string("Name shown, default Agent"),
+        kind: { type: "string", enum: ["say", "emote", "action", "ooc", "story", "mood"] },
+        mood: string("For kind mood: angry, laughing..."),
+        to: { type: "array", items: { type: "string" }, description: "Player names to whisper to" },
+      },
+      ["text"],
+    ),
+    run: (args, ctx) =>
+      out(
+        needTable(ctx).say(args.text, args.as || "Agent", false, {
+          ...(args.kind && args.kind !== "say" ? { kind: args.kind } : {}),
+          ...(args.kind === "mood" && args.mood ? { mood: String(args.mood).slice(0, 24) } : {}),
+          ...(Array.isArray(args.to) && args.to.length ? { to: args.to.map((name) => String(name).slice(0, 24)).slice(0, 12) } : {}),
+        }),
+      ),
+  },
+  {
+    name: "kraken_kick",
+    description: "FG's /kick: send a player away from the table (they can join again).",
+    inputSchema: object({ name: string("The player's name") }, ["name"]),
+    run(args, ctx) {
+      const gone = needTable(ctx).kick(args.name);
+      if (!gone) throw new Error(`Nobody called ${args.name} is at the table.`);
+      return out({ kicked: gone });
+    },
+  },
+  {
+    name: "kraken_vote",
+    description: "FG's /vote: ask the table a yes-or-no question (everyone answers in chat and sees the count), or with no question, read the votes so far.",
+    inputSchema: object({ question: string("The question") }),
+    run(args, ctx) {
+      const agent = needTable(ctx);
+      if (args.question) return out({ vote: agent.vote(args.question) });
+      return out({ votes: agent.votes() });
+    },
+  },
+  {
+    name: "kraken_save",
+    description: "FG's /save: save the campaign now.",
+    inputSchema: object({}),
+    run(_args, ctx) {
+      needTable(ctx).save();
+      return out({ saved: true });
+    },
   },
   {
     name: "kraken_chat_log",

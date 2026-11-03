@@ -36,6 +36,10 @@ const MESSAGES = {
   ping: "kraken_ping",
   scene: "kraken_scenes",
   "table-options": "kraken_table_options",
+  kick: "kraken_kick",
+  vote: "kraken_vote",
+  "vote-cast": "kraken_vote",
+  save: "kraken_save",
 };
 // Messages that are the connection itself, not something a person does.
 const PLUMBING = new Set(["join"]);
