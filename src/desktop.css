@@ -487,3 +487,9 @@ span.ct-init { display: inline-block; }
 .decal-actions { display: flex; gap: 8px; align-items: center; }
 .decal-actions .spacer { flex: 1; }
 .decal-actions .primary { background: var(--brass); color: #1a140c; border-color: var(--brass); font-weight: 700; }
+.decal-sets { display: flex; flex-wrap: wrap; gap: 6px; }
+.decal-set { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font-size: 0.8rem; background: transparent; border: 1px solid var(--line); color: var(--muted); }
+.decal-set.on { border-color: var(--brass); color: var(--text); background: rgba(210, 161, 90, 0.14); }
+.decal-set-mark { font-size: 0.66rem; color: var(--brass); text-transform: uppercase; letter-spacing: 0.06em; }
+.decal-thumb.wall { background-size: 96px 96px; background-repeat: repeat; }
+.decal-group { font-size: 0.7rem; color: var(--muted); margin-top: -4px; }

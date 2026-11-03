@@ -525,30 +525,33 @@ const TOOLS = [
   {
     name: "kraken_decal",
     description:
-      "The table's background decal, as FG's Background Decal (shown behind everything when no map is up, to every seat). action view (default): the decal now; list: the decals to choose from (Kraken's own, the GM's assets folder, FG's), filtered by search; set: put one up (id from list, \"kraken\" for the Kraken emblem, \"\" for none); import: copy a picture from this computer (path) into the GM's assets folder, so every campaign can use it, and put it up.",
+      "The table's background, as FG's: the decal (the picture in the middle, behind everything when no map is up) and the wallpaper (the tiles behind the desktop, FG's desktop theme), shown to every seat and saved with the campaign. kind decal (default) or wallpaper. action view (default): what is up now; list: what can be chosen (Kraken's own, a set for each game: D&D 5e, D&D 3.5e, AD&D 2e, AD&D, D&D, Castles & Crusades, Pathfinder 1e and 2e, Traveller 2e; the GM's assets folder; FG's), filtered by search (a game's name works); set: put one up (id from list; for a decal \"kraken\" is the Kraken emblem; \"\" is none, or a plain desktop); import: copy a picture from this computer (path) into the GM's assets folder, so every campaign can use it, and put it up.",
     inputSchema: object({
+      kind: { type: "string", enum: ["decal", "wallpaper"] },
       action: { type: "string", enum: ["view", "list", "set", "import"] },
-      id: string("Decal id (set)"),
+      id: string("Decal or wallpaper id (set)"),
       path: string("Full path of a .png, .webp, .jpg or .gif (import)"),
-      search: string("Part of the name or group (list)"),
+      search: string("Part of the name, group or game (list)"),
     }),
     run(args, ctx) {
       const agent = needTable(ctx);
-      const library = agent.decals();
+      const wallpaper = args.kind === "wallpaper";
+      const key = wallpaper ? "wallpaper" : "decal";
+      const library = wallpaper ? agent.wallpapers() : agent.decals();
       const action = args.action ?? "view";
       if (action === "list") {
         const wanted = String(args.search ?? "").toLowerCase();
-        const all = library ? library.list() : [];
-        return out({ decals: [{ id: "kraken", name: "Kraken", group: "Kraken" }, ...all].filter((item) => !wanted || `${item.group} ${item.name}`.toLowerCase().includes(wanted)), folder: library?.folder ?? null });
+        const all = [...(wallpaper ? [] : [{ id: "kraken", name: "Kraken", group: "Kraken" }]), ...(library ? library.list() : [])];
+        return out({ [`${key}s`]: all.filter((item) => !wanted || `${item.group} ${item.name} ${item.ruleset ?? ""}`.toLowerCase().includes(wanted)), folder: library?.folder ?? null });
       }
-      if (action === "set") return out({ decal: agent.setOptions({ decal: String(args.id ?? "") }).decal });
+      if (action === "set") return out({ [key]: agent.setOptions({ [key]: String(args.id ?? "") })[key] });
       if (action === "import") {
-        if (!library) throw new Error("This table has no decal library.");
+        if (!library) throw new Error(`This table has no ${key} library.`);
         const item = library.addFile(String(args.path ?? ""));
-        agent.setOptions({ decal: item.id });
-        return out({ imported: item, decal: item.id });
+        agent.setOptions({ [key]: item.id });
+        return out({ imported: item, [key]: item.id });
       }
-      return out({ decal: agent.options().decal });
+      return out({ [key]: agent.options()[key] });
     },
   },
   {
@@ -658,10 +661,10 @@ const TOOLS = [
   {
     name: "kraken_windows",
     description:
-      "The GM's windows: list them, or open, close, pop out (to a window of its own, for another monitor) or dock back a window. Kinds: characters, party, combat, players, settings, decals (the background decal picker), sheet (a character's sheet: give record, its id or name).",
+      "The GM's windows: list them, or open, close, pop out (to a window of its own, for another monitor) or dock back a window. Kinds: characters, party, combat, players, settings, decals (the background decal picker), wallpapers (the desktop wallpaper picker), sheet (a character's sheet: give record, its id or name).",
     inputSchema: object({
       action: { type: "string", enum: ["list", "open", "close", "popout", "dock"] },
-      kind: { type: "string", enum: ["characters", "party", "combat", "players", "settings", "decals", "sheet"] },
+      kind: { type: "string", enum: ["characters", "party", "combat", "players", "settings", "decals", "wallpapers", "sheet"] },
       record: string("For a sheet: the character's record id or name"),
     }),
     run: async (args, ctx) => out(await ctx.ui({ kind: "windows", action: args.action ?? "list", window: args.kind, record: args.record })),

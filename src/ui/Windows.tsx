@@ -8,7 +8,7 @@ import { openPopOut, PopOutWindow, screenOffset, type ScreenPlace } from "./PopO
 // the edge of the main window, or sent out with its pop-out button, becomes a
 // window of its own that can go on another monitor.
 
-export type WindowKind = "characters" | "party" | "combat" | "players" | "sheet" | "settings" | "decals";
+export type WindowKind = "characters" | "party" | "combat" | "players" | "sheet" | "settings" | "decals" | "wallpapers";
 type Placement = { x: number; y: number; w: number; h: number; out?: ScreenPlace | null };
 export type OpenWindow = { key: string; kind: WindowKind; title: string; payload?: string; z: number; popped: boolean } & Placement;
 
@@ -20,6 +20,7 @@ const DEFAULTS: Record<WindowKind, Placement> = {
   players: { x: 300, y: 120, w: 420, h: 360 },
   settings: { x: 340, y: 110, w: 460, h: 170 },
   decals: { x: 220, y: 70, w: 720, h: 600 },
+  wallpapers: { x: 240, y: 80, w: 720, h: 600 },
 };
 
 // The height of a window's own title bar, which a window of its own does not need.
