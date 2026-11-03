@@ -1,3 +1,4 @@
+import { Icon } from "../ui/icons";
 import { useEffect, useState } from "react";
 import type { Session, TableRecord } from "../session/useSession";
 import { ArtPicker, Picture } from "./ArtPicker";
@@ -439,8 +440,8 @@ export function CharacterPanel({ session, dock = false, selected: chosen }: { se
               ))}
             </select>
           ) : null}
-          <button type="button" onClick={() => setCreating(true)} data-action="new-character">
-            New character
+          <button type="button" className="new-character-button" title="New character" aria-label="New character" onClick={() => setCreating(true)} data-action="new-character">
+            <Icon name="add-character" size={22} />
           </button>
         </div>
         {creating ? (
@@ -454,7 +455,7 @@ export function CharacterPanel({ session, dock = false, selected: chosen }: { se
         ) : current ? (
           <Sheet record={current} session={session} />
         ) : (
-          <p className="hint">You have no character yet. Make one with New character.</p>
+          <p className="hint">You have no character yet. Make one with the new character button.</p>
         )}
       </section>
     );
@@ -463,8 +464,8 @@ export function CharacterPanel({ session, dock = false, selected: chosen }: { se
   return (
     <section className="characters" role="tabpanel">
       <aside className="character-list">
-        <button type="button" className="play-button" onClick={() => setCreating(true)} data-action="new-character">
-          New character
+        <button type="button" className="new-character-button" title="New character" aria-label="New character" onClick={() => setCreating(true)} data-action="new-character">
+          <Icon name="add-character" size={22} />
         </button>
         {characters.length === 0 ? <p className="hint">No characters yet.</p> : null}
         <ul>

@@ -285,7 +285,7 @@ export function Wizard({ session, onDone }: { session: Session; onDone: (id: str
     return (
       <section className="wizard">
         <h2>Create a character</h2>
-        <p className="hint">This campaign has no game books yet. The GM imports them first (for Castles &amp; Crusades: the Player's Handbook).</p>
+        <p className="hint">This campaign has no game books yet. The GM makes them active first: Books, Activation, then the Player's Handbook (and the Adventurer's Backpack for more classes).</p>
         <button type="button" onClick={() => onDone(null)}>
           Close
         </button>

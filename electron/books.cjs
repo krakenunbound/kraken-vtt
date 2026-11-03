@@ -198,7 +198,12 @@ function createBookShelf({ folder, cache = "" }) {
     return known;
   }
 
-  const info = (id) => load().get(String(id ?? "")) ?? null;
+  // A book by its id (its file), or by its title or FG name, as the GM says it.
+  const info = (id) => {
+    const wanted = String(id ?? "");
+    const all = load();
+    return all.get(wanted) ?? [...all.values()].find((item) => item.title === wanted || item.name === wanted) ?? null;
+  };
   // FG names a module by its own name (after "@"); Kraken by its file.
   const byName = (name) => [...load().values()].find((item) => item.name === name || item.id === name) ?? null;
 
@@ -250,6 +255,8 @@ function createBookShelf({ folder, cache = "" }) {
     // Every module, as FG's Modules window: by category, with its cover.
     list: () => [...load().values()].map(({ file, playerBook, ...rest }) => ({ ...rest, adventure: isAdventure(rest), forPlayers: !isAdventure(rest) && forPlayers(rest) })).sort((a, b) => a.category.localeCompare(b.category) || a.title.localeCompare(b.title)),
     info: publicInfo,
+    // Where a module is on this computer (to load its records).
+    file: (id) => info(id)?.file ?? null,
     refresh() {
       known = null;
       opened.clear();
