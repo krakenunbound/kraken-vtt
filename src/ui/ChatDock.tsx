@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import type { ChatLine, RollResult, Session } from "../session/useSession";
+import { diceStore, PRESETS, rolling, setThrow, tower as towerDrops } from "../dice/diceStore";
 import { DieShape, Icon } from "./icons";
 import { openPopOut, PopOutWindow, screenOffset, type ScreenPlace } from "./PopOut";
 
@@ -24,8 +25,28 @@ function rememberChat(place: ScreenPlace | null) {
 const TRAY = [4, 6, 8, 10, 12, 20, 100];
 
 // A roll as FG shows it in chat: what it was for, each die (dropped dice
-// faded), the modifier, and the total.
-export function RollCard({ roll }: { roll: RollResult }) {
+// faded), the modifier, and the total. While its dice are still rolling on
+// the table it shows only what was rolled.
+export function RollCard({ roll, pending = false }: { roll: RollResult; pending?: boolean }) {
+  if (pending) {
+    return (
+      <span className="roll-card rolling" data-rolling="true">
+        {roll.label ? <span className="roll-label">{roll.label}</span> : null}
+        <span className="roll-dice">
+          {roll.terms.flatMap((term, index) =>
+            term.kind === "dice"
+              ? term.rolls.map((_, die) => (
+                  <span key={`${index}-${die}`} className="die spinning">
+                    <DieShape sides={term.sides === 100 ? 10 : term.sides} size={28} label="" />
+                  </span>
+                ))
+              : [],
+          )}
+        </span>
+        <span className="roll-formula">{roll.formula}</span>
+      </span>
+    );
+  }
   return (
     <span className="roll-card" data-total={roll.total}>
       {roll.label ? <span className="roll-label">{roll.label}</span> : null}
@@ -53,13 +74,79 @@ export function RollCard({ roll }: { roll: RollResult }) {
 }
 
 function Line({ line }: { line: ChatLine }) {
+  useSyncExternalStore(rolling.subscribe, rolling.version);
   const system = line.from === "Combat";
-  const kind = system ? "chat-line system" : line.secret ? "chat-line secret" : "chat-line";
+  const kind = system ? "chat-line system" : line.secret || line.tower ? "chat-line secret" : "chat-line";
   return (
     <div className={kind} data-from={line.from}>
       {!system ? <b className="chat-from">{line.from}</b> : null}
-      {line.secret ? <span className="chat-tag">GM only</span> : null}
-      {line.roll ? <RollCard roll={line.roll} /> : <span className="chat-text">{line.text}</span>}
+      {line.secret ? <span className="chat-tag">{line.shownTo ? "GM and you" : "GM only"}</span> : null}
+      {line.tower ? <span className="chat-tag">To the GM</span> : null}
+      {line.roll ? <RollCard roll={line.roll} pending={rolling.has(line)} /> : <span className="chat-text">{line.text}</span>}
+    </div>
+  );
+}
+
+function formulaOf(dice: number[]) {
+  const counts = new Map<number, number>();
+  for (const sides of dice) counts.set(sides, (counts.get(sides) ?? 0) + 1);
+  return [...counts].map(([sides, count]) => `${count}d${sides}`).join("+");
+}
+
+// This seat's dice: 3D dice and their sound, the look of its own set, and
+// (the GM's) whether a roll in the dice tower is shown to its roller.
+function DiceSettings({ session, onClose }: { session: Session; onClose: () => void }) {
+  const settings = useSyncExternalStore(diceStore.subscribe, diceStore.settings);
+  const look = settings.look;
+  return (
+    <div className="dice-settings" role="dialog" aria-label="Dice settings">
+      <header>
+        <b>Dice</b>
+        <button type="button" className="window-close" aria-label="Close dice settings" onClick={onClose}>
+          <Icon name="close" size={14} />
+        </button>
+      </header>
+      <label className="check">
+        <input type="checkbox" checked={settings.show} onChange={(event) => diceStore.update({ show: event.target.checked })} />
+        3D dice roll across the table
+      </label>
+      <label className="check">
+        <input type="checkbox" checked={settings.sound} onChange={(event) => diceStore.update({ sound: event.target.checked })} />
+        Dice sounds
+      </label>
+      <input type="range" min={0} max={1} step={0.05} value={settings.volume} disabled={!settings.sound} aria-label="Dice volume" onChange={(event) => diceStore.update({ volume: Number(event.target.value) })} />
+      <span className="dice-settings-head">Your dice</span>
+      <div className="dice-swatches">
+        {PRESETS.map((preset) => (
+          <button
+            key={preset.name}
+            type="button"
+            title={preset.name}
+            aria-label={preset.name}
+            aria-pressed={look.theme === preset.theme && look.body === preset.body}
+            style={{ background: preset.body, color: preset.ink }}
+            onClick={() => diceStore.update({ look: { theme: preset.theme, body: preset.body, ink: preset.ink } })}
+          >
+            20
+          </button>
+        ))}
+      </div>
+      <div className="dice-colors">
+        <label>
+          Body
+          <input type="color" value={look.body.slice(0, 7)} onChange={(event) => diceStore.update({ look: { body: event.target.value } })} />
+        </label>
+        <label>
+          Numbers
+          <input type="color" value={look.ink.slice(0, 7)} onChange={(event) => diceStore.update({ look: { ink: event.target.value } })} />
+        </label>
+      </div>
+      {session.role === "dm" ? (
+        <label className="check gm-option">
+          <input type="checkbox" checked={session.options.towerReveal} onChange={(event) => session.setTableOptions({ towerReveal: event.target.checked })} />
+          Dice tower: players see their own result
+        </label>
+      ) : null}
     </div>
   );
 }
@@ -84,6 +171,11 @@ export function ChatDock({ session }: { session: Session }) {
   const [pool, setPool] = useState<number[]>([]);
   const [modifier, setModifier] = useState(0);
   const [tower, setTower] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  // A die being dragged from the tray, to throw or to drop in the tower.
+  const [ghost, setGhost] = useState<{ x: number; y: number; sides: number | null; overTower: boolean } | null>(null);
+  const dragged = useRef(false);
+  const towerButton = useRef<HTMLButtonElement>(null);
   const log = useRef<HTMLDivElement>(null);
   const dock = useRef<HTMLElement>(null);
   // Chat in a window of its own, for another monitor.
@@ -124,16 +216,78 @@ export function ChatDock({ session }: { session: Session }) {
     setOut(null);
   };
 
-  const poolFormula = () => {
-    const counts = new Map<number, number>();
-    for (const sides of pool) counts.set(sides, (counts.get(sides) ?? 0) + 1);
-    return [...counts].map(([sides, count]) => `${count}d${sides}`).join("+");
+  const poolFormula = () => formulaOf(pool);
+
+  // A roll into the tower the roller will not see: the dice still drop in.
+  const dropInTower = (dice: number[], from?: { x: number; y: number }) => {
+    if (session.role === "dm" || session.options.towerReveal || out) return;
+    const rect = towerButton.current?.getBoundingClientRect();
+    if (!rect) return;
+    // Dropped right on the tower, they still tumble in from just beside it.
+    const near = from && Math.hypot(from.x - rect.left, from.y - rect.top) > 90;
+    const start = near && from ? from : { x: rect.left - 120, y: rect.top - 160 };
+    towerDrops.drop({ sides: dice, from: { x: start.x / window.innerWidth, y: start.y / window.innerHeight, vx: 0, vy: 0 }, to: { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 } });
   };
-  const rollPool = () => {
-    if (pool.length === 0) return;
-    session.roll(withModifier(poolFormula(), modifier), "", "", tower);
+  const rollDice = (dice: number[], inTower: boolean, from?: { x: number; y: number }) => {
+    if (dice.length === 0) return;
+    session.roll(withModifier(formulaOf(dice), modifier), "", "", inTower);
+    if (inTower) dropInTower(dice, from);
     setPool([]);
     setModifier(0);
+  };
+  const rollPool = () => rollDice(pool, tower);
+
+  // FG's tray: drag a die (or the pool) out and let go to throw it the way
+  // the hand moved, or drop it on the dice tower. A click adds it to the pool.
+  const startDrag = (event: React.PointerEvent, sides: number | null) => {
+    if (event.button !== 0) return;
+    const view = event.currentTarget.ownerDocument.defaultView ?? window;
+    const startX = event.clientX;
+    const startY = event.clientY;
+    let dragging = false;
+    let samples: { x: number; y: number; t: number }[] = [];
+    const overTower = (x: number, y: number) => Boolean(view.document.elementFromPoint(x, y)?.closest(".tower"));
+    const move = (moveEvent: PointerEvent) => {
+      if (!dragging && Math.hypot(moveEvent.clientX - startX, moveEvent.clientY - startY) > 10) dragging = true;
+      if (!dragging) return;
+      const now = performance.now();
+      samples = [...samples.filter((sample) => now - sample.t < 140), { x: moveEvent.clientX, y: moveEvent.clientY, t: now }];
+      setGhost({ x: moveEvent.clientX, y: moveEvent.clientY, sides, overTower: overTower(moveEvent.clientX, moveEvent.clientY) });
+    };
+    const up = (upEvent: PointerEvent) => {
+      view.removeEventListener("pointermove", move);
+      view.removeEventListener("pointerup", up);
+      view.removeEventListener("pointercancel", up);
+      setGhost(null);
+      if (!dragging) return;
+      dragged.current = true;
+      view.setTimeout(() => (dragged.current = false), 0);
+      const dice = sides ? [...pool, sides] : pool;
+      if (overTower(upEvent.clientX, upEvent.clientY)) {
+        rollDice(dice, true, { x: upEvent.clientX, y: upEvent.clientY });
+        return;
+      }
+      // Thrown on the table (the main window's): the dice leave the hand there, that fast.
+      if (view === window) {
+        const first = samples.find((sample) => performance.now() - sample.t >= 30) ?? samples[0];
+        const seconds = first ? Math.max(0.016, (performance.now() - first.t) / 1000) : 1;
+        let vx = first ? (upEvent.clientX - first.x) / seconds / window.innerWidth : 0;
+        let vy = first ? (upEvent.clientY - first.y) / seconds / window.innerHeight : 0;
+        if (Math.hypot(vx, vy) < 0.15) {
+          // Let go without a throw: they tumble out toward the middle.
+          const dx = 0.5 - upEvent.clientX / window.innerWidth;
+          const dy = 0.45 - upEvent.clientY / window.innerHeight;
+          const length = Math.hypot(dx, dy) || 1;
+          vx = (dx / length) * 0.5;
+          vy = (dy / length) * 0.5;
+        }
+        setThrow({ x: upEvent.clientX / window.innerWidth, y: upEvent.clientY / window.innerHeight, vx, vy });
+      }
+      rollDice(dice, tower, { x: upEvent.clientX, y: upEvent.clientY });
+    };
+    view.addEventListener("pointermove", move);
+    view.addEventListener("pointerup", up);
+    view.addEventListener("pointercancel", up);
   };
 
   const body = (
@@ -159,6 +313,10 @@ export function ChatDock({ session }: { session: Session }) {
           event.preventDefault();
           if (!draft.trim()) return;
           submit(session, draft, modifier, tower);
+          if (tower) {
+            const command = /^\/(?:r|roll)\s+(\S+)/i.exec(draft.trim());
+            if (command) dropInTower([...command[1].matchAll(/d(\d+|%)/gi)].map((match) => (match[1] === "%" ? 100 : Number(match[1]))));
+          }
           setDraft("");
           setModifier(0);
         }}
@@ -167,6 +325,9 @@ export function ChatDock({ session }: { session: Session }) {
         <button type="submit" aria-label="Send">
           <Icon name="chat" />
         </button>
+        <button type="button" className="dice-settings-button" title="Dice settings" aria-label="Dice settings" aria-expanded={settingsOpen} onClick={() => setSettingsOpen(!settingsOpen)}>
+          <Icon name="settings" size={18} />
+        </button>
       </form>
       <div className="dice-tray" aria-label="Dice tray">
         {TRAY.map((sides) => (
@@ -174,13 +335,15 @@ export function ChatDock({ session }: { session: Session }) {
             key={sides}
             type="button"
             className="tray-die"
-            title={`Add a d${sides} (right-click rolls one now)`}
+            title={`Drag out and let go to throw a d${sides}, or drop it on the dice tower. Click adds it to the pool; right-click rolls one now.`}
             aria-label={`d${sides}`}
-            onClick={() => setPool([...pool, sides])}
+            onPointerDown={(event) => startDrag(event, sides)}
+            onClick={() => {
+              if (!dragged.current) setPool([...pool, sides]);
+            }}
             onContextMenu={(event) => {
               event.preventDefault();
-              session.roll(withModifier(`1d${sides}`, modifier), "", "", tower);
-              setModifier(0);
+              rollDice([sides], tower);
             }}
           >
             <DieShape sides={sides === 100 ? 10 : sides} size={30} label={sides === 100 ? "%" : sides} />
@@ -197,21 +360,36 @@ export function ChatDock({ session }: { session: Session }) {
         </div>
         <button
           type="button"
-          className={tower ? "tower on" : "tower"}
+          ref={towerButton}
+          className={["tower", tower ? "on" : "", ghost?.overTower ? "drop" : ""].filter(Boolean).join(" ")}
           aria-pressed={tower}
-          title={session.role === "dm" ? "Dice tower: your rolls stay hidden from players" : "Dice tower: only the GM sees your roll"}
+          title={
+            session.role === "dm"
+              ? "Dice tower: your rolls stay hidden from players. Drop dice here, or click to roll everything in it"
+              : session.options.towerReveal
+                ? "Dice tower: the GM and you see the roll. Drop dice here, or click to roll everything in it"
+                : "Dice tower: only the GM sees the roll. Drop dice here, or click to roll everything in it"
+          }
           onClick={() => setTower(!tower)}
         >
           <Icon name="tower" size={20} />
         </button>
       </div>
+      {settingsOpen ? <DiceSettings session={session} onClose={() => setSettingsOpen(false)} /> : null}
+      {ghost ? (
+        <span className={ghost.overTower ? "dice-ghost over-tower" : "dice-ghost"} style={{ left: ghost.x, top: ghost.y }} aria-hidden="true">
+          {(ghost.sides ? [...pool, ghost.sides] : pool).slice(-6).map((sides, index) => (
+            <DieShape key={index} sides={sides === 100 ? 10 : sides} size={34} label={sides === 100 ? "%" : sides} />
+          ))}
+        </span>
+      ) : null}
       {pool.length > 0 ? (
         <div className="dice-pool">
           <span>
             {poolFormula()}
             {modifier ? (modifier > 0 ? ` + ${modifier}` : ` − ${-modifier}`) : ""}
           </span>
-          <button type="button" className="play-button" onClick={rollPool}>
+          <button type="button" className="play-button" title="Click to roll, or drag out and throw" onPointerDown={(event) => startDrag(event, null)} onClick={() => !dragged.current && rollPool()}>
             Roll{tower ? " in the tower" : ""}
           </button>
           <button type="button" onClick={() => setPool([])}>

@@ -190,7 +190,8 @@ button .icon { vertical-align: -3px; }
 .modifier-box input { width: 2.6rem; padding: 2px; border: none; border-radius: 0; background: #0f1115; text-align: center; }
 .tower { margin-left: 4px; padding: 4px 6px; }
 .tower.on { color: #e0b8f2; border-color: #a612d4; background: rgba(166, 18, 212, 0.18); }
-.dice-pool { display: flex; align-items: center; gap: 8px; padding: 0 10px 10px; }
+/* The pool floats over the foot of the log, so the tray never moves under the hand. */
+.dice-pool { position: absolute; left: 8px; right: 8px; bottom: 92px; z-index: 3; display: flex; align-items: center; gap: 8px; padding: 6px 8px 6px 12px; background: rgba(28, 25, 21, 0.97); border: 1px solid var(--brass-dim); border-radius: 8px; box-shadow: var(--shadow); }
 .dice-pool span { flex: 1; color: var(--brass); font-weight: 700; }
 
 .roll-card {
@@ -441,3 +442,27 @@ span.ct-init { display: inline-block; }
 .chat-dock:hover .chat-popout { opacity: 1; }
 .chat-popout:hover { color: var(--text); border-color: var(--panel-edge); }
 .chat-dock.popped { position: static; width: auto; height: 100%; resize: none; border: 0; border-radius: 0; box-shadow: none; }
+
+/* --- 3D dice ---------------------------------------------------------------- */
+.dice-layer { position: fixed; inset: 0; z-index: 900; pointer-events: none; }
+.dice-layer canvas { width: 100%; height: 100%; display: block; }
+.roll-card.rolling .die.spinning { animation: die-spin 0.7s linear infinite; opacity: 0.75; }
+@keyframes die-spin { to { transform: rotate(360deg); } }
+.dice-ghost { position: fixed; z-index: 950; display: flex; gap: 2px; transform: translate(-50%, -50%) rotate(-8deg); pointer-events: none; filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.55)); }
+.dice-ghost.over-tower { transform: translate(-50%, -50%) scale(0.8); opacity: 0.7; }
+.tower.drop { border-color: var(--brass); box-shadow: 0 0 0 2px rgba(210, 161, 90, 0.45), 0 0 14px rgba(210, 161, 90, 0.55); }
+.tray-die { touch-action: none; cursor: grab; }
+.tray-die:active { cursor: grabbing; }
+.dice-settings-button { padding: 4px; background: transparent; border-color: transparent; color: var(--muted); }
+.dice-settings-button:hover, .dice-settings-button[aria-expanded="true"] { color: var(--text); border-color: var(--panel-edge); }
+.dice-settings { position: absolute; left: 10px; right: 10px; bottom: 86px; max-height: calc(100% - 96px); overflow: auto; z-index: 5; display: flex; flex-direction: column; gap: 8px; padding: 10px 12px 12px; background: var(--panel); border: 1px solid var(--panel-edge); border-radius: 10px; box-shadow: var(--shadow); }
+.dice-settings header { display: flex; align-items: center; justify-content: space-between; color: var(--brass); font-family: var(--serif); letter-spacing: 0.06em; }
+.dice-settings .check { display: flex; align-items: center; gap: 8px; font-size: 0.86rem; }
+.dice-settings-head { color: var(--muted); font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.08em; }
+.dice-swatches { display: flex; flex-wrap: wrap; gap: 6px; }
+.dice-swatches button { width: 34px; height: 34px; padding: 0; border-radius: 8px; font-family: Georgia, serif; font-weight: 700; border: 2px solid transparent; box-shadow: inset 0 -6px 10px rgba(0, 0, 0, 0.35); }
+.dice-swatches button[aria-pressed="true"] { border-color: var(--brass); }
+.dice-colors { display: flex; gap: 14px; font-size: 0.82rem; color: var(--muted); }
+.dice-colors label { display: flex; align-items: center; gap: 6px; }
+.dice-colors input { width: 34px; height: 24px; padding: 0; border: 0; background: none; }
+.dice-settings .gm-option { padding-top: 8px; border-top: 1px solid var(--panel-edge); color: var(--brass); }

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { MapScene } from "../table/MapView";
+import { rolling, throwIntent } from "../dice/diceStore";
 
 export type Seat = { id: string; name: string; role: "dm" | "player" };
 // The map as the host shows it to this seat (electron/mapState.cjs viewFor).
@@ -65,7 +66,9 @@ export type RollTerm =
   | { kind: "number"; sign: number; value: number }
   | { kind: "dice"; sign: number; count: number; sides: number; rolls: number[]; kept: boolean[]; sum: number };
 export type RollResult = { formula: string; label: string; total: number; terms: RollTerm[]; tag?: string; result?: string; target?: string; against?: number; by?: string };
-export type ChatLine = { id: string; from: string; text: string; at: number; roll?: RollResult; secret?: boolean };
+export type ChatLine = { id: string; from: string; text: string; at: number; roll?: RollResult; secret?: boolean; shownTo?: string; tower?: boolean };
+// The table's own options, set by the GM (electron/tableServer.cjs savedOptions).
+export type TableOptions = { towerReveal: boolean };
 // The combat tracker as the host shows it to this seat (electron/combat.cjs viewFor).
 export type CombatEntry = {
   id: string;
@@ -193,6 +196,7 @@ export function useSession() {
   const [map, setMap] = useState<TableMap>(EMPTY_MAP);
   const [party, setParty] = useState<import("../party/PartySheet").PartyView | null>(null);
   const [combat, setCombat] = useState<CombatView>({ round: 0, active: null, entries: [] });
+  const [options, setOptions] = useState<TableOptions>({ towerReveal: false });
   const [pings, setPings] = useState<Ping[]>([]);
   const [notice, setNotice] = useState<string | null>(null);
   const [chat, setChat] = useState<ChatLine[]>([]);
@@ -292,6 +296,7 @@ export function useSession() {
             setPlayers((msg.players as Seat[]) ?? []);
             applyMap(msg.map as TableMap);
             if (msg.combat) setCombat(msg.combat as CombatView);
+            if (msg.options) setOptions(msg.options as TableOptions);
             setChat((msg.chat as ChatLine[]) ?? []);
             setRecords(Object.fromEntries(((msg.records as TableRecord[]) ?? []).map((record) => [record.id, record])));
             setRemoteLabel(label);
@@ -305,6 +310,7 @@ export function useSession() {
           if (msg.type === "map") applyMap(msg as unknown as TableMap);
           if (msg.type === "party" && msg.party) setParty(msg.party as import("../party/PartySheet").PartyView);
           if (msg.type === "combat" && msg.combat) setCombat(msg.combat as CombatView);
+          if (msg.type === "options" && msg.options) setOptions(msg.options as TableOptions);
           if (msg.type === "ping") {
             const ping = { id: ++pingCounter.current, x: Number(msg.x), y: Number(msg.y), from: String(msg.from ?? ""), color: String(msg.color ?? "#fff") };
             setPings((current) => [...current, ping].slice(-12));
@@ -317,6 +323,8 @@ export function useSession() {
           }
           if (msg.type === "chat") {
             const line = msg as unknown as ChatLine;
+            // Its dice are thrown first; its card waits for them to land.
+            rolling.arrived(line);
             setChat((current) => [...current, line].slice(-100));
           }
           if (msg.type === "record" && msg.record) {
@@ -521,7 +529,7 @@ export function useSession() {
   const roll = useCallback((formula: string, label = "", tag = "", tower = false) => {
     const socket = socketRef.current;
     if (!formula.trim() || !socket || socket.readyState !== WebSocket.OPEN) return;
-    socket.send(JSON.stringify({ type: "roll", formula: formula.trim().slice(0, 200), label: label.slice(0, 120), ...(tag ? { tag } : {}), ...(tower ? { tower: true } : {}) }));
+    socket.send(JSON.stringify({ type: "roll", formula: formula.trim().slice(0, 200), label: label.slice(0, 120), ...(tag ? { tag } : {}), ...(tower ? { tower: true } : {}), ...throwIntent() }));
   }, []);
 
   // The creation wizard's character: the host builds it and answers with its id.
@@ -553,7 +561,7 @@ export function useSession() {
   const siegeCheck = useCallback((id: string, attribute: string, cl = 0, save = false) => {
     const socket = socketRef.current;
     if (!socket || socket.readyState !== WebSocket.OPEN) return;
-    socket.send(JSON.stringify({ type: "siege-check", id, attribute, cl, ...(save ? { label: `${attribute[0].toUpperCase()}${attribute.slice(1)} save` } : {}) }));
+    socket.send(JSON.stringify({ type: "siege-check", id, attribute, cl, ...(save ? { label: `${attribute[0].toUpperCase()}${attribute.slice(1)} save` } : {}), ...throwIntent() }));
   }, []);
 
   const levelUp = useCallback((id: string) => {
@@ -610,7 +618,9 @@ export function useSession() {
   const removeLight = useCallback((id: string) => send({ type: "light-remove", id }), [send]);
   // The party sheet's GM actions; the host splits and posts them as FG does.
   // The combat tracker: every action goes to the host, which applies FG's rules.
-  const ct = useCallback((action: string, payload: Record<string, unknown> = {}) => send({ type: "ct", action, ...payload }), [send]);
+  // The tracker's rolls are thrown from where they were asked for.
+  const ct = useCallback((action: string, payload: Record<string, unknown> = {}) => send({ type: "ct", action, ...payload, ...throwIntent() }), [send]);
+  const setTableOptions = useCallback((patch: Partial<TableOptions>) => send({ type: "table-options", options: patch }), [send]);
   const partyAwardXP = useCallback((xp: number) => send({ type: "party-award-xp", xp }), [send]);
   const partyAward = useCallback((kind: "quests" | "encounters", id?: string) => send({ type: "party-award", kind, id }), [send]);
   const partyDistribute = useCallback(() => send({ type: "party-distribute" }), [send]);
@@ -645,6 +655,8 @@ export function useSession() {
   }, [publish, sendChat, moveToken, placeToken, setDoor, roll, op]);
 
   return {
+    options,
+    setTableOptions,
     connected,
     connecting,
     canHost: typeof window !== "undefined" && Boolean(window.kraken),

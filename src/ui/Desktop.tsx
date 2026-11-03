@@ -1,13 +1,17 @@
-import type { ReactNode } from "react";
+import { lazy, Suspense, useSyncExternalStore, type ReactNode } from "react";
 import { Picture } from "../characters/ArtPicker";
 import { CharacterPanel } from "../characters/CharacterPanel";
 import { CombatTracker } from "../combat/CombatTracker";
 import { PartySheet } from "../party/PartySheet";
 import type { Session } from "../session/useSession";
+import { diceStore } from "../dice/diceStore";
 import { ChatDock } from "./ChatDock";
 import { Emblem, Mark } from "./Emblem";
 import { Icon } from "./icons";
 import { FloatingWindow, useWindows, type WindowKind } from "./Windows";
+
+// The 3D dice (three.js and cannon) load when the table first shows them.
+const DiceLayer = lazy(() => import("../dice/DiceLayer"));
 
 type Launcher = { kind: WindowKind; label: string; icon: string; title: string };
 
@@ -90,6 +94,7 @@ export function Desktop({
         { kind: "party", label: "Party", icon: "party", title: "Party Sheet" },
         { kind: "combat", label: "Combat", icon: "combat", title: "Combat Tracker" },
       ];
+  const dice = useSyncExternalStore(diceStore.subscribe, diceStore.settings);
   const myTurn = session.combat.entries.some((entry) => entry.mine && entry.id === session.combat.active);
 
   return (
@@ -175,6 +180,11 @@ export function Desktop({
         </div>
         {overlay}
       </div>
+      {dice.show ? (
+        <Suspense fallback={null}>
+          <DiceLayer />
+        </Suspense>
+      ) : null}
     </div>
   );
 }

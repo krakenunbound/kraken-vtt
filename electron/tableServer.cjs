@@ -153,6 +153,29 @@ function sanitizeScene(input) {
   };
 }
 
+// How a seat's dice leave its hand (fractions of its window, and per second)
+// and how its dice look, for the 3D dice every screen throws.
+const DICE_THEMES = new Set(["classic", "dragonhide", "starfall", "bone", "magma", "leviathan"]);
+function diceThrow(value) {
+  if (!value || typeof value !== "object") return null;
+  const n = (key, low, high) => Math.min(high, Math.max(low, Number(value[key])));
+  const out = { x: n("x", 0, 1), y: n("y", 0, 1), vx: n("vx", -4, 4), vy: n("vy", -4, 4) };
+  return Object.values(out).every(Number.isFinite) ? out : null;
+}
+function diceLook(value) {
+  if (!value || typeof value !== "object") return null;
+  const color = (item) => (typeof item === "string" && /^#[0-9a-f]{3,8}$/i.test(item) ? item : null);
+  const body = color(value.body);
+  const ink = color(value.ink);
+  return body && ink && DICE_THEMES.has(value.theme) ? { theme: value.theme, body, ink } : null;
+}
+
+// The table's own options. towerReveal: a roll in the dice tower is shown to
+// whoever rolled it too (FG shows it to the GM only).
+function savedOptions(value) {
+  return { towerReveal: Boolean(value && typeof value === "object" && value.towerReveal) };
+}
+
 function savedChat(value) {
   if (!Array.isArray(value)) return [];
   return value
@@ -164,6 +187,8 @@ function savedChat(value) {
       text: text(line.text, "").slice(0, 500),
       at: num(line.at, 0),
       ...(line.roll && typeof line.roll === "object" ? { roll: line.roll } : {}),
+      ...(line.secret ? { secret: true } : {}),
+      ...(typeof line.shownTo === "string" ? { shownTo: line.shownTo.slice(0, 24) } : {}),
       ...(line.secret ? { secret: true } : {}),
     }))
     .filter((line) => line.text || line.roll);
@@ -219,6 +244,15 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
   const clients = new Map();
   const tokenArt = new Map();
   const chat = savedChat(saved.chat);
+  let options = savedOptions(saved.options);
+  function setOptions(patch) {
+    options = savedOptions({ ...options, ...(patch && typeof patch === "object" ? patch : {}) });
+    broadcast({ type: "options", options });
+    onChange("table");
+    return options;
+  }
+  // The seat whose request is being handled now (and when).
+  let asking = null;
   const records = createRecordStore({ saved: saved.records, onChange: () => onChange("records") });
   const dice = createDice(saved.dice);
   const map = createMapState({
@@ -288,28 +322,40 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     return { role: client.role, name: client.name };
   }
 
-  // A secret line (FG's GM-only message: a hidden creature's turn) reaches the GM only.
+  // A secret line (FG's GM-only message: a hidden creature's turn) reaches the
+  // GM, and the one seat it is shown to (shownTo).
+  const seesLine = (client, line) => !line.secret || client.role === "dm" || (line.shownTo && line.shownTo === client.name);
+
   function addChat(entry) {
+    // A roll goes out with the throw its roller just made, for the 3D dice.
+    // (A tracker's roll is the agent's: it is thrown by the seat that just asked for it.)
+    if (entry.roll) {
+      const roller = [...clients.values()].find((client) => client.id === entry.id) ?? (asking && Date.now() - asking.at < 1500 ? asking.client : null);
+      const hand = roller?.hand;
+      if (hand && Date.now() - hand.at < 4000) {
+        if (hand.throw) entry.roll.throw = hand.throw;
+        if (hand.look) entry.roll.look = hand.look;
+      } else if (hand?.look) entry.roll.look = hand.look;
+    }
     chat.push(entry);
     if (chat.length > 100) chat.shift();
-    if (entry.secret) {
-      for (const [ws, client] of clients) if (client.role === "dm") send(ws, { type: "chat", ...entry });
-    } else broadcast({ type: "chat", ...entry });
+    for (const [ws, client] of clients) if (seesLine(client, entry)) send(ws, { type: "chat", ...entry });
     onChange("table");
     return entry;
   }
 
   function chatFor(client) {
-    return client.role === "dm" ? chat : chat.filter((line) => !line.secret);
+    return chat.filter((line) => seesLine(client, line));
   }
 
   // label: what the roll is for ("Strength check"). from: who rolled.
   // tag: the asker's own marker (a wizard waiting for its roll), echoed back.
   // extra: what an action adds to its roll card (an attack's HIT or MISS, its target).
+  // secret: the GM's only, or shown to that one seat too (a name).
   function rollDice(formula, label, from, id, tag, secret = false, extra = null) {
     const result = dice.roll(formula);
     const roll = { ...result, label: text(label, "").slice(0, 160), ...(tag ? { tag: text(tag, "").slice(0, 80) } : {}), ...(extra ?? {}) };
-    addChat({ id, from, text: "", roll, at: Date.now(), ...(secret ? { secret: true } : {}) });
+    addChat({ id, from, text: "", roll, at: Date.now(), ...(secret ? { secret: true } : {}), ...(typeof secret === "string" ? { shownTo: secret } : {}) });
     return roll;
   }
 
@@ -484,6 +530,12 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         return;
       }
       if (!msg || typeof msg !== "object") return;
+      if (client.joined) asking = { client, at: Date.now() };
+      // Any request may say how its dice are thrown; the roll it makes carries that.
+      if (client.joined && (msg.throw || msg.look)) {
+        const look = diceLook(msg.look) ?? client.hand?.look ?? null;
+        client.hand = { throw: diceThrow(msg.throw), look, at: Date.now() };
+      }
 
       if (!client.joined) {
         if (msg.type !== "join") {
@@ -514,6 +566,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
           map: map.viewFor(seatOf(client), client.assetToken),
           combat: combat.viewFor(seatOf(client)),
           chat: chatFor(client),
+          options,
           records: records.list({ seat: seatOf(client) }),
           scene: client.role === "player" ? sceneFor(client) : null,
         });
@@ -532,12 +585,24 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         return;
       }
 
+      if (msg.type === "table-options") {
+        if (client.role !== "dm") return;
+        setOptions(msg.options);
+        return;
+      }
+
       if (msg.type === "roll") {
         try {
-          // The dice tower: the roll goes to the GM only; the table hears that it happened.
+          // The dice tower, as FG's: the GM's roll, marked [TOWER]. Its roller sees
+          // what went in (FG's line with the dice, no result) unless the GM
+          // lets them see the result too; the rest of the table sees nothing.
           if (msg.tower) {
-            rollDice(msg.formula, msg.label, client.name, client.id, msg.tag, true);
-            if (client.role !== "dm") addChat({ id: client.id, from: client.name, text: "rolls in the dice tower.", at: Date.now() });
+            const label = `[TOWER] ${text(msg.label, "")}`.trim();
+            const reveal = client.role !== "dm" && options.towerReveal;
+            const roll = rollDice(msg.formula, label, client.name, client.id, msg.tag, reveal ? client.name : true);
+            if (client.role !== "dm" && !reveal) {
+              send(ws, { type: "chat", id: client.id, from: client.name, text: `${label} [${roll.formula}]`, at: Date.now(), tower: true });
+            }
           } else rollDice(msg.formula, msg.label, client.name, client.id, msg.tag);
         } catch (error) {
           send(ws, { type: "error", reason: error instanceof Error ? error.message : "Could not roll that." });
@@ -779,6 +844,8 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     seat: { role: "dm", name: "Agent" },
     records,
     dice,
+    options: () => ({ ...options }),
+    setOptions,
     roll: (formula, label, from = "Agent", secret = false, extra = null) => rollDice(formula, label, from, "agent", undefined, secret, extra),
     // Posts a roll already made (an attack decides HIT or MISS before its card goes out).
     postRoll: (result, label, from = "Agent", secret = false, extra = null) =>
@@ -837,6 +904,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     persisted() {
       return {
         chat: chat.slice(),
+        options,
         map: map.persisted(),
         combat: combat.persisted(),
         records: records.toJSON(),
