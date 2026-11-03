@@ -87,7 +87,7 @@ console.log("ok dice and records");
 const profile = mkdtempSync(path.join(tmpdir(), "kraken-agent-"));
 const agentFile = path.join(profile, "agent.json");
 const env = { ...process.env, KRAKEN_AGENT_FILE: agentFile, KRAKEN_AGENT_PORT: "0" };
-const app = await electron.launch({ args: [".", `--user-data-dir=${profile}`], cwd: process.cwd(), env });
+const app = await electron.launch({ args: [".", "--mute-audio", `--user-data-dir=${profile}`], cwd: process.cwd(), env });
 const page = await app.firstWindow();
 await page.waitForSelector("text=My Campaigns");
 

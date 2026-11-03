@@ -200,6 +200,11 @@ function savedOptions(value) {
     decal: id(options.decal, "kraken"),
     wallpaper: id(options.wallpaper, ""),
     gmIcon: id(options.gmIcon, GM_ICON),
+    // Sounds for the GM's hidden rolls, as Kraken's Syrinscape extension:
+    // "off" none, "combat" attacks, damage, healing and initiative only, "all".
+    soundHidden: ["off", "combat", "all"].includes(options.soundHidden) ? options.soundHidden : "combat",
+    // The same sound again only after this many seconds.
+    soundRepeat: Math.min(30, Math.max(0, Number.isFinite(Number(options.soundRepeat)) ? Number(options.soundRepeat) : 1)),
   };
 }
 
@@ -298,6 +303,8 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     };
   };
   let soundscape = cleanScape(saved.sound);
+  // When each folder last played (the same sound again only after a pause).
+  const lastSound = new Map();
   function setSoundscape(next) {
     soundscape = cleanScape(next);
     broadcast({ type: "soundscape", soundscape });
@@ -410,7 +417,15 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     // A trigger's sound goes with the line: every seat that sees it hears it (as its result shows).
     if (sounds && !entry.sound) {
       const found = soundFor(entry, soundTriggers, sounds);
-      if (found) entry.sound = found.id;
+      const hidden = entry.secret || entry.self;
+      const combatLine = /^\[(ATTACK|DAMAGE|HEAL|INIT)\]/.test(String(entry.roll?.label ?? ""));
+      const allowed = !hidden || options.soundHidden === "all" || (options.soundHidden === "combat" && combatLine);
+      const folder = found ? found.id.split("/").slice(0, -1).join("/") : "";
+      const again = found && Date.now() - (lastSound.get(folder) ?? 0) < options.soundRepeat * 1000;
+      if (found && allowed && !again) {
+        entry.sound = found.id;
+        lastSound.set(folder, Date.now());
+      }
     }
     // What the GM's seat (or the GM's agent) says carries the GM's chat picture.
     const speaker = [...clients.values()].find((client) => client.id === entry.id);

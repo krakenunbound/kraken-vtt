@@ -18,6 +18,8 @@ if (!app.commandLine.hasSwitch("user-data-dir")) app.setPath("userData", path.jo
 
 if (process.env.KRAKEN_E2E === "1" || process.env.KRAKEN_SMOKE === "1") {
   app.setPath("userData", fs.mkdtempSync(path.join(os.tmpdir(), "kraken-vtt-")));
+  // Test runs are silent (no test sounds or dice on the GM's speakers).
+  app.commandLine.appendSwitch("mute-audio");
   // Test runs host on this computer only, out of the firewall's way.
   if (!process.env.KRAKEN_BIND) process.env.KRAKEN_BIND = "127.0.0.1";
   // Test runs get their own agent bridge, so a running copy of the app keeps its own.

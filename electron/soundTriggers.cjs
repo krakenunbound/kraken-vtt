@@ -1,11 +1,12 @@
-// Which sound a chat line sets off (as Syrinscape's chat triggers in FG): what
-// the line is (an attack, a save, a spell cast, healing, damage, any roll, or
-// words in the text) and how it went (hit, miss, a natural 20's crit, a
-// natural 1's fumble, a save's success or failure). Triggers are tried in
-// order; the first that fits, and whose folder has sounds, plays.
+// Which sound a chat line sets off, as Syrinscape's chat triggers in FG (Kraken's
+// C&C Syrinscape extension): what the line is (an attack, its damage, a spell
+// cast, a save, healing, initiative, any roll, or words in the line) and, for an
+// attack, a natural 20's crit or a natural 1's fumble. An attack plays the
+// weapon's swing, its damage roll the hit. Triggers are tried in order; the
+// first that fits, and whose folder has sounds, plays.
 
-const ON = new Set(["attack", "spellattack", "save", "cast", "heal", "damage", "roll", "text"]);
-const RESULTS = new Set(["any", "hit", "miss", "crit", "fumble", "success", "failure"]);
+const ON = new Set(["attack", "damage", "save", "cast", "heal", "init", "roll", "text"]);
+const RESULTS = new Set(["any", "crit", "fumble", "success", "failure"]);
 
 function cleanTriggers(list) {
   if (!Array.isArray(list)) return null;
@@ -31,33 +32,36 @@ function natural(roll) {
   return index >= 0 ? term.rolls[index] : null;
 }
 
-// What a line is, and the results it may count as (the first that has a sound wins).
+// What a line is, the results it counts as (the first that has a sound wins),
+// and the words a trigger looks at: for an attack or damage, what it is made
+// with ("(M) Hammer, War"), never who it is at ("-> [at Orc]").
 function classify(line) {
   const label = String(line.roll?.label ?? "");
-  const words = `${label} ${line.text ?? ""}`;
+  const said = `${label} ${line.text ?? ""}`;
   const kinds = [];
   let results = ["any"];
   if (line.roll) kinds.push("roll");
-  if (/^\[ATTACK\]/.test(label)) {
-    kinds.push("attack", "spellattack");
-    const outcome = String(line.roll.result ?? "").toUpperCase();
+  const tag = /^\[([A-Z ]+)\]/.exec(label)?.[1] ?? "";
+  if (tag === "ATTACK") {
+    kinds.push("attack");
     const face = natural(line.roll);
-    if (face === 20) results = ["crit", "hit", "any"];
-    else if (face === 1) results = ["fumble", "miss", "any"];
-    else if (outcome === "HIT") results = ["hit", "any"];
-    else if (outcome === "MISS") results = ["miss", "any"];
-    // An attack rolled by hand: by its name, with crit and fumble from the die.
-    else results = face === null ? ["any"] : ["hit", "any"];
-  } else if (/^\[SAVE\]/.test(label)) {
+    if (face === 20) results = ["crit", "any"];
+    else if (face === 1) results = ["fumble", "any"];
+  } else if (tag === "DAMAGE") kinds.push("damage");
+  else if (tag === "SAVE") {
     kinds.push("save");
     results = /\[SUCCESS/.test(label) ? ["success", "any"] : /\[FAILURE/.test(label) ? ["failure", "any"] : ["any"];
-  } else if (/^\[CAST\]/.test(label)) kinds.push("cast");
-  else if (/^\[HEAL\]/.test(label)) kinds.push("heal");
-  else if (/^\[DAMAGE\]/.test(label)) kinds.push("damage");
+  } else if (tag === "CAST") kinds.push("cast");
+  else if (tag === "HEAL") kinds.push("heal");
+  else if (tag === "INIT") kinds.push("init");
   kinds.push("text");
-  // The name the trigger's words are looked for in: for an attack, what it attacks with.
-  const name = label.replace(/^\[[A-Z ]+\]\s*(\([A-Z]\))?\s*/, "").replace(/\[.*$/, "");
-  return { kinds, results, name, words };
+  const name = label
+    .replace(/^\[[A-Z ]+\]\s*/, "")
+    .replace(/->.*$/, "")
+    .replace(/\[(AC|HIT|MISS|NO TARGET|TYPE|SUCCESS|FAILURE|CB|HALF|EFFECT)[^\]]*\]/g, "")
+    .replace(/\[[^\]]*=[^\]]*\]/g, "")
+    .trim();
+  return { kinds, results, name, said };
 }
 
 const patterns = new Map();
@@ -78,12 +82,11 @@ function matches(rule, text) {
 // The sound for a line: { id, trigger } or null. library: sounds.cjs.
 function soundFor(line, triggers, library) {
   if (!library || !Array.isArray(triggers) || line.local) return null;
-  const { kinds, results, name, words } = classify(line);
+  const { kinds, results, name, said } = classify(line);
   for (const result of results) {
     for (const rule of triggers) {
-      if (!rule.enabled || !kinds.includes(rule.on)) continue;
-      if (rule.result !== result) continue;
-      if (!matches(rule, rule.on === "text" ? words : name || words)) continue;
+      if (!rule.enabled || !kinds.includes(rule.on) || rule.result !== result) continue;
+      if (!matches(rule, rule.on === "text" || rule.on === "roll" ? said : name)) continue;
       const picked = library.pick(rule.sound);
       if (picked) return { id: picked.id, trigger: rule.id };
     }

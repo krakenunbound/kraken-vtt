@@ -95,7 +95,7 @@ export type ChatSend = { kind?: ChatKind; mood?: string; to?: string[]; as?: str
 export type SoundTrigger = { id: string; name: string; on: string; match: string; result: string; sound: string; enabled: boolean };
 export type SoundItem = { id: string; kind: string; group: string; name: string };
 export type SoundLibrary = { sounds: SoundItem[]; groups: { id: string; count: number }[]; folder: string; triggers?: SoundTrigger[] };
-export type TableOptions = { towerReveal: boolean; decal: string; wallpaper: string; gmIcon: string };
+export type TableOptions = { towerReveal: boolean; decal: string; wallpaper: string; gmIcon: string; soundHidden: "off" | "combat" | "all"; soundRepeat: number };
 export type DecalItem = { id: string; name: string; group: string; ruleset?: string };
 export type PictureKind = "decal" | "wallpaper" | "gmicon";
 // The combat tracker as the host shows it to this seat (electron/combat.cjs viewFor).
@@ -227,7 +227,7 @@ export function useSession() {
   const [combat, setCombat] = useState<CombatView>({ round: 0, active: null, entries: [] });
   const [soundscape, setSoundscape] = useState<Soundscape>({ ambience: [], music: null });
   const [soundTriggers, setSoundTriggers] = useState<SoundTrigger[]>([]);
-  const [options, setOptions] = useState<TableOptions>({ towerReveal: false, decal: "kraken", wallpaper: "", gmIcon: "" });
+  const [options, setOptions] = useState<TableOptions>({ towerReveal: false, decal: "kraken", wallpaper: "", gmIcon: "", soundHidden: "combat", soundRepeat: 1 });
   const [pings, setPings] = useState<Ping[]>([]);
   const [notice, setNotice] = useState<string | null>(null);
   const [chat, setChat] = useState<ChatLine[]>([]);

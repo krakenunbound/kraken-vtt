@@ -21,7 +21,7 @@ const PORT = 47395;
 
 const profile = mkdtempSync(path.join(tmpdir(), "kraken-demo-"));
 const env = { ...process.env, KRAKEN_AGENT_FILE: path.join(profile, "agent.json"), KRAKEN_AGENT_PORT: "0" };
-const app = await electron.launch({ args: [".", `--user-data-dir=${profile}`], cwd: process.cwd(), env });
+const app = await electron.launch({ args: [".", "--mute-audio", `--user-data-dir=${profile}`], cwd: process.cwd(), env });
 const page = await app.firstWindow();
 await page.waitForSelector("text=My Campaigns");
 const child = spawn(process.execPath, ["electron/agent/mcp-stdio.cjs"], { env, stdio: ["pipe", "pipe", "inherit"] });

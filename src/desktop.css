@@ -646,3 +646,7 @@ span.ct-init { display: inline-block; }
 .sound-empty { padding: 10px 12px; border: 1px dashed var(--brass-dim); border-radius: 8px; color: var(--muted); }
 .sound-empty b { color: var(--brass); }
 .sound-empty p { margin: 4px 0 0; font-size: 0.86rem; line-height: 1.45; }
+.sound-trigger-options { display: flex; flex-wrap: wrap; gap: 16px; }
+.sound-trigger-options label { display: flex; align-items: center; gap: 8px; font-size: 0.86rem; color: var(--muted); }
+.sound-trigger .sound-play { font-size: 0.8rem; }
+.sound-note { color: #e7c07a; }

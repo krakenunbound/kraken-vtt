@@ -9,7 +9,7 @@ import path from "node:path";
 
 const [zip, sceneName, cx, cy, shownWidth, out] = process.argv.slice(2);
 const profile = mkdtempSync(path.join(tmpdir(), "kraken-shot-"));
-const app = await electron.launch({ args: [".", `--user-data-dir=${profile}`], cwd: process.cwd() });
+const app = await electron.launch({ args: [".", "--mute-audio", `--user-data-dir=${profile}`], cwd: process.cwd() });
 const page = await app.firstWindow();
 await app.evaluate(({ BrowserWindow }) => {
   const win = BrowserWindow.getAllWindows()[0];

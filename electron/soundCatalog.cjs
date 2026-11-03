@@ -2,10 +2,15 @@
 // them with the GM's ElevenLabs account, into assets/sounds), and the chat
 // triggers that play them. Each entry is a folder of sounds; a folder plays one
 // of its sounds at random. `keys` are the words in a roll's name that mean it
-// (a "Longsword" attack is a Sword); results are hit, miss, crit (a natural
-// 20) and fumble (a natural 1).
+// (a "Longsword" attack is a Sword).
+//
+// As Syrinscape's sounds in FG (Kraken's C&C Syrinscape extension): an attack
+// roll plays the weapon's Attack (its swing, or a bow's shot), the damage roll
+// its Hit; a natural 20 plays its Crit and a natural 1 its Fumble. The kinds
+// are Syrinscape's too: oneshots are voices (spoken lines), sfx are sound
+// effects, ambience are moods, and music.
 
-const RESULTS = ["Hit", "Miss", "Crit", "Fumble"];
+const RESULTS = ["Attack", "Hit", "Crit", "Fumble"];
 
 // Weapons: [folder, keys, what it sounds like].
 const WEAPONS = [
@@ -29,14 +34,14 @@ const WEAPONS = [
 ];
 const WEAPON_SOUND = {
   Hit: (what) => `${what} striking an armoured opponent, a solid hit with a grunt of pain, fantasy combat sound effect`,
-  Miss: (what) => `${what} swinging and missing, a fast whoosh through the air, fantasy combat sound effect`,
+  Attack: (what) => `${what} swung hard, a fast whoosh through the air, fantasy combat sound effect`,
   Crit: (what) => `a devastating critical hit with ${what}, a brutal crunching impact and a cry of pain, fantasy combat sound effect`,
   Fumble: (what) => `a clumsy fumble with ${what}, the weapon clattering and slipping, an embarrassed grunt, fantasy combat sound effect`,
 };
 const RANGED = new Set(["Bow", "Crossbow", "Sling", "Thrown"]);
 const RANGED_SOUND = {
-  Hit: (what) => `${what} loosed, flying and thudding hard into a target, fantasy combat sound effect`,
-  Miss: (what) => `${what} loosed, whistling past and clattering off stone, fantasy combat sound effect`,
+  Hit: (what) => `${what} thudding hard into its target, fantasy combat sound effect`,
+  Attack: (what) => `${what} loosed, the string twanging and the shot whistling away, fantasy combat sound effect`,
   Crit: (what) => `${what} loosed, a perfect shot punching deep into its target with a scream, fantasy combat sound effect`,
   Fumble: (what) => `${what} misfired, the string snapping or the shot dropping to the ground, fantasy combat sound effect`,
 };
@@ -59,7 +64,6 @@ const SPELLS = [
 const SPELL_SOUND = {
   Cast: (what) => `a wizard casting ${what}, a rising magical charge, fantasy spell sound effect`,
   Hit: (what) => `${what} striking its target with a powerful impact, fantasy spell sound effect`,
-  Miss: (what) => `${what} missing its target and fizzling away in the distance, fantasy spell sound effect`,
   Crit: (what) => `${what} exploding with overwhelming force on its target, fantasy spell sound effect`,
   Fumble: (what) => `${what} backfiring and sputtering out with a sad fizzle, fantasy spell sound effect`,
 };
@@ -103,8 +107,10 @@ const CREATURE_SOUND = {
 };
 
 const BODY = [
-  ["Injury", "a person getting badly wounded in battle, a sharp cry of pain"],
-  ["Injury", "a woman hurt in battle, a pained gasp and groan"],
+  ["Wounded", "a person hurt in battle, a short grunt of pain"],
+  ["Wounded", "a woman hurt in battle, a pained gasp"],
+  ["Badly Wounded", "a warrior badly wounded, a loud scream of pain"],
+  ["Dying", "a warrior collapsing, dying, a long anguished groan"],
   ["Death", "a warrior dying, a last breath and armour collapsing to the ground"],
   ["Unconscious", "a person falling unconscious, a groan and a body slumping to the floor"],
   ["Heal", "warm healing magic, a soft glowing chime and a relieved breath"],
@@ -114,7 +120,11 @@ const BODY = [
   ["Stabilised", "a dying person's breathing steadying, a calm sigh"],
 ];
 
-const ONESHOTS = [
+// Sound effects the GM plays by hand (and some triggers).
+const EFFECTS = [
+  ["Roll Initiative", "a dramatic orchestral hit and war drum, the start of a battle"],
+  ["Saving Throw", "magical wind chimes, a shimmering protective ward"],
+  ["Resist", "a magical shield flaring and repelling a spell"],
   ["Doors/Wooden Door", "a heavy wooden door creaking open slowly"],
   ["Doors/Iron Door", "a heavy iron dungeon door grinding open"],
   ["Doors/Slam", "a door slamming shut with a boom"],
@@ -145,6 +155,23 @@ const ONESHOTS = [
   ["Torch", "lighting a torch, a whoosh of flame"],
   ["Footsteps", "heavy footsteps approaching in a stone corridor"],
   ["Level Up", "a triumphant short fantasy fanfare of achievement"],
+];
+
+// Voices (Syrinscape's one-shots): [who, the kind of voice, what they say].
+// The generator speaks them with an ElevenLabs voice that fits.
+const VOICES = [
+  ["Guard", "male middle aged gruff", ["Halt! Who goes there?", "State your business.", "Move along.", "The gate is closed at sundown.", "You there! Stop!", "Guards! To me!", "Alright, you may pass."]],
+  ["Innkeeper", "male middle aged warm", ["Welcome, travellers! Come in out of the cold.", "What'll it be?", "Room and board is two silver a night.", "Ale's fresh today.", "No fighting in my tavern!", "Safe travels, friends."]],
+  ["Barmaid", "female young friendly", ["What can I get you, love?", "Coming right up!", "Another round?", "You lot look like trouble.", "Mind your hands."]],
+  ["Merchant", "male middle aged smooth", ["Finest wares in the land!", "For you, a special price.", "That's my final offer.", "No refunds!", "A pleasure doing business.", "You drive a hard bargain."]],
+  ["Old Wizard", "male old wise", ["I have been expecting you.", "Magic always has a price.", "The answer lies within the old ruins.", "Be careful what you wish for.", "Hmm. Interesting.", "Leave me to my studies."]],
+  ["Villain", "male deep menacing", ["You fools! You're too late!", "Kneel before me.", "You'll regret crossing me.", "Destroy them!", "Is that the best you can do?", "This isn't over!"]],
+  ["Sorceress", "female sinister", ["How delightful. Visitors.", "Your souls will make fine trinkets.", "Did you really think you could stop me?", "Come closer, little ones."]],
+  ["Goblin", "male high pitched raspy", ["Shinies! Give us the shinies!", "Kill them! Kill them!", "Run away! Run away!", "Hee hee hee!", "Mine! All mine!"]],
+  ["Orc", "male deep gravelly", ["Smash them!", "For the warchief!", "You die now!", "Weak little humans.", "Grrraagh!"]],
+  ["Townsfolk", "female nervous", ["Help! Somebody help!", "Thank the gods you're here!", "Monsters! In the woods!", "Please, save my child!", "Thank you, kind heroes."]],
+  ["Priest", "male old calm", ["May the light protect you.", "Go in peace.", "The gods have blessed this place.", "Rest here, and be healed."]],
+  ["Party", "male young confident", ["Yes.", "No.", "I can do that.", "Bye.", "Follow me!", "Watch out!", "Fall back!", "We've got company.", "Did you hear that?", "Let's get out of here!", "I need healing!", "On my mark."]],
 ];
 
 // Loops: [folder, what it sounds like].
@@ -206,42 +233,58 @@ function catalog() {
   }
   out.push({ group: "sfx/Weapons/Shield/Block", prompt: "a sword striking a raised wooden and steel shield, a heavy block, fantasy combat sound effect", seconds: 2, variants: 2 });
   out.push({ group: "sfx/Weapons/Shield/Bash", prompt: "a shield bash slamming into an opponent, fantasy combat sound effect", seconds: 2, variants: 2 });
-  for (const [folder, , what] of SPELLS) for (const result of ["Cast", ...RESULTS]) out.push({ group: `sfx/Spells/${folder}/${result}`, prompt: SPELL_SOUND[result](what), seconds: result === "Cast" ? 3 : 2.5, variants: 2 });
-  for (const [folder, prompt] of BODY) out.push({ group: `sfx/Body/${folder}`, prompt: `${prompt}, fantasy sound effect`, seconds: 3, variants: folder === "Injury" ? 1 : 2 });
+  for (const [folder, , what] of SPELLS) for (const result of ["Cast", "Hit", "Crit", "Fumble"]) out.push({ group: `sfx/Spells/${folder}/${result}`, prompt: SPELL_SOUND[result](what), seconds: result === "Cast" ? 3 : 2.5, variants: result === "Cast" || result === "Hit" ? 2 : 1 });
+  for (const [folder, prompt] of BODY) out.push({ group: `sfx/Body/${folder}`, prompt: `${prompt}, fantasy sound effect`, seconds: 3, variants: folder === "Wounded" ? 1 : 2 });
   for (const [folder, , what] of ANIMALS) for (const result of Object.keys(CREATURE_SOUND)) out.push({ group: `sfx/Animals/${folder}/${result}`, prompt: CREATURE_SOUND[result](what), seconds: 2.5, variants: 2 });
   for (const [folder, , what] of MONSTERS) for (const result of Object.keys(CREATURE_SOUND)) out.push({ group: `sfx/Monsters/${folder}/${result}`, prompt: CREATURE_SOUND[result](what), seconds: 3, variants: 2 });
-  for (const [folder, prompt] of ONESHOTS) out.push({ group: `oneshots/${folder}`, prompt: `${prompt}, fantasy sound effect`, seconds: 3, variants: 1 });
+  for (const [folder, prompt] of EFFECTS) out.push({ group: `sfx/Effects/${folder}`, prompt: `${prompt}, fantasy sound effect`, seconds: 3, variants: 1 });
+  for (const [who, voice, lines] of VOICES) for (const line of lines) out.push({ group: `oneshots/${who}`, say: line, voice, file: slug(line).slice(0, 40), seconds: 2, variants: 1 });
   for (const [folder, prompt] of AMBIENCE) out.push({ group: `ambience/${folder}`, prompt: `${prompt}, seamless loop, ambient background sound`, seconds: 22, loop: true, variants: 1 });
   for (const [folder, prompt] of MUSIC) out.push({ group: `music/${folder}`, prompt, seconds: 90, music: true, variants: 1 });
-  return out.map((item) => ({ ...item, file: slug(item.group.split("/").slice(1).join(" ")) }));
+  return out.map((item) => ({ ...item, file: item.file ?? slug(item.group.split("/").slice(1).join(" ")) }));
 }
 
 // The chat's triggers, in order (the first that fits and has sounds plays):
-// { id, name, on: attack | save | cast | heal | damage | text, match (words, a
-// regular expression, "" for any), result: any | hit | miss | crit | fumble |
-// success | failure, sound (a folder), on: true }.
+// { id, name, on: attack | save | cast | heal | damage | init | text, match
+// (words, a regular expression, "" for any), result: any | hit | miss | crit |
+// fumble | success | failure, sound (a folder), enabled }. As Syrinscape's in
+// FG: a crit or fumble first, then the weapon's swing on the attack and its
+// hit on the damage; spells by their element; wounds, initiative and saves.
 function defaultTriggers() {
   const out = [];
   const add = (name, on, match, result, sound) => out.push({ id: slug(`${on} ${name} ${result}`), name, on, match, result, sound, enabled: true });
-  for (const [folder, keys] of WEAPONS) for (const result of RESULTS) add(folder, "attack", keys, result.toLowerCase(), `sfx/Weapons/${folder}/${result}`);
-  for (const [folder, keys] of [...MONSTERS, ...ANIMALS]) {
-    const base = MONSTERS.some(([name]) => name === folder) ? "Monsters" : "Animals";
-    add(`${folder} attacks`, "attack", keys, "any", `sfx/${base}/${folder}/Attack`);
-  }
-  for (const result of RESULTS) add("Any weapon", "attack", "", result.toLowerCase(), `sfx/Weapons/Sword/${result}`);
-  for (const [folder, keys] of SPELLS) {
-    add(folder, "cast", keys, "any", `sfx/Spells/${folder}/Cast`);
-    for (const result of RESULTS) add(`${folder} spell`, "spellattack", keys, result.toLowerCase(), `sfx/Spells/${folder}/${result}`);
-  }
+  const creature = (folder) => (MONSTERS.some(([name]) => name === folder) ? "Monsters" : "Animals");
+  for (const [folder, keys] of WEAPONS) add(folder, "attack", keys, "crit", `sfx/Weapons/${folder}/Crit`);
+  for (const [folder, keys] of WEAPONS) add(folder, "attack", keys, "fumble", `sfx/Weapons/${folder}/Fumble`);
+  for (const [folder, keys] of SPELLS.filter(([name]) => name !== "Arcane")) add(`${folder} spell`, "attack", keys, "any", `sfx/Spells/${folder}/Cast`);
+  for (const [folder, keys] of WEAPONS) add(folder, "attack", keys, "any", `sfx/Weapons/${folder}/Attack`);
+  for (const [folder, keys] of [...MONSTERS, ...ANIMALS]) add(`${folder} attacks`, "attack", keys, "any", `sfx/${creature(folder)}/${folder}/Attack`);
+  add("Any melee attack", "attack", "\\(M\\)", "any", "sfx/Weapons/Sword/Attack");
+  add("Any ranged attack", "attack", "\\(R\\)", "any", "sfx/Weapons/Bow/Attack");
+  add("Any attack", "attack", "", "any", "sfx/Weapons/Sword/Attack");
+  for (const [folder, keys] of SPELLS.filter(([name]) => name !== "Arcane")) add(`${folder} spell`, "damage", keys, "any", `sfx/Spells/${folder}/Hit`);
+  for (const [folder, keys] of WEAPONS) add(folder, "damage", keys, "any", `sfx/Weapons/${folder}/Hit`);
+  for (const [folder, keys] of [...MONSTERS, ...ANIMALS]) add(`${folder} hurt`, "damage", keys, "any", `sfx/${creature(folder)}/${folder}/Hurt`);
+  add("Any ranged damage", "damage", "\\(R\\)", "any", "sfx/Weapons/Bow/Hit");
+  add("Any damage", "damage", "", "any", "sfx/Weapons/Sword/Hit");
+  for (const [folder, keys] of SPELLS) add(folder, "cast", keys, "any", `sfx/Spells/${folder}/Cast`);
   add("Healing", "heal", "", "any", "sfx/Body/Heal");
+  add("Initiative", "init", "", "any", "sfx/Effects/Roll Initiative");
+  add("Saving throw", "save", "", "any", "sfx/Effects/Saving Throw");
+  add("Critical hit", "text", "\\[(KRAKEN )?CRITICAL( HIT)?\\]", "any", "sfx/Weapons/Sword/Crit");
+  add("Fumble", "text", "\\[(KRAKEN )?(CRITICAL )?FUMBLE\\]", "any", "sfx/Weapons/Sword/Fumble");
+  // FG's [STATUS: ...] lines, and Kraken's own wound lines ("-> Orc: 6 (Wounded)").
+  add("Death", "text", "\\[STATUS: dead\\]|\\(Dead\\b|\\b(dies|is dead|has died|slain|is killed|falls dead)\\b", "any", "sfx/Body/Death");
+  add("Dying", "text", "\\[STATUS: dying\\]|\\(Dying\\b|is dying|bleeding", "any", "sfx/Body/Dying");
+  add("Unconscious", "text", "\\[STATUS: unconscious\\]|\\(Unconscious\\b|falls unconscious|falls down", "any", "sfx/Body/Unconscious");
+  add("Badly wounded", "text", "\\[STATUS: (heavy|critical)\\]|\\(Heavy\\b", "any", "sfx/Body/Badly Wounded");
+  add("Wounded", "text", "\\[STATUS: (wounded|light|moderate)\\]|\\(Wounded\\b", "any", "sfx/Body/Wounded");
+  add("Stabilised", "text", "stabili[sz]", "any", "sfx/Body/Stabilised");
   add("Potion", "text", "potion|drinks|quaff", "any", "sfx/Body/Potion");
   add("Bandage", "text", "bandage|binds? (his|her|their) wounds|first aid", "any", "sfx/Body/Bandage");
-  add("Death", "text", "\\b(dies|is dead|has died|slain|is killed|falls dead)\\b", "any", "sfx/Body/Death");
-  add("Unconscious", "text", "unconscious|is dying|drops to 0|falls down", "any", "sfx/Body/Unconscious");
-  add("Stabilised", "text", "stabili[sz]", "any", "sfx/Body/Stabilised");
   add("Resurrection", "text", "resurrect|raise dead|revive|brought back", "any", "sfx/Body/Resurrect");
-  add("Level up", "text", "\\[LEVEL UP\\]", "any", "oneshots/Level Up");
+  add("Level up", "text", "\\[LEVEL UP\\]", "any", "sfx/Effects/Level Up");
   return out;
 }
 
-module.exports = { catalog, defaultTriggers, WEAPONS, SPELLS, ANIMALS, MONSTERS };
+module.exports = { catalog, defaultTriggers, WEAPONS, SPELLS, ANIMALS, MONSTERS, VOICES };
