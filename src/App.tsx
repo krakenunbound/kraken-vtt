@@ -4,8 +4,28 @@ import { imageMime, inspectZip, type ImportCandidate, type LoadedAdventure } fro
 import { useSession } from "./session/useSession";
 import { SetupScreen } from "./setup/SetupScreen";
 import { MapView, type MapScene } from "./table/MapView";
+import { PRESETS, diceStore } from "./dice/diceStore";
+import { agentCommands } from "./ui/agentCommands";
 import { Desktop } from "./ui/Desktop";
 import { WindowProvider } from "./ui/Windows";
+
+const COLOUR = /^#[0-9a-f]{6}$/i;
+
+// The agent's dice settings: what this window's dice look like and sound like.
+function diceSettings(patch: { show?: boolean; sound?: boolean; volume?: number; preset?: string; body?: string; ink?: string }) {
+  const preset = patch.preset ? PRESETS.find((item) => item.name.toLowerCase() === String(patch.preset).toLowerCase()) : null;
+  if (patch.preset && !preset) throw new Error(`No dice preset "${patch.preset}". Presets: ${PRESETS.map((item) => item.name).join(", ")}.`);
+  for (const key of ["body", "ink"] as const) if (patch[key] !== undefined && !COLOUR.test(String(patch[key]))) throw new Error(`${key} must be a colour like #9d2136.`);
+  const look = { ...(preset ? { theme: preset.theme, body: preset.body, ink: preset.ink } : {}), ...(patch.body ? { body: patch.body } : {}), ...(patch.ink ? { ink: patch.ink } : {}) };
+  diceStore.update({
+    ...(typeof patch.show === "boolean" ? { show: patch.show } : {}),
+    ...(typeof patch.sound === "boolean" ? { sound: patch.sound } : {}),
+    ...(typeof patch.volume === "number" ? { volume: Math.min(1, Math.max(0, patch.volume)) } : {}),
+    look,
+  });
+  const now = diceStore.settings();
+  return { ...now, preset: PRESETS.find((item) => item.theme === now.look.theme && item.body === now.look.body && item.ink === now.look.ink)?.name ?? "custom" };
+}
 
 type TableAdventure = {
   name: string;
@@ -97,7 +117,13 @@ export function App() {
         if (failed) throw new Error(failed);
         return { hosting: true, campaignId: command.campaignId, port: command.port };
       }
-      throw new Error("Unknown command.");
+      if (command.kind === "dice-settings") return diceSettings(command.patch ?? {});
+      if (command.kind === "open-adventure") {
+        if (!current.connected || current.role !== "dm") throw new Error("Not hosting.");
+        return live.current.openBytes(new Uint8Array(command.bytes), command.name);
+      }
+      if (command.kind === "scenes") return live.current.scenes(command.adventure, command.scene);
+      return agentCommands.run(command);
     });
   }, []);
 
@@ -180,27 +206,70 @@ export function App() {
 
   async function openFile(file: File) {
     if (!dm) return;
+    try {
+      await openBytes(new Uint8Array(await file.arrayBuffer()), file.name);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Could not read that bundle.");
+    }
+  }
+
+  // A bundle's bytes (from a file the GM picked, or from the agent) onto the table.
+  async function openBytes(bytes: Uint8Array, name: string) {
     setError(null);
     setBusy(true);
     await new Promise((resolve) => setTimeout(resolve, 0));
     try {
-      const bytes = new Uint8Array(await file.arrayBuffer());
       const found = inspectZip(bytes);
-      if (found.length === 0) {
-        setError("No Foundry adventure bundle was in that zip.");
-        return;
-      }
+      if (found.length === 0) throw new Error(`No Foundry adventure bundle was in ${name}.`);
       const index = preferredCandidateIndex(found);
       if (campaignId) await window.kraken?.saveBundle(campaignId, bytes);
       setCandidates(found);
       setAdventureIndex(index);
       showAdventure(found[index]);
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Could not read that bundle.");
+      return { adventures: found.map((candidate) => candidate.name), opened: found[index].name };
     } finally {
       setBusy(false);
     }
   }
+
+  // What the agent sees of the adventures, and how it switches the scene on the table.
+  function scenes(adventure?: string, sceneName?: string) {
+    let table = pack;
+    let at = adventureIndex;
+    if (adventure) {
+      const wanted = adventure.toLowerCase();
+      const index = candidates.findIndex((candidate) => candidate.name.toLowerCase() === wanted);
+      if (index < 0) throw new Error(`No adventure "${adventure}" is open. Open: ${candidates.map((candidate) => candidate.name).join(", ") || "none"}.`);
+      if (index !== adventureIndex || !pack) {
+        revoke();
+        table = toTable(candidates[index].load(), urls.current);
+        at = index;
+        setPack(table);
+        setAdventureIndex(index);
+      }
+    }
+    if (!table) throw new Error("No adventure is open (kraken_open_adventure).");
+    let index = table === pack ? sceneIndex : preferredSceneIndex(table.scenes);
+    if (sceneName) {
+      const wanted = sceneName.toLowerCase();
+      index = table.scenes.findIndex((item) => item.id === sceneName || item.name.toLowerCase() === wanted);
+      if (index < 0) throw new Error(`No scene "${sceneName}" in ${table.name}.`);
+    }
+    const shown = table.scenes[index];
+    if (shown && (table !== pack || index !== sceneIndex)) {
+      setSceneIndex(index);
+      void publishCurrent(shown);
+      saveView(candidates[at]?.name ?? table.name, shown.id);
+    }
+    return {
+      adventures: candidates.map((candidate) => candidate.name),
+      adventure: candidates[at]?.name ?? table.name,
+      scenes: table.scenes.map((item) => ({ id: item.id, name: item.name })),
+      onTable: shown ? { id: shown.id, name: shown.name } : null,
+    };
+  }
+  const live = useRef({ openBytes, scenes });
+  live.current = { openBytes, scenes };
 
   function onDrop(event: React.DragEvent) {
     event.preventDefault();
