@@ -1,4 +1,5 @@
 import { Icon } from "../ui/icons";
+import { slotDrag } from "../ui/QuickSlots";
 import { useEffect, useState } from "react";
 import type { Session, TableRecord } from "../session/useSession";
 import { ArtPicker, Picture } from "./ArtPicker";
@@ -471,7 +472,7 @@ export function CharacterPanel({ session, dock = false, selected: chosen }: { se
         <ul>
           {characters.map((record) => (
             <li key={record.id}>
-              <button type="button" className={record.id === current?.id ? "selected" : ""} onClick={() => setSelected(record.id)}>
+              <button type="button" className={record.id === current?.id ? "selected" : ""} onClick={() => setSelected(record.id)} {...slotDrag({ kind: "sheet", record: record.id, label: record.name })}>
                 <span className="chip-face">
                   {typeof record.data.portrait === "string" && record.data.portrait ? <Picture session={session} id={record.data.portrait} alt="" /> : record.name.slice(0, 1)}
                 </span>

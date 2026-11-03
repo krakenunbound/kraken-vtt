@@ -109,6 +109,22 @@ try {
   await page.click('[aria-label="Next page"]');
   await page.waitForFunction(() => document.querySelector(".book-page h2")?.textContent === "The Inn");
 
+  // Quick slots: a page dragged onto a slot opens the book at that page again;
+  // a map dragged onto one opens it in Pictures; right-click empties a slot.
+  await page.dragAndDrop('.book-toc [data-page="inn"]', '[data-quick-slot="0"]');
+  await page.waitForSelector('[data-quick-slot="0"].full');
+  await page.click('.book-toc [data-page="gate"]');
+  await page.waitForFunction(() => document.querySelector(".book-page h2")?.textContent === "The Gate");
+  await page.click('[data-quick-slot="0"]');
+  await page.waitForFunction(() => document.querySelector(".book-page h2")?.textContent === "The Inn", null, { timeout: 8000 });
+  await page.click('[data-book-view="pictures"]');
+  await page.dragAndDrop('[data-picture="images/keep.png"]', '[data-quick-slot="1"]');
+  await page.waitForSelector('[data-quick-slot="1"].full');
+  await page.click('[data-quick-slot="1"]', { button: "right" });
+  await page.waitForSelector('[data-quick-slot="1"]:not(.full)');
+  const slots = await tool("kraken_quickslots", {});
+  assert(slots[0]?.kind === "book" && slots[0].page === "inn" && slots[1] === null, `the GM's slots, kept by the host (${JSON.stringify(slots.slice(0, 2))})`);
+
   // The GM opens the adventure's map (not shared yet).
   assert((await page.$('.book-window [data-share="The Test Keep"]')) === null && (await page.$('.books-window [data-share]')) === null, "no share symbol for a book");
   await page.click('[data-book-view="pictures"]');

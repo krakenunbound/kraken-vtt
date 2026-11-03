@@ -318,6 +318,21 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
   // record (the agent's chat log) keeps them.
   const chatCleared = new Map(Object.entries(saved.chatCleared && typeof saved.chatCleared === "object" ? saved.chatCleared : {}).filter(([, at]) => Number.isFinite(at)));
   const clearKey = (client) => (client.role === "dm" ? "@gm" : client.name);
+  // Each seat's quick slots (by name; the GM's as "@gm"): what they keep at
+  // hand to open again with a click: a book (at a page), a picture or map,
+  // a character sheet.
+  const SLOTS = 10;
+  const cleanSlot = (raw) => {
+    if (!raw || typeof raw !== "object") return null;
+    const label = text(raw.label, "").slice(0, 80);
+    if (raw.kind === "book" && typeof raw.book === "string") return { kind: "book", book: raw.book.slice(0, 200), page: text(raw.page, "").slice(0, 120), label: label || raw.book.slice(0, 80) };
+    if (raw.kind === "picture" && typeof raw.book === "string" && typeof raw.file === "string") return { kind: "picture", book: raw.book.slice(0, 200), file: raw.file.slice(0, 300), label: label || "Picture" };
+    if (raw.kind === "sheet" && typeof raw.record === "string") return { kind: "sheet", record: raw.record.slice(0, 80), label: label || "Character" };
+    return null;
+  };
+  const cleanSlots = (list) => Array.from({ length: SLOTS }, (_, index) => (Array.isArray(list) ? cleanSlot(list[index]) : null));
+  const quickSlots = new Map(Object.entries(saved.quickSlots && typeof saved.quickSlots === "object" ? saved.quickSlots : {}).map(([key, list]) => [key, cleanSlots(list)]));
+  const slotsFor = (client) => quickSlots.get(clearKey(client)) ?? cleanSlots([]);
   let options = savedOptions(saved.options);
   // The chat's sound triggers, and what plays under the game (ambience loops
   // and music), for every seat; saved with the campaign.
@@ -859,6 +874,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
           options,
           soundscape,
           books: shelfView(),
+          quickSlots: slotsFor(client),
           records: records.list({ seat: seatOf(client) }),
           scene: client.role === "player" ? sceneFor(client) : null,
         });
@@ -885,6 +901,15 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         } catch (error) {
           send(ws, { type: "error", reason: error.message });
         }
+        return;
+      }
+
+      // A seat's quick slots, set (each seat its own).
+      if (msg.type === "quickslots") {
+        const slots = cleanSlots(msg.slots);
+        quickSlots.set(clearKey(client), slots);
+        for (const [other, seat] of clients) if (clearKey(seat) === clearKey(client)) send(other, { type: "quickslots", slots });
+        onChange("table");
         return;
       }
 
@@ -1291,6 +1316,17 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     soundscape: () => soundscape,
     // Books: what there is, a book's contents and pages, and sharing.
     books: () => shelfFor({ role: "dm" }),
+    // A seat's quick slots (the GM's, or a player's by name), read or set.
+    quickSlots(who = "@gm", slots) {
+      const key = who === "GM" || who === "" ? "@gm" : who;
+      if (slots !== undefined) {
+        const cleaned = cleanSlots(slots);
+        quickSlots.set(key, cleaned);
+        for (const [ws, seat] of clients) if (clearKey(seat) === key) send(ws, { type: "quickslots", slots: cleaned });
+        onChange("table");
+      }
+      return quickSlots.get(key) ?? cleanSlots([]);
+    },
     activateBook,
     bookContents: (book) => {
       if (!books) throw new Error("There are no books here.");
@@ -1438,6 +1474,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         soundTriggers,
         soundTriggersVersion: TRIGGERS_VERSION,
         chatCleared: Object.fromEntries(chatCleared),
+        quickSlots: Object.fromEntries(quickSlots),
       };
     },
     // What agents (the MCP server, the in-app assistant) use. They act as the GM.

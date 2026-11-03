@@ -11,6 +11,7 @@ import { Mark } from "./Emblem";
 import { DecalPicker, SettingsWindow, TableDecal } from "./Settings";
 import { DiceWindow } from "../dice/DiceWindow";
 import { SoundWindow } from "../sound/SoundWindow";
+import { QuickSlots } from "./QuickSlots";
 import { BooksWindow, BookWindow, ImagesWindow, PictureWindow } from "../books/Books";
 import { Icon } from "./icons";
 import { FloatingWindow, useWindows, type WindowKind } from "./Windows";
@@ -255,6 +256,8 @@ export function Desktop({
             </FloatingWindow>
           ))}
         </div>
+        {/* Above the windows, as FG's hotkey bar: always there to drop onto. */}
+        <QuickSlots session={session} />
         {overlay}
       </div>
       {dice.show ? (

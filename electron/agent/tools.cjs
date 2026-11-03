@@ -379,6 +379,14 @@ const TOOLS = [
     },
   },
   {
+    name: "kraken_quickslots",
+    description: "A seat's quick slots (the bar along the bottom of the table: ten things kept at hand, opened with a click): the GM's, or a player's by name. Read them, or set slots to a list of ten (null for an empty slot): { kind: book, book (id), page (id, optional), label } | { kind: picture, book, file, label } | { kind: sheet, record (character id), label }.",
+    inputSchema: object({ seat: string("A player's name; empty for the GM"), slots: { type: "array", description: "Ten slots, or leave out to read" } }),
+    run(args, ctx) {
+      return out(needTable(ctx).quickSlots(args.seat || "@gm", args.slots));
+    },
+  },
+  {
     name: "kraken_sound",
     description:
       "Sound for the table, as Syrinscape in FG, from the GM's sounds (assets/sounds: oneshots, sfx, ambience, music; a folder plays one of its sounds at random). Every seat hears it, each at its own volumes. action list (kind, search: what there is, by folder); play (id or folder, e.g. \"oneshots/Doors/Wooden Door\" or \"sfx/Weapons/Sword/Hit\"); stop (stops one-shots and effects); ambience (add, remove, volume or clear loops; id, volume 0..1); music (play an id or a folder, next, stop, volume); triggers (the chat's sound triggers: read them, or set triggers to a list, or \"default\"); scape (what is playing now).",

@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import type { BookContents, BookInfo, BookPage, Session, ShownImage } from "../session/useSession";
 import { Icon } from "../ui/icons";
 import { useWindows } from "../ui/Windows";
+import { slotDrag } from "../ui/QuickSlots";
 
 // Books, as FG's Library: the Books window lists the campaign's active books
 // (by category, with their covers), and Activation every module for its game;
@@ -152,7 +153,7 @@ function usePictureActions(session: Session) {
 // Which page a book opens at (a link to another book's page).
 const startAt = new Map<string, string>();
 
-function useBookWindows() {
+export function useBookWindows() {
   const windows = useWindows();
   return {
     openBook(book: string, title: string, page = "") {
@@ -246,7 +247,7 @@ export function BooksWindow({ session, onOpenAdventure }: { session: Session; on
               .filter((item) => item.category === category)
               .map((item) => (
                 <div key={item.id} className={activation && !item.active ? "books-row off" : "books-row"} role="listitem">
-                  <button type="button" className="books-open" data-book={item.id} title={item.author || item.title} onClick={() => openBook(item.id, item.title)}>
+                  <button type="button" className="books-open" data-book={item.id} title={item.author || item.title} onClick={() => openBook(item.id, item.title)} {...slotDrag({ kind: "book", book: item.id, label: item.title })}>
                     {item.cover ? <img src={session.bookUrl("cover", item.id)} alt="" loading="lazy" /> : <span className="books-cover-none"><Icon name="book" size={22} /></span>}
                     <span>
                       <b>{item.title}</b>
@@ -374,7 +375,7 @@ export function BookWindow({ session, book }: { session: Session; book: string }
                       <div key={`${section.name}-${inner}`} className="book-section">
                         {section.name && section.name !== chapter.name ? <h4>{section.name}</h4> : null}
                         {section.pages.map((item) => (
-                          <button key={item.id} type="button" className={item.id === pageId ? "book-page-link on" : "book-page-link"} data-page={item.id} onClick={() => setPageId(item.id)}>
+                          <button key={item.id} type="button" className={item.id === pageId ? "book-page-link on" : "book-page-link"} data-page={item.id} onClick={() => setPageId(item.id)} {...slotDrag({ kind: "book", book, page: item.id, label: item.name })}>
                             {item.name}
                           </button>
                         ))}
@@ -391,6 +392,7 @@ export function BookWindow({ session, book }: { session: Session; book: string }
                       type="button"
                       className="book-page-link"
                       data-picture={item.file}
+                      {...slotDrag({ kind: "picture", book, file: item.file, label: item.name })}
                       onClick={() => openPicture({ book, file: item.file, name: item.name })}
                       onContextMenu={(event) => menu.show(event, actions.items({ book, file: item.file, name: item.name }, "book"))}
                     >
@@ -412,7 +414,7 @@ export function BookWindow({ session, book }: { session: Session; book: string }
             {page.blocks.map((block, index) =>
               block.kind === "picture" ? (
                 <figure key={index} className={`book-figure ${block.align}`} onContextMenu={(event) => menu.show(event, actions.items({ book, file: block.file, name: block.name || block.caption || page.name }, "book"))}>
-                  <button type="button" className="book-figure-open" title="Open it in Pictures" onClick={() => openPicture({ book, file: block.file, name: block.name || block.caption || page.name })}>
+                  <button type="button" className="book-figure-open" title="Open it in Pictures" onClick={() => openPicture({ book, file: block.file, name: block.name || block.caption || page.name })} {...slotDrag({ kind: "picture", book, file: block.file, label: block.name || block.caption || page.name })}>
                     <img src={session.bookUrl("picture", book, block.file)} alt={block.caption} loading="lazy" style={{ maxWidth: `${Math.min(100, block.scale)}%` }} />
                   </button>
                   {block.caption ? <figcaption>{block.caption}</figcaption> : null}
@@ -467,7 +469,7 @@ export function ImagesWindow({ session }: { session: Session }) {
       <div className="images-tabs" role="tablist">
         {tabs.map((tab) => (
           <div key={keyOf(tab)} className={keyOf(tab) === keyOf(active) ? "images-tab on" : "images-tab"} role="tab" aria-selected={keyOf(tab) === keyOf(active)} onContextMenu={(event) => menu.show(event, actions.items(tab, "tab"))}>
-            <button type="button" data-image-tab={tab.name} onClick={() => pictures.activate(keyOf(tab))}>
+            <button type="button" data-image-tab={tab.name} onClick={() => pictures.activate(keyOf(tab))} {...slotDrag({ kind: "picture", book: tab.book, file: tab.file, label: tab.name })}>
               {gm && tab.shown ? <Icon name="share" size={12} /> : null} {tab.name}
             </button>
             <button type="button" className="images-tab-close" aria-label={`Close ${tab.name}`} title="Close" onClick={() => actions.close(tab)}>
