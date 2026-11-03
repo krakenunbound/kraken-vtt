@@ -359,6 +359,53 @@ const TOOLS = [
     },
   },
   {
+    name: "kraken_combat",
+    description:
+      "The combat tracker (SiegeCore rules: d10 initiative, high to low; unconscious enemies lose their turns; effect durations count down each round; the dying bleed). action view (default); add (recordId of a character or NPC, count, hidden, place: also put tokens on the map; or entry {name, faction, hp, ac, init}); add-party; init (which: an entry id, npcs or all); next (next turn); round (next round); end (removeNpcs); update (id, patch {name, faction, init, initresult, hp, wounds, ac, hidden}); remove (id); damage / heal (id, amount); effect (id, effect {label, duration in rounds, gmOnly}); effect-remove (id, effectId).",
+    inputSchema: object({
+      action: { type: "string", enum: ["view", "add", "add-party", "init", "next", "round", "end", "update", "remove", "damage", "heal", "effect", "effect-remove"] },
+      id: string("Tracker entry id"),
+      recordId: string("Character or NPC record id"),
+      count: number("How many of that NPC"),
+      hidden: { type: "boolean" },
+      place: { type: "boolean", description: "Also place tokens on the map" },
+      entry: { type: "object" },
+      which: string("init: an entry id, npcs or all"),
+      removeNpcs: { type: "boolean" },
+      patch: { type: "object" },
+      amount: number("Damage or healing"),
+      effect: { type: "object", properties: { label: { type: "string" }, duration: { type: "number" }, gmOnly: { type: "boolean" } }, additionalProperties: false },
+      effectId: string("Effect id"),
+    }),
+    async run(args, ctx) {
+      const agent = needTable(ctx);
+      const { combat, seat, map } = agent;
+      const action = args.action ?? "view";
+      if (action === "add") {
+        const added = await combat.add(args.entry ?? { recordId: args.recordId, count: args.count, hidden: args.hidden }, seat);
+        if (args.place && map.scene()) {
+          for (const entry of Array.isArray(added) ? added : [added]) {
+            if (entry.tokenId) continue;
+            const token = map.place({ recordId: entry.recordId, name: entry.name, hidden: entry.hidden, faction: entry.faction, allowSecond: false }, seat);
+            combat.update(entry.id, { tokenId: token.id }, seat);
+          }
+        }
+      } else if (action === "add-party") {
+        for (const member of (await party.partyView(agent)).members) await combat.add({ recordId: member.id }, seat);
+      } else if (action === "init") await combat.rollInit(args.which ?? "all", seat);
+      else if (action === "next") await combat.next(seat);
+      else if (action === "round") await combat.nextRound(seat);
+      else if (action === "end") combat.end(seat, { removeNpcs: Boolean(args.removeNpcs) });
+      else if (action === "update") combat.update(args.id, args.patch ?? {}, seat);
+      else if (action === "remove") combat.remove(args.id, seat);
+      else if (action === "damage") await combat.damage(args.id, args.amount, seat);
+      else if (action === "heal") await combat.heal(args.id, args.amount, seat);
+      else if (action === "effect") combat.addEffect(args.id, args.effect ?? {}, seat);
+      else if (action === "effect-remove") combat.removeEffect(args.id, args.effectId, seat);
+      return out(combat.viewFor(seat));
+    },
+  },
+  {
     name: "kraken_party",
     description:
       "The party sheet: members (in party order: hp, wounds, AC, level, XP), the party inventory (every member's items with who carries them), the parcel (coins and items waiting to be handed out), quests and encounters with their XP, marching order and watches.",

@@ -118,6 +118,7 @@ export type MapActions = {
   updateLight: (id: string, patch: Partial<SceneLightRecord>) => void;
   removeLight: (id: string) => void;
   ping: (x: number, y: number) => void;
+  ct: (action: string, payload?: Record<string, unknown>) => void;
 };
 
 type Drag = { pointerId: number; id: string; start: Point; at: Point; moved: boolean; snap: boolean; squares: number };
@@ -275,6 +276,15 @@ export function MapView({
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [tokens, selected, gm, size, actions]);
+
+  useEffect(() => {
+    const onFocus = (event: Event) => {
+      const token = tokens.find((item) => item.id === (event as CustomEvent<string>).detail);
+      if (token) lookAt(token);
+    };
+    window.addEventListener("kraken:focus-token", onFocus);
+    return () => window.removeEventListener("kraken:focus-token", onFocus);
+  });
 
   function centeredOn(rect: DOMRect, point: Point, scale: number): Camera {
     const next = clampScale(scale);
@@ -548,7 +558,7 @@ export function MapView({
           return (
             <div
               key={token.id}
-              className={["token", canDrag ? "token-draggable" : "", token.mine ? "token-mine" : "", selected === token.id ? "token-selected" : "", token.hidden ? "token-hidden" : "", isDragged ? "token-lifted" : ""]
+              className={["token", canDrag ? "token-draggable" : "", token.mine ? "token-mine" : "", token.active ? "token-active" : "", selected === token.id ? "token-selected" : "", token.hidden ? "token-hidden" : "", isDragged ? "token-lifted" : ""]
                 .filter(Boolean)
                 .join(" ")}
               data-token={token.id}
@@ -700,6 +710,18 @@ export function MapView({
                     />
                     ft
                   </label>
+                ) : null}
+                {gm ? (
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      actions.ct("add", token.recordId ? { recordId: token.recordId } : { entry: { name: token.name, faction: token.faction === "none" ? "foe" : token.faction, hp: 1, ac: 10, tokenId: token.id } });
+                      setMenu(null);
+                    }}
+                  >
+                    Add to combat
+                  </button>
                 ) : null}
                 {gm ? (
                   <button type="button" role="menuitem" onClick={() => actions.updateToken(token.id, { hidden: !token.hidden })}>

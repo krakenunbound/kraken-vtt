@@ -114,7 +114,7 @@ try {
   assert((await tool("kraken_chat_log", { count: 5 })).some((line) => line.text?.startsWith("[LEVEL UP] Sir Aldric Fane is now Divine Knight 4")), "level up in chat");
 
   // The sheet in the GM's window, and its Check button.
-  await page.getByRole("tab", { name: "Characters" }).click();
+  await page.click('[data-launch="characters"]');
   await page.waitForSelector(`[data-character="${built.id}"]`);
   assert((await page.locator('[data-stat="ac"]').textContent()) === String(after.ac.total), "sheet AC");
   assert((await page.locator('[data-stat="bth"]').textContent()) === `+${after.bth}`, "sheet BtH");

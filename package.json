@@ -13,6 +13,7 @@
     "shot": "node scripts/shot-scene.mjs",
     "map": "node scripts/check-map.mjs",
     "party": "node scripts/check-party.mjs",
+    "combat": "node scripts/check-combat.mjs",
     "sight-parity": "node scripts/check-sight-parity.mjs",
     "session": "node scripts/check-session.mjs",
     "agent": "node scripts/check-agent.mjs",
