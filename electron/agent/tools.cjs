@@ -328,6 +328,30 @@ const TOOLS = [
     },
   },
   {
+    name: "kraken_party_order",
+    description:
+      "The party's watch order and marching formation, as FG's party sheet Order tab: a 7 by 7 grid (x and y from -3 to 3; with the party facing up, y 3 is the front) and three watches. action place (character, x, y: into a slot; onto another member swaps them), remove (character), watch (character, watch 1 to 3, or 0 for none), fill (columns 1, 2 or 3: the unplaced members into a column that wide from the front, then around the middle), rotate (direction left or right: the formation and its facing a quarter turn), clear. Returns the order: marching (front to back), watches, formation { facing 0 up 1 right 2 down 3 left, slots }.",
+    inputSchema: object(
+      {
+        action: { type: "string", enum: ["place", "remove", "watch", "fill", "rotate", "clear"] },
+        character: string("A party member's id or name"),
+        x: number("Slot column, -3 (left) to 3 (right)"),
+        y: number("Slot row, -3 (back) to 3 (front)"),
+        watch: number("1 to 3, or 0 for none"),
+        columns: number("1, 2 or 3 abreast"),
+        direction: { type: "string", enum: ["left", "right"] },
+      },
+      ["action"],
+    ),
+    run(args, ctx) {
+      const table = needTable(ctx);
+      const wanted = String(args.character ?? "").toLowerCase();
+      const found = wanted ? table.records.list({ type: "character" }).find((record) => record.id === args.character || record.name.toLowerCase() === wanted) : null;
+      if (wanted && !found) throw new Error(`No character "${args.character}".`);
+      return out(party.changeOrder(table, table.seat, { ...args, id: found?.id }));
+    },
+  },
+  {
     name: "kraken_sound",
     description:
       "Sound for the table, as Syrinscape in FG, from the GM's sounds (assets/sounds: oneshots, sfx, ambience, music; a folder plays one of its sounds at random). Every seat hears it, each at its own volumes. action list (kind, search: what there is, by folder); play (id or folder, e.g. \"oneshots/Doors/Wooden Door\" or \"sfx/Weapons/Sword/Hit\"); stop (stops one-shots and effects); ambience (add, remove, volume or clear loops; id, volume 0..1); music (play an id or a folder, next, stop, volume); triggers (the chat's sound triggers: read them, or set triggers to a list, or \"default\"); scape (what is playing now).",

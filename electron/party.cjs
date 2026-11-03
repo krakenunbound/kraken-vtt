@@ -7,7 +7,8 @@ const { siege, siegeLibrary, siegeCheck, ATTRIBUTES } = require("./siege.cjs");
 //   data.members     character ids, in party order (the last gets XP left over)
 //   data.parcel      { coins: { GP: 12, ... }, items: { id: { name, count, assign, item? } } }
 //   data.quests      { id: { name, xp, awarded } }   data.encounters likewise
-//   data.order       { marching: [ids], watches: { id: { name, members: [ids] } } }
+//   data.order       { marching: [ids], watches: { id: { name, members: [ids] } },
+//                      formation: { facing, slots: [{ x, y, id }] } }
 // Players cannot read each other's sheets, so they are sent partyView, a summary.
 
 const PARTY_ID = "party";
@@ -70,7 +71,7 @@ async function partyView(table) {
     parcel: party.data.parcel ?? { coins: {}, items: {} },
     quests: party.data.quests ?? {},
     encounters: party.data.encounters ?? {},
-    order: party.data.order ?? { marching: [], watches: {} },
+    order: orderOf(party),
   };
 }
 
@@ -196,4 +197,152 @@ async function groupCheck(table, kind, attribute, cl, from) {
   return { passed, of: members.length, failed, line };
 }
 
-module.exports = { PARTY_ID, partyRecord, partyView, awardXP, awardEntries, distribute, groupCheck };
+// FG's party formation (PartyFormationManager, CombatFormationManager): a 7 by
+// 7 grid of slots, x and y from -3 to 3 (y up is the front when the party
+// faces up), and a facing (0 up, 1 right, 2 down, 3 left). The watches are
+// FG's watch order: who stands which watch.
+const RANGE = 3;
+const WATCHES = 3;
+const key = (slot) => `${slot.x},${slot.y}`;
+
+function orderOf(record) {
+  const order = record.data.order ?? {};
+  const slots = Array.isArray(order.formation?.slots) ? order.formation.slots.filter((slot) => slot && typeof slot.id === "string" && Number.isInteger(slot.x) && Number.isInteger(slot.y)) : [];
+  return { marching: Array.isArray(order.marching) ? order.marching : [], watches: order.watches && typeof order.watches === "object" ? order.watches : {}, formation: { facing: ((Number(order.formation?.facing) % 4) + 4) % 4 || 0, slots } };
+}
+
+// Front to back, as the party faces (for the marching order): the slots
+// nearest the front first, then left to right across it.
+function frontToBack(formation) {
+  const ahead = [(slot) => slot.y, (slot) => slot.x, (slot) => -slot.y, (slot) => -slot.x][formation.facing];
+  const across = [(slot) => slot.x, (slot) => -slot.y, (slot) => -slot.x, (slot) => slot.y][formation.facing];
+  return [...formation.slots].sort((a, b) => ahead(b) - ahead(a) || across(a) - across(b)).map((slot) => slot.id);
+}
+
+// FG's column fills (1, 2 or 3 abreast, from the front back), then a spiral
+// from the middle for whoever is left.
+function startColumn(columns, count, facing) {
+  let rows = Math.floor(count / columns);
+  if (count % columns > 0) rows += 1;
+  const lead = Math.max(0, Math.min(RANGE, rows - RANGE - 1));
+  return [{ x: 0, y: lead }, { x: lead, y: 0 }, { x: 0, y: -lead }, { x: -lead, y: 0 }][facing];
+}
+// FG's order across a row, and the way back, for each facing (as its
+// getNextOpenColumnx1/2/3FillSlot): facing up, a row of three is middle, left,
+// right, and the next row is one back.
+const ACROSS = {
+  1: [[0], [0], [0], [0]],
+  2: [[0, 1], [0, -1], [0, -1], [0, 1]],
+  3: [[0, -1, 1], [0, -1, 1], [0, 1, -1], [0, 1, -1]],
+};
+const BACK = [{ along: "y", step: -1 }, { along: "x", step: -1 }, { along: "y", step: 1 }, { along: "x", step: 1 }];
+function nextColumn(at, used, facing, columns) {
+  const slot = { ...at };
+  const { along, step } = BACK[facing];
+  const side = along === "y" ? "x" : "y";
+  const sides = ACROSS[columns][facing];
+  while (used.has(key(slot))) {
+    const index = sides.indexOf(slot[side]);
+    if (index >= 0 && index < sides.length - 1) slot[side] = sides[index + 1];
+    else {
+      slot[side] = 0;
+      slot[along] += step;
+      if (Math.abs(slot[along]) > RANGE) return null;
+    }
+  }
+  return slot;
+}
+function nextSpiral(used) {
+  for (let ring = 0; ring <= RANGE; ring++) {
+    for (let y = ring; y >= -ring; y--) {
+      for (let x = -ring; x <= ring; x++) {
+        if (Math.max(Math.abs(x), Math.abs(y)) !== ring) continue;
+        if (!used.has(`${x},${y}`)) return { x, y };
+      }
+    }
+  }
+  return null;
+}
+function fillFormation(formation, members, columns) {
+  const slots = [...formation.slots];
+  const used = new Set(slots.map(key));
+  const placed = new Set(slots.map((slot) => slot.id));
+  const waiting = members.filter((id) => !placed.has(id));
+  let at = startColumn(columns, members.length, formation.facing);
+  for (const id of waiting) {
+    const slot = (at && nextColumn(at, used, formation.facing, columns)) || nextSpiral(used);
+    if (!slot) break;
+    if (at) at = slot;
+    slots.push({ ...slot, id });
+    used.add(key(slot));
+  }
+  return { ...formation, slots };
+}
+function rotate(formation, direction) {
+  const left = direction === "left";
+  return {
+    facing: (formation.facing + (left ? 3 : 1)) % 4,
+    slots: formation.slots.map((slot) => (left ? { x: -slot.y, y: slot.x, id: slot.id } : { x: slot.y, y: -slot.x, id: slot.id })),
+  };
+}
+
+// A change to the order, from the GM or a player. A player moves only their
+// own characters (and swaps only with their own); the fills, turning and
+// clearing are the GM's.
+function changeOrder(table, seat, change) {
+  const record = partyRecord(table);
+  const members = Array.isArray(record.data.members) ? record.data.members : [];
+  const order = orderOf(record);
+  const gm = seat.role === "dm";
+  const mine = (id) => gm || table.records.get(id)?.owner === seat.name;
+  const member = (id) => {
+    if (!members.includes(id)) throw new Error("That character is not in the party.");
+    if (!mine(id)) throw new Error("You can only place your own characters.");
+    return id;
+  };
+  const action = String(change?.action ?? "");
+  let { formation, watches } = order;
+  if (action === "place") {
+    const id = member(String(change.id ?? ""));
+    const x = Number(change.x);
+    const y = Number(change.y);
+    if (!Number.isInteger(x) || !Number.isInteger(y) || Math.abs(x) > RANGE || Math.abs(y) > RANGE) throw new Error("That is not a slot in the formation.");
+    const from = formation.slots.find((slot) => slot.id === id);
+    const there = formation.slots.find((slot) => slot.x === x && slot.y === y);
+    if (there && there.id !== id && !mine(there.id)) throw new Error("That slot is another player's.");
+    let slots = formation.slots.filter((slot) => slot.id !== id && slot !== there);
+    if (there && there.id !== id && from) slots.push({ x: from.x, y: from.y, id: there.id });
+    slots.push({ x, y, id });
+    formation = { ...formation, slots };
+  } else if (action === "remove") {
+    const id = member(String(change.id ?? ""));
+    formation = { ...formation, slots: formation.slots.filter((slot) => slot.id !== id) };
+  } else if (action === "watch") {
+    const id = member(String(change.id ?? ""));
+    const number = Number(change.watch);
+    if (!Number.isInteger(number) || number < 0 || number > WATCHES) throw new Error(`A watch is 1 to ${WATCHES}, or 0 for none.`);
+    watches = Object.fromEntries(
+      Array.from({ length: WATCHES }, (_, index) => {
+        const name = `watch-${index + 1}`;
+        const watch = watches[name] ?? { name: `Watch ${index + 1}`, members: [] };
+        const without = (watch.members ?? []).filter((other) => other !== id);
+        return [name, { name: watch.name ?? `Watch ${index + 1}`, members: number === index + 1 ? [...without, id] : without }];
+      }),
+    );
+  } else if (["fill", "rotate", "clear"].includes(action)) {
+    if (!gm) throw new Error("Only the GM can do that.");
+    if (action === "fill") {
+      const columns = Number(change.columns);
+      if (![1, 2, 3].includes(columns)) throw new Error("Fill 1, 2 or 3 abreast.");
+      formation = fillFormation(formation, members, columns);
+    } else if (action === "rotate") formation = rotate(formation, change.direction === "left" ? "left" : "right");
+    else formation = { facing: formation.facing, slots: [] };
+  } else throw new Error("Place, remove, watch, fill, rotate or clear.");
+  // Only the party's members stay in it.
+  formation = { ...formation, slots: formation.slots.filter((slot) => members.includes(slot.id)) };
+  const next = { marching: frontToBack(formation), watches, formation };
+  table.records.update(PARTY_ID, { data: { order: next } }, table.seat);
+  return next;
+}
+
+module.exports = { PARTY_ID, partyRecord, partyView, awardXP, awardEntries, distribute, groupCheck, changeOrder, fillFormation, rotate, RANGE };

@@ -250,6 +250,19 @@ try {
   await settle();
   const scape = player.events.filter((event) => event.type === "soundscape").at(-1).soundscape;
   assert(scape.ambience.length === 2 && scape.ambience[1].volume === 0.4 && scape.music.group === "music/Battle", `loops and a music folder: ${JSON.stringify(scape)}`);
+  assert(scape.music.loop === true, "a music folder of one track loops it");
+  // A folder of several plays them one after another, never the same twice running.
+  sounds.add("music", "Battle", "test-2.wav", wav());
+  gm.send({ type: "music", action: "play", id: "music/Battle" });
+  await settle();
+  const first = player.events.filter((event) => event.type === "soundscape").at(-1).soundscape.music;
+  assert(first.loop === false && first.group === "music/Battle", "a folder of several moves on, track by track");
+  for (let round = 0; round < 4; round++) {
+    const before = player.events.filter((event) => event.type === "soundscape").at(-1).soundscape.music.id;
+    gm.send({ type: "music", action: "next" });
+    await settle();
+    assert(player.events.filter((event) => event.type === "soundscape").at(-1).soundscape.music.id !== before, "the next track is never the one that just played");
+  }
   const late = await connect(port, { name: "Cal" });
   assert(late.ok.soundscape.ambience.length === 2 && late.ok.soundscape.music, "a seat that joins later hears what is playing");
   gm.send({ type: "ambience", action: "clear" });
@@ -264,7 +277,7 @@ try {
   assert(file.status === 206 && (await file.arrayBuffer()).byteLength === 40, "a player gets a range of a sound");
   assert((await fetch(`${base}/sound/list?token=${player.you.assetToken}`)).status === 404, "a player does not get the list");
   const list = await (await fetch(`${base}/sound/list?token=${gm.you.assetToken}`)).json();
-  assert(list.sounds.length === made.size && list.triggers.length === triggers.length, "the GM gets the list and the triggers");
+  assert(list.sounds.length === made.size + 1 && list.triggers.length === triggers.length, "the GM gets the list and the triggers");
 
   // Triggers turned off play nothing; Kraken's come back.
   gm.send({ type: "sound-triggers", triggers: agent.triggers().map((trigger) => (trigger.on === "attack" ? { ...trigger, enabled: false } : trigger)) });

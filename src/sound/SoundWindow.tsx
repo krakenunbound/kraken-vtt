@@ -64,6 +64,36 @@ function folderTree(groups: { id: string; count: number }[]): FolderNode[] {
   }
   return root.children;
 }
+// A play button that is a stop button while its sound (or any sound in its
+// folder) plays on this screen.
+function PlayToggle({
+  id,
+  className,
+  label,
+  title,
+  onPlay,
+  onStop,
+  data,
+  children,
+}: {
+  id: string;
+  className: string;
+  label: string;
+  title: string;
+  onPlay: () => void;
+  onStop: () => void;
+  data: Record<string, string>;
+  children: React.ReactNode;
+}) {
+  useSyncExternalStore(sound.subscribe, sound.playingNow);
+  const on = sound.isPlaying(id);
+  return (
+    <button type="button" className={on ? `${className} playing` : className} title={on ? "Stop it" : title} aria-label={on ? `Stop ${label}` : label} aria-pressed={on} onClick={on ? onStop : onPlay} {...data}>
+      {on ? "\u25a0" : children}
+    </button>
+  );
+}
+
 // "weapons sword hit 2" is the folder's #2.
 const variant = (name: string) => /(\d+)$/.exec(name)?.[1];
 
@@ -76,6 +106,7 @@ function Folder({
   inGroup,
   loop,
   play,
+  stop,
 }: {
   node: FolderNode;
   kind: SoundKind;
@@ -85,6 +116,7 @@ function Folder({
   inGroup: (group: string) => SoundItem[];
   loop: (id: string) => boolean;
   play: (id: string) => void;
+  stop: (id: string) => void;
 }) {
   const open = isOpen(node.path);
   const files = node.group && open ? inGroup(node.path) : [];
@@ -95,16 +127,17 @@ function Folder({
           {open ? "▾" : "▸"}
         </button>
         {node.group ? (
-          <button
-            type="button"
+          <PlayToggle
+            id={node.path}
             className="sound-play"
             title={kind === "ambience" ? "Play this loop for the table" : kind === "music" ? "Play this folder for the table, track after track" : "Play one of these, at random, for the table"}
-            aria-label={`Play ${node.path}`}
-            data-sound-group={node.path}
-            onClick={() => play(node.path)}
+            label={`Play ${node.path}`}
+            data={{ "data-sound-group": node.path }}
+            onPlay={() => play(node.path)}
+            onStop={() => stop(node.path)}
           >
             <Icon name="sound" size={14} />
-          </button>
+          </PlayToggle>
         ) : null}
         <button type="button" className="sound-group-name" onClick={() => toggle(node.path)}>
           {node.name}
@@ -117,20 +150,20 @@ function Folder({
         <div className="sound-files">
           {files.map((item) => (
             <div key={item.id} className={loop(item.id) ? "sound-file on" : "sound-file"}>
-              <button type="button" className="sound-hear" title="Hear it (on your screen only)" aria-label={`Hear ${item.name}`} data-hear={item.id} onClick={() => void sound.play(item.id, kind)}>
-                {"▶"}
-              </button>
+              <PlayToggle id={item.id} className="sound-hear" title="Hear it (on your screen only)" label={`Hear ${item.name}`} data={{ "data-hear": item.id }} onPlay={() => void sound.play(item.id, kind)} onStop={() => sound.stop(item.id)}>
+                {"\u25b6"}
+              </PlayToggle>
               <span className="sound-file-name">
                 {variant(item.name) ? <b>#{variant(item.name)}</b> : null} {item.name}
               </span>
-              <button type="button" className="ghost" title="Play it for the table" data-sound={item.id} onClick={() => play(item.id)}>
+              <PlayToggle id={item.id} className="ghost" title="Play it for the table" label={`Play ${item.name} for the table`} data={{ "data-sound": item.id }} onPlay={() => play(item.id)} onStop={() => stop(item.id)}>
                 <Icon name="sound" size={12} /> Table
-              </button>
+              </PlayToggle>
             </div>
           ))}
         </div>
       ) : null}
-      {open ? node.children.map((child) => <Folder key={child.path} node={child} kind={kind} depth={depth + 1} isOpen={isOpen} toggle={toggle} inGroup={inGroup} loop={loop} play={play} />) : null}
+      {open ? node.children.map((child) => <Folder key={child.path} node={child} kind={kind} depth={depth + 1} isOpen={isOpen} toggle={toggle} inGroup={inGroup} loop={loop} play={play} stop={stop} />) : null}
     </div>
   );
 }
@@ -160,6 +193,14 @@ function Browser({ session, kind, library, reload }: { session: Session; kind: S
     if (kind === "ambience") session.soundCommand({ type: "ambience", action: "add", id });
     else if (kind === "music") session.soundCommand({ type: "music", action: "play", id });
     else session.soundCommand({ type: "sound-play", id });
+  };
+  // Stop it for the table: a loop (or a folder's loops), the music, or an effect.
+  const stop = (id: string) => {
+    const under = (other: string) => other === id || other.startsWith(`${id}/`);
+    if (kind === "ambience") for (const item of scape.ambience.filter((loop) => under(loop.id))) session.soundCommand({ type: "ambience", action: "remove", id: item.id });
+    else if (kind === "music") session.soundCommand({ type: "music", action: "stop" });
+    else session.soundCommand({ type: "sound-stop", id });
+    sound.stop(id);
   };
   const add = async () => {
     await window.kraken?.pickSounds(kind, folder);
@@ -215,7 +256,7 @@ function Browser({ session, kind, library, reload }: { session: Session; kind: S
       <div className="sound-groups" role="tree">
         {groups.length === 0 ? <p className="hint">No {KINDS.find((item) => item.id === kind)?.name.toLowerCase()} yet.{kind === "oneshots" ? " Voices are spoken lines (Syrinscape's one-shots): a guard's \"Halt!\", an innkeeper's welcome." : ""}</p> : null}
         {nodes.map((node) => (
-          <Folder key={node.path} node={node} kind={kind} depth={0} isOpen={isOpen} toggle={toggle} inGroup={inGroup} loop={loop} play={play} />
+          <Folder key={node.path} node={node} kind={kind} depth={0} isOpen={isOpen} toggle={toggle} inGroup={inGroup} loop={loop} play={play} stop={stop} />
         ))}
       </div>
       {window.kraken ? (
@@ -297,13 +338,13 @@ function Triggers({ session, library }: { session: Session; library: SoundLibrar
               ) : (
                 <small className="none">no sounds yet</small>
               )}
-              <button
-                type="button"
+              <PlayToggle
+                id={item.sound}
                 className="sound-play"
                 title={sounds ? "Hear it (on your screen only)" : "No sounds in this folder yet"}
-                aria-label={`Hear ${item.name}`}
-                data-try={item.id}
-                onClick={() => {
+                label={`Hear ${item.name}`}
+                data={{ "data-try": item.id }}
+                onPlay={() => {
                   const found = soundsOf(item.sound);
                   if (found.length === 0) setNote(`${item.name}: no sounds in ${item.sound} yet.`);
                   else {
@@ -311,16 +352,17 @@ function Triggers({ session, library }: { session: Session; library: SoundLibrar
                     void sound.play(found[Math.floor(Math.random() * found.length)].id, item.sound.startsWith("oneshots/") ? "oneshots" : "sfx");
                   }
                 }}
+                onStop={() => sound.stop(item.sound)}
               >
                 ▶
-              </button>
+              </PlayToggle>
               {shownSounds === item.id ? (
                 <div className="sound-files sound-trigger-files">
                   {soundsOf(item.sound).map((one) => (
                     <div key={one.id} className="sound-file">
-                      <button type="button" className="sound-hear" title="Hear it (on your screen only)" aria-label={`Hear ${one.name}`} data-hear={one.id} onClick={() => void sound.play(one.id, item.sound.startsWith("oneshots/") ? "oneshots" : "sfx")}>
-                        {"▶"}
-                      </button>
+                      <PlayToggle id={one.id} className="sound-hear" title="Hear it (on your screen only)" label={`Hear ${one.name}`} data={{ "data-hear": one.id }} onPlay={() => void sound.play(one.id, item.sound.startsWith("oneshots/") ? "oneshots" : "sfx")} onStop={() => sound.stop(one.id)}>
+                        {"\u25b6"}
+                      </PlayToggle>
                       <span className="sound-file-name">
                         {variant(one.name) ? <b>#{variant(one.name)}</b> : null} {one.group.split("/").slice(-1)[0]} <small>{one.id.split("/").pop()}</small>
                       </span>

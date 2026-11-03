@@ -375,7 +375,10 @@ export function useSession() {
             setChat((current) => current.map((line) => (line.vote?.id === id ? { ...line, vote: { ...line.vote, yes: (msg.yes as string[]) ?? [], no: (msg.no as string[]) ?? [] } } : line)));
           }
           if (msg.type === "sound" && typeof msg.id === "string") void sound.play(msg.id, (msg.kind as "oneshots" | "sfx") ?? "sfx", Number(msg.volume ?? 1));
-          if (msg.type === "sound-stop") sound.stopAll();
+          if (msg.type === "sound-stop") {
+            if (typeof msg.id === "string") sound.stop(msg.id);
+            else sound.stopAll();
+          }
           if (msg.type === "soundscape" && msg.soundscape) {
             setSoundscape(msg.soundscape as Soundscape);
             void sound.setScape(msg.soundscape as Soundscape);
@@ -833,6 +836,8 @@ export function useSession() {
     bookUrl,
     // The GM's: share a book with the players (or stop), show them a picture, take it back.
     activateBook: (book: string, active: boolean) => send({ type: "book-activate", book, active }),
+    // The party's watch order and formation (a player moves their own characters).
+    partyOrder: (change: { action: "place" | "remove" | "watch" | "fill" | "rotate" | "clear"; id?: string; x?: number; y?: number; watch?: number; columns?: number; direction?: "left" | "right" }) => send({ type: "party-order", ...change }),
     shareBook: (book: string, shared: boolean) => send({ type: "book-share", book, shared }),
     showImage: (book: string, file: string, name: string) => send({ type: "image-share", book, file, name }),
     hideImage: (id: string) => send({ type: "image-unshare", id }),

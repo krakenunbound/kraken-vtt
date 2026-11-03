@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Picture } from "../characters/ArtPicker";
+import { Icon } from "../ui/icons";
 import type { Session } from "../session/useSession";
 
 export type PartyMember = {
@@ -24,7 +25,7 @@ export type PartyView = {
   parcel: { coins: Record<string, number>; items: Record<string, { name: string; count: number; assign?: string }> };
   quests: Record<string, Entry>;
   encounters: Record<string, Entry>;
-  order: { marching: string[]; watches: Record<string, { name: string; members: string[] }> };
+  order: { marching: string[]; watches: Record<string, { name: string; members: string[] }>; formation: { facing: number; slots: { x: number; y: number; id: string }[] } };
 };
 
 const ATTRIBUTES = ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"];
@@ -235,78 +236,7 @@ export function PartySheet({ session, compact = false }: { session: Session; com
         </div>
       ) : null}
 
-      {tab === "order" ? (
-        <div className="party-order">
-          <h3>Marching order</h3>
-          <ol className="marching">
-            {(party.order.marching?.length ? party.order.marching : party.members.map((member) => member.id))
-              .map((id) => party.members.find((member) => member.id === id))
-              .filter((member): member is PartyMember => Boolean(member))
-              .map((member, index, list) => (
-                <li key={member.id}>
-                  <span>{member.name}</span>
-                  {gm ? (
-                    <span className="order-buttons">
-                      <button
-                        type="button"
-                        disabled={index === 0}
-                        aria-label={`Move ${member.name} forward`}
-                        onClick={() => {
-                          const ids = list.map((item) => item.id);
-                          [ids[index - 1], ids[index]] = [ids[index], ids[index - 1]];
-                          patch({ order: { marching: ids } });
-                        }}
-                      >
-                        ↑
-                      </button>
-                      <button
-                        type="button"
-                        disabled={index === list.length - 1}
-                        aria-label={`Move ${member.name} back`}
-                        onClick={() => {
-                          const ids = list.map((item) => item.id);
-                          [ids[index + 1], ids[index]] = [ids[index], ids[index + 1]];
-                          patch({ order: { marching: ids } });
-                        }}
-                      >
-                        ↓
-                      </button>
-                    </span>
-                  ) : null}
-                </li>
-              ))}
-          </ol>
-          <h3>Watches</h3>
-          {[1, 2, 3].map((number) => {
-            const key = `watch-${number}`;
-            const watch = party.order.watches?.[key] ?? { name: `Watch ${number}`, members: [] };
-            return (
-              <div key={key} className="watch">
-                <b>{watch.name}</b>
-                {party.members.map((member) => (
-                  <label key={member.id} className="check">
-                    <input
-                      type="checkbox"
-                      disabled={!gm}
-                      checked={watch.members.includes(member.id)}
-                      onChange={(event) =>
-                        patch({
-                          order: {
-                            watches: {
-                              [key]: { name: watch.name, members: event.target.checked ? [...watch.members, member.id] : watch.members.filter((id) => id !== member.id) },
-                            },
-                          },
-                        })
-                      }
-                    />
-                    {member.name}
-                  </label>
-                ))}
-              </div>
-            );
-          })}
-        </div>
-      ) : null}
+      {tab === "order" ? <OrderTab session={session} party={party} /> : null}
 
       {tab === "xp" && gm ? (
         <div className="party-xp">
@@ -370,5 +300,160 @@ export function PartySheet({ session, compact = false }: { session: Session; com
         </div>
       ) : null}
     </section>
+  );
+}
+
+// FG's party sheet Order tab: the watch order and the marching formation (a 7
+// by 7 grid; FG's PartyFormationManager). Everyone drags their own
+// characters' tokens into a watch or a slot; the GM moves anyone, and fills,
+// turns and clears the formation. The host keeps it, and the marching order
+// follows it, front to back.
+const RANGE = 3;
+const ARROWS = ["\u25b2", "\u25b6", "\u25bc", "\u25c0"];
+function OrderTab({ session, party }: { session: Session; party: PartyView }) {
+  const gm = session.role === "dm";
+  const [dragging, setDragging] = useState("");
+  const [over, setOver] = useState("");
+  const formation = party.order.formation ?? { facing: 0, slots: [] };
+  const me = session.players.find((seat) => seat.id === session.selfId)?.name ?? "";
+  const mine = (member: PartyMember) => gm || member.owner === me;
+  const byId = new Map(party.members.map((member) => [member.id, member]));
+  const token = (member: PartyMember, size = 44) => (
+    <span className="order-token" style={{ width: size, height: size }} title={member.name}>
+      {member.portrait ? <Picture session={session} id={member.portrait} alt="" /> : <b>{member.name.slice(0, 1)}</b>}
+    </span>
+  );
+  const draggable = (member: PartyMember) =>
+    mine(member)
+      ? {
+          draggable: true,
+          onDragStart: (event: React.DragEvent) => {
+            event.dataTransfer.setData("text/kraken-member", member.id);
+            event.dataTransfer.effectAllowed = "move";
+            setDragging(member.id);
+          },
+          onDragEnd: () => {
+            setDragging("");
+            setOver("");
+          },
+        }
+      : {};
+  const dropZone = (name: string, drop: (id: string) => void) => ({
+    onDragOver: (event: React.DragEvent) => {
+      if (!dragging) return;
+      event.preventDefault();
+      setOver(name);
+    },
+    onDragLeave: () => setOver((current) => (current === name ? "" : current)),
+    onDrop: (event: React.DragEvent) => {
+      event.preventDefault();
+      const id = event.dataTransfer.getData("text/kraken-member") || dragging;
+      setOver("");
+      setDragging("");
+      if (id) drop(id);
+    },
+  });
+  const watches = [1, 2, 3].map((number) => ({ number, ...(party.order.watches?.[`watch-${number}`] ?? { name: `Watch ${number}`, members: [] }) }));
+  const onWatch = new Set(watches.flatMap((watch) => watch.members));
+  const placed = new Set(formation.slots.map((slot) => slot.id));
+  const yours = party.members.filter(mine);
+  const facingLabel = ["up", "right", "down", "left"][formation.facing] ?? "up";
+  if (party.members.length === 0) return <p className="hint">The party has no members yet. The GM adds them on the Main tab.</p>;
+  return (
+    <div className="party-order-grid">
+      <div className="order-tokens" aria-label="Your characters">
+        <span className="hint">{gm ? "Drag a token into a watch or a slot." : "Drag your character into a watch or a slot."}</span>
+        {yours.map((member) => (
+          <span key={member.id} className={placed.has(member.id) || onWatch.has(member.id) ? "order-pick placed" : "order-pick"} data-order-token={member.id} {...draggable(member)}>
+            {token(member, 36)}
+            <small>{member.name}</small>
+          </span>
+        ))}
+      </div>
+      <section className="order-watch">
+        <h3>Watch Order</h3>
+        {watches.map((watch) => (
+          <div key={watch.number} className={over === `watch-${watch.number}` ? "order-watch-slot over" : "order-watch-slot"} data-watch={watch.number} {...dropZone(`watch-${watch.number}`, (id) => session.partyOrder({ action: "watch", id, watch: watch.number }))}>
+            <b>{["1st", "2nd", "3rd"][watch.number - 1]} watch</b>
+            <div className="order-watch-members">
+              {watch.members
+                .map((id) => byId.get(id))
+                .filter((member): member is PartyMember => Boolean(member))
+                .map((member) => (
+                  <span key={member.id} className="order-watcher" {...draggable(member)}>
+                    {token(member, 30)}
+                    <small>{member.name}</small>
+                    {mine(member) ? (
+                      <button type="button" className="order-remove" aria-label={`Take ${member.name} off watch`} onClick={() => session.partyOrder({ action: "watch", id: member.id, watch: 0 })}>
+                        ×
+                      </button>
+                    ) : null}
+                  </span>
+                ))}
+              {watch.members.length === 0 ? <span className="hint">Drop here</span> : null}
+            </div>
+          </div>
+        ))}
+      </section>
+      <section className="order-formation">
+        <h3>Formation</h3>
+        <div className={`formation-board facing-${formation.facing}`} title={`The party faces ${facingLabel}`}>
+          <span className="formation-arrow" aria-label={`Facing ${facingLabel}`}>
+            {ARROWS[formation.facing]}
+          </span>
+          <div className="formation-slots">
+            {Array.from({ length: (RANGE * 2 + 1) ** 2 }, (_, index) => {
+              const x = (index % (RANGE * 2 + 1)) - RANGE;
+              const y = RANGE - Math.floor(index / (RANGE * 2 + 1));
+              const slot = formation.slots.find((item) => item.x === x && item.y === y);
+              const member = slot ? byId.get(slot.id) : undefined;
+              const name = `${x},${y}`;
+              return (
+                <div
+                  key={name}
+                  className={`formation-slot${over === name ? " over" : ""}${x === 0 && y === 0 ? " middle" : ""}`}
+                  data-slot={name}
+                  {...dropZone(name, (id) => session.partyOrder({ action: "place", id, x, y }))}
+                  onDoubleClick={() => member && mine(member) && session.partyOrder({ action: "remove", id: member.id })}
+                >
+                  {member ? (
+                    <span {...draggable(member)} data-slot-member={member.id}>
+                      {token(member)}
+                    </span>
+                  ) : x === 0 && y === 0 ? (
+                    <span className="formation-middle" aria-hidden>
+                      {"\u2316"}
+                    </span>
+                  ) : null}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        {gm ? (
+          <div className="formation-buttons">
+            {[1, 2, 3].map((columns) => (
+              <button key={columns} type="button" title={`Fill the party ${columns} abreast`} data-fill={columns} onClick={() => session.partyOrder({ action: "fill", columns })}>
+                {columns}×
+              </button>
+            ))}
+            <button type="button" title="Turn the formation left" aria-label="Turn left" data-rotate="left" onClick={() => session.partyOrder({ action: "rotate", direction: "left" })}>
+              {"\u21ba"}
+            </button>
+            <button type="button" title="Turn the formation right" aria-label="Turn right" data-rotate="right" onClick={() => session.partyOrder({ action: "rotate", direction: "right" })}>
+              {"\u21bb"}
+            </button>
+            <button type="button" className="formation-clear" title="Clear the formation" aria-label="Clear the formation" data-clear onClick={() => session.partyOrder({ action: "clear" })}>
+              <Icon name="trash" size={15} />
+            </button>
+          </div>
+        ) : (
+          <p className="hint">Double-click your token to take it out.</p>
+        )}
+        <p className="hint order-marching">
+          Marching order: {party.order.marching.map((id) => byId.get(id)?.name).filter(Boolean).join(", ") || "nobody placed yet"}
+        </p>
+      </section>
+    </div>
   );
 }
