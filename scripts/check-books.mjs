@@ -38,6 +38,13 @@ assert(text.includes("<b>guards</b>") && text.includes('<blockquote class="frame
 assert(!/<script/i.test(text) && text.includes("&lt;script&gt;"), "no script gets through; its text is escaped");
 assert(text.includes('data-page="inn"') && text.includes('data-file="images/keep.png"'), "links go to a page and to a picture");
 
+// Worldbuilding (no rules) takes only the books for any game, never another game's.
+{
+  const { fitsRuleset } = require("../electron/books.cjs");
+  const fits = (ruleset) => list.filter((item) => fitsRuleset(item, ruleset)).map((item) => item.id).sort().join();
+  assert(fits("Worldbuilding") === "Not A Book", `Worldbuilding: only any game's (${fits("Worldbuilding")})`);
+  assert(fits("Castles & Crusades") === "Not A Book,Test Handbook,Test Keep", `C&C: its own and any game's (${fits("Castles & Crusades")})`);
+}
 const server = createTableServer({ books, ruleset: "Castles & Crusades" });
 const tool = async (name, args) => JSON.parse((await callTool(name, args, { table: () => server })).content[0].text);
 function connect(port, join) {

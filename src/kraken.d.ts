@@ -31,6 +31,7 @@ export type KrakenApi = {
   campaigns: () => Promise<KrakenCampaign[]>;
   saveCampaign: (input: { name: string; ruleset: string }) => Promise<KrakenCampaign>;
   touchCampaign: (input: { id: string; port: number }) => Promise<KrakenCampaign | null>;
+  setCampaignRuleset: (input: { id: string; ruleset: string }) => Promise<KrakenCampaign>;
   copy: (text: string) => Promise<void>;
   startHost: (options: { port: number; password: string; lan: boolean; cloud: boolean; campaignId?: string }) => Promise<KrakenHostInfo>;
   stopHost: () => Promise<void>;

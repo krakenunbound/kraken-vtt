@@ -16,16 +16,16 @@ const { readModule, modulePicture } = require("./importers/fgModule.cjs");
 
 const PICTURES = /\.(png|webp|jpe?g|gif)$/i;
 
-// Which FG rulesets' modules fit a Kraken campaign's ruleset. A module for
-// "Any" (or CoreRPG, or none named) fits every campaign; Worldbuilding has
-// no rules, so every module fits it.
+// Which FG rulesets' modules fit a Kraken campaign's ruleset: the ruleset
+// decides the books. A module for "Any" (or CoreRPG, or none named) fits every
+// campaign; Worldbuilding (no rules) takes only those, never another game's.
 const FG_RULESETS = {
   "Castles & Crusades": ["SiegeCore", "CnCRPG"],
+  Worldbuilding: [],
 };
 const ANY = new Set(["", "any", "corerpg"]);
 function fitsRuleset(info, ruleset) {
-  const wanted = FG_RULESETS[ruleset];
-  if (!wanted) return true;
+  const wanted = FG_RULESETS[ruleset] ?? [String(ruleset ?? "")];
   const theirs = String(info.ruleset ?? "").toLowerCase();
   return ANY.has(theirs) || wanted.some((name) => name.toLowerCase() === theirs);
 }

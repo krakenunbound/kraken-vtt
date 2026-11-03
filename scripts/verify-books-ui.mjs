@@ -55,7 +55,15 @@ page.on("pageerror", (error) => failures.push(error.message));
 let browser = null;
 try {
   await rpc("initialize", { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "check", version: "1" } });
-  const campaign = await tool("kraken_campaign_create", { name: "Books UI", ruleset: "Castles & Crusades" });
+  // A campaign made as Worldbuilding, changed to Castles & Crusades on the campaign screen.
+  const campaign = await tool("kraken_campaign_create", { name: "Books UI", ruleset: "Worldbuilding" });
+  await page.reload();
+  await page.waitForSelector("text=Books UI");
+  await page.click("text=Books UI");
+  await page.selectOption('select[aria-label="Ruleset"]', "Castles & Crusades");
+  await page.waitForFunction(() => document.querySelector('select[aria-label="Ruleset"]')?.value === "Castles & Crusades");
+  const saved = (await tool("kraken_campaigns")).find((item) => item.id === campaign.id);
+  assert(saved?.ruleset === "Castles & Crusades", `the campaign's ruleset is changed (${saved?.ruleset})`);
   const port = 47395;
   await tool("kraken_host", { campaignId: campaign.id, port, password: "pw" });
   await page.waitForSelector("text=Hosting");

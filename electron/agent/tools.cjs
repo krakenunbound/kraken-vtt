@@ -65,6 +65,12 @@ const TOOLS = [
     run: (args, ctx) => out(ctx.campaigns.create({ name: args.name, ruleset: args.ruleset })),
   },
   {
+    name: "kraken_campaign_ruleset",
+    description: "Change a campaign's ruleset (Castles & Crusades, or Worldbuilding for no rules), as the campaign screen's Ruleset menu. It decides the campaign's books. Not while that campaign is hosted.",
+    inputSchema: object({ campaignId: string("Campaign id from kraken_campaigns"), ruleset: string("Castles & Crusades or Worldbuilding") }, ["campaignId", "ruleset"]),
+    run: (args, ctx) => out(ctx.campaigns.setRuleset({ id: args.campaignId, ruleset: args.ruleset })),
+  },
+  {
     name: "kraken_host",
     description: "Host a campaign in the app window, as the GM pressing Play. The window joins as the DM.",
     inputSchema: object(
