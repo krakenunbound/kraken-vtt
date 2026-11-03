@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { Emblem } from "../ui/Emblem";
+import { Emblem, Mark } from "../ui/Emblem";
 import type { KrakenCampaign, KrakenNetwork } from "../kraken";
 
 type HostInput = { name: string; port: number; password: string; lan: boolean; cloud: boolean; campaignId: string };
@@ -148,7 +148,9 @@ export function SetupScreen({
   return (
     <div className="setup">
       <header className="topbar">
-        <div className="brand">Kraken</div>
+        <div className="brand">
+          <Mark /> Kraken
+        </div>
         {inBrowser ? null : (
           <button type="button" className="join-toggle" data-action="join-mode" onClick={() => setMode(mode === "join" ? "campaigns" : "join")}>
             {mode === "join" ? "My campaigns" : "Join a game"}

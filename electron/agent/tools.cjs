@@ -361,12 +361,16 @@ const TOOLS = [
   {
     name: "kraken_combat",
     description:
-      "The combat tracker (SiegeCore rules: d10 initiative, high to low; unconscious enemies lose their turns; effect durations count down each round; the dying bleed). action view (default); add (recordId of a character or NPC, count, hidden, place: also put tokens on the map; or entry {name, faction, hp, ac, init}); add-party; init (which: an entry id, npcs or all); next (next turn); round (next round); end (removeNpcs); update (id, patch {name, faction, init, initresult, hp, wounds, ac, hidden}); remove (id); damage / heal (id, amount); effect (id, effect {label, duration in rounds, gmOnly}); effect-remove (id, effectId); target (id: the attacker entry, targetId, on true/false); clear-targets (id); attack / damage-roll (a character: recordId + weapon = its inventory key; an NPC: id + weapon = its attack key from view's attacks): SiegeCore's attack, one d20 per target against its AC (equal hits), damage rolled once and put on every target.",
+      "The combat tracker (SiegeCore rules: d10 initiative, high to low; unconscious enemies lose their turns; effect durations count down each round; the dying bleed). action view (default); add (recordId of a character or NPC, count, hidden, place: also put tokens on the map; or entry {name, faction, hp, ac, init}); add-party; init (which: an entry id, npcs or all); next (next turn); round (next round); end (removeNpcs); update (id, patch {name, faction, init, initresult, hp, wounds, ac, hidden}); remove (id); damage / heal (id, amount); effect (id, effect {label, duration in rounds, gmOnly}); effect-remove (id, effectId); target (id: the attacker entry, targetId, on true/false); clear-targets (id); attack / damage-roll (a character: recordId + weapon = its inventory key; an NPC: id + weapon = its attack key from view's attacks): SiegeCore's attack, one d20 per target against its AC (equal hits), damage rolled once and put on every target; save (id, attribute, cl): a SIEGE save; cast (recordId, power: its powers key, castAction: the power's actions key): spends a slot, targets save against the caster level, damage halves or cancels on a save, effects land on those who failed, healing goes to the targets.",
     inputSchema: object({
-      action: { type: "string", enum: ["view", "add", "add-party", "init", "next", "round", "end", "update", "remove", "damage", "heal", "effect", "effect-remove", "target", "clear-targets", "attack", "damage-roll"] },
+      action: { type: "string", enum: ["view", "add", "add-party", "init", "next", "round", "end", "update", "remove", "damage", "heal", "effect", "effect-remove", "target", "clear-targets", "attack", "damage-roll", "save", "cast"] },
       targetId: string("target: the entry to target"),
       on: { type: "boolean", description: "target: add (true) or drop (false)" },
       weapon: string("attack / damage-roll: inventory key (character) or attack key (NPC)"),
+      attribute: string("save: strength, dexterity, constitution, intelligence, wisdom or charisma"),
+      cl: number("save: the challenge level"),
+      power: string("cast: the character's powers key"),
+      castAction: string("cast: the power's actions key"),
       id: string("Tracker entry id"),
       recordId: string("Character or NPC record id"),
       count: number("How many of that NPC"),
@@ -408,6 +412,8 @@ const TOOLS = [
       else if (action === "target") combat.target(args.id, args.targetId, args.on ?? true, seat);
       else if (action === "clear-targets") combat.clearTargets(args.id, seat);
       else if (action === "attack") return out({ results: await combat.attack(args.recordId ? { recordId: args.recordId } : { entryId: args.id }, args.weapon, seat, "Agent"), combat: combat.viewFor(seat) });
+      else if (action === "save") return out({ save: await combat.save(args.id, args.attribute, args.cl ?? 0, "Agent"), combat: combat.viewFor(seat) });
+      else if (action === "cast") return out({ cast: await combat.cast(args.recordId, args.power, args.castAction ?? "", seat, "Agent"), combat: combat.viewFor(seat) });
       else if (action === "damage-roll") return out({ damage: await combat.damageRoll(args.recordId ? { recordId: args.recordId } : { entryId: args.id }, args.weapon, seat, "Agent"), combat: combat.viewFor(seat) });
       return out(combat.viewFor(seat));
     },

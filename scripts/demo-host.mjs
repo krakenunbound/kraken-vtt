@@ -49,7 +49,7 @@ await tool("kraken_host", { campaignId: campaign.id, port: PORT, password: "pw" 
 await tool("kraken_import_fg_module", { module: "C&C Player's Handbook" });
 await tool("kraken_import_fg_module", { module: "C&C Adventurer's Backpack" });
 await tool("kraken_import_fg_module", { module: "C&C Monsters & Treasure" });
-const spec = JSON.parse(readFileSync(path.join(fgDataFolder(), "cc-conversion", "pregens", "specs", "aldric-3.json"), "utf8"));
+const spec = JSON.parse(readFileSync(path.join(fgDataFolder(), "cc-conversion", "pregens", "specs", `${process.env.DEMO_ANN ?? "aldric-3"}.json`), "utf8"));
 const built = await tool("kraken_build_character", { spec, owner: "Ann" });
 await tool("kraken_build_character", { spec: { ...JSON.parse(readFileSync(path.join(fgDataFolder(), "cc-conversion", "pregens", "specs", "garrick-1.json"), "utf8")) }, owner: "Bob" });
 await page.setInputFiles("input.file-input", bundle);

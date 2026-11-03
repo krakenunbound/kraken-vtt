@@ -27,7 +27,7 @@ export function RollCard({ roll }: { roll: RollResult }) {
         )}
       </span>
       <span className="roll-formula">{roll.formula}</span>
-      {roll.result ? <span className={`roll-result ${roll.result === "HIT" ? "hit" : roll.result === "MISS" ? "miss" : "none"}`}>{roll.result}</span> : null}
+      {roll.result ? <span className={`roll-result ${roll.result === "HIT" || roll.result === "SAVED" ? "hit" : roll.result === "MISS" || roll.result === "FAILED" ? "miss" : "none"}`}>{roll.result}</span> : null}
       <b className="roll-total">{roll.total}</b>
     </span>
   );

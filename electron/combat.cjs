@@ -89,6 +89,59 @@ function effectBonus(entry, tag) {
 }
 
 const SHORT_TYPE = { melee: "M", ranged: "R" };
+const STATS = ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"];
+const SHORT_STAT = { strength: "STR", dexterity: "DEX", constitution: "CON", intelligence: "INT", wisdom: "WIS", charisma: "CHA" };
+const PHYSICAL = new Set(["strength", "dexterity", "constitution"]);
+
+// SiegeCore getSiegeEffect: a save counts SAVE components (a plain one, or one
+// naming this attribute) and the attribute's own tag (WIS: 1); a check counts
+// ABIL and the attribute's tag.
+function siegeEffect(entry, stat, save) {
+  let total = 0;
+  for (const effect of entry?.effects ?? []) {
+    for (const part of effect.label.split(";")) {
+      const match = /^\s*([A-Z]+)\s*:\s*([+-]?\d+)\s*(.*)$/i.exec(part);
+      if (!match) continue;
+      const tag = match[1].toUpperCase();
+      const rest = match[3].trim().toLowerCase();
+      const names = rest === "" || rest === stat || rest === SHORT_STAT[stat].toLowerCase();
+      if (tag === (save ? "SAVE" : "ABIL") && names) total += Number(match[2]);
+      if (tag === SHORT_STAT[stat] && rest === "") total += Number(match[2]);
+    }
+  }
+  return total;
+}
+
+// A power's caster level: the character's level (SiegePower.getCasterLevel).
+// How many times an action repeats at that level (Magic Missile's missiles):
+// repeatbase, then repeatincrement more every repeatevery levels after repeatstart.
+function repeats(action, casterLevel) {
+  const base = Math.max(1, num(action.repeatbase, 1));
+  const every = num(action.repeatevery, 0);
+  if (every <= 0) return base;
+  const extra = Math.floor(Math.max(0, casterLevel - num(action.repeatstart, 1)) / every) * Math.max(0, num(action.repeatincrement, 0));
+  return base + extra;
+}
+
+// SiegePower.resolveLevelDice: CL is the caster level (capped by scalecap),
+// (CL/2) a level every two; "CLd6", "CLd2+CL", "2d4+(CL/2)".
+function levelDice(dice, casterLevel, cap = 0) {
+  const text = String(dice ?? "").replace(/\s+/g, "");
+  if (!text.includes("CL")) return text;
+  const level = cap > 0 ? Math.min(casterLevel, cap) : casterLevel;
+  return text.replace(/\(CL\/(\d+)\)/g, (_, every) => String(Math.floor(level / Math.max(1, Number(every))))).replace(/CL/g, String(level));
+}
+
+// A spell's duration in rounds: "1 round per level", "1 minute per caster
+// level", "3 rounds"; minutes are SIEGE_ROUND_SECONDS (10) long rounds apart.
+function durationRounds(text, casterLevel, roundSeconds = 10) {
+  const value = String(text ?? "").toLowerCase();
+  const match = /(\d+)?\s*(round|minute|turn|hour)s?(\s*(?:\/|per)\s*(?:caster\s*)?level)?/.exec(value);
+  if (!match) return 0;
+  const count = Number(match[1] ?? 1) * (match[3] ? Math.max(1, casterLevel) : 1);
+  const seconds = { round: roundSeconds, minute: 60, turn: 60, hour: 3600 }[match[2]];
+  return Math.max(1, Math.round((count * seconds) / roundSeconds));
+}
 
 function savedCombat(value) {
   const raw = value && typeof value === "object" ? value : {};
@@ -544,6 +597,136 @@ function createCombat({ saved, table, onChange = () => undefined }) {
         dmgtype: String(attack.dmgtype ?? ""),
         entry,
       };
+    },
+    // A save (SiegeCore ActionSiege, type save): d20 + the attribute bonus +
+    // level + SAVE effects against CB (12 prime, 18 not) + CL. An NPC's level
+    // is its hit dice and its primes its primeset (physical, mental, both).
+    async save(entryId, stat, cl, from, castName) {
+      const { engine, game, options: opts } = await options();
+      if (!STATS.includes(stat)) throw new Error("Pick an attribute.");
+      const entry = find(entryId);
+      const linked = record(entry);
+      const data = linked?.data ?? {};
+      let score = 10;
+      let prime = false;
+      let level = 0;
+      if (linked?.type === "character") {
+        score = num(data.attributes?.[stat]?.score, 10);
+        prime = num(data.attributes?.[stat]?.prime, 0) === 1;
+        level = num(data.level, 0);
+      } else {
+        const set = String(data.primeset ?? "").toLowerCase();
+        prime = set === "both" || (set === "physical" && PHYSICAL.has(stat)) || (set === "mental" && !PHYSICAL.has(stat));
+        level = Number(/^(\d+)/.exec(String(data.hd ?? ""))?.[1] ?? 0);
+      }
+      const bonus = siegeEffect(entry, stat, true);
+      const addLevel = String(opts.SIEGE_ADD_LEVEL ?? "on").toLowerCase() === "on";
+      const modifier = engine.abilityBonus(score, game) + (addLevel ? level : 0) + bonus;
+      const rolled = table().dice.roll(`1d20${modifier >= 0 ? "+" : ""}${modifier}`);
+      const result = engine.check({ d20: rolled.terms[0].rolls[0], score, prime, level, addLevel, cl: Math.round(num(cl, 0)), bonus }, game);
+      const label = `[SAVE] ${castName ? `${castName} (${stat[0].toUpperCase()}${stat.slice(1)})` : `${stat[0].toUpperCase()}${stat.slice(1)}`} (${prime ? "Prime" : "Secondary"}) [CB ${result.cb} CL ${Math.round(num(cl, 0))} CC ${result.cc}]${bonus ? ` [EFFECT ${bonus > 0 ? "+" : ""}${bonus}]` : ""} [${result.success ? "SUCCESS" : "FAILURE"} ${result.total} vs ${result.cc}]`;
+      table().postRoll(rolled, label, from ?? entry.name, Boolean(entry.hidden), { result: result.success ? "SAVED" : "FAILED", by: entry.name });
+      return { name: entry.name, success: result.success, total: result.total, cc: result.cc };
+    },
+    // Casts one action of a character's power (SiegePowerActions with
+    // SiegePowerResolution): a slot of the power's level is spent
+    // (SIEGE_SLOTS_SPEND); targets roll their save against the caster level;
+    // damage is one roll for everyone (each missile its own), halved or
+    // cancelled for those who saved; an effect lands on those who failed;
+    // healing goes to the targets, or the caster with none.
+    async cast(recordId, powerKey, actionKey, seat, from) {
+      const { engine, game, options: opts } = await options();
+      cachedThresholds = thresholds(opts);
+      const caster = table().records.get(recordId);
+      if (!caster || caster.type !== "character") throw new Error("No such character.");
+      if (seat.role !== "dm" && caster.owner !== seat.name) throw new Error("That is not your character.");
+      const power = caster.data.powers?.[powerKey];
+      if (!power) throw new Error("No such power.");
+      if (actionKey && !power.actions?.[actionKey]) throw new Error("No such action.");
+      // A power with no actions casts from its own fields (SiegePower's power-level damage, heal, save).
+      const action = actionKey
+        ? { ...power.actions[actionKey] }
+        : { name: power.name, damage: power.damage, heal: power.heal, dmgtype: power.dmgtype, save: power.save, saveeffect: power.saveeffect };
+      const casterLevel = Math.max(1, num(caster.data.level, 1));
+      const cap = num(action.scalecap ?? power.scalecap, 0);
+      if (action.damage) action.damage = levelDice(action.damage, casterLevel, cap);
+      if (action.heal) action.heal = levelDice(action.heal, casterLevel, cap);
+      const level = Math.round(num(power.level, 0));
+      // Spend the slot.
+      if (String(opts.SIEGE_SLOTS_SPEND ?? "on").toLowerCase() !== "off" && !power.packagesource) {
+        const slot = caster.data.slots?.[`l${level}`];
+        if (slot) {
+          if (num(slot.used, 0) >= num(slot.max, 0)) throw new Error(`No level ${level} spells left today.`);
+          table().records.update(caster.id, { data: { slots: { [`l${level}`]: { used: num(slot.used, 0) + 1 } } } }, table().seat);
+        }
+      }
+      const entry = state.entries.find((item) => item.recordId === caster.id) ?? null;
+      const self = action.effecttarget === "self";
+      let targets = self || !entry ? [] : entry.targets.map((id) => state.entries.find((item) => item.id === id)).filter(Boolean);
+      if ((action.heal && targets.length === 0) || self) targets = entry ? [entry] : [];
+      const actionName = action.name && action.name !== power.name ? `${power.name}: ${action.name}` : power.name;
+      table().say(`[CAST] ${actionName}${power.powertype ? ` (${power.powertype})` : ""} at caster level ${casterLevel}${targets.length ? ` -> [at ${targets.map((t) => t.name).join(", ")}]` : ""}`, from);
+      // Saves.
+      const saveStat = String(action.save || power.save || "").toLowerCase();
+      const saveEffect = String(action.saveeffect || power.saveeffect || "").toLowerCase();
+      const saved = new Map();
+      if (STATS.includes(saveStat) && saveEffect !== "none") {
+        for (const target of targets) {
+          if (target === entry) continue;
+          saved.set(target.id, (await this.save(target.id, saveStat, casterLevel, target.name, power.name)).success);
+        }
+      }
+      // Damage: one roll per missile (or once for an area), shared out.
+      const results = [];
+      if (String(action.damage ?? "").trim()) {
+        const count = repeats(action, casterLevel);
+        const rolls = [];
+        for (let i = 0; i < count; i += 1) {
+          const rolled = table().roll(String(action.damage).replace(/\s+/g, ""), `[DAMAGE] ${actionName}${count > 1 ? ` (${i + 1} of ${count})` : ""}${action.dmgtype ? ` [TYPE: ${action.dmgtype}]` : ""}`, from);
+          rolls.push(Math.max(1, rolled.total));
+        }
+        // An area spell (no repeats) hits every target with the one roll; missiles go round the targets.
+        const hits = new Map();
+        if (count === 1) for (const target of targets) hits.set(target.id, rolls[0]);
+        else rolls.forEach((value, index) => targets.length && hits.set(targets[index % targets.length].id, (hits.get(targets[index % targets.length].id) ?? 0) + value));
+        for (const target of targets) {
+          let amount = hits.get(target.id) ?? 0;
+          if (!amount) continue;
+          if (saved.get(target.id)) amount = saveEffect === "half" ? Math.floor(amount / 2) : saveEffect === "negates" ? 0 : amount;
+          if (amount > 0) await applyWounds(target, amount, `[DAMAGE] ${power.name}${saved.get(target.id) && saveEffect === "half" ? " [HALF]" : ""}`, opts);
+          else table().say(`${target.name} saves: no damage from ${power.name}.`, "Combat", Boolean(target.hidden));
+          results.push({ target: target.name, damage: amount });
+        }
+      }
+      // Healing.
+      if (String(action.heal ?? "").trim()) {
+        const rolled = table().roll(String(action.heal).replace(/\s+/g, ""), `[HEAL] ${actionName}`, from);
+        for (const target of targets) {
+          await this.heal(target.id, Math.max(1, rolled.total), { role: "dm", name: "Combat" });
+          results.push({ target: target.name, heal: rolled.total });
+        }
+      }
+      // The effect, on those who did not save.
+      if (String(action.effect ?? "").trim()) {
+        const label = String(action.effect).replace(/\{CL:(\d+)\}/g, (_, cap) => String(Math.min(casterLevel, Number(cap)))).replace(/\{CL\}/g, String(casterLevel));
+        const rounds = num(action.effectduration, 0) || durationRounds(power.duration, casterLevel, num(opts.SIEGE_ROUND_SECONDS, 10));
+        const active = state.entries.find((item) => item.id === state.active);
+        const landed = [];
+        const resisted = [];
+        for (const target of targets) {
+          if (saved.get(target.id)) {
+            resisted.push(target.name);
+            continue;
+          }
+          target.effects.push(cleanEffect({ label, duration: rounds, init: active ? active.initresult : entry?.initresult ?? 0 }));
+          landed.push(target.name);
+        }
+        if (landed.length) table().say(`Effect ['${label}'] -> [to ${landed.join(", ")}]${rounds ? ` for ${rounds} round${rounds === 1 ? "" : "s"}` : ""}`, "Combat");
+        if (resisted.length) table().say(`${power.name}: no effect on ${resisted.join(", ")} (saved).`, "Combat");
+        results.push(...landed.map((name) => ({ target: name, effect: label, rounds })));
+        changed();
+      }
+      return { power: power.name, action: action.name ?? "", casterLevel, saves: [...saved].map(([id, success]) => ({ target: find(id).name, success })), results };
     },
     round: () => state.round,
     active: () => state.active,
