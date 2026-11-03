@@ -118,8 +118,11 @@ try {
   await page.click('[data-launch="characters"]');
   await page.waitForSelector(`[data-character="${built.id}"]`);
   assert((await page.locator('[data-stat="ac"]').textContent()) === String(after.ac.total), "sheet AC");
-  assert((await page.locator('[data-stat="bth"]').textContent()) === `+${after.bth}`, "sheet BtH");
+  assert((await page.locator('[data-stat="melee"]').textContent()) === `+${after.attack.melee.total}`, "sheet melee");
   assert((await page.locator('[data-stat="level"]').textContent()) === "4", "sheet level");
+  await page.click('[data-sheet-tab="combat"]');
+  assert((await page.locator('[data-stat="bth"]').textContent()) === `+${after.bth}`, "sheet BtH (Combat tab)");
+  await page.click('[data-sheet-tab="main"]');
   await tool("kraken_dice_force", { values: [7] });
   await page.getByRole("button", { name: "constitution check" }).click();
   const start = Date.now();
@@ -130,6 +133,34 @@ try {
   }
   // Constitution 16 (+2) + level 4 = +6, d20 7: 13.
   assert(line && line.roll.total === 13, `sheet check ${JSON.stringify(line)}`);
+
+  // Typed on the sheet, as on FG's: the host works the numbers out again.
+  const reread = async (test, label) => {
+    for (let wait = 0; wait < 60; wait++) {
+      const record = await tool("kraken_record_get", { id: built.id });
+      if (test(record.data)) return record.data;
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+    throw new Error(label);
+  };
+  await page.fill('[aria-label="Wounds"]', "3");
+  await page.press('[aria-label="Wounds"]', "Enter");
+  await reread((data) => data.hp.wounds === 3, "wounds typed on the sheet");
+  const strongBefore = after.attributes.strength.score;
+  await page.fill('[aria-label="strength score"]', String(strongBefore + 4));
+  await page.press('[aria-label="strength score"]', "Enter");
+  const stronger = await reread((data) => data.attributes.strength.score === strongBefore + 4, "a score typed on the sheet");
+  assert(stronger.attributes.strength.bonus > after.attributes.strength.bonus && stronger.attack.melee.total > after.attack.melee.total, `the bonus and melee follow the score (${stronger.attributes.strength.bonus}, ${stronger.attack.melee.total})`);
+  await page.waitForFunction((want) => document.querySelector('[data-stat="melee"]')?.textContent === want, `+${stronger.attack.melee.total}`);
+  const worn = Object.entries(stronger.inventorylist).find(([, item]) => Number(item.carried) === 2 && Number(item.acbonus) > 0);
+  if (worn) {
+    await page.click('[data-sheet-tab="inventory"]');
+    await page.click(`[data-item="${worn[0]}"] .cc-carried`);
+    const off = await reread((data) => Number(data.inventorylist[worn[0]].carried) === 1, "armour taken off on the sheet");
+    assert(off.ac.total === stronger.ac.total - Number(worn[1].acbonus), `armour off, AC drops (${stronger.ac.total} to ${off.ac.total})`);
+    assert(off.load && off.load.er > 0, "the load is worked out");
+    await page.click('[data-sheet-tab="main"]');
+  }
 
   // Ann owns the character and sees it; Bob does not.
   const ann = await joinAs(port, "Ann");

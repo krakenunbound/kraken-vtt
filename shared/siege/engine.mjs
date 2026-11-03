@@ -323,6 +323,157 @@ function refreshPackagePowers(character) {
   for (const key of existing.values()) delete powers[key];
 }
 
+// The load a character carries (SiegeLoad.refresh), from the game's load
+// profile: each carried item's encumbrance value (by the bundle; less when
+// worn, if the profile says so), packed items in their containers (each
+// container takes some off its contents), the encumbrance rating (base,
+// Strength's bonus, a bonus per listed prime) and the band the load falls in
+// (none, light, moderate...), with its move and Dexterity penalties.
+export function refreshLoad(character, game) {
+  const profile = game?.loadprofile;
+  const load = (character.load = { ...(character.load ?? {}) });
+  if (!profile || Number(profile.enabled) !== 1) {
+    for (const key of ["er", "ev", "maximum", "warningcount", "dexpenalty", "dexcheckcl", "dexautofail", "positivedexacdrop"]) load[key] = 0;
+    for (const key of ["category", "warnings", "effectivemove"]) load[key] = "";
+    return load;
+  }
+  const n = (value, fallback = 0) => (Number.isFinite(Number(value)) && value !== "" && value !== null && value !== undefined ? Number(value) : fallback);
+  const items = list(character.inventorylist).map(([key, item]) => ({ key, item }));
+  const byName = new Map();
+  const ambiguous = new Set();
+  for (const { item } of items) {
+    const name = String(item.name ?? "").toLowerCase();
+    if (byName.has(name)) ambiguous.add(name);
+    else byName.set(name, item);
+  }
+  const warnings = new Set();
+  const values = new Map();
+  const containers = new Map();
+  for (const { item } of items) {
+    if (n(item.carried, 1) <= 0) continue;
+    const count = item.count === undefined || item.count === "" ? 1 : Math.max(n(item.count), 0);
+    let value = null;
+    let bulk = false;
+    let threshold = 0;
+    if (n(item.encumbrancemanual, -1) >= 0) value = n(item.encumbrancemanual);
+    else if (item.encumbrancevalue === undefined || item.encumbrancevalue === "") {
+      threshold = n(item.encumbrancebulkthreshold);
+      const bulkValue = n(item.encumbrancebulkvalue, -1);
+      if (threshold > 0 && bulkValue >= 0) {
+        value = bulkValue;
+        bulk = true;
+      } else warnings.add(`Missing load value: ${item.name ?? ""}`);
+    } else if (Number.isFinite(Number(item.encumbrancevalue))) value = Number(item.encumbrancevalue);
+    else warnings.add(`Unreadable load value: ${item.name ?? ""}`);
+    if (value !== null) {
+      // "Arrows (20)" bought as a bundle, or 20 arrows counted singly.
+      const perBundle = Math.max(n(item.encumbranceunitcount, 1), 1);
+      const units = perBundle > 1 && !/\(\s*\d+\s*\)\s*$/.test(String(item.name ?? ""));
+      const bundles = units ? Math.ceil(count / perBundle) : count;
+      const unitCount = units ? count : count * perBundle;
+      let total = bulk ? (unitCount > threshold ? value * Math.floor(unitCount / threshold) : 0) : value * bundles;
+      if (!bulk && n(item.encumbranceempty) === 1) total = Math.max(value - n(item.encumbranceemptyreduction), n(item.encumbranceemptyminimum)) * bundles;
+      if (n(item.carried) === 2 && n(item.encumbranceworn) === 1) total -= n(profile.wornreduction) * bundles;
+      values.set(item, Math.max(total, 0));
+    }
+    if (count > 0 && n(item.encumbrancecapacity) > 0) containers.set(item, n(item.encumbrancecapacity));
+  }
+  const resolve = (location) => {
+    const name = String(location ?? "").toLowerCase();
+    if (!name || ambiguous.has(name)) return null;
+    return byName.get(name) ?? null;
+  };
+  // Packed in a container left behind: not carried either.
+  for (const { item } of items) {
+    if (!values.has(item)) continue;
+    const seen = new Set();
+    let node = resolve(item.location);
+    while (node && !seen.has(node)) {
+      seen.add(node);
+      if (n(node.carried, 1) <= 0) {
+        values.delete(item);
+        containers.delete(item);
+        break;
+      }
+      node = resolve(node.location);
+    }
+  }
+  const parents = new Map();
+  const children = new Map();
+  const loops = (start, target) => {
+    const seen = new Set();
+    for (let node = start; node; node = resolve(node.location)) {
+      if (node === target || seen.has(node)) return true;
+      seen.add(node);
+    }
+    return false;
+  };
+  for (const { item } of items) {
+    if (!values.has(item)) continue;
+    const location = String(item.location ?? "");
+    const container = resolve(location);
+    if (container) {
+      if (loops(container, item)) warnings.add(`Container cycle: ${item.name ?? ""}`);
+      else if (!containers.has(container) || !values.has(container)) warnings.add(`Invalid or uncarried container: ${location}`);
+      else {
+        parents.set(item, container);
+        children.set(container, [...(children.get(container) ?? []), item]);
+      }
+    } else if (location) warnings.add(`${ambiguous.has(location.toLowerCase()) ? "Ambiguous" : "Unknown"} container: ${location}`);
+  }
+  const subtree = (node) => {
+    let raw = 0;
+    let packed = 0;
+    for (const child of children.get(node) ?? []) {
+      const [r, p] = subtree(child);
+      raw += r;
+      packed += p;
+    }
+    if (containers.has(node) && raw > containers.get(node)) warnings.add(`Container capacity exceeded: ${node.name ?? ""}`);
+    const reduction = containers.has(node) ? n(node.encumbrancecontainerreduction, n(profile.containerreduction)) : 0;
+    const own = values.get(node) ?? 0;
+    return [own + raw, own + Math.max(packed - reduction, 0)];
+  };
+  let ev = 0;
+  for (const { item } of items) if (values.has(item) && !parents.has(item)) ev += subtree(item)[1];
+  let er = n(profile.base) + n(profile.strengthmodifier ?? profile.strengthmod, 1) * abilityBonus(Number(character.attributes?.strength?.score ?? 10), game);
+  for (const prime of String(profile.primes ?? "").split(",")) {
+    const stat = prime.trim().toLowerCase();
+    if (stat && Number(character.attributes?.[stat]?.prime) === 1) er += n(profile.primebonus);
+  }
+  const ratio = er > 0 ? ev / er : 0;
+  const bands = Object.values(profile.bands ?? {}).filter((band) => band && typeof band === "object").sort((a, b) => n(a.min) - n(b.min));
+  let band = bands.find((row) => ratio >= n(row.min) && ratio <= n(row.max)) ?? null;
+  let category = band ? String(band.name ?? "") : "";
+  const maximum = er * n(profile.maxmultiplier);
+  const over = maximum > 0 && ev > maximum;
+  if (over) {
+    category = String(profile.overcapacityname ?? "overcapacity");
+    band = null;
+    warnings.add("Load exceeds profile maximum");
+  }
+  Object.assign(load, { er, ev, maximum, category, warnings: [...warnings].sort().join("; "), warningcount: warnings.size });
+  if (band) {
+    const speed = Number(/\d+/.exec(String(character.speed ?? ""))?.[0]);
+    const ratioMove = Number(band.moveratio);
+    load.effectivemove = band.move ? String(band.move) : Number.isFinite(speed) && Number.isFinite(ratioMove) ? `${Math.floor(speed * ratioMove + 0.5)} ft.` : "";
+    load.dexpenalty = n(band.dexpenalty);
+    load.dexcheckcl = n(band.dexcheckcl);
+    load.dexautofail = n(band.dexautofail);
+    load.positivedexacdrop = n(band.positivedexacdrop);
+  } else if (over) {
+    load.effectivemove = String(profile.overcapacitymove ?? "0 ft.");
+    load.dexpenalty = n(profile.overcapacitydexpenalty);
+    load.dexcheckcl = n(profile.overcapacitydexcheckcl);
+    load.dexautofail = n(profile.overcapacitydexautofail, 1);
+    load.positivedexacdrop = n(profile.overcapacitypositivedexacdrop, 1);
+  } else {
+    load.effectivemove = "";
+    for (const key of ["dexpenalty", "dexcheckcl", "dexautofail", "positivedexacdrop"]) load[key] = 0;
+  }
+  return load;
+}
+
 // Everything the sheet works out from scores, packages and gear
 // (SiegeChar.refreshPackages, refreshActor, refreshAC, refreshCombat).
 // Returns a new character; the input is not changed.
@@ -373,6 +524,9 @@ export function derive(input, game) {
   let chosen = 0;
   for (const stat of STATS) if (character.attributes[stat].prime) chosen += 1;
   character.primes = { chosen };
+
+  // The load first: a heavy load takes the Dexterity bonus off AC.
+  refreshLoad(character, game);
 
   if (isOn(options, "SIEGE_AC_AUTO")) {
     const ac = (character.ac = { ...(character.ac ?? {}) });

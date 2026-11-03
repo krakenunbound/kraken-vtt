@@ -8,7 +8,7 @@ const { createRecordStore, canSee } = require("./records.cjs");
 const { soundFor, cleanTriggers } = require("./soundTriggers.cjs");
 const { defaultTriggers, TRIGGERS_VERSION } = require("./soundCatalog.cjs");
 const { createDice } = require("./dice.cjs");
-const { siege, siegeLibrary, siegeCheck, levelUp } = require("./siege.cjs");
+const { siege, siegeLibrary, siegeCheck, levelUp, editCharacter } = require("./siege.cjs");
 const { createMapState, playerColor } = require("./mapState.cjs");
 const party = require("./party.cjs");
 const { createCombat } = require("./combat.cjs");
@@ -1077,13 +1077,24 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       }
 
       // A SIEGE check from a sheet: the owner or the GM rolls it.
+      // The character sheet: fields typed on it, then every number worked out again.
+      if (msg.type === "character-edit") {
+        const record = records.get(String(msg.id ?? ""), seatOf(client));
+        if (!record || record.type !== "character") {
+          send(ws, { type: "error", reason: "No such character." });
+          return;
+        }
+        editCharacter(agentHandle, record, msg.changes, seatOf(client)).catch((error) => send(ws, { type: "error", reason: error instanceof Error ? error.message : "Could not change that." }));
+        return;
+      }
+
       if (msg.type === "siege-check") {
         const record = records.get(msg.id, seatOf(client));
         if (!record || (client.role !== "dm" && record.owner !== client.name)) {
           send(ws, { type: "error", reason: "You cannot roll for that character." });
           return;
         }
-        siegeCheck(agentHandle, record, { attribute: msg.attribute, cl: msg.cl, bonus: msg.bonus, label: msg.label }, client.role === "dm" ? record.name : client.name).catch((error) =>
+        siegeCheck(agentHandle, record, { attribute: msg.attribute, cl: msg.cl, bonus: msg.bonus, label: msg.label, addLevel: typeof msg.addLevel === "boolean" ? msg.addLevel : undefined }, client.role === "dm" ? record.name : client.name).catch((error) =>
           send(ws, { type: "error", reason: error instanceof Error ? error.message : "Could not roll that." }),
         );
         return;
