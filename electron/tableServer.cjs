@@ -187,6 +187,9 @@ function diceLook(value) {
 // the table's background, as FG's Background Decal: "kraken" (the emblem),
 // "" (none) or a decal id (decals.cjs). wallpaper: the tiles behind the
 // desktop, as FG's desktop theme: "" (plain) or a wallpaper id.
+// The GM's chat picture (the Kraken GM Icon extension's): "" for the name alone.
+const GM_ICON = "kraken/01 The Kraken.png";
+
 function savedOptions(value) {
   const options = value && typeof value === "object" ? value : {};
   const id = (text, fallback) => (typeof text === "string" && text.length <= 400 ? text : fallback);
@@ -194,6 +197,7 @@ function savedOptions(value) {
     towerReveal: Boolean(options.towerReveal),
     decal: id(options.decal, "kraken"),
     wallpaper: id(options.wallpaper, ""),
+    gmIcon: id(options.gmIcon, GM_ICON),
   };
 }
 
@@ -210,6 +214,7 @@ function savedChat(value) {
       ...(line.roll && typeof line.roll === "object" ? { roll: line.roll } : {}),
       ...(line.secret ? { secret: true } : {}),
       ...(typeof line.shownTo === "string" ? { shownTo: line.shownTo.slice(0, 24) } : {}),
+      ...(line.gm ? { gm: true } : {}),
       ...(line.secret ? { secret: true } : {}),
     }))
     .filter((line) => line.text || line.roll);
@@ -258,7 +263,7 @@ function serveWeb(url, res, root) {
 // art: the GM's portraits and tokens (artLibrary.cjs), served to the table.
 // decals, wallpapers: the background decals and desktop tiles the GM can
 // choose from (decals.cjs).
-function createTableServer({ saved = {}, onChange = () => undefined, webRoot = WEB_ROOT, art = null, decals = null, wallpapers = null } = {}) {
+function createTableServer({ saved = {}, onChange = () => undefined, webRoot = WEB_ROOT, art = null, decals = null, wallpapers = null, gmIcons = null } = {}) {
   let password = "";
   let hostToken = "";
   let image = null;
@@ -272,6 +277,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     const next = patch && typeof patch === "object" ? patch : {};
     if (next.decal !== undefined && !(next.decal === "" || next.decal === "kraken" || (decals && decals.has(String(next.decal))))) throw new Error(`No decal "${next.decal}".`);
     if (next.wallpaper !== undefined && !(next.wallpaper === "" || (wallpapers && wallpapers.has(String(next.wallpaper))))) throw new Error(`No wallpaper "${next.wallpaper}".`);
+    if (next.gmIcon !== undefined && !(next.gmIcon === "" || (gmIcons && gmIcons.has(String(next.gmIcon))))) throw new Error(`No GM icon "${next.gmIcon}".`);
     options = savedOptions({ ...options, ...next });
     broadcast({ type: "options", options });
     onChange("table");
@@ -363,6 +369,9 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         if (hand.look) entry.roll.look = hand.look;
       } else if (hand?.look) entry.roll.look = hand.look;
     }
+    // What the GM's seat (or the GM's agent) says carries the GM's chat picture.
+    const speaker = [...clients.values()].find((client) => client.id === entry.id);
+    if (speaker?.role === "dm" || (entry.id === "agent" && ["Agent", "GM", "DM"].includes(entry.from))) entry.gm = true;
     chat.push(entry);
     if (chat.length > 100) chat.shift();
     for (const [ws, client] of clients) if (seesLine(client, entry)) send(ws, { type: "chat", ...entry });
@@ -453,7 +462,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       return;
     }
     // Background decals and wallpapers: the list for the GM's picker, and the pictures for every seat.
-    const pictures = { "/decal/list": decals, "/decal/file": decals, "/wallpaper/list": wallpapers, "/wallpaper/file": wallpapers };
+    const pictures = { "/decal/list": decals, "/decal/file": decals, "/wallpaper/list": wallpapers, "/wallpaper/file": wallpapers, "/gmicon/list": gmIcons, "/gmicon/file": gmIcons };
     if (req.method === "GET" && Object.hasOwn(pictures, url.pathname)) {
       const library = pictures[url.pathname];
       const token = url.searchParams.get("token") || "";
@@ -911,6 +920,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     viewFor: (name) => map.viewFor({ role: "player", name }, ""),
     decals: () => decals,
     wallpapers: () => wallpapers,
+    gmIcons: () => gmIcons,
     // The GM's portraits and tokens (artLibrary.cjs), as the pickers show them.
     art: (kind) => (art ? art.list(kind) : []),
     // A ping on the map at a square, as a GM's click would make.

@@ -22,6 +22,9 @@ export function SettingsWindow({ session }: { session: Session }) {
             <button type="button" className="settings-button" data-setting="wallpaper" onClick={() => windows.open("wallpapers", "Desktop Wallpaper")}>
               Desktop Wallpaper
             </button>
+            <button type="button" className="settings-button" data-setting="gmicon" onClick={() => windows.open("gmicons", "GM Icon")}>
+              GM Icon
+            </button>
           </>
         ) : null}
       </div>
@@ -69,7 +72,8 @@ function useCampaignRuleset(session: Session) {
 // into Kraken's assets folder, so every campaign can use it from then on.
 export function DecalPicker({ session, kind = "decal", onClose }: { session: Session; kind?: PictureKind; onClose: () => void }) {
   const wallpaper = kind === "wallpaper";
-  const current = wallpaper ? session.options.wallpaper : session.options.decal;
+  const gmIcon = kind === "gmicon";
+  const current = wallpaper ? session.options.wallpaper : gmIcon ? session.options.gmIcon : session.options.decal;
   const [items, setItems] = useState<DecalItem[] | null>(null);
   const [failed, setFailed] = useState("");
   const [search, setSearch] = useState("");
@@ -90,7 +94,7 @@ export function DecalPicker({ session, kind = "decal", onClose }: { session: Ses
     };
   }, [session.decalList, kind]);
 
-  const all = useMemo(() => [...(wallpaper ? [] : [KRAKEN]), ...(items ?? [])], [items, wallpaper]);
+  const all = useMemo(() => [...(wallpaper || gmIcon ? [] : [KRAKEN]), ...(items ?? [])], [items, wallpaper, gmIcon]);
   // A chip for each set: this campaign's game first, then Kraken's, then the rest.
   const sets = useMemo(() => {
     const names = [...new Set(all.map((item) => item.ruleset ?? item.group))];
@@ -106,7 +110,7 @@ export function DecalPicker({ session, kind = "decal", onClose }: { session: Ses
   }, [all, group, search, ruleset]);
 
   function apply(id: string) {
-    session.setTableOptions(wallpaper ? { wallpaper: id } : { decal: id });
+    session.setTableOptions(wallpaper ? { wallpaper: id } : gmIcon ? { gmIcon: id } : { decal: id });
     onClose();
   }
 
@@ -182,8 +186,8 @@ export function DecalPicker({ session, kind = "decal", onClose }: { session: Ses
             {wallpaper ? (
               <span className="decal-thumb wall" style={{ backgroundImage: `url("${session.decalUrl(item.id, "wallpaper")}")` }} />
             ) : (
-              <span className="decal-thumb">
-                {item.id === "kraken" ? <Emblem className="decal-image" /> : <img className="decal-image" src={session.decalUrl(item.id)} alt="" loading="lazy" draggable={false} />}
+              <span className={gmIcon ? "decal-thumb icon" : "decal-thumb"}>
+                {item.id === "kraken" ? <Emblem className="decal-image" /> : <img className="decal-image" src={session.decalUrl(item.id, kind)} alt="" loading="lazy" draggable={false} />}
               </span>
             )}
             <span className="decal-name">{item.name}</span>
@@ -194,13 +198,14 @@ export function DecalPicker({ session, kind = "decal", onClose }: { session: Ses
         {items !== null && shown.length === 0 ? <p className="hint decal-empty">Nothing by that name.</p> : null}
       </div>
       <div className="decal-search">
-        <input type="search" placeholder={wallpaper ? "Search wallpapers" : "Search decals"} aria-label="Search" value={search} onChange={(event) => setSearch(event.target.value)} />
+        <input type="search" placeholder={wallpaper ? "Search wallpapers" : gmIcon ? "Search icons" : "Search decals"} aria-label="Search" value={search} onChange={(event) => setSearch(event.target.value)} />
         {kraken ? (
           <button type="button" className="ghost" title="Open the folder Kraken keeps these in" onClick={() => void kraken.openDecalFolder(kind)}>
             Assets folder
           </button>
         ) : null}
       </div>
+      {gmIcon ? <p className="hint">Your picture beside everything you say in chat, for the whole table. It follows you into every new campaign.</p> : null}
       {wallpaper ? <p className="hint">A wallpaper repeats across the desktop, so a picture that tiles works best. A picture you add is kept in your assets folder for every campaign.</p> : null}
       {failed ? (
         <p className="error" role="alert">
@@ -214,7 +219,7 @@ export function DecalPicker({ session, kind = "decal", onClose }: { session: Ses
           </button>
         ) : null}
         <button type="button" data-action="decal-empty" onClick={() => apply("")}>
-          {wallpaper ? "Plain Desktop" : "Use Empty Decal"}
+          {wallpaper ? "Plain Desktop" : gmIcon ? "Name Only" : "Use Empty Decal"}
         </button>
         <span className="spacer" />
         <button type="button" className="primary" data-action="decal-ok" onClick={() => apply(chosen)}>

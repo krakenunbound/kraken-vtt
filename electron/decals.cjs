@@ -26,7 +26,8 @@ function mimeOf(name) {
 }
 
 function prettyName(file) {
-  return path.basename(file, path.extname(file)).replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim();
+  // "01 The Kraken.png" is "The Kraken": a leading number only orders a set.
+  return path.basename(file, path.extname(file)).replace(/[_-]+/g, " ").replace(/^\d+\s+/, "").replace(/\s+/g, " ").trim();
 }
 
 // A zip's table of contents (the central directory), so one entry can be
@@ -173,7 +174,8 @@ function createDecalLibrary({ folder, builtin = "", fgData = "", own = ["kraken"
     list() {
       return [...scan().values()]
         .map(({ id, name, group, ruleset }) => ({ id, name, group, ...(ruleset ? { ruleset } : {}) }))
-        .sort((a, b) => rank(a.group) - rank(b.group) || a.group.localeCompare(b.group) || a.name.localeCompare(b.name));
+        // In the order of their files, so a numbered set keeps its order (the Kraken first).
+        .sort((a, b) => rank(a.group) - rank(b.group) || a.group.localeCompare(b.group) || a.id.localeCompare(b.id, undefined, { numeric: true }));
     },
     has: (id) => id === "" || own.includes(String(id)) || scan().has(String(id)),
     // The image's bytes and type, or null.

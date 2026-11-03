@@ -116,7 +116,7 @@ export function Desktop({
         if (command.kind !== "windows") return null;
         const { windows: manager, launchers: kinds, characters: sheets } = live.current;
         const list = () => manager.windows.map((item) => ({ key: item.key, kind: item.kind, title: item.title, poppedOut: item.popped }));
-        if (command.action === "list") return { open: list(), kinds: [...kinds.map((item) => item.kind), "sheet", "decals", "wallpapers", "dice"] };
+        if (command.action === "list") return { open: list(), kinds: [...kinds.map((item) => item.kind), "sheet", "decals", "wallpapers", "gmicons", "dice"] };
         let key: string = command.window ?? "";
         if (command.window === "sheet") {
           const wanted = String(command.record ?? "").toLowerCase();
@@ -132,6 +132,8 @@ export function Desktop({
                 ? { kind: "wallpapers" as const, title: "Desktop Wallpaper" }
                 : command.window === "dice"
                   ? { kind: "dice" as const, title: "Dice" }
+                  : command.window === "gmicons"
+                    ? { kind: "gmicons" as const, title: "GM Icon" }
                   : kinds.find((item) => item.kind === command.window);
           if (!launcher) throw new Error(`No window "${command.window ?? ""}". Kinds: ${kinds.map((item) => item.kind).join(", ")}, sheet.`);
           if (command.action === "open") manager.open(launcher.kind, launcher.title);
@@ -229,6 +231,7 @@ export function Desktop({
               {item.kind === "dice" ? <DiceWindow session={session} /> : null}
               {item.kind === "decals" ? <DecalPicker session={session} onClose={() => windows.close(item.key)} /> : null}
               {item.kind === "wallpapers" ? <DecalPicker session={session} kind="wallpaper" onClose={() => windows.close(item.key)} /> : null}
+              {item.kind === "gmicons" ? <DecalPicker session={session} kind="gmicon" onClose={() => windows.close(item.key)} /> : null}
             </FloatingWindow>
           ))}
         </div>

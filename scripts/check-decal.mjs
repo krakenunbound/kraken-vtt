@@ -24,13 +24,15 @@ function connect(port, join) {
     const ws = new WebSocket(`ws://127.0.0.1:${port}`);
     let options = null;
     const errors = [];
+    const chat = [];
     ws.on("message", (data) => {
       const msg = JSON.parse(data.toString());
+      if (msg.type === "chat") chat.push(msg);
       if (msg.type === "options") options = msg.options;
       if (msg.type === "error") errors.push(msg.reason);
       if (msg.type === "ok") {
         options = msg.options;
-        resolve({ ws, you: msg.you, options: () => options, errors, send: (body) => ws.send(JSON.stringify(body)) });
+        resolve({ ws, you: msg.you, options: () => options, errors, chat, send: (body) => ws.send(JSON.stringify(body)) });
       }
     });
     ws.on("error", reject);
@@ -43,7 +45,8 @@ const work = mkdtempSync(path.join(tmpdir(), "kraken-decal-"));
 const folder = path.join(work, "assets", "decals");
 const decals = createDecalLibrary({ folder, builtin: path.join(process.cwd(), "public", "decals"), fgData: fgDataFolder() });
 const wallpapers = createDecalLibrary({ folder: path.join(work, "assets", "wallpapers"), builtin: path.join(process.cwd(), "public", "wallpapers"), own: [], named: true });
-const server = createTableServer({ decals, wallpapers });
+const gmIcons = createDecalLibrary({ folder: path.join(work, "assets", "gm-icons"), builtin: path.join(process.cwd(), "public", "gm-icons"), own: [] });
+const server = createTableServer({ decals, wallpapers, gmIcons });
 const tool = async (args) => JSON.parse((await callTool("kraken_decal", args, { table: () => server })).content[0].text);
 const GAMES = ["D&D 5e", "D&D 3.5e", "AD&D 2e", "AD&D", "D&D", "Castles & Crusades", "Pathfinder 1e", "Pathfinder 2e", "Traveller 2e"];
 try {
@@ -121,6 +124,22 @@ try {
   assert(ann.options().wallpaper === tiles && gm.errors.some((reason) => reason.includes("No wallpaper")), "the Kraken emblem is a decal, not a wallpaper");
   assert(server.persisted().options.wallpaper === tiles, "the wallpaper is saved with the campaign");
   assert((await tool({ kind: "wallpaper", action: "set", id: "" })).wallpaper === "", "back to a plain desktop");
+
+  // The GM's chat picture (the Kraken GM Icon extension's): the Kraken to begin with, beside the GM's lines only.
+  assert(ann.options().gmIcon === "kraken/01 The Kraken.png", `the Kraken GM icon to begin with: ${ann.options().gmIcon}`);
+  const icons = (await tool({ kind: "gmicon", action: "list" })).gmIcons;
+  assert(icons.length === 10 && icons.some((item) => item.name === "Crystal Ball"), `the ten icons: ${icons.map((item) => item.name).join(", ")}`);
+  gm.send({ type: "chat", text: "Welcome to the Keep." });
+  ann.send({ type: "chat", text: "Hello!" });
+  await settle();
+  const said = ann.chat.slice(-2);
+  assert(said[0].gm === true && said[0].text === "Welcome to the Keep." && !said[1].gm, `GM lines carry the icon: ${JSON.stringify(said)}`);
+  const face = await fetch(`${base}/gmicon/file?token=${ann.you.assetToken}&id=${encodeURIComponent("kraken/08 Crystal Ball.png")}`);
+  assert(face.ok && face.headers.get("content-type") === "image/png", "players get the GM's picture");
+  assert((await tool({ kind: "gmicon", action: "set", id: "kraken/08 Crystal Ball.png" })).gmIcon === "kraken/08 Crystal Ball.png", "the agent picks the Crystal Ball");
+  await settle();
+  assert(ann.options().gmIcon === "kraken/08 Crystal Ball.png" && server.persisted().options.gmIcon === "kraken/08 Crystal Ball.png", "every seat gets it; kept with the campaign");
+  assert((await tool({ kind: "gmicon", action: "set", id: "" })).gmIcon === "", "the name alone");
 
   // No decal at all, as FG's Use Empty Decal.
   assert((await tool({ action: "set", id: "" })).decal === "", "an empty decal");

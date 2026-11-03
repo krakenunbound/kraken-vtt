@@ -66,11 +66,11 @@ export type RollTerm =
   | { kind: "number"; sign: number; value: number }
   | { kind: "dice"; sign: number; count: number; sides: number; rolls: number[]; kept: boolean[]; sum: number };
 export type RollResult = { formula: string; label: string; total: number; terms: RollTerm[]; tag?: string; result?: string; target?: string; against?: number; by?: string };
-export type ChatLine = { id: string; from: string; text: string; at: number; roll?: RollResult; secret?: boolean; shownTo?: string; tower?: boolean };
+export type ChatLine = { id: string; from: string; text: string; at: number; roll?: RollResult; secret?: boolean; shownTo?: string; tower?: boolean; gm?: boolean };
 // The table's own options, set by the GM (electron/tableServer.cjs savedOptions).
-export type TableOptions = { towerReveal: boolean; decal: string; wallpaper: string };
+export type TableOptions = { towerReveal: boolean; decal: string; wallpaper: string; gmIcon: string };
 export type DecalItem = { id: string; name: string; group: string; ruleset?: string };
-export type PictureKind = "decal" | "wallpaper";
+export type PictureKind = "decal" | "wallpaper" | "gmicon";
 // The combat tracker as the host shows it to this seat (electron/combat.cjs viewFor).
 export type CombatEntry = {
   id: string;
@@ -198,7 +198,7 @@ export function useSession() {
   const [map, setMap] = useState<TableMap>(EMPTY_MAP);
   const [party, setParty] = useState<import("../party/PartySheet").PartyView | null>(null);
   const [combat, setCombat] = useState<CombatView>({ round: 0, active: null, entries: [] });
-  const [options, setOptions] = useState<TableOptions>({ towerReveal: false, decal: "kraken", wallpaper: "" });
+  const [options, setOptions] = useState<TableOptions>({ towerReveal: false, decal: "kraken", wallpaper: "", gmIcon: "" });
   const [pings, setPings] = useState<Ping[]>([]);
   const [notice, setNotice] = useState<string | null>(null);
   const [chat, setChat] = useState<ChatLine[]>([]);
