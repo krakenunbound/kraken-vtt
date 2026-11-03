@@ -12,7 +12,7 @@ const { siege, siegeLibrary, siegeCheck, levelUp } = require("./siege.cjs");
 const { createMapState, playerColor } = require("./mapState.cjs");
 const party = require("./party.cjs");
 const { createCombat } = require("./combat.cjs");
-const { modulePicture } = require("./importers/fgModule.cjs");
+const { modulePicture, importModule } = require("./importers/fgModule.cjs");
 const { fitsRuleset } = require("./books.cjs");
 
 const MAX_CLIENTS = 16;
@@ -475,19 +475,38 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     if (!fits(info)) throw new Error(`${info.title} is for ${info.ruleset || "another game"}, not this campaign's ${ruleset}.`);
     return info;
   }
-  // Active for this campaign (FG's Activation). A book the players may read
-  // starts shared with them; the GM's books (monsters, guides, adventures) not.
+  // Active for this campaign (FG's Activation): its records (races, classes,
+  // gear, spells, monsters) are loaded into the campaign, as FG makes an active
+  // module's records available, and taken out again when it is made inactive.
+  // A book the players may read starts shared with them; the GM's books not.
+  const GM_SEAT = { role: "dm", name: "GM" };
+  function loadRecords(info) {
+    const file = books?.file?.(info.id);
+    if (!file || records.list({ source: info.name }).length > 0) return;
+    try {
+      importModule(records, GM_SEAT, file);
+    } catch {
+      /* a module whose records cannot be read is still a book to read */
+    }
+  }
   function activateBook(book, on = true) {
     const info = bookFor(book);
     if (on && !shelf.active.has(info.id)) {
       shelf.active.add(info.id);
       if (info.forPlayers) shelf.shared.add(info.id);
+      loadRecords(info);
     } else if (!on) {
       shelf.active.delete(info.id);
       shelf.shared.delete(info.id);
+      for (const record of records.list({ source: info.name })) records.remove(record.id, GM_SEAT);
     }
     shelfChanged();
     return shelfView();
+  }
+  // The books already active when the campaign opens have their records too.
+  for (const id of shelf.active) {
+    const info = books?.info(id);
+    if (info && fits(info)) loadRecords(info);
   }
   // The players may read it, or not (it is made active too). Never an
   // adventure: the players see its pictures and maps, as the GM shows them.

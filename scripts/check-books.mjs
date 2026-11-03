@@ -85,9 +85,13 @@ try {
   assert(activated.find((item) => item.id === "Test Keep").active && !activated.find((item) => item.id === "Test Keep").shared, "an active adventure stays the GM's");
   assert(activated.find((item) => item.id === "Test Handbook").shared, "an active players' handbook is open to the players");
   assert((await (await get(player, "/book/list")).json()).books.map((item) => item.id).join() === "Test Handbook", "the player's shelf: the handbook, not the adventure");
+  assert(server.agent.records.list({ source: "Test Handbook" }).length > 0, "an active module's records are loaded into the campaign (as FG's)");
+  const reopenedWith = createTableServer({ books, ruleset: "Castles & Crusades", saved: { books: server.persisted().books } });
+  assert(reopenedWith.agent.records.list({ source: "Test Handbook" }).length > 0, "a book active when the campaign opens has its records");
   gm.send({ type: "book-activate", book: "Test Handbook", active: false });
   await settle();
   assert((await (await get(player, "/book/list")).json()).books.length === 0, "a book made inactive leaves the player's shelf");
+  assert(server.agent.records.list({ source: "Test Handbook" }).length === 0, "made inactive, its records are taken out");
   assert((await (await get(player, "/book/list")).json()).books.length === 0, "a player sees no GM's book until the GM shares it");
   assert((await get(player, `/book/page?book=${book}&page=gate`)).status === 404, "a player cannot read a book not shared");
   assert((await get(player, `/book/picture?book=${book}&file=images/keep.png`)).status === 404, "nor see its pictures");

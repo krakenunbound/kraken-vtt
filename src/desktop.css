@@ -722,3 +722,6 @@ span.ct-init { display: inline-block; }
 .books-ticks label { display: inline-flex; align-items: center; gap: 4px; }
 .books-gm-only { min-width: 62px; font-size: 0.74rem; color: #d9a35c; }
 .books-players { flex: none; padding: 1px 8px; border-radius: 999px; font-size: 0.72rem; color: #10263a; background: #5cb8ff; }
+.new-character-button { width: 42px; height: 42px; padding: 0; border-radius: 50%; display: grid; place-items: center; color: var(--brass); background: var(--brass-soft); border: 1px solid var(--brass-dim); flex: none; }
+.new-character-button:hover { color: #1a1408; background: var(--brass); border-color: var(--brass); }
+.character-list .new-character-button, .dock-picker .new-character-button { width: 42px; padding: 0; justify-content: center; }
