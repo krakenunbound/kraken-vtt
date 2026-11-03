@@ -7,6 +7,7 @@ const { createTableServer, eachAddress } = require("./tableServer.cjs");
 const { createArtLibrary, defaultRoots } = require("./artLibrary.cjs");
 const { createDecalLibrary } = require("./decals.cjs");
 const { createSoundLibrary } = require("./sounds.cjs");
+const { createBookShelf } = require("./books.cjs");
 const { fgDataFolder } = require("./importers/fgModule.cjs");
 const campaigns = require("./campaigns.cjs");
 const { startAgentServer } = require("./agent/mcpServer.cjs");
@@ -89,6 +90,12 @@ let decalLibrary = null;
 let wallpaperLibrary = null;
 let gmIconLibrary = null;
 let soundLibrary = null;
+let bookShelf = null;
+// The GM's books: the FG modules on this computer, read in place.
+function books() {
+  if (!bookShelf) bookShelf = createBookShelf({ folder: process.env.KRAKEN_BOOKS || path.join(fgDataFolder(), "modules"), cache: path.join(app.getPath("userData"), "books-index.json") });
+  return bookShelf;
+}
 // The GM's sounds (one-shots, effects, ambience, music), shared by every campaign.
 function sounds() {
   if (!soundLibrary) soundLibrary = createSoundLibrary({ folder: path.join(app.getPath("userData"), "assets", "sounds"), builtin: path.join(__dirname, "..", "sounds") });
@@ -247,7 +254,8 @@ ipcMain.handle("start-host", async (_event, options) => {
   const remembered = preferences().gmIcon;
   if (typeof remembered === "string" && !(saved.options && "gmIcon" in saved.options)) saved.options = { ...(saved.options ?? {}), gmIcon: remembered };
   const dataFolder = fgDataFolder();
-  const next = createTableServer({ saved, onChange: markDirty, art: createArtLibrary({ base: dataFolder, roots: defaultRoots(dataFolder) }), decals: decals(), wallpapers: wallpapers(), gmIcons: gmIcons(), sounds: sounds() });
+  const ruleset = campaigns.read(campaignFile()).find((item) => item.id === campaignId)?.ruleset ?? "";
+  const next = createTableServer({ saved, ruleset, onChange: markDirty, art: createArtLibrary({ base: dataFolder, roots: defaultRoots(dataFolder) }), decals: decals(), wallpapers: wallpapers(), gmIcons: gmIcons(), sounds: sounds(), books: books() });
   try {
     const info = await next.listen({ port, password });
     table = next;

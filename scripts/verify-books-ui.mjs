@@ -1,0 +1,146 @@
+// Books in the real app, as FG's Library: the GM opens Books from the sidebar
+// (no "Open an adventure" on the table any more; map bundles open from
+// Books), makes books active, reads an adventure (chapters, a page with its
+// picture, a link to another page, the next page) and shows its map; a
+// player in Chrome reads the handbook (never the adventure) and gets the map
+// as a tab. A made-up module, so it
+// needs no FG modules.
+import "./loopback.mjs";
+import { spawn } from "node:child_process";
+import { mkdtempSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import readline from "node:readline";
+import { _electron as electron, chromium } from "playwright-core";
+import { makeBooks } from "./fake-books.mjs";
+
+function assert(condition, message) {
+  if (!condition) throw new Error(message);
+}
+
+const profile = mkdtempSync(path.join(tmpdir(), "kraken-books-ui-"));
+const env = { ...process.env, KRAKEN_AGENT_FILE: path.join(profile, "agent.json"), KRAKEN_AGENT_PORT: "0", KRAKEN_BOOKS: makeBooks() };
+const app = await electron.launch({ args: [".", "--mute-audio", `--user-data-dir=${profile}`], cwd: process.cwd(), env });
+const page = await app.firstWindow();
+await page.waitForSelector("text=My Campaigns");
+
+const child = spawn(process.execPath, ["electron/agent/mcp-stdio.cjs"], { env, stdio: ["pipe", "pipe", "inherit"] });
+const answers = new Map();
+readline.createInterface({ input: child.stdout }).on("line", (line) => {
+  const message = JSON.parse(line);
+  answers.get(message.id)?.(message);
+});
+let nextId = 0;
+function rpc(method, params) {
+  const id = ++nextId;
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(`${method} timed out`)), 90000);
+    answers.set(id, (message) => {
+      clearTimeout(timer);
+      if (message.error) reject(new Error(`${method}: ${message.error.message}`));
+      else resolve(message.result);
+    });
+    child.stdin.write(`${JSON.stringify({ jsonrpc: "2.0", id, method, params })}\n`);
+  });
+}
+async function tool(name, args = {}) {
+  const result = await rpc("tools/call", { name, arguments: args });
+  const text = result.content?.[0]?.text ?? "";
+  if (result.isError) throw new Error(`${name}: ${text}`);
+  return JSON.parse(text);
+}
+const heading = (where) => where.evaluate(() => document.querySelector(".book-page h2")?.textContent ?? "");
+const failures = [];
+page.on("pageerror", (error) => failures.push(error.message));
+let browser = null;
+try {
+  await rpc("initialize", { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "check", version: "1" } });
+  const campaign = await tool("kraken_campaign_create", { name: "Books UI", ruleset: "Castles & Crusades" });
+  const port = 47395;
+  await tool("kraken_host", { campaignId: campaign.id, port, password: "pw" });
+  await page.waitForSelector("text=Hosting");
+  assert((await page.$("text=Open an adventure")) === null, "no Open an adventure on the table");
+  assert((await page.$('.sidebar [data-launch="adventure"]')) === null, "no Open map in the sidebar");
+
+  // The GM opens Books from the sidebar: nothing active yet; Activation lists
+  // the modules for the campaign's game (not another game's), and the GM
+  // makes the adventure and the handbook active: the handbook opens to the
+  // players, the adventure not.
+  await page.click('.sidebar [data-launch="books"]');
+  await page.waitForSelector("text=No books are active in this campaign yet.");
+  await page.click('[data-books-tab="activation"]');
+  await page.waitForSelector('.books-window [data-activate="Test Keep"]');
+  assert((await page.$('.books-window [data-book="Other Game"]')) === null, "another game's book is not listed");
+  assert(await page.$('.books-window [data-book="Not A Book"]'), "Activation lists modules without a book too");
+  await page.click('[data-activate="Test Keep"]');
+  await page.click('[data-activate="Test Handbook"]');
+  await page.waitForSelector('[data-players="Test Handbook"]:checked');
+  assert((await page.$('[data-players="Test Keep"]')) === null, "an adventure has no Players tick: it is the GM's alone");
+  await page.click('[data-books-tab="books"]');
+  await page.waitForSelector('.books-window [data-book="Test Keep"]');
+  assert((await page.$$eval(".books-category h3", (heads) => heads.map((head) => head.textContent))).join() === "Core Rules,Test Adventures", "books by category");
+  assert((await page.$('.books-window [data-book="Not A Book"]')) === null, "a module without a book is not under Books");
+  assert(await page.$('.books-window [data-launch="adventure"]'), "map bundles open from Books");
+  await page.waitForFunction(() => {
+    const img = document.querySelector('[data-book="Test Keep"] img');
+    return img?.complete && img.naturalWidth > 0;
+  });
+
+  // Reading: chapters on the left, the first page with its picture and text.
+  await page.click('.books-window [data-book="Test Keep"]');
+  await page.waitForSelector(".book-page h2");
+  assert((await heading(page)) === "The Gate", "the book opens at its first page");
+  assert((await page.textContent(".book-chapter h3")) === "The Keep", "its chapters");
+  await page.waitForFunction(() => [...document.querySelectorAll(".book-figure img")].every((img) => img.complete && img.naturalWidth > 0));
+  assert((await page.textContent(".book-text")).includes("Two guards stand at the gate."), "its text");
+  assert((await page.$$(".book-text script")).length === 0, "no script in a page");
+  await page.click('.book-text a[data-page="inn"]');
+  await page.waitForFunction(() => document.querySelector(".book-page h2")?.textContent === "The Inn");
+  await page.click('[aria-label="Previous page"]');
+  await page.waitForFunction(() => document.querySelector(".book-page h2")?.textContent === "The Gate");
+  await page.click('[aria-label="Next page"]');
+  await page.waitForFunction(() => document.querySelector(".book-page h2")?.textContent === "The Inn");
+
+  // The GM opens the adventure's map (not shared yet).
+  assert((await page.$('.book-window [data-share="The Test Keep"]')) === null && (await page.$('.books-window [data-share]')) === null, "no share symbol for a book");
+  await page.click('[data-book-view="pictures"]');
+  await page.click('[data-picture="images/keep.png"]');
+  await page.waitForSelector('.images-window [data-image="images/keep.png"]');
+  assert((await page.textContent(".images-share span")) === "Not shared", "a picture the GM opens is not shared until shared");
+
+  // A player in Chrome: the shared book on the shelf, readable.
+  browser = await chromium.launch({ executablePath: String.raw`C:\Program Files\Google\Chrome\Application\chrome.exe`, headless: true });
+  const seat = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+  seat.on("pageerror", (error) => failures.push(`player: ${error.message}`));
+  await seat.goto(`http://127.0.0.1:${port}/`);
+  await seat.fill('input[name="name"]', "A test player");
+  await seat.fill('input[name="password"]', "pw");
+  await seat.click('button[type="submit"]');
+  await seat.waitForSelector(".sidebar");
+  await seat.click('.sidebar [data-launch="books"]');
+  await seat.waitForSelector('.books-window [data-book="Test Handbook"]');
+  assert((await seat.$('.books-window [data-book="Test Keep"]')) === null, "the player never has the adventure");
+  assert((await seat.$(".books-window [data-share]")) === null && (await seat.$('.books-window [data-launch="adventure"]')) === null, "a player cannot share or open maps");
+  await seat.click('.books-window [data-book="Test Handbook"]');
+  await seat.waitForFunction(() => document.querySelector(".book-page h2")?.textContent === "First");
+
+  // The GM shows the map: it opens as a tab on the player's screen.
+  await page.click(".images-share .share-button");
+  await page.waitForFunction(() => document.querySelector(".images-share span")?.textContent === "Shown to the players");
+  await seat.waitForSelector('.images-window [data-image="images/keep.png"]', { timeout: 10000 });
+  await seat.waitForFunction(() => [...document.querySelectorAll(".images-window img")].every((img) => img.complete && img.naturalWidth > 0));
+  assert((await seat.textContent(".images-tab")).includes("The Keep (map)"), "the map is a tab on the player's screen");
+  await seat.screenshot({ path: path.join(tmpdir(), "kraken-books-player.png") });
+  await page.screenshot({ path: path.join(tmpdir(), "kraken-books-gm.png") });
+
+  // The handbook made inactive, the player's shelf empties.
+  await tool("kraken_books", { action: "deactivate", book: "Test Handbook" });
+  // (The player's Books window is still open, behind the book.)
+  await seat.waitForSelector("text=The GM has not shared any books yet.", { timeout: 10000 });
+  assert(failures.length === 0, `no errors on screen: ${failures.join("; ")}`);
+  console.log("BOOKS_UI_OK the GM reads, shares and shows a map; a player in Chrome reads it and gets the map as a tab");
+} finally {
+  await browser?.close();
+  child.kill();
+  await app.close();
+}

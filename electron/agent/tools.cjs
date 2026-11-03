@@ -290,6 +290,38 @@ const TOOLS = [
       ),
   },
   {
+    name: "kraken_books",
+    description:
+      "The GM's books, as FG's Library: the Fantasy Grounds modules on this computer that fit the campaign's ruleset (rulebooks, adventures), read inside Kraken. action list (every module that fits: id, title, category, hasBook, adventure, active, shared, forPlayers); activate / deactivate (book: active for this campaign, as FG's Activation; a player's book starts shared, the GM's books (monsters, the GM's guide, adventures) do not); contents (book: its chapters, sections and pages, and its pictures and maps); page (book, page: a page's text as HTML and its pictures); share / unshare (book: the players may read it, or not; never an adventure, whose pictures and maps the GM shows one at a time with show); show (book, file, name: show the players a picture or map from it; it opens as a tab on their screens); hide (id, or \"all\"); shared (what the players have now).",
+    inputSchema: object(
+      {
+        action: { type: "string", enum: ["list", "activate", "deactivate", "contents", "page", "share", "unshare", "show", "hide", "shared"] },
+        book: string("A book's id (from list)"),
+        page: string("A page's id (from contents)"),
+        file: string("A picture's file in the book (from contents or a page)"),
+        name: string("What the players see the picture called"),
+        id: string("A shown picture's id (hide), or all"),
+        search: string("Part of a title or category (list)"),
+      },
+      ["action"],
+    ),
+    run(args, ctx) {
+      const table = needTable(ctx);
+      const action = args.action;
+      if (action === "list") {
+        const wanted = String(args.search ?? "").toLowerCase();
+        return out(table.books().filter((item) => !wanted || `${item.title} ${item.category}`.toLowerCase().includes(wanted)));
+      }
+      if (action === "activate" || action === "deactivate") return out(table.activateBook(args.book, action === "activate"));
+      if (action === "contents") return out(table.bookContents(args.book));
+      if (action === "page") return out(table.bookPage(args.book, args.page));
+      if (action === "share" || action === "unshare") return out(table.shareBook(args.book, action === "share"));
+      if (action === "show") return out(table.showImage(args.book, args.file, args.name));
+      if (action === "hide") return out(table.hideImage(args.id ?? "all"));
+      return out(table.shelf());
+    },
+  },
+  {
     name: "kraken_sound",
     description:
       "Sound for the table, as Syrinscape in FG, from the GM's sounds (assets/sounds: oneshots, sfx, ambience, music; a folder plays one of its sounds at random). Every seat hears it, each at its own volumes. action list (kind, search: what there is, by folder); play (id or folder, e.g. \"oneshots/Doors/Wooden Door\" or \"sfx/Weapons/Sword/Hit\"); stop (stops one-shots and effects); ambience (add, remove, volume or clear loops; id, volume 0..1); music (play an id or a folder, next, stop, volume); triggers (the chat's sound triggers: read them, or set triggers to a list, or \"default\"); scape (what is playing now).",
@@ -745,7 +777,7 @@ const TOOLS = [
       "The GM's windows: list them, or open, close, pop out (to a window of its own, for another monitor) or dock back a window. Kinds: characters, party, combat, players, settings, decals (the background decal picker), wallpapers (the desktop wallpaper picker), gmicons (the GM icon picker), dice (this seat's dice: sets, colours, design, material, effects), sound (one-shots, effects, ambience, music, chat triggers, volumes), sheet (a character's sheet: give record, its id or name).",
     inputSchema: object({
       action: { type: "string", enum: ["list", "open", "close", "popout", "dock"] },
-      kind: { type: "string", enum: ["characters", "party", "combat", "players", "settings", "decals", "wallpapers", "gmicons", "dice", "sound", "sheet"] },
+      kind: { type: "string", enum: ["characters", "party", "combat", "players", "settings", "decals", "wallpapers", "gmicons", "dice", "sound", "sheet", "books", "book", "images"] },
       record: string("For a sheet: the character's record id or name"),
     }),
     run: async (args, ctx) => out(await ctx.ui({ kind: "windows", action: args.action ?? "list", window: args.kind, record: args.record })),

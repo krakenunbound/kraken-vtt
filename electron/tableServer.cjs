@@ -13,6 +13,7 @@ const { createMapState, playerColor } = require("./mapState.cjs");
 const party = require("./party.cjs");
 const { createCombat } = require("./combat.cjs");
 const { modulePicture } = require("./importers/fgModule.cjs");
+const { fitsRuleset } = require("./books.cjs");
 
 const MAX_CLIENTS = 16;
 
@@ -281,7 +282,7 @@ function serveWeb(url, res, root) {
 // decals, wallpapers: the background decals and desktop tiles the GM can
 // choose from (decals.cjs).
 // sounds: the GM's sounds (sounds.cjs): one-shots, effects, ambience and music.
-function createTableServer({ saved = {}, onChange = () => undefined, webRoot = WEB_ROOT, art = null, decals = null, wallpapers = null, gmIcons = null, sounds = null } = {}) {
+function createTableServer({ saved = {}, onChange = () => undefined, webRoot = WEB_ROOT, art = null, decals = null, wallpapers = null, gmIcons = null, sounds = null, books = null, ruleset = "" } = {}) {
   let password = "";
   let hostToken = "";
   let image = null;
@@ -290,6 +291,28 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
   const clients = new Map();
   const tokenArt = new Map();
   const chat = savedChat(saved.chat);
+  // Books (FG's Library): the modules that fit the campaign's ruleset; those
+  // the GM has made active for this campaign (FG's Activation); of those, the
+  // ones the players may read (shared); and the pictures and maps shown to
+  // them (FG's shared images, a tab each).
+  const ids = (value) => (Array.isArray(value) ? value.filter((id) => typeof id === "string").slice(0, 300) : []);
+  const shelf = {
+    active: new Set(ids(saved.books?.active)),
+    shared: new Set(ids(saved.books?.shared)),
+    images: Array.isArray(saved.books?.images)
+      ? saved.books.images.filter((item) => item && typeof item.book === "string" && typeof item.file === "string").slice(-40).map((item) => ({ id: text(item.id, "").slice(0, 40), book: item.book, file: item.file, name: text(item.name, "Picture").slice(0, 120), at: num(item.at, 0) }))
+      : [],
+  };
+  const shelfView = () => ({ active: [...shelf.active], shared: [...shelf.shared].filter((id) => shelf.active.has(id)), images: shelf.images });
+  const fits = (info) => Boolean(info) && fitsRuleset(info, ruleset);
+  const canRead = (client, book) => (client.role === "dm" ? fits(books?.info(book)) : shelf.active.has(book) && shelf.shared.has(book));
+  // A seat's shelf: the GM's, every module that fits (with whether it is
+  // active and shared); a player's, the active books shared with them.
+  const shelfFor = (client) =>
+    (books ? books.list() : [])
+      .filter((item) => fits(item) && (client.role === "dm" || canRead(client, item.id)))
+      .map((item) => ({ ...item, active: shelf.active.has(item.id), shared: shelf.active.has(item.id) && shelf.shared.has(item.id) }));
+  const canSeePicture = (client, book, file) => canRead(client, book) || shelf.images.some((item) => item.book === book && item.file === file);
   // When each seat last cleared its chat (/clear), by name (the GM's as "@gm"):
   // its screen shows only newer lines, also after a restart. The table's own
   // record (the agent's chat log) keeps them.
@@ -442,6 +465,58 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     return entry;
   }
 
+  function shelfChanged() {
+    broadcast({ type: "books", ...shelfView() });
+    onChange("table");
+  }
+  function bookFor(book) {
+    const info = books?.info(book);
+    if (!info) throw new Error(`No book "${book}".`);
+    if (!fits(info)) throw new Error(`${info.title} is for ${info.ruleset || "another game"}, not this campaign's ${ruleset}.`);
+    return info;
+  }
+  // Active for this campaign (FG's Activation). A book the players may read
+  // starts shared with them; the GM's books (monsters, guides, adventures) not.
+  function activateBook(book, on = true) {
+    const info = bookFor(book);
+    if (on && !shelf.active.has(info.id)) {
+      shelf.active.add(info.id);
+      if (info.forPlayers) shelf.shared.add(info.id);
+    } else if (!on) {
+      shelf.active.delete(info.id);
+      shelf.shared.delete(info.id);
+    }
+    shelfChanged();
+    return shelfView();
+  }
+  // The players may read it, or not (it is made active too). Never an
+  // adventure: the players see its pictures and maps, as the GM shows them.
+  function shareBook(book, on = true) {
+    const info = bookFor(book);
+    if (on && info.adventure) throw new Error(`${info.title} is an adventure, the GM's alone. Show the players its pictures and maps instead.`);
+    if (on && !info.hasBook) throw new Error(`${info.title} has no book to read.`);
+    if (on) {
+      shelf.active.add(info.id);
+      shelf.shared.add(info.id);
+    } else shelf.shared.delete(info.id);
+    shelfChanged();
+    return shelfView();
+  }
+  function showImage(book, file, name) {
+    if (!books?.picture(book, file)) throw new Error("There is no such picture in that book.");
+    const existing = shelf.images.find((item) => item.book === book && item.file === file);
+    const shown = existing ?? { id: crypto.randomBytes(6).toString("hex"), book, file: String(file), name: text(name, "Picture").slice(0, 120), at: Date.now() };
+    if (!existing) shelf.images = [...shelf.images, shown].slice(-40);
+    shelfChanged();
+    broadcast({ type: "image-shown", id: shown.id });
+    return shown;
+  }
+  function hideImage(id) {
+    shelf.images = id === "all" ? [] : shelf.images.filter((item) => item.id !== id);
+    shelfChanged();
+    return shelfView();
+  }
+
   function chatFor(client) {
     const since = chatCleared.get(clearKey(client)) ?? 0;
     return chat.filter((line) => (line.at ?? 0) > since && seesLine(client, line));
@@ -524,6 +599,38 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         fs.createReadStream(found.path).pipe(res);
       });
       return;
+    }
+    // Books: the list, a book's contents, a page, a picture and a cover. The GM
+    // reads every book; a player those the GM shares, and the pictures shown.
+    if (req.method === "GET" && url.pathname.startsWith("/book/")) {
+      const token = url.searchParams.get("token") || "";
+      const client = token ? [...clients.values()].find((item) => item.assetToken === token) : null;
+      const book = url.searchParams.get("book") || "";
+      const nothing = () => {
+        res.writeHead(404, { "Cache-Control": "no-store" });
+        res.end();
+      };
+      if (!client || !books) return nothing();
+      const json = (value) => {
+        res.writeHead(200, { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" });
+        res.end(JSON.stringify(value));
+      };
+      const picture = (found) => {
+        if (!found) return nothing();
+        res.writeHead(200, { "Content-Type": found.mime, "Content-Length": found.bytes.length, "Cache-Control": "private, max-age=3600", "X-Content-Type-Options": "nosniff" });
+        res.end(found.bytes);
+      };
+      try {
+        if (url.pathname === "/book/list") return json({ books: shelfFor(client), ruleset, ...shelfView() });
+        if (url.pathname === "/book/cover") return canRead(client, book) ? picture(books.cover(book)) : nothing();
+        if (url.pathname === "/book/picture") return canSeePicture(client, book, url.searchParams.get("file") || "") ? picture(books.picture(book, url.searchParams.get("file") || "")) : nothing();
+        if (!canRead(client, book)) return nothing();
+        if (url.pathname === "/book/contents") return json(books.contents(book));
+        if (url.pathname === "/book/page") return json(books.page(book, url.searchParams.get("page") || ""));
+      } catch {
+        return nothing();
+      }
+      return nothing();
     }
     // Sounds: the GM's list, and the files for every seat (with ranges, so music can seek).
     if (req.method === "GET" && (url.pathname === "/sound/list" || url.pathname === "/sound/file")) {
@@ -732,6 +839,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
           chat: chatFor(client),
           options,
           soundscape,
+          books: shelfView(),
           records: records.list({ seat: seatOf(client) }),
           scene: client.role === "player" ? sceneFor(client) : null,
         });
@@ -740,6 +848,24 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
           .partyView(agentHandle)
           .then((view) => send(ws, { type: "party", party: view }))
           .catch(() => undefined);
+        return;
+      }
+
+      // The GM shares a book with the players, or stops; shows them a picture
+      // (it opens as a tab on their screens), or takes it back.
+      if (msg.type === "book-activate" || msg.type === "book-share" || msg.type === "image-share" || msg.type === "image-unshare") {
+        if (client.role !== "dm") {
+          send(ws, { type: "error", reason: "Only the GM shares books and pictures." });
+          return;
+        }
+        try {
+          if (msg.type === "book-activate") activateBook(msg.book, msg.active !== false);
+          else if (msg.type === "book-share") shareBook(msg.book, msg.shared !== false);
+          else if (msg.type === "image-share") showImage(msg.book, msg.file, msg.name);
+          else hideImage(msg.id);
+        } catch (error) {
+          send(ws, { type: "error", reason: error.message });
+        }
         return;
       }
 
@@ -1127,6 +1253,21 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     ambience,
     music,
     soundscape: () => soundscape,
+    // Books: what there is, a book's contents and pages, and sharing.
+    books: () => shelfFor({ role: "dm" }),
+    activateBook,
+    bookContents: (book) => {
+      if (!books) throw new Error("There are no books here.");
+      return books.contents(book);
+    },
+    bookPage: (book, page) => {
+      if (!books) throw new Error("There are no books here.");
+      return books.page(book, page);
+    },
+    shelf: shelfView,
+    shareBook,
+    showImage,
+    hideImage,
     triggers: () => soundTriggers,
     setTriggers,
     // The GM's portraits and tokens (artLibrary.cjs), as the pickers show them.
@@ -1253,6 +1394,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         records: records.toJSON(),
         dice: dice.toJSON(),
         sound: soundscape,
+        books: shelfView(),
         soundTriggers,
         soundTriggersVersion: TRIGGERS_VERSION,
         chatCleared: Object.fromEntries(chatCleared),
