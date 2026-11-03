@@ -15,7 +15,7 @@ export type OpenWindow = { key: string; kind: WindowKind; title: string; payload
 const DEFAULTS: Record<WindowKind, Placement> = {
   characters: { x: 120, y: 70, w: 760, h: 620 },
   sheet: { x: 160, y: 90, w: 640, h: 620 },
-  party: { x: 180, y: 80, w: 720, h: 560 },
+  party: { x: 180, y: 60, w: 760, h: 720 },
   combat: { x: 260, y: 70, w: 640, h: 520 },
   players: { x: 300, y: 120, w: 420, h: 360 },
   settings: { x: 340, y: 110, w: 460, h: 170 },

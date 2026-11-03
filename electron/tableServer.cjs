@@ -1030,7 +1030,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         }
         try {
           if (msg.type === "sound-play") playSound(msg.id, msg.volume);
-          else if (msg.type === "sound-stop") broadcast({ type: "sound-stop" });
+          else if (msg.type === "sound-stop") broadcast({ type: "sound-stop", ...(typeof msg.id === "string" && msg.id ? { id: msg.id.slice(0, 300) } : {}) });
           else if (msg.type === "ambience") ambience(msg.action, msg.id, msg.volume);
           else if (msg.type === "music") music(msg.action, msg.id, msg);
           else setTriggers(msg.triggers);
@@ -1185,6 +1185,17 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         return;
       }
 
+      // The party's watch order and formation: a player places their own
+      // characters; the GM anyone, and fills, turns and clears the formation.
+      if (msg.type === "party-order") {
+        try {
+          party.changeOrder(agentHandle, seatOf(client), msg);
+        } catch (error) {
+          send(ws, { type: "error", reason: error instanceof Error ? error.message : "Could not do that." });
+        }
+        return;
+      }
+
       // The party sheet's actions (the GM's): award XP, hand out the parcel,
       // group checks and saves.
       if (["party-award-xp", "party-award", "party-distribute", "party-group"].includes(msg.type)) {
@@ -1317,15 +1328,19 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     if (list.some((item) => item.id === picked.id)) return soundscape;
     return setSoundscape({ ...soundscape, ambience: [...list, { id: picked.id, volume: volume ?? 0.8 }] });
   }
-  // Music: one track (or a folder, a track at a time from it), looped or not.
+  // Music: one track, looped; or a folder, a track at a time from it, never
+  // the same one twice running, and round again (a folder of one track loops it).
   function music(action, idOrGroup, extra = {}) {
     if (action === "stop") return setSoundscape({ ...soundscape, music: null });
     if (action === "volume" && soundscape.music) return setSoundscape({ ...soundscape, music: { ...soundscape.music, volume: extra.volume } });
-    const group = action === "next" ? soundscape.music?.group : idOrGroup;
-    const picked = sounds?.pick(group ?? idOrGroup);
-    if (!picked) throw new Error(`No music "${group ?? idOrGroup}".`);
-    const fromFolder = sounds.has(String(group ?? idOrGroup)) ? null : String(group ?? idOrGroup);
-    return setSoundscape({ ...soundscape, music: { id: picked.id, volume: extra.volume ?? soundscape.music?.volume ?? 0.7, loop: extra.loop !== false && !fromFolder, group: fromFolder } });
+    const wanted = String((action === "next" ? soundscape.music?.group : idOrGroup) ?? idOrGroup ?? "");
+    const fromFolder = sounds?.has(wanted) ? null : wanted;
+    const inFolder = fromFolder ? sounds.list("music").filter((item) => `music/${item.group}` === fromFolder || `music/${item.group}`.startsWith(`${fromFolder}/`)) : [];
+    let picked = sounds?.pick(wanted);
+    for (let tries = 0; picked && inFolder.length > 1 && picked.id === soundscape.music?.id && tries < 8; tries++) picked = sounds.pick(wanted);
+    if (!picked) throw new Error(`No music "${wanted}".`);
+    const loop = extra.loop !== false && (!fromFolder || inFolder.length <= 1);
+    return setSoundscape({ ...soundscape, music: { id: picked.id, volume: extra.volume ?? soundscape.music?.volume ?? 0.7, loop, group: fromFolder } });
   }
   function setTriggers(list) {
     const cleaned = list === "default" ? defaultTriggers() : cleanTriggers(list);

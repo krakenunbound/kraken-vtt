@@ -110,6 +110,18 @@ try {
   assert((await page.evaluate(() => window.__krakenSound.playingHere().effects)) > 0 || fetched.length > tableBefore, "a sound in the tree plays when heard");
   await page.click("[data-hear-stop]");
 
+  // A play button is a stop button while its sound plays: a music track, heard here.
+  await page.click('[data-tab="music"]');
+  await page.click('[data-folder="music/Tavern"]');
+  const track = await page.getAttribute('[data-hear^="music/Tavern/"]', "data-hear");
+  await page.click(`[data-hear="${track}"]`);
+  await page.waitForSelector(`[data-hear="${track}"][aria-pressed="true"]`, { timeout: 15000 });
+  assert((await page.textContent(`[data-hear="${track}"]`)).trim() === "■", "playing, the button shows stop");
+  assert(await page.$('[data-sound-group="music/Tavern"][aria-pressed="true"]'), "and its folder's button too");
+  await page.click(`[data-hear="${track}"]`);
+  await page.waitForSelector(`[data-hear="${track}"][aria-pressed="false"]`, { timeout: 5000 });
+  assert(!(await page.evaluate((id) => window.__krakenSound.isPlaying(id), track)), "clicked again, it stops");
+
   // The other tabs have Kraken's own sounds in them.
   const library = await tool("kraken_sound", { action: "list" });
   const kinds = {};

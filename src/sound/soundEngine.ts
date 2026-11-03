@@ -41,7 +41,14 @@ const buffers = new Map<string, Promise<AudioBuffer>>();
 const ambience = new Map<string, { source: AudioBufferSourceNode; gain: GainNode }>();
 let music: { id: string; element: HTMLAudioElement; source: MediaElementAudioSourceNode; gain: GainNode } | null = null;
 let musicDone: (() => void) | null = null;
-const playing = new Set<AudioBufferSourceNode>();
+// The one-shots and effects playing here, by the sound's id (so a play
+// button can show it is playing, and stop just that one).
+const playing = new Map<AudioBufferSourceNode, string>();
+let nowPlaying: ReadonlySet<string> = new Set();
+const playingChanged = () => {
+  nowPlaying = new Set([...playing.values(), ...ambience.keys(), ...(music ? [music.id] : [])]);
+  changed();
+};
 
 function graph() {
   if (context) return context;
@@ -121,15 +128,39 @@ export const sound = {
       const gain = ctx.createGain();
       gain.gain.value = level;
       source.connect(gain).connect(buses.get(kind) ?? master!);
-      playing.add(source);
-      source.onended = () => playing.delete(source);
+      playing.set(source, id);
+      source.onended = () => {
+        playing.delete(source);
+        playingChanged();
+      };
       source.start();
+      playingChanged();
     } catch {
       /* a missing sound is quiet */
     }
   },
+  // What is playing on this screen now: effects, loops and the music, by id.
+  playingNow: () => nowPlaying,
+  // Is this sound, or any sound in this folder, playing here?
+  isPlaying(idOrFolder: string) {
+    for (const id of nowPlaying) if (id === idOrFolder || id.startsWith(`${idOrFolder}/`)) return true;
+    return false;
+  },
+  // Stop one sound, or every sound in a folder, playing here.
+  stop(idOrFolder: string) {
+    for (const [source, id] of playing) {
+      if (id !== idOrFolder && !id.startsWith(`${idOrFolder}/`)) continue;
+      try {
+        source.stop();
+      } catch {
+        /* already stopped */
+      }
+      playing.delete(source);
+    }
+    playingChanged();
+  },
   stopAll() {
-    for (const source of playing) {
+    for (const source of playing.keys()) {
       try {
         source.stop();
       } catch {
@@ -137,6 +168,7 @@ export const sound = {
       }
     }
     playing.clear();
+    playingChanged();
   },
   // What the GM has playing under the game: loops fade in and out, music changes track.
   async setScape(scape: Soundscape) {
@@ -157,6 +189,7 @@ export const sound = {
         }
       }, 2000);
       ambience.delete(id);
+      playingChanged();
     }
     for (const [id, level] of wanted) {
       if (ambience.has(id)) continue;
@@ -172,6 +205,7 @@ export const sound = {
         source.start();
         gain.gain.setTargetAtTime(level, ctx.currentTime, 0.6);
         ambience.set(id, { source, gain });
+        playingChanged();
       } catch {
         /* a missing loop is quiet */
       }
@@ -183,12 +217,18 @@ export const sound = {
         old.gain.gain.setTargetAtTime(0, ctx.currentTime, 0.5);
         setTimeout(() => old.element.pause(), 2500);
         music = null;
+        playingChanged();
       }
       return;
     }
     if (music?.id === track.id) {
       music.gain.gain.setTargetAtTime(track.volume, ctx.currentTime, 0.3);
       music.element.loop = track.loop;
+      // The same track again after it ended (a folder of one): from the top.
+      if (music.element.ended) {
+        music.element.currentTime = 0;
+        void music.element.play().catch(() => undefined);
+      }
       return;
     }
     if (music) {
@@ -205,6 +245,7 @@ export const sound = {
     source.connect(gain).connect(buses.get("music")!);
     element.addEventListener("ended", () => musicDone?.());
     music = { id: track.id, element, source, gain };
+    playingChanged();
     void element.play().catch(() => undefined);
     gain.gain.setTargetAtTime(track.volume, ctx.currentTime, 0.8);
   },

@@ -125,6 +125,32 @@ try {
   await latest(player, (m) => m.type === "error" && m.reason.includes("Only the GM"), "player award refused");
   player.ws.send(JSON.stringify({ type: "op", req: 4, op: "update", id: "party", patch: { data: { members: [] } } }));
   assert((await latest(player, (m) => m.type === "op-result" && m.req === 4, "op answer")).ok === false, "players cannot edit the party record");
+
+  // Watch order and formation, as FG's Order tab: Ann places her own
+  // character, not Bob's; a swap only with her own; the GM fills, turns, clears.
+  const order = (body) => player.ws.send(JSON.stringify({ type: "party-order", ...body }));
+  const partyOrder = () => agent.records.get("party").data.order;
+  order({ action: "place", id: ann.id, x: 0, y: 3 });
+  await latest(player, (m) => m.type === "party" && m.party.order.formation.slots.some((slot) => slot.id === ann.id && slot.y === 3), "Ann places her character at the front");
+  order({ action: "place", id: bob.id, x: 1, y: 3 });
+  await latest(player, (m) => m.type === "error" && /your own/.test(m.reason), "Ann cannot place Bob's character");
+  await tool("kraken_party_order", { action: "place", character: "Borin", x: 0, y: 2 });
+  order({ action: "place", id: ann.id, x: 0, y: 2 });
+  await latest(player, (m) => m.type === "error" && /another player/.test(m.reason), "Ann cannot take Bob's slot");
+  order({ action: "watch", id: ann.id, watch: 2 });
+  await latest(player, (m) => m.type === "party" && m.party.order.watches["watch-2"]?.members.includes(ann.id), "Ann takes the second watch");
+  order({ action: "fill", columns: 2 });
+  await latest(player, (m) => m.type === "error" && /Only the GM/.test(m.reason), "a player cannot fill the formation");
+  const filled = await tool("kraken_party_order", { action: "fill", columns: 1 });
+  assert(filled.formation.slots.length === 3 && filled.marching[0] === ann.id && filled.marching[1] === bob.id, `the GM fills the rest; marching is front to back (${filled.marching})`);
+  const turned = await tool("kraken_party_order", { action: "rotate", direction: "right" });
+  assert(turned.formation.facing === 1 && turned.formation.slots.find((slot) => slot.id === ann.id).x === 3 && turned.marching[0] === ann.id, "turned right, the front is to the right and the order holds");
+  // The GM swaps two members: dropped on a taken slot, they change places.
+  const annAt = turned.formation.slots.find((slot) => slot.id === ann.id);
+  const bobAt = turned.formation.slots.find((slot) => slot.id === bob.id);
+  const swapped = await tool("kraken_party_order", { action: "place", character: "Borin", x: annAt.x, y: annAt.y });
+  assert(swapped.formation.slots.find((slot) => slot.id === ann.id).x === bobAt.x && swapped.marching[0] === bob.id, "a drop on a taken slot swaps the two");
+  assert((await tool("kraken_party_order", { action: "clear" })).formation.slots.length === 0 && partyOrder().watches["watch-2"].members.includes(ann.id), "clear empties the formation, not the watches");
   console.log("PARTY_OK");
 } finally {
   for (const ws of sockets) ws.close();

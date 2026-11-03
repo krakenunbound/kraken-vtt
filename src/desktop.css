@@ -725,3 +725,34 @@ span.ct-init { display: inline-block; }
 .new-character-button { width: 42px; height: 42px; padding: 0; border-radius: 50%; display: grid; place-items: center; color: var(--brass); background: var(--brass-soft); border: 1px solid var(--brass-dim); flex: none; }
 .new-character-button:hover { color: #1a1408; background: var(--brass); border-color: var(--brass); }
 .character-list .new-character-button, .dock-picker .new-character-button { width: 42px; padding: 0; justify-content: center; }
+
+/* The party's Order tab: watch order and formation (FG's) */
+.party-order-grid { display: grid; grid-template-columns: minmax(200px, 260px) minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); gap: 10px; min-height: 0; }
+.order-tokens { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 8px; background: rgba(255, 255, 255, 0.03); }
+.order-pick { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px 2px 2px; border-radius: 999px; background: rgba(255, 255, 255, 0.05); cursor: grab; }
+.order-pick.placed { opacity: 0.6; }
+.order-token { display: grid; place-items: center; border-radius: 50%; overflow: hidden; background: #2a3442; border: 2px solid var(--brass-dim); flex: none; }
+.order-token img { width: 100%; height: 100%; object-fit: cover; }
+.order-token b { color: var(--brass); }
+.order-watch, .order-formation { display: flex; flex-direction: column; gap: 8px; padding: 8px; border: 1px solid var(--line); border-radius: 8px; background: rgba(0, 0, 0, 0.22); min-height: 0; }
+.order-watch h3, .order-formation h3 { margin: 0; text-align: center; font-size: 0.95rem; border-bottom: 1px solid var(--line); padding-bottom: 4px; }
+.order-watch-slot { flex: 1; display: flex; flex-direction: column; gap: 6px; padding: 8px; border: 1px dashed var(--line); border-radius: 6px; min-height: 70px; }
+.order-watch-slot.over, .formation-slot.over { border-color: var(--brass); background: var(--brass-soft); }
+.order-watch-members { display: flex; flex-wrap: wrap; gap: 6px; }
+.order-watcher { display: inline-flex; align-items: center; gap: 5px; padding: 2px 4px 2px 2px; border-radius: 999px; background: rgba(255, 255, 255, 0.05); cursor: grab; }
+.order-remove { border: none; background: transparent; color: var(--muted); padding: 0 4px; }
+.formation-board { position: relative; align-self: center; padding: 18px; }
+.formation-slots { display: grid; grid-template-columns: repeat(7, 46px); grid-auto-rows: 46px; gap: 6px; }
+.formation-slot { display: grid; place-items: center; border: 2px solid #3d6a5c; border-radius: 4px; background: rgba(255, 255, 255, 0.04); }
+.formation-slot > span[draggable] { cursor: grab; }
+.formation-middle { font-size: 1.8rem; color: #7cc4ef; }
+.formation-arrow { position: absolute; color: #7cc4ef; font-size: 1.1rem; }
+.facing-0 .formation-arrow { top: 0; left: 50%; transform: translateX(-50%); }
+.facing-1 .formation-arrow { right: 2px; top: 50%; transform: translateY(-50%); }
+.facing-2 .formation-arrow { bottom: 0; left: 50%; transform: translateX(-50%); }
+.facing-3 .formation-arrow { left: 2px; top: 50%; transform: translateY(-50%); }
+.formation-buttons { display: flex; justify-content: center; gap: 6px; }
+.formation-buttons button { min-width: 36px; }
+.formation-clear { margin-left: 16px; }
+.order-marching { text-align: center; }
+.sound-play.playing, .sound-hear.playing, .sound-file .ghost.playing { color: #10263a; background: #e7c07a; border-color: #e7c07a; }
