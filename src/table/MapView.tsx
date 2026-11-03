@@ -89,6 +89,12 @@ function saveExplored(key: string, polygons: number[][]) {
   }
 }
 
+function polygonKey(points: number[]): string {
+  let hash = 0;
+  for (const value of points) hash = (hash * 31 + value) | 0;
+  return `${points.length}:${hash}`;
+}
+
 function polygonPoints(points: number[]): string {
   const pairs: string[] = [];
   for (let index = 0; index + 1 < points.length; index += 2) pairs.push(`${points[index]},${points[index + 1]}`);
@@ -164,9 +170,11 @@ export function MapView({
   if (vision) {
     const known = explored.current.polygons;
     let added = false;
+    // Compare whole polygons: a door opened from the same spot gives a view
+    // that starts like the old one but reaches further.
     for (const polygon of vision) {
-      const key = polygon.slice(0, 8).join(",");
-      if (!known.some((item) => item.slice(0, 8).join(",") === key)) {
+      const key = polygonKey(polygon);
+      if (!known.some((item) => polygonKey(item) === key)) {
         known.push(polygon);
         added = true;
       }
@@ -571,7 +579,7 @@ export function MapView({
             <defs>
               <mask id="sight-explored">
                 <rect width={frame.worldWidth} height={frame.worldHeight} fill="#fff" />
-                {explored.current.polygons.map((polygon, index) => (
+                {[...explored.current.polygons, ...vision].map((polygon, index) => (
                   <polygon key={index} points={polygonPoints(polygon)} fill="#000" />
                 ))}
               </mask>

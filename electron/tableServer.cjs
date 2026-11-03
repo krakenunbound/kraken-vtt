@@ -115,6 +115,8 @@ function sanitizeScene(input) {
       move: num(wall.move, 20),
       door: num(wall.door, 0),
       ds: num(wall.ds, 0),
+      dir: num(wall.dir, 0),
+      threshold: num(wall.threshold, 0) > 0 ? num(wall.threshold, 0) : null,
     });
   }
   return {
