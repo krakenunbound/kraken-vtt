@@ -131,6 +131,17 @@ try {
   const late = await connect(port, { name: "Late player" });
   assert(late.ok.books.images.length === 1, "a player who joins later has the pictures shown");
 
+  // Quick slots: each seat its own, kept with the campaign; junk is dropped.
+  player.send({ type: "quickslots", slots: [{ kind: "book", book: "Test Handbook", page: "first", label: "Rules" }, { kind: "virus", label: "x" }, null, { kind: "picture", book: "Test Keep", file: "images/keep.png", label: "Keep" }] });
+  await settle();
+  const mine = player.events.filter((event) => event.type === "quickslots").at(-1)?.slots;
+  assert(mine?.length === 10 && mine[0].page === "first" && mine[1] === null && mine[3].kind === "picture", `a player's slots, cleaned: ${JSON.stringify(mine)}`);
+  assert(server.agent.quickSlots("@gm").every((slot) => slot === null), "the GM's slots are the GM's own");
+  assert(server.agent.quickSlots("A test player")[0].label === "Rules", "the agent reads a player's slots");
+  const later = createTableServer({ books, ruleset: "Castles & Crusades", saved: server.persisted() });
+  assert(later.agent.quickSlots("A test player")[3].file === "images/keep.png", "slots are kept with the campaign");
+  assert((await tool("kraken_quickslots", { slots: [{ kind: "sheet", record: "id-1", label: "Aldric" }] }))[0].kind === "sheet", "the agent sets the GM's slots");
+
   // The agent.
   assert((await tool("kraken_books", { action: "list", search: "keep" })).length === 1, "the agent lists books");
   await tool("kraken_books", { action: "deactivate", book: "Test Handbook" });

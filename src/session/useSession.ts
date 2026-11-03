@@ -104,6 +104,8 @@ export type BookPageRef = { id: string; name: string; keywords: string };
 export type BookContents = BookInfo & { chapters: { name: string; sections: { name: string; pages: BookPageRef[] }[] }[]; pictures: { name: string; category: string; file: string }[] };
 export type BookBlock = { kind: "text"; html: string; frame?: string } | { kind: "picture"; file: string; caption: string; align: string; scale: number; name: string };
 export type BookPage = { book: string; id: string; name: string; blocks: BookBlock[] };
+// A quick slot: something kept at hand, opened with a click.
+export type QuickSlot = { kind: "book"; book: string; page?: string; label: string } | { kind: "picture"; book: string; file: string; label: string } | { kind: "sheet"; record: string; label: string };
 export type SoundItem = { id: string; kind: string; group: string; name: string };
 export type SoundLibrary = { sounds: SoundItem[]; groups: { id: string; count: number }[]; folder: string; triggers?: SoundTrigger[] };
 export type TableOptions = { towerReveal: boolean; decal: string; wallpaper: string; gmIcon: string; soundHidden: "off" | "combat" | "all"; soundRepeat: number };
@@ -237,6 +239,7 @@ export function useSession() {
   const [party, setParty] = useState<import("../party/PartySheet").PartyView | null>(null);
   const [combat, setCombat] = useState<CombatView>({ round: 0, active: null, entries: [] });
   const [soundscape, setSoundscape] = useState<Soundscape>({ ambience: [], music: null });
+  const [quickSlots, setQuickSlotsState] = useState<(QuickSlot | null)[]>(Array(10).fill(null));
   const [bookShelf, setBookShelf] = useState<BookShelf>({ active: [], shared: [], images: [] });
   // The last picture the GM showed the players (a player's screen opens it).
   const [imageShown, setImageShown] = useState<{ id: string; at: number } | null>(null);
@@ -350,6 +353,7 @@ export function useSession() {
             if (msg.options) setOptions(msg.options as TableOptions);
             setChat((msg.chat as ChatLine[]) ?? []);
             if (msg.books) setBookShelf(msg.books as BookShelf);
+            if (Array.isArray(msg.quickSlots)) setQuickSlotsState(msg.quickSlots as (QuickSlot | null)[]);
             setRecords(Object.fromEntries(((msg.records as TableRecord[]) ?? []).map((record) => [record.id, record])));
             setRemoteLabel(label);
             setPlayerScene(you.role === "player" && msg.scene ? toPlayerScene(msg.scene as NetScene, origin) : null);
@@ -390,6 +394,7 @@ export function useSession() {
           if (msg.type === "kicked") setError(String(msg.reason ?? "The GM has asked you to leave the table."));
           if (msg.type === "books") setBookShelf({ active: (msg.active as string[]) ?? [], shared: (msg.shared as string[]) ?? [], images: (msg.images as ShownImage[]) ?? [] });
           if (msg.type === "image-shown" && typeof msg.id === "string") setImageShown({ id: msg.id, at: Date.now() });
+          if (msg.type === "quickslots" && Array.isArray(msg.slots)) setQuickSlotsState(msg.slots as (QuickSlot | null)[]);
           if (msg.type === "chat-cleared") {
             setChat([]);
             return;
@@ -841,6 +846,11 @@ export function useSession() {
     soundTriggers,
     bookShelf,
     imageShown,
+    quickSlots,
+    setQuickSlots: (slots: (QuickSlot | null)[]) => {
+      setQuickSlotsState(slots);
+      send({ type: "quickslots", slots });
+    },
     bookFetch,
     bookUrl,
     // The GM's: share a book with the players (or stop), show them a picture, take it back.

@@ -778,3 +778,13 @@ span.ct-init { display: inline-block; }
 .found-ring { position: absolute; transform: translate(-50%, -50%); border-radius: 50%; border: 6px solid #7cc4ef; pointer-events: none; animation: found-pulse 0.65s ease-out 3; }
 @keyframes found-pulse { from { opacity: 1; transform: translate(-50%, -50%) scale(1.6); } to { opacity: 0; transform: translate(-50%, -50%) scale(0.5); } }
 .map-controls.map-toolbar { top: 10px; bottom: auto; left: 50%; right: auto; transform: translateX(-50%); padding: 0; background: transparent; border: none; box-shadow: none; backdrop-filter: none; }
+
+/* Quick slots, along the bottom of the table */
+.desktop-surface { position: relative; }
+.quick-slots { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); z-index: 400; display: flex; gap: 6px; padding: 5px 8px; border-radius: 12px; background: rgba(12, 16, 22, 0.85); border: 1px solid var(--brass-dim); box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5); }
+.quick-slot { width: 74px; height: 46px; padding: 3px 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border-radius: 7px; border: 1px dashed rgba(255, 255, 255, 0.18); background: rgba(255, 255, 255, 0.03); color: var(--muted); font-size: 0.66rem; }
+.quick-slot.full { border-style: solid; border-color: var(--brass-dim); color: #e8d9b5; background: rgba(255, 255, 255, 0.06); }
+.quick-slot.full:hover { background: var(--brass-soft); }
+.quick-slot.over { border-color: var(--brass); background: var(--brass-soft); }
+.quick-slot span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.quick-slot-number { font-size: 0.8rem; opacity: 0.6; }
