@@ -365,12 +365,11 @@ export function App() {
     </div>
   ) : null;
 
+  // The table before a map is open: the decal alone (maps and books open from
+  // the Books window, or a map bundle dropped on the table).
   const emptyGM = (
     <div className="desktop-start">
-      <button type="button" className="play-button" onClick={() => fileInput.current?.click()} disabled={busy}>
-        {busy ? "Reading the bundle…" : "Open an adventure"}
-      </button>
-      <p className="desktop-hint">A prepared map bundle (.zip), or a zip holding several. You can also drop it here.</p>
+      {busy ? <p className="desktop-hint">Reading the bundle…</p> : null}
       {error ? (
         <p className="error" role="alert">
           {error}

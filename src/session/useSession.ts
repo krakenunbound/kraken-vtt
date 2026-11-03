@@ -93,6 +93,14 @@ export type RollMode = "public" | "gm" | "blind" | "self";
 export type ChatSend = { kind?: ChatKind; mood?: string; to?: string[]; as?: string };
 // The table's own options, set by the GM (electron/tableServer.cjs savedOptions).
 export type SoundTrigger = { id: string; name: string; on: string; match: string; result: string; sound: string; enabled: boolean };
+// Books (FG's Library): what the GM has shared, and the pictures shown to the players.
+export type ShownImage = { id: string; book: string; file: string; name: string; at: number };
+export type BookShelf = { active: string[]; shared: string[]; images: ShownImage[] };
+export type BookInfo = { id: string; name: string; title: string; category: string; ruleset: string; author: string; hasBook: boolean; cover: string; adventure: boolean; forPlayers: boolean; active: boolean; shared: boolean };
+export type BookPageRef = { id: string; name: string; keywords: string };
+export type BookContents = BookInfo & { chapters: { name: string; sections: { name: string; pages: BookPageRef[] }[] }[]; pictures: { name: string; category: string; file: string }[] };
+export type BookBlock = { kind: "text"; html: string; frame?: string } | { kind: "picture"; file: string; caption: string; align: string; scale: number; name: string };
+export type BookPage = { book: string; id: string; name: string; blocks: BookBlock[] };
 export type SoundItem = { id: string; kind: string; group: string; name: string };
 export type SoundLibrary = { sounds: SoundItem[]; groups: { id: string; count: number }[]; folder: string; triggers?: SoundTrigger[] };
 export type TableOptions = { towerReveal: boolean; decal: string; wallpaper: string; gmIcon: string; soundHidden: "off" | "combat" | "all"; soundRepeat: number };
@@ -226,6 +234,9 @@ export function useSession() {
   const [party, setParty] = useState<import("../party/PartySheet").PartyView | null>(null);
   const [combat, setCombat] = useState<CombatView>({ round: 0, active: null, entries: [] });
   const [soundscape, setSoundscape] = useState<Soundscape>({ ambience: [], music: null });
+  const [bookShelf, setBookShelf] = useState<BookShelf>({ active: [], shared: [], images: [] });
+  // The last picture the GM showed the players (a player's screen opens it).
+  const [imageShown, setImageShown] = useState<{ id: string; at: number } | null>(null);
   const [soundTriggers, setSoundTriggers] = useState<SoundTrigger[]>([]);
   const [options, setOptions] = useState<TableOptions>({ towerReveal: false, decal: "kraken", wallpaper: "", gmIcon: "", soundHidden: "combat", soundRepeat: 1 });
   const [pings, setPings] = useState<Ping[]>([]);
@@ -335,6 +346,7 @@ export function useSession() {
             if (msg.combat) setCombat(msg.combat as CombatView);
             if (msg.options) setOptions(msg.options as TableOptions);
             setChat((msg.chat as ChatLine[]) ?? []);
+            if (msg.books) setBookShelf(msg.books as BookShelf);
             setRecords(Object.fromEntries(((msg.records as TableRecord[]) ?? []).map((record) => [record.id, record])));
             setRemoteLabel(label);
             setPlayerScene(you.role === "player" && msg.scene ? toPlayerScene(msg.scene as NetScene, origin) : null);
@@ -370,6 +382,8 @@ export function useSession() {
           }
           if (msg.type === "sound-triggers" && Array.isArray(msg.triggers)) setSoundTriggers(msg.triggers as SoundTrigger[]);
           if (msg.type === "kicked") setError(String(msg.reason ?? "The GM has asked you to leave the table."));
+          if (msg.type === "books") setBookShelf({ active: (msg.active as string[]) ?? [], shared: (msg.shared as string[]) ?? [], images: (msg.images as ShownImage[]) ?? [] });
+          if (msg.type === "image-shown" && typeof msg.id === "string") setImageShown({ id: msg.id, at: Date.now() });
           if (msg.type === "chat-cleared") {
             setChat([]);
             return;
@@ -675,6 +689,18 @@ export function useSession() {
     (id: string, kind: PictureKind = "decal") => (id && assetRef.current ? `${originRef.current}/${kind}/file?token=${assetRef.current}&id=${encodeURIComponent(id)}` : ""),
     [],
   );
+  // Books: a route of the host's (the list, a book's contents, a page), and pictures.
+  const bookFetch = useCallback(async <T,>(route: "list" | "contents" | "page", params: Record<string, string> = {}): Promise<T> => {
+    const query = new URLSearchParams({ token: assetRef.current, ...params });
+    const response = await fetch(`${originRef.current}/book/${route}?${query}`);
+    if (!response.ok) throw new Error(route === "list" ? "No books here." : "That book is not open to you.");
+    return (await response.json()) as T;
+  }, []);
+  const bookUrl = useCallback(
+    (route: "cover" | "picture", book: string, file = "") =>
+      assetRef.current ? `${originRef.current}/book/${route}?${new URLSearchParams({ token: assetRef.current, book, ...(file ? { file } : {}) })}` : "",
+    [],
+  );
   const decalList = useCallback(async (kind: PictureKind = "decal"): Promise<DecalItem[]> => {
     const response = await fetch(`${originRef.current}/${kind}/list?token=${assetRef.current}`);
     if (!response.ok) throw new Error("Nothing to choose from.");
@@ -801,6 +827,15 @@ export function useSession() {
     tableCommand,
     soundscape,
     soundTriggers,
+    bookShelf,
+    imageShown,
+    bookFetch,
+    bookUrl,
+    // The GM's: share a book with the players (or stop), show them a picture, take it back.
+    activateBook: (book: string, active: boolean) => send({ type: "book-activate", book, active }),
+    shareBook: (book: string, shared: boolean) => send({ type: "book-share", book, shared }),
+    showImage: (book: string, file: string, name: string) => send({ type: "image-share", book, file, name }),
+    hideImage: (id: string) => send({ type: "image-unshare", id }),
     soundList,
     soundCommand,
     note,

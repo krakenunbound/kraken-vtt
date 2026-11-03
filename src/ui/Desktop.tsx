@@ -11,6 +11,7 @@ import { Mark } from "./Emblem";
 import { DecalPicker, SettingsWindow, TableDecal } from "./Settings";
 import { DiceWindow } from "../dice/DiceWindow";
 import { SoundWindow } from "../sound/SoundWindow";
+import { BooksWindow, BookWindow, ImagesWindow } from "../books/Books";
 import { Icon } from "./icons";
 import { FloatingWindow, useWindows, type WindowKind } from "./Windows";
 
@@ -97,6 +98,7 @@ export function Desktop({
         { kind: "characters", label: "Characters", icon: "character", title: "Characters" },
         { kind: "party", label: "Party", icon: "party", title: "Party Sheet" },
         { kind: "combat", label: "Combat", icon: "combat", title: "Combat Tracker" },
+        { kind: "books", label: "Books", icon: "book", title: "Books" },
         { kind: "players", label: "Players", icon: "players", title: "Players" },
         { kind: "sound", label: "Sound", icon: "music", title: "Sound" },
         { kind: "settings", label: "Settings", icon: "settings", title: "Settings" },
@@ -105,10 +107,15 @@ export function Desktop({
         { kind: "characters", label: characters.length === 1 ? "Character" : "Characters", icon: "character", title: characters.length === 1 ? characters[0].name : "My characters" },
         { kind: "party", label: "Party", icon: "party", title: "Party Sheet" },
         { kind: "combat", label: "Combat", icon: "combat", title: "Combat Tracker" },
+        { kind: "books", label: "Books", icon: "book", title: "Books" },
         { kind: "sound", label: "Sound", icon: "music", title: "Sound" },
         { kind: "settings", label: "Settings", icon: "settings", title: "Settings" },
       ];
   const dice = useSyncExternalStore(diceStore.subscribe, diceStore.settings);
+  // The GM shows the players a picture: it opens on their screens, as FG's.
+  useEffect(() => {
+    if (session.imageShown && !gm) windows.open("images", "Pictures");
+  }, [session.imageShown]);
 
   // The agent opens, closes, pops out and docks windows as the GM's clicks do.
   const live = useRef({ windows, launchers, characters });
@@ -119,9 +126,14 @@ export function Desktop({
         if (command.kind !== "windows") return null;
         const { windows: manager, launchers: kinds, characters: sheets } = live.current;
         const list = () => manager.windows.map((item) => ({ key: item.key, kind: item.kind, title: item.title, poppedOut: item.popped }));
-        if (command.action === "list") return { open: list(), kinds: [...kinds.map((item) => item.kind), "sheet", "decals", "wallpapers", "gmicons", "dice"] };
+        if (command.action === "list") return { open: list(), kinds: [...kinds.map((item) => item.kind), "sheet", "book", "images", "decals", "wallpapers", "gmicons", "dice"] };
         let key: string = command.window ?? "";
-        if (command.window === "sheet") {
+        if (command.window === "book") {
+          const book = String(command.record ?? "");
+          if (!book) throw new Error("Which book? Give its id (kraken_books list).");
+          if (command.action === "open") manager.open("book", book, book);
+          key = `book:${book}`;
+        } else if (command.window === "sheet") {
           const wanted = String(command.record ?? "").toLowerCase();
           const record = sheets.find((item) => item.id === command.record || item.name.toLowerCase() === wanted);
           if (!record) throw new Error(`No character "${command.record ?? ""}".`);
@@ -212,12 +224,6 @@ export function Desktop({
               {item.kind === "combat" && session.combat.round > 0 ? <i className="launcher-badge">{session.combat.round}</i> : null}
             </button>
           ))}
-          {gm ? (
-            <button type="button" className="launcher" data-launch="adventure" title="Open a prepared map bundle" onClick={onOpenAdventure}>
-              <Icon name="open" size={22} />
-              <span>Open map</span>
-            </button>
-          ) : null}
         </nav>
 
         <ChatDock session={session} />
@@ -233,6 +239,9 @@ export function Desktop({
               {item.kind === "settings" ? <SettingsWindow session={session} /> : null}
               {item.kind === "dice" ? <DiceWindow session={session} /> : null}
               {item.kind === "sound" ? <SoundWindow session={session} /> : null}
+              {item.kind === "books" ? <BooksWindow session={session} onOpenAdventure={gm ? onOpenAdventure : undefined} /> : null}
+              {item.kind === "book" && item.payload ? <BookWindow session={session} book={item.payload} /> : null}
+              {item.kind === "images" ? <ImagesWindow session={session} /> : null}
               {item.kind === "decals" ? <DecalPicker session={session} onClose={() => windows.close(item.key)} /> : null}
               {item.kind === "wallpapers" ? <DecalPicker session={session} kind="wallpaper" onClose={() => windows.close(item.key)} /> : null}
               {item.kind === "gmicons" ? <DecalPicker session={session} kind="gmicon" onClose={() => windows.close(item.key)} /> : null}
