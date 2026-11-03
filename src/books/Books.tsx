@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
-import type { BookContents, BookInfo, BookPage, Session, ShownImage } from "../session/useSession";
+import type { BookContents, BookInfo, BookPage, BookSoundRef, Session, ShownImage, SoundLibrary } from "../session/useSession";
 import { Icon } from "../ui/icons";
 import { useWindows } from "../ui/Windows";
+import { sound } from "../sound/soundEngine";
 import { slotDrag } from "../ui/QuickSlots";
 
 // Books, as FG's Library: the Books window lists the campaign's active books
@@ -148,6 +149,55 @@ function usePictureActions(session: Session) {
     return list;
   };
   return { toPictures, outOnItsOwn, backIn, close, items, shownOf };
+}
+
+// Sounds in the story, as FG's: the book's own sound links (Syrinscape's in
+// FG) play Kraken's sound of that kind and name, or the one the GM dropped on
+// them; a sound dropped between paragraphs sits there, a play button.
+const SOUND_DRAG = "text/kraken-sound";
+const STOP_WORDS = new Set(["ambience", "music", "sound", "sounds", "sfx", "the", "and", "of", "effect", "mood", "loop", "element"]);
+function matchSound(name: string, kind: string, groups: { id: string }[]) {
+  const words = name.toLowerCase().split(/[^a-z]+/).filter((word) => word.length > 2 && !STOP_WORDS.has(word));
+  let best = "";
+  let score = 0;
+  for (const group of groups) {
+    if (!group.id.startsWith(`${kind}/`)) continue;
+    const theirs = group.id.toLowerCase().split(/[^a-z]+/);
+    const fit = words.filter((word) => theirs.some((other) => other === word || (other.length > 3 && (other.startsWith(word) || word.startsWith(other))))).length;
+    if (fit > score) {
+      score = fit;
+      best = group.id;
+    }
+  }
+  return best;
+}
+function playForTable(session: Session, ref: BookSoundRef) {
+  if (ref.kind === "ambience") session.soundCommand({ type: "ambience", action: "add", id: ref.sound });
+  else if (ref.kind === "music") session.soundCommand({ type: "music", action: "play", id: ref.sound });
+  else session.soundCommand({ type: "sound-play", id: ref.sound });
+}
+function stopForTable(session: Session, ref: BookSoundRef) {
+  if (ref.kind === "ambience") {
+    for (const loop of session.soundscape.ambience.filter((item) => item.id === ref.sound || item.id.startsWith(`${ref.sound}/`))) session.soundCommand({ type: "ambience", action: "remove", id: loop.id });
+  } else if (ref.kind === "music") session.soundCommand({ type: "music", action: "stop" });
+  else session.soundCommand({ type: "sound-stop", id: ref.sound });
+  sound.stop(ref.sound);
+}
+function BookSound({ session, item, onRemove }: { session: Session; item: BookSoundRef & { id: string }; onRemove: () => void }) {
+  useSyncExternalStore(sound.subscribe, sound.playingNow);
+  const on = sound.isPlaying(item.sound);
+  return (
+    <span className={on ? "book-sound playing" : "book-sound"} data-book-sound={item.sound}>
+      <button type="button" className="book-sound-play" aria-label={on ? `Stop ${item.label}` : `Play ${item.label}`} aria-pressed={on} title={on ? "Stop it" : "Play it for the table"} onClick={() => (on ? stopForTable(session, item) : playForTable(session, item))}>
+        {on ? "\u25a0" : "\u25b6"}
+      </button>
+      <Icon name={item.kind === "music" ? "music" : "sound"} size={13} />
+      <span>{item.label}</span>
+      <button type="button" className="book-sound-remove" aria-label={`Take ${item.label} out of the story`} title="Take it out of the story" onClick={onRemove}>
+        ×
+      </button>
+    </span>
+  );
 }
 
 // Which page a book opens at (a link to another book's page).
@@ -297,6 +347,55 @@ export function BookWindow({ session, book }: { session: Session; book: string }
   const [view, setView] = useState<"book" | "pictures">("book");
   const [search, setSearch] = useState("");
   const body = useRef<HTMLDivElement>(null);
+  const [library, setLibrary] = useState<SoundLibrary | null>(null);
+  const [soundDrop, setSoundDrop] = useState(false);
+  useEffect(() => {
+    if (gm) session.soundList().then(setLibrary).catch(() => setLibrary(null));
+  }, [gm]);
+  const pageSounds = session.bookSounds[`${book}|${pageId}`] ?? { links: {}, blocks: [] };
+  // A sound link's sound: the one the GM dropped on it, else Kraken's of that kind and name.
+  const linkSound = (link: HTMLElement): BookSoundRef | null => {
+    const key = link.dataset.soundKey ?? "";
+    const bound = pageSounds.links[key];
+    if (bound) return bound;
+    const kind = link.dataset.soundKind ?? "sfx";
+    const found = library ? matchSound(link.dataset.soundName ?? link.textContent ?? "", kind, library.groups) : "";
+    return found ? { sound: found, kind, label: found.split("/").pop() ?? found } : null;
+  };
+  // Show on each sound link what it plays (or that it has no sound yet).
+  useEffect(() => {
+    for (const link of body.current?.querySelectorAll<HTMLElement>("a.book-link.sound") ?? []) {
+      const ref = gm ? linkSound(link) : null;
+      link.classList.toggle("bound", Boolean(ref));
+      link.classList.toggle("none", gm && !ref);
+      link.title = !gm ? "" : ref ? `Plays ${ref.sound} for the table (drop a sound here to change it)` : "No sound yet: drop one here from the Sound window";
+    }
+  });
+  const dropSound = (event: React.DragEvent) => {
+    if (!gm || !pageId) return;
+    let ref: BookSoundRef;
+    try {
+      ref = JSON.parse(event.dataTransfer.getData(SOUND_DRAG)) as BookSoundRef;
+    } catch {
+      return;
+    }
+    event.preventDefault();
+    setSoundDrop(false);
+    const target = event.target as HTMLElement;
+    const link = target.closest<HTMLElement>("a.book-link.sound");
+    if (link?.dataset.soundKey) {
+      session.setBookSound({ book, page: pageId, action: "bind", key: link.dataset.soundKey, ...ref });
+      return;
+    }
+    const block = target.closest<HTMLElement>("[data-block]");
+    session.setBookSound({ book, page: pageId, action: "add", block: block ? Number(block.dataset.block) : -1, ...ref });
+  };
+  const inlineSounds = (block: number) =>
+    gm
+      ? pageSounds.blocks
+          .filter((item) => item.block === block)
+          .map((item) => <BookSound key={item.id} session={session} item={item} onRemove={() => session.setBookSound({ book, page: pageId, action: "remove", id: item.id })} />)
+      : null;
   useEffect(() => {
     session
       .bookFetch<BookContents>("contents", { book })
@@ -341,6 +440,14 @@ export function BookWindow({ session, book }: { session: Session; book: string }
     const link = (event.target as HTMLElement).closest("a.book-link") as HTMLAnchorElement | null;
     if (!link) return;
     event.preventDefault();
+    if (link.classList.contains("sound")) {
+      const ref = gm ? linkSound(link) : null;
+      if (ref) {
+        if (sound.isPlaying(ref.sound)) stopForTable(session, ref);
+        else playForTable(session, ref);
+      }
+      return;
+    }
     const target = link.dataset;
     if (target.page && target.book === book) {
       setPageId(target.page);
@@ -405,15 +512,32 @@ export function BookWindow({ session, book }: { session: Session; book: string }
         </div>
         <input type="search" className="books-search" placeholder="Search" aria-label="Search this book" value={search} onChange={(event) => setSearch(event.target.value)} />
       </aside>
-      <article className="book-page" ref={body} onClick={follow}>
+      <article
+        className={soundDrop ? "book-page sound-drop" : "book-page"}
+        ref={body}
+        onClick={follow}
+        onDragOver={(event) => {
+          if (!gm || ![...event.dataTransfer.types].includes(SOUND_DRAG)) return;
+          event.preventDefault();
+          event.dataTransfer.dropEffect = "copy";
+          setSoundDrop(true);
+        }}
+        onDragLeave={(event) => {
+          if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setSoundDrop(false);
+        }}
+        onDrop={dropSound}
+      >
         {view === "pictures" ? (
           <p className="hint">Open a picture or map to see it{gm ? "; the share symbol shows it to the players, as a tab on their screens" : ""}.</p>
         ) : page ? (
           <>
             <h2>{page.name}</h2>
-            {page.blocks.map((block, index) =>
+            {inlineSounds(-1)}
+            {page.blocks.map((block, index) => (
+              <div key={index} className="book-block" data-block={index}>
+                {
               block.kind === "picture" ? (
-                <figure key={index} className={`book-figure ${block.align}`} onContextMenu={(event) => menu.show(event, actions.items({ book, file: block.file, name: block.name || block.caption || page.name }, "book"))}>
+                <figure className={`book-figure ${block.align}`} onContextMenu={(event) => menu.show(event, actions.items({ book, file: block.file, name: block.name || block.caption || page.name }, "book"))}>
                   <button type="button" className="book-figure-open" title="Open it in Pictures" onClick={() => openPicture({ book, file: block.file, name: block.name || block.caption || page.name })} {...slotDrag({ kind: "picture", book, file: block.file, label: block.name || block.caption || page.name })}>
                     <img src={session.bookUrl("picture", book, block.file)} alt={block.caption} loading="lazy" style={{ maxWidth: `${Math.min(100, block.scale)}%` }} />
                   </button>
@@ -421,9 +545,11 @@ export function BookWindow({ session, book }: { session: Session; book: string }
                   {gm ? <ShareButton shared={Boolean(shownPicture(block.file))} what={block.name || block.caption || "this picture"} onClick={() => toggleShown(block.file, block.name || block.caption || page.name)} /> : null}
                 </figure>
               ) : (
-                <div key={index} className={block.frame ? `book-text framed ${block.frame}` : "book-text"} dangerouslySetInnerHTML={{ __html: block.html }} />
-              ),
-            )}
+                <div className={block.frame ? `book-text framed ${block.frame}` : "book-text"} dangerouslySetInnerHTML={{ __html: block.html }} />
+              )}
+                {inlineSounds(index)}
+              </div>
+            ))}
             <nav className="book-turn">
               <button type="button" disabled={at <= 0} aria-label="Previous page" onClick={() => setPageId(pages[at - 1].id)}>
                 ‹ {at > 0 ? pages[at - 1].name : ""}

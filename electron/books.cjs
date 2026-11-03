@@ -111,8 +111,23 @@ function toHtml(formatted, resolve) {
       if (child.nodeType !== 1) continue;
       const tag = child.tagName;
       if (tag === "link") {
-        const target = resolve(child.getAttribute("class") || "", child.getAttribute("recordname") || "");
+        const linkClass = child.getAttribute("class") || "";
+        const recordname = child.getAttribute("recordname") || "";
         const text = walk(child) || "Link";
+        // FG's sound links (Syrinscape's: ss|id|mood or element|type|name): a
+        // sound of Kraken's own plays from them (matched by kind and name, or
+        // the one the GM drops on it); FG's "Sound: Context" has no use here.
+        if (linkClass === "soundplay") {
+          const [, , type = "", subtype = "", ...name] = recordname.split("|");
+          const kind = type === "mood" ? "ambience" : subtype === "music" ? "music" : type === "oneshot" ? "oneshots" : "sfx";
+          out += `<a class="book-link sound" data-sound-key="${escape(recordname || text)}" data-sound-kind="${kind}" data-sound-name="${escape(name.join("|") || text)}">${text}</a>`;
+          continue;
+        }
+        if (linkClass === "sound_context") {
+          out += `<span class="book-link dead sound-context">${text}</span>`;
+          continue;
+        }
+        const target = resolve(linkClass, recordname);
         if (target?.page) out += `<a class="book-link" data-book="${escape(target.book)}" data-page="${escape(target.page)}">${text}</a>`;
         else if (target?.file) out += `<a class="book-link picture" data-book="${escape(target.book)}" data-file="${escape(target.file)}" data-name="${escape(target.name)}">${text}</a>`;
         else out += `<span class="book-link dead">${text}</span>`;

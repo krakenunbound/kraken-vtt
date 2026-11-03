@@ -64,6 +64,20 @@ function folderTree(groups: { id: string; count: number }[]): FolderNode[] {
   }
   return root.children;
 }
+// A sound or folder dragged out of the window (into a book's story, or onto
+// one of its sound links).
+export const SOUND_DRAG = "text/kraken-sound";
+function soundDrag(ref: { sound: string; kind: string; label: string }) {
+  return {
+    draggable: true,
+    title: "Drag into a book to keep it in the story",
+    onDragStart: (event: React.DragEvent) => {
+      event.dataTransfer.setData(SOUND_DRAG, JSON.stringify(ref));
+      event.dataTransfer.effectAllowed = "copy";
+    },
+  };
+}
+
 // A play button that is a stop button while its sound (or any sound in its
 // folder) plays on this screen.
 function PlayToggle({
@@ -122,7 +136,7 @@ function Folder({
   const files = node.group && open ? inGroup(node.path) : [];
   return (
     <div className={open ? "sound-group open" : "sound-group"} role="treeitem" aria-expanded={open} style={{ marginLeft: depth ? 14 : 0 }}>
-      <div className="sound-group-row">
+      <div className="sound-group-row" {...(node.group ? soundDrag({ sound: node.path, kind, label: node.name }) : {})}>
         <button type="button" className="sound-twisty" aria-label={`${open ? "Close" : "Open"} ${node.name}`} data-folder={node.path} onClick={() => toggle(node.path)}>
           {open ? "▾" : "▸"}
         </button>
@@ -149,7 +163,7 @@ function Folder({
       {files.length > 0 ? (
         <div className="sound-files">
           {files.map((item) => (
-            <div key={item.id} className={loop(item.id) ? "sound-file on" : "sound-file"}>
+            <div key={item.id} className={loop(item.id) ? "sound-file on" : "sound-file"} {...soundDrag({ sound: item.id, kind, label: item.name })}>
               <PlayToggle id={item.id} className="sound-hear" title="Hear it (on your screen only)" label={`Hear ${item.name}`} data={{ "data-hear": item.id }} onPlay={() => void sound.play(item.id, kind)} onStop={() => sound.stop(item.id)}>
                 {"\u25b6"}
               </PlayToggle>
