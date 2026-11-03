@@ -10,6 +10,7 @@ import { ChatDock } from "./ChatDock";
 import { Mark } from "./Emblem";
 import { DecalPicker, SettingsWindow, TableDecal } from "./Settings";
 import { DiceWindow } from "../dice/DiceWindow";
+import { SoundWindow } from "../sound/SoundWindow";
 import { Icon } from "./icons";
 import { FloatingWindow, useWindows, type WindowKind } from "./Windows";
 
@@ -97,12 +98,14 @@ export function Desktop({
         { kind: "party", label: "Party", icon: "party", title: "Party Sheet" },
         { kind: "combat", label: "Combat", icon: "combat", title: "Combat Tracker" },
         { kind: "players", label: "Players", icon: "players", title: "Players" },
+        { kind: "sound", label: "Sound", icon: "music", title: "Sound" },
         { kind: "settings", label: "Settings", icon: "settings", title: "Settings" },
       ]
     : [
         { kind: "characters", label: characters.length === 1 ? "Character" : "Characters", icon: "character", title: characters.length === 1 ? characters[0].name : "My characters" },
         { kind: "party", label: "Party", icon: "party", title: "Party Sheet" },
         { kind: "combat", label: "Combat", icon: "combat", title: "Combat Tracker" },
+        { kind: "sound", label: "Sound", icon: "music", title: "Sound" },
         { kind: "settings", label: "Settings", icon: "settings", title: "Settings" },
       ];
   const dice = useSyncExternalStore(diceStore.subscribe, diceStore.settings);
@@ -229,6 +232,7 @@ export function Desktop({
               {item.kind === "players" ? <PlayersWindow session={session} /> : null}
               {item.kind === "settings" ? <SettingsWindow session={session} /> : null}
               {item.kind === "dice" ? <DiceWindow session={session} /> : null}
+              {item.kind === "sound" ? <SoundWindow session={session} /> : null}
               {item.kind === "decals" ? <DecalPicker session={session} onClose={() => windows.close(item.key)} /> : null}
               {item.kind === "wallpapers" ? <DecalPicker session={session} kind="wallpaper" onClose={() => windows.close(item.key)} /> : null}
               {item.kind === "gmicons" ? <DecalPicker session={session} kind="gmicon" onClose={() => windows.close(item.key)} /> : null}

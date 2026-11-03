@@ -15,3 +15,19 @@ Players open the address shown in the app's Players window in Chrome. In chat, t
 - `npm run dev` runs the interface in a browser, `npm start` opens the app on the last build.
 - Tests: `npm run coverage`, `agent`, `agent-ui`, `dice`, `spells`, `attack`, `combat`, `map`, `party`, `session`, `character`, `wizard`, `pregens`, `popout`, `setup`, `decal`.
 - [PLAN.md](PLAN.md) holds the plan and the progress log.
+
+## Sounds
+
+Kraken plays sounds in every player's browser: the GM's one-shots, sound effects the chat triggers (a Longsword hit, a fireball, a death), ambience loops and music, each with its own volume per player (the Sound button in the sidebar). The sounds are your own, in `%APPDATA%\kraken-vttssets\sounds`, in folders by kind: `oneshots`, `sfx`, `ambience`, `music`.
+
+Kraken's own set (about 500: every weapon's hit, miss, crit and fumble, spells by element, injuries, deaths, healing, potions, animals, monsters, one-shots and 32 ambience loops) is made with your ElevenLabs account:
+
+```
+$env:ELEVENLABS_API_KEY="your-key"
+npm run sounds -- --dry        # what it would make
+npm run sounds                 # make them (skips ones already made)
+npm run sounds -- --only sfx/Weapons --limit 20
+npm run sounds -- --music      # music too, if your plan has ElevenLabs Music
+```
+
+Listen in the Sound window, delete any you do not like, and run it again to make those again. The list of what to make is `electron/soundCatalog.cjs`.

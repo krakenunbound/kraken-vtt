@@ -5,6 +5,8 @@ const crypto = require("crypto");
 const os = require("os");
 const { WebSocketServer } = require("ws");
 const { createRecordStore, canSee } = require("./records.cjs");
+const { soundFor, cleanTriggers } = require("./soundTriggers.cjs");
+const { defaultTriggers } = require("./soundCatalog.cjs");
 const { createDice } = require("./dice.cjs");
 const { siege, siegeLibrary, siegeCheck, levelUp } = require("./siege.cjs");
 const { createMapState, playerColor } = require("./mapState.cjs");
@@ -273,7 +275,8 @@ function serveWeb(url, res, root) {
 // art: the GM's portraits and tokens (artLibrary.cjs), served to the table.
 // decals, wallpapers: the background decals and desktop tiles the GM can
 // choose from (decals.cjs).
-function createTableServer({ saved = {}, onChange = () => undefined, webRoot = WEB_ROOT, art = null, decals = null, wallpapers = null, gmIcons = null } = {}) {
+// sounds: the GM's sounds (sounds.cjs): one-shots, effects, ambience and music.
+function createTableServer({ saved = {}, onChange = () => undefined, webRoot = WEB_ROOT, art = null, decals = null, wallpapers = null, gmIcons = null, sounds = null } = {}) {
   let password = "";
   let hostToken = "";
   let image = null;
@@ -283,6 +286,24 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
   const tokenArt = new Map();
   const chat = savedChat(saved.chat);
   let options = savedOptions(saved.options);
+  // The chat's sound triggers, and what plays under the game (ambience loops
+  // and music), for every seat; saved with the campaign.
+  let soundTriggers = cleanTriggers(saved.soundTriggers) ?? defaultTriggers();
+  const cleanScape = (value) => {
+    const scape = value && typeof value === "object" ? value : {};
+    const level = (item) => Math.min(1, Math.max(0, Number(item?.volume ?? 1)));
+    return {
+      ambience: (Array.isArray(scape.ambience) ? scape.ambience : []).filter((item) => typeof item?.id === "string").slice(0, 8).map((item) => ({ id: item.id.slice(0, 300), volume: level(item) })),
+      music: scape.music && typeof scape.music.id === "string" ? { id: scape.music.id.slice(0, 300), volume: level(scape.music), loop: scape.music.loop !== false, group: typeof scape.music.group === "string" ? scape.music.group.slice(0, 300) : null } : null,
+    };
+  };
+  let soundscape = cleanScape(saved.sound);
+  function setSoundscape(next) {
+    soundscape = cleanScape(next);
+    broadcast({ type: "soundscape", soundscape });
+    onChange("table");
+    return soundscape;
+  }
   function setOptions(patch) {
     const next = patch && typeof patch === "object" ? patch : {};
     if (next.decal !== undefined && !(next.decal === "" || next.decal === "kraken" || (decals && decals.has(String(next.decal))))) throw new Error(`No decal "${next.decal}".`);
@@ -386,6 +407,11 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         if (hand.look) entry.roll.look = hand.look;
       } else if (hand?.look) entry.roll.look = hand.look;
     }
+    // A trigger's sound goes with the line: every seat that sees it hears it (as its result shows).
+    if (sounds && !entry.sound) {
+      const found = soundFor(entry, soundTriggers, sounds);
+      if (found) entry.sound = found.id;
+    }
     // What the GM's seat (or the GM's agent) says carries the GM's chat picture.
     const speaker = [...clients.values()].find((client) => client.id === entry.id);
     if (speaker?.role === "dm" || (entry.id === "agent" && ["Agent", "GM", "DM"].includes(entry.from))) entry.gm = true;
@@ -474,6 +500,50 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
           return;
         }
         res.writeHead(200, { "Content-Type": found.mime, "Content-Length": stat.size, "Cache-Control": "private, max-age=3600", "X-Content-Type-Options": "nosniff" });
+        fs.createReadStream(found.path).pipe(res);
+      });
+      return;
+    }
+    // Sounds: the GM's list, and the files for every seat (with ranges, so music can seek).
+    if (req.method === "GET" && (url.pathname === "/sound/list" || url.pathname === "/sound/file")) {
+      const token = url.searchParams.get("token") || "";
+      const client = token ? [...clients.values()].find((item) => item.assetToken === token) : null;
+      if (!client || !sounds || (url.pathname === "/sound/list" && client.role !== "dm")) {
+        res.writeHead(404, { "Cache-Control": "no-store" });
+        res.end();
+        return;
+      }
+      if (url.pathname === "/sound/list") {
+        res.writeHead(200, { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" });
+        res.end(JSON.stringify({ sounds: sounds.list(), groups: sounds.groups(), folder: sounds.folder, triggers: soundTriggers }));
+        return;
+      }
+      const found = sounds.file(url.searchParams.get("id") || "");
+      if (!found) {
+        res.writeHead(404, { "Cache-Control": "no-store" });
+        res.end();
+        return;
+      }
+      fs.stat(found.path, (error, stat) => {
+        if (error) {
+          res.writeHead(404);
+          res.end();
+          return;
+        }
+        const range = /^bytes=(\d*)-(\d*)$/.exec(req.headers.range || "");
+        if (range && (range[1] || range[2])) {
+          const start = range[1] ? Number(range[1]) : Math.max(0, stat.size - Number(range[2]));
+          const end = range[1] && range[2] ? Math.min(stat.size - 1, Number(range[2])) : stat.size - 1;
+          if (start >= stat.size || start > end) {
+            res.writeHead(416, { "Content-Range": `bytes */${stat.size}` });
+            res.end();
+            return;
+          }
+          res.writeHead(206, { "Content-Type": found.mime, "Content-Length": end - start + 1, "Content-Range": `bytes ${start}-${end}/${stat.size}`, "Accept-Ranges": "bytes", "Cache-Control": "private, max-age=3600" });
+          fs.createReadStream(found.path, { start, end }).pipe(res);
+          return;
+        }
+        res.writeHead(200, { "Content-Type": found.mime, "Content-Length": stat.size, "Accept-Ranges": "bytes", "Cache-Control": "private, max-age=3600" });
         fs.createReadStream(found.path).pipe(res);
       });
       return;
@@ -640,6 +710,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
           combat: combat.viewFor(seatOf(client)),
           chat: chatFor(client),
           options,
+          soundscape,
           records: records.list({ seat: seatOf(client) }),
           scene: client.role === "player" ? sceneFor(client) : null,
         });
@@ -774,6 +845,25 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
           send(ws, { type: "op-result", req: msg.req ?? null, ok: true, id: record.id });
         } catch (error) {
           send(ws, { type: "op-result", req: msg.req ?? null, ok: false, error: error instanceof Error ? error.message : "Not allowed." });
+        }
+        return;
+      }
+
+      // Sounds, the GM's: a one-shot or effect for everyone (a folder plays one of
+      // its sounds at random), the ambience loops, the music, and the chat's triggers.
+      if (["sound-play", "sound-stop", "ambience", "music", "sound-triggers"].includes(msg.type)) {
+        if (client.role !== "dm") {
+          send(ws, { type: "error", reason: "Only the GM plays sounds for the table." });
+          return;
+        }
+        try {
+          if (msg.type === "sound-play") playSound(msg.id, msg.volume);
+          else if (msg.type === "sound-stop") broadcast({ type: "sound-stop" });
+          else if (msg.type === "ambience") ambience(msg.action, msg.id, msg.volume);
+          else if (msg.type === "music") music(msg.action, msg.id, msg);
+          else setTriggers(msg.triggers);
+        } catch (error) {
+          send(ws, { type: "error", reason: error instanceof Error ? error.message : "Could not play that." });
         }
         return;
       }
@@ -997,6 +1087,14 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     decals: () => decals,
     wallpapers: () => wallpapers,
     gmIcons: () => gmIcons,
+    sounds: () => sounds,
+    playSound,
+    stopSounds: () => (broadcast({ type: "sound-stop" }), { stopped: true }),
+    ambience,
+    music,
+    soundscape: () => soundscape,
+    triggers: () => soundTriggers,
+    setTriggers,
     // The GM's portraits and tokens (artLibrary.cjs), as the pickers show them.
     art: (kind) => (art ? art.list(kind) : []),
     // A ping on the map at a square, as a GM's click would make.
@@ -1007,6 +1105,42 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       return at;
     },
   };
+
+  function playSound(idOrGroup, volume) {
+    const picked = sounds?.pick(idOrGroup);
+    if (!picked) throw new Error(`No sound "${idOrGroup}".`);
+    broadcast({ type: "sound", id: picked.id, kind: picked.kind, volume: Math.min(1, Math.max(0, Number(volume ?? 1))) });
+    return picked;
+  }
+  // Ambience: loops playing together (add, remove, volume, clear).
+  function ambience(action, idOrGroup, volume) {
+    const list = soundscape.ambience.slice();
+    if (action === "clear") return setSoundscape({ ...soundscape, ambience: [] });
+    if (action === "remove") return setSoundscape({ ...soundscape, ambience: list.filter((item) => item.id !== idOrGroup) });
+    if (action === "volume") return setSoundscape({ ...soundscape, ambience: list.map((item) => (item.id === idOrGroup ? { ...item, volume } : item)) });
+    const picked = sounds?.pick(idOrGroup);
+    if (!picked) throw new Error(`No ambience "${idOrGroup}".`);
+    if (list.some((item) => item.id === picked.id)) return soundscape;
+    return setSoundscape({ ...soundscape, ambience: [...list, { id: picked.id, volume: volume ?? 0.8 }] });
+  }
+  // Music: one track (or a folder, a track at a time from it), looped or not.
+  function music(action, idOrGroup, extra = {}) {
+    if (action === "stop") return setSoundscape({ ...soundscape, music: null });
+    if (action === "volume" && soundscape.music) return setSoundscape({ ...soundscape, music: { ...soundscape.music, volume: extra.volume } });
+    const group = action === "next" ? soundscape.music?.group : idOrGroup;
+    const picked = sounds?.pick(group ?? idOrGroup);
+    if (!picked) throw new Error(`No music "${group ?? idOrGroup}".`);
+    const fromFolder = sounds.has(String(group ?? idOrGroup)) ? null : String(group ?? idOrGroup);
+    return setSoundscape({ ...soundscape, music: { id: picked.id, volume: extra.volume ?? soundscape.music?.volume ?? 0.7, loop: extra.loop !== false && !fromFolder, group: fromFolder } });
+  }
+  function setTriggers(list) {
+    const cleaned = list === "default" ? defaultTriggers() : cleanTriggers(list);
+    if (!cleaned) throw new Error("Triggers are a list.");
+    soundTriggers = cleaned;
+    for (const [ws, client] of clients) if (client.role === "dm") send(ws, { type: "sound-triggers", triggers: soundTriggers });
+    onChange("table");
+    return soundTriggers;
+  }
 
   function kick(name) {
     const entry = [...clients.entries()].find(([, client]) => client.role !== "dm" && sameName(client.name, name));
@@ -1084,6 +1218,8 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         combat: combat.persisted(),
         records: records.toJSON(),
         dice: dice.toJSON(),
+        sound: soundscape,
+        soundTriggers,
       };
     },
     // What agents (the MCP server, the in-app assistant) use. They act as the GM.

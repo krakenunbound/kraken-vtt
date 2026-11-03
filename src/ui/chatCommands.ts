@@ -1,4 +1,5 @@
 import { diceStore } from "../dice/diceStore";
+import { sound } from "../sound/soundEngine";
 import type { RollMode, Session } from "../session/useSession";
 import type { WindowKind } from "./Windows";
 
@@ -35,6 +36,8 @@ const WINDOWS: Record<string, { kind: WindowKind; title: string }> = {
   settings: { kind: "settings", title: "Settings" },
   options: { kind: "settings", title: "Settings" },
   dice: { kind: "dice", title: "Dice" },
+  sound: { kind: "sound", title: "Sound" },
+  sounds: { kind: "sound", title: "Sound" },
   decal: { kind: "decals", title: "Background Decal" },
   wallpaper: { kind: "wallpapers", title: "Desktop Wallpaper" },
   gmicon: { kind: "gmicons", title: "GM Icon" },
@@ -201,6 +204,28 @@ export const COMMANDS: Command[] = [
   { names: ["help", "?", "commands"], args: "", help: "Every command", group: "Screen", run: (_rest, context) => context.showHelp() },
   { names: ["dice"], args: "", help: "Your dice: sets, colours, effects", group: "Screen", run: (_rest, context) => context.openWindow("dice", "Dice") },
   { names: ["settings"], args: "", help: "Settings", group: "Screen", run: (_rest, context) => context.openWindow("settings", "Settings") },
+  { names: ["sound", "sounds"], args: "", help: "Sound: your volumes (and the GM's one-shots, ambience, music and triggers)", group: "Screen", run: (_rest, context) => context.openWindow("sound", "Sound") },
+  {
+    names: ["play", "sfx"],
+    args: "[folder or sound]",
+    help: "Play a sound for the table: /play oneshots/Doors/Wooden Door",
+    group: "GM",
+    gm: true,
+    run: (rest, context) => (rest.trim() ? context.session.soundCommand({ type: "sound-play", id: rest.trim() }) : context.openWindow("sound", "Sound")),
+  },
+  {
+    names: ["volume"],
+    args: "[0-100] <kind>",
+    help: "This screen's volume (everything, or: oneshots, sfx, ambience, music)",
+    group: "Screen",
+    run: (rest, context) => {
+      const [level = "", kind = "master"] = rest.trim().split(/\s+/);
+      const value = percent(level, 0, 100);
+      const key = ["master", "oneshots", "sfx", "ambience", "music"].includes(kind.toLowerCase()) ? (kind.toLowerCase() as "master") : "master";
+      if (value === null) return context.session.note("As /volume 60, or /volume 30 music.");
+      sound.setVolumes({ [key]: value });
+    },
+  },
   {
     names: ["openwindow"],
     args: "[window]",
