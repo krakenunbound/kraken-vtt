@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
 import type { BookContents, BookInfo, BookPage, Session, ShownImage } from "../session/useSession";
 import { Icon } from "../ui/icons";
 import { useWindows } from "../ui/Windows";
@@ -10,15 +11,20 @@ import { useWindows } from "../ui/Windows";
 // books the GM opens to them (never an adventure); the GM shows them a
 // picture or map with the share symbol, and it opens as a tab on their screens.
 
-// The pictures open on this screen (tabs), besides those the GM has shown.
+// The pictures open on this screen (tabs), besides those the GM has shown;
+// which are out in a window of their own; and which shown ones this screen
+// closed (a shown picture comes back when the GM shows it again).
 type Tab = { book: string; file: string; name: string };
+const keyOf = (item: { book: string; file: string }) => `${item.book}|${item.file}`;
 const pictures = (() => {
   let tabs: Tab[] = [];
   let active = "";
+  let out = new Set<string>();
+  let hidden = new Set<string>();
   const listeners = new Set<() => void>();
-  let snapshot = { tabs, active };
+  let snapshot = { tabs, active, out, hidden };
   const changed = () => {
-    snapshot = { tabs, active };
+    snapshot = { tabs, active, out, hidden };
     for (const listener of listeners) listener();
   };
   return {
@@ -28,13 +34,24 @@ const pictures = (() => {
     },
     get: () => snapshot,
     open(tab: Tab) {
-      if (!tabs.some((item) => item.book === tab.book && item.file === tab.file)) tabs = [...tabs, tab];
-      active = `${tab.book}|${tab.file}`;
+      if (!tabs.some((item) => keyOf(item) === keyOf(tab))) tabs = [...tabs, tab];
+      active = keyOf(tab);
+      hidden = new Set([...hidden].filter((key) => key !== keyOf(tab)));
       changed();
     },
-    close(book: string, file: string) {
-      tabs = tabs.filter((item) => !(item.book === book && item.file === file));
-      if (active === `${book}|${file}`) active = tabs.length ? `${tabs.at(-1)!.book}|${tabs.at(-1)!.file}` : "";
+    close(key: string) {
+      tabs = tabs.filter((item) => keyOf(item) !== key);
+      out = new Set([...out].filter((item) => item !== key));
+      hidden = new Set([...hidden, key]);
+      if (active === key) active = tabs.length ? keyOf(tabs.at(-1)!) : "";
+      changed();
+    },
+    setOut(key: string, on: boolean) {
+      out = new Set(on ? [...out, key] : [...out].filter((item) => item !== key));
+      changed();
+    },
+    unhide(key: string) {
+      hidden = new Set([...hidden].filter((item) => item !== key));
       changed();
     },
     activate(key: string) {
@@ -43,6 +60,94 @@ const pictures = (() => {
     },
   };
 })();
+
+// A right-click menu, in whichever window was clicked (a popped-out one too).
+type MenuItem = { label: string; run: () => void; icon?: string };
+function useContextMenu() {
+  const [menu, setMenu] = useState<{ x: number; y: number; items: MenuItem[]; doc: Document } | null>(null);
+  useEffect(() => {
+    if (!menu) return;
+    const close = (event: Event) => {
+      if (event instanceof KeyboardEvent && event.key !== "Escape") return;
+      if (event.type === "pointerdown" && (event.target as HTMLElement | null)?.closest?.(".context-menu")) return;
+      setMenu(null);
+    };
+    menu.doc.addEventListener("pointerdown", close, true);
+    menu.doc.addEventListener("keydown", close, true);
+    return () => {
+      menu.doc.removeEventListener("pointerdown", close, true);
+      menu.doc.removeEventListener("keydown", close, true);
+    };
+  }, [menu]);
+  return {
+    show(event: React.MouseEvent, items: MenuItem[]) {
+      event.preventDefault();
+      event.stopPropagation();
+      const doc = (event.currentTarget as HTMLElement).ownerDocument;
+      const view = doc.defaultView ?? window;
+      setMenu({ x: Math.min(event.clientX, view.innerWidth - 220), y: Math.min(event.clientY, view.innerHeight - items.length * 34 - 12), items, doc });
+    },
+    element: menu
+      ? createPortal(
+          <div className="context-menu" role="menu" style={{ left: menu.x, top: menu.y }}>
+            {menu.items.map((item) => (
+              <button
+                key={item.label}
+                type="button"
+                role="menuitem"
+                data-menu={item.label}
+                onClick={() => {
+                  setMenu(null);
+                  item.run();
+                }}
+              >
+                {item.icon ? <Icon name={item.icon} size={14} /> : <span className="context-menu-gap" />} {item.label}
+              </button>
+            ))}
+          </div>,
+          menu.doc.body,
+        )
+      : null,
+  };
+}
+
+// What can be done with a picture or map, wherever it is: open it in
+// Pictures, put it out on its own (a window of its own, so a map stays up
+// while the book is read) or back in, share it or stop (the GM), close it.
+function usePictureActions(session: Session) {
+  const windows = useWindows();
+  const gm = session.role === "dm";
+  const shownOf = (tab: Tab) => session.bookShelf.images.find((item) => keyOf(item) === keyOf(tab));
+  const toPictures = (tab: Tab) => {
+    pictures.open(tab);
+    windows.open("images", "Pictures");
+  };
+  const outOnItsOwn = (tab: Tab) => {
+    pictures.open(tab);
+    pictures.setOut(keyOf(tab), true);
+    windows.open("picture", tab.name, keyOf(tab));
+  };
+  const backIn = (tab: Tab) => {
+    pictures.setOut(keyOf(tab), false);
+    windows.close(`picture:${keyOf(tab)}`);
+    toPictures(tab);
+  };
+  const close = (tab: Tab) => {
+    pictures.close(keyOf(tab));
+    windows.close(`picture:${keyOf(tab)}`);
+  };
+  const items = (tab: Tab, where: "book" | "tab" | "own"): MenuItem[] => {
+    const shown = shownOf(tab);
+    const list: MenuItem[] = [];
+    if (where === "book") list.push({ label: "Open in Pictures", icon: "eye", run: () => toPictures(tab) });
+    if (where !== "own") list.push({ label: "Out on its own", icon: "popout", run: () => outOnItsOwn(tab) });
+    else list.push({ label: "Back in", icon: "dock", run: () => backIn(tab) });
+    if (gm) list.push(shown ? { label: "Stop sharing", icon: "eye-off", run: () => session.hideImage(shown.id) } : { label: "Share with the players", icon: "share", run: () => session.showImage(tab.book, tab.file, tab.name) });
+    if (where !== "book") list.push({ label: "Close", icon: "close", run: () => close(tab) });
+    return list;
+  };
+  return { toPictures, outOnItsOwn, backIn, close, items, shownOf };
+}
 
 // Which page a book opens at (a link to another book's page).
 const startAt = new Map<string, string>();
@@ -55,8 +160,12 @@ function useBookWindows() {
       windows.open("book", title, book);
     },
     openPicture(tab: Tab) {
-      pictures.open(tab);
-      windows.open("images", "Pictures");
+      // Out on its own already: that window comes to the front.
+      if (pictures.get().out.has(keyOf(tab))) windows.open("picture", tab.name, keyOf(tab));
+      else {
+        pictures.open(tab);
+        windows.open("images", "Pictures");
+      }
     },
   };
 }
@@ -178,6 +287,8 @@ export function BooksWindow({ session, onOpenAdventure }: { session: Session; on
 export function BookWindow({ session, book }: { session: Session; book: string }) {
   const gm = session.role === "dm";
   const { openBook, openPicture } = useBookWindows();
+  const actions = usePictureActions(session);
+  const menu = useContextMenu();
   const [contents, setContents] = useState<BookContents | null>(null);
   const [error, setError] = useState("");
   const [pageId, setPageId] = useState(startAt.get(book) ?? "");
@@ -276,7 +387,13 @@ export function BookWindow({ session, book }: { session: Session; book: string }
                 .filter((item) => !wanted || `${item.name} ${item.category}`.toLowerCase().includes(wanted))
                 .map((item) => (
                   <div key={item.file} className="book-picture-row">
-                    <button type="button" className="book-page-link" data-picture={item.file} onClick={() => openPicture({ book, file: item.file, name: item.name })}>
+                    <button
+                      type="button"
+                      className="book-page-link"
+                      data-picture={item.file}
+                      onClick={() => openPicture({ book, file: item.file, name: item.name })}
+                      onContextMenu={(event) => menu.show(event, actions.items({ book, file: item.file, name: item.name }, "book"))}
+                    >
                       {item.name}
                       {item.category ? <small>{item.category}</small> : null}
                     </button>
@@ -294,7 +411,7 @@ export function BookWindow({ session, book }: { session: Session; book: string }
             <h2>{page.name}</h2>
             {page.blocks.map((block, index) =>
               block.kind === "picture" ? (
-                <figure key={index} className={`book-figure ${block.align}`}>
+                <figure key={index} className={`book-figure ${block.align}`} onContextMenu={(event) => menu.show(event, actions.items({ book, file: block.file, name: block.name || block.caption || page.name }, "book"))}>
                   <button type="button" className="book-figure-open" title="Open it in Pictures" onClick={() => openPicture({ book, file: block.file, name: block.name || block.caption || page.name })}>
                     <img src={session.bookUrl("picture", book, block.file)} alt={block.caption} loading="lazy" style={{ maxWidth: `${Math.min(100, block.scale)}%` }} />
                   </button>
@@ -318,21 +435,30 @@ export function BookWindow({ session, book }: { session: Session; book: string }
           <p className="hint">Opening the page…</p>
         )}
       </article>
+      {menu.element}
     </div>
   );
 }
 
-// Pictures: a tab for each picture the GM has shown, and each opened here.
+// Pictures: a tab for each picture the GM has shown, and each opened here
+// (not those out on their own, or closed here). Right-click for what can be done.
 export function ImagesWindow({ session }: { session: Session }) {
   const gm = session.role === "dm";
   const local = useSyncExternalStore(pictures.subscribe, pictures.get);
+  const actions = usePictureActions(session);
+  const menu = useContextMenu();
   const shown = session.bookShelf.images;
-  const keyOf = (item: { book: string; file: string }) => `${item.book}|${item.file}`;
-  const tabs: (Tab & { shown?: ShownImage })[] = [...shown.map((item) => ({ book: item.book, file: item.file, name: item.name, shown: item })), ...local.tabs.filter((tab) => !shown.some((item) => keyOf(item) === keyOf(tab)))];
-  // A picture the GM has just shown comes to the front.
+  const tabs: (Tab & { shown?: ShownImage })[] = [
+    ...shown.map((item) => ({ book: item.book, file: item.file, name: item.name, shown: item })),
+    ...local.tabs.filter((tab) => !shown.some((item) => keyOf(item) === keyOf(tab))),
+  ].filter((tab) => !local.out.has(keyOf(tab)) && !local.hidden.has(keyOf(tab)));
+  // A picture the GM has just shown comes back, and to the front.
   useEffect(() => {
     const latest = shown.find((item) => item.id === session.imageShown?.id);
-    if (latest) pictures.activate(keyOf(latest));
+    if (latest) {
+      pictures.unhide(keyOf(latest));
+      pictures.activate(keyOf(latest));
+    }
   }, [session.imageShown]);
   const active = tabs.find((tab) => keyOf(tab) === local.active) ?? tabs.at(-1);
   if (!active) return <p className="hint">{gm ? "Open a picture or map from a book." : "The GM has not shown you any pictures yet."}</p>;
@@ -340,33 +466,50 @@ export function ImagesWindow({ session }: { session: Session }) {
     <div className="images-window">
       <div className="images-tabs" role="tablist">
         {tabs.map((tab) => (
-          <div key={keyOf(tab)} className={keyOf(tab) === keyOf(active) ? "images-tab on" : "images-tab"} role="tab" aria-selected={keyOf(tab) === keyOf(active)}>
+          <div key={keyOf(tab)} className={keyOf(tab) === keyOf(active) ? "images-tab on" : "images-tab"} role="tab" aria-selected={keyOf(tab) === keyOf(active)} onContextMenu={(event) => menu.show(event, actions.items(tab, "tab"))}>
             <button type="button" data-image-tab={tab.name} onClick={() => pictures.activate(keyOf(tab))}>
               {gm && tab.shown ? <Icon name="share" size={12} /> : null} {tab.name}
             </button>
-            {gm || !tab.shown ? (
-              <button
-                type="button"
-                className="images-tab-close"
-                aria-label={`Close ${tab.name}`}
-                title={tab.shown ? "Stop showing it to the players" : "Close"}
-                onClick={() => (tab.shown ? session.hideImage(tab.shown.id) : pictures.close(tab.book, tab.file))}
-              >
-                ×
-              </button>
-            ) : null}
+            <button type="button" className="images-tab-close" aria-label={`Close ${tab.name}`} title="Close" onClick={() => actions.close(tab)}>
+              ×
+            </button>
           </div>
         ))}
       </div>
-      <div className="images-view">
-        {gm ? (
-          <div className="images-share">
-            <ShareButton shared={Boolean(active.shown)} what={active.name} onClick={() => (active.shown ? session.hideImage(active.shown.id) : session.showImage(active.book, active.file, active.name))} />
-            <span>{active.shown ? "Shown to the players" : "Not shared"}</span>
-          </div>
-        ) : null}
-        <img src={session.bookUrl("picture", active.book, active.file)} alt={active.name} data-image={active.file} />
-      </div>
+      <PictureView session={session} tab={active} shown={active.shown} onMenu={(event) => menu.show(event, actions.items(active, "tab"))} />
+      {menu.element}
+    </div>
+  );
+}
+
+// One picture or map, in a window of its own (out of Pictures, so it stays
+// up beside the book). Right-click to put it back in, share it, close it.
+export function PictureWindow({ session, payload }: { session: Session; payload: string }) {
+  const local = useSyncExternalStore(pictures.subscribe, pictures.get);
+  const actions = usePictureActions(session);
+  const menu = useContextMenu();
+  const shown = session.bookShelf.images.find((item) => keyOf(item) === payload);
+  const [book, ...rest] = payload.split("|");
+  const tab = local.tabs.find((item) => keyOf(item) === payload) ?? (shown ? { book: shown.book, file: shown.file, name: shown.name } : { book, file: rest.join("|"), name: rest.join("|").split("/").pop() ?? "Picture" });
+  return (
+    <div className="images-window picture-window">
+      <PictureView session={session} tab={tab} shown={shown} onMenu={(event) => menu.show(event, actions.items(tab, "own"))} />
+      {menu.element}
+    </div>
+  );
+}
+
+function PictureView({ session, tab, shown, onMenu }: { session: Session; tab: Tab; shown?: ShownImage; onMenu: (event: React.MouseEvent) => void }) {
+  const gm = session.role === "dm";
+  return (
+    <div className="images-view" onContextMenu={onMenu} title="Right-click for more">
+      {gm ? (
+        <div className="images-share">
+          <ShareButton shared={Boolean(shown)} what={tab.name} onClick={() => (shown ? session.hideImage(shown.id) : session.showImage(tab.book, tab.file, tab.name))} />
+          <span>{shown ? "Shown to the players" : "Not shared"}</span>
+        </div>
+      ) : null}
+      <img src={session.bookUrl("picture", tab.book, tab.file)} alt={tab.name} data-image={tab.file} />
     </div>
   );
 }
