@@ -527,8 +527,13 @@ export function model(kind: ShapeKind): Model {
 
 // Each body gets its own collider (cannon keeps per-shape world vertices).
 export function collider(kind: ShapeKind) {
-  const { shape } = model(kind);
-  return new CANNON.ConvexPolyhedron({ vertices: shape.vertices.map((v) => new CANNON.Vec3(v.x, v.y, v.z)), faces: shape.faces.map((face) => [...face]) });
+  const { shape, geometry } = model(kind);
+  // The size the die is drawn (its bevelled shell), so it touches what it is seen to touch.
+  geometry.computeBoundingBox();
+  const drawn = geometry.boundingBox!.max.x - geometry.boundingBox!.min.x;
+  const xs = shape.vertices.map((v) => v.x);
+  const fit = Math.min(1, drawn / (Math.max(...xs) - Math.min(...xs)));
+  return new CANNON.ConvexPolyhedron({ vertices: shape.vertices.map((v) => new CANNON.Vec3(v.x * fit, v.y * fit, v.z * fit)), faces: shape.faces.map((face) => [...face]) });
 }
 
 // What the dice are made of: how they take the light. Resin is the Gilded

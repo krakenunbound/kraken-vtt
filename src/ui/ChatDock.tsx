@@ -3,7 +3,6 @@ import type { ChatLine, RollResult, Session } from "../session/useSession";
 import { diceStore, rolling, setThrow, tower as towerDrops, type DiceLook } from "../dice/diceStore";
 import { DieShape, Icon } from "./icons";
 import { openPopOut, PopOutWindow, screenOffset, type ScreenPlace } from "./PopOut";
-import { useWindows } from "./Windows";
 
 // Where chat last was in a window of its own (in this browser).
 function chatPlace(): ScreenPlace | null {
@@ -152,7 +151,6 @@ export function ChatDock({ session }: { session: Session }) {
   const [pool, setPool] = useState<number[]>([]);
   const [modifier, setModifier] = useState(0);
   const [tower, setTower] = useState(false);
-  const windows = useWindows();
   const [size, setSize] = useState<ChatSize>(chatSize);
   // A right-click menu over the tray: how many of a die to roll, or the modifier's quick values.
   const [menu, setMenu] = useState<{ x: number; y: number; sides: number | null; custom?: boolean } | null>(null);
@@ -369,9 +367,6 @@ export function ChatDock({ session }: { session: Session }) {
         <input aria-label="Message" value={draft} maxLength={500} onChange={(event) => setDraft(event.target.value)} placeholder="Say something, or /r 1d20+2 Strength" />
         <button type="submit" aria-label="Send">
           <Icon name="chat" />
-        </button>
-        <button type="button" className="dice-settings-button" title="Dice settings" aria-label="Dice settings" aria-expanded={windows.isOpen("dice")} onClick={() => windows.open("dice", "Dice")}>
-          <Icon name="settings" size={18} />
         </button>
       </form>
       <div className="dice-tray" aria-label="Dice tray" style={{ ["--tray-glow" as string]: mine.accent ?? mine.body }}>

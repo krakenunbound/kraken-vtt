@@ -103,6 +103,7 @@ export function Desktop({
         { kind: "characters", label: characters.length === 1 ? "Character" : "Characters", icon: "character", title: characters.length === 1 ? characters[0].name : "My characters" },
         { kind: "party", label: "Party", icon: "party", title: "Party Sheet" },
         { kind: "combat", label: "Combat", icon: "combat", title: "Combat Tracker" },
+        { kind: "settings", label: "Settings", icon: "settings", title: "Settings" },
       ];
   const dice = useSyncExternalStore(diceStore.subscribe, diceStore.settings);
 

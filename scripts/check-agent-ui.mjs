@@ -83,12 +83,15 @@ try {
   assert(custom.look.material === "metal" && custom.look.effect === "fire" && custom.look.theme === "marble" && custom.look.accent === "#223344" && custom.look.font === "runic" && custom.look.crit === false && custom.look.body === "#9fd8ff", `custom look ${JSON.stringify(custom.look)}`);
   assert((await tool("kraken_dice_settings", { preset: "Rune Steel" })).preset === "Rune Steel", "a set is named again when matched");
   assert((await refused("kraken_dice_settings", { effect: "lasers" })).includes("Choose from"), "an unknown effect is refused");
-  // The Dice window opens from the chat's gear and shows the set chosen.
-  await page.click(".dice-settings-button");
+  // The Dice window opens from Settings (the chat has no gear now) and shows the set chosen.
+  assert((await page.$(".dice-settings-button")) === null, "no dice gear in the chat");
+  await page.click('[data-launch="settings"]');
+  await page.click('[data-setting="dice"]');
   await page.waitForSelector('.dice-window [data-preset="Rune Steel"][aria-pressed="true"]');
   await page.click('.dice-window [data-choice="glass"]');
   assert((await tool("kraken_dice_settings")).look.material === "glass", "a click in the Dice window changes the look");
   await tool("kraken_windows", { action: "close", kind: "dice" });
+  await tool("kraken_windows", { action: "close", kind: "settings" });
   // FG's tray: the dice are 3D in this seat's set; a right-click rolls several, the modifier's quick values add up.
   await page.waitForSelector(".tray-die img.tray-die-3d");
   await page.locator(".modifier-box").click({ button: "right" });

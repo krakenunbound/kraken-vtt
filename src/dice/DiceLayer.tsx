@@ -104,6 +104,7 @@ function createEngine(host: HTMLDivElement) {
   let frame = 0;
   let lastTick = performance.now();
   const quaternion = new THREE.Quaternion();
+  const ahead2 = new THREE.Quaternion();
   // A die's effect, given off as it moves (how far since the last frame).
   const trail = (effect: DiceLook["effect"], group: THREE.Group, last: THREE.Vector3) => {
     const speed = group.position.distanceTo(last);
@@ -127,11 +128,21 @@ function createEngine(host: HTMLDivElement) {
     const volume = diceStore.settings().sound ? diceStore.settings().volume : 0;
     for (let index = throws.length - 1; index >= 0; index--) {
       const item = throws[index];
-      const at = Math.min(item.count - 1, Math.floor((now - item.start) / FRAME_MS));
+      // Between two recorded frames, so a slow screen frame never makes a fast die jump.
+      const exact = Math.min(item.count - 1, (now - item.start) / FRAME_MS);
+      const at = Math.floor(exact);
+      const next = Math.min(item.count - 1, at + 1);
+      const part = exact - at;
       item.groups.forEach((group, die) => {
         const offset = (at * item.groups.length + die) * 7;
-        group.position.set(item.frames[offset], item.frames[offset + 1], item.frames[offset + 2]);
-        group.quaternion.copy(quaternion.set(item.frames[offset + 3], item.frames[offset + 4], item.frames[offset + 5], item.frames[offset + 6]));
+        const ahead = (next * item.groups.length + die) * 7;
+        group.position.set(
+          item.frames[offset] + (item.frames[ahead] - item.frames[offset]) * part,
+          item.frames[offset + 1] + (item.frames[ahead + 1] - item.frames[offset + 1]) * part,
+          item.frames[offset + 2] + (item.frames[ahead + 2] - item.frames[offset + 2]) * part,
+        );
+        quaternion.set(item.frames[offset + 3], item.frames[offset + 4], item.frames[offset + 5], item.frames[offset + 6]);
+        group.quaternion.copy(quaternion.slerp(ahead2.set(item.frames[ahead + 3], item.frames[ahead + 4], item.frames[ahead + 5], item.frames[ahead + 6]), part));
         if (!item.landed) trail(item.look.effect, group, item.last[die]);
       });
       while (item.played < item.hits.length && item.hits[item.played].frame <= at) {

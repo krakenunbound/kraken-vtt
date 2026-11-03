@@ -10,7 +10,8 @@ import { bottomFace, collider, model, topFace, type ShapeKind } from "./models";
 
 export type Die = { kind: ShapeKind; label: string };
 export type Hit = { frame: number; strength: number; onDie: boolean };
-const STEP = 1 / 120;
+// Four physics steps a frame: a fast die moves under a quarter of its width a step, so it never slips through a rail.
+const STEP = 1 / 240;
 export const MAX_DICE = 24;
 
 // The dice of a roll, as the host rolled them (d100 is a tens and a ones die).
@@ -58,37 +59,48 @@ export function simulate(dice: Die[], thrown: DiceThrow, width: number, depth: n
   world.addBody(floor);
   // The edges of the table are its rails.
   const rail = (x: number, z: number, hx: number, hz: number) => {
-    const body = new CANNON.Body({ type: CANNON.Body.STATIC, shape: new CANNON.Box(new CANNON.Vec3(hx, 4, hz)), material: wood });
-    body.position.set(x, 4, z);
+    const body = new CANNON.Body({ type: CANNON.Body.STATIC, shape: new CANNON.Box(new CANNON.Vec3(hx, 20, hz)), material: wood });
+    body.position.set(x, 20, z);
     world.addBody(body);
   };
   const across = area.right - area.left;
   const down = area.bottom - area.top;
-  rail(area.left - 1, area.top + down / 2, 1, down);
-  rail(area.right + 1, area.top + down / 2, 1, down);
-  rail(area.left + across / 2, area.top - 1, across, 1);
-  rail(area.left + across / 2, area.bottom + 1, across, 1);
+  // Thick, and overlapping at the corners, so nothing gets through them.
+  const thick = 6;
+  rail(area.left - thick, area.top + down / 2, thick, down / 2 + thick * 2);
+  rail(area.right + thick, area.top + down / 2, thick, down / 2 + thick * 2);
+  rail(area.left + across / 2, area.top - thick, across / 2 + thick * 2, thick);
+  rail(area.left + across / 2, area.bottom + thick, across / 2 + thick * 2, thick);
 
   // The dice leave the hand as fast as it moved (world units a second), from
   // a gentle toss to a hard flick across the table.
   const speed = Math.hypot(thrown.vx * width, thrown.vy * depth);
   const scale = speed < 1e-3 ? 0 : Math.min(56, Math.max(5, speed)) / speed;
   const heading = Math.atan2(thrown.vy * depth, thrown.vx * width);
-  const startX = Math.min(area.right - 1.2, Math.max(area.left + 1.2, thrown.x * width));
-  const startZ = Math.min(area.bottom - 1.2, Math.max(area.top + 1.2, thrown.y * depth));
+  // The dice leave the hand in a small group, spaced so none touch; the whole
+  // group starts inside the rails (a die started in a rail is thrown out of it
+  // hard, as if off something that is not there).
   const columns = Math.ceil(Math.sqrt(dice.length));
+  const spacing = 1.6;
+  const reach = ((columns - 1) / 2) * spacing + 1;
+  const startX = Math.min(area.right - reach, Math.max(area.left + reach, thrown.x * width));
+  const startZ = Math.min(area.bottom - reach, Math.max(area.top + reach, thrown.y * depth));
   const bodies = dice.map((die, index) => {
     const body = new CANNON.Body({ mass: 1, shape: collider(die.kind), material: diceStuff, linearDamping: 0.03, angularDamping: 0.06, sleepSpeedLimit: 0.3, sleepTimeLimit: 0.3 });
     const column = index % columns;
     const row = Math.floor(index / columns);
-    body.position.set(startX + (column - (columns - 1) / 2) * 1.05, 1.8 + row * 0.6 + Math.random() * 0.3, startZ + (row - (columns - 1) / 2) * 1.05);
+    body.position.set(startX + (column - (columns - 1) / 2) * spacing, 1.8 + Math.random() * 0.3, startZ + (row - (columns - 1) / 2) * spacing);
     body.quaternion.setFromEuler(Math.random() * Math.PI * 2, Math.random() * Math.PI * 2, Math.random() * Math.PI * 2);
     const turn = heading + (Math.random() - 0.5) * 0.35;
     const push = speed * scale * (0.85 + Math.random() * 0.3);
     body.velocity.set(Math.cos(turn) * push, 3 + Math.random() * 3 + push * 0.08, Math.sin(turn) * push);
-    // A harder throw spins the dice harder.
-    const spin = 18 + push * 1.1;
-    body.angularVelocity.set((Math.random() - 0.5) * spin, (Math.random() - 0.5) * spin, (Math.random() - 0.5) * spin);
+    // A thrown die tumbles end over end the way it travels, harder the harder
+    // it is thrown, with a little wobble. (Spin in any direction made a corner
+    // landing on the felt flick it sideways, as if off something not there.)
+    const roll = push + Math.random() * 4;
+    const along = { x: Math.cos(turn), z: Math.sin(turn) };
+    const wobble = () => (Math.random() - 0.5) * 8;
+    body.angularVelocity.set(along.z * roll + wobble(), wobble(), -along.x * roll + wobble());
     world.addBody(body);
     return body;
   });
@@ -110,8 +122,12 @@ export function simulate(dice: Die[], thrown: DiceThrow, width: number, depth: n
     frame = count;
     // Past 2.5 s a die still rocking settles quickly, as a real one stops wobbling.
     if (count === 150) bodies.forEach((body) => ((body.linearDamping = 0.7), (body.angularDamping = 0.8)));
-    world.step(STEP);
-    world.step(STEP);
+    // No die spins wildly: a tumbling die keeps its spin in hand.
+    bodies.forEach((body) => {
+      const spin = body.angularVelocity.length();
+      if (spin > 24) body.angularVelocity.scale(24 / spin, body.angularVelocity);
+    });
+    for (let step = 0; step < 4; step++) world.step(STEP);
     bodies.forEach((body, index) => {
       const at = (count * bodies.length + index) * 7;
       frames[at] = body.position.x;
@@ -125,15 +141,31 @@ export function simulate(dice: Die[], thrown: DiceThrow, width: number, depth: n
     if (count > 20 && bodies.every((body) => body.sleepState === CANNON.Body.SLEEPING)) {
       // A die left lying on another is knocked off it, so every die is read flat on the table.
       const perched = bodies.filter((body) => body.position.y > 1);
-      if (perched.length === 0 || count > limit - 90) {
+      if (perched.length === 0 || count > limit - 40) {
         count += 1;
         break;
       }
       perched.forEach((body) => {
-        const angle = Math.random() * Math.PI * 2;
+        // It slides off the die it rests on, away from that die's middle.
+        const below = bodies.filter((other) => other !== body).sort((a, b) => a.position.distanceTo(body.position) - b.position.distanceTo(body.position))[0];
+        let dx = below ? body.position.x - below.position.x : 1;
+        let dz = below ? body.position.z - below.position.z : 0;
+        const length = Math.hypot(dx, dz);
+        if (length < 0.05) {
+          const angle = Math.random() * Math.PI * 2;
+          [dx, dz] = [Math.cos(angle), Math.sin(angle)];
+        } else [dx, dz] = [dx / length, dz / length];
+        // ...and toward open table, so a die beside a rail is not pushed into it.
+        const cx = (area.left + area.right) / 2 - body.position.x;
+        const cz = (area.top + area.bottom) / 2 - body.position.z;
+        const toMiddle = Math.hypot(cx, cz) || 1;
+        dx += (cx / toMiddle) * 0.8;
+        dz += (cz / toMiddle) * 0.8;
+        const both = Math.hypot(dx, dz) || 1;
+        [dx, dz] = [dx / both, dz / both];
         body.linearDamping = 0.45;
         body.angularDamping = 0.6;
-        body.velocity.set(Math.cos(angle) * 3.5, 1.5, Math.sin(angle) * 3.5);
+        body.velocity.set(dx * 4, 1.5, dz * 4);
         body.angularVelocity.set((Math.random() - 0.5) * 8, 0, (Math.random() - 0.5) * 8);
         body.wakeUp();
       });
