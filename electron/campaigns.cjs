@@ -69,6 +69,18 @@ function touch(file, input) {
   return found;
 }
 
+// A campaign's ruleset, changed (it decides the books and the sheets).
+function setRuleset(file, input) {
+  const campaigns = read(file);
+  const found = campaigns.find((campaign) => campaign.id === String(input?.id ?? ""));
+  if (!found) throw new Error("That campaign is missing.");
+  const ruleset = clean(input?.ruleset, 40);
+  if (!ruleset) throw new Error("Give the ruleset.");
+  found.ruleset = ruleset;
+  write(file, campaigns);
+  return found;
+}
+
 // Each campaign keeps its table in <userData>/campaigns/<id>/:
 // state.json (view, chat, tokens and doors) and bundle.zip (the opened adventure).
 function folder(file, id) {
@@ -127,4 +139,4 @@ function writeBundle(file, id, bytes) {
   writeAtomic(path.join(folder(file, id), "bundle.zip"), bytes);
 }
 
-module.exports = { read, create, touch, exists, readState, writeState, readBundle, writeBundle };
+module.exports = { read, create, touch, setRuleset, exists, readState, writeState, readBundle, writeBundle };

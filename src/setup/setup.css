@@ -374,3 +374,5 @@
   .setup *::before,
   .setup *::after { animation: none !important; transition: none !important; }
 }
+.ruleset-select { cursor: pointer; font-family: inherit; appearance: auto; }
+.ruleset-select option { background: #12161c; color: #e8e2d4; }

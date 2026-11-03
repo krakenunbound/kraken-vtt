@@ -322,7 +322,26 @@ export function SetupScreen({
                   <div>
                     <h2>{selected.name}</h2>
                     <p>
-                      <span className="ruleset-chip">{selected.ruleset}</span> {formatPlayed(selected)}
+                      <select
+                        className="ruleset-chip ruleset-select"
+                        aria-label="Ruleset"
+                        title="The campaign's ruleset: it decides its books"
+                        value={selected.ruleset}
+                        onChange={(event) => {
+                          const ruleset = event.target.value;
+                          void window.kraken
+                            ?.setCampaignRuleset({ id: selected.id, ruleset })
+                            .then((changed) => setRows((current) => current.map((item) => (item.id === changed.id ? changed : item))))
+                            .catch((reason: Error) => setLocalError(reason.message));
+                        }}
+                      >
+                        {[...new Set([...RULESETS.map((item) => item.name), selected.ruleset])].map((name) => (
+                          <option key={name} value={name}>
+                            {name}
+                          </option>
+                        ))}
+                      </select>{" "}
+                      {formatPlayed(selected)}
                     </p>
                   </div>
                 </div>

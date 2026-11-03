@@ -210,6 +210,12 @@ function openCampaign(id) {
   return hosted.state;
 }
 
+// A campaign's ruleset is chosen before it is hosted (it decides its books).
+function setCampaignRuleset(input) {
+  if (hosted && hosted.id === String(input?.id ?? "")) throw new Error("Leave the table first: a campaign's ruleset is changed before it is hosted.");
+  return campaigns.setRuleset(campaignFile(), input);
+}
+
 function requireHosted(id) {
   if (!hosted || hosted.id !== String(id ?? "")) throw new Error("That campaign is not being hosted.");
   return hosted;
@@ -238,6 +244,7 @@ ipcMain.handle("network", () => networkSnapshot());
 ipcMain.handle("campaigns", () => campaigns.read(campaignFile()));
 ipcMain.handle("save-campaign", (_event, input) => campaigns.create(campaignFile(), input));
 ipcMain.handle("touch-campaign", (_event, input) => campaigns.touch(campaignFile(), input));
+ipcMain.handle("campaign-ruleset", (_event, input) => setCampaignRuleset(input));
 ipcMain.handle("copy", (_event, text) => {
   clipboard.writeText(String(text ?? "").slice(0, 200));
 });
@@ -388,6 +395,7 @@ const agentContext = {
   campaigns: {
     list: () => campaigns.read(campaignFile()),
     create: (input) => campaigns.create(campaignFile(), input),
+    setRuleset: (input) => setCampaignRuleset(input),
   },
   ui: (command, timeout) => askWindow(command, timeout),
   window: () => (mainWindow && !mainWindow.isDestroyed() ? mainWindow : null),
