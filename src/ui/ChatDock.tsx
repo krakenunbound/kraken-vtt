@@ -339,13 +339,15 @@ export function ChatDock({ session }: { session: Session }) {
     const startX = event.clientX;
     const startY = event.clientY;
     let dragging = false;
+    // Where the hand was, on the screen (so a popped-out chat on another
+    // monitor throws onto the table as the docked one does).
     let samples: { x: number; y: number; t: number }[] = [];
     const overTower = (x: number, y: number) => Boolean(view.document.elementFromPoint(x, y)?.closest(".tower"));
     const move = (moveEvent: PointerEvent) => {
       if (!dragging && Math.hypot(moveEvent.clientX - startX, moveEvent.clientY - startY) > 10) dragging = true;
       if (!dragging) return;
       const now = performance.now();
-      samples = [...samples.filter((sample) => now - sample.t < 140), { x: moveEvent.clientX, y: moveEvent.clientY, t: now }];
+      samples = [...samples.filter((sample) => now - sample.t < 140), { x: moveEvent.screenX, y: moveEvent.screenY, t: now }];
       setGhost({ x: moveEvent.clientX, y: moveEvent.clientY, sides, overTower: overTower(moveEvent.clientX, moveEvent.clientY) });
     };
     const up = (upEvent: PointerEvent) => {
@@ -361,21 +363,27 @@ export function ChatDock({ session }: { session: Session }) {
         rollDice(dice, true, { x: upEvent.clientX, y: upEvent.clientY });
         return;
       }
-      // Thrown on the table (the main window's): the dice leave the hand there, that fast.
-      if (view === window) {
+      // Thrown on the table (the main window's): the dice leave the hand there,
+      // that fast. From a popped-out chat, the screen says where that is.
+      {
+        const offset = view === window ? { x: upEvent.screenX - upEvent.clientX, y: upEvent.screenY - upEvent.clientY } : screenOffset();
+        const atX = (upEvent.screenX - offset.x) / window.innerWidth;
+        const atY = (upEvent.screenY - offset.y) / window.innerHeight;
         const first = samples.find((sample) => performance.now() - sample.t >= 30) ?? samples[0];
         const seconds = first ? Math.max(0.016, (performance.now() - first.t) / 1000) : 1;
-        let vx = first ? (upEvent.clientX - first.x) / seconds / window.innerWidth : 0;
-        let vy = first ? (upEvent.clientY - first.y) / seconds / window.innerHeight : 0;
+        let vx = first ? (upEvent.screenX - first.x) / seconds / window.innerWidth : 0;
+        let vy = first ? (upEvent.screenY - first.y) / seconds / window.innerHeight : 0;
+        const x = Math.min(0.98, Math.max(0.02, atX));
+        const y = Math.min(0.98, Math.max(0.02, atY));
         if (Math.hypot(vx, vy) < 0.15) {
           // Let go without a throw: they tumble out toward the middle.
-          const dx = 0.5 - upEvent.clientX / window.innerWidth;
-          const dy = 0.45 - upEvent.clientY / window.innerHeight;
+          const dx = 0.5 - x;
+          const dy = 0.45 - y;
           const length = Math.hypot(dx, dy) || 1;
           vx = (dx / length) * 0.5;
           vy = (dy / length) * 0.5;
         }
-        setThrow({ x: upEvent.clientX / window.innerWidth, y: upEvent.clientY / window.innerHeight, vx, vy });
+        setThrow({ x, y, vx, vy });
       }
       rollDice(dice, tower, { x: upEvent.clientX, y: upEvent.clientY });
     };

@@ -27,7 +27,7 @@ for (const side of sides) {
     // Every other throw a hard flick (as fast as a hand goes), the rest gentle to brisk.
     const hard = round % 2 === 1;
     const angle = Math.random() * Math.PI * 2;
-    const thrown = hard ? { x: Math.random(), y: Math.random(), vx: Math.cos(angle) * 3, vy: Math.sin(angle) * 3 } : { x: Math.random(), y: Math.random(), vx: Math.random() * 2 - 1, vy: Math.random() * 2 - 1 };
+    const thrown = hard ? { x: Math.random(), y: Math.random(), vx: Math.cos(angle) * (round === 5 ? 8 : 3), vy: Math.sin(angle) * (round === 5 ? 8 : 3) } : { x: Math.random(), y: Math.random(), vx: Math.random() * 2 - 1, vy: Math.random() * 2 - 1 };
     const result = simulate(dice, thrown, width, depth);
     throws += 1;
     if (result.count < 6 * 60) still += 1;

@@ -75,7 +75,7 @@ export function simulate(dice: Die[], thrown: DiceThrow, width: number, depth: n
   // The dice leave the hand as fast as it moved (world units a second), from
   // a gentle toss to a hard flick across the table.
   const speed = Math.hypot(thrown.vx * width, thrown.vy * depth);
-  const scale = speed < 1e-3 ? 0 : Math.min(56, Math.max(5, speed)) / speed;
+  const scale = speed < 1e-3 ? 0 : Math.min(90, Math.max(5, speed)) / speed;
   const heading = Math.atan2(thrown.vy * depth, thrown.vx * width);
   // The dice leave the hand in a small group, spaced so none touch; the whole
   // group starts inside the rails (a die started in a rail is thrown out of it

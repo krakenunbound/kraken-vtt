@@ -220,6 +220,15 @@ function createEngine(host: HTMLDivElement) {
         return group;
       });
       throws.push({ line, look, last: groups.map(() => new THREE.Vector3(Infinity, 0, 0)), dice, labels, groups, frames: result.frames, count: result.count, hits: result.hits, played: 0, start: performance.now(), landed: 0 });
+      // For tests and the agent's eyes: how this throw went (how far the first
+      // die rolled in its first half second, in table widths, and how long to rest).
+      let path = 0;
+      for (let frame = 1; frame <= Math.min(result.count - 1, 30); frame++) {
+        const at = frame * dice.length * 7;
+        const before = (frame - 1) * dice.length * 7;
+        path += Math.hypot(result.frames[at] - result.frames[before], result.frames[at + 2] - result.frames[before + 2]);
+      }
+      (window as unknown as { __krakenDice?: unknown }).__krakenDice = { thrown, table: { width, depth }, firstHalfSecond: path / width, seconds: result.count / 60 };
       wake();
     },
     // Dice into the tower: they tumble over and drop in; nobody sees them land.
