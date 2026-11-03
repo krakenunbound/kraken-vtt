@@ -228,6 +228,26 @@ try {
   const withArt = await latest(ann, "map", (m) => m.tokens.some((t) => t.id === placed.id && t.art), "token shows the portrait");
   assert(withArt.tokens.find((t) => t.id === placed.id).art.includes(encodeURIComponent(portraits[0].id)), "token art is the portrait");
 
+  // Drawing on the map, for everyone: Ann draws in her colour; she rubs out
+  // only her own lines; the GM rubs out anyone's and clears them all; saved.
+  ann.ws.send(JSON.stringify({ type: "draw", points: [10, 10, 60, 40, 90, 20], width: 5 }));
+  const drawn = await latest(dm, "map", (m) => m.drawings?.length === 1, "the GM sees Ann's line");
+  const line = drawn.drawings[0];
+  assert(line.by === "Ann" && /^#[0-9a-f]{6}$/i.test(line.color) && line.points.length === 6, `Ann's line, in her colour: ${JSON.stringify(line)}`);
+  const gmLine = await tool("kraken_draw", { action: "draw", points: [0, 0, 100, 100], color: "#ff5a5a" });
+  await latest(ann, "map", (m) => m.drawings?.length === 2, "Ann sees the GM's line");
+  ann.ws.send(JSON.stringify({ type: "draw-erase", id: gmLine.id }));
+  await latest(ann, "error", (m) => /your own lines/.test(m.reason), "Ann cannot rub out the GM's line");
+  ann.ws.send(JSON.stringify({ type: "draw-clear" }));
+  await latest(ann, "error", (m) => /Only the GM/.test(m.reason), "Ann cannot clear the drawings");
+  ann.ws.send(JSON.stringify({ type: "draw-erase", id: line.id }));
+  await latest(dm, "map", (m) => m.drawings?.length === 1 && m.drawings[0].id === gmLine.id, "Ann rubs out her own line");
+  ann.ws.send(JSON.stringify({ type: "draw", points: [5, 5] }));
+  await latest(ann, "error", (m) => /two points/.test(m.reason), "a line needs two points");
+  assert(server.persisted().map.drawings.keep.length === 1, "drawings are saved with the scene");
+  await tool("kraken_draw", { action: "clear" });
+  await latest(ann, "map", (m) => m.drawings?.length === 0, "the GM clears every line");
+
   await tool("kraken_token_remove", { id: placed.id });
   assert(!server.snapshot().tokens.some((t) => t.id === placed.id), "token removed");
   console.log("MAP_OK");

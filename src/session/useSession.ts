@@ -52,8 +52,11 @@ export type TableMap = {
   twilight?: boolean;
   sceneLights: SceneLightRecord[];
   settings: MapSettings;
+  drawings?: MapDrawing[];
 };
 export type Ping = { id: number; x: number; y: number; from: string; color: string };
+// A line drawn on the map, for everyone (by "" is the GM's).
+export type MapDrawing = { id: string; by: string; color: string; width: number; points: number[] };
 const EMPTY_MAP: TableMap = { sceneId: null, tokens: [], doors: [], vision: null,
   sight: false,
   locked: false,
@@ -742,6 +745,9 @@ export function useSession() {
     [send],
   );
   const updateSettings = useCallback((patch: import("../table/SceneSettings").SceneSettingsPatch) => send({ type: "scene-settings", patch }), [send]);
+  const draw = useCallback((points: number[], color: string | null, width: number) => send({ type: "draw", points, ...(color ? { color } : {}), width }), [send]);
+  const eraseDrawing = useCallback((id: string) => send({ type: "draw-erase", id }), [send]);
+  const clearDrawings = useCallback(() => send({ type: "draw-clear" }), [send]);
   const placeLight = useCallback((light: Partial<SceneLightRecord> & { preset?: string }) => send({ type: "light-place", light }), [send]);
   const updateLight = useCallback((id: string, patch: Partial<SceneLightRecord>) => send({ type: "light-update", id, patch }), [send]);
   const removeLight = useCallback((id: string) => send({ type: "light-remove", id }), [send]);
@@ -818,6 +824,9 @@ export function useSession() {
     ping,
     updateSettings,
     placeLight,
+    draw,
+    eraseDrawing,
+    clearDrawings,
     updateLight,
     removeLight,
     ct,

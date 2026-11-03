@@ -26,6 +26,8 @@
     "sound-ui": "node scripts/verify-sound-ui.mjs",
     "books": "node scripts/check-books.mjs",
     "books-ui": "node scripts/verify-books-ui.mjs",
+    "order-ui": "node scripts/verify-order-ui.mjs",
+    "maptools-ui": "node scripts/verify-maptools-ui.mjs",
     "sounds": "node --env-file=.env.local scripts/generate-sounds.mjs",
     "decal": "node scripts/check-decal.mjs",
     "sight-parity": "node scripts/check-sight-parity.mjs",

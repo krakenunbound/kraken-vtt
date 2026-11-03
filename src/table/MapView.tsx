@@ -1,3 +1,4 @@
+import { Icon } from "../ui/icons";
 import { lazy, Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { backgroundRect, colorWithAlpha, gridStops, sceneFrame, type BackgroundFit, type SceneFrame } from "../foundry/geometry";
 import { type SceneLight, type SceneMarker, type SceneRegion, type SceneWall } from "../foundry/sceneObjects";
@@ -119,8 +120,14 @@ export type MapActions = {
   updateLight: (id: string, patch: Partial<SceneLightRecord>) => void;
   removeLight: (id: string) => void;
   ping: (x: number, y: number) => void;
+  draw: (points: number[], color: string | null, width: number) => void;
+  eraseDrawing: (id: string) => void;
+  clearDrawings: () => void;
   ct: (action: string, payload?: Record<string, unknown>) => void;
 };
+// What a left-drag does on the map: pan it, ping, draw, or rub a line out.
+type Tool = "pan" | "ping" | "draw" | "erase";
+const DRAW_COLORS = ["#ffcc33", "#ff5a5a", "#5ad1ff", "#7dff7a", "#d38cff", "#ffffff", "#111111"];
 
 type Drag = { pointerId: number; id: string; start: Point; at: Point; moved: boolean; snap: boolean; squares: number };
 type Measure = { pointerId: number; start: Point; at: Point };
@@ -135,6 +142,7 @@ export function MapView({
   notice = null,
   actions,
   targeted = [],
+  me = "",
 }: {
   scene: MapScene;
   gm?: boolean;
@@ -145,7 +153,14 @@ export function MapView({
   actions: MapActions;
   // Tokens this seat's creatures have targeted (a reticle shows on them).
   targeted?: string[];
+  // This seat's name (a player rubs out only their own lines).
+  me?: string;
 }) {
+  const [tool, setTool] = useState<Tool>("pan");
+  const [drawColor, setDrawColor] = useState<string | null>(null);
+  const [stroke, setStroke] = useState<{ pointerId: number; points: number[] } | null>(null);
+  const [found, setFound] = useState<{ id: string; at: number } | null>(null);
+  const [hint, setHint] = useState("");
   const viewport = useRef<HTMLDivElement>(null);
   const pan = useRef<{ id: number; x: number; y: number } | null>(null);
   const [drag, setDrag] = useState<Drag | null>(null);
@@ -314,11 +329,42 @@ export function MapView({
     setCamera(fitCamera(rect.width, rect.height, frame, scene.width, scene.height));
   }
 
-  function lookAt(token: MapToken) {
+  function lookAt(token: MapToken, close = false) {
     const element = viewport.current;
     if (!element) return;
     setSelected(token.id);
-    setCamera((current) => centeredOn(element.getBoundingClientRect(), token, Math.max(current.scale, PLAYER_SQUARE_PX / size)));
+    // Found from the toolbar: close in (a square about 110 px), so a lost player sees just where they are.
+    setCamera((current) => centeredOn(element.getBoundingClientRect(), token, close ? 110 / size : Math.max(current.scale, PLAYER_SQUARE_PX / size)));
+    if (close) {
+      setFound({ id: token.id, at: Date.now() });
+      window.setTimeout(() => setFound((current) => (current && Date.now() - current.at >= 1900 ? null : current)), 2000);
+    }
+  }
+  function findMine() {
+    const token = tokens.find((item) => item.id === selected && (gm || item.mine)) ?? mine[0];
+    if (token) {
+      lookAt(token, true);
+      setHint("");
+    } else {
+      setHint(gm ? "Select a token first." : "Your token is not on this map.");
+      window.setTimeout(() => setHint(""), 3000);
+    }
+  }
+  // The nearest line this seat may rub out, within a few screen pixels.
+  function lineAt(point: Point) {
+    const reach = 10 / camera.scale;
+    let best: { id: string; distance: number } | null = null;
+    for (const line of map.drawings ?? []) {
+      if (!gm && line.by !== me) continue;
+      for (let index = 0; index + 3 < line.points.length; index += 2) {
+        const [x1, y1, x2, y2] = line.points.slice(index, index + 4);
+        const length = Math.hypot(x2 - x1, y2 - y1) || 1;
+        const along = Math.max(0, Math.min(1, ((point.x - x1) * (x2 - x1) + (point.y - y1) * (y2 - y1)) / (length * length)));
+        const distance = Math.hypot(point.x - (x1 + along * (x2 - x1)), point.y - (y1 + along * (y2 - y1))) - line.width / 2;
+        if (distance < reach && (!best || distance < best.distance)) best = { id: line.id, distance };
+      }
+    }
+    return best?.id ?? null;
   }
 
   function worldAt(clientX: number, clientY: number): Point | null {
@@ -367,6 +413,19 @@ export function MapView({
         }
         if (event.button !== 0) return;
         setSelected(null);
+        if (tool !== "pan") {
+          const point = worldAt(event.clientX, event.clientY);
+          if (!point) return;
+          if (tool === "ping") actions.ping(point.x, point.y);
+          else if (tool === "erase") {
+            const id = lineAt(point);
+            if (id) actions.eraseDrawing(id);
+          } else {
+            capture(event.currentTarget, event.pointerId);
+            setStroke({ pointerId: event.pointerId, points: [Math.round(point.x), Math.round(point.y)] });
+          }
+          return;
+        }
         capture(event.currentTarget, event.pointerId);
         pan.current = { id: event.pointerId, x: event.clientX, y: event.clientY };
         setPanning(true);
@@ -383,6 +442,12 @@ export function MapView({
         if (measure && measure.pointerId === event.pointerId) {
           const point = worldAt(event.clientX, event.clientY);
           if (point) setMeasure({ ...measure, at: point });
+          return;
+        }
+        if (stroke && stroke.pointerId === event.pointerId) {
+          const point = worldAt(event.clientX, event.clientY);
+          const [lastX, lastY] = stroke.points.slice(-2);
+          if (point && Math.hypot(point.x - lastX, point.y - lastY) > 3 / camera.scale && stroke.points.length < 3990) setStroke({ ...stroke, points: [...stroke.points, Math.round(point.x), Math.round(point.y)] });
           return;
         }
         const current = pan.current;
@@ -407,6 +472,13 @@ export function MapView({
         }
         if (measure && measure.pointerId === event.pointerId) {
           setMeasure(null);
+          return;
+        }
+        if (stroke && stroke.pointerId === event.pointerId) {
+          // A click is a dot: a short line where it was.
+          const points = stroke.points.length >= 4 ? stroke.points : [...stroke.points, stroke.points[0] + 1, stroke.points[1] + 1];
+          actions.draw(points, drawColor, Math.max(2, Math.round(4 / camera.scale)));
+          setStroke(null);
           return;
         }
         if (pan.current?.id === event.pointerId) {
@@ -659,6 +731,20 @@ export function MapView({
             </span>
           </>
         ) : null}
+        {(map.drawings?.length ?? 0) > 0 || stroke ? (
+          <svg className="overlay drawings" width={frame.worldWidth} height={frame.worldHeight} viewBox={`0 0 ${frame.worldWidth} ${frame.worldHeight}`}>
+            {(map.drawings ?? []).map((line) => (
+              <polyline key={line.id} data-drawing={line.id} points={line.points.join(" ")} fill="none" stroke={line.color} strokeWidth={line.width} strokeLinecap="round" strokeLinejoin="round" />
+            ))}
+            {stroke ? <polyline points={stroke.points.join(" ")} fill="none" stroke={drawColor ?? "#ffcc33"} strokeWidth={Math.max(2, Math.round(4 / camera.scale))} strokeLinecap="round" strokeLinejoin="round" opacity={0.8} /> : null}
+          </svg>
+        ) : null}
+        {found
+          ? (() => {
+              const token = tokens.find((item) => item.id === found.id);
+              return token ? <div key={found.at} className="found-ring" style={{ left: token.x, top: token.y, width: size * 3, height: size * 3 }} /> : null;
+            })()
+          : null}
         {pings.map((item) => (
           <div key={item.id} className="ping" style={{ left: item.x, top: item.y, width: size * 2, height: size * 2, borderColor: item.color }}>
             <span style={{ fontSize: 14 / camera.scale }}>{item.from}</span>
@@ -898,63 +984,88 @@ export function MapView({
         </aside>
       ) : null}
 
-      <div className="map-controls">
-        <button type="button" onClick={() => zoomAboutCenter(1 / 1.25)} aria-label="Zoom out">
-          −
-        </button>
-        <span className="zoom-readout">{Math.round(camera.scale * 100)}%</span>
-        <button type="button" onClick={() => zoomAboutCenter(1.25)} aria-label="Zoom in">
-          +
-        </button>
-        <button type="button" onClick={fit}>
-          Fit
-        </button>
-        {mine.length > 0 || (gm && selected) ? (
-          <button
-            type="button"
-            data-action="find-token"
-            onClick={() => {
-              const token = tokens.find((item) => item.id === selected && (gm || item.mine)) ?? mine[0];
-              if (token) lookAt(token);
-            }}
-          >
-            {gm ? "Find" : "My token"}
+      <div className="map-controls map-toolbar" role="toolbar" aria-label="Map tools">
+        <div className="tool-group">
+          <button type="button" className="tool" onClick={() => zoomAboutCenter(1 / 1.25)} aria-label="Zoom out" title="Zoom out">
+            <Icon name="zoom-out" />
           </button>
-        ) : null}
+          <span className="zoom-readout">{Math.round(camera.scale * 100)}%</span>
+          <button type="button" className="tool" onClick={() => zoomAboutCenter(1.25)} aria-label="Zoom in" title="Zoom in">
+            <Icon name="zoom-in" />
+          </button>
+          <button type="button" className="tool" onClick={fit} aria-label="Fit" title="See the whole map">
+            <Icon name="fit" />
+          </button>
+          <button type="button" className="tool find" data-action="find-token" onClick={findMine} aria-label={gm ? "Find the selected token" : "Find my token"} title={gm ? "Centre and zoom on the selected token" : "Where am I? Centre and zoom on my token"}>
+            <Icon name="locate" />
+          </button>
+        </div>
+        <div className="tool-group" role="radiogroup" aria-label="What a drag does">
+          {(
+            [
+              ["pan", "hand", "Move the map (drag)"],
+              ["ping", "ping", "Ping: click to show everyone a spot, in your colour"],
+              ["draw", "pen", "Draw on the map, for everyone"],
+              ["erase", "eraser", gm ? "Rub out a line (any)" : "Rub out one of your lines"],
+            ] as const
+          ).map(([id, icon, title]) => (
+            <button key={id} type="button" className={tool === id ? "tool on" : "tool"} role="radio" aria-checked={tool === id} aria-label={title} title={title} data-tool={id} onClick={() => setTool(id)}>
+              <Icon name={icon} />
+            </button>
+          ))}
+          {tool === "draw" ? (
+            <span className="draw-colors" aria-label="Line colour">
+              <button type="button" className={drawColor === null ? "swatch mine on" : "swatch mine"} title="Your own colour" aria-label="Your own colour" onClick={() => setDrawColor(null)}>
+                ●
+              </button>
+              {DRAW_COLORS.map((color) => (
+                <button key={color} type="button" className={drawColor === color ? "swatch on" : "swatch"} style={{ background: color }} aria-label={`Colour ${color}`} data-color={color} onClick={() => setDrawColor(color)} />
+              ))}
+            </span>
+          ) : null}
+          {gm && (map.drawings?.length ?? 0) > 0 ? (
+            <button type="button" className="tool" data-action="clear-drawings" aria-label="Clear every drawing" title="Clear every drawing" onClick={actions.clearDrawings}>
+              <Icon name="trash" />
+            </button>
+          ) : null}
+        </div>
         {gm ? (
-          <button type="button" data-action="scene-settings" aria-pressed={settingsOpen} onClick={() => setSettingsOpen(!settingsOpen)} title="Lighting, players, grid and weather">
-            Scene
-          </button>
-        ) : null}
-        {gm ? (
-          <button
-            type="button"
-            data-action="add-light"
-            title="Put a torch-bright light in the middle of the view; drag it, right-click to change it"
-            onClick={() => {
-              const center = viewCenter();
-              if (center) actions.placeLight({ x: center.x, y: center.y, preset: "torch", color: "#FFB347" });
-              setShowLights(true);
-            }}
-          >
-            Add light
-          </button>
-        ) : null}
-        {gm ? (
-          <button type="button" data-action="sight" aria-pressed={map.sight} onClick={() => actions.setSight(!map.sight)} title="Players see only what their tokens see, and walls stop their tokens">
-            Line of sight {map.sight ? "on" : "off"}
-          </button>
-        ) : null}
-        {gm ? (
-          <button type="button" data-action="lock" aria-pressed={map.locked} onClick={() => actions.setLocked(!map.locked)} title="Players cannot move their tokens while locked">
-            {map.locked ? "Movement locked" : "Lock movement"}
-          </button>
+          <div className="tool-group">
+            <button type="button" className={settingsOpen ? "tool on" : "tool"} data-action="scene-settings" aria-pressed={settingsOpen} aria-label="Scene" onClick={() => setSettingsOpen(!settingsOpen)} title="Scene: lighting, players, grid and weather">
+              <Icon name="settings" />
+            </button>
+            <button
+              type="button"
+              className="tool"
+              data-action="add-light"
+              aria-label="Add light"
+              title="Put a torch-bright light in the middle of the view; drag it, right-click to change it"
+              onClick={() => {
+                const center = viewCenter();
+                if (center) actions.placeLight({ x: center.x, y: center.y, preset: "torch", color: "#FFB347" });
+                setShowLights(true);
+              }}
+            >
+              <Icon name="sun" />
+            </button>
+            <button type="button" className={map.sight ? "tool on" : "tool"} data-action="sight" aria-pressed={map.sight} aria-label={`Line of sight ${map.sight ? "on" : "off"}`} onClick={() => actions.setSight(!map.sight)} title={`Line of sight ${map.sight ? "on" : "off"}: players see only what their tokens see, and walls stop their tokens`}>
+              <Icon name={map.sight ? "eye" : "eye-off"} />
+            </button>
+            <button type="button" className={map.locked ? "tool on" : "tool"} data-action="lock" aria-pressed={map.locked} aria-label={map.locked ? "Movement locked" : "Lock movement"} onClick={() => actions.setLocked(!map.locked)} title={map.locked ? "Movement locked: players cannot move their tokens" : "Lock movement"}>
+              <Icon name={map.locked ? "lock" : "unlock"} />
+            </button>
+          </div>
         ) : map.locked ? (
           <span className="lock-note" title="The GM has locked token movement">
-            Movement locked
+            <Icon name="lock" size={14} /> Movement locked
           </span>
         ) : null}
       </div>
+      {hint ? (
+        <p className="map-toast" role="status">
+          {hint}
+        </p>
+      ) : null}
       {gm && !settingsOpen ? (
         <SceneLegend
           walls={scene.walls}
@@ -975,7 +1086,7 @@ export function MapView({
           {notice}
         </p>
       ) : null}
-      <p className="map-hint">Drag to pan · wheel to zoom · right-drag to measure · double-click to ping · Ctrl+click a token to target it{gm || mine.length > 0 ? " · arrows move the selected token" : ""}</p>
+      <p className="map-hint">Drag to pan · wheel to zoom · right-drag to measure · double-click (or the ping tool) to ping · Ctrl+click a token to target it{gm || mine.length > 0 ? " · arrows move the selected token" : ""}</p>
       {scene.grid.type > 1 ? <p className="map-note">Hex grids are not drawn yet.</p> : null}
       {imageFailed || !scene.imageUrl ? <p className="map-note">This scene has no background image.</p> : null}
     </div>
