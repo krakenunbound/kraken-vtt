@@ -12,6 +12,7 @@ const { listTools } = require("../electron/agent/tools.cjs");
 // Table message -> the tool that does the same.
 const MESSAGES = {
   chat: "kraken_chat_send",
+  "chat-clear": "kraken_chat_log",
   roll: "kraken_roll",
   op: "kraken_record_update",
   "build-character": "kraken_build_character",

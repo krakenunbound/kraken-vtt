@@ -354,9 +354,9 @@ const TOOLS = [
   },
   {
     name: "kraken_chat_log",
-    description: "Recent chat, including roll results.",
-    inputSchema: object({ count: number("How many lines, default 20") }),
-    run: (args, ctx) => out(needTable(ctx).chatLog(args.count)),
+    description: "Recent chat, including roll results (the table's record, also lines the GM has cleared). clear: true clears the GM's chat window, as /clear; it stays cleared when the GM comes back.",
+    inputSchema: object({ count: number("How many lines, default 20"), clear: { type: "boolean", description: "Clear the GM's chat window (/clear)" } }),
+    run: (args, ctx) => out(args.clear ? needTable(ctx).clearChat() : needTable(ctx).chatLog(args.count)),
   },
   {
     name: "kraken_players",

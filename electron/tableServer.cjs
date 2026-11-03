@@ -290,6 +290,11 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
   const clients = new Map();
   const tokenArt = new Map();
   const chat = savedChat(saved.chat);
+  // When each seat last cleared its chat (/clear), by name (the GM's as "@gm"):
+  // its screen shows only newer lines, also after a restart. The table's own
+  // record (the agent's chat log) keeps them.
+  const chatCleared = new Map(Object.entries(saved.chatCleared && typeof saved.chatCleared === "object" ? saved.chatCleared : {}).filter(([, at]) => Number.isFinite(at)));
+  const clearKey = (client) => (client.role === "dm" ? "@gm" : client.name);
   let options = savedOptions(saved.options);
   // The chat's sound triggers, and what plays under the game (ambience loops
   // and music), for every seat; saved with the campaign.
@@ -438,7 +443,8 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
   }
 
   function chatFor(client) {
-    return chat.filter((line) => seesLine(client, line));
+    const since = chatCleared.get(clearKey(client)) ?? 0;
+    return chat.filter((line) => (line.at ?? 0) > since && seesLine(client, line));
   }
 
   // label: what the roll is for ("Strength check"). from: who rolled.
@@ -734,6 +740,12 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
           .partyView(agentHandle)
           .then((view) => send(ws, { type: "party", party: view }))
           .catch(() => undefined);
+        return;
+      }
+
+      if (msg.type === "chat-clear") {
+        chatCleared.set(clearKey(client), Date.now());
+        onChange("table");
         return;
       }
 
@@ -1093,6 +1105,13 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     vote: (question, by = "Agent") => startVote(text(question, "").slice(0, 200), { id: "agent", name: by }),
     votes: () => chat.filter((line) => line.vote).map((line) => line.vote),
     save: () => onChange("save"),
+    // The GM's /clear: the GM's chat windows clear, now and when they come back.
+    clearChat() {
+      chatCleared.set("@gm", Date.now());
+      for (const [ws, client] of clients) if (client.role === "dm") send(ws, { type: "chat-cleared" });
+      onChange("table");
+      return { cleared: true };
+    },
     chatLog: (count = 20) => chat.slice(-Math.max(1, Math.min(100, Number(count) || 20))),
     players: () => playerList(),
     scene: () => scene,
@@ -1236,6 +1255,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         sound: soundscape,
         soundTriggers,
         soundTriggersVersion: TRIGGERS_VERSION,
+        chatCleared: Object.fromEntries(chatCleared),
       };
     },
     // What agents (the MCP server, the in-app assistant) use. They act as the GM.

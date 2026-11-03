@@ -370,6 +370,10 @@ export function useSession() {
           }
           if (msg.type === "sound-triggers" && Array.isArray(msg.triggers)) setSoundTriggers(msg.triggers as SoundTrigger[]);
           if (msg.type === "kicked") setError(String(msg.reason ?? "The GM has asked you to leave the table."));
+          if (msg.type === "chat-cleared") {
+            setChat([]);
+            return;
+          }
           if (msg.type === "chat") {
             const line = msg as unknown as ChatLine;
             // Its dice are thrown first; its card waits for them to land.
@@ -645,7 +649,6 @@ export function useSession() {
   }, []);
   // A line on this screen only (/help, /info), and /clear.
   const note = useCallback((text: string, from = "Kraken") => setChat((current) => [...current, { id: "local", from, text, at: Date.now(), local: true }].slice(-100)), []);
-  const clearChat = useCallback(() => setChat([]), []);
   // Sound, the GM's: the library, playing for the table, ambience, music, the chat's triggers.
   const soundList = useCallback(async (): Promise<SoundLibrary> => {
     const response = await fetch(`${originRef.current}/sound/list?token=${assetRef.current}`);
@@ -689,6 +692,11 @@ export function useSession() {
     socket.send(JSON.stringify(message));
     return true;
   }, []);
+  // As FG's /clear, and it stays cleared: the host remembers when this seat cleared.
+  const clearChat = useCallback(() => {
+    setChat([]);
+    send({ type: "chat-clear" });
+  }, [send]);
 
   // Map actions. The host decides (walls, ownership) and sends everyone their view.
   const placeToken = useCallback((recordId: string | null, x?: number, y?: number, name?: string) => {
