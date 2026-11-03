@@ -5,7 +5,7 @@ A free, MIT-licensed virtual tabletop. The GM hosts from this app; players join 
 ## Running it
 
 - **Double-click `Kraken VTT.bat`** in this folder. It installs packages the first time, rebuilds the interface when the code has changed, and opens the app. `Kraken VTT.bat --build` always rebuilds.
-- **`Kraken VTT.exe`** in this folder is a packaged copy (built with `npm run exe`, then copied here). It doesn't need Node.js, but it is a snapshot: rebuild it to get newer changes. It isn't in git.
+- **`Kraken VTT.exe`** in this folder is a packaged copy (`npm run exe` builds it and puts it here). It doesn't need Node.js, but it is a snapshot: rebuild it to get newer changes. It isn't in git.
 
 Players open the address shown in the app's Players window in Chrome.
 

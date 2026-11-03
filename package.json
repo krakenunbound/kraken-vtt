@@ -30,7 +30,7 @@
     "demo": "node scripts/demo-host.mjs",
     "start": "electron .",
     "launch": "node scripts/launch.mjs",
-    "exe": "npm run build && electron-builder --win portable"
+    "exe": "npm run build && electron-builder --win portable && node scripts/copy-exe.mjs"
   },
   "dependencies": {
     "@fontsource/cinzel": "^5.3.0",
