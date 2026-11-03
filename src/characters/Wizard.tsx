@@ -297,9 +297,17 @@ export function Wizard({ session, onDone }: { session: Session; onDone: (id: str
     <section className="wizard" data-page={page}>
       <header className="wizard-head">
         <h2>Create a character</h2>
-        <button type="button" onClick={() => onDone(null)}>
-          Cancel
-        </button>
+        <span className="wizard-head-buttons">
+          <button type="button" data-wizard-back disabled={page === PAGES[0]} onClick={() => setPage(PAGES[Math.max(0, PAGES.indexOf(page) - 1)])}>
+            Back
+          </button>
+          <button type="button" className="wizard-next" data-wizard-next disabled={page === PAGES[PAGES.length - 1]} onClick={() => setPage(PAGES[Math.min(PAGES.length - 1, PAGES.indexOf(page) + 1)])}>
+            Next
+          </button>
+          <button type="button" onClick={() => onDone(null)}>
+            Cancel
+          </button>
+        </span>
       </header>
       <nav className="wizard-tabs" role="tablist">
         {PAGES.map((name) => (

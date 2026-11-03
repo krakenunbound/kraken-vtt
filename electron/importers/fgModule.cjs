@@ -69,7 +69,9 @@ function parseXml(text) {
   return doc.documentElement;
 }
 
-function readFiles(source) {
+// A module's files. xmlOnly: decompress just its XML (the records), not its
+// pictures (most of a big module), though every name is still listed.
+function readFiles(source, { xmlOnly = false } = {}) {
   const stat = fs.statSync(source);
   if (stat.isDirectory()) {
     const read = (name) => {
@@ -78,9 +80,15 @@ function readFiles(source) {
     };
     return { get: read, list: () => fs.readdirSync(source, { recursive: true }).map((item) => String(item).replaceAll("\\", "/")) };
   }
-  const zip = unzipSync(new Uint8Array(fs.readFileSync(source)));
+  const names = [];
+  const zip = unzipSync(new Uint8Array(fs.readFileSync(source)), {
+    filter: (entry) => {
+      names.push(entry.name.replaceAll("\\", "/"));
+      return !xmlOnly || /\.xml$/i.test(entry.name);
+    },
+  });
   const byName = new Map(Object.entries(zip).map(([name, bytes]) => [name.replaceAll("\\", "/"), bytes]));
-  return { get: (name) => byName.get(name) ?? null, list: () => [...byName.keys()] };
+  return { get: (name) => byName.get(name) ?? null, list: () => names };
 }
 
 function slug(text) {
@@ -125,9 +133,58 @@ function resolveModule(nameOrPath) {
   throw new Error(`No module "${given}" in ${folder}.`);
 }
 
-function readModule(nameOrPath) {
+// Just the wanted top-level sections of a module's XML (<npc>, <item>...),
+// found by a quick scan of its tags, so a big module's book pages (most of
+// its XML) are not parsed when only its creatures and gear are wanted.
+function pickRoots(xml, wanted) {
+  const open = xml.indexOf("<root");
+  const start = open < 0 ? -1 : xml.indexOf(">", open) + 1;
+  if (start <= 0) return xml;
+  const parts = [];
+  let depth = 0;
+  let sectionStart = -1;
+  let sectionName = "";
+  let at = start;
+  while (at < xml.length) {
+    const lt = xml.indexOf("<", at);
+    if (lt < 0) break;
+    const next = xml[lt + 1];
+    if (next === "!" || next === "?") {
+      // A comment, CDATA or declaration: skip over it whole.
+      const close = xml.startsWith("<!--", lt) ? xml.indexOf("-->", lt) + 3 : xml.startsWith("<![CDATA[", lt) ? xml.indexOf("]]>", lt) + 3 : xml.indexOf(">", lt) + 1;
+      at = close > lt ? close : xml.length;
+      continue;
+    }
+    const gt = xml.indexOf(">", lt);
+    if (gt < 0) break;
+    if (next === "/") {
+      depth -= 1;
+      if (depth === 0 && sectionStart >= 0) {
+        if (wanted.has(sectionName)) parts.push(xml.slice(sectionStart, gt + 1));
+        sectionStart = -1;
+      }
+      if (depth < 0) break;
+    } else {
+      const selfClosing = xml[gt - 1] === "/";
+      if (depth === 0) {
+        sectionStart = lt;
+        sectionName = /^<([\w.-]+)/.exec(xml.slice(lt, Math.min(gt + 1, lt + 80)))?.[1]?.toLowerCase() ?? "";
+        if (selfClosing) {
+          sectionStart = -1;
+          at = gt + 1;
+          continue;
+        }
+      }
+      if (!selfClosing) depth += 1;
+    }
+    at = gt + 1;
+  }
+  return `<root>${parts.join("")}</root>`;
+}
+
+function readModule(nameOrPath, { only = null } = {}) {
   const file = resolveModule(nameOrPath);
-  const files = readFiles(file);
+  const files = readFiles(file, { xmlOnly: true });
   const definitionBytes = files.get("definition.xml");
   if (!definitionBytes) throw new Error("That is not a Fantasy Grounds module (no definition.xml).");
   const definition = parseXml(strFromU8(definitionBytes));
@@ -147,7 +204,8 @@ function readModule(nameOrPath) {
   ]) {
     const bytes = files.get(part);
     if (!bytes) continue;
-    const root = parseXml(strFromU8(bytes));
+    const text = strFromU8(bytes);
+    const root = parseXml(only ? pickRoots(text, only) : text);
     for (const typeNode of elements(root)) {
       const type = typeNode.tagName.toLowerCase();
       if (SKIP_ROOTS.has(type)) continue;
@@ -174,9 +232,11 @@ function readModule(nameOrPath) {
 }
 
 // Put a module's records into a campaign's record store, replacing any
-// earlier import of the same module.
-function importModule(store, seat, nameOrPath) {
-  const { info, records, images } = readModule(nameOrPath);
+// earlier import of the same module. only: just these record types.
+function importModule(store, seat, nameOrPath, { only = null } = {}) {
+  const read = readModule(nameOrPath, { only });
+  const { info, images } = read;
+  const records = only ? read.records.filter((record) => only.has(record.type)) : read.records;
   for (const old of store.list({ source: info.name })) store.remove(old.id, seat);
   const counts = {};
   for (const record of records) {

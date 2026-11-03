@@ -788,3 +788,6 @@ span.ct-init { display: inline-block; }
 .quick-slot.over { border-color: var(--brass); background: var(--brass-soft); }
 .quick-slot span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .quick-slot-number { font-size: 0.8rem; opacity: 0.6; }
+.wizard-head-buttons { display: flex; gap: 6px; }
+.wizard-head-buttons .wizard-next { border-color: var(--brass); color: var(--brass); }
+.combat-tracker.dropping { outline: 2px dashed var(--brass); outline-offset: -4px; background: var(--brass-soft); }
