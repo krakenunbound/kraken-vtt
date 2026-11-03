@@ -3,9 +3,13 @@ const crypto = require("crypto");
 // The host's dice. Every roll in the game comes from here, so every screen
 // shows the same result and tests can fix the numbers.
 //
-// Formulas: terms joined by + or -. A term is a number, or NdS with optional
-// keep/drop: 4d6dl1 (drop lowest 1), 2d20kh1 (keep highest 1), kl, dh.
-// d% is d100.
+// Formulas: terms joined by + or -. A term is a number, or NdS with any of
+// (FG's and Foundry's forms both):
+//   keep/drop   4d6dl1 or 4d6d1 (drop lowest 1), 4d6kh3 or 4d6k3 (keep highest 3), kl, dh
+//   exploding   4d6! or 4d6x (a die on its highest rolls another), 4d6!>5 or x>=5
+//   reroll      4d6r1 (dice of 1 or less are rolled again, once), r<3 also reads
+//   successes   6d10cs>=7 (the total is how many dice reach 7), cs>5
+// d% is d100; dF (Fate) is -1, 0 or +1.
 
 const MAX_DICE = 200;
 const MAX_SIDES = 1000;
@@ -39,7 +43,8 @@ function parse(formula) {
   if (!text) throw new Error("Give a dice formula, like 1d20+3.");
   if (text.length > 200) throw new Error("That formula is too long.");
   const terms = [];
-  const pattern = /([+-]?)(?:(\d*)d(\d+|%)((?:k|kh|kl|d|dh|dl)\d+)?|(\d+))/y;
+  const pattern = /([+-]?)(?:(\d*)d(\d+|%|f)((?:kh|kl|k|dh|dl|d)\d+|[!x](?:[<>]=?\d+)?|ro?[<>]?=?\d+|cs[<>]=?\d+)*|(\d+))/y;
+  const modifier = /(kh|kl|k|dh|dl|d)(\d+)|[!x](?:([<>]=?)(\d+))?|ro?([<>]?=?)(\d+)|cs([<>]=?)(\d+)/y;
   let index = 0;
   let dice = 0;
   while (index < text.length) {
@@ -53,18 +58,38 @@ function parse(formula) {
       continue;
     }
     const count = match[2] === "" ? 1 : Number(match[2]);
-    const sides = match[3] === "%" ? 100 : Number(match[3]);
+    const fate = match[3] === "f";
+    const sides = match[3] === "%" ? 100 : fate ? 3 : Number(match[3]);
     if (count < 1 || sides < 2 || sides > MAX_SIDES) throw new Error(`Could not read "${formula}".`);
     dice += count;
     if (dice > MAX_DICE) throw new Error("That is too many dice.");
+    // The modifiers after the dice, in any order.
+    const tail = text.slice(match.index + match[0].length - (match[0].length - match[0].indexOf("d") - 1 - match[3].length), index);
     let keep = null;
-    if (match[4]) {
-      const [, mode, amount] = /^(kh|kl|k|dh|dl|d)(\d+)$/.exec(match[4]);
-      const n = Number(amount);
-      if (n < 1 || n > count) throw new Error(`Could not read "${formula}".`);
-      keep = { mode: mode === "k" ? "kh" : mode === "d" ? "dl" : mode, n };
+    let explode = null;
+    let reroll = null;
+    let success = null;
+    for (let at = 0; at < tail.length; ) {
+      modifier.lastIndex = at;
+      const part = modifier.exec(tail);
+      if (!part) throw new Error(`Could not read "${formula}".`);
+      at = modifier.lastIndex;
+      if (part[1]) {
+        const n = Number(part[2]);
+        if (n < 1 || n > count) throw new Error(`Could not read "${formula}".`);
+        keep = { mode: part[1] === "k" ? "kh" : part[1] === "d" ? "dl" : part[1], n };
+      } else if (part[0][0] === "!" || part[0][0] === "x") {
+        explode = { op: part[3] || ">=", n: part[4] ? Number(part[4]) : sides };
+        if (!fate && (explode.op === ">=" ? explode.n : explode.n + 1) <= 1) throw new Error("Those dice would explode for ever.");
+      } else if (part[0].startsWith("cs")) {
+        success = { op: part[7], n: Number(part[8]) };
+      } else {
+        // r1 rerolls dice of 1 or less; r<3, r<=2, r>5 say which.
+        const op = part[5] || "<=";
+        reroll = { op: op === "=" ? "<=" : op, n: Number(part[6]) };
+      }
     }
-    terms.push({ kind: "dice", sign, count, sides, keep });
+    terms.push({ kind: "dice", sign, count, sides, keep, ...(fate ? { fate: true } : {}), ...(explode ? { explode } : {}), ...(reroll ? { reroll } : {}), ...(success ? { success } : {}) });
   }
   return terms;
 }
@@ -100,11 +125,27 @@ function createDice(state = {}) {
           total += term.sign * term.value;
           return { kind: "number", sign: term.sign, value: term.value };
         }
-        const rolls = Array.from({ length: term.count }, () => face(term.sides));
+        const meets = (value, test) => (test.op === ">" ? value > test.n : test.op === ">=" ? value >= test.n : test.op === "<" ? value < test.n : value <= test.n);
+        const one = () => (term.fate ? face(3) - 2 : face(term.sides));
+        let rolls = Array.from({ length: term.count }, one);
+        // Rerolled once, the new result stands.
+        if (term.reroll) rolls = rolls.map((value) => (meets(value, term.reroll) ? one() : value));
+        // An exploding die rolls another, and that one may explode too (a hundred at most).
+        if (term.explode) {
+          let extra = 0;
+          for (let i = 0; i < rolls.length && extra < 100; i++) {
+            if (meets(rolls[i], term.explode)) {
+              rolls.push(one());
+              extra += 1;
+            }
+          }
+        }
         const kept = keptFlags(rolls, term.keep);
-        const sum = rolls.reduce((acc, value, i) => acc + (kept[i] ? value : 0), 0);
+        const sum = term.success
+          ? rolls.filter((value, i) => kept[i] && meets(value, term.success)).length
+          : rolls.reduce((acc, value, i) => acc + (kept[i] ? value : 0), 0);
         total += term.sign * sum;
-        return { kind: "dice", sign: term.sign, count: term.count, sides: term.sides, keep: term.keep, rolls, kept, sum };
+        return { kind: "dice", sign: term.sign, count: term.count, sides: term.sides, keep: term.keep, rolls, kept, sum, ...(term.fate ? { fate: true } : {}), ...(term.success ? { success: term.success } : {}) };
       });
       return { formula: String(formula).replace(/\s+/g, ""), terms: out, total };
     },

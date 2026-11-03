@@ -21,6 +21,7 @@
     "popout": "node scripts/check-popout.mjs",
     "setup": "node scripts/check-setup.mjs",
     "dice": "node scripts/check-dice.mjs && tsx scripts/check-dice-throw.ts",
+    "chat": "node scripts/check-chat.mjs",
     "decal": "node scripts/check-decal.mjs",
     "sight-parity": "node scripts/check-sight-parity.mjs",
     "session": "node scripts/check-session.mjs",

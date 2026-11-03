@@ -48,6 +48,9 @@ The app starts the MCP server when it opens. `electron/agent/mcp-stdio.cjs` is t
 | Every tracker action: add, initiative, turns, rounds, damage, healing, effects, targets, attacks, saves, spells | `kraken_combat` |
 | **Chat and dice** | |
 | Chat, `/r` rolls, the chat log | `kraken_chat_send`, `kraken_roll`, `kraken_chat_log` |
+| Chat commands: `/w` whispers, `/me` `/action` `/ooc` `/mood`, the GM's `/story` and `/id` | `kraken_chat_send` (`kind`, `to`, `as`, `mood`) |
+| `/gmroll`, `/blindroll` | `kraken_roll` with `secret` |
+| `/kick`, `/vote`, `/save` | `kraken_kick`, `kraken_vote`, `kraken_save` |
 | GM-only roll (the GM's dice tower) | `kraken_roll` with `secret` |
 | Dice tower: players see their own result | `kraken_table_options` |
 | Settings: Background Decal, Desktop Wallpaper and GM Icon (pick, a set for each game, Browse to import a picture, none) | `kraken_decal` (`kind` decal, wallpaper or gmicon) |
