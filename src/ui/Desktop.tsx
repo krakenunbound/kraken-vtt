@@ -60,6 +60,12 @@ function PlayersWindow({ session }: { session: Session }) {
   );
 }
 
+// The GM's wallpaper tiles the desktop, darkened so the decal and windows stand out.
+function wallpaperStyle(session: Session) {
+  const url = session.options.wallpaper ? session.decalUrl(session.options.wallpaper, "wallpaper") : "";
+  return url ? { backgroundImage: `linear-gradient(rgba(6, 8, 10, 0.42), rgba(6, 8, 10, 0.42)), url("${url}")`, backgroundSize: "auto, 384px 384px", backgroundRepeat: "repeat" } : undefined;
+}
+
 // The table for both sides, laid out as FG's desktop: the map (or the emblem)
 // fills the screen; the sidebar on the right opens windows; chat with the
 // dice tray sits bottom left; characters' portraits along the top.
@@ -108,7 +114,7 @@ export function Desktop({
         if (command.kind !== "windows") return null;
         const { windows: manager, launchers: kinds, characters: sheets } = live.current;
         const list = () => manager.windows.map((item) => ({ key: item.key, kind: item.kind, title: item.title, poppedOut: item.popped }));
-        if (command.action === "list") return { open: list(), kinds: [...kinds.map((item) => item.kind), "sheet", "decals"] };
+        if (command.action === "list") return { open: list(), kinds: [...kinds.map((item) => item.kind), "sheet", "decals", "wallpapers"] };
         let key: string = command.window ?? "";
         if (command.window === "sheet") {
           const wanted = String(command.record ?? "").toLowerCase();
@@ -117,7 +123,12 @@ export function Desktop({
           if (command.action === "open") manager.open("sheet", record.name, record.id);
           key = `sheet:${record.id}`;
         } else {
-          const launcher = command.window === "decals" ? { kind: "decals" as const, title: "Background Decal" } : kinds.find((item) => item.kind === command.window);
+          const launcher =
+            command.window === "decals"
+              ? { kind: "decals" as const, title: "Background Decal" }
+              : command.window === "wallpapers"
+                ? { kind: "wallpapers" as const, title: "Desktop Wallpaper" }
+                : kinds.find((item) => item.kind === command.window);
           if (!launcher) throw new Error(`No window "${command.window ?? ""}". Kinds: ${kinds.map((item) => item.kind).join(", ")}, sheet.`);
           if (command.action === "open") manager.open(launcher.kind, launcher.title);
         }
@@ -168,7 +179,7 @@ export function Desktop({
       </header>
 
       <div className="desktop">
-        <div className="desktop-surface">
+        <div className="desktop-surface" style={wallpaperStyle(session)}>
           {scene ?? (
             <div className="desktop-empty">
               <TableDecal session={session} />
@@ -212,6 +223,7 @@ export function Desktop({
               {item.kind === "players" ? <PlayersWindow session={session} /> : null}
               {item.kind === "settings" ? <SettingsWindow session={session} /> : null}
               {item.kind === "decals" ? <DecalPicker session={session} onClose={() => windows.close(item.key)} /> : null}
+              {item.kind === "wallpapers" ? <DecalPicker session={session} kind="wallpaper" onClose={() => windows.close(item.key)} /> : null}
             </FloatingWindow>
           ))}
         </div>

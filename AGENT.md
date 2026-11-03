@@ -50,7 +50,7 @@ The app starts the MCP server when it opens. `electron/agent/mcp-stdio.cjs` is t
 | Chat, `/r` rolls, the chat log | `kraken_chat_send`, `kraken_roll`, `kraken_chat_log` |
 | GM-only roll (the GM's dice tower) | `kraken_roll` with `secret` |
 | Dice tower: players see their own result | `kraken_table_options` |
-| Settings: Background Decal (pick, Browse to import a picture, Use Empty Decal) | `kraken_decal` |
+| Settings: Background Decal and Desktop Wallpaper (pick, a set for each game, Browse to import a picture, none) | `kraken_decal` (`kind` decal or wallpaper) |
 | 3D dice settings: show, sound, volume, set and colours | `kraken_dice_settings` |
 | Fix the next dice (tests, parity runs) | `kraken_dice_force`, `kraken_dice_clear` |
 | **Windows** | |

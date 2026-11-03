@@ -5,6 +5,7 @@ const { inflateSync } = require("fflate");
 
 // The decals a GM can put on the table's background, as FG's Background Decal:
 //   kraken/<file>  Kraken's own, made for it (public/decals, built into dist);
+//                  in a folder named for a game ("D&D 5e/"), that game's own;
 //   lib/<file>     Kraken's own assets folder (assets/decals in the app's
 //                  data), where an image the GM picks is copied, so every
 //                  campaign can use it from then on;
@@ -18,7 +19,7 @@ const { inflateSync } = require("fflate");
 const IMAGE = { ".png": "image/png", ".webp": "image/webp", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".gif": "image/gif" };
 const MAX_BYTES = 30 * 1024 * 1024;
 
-const rank = (group) => (group === "Kraken assets" ? 0 : group === "Kraken" ? 1 : 2);
+const rank = (group) => (group === "Kraken assets" ? 0 : group === "Kraken" ? 1 : group === "Fantasy Grounds" ? 3 : 2);
 
 function mimeOf(name) {
   return IMAGE[path.extname(name).toLowerCase()] ?? null;
@@ -91,10 +92,23 @@ function zipRead(file, entry) {
 }
 
 // folder: Kraken's assets folder for decals. builtin: Kraken's own decals.
-// fgData: FG's data folder (or "").
-function createDecalLibrary({ folder, builtin = "", fgData = "" }) {
+// fgData: FG's data folder (or ""). The same library holds the desktop's
+// wallpapers (tiles): own: the ids that need no file ("kraken" for decals);
+// named: Kraken's own files are named for the game they go with.
+function createDecalLibrary({ folder, builtin = "", fgData = "", own = ["kraken"], named = false }) {
   let index = null;
   let indexedAt = 0;
+
+  function foldersIn(dir) {
+    try {
+      return fs
+        .readdirSync(dir, { withFileTypes: true })
+        .filter((entry) => entry.isDirectory())
+        .map((entry) => entry.name);
+    } catch {
+      return [];
+    }
+  }
 
   function filesIn(dir) {
     try {
@@ -110,7 +124,18 @@ function createDecalLibrary({ folder, builtin = "", fgData = "" }) {
   function scan() {
     if (index && Date.now() - indexedAt < 15000) return index;
     const items = new Map();
-    if (builtin) for (const name of filesIn(builtin)) items.set(`kraken/${name}`, { id: `kraken/${name}`, name: prettyName(name), group: "Kraken", file: path.join(builtin, name), mime: mimeOf(name) });
+    if (builtin) {
+      for (const name of filesIn(builtin)) {
+        const ruleset = named ? path.basename(name, path.extname(name)) : undefined;
+        items.set(`kraken/${name}`, { id: `kraken/${name}`, name: prettyName(name), group: "Kraken", ruleset, file: path.join(builtin, name), mime: mimeOf(name) });
+      }
+      // A game's own, in a folder named for it.
+      for (const game of foldersIn(builtin)) {
+        for (const name of filesIn(path.join(builtin, game))) {
+          items.set(`kraken/${game}/${name}`, { id: `kraken/${game}/${name}`, name: prettyName(name), group: game, ruleset: game, file: path.join(builtin, game, name), mime: mimeOf(name) });
+        }
+      }
+    }
     for (const name of filesIn(folder)) items.set(`lib/${name}`, { id: `lib/${name}`, name: prettyName(name), group: "Kraken assets", file: path.join(folder, name), mime: mimeOf(name) });
     if (fgData) {
       const fgDecals = path.join(fgData, "decals");
@@ -147,10 +172,10 @@ function createDecalLibrary({ folder, builtin = "", fgData = "" }) {
     folder,
     list() {
       return [...scan().values()]
-        .map(({ id, name, group }) => ({ id, name, group }))
+        .map(({ id, name, group, ruleset }) => ({ id, name, group, ...(ruleset ? { ruleset } : {}) }))
         .sort((a, b) => rank(a.group) - rank(b.group) || a.group.localeCompare(b.group) || a.name.localeCompare(b.name));
     },
-    has: (id) => id === "" || id === "kraken" || scan().has(String(id)),
+    has: (id) => id === "" || own.includes(String(id)) || scan().has(String(id)),
     // The image's bytes and type, or null.
     file(id) {
       const item = scan().get(String(id));
@@ -171,7 +196,7 @@ function createDecalLibrary({ folder, builtin = "", fgData = "" }) {
     // (the same picture twice is kept once). Returns its entry.
     add(name, bytes) {
       const mime = mimeOf(String(name));
-      if (!mime) throw new Error("A decal is a .png, .webp, .jpg or .gif picture.");
+      if (!mime) throw new Error("It has to be a .png, .webp, .jpg or .gif picture.");
       const data = Buffer.isBuffer(bytes) ? bytes : Buffer.from(bytes);
       if (data.length === 0 || data.length > MAX_BYTES) throw new Error("That picture is empty or larger than 30 MB.");
       fs.mkdirSync(folder, { recursive: true });

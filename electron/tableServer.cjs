@@ -173,12 +173,15 @@ function diceLook(value) {
 // The table's own options. towerReveal: a roll in the dice tower is shown to
 // whoever rolled it too (FG shows it to the GM only). decal: the picture on
 // the table's background, as FG's Background Decal: "kraken" (the emblem),
-// "" (none) or a decal id (decals.cjs).
+// "" (none) or a decal id (decals.cjs). wallpaper: the tiles behind the
+// desktop, as FG's desktop theme: "" (plain) or a wallpaper id.
 function savedOptions(value) {
   const options = value && typeof value === "object" ? value : {};
+  const id = (text, fallback) => (typeof text === "string" && text.length <= 400 ? text : fallback);
   return {
     towerReveal: Boolean(options.towerReveal),
-    decal: typeof options.decal === "string" && options.decal.length <= 400 ? options.decal : "kraken",
+    decal: id(options.decal, "kraken"),
+    wallpaper: id(options.wallpaper, ""),
   };
 }
 
@@ -241,8 +244,9 @@ function serveWeb(url, res, root) {
 }
 
 // art: the GM's portraits and tokens (artLibrary.cjs), served to the table.
-// decals: the background decals the GM can choose from (decals.cjs).
-function createTableServer({ saved = {}, onChange = () => undefined, webRoot = WEB_ROOT, art = null, decals = null } = {}) {
+// decals, wallpapers: the background decals and desktop tiles the GM can
+// choose from (decals.cjs).
+function createTableServer({ saved = {}, onChange = () => undefined, webRoot = WEB_ROOT, art = null, decals = null, wallpapers = null } = {}) {
   let password = "";
   let hostToken = "";
   let image = null;
@@ -255,6 +259,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
   function setOptions(patch) {
     const next = patch && typeof patch === "object" ? patch : {};
     if (next.decal !== undefined && !(next.decal === "" || next.decal === "kraken" || (decals && decals.has(String(next.decal))))) throw new Error(`No decal "${next.decal}".`);
+    if (next.wallpaper !== undefined && !(next.wallpaper === "" || (wallpapers && wallpapers.has(String(next.wallpaper))))) throw new Error(`No wallpaper "${next.wallpaper}".`);
     options = savedOptions({ ...options, ...next });
     broadcast({ type: "options", options });
     onChange("table");
@@ -435,11 +440,13 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       });
       return;
     }
-    // Background decals: the list for the GM's picker, and the pictures for every seat.
-    if (req.method === "GET" && (url.pathname === "/decal/list" || url.pathname === "/decal/file")) {
+    // Background decals and wallpapers: the list for the GM's picker, and the pictures for every seat.
+    const pictures = { "/decal/list": decals, "/decal/file": decals, "/wallpaper/list": wallpapers, "/wallpaper/file": wallpapers };
+    if (req.method === "GET" && Object.hasOwn(pictures, url.pathname)) {
+      const library = pictures[url.pathname];
       const token = url.searchParams.get("token") || "";
       const client = token ? [...clients.values()].find((item) => item.assetToken === token) : null;
-      const found = client && decals ? (url.pathname === "/decal/list" ? (client.role === "dm" ? { list: decals.list() } : null) : decals.file(url.searchParams.get("id") || "")) : null;
+      const found = client && library ? (url.pathname.endsWith("/list") ? (client.role === "dm" ? { list: library.list() } : null) : library.file(url.searchParams.get("id") || "")) : null;
       if (!found) {
         res.writeHead(404, { "Cache-Control": "no-store" });
         res.end();
@@ -891,6 +898,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     combat,
     viewFor: (name) => map.viewFor({ role: "player", name }, ""),
     decals: () => decals,
+    wallpapers: () => wallpapers,
     // The GM's portraits and tokens (artLibrary.cjs), as the pickers show them.
     art: (kind) => (art ? art.list(kind) : []),
     // A ping on the map at a square, as a GM's click would make.

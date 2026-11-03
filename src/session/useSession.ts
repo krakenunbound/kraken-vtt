@@ -68,8 +68,9 @@ export type RollTerm =
 export type RollResult = { formula: string; label: string; total: number; terms: RollTerm[]; tag?: string; result?: string; target?: string; against?: number; by?: string };
 export type ChatLine = { id: string; from: string; text: string; at: number; roll?: RollResult; secret?: boolean; shownTo?: string; tower?: boolean };
 // The table's own options, set by the GM (electron/tableServer.cjs savedOptions).
-export type TableOptions = { towerReveal: boolean; decal: string };
-export type DecalItem = { id: string; name: string; group: string };
+export type TableOptions = { towerReveal: boolean; decal: string; wallpaper: string };
+export type DecalItem = { id: string; name: string; group: string; ruleset?: string };
+export type PictureKind = "decal" | "wallpaper";
 // The combat tracker as the host shows it to this seat (electron/combat.cjs viewFor).
 export type CombatEntry = {
   id: string;
@@ -197,7 +198,7 @@ export function useSession() {
   const [map, setMap] = useState<TableMap>(EMPTY_MAP);
   const [party, setParty] = useState<import("../party/PartySheet").PartyView | null>(null);
   const [combat, setCombat] = useState<CombatView>({ round: 0, active: null, entries: [] });
-  const [options, setOptions] = useState<TableOptions>({ towerReveal: false, decal: "kraken" });
+  const [options, setOptions] = useState<TableOptions>({ towerReveal: false, decal: "kraken", wallpaper: "" });
   const [pings, setPings] = useState<Ping[]>([]);
   const [notice, setNotice] = useState<string | null>(null);
   const [chat, setChat] = useState<ChatLine[]>([]);
@@ -586,11 +587,14 @@ export function useSession() {
       assetRef.current ? `${originRef.current}/table/record-art?token=${assetRef.current}&record=${encodeURIComponent(recordId)}&kind=${kind}` : "",
     [],
   );
-  // Background decals: a decal's picture (any seat), and the list to choose from (the GM's).
-  const decalUrl = useCallback((id: string) => (id && assetRef.current ? `${originRef.current}/decal/file?token=${assetRef.current}&id=${encodeURIComponent(id)}` : ""), []);
-  const decalList = useCallback(async (): Promise<DecalItem[]> => {
-    const response = await fetch(`${originRef.current}/decal/list?token=${assetRef.current}`);
-    if (!response.ok) throw new Error("No decals.");
+  // Background decals and wallpapers: a picture (any seat), and the list to choose from (the GM's).
+  const decalUrl = useCallback(
+    (id: string, kind: PictureKind = "decal") => (id && assetRef.current ? `${originRef.current}/${kind}/file?token=${assetRef.current}&id=${encodeURIComponent(id)}` : ""),
+    [],
+  );
+  const decalList = useCallback(async (kind: PictureKind = "decal"): Promise<DecalItem[]> => {
+    const response = await fetch(`${originRef.current}/${kind}/list?token=${assetRef.current}`);
+    if (!response.ok) throw new Error("Nothing to choose from.");
     return (await response.json()) as DecalItem[];
   }, []);
   const artList = useCallback(async (kind: "portrait" | "token") => {

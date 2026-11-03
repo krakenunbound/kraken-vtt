@@ -78,6 +78,20 @@ let quitting = false;
 // Background decals: Kraken's own, the GM's assets folder (shared by every
 // campaign; a picture the GM picks is copied in), and FG's decals.
 let decalLibrary = null;
+let wallpaperLibrary = null;
+// The desktop's wallpapers (FG's desktop theme): Kraken's own, one per game,
+// and the GM's own, in the assets folder too.
+function wallpapers() {
+  if (!wallpaperLibrary) {
+    wallpaperLibrary = createDecalLibrary({
+      folder: path.join(app.getPath("userData"), "assets", "wallpapers"),
+      builtin: path.join(__dirname, "..", "dist", "wallpapers"),
+      own: [],
+      named: true,
+    });
+  }
+  return wallpaperLibrary;
+}
 function decals() {
   if (!decalLibrary) {
     decalLibrary = createDecalLibrary({
@@ -176,7 +190,7 @@ ipcMain.handle("start-host", async (_event, options) => {
   const campaignId = typeof options?.campaignId === "string" ? options.campaignId : "";
   const saved = openCampaign(campaignId) ?? {};
   const dataFolder = fgDataFolder();
-  const next = createTableServer({ saved, onChange: markDirty, art: createArtLibrary({ base: dataFolder, roots: defaultRoots(dataFolder) }), decals: decals() });
+  const next = createTableServer({ saved, onChange: markDirty, art: createArtLibrary({ base: dataFolder, roots: defaultRoots(dataFolder) }), decals: decals(), wallpapers: wallpapers() });
   try {
     const info = await next.listen({ port, password });
     table = next;
@@ -225,20 +239,22 @@ ipcMain.handle("set-token-art", (_event, list) => {
 });
 
 // The decal picker's Browse: a picture from anywhere, copied into the assets folder.
-ipcMain.handle("decal-pick", async () => {
+ipcMain.handle("decal-pick", async (_event, kind) => {
+  const library = kind === "wallpaper" ? wallpapers() : decals();
   const picked = await dialog.showOpenDialog(mainWindow, {
-    title: "Choose a background decal",
+    title: kind === "wallpaper" ? "Choose a desktop wallpaper (a picture that tiles)" : "Choose a background decal",
     properties: ["openFile"],
     filters: [{ name: "Pictures", extensions: ["png", "webp", "jpg", "jpeg", "gif"] }],
   });
   if (picked.canceled || picked.filePaths.length === 0) return null;
-  return decals().addFile(picked.filePaths[0]);
+  return library.addFile(picked.filePaths[0]);
 });
 // A picture dropped on the picker.
-ipcMain.handle("decal-add", (_event, name, bytes) => decals().add(String(name ?? ""), Buffer.from(bytes ?? [])));
-ipcMain.handle("decal-folder", async () => {
-  fs.mkdirSync(decals().folder, { recursive: true });
-  return shell.openPath(decals().folder);
+ipcMain.handle("decal-add", (_event, name, bytes, kind) => (kind === "wallpaper" ? wallpapers() : decals()).add(String(name ?? ""), Buffer.from(bytes ?? [])));
+ipcMain.handle("decal-folder", async (_event, kind) => {
+  const folder = (kind === "wallpaper" ? wallpapers() : decals()).folder;
+  fs.mkdirSync(folder, { recursive: true });
+  return shell.openPath(folder);
 });
 
 ipcMain.handle("set-scene-image", (_event, bytes, mime) => {

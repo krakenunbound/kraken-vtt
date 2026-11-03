@@ -42,8 +42,10 @@ const settle = () => new Promise((resolve) => setTimeout(resolve, 150));
 const work = mkdtempSync(path.join(tmpdir(), "kraken-decal-"));
 const folder = path.join(work, "assets", "decals");
 const decals = createDecalLibrary({ folder, builtin: path.join(process.cwd(), "public", "decals"), fgData: fgDataFolder() });
-const server = createTableServer({ decals });
+const wallpapers = createDecalLibrary({ folder: path.join(work, "assets", "wallpapers"), builtin: path.join(process.cwd(), "public", "wallpapers"), own: [], named: true });
+const server = createTableServer({ decals, wallpapers });
 const tool = async (args) => JSON.parse((await callTool("kraken_decal", args, { table: () => server })).content[0].text);
+const GAMES = ["D&D 5e", "D&D 3.5e", "AD&D 2e", "AD&D", "D&D", "Castles & Crusades", "Pathfinder 1e", "Pathfinder 2e", "Traveller 2e"];
 try {
   const { port, hostToken } = await server.listen({ port: 0, password: "" });
   const gm = await connect(port, { name: "GM", hostToken });
@@ -96,10 +98,35 @@ try {
   }
   assert(refused, "only pictures can be decals");
 
+  // Each game has its own decals and wallpaper, found by the game's name.
+  for (const game of GAMES) {
+    const own = (await tool({ action: "list" })).decals.filter((item) => item.group === game && item.ruleset === game);
+    assert(own.length >= 2, `${game}: decals of its own (${own.length})`);
+    const walls = (await tool({ kind: "wallpaper", action: "list" })).wallpapers.filter((item) => item.ruleset === game);
+    assert(walls.length === 1, `${game}: a wallpaper of its own`);
+  }
+  assert((await tool({ action: "list", search: "castles" })).decals.filter((item) => item.ruleset === "Castles & Crusades").length >= 2, "search by game");
+
+  // The wallpaper: plain to begin with; the GM puts one up and every seat gets it.
+  assert(ann.options().wallpaper === "", "a plain desktop to begin with");
+  const tiles = "kraken/Castles & Crusades.webp";
+  assert((await tool({ kind: "wallpaper", action: "set", id: tiles })).wallpaper === tiles, "the agent puts the C&C wallpaper up");
+  await settle();
+  assert(ann.options().wallpaper === tiles, "Ann gets the wallpaper");
+  const wall = await fetch(`${base}/wallpaper/file?token=${ann.you.assetToken}&id=${encodeURIComponent(tiles)}`);
+  assert(wall.ok && wall.headers.get("content-type") === "image/webp", "and its picture");
+  assert((await fetch(`${base}/wallpaper/list?token=${ann.you.assetToken}`)).status === 404, "a player does not get the wallpaper list");
+  gm.send({ type: "table-options", options: { wallpaper: "kraken" } });
+  await settle();
+  assert(ann.options().wallpaper === tiles && gm.errors.some((reason) => reason.includes("No wallpaper")), "the Kraken emblem is a decal, not a wallpaper");
+  assert(server.persisted().options.wallpaper === tiles, "the wallpaper is saved with the campaign");
+  assert((await tool({ kind: "wallpaper", action: "set", id: "" })).wallpaper === "", "back to a plain desktop");
+
   // No decal at all, as FG's Use Empty Decal.
   assert((await tool({ action: "set", id: "" })).decal === "", "an empty decal");
   for (const seat of [gm, ann]) seat.ws.close();
-  console.log(`DECAL_OK ${own.length - 1} decals of Kraken's own`);
+  const counted = (await tool({ action: "list" })).decals.filter((item) => item.id.startsWith("kraken/")).length;
+  console.log(`DECAL_OK ${counted} decals and ${GAMES.length} wallpapers of Kraken's own, a set for each of ${GAMES.length} games`);
 } finally {
   await server.stop();
 }
