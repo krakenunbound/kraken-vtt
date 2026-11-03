@@ -7,8 +7,8 @@ const { WebSocketServer } = require("ws");
 const { createRecordStore, canSee } = require("./records.cjs");
 const { createDice } = require("./dice.cjs");
 const { siege, siegeLibrary, siegeCheck, levelUp } = require("./siege.cjs");
+const { createMapState, playerColor } = require("./mapState.cjs");
 
-const PALETTE = ["#d2a15a", "#6cb6ff", "#e07a6a", "#81b90c", "#ca81ff", "#77e7e8", "#ffb347", "#f4f1ea"];
 const MAX_CLIENTS = 16;
 
 function eachAddress() {
@@ -85,7 +85,7 @@ function sanitizeScene(input) {
   }
   const tokens = [];
   for (const [index, token] of (Array.isArray(input.tokens) ? input.tokens : []).entries()) {
-    if (!token || typeof token !== "object" || token.hidden || Number(token.disposition) === -2) continue;
+    if (!token || typeof token !== "object") continue;
     if (tokens.length >= 300) break;
     tokens.push({
       id: text(token.id, `token-${index}`).slice(0, 80),
@@ -95,7 +95,26 @@ function sanitizeScene(input) {
       width: Math.max(1, num(token.width, 100)),
       height: Math.max(1, num(token.height, 100)),
       disposition: num(token.disposition, 0),
-      hidden: false,
+      hidden: Boolean(token.hidden) || Number(token.disposition) === -2,
+    });
+  }
+  // Walls stay on the host: players are sent what they can see, never the walls.
+  const walls = [];
+  for (const [index, wall] of (Array.isArray(input.walls) ? input.walls : []).entries()) {
+    if (!wall || typeof wall !== "object") continue;
+    if (walls.length >= 5000) break;
+    const coords = [wall.x1, wall.y1, wall.x2, wall.y2].map((value) => num(value, NaN));
+    if (coords.some((value) => !Number.isFinite(value))) continue;
+    walls.push({
+      id: text(wall.id, `wall-${index}`).slice(0, 80),
+      x1: coords[0],
+      y1: coords[1],
+      x2: coords[2],
+      y2: coords[3],
+      sight: num(wall.sight, 20),
+      move: num(wall.move, 20),
+      door: num(wall.door, 0),
+      ds: num(wall.ds, 0),
     });
   }
   return {
@@ -122,16 +141,8 @@ function sanitizeScene(input) {
     fit: ["fill", "contain", "cover", "width", "height"].includes(input.fit) ? input.fit : "fill",
     lights,
     tokens,
+    walls,
   };
-}
-
-function sceneCenter(scene) {
-  if (!scene) return { x: 0, y: 0 };
-  // Same padding rule as src/foundry/geometry.ts sceneFrame.
-  const size = scene.grid.size > 0 ? scene.grid.size : 100;
-  const padX = Math.ceil(scene.padding * scene.width * (1 / size)) * size;
-  const padY = Math.ceil(scene.padding * scene.height * (1 / size)) * size;
-  return { x: padX + scene.width / 2, y: padY + scene.height / 2 };
 }
 
 function savedChat(value) {
@@ -149,26 +160,10 @@ function savedChat(value) {
     .filter((line) => line.text || line.roll);
 }
 
-function savedSpots(value) {
-  const spots = {};
-  if (!value || typeof value !== "object") return spots;
-  for (const [sceneId, byName] of Object.entries(value).slice(0, 500)) {
-    if (!byName || typeof byName !== "object") continue;
-    const row = {};
-    for (const [name, spot] of Object.entries(byName).slice(0, 64)) {
-      const x = num(spot?.x, NaN);
-      const y = num(spot?.y, NaN);
-      if (Number.isFinite(x) && Number.isFinite(y)) row[name.slice(0, 24)] = { x, y };
-    }
-    spots[sceneId.slice(0, 80)] = row;
-  }
-  return spots;
-}
-
-// saved: { chat, spots, records, dice } from an earlier session. Spots remember where each
-// named pawn stood on each scene, so a player who rejoins lands where they left.
+// saved: { chat, map, records, dice } from an earlier session. map holds each
+// scene's tokens and doors (mapState.cjs).
 // onChange(kind) fires whenever something to save changes: kind is "records"
-// for record changes and "table" for chat, pawns and dice.
+// for record changes and "table" for chat, the map and dice.
 // The web client players open in a browser: the built app (dist/).
 const WEB_ROOT = path.join(__dirname, "..", "dist");
 const WEB_TYPES = {
@@ -211,13 +206,32 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
   let image = null;
   let imageVersion = 0;
   let scene = null;
-  let colorIndex = 0;
   const clients = new Map();
-  const pawns = new Map();
+  const tokenArt = new Map();
   const chat = savedChat(saved.chat);
-  const spots = savedSpots(saved.spots);
   const records = createRecordStore({ saved: saved.records, onChange: () => onChange("records") });
   const dice = createDice(saved.dice);
+  const map = createMapState({
+    saved: saved.map,
+    records,
+    onChange: () => {
+      onChange("table");
+      sendMaps();
+    },
+    hasArt: (id) => tokenArt.has(id),
+  });
+
+  // Each seat is sent its own view of the map (mapState viewFor), once per
+  // burst of changes.
+  let mapsPending = false;
+  function sendMaps() {
+    if (mapsPending) return;
+    mapsPending = true;
+    setImmediate(() => {
+      mapsPending = false;
+      for (const [ws, client] of clients) send(ws, { type: "map", ...map.viewFor(seatOf(client), client.assetToken) });
+    });
+  }
 
   function seatOf(client) {
     return { role: client.role, name: client.name };
@@ -249,19 +263,9 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       if (sees) send(ws, { type: "record", record });
       else if ((before && canSee(before, seat)) || kind === "delete") send(ws, { type: "record-gone", id: record.id });
     }
+    // A token's health dot follows its record.
+    if (map.tokens().some((token) => token.recordId === record.id)) sendMaps();
   });
-
-  function spotFor(name) {
-    const spot = scene ? spots[scene.id]?.[name] : null;
-    return spot ? { x: spot.x, y: spot.y } : sceneCenter(scene);
-  }
-
-  function remember(pawn) {
-    if (!scene || !pawn.name) return;
-    spots[scene.id] = spots[scene.id] ?? {};
-    spots[scene.id][pawn.name] = { x: pawn.x, y: pawn.y };
-    onChange("table");
-  }
 
   const server = http.createServer((req, res) => {
     const url = new URL(req.url || "/", "http://127.0.0.1");
@@ -280,6 +284,19 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         "Access-Control-Allow-Origin": "*",
       });
       res.end(image.bytes);
+      return;
+    }
+    if (req.method === "GET" && url.pathname === "/table/token") {
+      const token = url.searchParams.get("token") || "";
+      const allowed = token.length > 0 && [...clients.values()].some((client) => client.assetToken === token);
+      const art = allowed ? tokenArt.get(url.searchParams.get("id") || "") : null;
+      if (!art) {
+        res.writeHead(404, { "Cache-Control": "no-store" });
+        res.end();
+        return;
+      }
+      res.writeHead(200, { "Content-Type": art.mime, "Content-Length": art.bytes.length, "Cache-Control": "private, max-age=3600" });
+      res.end(art.bytes);
       return;
     }
     if (req.method === "GET" && serveWeb(url, res, webRoot)) return;
@@ -304,14 +321,13 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     return [...clients.values()].map((client) => ({ id: client.id, name: client.name, role: client.role }));
   }
 
-  function pawnList() {
-    return [...pawns.values()].map(({ id, name, color, x, y }) => ({ id, name, color, x, y }));
-  }
-
+  // The scene a player is sent: the map and lights. Walls stay on the host
+  // and tokens come with the player's map view.
   function sceneFor(client) {
     if (!scene) return null;
+    const { walls, tokens, ...shown } = scene;
     return {
-      ...scene,
+      ...shown,
       image: image ? `/table/image?token=${client.assetToken}&v=${imageVersion}` : null,
     };
   }
@@ -327,9 +343,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     const client = clients.get(ws);
     if (!client) return;
     clients.delete(ws);
-    pawns.delete(client.id);
     broadcast({ type: "players", players: playerList() });
-    broadcast({ type: "pawns", pawns: pawnList() });
   }
 
   wss.on("connection", (ws, request) => {
@@ -377,26 +391,16 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         client.joined = true;
         clearTimeout(joinTimer);
         clients.set(ws, client);
-        const start = spotFor(client.name);
-        pawns.set(client.id, {
-          id: client.id,
-          name: client.name,
-          color: PALETTE[colorIndex++ % PALETTE.length],
-          x: start.x,
-          y: start.y,
-          seq: 0,
-        });
         send(ws, {
           type: "ok",
           you: { id: client.id, name: client.name, role: client.role },
           players: playerList(),
-          pawns: pawnList(),
+          map: map.viewFor(seatOf(client), client.assetToken),
           chat,
           records: records.list({ seat: seatOf(client) }),
           scene: client.role === "player" ? sceneFor(client) : null,
         });
         broadcast({ type: "players", players: playerList() }, ws);
-        broadcast({ type: "pawns", pawns: pawnList() }, ws);
         return;
       }
 
@@ -480,23 +484,43 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         return;
       }
 
-      if (msg.type === "pawn") {
-        const targetId = typeof msg.id === "string" && msg.id ? msg.id : client.id;
-        const pawn = pawns.get(targetId);
-        if (!pawn || (client.role !== "dm" && targetId !== client.id)) {
-          send(ws, { type: "pawns", pawns: pawnList() });
-          return;
+      // The map: tokens, doors, line of sight and pings (mapState.cjs decides
+      // who may do what).
+      if (["token-place", "token-move", "token-remove", "token-update", "door", "sight", "lock"].includes(msg.type)) {
+        const seat = seatOf(client);
+        try {
+          if (msg.type === "token-place") {
+            map.place({ recordId: msg.recordId, name: msg.name, x: num(msg.x, NaN), y: num(msg.y, NaN), hidden: msg.hidden }, seat);
+          } else if (msg.type === "token-move") {
+            const to = { x: num(msg.x, NaN), y: num(msg.y, NaN) };
+            if (!Number.isFinite(to.x) || !Number.isFinite(to.y) || Math.abs(to.x) > 1e7 || Math.abs(to.y) > 1e7) throw new Error("Where to?");
+            const { blocked } = map.move(String(msg.id ?? ""), to, seat, { snap: msg.snap !== false });
+            if (blocked) send(ws, { type: "notice", text: "A wall is in the way." });
+          } else if (msg.type === "token-remove") {
+            map.remove(String(msg.id ?? ""), seat);
+          } else if (msg.type === "token-update") {
+            map.update(String(msg.id ?? ""), msg.patch ?? {}, seat);
+          } else if (msg.type === "door") {
+            map.setDoor(String(msg.id ?? ""), msg.state === undefined ? undefined : num(msg.state, -1), seat);
+          } else if (msg.type === "sight") {
+            if (client.role !== "dm") throw new Error("Only the GM can change line of sight.");
+            map.setSight(Boolean(msg.on));
+          } else if (msg.type === "lock") {
+            if (client.role !== "dm") throw new Error("Only the GM can lock token movement.");
+            map.setLocked(Boolean(msg.on));
+          }
+        } catch (error) {
+          send(ws, { type: "error", reason: error instanceof Error ? error.message : "Not allowed." });
+          sendMaps();
         }
-        const x = Number(msg.x);
-        const y = Number(msg.y);
-        if (!Number.isFinite(x) || !Number.isFinite(y) || Math.abs(x) > 1e7 || Math.abs(y) > 1e7) return;
-        const seq = Number(msg.seq);
-        if (Number.isFinite(seq) && seq < pawn.seq) return;
-        if (Number.isFinite(seq)) pawn.seq = seq;
-        pawn.x = x;
-        pawn.y = y;
-        broadcast({ type: "pawns", pawns: pawnList() });
-        if (msg.done !== false) remember(pawn);
+        return;
+      }
+
+      if (msg.type === "ping") {
+        const x = num(msg.x, NaN);
+        const y = num(msg.y, NaN);
+        if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+        broadcast({ type: "ping", x, y, from: client.name, color: playerColorOf(client) });
         return;
       }
 
@@ -504,18 +528,10 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         if (client.role !== "dm") return;
         const next = sanitizeScene(msg.scene);
         if (!next) return;
-        const changed = scene?.id !== next.id;
         scene = next;
-        if (changed) {
-          for (const pawn of pawns.values()) {
-            const start = spotFor(pawn.name);
-            pawn.x = start.x;
-            pawn.y = start.y;
-            pawn.seq += 1;
-          }
-        }
+        map.setScene(next);
         broadcastScene();
-        if (changed) broadcast({ type: "pawns", pawns: pawnList() });
+        sendMaps();
       }
     });
 
@@ -538,15 +554,20 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     say: (line, from = "Agent") => addChat({ id: "agent", from: text(from, "Agent").slice(0, 24), text: text(line, "").slice(0, 500), at: Date.now() }),
     chatLog: (count = 20) => chat.slice(-Math.max(1, Math.min(100, Number(count) || 20))),
     players: () => playerList(),
-    pawns: () => pawnList(),
     scene: () => scene,
+    map,
+    viewFor: (name) => map.viewFor({ role: "player", name }, ""),
   };
+
+  function playerColorOf(client) {
+    return client.role === "dm" ? "#f4f1ea" : playerColor(client.name);
+  }
 
   return {
     listen({ port, password: nextPassword }) {
       password = String(nextPassword ?? "").trim();
       hostToken = crypto.randomBytes(24).toString("hex");
-      return new Promise((resolve, reject) => {
+      return map.ready.then(() => new Promise((resolve, reject) => {
         const onError = (error) => reject(error);
         server.once("error", onError);
         server.listen(port, "0.0.0.0", () => {
@@ -559,7 +580,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
             addresses: lanAddresses(),
           });
         });
-      });
+      }));
     },
     setImage(bytes, mime) {
       if (!bytes || bytes.length === 0) image = null;
@@ -569,10 +590,20 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       }
       imageVersion += 1;
     },
+    // Token pictures from the GM's adventure, by Foundry token id, so players see them too.
+    setTokenArt(list) {
+      tokenArt.clear();
+      for (const item of Array.isArray(list) ? list.slice(0, 400) : []) {
+        if (!item || typeof item.id !== "string" || !item.bytes || item.bytes.length === 0 || item.bytes.length > 8 * 1024 * 1024) continue;
+        const mime = typeof item.mime === "string" && item.mime.startsWith("image/") ? item.mime : "application/octet-stream";
+        tokenArt.set(item.id.slice(0, 80), { bytes: Buffer.from(item.bytes), mime });
+      }
+      sendMaps();
+    },
     persisted() {
       return {
         chat: chat.slice(),
-        spots: JSON.parse(JSON.stringify(spots)),
+        map: map.persisted(),
         records: records.toJSON(),
         dice: dice.toJSON(),
       };
@@ -582,7 +613,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     snapshot() {
       return {
         players: playerList(),
-        pawns: pawnList(),
+        tokens: map.tokens().map((token) => ({ ...token })),
         sceneId: scene?.id ?? null,
         imageBytes: image?.bytes.length ?? 0,
       };

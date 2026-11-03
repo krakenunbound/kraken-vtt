@@ -113,6 +113,7 @@ try {
   server.setImage(image, "image/jpeg");
   const playerScene = nextOf(player.ws, "scene");
   const otherScene = nextOf(second.ws, "scene");
+  const playerMap = nextOf(player.ws, "map");
   dm.ws.send(
     JSON.stringify({
       type: "scene",
@@ -139,7 +140,9 @@ try {
   assert(shown.scene.id === "morning", "player received the scene");
   assert(shown.scene.walls === undefined && shownToo.scene.walls === undefined, "players did not receive walls");
   assert(shown.scene.lights.length === 1, "player received the light");
-  assert(shown.scene.tokens.length === 1 && shown.scene.tokens[0].name === "Orc", "hidden and secret tokens stayed off the player scene");
+  const firstMap = await playerMap;
+  assert(shown.scene.tokens === undefined, "tokens come with the map view, not the scene");
+  assert(firstMap.tokens.length === 1 && firstMap.tokens[0].name === "Orc", `hidden and secret tokens stayed off the player map: ${firstMap.tokens.map((t) => t.name)}`);
   assert(typeof shown.scene.image === "string" && shown.scene.image.includes("token="), "scene points at the image");
   assert(!shown.scene.image.includes(info.hostToken), "image url is not the host token");
 
@@ -150,29 +153,36 @@ try {
   const missing = await get(`http://127.0.0.1:${info.port}/table/image?token=nope`);
   assert(missing.status === 404, "bad image token is 404");
 
-  let sawForbidden = false;
-  const watchForbidden = (data) => {
-    const msg = JSON.parse(data.toString());
-    if (msg.type === "pawns" && msg.pawns.some((pawn) => pawn.id === dm.msg.you.id && pawn.x === 999)) sawForbidden = true;
-  };
-  dm.ws.on("message", watchForbidden);
-  player.ws.on("message", watchForbidden);
-  player.ws.send(JSON.stringify({ type: "pawn", id: dm.msg.you.id, x: 999, y: 999, seq: 1 }));
-  await new Promise((resolve) => setTimeout(resolve, 200));
-  dm.ws.off("message", watchForbidden);
-  player.ws.off("message", watchForbidden);
-  const dmPawn = server.snapshot().pawns.find((pawn) => pawn.id === dm.msg.you.id);
-  assert(dmPawn && dmPawn.x !== 999 && !sawForbidden, "player cannot move the DM pawn");
+  // Tokens: a player cannot move the GM's creature, can place and move their own character.
+  const orc = server.snapshot().tokens.find((item) => item.name === "Orc");
+  const refused = nextOf(player.ws, "error");
+  player.ws.send(JSON.stringify({ type: "token-move", id: orc.id, x: 999, y: 999 }));
+  assert((await refused).reason.includes("not your token"), "player cannot move the GM's token");
+  assert(server.snapshot().tokens.find((item) => item.id === orc.id).x === orc.x, "the orc did not move");
 
-  player.ws.send(JSON.stringify({ type: "pawn", id: player.msg.you.id, x: 40, y: 50, seq: 2 }));
+  const heroId = server.agent.records.create({ type: "character", name: "Halvar", owner: "Player", visibility: "owner", data: { hp: { total: 10, wounds: 6 } } }, server.agent.seat).id;
+  player.ws.send(JSON.stringify({ type: "token-place", recordId: heroId, x: 130, y: 70 }));
+  let hero = null;
+  const placeDeadline = Date.now() + 2000;
+  while (!hero && Date.now() < placeDeadline) {
+    hero = server.snapshot().tokens.find((item) => item.recordId === heroId);
+    if (!hero) await new Promise((resolve) => setTimeout(resolve, 20));
+  }
+  // 50px squares: the drop at 130, 70 lands in the square centred on 125, 75.
+  assert(hero && hero.x === 125 && hero.y === 75 && hero.owner === "Player", `player placed their own character, snapped: ${JSON.stringify(hero)}`);
+  player.ws.send(JSON.stringify({ type: "token-move", id: hero.id, x: 240, y: 160 }));
   const moveDeadline = Date.now() + 2000;
-  let movedPawn = null;
+  let moved = null;
   while (Date.now() < moveDeadline) {
-    movedPawn = server.snapshot().pawns.find((pawn) => pawn.id === player.msg.you.id);
-    if (movedPawn && movedPawn.x === 40 && movedPawn.y === 50) break;
+    moved = server.snapshot().tokens.find((item) => item.id === hero.id);
+    if (moved.x === 225 && moved.y === 175) break;
     await new Promise((resolve) => setTimeout(resolve, 20));
   }
-  assert(movedPawn && movedPawn.x === 40 && movedPawn.y === 50, "player moved their own pawn");
+  assert(moved.x === 225 && moved.y === 175, `player moved their own token onto a square: ${moved.x},${moved.y}`);
+  const view = server.agent.viewFor("Player").tokens.find((item) => item.id === hero.id);
+  // 6 of 10 wounds: Heavy, CoreRPG's token gradient between mid and bottom.
+  assert(view.health.status === "Heavy" && view.health.color === "#FF9A00", `health dot ${JSON.stringify(view.health)}`);
+  assert(server.persisted().map.tokens.morning.some((item) => item.id === hero.id), "tokens are saved with the table");
 
   const chat = nextOf(player.ws, "chat");
   dm.ws.send(JSON.stringify({ type: "chat", text: "Roll init" }));

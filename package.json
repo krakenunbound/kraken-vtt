@@ -11,6 +11,7 @@
     "preview": "vite preview",
     "check": "tsx scripts/check-morning.ts && tsx scripts/check-foundry-parity.ts",
     "shot": "node scripts/shot-scene.mjs",
+    "map": "node scripts/check-map.mjs",
     "session": "node scripts/check-session.mjs",
     "agent": "node scripts/check-agent.mjs",
     "import-check": "node scripts/check-import.mjs",

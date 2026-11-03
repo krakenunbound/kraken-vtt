@@ -145,18 +145,26 @@ async function run(hostWindow, createWindow) {
   }
   if (Number(dmWalls) < 20) throw new Error(`DM wall count was ${dmWalls}`);
 
-  const selfId = await player.webContents.executeJavaScript("window.__kraken.snapshot().selfId");
-  await player.webContents.executeJavaScript(`window.__kraken.movePawn(${JSON.stringify(selfId)}, 640, 480, true)`);
+  // The DM gives the player a character; the player puts its token on the map.
+  const heroId = await hostWindow.webContents.executeJavaScript(
+    'window.__kraken.op({ op: "create", input: { type: "character", name: "Player Hero", owner: "Player", visibility: "owner", data: {} } })',
+  );
+  await waitFor(player, `window.__kraken.snapshot().records.some((record) => record.id === ${JSON.stringify(heroId)})`, 5000, "Player did not get their character");
+  await player.webContents.executeJavaScript(`window.__kraken.placeToken(${JSON.stringify(heroId)}, 640, 480)`);
   await waitFor(
     hostWindow,
-    `window.__kraken.snapshot().pawns.some((pawn) => pawn.id === ${JSON.stringify(selfId)} && Math.abs(pawn.x - 640) < 1 && Math.abs(pawn.y - 480) < 1)`,
+    `window.__kraken.snapshot().map.tokens.some((token) => token.recordId === ${JSON.stringify(heroId)})`,
     5000,
-    "DM did not see the player pawn move",
+    "DM did not see the player's token",
   );
+  const placed = await hostWindow.webContents.executeJavaScript(
+    `(() => { const t = window.__kraken.snapshot().map.tokens.find((token) => token.recordId === ${JSON.stringify(heroId)}); return { x: t.x, y: t.y }; })()`,
+  );
+  await waitFor(player, `document.querySelectorAll("[data-token]").length > 0`, 5000, "Player's map shows no tokens");
   player.close();
 
   // Leave and host the same campaign again: the map, scene, chat and the
-  // player's pawn spot must come back.
+  // player's token must come back.
   await waitFor(hostWindow, 'window.__kraken.snapshot().players.length === 1', 5000, "Player seat did not close");
   await hostWindow.webContents.executeJavaScript('[...document.querySelectorAll(".session-status button")].find((b) => b.textContent.trim() === "Leave").click()');
   await waitForText(hostWindow, "My Campaigns", 10000);
@@ -191,9 +199,9 @@ async function run(hostWindow, createWindow) {
   await waitFor(again, "Boolean(window.__kraken && window.__kraken.snapshot().role === 'player')", 10000, "Player could not rejoin");
   await waitFor(
     again,
-    `(() => { const s = window.__kraken.snapshot(); const me = s.pawns.find((p) => p.id === s.selfId); return Boolean(me && Math.abs(me.x - 640) < 1 && Math.abs(me.y - 480) < 1); })()`,
+    `window.__kraken.snapshot().map.tokens.some((token) => token.recordId === ${JSON.stringify(heroId)} && token.x === ${placed.x} && token.y === ${placed.y})`,
     5000,
-    "The rejoining player did not land on their saved spot",
+    "The rejoining player's token was not where they left it",
   );
   again.close();
 }

@@ -10,6 +10,7 @@ contextBridge.exposeInMainWorld("kraken", {
   startHost: (options) => ipcRenderer.invoke("start-host", options),
   stopHost: () => ipcRenderer.invoke("stop-host"),
   setSceneImage: (bytes, mime) => ipcRenderer.invoke("set-scene-image", bytes, mime),
+  setTokenArt: (list) => ipcRenderer.invoke("set-token-art", list),
   campaignView: (id) => ipcRenderer.invoke("campaign-view", id),
   campaignBundle: (id) => ipcRenderer.invoke("campaign-bundle", id),
   saveBundle: (id, bytes) => ipcRenderer.invoke("save-bundle", id, bytes),
