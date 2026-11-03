@@ -79,6 +79,36 @@ let quitting = false;
 // campaign; a picture the GM picks is copied in), and FG's decals.
 let decalLibrary = null;
 let wallpaperLibrary = null;
+let gmIconLibrary = null;
+// The GM's chat pictures: the Kraken GM Icon set and the GM's own.
+function gmIcons() {
+  if (!gmIconLibrary) {
+    gmIconLibrary = createDecalLibrary({
+      folder: path.join(app.getPath("userData"), "assets", "gm-icons"),
+      builtin: path.join(__dirname, "..", "dist", "gm-icons"),
+      own: [],
+    });
+  }
+  return gmIconLibrary;
+}
+// The GM's own choices that follow them into every campaign (the GM icon), on this computer.
+function preferencesFile() {
+  return path.join(app.getPath("userData"), "preferences.json");
+}
+function preferences() {
+  try {
+    return JSON.parse(fs.readFileSync(preferencesFile(), "utf8")) ?? {};
+  } catch {
+    return {};
+  }
+}
+function savePreference(key, value) {
+  try {
+    fs.writeFileSync(preferencesFile(), JSON.stringify({ ...preferences(), [key]: value }));
+  } catch {
+    /* the campaign still has it */
+  }
+}
 // The desktop's wallpapers (FG's desktop theme): Kraken's own, one per game,
 // and the GM's own, in the assets folder too.
 function wallpapers() {
@@ -126,6 +156,9 @@ function flushCampaign() {
 
 function markDirty(kind) {
   if (!hosted) return;
+  // A GM icon just chosen goes with the GM into every campaign.
+  const icon = table?.agent?.options?.().gmIcon;
+  if (typeof icon === "string" && icon !== preferences().gmIcon) savePreference("gmIcon", icon);
   hosted.dirty = true;
   if (kind === "records") hosted.recordsDirty = true;
   clearTimeout(hosted.soon);
@@ -189,8 +222,11 @@ ipcMain.handle("start-host", async (_event, options) => {
   await stopTable();
   const campaignId = typeof options?.campaignId === "string" ? options.campaignId : "";
   const saved = openCampaign(campaignId) ?? {};
+  // The GM's icon follows them: a campaign that has none yet takes the last one chosen.
+  const remembered = preferences().gmIcon;
+  if (typeof remembered === "string" && !(saved.options && "gmIcon" in saved.options)) saved.options = { ...(saved.options ?? {}), gmIcon: remembered };
   const dataFolder = fgDataFolder();
-  const next = createTableServer({ saved, onChange: markDirty, art: createArtLibrary({ base: dataFolder, roots: defaultRoots(dataFolder) }), decals: decals(), wallpapers: wallpapers() });
+  const next = createTableServer({ saved, onChange: markDirty, art: createArtLibrary({ base: dataFolder, roots: defaultRoots(dataFolder) }), decals: decals(), wallpapers: wallpapers(), gmIcons: gmIcons() });
   try {
     const info = await next.listen({ port, password });
     table = next;
@@ -239,10 +275,11 @@ ipcMain.handle("set-token-art", (_event, list) => {
 });
 
 // The decal picker's Browse: a picture from anywhere, copied into the assets folder.
+const libraryOf = (kind) => (kind === "wallpaper" ? wallpapers() : kind === "gmicon" ? gmIcons() : decals());
 ipcMain.handle("decal-pick", async (_event, kind) => {
-  const library = kind === "wallpaper" ? wallpapers() : decals();
+  const library = libraryOf(kind);
   const picked = await dialog.showOpenDialog(mainWindow, {
-    title: kind === "wallpaper" ? "Choose a desktop wallpaper (a picture that tiles)" : "Choose a background decal",
+    title: kind === "wallpaper" ? "Choose a desktop wallpaper (a picture that tiles)" : kind === "gmicon" ? "Choose your GM icon" : "Choose a background decal",
     properties: ["openFile"],
     filters: [{ name: "Pictures", extensions: ["png", "webp", "jpg", "jpeg", "gif"] }],
   });
@@ -250,9 +287,9 @@ ipcMain.handle("decal-pick", async (_event, kind) => {
   return library.addFile(picked.filePaths[0]);
 });
 // A picture dropped on the picker.
-ipcMain.handle("decal-add", (_event, name, bytes, kind) => (kind === "wallpaper" ? wallpapers() : decals()).add(String(name ?? ""), Buffer.from(bytes ?? [])));
+ipcMain.handle("decal-add", (_event, name, bytes, kind) => libraryOf(kind).add(String(name ?? ""), Buffer.from(bytes ?? [])));
 ipcMain.handle("decal-folder", async (_event, kind) => {
-  const folder = (kind === "wallpaper" ? wallpapers() : decals()).folder;
+  const folder = libraryOf(kind).folder;
   fs.mkdirSync(folder, { recursive: true });
   return shell.openPath(folder);
 });

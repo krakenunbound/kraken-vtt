@@ -40,9 +40,9 @@ export type KrakenApi = {
   campaignBundle: (id: string) => Promise<Uint8Array | null>;
   saveBundle: (id: string, bytes: Uint8Array) => Promise<void>;
   saveView: (id: string, view: KrakenView | null) => Promise<void>;
-  pickDecal: (kind?: "decal" | "wallpaper") => Promise<KrakenDecal | null>;
-  addDecal: (name: string, bytes: Uint8Array, kind?: "decal" | "wallpaper") => Promise<KrakenDecal>;
-  openDecalFolder: (kind?: "decal" | "wallpaper") => Promise<string>;
+  pickDecal: (kind?: "decal" | "wallpaper" | "gmicon") => Promise<KrakenDecal | null>;
+  addDecal: (name: string, bytes: Uint8Array, kind?: "decal" | "wallpaper" | "gmicon") => Promise<KrakenDecal>;
+  openDecalFolder: (kind?: "decal" | "wallpaper" | "gmicon") => Promise<string>;
   onAgentCommand: (handler: (command: KrakenAgentCommand) => Promise<unknown>) => () => void;
 };
 

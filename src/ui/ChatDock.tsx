@@ -111,12 +111,13 @@ export function RollCard({ roll, pending = false }: { roll: RollResult; pending?
   );
 }
 
-function Line({ line }: { line: ChatLine }) {
+function Line({ line, gmIcon }: { line: ChatLine; gmIcon: string }) {
   useSyncExternalStore(rolling.subscribe, rolling.version);
   const system = line.from === "Combat";
   const kind = system ? "chat-line system" : line.secret || line.tower ? "chat-line secret" : "chat-line";
   return (
     <div className={kind} data-from={line.from}>
+      {line.gm && gmIcon ? <img className="chat-icon" src={gmIcon} alt="" draggable={false} /> : null}
       {!system ? <b className="chat-from">{line.from}</b> : null}
       {line.secret ? <span className="chat-tag">{line.shownTo ? "GM and you" : "GM only"}</span> : null}
       {line.tower ? <span className="chat-tag">To the GM</span> : null}
@@ -156,6 +157,8 @@ export function ChatDock({ session }: { session: Session }) {
   const [menu, setMenu] = useState<{ x: number; y: number; sides: number | null; custom?: boolean } | null>(null);
   // This seat's own set, on the tray's dice (the GM's too).
   const diceSettings = useSyncExternalStore(diceStore.subscribe, diceStore.settings);
+  // The GM's chat picture, beside everything the GM says.
+  const gmIconUrl = session.options.gmIcon ? session.decalUrl(session.options.gmIcon, "gmicon") : "";
   const mine = diceSettings.look;
   const traySize = Math.round(29 * Math.min(1.6, Math.max(0.6, diceSettings.tray ?? 1)));
   const trayArt = useTrayArt(mine);
@@ -347,7 +350,7 @@ export function ChatDock({ session }: { session: Session }) {
       <div className="chat-log" aria-live="polite" ref={log}>
         {session.chat.length === 0 ? <p className="hint">The table is quiet.</p> : null}
         {session.chat.map((line, index) => (
-          <Line key={`${line.at}-${index}`} line={line} />
+          <Line key={`${line.at}-${index}`} line={line} gmIcon={gmIconUrl} />
         ))}
       </div>
       <form
