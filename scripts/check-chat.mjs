@@ -167,7 +167,32 @@ try {
   const again = await connect(port, { name: "Ann" });
   const history = again.events.find((event) => event.type === "ok").chat;
   assert(history.some((line) => line.text === "The door is trapped.") && !history.some((line) => line.text === "Psst"), "Ann's history has her whisper, not Bob's to Sir Aldric");
-  for (const seat of [gm, ann, again]) seat.ws.close();
+
+  // /clear stays cleared: the GM coming back (and the campaign reopened) sees
+  // only newer lines; a player's history is untouched; the record keeps them.
+  await settle();
+  gm.send({ type: "chat-clear" });
+  await settle();
+  gm.send({ type: "chat", text: "After the clear" });
+  await settle();
+  gm.ws.close();
+  await settle();
+  const gmBack = await connect(port, { name: "GM", hostToken });
+  assert(gmBack.you.role === "dm", "the GM comes back as the GM");
+  const gmHistory = gmBack.events.find((event) => event.type === "ok").chat;
+  assert(gmHistory.length === 1 && gmHistory[0].text === "After the clear", `the GM's cleared chat stays cleared (${gmHistory.map((line) => line.text).join(" | ")})`);
+  const annBack = await connect(port, { name: "Ann" });
+  assert(annBack.events.find((event) => event.type === "ok").chat.some((line) => line.text === "The door is trapped."), "a player's chat is not cleared by the GM's /clear");
+  assert(server.agent.chatLog(100).some((line) => line.text === "The door is trapped."), "the table's record keeps cleared lines");
+  const reopened = createTableServer({ saved: server.persisted() });
+  const { port: port2, hostToken: token2 } = await reopened.listen({ port: 0, password: "" });
+  const gmLater = await connect(port2, { name: "GM", hostToken: token2 });
+  assert(gmLater.events.find((event) => event.type === "ok").chat.every((line) => line.text !== "The door is trapped."), "the clear is saved with the campaign");
+  await tool("kraken_chat_log", { clear: true });
+  await settle();
+  assert(gmBack.events.some((event) => event.type === "chat-cleared"), "the agent's clear clears the GM's window");
+  for (const seat of [gm, ann, again, gmBack, annBack, gmLater]) seat.ws.close();
+  await reopened.stop();
   console.log("CHAT_OK");
 } finally {
   await server.stop();
