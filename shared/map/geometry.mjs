@@ -62,10 +62,45 @@ export function blocksMove(wall, doors) {
   return Number(wall.move) !== 0 && !doorOpen(wall, doors);
 }
 
-// Limited (terrain) and proximity/distance (window) walls let sight through.
+// Whether a wall can block sight at all (Foundry: sense NONE never does, an
+// open door never does).
 export function blocksSight(wall, doors) {
-  const sight = Number(wall.sight);
-  return sight === 20 && !doorOpen(wall, doors);
+  return Number(wall.sight) !== 0 && !doorOpen(wall, doors);
+}
+
+// Foundry's Edge#orientPoint: which side of a -> b the point is on.
+// 1 left, 2 right, 0 on the line.
+function side(wall, point) {
+  const orientation = (wall.y1 - point.y) * (wall.x2 - point.x) - (wall.x1 - point.x) * (wall.y2 - point.y);
+  if (orientation === 0) return 0;
+  return orientation < 0 ? 1 : 2;
+}
+
+function distanceToWall(point, wall) {
+  return distanceToSegment(point.x, point.y, wall.x1, wall.y1, wall.x2, wall.y2);
+}
+
+// The walls that shape what a viewer at origin sees, as Foundry's clockwise
+// sweep chooses them (_testEdgeInclusion): no sight-less walls or open doors,
+// none collinear with the viewer, no one-way wall seen from its open side,
+// and proximity / distance walls only when their threshold says so.
+// Limited walls come back marked: sight passes the first and stops at the second.
+export function sightEdges(origin, walls, doors, distancePixels = 1, externalRadius = 0) {
+  const edges = [];
+  for (const wall of walls) {
+    if (!blocksSight(wall, doors)) continue;
+    const where = side(wall, origin);
+    if (!where) continue;
+    if (wall.dir && where === Number(wall.dir)) continue;
+    const sight = Number(wall.sight);
+    if (sight >= 30 && wall.threshold > 0) {
+      const reach = wall.threshold * distancePixels;
+      const d = distanceToWall(origin, wall);
+      if (sight === 30 ? Math.max(d - externalRadius, 0) < reach : d + externalRadius > reach) continue;
+    }
+    edges.push({ x1: wall.x1, y1: wall.y1, x2: wall.x2, y2: wall.y2, limited: sight === 10 });
+  }
+  return edges;
 }
 
 // Where along a -> b (0..1) it first crosses segment c -> d, or null.
@@ -113,14 +148,16 @@ export function settleMove(scene, walls, doors, from, to, squares = 1, { snap = 
 }
 
 // The area a viewer at origin can see: a polygon [x0, y0, x1, y1, ...] bounded
-// by the walls that block sight and the rectangle bounds {x, y, width, height}.
-export function visibilityPolygon(origin, walls, doors, bounds) {
+// by the walls that block sight and the rectangle bounds {x, y, width, height}
+// (Foundry clips sight to the scene rectangle, not its padding).
+// distancePixels: pixels per scene unit, for wall thresholds; externalRadius:
+// the viewer's own radius (half a token), as Foundry's token vision uses.
+export function visibilityPolygon(origin, walls, doors, bounds, distancePixels = 1, externalRadius = 0) {
   const segments = [];
   const { x: bx, y: by, width: bw, height: bh } = bounds;
-  segments.push([bx, by, bx + bw, by], [bx + bw, by, bx + bw, by + bh], [bx + bw, by + bh, bx, by + bh], [bx, by + bh, bx, by]);
-  for (const wall of walls) {
-    if (blocksSight(wall, doors)) segments.push([wall.x1, wall.y1, wall.x2, wall.y2]);
-  }
+  segments.push([bx, by, bx + bw, by, false], [bx + bw, by, bx + bw, by + bh, false], [bx + bw, by + bh, bx, by + bh, false], [bx, by + bh, bx, by, false]);
+  for (const edge of sightEdges(origin, walls, doors, distancePixels, externalRadius)) segments.push([edge.x1, edge.y1, edge.x2, edge.y2, edge.limited]);
+  const anyLimited = segments.some((segment) => segment[4]);
   const angles = [];
   for (const [x1, y1, x2, y2] of segments) {
     for (const [px, py] of [
@@ -141,13 +178,28 @@ export function visibilityPolygon(origin, walls, doors, bounds) {
     const ex = origin.x + Math.cos(angle) * reach;
     const ey = origin.y + Math.sin(angle) * reach;
     let nearest = 1;
-    for (const [x1, y1, x2, y2] of segments) {
+    const limited = anyLimited ? [] : null;
+    for (const [x1, y1, x2, y2, isLimited] of segments) {
       const t = crossing(origin.x, origin.y, ex, ey, x1, y1, x2, y2);
-      if (t !== null && t < nearest) nearest = t;
+      if (t === null) continue;
+      if (isLimited) limited.push(t);
+      else if (t < nearest) nearest = t;
+    }
+    if (limited && limited.length > 1) {
+      limited.sort((a, b) => a - b);
+      if (limited[1] < nearest) nearest = limited[1];
     }
     points.push(Math.round(origin.x + (ex - origin.x) * nearest), Math.round(origin.y + (ey - origin.y) * nearest));
   }
   return points;
+}
+
+// What a viewer at origin sees on a scene: clipped to the scene rectangle,
+// with wall thresholds in the scene's units.
+export function sceneSight(scene, origin, doors, externalRadius = 0) {
+  const offset = gridOrigin(scene);
+  const per = Number(scene?.grid?.distance) > 0 ? Number(scene.grid.distance) : 5;
+  return visibilityPolygon(origin, scene.walls ?? [], doors, { x: offset.x, y: offset.y, width: scene.width, height: scene.height }, gridSize(scene) / per, externalRadius);
 }
 
 export function pointInPolygon(x, y, polygon) {

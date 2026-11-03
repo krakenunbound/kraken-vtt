@@ -22,6 +22,8 @@ export type SceneWall = {
   dir: number;
   door: number;
   ds: number;
+  // Foundry's proximity threshold for sight, in scene units (null: none).
+  threshold: number | null;
   category: WallCategory;
 };
 
@@ -215,6 +217,10 @@ export function readWalls(value: unknown): SceneWall[] {
       dir: asNumber(wall.dir, 0),
       door,
       ds: asNumber(wall.ds, 0),
+      threshold: (() => {
+        const value = asRecord(wall.threshold)?.sight;
+        return typeof value === "number" && value > 0 ? value : null;
+      })(),
       category: classifyWall({ sight, light, sound, move, door }),
     });
   }

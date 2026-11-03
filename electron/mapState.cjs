@@ -182,13 +182,10 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
 
   function polygonFor(token) {
     const doors = doorsHere();
-    const key = `${scene.id}|${token.x}|${token.y}`;
+    const key = `${scene.id}|${token.x}|${token.y}|${token.squares}`;
     let polygon = visionCache.get(key);
     if (!polygon) {
-      const origin = { x: 0, y: 0 };
-      const frame = geometry.gridOrigin(scene);
-      const bounds = { x: origin.x, y: origin.y, width: scene.width + frame.x * 2, height: scene.height + frame.y * 2 };
-      polygon = geometry.visibilityPolygon({ x: token.x, y: token.y }, scene.walls, doors, bounds);
+      polygon = geometry.sceneSight(scene, { x: token.x, y: token.y }, doors, (token.squares * geometry.gridSize(scene)) / 2);
       visionCache.set(key, polygon);
     }
     return polygon;
