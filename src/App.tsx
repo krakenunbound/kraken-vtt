@@ -240,7 +240,7 @@ export function App() {
     await new Promise((resolve) => setTimeout(resolve, 0));
     try {
       const found = inspectZip(bytes);
-      if (found.length === 0) throw new Error(`No Foundry adventure bundle was in ${name}.`);
+      if (found.length === 0) throw new Error(`No prepared map bundle was in ${name}.`);
       const index = preferredCandidateIndex(found);
       if (campaignId) await window.kraken?.saveBundle(campaignId, bytes);
       setCandidates(found);
@@ -370,7 +370,7 @@ export function App() {
       <button type="button" className="play-button" onClick={() => fileInput.current?.click()} disabled={busy}>
         {busy ? "Reading the bundle…" : "Open an adventure"}
       </button>
-      <p className="desktop-hint">A Foundry Adventure Bundler zip, or one holding several. You can also drop it here.</p>
+      <p className="desktop-hint">A prepared map bundle (.zip), or a zip holding several. You can also drop it here.</p>
       {error ? (
         <p className="error" role="alert">
           {error}
@@ -411,7 +411,7 @@ export function App() {
                   className="file-input"
                   type="file"
                   accept=".zip,application/zip"
-                  aria-label="Foundry bundle"
+                  aria-label="Map bundle"
                   onChange={(event) => {
                     const file = event.target.files?.[0];
                     if (file) void openFile(file);

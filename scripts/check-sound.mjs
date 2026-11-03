@@ -11,6 +11,7 @@ import "./loopback.mjs";
 import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
 import { WebSocket } from "ws";
 
@@ -109,6 +110,30 @@ assert(played("[ATTACK] (M) Claw [AC 15] [HIT 15 vs 15] -> [at Ann]") === "sfx/W
 assert(played("[ATTACK] (M) Goblin Spear [AC 15] [MISS 9 vs 15] -> [at Ann]") === "sfx/Weapons/Spear/Attack", "a goblin's spear is a spear");
 
 // A real battle in Kraken's combat tracker: a fighter with a longsword against an orc.
+// A campaign saved with the old triggers (before the Syrinscape layout) gets the new ones.
+{
+  const old = createTableServer({ sounds, saved: { soundTriggers: [{ id: "attack-sword-miss", name: "Sword", on: "attack", match: "sword", result: "failure", sound: "sfx/Weapons/Sword/Miss", enabled: true }] } });
+  assert(old.agent.triggers().length === defaultTriggers().length && !old.agent.triggers().some((one) => one.sound.endsWith("/Miss")), "old saved triggers are replaced by the new defaults");
+  const kept = createTableServer({ sounds, saved: { soundTriggers: old.agent.triggers().slice(0, 3), soundTriggersVersion: old.persisted().soundTriggersVersion } });
+  assert(kept.agent.triggers().length === 3, "triggers saved with this version are kept");
+}
+// Kraken's own sounds (shipped with the app) and the GM's are one library; the GM's win.
+{
+  const own = mkdtempSync(path.join(tmpdir(), "kraken-own-"));
+  const theirs = mkdtempSync(path.join(tmpdir(), "kraken-gm-"));
+  for (const [root, name] of [[own, "a.mp3"], [own, "b.mp3"], [theirs, "b.mp3"]]) {
+    mkdirSync(path.join(root, "sfx", "Test"), { recursive: true });
+    writeFileSync(path.join(root, "sfx", "Test", name), root === own ? "own" : "gm");
+  }
+  const both = createSoundLibrary({ folder: theirs, builtin: own });
+  assert(both.list("sfx").length === 2 && both.file("sfx/Test/b.mp3").path.startsWith(theirs) && both.file("sfx/Test/a.mp3").path.startsWith(own), "built-in sounds and the GM's are one library");
+}
+// Kraken's shipped set: every default trigger has a sound to play.
+{
+  const shipped = createSoundLibrary({ folder: mkdtempSync(path.join(tmpdir(), "kraken-none-")), builtin: path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "sounds") });
+  const silent = defaultTriggers().filter((trigger) => !shipped.pick(trigger.sound));
+  assert(silent.length === 0, `every trigger has a shipped sound; silent: ${silent.slice(0, 5).map((one) => one.sound).join(", ")}`);
+}
 const server = createTableServer({ sounds });
 const tool = async (name, args) => JSON.parse((await callTool(name, args, { table: () => server })).content[0].text);
 try {

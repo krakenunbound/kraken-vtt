@@ -91,7 +91,7 @@ let gmIconLibrary = null;
 let soundLibrary = null;
 // The GM's sounds (one-shots, effects, ambience, music), shared by every campaign.
 function sounds() {
-  if (!soundLibrary) soundLibrary = createSoundLibrary({ folder: path.join(app.getPath("userData"), "assets", "sounds") });
+  if (!soundLibrary) soundLibrary = createSoundLibrary({ folder: path.join(app.getPath("userData"), "assets", "sounds"), builtin: path.join(__dirname, "..", "sounds") });
   return soundLibrary;
 }
 // The GM's chat pictures: the Kraken GM Icon set and the GM's own.

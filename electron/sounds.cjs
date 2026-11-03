@@ -10,6 +10,8 @@ const path = require("path");
 // A folder is a group: playing it picks one of its sounds at random, so a
 // sword hit is not the same every time. Ids are paths inside the folder,
 // only ever looked up in the index.
+// builtin: Kraken's own sounds (made with ElevenLabs, shipped with the app),
+// in the same layout; a sound of the GM's with the same path wins.
 
 const KINDS = ["oneshots", "sfx", "ambience", "music"];
 const AUDIO = { ".mp3": "audio/mpeg", ".ogg": "audio/ogg", ".oga": "audio/ogg", ".wav": "audio/wav", ".m4a": "audio/mp4", ".webm": "audio/webm", ".flac": "audio/flac", ".opus": "audio/ogg" };
@@ -19,14 +21,14 @@ const MAX_FILES = 20000;
 const mimeOf = (name) => AUDIO[path.extname(name).toLowerCase()] ?? null;
 const prettyName = (file) => path.basename(file, path.extname(file)).replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim();
 
-function createSoundLibrary({ folder }) {
+function createSoundLibrary({ folder, builtin = "" }) {
   let index = null;
   let indexedAt = 0;
 
   function scan() {
     if (index && Date.now() - indexedAt < 10000) return index;
     const items = new Map();
-    const walk = (dir, depth) => {
+    const walk = (root, dir, depth) => {
       let entries;
       try {
         entries = fs.readdirSync(dir, { withFileTypes: true });
@@ -36,16 +38,17 @@ function createSoundLibrary({ folder }) {
       for (const entry of entries) {
         if (items.size >= MAX_FILES) return;
         const full = path.join(dir, entry.name);
-        if (entry.isDirectory() && depth < 6) walk(full, depth + 1);
+        if (entry.isDirectory() && depth < 6) walk(root, full, depth + 1);
         else if (entry.isFile() && mimeOf(entry.name)) {
-          const id = path.relative(folder, full).split(path.sep).join("/");
+          const id = path.relative(root, full).split(path.sep).join("/");
           const [kind, ...rest] = id.split("/");
           if (!KINDS.includes(kind) || rest.length === 0) continue;
           items.set(id, { id, kind, group: rest.slice(0, -1).join("/"), name: prettyName(entry.name), file: full, mime: mimeOf(entry.name) });
         }
       }
     };
-    walk(folder, 0);
+    if (builtin) walk(builtin, builtin, 0);
+    walk(folder, folder, 0);
     index = items;
     indexedAt = Date.now();
     return index;

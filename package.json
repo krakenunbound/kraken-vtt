@@ -23,7 +23,7 @@
     "dice": "node scripts/check-dice.mjs && tsx scripts/check-dice-throw.ts",
     "chat": "node scripts/check-chat.mjs",
     "sound": "node scripts/check-sound.mjs",
-    "sounds": "node scripts/generate-sounds.mjs",
+    "sounds": "node --env-file-if-exists=.env.local scripts/generate-sounds.mjs",
     "decal": "node scripts/check-decal.mjs",
     "sight-parity": "node scripts/check-sight-parity.mjs",
     "session": "node scripts/check-session.mjs",
@@ -50,6 +50,7 @@
     "ws": "^8.22.1"
   },
   "devDependencies": {
+    "@elevenlabs/elevenlabs-js": "^2.75.0",
     "@types/node": "^24.3.0",
     "@types/react": "^19.1.12",
     "@types/react-dom": "^19.1.9",
@@ -71,6 +72,7 @@
     "files": [
       "dist/**/*",
       "electron/**/*",
+      "sounds/**/*",
       "shared/**/*",
       "build/icon.png",
       "package.json",

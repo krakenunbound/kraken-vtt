@@ -6,7 +6,7 @@ const os = require("os");
 const { WebSocketServer } = require("ws");
 const { createRecordStore, canSee } = require("./records.cjs");
 const { soundFor, cleanTriggers } = require("./soundTriggers.cjs");
-const { defaultTriggers } = require("./soundCatalog.cjs");
+const { defaultTriggers, TRIGGERS_VERSION } = require("./soundCatalog.cjs");
 const { createDice } = require("./dice.cjs");
 const { siege, siegeLibrary, siegeCheck, levelUp } = require("./siege.cjs");
 const { createMapState, playerColor } = require("./mapState.cjs");
@@ -293,7 +293,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
   let options = savedOptions(saved.options);
   // The chat's sound triggers, and what plays under the game (ambience loops
   // and music), for every seat; saved with the campaign.
-  let soundTriggers = cleanTriggers(saved.soundTriggers) ?? defaultTriggers();
+  let soundTriggers = (saved.soundTriggersVersion === TRIGGERS_VERSION && cleanTriggers(saved.soundTriggers)) || defaultTriggers();
   const cleanScape = (value) => {
     const scape = value && typeof value === "object" ? value : {};
     const level = (item) => Math.min(1, Math.max(0, Number(item?.volume ?? 1)));
@@ -1235,6 +1235,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         dice: dice.toJSON(),
         sound: soundscape,
         soundTriggers,
+        soundTriggersVersion: TRIGGERS_VERSION,
       };
     },
     // What agents (the MCP server, the in-app assistant) use. They act as the GM.

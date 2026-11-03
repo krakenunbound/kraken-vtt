@@ -250,6 +250,10 @@ function catalog() {
 // fumble | success | failure, sound (a folder), enabled }. As Syrinscape's in
 // FG: a crit or fumble first, then the weapon's swing on the attack and its
 // hit on the damage; spells by their element; wounds, initiative and saves.
+// Goes up when the defaults change shape (folders renamed), so a campaign
+// saved with older triggers gets the new ones.
+const TRIGGERS_VERSION = 2;
+
 function defaultTriggers() {
   const out = [];
   const add = (name, on, match, result, sound) => out.push({ id: slug(`${on} ${name} ${result}`), name, on, match, result, sound, enabled: true });
@@ -287,4 +291,4 @@ function defaultTriggers() {
   return out;
 }
 
-module.exports = { catalog, defaultTriggers, WEAPONS, SPELLS, ANIMALS, MONSTERS, VOICES };
+module.exports = { catalog, defaultTriggers, TRIGGERS_VERSION, WEAPONS, SPELLS, ANIMALS, MONSTERS, VOICES };
