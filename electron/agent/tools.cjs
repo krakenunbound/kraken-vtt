@@ -296,7 +296,8 @@ const TOOLS = [
       if (!scene) return out({ scene: null });
       const view = map.viewFor({ role: "dm", name: "Agent" }, "");
       return out({
-        scene: { id: scene.id, name: scene.name, grid: scene.grid, cols: Math.round(scene.width / scene.grid.size), rows: Math.round(scene.height / scene.grid.size) },
+        scene: { id: scene.id, name: scene.name, grid: scene.grid, cols: Math.round(scene.width / scene.grid.size), rows: Math.round(scene.height / scene.grid.size), walls: scene.walls.length, adventureLights: scene.lights.length },
+        lights: map.lights().length,
         sight: view.sight,
         tokens: view.tokens.map((token) => ({ ...token, ...map.squareOf(token), color: undefined, mine: undefined })),
         doors: view.doors.map(({ id, state, secret }) => ({ id, state, secret })),
@@ -338,9 +339,12 @@ const TOOLS = [
   },
   {
     name: "kraken_token_update",
-    description: "Change a token: name, hidden from players, size in squares, faction, owner (player name).",
+    description:
+      "Change a token: name, hidden from players, size in squares, faction, owner (player name), a carried light (a preset: candle, lamp, torch, lantern, light, a game light profile name such as Torch, none; or {bright, dim, color} in feet), and its sight in the dark in feet (vision; null goes back to the character's senses).",
     inputSchema: object({
       id: string("Token id"),
+      light: { description: "Preset name, or {bright, dim, color} in feet, or none" },
+      vision: { type: ["number", "null"], description: "Sight in the dark, feet" },
       name: string("Name"),
       hidden: { type: "boolean" },
       squares: number("Size in squares"),
@@ -351,6 +355,50 @@ const TOOLS = [
       const { map, seat } = needTable(ctx);
       const { id, ...patch } = args;
       return out(map.update(id, patch, seat));
+    },
+  },
+  {
+    name: "kraken_scene_settings",
+    description:
+      "The scene's map settings: darkness (0 day .. 1 pitch black; from 0.5 players see only lit places and their darkvision; null returns to the adventure's own), the grid (show, alpha, color), and weather (type: none, rain, storm, snow, blizzard, fog, clouds, sandstorm, embers, ash, leaves, water; intensity 0..1; direction in degrees the wind blows toward). Call with nothing to read them.",
+    inputSchema: object({
+      darkness: { type: ["number", "null"] },
+      grid: { type: "object", properties: { show: { type: "boolean" }, alpha: { type: "number" }, color: { type: "string" } }, additionalProperties: false },
+      weather: { type: "object", properties: { type: { type: "string" }, intensity: { type: "number" }, direction: { type: "number" } }, additionalProperties: false },
+    }),
+    run(args, ctx) {
+      const { map, seat } = needTable(ctx);
+      const settings = Object.keys(args).length > 0 ? map.updateSettings(args, seat) : map.settings();
+      return out({ ...settings, darknessNow: map.darkness(), lightProfiles: map.lightProfiles().map((row) => ({ name: row.name, radius: row.radius })) });
+    },
+  },
+  {
+    name: "kraken_light",
+    description:
+      "Lights on the scene. action list; place (x, y in scene pixels or col/row, bright and dim in feet, color, or a preset: candle, lamp, torch, lantern, light); update (id and any of x, y, bright, dim, color, on, hidden); remove (id).",
+    inputSchema: object({
+      action: { type: "string", enum: ["list", "place", "update", "remove"] },
+      id: string("Light id"),
+      x: number("Scene pixels across"),
+      y: number("Scene pixels down"),
+      col: number("Square across"),
+      row: number("Square down"),
+      bright: number("Bright radius, feet"),
+      dim: number("Dim radius, feet"),
+      color: string("CSS colour"),
+      preset: string("candle, lamp, torch, lantern, light"),
+      on: { type: "boolean" },
+      hidden: { type: "boolean" },
+    }, ["action"]),
+    run(args, ctx) {
+      const { map, seat } = needTable(ctx);
+      const { action, id, col, row, ...rest } = args;
+      if (Number.isFinite(col) && Number.isFinite(row)) Object.assign(rest, map.squareCenter(col, row, 1));
+      if (action === "list") return out(map.lights());
+      if (action === "place") return out(map.placeLight(rest, seat));
+      if (action === "update") return out(map.updateLight(id, rest, seat));
+      map.removeLight(id, seat);
+      return out({ removed: id });
     },
   },
   {
@@ -382,6 +430,7 @@ const TOOLS = [
       if (args.on !== undefined) agent.map.setSight(args.on);
       if (args.lockMovement !== undefined) agent.map.setLocked(args.lockMovement);
       const view = args.player ? agent.viewFor(args.player) : null;
+      if (view) view.dark = view.darkness;
       return out({
         sight: agent.map.sightOn(),
         lockMovement: agent.map.lockedNow(),

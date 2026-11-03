@@ -19,11 +19,47 @@ export type MapToken = {
   health: TokenHealth | null;
   art?: string;
   video?: boolean;
+  light: { name: string; bright: number; dim: number; color: string } | null;
+  vision: number | null;
+  seesFt: number;
+};
+// A light shining now, with its own line of sight (pixels).
+export type MapLight = { id: string; x: number; y: number; brightPx: number; dimPx: number; color: string; polygon: number[] | null };
+// A player's token seeing in the dark (darkvision), pixels.
+export type MapSeeing = { x: number; y: number; radiusPx: number; polygon: number[] | null };
+// A light placed on the scene, as the GM edits it (radii in feet).
+export type SceneLightRecord = { id: string; x: number; y: number; bright: number; dim: number; color: string; on: boolean; hidden: boolean };
+export type MapSettings = {
+  darkness: number | null;
+  grid: { show: boolean; alpha: number | null; color: string | null };
+  weather: { type: import("../table/Weather").WeatherType; intensity: number; direction: number };
 };
 export type MapDoor = { id: string; x1: number; y1: number; x2: number; y2: number; state: number; secret?: boolean };
-export type TableMap = { sceneId: string | null; tokens: MapToken[]; doors: MapDoor[]; vision: number[][] | null; sight: boolean; locked: boolean };
+export type TableMap = {
+  sceneId: string | null;
+  tokens: MapToken[];
+  doors: MapDoor[];
+  vision: number[][] | null;
+  sight: boolean;
+  locked: boolean;
+  darkness: number;
+  lights: MapLight[];
+  seeing: MapSeeing[];
+  // This player's tokens have twilight vision (C&C elves).
+  twilight?: boolean;
+  sceneLights: SceneLightRecord[];
+  settings: MapSettings;
+};
 export type Ping = { id: number; x: number; y: number; from: string; color: string };
-const EMPTY_MAP: TableMap = { sceneId: null, tokens: [], doors: [], vision: null, sight: false, locked: false };
+const EMPTY_MAP: TableMap = { sceneId: null, tokens: [], doors: [], vision: null,
+  sight: false,
+  locked: false,
+  darkness: 0,
+  lights: [],
+  seeing: [],
+  sceneLights: [],
+  settings: { darkness: null, grid: { show: true, alpha: null, color: null }, weather: { type: "none", intensity: 0.5, direction: 250 } },
+};
 export type RollTerm =
   | { kind: "number"; sign: number; value: number }
   | { kind: "dice"; sign: number; count: number; sides: number; rolls: number[]; kept: boolean[]; sum: number };
@@ -106,6 +142,7 @@ function toPlayerScene(payload: NetScene, origin: string): MapScene {
     anchorY: payload.anchorY ?? 0,
     fit: payload.fit ?? "fill",
     walls: [],
+    darkness: 0,
     lights: payload.lights ?? [],
     markers: [],
     regions: [],
@@ -442,6 +479,7 @@ export function useSession() {
           anchorY: scene.anchorY,
           fit: scene.fit,
           lights: scene.lights,
+          darkness: scene.darkness,
           tokens,
           walls: scene.walls,
         },
@@ -526,7 +564,14 @@ export function useSession() {
     send({ type: "token-move", id, x, y, snap });
   }, [send]);
   const removeToken = useCallback((id: string) => send({ type: "token-remove", id }), [send]);
-  const updateToken = useCallback((id: string, patch: Partial<Pick<MapToken, "name" | "hidden" | "squares" | "faction" | "owner">>) => send({ type: "token-update", id, patch }), [send]);
+  const updateToken = useCallback(
+    (id: string, patch: Partial<Pick<MapToken, "name" | "hidden" | "squares" | "faction" | "owner" | "vision">> & { light?: string | MapToken["light"] }) => send({ type: "token-update", id, patch }),
+    [send],
+  );
+  const updateSettings = useCallback((patch: import("../table/SceneSettings").SceneSettingsPatch) => send({ type: "scene-settings", patch }), [send]);
+  const placeLight = useCallback((light: Partial<SceneLightRecord> & { preset?: string }) => send({ type: "light-place", light }), [send]);
+  const updateLight = useCallback((id: string, patch: Partial<SceneLightRecord>) => send({ type: "light-update", id, patch }), [send]);
+  const removeLight = useCallback((id: string) => send({ type: "light-remove", id }), [send]);
   const setDoor = useCallback((id: string, state?: number) => send({ type: "door", id, state }), [send]);
   const setSight = useCallback((on: boolean) => send({ type: "sight", on }), [send]);
   const setLocked = useCallback((on: boolean) => send({ type: "lock", on }), [send]);
@@ -585,6 +630,10 @@ export function useSession() {
     setSight,
     setLocked,
     ping,
+    updateSettings,
+    placeLight,
+    updateLight,
+    removeLight,
     artUrl,
     artList,
     roll,

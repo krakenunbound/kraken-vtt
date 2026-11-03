@@ -1,9 +1,12 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { backgroundRect, colorWithAlpha, gridStops, sceneFrame, type BackgroundFit, type SceneFrame } from "../foundry/geometry";
 import { type SceneLight, type SceneMarker, type SceneRegion, type SceneWall } from "../foundry/sceneObjects";
-import { gridDistance, snapCenter } from "../../shared/map/geometry.mjs";
-import type { MapToken, Ping, TableMap, TableRecord } from "../session/useSession";
+import { gridDistance, LIGHT_PRESETS, snapCenter } from "../../shared/map/geometry.mjs";
+import type { MapToken, Ping, SceneLightRecord, TableMap, TableRecord } from "../session/useSession";
+import { Lighting } from "./Lighting";
 import { SceneGraphics, SceneLegend, type OverlayToken } from "./SceneOverlay";
+import { SceneSettings, type SceneSettingsPatch } from "./SceneSettings";
+import { Weather } from "./Weather";
 
 export type MapScene = {
   id: string;
@@ -29,6 +32,7 @@ export type MapScene = {
   anchorY: number;
   fit: BackgroundFit;
   walls: SceneWall[];
+  darkness: number;
   lights: SceneLight[];
   tokens: OverlayToken[];
   markers: SceneMarker[];
@@ -105,10 +109,14 @@ export type MapActions = {
   placeToken: (recordId: string | null, x?: number, y?: number, name?: string) => void;
   moveToken: (id: string, x: number, y: number, snap?: boolean) => void;
   removeToken: (id: string) => void;
-  updateToken: (id: string, patch: Partial<Pick<MapToken, "name" | "hidden" | "squares" | "faction" | "owner">>) => void;
   setDoor: (id: string, state?: number) => void;
   setSight: (on: boolean) => void;
   setLocked: (on: boolean) => void;
+  updateToken: (id: string, patch: Partial<Pick<MapToken, "name" | "hidden" | "squares" | "faction" | "owner" | "vision">> & { light?: string | MapToken["light"] }) => void;
+  updateSettings: (patch: SceneSettingsPatch) => void;
+  placeLight: (light: Partial<SceneLightRecord> & { preset?: string }) => void;
+  updateLight: (id: string, patch: Partial<SceneLightRecord>) => void;
+  removeLight: (id: string) => void;
   ping: (x: number, y: number) => void;
 };
 
@@ -149,10 +157,15 @@ export function MapView({
   const [showLights, setShowLights] = useState(true);
   const [showCreatures, setShowCreatures] = useState(true);
   const [trayOpen, setTrayOpen] = useState(true);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [lightMenu, setLightMenu] = useState<{ id: string; left: number; top: number } | null>(null);
+  const lightDrag = useRef<{ pointerId: number; id: string } | null>(null);
   const explored = useRef<{ sceneId: string; polygons: number[][] }>({ sceneId: "", polygons: [] });
   const frame = sceneFrame(scene);
   const size = scene.grid.size > 0 ? scene.grid.size : 100;
-  const drawSquare = scene.grid.type === 1 && scene.grid.size > 0;
+  const gridSettings = map.sceneId === scene.id ? map.settings.grid : { show: true, alpha: null, color: null };
+  const gridStroke = colorWithAlpha(gridSettings.color ?? scene.grid.color, gridSettings.alpha ?? scene.grid.alpha);
+  const drawSquare = scene.grid.type === 1 && scene.grid.size > 0 && gridSettings.show;
   const vertical = drawSquare ? gridStops(scene.width, scene.grid.size) : [];
   const horizontal = drawSquare ? gridStops(scene.height, scene.grid.size) : [];
   const backdrop = backgroundRect(scene, frame, natural);
@@ -327,8 +340,9 @@ export function MapView({
       data-sight={map.sight ? "on" : "off"}
       onContextMenu={(event) => event.preventDefault()}
       onPointerDown={(event) => {
-        if ((event.target as HTMLElement).closest(".map-controls, .legend, .token-tray, .token-menu")) return;
+        if ((event.target as HTMLElement).closest(".map-controls, .legend, .token-tray, .token-menu, .scene-settings")) return;
         setMenu(null);
+        setLightMenu(null);
         if (event.button === 2) {
           // Right-drag measures, as FG's pointer does.
           const point = worldAt(event.clientX, event.clientY);
@@ -344,6 +358,7 @@ export function MapView({
         setPanning(true);
       }}
       onPointerMove={(event) => {
+        if (lightDrag.current && lightDrag.current.pointerId === event.pointerId) return;
         if (drag && drag.pointerId === event.pointerId) {
           const point = worldAt(event.clientX, event.clientY);
           if (!point) return;
@@ -365,6 +380,12 @@ export function MapView({
         setCamera((camera) => ({ ...camera, x: camera.x + dx, y: camera.y + dy }));
       }}
       onPointerUp={(event) => {
+        if (lightDrag.current && lightDrag.current.pointerId === event.pointerId) {
+          const point = worldAt(event.clientX, event.clientY);
+          if (point) actions.updateLight(lightDrag.current.id, { x: Math.round(point.x), y: Math.round(point.y) });
+          lightDrag.current = null;
+          return;
+        }
         if (drag && drag.pointerId === event.pointerId) {
           if (drag.moved) actions.moveToken(drag.id, drag.at.x, drag.at.y, !event.altKey);
           setDrag(null);
@@ -380,7 +401,7 @@ export function MapView({
         }
       }}
       onDoubleClick={(event) => {
-        if ((event.target as HTMLElement).closest(".map-controls, .legend, .token-tray, .token, .token-menu")) return;
+        if ((event.target as HTMLElement).closest(".map-controls, .legend, .token-tray, .token, .token-menu, .scene-settings, .light-handle")) return;
         const point = worldAt(event.clientX, event.clientY);
         if (point) actions.ping(point.x, point.y);
       }}
@@ -428,10 +449,10 @@ export function MapView({
             style={{ left: frame.padX, top: frame.padY }}
           >
             {vertical.map((x) => (
-              <line key={`v${x}`} x1={x} y1={0} x2={x} y2={scene.height} stroke={colorWithAlpha(scene.grid.color, scene.grid.alpha)} strokeWidth={strokeWidth} />
+              <line key={`v${x}`} x1={x} y1={0} x2={x} y2={scene.height} stroke={gridStroke} strokeWidth={strokeWidth} />
             ))}
             {horizontal.map((y) => (
-              <line key={`h${y}`} x1={0} y1={y} x2={scene.width} y2={y} stroke={colorWithAlpha(scene.grid.color, scene.grid.alpha)} strokeWidth={strokeWidth} />
+              <line key={`h${y}`} x1={0} y1={y} x2={scene.width} y2={y} stroke={gridStroke} strokeWidth={strokeWidth} />
             ))}
           </svg>
         ) : null}
@@ -439,7 +460,7 @@ export function MapView({
           worldWidth={frame.worldWidth}
           worldHeight={frame.worldHeight}
           walls={gm ? scene.walls : []}
-          lights={scene.lights}
+          lights={[]}
           tokens={[]}
           markers={gm ? scene.markers : []}
           regions={gm ? scene.regions : []}
@@ -450,6 +471,44 @@ export function MapView({
           doorStates={doorStates}
           onToggleDoor={(wallId) => actions.setDoor(wallId)}
         />
+        {map.sceneId === scene.id ? (
+          <Lighting
+            width={frame.worldWidth}
+            height={frame.worldHeight}
+            darkness={map.darkness}
+            lights={map.lights}
+            seeing={gm ? [] : map.seeing}
+            gm={gm}
+            twilight={!gm && Boolean(map.twilight)}
+            image={scene.imageUrl && !imageFailed ? { url: scene.imageUrl, ...backdrop } : null}
+          />
+        ) : null}
+        {gm && showLights
+          ? map.sceneLights.map((light) => {
+              const per = size / (scene.grid.distance > 0 ? scene.grid.distance : 5);
+              return (
+                <div
+                  key={light.id}
+                  className={light.on ? "light-handle" : "light-handle off"}
+                  data-light={light.id}
+                  title={`Light: bright ${light.bright} ${units}, dim ${light.dim} ${units}${light.hidden ? " (hidden from players)" : ""}${light.on ? "" : " (off)"}. Drag to move, right-click to change.`}
+                  style={{ left: light.x, top: light.y, width: 22 / camera.scale, height: 22 / camera.scale, ["--reach" as string]: `${light.dim * per * 2}px` }}
+                  onPointerDown={(event) => {
+                    if (event.button !== 0) return;
+                    event.stopPropagation();
+                    if (viewport.current) capture(viewport.current, event.pointerId);
+                    lightDrag.current = { pointerId: event.pointerId, id: light.id };
+                  }}
+                  onContextMenu={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    const rect = viewport.current?.getBoundingClientRect();
+                    if (rect) setLightMenu({ id: light.id, left: event.clientX - rect.left, top: event.clientY - rect.top });
+                  }}
+                />
+              );
+            })
+          : null}
         {!gm && (mine.length > 0 || !map.sight) ? (
           <svg className="overlay doors" width={frame.worldWidth} height={frame.worldHeight} viewBox={`0 0 ${frame.worldWidth} ${frame.worldHeight}`}>
             {map.doors.map((door) => {
@@ -458,24 +517,24 @@ export function MapView({
               const open = door.state === 1;
               const locked = door.state === 2;
               return (
-                <g key={door.id} className="player-door" data-door={door.id} data-state={door.state}>
-                  <line x1={door.x1} y1={door.y1} x2={door.x2} y2={door.y2} stroke={open ? "#66CC66" : "#c9a66b"} strokeWidth={size * 0.08} strokeDasharray={open ? `${size * 0.15} ${size * 0.12}` : undefined} />
-                  <circle
-                    className="door"
-                    cx={cx}
-                    cy={cy}
-                    r={Math.max(size * 0.16, 9 / camera.scale)}
-                    fill={open ? "#66CC66" : locked ? "#EE4444" : "#6666EE"}
-                    stroke="#000"
-                    strokeWidth={strokeWidth * 1.5}
-                    onPointerDown={(event) => event.stopPropagation()}
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      if (!locked) actions.setDoor(door.id);
-                    }}
-                  >
-                    <title>{locked ? "Locked door" : open ? "Open door. Click to close." : "Closed door. Click to open."}</title>
-                  </circle>
+                <g
+                  key={door.id}
+                  className="player-door"
+                  data-door={door.id}
+                  data-state={door.state}
+                  onPointerDown={(event) => event.stopPropagation()}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    if (!locked) actions.setDoor(door.id);
+                  }}
+                >
+                  <title>{locked ? "Locked door" : open ? "Open door. Click to close." : "Closed door. Click to open."}</title>
+                  <line className="door-hit" x1={door.x1} y1={door.y1} x2={door.x2} y2={door.y2} strokeWidth={Math.max(size * 0.35, 14 / camera.scale)} />
+                  <g className="door-icon" transform={`translate(${cx} ${cy}) scale(${Math.max(size * 0.012, 0.8 / camera.scale)})`}>
+                    <rect x={-11} y={-14} width={22} height={28} rx={3} fill="rgba(18,20,24,0.85)" />
+                    <path d={open ? "M-6 -9 L4 -11 L4 11 L-6 9 Z" : "M-6 -9 L6 -9 L6 10 L-6 10 Z"} fill={locked ? "#e07a6a" : "#d2a15a"} />
+                    <circle cx={open ? 1.5 : 3} cy={1} r={1.4} fill="#121418" />
+                  </g>
                 </g>
               );
             })}
@@ -602,6 +661,10 @@ export function MapView({
         ) : null}
       </div>
 
+      {map.sceneId === scene.id && map.settings.weather.type !== "none" ? (
+        <Weather type={map.settings.weather.type} intensity={map.settings.weather.intensity} direction={map.settings.weather.direction} camera={camera} />
+      ) : null}
+
       {menu
         ? (() => {
             const token = tokens.find((item) => item.id === menu.id);
@@ -609,6 +672,35 @@ export function MapView({
             return (
               <div className="token-menu" role="menu" style={{ left: menu.left, top: menu.top }} onPointerDown={(event) => event.stopPropagation()}>
                 <strong>{token.name}</strong>
+                <label className="token-menu-row">
+                  Light
+                  <select
+                    value={token.light ? Object.entries(LIGHT_PRESETS).find(([, preset]) => preset.name === token.light?.name)?.[0] ?? "custom" : "none"}
+                    onChange={(event) => actions.updateToken(token.id, { light: event.target.value })}
+                  >
+                    <option value="none">None</option>
+                    {Object.entries(LIGHT_PRESETS).map(([key, preset]) => (
+                      <option key={key} value={key}>
+                        {preset.name} ({preset.bright * 5}/{preset.dim * 5} ft)
+                      </option>
+                    ))}
+                    {token.light && !Object.values(LIGHT_PRESETS).some((preset) => preset.name === token.light?.name) ? <option value="custom">{token.light.name}</option> : null}
+                  </select>
+                </label>
+                {gm ? (
+                  <label className="token-menu-row">
+                    Sees in the dark
+                    <input
+                      type="number"
+                      min={0}
+                      step={5}
+                      value={token.vision ?? token.seesFt}
+                      onChange={(event) => actions.updateToken(token.id, { vision: event.target.value === "" ? null : Number(event.target.value) })}
+                      style={{ width: "4.5rem" }}
+                    />
+                    ft
+                  </label>
+                ) : null}
                 {gm ? (
                   <button type="button" role="menuitem" onClick={() => actions.updateToken(token.id, { hidden: !token.hidden })}>
                     {token.hidden ? "Show to players" : "Hide from players"}
@@ -647,6 +739,61 @@ export function MapView({
             );
           })()
         : null}
+
+      {lightMenu
+        ? (() => {
+            const light = map.sceneLights.find((item) => item.id === lightMenu.id);
+            if (!light) return null;
+            return (
+              <div className="token-menu" role="menu" style={{ left: lightMenu.left, top: lightMenu.top }} onPointerDown={(event) => event.stopPropagation()}>
+                <strong>Light</strong>
+                <label className="token-menu-row">
+                  Bright
+                  <input type="number" min={0} step={5} value={light.bright} onChange={(event) => actions.updateLight(light.id, { bright: Number(event.target.value) })} style={{ width: "4.5rem" }} />
+                  {units}
+                </label>
+                <label className="token-menu-row">
+                  Dim
+                  <input type="number" min={0} step={5} value={light.dim} onChange={(event) => actions.updateLight(light.id, { dim: Number(event.target.value) })} style={{ width: "4.5rem" }} />
+                  {units}
+                </label>
+                <label className="token-menu-row">
+                  Colour
+                  <input type="color" value={light.color.slice(0, 7)} onChange={(event) => actions.updateLight(light.id, { color: event.target.value })} />
+                </label>
+                <button type="button" onClick={() => actions.updateLight(light.id, { on: !light.on })}>
+                  {light.on ? "Turn off" : "Turn on"}
+                </button>
+                <button type="button" onClick={() => actions.updateLight(light.id, { hidden: !light.hidden })}>
+                  {light.hidden ? "Let players see it" : "Hide from players"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    actions.removeLight(light.id);
+                    setLightMenu(null);
+                  }}
+                >
+                  Remove light
+                </button>
+                <button type="button" onClick={() => setLightMenu(null)}>
+                  Done
+                </button>
+              </div>
+            );
+          })()
+        : null}
+
+      {settingsOpen && gm ? (
+        <SceneSettings
+          map={map}
+          gridDefaults={{ alpha: scene.grid.alpha, color: scene.grid.color }}
+          onSettings={actions.updateSettings}
+          onSight={actions.setSight}
+          onLocked={actions.setLocked}
+          onClose={() => setSettingsOpen(false)}
+        />
+      ) : null}
 
       {placeable.length > 0 || mine.length > 0 ? (
         <aside className={trayOpen ? "token-tray" : "token-tray closed"} onPointerDown={(event) => event.stopPropagation()}>
@@ -723,6 +870,25 @@ export function MapView({
             }}
           >
             {gm ? "Find" : "My token"}
+          </button>
+        ) : null}
+        {gm ? (
+          <button type="button" data-action="scene-settings" aria-pressed={settingsOpen} onClick={() => setSettingsOpen(!settingsOpen)} title="Lighting, players, grid and weather">
+            Scene
+          </button>
+        ) : null}
+        {gm ? (
+          <button
+            type="button"
+            data-action="add-light"
+            title="Put a torch-bright light in the middle of the view; drag it, right-click to change it"
+            onClick={() => {
+              const center = viewCenter();
+              if (center) actions.placeLight({ x: center.x, y: center.y, preset: "torch", color: "#FFB347" });
+              setShowLights(true);
+            }}
+          >
+            Add light
           </button>
         ) : null}
         {gm ? (

@@ -53,6 +53,58 @@ function cleanToken(raw) {
     owner: text(raw.owner, "").slice(0, 24),
     faction: FACTIONS.includes(raw.faction) ? raw.faction : "none",
     hidden: Boolean(raw.hidden),
+    // A carried light (feet; FG's LIGHT effect) and a sight range in the dark
+    // (feet; null: from the character's senses).
+    light: cleanCarried(raw.light),
+    vision: raw.vision == null ? null : Math.min(1000, Math.max(0, num(raw.vision, 0))),
+  };
+}
+
+function cleanCarried(raw) {
+  if (!raw || typeof raw !== "object") return null;
+  const bright = Math.min(1000, Math.max(0, num(raw.bright, 0)));
+  const dim = Math.min(1000, Math.max(bright, num(raw.dim, bright * 2)));
+  if (dim <= 0) return null;
+  return { name: text(raw.name, "Light").slice(0, 40), bright, dim, color: text(raw.color, "#FFF3E1").slice(0, 16) };
+}
+
+// A light on the scene (Foundry's ambient light), radii in scene units.
+function cleanLight(raw) {
+  if (!raw || typeof raw !== "object") return null;
+  const x = num(raw.x, NaN);
+  const y = num(raw.y, NaN);
+  if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
+  const bright = Math.min(1000, Math.max(0, num(raw.bright, 0)));
+  return {
+    id: text(raw.id, "").slice(0, 80) || `l-${crypto.randomBytes(6).toString("hex")}`,
+    x,
+    y,
+    bright,
+    dim: Math.min(2000, Math.max(bright, num(raw.dim, bright))),
+    color: text(raw.color, "#FFB347").slice(0, 16),
+    on: raw.on !== false,
+    hidden: Boolean(raw.hidden),
+  };
+}
+
+const WEATHER = ["none", "rain", "storm", "snow", "blizzard", "fog", "clouds", "sandstorm", "embers", "ash", "leaves", "water"];
+
+function cleanSettings(raw) {
+  const value = raw && typeof raw === "object" ? raw : {};
+  const grid = value.grid && typeof value.grid === "object" ? value.grid : {};
+  const weather = value.weather && typeof value.weather === "object" ? value.weather : {};
+  return {
+    darkness: value.darkness == null ? null : Math.min(1, Math.max(0, num(value.darkness, 0))),
+    grid: {
+      show: grid.show !== false,
+      alpha: grid.alpha == null ? null : Math.min(1, Math.max(0, num(grid.alpha, 0.2))),
+      color: grid.color == null ? null : text(grid.color, "#000000").slice(0, 16),
+    },
+    weather: {
+      type: WEATHER.includes(weather.type) ? weather.type : "none",
+      intensity: Math.min(1, Math.max(0, num(weather.intensity, 0.5))),
+      direction: ((num(weather.direction, 250) % 360) + 360) % 360,
+    },
   };
 }
 
@@ -61,7 +113,9 @@ function savedMap(value) {
   const doors = {};
   const sight = {};
   const locked = {};
-  if (!value || typeof value !== "object") return { tokens, doors, sight, locked };
+  const settings = {};
+  const lights = {};
+  if (!value || typeof value !== "object") return { tokens, doors, sight, locked, settings, lights };
   for (const [sceneId, list] of Object.entries(value.tokens ?? {}).slice(0, 500)) {
     if (!Array.isArray(list)) continue;
     tokens[sceneId.slice(0, 80)] = list.map(cleanToken).filter(Boolean).slice(0, MAX_TOKENS);
@@ -76,7 +130,22 @@ function savedMap(value) {
   }
   for (const [sceneId, on] of Object.entries(value.sight ?? {}).slice(0, 500)) sight[sceneId.slice(0, 80)] = Boolean(on);
   for (const [sceneId, on] of Object.entries(value.locked ?? {}).slice(0, 500)) locked[sceneId.slice(0, 80)] = Boolean(on);
-  return { tokens, doors, sight, locked };
+  for (const [sceneId, row] of Object.entries(value.settings ?? {}).slice(0, 500)) settings[sceneId.slice(0, 80)] = cleanSettings(row);
+  for (const [sceneId, list] of Object.entries(value.lights ?? {}).slice(0, 500)) {
+    if (Array.isArray(list)) lights[sceneId.slice(0, 80)] = list.map(cleanLight).filter(Boolean).slice(0, 500);
+  }
+  return { tokens, doors, sight, locked, settings, lights };
+}
+
+// A light from CoreRPG's presets (squares), in feet at 5 ft a square, or the
+// game's own light profiles by name (SiegeCore: radius r is bright r, dim 2r).
+function presetLight(name, profiles = []) {
+  const key = String(name).toLowerCase();
+  if (key === "none" || key === "") return null;
+  const profile = profiles.find((item) => String(item.name).toLowerCase() === key);
+  if (profile) return cleanCarried({ name: profile.name, bright: profile.radius, dim: profile.radius * 2, color: geometry.LIGHT_PRESETS[key.split(/[ ,]/)[0]]?.color ?? "#FFB45C" });
+  const preset = geometry.LIGHT_PRESETS[key];
+  return preset ? cleanCarried({ name: preset.name, bright: preset.bright * 5, dim: preset.dim * 5, color: preset.color }) : null;
 }
 
 function createMapState({ saved, records, onChange = () => undefined, hasArt = () => false, hasPicture = () => false }) {
@@ -94,6 +163,61 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
     if (!scene) return {};
     state.doors[scene.id] = state.doors[scene.id] ?? {};
     return state.doors[scene.id];
+  }
+
+  function settingsHere() {
+    if (!scene) return cleanSettings({});
+    state.settings[scene.id] = state.settings[scene.id] ?? cleanSettings({});
+    return state.settings[scene.id];
+  }
+
+  // The darkness now: the GM's setting, else the scene's own (from Foundry).
+  function darkness() {
+    const set = settingsHere().darkness;
+    return set == null ? (scene?.darkness ?? 0) : set;
+  }
+
+  function lightsHere() {
+    if (!scene) return [];
+    state.lights[scene.id] = state.lights[scene.id] ?? [];
+    return state.lights[scene.id];
+  }
+
+  // The game's light profiles (SiegeCore Game Settings: Torch 40, lanterns...).
+  function lightProfiles() {
+    const game = records.list({ type: "siegegame" })[0];
+    return Object.values(game?.data?.lightprofiles ?? {}).filter((row) => row && typeof row === "object" && Number(row.radius) > 0);
+  }
+
+  function pixelsPerUnit() {
+    return geometry.gridSize(scene) / units();
+  }
+
+  // How far a token sees in the dark, in feet: its own setting, else its
+  // character's senses (C&C deepvision, darkvision, twilight vision).
+  function visionRange(token) {
+    if (token.vision != null) return token.vision;
+    const record = token.recordId ? records.get(token.recordId) : null;
+    return geometry.sensesRange(record?.data?.senses);
+  }
+
+  // Every light shining now: the scene's lights that are on, and the lights
+  // tokens carry. Each with its reach (pixels) and its own line of sight.
+  function lightSources() {
+    const per = pixelsPerUnit();
+    const out = [];
+    const add = (id, x, y, bright, dim, color, hidden) => {
+      const key = `L|${scene.id}|${Math.round(x)}|${Math.round(y)}`;
+      let polygon = visionCache.get(key);
+      if (!polygon) {
+        polygon = geometry.sceneSight(scene, { x, y }, doorsHere());
+        visionCache.set(key, polygon);
+      }
+      out.push({ id, x, y, brightPx: bright * per, dimPx: dim * per, color, hidden, polygon });
+    };
+    for (const light of lightsHere()) if (light.on && !light.hidden) add(light.id, light.x, light.y, light.bright, light.dim, light.color, light.hidden);
+    for (const token of tokensHere()) if (token.light) add(`token:${token.id}`, token.x, token.y, token.light.bright, token.light.dim, token.light.color, token.hidden);
+    return out;
   }
 
   function sightOn() {
@@ -175,6 +299,9 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       hidden: token.hidden,
       mine: seat.role === "player" && token.owner === seat.name,
       health: health(token),
+      light: token.light,
+      vision: token.vision,
+      seesFt: visionRange(token),
     };
     // A character's token picture, else its portrait (FG's token from the sheet).
     const data = token.recordId ? records.get(token.recordId)?.data : null;
@@ -201,29 +328,56 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
   // with tokens on a line-of-sight scene sees what those tokens see; a player
   // with none sees the whole map, as in FG.
   function viewFor(seat, assetToken) {
-    if (!scene) return { sceneId: null, tokens: [], doors: [], vision: null, sight: false, locked: false };
+    if (!scene) return { sceneId: null, tokens: [], doors: [], vision: null, sight: false, locked: false, darkness: 0, lights: [], seeing: [], settings: cleanSettings({}), sceneLights: [] };
     const locked = Boolean(state.locked[scene.id]);
+    const settings = settingsHere();
+    const dark = darkness();
+    const sources = lightSources();
+    const per = pixelsPerUnit();
     const doors = doorsHere();
     const all = tokensHere();
     const doorList = scene.walls
       .filter((wall) => wall.door > 0)
       .map((wall) => ({ id: wall.id, x1: wall.x1, y1: wall.y1, x2: wall.x2, y2: wall.y2, secret: wall.door === 2, state: wall.id in doors ? doors[wall.id] : wall.ds }));
+    const shared = { sceneId: scene.id, sight: sightOn(), locked, darkness: dark, settings: { grid: settings.grid, weather: settings.weather, darkness: settings.darkness } };
+    const lightOut = (list) => list.map(({ id, x, y, brightPx, dimPx, color, polygon }) => ({ id, x, y, brightPx, dimPx, color, polygon }));
     if (seat.role === "dm") {
-      return { sceneId: scene.id, tokens: all.map((token) => publicToken(token, seat, assetToken)), doors: doorList, vision: null, sight: sightOn(), locked };
+      return {
+        ...shared,
+        tokens: all.map((token) => publicToken(token, seat, assetToken)),
+        doors: doorList,
+        vision: null,
+        lights: lightOut(sources),
+        seeing: [],
+        sceneLights: lightsHere(),
+      };
     }
     const shown = all.filter((token) => !token.hidden);
     const mine = shown.filter((token) => token.owner === seat.name);
     const vision = sightOn() && mine.length > 0 ? mine.map(polygonFor) : null;
     const slack = geometry.gridSize(scene) * 0.05;
-    const tokens = shown.filter((token) => token.owner === seat.name || !vision || geometry.seen(token.x, token.y, vision, slack));
+    const shining = sources;
+    // In the dark, a player sees only lit places and what their own tokens'
+    // darkvision reaches (inside that token's line of sight).
+    const seeing = mine
+      .map((token, index) => ({ x: token.x, y: token.y, radiusPx: visionRange(token) * per, polygon: vision ? vision[index] : null }))
+      .filter((item) => item.radiusPx > 0);
+    // Twilight vision: a moonlit night is like dusk, and dim light is enough.
+    const twilight = mine.some((token) => token.recordId && geometry.hasTwilightVision(records.get(token.recordId)?.data?.senses));
+    const needsLight = mine.length > 0 && (twilight ? dark >= 1 : dark >= geometry.NEEDS_LIGHT);
+    const visibleInDark = (x, y) =>
+      !needsLight || geometry.lit(x, y, shining) || seeing.some((item) => Math.hypot(x - item.x, y - item.y) <= item.radiusPx && (!item.polygon || geometry.pointInPolygon(x, y, item.polygon)));
+    const tokens = shown.filter((token) => token.owner === seat.name || ((!vision || geometry.seen(token.x, token.y, vision, slack)) && visibleInDark(token.x, token.y)));
     const playerDoors = doorList.filter((door) => !door.secret && (!vision || geometry.seen((door.x1 + door.x2) / 2, (door.y1 + door.y2) / 2, vision, slack)));
     return {
-      sceneId: scene.id,
       tokens: tokens.map((token) => publicToken(token, seat, assetToken)),
+      ...shared,
       doors: playerDoors.map(({ secret, ...door }) => door),
       vision,
-      sight: sightOn(),
-      locked,
+      lights: lightOut(shining),
+      seeing,
+      twilight,
+      sceneLights: [],
     };
   }
 
@@ -239,11 +393,16 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
     units,
     squareCenter,
     squareOf,
-    // A new scene from the GM. Its Foundry tokens become table tokens the
-    // first time it is shown; after that the table's own tokens are kept.
+    // A new scene from the GM. Its Foundry tokens and lights become the
+    // table's the first time it is shown; after that the table's own are kept.
     setScene(next) {
       scene = next;
       visionCache.clear();
+      if (!state.lights[next.id]) {
+        state.lights[next.id] = (next.lights ?? [])
+          .map((light) => cleanLight({ id: light.id, x: light.x, y: light.y, bright: light.bright, dim: light.dim, color: light.color, on: !light.hidden }))
+          .filter(Boolean);
+      }
       if (!state.tokens[next.id]) {
         const size = geometry.gridSize(next);
         state.tokens[next.id] = next.tokens
@@ -326,8 +485,14 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       return { token, blocked: result.blocked };
     },
     update(id, patch, seat) {
-      if (seat.role !== "dm") throw new Error("Only the GM can change tokens.");
       const token = findToken(id);
+      // A player may light or put out a light on their own token, nothing else.
+      if (seat.role !== "dm") {
+        const keys = Object.keys(patch);
+        if (!canMove(token, seat) || keys.some((key) => key !== "light")) throw new Error("Only the GM can change tokens.");
+      }
+      if (patch.light !== undefined) token.light = typeof patch.light === "string" ? presetLight(patch.light, lightProfiles()) : cleanCarried(patch.light);
+      if (patch.vision !== undefined) token.vision = patch.vision == null ? null : Math.min(1000, Math.max(0, num(patch.vision, 0)));
       if (patch.name !== undefined) token.name = text(patch.name, token.name).slice(0, 48);
       if (patch.hidden !== undefined) token.hidden = Boolean(patch.hidden);
       if (patch.squares !== undefined) token.squares = Math.min(10, Math.max(0.25, num(patch.squares, token.squares)));
@@ -364,6 +529,51 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       doors[wallId] = next;
       changed();
       return next;
+    },
+    darkness,
+    lightProfiles,
+    settings: settingsHere,
+    lights: lightsHere,
+    // Scene settings: darkness, grid, weather (the GM's map settings).
+    updateSettings(patch, seat) {
+      if (seat.role !== "dm") throw new Error("Only the GM can change the scene.");
+      if (!scene) throw new Error("No scene is open.");
+      const current = settingsHere();
+      state.settings[scene.id] = cleanSettings({
+        darkness: patch.darkness !== undefined ? patch.darkness : current.darkness,
+        grid: { ...current.grid, ...(patch.grid ?? {}) },
+        weather: { ...current.weather, ...(patch.weather ?? {}) },
+      });
+      changed();
+      return state.settings[scene.id];
+    },
+    placeLight(input, seat) {
+      if (seat.role !== "dm") throw new Error("Only the GM can place lights.");
+      if (!scene) throw new Error("No scene is open.");
+      const preset = typeof input.preset === "string" ? presetLight(input.preset) : null;
+      const light = cleanLight({ color: "#FFB347", bright: 20, dim: 40, ...(preset ?? {}), ...input, id: undefined });
+      if (!light) throw new Error("Where?");
+      if (lightsHere().length >= 500) throw new Error("This scene has too many lights.");
+      lightsHere().push(light);
+      changed();
+      return light;
+    },
+    updateLight(id, patch, seat) {
+      if (seat.role !== "dm") throw new Error("Only the GM can change lights.");
+      const list = lightsHere();
+      const index = list.findIndex((light) => light.id === id);
+      if (index < 0) throw new Error(`No light ${id}.`);
+      list[index] = cleanLight({ ...list[index], ...patch, id });
+      changed();
+      return list[index];
+    },
+    removeLight(id, seat) {
+      if (seat.role !== "dm") throw new Error("Only the GM can remove lights.");
+      const list = lightsHere();
+      const index = list.findIndex((light) => light.id === id);
+      if (index < 0) throw new Error(`No light ${id}.`);
+      list.splice(index, 1);
+      changed();
     },
     persisted: () => JSON.parse(JSON.stringify(state)),
   };

@@ -33,7 +33,7 @@ const num = (value) => (value === undefined || value === true ? 0 : Number(value
 function facts(sheet) {
   const out = {};
   for (const field of ["level", "bth", "exp", "expnext"]) out[field] = num(sheet[field]);
-  for (const field of ["hitdice", "race", "size", "speed", "alignment", "deity"]) out[field] = String(sheet[field] ?? "");
+  for (const field of ["hitdice", "race", "size", "speed", "senses", "alignment", "deity"]) out[field] = String(sheet[field] ?? "");
   out["hp.total"] = num(sheet.hp?.total);
   for (const stat of STATS) {
     const row = sheet.attributes?.[stat] ?? {};
