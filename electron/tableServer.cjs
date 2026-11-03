@@ -165,7 +165,7 @@ const DICE_FONTS = new Set(["classic", "bold", "runic", "script"]);
 function diceThrow(value) {
   if (!value || typeof value !== "object") return null;
   const n = (key, low, high) => Math.min(high, Math.max(low, Number(value[key])));
-  const out = { x: n("x", 0, 1), y: n("y", 0, 1), vx: n("vx", -4, 4), vy: n("vy", -4, 4) };
+  const out = { x: n("x", 0, 1), y: n("y", 0, 1), vx: n("vx", -8, 8), vy: n("vy", -8, 8) };
   return Object.values(out).every(Number.isFinite) ? out : null;
 }
 function diceLook(value) {
