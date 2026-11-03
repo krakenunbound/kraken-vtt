@@ -4,6 +4,7 @@
 // the spell's level; Magic Missile fires 1 missile, +1 every 2 levels; Hold
 // Person allows a Wisdom save that negates it, lasting 1 round per level;
 // Cure Light Wounds heals its target.
+import "./loopback.mjs";
 import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);

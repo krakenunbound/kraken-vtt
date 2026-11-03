@@ -3,6 +3,7 @@
 // tracker roll a player asked for carries theirs; FG's dice tower makes a
 // [TOWER] roll the GM's alone, the roller seeing only what went in, unless the
 // GM's towerReveal option shows the roller the result too.
+import "./loopback.mjs";
 import { WebSocket } from "ws";
 import { createRequire } from "node:module";
 

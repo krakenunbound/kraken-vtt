@@ -3,6 +3,7 @@
 // AC + AC effects, equal hits, one roll per target; damage is the weapon's dice
 // + the damage attribute + DMG effects, at least 1, put on every target; NPCs
 // attack with their record's attacks; an attack with no target says so.
+import "./loopback.mjs";
 import { createRequire } from "node:module";
 import { WebSocket } from "ws";
 

@@ -880,7 +880,8 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       return Promise.all([map.ready, combat.ready]).then(() => new Promise((resolve, reject) => {
         const onError = (error) => reject(error);
         server.once("error", onError);
-        server.listen(port, "0.0.0.0", () => {
+        // Every network, for LAN and internet players; tests set KRAKEN_BIND to 127.0.0.1.
+        server.listen(port, process.env.KRAKEN_BIND || "0.0.0.0", () => {
           server.off("error", onError);
           server.on("error", (error) => console.error("table server", error));
           const address = server.address();

@@ -3,6 +3,7 @@
 // see, walls and closed doors stop their tokens, players open doors but not
 // locked or secret ones, the GM is not stopped, and the agent's map tools
 // drive the same rules.
+import "./loopback.mjs";
 import { createRequire } from "node:module";
 import { WebSocket } from "ws";
 import * as geometry from "../shared/map/geometry.mjs";

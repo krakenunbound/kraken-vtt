@@ -1,6 +1,7 @@
 // The front screen in a narrow window and a wide one: "New campaign" brings
 // the new-campaign form into view with its name field ready to type in, from
 // the list and from a selected campaign. node scripts/check-setup.mjs [folder for screenshots]
+import "./loopback.mjs";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";

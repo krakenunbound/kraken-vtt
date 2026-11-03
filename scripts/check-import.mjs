@@ -3,6 +3,7 @@
 // the Kraken Agent Bridge daemon (127.0.0.1:47111). FG must be running with a
 // SiegeCore campaign that has the modules loaded; modules FG has not loaded
 // are compared with the file only.
+import "./loopback.mjs";
 import { createRequire } from "node:module";
 import { spawn } from "node:child_process";
 import { mkdtempSync } from "node:fs";

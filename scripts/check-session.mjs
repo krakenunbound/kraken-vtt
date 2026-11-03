@@ -1,3 +1,4 @@
+import "./loopback.mjs";
 import http from "node:http";
 import { WebSocket } from "ws";
 import { createTableServer, decideRole } from "../electron/tableServer.cjs";

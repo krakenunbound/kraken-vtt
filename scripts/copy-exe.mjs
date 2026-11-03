@@ -1,13 +1,15 @@
-// The last step of "npm run exe": the packaged app goes into the main folder,
-// next to Kraken VTT.bat. If the old copy is open, say so instead of keeping it.
+// The last step of "npm run exe": the installer goes into the main folder,
+// next to Kraken VTT.bat. Running it installs (or updates) Kraken VTT in
+// Program Files, with its firewall rule, so hosting never brings up
+// Windows Firewall's question.
 import { copyFileSync } from "node:fs";
 
 try {
-  copyFileSync("release/Kraken VTT.exe", "Kraken VTT.exe");
-  console.log("Kraken VTT.exe is in the main folder.");
+  copyFileSync("release/Kraken VTT Setup.exe", "Kraken VTT Setup.exe");
+  console.log("Kraken VTT Setup.exe is in the main folder.");
 } catch (error) {
   console.error(error.code === "EBUSY" || error.code === "EPERM"
-    ? "Kraken VTT.exe is open, so the new build stays in release\. Close the app and run: node scripts/copy-exe.mjs"
-    : `Could not copy Kraken VTT.exe: ${error.message}`);
+    ? "Kraken VTT Setup.exe is in use, so the new one stays in release\\. Close it and run: node scripts/copy-exe.mjs"
+    : `Could not copy Kraken VTT Setup.exe: ${error.message}`);
   process.exit(1);
 }

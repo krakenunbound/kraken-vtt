@@ -1,6 +1,7 @@
 // Opens a Foundry bundle scene in the real Kraken app (throwaway profile) and
 // screenshots the same world area Foundry shows, for side-by-side checks.
 // node scripts/shot-scene.mjs <zip> <scene name> <centerX> <centerY> <worldWidthShown> <out.png>
+import "./loopback.mjs";
 import { _electron as electron } from "playwright-core";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";

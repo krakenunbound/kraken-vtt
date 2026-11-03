@@ -1,6 +1,7 @@
 // Pop-out windows in the Electron app: a panel's window ("kraken-popout-*",
 // about:blank) opens as a real window that the page draws into; any other
 // window.open is refused.
+import "./loopback.mjs";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";

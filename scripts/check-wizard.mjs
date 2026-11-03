@@ -3,6 +3,7 @@
 // prime, roll hit points and coin, buy gear, name, create. The new character
 // must equal what the builder (already matched with FG, check-pregens) makes
 // from the same choices, and the host must have rolled every die.
+import "./loopback.mjs";
 import { spawn } from "node:child_process";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";

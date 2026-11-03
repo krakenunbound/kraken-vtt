@@ -4,6 +4,7 @@
 // pregen for player "Ann", puts a Foundry map on the table, and stays up
 // until stopped. Players then open http://<this computer>:47395/ in a browser.
 // node scripts/demo-host.mjs [bundle.zip] [scene name]
+import "./loopback.mjs";
 import { spawn } from "node:child_process";
 import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";

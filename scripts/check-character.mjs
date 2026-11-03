@@ -4,6 +4,7 @@
 // worked result; the Characters tab shows the sheet and its Check button
 // rolls through the host; the owning player sees the character, another
 // player does not.
+import "./loopback.mjs";
 import { spawn } from "node:child_process";
 import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";

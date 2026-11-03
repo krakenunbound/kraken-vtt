@@ -11,6 +11,8 @@ const { startAgentServer } = require("./agent/mcpServer.cjs");
 
 if (process.env.KRAKEN_E2E === "1" || process.env.KRAKEN_SMOKE === "1") {
   app.setPath("userData", fs.mkdtempSync(path.join(os.tmpdir(), "kraken-vtt-")));
+  // Test runs host on this computer only, out of the firewall's way.
+  if (!process.env.KRAKEN_BIND) process.env.KRAKEN_BIND = "127.0.0.1";
   // Test runs get their own agent bridge, so a running copy of the app keeps its own.
   if (!process.env.KRAKEN_AGENT_FILE) process.env.KRAKEN_AGENT_FILE = path.join(app.getPath("userData"), "agent.json");
   if (!process.env.KRAKEN_AGENT_PORT) process.env.KRAKEN_AGENT_PORT = "0";
