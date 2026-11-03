@@ -314,6 +314,10 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       out.art = `/art/file?token=${assetToken}&id=${encodeURIComponent(picture)}`;
       out.video = picture.toLowerCase().endsWith(".webm");
     } else if (token.sourceId && hasArt(token.sourceId)) out.art = `/table/token?token=${assetToken}&id=${encodeURIComponent(token.sourceId)}`;
+    else if (token.recordId && (data?.token || data?.picture) && records.get(token.recordId)?.type !== "character") {
+      // An NPC's own token picture, from its module.
+      out.art = `/table/record-art?token=${assetToken}&record=${encodeURIComponent(token.recordId)}`;
+    }
     return out;
   }
 

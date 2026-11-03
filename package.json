@@ -14,6 +14,7 @@
     "map": "node scripts/check-map.mjs",
     "party": "node scripts/check-party.mjs",
     "combat": "node scripts/check-combat.mjs",
+    "attack": "node scripts/check-attack.mjs",
     "sight-parity": "node scripts/check-sight-parity.mjs",
     "session": "node scripts/check-session.mjs",
     "agent": "node scripts/check-agent.mjs",

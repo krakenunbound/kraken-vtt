@@ -389,3 +389,21 @@ span.ct-init { display: inline-block; }
 .join-panel > p { margin: 0; text-align: center; color: var(--muted); }
 .join-emblem { width: 120px; height: 120px; margin: -6px auto -4px; }
 .join-panel .play-button { margin-top: 6px; padding: 0.7rem; font-size: 1rem; }
+
+/* --- Attacks and targets ---------------------------------------------------- */
+.target-reticle { position: absolute; inset: -8%; width: 116%; height: 116%; pointer-events: none; fill: none; stroke: #ff5a4d; stroke-width: 5; filter: drop-shadow(0 0 4px rgba(255, 90, 77, 0.8)); animation: reticle 2.4s linear infinite; }
+@keyframes reticle { to { transform: rotate(360deg); } }
+.roll-result { padding: 1px 8px; border-radius: 6px; font-weight: 800; letter-spacing: 0.06em; font-size: 0.78rem; }
+.roll-result.hit { background: #2f5f2a; color: #c9f2b8; }
+.roll-result.miss { background: #5a2a26; color: #f5c1b8; }
+.roll-result.none { background: #2a2f38; color: var(--muted); }
+.ct-actions { display: flex; flex-wrap: wrap; gap: 4px; padding: 0 8px 6px 70px; }
+.ct-attack { display: inline-flex; }
+.ct-attack button { padding: 2px 8px; font-size: 0.8rem; border-radius: 0; }
+.ct-attack button:first-child { border-radius: 6px 0 0 6px; }
+.ct-attack button:last-child { border-radius: 0 6px 6px 0; border-left: none; }
+.ct-attack button:only-child { border-radius: 6px; }
+.ct-target { display: inline-flex; align-items: center; gap: 4px; padding: 1px 4px 1px 8px; border: 1px solid rgba(255, 90, 77, 0.45); border-radius: 999px; background: rgba(255, 90, 77, 0.1); font-size: 0.75rem; }
+.ct-target button { padding: 0 4px; border: none; background: transparent; }
+.target-line { margin: 0; }
+.target-line b { color: #ff8a7d; }

@@ -301,7 +301,11 @@ export function App() {
       <WindowProvider>
         <Desktop
           session={session}
-          scene={scene ? <MapView scene={scene} gm={dm} map={session.map} records={Object.values(session.records)} pings={session.pings} notice={session.notice} actions={session} /> : null}
+          scene={
+            scene ? (
+              <MapView scene={scene} gm={dm} map={session.map} records={Object.values(session.records)} pings={session.pings} notice={session.notice} actions={session} targeted={targetedTokens(session)} />
+            ) : null
+          }
           sceneBar={sceneBar}
           emptyGM={emptyGM}
           onOpenAdventure={() => fileInput.current?.click()}
@@ -332,4 +336,16 @@ export function App() {
       </WindowProvider>
     </div>
   );
+}
+
+// The tokens this seat's creatures have targeted: a player's own characters,
+// or for the GM the creature whose turn it is.
+function targetedTokens(session: ReturnType<typeof useSession>): string[] {
+  const { entries, active } = session.combat;
+  const sources = session.role === "dm" ? entries.filter((entry) => entry.id === active) : entries.filter((entry) => entry.mine);
+  const ids = new Set(sources.flatMap((entry) => entry.targets));
+  return entries
+    .filter((entry) => ids.has(entry.id))
+    .map((entry) => entry.tokenId ?? session.map.tokens.find((token) => entry.recordId && token.recordId === entry.recordId)?.id ?? "")
+    .filter(Boolean);
 }

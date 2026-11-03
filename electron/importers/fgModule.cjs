@@ -200,4 +200,28 @@ function convertXml(text) {
   return convert(parseXml(text));
 }
 
-module.exports = { readModule, importModule, listModules, fgDataFolder, convertXml };
+// A picture a record names, read from inside its module: "images/mt-101.webp"
+// (the record's own module) or "tokens/mt-ogre.webp@Other Module". The last
+// few modules opened stay in memory.
+const opened = new Map();
+const PICTURE_TYPES = { ".png": "image/png", ".webp": "image/webp", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".gif": "image/gif" };
+function modulePicture(reference, ownModule) {
+  const [inner, other] = String(reference ?? "").split("@");
+  const moduleName = (other || ownModule || "").trim();
+  const mime = PICTURE_TYPES[path.extname(inner).toLowerCase()];
+  if (!inner || !moduleName || !mime) return null;
+  let files = opened.get(moduleName);
+  if (!files) {
+    try {
+      files = readFiles(resolveModule(moduleName));
+    } catch {
+      return null;
+    }
+    opened.set(moduleName, files);
+    if (opened.size > 4) opened.delete(opened.keys().next().value);
+  }
+  const bytes = files.get(inner.replace(/^\/+/, ""));
+  return bytes ? { bytes: Buffer.from(bytes), mime } : null;
+}
+
+module.exports = { readModule, importModule, listModules, fgDataFolder, convertXml, modulePicture };

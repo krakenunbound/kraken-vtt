@@ -64,7 +64,7 @@ const EMPTY_MAP: TableMap = { sceneId: null, tokens: [], doors: [], vision: null
 export type RollTerm =
   | { kind: "number"; sign: number; value: number }
   | { kind: "dice"; sign: number; count: number; sides: number; rolls: number[]; kept: boolean[]; sum: number };
-export type RollResult = { formula: string; label: string; total: number; terms: RollTerm[]; tag?: string };
+export type RollResult = { formula: string; label: string; total: number; terms: RollTerm[]; tag?: string; result?: string; target?: string; against?: number; by?: string };
 export type ChatLine = { id: string; from: string; text: string; at: number; roll?: RollResult; secret?: boolean };
 // The combat tracker as the host shows it to this seat (electron/combat.cjs viewFor).
 export type CombatEntry = {
@@ -83,6 +83,8 @@ export type CombatEntry = {
   wounds?: number;
   ac?: number;
   effects: { id: string; label: string; duration: number }[];
+  targets: string[];
+  attacks?: { key: string; name: string; bonus: number; damage: string }[];
 };
 export type CombatView = { round: number; active: string | null; entries: CombatEntry[] };
 export type TableRecord = {
@@ -569,6 +571,12 @@ export function useSession() {
 
   // The GM's art library (portraits and tokens), served by the host to this seat.
   const artUrl = useCallback((id: string) => (id && assetRef.current ? `${originRef.current}/art/file?token=${assetRef.current}&id=${encodeURIComponent(id)}` : ""), []);
+  // A creature's picture from its module (NPCs), served by the host.
+  const recordArtUrl = useCallback(
+    (recordId: string, kind: "token" | "portrait" = "token") =>
+      assetRef.current ? `${originRef.current}/table/record-art?token=${assetRef.current}&record=${encodeURIComponent(recordId)}&kind=${kind}` : "",
+    [],
+  );
   const artList = useCallback(async (kind: "portrait" | "token") => {
     const response = await fetch(`${originRef.current}/art/list?token=${assetRef.current}&kind=${kind}`);
     if (!response.ok) throw new Error("No art library.");
@@ -678,6 +686,7 @@ export function useSession() {
     partyGroup,
     artUrl,
     artList,
+    recordArtUrl,
     roll,
     op,
     siegeCheck,

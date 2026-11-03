@@ -10,6 +10,7 @@ const { siege, siegeLibrary, siegeCheck, levelUp } = require("./siege.cjs");
 const { createMapState, playerColor } = require("./mapState.cjs");
 const party = require("./party.cjs");
 const { createCombat } = require("./combat.cjs");
+const { modulePicture } = require("./importers/fgModule.cjs");
 
 const MAX_CLIENTS = 16;
 
@@ -304,9 +305,10 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
 
   // label: what the roll is for ("Strength check"). from: who rolled.
   // tag: the asker's own marker (a wizard waiting for its roll), echoed back.
-  function rollDice(formula, label, from, id, tag, secret = false) {
+  // extra: what an action adds to its roll card (an attack's HIT or MISS, its target).
+  function rollDice(formula, label, from, id, tag, secret = false, extra = null) {
     const result = dice.roll(formula);
-    const roll = { ...result, label: text(label, "").slice(0, 120), ...(tag ? { tag: text(tag, "").slice(0, 80) } : {}) };
+    const roll = { ...result, label: text(label, "").slice(0, 160), ...(tag ? { tag: text(tag, "").slice(0, 80) } : {}), ...(extra ?? {}) };
     addChat({ id, from, text: "", roll, at: Date.now(), ...(secret ? { secret: true } : {}) });
     return roll;
   }
@@ -376,6 +378,26 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         res.writeHead(200, { "Content-Type": found.mime, "Content-Length": stat.size, "Cache-Control": "private, max-age=3600", "X-Content-Type-Options": "nosniff" });
         fs.createReadStream(found.path).pipe(res);
       });
+      return;
+    }
+    // A creature's picture from its module (an NPC's token or portrait). A seat
+    // may have it when it can see the record or a visible token of it.
+    if (req.method === "GET" && url.pathname === "/table/record-art") {
+      const token = url.searchParams.get("token") || "";
+      const client = [...clients.values()].find((item) => item.assetToken === token);
+      const record = client ? records.get(url.searchParams.get("record") || "") : null;
+      const allowed =
+        record &&
+        (canSee(record, seatOf(client)) || map.tokens().some((item) => item.recordId === record.id && !item.hidden) || client.role === "dm");
+      const kind = url.searchParams.get("kind") === "portrait" ? "picture" : "token";
+      const picture = allowed ? modulePicture(record.data?.[kind] || record.data?.picture || record.data?.token, record.source) : null;
+      if (!picture) {
+        res.writeHead(404, { "Cache-Control": "no-store" });
+        res.end();
+        return;
+      }
+      res.writeHead(200, { "Content-Type": picture.mime, "Content-Length": picture.bytes.length, "Cache-Control": "private, max-age=3600" });
+      res.end(picture.bytes);
       return;
     }
     if (req.method === "GET" && url.pathname === "/table/token") {
@@ -661,6 +683,28 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
               return combat.removeEffect(String(msg.id), String(msg.effectId), seat);
             case "damage":
               return combat.damage(String(msg.id), msg.amount, seat);
+            case "target": {
+              // A target by token: the source is the player's own entry (the active
+              // one if several), or the GM's chosen or active entry.
+              const entries = combat.entries();
+              const target = msg.targetId ? entries.find((entry) => entry.id === msg.targetId) : entries.find((entry) => entry.tokenId === msg.tokenId || (msg.tokenId && entry.recordId && map.tokens().find((token) => token.id === msg.tokenId)?.recordId === entry.recordId));
+              if (!target) throw new Error("Add that token to the combat tracker first.");
+              const source = msg.sourceId
+                ? entries.find((entry) => entry.id === msg.sourceId)
+                : client.role === "dm"
+                  ? entries.find((entry) => entry.id === combat.active())
+                  : entries.find((entry) => entry.id === combat.active() && combat.viewFor(seat).entries.find((item) => item.id === entry.id)?.mine) ??
+                    entries.find((entry) => combat.viewFor(seat).entries.find((item) => item.id === entry.id)?.mine);
+              if (!source) throw new Error(client.role === "dm" ? "Whose target? Start combat or pick a creature." : "Your character is not in the fight.");
+              const already = source.targets.includes(target.id);
+              return combat.target(source.id, target.id, msg.on ?? !already, seat);
+            }
+            case "clear-targets":
+              return combat.clearTargets(String(msg.id), seat);
+            case "attack":
+              return combat.attack(msg.recordId ? { recordId: String(msg.recordId) } : { entryId: String(msg.id) }, String(msg.weapon), seat, client.role === "dm" ? "Combat" : client.name);
+            case "damage-roll":
+              return combat.damageRoll(msg.recordId ? { recordId: String(msg.recordId) } : { entryId: String(msg.id) }, String(msg.weapon), seat, client.role === "dm" ? "Combat" : client.name);
             case "heal":
               return combat.heal(String(msg.id), msg.amount, seat);
             default:
@@ -724,7 +768,10 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     seat: { role: "dm", name: "Agent" },
     records,
     dice,
-    roll: (formula, label, from = "Agent", secret = false) => rollDice(formula, label, from, "agent", undefined, secret),
+    roll: (formula, label, from = "Agent", secret = false, extra = null) => rollDice(formula, label, from, "agent", undefined, secret, extra),
+    // Posts a roll already made (an attack decides HIT or MISS before its card goes out).
+    postRoll: (result, label, from = "Agent", secret = false, extra = null) =>
+      addChat({ id: "agent", from: text(from, "Agent").slice(0, 24), text: "", roll: { ...result, label: text(label, "").slice(0, 160), ...(extra ?? {}) }, at: Date.now(), ...(secret ? { secret: true } : {}) }),
     say: (line, from = "Agent", secret = false) =>
       addChat({ id: "agent", from: text(from, "Agent").slice(0, 24), text: text(line, "").slice(0, 500), at: Date.now(), ...(secret ? { secret: true } : {}) }),
     chatLog: (count = 20) => chat.slice(-Math.max(1, Math.min(100, Number(count) || 20))),

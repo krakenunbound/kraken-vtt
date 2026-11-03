@@ -58,7 +58,9 @@ function Sheet({ record, session }: { record: TableRecord; session: Session }) {
   const exp = num(data.exp);
   const next = num(data.expnext);
   const ready = next > 0 && exp >= next;
-  const weapons = inventory.filter((item) => num(item.carried) === 2 && String(item.damage ?? "").trim() !== "");
+  const weapons = Object.entries((data.inventorylist ?? {}) as Record<string, Row>).filter(([, item]) => item && num(item.carried) === 2 && String(item.damage ?? "").trim() !== "");
+  const inFight = session.combat.entries.find((entry) => entry.recordId === record.id);
+  const targetNames = (inFight?.targets ?? []).map((id) => session.combat.entries.find((entry) => entry.id === id)?.name).filter(Boolean);
   const health = current <= 0 ? "#6C2DC7" : current / Math.max(1, total) < 0.5 ? "#e07a6a" : "#56b33f";
   const languages = rows(data.languagelist).map((row) => String(row.name));
 
@@ -223,21 +225,21 @@ function Sheet({ record, session }: { record: TableRecord; session: Session }) {
         <section aria-label="Combat" className="sheet-panel">
           <ul className="sheet-list attacks">
             {weapons.length === 0 ? <li className="hint">No weapon in hand.</li> : null}
-            {weapons.map((item, index) => {
-              const ranged = RANGED.test(String(item.name));
-              const bonus = num(field(data, `attack.${ranged ? "ranged" : "melee"}.total`)) + num(item.bonus);
+            {weapons.map(([key, item]) => {
+              const ranged = String(item.attacktype ?? "").toLowerCase() === "ranged" || RANGED.test(String(item.name));
+              const bonus = num(field(data, `attack.${ranged ? "ranged" : "melee"}.total`)) + num(item.bthbonus);
               return (
-                <li key={index}>
+                <li key={key}>
                   <span className="attack-name">
                     {String(item.name)}
                     <small>{ranged ? "ranged" : "melee"}</small>
                   </span>
                   {canRoll ? (
                     <>
-                      <button type="button" onClick={() => session.roll(`1d20${bonus >= 0 ? "+" : ""}${bonus}`, `${record.name}: Attack (${String(item.name)})`)}>
+                      <button type="button" data-action="attack" onClick={() => session.ct("attack", { recordId: record.id, weapon: key })} title={targetNames.length ? `Attack ${targetNames.join(", ")}` : "No target: Ctrl+click a token to target it"}>
                         Attack {signed(bonus)}
                       </button>
-                      <button type="button" onClick={() => session.roll(String(item.damage).replace(/\s+/g, ""), `${record.name}: Damage (${String(item.name)})`)}>
+                      <button type="button" data-action="damage" onClick={() => session.ct("damage-roll", { recordId: record.id, weapon: key })} title={targetNames.length ? `Damage ${targetNames.join(", ")}` : "Roll damage"}>
                         Damage {String(item.damage)}
                       </button>
                     </>
@@ -250,6 +252,17 @@ function Sheet({ record, session }: { record: TableRecord; session: Session }) {
               );
             })}
           </ul>
+          <p className="target-line">
+            {targetNames.length > 0 ? (
+              <>
+                Targeting <b>{targetNames.join(", ")}</b>
+              </>
+            ) : inFight ? (
+              <span className="hint">No target. Ctrl+click a token on the map to target it.</span>
+            ) : (
+              <span className="hint">Not in the fight: attacks roll without a target.</span>
+            )}
+          </p>
           <p className="hint">Other attacks: grapple {signed(num(field(data, "attack.grapple.total")))}, overbear {signed(num(field(data, "attack.overbear.total")))}, touch {signed(num(field(data, "attack.touch.total")))}.</p>
           {data.senses ? <p className="hint">Senses: {String(data.senses)}</p> : null}
         </section>

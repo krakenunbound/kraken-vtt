@@ -44,7 +44,15 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
           <span className="ct-init">{entry.initresult}</span>
         )}
         <button type="button" className="ct-face" title="Find on the map" onClick={() => focusToken(entry.tokenId ?? session.map.tokens.find((token) => token.recordId === entry.recordId)?.id ?? null)}>
-          {portrait ? <Picture session={session} id={portrait} alt="" /> : tokenArt ? <img src={tokenArt} alt="" /> : <span>{entry.name.slice(0, 1)}</span>}
+          {portrait ? (
+            <Picture session={session} id={portrait} alt="" />
+          ) : tokenArt ? (
+            <img src={tokenArt} alt="" />
+          ) : record && record.type === "npc" && (record.data.token || record.data.picture) ? (
+            <img src={session.recordArtUrl(record.id)} alt="" onError={(event) => (event.currentTarget.style.display = "none")} />
+          ) : (
+            <span>{entry.name.slice(0, 1)}</span>
+          )}
         </button>
         <span className="ct-name">
           <b>{entry.name}</b>
@@ -74,6 +82,14 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
             <button type="button" title={entry.hidden ? "Show to players" : "Hide from players"} onClick={() => session.ct("update", { id: entry.id, patch: { hidden: !entry.hidden } })}>
               <Icon name={entry.hidden ? "eye-off" : "eye"} size={16} />
             </button>
+            <button
+              type="button"
+              title="The creature whose turn it is targets this one"
+              disabled={!session.combat.active || session.combat.active === entry.id}
+              onClick={() => session.ct("target", { sourceId: session.combat.active, targetId: entry.id })}
+            >
+              <Icon name="target" size={16} />
+            </button>
             <button type="button" title="More" aria-expanded={open} onClick={() => setOpen(!open)}>
               <Icon name="settings" size={16} />
             </button>
@@ -86,6 +102,36 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
           </span>
         ) : null}
       </div>
+      {entry.targets.length > 0 || (gm && entry.attacks?.length) ? (
+        <div className="ct-actions">
+          {entry.attacks?.map((attack) => (
+            <span key={attack.key} className="ct-attack">
+              <button type="button" onClick={() => session.ct("attack", { id: entry.id, weapon: attack.key })} title={`${attack.name}: attack`}>
+                {attack.name} {attack.bonus >= 0 ? "+" : ""}
+                {attack.bonus}
+              </button>
+              {attack.damage ? (
+                <button type="button" onClick={() => session.ct("damage-roll", { id: entry.id, weapon: attack.key })} title={`${attack.name}: damage`}>
+                  {attack.damage}
+                </button>
+              ) : null}
+            </span>
+          ))}
+          {entry.targets.map((id) => {
+            const target = session.combat.entries.find((item) => item.id === id);
+            return target ? (
+              <span key={id} className="ct-target" title={`${entry.name} targets ${target.name}`}>
+                → {target.name}
+                {gm || entry.mine ? (
+                  <button type="button" aria-label={`Drop ${target.name}`} onClick={() => session.ct("target", { sourceId: entry.id, targetId: target.id, on: false })}>
+                    ×
+                  </button>
+                ) : null}
+              </span>
+            ) : null;
+          })}
+        </div>
+      ) : null}
       {entry.effects.length > 0 ? (
         <div className="ct-effects">
           {entry.effects.map((item) => (
