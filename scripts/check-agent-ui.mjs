@@ -4,6 +4,7 @@
 // pinging the map. Starts the real app and talks to it as an MCP client.
 // The adventure part needs a Foundry bundle: KRAKEN_BUNDLE, or the GM's Keep
 // on the Borderlands; it is skipped when there is none.
+import "./loopback.mjs";
 import { spawn } from "node:child_process";
 import { existsSync, mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";

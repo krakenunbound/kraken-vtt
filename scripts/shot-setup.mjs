@@ -1,5 +1,6 @@
 // Screenshots of the front screens (campaigns, hosting, joining) in the real app:
 // node scripts/shot-setup.mjs <folder>
+import "./loopback.mjs";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";

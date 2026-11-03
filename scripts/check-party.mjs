@@ -3,6 +3,7 @@
 // quests and encounters awarded once, coins split with the remainder left in
 // the parcel, assigned items handed out, a group check summed up in chat,
 // and only the GM may do any of it.
+import "./loopback.mjs";
 import { createRequire } from "node:module";
 import { WebSocket } from "ws";
 import { xpShares, coinShares, assignedShares } from "../shared/party/party.mjs";

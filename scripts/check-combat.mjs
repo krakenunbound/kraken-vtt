@@ -3,6 +3,7 @@
 // durations counting down at their initiative, damage and healing with the
 // negative hit point rules, unconscious enemies losing their turns, hidden
 // entries kept from players, and what players may do.
+import "./loopback.mjs";
 import { createRequire } from "node:module";
 import { WebSocket } from "ws";
 

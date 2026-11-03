@@ -14,5 +14,6 @@ content/
 # Machine-specific agent bridge info (token).
 agent.json
 
-# The packaged app, copied here to launch; rebuilt with npm run exe.
+# The installer, copied here by npm run exe (and the old portable build).
+/Kraken VTT Setup.exe
 /Kraken VTT.exe

@@ -4,6 +4,7 @@
 //    through electron/agent/mcp-stdio.cjs, hosts a campaign, makes records,
 //    rolls fixed dice, joins as a player over WebSocket to check what a player
 //    may see, then re-hosts to check everything was saved.
+import "./loopback.mjs";
 import { createRequire } from "node:module";
 import { spawn } from "node:child_process";
 import { mkdtempSync } from "node:fs";
