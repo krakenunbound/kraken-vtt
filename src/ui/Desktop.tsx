@@ -12,6 +12,7 @@ import { DecalPicker, SettingsWindow, TableDecal } from "./Settings";
 import { DiceWindow } from "../dice/DiceWindow";
 import { SoundWindow } from "../sound/SoundWindow";
 import { QuickSlots } from "./QuickSlots";
+import { NotesWindow, NoteWindow } from "../notes/Notes";
 import { BooksWindow, BookWindow, ImagesWindow, PictureWindow } from "../books/Books";
 import { Icon } from "./icons";
 import { FloatingWindow, useWindows, type WindowKind } from "./Windows";
@@ -100,6 +101,7 @@ export function Desktop({
         { kind: "party", label: "Party", icon: "party", title: "Party Sheet" },
         { kind: "combat", label: "Combat", icon: "combat", title: "Combat Tracker" },
         { kind: "books", label: "Books", icon: "book", title: "Books" },
+        { kind: "notes", label: "Notes", icon: "chat", title: "Notes" },
         { kind: "players", label: "Players", icon: "players", title: "Players" },
         { kind: "sound", label: "Sound", icon: "music", title: "Sound" },
         { kind: "settings", label: "Settings", icon: "settings", title: "Settings" },
@@ -109,6 +111,7 @@ export function Desktop({
         { kind: "party", label: "Party", icon: "party", title: "Party Sheet" },
         { kind: "combat", label: "Combat", icon: "combat", title: "Combat Tracker" },
         { kind: "books", label: "Books", icon: "book", title: "Books" },
+        { kind: "notes", label: "Notes", icon: "chat", title: "Player Notes" },
         { kind: "sound", label: "Sound", icon: "music", title: "Sound" },
         { kind: "settings", label: "Settings", icon: "settings", title: "Settings" },
       ];
@@ -127,9 +130,14 @@ export function Desktop({
         if (command.kind !== "windows") return null;
         const { windows: manager, launchers: kinds, characters: sheets } = live.current;
         const list = () => manager.windows.map((item) => ({ key: item.key, kind: item.kind, title: item.title, poppedOut: item.popped }));
-        if (command.action === "list") return { open: list(), kinds: [...kinds.map((item) => item.kind), "sheet", "book", "images", "picture", "decals", "wallpapers", "gmicons", "dice"] };
+        if (command.action === "list") return { open: list(), kinds: [...kinds.map((item) => item.kind), "sheet", "book", "images", "picture", "note", "decals", "wallpapers", "gmicons", "dice"] };
         let key: string = command.window ?? "";
-        if (command.window === "picture") {
+        if (command.window === "note") {
+          const id = String(command.record ?? "");
+          if (!id) throw new Error("Which note? record is its id.");
+          if (command.action === "open") manager.open("note", id, id);
+          key = `note:${id}`;
+        } else if (command.window === "picture") {
           // record: "<book>|<file>", a picture out on its own.
           const picture = String(command.record ?? "");
           if (!picture.includes("|")) throw new Error('Which picture? record is "<book id>|<file>" (kraken_books contents).');
@@ -250,6 +258,8 @@ export function Desktop({
               {item.kind === "book" && item.payload ? <BookWindow session={session} book={item.payload} /> : null}
               {item.kind === "images" ? <ImagesWindow session={session} /> : null}
               {item.kind === "picture" && item.payload ? <PictureWindow session={session} payload={item.payload} /> : null}
+              {item.kind === "notes" ? <NotesWindow session={session} /> : null}
+              {item.kind === "note" && item.payload ? <NoteWindow session={session} id={item.payload} /> : null}
               {item.kind === "decals" ? <DecalPicker session={session} onClose={() => windows.close(item.key)} /> : null}
               {item.kind === "wallpapers" ? <DecalPicker session={session} kind="wallpaper" onClose={() => windows.close(item.key)} /> : null}
               {item.kind === "gmicons" ? <DecalPicker session={session} kind="gmicon" onClose={() => windows.close(item.key)} /> : null}

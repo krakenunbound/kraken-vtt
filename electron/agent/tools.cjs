@@ -849,7 +849,7 @@ const TOOLS = [
       "The GM's windows: list them, or open, close, pop out (to a window of its own, for another monitor) or dock back a window. Kinds: characters, party, combat, players, settings, decals (the background decal picker), wallpapers (the desktop wallpaper picker), gmicons (the GM icon picker), dice (this seat's dice: sets, colours, design, material, effects), sound (one-shots, effects, ambience, music, chat triggers, volumes), sheet (a character's sheet: give record, its id or name).",
     inputSchema: object({
       action: { type: "string", enum: ["list", "open", "close", "popout", "dock"] },
-      kind: { type: "string", enum: ["characters", "party", "combat", "players", "settings", "decals", "wallpapers", "gmicons", "dice", "sound", "sheet", "books", "book", "images", "picture"] },
+      kind: { type: "string", enum: ["characters", "party", "combat", "players", "settings", "decals", "wallpapers", "gmicons", "dice", "sound", "sheet", "books", "book", "images", "picture", "notes", "note"] },
       record: string("For a sheet: the character's record id or name"),
     }),
     run: async (args, ctx) => out(await ctx.ui({ kind: "windows", action: args.action ?? "list", window: args.kind, record: args.record })),

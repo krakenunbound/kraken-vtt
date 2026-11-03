@@ -165,6 +165,9 @@ function createRecordStore({ saved = [], onChange = () => undefined } = {}) {
           if (!VISIBILITY.includes(patch.visibility)) throw new Error("Visibility is gm, owner or all.");
           next.visibility = patch.visibility;
         }
+      } else if (before.type === "note" && (patch?.visibility === "owner" || patch?.visibility === "all")) {
+        // A player shares their own note with the table, or stops (FG's notes).
+        next.visibility = patch.visibility;
       }
       if (patch?.data !== undefined) next.data = cleanData(replace ? patch.data : merge(before.data, patch.data));
       next.updatedAt = Date.now();

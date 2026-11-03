@@ -145,6 +145,33 @@ try {
   assert(later.agent.quickSlots("A test player")[3].file === "images/keep.png", "slots are kept with the campaign");
   assert((await tool("kraken_quickslots", { slots: [{ kind: "sheet", record: "id-1", label: "Aldric" }] }))[0].kind === "sheet", "the agent sets the GM's slots");
 
+  // Notes, as FG's Player Notes: a player's own, shared when they say so.
+  const other = await connect(port, { name: "Another player" });
+  const op = (seat, body) =>
+    new Promise((resolve) => {
+      const req = Math.floor(Math.random() * 1e9);
+      seat.ws.on("message", function answer(data) {
+        const msg = JSON.parse(data.toString());
+        if (msg.type === "op-result" && msg.req === req) {
+          seat.ws.off("message", answer);
+          resolve(msg);
+        }
+      });
+      seat.send({ type: "op", req, ...body });
+    });
+  const made = await op(player, { op: "create", input: { type: "note", name: "Clues", visibility: "owner", data: { text: "The innkeeper lies.", links: [{ kind: "sound", sound: "ambience/Tavern", soundKind: "ambience", label: "Tavern" }] } } });
+  assert(made.ok, `a player makes a note (${JSON.stringify(made)})`);
+  const note = server.agent.records.get(made.id);
+  assert(note.owner === "A test player" && note.visibility === "owner", "the note is its writer's");
+  assert(!(await op(other, { op: "update", id: made.id, patch: { name: "Mine now" } })).ok, "another player cannot change it");
+  assert((await op(player, { op: "update", id: made.id, patch: { visibility: "all" } })).ok && server.agent.records.get(made.id).visibility === "all", "its writer shares it with the table");
+  assert((await op(player, { op: "update", id: made.id, patch: { visibility: "owner" } })).ok && server.agent.records.get(made.id).visibility === "owner", "and makes it theirs alone again");
+  player.send({ type: "quickslots", slots: [{ kind: "note", record: made.id, label: "Clues" }, { kind: "sound", sound: "ambience/Tavern", soundKind: "ambience", label: "Tavern" }] });
+  await settle();
+  const slotted = player.events.filter((event) => event.type === "quickslots").at(-1).slots;
+  assert(slotted[0]?.kind === "note" && slotted[1]?.kind === "sound", `quick slots keep notes and sounds (${JSON.stringify(slotted.slice(0, 2))})`);
+  other.ws.close();
+
   // The agent.
   assert((await tool("kraken_books", { action: "list", search: "keep" })).length === 1, "the agent lists books");
   await tool("kraken_books", { action: "deactivate", book: "Test Handbook" });

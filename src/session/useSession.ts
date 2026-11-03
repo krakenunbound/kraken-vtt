@@ -109,7 +109,16 @@ export type BookPage = { book: string; id: string; name: string; blocks: BookBlo
 // link's key), and dropped in between its paragraphs (after block; -1 the top).
 export type BookSoundRef = { sound: string; kind: string; label: string };
 export type PageSounds = { links: Record<string, BookSoundRef>; blocks: (BookSoundRef & { block: number; id: string })[] };
-export type QuickSlot = { kind: "book"; book: string; page?: string; label: string } | { kind: "picture"; book: string; file: string; label: string } | { kind: "sheet"; record: string; label: string };
+// A link: anything that can be clicked or dragged in Kraken, and dropped on a
+// quick slot, into a note or a story: a book (at a page), a picture or map,
+// a character's sheet, a sound, a note.
+export type QuickSlot =
+  | { kind: "book"; book: string; page?: string; label: string }
+  | { kind: "picture"; book: string; file: string; label: string }
+  | { kind: "sheet"; record: string; label: string }
+  | { kind: "sound"; sound: string; soundKind: string; label: string }
+  | { kind: "note"; record: string; label: string };
+export type KrakenLink = QuickSlot;
 export type SoundItem = { id: string; kind: string; group: string; name: string };
 export type SoundLibrary = { sounds: SoundItem[]; groups: { id: string; count: number }[]; folder: string; triggers?: SoundTrigger[] };
 export type TableOptions = { towerReveal: boolean; decal: string; wallpaper: string; gmIcon: string; soundHidden: "off" | "combat" | "all"; soundRepeat: number };
