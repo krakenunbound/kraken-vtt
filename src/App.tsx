@@ -4,7 +4,8 @@ import { imageMime, inspectZip, type ImportCandidate, type LoadedAdventure } fro
 import { useSession } from "./session/useSession";
 import { SetupScreen } from "./setup/SetupScreen";
 import { MapView, type MapScene } from "./table/MapView";
-import { PRESETS, diceStore } from "./dice/diceStore";
+import { DESIGNS, EFFECTS, FONTS, MATERIALS, PRESETS, diceStore, type DiceLook } from "./dice/diceStore";
+import type { DiceSettingsPatch } from "./kraken";
 import { agentCommands } from "./ui/agentCommands";
 import { Desktop } from "./ui/Desktop";
 import { WindowProvider } from "./ui/Windows";
@@ -12,11 +13,29 @@ import { WindowProvider } from "./ui/Windows";
 const COLOUR = /^#[0-9a-f]{6}$/i;
 
 // The agent's dice settings: what this window's dice look like and sound like.
-function diceSettings(patch: { show?: boolean; sound?: boolean; volume?: number; preset?: string; body?: string; ink?: string }) {
-  const preset = patch.preset ? PRESETS.find((item) => item.name.toLowerCase() === String(patch.preset).toLowerCase()) : null;
-  if (patch.preset && !preset) throw new Error(`No dice preset "${patch.preset}". Presets: ${PRESETS.map((item) => item.name).join(", ")}.`);
-  for (const key of ["body", "ink"] as const) if (patch[key] !== undefined && !COLOUR.test(String(patch[key]))) throw new Error(`${key} must be a colour like #9d2136.`);
-  const look = { ...(preset ? { theme: preset.theme, body: preset.body, ink: preset.ink } : {}), ...(patch.body ? { body: patch.body } : {}), ...(patch.ink ? { ink: patch.ink } : {}) };
+function oneOf<T extends string>(what: string, value: string | undefined, items: { id: T }[]): T | undefined {
+  if (value === undefined) return undefined;
+  const found = items.find((item) => item.id === value);
+  if (!found) throw new Error(`No ${what} "${value}". Choose from: ${items.map((item) => item.id).join(", ")}.`);
+  return found.id;
+}
+
+function diceSettings(patch: DiceSettingsPatch) {
+  const found = patch.preset ? PRESETS.find((item) => item.name.toLowerCase() === String(patch.preset).toLowerCase()) : null;
+  if (patch.preset && !found) throw new Error(`No dice preset "${patch.preset}". Presets: ${PRESETS.map((item) => item.name).join(", ")}.`);
+  for (const key of ["body", "accent", "ink"] as const) if (patch[key] !== undefined && !COLOUR.test(String(patch[key]))) throw new Error(`${key} must be a colour like #9d2136.`);
+  const { name: _name, ...preset } = found ?? { name: "" };
+  const parts: Partial<DiceLook> = {
+    ...(patch.body ? { body: patch.body } : {}),
+    ...(patch.accent ? { accent: patch.accent } : {}),
+    ...(patch.ink ? { ink: patch.ink } : {}),
+    ...(patch.design !== undefined ? { theme: oneOf("design", patch.design, DESIGNS) } : {}),
+    ...(patch.material !== undefined ? { material: oneOf("material", patch.material, MATERIALS) } : {}),
+    ...(patch.font !== undefined ? { font: oneOf("font", patch.font, FONTS) } : {}),
+    ...(patch.effect !== undefined ? { effect: oneOf("effect", patch.effect, EFFECTS) } : {}),
+    ...(typeof patch.crit === "boolean" ? { crit: patch.crit } : {}),
+  };
+  const look = { ...preset, ...parts };
   diceStore.update({
     ...(typeof patch.show === "boolean" ? { show: patch.show } : {}),
     ...(typeof patch.sound === "boolean" ? { sound: patch.sound } : {}),
@@ -24,7 +43,8 @@ function diceSettings(patch: { show?: boolean; sound?: boolean; volume?: number;
     look,
   });
   const now = diceStore.settings();
-  return { ...now, preset: PRESETS.find((item) => item.theme === now.look.theme && item.body === now.look.body && item.ink === now.look.ink)?.name ?? "custom" };
+  const named = PRESETS.find((item) => (["theme", "body", "ink", "accent", "material", "effect", "font"] as const).every((key) => item[key] === now.look[key]));
+  return { ...now, preset: named?.name ?? "custom" };
 }
 
 type TableAdventure = {

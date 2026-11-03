@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import type { ChatLine, RollResult, Session } from "../session/useSession";
-import { diceStore, PRESETS, rolling, setThrow, tower as towerDrops } from "../dice/diceStore";
+import { diceStore, rolling, setThrow, tower as towerDrops, type DiceLook } from "../dice/diceStore";
 import { DieShape, Icon } from "./icons";
 import { openPopOut, PopOutWindow, screenOffset, type ScreenPlace } from "./PopOut";
+import { useWindows } from "./Windows";
 
 // Where chat last was in a window of its own (in this browser).
 function chatPlace(): ScreenPlace | null {
@@ -27,7 +28,9 @@ const TRAY = [4, 6, 8, 10, 12, 20, 100];
 // A roll as FG shows it in chat: what it was for, each die (dropped dice
 // faded), the modifier, and the total. While its dice are still rolling on
 // the table it shows only what was rolled.
+// The dice on a card wear the roller's set (the look the roll carries).
 export function RollCard({ roll, pending = false }: { roll: RollResult; pending?: boolean }) {
+  const look = (roll as { look?: DiceLook }).look;
   if (pending) {
     return (
       <span className="roll-card rolling" data-rolling="true">
@@ -37,7 +40,7 @@ export function RollCard({ roll, pending = false }: { roll: RollResult; pending?
             term.kind === "dice"
               ? term.rolls.map((_, die) => (
                   <span key={`${index}-${die}`} className="die spinning">
-                    <DieShape sides={term.sides === 100 ? 10 : term.sides} size={28} label="" />
+                    <DieShape sides={term.sides === 100 ? 10 : term.sides} size={28} label="" look={look} />
                   </span>
                 ))
               : [],
@@ -60,7 +63,7 @@ export function RollCard({ roll, pending = false }: { roll: RollResult; pending?
           ) : (
             term.rolls.map((value, die) => (
               <span key={`${index}-${die}`} className={term.kept[die] ? "die" : "die dropped"} title={`d${term.sides}`}>
-                <DieShape sides={term.sides === 100 ? 10 : term.sides} size={28} label={value} />
+                <DieShape sides={term.sides === 100 ? 10 : term.sides} size={28} label={value} look={look} />
               </span>
             ))
           ),
@@ -93,64 +96,6 @@ function formulaOf(dice: number[]) {
   return [...counts].map(([sides, count]) => `${count}d${sides}`).join("+");
 }
 
-// This seat's dice: 3D dice and their sound, the look of its own set, and
-// (the GM's) whether a roll in the dice tower is shown to its roller.
-function DiceSettings({ session, onClose }: { session: Session; onClose: () => void }) {
-  const settings = useSyncExternalStore(diceStore.subscribe, diceStore.settings);
-  const look = settings.look;
-  return (
-    <div className="dice-settings" role="dialog" aria-label="Dice settings">
-      <header>
-        <b>Dice</b>
-        <button type="button" className="window-close" aria-label="Close dice settings" onClick={onClose}>
-          <Icon name="close" size={14} />
-        </button>
-      </header>
-      <label className="check">
-        <input type="checkbox" checked={settings.show} onChange={(event) => diceStore.update({ show: event.target.checked })} />
-        3D dice roll across the table
-      </label>
-      <label className="check">
-        <input type="checkbox" checked={settings.sound} onChange={(event) => diceStore.update({ sound: event.target.checked })} />
-        Dice sounds
-      </label>
-      <input type="range" min={0} max={1} step={0.05} value={settings.volume} disabled={!settings.sound} aria-label="Dice volume" onChange={(event) => diceStore.update({ volume: Number(event.target.value) })} />
-      <span className="dice-settings-head">Your dice</span>
-      <div className="dice-swatches">
-        {PRESETS.map((preset) => (
-          <button
-            key={preset.name}
-            type="button"
-            title={preset.name}
-            aria-label={preset.name}
-            aria-pressed={look.theme === preset.theme && look.body === preset.body}
-            style={{ background: preset.body, color: preset.ink }}
-            onClick={() => diceStore.update({ look: { theme: preset.theme, body: preset.body, ink: preset.ink } })}
-          >
-            20
-          </button>
-        ))}
-      </div>
-      <div className="dice-colors">
-        <label>
-          Body
-          <input type="color" value={look.body.slice(0, 7)} onChange={(event) => diceStore.update({ look: { body: event.target.value } })} />
-        </label>
-        <label>
-          Numbers
-          <input type="color" value={look.ink.slice(0, 7)} onChange={(event) => diceStore.update({ look: { ink: event.target.value } })} />
-        </label>
-      </div>
-      {session.role === "dm" ? (
-        <label className="check gm-option">
-          <input type="checkbox" checked={session.options.towerReveal} onChange={(event) => session.setTableOptions({ towerReveal: event.target.checked })} />
-          Dice tower: players see their own result
-        </label>
-      ) : null}
-    </div>
-  );
-}
-
 // "/r 1d20+3 Strength check" (or /roll) rolls; anything else is said.
 function submit(session: Session, draft: string, modifier: number, tower: boolean) {
   const command = /^\/(?:r|roll)\s+(\S+)\s*(.*)$/i.exec(draft.trim());
@@ -171,7 +116,9 @@ export function ChatDock({ session }: { session: Session }) {
   const [pool, setPool] = useState<number[]>([]);
   const [modifier, setModifier] = useState(0);
   const [tower, setTower] = useState(false);
-  const [settingsOpen, setSettingsOpen] = useState(false);
+  const windows = useWindows();
+  // This seat's own set, on the tray's dice (the GM's too).
+  const mine = useSyncExternalStore(diceStore.subscribe, diceStore.settings).look;
   // A die being dragged from the tray, to throw or to drop in the tower.
   const [ghost, setGhost] = useState<{ x: number; y: number; sides: number | null; overTower: boolean } | null>(null);
   const dragged = useRef(false);
@@ -325,7 +272,7 @@ export function ChatDock({ session }: { session: Session }) {
         <button type="submit" aria-label="Send">
           <Icon name="chat" />
         </button>
-        <button type="button" className="dice-settings-button" title="Dice settings" aria-label="Dice settings" aria-expanded={settingsOpen} onClick={() => setSettingsOpen(!settingsOpen)}>
+        <button type="button" className="dice-settings-button" title="Dice settings" aria-label="Dice settings" aria-expanded={windows.isOpen("dice")} onClick={() => windows.open("dice", "Dice")}>
           <Icon name="settings" size={18} />
         </button>
       </form>
@@ -346,7 +293,7 @@ export function ChatDock({ session }: { session: Session }) {
               rollDice([sides], tower);
             }}
           >
-            <DieShape sides={sides === 100 ? 10 : sides} size={30} label={sides === 100 ? "%" : sides} />
+            <DieShape sides={sides === 100 ? 10 : sides} size={30} label={sides === 100 ? "%" : sides} look={mine} />
           </button>
         ))}
         <div className="modifier-box" title="Modifier for the next roll (FG's modifier box)">
@@ -375,11 +322,10 @@ export function ChatDock({ session }: { session: Session }) {
           <Icon name="tower" size={20} />
         </button>
       </div>
-      {settingsOpen ? <DiceSettings session={session} onClose={() => setSettingsOpen(false)} /> : null}
       {ghost ? (
         <span className={ghost.overTower ? "dice-ghost over-tower" : "dice-ghost"} style={{ left: ghost.x, top: ghost.y }} aria-hidden="true">
           {(ghost.sides ? [...pool, ghost.sides] : pool).slice(-6).map((sides, index) => (
-            <DieShape key={index} sides={sides === 100 ? 10 : sides} size={34} label={sides === 100 ? "%" : sides} />
+            <DieShape key={index} sides={sides === 100 ? 10 : sides} size={34} label={sides === 100 ? "%" : sides} look={mine} />
           ))}
         </span>
       ) : null}

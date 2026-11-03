@@ -2,7 +2,7 @@ import * as THREE from "three";
 import * as CANNON from "cannon-es";
 import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
-import type { DiceLook, DiceTheme } from "./diceStore";
+import type { DiceFont, DiceLook, DiceTheme } from "./diceStore";
 
 // The dice themselves, from The Gilded Die (F:\dice_table): rounded convex
 // shells, centred numerals, procedural themes. Shapes, textures and materials
@@ -129,13 +129,22 @@ function makeFaces(shape: ShapeData): FaceGroup[] {
   });
 }
 
-function engravedTexture(value: string, color: string) {
+// The numbers' lettering: the Gilded Die's Georgia, a heavy sans, carved
+// capitals (Cinzel, bundled with Kraken) and an italic script.
+const FONT_FACES: Record<DiceFont, (px: number) => string> = {
+  classic: (px) => `700 ${px}px Georgia`,
+  bold: (px) => `900 ${px}px "Arial Black", "Segoe UI Black", Impact, sans-serif`,
+  runic: (px) => `700 ${px}px Cinzel, "Trajan Pro", Georgia, serif`,
+  script: (px) => `italic 700 ${px}px "Palatino Linotype", Palatino, "Book Antiqua", serif`,
+};
+
+function engravedTexture(value: string, color: string, font: DiceFont = "classic") {
   const canvas = document.createElement("canvas");
   canvas.width = canvas.height = 256;
   const ctx = canvas.getContext("2d")!;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.font = `700 ${value.length > 1 ? 132 : 162}px Georgia`;
+  ctx.font = (FONT_FACES[font] ?? FONT_FACES.classic)(value.length > 1 ? (font === "bold" ? 116 : 132) : font === "bold" ? 148 : 162);
   ctx.fillStyle = "rgba(0,0,0,.6)";
   ctx.fillText(value, 132, 136);
   ctx.fillStyle = color;
@@ -147,7 +156,7 @@ function engravedTexture(value: string, color: string) {
   return texture;
 }
 
-function themeMaps(theme: DiceTheme, color: string): { map?: THREE.Texture; bumpMap?: THREE.Texture } {
+function themeMaps(theme: DiceTheme, color: string, accentColor = "#d8b46a"): { map?: THREE.Texture; bumpMap?: THREE.Texture } {
   if (theme === "classic") return {};
   const size = 384;
   const albedo = document.createElement("canvas");
@@ -158,7 +167,8 @@ function themeMaps(theme: DiceTheme, color: string): { map?: THREE.Texture; bump
   const base = new THREE.Color(color);
   const dark = base.clone().offsetHSL(0, 0.03, -0.2);
   const light = base.clone().offsetHSL(0, -0.03, 0.2);
-  let seed = { dragonhide: 9217, starfall: 4109, bone: 7741, magma: 6389, leviathan: 2851 }[theme];
+  const accent = new THREE.Color(accentColor);
+  let seed = ({ dragonhide: 9217, starfall: 4109, bone: 7741, magma: 6389, leviathan: 2851, marble: 3307, swirl: 5519, speckle: 8093, wood: 1201, runes: 6661, stripes: 4421 } as Record<string, number>)[theme] ?? 1;
   const random = () => {
     seed = (seed * 1664525 + 1013904223) >>> 0;
     return seed / 4294967296;
@@ -272,6 +282,137 @@ function themeMaps(theme: DiceTheme, color: string): { map?: THREE.Texture; bump
       btx.lineWidth = 4;
       btx.stroke();
     }
+  } else if (theme === "marble") {
+    // Veins of the accent colour wandering through the stone, soft and sharp.
+    for (let vein = 0; vein < 22; vein++) {
+      let x = random() * size;
+      let y = random() * size;
+      let angle = random() * Math.PI * 2;
+      ctx.beginPath();
+      btx.beginPath();
+      ctx.moveTo(x, y);
+      btx.moveTo(x, y);
+      for (let step = 0; step < 40; step++) {
+        angle += (random() - 0.5) * 0.7;
+        x += Math.cos(angle) * 9;
+        y += Math.sin(angle) * 9;
+        ctx.lineTo(x, y);
+        btx.lineTo(x, y);
+      }
+      ctx.strokeStyle = accent.getStyle();
+      ctx.globalAlpha = vein % 4 === 0 ? 0.85 : 0.34;
+      ctx.lineWidth = vein % 4 === 0 ? 2.2 : 5 + random() * 7;
+      ctx.filter = vein % 4 === 0 ? "none" : "blur(3px)";
+      ctx.stroke();
+      ctx.filter = "none";
+      btx.strokeStyle = "#6a6a6a";
+      btx.lineWidth = 1.5;
+      btx.stroke();
+    }
+    ctx.globalAlpha = 1;
+  } else if (theme === "swirl") {
+    // Two colours stirred together, like swirled resin.
+    for (let band = 0; band < 26; band++) {
+      ctx.beginPath();
+      const offset = band * 0.42;
+      for (let t = 0; t <= 1; t += 0.01) {
+        const r = t * size * 0.75;
+        const a = offset + t * 9;
+        const x = size / 2 + Math.cos(a) * r;
+        const y = size / 2 + Math.sin(a) * r;
+        if (t === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.strokeStyle = (band % 2 ? accent : light).getStyle();
+      ctx.globalAlpha = band % 2 ? 0.5 : 0.18;
+      ctx.lineWidth = 9 + random() * 10;
+      ctx.filter = "blur(4px)";
+      ctx.stroke();
+    }
+    ctx.filter = "none";
+    ctx.globalAlpha = 1;
+  } else if (theme === "speckle") {
+    // Flecks of the accent colour and a little gold, as glitter in resin.
+    for (let i = 0; i < 900; i++) {
+      const x = random() * size;
+      const y = random() * size;
+      const big = random() > 0.93;
+      ctx.fillStyle = random() > 0.82 ? "#f6dc9a" : accent.getStyle();
+      ctx.globalAlpha = 0.35 + random() * 0.65;
+      ctx.beginPath();
+      ctx.arc(x, y, big ? 2.2 : 0.5 + random() * 1.1, 0, Math.PI * 2);
+      ctx.fill();
+      if (big) {
+        btx.fillStyle = "#a0a0a0";
+        btx.fillRect(x - 1, y - 1, 2, 2);
+      }
+    }
+    ctx.globalAlpha = 1;
+  } else if (theme === "wood") {
+    // Growth rings and grain, darker in the accent colour.
+    for (let ring = 0; ring < 46; ring++) {
+      ctx.beginPath();
+      btx.beginPath();
+      const y0 = ring * (size / 40) - 20;
+      for (let x = -10; x <= size + 10; x += 6) {
+        const y = y0 + Math.sin(x * 0.018 + ring * 0.31) * 10 + Math.sin(x * 0.07 + ring) * 2.5;
+        if (x < 0) {
+          ctx.moveTo(x, y);
+          btx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+          btx.lineTo(x, y);
+        }
+      }
+      ctx.strokeStyle = accent.getStyle();
+      ctx.globalAlpha = 0.18 + random() * 0.32;
+      ctx.lineWidth = 1 + random() * 3.5;
+      ctx.stroke();
+      btx.strokeStyle = "#5c5c5c";
+      btx.lineWidth = 1.5;
+      btx.stroke();
+    }
+    ctx.globalAlpha = 1;
+  } else if (theme === "runes") {
+    // Runes carved all over, filled with the accent colour.
+    const glyphs = "ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃᛇᛈᛉᛊᛏᛒᛖᛗᛚᛜᛞᛟ";
+    ctx.textAlign = btx.textAlign = "center";
+    ctx.textBaseline = btx.textBaseline = "middle";
+    for (let row = 0; row < 7; row++)
+      for (let column = 0; column < 7; column++) {
+        const glyph = glyphs[Math.floor(random() * glyphs.length)];
+        const x = column * (size / 6.5) + (row % 2) * 18 + 10;
+        const y = row * (size / 6.5) + 14;
+        ctx.font = btx.font = `700 ${26 + Math.floor(random() * 10)}px "Segoe UI Historic", "Noto Sans Runic", serif`;
+        ctx.fillStyle = accent.getStyle();
+        ctx.globalAlpha = 0.5;
+        ctx.shadowColor = accent.getStyle();
+        ctx.shadowBlur = 8;
+        ctx.fillText(glyph, x, y);
+        ctx.shadowBlur = 0;
+        btx.fillStyle = "#3a3a3a";
+        btx.fillText(glyph, x, y);
+      }
+    ctx.globalAlpha = 1;
+  } else if (theme === "stripes") {
+    // Bold diagonal bands in the accent colour.
+    ctx.save();
+    ctx.translate(size / 2, size / 2);
+    ctx.rotate(-Math.PI / 4);
+    for (let band = -10; band < 10; band++) {
+      if (band % 2) continue;
+      ctx.fillStyle = accent.getStyle();
+      ctx.globalAlpha = 0.85;
+      ctx.fillRect(-size, band * 30, size * 2, 30);
+      btx.save();
+      btx.translate(size / 2, size / 2);
+      btx.rotate(-Math.PI / 4);
+      btx.fillStyle = "#8a8a8a";
+      btx.fillRect(-size, band * 30, size * 2, 2);
+      btx.restore();
+    }
+    ctx.restore();
+    ctx.globalAlpha = 1;
   } else {
     for (let wave = -2; wave < 14; wave++) {
       ctx.beginPath();
@@ -390,13 +531,18 @@ export function collider(kind: ShapeKind) {
   return new CANNON.ConvexPolyhedron({ vertices: shape.vertices.map((v) => new CANNON.Vec3(v.x, v.y, v.z)), faces: shape.faces.map((face) => [...face]) });
 }
 
+// What the dice are made of: how they take the light. Resin is the Gilded
+// Die's; glass lets the light through, tinted by the body; metal mirrors the
+// room; pearl shimmers; stone and wood are matte. A glowing set shines on its own.
 function shellMaterial(look: DiceLook) {
-  const key = `${look.theme}|${look.body}`;
+  const material_ = look.material ?? "plastic";
+  const key = `${look.theme}|${look.body}|${look.accent}|${material_}|${look.effect === "glow" ? "glow" : ""}`;
   let material = shells.get(key);
   if (!material) {
-    const maps = themeMaps(look.theme, look.body);
-    material = new THREE.MeshPhysicalMaterial({
-      color: look.theme === "classic" ? look.body : "#ffffff",
+    const maps = themeMaps(look.theme, look.body, look.accent);
+    const solid = look.theme === "classic";
+    const base = {
+      color: solid ? look.body : "#ffffff",
       map: maps.map,
       bumpMap: maps.bumpMap,
       bumpScale: look.theme === "bone" ? 0.018 : 0.028,
@@ -404,17 +550,47 @@ function shellMaterial(look: DiceLook) {
       metalness: 0.015,
       clearcoat: look.theme === "starfall" || look.theme === "leviathan" ? 0.38 : 0.2,
       clearcoatRoughness: 0.4,
-    });
+    };
+    const physical = new THREE.MeshPhysicalMaterial(base);
+    if (material_ === "glass") {
+      // Dark glass stays dark (obsidian, smoke); light glass lets the light through.
+      const tint = new THREE.Color(look.body);
+      const dark = tint.getHSL({ h: 0, s: 0, l: 0 }).l < 0.25;
+      Object.assign(physical, { transmission: dark ? 0 : 0.94, thickness: 0.7, ior: 1.48, roughness: dark ? 0.06 : 0.05, metalness: dark ? 0.2 : 0.015, clearcoat: 1, clearcoatRoughness: 0.05 });
+      physical.attenuationColor = tint;
+      physical.attenuationDistance = dark ? 0.35 : 0.9;
+      physical.color = dark ? tint.clone() : tint.clone().lerp(new THREE.Color("#ffffff"), 0.45);
+      physical.specularIntensity = 1;
+    } else if (material_ === "metal") {
+      Object.assign(physical, { metalness: 1, roughness: 0.26, clearcoat: 0.3, clearcoatRoughness: 0.2 });
+      if (solid) physical.color = new THREE.Color(look.body);
+    } else if (material_ === "pearl") {
+      // A shimmer over the dice's own colour, not over it.
+      Object.assign(physical, { roughness: 0.3, clearcoat: 0.8, clearcoatRoughness: 0.15, iridescence: 0.45, iridescenceIOR: 1.4, sheen: 0.25 });
+      physical.iridescenceThicknessRange = [220, 480];
+      physical.sheenColor = new THREE.Color(look.accent ?? "#ffffff").lerp(new THREE.Color(look.body), 0.5);
+      if (solid) physical.color = new THREE.Color(look.body);
+    } else if (material_ === "stone") {
+      Object.assign(physical, { roughness: 0.88, clearcoat: 0, bumpScale: base.bumpScale * 2.2 });
+    } else if (material_ === "wood") {
+      Object.assign(physical, { roughness: 0.68, clearcoat: 0.35, clearcoatRoughness: 0.5, bumpScale: base.bumpScale * 1.4 });
+    }
+    if (look.effect === "glow") {
+      physical.emissive = new THREE.Color(look.body).lerp(new THREE.Color(look.accent ?? "#ffffff"), 0.35);
+      physical.emissiveIntensity = 0.55;
+      if (maps.map) physical.emissiveMap = maps.map;
+    }
+    material = physical;
     shells.set(key, material);
   }
   return material;
 }
 
-function labelMaterial(value: string, ink: string) {
-  const key = `${value}|${ink}`;
+function labelMaterial(value: string, ink: string, font: DiceFont = "classic") {
+  const key = `${value}|${ink}|${font}`;
   let material = labels.get(key);
   if (!material) {
-    material = new THREE.MeshBasicMaterial({ map: engravedTexture(value, ink), transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -3, side: THREE.DoubleSide });
+    material = new THREE.MeshBasicMaterial({ map: engravedTexture(value, ink, font), transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -3, side: THREE.DoubleSide });
     labels.set(key, material);
   }
   return material;
@@ -438,7 +614,7 @@ export function buildDie(kind: ShapeKind, look: DiceLook, values: string[]) {
   group.add(shell);
   const size = kind === "d20" ? 0.39 : kind === "d12" ? 0.43 : kind === "d4" ? 0.43 : 0.5;
   faces.forEach((face, index) => {
-    const label = new THREE.Mesh(plane(size), labelMaterial(values[index % values.length], look.ink));
+    const label = new THREE.Mesh(plane(size), labelMaterial(values[index % values.length], look.ink, look.font));
     label.position.copy(face.center).addScaledVector(face.normal, 0.004);
     let right = face.right;
     let up = face.up;

@@ -493,3 +493,26 @@ span.ct-init { display: inline-block; }
 .decal-set-mark { font-size: 0.66rem; color: var(--brass); text-transform: uppercase; letter-spacing: 0.06em; }
 .decal-thumb.wall { background-size: 96px 96px; background-repeat: repeat; }
 .decal-group { font-size: 0.7rem; color: var(--muted); margin-top: -4px; }
+
+/* --- The Dice window -------------------------------------------------------- */
+.dice-window { display: grid; grid-template-columns: minmax(200px, 270px) minmax(0, 1fr); gap: 16px; padding: 14px; height: 100%; min-height: 0; }
+.dice-window-preview { display: flex; flex-direction: column; gap: 8px; align-self: start; position: sticky; top: 0; }
+.dice-preview { width: 100%; aspect-ratio: 1; border-radius: 14px; background: radial-gradient(ellipse at 50% 60%, #22303a, #0b0f13 75%); border: 1px solid var(--panel-edge); overflow: hidden; }
+.dice-preview canvas { display: block; width: 100%; height: 100%; }
+.dice-window-controls { display: flex; flex-direction: column; gap: 12px; overflow: auto; min-height: 0; padding-right: 4px; }
+.dice-window .check { display: flex; align-items: center; gap: 8px; font-size: 0.86rem; }
+.dice-field { display: flex; flex-direction: column; gap: 6px; }
+.dice-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.dice-chip { padding: 4px 11px; border-radius: 999px; font-size: 0.82rem; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--line); color: var(--muted); }
+.dice-chip:hover { border-color: var(--brass-dim); color: var(--text); }
+.dice-chip.on { border-color: var(--brass); color: var(--text); background: rgba(210, 161, 90, 0.16); }
+.dice-window .dice-swatches button { width: 40px; height: 40px; border-radius: 10px; font-size: 0.95rem; }
+.dice-window .dice-colors { display: flex; gap: 14px; }
+.dice-window .dice-colors label { display: flex; align-items: center; gap: 6px; font-size: 0.86rem; color: var(--muted); }
+.dice-window .table-part { padding-top: 8px; border-top: 1px solid var(--panel-edge); }
+.dice-window .gm-option { padding-top: 8px; border-top: 1px solid var(--panel-edge); color: var(--brass); }
+@media (max-width: 700px) { .dice-window { grid-template-columns: 1fr; } .dice-window-preview { position: static; max-width: 260px; } }
+/* A die in its owner's set (tray, pool, roll cards). */
+.die-shape.set polygon { stroke: rgba(255, 255, 255, 0.42); stroke-width: 1.1; stroke-linejoin: round; filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.55)); }
+.die-shape.set text { paint-order: stroke; stroke: rgba(0, 0, 0, 0.5); stroke-width: 1.5px; stroke-linejoin: round; }
+.die.dropped .die-shape.set { opacity: 0.45; filter: grayscale(0.6); }
