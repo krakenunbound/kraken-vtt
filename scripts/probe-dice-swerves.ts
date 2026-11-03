@@ -1,3 +1,4 @@
+// Counts dice that swerve sharply with nothing but the felt to turn them (npx tsx scripts/probe-dice-swerves.ts).
 import * as CANNON from "cannon-es";
 import { diceOf, simulate } from "../src/dice/throw";
 import type { ChatLine, RollTerm } from "../src/session/useSession";
