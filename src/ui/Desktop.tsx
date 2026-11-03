@@ -213,7 +213,7 @@ export function Desktop({
             </button>
           ))}
           {gm ? (
-            <button type="button" className="launcher" data-launch="adventure" title="Open a Foundry adventure bundle" onClick={onOpenAdventure}>
+            <button type="button" className="launcher" data-launch="adventure" title="Open a prepared map bundle" onClick={onOpenAdventure}>
               <Icon name="open" size={22} />
               <span>Open map</span>
             </button>

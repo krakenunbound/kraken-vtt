@@ -712,7 +712,7 @@ const TOOLS = [
   },
   {
     name: "kraken_open_adventure",
-    description: "Open a Foundry adventure bundle (a .zip on this computer) on the table, as the GM's Open map button. It is saved with the campaign; kraken_scenes lists and switches its scenes.",
+    description: "Open a prepared map bundle (an adventure .zip on this computer, with scenes, walls, lights and tokens) on the table, as the GM's Open map button. It is saved with the campaign; kraken_scenes lists and switches its scenes.",
     inputSchema: object({ path: string("Full path of the .zip") }, ["path"]),
     async run(args, ctx) {
       needTable(ctx);

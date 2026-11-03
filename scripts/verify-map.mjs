@@ -18,7 +18,7 @@ await page.goto("http://localhost:5173/", { waitUntil: "networkidle" });
 const tabs = await page.getByRole("tab").allTextContents();
 assert(tabs.join("|") === "Table|Party|Library|Audio|Encounters", `tabs ${tabs.join("|")}`);
 
-await page.getByLabel("Foundry bundle").setInputFiles(zipPath);
+await page.getByLabel("Map bundle").setInputFiles(zipPath);
 await page.waitForFunction(
   () => document.querySelector(".toolbar")?.getAttribute("data-adventure") === "Troll's Pot Morning",
   null,
@@ -106,7 +106,7 @@ await page.getByLabel("Adventure").selectOption({ label: "Troll's Pot Night" });
 await page.waitForFunction(() => document.querySelector(".legend")?.getAttribute("data-lights") === "2");
 await page.waitForFunction(() => document.querySelectorAll(".light").length === 2);
 
-await page.getByLabel("Foundry bundle").setInputFiles(String.raw`G:\TTRPG Books (pdf)\Professional Maps\Dirty Rotten Looters (Prepared Foundry).zip`);
+await page.getByLabel("Map bundle").setInputFiles(String.raw`G:\TTRPG Books (pdf)\Professional Maps\Dirty Rotten Looters (Prepared Foundry).zip`);
 await page.waitForFunction(() => Number(document.querySelector(".legend")?.getAttribute("data-door") ?? 0) > 0, null, {
   timeout: 60000,
 });

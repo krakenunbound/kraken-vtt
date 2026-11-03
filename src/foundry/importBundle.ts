@@ -105,7 +105,7 @@ function readAdventureRecord(files: ZipFiles): Record<string, unknown> {
   }
   const root = asRecord(parsed);
   const adventure = asRecord(root?.adventureData);
-  if (!adventure) throw new Error("This zip is not a Foundry adventure bundle.");
+  if (!adventure) throw new Error("This zip is not a prepared map bundle.");
   return adventure;
 }
 
