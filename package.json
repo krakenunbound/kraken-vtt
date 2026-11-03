@@ -16,6 +16,7 @@
     "combat": "node scripts/check-combat.mjs",
     "attack": "node scripts/check-attack.mjs",
     "spells": "node scripts/check-spells.mjs",
+    "popout": "node scripts/check-popout.mjs",
     "sight-parity": "node scripts/check-sight-parity.mjs",
     "session": "node scripts/check-session.mjs",
     "agent": "node scripts/check-agent.mjs",

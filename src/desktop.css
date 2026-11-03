@@ -430,3 +430,14 @@ span.ct-init { display: inline-block; }
 .brand { display: flex; align-items: center; gap: 6px; }
 .emblem { width: min(380px, 42vw); height: auto; opacity: 1; filter: drop-shadow(0 0 40px rgba(40, 180, 170, 0.18)); border-radius: 50%; }
 .join-emblem { width: 150px; height: 150px; object-fit: cover; margin: -4px auto -6px; border-radius: 50%; }
+
+/* --- Pop-out windows (a window of its own, on any monitor) ----------------- */
+.popout-body { margin: 0; height: 100vh; overflow: hidden; background: var(--panel, #1b1916); color: var(--text); }
+.popout-root { height: 100%; }
+.window.popped { position: static; height: 100%; border: 0; border-radius: 0; box-shadow: none; }
+.popout-bar { display: flex; align-items: center; gap: 8px; padding: 4px 8px 4px 14px; background: linear-gradient(#2a2620, #1e1b17); border-bottom: 1px solid var(--panel-edge); color: var(--brass); font-family: var(--serif); letter-spacing: 0.06em; user-select: none; }
+.popout-bar span { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chat-popout { position: absolute; top: 6px; right: 8px; z-index: 2; padding: 2px 4px; background: rgba(20, 23, 28, 0.8); border-color: transparent; color: var(--muted); opacity: 0.55; }
+.chat-dock:hover .chat-popout { opacity: 1; }
+.chat-popout:hover { color: var(--text); border-color: var(--panel-edge); }
+.chat-dock.popped { position: static; width: auto; height: 100%; resize: none; border: 0; border-radius: 0; box-shadow: none; }

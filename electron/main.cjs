@@ -300,7 +300,27 @@ function createWindow() {
   win.webContents.on("will-navigate", (event) => {
     event.preventDefault();
   });
-  win.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
+  // Panels popped out of the table (the renderer draws into them), so they can
+  // go on another monitor. Nothing else may open a window.
+  win.webContents.setWindowOpenHandler(({ url, frameName }) => {
+    if (url !== "about:blank" || !frameName.startsWith("kraken-popout-")) return { action: "deny" };
+    return {
+      action: "allow",
+      overrideBrowserWindowOptions: {
+        backgroundColor: "#1b1916",
+        icon: path.join(__dirname, "..", "build", "icon.png"),
+        autoHideMenuBar: true,
+        useContentSize: true,
+        minWidth: 320,
+        minHeight: 200,
+        show: !headless,
+      },
+    };
+  });
+  win.webContents.on("did-create-window", (child) => {
+    child.webContents.on("will-navigate", (event) => event.preventDefault());
+    child.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
+  });
 
   const smokeErrors = [];
   win.webContents.on("console-message", (event) => {

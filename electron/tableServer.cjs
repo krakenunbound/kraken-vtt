@@ -419,6 +419,8 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
   });
 
   const wss = new WebSocketServer({ server, maxPayload: 8 * 1024 * 1024 });
+  // The http server's errors (a port in use) come here too; listen() reports them.
+  wss.on("error", () => {});
 
   function send(ws, message) {
     if (ws.readyState === ws.OPEN) ws.send(JSON.stringify(message));

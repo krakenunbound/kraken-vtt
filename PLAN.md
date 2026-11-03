@@ -230,7 +230,8 @@ Each step is tested before the next one starts. Where FG or Foundry does the sam
 | 4 Saves and spells | Done | `spells`: SiegeCore's save (d20 + attribute + level + SAVE effects against CB 12/18 + CL; an NPC's level is its hit dice, its primes its primeset; FG's "[SAVE] ... [CB 18 CL 3 CC 21] [SUCCESS 21 vs 21]"), casting spends a slot of the spell's level, Magic Missile's repeating missiles, Hold Person's Wisdom save negating a 1 round per level effect, half or no damage on a save, healing, CL dice ("CLd2+CL") for powers with no actions. Sheet Check/Save switch, spell slot pips, GM rest; tracker save prompt |
 | Look | Done | The user's Kraken logo as the emblem, menu mark, favicon and app icon; three.js loads only when a scene has weather |
 | 4 Still to do | Next | Critical hits by option, ammunition, spell resistance, NPC spellcasting |
-| UI Pop-out windows | Next | Every floating window can be dragged out of the main window onto another monitor |
+| UI Pop-out windows | Done | `popout`: drag any window (characters, sheets, party, combat tracker, players) past the edge of the main window, or press its pop-out button, and it becomes a real window of its own for another monitor; chat pops out too. It stays live (the same session), remembers where it was, opens there again, and has a button to come back. Electron allows only these windows. Chrome pass as Ann: tracker popped out, rolled initiative from it, chat rolled from its own window, both brought back. A port in use no longer crashes the host |
+| Dice: 3D dice on the table | Next | The Gilded Die (`F:\dice_table`): physics dice thrown across the table from the tray, landing on the result the host decided, with its sound; `/roll` still works. Dice dropped in the dice tower: a GM option whether players see the result |
 | 6 | Not started | In-app DM assistant |
 
 Where things are:
