@@ -3,6 +3,7 @@ import { gridLabel, preferredCandidateIndex, preferredSceneIndex } from "./found
 import { imageMime, inspectZip, type ImportCandidate, type LoadedAdventure } from "./foundry/importBundle";
 import { Picture } from "./characters/ArtPicker";
 import { CharacterPanel } from "./characters/CharacterPanel";
+import { PartySheet } from "./party/PartySheet";
 import { ChatPane, PartyPanel } from "./session/PartyPanel";
 import { useSession } from "./session/useSession";
 import { SetupScreen } from "./setup/SetupScreen";
@@ -388,7 +389,10 @@ export function App() {
         ) : dockTab === "character" ? (
           <CharacterPanel session={session} dock selected={pickedCharacter} />
         ) : (
-          <PlayerParty session={session} />
+          <div className="dock-party-sheet">
+            <PartySheet session={session} compact />
+            <PlayerParty session={session} />
+          </div>
         )
       ) : null}
     </aside>
@@ -471,18 +475,23 @@ export function App() {
         </div>
       </header>
 
-      <div className="stage" hidden={tab !== "table"}>
-        {tableSection}
+      {/* The GM's chat stays beside every tab, as FG's chat window does. */}
+      <div className="stage">
+        <div className="workspace">
+          <div className="stage-table" hidden={tab !== "table"}>
+            {tableSection}
+          </div>
+          {tab === "party" ? <PartyPanel session={session} /> : null}
+          {tab === "characters" ? <CharacterPanel session={session} /> : null}
+          {tab !== "table" && tab !== "party" && tab !== "characters" ? (
+            <section className="placeholder" role="tabpanel">
+              <h1>{TABS.find((item) => item.id === tab)?.label}</h1>
+              <p>{PLACEHOLDERS[tab]}</p>
+            </section>
+          ) : null}
+        </div>
         {dock}
       </div>
-      {tab === "party" ? <PartyPanel session={session} /> : null}
-      {tab === "characters" ? <CharacterPanel session={session} /> : null}
-      {tab !== "table" && tab !== "party" && tab !== "characters" ? (
-        <section className="placeholder" role="tabpanel">
-          <h1>{TABS.find((item) => item.id === tab)?.label}</h1>
-          <p>{PLACEHOLDERS[tab]}</p>
-        </section>
-      ) : null}
 
       {common}
     </div>

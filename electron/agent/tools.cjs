@@ -10,6 +10,7 @@
 
 const fgModule = require("../importers/fgModule.cjs");
 const { siege, siegeLibrary, siegeCheck, levelUp } = require("../siege.cjs");
+const party = require("../party.cjs");
 
 function out(value) {
   return { content: [{ type: "text", text: typeof value === "string" ? value : JSON.stringify(value, null, 2) }] };
@@ -355,6 +356,85 @@ const TOOLS = [
       const { map, seat } = needTable(ctx);
       const { id, ...patch } = args;
       return out(map.update(id, patch, seat));
+    },
+  },
+  {
+    name: "kraken_party",
+    description:
+      "The party sheet: members (in party order: hp, wounds, AC, level, XP), the party inventory (every member's items with who carries them), the parcel (coins and items waiting to be handed out), quests and encounters with their XP, marching order and watches.",
+    inputSchema: object({}),
+    async run(_args, ctx) {
+      return out(await party.partyView(needTable(ctx)));
+    },
+  },
+  {
+    name: "kraken_party_edit",
+    description:
+      "Change the party sheet. members: the character ids in party order (or allPlayers: every character a player owns). parcel coins: { GP: 30, SP: 12 } (amounts to hand out). parcelItem: add an item to the parcel {name, count, assign: \"Name, Name\", itemId: an item record to copy}. quest / encounter: add {name, xp}. marching: character ids front to back.",
+    inputSchema: object({
+      members: { type: "array", items: { type: "string" } },
+      allPlayers: { type: "boolean" },
+      coins: { type: "object", additionalProperties: { type: "number" } },
+      parcelItem: { type: "object", properties: { name: { type: "string" }, count: { type: "number" }, assign: { type: "string" }, itemId: { type: "string" } }, additionalProperties: false },
+      quest: { type: "object", properties: { name: { type: "string" }, xp: { type: "number" } }, additionalProperties: false },
+      encounter: { type: "object", properties: { name: { type: "string" }, xp: { type: "number" } }, additionalProperties: false },
+      marching: { type: "array", items: { type: "string" } },
+    }),
+    async run(args, ctx) {
+      const agent = needTable(ctx);
+      const record = party.partyRecord(agent);
+      const patch = {};
+      const key = () => `id-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+      if (args.allPlayers) {
+        patch.members = agent.records
+          .list({ type: "character" })
+          .filter((item) => item.owner)
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .map((item) => item.id);
+      }
+      if (args.members) patch.members = args.members.filter((id) => agent.records.get(id)?.type === "character");
+      if (args.coins) patch.parcel = { ...(patch.parcel ?? {}), coins: args.coins };
+      if (args.parcelItem) {
+        const source = args.parcelItem.itemId ? agent.records.get(args.parcelItem.itemId) : null;
+        patch.parcel = {
+          ...(patch.parcel ?? {}),
+          items: { [key()]: { name: args.parcelItem.name || source?.name || "Item", count: Math.max(1, Number(args.parcelItem.count) || 1), assign: args.parcelItem.assign ?? "", ...(source ? { item: source.data } : {}) } },
+        };
+      }
+      if (args.quest) patch.quests = { [key()]: { name: args.quest.name ?? "Quest", xp: Number(args.quest.xp) || 0, awarded: 0 } };
+      if (args.encounter) patch.encounters = { [key()]: { name: args.encounter.name ?? "Encounter", xp: Number(args.encounter.xp) || 0, awarded: 0 } };
+      if (args.marching) patch.order = { marching: args.marching };
+      if (patch.members) agent.records.update(record.id, { data: { members: null } }, agent.seat);
+      agent.records.update(record.id, { data: patch }, agent.seat);
+      return out(await party.partyView(agent));
+    },
+  },
+  {
+    name: "kraken_party_award",
+    description: "Award XP to the party, split as FG does (the last member gets what is left). xp: an amount; or kind quests / encounters with an optional id, to award what is not awarded yet.",
+    inputSchema: object({ xp: number("XP to split"), kind: { type: "string", enum: ["quests", "encounters"] }, id: string("One quest or encounter") }),
+    async run(args, ctx) {
+      const agent = needTable(ctx);
+      const xp = args.kind ? await party.awardEntries(agent, args.kind, args.id) : await party.awardXP(agent, args.xp);
+      return out({ awarded: xp, party: (await party.partyView(agent)).members.map(({ name, exp }) => ({ name, exp })) });
+    },
+  },
+  {
+    name: "kraken_party_distribute",
+    description: "Hand out the parcel: assigned items to the people named, then each coin split evenly across the party with the remainder left in the parcel (FG's Distribute).",
+    inputSchema: object({}),
+    async run(_args, ctx) {
+      const agent = needTable(ctx);
+      await party.distribute(agent);
+      return out(await party.partyView(agent));
+    },
+  },
+  {
+    name: "kraken_party_group_check",
+    description: "SiegeCore's group check or save: every party member rolls the attribute against the CL in front of the table, and chat sums up who succeeded.",
+    inputSchema: object({ kind: { type: "string", enum: ["check", "save"] }, attribute: { type: "string", enum: ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"] }, cl: number("Challenge level") }, ["attribute"]),
+    async run(args, ctx) {
+      return out(await party.groupCheck(needTable(ctx), args.kind ?? "check", args.attribute, args.cl ?? 0));
     },
   },
   {

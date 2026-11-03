@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { PartySheet } from "../party/PartySheet";
 import type { RollResult, Session } from "./useSession";
 
 function RollCard({ roll }: { roll: RollResult }) {
@@ -39,7 +40,7 @@ export function PartyPanel({ session }: { session: Session }) {
   return (
     <section className="party" role="tabpanel">
       <aside className="roster">
-        <h1>Party</h1>
+        <h1>Table</h1>
         {session.role === "dm" && session.hostInfo ? (
           <div className="share-card">
             <p>Players connect to one of these.</p>
@@ -86,7 +87,7 @@ export function PartyPanel({ session }: { session: Session }) {
           })}
         </ul>
       </aside>
-      <ChatPane session={session} />
+      <PartySheet session={session} />
     </section>
   );
 }
