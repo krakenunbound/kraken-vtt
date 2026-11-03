@@ -2,7 +2,8 @@ import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import type { ChatLine } from "../session/useSession";
-import { diceStore, rolling, SHAPED, tower, type DiceLook, type DiceThrow, type TowerDrop } from "./diceStore";
+import { diceStore, fullLook, rolling, SHAPED, tower, type DiceLook, type DiceThrow, type TowerDrop } from "./diceStore";
+import { createEffects } from "./effects";
 import { bottomFace, buildDie, model, tensLook, topFace, type ShapeKind } from "./models";
 import { playHit } from "./sound";
 import { defaultThrow, diceOf, labelsFor, MAX_DICE, simulate, type Die, type Hit } from "./throw";
@@ -14,6 +15,8 @@ import { defaultThrow, diceOf, labelsFor, MAX_DICE, simulate, type Die, type Hit
 
 type Throwing = {
   line: ChatLine | null;
+  look: DiceLook;
+  last: THREE.Vector3[];
   dice: Die[];
   labels: string[][];
   groups: THREE.Group[];
@@ -24,7 +27,7 @@ type Throwing = {
   start: number;
   landed: number;
 };
-type Flight = { groups: THREE.Group[]; from: THREE.Vector3[]; to: THREE.Vector3; spin: THREE.Vector3[]; start: number };
+type Flight = { groups: THREE.Group[]; from: THREE.Vector3[]; to: THREE.Vector3; spin: THREE.Vector3[]; start: number; look: DiceLook; last: THREE.Vector3[] };
 
 const FRAME_MS = 1000 / 60;
 const HOLD_MS = 2600;
@@ -32,7 +35,7 @@ const SHRINK_MS = 380;
 
 function lookOf(line: ChatLine): DiceLook {
   const look = (line.roll as { look?: DiceLook } | undefined)?.look;
-  return look && typeof look.body === "string" ? look : diceStore.settings().look;
+  return look && typeof look.body === "string" ? fullLook(look) : diceStore.settings().look;
 }
 
 function createEngine(host: HTMLDivElement) {
@@ -60,6 +63,7 @@ function createEngine(host: HTMLDivElement) {
   scene.add(catcher);
   const camera = new THREE.PerspectiveCamera(30, 1, 0.5, 200);
   camera.up.set(0, 0, -1);
+  const effects = createEffects(scene);
 
   let width = 1;
   let depth = 1;
@@ -75,6 +79,7 @@ function createEngine(host: HTMLDivElement) {
     camera.position.set(width / 2, depth / 2 / Math.tan(THREE.MathUtils.degToRad(15)), depth / 2);
     camera.lookAt(width / 2, 0, depth / 2);
     camera.updateProjectionMatrix();
+    effects.setScale(h * renderer.getPixelRatio(), camera.fov);
     catcher.scale.set(width, depth, 1);
     catcher.position.set(width / 2, 0, depth / 2);
     key.position.set(width * 0.32, 40, depth * 0.1);
@@ -89,7 +94,14 @@ function createEngine(host: HTMLDivElement) {
   const throws: Throwing[] = [];
   const flights: Flight[] = [];
   let frame = 0;
+  let lastTick = performance.now();
   const quaternion = new THREE.Quaternion();
+  // A die's effect, given off as it moves (how far since the last frame).
+  const trail = (effect: DiceLook["effect"], group: THREE.Group, last: THREE.Vector3) => {
+    const speed = group.position.distanceTo(last);
+    if (speed < 2) effects.emit(effect, group.position.x, group.position.y, group.position.z, speed);
+    last.copy(group.position);
+  };
 
   // The dice roll on the desktop: below the menu bar, beside the sidebar.
   const table = () => {
@@ -102,6 +114,8 @@ function createEngine(host: HTMLDivElement) {
 
   const tick = () => {
     const now = performance.now();
+    const dt = Math.min(0.05, (now - lastTick) / 1000);
+    lastTick = now;
     const volume = diceStore.settings().sound ? diceStore.settings().volume : 0;
     for (let index = throws.length - 1; index >= 0; index--) {
       const item = throws[index];
@@ -110,6 +124,7 @@ function createEngine(host: HTMLDivElement) {
         const offset = (at * item.groups.length + die) * 7;
         group.position.set(item.frames[offset], item.frames[offset + 1], item.frames[offset + 2]);
         group.quaternion.copy(quaternion.set(item.frames[offset + 3], item.frames[offset + 4], item.frames[offset + 5], item.frames[offset + 6]));
+        if (!item.landed) trail(item.look.effect, group, item.last[die]);
       });
       while (item.played < item.hits.length && item.hits[item.played].frame <= at) {
         const hit = item.hits[item.played++];
@@ -126,6 +141,13 @@ function createEngine(host: HTMLDivElement) {
             return kind === "d4" ? labels.find((_, face) => face !== bottomFace(kind, group.quaternion)) : labels[topFace(kind, group.quaternion)];
           })
           .join(" ");
+        // A natural 20 or a 1 on a d20 flares where it lies.
+        if (item.look.crit !== false)
+          item.groups.forEach((group, die) => {
+            if (item.dice[die].kind !== "d20") return;
+            const shown = item.labels[die][topFace("d20", group.quaternion)];
+            if (shown === "20" || shown === "1") effects.flare(shown === "20" ? "high" : "low", group.position.x, group.position.y, group.position.z);
+          });
       }
       if (item.landed && now - item.landed > HOLD_MS) {
         const left = 1 - (now - item.landed - HOLD_MS) / SHRINK_MS;
@@ -143,18 +165,23 @@ function createEngine(host: HTMLDivElement) {
         group.position.y += Math.sin(Math.PI * t) * 2.5;
         group.rotation.set(flight.spin[die].x * t, flight.spin[die].y * t, flight.spin[die].z * t);
         group.scale.setScalar(t < 0.7 ? 1 : Math.max(0.01, (1 - t) / 0.3));
+        trail(flight.look.effect, group, flight.last[die]);
       });
       if (t >= 1) {
         removeGroups(flight.groups);
         flights.splice(index, 1);
       }
     }
+    const sparks = effects.update(dt);
     renderer.render(scene, camera);
-    frame = throws.length || flights.length ? requestAnimationFrame(tick) : 0;
+    frame = throws.length || flights.length || sparks ? requestAnimationFrame(tick) : 0;
     if (!frame) renderer.clear();
   };
   const wake = () => {
-    if (!frame) frame = requestAnimationFrame(tick);
+    if (!frame) {
+      lastTick = performance.now();
+      frame = requestAnimationFrame(tick);
+    }
   };
 
   return {
@@ -173,7 +200,7 @@ function createEngine(host: HTMLDivElement) {
         scene.add(group);
         return group;
       });
-      throws.push({ line, dice, labels, groups, frames: result.frames, count: result.count, hits: result.hits, played: 0, start: performance.now(), landed: 0 });
+      throws.push({ line, look, last: groups.map(() => new THREE.Vector3(Infinity, 0, 0)), dice, labels, groups, frames: result.frames, count: result.count, hits: result.hits, played: 0, start: performance.now(), landed: 0 });
       wake();
     },
     // Dice into the tower: they tumble over and drop in; nobody sees them land.
@@ -189,7 +216,7 @@ function createEngine(host: HTMLDivElement) {
       });
       const from = groups.map((_, index) => new THREE.Vector3(drop.from.x * width + (index % 3) * 0.9, 1.2, drop.from.y * depth + Math.floor(index / 3) * 0.9));
       const spin = groups.map(() => new THREE.Vector3((Math.random() - 0.5) * 14, (Math.random() - 0.5) * 14, (Math.random() - 0.5) * 14));
-      flights.push({ groups, from, to, spin, start: performance.now() });
+      flights.push({ groups, from, to, spin, start: performance.now(), look, last: groups.map(() => new THREE.Vector3(Infinity, 0, 0)) });
       wake();
     },
     dispose() {
@@ -200,6 +227,7 @@ function createEngine(host: HTMLDivElement) {
         if (item.line) rolling.landed(item.line);
       });
       flights.forEach((flight) => removeGroups(flight.groups));
+      effects.dispose();
       renderer.dispose();
       pmrem.dispose();
       renderer.domElement.remove();

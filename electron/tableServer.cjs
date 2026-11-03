@@ -155,7 +155,10 @@ function sanitizeScene(input) {
 
 // How a seat's dice leave its hand (fractions of its window, and per second)
 // and how its dice look, for the 3D dice every screen throws.
-const DICE_THEMES = new Set(["classic", "dragonhide", "starfall", "bone", "magma", "leviathan"]);
+const DICE_THEMES = new Set(["classic", "dragonhide", "starfall", "bone", "magma", "leviathan", "marble", "swirl", "speckle", "wood", "runes", "stripes"]);
+const DICE_MATERIALS = new Set(["plastic", "glass", "metal", "pearl", "stone", "wood"]);
+const DICE_EFFECTS = new Set(["none", "sparkles", "fire", "frost", "arcane", "shadow", "glow"]);
+const DICE_FONTS = new Set(["classic", "bold", "runic", "script"]);
 function diceThrow(value) {
   if (!value || typeof value !== "object") return null;
   const n = (key, low, high) => Math.min(high, Math.max(low, Number(value[key])));
@@ -167,7 +170,16 @@ function diceLook(value) {
   const color = (item) => (typeof item === "string" && /^#[0-9a-f]{3,8}$/i.test(item) ? item : null);
   const body = color(value.body);
   const ink = color(value.ink);
-  return body && ink && DICE_THEMES.has(value.theme) ? { theme: value.theme, body, ink } : null;
+  if (!body || !ink || !DICE_THEMES.has(value.theme)) return null;
+  // The rest is optional: what is missing or unknown is left out (the dice use their defaults).
+  const look = { theme: value.theme, body, ink };
+  const accent = color(value.accent);
+  if (accent) look.accent = accent;
+  if (DICE_MATERIALS.has(value.material)) look.material = value.material;
+  if (DICE_EFFECTS.has(value.effect)) look.effect = value.effect;
+  if (DICE_FONTS.has(value.font)) look.font = value.font;
+  if (typeof value.crit === "boolean") look.crit = value.crit;
+  return look;
 }
 
 // The table's own options. towerReveal: a roll in the dice tower is shown to

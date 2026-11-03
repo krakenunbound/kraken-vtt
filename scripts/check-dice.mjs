@@ -58,6 +58,16 @@ try {
   assert(odd.throw === undefined, "a bad throw is dropped");
   assert(odd.look?.theme === "starfall", "a bad look keeps the last good one");
 
+  // The whole look goes with a roll; parts nobody knows are left out.
+  ann.send({ type: "roll", formula: "1d20", look: { theme: "marble", body: "#eeeeee", ink: "#111111", accent: "#445566", material: "glass", effect: "frost", font: "runic", crit: false } });
+  await settle();
+  const rich = bob.lines.at(-1).roll.look;
+  assert(rich.theme === "marble" && rich.accent === "#445566" && rich.material === "glass" && rich.effect === "frost" && rich.font === "runic" && rich.crit === false, `the whole look: ${JSON.stringify(rich)}`);
+  ann.send({ type: "roll", formula: "1d20", look: { theme: "swirl", body: "#123456", ink: "#ffffff", material: "plutonium", effect: "<script>", accent: "blue" } });
+  await settle();
+  const trimmed = bob.lines.at(-1).roll.look;
+  assert(trimmed.theme === "swirl" && trimmed.material === undefined && trimmed.effect === undefined && trimmed.accent === undefined, `unknown parts dropped: ${JSON.stringify(trimmed)}`);
+
   // A tracker roll Ann asks for (her saving throw) is thrown by her.
   server.agent.records.create({ type: "siegegame", name: "Rules", data: { options: { SIEGE_INIT_STAT: "none" } } }, server.agent.seat);
   const elowen = server.agent.records.create({ type: "character", name: "Elowen", owner: "Ann", visibility: "owner", data: { level: 1, attributes: { wisdom: { score: 13 } } } }, server.agent.seat);

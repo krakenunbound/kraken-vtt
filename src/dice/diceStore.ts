@@ -4,23 +4,93 @@
 
 import type { ChatLine, RollResult } from "../session/useSession";
 
-export type DiceTheme = "classic" | "dragonhide" | "starfall" | "bone" | "magma" | "leviathan";
-export type DiceLook = { theme: DiceTheme; body: string; ink: string };
+// The design on the dice (the Gilded Die's six, and more), what they are made
+// of, the numbers' lettering, and an effect that follows them as they roll.
+export type DiceTheme = "classic" | "dragonhide" | "starfall" | "bone" | "magma" | "leviathan" | "marble" | "swirl" | "speckle" | "wood" | "runes" | "stripes";
+export type DiceMaterial = "plastic" | "glass" | "metal" | "pearl" | "stone" | "wood";
+export type DiceEffect = "none" | "sparkles" | "fire" | "frost" | "arcane" | "shadow" | "glow";
+export type DiceFont = "classic" | "bold" | "runic" | "script";
+// accent: the second colour of two-colour designs. crit: a natural 20 bursts gold, a 1 red.
+export type DiceLook = { theme: DiceTheme; body: string; ink: string; accent: string; material: DiceMaterial; effect: DiceEffect; font: DiceFont; crit: boolean };
+
+export const DESIGNS: { id: DiceTheme; name: string }[] = [
+  { id: "classic", name: "Solid" },
+  { id: "marble", name: "Marble" },
+  { id: "swirl", name: "Swirl" },
+  { id: "speckle", name: "Speckle" },
+  { id: "stripes", name: "Stripes" },
+  { id: "wood", name: "Wood grain" },
+  { id: "runes", name: "Runes" },
+  { id: "dragonhide", name: "Dragonhide" },
+  { id: "starfall", name: "Starfall" },
+  { id: "bone", name: "Bone" },
+  { id: "magma", name: "Magma" },
+  { id: "leviathan", name: "Leviathan" },
+];
+export const MATERIALS: { id: DiceMaterial; name: string }[] = [
+  { id: "plastic", name: "Resin" },
+  { id: "glass", name: "Glass" },
+  { id: "metal", name: "Metal" },
+  { id: "pearl", name: "Pearl" },
+  { id: "stone", name: "Stone" },
+  { id: "wood", name: "Wood" },
+];
+export const EFFECTS: { id: DiceEffect; name: string }[] = [
+  { id: "none", name: "None" },
+  { id: "sparkles", name: "Sparkles" },
+  { id: "fire", name: "Fire" },
+  { id: "frost", name: "Frost" },
+  { id: "arcane", name: "Arcane" },
+  { id: "shadow", name: "Shadow" },
+  { id: "glow", name: "Glow" },
+];
+export const FONTS: { id: DiceFont; name: string }[] = [
+  { id: "classic", name: "Classic" },
+  { id: "bold", name: "Bold" },
+  { id: "runic", name: "Carved" },
+  { id: "script", name: "Script" },
+];
 // Where the dice leave the hand and how fast, as fractions of the window (per second).
 export type DiceThrow = { x: number; y: number; vx: number; vy: number };
 
+const set = (name: string, look: Partial<DiceLook> & Pick<DiceLook, "theme" | "body" | "ink">): { name: string } & DiceLook => ({
+  name,
+  accent: "#d8b46a",
+  material: "plastic",
+  effect: "none",
+  font: "classic",
+  crit: true,
+  ...look,
+});
+
+// Ready-made sets: the Gilded Die's six, and Kraken's own.
 export const PRESETS: ({ name: string } & DiceLook)[] = [
-  { name: "Classic Ruby", theme: "classic", body: "#9d2136", ink: "#f9e7c1" },
-  { name: "Dragonhide", theme: "dragonhide", body: "#245b3b", ink: "#f5d99d" },
-  { name: "Starfall", theme: "starfall", body: "#101c4c", ink: "#e8f3ff" },
-  { name: "Ancient Bone", theme: "bone", body: "#d8c49c", ink: "#3a281d" },
-  { name: "Magma Vein", theme: "magma", body: "#541d20", ink: "#ffd26f" },
-  { name: "Leviathan", theme: "leviathan", body: "#126d73", ink: "#dcfff5" },
+  set("Classic Ruby", { theme: "classic", body: "#9d2136", ink: "#f9e7c1" }),
+  set("Dragonhide", { theme: "dragonhide", body: "#245b3b", ink: "#f5d99d" }),
+  set("Starfall", { theme: "starfall", body: "#101c4c", ink: "#e8f3ff", effect: "sparkles" }),
+  set("Ancient Bone", { theme: "bone", body: "#d8c49c", ink: "#3a281d", material: "stone" }),
+  set("Magma Vein", { theme: "magma", body: "#541d20", ink: "#ffd26f", effect: "fire" }),
+  set("Leviathan", { theme: "leviathan", body: "#126d73", ink: "#dcfff5", material: "pearl" }),
+  set("Frost Glass", { theme: "classic", body: "#9fd8ff", ink: "#ffffff", material: "glass", effect: "frost" }),
+  set("Molten Gold", { theme: "classic", body: "#d9a63a", ink: "#3b1d05", material: "metal", effect: "fire", font: "bold" }),
+  set("Arcane Pearl", { theme: "swirl", body: "#4b2a7a", accent: "#4fd6d0", ink: "#f4e9ff", material: "pearl", effect: "arcane", font: "runic" }),
+  set("Obsidian", { theme: "classic", body: "#17121c", ink: "#c9a2ff", material: "glass", effect: "shadow" }),
+  set("Carrara", { theme: "marble", body: "#ece8e1", accent: "#6d6a73", ink: "#1f2a44", material: "stone", font: "runic" }),
+  set("Oak and Iron", { theme: "wood", body: "#8a5a2f", accent: "#3c2412", ink: "#f1dfb8", material: "wood", font: "bold" }),
+  set("Rune Steel", { theme: "runes", body: "#5a6470", accent: "#7fe7ff", ink: "#e9f6ff", material: "metal", effect: "glow", font: "runic" }),
+  set("Kraken Deep", { theme: "speckle", body: "#0f3b44", accent: "#4fd6d0", ink: "#f2d08d", effect: "sparkles" }),
 ];
 
 export type DiceSettings = { show: boolean; sound: boolean; volume: number; look: DiceLook };
 type SettingsPatch = Partial<Omit<DiceSettings, "look">> & { look?: Partial<DiceLook> };
-const DEFAULTS: DiceSettings = { show: true, sound: true, volume: 0.7, look: { theme: PRESETS[0].theme, body: PRESETS[0].body, ink: PRESETS[0].ink } };
+const { name: _first, ...firstLook } = PRESETS[0];
+const DEFAULTS: DiceSettings = { show: true, sound: true, volume: 0.7, look: firstLook };
+
+// A look from another seat (or an older one) with whatever it leaves out filled in.
+export function fullLook(look: Partial<DiceLook>): DiceLook {
+  return { ...firstLook, theme: "classic", material: "plastic", effect: "none", font: "classic", crit: true, accent: "#d8b46a", ...look } as DiceLook;
+}
+
 
 // The dice that can be drawn: d4 to d20, and d100 as two d10s.
 export const SHAPED = new Set([4, 6, 8, 10, 12, 20, 100]);

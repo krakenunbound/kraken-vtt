@@ -52,7 +52,9 @@ export type KrakenAgentCommand =
   | { kind: "open-adventure"; name: string; bytes: Uint8Array }
   | { kind: "scenes"; adventure?: string; scene?: string }
   | { kind: "windows"; action: "list" | "open" | "close" | "popout" | "dock"; window?: string; record?: string }
-  | { kind: "dice-settings"; patch: { show?: boolean; sound?: boolean; volume?: number; preset?: string; body?: string; ink?: string } };
+  | { kind: "dice-settings"; patch: DiceSettingsPatch };
+
+export type DiceSettingsPatch = { show?: boolean; sound?: boolean; volume?: number; preset?: string; body?: string; accent?: string; ink?: string; design?: string; material?: string; font?: string; effect?: string; crit?: boolean };
 
 export type KrakenDecal = { id: string; name: string; group: string; ruleset?: string };
 

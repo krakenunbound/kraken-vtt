@@ -1,3 +1,4 @@
+import { useId } from "react";
 // Line icons for the sidebar, windows and chat (24 x 24, drawn with currentColor).
 const PATHS: Record<string, string> = {
   character: "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-7 8c0-3.3 3.1-6 7-6s7 2.7 7 6",
@@ -37,7 +38,11 @@ export function Icon({ name, size = 18, title }: { name: keyof typeof PATHS | st
 }
 
 // A die's outline for the dice tray and roll cards, by its number of sides.
-export function DieShape({ sides, size = 26, label }: { sides: number; size?: number; label?: string | number }) {
+// A set's colours for a die icon: its body shading into its accent, numbers in its ink.
+export type DieColors = { body: string; ink: string; accent?: string; material?: string };
+
+export function DieShape({ sides, size = 26, label, look }: { sides: number; size?: number; label?: string | number; look?: DieColors }) {
+  const id = `die${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
   const shape: Record<number, string> = {
     4: "12,2.5 22,20.5 2,20.5",
     6: "4,4 20,4 20,20 4,20",
@@ -47,10 +52,19 @@ export function DieShape({ sides, size = 26, label }: { sides: number; size?: nu
     20: "12,1.8 21,7 21,17 12,22.2 3,17 3,7",
   };
   return (
-    <svg className={`die-shape d${sides}`} width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
-      <polygon points={shape[sides] ?? shape[20]} />
+    <svg className={look ? `die-shape d${sides} set` : `die-shape d${sides}`} width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+      {look ? (
+        <defs>
+          <linearGradient id={`${id}-body`} x1="0.15" y1="0" x2="0.85" y2="1">
+            <stop offset="0" stopColor={look.material === "metal" || look.material === "glass" ? "#ffffff" : look.body} stopOpacity={look.material === "metal" || look.material === "glass" ? 0.55 : 1} />
+            <stop offset="0.18" stopColor={look.body} />
+            <stop offset="1" stopColor={look.accent && look.accent !== look.body ? look.accent : look.body} stopOpacity={look.material === "glass" ? 0.75 : 1} />
+          </linearGradient>
+        </defs>
+      ) : null}
+      <polygon points={shape[sides] ?? shape[20]} style={look ? { fill: `url(#${id}-body)` } : undefined} />
       {label !== undefined ? (
-        <text x="12" y={sides === 4 ? 16.5 : 13} textAnchor="middle" dominantBaseline="middle">
+        <text x="12" y={sides === 4 ? 16.5 : 13} textAnchor="middle" dominantBaseline="middle" style={look ? { fill: look.ink } : undefined}>
           {label}
         </text>
       ) : null}

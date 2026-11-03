@@ -661,10 +661,10 @@ const TOOLS = [
   {
     name: "kraken_windows",
     description:
-      "The GM's windows: list them, or open, close, pop out (to a window of its own, for another monitor) or dock back a window. Kinds: characters, party, combat, players, settings, decals (the background decal picker), wallpapers (the desktop wallpaper picker), sheet (a character's sheet: give record, its id or name).",
+      "The GM's windows: list them, or open, close, pop out (to a window of its own, for another monitor) or dock back a window. Kinds: characters, party, combat, players, settings, decals (the background decal picker), wallpapers (the desktop wallpaper picker), dice (this seat's dice: sets, colours, design, material, effects), sheet (a character's sheet: give record, its id or name).",
     inputSchema: object({
       action: { type: "string", enum: ["list", "open", "close", "popout", "dock"] },
-      kind: { type: "string", enum: ["characters", "party", "combat", "players", "settings", "decals", "wallpapers", "sheet"] },
+      kind: { type: "string", enum: ["characters", "party", "combat", "players", "settings", "decals", "wallpapers", "dice", "sheet"] },
       record: string("For a sheet: the character's record id or name"),
     }),
     run: async (args, ctx) => out(await ctx.ui({ kind: "windows", action: args.action ?? "list", window: args.kind, record: args.record })),
@@ -672,14 +672,20 @@ const TOOLS = [
   {
     name: "kraken_dice_settings",
     description:
-      "The GM's own 3D dice settings: show the dice rolling on the table, sound and volume (0..1), and the dice look (preset: Classic Ruby, Dragonhide, Starfall, Ancient Bone, Magma Vein, Leviathan; or body and ink colours as #rrggbb). Without arguments, reads them. Who sees a dice-tower result is kraken_table_options.",
+      "The GM's own 3D dice, as FG's dice skins and more (everyone at the table sees the roller's dice as set here): show the dice rolling on the table, sound and volume (0..1); a ready-made set (preset: Classic Ruby, Dragonhide, Starfall, Ancient Bone, Magma Vein, Leviathan, Frost Glass, Molten Gold, Arcane Pearl, Obsidian, Carrara, Oak and Iron, Rune Steel, Kraken Deep), or the parts: body, accent (the second colour of two-colour designs) and ink (the numbers) as #rrggbb; design (classic = solid, marble, swirl, speckle, stripes, wood, runes, dragonhide, starfall, bone, magma, leviathan); material (plastic = resin, glass, metal, pearl, stone, wood); font for the numbers (classic, bold, runic = carved capitals, script); effect as they roll (none, sparkles, fire, frost, arcane, shadow, glow); crit: a natural 20 flares gold and a 1 red. A preset first, then any parts on top of it. Without arguments, reads them. Who sees a dice-tower result is kraken_table_options.",
     inputSchema: object({
       show: { type: "boolean" },
       sound: { type: "boolean" },
       volume: number("0 to 1"),
       preset: string("Preset name"),
       body: string("Dice colour, #rrggbb"),
+      accent: string("Second colour, #rrggbb"),
       ink: string("Numbers colour, #rrggbb"),
+      design: { type: "string", enum: ["classic", "marble", "swirl", "speckle", "stripes", "wood", "runes", "dragonhide", "starfall", "bone", "magma", "leviathan"] },
+      material: { type: "string", enum: ["plastic", "glass", "metal", "pearl", "stone", "wood"] },
+      font: { type: "string", enum: ["classic", "bold", "runic", "script"] },
+      effect: { type: "string", enum: ["none", "sparkles", "fire", "frost", "arcane", "shadow", "glow"] },
+      crit: { type: "boolean" },
     }),
     run: async (args, ctx) => out(await ctx.ui({ kind: "dice-settings", patch: args })),
   },

@@ -78,6 +78,17 @@ try {
   assert((await tool("kraken_dice_settings", { ink: "#ffcc00" })).preset === "custom", "a custom colour");
   assert((await refused("kraken_dice_settings", { preset: "Plaid" })).includes("Presets:"), "an unknown preset is refused");
   assert((await refused("kraken_dice_settings", { body: "red" })).includes("colour"), "a bad colour is refused");
+  // The parts of a look: a set, then a material, an effect, a design and lettering on top of it.
+  const custom = await tool("kraken_dice_settings", { preset: "Frost Glass", material: "metal", effect: "fire", design: "marble", accent: "#223344", font: "runic", crit: false });
+  assert(custom.look.material === "metal" && custom.look.effect === "fire" && custom.look.theme === "marble" && custom.look.accent === "#223344" && custom.look.font === "runic" && custom.look.crit === false && custom.look.body === "#9fd8ff", `custom look ${JSON.stringify(custom.look)}`);
+  assert((await tool("kraken_dice_settings", { preset: "Rune Steel" })).preset === "Rune Steel", "a set is named again when matched");
+  assert((await refused("kraken_dice_settings", { effect: "lasers" })).includes("Choose from"), "an unknown effect is refused");
+  // The Dice window opens from the chat's gear and shows the set chosen.
+  await page.click(".dice-settings-button");
+  await page.waitForSelector('.dice-window [data-preset="Rune Steel"][aria-pressed="true"]');
+  await page.click('.dice-window [data-choice="glass"]');
+  assert((await tool("kraken_dice_settings")).look.material === "glass", "a click in the Dice window changes the look");
+  await tool("kraken_windows", { action: "close", kind: "dice" });
 
   // The art library the pickers show (empty when this computer has no FG art).
   const art = await tool("kraken_art", { kind: "portrait", limit: 3 });
