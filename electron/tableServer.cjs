@@ -494,12 +494,21 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
   // gear, spells, monsters) are loaded into the campaign, as FG makes an active
   // module's records available, and taken out again when it is made inactive.
   // A book the players may read starts shared with them; the GM's books not.
+  // Only what the rules use (classes and races, powers, the game's settings,
+  // items, creatures): the book's pages, pictures, tables and encounters are
+  // read from the module itself (the Books window), as FG reads them, never
+  // copied into the campaign (they made it tens of MB, sent to every player).
   const GM_SEAT = { role: "dm", name: "GM" };
+  const RULES_TYPES = new Set(["siegepackage", "siegepower", "siegegame", "item", "npc", "spell"]);
   function loadRecords(info) {
     const file = books?.file?.(info.id);
-    if (!file || records.list({ source: info.name }).length > 0) return;
+    if (!file) return;
+    const had = records.list({ source: info.name });
+    // An earlier, fuller load: take out what the rules do not use.
+    for (const record of had) if (!RULES_TYPES.has(record.type)) records.remove(record.id, GM_SEAT);
+    if (had.some((record) => RULES_TYPES.has(record.type))) return;
     try {
-      importModule(records, GM_SEAT, file);
+      importModule(records, GM_SEAT, file, { only: RULES_TYPES });
     } catch {
       /* a module whose records cannot be read is still a book to read */
     }
@@ -518,11 +527,17 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     shelfChanged();
     return shelfView();
   }
-  // The books already active when the campaign opens have their records too.
-  for (const id of shelf.active) {
+  // The books already active when the campaign opens have their records too:
+  // after the table is open, a book at a time, so Play never waits for them.
+  const pendingBooks = [...shelf.active];
+  const loadNextBook = () => {
+    const id = pendingBooks.shift();
+    if (id === undefined) return;
     const info = books?.info(id);
     if (info && fits(info)) loadRecords(info);
-  }
+    setTimeout(loadNextBook, 50);
+  };
+  if (pendingBooks.length > 0 && books) setTimeout(loadNextBook, 300);
   // The players may read it, or not (it is made active too). Never an
   // adventure: the players see its pictures and maps, as the GM shows them.
   function shareBook(book, on = true) {

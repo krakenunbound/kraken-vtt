@@ -92,6 +92,22 @@ try {
   assert(state.order.formation.facing === 1 && state.order.marching[0] === mine.id, `turned, the player's character still leads (${state.order.marching})`);
   // The player cannot drag another player's token: theirs is not draggable.
   assert(!(await seat.$eval(`[data-slot-member="${theirs.id}"]`, (element) => element.draggable)), "another player's token cannot be dragged by this player");
+  // Drag and drop: the GM drags a character from Characters onto the combat tracker.
+  await page.click('.sidebar [data-launch="party"]');
+  await page.click('.sidebar [data-launch="characters"]');
+  await page.click('.sidebar [data-launch="combat"]');
+  await page.waitForSelector(".combat-tracker");
+  // Move the tracker aside by its title bar, so the Characters list shows.
+  const title = await (await page.$('.window-title:has-text("Combat Tracker")')).boundingBox();
+  await page.mouse.move(title.x + 60, title.y + title.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(title.x + 700, title.y + 200, { steps: 8 });
+  await page.mouse.up();
+  await page.click('.window-title:has-text("Characters")');
+  await page.dragAndDrop('.character-list li button:has-text("Borin")', ".combat-tracker");
+  await page.waitForFunction(() => document.querySelector(".combat-tracker")?.textContent?.includes("Borin"), null, { timeout: 8000 });
+  const fight = await tool("kraken_combat", {});
+  assert(JSON.stringify(fight).includes("Borin"), "the host has the dropped character in the fight");
   await seat.screenshot({ path: path.join(tmpdir(), "kraken-order-player.png") });
   await page.screenshot({ path: path.join(tmpdir(), "kraken-order-gm.png") });
   assert(failures.length === 0, `no errors on screen: ${failures.join("; ")}`);

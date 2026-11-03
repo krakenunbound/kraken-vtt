@@ -239,6 +239,7 @@ export function CombatTracker({ session }: { session: Session }) {
   const [search, setSearch] = useState("");
   const [count, setCount] = useState(1);
   const [place, setPlace] = useState(true);
+  const [dropping, setDropping] = useState(false);
   const npcs = Object.values(session.records)
     .filter((record) => record.type === "npc" && (!search || record.name.toLowerCase().includes(search.toLowerCase())))
     .sort((a, b) => a.name.localeCompare(b.name))
@@ -246,7 +247,26 @@ export function CombatTracker({ session }: { session: Session }) {
   const mine = combat.entries.find((entry) => entry.mine && entry.id === combat.active);
 
   return (
-    <div className="combat-tracker" data-round={combat.round}>
+    <div
+      className={dropping ? "combat-tracker dropping" : "combat-tracker"}
+      data-round={combat.round}
+      onDragOver={(event) => {
+        if (!gm || ![...event.dataTransfer.types].includes("application/x-kraken-record")) return;
+        event.preventDefault();
+        event.dataTransfer.dropEffect = "copy";
+        setDropping(true);
+      }}
+      onDragLeave={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setDropping(false);
+      }}
+      onDrop={(event) => {
+        setDropping(false);
+        const recordId = event.dataTransfer.getData("application/x-kraken-record");
+        if (!gm || !recordId) return;
+        event.preventDefault();
+        session.ct("add", { recordId, count: 1, place });
+      }}
+    >
       <header className="ct-head">
         <span className="ct-round">
           <Icon name="flag" size={16} /> {combat.round > 0 ? `Round ${combat.round}` : "Not started"}

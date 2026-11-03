@@ -85,9 +85,12 @@ try {
   assert(activated.find((item) => item.id === "Test Keep").active && !activated.find((item) => item.id === "Test Keep").shared, "an active adventure stays the GM's");
   assert(activated.find((item) => item.id === "Test Handbook").shared, "an active players' handbook is open to the players");
   assert((await (await get(player, "/book/list")).json()).books.map((item) => item.id).join() === "Test Handbook", "the player's shelf: the handbook, not the adventure");
-  assert(server.agent.records.list({ source: "Test Handbook" }).length > 0, "an active module's records are loaded into the campaign (as FG's)");
+  const loaded = server.agent.records.list({ source: "Test Handbook" });
+  assert(loaded.length === 1 && loaded[0].type === "item", `an active module's rules records (its gear) are loaded into the campaign, not its book pages (${loaded.map((record) => record.type)})`);
   const reopenedWith = createTableServer({ books, ruleset: "Castles & Crusades", saved: { books: server.persisted().books } });
-  assert(reopenedWith.agent.records.list({ source: "Test Handbook" }).length > 0, "a book active when the campaign opens has its records");
+  assert(reopenedWith.agent.records.list({ source: "Test Handbook" }).length === 0, "opening the campaign does not wait for the books");
+  await new Promise((resolve) => setTimeout(resolve, 800));
+  assert(reopenedWith.agent.records.list({ source: "Test Handbook" }).length === 1, "a book active when the campaign opens has its records soon after");
   gm.send({ type: "book-activate", book: "Test Handbook", active: false });
   await settle();
   assert((await (await get(player, "/book/list")).json()).books.length === 0, "a book made inactive leaves the player's shelf");

@@ -17,7 +17,9 @@ export function slotDrag(slot: QuickSlot) {
     draggable: true,
     onDragStart: (event: React.DragEvent) => {
       event.dataTransfer.setData(SLOT_DRAG, JSON.stringify(slot));
-      event.dataTransfer.effectAllowed = "copy";
+      // A character goes onto the combat tracker or the map as well.
+      if (slot.kind === "sheet") event.dataTransfer.setData("application/x-kraken-record", slot.record);
+      event.dataTransfer.effectAllowed = "copyMove";
     },
   };
 }
