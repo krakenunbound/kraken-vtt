@@ -15,6 +15,17 @@ function chatPlace(): ScreenPlace | null {
   }
 }
 
+// How big the chat is in the main window (stretched from its top-right corner), in this browser.
+type ChatSize = { w: number; h: number } | null;
+function chatSize(): ChatSize {
+  try {
+    const saved = JSON.parse(window.localStorage.getItem("kraken-chat-size") ?? "null");
+    return saved && Number.isFinite(saved.w) && Number.isFinite(saved.h) ? saved : null;
+  } catch {
+    return null;
+  }
+}
+
 function rememberChat(place: ScreenPlace | null) {
   try {
     window.localStorage.setItem("kraken-window:chat", JSON.stringify(place));
@@ -142,6 +153,7 @@ export function ChatDock({ session }: { session: Session }) {
   const [modifier, setModifier] = useState(0);
   const [tower, setTower] = useState(false);
   const windows = useWindows();
+  const [size, setSize] = useState<ChatSize>(chatSize);
   // A right-click menu over the tray: how many of a die to roll, or the modifier's quick values.
   const [menu, setMenu] = useState<{ x: number; y: number; sides: number | null; custom?: boolean } | null>(null);
   // This seat's own set, on the tray's dice (the GM's too).
@@ -287,8 +299,44 @@ export function ChatDock({ session }: { session: Session }) {
     view.addEventListener("pointercancel", up);
   };
 
+  // Stretch the chat from its top-right corner: up for taller, right for wider.
+  const stretch = (event: React.PointerEvent) => {
+    if (event.button !== 0 || !dock.current) return;
+    event.preventDefault();
+    const start = { x: event.clientX, y: event.clientY, w: dock.current.offsetWidth, h: dock.current.offsetHeight };
+    const room = dock.current.parentElement?.getBoundingClientRect();
+    const move = (moveEvent: PointerEvent) => {
+      const w = Math.round(Math.min((room?.width ?? window.innerWidth) - 24, Math.max(280, start.w + moveEvent.clientX - start.x)));
+      const h = Math.round(Math.min((room?.height ?? window.innerHeight) - 24, Math.max(220, start.h - (moveEvent.clientY - start.y))));
+      setSize({ w, h });
+    };
+    const up = () => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
+      setSize((now) => {
+        try {
+          window.localStorage.setItem("kraken-chat-size", JSON.stringify(now));
+        } catch {
+          /* only this browser forgets */
+        }
+        return now;
+      });
+    };
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
+  };
+  const resetSize = () => {
+    setSize(null);
+    try {
+      window.localStorage.removeItem("kraken-chat-size");
+    } catch {
+      /* nothing kept */
+    }
+  };
+
   const body = (
-    <section className={out ? "chat-dock popped" : "chat-dock"} aria-label="Chat" ref={dock}>
+    <section className={out ? "chat-dock popped" : "chat-dock"} aria-label="Chat" ref={dock} style={!out && size ? { width: size.w, height: size.h } : undefined}>
+      {out ? null : <span className="chat-grip" role="separator" aria-label="Stretch the chat" title="Drag to stretch the chat; double-click for its usual size" onPointerDown={stretch} onDoubleClick={resetSize} />}
       <button
         type="button"
         className="chat-popout"

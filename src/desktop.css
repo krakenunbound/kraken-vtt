@@ -158,7 +158,6 @@ button .icon { vertical-align: -3px; }
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  resize: both;
   background: rgba(20, 23, 28, 0.94);
   border: 1px solid var(--panel-edge);
   border-radius: 10px;
@@ -559,3 +558,8 @@ span.ct-init { display: inline-block; }
 .chat-dock .dice-tray .modifier-box button { padding: 2px 5px; }
 .chat-dock .dice-tray .modifier-box input { width: 2.4rem; padding: 0; }
 .chat-dock .dice-tray .tower { flex: none; margin-left: 3px; }
+
+/* The chat's grip, top right: drag up and right to stretch it. */
+.chat-grip { position: absolute; top: 0; right: 0; z-index: 3; width: 22px; height: 22px; cursor: nesw-resize; touch-action: none; background: linear-gradient(225deg, transparent 0 4px, var(--brass-dim) 4px 5.5px, transparent 5.5px 8px, var(--brass-dim) 8px 9.5px, transparent 9.5px 12px, var(--brass-dim) 12px 13.5px, transparent 13.5px); opacity: 0.55; border-top-right-radius: 10px; }
+.chat-grip:hover { opacity: 1; }
+.chat-dock .chat-popout { right: 26px; }

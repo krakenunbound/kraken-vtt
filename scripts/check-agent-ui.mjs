@@ -98,6 +98,18 @@ try {
   await settle(600);
   const thrown = (await tool("kraken_chat_log", { count: 3 })).at(-1);
   assert(thrown.roll?.formula === "3d6+2", `right-click rolled 3d6 with the +2: ${JSON.stringify(thrown.roll?.formula)}`);
+  // The chat stretches from its top-right grip, and keeps its size.
+  const before = await page.locator(".chat-dock").boundingBox();
+  const grip = await page.locator(".chat-grip").boundingBox();
+  await page.mouse.move(grip.x + 10, grip.y + 10);
+  await page.mouse.down();
+  await page.mouse.move(grip.x + 160, grip.y - 140, { steps: 8 });
+  await page.mouse.up();
+  const after = await page.locator(".chat-dock").boundingBox();
+  assert(after.width > before.width + 120 && after.height > before.height + 100, `the chat stretched: ${JSON.stringify({ before, after })}`);
+  assert(JSON.parse(await page.evaluate(() => localStorage.getItem("kraken-chat-size"))).w === Math.round(after.width), "its size is kept");
+  await page.dblclick(".chat-grip");
+  assert(Math.abs((await page.locator(".chat-dock").boundingBox()).width - before.width) < 2, "a double-click puts it back");
 
   // The art library the pickers show (empty when this computer has no FG art).
   const art = await tool("kraken_art", { kind: "portrait", limit: 3 });
