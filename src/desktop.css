@@ -383,13 +383,7 @@ span.ct-init { display: inline-block; }
 .notes-list dd { margin: 0; }
 .notes-text { margin: 0; color: var(--text); line-height: 1.45; }
 
-/* --- Join and host screens ------------------------------------------------- */
-.setup { background: radial-gradient(ellipse at 50% 30%, #1d2027 0%, #0d0f13 70%); }
-.join-panel { align-items: stretch; gap: 12px; padding: 22px 26px 26px; border: 1px solid var(--panel-edge); border-radius: 14px; background: rgba(23, 26, 32, 0.92); box-shadow: var(--shadow); }
-.join-panel h1 { margin: 0; text-align: center; font: 500 1.8rem var(--serif); color: var(--brass); letter-spacing: 0.04em; }
-.join-panel > p { margin: 0; text-align: center; color: var(--muted); }
-.join-emblem { width: 120px; height: 120px; margin: -6px auto -4px; }
-.join-panel .play-button { margin-top: 6px; padding: 0.7rem; font-size: 1rem; }
+/* The join and campaign screens are in src/setup/setup.css. */
 
 /* --- Attacks and targets ---------------------------------------------------- */
 .target-reticle { position: absolute; inset: -8%; width: 116%; height: 116%; pointer-events: none; fill: none; stroke: #ff5a4d; stroke-width: 5; filter: drop-shadow(0 0 4px rgba(255, 90, 77, 0.8)); animation: reticle 2.4s linear infinite; }
