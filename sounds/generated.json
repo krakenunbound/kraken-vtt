@@ -1,0 +1,3578 @@
+[
+ {
+  "group": "sfx/Weapons/Sword/Attack",
+  "file": "weapons-sword-attack-1.mp3",
+  "prompt": "a steel sword swung hard, a fast whoosh through the air, fantasy combat sound effect",
+  "at": "2026-11-03T19:36:26.944Z"
+ },
+ {
+  "group": "sfx/Weapons/Sword/Fumble",
+  "file": "weapons-sword-fumble-1.mp3",
+  "prompt": "a clumsy fumble with a steel sword, the weapon clattering and slipping, an embarrassed grunt, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:02.697Z"
+ },
+ {
+  "group": "sfx/Weapons/Sword/Hit",
+  "file": "weapons-sword-hit-1.mp3",
+  "prompt": "a steel sword striking an armoured opponent, a solid hit with a grunt of pain, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:02.734Z"
+ },
+ {
+  "group": "sfx/Weapons/Sword/Crit",
+  "file": "weapons-sword-crit-1.mp3",
+  "prompt": "a devastating critical hit with a steel sword, a brutal crunching impact and a cry of pain, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:02.771Z"
+ },
+ {
+  "group": "sfx/Weapons/Greatsword/Attack",
+  "file": "weapons-greatsword-attack-1.mp3",
+  "prompt": "a huge two-handed greatsword swung hard, a fast whoosh through the air, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:04.242Z"
+ },
+ {
+  "group": "sfx/Weapons/Greatsword/Crit",
+  "file": "weapons-greatsword-crit-1.mp3",
+  "prompt": "a devastating critical hit with a huge two-handed greatsword, a brutal crunching impact and a cry of pain, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:04.570Z"
+ },
+ {
+  "group": "sfx/Weapons/Greatsword/Hit",
+  "file": "weapons-greatsword-hit-1.mp3",
+  "prompt": "a huge two-handed greatsword striking an armoured opponent, a solid hit with a grunt of pain, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:04.732Z"
+ },
+ {
+  "group": "sfx/Weapons/Greatsword/Fumble",
+  "file": "weapons-greatsword-fumble-1.mp3",
+  "prompt": "a clumsy fumble with a huge two-handed greatsword, the weapon clattering and slipping, an embarrassed grunt, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:05.613Z"
+ },
+ {
+  "group": "sfx/Weapons/Axe/Attack",
+  "file": "weapons-axe-attack-1.mp3",
+  "prompt": "a battle axe swung hard, a fast whoosh through the air, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:06.042Z"
+ },
+ {
+  "group": "sfx/Weapons/Axe/Hit",
+  "file": "weapons-axe-hit-1.mp3",
+  "prompt": "a battle axe striking an armoured opponent, a solid hit with a grunt of pain, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:06.149Z"
+ },
+ {
+  "group": "sfx/Weapons/Axe/Crit",
+  "file": "weapons-axe-crit-1.mp3",
+  "prompt": "a devastating critical hit with a battle axe, a brutal crunching impact and a cry of pain, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:07.383Z"
+ },
+ {
+  "group": "sfx/Weapons/Axe/Fumble",
+  "file": "weapons-axe-fumble-1.mp3",
+  "prompt": "a clumsy fumble with a battle axe, the weapon clattering and slipping, an embarrassed grunt, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:07.644Z"
+ },
+ {
+  "group": "sfx/Weapons/Mace/Attack",
+  "file": "weapons-mace-attack-1.mp3",
+  "prompt": "a heavy iron mace swung hard, a fast whoosh through the air, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:07.769Z"
+ },
+ {
+  "group": "sfx/Weapons/Mace/Fumble",
+  "file": "weapons-mace-fumble-1.mp3",
+  "prompt": "a clumsy fumble with a heavy iron mace, the weapon clattering and slipping, an embarrassed grunt, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:24.512Z"
+ },
+ {
+  "group": "sfx/Weapons/Mace/Hit",
+  "file": "weapons-mace-hit-1.mp3",
+  "prompt": "a heavy iron mace striking an armoured opponent, a solid hit with a grunt of pain, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:24.597Z"
+ },
+ {
+  "group": "sfx/Weapons/Mace/Crit",
+  "file": "weapons-mace-crit-1.mp3",
+  "prompt": "a devastating critical hit with a heavy iron mace, a brutal crunching impact and a cry of pain, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:25.230Z"
+ },
+ {
+  "group": "sfx/Weapons/Warhammer/Attack",
+  "file": "weapons-warhammer-attack-1.mp3",
+  "prompt": "a warhammer swung hard, a fast whoosh through the air, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:26.155Z"
+ },
+ {
+  "group": "sfx/Weapons/Warhammer/Hit",
+  "file": "weapons-warhammer-hit-1.mp3",
+  "prompt": "a warhammer striking an armoured opponent, a solid hit with a grunt of pain, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:26.476Z"
+ },
+ {
+  "group": "sfx/Weapons/Warhammer/Crit",
+  "file": "weapons-warhammer-crit-1.mp3",
+  "prompt": "a devastating critical hit with a warhammer, a brutal crunching impact and a cry of pain, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:26.583Z"
+ },
+ {
+  "group": "sfx/Weapons/Warhammer/Fumble",
+  "file": "weapons-warhammer-fumble-1.mp3",
+  "prompt": "a clumsy fumble with a warhammer, the weapon clattering and slipping, an embarrassed grunt, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:27.661Z"
+ },
+ {
+  "group": "sfx/Weapons/Flail/Attack",
+  "file": "weapons-flail-attack-1.mp3",
+  "prompt": "a spiked chain flail swung hard, a fast whoosh through the air, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:28.047Z"
+ },
+ {
+  "group": "sfx/Weapons/Flail/Hit",
+  "file": "weapons-flail-hit-1.mp3",
+  "prompt": "a spiked chain flail striking an armoured opponent, a solid hit with a grunt of pain, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:28.121Z"
+ },
+ {
+  "group": "sfx/Weapons/Flail/Crit",
+  "file": "weapons-flail-crit-1.mp3",
+  "prompt": "a devastating critical hit with a spiked chain flail, a brutal crunching impact and a cry of pain, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:29.172Z"
+ },
+ {
+  "group": "sfx/Weapons/Dagger/Attack",
+  "file": "weapons-dagger-attack-1.mp3",
+  "prompt": "a small dagger swung hard, a fast whoosh through the air, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:29.399Z"
+ },
+ {
+  "group": "sfx/Weapons/Flail/Fumble",
+  "file": "weapons-flail-fumble-1.mp3",
+  "prompt": "a clumsy fumble with a spiked chain flail, the weapon clattering and slipping, an embarrassed grunt, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:29.557Z"
+ },
+ {
+  "group": "sfx/Weapons/Dagger/Hit",
+  "file": "weapons-dagger-hit-1.mp3",
+  "prompt": "a small dagger striking an armoured opponent, a solid hit with a grunt of pain, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:30.763Z"
+ },
+ {
+  "group": "sfx/Weapons/Dagger/Crit",
+  "file": "weapons-dagger-crit-1.mp3",
+  "prompt": "a devastating critical hit with a small dagger, a brutal crunching impact and a cry of pain, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:30.935Z"
+ },
+ {
+  "group": "sfx/Weapons/Dagger/Fumble",
+  "file": "weapons-dagger-fumble-1.mp3",
+  "prompt": "a clumsy fumble with a small dagger, the weapon clattering and slipping, an embarrassed grunt, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:31.057Z"
+ },
+ {
+  "group": "sfx/Weapons/Spear/Attack",
+  "file": "weapons-spear-attack-1.mp3",
+  "prompt": "a long spear swung hard, a fast whoosh through the air, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:32.254Z"
+ },
+ {
+  "group": "sfx/Weapons/Spear/Hit",
+  "file": "weapons-spear-hit-1.mp3",
+  "prompt": "a long spear striking an armoured opponent, a solid hit with a grunt of pain, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:32.459Z"
+ },
+ {
+  "group": "sfx/Weapons/Spear/Crit",
+  "file": "weapons-spear-crit-1.mp3",
+  "prompt": "a devastating critical hit with a long spear, a brutal crunching impact and a cry of pain, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:32.675Z"
+ },
+ {
+  "group": "sfx/Weapons/Spear/Fumble",
+  "file": "weapons-spear-fumble-1.mp3",
+  "prompt": "a clumsy fumble with a long spear, the weapon clattering and slipping, an embarrassed grunt, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:33.800Z"
+ },
+ {
+  "group": "sfx/Weapons/Staff/Attack",
+  "file": "weapons-staff-attack-1.mp3",
+  "prompt": "a wooden quarterstaff swung hard, a fast whoosh through the air, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:33.931Z"
+ },
+ {
+  "group": "sfx/Weapons/Staff/Hit",
+  "file": "weapons-staff-hit-1.mp3",
+  "prompt": "a wooden quarterstaff striking an armoured opponent, a solid hit with a grunt of pain, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:34.185Z"
+ },
+ {
+  "group": "sfx/Weapons/Staff/Crit",
+  "file": "weapons-staff-crit-1.mp3",
+  "prompt": "a devastating critical hit with a wooden quarterstaff, a brutal crunching impact and a cry of pain, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:35.458Z"
+ },
+ {
+  "group": "sfx/Weapons/Staff/Fumble",
+  "file": "weapons-staff-fumble-1.mp3",
+  "prompt": "a clumsy fumble with a wooden quarterstaff, the weapon clattering and slipping, an embarrassed grunt, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:35.499Z"
+ },
+ {
+  "group": "sfx/Weapons/Whip/Attack",
+  "file": "weapons-whip-attack-1.mp3",
+  "prompt": "a leather whip swung hard, a fast whoosh through the air, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:36.041Z"
+ },
+ {
+  "group": "sfx/Weapons/Whip/Hit",
+  "file": "weapons-whip-hit-1.mp3",
+  "prompt": "a leather whip striking an armoured opponent, a solid hit with a grunt of pain, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:36.808Z"
+ },
+ {
+  "group": "sfx/Weapons/Whip/Crit",
+  "file": "weapons-whip-crit-1.mp3",
+  "prompt": "a devastating critical hit with a leather whip, a brutal crunching impact and a cry of pain, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:36.964Z"
+ },
+ {
+  "group": "sfx/Weapons/Whip/Fumble",
+  "file": "weapons-whip-fumble-1.mp3",
+  "prompt": "a clumsy fumble with a leather whip, the weapon clattering and slipping, an embarrassed grunt, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:37.675Z"
+ },
+ {
+  "group": "sfx/Weapons/Bow/Attack",
+  "file": "weapons-bow-attack-1.mp3",
+  "prompt": "a bow and arrow loosed, the string twanging and the shot whistling away, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:38.465Z"
+ },
+ {
+  "group": "sfx/Weapons/Bow/Hit",
+  "file": "weapons-bow-hit-1.mp3",
+  "prompt": "a bow and arrow thudding hard into its target, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:38.503Z"
+ },
+ {
+  "group": "sfx/Weapons/Bow/Crit",
+  "file": "weapons-bow-crit-1.mp3",
+  "prompt": "a bow and arrow loosed, a perfect shot punching deep into its target with a scream, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:39.235Z"
+ },
+ {
+  "group": "sfx/Weapons/Bow/Fumble",
+  "file": "weapons-bow-fumble-1.mp3",
+  "prompt": "a bow and arrow misfired, the string snapping or the shot dropping to the ground, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:39.929Z"
+ },
+ {
+  "group": "sfx/Weapons/Crossbow/Attack",
+  "file": "weapons-crossbow-attack-1.mp3",
+  "prompt": "a crossbow bolt loosed, the string twanging and the shot whistling away, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:40.513Z"
+ },
+ {
+  "group": "sfx/Weapons/Crossbow/Hit",
+  "file": "weapons-crossbow-hit-1.mp3",
+  "prompt": "a crossbow bolt thudding hard into its target, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:40.899Z"
+ },
+ {
+  "group": "sfx/Weapons/Crossbow/Crit",
+  "file": "weapons-crossbow-crit-1.mp3",
+  "prompt": "a crossbow bolt loosed, a perfect shot punching deep into its target with a scream, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:41.463Z"
+ },
+ {
+  "group": "sfx/Weapons/Crossbow/Fumble",
+  "file": "weapons-crossbow-fumble-1.mp3",
+  "prompt": "a crossbow bolt misfired, the string snapping or the shot dropping to the ground, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:42.120Z"
+ },
+ {
+  "group": "sfx/Weapons/Sling/Attack",
+  "file": "weapons-sling-attack-1.mp3",
+  "prompt": "a sling stone loosed, the string twanging and the shot whistling away, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:42.564Z"
+ },
+ {
+  "group": "sfx/Weapons/Sling/Hit",
+  "file": "weapons-sling-hit-1.mp3",
+  "prompt": "a sling stone thudding hard into its target, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:43.033Z"
+ },
+ {
+  "group": "sfx/Weapons/Sling/Crit",
+  "file": "weapons-sling-crit-1.mp3",
+  "prompt": "a sling stone loosed, a perfect shot punching deep into its target with a scream, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:43.568Z"
+ },
+ {
+  "group": "sfx/Weapons/Sling/Fumble",
+  "file": "weapons-sling-fumble-1.mp3",
+  "prompt": "a sling stone misfired, the string snapping or the shot dropping to the ground, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:44.170Z"
+ },
+ {
+  "group": "sfx/Weapons/Thrown/Attack",
+  "file": "weapons-thrown-attack-1.mp3",
+  "prompt": "a thrown javelin loosed, the string twanging and the shot whistling away, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:44.598Z"
+ },
+ {
+  "group": "sfx/Weapons/Thrown/Hit",
+  "file": "weapons-thrown-hit-1.mp3",
+  "prompt": "a thrown javelin thudding hard into its target, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:45.147Z"
+ },
+ {
+  "group": "sfx/Weapons/Thrown/Crit",
+  "file": "weapons-thrown-crit-1.mp3",
+  "prompt": "a thrown javelin loosed, a perfect shot punching deep into its target with a scream, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:45.601Z"
+ },
+ {
+  "group": "sfx/Weapons/Thrown/Fumble",
+  "file": "weapons-thrown-fumble-1.mp3",
+  "prompt": "a thrown javelin misfired, the string snapping or the shot dropping to the ground, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:46.015Z"
+ },
+ {
+  "group": "sfx/Weapons/Unarmed/Attack",
+  "file": "weapons-unarmed-attack-1.mp3",
+  "prompt": "a bare-fisted punch swung hard, a fast whoosh through the air, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:46.558Z"
+ },
+ {
+  "group": "sfx/Weapons/Unarmed/Hit",
+  "file": "weapons-unarmed-hit-1.mp3",
+  "prompt": "a bare-fisted punch striking an armoured opponent, a solid hit with a grunt of pain, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:47.264Z"
+ },
+ {
+  "group": "sfx/Weapons/Unarmed/Crit",
+  "file": "weapons-unarmed-crit-1.mp3",
+  "prompt": "a devastating critical hit with a bare-fisted punch, a brutal crunching impact and a cry of pain, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:47.712Z"
+ },
+ {
+  "group": "sfx/Weapons/Unarmed/Fumble",
+  "file": "weapons-unarmed-fumble-1.mp3",
+  "prompt": "a clumsy fumble with a bare-fisted punch, the weapon clattering and slipping, an embarrassed grunt, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:48.005Z"
+ },
+ {
+  "group": "sfx/Weapons/Claws/Attack",
+  "file": "weapons-claws-attack-1.mp3",
+  "prompt": "a monster's claws swung hard, a fast whoosh through the air, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:49.041Z"
+ },
+ {
+  "group": "sfx/Weapons/Claws/Crit",
+  "file": "weapons-claws-crit-1.mp3",
+  "prompt": "a devastating critical hit with a monster's claws, a brutal crunching impact and a cry of pain, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:49.653Z"
+ },
+ {
+  "group": "sfx/Weapons/Claws/Hit",
+  "file": "weapons-claws-hit-1.mp3",
+  "prompt": "a monster's claws striking an armoured opponent, a solid hit with a grunt of pain, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:50.136Z"
+ },
+ {
+  "group": "sfx/Weapons/Claws/Fumble",
+  "file": "weapons-claws-fumble-1.mp3",
+  "prompt": "a clumsy fumble with a monster's claws, the weapon clattering and slipping, an embarrassed grunt, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:50.994Z"
+ },
+ {
+  "group": "sfx/Weapons/Bite/Hit",
+  "file": "weapons-bite-hit-1.mp3",
+  "prompt": "a beast's bite striking an armoured opponent, a solid hit with a grunt of pain, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:51.504Z"
+ },
+ {
+  "group": "sfx/Weapons/Bite/Attack",
+  "file": "weapons-bite-attack-1.mp3",
+  "prompt": "a beast's bite swung hard, a fast whoosh through the air, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:51.765Z"
+ },
+ {
+  "group": "sfx/Weapons/Bite/Crit",
+  "file": "weapons-bite-crit-1.mp3",
+  "prompt": "a devastating critical hit with a beast's bite, a brutal crunching impact and a cry of pain, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:52.445Z"
+ },
+ {
+  "group": "sfx/Weapons/Shield/Block",
+  "file": "weapons-shield-block-1.mp3",
+  "prompt": "a sword striking a raised wooden and steel shield, a heavy block, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:53.192Z"
+ },
+ {
+  "group": "sfx/Weapons/Bite/Fumble",
+  "file": "weapons-bite-fumble-1.mp3",
+  "prompt": "a clumsy fumble with a beast's bite, the weapon clattering and slipping, an embarrassed grunt, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:54.052Z"
+ },
+ {
+  "group": "sfx/Weapons/Shield/Bash",
+  "file": "weapons-shield-bash-1.mp3",
+  "prompt": "a shield bash slamming into an opponent, fantasy combat sound effect",
+  "at": "2026-11-03T19:37:54.362Z"
+ },
+ {
+  "group": "sfx/Spells/Fire/Cast",
+  "file": "spells-fire-cast-1.mp3",
+  "prompt": "a wizard casting roaring fire magic, a rising magical charge, fantasy spell sound effect",
+  "at": "2026-11-03T19:37:54.583Z"
+ },
+ {
+  "group": "sfx/Spells/Fire/Hit",
+  "file": "spells-fire-hit-1.mp3",
+  "prompt": "roaring fire magic striking its target with a powerful impact, fantasy spell sound effect",
+  "at": "2026-11-03T19:37:55.743Z"
+ },
+ {
+  "group": "sfx/Spells/Fire/Crit",
+  "file": "spells-fire-crit-1.mp3",
+  "prompt": "roaring fire magic exploding with overwhelming force on its target, fantasy spell sound effect",
+  "at": "2026-11-03T19:37:56.197Z"
+ },
+ {
+  "group": "sfx/Spells/Fire/Fumble",
+  "file": "spells-fire-fumble-1.mp3",
+  "prompt": "roaring fire magic backfiring and sputtering out with a sad fizzle, fantasy spell sound effect",
+  "at": "2026-11-03T19:37:56.514Z"
+ },
+ {
+  "group": "sfx/Spells/Ice/Cast",
+  "file": "spells-ice-cast-1.mp3",
+  "prompt": "a wizard casting freezing ice magic, a rising magical charge, fantasy spell sound effect",
+  "at": "2026-11-03T19:37:57.162Z"
+ },
+ {
+  "group": "sfx/Spells/Ice/Hit",
+  "file": "spells-ice-hit-1.mp3",
+  "prompt": "freezing ice magic striking its target with a powerful impact, fantasy spell sound effect",
+  "at": "2026-11-03T19:37:57.692Z"
+ },
+ {
+  "group": "sfx/Spells/Ice/Crit",
+  "file": "spells-ice-crit-1.mp3",
+  "prompt": "freezing ice magic exploding with overwhelming force on its target, fantasy spell sound effect",
+  "at": "2026-11-03T19:37:57.927Z"
+ },
+ {
+  "group": "sfx/Spells/Ice/Fumble",
+  "file": "spells-ice-fumble-1.mp3",
+  "prompt": "freezing ice magic backfiring and sputtering out with a sad fizzle, fantasy spell sound effect",
+  "at": "2026-11-03T19:37:58.998Z"
+ },
+ {
+  "group": "sfx/Spells/Lightning/Cast",
+  "file": "spells-lightning-cast-1.mp3",
+  "prompt": "a wizard casting crackling lightning magic, a rising magical charge, fantasy spell sound effect",
+  "at": "2026-11-03T19:37:59.200Z"
+ },
+ {
+  "group": "sfx/Spells/Lightning/Hit",
+  "file": "spells-lightning-hit-1.mp3",
+  "prompt": "crackling lightning magic striking its target with a powerful impact, fantasy spell sound effect",
+  "at": "2026-11-03T19:37:59.634Z"
+ },
+ {
+  "group": "sfx/Spells/Lightning/Crit",
+  "file": "spells-lightning-crit-1.mp3",
+  "prompt": "crackling lightning magic exploding with overwhelming force on its target, fantasy spell sound effect",
+  "at": "2026-11-03T19:38:00.383Z"
+ },
+ {
+  "group": "sfx/Spells/Lightning/Fumble",
+  "file": "spells-lightning-fumble-1.mp3",
+  "prompt": "crackling lightning magic backfiring and sputtering out with a sad fizzle, fantasy spell sound effect",
+  "at": "2026-11-03T19:38:00.752Z"
+ },
+ {
+  "group": "sfx/Spells/Thunder/Cast",
+  "file": "spells-thunder-cast-1.mp3",
+  "prompt": "a wizard casting a booming thunderclap spell, a rising magical charge, fantasy spell sound effect",
+  "at": "2026-11-03T19:38:01.329Z"
+ },
+ {
+  "group": "sfx/Spells/Thunder/Hit",
+  "file": "spells-thunder-hit-1.mp3",
+  "prompt": "a booming thunderclap spell striking its target with a powerful impact, fantasy spell sound effect",
+  "at": "2026-11-03T19:38:01.924Z"
+ },
+ {
+  "group": "sfx/Spells/Thunder/Crit",
+  "file": "spells-thunder-crit-1.mp3",
+  "prompt": "a booming thunderclap spell exploding with overwhelming force on its target, fantasy spell sound effect",
+  "at": "2026-11-03T19:38:02.293Z"
+ },
+ {
+  "group": "sfx/Spells/Thunder/Fumble",
+  "file": "spells-thunder-fumble-1.mp3",
+  "prompt": "a booming thunderclap spell backfiring and sputtering out with a sad fizzle, fantasy spell sound effect",
+  "at": "2026-11-03T19:38:03.015Z"
+ },
+ {
+  "group": "sfx/Spells/Acid/Cast",
+  "file": "spells-acid-cast-1.mp3",
+  "prompt": "a wizard casting hissing acid magic, a rising magical charge, fantasy spell sound effect",
+  "at": "2026-11-03T19:38:03.703Z"
+ },
+ {
+  "group": "sfx/Spells/Acid/Hit",
+  "file": "spells-acid-hit-1.mp3",
+  "prompt": "hissing acid magic striking its target with a powerful impact, fantasy spell sound effect",
+  "at": "2026-11-03T19:38:03.743Z"
+ },
+ {
+  "group": "sfx/Spells/Acid/Crit",
+  "file": "spells-acid-crit-1.mp3",
+  "prompt": "hissing acid magic exploding with overwhelming force on its target, fantasy spell sound effect",
+  "at": "2026-11-03T19:38:04.588Z"
+ },
+ {
+  "group": "sfx/Spells/Poison/Cast",
+  "file": "spells-poison-cast-1.mp3",
+  "prompt": "a wizard casting bubbling poison magic, a rising magical charge, fantasy spell sound effect",
+  "at": "2026-11-03T19:38:05.168Z"
+ },
+ {
+  "group": "sfx/Spells/Acid/Fumble",
+  "file": "spells-acid-fumble-1.mp3",
+  "prompt": "hissing acid magic backfiring and sputtering out with a sad fizzle, fantasy spell sound effect",
+  "at": "2026-11-03T19:38:05.180Z"
+ },
+ {
+  "group": "sfx/Spells/Poison/Hit",
+  "file": "spells-poison-hit-1.mp3",
+  "prompt": "bubbling poison magic striking its target with a powerful impact, fantasy spell sound effect",
+  "at": "2026-11-03T19:38:06.156Z"
+ },
+ {
+  "group": "sfx/Spells/Poison/Fumble",
+  "file": "spells-poison-fumble-1.mp3",
+  "prompt": "bubbling poison magic backfiring and sputtering out with a sad fizzle, fantasy spell sound effect",
+  "at": "2026-11-03T19:38:06.814Z"
+ },
+ {
+  "group": "sfx/Spells/Poison/Crit",
+  "file": "spells-poison-crit-1.mp3",
+  "prompt": "bubbling poison magic exploding with overwhelming force on its target, fantasy spell sound effect",
+  "at": "2026-11-03T19:38:06.927Z"
+ },
+ {
+  "group": "sfx/Spells/Holy/Cast",
+  "file": "spells-holy-cast-1.mp3",
+  "prompt": "a wizard casting radiant holy magic with a heavenly choir, a rising magical charge, fantasy spell sound effect",
+  "at": "2026-11-03T19:38:07.758Z"
+ },
+ {
+  "group": "sfx/Spells/Holy/Hit",
+  "file": "spells-holy-hit-1.mp3",
+  "prompt": "radiant holy magic with a heavenly choir striking its target with a powerful impact, fantasy spell sound effect",
+  "at": "2026-11-03T19:38:08.342Z"
+ },
+ {
+  "group": "sfx/Spells/Holy/Crit",
+  "file": "spells-holy-crit-1.mp3",
+  "prompt": "radiant holy magic with a heavenly choir exploding with overwhelming force on its target, fantasy spell sound effect",
+  "at": "2026-11-03T19:38:08.536Z"
+ },
+ {
+  "group": "sfx/Spells/Holy/Fumble",
+  "file": "spells-holy-fumble-1.mp3",
+  "prompt": "radiant holy magic with a heavenly choir backfiring and sputtering out with a sad fizzle, fantasy spell sound effect",
+  "at": "2026-11-03T19:38:09.193Z"
+ },
+ {
+  "group": "sfx/Spells/Necrotic/Hit",
+  "file": "spells-necrotic-hit-1.mp3",
+  "prompt": "dark necrotic magic with ghostly whispers striking its target with a powerful impact, fantasy spell sound effect",
+  "at": "2026-11-03T19:38:10.148Z"
+ },
+ {
+  "group": "sfx/Spells/Necrotic/Cast",
+  "file": "spells-necrotic-cast-1.mp3",
+  "prompt": "a wizard casting dark necrotic magic with ghostly whispers, a rising magical charge, fantasy spell sound effect",
+  "at": "2026-11-03T19:38:10.193Z"
+ },
+ {
+  "group": "sfx/Spells/Necrotic/Crit",
+  "file": "spells-necrotic-crit-1.mp3",
+  "prompt": "dark necrotic magic with ghostly whispers exploding with overwhelming force on its target, fantasy spell sound effect",
+  "at": "2026-11-03T19:38:11.390Z"
+ },
+ {
+  "group": "sfx/Spells/Necrotic/Fumble",
+  "file": "spells-necrotic-fumble-1.mp3",
+  "prompt": "dark necrotic magic with ghostly whispers backfiring and sputtering out with a sad fizzle, fantasy spell sound effect",
+  "at": "2026-11-03T19:38:11.790Z"
+ },
+ {
+  "group": "sfx/Spells/Psychic/Cast",
+  "file": "spells-psychic-cast-1.mp3",
+  "prompt": "a wizard casting eerie psychic magic, a rising magical charge, fantasy spell sound effect",
+  "at": "2026-11-03T19:38:11.862Z"
+ },
+ {
+  "group": "sfx/Spells/Psychic/Hit",
+  "file": "spells-psychic-hit-1.mp3",
+  "prompt": "eerie psychic magic striking its target with a powerful impact, fantasy spell sound effect",
+  "at": "2026-11-03T19:38:13.072Z"
+ },
+ {
+  "group": "sfx/Spells/Psychic/Crit",
+  "file": "spells-psychic-crit-1.mp3",
+  "prompt": "eerie psychic magic exploding with overwhelming force on its target, fantasy spell sound effect",
+  "at": "2026-11-03T19:38:13.122Z"
+ },
+ {
+  "group": "sfx/Spells/Psychic/Fumble",
+  "file": "spells-psychic-fumble-1.mp3",
+  "prompt": "eerie psychic magic backfiring and sputtering out with a sad fizzle, fantasy spell sound effect",
+  "at": "2026-11-03T19:38:13.458Z"
+ },
+ {
+  "group": "sfx/Spells/Nature/Cast",
+  "file": "spells-nature-cast-1.mp3",
+  "prompt": "a wizard casting rustling earthy nature magic, a rising magical charge, fantasy spell sound effect",
+  "at": "2026-11-03T19:38:14.576Z"
+ },
+ {
+  "group": "sfx/Spells/Nature/Hit",
+  "file": "spells-nature-hit-1.mp3",
+  "prompt": "rustling earthy nature magic striking its target with a powerful impact, fantasy spell sound effect",
+  "at": "2026-11-03T19:38:14.862Z"
+ },
+ {
+  "group": "sfx/Spells/Nature/Crit",
+  "file": "spells-nature-crit-1.mp3",
+  "prompt": "rustling earthy nature magic exploding with overwhelming force on its target, fantasy spell sound effect",
+  "at": "2026-11-03T19:38:15.155Z"
+ },
+ {
+  "group": "sfx/Spells/Nature/Fumble",
+  "file": "spells-nature-fumble-1.mp3",
+  "prompt": "rustling earthy nature magic backfiring and sputtering out with a sad fizzle, fantasy spell sound effect",
+  "at": "2026-11-03T19:38:16.030Z"
+ },
+ {
+  "group": "sfx/Spells/Force/Cast",
+  "file": "spells-force-cast-1.mp3",
+  "prompt": "a wizard casting glowing arcane force bolts, a rising magical charge, fantasy spell sound effect",
+  "at": "2026-11-03T19:38:16.416Z"
+ },
+ {
+  "group": "sfx/Spells/Force/Hit",
+  "file": "spells-force-hit-1.mp3",
+  "prompt": "glowing arcane force bolts striking its target with a powerful impact, fantasy spell sound effect",
+  "at": "2026-11-03T19:38:16.741Z"
+ },
+ {
+  "group": "sfx/Spells/Force/Crit",
+  "file": "spells-force-crit-1.mp3",
+  "prompt": "glowing arcane force bolts exploding with overwhelming force on its target, fantasy spell sound effect",
+  "at": "2026-11-03T19:38:17.351Z"
+ },
+ {
+  "group": "sfx/Spells/Force/Fumble",
+  "file": "spells-force-fumble-1.mp3",
+  "prompt": "glowing arcane force bolts backfiring and sputtering out with a sad fizzle, fantasy spell sound effect",
+  "at": "2026-11-03T19:38:17.886Z"
+ },
+ {
+  "group": "sfx/Spells/Arcane/Cast",
+  "file": "spells-arcane-cast-1.mp3",
+  "prompt": "a wizard casting shimmering arcane magic, a rising magical charge, fantasy spell sound effect",
+  "at": "2026-11-03T19:38:18.438Z"
+ },
+ {
+  "group": "sfx/Spells/Arcane/Hit",
+  "file": "spells-arcane-hit-1.mp3",
+  "prompt": "shimmering arcane magic striking its target with a powerful impact, fantasy spell sound effect",
+  "at": "2026-11-03T19:38:18.918Z"
+ },
+ {
+  "group": "sfx/Spells/Arcane/Crit",
+  "file": "spells-arcane-crit-1.mp3",
+  "prompt": "shimmering arcane magic exploding with overwhelming force on its target, fantasy spell sound effect",
+  "at": "2026-11-03T19:38:19.621Z"
+ },
+ {
+  "group": "sfx/Spells/Arcane/Fumble",
+  "file": "spells-arcane-fumble-1.mp3",
+  "prompt": "shimmering arcane magic backfiring and sputtering out with a sad fizzle, fantasy spell sound effect",
+  "at": "2026-11-03T19:38:19.859Z"
+ },
+ {
+  "group": "sfx/Body/Wounded",
+  "file": "body-wounded-1.mp3",
+  "prompt": "a person hurt in battle, a short grunt of pain, fantasy sound effect",
+  "at": "2026-11-03T19:38:20.495Z"
+ },
+ {
+  "group": "sfx/Body/Badly Wounded",
+  "file": "body-badly-wounded-1.mp3",
+  "prompt": "a warrior badly wounded, a loud scream of pain, fantasy sound effect",
+  "at": "2026-11-03T19:38:21.450Z"
+ },
+ {
+  "group": "sfx/Body/Wounded",
+  "file": "body-wounded-1.mp3",
+  "prompt": "a woman hurt in battle, a pained gasp, fantasy sound effect",
+  "at": "2026-11-03T19:38:21.574Z"
+ },
+ {
+  "group": "sfx/Body/Dying",
+  "file": "body-dying-1.mp3",
+  "prompt": "a warrior collapsing, dying, a long anguished groan, fantasy sound effect",
+  "at": "2026-11-03T19:38:21.961Z"
+ },
+ {
+  "group": "sfx/Body/Unconscious",
+  "file": "body-unconscious-1.mp3",
+  "prompt": "a person falling unconscious, a groan and a body slumping to the floor, fantasy sound effect",
+  "at": "2026-11-03T19:38:23.389Z"
+ },
+ {
+  "group": "sfx/Body/Death",
+  "file": "body-death-1.mp3",
+  "prompt": "a warrior dying, a last breath and armour collapsing to the ground, fantasy sound effect",
+  "at": "2026-11-03T19:38:23.447Z"
+ },
+ {
+  "group": "sfx/Body/Heal",
+  "file": "body-heal-1.mp3",
+  "prompt": "warm healing magic, a soft glowing chime and a relieved breath, fantasy sound effect",
+  "at": "2026-11-03T19:38:24.160Z"
+ },
+ {
+  "group": "sfx/Body/Potion",
+  "file": "body-potion-1.mp3",
+  "prompt": "uncorking a glass potion bottle, gulping it down and a satisfied sigh, fantasy sound effect",
+  "at": "2026-11-03T19:38:25.176Z"
+ },
+ {
+  "group": "sfx/Body/Bandage",
+  "file": "body-bandage-1.mp3",
+  "prompt": "cloth bandages being torn and wrapped tightly around a wound, fantasy sound effect",
+  "at": "2026-11-03T19:38:25.258Z"
+ },
+ {
+  "group": "sfx/Body/Resurrect",
+  "file": "body-resurrect-1.mp3",
+  "prompt": "a divine resurrection, a rising heavenly choir and a sudden gasp of breath, fantasy sound effect",
+  "at": "2026-11-03T19:38:25.936Z"
+ },
+ {
+  "group": "sfx/Body/Stabilised",
+  "file": "body-stabilised-1.mp3",
+  "prompt": "a dying person's breathing steadying, a calm sigh, fantasy sound effect",
+  "at": "2026-11-03T19:38:26.553Z"
+ },
+ {
+  "group": "sfx/Animals/Wolf/Attack",
+  "file": "animals-wolf-attack-1.mp3",
+  "prompt": "a snarling wolf attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:38:26.645Z"
+ },
+ {
+  "group": "sfx/Animals/Wolf/Hurt",
+  "file": "animals-wolf-hurt-1.mp3",
+  "prompt": "a snarling wolf getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:38:27.433Z"
+ },
+ {
+  "group": "sfx/Animals/Wolf/Death",
+  "file": "animals-wolf-death-1.mp3",
+  "prompt": "a snarling wolf being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:38:28.010Z"
+ },
+ {
+  "group": "sfx/Animals/Bear/Attack",
+  "file": "animals-bear-attack-1.mp3",
+  "prompt": "a huge angry bear attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:38:28.044Z"
+ },
+ {
+  "group": "sfx/Animals/Bear/Hurt",
+  "file": "animals-bear-hurt-1.mp3",
+  "prompt": "a huge angry bear getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:38:29.130Z"
+ },
+ {
+  "group": "sfx/Animals/Bear/Death",
+  "file": "animals-bear-death-1.mp3",
+  "prompt": "a huge angry bear being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:38:29.485Z"
+ },
+ {
+  "group": "sfx/Animals/Boar/Attack",
+  "file": "animals-boar-attack-1.mp3",
+  "prompt": "a wild boar attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:38:29.900Z"
+ },
+ {
+  "group": "sfx/Animals/Boar/Hurt",
+  "file": "animals-boar-hurt-1.mp3",
+  "prompt": "a wild boar getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:38:30.734Z"
+ },
+ {
+  "group": "sfx/Animals/Boar/Death",
+  "file": "animals-boar-death-1.mp3",
+  "prompt": "a wild boar being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:38:30.948Z"
+ },
+ {
+  "group": "sfx/Animals/Big Cat/Attack",
+  "file": "animals-big-cat-attack-1.mp3",
+  "prompt": "a big wild cat attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:38:31.353Z"
+ },
+ {
+  "group": "sfx/Animals/Big Cat/Hurt",
+  "file": "animals-big-cat-hurt-1.mp3",
+  "prompt": "a big wild cat getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:38:32.243Z"
+ },
+ {
+  "group": "sfx/Animals/Big Cat/Death",
+  "file": "animals-big-cat-death-1.mp3",
+  "prompt": "a big wild cat being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:38:32.604Z"
+ },
+ {
+  "group": "sfx/Animals/Horse/Attack",
+  "file": "animals-horse-attack-1.mp3",
+  "prompt": "a horse attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:38:33.129Z"
+ },
+ {
+  "group": "sfx/Animals/Horse/Hurt",
+  "file": "animals-horse-hurt-1.mp3",
+  "prompt": "a horse getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:38:33.791Z"
+ },
+ {
+  "group": "sfx/Animals/Horse/Death",
+  "file": "animals-horse-death-1.mp3",
+  "prompt": "a horse being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:38:34.100Z"
+ },
+ {
+  "group": "sfx/Animals/Snake/Attack",
+  "file": "animals-snake-attack-1.mp3",
+  "prompt": "a hissing giant snake attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:38:34.727Z"
+ },
+ {
+  "group": "sfx/Animals/Snake/Hurt",
+  "file": "animals-snake-hurt-1.mp3",
+  "prompt": "a hissing giant snake getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:38:35.281Z"
+ },
+ {
+  "group": "sfx/Animals/Snake/Death",
+  "file": "animals-snake-death-1.mp3",
+  "prompt": "a hissing giant snake being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:38:35.652Z"
+ },
+ {
+  "group": "sfx/Animals/Spider/Attack",
+  "file": "animals-spider-attack-1.mp3",
+  "prompt": "a giant spider attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:38:36.155Z"
+ },
+ {
+  "group": "sfx/Animals/Spider/Hurt",
+  "file": "animals-spider-hurt-1.mp3",
+  "prompt": "a giant spider getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:38:37.177Z"
+ },
+ {
+  "group": "sfx/Animals/Spider/Death",
+  "file": "animals-spider-death-1.mp3",
+  "prompt": "a giant spider being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:38:37.396Z"
+ },
+ {
+  "group": "sfx/Animals/Rat/Attack",
+  "file": "animals-rat-attack-1.mp3",
+  "prompt": "a giant rat attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:38:37.779Z"
+ },
+ {
+  "group": "sfx/Animals/Rat/Hurt",
+  "file": "animals-rat-hurt-1.mp3",
+  "prompt": "a giant rat getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:38:38.651Z"
+ },
+ {
+  "group": "sfx/Animals/Rat/Death",
+  "file": "animals-rat-death-1.mp3",
+  "prompt": "a giant rat being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:38:38.959Z"
+ },
+ {
+  "group": "sfx/Animals/Bat/Attack",
+  "file": "animals-bat-attack-1.mp3",
+  "prompt": "a giant bat attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:38:39.154Z"
+ },
+ {
+  "group": "sfx/Animals/Bat/Hurt",
+  "file": "animals-bat-hurt-1.mp3",
+  "prompt": "a giant bat getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:38:40.259Z"
+ },
+ {
+  "group": "sfx/Animals/Bat/Death",
+  "file": "animals-bat-death-1.mp3",
+  "prompt": "a giant bat being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:38:40.670Z"
+ },
+ {
+  "group": "sfx/Animals/Bird of Prey/Attack",
+  "file": "animals-bird-of-prey-attack-1.mp3",
+  "prompt": "a screeching bird of prey attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:38:41.457Z"
+ },
+ {
+  "group": "sfx/Animals/Bird of Prey/Hurt",
+  "file": "animals-bird-of-prey-hurt-1.mp3",
+  "prompt": "a screeching bird of prey getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:38:42.188Z"
+ },
+ {
+  "group": "sfx/Animals/Bird of Prey/Death",
+  "file": "animals-bird-of-prey-death-1.mp3",
+  "prompt": "a screeching bird of prey being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:38:42.279Z"
+ },
+ {
+  "group": "sfx/Animals/Crocodile/Attack",
+  "file": "animals-crocodile-attack-1.mp3",
+  "prompt": "a crocodile attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:38:42.992Z"
+ },
+ {
+  "group": "sfx/Animals/Crocodile/Death",
+  "file": "animals-crocodile-death-1.mp3",
+  "prompt": "a crocodile being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:38:43.578Z"
+ },
+ {
+  "group": "sfx/Animals/Crocodile/Hurt",
+  "file": "animals-crocodile-hurt-1.mp3",
+  "prompt": "a crocodile getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:38:43.651Z"
+ },
+ {
+  "group": "sfx/Monsters/Goblin/Attack",
+  "file": "monsters-goblin-attack-1.mp3",
+  "prompt": "a small cackling goblin attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:38:44.699Z"
+ },
+ {
+  "group": "sfx/Monsters/Goblin/Death",
+  "file": "monsters-goblin-death-1.mp3",
+  "prompt": "a small cackling goblin being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:38:45.141Z"
+ },
+ {
+  "group": "sfx/Monsters/Goblin/Hurt",
+  "file": "monsters-goblin-hurt-1.mp3",
+  "prompt": "a small cackling goblin getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:38:45.155Z"
+ },
+ {
+  "group": "sfx/Monsters/Orc/Attack",
+  "file": "monsters-orc-attack-1.mp3",
+  "prompt": "a brutish orc warrior attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:38:46.172Z"
+ },
+ {
+  "group": "sfx/Monsters/Orc/Death",
+  "file": "monsters-orc-death-1.mp3",
+  "prompt": "a brutish orc warrior being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:38:46.693Z"
+ },
+ {
+  "group": "sfx/Monsters/Ogre/Attack",
+  "file": "monsters-ogre-attack-1.mp3",
+  "prompt": "a huge lumbering ogre attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:38:47.730Z"
+ },
+ {
+  "group": "sfx/Monsters/Orc/Hurt",
+  "file": "monsters-orc-hurt-1.mp3",
+  "prompt": "a brutish orc warrior getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:38:47.805Z"
+ },
+ {
+  "group": "sfx/Monsters/Ogre/Hurt",
+  "file": "monsters-ogre-hurt-1.mp3",
+  "prompt": "a huge lumbering ogre getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:38:48.398Z"
+ },
+ {
+  "group": "sfx/Monsters/Ogre/Death",
+  "file": "monsters-ogre-death-1.mp3",
+  "prompt": "a huge lumbering ogre being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:38:49.303Z"
+ },
+ {
+  "group": "sfx/Monsters/Giant/Hurt",
+  "file": "monsters-giant-hurt-1.mp3",
+  "prompt": "a towering giant getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:38:49.839Z"
+ },
+ {
+  "group": "sfx/Monsters/Giant/Attack",
+  "file": "monsters-giant-attack-1.mp3",
+  "prompt": "a towering giant attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:38:50.053Z"
+ },
+ {
+  "group": "sfx/Monsters/Giant/Death",
+  "file": "monsters-giant-death-1.mp3",
+  "prompt": "a towering giant being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:38:50.926Z"
+ },
+ {
+  "group": "sfx/Monsters/Zombie/Attack",
+  "file": "monsters-zombie-attack-1.mp3",
+  "prompt": "a rotting zombie attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:38:51.464Z"
+ },
+ {
+  "group": "sfx/Monsters/Zombie/Hurt",
+  "file": "monsters-zombie-hurt-1.mp3",
+  "prompt": "a rotting zombie getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:38:51.486Z"
+ },
+ {
+  "group": "sfx/Monsters/Zombie/Death",
+  "file": "monsters-zombie-death-1.mp3",
+  "prompt": "a rotting zombie being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:38:52.360Z"
+ },
+ {
+  "group": "sfx/Monsters/Skeleton/Hurt",
+  "file": "monsters-skeleton-hurt-1.mp3",
+  "prompt": "a rattling skeleton warrior getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:38:52.908Z"
+ },
+ {
+  "group": "sfx/Monsters/Skeleton/Attack",
+  "file": "monsters-skeleton-attack-1.mp3",
+  "prompt": "a rattling skeleton warrior attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:38:53.102Z"
+ },
+ {
+  "group": "sfx/Monsters/Skeleton/Death",
+  "file": "monsters-skeleton-death-1.mp3",
+  "prompt": "a rattling skeleton warrior being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:38:53.825Z"
+ },
+ {
+  "group": "sfx/Monsters/Ghost/Attack",
+  "file": "monsters-ghost-attack-1.mp3",
+  "prompt": "a wailing ghost attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:38:54.748Z"
+ },
+ {
+  "group": "sfx/Monsters/Ghost/Hurt",
+  "file": "monsters-ghost-hurt-1.mp3",
+  "prompt": "a wailing ghost getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:38:55.277Z"
+ },
+ {
+  "group": "sfx/Monsters/Ghost/Death",
+  "file": "monsters-ghost-death-1.mp3",
+  "prompt": "a wailing ghost being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:38:55.370Z"
+ },
+ {
+  "group": "sfx/Monsters/Vampire/Attack",
+  "file": "monsters-vampire-attack-1.mp3",
+  "prompt": "a sinister vampire lord attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:38:56.362Z"
+ },
+ {
+  "group": "sfx/Monsters/Vampire/Death",
+  "file": "monsters-vampire-death-1.mp3",
+  "prompt": "a sinister vampire lord being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:38:56.839Z"
+ },
+ {
+  "group": "sfx/Monsters/Vampire/Hurt",
+  "file": "monsters-vampire-hurt-1.mp3",
+  "prompt": "a sinister vampire lord getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:38:57.078Z"
+ },
+ {
+  "group": "sfx/Monsters/Dragon/Attack",
+  "file": "monsters-dragon-attack-1.mp3",
+  "prompt": "a colossal dragon attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:38:57.916Z"
+ },
+ {
+  "group": "sfx/Monsters/Dragon/Hurt",
+  "file": "monsters-dragon-hurt-1.mp3",
+  "prompt": "a colossal dragon getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:38:58.296Z"
+ },
+ {
+  "group": "sfx/Monsters/Dragon/Death",
+  "file": "monsters-dragon-death-1.mp3",
+  "prompt": "a colossal dragon being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:38:58.594Z"
+ },
+ {
+  "group": "sfx/Monsters/Demon/Attack",
+  "file": "monsters-demon-attack-1.mp3",
+  "prompt": "a roaring demon attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:38:59.579Z"
+ },
+ {
+  "group": "sfx/Monsters/Demon/Death",
+  "file": "monsters-demon-death-1.mp3",
+  "prompt": "a roaring demon being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:39:00.181Z"
+ },
+ {
+  "group": "sfx/Monsters/Demon/Hurt",
+  "file": "monsters-demon-hurt-1.mp3",
+  "prompt": "a roaring demon getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:39:01.020Z"
+ },
+ {
+  "group": "sfx/Monsters/Werewolf/Hurt",
+  "file": "monsters-werewolf-hurt-1.mp3",
+  "prompt": "a howling werewolf getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:39:01.998Z"
+ },
+ {
+  "group": "sfx/Monsters/Werewolf/Death",
+  "file": "monsters-werewolf-death-1.mp3",
+  "prompt": "a howling werewolf being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:39:02.418Z"
+ },
+ {
+  "group": "sfx/Monsters/Werewolf/Attack",
+  "file": "monsters-werewolf-attack-1.mp3",
+  "prompt": "a howling werewolf attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:39:02.514Z"
+ },
+ {
+  "group": "sfx/Monsters/Minotaur/Attack",
+  "file": "monsters-minotaur-attack-1.mp3",
+  "prompt": "a bellowing minotaur attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:39:03.720Z"
+ },
+ {
+  "group": "sfx/Monsters/Minotaur/Hurt",
+  "file": "monsters-minotaur-hurt-1.mp3",
+  "prompt": "a bellowing minotaur getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:39:04.010Z"
+ },
+ {
+  "group": "sfx/Monsters/Minotaur/Death",
+  "file": "monsters-minotaur-death-1.mp3",
+  "prompt": "a bellowing minotaur being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:39:04.079Z"
+ },
+ {
+  "group": "sfx/Monsters/Ooze/Attack",
+  "file": "monsters-ooze-attack-1.mp3",
+  "prompt": "a gurgling slime attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:39:05.145Z"
+ },
+ {
+  "group": "sfx/Monsters/Ooze/Hurt",
+  "file": "monsters-ooze-hurt-1.mp3",
+  "prompt": "a gurgling slime getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:39:05.395Z"
+ },
+ {
+  "group": "sfx/Monsters/Ooze/Death",
+  "file": "monsters-ooze-death-1.mp3",
+  "prompt": "a gurgling slime being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:39:05.829Z"
+ },
+ {
+  "group": "sfx/Monsters/Insect Swarm/Attack",
+  "file": "monsters-insect-swarm-attack-1.mp3",
+  "prompt": "a buzzing insect swarm attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:39:06.737Z"
+ },
+ {
+  "group": "sfx/Monsters/Insect Swarm/Hurt",
+  "file": "monsters-insect-swarm-hurt-1.mp3",
+  "prompt": "a buzzing insect swarm getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:39:06.857Z"
+ },
+ {
+  "group": "sfx/Monsters/Insect Swarm/Death",
+  "file": "monsters-insect-swarm-death-1.mp3",
+  "prompt": "a buzzing insect swarm being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:39:07.615Z"
+ },
+ {
+  "group": "sfx/Monsters/Elemental/Attack",
+  "file": "monsters-elemental-attack-1.mp3",
+  "prompt": "a rumbling elemental attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:39:08.181Z"
+ },
+ {
+  "group": "sfx/Monsters/Elemental/Hurt",
+  "file": "monsters-elemental-hurt-1.mp3",
+  "prompt": "a rumbling elemental getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:39:08.697Z"
+ },
+ {
+  "group": "sfx/Monsters/Elemental/Death",
+  "file": "monsters-elemental-death-1.mp3",
+  "prompt": "a rumbling elemental being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:39:09.178Z"
+ },
+ {
+  "group": "sfx/Monsters/Harpy/Attack",
+  "file": "monsters-harpy-attack-1.mp3",
+  "prompt": "a shrieking harpy attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:39:10.030Z"
+ },
+ {
+  "group": "sfx/Monsters/Harpy/Hurt",
+  "file": "monsters-harpy-hurt-1.mp3",
+  "prompt": "a shrieking harpy getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:39:10.222Z"
+ },
+ {
+  "group": "sfx/Monsters/Harpy/Death",
+  "file": "monsters-harpy-death-1.mp3",
+  "prompt": "a shrieking harpy being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:39:10.733Z"
+ },
+ {
+  "group": "sfx/Effects/Resist",
+  "file": "effects-resist-1.mp3",
+  "prompt": "a magical shield flaring and repelling a spell, fantasy sound effect",
+  "at": "2026-11-03T19:39:12.329Z"
+ },
+ {
+  "group": "sfx/Effects/Roll Initiative",
+  "file": "effects-roll-initiative-1.mp3",
+  "prompt": "a dramatic orchestral hit and war drum, the start of a battle, fantasy sound effect",
+  "at": "2026-11-03T19:39:12.480Z"
+ },
+ {
+  "group": "sfx/Effects/Saving Throw",
+  "file": "effects-saving-throw-1.mp3",
+  "prompt": "magical wind chimes, a shimmering protective ward, fantasy sound effect",
+  "at": "2026-11-03T19:39:13.182Z"
+ },
+ {
+  "group": "sfx/Effects/Doors/Wooden Door",
+  "file": "effects-doors-wooden-door-1.mp3",
+  "prompt": "a heavy wooden door creaking open slowly, fantasy sound effect",
+  "at": "2026-11-03T19:39:14.015Z"
+ },
+ {
+  "group": "sfx/Effects/Doors/Iron Door",
+  "file": "effects-doors-iron-door-1.mp3",
+  "prompt": "a heavy iron dungeon door grinding open, fantasy sound effect",
+  "at": "2026-11-03T19:39:14.066Z"
+ },
+ {
+  "group": "sfx/Effects/Doors/Slam",
+  "file": "effects-doors-slam-1.mp3",
+  "prompt": "a door slamming shut with a boom, fantasy sound effect",
+  "at": "2026-11-03T19:39:14.858Z"
+ },
+ {
+  "group": "sfx/Effects/Doors/Portcullis",
+  "file": "effects-doors-portcullis-1.mp3",
+  "prompt": "an iron portcullis being raised with chains, fantasy sound effect",
+  "at": "2026-11-03T19:39:15.650Z"
+ },
+ {
+  "group": "sfx/Effects/Doors/Locked",
+  "file": "effects-doors-locked-1.mp3",
+  "prompt": "rattling a locked door handle, fantasy sound effect",
+  "at": "2026-11-03T19:39:16.268Z"
+ },
+ {
+  "group": "sfx/Effects/Treasure/Chest",
+  "file": "effects-treasure-chest-1.mp3",
+  "prompt": "a wooden treasure chest creaking open, fantasy sound effect",
+  "at": "2026-11-03T19:39:16.498Z"
+ },
+ {
+  "group": "sfx/Effects/Treasure/Coins",
+  "file": "effects-treasure-coins-1.mp3",
+  "prompt": "a handful of gold coins jingling, fantasy sound effect",
+  "at": "2026-11-03T19:39:17.216Z"
+ },
+ {
+  "group": "sfx/Effects/Treasure/Gem",
+  "file": "effects-treasure-gem-1.mp3",
+  "prompt": "a sparkling magical chime as a gem is found, fantasy sound effect",
+  "at": "2026-11-03T19:39:17.858Z"
+ },
+ {
+  "group": "sfx/Effects/Traps/Spikes",
+  "file": "effects-traps-spikes-1.mp3",
+  "prompt": "a spike trap springing out of the floor, fantasy sound effect",
+  "at": "2026-11-03T19:39:18.758Z"
+ },
+ {
+  "group": "sfx/Effects/Traps/Click",
+  "file": "effects-traps-click-1.mp3",
+  "prompt": "a pressure plate clicking underfoot, fantasy sound effect",
+  "at": "2026-11-03T19:39:18.976Z"
+ },
+ {
+  "group": "sfx/Effects/Traps/Darts",
+  "file": "effects-traps-darts-1.mp3",
+  "prompt": "poison darts shooting from the wall, fantasy sound effect",
+  "at": "2026-11-03T19:39:19.386Z"
+ },
+ {
+  "group": "sfx/Effects/Traps/Pit",
+  "file": "effects-traps-pit-1.mp3",
+  "prompt": "the floor giving way and rocks falling into a pit, fantasy sound effect",
+  "at": "2026-11-03T19:39:20.276Z"
+ },
+ {
+  "group": "sfx/Effects/Traps/Boulder",
+  "file": "effects-traps-boulder-1.mp3",
+  "prompt": "a huge boulder rolling and rumbling down a corridor, fantasy sound effect",
+  "at": "2026-11-03T19:39:20.540Z"
+ },
+ {
+  "group": "sfx/Effects/Lever",
+  "file": "effects-lever-1.mp3",
+  "prompt": "pulling a heavy stone lever with a clunk, fantasy sound effect",
+  "at": "2026-11-03T19:39:20.910Z"
+ },
+ {
+  "group": "sfx/Effects/Secret Door",
+  "file": "effects-secret-door-1.mp3",
+  "prompt": "a hidden stone wall sliding open with grinding, fantasy sound effect",
+  "at": "2026-11-03T19:39:21.839Z"
+ },
+ {
+  "group": "sfx/Effects/Magic/Portal",
+  "file": "effects-magic-portal-1.mp3",
+  "prompt": "a magical portal swirling open, fantasy sound effect",
+  "at": "2026-11-03T19:39:22.125Z"
+ },
+ {
+  "group": "sfx/Effects/Magic/Teleport",
+  "file": "effects-magic-teleport-1.mp3",
+  "prompt": "a magical teleport whoosh, fantasy sound effect",
+  "at": "2026-11-03T19:39:22.436Z"
+ },
+ {
+  "group": "sfx/Effects/Magic/Explosion",
+  "file": "effects-magic-explosion-1.mp3",
+  "prompt": "a huge magical explosion, fantasy sound effect",
+  "at": "2026-11-03T19:39:23.309Z"
+ },
+ {
+  "group": "sfx/Effects/Weather/Thunder",
+  "file": "effects-weather-thunder-1.mp3",
+  "prompt": "a loud crack of thunder, fantasy sound effect",
+  "at": "2026-11-03T19:39:23.657Z"
+ },
+ {
+  "group": "sfx/Effects/Bell",
+  "file": "effects-bell-1.mp3",
+  "prompt": "a large church bell tolling once, fantasy sound effect",
+  "at": "2026-11-03T19:39:24.159Z"
+ },
+ {
+  "group": "sfx/Effects/War Horn",
+  "file": "effects-war-horn-1.mp3",
+  "prompt": "a war horn blowing a call to battle, fantasy sound effect",
+  "at": "2026-11-03T19:39:25.105Z"
+ },
+ {
+  "group": "sfx/Effects/Crowd/Cheer",
+  "file": "effects-crowd-cheer-1.mp3",
+  "prompt": "a tavern crowd cheering, fantasy sound effect",
+  "at": "2026-11-03T19:39:25.439Z"
+ },
+ {
+  "group": "sfx/Effects/Crowd/Gasp",
+  "file": "effects-crowd-gasp-1.mp3",
+  "prompt": "a crowd gasping in shock, fantasy sound effect",
+  "at": "2026-11-03T19:39:25.825Z"
+ },
+ {
+  "group": "sfx/Effects/Scream",
+  "file": "effects-scream-1.mp3",
+  "prompt": "a terrified scream in the distance, fantasy sound effect",
+  "at": "2026-11-03T19:39:26.726Z"
+ },
+ {
+  "group": "sfx/Effects/Evil Laugh",
+  "file": "effects-evil-laugh-1.mp3",
+  "prompt": "a villain's evil laugh echoing, fantasy sound effect",
+  "at": "2026-11-03T19:39:26.888Z"
+ },
+ {
+  "group": "sfx/Effects/Glass Shatter",
+  "file": "effects-glass-shatter-1.mp3",
+  "prompt": "a glass bottle shattering on stone, fantasy sound effect",
+  "at": "2026-11-03T19:39:27.515Z"
+ },
+ {
+  "group": "sfx/Effects/Torch",
+  "file": "effects-torch-1.mp3",
+  "prompt": "lighting a torch, a whoosh of flame, fantasy sound effect",
+  "at": "2026-11-03T19:39:28.272Z"
+ },
+ {
+  "group": "sfx/Effects/Book",
+  "file": "effects-book-1.mp3",
+  "prompt": "turning the pages of an old book, fantasy sound effect",
+  "at": "2026-11-03T19:39:28.343Z"
+ },
+ {
+  "group": "sfx/Effects/Footsteps",
+  "file": "effects-footsteps-1.mp3",
+  "prompt": "heavy footsteps approaching in a stone corridor, fantasy sound effect",
+  "at": "2026-11-03T19:39:28.912Z"
+ },
+ {
+  "group": "sfx/Effects/Level Up",
+  "file": "effects-level-up-1.mp3",
+  "prompt": "a triumphant short fantasy fanfare of achievement, fantasy sound effect",
+  "at": "2026-11-03T19:39:29.970Z"
+ },
+ {
+  "group": "oneshots/Guard",
+  "file": "move-along-1.mp3",
+  "prompt": "Move along.",
+  "at": "2026-11-03T19:39:41.135Z"
+ },
+ {
+  "group": "oneshots/Guard",
+  "file": "halt-who-goes-there-1.mp3",
+  "prompt": "Halt! Who goes there?",
+  "at": "2026-11-03T19:39:41.198Z"
+ },
+ {
+  "group": "oneshots/Guard",
+  "file": "state-your-business-1.mp3",
+  "prompt": "State your business.",
+  "at": "2026-11-03T19:39:41.216Z"
+ },
+ {
+  "group": "oneshots/Guard",
+  "file": "the-gate-is-closed-at-sundown-1.mp3",
+  "prompt": "The gate is closed at sundown.",
+  "at": "2026-11-03T19:39:41.577Z"
+ },
+ {
+  "group": "oneshots/Guard",
+  "file": "you-there-stop-1.mp3",
+  "prompt": "You there! Stop!",
+  "at": "2026-11-03T19:39:41.618Z"
+ },
+ {
+  "group": "oneshots/Guard",
+  "file": "guards-to-me-1.mp3",
+  "prompt": "Guards! To me!",
+  "at": "2026-11-03T19:39:41.629Z"
+ },
+ {
+  "group": "oneshots/Innkeeper",
+  "file": "what-ll-it-be-1.mp3",
+  "prompt": "What'll it be?",
+  "at": "2026-11-03T19:39:42.015Z"
+ },
+ {
+  "group": "oneshots/Guard",
+  "file": "alright-you-may-pass-1.mp3",
+  "prompt": "Alright, you may pass.",
+  "at": "2026-11-03T19:39:42.016Z"
+ },
+ {
+  "group": "oneshots/Innkeeper",
+  "file": "welcome-travellers-come-in-out-of-the-co-1.mp3",
+  "prompt": "Welcome, travellers! Come in out of the cold.",
+  "at": "2026-11-03T19:39:42.235Z"
+ },
+ {
+  "group": "oneshots/Innkeeper",
+  "file": "ale-s-fresh-today-1.mp3",
+  "prompt": "Ale's fresh today.",
+  "at": "2026-11-03T19:39:42.400Z"
+ },
+ {
+  "group": "oneshots/Innkeeper",
+  "file": "room-and-board-is-two-silver-a-night-1.mp3",
+  "prompt": "Room and board is two silver a night.",
+  "at": "2026-11-03T19:39:42.447Z"
+ },
+ {
+  "group": "oneshots/Innkeeper",
+  "file": "no-fighting-in-my-tavern-1.mp3",
+  "prompt": "No fighting in my tavern!",
+  "at": "2026-11-03T19:39:42.689Z"
+ },
+ {
+  "group": "oneshots/Innkeeper",
+  "file": "safe-travels-friends-1.mp3",
+  "prompt": "Safe travels, friends.",
+  "at": "2026-11-03T19:39:42.799Z"
+ },
+ {
+  "group": "oneshots/Barmaid",
+  "file": "coming-right-up-1.mp3",
+  "prompt": "Coming right up!",
+  "at": "2026-11-03T19:39:43.011Z"
+ },
+ {
+  "group": "oneshots/Barmaid",
+  "file": "what-can-i-get-you-love-1.mp3",
+  "prompt": "What can I get you, love?",
+  "at": "2026-11-03T19:39:43.031Z"
+ },
+ {
+  "group": "oneshots/Barmaid",
+  "file": "another-round-1.mp3",
+  "prompt": "Another round?",
+  "at": "2026-11-03T19:39:43.173Z"
+ },
+ {
+  "group": "oneshots/Barmaid",
+  "file": "mind-your-hands-1.mp3",
+  "prompt": "Mind your hands.",
+  "at": "2026-11-03T19:39:43.411Z"
+ },
+ {
+  "group": "oneshots/Barmaid",
+  "file": "you-lot-look-like-trouble-1.mp3",
+  "prompt": "You lot look like trouble.",
+  "at": "2026-11-03T19:39:43.417Z"
+ },
+ {
+  "group": "oneshots/Merchant",
+  "file": "finest-wares-in-the-land-1.mp3",
+  "prompt": "Finest wares in the land!",
+  "at": "2026-11-03T19:39:43.581Z"
+ },
+ {
+  "group": "oneshots/Merchant",
+  "file": "for-you-a-special-price-1.mp3",
+  "prompt": "For you, a special price.",
+  "at": "2026-11-03T19:39:43.778Z"
+ },
+ {
+  "group": "oneshots/Merchant",
+  "file": "that-s-my-final-offer-1.mp3",
+  "prompt": "That's my final offer.",
+  "at": "2026-11-03T19:39:43.803Z"
+ },
+ {
+  "group": "oneshots/Merchant",
+  "file": "no-refunds-1.mp3",
+  "prompt": "No refunds!",
+  "at": "2026-11-03T19:39:43.961Z"
+ },
+ {
+  "group": "oneshots/Merchant",
+  "file": "a-pleasure-doing-business-1.mp3",
+  "prompt": "A pleasure doing business.",
+  "at": "2026-11-03T19:39:44.179Z"
+ },
+ {
+  "group": "oneshots/Merchant",
+  "file": "you-drive-a-hard-bargain-1.mp3",
+  "prompt": "You drive a hard bargain.",
+  "at": "2026-11-03T19:39:44.213Z"
+ },
+ {
+  "group": "oneshots/Old Wizard",
+  "file": "i-have-been-expecting-you-1.mp3",
+  "prompt": "I have been expecting you.",
+  "at": "2026-11-03T19:39:44.337Z"
+ },
+ {
+  "group": "oneshots/Old Wizard",
+  "file": "magic-always-has-a-price-1.mp3",
+  "prompt": "Magic always has a price.",
+  "at": "2026-11-03T19:39:44.612Z"
+ },
+ {
+  "group": "oneshots/Old Wizard",
+  "file": "the-answer-lies-within-the-old-ruins-1.mp3",
+  "prompt": "The answer lies within the old ruins.",
+  "at": "2026-11-03T19:39:44.685Z"
+ },
+ {
+  "group": "oneshots/Old Wizard",
+  "file": "be-careful-what-you-wish-for-1.mp3",
+  "prompt": "Be careful what you wish for.",
+  "at": "2026-11-03T19:39:44.757Z"
+ },
+ {
+  "group": "oneshots/Old Wizard",
+  "file": "hmm-interesting-1.mp3",
+  "prompt": "Hmm. Interesting.",
+  "at": "2026-11-03T19:39:45.018Z"
+ },
+ {
+  "group": "oneshots/Old Wizard",
+  "file": "leave-me-to-my-studies-1.mp3",
+  "prompt": "Leave me to my studies.",
+  "at": "2026-11-03T19:39:45.115Z"
+ },
+ {
+  "group": "oneshots/Villain",
+  "file": "you-fools-you-re-too-late-1.mp3",
+  "prompt": "You fools! You're too late!",
+  "at": "2026-11-03T19:39:45.366Z"
+ },
+ {
+  "group": "oneshots/Villain",
+  "file": "kneel-before-me-1.mp3",
+  "prompt": "Kneel before me.",
+  "at": "2026-11-03T19:39:45.384Z"
+ },
+ {
+  "group": "oneshots/Villain",
+  "file": "you-ll-regret-crossing-me-1.mp3",
+  "prompt": "You'll regret crossing me.",
+  "at": "2026-11-03T19:39:45.679Z"
+ },
+ {
+  "group": "oneshots/Villain",
+  "file": "destroy-them-1.mp3",
+  "prompt": "Destroy them!",
+  "at": "2026-11-03T19:39:45.760Z"
+ },
+ {
+  "group": "oneshots/Villain",
+  "file": "is-that-the-best-you-can-do-1.mp3",
+  "prompt": "Is that the best you can do?",
+  "at": "2026-11-03T19:39:45.999Z"
+ },
+ {
+  "group": "oneshots/Villain",
+  "file": "this-isn-t-over-1.mp3",
+  "prompt": "This isn't over!",
+  "at": "2026-11-03T19:39:46.126Z"
+ },
+ {
+  "group": "oneshots/Sorceress",
+  "file": "how-delightful-visitors-1.mp3",
+  "prompt": "How delightful. Visitors.",
+  "at": "2026-11-03T19:39:46.159Z"
+ },
+ {
+  "group": "oneshots/Sorceress",
+  "file": "your-souls-will-make-fine-trinkets-1.mp3",
+  "prompt": "Your souls will make fine trinkets.",
+  "at": "2026-11-03T19:39:46.332Z"
+ },
+ {
+  "group": "oneshots/Sorceress",
+  "file": "come-closer-little-ones-1.mp3",
+  "prompt": "Come closer, little ones.",
+  "at": "2026-11-03T19:39:46.512Z"
+ },
+ {
+  "group": "oneshots/Sorceress",
+  "file": "did-you-really-think-you-could-stop-me-1.mp3",
+  "prompt": "Did you really think you could stop me?",
+  "at": "2026-11-03T19:39:46.621Z"
+ },
+ {
+  "group": "oneshots/Goblin",
+  "file": "shinies-give-us-the-shinies-1.mp3",
+  "prompt": "Shinies! Give us the shinies!",
+  "at": "2026-11-03T19:39:46.935Z"
+ },
+ {
+  "group": "oneshots/Goblin",
+  "file": "kill-them-kill-them-1.mp3",
+  "prompt": "Kill them! Kill them!",
+  "at": "2026-11-03T19:39:46.962Z"
+ },
+ {
+  "group": "oneshots/Goblin",
+  "file": "run-away-run-away-1.mp3",
+  "prompt": "Run away! Run away!",
+  "at": "2026-11-03T19:39:47.052Z"
+ },
+ {
+  "group": "oneshots/Goblin",
+  "file": "mine-all-mine-1.mp3",
+  "prompt": "Mine! All mine!",
+  "at": "2026-11-03T19:39:47.432Z"
+ },
+ {
+  "group": "oneshots/Goblin",
+  "file": "hee-hee-hee-1.mp3",
+  "prompt": "Hee hee hee!",
+  "at": "2026-11-03T19:39:47.442Z"
+ },
+ {
+  "group": "oneshots/Orc",
+  "file": "smash-them-1.mp3",
+  "prompt": "Smash them!",
+  "at": "2026-11-03T19:39:47.487Z"
+ },
+ {
+  "group": "oneshots/Orc",
+  "file": "for-the-warchief-1.mp3",
+  "prompt": "For the warchief!",
+  "at": "2026-11-03T19:39:47.846Z"
+ },
+ {
+  "group": "oneshots/Orc",
+  "file": "you-die-now-1.mp3",
+  "prompt": "You die now!",
+  "at": "2026-11-03T19:39:47.884Z"
+ },
+ {
+  "group": "oneshots/Orc",
+  "file": "weak-little-humans-1.mp3",
+  "prompt": "Weak little humans.",
+  "at": "2026-11-03T19:39:47.948Z"
+ },
+ {
+  "group": "oneshots/Townsfolk",
+  "file": "help-somebody-help-1.mp3",
+  "prompt": "Help! Somebody help!",
+  "at": "2026-11-03T19:39:48.248Z"
+ },
+ {
+  "group": "oneshots/Orc",
+  "file": "grrraagh-1.mp3",
+  "prompt": "Grrraagh!",
+  "at": "2026-11-03T19:39:48.250Z"
+ },
+ {
+  "group": "oneshots/Townsfolk",
+  "file": "thank-the-gods-you-re-here-1.mp3",
+  "prompt": "Thank the gods you're here!",
+  "at": "2026-11-03T19:39:48.364Z"
+ },
+ {
+  "group": "oneshots/Townsfolk",
+  "file": "please-save-my-child-1.mp3",
+  "prompt": "Please, save my child!",
+  "at": "2026-11-03T19:39:48.649Z"
+ },
+ {
+  "group": "oneshots/Townsfolk",
+  "file": "monsters-in-the-woods-1.mp3",
+  "prompt": "Monsters! In the woods!",
+  "at": "2026-11-03T19:39:48.666Z"
+ },
+ {
+  "group": "oneshots/Townsfolk",
+  "file": "thank-you-kind-heroes-1.mp3",
+  "prompt": "Thank you, kind heroes.",
+  "at": "2026-11-03T19:39:48.737Z"
+ },
+ {
+  "group": "oneshots/Priest",
+  "file": "the-gods-have-blessed-this-place-1.mp3",
+  "prompt": "The gods have blessed this place.",
+  "at": "2026-11-03T19:39:49.102Z"
+ },
+ {
+  "group": "oneshots/Priest",
+  "file": "may-the-light-protect-you-1.mp3",
+  "prompt": "May the light protect you.",
+  "at": "2026-11-03T19:39:49.135Z"
+ },
+ {
+  "group": "oneshots/Priest",
+  "file": "go-in-peace-1.mp3",
+  "prompt": "Go in peace.",
+  "at": "2026-11-03T19:39:49.177Z"
+ },
+ {
+  "group": "oneshots/Priest",
+  "file": "rest-here-and-be-healed-1.mp3",
+  "prompt": "Rest here, and be healed.",
+  "at": "2026-11-03T19:39:49.425Z"
+ },
+ {
+  "group": "oneshots/Party",
+  "file": "yes-1.mp3",
+  "prompt": "Yes.",
+  "at": "2026-11-03T19:39:49.531Z"
+ },
+ {
+  "group": "oneshots/Party",
+  "file": "no-1.mp3",
+  "prompt": "No.",
+  "at": "2026-11-03T19:39:49.575Z"
+ },
+ {
+  "group": "oneshots/Party",
+  "file": "i-can-do-that-1.mp3",
+  "prompt": "I can do that.",
+  "at": "2026-11-03T19:39:49.817Z"
+ },
+ {
+  "group": "oneshots/Party",
+  "file": "bye-1.mp3",
+  "prompt": "Bye.",
+  "at": "2026-11-03T19:39:49.861Z"
+ },
+ {
+  "group": "oneshots/Party",
+  "file": "follow-me-1.mp3",
+  "prompt": "Follow me!",
+  "at": "2026-11-03T19:39:49.919Z"
+ },
+ {
+  "group": "oneshots/Party",
+  "file": "watch-out-1.mp3",
+  "prompt": "Watch out!",
+  "at": "2026-11-03T19:39:50.109Z"
+ },
+ {
+  "group": "oneshots/Party",
+  "file": "fall-back-1.mp3",
+  "prompt": "Fall back!",
+  "at": "2026-11-03T19:39:50.128Z"
+ },
+ {
+  "group": "oneshots/Party",
+  "file": "we-ve-got-company-1.mp3",
+  "prompt": "We've got company.",
+  "at": "2026-11-03T19:39:50.319Z"
+ },
+ {
+  "group": "oneshots/Party",
+  "file": "did-you-hear-that-1.mp3",
+  "prompt": "Did you hear that?",
+  "at": "2026-11-03T19:39:50.503Z"
+ },
+ {
+  "group": "oneshots/Party",
+  "file": "let-s-get-out-of-here-1.mp3",
+  "prompt": "Let's get out of here!",
+  "at": "2026-11-03T19:39:50.515Z"
+ },
+ {
+  "group": "oneshots/Party",
+  "file": "i-need-healing-1.mp3",
+  "prompt": "I need healing!",
+  "at": "2026-11-03T19:39:50.750Z"
+ },
+ {
+  "group": "oneshots/Party",
+  "file": "on-my-mark-1.mp3",
+  "prompt": "On my mark.",
+  "at": "2026-11-03T19:39:50.934Z"
+ },
+ {
+  "group": "oneshots/Guard",
+  "file": "halt-who-goes-there-1.mp3",
+  "prompt": "Halt! Who goes there?",
+  "at": "2026-11-03T19:40:19.236Z"
+ },
+ {
+  "group": "oneshots/Guard",
+  "file": "move-along-1.mp3",
+  "prompt": "Move along.",
+  "at": "2026-11-03T19:40:19.268Z"
+ },
+ {
+  "group": "oneshots/Guard",
+  "file": "state-your-business-1.mp3",
+  "prompt": "State your business.",
+  "at": "2026-11-03T19:40:19.277Z"
+ },
+ {
+  "group": "oneshots/Guard",
+  "file": "guards-to-me-1.mp3",
+  "prompt": "Guards! To me!",
+  "at": "2026-11-03T19:40:19.590Z"
+ },
+ {
+  "group": "oneshots/Guard",
+  "file": "the-gate-is-closed-at-sundown-1.mp3",
+  "prompt": "The gate is closed at sundown.",
+  "at": "2026-11-03T19:40:19.633Z"
+ },
+ {
+  "group": "oneshots/Guard",
+  "file": "you-there-stop-1.mp3",
+  "prompt": "You there! Stop!",
+  "at": "2026-11-03T19:40:19.646Z"
+ },
+ {
+  "group": "oneshots/Guard",
+  "file": "alright-you-may-pass-1.mp3",
+  "prompt": "Alright, you may pass.",
+  "at": "2026-11-03T19:40:20.005Z"
+ },
+ {
+  "group": "ambience/Forest at Night",
+  "file": "forest-at-night-1.mp3",
+  "prompt": "a forest at night, crickets, an owl hooting and wind in the trees, seamless loop, ambient background sound",
+  "at": "2026-11-03T19:40:29.125Z"
+ },
+ {
+  "group": "ambience/Gentle Meadow",
+  "file": "gentle-meadow-1.mp3",
+  "prompt": "a gentle summer meadow, birdsong, buzzing insects and a soft breeze, seamless loop, ambient background sound",
+  "at": "2026-11-03T19:40:29.133Z"
+ },
+ {
+  "group": "ambience/Forest by Day",
+  "file": "forest-by-day-1.mp3",
+  "prompt": "a forest in the daytime, birds, rustling leaves and a distant woodpecker, seamless loop, ambient background sound",
+  "at": "2026-11-03T19:40:29.862Z"
+ },
+ {
+  "group": "ambience/Swamp",
+  "file": "swamp-1.mp3",
+  "prompt": "a murky swamp, frogs croaking, bubbling water and buzzing flies, seamless loop, ambient background sound",
+  "at": "2026-11-03T19:40:34.001Z"
+ },
+ {
+  "group": "ambience/Cave",
+  "file": "cave-1.mp3",
+  "prompt": "a damp cave, water dripping and a low echoing hum, seamless loop, ambient background sound",
+  "at": "2026-11-03T19:40:34.682Z"
+ },
+ {
+  "group": "ambience/Jungle",
+  "file": "jungle-1.mp3",
+  "prompt": "a dense tropical jungle, exotic birds, monkeys and insects, seamless loop, ambient background sound",
+  "at": "2026-11-03T19:40:37.123Z"
+ },
+ {
+  "group": "ambience/Dungeon",
+  "file": "dungeon-1.mp3",
+  "prompt": "a dark stone dungeon, distant dripping, chains rattling and a faint moan, seamless loop, ambient background sound",
+  "at": "2026-11-03T19:40:38.819Z"
+ },
+ {
+  "group": "ambience/Crypt",
+  "file": "crypt-1.mp3",
+  "prompt": "an ancient crypt, eerie wind and stone settling, seamless loop, ambient background sound",
+  "at": "2026-11-03T19:40:39.223Z"
+ },
+ {
+  "group": "ambience/Underdark",
+  "file": "underdark-1.mp3",
+  "prompt": "a vast underground cavern, deep rumbles and distant echoes, seamless loop, ambient background sound",
+  "at": "2026-11-03T19:40:41.799Z"
+ },
+ {
+  "group": "ambience/Lava Cavern",
+  "file": "lava-cavern-1.mp3",
+  "prompt": "a volcanic cavern, bubbling lava and hissing steam, seamless loop, ambient background sound",
+  "at": "2026-11-03T19:40:43.586Z"
+ },
+ {
+  "group": "ambience/Graveyard at Night",
+  "file": "graveyard-at-night-1.mp3",
+  "prompt": "a graveyard at night, wind, a crow and creaking branches, seamless loop, ambient background sound",
+  "at": "2026-11-03T19:40:43.739Z"
+ },
+ {
+  "group": "ambience/Sewers",
+  "file": "sewers-1.mp3",
+  "prompt": "city sewers, running water, rats squeaking and dripping, seamless loop, ambient background sound",
+  "at": "2026-11-03T19:40:46.230Z"
+ },
+ {
+  "group": "ambience/Rural Village",
+  "file": "rural-village-1.mp3",
+  "prompt": "a quiet rural village, chickens, a dog barking and villagers chatting, seamless loop, ambient background sound",
+  "at": "2026-11-03T19:40:47.995Z"
+ },
+ {
+  "group": "ambience/Tavern",
+  "file": "tavern-1.mp3",
+  "prompt": "a busy medieval tavern, chatter, laughter and clinking mugs, seamless loop, ambient background sound",
+  "at": "2026-11-03T19:40:48.323Z"
+ },
+ {
+  "group": "ambience/Busy City",
+  "file": "busy-city-1.mp3",
+  "prompt": "a busy medieval city street, crowds, carts and merchants calling, seamless loop, ambient background sound",
+  "at": "2026-11-03T19:40:50.717Z"
+ },
+ {
+  "group": "ambience/Market",
+  "file": "market-1.mp3",
+  "prompt": "a medieval market square, haggling merchants and livestock, seamless loop, ambient background sound",
+  "at": "2026-11-03T19:40:52.512Z"
+ },
+ {
+  "group": "ambience/Docks",
+  "file": "docks-1.mp3",
+  "prompt": "a harbour dock, seagulls, creaking ropes and lapping water, seamless loop, ambient background sound",
+  "at": "2026-11-03T19:40:52.689Z"
+ },
+ {
+  "group": "ambience/Ship at Sea",
+  "file": "ship-at-sea-1.mp3",
+  "prompt": "a wooden sailing ship at sea, creaking hull, flapping sails and waves, seamless loop, ambient background sound",
+  "at": "2026-11-03T19:40:55.299Z"
+ },
+ {
+  "group": "ambience/Ocean Shore",
+  "file": "ocean-shore-1.mp3",
+  "prompt": "waves breaking gently on a beach with seagulls, seamless loop, ambient background sound",
+  "at": "2026-11-03T19:40:57.188Z"
+ },
+ {
+  "group": "ambience/Waterfall",
+  "file": "waterfall-1.mp3",
+  "prompt": "a roaring waterfall, seamless loop, ambient background sound",
+  "at": "2026-11-03T19:40:59.895Z"
+ },
+ {
+  "group": "ambience/River",
+  "file": "river-1.mp3",
+  "prompt": "a flowing river over rocks, seamless loop, ambient background sound",
+  "at": "2026-11-03T19:41:00.100Z"
+ },
+ {
+  "group": "ambience/Mountain Wind",
+  "file": "mountain-wind-1.mp3",
+  "prompt": "strong wind howling across a mountain peak, seamless loop, ambient background sound",
+  "at": "2026-11-03T19:41:01.627Z"
+ },
+ {
+  "group": "ambience/Desert",
+  "file": "desert-1.mp3",
+  "prompt": "hot desert wind blowing sand, seamless loop, ambient background sound",
+  "at": "2026-11-03T19:41:04.396Z"
+ },
+ {
+  "group": "ambience/Rain",
+  "file": "rain-1.mp3",
+  "prompt": "steady rain falling on a forest, seamless loop, ambient background sound",
+  "at": "2026-11-03T19:41:04.706Z"
+ },
+ {
+  "group": "ambience/Thunderstorm",
+  "file": "thunderstorm-1.mp3",
+  "prompt": "a heavy thunderstorm with rolling thunder, seamless loop, ambient background sound",
+  "at": "2026-11-03T19:41:05.924Z"
+ },
+ {
+  "group": "ambience/Snow",
+  "file": "snow-1.mp3",
+  "prompt": "a quiet snowy landscape, soft wind and crunching snow, seamless loop, ambient background sound",
+  "at": "2026-11-03T19:41:09.041Z"
+ },
+ {
+  "group": "ambience/Blizzard",
+  "file": "blizzard-1.mp3",
+  "prompt": "a fierce blizzard, howling icy wind, seamless loop, ambient background sound",
+  "at": "2026-11-03T19:41:09.180Z"
+ },
+ {
+  "group": "ambience/Campfire",
+  "file": "campfire-1.mp3",
+  "prompt": "a crackling campfire at night with crickets, seamless loop, ambient background sound",
+  "at": "2026-11-03T19:41:11.017Z"
+ },
+ {
+  "group": "ambience/Blacksmith",
+  "file": "blacksmith-1.mp3",
+  "prompt": "a blacksmith's forge, hammering metal and bellows, seamless loop, ambient background sound",
+  "at": "2026-11-03T19:41:13.498Z"
+ },
+ {
+  "group": "ambience/Temple",
+  "file": "temple-1.mp3",
+  "prompt": "a quiet stone temple, soft chanting and echoes, seamless loop, ambient background sound",
+  "at": "2026-11-03T19:41:13.843Z"
+ },
+ {
+  "group": "ambience/Throne Room",
+  "file": "throne-room-1.mp3",
+  "prompt": "a grand throne room, quiet murmuring courtiers and echoes, seamless loop, ambient background sound",
+  "at": "2026-11-03T19:41:15.518Z"
+ },
+ {
+  "group": "ambience/Battlefield",
+  "file": "battlefield-1.mp3",
+  "prompt": "a distant battle, clashing swords, shouts and war cries, seamless loop, ambient background sound",
+  "at": "2026-11-03T19:41:18.062Z"
+ },
+ {
+  "group": "sfx/Weapons/Sword/Attack",
+  "file": "weapons-sword-attack-2.mp3",
+  "prompt": "a steel sword swung hard, a fast whoosh through the air, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:24.330Z"
+ },
+ {
+  "group": "sfx/Weapons/Sword/Crit",
+  "file": "weapons-sword-crit-2.mp3",
+  "prompt": "a devastating critical hit with a steel sword, a brutal crunching impact and a cry of pain, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:24.405Z"
+ },
+ {
+  "group": "sfx/Weapons/Sword/Hit",
+  "file": "weapons-sword-hit-2.mp3",
+  "prompt": "a steel sword striking an armoured opponent, a solid hit with a grunt of pain, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:24.623Z"
+ },
+ {
+  "group": "sfx/Weapons/Sword/Fumble",
+  "file": "weapons-sword-fumble-2.mp3",
+  "prompt": "a clumsy fumble with a steel sword, the weapon clattering and slipping, an embarrassed grunt, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:25.714Z"
+ },
+ {
+  "group": "sfx/Weapons/Greatsword/Attack",
+  "file": "weapons-greatsword-attack-2.mp3",
+  "prompt": "a huge two-handed greatsword swung hard, a fast whoosh through the air, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:26.010Z"
+ },
+ {
+  "group": "sfx/Weapons/Greatsword/Hit",
+  "file": "weapons-greatsword-hit-2.mp3",
+  "prompt": "a huge two-handed greatsword striking an armoured opponent, a solid hit with a grunt of pain, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:26.219Z"
+ },
+ {
+  "group": "sfx/Weapons/Greatsword/Crit",
+  "file": "weapons-greatsword-crit-2.mp3",
+  "prompt": "a devastating critical hit with a huge two-handed greatsword, a brutal crunching impact and a cry of pain, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:27.271Z"
+ },
+ {
+  "group": "sfx/Weapons/Greatsword/Fumble",
+  "file": "weapons-greatsword-fumble-2.mp3",
+  "prompt": "a clumsy fumble with a huge two-handed greatsword, the weapon clattering and slipping, an embarrassed grunt, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:27.417Z"
+ },
+ {
+  "group": "sfx/Weapons/Axe/Attack",
+  "file": "weapons-axe-attack-2.mp3",
+  "prompt": "a battle axe swung hard, a fast whoosh through the air, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:27.750Z"
+ },
+ {
+  "group": "sfx/Weapons/Axe/Hit",
+  "file": "weapons-axe-hit-2.mp3",
+  "prompt": "a battle axe striking an armoured opponent, a solid hit with a grunt of pain, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:28.891Z"
+ },
+ {
+  "group": "sfx/Weapons/Axe/Crit",
+  "file": "weapons-axe-crit-2.mp3",
+  "prompt": "a devastating critical hit with a battle axe, a brutal crunching impact and a cry of pain, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:29.059Z"
+ },
+ {
+  "group": "sfx/Weapons/Axe/Fumble",
+  "file": "weapons-axe-fumble-2.mp3",
+  "prompt": "a clumsy fumble with a battle axe, the weapon clattering and slipping, an embarrassed grunt, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:30.009Z"
+ },
+ {
+  "group": "sfx/Weapons/Mace/Attack",
+  "file": "weapons-mace-attack-2.mp3",
+  "prompt": "a heavy iron mace swung hard, a fast whoosh through the air, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:30.328Z"
+ },
+ {
+  "group": "sfx/Weapons/Mace/Hit",
+  "file": "weapons-mace-hit-2.mp3",
+  "prompt": "a heavy iron mace striking an armoured opponent, a solid hit with a grunt of pain, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:30.650Z"
+ },
+ {
+  "group": "sfx/Weapons/Mace/Crit",
+  "file": "weapons-mace-crit-2.mp3",
+  "prompt": "a devastating critical hit with a heavy iron mace, a brutal crunching impact and a cry of pain, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:31.698Z"
+ },
+ {
+  "group": "sfx/Weapons/Mace/Fumble",
+  "file": "weapons-mace-fumble-2.mp3",
+  "prompt": "a clumsy fumble with a heavy iron mace, the weapon clattering and slipping, an embarrassed grunt, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:31.993Z"
+ },
+ {
+  "group": "sfx/Weapons/Warhammer/Attack",
+  "file": "weapons-warhammer-attack-2.mp3",
+  "prompt": "a warhammer swung hard, a fast whoosh through the air, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:32.181Z"
+ },
+ {
+  "group": "sfx/Weapons/Warhammer/Crit",
+  "file": "weapons-warhammer-crit-2.mp3",
+  "prompt": "a devastating critical hit with a warhammer, a brutal crunching impact and a cry of pain, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:33.409Z"
+ },
+ {
+  "group": "sfx/Weapons/Warhammer/Hit",
+  "file": "weapons-warhammer-hit-2.mp3",
+  "prompt": "a warhammer striking an armoured opponent, a solid hit with a grunt of pain, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:33.629Z"
+ },
+ {
+  "group": "sfx/Weapons/Warhammer/Fumble",
+  "file": "weapons-warhammer-fumble-2.mp3",
+  "prompt": "a clumsy fumble with a warhammer, the weapon clattering and slipping, an embarrassed grunt, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:33.837Z"
+ },
+ {
+  "group": "sfx/Weapons/Flail/Attack",
+  "file": "weapons-flail-attack-2.mp3",
+  "prompt": "a spiked chain flail swung hard, a fast whoosh through the air, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:34.808Z"
+ },
+ {
+  "group": "sfx/Weapons/Flail/Crit",
+  "file": "weapons-flail-crit-2.mp3",
+  "prompt": "a devastating critical hit with a spiked chain flail, a brutal crunching impact and a cry of pain, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:35.296Z"
+ },
+ {
+  "group": "sfx/Weapons/Flail/Hit",
+  "file": "weapons-flail-hit-2.mp3",
+  "prompt": "a spiked chain flail striking an armoured opponent, a solid hit with a grunt of pain, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:35.388Z"
+ },
+ {
+  "group": "sfx/Weapons/Flail/Fumble",
+  "file": "weapons-flail-fumble-2.mp3",
+  "prompt": "a clumsy fumble with a spiked chain flail, the weapon clattering and slipping, an embarrassed grunt, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:36.311Z"
+ },
+ {
+  "group": "sfx/Weapons/Dagger/Hit",
+  "file": "weapons-dagger-hit-2.mp3",
+  "prompt": "a small dagger striking an armoured opponent, a solid hit with a grunt of pain, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:36.924Z"
+ },
+ {
+  "group": "sfx/Weapons/Dagger/Attack",
+  "file": "weapons-dagger-attack-2.mp3",
+  "prompt": "a small dagger swung hard, a fast whoosh through the air, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:37.126Z"
+ },
+ {
+  "group": "sfx/Weapons/Dagger/Crit",
+  "file": "weapons-dagger-crit-2.mp3",
+  "prompt": "a devastating critical hit with a small dagger, a brutal crunching impact and a cry of pain, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:38.051Z"
+ },
+ {
+  "group": "sfx/Weapons/Dagger/Fumble",
+  "file": "weapons-dagger-fumble-2.mp3",
+  "prompt": "a clumsy fumble with a small dagger, the weapon clattering and slipping, an embarrassed grunt, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:38.483Z"
+ },
+ {
+  "group": "sfx/Weapons/Spear/Attack",
+  "file": "weapons-spear-attack-2.mp3",
+  "prompt": "a long spear swung hard, a fast whoosh through the air, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:38.916Z"
+ },
+ {
+  "group": "sfx/Weapons/Spear/Hit",
+  "file": "weapons-spear-hit-2.mp3",
+  "prompt": "a long spear striking an armoured opponent, a solid hit with a grunt of pain, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:39.499Z"
+ },
+ {
+  "group": "sfx/Weapons/Spear/Crit",
+  "file": "weapons-spear-crit-2.mp3",
+  "prompt": "a devastating critical hit with a long spear, a brutal crunching impact and a cry of pain, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:40.144Z"
+ },
+ {
+  "group": "sfx/Weapons/Spear/Fumble",
+  "file": "weapons-spear-fumble-2.mp3",
+  "prompt": "a clumsy fumble with a long spear, the weapon clattering and slipping, an embarrassed grunt, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:40.352Z"
+ },
+ {
+  "group": "sfx/Weapons/Staff/Attack",
+  "file": "weapons-staff-attack-2.mp3",
+  "prompt": "a wooden quarterstaff swung hard, a fast whoosh through the air, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:40.930Z"
+ },
+ {
+  "group": "sfx/Weapons/Staff/Crit",
+  "file": "weapons-staff-crit-2.mp3",
+  "prompt": "a devastating critical hit with a wooden quarterstaff, a brutal crunching impact and a cry of pain, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:41.983Z"
+ },
+ {
+  "group": "sfx/Weapons/Staff/Hit",
+  "file": "weapons-staff-hit-2.mp3",
+  "prompt": "a wooden quarterstaff striking an armoured opponent, a solid hit with a grunt of pain, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:42.141Z"
+ },
+ {
+  "group": "sfx/Weapons/Staff/Fumble",
+  "file": "weapons-staff-fumble-2.mp3",
+  "prompt": "a clumsy fumble with a wooden quarterstaff, the weapon clattering and slipping, an embarrassed grunt, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:43.206Z"
+ },
+ {
+  "group": "sfx/Weapons/Whip/Attack",
+  "file": "weapons-whip-attack-2.mp3",
+  "prompt": "a leather whip swung hard, a fast whoosh through the air, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:43.801Z"
+ },
+ {
+  "group": "sfx/Weapons/Whip/Hit",
+  "file": "weapons-whip-hit-2.mp3",
+  "prompt": "a leather whip striking an armoured opponent, a solid hit with a grunt of pain, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:43.814Z"
+ },
+ {
+  "group": "sfx/Weapons/Whip/Crit",
+  "file": "weapons-whip-crit-2.mp3",
+  "prompt": "a devastating critical hit with a leather whip, a brutal crunching impact and a cry of pain, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:44.723Z"
+ },
+ {
+  "group": "sfx/Weapons/Whip/Fumble",
+  "file": "weapons-whip-fumble-2.mp3",
+  "prompt": "a clumsy fumble with a leather whip, the weapon clattering and slipping, an embarrassed grunt, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:45.318Z"
+ },
+ {
+  "group": "sfx/Weapons/Bow/Attack",
+  "file": "weapons-bow-attack-2.mp3",
+  "prompt": "a bow and arrow loosed, the string twanging and the shot whistling away, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:45.399Z"
+ },
+ {
+  "group": "sfx/Weapons/Bow/Hit",
+  "file": "weapons-bow-hit-2.mp3",
+  "prompt": "a bow and arrow thudding hard into its target, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:46.017Z"
+ },
+ {
+  "group": "sfx/Weapons/Bow/Fumble",
+  "file": "weapons-bow-fumble-2.mp3",
+  "prompt": "a bow and arrow misfired, the string snapping or the shot dropping to the ground, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:47.039Z"
+ },
+ {
+  "group": "sfx/Weapons/Bow/Crit",
+  "file": "weapons-bow-crit-2.mp3",
+  "prompt": "a bow and arrow loosed, a perfect shot punching deep into its target with a scream, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:47.182Z"
+ },
+ {
+  "group": "sfx/Weapons/Crossbow/Attack",
+  "file": "weapons-crossbow-attack-2.mp3",
+  "prompt": "a crossbow bolt loosed, the string twanging and the shot whistling away, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:47.329Z"
+ },
+ {
+  "group": "sfx/Weapons/Crossbow/Hit",
+  "file": "weapons-crossbow-hit-2.mp3",
+  "prompt": "a crossbow bolt thudding hard into its target, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:48.599Z"
+ },
+ {
+  "group": "sfx/Weapons/Crossbow/Fumble",
+  "file": "weapons-crossbow-fumble-2.mp3",
+  "prompt": "a crossbow bolt misfired, the string snapping or the shot dropping to the ground, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:48.927Z"
+ },
+ {
+  "group": "sfx/Weapons/Crossbow/Crit",
+  "file": "weapons-crossbow-crit-2.mp3",
+  "prompt": "a crossbow bolt loosed, a perfect shot punching deep into its target with a scream, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:49.341Z"
+ },
+ {
+  "group": "sfx/Weapons/Sling/Attack",
+  "file": "weapons-sling-attack-2.mp3",
+  "prompt": "a sling stone loosed, the string twanging and the shot whistling away, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:50.106Z"
+ },
+ {
+  "group": "sfx/Weapons/Sling/Hit",
+  "file": "weapons-sling-hit-2.mp3",
+  "prompt": "a sling stone thudding hard into its target, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:50.583Z"
+ },
+ {
+  "group": "sfx/Weapons/Sling/Crit",
+  "file": "weapons-sling-crit-2.mp3",
+  "prompt": "a sling stone loosed, a perfect shot punching deep into its target with a scream, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:50.926Z"
+ },
+ {
+  "group": "sfx/Weapons/Sling/Fumble",
+  "file": "weapons-sling-fumble-2.mp3",
+  "prompt": "a sling stone misfired, the string snapping or the shot dropping to the ground, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:51.648Z"
+ },
+ {
+  "group": "sfx/Weapons/Thrown/Attack",
+  "file": "weapons-thrown-attack-2.mp3",
+  "prompt": "a thrown javelin loosed, the string twanging and the shot whistling away, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:52.050Z"
+ },
+ {
+  "group": "sfx/Weapons/Thrown/Hit",
+  "file": "weapons-thrown-hit-2.mp3",
+  "prompt": "a thrown javelin thudding hard into its target, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:52.479Z"
+ },
+ {
+  "group": "sfx/Weapons/Thrown/Crit",
+  "file": "weapons-thrown-crit-2.mp3",
+  "prompt": "a thrown javelin loosed, a perfect shot punching deep into its target with a scream, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:53.030Z"
+ },
+ {
+  "group": "sfx/Weapons/Thrown/Fumble",
+  "file": "weapons-thrown-fumble-2.mp3",
+  "prompt": "a thrown javelin misfired, the string snapping or the shot dropping to the ground, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:53.616Z"
+ },
+ {
+  "group": "sfx/Weapons/Unarmed/Attack",
+  "file": "weapons-unarmed-attack-2.mp3",
+  "prompt": "a bare-fisted punch swung hard, a fast whoosh through the air, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:54.063Z"
+ },
+ {
+  "group": "sfx/Weapons/Unarmed/Hit",
+  "file": "weapons-unarmed-hit-2.mp3",
+  "prompt": "a bare-fisted punch striking an armoured opponent, a solid hit with a grunt of pain, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:54.677Z"
+ },
+ {
+  "group": "sfx/Weapons/Unarmed/Crit",
+  "file": "weapons-unarmed-crit-2.mp3",
+  "prompt": "a devastating critical hit with a bare-fisted punch, a brutal crunching impact and a cry of pain, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:55.624Z"
+ },
+ {
+  "group": "sfx/Weapons/Unarmed/Fumble",
+  "file": "weapons-unarmed-fumble-2.mp3",
+  "prompt": "a clumsy fumble with a bare-fisted punch, the weapon clattering and slipping, an embarrassed grunt, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:55.909Z"
+ },
+ {
+  "group": "sfx/Weapons/Claws/Attack",
+  "file": "weapons-claws-attack-2.mp3",
+  "prompt": "a monster's claws swung hard, a fast whoosh through the air, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:56.158Z"
+ },
+ {
+  "group": "sfx/Weapons/Claws/Hit",
+  "file": "weapons-claws-hit-2.mp3",
+  "prompt": "a monster's claws striking an armoured opponent, a solid hit with a grunt of pain, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:57.179Z"
+ },
+ {
+  "group": "sfx/Weapons/Claws/Crit",
+  "file": "weapons-claws-crit-2.mp3",
+  "prompt": "a devastating critical hit with a monster's claws, a brutal crunching impact and a cry of pain, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:57.378Z"
+ },
+ {
+  "group": "sfx/Weapons/Claws/Fumble",
+  "file": "weapons-claws-fumble-2.mp3",
+  "prompt": "a clumsy fumble with a monster's claws, the weapon clattering and slipping, an embarrassed grunt, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:57.927Z"
+ },
+ {
+  "group": "sfx/Weapons/Bite/Attack",
+  "file": "weapons-bite-attack-2.mp3",
+  "prompt": "a beast's bite swung hard, a fast whoosh through the air, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:58.928Z"
+ },
+ {
+  "group": "sfx/Weapons/Bite/Hit",
+  "file": "weapons-bite-hit-2.mp3",
+  "prompt": "a beast's bite striking an armoured opponent, a solid hit with a grunt of pain, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:59.164Z"
+ },
+ {
+  "group": "sfx/Weapons/Bite/Crit",
+  "file": "weapons-bite-crit-2.mp3",
+  "prompt": "a devastating critical hit with a beast's bite, a brutal crunching impact and a cry of pain, fantasy combat sound effect",
+  "at": "2026-11-03T19:41:59.671Z"
+ },
+ {
+  "group": "sfx/Weapons/Bite/Fumble",
+  "file": "weapons-bite-fumble-2.mp3",
+  "prompt": "a clumsy fumble with a beast's bite, the weapon clattering and slipping, an embarrassed grunt, fantasy combat sound effect",
+  "at": "2026-11-03T19:42:00.373Z"
+ },
+ {
+  "group": "sfx/Weapons/Shield/Block",
+  "file": "weapons-shield-block-2.mp3",
+  "prompt": "a sword striking a raised wooden and steel shield, a heavy block, fantasy combat sound effect",
+  "at": "2026-11-03T19:42:00.572Z"
+ },
+ {
+  "group": "sfx/Weapons/Shield/Bash",
+  "file": "weapons-shield-bash-2.mp3",
+  "prompt": "a shield bash slamming into an opponent, fantasy combat sound effect",
+  "at": "2026-11-03T19:42:01.132Z"
+ },
+ {
+  "group": "sfx/Spells/Fire/Cast",
+  "file": "spells-fire-cast-2.mp3",
+  "prompt": "a wizard casting roaring fire magic, a rising magical charge, fantasy spell sound effect",
+  "at": "2026-11-03T19:42:01.777Z"
+ },
+ {
+  "group": "sfx/Spells/Fire/Hit",
+  "file": "spells-fire-hit-2.mp3",
+  "prompt": "roaring fire magic striking its target with a powerful impact, fantasy spell sound effect",
+  "at": "2026-11-03T19:42:02.185Z"
+ },
+ {
+  "group": "sfx/Spells/Fire/Crit",
+  "file": "spells-fire-crit-2.mp3",
+  "prompt": "roaring fire magic exploding with overwhelming force on its target, fantasy spell sound effect",
+  "at": "2026-11-03T19:42:02.857Z"
+ },
+ {
+  "group": "sfx/Spells/Fire/Fumble",
+  "file": "spells-fire-fumble-2.mp3",
+  "prompt": "roaring fire magic backfiring and sputtering out with a sad fizzle, fantasy spell sound effect",
+  "at": "2026-11-03T19:42:03.384Z"
+ },
+ {
+  "group": "sfx/Spells/Ice/Hit",
+  "file": "spells-ice-hit-2.mp3",
+  "prompt": "freezing ice magic striking its target with a powerful impact, fantasy spell sound effect",
+  "at": "2026-11-03T19:42:04.291Z"
+ },
+ {
+  "group": "sfx/Spells/Ice/Cast",
+  "file": "spells-ice-cast-2.mp3",
+  "prompt": "a wizard casting freezing ice magic, a rising magical charge, fantasy spell sound effect",
+  "at": "2026-11-03T19:42:04.625Z"
+ },
+ {
+  "group": "sfx/Spells/Ice/Crit",
+  "file": "spells-ice-crit-2.mp3",
+  "prompt": "freezing ice magic exploding with overwhelming force on its target, fantasy spell sound effect",
+  "at": "2026-11-03T19:42:05.068Z"
+ },
+ {
+  "group": "sfx/Spells/Ice/Fumble",
+  "file": "spells-ice-fumble-2.mp3",
+  "prompt": "freezing ice magic backfiring and sputtering out with a sad fizzle, fantasy spell sound effect",
+  "at": "2026-11-03T19:42:05.734Z"
+ },
+ {
+  "group": "sfx/Spells/Lightning/Cast",
+  "file": "spells-lightning-cast-2.mp3",
+  "prompt": "a wizard casting crackling lightning magic, a rising magical charge, fantasy spell sound effect",
+  "at": "2026-11-03T19:42:06.437Z"
+ },
+ {
+  "group": "sfx/Spells/Lightning/Hit",
+  "file": "spells-lightning-hit-2.mp3",
+  "prompt": "crackling lightning magic striking its target with a powerful impact, fantasy spell sound effect",
+  "at": "2026-11-03T19:42:06.454Z"
+ },
+ {
+  "group": "sfx/Spells/Lightning/Crit",
+  "file": "spells-lightning-crit-2.mp3",
+  "prompt": "crackling lightning magic exploding with overwhelming force on its target, fantasy spell sound effect",
+  "at": "2026-11-03T19:42:07.227Z"
+ },
+ {
+  "group": "sfx/Spells/Lightning/Fumble",
+  "file": "spells-lightning-fumble-2.mp3",
+  "prompt": "crackling lightning magic backfiring and sputtering out with a sad fizzle, fantasy spell sound effect",
+  "at": "2026-11-03T19:42:07.945Z"
+ },
+ {
+  "group": "sfx/Spells/Thunder/Cast",
+  "file": "spells-thunder-cast-2.mp3",
+  "prompt": "a wizard casting a booming thunderclap spell, a rising magical charge, fantasy spell sound effect",
+  "at": "2026-11-03T19:42:08.575Z"
+ },
+ {
+  "group": "sfx/Spells/Thunder/Hit",
+  "file": "spells-thunder-hit-2.mp3",
+  "prompt": "a booming thunderclap spell striking its target with a powerful impact, fantasy spell sound effect",
+  "at": "2026-11-03T19:42:09.081Z"
+ },
+ {
+  "group": "sfx/Spells/Thunder/Crit",
+  "file": "spells-thunder-crit-2.mp3",
+  "prompt": "a booming thunderclap spell exploding with overwhelming force on its target, fantasy spell sound effect",
+  "at": "2026-11-03T19:42:09.285Z"
+ },
+ {
+  "group": "sfx/Spells/Thunder/Fumble",
+  "file": "spells-thunder-fumble-2.mp3",
+  "prompt": "a booming thunderclap spell backfiring and sputtering out with a sad fizzle, fantasy spell sound effect",
+  "at": "2026-11-03T19:42:10.069Z"
+ },
+ {
+  "group": "sfx/Spells/Acid/Cast",
+  "file": "spells-acid-cast-2.mp3",
+  "prompt": "a wizard casting hissing acid magic, a rising magical charge, fantasy spell sound effect",
+  "at": "2026-11-03T19:42:10.558Z"
+ },
+ {
+  "group": "sfx/Spells/Acid/Hit",
+  "file": "spells-acid-hit-2.mp3",
+  "prompt": "hissing acid magic striking its target with a powerful impact, fantasy spell sound effect",
+  "at": "2026-11-03T19:42:10.719Z"
+ },
+ {
+  "group": "sfx/Spells/Acid/Crit",
+  "file": "spells-acid-crit-2.mp3",
+  "prompt": "hissing acid magic exploding with overwhelming force on its target, fantasy spell sound effect",
+  "at": "2026-11-03T19:42:11.696Z"
+ },
+ {
+  "group": "sfx/Spells/Acid/Fumble",
+  "file": "spells-acid-fumble-2.mp3",
+  "prompt": "hissing acid magic backfiring and sputtering out with a sad fizzle, fantasy spell sound effect",
+  "at": "2026-11-03T19:42:12.018Z"
+ },
+ {
+  "group": "sfx/Spells/Poison/Cast",
+  "file": "spells-poison-cast-2.mp3",
+  "prompt": "a wizard casting bubbling poison magic, a rising magical charge, fantasy spell sound effect",
+  "at": "2026-11-03T19:42:12.341Z"
+ },
+ {
+  "group": "sfx/Spells/Poison/Hit",
+  "file": "spells-poison-hit-2.mp3",
+  "prompt": "bubbling poison magic striking its target with a powerful impact, fantasy spell sound effect",
+  "at": "2026-11-03T19:42:13.475Z"
+ },
+ {
+  "group": "sfx/Spells/Poison/Crit",
+  "file": "spells-poison-crit-2.mp3",
+  "prompt": "bubbling poison magic exploding with overwhelming force on its target, fantasy spell sound effect",
+  "at": "2026-11-03T19:42:13.695Z"
+ },
+ {
+  "group": "sfx/Spells/Poison/Fumble",
+  "file": "spells-poison-fumble-2.mp3",
+  "prompt": "bubbling poison magic backfiring and sputtering out with a sad fizzle, fantasy spell sound effect",
+  "at": "2026-11-03T19:42:14.345Z"
+ },
+ {
+  "group": "sfx/Spells/Holy/Cast",
+  "file": "spells-holy-cast-2.mp3",
+  "prompt": "a wizard casting radiant holy magic with a heavenly choir, a rising magical charge, fantasy spell sound effect",
+  "at": "2026-11-03T19:42:15.259Z"
+ },
+ {
+  "group": "sfx/Spells/Holy/Crit",
+  "file": "spells-holy-crit-2.mp3",
+  "prompt": "radiant holy magic with a heavenly choir exploding with overwhelming force on its target, fantasy spell sound effect",
+  "at": "2026-11-03T19:42:16.062Z"
+ },
+ {
+  "group": "sfx/Spells/Holy/Fumble",
+  "file": "spells-holy-fumble-2.mp3",
+  "prompt": "radiant holy magic with a heavenly choir backfiring and sputtering out with a sad fizzle, fantasy spell sound effect",
+  "at": "2026-11-03T19:42:16.551Z"
+ },
+ {
+  "group": "sfx/Spells/Holy/Hit",
+  "file": "spells-holy-hit-2.mp3",
+  "prompt": "radiant holy magic with a heavenly choir striking its target with a powerful impact, fantasy spell sound effect",
+  "at": "2026-11-03T19:42:16.931Z"
+ },
+ {
+  "group": "sfx/Spells/Necrotic/Cast",
+  "file": "spells-necrotic-cast-2.mp3",
+  "prompt": "a wizard casting dark necrotic magic with ghostly whispers, a rising magical charge, fantasy spell sound effect",
+  "at": "2026-11-03T19:42:17.661Z"
+ },
+ {
+  "group": "sfx/Spells/Necrotic/Crit",
+  "file": "spells-necrotic-crit-2.mp3",
+  "prompt": "dark necrotic magic with ghostly whispers exploding with overwhelming force on its target, fantasy spell sound effect",
+  "at": "2026-11-03T19:42:18.436Z"
+ },
+ {
+  "group": "sfx/Spells/Necrotic/Fumble",
+  "file": "spells-necrotic-fumble-2.mp3",
+  "prompt": "dark necrotic magic with ghostly whispers backfiring and sputtering out with a sad fizzle, fantasy spell sound effect",
+  "at": "2026-11-03T19:42:19.108Z"
+ },
+ {
+  "group": "sfx/Spells/Necrotic/Hit",
+  "file": "spells-necrotic-hit-2.mp3",
+  "prompt": "dark necrotic magic with ghostly whispers striking its target with a powerful impact, fantasy spell sound effect",
+  "at": "2026-11-03T19:42:19.208Z"
+ },
+ {
+  "group": "sfx/Spells/Psychic/Cast",
+  "file": "spells-psychic-cast-2.mp3",
+  "prompt": "a wizard casting eerie psychic magic, a rising magical charge, fantasy spell sound effect",
+  "at": "2026-11-03T19:42:20.228Z"
+ },
+ {
+  "group": "sfx/Spells/Psychic/Crit",
+  "file": "spells-psychic-crit-2.mp3",
+  "prompt": "eerie psychic magic exploding with overwhelming force on its target, fantasy spell sound effect",
+  "at": "2026-11-03T19:42:20.658Z"
+ },
+ {
+  "group": "sfx/Spells/Psychic/Hit",
+  "file": "spells-psychic-hit-2.mp3",
+  "prompt": "eerie psychic magic striking its target with a powerful impact, fantasy spell sound effect",
+  "at": "2026-11-03T19:42:20.728Z"
+ },
+ {
+  "group": "sfx/Spells/Psychic/Fumble",
+  "file": "spells-psychic-fumble-2.mp3",
+  "prompt": "eerie psychic magic backfiring and sputtering out with a sad fizzle, fantasy spell sound effect",
+  "at": "2026-11-03T19:42:21.699Z"
+ },
+ {
+  "group": "sfx/Spells/Nature/Hit",
+  "file": "spells-nature-hit-2.mp3",
+  "prompt": "rustling earthy nature magic striking its target with a powerful impact, fantasy spell sound effect",
+  "at": "2026-11-03T19:42:22.365Z"
+ },
+ {
+  "group": "sfx/Spells/Nature/Cast",
+  "file": "spells-nature-cast-2.mp3",
+  "prompt": "a wizard casting rustling earthy nature magic, a rising magical charge, fantasy spell sound effect",
+  "at": "2026-11-03T19:42:22.647Z"
+ },
+ {
+  "group": "sfx/Spells/Nature/Crit",
+  "file": "spells-nature-crit-2.mp3",
+  "prompt": "rustling earthy nature magic exploding with overwhelming force on its target, fantasy spell sound effect",
+  "at": "2026-11-03T19:42:23.192Z"
+ },
+ {
+  "group": "sfx/Spells/Nature/Fumble",
+  "file": "spells-nature-fumble-2.mp3",
+  "prompt": "rustling earthy nature magic backfiring and sputtering out with a sad fizzle, fantasy spell sound effect",
+  "at": "2026-11-03T19:42:23.906Z"
+ },
+ {
+  "group": "sfx/Spells/Force/Cast",
+  "file": "spells-force-cast-2.mp3",
+  "prompt": "a wizard casting glowing arcane force bolts, a rising magical charge, fantasy spell sound effect",
+  "at": "2026-11-03T19:42:24.366Z"
+ },
+ {
+  "group": "sfx/Spells/Force/Hit",
+  "file": "spells-force-hit-2.mp3",
+  "prompt": "glowing arcane force bolts striking its target with a powerful impact, fantasy spell sound effect",
+  "at": "2026-11-03T19:42:24.618Z"
+ },
+ {
+  "group": "sfx/Spells/Force/Crit",
+  "file": "spells-force-crit-2.mp3",
+  "prompt": "glowing arcane force bolts exploding with overwhelming force on its target, fantasy spell sound effect",
+  "at": "2026-11-03T19:42:25.467Z"
+ },
+ {
+  "group": "sfx/Spells/Force/Fumble",
+  "file": "spells-force-fumble-2.mp3",
+  "prompt": "glowing arcane force bolts backfiring and sputtering out with a sad fizzle, fantasy spell sound effect",
+  "at": "2026-11-03T19:42:25.741Z"
+ },
+ {
+  "group": "sfx/Spells/Arcane/Cast",
+  "file": "spells-arcane-cast-2.mp3",
+  "prompt": "a wizard casting shimmering arcane magic, a rising magical charge, fantasy spell sound effect",
+  "at": "2026-11-03T19:42:26.173Z"
+ },
+ {
+  "group": "sfx/Spells/Arcane/Crit",
+  "file": "spells-arcane-crit-2.mp3",
+  "prompt": "shimmering arcane magic exploding with overwhelming force on its target, fantasy spell sound effect",
+  "at": "2026-11-03T19:42:27.198Z"
+ },
+ {
+  "group": "sfx/Spells/Arcane/Fumble",
+  "file": "spells-arcane-fumble-2.mp3",
+  "prompt": "shimmering arcane magic backfiring and sputtering out with a sad fizzle, fantasy spell sound effect",
+  "at": "2026-11-03T19:42:27.655Z"
+ },
+ {
+  "group": "sfx/Spells/Arcane/Hit",
+  "file": "spells-arcane-hit-2.mp3",
+  "prompt": "shimmering arcane magic striking its target with a powerful impact, fantasy spell sound effect",
+  "at": "2026-11-03T19:42:27.864Z"
+ },
+ {
+  "group": "sfx/Body/Wounded",
+  "file": "body-wounded-2.mp3",
+  "prompt": "a person hurt in battle, a short grunt of pain, fantasy sound effect",
+  "at": "2026-11-03T19:42:28.578Z"
+ },
+ {
+  "group": "sfx/Body/Badly Wounded",
+  "file": "body-badly-wounded-2.mp3",
+  "prompt": "a warrior badly wounded, a loud scream of pain, fantasy sound effect",
+  "at": "2026-11-03T19:42:29.327Z"
+ },
+ {
+  "group": "sfx/Body/Wounded",
+  "file": "body-wounded-2.mp3",
+  "prompt": "a woman hurt in battle, a pained gasp, fantasy sound effect",
+  "at": "2026-11-03T19:42:29.574Z"
+ },
+ {
+  "group": "sfx/Body/Dying",
+  "file": "body-dying-2.mp3",
+  "prompt": "a warrior collapsing, dying, a long anguished groan, fantasy sound effect",
+  "at": "2026-11-03T19:42:30.440Z"
+ },
+ {
+  "group": "sfx/Body/Death",
+  "file": "body-death-2.mp3",
+  "prompt": "a warrior dying, a last breath and armour collapsing to the ground, fantasy sound effect",
+  "at": "2026-11-03T19:42:30.867Z"
+ },
+ {
+  "group": "sfx/Body/Unconscious",
+  "file": "body-unconscious-2.mp3",
+  "prompt": "a person falling unconscious, a groan and a body slumping to the floor, fantasy sound effect",
+  "at": "2026-11-03T19:42:31.308Z"
+ },
+ {
+  "group": "sfx/Body/Heal",
+  "file": "body-heal-2.mp3",
+  "prompt": "warm healing magic, a soft glowing chime and a relieved breath, fantasy sound effect",
+  "at": "2026-11-03T19:42:31.923Z"
+ },
+ {
+  "group": "sfx/Body/Bandage",
+  "file": "body-bandage-2.mp3",
+  "prompt": "cloth bandages being torn and wrapped tightly around a wound, fantasy sound effect",
+  "at": "2026-11-03T19:42:32.302Z"
+ },
+ {
+  "group": "sfx/Body/Potion",
+  "file": "body-potion-2.mp3",
+  "prompt": "uncorking a glass potion bottle, gulping it down and a satisfied sigh, fantasy sound effect",
+  "at": "2026-11-03T19:42:32.911Z"
+ },
+ {
+  "group": "sfx/Body/Resurrect",
+  "file": "body-resurrect-2.mp3",
+  "prompt": "a divine resurrection, a rising heavenly choir and a sudden gasp of breath, fantasy sound effect",
+  "at": "2026-11-03T19:42:33.444Z"
+ },
+ {
+  "group": "sfx/Body/Stabilised",
+  "file": "body-stabilised-2.mp3",
+  "prompt": "a dying person's breathing steadying, a calm sigh, fantasy sound effect",
+  "at": "2026-11-03T19:42:34.118Z"
+ },
+ {
+  "group": "sfx/Animals/Wolf/Attack",
+  "file": "animals-wolf-attack-2.mp3",
+  "prompt": "a snarling wolf attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:42:34.426Z"
+ },
+ {
+  "group": "sfx/Animals/Wolf/Hurt",
+  "file": "animals-wolf-hurt-2.mp3",
+  "prompt": "a snarling wolf getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:42:35.091Z"
+ },
+ {
+  "group": "sfx/Animals/Wolf/Death",
+  "file": "animals-wolf-death-2.mp3",
+  "prompt": "a snarling wolf being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:42:35.680Z"
+ },
+ {
+  "group": "sfx/Animals/Bear/Attack",
+  "file": "animals-bear-attack-2.mp3",
+  "prompt": "a huge angry bear attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:42:35.824Z"
+ },
+ {
+  "group": "sfx/Animals/Bear/Hurt",
+  "file": "animals-bear-hurt-2.mp3",
+  "prompt": "a huge angry bear getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:42:36.713Z"
+ },
+ {
+  "group": "sfx/Animals/Bear/Death",
+  "file": "animals-bear-death-2.mp3",
+  "prompt": "a huge angry bear being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:42:37.121Z"
+ },
+ {
+  "group": "sfx/Animals/Boar/Attack",
+  "file": "animals-boar-attack-2.mp3",
+  "prompt": "a wild boar attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:42:37.805Z"
+ },
+ {
+  "group": "sfx/Animals/Boar/Hurt",
+  "file": "animals-boar-hurt-2.mp3",
+  "prompt": "a wild boar getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:42:38.192Z"
+ },
+ {
+  "group": "sfx/Animals/Boar/Death",
+  "file": "animals-boar-death-2.mp3",
+  "prompt": "a wild boar being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:42:39.053Z"
+ },
+ {
+  "group": "sfx/Animals/Big Cat/Attack",
+  "file": "animals-big-cat-attack-2.mp3",
+  "prompt": "a big wild cat attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:42:39.212Z"
+ },
+ {
+  "group": "sfx/Animals/Big Cat/Death",
+  "file": "animals-big-cat-death-2.mp3",
+  "prompt": "a big wild cat being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:42:40.498Z"
+ },
+ {
+  "group": "sfx/Animals/Horse/Attack",
+  "file": "animals-horse-attack-2.mp3",
+  "prompt": "a horse attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:42:40.794Z"
+ },
+ {
+  "group": "sfx/Animals/Big Cat/Hurt",
+  "file": "animals-big-cat-hurt-2.mp3",
+  "prompt": "a big wild cat getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:42:41.097Z"
+ },
+ {
+  "group": "sfx/Animals/Horse/Hurt",
+  "file": "animals-horse-hurt-2.mp3",
+  "prompt": "a horse getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:42:42.131Z"
+ },
+ {
+  "group": "sfx/Animals/Horse/Death",
+  "file": "animals-horse-death-2.mp3",
+  "prompt": "a horse being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:42:42.269Z"
+ },
+ {
+  "group": "sfx/Animals/Snake/Attack",
+  "file": "animals-snake-attack-2.mp3",
+  "prompt": "a hissing giant snake attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:42:42.664Z"
+ },
+ {
+  "group": "sfx/Animals/Snake/Hurt",
+  "file": "animals-snake-hurt-2.mp3",
+  "prompt": "a hissing giant snake getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:42:43.470Z"
+ },
+ {
+  "group": "sfx/Animals/Snake/Death",
+  "file": "animals-snake-death-2.mp3",
+  "prompt": "a hissing giant snake being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:42:43.854Z"
+ },
+ {
+  "group": "sfx/Animals/Spider/Attack",
+  "file": "animals-spider-attack-2.mp3",
+  "prompt": "a giant spider attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:42:44.222Z"
+ },
+ {
+  "group": "sfx/Animals/Spider/Hurt",
+  "file": "animals-spider-hurt-2.mp3",
+  "prompt": "a giant spider getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:42:44.874Z"
+ },
+ {
+  "group": "sfx/Animals/Spider/Death",
+  "file": "animals-spider-death-2.mp3",
+  "prompt": "a giant spider being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:42:45.526Z"
+ },
+ {
+  "group": "sfx/Animals/Rat/Attack",
+  "file": "animals-rat-attack-2.mp3",
+  "prompt": "a giant rat attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:42:45.740Z"
+ },
+ {
+  "group": "sfx/Animals/Rat/Hurt",
+  "file": "animals-rat-hurt-2.mp3",
+  "prompt": "a giant rat getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:42:46.379Z"
+ },
+ {
+  "group": "sfx/Animals/Rat/Death",
+  "file": "animals-rat-death-2.mp3",
+  "prompt": "a giant rat being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:42:47.238Z"
+ },
+ {
+  "group": "sfx/Animals/Bat/Attack",
+  "file": "animals-bat-attack-2.mp3",
+  "prompt": "a giant bat attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:42:47.459Z"
+ },
+ {
+  "group": "sfx/Animals/Bat/Death",
+  "file": "animals-bat-death-2.mp3",
+  "prompt": "a giant bat being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:42:48.594Z"
+ },
+ {
+  "group": "sfx/Animals/Bat/Hurt",
+  "file": "animals-bat-hurt-2.mp3",
+  "prompt": "a giant bat getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:42:48.836Z"
+ },
+ {
+  "group": "sfx/Animals/Bird of Prey/Attack",
+  "file": "animals-bird-of-prey-attack-2.mp3",
+  "prompt": "a screeching bird of prey attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:42:48.967Z"
+ },
+ {
+  "group": "sfx/Animals/Bird of Prey/Death",
+  "file": "animals-bird-of-prey-death-2.mp3",
+  "prompt": "a screeching bird of prey being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:42:50.355Z"
+ },
+ {
+  "group": "sfx/Animals/Crocodile/Attack",
+  "file": "animals-crocodile-attack-2.mp3",
+  "prompt": "a crocodile attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:42:50.648Z"
+ },
+ {
+  "group": "sfx/Animals/Bird of Prey/Hurt",
+  "file": "animals-bird-of-prey-hurt-2.mp3",
+  "prompt": "a screeching bird of prey getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:42:51.160Z"
+ },
+ {
+  "group": "sfx/Animals/Crocodile/Hurt",
+  "file": "animals-crocodile-hurt-2.mp3",
+  "prompt": "a crocodile getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:42:52.062Z"
+ },
+ {
+  "group": "sfx/Animals/Crocodile/Death",
+  "file": "animals-crocodile-death-2.mp3",
+  "prompt": "a crocodile being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:42:52.201Z"
+ },
+ {
+  "group": "sfx/Monsters/Goblin/Attack",
+  "file": "monsters-goblin-attack-2.mp3",
+  "prompt": "a small cackling goblin attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:42:52.950Z"
+ },
+ {
+  "group": "sfx/Monsters/Goblin/Death",
+  "file": "monsters-goblin-death-2.mp3",
+  "prompt": "a small cackling goblin being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:42:53.549Z"
+ },
+ {
+  "group": "sfx/Monsters/Goblin/Hurt",
+  "file": "monsters-goblin-hurt-2.mp3",
+  "prompt": "a small cackling goblin getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:42:53.716Z"
+ },
+ {
+  "group": "sfx/Monsters/Orc/Attack",
+  "file": "monsters-orc-attack-2.mp3",
+  "prompt": "a brutish orc warrior attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:42:54.404Z"
+ },
+ {
+  "group": "sfx/Monsters/Orc/Death",
+  "file": "monsters-orc-death-2.mp3",
+  "prompt": "a brutish orc warrior being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:42:55.244Z"
+ },
+ {
+  "group": "sfx/Monsters/Orc/Hurt",
+  "file": "monsters-orc-hurt-2.mp3",
+  "prompt": "a brutish orc warrior getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:42:55.251Z"
+ },
+ {
+  "group": "sfx/Monsters/Ogre/Attack",
+  "file": "monsters-ogre-attack-2.mp3",
+  "prompt": "a huge lumbering ogre attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:42:56.209Z"
+ },
+ {
+  "group": "sfx/Monsters/Ogre/Hurt",
+  "file": "monsters-ogre-hurt-2.mp3",
+  "prompt": "a huge lumbering ogre getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:42:56.947Z"
+ },
+ {
+  "group": "sfx/Monsters/Ogre/Death",
+  "file": "monsters-ogre-death-2.mp3",
+  "prompt": "a huge lumbering ogre being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:42:57.274Z"
+ },
+ {
+  "group": "sfx/Monsters/Giant/Attack",
+  "file": "monsters-giant-attack-2.mp3",
+  "prompt": "a towering giant attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:42:57.951Z"
+ },
+ {
+  "group": "sfx/Monsters/Giant/Hurt",
+  "file": "monsters-giant-hurt-2.mp3",
+  "prompt": "a towering giant getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:42:59.010Z"
+ },
+ {
+  "group": "sfx/Monsters/Giant/Death",
+  "file": "monsters-giant-death-2.mp3",
+  "prompt": "a towering giant being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:42:59.072Z"
+ },
+ {
+  "group": "sfx/Monsters/Zombie/Attack",
+  "file": "monsters-zombie-attack-2.mp3",
+  "prompt": "a rotting zombie attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:43:00.235Z"
+ },
+ {
+  "group": "sfx/Monsters/Zombie/Death",
+  "file": "monsters-zombie-death-2.mp3",
+  "prompt": "a rotting zombie being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:43:00.523Z"
+ },
+ {
+  "group": "sfx/Monsters/Zombie/Hurt",
+  "file": "monsters-zombie-hurt-2.mp3",
+  "prompt": "a rotting zombie getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:43:00.671Z"
+ },
+ {
+  "group": "sfx/Monsters/Skeleton/Attack",
+  "file": "monsters-skeleton-attack-2.mp3",
+  "prompt": "a rattling skeleton warrior attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:43:02.091Z"
+ },
+ {
+  "group": "sfx/Monsters/Skeleton/Hurt",
+  "file": "monsters-skeleton-hurt-2.mp3",
+  "prompt": "a rattling skeleton warrior getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:43:02.332Z"
+ },
+ {
+  "group": "sfx/Monsters/Skeleton/Death",
+  "file": "monsters-skeleton-death-2.mp3",
+  "prompt": "a rattling skeleton warrior being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:43:02.632Z"
+ },
+ {
+  "group": "sfx/Monsters/Ghost/Hurt",
+  "file": "monsters-ghost-hurt-2.mp3",
+  "prompt": "a wailing ghost getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:43:03.958Z"
+ },
+ {
+  "group": "sfx/Monsters/Ghost/Attack",
+  "file": "monsters-ghost-attack-2.mp3",
+  "prompt": "a wailing ghost attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:43:04.269Z"
+ },
+ {
+  "group": "sfx/Monsters/Ghost/Death",
+  "file": "monsters-ghost-death-2.mp3",
+  "prompt": "a wailing ghost being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:43:04.795Z"
+ },
+ {
+  "group": "sfx/Monsters/Vampire/Attack",
+  "file": "monsters-vampire-attack-2.mp3",
+  "prompt": "a sinister vampire lord attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:43:05.557Z"
+ },
+ {
+  "group": "sfx/Monsters/Vampire/Death",
+  "file": "monsters-vampire-death-2.mp3",
+  "prompt": "a sinister vampire lord being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:43:06.269Z"
+ },
+ {
+  "group": "sfx/Monsters/Vampire/Hurt",
+  "file": "monsters-vampire-hurt-2.mp3",
+  "prompt": "a sinister vampire lord getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:43:06.560Z"
+ },
+ {
+  "group": "sfx/Monsters/Dragon/Attack",
+  "file": "monsters-dragon-attack-2.mp3",
+  "prompt": "a colossal dragon attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:43:07.027Z"
+ },
+ {
+  "group": "sfx/Monsters/Dragon/Hurt",
+  "file": "monsters-dragon-hurt-2.mp3",
+  "prompt": "a colossal dragon getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:43:07.703Z"
+ },
+ {
+  "group": "sfx/Monsters/Dragon/Death",
+  "file": "monsters-dragon-death-2.mp3",
+  "prompt": "a colossal dragon being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:43:07.905Z"
+ },
+ {
+  "group": "sfx/Monsters/Demon/Attack",
+  "file": "monsters-demon-attack-2.mp3",
+  "prompt": "a roaring demon attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:43:08.791Z"
+ },
+ {
+  "group": "sfx/Monsters/Demon/Hurt",
+  "file": "monsters-demon-hurt-2.mp3",
+  "prompt": "a roaring demon getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:43:09.161Z"
+ },
+ {
+  "group": "sfx/Monsters/Demon/Death",
+  "file": "monsters-demon-death-2.mp3",
+  "prompt": "a roaring demon being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:43:09.502Z"
+ },
+ {
+  "group": "sfx/Monsters/Werewolf/Attack",
+  "file": "monsters-werewolf-attack-2.mp3",
+  "prompt": "a howling werewolf attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:43:10.349Z"
+ },
+ {
+  "group": "sfx/Monsters/Werewolf/Hurt",
+  "file": "monsters-werewolf-hurt-2.mp3",
+  "prompt": "a howling werewolf getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:43:10.810Z"
+ },
+ {
+  "group": "sfx/Monsters/Werewolf/Death",
+  "file": "monsters-werewolf-death-2.mp3",
+  "prompt": "a howling werewolf being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:43:11.076Z"
+ },
+ {
+  "group": "sfx/Monsters/Minotaur/Attack",
+  "file": "monsters-minotaur-attack-2.mp3",
+  "prompt": "a bellowing minotaur attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:43:11.826Z"
+ },
+ {
+  "group": "sfx/Monsters/Minotaur/Hurt",
+  "file": "monsters-minotaur-hurt-2.mp3",
+  "prompt": "a bellowing minotaur getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:43:12.388Z"
+ },
+ {
+  "group": "sfx/Monsters/Minotaur/Death",
+  "file": "monsters-minotaur-death-2.mp3",
+  "prompt": "a bellowing minotaur being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:43:12.562Z"
+ },
+ {
+  "group": "sfx/Monsters/Ooze/Attack",
+  "file": "monsters-ooze-attack-2.mp3",
+  "prompt": "a gurgling slime attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:43:13.797Z"
+ },
+ {
+  "group": "sfx/Monsters/Ooze/Hurt",
+  "file": "monsters-ooze-hurt-2.mp3",
+  "prompt": "a gurgling slime getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:43:14.068Z"
+ },
+ {
+  "group": "sfx/Monsters/Ooze/Death",
+  "file": "monsters-ooze-death-2.mp3",
+  "prompt": "a gurgling slime being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:43:14.259Z"
+ },
+ {
+  "group": "sfx/Monsters/Insect Swarm/Attack",
+  "file": "monsters-insect-swarm-attack-2.mp3",
+  "prompt": "a buzzing insect swarm attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:43:15.528Z"
+ },
+ {
+  "group": "sfx/Monsters/Insect Swarm/Hurt",
+  "file": "monsters-insect-swarm-hurt-2.mp3",
+  "prompt": "a buzzing insect swarm getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:43:15.642Z"
+ },
+ {
+  "group": "sfx/Monsters/Insect Swarm/Death",
+  "file": "monsters-insect-swarm-death-2.mp3",
+  "prompt": "a buzzing insect swarm being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:43:15.928Z"
+ },
+ {
+  "group": "sfx/Monsters/Elemental/Attack",
+  "file": "monsters-elemental-attack-2.mp3",
+  "prompt": "a rumbling elemental attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:43:17.227Z"
+ },
+ {
+  "group": "sfx/Monsters/Elemental/Hurt",
+  "file": "monsters-elemental-hurt-2.mp3",
+  "prompt": "a rumbling elemental getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:43:17.251Z"
+ },
+ {
+  "group": "sfx/Monsters/Elemental/Death",
+  "file": "monsters-elemental-death-2.mp3",
+  "prompt": "a rumbling elemental being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:43:17.607Z"
+ },
+ {
+  "group": "sfx/Monsters/Harpy/Hurt",
+  "file": "monsters-harpy-hurt-2.mp3",
+  "prompt": "a shrieking harpy getting hit and crying out in pain, creature sound effect",
+  "at": "2026-11-03T19:43:18.921Z"
+ },
+ {
+  "group": "sfx/Monsters/Harpy/Attack",
+  "file": "monsters-harpy-attack-2.mp3",
+  "prompt": "a shrieking harpy attacking with a vicious roar, creature sound effect",
+  "at": "2026-11-03T19:43:18.923Z"
+ },
+ {
+  "group": "sfx/Monsters/Harpy/Death",
+  "file": "monsters-harpy-death-2.mp3",
+  "prompt": "a shrieking harpy being killed, a final dying cry and collapse, creature sound effect",
+  "at": "2026-11-03T19:43:19.262Z"
+ },
+ {
+  "group": "sfx/Effects/Saving Throw",
+  "file": "effects-saving-throw-2.mp3",
+  "prompt": "magical wind chimes, a shimmering protective ward, fantasy sound effect",
+  "at": "2026-11-03T19:43:20.638Z"
+ },
+ {
+  "group": "sfx/Effects/Roll Initiative",
+  "file": "effects-roll-initiative-2.mp3",
+  "prompt": "a dramatic orchestral hit and war drum, the start of a battle, fantasy sound effect",
+  "at": "2026-11-03T19:43:20.649Z"
+ },
+ {
+  "group": "sfx/Effects/Resist",
+  "file": "effects-resist-2.mp3",
+  "prompt": "a magical shield flaring and repelling a spell, fantasy sound effect",
+  "at": "2026-11-03T19:43:21.221Z"
+ },
+ {
+  "group": "sfx/Effects/Doors/Iron Door",
+  "file": "effects-doors-iron-door-2.mp3",
+  "prompt": "a heavy iron dungeon door grinding open, fantasy sound effect",
+  "at": "2026-11-03T19:43:22.115Z"
+ },
+ {
+  "group": "sfx/Effects/Doors/Wooden Door",
+  "file": "effects-doors-wooden-door-2.mp3",
+  "prompt": "a heavy wooden door creaking open slowly, fantasy sound effect",
+  "at": "2026-11-03T19:43:22.193Z"
+ },
+ {
+  "group": "sfx/Effects/Doors/Slam",
+  "file": "effects-doors-slam-2.mp3",
+  "prompt": "a door slamming shut with a boom, fantasy sound effect",
+  "at": "2026-11-03T19:43:22.663Z"
+ },
+ {
+  "group": "sfx/Effects/Doors/Portcullis",
+  "file": "effects-doors-portcullis-2.mp3",
+  "prompt": "an iron portcullis being raised with chains, fantasy sound effect",
+  "at": "2026-11-03T19:43:23.741Z"
+ },
+ {
+  "group": "sfx/Effects/Doors/Locked",
+  "file": "effects-doors-locked-2.mp3",
+  "prompt": "rattling a locked door handle, fantasy sound effect",
+  "at": "2026-11-03T19:43:23.743Z"
+ },
+ {
+  "group": "sfx/Effects/Treasure/Chest",
+  "file": "effects-treasure-chest-2.mp3",
+  "prompt": "a wooden treasure chest creaking open, fantasy sound effect",
+  "at": "2026-11-03T19:43:24.583Z"
+ },
+ {
+  "group": "sfx/Effects/Treasure/Gem",
+  "file": "effects-treasure-gem-2.mp3",
+  "prompt": "a sparkling magical chime as a gem is found, fantasy sound effect",
+  "at": "2026-11-03T19:43:25.358Z"
+ },
+ {
+  "group": "sfx/Effects/Treasure/Coins",
+  "file": "effects-treasure-coins-2.mp3",
+  "prompt": "a handful of gold coins jingling, fantasy sound effect",
+  "at": "2026-11-03T19:43:25.718Z"
+ },
+ {
+  "group": "sfx/Effects/Traps/Click",
+  "file": "effects-traps-click-2.mp3",
+  "prompt": "a pressure plate clicking underfoot, fantasy sound effect",
+  "at": "2026-11-03T19:43:26.073Z"
+ },
+ {
+  "group": "sfx/Effects/Traps/Spikes",
+  "file": "effects-traps-spikes-2.mp3",
+  "prompt": "a spike trap springing out of the floor, fantasy sound effect",
+  "at": "2026-11-03T19:43:26.830Z"
+ },
+ {
+  "group": "sfx/Effects/Traps/Darts",
+  "file": "effects-traps-darts-2.mp3",
+  "prompt": "poison darts shooting from the wall, fantasy sound effect",
+  "at": "2026-11-03T19:43:27.297Z"
+ },
+ {
+  "group": "sfx/Effects/Traps/Pit",
+  "file": "effects-traps-pit-2.mp3",
+  "prompt": "the floor giving way and rocks falling into a pit, fantasy sound effect",
+  "at": "2026-11-03T19:43:27.737Z"
+ },
+ {
+  "group": "sfx/Effects/Traps/Boulder",
+  "file": "effects-traps-boulder-2.mp3",
+  "prompt": "a huge boulder rolling and rumbling down a corridor, fantasy sound effect",
+  "at": "2026-11-03T19:43:28.346Z"
+ },
+ {
+  "group": "sfx/Effects/Lever",
+  "file": "effects-lever-2.mp3",
+  "prompt": "pulling a heavy stone lever with a clunk, fantasy sound effect",
+  "at": "2026-11-03T19:43:28.771Z"
+ },
+ {
+  "group": "sfx/Effects/Secret Door",
+  "file": "effects-secret-door-2.mp3",
+  "prompt": "a hidden stone wall sliding open with grinding, fantasy sound effect",
+  "at": "2026-11-03T19:43:29.419Z"
+ },
+ {
+  "group": "sfx/Effects/Magic/Portal",
+  "file": "effects-magic-portal-2.mp3",
+  "prompt": "a magical portal swirling open, fantasy sound effect",
+  "at": "2026-11-03T19:43:29.799Z"
+ },
+ {
+  "group": "sfx/Effects/Magic/Teleport",
+  "file": "effects-magic-teleport-2.mp3",
+  "prompt": "a magical teleport whoosh, fantasy sound effect",
+  "at": "2026-11-03T19:43:30.774Z"
+ },
+ {
+  "group": "sfx/Effects/Magic/Explosion",
+  "file": "effects-magic-explosion-2.mp3",
+  "prompt": "a huge magical explosion, fantasy sound effect",
+  "at": "2026-11-03T19:43:31.136Z"
+ },
+ {
+  "group": "sfx/Effects/Weather/Thunder",
+  "file": "effects-weather-thunder-2.mp3",
+  "prompt": "a loud crack of thunder, fantasy sound effect",
+  "at": "2026-11-03T19:43:31.649Z"
+ },
+ {
+  "group": "sfx/Effects/Bell",
+  "file": "effects-bell-2.mp3",
+  "prompt": "a large church bell tolling once, fantasy sound effect",
+  "at": "2026-11-03T19:43:32.290Z"
+ },
+ {
+  "group": "sfx/Effects/War Horn",
+  "file": "effects-war-horn-2.mp3",
+  "prompt": "a war horn blowing a call to battle, fantasy sound effect",
+  "at": "2026-11-03T19:43:33.182Z"
+ },
+ {
+  "group": "sfx/Effects/Crowd/Cheer",
+  "file": "effects-crowd-cheer-2.mp3",
+  "prompt": "a tavern crowd cheering, fantasy sound effect",
+  "at": "2026-11-03T19:43:33.189Z"
+ },
+ {
+  "group": "sfx/Effects/Crowd/Gasp",
+  "file": "effects-crowd-gasp-2.mp3",
+  "prompt": "a crowd gasping in shock, fantasy sound effect",
+  "at": "2026-11-03T19:43:34.071Z"
+ },
+ {
+  "group": "sfx/Effects/Scream",
+  "file": "effects-scream-2.mp3",
+  "prompt": "a terrified scream in the distance, fantasy sound effect",
+  "at": "2026-11-03T19:43:34.847Z"
+ },
+ {
+  "group": "sfx/Effects/Evil Laugh",
+  "file": "effects-evil-laugh-2.mp3",
+  "prompt": "a villain's evil laugh echoing, fantasy sound effect",
+  "at": "2026-11-03T19:43:34.848Z"
+ },
+ {
+  "group": "sfx/Effects/Glass Shatter",
+  "file": "effects-glass-shatter-2.mp3",
+  "prompt": "a glass bottle shattering on stone, fantasy sound effect",
+  "at": "2026-11-03T19:43:35.625Z"
+ },
+ {
+  "group": "sfx/Effects/Book",
+  "file": "effects-book-2.mp3",
+  "prompt": "turning the pages of an old book, fantasy sound effect",
+  "at": "2026-11-03T19:43:36.440Z"
+ },
+ {
+  "group": "sfx/Effects/Torch",
+  "file": "effects-torch-2.mp3",
+  "prompt": "lighting a torch, a whoosh of flame, fantasy sound effect",
+  "at": "2026-11-03T19:43:36.609Z"
+ },
+ {
+  "group": "sfx/Effects/Footsteps",
+  "file": "effects-footsteps-2.mp3",
+  "prompt": "heavy footsteps approaching in a stone corridor, fantasy sound effect",
+  "at": "2026-11-03T19:43:36.979Z"
+ },
+ {
+  "group": "sfx/Effects/Level Up",
+  "file": "effects-level-up-2.mp3",
+  "prompt": "a triumphant short fantasy fanfare of achievement, fantasy sound effect",
+  "at": "2026-11-03T19:43:37.902Z"
+ }
+]
