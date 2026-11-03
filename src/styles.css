@@ -376,40 +376,6 @@ select {
   font-size: 0.85rem;
 }
 
-.setup {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.join-toggle {
-  margin-left: auto;
-  margin-right: 0.75rem;
-  align-self: center;
-}
-
-.campaign-scroll {
-  flex: 1;
-  min-height: 0;
-  overflow: auto;
-  padding: 1rem 1.25rem 1.5rem;
-}
-
-.setup h1 {
-  margin: 0 0 0.75rem;
-  font-family: Palatino, "Palatino Linotype", serif;
-  font-weight: 500;
-  font-size: 1.7rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--brass);
-}
-
-.campaign-search,
-.campaign-create input,
-.campaign-detail input[type="text"],
-.campaign-detail input[type="number"],
-.join-panel input,
 .chat-form input {
   background: #121418;
   border: 1px solid var(--line);
@@ -419,88 +385,6 @@ select {
   font: inherit;
 }
 
-.campaign-search { width: 100%; margin-bottom: 0.75rem; }
-
-.campaign-head,
-.campaign-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 11rem 8rem;
-  gap: 0.75rem;
-  align-items: center;
-  width: 100%;
-  text-align: left;
-}
-
-.campaign-head {
-  padding: 0.35rem 0.7rem;
-  color: var(--brass);
-  font-size: 0.75rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  border-bottom: 1px solid var(--brass-dim);
-}
-
-.campaign-row {
-  background: transparent;
-  border: none;
-  border-bottom: 1px solid var(--line);
-  border-radius: 0;
-  padding: 0.55rem 0.7rem;
-  color: var(--text);
-}
-
-.campaign-row:hover { background: #222833; }
-.campaign-row.selected { background: #2a2418; box-shadow: inset 3px 0 0 var(--brass); }
-.campaign-row span:last-child { color: var(--muted); text-align: right; }
-.campaign-empty { padding: 1rem 0.2rem; }
-
-.campaign-detail {
-  display: flex;
-  flex-direction: column;
-  gap: 0.55rem;
-  margin: 0 0 0.4rem;
-  padding: 0.9rem 1rem 1rem;
-  background: #171b21;
-  border: 1px solid var(--brass-dim);
-  border-radius: 8px;
-}
-
-.detail-title {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.detail-title span,
-.campaign-detail p { margin: 0; color: var(--muted); }
-
-.conn-row {
-  display: grid;
-  grid-template-columns: 7.5rem minmax(0, 1fr);
-  gap: 0.6rem;
-  align-items: center;
-  color: var(--brass);
-  font-size: 0.78rem;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-.checks { display: flex; gap: 1.2rem; text-transform: none; letter-spacing: 0; color: var(--text); font-size: 0.95rem; }
-.checks label { display: flex; align-items: center; gap: 0.4rem; }
-
-.addr-block { display: flex; flex-direction: column; gap: 0.35rem; }
-.addr-heading {
-  margin: 0.35rem 0 0;
-  color: var(--brass);
-  font-size: 0.75rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-.addr { display: flex; align-items: center; gap: 0.5rem; margin: 0; }
-.addr-label { width: 3rem; color: var(--muted); font-size: 0.85rem; }
-.addr .secret { margin-left: 0; }
-
-.play-row { display: flex; align-items: center; justify-content: flex-end; gap: 0.8rem; }
 .play-button {
   background: var(--brass);
   color: #1a140c;
@@ -510,37 +394,6 @@ select {
 }
 .play-button:hover { border: none; filter: brightness(1.05); }
 .play-button:disabled { filter: none; }
-
-.campaign-create {
-  display: flex;
-  gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  border-top: 1px solid var(--line);
-  background: var(--bar);
-}
-.campaign-create input:first-child { flex: 1; }
-.campaign-create input:nth-child(2) { width: 12rem; }
-
-.join-panel {
-  width: min(28rem, calc(100% - 2rem));
-  margin: 2rem auto;
-  display: flex;
-  flex-direction: column;
-  gap: 0.7rem;
-  background: var(--bar);
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 1.15rem 1.2rem 1.25rem;
-}
-.join-panel h1 { text-transform: none; letter-spacing: 0; color: var(--text); font-size: 1.8rem; }
-.join-panel p { margin: 0; color: var(--muted); }
-.join-panel label { display: flex; flex-direction: column; gap: 0.25rem; color: var(--muted); font-size: 0.85rem; }
-
-@media (max-width: 800px) {
-  .campaign-head, .campaign-row { grid-template-columns: minmax(0, 1fr) 7rem 5.5rem; }
-  .campaign-create { flex-wrap: wrap; }
-  .campaign-create input:nth-child(2) { width: auto; flex: 1; }
-}
 
 .party {
   flex: 1;
