@@ -622,9 +622,16 @@ span.ct-init { display: inline-block; }
 .sound-group-name small { color: var(--muted); }
 .sound-play { display: grid; place-items: center; width: 30px; height: 28px; padding: 0; border-radius: 7px; background: #1d3a44; border-color: var(--brass-dim); color: var(--text); }
 .sound-play:hover:not(:disabled) { background: #26505f; }
-.sound-files { display: flex; flex-wrap: wrap; gap: 4px; padding: 0 8px 8px 40px; }
+.sound-files { display: flex; flex-direction: column; gap: 2px; padding: 0 8px 6px 34px; }
+.sound-file { display: flex; align-items: center; gap: 8px; padding: 1px 4px; border-radius: 6px; }
+.sound-file:hover { background: rgba(255, 255, 255, 0.04); }
+.sound-file.on { background: var(--brass-soft); }
+.sound-file-name { flex: 1; font-size: 0.84rem; color: var(--muted); }
+.sound-file-name b { color: var(--brass); margin-right: 4px; }
+.sound-twisty { width: 22px; padding: 0; border: none; background: transparent; color: var(--muted); font-size: 0.85rem; }
+.sound-group .sound-group { border: none; background: transparent; }
+.sound-stops { display: flex; gap: 6px; }
 .sound-files button { display: inline-flex; align-items: center; gap: 5px; padding: 2px 9px; border-radius: 999px; font-size: 0.8rem; }
-.sound-files button.on { border-color: var(--brass); background: var(--brass-soft); }
 .sound-now { display: flex; flex-direction: column; gap: 6px; padding: 8px; border: 1px solid var(--brass-dim); border-radius: 8px; background: rgba(210, 161, 90, 0.07); }
 .sound-now > b { color: var(--brass); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; }
 .sound-now-row { display: flex; align-items: center; gap: 8px; }
@@ -650,3 +657,7 @@ span.ct-init { display: inline-block; }
 .sound-trigger-options label { display: flex; align-items: center; gap: 8px; font-size: 0.86rem; color: var(--muted); }
 .sound-trigger .sound-play { font-size: 0.8rem; }
 .sound-note { color: #e7c07a; }
+.sound-count { border: none; background: transparent; padding: 0 4px; font-size: 0.78rem; color: var(--muted); white-space: nowrap; }
+.sound-count.has { color: #8fcf8f; }
+
+.sound-trigger-files { grid-column: 1 / -1; padding-left: 28px; }

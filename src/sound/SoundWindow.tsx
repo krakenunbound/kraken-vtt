@@ -41,9 +41,103 @@ export function VolumePanel() {
 
 const leaf = (group: string) => group.split("/").pop() || group;
 
+// The folders of a kind as a tree: Weapons > Sword > Hit. A folder with
+// sounds of its own (a group) plays one of them at random; opened, it lists
+// each sound, to hear (on this screen only) or play for the table.
+type FolderNode = { name: string; path: string; count: number; group: boolean; children: FolderNode[] };
+function folderTree(groups: { id: string; count: number }[]): FolderNode[] {
+  const root: FolderNode = { name: "", path: "", count: 0, group: false, children: [] };
+  for (const group of groups) {
+    const [kind, ...parts] = group.id.split("/");
+    let at = root;
+    parts.forEach((part, index) => {
+      const path = [kind, ...parts.slice(0, index + 1)].join("/");
+      let next = at.children.find((child) => child.path === path);
+      if (!next) {
+        next = { name: part, path, count: 0, group: false, children: [] };
+        at.children.push(next);
+      }
+      next.count += group.count;
+      if (index === parts.length - 1) next.group = true;
+      at = next;
+    });
+  }
+  return root.children;
+}
+// "weapons sword hit 2" is the folder's #2.
+const variant = (name: string) => /(\d+)$/.exec(name)?.[1];
+
+function Folder({
+  node,
+  kind,
+  depth,
+  isOpen,
+  toggle,
+  inGroup,
+  loop,
+  play,
+}: {
+  node: FolderNode;
+  kind: SoundKind;
+  depth: number;
+  isOpen: (path: string) => boolean;
+  toggle: (path: string) => void;
+  inGroup: (group: string) => SoundItem[];
+  loop: (id: string) => boolean;
+  play: (id: string) => void;
+}) {
+  const open = isOpen(node.path);
+  const files = node.group && open ? inGroup(node.path) : [];
+  return (
+    <div className={open ? "sound-group open" : "sound-group"} role="treeitem" aria-expanded={open} style={{ marginLeft: depth ? 14 : 0 }}>
+      <div className="sound-group-row">
+        <button type="button" className="sound-twisty" aria-label={`${open ? "Close" : "Open"} ${node.name}`} data-folder={node.path} onClick={() => toggle(node.path)}>
+          {open ? "▾" : "▸"}
+        </button>
+        {node.group ? (
+          <button
+            type="button"
+            className="sound-play"
+            title={kind === "ambience" ? "Play this loop for the table" : kind === "music" ? "Play this folder for the table, track after track" : "Play one of these, at random, for the table"}
+            aria-label={`Play ${node.path}`}
+            data-sound-group={node.path}
+            onClick={() => play(node.path)}
+          >
+            <Icon name="sound" size={14} />
+          </button>
+        ) : null}
+        <button type="button" className="sound-group-name" onClick={() => toggle(node.path)}>
+          {node.name}
+          <small>
+            {node.count} sound{node.count === 1 ? "" : "s"}
+          </small>
+        </button>
+      </div>
+      {files.length > 0 ? (
+        <div className="sound-files">
+          {files.map((item) => (
+            <div key={item.id} className={loop(item.id) ? "sound-file on" : "sound-file"}>
+              <button type="button" className="sound-hear" title="Hear it (on your screen only)" aria-label={`Hear ${item.name}`} data-hear={item.id} onClick={() => void sound.play(item.id, kind)}>
+                {"▶"}
+              </button>
+              <span className="sound-file-name">
+                {variant(item.name) ? <b>#{variant(item.name)}</b> : null} {item.name}
+              </span>
+              <button type="button" className="ghost" title="Play it for the table" data-sound={item.id} onClick={() => play(item.id)}>
+                <Icon name="sound" size={12} /> Table
+              </button>
+            </div>
+          ))}
+        </div>
+      ) : null}
+      {open ? node.children.map((child) => <Folder key={child.path} node={child} kind={kind} depth={depth + 1} isOpen={isOpen} toggle={toggle} inGroup={inGroup} loop={loop} play={play} />) : null}
+    </div>
+  );
+}
+
 function Browser({ session, kind, library, reload }: { session: Session; kind: SoundKind; library: SoundLibrary; reload: () => void }) {
   const [search, setSearch] = useState("");
-  const [open, setOpen] = useState<string | null>(null);
+  const [open, setOpen] = useState<Set<string>>(() => new Set());
   const [folder, setFolder] = useState("");
   const scape = session.soundscape;
   const groups = useMemo(
@@ -51,6 +145,16 @@ function Browser({ session, kind, library, reload }: { session: Session; kind: S
     [library, kind, search],
   );
   const inGroup = (group: string): SoundItem[] => library.sounds.filter((item) => `${item.kind}/${item.group}` === group);
+  const nodes = useMemo(() => folderTree(groups), [groups]);
+  // While searching, every folder that matches is open.
+  const isOpen = (path: string) => Boolean(search) || open.has(path);
+  const toggle = (path: string) =>
+    setOpen((current) => {
+      const next = new Set(current);
+      if (next.has(path)) next.delete(path);
+      else next.add(path);
+      return next;
+    });
   const loop = (id: string) => scape.ambience.some((item) => item.id === id);
   const play = (id: string) => {
     if (kind === "ambience") session.soundCommand({ type: "ambience", action: "add", id });
@@ -97,35 +201,21 @@ function Browser({ session, kind, library, reload }: { session: Session; kind: S
           </div>
         </div>
       ) : null}
-      {kind === "oneshots" || kind === "sfx" ? (
-        <button type="button" className="sound-stop" onClick={() => session.soundCommand({ type: "sound-stop" })}>
-          Stop all sounds
+      <div className="sound-stops">
+        {kind === "oneshots" || kind === "sfx" ? (
+          <button type="button" className="sound-stop" onClick={() => session.soundCommand({ type: "sound-stop" })}>
+            Stop all sounds
+          </button>
+        ) : null}
+        <button type="button" className="sound-stop ghost" data-hear-stop onClick={() => sound.stopAll()}>
+          Stop what I hear
         </button>
-      ) : null}
+      </div>
       <input type="search" placeholder="Search" aria-label="Search sounds" value={search} onChange={(event) => setSearch(event.target.value)} />
-      <div className="sound-groups">
+      <div className="sound-groups" role="tree">
         {groups.length === 0 ? <p className="hint">No {KINDS.find((item) => item.id === kind)?.name.toLowerCase()} yet.{kind === "oneshots" ? " Voices are spoken lines (Syrinscape's one-shots): a guard's \"Halt!\", an innkeeper's welcome." : ""}</p> : null}
-        {groups.map((group) => (
-          <div key={group.id} className={open === group.id ? "sound-group open" : "sound-group"}>
-            <div className="sound-group-row">
-              <button type="button" className="sound-play" title={kind === "ambience" ? "Play this loop for the table" : kind === "music" ? "Play this folder for the table, track after track" : "Play one of these for the table"} aria-label={`Play ${group.id}`} data-sound-group={group.id} onClick={() => play(group.id)}>
-                <Icon name="sound" size={14} />
-              </button>
-              <button type="button" className="sound-group-name" onClick={() => setOpen(open === group.id ? null : group.id)}>
-                {group.id.split("/").slice(1).join(" › ")}
-                <small>{group.count}</small>
-              </button>
-            </div>
-            {open === group.id ? (
-              <div className="sound-files">
-                {inGroup(group.id).map((item) => (
-                  <button key={item.id} type="button" className={loop(item.id) ? "on" : ""} data-sound={item.id} onClick={() => play(item.id)}>
-                    <Icon name="sound" size={12} /> {item.name}
-                  </button>
-                ))}
-              </div>
-            ) : null}
-          </div>
+        {nodes.map((node) => (
+          <Folder key={node.path} node={node} kind={kind} depth={0} isOpen={isOpen} toggle={toggle} inGroup={inGroup} loop={loop} play={play} />
         ))}
       </div>
       {window.kraken ? (
@@ -147,7 +237,9 @@ function Triggers({ session, library }: { session: Session; library: SoundLibrar
   const [list, setList] = useState<SoundTrigger[]>(session.soundTriggers);
   const [search, setSearch] = useState("");
   const [note, setNote] = useState("");
+  const [shownSounds, setShownSounds] = useState<string | null>(null);
   useEffect(() => setList(session.soundTriggers), [session.soundTriggers]);
+  const soundsOf = (folder: string) => library.sounds.filter((one) => `${one.kind}/${one.group}` === folder || `${one.kind}/${one.group}`.startsWith(`${folder}/`));
   const count = (folder: string) => library.groups.filter((group) => group.id === folder || group.id.startsWith(`${folder}/`)).reduce((sum, group) => sum + group.count, 0);
   const save = (next: SoundTrigger[]) => {
     setList(next);
@@ -198,7 +290,13 @@ function Triggers({ session, library }: { session: Session; library: SoundLibrar
                 </small>
               </span>
               <input className="sound-trigger-sound" value={item.sound} aria-label={`${item.name} sound`} onChange={(event) => setList(list.map((other) => (other.id === item.id ? { ...other, sound: event.target.value } : other)))} onBlur={() => save(list)} />
-              <small className={sounds ? "has" : "none"}>{sounds ? `${sounds} sound${sounds === 1 ? "" : "s"}` : "no sounds yet"}</small>
+              {sounds ? (
+                <button type="button" className="sound-count has" title="Show each sound, to hear them one by one" aria-expanded={shownSounds === item.id} data-trigger-sounds={item.id} onClick={() => setShownSounds(shownSounds === item.id ? null : item.id)}>
+                  {shownSounds === item.id ? "▾" : "▸"} {sounds} sound{sounds === 1 ? "" : "s"}
+                </button>
+              ) : (
+                <small className="none">no sounds yet</small>
+              )}
               <button
                 type="button"
                 className="sound-play"
@@ -206,7 +304,7 @@ function Triggers({ session, library }: { session: Session; library: SoundLibrar
                 aria-label={`Hear ${item.name}`}
                 data-try={item.id}
                 onClick={() => {
-                  const found = library.sounds.filter((one) => `${one.kind}/${one.group}` === item.sound || `${one.kind}/${one.group}`.startsWith(`${item.sound}/`));
+                  const found = soundsOf(item.sound);
                   if (found.length === 0) setNote(`${item.name}: no sounds in ${item.sound} yet.`);
                   else {
                     setNote("");
@@ -216,6 +314,20 @@ function Triggers({ session, library }: { session: Session; library: SoundLibrar
               >
                 ▶
               </button>
+              {shownSounds === item.id ? (
+                <div className="sound-files sound-trigger-files">
+                  {soundsOf(item.sound).map((one) => (
+                    <div key={one.id} className="sound-file">
+                      <button type="button" className="sound-hear" title="Hear it (on your screen only)" aria-label={`Hear ${one.name}`} data-hear={one.id} onClick={() => void sound.play(one.id, item.sound.startsWith("oneshots/") ? "oneshots" : "sfx")}>
+                        {"▶"}
+                      </button>
+                      <span className="sound-file-name">
+                        {variant(one.name) ? <b>#{variant(one.name)}</b> : null} {one.group.split("/").slice(-1)[0]} <small>{one.id.split("/").pop()}</small>
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
             </div>
           );
         })}

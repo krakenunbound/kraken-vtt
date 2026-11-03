@@ -82,12 +82,40 @@ try {
   const heard = await page.evaluate(() => window.__krakenSound.playingHere());
   assert(heard.running, `the sound engine runs (${JSON.stringify(heard)})`);
 
+  // A trigger opens to its sounds, each heard on its own (#1, #2), to tell them apart.
+  await page.click('[data-trigger-sounds="attack-sword-attack-any"], [data-trigger*="sword"] [data-trigger-sounds]');
+  const variants = await page.$$eval(".sound-trigger-files [data-hear]", (buttons) => buttons.map((button) => button.getAttribute("data-hear")));
+  assert(variants.length >= 2, `the sword's trigger lists its sounds (${variants.join(", ")})`);
+  for (const id of variants) {
+    const before = await page.evaluate(() => window.__krakenSound.playingHere().effects);
+    await page.click(`.sound-trigger-files [data-hear="${id}"]`);
+    let now = before;
+    for (let wait = 0; wait < 40 && now <= before; wait++) {
+      await settle(50);
+      now = await page.evaluate(() => window.__krakenSound.playingHere().effects);
+    }
+    assert(now > before, `${id} plays on its own`);
+  }
+  const labels = await page.$$eval(".sound-trigger-files .sound-file-name b", (marks) => marks.map((mark) => mark.textContent));
+  assert(labels.includes("#1") && labels.includes("#2"), `each sound is numbered (${labels.join(" ")})`);
+
+  // Sound effects as a tree: Weapons > Sword > Hit > #1, #2.
+  await page.click('[data-tab="sfx"]');
+  for (const folder of ["sfx/Weapons", "sfx/Weapons/Sword", "sfx/Weapons/Sword/Hit"]) await page.click(`[data-folder="${folder}"]`);
+  const hits = await page.$$eval('[data-hear^="sfx/Weapons/Sword/Hit/"]', (buttons) => buttons.map((button) => button.getAttribute("data-hear")));
+  assert(hits.length === 2, `Weapons > Sword > Hit opens to its two sounds (${hits.join(", ")})`);
+  const tableBefore = fetched.length;
+  await page.click(`[data-hear="${hits[1]}"]`);
+  await settle(600);
+  assert((await page.evaluate(() => window.__krakenSound.playingHere().effects)) > 0 || fetched.length > tableBefore, "a sound in the tree plays when heard");
+  await page.click("[data-hear-stop]");
+
   // The other tabs have Kraken's own sounds in them.
   const library = await tool("kraken_sound", { action: "list" });
   const kinds = {};
   for (const group of library.groups ?? []) kinds[group.id.split("/")[0]] = (kinds[group.id.split("/")[0]] ?? 0) + group.count;
   assert(kinds.oneshots >= 71 && kinds.sfx >= 400 && kinds.ambience >= 32 && kinds.music >= 1, `the shipped library ${JSON.stringify(kinds)}`);
-  console.log(`SOUND_UI_OK ${tries.length} trigger previews played (${fetched.length} files fetched); library ${JSON.stringify(kinds)}`);
+  console.log(`SOUND_UI_OK ${tries.length} trigger previews played, each sound of a trigger and the tree heard on its own (${fetched.length} files fetched); library ${JSON.stringify(kinds)}`);
 } finally {
   child.kill();
   await app.close();
