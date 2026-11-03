@@ -791,3 +791,15 @@ span.ct-init { display: inline-block; }
 .wizard-head-buttons { display: flex; gap: 6px; }
 .wizard-head-buttons .wizard-next { border-color: var(--brass); color: var(--brass); }
 .combat-tracker.dropping { outline: 2px dashed var(--brass); outline-offset: -4px; background: var(--brass-soft); }
+
+/* Sounds in a book's story (FG's sound links) */
+.book-link.sound { color: #e7c07a; }
+.book-link.sound.bound::before { content: "\25b6  "; font-size: 0.75em; }
+.book-link.sound.none { color: var(--muted); text-decoration: underline dotted; }
+.book-page.sound-drop { outline: 2px dashed #e7c07a; outline-offset: -6px; }
+.book-sound { display: inline-flex; align-items: center; gap: 6px; margin: 4px 6px 4px 0; padding: 2px 6px 2px 2px; border-radius: 999px; border: 1px solid #6b5a3a; background: rgba(231, 192, 122, 0.08); font-size: 0.85rem; }
+.book-sound.playing { border-color: #e7c07a; background: rgba(231, 192, 122, 0.2); }
+.book-sound-play { width: 26px; height: 26px; padding: 0; border-radius: 50%; display: grid; place-items: center; }
+.book-sound.playing .book-sound-play { background: #e7c07a; color: #10263a; }
+.book-sound-remove { border: none; background: transparent; color: var(--muted); padding: 0 2px; }
+.sound-group-row[draggable="true"], .sound-file[draggable="true"] { cursor: grab; }

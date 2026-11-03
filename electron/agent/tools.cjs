@@ -298,10 +298,15 @@ const TOOLS = [
   {
     name: "kraken_books",
     description:
-      "The GM's books, as FG's Library: the Fantasy Grounds modules on this computer that fit the campaign's ruleset (rulebooks, adventures), read inside Kraken. action list (every module that fits: id, title, category, hasBook, adventure, active, shared, forPlayers); activate / deactivate (book: active for this campaign, as FG's Activation; a player's book starts shared, the GM's books (monsters, the GM's guide, adventures) do not); contents (book: its chapters, sections and pages, and its pictures and maps); page (book, page: a page's text as HTML and its pictures); share / unshare (book: the players may read it, or not; never an adventure, whose pictures and maps the GM shows one at a time with show); show (book, file, name: show the players a picture or map from it; it opens as a tab on their screens); hide (id, or \"all\"); shared (what the players have now).",
+      "The GM's books, as FG's Library: the Fantasy Grounds modules on this computer that fit the campaign's ruleset (rulebooks, adventures), read inside Kraken. action list (every module that fits: id, title, category, hasBook, adventure, active, shared, forPlayers); activate / deactivate (book: active for this campaign, as FG's Activation; a player's book starts shared, the GM's books (monsters, the GM's guide, adventures) do not); contents (book: its chapters, sections and pages, and its pictures and maps); page (book, page: a page's text as HTML and its pictures); share / unshare (book: the players may read it, or not; never an adventure, whose pictures and maps the GM shows one at a time with show); show (book, file, name: show the players a picture or map from it; it opens as a tab on their screens); hide (id, or \"all\"); shared (what the players have now); sound (book, page, soundAction bind: a sound for one of the page's sound links, key = the link's data-sound-key; unbind (key); add: a sound in the story after a paragraph, block = its index (-1 at the top); remove (id); sound = a sound or folder id, as kraken_sound list); sounds (every sound kept in the books).",
     inputSchema: object(
       {
-        action: { type: "string", enum: ["list", "activate", "deactivate", "contents", "page", "share", "unshare", "show", "hide", "shared"] },
+        action: { type: "string", enum: ["list", "activate", "deactivate", "contents", "page", "share", "unshare", "show", "hide", "shared", "sound", "sounds"] },
+        soundAction: { type: "string", enum: ["bind", "unbind", "add", "remove"] },
+        key: string("A sound link's key (bind, unbind)"),
+        block: number("The paragraph a sound goes after (add); -1 for the top"),
+        sound: string("A sound or folder id (bind, add)"),
+        label: string("What the sound is called on the page"),
         book: string("A book's id (from list)"),
         page: string("A page's id (from contents)"),
         file: string("A picture's file in the book (from contents or a page)"),
@@ -323,6 +328,8 @@ const TOOLS = [
       if (action === "page") return out(table.bookPage(args.book, args.page));
       if (action === "share" || action === "unshare") return out(table.shareBook(args.book, action === "share"));
       if (action === "show") return out(table.showImage(args.book, args.file, args.name));
+      if (action === "sound") return out(table.setBookSound({ ...args, action: args.soundAction, id: args.id }));
+      if (action === "sounds") return out(table.bookSounds());
       if (action === "hide") return out(table.hideImage(args.id ?? "all"));
       return out(table.shelf());
     },

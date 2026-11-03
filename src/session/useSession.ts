@@ -105,6 +105,10 @@ export type BookContents = BookInfo & { chapters: { name: string; sections: { na
 export type BookBlock = { kind: "text"; html: string; frame?: string } | { kind: "picture"; file: string; caption: string; align: string; scale: number; name: string };
 export type BookPage = { book: string; id: string; name: string; blocks: BookBlock[] };
 // A quick slot: something kept at hand, opened with a click.
+// The sounds the GM keeps in a book page: bound to its sound links (by the
+// link's key), and dropped in between its paragraphs (after block; -1 the top).
+export type BookSoundRef = { sound: string; kind: string; label: string };
+export type PageSounds = { links: Record<string, BookSoundRef>; blocks: (BookSoundRef & { block: number; id: string })[] };
 export type QuickSlot = { kind: "book"; book: string; page?: string; label: string } | { kind: "picture"; book: string; file: string; label: string } | { kind: "sheet"; record: string; label: string };
 export type SoundItem = { id: string; kind: string; group: string; name: string };
 export type SoundLibrary = { sounds: SoundItem[]; groups: { id: string; count: number }[]; folder: string; triggers?: SoundTrigger[] };
@@ -239,6 +243,7 @@ export function useSession() {
   const [party, setParty] = useState<import("../party/PartySheet").PartyView | null>(null);
   const [combat, setCombat] = useState<CombatView>({ round: 0, active: null, entries: [] });
   const [soundscape, setSoundscape] = useState<Soundscape>({ ambience: [], music: null });
+  const [bookSounds, setBookSounds] = useState<Record<string, PageSounds>>({});
   const [quickSlots, setQuickSlotsState] = useState<(QuickSlot | null)[]>(Array(10).fill(null));
   const [bookShelf, setBookShelf] = useState<BookShelf>({ active: [], shared: [], images: [] });
   // The last picture the GM showed the players (a player's screen opens it).
@@ -354,6 +359,7 @@ export function useSession() {
             setChat((msg.chat as ChatLine[]) ?? []);
             if (msg.books) setBookShelf(msg.books as BookShelf);
             if (Array.isArray(msg.quickSlots)) setQuickSlotsState(msg.quickSlots as (QuickSlot | null)[]);
+            if (msg.bookSounds && typeof msg.bookSounds === "object") setBookSounds(msg.bookSounds as Record<string, PageSounds>);
             setRecords(Object.fromEntries(((msg.records as TableRecord[]) ?? []).map((record) => [record.id, record])));
             setRemoteLabel(label);
             setPlayerScene(you.role === "player" && msg.scene ? toPlayerScene(msg.scene as NetScene, origin) : null);
@@ -394,6 +400,7 @@ export function useSession() {
           if (msg.type === "kicked") setError(String(msg.reason ?? "The GM has asked you to leave the table."));
           if (msg.type === "books") setBookShelf({ active: (msg.active as string[]) ?? [], shared: (msg.shared as string[]) ?? [], images: (msg.images as ShownImage[]) ?? [] });
           if (msg.type === "image-shown" && typeof msg.id === "string") setImageShown({ id: msg.id, at: Date.now() });
+          if (msg.type === "book-sounds" && msg.sounds && typeof msg.sounds === "object") setBookSounds(msg.sounds as Record<string, PageSounds>);
           if (msg.type === "quickslots" && Array.isArray(msg.slots)) setQuickSlotsState(msg.slots as (QuickSlot | null)[]);
           if (msg.type === "chat-cleared") {
             setChat([]);
@@ -846,6 +853,9 @@ export function useSession() {
     soundTriggers,
     bookShelf,
     imageShown,
+    bookSounds,
+    // The GM's: a sound on one of a page's sound links, or in its story.
+    setBookSound: (change: { book: string; page: string; action: "bind" | "unbind" | "add" | "remove"; key?: string; block?: number; id?: string; sound?: string; kind?: string; label?: string }) => send({ type: "book-sound", ...change }),
     quickSlots,
     setQuickSlots: (slots: (QuickSlot | null)[]) => {
       setQuickSlotsState(slots);

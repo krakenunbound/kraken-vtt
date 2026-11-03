@@ -109,6 +109,40 @@ try {
   await page.click('[aria-label="Next page"]');
   await page.waitForFunction(() => document.querySelector(".book-page h2")?.textContent === "The Inn");
 
+  // Sounds in the story, as FG's: the book's own sound link plays Kraken's
+  // sound of its kind and name; a sound dropped on it changes it; a sound
+  // dropped between paragraphs sits there and plays from the book.
+  await page.click('.book-toc [data-page="gate"]');
+  await page.waitForSelector("a.book-link.sound.bound", { timeout: 15000 });
+  assert((await page.getAttribute("a.book-link.sound", "title")).includes("ambience/Forest"), `the link finds the forest loop (${await page.getAttribute("a.book-link.sound", "title")})`);
+  await page.click("a.book-link.sound");
+  let scape = await tool("kraken_sound", { action: "scape" });
+  for (let wait = 0; wait < 20 && !JSON.stringify(scape).includes("ambience/Forest"); wait++) {
+    await new Promise((resolve) => setTimeout(resolve, 150));
+    scape = await tool("kraken_sound", { action: "scape" });
+  }
+  assert(JSON.stringify(scape).includes("ambience/Forest"), `clicking the link starts the loop for the table (${JSON.stringify(scape).slice(0, 200)})`);
+  const dropSound = (selector, ref) =>
+    page.evaluate(
+      ([target, data]) => {
+        const element = document.querySelector(target);
+        const transfer = new DataTransfer();
+        transfer.setData("text/kraken-sound", JSON.stringify(data));
+        for (const type of ["dragover", "drop"]) element.dispatchEvent(new DragEvent(type, { dataTransfer: transfer, bubbles: true, cancelable: true }));
+      },
+      [selector, ref],
+    );
+  await dropSound("a.book-link.sound", { sound: "ambience/Rain", kind: "ambience", label: "Rain" });
+  await page.waitForFunction(() => document.querySelector("a.book-link.sound")?.title.includes("ambience/Rain"), null, { timeout: 8000 });
+  await dropSound('.book-block[data-block="1"] .book-text', { sound: "sfx/Effects/Door Creak", kind: "sfx", label: "Door creak" });
+  await page.waitForSelector('.book-block[data-block="1"] .book-sound', { timeout: 8000 });
+  const kept = await tool("kraken_books", { action: "sounds" });
+  const here = kept["Test Keep|gate"];
+  assert(here?.links["ss|6041|mood||Forest ambience"]?.sound === "ambience/Rain" && here.blocks[0].block === 1, `the host keeps the page's sounds (${JSON.stringify(kept)})`);
+  await page.click('.book-block[data-block="1"] .book-sound-remove');
+  await page.waitForFunction(() => !document.querySelector(".book-sound"), null, { timeout: 8000 });
+  await tool("kraken_sound", { action: "ambience", ambience: "clear" }).catch(() => undefined);
+
   // Quick slots: a page dragged onto a slot opens the book at that page again;
   // a map dragged onto one opens it in Pictures; right-click empties a slot.
   await page.dragAndDrop('.book-toc [data-page="inn"]', '[data-quick-slot="0"]');

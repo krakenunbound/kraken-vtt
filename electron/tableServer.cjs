@@ -303,6 +303,35 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       ? saved.books.images.filter((item) => item && typeof item.book === "string" && typeof item.file === "string").slice(-40).map((item) => ({ id: text(item.id, "").slice(0, 40), book: item.book, file: item.file, name: text(item.name, "Picture").slice(0, 120), at: num(item.at, 0) }))
       : [],
   };
+  // Sounds the GM keeps in the books, as FG's sound links in the story: a
+  // sound bound to one of the book's own sound links, and sounds dropped in
+  // between its paragraphs. By "<book>|<page>"; the GM's alone.
+  const bookSounds = new Map(Object.entries(saved.bookSounds && typeof saved.bookSounds === "object" ? saved.bookSounds : {}).slice(0, 2000));
+  const soundRef = (raw) => {
+    const id = text(raw?.sound, "").slice(0, 300);
+    const kind = ["oneshots", "sfx", "ambience", "music"].includes(raw?.kind) ? raw.kind : id.split("/")[0];
+    if (!id || !["oneshots", "sfx", "ambience", "music"].includes(kind)) throw new Error("Which sound?");
+    return { sound: id, kind, label: text(raw?.label, "").slice(0, 80) || id.split("/").pop() };
+  };
+  function setBookSound(change) {
+    const key = `${text(change?.book, "").slice(0, 200)}|${text(change?.page, "").slice(0, 120)}`;
+    const here = bookSounds.get(key) ?? { links: {}, blocks: [] };
+    const action = change?.action;
+    if (action === "bind") here.links = { ...here.links, [text(change.key, "").slice(0, 300)]: soundRef(change) };
+    else if (action === "unbind") {
+      const { [text(change.key, "")]: gone, ...rest } = here.links;
+      here.links = rest;
+    } else if (action === "add") {
+      const block = Math.max(-1, Math.min(500, Math.round(num(change.block, -1))));
+      here.blocks = [...here.blocks, { ...soundRef(change), block, id: crypto.randomBytes(5).toString("hex") }].slice(-60);
+    } else if (action === "remove") here.blocks = here.blocks.filter((item) => item.id !== change.id);
+    else throw new Error("bind, unbind, add or remove.");
+    if (Object.keys(here.links).length === 0 && here.blocks.length === 0) bookSounds.delete(key);
+    else bookSounds.set(key, here);
+    for (const [ws, client] of clients) if (client.role === "dm") send(ws, { type: "book-sounds", sounds: Object.fromEntries(bookSounds) });
+    onChange("table");
+    return here;
+  }
   const shelfView = () => ({ active: [...shelf.active], shared: [...shelf.shared].filter((id) => shelf.active.has(id)), images: shelf.images });
   const fits = (info) => Boolean(info) && fitsRuleset(info, ruleset);
   const canRead = (client, book) => (client.role === "dm" ? fits(books?.info(book)) : shelf.active.has(book) && shelf.shared.has(book));
@@ -890,6 +919,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
           soundscape,
           books: shelfView(),
           quickSlots: slotsFor(client),
+          ...(client.role === "dm" ? { bookSounds: Object.fromEntries(bookSounds) } : {}),
           records: records.list({ seat: seatOf(client) }),
           scene: client.role === "player" ? sceneFor(client) : null,
         });
@@ -903,6 +933,19 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
 
       // The GM shares a book with the players, or stops; shows them a picture
       // (it opens as a tab on their screens), or takes it back.
+      if (msg.type === "book-sound") {
+        if (client.role !== "dm") {
+          send(ws, { type: "error", reason: "Only the GM keeps sounds in the books." });
+          return;
+        }
+        try {
+          setBookSound(msg);
+        } catch (error) {
+          send(ws, { type: "error", reason: error.message });
+        }
+        return;
+      }
+
       if (msg.type === "book-activate" || msg.type === "book-share" || msg.type === "image-share" || msg.type === "image-unshare") {
         if (client.role !== "dm") {
           send(ws, { type: "error", reason: "Only the GM shares books and pictures." });
@@ -1352,6 +1395,8 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       return books.page(book, page);
     },
     shelf: shelfView,
+    bookSounds: () => Object.fromEntries(bookSounds),
+    setBookSound,
     shareBook,
     showImage,
     hideImage,
@@ -1490,6 +1535,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         soundTriggersVersion: TRIGGERS_VERSION,
         chatCleared: Object.fromEntries(chatCleared),
         quickSlots: Object.fromEntries(quickSlots),
+        bookSounds: Object.fromEntries(bookSounds),
       };
     },
     // What agents (the MCP server, the in-app assistant) use. They act as the GM.
