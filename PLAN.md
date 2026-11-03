@@ -218,12 +218,19 @@ Each step is tested before the next one starts. Where FG or Foundry does the sam
 | 2 Level up (single class) | Done | `character`: host-rolled HP, BtH, hit dice and next XP from the package rows, [LEVEL UP] in chat, sheet button |
 | 2 Multi-class, enhanced, class plus; dual class and reclass | Next | Port from `KrakenCharWizardCC` (CCClassRules, CCCombine, CCLevelUp) |
 | 5 Tokens and line of sight (first pass, ahead of 3–4) | Done | `map`: snapping, distance, walls stop players, doors (open, locked, secret), per-player line of sight, hidden tokens, movement lock, agent map tools, save/reopen. `session` and E2E: a player places and moves their own character's token. Chrome passes on Cragmaw Hideout and Cragmaw Castle |
-| 5 Still to do | Next after 3–4 | Light and vision ranges (darkvision, torches; today sight is unlimited), multi-select and group moves, character portraits as token art, facing, side-by-side check against Foundry's visible area |
-| 3–4, 6 | Not started | |
+| 5 Line of sight against Foundry | Done | `sight-parity`: a scene's walls in a temporary Foundry scene, a token either side of every door (closed and open); Foundry's token vision equals Kraken's within 1% (Cragmaw Castle 0.53%, Dragon's Fane 0.10%) |
+| 5 Map settings, lighting, weather | Done | `map`: darkness, lights, torches from SiegeCore light profiles, deepvision/darkvision in grey, twilight vision, weather and grid settings; Chrome passes as GM and player |
+| Player and GM layouts | Done | Players: map with a Chat / Character / Party dock and their portraits; the GM keeps the tabs with chat docked beside them. E2E checks a player has no GM tabs |
+| Portraits and tokens | Done | The GM's FG portraits/ and tokens/ folders (and each campaign's) served to the table; the sheet's portrait frame picks one; tokens show it |
+| 3 Party sheet | Done | `party`: CoreRPG's XP split (last member gets the remainder), quests and encounters awarded once, coin and item distribution, SiegeCore's group check and save; players read only. (FG's PartyXPManager is not reachable through the bridge, so the split is tested against its source, not live.) |
+| 5 Still to do | Later | Multi-select and group moves, facing, light animation (flicker), bright lights spoiling darkvision, an FG player client side by side with Kraken's player view |
+| 4, 6 | Not started | Combat tracker next |
 
 Where things are:
 - `electron/records.cjs`, `dice.cjs`, `tableServer.cjs`, `mapState.cjs` (tokens, doors, what each player sees)
-- `shared/map/geometry.mjs`: grid snapping, distance, wall collision, line of sight, token health colours
+- `shared/map/geometry.mjs`: grid snapping, distance, wall collision, line of sight (Foundry's rules), light, senses, token health colours
+- `electron/artLibrary.cjs` (portraits and tokens), `electron/party.cjs` and `shared/party/party.mjs` (party sheet)
+- `src/table/Lighting.tsx`, `Weather.tsx` (three.js), `SceneSettings.tsx`; `src/party/PartySheet.tsx`
 - `electron/agent/`: `tools.cjs`, `mcpServer.cjs`, `mcp-stdio.cjs`. `.mcp.json` registers it for Claude Code.
 - `electron/importers/fgModule.cjs`
 - `shared/siege/engine.mjs` (rules) and `builder.mjs` (characters)

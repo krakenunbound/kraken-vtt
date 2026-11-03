@@ -906,7 +906,7 @@ export function MapView({
           </span>
         ) : null}
       </div>
-      {gm ? (
+      {gm && !settingsOpen ? (
         <SceneLegend
           walls={scene.walls}
           lights={scene.lights}

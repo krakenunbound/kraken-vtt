@@ -169,6 +169,7 @@ export function useSession() {
   const [remoteLabel, setRemoteLabel] = useState("");
   const [players, setPlayers] = useState<Seat[]>([]);
   const [map, setMap] = useState<TableMap>(EMPTY_MAP);
+  const [party, setParty] = useState<import("../party/PartySheet").PartyView | null>(null);
   const [pings, setPings] = useState<Ping[]>([]);
   const [notice, setNotice] = useState<string | null>(null);
   const [chat, setChat] = useState<ChatLine[]>([]);
@@ -207,6 +208,7 @@ export function useSession() {
     setSelfId(null);
     setPlayers([]);
     setMap(EMPTY_MAP);
+    setParty(null);
     setPings([]);
     setChat([]);
     setPlayerScene(null);
@@ -276,6 +278,7 @@ export function useSession() {
           }
           if (msg.type === "players") setPlayers((msg.players as Seat[]) ?? []);
           if (msg.type === "map") applyMap(msg as unknown as TableMap);
+          if (msg.type === "party" && msg.party) setParty(msg.party as import("../party/PartySheet").PartyView);
           if (msg.type === "ping") {
             const ping = { id: ++pingCounter.current, x: Number(msg.x), y: Number(msg.y), from: String(msg.from ?? ""), color: String(msg.color ?? "#fff") };
             setPings((current) => [...current, ping].slice(-12));
@@ -572,6 +575,11 @@ export function useSession() {
   const placeLight = useCallback((light: Partial<SceneLightRecord> & { preset?: string }) => send({ type: "light-place", light }), [send]);
   const updateLight = useCallback((id: string, patch: Partial<SceneLightRecord>) => send({ type: "light-update", id, patch }), [send]);
   const removeLight = useCallback((id: string) => send({ type: "light-remove", id }), [send]);
+  // The party sheet's GM actions; the host splits and posts them as FG does.
+  const partyAwardXP = useCallback((xp: number) => send({ type: "party-award-xp", xp }), [send]);
+  const partyAward = useCallback((kind: "quests" | "encounters", id?: string) => send({ type: "party-award", kind, id }), [send]);
+  const partyDistribute = useCallback(() => send({ type: "party-distribute" }), [send]);
+  const partyGroup = useCallback((kind: "check" | "save", attribute: string, cl: number) => send({ type: "party-group", kind, attribute, cl }), [send]);
   const setDoor = useCallback((id: string, state?: number) => send({ type: "door", id, state }), [send]);
   const setSight = useCallback((on: boolean) => send({ type: "sight", on }), [send]);
   const setLocked = useCallback((on: boolean) => send({ type: "lock", on }), [send]);
@@ -611,6 +619,7 @@ export function useSession() {
     remoteLabel,
     players,
     map,
+    party,
     pings,
     notice,
     chat,
@@ -634,6 +643,10 @@ export function useSession() {
     placeLight,
     updateLight,
     removeLight,
+    partyAwardXP,
+    partyAward,
+    partyDistribute,
+    partyGroup,
     artUrl,
     artList,
     roll,

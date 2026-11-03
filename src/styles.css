@@ -1096,3 +1096,51 @@ select {
 .segmented button { padding: 3px 8px; }
 .segmented button[aria-pressed="true"] { border-color: var(--brass); color: var(--brass); }
 button.link { background: none; border: none; color: var(--brass); padding: 0; text-align: left; }
+
+/* The GM's tabs share the stage with the chat dock. */
+.workspace { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+.stage-table { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.stage-table[hidden] { display: none; }
+.stage-table > .table { flex: 1; }
+.workspace > .party, .workspace > .characters, .workspace > .placeholder { flex: 1; min-height: 0; }
+.dock-party-sheet { display: flex; flex-direction: column; gap: 10px; overflow: auto; flex: 1; min-height: 0; padding: 10px; }
+
+/* The party sheet (FG's Main, Inventory, Order, XP). */
+.party-sheet { display: flex; flex-direction: column; gap: 10px; padding: 16px; overflow: auto; min-height: 0; }
+.party-sheet.compact { padding: 0; }
+.party-tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--line); }
+.party-tabs button { border: none; border-radius: 0; background: transparent; color: var(--muted); padding: 0.5rem 0.9rem; }
+.party-tabs button[aria-selected="true"] { color: var(--text); box-shadow: inset 0 -2px 0 var(--brass); }
+.party-sheet h3 { margin: 10px 0 6px; color: var(--brass); font-size: 1rem; display: flex; gap: 8px; align-items: center; }
+.party-members { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.party-members li { display: flex; align-items: center; gap: 10px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 8px; background: rgba(255, 255, 255, 0.02); }
+.party-face { display: grid; place-items: center; width: 44px; height: 44px; flex: none; overflow: hidden; border-radius: 8px; background: var(--brass); color: #121418; font: 700 1.1rem Georgia, serif; }
+.party-face img, .party-face video { width: 100%; height: 100%; object-fit: cover; }
+.party-who { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.party-who small { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.party-stat { display: flex; flex-direction: column; align-items: center; min-width: 3.2rem; font-variant-numeric: tabular-nums; }
+.party-stat small { color: var(--muted); font-size: 0.68rem; letter-spacing: 0.08em; }
+.party-remove { padding: 2px 8px; }
+.party-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 8px; }
+.party-group { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.party-parcel { display: grid; gap: 8px; padding: 10px; border: 1px solid var(--line); border-radius: 8px; }
+.parcel-coins { display: flex; gap: 8px; flex-wrap: wrap; }
+.parcel-coins label { display: grid; gap: 2px; font-size: 0.8rem; color: var(--muted); }
+.parcel-coins input { width: 5rem; }
+.parcel-add { display: flex; gap: 6px; flex-wrap: wrap; }
+.parcel-add input:first-child { flex: 1; min-width: 10rem; }
+.marching { margin: 0; padding-left: 1.4rem; display: grid; gap: 4px; }
+.marching li { display: flex; justify-content: space-between; gap: 8px; }
+.order-buttons { display: flex; gap: 4px; }
+.order-buttons button { padding: 0 8px; }
+.watch { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 4px 0; }
+.watch label.check { display: flex; gap: 4px; align-items: center; }
+.xp-award { display: flex; gap: 8px; align-items: center; }
+.sheet-list li.awarded { opacity: 0.6; }
+.compact .party-members li { gap: 6px; padding: 4px 6px; }
+.compact .party-face { width: 34px; height: 34px; }
+.compact .party-stat { min-width: 2.6rem; font-size: 0.85rem; }
+.compact .party-members li { flex-wrap: wrap; }
+.compact .party-who { flex-basis: calc(100% - 44px); }
+.compact .party-stat { min-width: 0; flex: 1; flex-direction: row; gap: 4px; justify-content: center; }
+.dock-party-sheet { overflow-x: hidden; }

@@ -8,6 +8,7 @@ const { createRecordStore, canSee } = require("./records.cjs");
 const { createDice } = require("./dice.cjs");
 const { siege, siegeLibrary, siegeCheck, levelUp } = require("./siege.cjs");
 const { createMapState, playerColor } = require("./mapState.cjs");
+const party = require("./party.cjs");
 
 const MAX_CLIENTS = 16;
 
@@ -228,6 +229,20 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     hasPicture: (id) => Boolean(art && art.has(id)),
   });
 
+  // The party sheet summary goes to everyone when the party or a member changes.
+  let partyPending = false;
+  function sendParty() {
+    if (partyPending) return;
+    partyPending = true;
+    setTimeout(() => {
+      partyPending = false;
+      party
+        .partyView(agentHandle)
+        .then((view) => broadcast({ type: "party", party: view }))
+        .catch((error) => console.error("party view", error));
+    }, 30);
+  }
+
   // Each seat is sent its own view of the map (mapState viewFor), once per
   // burst of changes.
   let mapsPending = false;
@@ -272,6 +287,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     }
     // A token's health dot follows its record.
     if (map.tokens().some((token) => token.recordId === record.id)) sendMaps();
+    if (record.id === party.PARTY_ID || record.type === "character") sendParty();
   });
 
   const server = http.createServer((req, res) => {
@@ -441,6 +457,10 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
           scene: client.role === "player" ? sceneFor(client) : null,
         });
         broadcast({ type: "players", players: playerList() }, ws);
+        party
+          .partyView(agentHandle)
+          .then((view) => send(ws, { type: "party", party: view }))
+          .catch(() => undefined);
         return;
       }
 
@@ -561,6 +581,25 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
           send(ws, { type: "error", reason: error instanceof Error ? error.message : "Not allowed." });
           sendMaps();
         }
+        return;
+      }
+
+      // The party sheet's actions (the GM's): award XP, hand out the parcel,
+      // group checks and saves.
+      if (["party-award-xp", "party-award", "party-distribute", "party-group"].includes(msg.type)) {
+        if (client.role !== "dm") {
+          send(ws, { type: "error", reason: "Only the GM can do that." });
+          return;
+        }
+        const run =
+          msg.type === "party-award-xp"
+            ? party.awardXP(agentHandle, msg.xp, client.name)
+            : msg.type === "party-award"
+              ? party.awardEntries(agentHandle, msg.kind, msg.id, client.name)
+              : msg.type === "party-distribute"
+                ? party.distribute(agentHandle, client.name)
+                : party.groupCheck(agentHandle, msg.kind === "save" ? "save" : "check", msg.attribute, msg.cl, client.name);
+        run.catch((error) => send(ws, { type: "error", reason: error instanceof Error ? error.message : "Could not do that." }));
         return;
       }
 
