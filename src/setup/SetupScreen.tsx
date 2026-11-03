@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { LivingEmblem, Mark } from "../ui/Emblem";
 import type { KrakenCampaign, KrakenNetwork } from "../kraken";
 import "@fontsource/cinzel/latin-500.css";
@@ -109,6 +109,8 @@ export function SetupScreen({
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [ruleset, setRuleset] = useState(RULESETS[0].name);
+  const [beckon, setBeckon] = useState(0);
+  const newName = useRef<HTMLInputElement>(null);
   const [lanOn, setLanOn] = useState(true);
   const [cloudOn, setCloudOn] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
@@ -137,6 +139,20 @@ export function SetupScreen({
     .sort((a, b) => (b.playedAt ?? b.createdAt) - (a.playedAt ?? a.createdAt));
   const selected = rows.find((campaign) => campaign.id === selectedId) ?? null;
   const alert = localError || error;
+
+  // "New campaign": the form comes into view (below the list in a narrow
+  // window), its name ready to type, and it glows to say here.
+  function newCampaign() {
+    setSelectedId(null);
+    setBeckon((count) => count + 1);
+  }
+  useEffect(() => {
+    if (!beckon) return;
+    const input = newName.current;
+    if (!input) return;
+    input.closest("form")?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    input.focus({ preventScroll: true });
+  }, [beckon]);
 
   async function createCampaign(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -293,7 +309,7 @@ export function SetupScreen({
                 </button>
               ))}
             </div>
-            <button type="button" className="new-campaign" data-action="new-campaign" onClick={() => setSelectedId(null)}>
+            <button type="button" className="new-campaign" data-action="new-campaign" onClick={newCampaign}>
               <span aria-hidden="true">+</span> New campaign
             </button>
           </section>
@@ -364,11 +380,11 @@ export function SetupScreen({
                 {alertLine}
               </form>
             ) : (
-              <form className="campaign-create glass rise" data-form="create" onSubmit={(event) => void createCampaign(event)}>
+              <form key={`create-${beckon}`} className={beckon ? "campaign-create glass rise beckon" : "campaign-create glass rise"} data-form="create" onSubmit={(event) => void createCampaign(event)}>
                 <h2>Begin a new campaign</h2>
                 <label className="field">
                   <span>Name</span>
-                  <input name="new-campaign" placeholder="The Keep on the Borderlands" aria-label="New campaign name" maxLength={80} required />
+                  <input ref={newName} name="new-campaign" placeholder="The Keep on the Borderlands" aria-label="New campaign name" maxLength={80} required />
                 </label>
                 <div className="field">
                   <span>Ruleset</span>
