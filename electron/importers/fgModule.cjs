@@ -242,6 +242,29 @@ function siegeNpc(data) {
   return out;
 }
 
+// Prices the books leave out (C&C gives none for a staff or a sling; 3.5E
+// neither): Kraken's own, after 5E's where it has one, so every common item
+// can be bought. A natural weapon (Fist) stays without one.
+const KRAKEN_PRICES = {
+  staff: "5 gp",
+  sling: "1 sp",
+  club: "1 sp",
+  rock: "0 cp",
+  "dust, bag of": "1 cp",
+  "holy symbol, chalk": "1 cp",
+  "bedroll, fur lining": "5 sp",
+  jewelry: "10 gp",
+  "jewelry (varied)": "10 gp",
+  "signet ring": "15 gp",
+  "liquor, cask": "25 gp",
+};
+function priced(item) {
+  const name = String(item.name ?? "").trim().toLowerCase();
+  const cost = String(item.cost ?? "").trim();
+  if (!(name in KRAKEN_PRICES) || /^[\d.]+\s*(pp|gp|ep|sp|cp)$/i.test(cost)) return item;
+  return { ...item, cost: KRAKEN_PRICES[name], ...(cost ? { bookcost: cost } : {}), krakenprice: 1 };
+}
+
 function readModule(nameOrPath, { only = null } = {}) {
   const file = resolveModule(nameOrPath);
   const files = readFiles(file, { xmlOnly: true });
@@ -275,7 +298,8 @@ function readModule(nameOrPath, { only = null } = {}) {
         seen.add(fgPath);
         const data = convert(node);
         const converted = data && typeof data === "object" ? data : { value: data };
-        const fields = (innerType ?? type) === "npc" ? siegeNpc(converted) : converted;
+        const kind = innerType ?? type;
+        const fields = kind === "npc" ? siegeNpc(converted) : kind === "item" ? priced(converted) : converted;
         const isPublic = visibility === "all" || fields.public === true;
         records.push({
           id: `${prefix}:${fgPath}`.slice(0, 160),

@@ -17,7 +17,7 @@ Each bug has a test once fixed. Severity: **high** (wrong rules or data, or the 
 | 9 | medium | A map pin (FG's shortcut) does not open its story entry or encounter when clicked | play test | Fixed (alpha.14): a story pin opens the book at its entry; an encounter pin offers to put it on the tracker (`verify-library-ui`) |
 | 10 | medium | Chat keeps only the last 100 lines: a few rounds of combat push the start of the session out (FG keeps the whole session) | play test | Fixed (alpha.14): 2,000 lines kept with the campaign, the last 300 sent to a joining seat, 1,000 in the chat window |
 | 11 | low | Area spells (Sleep) affect only the caster's targets; there is no quick way to target everyone in an area (FG: the same, the GM targets each) | play test | Fixed (alpha.15): the map's Area target tool (players too) and `kraken_combat` target-area: everyone within a radius of a point, a faction to narrow |
-| 12 | low | Items with no price (Staff "—", Sling) cannot be bought in the wizard or the builder. FG's wizard skips them too, so this is FG-faithful: the GM's call | play test | Decision for the GM |
+| 12 | low | Items with no price (Staff "—", Sling) cannot be bought in the wizard or the builder. FG's wizard skips them too | play test | Fixed (alpha.18, the GM's call): Kraken's own prices where the book gives none, after 5E's (Staff 5 gp, Sling 1 sp, Club 1 sp, Rock free, jewelry 10 gp...), marked krakenprice; Fist stays a natural weapon |
 | 13 | low | Targets persist after a spell: the cleric's Cure Light Wounds also healed the kobold it had targeted the turn before. FG keeps targets the same way; an option to clear targets after a cast would help | play test | Fixed (alpha.17): Settings > Clear targets: never (FG's default), after a spell or an attack's damage, or at the end of the creature's turn (`kraken_table_options` clearTargets) |
 | 14 | medium | An area target also took creatures already dead | play test, phase 2 | Fixed (alpha.16) |
 
@@ -25,4 +25,4 @@ Each bug has a test once fixed. Severity: **high** (wrong rules or data, or the 
 
 Phase 2 added: Sleep cast on an area target over the kobold pack (eight asleep), a kobold killed outright (shown Dead), the encounter's 120 XP split between the four characters, the parcel's item assigned to Pip and handed out with the coin, and Thorin levelled from 2 to 3 (18 to 26 hit points, base to hit 2 to 3, next level 8,501 XP). All as expected, but for bug 14.
 
-Still open after both runs: 12 (the GM's decision on unpriced items).
+Nothing open after both runs.
