@@ -833,9 +833,20 @@ function createCombat({ saved, table, onChange = () => undefined }) {
         npcEntry.used = { ...(npcEntry.used ?? {}), [powerKey]: used + 1 };
       }
       if (actionKey && !power.actions?.[actionKey]) throw new Error("No such action.");
+      // A power with actions casts its first action unless one is named, as FG's
+      // first cast button (Cure Light Wounds: Cure (living), not all three at once).
+      let fromPower = null;
+      if (!actionKey) {
+        const first = Object.entries(power.actions ?? {}).find(([, item]) => item && typeof item === "object" && (item.effect || item.damage || item.heal || item.failedeffect));
+        if (first) {
+          actionKey = first[0];
+          // The power's own scaling (missiles a level, caps) under the action's.
+          fromPower = Object.fromEntries(["repeatbase", "repeatevery", "repeatstart", "repeatincrement", "scalecap", "dmgtype", "save", "saveeffect", "effectduration"].filter((key) => power[key] !== undefined && power[key] !== "").map((key) => [key, power[key]]));
+        }
+      }
       // A power with no actions casts from its own fields (SiegePower's power-level damage, heal, save).
       const action = actionKey
-        ? { ...power.actions[actionKey] }
+        ? { ...(fromPower ?? {}), ...power.actions[actionKey] }
         : { name: power.name, damage: power.damage, heal: power.heal, dmgtype: power.dmgtype, save: power.save, saveeffect: power.saveeffect, effect: power.effect, failedeffect: power.failedeffect, failedduration: power.failedduration };
       const casterLevel = npcEntry ? Math.max(1, num(caster.data.level, 0) || Number(/^(\d+)/.exec(String(caster.data.hd ?? ""))?.[1] ?? 1)) : Math.max(1, num(caster.data.level, 1));
       const cap = num(action.scalecap ?? power.scalecap, 0);
