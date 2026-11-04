@@ -250,6 +250,7 @@ export function useSession() {
   const [players, setPlayers] = useState<Seat[]>([]);
   const [map, setMap] = useState<TableMap>(EMPTY_MAP);
   const [party, setParty] = useState<import("../party/PartySheet").PartyView | null>(null);
+  const [krits, setKrits] = useState<Record<string, string> | null>(null);
   const [combat, setCombat] = useState<CombatView>({ round: 0, active: null, entries: [] });
   const [soundscape, setSoundscape] = useState<Soundscape>({ ambience: [], music: null });
   const [bookSounds, setBookSounds] = useState<Record<string, PageSounds>>({});
@@ -379,6 +380,7 @@ export function useSession() {
           }
           if (msg.type === "players") setPlayers((msg.players as Seat[]) ?? []);
           if (msg.type === "map") applyMap(msg as unknown as TableMap);
+          if (msg.type === "krits" && msg.settings) setKrits(msg.settings as Record<string, string>);
           if (msg.type === "party" && msg.party) setParty(msg.party as import("../party/PartySheet").PartyView);
           if (msg.type === "combat" && msg.combat) setCombat(msg.combat as CombatView);
           if (msg.type === "options" && msg.options) setOptions(msg.options as TableOptions);
@@ -836,6 +838,7 @@ export function useSession() {
     players,
     map,
     party,
+    krits,
     combat,
     pings,
     notice,

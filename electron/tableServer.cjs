@@ -1293,6 +1293,13 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
               return combat.damageRoll(msg.recordId ? { recordId: String(msg.recordId) } : { entryId: String(msg.id) }, String(msg.weapon), seat, client.role === "dm" ? "Combat" : client.name);
             case "heal":
               return combat.heal(String(msg.id), msg.amount, seat);
+            case "krits": {
+              const settings = await combat.krits(msg.settings, seat);
+              send(ws, { type: "krits", ...settings });
+              return;
+            }
+            case "krit-test":
+              return combat.kritTest(String(msg.kind), String(msg.id), msg.targetId ? String(msg.targetId) : null, seat);
             default:
               throw new Error("Unknown tracker action.");
           }

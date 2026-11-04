@@ -588,9 +588,9 @@ const TOOLS = [
   {
     name: "kraken_combat",
     description:
-      "The combat tracker (SiegeCore rules: d10 initiative, high to low; unconscious enemies lose their turns; effect durations count down each round; the dying bleed). action view (default); add (recordId of a character or NPC, count, hidden, place: also put tokens on the map; or entry {name, faction, hp, ac, init}); add-party; init (which: an entry id, npcs or all); next (next turn); round (next round); end (removeNpcs); update (id, patch {name, faction, init, initresult, hp, wounds, ac, hidden}); remove (id); damage / heal (id, amount); effect (id, effect {label, duration in rounds, gmOnly}); effect-remove (id, effectId); target (id: the attacker entry, targetId, on true/false); clear-targets (id); attack / damage-roll (a character: recordId + weapon = its inventory key; an NPC: id + weapon = its attack key from view's attacks): SiegeCore's attack, one d20 per target against its AC (equal hits), damage rolled once and put on every target; save (id, attribute, cl): a SIEGE save; cast (recordId, power: its powers key, castAction: the power's actions key): spends a slot, targets save against the caster level, damage halves or cancels on a save, effects land on those who failed, healing goes to the targets.",
+      "The combat tracker (SiegeCore rules: d10 initiative, high to low; unconscious enemies lose their turns; effect durations count down each round; the dying bleed). action view (default); add (recordId of a character or NPC, count, hidden, place: also put tokens on the map; or entry {name, faction, hp, ac, init}); add-party; init (which: an entry id, npcs or all); next (next turn); round (next round); end (removeNpcs); update (id, patch {name, faction, init, initresult, hp, wounds, ac, hidden}); remove (id); damage / heal (id, amount); effect (id, effect {label, duration in rounds, gmOnly}); effect-remove (id, effectId); target (id: the attacker entry, targetId, on true/false); clear-targets (id); attack / damage-roll (a character: recordId + weapon = its inventory key; an NPC: id + weapon = its attack key from view's attacks): SiegeCore's attack, one d20 per target against its AC (equal hits), damage rolled once and put on every target; save (id, attribute, cl): a SIEGE save; cast (recordId, power: its powers key, castAction: the power's actions key): spends a slot, targets save against the caster level, damage halves or cancels on a save, effects land on those who failed, healing goes to the targets. krits: critical hits and fumbles (the Castle Keeper's Guide options as Kraken Krits & Fumbles: a natural 20 rolls the critical table, a natural 1 the fumble table, and the result is applied: effects, damage, the next damage roll at maximum or doubled; ranged attacks use up ammunition; spells with spell resistance on are checked first). settings: { mode opt5|opt6|opt1|opt4, crit/fumble always|half|third|off, auto yes|no, npc yes|no, show all|gm, death gm|apply } (omit to read them). krit-test: roll a critical (kind crit) or fumble (kind fumble) for id against targetId (table, roll to fix the result).",
     inputSchema: object({
-      action: { type: "string", enum: ["view", "add", "add-party", "init", "next", "round", "end", "update", "remove", "damage", "heal", "effect", "effect-remove", "target", "clear-targets", "attack", "damage-roll", "save", "cast"] },
+      action: { type: "string", enum: ["view", "add", "add-party", "init", "next", "round", "end", "update", "remove", "damage", "heal", "effect", "effect-remove", "target", "clear-targets", "attack", "damage-roll", "save", "cast", "krits", "krit-test"] },
       targetId: string("target: the entry to target"),
       on: { type: "boolean", description: "target: add (true) or drop (false)" },
       weapon: string("attack / damage-roll: inventory key (character) or attack key (NPC)"),
@@ -610,6 +610,10 @@ const TOOLS = [
       amount: number("Damage or healing"),
       effect: { type: "object", properties: { label: { type: "string" }, duration: { type: "number" }, gmOnly: { type: "boolean" } }, additionalProperties: false },
       effectId: string("Effect id"),
+      settings: { type: "object", description: "krits: the choices to change" },
+      kind: { type: "string", enum: ["crit", "fumble"], description: "krit-test" },
+      table: string("krit-test: a table key (opt5_crit, opt6_fumble...)"),
+      roll: number("krit-test: the table roll"),
     }),
     async run(args, ctx) {
       const agent = needTable(ctx);
@@ -641,6 +645,8 @@ const TOOLS = [
       else if (action === "attack") return out({ results: await combat.attack(args.recordId ? { recordId: args.recordId } : { entryId: args.id }, args.weapon, seat, "Agent"), combat: combat.viewFor(seat) });
       else if (action === "save") return out({ save: await combat.save(args.id, args.attribute, args.cl ?? 0, "Agent"), combat: combat.viewFor(seat) });
       else if (action === "cast") return out({ cast: await combat.cast(args.recordId, args.power, args.castAction ?? "", seat, "Agent"), combat: combat.viewFor(seat) });
+      else if (action === "krits") return out(await combat.krits(args.settings, seat));
+      else if (action === "krit-test") return out({ krit: await combat.kritTest(args.kind, args.id, args.targetId, seat, args.table || args.roll ? { table: args.table, roll: args.roll } : undefined), combat: combat.viewFor(seat) });
       else if (action === "damage-roll") return out({ damage: await combat.damageRoll(args.recordId ? { recordId: args.recordId } : { entryId: args.id }, args.weapon, seat, "Agent"), combat: combat.viewFor(seat) });
       return out(combat.viewFor(seat));
     },
@@ -889,10 +895,10 @@ const TOOLS = [
   {
     name: "kraken_windows",
     description:
-      "The GM's windows: list them, or open, close, pop out (to a window of its own, for another monitor) or dock back a window. Kinds: characters, party, combat, players, settings, decals (the background decal picker), wallpapers (the desktop wallpaper picker), gmicons (the GM icon picker), dice (this seat's dice: sets, colours, design, material, effects), sound (one-shots, effects, ambience, music, chat triggers, volumes), sheet (a character's sheet: give record, its id or name).",
+      "The GM's windows: list them, or open, close, pop out (to a window of its own, for another monitor) or dock back a window. Kinds: characters, party, combat, players, settings, decals (the background decal picker), wallpapers (the desktop wallpaper picker), gmicons (the GM icon picker), krits (critical hits and fumbles), dice (this seat's dice: sets, colours, design, material, effects), sound (one-shots, effects, ambience, music, chat triggers, volumes), sheet (a character's sheet: give record, its id or name).",
     inputSchema: object({
       action: { type: "string", enum: ["list", "open", "close", "popout", "dock"] },
-      kind: { type: "string", enum: ["characters", "party", "combat", "players", "settings", "decals", "wallpapers", "gmicons", "dice", "sound", "sheet", "books", "book", "images", "picture", "notes", "note"] },
+      kind: { type: "string", enum: ["characters", "party", "combat", "players", "settings", "decals", "wallpapers", "gmicons", "krits", "dice", "sound", "sheet", "books", "book", "images", "picture", "notes", "note"] },
       record: string("For a sheet: the character's record id or name"),
     }),
     run: async (args, ctx) => out(await ctx.ui({ kind: "windows", action: args.action ?? "list", window: args.kind, record: args.record })),

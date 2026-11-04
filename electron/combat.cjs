@@ -18,6 +18,12 @@ const { siege, siegeLibrary } = require("./siege.cjs");
 //   the dying; the dying bleed 1 a round at their turn (SIEGE_NEGATIVE_HP_BLEED).
 // A character's entry uses its sheet's hit points and AC; an NPC's are the entry's own.
 
+// Critical hits and fumbles (KrakenKrits, built into SiegeCore).
+let krits = null;
+const kritsReady = import(pathToFileURL(path.join(__dirname, "..", "shared", "siege", "krits.mjs")).href).then((module) => {
+  krits = module;
+});
+
 let geometry = null;
 const geometryReady = import(pathToFileURL(path.join(__dirname, "..", "shared", "map", "geometry.mjs")).href).then((module) => {
   geometry = module;
@@ -146,6 +152,8 @@ function durationRounds(text, casterLevel, roundSeconds = 10) {
 function savedCombat(value) {
   const raw = value && typeof value === "object" ? value : {};
   return {
+    // The CK's critical and fumble choices (null: FG's defaults).
+    krits: raw.krits && typeof raw.krits === "object" ? raw.krits : null,
     round: Math.max(0, Math.round(num(raw.round, 0))),
     active: raw.active ? text(raw.active, "") : null,
     entries: (Array.isArray(raw.entries) ? raw.entries : []).map(cleanEntry).filter(Boolean).slice(0, 200),
@@ -168,6 +176,111 @@ function createCombat({ saved, table, onChange = () => undefined }) {
 
   function record(entry) {
     return entry.recordId ? table().records.get(entry.recordId) : null;
+  }
+
+  // An effect the tracker puts on by itself (no GM seat needed).
+  function putEffect(entry, label, duration = 0, gmOnly = false) {
+    const active = state.entries.find((item) => item.id === state.active);
+    const effect = cleanEffect({ label, duration, gmOnly, init: active ? active.initresult : entry.initresult });
+    if (effect) entry.effects.push(effect);
+    return effect;
+  }
+
+  // KrakenKrits.onAttackResult / resolve: on a natural 20 or 1, roll the CK's
+  // table and apply its result (effects on the tracker, real damage rolls,
+  // a mark on the attacker's next damage roll); what cannot be kept is told
+  // to the GM. forced: { table, roll } for tests.
+  async function resolveKrit(kind, source, target, ranged, opts, forced) {
+    await kritsReady;
+    const settings = krits.cleanSettings(state.krits);
+    const isPC = source && record(source)?.type === "character";
+    if (!forced) {
+      if (source && !isPC && settings.npc === "no") return null;
+      const chance = settings[kind === "crit" ? "crit" : "fumble"];
+      if (chance === "off" || (chance === "half" && table().dice.roll("1d2").total !== 1) || (chance === "third" && table().dice.roll("1d3").total !== 1)) return null;
+    }
+    const key = forced?.table ?? krits.pickTable(kind, settings.mode, ranged);
+    const chart = krits.TABLES[key];
+    if (!chart) return null;
+    const roll = Number(forced?.roll) || (chart.die > 1 ? table().dice.roll(`1d${chart.die}`).total : 1);
+    const row = krits.findRow(chart, roll);
+    if (!row) return null;
+    const auto = settings.auto !== "no";
+    const out = [];
+    const nameOf = (entry) => entry?.name ?? "?";
+    for (const fx of row[4]) {
+      const who = fx.who === "a" ? source : kind === "fumble" ? source : target;
+      if (fx.effect) {
+        if (auto && who) {
+          putEffect(who, fx.effect, fx.dur ?? 0);
+          out.push(`${fx.effect} -> ${nameOf(who)}`);
+        } else out.push(`(${nameOf(who)}: ${fx.effect})`);
+      }
+      if (fx.dmg) {
+        if (auto && who) {
+          const rolled = table().roll(String(fx.dmg), `[DAMAGE] Kraken Krit: ${fx.title ?? "extra damage"}`, source?.name ?? "Combat", Boolean(who.hidden));
+          await applyWounds(who, Math.max(1, rolled.total), `[DAMAGE] Kraken Krit: ${fx.title ?? "extra damage"}`, opts);
+        } else out.push(`(${nameOf(who)} takes ${fx.dmg} damage)`);
+      }
+      if (fx.mark !== undefined && source) {
+        const label = krits.markLabel(fx.mark);
+        if (auto) {
+          putEffect(source, label, 1);
+          out.push(`${label} (next damage roll)`);
+        } else out.push(`(${label})`);
+      }
+      if (fx.death) {
+        if (settings.death === "apply" && auto && who) {
+          await applyWounds(who, 999, "[DAMAGE] Kraken Krit: instant death", opts);
+          out.push(`INSTANT DEATH -> ${nameOf(who)}`);
+        } else out.push(`GM: INSTANT DEATH for ${nameOf(who)} if you allow it (Settings: instant death results)`);
+      }
+      if (fx.note) out.push(`GM: ${fx.note}`);
+    }
+    const tag = kind === "fumble" ? "[KRAKEN FUMBLE]" : "[KRAKEN CRITICAL]";
+    const extra = row[3] && row[3] !== row[2] ? ` ${row[3]}` : "";
+    table().say(`${tag} ${nameOf(source)}: ${chart.name} d${chart.die} = ${roll}: ${row[2]}.${extra}${out.length ? `\n[APPLIED] ${out.join("; ")}` : ""}`, "Combat", settings.show === "gm");
+    changed();
+    return { kind, table: key, roll, title: row[2], applied: out };
+  }
+
+  // SiegeChar.fireAmmunition: a ranged weapon with an ammunition type fires
+  // one of the readied (else carried) ammunition of that type. false: none left.
+  function fireAmmunition(recordRow, item, opts) {
+    const type = String(item.ammotype ?? "").trim().toLowerCase();
+    if (!type || String(item.attacktype ?? "").toLowerCase() !== "ranged") return { ok: true };
+    const inventory = recordRow.data.inventorylist ?? {};
+    const left = (row) => Math.max(0, num(row.count, 1)) * Math.max(1, num(row.ammoperunit, 1)) - num(row.ammoused, 0);
+    const choices = Object.entries(inventory).filter(([, row]) => String(row?.subtype ?? "").toLowerCase() === "ammunition" && String(row.ammotype ?? "").trim().toLowerCase() === type && left(row) > 0);
+    const pick = choices.find(([, row]) => num(row.carried, 1) === 2) ?? choices.find(([, row]) => num(row.carried, 1) === 1);
+    if (String(opts.SIEGE_AMMO_TRACK ?? "on").toLowerCase() === "off") return { ok: true, ammo: pick?.[1]?.name };
+    if (!pick) {
+      table().say(`${item.name}: no ${type} left to fire.`, "Combat");
+      return { ok: false };
+    }
+    const [key, row] = pick;
+    const per = Math.max(1, num(row.ammoperunit, 1));
+    let used = num(row.ammoused, 0) + 1;
+    let count = num(row.count, 1);
+    if (used >= per) {
+      count = Math.max(0, count - 1);
+      used = 0;
+    }
+    table().records.update(recordRow.id, { data: { inventorylist: { [key]: { count, ammoused: used } } } }, table().seat);
+    const remaining = count * per - used;
+    table().say(`${item.name}: fired ${row.name}, ${remaining} left.`, "Combat");
+    return { ok: true, ammo: row.name, left: remaining };
+  }
+
+  // ActionSpellResistance.getResistance: the creature's spell resistance (a
+  // qualified entry, with notes, counts only once the referee enables it); a
+  // character's worn items can give it, the highest counting.
+  function spellResistance(entry) {
+    const data = record(entry)?.data ?? {};
+    let sr = Math.max(num(data.spellresistance, 0), num(entry.sr, 0));
+    if (String(data.srnotes ?? "").trim() && num(data.srenabled, 0) !== 1) return 0;
+    if (record(entry)?.type === "character") for (const item of Object.values(data.inventorylist ?? {})) if (num(item?.carried, 0) === 2) sr = Math.max(sr, num(item.spellresistance, 0));
+    return Math.max(0, sr);
   }
 
   // A character's entry reads its sheet; an NPC's keeps its own numbers.
@@ -236,6 +349,15 @@ function createCombat({ saved, table, onChange = () => undefined }) {
   async function startTurn(entry, opts) {
     const secret = entry.hidden;
     table().say(`[TURN] ${entry.name}`, "Combat", secret);
+    // Ongoing damage (CoreRPG's DMGO: "Severed artery; DMGO: 1d12") at the start of the turn.
+    for (const effect of entry.effects) {
+      for (const part of effect.label.split(";")) {
+        const match = /^\s*DMGO\s*:\s*([0-9d+\- ]+)\s*$/i.exec(part);
+        if (!match) continue;
+        const rolled = table().roll(match[1].replace(/\s+/g, ""), `[DAMAGE] Ongoing damage (${effect.label.split(";")[0].trim()})`, "Combat", secret);
+        await applyWounds(entry, Math.max(1, rolled.total), "[DAMAGE] Ongoing damage", opts);
+      }
+    }
     // The dying bleed at the start of their turn, once a round.
     if (String(opts?.SIEGE_NEGATIVE_HP_BLEED ?? "off").toLowerCase() === "on" && !entry.stabilized && state.round > 0 && entry.bleedRound < state.round) {
       const { hp, wounds } = vitals(entry);
@@ -523,14 +645,27 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       const { engine, game, options: opts } = await options();
       const plan = this.weapon(who, weaponKey, engine, game, opts, seat);
       const source = plan.entry;
+      if (plan.item && plan.record) {
+        const fired = fireAmmunition(plan.record, plan.item, opts);
+        if (!fired.ok) return [{ refused: `no ${plan.item.ammotype} left` }];
+      }
       const atk = plan.bonus + effectBonus(source, "ATK");
       const formula = `1d20${atk >= 0 ? "+" : ""}${atk}`;
       const kind = SHORT_TYPE[plan.type] ? ` (${SHORT_TYPE[plan.type]})` : "";
       const targets = (source?.targets ?? []).map((id) => state.entries.find((entry) => entry.id === id)).filter(Boolean);
       const results = [];
+      const natural = (roll) => roll?.terms?.[0]?.rolls?.[0];
+      // CKG Chapter 17: a natural 20 is a critical hit, a natural 1 a fumble.
+      const krit = async (roll, target) => {
+        const die = natural(roll);
+        if (die === 20 && target) return resolveKrit("crit", source, target, plan.type === "ranged", opts);
+        if (die === 1) return resolveKrit("fumble", source, target, plan.type === "ranged", opts);
+        return null;
+      };
       if (targets.length === 0) {
         const roll = table().roll(formula, `[ATTACK]${kind} ${plan.name}`, from, false, { result: "NO TARGET", by: plan.actor });
-        results.push({ total: roll.total, hit: null });
+        const result = await krit(roll, null);
+        results.push({ total: roll.total, hit: null, natural: natural(roll), ...(result ? { krit: result } : {}) });
       }
       for (const target of targets) {
         const ac = vitals(target).ac + effectBonus(target, "AC");
@@ -538,7 +673,8 @@ function createCombat({ saved, table, onChange = () => undefined }) {
         const hit = rolled.total >= ac;
         const label = `[ATTACK]${kind} ${plan.name} [AC ${ac}] [${hit ? "HIT" : "MISS"} ${rolled.total} vs ${ac}] -> [at ${target.name}]`;
         table().postRoll(rolled, label, from, Boolean(target.hidden), { result: hit ? "HIT" : "MISS", by: plan.actor, against: ac, target: target.name });
-        results.push({ target: target.name, total: rolled.total, ac, hit });
+        const result = await krit(rolled, target);
+        results.push({ target: target.name, total: rolled.total, ac, hit, natural: natural(rolled), ...(result ? { krit: result } : {}) });
       }
       return results;
     },
@@ -551,10 +687,23 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       const plan = this.weapon(who, weaponKey, engine, game, opts, seat);
       if (!plan.damage) throw new Error(`${plan.name} has no damage.`);
       const bonus = plan.damageBonus + effectBonus(plan.entry, "DMG");
-      const formula = `${plan.damage.replace(/\s+/g, "")}${bonus ? `${bonus > 0 ? "+" : ""}${bonus}` : ""}`;
+      let formula = `${plan.damage.replace(/\s+/g, "")}${bonus ? `${bonus > 0 ? "+" : ""}${bonus}` : ""}`;
       const kind = SHORT_TYPE[plan.type] ? ` (${SHORT_TYPE[plan.type]})` : "";
       const targets = (plan.entry?.targets ?? []).map((id) => state.entries.find((entry) => entry.id === id)).filter(Boolean);
-      const roll = table().roll(formula, `[DAMAGE]${kind} ${plan.name}${plan.dmgtype ? ` [TYPE: ${plan.dmgtype}]` : ""}`, from, false, { by: plan.actor });
+      // A critical's mark (maximum, an extra die, doubled...) changes this roll and is used up.
+      await kritsReady;
+      let tag = "";
+      const mark = plan.entry?.effects.find((effect) => krits.isMark(effect.label));
+      if (mark) {
+        const marked = krits.markedFormula(plan.damage, bonus, mark.label);
+        if (marked) {
+          formula = marked.formula;
+          tag = ` ${marked.tag}`;
+        }
+        plan.entry.effects = plan.entry.effects.filter((effect) => effect !== mark);
+        changed();
+      }
+      const roll = table().roll(formula, `[DAMAGE]${kind} ${plan.name}${plan.dmgtype ? ` [TYPE: ${plan.dmgtype}]` : ""}${tag}`, from, false, { by: plan.actor });
       // CoreRPG: damage is at least 1 when dice were rolled.
       const amount = Math.max(1, roll.total);
       for (const target of targets) await applyWounds(target, amount, `[DAMAGE] ${plan.name}`, opts);
@@ -580,6 +729,8 @@ function createCombat({ saved, table, onChange = () => undefined }) {
           damageBonus: num(item.dmgbonus, 0) + (score != null ? engine.abilityBonus(score, game) : 0),
           dmgtype: String(item.dmgtype ?? ""),
           entry: state.entries.find((entry) => entry.recordId === record.id) ?? null,
+          item,
+          record,
         };
       }
       mustGM(seat);
@@ -666,6 +817,25 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       if ((action.heal && targets.length === 0) || self) targets = entry ? [entry] : [];
       const actionName = action.name && action.name !== power.name ? `${power.name}: ${action.name}` : power.name;
       table().say(`[CAST] ${actionName}${power.powertype ? ` (${power.powertype})` : ""} at caster level ${casterLevel}${targets.length ? ` -> [at ${targets.map((t) => t.name).join(", ")}]` : ""}`, from);
+      // Spell resistance (SiegePowerResolution, srmode on): a target with
+      // spell resistance rolls a plain d20; under it, the spell does nothing to it.
+      const srMode = String(action.srmode || power.srmode || "").toLowerCase();
+      if (srMode === "on") {
+        const kept = [];
+        for (const target of targets) {
+          const sr = target === entry ? 0 : spellResistance(target);
+          if (sr <= 0) {
+            kept.push(target);
+            continue;
+          }
+          const rolled = table().dice.roll("1d20");
+          const die = rolled.terms[0].rolls[0];
+          const affects = die >= sr;
+          table().postRoll(rolled, `[SPELL RESISTANCE] vs SR ${sr} [${affects ? "Spell affects target" : "Spell resisted"} ${die} vs SR ${sr}] -> [${target.name}]`, target.name, Boolean(target.hidden), { result: affects ? "AFFECTED" : "RESISTED", by: target.name });
+          if (affects) kept.push(target);
+        }
+        targets = kept;
+      }
       // Saves.
       const saveStat = String(action.save || power.save || "").toLowerCase();
       const saveEffect = String(action.saveeffect || power.saveeffect || "").toLowerCase();
@@ -727,6 +897,23 @@ function createCombat({ saved, table, onChange = () => undefined }) {
         changed();
       }
       return { power: power.name, action: action.name ?? "", casterLevel, saves: [...saved].map(([id, success]) => ({ target: find(id).name, success })), results };
+    },
+    // The CK's critical and fumble choices.
+    async krits(changes, seat) {
+      await kritsReady;
+      if (changes && Object.keys(changes).length) {
+        mustGM(seat);
+        state.krits = krits.cleanSettings({ ...krits.cleanSettings(state.krits), ...changes });
+        changed();
+      }
+      return { settings: krits.cleanSettings(state.krits), options: krits.OPTIONS, tables: Object.fromEntries(Object.entries(krits.TABLES).map(([key, chart]) => [key, chart.name])) };
+    },
+    // /krakenkrits crit|fumble: a result for one tracker entry against another.
+    async kritTest(kind, sourceId, targetId, seat, forced) {
+      mustGM(seat);
+      const { options: opts } = await options();
+      cachedThresholds = thresholds(opts);
+      return resolveKrit(kind === "fumble" ? "fumble" : "crit", find(sourceId), targetId ? find(targetId) : null, false, opts, forced);
     },
     round: () => state.round,
     active: () => state.active,
