@@ -29,7 +29,7 @@ export function slotDrag(slot: QuickSlot) {
   };
 }
 
-export const LINK_ICON: Record<QuickSlot["kind"], string> = { book: "book", picture: "map", sheet: "character", sound: "sound", note: "chat" };
+export const LINK_ICON: Record<QuickSlot["kind"], string> = { book: "book", picture: "map", sheet: "character", sound: "sound", note: "chat", record: "shield" };
 // A link read from a drop, if it is one.
 export function linkFrom(event: React.DragEvent): QuickSlot | null {
   try {
@@ -51,6 +51,7 @@ export function useOpenLink(session: Session) {
     else if (link.kind === "picture") openPicture({ book: link.book, file: link.file, name: link.label });
     else if (link.kind === "sheet") windows.open("sheet", link.label, link.record);
     else if (link.kind === "note") windows.open("note", link.label, link.record);
+    else if (link.kind === "record") windows.open("record", link.label, link.record);
     else if (link.kind === "sound") {
       if (sound.isPlaying(link.sound)) {
         if (session.role === "dm") stopSoundForTable(session, link.sound, link.soundKind);

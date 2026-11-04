@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useRef, useSyncExternalStore, type ReactNode
 import { Picture } from "../characters/ArtPicker";
 import { CharacterPanel } from "../characters/CharacterPanel";
 import { CharacterSelect } from "../characters/CharacterSelect";
+import { RecordsWindow, RecordWindow } from "../books/Records";
 import { CombatTracker } from "../combat/CombatTracker";
 import { PartySheet } from "../party/PartySheet";
 import type { Session } from "../session/useSession";
@@ -112,6 +113,7 @@ export function Desktop({
         { kind: "combat", label: "Combat", icon: "combat", title: "Combat Tracker" },
         { kind: "books", label: "Books", icon: "book", title: "Books" },
         { kind: "library", label: "Library", icon: "map", title: "Library: an adventure's maps, encounters, NPCs, parcels and tables" },
+        { kind: "records", label: "Lists", icon: "shield", title: "Lists" },
         { kind: "notes", label: "Notes", icon: "chat", title: "Notes" },
         { kind: "assistant", label: "Assistant", icon: "sparkle", title: "DM Assistant" },
         { kind: "players", label: "Players", icon: "players", title: "Players" },
@@ -126,6 +128,7 @@ export function Desktop({
         { kind: "party", label: "Party", icon: "party", title: "Party Sheet" },
         { kind: "combat", label: "Combat", icon: "combat", title: "Combat Tracker" },
         { kind: "books", label: "Books", icon: "book", title: "Books" },
+        { kind: "records", label: "Lists", icon: "shield", title: "Lists" },
         { kind: "notes", label: "Notes", icon: "chat", title: "Player Notes" },
         { kind: "sound", label: "Sound", icon: "music", title: "Sound" },
         { kind: "settings", label: "Settings", icon: "settings", title: "Settings" },
@@ -148,8 +151,8 @@ export function Desktop({
   }, [session.imageShown]);
 
   // The agent opens, closes, pops out and docks windows as the GM's clicks do.
-  const live = useRef({ windows, launchers, characters });
-  live.current = { windows, launchers, characters };
+  const live = useRef({ windows, launchers, characters, records: session.records });
+  live.current = { windows, launchers, characters, records: session.records };
   useEffect(
     () =>
       agentCommands.register("windows", (command) => {
@@ -169,6 +172,13 @@ export function Desktop({
           if (!picture.includes("|")) throw new Error('Which picture? record is "<book id>|<file>" (kraken_books contents).');
           if (command.action === "open") manager.open("picture", picture.split("|")[1].split("/").pop() ?? picture, picture);
           key = `picture:${picture}`;
+        } else if (command.window === "record") {
+          // record: a record's id, or its name.
+          const wanted = String(command.record ?? "");
+          const found = live.current.records[wanted] ?? Object.values(live.current.records).find((item) => item.name.toLowerCase() === wanted.toLowerCase());
+          if (!found) throw new Error(`No record "${wanted}" shown here.`);
+          if (command.action === "open") manager.open("record", found.name, found.id);
+          key = `record:${found.id}`;
         } else if (command.window === "book") {
           const book = String(command.record ?? "");
           if (!book) throw new Error("Which book? Give its id (kraken_books list).");
@@ -281,6 +291,8 @@ export function Desktop({
           {windows.windows.map((item) => (
             <FloatingWindow key={item.key} item={item}>
               {item.kind === "characters" ? <CharacterPanel session={session} dock={!gm} create={item.payload === "new"} /> : null}
+              {item.kind === "records" ? <RecordsWindow session={session} onOpen={(record) => windows.open("record", record.name, record.id)} /> : null}
+              {item.kind === "record" && item.payload ? <RecordWindow session={session} id={item.payload} /> : null}
               {item.kind === "charselect" ? <CharacterSelect session={session} onSheet={(id, name) => windows.open("sheet", name, id)} onWizard={() => windows.open("characters", "Character Wizard", "new")} onClose={() => windows.close(item.key)} /> : null}
               {item.kind === "sheet" ? <CharacterPanel session={session} dock selected={item.payload ?? null} /> : null}
               {item.kind === "party" ? <PartySheet session={session} /> : null}

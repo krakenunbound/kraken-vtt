@@ -365,6 +365,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     if (raw.kind === "picture" && typeof raw.book === "string" && typeof raw.file === "string") return { kind: "picture", book: raw.book.slice(0, 200), file: raw.file.slice(0, 300), label: label || "Picture" };
     if (raw.kind === "sheet" && typeof raw.record === "string") return { kind: "sheet", record: raw.record.slice(0, 80), label: label || "Character" };
     if (raw.kind === "note" && typeof raw.record === "string") return { kind: "note", record: raw.record.slice(0, 80), label: label || "Note" };
+    if (raw.kind === "record" && typeof raw.record === "string") return { kind: "record", record: raw.record.slice(0, 160), label: label || "Record" };
     if (raw.kind === "sound" && typeof raw.sound === "string" && ["oneshots", "sfx", "ambience", "music"].includes(raw.soundKind)) return { kind: "sound", sound: raw.sound.slice(0, 300), soundKind: raw.soundKind, label: label || "Sound" };
     return null;
   };
