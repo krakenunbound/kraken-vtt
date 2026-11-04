@@ -25,6 +25,9 @@ export function SettingsWindow({ session }: { session: Session }) {
             <button type="button" className="settings-button" data-setting="gmicon" onClick={() => windows.open("gmicons", "GM Icon")}>
               GM Icon
             </button>
+            <button type="button" className="settings-button" data-setting="krits" onClick={() => windows.open("krits", "Critical Hits & Fumbles")}>
+              Critical Hits &amp; Fumbles
+            </button>
           </>
         ) : null}
       </div>

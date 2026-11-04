@@ -12,6 +12,7 @@ import { DecalPicker, SettingsWindow, TableDecal } from "./Settings";
 import { DiceWindow } from "../dice/DiceWindow";
 import { SoundWindow } from "../sound/SoundWindow";
 import { QuickSlots } from "./QuickSlots";
+import { KritsWindow } from "../combat/KritsWindow";
 import { NotesWindow, NoteWindow } from "../notes/Notes";
 import { BooksWindow, BookWindow, ImagesWindow, PictureWindow } from "../books/Books";
 import { Icon } from "./icons";
@@ -130,7 +131,7 @@ export function Desktop({
         if (command.kind !== "windows") return null;
         const { windows: manager, launchers: kinds, characters: sheets } = live.current;
         const list = () => manager.windows.map((item) => ({ key: item.key, kind: item.kind, title: item.title, poppedOut: item.popped }));
-        if (command.action === "list") return { open: list(), kinds: [...kinds.map((item) => item.kind), "sheet", "book", "images", "picture", "note", "decals", "wallpapers", "gmicons", "dice"] };
+        if (command.action === "list") return { open: list(), kinds: [...kinds.map((item) => item.kind), "sheet", "book", "images", "picture", "note", "decals", "wallpapers", "gmicons", "krits", "dice"] };
         let key: string = command.window ?? "";
         if (command.window === "note") {
           const id = String(command.record ?? "");
@@ -164,6 +165,8 @@ export function Desktop({
                   ? { kind: "dice" as const, title: "Dice" }
                   : command.window === "gmicons"
                     ? { kind: "gmicons" as const, title: "GM Icon" }
+                  : command.window === "krits"
+                    ? { kind: "krits" as const, title: "Critical Hits & Fumbles" }
                   : kinds.find((item) => item.kind === command.window);
           if (!launcher) throw new Error(`No window "${command.window ?? ""}". Kinds: ${kinds.map((item) => item.kind).join(", ")}, sheet.`);
           if (command.action === "open") manager.open(launcher.kind, launcher.title);
@@ -262,6 +265,7 @@ export function Desktop({
               {item.kind === "note" && item.payload ? <NoteWindow session={session} id={item.payload} /> : null}
               {item.kind === "decals" ? <DecalPicker session={session} onClose={() => windows.close(item.key)} /> : null}
               {item.kind === "wallpapers" ? <DecalPicker session={session} kind="wallpaper" onClose={() => windows.close(item.key)} /> : null}
+              {item.kind === "krits" ? <KritsWindow session={session} /> : null}
               {item.kind === "gmicons" ? <DecalPicker session={session} kind="gmicon" onClose={() => windows.close(item.key)} /> : null}
             </FloatingWindow>
           ))}
