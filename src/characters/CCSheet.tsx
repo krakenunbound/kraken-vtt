@@ -130,6 +130,7 @@ export function CCSheet({ record, session }: { record: TableRecord; session: Ses
               session={session}
               kind={picking}
               current={typeof data[picking] === "string" ? String(data[picking]) : undefined}
+              race={String(data.race ?? data.species ?? "")}
               onClose={() => setPicking(null)}
               onPick={(id) => {
                 void session.op({ op: "update", id: record.id, patch: { data: { [picking]: id } } });

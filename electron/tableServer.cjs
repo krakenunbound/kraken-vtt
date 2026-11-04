@@ -5,6 +5,7 @@ const crypto = require("crypto");
 const os = require("os");
 const { WebSocketServer } = require("ws");
 const { createRecordStore, canSee } = require("./records.cjs");
+const { withArt } = require("./characterArt.cjs");
 const { soundFor, cleanTriggers } = require("./soundTriggers.cjs");
 const { defaultTriggers, TRIGGERS_VERSION } = require("./soundCatalog.cjs");
 const { createDice } = require("./dice.cjs");
@@ -1299,7 +1300,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
             if (!character) throw new Error(report.problems.join("; ") || "Could not build that character.");
             const owner = client.role === "dm" ? text(msg.owner, "").slice(0, 24) : client.name;
             const record = records.create(
-              { type: "character", name: character.name || "Unnamed character", owner, visibility: owner ? "owner" : "gm", data: character },
+              { type: "character", name: character.name || "Unnamed character", owner, visibility: owner ? "owner" : "gm", data: withArt(character, msg.spec, agentHandle.art) },
               client.role === "dm" ? seatOf(client) : { role: "dm", name: client.name },
             );
             addChat({ id: client.id, from: client.name, text: `Created ${record.name}: ${character.race ?? ""} ${msg.spec?.class ?? ""} ${character.level ?? 1}.`, at: Date.now() });
@@ -1563,6 +1564,20 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
               return combat.update(String(msg.id), msg.patch ?? {}, seat);
             case "remove":
               return combat.remove(String(msg.id), seat);
+            case "place-token": {
+              // The GM drags a creature from the tracker onto the map: its token
+              // goes where it fell, tied to that entry (players can then target it).
+              if (client.role !== "dm") throw new Error("Only the GM places creatures.");
+              const entry = combat.entries().find((item) => item.id === msg.id);
+              if (!entry) throw new Error("No one like that is in the fight.");
+              if (!map.scene()) throw new Error("Open a map first.");
+              const old = entry.tokenId ? map.tokens().find((token) => token.id === entry.tokenId) : null;
+              const x = num(msg.x, NaN);
+              const y = num(msg.y, NaN);
+              if (old) return map.move(old.id, { x, y }, seat, { snap: true });
+              const token = map.place({ recordId: entry.recordId, name: entry.name, x, y, hidden: entry.hidden, faction: entry.faction, allowSecond: true }, seat);
+              return combat.update(entry.id, { tokenId: token.id }, seat);
+            }
             case "init":
               return combat.rollInit(String(msg.which ?? ""), seat);
             case "next":

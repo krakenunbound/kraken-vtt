@@ -19,6 +19,7 @@ import { LibraryWindow } from "../books/Library";
 import { NotesWindow, NoteWindow } from "../notes/Notes";
 import { BooksWindow, BookWindow, ImagesWindow, PictureWindow } from "../books/Books";
 import { Icon } from "./icons";
+import { sound } from "../sound/soundEngine";
 import { FloatingWindow, useWindows, type WindowKind } from "./Windows";
 import { AssistantWindow } from "./AssistantWindow";
 
@@ -310,6 +311,13 @@ export function Desktop({
     [],
   );
   const myTurn = session.combat.entries.some((entry) => entry.mine && entry.id === session.combat.active);
+  // A player's turn coming round rings once, on their screen alone (the GM runs every turn).
+  const turnRang = useRef("");
+  useEffect(() => {
+    const key = myTurn ? `${session.combat.round}:${session.combat.active}` : "";
+    if (!gm && key && key !== turnRang.current) sound.yourTurn();
+    turnRang.current = key;
+  }, [myTurn, session.combat.round, session.combat.active]);
 
   return (
     <div className="shell desktop-shell" data-session={session.role}>

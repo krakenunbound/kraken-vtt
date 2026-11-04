@@ -13,6 +13,15 @@ import {
   type WallCategory,
 } from "../foundry/sceneObjects";
 
+// A door's handle (the GM's, to open and close it): sized to the door, at
+// most 8 screen pixels across in radius, and left off when the map is zoomed
+// out so far that it would be under 3 (doors are then the coloured lines).
+function doorDot(wall: SceneWall, scale: number) {
+  const length = Math.hypot(wall.x2 - wall.x1, wall.y2 - wall.y1);
+  const onScreen = Math.min(8, length * 0.12 * scale);
+  return onScreen < 3 ? 0 : onScreen / scale;
+}
+
 const LEGEND_ORDER: WallCategory[] = ["normal", "window", "invisible", "terrain", "ethereal", "door", "secret", "blank"];
 
 export type OverlayToken = SceneToken & { imageUrl: string | null };
@@ -94,12 +103,12 @@ export function SceneGraphics({
                   <title>{wallTitle(wall, state)}</title>
                 </line>
                 {tick ? <line x1={tick.x1} y1={tick.y1} x2={tick.x2} y2={tick.y2} stroke={color} strokeWidth={stroke} /> : null}
-                {wall.door > 0 ? (
+                {wall.door > 0 && doorDot(wall, scale) > 0 ? (
                   <circle
                     className="door"
                     cx={(wall.x1 + wall.x2) / 2}
                     cy={(wall.y1 + wall.y2) / 2}
-                    r={12 / scale}
+                    r={doorDot(wall, scale)}
                     fill={state === 1 ? "#66CC66" : state === 2 ? "#EE4444" : wall.door === 2 ? "#A612D4" : "#6666EE"}
                     stroke="#000"
                     strokeWidth={stroke}

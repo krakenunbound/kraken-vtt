@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import type { Session, TableRecord } from "../session/useSession";
 import { Icon } from "../ui/icons";
 import { slotDrag } from "../ui/QuickSlots";
-import { ArtPicker, Picture } from "./ArtPicker";
+import { ArtChoice, ArtPicker, Picture } from "./ArtPicker";
 import { Field } from "./CCSheet";
 import { CASTERS, classSkillChoices, SKILLS, skillKey, STANDARD_ARRAY, STATS, mod, signed } from "../../shared/dnd5e/rules.mjs";
 
@@ -86,6 +86,7 @@ export function Sheet5e({ record, session }: { record: TableRecord; session: Ses
               session={session}
               kind={picking}
               current={typeof data[picking] === "string" ? String(data[picking]) : undefined}
+              race={String(data.race ?? data.species ?? "")}
               onClose={() => setPicking(null)}
               onPick={(id) => {
                 void session.op({ op: "update", id: record.id, patch: { data: { [picking]: id } } });
@@ -360,6 +361,7 @@ export function Wizard5e({ session, onDone }: { session: Session; onDone: (id: s
   const [gear, setGear] = useState(true);
   const [problem, setProblem] = useState("");
   const [busy, setBusy] = useState(false);
+  const [art, setArt] = useState<{ portrait?: string; token?: string }>({});
   const classRecord = classes.find((item) => item.name === cls);
   const choices = classRecord ? classSkillChoices(classRecord) : { count: 0, names: [] as string[] };
   const caster = CASTERS[skillKey(cls) as keyof typeof CASTERS];
@@ -372,7 +374,7 @@ export function Wizard5e({ session, onDone }: { session: Session; onDone: (id: s
     setBusy(true);
     setProblem("");
     try {
-      const id = await session.buildCharacter({ name: name || "Adventurer", class: cls, species: kind, background, level: 1, scores, skills: skills.map((key) => SKILLS[key as keyof typeof SKILLS][0]), gear: gear ? startingGear() : [], spells });
+      const id = await session.buildCharacter({ name: name || "Adventurer", class: cls, species: kind, background, level: 1, scores, skills: skills.map((key) => SKILLS[key as keyof typeof SKILLS][0]), gear: gear ? startingGear() : [], spells, ...art });
       onDone(id);
     } catch (error) {
       setProblem(error instanceof Error ? error.message : String(error));
@@ -394,6 +396,7 @@ export function Wizard5e({ session, onDone }: { session: Session; onDone: (id: s
         </button>
       </header>
       <div className="wizard-5e-grid">
+        <ArtChoice session={session} race={kind} cls={cls} value={art} onChange={setArt} />
         <label>
           Name <input value={name} onChange={(event) => setName(event.target.value)} aria-label="Character name" />
         </label>

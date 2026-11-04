@@ -29,7 +29,33 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
   };
 
   return (
-    <li className={["ct-row", `faction-${entry.faction}`, active ? "active" : "", entry.hidden ? "hidden-entry" : ""].filter(Boolean).join(" ")} data-ct={entry.id}>
+    <li
+      className={["ct-row", `faction-${entry.faction}`, active ? "active" : "", entry.hidden ? "hidden-entry" : ""].filter(Boolean).join(" ")}
+      data-ct={entry.id}
+      // The GM drags a creature onto the map: its token goes where it falls (FG's tracker to the map).
+      draggable={gm}
+      onDragStart={(event) => {
+        if (!gm || (event.target as HTMLElement).closest("input, button:not(.ct-face)")) return;
+        event.dataTransfer.setData("application/x-kraken-ct", entry.id);
+        event.dataTransfer.effectAllowed = "copyMove";
+      }}
+      // A damage or healing roll from chat dropped here applies to this creature (FG's drop on the tracker).
+      onDragOver={(event) => {
+        if (gm && [...event.dataTransfer.types].includes("application/x-kraken-damage")) event.preventDefault();
+      }}
+      onDrop={(event) => {
+        const raw = event.dataTransfer.getData("application/x-kraken-damage");
+        if (!gm || !raw) return;
+        event.preventDefault();
+        event.stopPropagation();
+        try {
+          const roll = JSON.parse(raw) as { amount: number; heal?: boolean };
+          if (roll.amount > 0) session.ct(roll.heal ? "heal" : "damage", { id: entry.id, amount: roll.amount });
+        } catch {
+          /* not a roll */
+        }
+      }}
+    >
       <div className="ct-main">
         <span className="ct-turn" aria-label={active ? "Their turn" : undefined}>
           {active ? <Icon name="next" size={16} /> : null}
