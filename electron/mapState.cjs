@@ -57,7 +57,14 @@ function cleanToken(raw) {
     // (feet; null: from the character's senses).
     light: cleanCarried(raw.light),
     vision: raw.vision == null ? null : Math.min(1000, Math.max(0, num(raw.vision, 0))),
+    // Which way it faces, degrees clockwise from up (FG's token orientation); null: not turned.
+    facing: cleanFacing(raw.facing),
   };
+}
+function cleanFacing(value) {
+  if (value == null || value === "") return null;
+  const n = num(value, NaN);
+  return Number.isFinite(n) ? ((Math.round(n) % 360) + 360) % 360 : null;
 }
 
 function cleanCarried(raw) {
@@ -598,6 +605,7 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       active: Boolean(combatFor(token.id)?.active) || (token.recordId != null && token.recordId === activeRecord()),
       light: token.light,
       vision: token.vision,
+      facing: token.facing ?? null,
       seesFt: visionRange(token),
     };
     // A character's token picture, else its portrait (FG's token from the sheet).
@@ -666,8 +674,12 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
     const shining = sources;
     // In the dark, a player sees only lit places and what their own tokens'
     // darkvision reaches (inside that token's line of sight).
+    // C&C (PHB): bright light, such as a lantern's or a torch's, spoils deepvision
+    // and darkvision: a token standing in a light's bright light sees only by light.
+    const spoils = records.list({ type: "siegegame" }).length > 0;
+    const spoiled = spoils && dark > 0 ? mine.filter((token) => visionRange(token) > 0 && geometry.brightlyLit(token.x, token.y, shining)).map((token) => token.id) : [];
     const seeing = mine
-      .map((token, index) => ({ x: token.x, y: token.y, radiusPx: visionRange(token) * per, polygon: vision ? vision[index] : null }))
+      .map((token, index) => ({ x: token.x, y: token.y, radiusPx: spoiled.includes(token.id) ? 0 : visionRange(token) * per, polygon: vision ? vision[index] : null }))
       .filter((item) => item.radiusPx > 0);
     // Twilight vision: a moonlit night is like dusk, and dim light is enough.
     const twilight = mine.some((token) => token.recordId && geometry.hasTwilightVision(records.get(token.recordId)?.data?.senses));
@@ -685,6 +697,8 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       lights: lightOut(shining),
       seeing,
       twilight,
+      // Tokens of this player whose darkvision a bright light spoils now.
+      ...(spoiled.length ? { spoiled } : {}),
       sceneLights: [],
       // Labels: not hidden, in a group players see, not under the mask; a pin's link only when the player may open the record.
       // Paint in a group players may not see, and the GM's own FX, stay with the GM.
@@ -713,6 +727,7 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
     units,
     squareCenter,
     squareOf,
+    squareSize: () => (scene ? geometry.gridSize(scene) : 0),
     // A new scene from the GM. Its Foundry tokens and lights become the
     // table's the first time it is shown; after that the table's own are kept.
     setScene(next) {
@@ -811,13 +826,35 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       changed();
       return { token, blocked: result.blocked };
     },
+    // Several tokens at once (a group dragged together, a marching order):
+    // every one must be the seat's to move; each is stopped by walls on its own.
+    moveMany(moves, seat, { snap = true, collide } = {}) {
+      if (!scene) throw new Error("No scene is open.");
+      if (!Array.isArray(moves) || moves.length === 0) throw new Error("Which tokens?");
+      if (moves.length > MAX_TOKENS) throw new Error("Too many tokens at once.");
+      const list = moves.map((item) => ({ token: findToken(String(item.id)), to: { x: num(item.x, NaN), y: num(item.y, NaN) } }));
+      if (list.some(({ to }) => !Number.isFinite(to.x) || !Number.isFinite(to.y))) throw new Error("Where to?");
+      for (const { token } of list) if (!canMove(token, seat)) throw new Error(`${token.name} is not your token.`);
+      if (seat.role !== "dm" && state.locked[scene.id]) throw new Error("The GM has locked token movement.");
+      const blockByWalls = collide ?? (seat.role !== "dm" && sightOn());
+      const out = [];
+      for (const { token, to } of list) {
+        const result = geometry.settleMove(scene, wallsHere(), doorsHere(), { x: token.x, y: token.y }, to, token.squares, { snap, collide: blockByWalls });
+        token.x = result.x;
+        token.y = result.y;
+        out.push({ token, blocked: result.blocked });
+      }
+      changed();
+      return out;
+    },
     update(id, patch, seat) {
       const token = findToken(id);
-      // A player may light or put out a light on their own token, nothing else.
+      // A player may light or put out a light on their own token, and turn it; nothing else.
       if (seat.role !== "dm") {
         const keys = Object.keys(patch);
-        if (!canMove(token, seat) || keys.some((key) => key !== "light")) throw new Error("Only the GM can change tokens.");
+        if (!canMove(token, seat) || keys.some((key) => key !== "light" && key !== "facing")) throw new Error("Only the GM can change tokens.");
       }
+      if (patch.facing !== undefined) token.facing = cleanFacing(patch.facing);
       if (patch.light !== undefined) token.light = typeof patch.light === "string" ? presetLight(patch.light, lightProfiles()) : cleanCarried(patch.light);
       if (patch.vision !== undefined) token.vision = patch.vision == null ? null : Math.min(1000, Math.max(0, num(patch.vision, 0)));
       if (patch.name !== undefined) token.name = text(patch.name, token.name).slice(0, 48);

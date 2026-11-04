@@ -572,10 +572,21 @@ const TOOLS = [
   {
     name: "kraken_token_move",
     description:
-      "Move a token to a square (col/row, its top-left square). asPlayer: move it the way its owner would, stopped by walls and closed doors when line of sight is on; the answer says whether a wall stopped it.",
-    inputSchema: object({ id: string("Token id"), col: number("Square across"), row: number("Square down"), asPlayer: { type: "boolean" } }, ["id", "col", "row"]),
+      "Move a token to a square (col/row, its top-left square), or several together (a group dragged as one, as Foundry's multi-select): ids and dcol/drow, the squares across and down each moves. asPlayer: move them the way their owner would, stopped by walls and closed doors when line of sight is on; the answer says whether a wall stopped one.",
+    inputSchema: object({ id: string("Token id"), col: number("Square across"), row: number("Square down"), ids: { type: "array", items: { type: "string" }, description: "Several tokens moved together" }, dcol: number("Squares across each moves (with ids)"), drow: number("Squares down each moves (with ids)"), asPlayer: { type: "boolean" } }),
     run(args, ctx) {
       const { map, seat } = needTable(ctx);
+      if (Array.isArray(args.ids)) {
+        const step = map.squareSize();
+        const moves = args.ids.map((id) => {
+          const token = map.tokens().find((item) => item.id === id);
+          if (!token) throw new Error(`No token ${id}.`);
+          return { id, x: token.x + (args.dcol ?? 0) * step, y: token.y + (args.drow ?? 0) * step };
+        });
+        const moved = map.moveMany(moves, seat, { collide: args.asPlayer ? map.sightOn() : false });
+        return out(moved.map((item) => ({ id: item.token.id, ...map.squareOf(item.token), blocked: item.blocked })));
+      }
+      if (args.id === undefined || args.col === undefined || args.row === undefined) throw new Error("Give id, col and row (or ids with dcol and drow).");
       const token = map.tokens().find((item) => item.id === args.id);
       if (!token) throw new Error(`No token ${args.id}.`);
       const to = map.squareCenter(args.col, args.row, token.squares);
@@ -586,7 +597,7 @@ const TOOLS = [
   {
     name: "kraken_token_update",
     description:
-      "Change a token: name, hidden from players, size in squares, faction, owner (player name), a carried light (a preset: candle, lamp, torch, lantern, light, a game light profile name such as Torch, none; or {bright, dim, color} in feet), and its sight in the dark in feet (vision; null goes back to the character's senses).",
+      "Change a token: name, hidden from players, size in squares, faction, owner (player name), facing (degrees clockwise from up, as FG's token orientation; null: not turned), a carried light (a preset: candle, lamp, torch, lantern, light, a game light profile name such as Torch, none; or {bright, dim, color} in feet), and its sight in the dark in feet (vision; null goes back to the character's senses).",
     inputSchema: object({
       id: string("Token id"),
       light: { description: "Preset name, or {bright, dim, color} in feet, or none" },
@@ -596,6 +607,7 @@ const TOOLS = [
       squares: number("Size in squares"),
       faction: { type: "string", enum: ["friend", "neutral", "foe", "none"] },
       owner: string("Player who may move it"),
+      facing: { type: ["number", "null"], description: "Degrees clockwise from up" },
     }, ["id"]),
     run(args, ctx) {
       const { map, seat } = needTable(ctx);

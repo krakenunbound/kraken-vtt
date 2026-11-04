@@ -118,11 +118,12 @@ function polygonPoints(points: number[]): string {
 export type MapActions = {
   placeToken: (recordId: string | null, x?: number, y?: number, name?: string) => void;
   moveToken: (id: string, x: number, y: number, snap?: boolean) => void;
+  moveTokens?: (moves: { id: string; x: number; y: number }[], snap?: boolean) => void;
   removeToken: (id: string) => void;
   setDoor: (id: string, state?: number) => void;
   setSight: (on: boolean) => void;
   setLocked: (on: boolean) => void;
-  updateToken: (id: string, patch: Partial<Pick<MapToken, "name" | "hidden" | "squares" | "faction" | "owner" | "vision">> & { light?: string | MapToken["light"] }) => void;
+  updateToken: (id: string, patch: Partial<Pick<MapToken, "name" | "hidden" | "squares" | "faction" | "owner" | "vision" | "facing">> & { light?: string | MapToken["light"] }) => void;
   updateSettings: (patch: SceneSettingsPatch) => void;
   placeLight: (light: Partial<SceneLightRecord> & { preset?: string }) => void;
   updateLight: (id: string, patch: Partial<SceneLightRecord>) => void;
@@ -149,7 +150,8 @@ export type MapActions = {
 type Tool = "pan" | "ping" | "draw" | "erase" | "area";
 const DRAW_COLORS = ["#ffcc33", "#ff5a5a", "#5ad1ff", "#7dff7a", "#d38cff", "#ffffff", "#111111"];
 
-type Drag = { pointerId: number; id: string; start: Point; at: Point; moved: boolean; snap: boolean; squares: number };
+// group: the other picked tokens dragged with it (their places when the drag began).
+type Drag = { pointerId: number; id: string; start: Point; at: Point; moved: boolean; snap: boolean; squares: number; group?: { id: string; x: number; y: number; squares: number }[] };
 type Measure = { pointerId: number; start: Point; at: Point };
 type Menu = { id: string; left: number; top: number };
 
@@ -223,6 +225,11 @@ export function MapView({
   const [drag, setDrag] = useState<Drag | null>(null);
   const [measure, setMeasure] = useState<Measure | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
+  // Several tokens picked at once (Shift+click, or Shift+drag a box): dragged together.
+  const [picked, setPicked] = useState<string[]>([]);
+  const [box, setBox] = useState<{ pointerId: number; start: Point; at: Point } | null>(null);
+  // Shift+wheel over a token turns it (FG's token orientation): set each render, read by the wheel handler.
+  const turnRef = useRef<(tokenId: string, direction: number, fine: boolean) => boolean>(() => false);
   const [menu, setMenu] = useState<Menu | null>(null);
   const [camera, setCamera] = useState<Camera>({ x: 0, y: 0, scale: 0.1 });
   const cameraRef = useRef(camera);
@@ -342,6 +349,11 @@ export function MapView({
     if (!element) return;
     const onWheel = (event: WheelEvent) => {
       event.preventDefault();
+      if (event.shiftKey) {
+        const over = (event.target as HTMLElement | null)?.closest?.("[data-token]")?.getAttribute("data-token");
+        const turn = Math.sign(event.deltaY || event.deltaX);
+        if (over && turn && turnRef.current(over, turn, event.ctrlKey || event.altKey)) return;
+      }
       const rect = element.getBoundingClientRect();
       const pointerX = event.clientX - rect.left;
       const pointerY = event.clientY - rect.top;
@@ -369,6 +381,7 @@ export function MapView({
       const token = tokens.find((item) => item.id === selected);
       if (event.key === "Escape") {
         setSelected(null);
+        setPicked([]);
         setMenu(null);
         return;
       }
@@ -376,7 +389,9 @@ export function MapView({
       const step = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[event.key];
       if (step) {
         event.preventDefault();
-        actions.moveToken(token.id, token.x + step[0] * size, token.y + step[1] * size, true);
+        const group = picked.includes(token.id) ? tokens.filter((item) => picked.includes(item.id) && (gm || item.mine)) : [];
+        if (group.length > 1 && actions.moveTokens) actions.moveTokens(group.map((item) => ({ id: item.id, x: item.x + step[0] * size, y: item.y + step[1] * size })), true);
+        else actions.moveToken(token.id, token.x + step[0] * size, token.y + step[1] * size, true);
       } else if (gm && (event.key === "Delete" || event.key === "Backspace")) {
         actions.removeToken(token.id);
         setSelected(null);
@@ -386,7 +401,7 @@ export function MapView({
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [tokens, selected, gm, size, actions]);
+  }, [tokens, selected, picked, gm, size, actions]);
 
   useEffect(() => {
     const onFocus = (event: Event) => {
@@ -458,6 +473,16 @@ export function MapView({
     }
     return best?.id ?? null;
   }
+
+  // Shift+wheel over a token: a turn of 45 degrees (Ctrl or Alt: 15), for the GM or the token's player.
+  turnRef.current = (tokenId, direction, fine) => {
+    const token = tokens.find((item) => item.id === tokenId);
+    if (!token || !(gm || token.mine)) return false;
+    const step = fine ? 15 : 45;
+    const next = ((Math.round(((token.facing ?? 0) + direction * step) / step) * step) % 360 + 360) % 360;
+    actions.updateToken(token.id, { facing: next });
+    return true;
+  };
 
   // Image layers (FG's image layers, Foundry's tiles), in their order. An
   // "above" layer is faded on this screen while one of this seat's tokens (the
@@ -665,6 +690,15 @@ export function MapView({
         }
         if (event.button !== 0) return;
         setSelected(null);
+        if (event.shiftKey && tool === "pan" && !(gm && editorOpen && editTool)) {
+          // Shift+drag on the map: a box that picks the tokens in it (yours; the GM's: any).
+          const point = worldAt(event.clientX, event.clientY);
+          if (!point) return;
+          capture(event.currentTarget, event.pointerId);
+          setBox({ pointerId: event.pointerId, start: point, at: point });
+          return;
+        }
+        setPicked([]);
         if (gm && editorOpen && editTool && editTab === "fx" && editTool === "fxmask" && actions.fx && selectedFx) {
           // The FX layer's mask: a rectangle, two clicks.
           const raw = worldAt(event.clientX, event.clientY);
@@ -777,6 +811,11 @@ export function MapView({
         setPanning(true);
       }}
       onPointerMove={(event) => {
+        if (box && box.pointerId === event.pointerId) {
+          const point = worldAt(event.clientX, event.clientY);
+          if (point) setBox({ ...box, at: point });
+          return;
+        }
         if (tileDrag.current && tileDrag.current.pointerId === event.pointerId) {
           const point = worldAt(event.clientX, event.clientY);
           if (!point) return;
@@ -848,6 +887,17 @@ export function MapView({
         setCamera((camera) => ({ ...camera, x: camera.x + dx, y: camera.y + dy }));
       }}
       onPointerUp={(event) => {
+        if (box && box.pointerId === event.pointerId) {
+          const left = Math.min(box.start.x, box.at.x);
+          const right = Math.max(box.start.x, box.at.x);
+          const top = Math.min(box.start.y, box.at.y);
+          const bottom = Math.max(box.start.y, box.at.y);
+          const inside = tokens.filter((token) => (gm || token.mine) && token.x >= left && token.x <= right && token.y >= top && token.y <= bottom).map((token) => token.id);
+          setPicked((current) => [...new Set([...current, ...inside])]);
+          if (inside.length) setSelected(inside[0]);
+          setBox(null);
+          return;
+        }
         if (tileDrag.current && tileDrag.current.pointerId === event.pointerId) {
           const { id, tile } = tileDrag.current;
           tileDrag.current = null;
@@ -871,7 +921,13 @@ export function MapView({
           return;
         }
         if (drag && drag.pointerId === event.pointerId) {
-          if (drag.moved) actions.moveToken(drag.id, drag.at.x, drag.at.y, !event.altKey);
+          if (drag.moved && drag.group?.length && actions.moveTokens) {
+            // The others move as far as the one held; each snaps and is stopped by walls on its own.
+            const lead = ghost ?? drag.at;
+            const dx = lead.x - drag.start.x;
+            const dy = lead.y - drag.start.y;
+            actions.moveTokens([{ id: drag.id, x: drag.at.x, y: drag.at.y }, ...drag.group.map((item) => ({ id: item.id, x: item.x + dx, y: item.y + dy }))], !event.altKey);
+          } else if (drag.moved) actions.moveToken(drag.id, drag.at.x, drag.at.y, !event.altKey);
           setDrag(null);
           return;
         }
@@ -1142,7 +1198,7 @@ export function MapView({
           return (
             <div
               key={token.id}
-              className={["token", canDrag ? "token-draggable" : "", token.mine ? "token-mine" : "", token.active ? "token-active" : "", targeted.includes(token.id) ? "token-targeted" : "", selected === token.id ? "token-selected" : "", token.hidden ? "token-hidden" : "", isDragged ? "token-lifted" : ""]
+              className={["token", canDrag ? "token-draggable" : "", token.mine ? "token-mine" : "", token.active ? "token-active" : "", targeted.includes(token.id) ? "token-targeted" : "", selected === token.id ? "token-selected" : "", picked.includes(token.id) ? "token-picked" : "", token.hidden ? "token-hidden" : "", isDragged ? "token-lifted" : ""]
                 .filter(Boolean)
                 .join(" ")}
               data-token={token.id}
@@ -1160,11 +1216,18 @@ export function MapView({
                   return;
                 }
                 setSelected(token.id);
+                if (event.button === 0 && event.shiftKey) {
+                  // Shift+click picks it too, or lets it go.
+                  if (canDrag) setPicked((current) => (current.includes(token.id) ? current.filter((id) => id !== token.id) : [...current, token.id]));
+                  return;
+                }
+                const group = picked.includes(token.id) ? tokens.filter((item) => item.id !== token.id && picked.includes(item.id) && (gm || (item.mine && !map.locked))) : [];
+                if (!picked.includes(token.id)) setPicked([]);
                 if (event.button !== 0 || !canDrag) return;
                 const point = worldAt(event.clientX, event.clientY);
                 if (!point) return;
                 if (viewport.current) capture(viewport.current, event.pointerId);
-                setDrag({ pointerId: event.pointerId, id: token.id, start: { x: token.x, y: token.y }, at: point, moved: false, snap: !event.altKey, squares: token.squares });
+                setDrag({ pointerId: event.pointerId, id: token.id, start: { x: token.x, y: token.y }, at: point, moved: false, snap: !event.altKey, squares: token.squares, group: group.map((item) => ({ id: item.id, x: item.x, y: item.y, squares: item.squares })) });
               }}
               onContextMenu={(event) => {
                 event.preventDefault();
@@ -1187,13 +1250,18 @@ export function MapView({
                 }}
               >
                 {token.art && token.video ? (
-                  <video src={token.art} autoPlay loop muted playsInline />
+                  <video src={token.art} autoPlay loop muted playsInline style={token.facing != null ? { transform: `rotate(${token.facing}deg)` } : undefined} />
                 ) : token.art ? (
-                  <img src={token.art} alt="" draggable={false} />
+                  <img src={token.art} alt="" draggable={false} style={token.facing != null ? { transform: `rotate(${token.facing}deg)` } : undefined} />
                 ) : (
                   <span>{initials(token.name)}</span>
                 )}
               </div>
+              {token.facing != null ? (
+                <i className="token-facing" data-facing={token.facing} style={{ transform: `rotate(${token.facing}deg)` }} aria-hidden>
+                  <b style={{ borderBottomColor: token.color, borderWidth: `0 ${span * 0.09}px ${span * 0.13}px` }} />
+                </i>
+              ) : null}
               {targeted.includes(token.id) ? (
                 <svg className="target-reticle" viewBox="0 0 100 100" aria-label="Targeted">
                   <circle cx="50" cy="50" r="44" />
@@ -1215,6 +1283,14 @@ export function MapView({
           );
         })}
         {tileLayer("above")}
+        {drag && ghost && dragging && drag.group?.length
+          ? drag.group.map((item) => (
+              <div key={`ghost-${item.id}`} className="token-ghost" data-group-ghost={item.id} style={{ left: item.x + ghost.x - drag.start.x - (item.squares * size) / 2, top: item.y + ghost.y - drag.start.y - (item.squares * size) / 2, width: item.squares * size, height: item.squares * size }} />
+            ))
+          : null}
+        {box ? (
+          <div className="pick-box" style={{ left: Math.min(box.start.x, box.at.x), top: Math.min(box.start.y, box.at.y), width: Math.abs(box.at.x - box.start.x), height: Math.abs(box.at.y - box.start.y), borderWidth: 2 / camera.scale }} />
+        ) : null}
         {drag && ghost && dragging ? (
           <>
             <div
@@ -1605,6 +1681,12 @@ export function MapView({
       {hint ? (
         <p className="map-toast" role="status">
           {hint}
+        </p>
+      ) : null}
+      {!gm && map.sceneId === scene.id && map.spoiled?.length ? (
+        // C&C: bright light spoils deepvision and darkvision.
+        <p className="map-chip spoiled" role="status" data-spoiled={map.spoiled.length}>
+          Bright light spoils your {map.spoiled.length > 1 ? "tokens'" : ""} darkvision: you see only what the light shows.
         </p>
       ) : null}
       {gm && editorOpen && actions.wall && actions.mapUndo ? (

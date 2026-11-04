@@ -112,10 +112,45 @@ try {
   await seat.click('[data-tool="ping"]');
   await seat.mouse.click(view.x + 220, view.y - 160);
   await page.waitForSelector(".ping", { timeout: 8000 });
+
+  // Several at once: a second token of hers beside Aldric; Shift+drag a box round both, drag one, both go; Shift+wheel turns him.
+  const heroToken = (await tool("kraken_map", {})).tokens.find((token) => token.name === "Aldric");
+  const hound = await tool("kraken_token_place", { name: "Hound", col: heroToken.col + 1, row: heroToken.row });
+  await tool("kraken_token_update", { id: hound.id, owner: "A test player" });
+  await seat.waitForSelector('.token[data-name="Hound"]');
+  await seat.click('[data-tool="pan"]');
+  const boxOf = (name) => seat.$eval(`.token[data-name="${name}"]`, (element) => {
+    const box = element.getBoundingClientRect();
+    return { x: box.left + box.width / 2, y: box.top + box.height / 2, w: box.width };
+  });
+  const a = await boxOf("Aldric");
+  const b = await boxOf("Hound");
+  await seat.keyboard.down("Shift");
+  await seat.mouse.move(Math.min(a.x, b.x) - a.w, Math.min(a.y, b.y) - a.w);
+  await seat.mouse.down();
+  await seat.mouse.move(Math.max(a.x, b.x) + a.w, Math.max(a.y, b.y) + a.w, { steps: 8 });
+  await seat.mouse.up();
+  await seat.keyboard.up("Shift");
+  await seat.waitForFunction(() => document.querySelectorAll(".token.token-picked").length === 2, null, { timeout: 5000 });
+  const before = Object.fromEntries((await tool("kraken_map", {})).tokens.map((token) => [token.name, token]));
+  await seat.mouse.move(a.x, a.y);
+  await seat.mouse.down();
+  await seat.mouse.move(a.x, a.y + a.w * 2.2, { steps: 10 });
+  await seat.mouse.up();
+  await settle(800);
+  const after = Object.fromEntries((await tool("kraken_map", {})).tokens.map((token) => [token.name, token]));
+  assert(after.Aldric.row === before.Aldric.row + 2 && after["Hound"].row === before["Hound"].row + 2, `both moved two squares down: ${before.Aldric.row}->${after.Aldric.row}, ${before["Hound"].row}->${after["Hound"].row}`);
+  const turned = await boxOf("Aldric");
+  await seat.mouse.move(turned.x, turned.y);
+  await seat.keyboard.down("Shift");
+  await seat.mouse.wheel(0, 100);
+  await seat.keyboard.up("Shift");
+  await seat.waitForSelector('.token[data-name="Aldric"] .token-facing[data-facing="45"]', { timeout: 5000 });
+  await page.waitForSelector('.token[data-name="Aldric"] .token-facing[data-facing="45"]', { timeout: 5000 });
   await seat.screenshot({ path: path.join(tmpdir(), "kraken-maptools-player.png") });
   await page.screenshot({ path: path.join(tmpdir(), "kraken-maptools-gm.png") });
   assert(failures.length === 0, `no errors on screen: ${failures.join("; ")}`);
-  console.log("MAPTOOLS_UI_OK find my token centres and zooms; a player draws, rubs out and pings; the GM sees it");
+  console.log("MAPTOOLS_UI_OK find my token centres and zooms; a player draws, rubs out and pings; the GM sees it; she box-picks her two tokens and drags them together, and turns one with Shift+wheel");
 } finally {
   await browser?.close();
   child.kill();

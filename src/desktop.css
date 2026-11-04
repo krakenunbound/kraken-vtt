@@ -1172,3 +1172,12 @@ textarea.cc-field.tall { min-height: 220px; }
 /* The Dice window's sets: my dice, NPC dice, damage dice. */
 .dice-which { margin-bottom: 6px; }
 .dice-follow { margin: 0 0 8px; }
+
+/* Several tokens picked at once, the box that picks them, and a token's facing. */
+.token.token-picked .token-disc { box-shadow: 0 0 0 3px #ffd36b, 0 0 14px rgba(255, 211, 107, 0.8); }
+.world .pick-box { position: absolute; border: 2px dashed #ffd36b; background: rgba(255, 211, 107, 0.12); pointer-events: none; z-index: 20; }
+.token .token-facing { position: absolute; inset: 0; pointer-events: none; }
+.token .token-facing b { position: absolute; left: 50%; top: -2%; width: 0; height: 0; border-style: solid; border-color: transparent; transform: translate(-50%, -60%); filter: drop-shadow(0 0 2px #000); }
+.token .token-disc img, .token .token-disc video { transition: transform 0.15s; }
+
+.map-chip.spoiled { position: absolute; left: 50%; bottom: 96px; transform: translateX(-50%); margin: 0; padding: 5px 12px; border-radius: 14px; background: rgba(20, 16, 10, 0.82); border: 1px solid var(--brass-soft, #a8834a); color: #f3dfb3; font-size: 13px; pointer-events: none; z-index: 30; }

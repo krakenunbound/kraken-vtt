@@ -25,6 +25,8 @@ export type MapToken = {
   light: { name: string; bright: number; dim: number; color: string } | null;
   vision: number | null;
   seesFt: number;
+  // Degrees clockwise from up; null: not turned.
+  facing?: number | null;
 };
 // A light shining now, with its own line of sight (pixels).
 export type MapLight = { id: string; x: number; y: number; brightPx: number; dimPx: number; color: string; polygon: number[] | null; animation?: string; speed?: number };
@@ -53,6 +55,8 @@ export type TableMap = {
   seeing: MapSeeing[];
   // This player's tokens have twilight vision (C&C elves).
   twilight?: boolean;
+  // This player's tokens whose darkvision a bright light spoils now (C&C).
+  spoiled?: string[];
   sceneLights: SceneLightRecord[];
   settings: MapSettings;
   drawings?: MapDrawing[];
@@ -819,9 +823,15 @@ export function useSession() {
     setMap((current) => ({ ...current, tokens: current.tokens.map((token) => (token.id === id ? { ...token, x, y } : token)) }));
     send({ type: "token-move", id, x, y, snap });
   }, [send]);
+  // A group dragged together: each token to its own place, in one message.
+  const moveTokens = useCallback((moves: { id: string; x: number; y: number }[], snap = true) => {
+    const at = new Map(moves.map((move) => [move.id, move]));
+    setMap((current) => ({ ...current, tokens: current.tokens.map((token) => (at.has(token.id) ? { ...token, x: at.get(token.id)!.x, y: at.get(token.id)!.y } : token)) }));
+    send({ type: "token-move", moves, snap });
+  }, [send]);
   const removeToken = useCallback((id: string) => send({ type: "token-remove", id }), [send]);
   const updateToken = useCallback(
-    (id: string, patch: Partial<Pick<MapToken, "name" | "hidden" | "squares" | "faction" | "owner" | "vision">> & { light?: string | MapToken["light"] }) => send({ type: "token-update", id, patch }),
+    (id: string, patch: Partial<Pick<MapToken, "name" | "hidden" | "squares" | "faction" | "owner" | "vision" | "facing">> & { light?: string | MapToken["light"] }) => send({ type: "token-update", id, patch }),
     [send],
   );
   const updateSettings = useCallback((patch: import("../table/SceneSettings").SceneSettingsPatch) => send({ type: "scene-settings", patch }), [send]);
@@ -916,6 +926,7 @@ export function useSession() {
     sendChat,
     placeToken,
     moveToken,
+    moveTokens,
     removeToken,
     updateToken,
     setDoor,

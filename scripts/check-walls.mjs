@@ -240,7 +240,29 @@ try {
   // Saved with the campaign.
   const saved = server.agent.map.persisted();
   assert(saved.walls.room.length === 4, `walls are saved: ${saved.walls.room.length}`);
-  console.log("ok walls: chains drawn; wall, ethereal, invisible, window (opened by the player, closed by Close all doors), toggle, one-way and shadow caster each as FG; split, remove, undo; the mask (global, reveal, hide again, undo) withholds what is under it; text, numbers (no reuse, renumber, prefix) and pins in layer groups (GM-only, locked); paint shapes and fills; FX layers with masks; saved; never sent to players");
+  // C&C: bright light spoils darkvision (PHB, Dwarf: "Bright lights, such as from a lantern or other light source, spoil deepvision").
+  await tool("kraken_wall", { action: "clear" });
+  await tool("kraken_mask", { action: "off" });
+  server.agent.records.create({ type: "siegegame", name: "Rules", data: {} }, seat);
+  for (const light of map.lights()) await tool("kraken_light", { action: "remove", id: light.id });
+  map.move(orc.id, { x: 525, y: 125 }, seat, { snap: false });
+  map.move(hero.id, { x: 75, y: 125 }, seat, { snap: false });
+  await tool("kraken_scene_settings", { darkness: 1 });
+  await tool("kraken_token_update", { id: hero.id, vision: 60 });
+  const darkView = () => map.viewFor(playerSeat, "");
+  assert(darkView().tokens.some((item) => item.id === orc.id) && !darkView().spoiled, "60 ft of darkvision sees the orc 45 ft off in the dark");
+  await tool("kraken_token_update", { id: hero.id, light: "torch" });
+  assert(!darkView().tokens.some((item) => item.id === orc.id) && darkView().spoiled?.includes(hero.id), "a torch in hand spoils it: only the torch's 40 ft are seen");
+  await tool("kraken_token_update", { id: hero.id, light: "none" });
+  const lamp = await tool("kraken_light", { action: "place", x: 75, y: 125, preset: "torch" });
+  assert(!darkView().tokens.some((item) => item.id === orc.id), "standing in a torch's bright light spoils it too");
+  await tool("kraken_light", { action: "update", id: lamp.id, x: 275, y: 125, bright: 10, dim: 22 });
+  assert(darkView().tokens.some((item) => item.id === orc.id) && !darkView().spoiled, "out of its bright light (still in its dim light), the darkvision works again");
+  await tool("kraken_light", { action: "remove", id: lamp.id });
+  assert(darkView().tokens.some((item) => item.id === orc.id), "light gone: darkvision back");
+  await tool("kraken_scene_settings", { darkness: null });
+
+  console.log("ok walls: chains drawn; wall, ethereal, invisible, window (opened by the player, closed by Close all doors), toggle, one-way and shadow caster each as FG; split, remove, undo; the mask (global, reveal, hide again, undo) withholds what is under it; text, numbers (no reuse, renumber, prefix) and pins in layer groups (GM-only, locked); paint shapes and fills; FX layers with masks; bright light spoils darkvision (C&C); saved; never sent to players");
 } finally {
   for (const ws of sockets) ws.close();
   await server.stop();
