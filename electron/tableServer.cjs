@@ -204,6 +204,8 @@ function savedOptions(value) {
     // Sounds for the GM's hidden rolls, as Kraken's Syrinscape extension:
     // "off" none, "combat" attacks, damage, healing and initiative only, "all".
     soundHidden: ["off", "combat", "all"].includes(options.soundHidden) ? options.soundHidden : "combat",
+    // When a creature's targets clear: never (FG), after its spell or attack, or at the end of its turn.
+    clearTargets: ["never", "action", "turn"].includes(options.clearTargets) ? options.clearTargets : "never",
     // The same sound again only after this many seconds.
     soundRepeat: Math.min(30, Math.max(0, Number.isFinite(Number(options.soundRepeat)) ? Number(options.soundRepeat) : 1)),
   };

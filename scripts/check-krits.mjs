@@ -17,6 +17,11 @@ const server = createTableServer();
 try {
   await server.listen({ port: 0, password: "" });
   const agent = server.agent;
+  const tool = async (name, args = {}) => {
+    const result = await callTool(name, args, { table: () => server });
+    if (result.isError) throw new Error(result.content[0].text);
+    return JSON.parse(result.content[0].text);
+  };
   const ct = async (args) => {
     const result = await callTool("kraken_combat", args, { table: () => server });
     if (result.isError) throw new Error(result.content[0].text);
@@ -190,7 +195,15 @@ try {
   }
   assert(/used Lightning once today/.test(refused), `once a day: ${refused}`);
 
-  console.log("ok krits: Option 5 crit and fumble tables applied (damage, effects, ongoing bleed), Option 6 maximum x2 and Option 4 doubling on the next damage, instant death left to the GM, crits off; ammunition fired and refused; spell resistance resists and lets through; an NPC casts at its hit dice, a failed save paralyses, uses per day are counted");
+  // The table's option: targets clear after a spell.
+  await tool("kraken_table_options", { clearTargets: "action" });
+  await ct({ action: "target", id: id("Aldric"), targetId: id("Imp") });
+  agent.dice.force([17, 2]);
+  await ct({ action: "cast", recordId: hero.id, power: "id-00001" });
+  assert((await ct({ action: "view" })).entries.find((entry) => entry.name === "Aldric").targets.length === 0, "targets clear after the spell");
+  await tool("kraken_table_options", { clearTargets: "never" });
+
+  console.log("ok krits: Option 5 crit and fumble tables applied (damage, effects, ongoing bleed), Option 6 maximum x2 and Option 4 doubling on the next damage, instant death left to the GM, crits off; ammunition fired and refused; spell resistance resists and lets through; an NPC casts at its hit dice, a failed save paralyses, uses per day are counted; targets clear after a spell by the table's option");
 } finally {
   await server.stop();
 }

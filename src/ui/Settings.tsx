@@ -35,6 +35,16 @@ export function SettingsWindow({ session }: { session: Session }) {
         <input type="checkbox" checked={session.options.towerReveal} onChange={(event) => session.setTableOptions({ towerReveal: event.target.checked })} />
         Let players see their own dice-tower rolls (unticked: only the GM sees them, as in FG)
       </label> : null}
+      {gm ? (
+        <label className="settings-check">
+          Clear targets{" "}
+          <select value={(session.options as { clearTargets?: string }).clearTargets ?? "never"} onChange={(event) => session.setTableOptions({ clearTargets: event.target.value } as never)} aria-label="Clear targets" data-setting="clear-targets">
+            <option value="never">Never (as FG)</option>
+            <option value="action">After a spell or an attack's damage</option>
+            <option value="turn">At the end of the creature's turn</option>
+          </select>
+        </label>
+      ) : null}
     </div>
   );
 }
