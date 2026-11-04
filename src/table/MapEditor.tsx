@@ -1,5 +1,5 @@
-import { useState } from "react";
-import type { EditWall, MapLabel, SceneLightRecord, TableMap, WallKind } from "../session/useSession";
+import { useEffect, useState } from "react";
+import type { DecalItem, EditWall, MapLabel, MapTile, SceneLightRecord, TableMap, WallKind } from "../session/useSession";
 import type { SceneSettingsPatch } from "./SceneSettings";
 import { LIGHT_PRESETS } from "../../shared/map/geometry.mjs";
 
@@ -9,7 +9,7 @@ import { LIGHT_PRESETS } from "../../shared/map/geometry.mjs";
 // has as a tool too (kraken_wall, kraken_light, kraken_scene_settings,
 // kraken_map_undo).
 
-export type EditTab = "walls" | "lights" | "mask" | "text" | "grid" | "paint" | "fx";
+export type EditTab = "walls" | "lights" | "mask" | "text" | "grid" | "paint" | "fx" | "images";
 export type EditTool = "select" | "line" | "rect" | "poly" | "light" | "cell" | "text" | "number" | "free" | "ellipse" | "fxmask" | null;
 // What the Paint tab draws next.
 export type PaintStyle = { color: string; width: number; alpha: number; fill: string | null; fillAlpha: number; group: string };
@@ -67,7 +67,14 @@ type Props = {
   selectedLabel: string | null;
   maskMode: "reveal" | "hide";
   setMaskMode: (mode: "reveal" | "hide") => void;
+  selectedTile: string | null;
+  setSelectedTile: (id: string | null) => void;
+  viewCenter: () => { x: number; y: number } | null;
+  // The tile library: its pictures and their addresses.
+  tilePictures: () => Promise<DecalItem[]>;
+  tileUrl: (id: string) => string;
   actions: {
+    tile: (action: string, payload?: Record<string, unknown>) => void;
     fx: (action: string, payload?: Record<string, unknown>) => void;
     clearDrawings: () => void;
     label: (action: string, payload?: Record<string, unknown>) => void;
@@ -115,11 +122,12 @@ export function MapEditor(props: Props) {
             ["text", "Tt", "Text"],
             ["paint", "🖌", "Paint"],
             ["fx", "ƒx", "FX"],
+            ["images", "🖼", "Image layers: pictures placed on the map, in order"],
           ] as const
         ).map(([id, icon, title]) => (
           <button key={id} type="button" role="tab" aria-selected={tab === id} title={title} data-edit-tab={id} onClick={() => setTab(id)}>
             <span aria-hidden>{icon}</span>
-            <small>{{ walls: "Walls", lights: "Lights", mask: "Mask", grid: "Grid", text: "Text", paint: "Paint", fx: "FX" }[id]}</small>
+            <small>{{ walls: "Walls", lights: "Lights", mask: "Mask", grid: "Grid", text: "Text", paint: "Paint", fx: "FX", images: "Images" }[id]}</small>
           </button>
         ))}
       </nav>
@@ -356,6 +364,7 @@ export function MapEditor(props: Props) {
       ) : null}
       {tab === "paint" ? <PaintTab {...props} /> : null}
       {tab === "fx" ? <FxTab {...props} /> : null}
+      {tab === "images" ? <ImagesTab {...props} /> : null}
 
       {tab === "grid" ? (
         <div className="me-box me-grid-tab">
@@ -725,6 +734,194 @@ function FxTab(props: Props) {
         {layers.map((item) => (
           <button key={item.id} type="button" className={item.id === selectedFx ? "me-layer-row on" : "me-layer-row"} data-fx={item.id} onClick={() => setSelectedFx(item.id)}>
             ƒx {item.name || item.type} <small className="hint">{item.type}{item.mask.use ? ` · masked ${item.mask.mode}` : ""}{item.players ? "" : " · GM only"}</small>
+          </button>
+        ))}
+      </div>
+    </>
+  );
+}
+
+// FG's image layers (Foundry's tiles): pictures from the tile library placed
+// on the map, listed top first (the last drawn); each below or above the
+// tokens, hidden from players, locked, in a group; ordered up and down.
+// A picture is added from the library, by Browse (copied into it), or by
+// dropping a picture file on the map while this tab is open.
+export async function placePicture(id: string, url: string, center: { x: number; y: number } | null, add: (tile: Partial<MapTile>) => void, name = "") {
+  const size = await new Promise<{ width: number; height: number }>((resolve) => {
+    const picture = new Image();
+    picture.onload = () => resolve({ width: picture.naturalWidth || 200, height: picture.naturalHeight || 200 });
+    picture.onerror = () => resolve({ width: 200, height: 200 });
+    picture.src = url;
+  });
+  const at = center ?? { x: size.width / 2, y: size.height / 2 };
+  add({ src: id, name, x: Math.round(at.x - size.width / 2), y: Math.round(at.y - size.height / 2), width: size.width, height: size.height });
+}
+
+function ImagesTab(props: Props) {
+  const { map, actions, selectedTile, setSelectedTile } = props;
+  const tiles = map.tiles ?? [];
+  const tile = tiles.find((item) => item.id === selectedTile) ?? null;
+  const [pictures, setPictures] = useState<DecalItem[] | null>(null);
+  const [problem, setProblem] = useState("");
+  const [choosing, setChoosing] = useState(false);
+  useEffect(() => {
+    if (!choosing || pictures) return;
+    props.tilePictures().then(setPictures, () => setPictures([]));
+  }, [choosing, pictures, props]);
+  const set = (patch: Partial<MapTile>) => tile && actions.tile("update", { id: tile.id, patch });
+  const add = (id: string, name = "") => {
+    setChoosing(false);
+    void placePicture(id, props.tileUrl(id), props.viewCenter(), (made) => actions.tile("add", { tile: made }), name);
+  };
+  const browse = async () => {
+    try {
+      const picked = await window.kraken?.pickDecal("tile");
+      if (picked) {
+        setPictures(null);
+        add(picked.id, picked.name);
+      }
+    } catch (error) {
+      setProblem(error instanceof Error ? error.message : String(error));
+    }
+  };
+  const field = (key: "x" | "y" | "width" | "height" | "rotation", label: string) =>
+    tile ? (
+      <label>
+        {label}
+        <input type="number" value={tile[key]} disabled={tile.locked && key !== "rotation"} onChange={(event) => set({ [key]: Number(event.target.value) })} aria-label={`Image layer ${label}`} data-tile-field={key} />
+      </label>
+    ) : null;
+  return (
+    <>
+      <div className="me-tools">
+        <button type="button" className={choosing ? "me-tool on" : "me-tool"} title="Add a picture from the tile library" aria-label="Add an image layer" data-action="tile-add" onClick={() => setChoosing(!choosing)}>
+          ✚
+        </button>
+        {window.kraken ? (
+          <button type="button" className="me-tool" title="Browse for a picture on this computer (copied into the tile library)" aria-label="Browse for a picture" data-action="tile-browse" onClick={() => void browse()}>
+            📂
+          </button>
+        ) : null}
+        <span className="me-spacer" />
+        {tile ? (
+          <>
+            {(
+              [
+                ["top", "⤒", "To the top"],
+                ["up", "↑", "Up one"],
+                ["down", "↓", "Down one"],
+                ["bottom", "⤓", "To the bottom"],
+              ] as const
+            ).map(([where, icon, title]) => (
+              <button key={where} type="button" className="me-tool" title={title} aria-label={`Move the image layer ${where}`} data-tile-order={where} onClick={() => actions.tile("order", { id: tile.id, where })}>
+                {icon}
+              </button>
+            ))}
+          </>
+        ) : null}
+        <button type="button" className="me-tool" title="Undo the last map edit" aria-label="Undo" onClick={actions.mapUndo}>
+          ↶
+        </button>
+      </div>
+      {choosing ? (
+        <div className="me-box me-tile-pictures" aria-label="Tile pictures">
+          {pictures === null ? <p className="me-caption">Reading the tile library...</p> : null}
+          {pictures && pictures.length === 0 ? <p className="me-caption">No pictures yet: Browse for one, or drop a picture file on the map.</p> : null}
+          <div className="me-tile-grid">
+            {(pictures ?? []).map((item) => (
+              <button key={item.id} type="button" title={item.name} data-tile-picture={item.id} onClick={() => add(item.id, item.name)}>
+                <img src={props.tileUrl(item.id)} alt={item.name} loading="lazy" />
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : null}
+      <div className="me-box">
+        {tile ? (
+          <>
+            <label className="me-row">
+              Name
+              <input value={tile.name} onChange={(event) => set({ name: event.target.value })} aria-label="Image layer name" />
+            </label>
+            <div className="me-grid2">
+              {field("x", "X")}
+              {field("y", "Y")}
+              {field("width", "Width")}
+              {field("height", "Height")}
+              {field("rotation", "Rotation")}
+              <label>
+                Opacity
+                <input type="range" min={0} max={1} step={0.05} value={tile.alpha} onChange={(event) => set({ alpha: Number(event.target.value) })} aria-label="Image layer opacity" />
+              </label>
+            </div>
+            <label className="me-row">
+              Level
+              <select value={tile.level} onChange={(event) => set({ level: event.target.value as "below" })} aria-label="Image layer level" data-tile-level-select>
+                <option value="below">Below tokens (floor, rugs, rubble)</option>
+                <option value="above">Above tokens (roofs, tree tops: fade when a token is under)</option>
+              </select>
+            </label>
+            <div className="me-row">
+              <label>
+                <input type="checkbox" checked={tile.flipX} disabled={tile.locked} onChange={(event) => set({ flipX: event.target.checked })} /> Flip ⇆
+              </label>
+              <label>
+                <input type="checkbox" checked={tile.flipY} disabled={tile.locked} onChange={(event) => set({ flipY: event.target.checked })} /> Flip ⇅
+              </label>
+              <label>
+                <input type="checkbox" checked={!tile.hidden} onChange={(event) => set({ hidden: !event.target.checked })} data-tile-players /> Players see it
+              </label>
+              <label>
+                <input type="checkbox" checked={Boolean(tile.locked)} onChange={(event) => set({ locked: event.target.checked })} data-tile-locked /> Locked
+              </label>
+            </div>
+            <label className="me-row">
+              Group
+              <input list="me-tile-groups" value={tile.group} onChange={(event) => set({ group: event.target.value })} aria-label="Image layer group" />
+              <datalist id="me-tile-groups">
+                {(map.groups ?? []).map((group) => (
+                  <option key={group.name} value={group.name} />
+                ))}
+              </datalist>
+            </label>
+            <div className="me-row">
+              <button type="button" onClick={() => set({ width: Math.round(tile.width * 0.5), height: Math.round(tile.height * 0.5) })} disabled={tile.locked}>
+                Half size
+              </button>
+              <button type="button" onClick={() => set({ width: Math.round(tile.width * 2), height: Math.round(tile.height * 2) })} disabled={tile.locked}>
+                Double
+              </button>
+              <button
+                type="button"
+                disabled={tile.locked}
+                data-action="tile-remove"
+                onClick={() => {
+                  actions.tile("remove", { id: tile.id });
+                  setSelectedTile(null);
+                }}
+              >
+                Delete
+              </button>
+            </div>
+          </>
+        ) : (
+          <p className="me-caption">Add a picture (a tree, a cart, a roof, a second map piece) or pick a layer below; drag it on the map to move it (Shift: no snapping), its corner to resize it.</p>
+        )}
+        {problem ? <p className="me-caption error">{problem}</p> : null}
+      </div>
+      <div className="me-layers" aria-label="Image layers">
+        <div className="me-layer head">
+          <b>IMAGE LAYERS</b> <small className="hint">top first</small>
+        </div>
+        {[...tiles].reverse().map((item) => (
+          <button key={item.id} type="button" className={item.id === selectedTile ? "me-layer-row on" : "me-layer-row"} data-tile-row={item.id} onClick={() => setSelectedTile(item.id)}>
+            🖼 {item.name || item.src.replace(/^lib\/[0-9a-f]{12}-/, "")}{" "}
+            <small className="hint">
+              {item.level === "above" ? "above tokens" : "below"}
+              {item.hidden ? " · GM only" : ""}
+              {item.locked ? " · locked" : ""}
+              {item.group ? ` · ${item.group}` : ""}
+            </small>
           </button>
         ))}
       </div>

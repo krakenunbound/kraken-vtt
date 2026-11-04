@@ -63,7 +63,10 @@ export type TableMap = {
   labels?: MapLabel[];
   groups?: MapGroup[];
   fx?: MapFx[];
+  tiles?: MapTile[];
 };
+// An image layer (FG's image layers, Foundry's tiles): url is where this seat loads it.
+export type MapTile = { id: string; name: string; src: string; url: string; x: number; y: number; width: number; height: number; rotation: number; alpha: number; flipX: boolean; flipY: boolean; level: "below" | "above"; hidden: boolean; locked?: boolean; group: string };
 // Text on the map (FG's text layers): labels, numbers, pins.
 export type MapLabel = { id: string; x: number; y: number; text: string; font: string; size: number; color: string; rotation: number; anchor: string; outline: { width: number; color: string }; shadow: { offset: number; blur: number; color: string }; hidden: boolean; group: string; number: number | null; icon: string; link: { kind: string; id: string } | null };
 export type MapGroup = { name: string; shown?: boolean; players?: boolean; locked?: boolean; nextNumber?: number; prefix?: string };
@@ -140,7 +143,7 @@ export type SoundItem = { id: string; kind: string; group: string; name: string 
 export type SoundLibrary = { sounds: SoundItem[]; groups: { id: string; count: number }[]; folder: string; triggers?: SoundTrigger[] };
 export type TableOptions = { towerReveal: boolean; decal: string; wallpaper: string; gmIcon: string; soundHidden: "off" | "combat" | "all"; soundRepeat: number };
 export type DecalItem = { id: string; name: string; group: string; ruleset?: string };
-export type PictureKind = "decal" | "wallpaper" | "gmicon";
+export type PictureKind = "decal" | "wallpaper" | "gmicon" | "tile";
 // The combat tracker as the host shows it to this seat (electron/combat.cjs viewFor).
 export type CombatEntry = {
   id: string;
@@ -308,7 +311,8 @@ export function useSession() {
     }
     // Token pictures are served by the host, under this seat's asset token.
     const tokens = (next.tokens ?? []).map((token) => (token.art && token.art.startsWith("/") ? { ...token, art: `${originRef.current}${token.art}` } : token));
-    setMap({ ...EMPTY_MAP, ...next, tokens });
+    const tiles = (next.tiles ?? []).map((tile) => (tile.url && tile.url.startsWith("/") ? { ...tile, url: `${originRef.current}${tile.url}` } : tile));
+    setMap({ ...EMPTY_MAP, ...next, tokens, tiles });
   }, []);
 
   const reset = useCallback(() => {
@@ -618,10 +622,23 @@ export function useSession() {
     } catch {
       /* Token pictures are optional: players then see initials. */
     }
+    // A bundle's tiles: their pictures into the tile library, then placed by the host (once per scene).
+    const tiles: Record<string, unknown>[] = [];
+    for (const tile of scene.tiles ?? []) {
+      if (!tile.image) continue;
+      try {
+        const made = await window.kraken.addDecal(tile.src.split("/").pop() || "tile.webp", tile.image, "tile");
+        const { image: _image, src: _src, ...rest } = tile;
+        tiles.push({ ...rest, src: made.id });
+      } catch {
+        /* a picture the library refuses is left off */
+      }
+    }
     socket.send(
       JSON.stringify({
         type: "scene",
         scene: {
+          ...(tiles.length ? { tiles } : {}),
           id: scene.id,
           name: scene.name,
           width: scene.width,
@@ -824,6 +841,7 @@ export function useSession() {
   }, []);
   const paint = useCallback((payload: Record<string, unknown>) => send({ type: "draw", ...payload }), [send]);
   const fx = useCallback((action: string, payload: Record<string, unknown> = {}) => send({ type: "fx", action, ...payload }), [send]);
+  const tile = useCallback((action: string, payload: Record<string, unknown> = {}) => send({ type: "tile", action, ...payload }), [send]);
   const label = useCallback((action: string, payload: Record<string, unknown> = {}) => send({ type: "label", action, ...payload }), [send]);
   const mapGroup = useCallback((action: string, payload: Record<string, unknown> = {}) => send({ type: "map-group", action, ...payload }), [send]);
   const placeLight = useCallback((light: Partial<SceneLightRecord> & { preset?: string }) => send({ type: "light-place", light }), [send]);
@@ -962,6 +980,7 @@ export function useSession() {
     mapGroup,
     paint,
     fx,
+    tile,
     changeClass,
   };
 }

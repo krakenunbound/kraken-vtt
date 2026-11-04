@@ -176,6 +176,30 @@ try {
   await page.selectOption('[aria-label="FX type"]', "snow");
   await page.waitForSelector('[data-weather="snow"]');
 
+  // Images tab: a picture copied into the tile library (as Browse does), added from the + list, dragged.
+  const decal = path.join(process.cwd(), "public", "decals", "Arcane Circle.webp");
+  await tool("kraken_tile", { action: "add", file: decal, x: cx - 380, y: cy - 280, width: 100, height: 100, name: "From the agent" });
+  await page.click('[data-edit-tab="images"]');
+  await page.click('[data-action="tile-add"]');
+  await page.waitForSelector("[data-tile-picture]");
+  await page.click("[data-tile-picture]");
+  await page.waitForFunction(() => document.querySelectorAll(".map-tile").length === 2, null, { timeout: 10000 });
+  let tilesNow = await tool("kraken_tile", { action: "list" });
+  const added = tilesNow.find((tile) => tile.name !== "From the agent");
+  const grab = await screenOf(page, added.x + added.width * 0.2, added.y + added.height * 0.8);
+  await page.mouse.move(grab.x, grab.y);
+  await page.mouse.down();
+  await page.mouse.move(grab.x + 60, grab.y + 40, { steps: 6 });
+  await page.mouse.up();
+  await settle(500);
+  tilesNow = await tool("kraken_tile", { action: "list" });
+  const moved = tilesNow.find((tile) => tile.id === added.id);
+  assert(moved.x !== added.x || moved.y !== added.y, `the picture was dragged: ${added.x},${added.y} -> ${moved.x},${moved.y}`);
+  await page.waitForSelector(`[data-tile-row="${added.id}"].on`);
+  await page.click('[data-tile-order="bottom"]');
+  await settle(300);
+  assert((await tool("kraken_tile", { action: "list" }))[0].id === added.id, "to the bottom from the Images tab");
+
   // Grid tab: hex rows.
   await page.click('[data-edit-tab="grid"]');
   await page.selectOption('[aria-label="Grid type"]', "hexrow");
@@ -200,6 +224,8 @@ try {
   await seat.waitForSelector('[data-label-text="1"]', { timeout: 10000 });
   await seat.waitForSelector("rect[data-drawing]", { timeout: 10000 });
   await seat.waitForSelector('[data-weather="snow"]', { timeout: 10000 });
+  // The image layers, their pictures loaded from the host under the player's own token.
+  await seat.waitForFunction(() => [...document.querySelectorAll(".map-tile img")].filter((img) => img.complete && img.naturalWidth > 0).length === 2, null, { timeout: 15000 });
   // Every frame the player got (the join reply carries the first map and scene): no walls anywhere.
   await settle(800);
   const frames = messages.map((text) => JSON.parse(text));
@@ -208,7 +234,7 @@ try {
   const doorHandles = await seat.$$eval(".overlay.doors [data-door], .overlay.doors .door", (nodes) => nodes.length).catch(() => 0);
   await seat.screenshot({ path: path.join(tmpdir(), "kraken-mapedit-player.png") });
   assert(failures.length === 0, `page errors: ${failures.join(" | ")}`);
-  console.log(`ok map editor: walls drawn as a chain, made a door, deleted and undone; the global mask with a revealed rectangle, black for the player; a label and numbers placed from the Text tab, seen by the player; a filled rectangle painted and a snow FX layer, both reaching the player; hex grid for the GM and the player; walls never sent to the player. ${path.join(tmpdir(), "kraken-mapedit-gm.png")}`);
+  console.log(`ok map editor: walls drawn as a chain, made a door, deleted and undone; the global mask with a revealed rectangle, black for the player; a label and numbers placed from the Text tab, seen by the player; a filled rectangle painted and a snow FX layer, both reaching the player; two image layers (one from the agent, one from the Images tab, dragged and sent to the bottom) whose pictures load for the player; hex grid for the GM and the player; walls never sent to the player. ${path.join(tmpdir(), "kraken-mapedit-gm.png")}`);
 } finally {
   await browser?.close();
   child.kill();

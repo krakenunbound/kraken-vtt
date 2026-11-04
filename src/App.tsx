@@ -88,6 +88,7 @@ function toTable(loaded: LoadedAdventure, urls: string[]): TableAdventure {
         lights: scene.lights,
         markers: scene.markers,
         regions: scene.regions,
+        tiles: scene.tiles,
         tokens: scene.tokens.map((token) => {
           const tokenUrl = token.image && token.imageName ? blobUrl(token.image, imageMime(token.imageName)) : null;
           if (tokenUrl) urls.push(tokenUrl);

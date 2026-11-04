@@ -990,7 +990,7 @@ const TOOLS = [
   },
   {
     name: "kraken_map_group",
-    description: "Layer groups on the scene (FG's layer folders): everything in a group (text now; paint and FX to come) is shown or not, seen by players or not, locked or not, all at once. action list; update (name and any of shown, players, locked, prefix for its numbers, name to rename; made if new); remove (name; its things leave the group).",
+    description: "Layer groups on the scene (FG's layer folders): everything in a group (text, image layers, paint, FX) is shown or not, seen by players or not, locked or not, all at once. action list; update (name and any of shown, players, locked, prefix for its numbers, name to rename; made if new); remove (name; its things leave the group).",
     inputSchema: object({
       action: { type: "string", enum: ["list", "update", "remove"] },
       name: string("The group"),
@@ -1009,6 +1009,56 @@ const TOOLS = [
       }
       const { action: _a, name, rename, ...patch } = args;
       return out(map.updateGroup(name, { ...patch, ...(rename ? { name: rename } : {}) }, seat));
+    },
+  },
+  {
+    name: "kraken_tile",
+    description:
+      "Image layers on the scene (FG's image layers, Foundry's tiles): pictures placed on the map, drawn in list order (first at the bottom), each below the tokens (level below, as FG) or over them (level above: roofs and tree tops, faded on a seat's screen while one of its tokens is under). Coordinates are scene pixels from the map's top-left (the tile's top-left corner); rotation in degrees about its centre. action list (this scene's layers); library (the tile pictures there are: ids lib/...); add (src: a library id, or file: a picture on this computer to copy into the library; x, y, width, height in scene pixels, rotation, alpha 0..1, flipX, flipY, level, hidden (the GM's eyes only), locked, group, name); update (id and fields); order (id, where: up, down, top, bottom, or an index); remove (id).",
+    inputSchema: object({
+      action: { type: "string", enum: ["list", "library", "add", "update", "order", "remove"] },
+      id: string("Image layer id"),
+      src: string("A tile library picture id (lib/...)"),
+      file: string("add: a picture file on this computer, copied into the tile library"),
+      name: string("A name for the layer list"),
+      x: number("Left, scene pixels"),
+      y: number("Top, scene pixels"),
+      width: number("Pixels"),
+      height: number("Pixels"),
+      rotation: number("Degrees"),
+      alpha: number("Opacity 0..1"),
+      flipX: { type: "boolean" },
+      flipY: { type: "boolean" },
+      level: { type: "string", enum: ["below", "above"] },
+      hidden: { type: "boolean" },
+      locked: { type: "boolean" },
+      group: string("Layer group"),
+      where: { description: "order: up, down, top, bottom, or an index", oneOf: [{ type: "string", enum: ["up", "down", "top", "bottom"] }, { type: "integer" }] },
+    }, ["action"]),
+    run(args, ctx) {
+      const table = needTable(ctx);
+      const { map, seat } = table;
+      const { action, id, file, where, ...fields } = args;
+      const library = table.tiles?.();
+      if (action === "list") return out(map.tiles());
+      if (action === "library") return out(library ? library.list() : []);
+      if (action === "add") {
+        if (file) {
+          if (!library) throw new Error("There is no tile library here.");
+          fields.src = library.addFile(String(file)).id;
+        }
+        return out(map.addTile(fields, seat));
+      }
+      if (action === "update") {
+        if (file) {
+          if (!library) throw new Error("There is no tile library here.");
+          fields.src = library.addFile(String(file)).id;
+        }
+        return out(map.updateTile(id, fields, seat));
+      }
+      if (action === "order") return out(map.orderTile(id, where, seat));
+      map.removeTile(id, seat);
+      return out({ removed: id });
     },
   },
   {
