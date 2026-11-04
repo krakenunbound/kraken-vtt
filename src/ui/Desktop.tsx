@@ -18,6 +18,7 @@ import { NotesWindow, NoteWindow } from "../notes/Notes";
 import { BooksWindow, BookWindow, ImagesWindow, PictureWindow } from "../books/Books";
 import { Icon } from "./icons";
 import { FloatingWindow, useWindows, type WindowKind } from "./Windows";
+import { AssistantWindow } from "./AssistantWindow";
 
 // The 3D dice (three.js and cannon) load when the table first shows them.
 const DiceLayer = lazy(() => import("../dice/DiceLayer"));
@@ -108,6 +109,7 @@ export function Desktop({
         { kind: "books", label: "Books", icon: "book", title: "Books" },
         { kind: "library", label: "Library", icon: "map", title: "Library: an adventure's maps, encounters, NPCs, parcels and tables" },
         { kind: "notes", label: "Notes", icon: "chat", title: "Notes" },
+        { kind: "assistant", label: "Assistant", icon: "sparkle", title: "DM Assistant" },
         { kind: "players", label: "Players", icon: "players", title: "Players" },
         { kind: "sound", label: "Sound", icon: "music", title: "Sound" },
         { kind: "settings", label: "Settings", icon: "settings", title: "Settings" },
@@ -261,6 +263,7 @@ export function Desktop({
               {item.kind === "players" ? <PlayersWindow session={session} /> : null}
               {item.kind === "settings" ? <SettingsWindow session={session} /> : null}
               {item.kind === "dice" ? <DiceWindow session={session} /> : null}
+              {item.kind === "assistant" && gm ? <AssistantWindow /> : null}
               {item.kind === "sound" ? <SoundWindow session={session} /> : null}
               {item.kind === "books" ? <BooksWindow session={session} onOpenAdventure={gm ? onOpenAdventure : undefined} /> : null}
               {item.kind === "book" && item.payload ? <BookWindow session={session} book={item.payload} /> : null}

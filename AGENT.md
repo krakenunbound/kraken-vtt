@@ -17,6 +17,8 @@ The app starts the MCP server when it opens. `electron/agent/mcp-stdio.cjs` is t
 
 | In the app | Tool |
 |---|---|
+| **The DM assistant** (GM only; skill: [skills/kraken-dm-assistant/SKILL.md](skills/kraken-dm-assistant/SKILL.md)) | |
+| Sidebar Assistant: ask, stop, new chat (its key is set in its window or ANTHROPIC_API_KEY, never by a tool) | `kraken_assistant`, `kraken_windows` kind assistant |
 | **Campaigns** | |
 | List campaigns, make one | `kraken_campaigns`, `kraken_campaign_create` |
 | Play (host) a campaign, leave | `kraken_host`, `kraken_leave` |

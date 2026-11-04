@@ -2,7 +2,7 @@
   "name": "kraken-vtt",
   "private": true,
   "license": "MIT",
-  "version": "0.1.0-alpha.19",
+  "version": "0.1.0-alpha.20",
   "description": "A free virtual tabletop: the GM hosts, players join from a browser.",
   "author": "Kraken VTT",
   "type": "module",
@@ -34,6 +34,7 @@
     "sight-parity": "node scripts/check-sight-parity.mjs",
     "session": "node scripts/check-session.mjs",
     "agent": "node scripts/check-agent.mjs",
+    "assistant": "node scripts/check-assistant.mjs",
     "agent-ui": "node scripts/check-agent-ui.mjs",
     "coverage": "node scripts/check-coverage.mjs",
     "import-check": "node scripts/check-import.mjs",
@@ -56,6 +57,7 @@
     "exe": "npm run build && electron-builder --win nsis && node scripts/copy-exe.mjs"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^1.4.0",
     "@fontsource/cinzel": "^5.3.0",
     "@xmldom/xmldom": "^0.8.10",
     "cannon-es": "^0.20.0",
@@ -90,6 +92,7 @@
       "electron/**/*",
       "sounds/**/*",
       "shared/**/*",
+      "skills/**/*",
       "build/icon.png",
       "package.json",
       "node_modules/ws/**/*",

@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu, ipcMain, clipboard, dialog, shell } = require("electron");
+const { app, BrowserWindow, Menu, ipcMain, clipboard, dialog, shell, safeStorage } = require("electron");
 const fs = require("fs");
 const https = require("https");
 const os = require("os");
@@ -11,6 +11,7 @@ const { createBookShelf } = require("./books.cjs");
 const { fgDataFolder } = require("./importers/fgModule.cjs");
 const campaigns = require("./campaigns.cjs");
 const { startAgentServer } = require("./agent/mcpServer.cjs");
+const assistantModule = require("./assistant.cjs");
 
 // The development copy (Kraken VTT.bat) and the installed app keep their
 // campaigns and assets in one place, whichever is opened.
@@ -399,7 +400,41 @@ const agentContext = {
   },
   ui: (command, timeout) => askWindow(command, timeout),
   window: () => (mainWindow && !mainWindow.isDestroyed() ? mainWindow : null),
+  assistant: () => assistant,
 };
+
+// The DM assistant (GM only): the key from the environment or .env.local, or
+// one the GM typed into its window (kept encrypted on this computer).
+const assistantKeys = assistantModule.keyStore(path.join(app.getPath("userData"), "assistant-key.bin"), safeStorage);
+function assistantKey() {
+  const typed = assistantKeys.get();
+  if (typed) return { key: typed, from: "app" };
+  return assistantModule.envKey(path.join(__dirname, ".."));
+}
+const assistant = assistantModule.createAssistant({
+  ctx: agentContext,
+  key: () => assistantKey()?.key ?? null,
+  makeClient: (key) => {
+    const Anthropic = require("@anthropic-ai/sdk").default;
+    return new Anthropic({ apiKey: key });
+  },
+  onEvent: (event) => {
+    if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send("assistant-event", event);
+  },
+});
+function assistantStatus() {
+  const found = assistantKey();
+  return { ...assistant.view(), hasKey: Boolean(found), keyFrom: found?.from ?? null };
+}
+// Only the GM's own window asks: players never reach the assistant (they are browsers on the table server).
+ipcMain.handle("assistant-status", () => assistantStatus());
+ipcMain.handle("assistant-ask", (_event, text) => assistant.ask(String(text ?? "")));
+ipcMain.handle("assistant-stop", () => assistant.stop());
+ipcMain.handle("assistant-reset", () => assistant.reset());
+ipcMain.handle("assistant-key", (_event, key) => {
+  assistantKeys.set(typeof key === "string" ? key : "");
+  return assistantStatus();
+});
 
 let agentServer = null;
 
