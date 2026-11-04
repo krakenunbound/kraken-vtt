@@ -600,7 +600,7 @@ const TOOLS = [
         lights: map.lights().length,
         sight: view.sight,
         tokens: view.tokens.map((token) => ({ ...token, ...map.squareOf(token), color: undefined, mine: undefined })),
-        doors: view.doors.map(({ id, state, secret }) => ({ id, state, secret })),
+        doors: view.doors.map(({ id, group, state, secret }) => ({ id, group, state, secret })),
       });
     },
   },
