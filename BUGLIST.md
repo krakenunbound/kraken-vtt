@@ -34,3 +34,7 @@ Nothing open after both runs.
 ## Play test, third run (alpha.26)
 
 Phase 3 added for alpha.21 to .25: the party's four tokens moved together, Thorin turned to face the lair, an image layer by the lair, the caves keeping their own cave loop, pitch dark with Thorin's torch in hand; the test player in Chrome sees the image layer, Thorin's facing and the notice that the torch spoils his deepvision. One problem (15), fixed. Every other check passes; `pregens` matches 128 of 132 here, the other four need a live FG build with the SC C&C wizard loaded.
+
+## Play test, fourth run (alpha.28)
+
+After the second ruleset (D&D 5E) changed the tracker and character building: no problems. Every check passes (`dnd5e`, `dnd5e-ui` and `dnd5e-fg` new); `pregens` 128 of 132 while FG is on a 5E campaign (the other four need FG's C&C wizard live).
