@@ -158,10 +158,11 @@ function sanitizeScene(input) {
 
 // How a seat's dice leave its hand (fractions of its window, and per second)
 // and how its dice look, for the 3D dice every screen throws.
-const DICE_THEMES = new Set(["classic", "dragonhide", "starfall", "bone", "magma", "leviathan", "marble", "swirl", "speckle", "wood", "runes", "stripes"]);
-const DICE_MATERIALS = new Set(["plastic", "glass", "metal", "pearl", "stone", "wood"]);
-const DICE_EFFECTS = new Set(["none", "sparkles", "fire", "frost", "arcane", "shadow", "glow"]);
-const DICE_FONTS = new Set(["classic", "bold", "runic", "script"]);
+// The Gilded Die's themes, finishes ("design": the theme's own), trails and lettering too.
+const DICE_THEMES = new Set(["classic", "dragonhide", "starfall", "bone", "magma", "leviathan", "marble", "swirl", "speckle", "wood", "runes", "stripes", "aether", "reliquary", "rosewindow", "gilded", "emerald", "frost", "obsidian", "bloodstone", "arcane", "void", "hero", "monster", "wizard", "bard", "necromancer", "goblin", "wyrm", "ghost", "undead", "traveller", "mythos"]);
+const DICE_MATERIALS = new Set(["plastic", "glass", "metal", "pearl", "stone", "wood", "design"]);
+const DICE_EFFECTS = new Set(["none", "sparkles", "fire", "frost", "arcane", "shadow", "glow", "aura", "wisp", "spark", "embers", "holy", "charge", "notes", "ion"]);
+const DICE_FONTS = new Set(["classic", "bold", "runic", "script", "glow", "metal", "engrave"]);
 function diceThrow(value) {
   if (!value || typeof value !== "object") return null;
   const n = (key, low, high) => Math.min(high, Math.max(low, Number(value[key])));
@@ -182,6 +183,7 @@ function diceLook(value) {
   if (DICE_EFFECTS.has(value.effect)) look.effect = value.effect;
   if (DICE_FONTS.has(value.font)) look.font = value.font;
   if (typeof value.crit === "boolean") look.crit = value.crit;
+  if (typeof value.pips === "boolean") look.pips = value.pips;
   return look;
 }
 

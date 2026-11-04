@@ -35,8 +35,10 @@ function diceSettings(patch: DiceSettingsPatch) {
     ...(patch.font !== undefined ? { font: oneOf("font", patch.font, FONTS) } : {}),
     ...(patch.effect !== undefined ? { effect: oneOf("effect", patch.effect, EFFECTS) } : {}),
     ...(typeof patch.crit === "boolean" ? { crit: patch.crit } : {}),
+    ...(typeof patch.pips === "boolean" ? { pips: patch.pips } : {}),
   };
-  const look = { ...preset, ...parts };
+  // A preset is the whole look: pips only where it has them.
+  const look = { ...(found ? { pips: Boolean((preset as Partial<DiceLook>).pips) } : {}), ...preset, ...parts };
   diceStore.update({
     ...(typeof patch.show === "boolean" ? { show: patch.show } : {}),
     ...(typeof patch.sound === "boolean" ? { sound: patch.sound } : {}),
@@ -44,7 +46,7 @@ function diceSettings(patch: DiceSettingsPatch) {
     look,
   });
   const now = diceStore.settings();
-  const named = PRESETS.find((item) => (["theme", "body", "ink", "accent", "material", "effect", "font"] as const).every((key) => item[key] === now.look[key]));
+  const named = PRESETS.find((item) => (["theme", "body", "ink", "accent", "material", "effect", "font"] as const).every((key) => item[key] === now.look[key]) && Boolean(item.pips) === Boolean(now.look.pips));
   return { ...now, preset: named?.name ?? "custom" };
 }
 
