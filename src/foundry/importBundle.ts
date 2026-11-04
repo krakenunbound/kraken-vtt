@@ -1,4 +1,4 @@
-import { strFromU8, unzipSync } from "fflate";
+import { strFromU8, strToU8, unzipSync, zipSync } from "fflate";
 import { cssColor, type BackgroundFit, type SquareGrid } from "./geometry";
 import {
   readLights,
@@ -279,4 +279,34 @@ export function inspectZip(bytes: Uint8Array): ImportCandidate[] {
     }
   }
   return candidates;
+}
+
+// A bare picture (a map with nothing on it yet) as a one-scene bundle, so the
+// GM can build it into a playable scene in the map editor: grid, walls, doors,
+// lights, text. Its scene id follows the picture's bytes, so the same picture
+// opened again finds the walls and tokens already made for it.
+export const PICTURE = /\.(png|jpe?g|webp|gif)$/i;
+export function pictureBundle(bytes: Uint8Array, fileName: string, size: { width: number; height: number }): Uint8Array {
+  let hash = 2166136261;
+  const step = Math.max(1, Math.floor(bytes.length / 4096));
+  for (let index = 0; index < bytes.length; index += step) hash = Math.imul(hash ^ bytes[index], 16777619) >>> 0;
+  hash = Math.imul(hash ^ bytes.length, 16777619) >>> 0;
+  const name = baseName(fileName).replace(PICTURE, "").replace(/[_-]+/g, " ").trim() || "Map";
+  const file = `map${(PICTURE.exec(fileName)?.[0] ?? ".png").toLowerCase()}`;
+  const scene = {
+    _id: `pic-${hash.toString(36)}`,
+    name,
+    width: Math.round(size.width),
+    height: Math.round(size.height),
+    padding: 0,
+    backgroundColor: "#000000",
+    // A square grid to start with (FG's default 50 px is small on most battle maps): the Grid tab fits it to the picture.
+    grid: { size: 100, type: 1, distance: 5, units: "ft", color: "#000000", alpha: 0.25 },
+    background: { src: file },
+    walls: [],
+    lights: [],
+    tokens: [],
+    notes: [],
+  };
+  return zipSync({ "bundle.json": strToU8(JSON.stringify({ adventureData: { name, scenes: [scene] } })), [file]: bytes }, { level: 0 });
 }

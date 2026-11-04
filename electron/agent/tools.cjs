@@ -772,10 +772,26 @@ const TOOLS = [
   {
     name: "kraken_scene_settings",
     description:
-      "The scene's map settings: darkness (0 day .. 1 pitch black; from 0.5 players see only lit places and their darkvision; null returns to the adventure's own), the grid (show, alpha, color), and weather (type: none, rain, storm, snow, blizzard, fog, clouds, sandstorm, embers, ash, leaves, water; intensity 0..1; direction in degrees the wind blows toward). Call with nothing to read them.",
+      "The scene's map settings: darkness (0 day .. 1 pitch black; from 0.5 players see only lit places and their darkvision; null returns to the adventure's own), the grid (the map editor's Grid tab: show, alpha, color, type square/hexrow/hexcol/none, size in pixels, offsetX and offsetY in pixels, distance per square and units, style solid/dashed/dotted, thickness; null for a field goes back to the scene's own), and weather (type: none, rain, storm, snow, blizzard, fog, clouds, sandstorm, embers, ash, leaves, water; intensity 0..1; direction in degrees the wind blows toward). Call with nothing to read them.",
     inputSchema: object({
       darkness: { type: ["number", "null"] },
-      grid: { type: "object", properties: { show: { type: "boolean" }, alpha: { type: "number" }, color: { type: "string" } }, additionalProperties: false },
+      grid: {
+        type: "object",
+        properties: {
+          show: { type: "boolean" },
+          alpha: { type: ["number", "null"] },
+          color: { type: ["string", "null"] },
+          type: { type: ["string", "null"], enum: ["square", "hexrow", "hexcol", "none", null] },
+          size: { type: ["number", "null"] },
+          offsetX: { type: ["number", "null"] },
+          offsetY: { type: ["number", "null"] },
+          distance: { type: ["number", "null"] },
+          units: { type: ["string", "null"] },
+          style: { type: "string", enum: ["solid", "dashed", "dotted"] },
+          thickness: { type: "number" },
+        },
+        additionalProperties: false,
+      },
       weather: { type: "object", properties: { type: { type: "string" }, intensity: { type: "number" }, direction: { type: "number" } }, additionalProperties: false },
     }),
     run(args, ctx) {
@@ -1165,13 +1181,13 @@ const TOOLS = [
   },
   {
     name: "kraken_open_adventure",
-    description: "Open a prepared map bundle (an adventure .zip on this computer, with scenes, walls, lights and tokens) on the table, as the GM's Open map button. It is saved with the campaign; kraken_scenes lists and switches its scenes.",
-    inputSchema: object({ path: string("Full path of the .zip") }, ["path"]),
+    description: "Open a map on the table, as the GM's Open map button: a prepared map bundle (an adventure .zip on this computer, with scenes, walls, lights and tokens), or a bare picture (.png, .jpg, .webp, .gif: one scene with a 100 px square grid and nothing on it, built up with kraken_scene_settings grid, kraken_wall, kraken_light, kraken_label, kraken_tile...; the same picture opened again keeps what was made for it). It is saved with the campaign; kraken_scenes lists and switches its scenes.",
+    inputSchema: object({ path: string("Full path of the .zip or picture") }, ["path"]),
     async run(args, ctx) {
       needTable(ctx);
       const fs = require("fs");
       const file = String(args.path ?? "");
-      if (!/\.zip$/i.test(file) || !fs.existsSync(file)) throw new Error("No .zip at that path.");
+      if (!/\.(zip|png|jpe?g|webp|gif)$/i.test(file) || !fs.existsSync(file)) throw new Error("No .zip or picture at that path.");
       return out(await ctx.ui({ kind: "open-adventure", name: require("path").basename(file), bytes: new Uint8Array(fs.readFileSync(file)) }, 60000));
     },
   },

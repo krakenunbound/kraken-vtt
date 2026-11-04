@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { gridLabel, preferredCandidateIndex, preferredSceneIndex } from "./foundry/geometry";
 import { withGrid } from "../shared/map/geometry.mjs";
-import { imageMime, inspectZip, type ImportCandidate, type LoadedAdventure } from "./foundry/importBundle";
+import { imageMime, inspectZip, PICTURE, pictureBundle, type ImportCandidate, type LoadedAdventure } from "./foundry/importBundle";
 import { useSession } from "./session/useSession";
 import { SetupScreen } from "./setup/SetupScreen";
 import { MapView, type MapScene } from "./table/MapView";
@@ -247,6 +247,12 @@ export function App() {
     setBusy(true);
     await new Promise((resolve) => setTimeout(resolve, 0));
     try {
+      // A bare picture becomes a one-scene map to build in the map editor.
+      if (PICTURE.test(name)) {
+        const picture = await createImageBitmap(new Blob([bytes as Uint8Array<ArrayBuffer>], { type: imageMime(name) }));
+        bytes = pictureBundle(bytes, name, { width: picture.width, height: picture.height });
+        picture.close();
+      }
       const found = inspectZip(bytes);
       if (found.length === 0) throw new Error(`No prepared map bundle was in ${name}.`);
       const index = preferredCandidateIndex(found);
@@ -418,8 +424,8 @@ export function App() {
                   ref={fileInput}
                   className="file-input"
                   type="file"
-                  accept=".zip,application/zip"
-                  aria-label="Map bundle"
+                  accept=".zip,application/zip,.png,.jpg,.jpeg,.webp,.gif,image/*"
+                  aria-label="Map bundle or picture"
                   onChange={(event) => {
                     const file = event.target.files?.[0];
                     if (file) void openFile(file);
