@@ -398,6 +398,7 @@ export function App() {
           sceneBar={sceneBar}
           emptyGM={emptyGM}
           onOpenAdventure={() => fileInput.current?.click()}
+          openMaps={(bytes, name) => openBytes(bytes, name)}
           overlay={
             <>
               {error && scene ? (

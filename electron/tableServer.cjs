@@ -630,6 +630,27 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
 
   const server = http.createServer((req, res) => {
     const url = new URL(req.url || "/", "http://127.0.0.1");
+    // An FG module's maps as a map bundle, for the GM's Library (its scenes' pins and FX seeded here).
+    if (req.method === "GET" && url.pathname === "/table/fg-maps") {
+      const token = url.searchParams.get("token") || "";
+      const client = token ? [...clients.values()].find((item) => item.assetToken === token) : null;
+      if (!client || client.role !== "dm") {
+        res.writeHead(403, { "Cache-Control": "no-store" });
+        res.end();
+        return;
+      }
+      try {
+        const { fgModuleBundle } = require("./importers/fgMaps.cjs");
+        const bundle = fgModuleBundle(String(url.searchParams.get("module") || ""));
+        for (const [id, extra] of Object.entries(bundle.extras)) map.seed(id, extra);
+        res.writeHead(200, { "Content-Type": "application/zip", "Content-Length": bundle.bytes.length, "Cache-Control": "no-store" });
+        res.end(Buffer.from(bundle.bytes));
+      } catch (error) {
+        res.writeHead(404, { "Content-Type": "text/plain", "Cache-Control": "no-store" });
+        res.end(error instanceof Error ? error.message : "No maps.");
+      }
+      return;
+    }
     if (req.method === "GET" && url.pathname === "/table/image") {
       const token = url.searchParams.get("token") || "";
       const allowed = token.length > 0 && [...clients.values()].some((client) => client.assetToken === token);
@@ -1087,6 +1108,25 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         levelUp(agentHandle, record, msg.package, client.role === "dm" ? record.name : client.name).catch((error) =>
           send(ws, { type: "error", reason: error instanceof Error ? error.message : "Could not level up." }),
         );
+        return;
+      }
+
+      // FG's Library of an adventure module (the GM's): NPCs, encounters, parcels, tables.
+      if (msg.type === "library") {
+        if (client.role !== "dm") {
+          send(ws, { type: "error", reason: "The Library is the GM's." });
+          return;
+        }
+        const library = require("./library.cjs");
+        (async () => {
+          const moduleName = String(msg.module ?? "");
+          if (msg.action === "list") send(ws, { type: "library", module: moduleName, kind: msg.kind, items: library.list(moduleName, String(msg.kind ?? ""), String(msg.search ?? "")) });
+          else if (msg.action === "npc") await combat.add({ recordId: library.ensureNpc(agentHandle, String(msg.path)).id, count: msg.count }, seatOf(client));
+          else if (msg.action === "battle") await library.addBattle(agentHandle, String(msg.path), { place: msg.place !== false });
+          else if (msg.action === "parcel") library.giveParcel(agentHandle, String(msg.path), party);
+          else if (msg.action === "table") library.rollTable(agentHandle, String(msg.path), client.name);
+          else throw new Error("What should the Library do?");
+        })().catch((error) => send(ws, { type: "error", reason: error instanceof Error ? error.message : "The Library could not do that." }));
         return;
       }
 

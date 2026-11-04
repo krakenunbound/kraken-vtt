@@ -13,6 +13,7 @@ import { DiceWindow } from "../dice/DiceWindow";
 import { SoundWindow } from "../sound/SoundWindow";
 import { QuickSlots } from "./QuickSlots";
 import { KritsWindow } from "../combat/KritsWindow";
+import { LibraryWindow } from "../books/Library";
 import { NotesWindow, NoteWindow } from "../notes/Notes";
 import { BooksWindow, BookWindow, ImagesWindow, PictureWindow } from "../books/Books";
 import { Icon } from "./icons";
@@ -81,6 +82,7 @@ export function Desktop({
   sceneBar,
   emptyGM,
   onOpenAdventure,
+  openMaps = async () => undefined,
   overlay,
 }: {
   session: Session;
@@ -88,6 +90,8 @@ export function Desktop({
   sceneBar: ReactNode;
   emptyGM: ReactNode;
   onOpenAdventure: () => void;
+  // Opens a map bundle on the table (an FG module's maps from the Library).
+  openMaps?: (bytes: Uint8Array, name: string) => Promise<unknown>;
   overlay: ReactNode;
 }) {
   const gm = session.role === "dm";
@@ -102,6 +106,7 @@ export function Desktop({
         { kind: "party", label: "Party", icon: "party", title: "Party Sheet" },
         { kind: "combat", label: "Combat", icon: "combat", title: "Combat Tracker" },
         { kind: "books", label: "Books", icon: "book", title: "Books" },
+        { kind: "library", label: "Library", icon: "map", title: "Library: an adventure's maps, encounters, NPCs, parcels and tables" },
         { kind: "notes", label: "Notes", icon: "chat", title: "Notes" },
         { kind: "players", label: "Players", icon: "players", title: "Players" },
         { kind: "sound", label: "Sound", icon: "music", title: "Sound" },
@@ -266,6 +271,7 @@ export function Desktop({
               {item.kind === "decals" ? <DecalPicker session={session} onClose={() => windows.close(item.key)} /> : null}
               {item.kind === "wallpapers" ? <DecalPicker session={session} kind="wallpaper" onClose={() => windows.close(item.key)} /> : null}
               {item.kind === "krits" ? <KritsWindow session={session} /> : null}
+              {item.kind === "library" ? <LibraryWindow session={session} openMaps={openMaps} /> : null}
               {item.kind === "gmicons" ? <DecalPicker session={session} kind="gmicon" onClose={() => windows.close(item.key)} /> : null}
             </FloatingWindow>
           ))}

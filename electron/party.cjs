@@ -345,4 +345,22 @@ function changeOrder(table, seat, change) {
   return next;
 }
 
-module.exports = { PARTY_ID, partyRecord, partyView, awardXP, awardEntries, distribute, groupCheck, changeOrder, fillFormation, rotate, RANGE };
+// A treasure parcel into the party's parcel (FG's drag of a parcel onto the
+// party sheet): its coins added up, its items listed to hand out.
+function addToParcel(table, { coins = {}, items = [], from = "" } = {}) {
+  const party = partyRecord(table);
+  const parcel = party.data.parcel ?? { coins: {}, items: {} };
+  const nextCoins = { ...(parcel.coins ?? {}) };
+  for (const [name, amount] of Object.entries(coins)) nextCoins[name] = (Number(nextCoins[name]) || 0) + (Number(amount) || 0);
+  const nextItems = {};
+  let n = Object.keys(parcel.items ?? {}).length;
+  for (const item of items.slice(0, 100)) {
+    n += 1;
+    nextItems[`p-${Date.now().toString(36)}-${n}`] = { name: String(item.name).slice(0, 120), count: Math.max(1, Number(item.count) || 1), assign: "", item: item.item ?? null };
+  }
+  table.records.update(PARTY_ID, { data: { parcel: { coins: nextCoins, items: nextItems } } }, table.seat);
+  table.say(`[PARCEL] ${from || "Treasure"} added to the party's parcel: ${[...Object.entries(coins).filter(([, a]) => Number(a) > 0).map(([c, a]) => `${a} ${c}`), ...items.map((item) => `${item.count > 1 ? `${item.count} ` : ""}${item.name}`)].join(", ") || "nothing"}.`, "Party", true);
+  return { coins: nextCoins, items: items.length };
+}
+
+module.exports = { addToParcel, PARTY_ID, partyRecord, partyView, awardXP, awardEntries, distribute, groupCheck, changeOrder, fillFormation, rotate, RANGE };

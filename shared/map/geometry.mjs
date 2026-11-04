@@ -264,38 +264,110 @@ export function settleMove(scene, walls, doors, from, to, squares = 1, { snap = 
 // (Foundry clips sight to the scene rectangle, not its padding).
 // distancePixels: pixels per scene unit, for wall thresholds; externalRadius:
 // the viewer's own radius (half a token), as Foundry's token vision uses.
-export function visibilityPolygon(origin, walls, doors, bounds, distancePixels = 1, externalRadius = 0, sense = "sight") {
+export function visibilityPolygon(origin, walls, doors, bounds, distancePixels = 1, externalRadius = 0, sense = "sight", radius = 0) {
+  let { x: bx, y: by, width: bw, height: bh } = bounds;
+  // A light reaches only so far: its square around it, inside the scene.
+  if (radius > 0) {
+    const left = Math.max(bx, origin.x - radius);
+    const top = Math.max(by, origin.y - radius);
+    const right = Math.min(bx + bw, origin.x + radius);
+    const bottom = Math.min(by + bh, origin.y + radius);
+    if (right > left && bottom > top) {
+      bx = left;
+      by = top;
+      bw = right - left;
+      bh = bottom - top;
+    }
+  }
   const segments = [];
-  const { x: bx, y: by, width: bw, height: bh } = bounds;
   segments.push([bx, by, bx + bw, by, false], [bx + bw, by, bx + bw, by + bh, false], [bx + bw, by + bh, bx, by + bh, false], [bx, by + bh, bx, by, false]);
-  for (const edge of sightEdges(origin, walls, doors, distancePixels, externalRadius, sense)) segments.push([edge.x1, edge.y1, edge.x2, edge.y2, edge.limited]);
+  const inBox = (x1, y1, x2, y2) => !(Math.max(x1, x2) < bx || Math.min(x1, x2) > bx + bw || Math.max(y1, y2) < by || Math.min(y1, y2) > by + bh);
+  for (const edge of sightEdges(origin, walls, doors, distancePixels, externalRadius, sense)) if (inBox(edge.x1, edge.y1, edge.x2, edge.y2)) segments.push([edge.x1, edge.y1, edge.x2, edge.y2, edge.limited]);
   const anyLimited = segments.some((segment) => segment[4]);
+  // Each corner once (chained walls share their ends), three rays round it.
   const angles = [];
+  const corners = new Set();
   for (const [x1, y1, x2, y2] of segments) {
     for (const [px, py] of [
       [x1, y1],
       [x2, y2],
     ]) {
+      const key = `${Math.round(px * 4)},${Math.round(py * 4)}`;
+      if (corners.has(key)) continue;
+      corners.add(key);
       const angle = Math.atan2(py - origin.y, px - origin.x);
       angles.push(angle - 1e-4, angle, angle + 1e-4);
     }
   }
   angles.sort((a, b) => a - b);
   const reach = (bw + bh) * 4;
+  // Many walls: a grid of cells over the area, each listing the walls in it,
+  // so a ray tests only the walls in the cells it crosses.
+  const many = segments.length > 120;
+  const cells = Math.max(8, Math.min(96, Math.round(Math.sqrt(segments.length) * 1.5)));
+  const cw = bw / cells;
+  const ch = bh / cells;
+  const grid = many ? Array.from({ length: cells * cells }, () => []) : null;
+  if (grid) {
+    segments.forEach((segment, index) => {
+      const [x1, y1, x2, y2] = segment;
+      const c0 = Math.max(0, Math.min(cells - 1, Math.floor((Math.min(x1, x2) - bx) / cw)));
+      const c1 = Math.max(0, Math.min(cells - 1, Math.floor((Math.max(x1, x2) - bx) / cw)));
+      const r0 = Math.max(0, Math.min(cells - 1, Math.floor((Math.min(y1, y2) - by) / ch)));
+      const r1 = Math.max(0, Math.min(cells - 1, Math.floor((Math.max(y1, y2) - by) / ch)));
+      for (let r = r0; r <= r1; r += 1) for (let c = c0; c <= c1; c += 1) grid[r * cells + c].push(index);
+    });
+  }
+  const stamp = new Int32Array(segments.length);
+  let ray = 0;
   const points = [];
   let last = NaN;
   for (const angle of angles) {
     if (angle - last < 1e-7) continue;
     last = angle;
-    const ex = origin.x + Math.cos(angle) * reach;
-    const ey = origin.y + Math.sin(angle) * reach;
+    const dx = Math.cos(angle);
+    const dy = Math.sin(angle);
+    const ex = origin.x + dx * reach;
+    const ey = origin.y + dy * reach;
     let nearest = 1;
     const limited = anyLimited ? [] : null;
-    for (const [x1, y1, x2, y2, isLimited] of segments) {
+    const test = (index) => {
+      const [x1, y1, x2, y2, isLimited] = segments[index];
       const t = crossing(origin.x, origin.y, ex, ey, x1, y1, x2, y2);
-      if (t === null) continue;
+      if (t === null) return;
       if (isLimited) limited.push(t);
       else if (t < nearest) nearest = t;
+    };
+    if (!grid) for (let index = 0; index < segments.length; index += 1) test(index);
+    else {
+      // Amanatides & Woo: walk the cells along the ray, nearest first.
+      ray += 1;
+      let c = Math.max(0, Math.min(cells - 1, Math.floor((origin.x - bx) / cw)));
+      let r = Math.max(0, Math.min(cells - 1, Math.floor((origin.y - by) / ch)));
+      const stepC = dx > 0 ? 1 : -1;
+      const stepR = dy > 0 ? 1 : -1;
+      const tDeltaC = dx !== 0 ? Math.abs(cw / (dx * reach)) : Infinity;
+      const tDeltaR = dy !== 0 ? Math.abs(ch / (dy * reach)) : Infinity;
+      let tMaxC = dx !== 0 ? (bx + (c + (dx > 0 ? 1 : 0)) * cw - origin.x) / (dx * reach) : Infinity;
+      let tMaxR = dy !== 0 ? (by + (r + (dy > 0 ? 1 : 0)) * ch - origin.y) / (dy * reach) : Infinity;
+      for (let guard = 0; guard < cells * 2 + 4; guard += 1) {
+        for (const index of grid[r * cells + c]) {
+          if (stamp[index] === ray) continue;
+          stamp[index] = ray;
+          test(index);
+        }
+        const leave = Math.min(tMaxC, tMaxR);
+        const limitedStop = limited && limited.length > 1 ? limited.slice().sort((a, b) => a - b)[1] : Infinity;
+        if (Math.min(nearest, limitedStop) <= leave) break;
+        if (tMaxC < tMaxR) {
+          c += stepC;
+          tMaxC += tDeltaC;
+        } else {
+          r += stepR;
+          tMaxR += tDeltaR;
+        }
+        if (c < 0 || r < 0 || c >= cells || r >= cells) break;
+      }
     }
     if (limited && limited.length > 1) {
       limited.sort((a, b) => a - b);
@@ -308,10 +380,10 @@ export function visibilityPolygon(origin, walls, doors, bounds, distancePixels =
 
 // What a viewer at origin sees on a scene: clipped to the scene rectangle,
 // with wall thresholds in the scene's units.
-export function sceneSight(scene, origin, doors, externalRadius = 0, sense = "sight") {
+export function sceneSight(scene, origin, doors, externalRadius = 0, sense = "sight", radius = 0) {
   const offset = sceneOrigin(scene);
   const per = Number(scene?.grid?.distance) > 0 ? Number(scene.grid.distance) : 5;
-  return visibilityPolygon(origin, scene.walls ?? [], doors, { x: offset.x, y: offset.y, width: scene.width, height: scene.height }, gridSize(scene) / per, externalRadius, sense);
+  return visibilityPolygon(origin, scene.walls ?? [], doors, { x: offset.x, y: offset.y, width: scene.width, height: scene.height }, gridSize(scene) / per, externalRadius, sense, radius);
 }
 
 export function pointInPolygon(x, y, polygon) {

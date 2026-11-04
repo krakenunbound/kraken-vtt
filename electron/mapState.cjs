@@ -269,7 +269,8 @@ function savedMap(value) {
   const labels = {};
   const groups = {};
   const fx = {};
-  if (!value || typeof value !== "object") return { tokens, doors, sight, locked, settings, lights, drawings, walls, masks, labels, groups, fx };
+  const frames = value && typeof value === "object" && value.frames && typeof value.frames === "object" ? Object.fromEntries(Object.entries(value.frames).slice(0, 500)) : {};
+  if (!value || typeof value !== "object") return { tokens, doors, sight, locked, settings, lights, drawings, walls, masks, labels, groups, fx, frames };
   for (const [sceneId, list] of Object.entries(value.fx ?? {}).slice(0, 500)) if (Array.isArray(list)) fx[sceneId.slice(0, 80)] = list.map(cleanFx).filter(Boolean).slice(0, 20);
   for (const [sceneId, list] of Object.entries(value.labels ?? {}).slice(0, 500)) if (Array.isArray(list)) labels[sceneId.slice(0, 80)] = list.map(cleanLabel).filter(Boolean).slice(0, 2000);
   for (const [sceneId, list] of Object.entries(value.groups ?? {}).slice(0, 500)) if (Array.isArray(list)) groups[sceneId.slice(0, 80)] = list.map(cleanGroup).filter(Boolean).slice(0, 100);
@@ -298,7 +299,7 @@ function savedMap(value) {
   for (const [sceneId, list] of Object.entries(value.drawings ?? {}).slice(0, 500)) {
     if (Array.isArray(list)) drawings[sceneId.slice(0, 80)] = list.map(cleanDrawing).filter(Boolean).slice(-MAX_DRAWINGS);
   }
-  return { tokens, doors, sight, locked, settings, lights, drawings, walls, masks, labels, groups, fx };
+  return { tokens, doors, sight, locked, settings, lights, drawings, walls, masks, labels, groups, fx, frames };
 }
 const MAX_DRAWINGS = 400;
 
@@ -443,10 +444,12 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
     const per = pixelsPerUnit();
     const out = [];
     const add = (id, x, y, bright, dim, color, hidden) => {
-      const key = `L|${scene.id}|${Math.round(x)}|${Math.round(y)}`;
+      const reachPx = Math.max(bright, dim) * per;
+      const key = `L|${scene.id}|${Math.round(x)}|${Math.round(y)}|${Math.round(reachPx)}`;
       let polygon = visionCache.get(key);
       if (!polygon) {
-        polygon = geometry.sceneSight(scene, { x, y }, doorsHere(), 0, "light");
+        // A light's polygon reaches only as far as its dim light (and a little).
+        polygon = geometry.sceneSight(scene, { x, y }, doorsHere(), 0, "light", reachPx * 1.05 + 1);
         visionCache.set(key, polygon);
       }
       out.push({ id, x, y, brightPx: bright * per, dimPx: dim * per, color, hidden, polygon });
@@ -950,6 +953,24 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       for (const wall of wallsHere()) if (wall.door > 0 || (wall.toggle && wall.toggle !== "none")) doors[wall.id] = (wall.id in doors ? doors[wall.id] : wall.ds) === 2 ? 2 : 0;
       changed();
     },
+    // An FG module's map, before it is first shown: its pins, FX layers and
+    // grid offset, kept only when the scene has none of its own yet.
+    seed(sceneId, { pins = [], fx = [], gridOffset = null, frame = null } = {}) {
+      const id = String(sceneId).slice(0, 80);
+      // Which FG image the scene came from, and its size: to place an encounter's tokens where FG had them.
+      if (frame) state.frames[id] = { image: String(frame.image).slice(0, 160), module: String(frame.module).slice(0, 160), width: num(frame.width, 0), height: num(frame.height, 0) };
+      if (!state.labels[id]) {
+        state.labels[id] = pins.map((pin) => cleanLabel({ ...pin, link: pin.link ? { kind: pin.link.kind, id: pin.link.id } : null })).filter(Boolean).slice(0, 2000);
+        const names = [...new Set(state.labels[id].map((label) => label.group).filter(Boolean))];
+        // Encounter pins are the GM's; map keys too, until the GM shares them.
+        state.groups[id] = names.map((name) => cleanGroup({ name, players: false }));
+      }
+      if (!state.fx[id]) state.fx[id] = fx.map(cleanFx).filter(Boolean).slice(0, 20);
+      if (gridOffset && !state.settings[id]) state.settings[id] = cleanSettings({ grid: { offsetX: gridOffset.x, offsetY: gridOffset.y } });
+      onChange();
+    },
+    // The FG image the open scene came from (fgMaps), or null.
+    frame: () => (scene ? state.frames[scene.id] ?? null : null),
     // FX layers (FG's FX tab): several at once, each with its own mask.
     fx: () => fxHere(),
     addFx(input, seat) {
