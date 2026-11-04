@@ -145,7 +145,52 @@ try {
   result = await ct({ action: "cast", recordId: hero.id, power: "id-00001" });
   assert(result.cast.results[0]?.damage === 4, `through ${JSON.stringify(result.cast)}`);
 
-  console.log("ok krits: Option 5 crit and fumble tables applied (damage, effects, ongoing bleed), Option 6 maximum x2 and Option 4 doubling on the next damage, instant death left to the GM, crits off; ammunition fired and refused; spell resistance resists and lets through");
+  // NPC spellcasting: the drider's Poison (constitution save, Paralyzed 2 turns on a failure) and
+  // a once-a-day Lightning (3d6, half on a save) at caster level = its 7 hit dice.
+  const drider = agent.records.create(
+    {
+      type: "npc",
+      name: "Drider",
+      data: {
+        hd: "7d8",
+        hptotal: 40,
+        ac: { total: 17 },
+        primeset: "physical",
+        powers: {
+          p1: { name: "Poison", powertype: "Special Ability", noslot: 1, uses: 0, save: "constitution", failedeffect: "Paralyzed", failedduration: "2 turns" },
+          p2: { name: "Lightning", powertype: "Spell", noslot: 1, uses: 1, damage: "3d6", save: "dexterity", saveeffect: "half" },
+          p3: { name: "Lore", powertype: "Special Ability", noslot: 1, uses: 0 },
+        },
+      },
+    },
+    agent.seat,
+  );
+  view = await ct({ action: "add", recordId: drider.id });
+  const driderId = view.entries.find((entry) => entry.name === "Drider").id;
+  const listed = view.entries.find((entry) => entry.name === "Drider").powers;
+  assert(listed?.map((power) => power.key).join() === "p1,p2", `the GM sees the drider's usable powers: ${JSON.stringify(listed)}`);
+  await ct({ action: "target", id: driderId, targetId: id("Aldric") });
+  // Aldric's constitution save (10, secondary: CB 18 + CL 7 = 25) fails on a 4.
+  agent.dice.force([4]);
+  result = await ct({ action: "cast", id: driderId, power: "p1" });
+  assert(result.cast.casterLevel === 7, `caster level from hit dice: ${result.cast.casterLevel}`);
+  const paralyzed = result.combat.entries.find((entry) => entry.name === "Aldric").effects.find((effect) => effect.label === "Paralyzed");
+  assert(paralyzed && paralyzed.duration === 20, `paralyzed for 2 turns (20 rounds: SiegeCore leaves the round length unset, CoreRPG counts a minute as 10): ${JSON.stringify(paralyzed)}`);
+  // Lightning: save fails on 2; 3d6 = 4+5+6 = 15.
+  const heroBefore = result.combat.entries.find((entry) => entry.name === "Aldric").wounds;
+  agent.dice.force([2, 4, 5, 6]);
+  result = await ct({ action: "cast", id: driderId, power: "p2" });
+  assert(result.combat.entries.find((entry) => entry.name === "Aldric").wounds === heroBefore + 15, "lightning 15");
+  assert(result.combat.entries.find((entry) => entry.name === "Drider").powers.find((power) => power.key === "p2").used === 1, "one use counted");
+  let refused = "";
+  try {
+    await ct({ action: "cast", id: driderId, power: "p2" });
+  } catch (error) {
+    refused = error.message;
+  }
+  assert(/used Lightning once today/.test(refused), `once a day: ${refused}`);
+
+  console.log("ok krits: Option 5 crit and fumble tables applied (damage, effects, ongoing bleed), Option 6 maximum x2 and Option 4 doubling on the next damage, instant death left to the GM, crits off; ammunition fired and refused; spell resistance resists and lets through; an NPC casts at its hit dice, a failed save paralyses, uses per day are counted");
 } finally {
   await server.stop();
 }

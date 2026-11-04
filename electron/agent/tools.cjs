@@ -596,7 +596,7 @@ const TOOLS = [
       weapon: string("attack / damage-roll: inventory key (character) or attack key (NPC)"),
       attribute: string("save: strength, dexterity, constitution, intelligence, wisdom or charisma"),
       cl: number("save: the challenge level"),
-      power: string("cast: the character's powers key"),
+      power: string("cast: the powers key of the character (recordId) or of the NPC on the tracker (id); an NPC's caster level is its hit dice and its uses per day are counted"),
       castAction: string("cast: the power's actions key"),
       id: string("Tracker entry id"),
       recordId: string("Character or NPC record id"),
@@ -644,7 +644,7 @@ const TOOLS = [
       else if (action === "clear-targets") combat.clearTargets(args.id, seat);
       else if (action === "attack") return out({ results: await combat.attack(args.recordId ? { recordId: args.recordId } : { entryId: args.id }, args.weapon, seat, "Agent"), combat: combat.viewFor(seat) });
       else if (action === "save") return out({ save: await combat.save(args.id, args.attribute, args.cl ?? 0, "Agent"), combat: combat.viewFor(seat) });
-      else if (action === "cast") return out({ cast: await combat.cast(args.recordId, args.power, args.castAction ?? "", seat, "Agent"), combat: combat.viewFor(seat) });
+      else if (action === "cast") return out({ cast: await combat.cast(args.recordId ? { recordId: args.recordId } : { entryId: args.id }, args.power, args.castAction ?? "", seat, "Agent"), combat: combat.viewFor(seat) });
       else if (action === "krits") return out(await combat.krits(args.settings, seat));
       else if (action === "krit-test") return out({ krit: await combat.kritTest(args.kind, args.id, args.targetId, seat, args.table || args.roll ? { table: args.table, roll: args.roll } : undefined), combat: combat.viewFor(seat) });
       else if (action === "damage-roll") return out({ damage: await combat.damageRoll(args.recordId ? { recordId: args.recordId } : { entryId: args.id }, args.weapon, seat, "Agent"), combat: combat.viewFor(seat) });
