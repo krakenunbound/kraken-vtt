@@ -9,8 +9,8 @@ import { LIGHT_PRESETS } from "../../shared/map/geometry.mjs";
 // has as a tool too (kraken_wall, kraken_light, kraken_scene_settings,
 // kraken_map_undo).
 
-export type EditTab = "walls" | "lights" | "grid";
-export type EditTool = "select" | "line" | "rect" | "poly" | "light" | null;
+export type EditTab = "walls" | "lights" | "mask" | "grid";
+export type EditTool = "select" | "line" | "rect" | "poly" | "light" | "cell" | null;
 
 // FG's line-of-sight types, with FG's tooltips.
 export const WALL_KIND_INFO: { kind: WallKind; label: string; icon: string; tip: string; color: string }[] = [
@@ -53,7 +53,10 @@ type Props = {
   lightPreset: string;
   setLightPreset: (preset: string) => void;
   gridScene: { size: number; type: number; color: string; alpha: number; distance: number; units: string; offsetX?: number; offsetY?: number };
+  maskMode: "reveal" | "hide";
+  setMaskMode: (mode: "reveal" | "hide") => void;
   actions: {
+    mask: (action: string, payload?: Record<string, unknown>) => void;
     wall: (action: string, payload?: Record<string, unknown>) => void;
     mapUndo: () => void;
     updateSettings: (patch: SceneSettingsPatch) => void;
@@ -91,6 +94,7 @@ export function MapEditor(props: Props) {
           [
             ["walls", "▦", "Line Of Sight: walls, doors, windows"],
             ["lights", "💡", "Lighting"],
+            ["mask", "◑", "Mask"],
             ["grid", "#", "Grid"],
           ] as const
         ).map(([id, icon, title]) => (
@@ -260,6 +264,47 @@ export function MapEditor(props: Props) {
           </div>
           <div className="me-foot">
             <span className="hint">{map.sceneLights.length} lights</span>
+          </div>
+        </>
+      ) : null}
+
+      {tab === "mask" ? (
+        <>
+          <div className="me-tools">
+            {toolButton("rect", "▭", "Mask a rectangle: click two corners")}
+            {toolButton("poly", "⬠", "Mask a shape: click its corners, double-click to close")}
+            {toolButton("cell", "▦", "Mask whole squares: click a square")}
+            <span className="me-spacer" />
+            <button type="button" className="me-tool" title="Undo" aria-label="Undo" onClick={actions.mapUndo}>
+              ↶
+            </button>
+          </div>
+          <div className="me-box">
+            <div className="me-row" role="radiogroup" aria-label="Mask mode">
+              <label>
+                <input type="radio" checked={props.maskMode === "reveal"} onChange={() => props.setMaskMode("reveal")} data-mask-mode="reveal" /> Reveal
+              </label>
+              <label>
+                <input type="radio" checked={props.maskMode === "hide"} onChange={() => props.setMaskMode("hide")} data-mask-mode="hide" /> Hide again
+              </label>
+            </div>
+            <p className="me-caption">With the global mask on, players see black but where you reveal; what lies under the mask (tokens, doors) is not sent to them. Later shapes win over earlier ones.</p>
+            <div className="me-row">
+              <button type="button" data-action="mask-on" onClick={() => actions.mask("on")} disabled={Boolean(map.mask?.on)}>
+                Add Global Mask
+              </button>
+              <button type="button" data-action="mask-off" onClick={() => actions.mask("off")} disabled={!map.mask?.on}>
+                Remove Global Mask
+              </button>
+            </div>
+          </div>
+          <div className="me-foot">
+            <span className="hint">
+              {map.mask?.on ? "Mask on" : "Mask off"} · {map.mask?.shapes.length ?? 0} shapes
+            </span>
+            <button type="button" data-action="mask-clear" onClick={() => actions.mask("clear")}>
+              Clear shapes
+            </button>
           </div>
         </>
       ) : null}

@@ -123,6 +123,22 @@ function cleanWall(raw) {
 }
 const MAX_WALLS = 5000;
 
+// FG's mask: a global mask over the picture and shapes, in order, that
+// reveal it or hide it again. Points are scene pixels.
+function cleanMask(raw) {
+  const value = raw && typeof raw === "object" ? raw : {};
+  const shapes = (Array.isArray(value.shapes) ? value.shapes : [])
+    .map((shape) => {
+      if (!shape || !Array.isArray(shape.points)) return null;
+      const points = shape.points.slice(0, 2000).map(Number);
+      if (points.length < 6 || points.length % 2 || !points.every((n) => Number.isFinite(n) && Math.abs(n) < 1e7)) return null;
+      return { id: text(shape.id, "").slice(0, 40) || crypto.randomBytes(5).toString("hex"), mode: shape.mode === "hide" ? "hide" : "reveal", points: points.map((n) => Math.round(n * 10) / 10) };
+    })
+    .filter(Boolean)
+    .slice(-1000);
+  return { on: Boolean(value.on), shapes };
+}
+
 const WEATHER = ["none", "rain", "storm", "snow", "blizzard", "fog", "clouds", "sandstorm", "embers", "ash", "leaves", "water"];
 
 function cleanSettings(raw) {
@@ -173,7 +189,9 @@ function savedMap(value) {
   const lights = {};
   const drawings = {};
   const walls = {};
-  if (!value || typeof value !== "object") return { tokens, doors, sight, locked, settings, lights, drawings, walls };
+  const masks = {};
+  if (!value || typeof value !== "object") return { tokens, doors, sight, locked, settings, lights, drawings, walls, masks };
+  for (const [sceneId, mask] of Object.entries(value.masks ?? {}).slice(0, 500)) masks[sceneId.slice(0, 80)] = cleanMask(mask);
   for (const [sceneId, list] of Object.entries(value.walls ?? {}).slice(0, 500)) {
     if (Array.isArray(list)) walls[sceneId.slice(0, 80)] = list.map(cleanWall).filter(Boolean).slice(0, MAX_WALLS);
   }
@@ -198,7 +216,7 @@ function savedMap(value) {
   for (const [sceneId, list] of Object.entries(value.drawings ?? {}).slice(0, 500)) {
     if (Array.isArray(list)) drawings[sceneId.slice(0, 80)] = list.map(cleanDrawing).filter(Boolean).slice(-MAX_DRAWINGS);
   }
-  return { tokens, doors, sight, locked, settings, lights, drawings, walls };
+  return { tokens, doors, sight, locked, settings, lights, drawings, walls, masks };
 }
 const MAX_DRAWINGS = 400;
 
@@ -233,9 +251,22 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
     scene.baseGrid = scene.baseGrid ?? { ...scene.grid };
     scene.grid = geometry.withGrid({ grid: scene.baseGrid }, settingsHere().grid).grid;
   }
+  function maskHere() {
+    if (!scene) return cleanMask({});
+    state.masks[scene.id] = state.masks[scene.id] ?? cleanMask({});
+    return state.masks[scene.id];
+  }
+  // Under the mask for players: the mask is on and the last shape over the point does not reveal it.
+  function masked(x, y) {
+    const mask = maskHere();
+    if (!mask.on) return false;
+    let hidden = true;
+    for (const shape of mask.shapes) if (geometry.pointInPolygon(x, y, shape.points)) hidden = shape.mode === "hide";
+    return hidden;
+  }
   function remember(label) {
     const ring = undoRing.get(scene.id) ?? [];
-    ring.push({ label, walls: JSON.parse(JSON.stringify(wallsHere())) });
+    ring.push({ label, walls: JSON.parse(JSON.stringify(wallsHere())), mask: JSON.parse(JSON.stringify(maskHere())) });
     if (ring.length > 50) ring.shift();
     undoRing.set(scene.id, ring);
   }
@@ -441,7 +472,8 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
     const doorList = wallsHere()
       .filter((wall) => wall.door > 0 || wall.toggle === "players" || wall.toggle === "gm")
       .map((wall) => ({ id: wall.id, x1: wall.x1, y1: wall.y1, x2: wall.x2, y2: wall.y2, secret: wall.door === 2 || wall.toggle === "gm", kind: wall.door > 0 ? "door" : wall.kind, state: wall.id in doors ? doors[wall.id] : wall.ds }));
-    const shared = { sceneId: scene.id, sight: sightOn(), locked, darkness: dark, settings: { grid: settings.grid, weather: settings.weather, darkness: settings.darkness }, drawings: drawingsHere() };
+    const mask = maskHere();
+    const shared = { sceneId: scene.id, sight: sightOn(), locked, darkness: dark, settings: { grid: settings.grid, weather: settings.weather, darkness: settings.darkness }, drawings: drawingsHere(), mask: mask.on || mask.shapes.length ? mask : null };
     const lightOut = (list) => list.map(({ id, x, y, brightPx, dimPx, color, polygon }) => ({ id, x, y, brightPx, dimPx, color, polygon }));
     if (seat.role === "dm") {
       return {
@@ -470,8 +502,9 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
     const needsLight = mine.length > 0 && (twilight ? dark >= 1 : dark >= geometry.NEEDS_LIGHT);
     const visibleInDark = (x, y) =>
       !needsLight || geometry.lit(x, y, shining) || seeing.some((item) => Math.hypot(x - item.x, y - item.y) <= item.radiusPx && (!item.polygon || geometry.pointInPolygon(x, y, item.polygon)));
-    const tokens = shown.filter((token) => token.owner === seat.name || ((!vision || geometry.seen(token.x, token.y, vision, slack)) && visibleInDark(token.x, token.y)));
-    const playerDoors = doorList.filter((door) => !door.secret && (!vision || geometry.seen((door.x1 + door.x2) / 2, (door.y1 + door.y2) / 2, vision, slack)));
+    // Nothing under the GM's mask reaches a player (FG: tokens under the mask are hidden), but their own tokens.
+    const tokens = shown.filter((token) => token.owner === seat.name || ((!vision || geometry.seen(token.x, token.y, vision, slack)) && visibleInDark(token.x, token.y) && !masked(token.x, token.y)));
+    const playerDoors = doorList.filter((door) => !door.secret && !masked((door.x1 + door.x2) / 2, (door.y1 + door.y2) / 2) && (!vision || geometry.seen((door.x1 + door.x2) / 2, (door.y1 + door.y2) / 2, vision, slack)));
     return {
       tokens: tokens.map((token) => publicToken(token, seat, assetToken)),
       ...shared,
@@ -791,6 +824,28 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       for (const wall of wallsHere()) if (wall.door > 0 || (wall.toggle && wall.toggle !== "none")) doors[wall.id] = (wall.id in doors ? doors[wall.id] : wall.ds) === 2 ? 2 : 0;
       changed();
     },
+    // The mask (FG's Mask tab): on (Add Global Mask), off (Remove Global Mask),
+    // a shape that reveals or hides again, clear, a shape removed.
+    mask: () => maskHere(),
+    setMask(input, seat) {
+      if (seat.role !== "dm") throw new Error("Only the GM can mask the map.");
+      if (!scene) throw new Error("No scene is open.");
+      const mask = maskHere();
+      remember("mask");
+      if (input.action === "on") mask.on = true;
+      else if (input.action === "off") mask.on = false;
+      else if (input.action === "clear") mask.shapes = [];
+      else if (input.action === "remove") mask.shapes = mask.shapes.filter((shape) => shape.id !== input.id);
+      else if (input.action === "reveal" || input.action === "hide") {
+        const shape = cleanMask({ shapes: [{ mode: input.action, points: input.points }] }).shapes[0];
+        if (!shape) throw new Error("A mask shape needs three points or more.");
+        mask.shapes.push(shape);
+        if (mask.shapes.length > 1000) mask.shapes.shift();
+        mask.on = true;
+      } else throw new Error("What should the mask do?");
+      changed();
+      return mask;
+    },
     undo(seat) {
       if (seat.role !== "dm") throw new Error("Only the GM can undo map edits.");
       if (!scene) throw new Error("No scene is open.");
@@ -798,6 +853,7 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       const last = ring.pop();
       if (!last) throw new Error("Nothing to undo.");
       state.walls[scene.id] = last.walls.map(cleanWall).filter(Boolean);
+      if (last.mask) state.masks[scene.id] = cleanMask(last.mask);
       liveScene();
       changed();
       return last.label;

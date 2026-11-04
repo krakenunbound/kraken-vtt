@@ -125,6 +125,22 @@ try {
   await settle(400);
   assert((await tool("kraken_wall", { action: "list" })).total === before + 2, "undone");
 
+  // Mask tab: the global mask, then a revealed rectangle.
+  await page.click('[data-edit-tab="mask"]');
+  await page.click('[data-action="mask-on"]');
+  await page.click('[data-edit-tool="rect"]');
+  for (const [x, y] of [
+    [cx - 400, cy - 300],
+    [cx + 400, cy + 300],
+  ]) {
+    const at = await screenOf(page, x, y);
+    await page.mouse.click(at.x, at.y);
+    await settle(250);
+  }
+  await page.waitForSelector('.mask-overlay[data-mask="1"]');
+  const mask = await tool("kraken_mask", { action: "list" });
+  assert(mask.on && mask.shapes.length === 1 && mask.shapes[0].mode === "reveal", `a revealed rectangle: ${JSON.stringify(mask).slice(0, 120)}`);
+
   // Grid tab: hex rows.
   await page.click('[data-edit-tab="grid"]');
   await page.selectOption('[aria-label="Grid type"]', "hexrow");
@@ -144,6 +160,7 @@ try {
   await seat.waitForSelector(".map-toolbar");
   await seat.waitForSelector('[data-grid="hex"]', { timeout: 15000 });
   assert((await seat.$('[data-action="map-editor"]')) === null, "a player has no map editor");
+  await seat.waitForSelector('.mask-overlay:not(.gm)[data-mask="1"]', { timeout: 10000 });
   // Every frame the player got (the join reply carries the first map and scene): no walls anywhere.
   await settle(800);
   const frames = messages.map((text) => JSON.parse(text));
@@ -152,7 +169,7 @@ try {
   const doorHandles = await seat.$$eval(".overlay.doors [data-door], .overlay.doors .door", (nodes) => nodes.length).catch(() => 0);
   await seat.screenshot({ path: path.join(tmpdir(), "kraken-mapedit-player.png") });
   assert(failures.length === 0, `page errors: ${failures.join(" | ")}`);
-  console.log(`ok map editor: walls drawn as a chain, made a door, deleted and undone; hex grid for the GM and the player; walls never sent to the player. ${path.join(tmpdir(), "kraken-mapedit-gm.png")}`);
+  console.log(`ok map editor: walls drawn as a chain, made a door, deleted and undone; the global mask with a revealed rectangle, black for the player; hex grid for the GM and the player; walls never sent to the player. ${path.join(tmpdir(), "kraken-mapedit-gm.png")}`);
 } finally {
   await browser?.close();
   child.kill();

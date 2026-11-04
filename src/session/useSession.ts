@@ -58,7 +58,10 @@ export type TableMap = {
   drawings?: MapDrawing[];
   // The GM's: the scene's walls as the table keeps them.
   walls?: EditWall[];
+  // FG's mask: on, and the shapes that reveal or hide again, in order.
+  mask?: MapMask | null;
 };
+export type MapMask = { on: boolean; shapes: { id: string; mode: "reveal" | "hide"; points: number[] }[] };
 export type Ping = { id: number; x: number; y: number; from: string; color: string };
 // A line drawn on the map, for everyone (by "" is the GM's).
 export type MapDrawing = { id: string; by: string; color: string; width: number; points: number[] };
@@ -799,6 +802,7 @@ export function useSession() {
   // The GM's map editor: walls and undo.
   const wall = useCallback((action: string, payload: Record<string, unknown> = {}) => send({ type: "wall", action, ...payload }), [send]);
   const mapUndo = useCallback(() => send({ type: "map-undo" }), [send]);
+  const mask = useCallback((action: string, payload: Record<string, unknown> = {}) => send({ type: "mask", action, ...payload }), [send]);
   const placeLight = useCallback((light: Partial<SceneLightRecord> & { preset?: string }) => send({ type: "light-place", light }), [send]);
   const updateLight = useCallback((id: string, patch: Partial<SceneLightRecord>) => send({ type: "light-update", id, patch }), [send]);
   const removeLight = useCallback((id: string) => send({ type: "light-remove", id }), [send]);
@@ -927,6 +931,7 @@ export function useSession() {
     levelUp,
     wall,
     mapUndo,
+    mask,
     changeClass,
   };
 }
