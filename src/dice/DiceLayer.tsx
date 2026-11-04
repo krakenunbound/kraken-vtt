@@ -31,6 +31,7 @@ type Flight = { groups: THREE.Group[]; from: THREE.Vector3[]; to: THREE.Vector3;
 
 const FRAME_MS = 1000 / 60;
 const HOLD_MS = 2600;
+const MAX_ON_TABLE = 16;
 const SHRINK_MS = 380;
 
 function lookOf(line: ChatLine): DiceLook {
@@ -219,6 +220,17 @@ function createEngine(host: HTMLDivElement) {
         scene.add(group);
         return group;
       });
+      // A crowded table (a pack of kobolds, an agent's quick rolls): the oldest
+      // landed dice make way at once, so no more than MAX_ON_TABLE lie there.
+      let onTable = throws.reduce((sum, item) => sum + item.groups.length, 0) + groups.length;
+      for (const item of throws) {
+        if (onTable <= MAX_ON_TABLE) break;
+        // Dice still rolling land first: their chat line waits for them.
+        if (!item.landed) continue;
+        const now = performance.now();
+        if (now - item.landed < HOLD_MS) item.landed = now - HOLD_MS;
+        onTable -= item.groups.length;
+      }
       throws.push({ line, look, last: groups.map(() => new THREE.Vector3(Infinity, 0, 0)), dice, labels, groups, frames: result.frames, count: result.count, hits: result.hits, played: 0, start: performance.now(), landed: 0 });
       // For tests and the agent's eyes: how this throw went (how far the first
       // die rolled in its first half second, in table widths, and how long to rest).

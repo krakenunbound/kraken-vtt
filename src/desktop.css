@@ -1112,3 +1112,15 @@ textarea.cc-field.tall { min-height: 220px; }
 .library-list h4 { margin: 10px 0 4px; color: var(--brass); font-size: 0.82rem; }
 .library-row { display: flex; justify-content: space-between; gap: 8px; align-items: center; padding: 4px 2px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
 .library-row button { flex: none; padding: 2px 8px; }
+
+/* The top bar never overlaps: the brand and the status keep their room, the party and the scene names give way. */
+.menubar .brand, .menubar .session-status { flex: none; white-space: nowrap; }
+.brand-version { white-space: nowrap; }
+.menubar .portrait-strip { flex: 0 1 auto; min-width: 0; overflow: hidden; }
+.menubar .portrait-strip.compact .chip-name { display: none; }
+.menubar .portrait-strip.compact .portrait-chip { padding: 3px; }
+.menubar .scene-bar { flex: 1 1 auto; min-width: 0; overflow: hidden; }
+.scene-bar .toolbar { min-width: 0; }
+.scene-bar .adventure-name { flex: 0 1 auto; min-width: 0; }
+.scene-bar select { flex: 0 1 auto; min-width: 6rem; }
+.grid-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }

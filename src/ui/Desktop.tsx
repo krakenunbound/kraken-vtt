@@ -193,7 +193,7 @@ export function Desktop({
         <div className="brand">
           <Mark /> Kraken <span className="brand-version" title="Alpha test version">{__KRAKEN_VERSION__}</span>
         </div>
-        <div className="portrait-strip" aria-label={gm ? "The party" : "Your characters"}>
+        <div className={portraits.length > 3 ? "portrait-strip compact" : "portrait-strip"} aria-label={gm ? "The party" : "Your characters"}>
           {portraits.map((record) => {
             const active = session.combat.entries.some((entry) => entry.recordId === record.id && entry.id === session.combat.active);
             return (
