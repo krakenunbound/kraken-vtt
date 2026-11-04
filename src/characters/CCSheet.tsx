@@ -96,14 +96,17 @@ export function CCSheet({ record, session }: { record: TableRecord; session: Ses
     <article className="cc-sheet" data-character={record.id}>
       <div className="cc-body">
         <header className="cc-head">
-          <button type="button" className="cc-portrait" data-action="pick-portrait" disabled={!editable} title={editable ? "Click to choose a portrait" : record.name} onClick={() => setPicking("portrait")} {...slotDrag({ kind: "sheet", record: record.id, label: record.name })}>
-            {portraitUrl ? <Picture session={session} id={portraitUrl} alt={record.name} /> : <span>{record.name.slice(0, 1)}</span>}
-          </button>
+          {/* The token as a small round badge on the portrait's corner. */}
+          <div className="cc-portrait-frame">
+            <button type="button" className="cc-portrait" data-action="pick-portrait" disabled={!editable} title={editable ? "Click to choose a portrait" : record.name} onClick={() => setPicking("portrait")} {...slotDrag({ kind: "sheet", record: record.id, label: record.name })}>
+              {portraitUrl ? <Picture session={session} id={portraitUrl} alt={record.name} /> : <span>{record.name.slice(0, 1)}</span>}
+            </button>
+            <button type="button" className="cc-token" data-action="pick-token" disabled={!editable} title={editable ? "Click to choose a token (the portrait is used without one)" : "Token"} onClick={() => setPicking("token")}>
+              {typeof data.token === "string" && data.token ? <Picture session={session} id={data.token} alt="Token" /> : portraitUrl ? <Picture session={session} id={portraitUrl} alt="Token" /> : <Icon name="character" size={18} />}
+            </button>
+          </div>
           <div className="cc-identity">
             <div className="cc-name-row">
-              <button type="button" className="cc-token" data-action="pick-token" disabled={!editable} title={editable ? "Click to choose a token (the portrait is used without one)" : "Token"} onClick={() => setPicking("token")}>
-                {typeof data.token === "string" && data.token ? <Picture session={session} id={data.token} alt="Token" /> : portraitUrl ? <Picture session={session} id={portraitUrl} alt="Token" /> : <Icon name="character" size={18} />}
-              </button>
               <label className="cc-labelled grow">
                 <Field value={record.name} editable={editable} label="Name" className="cc-name" onSave={(value) => change("name", value)} />
                 <small>Name</small>
