@@ -2,8 +2,9 @@ import { Icon } from "../ui/icons";
 import { lazy, Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { backgroundRect, colorWithAlpha, gridStops, sceneFrame, type BackgroundFit, type SceneFrame } from "../foundry/geometry";
 import { type SceneLight, type SceneMarker, type SceneRegion, type SceneWall } from "../foundry/sceneObjects";
-import { gridDistance, LIGHT_PRESETS, snapCenter } from "../../shared/map/geometry.mjs";
-import type { MapToken, Ping, SceneLightRecord, TableMap, TableRecord } from "../session/useSession";
+import { gridDistance, gridKind, gridOrigin, hexCorners, hexOf, LIGHT_PRESETS, snapCenter, withGrid } from "../../shared/map/geometry.mjs";
+import type { EditWall, MapToken, Ping, SceneLightRecord, TableMap, TableRecord, WallKind } from "../session/useSession";
+import { MapEditor, kindColor, type EditTab, type EditTool } from "./MapEditor";
 import { Lighting } from "./Lighting";
 import { SceneGraphics, SceneLegend, type OverlayToken } from "./SceneOverlay";
 import { SceneSettings, type SceneSettingsPatch } from "./SceneSettings";
@@ -24,7 +25,11 @@ export type MapScene = {
     alpha: number;
     distance: number;
     units: string;
+    offsetX?: number;
+    offsetY?: number;
   };
+  // The scene's own grid, under the GM's settings.
+  baseGrid?: MapScene["grid"];
   imageUrl: string | null;
   offsetX: number;
   offsetY: number;
@@ -124,6 +129,9 @@ export type MapActions = {
   eraseDrawing: (id: string) => void;
   clearDrawings: () => void;
   ct: (action: string, payload?: Record<string, unknown>) => void;
+  // The GM's map editor.
+  wall?: (action: string, payload?: Record<string, unknown>) => void;
+  mapUndo?: () => void;
 };
 // What a left-drag does on the map: pan it, ping, draw, or rub a line out.
 type Tool = "pan" | "ping" | "draw" | "erase";
@@ -134,7 +142,7 @@ type Measure = { pointerId: number; start: Point; at: Point };
 type Menu = { id: string; left: number; top: number };
 
 export function MapView({
-  scene,
+  scene: sceneIn,
   gm = true,
   map,
   records = [],
@@ -156,7 +164,24 @@ export function MapView({
   // This seat's name (a player rubs out only their own lines).
   me?: string;
 }) {
+  // The scene with the GM's grid settings over its own (type, cell size, offset...).
+  const scene = useMemo(
+    () => withGrid({ ...sceneIn, grid: sceneIn.baseGrid ?? sceneIn.grid }, map.sceneId === sceneIn.id ? map.settings.grid : null) as MapScene,
+    [sceneIn, map.sceneId, map.settings.grid],
+  );
   const [tool, setTool] = useState<Tool>("pan");
+  // The GM's map editor (FG's image layer panel).
+  const [editorOpen, setEditorOpen] = useState(false);
+  const [editTab, setEditTab] = useState<EditTab>("walls");
+  const [editTool, setEditTool] = useState<EditTool>(null);
+  const [wallKind, setWallKind] = useState<WallKind>("wall");
+  const [gridSnap, setGridSnap] = useState(true);
+  const [pointSnap, setPointSnap] = useState(true);
+  const [selectedWalls, setSelectedWalls] = useState<string[]>([]);
+  const [selectedLight, setSelectedLight] = useState<string | null>(null);
+  const [lightPreset, setLightPreset] = useState("torch");
+  const [pending, setPending] = useState<number[]>([]);
+  const [hover, setHover] = useState<{ x: number; y: number } | null>(null);
   const [drawColor, setDrawColor] = useState<string | null>(null);
   const [stroke, setStroke] = useState<{ pointerId: number; points: number[] } | null>(null);
   const [found, setFound] = useState<{ id: string; at: number } | null>(null);
@@ -185,9 +210,44 @@ export function MapView({
   const size = scene.grid.size > 0 ? scene.grid.size : 100;
   const gridSettings = map.sceneId === scene.id ? map.settings.grid : { show: true, alpha: null, color: null };
   const gridStroke = colorWithAlpha(gridSettings.color ?? scene.grid.color, gridSettings.alpha ?? scene.grid.alpha);
-  const drawSquare = scene.grid.type === 1 && scene.grid.size > 0 && gridSettings.show;
-  const vertical = drawSquare ? gridStops(scene.width, scene.grid.size) : [];
-  const horizontal = drawSquare ? gridStops(scene.height, scene.grid.size) : [];
+  const kindOfGrid = gridKind(scene);
+  const drawSquare = kindOfGrid === "square" && scene.grid.size > 0 && gridSettings.show;
+  const offX = ((Number(scene.grid.offsetX) || 0) % scene.grid.size + scene.grid.size) % scene.grid.size;
+  const offY = ((Number(scene.grid.offsetY) || 0) % scene.grid.size + scene.grid.size) % scene.grid.size;
+  const vertical = drawSquare ? gridStops(scene.width, scene.grid.size).map((x) => x + offX).filter((x) => x <= scene.width) : [];
+  const horizontal = drawSquare ? gridStops(scene.height, scene.grid.size).map((y) => y + offY).filter((y) => y <= scene.height) : [];
+  const gridDash = gridSettings.style === "dashed" ? `${6 / camera.scale} ${4 / camera.scale}` : gridSettings.style === "dotted" ? `${1 / camera.scale} ${4 / camera.scale}` : undefined;
+  // Hex grids: one path of every hex over the scene (FG's hex rows and columns).
+  const hexPath = useMemo(() => {
+    if (!gridSettings.show || (kindOfGrid !== "hexrow" && kindOfGrid !== "hexcol")) return "";
+    const origin = { x: frame.padX, y: frame.padY };
+    const a = hexOf(scene, origin.x, origin.y);
+    const b = hexOf(scene, origin.x + scene.width, origin.y + scene.height);
+    const parts: string[] = [];
+    const span = Math.abs(b.q - a.q) + Math.abs(b.r - a.r) + 4;
+    if (span > 400) return "";
+    for (let q = Math.min(a.q, b.q) - span; q <= Math.max(a.q, b.q) + span; q += 1) {
+      for (let r = Math.min(a.r, b.r) - span; r <= Math.max(a.r, b.r) + span; r += 1) {
+        const corners = hexCorners(scene, q, r);
+        const cx = (corners[0] + corners[6]) / 2;
+        const cy = (corners[1] + corners[7]) / 2;
+        if (cx < origin.x - scene.grid.size || cy < origin.y - scene.grid.size || cx > origin.x + scene.width + scene.grid.size || cy > origin.y + scene.height + scene.grid.size) continue;
+        parts.push(`M${corners.slice(0, 2).join(",")}L${corners.slice(2).join(" ")}Z`);
+      }
+    }
+    return parts.join("");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [kindOfGrid, gridSettings.show, scene.grid.size, scene.grid.offsetX, scene.grid.offsetY, scene.width, scene.height, frame.padX, frame.padY]);
+  // The walls the GM sees: the table's own (editable), else the imported ones.
+  const liveWalls = useMemo(
+    () =>
+      (map.walls ?? []).map((wall: EditWall) => ({
+        ...wall,
+        category: (wall.kind === "secret" ? "secret" : wall.kind === "door" ? "door" : wall.kind === "window" ? "window" : wall.kind === "terrain" ? "terrain" : wall.kind === "invisible" ? "invisible" : wall.kind === "ethereal" || wall.kind === "illusion" ? "ethereal" : wall.kind === "shadow" ? "blank" : "normal") as SceneWall["category"],
+      })),
+    [map.walls],
+  );
+  const wallsShown: SceneWall[] = map.walls ? liveWalls : scene.walls;
   const backdrop = backgroundRect(scene, frame, natural);
   const strokeWidth = 1 / camera.scale;
   const units = scene.grid.units || "ft";
@@ -386,6 +446,99 @@ export function MapView({
     return `${gridDistance(scene, from, to, 1)} ${units}`;
   }
 
+  // Wall points snap to the grid's corners (hex corners on a hex grid) and to
+  // existing wall ends (FG's Grid Snap and Point Snap); Shift draws free.
+  function snapPoint(point: Point, snapping: boolean): Point {
+    const round = (value: number) => Math.round(value * 10) / 10;
+    if (snapping && pointSnap) {
+      const reach = 10 / camera.scale;
+      let best: Point | null = null;
+      let bestDistance = reach;
+      for (const wall of map.walls ?? []) {
+        for (const end of [
+          { x: wall.x1, y: wall.y1 },
+          { x: wall.x2, y: wall.y2 },
+        ]) {
+          const distance = Math.hypot(end.x - point.x, end.y - point.y);
+          if (distance < bestDistance) {
+            best = end;
+            bestDistance = distance;
+          }
+        }
+      }
+      if (best) return best;
+    }
+    if (snapping && gridSnap) {
+      if (kindOfGrid === "square") {
+        const origin = gridOrigin(scene);
+        const half = size / 2;
+        // Corners and the middle of each side (Foundry's half-square snap).
+        return { x: round(Math.round((point.x - origin.x) / half) * half + origin.x), y: round(Math.round((point.y - origin.y) / half) * half + origin.y) };
+      }
+      if (kindOfGrid === "hexrow" || kindOfGrid === "hexcol") {
+        const { q, r } = hexOf(scene, point.x, point.y);
+        const corners = hexCorners(scene, q, r);
+        let best = { x: point.x, y: point.y };
+        let bestDistance = Infinity;
+        for (let i = 0; i < 12; i += 2) {
+          const distance = Math.hypot(corners[i] - point.x, corners[i + 1] - point.y);
+          if (distance < bestDistance) {
+            best = { x: round(corners[i]), y: round(corners[i + 1]) };
+            bestDistance = distance;
+          }
+        }
+        return best;
+      }
+    }
+    return { x: round(point.x), y: round(point.y) };
+  }
+  function wallAt(point: Point): string | null {
+    let best: string | null = null;
+    let bestDistance = 8 / camera.scale;
+    for (const wall of map.walls ?? []) {
+      const dx = wall.x2 - wall.x1;
+      const dy = wall.y2 - wall.y1;
+      const length = dx * dx + dy * dy || 1;
+      const t = Math.max(0, Math.min(1, ((point.x - wall.x1) * dx + (point.y - wall.y1) * dy) / length));
+      const distance = Math.hypot(point.x - (wall.x1 + t * dx), point.y - (wall.y1 + t * dy));
+      if (distance < bestDistance) {
+        best = wall.id;
+        bestDistance = distance;
+      }
+    }
+    return best;
+  }
+  function finishShape() {
+    if (editTool === "poly" && pending.length >= 6 && actions.wall) actions.wall("add", { wall: { points: pending, closed: true, kind: wallKind } });
+    setPending([]);
+    setHover(null);
+  }
+  // Esc ends a chain, Enter closes a shape, Delete removes the selection, Ctrl+Z undoes.
+  useEffect(() => {
+    if (!gm || !editorOpen) return;
+    const onKey = (event: KeyboardEvent) => {
+      if ((event.target as HTMLElement)?.closest?.("input, textarea, select")) return;
+      if (event.key === "Escape") {
+        setPending([]);
+        setHover(null);
+      } else if (event.key === "Enter") finishShape();
+      else if ((event.key === "Delete" || event.key === "Backspace") && selectedWalls.length && actions.wall) {
+        actions.wall("remove", { ids: selectedWalls });
+        setSelectedWalls([]);
+      } else if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "z" && actions.mapUndo) {
+        event.preventDefault();
+        actions.mapUndo();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gm, editorOpen, selectedWalls, pending, editTool, wallKind]);
+  useEffect(() => {
+    setPending([]);
+    setHover(null);
+  }, [editTool, editorOpen]);
+
   const placeable = records.filter((record) => record.type === "character" && (gm || record.owner !== ""));
   const dragging = drag ? tokens.find((token) => token.id === drag.id) : null;
   const ghost = drag && drag.moved ? (drag.snap ? snapCenter(scene, drag.at.x, drag.at.y, drag.squares) : drag.at) : null;
@@ -400,7 +553,7 @@ export function MapView({
       data-sight={map.sight ? "on" : "off"}
       onContextMenu={(event) => event.preventDefault()}
       onPointerDown={(event) => {
-        if ((event.target as HTMLElement).closest(".map-controls, .legend, .token-tray, .token-menu, .scene-settings")) return;
+        if ((event.target as HTMLElement).closest(".map-controls, .legend, .token-tray, .token-menu, .scene-settings, .map-editor")) return;
         setMenu(null);
         setLightMenu(null);
         if (event.button === 2) {
@@ -413,6 +566,30 @@ export function MapView({
         }
         if (event.button !== 0) return;
         setSelected(null);
+        if (gm && editorOpen && editTool && actions.wall) {
+          const raw = worldAt(event.clientX, event.clientY);
+          if (!raw) return;
+          const point = snapPoint(raw, !event.shiftKey);
+          if (editTool === "select") {
+            const id = wallAt(raw);
+            setSelectedWalls((current) => (id ? (event.shiftKey ? (current.includes(id) ? current.filter((item) => item !== id) : [...current, id]) : [id]) : event.shiftKey ? current : []));
+          } else if (editTool === "light") {
+            actions.placeLight({ x: Math.round(raw.x), y: Math.round(raw.y), preset: lightPreset });
+          } else if (editTool === "line") {
+            // Point to point: each click adds a wall from the last point (FG's line, Foundry's chain).
+            if (pending.length >= 2) actions.wall("add", { wall: { points: [pending[0], pending[1], point.x, point.y], kind: wallKind } });
+            setPending([point.x, point.y]);
+          } else if (editTool === "rect") {
+            if (pending.length >= 2) {
+              const [x1, y1] = pending;
+              actions.wall("add", { wall: { points: [x1, y1, point.x, y1, point.x, point.y, x1, point.y], closed: true, kind: wallKind } });
+              setPending([]);
+            } else setPending([point.x, point.y]);
+          } else if (editTool === "poly") {
+            setPending((current) => [...current, point.x, point.y]);
+          }
+          return;
+        }
         if (tool !== "pan") {
           const point = worldAt(event.clientX, event.clientY);
           if (!point) return;
@@ -431,6 +608,10 @@ export function MapView({
         setPanning(true);
       }}
       onPointerMove={(event) => {
+        if (gm && editorOpen && pending.length >= 2) {
+          const point = worldAt(event.clientX, event.clientY);
+          if (point) setHover(snapPoint(point, !event.shiftKey));
+        }
         if (lightDrag.current && lightDrag.current.pointerId === event.pointerId) return;
         if (drag && drag.pointerId === event.pointerId) {
           const point = worldAt(event.clientX, event.clientY);
@@ -487,7 +668,11 @@ export function MapView({
         }
       }}
       onDoubleClick={(event) => {
-        if ((event.target as HTMLElement).closest(".map-controls, .legend, .token-tray, .token, .token-menu, .scene-settings, .light-handle")) return;
+        if ((event.target as HTMLElement).closest(".map-controls, .legend, .token-tray, .token, .token-menu, .scene-settings, .light-handle, .map-editor")) return;
+        if (gm && editorOpen && editTool && editTool !== "select" && editTool !== "light") {
+          finishShape();
+          return;
+        }
         const point = worldAt(event.clientX, event.clientY);
         if (point) actions.ping(point.x, point.y);
       }}
@@ -535,17 +720,27 @@ export function MapView({
             style={{ left: frame.padX, top: frame.padY }}
           >
             {vertical.map((x) => (
-              <line key={`v${x}`} x1={x} y1={0} x2={x} y2={scene.height} stroke={gridStroke} strokeWidth={strokeWidth} />
+              <line key={`v${x}`} x1={x} y1={0} x2={x} y2={scene.height} stroke={gridStroke} strokeWidth={strokeWidth * (gridSettings.thickness ?? 1)} strokeDasharray={gridDash} />
             ))}
             {horizontal.map((y) => (
-              <line key={`h${y}`} x1={0} y1={y} x2={scene.width} y2={y} stroke={gridStroke} strokeWidth={strokeWidth} />
+              <line key={`h${y}`} x1={0} y1={y} x2={scene.width} y2={y} stroke={gridStroke} strokeWidth={strokeWidth * (gridSettings.thickness ?? 1)} strokeDasharray={gridDash} />
             ))}
+          </svg>
+        ) : null}
+        {hexPath ? (
+          <svg className="grid hex" width={frame.worldWidth} height={frame.worldHeight} viewBox={`0 0 ${frame.worldWidth} ${frame.worldHeight}`} style={{ left: 0, top: 0 }} data-grid="hex">
+            <defs>
+              <clipPath id="hex-clip">
+                <rect x={frame.padX} y={frame.padY} width={scene.width} height={scene.height} />
+              </clipPath>
+            </defs>
+            <path d={hexPath} fill="none" stroke={gridStroke} strokeWidth={strokeWidth * (gridSettings.thickness ?? 1)} strokeDasharray={gridDash} clipPath="url(#hex-clip)" />
           </svg>
         ) : null}
         <SceneGraphics
           worldWidth={frame.worldWidth}
           worldHeight={frame.worldHeight}
-          walls={gm ? scene.walls : []}
+          walls={gm ? wallsShown : []}
           lights={[]}
           tokens={[]}
           markers={gm ? scene.markers : []}
@@ -569,6 +764,28 @@ export function MapView({
             image={scene.imageUrl && !imageFailed ? { url: scene.imageUrl, ...backdrop } : null}
           />
         ) : null}
+        {gm && editorOpen ? (
+          <svg className="overlay edit-overlay" width={frame.worldWidth} height={frame.worldHeight} viewBox={`0 0 ${frame.worldWidth} ${frame.worldHeight}`} data-editing={editTool ?? ""}>
+            {(map.walls ?? [])
+              .filter((wall) => selectedWalls.includes(wall.id))
+              .map((wall) => (
+                <line key={`sel-${wall.id}`} x1={wall.x1} y1={wall.y1} x2={wall.x2} y2={wall.y2} stroke="#ff9f1a" strokeWidth={6 / camera.scale} strokeLinecap="round" opacity={0.85} data-selected-wall={wall.id} />
+              ))}
+            {(map.walls ?? []).map((wall) => (
+              <g key={`end-${wall.id}`}>
+                <circle cx={wall.x1} cy={wall.y1} r={3 / camera.scale} fill={kindColor(wall.kind)} />
+                <circle cx={wall.x2} cy={wall.y2} r={3 / camera.scale} fill={kindColor(wall.kind)} />
+                {wall.hidden ? <line x1={wall.x1} y1={wall.y1} x2={wall.x2} y2={wall.y2} stroke="#ff4444" strokeWidth={2 / camera.scale} strokeDasharray={`${4 / camera.scale} ${4 / camera.scale}`} /> : null}
+              </g>
+            ))}
+            {pending.length >= 2 ? (
+              <>
+                <polyline points={[...pending, ...(hover ? [hover.x, hover.y] : [])].join(" ")} fill="none" stroke={kindColor(wallKind)} strokeWidth={3 / camera.scale} strokeDasharray={`${8 / camera.scale} ${4 / camera.scale}`} />
+                {editTool === "rect" && hover ? <rect x={Math.min(pending[0], hover.x)} y={Math.min(pending[1], hover.y)} width={Math.abs(hover.x - pending[0])} height={Math.abs(hover.y - pending[1])} fill="none" stroke={kindColor(wallKind)} strokeWidth={3 / camera.scale} /> : null}
+              </>
+            ) : null}
+          </svg>
+        ) : null}
         {gm && showLights
           ? map.sceneLights.map((light) => {
               const per = size / (scene.grid.distance > 0 ? scene.grid.distance : 5);
@@ -582,6 +799,10 @@ export function MapView({
                   onPointerDown={(event) => {
                     if (event.button !== 0) return;
                     event.stopPropagation();
+                    if (editorOpen) {
+                      setSelectedLight(light.id);
+                      setEditTab("lights");
+                    }
                     if (viewport.current) capture(viewport.current, event.pointerId);
                     lightDrag.current = { pointerId: event.pointerId, id: light.id };
                   }}
@@ -1031,6 +1252,9 @@ export function MapView({
         </div>
         {gm ? (
           <div className="tool-group">
+            <button type="button" className={editorOpen ? "tool on" : "tool"} data-action="map-editor" aria-pressed={editorOpen} aria-label="Edit map" title="Edit the map: walls, doors, windows, lights and the grid (FG's layer panel)" onClick={() => setEditorOpen(!editorOpen)}>
+              <Icon name="pen" />
+            </button>
             <button type="button" className={settingsOpen ? "tool on" : "tool"} data-action="scene-settings" aria-pressed={settingsOpen} aria-label="Scene" onClick={() => setSettingsOpen(!settingsOpen)} title="Scene: lighting, players, grid and weather">
               <Icon name="settings" />
             </button>
@@ -1066,9 +1290,32 @@ export function MapView({
           {hint}
         </p>
       ) : null}
-      {gm && !settingsOpen ? (
+      {gm && editorOpen && actions.wall && actions.mapUndo ? (
+        <MapEditor
+          map={map}
+          tab={editTab}
+          setTab={setEditTab}
+          tool={editTool}
+          setTool={setEditTool}
+          kind={wallKind}
+          setKind={setWallKind}
+          snap={gridSnap}
+          setSnap={setGridSnap}
+          pointSnap={pointSnap}
+          setPointSnap={setPointSnap}
+          selected={selectedWalls}
+          setSelected={setSelectedWalls}
+          selectedLight={selectedLight}
+          lightPreset={lightPreset}
+          setLightPreset={setLightPreset}
+          gridScene={scene.baseGrid ?? sceneIn.grid}
+          actions={{ wall: actions.wall, mapUndo: actions.mapUndo, updateSettings: actions.updateSettings, updateLight: actions.updateLight, removeLight: actions.removeLight }}
+          onClose={() => setEditorOpen(false)}
+        />
+      ) : null}
+      {gm && !settingsOpen && !editorOpen ? (
         <SceneLegend
-          walls={scene.walls}
+          walls={wallsShown}
           lights={scene.lights}
           tokens={scene.tokens}
           markers={scene.markers}
@@ -1087,7 +1334,6 @@ export function MapView({
         </p>
       ) : null}
       <p className="map-hint">Drag to pan · wheel to zoom · right-drag to measure · double-click (or the ping tool) to ping · Ctrl+click a token to target it{gm || mine.length > 0 ? " · arrows move the selected token" : ""}</p>
-      {scene.grid.type > 1 ? <p className="map-note">Hex grids are not drawn yet.</p> : null}
       {imageFailed || !scene.imageUrl ? <p className="map-note">This scene has no background image.</p> : null}
     </div>
   );

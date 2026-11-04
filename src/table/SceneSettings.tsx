@@ -3,7 +3,7 @@ import { WEATHER_TYPES, type WeatherType } from "./weatherTypes";
 
 export type SceneSettingsPatch = {
   darkness?: number | null;
-  grid?: { show?: boolean; alpha?: number | null; color?: string | null };
+  grid?: { show?: boolean; alpha?: number | null; color?: string | null; type?: "square" | "hexrow" | "hexcol" | "none" | null; size?: number | null; offsetX?: number | null; offsetY?: number | null; distance?: number | null; units?: string | null; style?: string; thickness?: number };
   weather?: { type?: WeatherType; intensity?: number; direction?: number };
 };
 

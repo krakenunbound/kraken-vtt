@@ -2,8 +2,8 @@
 // distances, walls that stop movement, and line of sight. Positions are world
 // coordinates (Foundry's padded scene origin); a token's x, y is its centre.
 
-// The grid starts at the padded scene origin (see src/foundry/geometry.ts sceneFrame).
-export function gridOrigin(scene) {
+// The picture starts at the padded scene origin (see src/foundry/geometry.ts sceneFrame).
+export function sceneOrigin(scene) {
   const size = gridSize(scene);
   return {
     x: Math.ceil(scene.padding * scene.width * (1 / size)) * size,
@@ -11,14 +11,98 @@ export function gridOrigin(scene) {
   };
 }
 
+// The grid starts there too, moved by the GM's offset (FG's Adjust Position).
+export function gridOrigin(scene) {
+  const origin = sceneOrigin(scene);
+  return { x: origin.x + (Number(scene?.grid?.offsetX) || 0), y: origin.y + (Number(scene?.grid?.offsetY) || 0) };
+}
+
 export function gridSize(scene) {
   const size = Number(scene?.grid?.size);
   return size > 0 ? size : 100;
 }
 
+// The grid's kind from Foundry's type: 0 none, 1 square, 2-3 hex rows
+// (pointy-topped), 4-5 hex columns (flat-topped).
+export function gridKind(scene) {
+  const type = Number(scene?.grid?.type ?? 1);
+  if (type === 0) return "none";
+  if (type === 2 || type === 3) return "hexrow";
+  if (type === 4 || type === 5) return "hexcol";
+  return "square";
+}
+const KIND_TYPE = { none: 0, square: 1, hexrow: 2, hexcol: 4 };
+
+// The scene with the GM's grid settings over its own (FG's Grid tab: type,
+// cell size, offset, colour, opacity, distance): what the rules and the map use.
+export function withGrid(scene, settings) {
+  if (!scene || !settings) return scene;
+  const grid = { ...scene.grid };
+  if (settings.type && KIND_TYPE[settings.type] !== undefined) grid.type = KIND_TYPE[settings.type];
+  if (Number(settings.size) >= 10) grid.size = Number(settings.size);
+  if (settings.offsetX != null) grid.offsetX = Number(settings.offsetX) || 0;
+  if (settings.offsetY != null) grid.offsetY = Number(settings.offsetY) || 0;
+  if (settings.color) grid.color = settings.color;
+  if (settings.alpha != null) grid.alpha = Number(settings.alpha);
+  if (Number(settings.distance) > 0) grid.distance = Number(settings.distance);
+  if (settings.units) grid.units = settings.units;
+  return { ...scene, grid };
+}
+
+// Hexes (size: the distance between neighbouring centres, flat side to flat
+// side): the nearest centre, and hex steps between two points.
+function hexAxes(scene) {
+  const size = gridSize(scene);
+  const radius = size / Math.sqrt(3);
+  return { size, radius, columns: gridKind(scene) === "hexcol" };
+}
+function cubeRound(q, r) {
+  let x = q;
+  let z = r;
+  let y = -x - z;
+  let rx = Math.round(x);
+  let ry = Math.round(y);
+  let rz = Math.round(z);
+  const dx = Math.abs(rx - x);
+  const dy = Math.abs(ry - y);
+  const dz = Math.abs(rz - z);
+  if (dx > dy && dx > dz) rx = -ry - rz;
+  else if (dy > dz) ry = -rx - rz;
+  else rz = -rx - ry;
+  return { q: rx, r: rz };
+}
+export function hexOf(scene, x, y) {
+  const { radius, columns } = hexAxes(scene);
+  const origin = gridOrigin(scene);
+  const px = x - origin.x;
+  const py = y - origin.y;
+  return columns ? cubeRound(((2 / 3) * px) / radius, ((-1 / 3) * px + (Math.sqrt(3) / 3) * py) / radius) : cubeRound(((Math.sqrt(3) / 3) * px - (1 / 3) * py) / radius, ((2 / 3) * py) / radius);
+}
+export function hexCenter(scene, q, r) {
+  const { radius, columns } = hexAxes(scene);
+  const origin = gridOrigin(scene);
+  return columns ? { x: origin.x + radius * 1.5 * q, y: origin.y + radius * Math.sqrt(3) * (r + q / 2) } : { x: origin.x + radius * Math.sqrt(3) * (q + r / 2), y: origin.y + radius * 1.5 * r };
+}
+export function hexCorners(scene, q, r) {
+  const { radius, columns } = hexAxes(scene);
+  const c = hexCenter(scene, q, r);
+  const out = [];
+  for (let i = 0; i < 6; i += 1) {
+    const angle = (Math.PI / 180) * (60 * i + (columns ? 0 : 30));
+    out.push(c.x + radius * Math.cos(angle), c.y + radius * Math.sin(angle));
+  }
+  return out;
+}
+
 // The centre a token of `squares` squares snaps to when dropped at x, y: its
 // footprint lines up with the grid, as FG and Foundry snap tokens.
 export function snapCenter(scene, x, y, squares = 1) {
+  const kind = gridKind(scene);
+  if (kind === "hexrow" || kind === "hexcol") {
+    const { q, r } = hexOf(scene, x, y);
+    return hexCenter(scene, q, r);
+  }
+  if (kind === "none") return { x, y };
   const size = gridSize(scene);
   const origin = gridOrigin(scene);
   const span = Math.max(1, squares) * size;
@@ -41,6 +125,13 @@ export function tokenSquares(space, unitsPerSquare = 5) {
 export function gridDistance(scene, a, b, diagonal = 1) {
   const size = gridSize(scene);
   const per = Number(scene?.grid?.distance) > 0 ? Number(scene.grid.distance) : 5;
+  const kind = gridKind(scene);
+  if ((kind === "hexrow" || kind === "hexcol") && diagonal !== "raw") {
+    const from = hexOf(scene, a.x, a.y);
+    const to = hexOf(scene, b.x, b.y);
+    const steps = (Math.abs(from.q - to.q) + Math.abs(from.q + from.r - to.q - to.r) + Math.abs(from.r - to.r)) / 2;
+    return Math.round(steps * per * 10) / 10;
+  }
   const dx = Math.abs(Math.round((b.x - a.x) / size));
   const dy = Math.abs(Math.round((b.y - a.y) / size));
   let squares;
@@ -52,21 +143,42 @@ export function gridDistance(scene, a, b, diagonal = 1) {
 
 // Foundry wall senses: 0 none, 10 limited, 20 normal, 30 proximity, 40 distance.
 // doorState: 0 closed, 1 open, 2 locked.
+// A door, a window or a toggle wall (FG's toggleable) that is open now.
 export function doorOpen(wall, doors) {
-  if (!(wall.door > 0)) return false;
+  if (!(wall.door > 0) && !(wall.toggle && wall.toggle !== "none")) return false;
   const state = doors && wall.id in doors ? doors[wall.id] : wall.ds;
   return state === 1;
 }
 
+// FG's hidden occluder: a wall toggled off blocks nothing.
+const off = (wall, doors) => Boolean(wall.hidden) || doorOpen(wall, doors);
+
 export function blocksMove(wall, doors) {
-  return Number(wall.move) !== 0 && !doorOpen(wall, doors);
+  return Number(wall.move) !== 0 && !off(wall, doors);
 }
 
-// Whether a wall can block sight at all (Foundry: sense NONE never does, an
-// open door never does).
-export function blocksSight(wall, doors) {
-  return Number(wall.sight) !== 0 && !doorOpen(wall, doors);
+// Whether a wall can block a sense at all (Foundry: sense NONE never does, an
+// open door never does). sense: "sight" (default) or "light".
+export function blocksSight(wall, doors, sense = "sight") {
+  return Number(wall[sense] ?? wall.sight) !== 0 && !off(wall, doors);
 }
+
+// The wall kinds the GM draws, FG's names with Foundry's senses (sight,
+// light, sound, move: 0 none, 10 limited, 20 normal, 30 proximity; door: 1
+// door, 2 secret). A window sees through (FG), or only close up (Foundry,
+// windowStyle "proximity").
+export const WALL_KINDS = {
+  wall: { sight: 20, light: 20, sound: 20, move: 20, door: 0 },
+  terrain: { sight: 10, light: 10, sound: 10, move: 20, door: 0 },
+  door: { sight: 20, light: 20, sound: 20, move: 20, door: 1 },
+  secret: { sight: 20, light: 20, sound: 20, move: 20, door: 2 },
+  toggle: { sight: 20, light: 20, sound: 20, move: 20, door: 0, toggle: "gm" },
+  window: { sight: 0, light: 0, sound: 20, move: 20, door: 0, toggle: "players" },
+  illusion: { sight: 20, light: 20, sound: 0, move: 0, door: 0 },
+  invisible: { sight: 0, light: 0, sound: 0, move: 20, door: 0 },
+  ethereal: { sight: 20, light: 20, sound: 0, move: 0, door: 0 },
+  shadow: { sight: 0, light: 20, sound: 0, move: 0, door: 0 },
+};
 
 // Foundry's Edge#orientPoint: which side of a -> b the point is on.
 // 1 left, 2 right, 0 on the line.
@@ -85,14 +197,14 @@ function distanceToWall(point, wall) {
 // none collinear with the viewer, no one-way wall seen from its open side,
 // and proximity / distance walls only when their threshold says so.
 // Limited walls come back marked: sight passes the first and stops at the second.
-export function sightEdges(origin, walls, doors, distancePixels = 1, externalRadius = 0) {
+export function sightEdges(origin, walls, doors, distancePixels = 1, externalRadius = 0, sense = "sight") {
   const edges = [];
   for (const wall of walls) {
-    if (!blocksSight(wall, doors)) continue;
+    if (!blocksSight(wall, doors, sense)) continue;
     const where = side(wall, origin);
     if (!where) continue;
     if (wall.dir && where === Number(wall.dir)) continue;
-    const sight = Number(wall.sight);
+    const sight = Number(wall[sense] ?? wall.sight);
     if (sight >= 30 && wall.threshold > 0) {
       const reach = wall.threshold * distancePixels;
       const d = distanceToWall(origin, wall);
@@ -152,11 +264,11 @@ export function settleMove(scene, walls, doors, from, to, squares = 1, { snap = 
 // (Foundry clips sight to the scene rectangle, not its padding).
 // distancePixels: pixels per scene unit, for wall thresholds; externalRadius:
 // the viewer's own radius (half a token), as Foundry's token vision uses.
-export function visibilityPolygon(origin, walls, doors, bounds, distancePixels = 1, externalRadius = 0) {
+export function visibilityPolygon(origin, walls, doors, bounds, distancePixels = 1, externalRadius = 0, sense = "sight") {
   const segments = [];
   const { x: bx, y: by, width: bw, height: bh } = bounds;
   segments.push([bx, by, bx + bw, by, false], [bx + bw, by, bx + bw, by + bh, false], [bx + bw, by + bh, bx, by + bh, false], [bx, by + bh, bx, by, false]);
-  for (const edge of sightEdges(origin, walls, doors, distancePixels, externalRadius)) segments.push([edge.x1, edge.y1, edge.x2, edge.y2, edge.limited]);
+  for (const edge of sightEdges(origin, walls, doors, distancePixels, externalRadius, sense)) segments.push([edge.x1, edge.y1, edge.x2, edge.y2, edge.limited]);
   const anyLimited = segments.some((segment) => segment[4]);
   const angles = [];
   for (const [x1, y1, x2, y2] of segments) {
@@ -196,10 +308,10 @@ export function visibilityPolygon(origin, walls, doors, bounds, distancePixels =
 
 // What a viewer at origin sees on a scene: clipped to the scene rectangle,
 // with wall thresholds in the scene's units.
-export function sceneSight(scene, origin, doors, externalRadius = 0) {
-  const offset = gridOrigin(scene);
+export function sceneSight(scene, origin, doors, externalRadius = 0, sense = "sight") {
+  const offset = sceneOrigin(scene);
   const per = Number(scene?.grid?.distance) > 0 ? Number(scene.grid.distance) : 5;
-  return visibilityPolygon(origin, scene.walls ?? [], doors, { x: offset.x, y: offset.y, width: scene.width, height: scene.height }, gridSize(scene) / per, externalRadius);
+  return visibilityPolygon(origin, scene.walls ?? [], doors, { x: offset.x, y: offset.y, width: scene.width, height: scene.height }, gridSize(scene) / per, externalRadius, sense);
 }
 
 export function pointInPolygon(x, y, polygon) {

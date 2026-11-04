@@ -44,6 +44,8 @@ const MESSAGES = {
   "light-place": "kraken_light",
   "light-update": "kraken_light",
   "light-remove": "kraken_light",
+  wall: "kraken_wall",
+  "map-undo": "kraken_map_undo",
   ping: "kraken_ping",
   draw: "kraken_draw",
   "draw-erase": "kraken_draw",

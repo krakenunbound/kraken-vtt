@@ -1193,7 +1193,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
 
       // The map: tokens, doors, line of sight and pings (mapState.cjs decides
       // who may do what).
-      if (["token-place", "token-move", "token-remove", "token-update", "door", "sight", "lock", "scene-settings", "light-place", "light-update", "light-remove", "draw", "draw-erase", "draw-clear"].includes(msg.type)) {
+      if (["token-place", "token-move", "token-remove", "token-update", "door", "sight", "lock", "scene-settings", "light-place", "light-update", "light-remove", "draw", "draw-erase", "draw-clear", "wall", "map-undo"].includes(msg.type)) {
         const seat = seatOf(client);
         try {
           if (msg.type === "token-place") {
@@ -1226,6 +1226,18 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
             map.updateLight(String(msg.id ?? ""), msg.patch ?? {}, seat);
           } else if (msg.type === "light-remove") {
             map.removeLight(String(msg.id ?? ""), seat);
+          } else if (msg.type === "wall") {
+            // The GM's map editor: walls drawn, changed, split, removed, cleared; every door closed.
+            const ids = Array.isArray(msg.ids) ? msg.ids.map(String) : msg.id ? [String(msg.id)] : [];
+            if (msg.action === "add") map.addWalls(msg.wall ?? {}, seat);
+            else if (msg.action === "update") map.updateWalls(ids, msg.patch ?? {}, seat);
+            else if (msg.action === "remove") map.removeWalls(ids, seat);
+            else if (msg.action === "split") map.splitWall(ids[0], num(msg.x, NaN), num(msg.y, NaN), seat);
+            else if (msg.action === "clear") map.clearWalls(seat);
+            else if (msg.action === "close-doors") map.closeDoors(seat);
+            else throw new Error("What should the walls do?");
+          } else if (msg.type === "map-undo") {
+            map.undo(seat);
           } else if (msg.type === "lock") {
             if (client.role !== "dm") throw new Error("Only the GM can lock token movement.");
             map.setLocked(Boolean(msg.on));
