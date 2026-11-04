@@ -228,14 +228,14 @@ export function SetupScreen({
     const data = new FormData(event.currentTarget);
     const port = Number(data.get("port"));
     const password = String(data.get("password") || "");
-    const name = String(data.get("dm-name") || "DM");
+    const name = String(data.get("dm-name") || "").trim() || "DM";
     setLocalError(null);
     if (!lanOn && !cloudOn) {
       setLocalError("Turn on LAN or Cloud.");
       return;
     }
     try {
-      const touched = await window.kraken?.touchCampaign({ id: campaign.id, port });
+      const touched = await window.kraken?.touchCampaign({ id: campaign.id, port, gmName: name });
       if (touched) setRows((current) => current.map((item) => (item.id === touched.id ? touched : item)));
     } catch {
       /* The table can still start if the date stamp fails. */
@@ -484,7 +484,7 @@ export function SetupScreen({
                 <div className="detail-grid">
                   <label className="field">
                     <span>Your name</span>
-                    <input name="dm-name" defaultValue="DM" maxLength={24} autoComplete="nickname" />
+                    <input name="dm-name" defaultValue={selected.gmName || "DM"} maxLength={24} autoComplete="nickname" />
                   </label>
                   <label className="field port">
                     <span>Port</span>

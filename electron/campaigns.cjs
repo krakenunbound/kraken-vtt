@@ -23,6 +23,8 @@ function asCampaign(value) {
     createdAt: Number(value.createdAt) || Date.now(),
     playedAt: Number.isFinite(played) && played > 0 ? played : null,
     port: Number.isInteger(port) && port >= 1 && port <= 65535 ? port : 47300,
+    // The name the GM plays under in this campaign, kept from the last Play.
+    gmName: clean(value.gmName, 24),
   };
 }
 
@@ -51,6 +53,7 @@ function create(file, input) {
     createdAt: Date.now(),
     playedAt: null,
     port: 47300,
+    gmName: "",
   };
   const campaigns = read(file);
   campaigns.unshift(campaign);
@@ -65,6 +68,8 @@ function touch(file, input) {
   found.playedAt = Date.now();
   const port = Number(input?.port);
   if (Number.isInteger(port) && port >= 1 && port <= 65535) found.port = port;
+  const gmName = clean(input?.gmName, 24);
+  if (gmName) found.gmName = gmName;
   write(file, campaigns);
   return found;
 }
