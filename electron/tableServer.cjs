@@ -1371,6 +1371,19 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
               return combat.cast(msg.recordId ? { recordId: String(msg.recordId) } : { entryId: String(msg.id) }, String(msg.power), msg.action ? String(msg.action) : "", seat, client.role === "dm" ? "Combat" : client.name);
             case "clear-targets":
               return combat.clearTargets(String(msg.id), seat);
+            case "target-area": {
+              // Feet to scene pixels; each entry's token, by its own or its record's.
+              const per = map.units() > 0 ? (map.squareCenter(1, 0, 1).x - map.squareCenter(0, 0, 1).x) / map.units() : 10;
+              // No source named: the player's own creature (the active one if several), or the GM's active one.
+              const entries = combat.entries();
+              const sourceId = msg.id
+                ? String(msg.id)
+                : client.role === "dm"
+                  ? combat.active()
+                  : (entries.find((entry) => entry.id === combat.active() && combat.viewFor(seat).entries.find((item) => item.id === entry.id)?.mine) ?? entries.find((entry) => combat.viewFor(seat).entries.find((item) => item.id === entry.id)?.mine))?.id;
+              if (!sourceId) throw new Error(client.role === "dm" ? "Whose spell? Start combat first." : "Your character is not in the fight.");
+              return combat.targetArea(sourceId, { x: num(msg.x, 0), y: num(msg.y, 0), radius: num(msg.radius, 0) * per, faction: msg.faction ?? null }, seat, (entry) => map.tokens().find((token) => token.id === entry.tokenId) ?? map.tokens().find((token) => entry.recordId && token.recordId === entry.recordId) ?? null);
+            }
             case "attack":
               return combat.attack(msg.recordId ? { recordId: String(msg.recordId) } : { entryId: String(msg.id) }, String(msg.weapon), seat, client.role === "dm" ? "Combat" : client.name);
             case "damage-roll":

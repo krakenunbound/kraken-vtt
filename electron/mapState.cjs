@@ -84,6 +84,11 @@ function cleanLight(raw) {
     color: text(raw.color, "#FFB347").slice(0, 16),
     on: raw.on !== false,
     hidden: Boolean(raw.hidden),
+    // FG's Angle and Rotation (a lantern's beam), Animation and Speed.
+    angle: Math.min(360, Math.max(1, Math.round(num(raw.angle, 360)))),
+    rotation: ((Math.round(num(raw.rotation, 0)) % 360) + 360) % 360,
+    animation: ["none", "flicker", "pulse", "flash", "torch"].includes(raw.animation) ? raw.animation : "none",
+    speed: Math.min(1, Math.max(0, num(raw.speed, 0.5))),
   };
 }
 
@@ -443,18 +448,20 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
   function lightSources() {
     const per = pixelsPerUnit();
     const out = [];
-    const add = (id, x, y, bright, dim, color, hidden) => {
+    const add = (id, x, y, bright, dim, color, hidden, shape = {}) => {
       const reachPx = Math.max(bright, dim) * per;
-      const key = `L|${scene.id}|${Math.round(x)}|${Math.round(y)}|${Math.round(reachPx)}`;
+      const angle = shape.angle ?? 360;
+      const key = `L|${scene.id}|${Math.round(x)}|${Math.round(y)}|${Math.round(reachPx)}|${angle}|${shape.rotation ?? 0}`;
       let polygon = visionCache.get(key);
       if (!polygon) {
-        // A light's polygon reaches only as far as its dim light (and a little).
-        polygon = geometry.sceneSight(scene, { x, y }, doorsHere(), 0, "light", reachPx * 1.05 + 1);
+        // A light's polygon reaches only as far as its dim light (and a little); a beam only its cone.
+        const cone = angle < 360 ? { angle, from: (((shape.rotation ?? 0) - angle / 2) * Math.PI) / 180 } : null;
+        polygon = geometry.sceneSight(scene, { x, y }, doorsHere(), 0, "light", reachPx * 1.05 + 1, cone);
         visionCache.set(key, polygon);
       }
-      out.push({ id, x, y, brightPx: bright * per, dimPx: dim * per, color, hidden, polygon });
+      out.push({ id, x, y, brightPx: bright * per, dimPx: dim * per, color, hidden, polygon, ...(shape.animation && shape.animation !== "none" ? { animation: shape.animation, speed: shape.speed } : {}) });
     };
-    for (const light of lightsHere()) if (light.on && !light.hidden) add(light.id, light.x, light.y, light.bright, light.dim, light.color, light.hidden);
+    for (const light of lightsHere()) if (light.on && !light.hidden) add(light.id, light.x, light.y, light.bright, light.dim, light.color, light.hidden, light);
     for (const token of tokensHere()) if (token.light) add(`token:${token.id}`, token.x, token.y, token.light.bright, token.light.dim, token.light.color, token.hidden);
     return out;
   }
@@ -590,7 +597,7 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
     const mask = maskHere();
     const groups = groupsHere();
     const shared = { sceneId: scene.id, sight: sightOn(), locked, darkness: dark, settings: { grid: settings.grid, weather: settings.weather, darkness: settings.darkness }, drawings: drawingsHere(), mask: mask.on || mask.shapes.length ? mask : null, groups, fx: fxHere() };
-    const lightOut = (list) => list.map(({ id, x, y, brightPx, dimPx, color, polygon }) => ({ id, x, y, brightPx, dimPx, color, polygon }));
+    const lightOut = (list) => list.map(({ id, x, y, brightPx, dimPx, color, polygon, animation, speed }) => ({ id, x, y, brightPx, dimPx, color, polygon, ...(animation ? { animation, speed } : {}) }));
     if (seat.role === "dm") {
       return {
         ...shared,

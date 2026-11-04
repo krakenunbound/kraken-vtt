@@ -269,6 +269,28 @@ export function MapEditor(props: Props) {
                   <input type="color" value={light.color.slice(0, 7)} onChange={(event) => actions.updateLight(light.id, { color: event.target.value })} aria-label="Light colour" />
                 </label>
                 <label>
+                  Angle
+                  <input type="number" min={1} max={360} value={light.angle ?? 360} onChange={(event) => actions.updateLight(light.id, { angle: Number(event.target.value) || 360 })} aria-label="Light angle" />
+                </label>
+                <label>
+                  Rotation
+                  <input type="number" min={0} max={359} value={light.rotation ?? 0} onChange={(event) => actions.updateLight(light.id, { rotation: Number(event.target.value) || 0 })} aria-label="Light rotation" />
+                </label>
+                <label>
+                  Animation
+                  <select value={light.animation ?? "none"} onChange={(event) => actions.updateLight(light.id, { animation: event.target.value })} aria-label="Light animation">
+                    <option value="none">None</option>
+                    <option value="flicker">Flicker</option>
+                    <option value="torch">Torch</option>
+                    <option value="pulse">Pulse</option>
+                    <option value="flash">Flash</option>
+                  </select>
+                </label>
+                <label>
+                  Speed
+                  <input type="range" min={0} max={1} step={0.05} value={light.speed ?? 0.5} onChange={(event) => actions.updateLight(light.id, { speed: Number(event.target.value) })} aria-label="Light speed" />
+                </label>
+                <label>
                   <input type="checkbox" checked={light.on} onChange={(event) => actions.updateLight(light.id, { on: event.target.checked })} /> On
                 </label>
                 <label>

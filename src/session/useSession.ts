@@ -27,11 +27,11 @@ export type MapToken = {
   seesFt: number;
 };
 // A light shining now, with its own line of sight (pixels).
-export type MapLight = { id: string; x: number; y: number; brightPx: number; dimPx: number; color: string; polygon: number[] | null };
+export type MapLight = { id: string; x: number; y: number; brightPx: number; dimPx: number; color: string; polygon: number[] | null; animation?: string; speed?: number };
 // A player's token seeing in the dark (darkvision), pixels.
 export type MapSeeing = { x: number; y: number; radiusPx: number; polygon: number[] | null };
 // A light placed on the scene, as the GM edits it (radii in feet).
-export type SceneLightRecord = { id: string; x: number; y: number; bright: number; dim: number; color: string; on: boolean; hidden: boolean };
+export type SceneLightRecord = { id: string; x: number; y: number; bright: number; dim: number; color: string; on: boolean; hidden: boolean; angle?: number; rotation?: number; animation?: string; speed?: number };
 export type MapSettings = {
   darkness: number | null;
   grid: { show: boolean; alpha: number | null; color: string | null; type?: "square" | "hexrow" | "hexcol" | "none" | null; size?: number | null; offsetX?: number | null; offsetY?: number | null; distance?: number | null; units?: string | null; style?: string; thickness?: number };

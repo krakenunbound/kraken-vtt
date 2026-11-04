@@ -1124,3 +1124,13 @@ textarea.cc-field.tall { min-height: 220px; }
 .scene-bar .adventure-name { flex: 0 1 auto; min-width: 0; }
 .scene-bar select { flex: 0 1 auto; min-width: 6rem; }
 .grid-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+
+/* FG light animations on the glow. */
+.light-anim { animation-iteration-count: infinite; animation-timing-function: ease-in-out; }
+.light-anim.flicker, .light-anim.torch { animation-name: light-flicker; animation-timing-function: steps(6, end); }
+.light-anim.pulse { animation-name: light-pulse; animation-direction: alternate; }
+.light-anim.flash { animation-name: light-flash; }
+@keyframes light-flicker { 0%, 100% { opacity: 1; transform: scale(1); } 20% { opacity: 0.82; transform: scale(0.97); } 45% { opacity: 0.95; transform: scale(1.01); } 70% { opacity: 0.78; transform: scale(0.96); } }
+@keyframes light-pulse { from { opacity: 1; transform: scale(1); } to { opacity: 0.65; transform: scale(0.9); } }
+@keyframes light-flash { 0%, 88%, 100% { opacity: 1; } 92% { opacity: 0.15; } }
+@media (prefers-reduced-motion: reduce) { .light-anim { animation: none; } }

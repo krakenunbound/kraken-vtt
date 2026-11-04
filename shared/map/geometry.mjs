@@ -264,7 +264,7 @@ export function settleMove(scene, walls, doors, from, to, squares = 1, { snap = 
 // (Foundry clips sight to the scene rectangle, not its padding).
 // distancePixels: pixels per scene unit, for wall thresholds; externalRadius:
 // the viewer's own radius (half a token), as Foundry's token vision uses.
-export function visibilityPolygon(origin, walls, doors, bounds, distancePixels = 1, externalRadius = 0, sense = "sight", radius = 0) {
+export function visibilityPolygon(origin, walls, doors, bounds, distancePixels = 1, externalRadius = 0, sense = "sight", radius = 0, cone = null) {
   let { x: bx, y: by, width: bw, height: bh } = bounds;
   // A light reaches only so far: its square around it, inside the scene.
   if (radius > 0) {
@@ -300,6 +300,15 @@ export function visibilityPolygon(origin, walls, doors, bounds, distancePixels =
     }
   }
   angles.sort((a, b) => a - b);
+  // A cone (FG's light angle and rotation): only the rays inside it, from its
+  // first edge round to its last, and the light itself as the first point.
+  let rays = angles;
+  if (cone && cone.angle < 360) {
+    const start = cone.from;
+    const span = (cone.angle * Math.PI) / 180;
+    const rel = (angle) => ((angle - start) % (Math.PI * 2) + Math.PI * 4) % (Math.PI * 2);
+    rays = [start, ...angles.filter((angle) => rel(angle) > 1e-6 && rel(angle) < span - 1e-6).sort((a, b) => rel(a) - rel(b)), start + span];
+  }
   const reach = (bw + bh) * 4;
   // Many walls: a grid of cells over the area, each listing the walls in it,
   // so a ray tests only the walls in the cells it crosses.
@@ -320,10 +329,10 @@ export function visibilityPolygon(origin, walls, doors, bounds, distancePixels =
   }
   const stamp = new Int32Array(segments.length);
   let ray = 0;
-  const points = [];
+  const points = cone && cone.angle < 360 ? [Math.round(origin.x), Math.round(origin.y)] : [];
   let last = NaN;
-  for (const angle of angles) {
-    if (angle - last < 1e-7) continue;
+  for (const angle of rays) {
+    if (Math.abs(angle - last) < 1e-7) continue;
     last = angle;
     const dx = Math.cos(angle);
     const dy = Math.sin(angle);
@@ -380,10 +389,10 @@ export function visibilityPolygon(origin, walls, doors, bounds, distancePixels =
 
 // What a viewer at origin sees on a scene: clipped to the scene rectangle,
 // with wall thresholds in the scene's units.
-export function sceneSight(scene, origin, doors, externalRadius = 0, sense = "sight", radius = 0) {
+export function sceneSight(scene, origin, doors, externalRadius = 0, sense = "sight", radius = 0, cone = null) {
   const offset = sceneOrigin(scene);
   const per = Number(scene?.grid?.distance) > 0 ? Number(scene.grid.distance) : 5;
-  return visibilityPolygon(origin, scene.walls ?? [], doors, { x: offset.x, y: offset.y, width: scene.width, height: scene.height }, gridSize(scene) / per, externalRadius, sense, radius);
+  return visibilityPolygon(origin, scene.walls ?? [], doors, { x: offset.x, y: offset.y, width: scene.width, height: scene.height }, gridSize(scene) / per, externalRadius, sense, radius, cone);
 }
 
 export function pointInPolygon(x, y, polygon) {
