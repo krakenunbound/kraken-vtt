@@ -140,8 +140,9 @@ export function App() {
       }
       if (command.kind === "host") {
         if (current.connected) current.leave(true);
-        await kraken.touchCampaign({ id: command.campaignId, port: command.port }).catch(() => null);
-        const failed = await current.host({ name: "DM", port: command.port, password: command.password, lan: true, cloud: false, campaignId: command.campaignId });
+        // The GM plays under the name kept with the campaign.
+        const touched = await kraken.touchCampaign({ id: command.campaignId, port: command.port }).catch(() => null);
+        const failed = await current.host({ name: touched?.gmName || "DM", port: command.port, password: command.password, lan: true, cloud: false, campaignId: command.campaignId });
         if (failed) throw new Error(failed);
         return { hosting: true, campaignId: command.campaignId, port: command.port };
       }

@@ -7,6 +7,8 @@ export type KrakenCampaign = {
   createdAt: number;
   playedAt: number | null;
   port: number;
+  // The GM's name in this campaign, from the last Play ("" before).
+  gmName?: string;
 };
 
 export type KrakenNetwork = {
@@ -39,7 +41,7 @@ export type KrakenApi = {
   network: () => Promise<KrakenNetwork>;
   campaigns: () => Promise<KrakenCampaign[]>;
   saveCampaign: (input: { name: string; ruleset: string }) => Promise<KrakenCampaign>;
-  touchCampaign: (input: { id: string; port: number }) => Promise<KrakenCampaign | null>;
+  touchCampaign: (input: { id: string; port: number; gmName?: string }) => Promise<KrakenCampaign | null>;
   setCampaignRuleset: (input: { id: string; ruleset: string }) => Promise<KrakenCampaign>;
   copy: (text: string) => Promise<boolean | void>;
   startHost: (options: { port: number; password: string; lan: boolean; cloud: boolean; campaignId?: string }) => Promise<KrakenHostInfo>;
