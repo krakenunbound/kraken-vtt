@@ -354,11 +354,12 @@ export function useSession() {
         const socket = new WebSocket(url);
         socketRef.current = socket;
         let settled = false;
+        let opened = false;
         const timer = window.setTimeout(() => {
           if (settled) return;
           settled = true;
           socket.close();
-          reject(new Error("Could not reach that table."));
+          reject(new Error(`No table answered at ${label} in time. Check that the GM has pressed Play and that the address and port match. From another computer, the GM's firewall must allow Kraken VTT.`));
         }, 8000);
 
         const fail = (message: string) => {
@@ -489,7 +490,12 @@ export function useSession() {
 
         socket.onclose = () => {
           if (!settled) {
-            fail("Could not join. Check the address, port, and password.");
+            // Never opened: nothing answered there. Opened, then closed: the table turned us away.
+            fail(
+              opened
+                ? "The table closed the connection before you were seated. Try again."
+                : `No table answered at ${label}. Check that the GM has pressed Play and that the address and port match. From another computer, the GM's firewall must allow Kraken VTT.`,
+            );
             return;
           }
           if (generation.current !== gen || intentional.current) return;
@@ -498,6 +504,7 @@ export function useSession() {
         };
 
         socket.onopen = () => {
+          opened = true;
           socket.send(JSON.stringify({ type: "join", name: join.name, password: join.password, hostToken: join.hostToken }));
         };
       });
