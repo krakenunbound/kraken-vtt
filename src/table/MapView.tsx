@@ -131,6 +131,7 @@ export type MapActions = {
   ct: (action: string, payload?: Record<string, unknown>) => void;
   // The GM's map editor.
   wall?: (action: string, payload?: Record<string, unknown>) => void;
+  mask?: (action: string, payload?: Record<string, unknown>) => void;
   mapUndo?: () => void;
 };
 // What a left-drag does on the map: pan it, ping, draw, or rub a line out.
@@ -181,6 +182,7 @@ export function MapView({
   const [selectedLight, setSelectedLight] = useState<string | null>(null);
   const [lightPreset, setLightPreset] = useState("torch");
   const [pending, setPending] = useState<number[]>([]);
+  const [maskMode, setMaskMode] = useState<"reveal" | "hide">("reveal");
   const [hover, setHover] = useState<{ x: number; y: number } | null>(null);
   const [drawColor, setDrawColor] = useState<string | null>(null);
   const [stroke, setStroke] = useState<{ pointerId: number; points: number[] } | null>(null);
@@ -509,7 +511,8 @@ export function MapView({
     return best;
   }
   function finishShape() {
-    if (editTool === "poly" && pending.length >= 6 && actions.wall) actions.wall("add", { wall: { points: pending, closed: true, kind: wallKind } });
+    if (editTab === "mask" && editTool === "poly" && pending.length >= 6 && actions.mask) actions.mask(maskMode, { points: pending });
+    else if (editTool === "poly" && pending.length >= 6 && actions.wall) actions.wall("add", { wall: { points: pending, closed: true, kind: wallKind } });
     setPending([]);
     setHover(null);
   }
@@ -566,6 +569,27 @@ export function MapView({
         }
         if (event.button !== 0) return;
         setSelected(null);
+        if (gm && editorOpen && editTool && editTab === "mask" && actions.mask) {
+          // The mask: a rectangle, a shape or whole squares, revealed or hidden again.
+          const raw = worldAt(event.clientX, event.clientY);
+          if (!raw) return;
+          const point = snapPoint(raw, !event.shiftKey);
+          if (editTool === "cell") {
+            const corner = gridOrigin(scene);
+            const col = Math.floor((raw.x - corner.x) / size);
+            const row = Math.floor((raw.y - corner.y) / size);
+            const x = corner.x + col * size;
+            const y = corner.y + row * size;
+            actions.mask(maskMode, { points: [x, y, x + size, y, x + size, y + size, x, y + size] });
+          } else if (editTool === "rect") {
+            if (pending.length >= 2) {
+              const [x1, y1] = pending;
+              actions.mask(maskMode, { points: [x1, y1, point.x, y1, point.x, point.y, x1, point.y] });
+              setPending([]);
+            } else setPending([point.x, point.y]);
+          } else if (editTool === "poly") setPending((current) => [...current, point.x, point.y]);
+          return;
+        }
         if (gm && editorOpen && editTool && actions.wall) {
           const raw = worldAt(event.clientX, event.clientY);
           if (!raw) return;
@@ -763,6 +787,20 @@ export function MapView({
             twilight={!gm && Boolean(map.twilight)}
             image={scene.imageUrl && !imageFailed ? { url: scene.imageUrl, ...backdrop } : null}
           />
+        ) : null}
+        {map.mask?.on ? (
+          // FG's mask: black for players but where revealed; a tint for the GM.
+          <svg className={gm ? "overlay mask-overlay gm" : "overlay mask-overlay"} width={frame.worldWidth} height={frame.worldHeight} viewBox={`0 0 ${frame.worldWidth} ${frame.worldHeight}`} data-mask={map.mask.shapes.length}>
+            <defs>
+              <mask id="kraken-map-mask">
+                <rect x={0} y={0} width={frame.worldWidth} height={frame.worldHeight} fill="white" />
+                {map.mask.shapes.map((shape) => (
+                  <polygon key={shape.id} points={shape.points.join(" ")} fill={shape.mode === "reveal" ? "black" : "white"} />
+                ))}
+              </mask>
+            </defs>
+            <rect x={0} y={0} width={frame.worldWidth} height={frame.worldHeight} fill={gm ? "rgba(120, 20, 160, 0.35)" : "#000"} mask="url(#kraken-map-mask)" />
+          </svg>
         ) : null}
         {gm && editorOpen ? (
           <svg className="overlay edit-overlay" width={frame.worldWidth} height={frame.worldHeight} viewBox={`0 0 ${frame.worldWidth} ${frame.worldHeight}`} data-editing={editTool ?? ""}>
@@ -1309,7 +1347,9 @@ export function MapView({
           lightPreset={lightPreset}
           setLightPreset={setLightPreset}
           gridScene={scene.baseGrid ?? sceneIn.grid}
-          actions={{ wall: actions.wall, mapUndo: actions.mapUndo, updateSettings: actions.updateSettings, updateLight: actions.updateLight, removeLight: actions.removeLight }}
+          maskMode={maskMode}
+          setMaskMode={setMaskMode}
+          actions={{ mask: actions.mask ?? (() => undefined), wall: actions.wall, mapUndo: actions.mapUndo, updateSettings: actions.updateSettings, updateLight: actions.updateLight, removeLight: actions.removeLight }}
           onClose={() => setEditorOpen(false)}
         />
       ) : null}

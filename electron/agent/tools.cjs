@@ -902,8 +902,40 @@ const TOOLS = [
     },
   },
   {
+    name: "kraken_mask",
+    description:
+      "The GM's mask over the map (FG's Mask tab): players see black where it is on, and are sent no tokens or doors under it. action list; on (Add Global Mask); off (Remove Global Mask); reveal or hide (a shape: points [x1, y1, ...] in scene pixels, or rect {x, y, width, height}, or cells [[col, row], ...] for whole squares; later shapes win; reveal turns the mask on); remove (id of a shape); clear (every shape). Undo with kraken_map_undo.",
+    inputSchema: object({
+      action: { type: "string", enum: ["list", "on", "off", "reveal", "hide", "remove", "clear"] },
+      points: { type: "array", items: { type: "number" } },
+      rect: { type: "object", properties: { x: { type: "number" }, y: { type: "number" }, width: { type: "number" }, height: { type: "number" } } },
+      cells: { type: "array", items: { type: "array", items: { type: "number" } } },
+      id: string("A shape's id (remove)"),
+    }, ["action"]),
+    run(args, ctx) {
+      const { map, seat } = needTable(ctx);
+      if (args.action === "list") return out(map.mask());
+      const shapes = [];
+      if (args.points) shapes.push(args.points);
+      if (args.rect) {
+        const { x, y, width, height } = args.rect;
+        shapes.push([x, y, x + width, y, x + width, y + height, x, y + height]);
+      }
+      for (const [col, row] of args.cells ?? []) {
+        const centre = map.squareCenter(col, row, 1);
+        const half = (map.squareCenter(1, 0, 1).x - map.squareCenter(0, 0, 1).x) / 2;
+        shapes.push([centre.x - half, centre.y - half, centre.x + half, centre.y - half, centre.x + half, centre.y + half, centre.x - half, centre.y + half]);
+      }
+      if ((args.action === "reveal" || args.action === "hide") && shapes.length === 0) throw new Error("Give points, rect or cells.");
+      let mask = null;
+      if (shapes.length) for (const points of shapes) mask = map.setMask({ action: args.action, points }, seat);
+      else mask = map.setMask({ action: args.action, id: args.id }, seat);
+      return out({ on: mask.on, shapes: mask.shapes.length });
+    },
+  },
+  {
     name: "kraken_map_undo",
-    description: "Undo the last edit to the scene's walls in the map editor (up to 50 back).",
+    description: "Undo the last edit to the scene's walls or mask in the map editor (up to 50 back).",
     inputSchema: object({}),
     run(_args, ctx) {
       const { map, seat } = needTable(ctx);

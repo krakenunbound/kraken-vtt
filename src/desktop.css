@@ -1086,3 +1086,5 @@ textarea.cc-field.tall { min-height: 220px; }
 .edit-overlay { position: absolute; left: 0; top: 0; pointer-events: none; }
 .grid.hex { position: absolute; pointer-events: none; }
 .viewport [data-editing="line"], .viewport [data-editing="poly"], .viewport [data-editing="rect"] { cursor: crosshair; }
+
+.mask-overlay { position: absolute; left: 0; top: 0; pointer-events: none; z-index: 6; }

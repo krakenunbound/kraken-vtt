@@ -145,10 +145,31 @@ try {
   const lastGM = [...dm.inbox].reverse().find((m) => m.type === "map");
   assert(!("walls" in lastPlayer) || lastPlayer.walls.length === 0, "the player is never sent walls");
   assert(lastGM.walls?.some((wall) => wall.kind === "door"), "the GM's map has the walls, the new door too");
+  // The mask (FG's Mask tab): with the global mask on, nothing under it reaches the player.
+  map.move(orc.id, { x: 475, y: 125 }, seat);
+  assert(sees(orc), "no mask: seen");
+  await tool("kraken_mask", { action: "on" });
+  assert(!sees(orc), "under the global mask: not sent");
+  assert(map.viewFor(playerSeat, "").tokens.some((item) => item.id === hero.id), "the player's own token still shows");
+  await tool("kraken_mask", { action: "reveal", rect: { x: 400, y: 50, width: 150, height: 150 } });
+  assert(sees(orc), "revealed: seen");
+  await tool("kraken_mask", { action: "hide", cells: [[9, 2]] });
+  assert(!sees(orc), "hidden again inside the reveal: not seen");
+  await tool("kraken_map_undo");
+  assert(sees(orc), "undo the hide");
+  const masked = map.viewFor(playerSeat, "");
+  assert(masked.mask?.on && masked.mask.shapes.length === 1, "the player gets the mask's shape to draw it");
+  await tool("kraken_mask", { action: "off" });
+  await tool("kraken_mask", { action: "on" });
+  await tool("kraken_mask", { action: "clear" });
+  assert(!sees(orc), "cleared shapes: all masked again");
+  await tool("kraken_mask", { action: "off" });
+  assert(sees(orc), "mask off");
+
   // Saved with the campaign.
   const saved = server.agent.map.persisted();
   assert(saved.walls.room.length === 4, `walls are saved: ${saved.walls.room.length}`);
-  console.log("ok walls: chains drawn; wall, ethereal, invisible, window (opened by the player, closed by Close all doors), toggle, one-way and shadow caster each as FG; split, remove, undo; saved; never sent to players");
+  console.log("ok walls: chains drawn; wall, ethereal, invisible, window (opened by the player, closed by Close all doors), toggle, one-way and shadow caster each as FG; split, remove, undo; the mask (global, reveal, hide again, undo) withholds what is under it; saved; never sent to players");
 } finally {
   for (const ws of sockets) ws.close();
   await server.stop();

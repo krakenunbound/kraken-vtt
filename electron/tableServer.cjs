@@ -1193,7 +1193,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
 
       // The map: tokens, doors, line of sight and pings (mapState.cjs decides
       // who may do what).
-      if (["token-place", "token-move", "token-remove", "token-update", "door", "sight", "lock", "scene-settings", "light-place", "light-update", "light-remove", "draw", "draw-erase", "draw-clear", "wall", "map-undo"].includes(msg.type)) {
+      if (["token-place", "token-move", "token-remove", "token-update", "door", "sight", "lock", "scene-settings", "light-place", "light-update", "light-remove", "draw", "draw-erase", "draw-clear", "wall", "map-undo", "mask"].includes(msg.type)) {
         const seat = seatOf(client);
         try {
           if (msg.type === "token-place") {
@@ -1238,6 +1238,8 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
             else throw new Error("What should the walls do?");
           } else if (msg.type === "map-undo") {
             map.undo(seat);
+          } else if (msg.type === "mask") {
+            map.setMask({ action: String(msg.action ?? ""), points: msg.points, id: msg.id }, seat);
           } else if (msg.type === "lock") {
             if (client.role !== "dm") throw new Error("Only the GM can lock token movement.");
             map.setLocked(Boolean(msg.on));
