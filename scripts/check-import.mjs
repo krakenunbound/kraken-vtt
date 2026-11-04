@@ -98,8 +98,11 @@ try {
 
   // A record read through Kraken matches FG field for field.
   const fighter = await tool("kraken_record_get", { id: "c-c-player-s-handbook:siegepackage.cc_fighter" });
-  const fgLevel = (await fg("db_get", { path: "siegepackage.cc_fighter.levels.l05@C&C Player's Handbook", depth: 2 })).value;
-  assert(JSON.stringify(fighter.data.levels.l05) === JSON.stringify({ level: fgLevel.level, xp: fgLevel.xp, bth: fgLevel.bth, hd: fgLevel.hd }), "Fighter level 5 row matches FG");
+  // Field for field against FG when FG has the Player's Handbook loaded.
+  if (await fgLoaded("C&C Player's Handbook")) {
+    const fgLevel = (await fg("db_get", { path: "siegepackage.cc_fighter.levels.l05@C&C Player's Handbook", depth: 2 })).value;
+    assert(JSON.stringify(fighter.data.levels.l05) === JSON.stringify({ level: fgLevel.level, xp: fgLevel.xp, bth: fgLevel.bth, hd: fgLevel.hd }), "Fighter level 5 row matches FG");
+  } else console.log("skip the Fighter's level 5 row against FG: the Player's Handbook is not loaded in FG");
   assert(fighter.visibility === "all" && fighter.source === "C&C Player's Handbook", "PHB records are public and sourced");
 
   // Re-import replaces rather than doubles.

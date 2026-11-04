@@ -21,7 +21,12 @@ const adventure = root.adventureData ?? root;
 const source = (adventure.scenes ?? []).find((scene) => scene.name.includes(wanted) && (scene.walls ?? []).some((wall) => wall.door > 0));
 if (!source) throw new Error("No scene with doors in that bundle.");
 
-const browser = await chromium.connectOverCDP("http://127.0.0.1:9333");
+// Skipped when Foundry is not running with the bridge's debug port.
+const browser = await chromium.connectOverCDP("http://127.0.0.1:9333").catch(() => null);
+if (!browser) {
+  console.log("skip sight-parity: Foundry is not running with the bridge's debug port (9333)");
+  process.exit(0);
+}
 const page = browser.contexts().flatMap((context) => context.pages()).find((item) => item.url().includes("/game"));
 if (!page) throw new Error("Foundry is not in a world.");
 

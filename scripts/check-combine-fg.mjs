@@ -15,6 +15,14 @@ async function fg(cmd, args) {
   if (!body.ok) throw new Error(`FG ${cmd}: ${body.error}`);
   return body.data;
 }
+// Skipped when FG is not open on a C&C campaign (no CCWizard to build with).
+try {
+  await fg("get", { package: "CCWizard", fns: ["buildFromSpec"] });
+} catch (error) {
+  console.log(`skip combine-fg: FG's C&C wizard is not reachable (${error.message}); open FG on a C&C campaign`);
+  process.exit(0);
+}
+
 async function liveSheet(spec) {
   const built = (await fg("call", { package: "CCWizard", fn: "buildFromSpec", args: [spec] })).result[0];
   if (!built?.path) throw new Error(`FG built nothing: ${JSON.stringify(built)}`);

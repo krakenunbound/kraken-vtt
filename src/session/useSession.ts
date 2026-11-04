@@ -149,6 +149,9 @@ export type TableOptions = { towerReveal: boolean; decal: string; wallpaper: str
 export type DecalItem = { id: string; name: string; group: string; ruleset?: string };
 export type PictureKind = "decal" | "wallpaper" | "gmicon" | "tile";
 // The combat tracker as the host shows it to this seat (electron/combat.cjs viewFor).
+// A character's face as everyone is told it (FG's character list).
+export type RosterEntry = { id: string; name: string; owner: string; online: boolean; portrait: string | null; species: string; classes: string; level: number };
+
 export type CombatEntry = {
   // 5E: death saves of a Dying character.
   deathsaves?: { success: number; failure: number };
@@ -275,6 +278,8 @@ export function useSession() {
   const [hostInfo, setHostInfo] = useState<HostInfo | null>(null);
   const [remoteLabel, setRemoteLabel] = useState("");
   const [players, setPlayers] = useState<Seat[]>([]);
+  // FG's character list: every character at the table (the portrait bar, Character Selection).
+  const [roster, setRoster] = useState<RosterEntry[]>([]);
   const [map, setMap] = useState<TableMap>(EMPTY_MAP);
   const [party, setParty] = useState<import("../party/PartySheet").PartyView | null>(null);
   const [krits, setKrits] = useState<Record<string, string> | null>(null);
@@ -331,6 +336,7 @@ export function useSession() {
     setRole(null);
     setSelfId(null);
     setPlayers([]);
+    setRoster([]);
     setMap(EMPTY_MAP);
     setParty(null);
     setCombat({ round: 0, active: null, entries: [] });
@@ -400,6 +406,7 @@ export function useSession() {
             setRole(you.role);
             setSelfId(you.id);
             setPlayers((msg.players as Seat[]) ?? []);
+            setRoster(Array.isArray(msg.roster) ? (msg.roster as RosterEntry[]) : []);
             applyMap(msg.map as TableMap);
             if (msg.combat) setCombat(msg.combat as CombatView);
             if (msg.options) setOptions(msg.options as TableOptions);
@@ -416,6 +423,7 @@ export function useSession() {
             return;
           }
           if (msg.type === "players") setPlayers((msg.players as Seat[]) ?? []);
+          if (msg.type === "roster" && Array.isArray(msg.roster)) setRoster(msg.roster as RosterEntry[]);
           if (msg.type === "map") applyMap(msg as unknown as TableMap);
           if (msg.type === "library" && Array.isArray(msg.items)) setLibrary((current) => ({ ...current, [`${msg.module}|${msg.kind}`]: msg.items as LibraryItem[] }));
           if (msg.type === "krits" && msg.settings) setKrits(msg.settings as Record<string, string>);
@@ -712,6 +720,17 @@ export function useSession() {
     });
   }, []);
 
+  // FG's Character Selection: take a character no one holds; it becomes this seat's.
+  const takeCharacter = useCallback((id: string) => {
+    const socket = socketRef.current;
+    if (!socket || socket.readyState !== WebSocket.OPEN) return Promise.reject(new Error("Not connected."));
+    const req = ++opCounter.current;
+    return new Promise<string>((resolve, reject) => {
+      opWaits.current.set(req, { resolve, reject });
+      socket.send(JSON.stringify({ type: "take-character", req, id }));
+    });
+  }, []);
+
   // A character file from another table (Kraken, FG, Foundry, Roll20): the host reads it.
   const importCharacter = useCallback((text: string, owner = "") => {
     const socket = socketRef.current;
@@ -922,6 +941,7 @@ export function useSession() {
     hostInfo,
     remoteLabel,
     players,
+    roster,
     map,
     party,
     krits,
@@ -983,6 +1003,7 @@ export function useSession() {
     // The GM's: share a book with the players (or stop), show them a picture, take it back.
     // The character sheet: fields typed on it (the host works the numbers out again).
     importCharacter,
+    takeCharacter,
     editCharacter: (id: string, changes: { path: string; value: unknown }[]) => send({ type: "character-edit", id, changes }),
     activateBook: (book: string, active: boolean) => send({ type: "book-activate", book, active }),
     // The party's watch order and formation (a player moves their own characters).

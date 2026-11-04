@@ -55,10 +55,11 @@ function rollWith(mode: RollMode) {
   };
 }
 
-// The names at the front of "/w Ann, Bob hello": players at the table (the
-// longest name that fits, so "Sir Aldric" works), or GM.
+// The names at the front of "/w Ann, Bob hello": players at the table, the
+// characters someone holds (it reaches whoever holds it), or GM; the longest
+// name that fits, so "Sir Aldric" works.
 function splitNames(rest: string, session: Session): { names: string[]; text: string } {
-  const known = [...session.players.map((seat) => seat.name), "GM", "DM"].sort((a, b) => b.length - a.length);
+  const known = [...session.players.map((seat) => seat.name), ...session.roster.filter((entry) => entry.owner).map((entry) => entry.name), "GM", "DM"].sort((a, b) => b.length - a.length);
   const names: string[] = [];
   let left = rest.trim();
   for (;;) {

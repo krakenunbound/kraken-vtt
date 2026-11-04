@@ -136,6 +136,31 @@ const TOOLS = [
     run: (args, ctx) => out(needTable(ctx).records.create(args, needTable(ctx).seat)),
   },
   {
+    name: "kraken_characters",
+    description:
+      "FG's character list and Character Selection. roster: every character at the table (name, portrait, species, class, level, owner, whether the owner is seated); what the portrait bar shows. give: hand a character to a player (owner = their name; they see it and it is theirs, as when they pick it in Character Selection). release: take it back (no one holds it; it is listed again for players to pick).",
+    inputSchema: object(
+      {
+        action: { type: "string", enum: ["roster", "give", "release"] },
+        id: string("Character record id (give, release)"),
+        owner: string("The player's name (give)"),
+      },
+      ["action"],
+    ),
+    run(args, ctx) {
+      const agent = needTable(ctx);
+      if (args.action === "roster") return out({ roster: agent.roster() });
+      const record = agent.records.get(args.id ?? "");
+      if (!record || record.type !== "character") throw new Error(`No character ${args.id ?? ""}.`);
+      if (args.action === "give") {
+        if (!args.owner) throw new Error("give needs owner: the player's name.");
+        agent.records.update(record.id, { owner: args.owner, visibility: "owner" }, agent.seat);
+      } else if (args.action === "release") agent.records.update(record.id, { owner: "", visibility: "gm" }, agent.seat);
+      else throw new Error("action is roster, give or release.");
+      return out({ roster: agent.roster() });
+    },
+  },
+  {
     name: "kraken_record_update",
     description: "Change a record. data deep-merges into the existing data (a null value deletes a key) unless replace is true.",
     inputSchema: object(
