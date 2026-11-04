@@ -3,9 +3,9 @@ import { lazy, Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState }
 import { backgroundRect, colorWithAlpha, gridStops, sceneFrame, type BackgroundFit, type SceneFrame } from "../foundry/geometry";
 import { type SceneLight, type SceneMarker, type SceneRegion, type SceneWall } from "../foundry/sceneObjects";
 import { gridDistance, gridKind, gridOrigin, hexCorners, hexOf, LIGHT_PRESETS, snapCenter, withGrid } from "../../shared/map/geometry.mjs";
-import type { EditWall, MapToken, Ping, SceneLightRecord, TableMap, TableRecord, WallKind } from "../session/useSession";
+import type { DecalItem, EditWall, MapTile, MapToken, Ping, PictureKind, SceneLightRecord, TableMap, TableRecord, WallKind } from "../session/useSession";
 import { useBookWindows } from "../books/Books";
-import { MapEditor, kindColor, type EditTab, type EditTool, type LabelStyle, type PaintStyle } from "./MapEditor";
+import { MapEditor, kindColor, placePicture, type EditTab, type EditTool, type LabelStyle, type PaintStyle } from "./MapEditor";
 import { Lighting } from "./Lighting";
 import { SceneGraphics, SceneLegend, type OverlayToken } from "./SceneOverlay";
 import { SceneSettings, type SceneSettingsPatch } from "./SceneSettings";
@@ -45,6 +45,8 @@ export type MapScene = {
   tokens: OverlayToken[];
   markers: SceneMarker[];
   regions: SceneRegion[];
+  // A bundle's tiles, the first time the scene is shown (the host keeps them as image layers).
+  tiles?: import("../foundry/importBundle").SceneTile[];
 };
 
 type Camera = { x: number; y: number; scale: number };
@@ -137,6 +139,9 @@ export type MapActions = {
   mapGroup?: (action: string, payload?: Record<string, unknown>) => void;
   paint?: (payload: Record<string, unknown>) => void;
   fx?: (action: string, payload?: Record<string, unknown>) => void;
+  tile?: (action: string, payload?: Record<string, unknown>) => void;
+  decalList?: (kind?: PictureKind) => Promise<DecalItem[]>;
+  decalUrl?: (id: string, kind?: PictureKind) => string;
   mapUndo?: () => void;
   libraryAction?: (action: string, payload?: Record<string, unknown>) => void;
 };
@@ -203,6 +208,10 @@ export function MapView({
   const [selectedLabel, setSelectedLabel] = useState<string | null>(null);
   const [paintStyle, setPaintStyle] = useState<PaintStyle>({ color: "#c0392b", width: 6, alpha: 1, fill: null, fillAlpha: 0.4, group: "" });
   const [selectedFx, setSelectedFx] = useState<string | null>(null);
+  // Image layers: the one selected in the Images tab, and a move or resize under way.
+  const [selectedTile, setSelectedTile] = useState<string | null>(null);
+  const tileDrag = useRef<{ pointerId: number; id: string; mode: "move" | "resize"; start: Point; tile: MapTile } | null>(null);
+  const [tileDraft, setTileDraft] = useState<MapTile | null>(null);
   const paintStroke = useRef<{ pointerId: number; points: number[] } | null>(null);
   const [hover, setHover] = useState<{ x: number; y: number } | null>(null);
   const [drawColor, setDrawColor] = useState<string | null>(null);
@@ -448,6 +457,63 @@ export function MapView({
       }
     }
     return best?.id ?? null;
+  }
+
+  // Image layers (FG's image layers, Foundry's tiles), in their order. An
+  // "above" layer is faded on this screen while one of this seat's tokens (the
+  // GM's: the selected one) is under it, as Foundry's roofs. In the Images tab
+  // the GM picks, drags (Shift: no snapping) and resizes them from a corner.
+  function tileLayer(level: "below" | "above") {
+    const list = (map.sceneId === scene.id ? map.tiles ?? [] : []).filter((tile) => tile.level === level && (!tile.group || (map.groups ?? []).find((group) => group.name === tile.group)?.shown !== false));
+    if (!list.length) return null;
+    const editing = gm && editorOpen && editTab === "images";
+    const watchers = tokens.filter((token) => (gm ? token.id === selected : token.mine));
+    return list.map((shown) => {
+      const tile = tileDraft && tileDraft.id === shown.id ? tileDraft : shown;
+      const under = level === "above" && watchers.some((token) => token.x >= tile.x && token.x <= tile.x + tile.width && token.y >= tile.y && token.y <= tile.y + tile.height);
+      const opacity = tile.alpha * (tile.hidden ? 0.45 : 1) * (under ? 0.25 : 1);
+      const picked = editing && selectedTile === tile.id;
+      return (
+        <div
+          key={tile.id}
+          className={["map-tile", picked ? "picked" : "", tile.hidden ? "hidden" : "", editing ? "editing" : ""].filter(Boolean).join(" ")}
+          data-tile={tile.id}
+          data-tile-level={tile.level}
+          data-tile-faded={under ? "1" : "0"}
+          style={{ left: tile.x, top: tile.y, width: tile.width, height: tile.height, opacity, transform: `rotate(${tile.rotation}deg)`, pointerEvents: editing ? "auto" : "none" }}
+          onPointerDown={
+            editing
+              ? (event) => {
+                  if (event.button !== 0) return;
+                  event.stopPropagation();
+                  setSelectedTile(tile.id);
+                  const point = worldAt(event.clientX, event.clientY);
+                  if (!point || tile.locked) return;
+                  capture(event.currentTarget, event.pointerId);
+                  tileDrag.current = { pointerId: event.pointerId, id: tile.id, mode: "move", start: point, tile: shown };
+                }
+              : undefined
+          }
+        >
+          <img src={tile.url} alt={tile.name} draggable={false} style={{ transform: `scale(${tile.flipX ? -1 : 1}, ${tile.flipY ? -1 : 1})` }} />
+          {picked && !tile.locked ? (
+            <span
+              className="map-tile-grip"
+              title="Drag to resize (Shift keeps its shape)"
+              style={{ width: 14 / camera.scale, height: 14 / camera.scale }}
+              onPointerDown={(event) => {
+                if (event.button !== 0) return;
+                event.stopPropagation();
+                const point = worldAt(event.clientX, event.clientY);
+                if (!point) return;
+                capture(event.currentTarget, event.pointerId);
+                tileDrag.current = { pointerId: event.pointerId, id: tile.id, mode: "resize", start: point, tile: shown };
+              }}
+            />
+          ) : null}
+        </div>
+      );
+    });
   }
 
   function worldAt(clientX: number, clientY: number): Point | null {
@@ -711,6 +777,35 @@ export function MapView({
         setPanning(true);
       }}
       onPointerMove={(event) => {
+        if (tileDrag.current && tileDrag.current.pointerId === event.pointerId) {
+          const point = worldAt(event.clientX, event.clientY);
+          if (!point) return;
+          const { start, tile, mode } = tileDrag.current;
+          const dx = point.x - start.x;
+          const dy = point.y - start.y;
+          if (mode === "move") {
+            // Snaps its corner to the grid unless Shift is held.
+            let x = tile.x + dx;
+            let y = tile.y + dy;
+            if (!event.shiftKey && gridSnap && size > 0) {
+              const corner = gridOrigin(scene);
+              x = corner.x + Math.round((x - corner.x) / (size / 2)) * (size / 2);
+              y = corner.y + Math.round((y - corner.y) / (size / 2)) * (size / 2);
+            }
+            setTileDraft({ ...tile, x: Math.round(x), y: Math.round(y) });
+          } else {
+            // The corner handle: Shift keeps the picture's shape.
+            let width = Math.max(8, tile.width + dx);
+            let height = Math.max(8, tile.height + dy);
+            if (event.shiftKey) height = (width * tile.height) / tile.width;
+            if (!event.shiftKey && gridSnap && size > 0) {
+              width = Math.max(size / 2, Math.round(width / (size / 2)) * (size / 2));
+              height = Math.max(size / 2, Math.round(height / (size / 2)) * (size / 2));
+            }
+            setTileDraft({ ...tile, width: Math.round(width), height: Math.round(height) });
+          }
+          return;
+        }
         if (paintStroke.current && paintStroke.current.pointerId === event.pointerId) {
           const point = worldAt(event.clientX, event.clientY);
           const current = paintStroke.current;
@@ -753,6 +848,15 @@ export function MapView({
         setCamera((camera) => ({ ...camera, x: camera.x + dx, y: camera.y + dy }));
       }}
       onPointerUp={(event) => {
+        if (tileDrag.current && tileDrag.current.pointerId === event.pointerId) {
+          const { id, tile } = tileDrag.current;
+          tileDrag.current = null;
+          if (tileDraft && tileDraft.id === id && (tileDraft.x !== tile.x || tileDraft.y !== tile.y || tileDraft.width !== tile.width || tileDraft.height !== tile.height)) {
+            actions.tile?.("update", { id, patch: { x: tileDraft.x, y: tileDraft.y, width: tileDraft.width, height: tileDraft.height } });
+          }
+          setTileDraft(null);
+          return;
+        }
         if (paintStroke.current && paintStroke.current.pointerId === event.pointerId) {
           const points = paintStroke.current.points.length >= 4 ? paintStroke.current.points : [...paintStroke.current.points, paintStroke.current.points[0] + 1, paintStroke.current.points[1] + 1];
           actions.paint?.({ points, color: paintStyle.color, width: paintStyle.width, alpha: paintStyle.alpha, ...(paintStyle.group ? { group: paintStyle.group } : {}) });
@@ -797,12 +901,29 @@ export function MapView({
         if (point) actions.ping(point.x, point.y);
       }}
       onDragOver={(event) => {
+        if (gm && editorOpen && editTab === "images" && [...event.dataTransfer.types].includes("Files")) {
+          event.preventDefault();
+          return;
+        }
         if ([...event.dataTransfer.types].includes("application/x-kraken-record")) {
           event.preventDefault();
           event.stopPropagation();
         }
       }}
       onDrop={(event) => {
+        if (gm && editorOpen && editTab === "images" && event.dataTransfer.files.length && window.kraken) {
+          // A picture file dropped on the map: into the tile library, then onto the map where it fell.
+          event.preventDefault();
+          const point = worldAt(event.clientX, event.clientY);
+          for (const file of [...event.dataTransfer.files].slice(0, 10)) {
+            void file
+              .arrayBuffer()
+              .then((bytes) => window.kraken!.addDecal(file.name, new Uint8Array(bytes), "tile"))
+              .then((made) => placePicture(made.id, actions.decalUrl ? actions.decalUrl(made.id, "tile") : "", point, (tile) => actions.tile?.("add", { tile }), made.name))
+              .catch((error) => setHint(error instanceof Error ? error.message : String(error)));
+          }
+          return;
+        }
         const recordId = event.dataTransfer.getData("application/x-kraken-record");
         if (!recordId) return;
         event.preventDefault();
@@ -831,6 +952,7 @@ export function MapView({
             onError={() => setImageFailed(true)}
           />
         ) : null}
+        {tileLayer("below")}
         {drawSquare ? (
           <svg
             className="grid"
@@ -1092,6 +1214,7 @@ export function MapView({
             </div>
           );
         })}
+        {tileLayer("above")}
         {drag && ghost && dragging ? (
           <>
             <div
@@ -1511,8 +1634,13 @@ export function MapView({
           setPaintStyle={setPaintStyle}
           selectedFx={selectedFx}
           setSelectedFx={setSelectedFx}
+          selectedTile={selectedTile}
+          setSelectedTile={setSelectedTile}
+          viewCenter={() => viewCenter()}
+          tilePictures={() => (actions.decalList ? actions.decalList("tile") : Promise.resolve([]))}
+          tileUrl={(id) => (actions.decalUrl ? actions.decalUrl(id, "tile") : "")}
           selectedLabel={selectedLabel}
-          actions={{ fx: actions.fx ?? (() => undefined), clearDrawings: actions.clearDrawings, label: actions.label ?? (() => undefined), mapGroup: actions.mapGroup ?? (() => undefined), mask: actions.mask ?? (() => undefined), wall: actions.wall, mapUndo: actions.mapUndo, updateSettings: actions.updateSettings, updateLight: actions.updateLight, removeLight: actions.removeLight }}
+          actions={{ tile: actions.tile ?? (() => undefined), fx: actions.fx ?? (() => undefined), clearDrawings: actions.clearDrawings, label: actions.label ?? (() => undefined), mapGroup: actions.mapGroup ?? (() => undefined), mask: actions.mask ?? (() => undefined), wall: actions.wall, mapUndo: actions.mapUndo, updateSettings: actions.updateSettings, updateLight: actions.updateLight, removeLight: actions.removeLight }}
           onClose={() => setEditorOpen(false)}
         />
       ) : null}

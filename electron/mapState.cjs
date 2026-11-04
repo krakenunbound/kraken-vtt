@@ -261,6 +261,38 @@ function cleanFx(raw) {
   };
 }
 
+// An image layer (FG's image layers, Foundry's tiles): a picture from the
+// tile library (lib/<file>) placed on the map, in scene pixels from its
+// top-left corner, turned about its centre. level below: under the tokens
+// (FG); above: over them (Foundry's overhead tiles: roofs, tree tops), faded
+// on a seat's screen while one of its tokens is under it. The list's order is
+// the drawing order: first at the bottom.
+const MAX_TILES = 300;
+function cleanTile(raw) {
+  if (!raw || typeof raw !== "object") return null;
+  const src = text(raw.src, "").slice(0, 300);
+  const width = num(raw.width, 0);
+  const height = num(raw.height, 0);
+  if (!src || !(width > 0) || !(height > 0)) return null;
+  return {
+    id: text(raw.id, "").slice(0, 40) || `tile-${crypto.randomBytes(5).toString("hex")}`,
+    name: text(raw.name, "").slice(0, 60),
+    src,
+    x: Math.round(num(raw.x, 0) * 10) / 10,
+    y: Math.round(num(raw.y, 0) * 10) / 10,
+    width: Math.min(40000, Math.round(width * 10) / 10),
+    height: Math.min(40000, Math.round(height * 10) / 10),
+    rotation: ((Math.round(num(raw.rotation, 0)) % 360) + 360) % 360,
+    alpha: Math.min(1, Math.max(0, num(raw.alpha, 1))),
+    flipX: Boolean(raw.flipX),
+    flipY: Boolean(raw.flipY),
+    level: raw.level === "above" ? "above" : "below",
+    hidden: Boolean(raw.hidden),
+    locked: Boolean(raw.locked),
+    group: text(raw.group, "").slice(0, 40),
+  };
+}
+
 function savedMap(value) {
   const tokens = {};
   const doors = {};
@@ -274,8 +306,10 @@ function savedMap(value) {
   const labels = {};
   const groups = {};
   const fx = {};
+  const tiles = {};
   const frames = value && typeof value === "object" && value.frames && typeof value.frames === "object" ? Object.fromEntries(Object.entries(value.frames).slice(0, 500)) : {};
-  if (!value || typeof value !== "object") return { tokens, doors, sight, locked, settings, lights, drawings, walls, masks, labels, groups, fx, frames };
+  if (!value || typeof value !== "object") return { tokens, doors, sight, locked, settings, lights, drawings, walls, masks, labels, groups, fx, tiles, frames };
+  for (const [sceneId, list] of Object.entries(value.tiles ?? {}).slice(0, 500)) if (Array.isArray(list)) tiles[sceneId.slice(0, 80)] = list.map(cleanTile).filter(Boolean).slice(0, MAX_TILES);
   for (const [sceneId, list] of Object.entries(value.fx ?? {}).slice(0, 500)) if (Array.isArray(list)) fx[sceneId.slice(0, 80)] = list.map(cleanFx).filter(Boolean).slice(0, 20);
   for (const [sceneId, list] of Object.entries(value.labels ?? {}).slice(0, 500)) if (Array.isArray(list)) labels[sceneId.slice(0, 80)] = list.map(cleanLabel).filter(Boolean).slice(0, 2000);
   for (const [sceneId, list] of Object.entries(value.groups ?? {}).slice(0, 500)) if (Array.isArray(list)) groups[sceneId.slice(0, 80)] = list.map(cleanGroup).filter(Boolean).slice(0, 100);
@@ -304,7 +338,7 @@ function savedMap(value) {
   for (const [sceneId, list] of Object.entries(value.drawings ?? {}).slice(0, 500)) {
     if (Array.isArray(list)) drawings[sceneId.slice(0, 80)] = list.map(cleanDrawing).filter(Boolean).slice(-MAX_DRAWINGS);
   }
-  return { tokens, doors, sight, locked, settings, lights, drawings, walls, masks, labels, groups, fx, frames };
+  return { tokens, doors, sight, locked, settings, lights, drawings, walls, masks, labels, groups, fx, tiles, frames };
 }
 const MAX_DRAWINGS = 400;
 
@@ -319,7 +353,7 @@ function presetLight(name, profiles = []) {
   return preset ? cleanCarried({ name: preset.name, bright: preset.bright * 5, dim: preset.dim * 5, color: preset.color }) : null;
 }
 
-function createMapState({ saved, records, onChange = () => undefined, hasArt = () => false, hasPicture = () => false, combatFor = () => null, activeRecord = () => null }) {
+function createMapState({ saved, records, onChange = () => undefined, hasArt = () => false, hasPicture = () => false, hasTile = () => true, combatFor = () => null, activeRecord = () => null }) {
   const state = savedMap(saved);
   let scene = null;
   const visionCache = new Map();
@@ -344,6 +378,19 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
     state.fx[scene.id] = state.fx[scene.id] ?? [];
     return state.fx[scene.id];
   }
+  function tilesHere() {
+    if (!scene) return [];
+    state.tiles[scene.id] = state.tiles[scene.id] ?? [];
+    return state.tiles[scene.id];
+  }
+  function findTile(id) {
+    const tile = tilesHere().find((item) => item.id === id);
+    if (!tile) throw new Error(`No image layer ${id} on this scene.`);
+    return tile;
+  }
+  const groupLocked = (name) => Boolean(name && groupsHere().find((group) => group.name === name)?.locked);
+  // The picture's address for a seat (served under its asset token).
+  const tileOut = (tile, assetToken) => ({ ...tile, url: `/tile/file?token=${assetToken}&id=${encodeURIComponent(tile.src)}` });
   function labelsHere() {
     if (!scene) return [];
     state.labels[scene.id] = state.labels[scene.id] ?? [];
@@ -384,7 +431,7 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
   }
   function remember(label) {
     const ring = undoRing.get(scene.id) ?? [];
-    ring.push({ label, walls: JSON.parse(JSON.stringify(wallsHere())), mask: JSON.parse(JSON.stringify(maskHere())), labels: JSON.parse(JSON.stringify(labelsHere())), groups: JSON.parse(JSON.stringify(groupsHere())) });
+    ring.push({ label, walls: JSON.parse(JSON.stringify(wallsHere())), mask: JSON.parse(JSON.stringify(maskHere())), labels: JSON.parse(JSON.stringify(labelsHere())), groups: JSON.parse(JSON.stringify(groupsHere())), tiles: JSON.parse(JSON.stringify(tilesHere())) });
     if (ring.length > 50) ring.shift();
     undoRing.set(scene.id, ring);
   }
@@ -609,6 +656,7 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
         sceneLights: lightsHere(),
         walls: wallsHere(),
         labels: labelsHere(),
+        tiles: tilesHere().map((tile) => tileOut(tile, assetToken)),
       };
     }
     const shown = all.filter((token) => !token.hidden);
@@ -646,6 +694,10 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
         .filter((label) => !label.hidden && groupLets(label.group, seat) && !masked(label.x, label.y))
         .map((label) => (label.link && label.link.kind === "record" && !records.get(label.link.id, seat) ? { ...label, link: null } : label)),
       groups: groups.filter((group) => group.shown && group.players).map(({ name }) => ({ name })),
+      // Image layers: not hidden, in a group players see, not wholly under the mask.
+      tiles: tilesHere()
+        .filter((tile) => !tile.hidden && groupLets(tile.group, seat) && ![[0.5, 0.5], [0, 0], [1, 0], [0, 1], [1, 1]].every(([u, v]) => masked(tile.x + tile.width * u, tile.y + tile.height * v)))
+        .map(({ locked: _locked, ...tile }) => tileOut(tile, assetToken)),
     };
   }
 
@@ -962,17 +1014,27 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
     },
     // An FG module's map, before it is first shown: its pins, FX layers and
     // grid offset, kept only when the scene has none of its own yet.
-    seed(sceneId, { pins = [], fx = [], gridOffset = null, frame = null } = {}) {
+    seed(sceneId, { pins = [], fx = [], tiles = [], groups = [], gridOffset = null, frame = null } = {}) {
       const id = String(sceneId).slice(0, 80);
       // Which FG image the scene came from, and its size: to place an encounter's tokens where FG had them.
       if (frame) state.frames[id] = { image: String(frame.image).slice(0, 160), module: String(frame.module).slice(0, 160), width: num(frame.width, 0), height: num(frame.height, 0) };
       if (!state.labels[id]) {
         state.labels[id] = pins.map((pin) => cleanLabel({ ...pin, link: pin.link ? { kind: pin.link.kind, id: pin.link.id } : null })).filter(Boolean).slice(0, 2000);
         const names = [...new Set(state.labels[id].map((label) => label.group).filter(Boolean))];
-        // Encounter pins are the GM's; map keys too, until the GM shares them.
-        state.groups[id] = names.map((name) => cleanGroup({ name, players: false }));
+        // Encounter pins are the GM's; map keys too, until the GM shares them. FG's own folders keep their settings.
+        const own = groups.map(cleanGroup).filter(Boolean);
+        state.groups[id] = [...own, ...names.filter((name) => !own.some((group) => group.name === name)).map((name) => cleanGroup({ name, players: false }))];
+        // A group's numbers carry on after the module's.
+        for (const group of state.groups[id]) {
+          const top = Math.max(0, ...state.labels[id].filter((label) => label.group === group.name && label.number !== null).map((label) => label.number));
+          if (top >= group.nextNumber) group.nextNumber = top + 1;
+        }
       }
       if (!state.fx[id]) state.fx[id] = fx.map(cleanFx).filter(Boolean).slice(0, 20);
+      if (!state.tiles[id] && tiles.length) {
+        state.tiles[id] = tiles.map(cleanTile).filter(Boolean).slice(0, MAX_TILES);
+        for (const name of new Set(state.tiles[id].map((tile) => tile.group).filter(Boolean))) if (!state.groups[id]?.some((group) => group.name === name)) (state.groups[id] = state.groups[id] ?? []).push(cleanGroup({ name }));
+      }
       if (gridOffset && !state.settings[id]) state.settings[id] = cleanSettings({ grid: { offsetX: gridOffset.x, offsetY: gridOffset.y } });
       onChange();
     },
@@ -1006,6 +1068,61 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       const index = list.findIndex((layer) => layer.id === id);
       if (index < 0) throw new Error(`No effect ${id}.`);
       list.splice(index, 1);
+      changed();
+    },
+    // Image layers (FG's image layers, Foundry's tiles): add, change, order, remove.
+    tiles: () => tilesHere(),
+    addTile(input, seat) {
+      if (seat.role !== "dm") throw new Error("Only the GM can add image layers.");
+      if (!scene) throw new Error("No scene is open.");
+      if (tilesHere().length >= MAX_TILES) throw new Error("This scene has enough image layers.");
+      const tile = cleanTile({ ...input, id: undefined });
+      if (!tile) throw new Error("An image layer needs a picture (src) and a width and height.");
+      if (!hasTile(tile.src)) throw new Error(`No picture ${tile.src} in the tile library.`);
+      if (groupLocked(tile.group)) throw new Error(`The group ${tile.group} is locked.`);
+      if (tile.group) groupOf(tile.group);
+      remember("add image layer");
+      tilesHere().push(tile);
+      changed();
+      return tile;
+    },
+    updateTile(id, patch, seat) {
+      if (seat.role !== "dm") throw new Error("Only the GM can change image layers.");
+      const list = tilesHere();
+      const tile = findTile(id);
+      // A locked layer (or group) keeps its place and size; unlocking is always allowed.
+      const moves = ["x", "y", "width", "height", "rotation", "flipX", "flipY", "src"].some((key) => patch[key] !== undefined);
+      if (moves && (tile.locked || groupLocked(tile.group)) && patch.locked !== false) throw new Error(`The image layer ${tile.name || id} is locked.`);
+      if (patch.src !== undefined && !hasTile(String(patch.src))) throw new Error(`No picture ${patch.src} in the tile library.`);
+      remember("change image layer");
+      const next = cleanTile({ ...tile, ...patch, id }) ?? tile;
+      list[list.indexOf(tile)] = next;
+      if (next.group) groupOf(next.group);
+      changed();
+      return next;
+    },
+    // FG's layer order: up, down, to the top, to the bottom (or to an index).
+    orderTile(id, where, seat) {
+      if (seat.role !== "dm") throw new Error("Only the GM can order image layers.");
+      const list = tilesHere();
+      const tile = findTile(id);
+      const from = list.indexOf(tile);
+      const to =
+        where === "top" ? list.length - 1 : where === "bottom" ? 0 : where === "up" ? Math.min(list.length - 1, from + 1) : where === "down" ? Math.max(0, from - 1) : Number.isInteger(where) ? Math.min(list.length - 1, Math.max(0, where)) : NaN;
+      if (!Number.isFinite(to)) throw new Error("Order it up, down, top, bottom or to an index.");
+      remember("order image layers");
+      list.splice(from, 1);
+      list.splice(to, 0, tile);
+      changed();
+      return list.map((item) => item.id);
+    },
+    removeTile(id, seat) {
+      if (seat.role !== "dm") throw new Error("Only the GM can remove image layers.");
+      const list = tilesHere();
+      const tile = findTile(id);
+      if (tile.locked || groupLocked(tile.group)) throw new Error(`The image layer ${tile.name || id} is locked.`);
+      remember("remove image layer");
+      list.splice(list.indexOf(tile), 1);
       changed();
     },
     // Text on the map (FG's Text tab): labels, numbers and pins, in groups.
@@ -1078,6 +1195,7 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       const next = cleanGroup({ ...group, ...patch, name: patch.name ?? group.name });
       if (!next) throw new Error("A group needs a name.");
       if (next.name !== group.name) for (const label of labelsHere()) if (label.group === group.name) label.group = next.name;
+      if (next.name !== group.name) for (const tile of tilesHere()) if (tile.group === group.name) tile.group = next.name;
       list[list.indexOf(group)] = next;
       changed();
       return next;
@@ -1087,6 +1205,7 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       if (!scene) return;
       state.groups[scene.id] = groupsHere().filter((group) => group.name !== name);
       for (const label of labelsHere()) if (label.group === name) label.group = "";
+      for (const tile of tilesHere()) if (tile.group === name) tile.group = "";
       changed();
     },
     // The mask (FG's Mask tab): on (Add Global Mask), off (Remove Global Mask),
@@ -1121,6 +1240,7 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       if (last.mask) state.masks[scene.id] = cleanMask(last.mask);
       if (last.labels) state.labels[scene.id] = last.labels.map(cleanLabel).filter(Boolean);
       if (last.groups) state.groups[scene.id] = last.groups.map(cleanGroup).filter(Boolean);
+      if (last.tiles) state.tiles[scene.id] = last.tiles.map(cleanTile).filter(Boolean);
       liveScene();
       changed();
       return last.label;

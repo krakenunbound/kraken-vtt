@@ -113,6 +113,13 @@ function gmIcons() {
   }
   return gmIconLibrary;
 }
+// Image layers' pictures (map tiles): the GM's assets folder, shared by every
+// campaign; a module's or bundle's pictures are copied in once, named by content.
+let tileLibrary = null;
+function tiles() {
+  if (!tileLibrary) tileLibrary = createDecalLibrary({ folder: path.join(app.getPath("userData"), "assets", "tiles"), own: [], hashNames: true });
+  return tileLibrary;
+}
 // The GM's own choices that follow them into every campaign (the GM icon), on this computer.
 function preferencesFile() {
   return path.join(app.getPath("userData"), "preferences.json");
@@ -263,7 +270,7 @@ ipcMain.handle("start-host", async (_event, options) => {
   if (typeof remembered === "string" && !(saved.options && "gmIcon" in saved.options)) saved.options = { ...(saved.options ?? {}), gmIcon: remembered };
   const dataFolder = fgDataFolder();
   const ruleset = campaigns.read(campaignFile()).find((item) => item.id === campaignId)?.ruleset ?? "";
-  const next = createTableServer({ saved, ruleset, onChange: markDirty, art: createArtLibrary({ base: dataFolder, roots: defaultRoots(dataFolder) }), decals: decals(), wallpapers: wallpapers(), gmIcons: gmIcons(), sounds: sounds(), books: books() });
+  const next = createTableServer({ saved, ruleset, onChange: markDirty, art: createArtLibrary({ base: dataFolder, roots: defaultRoots(dataFolder) }), decals: decals(), wallpapers: wallpapers(), gmIcons: gmIcons(), tiles: tiles(), sounds: sounds(), books: books() });
   try {
     const info = await next.listen({ port, password });
     table = next;
@@ -312,11 +319,11 @@ ipcMain.handle("set-token-art", (_event, list) => {
 });
 
 // The decal picker's Browse: a picture from anywhere, copied into the assets folder.
-const libraryOf = (kind) => (kind === "wallpaper" ? wallpapers() : kind === "gmicon" ? gmIcons() : decals());
+const libraryOf = (kind) => (kind === "wallpaper" ? wallpapers() : kind === "gmicon" ? gmIcons() : kind === "tile" ? tiles() : decals());
 ipcMain.handle("decal-pick", async (_event, kind) => {
   const library = libraryOf(kind);
   const picked = await dialog.showOpenDialog(mainWindow, {
-    title: kind === "wallpaper" ? "Choose a desktop wallpaper (a picture that tiles)" : kind === "gmicon" ? "Choose your GM icon" : "Choose a background decal",
+    title: kind === "wallpaper" ? "Choose a desktop wallpaper (a picture that tiles)" : kind === "gmicon" ? "Choose your GM icon" : kind === "tile" ? "Choose a picture to place on the map" : "Choose a background decal",
     properties: ["openFile"],
     filters: [{ name: "Pictures", extensions: ["png", "webp", "jpg", "jpeg", "gif"] }],
   });

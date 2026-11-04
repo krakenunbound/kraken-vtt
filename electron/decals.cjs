@@ -96,7 +96,9 @@ function zipRead(file, entry) {
 // fgData: FG's data folder (or ""). The same library holds the desktop's
 // wallpapers (tiles): own: the ids that need no file ("kraken" for decals);
 // named: Kraken's own files are named for the game they go with.
-function createDecalLibrary({ folder, builtin = "", fgData = "", own = ["kraken"], named = false }) {
+// hashNames: files are named by their content (the tile library, which may
+// take hundreds of a module's pictures), so a picture is found again at once.
+function createDecalLibrary({ folder, builtin = "", fgData = "", own = ["kraken"], named = false, hashNames = false }) {
   let index = null;
   let indexedAt = 0;
 
@@ -137,7 +139,7 @@ function createDecalLibrary({ folder, builtin = "", fgData = "", own = ["kraken"
         }
       }
     }
-    for (const name of filesIn(folder)) items.set(`lib/${name}`, { id: `lib/${name}`, name: prettyName(name), group: "Kraken assets", file: path.join(folder, name), mime: mimeOf(name) });
+    for (const name of filesIn(folder)) items.set(`lib/${name}`, { id: `lib/${name}`, name: prettyName(hashNames ? name.replace(/^[0-9a-f]{12}-/, "") : name), group: "Kraken assets", file: path.join(folder, name), mime: mimeOf(name) });
     if (fgData) {
       const fgDecals = path.join(fgData, "decals");
       for (const name of filesIn(fgDecals)) items.set(`fg/${name}`, { id: `fg/${name}`, name: prettyName(name), group: "Fantasy Grounds", file: path.join(fgDecals, name), mime: mimeOf(name) });
@@ -203,6 +205,15 @@ function createDecalLibrary({ folder, builtin = "", fgData = "", own = ["kraken"
       if (data.length === 0 || data.length > MAX_BYTES) throw new Error("That picture is empty or larger than 30 MB.");
       fs.mkdirSync(folder, { recursive: true });
       const hash = crypto.createHash("sha1").update(data).digest("hex");
+      if (hashNames) {
+        const clean = path.basename(String(name)).replace(/[^\w .()&'-]+/g, "_").slice(-80);
+        const target = filesIn(folder).find((file) => file.startsWith(`${hash.slice(0, 12)}-`)) ?? `${hash.slice(0, 12)}-${clean}`;
+        if (!fs.existsSync(path.join(folder, target))) {
+          fs.writeFileSync(path.join(folder, target), data);
+          index = null;
+        }
+        return { id: `lib/${target}`, name: prettyName(target.slice(13)), group: "Kraken assets" };
+      }
       const existing = filesIn(folder).find((file) => {
         try {
           return crypto.createHash("sha1").update(fs.readFileSync(path.join(folder, file))).digest("hex") === hash;

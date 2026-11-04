@@ -1156,3 +1156,15 @@ textarea.cc-field.tall { min-height: 220px; }
 .assistant-say { display: flex; flex-direction: column; gap: 6px; }
 .assistant-say textarea { width: 100%; box-sizing: border-box; resize: vertical; min-height: 48px; font: inherit; }
 .assistant-buttons { display: flex; gap: 6px; justify-content: flex-end; }
+
+/* Image layers (FG's image layers, Foundry's tiles). */
+.world .map-tile { position: absolute; transform-origin: center; }
+.world .map-tile img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; display: block; user-select: none; }
+.world .map-tile.editing { cursor: move; outline: 1px dashed rgba(255, 210, 120, 0.35); }
+.world .map-tile.hidden { outline: 2px dashed rgba(200, 120, 255, 0.7); }
+.world .map-tile.picked { outline: 3px solid #ff9f1a; z-index: 5; }
+.world .map-tile[data-tile-level="above"] { z-index: 6; transition: opacity 0.25s; }
+.world .map-tile-grip { position: absolute; right: 0; bottom: 0; transform: translate(50%, 50%); background: #ff9f1a; border: 1px solid #000; border-radius: 2px; cursor: nwse-resize; }
+.me-tile-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; max-height: 180px; overflow: auto; }
+.me-tile-grid button { padding: 2px; aspect-ratio: 1; background: rgba(0, 0, 0, 0.25); border: 1px solid var(--brass-soft); border-radius: 4px; }
+.me-tile-grid img { width: 100%; height: 100%; object-fit: contain; }

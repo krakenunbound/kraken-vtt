@@ -52,6 +52,34 @@ function layerOffset(layer) {
   return matrix.length === 16 ? { x: matrix[12], y: matrix[13] } : { x: 0, y: 0 };
 }
 
+// A layer's scale and turn from its matrix (column-major 4x4).
+function layerShape(layer) {
+  const m = nums(layer?.matrix);
+  if (m.length !== 16) return { sx: 1, sy: 1, rotation: 0 };
+  const sx = Math.hypot(m[0], m[1]) || 1;
+  const sy = Math.hypot(m[4], m[5]) || 1;
+  // FG's y is up, the screen's down: a turn counter-clockwise in FG is clockwise here.
+  const rotation = Math.round((-Math.atan2(m[1], m[0]) * 180) / Math.PI);
+  return { sx, sy, rotation: ((rotation % 360) + 360) % 360 };
+}
+
+// FG's #AARRGGBB (or #RRGGBB) colour as #RRGGBB.
+function fgColor(value, fallback) {
+  const match = /^#(?:[0-9a-f]{2})?([0-9a-f]{6})$/i.exec(String(value ?? ""));
+  return match ? `#${match[1].toUpperCase()}` : fallback;
+}
+
+// FG's text layer fonts (file names) as the label fonts Kraken has.
+function fgFont(file) {
+  const name = String(file ?? "").toLowerCase();
+  if (name.includes("bebas")) return "Bebas Neue";
+  if (name.includes("cinzel")) return "Cinzel";
+  if (name.includes("signika")) return "Signika";
+  if (name.includes("courier") || name.includes("mono")) return "Courier New";
+  if (name.includes("georgia") || name.includes("serif")) return "Georgia";
+  return "Bebas Neue";
+}
+
 const FX_MAP = { rain: "rain", snow: "snow", blizzard: "blizzard", myst: "fog", clouds: "clouds", water: "water", ocean: "water" };
 
 // One FG image record as a scene for the bundle, and Kraken's extras for it.
@@ -143,6 +171,59 @@ function imageScene(record, moduleName, sceneId) {
         return [Math.round(p.x), Math.round(p.y)];
       })()))] } : { use: false, mode: "inside", polygons: [] },
     }));
+  // FG's folders: layer groups. A layer in a folder (its parentid) is in that group.
+  const folders = new Map(layers.filter((layer) => layer.type === "folder").map((layer) => [String(layer.id), { name: String(layer.name ?? "Folder").slice(0, 40), shown: !layer.invisible }]));
+  const groupOf = (layer) => folders.get(String(layer.parentid ?? ""))?.name ?? "";
+  // The base picture's other image layers (seasons, overlays, a second map piece): image layers (tiles), in FG's order.
+  const tiles = [];
+  for (const layer of layers) {
+    if (layer === base || layer.type !== "image" || typeof layer.bitmap !== "string" || !layer.bitmap) continue;
+    const art = modulePicture(layer.bitmap, moduleName);
+    const own = art ? pictureSize(art.bytes) : null;
+    if (!own) continue;
+    const shape = layerShape(layer);
+    const shift = layerOffset(layer);
+    const width = own.width * shape.sx;
+    const height = own.height * shape.sy;
+    const center = { x: size.width / 2 + shift.x, y: size.height / 2 - shift.y };
+    tiles.push({
+      name: String(layer.name ?? "").slice(0, 60),
+      x: Math.round(center.x - width / 2),
+      y: Math.round(center.y - height / 2),
+      width: Math.round(width),
+      height: Math.round(height),
+      rotation: shape.rotation,
+      // FG's hidden layer: the GM sees it faintly and can show it (a season, a revealed secret).
+      hidden: Boolean(layer.invisible),
+      group: groupOf(layer),
+      file: layer.bitmap.slice(layer.bitmap.lastIndexOf("/") + 1),
+      bytes: art.bytes,
+    });
+  }
+  // FG's text layers: labels (a number is a numbered label of its group).
+  const texts = [];
+  for (const layer of layers.filter((item) => item.type === "text" && String(item.displayText ?? item.name ?? "").trim())) {
+    const shift = layerOffset(layer);
+    const words = String(layer.displayText ?? layer.name).slice(0, 200);
+    const fontSize = Number(layer.fontsize);
+    texts.push({
+      x: Math.round(size.width / 2 + shift.x),
+      y: Math.round(size.height / 2 - shift.y),
+      text: words,
+      font: fgFont(layer.fontname),
+      // FG's font size is in squares, a little larger than Kraken's.
+      size: Number.isFinite(fontSize) && fontSize > 0 ? Math.min(20, fontSize / 1.25) : 1,
+      color: fgColor(layer.textColor, "#FFFFFF"),
+      outline: { width: Math.min(10, Number(layer.strokeSize) * 4 || 0), color: fgColor(layer.strokeColor, "#000000") },
+      rotation: layerShape(layer).rotation,
+      hidden: Boolean(layer.invisible),
+      group: groupOf(layer) || "Text",
+      ...(/^\d+$/.test(words.trim()) ? { number: Number(words.trim()) } : {}),
+    });
+  }
+  // Text is the players' to see (FG shares text layers); map keys and encounter pins stay the GM's.
+  const groups = [...folders.values()].map((folder) => ({ ...folder, players: true }));
+  if (texts.some((item) => item.group === "Text") && !groups.some((group) => group.name === "Text")) groups.push({ name: "Text", shown: true, players: true });
   const file = `${sceneId}${base.bitmap.slice(base.bitmap.lastIndexOf(".")).toLowerCase()}`;
   return {
     scene: {
@@ -165,6 +246,9 @@ function imageScene(record, moduleName, sceneId) {
     bytes: picture.bytes,
     pins,
     fx,
+    tiles,
+    texts,
+    groups,
     baseAt,
   };
 }
@@ -194,7 +278,7 @@ function fgModuleBundle(moduleName, { only, all = false } = {}) {
     if (!made) continue;
     files[made.file] = new Uint8Array(made.bytes);
     scenes.push(made.scene);
-    extras[id] = { pins: made.pins, fx: made.fx, gridOffset: made.gridOffset, walls: made.scene.walls.length, lights: made.scene.lights.length, frame: { image: String(record.data.fgPath ?? "").replace(/@.*$/, ""), module: moduleName, width: made.scene.width, height: made.scene.height } };
+    extras[id] = { pins: [...made.pins, ...made.texts], fx: made.fx, tiles: made.tiles, groups: made.groups, gridOffset: made.gridOffset, walls: made.scene.walls.length, lights: made.scene.lights.length, frame: { image: String(record.data.fgPath ?? "").replace(/@.*$/, ""), module: moduleName, width: made.scene.width, height: made.scene.height } };
   }
   if (scenes.length === 0) throw new Error(`No maps in ${moduleName}.`);
   files["bundle.json"] = strToU8(JSON.stringify({ adventureData: { name: module.name ?? moduleName, scenes } }));

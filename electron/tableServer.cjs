@@ -289,7 +289,7 @@ function serveWeb(url, res, root) {
 // decals, wallpapers: the background decals and desktop tiles the GM can
 // choose from (decals.cjs).
 // sounds: the GM's sounds (sounds.cjs): one-shots, effects, ambience and music.
-function createTableServer({ saved = {}, onChange = () => undefined, webRoot = WEB_ROOT, art = null, decals = null, wallpapers = null, gmIcons = null, sounds = null, books = null, ruleset = "" } = {}) {
+function createTableServer({ saved = {}, onChange = () => undefined, webRoot = WEB_ROOT, art = null, decals = null, wallpapers = null, gmIcons = null, tiles = null, sounds = null, books = null, ruleset = "" } = {}) {
   let password = "";
   let hostToken = "";
   let image = null;
@@ -415,6 +415,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     },
     hasArt: (id) => tokenArt.has(id),
     hasPicture: (id) => Boolean(art && art.has(id)),
+    hasTile: (id) => Boolean(tiles && tiles.has(id)),
     // An NPC token's health and the active turn come from the tracker.
     combatFor: (tokenId) => {
       const entry = combat.entries().find((item) => item.tokenId === tokenId);
@@ -635,6 +636,22 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     if (combat.entries().some((entry) => entry.recordId === record.id)) sendCombat();
   });
 
+  // Pictures for image layers that came with a map (an FG module's layers, a
+  // bundle's tiles): copied into the tile library once, then placed by id.
+  function storeTiles(list) {
+    if (!tiles || !Array.isArray(list)) return [];
+    const out = [];
+    for (const { bytes, file, ...tile } of list) {
+      try {
+        if (bytes && file) out.push({ ...tile, src: tiles.add(file, Buffer.from(bytes)).id });
+        else if (tile.src && tiles.has(tile.src)) out.push(tile);
+      } catch {
+        /* a picture the library refuses (too big, not a picture) is left off */
+      }
+    }
+    return out;
+  }
+
   const server = http.createServer((req, res) => {
     const url = new URL(req.url || "/", "http://127.0.0.1");
     // An FG module's maps as a map bundle, for the GM's Library (its scenes' pins and FX seeded here).
@@ -649,7 +666,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       try {
         const { fgModuleBundle } = require("./importers/fgMaps.cjs");
         const bundle = fgModuleBundle(String(url.searchParams.get("module") || ""));
-        for (const [id, extra] of Object.entries(bundle.extras)) map.seed(id, extra);
+        for (const [id, extra] of Object.entries(bundle.extras)) map.seed(id, { ...extra, tiles: storeTiles(extra.tiles) });
         res.writeHead(200, { "Content-Type": "application/zip", "Content-Length": bundle.bytes.length, "Cache-Control": "no-store" });
         res.end(Buffer.from(bundle.bytes));
       } catch (error) {
@@ -785,7 +802,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       return;
     }
     // Background decals and wallpapers: the list for the GM's picker, and the pictures for every seat.
-    const pictures = { "/decal/list": decals, "/decal/file": decals, "/wallpaper/list": wallpapers, "/wallpaper/file": wallpapers, "/gmicon/list": gmIcons, "/gmicon/file": gmIcons };
+    const pictures = { "/decal/list": decals, "/decal/file": decals, "/wallpaper/list": wallpapers, "/wallpaper/file": wallpapers, "/gmicon/list": gmIcons, "/gmicon/file": gmIcons, "/tile/list": tiles, "/tile/file": tiles };
     if (req.method === "GET" && Object.hasOwn(pictures, url.pathname)) {
       const library = pictures[url.pathname];
       const token = url.searchParams.get("token") || "";
@@ -1240,7 +1257,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
 
       // The map: tokens, doors, line of sight and pings (mapState.cjs decides
       // who may do what).
-      if (["token-place", "token-move", "token-remove", "token-update", "door", "sight", "lock", "scene-settings", "light-place", "light-update", "light-remove", "draw", "draw-erase", "draw-clear", "wall", "map-undo", "mask", "label", "map-group", "fx"].includes(msg.type)) {
+      if (["token-place", "token-move", "token-remove", "token-update", "door", "sight", "lock", "scene-settings", "light-place", "light-update", "light-remove", "draw", "draw-erase", "draw-clear", "wall", "map-undo", "mask", "label", "map-group", "fx", "tile"].includes(msg.type)) {
         const seat = seatOf(client);
         try {
           if (msg.type === "token-place") {
@@ -1296,6 +1313,12 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
             else if (msg.action === "update") map.updateFx(String(msg.id ?? ""), msg.patch ?? {}, seat);
             else if (msg.action === "remove") map.removeFx(String(msg.id ?? ""), seat);
             else throw new Error("What should the effect do?");
+          } else if (msg.type === "tile") {
+            if (msg.action === "add") map.addTile(msg.tile ?? {}, seat);
+            else if (msg.action === "update") map.updateTile(String(msg.id ?? ""), msg.patch ?? {}, seat);
+            else if (msg.action === "order") map.orderTile(String(msg.id ?? ""), typeof msg.where === "number" ? Math.round(msg.where) : String(msg.where ?? ""), seat);
+            else if (msg.action === "remove") map.removeTile(String(msg.id ?? ""), seat);
+            else throw new Error("What should the image layer do?");
           } else if (msg.type === "map-group") {
             if (msg.action === "remove") map.removeGroup(String(msg.name ?? ""), seat);
             else map.updateGroup(String(msg.name ?? ""), msg.patch ?? {}, seat);
@@ -1452,6 +1475,8 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         const next = sanitizeScene(msg.scene);
         if (!next) return;
         scene = next;
+        // A bundle's tiles (Foundry's), placed the first time the scene opens.
+        if (Array.isArray(msg.scene?.tiles) && msg.scene.tiles.length) map.seed(next.id, { tiles: storeTiles(msg.scene.tiles.slice(0, 300)) });
         map.setScene(next);
         broadcastScene();
         sendMaps();
@@ -1499,6 +1524,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     combat,
     viewFor: (name) => map.viewFor({ role: "player", name }, ""),
     decals: () => decals,
+    tiles: () => tiles,
     wallpapers: () => wallpapers,
     gmIcons: () => gmIcons,
     sounds: () => sounds,

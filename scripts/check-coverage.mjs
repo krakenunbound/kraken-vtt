@@ -51,6 +51,7 @@ const MESSAGES = {
   label: "kraken_label",
   "map-group": "kraken_map_group",
   fx: "kraken_fx",
+  tile: "kraken_tile",
   ping: "kraken_ping",
   draw: "kraken_draw",
   "draw-erase": "kraken_draw",

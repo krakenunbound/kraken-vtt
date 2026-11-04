@@ -37,7 +37,44 @@ export type ParsedScene = {
   tokens: SceneToken[];
   markers: SceneMarker[];
   regions: SceneRegion[];
+  // Foundry's tiles: Kraken's image layers (their pictures from the bundle).
+  tiles: SceneTile[];
 };
+
+// A Foundry tile (v9's img and overhead, v10+'s texture and occlusion/elevation).
+export type SceneTile = { name: string; src: string; image: Uint8Array | null; x: number; y: number; width: number; height: number; rotation: number; alpha: number; hidden: boolean; level: "below" | "above"; flipX: boolean; flipY: boolean };
+
+function readTiles(value: unknown): Omit<SceneTile, "image">[] {
+  const list = Array.isArray(value) ? value : [];
+  const out: Omit<SceneTile, "image">[] = [];
+  for (const item of list) {
+    const tile = asRecord(item);
+    if (!tile) continue;
+    const texture = asRecord(tile.texture) ?? {};
+    const src = asString(texture.src ?? tile.img);
+    const width = asNumber(tile.width, 0);
+    const height = asNumber(tile.height, 0);
+    if (!src || width <= 0 || height <= 0) continue;
+    const occlusion = asRecord(tile.occlusion);
+    // Overhead: v9/v10's overhead flag; v12+: a tile above the tokens' elevation, or one that occludes.
+    const above = tile.overhead === true || asNumber(tile.elevation, 0) > 0 || (occlusion != null && asNumber(occlusion.mode, 0) > 0 && tile.overhead !== false);
+    out.push({
+      name: baseName(src).replace(/\.[a-z0-9]+$/i, ""),
+      src,
+      x: asNumber(tile.x, 0),
+      y: asNumber(tile.y, 0),
+      width,
+      height,
+      rotation: asNumber(tile.rotation, 0),
+      alpha: Math.min(1, Math.max(0, asNumber(tile.alpha, 1))),
+      hidden: tile.hidden === true,
+      level: above ? "above" : "below",
+      flipX: asNumber(texture.scaleX, 1) < 0,
+      flipY: asNumber(texture.scaleY, 1) < 0,
+    });
+  }
+  return out.slice(0, 300);
+}
 
 export type LoadedAdventure = {
   name: string;
@@ -122,7 +159,7 @@ export function imageMime(name: string): string {
   return mimeFor(name);
 }
 
-function parseScenes(adventure: Record<string, unknown>): Omit<ParsedScene, "image">[] {
+function parseScenes(adventure: Record<string, unknown>): (Omit<ParsedScene, "image" | "tiles"> & { tiles: Omit<SceneTile, "image">[] })[] {
   const source = Array.isArray(adventure.scenes) ? adventure.scenes : [];
   return source.map((value, index) => {
     const scene = asRecord(value) ?? {};
@@ -167,6 +204,7 @@ function parseScenes(adventure: Record<string, unknown>): Omit<ParsedScene, "ima
       tokens: readTokens(scene.tokens, asNumber(grid.size, 100)),
       markers: readMarkers(scene.notes, scene.drawings),
       regions: readRegions(scene.regions),
+      tiles: readTiles(scene.tiles),
     };
   });
 }
@@ -194,6 +232,7 @@ export function loadBundle(bytes: Uint8Array): LoadedAdventure {
       .flatMap((scene) => [
         scene.backgroundSrc ? baseName(scene.backgroundSrc) : "",
         ...scene.tokens.map((token) => (token.imageName ? baseName(token.imageName) : "")),
+        ...scene.tiles.map((tile) => baseName(tile.src)),
       ])
       .filter(Boolean),
   );
@@ -211,6 +250,7 @@ export function loadBundle(bytes: Uint8Array): LoadedAdventure {
         ...token,
         image: token.imageName ? assets.get(baseName(token.imageName)) ?? null : null,
       })),
+      tiles: scene.tiles.map((tile) => ({ ...tile, image: assets.get(baseName(tile.src)) ?? null })),
     })),
   };
 }
