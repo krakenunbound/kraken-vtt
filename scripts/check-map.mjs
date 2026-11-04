@@ -163,6 +163,29 @@ try {
   const playerMove = await tool("kraken_token_move", { id: placed.id, col: 0, row: 2, asPlayer: true });
   assert(playerMove.blocked && playerMove.col === 5, `as a player, the locked door stops the move: ${JSON.stringify(playerMove)}`);
 
+  // Several tokens at once (a picked group dragged together): the GM's through walls; a player's only their own, each stopped on its own.
+  const annPet = server.agent.map.place({ name: "Ann's Dog", x: 325, y: 175, owner: "Ann" }, server.agent.seat);
+  const before = server.snapshot().tokens.find((t) => t.id === placed.id);
+  const group = await tool("kraken_token_move", { ids: [orcMap.id, annPet.id], dcol: 1, drow: 0 });
+  assert(group.length === 2 && group.every((item) => !item.blocked), `the GM's group move: ${JSON.stringify(group)}`);
+  ann.ws.send(JSON.stringify({ type: "token-move", moves: [{ id: placed.id, x: before.x, y: before.y + 50 }, { id: orcMap.id, x: 75, y: 75 }] }));
+  await latest(ann, "error", (m) => m.reason.includes("not your token"), "a group with someone else's token is refused");
+  assert(server.snapshot().tokens.find((t) => t.id === placed.id).y === before.y, "nothing of a refused group moves");
+  const dogAt = server.snapshot().tokens.find((t) => t.id === annPet.id);
+  ann.ws.send(JSON.stringify({ type: "token-move", moves: [{ id: placed.id, x: before.x, y: before.y + 50 }, { id: annPet.id, x: dogAt.x, y: dogAt.y + 50 }] }));
+  await latest(ann, "map", (m) => m.tokens.some((t) => t.id === annPet.id && t.y === dogAt.y + 50), "her two tokens moved together");
+  assert(server.snapshot().tokens.find((t) => t.id === placed.id).y === before.y + 50, "both of them");
+  ann.ws.send(JSON.stringify({ type: "token-move", moves: [{ id: placed.id, x: before.x, y: before.y }] }));
+  server.agent.map.remove(annPet.id, server.agent.seat);
+
+  // Facing (FG's token orientation): the GM turns any token, a player her own.
+  assert((await tool("kraken_token_update", { id: orcMap.id, facing: 450 })).facing === 90, "the GM turns the orc (450 is 90)");
+  ann.ws.send(JSON.stringify({ type: "token-update", id: placed.id, patch: { facing: 225 } }));
+  await latest(ann, "map", (m) => m.tokens.some((t) => t.id === placed.id && t.facing === 225), "Ann turns her token");
+  ann.ws.send(JSON.stringify({ type: "token-update", id: orcMap.id, patch: { facing: 0 } }));
+  await latest(ann, "error", (m) => m.reason.includes("Only the GM"), "she cannot turn the orc");
+  assert((await tool("kraken_token_update", { id: placed.id, facing: null })).facing === null, "back to not turned");
+
   // The GM's token lock stops players moving, until it is lifted.
   assert((await tool("kraken_line_of_sight", { lockMovement: true })).lockMovement === true, "movement locked");
   ann.ws.send(JSON.stringify({ type: "token-move", id: placed.id, x: 325, y: 75 }));

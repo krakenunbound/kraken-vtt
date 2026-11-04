@@ -1277,6 +1277,10 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         try {
           if (msg.type === "token-place") {
             map.place({ recordId: msg.recordId, name: msg.name, x: num(msg.x, NaN), y: num(msg.y, NaN), hidden: msg.hidden }, seat);
+          } else if (msg.type === "token-move" && Array.isArray(msg.moves)) {
+            // A group dragged together.
+            const moved = map.moveMany(msg.moves.slice(0, 400), seat, { snap: msg.snap !== false });
+            if (moved.some((item) => item.blocked)) send(ws, { type: "notice", text: "A wall is in the way." });
           } else if (msg.type === "token-move") {
             const to = { x: num(msg.x, NaN), y: num(msg.y, NaN) };
             if (!Number.isFinite(to.x) || !Number.isFinite(to.y) || Math.abs(to.x) > 1e7 || Math.abs(to.y) > 1e7) throw new Error("Where to?");

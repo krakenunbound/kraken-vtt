@@ -489,6 +489,15 @@ export function hasTwilightVision(senses) {
   return /twilight vision|low-light vision/i.test(String(senses ?? ""));
 }
 
+// Whether a light's bright light reaches point (inside its bright radius and line of sight).
+export function brightlyLit(x, y, lights) {
+  for (const light of lights) {
+    if (light.brightPx <= 0 || Math.hypot(x - light.x, y - light.y) > light.brightPx) continue;
+    if (!light.polygon || pointInPolygon(x, y, light.polygon)) return true;
+  }
+  return false;
+}
+
 // Whether any light reaches point: inside its dim radius and its own line of sight.
 export function lit(x, y, lights) {
   for (const light of lights) {
