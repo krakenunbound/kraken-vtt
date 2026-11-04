@@ -153,9 +153,25 @@ function Line({ line, gmIcon, session }: { line: ChatLine; gmIcon: string; sessi
   const classes = ["chat-line", system ? "system" : "", line.secret || line.tower || line.self ? "secret" : "", line.to ? "whisper" : "", line.kind ? `kind-${line.kind}` : "", line.local ? "local" : ""].filter(Boolean).join(" ");
   const mark = iconOf(line);
   const me = session.players.find((seat) => seat.id === session.selfId)?.name ?? "";
+  const applied = line.roll && session.role === "dm" && /^\[(DAMAGE|HEAL)/i.test(line.roll.label ?? "") ? { amount: Number(line.roll.total) || 0, heal: /^\[HEAL/i.test(line.roll.label ?? "") } : null;
   const myVote = line.vote ? (line.vote.yes.includes(me) ? "yes" : line.vote.no.includes(me) ? "no" : "") : "";
   return (
-    <div className={classes} data-from={line.from} data-kind={line.kind ?? (line.roll ? "roll" : "say")}>
+    <div
+      className={classes}
+      data-from={line.from}
+      data-kind={line.kind ?? (line.roll ? "roll" : "say")}
+      // A damage or healing roll is dragged onto a creature (the tracker, its token) to apply it, as in FG.
+      {...(applied
+        ? {
+            draggable: true,
+            onDragStart: (event: React.DragEvent) => {
+              event.dataTransfer.setData("application/x-kraken-damage", JSON.stringify(applied));
+              event.dataTransfer.effectAllowed = "copy";
+            },
+            title: `Drag onto a creature to ${applied.heal ? "heal" : "deal"} ${applied.amount}`,
+          }
+        : {})}
+    >
       {mark ? (
         <span className={`chat-kind tone-${mark.tone}`} aria-hidden="true">
           <Icon name={mark.icon} size={13} />
@@ -287,9 +303,36 @@ export function ChatDock({ session }: { session: Session }) {
   const dock = useRef<HTMLElement>(null);
   // Chat in a window of its own, for another monitor.
   const [out, setOut] = useState<Window | null>(null);
+  // The log stays at the newest line (as FG's chat): whenever anything in it
+  // changes (a line, a roll card filling in once its dice land, the window
+  // resized), unless the reader has scrolled up to read back.
+  const stuck = useRef(true);
   useEffect(() => {
-    log.current?.scrollTo({ top: log.current.scrollHeight });
-  }, [session.chat.length, out]);
+    const element = log.current;
+    if (!element) return;
+    const toBottom = () => {
+      if (stuck.current) element.scrollTop = element.scrollHeight;
+    };
+    const onScroll = () => {
+      stuck.current = element.scrollHeight - element.scrollTop - element.clientHeight < 40;
+    };
+    element.addEventListener("scroll", onScroll, { passive: true });
+    const changes = new MutationObserver(toBottom);
+    changes.observe(element, { childList: true, subtree: true, characterData: true });
+    const sizes = new ResizeObserver(toBottom);
+    sizes.observe(element);
+    stuck.current = true;
+    toBottom();
+    return () => {
+      element.removeEventListener("scroll", onScroll);
+      changes.disconnect();
+      sizes.disconnect();
+    };
+  }, [out]);
+  useEffect(() => {
+    const element = log.current;
+    if (element && stuck.current) element.scrollTop = element.scrollHeight;
+  }, [session.chat]);
   // Left out last time: out again (the app allows it; a browser may not).
   useEffect(() => {
     const place = chatPlace();

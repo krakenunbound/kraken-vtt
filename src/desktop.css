@@ -1276,3 +1276,18 @@ textarea.cc-field.tall { min-height: 220px; }
 .accounts-list .account-actions, .accounts-list .account-reset { margin-left: auto; display: inline-flex; gap: 4px; }
 .account-create { display: flex; gap: 6px; flex-wrap: wrap; }
 .account-create input { flex: 1; min-width: 7rem; }
+
+/* The wizard's portrait and token, chosen before the character is made. */
+.art-choice { display: flex; gap: 14px; align-items: flex-end; margin: 4px 0 10px; }
+.art-choice > div { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.art-choice-face { padding: 0; border: 2px solid var(--brass-dim, #8a6a3a); background: rgba(0, 0, 0, 0.35); overflow: hidden; cursor: pointer; display: grid; place-items: center; }
+.art-choice-portrait .art-choice-face { width: 120px; height: 120px; border-radius: 6px; }
+.art-choice-token .art-choice-face { width: 72px; height: 72px; border-radius: 50%; }
+.art-choice-face img, .art-choice-face video { width: 100%; height: 100%; object-fit: cover; }
+.art-choice-face:hover { border-color: var(--brass, #d2a15a); }
+
+/* Drag sources: a press-and-drag moves the thing, never paints the page with a text selection. */
+.ct-row, .chat-line[draggable="true"], .portrait-chip, .records-name, .charselect-card, .quick-slot { user-select: none; -webkit-user-select: none; }
+.chat-line[draggable="true"] { cursor: grab; }
+.ct-row[draggable="true"] { cursor: grab; }
+.ct-row input, .ct-row button { cursor: auto; }

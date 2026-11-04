@@ -23,7 +23,8 @@ async function build5e(table, spec, owner, seat) {
   const lib = library5e(table.records);
   if (lib.classes.length === 0) throw new Error("No 5E classes in this campaign: make the SRD player book active (Books).");
   const built = rules.buildFromSpec(spec ?? {}, lib);
-  const record = table.records.create({ type: "character", name: built.name, owner: owner ?? "", visibility: owner ? "owner" : "gm", data: built.data }, seat ?? table.seat);
+  const data = require("./characterArt.cjs").withArt(built.data, spec, table.art);
+  const record = table.records.create({ type: "character", name: built.name, owner: owner ?? "", visibility: owner ? "owner" : "gm", data }, seat ?? table.seat);
   return { record, problems: built.problems };
 }
 

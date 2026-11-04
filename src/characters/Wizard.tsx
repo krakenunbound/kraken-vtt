@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import type { RollResult, Session } from "../session/useSession";
+import { ArtChoice } from "./ArtPicker";
 import { STATS, abilityBonus, exactRow, levelGain, parseCost, progressionRow, raceLanguages, spellChoices, spellPicksAllowed, CORE_BOOK } from "./siege";
 import { ALIGNMENTS as COMBO_ALIGNMENTS, COMBO, alignmentAllowed, alignmentText, canPlus, classKey, dieOf, enhancedDie, enhancedRule, isRaceClass, multiDie, multiRule, plusText, startXP, supportLevel, supportOptions, supportPrime } from "../../shared/siege/combine.mjs";
 
@@ -368,6 +369,8 @@ export function Wizard({ session, onDone }: { session: Session; onDone: (id: str
   const [spellLevel, setSpellLevel] = useState("all");
   const [readSpell, setReadSpell] = useState("");
   const [details, setDetails] = useState<Record<string, string>>({ name: "" });
+  // The portrait and token chosen on the Finish page ({}: the race and class's own).
+  const [art, setArt] = useState<{ portrait?: string; token?: string }>({});
   const [note, setNote] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
@@ -648,6 +651,7 @@ export function Wizard({ session, onDone }: { session: Session; onDone: (id: str
         gold: gold ?? 0,
         gear: cart.map((entry) => [entry.name, entry.count]),
         spells,
+        ...art,
         ...(multi ? { multiclass: multiName } : {}),
         ...(supportRecord ? { support: supportKey } : {}),
         ...(plusNames.length ? { plus: plusNames } : {}),
@@ -1200,6 +1204,7 @@ export function Wizard({ session, onDone }: { session: Session; onDone: (id: str
             </div>
             <Plate>Details</Plate>
             <div className="ccw-panel ccw-details">
+              <ArtChoice session={session} race={raceName ?? ""} cls={className ?? ""} value={art} onChange={setArt} />
               <label>
                 Name <input value={details.name ?? ""} onChange={(event) => setDetails({ ...details, name: event.target.value })} aria-label="Character name" />
               </label>

@@ -121,6 +121,15 @@ function accounts() {
   if (!accountStore) accountStore = require("./accounts.cjs").createAccountStore(path.join(app.getPath("userData"), "accounts.json"));
   return accountStore;
 }
+// Kraken's own portraits and tokens (a race and class set, round tokens made
+// from them), in the assets folder beside the GM's FG collection; by race.
+function krakenArtRoots() {
+  const assets = path.join(app.getPath("userData"), "assets");
+  return [
+    { dir: path.join(assets, "portraits"), kind: "portrait", group: "Kraken", prefix: "kraken/portraits/" },
+    { dir: path.join(assets, "tokens"), kind: "token", group: "Kraken", prefix: "kraken/tokens/" },
+  ];
+}
 let tileLibrary = null;
 function tiles() {
   if (!tileLibrary) tileLibrary = createDecalLibrary({ folder: path.join(app.getPath("userData"), "assets", "tiles"), own: [], hashNames: true });
@@ -279,7 +288,7 @@ ipcMain.handle("start-host", async (_event, options) => {
   if (typeof remembered === "string" && !(saved.options && "gmIcon" in saved.options)) saved.options = { ...(saved.options ?? {}), gmIcon: remembered };
   const dataFolder = fgDataFolder();
   const ruleset = campaigns.read(campaignFile()).find((item) => item.id === campaignId)?.ruleset ?? "";
-  const next = createTableServer({ saved, ruleset, onChange: markDirty, art: createArtLibrary({ base: dataFolder, roots: defaultRoots(dataFolder) }), decals: decals(), wallpapers: wallpapers(), gmIcons: gmIcons(), tiles: tiles(), sounds: sounds(), books: books(), accounts: accounts() });
+  const next = createTableServer({ saved, ruleset, onChange: markDirty, art: createArtLibrary({ base: dataFolder, roots: [...defaultRoots(dataFolder), ...krakenArtRoots()] }), decals: decals(), wallpapers: wallpapers(), gmIcons: gmIcons(), tiles: tiles(), sounds: sounds(), books: books(), accounts: accounts() });
   try {
     const info = await next.listen({ port, password });
     table = next;

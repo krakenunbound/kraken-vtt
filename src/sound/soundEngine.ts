@@ -97,6 +97,9 @@ function buffer(id: string) {
   return pending;
 }
 
+// When each triggered sound's folder last played (a burst plays once).
+const recentlyPlayed = new Map<string, number>();
+
 export const sound = {
   subscribe(listener: () => void) {
     listeners.add(listener);
@@ -258,15 +261,28 @@ export const sound = {
     const id = (line as { sound?: string }).sound;
     if (!id) return;
     const kind: SoundKind = id.startsWith("oneshots/") ? "oneshots" : "sfx";
-    if (!rolling.has(line)) {
+    // A burst of lines with the same sound (Roll all: a line of initiative for
+    // each creature) is heard once, not once a line.
+    const once = () => {
+      const folder = id.slice(0, id.lastIndexOf("/"));
+      const now = Date.now();
+      if (now - (recentlyPlayed.get(folder) ?? 0) < 1500) return;
+      recentlyPlayed.set(folder, now);
       void sound.play(id, kind);
+    };
+    if (!rolling.has(line)) {
+      once();
       return;
     }
     const stop = rolling.subscribe(() => {
       if (rolling.has(line)) return;
       stop();
-      void sound.play(id, kind);
+      once();
     });
+  },
+  // Your turn has come (the combat tracker): a bell, on this screen only.
+  yourTurn() {
+    void sound.play(`sfx/Effects/Bell/effects-bell-${1 + Math.floor(Math.random() * 2)}.mp3`, "sfx");
   },
   // For tests and the Sound window: what is playing here.
   playingHere: () => ({ ambience: [...ambience.keys()], music: music?.id ?? null, effects: playing.size, running: context?.state === "running" }),

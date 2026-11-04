@@ -117,6 +117,8 @@ function polygonPoints(points: number[]): string {
 
 export type MapActions = {
   placeToken: (recordId: string | null, x?: number, y?: number, name?: string) => void;
+  // The combat tracker's entries (a damage roll dropped on a token finds its creature).
+  combat?: { entries: { id: string; tokenId?: string | null; recordId?: string | null }[] };
   moveToken: (id: string, x: number, y: number, snap?: boolean) => void;
   moveTokens?: (moves: { id: string; x: number; y: number }[], snap?: boolean) => void;
   removeToken: (id: string) => void;
@@ -962,7 +964,7 @@ export function MapView({
           event.stopPropagation();
           return;
         }
-        if ([...event.dataTransfer.types].includes("application/x-kraken-record")) {
+        if (["application/x-kraken-record", "application/x-kraken-ct", "application/x-kraken-damage"].some((type) => [...event.dataTransfer.types].includes(type))) {
           event.preventDefault();
           event.stopPropagation();
         }
@@ -980,6 +982,32 @@ export function MapView({
               .then((made) => placePicture(made.id, actions.decalUrl ? actions.decalUrl(made.id, "tile") : "", point, (tile) => actions.tile?.("add", { tile }), made.name))
               .catch((error) => setHint(error instanceof Error ? error.message : String(error)));
           }
+          return;
+        }
+        // A damage or healing roll from chat dropped on a creature's token (the GM's, as in FG).
+        const damage = event.dataTransfer.getData("application/x-kraken-damage");
+        if (damage && gm) {
+          event.preventDefault();
+          event.stopPropagation();
+          const at = worldAt(event.clientX, event.clientY);
+          const hit = at ? tokens.find((token) => Math.abs(at.x - token.x) <= (token.squares * size) / 2 && Math.abs(at.y - token.y) <= (token.squares * size) / 2) : null;
+          const entry = hit ? actions.combat?.entries.find((item) => item.tokenId === hit.id || (hit.recordId && item.recordId === hit.recordId)) : null;
+          try {
+            const roll = JSON.parse(damage) as { amount: number; heal?: boolean };
+            if (entry && roll.amount > 0) actions.ct(roll.heal ? "heal" : "damage", { id: entry.id, amount: roll.amount });
+            else setHint(hit ? `${hit.name} is not on the combat tracker.` : "Drop it on a creature's token.");
+          } catch {
+            /* not a roll */
+          }
+          return;
+        }
+        // A creature from the combat tracker (the GM's): its token where it fell.
+        const entryId = event.dataTransfer.getData("application/x-kraken-ct");
+        if (entryId && gm) {
+          event.preventDefault();
+          event.stopPropagation();
+          const at = worldAt(event.clientX, event.clientY);
+          if (at) actions.ct("place-token", { id: entryId, x: at.x, y: at.y });
           return;
         }
         const recordId = event.dataTransfer.getData("application/x-kraken-record");
@@ -1347,17 +1375,25 @@ export function MapView({
         {vision ? (
           <svg className="overlay sight" width={frame.worldWidth} height={frame.worldHeight} viewBox={`0 0 ${frame.worldWidth} ${frame.worldHeight}`}>
             <defs>
+              {/* The edge of what a token sees fades over about half a square, as a light's does, never a hard line. */}
+              <filter id="sight-soft" filterUnits="userSpaceOnUse" x={0} y={0} width={frame.worldWidth} height={frame.worldHeight}>
+                <feGaussianBlur stdDeviation={Math.max(4, size * 0.22)} />
+              </filter>
               <mask id="sight-explored">
                 <rect width={frame.worldWidth} height={frame.worldHeight} fill="#fff" />
-                {[...explored.current.polygons, ...vision].map((polygon, index) => (
-                  <polygon key={index} points={polygonPoints(polygon)} fill="#000" />
-                ))}
+                <g filter="url(#sight-soft)">
+                  {[...explored.current.polygons, ...vision].map((polygon, index) => (
+                    <polygon key={index} points={polygonPoints(polygon)} fill="#000" />
+                  ))}
+                </g>
               </mask>
               <mask id="sight-now">
                 <rect width={frame.worldWidth} height={frame.worldHeight} fill="#fff" />
-                {vision.map((polygon, index) => (
-                  <polygon key={index} points={polygonPoints(polygon)} fill="#000" />
-                ))}
+                <g filter="url(#sight-soft)">
+                  {vision.map((polygon, index) => (
+                    <polygon key={index} points={polygonPoints(polygon)} fill="#000" />
+                  ))}
+                </g>
               </mask>
             </defs>
             <rect width={frame.worldWidth} height={frame.worldHeight} fill="#000" mask="url(#sight-explored)" />

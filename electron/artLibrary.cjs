@@ -29,7 +29,9 @@ function defaultRoots(dataFolder) {
   return roots;
 }
 
-// base: the folder ids are relative to. roots: [{ dir, kind, group }].
+// base: the folder ids are relative to. roots: [{ dir, kind, group, prefix? }];
+// a root outside base (Kraken's own assets folder) gives its ids a prefix and
+// is relative to its own folder.
 function createArtLibrary({ base, roots }) {
   const root = path.resolve(base);
   let index = null;
@@ -53,14 +55,16 @@ function createArtLibrary({ base, roots }) {
   function scan() {
     if (index && Date.now() - indexedAt < 30000) return index;
     const items = new Map();
-    for (const { dir, kind, group } of roots) {
+    for (const { dir, kind, group, prefix } of roots) {
       const files = [];
       walk(dir, 0, files);
       for (const file of files) {
-        const id = path.relative(root, file).split(path.sep).join("/");
+        const id = prefix ? `${prefix}${path.relative(dir, file).split(path.sep).join("/")}` : path.relative(root, file).split(path.sep).join("/");
         if (id.startsWith("..") || items.has(id)) continue;
         const ext = path.extname(file).toLowerCase();
-        items.set(id, { id, kind, group, name: path.basename(file, path.extname(file)), video: ext === ".webm", file, mime: IMAGE[ext] });
+        // A subfolder (FG's portraits/Dwarf, Kraken's by race) is a folder of its own.
+        const sub = path.relative(dir, path.dirname(file)).split(path.sep)[0];
+        items.set(id, { id, kind, group: sub && sub !== "." ? `${group} · ${sub}` : group, name: path.basename(file, path.extname(file)), video: ext === ".webm", file, mime: IMAGE[ext] });
       }
     }
     index = items;
