@@ -959,6 +959,7 @@ export function MapView({
       onDragOver={(event) => {
         if (gm && editorOpen && editTab === "images" && [...event.dataTransfer.types].includes("Files")) {
           event.preventDefault();
+          event.stopPropagation();
           return;
         }
         if ([...event.dataTransfer.types].includes("application/x-kraken-record")) {
@@ -968,8 +969,9 @@ export function MapView({
       }}
       onDrop={(event) => {
         if (gm && editorOpen && editTab === "images" && event.dataTransfer.files.length && window.kraken) {
-          // A picture file dropped on the map: into the tile library, then onto the map where it fell.
+          // A picture file dropped on the map: into the tile library, then onto the map where it fell (not a new map).
           event.preventDefault();
+          event.stopPropagation();
           const point = worldAt(event.clientX, event.clientY);
           for (const file of [...event.dataTransfer.files].slice(0, 10)) {
             void file

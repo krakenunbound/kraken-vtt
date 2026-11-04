@@ -58,6 +58,9 @@ try {
   // A campaign made as Worldbuilding, changed to Castles & Crusades on the campaign screen.
   const campaign = await tool("kraken_campaign_create", { name: "Books UI", ruleset: "Worldbuilding" });
   await page.reload();
+  // Home first: My Campaigns leads to the campaign screen.
+  await page.waitForSelector("text=My Campaigns");
+  if (!(await page.$('select[aria-label="Ruleset"]'))) await page.click("text=My Campaigns");
   await page.waitForSelector("text=Books UI");
   await page.click("text=Books UI");
   await page.selectOption('select[aria-label="Ruleset"]', "Castles & Crusades");

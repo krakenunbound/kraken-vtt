@@ -66,12 +66,13 @@ When the GM asks for a random or wandering encounter:
 
 ## 7. Maps and the table
 
-- Scenes: `kraken_scenes`, `kraken_open_fg_module` (an adventure's maps), `kraken_open_adventure`.
-- Tokens: `kraken_token_place`, `kraken_token_move`, `kraken_token_update` (hidden, size, faction, a carried light), `kraken_token_remove`.
+- Scenes: `kraken_scenes`, `kraken_open_fg_module` (an adventure's maps, with FG's image layers, text and folders), `kraken_open_adventure` (a prepared map bundle, or a bare picture to build a scene on).
+- Tokens: `kraken_token_place`, `kraken_token_move` (one token, or `ids` with `dcol`/`drow` to move a group together, the marching party), `kraken_token_update` (hidden, size, faction, facing, a carried light), `kraken_token_remove`.
 - Doors, sight and light: `kraken_door`, `kraken_line_of_sight`, `kraken_light`, `kraken_scene_settings` (darkness).
-- Map editing: `kraken_wall`, `kraken_mask`, `kraken_label`, `kraken_map_group`, `kraken_fx` (rain, fog, snow...), `kraken_draw`, `kraken_map_undo`.
+- Map editing: `kraken_scene_settings` (the grid: size, type, offset, distance), `kraken_wall`, `kraken_mask`, `kraken_label`, `kraken_tile` (image layers: pictures on the map below or above the tokens, a roof, a cart, a second map piece; hidden ones are the GM's), `kraken_map_group`, `kraken_fx` (rain, fog, snow...), `kraken_draw`, `kraken_map_undo`.
+- In C&C, bright light (a torch in hand, standing in a lamp's bright light) spoils deepvision and darkvision: that token sees only by light. Say so when the GM asks why a dwarf sees so little.
 - `kraken_ping` points something out on the map for everyone.
-- Atmosphere: `kraken_sound` (one-shots, ambience, music), `kraken_chat_send` (say, emote, story text read to the table).
+- Atmosphere: `kraken_sound` (one-shots, ambience, music; `scene` keep makes what plays now the open scene's own, started whenever it opens), `kraken_chat_send` (say, emote, story text read to the table). A creature's natural attacks and its death play its own sounds by themselves.
 - The GM's windows: `kraken_windows` opens a sheet, the tracker, a book for the GM.
 
 ## 8. Rules of the road
@@ -95,5 +96,7 @@ When the GM asks for a random or wandering encounter:
 **"Start the fight with the goblins in room 3."** `kraken_library` list kind battle with a search for the room; action `battle` with its path; `kraken_combat` `add-party` if the party isn't on yet; `kraken_combat` `init` all; `kraken_combat` view; report the order and whose turn it is.
 
 **"What does Bless do?"** `kraken_books` `contents` of the Player's Handbook, find Bless under the spells, `page` to read it; answer with its effect, duration and range, citing the book. (A spell already on a character or in the campaign is quicker with `kraken_records_list`.)
+
+**"Make me a map from this picture."** `kraken_open_adventure` with the picture's path; `kraken_scene_settings` grid size (and offset) to fit its squares; `kraken_wall` round the rooms, doors where the picture has them; `kraken_light`; `kraken_label` for room names or numbers; `kraken_line_of_sight` on. Report what you made, and that the GM should look it over.
 
 **"Light the room, it's night."** `kraken_scene_settings` darkness 0.6; `kraken_light` place a torch where the GM says; the players see only what's lit and their darkvision.

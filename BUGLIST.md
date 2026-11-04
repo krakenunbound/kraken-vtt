@@ -20,9 +20,17 @@ Each bug has a test once fixed. Severity: **high** (wrong rules or data, or the 
 | 12 | low | Items with no price (Staff "—", Sling) cannot be bought in the wizard or the builder. FG's wizard skips them too | play test | Fixed (alpha.18, the GM's call): Kraken's own prices where the book gives none, after 5E's (Staff 5 gp, Sling 1 sp, Club 1 sp, Rock free, jewelry 10 gp...), marked krakenprice; Fist stays a natural weapon |
 | 13 | low | Targets persist after a spell: the cleric's Cure Light Wounds also healed the kobold it had targeted the turn before. FG keeps targets the same way; an option to clear targets after a cast would help | play test | Fixed (alpha.17): Settings > Clear targets: never (FG's default), after a spell or an attack's damage, or at the end of the creature's turn (`kraken_table_options` clearTargets) |
 | 14 | medium | An area target also took creatures already dead | play test, phase 2 | Fixed (alpha.16) |
+| 15 | medium | A Kraken Krit instant death (when the GM lets it apply) put 999 wounds on the creature | play test, phase 3 | Fixed (alpha.26): down to the dead threshold (-10 hit points); `krits` |
+| 16 | medium | The GM's tracker attack for a character (spoken by "Combat") was thrown in the GM's NPC dice | `assistant` | Fixed (alpha.26): the roll's actor decides; `dice` |
+| 17 | low | A picture dropped on the map in the Images tab would also open as a whole new map | review | Fixed (alpha.26) |
+| 18 | low | `verify-books-ui` and `verify-sound-ui` had gone stale (the Home screen; a sound still playing from the step before) | test phase | Fixed (alpha.26) |
 
 ## Play test, second run (alpha.15)
 
 Phase 2 added: Sleep cast on an area target over the kobold pack (eight asleep), a kobold killed outright (shown Dead), the encounter's 120 XP split between the four characters, the parcel's item assigned to Pip and handed out with the coin, and Thorin levelled from 2 to 3 (18 to 26 hit points, base to hit 2 to 3, next level 8,501 XP). All as expected, but for bug 14.
 
 Nothing open after both runs.
+
+## Play test, third run (alpha.26)
+
+Phase 3 added for alpha.21 to .25: the party's four tokens moved together, Thorin turned to face the lair, an image layer by the lair, the caves keeping their own cave loop, pitch dark with Thorin's torch in hand; the test player in Chrome sees the image layer, Thorin's facing and the notice that the torch spoils his deepvision. One problem (15), fixed. Every other check passes; `pregens` matches 128 of 132 here, the other four need a live FG build with the SC C&C wizard loaded.

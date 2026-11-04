@@ -516,9 +516,10 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
   function lookFor(entry, roller, hand) {
     const label = String(entry.roll?.label ?? "");
     if (hand.looks?.damage && /^\[DAMAGE\]/.test(label)) return hand.looks.damage;
-    const from = String(entry.from ?? "");
+    // Who the roll is for: a tracker roll names its actor (by); else who it is from. The tracker's own voice decides nothing.
+    const from = String(entry.roll?.by || entry.from || "");
     const asCreature =
-      roller.role === "dm" && from && !sameName(from, roller.name) && !/^(gm|dm|agent)$/i.test(from) && !records.list({ type: "character" }).some((record) => sameName(record.name, from));
+      roller.role === "dm" && from && !sameName(from, roller.name) && !/^(gm|dm|agent|combat)$/i.test(from) && !records.list({ type: "character" }).some((record) => sameName(record.name, from));
     if (hand.looks?.npc && asCreature) return hand.looks.npc;
     return hand.look ?? null;
   }

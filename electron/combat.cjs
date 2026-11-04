@@ -255,7 +255,9 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       }
       if (fx.death) {
         if (settings.death === "apply" && auto && who) {
-          await applyWounds(who, 999, "[DAMAGE] Kraken Krit: instant death", opts);
+          // Down to the dead threshold (C&C: -10 hit points), not a heap of wounds.
+          const now = vitals(who);
+          await applyWounds(who, Math.max(1, now.hp - thresholds(opts).dead - now.wounds), "[DAMAGE] Kraken Krit: instant death", opts);
           out.push(`INSTANT DEATH -> ${nameOf(who)}`);
         } else out.push(`GM: INSTANT DEATH for ${nameOf(who)} if you allow it (Settings: instant death results)`);
       }
