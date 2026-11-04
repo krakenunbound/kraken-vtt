@@ -47,6 +47,8 @@ const MESSAGES = {
   wall: "kraken_wall",
   "map-undo": "kraken_map_undo",
   mask: "kraken_mask",
+  label: "kraken_label",
+  "map-group": "kraken_map_group",
   ping: "kraken_ping",
   draw: "kraken_draw",
   "draw-erase": "kraken_draw",

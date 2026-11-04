@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { EditWall, SceneLightRecord, TableMap, WallKind } from "../session/useSession";
+import type { EditWall, MapLabel, SceneLightRecord, TableMap, WallKind } from "../session/useSession";
 import type { SceneSettingsPatch } from "./SceneSettings";
 import { LIGHT_PRESETS } from "../../shared/map/geometry.mjs";
 
@@ -9,8 +9,11 @@ import { LIGHT_PRESETS } from "../../shared/map/geometry.mjs";
 // has as a tool too (kraken_wall, kraken_light, kraken_scene_settings,
 // kraken_map_undo).
 
-export type EditTab = "walls" | "lights" | "mask" | "grid";
-export type EditTool = "select" | "line" | "rect" | "poly" | "light" | "cell" | null;
+export type EditTab = "walls" | "lights" | "mask" | "text" | "grid";
+export type EditTool = "select" | "line" | "rect" | "poly" | "light" | "cell" | "text" | "number" | null;
+export const LABEL_FONTS = ["Bebas Neue", "Cinzel", "Georgia", "Signika", "Arial", "Courier New"];
+// What the Text tab places next (FG's text properties).
+export type LabelStyle = { text: string; font: string; size: number; color: string; outline: { width: number; color: string }; shadow: { offset: number; blur: number; color: string }; group: string; icon: string };
 
 // FG's line-of-sight types, with FG's tooltips.
 export const WALL_KIND_INFO: { kind: WallKind; label: string; icon: string; tip: string; color: string }[] = [
@@ -53,9 +56,14 @@ type Props = {
   lightPreset: string;
   setLightPreset: (preset: string) => void;
   gridScene: { size: number; type: number; color: string; alpha: number; distance: number; units: string; offsetX?: number; offsetY?: number };
+  labelStyle: LabelStyle;
+  setLabelStyle: (style: LabelStyle) => void;
+  selectedLabel: string | null;
   maskMode: "reveal" | "hide";
   setMaskMode: (mode: "reveal" | "hide") => void;
   actions: {
+    label: (action: string, payload?: Record<string, unknown>) => void;
+    mapGroup: (action: string, payload?: Record<string, unknown>) => void;
     mask: (action: string, payload?: Record<string, unknown>) => void;
     wall: (action: string, payload?: Record<string, unknown>) => void;
     mapUndo: () => void;
@@ -96,6 +104,7 @@ export function MapEditor(props: Props) {
             ["lights", "💡", "Lighting"],
             ["mask", "◑", "Mask"],
             ["grid", "#", "Grid"],
+            ["text", "Tt", "Text"],
           ] as const
         ).map(([id, icon, title]) => (
           <button key={id} type="button" role="tab" aria-selected={tab === id} title={title} data-edit-tab={id} onClick={() => setTab(id)}>
@@ -309,6 +318,10 @@ export function MapEditor(props: Props) {
         </>
       ) : null}
 
+      {tab === "text" ? (
+        <TextTab {...props} />
+      ) : null}
+
       {tab === "grid" ? (
         <div className="me-box me-grid-tab">
           <div className="me-row">
@@ -389,5 +402,138 @@ export function MapEditor(props: Props) {
         </div>
       ) : null}
     </aside>
+  );
+}
+
+// FG's Text tab: place text or the next number; FG's text properties; the
+// layer groups (FG's folders) with Shown, Players and Lock, and renumbering.
+function TextTab(props: Props) {
+  const { map, tool, setTool, actions, labelStyle: style, setLabelStyle: setStyle } = props;
+  const [newGroup, setNewGroup] = useState("");
+  const chosen: MapLabel | null = props.selectedLabel ? (map.labels ?? []).find((label) => label.id === props.selectedLabel) ?? null : null;
+  // Changes go to the selected text, and to what is placed next.
+  const change = (patch: Partial<LabelStyle>) => {
+    setStyle({ ...style, ...patch });
+    if (chosen) actions.label("update", { id: chosen.id, patch });
+  };
+  const groups = map.groups ?? [];
+  const toolButton = (id: EditTool, icon: string, title: string) => (
+    <button type="button" className={tool === id ? "me-tool on" : "me-tool"} aria-pressed={tool === id} title={title} aria-label={title} data-edit-tool={id ?? "none"} onClick={() => setTool(tool === id ? null : id)}>
+      {icon}
+    </button>
+  );
+  const shown = chosen ?? style;
+  return (
+    <>
+      <div className="me-tools">
+        {toolButton("text", "T", "Place text: click the map")}
+        {toolButton("number", "#", "Number: each click drops the group's next number (1, 2, 3...)")}
+        {toolButton("select", "⬚", "Select text: click it; Delete removes it")}
+        <span className="me-spacer" />
+        <button type="button" className="me-tool" title="Undo" aria-label="Undo" onClick={actions.mapUndo}>
+          ↶
+        </button>
+      </div>
+      <div className="me-box">
+        <label className="me-row">
+          <input className="me-text" value={chosen ? chosen.text : style.text} placeholder="Enter text…" onChange={(event) => change({ text: event.target.value })} aria-label="Text" />
+        </label>
+        <div className="me-grid2">
+          <label>
+            Font
+            <select value={shown.font} onChange={(event) => change({ font: event.target.value })} aria-label="Font">
+              {LABEL_FONTS.map((font) => (
+                <option key={font}>{font}</option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Tint
+            <input type="color" value={shown.color} onChange={(event) => change({ color: event.target.value })} aria-label="Text colour" />
+          </label>
+          <label>
+            Size (squares)
+            <input type="number" min={0.2} max={20} step={0.1} value={shown.size} onChange={(event) => change({ size: Number(event.target.value) || 1 })} aria-label="Text size" />
+          </label>
+          <label>
+            Outline width
+            <input type="number" min={0} max={10} value={shown.outline.width} onChange={(event) => change({ outline: { ...shown.outline, width: Number(event.target.value) || 0 } })} aria-label="Outline width" />
+          </label>
+          <label>
+            Outline colour
+            <input type="color" value={shown.outline.color} onChange={(event) => change({ outline: { ...shown.outline, color: event.target.value } })} aria-label="Outline colour" />
+          </label>
+          <label>
+            Shadow offset
+            <input type="number" min={0} max={10} value={shown.shadow.offset} onChange={(event) => change({ shadow: { ...shown.shadow, offset: Number(event.target.value) || 0 } })} aria-label="Shadow offset" />
+          </label>
+          <label>
+            Shadow blur
+            <input type="number" min={0} max={10} value={shown.shadow.blur} onChange={(event) => change({ shadow: { ...shown.shadow, blur: Number(event.target.value) || 0 } })} aria-label="Shadow blur" />
+          </label>
+          <label>
+            Pin
+            <select value={chosen ? chosen.icon : style.icon} onChange={(event) => change({ icon: event.target.value })} aria-label="Pin icon">
+              <option value="">None</option>
+              <option value="pin">📍 Pin</option>
+              <option value="trap">⚠ Trap</option>
+              <option value="door">🚪 Door</option>
+              <option value="chest">🧰 Chest</option>
+            </select>
+          </label>
+        </div>
+        <label className="me-row">
+          Group
+          <select value={chosen ? chosen.group : style.group} onChange={(event) => change({ group: event.target.value })} aria-label="Text group">
+            <option value="">(none)</option>
+            {groups.map((group) => (
+              <option key={group.name}>{group.name}</option>
+            ))}
+          </select>
+        </label>
+        {chosen ? (
+          <div className="me-row">
+            <button type="button" onClick={() => actions.label("update", { id: chosen.id, patch: { hidden: !chosen.hidden } })}>{chosen.hidden ? "Show to players" : "Hide from players"}</button>
+            <button type="button" data-action="label-delete" onClick={() => actions.label("remove", { id: chosen.id })}>
+              Delete
+            </button>
+          </div>
+        ) : null}
+      </div>
+      <div className="me-layers" aria-label="Layer groups">
+        <div className="me-layer head">
+          <b>LAYER GROUPS</b>
+          <span title="Shown">👁</span>
+          <span title="Players see it">👥</span>
+          <span title="Locked">🔒</span>
+        </div>
+        {groups.map((group) => (
+          <div key={group.name} className="me-layer" data-group={group.name}>
+            <span>📁 {group.name}</span>
+            <input type="checkbox" checked={group.shown !== false} onChange={(event) => actions.mapGroup("update", { name: group.name, patch: { shown: event.target.checked } })} aria-label={`${group.name} shown`} />
+            <input type="checkbox" checked={group.players !== false} onChange={(event) => actions.mapGroup("update", { name: group.name, patch: { players: event.target.checked } })} aria-label={`${group.name} players`} />
+            <input type="checkbox" checked={Boolean(group.locked)} onChange={(event) => actions.mapGroup("update", { name: group.name, patch: { locked: event.target.checked } })} aria-label={`${group.name} locked`} />
+            <button type="button" title={`Renumber ${group.name} from 1`} onClick={() => actions.label("renumber", { group: group.name, start: 1 })}>
+              1…
+            </button>
+          </div>
+        ))}
+        <div className="me-row">
+          <input value={newGroup} placeholder="New group" onChange={(event) => setNewGroup(event.target.value)} aria-label="New group name" />
+          <button
+            type="button"
+            data-action="group-add"
+            onClick={() => {
+              if (!newGroup.trim()) return;
+              actions.mapGroup("update", { name: newGroup.trim(), patch: {} });
+              setStyle({ ...style, group: newGroup.trim() });
+              setNewGroup("");
+            }}
+          >
+            + Group
+          </button>
+        </div>
+      </div>
+    </>
   );
 }
