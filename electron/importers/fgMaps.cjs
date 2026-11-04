@@ -170,7 +170,17 @@ function imageScene(record, moduleName, sceneId) {
 }
 
 // Every map of an FG module as a bundle (zip bytes) and Kraken's extras per scene id.
-function fgModuleBundle(moduleName, { only } = {}) {
+// A playable map: in FG's Maps (or Region map) category, or with a grid or walls.
+// Handouts, portraits and book pictures stay in Images & Maps.
+function isMap(record) {
+  const category = String(record.data?.fgCategory ?? "");
+  if (/^(maps|region map)$/i.test(category)) return true;
+  const image = record.data?.image ?? {};
+  if (image.grid === "on") return true;
+  return list(image.layers?.layer).some((layer) => layer.occluders);
+}
+
+function fgModuleBundle(moduleName, { only, all = false } = {}) {
   const module = readModule(moduleName, { only: new Set(["image"]) });
   const files = {};
   const scenes = [];
@@ -178,6 +188,7 @@ function fgModuleBundle(moduleName, { only } = {}) {
   const slug = (text) => String(text).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 40);
   for (const record of module.records.filter((item) => item.type === "image")) {
     if (only && !only.some((name) => String(record.name).toLowerCase().includes(String(name).toLowerCase()))) continue;
+    if (!only && !all && !isMap(record)) continue;
     const id = `fg-${slug(moduleName).slice(0, 16)}-${slug(record.name)}`.slice(0, 70);
     const made = imageScene(record, moduleName, id);
     if (!made) continue;

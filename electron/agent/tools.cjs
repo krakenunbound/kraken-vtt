@@ -1103,12 +1103,12 @@ const TOOLS = [
   {
     name: "kraken_open_fg_module",
     description:
-      "Put an FG adventure module's maps on the table (B1 In Search of the Unknown, B2 The Keep on the Borderlands...): every map becomes a scene with its picture, FG's walls (doors, see-through and one-way walls), lights, grid, FX layers (rain, clouds, water in its mask) and FG's shortcuts as map pins in two GM-only layer groups (Map keys, Encounters) linked to the story entries and encounters. maps: names to take only some (part of the name). The first map goes on the table; kraken_scenes switches.",
-    inputSchema: object({ module: string("The module's name, as FG lists it"), maps: { type: "array", items: { type: "string" } } }, ["module"]),
+      "Put an FG adventure module's maps on the table (B1 In Search of the Unknown, B2 The Keep on the Borderlands...): every map becomes a scene with its picture, FG's walls (doors, see-through and one-way walls), lights, grid, FX layers (rain, clouds, water in its mask) and FG's shortcuts as map pins in two GM-only layer groups (Map keys, Encounters) linked to the story entries and encounters. maps: names to take only some (part of the name); without, the module's playable maps (FG's Maps and Region map, or with a grid or walls; handouts and portraits stay in Images & Maps), all: true for every picture. The first map goes on the table; kraken_scenes switches.",
+    inputSchema: object({ module: string("The module's name, as FG lists it"), maps: { type: "array", items: { type: "string" } }, all: { type: "boolean" } }, ["module"]),
     async run(args, ctx) {
       const table = needTable(ctx);
       const { fgModuleBundle } = require("../importers/fgMaps.cjs");
-      const bundle = fgModuleBundle(String(args.module), { only: args.maps });
+      const bundle = fgModuleBundle(String(args.module), { only: args.maps, all: Boolean(args.all) });
       for (const [id, extra] of Object.entries(bundle.extras)) table.map.seed(id, extra);
       const opened = await ctx.ui({ kind: "open-adventure", name: bundle.name, bytes: new Uint8Array(bundle.bytes) }, 120000);
       return out({ opened, scenes: bundle.scenes });

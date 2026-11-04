@@ -212,13 +212,16 @@ function savedOptions(value) {
 // What a chat line is (FG's and Foundry's chat commands): said, an emote
 // (/emote, /me), an action (/action), out of character (/ooc), the GM's story
 // text (/story), a line with a mood (/mood); a whisper has `to`.
+// The session's chat kept with the campaign (FG keeps the whole session); a joining seat gets the last JOIN_CHAT.
+const MAX_CHAT = 2000;
+const JOIN_CHAT = 300;
 const CHAT_KINDS = new Set(["say", "emote", "action", "ooc", "story", "mood"]);
 
 function savedChat(value) {
   if (!Array.isArray(value)) return [];
   return value
     .filter((line) => line && typeof line === "object" && typeof line.text === "string")
-    .slice(-100)
+    .slice(-MAX_CHAT)
     .map((line) => ({
       id: text(line.id, "").slice(0, 32),
       from: text(line.from, "Player").slice(0, 24),
@@ -505,7 +508,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     const speaker = [...clients.values()].find((client) => client.id === entry.id);
     if (speaker?.role === "dm" || (entry.id === "agent" && ["Agent", "GM", "DM"].includes(entry.from))) entry.gm = true;
     chat.push(entry);
-    if (chat.length > 100) chat.shift();
+    if (chat.length > MAX_CHAT) chat.shift();
     for (const [ws, client] of clients) if (seesLine(client, entry)) send(ws, { type: "chat", ...entry });
     onChange("table");
     return entry;
@@ -599,7 +602,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
 
   function chatFor(client) {
     const since = chatCleared.get(clearKey(client)) ?? 0;
-    return chat.filter((line) => (line.at ?? 0) > since && seesLine(client, line));
+    return chat.filter((line) => (line.at ?? 0) > since && seesLine(client, line)).slice(-JOIN_CHAT);
   }
 
   // label: what the roll is for ("Strength check"). from: who rolled.
@@ -1472,7 +1475,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       onChange("table");
       return { cleared: true };
     },
-    chatLog: (count = 20) => chat.slice(-Math.max(1, Math.min(100, Number(count) || 20))),
+    chatLog: (count = 20) => chat.slice(-Math.max(1, Math.min(MAX_CHAT, Number(count) || 20))),
     players: () => playerList(),
     scene: () => scene,
     map,

@@ -4,6 +4,7 @@ import { backgroundRect, colorWithAlpha, gridStops, sceneFrame, type BackgroundF
 import { type SceneLight, type SceneMarker, type SceneRegion, type SceneWall } from "../foundry/sceneObjects";
 import { gridDistance, gridKind, gridOrigin, hexCorners, hexOf, LIGHT_PRESETS, snapCenter, withGrid } from "../../shared/map/geometry.mjs";
 import type { EditWall, MapToken, Ping, SceneLightRecord, TableMap, TableRecord, WallKind } from "../session/useSession";
+import { useBookWindows } from "../books/Books";
 import { MapEditor, kindColor, type EditTab, type EditTool, type LabelStyle, type PaintStyle } from "./MapEditor";
 import { Lighting } from "./Lighting";
 import { SceneGraphics, SceneLegend, type OverlayToken } from "./SceneOverlay";
@@ -137,6 +138,7 @@ export type MapActions = {
   paint?: (payload: Record<string, unknown>) => void;
   fx?: (action: string, payload?: Record<string, unknown>) => void;
   mapUndo?: () => void;
+  libraryAction?: (action: string, payload?: Record<string, unknown>) => void;
 };
 // What a left-drag does on the map: pan it, ping, draw, or rub a line out.
 type Tool = "pan" | "ping" | "draw" | "erase";
@@ -175,6 +177,16 @@ export function MapView({
     [sceneIn, map.sceneId, map.settings.grid],
   );
   const [tool, setTool] = useState<Tool>("pan");
+  const bookWindows = useBookWindows();
+  // A map pin (FG's shortcut): its story entry opens in the book; an encounter goes to the tracker.
+  function openPin(link: { kind: string; id: string }) {
+    if (link.kind !== "fg") return;
+    const [record, ...rest] = link.id.split("@");
+    const module = rest.join("@");
+    const page = /^reference\.refmanualdata\.([^.]+)$/.exec(record)?.[1];
+    if (page) bookWindows.openBook(module, module, page);
+    else if (/^battle\./.test(record) && gm && actions.libraryAction && window.confirm("Put this encounter on the combat tracker (its tokens on this map, hidden)?")) actions.libraryAction("battle", { path: link.id });
+  }
   // The GM's map editor (FG's image layer panel).
   const [editorOpen, setEditorOpen] = useState(false);
   const [editTab, setEditTab] = useState<EditTab>("walls");
@@ -886,7 +898,7 @@ export function MapView({
                 const baseline = label.anchor === "top" ? "hanging" : label.anchor === "bottom" ? "auto" : "central";
                 const icon = { pin: "📍", trap: "⚠", door: "🚪", chest: "🧰" }[label.icon as "pin"] ?? "";
                 return (
-                  <g key={label.id} transform={`rotate(${label.rotation} ${label.x} ${label.y})`} opacity={label.hidden ? 0.45 : 1} data-label={label.id} data-label-text={label.text} filter={label.shadow.blur > 0 || label.shadow.offset > 0 ? `url(#shadow-${label.id})` : undefined}>
+                  <g key={label.id} transform={`rotate(${label.rotation} ${label.x} ${label.y})`} opacity={label.hidden ? 0.45 : 1} data-label={label.id} data-label-text={label.text} style={label.link ? { pointerEvents: "auto", cursor: "pointer" } : undefined} onPointerDown={label.link ? (event) => event.stopPropagation() : undefined} onClick={label.link ? () => openPin(label.link as { kind: string; id: string }) : undefined} filter={label.shadow.blur > 0 || label.shadow.offset > 0 ? `url(#shadow-${label.id})` : undefined}>
                     <text x={label.x} y={label.y} textAnchor={anchor} dominantBaseline={baseline} fontFamily={`"${label.font}", Cinzel, sans-serif`} fontSize={fontSize} fill={label.color} stroke={label.outline.width > 0 ? label.outline.color : "none"} strokeWidth={label.outline.width * fontSize * 0.04} paintOrder="stroke" strokeLinejoin="round">
                       {icon ? `${icon} ` : ""}
                       {label.text}

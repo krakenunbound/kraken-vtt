@@ -444,7 +444,7 @@ export function useSession() {
             rolling.arrived(line);
             // Its triggered sound plays as its result shows.
             sound.lineArrived(line);
-            setChat((current) => [...current, line].slice(-100));
+            setChat((current) => [...current, line].slice(-1000));
           }
           if (msg.type === "record" && msg.record) {
             const record = msg.record as TableRecord;
