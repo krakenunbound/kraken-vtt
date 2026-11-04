@@ -280,6 +280,58 @@ try {
   const after = await tool("kraken_party");
   note(`party parcel: ${JSON.stringify(after.parcel).slice(0, 200)}`);
 
+  // --- Phase 2: area Sleep, a kill, XP, the parcel handed out, a level up ---------------
+  view = await tool("kraken_combat", { action: "view" });
+  const standing = view.entries.filter((entry) => !party.some((member) => member.id === entry.recordId) && entry.wounds < entry.hp);
+  const elara = party.find((member) => classOf(member) === "Wizard");
+  const mapTokens = (await tool("kraken_map")).tokens;
+  const tokenOf = (entry) => mapTokens.find((token) => token.id === entry.tokenId) ?? mapTokens.find((token) => token.recordId === entry.recordId);
+  if (elara && standing.length >= 2) {
+    const centre = tokenOf(standing[0]);
+    if (check(centre, "tokens", "a standing kobold has no token")) {
+      const area = await attempt("spells", "area target for Sleep", "kraken_combat", { action: "target-area", id: entryOf(elara).id, x: centre.x, y: centre.y, radius: 30, faction: "foe" });
+      note(`area target: ${area?.targets?.join(", ")}`);
+      check((area?.targets ?? []).length >= 2, "spells", "the area target took fewer than two kobolds", JSON.stringify(area?.targets));
+      // A fresh day's slots for the test, then Sleep on the area.
+      await attempt("spells", "resetting Elara's slots", "kraken_record_update", { id: elara.id, data: { slots: { l1: { used: 0 } } } });
+      const sleep = powerOf(elara, "Sleep");
+      const cast = sleep ? await attempt("spells", "Sleep on the area", "kraken_combat", { action: "cast", recordId: elara.id, power: sleep }) : null;
+      const slept = (cast?.cast?.results ?? []).filter((item) => item.effect);
+      note(`Sleep on the area: ${slept.map((item) => item.target).join(", ")}`);
+      check(slept.length >= 2, "spells", "Sleep on the area put fewer than two kobolds to sleep", JSON.stringify(cast?.cast).slice(0, 300));
+    }
+  }
+  // Thorin finishes one off: the tracker should call it dead.
+  view = await tool("kraken_combat", { action: "view" });
+  const victim = view.entries.find((entry) => !party.some((member) => member.id === entry.recordId) && entry.wounds < entry.hp);
+  if (victim) {
+    await attempt("combat", "a killing blow", "kraken_combat", { action: "damage", id: victim.id, amount: victim.hp + 12 });
+    const dead = (await tool("kraken_combat", { action: "view" })).entries.find((entry) => entry.id === victim.id);
+    note(`killed ${victim.name}: health ${JSON.stringify(dead?.health)}`);
+    check(/dead/i.test(JSON.stringify(dead?.health ?? "")), "combat", `${victim.name} at ${dead?.hp - dead?.wounds} hit points is not shown dead`, JSON.stringify(dead?.health));
+  }
+  // The encounter's XP split between the party.
+  const expBefore = (await tool("kraken_party")).members.map((member) => member.exp ?? 0);
+  const award = await attempt("party", "awarding the encounter's XP", "kraken_party_award", { kind: "encounters" });
+  const expAfter = award?.party?.map((member) => member.exp ?? 0) ?? [];
+  note(`XP: ${expBefore.join("/")} -> ${expAfter.join("/")}`);
+  check(expAfter.reduce((a, b) => a + b, 0) - expBefore.reduce((a, b) => a + b, 0) === 120, "party", "the encounter's 120 XP was not split between the party", `${expBefore} -> ${expAfter}`);
+  // The parcel: the item to Pip, the coin shared.
+  const parcelNow = (await tool("kraken_party")).parcel;
+  const item = Object.values(parcelNow.items ?? {})[0];
+  if (item) await attempt("party", "assigning the parcel item", "kraken_party_edit", { parcelItem: { name: item.name, count: 1, assign: "Pip Underbough" } });
+  const handed = await attempt("party", "handing out the parcel", "kraken_party_distribute", {});
+  note(`hand-out: ${JSON.stringify(handed).slice(0, 240)}`);
+  const pipNow = (await tool("kraken_record_get", { id: party[3]?.id })).data;
+  check(Object.values(pipNow.inventorylist ?? {}).some((row) => row.name === item?.name), "party", "Pip did not get the parcel item", JSON.stringify(Object.values(pipNow.inventorylist ?? {}).map((row) => row.name)));
+  // A level up once there is XP enough: Thorin to 3.
+  const thorinRecord = (await tool("kraken_record_get", { id: party[0].id })).data;
+  await attempt("characters", "giving Thorin his next level's XP", "kraken_character_edit", { id: party[0].id, changes: [{ path: "exp", value: Number(thorinRecord.expnext) || 4001 }] });
+  const levelled = await attempt("characters", "Thorin's level up", "kraken_level_up", { id: party[0].id });
+  const thorinAfter = (await tool("kraken_record_get", { id: party[0].id })).data;
+  note(`Thorin: level ${thorinRecord.level} -> ${thorinAfter.level}, HP ${thorinRecord.hp?.total} -> ${thorinAfter.hp?.total}, BtH ${thorinRecord.bth} -> ${thorinAfter.bth} ${JSON.stringify(levelled ?? {}).slice(0, 80)}`);
+  check(thorinAfter.level === thorinRecord.level + 1 && thorinAfter.hp.total > thorinRecord.hp.total, "characters", "Thorin did not level up", `${thorinRecord.level} -> ${thorinAfter.level}`);
+
   // --- A test player in Chrome ------------------------------------------------------
   browser = await chromium.launch({ executablePath: String.raw`C:\Program Files\Google\Chrome\Application\chrome.exe`, headless: true });
   const seat = await browser.newPage({ viewport: { width: 1400, height: 900 } });
