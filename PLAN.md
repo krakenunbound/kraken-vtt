@@ -2,7 +2,7 @@
 
 A free, open-source (MIT) virtual tabletop that runs in the web browser. It aims for Foundry-level presentation with Fantasy Grounds-level ease of use, and a rules engine that matches FG's behavior.
 
-Status: the plan is still being worked out. The code in this folder is a rough first draft.
+Status: alpha test (see `package.json` for the version; `npm run bump` moves it on, one step per pushed build, tagged `v<version>`). Backed up at https://github.com/krakenunbound/kraken-vtt (private).
 
 ---
 
@@ -217,7 +217,7 @@ Each step is tested before the next one starts. Where FG or Foundry does the sam
 | 2 Creation wizard UI | Done | `wizard`: every page driven with fixed dice; result equals the builder; host rolls every die |
 | Players in a browser | Done | The host serves the web client; `agent` checks it; manual Chrome pass as a player (join, map, own sheet only, check, chat) |
 | 2 Level up (single class) | Done | `character`: host-rolled HP, BtH, hit dice and next XP from the package rows, [LEVEL UP] in chat, sheet button |
-| 2 Multi-class, enhanced, class plus; dual class and reclass | Next | Port from `KrakenCharWizardCC` (CCClassRules, CCCombine, CCLevelUp) |
+| 2 Multi-class, enhanced, class plus; dual class and reclass | Next (1 below) | Port from `KrakenCharWizardCC` (CCClassRules, CCCombine, CCLevelUp) |
 | 5 Tokens and line of sight (first pass, ahead of 3–4) | Done | `map`: snapping, distance, walls stop players, doors (open, locked, secret), per-player line of sight, hidden tokens, movement lock, agent map tools, save/reopen. `session` and E2E: a player places and moves their own character's token. Chrome passes on Cragmaw Hideout and Cragmaw Castle |
 | 5 Line of sight against Foundry | Done | `sight-parity`: a scene's walls in a temporary Foundry scene, a token either side of every door (closed and open); Foundry's token vision equals Kraken's within 1% (Cragmaw Castle 0.53%, Dragon's Fane 0.10%) |
 | 5 Map settings, lighting, weather | Done | `map`: darkness, lights, torches from SiegeCore light profiles, deepvision/darkvision in grey, twilight vision, weather and grid settings; Chrome passes as GM and player |
@@ -272,6 +272,20 @@ Each step is tested before the next one starts. Where FG or Foundry does the sam
 | Characters in and out | Done | `shared/siege/interchange.mjs`. Import (the Characters window's import button, a file dropped on the list, `kraken_character_import`; a player's import is theirs): a Kraken export comes back as it was; an FG character XML from FG's SC C&C sheet comes over whole (all 132 FG-built pregens read and round-trip); another ruleset's FG character (5E, 3.5E...), a Foundry VTT actor's Export Data (dnd5e and other systems with ability scores) and a Roll20 character JSON become C&C characters with the campaign's books: race and class (other games' names too: Hill Dwarf, Thief, Magic-User), level, scores, hit points and spells through the builder, gear matched to the books' items (Longsword is Sword, Long; chain mail a mail hauberk) and worn as it was, coin, languages, alignment, XP, biography; what did not match, and the primes still to choose, go in the notes. Export (the export button, `kraken_character_export`): Kraken's file (.kraken.json, the whole sheet) or FG's character XML. `interchange` and `wizard` test them |
 | Sound: to come | Later | A second variant of each sound and the remaining ambience (ElevenLabs credits, Starter plan); NPC/creature attacks choosing their creature's sounds from the attacker; a scene's own ambience that starts with the scene; playlists |
 | 6 | Not started | In-app DM assistant |
+
+### Where we are and what's next (2026-11-03, 0.1.0-alpha.2)
+
+Steps 0 to 5 are done for single-class C&C, and the table grew a good deal past the first plan along the way, from the GM's own requests: books as FG's library (by ruleset, made active, players' books apart from the GM's), sound as Syrinscape's (shipped sounds, links in the story), everything a link (quick slots, notes, stories take any link; anything clickable drags), FG-faithful windows (the sheet with tabs hanging off its edge, the parchment wizard, the map toolbar), a neutral front screen, characters in and out of other tables. The rows above say where each one stands. What is left, in order:
+
+| # | Work | Done when |
+|---|---|---|
+| 1 | **Finish characters (step 2):** multi-class, enhanced class and class plus; dual class and reclass; the wizard's Combine Classes and Castle Keeper options; level up for them | The pregens and wizard checks cover a multi-class character built and levelled in Kraken and in FG with the same sheet |
+| 2 | **Finish combat (step 4):** critical hits by option, ammunition, spell resistance, NPC spellcasting | `attack` and `spells` cover each against SiegeCore's numbers |
+| 3 | **The A to Z run:** B2 on the table, the party made in the wizard by players in Chrome, a fight on the map, treasure and XP through the party sheet | A scripted session plus a manual pass as a player, each issue found fixed |
+| 4 | **In-app DM assistant (step 6):** a chat panel for the GM driving the same MCP tools | It can build a character, start combat, run a turn and share a map from a request |
+| 5 | **Later:** NPC and damage dice sets; multi-select, facing and flickering lights on the map; a second sound variant and scene ambience; a second ruleset (and its own sheet layout) to prove the core is neutral | Each as its own row above when started |
+
+Standing ways of working: every action ships with its MCP tool and a test (`npm run coverage`); FG is the model for look and behaviour; the player view is checked from Chrome; each pushed build gets a version bump and a tag; the newest build is left open.
 
 Where things are:
 - `electron/records.cjs`, `dice.cjs`, `tableServer.cjs`, `mapState.cjs` (tokens, doors, what each player sees)
