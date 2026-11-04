@@ -258,6 +258,24 @@ function Browser({ session, kind, library, reload }: { session: Session; kind: S
           </div>
         </div>
       ) : null}
+      {session.role === "dm" && (kind === "ambience" || kind === "music") && session.map.sceneId ? (
+        // A scene's own sound, as Syrinscape's moods per map in FG: started whenever the scene is opened.
+        <div className="sound-scene" data-scene-sound={session.sceneSound.kept && session.sceneSound.sceneId === session.map.sceneId ? "kept" : "none"}>
+          <span>
+            {session.sceneSound.kept && session.sceneSound.sceneId === session.map.sceneId
+              ? `This scene starts its own sound: ${[...session.sceneSound.kept.ambience.map((item) => leaf(item.id.split("/").slice(1, -1).join("/") || item.id)), session.sceneSound.kept.music ? leaf(session.sceneSound.kept.music.group ?? session.sceneSound.kept.music.id.replace(/\.[^.]+$/, "")) : ""].filter(Boolean).join(", ") || "silence"}.`
+              : "This scene has no sound of its own."}
+          </span>
+          <button type="button" data-action="scene-sound-keep" title="Whenever this scene is opened, these loops and this music start" onClick={() => session.soundCommand({ type: "scene-sound", action: "keep" })}>
+            Keep for this scene
+          </button>
+          {session.sceneSound.kept && session.sceneSound.sceneId === session.map.sceneId ? (
+            <button type="button" className="ghost" onClick={() => session.soundCommand({ type: "scene-sound", action: "clear" })}>
+              Forget
+            </button>
+          ) : null}
+        </div>
+      ) : null}
       <div className="sound-stops">
         {kind === "oneshots" || kind === "sfx" ? (
           <button type="button" className="sound-stop" onClick={() => session.soundCommand({ type: "sound-stop" })}>

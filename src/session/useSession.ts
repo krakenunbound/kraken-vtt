@@ -280,6 +280,8 @@ export function useSession() {
   const [library, setLibrary] = useState<Record<string, LibraryItem[]>>({});
   const [combat, setCombat] = useState<CombatView>({ round: 0, active: null, entries: [] });
   const [soundscape, setSoundscape] = useState<Soundscape>({ ambience: [], music: null });
+  // The GM's: the open scene's own sound, if it has one.
+  const [sceneSound, setSceneSound] = useState<{ sceneId: string | null; kept: Soundscape | null }>({ sceneId: null, kept: null });
   const [bookSounds, setBookSounds] = useState<Record<string, PageSounds>>({});
   const [quickSlots, setQuickSlotsState] = useState<(QuickSlot | null)[]>(Array(10).fill(null));
   const [bookShelf, setBookShelf] = useState<BookShelf>({ active: [], shared: [], images: [] });
@@ -383,6 +385,7 @@ export function useSession() {
             assetRef.current = you.assetToken ?? "";
             // Sounds come from the host, for this seat.
             sound.setSource((id) => `${originRef.current}/sound/file?token=${assetRef.current}&id=${encodeURIComponent(id)}`);
+            if (msg.sceneSound && typeof msg.sceneSound === "object") setSceneSound(msg.sceneSound as { sceneId: string | null; kept: Soundscape | null });
             if (msg.soundscape) {
               setSoundscape(msg.soundscape as Soundscape);
               void sound.setScape(msg.soundscape as Soundscape);
@@ -432,6 +435,7 @@ export function useSession() {
             if (typeof msg.id === "string") sound.stop(msg.id);
             else sound.stopAll();
           }
+          if (msg.type === "scene-sound") setSceneSound({ sceneId: typeof msg.sceneId === "string" ? msg.sceneId : null, kept: (msg.kept as Soundscape | null) ?? null });
           if (msg.type === "soundscape" && msg.soundscape) {
             setSoundscape(msg.soundscape as Soundscape);
             void sound.setScape(msg.soundscape as Soundscape);
@@ -949,6 +953,7 @@ export function useSession() {
     artList,
     tableCommand,
     soundscape,
+    sceneSound,
     soundTriggers,
     bookShelf,
     imageShown,

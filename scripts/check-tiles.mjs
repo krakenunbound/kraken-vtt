@@ -192,6 +192,15 @@ try {
     assert(!map.viewFor(playerSeat, "p").tiles.length, "the hidden seasons are the GM's until shown");
     await tool("kraken_tile", { action: "update", id: seasons[1].id, hidden: false });
     assert(map.viewFor(playerSeat, "p").tiles.length === 1, "winter shown to the table");
+    // The agent's way in (kraken_open_fg_module) stores the layers' pictures too.
+    const other = createTableServer({ tiles });
+    try {
+      await callTool("kraken_open_fg_module", { module: "D&D 3.5e The Village of Hommlet", maps: ["Village of Hommlet"] }, { table: () => other, ui: async () => ({ opened: true }) });
+      const seeded = other.persisted().map.tiles[id] ?? [];
+      assert(seeded.length === 2 && seeded.every((tile) => tiles.has(tile.src)), `kraken_open_fg_module keeps the seasons: ${seeded.length}`);
+    } finally {
+      await other.stop();
+    }
     fgNote = "Hommlet's seasons (hidden image layers) and 33 numbers in its Location numbers group";
   }
   console.log(`ok tiles: image layers from the tile library placed, moved, ordered, locked, hidden, grouped, masked, undone, saved; a player refused; pictures only to seats; a Foundry bundle's tiles (flipped, turned, overhead) placed once; ${fgNote}`);

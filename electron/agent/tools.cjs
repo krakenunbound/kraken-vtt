@@ -457,14 +457,14 @@ const TOOLS = [
   {
     name: "kraken_sound",
     description:
-      "Sound for the table, as Syrinscape in FG, from the GM's sounds (assets/sounds: oneshots, sfx, ambience, music; a folder plays one of its sounds at random). Every seat hears it, each at its own volumes. action list (kind, search: what there is, by folder); play (id or folder, e.g. \"oneshots/Doors/Wooden Door\" or \"sfx/Weapons/Sword/Hit\"); stop (stops one-shots and effects); ambience (add, remove, volume or clear loops; id, volume 0..1); music (play an id or a folder, next, stop, volume); triggers (the chat's sound triggers: read them, or set triggers to a list, or \"default\"); scape (what is playing now).",
+      "Sound for the table, as Syrinscape in FG, from the GM's sounds (assets/sounds: oneshots, sfx, ambience, music; a folder plays one of its sounds at random). Every seat hears it, each at its own volumes. action list (kind, search: what there is, by folder); play (id or folder, e.g. \"oneshots/Doors/Wooden Door\" or \"sfx/Weapons/Sword/Hit\"); stop (stops one-shots and effects); ambience (add, remove, volume or clear loops; id, volume 0..1); music (play an id or a folder, next, stop, volume); triggers (the chat's sound triggers: read them, or set triggers to a list, or \"default\"); scape (what is playing now); scene (the open scene's own sound, as Syrinscape's moods per map: do keep makes what plays now the scene's, started whenever the scene is opened; clear; play; without do, reads it). A creature's natural attack (an orc's bite, a wolf's claws) plays its own attack sound from sfx/Monsters or sfx/Animals, and a creature killed its death cry.",
     inputSchema: object({
-      action: { type: "string", enum: ["list", "play", "stop", "ambience", "music", "triggers", "scape"] },
+      action: { type: "string", enum: ["list", "play", "stop", "ambience", "music", "triggers", "scape", "scene"] },
       kind: { type: "string", enum: ["oneshots", "sfx", "ambience", "music"] },
       search: string("Part of a name or folder (list)"),
       id: string("A sound's id, or a folder"),
       volume: number("0 to 1"),
-      do: { type: "string", enum: ["add", "remove", "volume", "clear", "play", "next", "stop"], description: "For ambience and music" },
+      do: { type: "string", enum: ["add", "remove", "volume", "clear", "play", "next", "stop", "keep", "view"], description: "For ambience, music and scene" },
       loop: { type: "boolean", description: "Music: loop the track (default true)" },
       triggers: { description: "A list of { name, on: attack|spellattack|save|cast|heal|damage|roll|text, match, result: any|hit|miss|crit|fumble|success|failure, sound, enabled }, or \"default\"" },
     }),
@@ -485,6 +485,7 @@ const TOOLS = [
       if (action === "ambience") return out(agent.ambience(args.do ?? "add", args.id, args.volume));
       if (action === "music") return out(agent.music(args.do ?? "play", args.id, { volume: args.volume, loop: args.loop }));
       if (action === "triggers") return out({ triggers: args.triggers !== undefined ? agent.setTriggers(args.triggers) : agent.triggers() });
+      if (action === "scene") return out(agent.sceneSound(args.do ?? "view"));
       return out(agent.soundscape());
     },
   },
@@ -1183,7 +1184,8 @@ const TOOLS = [
       const table = needTable(ctx);
       const { fgModuleBundle } = require("../importers/fgMaps.cjs");
       const bundle = fgModuleBundle(String(args.module), { only: args.maps, all: Boolean(args.all) });
-      for (const [id, extra] of Object.entries(bundle.extras)) table.map.seed(id, extra);
+      // The maps' image layers: their pictures into the tile library first.
+      for (const [id, extra] of Object.entries(bundle.extras)) table.map.seed(id, { ...extra, tiles: table.storeTiles ? table.storeTiles(extra.tiles) : [] });
       const opened = await ctx.ui({ kind: "open-adventure", name: bundle.name, bytes: new Uint8Array(bundle.bytes) }, 120000);
       return out({ opened, scenes: bundle.scenes });
     },

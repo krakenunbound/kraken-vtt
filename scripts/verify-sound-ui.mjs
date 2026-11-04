@@ -87,6 +87,9 @@ try {
   const variants = await page.$$eval(".sound-trigger-files [data-hear]", (buttons) => buttons.map((button) => button.getAttribute("data-hear")));
   assert(variants.length >= 2, `the sword's trigger lists its sounds (${variants.join(", ")})`);
   for (const id of variants) {
+    // Nothing still playing from before (a play button stops its sound while it plays).
+    await page.evaluate(() => window.__krakenSound.stopAll());
+    await settle(100);
     const before = await page.evaluate(() => window.__krakenSound.playingHere().effects);
     await page.click(`.sound-trigger-files [data-hear="${id}"]`);
     let now = before;
@@ -121,6 +124,18 @@ try {
   await page.click(`[data-hear="${track}"]`);
   await page.waitForSelector(`[data-hear="${track}"][aria-pressed="false"]`, { timeout: 5000 });
   assert(!(await page.evaluate((id) => window.__krakenSound.isPlaying(id), track)), "clicked again, it stops");
+
+  // A scene's own sound: B1's map on the table, the Tavern loop playing, kept for the scene from the window.
+  await tool("kraken_open_fg_module", { module: "B1 In Search of the Unknown (C&C)" });
+  await page.waitForSelector(".map-toolbar", { timeout: 60000 });
+  await tool("kraken_sound", { action: "ambience", do: "add", id: "ambience/Tavern" });
+  await page.click('[data-tab="ambience"]');
+  await page.waitForSelector('[data-scene-sound="none"]');
+  await page.click('[data-action="scene-sound-keep"]');
+  await page.waitForSelector('[data-scene-sound="kept"]');
+  const keptHere = await tool("kraken_sound", { action: "scene" });
+  assert(keptHere.kept?.ambience.some((item) => item.id.startsWith("ambience/Tavern")), `the window kept the scene's sound: ${JSON.stringify(keptHere)}`);
+  await tool("kraken_sound", { action: "ambience", do: "clear" });
 
   // The other tabs have Kraken's own sounds in them.
   const library = await tool("kraken_sound", { action: "list" });
