@@ -92,7 +92,7 @@ export function gridLabel(grid: SquareGrid): string {
   if (grid.type === 0) return "Gridless";
   const measure = grid.units ? `${grid.distance} ${grid.units}` : `${grid.distance}`;
   if (grid.type === 1) return `Square · ${grid.size} px · ${measure}`;
-  return "Hex grid";
+  return `${grid.type >= 4 ? "Hex columns" : "Hex rows"} · ${grid.size} px · ${measure}`;
 }
 
 export function cssColor(value: unknown, fallback: string): string {

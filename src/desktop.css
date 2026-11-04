@@ -1054,3 +1054,35 @@ textarea.cc-field.tall { min-height: 220px; }
 .cc-change-list { max-height: 260px; overflow: auto; }
 .cc-class-row button, .cc-change-row button { padding: 1px 8px; font-size: 0.78rem; }
 .cc-next-source { margin: -4px 4px 0; text-align: right; }
+
+/* The GM's map editor, as FG's image layer panel: docked on the right of the map. */
+.map-editor { position: absolute; top: 56px; right: 12px; bottom: 64px; z-index: 30; width: 300px; display: flex; flex-direction: column; gap: 6px; padding: 8px; overflow: auto; color: #e8e2d4; background: rgba(14, 18, 24, 0.94); border: 1px solid var(--brass-dim); border-radius: 10px; box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55); font-size: 0.85rem; }
+.me-head { display: flex; justify-content: space-between; align-items: center; }
+.me-head b { font-family: Cinzel, Georgia, serif; color: var(--brass); }
+.me-close { padding: 0 8px; background: transparent; border: none; font-size: 1.1rem; color: var(--muted); }
+.me-tabs { display: flex; flex-wrap: wrap; gap: 3px; }
+.me-tabs button { flex: 1; padding: 5px 6px; font-size: 0.78rem; border-radius: 6px 6px 0 0; background: rgba(255, 255, 255, 0.04); }
+.me-tabs button[aria-selected="true"] { background: var(--brass-soft); border-color: var(--brass); color: #f4d8a0; }
+.me-tools { display: flex; gap: 4px; align-items: center; }
+.me-tool { width: 30px; height: 30px; padding: 0; display: grid; place-items: center; font-size: 1rem; border-radius: 6px; }
+.me-tool.on { background: var(--brass); color: #1a1408; border-color: var(--brass); }
+.me-spacer { flex: 1; }
+.me-box { display: flex; flex-direction: column; gap: 8px; padding: 10px; border: 1px solid rgba(232, 226, 212, 0.25); border-radius: 12px; background: rgba(255, 255, 255, 0.03); }
+.me-kinds { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; }
+.me-kind { height: 32px; padding: 0; font-size: 1rem; border-width: 2px; border-radius: 6px; background: rgba(0, 0, 0, 0.3); }
+.me-kind.on { background: rgba(214, 170, 92, 0.25); box-shadow: 0 0 0 2px var(--brass); }
+.me-caption { margin: 0; color: var(--muted); font-size: 0.78rem; line-height: 1.35; }
+.me-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.me-row label { display: inline-flex; align-items: center; gap: 4px; }
+.me-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; }
+.me-grid2 label { display: flex; flex-direction: column; gap: 2px; font-size: 0.78rem; color: var(--muted); }
+.me-grid2 input[type="number"], .me-grid2 select, .me-grid2 input:not([type]) { width: 100%; }
+.me-advanced { align-self: flex-start; padding: 2px 6px; background: transparent; border: none; color: var(--brass); }
+.me-selection { display: flex; flex-direction: column; gap: 6px; padding-top: 6px; border-top: 1px solid rgba(255, 255, 255, 0.08); }
+.me-selection p { margin: 0; }
+.me-foot { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.me-foot .hint { flex: 1; }
+.me-nudge button { width: 28px; padding: 2px 0; }
+.edit-overlay { position: absolute; left: 0; top: 0; pointer-events: none; }
+.grid.hex { position: absolute; pointer-events: none; }
+.viewport [data-editing="line"], .viewport [data-editing="poly"], .viewport [data-editing="rect"] { cursor: crosshair; }

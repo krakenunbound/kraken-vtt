@@ -87,18 +87,64 @@ function cleanLight(raw) {
   };
 }
 
+// A wall the GM drew or imported: Foundry's senses (0 none, 10 limited, 20
+// normal, 30 proximity, 40 distance), with FG's kinds.
+const SENSES = [0, 10, 20, 30, 40];
+function cleanWall(raw) {
+  if (!raw || typeof raw !== "object") return null;
+  const coords = [raw.x1, raw.y1, raw.x2, raw.y2].map((value) => num(value, NaN));
+  if (coords.some((value) => !Number.isFinite(value) || Math.abs(value) > 1e7)) return null;
+  if (coords[0] === coords[2] && coords[1] === coords[3]) return null;
+  const kinds = geometry?.WALL_KINDS ?? {};
+  const kind = kinds[raw.kind] || ["wall", "terrain", "door", "secret", "toggle", "window", "illusion", "invisible", "ethereal", "shadow"].includes(raw.kind) ? raw.kind : "custom";
+  const base = kinds[kind] ?? {};
+  const sense = (key) => {
+    const value = raw[key] ?? base[key] ?? 20;
+    return SENSES.includes(Number(value)) ? Number(value) : 20;
+  };
+  return {
+    id: text(raw.id, "").slice(0, 80) || `w-${crypto.randomBytes(6).toString("hex")}`,
+    x1: Math.round(coords[0] * 10) / 10,
+    y1: Math.round(coords[1] * 10) / 10,
+    x2: Math.round(coords[2] * 10) / 10,
+    y2: Math.round(coords[3] * 10) / 10,
+    kind,
+    sight: sense("sight"),
+    light: sense("light"),
+    sound: sense("sound"),
+    move: [0, 20].includes(Number(raw.move ?? base.move ?? 20)) ? Number(raw.move ?? base.move ?? 20) : 20,
+    dir: [0, 1, 2].includes(Number(raw.dir)) ? Number(raw.dir) : 0,
+    door: [0, 1, 2].includes(Number(raw.door ?? base.door ?? 0)) ? Number(raw.door ?? base.door ?? 0) : 0,
+    ds: [0, 1, 2].includes(Number(raw.ds)) ? Number(raw.ds) : 0,
+    toggle: ["none", "gm", "players"].includes(raw.toggle) ? raw.toggle : (base.toggle ?? "none"),
+    threshold: num(raw.threshold, 0) > 0 ? num(raw.threshold, 0) : null,
+    hidden: Boolean(raw.hidden),
+  };
+}
+const MAX_WALLS = 5000;
+
 const WEATHER = ["none", "rain", "storm", "snow", "blizzard", "fog", "clouds", "sandstorm", "embers", "ash", "leaves", "water"];
 
 function cleanSettings(raw) {
   const value = raw && typeof raw === "object" ? raw : {};
   const grid = value.grid && typeof value.grid === "object" ? value.grid : {};
   const weather = value.weather && typeof value.weather === "object" ? value.weather : {};
+  const nullable = (value, clean) => (value == null || value === "" ? null : clean(value));
   return {
     darkness: value.darkness == null ? null : Math.min(1, Math.max(0, num(value.darkness, 0))),
+    // FG's Grid tab (null: the scene's own).
     grid: {
       show: grid.show !== false,
       alpha: grid.alpha == null ? null : Math.min(1, Math.max(0, num(grid.alpha, 0.2))),
       color: grid.color == null ? null : text(grid.color, "#000000").slice(0, 16),
+      type: ["square", "hexrow", "hexcol", "none"].includes(grid.type) ? grid.type : null,
+      size: nullable(grid.size, (size) => Math.min(1000, Math.max(10, num(size, 100)))),
+      offsetX: nullable(grid.offsetX, (offset) => Math.min(1000, Math.max(-1000, Math.round(num(offset, 0) * 10) / 10))),
+      offsetY: nullable(grid.offsetY, (offset) => Math.min(1000, Math.max(-1000, Math.round(num(offset, 0) * 10) / 10))),
+      distance: nullable(grid.distance, (distance) => Math.min(1000, Math.max(0.1, num(distance, 5)))),
+      units: grid.units == null ? null : text(grid.units, "ft").slice(0, 12),
+      style: ["solid", "dashed", "dotted"].includes(grid.style) ? grid.style : "solid",
+      thickness: Math.min(8, Math.max(1, Math.round(num(grid.thickness, 1)))),
     },
     weather: {
       type: WEATHER.includes(weather.type) ? weather.type : "none",
@@ -126,7 +172,11 @@ function savedMap(value) {
   const settings = {};
   const lights = {};
   const drawings = {};
-  if (!value || typeof value !== "object") return { tokens, doors, sight, locked, settings, lights, drawings };
+  const walls = {};
+  if (!value || typeof value !== "object") return { tokens, doors, sight, locked, settings, lights, drawings, walls };
+  for (const [sceneId, list] of Object.entries(value.walls ?? {}).slice(0, 500)) {
+    if (Array.isArray(list)) walls[sceneId.slice(0, 80)] = list.map(cleanWall).filter(Boolean).slice(0, MAX_WALLS);
+  }
   for (const [sceneId, list] of Object.entries(value.tokens ?? {}).slice(0, 500)) {
     if (!Array.isArray(list)) continue;
     tokens[sceneId.slice(0, 80)] = list.map(cleanToken).filter(Boolean).slice(0, MAX_TOKENS);
@@ -148,7 +198,7 @@ function savedMap(value) {
   for (const [sceneId, list] of Object.entries(value.drawings ?? {}).slice(0, 500)) {
     if (Array.isArray(list)) drawings[sceneId.slice(0, 80)] = list.map(cleanDrawing).filter(Boolean).slice(-MAX_DRAWINGS);
   }
-  return { tokens, doors, sight, locked, settings, lights, drawings };
+  return { tokens, doors, sight, locked, settings, lights, drawings, walls };
 }
 const MAX_DRAWINGS = 400;
 
@@ -167,6 +217,28 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
   const state = savedMap(saved);
   let scene = null;
   const visionCache = new Map();
+  // The last edits on each scene's walls, to undo (FG has none; Foundry Ctrl+Z).
+  const undoRing = new Map();
+
+  function wallsHere() {
+    if (!scene) return [];
+    state.walls[scene.id] = state.walls[scene.id] ?? [];
+    return state.walls[scene.id];
+  }
+  // The scene the rules see: its walls are the table's own, its grid the GM's.
+  function liveScene() {
+    if (!scene) return;
+    scene.walls = wallsHere();
+    // The scene's own grid is kept beside the GM's, so clearing a setting goes back to it.
+    scene.baseGrid = scene.baseGrid ?? { ...scene.grid };
+    scene.grid = geometry.withGrid({ grid: scene.baseGrid }, settingsHere().grid).grid;
+  }
+  function remember(label) {
+    const ring = undoRing.get(scene.id) ?? [];
+    ring.push({ label, walls: JSON.parse(JSON.stringify(wallsHere())) });
+    if (ring.length > 50) ring.shift();
+    undoRing.set(scene.id, ring);
+  }
 
   function tokensHere() {
     if (!scene) return [];
@@ -231,7 +303,7 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       const key = `L|${scene.id}|${Math.round(x)}|${Math.round(y)}`;
       let polygon = visionCache.get(key);
       if (!polygon) {
-        polygon = geometry.sceneSight(scene, { x, y }, doorsHere());
+        polygon = geometry.sceneSight(scene, { x, y }, doorsHere(), 0, "light");
         visionCache.set(key, polygon);
       }
       out.push({ id, x, y, brightPx: bright * per, dimPx: dim * per, color, hidden, polygon });
@@ -244,7 +316,7 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
   function sightOn() {
     if (!scene) return false;
     if (scene.id in state.sight) return state.sight[scene.id];
-    return scene.walls.some((wall) => geometry.blocksSight(wall, {}));
+    return wallsHere().some((wall) => geometry.blocksSight(wall, {}));
   }
 
   function changed() {
@@ -365,9 +437,10 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
     const per = pixelsPerUnit();
     const doors = doorsHere();
     const all = tokensHere();
-    const doorList = scene.walls
-      .filter((wall) => wall.door > 0)
-      .map((wall) => ({ id: wall.id, x1: wall.x1, y1: wall.y1, x2: wall.x2, y2: wall.y2, secret: wall.door === 2, state: wall.id in doors ? doors[wall.id] : wall.ds }));
+    // Doors, and windows and toggle walls players may open (FG's toggleable).
+    const doorList = wallsHere()
+      .filter((wall) => wall.door > 0 || wall.toggle === "players" || wall.toggle === "gm")
+      .map((wall) => ({ id: wall.id, x1: wall.x1, y1: wall.y1, x2: wall.x2, y2: wall.y2, secret: wall.door === 2 || wall.toggle === "gm", kind: wall.door > 0 ? "door" : wall.kind, state: wall.id in doors ? doors[wall.id] : wall.ds }));
     const shared = { sceneId: scene.id, sight: sightOn(), locked, darkness: dark, settings: { grid: settings.grid, weather: settings.weather, darkness: settings.darkness }, drawings: drawingsHere() };
     const lightOut = (list) => list.map(({ id, x, y, brightPx, dimPx, color, polygon }) => ({ id, x, y, brightPx, dimPx, color, polygon }));
     if (seat.role === "dm") {
@@ -379,6 +452,7 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
         lights: lightOut(sources),
         seeing: [],
         sceneLights: lightsHere(),
+        walls: wallsHere(),
       };
     }
     const shown = all.filter((token) => !token.hidden);
@@ -427,6 +501,13 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
     setScene(next) {
       scene = next;
       visionCache.clear();
+      // The imported walls become the table's the first time; after that the table's own are kept.
+      if (!state.walls[next.id]) {
+        state.walls[next.id] = (next.walls ?? [])
+          .map((wall) => cleanWall({ ...wall, kind: wall.door === 2 ? "secret" : wall.door === 1 ? "door" : Number(wall.sight) === 10 ? "terrain" : Number(wall.sight) === 0 && Number(wall.move) !== 0 ? "invisible" : Number(wall.move) === 0 && Number(wall.sight) !== 0 ? "ethereal" : Number(wall.sight) === 30 ? "window" : "wall", ...(Number(wall.sight) === 30 ? { sight: 30, light: Number(wall.light ?? 30), toggle: "none" } : {}) }))
+          .filter(Boolean);
+      }
+      liveScene();
       if (!state.lights[next.id]) {
         state.lights[next.id] = (next.lights ?? [])
           .map((light) => cleanLight({ id: light.id, x: light.x, y: light.y, bright: light.bright, dim: light.dim, color: light.color, on: !light.hidden }))
@@ -507,7 +588,7 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       if (!canMove(token, seat)) throw new Error("That is not your token.");
       if (seat.role !== "dm" && state.locked[scene.id]) throw new Error("The GM has locked token movement.");
       const blockByWalls = collide ?? (seat.role !== "dm" && sightOn());
-      const result = geometry.settleMove(scene, scene.walls, doorsHere(), { x: token.x, y: token.y }, to, token.squares, { snap, collide: blockByWalls });
+      const result = geometry.settleMove(scene, wallsHere(), doorsHere(), { x: token.x, y: token.y }, to, token.squares, { snap, collide: blockByWalls });
       token.x = result.x;
       token.y = result.y;
       changed();
@@ -542,8 +623,9 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
     // see; they cannot unlock a locked door or use a secret one.
     setDoor(wallId, wanted, seat) {
       if (!scene) throw new Error("No scene is open.");
-      const wall = scene.walls.find((item) => item.id === wallId && item.door > 0);
+      const wall = wallsHere().find((item) => item.id === wallId && (item.door > 0 || (item.toggle && item.toggle !== "none")));
       if (!wall) throw new Error(`No door ${wallId}.`);
+      if (seat.role !== "dm" && wall.toggle === "gm") throw new Error("Only the GM can open that.");
       const doors = doorsHere();
       const current = wallId in doors ? doors[wallId] : wall.ds;
       const next = wanted === undefined ? (current === 1 ? 0 : 1) : wanted;
@@ -573,6 +655,7 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
         grid: { ...current.grid, ...(patch.grid ?? {}) },
         weather: { ...current.weather, ...(patch.weather ?? {}) },
       });
+      liveScene();
       changed();
       return state.settings[scene.id];
     },
@@ -630,6 +713,94 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       if (index < 0) throw new Error(`No light ${id}.`);
       list.splice(index, 1);
       changed();
+    },
+    // Walls (the GM's map editor): drawn as chains of segments, changed, removed, undone.
+    walls: () => wallsHere(),
+    addWalls(input, seat) {
+      if (seat.role !== "dm") throw new Error("Only the GM can draw walls.");
+      if (!scene) throw new Error("No scene is open.");
+      const points = (Array.isArray(input.points) ? input.points : []).map(Number);
+      if (points.length < 4 || points.length % 2 || !points.every(Number.isFinite)) throw new Error("A wall needs two points or more: [x1, y1, x2, y2, ...].");
+      if (input.closed && points.length >= 6) points.push(points[0], points[1]);
+      const list = wallsHere();
+      if (list.length + points.length / 2 > MAX_WALLS) throw new Error("This scene has too many walls.");
+      remember("add walls");
+      const made = [];
+      const { points: _points, closed: _closed, id: _id, ...fields } = input;
+      for (let i = 0; i + 3 < points.length; i += 2) {
+        const wall = cleanWall({ ...fields, x1: points[i], y1: points[i + 1], x2: points[i + 2], y2: points[i + 3] });
+        if (wall) {
+          list.push(wall);
+          made.push(wall);
+        }
+      }
+      changed();
+      return made;
+    },
+    updateWalls(ids, patch, seat) {
+      if (seat.role !== "dm") throw new Error("Only the GM can change walls.");
+      const list = wallsHere();
+      const wanted = new Set(ids);
+      const found = list.filter((wall) => wanted.has(wall.id));
+      if (found.length === 0) throw new Error("No such wall.");
+      remember("change walls");
+      // A new kind brings its senses unless they are given too.
+      const fromKind = patch.kind && geometry?.WALL_KINDS?.[patch.kind] ? { ...geometry.WALL_KINDS[patch.kind], toggle: geometry.WALL_KINDS[patch.kind].toggle ?? "none" } : {};
+      for (const wall of found) list[list.indexOf(wall)] = cleanWall({ ...wall, ...fromKind, ...patch, id: wall.id });
+      changed();
+      return list.filter((wall) => wanted.has(wall.id));
+    },
+    removeWalls(ids, seat) {
+      if (seat.role !== "dm") throw new Error("Only the GM can remove walls.");
+      const wanted = new Set(ids);
+      const list = wallsHere();
+      if (!list.some((wall) => wanted.has(wall.id))) throw new Error("No such wall.");
+      remember("remove walls");
+      state.walls[scene.id] = list.filter((wall) => !wanted.has(wall.id));
+      for (const id of wanted) delete doorsHere()[id];
+      liveScene();
+      changed();
+    },
+    clearWalls(seat) {
+      if (seat.role !== "dm") throw new Error("Only the GM can clear the walls.");
+      if (!scene) return;
+      remember("clear walls");
+      state.walls[scene.id] = [];
+      state.doors[scene.id] = {};
+      liveScene();
+      changed();
+    },
+    // Splits a wall at a point (FG's razor).
+    splitWall(id, x, y, seat) {
+      if (seat.role !== "dm") throw new Error("Only the GM can change walls.");
+      const list = wallsHere();
+      const wall = list.find((item) => item.id === id);
+      if (!wall) throw new Error("No such wall.");
+      remember("split wall");
+      const first = cleanWall({ ...wall, id: undefined, x2: x, y2: y });
+      const second = cleanWall({ ...wall, id: undefined, x1: x, y1: y });
+      if (!first || !second) throw new Error("Split it somewhere along the wall.");
+      list.splice(list.indexOf(wall), 1, first, second);
+      changed();
+      return [first, second];
+    },
+    // Foundry's Close all doors: every door and window shut (locks kept).
+    closeDoors(seat) {
+      if (seat.role !== "dm") throw new Error("Only the GM can close every door.");
+      const doors = doorsHere();
+      for (const wall of wallsHere()) if (wall.door > 0 || (wall.toggle && wall.toggle !== "none")) doors[wall.id] = (wall.id in doors ? doors[wall.id] : wall.ds) === 2 ? 2 : 0;
+      changed();
+    },
+    undo(seat) {
+      if (seat.role !== "dm") throw new Error("Only the GM can undo map edits.");
+      if (!scene) throw new Error("No scene is open.");
+      const ring = undoRing.get(scene.id) ?? [];
+      const last = ring.pop();
+      if (!last) throw new Error("Nothing to undo.");
+      state.walls[scene.id] = last.walls.map(cleanWall).filter(Boolean);
+      liveScene();
+      changed();
+      return last.label;
     },
     persisted: () => JSON.parse(JSON.stringify(state)),
   };

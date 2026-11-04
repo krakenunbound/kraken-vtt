@@ -34,10 +34,13 @@ export type MapSeeing = { x: number; y: number; radiusPx: number; polygon: numbe
 export type SceneLightRecord = { id: string; x: number; y: number; bright: number; dim: number; color: string; on: boolean; hidden: boolean };
 export type MapSettings = {
   darkness: number | null;
-  grid: { show: boolean; alpha: number | null; color: string | null };
+  grid: { show: boolean; alpha: number | null; color: string | null; type?: "square" | "hexrow" | "hexcol" | "none" | null; size?: number | null; offsetX?: number | null; offsetY?: number | null; distance?: number | null; units?: string | null; style?: string; thickness?: number };
   weather: { type: import("../table/Weather").WeatherType; intensity: number; direction: number };
 };
-export type MapDoor = { id: string; x1: number; y1: number; x2: number; y2: number; state: number; secret?: boolean };
+export type MapDoor = { id: string; x1: number; y1: number; x2: number; y2: number; state: number; secret?: boolean; kind?: string };
+// A wall in the GM's map editor (FG's kinds with Foundry's senses).
+export type WallKind = "wall" | "terrain" | "door" | "secret" | "toggle" | "window" | "illusion" | "invisible" | "ethereal" | "shadow" | "custom";
+export type EditWall = { id: string; x1: number; y1: number; x2: number; y2: number; kind: WallKind; sight: number; light: number; sound: number; move: number; dir: number; door: number; ds: number; toggle: "none" | "gm" | "players"; threshold: number | null; hidden: boolean };
 export type TableMap = {
   sceneId: string | null;
   tokens: MapToken[];
@@ -53,6 +56,8 @@ export type TableMap = {
   sceneLights: SceneLightRecord[];
   settings: MapSettings;
   drawings?: MapDrawing[];
+  // The GM's: the scene's walls as the table keeps them.
+  walls?: EditWall[];
 };
 export type Ping = { id: number; x: number; y: number; from: string; color: string };
 // A line drawn on the map, for everyone (by "" is the GM's).
@@ -791,6 +796,9 @@ export function useSession() {
   const draw = useCallback((points: number[], color: string | null, width: number) => send({ type: "draw", points, ...(color ? { color } : {}), width }), [send]);
   const eraseDrawing = useCallback((id: string) => send({ type: "draw-erase", id }), [send]);
   const clearDrawings = useCallback(() => send({ type: "draw-clear" }), [send]);
+  // The GM's map editor: walls and undo.
+  const wall = useCallback((action: string, payload: Record<string, unknown> = {}) => send({ type: "wall", action, ...payload }), [send]);
+  const mapUndo = useCallback(() => send({ type: "map-undo" }), [send]);
   const placeLight = useCallback((light: Partial<SceneLightRecord> & { preset?: string }) => send({ type: "light-place", light }), [send]);
   const updateLight = useCallback((id: string, patch: Partial<SceneLightRecord>) => send({ type: "light-update", id, patch }), [send]);
   const removeLight = useCallback((id: string) => send({ type: "light-remove", id }), [send]);
@@ -917,6 +925,8 @@ export function useSession() {
     siegeCheck,
     buildCharacter,
     levelUp,
+    wall,
+    mapUndo,
     changeClass,
   };
 }

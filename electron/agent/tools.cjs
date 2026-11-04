@@ -831,6 +831,86 @@ const TOOLS = [
     },
   },
   {
+    name: "kraken_wall",
+    description:
+      "Walls on the scene (the GM's map editor: FG's line-of-sight layer with Foundry's senses). action list (near: {x, y, r} to narrow, kind); add (points [x1, y1, x2, y2, ...] in scene pixels, or cells [[col, row], ...] for square corners; consecutive points make a chain; closed: true joins the last to the first; kind: wall, terrain (see into, not through), door, secret (a door players never see), toggle (the GM switches it on and off), window (see through, blocks movement; players may open it; windowStyle proximity: see through only within 2 squares, as Foundry), illusion (blocks sight only: curtains), invisible (blocks movement only), ethereal (blocks sight, not movement), shadow (blocks light only); or the senses sight, light, sound (0 none, 10 limited, 20 normal, 30 proximity, 40 distance), move (0, 20), dir (0 both, 1 left, 2 right: one way), door (0, 1, 2), ds (0 closed, 1 open, 2 locked), toggle (none, gm, players), threshold (feet), hidden (toggled off)); update (id or ids, and any field; a new kind brings its senses); remove (id or ids); split (id, x, y); clear; close_doors (every door and window shut, locks kept). Undo with kraken_map_undo.",
+    inputSchema: object({
+      action: { type: "string", enum: ["list", "add", "update", "remove", "split", "clear", "close_doors"] },
+      id: string("Wall id"),
+      ids: { type: "array", items: { type: "string" } },
+      points: { type: "array", items: { type: "number" }, description: "x1, y1, x2, y2, ... in scene pixels" },
+      cells: { type: "array", items: { type: "array", items: { type: "number" } }, description: "[[col, row], ...] grid corners, instead of points" },
+      closed: { type: "boolean" },
+      kind: { type: "string", enum: ["wall", "terrain", "door", "secret", "toggle", "window", "illusion", "invisible", "ethereal", "shadow"] },
+      windowStyle: { type: "string", enum: ["through", "proximity"] },
+      sight: number("0, 10, 20, 30, 40"),
+      light: number("0, 10, 20, 30, 40"),
+      sound: number("0, 10, 20, 30, 40"),
+      move: number("0 or 20"),
+      dir: number("0 both, 1 left, 2 right"),
+      door: number("0, 1 door, 2 secret"),
+      ds: number("0 closed, 1 open, 2 locked"),
+      toggle: { type: "string", enum: ["none", "gm", "players"] },
+      threshold: number("Feet (proximity and distance walls)"),
+      hidden: { type: "boolean" },
+      x: number("split: scene pixels across"),
+      y: number("split: scene pixels down"),
+      near: { type: "object", properties: { x: { type: "number" }, y: { type: "number" }, r: { type: "number" } } },
+    }, ["action"]),
+    run(args, ctx) {
+      const { map, seat } = needTable(ctx);
+      const { action, id, ids, cells, near, windowStyle, ...rest } = args;
+      const which = ids ?? (id ? [id] : []);
+      if (action === "list") {
+        let list = map.walls();
+        if (args.kind) list = list.filter((wall) => wall.kind === args.kind);
+        if (near) list = list.filter((wall) => Math.min(Math.hypot(wall.x1 - near.x, wall.y1 - near.y), Math.hypot(wall.x2 - near.x, wall.y2 - near.y)) <= (near.r ?? 200));
+        const byKind = {};
+        for (const wall of map.walls()) byKind[wall.kind] = (byKind[wall.kind] ?? 0) + 1;
+        return out({ total: map.walls().length, byKind, walls: list.slice(0, 500) });
+      }
+      const fields = { ...rest };
+      delete fields.x;
+      delete fields.y;
+      // Foundry's window: sight and light pass only within 2 squares.
+      if (args.kind === "window" && windowStyle === "proximity") Object.assign(fields, { sight: 30, light: 30, threshold: 2 * map.units(), toggle: "none" });
+      if (action === "add") {
+        let points = args.points;
+        if (cells) {
+          const size = map.squareCenter(1, 0, 1).x - map.squareCenter(0, 0, 1).x;
+          const origin = map.squareCenter(0, 0, 1);
+          points = cells.flatMap(([col, row]) => [origin.x - size / 2 + col * size, origin.y - size / 2 + row * size]);
+        }
+        const made = map.addWalls({ ...fields, points }, seat);
+        return out({ added: made.length, ids: made.map((wall) => wall.id), walls: made });
+      }
+      if (action === "update") {
+        delete fields.points;
+        return out({ walls: map.updateWalls(which, fields, seat) });
+      }
+      if (action === "remove") {
+        map.removeWalls(which, seat);
+        return out({ removed: which });
+      }
+      if (action === "split") return out({ walls: map.splitWall(which[0], args.x, args.y, seat) });
+      if (action === "clear") {
+        map.clearWalls(seat);
+        return out({ cleared: true });
+      }
+      map.closeDoors(seat);
+      return out({ closed: true });
+    },
+  },
+  {
+    name: "kraken_map_undo",
+    description: "Undo the last edit to the scene's walls in the map editor (up to 50 back).",
+    inputSchema: object({}),
+    run(_args, ctx) {
+      const { map, seat } = needTable(ctx);
+      return out({ undone: map.undo(seat) });
+    },
+  },
+  {
     name: "kraken_token_remove",
     description: "Take a token off the scene.",
     inputSchema: object({ id: string("Token id") }, ["id"]),

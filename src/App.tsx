@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { gridLabel, preferredCandidateIndex, preferredSceneIndex } from "./foundry/geometry";
+import { withGrid } from "../shared/map/geometry.mjs";
 import { imageMime, inspectZip, type ImportCandidate, type LoadedAdventure } from "./foundry/importBundle";
 import { useSession } from "./session/useSession";
 import { SetupScreen } from "./setup/SetupScreen";
@@ -361,7 +362,7 @@ export function App() {
           ))}
         </select>
       ) : null}
-      <span className="grid-label">{gridLabel(scene.grid)}</span>
+      <span className="grid-label">{gridLabel(withGrid({ ...scene, grid: scene.baseGrid ?? scene.grid }, session.map.sceneId === scene.id ? session.map.settings.grid : null).grid)}</span>
     </div>
   ) : null;
 
