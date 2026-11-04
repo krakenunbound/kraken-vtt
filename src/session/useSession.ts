@@ -143,6 +143,7 @@ export type CombatEntry = {
   effects: { id: string; label: string; duration: number }[];
   targets: string[];
   attacks?: { key: string; name: string; bonus: number; damage: string }[];
+  powers?: { key: string; name: string; uses: number; used: number; damage: string; save: string }[];
 };
 export type CombatView = { round: number; active: string | null; entries: CombatEntry[] };
 export type TableRecord = {

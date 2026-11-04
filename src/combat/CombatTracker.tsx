@@ -104,7 +104,7 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
           </span>
         ) : null}
       </div>
-      {entry.targets.length > 0 || (gm && entry.attacks?.length) ? (
+      {entry.targets.length > 0 || (gm && (entry.attacks?.length || entry.powers?.length)) ? (
         <div className="ct-actions">
           {entry.attacks?.map((attack) => (
             <span key={attack.key} className="ct-attack">
@@ -117,6 +117,20 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
                   {attack.damage}
                 </button>
               ) : null}
+            </span>
+          ))}
+          {entry.powers?.map((power) => (
+            <span key={power.key} className="ct-attack ct-power">
+              <button
+                type="button"
+                data-action="npc-cast"
+                disabled={power.uses > 0 && power.used >= power.uses}
+                onClick={() => session.ct("cast", { id: entry.id, power: power.key })}
+                title={`${power.name}: use it on ${entry.name}'s targets${power.save ? ` (save: ${power.save})` : ""}${power.uses ? `; ${power.uses - power.used} of ${power.uses} left today` : ""}`}
+              >
+                ✦ {power.name}
+                {power.uses ? ` ${power.uses - power.used}/${power.uses}` : ""}
+              </button>
             </span>
           ))}
           {entry.targets.map((id) => {

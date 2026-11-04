@@ -1284,7 +1284,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
               return combat.save(entry.id, String(msg.attribute), msg.cl, client.role === "dm" ? entry.name : client.name);
             }
             case "cast":
-              return combat.cast(String(msg.recordId), String(msg.power), msg.action ? String(msg.action) : "", seat, client.role === "dm" ? "Combat" : client.name);
+              return combat.cast(msg.recordId ? { recordId: String(msg.recordId) } : { entryId: String(msg.id) }, String(msg.power), msg.action ? String(msg.action) : "", seat, client.role === "dm" ? "Combat" : client.name);
             case "clear-targets":
               return combat.clearTargets(String(msg.id), seat);
             case "attack":

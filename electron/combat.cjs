@@ -76,6 +76,8 @@ function cleanEntry(raw) {
     stabilized: Boolean(raw.stabilized),
     bleedRound: Math.round(num(raw.bleedRound, -1)),
     effects: (Array.isArray(raw.effects) ? raw.effects : []).map(cleanEffect).filter(Boolean).slice(0, 50),
+    // An NPC's powers used today (FG's per-day uses on the tracker's copy).
+    used: raw.used && typeof raw.used === "object" ? Object.fromEntries(Object.entries(raw.used).slice(0, 60).map(([key, value]) => [String(key).slice(0, 60), Math.max(0, Math.round(num(value, 0)))])) : {},
     // Who this creature has targeted (FG's targets on the tracker).
     targets: (Array.isArray(raw.targets) ? raw.targets : []).map((id) => text(id, "")).filter(Boolean).slice(0, 20),
   };
@@ -136,6 +138,28 @@ function levelDice(dice, casterLevel, cap = 0) {
   if (!text.includes("CL")) return text;
   const level = cap > 0 ? Math.min(casterLevel, cap) : casterLevel;
   return text.replace(/\(CL\/(\d+)\)/g, (_, every) => String(Math.floor(level / Math.max(1, Number(every))))).replace(/CL/g, String(level));
+}
+
+// SiegePowerResolution.rollDuration for a failed effect: "3", "1d4+1",
+// "1d4+1 min", "2 turns" (a C&C turn counts as a minute), "1 day". With the
+// game's round length set, longer units become rounds; unset (0, SiegeCore's
+// default), CoreRPG counts a minute as 10 rounds, an hour 600, a day 14400.
+function failedRounds(text, roundSeconds, roll = (formula) => require("./dice.cjs").createDice().roll(formula).total) {
+  const value = String(text ?? "").trim().toLowerCase();
+  if (!value) return 0;
+  const units = { rd: "", rnd: "", round: "", min: "minute", minute: "minute", turn: "minute", hr: "hour", hour: "hour", day: "day" };
+  const unitWord = (/([a-z]{2,})\s*$/.exec(value)?.[1] ?? "").replace(/s$/, "");
+  const dice = value.replace(/[a-z]*\s*$/, "").replace(/\s+/g, "");
+  let total = 0;
+  for (const [, sign, term] of dice.matchAll(/([+-]?)([^+-]+)/g)) {
+    const amount = /^\d*d\d+$/.test(term) ? roll(term) : Number(term) || 0;
+    total += sign === "-" ? -amount : amount;
+  }
+  total = Math.max(0, total);
+  const unit = units[unitWord] ?? "";
+  const seconds = { minute: 60, hour: 3600, day: 86400 }[unit];
+  if (roundSeconds > 0 && seconds) return Math.ceil((total * seconds) / roundSeconds);
+  return total * ({ minute: 10, hour: 600, day: 14400 }[unit] ?? 1);
 }
 
 // A spell's duration in rounds: "1 round per level", "1 minute per caster
@@ -415,6 +439,12 @@ function createCombat({ saved, table, onChange = () => undefined }) {
             attacks:
               seat.role === "dm" && record(entry)?.type === "npc"
                 ? Object.entries(record(entry).data?.attacks ?? {}).map(([key, attack]) => ({ key, name: String(attack.name ?? "Attack"), bonus: num(record(entry).data?.bth, 0) + num(attack.bth, 0), damage: String(attack.damage ?? "") }))
+                : undefined,
+            powers:
+              seat.role === "dm" && record(entry)?.type === "npc"
+                ? Object.entries(record(entry).data?.powers ?? {})
+                    .filter(([, power]) => power && typeof power === "object" && (power.damage || power.heal || power.save || power.failedeffect || power.effect || power.actions))
+                    .map(([key, power]) => ({ key, name: String(power.name ?? "Power"), uses: num(power.uses, 0), used: num(entry.used?.[key], 0), damage: String(power.damage ?? ""), save: String(power.save ?? "") }))
                 : undefined,
           };
         }),
@@ -785,33 +815,42 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     // damage is one roll for everyone (each missile its own), halved or
     // cancelled for those who saved; an effect lands on those who failed;
     // healing goes to the targets, or the caster with none.
-    async cast(recordId, powerKey, actionKey, seat, from) {
+    async cast(who, powerKey, actionKey, seat, from) {
       const { engine, game, options: opts } = await options();
       cachedThresholds = thresholds(opts);
-      const caster = table().records.get(recordId);
-      if (!caster || caster.type !== "character") throw new Error("No such character.");
-      if (seat.role !== "dm" && caster.owner !== seat.name) throw new Error("That is not your character.");
+      // An NPC casts from its tracker entry: its caster level is its hit dice,
+      // and a power with uses per day counts them on the entry.
+      const npcEntry = typeof who === "object" && who?.entryId ? find(who.entryId) : null;
+      if (npcEntry) mustGM(seat);
+      const caster = npcEntry ? record(npcEntry) : table().records.get(typeof who === "object" ? who.recordId : who);
+      if (!caster || (!npcEntry && caster.type !== "character")) throw new Error(npcEntry ? "That creature has no record to cast from." : "No such character.");
+      if (!npcEntry && seat.role !== "dm" && caster.owner !== seat.name) throw new Error("That is not your character.");
       const power = caster.data.powers?.[powerKey];
       if (!power) throw new Error("No such power.");
+      if (npcEntry && num(power.uses, 0) > 0) {
+        const used = num(npcEntry.used?.[powerKey], 0);
+        if (used >= num(power.uses, 0)) throw new Error(`${npcEntry.name} has used ${power.name} ${used === 1 ? "once" : `${used} times`} today.`);
+        npcEntry.used = { ...(npcEntry.used ?? {}), [powerKey]: used + 1 };
+      }
       if (actionKey && !power.actions?.[actionKey]) throw new Error("No such action.");
       // A power with no actions casts from its own fields (SiegePower's power-level damage, heal, save).
       const action = actionKey
         ? { ...power.actions[actionKey] }
-        : { name: power.name, damage: power.damage, heal: power.heal, dmgtype: power.dmgtype, save: power.save, saveeffect: power.saveeffect };
-      const casterLevel = Math.max(1, num(caster.data.level, 1));
+        : { name: power.name, damage: power.damage, heal: power.heal, dmgtype: power.dmgtype, save: power.save, saveeffect: power.saveeffect, effect: power.effect, failedeffect: power.failedeffect, failedduration: power.failedduration };
+      const casterLevel = npcEntry ? Math.max(1, num(caster.data.level, 0) || Number(/^(\d+)/.exec(String(caster.data.hd ?? ""))?.[1] ?? 1)) : Math.max(1, num(caster.data.level, 1));
       const cap = num(action.scalecap ?? power.scalecap, 0);
       if (action.damage) action.damage = levelDice(action.damage, casterLevel, cap);
       if (action.heal) action.heal = levelDice(action.heal, casterLevel, cap);
       const level = Math.round(num(power.level, 0));
       // Spend the slot.
-      if (String(opts.SIEGE_SLOTS_SPEND ?? "on").toLowerCase() !== "off" && !power.packagesource) {
+      if (!npcEntry && String(opts.SIEGE_SLOTS_SPEND ?? "on").toLowerCase() !== "off" && !power.packagesource && !num(power.noslot, 0)) {
         const slot = caster.data.slots?.[`l${level}`];
         if (slot) {
           if (num(slot.used, 0) >= num(slot.max, 0)) throw new Error(`No level ${level} spells left today.`);
           table().records.update(caster.id, { data: { slots: { [`l${level}`]: { used: num(slot.used, 0) + 1 } } } }, table().seat);
         }
       }
-      const entry = state.entries.find((item) => item.recordId === caster.id) ?? null;
+      const entry = npcEntry ?? state.entries.find((item) => item.recordId === caster.id) ?? null;
       const self = action.effecttarget === "self";
       let targets = self || !entry ? [] : entry.targets.map((id) => state.entries.find((item) => item.id === id)).filter(Boolean);
       if ((action.heal && targets.length === 0) || self) targets = entry ? [entry] : [];
@@ -875,6 +914,28 @@ function createCombat({ saved, table, onChange = () => undefined }) {
           await this.heal(target.id, Math.max(1, rolled.total), { role: "dm", name: "Combat" });
           results.push({ target: target.name, heal: rolled.total });
         }
+      }
+      // The failed effect (Paralyzed, Petrified): on each target that failed its
+      // save, for its failed duration, unless "IMMUNE: <word>" matches.
+      if (String(action.failedeffect ?? "").trim() && saved.size > 0) {
+        const label = String(action.failedeffect).trim();
+        const rounds = failedRounds(String(action.failedduration ?? ""), num(opts.SIEGE_ROUND_SECONDS, 0));
+        for (const target of targets) {
+          if (saved.get(target.id) !== false) continue;
+          const names = `${label} ${power.name}`.toLowerCase();
+          const immune = target.effects.some((effect) => effect.label.split(";").some((part) => {
+            const match = /^\s*IMMUNE\s*:\s*(.*)$/i.exec(part);
+            return match ? match[1].split(",").some((word) => word.trim().length > 2 && names.includes(word.trim().toLowerCase())) : false;
+          }));
+          if (immune) {
+            table().say(`${target.name} is immune to ${label}.`, "Combat");
+            continue;
+          }
+          putEffect(target, label, rounds);
+          table().say(`Effect ['${label}'] -> [to ${target.name}]${rounds ? ` for ${rounds} round${rounds === 1 ? "" : "s"}` : ""}`, "Combat", Boolean(target.hidden));
+          results.push({ target: target.name, effect: label, rounds });
+        }
+        changed();
       }
       // The effect, on those who did not save.
       if (String(action.effect ?? "").trim()) {
