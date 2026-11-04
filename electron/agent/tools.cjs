@@ -10,6 +10,7 @@
 
 const fgModule = require("../importers/fgModule.cjs");
 const { siege, siegeLibrary, siegeCheck, levelUp, changeClass } = require("../siege.cjs");
+const dnd5e = require("../dnd5e.cjs");
 const party = require("../party.cjs");
 const { editCharacter: siegeEdit, importCharacter, exportCharacter } = require("../siege.cjs");
 const fs = require("fs");
@@ -63,7 +64,7 @@ const TOOLS = [
   {
     name: "kraken_campaign_create",
     description: "Create a campaign. Returns its id.",
-    inputSchema: object({ name: string("Campaign name"), ruleset: string("Ruleset, e.g. Castles & Crusades") }, ["name"]),
+    inputSchema: object({ name: string("Campaign name"), ruleset: string("Ruleset: Castles & Crusades, D&D 5E (the SRD 5.2.1) or Worldbuilding") }, ["name"]),
     run: (args, ctx) => out(ctx.campaigns.create({ name: args.name, ruleset: args.ruleset })),
   },
   {
@@ -194,6 +195,10 @@ const TOOLS = [
     ),
     async run(args, ctx) {
       const agent = needTable(ctx);
+      if (agent.ruleset?.() === dnd5e.RULESET_NAME) {
+        const { record, problems } = await dnd5e.build5e(agent, args.spec, args.owner ?? "", agent.seat);
+        return out({ created: true, id: record.id, hp: record.data.hp.total, ac: record.data.ac.total, problems });
+      }
       const { builder } = await siege();
       const library = siegeLibrary(agent.records);
       if (library.packages.length === 0) throw new Error("No SIEGE packages in this campaign. Import the game's modules first (kraken_import_fg_module).");
@@ -214,6 +219,11 @@ const TOOLS = [
       const agent = needTable(ctx);
       const record = agent.records.get(args.id);
       if (!record) throw new Error(`No record ${args.id}.`);
+      if (dnd5e.is5e(record)) {
+        const derived = (await dnd5e.rules5e()).derive(record.data);
+        const updated = agent.records.update(args.id, { data: derived }, agent.seat, { replace: true });
+        return out({ id: updated.id, level: derived.level, prof: derived.prof, hp: derived.hp.total, ac: derived.ac.total, expnext: derived.expnext });
+      }
       const { engine } = await siege();
       const derived = engine.derive(record.data, siegeLibrary(agent.records).game);
       const updated = agent.records.update(args.id, { data: derived }, agent.seat, { replace: true });
@@ -229,22 +239,26 @@ const TOOLS = [
       const record = agent.records.get(args.id);
       if (!record) throw new Error(`No record ${args.id}.`);
       const { record: updated, gain, level } = await levelUp(agent, record, args.package);
-      return out({ id: updated.id, level, gain, hp: updated.data.hp.total, bth: updated.data.bth, expnext: updated.data.expnext });
+      return out({ id: updated.id, level, gain, hp: updated.data.hp.total, ...(dnd5e.is5e(updated) ? { prof: updated.data.prof } : { bth: updated.data.bth }), expnext: updated.data.expnext });
     },
   },
   {
     name: "kraken_siege_check",
-    description: "Make a SIEGE attribute check or save for a character in front of the table: d20 + attribute modifier + level (when added) + bonus, against the challenge base (prime 12 / secondary 18 by default) + challenge level. Goes to chat.",
+    description: "Make a check or save for a character in front of the table, by the campaign's ruleset. Castles & Crusades: a SIEGE attribute check or save, d20 + attribute modifier + level (when added) + bonus, against the challenge base (prime 12 / secondary 18 by default) + challenge level. D&D 5E: kind check (an ability), save, or skill (skill: its name), d20 + modifier (+ proficiency) + bonus, against dc; advantage or disadvantage rolls 2d20. Goes to chat.",
     inputSchema: object(
       {
         id: string("Character record id"),
         attribute: { type: "string", enum: ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"] },
-        cl: number("Challenge level, default 0"),
+        cl: number("C&C: challenge level, default 0"),
         bonus: number("Extra modifier, default 0"),
         addLevel: { type: "boolean", description: "Add the character's level (default: the game's SIEGE_ADD_LEVEL)" },
         label: string("What the check is for"),
+        kind: { type: "string", enum: ["check", "save", "skill"], description: "5E: an ability check, a saving throw, or a skill" },
+        skill: string("5E: the skill (Perception, Stealth...)"),
+        dc: number("5E: the difficulty class"),
+        advantage: { type: "string", enum: ["", "advantage", "disadvantage"] },
       },
-      ["id", "attribute"],
+      ["id"],
     ),
     async run(args, ctx) {
       const agent = needTable(ctx);
@@ -619,9 +633,9 @@ const TOOLS = [
   {
     name: "kraken_combat",
     description:
-      "The combat tracker (SiegeCore rules: d10 initiative, high to low; unconscious enemies lose their turns; effect durations count down each round; the dying bleed). action view (default); add (recordId of a character or NPC, count, hidden, place: also put tokens on the map; or entry {name, faction, hp, ac, init}); add-party; init (which: an entry id, npcs or all); next (next turn); round (next round); end (removeNpcs); update (id, patch {name, faction, init, initresult, hp, wounds, ac, hidden}); remove (id); damage / heal (id, amount); effect (id, effect {label, duration in rounds, gmOnly}); effect-remove (id, effectId); target (id: the attacker entry, targetId, on true/false); clear-targets (id); attack / damage-roll (a character: recordId + weapon = its inventory key; an NPC: id + weapon = its attack key from view's attacks): SiegeCore's attack, one d20 per target against its AC (equal hits), damage rolled once and put on every target; save (id, attribute, cl): a SIEGE save; cast (recordId, power: its powers key, castAction: the power's actions key): spends a slot, targets save against the caster level, damage halves or cancels on a save, effects land on those who failed, healing goes to the targets. target-area: the source (id) targets everyone whose token is within radius feet of x, y (faction to narrow), for an area spell. krits: critical hits and fumbles (the Castle Keeper's Guide options as Kraken Krits & Fumbles: a natural 20 rolls the critical table, a natural 1 the fumble table, and the result is applied: effects, damage, the next damage roll at maximum or doubled; ranged attacks use up ammunition; spells with spell resistance on are checked first). settings: { mode opt5|opt6|opt1|opt4, crit/fumble always|half|third|off, auto yes|no, npc yes|no, show all|gm, death gm|apply } (omit to read them). krit-test: roll a critical (kind crit) or fumble (kind fumble) for id against targetId (table, roll to fix the result).",
+      "The combat tracker (SiegeCore rules: d10 initiative, high to low; unconscious enemies lose their turns; effect durations count down each round; the dying bleed). action view (default); add (recordId of a character or NPC, count, hidden, place: also put tokens on the map; or entry {name, faction, hp, ac, init}); add-party; init (which: an entry id, npcs or all); next (next turn); round (next round); end (removeNpcs); update (id, patch {name, faction, init, initresult, hp, wounds, ac, hidden}); remove (id); damage / heal (id, amount); effect (id, effect {label, duration in rounds, gmOnly}); effect-remove (id, effectId); target (id: the attacker entry, targetId, on true/false); clear-targets (id); attack / damage-roll (a character: recordId + weapon = its inventory key; an NPC: id + weapon = its attack key from view's attacks): SiegeCore's attack, one d20 per target against its AC (equal hits), damage rolled once and put on every target; save (id, attribute, cl): a SIEGE save; cast (recordId, power: its powers key, castAction: the power's actions key): spends a slot, targets save against the caster level, damage halves or cancels on a save, effects land on those who failed, healing goes to the targets. target-area: the source (id) targets everyone whose token is within radius feet of x, y (faction to narrow), for an area spell. krits: critical hits and fumbles (the Castle Keeper's Guide options as Kraken Krits & Fumbles: a natural 20 rolls the critical table, a natural 1 the fumble table, and the result is applied: effects, damage, the next damage roll at maximum or doubled; ranged attacks use up ammunition; spells with spell resistance on are checked first). settings: { mode opt5|opt6|opt1|opt4, crit/fumble always|half|third|off, auto yes|no, npc yes|no, show all|gm, death gm|apply } (omit to read them). krit-test: roll a critical (kind crit) or fumble (kind fumble) for id against targetId (table, roll to fix the result). In a D&D 5E campaign the tracker plays FG's 5E rules instead: init d20 + DEX; attack d20 + bonus against AC, a natural 20 a CRITICAL HIT (the next damage roll doubles its dice), a natural 1 an AUTOMATIC MISS, no krits; save (id, attribute, cl = the DC); cast (recordId or id, power = the spell's name): a slot of its level (or the lowest free above), attack roll or save against the caster's DC, damage (cantrips scale, half on a save where the spell says), healing, effects; a creature at 0 hit points is dead, a character Dying: death-save (id) rolls its death saving throw.",
     inputSchema: object({
-      action: { type: "string", enum: ["view", "add", "add-party", "init", "next", "round", "end", "update", "remove", "damage", "heal", "effect", "effect-remove", "target", "clear-targets", "attack", "damage-roll", "save", "cast", "krits", "krit-test", "target-area"] },
+      action: { type: "string", enum: ["view", "add", "add-party", "init", "next", "round", "end", "update", "remove", "damage", "heal", "effect", "effect-remove", "target", "clear-targets", "attack", "damage-roll", "save", "cast", "krits", "krit-test", "target-area", "death-save"] },
       targetId: string("target: the entry to target"),
       on: { type: "boolean", description: "target: add (true) or drop (false)" },
       weapon: string("attack / damage-roll: inventory key (character) or attack key (NPC)"),
@@ -677,6 +691,7 @@ const TOOLS = [
       else if (action === "effect-remove") combat.removeEffect(args.id, args.effectId, seat);
       else if (action === "target") combat.target(args.id, args.targetId, args.on ?? true, seat);
       else if (action === "clear-targets") combat.clearTargets(args.id, seat);
+      else if (action === "death-save") return out({ deathSave: await combat.deathSave(args.id, seat), combat: combat.viewFor(seat) });
       else if (action === "target-area") {
         const per = map.units() > 0 ? (map.squareCenter(1, 0, 1).x - map.squareCenter(0, 0, 1).x) / map.units() : 10;
         return out({ targets: combat.targetArea(args.id, { x: args.x, y: args.y, radius: (args.radius ?? 0) * per, faction: args.faction ?? null }, seat, (entry) => map.tokens().find((token) => token.id === entry.tokenId) ?? map.tokens().find((token) => entry.recordId && token.recordId === entry.recordId) ?? null), combat: combat.viewFor(seat) });

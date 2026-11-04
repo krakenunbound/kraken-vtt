@@ -36,7 +36,7 @@ const at = (data: Row, path: string): unknown => path.split(".").reduce<unknown>
 const plain = (html: unknown) => String(html ?? "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
 
 // A field to type in: kept while typing, sent when it is left (or Enter).
-function Field({ value, onSave, number = false, editable, label, wide = false, area = false, className = "" }: { value: unknown; onSave: (value: string) => void; number?: boolean; editable: boolean; label?: string; wide?: boolean; area?: boolean; className?: string }) {
+export function Field({ value, onSave, number = false, editable, label, wide = false, area = false, className = "" }: { value: unknown; onSave: (value: string) => void; number?: boolean; editable: boolean; label?: string; wide?: boolean; area?: boolean; className?: string }) {
   const shown = value === undefined || value === null ? "" : String(value);
   const [text, setText] = useState(shown);
   const [typing, setTyping] = useState(false);

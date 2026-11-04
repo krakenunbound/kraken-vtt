@@ -79,6 +79,12 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
             {entry.health.status}
           </span>
         )}
+        {session.ruleset === "D&D 5E" && entry.health.status === "Dying" && (gm || entry.mine) ? (
+          // 5E: a Dying character's death saving throw.
+          <button type="button" className="ct-death-save" data-action="death-save" title={`Death saves: ${entry.deathsaves?.success ?? 0} successes, ${entry.deathsaves?.failure ?? 0} failures`} onClick={() => session.ct("death-save", { id: entry.id })}>
+            Death save {entry.deathsaves ? `(${entry.deathsaves.success}✓ ${entry.deathsaves.failure}✗)` : ""}
+          </button>
+        ) : null}
         {gm ? (
           <span className="ct-tools">
             <button type="button" title={entry.hidden ? "Show to players" : "Hide from players"} onClick={() => session.ct("update", { id: entry.id, patch: { hidden: !entry.hidden } })}>
@@ -203,8 +209,8 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
               ))}
             </select>
             <label>
-              CL
-              <input type="number" value={saveCl} onChange={(event) => setSaveCl(event.target.value)} style={{ width: "3.6rem" }} />
+              {session.ruleset === "D&D 5E" ? "DC" : "CL"}
+              <input type="number" value={saveCl} onChange={(event) => setSaveCl(event.target.value)} style={{ width: "3.6rem" }} aria-label={session.ruleset === "D&D 5E" ? "Save DC" : "Save CL"} />
             </label>
             <button type="button" onClick={() => session.ct("save", { id: entry.id, attribute: saveStat, cl: Number(saveCl) || 0 })}>
               Roll save

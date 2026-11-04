@@ -16,7 +16,7 @@ const width = 30;
 const depth = 16;
 let throws = 0;
 let still = 0;
-const sides = [4, 6, 8, 10, 12, 20, 100];
+const sides = [2, 3, 4, 6, 8, 10, 12, 20, 100];
 for (const side of sides) {
   for (let round = 0; round < 6; round++) {
     const rolls = Array.from({ length: 3 }, () => 1 + Math.floor(Math.random() * side));
@@ -40,7 +40,8 @@ for (const side of sides) {
         assert(values.every((value, face) => (face === bottom ? value !== die.label : value === die.label)), `d4 shows ${values.join()} resting on ${bottom}, wanted ${die.label}`);
       } else {
         assert(values[top] === die.label, `d${side} (${die.kind}) shows ${values[top]} on top, wanted ${die.label}`);
-        assert([...values].sort().join() === [...model(die.kind).shape.values].sort().join(), `${die.kind}: every number once`);
+        assert([...values].sort().join() === [...(die.faces ?? model(die.kind).shape.values)].sort().join(), `${die.kind}: every number once`);
+        if (side === 2 || side === 3) assert(die.kind === "d6" && values.every((value) => Number(value) >= 1 && Number(value) <= side), `a d${side} is a d6 numbered 1-${side}: ${values.join()}`);
       }
       const last = (result.count - 1) * dice.length + index;
       const [x, y, z] = [result.frames[last * 7], result.frames[last * 7 + 1], result.frames[last * 7 + 2]];

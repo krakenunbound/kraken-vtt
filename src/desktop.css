@@ -1184,3 +1184,24 @@ textarea.cc-field.tall { min-height: 220px; }
 
 .sound-scene { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 6px 0; padding: 6px 8px; border: 1px dashed var(--brass-soft, #a8834a); border-radius: 6px; font-size: 12px; }
 .sound-scene span { flex: 1 1 100%; }
+
+/* The D&D 5E sheet and wizard (in the C&C sheet's style). */
+.sheet-5e .five-strip { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.sheet-5e .five-main { grid-template-columns: minmax(260px, 1.2fr) minmax(180px, 1fr); }
+.sheet-5e .five-ability-head, .sheet-5e .five-ability { display: grid; grid-template-columns: 7.5em 3.4em 3.2em 2em 3.2em; gap: 6px; align-items: center; margin: 3px 0; }
+.sheet-5e .five-defence { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; align-content: start; }
+.sheet-5e .five-big { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px; border: 1px solid var(--brass-soft, #a8834a); border-radius: 8px; }
+.sheet-5e .five-big > span:first-of-type { font-size: 1.3em; font-weight: 700; }
+.sheet-5e .five-skills { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 14px; }
+.sheet-5e .five-skill { display: grid; grid-template-columns: 3em 1fr 3.4em; gap: 6px; align-items: center; }
+.sheet-5e .five-attacks li, .sheet-5e .five-items li, .sheet-5e .five-spells li { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 4px 0; border-bottom: 1px solid rgba(168, 131, 74, 0.25); }
+.sheet-5e .five-attacks, .sheet-5e .five-items, .sheet-5e .five-spells { list-style: none; margin: 0; padding: 0; }
+.sheet-5e .five-spells li p { flex-basis: 100%; margin: 0; }
+.sheet-5e .five-slots { display: flex; flex-wrap: wrap; gap: 12px; margin: 6px 0; }
+.sheet-5e .five-coins { display: flex; gap: 12px; margin-top: 8px; }
+.wizard-5e { display: flex; flex-direction: column; gap: 8px; padding: 12px; overflow: auto; }
+.wizard-5e-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
+.wizard-5e-grid label, .wizard-5e-scores label { display: flex; flex-direction: column; gap: 3px; }
+.wizard-5e-scores { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
+.wizard-5e-skills, .wizard-5e-spells { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 4px 10px; max-height: 220px; overflow: auto; }
+.ct-death-save { margin-left: 6px; font-size: 12px; }

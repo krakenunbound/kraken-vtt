@@ -576,7 +576,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
   // read from the module itself (the Books window), as FG reads them, never
   // copied into the campaign (they made it tens of MB, sent to every player).
   const GM_SEAT = { role: "dm", name: "GM" };
-  const RULES_TYPES = new Set(["siegepackage", "siegepower", "siegegame", "item", "npc", "spell"]);
+  const RULES_TYPES = new Set(["siegepackage", "siegepower", "siegegame", "item", "npc", "spell", ...require("./dnd5e.cjs").TYPES_5E]);
   function loadRecords(info) {
     const file = books?.file?.(info.id);
     if (!file) return;
@@ -998,6 +998,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         clients.set(ws, client);
         send(ws, {
           type: "ok",
+          ruleset,
           you: { id: client.id, name: client.name, role: client.role, assetToken: client.assetToken },
           players: playerList(),
           map: map.viewFor(seatOf(client), client.assetToken),
@@ -1132,6 +1133,18 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       // spec with the campaign's books. A player's character is theirs.
       if (msg.type === "build-character") {
         const answer = (body) => send(ws, { type: "op-result", req: msg.req ?? null, ...body });
+        if (ruleset === require("./dnd5e.cjs").RULESET_NAME) {
+          // A 5E character from its wizard's spec.
+          const owner = client.role === "dm" ? text(msg.owner, "").slice(0, 24) : client.name;
+          require("./dnd5e.cjs")
+            .build5e(agentHandle, msg.spec ?? {}, owner, client.role === "dm" ? seatOf(client) : { role: "dm", name: client.name })
+            .then(({ record, problems }) => {
+              addChat({ id: client.id, from: client.name, text: `Created ${record.name}: ${record.data.species ?? ""} ${msg.spec?.class ?? ""} ${record.data.level}.`, at: Date.now() });
+              answer({ ok: true, id: record.id, problems });
+            })
+            .catch((error) => answer({ ok: false, error: error instanceof Error ? error.message : "Could not build that character." }));
+          return;
+        }
         siege()
           .then(({ builder }) => {
             const library = siegeLibrary(records);
@@ -1226,7 +1239,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
           send(ws, { type: "error", reason: "You cannot roll for that character." });
           return;
         }
-        siegeCheck(agentHandle, record, { attribute: msg.attribute, cl: msg.cl, bonus: msg.bonus, label: msg.label, addLevel: typeof msg.addLevel === "boolean" ? msg.addLevel : undefined }, client.role === "dm" ? record.name : client.name).catch((error) =>
+        siegeCheck(agentHandle, record, { attribute: msg.attribute, cl: msg.cl, bonus: msg.bonus, label: msg.label, addLevel: typeof msg.addLevel === "boolean" ? msg.addLevel : undefined, ...(["check", "save", "skill"].includes(msg.kind) ? { kind: msg.kind, skill: text(msg.skill, ""), dc: num(msg.dc, 0), advantage: ["advantage", "disadvantage"].includes(msg.advantage) ? msg.advantage : "" } : {}) }, client.role === "dm" ? record.name : client.name).catch((error) =>
           send(ws, { type: "error", reason: error instanceof Error ? error.message : "Could not roll that." }),
         );
         return;
@@ -1442,6 +1455,9 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
             }
             case "cast":
               return combat.cast(msg.recordId ? { recordId: String(msg.recordId) } : { entryId: String(msg.id) }, String(msg.power), msg.action ? String(msg.action) : "", seat, client.role === "dm" ? "Combat" : client.name);
+            case "death-save":
+              // 5E: a Dying character's death saving throw (the player rolls their own).
+              return combat.deathSave(String(msg.id), seat);
             case "clear-targets":
               return combat.clearTargets(String(msg.id), seat);
             case "target-area": {
@@ -1546,6 +1562,8 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
   // What agents (the MCP server, the in-app assistant) use. They act as the GM.
   const agentHandle = {
     seat: { role: "dm", name: "Agent" },
+    // The campaign's ruleset ("Castles & Crusades", "D&D 5E", "Worldbuilding").
+    ruleset: () => ruleset,
     records,
     dice,
     options: () => ({ ...options }),
@@ -1754,6 +1772,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     },
     // What agents (the MCP server, the in-app assistant) use. They act as the GM.
     agent: agentHandle,
+    ruleset: () => ruleset,
     snapshot() {
       return {
         players: playerList(),

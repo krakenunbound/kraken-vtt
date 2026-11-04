@@ -165,7 +165,9 @@ export function fullLook(look: Partial<DiceLook>): DiceLook {
 
 
 // The dice that can be drawn: d4 to d20, and d100 as two d10s.
-export const SHAPED = new Set([4, 6, 8, 10, 12, 20, 100]);
+// d2 and d3 are thrown as a d6 numbered 1-2 three times or 1-3 twice, as real ones are.
+export const SHAPED = new Set([2, 3, 4, 6, 8, 10, 12, 20, 100]);
+export const SIX_SIDED: Record<number, string[]> = { 2: ["1", "2", "1", "2", "1", "2"], 3: ["1", "2", "3", "1", "2", "3"] };
 
 function load(): DiceSettings {
   try {

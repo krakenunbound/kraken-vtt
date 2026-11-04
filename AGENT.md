@@ -37,10 +37,10 @@ The app starts the MCP server when it opens. `electron/agent/mcp-stdio.cjs` is t
 | The map editor's Images tab: image layers (pictures placed on the map, below or above the tokens, ordered, hidden, locked, grouped; Browse or drop a picture into the tile library) | `kraken_tile` |
 | **Characters and records** | |
 | Characters, NPCs, items, notes: list, read, make, edit, delete | `kraken_records_list`, `kraken_record_get`, `kraken_record_create`, `kraken_record_update`, `kraken_record_delete` |
-| Creation wizard | `kraken_build_character` |
+| Creation wizard (C&C's, or the 5E wizard in a D&D 5E campaign: species, class, background, scores, skills, gear, spells) | `kraken_build_character` |
 | Recalculate a sheet | `kraken_character_refresh` |
 | Level up | `kraken_level_up` |
-| Check or save from the sheet | `kraken_siege_check` |
+| Check, save or skill from the sheet (5E: `kind`, `skill`, `dc`, `advantage`) | `kraken_siege_check` |
 | Portrait and token pickers | `kraken_art` (then `kraken_record_update`) |
 | Import FG modules | `kraken_fg_modules`, `kraken_import_fg_module` |
 | **Party sheet** | |
@@ -49,7 +49,7 @@ The app starts the MCP server when it opens. `electron/agent/mcp-stdio.cjs` is t
 | Hand out coin and items | `kraken_party_distribute` |
 | Group check or save | `kraken_party_group_check` |
 | **Combat tracker** | |
-| Every tracker action: add, initiative, turns, rounds, damage, healing, effects, targets, attacks, saves, spells | `kraken_combat` |
+| Every tracker action: add, initiative, turns, rounds, damage, healing, effects, targets, attacks, saves, spells; 5E death saves | `kraken_combat` |
 | **Chat and dice** | |
 | Chat, `/r` rolls, the chat log | `kraken_chat_send`, `kraken_roll`, `kraken_chat_log` |
 | Chat commands: `/w` whispers, `/me` `/action` `/ooc` `/mood`, the GM's `/story` and `/id` | `kraken_chat_send` (`kind`, `to`, `as`, `mood`) |

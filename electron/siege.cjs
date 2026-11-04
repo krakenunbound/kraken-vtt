@@ -1,5 +1,6 @@
 const path = require("path");
 const { pathToFileURL } = require("url");
+const dnd5e = require("./dnd5e.cjs");
 
 // Host side of the SIEGE engine (shared/siege, ES modules shared with the
 // app window): the game library from the campaign's imported records, and
@@ -23,7 +24,9 @@ const ATTRIBUTES = ["strength", "dexterity", "constitution", "intelligence", "wi
 
 // A SIEGE check for a character record, rolled by the host's dice and posted
 // as a roll card. table: the table server's agent handle.
-async function siegeCheck(table, record, { attribute, cl = 0, bonus = 0, addLevel, label } = {}, from) {
+async function siegeCheck(table, record, { attribute, cl = 0, bonus = 0, addLevel, label, kind, skill, dc, advantage } = {}, from) {
+  // A 5E character: its ruleset's check, save or skill (dc, advantage).
+  if (dnd5e.is5e(record)) return dnd5e.check5e(table, record, { kind: kind ?? (/save/i.test(String(label ?? "")) ? "save" : "check"), attribute, skill, dc: dc ?? cl, bonus, advantage, label: kind ? label : undefined }, from);
   if (!ATTRIBUTES.includes(attribute)) throw new Error("Pick an attribute.");
   const { engine } = await siege();
   const game = siegeLibrary(table.records).game;
@@ -46,6 +49,7 @@ async function siegeCheck(table, record, { attribute, cl = 0, bonus = 0, addLeve
 // level's hit points (or adds the flat gain), the sheet is rebuilt, and chat
 // says so.
 async function levelUp(table, record, packageKey, from) {
+  if (dnd5e.is5e(record)) return dnd5e.levelUp5e(table, record, from);
   const { engine } = await siege();
   const game = siegeLibrary(table.records).game;
   const found = engine.levelUpPackage(record.data, packageKey);
@@ -138,6 +142,7 @@ function setPath(data, path, value) {
   node[keys.at(-1)] = value;
 }
 async function editCharacter(table, record, changes, seat) {
+  if (dnd5e.is5e(record)) return dnd5e.edit5e(table, record, changes, seat);
   if (seat.role !== "dm" && record.owner !== seat.name) throw new Error("You can only change your own character.");
   if (!Array.isArray(changes) || changes.length === 0) throw new Error("What changes?");
   const { engine } = await siege();

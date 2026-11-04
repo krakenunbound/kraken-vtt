@@ -140,6 +140,14 @@ async function distribute(table, from) {
       }
       const data = structuredClone(table.records.get(member.id).data);
       const source = item.item && typeof item.item === "object" ? { ...item.item, name: item.name } : { name: item.name };
+      if (data.ruleset === "dnd5e") {
+        // A 5E character: the item into the pack (carried), the sheet worked out again.
+        const list = (data.inventorylist = data.inventorylist ?? {});
+        list[engine.nextId(list)] = { ...source, count: each, carried: 1 };
+        table.records.update(member.id, { data: (await require("./dnd5e.cjs").rules5e()).derive(data) }, table.seat, { replace: true });
+        given.push(`${item.name} (${each}) -> ${member.name}`);
+        continue;
+      }
       const row = engine.addItem(data, source, game);
       row.count = (Number(row.count) || 1) + (each - 1);
       table.records.update(member.id, { data: engine.derive(data, game) }, table.seat, { replace: true });
