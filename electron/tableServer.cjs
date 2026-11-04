@@ -384,6 +384,31 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     };
   };
   let soundscape = cleanScape(saved.sound);
+  // A scene's own sound (Syrinscape's moods in FG, per map): the ambience and
+  // music the GM kept for it, started when the scene is opened.
+  const sceneSounds = new Map(
+    Object.entries(saved.sceneSounds && typeof saved.sceneSounds === "object" ? saved.sceneSounds : {})
+      .slice(0, 500)
+      .map(([id, value]) => [id.slice(0, 80), cleanScape(value)]),
+  );
+  const sceneSoundView = () => (scene ? { sceneId: scene.id, kept: sceneSounds.get(scene.id) ?? null } : { sceneId: null, kept: null });
+  function sendSceneSound() {
+    for (const [ws, client] of clients) if (client.role === "dm") send(ws, { type: "scene-sound", ...sceneSoundView() });
+  }
+  // keep: what plays now becomes the scene's; clear: the scene has none of its own; view.
+  function sceneSound(action) {
+    if (action === "view") return sceneSoundView();
+    if (!scene) throw new Error("No scene is open.");
+    if (action === "keep") sceneSounds.set(scene.id, cleanScape(soundscape));
+    else if (action === "clear") sceneSounds.delete(scene.id);
+    else if (action === "play") {
+      const kept = sceneSounds.get(scene.id);
+      if (kept) setSoundscape(kept);
+    } else throw new Error("Keep, clear, play or view the scene's sound.");
+    onChange("table");
+    sendSceneSound();
+    return sceneSoundView();
+  }
   // When each folder last played (the same sound again only after a pause).
   const lastSound = new Map();
   function setSoundscape(next) {
@@ -981,7 +1006,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
           soundscape,
           books: shelfView(),
           quickSlots: slotsFor(client),
-          ...(client.role === "dm" ? { bookSounds: Object.fromEntries(bookSounds) } : {}),
+          ...(client.role === "dm" ? { bookSounds: Object.fromEntries(bookSounds), sceneSound: sceneSoundView() } : {}),
           records: records.list({ seat: seatOf(client) }),
           scene: client.role === "player" ? sceneFor(client) : null,
         });
@@ -1225,7 +1250,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
 
       // Sounds, the GM's: a one-shot or effect for everyone (a folder plays one of
       // its sounds at random), the ambience loops, the music, and the chat's triggers.
-      if (["sound-play", "sound-stop", "ambience", "music", "sound-triggers"].includes(msg.type)) {
+      if (["sound-play", "sound-stop", "ambience", "music", "sound-triggers", "scene-sound"].includes(msg.type)) {
         if (client.role !== "dm") {
           send(ws, { type: "error", reason: "Only the GM plays sounds for the table." });
           return;
@@ -1234,6 +1259,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
           if (msg.type === "sound-play") playSound(msg.id, msg.volume);
           else if (msg.type === "sound-stop") broadcast({ type: "sound-stop", ...(typeof msg.id === "string" && msg.id ? { id: msg.id.slice(0, 300) } : {}) });
           else if (msg.type === "ambience") ambience(msg.action, msg.id, msg.volume);
+          else if (msg.type === "scene-sound") sceneSound(String(msg.action ?? "view"));
           else if (msg.type === "music") music(msg.action, msg.id, msg);
           else setTriggers(msg.triggers);
         } catch (error) {
@@ -1493,7 +1519,11 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         if (client.role !== "dm") return;
         const next = sanitizeScene(msg.scene);
         if (!next) return;
+        const opened = scene?.id !== next.id;
         scene = next;
+        // A scene with its own sound starts it (the soundscape goes on otherwise).
+        if (opened && sceneSounds.has(next.id)) setSoundscape(sceneSounds.get(next.id));
+        if (opened) sendSceneSound();
         // A bundle's tiles (Foundry's), placed the first time the scene opens.
         if (Array.isArray(msg.scene?.tiles) && msg.scene.tiles.length) map.seed(next.id, { tiles: storeTiles(msg.scene.tiles.slice(0, 300)) });
         map.setScene(next);
@@ -1552,6 +1582,8 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     ambience,
     music,
     soundscape: () => soundscape,
+    sceneSound,
+    storeTiles,
     // Books: what there is, a book's contents and pages, and sharing.
     books: () => shelfFor({ role: "dm" }),
     // A seat's quick slots (the GM's, or a player's by name), read or set.
@@ -1716,6 +1748,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         chatCleared: Object.fromEntries(chatCleared),
         quickSlots: Object.fromEntries(quickSlots),
         bookSounds: Object.fromEntries(bookSounds),
+        sceneSounds: Object.fromEntries(sceneSounds),
       };
     },
     // What agents (the MCP server, the in-app assistant) use. They act as the GM.

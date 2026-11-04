@@ -109,6 +109,14 @@ assert(played("[ATTACK] (M) Sword, Long [AC 13] [HIT 15 vs 13] -> [at Orc]") ===
 assert(played("[ATTACK] (M) Claw [AC 15] [HIT 15 vs 15] -> [at Ann]") === "sfx/Weapons/Claws/Attack", "a monster's claws");
 assert(played("[ATTACK] (M) Goblin Spear [AC 15] [MISS 9 vs 15] -> [at Ann]") === "sfx/Weapons/Spear/Attack", "a goblin's spear is a spear");
 
+// A creature's own sounds: an orc's bite, a dire wolf's claws, a giant spider's bite; a weapon is still the weapon; a creature killed cries out.
+assert(played("[ATTACK] (M) Bite [AC 15] [HIT 15 vs 15] -> [at Ann]", d20(12, 1), { from: "Orc 2" }) === "sfx/Monsters/Orc/Attack", "an orc's bite is the orc");
+assert(played("[ATTACK] (M) Claws [AC 15] [HIT 15 vs 15] -> [at Ann]", d20(12, 1), { from: "Dire Wolf" }) === "sfx/Animals/Wolf/Attack", "a dire wolf's claws are the wolf");
+assert(played("[ATTACK] (M) Bite [AC 15] [HIT 15 vs 15] -> [at Ann]", d20(12, 1), { from: "Giant Spider 1" }) === "sfx/Animals/Spider/Attack", "a giant spider is a spider");
+assert(played("[ATTACK] (M) Axe, Battle [AC 15] [HIT 15 vs 15] -> [at Ann]", d20(12, 1), { from: "Orc 2" }) === "sfx/Weapons/Axe/Attack", "an orc's axe is still the axe");
+assert(played("[ATTACK] (M) Bite [AC 15] [HIT 15 vs 15] -> [at Ann]", d20(12, 1), { from: "Aldric" }) !== "sfx/Monsters/Orc/Attack", "a character is no creature");
+assert(folderOf(soundFor({ from: "Combat", text: "[DAMAGE] (M) Sword, Long -> Orc 2: 9 (Dead)" }, triggers, sounds)?.id) === "sfx/Monsters/Orc/Death", "an orc killed cries out");
+
 // A real battle in Kraken's combat tracker: a fighter with a longsword against an orc.
 // A campaign saved with the old triggers (before the Syrinscape layout) gets the new ones.
 {
@@ -289,8 +297,35 @@ try {
   assert(!last(/^\[ATTACK\]/).sound, "attack triggers turned off play nothing");
   assert((await tool("kraken_sound", { action: "triggers", triggers: "default" })).triggers.every((trigger) => trigger.enabled), "Kraken's triggers again");
   assert((await tool("kraken_sound", { action: "play", id: "sfx/Body/Heal" })).playing.id === "sfx/Body/Heal/test-1.wav", "the agent plays a sound");
+  // A scene's own sound (Syrinscape's moods per map): kept, started when the scene is opened again, never a player's to change.
+  const room = (id) => ({ id, name: id, width: 500, height: 300, padding: 0, backgroundColor: "#000", grid: { size: 50, type: 1, color: "#000", alpha: 0.2, distance: 5, units: "ft" }, lights: [], tokens: [], walls: [] });
+  gm.send({ type: "scene", scene: room("tavern") });
+  await settle();
+  await tool("kraken_sound", { action: "ambience", do: "clear" });
+  await tool("kraken_sound", { action: "ambience", do: "add", id: "ambience/Tavern" });
+  await tool("kraken_sound", { action: "music", do: "play", id: "music/Battle" });
+  const keptScene = await tool("kraken_sound", { action: "scene", do: "keep" });
+  assert(keptScene.sceneId === "tavern" && keptScene.kept.ambience.length === 1 && keptScene.kept.music, `the tavern keeps its sound: ${JSON.stringify(keptScene)}`);
+  await settle();
+  assert(gm.events.some((event) => event.type === "scene-sound" && event.kept), "the GM's window hears it");
+  gm.send({ type: "scene", scene: room("road") });
+  await settle();
+  await tool("kraken_sound", { action: "ambience", do: "clear" });
+  await tool("kraken_sound", { action: "music", do: "stop" });
+  assert((await tool("kraken_sound", { action: "scene" })).kept === null, "the road has none of its own");
+  gm.send({ type: "scene", scene: room("tavern") });
+  await settle();
+  const back = agent.soundscape();
+  assert(back.ambience.length === 1 && back.ambience[0].id.startsWith("ambience/Tavern") && back.music, `back in the tavern, its sound starts: ${JSON.stringify(back)}`);
+  player.send({ type: "scene-sound", action: "clear" });
+  await settle();
+  assert((await tool("kraken_sound", { action: "scene" })).kept, "a player cannot forget it");
+  assert(server.persisted().sceneSounds.tavern.ambience.length === 1, "saved with the campaign");
+  await tool("kraken_sound", { action: "scene", do: "clear" });
+  assert((await tool("kraken_sound", { action: "scene" })).kept === null, "forgotten");
+
   for (const seat of [gm, player, late]) seat.ws.close();
-  console.log(`SOUND_OK FG's ${FG.length} lines, a battle in the tracker; ${triggers.length} triggers, ${made.size} folders to make`);
+  console.log(`SOUND_OK FG's ${FG.length} lines, a battle in the tracker, creatures' own sounds, a scene's own sound; ${triggers.length} triggers, ${made.size} folders to make`);
 } finally {
   await server.stop();
 }

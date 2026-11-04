@@ -67,6 +67,7 @@ const MESSAGES = {
   ambience: "kraken_sound",
   music: "kraken_sound",
   "sound-triggers": "kraken_sound",
+  "scene-sound": "kraken_sound",
 };
 // Messages that are the connection itself, not something a person does.
 const PLUMBING = new Set(["join"]);
