@@ -150,10 +150,13 @@ export const PRESETS: ({ name: string } & DiceLook)[] = [
 ];
 
 // tray, roll: how big the tray's dice and the dice on the table are (FG's Tray and Roll sizes), 1 = 100%.
-export type DiceSettings = { show: boolean; sound: boolean; volume: number; tray: number; roll: number; look: DiceLook };
-type SettingsPatch = Partial<Omit<DiceSettings, "look">> & { look?: Partial<DiceLook> };
+// npc, damage: FG's other dice sets, the GM's dice for the creatures they roll
+// for, and the dice for damage rolls (anyone's); null is "as my dice".
+export type DiceSettings = { show: boolean; sound: boolean; volume: number; tray: number; roll: number; look: DiceLook; npc: DiceLook | null; damage: DiceLook | null };
+export type DiceSet = "look" | "npc" | "damage";
+type SettingsPatch = Partial<Omit<DiceSettings, "look" | "npc" | "damage">> & { look?: Partial<DiceLook>; npc?: Partial<DiceLook> | null; damage?: Partial<DiceLook> | null };
 const { name: _first, ...firstLook } = PRESETS.find((preset) => preset.name === "Classic Ruby") ?? PRESETS[0];
-const DEFAULTS: DiceSettings = { show: true, sound: true, volume: 0.7, tray: 1, roll: 1, look: firstLook };
+const DEFAULTS: DiceSettings = { show: true, sound: true, volume: 0.7, tray: 1, roll: 1, look: firstLook, npc: null, damage: null };
 
 // A look from another seat (or an older one) with whatever it leaves out filled in.
 export function fullLook(look: Partial<DiceLook>): DiceLook {
@@ -167,7 +170,8 @@ export const SHAPED = new Set([4, 6, 8, 10, 12, 20, 100]);
 function load(): DiceSettings {
   try {
     const saved = JSON.parse(window.localStorage.getItem("kraken-dice") ?? "null");
-    if (saved && typeof saved === "object") return { ...DEFAULTS, ...saved, look: { ...DEFAULTS.look, ...(saved.look ?? {}) } };
+    if (saved && typeof saved === "object")
+      return { ...DEFAULTS, ...saved, look: { ...DEFAULTS.look, ...(saved.look ?? {}) }, npc: saved.npc ? fullLook(saved.npc) : null, damage: saved.damage ? fullLook(saved.damage) : null };
   } catch {
     /* defaults */
   }
@@ -185,7 +189,9 @@ export const diceStore = {
   },
   settings: () => settings,
   update(patch: SettingsPatch) {
-    settings = { ...settings, ...patch, look: { ...settings.look, ...(patch.look ?? {}) } };
+    // A set given parts starts from what it was, or from my dice.
+    const other = (key: "npc" | "damage") => (patch[key] === undefined ? settings[key] : patch[key] === null ? null : { ...(settings[key] ?? settings.look), ...patch[key] });
+    settings = { ...settings, ...patch, look: { ...settings.look, ...(patch.look ?? {}) }, npc: other("npc"), damage: other("damage") };
     try {
       window.localStorage.setItem("kraken-dice", JSON.stringify(settings));
     } catch {
@@ -215,13 +221,15 @@ function clamp(value: number, low: number, high: number) {
 }
 
 // What goes with a roll request: the throw and how this seat's dice look.
-export function throwIntent(): { throw?: DiceThrow; look: DiceLook } {
+export function throwIntent(): { throw?: DiceThrow; look: DiceLook; looks?: { npc?: DiceLook; damage?: DiceLook } } {
   const now = performance.now();
   const look = settings.look;
+  // The other sets go along; the host picks the one the roll is (a creature's, damage).
+  const looks = settings.npc || settings.damage ? { looks: { ...(settings.npc ? { npc: settings.npc } : {}), ...(settings.damage ? { damage: settings.damage } : {}) } } : {};
   if (explicitThrow && now - explicitThrow.at < 1500) {
     const value = explicitThrow.value;
     explicitThrow = null;
-    return { throw: value, look };
+    return { throw: value, look, ...looks };
   }
   if (lastPress && now - lastPress.at < 2500 && typeof window !== "undefined") {
     const x = clamp(lastPress.x / window.innerWidth, 0.02, 0.98);
@@ -229,9 +237,9 @@ export function throwIntent(): { throw?: DiceThrow; look: DiceLook } {
     const dx = 0.5 - x || 0.01;
     const dy = 0.45 - y || 0.01;
     const length = Math.hypot(dx, dy);
-    return { throw: { x, y, vx: (dx / length) * 0.75, vy: (dy / length) * 0.75 }, look };
+    return { throw: { x, y, vx: (dx / length) * 0.75, vy: (dy / length) * 0.75 }, look, ...looks };
   }
-  return { look };
+  return { look, ...looks };
 }
 
 // --- Cards still rolling ----------------------------------------------------

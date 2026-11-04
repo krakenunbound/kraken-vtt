@@ -39,15 +39,19 @@ function diceSettings(patch: DiceSettingsPatch) {
   };
   // A preset is the whole look: pips only where it has them.
   const look = { ...(found ? { pips: Boolean((preset as Partial<DiceLook>).pips) } : {}), ...preset, ...parts };
+  if (patch.set !== undefined && !["mine", "npc", "damage"].includes(patch.set)) throw new Error("set is mine, npc or damage.");
+  const key = patch.set === "npc" ? "npc" : patch.set === "damage" ? "damage" : "look";
+  const changes = Object.keys(look).length > 0;
   diceStore.update({
     ...(typeof patch.show === "boolean" ? { show: patch.show } : {}),
     ...(typeof patch.sound === "boolean" ? { sound: patch.sound } : {}),
     ...(typeof patch.volume === "number" ? { volume: Math.min(1, Math.max(0, patch.volume)) } : {}),
-    look,
+    ...(key === "look" ? { look } : patch.same ? { [key]: null } : changes ? { [key]: look } : {}),
   });
   const now = diceStore.settings();
-  const named = PRESETS.find((item) => (["theme", "body", "ink", "accent", "material", "effect", "font"] as const).every((key) => item[key] === now.look[key]) && Boolean(item.pips) === Boolean(now.look.pips));
-  return { ...now, preset: named?.name ?? "custom" };
+  const nameOf = (value: DiceLook | null) =>
+    value ? PRESETS.find((item) => (["theme", "body", "ink", "accent", "material", "effect", "font"] as const).every((part) => item[part] === value[part]) && Boolean(item.pips) === Boolean(value.pips))?.name ?? "custom" : "as my dice";
+  return { ...now, preset: nameOf(now.look), npcSet: nameOf(now.npc), damageSet: nameOf(now.damage) };
 }
 
 type TableAdventure = {

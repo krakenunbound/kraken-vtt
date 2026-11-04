@@ -60,7 +60,7 @@ The app starts the MCP server when it opens. `electron/agent/mcp-stdio.cjs` is t
 | GM-only roll (the GM's dice tower) | `kraken_roll` with `secret` |
 | Dice tower: players see their own result | `kraken_table_options` |
 | Settings: Background Decal, Desktop Wallpaper and GM Icon (pick, a set for each game, Browse to import a picture, none) | `kraken_decal` (`kind` decal, wallpaper or gmicon) |
-| The Dice window: sets, dice, accent and number colours, design, material, lettering, effects, crit flare, 3D, sound | `kraken_dice_settings` |
+| The Dice window: sets, dice, accent and number colours, design, material, lettering, effects, crit flare, 3D, sound; NPC dice and damage dice | `kraken_dice_settings` (`set` npc or damage) |
 | Fix the next dice (tests, parity runs) | `kraken_dice_force`, `kraken_dice_clear` |
 | **Windows** | |
 | Sidebar windows (Settings and the decal picker too) and character sheets: open, close, pop out to another monitor, dock back | `kraken_windows` |
