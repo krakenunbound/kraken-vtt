@@ -45,6 +45,17 @@ try {
     await page.waitForTimeout(400);
     await (await page.$(".cc-sheet")).screenshot({ path: path.join(tmpdir(), `kraken-sheet-${tab}.png`) });
   }
+  // The whole table: the tabs hanging off the window, the quick slots docked.
+  await shot("window");
+  const grip = await page.$('[data-action="quickslots-move"]');
+  if (grip) {
+    const box = await grip.boundingBox();
+    await page.mouse.move(box.x + 5, box.y + 10);
+    await page.mouse.down();
+    await page.mouse.move(box.x - 300, box.y - 400, { steps: 8 });
+    await page.mouse.up();
+    await shot("slots-undocked");
+  }
   console.log("saved", path.join(tmpdir(), "kraken-sheet-<tab>.png"));
 } finally {
   child.kill();

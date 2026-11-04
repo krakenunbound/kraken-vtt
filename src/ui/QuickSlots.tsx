@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { QuickSlot, Session } from "../session/useSession";
 import { Icon } from "./icons";
 import { useWindows } from "./Windows";
@@ -71,14 +71,81 @@ export function stopSoundForTable(session: Session, id: string, kind: string) {
   else session.soundCommand({ type: "sound-stop", id });
 }
 
+// Where the bar sits: docked (centred along the bottom) or undocked at a
+// place of this screen's choosing, kept on this screen.
+const PLACE_KEY = "kraken-quickslots-place";
+type Place = { x: number; y: number } | null;
+function readPlace(): Place {
+  try {
+    const value = JSON.parse(window.localStorage.getItem(PLACE_KEY) ?? "null");
+    return value && Number.isFinite(value.x) && Number.isFinite(value.y) ? value : null;
+  } catch {
+    return null;
+  }
+}
+function keepPlace(place: Place) {
+  try {
+    if (place) window.localStorage.setItem(PLACE_KEY, JSON.stringify(place));
+    else window.localStorage.removeItem(PLACE_KEY);
+  } catch {
+    /* this screen only */
+  }
+}
+
 export function QuickSlots({ session }: { session: Session }) {
   const openLink = useOpenLink(session);
   const [over, setOver] = useState(-1);
+  const [place, setPlace] = useState<Place>(readPlace);
+  const bar = useRef<HTMLDivElement>(null);
   const slots = session.quickSlots;
   const set = (index: number, slot: QuickSlot | null) => session.setQuickSlots(slots.map((item, at) => (at === index ? slot : item)));
   const open = openLink;
+  // Inside the table area, whatever the window's size.
+  const clamp = (x: number, y: number) => {
+    const parent = bar.current?.offsetParent as HTMLElement | null;
+    const width = bar.current?.offsetWidth ?? 0;
+    const height = bar.current?.offsetHeight ?? 0;
+    if (!parent) return { x, y };
+    return { x: Math.max(0, Math.min(parent.clientWidth - width, x)), y: Math.max(0, Math.min(parent.clientHeight - height, y)) };
+  };
+  useEffect(() => {
+    if (!place) return;
+    const refit = () => setPlace((current) => (current ? clamp(current.x, current.y) : current));
+    refit();
+    window.addEventListener("resize", refit);
+    return () => window.removeEventListener("resize", refit);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [place === null]);
+  // Drag the grip: the bar comes off the dock and goes where it is put.
+  const grab = (event: React.PointerEvent) => {
+    const element = bar.current;
+    if (!element || event.button !== 0) return;
+    event.preventDefault();
+    const start = { x: event.clientX, y: event.clientY, left: element.offsetLeft, top: element.offsetTop };
+    let moved: Place = null;
+    const move = (next: PointerEvent) => {
+      moved = clamp(start.left + next.clientX - start.x, start.top + next.clientY - start.y);
+      setPlace(moved);
+    };
+    const up = () => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
+      if (moved) keepPlace(moved);
+    };
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
+  };
+  const dock = () => {
+    setPlace(null);
+    keepPlace(null);
+  };
   return (
-    <div className="quick-slots" role="toolbar" aria-label="Quick slots">
+    <div ref={bar} className={place ? "quick-slots undocked" : "quick-slots"} role="toolbar" aria-label="Quick slots" data-docked={place ? "false" : "true"} style={place ? { left: place.x, top: place.y } : undefined}>
+      <span className="quick-slots-grip" title={place ? "Drag to move the quick slots" : "Drag to undock and move the quick slots"} aria-label="Move quick slots" data-action="quickslots-move" onPointerDown={grab} onDoubleClick={dock}>
+        <i />
+        <i />
+        <i />
+      </span>
       {slots.map((slot, index) => (
         <button
           key={index}
@@ -116,6 +183,11 @@ export function QuickSlots({ session }: { session: Session }) {
           )}
         </button>
       ))}
+      {place ? (
+        <button type="button" className="quick-slots-dock" title="Dock the quick slots at the bottom" aria-label="Dock quick slots" data-action="quickslots-dock" onClick={dock}>
+          <Icon name="dock" size={14} />
+        </button>
+      ) : null}
     </div>
   );
 }
