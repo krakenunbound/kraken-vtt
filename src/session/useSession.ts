@@ -62,6 +62,7 @@ export type TableMap = {
   mask?: MapMask | null;
   labels?: MapLabel[];
   groups?: MapGroup[];
+  fx?: MapFx[];
 };
 // Text on the map (FG's text layers): labels, numbers, pins.
 export type MapLabel = { id: string; x: number; y: number; text: string; font: string; size: number; color: string; rotation: number; anchor: string; outline: { width: number; color: string }; shadow: { offset: number; blur: number; color: string }; hidden: boolean; group: string; number: number | null; icon: string; link: { kind: string; id: string } | null };
@@ -69,7 +70,9 @@ export type MapGroup = { name: string; shown?: boolean; players?: boolean; locke
 export type MapMask = { on: boolean; shapes: { id: string; mode: "reveal" | "hide"; points: number[] }[] };
 export type Ping = { id: number; x: number; y: number; from: string; color: string };
 // A line drawn on the map, for everyone (by "" is the GM's).
-export type MapDrawing = { id: string; by: string; color: string; width: number; points: number[] };
+export type MapDrawing = { id: string; by: string; color: string; width: number; points: number[]; shape?: "line" | "rect" | "ellipse" | "poly"; fill?: string; fillAlpha?: number; alpha?: number; group?: string };
+// An FX layer (FG's FX tab).
+export type MapFx = { id: string; name: string; type: import("../table/Weather").WeatherType; amount: number; intensity: number; speed: number; direction: number; mask: { use: boolean; mode: "inside" | "outside"; polygons: number[][] }; group: string; players: boolean; shown: boolean };
 const EMPTY_MAP: TableMap = { sceneId: null, tokens: [], doors: [], vision: null,
   sight: false,
   locked: false,
@@ -808,6 +811,8 @@ export function useSession() {
   const wall = useCallback((action: string, payload: Record<string, unknown> = {}) => send({ type: "wall", action, ...payload }), [send]);
   const mapUndo = useCallback(() => send({ type: "map-undo" }), [send]);
   const mask = useCallback((action: string, payload: Record<string, unknown> = {}) => send({ type: "mask", action, ...payload }), [send]);
+  const paint = useCallback((payload: Record<string, unknown>) => send({ type: "draw", ...payload }), [send]);
+  const fx = useCallback((action: string, payload: Record<string, unknown> = {}) => send({ type: "fx", action, ...payload }), [send]);
   const label = useCallback((action: string, payload: Record<string, unknown> = {}) => send({ type: "label", action, ...payload }), [send]);
   const mapGroup = useCallback((action: string, payload: Record<string, unknown> = {}) => send({ type: "map-group", action, ...payload }), [send]);
   const placeLight = useCallback((light: Partial<SceneLightRecord> & { preset?: string }) => send({ type: "light-place", light }), [send]);
@@ -941,6 +946,8 @@ export function useSession() {
     mask,
     label,
     mapGroup,
+    paint,
+    fx,
     changeClass,
   };
 }

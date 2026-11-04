@@ -71,7 +71,7 @@ const HAZE_SHADER = `
 // Weather over the map (three.js). Particles fall in screen space with the
 // wind; haze, cloud shadows and water are anchored to the map, so they move
 // when the view is panned or zoomed.
-export function Weather({ type, intensity, direction, camera }: { type: WeatherType; intensity: number; direction: number; camera: Camera }) {
+export function Weather({ type, intensity, direction, camera, amount = 1, speed = 0.5, clip }: { type: WeatherType; intensity: number; direction: number; camera: Camera; amount?: number; speed?: number; clip?: string }) {
   const host = useRef<HTMLDivElement>(null);
   const cameraRef = useRef(camera);
   cameraRef.current = camera;
@@ -134,7 +134,9 @@ export function Weather({ type, intensity, direction, camera }: { type: WeatherT
     resize();
 
     // Particles: positions in screen pixels, each with its own speed and sway.
-    const count = Math.round(kind.count * (0.25 + intensity * 0.75));
+    // FG's Amount scales how many; Speed from a quarter to twice as fast.
+    const count = Math.round(kind.count * (0.25 + intensity * 0.75) * Math.max(0.05, amount));
+    const pace = 0.25 + speed * 1.75 * (0.5 / 0.5875);
     const positions = new Float32Array(count * (kind.streak ? 6 : 3));
     const seeds = new Float32Array(count * 3);
     for (let index = 0; index < count; index += 1) {
@@ -194,8 +196,8 @@ export function Weather({ type, intensity, direction, camera }: { type: WeatherT
       for (let index = 0; index < count; index += 1) {
         const s = seeds[index * 3 + 2];
         const sway = kind.streak ? 0 : Math.sin(t * 1.3 + index) * 12 * dt;
-        let x = seeds[index * 3] + (wind.x * kind.speed * drift * s + sway * 40) * dt;
-        let y = seeds[index * 3 + 1] + (fall * kind.speed * s + wind.y * kind.speed * drift * s) * dt;
+        let x = seeds[index * 3] + (wind.x * kind.speed * pace * drift * s + sway * 40) * dt;
+        let y = seeds[index * 3 + 1] + (fall * kind.speed * pace * s + wind.y * kind.speed * pace * drift * s) * dt;
         if (y > height + 20) y -= height + 40;
         if (y < -20) y += height + 40;
         if (x > width + 20) x -= width + 40;
@@ -226,8 +228,8 @@ export function Weather({ type, intensity, direction, camera }: { type: WeatherT
       renderer.dispose();
       renderer.domElement.remove();
     };
-  }, [type, intensity, direction]);
+  }, [type, intensity, direction, amount, speed]);
 
   if (type === "none") return null;
-  return <div className="weather" ref={host} data-weather={type} aria-hidden="true" />;
+  return <div className="weather" ref={host} data-weather={type} aria-hidden="true" style={clip ? { clipPath: clip } : undefined} />;
 }

@@ -362,7 +362,7 @@ const TOOLS = [
   },
   {
     name: "kraken_draw",
-    description: "Drawing on the open scene, for everyone, as the map toolbar's pen: action list (the lines: id, who drew it, colour, width, points), draw (points: [x, y, x, y, ...] in scene pixels, colour #rrggbb, width), erase (id), clear (every line).",
+    description: "Drawing on the open scene, for everyone, as the map toolbar's pen, and the GM's paint (the map editor's Paint tab): action list (the lines: id, who drew it, colour, width, points, shape, fill, group), draw (points: [x, y, x, y, ...] in scene pixels, colour #rrggbb, width; the GM also: shape free, line, rect or ellipse (points: two corners), poly (closed), fill #rrggbb and fillAlpha 0..1, alpha 0..1, group: a layer group (made if new; a group players may not see keeps its paint with the GM)), erase (id), clear (every line).",
     inputSchema: object(
       {
         action: { type: "string", enum: ["list", "draw", "erase", "clear"] },
@@ -370,12 +370,17 @@ const TOOLS = [
         color: string("#rrggbb"),
         width: number("Line width in scene pixels"),
         id: string("A line's id (erase)"),
+        shape: { type: "string", enum: ["free", "line", "rect", "ellipse", "poly"] },
+        fill: string("#rrggbb fill (rect, ellipse, poly)"),
+        fillAlpha: number("0..1"),
+        alpha: number("Line opacity 0..1"),
+        group: string("Layer group"),
       },
       ["action"],
     ),
     run(args, ctx) {
       const table = needTable(ctx);
-      if (args.action === "draw") return out(table.map.draw({ points: args.points, color: args.color, width: args.width }, table.seat));
+      if (args.action === "draw") return out(table.map.draw({ points: args.points, color: args.color, width: args.width, shape: args.shape, fill: args.fill, fillAlpha: args.fillAlpha, alpha: args.alpha, group: args.group }, table.seat));
       if (args.action === "erase") {
         table.map.erase(String(args.id ?? ""), table.seat);
         return out({ erased: args.id });
@@ -992,6 +997,40 @@ const TOOLS = [
       }
       const { action: _a, name, rename, ...patch } = args;
       return out(map.updateGroup(name, { ...patch, ...(rename ? { name: rename } : {}) }, seat));
+    },
+  },
+  {
+    name: "kraken_fx",
+    description:
+      "FX layers on the scene (FG's FX tab): several at once, each rain, storm, snow, blizzard, fog, clouds, sandstorm, embers, ash, leaves or water, with FG's sliders amount, intensity, speed (0..1) and direction (degrees the wind blows toward), and a mask it fills (mode inside: only there, as water in a river) or leaves clear (outside: everywhere but there, as rain not under a roof). action list; add (type, name, amount, intensity, speed, direction, mask {use, mode, polygons: [[x1, y1, ...], ...]} or maskRect {x, y, width, height}, group, players false for the GM's eyes only); update (id and fields); remove (id).",
+    inputSchema: object({
+      action: { type: "string", enum: ["list", "add", "update", "remove"] },
+      id: string("FX layer id"),
+      type: { type: "string", enum: ["rain", "storm", "snow", "blizzard", "fog", "clouds", "sandstorm", "embers", "ash", "leaves", "water"] },
+      name: string("A name for the list"),
+      amount: number("0..1"),
+      intensity: number("0..1"),
+      speed: number("0..1"),
+      direction: number("Degrees"),
+      mask: { type: "object" },
+      maskRect: { type: "object", properties: { x: { type: "number" }, y: { type: "number" }, width: { type: "number" }, height: { type: "number" } } },
+      maskMode: { type: "string", enum: ["inside", "outside"] },
+      group: string("Layer group"),
+      players: { type: "boolean" },
+      shown: { type: "boolean" },
+    }, ["action"]),
+    run(args, ctx) {
+      const { map, seat } = needTable(ctx);
+      const { action, id, maskRect, maskMode, ...fields } = args;
+      if (maskRect) {
+        const { x, y, width, height } = maskRect;
+        fields.mask = { use: true, mode: maskMode ?? "inside", polygons: [[x, y, x + width, y, x + width, y + height, x, y + height]] };
+      } else if (maskMode) fields.mask = { ...(fields.mask ?? {}), mode: maskMode };
+      if (action === "list") return out(map.fx());
+      if (action === "add") return out(map.addFx(fields, seat));
+      if (action === "update") return out(map.updateFx(id, fields, seat));
+      map.removeFx(id, seat);
+      return out({ removed: id });
     },
   },
   {

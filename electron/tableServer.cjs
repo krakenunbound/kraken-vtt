@@ -1193,7 +1193,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
 
       // The map: tokens, doors, line of sight and pings (mapState.cjs decides
       // who may do what).
-      if (["token-place", "token-move", "token-remove", "token-update", "door", "sight", "lock", "scene-settings", "light-place", "light-update", "light-remove", "draw", "draw-erase", "draw-clear", "wall", "map-undo", "mask", "label", "map-group"].includes(msg.type)) {
+      if (["token-place", "token-move", "token-remove", "token-update", "door", "sight", "lock", "scene-settings", "light-place", "light-update", "light-remove", "draw", "draw-erase", "draw-clear", "wall", "map-undo", "mask", "label", "map-group", "fx"].includes(msg.type)) {
         const seat = seatOf(client);
         try {
           if (msg.type === "token-place") {
@@ -1215,7 +1215,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
           } else if (msg.type === "scene-settings") {
             map.updateSettings(msg.patch ?? {}, seat);
           } else if (msg.type === "draw") {
-            map.draw({ points: msg.points, color: msg.color, width: msg.width }, seat);
+            map.draw({ points: msg.points, color: msg.color, width: msg.width, shape: msg.shape, fill: msg.fill, fillAlpha: msg.fillAlpha, alpha: msg.alpha, group: msg.group }, seat);
           } else if (msg.type === "draw-erase") {
             map.erase(String(msg.id ?? ""), seat);
           } else if (msg.type === "draw-clear") {
@@ -1244,6 +1244,11 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
             else if (msg.action === "remove") map.removeLabel(String(msg.id ?? ""), seat);
             else if (msg.action === "renumber") map.renumber(String(msg.group ?? ""), seat, num(msg.start, 1));
             else throw new Error("What should the text do?");
+          } else if (msg.type === "fx") {
+            if (msg.action === "add") map.addFx(msg.fx ?? {}, seat);
+            else if (msg.action === "update") map.updateFx(String(msg.id ?? ""), msg.patch ?? {}, seat);
+            else if (msg.action === "remove") map.removeFx(String(msg.id ?? ""), seat);
+            else throw new Error("What should the effect do?");
           } else if (msg.type === "map-group") {
             if (msg.action === "remove") map.removeGroup(String(msg.name ?? ""), seat);
             else map.updateGroup(String(msg.name ?? ""), msg.patch ?? {}, seat);

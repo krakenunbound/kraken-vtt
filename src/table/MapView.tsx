@@ -4,7 +4,7 @@ import { backgroundRect, colorWithAlpha, gridStops, sceneFrame, type BackgroundF
 import { type SceneLight, type SceneMarker, type SceneRegion, type SceneWall } from "../foundry/sceneObjects";
 import { gridDistance, gridKind, gridOrigin, hexCorners, hexOf, LIGHT_PRESETS, snapCenter, withGrid } from "../../shared/map/geometry.mjs";
 import type { EditWall, MapToken, Ping, SceneLightRecord, TableMap, TableRecord, WallKind } from "../session/useSession";
-import { MapEditor, kindColor, type EditTab, type EditTool, type LabelStyle } from "./MapEditor";
+import { MapEditor, kindColor, type EditTab, type EditTool, type LabelStyle, type PaintStyle } from "./MapEditor";
 import { Lighting } from "./Lighting";
 import { SceneGraphics, SceneLegend, type OverlayToken } from "./SceneOverlay";
 import { SceneSettings, type SceneSettingsPatch } from "./SceneSettings";
@@ -134,6 +134,8 @@ export type MapActions = {
   mask?: (action: string, payload?: Record<string, unknown>) => void;
   label?: (action: string, payload?: Record<string, unknown>) => void;
   mapGroup?: (action: string, payload?: Record<string, unknown>) => void;
+  paint?: (payload: Record<string, unknown>) => void;
+  fx?: (action: string, payload?: Record<string, unknown>) => void;
   mapUndo?: () => void;
 };
 // What a left-drag does on the map: pan it, ping, draw, or rub a line out.
@@ -187,6 +189,9 @@ export function MapView({
   const [maskMode, setMaskMode] = useState<"reveal" | "hide">("reveal");
   const [labelStyle, setLabelStyle] = useState<LabelStyle>({ text: "", font: "Bebas Neue", size: 1, color: "#ffffff", outline: { width: 2, color: "#000000" }, shadow: { offset: 0, blur: 0, color: "#000000" }, group: "", icon: "" });
   const [selectedLabel, setSelectedLabel] = useState<string | null>(null);
+  const [paintStyle, setPaintStyle] = useState<PaintStyle>({ color: "#c0392b", width: 6, alpha: 1, fill: null, fillAlpha: 0.4, group: "" });
+  const [selectedFx, setSelectedFx] = useState<string | null>(null);
+  const paintStroke = useRef<{ pointerId: number; points: number[] } | null>(null);
   const [hover, setHover] = useState<{ x: number; y: number } | null>(null);
   const [drawColor, setDrawColor] = useState<string | null>(null);
   const [stroke, setStroke] = useState<{ pointerId: number; points: number[] } | null>(null);
@@ -515,6 +520,12 @@ export function MapView({
     return best;
   }
   function finishShape() {
+    if (editTab === "paint" && editTool === "poly" && pending.length >= 6 && actions.paint) {
+      actions.paint({ shape: "poly", points: pending, color: paintStyle.color, width: paintStyle.width, alpha: paintStyle.alpha, ...(paintStyle.fill ? { fill: paintStyle.fill, fillAlpha: paintStyle.fillAlpha } : {}), ...(paintStyle.group ? { group: paintStyle.group } : {}) });
+      setPending([]);
+      setHover(null);
+      return;
+    }
     if (editTab === "mask" && editTool === "poly" && pending.length >= 6 && actions.mask) actions.mask(maskMode, { points: pending });
     else if (editTool === "poly" && pending.length >= 6 && actions.wall) actions.wall("add", { wall: { points: pending, closed: true, kind: wallKind } });
     setPending([]);
@@ -576,6 +587,35 @@ export function MapView({
         }
         if (event.button !== 0) return;
         setSelected(null);
+        if (gm && editorOpen && editTool && editTab === "fx" && editTool === "fxmask" && actions.fx && selectedFx) {
+          // The FX layer's mask: a rectangle, two clicks.
+          const raw = worldAt(event.clientX, event.clientY);
+          if (!raw) return;
+          if (pending.length >= 2) {
+            const [x1, y1] = pending;
+            actions.fx("update", { id: selectedFx, patch: { mask: { use: true, polygons: [[x1, y1, raw.x, y1, raw.x, raw.y, x1, raw.y].map(Math.round)] } } });
+            setPending([]);
+          } else setPending([Math.round(raw.x), Math.round(raw.y)]);
+          return;
+        }
+        if (gm && editorOpen && editTool && editTab === "paint" && actions.paint) {
+          // The GM's paint: freehand by dragging; lines, rectangles, ellipses by two clicks; shapes by corners.
+          const raw = worldAt(event.clientX, event.clientY);
+          if (!raw) return;
+          const point = { x: Math.round(raw.x), y: Math.round(raw.y) };
+          const style = { color: paintStyle.color, width: paintStyle.width, alpha: paintStyle.alpha, ...(paintStyle.fill ? { fill: paintStyle.fill, fillAlpha: paintStyle.fillAlpha } : {}), ...(paintStyle.group ? { group: paintStyle.group } : {}) };
+          if (editTool === "free") {
+            capture(event.currentTarget, event.pointerId);
+            paintStroke.current = { pointerId: event.pointerId, points: [point.x, point.y] };
+            setStroke({ pointerId: -1, points: [point.x, point.y] });
+          } else if (editTool === "line" || editTool === "rect" || editTool === "ellipse") {
+            if (pending.length >= 2) {
+              actions.paint({ ...style, shape: editTool, points: [pending[0], pending[1], point.x, point.y] });
+              setPending([]);
+            } else setPending([point.x, point.y]);
+          } else if (editTool === "poly") setPending((current) => [...current, point.x, point.y]);
+          return;
+        }
         if (gm && editorOpen && editTool && editTab === "text" && actions.label) {
           // Text: place it, drop the next number, or select a label.
           const raw = worldAt(event.clientX, event.clientY);
@@ -653,6 +693,16 @@ export function MapView({
         setPanning(true);
       }}
       onPointerMove={(event) => {
+        if (paintStroke.current && paintStroke.current.pointerId === event.pointerId) {
+          const point = worldAt(event.clientX, event.clientY);
+          const current = paintStroke.current;
+          const [lastX, lastY] = current.points.slice(-2);
+          if (point && Math.hypot(point.x - lastX, point.y - lastY) > 3 / camera.scale && current.points.length < 3990) {
+            current.points.push(Math.round(point.x), Math.round(point.y));
+            setStroke({ pointerId: -1, points: [...current.points] });
+          }
+          return;
+        }
         if (gm && editorOpen && pending.length >= 2) {
           const point = worldAt(event.clientX, event.clientY);
           if (point) setHover(snapPoint(point, !event.shiftKey));
@@ -685,6 +735,13 @@ export function MapView({
         setCamera((camera) => ({ ...camera, x: camera.x + dx, y: camera.y + dy }));
       }}
       onPointerUp={(event) => {
+        if (paintStroke.current && paintStroke.current.pointerId === event.pointerId) {
+          const points = paintStroke.current.points.length >= 4 ? paintStroke.current.points : [...paintStroke.current.points, paintStroke.current.points[0] + 1, paintStroke.current.points[1] + 1];
+          actions.paint?.({ points, color: paintStyle.color, width: paintStyle.width, alpha: paintStyle.alpha, ...(paintStyle.group ? { group: paintStyle.group } : {}) });
+          paintStroke.current = null;
+          setStroke(null);
+          return;
+        }
         if (lightDrag.current && lightDrag.current.pointerId === event.pointerId) {
           const point = worldAt(event.clientX, event.clientY);
           if (point) actions.updateLight(lightDrag.current.id, { x: Math.round(point.x), y: Math.round(point.y) });
@@ -1044,9 +1101,16 @@ export function MapView({
         ) : null}
         {(map.drawings?.length ?? 0) > 0 || stroke ? (
           <svg className="overlay drawings" width={frame.worldWidth} height={frame.worldHeight} viewBox={`0 0 ${frame.worldWidth} ${frame.worldHeight}`}>
-            {(map.drawings ?? []).map((line) => (
-              <polyline key={line.id} data-drawing={line.id} points={line.points.join(" ")} fill="none" stroke={line.color} strokeWidth={line.width} strokeLinecap="round" strokeLinejoin="round" />
-            ))}
+            {(map.drawings ?? [])
+              .filter((line) => !line.group || (map.groups ?? []).find((group) => group.name === line.group)?.shown !== false)
+              .map((line) => {
+                const common = { key: line.id, "data-drawing": line.id, stroke: line.color, strokeWidth: line.width, strokeOpacity: line.alpha ?? 1, fill: line.fill ?? "none", fillOpacity: line.fill ? (line.fillAlpha ?? 0.5) : 0, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
+                const [x1, y1, x2, y2] = line.points;
+                if (line.shape === "rect") return <rect {...common} x={Math.min(x1, x2)} y={Math.min(y1, y2)} width={Math.abs(x2 - x1)} height={Math.abs(y2 - y1)} />;
+                if (line.shape === "ellipse") return <ellipse {...common} cx={(x1 + x2) / 2} cy={(y1 + y2) / 2} rx={Math.abs(x2 - x1) / 2} ry={Math.abs(y2 - y1) / 2} />;
+                if (line.shape === "poly") return <polygon {...common} points={line.points.join(" ")} />;
+                return <polyline {...common} fill="none" points={line.points.join(" ")} />;
+              })}
             {stroke ? <polyline points={stroke.points.join(" ")} fill="none" stroke={drawColor ?? "#ffcc33"} strokeWidth={Math.max(2, Math.round(4 / camera.scale))} strokeLinecap="round" strokeLinejoin="round" opacity={0.8} /> : null}
           </svg>
         ) : null}
@@ -1083,6 +1147,27 @@ export function MapView({
         ) : null}
       </div>
 
+      {map.sceneId === scene.id
+        ? (map.fx ?? [])
+            .filter((layer) => layer.shown && (!layer.group || (map.groups ?? []).find((group) => group.name === layer.group)?.shown !== false))
+            .map((layer) => {
+              // The FX layer's mask, in screen pixels: only inside, or everywhere but inside.
+              let clip: string | undefined;
+              if (layer.mask.use && layer.mask.polygons.length) {
+                const shapes = layer.mask.polygons.map((points) => {
+                  const xy: string[] = [];
+                  for (let i = 0; i < points.length; i += 2) xy.push(`${Math.round(points[i] * camera.scale + camera.x)} ${Math.round(points[i + 1] * camera.scale + camera.y)}`);
+                  return `M${xy.join(" L")} Z`;
+                });
+                clip = layer.mask.mode === "outside" ? `path(evenodd, "M-99999 -99999 H99999 V99999 H-99999 Z ${shapes.join(" ")}")` : `path("${shapes.join(" ")}")`;
+              }
+              return (
+                <Suspense key={layer.id} fallback={null}>
+                  <Weather type={layer.type} intensity={layer.intensity} direction={layer.direction} amount={layer.amount} speed={layer.speed} camera={camera} clip={clip} />
+                </Suspense>
+              );
+            })
+        : null}
       {map.sceneId === scene.id && map.settings.weather.type !== "none" ? (
         <Suspense fallback={null}>
           <Weather type={map.settings.weather.type} intensity={map.settings.weather.intensity} direction={map.settings.weather.direction} camera={camera} />
@@ -1403,8 +1488,12 @@ export function MapView({
           setMaskMode={setMaskMode}
           labelStyle={labelStyle}
           setLabelStyle={setLabelStyle}
+          paintStyle={paintStyle}
+          setPaintStyle={setPaintStyle}
+          selectedFx={selectedFx}
+          setSelectedFx={setSelectedFx}
           selectedLabel={selectedLabel}
-          actions={{ label: actions.label ?? (() => undefined), mapGroup: actions.mapGroup ?? (() => undefined), mask: actions.mask ?? (() => undefined), wall: actions.wall, mapUndo: actions.mapUndo, updateSettings: actions.updateSettings, updateLight: actions.updateLight, removeLight: actions.removeLight }}
+          actions={{ fx: actions.fx ?? (() => undefined), clearDrawings: actions.clearDrawings, label: actions.label ?? (() => undefined), mapGroup: actions.mapGroup ?? (() => undefined), mask: actions.mask ?? (() => undefined), wall: actions.wall, mapUndo: actions.mapUndo, updateSettings: actions.updateSettings, updateLight: actions.updateLight, removeLight: actions.removeLight }}
           onClose={() => setEditorOpen(false)}
         />
       ) : null}

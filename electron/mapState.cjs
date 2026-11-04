@@ -218,7 +218,42 @@ function cleanDrawing(raw) {
   const points = raw.points.slice(0, 4000).map(Number);
   if (points.length < 4 || points.length % 2 || !points.every((value) => Number.isFinite(value) && Math.abs(value) < 1e7)) return null;
   const color = /^#[0-9a-f]{6}$/i.test(String(raw.color)) ? String(raw.color) : "#ffcc33";
-  return { id: text(raw.id, "") || crypto.randomBytes(6).toString("hex"), by: text(raw.by, "").slice(0, 24), color, width: Math.min(80, Math.max(1, num(raw.width, 6))), points: points.map((value) => Math.round(value * 10) / 10) };
+  const line = { id: text(raw.id, "") || crypto.randomBytes(6).toString("hex"), by: text(raw.by, "").slice(0, 24), color, width: Math.min(80, Math.max(1, num(raw.width, 6))), points: points.map((value) => Math.round(value * 10) / 10) };
+  // The GM's paint (FG's Paint tab, Foundry's drawings): a shape, a fill, an opacity, a group.
+  const shape = ["free", "line", "rect", "ellipse", "poly"].includes(raw.shape) ? raw.shape : "free";
+  if (shape !== "free") line.shape = shape;
+  if (raw.fill && /^#[0-9a-f]{6}$/i.test(String(raw.fill))) {
+    line.fill = String(raw.fill);
+    line.fillAlpha = Math.min(1, Math.max(0, num(raw.fillAlpha, 0.5)));
+  }
+  if (raw.alpha != null) line.alpha = Math.min(1, Math.max(0.05, num(raw.alpha, 1)));
+  if (raw.group) line.group = text(raw.group, "").slice(0, 40);
+  return line;
+}
+
+// An FX layer (FG's FX tab): rain, snow, fog... with FG's sliders (0..1) and
+// a mask it fills (inside) or leaves (outside). players false: the GM's only.
+const FX_TYPES = ["rain", "storm", "snow", "blizzard", "fog", "clouds", "sandstorm", "embers", "ash", "leaves", "water"];
+function cleanFx(raw) {
+  if (!raw || typeof raw !== "object") return null;
+  const unit = (value, fallback) => Math.min(1, Math.max(0, num(value, fallback)));
+  const polygons = (Array.isArray(raw.mask?.polygons) ? raw.mask.polygons : [])
+    .map((points) => (Array.isArray(points) ? points.slice(0, 2000).map(Number) : []))
+    .filter((points) => points.length >= 6 && points.length % 2 === 0 && points.every(Number.isFinite))
+    .slice(0, 50);
+  return {
+    id: text(raw.id, "").slice(0, 40) || `fx-${crypto.randomBytes(5).toString("hex")}`,
+    name: text(raw.name, "").slice(0, 40),
+    type: FX_TYPES.includes(raw.type) ? raw.type : "rain",
+    amount: unit(raw.amount, 1),
+    intensity: unit(raw.intensity, 0.5),
+    speed: unit(raw.speed, 0.5),
+    direction: ((num(raw.direction, 250) % 360) + 360) % 360,
+    mask: { use: Boolean(raw.mask?.use) && polygons.length > 0, mode: raw.mask?.mode === "outside" ? "outside" : "inside", polygons },
+    group: text(raw.group, "").slice(0, 40),
+    players: raw.players !== false,
+    shown: raw.shown !== false,
+  };
 }
 
 function savedMap(value) {
@@ -233,7 +268,9 @@ function savedMap(value) {
   const masks = {};
   const labels = {};
   const groups = {};
-  if (!value || typeof value !== "object") return { tokens, doors, sight, locked, settings, lights, drawings, walls, masks, labels, groups };
+  const fx = {};
+  if (!value || typeof value !== "object") return { tokens, doors, sight, locked, settings, lights, drawings, walls, masks, labels, groups, fx };
+  for (const [sceneId, list] of Object.entries(value.fx ?? {}).slice(0, 500)) if (Array.isArray(list)) fx[sceneId.slice(0, 80)] = list.map(cleanFx).filter(Boolean).slice(0, 20);
   for (const [sceneId, list] of Object.entries(value.labels ?? {}).slice(0, 500)) if (Array.isArray(list)) labels[sceneId.slice(0, 80)] = list.map(cleanLabel).filter(Boolean).slice(0, 2000);
   for (const [sceneId, list] of Object.entries(value.groups ?? {}).slice(0, 500)) if (Array.isArray(list)) groups[sceneId.slice(0, 80)] = list.map(cleanGroup).filter(Boolean).slice(0, 100);
   for (const [sceneId, mask] of Object.entries(value.masks ?? {}).slice(0, 500)) masks[sceneId.slice(0, 80)] = cleanMask(mask);
@@ -261,7 +298,7 @@ function savedMap(value) {
   for (const [sceneId, list] of Object.entries(value.drawings ?? {}).slice(0, 500)) {
     if (Array.isArray(list)) drawings[sceneId.slice(0, 80)] = list.map(cleanDrawing).filter(Boolean).slice(-MAX_DRAWINGS);
   }
-  return { tokens, doors, sight, locked, settings, lights, drawings, walls, masks, labels, groups };
+  return { tokens, doors, sight, locked, settings, lights, drawings, walls, masks, labels, groups, fx };
 }
 const MAX_DRAWINGS = 400;
 
@@ -295,6 +332,11 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
     // The scene's own grid is kept beside the GM's, so clearing a setting goes back to it.
     scene.baseGrid = scene.baseGrid ?? { ...scene.grid };
     scene.grid = geometry.withGrid({ grid: scene.baseGrid }, settingsHere().grid).grid;
+  }
+  function fxHere() {
+    if (!scene) return [];
+    state.fx[scene.id] = state.fx[scene.id] ?? [];
+    return state.fx[scene.id];
   }
   function labelsHere() {
     if (!scene) return [];
@@ -544,7 +586,7 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       .map((wall) => ({ id: wall.id, x1: wall.x1, y1: wall.y1, x2: wall.x2, y2: wall.y2, secret: wall.door === 2 || wall.toggle === "gm", kind: wall.door > 0 ? "door" : wall.kind, state: wall.id in doors ? doors[wall.id] : wall.ds }));
     const mask = maskHere();
     const groups = groupsHere();
-    const shared = { sceneId: scene.id, sight: sightOn(), locked, darkness: dark, settings: { grid: settings.grid, weather: settings.weather, darkness: settings.darkness }, drawings: drawingsHere(), mask: mask.on || mask.shapes.length ? mask : null, groups };
+    const shared = { sceneId: scene.id, sight: sightOn(), locked, darkness: dark, settings: { grid: settings.grid, weather: settings.weather, darkness: settings.darkness }, drawings: drawingsHere(), mask: mask.on || mask.shapes.length ? mask : null, groups, fx: fxHere() };
     const lightOut = (list) => list.map(({ id, x, y, brightPx, dimPx, color, polygon }) => ({ id, x, y, brightPx, dimPx, color, polygon }));
     if (seat.role === "dm") {
       return {
@@ -587,6 +629,9 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       twilight,
       sceneLights: [],
       // Labels: not hidden, in a group players see, not under the mask; a pin's link only when the player may open the record.
+      // Paint in a group players may not see, and the GM's own FX, stay with the GM.
+      drawings: drawingsHere().filter((line) => groupLets(line.group, seat)),
+      fx: fxHere().filter((layer) => layer.players && layer.shown && groupLets(layer.group, seat)),
       labels: labelsHere()
         .filter((label) => !label.hidden && groupLets(label.group, seat) && !masked(label.x, label.y))
         .map((label) => (label.link && label.link.kind === "record" && !records.get(label.link.id, seat) ? { ...label, link: null } : label)),
@@ -774,7 +819,11 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
     drawings: () => drawingsHere(),
     draw(input, seat) {
       if (!scene) throw new Error("No scene is open.");
-      const line = cleanDrawing({ ...input, id: undefined, by: seat.role === "dm" ? "" : seat.name, color: input?.color ?? playerColor(seat.name) });
+      // Players draw free lines; the GM's paint has shapes, fills and groups.
+      const own = seat.role === "dm" ? input : { points: input?.points, color: input?.color, width: input?.width };
+      const line = cleanDrawing({ ...own, id: undefined, by: seat.role === "dm" ? "" : seat.name, color: input?.color ?? playerColor(seat.name) });
+      if (line?.group && groupsHere().find((group) => group.name === line.group)?.locked) throw new Error(`The group ${line.group} is locked.`);
+      if (line?.group) groupOf(line.group);
       if (!line) throw new Error("A line needs two points or more.");
       const list = drawingsHere();
       list.push(line);
@@ -899,6 +948,36 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       if (seat.role !== "dm") throw new Error("Only the GM can close every door.");
       const doors = doorsHere();
       for (const wall of wallsHere()) if (wall.door > 0 || (wall.toggle && wall.toggle !== "none")) doors[wall.id] = (wall.id in doors ? doors[wall.id] : wall.ds) === 2 ? 2 : 0;
+      changed();
+    },
+    // FX layers (FG's FX tab): several at once, each with its own mask.
+    fx: () => fxHere(),
+    addFx(input, seat) {
+      if (seat.role !== "dm") throw new Error("Only the GM can add effects.");
+      if (!scene) throw new Error("No scene is open.");
+      if (fxHere().length >= 20) throw new Error("This scene has enough effects.");
+      const layer = cleanFx({ ...input, id: undefined });
+      if (layer.group) groupOf(layer.group);
+      fxHere().push(layer);
+      changed();
+      return layer;
+    },
+    updateFx(id, patch, seat) {
+      if (seat.role !== "dm") throw new Error("Only the GM can change effects.");
+      const list = fxHere();
+      const index = list.findIndex((layer) => layer.id === id);
+      if (index < 0) throw new Error(`No effect ${id}.`);
+      list[index] = cleanFx({ ...list[index], ...patch, mask: { ...list[index].mask, ...(patch.mask ?? {}) }, id });
+      if (list[index].group) groupOf(list[index].group);
+      changed();
+      return list[index];
+    },
+    removeFx(id, seat) {
+      if (seat.role !== "dm") throw new Error("Only the GM can remove effects.");
+      const list = fxHere();
+      const index = list.findIndex((layer) => layer.id === id);
+      if (index < 0) throw new Error(`No effect ${id}.`);
+      list.splice(index, 1);
       changed();
     },
     // Text on the map (FG's Text tab): labels, numbers and pins, in groups.
