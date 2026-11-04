@@ -1,7 +1,7 @@
 // A demo table for looking at the player's side by hand: starts the app
 // (throwaway profile), hosts a campaign on port 47395 (password "pw"),
 // imports the C&C Player's Handbook and Backpack, builds a Common Room
-// pregen for player "Ann", puts a Foundry map on the table, and stays up
+// pregen for a test player ("Tester"), puts a Foundry map on the table, and stays up
 // until stopped. Players then open http://<this computer>:47395/ in a browser.
 // node scripts/demo-host.mjs [bundle.zip] [scene name]
 import "./loopback.mjs";
@@ -51,15 +51,15 @@ await tool("kraken_import_fg_module", { module: "C&C Player's Handbook" });
 await tool("kraken_import_fg_module", { module: "C&C Adventurer's Backpack" });
 await tool("kraken_import_fg_module", { module: "C&C Monsters & Treasure" });
 const spec = JSON.parse(readFileSync(path.join(fgDataFolder(), "cc-conversion", "pregens", "specs", `${process.env.DEMO_ANN ?? "aldric-3"}.json`), "utf8"));
-const built = await tool("kraken_build_character", { spec, owner: "Ann" });
+const built = await tool("kraken_build_character", { spec, owner: "Tester" });
 await tool("kraken_build_character", { spec: { ...JSON.parse(readFileSync(path.join(fgDataFolder(), "cc-conversion", "pregens", "specs", "garrick-1.json"), "utf8")) }, owner: "Bob" });
 await page.setInputFiles("input.file-input", bundle);
 await page.waitForSelector("[data-scene]", { timeout: 180000 });
-const scene = page.getByLabel("Scene");
+const scene = page.locator('select[aria-label="Scene"]');
 if (await scene.count()) {
   const value = await scene.locator("option", { hasText: sceneName }).first().getAttribute("value");
   if (value) await scene.selectOption(value);
 }
-await tool("kraken_chat_send", { text: "Welcome to the table. Ann: your paladin is under Character in the side panel; put your token on the map from the Tokens tray." });
-console.log(`DEMO_READY http://127.0.0.1:${PORT}/ password pw; Ann owns ${built.id}; agent file ${env.KRAKEN_AGENT_FILE}`);
+await tool("kraken_chat_send", { text: "Welcome to the table. Tester: your paladin is under Character in the side panel; put your token on the map from the Tokens tray." });
+console.log(`DEMO_READY http://127.0.0.1:${PORT}/ password pw; Tester owns ${built.id}; agent file ${env.KRAKEN_AGENT_FILE}`);
 await new Promise(() => undefined);
