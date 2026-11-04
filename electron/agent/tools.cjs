@@ -774,8 +774,8 @@ const TOOLS = [
   {
     name: "kraken_table_options",
     description:
-      "The table's own options. towerReveal: a roll a player drops in the dice tower is shown to that player too (as FG, it is otherwise the GM's alone; the player sees only what went in). decal: the background decal (kraken_decal chooses one). Call with nothing to read them.",
-    inputSchema: object({ towerReveal: { type: "boolean" } }),
+      "The table's own options. towerReveal: a roll a player drops in the dice tower is shown to that player too (as FG, it is otherwise the GM's alone; the player sees only what went in). decal: the background decal (kraken_decal chooses one). clearTargets: when a creature's targets clear: never (FG), action (after its spell, or its attack's damage), turn (at the end of its turn). Call with nothing to read them.",
+    inputSchema: object({ towerReveal: { type: "boolean" }, clearTargets: { type: "string", enum: ["never", "action", "turn"] } }),
     run(args, ctx) {
       const agent = needTable(ctx);
       return out(Object.keys(args).length > 0 ? agent.setOptions(args) : agent.options());

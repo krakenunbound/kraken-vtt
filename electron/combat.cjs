@@ -552,6 +552,8 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       const list = sorted();
       if (list.length === 0) throw new Error("No one is on the tracker.");
       const active = list.find((entry) => entry.id === state.active) ?? null;
+      // The table's option: a creature's targets clear when its turn ends.
+      if (active && table().options?.().clearTargets === "turn") active.targets = [];
       if (seat.role !== "dm" && (!active || owner(active) !== seat.name)) throw new Error("It is not your turn.");
       const index = active ? list.indexOf(active) : -1;
       let nextIndex = -1;
@@ -755,6 +757,11 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       // CoreRPG: damage is at least 1 when dice were rolled.
       const amount = Math.max(1, roll.total);
       for (const target of targets) await applyWounds(target, amount, `[DAMAGE] ${plan.name}`, opts);
+      // The table's option: targets clear once the attack's damage is rolled.
+      if (plan.entry && table().options?.().clearTargets === "action") {
+        plan.entry.targets = [];
+        changed();
+      }
       return { total: amount, targets: targets.map((target) => target.name) };
     },
     // What a creature attacks with, and its numbers.
@@ -986,6 +993,8 @@ function createCombat({ saved, table, onChange = () => undefined }) {
         results.push(...landed.map((name) => ({ target: name, effect: label, rounds })));
         changed();
       }
+      if (entry && table().options?.().clearTargets === "action") entry.targets = [];
+      changed();
       return { power: power.name, action: action.name ?? "", casterLevel, saves: [...saved].map(([id, success]) => ({ target: find(id).name, success })), results };
     },
     // The CK's critical and fumble choices.
