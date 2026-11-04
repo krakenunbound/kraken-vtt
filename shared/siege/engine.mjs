@@ -10,6 +10,8 @@
 //   level, hproll, hplog), level, bth, hitdice, exp, expnext, hp.{total, wounds},
 //   ac.{total, dex, armor, shield, ...}, inventorylist.<id>, coins, powers.<id>.
 
+import { COMBO, dieOf, enhancedDie, isCombined, isSupportAbility, multiDie, nextXP as combinedNextXP, plusSlots, reclassLoss, reclassStep, supportLevel } from "./combine.mjs";
+
 export const STATS = ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"];
 export const STAT_SHORT = { strength: "STR", dexterity: "DEX", constitution: "CON", intelligence: "INT", wisdom: "WIS", charisma: "CHA" };
 
@@ -211,6 +213,8 @@ export function activeAbilityEffects(character) {
     const level = rows(pkg).length > 0 ? Number(pkg.level) || 1 : charLevel;
     for (const [, ability] of list(pkg.abilities)) {
       if ((Number(ability.level) || 1) > level) continue;
+      // A supporting sub-class keeps only the abilities it names (CCCombine).
+      if (pkg.ccsupport && !isSupportAbility(pkg.ccsupport, ability.name)) continue;
       for (const [, effect] of list(ability.effects)) {
         const from = Number(effect.fromlevel) || 0;
         const to = Number(effect.tolevel) || 0;
@@ -495,6 +499,8 @@ export function derive(input, game) {
   let next = 0;
   let nextSource = "";
   const slots = {};
+  const pools = {};
+  const principalLevel = Number(list(character.packages).find(([, pkg]) => pkg.ccprincipal)?.[1]?.level) || 0;
   for (const [, pkg] of list(character.packages)) {
     if (rows(pkg).length === 0) continue;
     const level = Number(pkg.level) || 1;
@@ -507,16 +513,37 @@ export function derive(input, game) {
       next = xp;
       nextSource = `${pkg.name ?? ""} ${level + 1}`;
     }
-    const own = packageSlots(pkg, level, scoreOf);
-    for (const [n, count] of Object.entries(own)) slots[n] = (slots[n] ?? 0) + count;
+    // A supporting option that casts uses its own table at the principal's level (no bonus slots).
+    const supportSpells = pkg.ccsupport ? COMBO.SUPPORT[pkg.ccsupport]?.spells?.[String(principalLevel)] : null;
+    const own = supportSpells ? Object.fromEntries(Object.entries(supportSpells).map(([n, count]) => [n, Number(count) || 0])) : packageSlots(pkg, level, scoreOf);
+    const poolName = String(pkg.spellclass ?? "").replace(/[^A-Za-z0-9_]/g, "").toLowerCase();
+    for (const [n, count] of Object.entries(own)) {
+      slots[n] = (slots[n] ?? 0) + count;
+      if (poolName && count > 0) (pools[poolName] = pools[poolName] ?? {})[n] = (pools[poolName][n] ?? 0) + count;
+    }
   }
   if (levels.length > 0) {
     character.level = combine(levels, options.SIEGE_PKG_LEVEL);
     character.bth = combine(bths, options.SIEGE_PKG_BTH);
     character.hitdice = hds.join(", ");
   }
+  // Combined classes: the Adventurer's Backpack's experience (CCCombine.getNextXP).
+  if (isCombined(character)) {
+    const combined = combinedNextXP(character);
+    if (combined) {
+      next = combined.next;
+      nextSource = combined.source;
+    }
+  }
   character.expnext = next;
   character.expnextsource = nextSource;
+  // Class plus: two 0-level spells a day of that class.
+  for (const [poolName, count] of Object.entries(plusSlots(character))) {
+    const pool = (pools[poolName] = pools[poolName] ?? {});
+    if ((pool[0] ?? 0) < count) pool[0] = count;
+    slots[0] = (slots[0] ?? 0) + count;
+  }
+  if (Object.keys(pools).length > 1 || character.spellpools) character.spellpools = Object.fromEntries(Object.entries(pools).map(([name, levels]) => [name, Object.fromEntries(Object.entries(levels).map(([n, max]) => [`l${n}`, { max, used: Number(input.spellpools?.[name]?.[`l${n}`]?.used) || 0 }]))]));
   character.slots = Object.fromEntries(Object.entries(slots).map(([n, max]) => [`l${n}`, { max, used: Number(input.slots?.[`l${n}`]?.used) || 0 }]));
 
   refreshPackagePowers(character);
@@ -600,8 +627,12 @@ export function check({ d20, score, prime, level = 0, addLevel, cl = 0, bonus = 
 // The class package a level-up raises: the one named, else the only package
 // with a progression table, else the one with the lowest XP to its next row.
 export function levelUpPackage(character, packageKey) {
-  const classes = list(character.packages).filter(([, pkg]) => rows(pkg).length > 0);
+  // A supporting class rises with its principal; an abandoned (reclassed) class no longer advances.
+  const classes = list(character.packages).filter(([, pkg]) => rows(pkg).length > 0 && !pkg.ccsupport && !pkg.ccreclassorigin);
   if (packageKey) return classes.find(([key]) => key === packageKey) ?? null;
+  // A multi-class set rises as one.
+  const multi = classes.find(([, pkg]) => pkg.ccmulti);
+  if (multi) return multi;
   if (classes.length <= 1) return classes[0] ?? null;
   const nextXP = (pkg) => Number(exactRow(pkg, (Number(pkg.level) || 1) + 1)?.xp) || Infinity;
   return classes.sort(([, a], [, b]) => nextXP(a) - nextXP(b))[0];
@@ -613,14 +644,43 @@ export function levelUpRoll(character, pkg, game) {
   const options = gameOptions(game);
   const next = (Number(pkg.level) || 1) + 1;
   if (!exactRow(pkg, next)) return null;
-  const { dice, flat } = levelGain(pkg, next);
+  const { dice: own, flat } = levelGain(pkg, next);
+  // Combined classes (CCLevelUp.getHPPlan): the dual class's second class
+  // gains none; a reclassed class gets fixed hit points until it passes the
+  // old one; the rest roll the combined die.
+  const packages = list(character.packages).map(([, item]) => item);
+  if (pkg.ccdualclass) return { level: next, formula: "", flat: 0, con: 0, minimum: 0, note: "This is the dual class's second class: it gains no hit points (Adventurer's Backpack)." };
+  if (pkg.ccreclass) {
+    const old = packages.find((item) => item.ccreclassorigin);
+    const oldLevel = Number(old?.level) || 0;
+    if (old && next <= oldLevel) {
+      const step = reclassStep(dieOf(old), dieOf(pkg));
+      return step > 0
+        ? { level: next, formula: "", flat: step, con: 0, minimum: 0, note: `Reclass Hit Point Modification: ${pkg.name} (${dieOf(pkg)}) after ${old.name} (${dieOf(old)}) gives ${step} hit point(s) a level, no constitution bonus, until ${pkg.name}'s level passes ${old.name}'s (${oldLevel}).` }
+        : { level: next, formula: "", flat: 0, con: 0, minimum: 0, note: `Reclass: no hit points until ${pkg.name}'s level passes ${old.name}'s (${oldLevel}); the new hit die is not larger (Adventurer's Backpack).` };
+    }
+  }
+  let comboDie = "";
+  let note = "";
+  if (pkg.ccmulti) comboDie = multiDie(packages.filter((item) => item.ccmulti).map(dieOf));
+  else if (pkg.ccprincipal) {
+    const support = packages.find((item) => item.ccsupport);
+    if (support) comboDie = enhancedDie(dieOf(support), dieOf(pkg));
+  } else if (pkg.ccdualorigin) {
+    const dual = packages.find((item) => item.ccdualclass);
+    if (dual) {
+      comboDie = multiDie([dieOf(pkg), dieOf(dual)]);
+      note = `Dual Class Hit Die: ${dieOf(pkg)} with ${dieOf(dual)} rolls ${comboDie}.`;
+    }
+  }
+  const dice = comboDie ? own.map(() => comboDie) : own;
   const con = dice.length > 0 && isOn(options, "SIEGE_HP_CON") ? abilityBonus(character.attributes?.constitution?.score ?? 10, game) : 0;
   const counts = new Map();
   for (const die of dice) counts.set(die, (counts.get(die) ?? 0) + 1);
   const bonus = flat + con;
   const dicePart = [...counts].map(([die, count]) => `${count}${die}`).join("+");
   const formula = dice.length > 0 ? dicePart + (bonus > 0 ? `+${bonus}` : bonus < 0 ? `${bonus}` : "") : "";
-  return { level: next, formula, flat, con, minimum: dice.length > 0 && isOn(options, "SIEGE_HP_MIN1") ? 1 : 0 };
+  return { level: next, formula, flat, con, minimum: dice.length > 0 && isOn(options, "SIEGE_HP_MIN1") ? 1 : 0, ...(note ? { note } : {}) };
 }
 
 // Raises a package one level and adds the hit points gained (logged in
@@ -633,5 +693,76 @@ export function applyLevelUp(input, packageKey, gain, game) {
   pkg.hproll = next;
   pkg.hplog = { ...(pkg.hplog ?? {}), [`l${next}`]: gain };
   character.hp = { ...(character.hp ?? {}), total: (Number(character.hp?.total) || 0) + gain };
+  // The others follow, with no hit points: a multi-class rises together; a
+  // supporting class to its share of the principal's level.
+  const follow = (other, level) => {
+    const from = Number(other.hproll) || Number(other.level) || 1;
+    other.level = level;
+    other.hplog = { ...(other.hplog ?? {}) };
+    for (let k = from + 1; k <= level; k += 1) other.hplog[`l${k}`] = 0;
+    other.hproll = Math.max(from, level);
+  };
+  for (const [key, other] of list(character.packages)) {
+    if (key === packageKey) continue;
+    if (pkg.ccmulti && other.ccmulti) follow(other, next);
+    if (pkg.ccprincipal && other.ccsupport) follow(other, supportLevel(other.ccsupport, next));
+  }
   return derive(character, game);
+}
+
+// Dual class (the Adventurer's Backpack, CCLevelUp): the character keeps its
+// class and adds another at 1st level; from now on experience is split
+// between them. No hit points for the new class.
+export function addDualClass(input, classRecord, game) {
+  const character = structuredClone(input);
+  const classes = list(character.packages).filter(([, pkg]) => rows(pkg).length > 0);
+  if (classes.length !== 1) throw new Error("The character already has two classes (dual classed or reclassed).");
+  const [, original] = classes[0];
+  original.ccdualorigin = 1;
+  const key = nextId(character.packages);
+  const pkg = { ...structuredClone(classRecord), level: 1, hproll: 1, hplog: { l1: 0 }, ccdualclass: 1, ccdualbase: Number(character.exp) || 0 };
+  delete pkg.public;
+  character.packages[key] = pkg;
+  for (const stat of STATS) if (Number(classRecord.primes?.[stat]) === 1) (character.attributes[stat] = character.attributes[stat] ?? {}).prime = 1;
+  return { character: derive(character, game), key };
+}
+
+// Reclass: the old class is abandoned and loses a level (two leaving a
+// deity's service for a class without one) and that level's hit points;
+// primes swap when the new class's is not held; the new class starts at 1st
+// level with the fixed hit points of the Reclass Hit Point Modification.
+export function reclass(input, classRecord, game) {
+  const character = structuredClone(input);
+  const classes = list(character.packages).filter(([, pkg]) => rows(pkg).length > 0);
+  if (classes.length !== 1) throw new Error("The character already has two classes (dual classed or reclassed).");
+  const [, old] = classes[0];
+  const loss = reclassLoss(old.name, classRecord.name);
+  const oldLevel = Number(old.level) || 1;
+  const newLevel = Math.max(oldLevel - loss, 1);
+  let removed = 0;
+  for (let k = newLevel + 1; k <= (Number(old.hproll) || oldLevel); k += 1) {
+    removed += Number(old.hplog?.[`l${k}`]) || 0;
+    if (old.hplog) delete old.hplog[`l${k}`];
+  }
+  old.level = newLevel;
+  old.hproll = newLevel;
+  old.ccreclassorigin = 1;
+  character.hp = { ...(character.hp ?? {}), total: Math.max((Number(character.hp?.total) || 0) - removed, 0) };
+  // Primes swap when the character lacks the new class's.
+  const wanted = STATS.filter((stat) => Number(classRecord.primes?.[stat]) === 1);
+  let swapped = null;
+  if (wanted.length && !wanted.some((stat) => Number(character.attributes?.[stat]?.prime) === 1)) {
+    const oldPrimes = STATS.filter((stat) => Number(old.primes?.[stat]) === 1);
+    for (const stat of oldPrimes) if (character.attributes[stat]) character.attributes[stat].prime = 0;
+    (character.attributes[wanted[0]] = character.attributes[wanted[0]] ?? {}).prime = 1;
+    swapped = { to: wanted[0], from: oldPrimes };
+  }
+  const step = reclassStep(dieOf(old), dieOf(classRecord));
+  const gain = step > 0 ? step : 0;
+  const key = nextId(character.packages);
+  const pkg = { ...structuredClone(classRecord), level: 1, hproll: 1, hplog: { l1: gain }, ccreclass: 1, ccreclassbase: Number(character.exp) || 0 };
+  delete pkg.public;
+  character.packages[key] = pkg;
+  character.hp.total += gain;
+  return { character: derive(character, game), key, loss, oldLevel, newLevel, removed, gain, swapped };
 }

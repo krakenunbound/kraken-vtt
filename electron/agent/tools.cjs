@@ -9,7 +9,7 @@
 //   window()         the main BrowserWindow, for screenshots and page text
 
 const fgModule = require("../importers/fgModule.cjs");
-const { siege, siegeLibrary, siegeCheck, levelUp } = require("../siege.cjs");
+const { siege, siegeLibrary, siegeCheck, levelUp, changeClass } = require("../siege.cjs");
 const party = require("../party.cjs");
 const { editCharacter: siegeEdit, importCharacter, exportCharacter } = require("../siege.cjs");
 const fs = require("fs");
@@ -406,6 +406,19 @@ const TOOLS = [
       if (!record || record.type !== "character") throw new Error(`No character "${args.id}".`);
       const updated = await siegeEdit(table, record, args.changes, table.seat);
       return out({ id: updated.id, name: updated.name, level: updated.data.level, hp: updated.data.hp, ac: updated.data.ac?.total, attributes: updated.data.attributes });
+    },
+  },
+  {
+    name: "kraken_class_change",
+    description:
+      "Change a character's classes at a level up (the Adventurer's Backpack, as FG's level-up wizard). mode dual: keep the class and add another at 1st level (the combination table must allow it, and the character must already have one of its primes); from then on experience is split between the classes and only the original class gains hit points (on the Multi-Class Hit Die). mode reclass: abandon the class for another (no table or prime needed; primes swap); the old class loses a level (two when leaving a cleric, druid or paladin for a class serving no deity) and that level's hit points; the new class starts at 1st with fixed hit points (the Reclass Hit Point Modification) until it passes the old one. Only for a character with one class.",
+    inputSchema: object({ id: string("The character's record id"), mode: { type: "string", enum: ["dual", "reclass"] }, className: string("The class to add or change to") }, ["id", "mode", "className"]),
+    async run(args, ctx) {
+      const table = needTable(ctx);
+      const record = table.records.get(args.id);
+      if (!record || record.type !== "character") throw new Error(`No character "${args.id}".`);
+      const { record: updated, summary } = await changeClass(table, record, args.mode, args.className, "Agent");
+      return out({ summary, level: updated.data.level, exp: updated.data.exp, expnext: updated.data.expnext, expnextsource: updated.data.expnextsource, hp: updated.data.hp, packages: Object.values(updated.data.packages ?? {}).map((pkg) => ({ name: pkg.name, level: pkg.level })) });
     },
   },
   {

@@ -61,8 +61,57 @@ async function levelUp(table, record, packageKey, from) {
   const data = engine.applyLevelUp(record.data, key, gain, game);
   const updated = table.records.update(record.id, { data }, table.seat, { replace: true });
   const bth = data.bth >= 0 ? `+${data.bth}` : `${data.bth}`;
-  table.say(`[LEVEL UP] ${record.name} is now ${pkg.name} ${plan.level}: +${gain} hit points (${data.hp.total}), BtH ${bth}.`, from || record.name);
-  return { record: updated, gain, level: plan.level };
+  table.say(`[LEVEL UP] ${record.name} is now ${pkg.name} ${plan.level}: +${gain} hit points (${data.hp.total}), BtH ${bth}.${plan.note ? ` ${plan.note}` : ""}`, from || record.name);
+  return { record: updated, gain, level: plan.level, note: plan.note ?? "" };
+}
+
+let combineModule = null;
+const combineRules = () => (combineModule ??= import(pathToFileURL(path.join(__dirname, "..", "shared", "siege", "combine.mjs")).href));
+const capital = (stat) => `${stat[0].toUpperCase()}${stat.slice(1)}`;
+
+// Changing classes at a level up (the Adventurer's Backpack, as FG's level-up
+// wizard): mode "dual" adds a class at 1st level (the combination table, and a
+// prime the character already has); "reclass" abandons the class for another.
+async function changeClass(table, record, mode, className, from) {
+  const { engine } = await siege();
+  const combine = await combineRules();
+  const library = siegeLibrary(table.records);
+  const game = library.game;
+  const data = record.data;
+  const classes = combine.classPackages(data).map(([, pkg]) => pkg);
+  if (classes.length === 0) throw new Error("The character has no class yet: use the Character Wizard.");
+  if (classes.length > 1) throw new Error("The character already has two classes (dual classed or reclassed).");
+  const current = classes[0];
+  const raceClass = "A race class (dwarf, elf, gnome, halfling) cannot be combined with another class (Adventurer's Backpack).";
+  if (combine.isRaceClass(current.name)) throw new Error(raceClass);
+  const target = library.packages.find((pkg) => String(pkg.packagetype ?? "").toLowerCase() === "class" && engine.plainName(pkg.name) === engine.plainName(className));
+  if (!target) throw new Error(`No class "${className}" in this campaign's books.`);
+  if (combine.classKey(target.name) === combine.classKey(current.name)) throw new Error("Same class.");
+  if (combine.isRaceClass(target.name)) throw new Error(raceClass);
+  const exp = Number(data.exp) || 0;
+  let result;
+  let summary;
+  if (mode === "dual") {
+    const rule = combine.multiRule(current.name, target.name, data.race);
+    if (!rule.allowed) throw new Error(`${target.name}: ${rule.words}`);
+    const primes = engine.STATS.filter((stat) => Number(target.primes?.[stat]) === 1);
+    if (primes.length && !primes.some((stat) => Number(data.attributes?.[stat]?.prime) === 1)) throw new Error(`Dual class needs a prime the character has (${capital(primes[0])} is not prime); reclass swaps primes.`);
+    result = engine.addDualClass(data, target, game);
+    summary = `Dual class: ${record.name} adds ${target.name} at 1st level (${current.name} keeps advancing; experience is divided equally).`;
+  } else if (mode === "reclass") {
+    result = engine.reclass(data, target, game);
+    const deityOld = ["cleric", "druid", "paladin"].includes(combine.classKey(String(current.name).split(" ")[0]));
+    summary = `Reclass: ${record.name} abandons ${current.name} for ${target.name} (1st level). ${current.name} drops from level ${result.oldLevel} to ${result.newLevel} and loses the hit points of the lost level(s) (${result.removed}).`;
+    if (result.loss === 2) summary += ` Leaving a deity-serving class: two levels go and ${current.name}'s abilities can no longer be used (they stay listed on the sheet).`;
+    else if (deityOld) summary += ` Deity-serving class to deity-serving class: keeping the same religion, ${current.name}'s abilities stay usable; otherwise the Castle Keeper applies the two-level loss.`;
+    else summary += ` Using abilities found only in ${current.name} costs 10% of the adventure's experience (5% for preparing them).`;
+    if (result.swapped) summary += ` Primes swap: ${capital(result.swapped.to)} becomes prime, ${result.swapped.from.map(capital).join(", ")} stops being prime.`;
+    summary += ` Base to hit and saves use the better of the two classes. Hit points: +${result.gain}.`;
+  } else throw new Error("Change class how? dual or reclass.");
+  const updated = table.records.update(record.id, { data: result.character }, table.seat, { replace: true });
+  table.say(`[LEVEL UP] ${summary}`, from || record.name);
+  table.say(combine.trainingNote(exp, target.name), from || record.name);
+  return { record: updated, summary };
 }
 
 // What the character sheet may change, as typed on FG's sheet: who they are,
@@ -148,4 +197,4 @@ async function exportCharacter(record, format = "kraken") {
   return { text: interchange.toKrakenFile(record), file: `${record.name}.kraken.json`, type: "application/json" };
 }
 
-module.exports = { siege, siegeLibrary, siegeCheck, levelUp, editCharacter, importCharacter, exportCharacter, ATTRIBUTES };
+module.exports = { siege, siegeLibrary, siegeCheck, levelUp, changeClass, editCharacter, importCharacter, exportCharacter, ATTRIBUTES };

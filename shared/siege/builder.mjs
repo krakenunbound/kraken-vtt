@@ -10,6 +10,7 @@
 // Combined classes (multi-class, enhanced, class plus) are not built yet.
 
 import { STATS, abilityBonus, addItem, derive, exactRow, levelGain, packageSlots, parseCounts, plainName, progressionRow, setCarried } from "./engine.mjs";
+import { COMBO, classKey, dieOf, enhancedDie, multiDie, plusAbilities, startXP, supportLevel, supportPrime } from "./combine.mjs";
 
 export const CORE_BOOK = "C&C Player's Handbook";
 
@@ -112,11 +113,28 @@ export function buildFromSpec(spec, library) {
   const level = Number(spec.level) || 1;
   const finalScore = (stat) => Number(spec.scores?.[stat] ?? 10);
 
+  // Combining classes (the Adventurer's Backpack, as FG's wizard): a
+  // multi-class second class, a supporting option (enhanced class), plussed
+  // classes. spec.multiclass: a class name; spec.support: an option key
+  // (killer, fighter, scout...); spec.plus: class names.
+  const classByKey = (key) => library.packages.find((pkg) => String(pkg.packagetype ?? "").toLowerCase() === "class" && classKey(pkg.name) === key) ?? null;
+  const multi = spec.multiclass ? findPackage("class", spec.multiclass) : null;
+  if (spec.multiclass && !multi) problem(`multi-class not found: ${spec.multiclass}`);
+  const supportKey = spec.support ? classKey(spec.support) : "";
+  const supportOption = supportKey ? COMBO.SUPPORT[supportKey] : null;
+  const supportRecord = supportOption ? classByKey(supportOption.class) : null;
+  if (spec.support && !supportRecord) problem(`supporting class not found: ${spec.support}`);
+  const plussed = (spec.plus ?? []).map((name) => findPackage("class", name)).filter(Boolean);
+  const comboDie = multi ? multiDie([dieOf(cls), dieOf(multi)]) : supportRecord ? enhancedDie(dieOf(supportRecord), dieOf(cls)) : "";
+
   // Primes: the class's are fixed; the spec names the chosen ones.
   const forced = STATS.filter((stat) => Number(cls.primes?.[stat]) === 1);
-  const primes = new Set(forced);
+  const multiPrimes = multi ? STATS.filter((stat) => Number(multi.primes?.[stat]) === 1) : [];
+  const supportStat = supportRecord ? supportPrime(supportKey, supportRecord) : "";
+  const primes = new Set([...forced, ...multiPrimes, ...(supportStat ? [supportStat] : [])]);
   for (const stat of spec.primes ?? []) primes.add(stat);
-  const allowed = forced.length + (Number(cls.primechoice) || 0) + (Number(race?.primechoice) || 0);
+  // The multi-class's primes add to the count (even one the class already has, as FG); a supporting prime does not.
+  const allowed = forced.length + (Number(cls.primechoice) || 0) + (Number(race?.primechoice) || 0) + multiPrimes.length;
   if (primes.size !== allowed) problem(`primes: ${primes.size} chosen, ${allowed} allowed`);
 
   // Hit points, one level at a time.
@@ -124,7 +142,9 @@ export function buildFromSpec(spec, library) {
   const hplog = {};
   let hpTotal = 0;
   for (let n = 1; n <= level; n += 1) {
-    const { dice, flat } = levelGain(cls, n);
+    const { dice: own, flat } = levelGain(cls, n);
+    // A combined character's dice are the combined die (Multi-Class or Enhanced Class Hit Die table).
+    const dice = comboDie ? own.map(() => comboDie) : own;
     let gain = flat;
     if (dice.length > 0) {
       for (const die of dice) {
@@ -189,7 +209,10 @@ export function buildFromSpec(spec, library) {
 
   // The character, field for field as FG's buildCharacter writes it.
   const character = { name: String(spec.name ?? "").trim(), attributes: {}, packages: {}, inventorylist: {}, powers: {}, languagelist: {} };
-  for (const stat of STATS) character.attributes[stat] = { score: finalScore(stat), prime: primes.has(stat) ? 1 : 0 };
+  const writePrimes = () => {
+    for (const stat of STATS) character.attributes[stat] = { score: finalScore(stat), prime: primes.has(stat) ? 1 : 0 };
+  };
+  writePrimes();
   let next = 1;
   if (race) {
     character.packages[id(next++)] = { ...structuredClone(race), level: 1 };
@@ -198,8 +221,18 @@ export function buildFromSpec(spec, library) {
     if (race.speed) character.speed = race.speed;
     if (race.senses) character.senses = race.senses;
   }
-  character.packages[id(next++)] = { ...structuredClone(cls), level, hproll: level, hplog };
-  character.exp = Number(exactRow(cls, level)?.xp) || 0;
+  character.packages[id(next++)] = { ...structuredClone(cls), level, hproll: level, hplog, ...(multi ? { ccmulti: 1 } : {}), ...(supportRecord ? { ccprincipal: 1 } : {}) };
+  const zeroLog = (n) => Object.fromEntries(Array.from({ length: n }, (_, i) => [`l${i + 1}`, 0]));
+  if (multi) character.packages[id(next++)] = { ...structuredClone(multi), level, hproll: level, hplog: zeroLog(level), ccmulti: 1 };
+  if (supportRecord) {
+    const at = supportLevel(supportKey, level);
+    character.packages[id(next++)] = { ...structuredClone(supportRecord), ...(supportOption.sub ? { name: `${supportOption.name} (${supportRecord.name})` } : {}), level: at, hproll: at, hplog: zeroLog(at), ccsupport: supportKey };
+    // FG adds the supporting class record whole, ticking its primes too (a Scout gets Ranger's Strength).
+    for (const stat of STATS) if (Number(supportRecord.primes?.[stat]) === 1) primes.add(stat);
+  }
+  writePrimes();
+  if (plussed.length) character.ccplus = Object.fromEntries(plussed.map((pkg) => [classKey(pkg.name), plusAbilities(pkg)]));
+  character.exp = multi || supportRecord || plussed.length ? startXP({ main: cls, multi, supportKey: supportRecord ? supportKey : "", plusCount: plussed.length }, level) : Number(exactRow(cls, level)?.xp) || 0;
   character.hp = { total: hpTotal, wounds: 0 };
 
   // Gear goes in one copy at a time, as the wizard's shop hands it over.
@@ -235,8 +268,27 @@ export function buildFromSpec(spec, library) {
     if (amount > 0) character.coins[id(coin++)] = { name, amount };
   }
 
+  // A second casting class: the multi-class's own table, or the supporting option's spells at the principal's level.
+  const picks2 = [];
+  const second = multi ?? (supportOption?.spells ? supportRecord : null);
+  if (second && second.spellclass) {
+    const day2 = multi ? spellPicksAllowed(multi, level, castingScore) : Object.fromEntries(Object.entries(supportOption.spells?.[String(level)] ?? {}).map(([n, count]) => [n, Number(count) || 0]));
+    if (Object.values(day2).some((count) => count > 0)) {
+      const choices2 = spellChoices(library.powers, second, day2);
+      const byName2 = new Map(choices2.map((choice) => [plainName(choice.power.name), choice]));
+      const countAt2 = (n) => picks2.filter((pick) => pick.level === n).length;
+      for (const name of spec.spells2 ?? []) {
+        const choice = byName2.get(plainName(name));
+        if (!choice || countAt2(choice.level) >= (day2[choice.level] ?? 0)) report.skipped.push(name);
+        else picks2.push(choice);
+      }
+    }
+  }
+  const pool = (pkg) => String(pkg?.spellclass ?? "").replace(/[^A-Za-z0-9_]/g, "").toLowerCase();
+  const twoLists = picks2.length > 0;
   let power = 1;
-  for (const pick of picks) character.powers[id(power++)] = { ...structuredClone(pick.power), level: pick.level };
+  for (const pick of picks) character.powers[id(power++)] = { ...structuredClone(pick.power), level: pick.level, ...(twoLists ? { spellpool: pool(cls), spelllevel: pick.level } : {}) };
+  for (const pick of picks2) character.powers[id(power++)] = { ...structuredClone(pick.power), level: pick.level, spellpool: pool(second), spelllevel: pick.level };
   // Spells the class lists do not give (a divine knight's mana spells, an
   // arcane thief's grimoire copies), by FG path, as the pregen runner adds them.
   for (const extra of spec.extraspells ?? []) {

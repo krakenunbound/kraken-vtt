@@ -8,7 +8,7 @@ const { createRecordStore, canSee } = require("./records.cjs");
 const { soundFor, cleanTriggers } = require("./soundTriggers.cjs");
 const { defaultTriggers, TRIGGERS_VERSION } = require("./soundCatalog.cjs");
 const { createDice } = require("./dice.cjs");
-const { siege, siegeLibrary, siegeCheck, levelUp, editCharacter, importCharacter } = require("./siege.cjs");
+const { siege, siegeLibrary, siegeCheck, levelUp, changeClass, editCharacter, importCharacter } = require("./siege.cjs");
 const { createMapState, playerColor } = require("./mapState.cjs");
 const party = require("./party.cjs");
 const { createCombat } = require("./combat.cjs");
@@ -1086,6 +1086,19 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         }
         levelUp(agentHandle, record, msg.package, client.role === "dm" ? record.name : client.name).catch((error) =>
           send(ws, { type: "error", reason: error instanceof Error ? error.message : "Could not level up." }),
+        );
+        return;
+      }
+
+      // Dual class or reclass at a level up: the owner or the GM.
+      if (msg.type === "class-change") {
+        const record = records.get(String(msg.id ?? ""), seatOf(client));
+        if (!record || (client.role !== "dm" && record.owner !== client.name)) {
+          send(ws, { type: "error", reason: "You cannot change that character's class." });
+          return;
+        }
+        changeClass(agentHandle, record, String(msg.mode), String(msg.className ?? ""), client.role === "dm" ? record.name : client.name).catch((error) =>
+          send(ws, { type: "error", reason: error instanceof Error ? error.message : "Could not change the class." }),
         );
         return;
       }
