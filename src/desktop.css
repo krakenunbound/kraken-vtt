@@ -1013,3 +1013,5 @@ textarea.cc-field.tall { min-height: 220px; }
 .character-export-menu button { text-align: left; border: none; background: transparent; padding: 6px 10px; }
 .character-export-menu button:hover { background: var(--brass-soft); }
 .character-file-status { margin: 6px 0; cursor: pointer; }
+
+.brand-version { margin-left: 6px; padding: 1px 6px; font-family: system-ui, sans-serif; font-size: 0.62rem; font-weight: 600; letter-spacing: 0.04em; color: var(--brass); border: 1px solid var(--brass-dim); border-radius: 8px; vertical-align: middle; }

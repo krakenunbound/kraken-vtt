@@ -183,7 +183,7 @@ export function Desktop({
     <div className="shell desktop-shell" data-session={session.role}>
       <header className="menubar">
         <div className="brand">
-          <Mark /> Kraken
+          <Mark /> Kraken <span className="brand-version" title="Alpha test version">{__KRAKEN_VERSION__}</span>
         </div>
         <div className="portrait-strip" aria-label={gm ? "The party" : "Your characters"}>
           {portraits.map((record) => {

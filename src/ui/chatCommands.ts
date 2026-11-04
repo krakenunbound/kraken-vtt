@@ -319,7 +319,6 @@ export const COMMANDS: Command[] = [
   { names: ["reload"], args: "", help: "Reload this screen", group: "Screen", run: () => window.location.reload() },
 ];
 
-declare const __KRAKEN_VERSION__: string;
 
 // The whole screen's size (FG's /scaleui), kept in this browser.
 export function setUiScale(value: number) {
