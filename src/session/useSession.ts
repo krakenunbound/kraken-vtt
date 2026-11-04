@@ -687,10 +687,16 @@ export function useSession() {
     socket.send(JSON.stringify({ type: "siege-check", id, attribute, cl, ...(save ? { label: `${attribute[0].toUpperCase()}${attribute.slice(1)} save` } : {}), ...(extra ?? {}), ...throwIntent() }));
   }, []);
 
-  const levelUp = useCallback((id: string) => {
+  // Dual class or reclass at a level up (the Adventurer's Backpack).
+  const changeClass = useCallback((id: string, mode: "dual" | "reclass", className: string) => {
+    const socket = socketRef.current;
+    if (socket && socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify({ type: "class-change", id, mode, className }));
+  }, []);
+
+  const levelUp = useCallback((id: string, packageKey?: string) => {
     const socket = socketRef.current;
     if (!socket || socket.readyState !== WebSocket.OPEN) return;
-    socket.send(JSON.stringify({ type: "level-up", id }));
+    socket.send(JSON.stringify({ type: "level-up", id, ...(packageKey ? { package: packageKey } : {}) }));
   }, []);
 
   const sendChat = useCallback((text: string, how: ChatSend = {}) => {
@@ -911,6 +917,7 @@ export function useSession() {
     siegeCheck,
     buildCharacter,
     levelUp,
+    changeClass,
   };
 }
 

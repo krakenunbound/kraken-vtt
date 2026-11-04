@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { ClassLevel } from "./ClassLevel";
 import type { Session, TableRecord } from "../session/useSession";
 import { Icon } from "../ui/icons";
 import { slotDrag } from "../ui/QuickSlots";
@@ -64,6 +65,7 @@ export function CCSheet({ record, session }: { record: TableRecord; session: Ses
   const [cl, setCl] = useState(0);
   const [picking, setPicking] = useState<"portrait" | "token" | null>(null);
   const [language, setLanguage] = useState("");
+  const [classPanel, setClassPanel] = useState(false);
   const data = record.data as Row;
   const me = session.players.find((seat) => seat.id === session.selfId)?.name;
   const editable = session.role === "dm" || (record.owner !== "" && record.owner === me);
@@ -159,12 +161,17 @@ export function CCSheet({ record, session }: { record: TableRecord; session: Ses
                     <Icon name="levelup" size={15} />
                   </button>
                 ) : null}
+                <button type="button" className="cc-levelup" data-action="class-level" aria-pressed={classPanel} title="Class & Level: each class, level up one, or change classes (Adventurer's Backpack)" aria-label="Class and level" onClick={() => setClassPanel(!classPanel)}>
+                  <Icon name="settings" size={14} />
+                </button>
               </span>
               <span className="cc-inline">
                 <b>XP</b> <Field value={exp} number editable={editable} label="Experience" onSave={numberAt("exp")} /> / <span className="cc-num">{next || "—"}</span>
               </span>
             </section>
 
+            {classPanel ? <ClassLevel record={record} session={session} editable={editable} /> : null}
+            {String(data.expnextsource ?? "") && next > 0 ? <p className="hint cc-next-source">Next level: {String(data.expnextsource)} at {next} XP</p> : null}
             <div className="cc-main-grid">
               <section className="cc-panel cc-attributes" aria-label="Attributes">
                 <div className="cc-attr-head">

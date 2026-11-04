@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import type { RollResult, Session } from "../session/useSession";
 import { STATS, abilityBonus, exactRow, levelGain, parseCost, progressionRow, raceLanguages, spellChoices, spellPicksAllowed, CORE_BOOK } from "./siege";
+import { ALIGNMENTS as COMBO_ALIGNMENTS, COMBO, alignmentAllowed, alignmentText, canPlus, classKey, dieOf, enhancedDie, enhancedRule, isRaceClass, multiDie, multiRule, plusText, startXP, supportLevel, supportOptions, supportPrime } from "../../shared/siege/combine.mjs";
 
 // Character creation for Castles & Crusades, after the SC C&C Character
 // Creation Wizard in Fantasy Grounds (KrakenCharWizardCC): eight pages in any
@@ -17,6 +18,7 @@ import { STATS, abilityBonus, exactRow, levelGain, parseCost, progressionRow, ra
 type Row = Record<string, unknown>;
 type Stat = (typeof STATS)[number];
 type Method = "3d6" | "4d6" | "3d6order";
+type SupportRow = { name: string; class: string; sub: boolean; prime: string; abilities: string; adv?: Record<string, { xp: number; gained: string }>; spells?: Record<string, Record<string, number>> };
 
 const STAT_NAME: Record<string, string> = { strength: "Strength", dexterity: "Dexterity", constitution: "Constitution", intelligence: "Intelligence", wisdom: "Wisdom", charisma: "Charisma" };
 const SHORT: Record<string, string> = { strength: "STR", dexterity: "DEX", constitution: "CON", intelligence: "INT", wisdom: "WIS", charisma: "CHA" };
@@ -369,6 +371,13 @@ export function Wizard({ session, onDone }: { session: Session; onDone: (id: str
   const [note, setNote] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
+  // Combining classes (the Adventurer's Backpack): a multi-class, a supporting option, plussed classes.
+  const [multiName, setMultiName] = useState("");
+  const [supportKey, setSupportKey] = useState("");
+  const [plusNames, setPlusNames] = useState<string[]>([]);
+  const [comboPick, setComboPick] = useState<"" | "multi" | "support" | "plus">("");
+  const [spells2, setSpells2] = useState<string[]>([]);
+  const [spellList, setSpellList] = useState<"main" | "second">("main");
   const generation = useRef({ attr: 0, hp: 0, gold: 0 });
 
   const race = races.find((row) => row.name === raceName) ?? null;
@@ -378,8 +387,16 @@ export function Wizard({ session, onDone }: { session: Session; onDone: (id: str
   const final = (stat: Stat) => (base[stat] === undefined ? null : (base[stat] as number) + raceMod(stat));
   const finalOr10 = (stat: string) => final(stat as Stat) ?? 10;
   const allRolled = STATS.every((stat) => base[stat as Stat] !== undefined);
-  const forcedPrimes = STATS.filter((stat) => num((cls?.primes as Row | undefined)?.[stat]) === 1) as Stat[];
-  const primesAllowed = forcedPrimes.length + num(cls?.primechoice) + num(race?.primechoice);
+  const multi = classes.find((row) => row.name === multiName) ?? null;
+  const supportOption = supportKey ? (COMBO.SUPPORT as unknown as Record<string, SupportRow>)[supportKey] ?? null : null;
+  const supportRecord = supportOption ? classes.find((row) => classKey(row.name) === supportOption.class) ?? null : null;
+  const multiPrimes = STATS.filter((stat) => num((multi?.primes as Row | undefined)?.[stat]) === 1) as Stat[];
+  const supportStat = supportRecord ? (supportPrime(supportKey, supportRecord) as Stat) : "";
+  const forcedPrimes = [...new Set([...STATS.filter((stat) => num((cls?.primes as Row | undefined)?.[stat]) === 1), ...multiPrimes, ...(supportStat ? [supportStat] : [])])] as Stat[];
+  const primeFrom = (stat: Stat) => (num((cls?.primes as Row | undefined)?.[stat]) === 1 ? "from your class" : multiPrimes.includes(stat) ? "multi-class" : stat === supportStat ? "supporting class" : "");
+  const primesAllowed = STATS.filter((stat) => num((cls?.primes as Row | undefined)?.[stat]) === 1).length + num(cls?.primechoice) + num(race?.primechoice) + multiPrimes.length;
+  const comboDie = cls && multi ? multiDie([dieOf(cls), dieOf(multi)]) : cls && supportRecord ? enhancedDie(dieOf(supportRecord), dieOf(cls)) : "";
+  const combined = Boolean(multi || supportRecord || plusNames.length);
   const primes = new Set<Stat>([...forcedPrimes, ...chosenPrimes.filter((stat) => !forcedPrimes.includes(stat))]);
   const con = abilityBonus(finalOr10("constitution"), library.game);
   const hpTotal = hp.reduce((a, b) => a + b, 0);
@@ -390,13 +407,25 @@ export function Wizard({ session, onDone }: { session: Session; onDone: (id: str
   const day = cls ? (spellPicksAllowed(cls, level, finalOr10) as Record<string, number>) : {};
   const castsSpells = Boolean(cls?.spellclass) && Object.values(day).some((count) => count > 0);
   const choices = castsSpells && cls ? (spellChoices(library.powers, cls, day) as { power: Row; level: number }[]) : [];
-  const picksAt = (n: number) => choices.filter((choice) => choice.level === n && spells.includes(String(choice.power.name))).length;
-  const usable = useMemo(() => usableBy(cls), [cls]);
+  // A second spell list: the multi-class's own table, or the supporting option's at this level.
+  const secondCaster = multi?.spellclass ? multi : supportOption?.spells && supportRecord?.spellclass ? supportRecord : null;
+  const day2: Record<string, number> = !secondCaster ? {} : multi ? (spellPicksAllowed(multi, level, finalOr10) as Record<string, number>) : Object.fromEntries(Object.entries((supportOption?.spells as Record<string, Record<string, number>> | undefined)?.[String(level)] ?? {}).map(([n, count]) => [n, Number(count) || 0]));
+  const castsSecond = Boolean(secondCaster) && Object.values(day2).some((count) => count > 0);
+  const choices2 = castsSecond && secondCaster ? (spellChoices(library.powers, secondCaster, day2) as { power: Row; level: number }[]) : [];
+  const onSecond = spellList === "second" && castsSecond;
+  const listDay = onSecond ? day2 : day;
+  const listChoices = onSecond ? choices2 : choices;
+  const listSpells = onSecond ? spells2 : spells;
+  const picksAt = (n: number) => listChoices.filter((choice) => choice.level === n && listSpells.includes(String(choice.power.name))).length;
+  const usableMain = useMemo(() => usableBy(cls), [cls]);
+  const usableMulti = useMemo(() => (multi ? usableBy(multi) : null), [multi]);
+  // The shop offers what the class or the multi-class may use (FG).
+  const usable = (item: Row) => usableMain(item) || Boolean(usableMulti?.(item));
   const levelRow = cls ? progressionRow(cls, level) : null;
   const say = (text: string) => setNote(text);
 
   // Hit points rest on the class, race, level and Constitution: when one changes, they are rolled again.
-  const hpSignature = `${className}|${raceName}|${level}|${con}`;
+  const hpSignature = `${className}|${raceName}|${level}|${con}|${multiName}|${supportKey}`;
   const lastSignature = useRef(hpSignature);
   useEffect(() => {
     if (lastSignature.current !== hpSignature) {
@@ -448,7 +477,26 @@ export function Wizard({ session, onDone }: { session: Session; onDone: (id: str
     setGold(null);
     setCart([]);
     setSpells([]);
+    // ...and the combined classes.
+    setMultiName("");
+    setSupportKey("");
+    setPlusNames([]);
+    setComboPick("");
+    setSpells2([]);
     if (details.alignment && row && !alignmentsFor(String(row.name)).allowed.includes(details.alignment)) setDetails({ ...details, alignment: "" });
+  }
+  function setCombo(kind: "multi" | "support" | "plus", value: string, on = true) {
+    // Choosing or removing clears the second spell list and the hit point rolls.
+    setSpells2([]);
+    setComboPick("");
+    setChosenPrimes([]);
+    if (kind === "multi") {
+      setMultiName(on ? value : "");
+      if (on) setSupportKey("");
+    } else if (kind === "support") {
+      setSupportKey(on ? value : "");
+      if (on) setMultiName("");
+    } else setPlusNames((current) => (on ? [...current.filter((name) => name !== value), value] : current.filter((name) => name !== value)));
   }
 
   async function rollAbilities() {
@@ -476,7 +524,9 @@ export function Wizard({ session, onDone }: { session: Session; onDone: (id: str
   const hpPlan = cls
     ? Array.from({ length: level }, (_, index) => {
         const n = index + 1;
-        const { dice, flat } = levelGain(cls, n) as { dice: string[]; flat: number };
+        const { dice: own, flat } = levelGain(cls, n) as { dice: string[]; flat: number };
+        // A combined character rolls the combined die (Multi-Class or Enhanced Class Hit Die table).
+        const dice = comboDie ? own.map(() => comboDie) : own;
         const counts = new Map<string, number>();
         for (const die of dice) counts.set(die, (counts.get(die) ?? 0) + 1);
         return { n, dice: [...counts].map(([die, count]) => `${count > 1 ? `${die} x${count}` : `1${die}`}`).join(" + "), formula: [...counts].map(([die, count]) => `${count}${die}`).join("+"), flat };
@@ -552,9 +602,10 @@ export function Wizard({ session, onDone }: { session: Session; onDone: (id: str
   const giveBack = (name: string) => setCart((current) => current.flatMap((entry) => (entry.name !== name ? [entry] : entry.count > 1 ? [{ ...entry, count: entry.count - 1 }] : [])));
 
   function toggleSpell(name: string, at: number) {
-    if (spells.includes(name)) return setSpells(spells.filter((item) => item !== name));
-    if (picksAt(at) >= (day[at] ?? 0)) return say(`You already have ${at === 0 ? "0-level" : `Level ${at}`} spells: ${day[at] ?? 0} allowed. Untick one to choose another.`);
-    setSpells([...spells, name]);
+    const set = onSecond ? setSpells2 : setSpells;
+    if (listSpells.includes(name)) return set(listSpells.filter((item) => item !== name));
+    if (picksAt(at) >= (listDay[at] ?? 0)) return say(`You already have ${at === 0 ? "0-level" : `Level ${at}`} spells: ${listDay[at] ?? 0} allowed. Untick one to choose another.`);
+    set([...listSpells, name]);
   }
   function togglePrime(stat: Stat, on: boolean) {
     if (forcedPrimes.includes(stat)) return;
@@ -562,7 +613,10 @@ export function Wizard({ session, onDone }: { session: Session; onDone: (id: str
     setChosenPrimes((current) => (on ? [...current, stat] : current.filter((item) => item !== stat)));
   }
 
-  const alignment = alignmentsFor(className);
+  // The main class and the multi-class both decide the alignment (FG's wizard).
+  const alignment = multi
+    ? { allowed: COMBO_ALIGNMENTS.filter((item) => alignmentAllowed(className, item) && alignmentAllowed(multiName, item)), rule: `${className}: ${alignmentText(className)}; ${multiName}: ${alignmentText(multiName)}` }
+    : alignmentsFor(className);
   const alerts: Record<Page, string[]> = {
     abilities: allRolled ? [] : ["Roll the attribute scores"],
     race: race ? [] : ["Choose a race"],
@@ -570,10 +624,10 @@ export function Wizard({ session, onDone }: { session: Session; onDone: (id: str
     primes: !race || !cls ? ["Choose primes (after race and class)"] : primes.size !== primesAllowed ? [`Choose primes (${primes.size} of ${primesAllowed} chosen)`] : [],
     hp: hp.length === level && cls ? [] : ["Roll hit points"],
     equipment: gold === null ? ["Roll starting coin"] : [],
-    spells: castsSpells && spells.length === 0 ? ["Choose spells"] : [],
+    spells: (castsSpells && spells.length === 0) || (castsSecond && spells2.length === 0) ? ["Choose spells"] : [],
     finish: [...(details.name?.trim() ? [] : ["Enter name"]), ...(details.alignment ? [] : ["Enter alignment"])],
   };
-  const pages = PAGES.filter((name) => name !== "spells" || castsSpells);
+  const pages = PAGES.filter((name) => name !== "spells" || castsSpells || castsSecond);
   const warnings = pages.flatMap((name) => alerts[name]);
 
   async function create() {
@@ -594,11 +648,16 @@ export function Wizard({ session, onDone }: { session: Session; onDone: (id: str
         gold: gold ?? 0,
         gear: cart.map((entry) => [entry.name, entry.count]),
         spells,
+        ...(multi ? { multiclass: multiName } : {}),
+        ...(supportRecord ? { support: supportKey } : {}),
+        ...(plusNames.length ? { plus: plusNames } : {}),
+        ...(spells2.length ? { spells2 } : {}),
         ...Object.fromEntries(["alignment", "deity", "gender", "age", "height", "weight", "appearance"].map((key) => [key, details[key] ?? ""])),
         notes: [unfinished.length > 0 ? `Unfinished in the character wizard (finish with your Castle Keeper): ${unfinished.join(", ")}.` : "", details.notes ?? ""].filter(Boolean).join("\n\n"),
       };
       const id = await session.buildCharacter(spec);
-      session.sendChat(`${spec.name} joins the adventure (level ${level} ${raceName || "?"} ${className || "?"}).${unfinished.length ? ` Saved unfinished: still to choose ${unfinished.join(", ")}; the list is in the sheet's notes.` : ""}`, {});
+      const classText = [className || "?", multiName, supportOption ? `with ${supportOption.name}` : "", ...plusNames.map((name) => `${name} plus`)].filter(Boolean).join(multi ? "/" : " ");
+      session.sendChat(`${spec.name} joins the adventure (level ${level} ${raceName || "?"} ${classText}).${unfinished.length ? ` Saved unfinished: still to choose ${unfinished.join(", ")}; the list is in the sheet's notes.` : ""}`, {});
       onDone(id);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Could not create the character.");
@@ -810,7 +869,7 @@ export function Wizard({ session, onDone }: { session: Session; onDone: (id: str
                     </span>
                   </div>
                   {unsupported ? <p className="ccw-warn">{unsupported}</p> : null}
-                  <p>Prime attribute: {forcedPrimes.map((stat) => STAT_NAME[stat]).join(", ") || "-"}</p>
+                  <p>Prime attribute: {STATS.filter((stat) => num((cls.primes as Row | undefined)?.[stat]) === 1).map((stat) => STAT_NAME[stat]).join(", ") || "-"}</p>
                   <p>Hit die: {String(cls.hitdie ?? "")}</p>
                   {levelRow ? (
                     <p>
@@ -818,6 +877,7 @@ export function Wizard({ session, onDone }: { session: Session; onDone: (id: str
                     </p>
                   ) : null}
                   <p>Starting coin: {String(cls.startgold ?? "-").replace(/x/i, " x ")} gp</p>
+                  {combined ? <p data-start-xp>Starting experience: {startXP({ main: cls, multi, supportKey: supportRecord ? supportKey : "", plusCount: plusNames.length }, level)} XP (combined classes)</p> : null}
                   <p>Source: {sourceOf(cls)}</p>
                 </div>
               </div>
@@ -828,6 +888,108 @@ export function Wizard({ session, onDone }: { session: Session; onDone: (id: str
                 .map((row) => (
                   <Card key={String(row.name)} title={`(Level ${String(num(row.level || 1)).padStart(2, "0")})  ${String(row.name)}`} text={plain(row.text)} />
                 ))}
+              <Plate>Combine Classes (Adventurer's Backpack)</Plate>
+              {multi ? (
+                <div className="ccw-card open ccw-combo-card" data-combo="multi">
+                  <div className="ccw-card-title">
+                    <b>Multi-class: {multiName}</b>
+                    <button type="button" onClick={() => setCombo("multi", "", false)} data-action="remove-multi">
+                      Remove
+                    </button>
+                  </div>
+                  <p className="ccw-card-text">
+                    {(() => {
+                      const rule = multiRule(className, multiName, raceName);
+                      return `${rule.code ? `[${rule.code}] ` : ""}${rule.words} Both classes advance together; experience needed is the two classes' added together; hit points use the Multi-Class Hit Die table (${dieOf(cls)} with ${dieOf(multi)}: ${comboDie || "?"}).`;
+                    })()}
+                  </p>
+                </div>
+              ) : null}
+              {supportRecord && supportOption ? (
+                <div className="ccw-card open ccw-combo-card" data-combo="support">
+                  <div className="ccw-card-title">
+                    <b>Enhanced class, supporting: {supportOption.sub ? `${supportOption.name} (${String(supportRecord.name)})` : supportOption.name}</b>
+                    <button type="button" onClick={() => setCombo("support", "", false)} data-action="remove-support">
+                      Remove
+                    </button>
+                  </div>
+                  <p className="ccw-card-text">
+                    {(() => {
+                      const rule = enhancedRule(className, supportKey, raceName);
+                      const adv = supportOption.adv?.[String(level)];
+                      return `${rule.code ? `[${rule.code}] ` : ""}${rule.words} Gives: ${supportOption.abilities}. It counts as level ${supportLevel(supportKey, level)} (half the principal level); at level ${level} it adds ${adv?.xp ?? 0} XP to each level's experience${adv?.gained ? ` and gives: ${adv.gained}` : ""}. Hit points use the Enhanced Class Hit Die table (${dieOf(supportRecord)} supporting ${dieOf(cls)}: ${comboDie || "?"}).`;
+                    })()}
+                  </p>
+                </div>
+              ) : null}
+              {plusNames.map((name) => (
+                <div key={name} className="ccw-card open ccw-combo-card" data-combo="plus">
+                  <div className="ccw-card-title">
+                    <b>Class plus: {name}</b>
+                    <button type="button" onClick={() => setCombo("plus", name, false)} data-action="remove-plus">
+                      Remove
+                    </button>
+                  </div>
+                  <p className="ccw-card-text">{plusText(name)}. Zero level only; costs 5% of all experience earned.</p>
+                </div>
+              ))}
+              <div className="ccw-panel">
+                {isRaceClass(className) ? (
+                  <p className="hint">A race class combines with no other class (Adventurer's Backpack).</p>
+                ) : (
+                  <>
+                    <p className="hint">Optional: begin with more than one class. The Castle Keeper has the last word on any combination.</p>
+                    <div className="ccw-row">
+                      {!multi && !supportRecord ? (
+                        <>
+                          <button type="button" className="ccw-button" title="Two classes from 1st level, advancing together (Adventurer's Backpack)" data-action="combo-multi" onClick={() => setComboPick(comboPick === "multi" ? "" : "multi")}>
+                            {comboPick === "multi" ? "Cancel" : "Add Class (multi-class)"}
+                          </button>
+                          <button type="button" className="ccw-button" title="Some abilities of another class, at half the rate (Adventurer's Backpack)" data-action="combo-support" onClick={() => setComboPick(comboPick === "support" ? "" : "support")}>
+                            {comboPick === "support" ? "Cancel" : "Add Supporting Class (enhanced)"}
+                          </button>
+                        </>
+                      ) : null}
+                      <button type="button" className="ccw-button" title="Zero-level abilities of another class, 5% of experience each (Adventurer's Backpack)" data-action="combo-plus" onClick={() => setComboPick(comboPick === "plus" ? "" : "plus")}>
+                        {comboPick === "plus" ? "Cancel" : "Add Class Plus"}
+                      </button>
+                    </div>
+                    {comboPick ? (
+                      <div className="ccw-picklist ccw-combo-list">
+                        {(comboPick === "multi"
+                          ? classes.filter((row) => row.name !== className).map((row) => ({ id: String(row.name), label: String(row.name), rule: multiRule(className, String(row.name), raceName), extra: "", source: sourceOf(row) }))
+                          : comboPick === "support"
+                            ? supportOptions()
+                                .map((option) => ({ option, record: classes.find((row) => classKey(row.name) === option.class) }))
+                                .filter(({ record }) => record && record.name !== className)
+                                .map(({ option, record }) => {
+                                  const prime = supportPrime(option.key, record);
+                                  return { id: option.key, label: option.sub ? `${option.name} (${String(record?.name)})` : option.name, rule: enhancedRule(className, option.key, raceName), extra: prime ? `  Needs ${prime[0].toUpperCase()}${prime.slice(1)} as a prime.` : "", source: sourceOf(record as Row) };
+                                })
+                            : classes.filter((row) => row.name !== className && canPlus(String(row.name)) && !plusNames.includes(String(row.name))).map((row) => ({ id: String(row.name), label: String(row.name), rule: { code: "", words: String(plusText(String(row.name))), allowed: true }, extra: "", source: sourceOf(row) }))
+                        )
+                          .sort((a, b) => Number(b.rule.allowed) - Number(a.rule.allowed) || a.label.localeCompare(b.label))
+                          .map((item) => (
+                            <div key={item.id} className={item.rule.allowed ? "ccw-pick" : "ccw-pick blocked"} data-combo-row={item.id}>
+                              {item.rule.allowed ? (
+                                <button type="button" className="ccw-add" title="Add" aria-label={`Add ${item.label}`} data-combo-add={item.id} onClick={() => setCombo(comboPick, item.id)}>
+                                  +
+                                </button>
+                              ) : (
+                                <span />
+                              )}
+                              <span className="ccw-pick-name">
+                                {item.label} {item.rule.code ? <small>[{item.rule.code}]</small> : null}
+                                <small className="ccw-combo-rule"> {item.rule.words}{item.extra}</small>
+                              </span>
+                              <span className="ccw-pick-source">{item.source}</span>
+                            </div>
+                          ))}
+                      </div>
+                    ) : null}
+                  </>
+                )}
+              </div>
             </>
           ) : (
             <>
@@ -857,7 +1019,7 @@ export function Wizard({ session, onDone }: { session: Session; onDone: (id: str
                     <input type="checkbox" checked={primes.has(stat)} disabled={forced || !cls} onChange={(event) => togglePrime(stat, event.target.checked)} aria-label={`${stat} prime`} />
                     <b>{STAT_NAME[stat]}</b>
                     <span>{final(stat) ?? "—"}</span>
-                    <span className="hint">{forced ? "   (from your class)" : ""}</span>
+                    <span className="hint">{forced ? `   (${primeFrom(stat)})` : ""}</span>
                   </label>
                 );
               })}
@@ -957,17 +1119,29 @@ export function Wizard({ session, onDone }: { session: Session; onDone: (id: str
           <>
             <Plate>Spells</Plate>
             <div className="ccw-panel">
+              {castsSecond ? (
+                <div className="ccw-row">
+                  {castsSpells ? (
+                    <button type="button" className="ccw-button" aria-pressed={!onSecond} data-spell-list="main" onClick={() => setSpellList("main")}>
+                      {String(cls?.spellclass ?? className)}
+                    </button>
+                  ) : null}
+                  <button type="button" className="ccw-button" aria-pressed={onSecond} data-spell-list="second" onClick={() => setSpellList("second")}>
+                    {String(secondCaster?.spellclass ?? "Second class")}
+                  </button>
+                </div>
+              ) : null}
               <p>
                 <b>
                   Spells per day at level {level}:{" "}
-                  {Object.entries(day)
+                  {Object.entries(listDay)
                     .filter(([, count]) => count > 0)
                     .map(([n, count]) => `${n === "0" ? "0-level" : `level ${n}`}: ${count}`)
                     .join(", ")}
                 </b>
               </p>
               <p>Choose your starting spells:</p>
-              {Object.entries(day)
+              {Object.entries(listDay)
                 .filter(([, count]) => count > 0)
                 .map(([n, count]) => (
                   <p key={n} className="ccw-plan">
@@ -982,7 +1156,7 @@ export function Wizard({ session, onDone }: { session: Session; onDone: (id: str
                   Level{" "}
                   <select value={spellLevel} onChange={(event) => setSpellLevel(event.target.value)} aria-label="Spell level">
                     <option value="all">All levels</option>
-                    {Object.entries(day)
+                    {Object.entries(listDay)
                       .filter(([, count]) => count > 0)
                       .map(([n]) => (
                         <option key={n} value={n}>
@@ -993,13 +1167,13 @@ export function Wizard({ session, onDone }: { session: Session; onDone: (id: str
                 </label>
               </div>
               <div className="ccw-spells">
-                {choices
+                {listChoices
                   .filter((choice) => (spellLevel === "all" || String(choice.level) === spellLevel) && String(choice.power.name).toLowerCase().includes(spellSearch.toLowerCase()))
                   .map((choice) => {
                     const name = String(choice.power.name);
                     return (
                       <div key={name} className="ccw-spell">
-                        <input type="checkbox" checked={spells.includes(name)} onChange={() => toggleSpell(name, choice.level)} aria-label={`Spell ${name}`} />
+                        <input type="checkbox" checked={listSpells.includes(name)} onChange={() => toggleSpell(name, choice.level)} aria-label={`Spell ${name}`} />
                         <span className="ccw-spell-level">{choice.level}</span>
                         <button type="button" className="ccw-pick-name" onClick={() => setReadSpell(readSpell === name ? "" : name)}>
                           {name}
