@@ -1,10 +1,11 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
-import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import type { ChatLine } from "../session/useSession";
 import { diceStore, fullLook, rolling, SHAPED, tower, type DiceLook, type DiceThrow, type TowerDrop } from "./diceStore";
 import { createEffects } from "./effects";
-import { bottomFace, buildDie, model, tensLook, topFace, type ShapeKind } from "./models";
+import { bottomFace, buildDie, model, pulseDice, tensLook, topFace, type ShapeKind } from "./models";
+import { sparkColors, studioScene } from "./gilded";
+import { TRAILS } from "./effects";
 import { playHit } from "./sound";
 import { defaultThrow, diceOf, labelsFor, MAX_DICE, simulate, type Die, type Hit } from "./throw";
 
@@ -50,7 +51,8 @@ function createEngine(host: HTMLDivElement) {
   host.appendChild(renderer.domElement);
   const scene = new THREE.Scene();
   const pmrem = new THREE.PMREMGenerator(renderer);
-  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+  scene.environment = pmrem.fromScene(studioScene(), 0.04).texture;
+  scene.environmentIntensity = 1.2;
   scene.add(new THREE.HemisphereLight("#f7e8cf", "#20232a", 1.5));
   const key = new THREE.DirectionalLight("#ffe6bd", 2.4);
   key.castShadow = true;
@@ -107,9 +109,11 @@ function createEngine(host: HTMLDivElement) {
   const quaternion = new THREE.Quaternion();
   const ahead2 = new THREE.Quaternion();
   // A die's effect, given off as it moves (how far since the last frame).
-  const trail = (effect: DiceLook["effect"], group: THREE.Group, last: THREE.Vector3) => {
+  const motion = new THREE.Vector3();
+  const trail = (look: DiceLook, group: THREE.Group, last: THREE.Vector3) => {
     const speed = group.position.distanceTo(last);
-    if (speed < 2) effects.emit(effect, group.position.x, group.position.y, group.position.z, speed);
+    motion.subVectors(group.position, last);
+    if (speed < 2) effects.emit(look.effect, group.position.x, group.position.y, group.position.z, speed, sparkColors(look), motion);
     last.copy(group.position);
   };
 
@@ -144,7 +148,8 @@ function createEngine(host: HTMLDivElement) {
         );
         quaternion.set(item.frames[offset + 3], item.frames[offset + 4], item.frames[offset + 5], item.frames[offset + 6]);
         group.quaternion.copy(quaternion.slerp(ahead2.set(item.frames[ahead + 3], item.frames[ahead + 4], item.frames[ahead + 5], item.frames[ahead + 6]), part));
-        if (!item.landed) trail(item.look.effect, group, item.last[die]);
+        if (!item.landed) trail(item.look, group, item.last[die]);
+        pulseDice(group, now / 1000);
       });
       while (item.played < item.hits.length && item.hits[item.played].frame <= at) {
         const hit = item.hits[item.played++];
@@ -161,6 +166,17 @@ function createEngine(host: HTMLDivElement) {
             return kind === "d4" ? labels.find((_, face) => face !== bottomFace(kind, group.quaternion)) : labels[topFace(kind, group.quaternion)];
           })
           .join(" ");
+        // The Gilded Die's trails settle as a ring of sparks, and its highest face bursts.
+        if (TRAILS.has(item.look.effect))
+          item.groups.forEach((group, die) => {
+            const kind = item.dice[die].kind;
+            const colors = sparkColors(item.look);
+            effects.ring(item.look.effect, group.position.x, Math.max(0.02, group.position.y - 0.42), group.position.z, colors);
+            const labels = item.labels[die];
+            const shown = kind === "d4" ? labels.find((_, face) => face !== bottomFace(kind, group.quaternion)) : labels[topFace(kind, group.quaternion)];
+            const max = kind === "d100" || kind === "d100tens" ? null : String(Number(kind.slice(1)));
+            if (max && shown === max && kind !== "d20") effects.burst(group.position.x, group.position.y, group.position.z, colors);
+          });
         // A natural 20 or a 1 on a d20 flares where it lies.
         if (item.look.crit !== false)
           item.groups.forEach((group, die) => {
@@ -185,7 +201,7 @@ function createEngine(host: HTMLDivElement) {
         group.position.y += Math.sin(Math.PI * t) * 2.5;
         group.rotation.set(flight.spin[die].x * t, flight.spin[die].y * t, flight.spin[die].z * t);
         group.scale.setScalar(t < 0.7 ? 1 : Math.max(0.01, (1 - t) / 0.3));
-        trail(flight.look.effect, group, flight.last[die]);
+        trail(flight.look, group, flight.last[die]);
       });
       if (t >= 1) {
         removeGroups(flight.groups);

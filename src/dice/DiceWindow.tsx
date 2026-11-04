@@ -10,12 +10,15 @@ const FONT_STYLE: Record<DiceLook["font"], React.CSSProperties> = {
   bold: { fontFamily: '"Arial Black", "Segoe UI Black", Impact, sans-serif', fontWeight: 900 },
   runic: { fontFamily: "Cinzel, Georgia, serif", fontWeight: 700 },
   script: { fontFamily: '"Palatino Linotype", Palatino, serif', fontStyle: "italic", fontWeight: 700 },
+  glow: { fontFamily: "Cinzel, Georgia, serif", fontWeight: 700, textShadow: "0 0 6px currentColor" },
+  metal: { fontFamily: "Cinzel, Georgia, serif", fontWeight: 700, color: "#e8c46a" },
+  engrave: { fontFamily: "Cinzel, Georgia, serif", fontWeight: 700, opacity: 0.8 },
 };
 const TRAY_DICE = [20, 12, 10, 8, 6, 4, 100];
 
 const lookOf = ({ name: _name, ...look }: { name: string } & DiceLook): DiceLook => look;
 function sameLook(a: DiceLook, b: DiceLook) {
-  return (["theme", "body", "ink", "accent", "material", "effect", "font"] as const).every((key) => a[key] === b[key]);
+  return (["theme", "body", "ink", "accent", "material", "effect", "font"] as const).every((key) => a[key] === b[key]) && Boolean(a.pips) === Boolean(b.pips);
 }
 const nameOf = (look: DiceLook) => PRESETS.find((preset) => sameLook(look, preset))?.name ?? null;
 
@@ -166,6 +169,10 @@ export function DiceWindow({ session }: { session: Session }) {
         <label className="check">
           <input type="checkbox" checked={look.crit !== false} onChange={(event) => setLook({ crit: event.target.checked })} />
           A natural 20 flares gold, a 1 red
+        </label>
+        <label className="check">
+          <input type="checkbox" checked={Boolean(look.pips)} onChange={(event) => setLook({ pips: event.target.checked })} data-dice="pips" />
+          Pips on the d6
         </label>
       </section>
 

@@ -51,6 +51,14 @@ try {
   assert(thrown.roll.label === "Thrown" && thrown.roll.throw?.x === 0.2 && thrown.roll.throw.vy === -0.5, `throw carried: ${JSON.stringify(thrown.roll.throw)}`);
   assert(thrown.roll.look?.theme === "starfall" && thrown.roll.look.body === "#101c4c", "dice look carried");
 
+  // The Gilded Die's themes: its own finish, a trail, gilt numbers and pips.
+  ann.send({ type: "roll", formula: "1d6", look: { theme: "bard", body: "#6e243f", ink: "#f0d78c", material: "design", effect: "notes", font: "metal", pips: true } });
+  await settle();
+  const bard = bob.lines.at(-1).roll.look;
+  assert(bard.theme === "bard" && bard.material === "design" && bard.effect === "notes" && bard.font === "metal" && bard.pips === true, `the Gilded Die's look carried: ${JSON.stringify(bard)}`);
+  ann.send({ type: "roll", formula: "1d20", look });
+  await settle();
+
   // Nonsense is not passed on.
   ann.send({ type: "roll", formula: "1d20", throw: { x: "far", y: 2 }, look: { theme: "plaid", body: "red", ink: "#fff" } });
   await settle();

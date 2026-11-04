@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
+import { studioScene } from "./gilded";
 import type { DiceLook } from "./diceStore";
 import { buildDie, model, type ShapeKind } from "./models";
 
@@ -35,7 +35,8 @@ function render(jobs: { look: DiceLook; sides: number }[]): string[] {
       renderer.toneMappingExposure = 1.1;
       const scene = new THREE.Scene();
       const pmrem = new THREE.PMREMGenerator(renderer);
-      scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+      scene.environment = pmrem.fromScene(studioScene(), 0.04).texture;
+  scene.environmentIntensity = 1.2;
       scene.add(new THREE.HemisphereLight("#f7e8cf", "#1a1d22", 1.3));
       const key = new THREE.DirectionalLight("#fff1d6", 2.4);
       key.position.set(-2, 3, 4);

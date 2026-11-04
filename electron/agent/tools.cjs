@@ -1183,7 +1183,7 @@ const TOOLS = [
   {
     name: "kraken_dice_settings",
     description:
-      "The GM's own 3D dice, as FG's dice skins and more (everyone at the table sees the roller's dice as set here): show the dice rolling on the table, sound and volume (0..1); a ready-made set (preset: Classic Ruby, Dragonhide, Starfall, Ancient Bone, Magma Vein, Leviathan, Frost Glass, Molten Gold, Arcane Pearl, Obsidian, Carrara, Oak and Iron, Rune Steel, Kraken Deep), or the parts: body, accent (the second colour of two-colour designs) and ink (the numbers) as #rrggbb; design (classic = solid, marble, swirl, speckle, stripes, wood, runes, dragonhide, starfall, bone, magma, leviathan); material (plastic = resin, glass, metal, pearl, stone, wood); font for the numbers (classic, bold, runic = carved capitals, script); effect as they roll (none, sparkles, fire, frost, arcane, shadow, glow); crit: a natural 20 flares gold and a 1 red. A preset first, then any parts on top of it. Without arguments, reads them. Who sees a dice-tower result is kraken_table_options.",
+      "The GM's own 3D dice, as FG's dice skins and more (everyone at the table sees the roller's dice as set here): show the dice rolling on the table, sound and volume (0..1); a ready-made set (preset; the Gilded Die's: Cores Aether Core, Emerald Cut, Frostcrystal, Obsidian Glass, Voidglass, Ghost; Relics Reliquary, Rose Window, Classic Ruby, Gilded, Bloodstone, Champion; Wilds Dragonhide, Wyrmscale, Behemoth, Ancient Bone, Gravewrought, Leviathan, Magma Vein; Classes Arcane Seal, Wizard, Bard, Necromancer, Goblin Scrap; Worlds Starfall, Imperial, Mythos; Kraken's: Frost Glass, Molten Gold, Arcane Pearl, Obsidian, Carrara, Oak and Iron, Rune Steel, Kraken Deep), or the parts: body, accent (the second colour of two-colour designs) and ink (the numbers) as #rrggbb; design (classic = solid, marble, swirl, speckle, stripes, wood, runes, dragonhide, starfall, bone, magma, leviathan, and the Gilded Die's aether, emerald, frost, obsidian, void, ghost, reliquary, rosewindow, gilded, bloodstone, hero, monster, wyrm, undead, arcane, wizard, bard, necromancer, goblin, traveller, mythos); material (plastic = resin, glass, metal, pearl, stone, wood, design = the design's own finish: inner crystals, enamel or stained-glass inlays, the reliquary's gems); font for the numbers (classic, bold, runic = carved capitals, script, glow, metal = gilt, engrave); pips: a d6 shows pips; effect as they roll (none, sparkles, fire, frost, arcane, shadow, glow, and the Gilded Die's trails: aura = soft glow, wisp = ectoplasm, spark, embers, holy = rising motes, charge = charged orb, notes = rising music, ion = ion streak; these settle as a ring of sparks and burst on the highest face); crit: a natural 20 flares gold and a 1 red. A preset first, then any parts on top of it. Without arguments, reads them. Who sees a dice-tower result is kraken_table_options.",
     inputSchema: object({
       show: { type: "boolean" },
       sound: { type: "boolean" },
@@ -1192,10 +1192,11 @@ const TOOLS = [
       body: string("Dice colour, #rrggbb"),
       accent: string("Second colour, #rrggbb"),
       ink: string("Numbers colour, #rrggbb"),
-      design: { type: "string", enum: ["classic", "marble", "swirl", "speckle", "stripes", "wood", "runes", "dragonhide", "starfall", "bone", "magma", "leviathan"] },
-      material: { type: "string", enum: ["plastic", "glass", "metal", "pearl", "stone", "wood"] },
-      font: { type: "string", enum: ["classic", "bold", "runic", "script"] },
-      effect: { type: "string", enum: ["none", "sparkles", "fire", "frost", "arcane", "shadow", "glow"] },
+      design: { type: "string", enum: ["classic", "marble", "swirl", "speckle", "stripes", "wood", "runes", "dragonhide", "starfall", "bone", "magma", "leviathan", "aether", "reliquary", "rosewindow", "gilded", "emerald", "frost", "obsidian", "bloodstone", "arcane", "void", "hero", "monster", "wizard", "bard", "necromancer", "goblin", "wyrm", "ghost", "undead", "traveller", "mythos"] },
+      material: { type: "string", enum: ["plastic", "glass", "metal", "pearl", "stone", "wood", "design"] },
+      font: { type: "string", enum: ["classic", "bold", "runic", "script", "glow", "metal", "engrave"] },
+      pips: { type: "boolean" },
+      effect: { type: "string", enum: ["none", "sparkles", "fire", "frost", "arcane", "shadow", "glow", "aura", "wisp", "spark", "embers", "holy", "charge", "notes", "ion"] },
       crit: { type: "boolean" },
     }),
     run: async (args, ctx) => out(await ctx.ui({ kind: "dice-settings", patch: args })),

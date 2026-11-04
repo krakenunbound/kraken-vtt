@@ -3,6 +3,7 @@ import * as CANNON from "cannon-es";
 import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import type { DiceFont, DiceLook, DiceTheme } from "./diceStore";
+import { applyGilded, boundaryLoop, createInlayMaterial, crystalGeometry, gemGeometry, getGemMaterial, gildedMaps, gildedNumber, inclusionMaterial, insetFaceGeometry, isGilded, jewelAnchor, KRAKEN_PAINTED, themeProfile, type GildedTheme, type NumberStyle } from "./gilded";
 
 // The dice themselves, from The Gilded Die (F:\dice_table): rounded convex
 // shells, centred numerals, procedural themes. Shapes, textures and materials
@@ -136,6 +137,9 @@ const FONT_FACES: Record<DiceFont, (px: number) => string> = {
   bold: (px) => `900 ${px}px "Arial Black", "Segoe UI Black", Impact, sans-serif`,
   runic: (px) => `700 ${px}px Cinzel, "Trajan Pro", Georgia, serif`,
   script: (px) => `italic 700 ${px}px "Palatino Linotype", Palatino, "Book Antiqua", serif`,
+  glow: (px) => `700 ${px}px Cinzel, Georgia, serif`,
+  metal: (px) => `700 ${px}px Cinzel, Georgia, serif`,
+  engrave: (px) => `700 ${px}px Cinzel, Georgia, serif`,
 };
 
 function engravedTexture(value: string, color: string, font: DiceFont = "classic") {
@@ -156,8 +160,10 @@ function engravedTexture(value: string, color: string, font: DiceFont = "classic
   return texture;
 }
 
-function themeMaps(theme: DiceTheme, color: string, accentColor = "#d8b46a"): { map?: THREE.Texture; bumpMap?: THREE.Texture } {
+function themeMaps(theme: DiceTheme, color: string, accentColor = "#d8b46a"): { map?: THREE.Texture; bumpMap?: THREE.Texture; emissiveMap?: THREE.Texture } {
   if (theme === "classic") return {};
+  // The Gilded Die's newer themes, as it paints them.
+  if (isGilded(theme) && !KRAKEN_PAINTED.has(theme)) return gildedMaps(theme, color);
   const size = 384;
   const albedo = document.createElement("canvas");
   const bump = document.createElement("canvas");
@@ -543,6 +549,14 @@ function shellMaterial(look: DiceLook) {
   const material_ = look.material ?? "plastic";
   const key = `${look.theme}|${look.body}|${look.accent}|${material_}|${look.effect === "glow" ? "glow" : ""}`;
   let material = shells.get(key);
+  if (!material && material_ === "design" && isGilded(look.theme)) {
+    // Made as its design is: the Gilded Die's own finish for it.
+    const physical = new THREE.MeshPhysicalMaterial();
+    applyGilded(physical, look.theme, look.body, KRAKEN_PAINTED.has(look.theme) ? themeMaps(look.theme, look.body, look.accent) : undefined);
+    if (physical.emissiveIntensity > 0) physical.userData.pulse = { base: physical.emissiveIntensity, amount: themeProfile(look.theme).pulse };
+    material = physical;
+    shells.set(key, material);
+  }
   if (!material) {
     const maps = themeMaps(look.theme, look.body, look.accent);
     const solid = look.theme === "classic";
@@ -580,6 +594,12 @@ function shellMaterial(look: DiceLook) {
     } else if (material_ === "wood") {
       Object.assign(physical, { roughness: 0.68, clearcoat: 0.35, clearcoatRoughness: 0.5, bumpScale: base.bumpScale * 1.4 });
     }
+    if (maps.emissiveMap) {
+      // A theme's own glow (stars, veins, runes) shines through any material.
+      physical.emissive = new THREE.Color("#ffffff");
+      physical.emissiveMap = maps.emissiveMap;
+      physical.emissiveIntensity = 0.45;
+    }
     if (look.effect === "glow") {
       physical.emissive = new THREE.Color(look.body).lerp(new THREE.Color(look.accent ?? "#ffffff"), 0.35);
       physical.emissiveIntensity = 0.55;
@@ -591,11 +611,15 @@ function shellMaterial(look: DiceLook) {
   return material;
 }
 
-function labelMaterial(value: string, ink: string, font: DiceFont = "classic") {
-  const key = `${value}|${ink}|${font}`;
+const STYLED = new Set(["glow", "metal", "engrave"]);
+function labelMaterial(value: string, ink: string, font: DiceFont = "classic", pips = false, largePips = false) {
+  const style: NumberStyle | null = pips ? "pips" : STYLED.has(font) ? (font as NumberStyle) : null;
+  const key = `${value}|${ink}|${font}|${style ?? ""}|${largePips ? "lg" : ""}`;
   let material = labels.get(key);
   if (!material) {
-    material = new THREE.MeshBasicMaterial({ map: engravedTexture(value, ink, font), transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -3, side: THREE.DoubleSide });
+    // Glowing, gilt and engraved numbers, and pips, as the Gilded Die letters them.
+    const map = style ? gildedNumber(value, ink, style, largePips) : engravedTexture(value, ink, font);
+    material = new THREE.MeshBasicMaterial({ map, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -3, side: THREE.DoubleSide, toneMapped: !style });
     labels.set(key, material);
   }
   return material;
@@ -617,10 +641,32 @@ export function buildDie(kind: ShapeKind, look: DiceLook, values: string[]) {
   const shell = new THREE.Mesh(geometry, shellMaterial(look));
   shell.castShadow = shell.receiveShadow = true;
   group.add(shell);
-  const size = kind === "d20" ? 0.39 : kind === "d12" ? 0.43 : kind === "d4" ? 0.43 : 0.5;
+  // Its own design: the Gilded Die's inner crystal, face inlays and gems.
+  const profile = look.material === "design" && isGilded(look.theme) ? themeProfile(look.theme) : null;
+  const theme = look.theme as GildedTheme;
+  if (profile) {
+    shell.renderOrder = profile.transmission > 0 ? 2 : 0;
+    if (profile.inclusion) group.add(...crystal(kind, theme, look.body));
+  }
+  const pips = Boolean(look.pips) && kind === "d6";
+  const largePips = pips && look.theme === "gilded";
+  const size = largePips ? 0.82 : kind === "d20" ? 0.39 : kind === "d12" ? 0.43 : kind === "d4" ? 0.43 : 0.5;
+  const visual = kind === "d100" || kind === "d100tens" ? "d10" : kind;
+  const inlaid = Boolean(profile && profile.faceMode !== "none");
+  const inset = profile ? (visual === "d6" ? 0.15 : visual === "d20" ? 0.04 : visual === "d4" ? 0.09 : 0.06) * (profile.faceMode === "glass" ? 0.62 : 1) : 0;
   faces.forEach((face, index) => {
-    const label = new THREE.Mesh(plane(size), labelMaterial(values[index % values.length], look.ink, look.font));
-    label.position.copy(face.center).addScaledVector(face.normal, 0.004);
+    if (inlaid) {
+      const inlay = inlayMaterial(theme, look.body, index);
+      const loop = boundaryLoop(face.edges.filter((edge) => (edge as { count?: number }).count === 1));
+      if (inlay && loop.length >= 3) {
+        const mesh = new THREE.Mesh(insetFaceGeometry(loop, face.normal, face.center, inset, 0.01), inlay);
+        mesh.renderOrder = 3;
+        group.add(mesh);
+      }
+    }
+    const label = new THREE.Mesh(plane(size), labelMaterial(values[index % values.length], look.ink, look.font, pips, largePips));
+    label.position.copy(face.center).addScaledVector(face.normal, inlaid ? 0.02 : 0.004);
+    label.renderOrder = 4;
     let right = face.right;
     let up = face.up;
     if (kind === "d10" || kind === "d100" || kind === "d100tens") {
@@ -632,7 +678,81 @@ export function buildDie(kind: ShapeKind, look: DiceLook, values: string[]) {
     label.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(right, up, face.normal));
     group.add(label);
   });
+  if (profile && look.theme === "reliquary") group.add(gems(kind));
   return group;
+}
+
+// The gem dice's inner crystal: a faceted core in the theme's accent and a bright heart.
+const crystals = new Map<string, THREE.Mesh[]>();
+function crystal(kind: ShapeKind, theme: GildedTheme, body: string) {
+  const key = `${kind}|${theme}|${body}`;
+  let found = crystals.get(key);
+  if (!found) {
+    const profile = themeProfile(theme);
+    const geometry = crystalGeometry(model(kind).shape, body);
+    const coreMaterial = inclusionMaterial(profile.accent, theme === "aether" ? 0.85 : 0.55);
+    const heartMaterial = inclusionMaterial("#f7fbff", theme === "aether" ? 1.35 : 0.95);
+    heartMaterial.vertexColors = false;
+    heartMaterial.color.set(theme === "emerald" ? "#eafff4" : theme === "void" ? "#f3e6ff" : theme === "obsidian" ? "#c9d4ff" : "#f4fbff");
+    coreMaterial.userData.pulse = { base: coreMaterial.emissiveIntensity, amount: profile.pulse };
+    heartMaterial.userData.pulse = { base: heartMaterial.emissiveIntensity, amount: profile.pulse };
+    const core = new THREE.Mesh(geometry, coreMaterial);
+    core.scale.setScalar(theme === "obsidian" ? 0.5 : 0.6);
+    const heart = new THREE.Mesh(geometry, heartMaterial);
+    heart.scale.setScalar(0.34);
+    found = [core, heart];
+    crystals.set(key, found);
+  }
+  // Each die its own meshes, sharing the geometry and materials.
+  return found.map((mesh) => {
+    const copy = new THREE.Mesh(mesh.geometry, mesh.material);
+    copy.scale.copy(mesh.scale);
+    return copy;
+  });
+}
+
+const inlays = new Map<string, THREE.Material | null>();
+function inlayMaterial(theme: GildedTheme, body: string, index: number) {
+  const key = `${theme}|${body}|${index % 8}`;
+  if (!inlays.has(key)) inlays.set(key, createInlayMaterial(theme, body, index));
+  return inlays.get(key) ?? null;
+}
+
+// The reliquary's gems: one on every corner and every edge.
+const jewelDummy = new THREE.Object3D();
+function gems(kind: ShapeKind) {
+  const { shape } = model(kind);
+  const visual = kind === "d100" || kind === "d100tens" ? "d10" : kind;
+  const anchors = shape.vertices.map((vertex) => ({ point: jewelAnchor(visual, vertex), scale: visual === "d20" || visual === "d12" ? 0.72 : 1 }));
+  const seen = new Set<string>();
+  shape.faces.forEach((face) =>
+    face.forEach((start, index) => {
+      const end = face[(index + 1) % face.length];
+      const key = start < end ? `${start}:${end}` : `${end}:${start}`;
+      if (seen.has(key)) return;
+      seen.add(key);
+      anchors.push({ point: jewelAnchor(visual, shape.vertices[start].clone().add(shape.vertices[end]).multiplyScalar(0.5)), scale: visual === "d20" ? 0.42 : 0.55 });
+    }),
+  );
+  const jewels = new THREE.InstancedMesh(gemGeometry(), getGemMaterial(), anchors.length);
+  anchors.forEach((anchor, index) => {
+    jewelDummy.position.copy(anchor.point);
+    jewelDummy.scale.setScalar(anchor.scale);
+    jewelDummy.updateMatrix();
+    jewels.setMatrixAt(index, jewelDummy.matrix);
+  });
+  jewels.instanceMatrix.needsUpdate = true;
+  return jewels;
+}
+
+// Glowing designs breathe: every pulsing material's glow, at this time (seconds).
+export function pulseDice(group: THREE.Object3D, time: number) {
+  const phase = (group.userData.phase ??= Math.random() * Math.PI * 2) as number;
+  group.traverse((object) => {
+    const material = (object as THREE.Mesh).material as THREE.MeshStandardMaterial | undefined;
+    const pulse = material?.userData?.pulse as { base: number; amount: number } | undefined;
+    if (pulse && pulse.amount > 0) material!.emissiveIntensity = pulse.base * (1 + Math.sin(time * 2.4 + phase) * pulse.amount);
+  });
 }
 
 // The face that points up when the die rests with this rotation.
