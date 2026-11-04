@@ -1040,3 +1040,17 @@ textarea.cc-field.tall { min-height: 220px; }
 
 .krits-window { display: flex; flex-direction: column; gap: 10px; padding: 14px; }
 .krits-row { display: grid; grid-template-columns: 200px minmax(0, 1fr); align-items: center; gap: 10px; }
+
+.ccw-combo-card .ccw-card-title { display: flex; justify-content: space-between; align-items: center; padding: 4px 8px; }
+.ccw-combo-card .ccw-card-title button { padding: 1px 8px; font-size: 0.78rem; }
+.ccw-combo-rule { font-weight: 400; color: #6b5536; }
+.ccw-combo-list { margin-top: 8px; max-height: 320px; overflow: auto; }
+.ccw button[aria-pressed="true"] { background: linear-gradient(180deg, #c9b07e, #e9dab8); box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.25); }
+
+.cc-classlevel { display: flex; flex-direction: column; gap: 4px; }
+.cc-classlevel h4 { display: flex; justify-content: center; align-items: center; gap: 8px; margin: 6px 0 2px; }
+.cc-class-row, .cc-change-row { display: grid; grid-template-columns: 150px 40px minmax(0, 1fr) auto auto; gap: 8px; align-items: center; padding: 2px 0; font-size: 0.84rem; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+.cc-change-row { grid-template-columns: 150px minmax(0, 1fr) auto auto; }
+.cc-change-list { max-height: 260px; overflow: auto; }
+.cc-class-row button, .cc-change-row button { padding: 1px 8px; font-size: 0.78rem; }
+.cc-next-source { margin: -4px 4px 0; text-align: right; }

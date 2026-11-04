@@ -60,6 +60,12 @@ try {
   await page.getByLabel("Higher starting level").click();
   await page.getByLabel("Higher starting level").click();
   await snap("class");
+  await page.click('[data-action="combo-multi"]');
+  await page.locator(".ccw-combo-list").scrollIntoViewIfNeeded();
+  await snap("combine-list");
+  await page.click('[data-combo-add="Fighter"]');
+  await page.locator('[data-combo="multi"]').scrollIntoViewIfNeeded();
+  await snap("combine");
   await page.click('[data-wizard-tab="primes"]');
   await snap("primes");
   await page.click('[data-wizard-tab="hp"]');

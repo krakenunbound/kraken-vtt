@@ -272,6 +272,76 @@ try {
   const unfinished = (await tool("kraken_record_get", { id: rest.records.find((record) => record.name === "Unfinished Paladin").id })).data;
   assert(String(unfinished.notes).includes("Unfinished in the character wizard (finish with your Castle Keeper): Abilities, Primes, Hit Points, Equipment, Alignment."), `notes: ${unfinished.notes}`);
 
+  // Combining classes: a Human Fighter/Wizard (multi-class) at level 2 with a Rogue plus.
+  await page.click('[data-action="new-character"]');
+  await tool("kraken_dice_clear");
+  await tool("kraken_dice_force", { values: [4, 5, 5, 4, 4, 4, 4, 3, 3, 5, 5, 4, 4, 4, 4, 3, 3, 4] });
+  await page.click('[data-action="roll-abilities"]');
+  await page.waitForFunction(() => document.querySelector('[data-final="charisma"]')?.textContent === "10");
+  await page.click('[data-wizard-tab="race"]');
+  await page.click('[data-race="Human"]');
+  await page.waitForSelector('[data-action="change-race"]');
+  await page.click('[data-wizard-tab="class"]');
+  await page.click('[data-class="Fighter"]');
+  await page.getByLabel("Higher starting level").click();
+  await page.click('[data-action="combo-multi"]');
+  // Fighter/Knight is a race-limited pair for a human? Whatever the code, a refused row has no +.
+  for (const row of await page.locator(".ccw-combo-list .ccw-pick.blocked").all()) assert((await row.locator("[data-combo-add]").count()) === 0, "a refused combination has no +");
+  await page.click('[data-combo-add="Wizard"]');
+  await page.waitForSelector('[data-combo="multi"]');
+  assert(/Multi-Class Hit Die table \(d10 with d4: d8\)/.test(await page.locator('[data-combo="multi"]').textContent()), "multi card");
+  await page.click('[data-action="combo-plus"]');
+  await page.click('[data-combo-add="Rogue"]');
+  await page.waitForSelector('[data-combo="plus"]');
+  await page.click('[data-wizard-tab="primes"]');
+  assert(await page.getByLabel("intelligence prime").isChecked(), "the wizard's prime is forced");
+  await page.getByLabel("dexterity prime").check();
+  await page.getByLabel("wisdom prime").check();
+  await page.click('[data-wizard-tab="hp"]');
+  await tool("kraken_dice_force", { values: [6] });
+  await page.click('[data-action="roll-hp"]');
+  // Level 1 on the d8 rolls 6 (+0 Con 10); level 2 likewise.
+  await tool("kraken_dice_force", { values: [6] });
+  await page.waitForFunction(() => Number(document.querySelector("[data-hp-total]")?.getAttribute("data-hp-total")) > 0);
+  const multiHp = Number(await page.locator("[data-hp-total]").getAttribute("data-hp-total"));
+  await page.click('[data-wizard-tab="spells"]');
+  await page.click('[data-spell-list="second"]');
+  const secondBoxes = page.locator('.ccw-spell input[type="checkbox"]');
+  await secondBoxes.nth(0).check();
+  const wizardSpell = (await page.locator(".ccw-spell .ccw-pick-name").nth(0).textContent()).trim();
+  await page.click('[data-wizard-tab="finish"]');
+  await page.getByLabel("Character name").fill("Varis Twohands");
+  await page.getByLabel("alignment").selectOption("Neutral Good");
+  await page.click('[data-action="create-character"]');
+  await page.waitForFunction(() => document.querySelector('[data-character] .cc-name')?.value === "Varis Twohands", null, { timeout: 30000 });
+  {
+    const all = await tool("kraken_records_list", { type: "character" });
+    const varis = (await tool("kraken_record_get", { id: all.records.find((record) => record.name === "Varis Twohands").id })).data;
+    const pkgs = Object.values(varis.packages).filter((pkg) => pkg.levels);
+    assert(pkgs.map((pkg) => `${pkg.name}${pkg.ccmulti ? "*" : ""}${pkg.level}`).join() === "Fighter*2,Wizard*2", `packages ${pkgs.map((pkg) => pkg.name).join()}`);
+    assert(varis.hp.total === multiHp, `hp ${varis.hp.total} vs ${multiHp}`);
+    assert(varis.ccplus?.rogue, "rogue plus");
+    assert(String(varis.expnextsource).startsWith("Fighter/Wizard 3 (class plus"), `next ${varis.expnextsource}`);
+    assert(Object.values(varis.powers ?? {}).some((power) => power.name === wizardSpell && power.spellpool === "wizard"), `wizard spell ${wizardSpell} in its pool`);
+  }
+
+  // Class & Level on the sheet: Level Up on the Wizard raises both classes of the multi-class.
+  await page.click('[data-action="class-level"]');
+  await page.click('[data-class-row="Wizard"] [data-action="level-up-class"]');
+  await page.waitForFunction(() => document.querySelector('[data-class-row="Wizard"] .cc-num')?.textContent === "3", null, { timeout: 20000 });
+  assert((await page.locator('[data-class-row="Fighter"] .cc-num').textContent()) === "3", "the fighter rose with it");
+  assert((await page.locator(".cc-classlevel").textContent()).includes("The character already has two classes"), "a multi-class cannot dual class");
+
+  // Borin (Dwarf Fighter, Constitution prime) dual-classes into Barbarian ([S] for a dwarf).
+  await page.locator(".character-list li", { hasText: "Borin Stonefist" }).first().locator("button").click();
+  await page.waitForFunction(() => document.querySelector('[data-character] .cc-name')?.value === "Borin Stonefist");
+  if (!(await page.locator(".cc-classlevel").count())) await page.click('[data-action="class-level"]');
+  await page.click('[data-action="change-class-open"]');
+  assert((await page.locator('[data-change-row="Rogue"] [data-action="dual-class"]').count()) === 0, "no dual class into Rogue without Dexterity prime");
+  await page.click('[data-change-row="Barbarian"] [data-action="dual-class"]');
+  await page.waitForSelector('[data-class-row="Barbarian"]', { timeout: 20000 });
+  assert((await page.locator('[data-class-row="Barbarian"]').textContent()).includes("dual class"), "barbarian is the dual class");
+
   // Out and back in: Borin exported as Kraken's file and as FG's XML, then
   // both imported through the Characters window's Import button.
   const { writeFileSync } = await import("node:fs");
@@ -300,7 +370,7 @@ try {
   await page.click('[data-action="export-character"]');
 
   await tool("kraken_leave");
-  console.log(`ok wizard: Borin Stonefist (HP ${made.hp.total}, AC ${made.ac.total}, BtH ${made.bth}) and Ilyana Starweave (level ${elf.level}, HP ${elf.hp.total}, spells ${kept.length}) equal to the builder; spells trimmed on a level change; paladin alignment; an unfinished character lists what is left; exported (Kraken, FG) and imported back with Foundry's. ${path.join(profile, "wizard-result.png")}`);
+  console.log(`ok wizard: Borin Stonefist (HP ${made.hp.total}, AC ${made.ac.total}, BtH ${made.bth}) and Ilyana Starweave (level ${elf.level}, HP ${elf.hp.total}, spells ${kept.length}) equal to the builder; spells trimmed on a level change; paladin alignment; an unfinished character lists what is left; a Fighter/Wizard multi-class with a Rogue plus made through Combine Classes, levelled from Class & Level; Borin dual-classed into Barbarian; exported (Kraken, FG) and imported back with Foundry's. ${path.join(profile, "wizard-result.png")}`);
 } catch (error) {
   await page.screenshot({ path: path.join(profile, "wizard-failed.png") }).catch(() => undefined);
   console.log("failed:", path.join(profile, "wizard-failed.png"));
