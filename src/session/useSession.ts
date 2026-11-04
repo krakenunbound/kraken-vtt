@@ -141,7 +141,9 @@ export type QuickSlot =
   | { kind: "picture"; book: string; file: string; label: string }
   | { kind: "sheet"; record: string; label: string }
   | { kind: "sound"; sound: string; soundKind: string; label: string }
-  | { kind: "note"; record: string; label: string };
+  | { kind: "note"; record: string; label: string }
+  // A record in the campaign's lists (an NPC, an item, a spell...).
+  | { kind: "record"; record: string; label: string };
 export type KrakenLink = QuickSlot;
 export type SoundItem = { id: string; kind: string; group: string; name: string };
 export type SoundLibrary = { sounds: SoundItem[]; groups: { id: string; count: number }[]; folder: string; triggers?: SoundTrigger[] };
@@ -181,6 +183,8 @@ export type TableRecord = {
   name: string;
   owner: string;
   visibility: "gm" | "owner" | "all";
+  // The book (module) it came from, if any.
+  source?: string;
   data: Record<string, unknown>;
   updatedAt: number;
 };

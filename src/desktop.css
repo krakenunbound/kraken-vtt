@@ -1234,3 +1234,36 @@ textarea.cc-field.tall { min-height: 220px; }
 
 /* FG's identity list under the chat: who a player speaks and rolls as. */
 .chat-identity { margin: 0 8px 6px; font-size: 0.8rem; max-width: calc(100% - 16px); }
+
+/* FG's campaign lists: the lists down the side, a list grouped by category, the sharing icon. */
+.records-window { display: grid; grid-template-columns: 150px 1fr; height: 100%; min-height: 0; }
+.records-lists { display: flex; flex-direction: column; gap: 2px; padding: 8px; border-right: 1px solid var(--panel-edge); overflow: auto; }
+.records-lists button { text-align: left; background: transparent; border: 1px solid transparent; padding: 4px 8px; display: flex; justify-content: space-between; gap: 6px; }
+.records-lists button small { color: var(--muted); }
+.records-lists button.on { border-color: var(--brass-dim); background: var(--brass-soft); color: var(--brass); }
+.records-main { display: flex; flex-direction: column; min-height: 0; padding: 8px; gap: 6px; }
+.records-head { display: flex; gap: 6px; }
+.records-head input { flex: 1; }
+.records-head button.on { border-color: var(--brass); color: var(--brass); }
+.records-list { overflow: auto; flex: 1; }
+.records-list h4 { margin: 8px 0 2px; font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+.records-row { display: flex; align-items: center; gap: 4px; }
+.records-name { flex: 1; text-align: left; background: transparent; border: 0; padding: 3px 4px; }
+.records-name:hover { color: var(--brass); }
+.records-share { background: transparent; border: 1px solid transparent; padding: 2px 4px; color: var(--muted); display: inline-flex; align-items: center; gap: 4px; }
+.records-share.on { color: var(--brass); }
+.records-share.some { color: #9fc6e0; }
+.record-window { padding: 12px 14px; overflow: auto; height: 100%; box-sizing: border-box; }
+.record-window header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin-bottom: 8px; }
+.record-window header h3 { margin: 0; width: 100%; cursor: grab; }
+.record-window header .records-share { margin-left: auto; border-color: var(--panel-edge); }
+.record-abilities { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; margin: 6px 0 10px; text-align: center; font-size: 0.85rem; }
+.record-abilities b { display: block; color: var(--brass); font-size: 0.72rem; }
+.record-fields { display: grid; grid-template-columns: max-content 1fr; gap: 2px 12px; margin: 0 0 10px; font-size: 0.88rem; }
+.record-fields dt { color: var(--muted); }
+.record-fields dd { margin: 0; }
+.record-list h4, .record-text h4 { margin: 10px 0 4px; color: var(--brass); font-size: 0.85rem; }
+.formatted-text table { border-collapse: collapse; margin: 6px 0; }
+.formatted-text td, .formatted-text th { border: 1px solid var(--panel-edge); padding: 2px 6px; }
+.formatted-text blockquote { margin: 6px 0; padding: 6px 10px; border-left: 3px solid var(--brass-dim); background: rgba(255, 255, 255, 0.03); }
+.record-link { color: var(--brass); }

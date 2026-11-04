@@ -60,7 +60,7 @@ When the GM asks for a random or wandering encounter:
 
 ## 6. Characters, party, treasure, XP
 
-- `kraken_build_character` builds a C&C character from a spec (race, class, level, scores, primes, gear...), as the character wizard does. `kraken_level_up` raises a level (the host rolls hit points in front of the table). `kraken_character_edit` changes a sheet as if typed. `kraken_class_change` dual- or multi-classes. A character built with no owner is the GM's until a player takes it in Character Selection; `kraken_characters` give hands one to a player, release takes it back, roster lists who holds what.
+- `kraken_build_character` builds a C&C character from a spec (race, class, level, scores, primes, gear...), as the character wizard does. `kraken_level_up` raises a level (the host rolls hit points in front of the table). `kraken_character_edit` changes a sheet as if typed. `kraken_class_change` dual- or multi-classes. A character built with no owner is the GM's until a player takes it in Character Selection; `kraken_characters` give hands one to a player, release takes it back, roster lists who holds what. To show the players an NPC, an item or a spell (FG's Share), set its visibility to all with `kraken_record_update`; gm hides it again. They find it in their Lists.
 - `kraken_party_edit` sets the party; `kraken_party_award` awards XP (split as FG does); a treasure parcel goes to the party with `kraken_library` action `parcel`, and `kraken_party_distribute` hands it out.
 - Ask before you change a player's character beyond what the GM asked for.
 
