@@ -1,0 +1,21 @@
+# Kraken VTT: bug list
+
+From the B2 play test (`scripts/playtest-b2.mjs`, 2026-11-03): a C&C campaign with the Player's Handbook, Monsters & Treasure and B2 The Keep on the Borderlands; four characters for four test players (Dwarf Fighter, Human Cleric, Elf Wizard, Halfling Rogue, all level 2) on the party sheet and the combat tracker; B2's Caves of Chaos on the table; the kobold ambush from the Library; three rounds of initiative, attacks, damage, saves, Bless, Sleep, Magic Missile, Cure Light Wounds and effects; treasure and XP; a test player in Chrome. Plus what the B-series sweep and the screenshots showed.
+
+Each bug has a test once fixed. Severity: **high** (wrong rules or data, or the app stops), **medium** (works, badly), **low** (polish).
+
+| # | Severity | Bug | Found by | State |
+|---|---|---|---|---|
+| 1 | high | FG's XML reader kept one of each repeated element, so an image's layers collapsed into one: maps lost their walls, lights and pins | B2 import | Fixed (alpha.12): image layers, occluders, lights, strokes and paths are lists |
+| 2 | high | Line of sight froze the app on big maps (B2's Caves of Chaos: 4,916 walls, 162 lights) | B2 import screenshot | Fixed (alpha.12): a light reaches only its radius; rays walk a grid of cells (20 ms a token) |
+| 3 | high | Casting a spell whose effect is in its actions did nothing (Bless, Sleep cast from the power) | play test | Fixed (alpha.13): the first action is cast unless one is named, as FG's cast button |
+| 4 | high | Cure Light Wounds cast from the power used all three of its actions' fields at once: it both damaged and healed every target | play test | Fixed (alpha.13): the first action only (Cure (living)) |
+| 5 | high | Magic Missile fired one missile at any level: fix 1 made fields a module writes twice (the PHB's repeatbase) into lists | `spells` | Fixed (alpha.13): only an image's repeated elements become lists |
+| 6 | medium | 3D dice pile up on the GM's screen: every roll's dice stay where they land (FG fades them after a moment) | GM screenshot | Open |
+| 7 | medium | The GM's top bar overlaps: party portraits, the module and scene names, the grid label and "Hosting" run into one another | GM screenshot | Open |
+| 8 | medium | Maps to the table opens every picture of a module, handouts included (B1: 116 scenes; B5: a 171 MB bundle) | B-series sweep | Open |
+| 9 | medium | A map pin (FG's shortcut) does not open its story entry or encounter when clicked | play test | Open |
+| 10 | medium | Chat keeps only the last 100 lines: a few rounds of combat push the start of the session out (FG keeps the whole session) | play test | Open |
+| 11 | low | Area spells (Sleep) affect only the caster's targets; there is no quick way to target everyone in an area (FG: the same, the GM targets each) | play test | Open |
+| 12 | low | Items with no price (Staff "—", Sling) cannot be bought in the wizard or the builder. FG's wizard skips them too, so this is FG-faithful: the GM's call | play test | Decision for the GM |
+| 13 | low | Targets persist after a spell: the cleric's Cure Light Wounds also healed the kobold it had targeted the turn before. FG keeps targets the same way; an option to clear targets after a cast would help | play test | Open |

@@ -37,6 +37,8 @@ function innerXml(node) {
   return text.trim();
 }
 
+const LIST_TAGS = new Set(["layer", "occluder", "light", "stroke", "path"]);
+
 function convert(node) {
   const type = node.getAttribute("type");
   const kids = elements(node);
@@ -55,12 +57,14 @@ function convert(node) {
     const text = (node.textContent || "").trim();
     return text === "" ? true : text;
   }
-  // Repeated elements (an image's <layer>, <occluder>, <light>) become a list;
-  // FG's records are id-keyed, so this changes nothing else.
+  // An image's repeated elements (<layer>, <occluder>, <light>, <stroke>,
+  // <path>) become a list. Anything else repeated keeps the last, as before
+  // (a module may write a field twice: the PHB's Magic Missile repeatbase).
   const out = {};
   for (const kid of kids) {
     const value = convert(kid);
-    if (!(kid.tagName in out)) out[kid.tagName] = value;
+    if (!LIST_TAGS.has(kid.tagName)) out[kid.tagName] = value;
+    else if (!(kid.tagName in out)) out[kid.tagName] = value;
     else if (Array.isArray(out[kid.tagName]) && out[`__list_${kid.tagName}`]) out[kid.tagName].push(value);
     else {
       out[kid.tagName] = [out[kid.tagName], value];
