@@ -60,7 +60,12 @@ export type TableMap = {
   walls?: EditWall[];
   // FG's mask: on, and the shapes that reveal or hide again, in order.
   mask?: MapMask | null;
+  labels?: MapLabel[];
+  groups?: MapGroup[];
 };
+// Text on the map (FG's text layers): labels, numbers, pins.
+export type MapLabel = { id: string; x: number; y: number; text: string; font: string; size: number; color: string; rotation: number; anchor: string; outline: { width: number; color: string }; shadow: { offset: number; blur: number; color: string }; hidden: boolean; group: string; number: number | null; icon: string; link: { kind: string; id: string } | null };
+export type MapGroup = { name: string; shown?: boolean; players?: boolean; locked?: boolean; nextNumber?: number; prefix?: string };
 export type MapMask = { on: boolean; shapes: { id: string; mode: "reveal" | "hide"; points: number[] }[] };
 export type Ping = { id: number; x: number; y: number; from: string; color: string };
 // A line drawn on the map, for everyone (by "" is the GM's).
@@ -803,6 +808,8 @@ export function useSession() {
   const wall = useCallback((action: string, payload: Record<string, unknown> = {}) => send({ type: "wall", action, ...payload }), [send]);
   const mapUndo = useCallback(() => send({ type: "map-undo" }), [send]);
   const mask = useCallback((action: string, payload: Record<string, unknown> = {}) => send({ type: "mask", action, ...payload }), [send]);
+  const label = useCallback((action: string, payload: Record<string, unknown> = {}) => send({ type: "label", action, ...payload }), [send]);
+  const mapGroup = useCallback((action: string, payload: Record<string, unknown> = {}) => send({ type: "map-group", action, ...payload }), [send]);
   const placeLight = useCallback((light: Partial<SceneLightRecord> & { preset?: string }) => send({ type: "light-place", light }), [send]);
   const updateLight = useCallback((id: string, patch: Partial<SceneLightRecord>) => send({ type: "light-update", id, patch }), [send]);
   const removeLight = useCallback((id: string) => send({ type: "light-remove", id }), [send]);
@@ -932,6 +939,8 @@ export function useSession() {
     wall,
     mapUndo,
     mask,
+    label,
+    mapGroup,
     changeClass,
   };
 }

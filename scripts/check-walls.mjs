@@ -166,10 +166,52 @@ try {
   await tool("kraken_mask", { action: "off" });
   assert(sees(orc), "mask off");
 
+  // Text, numbers and pins (FG's Text tab), in layer groups.
+  const playerLabels = () => map.viewFor(playerSeat, "").labels.map((label) => label.text);
+  await tool("kraken_label", { action: "add", x: 100, y: 50, text: "Throne Room" });
+  await tool("kraken_label", { action: "add", x: 120, y: 60, text: "Secret stash", hidden: true });
+  const one = await tool("kraken_label", { action: "number", x: 200, y: 200 });
+  const two = await tool("kraken_label", { action: "number", x: 220, y: 200 });
+  await tool("kraken_label", { action: "remove", id: two.id });
+  const three = await tool("kraken_label", { action: "number", x: 240, y: 200 });
+  assert([one.text, three.text].join() === "1,3", `numbers are not reused after a delete (FG): ${one.text}, ${three.text}`);
+  await tool("kraken_label", { action: "renumber", group: "Numbers" });
+  assert((await tool("kraken_label", { action: "list" })).labels.filter((label) => label.group === "Numbers").map((label) => label.text).join() === "1,2", "renumbered 1, 2");
+  assert(playerLabels().includes("Throne Room") && !playerLabels().includes("Secret stash"), `hidden text is not sent: ${playerLabels().join(", ")}`);
+  assert(playerLabels().includes("1"), "numbers reach players");
+  // A group players may not see: everything in it is withheld; shown again, it comes back.
+  await tool("kraken_map_group", { action: "update", name: "Numbers", players: false });
+  assert(!playerLabels().includes("1"), "a GM-only group's text is not sent");
+  await tool("kraken_map_group", { action: "update", name: "Numbers", players: true, prefix: "A" });
+  await tool("kraken_label", { action: "renumber", group: "Numbers" });
+  assert(playerLabels().includes("A1"), `a prefix: ${playerLabels().join(", ")}`);
+  // Locked group: no changes.
+  await tool("kraken_map_group", { action: "update", name: "Numbers", locked: true });
+  let lockedRefusal = "";
+  try {
+    await tool("kraken_label", { action: "update", id: one.id, text: "Z" });
+  } catch (error) {
+    lockedRefusal = error.message;
+  }
+  assert(/locked/.test(lockedRefusal), `a locked group refuses edits: ${lockedRefusal}`);
+  await tool("kraken_map_group", { action: "update", name: "Numbers", locked: false });
+  // A pin linked to a record the player may not open keeps its place but loses the link.
+  const secret = server.agent.records.create({ type: "note", name: "GM notes", visibility: "gm", data: {} }, seat);
+  await tool("kraken_label", { action: "add", x: 300, y: 100, text: "Trap", icon: "trap", link: { kind: "record", id: secret.id } });
+  const pin = map.viewFor(playerSeat, "").labels.find((label) => label.text === "Trap");
+  assert(pin && pin.link === null && pin.icon === "trap", "a pin's GM-only link is not sent");
+  // Under the mask: not sent.
+  await tool("kraken_mask", { action: "on" });
+  assert(!playerLabels().includes("Throne Room"), "text under the mask is not sent");
+  await tool("kraken_mask", { action: "off" });
+  await tool("kraken_map_undo");
+  assert(map.mask().on && !playerLabels().includes("Throne Room"), "undo brings the mask back on, and the text is withheld again");
+  await tool("kraken_mask", { action: "off" });
+
   // Saved with the campaign.
   const saved = server.agent.map.persisted();
   assert(saved.walls.room.length === 4, `walls are saved: ${saved.walls.room.length}`);
-  console.log("ok walls: chains drawn; wall, ethereal, invisible, window (opened by the player, closed by Close all doors), toggle, one-way and shadow caster each as FG; split, remove, undo; the mask (global, reveal, hide again, undo) withholds what is under it; saved; never sent to players");
+  console.log("ok walls: chains drawn; wall, ethereal, invisible, window (opened by the player, closed by Close all doors), toggle, one-way and shadow caster each as FG; split, remove, undo; the mask (global, reveal, hide again, undo) withholds what is under it; text, numbers (no reuse, renumber, prefix) and pins in layer groups (GM-only, locked); saved; never sent to players");
 } finally {
   for (const ws of sockets) ws.close();
   await server.stop();

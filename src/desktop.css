@@ -1088,3 +1088,10 @@ textarea.cc-field.tall { min-height: 220px; }
 .viewport [data-editing="line"], .viewport [data-editing="poly"], .viewport [data-editing="rect"] { cursor: crosshair; }
 
 .mask-overlay { position: absolute; left: 0; top: 0; pointer-events: none; z-index: 6; }
+
+.overlay.labels { position: absolute; left: 0; top: 0; pointer-events: none; z-index: 5; }
+.me-text { width: 100%; }
+.me-layers { display: flex; flex-direction: column; gap: 2px; padding: 8px; border: 1px solid rgba(232, 226, 212, 0.25); border-radius: 12px; }
+.me-layer { display: grid; grid-template-columns: minmax(0, 1fr) 24px 24px 24px 34px; gap: 4px; align-items: center; padding: 2px 0; }
+.me-layer.head { font-size: 0.72rem; color: var(--muted); }
+.me-layer button { padding: 0 4px; font-size: 0.72rem; }

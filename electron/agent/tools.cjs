@@ -934,6 +934,67 @@ const TOOLS = [
     },
   },
   {
+    name: "kraken_label",
+    description:
+      "Text on the map (FG's Text tab): labels, numbers and pins. action list; add (x, y in scene pixels or col/row; text; font Bebas Neue, Cinzel, Georgia, Signika, Arial, Courier New; size in squares (1); color; rotation; anchor; outline {width, color}; shadow {offset, blur, color}; hidden; group (a layer group, made if new); icon pin, trap, door, chest for a map pin; link {kind: record, id} to open a record from it); number (places the group's next number, default group Numbers; never reused unless renumbered, as FG); update (id and fields); remove (id); renumber (group, start: 1). Players never get hidden text, text in a group they may not see, text under the mask, or a link to a record they may not open.",
+    inputSchema: object({
+      action: { type: "string", enum: ["list", "add", "number", "update", "remove", "renumber"] },
+      id: string("Text id"),
+      x: number("Scene pixels across"),
+      y: number("Scene pixels down"),
+      col: number("Square across"),
+      row: number("Square down"),
+      text: string("The words"),
+      font: string("Bebas Neue, Cinzel, Georgia, Signika, Arial, Courier New"),
+      size: number("Squares high (1)"),
+      color: string("#rrggbb"),
+      rotation: number("Degrees"),
+      anchor: { type: "string", enum: ["center", "top", "bottom", "left", "right"] },
+      outline: { type: "object" },
+      shadow: { type: "object" },
+      hidden: { type: "boolean" },
+      group: string("Layer group (folder) name"),
+      icon: { type: "string", enum: ["", "pin", "trap", "door", "chest"] },
+      link: { type: "object" },
+      start: number("renumber: the first number"),
+    }, ["action"]),
+    run(args, ctx) {
+      const { map, seat } = needTable(ctx);
+      const { action, id, col, row, start, ...fields } = args;
+      if (Number.isFinite(col) && Number.isFinite(row)) Object.assign(fields, map.squareCenter(col, row, 1));
+      if (action === "list") return out({ labels: map.labels(), groups: map.groups() });
+      if (action === "add") return out(map.addLabel(fields, seat));
+      if (action === "number") return out(map.addLabel({ ...fields, numbering: true }, seat));
+      if (action === "update") return out(map.updateLabel(id, fields, seat));
+      if (action === "renumber") return out(map.renumber(fields.group, seat, start ?? 1));
+      map.removeLabel(id, seat);
+      return out({ removed: id });
+    },
+  },
+  {
+    name: "kraken_map_group",
+    description: "Layer groups on the scene (FG's layer folders): everything in a group (text now; paint and FX to come) is shown or not, seen by players or not, locked or not, all at once. action list; update (name and any of shown, players, locked, prefix for its numbers, name to rename; made if new); remove (name; its things leave the group).",
+    inputSchema: object({
+      action: { type: "string", enum: ["list", "update", "remove"] },
+      name: string("The group"),
+      rename: string("A new name"),
+      shown: { type: "boolean" },
+      players: { type: "boolean" },
+      locked: { type: "boolean" },
+      prefix: string("Prefix for numbers (A for A1, A2...)"),
+    }, ["action"]),
+    run(args, ctx) {
+      const { map, seat } = needTable(ctx);
+      if (args.action === "list") return out(map.groups());
+      if (args.action === "remove") {
+        map.removeGroup(args.name, seat);
+        return out({ removed: args.name });
+      }
+      const { action: _a, name, rename, ...patch } = args;
+      return out(map.updateGroup(name, { ...patch, ...(rename ? { name: rename } : {}) }, seat));
+    },
+  },
+  {
     name: "kraken_map_undo",
     description: "Undo the last edit to the scene's walls or mask in the map editor (up to 50 back).",
     inputSchema: object({}),

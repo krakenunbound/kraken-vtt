@@ -123,6 +123,47 @@ function cleanWall(raw) {
 }
 const MAX_WALLS = 5000;
 
+// Text on the map (FG's text layers, Foundry's drawing text): a label, a
+// number from the numbering tool, or a pin linked to a record. size is in
+// squares (FG's units). group: the layer group (folder) it is in.
+const FONTS = ["Bebas Neue", "Cinzel", "Georgia", "Signika", "Arial", "Courier New"];
+const ANCHORS = ["center", "top", "bottom", "left", "right"];
+function cleanLabel(raw) {
+  if (!raw || typeof raw !== "object") return null;
+  const x = num(raw.x, NaN);
+  const y = num(raw.y, NaN);
+  if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
+  const words = text(raw.text, "").slice(0, 200);
+  if (!words) return null;
+  const color = (value, fallback) => (/^#[0-9a-f]{6}$/i.test(String(value)) ? String(value) : fallback);
+  return {
+    id: text(raw.id, "").slice(0, 40) || `t-${crypto.randomBytes(5).toString("hex")}`,
+    x: Math.round(x * 10) / 10,
+    y: Math.round(y * 10) / 10,
+    text: words,
+    font: FONTS.includes(raw.font) ? raw.font : "Bebas Neue",
+    size: Math.min(20, Math.max(0.2, num(raw.size, 1))),
+    color: color(raw.color, "#ffffff"),
+    rotation: ((num(raw.rotation, 0) % 360) + 360) % 360,
+    anchor: ANCHORS.includes(raw.anchor) ? raw.anchor : "center",
+    outline: { width: Math.min(10, Math.max(0, num(raw.outline?.width, 2))), color: color(raw.outline?.color, "#000000") },
+    shadow: { offset: Math.min(10, Math.max(0, num(raw.shadow?.offset, 0))), blur: Math.min(10, Math.max(0, num(raw.shadow?.blur, 0))), color: color(raw.shadow?.color, "#000000") },
+    hidden: Boolean(raw.hidden),
+    group: text(raw.group, "").slice(0, 40),
+    number: Number.isFinite(Number(raw.number)) && raw.number !== null && raw.number !== "" ? Math.round(Number(raw.number)) : null,
+    icon: ["pin", "trap", "door", "chest", ""].includes(raw.icon) ? raw.icon : "",
+    link: raw.link && typeof raw.link === "object" && raw.link.id ? { kind: text(raw.link.kind, "record").slice(0, 20), id: text(raw.link.id, "").slice(0, 160) } : null,
+  };
+}
+// A layer group (FG's layer folder): what is in it is shown or not, seen by
+// players or not, locked or not, all at once.
+function cleanGroup(raw) {
+  if (!raw || typeof raw !== "object") return null;
+  const name = text(raw.name, "").slice(0, 40);
+  if (!name) return null;
+  return { name, shown: raw.shown !== false, players: raw.players !== false, locked: Boolean(raw.locked), nextNumber: Math.max(1, Math.round(num(raw.nextNumber, 1))), prefix: text(raw.prefix, "").slice(0, 6) };
+}
+
 // FG's mask: a global mask over the picture and shapes, in order, that
 // reveal it or hide it again. Points are scene pixels.
 function cleanMask(raw) {
@@ -190,7 +231,11 @@ function savedMap(value) {
   const drawings = {};
   const walls = {};
   const masks = {};
-  if (!value || typeof value !== "object") return { tokens, doors, sight, locked, settings, lights, drawings, walls, masks };
+  const labels = {};
+  const groups = {};
+  if (!value || typeof value !== "object") return { tokens, doors, sight, locked, settings, lights, drawings, walls, masks, labels, groups };
+  for (const [sceneId, list] of Object.entries(value.labels ?? {}).slice(0, 500)) if (Array.isArray(list)) labels[sceneId.slice(0, 80)] = list.map(cleanLabel).filter(Boolean).slice(0, 2000);
+  for (const [sceneId, list] of Object.entries(value.groups ?? {}).slice(0, 500)) if (Array.isArray(list)) groups[sceneId.slice(0, 80)] = list.map(cleanGroup).filter(Boolean).slice(0, 100);
   for (const [sceneId, mask] of Object.entries(value.masks ?? {}).slice(0, 500)) masks[sceneId.slice(0, 80)] = cleanMask(mask);
   for (const [sceneId, list] of Object.entries(value.walls ?? {}).slice(0, 500)) {
     if (Array.isArray(list)) walls[sceneId.slice(0, 80)] = list.map(cleanWall).filter(Boolean).slice(0, MAX_WALLS);
@@ -216,7 +261,7 @@ function savedMap(value) {
   for (const [sceneId, list] of Object.entries(value.drawings ?? {}).slice(0, 500)) {
     if (Array.isArray(list)) drawings[sceneId.slice(0, 80)] = list.map(cleanDrawing).filter(Boolean).slice(-MAX_DRAWINGS);
   }
-  return { tokens, doors, sight, locked, settings, lights, drawings, walls, masks };
+  return { tokens, doors, sight, locked, settings, lights, drawings, walls, masks, labels, groups };
 }
 const MAX_DRAWINGS = 400;
 
@@ -251,6 +296,31 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
     scene.baseGrid = scene.baseGrid ?? { ...scene.grid };
     scene.grid = geometry.withGrid({ grid: scene.baseGrid }, settingsHere().grid).grid;
   }
+  function labelsHere() {
+    if (!scene) return [];
+    state.labels[scene.id] = state.labels[scene.id] ?? [];
+    return state.labels[scene.id];
+  }
+  function groupsHere() {
+    if (!scene) return [];
+    state.groups[scene.id] = state.groups[scene.id] ?? [];
+    return state.groups[scene.id];
+  }
+  function groupOf(name) {
+    if (!name) return null;
+    let group = groupsHere().find((item) => item.name === name);
+    if (!group) {
+      group = cleanGroup({ name });
+      groupsHere().push(group);
+    }
+    return group;
+  }
+  // What a seat sees of a thing in a group: the group shown, players allowed.
+  const groupLets = (name, seat) => {
+    const group = name ? groupsHere().find((item) => item.name === name) : null;
+    if (!group) return true;
+    return seat.role === "dm" ? true : group.shown && group.players;
+  };
   function maskHere() {
     if (!scene) return cleanMask({});
     state.masks[scene.id] = state.masks[scene.id] ?? cleanMask({});
@@ -266,7 +336,7 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
   }
   function remember(label) {
     const ring = undoRing.get(scene.id) ?? [];
-    ring.push({ label, walls: JSON.parse(JSON.stringify(wallsHere())), mask: JSON.parse(JSON.stringify(maskHere())) });
+    ring.push({ label, walls: JSON.parse(JSON.stringify(wallsHere())), mask: JSON.parse(JSON.stringify(maskHere())), labels: JSON.parse(JSON.stringify(labelsHere())), groups: JSON.parse(JSON.stringify(groupsHere())) });
     if (ring.length > 50) ring.shift();
     undoRing.set(scene.id, ring);
   }
@@ -473,7 +543,8 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       .filter((wall) => wall.door > 0 || wall.toggle === "players" || wall.toggle === "gm")
       .map((wall) => ({ id: wall.id, x1: wall.x1, y1: wall.y1, x2: wall.x2, y2: wall.y2, secret: wall.door === 2 || wall.toggle === "gm", kind: wall.door > 0 ? "door" : wall.kind, state: wall.id in doors ? doors[wall.id] : wall.ds }));
     const mask = maskHere();
-    const shared = { sceneId: scene.id, sight: sightOn(), locked, darkness: dark, settings: { grid: settings.grid, weather: settings.weather, darkness: settings.darkness }, drawings: drawingsHere(), mask: mask.on || mask.shapes.length ? mask : null };
+    const groups = groupsHere();
+    const shared = { sceneId: scene.id, sight: sightOn(), locked, darkness: dark, settings: { grid: settings.grid, weather: settings.weather, darkness: settings.darkness }, drawings: drawingsHere(), mask: mask.on || mask.shapes.length ? mask : null, groups };
     const lightOut = (list) => list.map(({ id, x, y, brightPx, dimPx, color, polygon }) => ({ id, x, y, brightPx, dimPx, color, polygon }));
     if (seat.role === "dm") {
       return {
@@ -485,6 +556,7 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
         seeing: [],
         sceneLights: lightsHere(),
         walls: wallsHere(),
+        labels: labelsHere(),
       };
     }
     const shown = all.filter((token) => !token.hidden);
@@ -514,6 +586,11 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       seeing,
       twilight,
       sceneLights: [],
+      // Labels: not hidden, in a group players see, not under the mask; a pin's link only when the player may open the record.
+      labels: labelsHere()
+        .filter((label) => !label.hidden && groupLets(label.group, seat) && !masked(label.x, label.y))
+        .map((label) => (label.link && label.link.kind === "record" && !records.get(label.link.id, seat) ? { ...label, link: null } : label)),
+      groups: groups.filter((group) => group.shown && group.players).map(({ name }) => ({ name })),
     };
   }
 
@@ -824,6 +901,87 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       for (const wall of wallsHere()) if (wall.door > 0 || (wall.toggle && wall.toggle !== "none")) doors[wall.id] = (wall.id in doors ? doors[wall.id] : wall.ds) === 2 ? 2 : 0;
       changed();
     },
+    // Text on the map (FG's Text tab): labels, numbers and pins, in groups.
+    labels: () => labelsHere(),
+    groups: () => groupsHere(),
+    addLabel(input, seat) {
+      if (seat.role !== "dm") throw new Error("Only the GM can put text on the map.");
+      if (!scene) throw new Error("No scene is open.");
+      if (labelsHere().length >= 2000) throw new Error("This scene has too much text.");
+      let words = input.text;
+      let number = null;
+      // The numbering tool: the group's next number (never reused unless renumbered, as FG).
+      if (input.numbering) {
+        const group = groupOf(text(input.group, "") || "Numbers");
+        input = { ...input, group: group.name };
+        number = group.nextNumber;
+        group.nextNumber += 1;
+        words = `${group.prefix}${number}`;
+      }
+      const label = cleanLabel({ ...input, text: words, number, id: undefined });
+      if (!label) throw new Error("Text needs words and a place.");
+      if (label.group) groupOf(label.group);
+      if (label.group && groupsHere().find((group) => group.name === label.group)?.locked) throw new Error(`The group ${label.group} is locked.`);
+      remember("add text");
+      labelsHere().push(label);
+      changed();
+      return label;
+    },
+    updateLabel(id, patch, seat) {
+      if (seat.role !== "dm") throw new Error("Only the GM can change text on the map.");
+      const list = labelsHere();
+      const index = list.findIndex((label) => label.id === id);
+      if (index < 0) throw new Error(`No text ${id}.`);
+      if (list[index].group && groupsHere().find((group) => group.name === list[index].group)?.locked) throw new Error(`The group ${list[index].group} is locked.`);
+      remember("change text");
+      list[index] = cleanLabel({ ...list[index], ...patch, id }) ?? list[index];
+      if (list[index].group) groupOf(list[index].group);
+      changed();
+      return list[index];
+    },
+    removeLabel(id, seat) {
+      if (seat.role !== "dm") throw new Error("Only the GM can remove text from the map.");
+      const list = labelsHere();
+      const index = list.findIndex((label) => label.id === id);
+      if (index < 0) throw new Error(`No text ${id}.`);
+      remember("remove text");
+      list.splice(index, 1);
+      changed();
+    },
+    // Renumbers a group from 1 (or start), in the order the numbers were placed.
+    renumber(groupName, seat, start = 1) {
+      if (seat.role !== "dm") throw new Error("Only the GM can renumber.");
+      const group = groupOf(groupName || "Numbers");
+      remember("renumber");
+      let n = Math.max(1, Math.round(start));
+      for (const label of labelsHere().filter((item) => item.group === group.name && item.number !== null).sort((a, b) => a.number - b.number)) {
+        label.number = n;
+        label.text = `${group.prefix}${n}`;
+        n += 1;
+      }
+      group.nextNumber = n;
+      changed();
+      return group;
+    },
+    // A layer group (FG's folder): shown, players, locked, prefix; renamed or removed (its things leave it).
+    updateGroup(name, patch, seat) {
+      if (seat.role !== "dm") throw new Error("Only the GM can change groups.");
+      const group = groupOf(name);
+      const list = groupsHere();
+      const next = cleanGroup({ ...group, ...patch, name: patch.name ?? group.name });
+      if (!next) throw new Error("A group needs a name.");
+      if (next.name !== group.name) for (const label of labelsHere()) if (label.group === group.name) label.group = next.name;
+      list[list.indexOf(group)] = next;
+      changed();
+      return next;
+    },
+    removeGroup(name, seat) {
+      if (seat.role !== "dm") throw new Error("Only the GM can remove groups.");
+      if (!scene) return;
+      state.groups[scene.id] = groupsHere().filter((group) => group.name !== name);
+      for (const label of labelsHere()) if (label.group === name) label.group = "";
+      changed();
+    },
     // The mask (FG's Mask tab): on (Add Global Mask), off (Remove Global Mask),
     // a shape that reveals or hides again, clear, a shape removed.
     mask: () => maskHere(),
@@ -854,6 +1012,8 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       if (!last) throw new Error("Nothing to undo.");
       state.walls[scene.id] = last.walls.map(cleanWall).filter(Boolean);
       if (last.mask) state.masks[scene.id] = cleanMask(last.mask);
+      if (last.labels) state.labels[scene.id] = last.labels.map(cleanLabel).filter(Boolean);
+      if (last.groups) state.groups[scene.id] = last.groups.map(cleanGroup).filter(Boolean);
       liveScene();
       changed();
       return last.label;

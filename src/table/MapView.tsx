@@ -4,7 +4,7 @@ import { backgroundRect, colorWithAlpha, gridStops, sceneFrame, type BackgroundF
 import { type SceneLight, type SceneMarker, type SceneRegion, type SceneWall } from "../foundry/sceneObjects";
 import { gridDistance, gridKind, gridOrigin, hexCorners, hexOf, LIGHT_PRESETS, snapCenter, withGrid } from "../../shared/map/geometry.mjs";
 import type { EditWall, MapToken, Ping, SceneLightRecord, TableMap, TableRecord, WallKind } from "../session/useSession";
-import { MapEditor, kindColor, type EditTab, type EditTool } from "./MapEditor";
+import { MapEditor, kindColor, type EditTab, type EditTool, type LabelStyle } from "./MapEditor";
 import { Lighting } from "./Lighting";
 import { SceneGraphics, SceneLegend, type OverlayToken } from "./SceneOverlay";
 import { SceneSettings, type SceneSettingsPatch } from "./SceneSettings";
@@ -132,6 +132,8 @@ export type MapActions = {
   // The GM's map editor.
   wall?: (action: string, payload?: Record<string, unknown>) => void;
   mask?: (action: string, payload?: Record<string, unknown>) => void;
+  label?: (action: string, payload?: Record<string, unknown>) => void;
+  mapGroup?: (action: string, payload?: Record<string, unknown>) => void;
   mapUndo?: () => void;
 };
 // What a left-drag does on the map: pan it, ping, draw, or rub a line out.
@@ -183,6 +185,8 @@ export function MapView({
   const [lightPreset, setLightPreset] = useState("torch");
   const [pending, setPending] = useState<number[]>([]);
   const [maskMode, setMaskMode] = useState<"reveal" | "hide">("reveal");
+  const [labelStyle, setLabelStyle] = useState<LabelStyle>({ text: "", font: "Bebas Neue", size: 1, color: "#ffffff", outline: { width: 2, color: "#000000" }, shadow: { offset: 0, blur: 0, color: "#000000" }, group: "", icon: "" });
+  const [selectedLabel, setSelectedLabel] = useState<string | null>(null);
   const [hover, setHover] = useState<{ x: number; y: number } | null>(null);
   const [drawColor, setDrawColor] = useState<string | null>(null);
   const [stroke, setStroke] = useState<{ pointerId: number; points: number[] } | null>(null);
@@ -525,7 +529,10 @@ export function MapView({
         setPending([]);
         setHover(null);
       } else if (event.key === "Enter") finishShape();
-      else if ((event.key === "Delete" || event.key === "Backspace") && selectedWalls.length && actions.wall) {
+      else if ((event.key === "Delete" || event.key === "Backspace") && editTab === "text" && selectedLabel && actions.label) {
+        actions.label("remove", { id: selectedLabel });
+        setSelectedLabel(null);
+      } else if ((event.key === "Delete" || event.key === "Backspace") && selectedWalls.length && actions.wall) {
         actions.wall("remove", { ids: selectedWalls });
         setSelectedWalls([]);
       } else if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "z" && actions.mapUndo) {
@@ -536,7 +543,7 @@ export function MapView({
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gm, editorOpen, selectedWalls, pending, editTool, wallKind]);
+  }, [gm, editorOpen, selectedWalls, pending, editTool, wallKind, editTab, selectedLabel]);
   useEffect(() => {
     setPending([]);
     setHover(null);
@@ -569,6 +576,20 @@ export function MapView({
         }
         if (event.button !== 0) return;
         setSelected(null);
+        if (gm && editorOpen && editTool && editTab === "text" && actions.label) {
+          // Text: place it, drop the next number, or select a label.
+          const raw = worldAt(event.clientX, event.clientY);
+          if (!raw) return;
+          if (editTool === "select") {
+            const near = (map.labels ?? []).find((label) => Math.hypot(label.x - raw.x, label.y - raw.y) < Math.max(size * label.size * 0.6, 12 / camera.scale));
+            setSelectedLabel(near?.id ?? null);
+          } else if (editTool === "number") actions.label("add", { label: { ...labelStyle, text: "#", x: Math.round(raw.x), y: Math.round(raw.y), numbering: true, group: labelStyle.group || "Numbers" } });
+          else if (editTool === "text") {
+            if (!labelStyle.text.trim()) setHint("Type the text in the Text tab first.");
+            else actions.label("add", { label: { ...labelStyle, x: Math.round(raw.x), y: Math.round(raw.y) } });
+          }
+          return;
+        }
         if (gm && editorOpen && editTool && editTab === "mask" && actions.mask) {
           // The mask: a rectangle, a shape or whole squares, revealed or hidden again.
           const raw = worldAt(event.clientX, event.clientY);
@@ -787,6 +808,37 @@ export function MapView({
             twilight={!gm && Boolean(map.twilight)}
             image={scene.imageUrl && !imageFailed ? { url: scene.imageUrl, ...backdrop } : null}
           />
+        ) : null}
+        {(map.labels ?? []).length ? (
+          // Text on the map (FG's text layers): outlined, with a shadow; size in squares.
+          <svg className="overlay labels" width={frame.worldWidth} height={frame.worldHeight} viewBox={`0 0 ${frame.worldWidth} ${frame.worldHeight}`}>
+            <defs>
+              {(map.labels ?? [])
+                .filter((label) => label.shadow.blur > 0 || label.shadow.offset > 0)
+                .map((label) => (
+                  <filter key={`f-${label.id}`} id={`shadow-${label.id}`} x="-50%" y="-50%" width="200%" height="200%">
+                    <feDropShadow dx={label.shadow.offset * size * 0.05} dy={label.shadow.offset * size * 0.05} stdDeviation={label.shadow.blur * size * 0.03} floodColor={label.shadow.color} />
+                  </filter>
+                ))}
+            </defs>
+            {(map.labels ?? [])
+              .filter((label) => (map.groups ?? []).find((group) => group.name === label.group)?.shown !== false)
+              .map((label) => {
+                const fontSize = label.size * size * 0.8;
+                const anchor = label.anchor === "left" ? "start" : label.anchor === "right" ? "end" : "middle";
+                const baseline = label.anchor === "top" ? "hanging" : label.anchor === "bottom" ? "auto" : "central";
+                const icon = { pin: "📍", trap: "⚠", door: "🚪", chest: "🧰" }[label.icon as "pin"] ?? "";
+                return (
+                  <g key={label.id} transform={`rotate(${label.rotation} ${label.x} ${label.y})`} opacity={label.hidden ? 0.45 : 1} data-label={label.id} data-label-text={label.text} filter={label.shadow.blur > 0 || label.shadow.offset > 0 ? `url(#shadow-${label.id})` : undefined}>
+                    <text x={label.x} y={label.y} textAnchor={anchor} dominantBaseline={baseline} fontFamily={`"${label.font}", Cinzel, sans-serif`} fontSize={fontSize} fill={label.color} stroke={label.outline.width > 0 ? label.outline.color : "none"} strokeWidth={label.outline.width * fontSize * 0.04} paintOrder="stroke" strokeLinejoin="round">
+                      {icon ? `${icon} ` : ""}
+                      {label.text}
+                    </text>
+                    {gm && editorOpen && selectedLabel === label.id ? <circle cx={label.x} cy={label.y} r={fontSize * 0.7} fill="none" stroke="#ff9f1a" strokeWidth={3 / camera.scale} /> : null}
+                  </g>
+                );
+              })}
+          </svg>
         ) : null}
         {map.mask?.on ? (
           // FG's mask: black for players but where revealed; a tint for the GM.
@@ -1349,7 +1401,10 @@ export function MapView({
           gridScene={scene.baseGrid ?? sceneIn.grid}
           maskMode={maskMode}
           setMaskMode={setMaskMode}
-          actions={{ mask: actions.mask ?? (() => undefined), wall: actions.wall, mapUndo: actions.mapUndo, updateSettings: actions.updateSettings, updateLight: actions.updateLight, removeLight: actions.removeLight }}
+          labelStyle={labelStyle}
+          setLabelStyle={setLabelStyle}
+          selectedLabel={selectedLabel}
+          actions={{ label: actions.label ?? (() => undefined), mapGroup: actions.mapGroup ?? (() => undefined), mask: actions.mask ?? (() => undefined), wall: actions.wall, mapUndo: actions.mapUndo, updateSettings: actions.updateSettings, updateLight: actions.updateLight, removeLight: actions.removeLight }}
           onClose={() => setEditorOpen(false)}
         />
       ) : null}
