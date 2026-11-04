@@ -121,6 +121,12 @@ try {
   await ct({ action: "krit-test", kind: "crit", id: id("Aldric"), targetId: id("Ogre"), table: "opt5_crit", roll: 20 });
   assert((await ct({ action: "view" })).entries.find((entry) => entry.name === "Ogre").wounds === ogreWounds, "no instant death");
   assert(lines().some((line) => line.includes("GM: INSTANT DEATH for Ogre if you allow it")), "the GM is told");
+  // Applied (the GM's setting): the ogre goes to the dead threshold, -10 hit points, not 999 wounds.
+  await ct({ action: "krits", settings: { death: "apply" } });
+  await ct({ action: "krit-test", kind: "crit", id: id("Aldric"), targetId: id("Ogre"), table: "opt5_crit", roll: 20 });
+  const slain = (await ct({ action: "view" })).entries.find((entry) => entry.name === "Ogre");
+  assert(slain.wounds === slain.hp + 10, `instant death to -10: ${slain.wounds} wounds of ${slain.hp}`);
+  await ct({ action: "krits", settings: { death: "gm" } });
 
   // Off: a natural 20 is just a hit.
   await ct({ action: "krits", settings: { crit: "off" } });
@@ -203,7 +209,7 @@ try {
   assert((await ct({ action: "view" })).entries.find((entry) => entry.name === "Aldric").targets.length === 0, "targets clear after the spell");
   await tool("kraken_table_options", { clearTargets: "never" });
 
-  console.log("ok krits: Option 5 crit and fumble tables applied (damage, effects, ongoing bleed), Option 6 maximum x2 and Option 4 doubling on the next damage, instant death left to the GM, crits off; ammunition fired and refused; spell resistance resists and lets through; an NPC casts at its hit dice, a failed save paralyses, uses per day are counted; targets clear after a spell by the table's option");
+  console.log("ok krits: Option 5 crit and fumble tables applied (damage, effects, ongoing bleed), Option 6 maximum x2 and Option 4 doubling on the next damage, instant death left to the GM (or applied, to -10), crits off; ammunition fired and refused; spell resistance resists and lets through; an NPC casts at its hit dice, a failed save paralyses, uses per day are counted; targets clear after a spell by the table's option");
 } finally {
   await server.stop();
 }

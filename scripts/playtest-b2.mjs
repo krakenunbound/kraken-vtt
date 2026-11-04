@@ -332,6 +332,26 @@ try {
   note(`Thorin: level ${thorinRecord.level} -> ${thorinAfter.level}, HP ${thorinRecord.hp?.total} -> ${thorinAfter.hp?.total}, BtH ${thorinRecord.bth} -> ${thorinAfter.bth} ${JSON.stringify(levelled ?? {}).slice(0, 80)}`);
   check(thorinAfter.level === thorinRecord.level + 1 && thorinAfter.hp.total > thorinRecord.hp.total, "characters", "Thorin did not level up", `${thorinRecord.level} -> ${thorinAfter.level}`);
 
+  // --- Phase 3 (alpha.21 to .25): the party moved as one, facing, an image layer, the caves' own sound, light spoiling deepvision ---
+  const partyTokens = (await tool("kraken_map")).tokens.filter((token) => party.some((member) => member.id === token.recordId));
+  const grouped = await attempt("tokens", "moving the party together", "kraken_token_move", { ids: partyTokens.map((token) => token.id), dcol: 0, drow: 1 });
+  note(`the party moved as one: ${JSON.stringify((grouped ?? []).map((item) => [item.col, item.row, item.blocked]))}`);
+  check(grouped?.length === partyTokens.length, "tokens", "the party did not move together", JSON.stringify(grouped).slice(0, 200));
+  const thorinToken = partyTokens.find((token) => token.recordId === party[0]?.id);
+  if (thorinToken) {
+    const faced = await attempt("tokens", "turning Thorin to face the lair", "kraken_token_update", { id: thorinToken.id, facing: 0 });
+    check(faced?.facing === 0, "tokens", "Thorin's facing did not take", JSON.stringify(faced).slice(0, 120));
+  }
+  const circle = path.join(process.cwd(), "public", "decals", "Arcane Circle.webp");
+  const layer = kobold ? await attempt("tiles", "an image layer by the lair", "kraken_tile", { action: "add", file: circle, x: kobold.x - 60, y: kobold.y + 60, width: 120, height: 120, name: "Rune circle" }) : null;
+  check(layer?.id, "tiles", "no image layer");
+  await attempt("sound", "a cave loop", "kraken_sound", { action: "ambience", do: "add", id: "ambience/Cave" });
+  const caveSound = await attempt("sound", "keeping the caves' sound", "kraken_sound", { action: "scene", do: "keep" });
+  check(caveSound?.kept?.ambience?.length === 1, "sound", "the caves did not keep their sound", JSON.stringify(caveSound).slice(0, 200));
+  // Deepvision in the dark; a torch in hand spoils it (C&C PHB).
+  await attempt("map", "pitch dark", "kraken_scene_settings", { darkness: 1 });
+  if (thorinToken) await attempt("map", "Thorin lights a torch", "kraken_token_update", { id: thorinToken.id, light: "torch" });
+
   // --- A test player in Chrome ------------------------------------------------------
   browser = await chromium.launch({ executablePath: String.raw`C:\Program Files\Google\Chrome\Application\chrome.exe`, headless: true });
   const seat = await browser.newPage({ viewport: { width: 1400, height: 900 } });
@@ -352,7 +372,14 @@ try {
   note(`the player sees: ${JSON.stringify(playerView).slice(0, 300)}`);
   check(playerView.labels === 0, "player", "the player sees the GM-only map pins", playerView.labels);
   check(playerView.tokens.some((title) => /Thorin/.test(title)), "player", "the player does not see their own token", JSON.stringify(playerView.tokens));
+  const phase3 = await seat.evaluate(() => ({ tiles: document.querySelectorAll(".map-tile").length, spoiled: Boolean(document.querySelector(".map-chip.spoiled")), facing: document.querySelector('.token .token-facing')?.getAttribute("data-facing") ?? null }));
+  note(`phase 3 for the player: ${JSON.stringify(phase3)}`);
+  check(phase3.tiles >= 1, "tiles", "the player does not see the image layer", JSON.stringify(phase3));
+  check(phase3.spoiled, "map", "the player is not told the torch spoils Thorin's deepvision", JSON.stringify(phase3));
+  check(phase3.facing === "0", "tokens", "the player does not see Thorin's facing", JSON.stringify(phase3));
   await seat.screenshot({ path: path.join(tmpdir(), "kraken-playtest-player.png") });
+  if (thorinToken) await attempt("map", "Thorin puts the torch out", "kraken_token_update", { id: thorinToken.id, light: "none" });
+  await attempt("map", "daylight again", "kraken_scene_settings", { darkness: null });
   await page.screenshot({ path: path.join(tmpdir(), "kraken-playtest-gm.png") });
   // The player's sheet: their character, with its numbers.
   await seat.click('[data-launch="characters"]').catch(() => problem("player", "the player has no Characters button"));

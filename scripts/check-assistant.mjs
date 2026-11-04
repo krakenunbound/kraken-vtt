@@ -111,6 +111,67 @@ try {
   assert(asked.log.at(-1).text === "Hello, GM." && asked.model === MODEL, "kraken_assistant ask");
   const reset = JSON.parse((await callTool("kraken_assistant", { action: "reset" }, toolCtx)).content[0].text);
   assert(reset.log.length === 0, "kraken_assistant reset");
+  // Step 6's "done when", through the assistant's own loop with a stand-in that
+  // decides each next call from the last results, as Claude would: build a
+  // character, start combat with an orc, run a round. (Real Claude needs the GM's key.)
+  const { listModules } = require("../electron/importers/fgModule.cjs");
+  const phb = listModules().find((item) => (item.name ?? item) === "C&C Player's Handbook");
+  let stepNote = "the C&C Player's Handbook was not on this computer";
+  if (phb) {
+    const lastResults = (params) => {
+      const last = params.messages.at(-1);
+      return Array.isArray(last.content) ? last.content.map((item) => JSON.parse(item.content?.[0]?.text ?? "null")) : [];
+    };
+    let step = 0;
+    const planner = {
+      beta: {
+        messages: {
+          async create(params) {
+            step += 1;
+            const [result] = lastResults(params);
+            const call = (name, input) => ({ stop_reason: "tool_use", content: [toolUse(`p${step}`, name, input)] });
+            if (step === 1) return call("kraken_import_fg_module", { module: "C&C Player's Handbook" });
+            if (step === 2) return call("kraken_build_character", { owner: "Ann", spec: { name: "Thorin Ironfist", race: "Dwarf", class: "Fighter", level: 1, scores: { strength: 17, dexterity: 12, constitution: 15, intelligence: 10, wisdom: 11, charisma: 8 }, primes: ["constitution"], gold: 100, gear: [["Sword, Long", 1], ["Scale Mail", 1]] } });
+            if (step === 3) {
+              planner.thorin = result.id;
+              return { stop_reason: "tool_use", content: [toolUse("p3a", "kraken_record_create", { type: "npc", name: "Orc", data: { hd: "1d8", hp: 6, ac: 13, atk: "1d8" } }), toolUse("p3b", "kraken_combat", { action: "add", recordId: planner.thorin })] };
+            }
+            if (step === 4) {
+              const orc = lastResults(params)[0];
+              return { stop_reason: "tool_use", content: [toolUse("p4a", "kraken_combat", { action: "add", recordId: orc.id }), toolUse("p4b", "kraken_combat", { action: "init", which: "all" })] };
+            }
+            if (step === 5) return call("kraken_combat", { action: "view" });
+            if (step === 6) {
+              planner.view = result;
+              const thorin = result.entries.find((entry) => entry.name === "Thorin Ironfist");
+              const orc = result.entries.find((entry) => /Orc/.test(entry.name));
+              // As Claude would read it from kraken_record_get: the longsword's key on Thorin's sheet.
+              const sword = Object.entries(server.agent.records.get(planner.thorin).data.inventorylist ?? {}).find(([, item]) => /Sword/.test(item.name))?.[0];
+              return { stop_reason: "tool_use", content: [toolUse("p6a", "kraken_combat", { action: "target", id: thorin.id, targetId: orc.id, on: true }), toolUse("p6b", "kraken_combat", { action: "attack", recordId: planner.thorin, weapon: sword })] };
+            }
+            // Round 1: the first turn, the second; then round 2 begins.
+            if (step < 6 + 4) return call("kraken_combat", { action: "next" });
+            if (step === 10) return call("kraken_combat", { action: "view" });
+            planner.after = result;
+            return { stop_reason: "end_turn", content: [{ type: "text", text: `Thorin is built, the fight with the orc has started and round ${result.round} is under way.` }] };
+          },
+        },
+      },
+    };
+    const runner = createAssistant({ ctx, key: () => "k", makeClient: () => planner });
+    const finished = await runner.ask("Build Ann a dwarf fighter, Thorin, put him against an orc and run the first round.");
+    const failed = finished.log.filter((event) => event.kind === "tool-result" && !event.ok);
+    assert(failed.length === 0, `every call worked: ${JSON.stringify(failed).slice(0, 300)}`);
+    const thorin = server.agent.records.get(planner.thorin);
+    assert(thorin?.type === "character" && thorin.owner === "Ann" && thorin.data.hp?.total > 0, "Thorin was built for Ann");
+    assert(planner.view.entries.length === 2 && planner.view.entries.every((entry) => entry.initresult != null), `both are on the tracker with initiative: ${JSON.stringify(planner.view.entries.map((entry) => [entry.name, entry.initresult]))}`);
+    const attackLine = JSON.parse((await callTool("kraken_chat_log", { count: 40 }, ctx)).content[0].text).find((line) => /^\[ATTACK\]/.test(line.roll?.label ?? "") && /Thorin/.test(line.roll?.by ?? line.from));
+    assert(attackLine, `Thorin's attack is in chat: ${JSON.stringify(JSON.parse((await callTool("kraken_chat_log", { count: 12 }, ctx)).content[0].text).map((line) => [line.from, line.roll?.label ?? line.text]))}`);
+    const turns = JSON.parse((await callTool("kraken_chat_log", { count: 40 }, ctx)).content[0].text).filter((line) => /^\[TURN\]/.test(line.text ?? "")).map((line) => line.text);
+    assert(planner.after.round === 2 && turns.some((line) => /Thorin/.test(line)) && turns.some((line) => /Orc/.test(line)), `round 1 run, each had a turn, round 2 begun: ${JSON.stringify({ round: planner.after.round, turns })}`);
+    stepNote = `step 6 through the loop: Thorin built, on the tracker with an orc, initiative, his attack in chat, round ${planner.after.round}`;
+  }
+  console.log(`${stepNote}`);
   console.log("ok assistant: tools run on the table (a re-roll in chat, the tracker read), results go back together, thinking kept, a failing tool and a refusal handled, no key explained, kraken_ui_eval withheld, kraken_assistant drives it");
 } finally {
   await server.stop();

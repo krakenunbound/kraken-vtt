@@ -92,27 +92,39 @@ try {
   const npcLook = { theme: "monster", body: "#3a5a1c", ink: "#f2e3b0" };
   const damageLook = { theme: "magma", body: "#2a0d05", ink: "#ffb347" };
   const looks = { npc: npcLook, damage: damageLook };
+  // The theme of the next line Bob gets (waits for it, however busy the machine is).
+  let seen = bob.lines.length;
   const lookOfLast = () => bob.lines.at(-1).roll.look?.theme;
+  const arrived = async () => {
+    for (let wait = 0; wait < 100 && bob.lines.length <= seen; wait++) await new Promise((resolve) => setTimeout(resolve, 30));
+    seen = bob.lines.length;
+  };
   gm.send({ type: "roll", formula: "1d20+2", label: "Orc attack", as: "Orc 1", look, looks });
-  await settle();
+  await arrived();
   assert(lookOfLast() === "monster", `a roll as a creature is in NPC dice: ${lookOfLast()}`);
   gm.send({ type: "roll", formula: "1d8", label: "[DAMAGE] Orc 1 axe", as: "Orc 1", look, looks });
-  await settle();
+  await arrived();
   assert(lookOfLast() === "magma", `damage is in damage dice: ${lookOfLast()}`);
   gm.send({ type: "roll", formula: "1d20", label: "Elowen's check", as: "Elowen", look, looks });
-  await settle();
+  await arrived();
   assert(lookOfLast() === "starfall", `the GM rolling for a character uses their own dice: ${lookOfLast()}`);
   gm.send({ type: "roll", formula: "1d20", label: "GM's roll", look, looks });
-  await settle();
+  await arrived();
   assert(lookOfLast() === "starfall", "the GM as themself: their own dice");
   ann.send({ type: "roll", formula: "2d6", label: "[DAMAGE] Longsword", look, looks: { damage: damageLook, npc: npcLook } });
-  await settle();
+  await arrived();
   assert(lookOfLast() === "magma", "a player's damage dice");
   ann.send({ type: "roll", formula: "1d20", label: "Attack", as: "Orc 1", look, looks });
-  await settle();
+  await arrived();
   assert(lookOfLast() === "starfall", "a player's NPC dice are never used (and a player cannot roll as another)");
+  // The GM's tracker attack for a character (spoken by Combat, by Elowen) is in the GM's own dice; for a creature, NPC dice.
+  const sword = { name: "Sword, Long", damage: "1d8", attacktype: "melee", carried: 2 };
+  server.agent.records.update(elowen.id, { data: { inventorylist: { "id-00001": sword }, attack: { melee: { total: 1 } } } }, server.agent.seat);
+  gm.send({ type: "ct", action: "attack", recordId: elowen.id, weapon: "id-00001", look, looks });
+  await arrived();
+  assert(lookOfLast() === "starfall", `a tracker attack for a character: the GM's own dice (${lookOfLast()})`);
   gm.send({ type: "roll", formula: "1d6", label: "Orc morale", as: "Orc 1", look });
-  await settle();
+  await arrived();
   assert(lookOfLast() === "monster", "the sets are remembered from the seat's last request");
 
   // The dice tower, as FG's: the GM sees "[TOWER]" and the result, Ann sees
