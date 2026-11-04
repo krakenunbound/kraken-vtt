@@ -290,7 +290,7 @@ export function SetupScreen({
       <Backdrop scene={mode === "join" ? "hall" : "keep"} />
       <header className="setup-bar">
         <div className="brand">
-          <Mark /> Kraken <span className="brand-sub">VTT</span>
+          <Mark /> Kraken <span className="brand-sub">VTT</span> <span className="brand-version" title="Alpha test version">{__KRAKEN_VERSION__}</span>
         </div>
         {inBrowser || mode === "home" ? null : (
           <button type="button" className="join-toggle" data-action="home" onClick={() => setMode("home")}>
