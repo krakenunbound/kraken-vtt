@@ -1101,6 +1101,46 @@ const TOOLS = [
     },
   },
   {
+    name: "kraken_open_fg_module",
+    description:
+      "Put an FG adventure module's maps on the table (B1 In Search of the Unknown, B2 The Keep on the Borderlands...): every map becomes a scene with its picture, FG's walls (doors, see-through and one-way walls), lights, grid, FX layers (rain, clouds, water in its mask) and FG's shortcuts as map pins in two GM-only layer groups (Map keys, Encounters) linked to the story entries and encounters. maps: names to take only some (part of the name). The first map goes on the table; kraken_scenes switches.",
+    inputSchema: object({ module: string("The module's name, as FG lists it"), maps: { type: "array", items: { type: "string" } } }, ["module"]),
+    async run(args, ctx) {
+      const table = needTable(ctx);
+      const { fgModuleBundle } = require("../importers/fgMaps.cjs");
+      const bundle = fgModuleBundle(String(args.module), { only: args.maps });
+      for (const [id, extra] of Object.entries(bundle.extras)) table.map.seed(id, extra);
+      const opened = await ctx.ui({ kind: "open-adventure", name: bundle.name, bytes: new Uint8Array(bundle.bytes) }, 120000);
+      return out({ opened, scenes: bundle.scenes });
+    },
+  },
+  {
+    name: "kraken_library",
+    description:
+      "FG's Library of an adventure module (B1, B2... read in place): action list (kind npc, battle (FG's encounters), parcel (treasure parcels) or table; search); npc (path: put the NPC on the combat tracker, count); battle (path: the encounter's NPCs onto the tracker, and when its FG map is open (kraken_open_fg_module) their tokens where FG placed them, hidden until revealed; place false: tracker only); parcel (path: its coins and items into the party sheet's parcel to hand out); table (path: roll it on the host's dice; the result goes to chat).",
+    inputSchema: object({
+      action: { type: "string", enum: ["list", "npc", "battle", "parcel", "table"] },
+      module: string("The module's name (list)"),
+      kind: { type: "string", enum: ["npc", "battle", "parcel", "table"] },
+      search: string("Part of the name (list)"),
+      path: string("The record's FG path, as list gives it"),
+      count: number("npc: how many"),
+      place: { type: "boolean", description: "battle: place tokens on the open map (default true)" },
+    }, ["action"]),
+    async run(args, ctx) {
+      const table = needTable(ctx);
+      const library = require("../library.cjs");
+      if (args.action === "list") return out(library.list(String(args.module ?? ""), args.kind, args.search ?? ""));
+      if (args.action === "npc") {
+        const record = library.ensureNpc(table, String(args.path));
+        return out({ added: await table.combat.add({ recordId: record.id, count: args.count }, table.seat), record: record.id });
+      }
+      if (args.action === "battle") return out(await library.addBattle(table, String(args.path), { place: args.place !== false }));
+      if (args.action === "parcel") return out(library.giveParcel(table, String(args.path), party));
+      return out(library.rollTable(table, String(args.path), "Agent"));
+    },
+  },
+  {
     name: "kraken_scenes",
     description: "The adventures and scenes the GM has open, and which is on the table. Give adventure and/or scene (name or id) to put another on the table for everyone.",
     inputSchema: object({ adventure: string("Adventure name"), scene: string("Scene name or id") }),
@@ -1123,7 +1163,7 @@ const TOOLS = [
       "The GM's windows: list them, or open, close, pop out (to a window of its own, for another monitor) or dock back a window. Kinds: characters, party, combat, players, settings, decals (the background decal picker), wallpapers (the desktop wallpaper picker), gmicons (the GM icon picker), krits (critical hits and fumbles), dice (this seat's dice: sets, colours, design, material, effects), sound (one-shots, effects, ambience, music, chat triggers, volumes), sheet (a character's sheet: give record, its id or name).",
     inputSchema: object({
       action: { type: "string", enum: ["list", "open", "close", "popout", "dock"] },
-      kind: { type: "string", enum: ["characters", "party", "combat", "players", "settings", "decals", "wallpapers", "gmicons", "krits", "dice", "sound", "sheet", "books", "book", "images", "picture", "notes", "note"] },
+      kind: { type: "string", enum: ["characters", "party", "combat", "players", "settings", "decals", "wallpapers", "gmicons", "krits", "library", "dice", "sound", "sheet", "books", "book", "images", "picture", "notes", "note"] },
       record: string("For a sheet: the character's record id or name"),
     }),
     run: async (args, ctx) => out(await ctx.ui({ kind: "windows", action: args.action ?? "list", window: args.kind, record: args.record })),

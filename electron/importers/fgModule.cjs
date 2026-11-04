@@ -55,8 +55,19 @@ function convert(node) {
     const text = (node.textContent || "").trim();
     return text === "" ? true : text;
   }
+  // Repeated elements (an image's <layer>, <occluder>, <light>) become a list;
+  // FG's records are id-keyed, so this changes nothing else.
   const out = {};
-  for (const kid of kids) out[kid.tagName] = convert(kid);
+  for (const kid of kids) {
+    const value = convert(kid);
+    if (!(kid.tagName in out)) out[kid.tagName] = value;
+    else if (Array.isArray(out[kid.tagName]) && out[`__list_${kid.tagName}`]) out[kid.tagName].push(value);
+    else {
+      out[kid.tagName] = [out[kid.tagName], value];
+      out[`__list_${kid.tagName}`] = true;
+    }
+  }
+  for (const key of Object.keys(out)) if (key.startsWith("__list_")) delete out[key];
   return out;
 }
 
@@ -182,6 +193,51 @@ function pickRoots(xml, wanted) {
   return `<root>${parts.join("")}</root>`;
 }
 
+// An NPC written in the official C&C ruleset's fields (monsterac, monsterhd,
+// monsteratk text: the B series) in SiegeCore's, as the tracker reads them:
+// ac.total, hd "4d8", hptotal, bth = hit dice (C&C), primeset from the saves
+// (P, M, P/M), attacks parsed from "Pole arm (1d10), Dagger (1d4)".
+function siegeNpc(data) {
+  if (data.ac || data.monsterac === undefined) return data;
+  const out = { ...data };
+  const ac = parseInt(String(data.monsterac), 10);
+  if (Number.isFinite(ac)) out.ac = { total: ac };
+  const hdText = String(data.monsterhd ?? data.hd ?? "");
+  const hd = /(\d+)\s*\(\s*(d\d+)\s*\)/i.exec(hdText);
+  if (hd) {
+    out.hd = `${hd[1]}${hd[2]}`;
+    out.hdtext = hdText;
+    out.bth = Number(hd[1]);
+  } else if (/^\d+d\d+/.test(hdText)) out.hd = hdText.replace(/\s+/g, "");
+  const hp = Number(data.monsterhp ?? data.hp);
+  if (hp > 0) out.hptotal = hp;
+  const saves = String(data.saves ?? data.Saves ?? "").toUpperCase();
+  out.primeset = saves.includes("P") && saves.includes("M") ? "both" : saves.includes("M") ? "mental" : saves.includes("P") ? "physical" : "";
+  if (data.monstermove) out.speed = String(data.monstermove);
+  if (data.monsterintelligence) out.intelligence = String(data.monsterintelligence);
+  if (data.monsteralignment && !data.alignment) out.alignment = String(data.monsteralignment);
+  if (data.sa) out.specialabilities = String(data.sa);
+  out.attackstext = String(data.monsteratk ?? "");
+  const attacks = {};
+  let n = 1;
+  // "2 claws (1d4), bite (1d8)", "Pole arm (1d10), Dagger (1d4)", "Sword (1d8) or bow (1d6)".
+  for (const part of String(data.monsteratk ?? "").split(/,|or|and/i)) {
+    const match = /^\s*(?:(\d+)\s+)?([^()]+?)\s*\(([^)]*)\)/.exec(part);
+    if (!match) continue;
+    const damage = /\d*d\d+(?:\s*[+-]\s*\d+)?/i.exec(match[3])?.[0]?.replace(/\s+/g, "") ?? "";
+    const name = match[2].trim().replace(/^./, (c) => c.toUpperCase());
+    const ranged = /bow|crossbow|sling|javelin|dart|spit|breath/i.test(name);
+    for (let i = 0; i < Math.max(1, Math.min(4, Number(match[1]) || 1)); i += 1) {
+      attacks[`a${String(n).padStart(2, "0")}`] = { name: Number(match[1]) > 1 ? `${name.replace(/s$/, "")} ${i + 1}` : name, bth: 0, attacktype: ranged ? "ranged" : "melee", damage };
+      n += 1;
+    }
+  }
+  // "By weapon": a weapon of the CK's choosing, 1d6 until it is set.
+  if (n === 1 && /by weapon/i.test(String(data.monsteratk ?? ""))) attacks.a01 = { name: "By Weapon", bth: 0, attacktype: "melee", damage: "1d6" }, (n = 2);
+  if (n > 1) out.attacks = attacks;
+  return out;
+}
+
 function readModule(nameOrPath, { only = null } = {}) {
   const file = resolveModule(nameOrPath);
   const files = readFiles(file, { xmlOnly: true });
@@ -214,7 +270,8 @@ function readModule(nameOrPath, { only = null } = {}) {
         if (seen.has(fgPath)) continue;
         seen.add(fgPath);
         const data = convert(node);
-        const fields = data && typeof data === "object" ? data : { value: data };
+        const converted = data && typeof data === "object" ? data : { value: data };
+        const fields = (innerType ?? type) === "npc" ? siegeNpc(converted) : converted;
         const isPublic = visibility === "all" || fields.public === true;
         records.push({
           id: `${prefix}:${fgPath}`.slice(0, 160),
