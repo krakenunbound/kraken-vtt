@@ -670,6 +670,8 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       const reach = Math.max(0, num(radius, 0));
       const inside = state.entries.filter((entry) => {
         if (entry.id === source.id || (faction && entry.faction !== faction)) return false;
+        // The dead are no one's target.
+        if (health(entry).status === "Dead") return false;
         const token = tokenAt(entry);
         return token && Math.hypot(token.x - x, token.y - y) <= reach + 1e-6;
       });

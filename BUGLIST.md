@@ -19,3 +19,10 @@ Each bug has a test once fixed. Severity: **high** (wrong rules or data, or the 
 | 11 | low | Area spells (Sleep) affect only the caster's targets; there is no quick way to target everyone in an area (FG: the same, the GM targets each) | play test | Fixed (alpha.15): the map's Area target tool (players too) and `kraken_combat` target-area: everyone within a radius of a point, a faction to narrow |
 | 12 | low | Items with no price (Staff "—", Sling) cannot be bought in the wizard or the builder. FG's wizard skips them too, so this is FG-faithful: the GM's call | play test | Decision for the GM |
 | 13 | low | Targets persist after a spell: the cleric's Cure Light Wounds also healed the kobold it had targeted the turn before. FG keeps targets the same way; an option to clear targets after a cast would help | play test | Open |
+| 14 | medium | An area target also took creatures already dead | play test, phase 2 | Fixed (alpha.16) |
+
+## Play test, second run (alpha.15)
+
+Phase 2 added: Sleep cast on an area target over the kobold pack (eight asleep), a kobold killed outright (shown Dead), the encounter's 120 XP split between the four characters, the parcel's item assigned to Pip and handed out with the coin, and Thorin levelled from 2 to 3 (18 to 26 hit points, base to hit 2 to 3, next level 8,501 XP). All as expected, but for bug 14.
+
+Still open after both runs: 12 (the GM's decision) and 13 (an option to clear targets after a cast).
