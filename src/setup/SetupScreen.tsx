@@ -37,6 +37,7 @@ function rememberGame(game: RecentGame) {
 // The rulesets a campaign can be made with.
 const RULESETS = [
   { name: "Castles & Crusades", blurb: "SiegeCore rules: character sheets, the SIEGE engine, combat and spells." },
+  { name: "D&D 5E", blurb: "The SRD 5.2.1: 5E sheets and character building, d20 combat with criticals, saves, spells and death saves." },
   { name: "Worldbuilding", blurb: "No game rules: maps, tokens, chat and dice for any system." },
 ];
 

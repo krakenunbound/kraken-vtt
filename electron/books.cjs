@@ -21,6 +21,8 @@ const PICTURES = /\.(png|webp|jpe?g|gif)$/i;
 // campaign; Worldbuilding (no rules) takes only those, never another game's.
 const FG_RULESETS = {
   "Castles & Crusades": ["SiegeCore", "CnCRPG"],
+  // FG's 5E ruleset's modules (the SRD 5.2.1's player book, bestiary, magic items).
+  "D&D 5E": ["5E"],
   Worldbuilding: [],
 };
 const ANY = new Set(["", "any", "corerpg"]);

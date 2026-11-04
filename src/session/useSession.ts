@@ -150,6 +150,8 @@ export type DecalItem = { id: string; name: string; group: string; ruleset?: str
 export type PictureKind = "decal" | "wallpaper" | "gmicon" | "tile";
 // The combat tracker as the host shows it to this seat (electron/combat.cjs viewFor).
 export type CombatEntry = {
+  // 5E: death saves of a Dying character.
+  deathsaves?: { success: number; failure: number };
   id: string;
   recordId: string | null;
   tokenId: string | null;
@@ -280,6 +282,8 @@ export function useSession() {
   const [library, setLibrary] = useState<Record<string, LibraryItem[]>>({});
   const [combat, setCombat] = useState<CombatView>({ round: 0, active: null, entries: [] });
   const [soundscape, setSoundscape] = useState<Soundscape>({ ambience: [], music: null });
+  // The campaign's ruleset ("Castles & Crusades", "D&D 5E", "Worldbuilding"): it picks the sheet.
+  const [ruleset, setRuleset] = useState("");
   // The GM's: the open scene's own sound, if it has one.
   const [sceneSound, setSceneSound] = useState<{ sceneId: string | null; kept: Soundscape | null }>({ sceneId: null, kept: null });
   const [bookSounds, setBookSounds] = useState<Record<string, PageSounds>>({});
@@ -385,6 +389,7 @@ export function useSession() {
             assetRef.current = you.assetToken ?? "";
             // Sounds come from the host, for this seat.
             sound.setSource((id) => `${originRef.current}/sound/file?token=${assetRef.current}&id=${encodeURIComponent(id)}`);
+            setRuleset(typeof msg.ruleset === "string" ? msg.ruleset : "");
             if (msg.sceneSound && typeof msg.sceneSound === "object") setSceneSound(msg.sceneSound as { sceneId: string | null; kept: Soundscape | null });
             if (msg.soundscape) {
               setSoundscape(msg.soundscape as Soundscape);
@@ -726,7 +731,7 @@ export function useSession() {
   );
 
   // A SIEGE check for a character; the host rolls it and posts the result.
-  const siegeCheck = useCallback((id: string, attribute: string, cl = 0, save = false, extra?: { label?: string; bonus?: number; addLevel?: boolean }) => {
+  const siegeCheck = useCallback((id: string, attribute: string, cl = 0, save = false, extra?: { label?: string; bonus?: number; addLevel?: boolean; kind?: "check" | "save" | "skill"; skill?: string; dc?: number; advantage?: string }) => {
     const socket = socketRef.current;
     if (!socket || socket.readyState !== WebSocket.OPEN) return;
     socket.send(JSON.stringify({ type: "siege-check", id, attribute, cl, ...(save ? { label: `${attribute[0].toUpperCase()}${attribute.slice(1)} save` } : {}), ...(extra ?? {}), ...throwIntent() }));
@@ -954,6 +959,7 @@ export function useSession() {
     tableCommand,
     soundscape,
     sceneSound,
+    ruleset,
     soundTriggers,
     bookShelf,
     imageShown,

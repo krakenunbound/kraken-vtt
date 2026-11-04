@@ -263,7 +263,7 @@ function createEngine(host: HTMLDivElement) {
     towerDrop(drop: TowerDrop) {
       const look = diceStore.settings().look;
       const to = new THREE.Vector3(drop.to.x / unit, 0.4, drop.to.y / unit);
-      const kinds = drop.sides.flatMap((sides): ShapeKind[] => (sides === 100 ? ["d100tens", "d100"] : SHAPED.has(sides) ? [`d${sides}` as ShapeKind] : [])).slice(0, MAX_DICE);
+      const kinds = drop.sides.flatMap((sides): ShapeKind[] => (sides === 100 ? ["d100tens", "d100"] : sides === 2 || sides === 3 ? ["d6"] : SHAPED.has(sides) ? [`d${sides}` as ShapeKind] : [])).slice(0, MAX_DICE);
       if (kinds.length === 0) return;
       const groups = kinds.map((kind) => {
         const group = buildDie(kind, kind === "d100tens" ? tensLook(look) : look, model(kind).shape.values);

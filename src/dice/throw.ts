@@ -1,14 +1,15 @@
 import * as THREE from "three";
 import * as CANNON from "cannon-es";
 import type { ChatLine } from "../session/useSession";
-import { SHAPED, type DiceThrow } from "./diceStore";
+import { SHAPED, SIX_SIDED, type DiceThrow } from "./diceStore";
 import { bottomFace, collider, model, topFace, type ShapeKind } from "./models";
 
 // A throw worked out before it is shown: the dice of a roll, their flight in
 // a physics world of their own, and the labels that put the host's number on
 // the face each die comes to rest on. (No DOM here: the checks run it too.)
 
-export type Die = { kind: ShapeKind; label: string };
+// faces: what each face shows when it is not the shape's own numbers (a d3 is a d6 with 1-3 twice).
+export type Die = { kind: ShapeKind; label: string; faces?: string[] };
 export type Hit = { frame: number; strength: number; onDie: boolean };
 // Four physics steps a frame: a fast die moves under a quarter of its width a step, so it never slips through a rail.
 const STEP = 1 / 240;
@@ -24,7 +25,8 @@ export function diceOf(line: ChatLine): Die[] {
       if (term.sides === 100) {
         const tens = Math.floor((value % 100) / 10);
         dice.push({ kind: "d100tens", label: `${tens}0` }, { kind: "d100", label: `${value % 10}` });
-      } else if (term.sides === 10) dice.push({ kind: "d10", label: value === 10 ? "0" : `${value}` });
+      } else if (SIX_SIDED[term.sides]) dice.push({ kind: "d6", label: `${value}`, faces: SIX_SIDED[term.sides] });
+      else if (term.sides === 10) dice.push({ kind: "d10", label: value === 10 ? "0" : `${value}` });
       else dice.push({ kind: `d${term.sides}` as ShapeKind, label: `${value}` });
     }
   }
@@ -177,7 +179,7 @@ export function simulate(dice: Die[], thrown: DiceThrow, width: number, depth: n
 
 // The labels a die is made with so that its own number is on the face it rests on.
 export function labelsFor(die: Die, rest: THREE.Quaternion) {
-  const values = model(die.kind).shape.values.slice();
+  const values = (die.faces ?? model(die.kind).shape.values).slice();
   // A d4 is read at its top, as a real one: the three faces that can be seen
   // all show its number, and the face it rests on another.
   if (die.kind === "d4") {

@@ -6,6 +6,7 @@ import { toFgXml, toKrakenFile } from "../../shared/siege/interchange.mjs";
 import { Picture } from "./ArtPicker";
 import { Wizard } from "./Wizard";
 import { CCSheet } from "./CCSheet";
+import { Sheet5e, Wizard5e } from "./Sheet5e";
 
 // Characters in and out: Import reads a file from another table (Kraken,
 // Fantasy Grounds XML, Foundry or Roll20 JSON; dropping one on the list does
@@ -144,15 +145,25 @@ export function CharacterPanel({ session, dock = false, selected: chosen }: { se
         </div>
         {status}
         {creating ? (
-          <Wizard
-            session={session}
-            onDone={(id) => {
-              setCreating(false);
-              if (id) setSelected(id);
-            }}
-          />
+          session.ruleset === "D&D 5E" ? (
+            <Wizard5e
+              session={session}
+              onDone={(id) => {
+                setCreating(false);
+                if (id) setSelected(id);
+              }}
+            />
+          ) : (
+            <Wizard
+              session={session}
+              onDone={(id) => {
+                setCreating(false);
+                if (id) setSelected(id);
+              }}
+            />
+          )
         ) : current ? (
-          <CCSheet record={current} session={session} />
+          current.data.ruleset === "dnd5e" ? <Sheet5e record={current} session={session} /> : <CCSheet record={current} session={session} />
         ) : (
           <p className="hint">You have no character yet. Make one with the new character button.</p>
         )}
@@ -188,15 +199,25 @@ export function CharacterPanel({ session, dock = false, selected: chosen }: { se
         </ul>
       </aside>
       {creating ? (
-        <Wizard
-          session={session}
-          onDone={(id) => {
-            setCreating(false);
-            if (id) setSelected(id);
-          }}
-        />
+        session.ruleset === "D&D 5E" ? (
+          <Wizard5e
+            session={session}
+            onDone={(id) => {
+              setCreating(false);
+              if (id) setSelected(id);
+            }}
+          />
+        ) : (
+          <Wizard
+            session={session}
+            onDone={(id) => {
+              setCreating(false);
+              if (id) setSelected(id);
+            }}
+          />
+        )
       ) : current ? (
-        <CCSheet record={current} session={session} />
+        current.data.ruleset === "dnd5e" ? <Sheet5e record={current} session={session} /> : <CCSheet record={current} session={session} />
       ) : null}
     </section>
   );
