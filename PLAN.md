@@ -282,7 +282,7 @@ Steps 0 to 5 are done for single-class C&C, and the table grew a good deal past 
 
 | # | Work | Done when |
 |---|---|---|
-| 1 | **Finish characters (step 2), done in alpha.5 and alpha.6 (FG parity runs to come):** multi-class, enhanced class and class plus; dual class and reclass; the wizard's Combine Classes and Castle Keeper options; level up for them | The pregens and wizard checks cover a multi-class character built and levelled in Kraken and in FG with the same sheet |
+| 1 | **Finish characters (step 2), done in alpha.5 to alpha.7 (`combine-fg`: six combined characters equal FG's live builds; FG's buildFromSpec took multiclass, support and plus for it):** multi-class, enhanced class and class plus; dual class and reclass; the wizard's Combine Classes and Castle Keeper options; level up for them | The pregens and wizard checks cover a multi-class character built and levelled in Kraken and in FG with the same sheet |
 | 2 | ~~Finish combat (step 4)~~ Done in alpha.3 and alpha.4: critical hits and fumbles, ammunition, spell resistance, NPC spellcasting | `krits`, `attack`, `spells` |
 | 3 | **The A to Z run:** B2 on the table, the party made in the wizard by players in Chrome, a fight on the map, treasure and XP through the party sheet | A scripted session plus a manual pass as a player, each issue found fixed |
 | 4 | **In-app DM assistant (step 6):** a chat panel for the GM driving the same MCP tools | It can build a character, start combat, run a turn and share a map from a request |
