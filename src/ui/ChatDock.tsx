@@ -214,7 +214,20 @@ export function ChatDock({ session }: { session: Session }) {
   const [size, setSize] = useState<ChatSize>(chatSize);
   const windows = useWindows();
   // /id: who the GM speaks as for now; /gmid: the GM's own name, kept in this browser.
+  // A player speaks as one of their characters (FG's identity list under the
+  // chat), or as themselves; taking a character makes it who they speak as.
   const [speakAs, setSpeakAs] = useState("");
+  const me = session.players.find((seat) => seat.id === session.selfId)?.name ?? "";
+  const myCharacters = session.role === "dm" ? [] : Object.values(session.records).filter((record) => record.type === "character" && record.owner === me).map((record) => record.name).sort();
+  const mineKey = myCharacters.join("|");
+  const known = useRef<string[]>([]);
+  useEffect(() => {
+    if (session.role === "dm") return;
+    const added = myCharacters.find((name) => !known.current.includes(name));
+    known.current = myCharacters;
+    if (added) setSpeakAs(added);
+    else if (speakAs && !myCharacters.includes(speakAs)) setSpeakAs(myCharacters[0] ?? "");
+  }, [mineKey, session.role]);
   const [gmName, setGmNameState] = useState(() => {
     try {
       return window.localStorage.getItem("kraken-gm-name") ?? "";
@@ -324,7 +337,7 @@ export function ChatDock({ session }: { session: Session }) {
   };
   const rollDice = (dice: number[], inTower: boolean, from?: { x: number; y: number }) => {
     if (dice.length === 0) return;
-    session.roll(withModifier(formulaOf(dice), modifier), "", "", inTower);
+    session.roll(withModifier(formulaOf(dice), modifier), "", "", inTower, "public", speakAs || (session.role === "dm" ? gmName : ""));
     if (inTower) dropInTower(dice, from);
     setPool([]);
     setModifier(0);
@@ -496,6 +509,16 @@ export function ChatDock({ session }: { session: Session }) {
           <Icon name="chat" />
         </button>
       </form>
+      {myCharacters.length > 0 ? (
+        <select className="chat-identity" aria-label="Speak as" value={speakAs} onChange={(event) => setSpeakAs(event.target.value)} title="Who you speak and roll as">
+          {myCharacters.map((name) => (
+            <option key={name} value={name}>
+              {name}
+            </option>
+          ))}
+          <option value="">{me || "Yourself"} (out of character)</option>
+        </select>
+      ) : null}
       {helpOpen || suggestions.length > 0 ? (
         <div className="chat-commands" role="listbox" aria-label="Chat commands">
           {helpOpen ? (

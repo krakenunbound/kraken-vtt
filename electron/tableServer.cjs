@@ -506,7 +506,13 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     // A self roll (Foundry's /selfroll) is the roller's alone.
     if (line.self) return client.id === line.id;
     // A whisper: who sent it, who it is to, and the GM (as FG's GM sees every whisper).
-    if (line.to) return client.role === "dm" || client.id === line.id || line.to.some((name) => sameName(name, client.name) || (client.role === "dm" && /^(gm|dm)$/i.test(name)));
+    // A whisper to a character reaches whoever holds it.
+    if (line.to)
+      return (
+        client.role === "dm" ||
+        client.id === line.id ||
+        line.to.some((name) => sameName(name, client.name) || records.list({ type: "character", owner: client.name }).some((record) => sameName(name, record.name)))
+      );
     return !line.secret || client.role === "dm" || (line.shownTo && line.shownTo === client.name);
   };
 
@@ -671,6 +677,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     // A token's health dot follows its record.
     if (map.tokens().some((token) => token.recordId === record.id)) sendMaps();
     if (record.id === party.PARTY_ID || record.type === "character") sendParty();
+    if (record.type === "character" || before?.type === "character") sendRoster();
     if (combat.entries().some((entry) => entry.recordId === record.id)) sendCombat();
   });
 
@@ -917,6 +924,56 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     return [...clients.values()].map((client) => ({ id: client.id, name: client.name, role: client.role }));
   }
 
+  // FG's character list: every character at the table, for the portrait bar
+  // and Character Selection. Everyone is told only the face of each: name,
+  // portrait, species, class and level, who holds it, and whether they are
+  // seated. A character no one holds ("Server" in FG) a player may take.
+  function rosterView() {
+    const seated = new Set([...clients.values()].filter((item) => item.joined && item.role === "player").map((item) => item.name));
+    return records
+      .list({ type: "character" })
+      .map((record) => {
+        const data = record.data ?? {};
+        const packages = data.packages && typeof data.packages === "object" ? Object.values(data.packages) : [];
+        const classes = packages
+          .filter((pkg) => pkg && String(pkg.packagetype).toLowerCase() === "class")
+          .map((pkg) => `${pkg.name} ${Number(pkg.level) || 1}`)
+          .join(" / ");
+        return {
+          id: record.id,
+          name: record.name,
+          owner: record.owner,
+          online: Boolean(record.owner) && seated.has(record.owner),
+          portrait: typeof data.portrait === "string" ? data.portrait : null,
+          species: String(data.race ?? data.species ?? ""),
+          classes,
+          level: Number(data.level) || 0,
+        };
+      })
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }
+  function sendRoster() {
+    broadcast({ type: "roster", roster: rosterView() });
+  }
+
+  // Who a player speaks and rolls as (FG's identity list): one of the characters
+  // they hold, or themselves ("").
+  function speaksAs(client, name) {
+    const wanted = text(name, "").slice(0, 120);
+    if (!wanted) return "";
+    return records.list({ type: "character", owner: client.name }).some((record) => record.name === wanted) ? wanted : "";
+  }
+
+  // A player takes a character no one holds (FG's Character Selection): it
+  // becomes theirs, seen by them and the GM.
+  function takeCharacter(client, id) {
+    if (client.role === "dm") throw new Error("The GM gives a character to a player by setting its owner.");
+    const record = records.get(text(id, ""));
+    if (!record || record.type !== "character") throw new Error("There is no such character.");
+    if (record.owner && record.owner !== client.name) throw new Error(`${record.name} is ${record.owner}'s.`);
+    return records.update(record.id, { owner: client.name, visibility: "owner" }, { role: "dm", name: "GM" });
+  }
+
   // The scene a player is sent: the map and lights. Walls stay on the host
   // and tokens come with the player's map view.
   function sceneFor(client) {
@@ -940,6 +997,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     if (!client) return;
     clients.delete(ws);
     broadcast({ type: "players", players: playerList() });
+    if (client.role === "player") sendRoster();
   }
 
   wss.on("connection", (ws, request) => {
@@ -1011,8 +1069,10 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
           ...(client.role === "dm" ? { bookSounds: Object.fromEntries(bookSounds), sceneSound: sceneSoundView() } : {}),
           records: records.list({ seat: seatOf(client) }),
           scene: client.role === "player" ? sceneFor(client) : null,
+          roster: rosterView(),
         });
         broadcast({ type: "players", players: playerList() }, ws);
+        if (client.role === "player") broadcast({ type: "roster", roster: rosterView() }, ws);
         party
           .partyView(agentHandle)
           .then((view) => send(ws, { type: "party", party: view }))
@@ -1051,6 +1111,17 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         return;
       }
 
+      // FG's Character Selection: a player takes a character no one holds.
+      if (msg.type === "take-character") {
+        try {
+          const record = takeCharacter(client, msg.id);
+          send(ws, { type: "op-result", req: msg.req, ok: true, id: record.id });
+        } catch (error) {
+          send(ws, { type: "op-result", req: msg.req, ok: false, error: error.message });
+        }
+        return;
+      }
+
       // A seat's quick slots, set (each seat its own).
       if (msg.type === "quickslots") {
         const slots = cleanSlots(msg.slots);
@@ -1075,7 +1146,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
           send(ws, { type: "error", reason: "Only the GM tells the story (/story)." });
           return;
         }
-        const as = client.role === "dm" ? text(msg.as, "").slice(0, 24) : "";
+        const as = client.role === "dm" ? text(msg.as, "").slice(0, 24) : speaksAs(client, msg.as);
         const to = Array.isArray(msg.to) ? msg.to.map((name) => text(name, "").slice(0, 24)).filter(Boolean).slice(0, 12) : null;
         addChat({
           id: client.id,
@@ -1122,7 +1193,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
             // Foundry's /selfroll: the roller alone.
             const result = dice.roll(msg.formula);
             addChat({ id: client.id, from: client.name, text: "", roll: { ...result, label: text(msg.label, "").slice(0, 160) }, at: Date.now(), self: true });
-          } else rollDice(msg.formula, msg.label, client.role === "dm" && msg.as ? text(msg.as, "").slice(0, 24) : client.name, client.id, msg.tag);
+          } else rollDice(msg.formula, msg.label, client.role === "dm" ? (msg.as ? text(msg.as, "").slice(0, 24) : client.name) : speaksAs(client, msg.as) || client.name, client.id, msg.tag);
         } catch (error) {
           send(ws, { type: "error", reason: error instanceof Error ? error.message : "Could not roll that." });
         }
@@ -1564,6 +1635,8 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     seat: { role: "dm", name: "Agent" },
     // The campaign's ruleset ("Castles & Crusades", "D&D 5E", "Worldbuilding").
     ruleset: () => ruleset,
+    // FG's character list: every character's face, who holds it, who is seated.
+    roster: () => rosterView(),
     records,
     dice,
     options: () => ({ ...options }),

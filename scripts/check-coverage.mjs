@@ -22,6 +22,7 @@ const MESSAGES = {
   roll: "kraken_roll",
   op: "kraken_record_update",
   "build-character": "kraken_build_character",
+  "take-character": "kraken_characters",
   "level-up": "kraken_level_up",
   "siege-check": "kraken_siege_check",
   ct: "kraken_combat",

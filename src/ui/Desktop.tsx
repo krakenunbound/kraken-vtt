@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useRef, useSyncExternalStore, type ReactNode } from "react";
 import { Picture } from "../characters/ArtPicker";
 import { CharacterPanel } from "../characters/CharacterPanel";
+import { CharacterSelect } from "../characters/CharacterSelect";
 import { CombatTracker } from "../combat/CombatTracker";
 import { PartySheet } from "../party/PartySheet";
 import type { Session } from "../session/useSession";
@@ -11,7 +12,7 @@ import { Mark } from "./Emblem";
 import { DecalPicker, SettingsWindow, TableDecal } from "./Settings";
 import { DiceWindow } from "../dice/DiceWindow";
 import { SoundWindow } from "../sound/SoundWindow";
-import { QuickSlots } from "./QuickSlots";
+import { QuickSlots, slotDrag } from "./QuickSlots";
 import { KritsWindow } from "../combat/KritsWindow";
 import { LibraryWindow } from "../books/Library";
 import { NotesWindow, NoteWindow } from "../notes/Notes";
@@ -23,7 +24,8 @@ import { AssistantWindow } from "./AssistantWindow";
 // The 3D dice (three.js and cannon) load when the table first shows them.
 const DiceLayer = lazy(() => import("../dice/DiceLayer"));
 
-type Launcher = { kind: WindowKind; label: string; icon: string; title: string };
+// launch: the button's data-launch when it is not the kind (the player's Characters button opening Character Selection).
+type Launcher = { kind: WindowKind; label: string; icon: string; title: string; launch?: string };
 
 // Everyone at the table, and how players connect (the GM's).
 function PlayersWindow({ session }: { session: Session }) {
@@ -100,7 +102,9 @@ export function Desktop({
   const characters = Object.values(session.records)
     .filter((record) => record.type === "character")
     .sort((a, b) => a.name.localeCompare(b.name));
-  const portraits = gm ? characters.filter((record) => session.party?.members.some((member) => member.id === record.id)) : characters;
+  // FG's character list along the top: every character at the table, for both sides.
+  const me = session.players.find((seat) => seat.id === session.selfId)?.name ?? "";
+  const portraits = session.roster;
   const launchers: Launcher[] = gm
     ? [
         { kind: "characters", label: "Characters", icon: "character", title: "Characters" },
@@ -115,7 +119,10 @@ export function Desktop({
         { kind: "settings", label: "Settings", icon: "settings", title: "Settings" },
       ]
     : [
-        { kind: "characters", label: characters.length === 1 ? "Character" : "Characters", icon: "character", title: characters.length === 1 ? characters[0].name : "My characters" },
+        // With no character yet, FG's Characters button opens Character Selection.
+        characters.length === 0
+          ? { kind: "charselect", label: "Characters", icon: "character", title: "Character Selection", launch: "characters" }
+          : { kind: "characters", label: characters.length === 1 ? "Character" : "Characters", icon: "character", title: characters.length === 1 ? characters[0].name : "My characters" },
         { kind: "party", label: "Party", icon: "party", title: "Party Sheet" },
         { kind: "combat", label: "Combat", icon: "combat", title: "Combat Tracker" },
         { kind: "books", label: "Books", icon: "book", title: "Books" },
@@ -124,6 +131,17 @@ export function Desktop({
         { kind: "settings", label: "Settings", icon: "settings", title: "Settings" },
       ];
   const dice = useSyncExternalStore(diceStore.subscribe, diceStore.settings);
+  // A sheet whose character this seat may no longer see (the GM took it back) closes.
+  useEffect(() => {
+    for (const item of windows.windows) if (item.kind === "sheet" && item.payload && !session.records[item.payload]) windows.close(item.key);
+  }, [session.records]);
+  // A player who holds no character is shown Character Selection on joining, as in FG.
+  const offered = useRef(false);
+  useEffect(() => {
+    if (gm || offered.current || !session.selfId) return;
+    offered.current = true;
+    if (characters.length === 0) windows.open("charselect", "Character Selection");
+  }, [gm, session.selfId, characters.length]);
   // The GM shows the players a picture: it opens on their screens, as FG's.
   useEffect(() => {
     if (session.imageShown && !gm) windows.open("images", "Pictures");
@@ -138,7 +156,7 @@ export function Desktop({
         if (command.kind !== "windows") return null;
         const { windows: manager, launchers: kinds, characters: sheets } = live.current;
         const list = () => manager.windows.map((item) => ({ key: item.key, kind: item.kind, title: item.title, poppedOut: item.popped }));
-        if (command.action === "list") return { open: list(), kinds: [...kinds.map((item) => item.kind), "sheet", "book", "images", "picture", "note", "decals", "wallpapers", "gmicons", "krits", "dice"] };
+        if (command.action === "list") return { open: list(), kinds: [...kinds.map((item) => item.kind), "sheet", "book", "images", "picture", "note", "decals", "wallpapers", "gmicons", "krits", "dice", "charselect"] };
         let key: string = command.window ?? "";
         if (command.window === "note") {
           const id = String(command.record ?? "");
@@ -172,6 +190,8 @@ export function Desktop({
                   ? { kind: "dice" as const, title: "Dice" }
                   : command.window === "gmicons"
                     ? { kind: "gmicons" as const, title: "GM Icon" }
+                  : command.window === "charselect"
+                    ? { kind: "charselect" as const, title: "Character Selection" }
                   : command.window === "krits"
                     ? { kind: "krits" as const, title: "Critical Hits & Fumbles" }
                   : kinds.find((item) => item.kind === command.window);
@@ -196,20 +216,24 @@ export function Desktop({
           <Mark /> Kraken <span className="brand-version" title="Alpha test version">{__KRAKEN_VERSION__}</span>
         </div>
         <div className={portraits.length > 3 ? "portrait-strip compact" : "portrait-strip"} aria-label={gm ? "The party" : "Your characters"}>
-          {portraits.map((record) => {
-            const active = session.combat.entries.some((entry) => entry.recordId === record.id && entry.id === session.combat.active);
+          {portraits.map((entry) => {
+            const active = session.combat.entries.some((item) => item.recordId === entry.id && item.id === session.combat.active);
+            // The GM opens any sheet; a player their own. Whose it is shows beneath, as FG's.
+            const opens = gm || (Boolean(me) && entry.owner === me);
+            const classes = ["portrait-chip", active ? "active" : "", entry.owner && !entry.online ? "away" : "", opens ? "" : "theirs"].filter(Boolean).join(" ");
             return (
               <button
-                key={record.id}
+                key={entry.id}
                 type="button"
-                className={active ? "portrait-chip active" : "portrait-chip"}
-                title={`${record.name}: open the sheet`}
-                onClick={() => windows.open("sheet", record.name, record.id)}
+                className={classes}
+                data-portrait={entry.id}
+                title={opens ? `${entry.name}: open the sheet` : entry.owner ? `${entry.name} (${entry.owner})` : `${entry.name}: no one holds it yet; take it in Character Selection`}
+                onClick={() => (opens ? windows.open("sheet", entry.name, entry.id) : !entry.owner ? windows.open("charselect", "Character Selection") : undefined)}
+                {...(opens ? slotDrag({ kind: "sheet", record: entry.id, label: entry.name }) : {})}
               >
-                <span className="chip-face">
-                  {typeof record.data.portrait === "string" && record.data.portrait ? <Picture session={session} id={record.data.portrait} alt="" /> : record.name.slice(0, 1)}
-                </span>
-                <span className="chip-name">{record.name}</span>
+                <span className="chip-face">{entry.portrait ? <Picture session={session} id={entry.portrait} alt="" /> : entry.name.slice(0, 1)}</span>
+                <span className="chip-name">{entry.name}</span>
+                <span className="chip-holder">{entry.owner || "Server"}</span>
               </button>
             );
           })}
@@ -240,9 +264,9 @@ export function Desktop({
               key={item.kind}
               type="button"
               className={windows.isOpen(item.kind) ? "launcher open" : "launcher"}
-              data-launch={item.kind}
+              data-launch={item.launch ?? item.kind}
               title={item.title}
-              onClick={() => windows.toggle(item.kind, item.title)}
+              onClick={() => (item.kind === "charselect" ? windows.open(item.kind, item.title) : windows.toggle(item.kind, item.title))}
             >
               <Icon name={item.icon} size={22} />
               <span>{item.label}</span>
@@ -256,7 +280,8 @@ export function Desktop({
         <div className="window-layer">
           {windows.windows.map((item) => (
             <FloatingWindow key={item.key} item={item}>
-              {item.kind === "characters" ? <CharacterPanel session={session} dock={!gm} /> : null}
+              {item.kind === "characters" ? <CharacterPanel session={session} dock={!gm} create={item.payload === "new"} /> : null}
+              {item.kind === "charselect" ? <CharacterSelect session={session} onSheet={(id, name) => windows.open("sheet", name, id)} onWizard={() => windows.open("characters", "Character Wizard", "new")} onClose={() => windows.close(item.key)} /> : null}
               {item.kind === "sheet" ? <CharacterPanel session={session} dock selected={item.payload ?? null} /> : null}
               {item.kind === "party" ? <PartySheet session={session} /> : null}
               {item.kind === "combat" ? <CombatTracker session={session} /> : null}

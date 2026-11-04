@@ -11,7 +11,7 @@ import { Sheet5e, Wizard5e } from "./Sheet5e";
 // Characters in and out: Import reads a file from another table (Kraken,
 // Fantasy Grounds XML, Foundry or Roll20 JSON; dropping one on the list does
 // the same), Export saves the shown character as Kraken's file or FG's XML.
-function useCharacterFiles(session: Session, onImported: (id: string) => void) {
+export function useCharacterFiles(session: Session, onImported: (id: string) => void) {
   const input = useRef<HTMLInputElement>(null);
   const [status, setStatus] = useState("");
   const importFile = async (file: File) => {
@@ -105,12 +105,13 @@ function FileButtons({ files, current }: { files: ReturnType<typeof useCharacter
 }
 
 // dock: the player's side panel beside the map, with a picker in place of the list.
-export function CharacterPanel({ session, dock = false, selected: chosen }: { session: Session; dock?: boolean; selected?: string | null }) {
+// create: open on the creation wizard (Character Selection's Character Wizard).
+export function CharacterPanel({ session, dock = false, selected: chosen, create = false }: { session: Session; dock?: boolean; selected?: string | null; create?: boolean }) {
   const characters = Object.values(session.records)
     .filter((record) => record.type === "character")
     .sort((a, b) => a.name.localeCompare(b.name));
   const [selected, setSelected] = useState<string | null>(null);
-  const [creating, setCreating] = useState(false);
+  const [creating, setCreating] = useState(create);
   useEffect(() => {
     if (chosen) setSelected(chosen);
   }, [chosen]);
