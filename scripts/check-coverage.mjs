@@ -32,6 +32,7 @@ const MESSAGES = {
   "party-order": "kraken_party_order",
   "character-edit": "kraken_character_edit",
   "character-import": "kraken_character_import",
+  "class-change": "kraken_class_change",
   "token-place": "kraken_token_place",
   "token-move": "kraken_token_move",
   "token-update": "kraken_token_update",
