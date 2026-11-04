@@ -153,7 +153,7 @@ export function nextXP(character) {
   if (principal && support) {
     const n = lvl(principal) + 1;
     const option = COMBO.SUPPORT[support.ccsupport];
-    result = { next: packageXP(principal, n) + (Number(option?.adv?.[String(n)]?.xp) || 0), source: `${principal.name} ${n} (with ${option?.name ?? support.name})` };
+    result = { next: packageXP(principal, n) + (Number(option?.adv?.[String(n)]?.xp) || 0), source: `${principal.name} ${n} (with ${support.name ?? option?.name})` };
   } else if (multis.length >= 2) {
     result = { next: multis.reduce((sum, pkg) => sum + packageXP(pkg, lvl(pkg) + 1), 0), source: `${multis.map((pkg) => pkg.name).join("/")} ${lvl(multis[0]) + 1}` };
   } else if (reclass) {
