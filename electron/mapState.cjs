@@ -102,6 +102,14 @@ function cleanLight(raw) {
 // A wall the GM drew or imported: Foundry's senses (0 none, 10 limited, 20
 // normal, 30 proximity, 40 distance), with FG's kinds.
 const SENSES = [0, 10, 20, 30, 40];
+// The door a wall is part of (FG's door is one shape, its sides Kraken's wall
+// lines: "fg-<door>-<n>", or an explicit group): one state, opened as one.
+function doorGroup(wall) {
+  if (typeof wall.group === "string" && wall.group) return wall.group;
+  const match = /^(fg-.+)-\d+$/.exec(String(wall.id ?? ""));
+  return match ? match[1] : wall.id;
+}
+
 function cleanWall(raw) {
   if (!raw || typeof raw !== "object") return null;
   const coords = [raw.x1, raw.y1, raw.x2, raw.y2].map((value) => num(value, NaN));
@@ -648,7 +656,7 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
     // Doors, and windows and toggle walls players may open (FG's toggleable).
     const doorList = wallsHere()
       .filter((wall) => wall.door > 0 || wall.toggle === "players" || wall.toggle === "gm")
-      .map((wall) => ({ id: wall.id, x1: wall.x1, y1: wall.y1, x2: wall.x2, y2: wall.y2, secret: wall.door === 2 || wall.toggle === "gm", kind: wall.door > 0 ? "door" : wall.kind, state: wall.id in doors ? doors[wall.id] : wall.ds }));
+      .map((wall) => ({ id: wall.id, group: doorGroup(wall), x1: wall.x1, y1: wall.y1, x2: wall.x2, y2: wall.y2, secret: wall.door === 2 || wall.toggle === "gm", kind: wall.door > 0 ? "door" : wall.kind, state: wall.id in doors ? doors[wall.id] : wall.ds }));
     const mask = maskHere();
     const groups = groupsHere();
     const shared = { sceneId: scene.id, sight: sightOn(), locked, darkness: dark, settings: { grid: settings.grid, weather: settings.weather, darkness: settings.darkness }, drawings: drawingsHere(), mask: mask.on || mask.shapes.length ? mask : null, groups, fx: fxHere() };
@@ -688,7 +696,10 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       !needsLight || geometry.lit(x, y, shining) || seeing.some((item) => Math.hypot(x - item.x, y - item.y) <= item.radiusPx && (!item.polygon || geometry.pointInPolygon(x, y, item.polygon)));
     // Nothing under the GM's mask reaches a player (FG: tokens under the mask are hidden), but their own tokens.
     const tokens = shown.filter((token) => token.owner === seat.name || ((!vision || geometry.seen(token.x, token.y, vision, slack)) && visibleInDark(token.x, token.y) && !masked(token.x, token.y)));
-    const playerDoors = doorList.filter((door) => !door.secret && !masked((door.x1 + door.x2) / 2, (door.y1 + door.y2) / 2) && (!vision || geometry.seen((door.x1 + door.x2) / 2, (door.y1 + door.y2) / 2, vision, slack)));
+    // A door a player sees any side of is shown whole (all its sides).
+    const seenSide = (door) => !door.secret && !masked((door.x1 + door.x2) / 2, (door.y1 + door.y2) / 2) && (!vision || geometry.seen((door.x1 + door.x2) / 2, (door.y1 + door.y2) / 2, vision, slack));
+    const seenGroups = new Set(doorList.filter(seenSide).map((door) => door.group));
+    const playerDoors = doorList.filter((door) => !door.secret && seenGroups.has(door.group));
     return {
       tokens: tokens.map((token) => publicToken(token, seat, assetToken)),
       ...shared,
@@ -891,7 +902,9 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
         const view = viewFor(seat, "");
         if (!view.doors.some((door) => door.id === wallId)) throw new Error("You cannot see that door.");
       }
-      doors[wallId] = next;
+      // Every side of the same door opens and closes with it.
+      const group = doorGroup(wall);
+      for (const side of wallsHere()) if (side.id === wallId || ((side.door > 0 || (side.toggle && side.toggle !== "none")) && doorGroup(side) === group)) doors[side.id] = next;
       changed();
       return next;
     },

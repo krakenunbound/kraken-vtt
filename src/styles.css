@@ -997,3 +997,12 @@ button.link { background: none; border: none; color: var(--brass); padding: 0; t
 .compact .party-who { flex-basis: calc(100% - 44px); }
 .compact .party-stat { min-width: 0; flex: 1; flex-direction: row; gap: 4px; justify-content: center; }
 .dock-party-sheet { overflow-x: hidden; }
+
+/* FG's doors in play: invisible until hovered; then the whole door shape
+   lights translucent blue and its door shows (closed or open); one click. */
+.overlay.doors .door-shape { fill: transparent; stroke: transparent; pointer-events: all; transition: fill 0.1s; }
+.overlay.doors .door-shape.line { fill: none; pointer-events: stroke; stroke-linecap: round; }
+.overlay.doors .player-door:hover .door-shape { fill: rgba(70, 90, 255, 0.5); }
+.overlay.doors .player-door:hover .door-shape.line { fill: none; stroke: rgba(70, 90, 255, 0.5); }
+.overlay.doors .player-door.locked:hover .door-shape { fill: rgba(224, 90, 80, 0.45); }
+.overlay.doors .player-door.secret:hover .door-shape { fill: rgba(166, 18, 212, 0.4); }

@@ -3,7 +3,7 @@ import { lazy, Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState }
 import { backgroundRect, colorWithAlpha, gridStops, sceneFrame, type BackgroundFit, type SceneFrame } from "../foundry/geometry";
 import { type SceneLight, type SceneMarker, type SceneRegion, type SceneWall } from "../foundry/sceneObjects";
 import { gridDistance, gridKind, gridOrigin, hexCorners, hexOf, LIGHT_PRESETS, snapCenter, withGrid } from "../../shared/map/geometry.mjs";
-import type { DecalItem, EditWall, MapTile, MapToken, Ping, PictureKind, SceneLightRecord, TableMap, TableRecord, WallKind } from "../session/useSession";
+import type { DecalItem, EditWall, MapDoor, MapTile, MapToken, Ping, PictureKind, SceneLightRecord, TableMap, TableRecord, WallKind } from "../session/useSession";
 import { useBookWindows } from "../books/Books";
 import { MapEditor, kindColor, placePicture, type EditTab, type EditTool, type LabelStyle, type PaintStyle } from "./MapEditor";
 import { Lighting } from "./Lighting";
@@ -157,6 +157,36 @@ type Drag = { pointerId: number; id: string; start: Point; at: Point; moved: boo
 type Measure = { pointerId: number; start: Point; at: Point };
 type Menu = { id: string; left: number; top: number };
 
+// FG's doors: a door is one shape (its sides arrive as wall lines named
+// fg-<door>-<n>, or share a group), drawn and clicked as one. A shape that
+// closes on itself is a polygon; a single door line stays a line.
+type DoorShape = { id: string; group: string; points: number[]; closed: boolean; cx: number; cy: number; state: number; secret: boolean };
+function doorShapes(doors: MapDoor[]): DoorShape[] {
+  const groups = new Map<string, MapDoor[]>();
+  for (const door of doors) {
+    const key = door.group ?? door.id;
+    groups.set(key, [...(groups.get(key) ?? []), door]);
+  }
+  return [...groups].map(([group, sides]) => {
+    const order = (door: MapDoor) => Number(/-(\d+)$/.exec(door.id)?.[1] ?? 0);
+    const list = [...sides].sort((a, b) => order(a) - order(b));
+    const points = [list[0].x1, list[0].y1, ...list.flatMap((side) => [side.x2, side.y2])];
+    const closed = list.length >= 3 && Math.hypot(points[0] - points[points.length - 2], points[1] - points[points.length - 1]) < 1;
+    const xs = points.filter((_, index) => index % 2 === 0);
+    const ys = points.filter((_, index) => index % 2 === 1);
+    return {
+      id: list[0].id,
+      group,
+      points: closed ? points.slice(0, -2) : points,
+      closed,
+      cx: (Math.min(...xs) + Math.max(...xs)) / 2,
+      cy: (Math.min(...ys) + Math.max(...ys)) / 2,
+      state: list[0].state,
+      secret: Boolean(list[0].secret),
+    };
+  });
+}
+
 export function MapView({
   scene: sceneIn,
   gm = true,
@@ -239,7 +269,11 @@ export function MapView({
   const [panning, setPanning] = useState(false);
   const [natural, setNatural] = useState<{ width: number; height: number } | null>(null);
   const [imageFailed, setImageFailed] = useState(false);
-  const [showWalls, setShowWalls] = useState(true);
+  // FG's play mode by default: the lines (walls, doors, windows) show only
+  // while they are being edited (the map editor's Line of Sight tab), or
+  // when the GM ticks Walls and doors in the legend.
+  const [showWalls, setShowWalls] = useState(false);
+  const linesShown = gm && (showWalls || (editorOpen && editTab === "walls"));
   const [showLights, setShowLights] = useState(true);
   const [showCreatures, setShowCreatures] = useState(true);
   const [trayOpen, setTrayOpen] = useState(true);
@@ -1074,7 +1108,7 @@ export function MapView({
           markers={gm ? scene.markers : []}
           regions={gm ? scene.regions : []}
           scale={camera.scale}
-          showWalls={showWalls && gm}
+          showWalls={linesShown}
           showLights={showLights}
           showCreatures={false}
           doorStates={doorStates}
@@ -1159,7 +1193,8 @@ export function MapView({
             ) : null}
           </svg>
         ) : null}
-        {gm && showLights
+        {/* Light handles (FG's): only while the lights are being edited (the editor's Lights tab). */}
+        {gm && editorOpen && editTab === "lights"
           ? map.sceneLights.map((light) => {
               const per = size / (scene.grid.distance > 0 ? scene.grid.distance : 5);
               return (
@@ -1168,7 +1203,7 @@ export function MapView({
                   className={light.on ? "light-handle" : "light-handle off"}
                   data-light={light.id}
                   title={`Light: bright ${light.bright} ${units}, dim ${light.dim} ${units}${light.hidden ? " (hidden from players)" : ""}${light.on ? "" : " (off)"}. Drag to move, right-click to change.`}
-                  style={{ left: light.x, top: light.y, width: 22 / camera.scale, height: 22 / camera.scale, ["--reach" as string]: `${light.dim * per * 2}px` }}
+                  style={{ left: light.x, top: light.y, width: 12 / camera.scale, height: 12 / camera.scale, ["--reach" as string]: `${light.dim * per * 2}px` }}
                   onPointerDown={(event) => {
                     if (event.button !== 0) return;
                     event.stopPropagation();
@@ -1189,31 +1224,39 @@ export function MapView({
               );
             })
           : null}
-        {!gm && (mine.length > 0 || !map.sight) ? (
+        {/* Doors in play (FG): no lines; a door is one shape. Hovered, the whole
+            shape lights up and its door shows, closed or open; a click opens or
+            closes all of it. Players see the doors they can see; the GM every
+            one, when the walls are not being edited (Line of Sight). */}
+        {(gm ? !linesShown : mine.length > 0 || !map.sight) ? (
           <svg className="overlay doors" width={frame.worldWidth} height={frame.worldHeight} viewBox={`0 0 ${frame.worldWidth} ${frame.worldHeight}`}>
-            {map.doors.map((door) => {
-              const cx = (door.x1 + door.x2) / 2;
-              const cy = (door.y1 + door.y2) / 2;
+            {doorShapes(map.doors).map((door) => {
               const open = door.state === 1;
               const locked = door.state === 2;
+              const icon = Math.max(size * 0.012, 0.8 / camera.scale);
               return (
                 <g
                   key={door.id}
-                  className="player-door"
+                  className={["player-door", door.secret ? "secret" : "", locked ? "locked" : ""].filter(Boolean).join(" ")}
                   data-door={door.id}
+                  data-door-group={door.group}
                   data-state={door.state}
                   onPointerDown={(event) => event.stopPropagation()}
                   onClick={(event) => {
                     event.stopPropagation();
-                    if (!locked) actions.setDoor(door.id);
+                    if (!locked || gm) actions.setDoor(door.id);
                   }}
                 >
-                  <title>{locked ? "Locked door" : open ? "Open door. Click to close." : "Closed door. Click to open."}</title>
-                  <line className="door-hit" x1={door.x1} y1={door.y1} x2={door.x2} y2={door.y2} strokeWidth={Math.max(size * 0.35, 14 / camera.scale)} />
-                  <g className="door-icon" transform={`translate(${cx} ${cy}) scale(${Math.max(size * 0.012, 0.8 / camera.scale)})`}>
-                    <rect x={-11} y={-14} width={22} height={28} rx={3} fill="rgba(18,20,24,0.85)" />
-                    <path d={open ? "M-6 -9 L4 -11 L4 11 L-6 9 Z" : "M-6 -9 L6 -9 L6 10 L-6 10 Z"} fill={locked ? "#e07a6a" : "#d2a15a"} />
-                    <circle cx={open ? 1.5 : 3} cy={1} r={1.4} fill="#121418" />
+                  <title>{locked ? (gm ? "Locked door. Click to open (right-click the wall to unlock in the editor)." : "Locked door") : open ? "Open door. Click to close." : "Closed door. Click to open."}</title>
+                  {door.closed ? (
+                    <polygon className="door-shape" points={door.points.join(" ")} />
+                  ) : (
+                    <polyline className="door-shape line" points={door.points.join(" ")} strokeWidth={Math.max(size * 0.35, 14 / camera.scale)} />
+                  )}
+                  <g className="door-icon" transform={`translate(${door.cx} ${door.cy}) scale(${icon})`}>
+                    <rect x={-9} y={-15} width={18} height={30} rx={1.5} fill={locked ? "#e07a6a" : "#f2f2f0"} stroke="#1b1d22" strokeWidth={1.6} />
+                    {open ? <path d="M-9 -15 L3 -11 L3 13 L-9 15 Z" fill="#cfd2d8" stroke="#1b1d22" strokeWidth={1.4} /> : null}
+                    <circle cx={open ? 0 : 5} cy={1} r={1.4} fill="#1b1d22" />
                   </g>
                 </g>
               );
