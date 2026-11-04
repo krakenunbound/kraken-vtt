@@ -161,6 +161,20 @@ const TOOLS = [
     },
   },
   {
+    name: "kraken_accounts",
+    description:
+      "Players' accounts (kept by the GM's app for all its campaigns, as Foundry's users): a player's name with an account needs its password to sit at the table, and their characters belong to it. list: every account (name, when made, last seen, signed-in browsers, seated now). create: make one for a player ahead of time (name, password, at least 4 characters). password: set a new password for a player who forgot theirs (every browser of theirs is signed out). remove: delete an account (its characters keep their owner's name). Passwords are never shown.",
+    inputSchema: object(
+      {
+        action: { type: "string", enum: ["list", "create", "password", "remove"] },
+        name: string("The player's name"),
+        password: string("create and password: the password to set"),
+      },
+      ["action"],
+    ),
+    run: (args, ctx) => out(needTable(ctx).accounts(args)),
+  },
+  {
     name: "kraken_record_update",
     description: "Change a record. data deep-merges into the existing data (a null value deletes a key) unless replace is true.",
     inputSchema: object(

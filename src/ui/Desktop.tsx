@@ -1,11 +1,11 @@
-import { lazy, Suspense, useEffect, useRef, useSyncExternalStore, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { Picture } from "../characters/ArtPicker";
 import { CharacterPanel } from "../characters/CharacterPanel";
 import { CharacterSelect } from "../characters/CharacterSelect";
 import { RecordsWindow, RecordWindow } from "../books/Records";
 import { CombatTracker } from "../combat/CombatTracker";
 import { PartySheet } from "../party/PartySheet";
-import type { Session } from "../session/useSession";
+import { savedSignIn, type Session } from "../session/useSession";
 import { diceStore } from "../dice/diceStore";
 import { agentCommands } from "./agentCommands";
 import { ChatDock } from "./ChatDock";
@@ -51,7 +51,7 @@ function PlayersWindow({ session }: { session: Session }) {
               Internet <span className="secret">http://{info.externalV4}:{info.port}</span>
             </p>
           ) : null}
-          <p>{info.publicGame ? "Public game: players leave the password blank." : <>Password <span className="secret">{info.password}</span></>}</p>
+          <p>{info.publicGame ? "Public game: players leave the table password blank." : <>Table password <span className="secret">{info.password}</span></>}</p>
         </div>
       ) : null}
       <h3>At the table</h3>
@@ -67,7 +67,99 @@ function PlayersWindow({ session }: { session: Session }) {
           );
         })}
       </ul>
+      {session.role === "dm" ? <AccountsPanel session={session} /> : null}
     </div>
+  );
+}
+
+// Players' accounts (the GM's, kept by this app for all its campaigns): a
+// player's name with an account needs its password to sit down, so no one
+// else can take their characters. Make one ahead for a player, set a new
+// password for one who forgot theirs (their browsers are signed out), remove one.
+function AccountsPanel({ session }: { session: Session }) {
+  const [name, setName] = useState("");
+  const [password, setPassword] = useState("");
+  const [editing, setEditing] = useState<string | null>(null);
+  const [makePassword, setMakePassword] = useState("");
+  const seatedKey = session.players.map((seat) => seat.name).join("|");
+  useEffect(() => session.accountAction({ action: "list" }), [seatedKey]);
+  const when = (at: number | null) => (at ? new Date(at).toLocaleDateString() : "never");
+  return (
+    <section className="accounts-panel" data-panel="accounts">
+      <h3>Accounts</h3>
+      <p className="hint">A player chooses a password the first time they sit down; after that their name needs it, and their browser remembers them.</p>
+      {session.accounts.note ? (
+        <p className="hint" role="status">
+          Done: {session.accounts.note}.
+        </p>
+      ) : null}
+      {session.accounts.error ? (
+        <p className="error-line" role="alert">
+          {session.accounts.error}
+        </p>
+      ) : null}
+      <ul className="accounts-list">
+        {session.accounts.list.map((account) => (
+          <li key={account.name} data-account={account.name}>
+            <span className="seat-dot" style={{ background: account.seated ? "#7ccf8a" : "#555" }} title={account.seated ? "At the table" : "Away"} />
+            <span className="account-name">{account.name}</span>
+            <small className="hint">
+              last seen {when(account.seenAt)} · {account.devices} browser{account.devices === 1 ? "" : "s"}
+            </small>
+            {editing === account.name ? (
+              <form
+                className="account-reset"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  session.accountAction({ action: "password", name: account.name, password });
+                  setPassword("");
+                  setEditing(null);
+                }}
+              >
+                <input type="password" aria-label={`New password for ${account.name}`} value={password} minLength={4} required onChange={(event) => setPassword(event.target.value)} placeholder="New password" />
+                <button type="submit">Set</button>
+                <button type="button" className="ghost" onClick={() => setEditing(null)}>
+                  Cancel
+                </button>
+              </form>
+            ) : (
+              <span className="account-actions">
+                <button type="button" className="ghost" data-action="account-password" onClick={() => setEditing(account.name)} title="Set a new password (a player who forgot theirs); their browsers are signed out">
+                  New password
+                </button>
+                <button
+                  type="button"
+                  className="ghost"
+                  data-action="account-remove"
+                  title="Remove the account (their characters keep their name; anyone could sit under it again)"
+                  onClick={() => {
+                    if (window.confirm(`Remove ${account.name}'s account? Anyone could then sit down under that name.`)) session.accountAction({ action: "remove", name: account.name });
+                  }}
+                >
+                  Remove
+                </button>
+              </span>
+            )}
+          </li>
+        ))}
+        {session.accounts.list.length === 0 ? <li className="hint">No accounts yet.</li> : null}
+      </ul>
+      <form
+        className="account-create"
+        onSubmit={(event) => {
+          event.preventDefault();
+          session.accountAction({ action: "create", name, password: makePassword });
+          setName("");
+          setMakePassword("");
+        }}
+      >
+        <input aria-label="New account name" placeholder="Player's name" value={name} maxLength={24} required onChange={(event) => setName(event.target.value)} />
+        <input aria-label="New account password" type="password" placeholder="Password" value={makePassword} minLength={4} required onChange={(event) => setMakePassword(event.target.value)} />
+        <button type="submit" data-action="account-create">
+          Make account
+        </button>
+      </form>
+    </section>
   );
 }
 
@@ -252,6 +344,11 @@ export function Desktop({
         <div className="session-status">
           {myTurn ? <span className="turn-flag">Your turn</span> : null}
           <span className="where">{gm ? `Hosting · ${session.players.length - 1} player${session.players.length === 2 ? "" : "s"}` : `At ${session.remoteLabel}`}</span>
+          {!gm && savedSignIn(session.remoteLabel) ? (
+            <button type="button" className="ghost" data-action="sign-out" onClick={() => session.signOut()} title="Sign this browser out of your account at this table, and leave">
+              Sign out
+            </button>
+          ) : null}
           <button type="button" className="ghost" onClick={() => session.leave()} title="Leave the table">
             <Icon name="leave" size={16} /> Leave
           </button>

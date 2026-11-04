@@ -1267,3 +1267,12 @@ textarea.cc-field.tall { min-height: 220px; }
 .formatted-text td, .formatted-text th { border: 1px solid var(--panel-edge); padding: 2px 6px; }
 .formatted-text blockquote { margin: 6px 0; padding: 6px 10px; border-left: 3px solid var(--brass-dim); background: rgba(255, 255, 255, 0.03); }
 .record-link { color: var(--brass); }
+
+/* Players' accounts (the GM's Players window) and signing in on the join form. */
+.accounts-panel { margin-top: 14px; }
+.accounts-list { list-style: none; margin: 6px 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.accounts-list li { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.accounts-list .account-name { font-weight: 600; }
+.accounts-list .account-actions, .accounts-list .account-reset { margin-left: auto; display: inline-flex; gap: 4px; }
+.account-create { display: flex; gap: 6px; flex-wrap: wrap; }
+.account-create input { flex: 1; min-width: 7rem; }

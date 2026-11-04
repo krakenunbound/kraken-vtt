@@ -94,6 +94,7 @@ try {
   seat.on("websocket", (ws) => ws.on("framereceived", (frame) => frames.push(typeof frame.payload === "string" ? frame.payload : Buffer.from(frame.payload).toString("utf8"))));
   await seat.goto(`http://127.0.0.1:${port}/`);
   await seat.fill('input[name="name"]', "A test player");
+  await seat.fill('input[name="account-password"]', "test-pass");
   await seat.fill('input[name="password"]', "pw");
   await seat.click('button[type="submit"]');
   await seat.waitForSelector(".map-toolbar");

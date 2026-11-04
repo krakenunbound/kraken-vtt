@@ -289,7 +289,7 @@ function serveWeb(url, res, root) {
 // decals, wallpapers: the background decals and desktop tiles the GM can
 // choose from (decals.cjs).
 // sounds: the GM's sounds (sounds.cjs): one-shots, effects, ambience and music.
-function createTableServer({ saved = {}, onChange = () => undefined, webRoot = WEB_ROOT, art = null, decals = null, wallpapers = null, gmIcons = null, tiles = null, sounds = null, books = null, ruleset = "" } = {}) {
+function createTableServer({ saved = {}, onChange = () => undefined, webRoot = WEB_ROOT, art = null, decals = null, wallpapers = null, gmIcons = null, tiles = null, sounds = null, books = null, ruleset = "", accounts = null } = {}) {
   let password = "";
   let hostToken = "";
   let image = null;
@@ -925,6 +925,20 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     return [...clients.values()].map((client) => ({ id: client.id, name: client.name, role: client.role }));
   }
 
+  // The GM's account controls, for the Players window and the agent.
+  function accountAction(input) {
+    if (!accounts) throw new Error("This table keeps no accounts.");
+    const action = String(input?.action ?? "list");
+    const name = text(input?.name, "").slice(0, 24);
+    let done = null;
+    if (action === "create") done = accounts.create(name, String(input?.password ?? ""), { signIn: false }).name;
+    else if (action === "password") done = accounts.setPassword(name, String(input?.password ?? "")).name;
+    else if (action === "remove") done = accounts.remove(name).name;
+    else if (action !== "list") throw new Error("action is list, create, password or remove.");
+    const seated = new Set([...clients.values()].filter((item) => item.role === "player").map((item) => item.name.toLowerCase()));
+    return { ...(done ? { done: `${action} ${done}` } : {}), accounts: accounts.list().map((row) => ({ ...row, seated: seated.has(row.name.toLowerCase()) })) };
+  }
+
   // FG's character list: every character at the table, for the portrait bar
   // and Character Selection. Everyone is told only the face of each: name,
   // portrait, species, class and level, who holds it, and whether they are
@@ -1051,6 +1065,46 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         const dmSeated = [...clients.values()].some((seat) => seat.role === "dm");
         client.role = decideRole(remote, hostToken, msg.hostToken, dmSeated);
         client.name = text(msg.name, client.role === "dm" ? "DM" : "Player").slice(0, 24);
+        // A player's account (accounts.cjs): a name with one needs its password,
+        // or the token this browser kept; a new name with a password makes one.
+        // A name already at the table cannot sit twice.
+        if (client.role === "player") {
+          const refuse = (reason, extra = {}) => {
+            send(ws, { type: "no", reason, ...extra });
+            ws.close();
+          };
+          if (!accounts?.has(client.name) && [...clients.values()].some((seat) => seat.role === "player" && sameName(seat.name, client.name))) return refuse(`Someone named ${client.name} is already at the table.`);
+          const account = msg.account && typeof msg.account === "object" ? msg.account : {};
+          const accountPassword = typeof account.password === "string" ? account.password : "";
+          const accountToken = typeof account.token === "string" ? account.token.slice(0, 100) : "";
+          if (accounts?.has(client.name)) {
+            const signed = accounts.signIn(client.name, { password: accountPassword, token: accountToken });
+            if (!signed)
+              return refuse(
+                accountPassword
+                  ? `Wrong password for ${accounts.nameOf(client.name)}. If you forgot it, the GM can set a new one (Players window).`
+                  : `${accounts.nameOf(client.name)} has an account: enter its password.`,
+                { account: "password" },
+              );
+            client.name = signed.name;
+            client.accountToken = signed.token;
+            // Signed in again (a reload, another device): this seat takes the place of the old one.
+            for (const [other, seat] of [...clients]) {
+              if (seat.role !== "player" || !sameName(seat.name, client.name)) continue;
+              send(other, { type: "kicked", reason: `${client.name} signed in somewhere else.` });
+              other.close();
+              removeClient(other);
+            }
+          } else if (accounts && accountPassword) {
+            try {
+              const made = accounts.create(client.name, accountPassword);
+              client.name = made.name;
+              client.accountToken = made.token;
+            } catch (error) {
+              return refuse(error.message, { account: "new" });
+            }
+          }
+        }
         client.assetToken = crypto.randomBytes(18).toString("hex");
         client.joined = true;
         clearTimeout(joinTimer);
@@ -1058,7 +1112,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         send(ws, {
           type: "ok",
           ruleset,
-          you: { id: client.id, name: client.name, role: client.role, assetToken: client.assetToken },
+          you: { id: client.id, name: client.name, role: client.role, assetToken: client.assetToken, ...(client.accountToken ? { accountToken: client.accountToken } : {}), account: Boolean(accounts?.has(client.name)) },
           players: playerList(),
           map: map.viewFor(seatOf(client), client.assetToken),
           combat: combat.viewFor(seatOf(client)),
@@ -1108,6 +1162,27 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
           else hideImage(msg.id);
         } catch (error) {
           send(ws, { type: "error", reason: error.message });
+        }
+        return;
+      }
+
+      // A browser signs out of its account: its token is forgotten.
+      if (msg.type === "sign-out") {
+        if (accounts && client.role === "player") accounts.signOut(client.name, typeof msg.token === "string" ? msg.token : "");
+        return;
+      }
+
+      // The GM's account controls (the Players window): list, make one for a
+      // player, set a new password, remove one.
+      if (msg.type === "accounts") {
+        if (client.role !== "dm") {
+          send(ws, { type: "error", reason: "Only the GM manages accounts." });
+          return;
+        }
+        try {
+          send(ws, { type: "accounts", ...accountAction(msg), req: msg.req });
+        } catch (error) {
+          send(ws, { type: "accounts", error: error.message, accounts: accounts?.list() ?? [], req: msg.req });
         }
         return;
       }
@@ -1638,6 +1713,8 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     ruleset: () => ruleset,
     // FG's character list: every character's face, who holds it, who is seated.
     roster: () => rosterView(),
+    // Players' accounts: list, create, password, remove (accountAction).
+    accounts: (input) => accountAction(input),
     records,
     dice,
     options: () => ({ ...options }),

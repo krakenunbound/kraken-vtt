@@ -23,6 +23,8 @@ const MESSAGES = {
   op: "kraken_record_update",
   "build-character": "kraken_build_character",
   "take-character": "kraken_characters",
+  accounts: "kraken_accounts",
+  "sign-out": "kraken_accounts",
   "level-up": "kraken_level_up",
   "siege-check": "kraken_siege_check",
   ct: "kraken_combat",

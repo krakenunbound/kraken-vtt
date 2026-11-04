@@ -93,6 +93,7 @@ async function run(hostWindow, createWindow) {
   await fill(player, 'form[data-form="join"] input[name="address"]', "127.0.0.1");
   await fill(player, 'form[data-form="join"] input[name="port"]', String(PORT));
   await fill(player, 'form[data-form="join"] input[name="password"]', PASSWORD);
+    await fill(player, 'form[data-form="join"] input[name="account-password"]', "test-pass");
   await player.webContents.executeJavaScript('document.querySelector(\'form[data-form="join"]\').requestSubmit()');
   await waitForText(player, "At 127.0.0.1:47321", 10000);
   await waitFor(player, "Boolean(window.__kraken && window.__kraken.snapshot().role === 'player')", 5000, "Player handle missing");

@@ -5,10 +5,12 @@ import "@fontsource/cinzel/latin-500.css";
 import "@fontsource/cinzel/latin-600.css";
 import "@fontsource/cinzel/latin-700.css";
 import { Backdrop } from "./Backdrop";
+import { forgetSignIn, savedSignIn } from "../session/useSession";
 import "./setup.css";
 
 type HostInput = { name: string; port: number; password: string; lan: boolean; cloud: boolean; campaignId: string };
-type JoinInput = { name: string; address: string; port: number; password: string };
+// accountPassword: the player's own password (their account at that table).
+type JoinInput = { name: string; address: string; port: number; password: string; accountPassword?: string };
 
 const EMPTY_NET: KrakenNetwork = { v4: [], v6: [], externalV4: "", externalV6: "" };
 
@@ -152,6 +154,9 @@ export function SetupScreen({
 }) {
   // Opened in a browser from the host's address: this page is a player's way in.
   const inBrowser = !window.kraken && window.location.protocol.startsWith("http");
+  // In a browser at the table's own address: whether this browser is signed in there.
+  const browserTable = inBrowser ? `${window.location.hostname}:${window.location.port || (window.location.protocol === "https:" ? "443" : "80")}` : "";
+  const [signIn, setSignIn] = useState(() => (browserTable ? savedSignIn(browserTable) : null));
   // Home: the two ways in, side by side; then a campaign to run, or a game to join.
   const [mode, setMode] = useState<"home" | "campaigns" | "join">(inBrowser ? "join" : "home");
   const [recent, setRecent] = useState<RecentGame[]>(() => recentGames());
@@ -244,12 +249,18 @@ export function SetupScreen({
   }
 
   // Joining; a game joined is kept for a quick way back.
-  async function join(game: { name: string; address: string; port: number; password: string }) {
+  async function join(game: JoinInput) {
     setLocalError(null);
     try {
-      // Only a game that let us in is kept.
-      if ((await onJoin(game)) === false) return;
-      rememberGame({ ...game, at: Date.now() });
+      // Only a game that let us in is kept, without the player's own password
+      // (the host gave this browser a token for that).
+      if ((await onJoin(game)) === false) {
+        // A sign-in the table no longer takes is gone: the password is asked again.
+        if (browserTable) setSignIn(savedSignIn(browserTable));
+        return;
+      }
+      const { accountPassword: _secret, ...kept } = game;
+      rememberGame({ ...kept, at: Date.now() });
       setRecent(recentGames());
     } catch {
       /* the error shows */
@@ -263,6 +274,7 @@ export function SetupScreen({
       address: String(data.get("address") || ""),
       port: Number(data.get("port")),
       password: String(data.get("password") || ""),
+      accountPassword: String(data.get("account-password") || ""),
     });
   }
   function forget(game: RecentGame) {
@@ -365,15 +377,41 @@ export function SetupScreen({
             <h1>Take your seat</h1>
             {inBrowser ? (
               <p className="join-lede">
-                The table at <span className="secret">{window.location.host}</span> is waiting. Leave the password blank when the game is public.
+                The table at <span className="secret">{window.location.host}</span> is waiting. Leave the table password blank when the game is public.
               </p>
             ) : (
-              <p className="join-lede">Use the address and port from your GM. Leave the password blank when the game is public.</p>
+              <p className="join-lede">Use the address and port from your GM. Leave the table password blank when the game is public.</p>
             )}
-            <label className="field">
-              <span>Your name</span>
-              <input name="name" defaultValue={joinFill?.name ?? (inBrowser ? recent.find((game) => game.address === window.location.hostname)?.name ?? "" : "Player")} placeholder="What does the table call you?" maxLength={24} autoComplete="nickname" required={inBrowser} />
-            </label>
+            {signIn ? (
+              // Signed in here before: the token this browser kept is enough.
+              <p className="join-signed-in" data-signed-in={signIn.name}>
+                <input type="hidden" name="name" value={signIn.name} />
+                Signed in as <b>{signIn.name}</b>.{" "}
+                <button
+                  type="button"
+                  className="link-button"
+                  data-action="join-sign-out"
+                  onClick={() => {
+                    forgetSignIn(browserTable);
+                    setSignIn(null);
+                  }}
+                >
+                  Not you? Sign out
+                </button>
+              </p>
+            ) : (
+              <>
+                <label className="field">
+                  <span>Your name</span>
+                  <input name="name" defaultValue={joinFill?.name ?? (inBrowser ? recent.find((game) => game.address === window.location.hostname)?.name ?? "" : "Player")} placeholder="What does the table call you?" maxLength={24} autoComplete="username" required={inBrowser} />
+                </label>
+                <label className="field">
+                  <span>Your password</span>
+                  <input name="account-password" type="password" placeholder="Yours alone: it keeps your characters yours" autoComplete="current-password" minLength={4} maxLength={200} required />
+                </label>
+                <p className="hint">The first time at this table, choose one. Next time this browser remembers you.</p>
+              </>
+            )}
             {inBrowser ? (
               <>
                 <input type="hidden" name="address" value={window.location.hostname} />
@@ -392,8 +430,8 @@ export function SetupScreen({
               </div>
             )}
             <label className="field">
-              <span>Password</span>
-              <input name="password" type="text" placeholder="Blank if the game is public" autoComplete="off" defaultValue={joinFill?.password ?? ""} />
+              <span>Table password</span>
+              <input name="password" type="text" placeholder="The GM's, blank if the game is public" autoComplete="off" defaultValue={joinFill?.password ?? ""} />
             </label>
             <button type="submit" className="play-button grand" disabled={busy}>
               {busy ? "Joining…" : "Take your seat"}

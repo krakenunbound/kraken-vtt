@@ -115,6 +115,12 @@ function gmIcons() {
 }
 // Image layers' pictures (map tiles): the GM's assets folder, shared by every
 // campaign; a module's or bundle's pictures are copied in once, named by content.
+// Players' accounts: one list for every campaign this GM runs (accounts.cjs).
+let accountStore = null;
+function accounts() {
+  if (!accountStore) accountStore = require("./accounts.cjs").createAccountStore(path.join(app.getPath("userData"), "accounts.json"));
+  return accountStore;
+}
 let tileLibrary = null;
 function tiles() {
   if (!tileLibrary) tileLibrary = createDecalLibrary({ folder: path.join(app.getPath("userData"), "assets", "tiles"), own: [], hashNames: true });
@@ -273,7 +279,7 @@ ipcMain.handle("start-host", async (_event, options) => {
   if (typeof remembered === "string" && !(saved.options && "gmIcon" in saved.options)) saved.options = { ...(saved.options ?? {}), gmIcon: remembered };
   const dataFolder = fgDataFolder();
   const ruleset = campaigns.read(campaignFile()).find((item) => item.id === campaignId)?.ruleset ?? "";
-  const next = createTableServer({ saved, ruleset, onChange: markDirty, art: createArtLibrary({ base: dataFolder, roots: defaultRoots(dataFolder) }), decals: decals(), wallpapers: wallpapers(), gmIcons: gmIcons(), tiles: tiles(), sounds: sounds(), books: books() });
+  const next = createTableServer({ saved, ruleset, onChange: markDirty, art: createArtLibrary({ base: dataFolder, roots: defaultRoots(dataFolder) }), decals: decals(), wallpapers: wallpapers(), gmIcons: gmIcons(), tiles: tiles(), sounds: sounds(), books: books(), accounts: accounts() });
   try {
     const info = await next.listen({ port, password });
     table = next;
