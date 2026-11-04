@@ -661,6 +661,22 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       changed();
       return source.targets;
     },
+    // Everyone on the tracker whose token lies within radius feet of a point (a
+    // Sleep or a fireball's area): the source's targets become them. faction
+    // "foe", "friend" or "neutral" narrows it; the source is never its own target.
+    targetArea(sourceId, { x, y, radius, faction = null }, seat, tokenAt) {
+      const source = find(sourceId);
+      if (seat.role !== "dm" && owner(source) !== seat.name) throw new Error("You can target only with your own character.");
+      const reach = Math.max(0, num(radius, 0));
+      const inside = state.entries.filter((entry) => {
+        if (entry.id === source.id || (faction && entry.faction !== faction)) return false;
+        const token = tokenAt(entry);
+        return token && Math.hypot(token.x - x, token.y - y) <= reach + 1e-6;
+      });
+      source.targets = inside.map((entry) => entry.id);
+      changed();
+      return inside.map((entry) => entry.name);
+    },
     clearTargets(sourceId, seat) {
       const source = find(sourceId);
       if (seat.role !== "dm" && owner(source) !== seat.name) throw new Error("You can clear only your own targets.");

@@ -105,7 +105,17 @@ export function Lighting({
       {shade > 0 ? <rect width={width} height={height} fill="#03050a" fillOpacity={shade} mask="url(#darkness-cut)" /> : null}
       <g className="light-glow">
         {lights.map((light, index) => (
-          <circle key={light.id} cx={light.x} cy={light.y} r={light.dimPx} fill={`url(#light-glow-${index})`} clipPath={`url(#light-reach-${index})`} />
+          <circle
+            key={light.id}
+            cx={light.x}
+            cy={light.y}
+            r={light.dimPx}
+            fill={`url(#light-glow-${index})`}
+            clipPath={`url(#light-reach-${index})`}
+            // FG's light animation: the glow flickers, pulses or flashes, faster with Speed.
+            className={light.animation ? `light-anim ${light.animation}` : undefined}
+            style={light.animation ? { animationDuration: `${(2.4 - 1.9 * (light.speed ?? 0.5)).toFixed(2)}s`, transformOrigin: `${light.x}px ${light.y}px` } : undefined}
+          />
         ))}
       </g>
     </svg>

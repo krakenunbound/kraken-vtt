@@ -54,6 +54,14 @@ try {
   const viper = (await tool("kraken_combat", { action: "view" })).entries.find((entry) => entry.name.startsWith("Pit Viper"));
   assert(viper.hp > 0 && viper.ac > 10, `a viper's hit points and armour class from B2's fields: hp ${viper.hp}, AC ${viper.ac}`);
 
+  // Area targeting (an area spell): from the first viper, everyone within 15 feet of it.
+  const first = tokens[0];
+  const vipersOnTracker = (await tool("kraken_combat", { action: "view" })).entries.filter((entry) => entry.name.startsWith("Pit Viper"));
+  const area = await tool("kraken_combat", { action: "target-area", id: vipersOnTracker[0].id, x: first.x, y: first.y, radius: 15 });
+  assert(area.targets.length === 3, `the other three vipers are in the area: ${area.targets.join(", ")}`);
+  const none = await tool("kraken_combat", { action: "target-area", id: vipersOnTracker[0].id, x: first.x, y: first.y, radius: 15, faction: "friend" });
+  assert(none.targets.length === 0, "no friends in it");
+
   // An orc leader from B2: its attack parsed, its base to hit its hit dice.
   const leader = (await tool("kraken_library", { action: "list", module: B2, kind: "npc", search: "Orc Leader (Tribe B)" }))[0];
   await tool("kraken_library", { action: "npc", path: leader.path });
@@ -71,7 +79,7 @@ try {
   agent.dice.force([3]);
   const rolled = await tool("kraken_library", { action: "table", path: rumors.path });
   assert(rolled.roll === 3 && /Tribes of different creatures/.test(rolled.result), `rumor 3: ${JSON.stringify(rolled)}`);
-  console.log(`ok library: B2's ${counts.npc} NPCs, ${counts.battle} encounters, ${counts.parcel} parcels, ${counts.table} tables; the pit vipers on the tracker and hidden on the Keep's map where FG placed them; an orc leader converted; a parcel to the party; the rumor table rolled`);
+  console.log(`ok library: B2's ${counts.npc} NPCs, ${counts.battle} encounters, ${counts.parcel} parcels, ${counts.table} tables; the pit vipers on the tracker and hidden on the Keep's map where FG placed them; an area target takes the other three; an orc leader converted; a parcel to the party; the rumor table rolled`);
 } finally {
   await server.stop();
 }

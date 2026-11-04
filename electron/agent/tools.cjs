@@ -606,9 +606,9 @@ const TOOLS = [
   {
     name: "kraken_combat",
     description:
-      "The combat tracker (SiegeCore rules: d10 initiative, high to low; unconscious enemies lose their turns; effect durations count down each round; the dying bleed). action view (default); add (recordId of a character or NPC, count, hidden, place: also put tokens on the map; or entry {name, faction, hp, ac, init}); add-party; init (which: an entry id, npcs or all); next (next turn); round (next round); end (removeNpcs); update (id, patch {name, faction, init, initresult, hp, wounds, ac, hidden}); remove (id); damage / heal (id, amount); effect (id, effect {label, duration in rounds, gmOnly}); effect-remove (id, effectId); target (id: the attacker entry, targetId, on true/false); clear-targets (id); attack / damage-roll (a character: recordId + weapon = its inventory key; an NPC: id + weapon = its attack key from view's attacks): SiegeCore's attack, one d20 per target against its AC (equal hits), damage rolled once and put on every target; save (id, attribute, cl): a SIEGE save; cast (recordId, power: its powers key, castAction: the power's actions key): spends a slot, targets save against the caster level, damage halves or cancels on a save, effects land on those who failed, healing goes to the targets. krits: critical hits and fumbles (the Castle Keeper's Guide options as Kraken Krits & Fumbles: a natural 20 rolls the critical table, a natural 1 the fumble table, and the result is applied: effects, damage, the next damage roll at maximum or doubled; ranged attacks use up ammunition; spells with spell resistance on are checked first). settings: { mode opt5|opt6|opt1|opt4, crit/fumble always|half|third|off, auto yes|no, npc yes|no, show all|gm, death gm|apply } (omit to read them). krit-test: roll a critical (kind crit) or fumble (kind fumble) for id against targetId (table, roll to fix the result).",
+      "The combat tracker (SiegeCore rules: d10 initiative, high to low; unconscious enemies lose their turns; effect durations count down each round; the dying bleed). action view (default); add (recordId of a character or NPC, count, hidden, place: also put tokens on the map; or entry {name, faction, hp, ac, init}); add-party; init (which: an entry id, npcs or all); next (next turn); round (next round); end (removeNpcs); update (id, patch {name, faction, init, initresult, hp, wounds, ac, hidden}); remove (id); damage / heal (id, amount); effect (id, effect {label, duration in rounds, gmOnly}); effect-remove (id, effectId); target (id: the attacker entry, targetId, on true/false); clear-targets (id); attack / damage-roll (a character: recordId + weapon = its inventory key; an NPC: id + weapon = its attack key from view's attacks): SiegeCore's attack, one d20 per target against its AC (equal hits), damage rolled once and put on every target; save (id, attribute, cl): a SIEGE save; cast (recordId, power: its powers key, castAction: the power's actions key): spends a slot, targets save against the caster level, damage halves or cancels on a save, effects land on those who failed, healing goes to the targets. target-area: the source (id) targets everyone whose token is within radius feet of x, y (faction to narrow), for an area spell. krits: critical hits and fumbles (the Castle Keeper's Guide options as Kraken Krits & Fumbles: a natural 20 rolls the critical table, a natural 1 the fumble table, and the result is applied: effects, damage, the next damage roll at maximum or doubled; ranged attacks use up ammunition; spells with spell resistance on are checked first). settings: { mode opt5|opt6|opt1|opt4, crit/fumble always|half|third|off, auto yes|no, npc yes|no, show all|gm, death gm|apply } (omit to read them). krit-test: roll a critical (kind crit) or fumble (kind fumble) for id against targetId (table, roll to fix the result).",
     inputSchema: object({
-      action: { type: "string", enum: ["view", "add", "add-party", "init", "next", "round", "end", "update", "remove", "damage", "heal", "effect", "effect-remove", "target", "clear-targets", "attack", "damage-roll", "save", "cast", "krits", "krit-test"] },
+      action: { type: "string", enum: ["view", "add", "add-party", "init", "next", "round", "end", "update", "remove", "damage", "heal", "effect", "effect-remove", "target", "clear-targets", "attack", "damage-roll", "save", "cast", "krits", "krit-test", "target-area"] },
       targetId: string("target: the entry to target"),
       on: { type: "boolean", description: "target: add (true) or drop (false)" },
       weapon: string("attack / damage-roll: inventory key (character) or attack key (NPC)"),
@@ -632,6 +632,10 @@ const TOOLS = [
       kind: { type: "string", enum: ["crit", "fumble"], description: "krit-test" },
       table: string("krit-test: a table key (opt5_crit, opt6_fumble...)"),
       roll: number("krit-test: the table roll"),
+      x: number("target-area: scene pixels across"),
+      y: number("target-area: scene pixels down"),
+      radius: number("target-area: feet (Sleep: 15 ft radius, a fireball 20)"),
+      faction: { type: "string", enum: ["foe", "friend", "neutral"], description: "target-area: only these" },
     }),
     async run(args, ctx) {
       const agent = needTable(ctx);
@@ -660,6 +664,10 @@ const TOOLS = [
       else if (action === "effect-remove") combat.removeEffect(args.id, args.effectId, seat);
       else if (action === "target") combat.target(args.id, args.targetId, args.on ?? true, seat);
       else if (action === "clear-targets") combat.clearTargets(args.id, seat);
+      else if (action === "target-area") {
+        const per = map.units() > 0 ? (map.squareCenter(1, 0, 1).x - map.squareCenter(0, 0, 1).x) / map.units() : 10;
+        return out({ targets: combat.targetArea(args.id, { x: args.x, y: args.y, radius: (args.radius ?? 0) * per, faction: args.faction ?? null }, seat, (entry) => map.tokens().find((token) => token.id === entry.tokenId) ?? map.tokens().find((token) => entry.recordId && token.recordId === entry.recordId) ?? null), combat: combat.viewFor(seat) });
+      }
       else if (action === "attack") return out({ results: await combat.attack(args.recordId ? { recordId: args.recordId } : { entryId: args.id }, args.weapon, seat, "Agent"), combat: combat.viewFor(seat) });
       else if (action === "save") return out({ save: await combat.save(args.id, args.attribute, args.cl ?? 0, "Agent"), combat: combat.viewFor(seat) });
       else if (action === "cast") return out({ cast: await combat.cast(args.recordId ? { recordId: args.recordId } : { entryId: args.id }, args.power, args.castAction ?? "", seat, "Agent"), combat: combat.viewFor(seat) });
@@ -809,7 +817,7 @@ const TOOLS = [
   {
     name: "kraken_light",
     description:
-      "Lights on the scene. action list; place (x, y in scene pixels or col/row, bright and dim in feet, color, or a preset: candle, lamp, torch, lantern, light); update (id and any of x, y, bright, dim, color, on, hidden); remove (id).",
+      "Lights on the scene. action list; place (x, y in scene pixels or col/row, bright and dim in feet, color, or a preset: candle, lamp, torch, lantern, light; angle 1-360 and rotation 0-359 degrees for a beam (FG's lantern bullseye: 60); animation none, flicker, pulse, flash or torch, and speed 0..1); update (id and any of those, on, hidden); remove (id).",
     inputSchema: object({
       action: { type: "string", enum: ["list", "place", "update", "remove"] },
       id: string("Light id"),
@@ -823,6 +831,10 @@ const TOOLS = [
       preset: string("candle, lamp, torch, lantern, light"),
       on: { type: "boolean" },
       hidden: { type: "boolean" },
+      angle: number("Degrees of the beam (360: all round)"),
+      rotation: number("Degrees the beam points (0: east, 90: south)"),
+      animation: { type: "string", enum: ["none", "flicker", "pulse", "flash", "torch"] },
+      speed: number("Animation speed 0..1"),
     }, ["action"]),
     run(args, ctx) {
       const { map, seat } = needTable(ctx);

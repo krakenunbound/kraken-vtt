@@ -141,7 +141,7 @@ export type MapActions = {
   libraryAction?: (action: string, payload?: Record<string, unknown>) => void;
 };
 // What a left-drag does on the map: pan it, ping, draw, or rub a line out.
-type Tool = "pan" | "ping" | "draw" | "erase";
+type Tool = "pan" | "ping" | "draw" | "erase" | "area";
 const DRAW_COLORS = ["#ffcc33", "#ff5a5a", "#5ad1ff", "#7dff7a", "#d38cff", "#ffffff", "#111111"];
 
 type Drag = { pointerId: number; id: string; start: Point; at: Point; moved: boolean; snap: boolean; squares: number };
@@ -691,6 +691,12 @@ export function MapView({
           const point = worldAt(event.clientX, event.clientY);
           if (!point) return;
           if (tool === "ping") actions.ping(point.x, point.y);
+          else if (tool === "area") {
+            // An area spell: everyone within the radius becomes the target of your creature (the GM's: the active one).
+            const answer = window.prompt("Target everyone within how many feet of this point? (Sleep 15, a fireball 20)", "15");
+            const radius = Number(answer);
+            if (answer !== null && radius > 0) actions.ct("target-area", { x: Math.round(point.x), y: Math.round(point.y), radius });
+          }
           else if (tool === "erase") {
             const id = lineAt(point);
             if (id) actions.eraseDrawing(id);
@@ -1415,6 +1421,7 @@ export function MapView({
               ["ping", "ping", "Ping: click to show everyone a spot, in your colour"],
               ["draw", "pen", "Draw on the map, for everyone"],
               ["erase", "eraser", gm ? "Rub out a line (any)" : "Rub out one of your lines"],
+              ["area", "target", "Area target: click a spot, give a radius; your creature (the GM's: whose turn it is) targets everyone in it"],
             ] as const
           ).map(([id, icon, title]) => (
             <button key={id} type="button" className={tool === id ? "tool on" : "tool"} role="radio" aria-checked={tool === id} aria-label={title} title={title} data-tool={id} onClick={() => setTool(id)}>

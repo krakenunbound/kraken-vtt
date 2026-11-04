@@ -129,6 +129,13 @@ try {
   const xs = light.polygon.filter((_, index) => index % 2 === 0);
   assert(Math.max(...xs) <= 301, `the light stops at the shadow caster: reaches x ${Math.max(...xs)}`);
 
+  // A beam (FG's lantern bullseye): 60 degrees pointing east lights nothing to the west; its animation is kept.
+  const beam = map.placeLight({ x: 150, y: 150, bright: 50, dim: 100, angle: 60, rotation: 0, animation: "flicker", speed: 0.7 }, seat);
+  const beamOut = map.viewFor(seat, "").lights.find((item) => item.id === beam.id);
+  const beamXs = beamOut.polygon.filter((_, index) => index % 2 === 0);
+  assert(Math.min(...beamXs) >= 149 && Math.max(...beamXs) > 200 && beamOut.animation === "flicker", `the beam lights only east of the lantern: x ${Math.min(...beamXs)}..${Math.max(...beamXs)}, ${beamOut.animation}`);
+  map.removeLight(beam.id, seat);
+
   // Split, remove, undo; the player is never sent walls.
   const split = await tool("kraken_wall", { action: "split", id: chain.ids[0], x: 300, y: 75 });
   assert(split.walls.length === 2, "split in two");
