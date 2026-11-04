@@ -253,8 +253,11 @@ ipcMain.handle("campaigns", () => campaigns.read(campaignFile()));
 ipcMain.handle("save-campaign", (_event, input) => campaigns.create(campaignFile(), input));
 ipcMain.handle("touch-campaign", (_event, input) => campaigns.touch(campaignFile(), input));
 ipcMain.handle("campaign-ruleset", (_event, input) => setCampaignRuleset(input));
+// True when the text is on the clipboard afterwards.
 ipcMain.handle("copy", (_event, text) => {
-  clipboard.writeText(String(text ?? "").slice(0, 200));
+  const value = String(text ?? "").slice(0, 200);
+  clipboard.writeText(value);
+  return clipboard.readText() === value;
 });
 
 ipcMain.handle("start-host", async (_event, options) => {

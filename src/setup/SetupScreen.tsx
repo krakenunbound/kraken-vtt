@@ -93,15 +93,41 @@ function Crest({ name }: { name: string }) {
   );
 }
 
+// Puts text on the clipboard: the page's own clipboard first, the app's
+// (Electron's) when the page may not write it. True when it got there.
+async function copyText(text: string) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    // The app's clipboard below.
+  }
+  try {
+    if (!window.kraken?.copy) return false;
+    return (await window.kraken.copy(text)) !== false;
+  } catch {
+    return false;
+  }
+}
+
 function CopyAddress({ label, value }: { label: string; value: string }) {
+  const [state, setState] = useState<"" | "copied" | "failed">("");
+  const timer = useRef<number | undefined>(undefined);
+  useEffect(() => () => window.clearTimeout(timer.current), []);
+  const copy = async () => {
+    const ok = await copyText(value);
+    setState(ok ? "copied" : "failed");
+    window.clearTimeout(timer.current);
+    timer.current = window.setTimeout(() => setState(""), 1800);
+  };
   return (
     <p className="addr">
       <span className="addr-label">{label}</span>
       {value ? (
         <>
           <span className="secret">{value}</span>
-          <button type="button" className="addr-copy" aria-label={`Copy ${label} ${value}`} onClick={() => void window.kraken?.copy(value)}>
-            Copy
+          <button type="button" className={state ? `addr-copy ${state}` : "addr-copy"} aria-label={`Copy ${label} ${value}`} aria-live="polite" onClick={() => void copy()}>
+            {state === "copied" ? "Copied" : state === "failed" ? "Couldn't copy" : "Copy"}
           </button>
         </>
       ) : (
