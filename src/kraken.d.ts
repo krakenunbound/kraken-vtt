@@ -25,7 +25,16 @@ export type KrakenHostInfo = {
   externalV6?: string;
 };
 
+export type KrakenAssistantApi = {
+  status: () => Promise<{ busy: boolean; model: string; log: never[]; hasKey: boolean; keyFrom: string | null }>;
+  ask: (text: string) => Promise<unknown>;
+  stop: () => Promise<unknown>;
+  reset: () => Promise<unknown>;
+  setKey: (key: string) => Promise<{ busy: boolean; model: string; log: never[]; hasKey: boolean; keyFrom: string | null }>;
+  onEvent: (handler: (event: never) => void) => () => void;
+};
 export type KrakenApi = {
+  assistant?: KrakenAssistantApi;
   addresses: () => Promise<string[]>;
   network: () => Promise<KrakenNetwork>;
   campaigns: () => Promise<KrakenCampaign[]>;

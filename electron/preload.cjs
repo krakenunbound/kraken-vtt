@@ -22,6 +22,19 @@ contextBridge.exposeInMainWorld("kraken", {
   campaignBundle: (id) => ipcRenderer.invoke("campaign-bundle", id),
   saveBundle: (id, bytes) => ipcRenderer.invoke("save-bundle", id, bytes),
   saveView: (id, view) => ipcRenderer.invoke("save-view", id, view),
+  // The DM assistant (the GM's window only).
+  assistant: {
+    status: () => ipcRenderer.invoke("assistant-status"),
+    ask: (text) => ipcRenderer.invoke("assistant-ask", text),
+    stop: () => ipcRenderer.invoke("assistant-stop"),
+    reset: () => ipcRenderer.invoke("assistant-reset"),
+    setKey: (key) => ipcRenderer.invoke("assistant-key", key),
+    onEvent: (handler) => {
+      const listener = (_event, value) => handler(value);
+      ipcRenderer.on("assistant-event", listener);
+      return () => ipcRenderer.removeListener("assistant-event", listener);
+    },
+  },
   // Commands from the agent bridge (host, leave...). The handler's answer goes back.
   onAgentCommand: (handler) => {
     const listener = async (_event, req, command) => {

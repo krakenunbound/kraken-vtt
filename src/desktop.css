@@ -1134,3 +1134,25 @@ textarea.cc-field.tall { min-height: 220px; }
 @keyframes light-pulse { from { opacity: 1; transform: scale(1); } to { opacity: 0.65; transform: scale(0.9); } }
 @keyframes light-flash { 0%, 88%, 100% { opacity: 1; } 92% { opacity: 0.15; } }
 @media (prefers-reduced-motion: reduce) { .light-anim { animation: none; } }
+
+/* The DM assistant (GM only) */
+.assistant { display: flex; flex-direction: column; height: 100%; gap: 8px; padding: 10px; box-sizing: border-box; }
+.assistant-empty { padding: 16px; color: var(--muted); }
+.assistant-key { padding: 10px; border: 1px solid var(--brass); border-radius: 10px; background: rgba(216, 180, 106, 0.08); font-size: 0.85rem; }
+.assistant-key p { margin: 0 0 8px; }
+.assistant-key-row { display: flex; gap: 6px; }
+.assistant-key-row input { flex: 1; min-width: 0; }
+.assistant-log { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding-right: 4px; }
+.assistant-ideas { display: flex; flex-direction: column; gap: 6px; color: var(--muted); font-size: 0.85rem; }
+.assistant-ideas p { margin: 0 0 4px; }
+.assistant-ideas button { text-align: left; white-space: normal; }
+.assistant-line { padding: 8px 10px; border-radius: 10px; white-space: pre-wrap; line-height: 1.4; font-size: 0.9rem; max-width: 92%; }
+.assistant-line.you { align-self: flex-end; background: rgba(79, 214, 208, 0.12); border: 1px solid rgba(79, 214, 208, 0.3); }
+.assistant-line.it { align-self: flex-start; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--panel-edge); }
+.assistant-tool { align-self: flex-start; font: 0.74rem ui-monospace, Consolas, monospace; color: var(--brass); opacity: 0.85; display: flex; align-items: center; gap: 4px; }
+.assistant-tool.failed { color: #ff8a7a; }
+.assistant-note { font-size: 0.8rem; color: var(--muted); font-style: italic; }
+.assistant-note.error { color: #ff8a7a; font-style: normal; }
+.assistant-say { display: flex; flex-direction: column; gap: 6px; }
+.assistant-say textarea { width: 100%; box-sizing: border-box; resize: vertical; min-height: 48px; font: inherit; }
+.assistant-buttons { display: flex; gap: 6px; justify-content: flex-end; }
