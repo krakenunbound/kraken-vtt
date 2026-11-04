@@ -485,16 +485,28 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     return !line.secret || client.role === "dm" || (line.shownTo && line.shownTo === client.name);
   };
 
+  // Which of the roller's dice sets a roll is thrown with: damage dice for a
+  // damage roll; the GM's NPC dice for a roll as a creature (not the GM, not a
+  // character); else their own.
+  function lookFor(entry, roller, hand) {
+    const label = String(entry.roll?.label ?? "");
+    if (hand.looks?.damage && /^\[DAMAGE\]/.test(label)) return hand.looks.damage;
+    const from = String(entry.from ?? "");
+    const asCreature =
+      roller.role === "dm" && from && !sameName(from, roller.name) && !/^(gm|dm|agent)$/i.test(from) && !records.list({ type: "character" }).some((record) => sameName(record.name, from));
+    if (hand.looks?.npc && asCreature) return hand.looks.npc;
+    return hand.look ?? null;
+  }
+
   function addChat(entry) {
     // A roll goes out with the throw its roller just made, for the 3D dice.
     // (A tracker's roll is the agent's: it is thrown by the seat that just asked for it.)
     if (entry.roll) {
       const roller = [...clients.values()].find((client) => client.id === entry.id) ?? (asking && Date.now() - asking.at < 1500 ? asking.client : null);
       const hand = roller?.hand;
-      if (hand && Date.now() - hand.at < 4000) {
-        if (hand.throw) entry.roll.throw = hand.throw;
-        if (hand.look) entry.roll.look = hand.look;
-      } else if (hand?.look) entry.roll.look = hand.look;
+      if (hand && Date.now() - hand.at < 4000 && hand.throw) entry.roll.throw = hand.throw;
+      const look = hand ? lookFor(entry, roller, hand) : null;
+      if (look) entry.roll.look = look;
     }
     // A trigger's sound goes with the line: every seat that sees it hears it (as its result shows).
     if (sounds && !entry.sound) {
@@ -930,7 +942,10 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       // Any request may say how its dice are thrown; the roll it makes carries that.
       if (client.joined && (msg.throw || msg.look)) {
         const look = diceLook(msg.look) ?? client.hand?.look ?? null;
-        client.hand = { throw: diceThrow(msg.throw), look, at: Date.now() };
+        // FG's other dice sets: the GM's NPC dice, and damage dice.
+        const npc = diceLook(msg.looks?.npc);
+        const damage = diceLook(msg.looks?.damage);
+        client.hand = { throw: diceThrow(msg.throw), look, looks: npc || damage ? { npc, damage } : client.hand?.looks ?? null, at: Date.now() };
       }
 
       if (!client.joined) {

@@ -87,6 +87,34 @@ try {
   const save = bob.lines.find((line) => line.roll?.label?.startsWith("[SAVE]"));
   assert(save?.roll.throw?.x === 0.4, `the save is thrown by Ann: ${JSON.stringify(save?.roll)}`);
 
+  // FG's dice sets: the GM's NPC dice for a roll as a creature, damage dice for
+  // damage; the GM's roll for a character, or as themself, is their own dice.
+  const npcLook = { theme: "monster", body: "#3a5a1c", ink: "#f2e3b0" };
+  const damageLook = { theme: "magma", body: "#2a0d05", ink: "#ffb347" };
+  const looks = { npc: npcLook, damage: damageLook };
+  const lookOfLast = () => bob.lines.at(-1).roll.look?.theme;
+  gm.send({ type: "roll", formula: "1d20+2", label: "Orc attack", as: "Orc 1", look, looks });
+  await settle();
+  assert(lookOfLast() === "monster", `a roll as a creature is in NPC dice: ${lookOfLast()}`);
+  gm.send({ type: "roll", formula: "1d8", label: "[DAMAGE] Orc 1 axe", as: "Orc 1", look, looks });
+  await settle();
+  assert(lookOfLast() === "magma", `damage is in damage dice: ${lookOfLast()}`);
+  gm.send({ type: "roll", formula: "1d20", label: "Elowen's check", as: "Elowen", look, looks });
+  await settle();
+  assert(lookOfLast() === "starfall", `the GM rolling for a character uses their own dice: ${lookOfLast()}`);
+  gm.send({ type: "roll", formula: "1d20", label: "GM's roll", look, looks });
+  await settle();
+  assert(lookOfLast() === "starfall", "the GM as themself: their own dice");
+  ann.send({ type: "roll", formula: "2d6", label: "[DAMAGE] Longsword", look, looks: { damage: damageLook, npc: npcLook } });
+  await settle();
+  assert(lookOfLast() === "magma", "a player's damage dice");
+  ann.send({ type: "roll", formula: "1d20", label: "Attack", as: "Orc 1", look, looks });
+  await settle();
+  assert(lookOfLast() === "starfall", "a player's NPC dice are never used (and a player cannot roll as another)");
+  gm.send({ type: "roll", formula: "1d6", label: "Orc morale", as: "Orc 1", look });
+  await settle();
+  assert(lookOfLast() === "monster", "the sets are remembered from the seat's last request");
+
   // The dice tower, as FG's: the GM sees "[TOWER]" and the result, Ann sees
   // what went in (no result), Bob sees nothing.
   const before = { ann: ann.lines.length, bob: bob.lines.length, gm: gm.lines.length };

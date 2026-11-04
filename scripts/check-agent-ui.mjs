@@ -90,6 +90,17 @@ try {
   await page.waitForSelector('.dice-window [data-preset="Rune Steel"][aria-pressed="true"]');
   await page.click('.dice-window [data-choice="glass"]');
   assert((await tool("kraken_dice_settings")).look.material === "glass", "a click in the Dice window changes the look");
+  // FG's other dice sets: NPC dice from the agent, damage dice from the window.
+  const npcSet = await tool("kraken_dice_settings", { set: "npc", preset: "Goblin Scrap" });
+  assert(npcSet.npcSet === "Goblin Scrap" && npcSet.look.material === "glass" && npcSet.damageSet === "as my dice", `NPC dice set alone: ${npcSet.npcSet}, ${npcSet.damageSet}`);
+  await page.click('.dice-window [data-dice-set="damage"]');
+  await page.click('.dice-window [data-dice-follow]');
+  await page.click('.dice-window [aria-label="Groups"] >> text=All');
+  await page.click('.dice-window [data-preset="Magma Vein"]');
+  const damageSet = await tool("kraken_dice_settings");
+  assert(damageSet.damageSet === "Magma Vein" && damageSet.npcSet === "Goblin Scrap" && damageSet.look.material === "glass", `damage dice from the window: ${damageSet.damageSet}`);
+  assert((await tool("kraken_dice_settings", { set: "npc", same: true })).npcSet === "as my dice", "NPC dice back to my dice");
+  await tool("kraken_dice_settings", { set: "damage", same: true });
   await tool("kraken_windows", { action: "close", kind: "dice" });
   await tool("kraken_windows", { action: "close", kind: "settings" });
   // FG's tray: the dice are 3D in this seat's set; a right-click rolls several, the modifier's quick values add up.

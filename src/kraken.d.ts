@@ -67,7 +67,7 @@ export type KrakenAgentCommand =
   | { kind: "windows"; action: "list" | "open" | "close" | "popout" | "dock"; window?: string; record?: string }
   | { kind: "dice-settings"; patch: DiceSettingsPatch };
 
-export type DiceSettingsPatch = { show?: boolean; sound?: boolean; volume?: number; preset?: string; body?: string; accent?: string; ink?: string; design?: string; material?: string; font?: string; effect?: string; crit?: boolean; pips?: boolean };
+export type DiceSettingsPatch = { show?: boolean; sound?: boolean; volume?: number; preset?: string; body?: string; accent?: string; ink?: string; design?: string; material?: string; font?: string; effect?: string; crit?: boolean; pips?: boolean; set?: "mine" | "npc" | "damage"; same?: boolean };
 
 export type KrakenSound = { id: string; kind: string; group: string; name: string };
 

@@ -1168,3 +1168,7 @@ textarea.cc-field.tall { min-height: 220px; }
 .me-tile-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; max-height: 180px; overflow: auto; }
 .me-tile-grid button { padding: 2px; aspect-ratio: 1; background: rgba(0, 0, 0, 0.25); border: 1px solid var(--brass-soft); border-radius: 4px; }
 .me-tile-grid img { width: 100%; height: 100%; object-fit: contain; }
+
+/* The Dice window's sets: my dice, NPC dice, damage dice. */
+.dice-which { margin-bottom: 6px; }
+.dice-follow { margin: 0 0 8px; }

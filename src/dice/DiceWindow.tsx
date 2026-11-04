@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useState, useSyncExternalStore } from "react";
 import type { Session } from "../session/useSession";
-import { DESIGNS, diceStore, EFFECTS, FONTS, MATERIALS, PRESETS, SET_GROUPS, type DiceLook } from "./diceStore";
+import { DESIGNS, diceStore, EFFECTS, FONTS, MATERIALS, PRESETS, SET_GROUPS, type DiceLook, type DiceSet } from "./diceStore";
 
 // The preview's three.js loads with the window.
 const DicePreview = lazy(() => import("./DicePreview"));
@@ -75,8 +75,12 @@ function Stepper({ label, value, onChange, low, high }: { label: string; value: 
 // Everyone at the table sees your dice as you set them here.
 export function DiceWindow({ session }: { session: Session }) {
   const settings = useSyncExternalStore(diceStore.subscribe, diceStore.settings);
-  const look = settings.look;
-  const setLook = (patch: Partial<DiceLook>) => diceStore.update({ look: patch });
+  // FG's dice sets: my dice; the GM's NPC dice; damage dice. A set left "as my dice" follows mine.
+  const [editing, setEditing] = useState<DiceSet>("look");
+  const own = editing === "look" ? null : settings[editing];
+  const look = own ?? settings.look;
+  const setLook = (patch: Partial<DiceLook>) => diceStore.update({ [editing]: patch });
+  const following = editing !== "look" && own === null;
   const [group, setGroup] = useState(SET_GROUPS.find((item) => item.sets.includes(nameOf(look) ?? ""))?.name ?? "All");
   const tray = usePictures(() => import("./trayArt").then(({ renderTray }) => renderTray(look)), JSON.stringify(look), {} as Record<number, string>);
   const sets = usePictures(() => import("./trayArt").then(({ renderSets }) => renderSets(PRESETS.map(lookOf))), "sets", [] as string[]);
@@ -85,8 +89,27 @@ export function DiceWindow({ session }: { session: Session }) {
 
   return (
     <div className="dice-window">
-      <section className="dice-panel active-set">
-        <h3>Active dice set</h3>
+      <div className="dice-groups dice-which" role="tablist" aria-label="Which dice">
+        {(
+          [
+            ["look", "My dice", "Your rolls"],
+            ...(session.role === "dm" ? ([["npc", "NPC dice", "Your rolls for the creatures: their attacks, saves and checks from the tracker"]] as const) : []),
+            ["damage", "Damage dice", "Every damage roll you make"],
+          ] as const
+        ).map(([id, label, tip]) => (
+          <button key={id} type="button" role="tab" aria-selected={editing === id} className={editing === id ? "dice-chip on" : "dice-chip"} title={tip} data-dice-set={id} onClick={() => setEditing(id)}>
+            {label}
+          </button>
+        ))}
+      </div>
+      {editing !== "look" ? (
+        <label className="check dice-follow">
+          <input type="checkbox" checked={following} data-dice-follow onChange={(event) => diceStore.update({ [editing]: event.target.checked ? null : { ...settings.look } })} />
+          {editing === "npc" ? "NPC dice are my dice" : "Damage dice are my dice"} (untick to give them their own set)
+        </label>
+      ) : null}
+      <section className="dice-panel active-set" data-editing={editing}>
+        <h3>{editing === "npc" ? "NPC dice" : editing === "damage" ? "Damage dice" : "Active dice set"}</h3>
         <div className="active-body">
           <Suspense fallback={<div className="dice-preview" />}>
             <DicePreview look={look} />
@@ -111,7 +134,7 @@ export function DiceWindow({ session }: { session: Session }) {
                 Numbers
               </label>
             </div>
-            <p className="hint">Everyone at the table sees your dice like this.</p>
+            <p className="hint">{editing === "npc" ? "The table sees the creatures' rolls in these." : editing === "damage" ? "The table sees your damage rolls in these." : "Everyone at the table sees your dice like this."}</p>
           </div>
         </div>
       </section>
