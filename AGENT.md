@@ -24,7 +24,7 @@ The app starts the MCP server when it opens. `electron/agent/mcp-stdio.cjs` is t
 | Play (host) a campaign, leave | `kraken_host`, `kraken_leave` |
 | See who is connected, what's going on | `kraken_status`, `kraken_players` |
 | **Maps** | |
-| Open map (a Foundry adventure bundle) | `kraken_open_adventure` |
+| Open map (a prepared map bundle, or a bare picture to build on) | `kraken_open_adventure` |
 | Adventure and scene menus | `kraken_scenes` |
 | Scene settings: darkness, weather, grid | `kraken_scene_settings` |
 | Place, move (one, or several together), change (facing too), remove tokens | `kraken_token_place`, `kraken_token_move` (`ids`, `dcol`, `drow`), `kraken_token_update`, `kraken_token_remove` |
