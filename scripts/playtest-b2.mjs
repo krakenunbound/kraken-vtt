@@ -218,7 +218,11 @@ try {
         const cure = powerOf(member, "Cure Light Wounds");
         if (thorinEntry && cure) {
           await attempt("combat", "the cleric targets Thorin", "kraken_combat", { action: "target", id: me.id, targetId: thorinEntry.id, on: true });
-          const before = (await tool("kraken_combat", { action: "view" })).entries.find((entry) => entry.id === thorinEntry.id)?.wounds ?? 0;
+          const seen = (await tool("kraken_combat", { action: "view" })).entries.find((entry) => entry.id === thorinEntry.id);
+          // The dice decide: a Thorin already dead (wounds to -10) is not healed by a cure, as C&C's rules say.
+          const dead = /dead/i.test(String(seen?.health?.status ?? ""));
+          const before = dead ? 0 : seen?.wounds ?? 0;
+          if (dead) note("Thorin fell to -10 before the cleric's turn: dead, so Cure Light Wounds is not expected to heal him");
           const cast = await attempt("spells", "Cure Light Wounds", "kraken_combat", { action: "cast", recordId: member.id, power: cure });
           const afterWounds = (await tool("kraken_combat", { action: "view" })).entries.find((entry) => entry.id === thorinEntry.id)?.wounds ?? 0;
           note(`Cure Light Wounds on Thorin: wounds ${before} -> ${afterWounds} ${JSON.stringify(cast?.cast?.results ?? []).slice(0, 120)}`);
@@ -266,7 +270,11 @@ try {
   check(!fury || fury.duration < 3, "effects", "the effect's duration did not count down", JSON.stringify(fury));
   const downed = view.entries.filter((entry) => !party.some((member) => member.id === entry.recordId) && entry.wounds >= entry.hp);
   note(`after the fight: ${downed.length} of ${view.entries.length - party.length} foes down; party wounds ${party.map((member) => entryOf(member)?.wounds ?? "?").join(", ")}`);
-  check(view.entries.filter((entry) => !party.some((member) => member.id === entry.recordId)).every((entry) => entry.wounds <= entry.hp + 20), "combat", "a foe has absurd wounds");
+  // FG's SiegeCore turns on negative hit points, so CoreRPG lets wounds pile up
+  // past death as a dead kobold is hit again (Kraken does the same); what is
+  // caught here is a heap such as the old instant death's 999 wounds.
+  const absurd = view.entries.filter((entry) => !party.some((member) => member.id === entry.recordId) && entry.wounds > entry.hp + 200);
+  check(absurd.length === 0, "combat", "a foe has absurd wounds", JSON.stringify(absurd.map(({ name, hp, wounds, health }) => ({ name, hp, wounds, status: health?.status }))));
   const chat = await tool("kraken_chat_log", { count: 200 });
   note(`chat: ${chat.length} lines; krits ${chat.filter((line) => /KRAKEN (CRITICAL|FUMBLE)/.test(line.text ?? "")).length}; sleep/effects ${chat.filter((line) => /Effect \[/.test(line.text ?? "")).length}`);
   check(chat.some((line) => (line.roll?.label ?? line.text ?? "").startsWith("[ATTACK]")), "chat", "no [ATTACK] lines in chat");
@@ -359,6 +367,7 @@ try {
   seat.on("pageerror", (error) => seatErrors.push(error.message));
   await seat.goto(`http://127.0.0.1:${port}/`);
   await seat.fill('input[name="name"]', "Player One");
+  await seat.fill('input[name="account-password"]', "test-pass");
   await seat.click('button[type="submit"]');
   const loaded = await seat.waitForSelector(".map-toolbar", { timeout: 30000 }).then(() => true).catch(() => false);
   check(loaded, "player", "the player's map did not load");

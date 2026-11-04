@@ -9,7 +9,19 @@ import { buildFromSpec } from "../shared/siege/builder.mjs";
 const require = createRequire(import.meta.url);
 const { readModule } = require("../electron/importers/fgModule.cjs");
 
+// Whether FG is open with the bridge (asked once): when it is not, a call
+// would wait in the bridge's queue for minutes, so it fails at once instead.
+let fgUp = null;
+async function fgPolling() {
+  if (fgUp === null)
+    fgUp = await fetch("http://127.0.0.1:47111/status", { signal: AbortSignal.timeout(5000) })
+      .then((response) => response.json())
+      .then((status) => Boolean(status.connected))
+      .catch(() => false);
+  return fgUp;
+}
 async function fg(cmd, args) {
+  if (!(await fgPolling())) throw new Error("FG is not open (the agent bridge has not heard from it)");
   const response = await fetch("http://127.0.0.1:47111/cmd", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ cmd, args, timeout: 600 }) });
   const body = await response.json();
   if (!body.ok) throw new Error(`FG ${cmd}: ${body.error}`);

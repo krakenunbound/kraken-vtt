@@ -73,7 +73,19 @@ function facts(sheet) {
 // build in Fantasy Grounds through the agent bridge instead, when FG is up.
 const STALE = new Set(["aerendil-1", "aerendil-3", "lirael-1", "lirael-3"]);
 
+// Whether FG is open with the bridge (asked once): when it is not, a call
+// would wait in the bridge's queue for minutes, so it fails at once instead.
+let fgUp = null;
+async function fgPolling() {
+  if (fgUp === null)
+    fgUp = await fetch("http://127.0.0.1:47111/status", { signal: AbortSignal.timeout(5000) })
+      .then((response) => response.json())
+      .then((status) => Boolean(status.connected))
+      .catch(() => false);
+  return fgUp;
+}
 async function fg(cmd, args) {
+  if (!(await fgPolling())) throw new Error("FG is not open (the agent bridge has not heard from it)");
   const response = await fetch("http://127.0.0.1:47111/cmd", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -100,6 +112,8 @@ const keys = readdirSync(path.join(folder, "specs"))
   .filter((key) => only.size === 0 || only.has(key))
   .sort();
 let failed = 0;
+// The stale sheets left unchecked because FG is not open (not a failure: nothing differed).
+const unchecked = [];
 const byField = {};
 for (const key of keys) {
   const spec = JSON.parse(readFileSync(path.join(folder, "specs", `${key}.json`), "utf8"));
@@ -117,7 +131,8 @@ for (const key of keys) {
         fgSheet = await liveSheet(spec);
         live = true;
       } catch (error) {
-        wrong.push(`stale FG sheet, and live FG not reachable (${error.message})`);
+        if (!(await fgPolling())) unchecked.push(key);
+        else wrong.push(`stale FG sheet, and the live FG build failed (${error.message})`);
       }
     } else if (existsSync(xml)) fgSheet = convertXml(readFileSync(xml, "utf8")).character;
     if (fgSheet) {
@@ -140,5 +155,6 @@ for (const key of keys) {
     console.log(`FAIL ${key} (${spec.race} ${spec.class} ${spec.level}):\n  ${wrong.join("\n  ")}`);
   }
 }
-console.log(`${keys.length - failed}/${keys.length} pregens match FG's exported sheets${failed ? `; differing fields ${JSON.stringify(byField)}` : ""}`);
+if (unchecked.length) console.log(`skip ${unchecked.join(", ")}: their FG sheets are older than the wizard; they are compared with a live FG build, and FG is not open on a C&C campaign`);
+console.log(`${keys.length - failed - unchecked.length}/${keys.length - unchecked.length} pregens match FG's sheets${unchecked.length ? ` (${unchecked.length} skipped)` : ""}${failed ? `; differing fields ${JSON.stringify(byField)}` : ""}`);
 process.exit(failed ? 1 : 0);

@@ -160,6 +160,9 @@ try {
   const again = await connect(port, { name: "Ann" });
   const history = again.ok.chat.filter((line) => line.roll?.label?.startsWith("[TOWER]")).map((line) => line.roll.label);
   assert(history.join() === "[TOWER] Listen", `Ann's history: ${history.join()}`);
+  // Bob reconnects too (a name sits once: his old seat goes first).
+  bob.ws.close();
+  await settle();
   const bobAgain = await connect(port, { name: "Bob" });
   assert(!bobAgain.ok.chat.some((line) => line.roll?.label?.startsWith("[TOWER]")), "Bob's history has no tower rolls");
 

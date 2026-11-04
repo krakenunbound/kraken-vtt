@@ -40,6 +40,7 @@ try {
   // The player tries first: nothing is hosting yet.
   await player.click('[data-action="join-mode"]');
   await player.fill('form[data-form="join"] input[name="name"]', "A test player");
+  await player.fill('form[data-form="join"] input[name="account-password"]', "test-pass");
   await player.fill('form[data-form="join"] input[name="address"]', address);
   await player.fill('form[data-form="join"] input[name="port"]', String(port));
   await player.click('form[data-form="join"] button[type="submit"]');
@@ -68,6 +69,7 @@ try {
   seat.on("pageerror", (error) => failures.push(`chrome: ${error.message}`));
   await seat.goto(`http://${address}:${port}/`);
   await seat.fill('input[name="name"]', "Chrome player");
+  await seat.fill('input[name="account-password"]', "test-pass");
   await seat.click('button[type="submit"]');
   await seat.waitForSelector(".sidebar", { timeout: 20000 });
   await gm.waitForSelector('.roster-list li[data-role="player"]:has-text("Chrome player")', { timeout: 10000 });

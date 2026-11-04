@@ -72,6 +72,7 @@ try {
   seat.on("pageerror", (error) => failures.push(`player: ${error.message}`));
   await seat.goto(`http://127.0.0.1:${port}/`);
   await seat.fill('input[name="name"]', "A test player");
+  await seat.fill('input[name="account-password"]', "test-pass");
   await seat.fill('input[name="password"]', "pw");
   await seat.click('button[type="submit"]');
   await seat.waitForSelector(".sidebar");
@@ -104,6 +105,7 @@ try {
   const second = await browser.newPage({ viewport: { width: 1200, height: 800 } });
   await second.goto(`http://127.0.0.1:${port}/`);
   await second.fill('input[name="name"]', "Another player");
+  await second.fill('input[name="account-password"]', "test-pass");
   await second.fill('input[name="password"]', "pw");
   await second.click('button[type="submit"]');
   await second.waitForSelector(".sidebar");

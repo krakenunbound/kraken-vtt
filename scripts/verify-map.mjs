@@ -9,6 +9,11 @@ function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
+// The Vite dev server's page (npm run dev): skipped when it is not running.
+if (!(await fetch("http://localhost:5173/", { signal: AbortSignal.timeout(3000) }).then((response) => response.ok).catch(() => false))) {
+  console.log("skip verify-map: the dev server is not running (npm run dev, port 5173)");
+  process.exit(0);
+}
 const browser = await chromium.launch({ executablePath: chrome, headless: true });
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
 const failures = [];

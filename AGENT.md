@@ -39,6 +39,7 @@ The app starts the MCP server when it opens. `electron/agent/mcp-stdio.cjs` is t
 | Characters, NPCs, items, notes: list, read, make, edit, delete | `kraken_records_list`, `kraken_record_get`, `kraken_record_create`, `kraken_record_update`, `kraken_record_delete` |
 | Creation wizard (C&C's, or the 5E wizard in a D&D 5E campaign: species, class, background, scores, skills, gear, spells) | `kraken_build_character` |
 | Character Selection (a player takes a character no one holds), the portrait bar along the top | `kraken_characters` (roster, give, release) |
+| Players' accounts (the Players window): list, make one ahead, a new password, remove | `kraken_accounts` |
 | Lists (FG's campaign lists): share a record with the players or hide it (the sharing icon, FG's Share / Unshare); open the lists or a record | `kraken_record_update` visibility all / gm; `kraken_windows` records, record |
 | Recalculate a sheet | `kraken_character_refresh` |
 | Level up | `kraken_level_up` |

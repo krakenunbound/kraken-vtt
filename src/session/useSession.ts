@@ -152,6 +152,8 @@ export type DecalItem = { id: string; name: string; group: string; ruleset?: str
 export type PictureKind = "decal" | "wallpaper" | "gmicon" | "tile";
 // The combat tracker as the host shows it to this seat (electron/combat.cjs viewFor).
 // A character's face as everyone is told it (FG's character list).
+// A player's account as the GM is shown it (never a password).
+export type PlayerAccount = { name: string; createdAt: number; seenAt: number | null; devices: number; seated: boolean };
 export type RosterEntry = { id: string; name: string; owner: string; online: boolean; portrait: string | null; species: string; classes: string; level: number };
 
 export type CombatEntry = {
@@ -222,7 +224,35 @@ type NetScene = {
   image: string | null;
 };
 
-type JoinMessage = { name: string; password: string; hostToken?: string };
+// account: the player's account at that table (its password, or the token this browser kept).
+type JoinMessage = { name: string; password: string; hostToken?: string; account?: { password?: string; token?: string } };
+
+// A browser stays signed in to a table's account: the name and the token the
+// host gave, kept per table (address:port). Never the password.
+export type SignIn = { name: string; token: string };
+const signInKey = (table: string) => `kraken-signin:${table.toLowerCase()}`;
+export function savedSignIn(table: string): SignIn | null {
+  try {
+    const saved = JSON.parse(window.localStorage.getItem(signInKey(table)) ?? "null") as SignIn | null;
+    return saved && typeof saved.name === "string" && typeof saved.token === "string" ? saved : null;
+  } catch {
+    return null;
+  }
+}
+export function forgetSignIn(table: string) {
+  try {
+    window.localStorage.removeItem(signInKey(table));
+  } catch {
+    /* nothing kept */
+  }
+}
+function keepSignIn(table: string, signIn: SignIn) {
+  try {
+    window.localStorage.setItem(signInKey(table), JSON.stringify(signIn));
+  } catch {
+    /* this browser keeps nothing: the password is asked each time */
+  }
+}
 
 function endpoint(address: string, port: number, scheme: "ws" | "http"): string {
   const host = address.includes(":") && !address.startsWith("[") ? `[${address}]` : address;
@@ -284,6 +314,8 @@ export function useSession() {
   const [players, setPlayers] = useState<Seat[]>([]);
   // FG's character list: every character at the table (the portrait bar, Character Selection).
   const [roster, setRoster] = useState<RosterEntry[]>([]);
+  // The GM's: players' accounts, and what the last account action said.
+  const [accounts, setAccounts] = useState<{ list: PlayerAccount[]; note: string; error: string }>({ list: [], note: "", error: "" });
   const [map, setMap] = useState<TableMap>(EMPTY_MAP);
   const [party, setParty] = useState<import("../party/PartySheet").PartyView | null>(null);
   const [krits, setKrits] = useState<Record<string, string> | null>(null);
@@ -365,6 +397,8 @@ export function useSession() {
         socketRef.current = socket;
         let settled = false;
         let opened = false;
+        // Why the host sent this seat away (kicked, signed in elsewhere): kept past the close.
+        let sentAway = "";
         const timer = window.setTimeout(() => {
           if (settled) return;
           settled = true;
@@ -390,13 +424,17 @@ export function useSession() {
             return;
           }
           if (msg.type === "no") {
+            // The account would not take this browser's token (a new password, signed out elsewhere): forget it.
+            if (msg.account === "password") forgetSignIn(label);
             fail(typeof msg.reason === "string" ? msg.reason : "Wrong password.");
             return;
           }
           if (msg.type === "ok" && !settled) {
             settled = true;
             window.clearTimeout(timer);
-            const you = msg.you as Seat & { assetToken?: string };
+            const you = msg.you as Seat & { assetToken?: string; accountToken?: string };
+            // Signed in: this browser keeps the token, not the password.
+            if (you.accountToken) keepSignIn(label, { name: you.name, token: you.accountToken });
             assetRef.current = you.assetToken ?? "";
             // Sounds come from the host, for this seat.
             sound.setSource((id) => `${originRef.current}/sound/file?token=${assetRef.current}&id=${encodeURIComponent(id)}`);
@@ -428,6 +466,7 @@ export function useSession() {
           }
           if (msg.type === "players") setPlayers((msg.players as Seat[]) ?? []);
           if (msg.type === "roster" && Array.isArray(msg.roster)) setRoster(msg.roster as RosterEntry[]);
+          if (msg.type === "accounts") setAccounts({ list: Array.isArray(msg.accounts) ? (msg.accounts as PlayerAccount[]) : [], note: typeof msg.done === "string" ? msg.done : "", error: typeof msg.error === "string" ? msg.error : "" });
           if (msg.type === "map") applyMap(msg as unknown as TableMap);
           if (msg.type === "library" && Array.isArray(msg.items)) setLibrary((current) => ({ ...current, [`${msg.module}|${msg.kind}`]: msg.items as LibraryItem[] }));
           if (msg.type === "krits" && msg.settings) setKrits(msg.settings as Record<string, string>);
@@ -459,7 +498,10 @@ export function useSession() {
             void sound.setScape(msg.soundscape as Soundscape);
           }
           if (msg.type === "sound-triggers" && Array.isArray(msg.triggers)) setSoundTriggers(msg.triggers as SoundTrigger[]);
-          if (msg.type === "kicked") setError(String(msg.reason ?? "The GM has asked you to leave the table."));
+          if (msg.type === "kicked") {
+            sentAway = String(msg.reason ?? "The GM has asked you to leave the table.");
+            setError(sentAway);
+          }
           if (msg.type === "books") setBookShelf({ active: (msg.active as string[]) ?? [], shared: (msg.shared as string[]) ?? [], images: (msg.images as ShownImage[]) ?? [] });
           if (msg.type === "image-shown" && typeof msg.id === "string") setImageShown({ id: msg.id, at: Date.now() });
           if (msg.type === "book-sounds" && msg.sounds && typeof msg.sounds === "object") setBookSounds(msg.sounds as Record<string, PageSounds>);
@@ -511,13 +553,13 @@ export function useSession() {
             return;
           }
           if (generation.current !== gen || intentional.current) return;
-          setError("The table closed.");
+          setError(sentAway || "The table closed.");
           reset();
         };
 
         socket.onopen = () => {
           opened = true;
-          socket.send(JSON.stringify({ type: "join", name: join.name, password: join.password, hostToken: join.hostToken }));
+          socket.send(JSON.stringify({ type: "join", name: join.name, password: join.password, hostToken: join.hostToken, ...(join.account ? { account: join.account } : {}) }));
         };
       });
     },
@@ -539,6 +581,17 @@ export function useSession() {
     reset();
     if (wasDm) void window.kraken?.stopHost();
   }, [reset]);
+
+  // A player signs this browser out of their account at this table and leaves:
+  // the host forgets this browser's token; the password is needed next time.
+  const signOut = useCallback(() => {
+    const table = remoteLabel;
+    const kept = table ? savedSignIn(table) : null;
+    const socket = socketRef.current;
+    if (kept && socket && socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify({ type: "sign-out", token: kept.token }));
+    if (table) forgetSignIn(table);
+    window.setTimeout(() => leave(true), 150);
+  }, [remoteLabel, leave]);
 
   const host = useCallback(
     async (input: { name: string; port: number; password: string; lan: boolean; cloud: boolean; campaignId: string }) => {
@@ -591,16 +644,20 @@ export function useSession() {
   );
 
   const join = useCallback(
-    async (input: { name: string; address: string; port: number; password: string }) => {
+    async (input: { name: string; address: string; port: number; password: string; accountPassword?: string }) => {
       setConnecting(true);
       setError(null);
       try {
         const address = cleanAddress(input.address);
         checkPort(input.port);
         if (!address) throw new Error("Enter the DM's address.");
+        // This browser's sign-in at that table, when it is the same name.
+        const kept = savedSignIn(`${address}:${input.port}`);
+        const token = kept && kept.name.toLowerCase() === input.name.trim().toLowerCase() ? kept.token : "";
+        const account = input.accountPassword || token ? { ...(input.accountPassword ? { password: input.accountPassword } : {}), ...(token ? { token } : {}) } : undefined;
         await connect(
           endpoint(address, input.port, "ws"),
-          { name: input.name, password: input.password },
+          { name: input.name, password: input.password, account },
           `${address}:${input.port}`,
           endpoint(address, input.port, "http"),
         );
@@ -722,6 +779,12 @@ export function useSession() {
       opWaits.current.set(req, { resolve, reject });
       socket.send(JSON.stringify({ type: "build-character", req, spec, owner }));
     });
+  }, []);
+
+  // The GM's account controls: list, create (name, password), password (a new one), remove.
+  const accountAction = useCallback((input: { action: "list" | "create" | "password" | "remove"; name?: string; password?: string }) => {
+    const socket = socketRef.current;
+    if (socket && socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify({ type: "accounts", ...input }));
   }, []);
 
   // FG's Character Selection: take a character no one holds; it becomes this seat's.
@@ -946,6 +1009,8 @@ export function useSession() {
     remoteLabel,
     players,
     roster,
+    accounts,
+    accountAction,
     map,
     party,
     krits,
@@ -962,6 +1027,7 @@ export function useSession() {
     host,
     join,
     leave,
+    signOut,
     publish,
     sendChat,
     placeToken,

@@ -26,6 +26,8 @@ function connect(port, join) {
       if (msg.type === "chat") lines.push(msg);
       if (msg.type === "error") errors.push(msg.reason);
       events.push(msg);
+      // Turned away (a wrong password, a name already at the table): fail, never wait.
+      if (msg.type === "no") reject(new Error(`join refused: ${msg.reason}`));
       if (msg.type === "ok") resolve({ ws, you: msg.you, lines, errors, events, send: (body) => ws.send(JSON.stringify(body)), closed: new Promise((done) => ws.on("close", done)) });
     });
     ws.on("error", reject);
@@ -164,6 +166,10 @@ try {
   assert((await tool("kraken_kick", { name: "Sir Aldric" })).kicked === "Sir Aldric", "the agent kicks");
 
   // A whisper is kept in the history for those it was to, and only them.
+  // Ann reconnects (a name sits once, so her old seat goes first).
+  ann.ws.close();
+  await ann.closed;
+  await settle();
   const again = await connect(port, { name: "Ann" });
   const history = again.events.find((event) => event.type === "ok").chat;
   assert(history.some((line) => line.text === "The door is trapped.") && !history.some((line) => line.text === "Psst"), "Ann's history has her whisper, not Bob's to Sir Aldric");
@@ -181,6 +187,9 @@ try {
   assert(gmBack.you.role === "dm", "the GM comes back as the GM");
   const gmHistory = gmBack.events.find((event) => event.type === "ok").chat;
   assert(gmHistory.length === 1 && gmHistory[0].text === "After the clear", `the GM's cleared chat stays cleared (${gmHistory.map((line) => line.text).join(" | ")})`);
+  again.ws.close();
+  await again.closed;
+  await settle();
   const annBack = await connect(port, { name: "Ann" });
   assert(annBack.events.find((event) => event.type === "ok").chat.some((line) => line.text === "The door is trapped."), "a player's chat is not cleared by the GM's /clear");
   assert(server.agent.chatLog(100).some((line) => line.text === "The door is trapped."), "the table's record keeps cleared lines");

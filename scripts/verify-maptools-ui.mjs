@@ -71,6 +71,7 @@ try {
   seat.on("pageerror", (error) => failures.push(`player: ${error.message}`));
   await seat.goto(`http://127.0.0.1:${port}/`);
   await seat.fill('input[name="name"]', "A test player");
+  await seat.fill('input[name="account-password"]', "test-pass");
   await seat.fill('input[name="password"]', "pw");
   await seat.click('button[type="submit"]');
   await seat.waitForSelector(".map-toolbar");
