@@ -9,8 +9,10 @@ import { LIGHT_PRESETS } from "../../shared/map/geometry.mjs";
 // has as a tool too (kraken_wall, kraken_light, kraken_scene_settings,
 // kraken_map_undo).
 
-export type EditTab = "walls" | "lights" | "mask" | "text" | "grid";
-export type EditTool = "select" | "line" | "rect" | "poly" | "light" | "cell" | "text" | "number" | null;
+export type EditTab = "walls" | "lights" | "mask" | "text" | "grid" | "paint" | "fx";
+export type EditTool = "select" | "line" | "rect" | "poly" | "light" | "cell" | "text" | "number" | "free" | "ellipse" | "fxmask" | null;
+// What the Paint tab draws next.
+export type PaintStyle = { color: string; width: number; alpha: number; fill: string | null; fillAlpha: number; group: string };
 export const LABEL_FONTS = ["Bebas Neue", "Cinzel", "Georgia", "Signika", "Arial", "Courier New"];
 // What the Text tab places next (FG's text properties).
 export type LabelStyle = { text: string; font: string; size: number; color: string; outline: { width: number; color: string }; shadow: { offset: number; blur: number; color: string }; group: string; icon: string };
@@ -56,12 +58,18 @@ type Props = {
   lightPreset: string;
   setLightPreset: (preset: string) => void;
   gridScene: { size: number; type: number; color: string; alpha: number; distance: number; units: string; offsetX?: number; offsetY?: number };
+  paintStyle: PaintStyle;
+  setPaintStyle: (style: PaintStyle) => void;
+  selectedFx: string | null;
+  setSelectedFx: (id: string | null) => void;
   labelStyle: LabelStyle;
   setLabelStyle: (style: LabelStyle) => void;
   selectedLabel: string | null;
   maskMode: "reveal" | "hide";
   setMaskMode: (mode: "reveal" | "hide") => void;
   actions: {
+    fx: (action: string, payload?: Record<string, unknown>) => void;
+    clearDrawings: () => void;
     label: (action: string, payload?: Record<string, unknown>) => void;
     mapGroup: (action: string, payload?: Record<string, unknown>) => void;
     mask: (action: string, payload?: Record<string, unknown>) => void;
@@ -105,10 +113,13 @@ export function MapEditor(props: Props) {
             ["mask", "◑", "Mask"],
             ["grid", "#", "Grid"],
             ["text", "Tt", "Text"],
+            ["paint", "🖌", "Paint"],
+            ["fx", "ƒx", "FX"],
           ] as const
         ).map(([id, icon, title]) => (
           <button key={id} type="button" role="tab" aria-selected={tab === id} title={title} data-edit-tab={id} onClick={() => setTab(id)}>
-            <span aria-hidden>{icon}</span> {title.split(":")[0]}
+            <span aria-hidden>{icon}</span>
+            <small>{{ walls: "Walls", lights: "Lights", mask: "Mask", grid: "Grid", text: "Text", paint: "Paint", fx: "FX" }[id]}</small>
           </button>
         ))}
       </nav>
@@ -321,6 +332,8 @@ export function MapEditor(props: Props) {
       {tab === "text" ? (
         <TextTab {...props} />
       ) : null}
+      {tab === "paint" ? <PaintTab {...props} /> : null}
+      {tab === "fx" ? <FxTab {...props} /> : null}
 
       {tab === "grid" ? (
         <div className="me-box me-grid-tab">
@@ -533,6 +546,165 @@ function TextTab(props: Props) {
             + Group
           </button>
         </div>
+      </div>
+    </>
+  );
+}
+
+// FG's Paint tab: freehand, line, rectangle, ellipse and closed shapes, with
+// a stroke (colour, width, opacity) and Foundry's fill, in a layer group.
+function PaintTab(props: Props) {
+  const { tool, setTool, paintStyle: style, setPaintStyle: setStyle, map, actions } = props;
+  const toolButton = (id: EditTool, icon: string, title: string) => (
+    <button type="button" className={tool === id ? "me-tool on" : "me-tool"} aria-pressed={tool === id} title={title} aria-label={title} data-edit-tool={id ?? "none"} onClick={() => setTool(tool === id ? null : id)}>
+      {icon}
+    </button>
+  );
+  return (
+    <>
+      <div className="me-tools">
+        {toolButton("free", "✎", "Paint freehand: drag")}
+        {toolButton("line", "╱", "A straight line: click two points")}
+        {toolButton("rect", "▭", "A rectangle: click two corners")}
+        {toolButton("ellipse", "◯", "An ellipse: click two corners")}
+        {toolButton("poly", "⬠", "A closed shape: click its corners, double-click to close")}
+      </div>
+      <div className="me-box">
+        <div className="me-grid2">
+          <label>
+            Tint
+            <input type="color" value={style.color} onChange={(event) => setStyle({ ...style, color: event.target.value })} aria-label="Paint colour" />
+          </label>
+          <label>
+            Width (px)
+            <input type="number" min={1} max={80} value={style.width} onChange={(event) => setStyle({ ...style, width: Number(event.target.value) || 6 })} aria-label="Paint width" />
+          </label>
+          <label>
+            Opacity
+            <input type="range" min={0.05} max={1} step={0.05} value={style.alpha} onChange={(event) => setStyle({ ...style, alpha: Number(event.target.value) })} aria-label="Paint opacity" />
+          </label>
+          <label>
+            <span>
+              <input type="checkbox" checked={style.fill !== null} onChange={(event) => setStyle({ ...style, fill: event.target.checked ? style.color : null })} aria-label="Fill" /> Fill
+            </span>
+            <input type="color" value={style.fill ?? style.color} disabled={style.fill === null} onChange={(event) => setStyle({ ...style, fill: event.target.value })} aria-label="Fill colour" />
+          </label>
+          <label>
+            Fill opacity
+            <input type="range" min={0} max={1} step={0.05} value={style.fillAlpha} disabled={style.fill === null} onChange={(event) => setStyle({ ...style, fillAlpha: Number(event.target.value) })} aria-label="Fill opacity" />
+          </label>
+          <label>
+            Group
+            <select value={style.group} onChange={(event) => setStyle({ ...style, group: event.target.value })} aria-label="Paint group">
+              <option value="">(none)</option>
+              {(map.groups ?? []).map((group) => (
+                <option key={group.name}>{group.name}</option>
+              ))}
+            </select>
+          </label>
+        </div>
+        <p className="me-caption">Players draw with the play bar's pen; the GM's paint can be put in a group players do not see (make groups in the Text tab).</p>
+      </div>
+      <div className="me-foot">
+        <span className="hint">{map.drawings?.length ?? 0} drawings</span>
+        <button type="button" onClick={actions.clearDrawings}>
+          Clear all
+        </button>
+      </div>
+    </>
+  );
+}
+
+const FX_LIST = ["rain", "storm", "snow", "blizzard", "fog", "clouds", "sandstorm", "embers", "ash", "leaves", "water"] as const;
+
+// FG's FX tab: FX layers (several at once), FX Type, Amount, Intensity, Speed
+// and Direction (0 to 100 as FG shows them), and a mask the effect fills or leaves.
+function FxTab(props: Props) {
+  const { map, actions, selectedFx, setSelectedFx, tool, setTool } = props;
+  const layers = map.fx ?? [];
+  const layer = layers.find((item) => item.id === selectedFx) ?? null;
+  const set = (patch: Record<string, unknown>) => layer && actions.fx("update", { id: layer.id, patch });
+  const slider = (key: "amount" | "intensity" | "speed", label: string) =>
+    layer ? (
+      <label className="me-slider">
+        {label}
+        <input type="range" min={0} max={100} value={Math.round(layer[key] * 100)} onChange={(event) => set({ [key]: Number(event.target.value) / 100 })} aria-label={`FX ${label}`} />
+        <span>{Math.round(layer[key] * 100)}</span>
+      </label>
+    ) : null;
+  return (
+    <>
+      <div className="me-tools">
+        <button type="button" className="me-tool" title="New FX layer (rain)" aria-label="New FX layer" data-action="fx-add" onClick={() => actions.fx("add", { fx: { type: "rain", name: `FX ${layers.length + 1}` } })}>
+          ✚
+        </button>
+        {layer ? (
+          <button type="button" className={tool === "fxmask" ? "me-tool on" : "me-tool"} aria-pressed={tool === "fxmask"} title="Mask this effect to a rectangle: click two corners" aria-label="Mask the effect" data-edit-tool="fxmask" onClick={() => setTool(tool === "fxmask" ? null : "fxmask")}>
+            ▭
+          </button>
+        ) : null}
+      </div>
+      <div className="me-box">
+        {layer ? (
+          <>
+            <label className="me-row">
+              FX Type
+              <select value={layer.type} onChange={(event) => set({ type: event.target.value })} aria-label="FX type">
+                {FX_LIST.map((type) => (
+                  <option key={type} value={type}>
+                    {type[0].toUpperCase() + type.slice(1)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            {slider("amount", "Amount")}
+            {slider("intensity", "Intensity")}
+            {slider("speed", "Speed")}
+            <label className="me-slider">
+              Direction
+              <input type="range" min={0} max={359} value={layer.direction} onChange={(event) => set({ direction: Number(event.target.value) })} aria-label="FX direction" />
+              <span>{layer.direction}°</span>
+            </label>
+            <div className="me-row">
+              <label>
+                <input type="checkbox" checked={layer.mask.use} disabled={!layer.mask.polygons.length} onChange={(event) => set({ mask: { use: event.target.checked } })} /> Use mask
+              </label>
+              <select value={layer.mask.mode} onChange={(event) => set({ mask: { mode: event.target.value } })} aria-label="FX mask mode">
+                <option value="inside">Only inside</option>
+                <option value="outside">Everywhere but inside</option>
+              </select>
+              <button type="button" onClick={() => set({ mask: { use: false, polygons: [] } })} disabled={!layer.mask.polygons.length}>
+                Clear mask
+              </button>
+            </div>
+            <div className="me-row">
+              <label>
+                <input type="checkbox" checked={layer.players} onChange={(event) => set({ players: event.target.checked })} /> Players see it
+              </label>
+              <label>
+                <input type="checkbox" checked={layer.shown} onChange={(event) => set({ shown: event.target.checked })} /> Shown
+              </label>
+              <button type="button" onClick={() => {
+                actions.fx("remove", { id: layer.id });
+                setSelectedFx(null);
+              }}>
+                Delete
+              </button>
+            </div>
+          </>
+        ) : (
+          <p className="me-caption">Add an FX layer, or pick one below. Several can run at once: water in a river, rain everywhere but under a roof.</p>
+        )}
+      </div>
+      <div className="me-layers" aria-label="FX layers">
+        <div className="me-layer head">
+          <b>FX LAYERS</b>
+        </div>
+        {layers.map((item) => (
+          <button key={item.id} type="button" className={item.id === selectedFx ? "me-layer-row on" : "me-layer-row"} data-fx={item.id} onClick={() => setSelectedFx(item.id)}>
+            ƒx {item.name || item.type} <small className="hint">{item.type}{item.mask.use ? ` · masked ${item.mask.mode}` : ""}{item.players ? "" : " · GM only"}</small>
+          </button>
+        ))}
       </div>
     </>
   );

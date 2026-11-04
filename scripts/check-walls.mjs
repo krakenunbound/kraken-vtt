@@ -208,10 +208,32 @@ try {
   assert(map.mask().on && !playerLabels().includes("Throne Room"), "undo brings the mask back on, and the text is withheld again");
   await tool("kraken_mask", { action: "off" });
 
+  // Paint (the Paint tab): shapes and fills in groups; players draw only plain lines.
+  await tool("kraken_map_group", { action: "update", name: "GM notes", players: false });
+  const box = await tool("kraken_draw", { action: "draw", shape: "rect", points: [10, 10, 90, 60], color: "#c0392b", fill: "#c0392b", fillAlpha: 0.4, group: "GM notes" });
+  const river = await tool("kraken_draw", { action: "draw", shape: "ellipse", points: [100, 100, 200, 160], color: "#3a7bd5", fill: "#3a7bd5" });
+  assert(box.shape === "rect" && box.fill === "#c0392b" && river.shape === "ellipse", "the GM's shapes keep their fills");
+  const playerDrawings = () => map.viewFor(playerSeat, "").drawings.map((line) => line.id);
+  assert(!playerDrawings().includes(box.id) && playerDrawings().includes(river.id), "paint in a GM-only group stays with the GM");
+  const scribble = map.draw({ points: [0, 0, 10, 10], shape: "rect", fill: "#ffffff", group: "GM notes" }, playerSeat);
+  assert(!scribble.shape && !scribble.fill && !scribble.group, "a player draws plain lines");
+
+  // FX layers (the FX tab): several at once, each with a mask; a GM-only one stays with the GM.
+  const rain = await tool("kraken_fx", { action: "add", type: "rain", amount: 0.8, intensity: 0.13, speed: 1, direction: 144, maskRect: { x: 0, y: 0, width: 300, height: 300 }, maskMode: "outside" });
+  const water = await tool("kraken_fx", { action: "add", type: "water", maskRect: { x: 300, y: 0, width: 100, height: 300 } });
+  await tool("kraken_fx", { action: "add", type: "fog", players: false });
+  const playerFx = map.viewFor(playerSeat, "").fx;
+  assert(playerFx.length === 2 && playerFx.some((layer) => layer.id === rain.id && layer.mask.mode === "outside" && layer.mask.polygons[0].length === 8) && playerFx.some((layer) => layer.id === water.id), `players get the two shared FX layers with their masks: ${playerFx.length}`);
+  assert(map.viewFor(seat, "").fx.length === 3, "the GM gets all three");
+  await tool("kraken_fx", { action: "update", id: rain.id, intensity: 0.5 });
+  assert(map.fx().find((layer) => layer.id === rain.id).intensity === 0.5 && map.fx().find((layer) => layer.id === rain.id).mask.use, "an update keeps the mask");
+  await tool("kraken_fx", { action: "remove", id: water.id });
+  assert(map.fx().length === 2, "removed");
+
   // Saved with the campaign.
   const saved = server.agent.map.persisted();
   assert(saved.walls.room.length === 4, `walls are saved: ${saved.walls.room.length}`);
-  console.log("ok walls: chains drawn; wall, ethereal, invisible, window (opened by the player, closed by Close all doors), toggle, one-way and shadow caster each as FG; split, remove, undo; the mask (global, reveal, hide again, undo) withholds what is under it; text, numbers (no reuse, renumber, prefix) and pins in layer groups (GM-only, locked); saved; never sent to players");
+  console.log("ok walls: chains drawn; wall, ethereal, invisible, window (opened by the player, closed by Close all doors), toggle, one-way and shadow caster each as FG; split, remove, undo; the mask (global, reveal, hide again, undo) withholds what is under it; text, numbers (no reuse, renumber, prefix) and pins in layer groups (GM-only, locked); paint shapes and fills; FX layers with masks; saved; never sent to players");
 } finally {
   for (const ws of sockets) ws.close();
   await server.stop();
