@@ -1,4 +1,5 @@
 import { Icon } from "../ui/icons";
+import { tilesInView, watchTiles, type MapTile as PictureTile, type TileSet } from "./mapTiles";
 import { lazy, memo, Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { backgroundRect, colorWithAlpha, gridStops, sceneFrame, type BackgroundFit, type SceneFrame } from "../foundry/geometry";
 import { type SceneLight, type SceneMarker, type SceneRegion, type SceneWall } from "../foundry/sceneObjects";
@@ -409,6 +410,19 @@ function MapViewInner({
 
   // The first view of a scene: the GM sees all of it; a player starts on
   // their own token, close enough to see the squares.
+  // A big map as tiles (mapTiles.ts): decoded and cut in a worker, the
+  // coarsest level first, only the tiles in view drawn at the detail the zoom
+  // needs (decoding a 4600x6400 picture on the window's thread stood it still
+  // ~300 ms at every scene change). A small picture is drawn as it is.
+  const [tileSet, setTileSet] = useState<TileSet | null>(null);
+  useEffect(() => {
+    setTileSet(null);
+    if (!scene.imageUrl) return;
+    return watchTiles(scene.imageUrl, (set) => {
+      setTileSet(set);
+      if (set.width > 0) setNatural({ width: set.width, height: set.height });
+    });
+  }, [scene.imageUrl]);
   const framedFor = useRef(views.get(sceneIn.id)?.framed ?? "");
   // The view kept as it changes, for when the map moves to another window.
   useEffect(() => {
@@ -1258,9 +1272,34 @@ function MapViewInner({
           transform: `translate(${camera.x}px, ${camera.y}px) scale(${camera.scale})`,
         }}
       >
-        {scene.imageUrl && !imageFailed ? (
+        {scene.imageUrl && !imageFailed && tileSet && tileSet.levels.length > 0 && natural ? (
+          (() => {
+            // The tiles in view, at the zoom's detail, over the whole map at its coarsest (no gaps while they decode).
+            const bx = backdrop.width / tileSet.width;
+            const by = backdrop.height / tileSet.height;
+            const rect = viewport.current?.getBoundingClientRect();
+            const toPicture = (sx: number, sy: number) => ({ x: ((sx - camera.x) / camera.scale - backdrop.left) / bx, y: ((sy - camera.y) / camera.scale - backdrop.top) / by });
+            const a = toPicture(0, 0);
+            const b = toPicture(rect?.width ?? 4000, rect?.height ?? 4000);
+            const coarsest = tileSet.levels[0].tiles;
+            const shown = tilesInView(tileSet, camera.scale * bx, { left: a.x, top: a.y, right: b.x, bottom: b.y });
+            const place = (tile: PictureTile) => ({ left: backdrop.left + tile.x * bx, top: backdrop.top + tile.y * by, width: tile.width * bx, height: tile.height * by });
+            return (
+              <div className="map-picture" data-width={tileSet.width} data-height={tileSet.height} data-ready={tileSet.done ? "true" : "false"} data-tiles={shown.length} aria-label={scene.name}>
+                {coarsest.map((tile) => (
+                  <img key={`c${tile.x},${tile.y}`} className="map-tile-under" src={tile.url} alt="" draggable={false} decoding="async" style={place(tile)} />
+                ))}
+                {shown.filter((tile) => tile.level > 0).map((tile) => (
+                  <img key={`${tile.level}:${tile.x},${tile.y}`} src={tile.url} alt="" draggable={false} decoding="async" style={place(tile)} />
+                ))}
+              </div>
+            );
+          })()
+        ) : null}
+        {scene.imageUrl && !imageFailed && tileSet?.done && tileSet.levels.length === 0 ? (
           <img
             src={scene.imageUrl}
+            decoding="async"
             alt={scene.name}
             draggable={false}
             style={{ left: backdrop.left, top: backdrop.top, width: backdrop.width, height: backdrop.height }}
