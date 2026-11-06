@@ -80,3 +80,7 @@ The app starts the MCP server when it opens. `electron/agent/mcp-stdio.cjs` is t
 
 - Popping out the chat (the chat is not a sidebar window); moving or resizing a window to an exact place.
 - Acting as a particular player. The agent is the GM; `kraken_token_move` with `asPlayer` and `kraken_line_of_sight` with `player` show what a player would get.
+
+## Processes
+
+The GM's app is two processes: `electron/main.cjs` (the window: it draws, opens dialogs, keeps the assistant key, and forwards every other call) and `electron/backend.cjs` (Electron's utility process: the table server, campaigns, libraries, books, the agent bridge and its tools, the assistant). Agent tools run in the backend; `ctx.ui` and `ctx.windowOp` reach the window through main. Heavy work belongs in the backend, never in main.

@@ -1456,12 +1456,9 @@ const TOOLS = [
     description: "Screenshot the GM's app window.",
     inputSchema: object({}),
     async run(_args, ctx) {
-      const win = ctx.window();
-      if (!win) throw new Error("The app window is closed.");
-      const image = await win.webContents.capturePage();
-      const size = image.getSize();
-      const scaled = size.width > 1600 ? image.resize({ width: 1600 }) : image;
-      return { content: [{ type: "image", data: scaled.toPNG().toString("base64"), mimeType: "image/png" }] };
+      // The window is the window's process's (the backend asks it).
+      const data = await ctx.windowOp("screenshot");
+      return { content: [{ type: "image", data, mimeType: "image/png" }] };
     },
   },
   {
@@ -1469,9 +1466,7 @@ const TOOLS = [
     description: "The visible text of the GM's app window.",
     inputSchema: object({}),
     async run(_args, ctx) {
-      const win = ctx.window();
-      if (!win) throw new Error("The app window is closed.");
-      return out(await win.webContents.executeJavaScript("document.body ? document.body.innerText : ''"));
+      return out(await ctx.windowOp("text"));
     },
   },
   {
@@ -1479,21 +1474,7 @@ const TOOLS = [
     description: "Run JavaScript in the GM's app window and return the result (for driving or inspecting the UI). window.__kraken has the session handle.",
     inputSchema: object({ code: string("An expression, or statements ending in a value") }, ["code"]),
     async run(args, ctx) {
-      const win = ctx.window();
-      if (!win) throw new Error("The app window is closed.");
-      // Try the code as an expression; only if that does not parse, as statements.
-      const source = JSON.stringify(String(args.code));
-      const value = await win.webContents.executeJavaScript(
-        `(async () => {
-          const AsyncFunction = (async () => {}).constructor;
-          let fn;
-          try { fn = new AsyncFunction("return (" + ${source} + ");"); }
-          catch (error) { if (!(error instanceof SyntaxError)) throw error; fn = new AsyncFunction(${source}); }
-          return await fn();
-        })()`,
-        true,
-      );
-      return out(value === undefined ? "undefined" : value);
+      return out(await ctx.windowOp("eval", { code: String(args.code) }));
     },
   },
 ];
