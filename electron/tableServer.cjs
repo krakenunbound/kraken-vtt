@@ -437,6 +437,12 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
   let asking = null;
   const records = createRecordStore({ saved: saved.records, onChange: () => onChange("records") });
   const dice = createDice(saved.dice);
+  // A character's race and class token (Kraken's pair), when it has no picture of its own.
+  const artForCharacter = (data) => {
+    if (!art || !data) return null;
+    const cls = data.class ?? Object.values(data.packages ?? {}).find((pkg) => pkg && pkg.levels)?.name ?? "";
+    return require("./characterArt.cjs").pickArt(art.list("token"), data.race ?? data.species, cls)?.id ?? null;
+  };
   const map = createMapState({
     saved: saved.map,
     records,
@@ -446,6 +452,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     },
     hasArt: (id) => tokenArt.has(id),
     hasPicture: (id) => Boolean(art && art.has(id)),
+    artFor: (data) => artForCharacter(data),
     hasTile: (id) => Boolean(tiles && tiles.has(id)),
     // An NPC token's health and the active turn come from the tracker.
     combatFor: (tokenId) => {
@@ -890,6 +897,20 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         record &&
         (canSee(record, seatOf(client)) || map.tokens().some((item) => item.recordId === record.id && !item.hidden) || client.role === "dm");
       const kind = url.searchParams.get("kind") === "portrait" ? "picture" : "token";
+      // A character's: its token (or portrait, or its race and class's), from the art library, as a still.
+      if (allowed && record.type === "character" && art) {
+        const data = record.data ?? {};
+        const wanted = kind === "picture" ? [data.portrait, data.token] : [data.token, data.portrait];
+        const id = [...wanted, artForCharacter(data)].find((item) => typeof item === "string" && art.has(item));
+        const still = id && /\.webm$/i.test(id) && art.has(id.replace(/\.webm$/i, ".png")) ? id.replace(/\.webm$/i, ".png") : id;
+        const file = still ? art.file(still) : null;
+        if (file) {
+          const bytes = fs.readFileSync(file.path);
+          res.writeHead(200, { "Content-Type": file.mime, "Content-Length": bytes.length, "Cache-Control": "private, max-age=300" });
+          res.end(bytes);
+          return;
+        }
+      }
       const picture = allowed ? modulePicture(record.data?.[kind] || record.data?.picture || record.data?.token, record.source) : null;
       if (!picture) {
         res.writeHead(404, { "Cache-Control": "no-store" });
@@ -1542,6 +1563,8 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
             if (msg.action === "add") map.addWalls(msg.wall ?? {}, seat);
             else if (msg.action === "update") map.updateWalls(ids, msg.patch ?? {}, seat);
             else if (msg.action === "remove") map.removeWalls(ids, seat);
+            else if (msg.action === "move") map.moveWalls(ids, num(msg.dx, NaN), num(msg.dy, NaN), seat);
+            else if (msg.action === "move-point") map.movePoint(msg.from, msg.to, ids, seat);
             else if (msg.action === "split") map.splitWall(ids[0], num(msg.x, NaN), num(msg.y, NaN), seat);
             else if (msg.action === "clear") map.clearWalls(seat);
             else if (msg.action === "close-doors") map.closeDoors(seat);

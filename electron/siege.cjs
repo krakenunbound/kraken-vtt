@@ -285,6 +285,11 @@ async function dropOnCharacter(table, record, source, from) {
     added = "item";
     summary = `${record.name} gets ${copy.name}${Number(row.carried) === 2 ? " (equipped)" : ""}.`;
   } else throw new Error(`A ${source.type} does not go on a character sheet.`);
+  // A character made by hand gets its race and class's portrait and token, as the wizard gives them (none of its own chosen yet).
+  if (added === "package" && typeof table.art === "function" && (!data.portrait || !data.token)) {
+    const cls = Object.values(data.packages ?? {}).find((pkg) => pkg && pkg.levels)?.name ?? "";
+    Object.assign(data, require("./characterArt.cjs").withArt(data, { race: data.race, class: cls }, table.art));
+  }
   const updated = table.records.update(record.id, { data: engine.derive(data, game) }, table.seat, { replace: true });
   // A character the players do not see: only the GM hears what it got.
   table.say(summary, who, record.visibility === "gm");

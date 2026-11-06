@@ -139,6 +139,8 @@ function cleanWall(raw) {
     toggle: ["none", "gm", "players"].includes(raw.toggle) ? raw.toggle : (base.toggle ?? "none"),
     threshold: num(raw.threshold, 0) > 0 ? num(raw.threshold, 0) : null,
     hidden: Boolean(raw.hidden),
+    // The door it is a side of (a door drawn as a box or shape opens as one, as FG's).
+    ...(typeof raw.group === "string" && raw.group.trim() ? { group: raw.group.trim().slice(0, 60) } : {}),
   };
 }
 const MAX_WALLS = 5000;
@@ -376,7 +378,7 @@ function presetLight(name, profiles = []) {
   return preset ? cleanCarried({ name: preset.name, bright: preset.bright * 5, dim: preset.dim * 5, color: preset.color }) : null;
 }
 
-function createMapState({ saved, records, onChange = () => undefined, hasArt = () => false, hasPicture = () => false, hasTile = () => true, combatFor = () => null, activeRecord = () => null }) {
+function createMapState({ saved, records, onChange = () => undefined, hasArt = () => false, hasPicture = () => false, artFor = () => null, hasTile = () => true, combatFor = () => null, activeRecord = () => null }) {
   const state = savedMap(saved);
   let scene = null;
   const visionCache = new Map();
@@ -626,7 +628,9 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
     };
     // A character's token picture, else its portrait (FG's token from the sheet).
     const data = token.recordId ? records.get(token.recordId)?.data : null;
-    const picture = [data?.token, data?.portrait].find((id) => typeof id === "string" && hasPicture(id));
+    // A character with none of its own: its race and class's (Kraken's pair).
+    const own = [data?.token, data?.portrait].find((id) => typeof id === "string" && hasPicture(id));
+    const picture = own ?? (data && records.get(token.recordId)?.type === "character" ? artFor(data) : null);
     if (picture) {
       out.art = `/art/file?token=${assetToken}&id=${encodeURIComponent(picture)}`;
       out.video = picture.toLowerCase().endsWith(".webm");
@@ -1028,6 +1032,42 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       for (const wall of found) list[list.indexOf(wall)] = cleanWall({ ...wall, ...fromKind, ...patch, id: wall.id });
       changed();
       return list.filter((wall) => wanted.has(wall.id));
+    },
+    // Walls dragged: every one of them moved by dx, dy (scene pixels).
+    moveWalls(ids, dx, dy, seat) {
+      if (seat.role !== "dm") throw new Error("Only the GM can move walls.");
+      const shift = [Number(dx), Number(dy)];
+      if (!shift.every(Number.isFinite) || Math.max(Math.abs(shift[0]), Math.abs(shift[1])) > 1e6) throw new Error("Move by dx, dy in scene pixels.");
+      const list = wallsHere();
+      const wanted = new Set(ids);
+      const found = list.filter((wall) => wanted.has(wall.id));
+      if (found.length === 0) throw new Error("No such wall.");
+      remember("move walls");
+      for (const wall of found) list[list.indexOf(wall)] = cleanWall({ ...wall, x1: wall.x1 + shift[0], y1: wall.y1 + shift[1], x2: wall.x2 + shift[0], y2: wall.y2 + shift[1] });
+      changed();
+      return list.filter((wall) => wanted.has(wall.id));
+    },
+    // A corner dragged: every wall end at (x, y) (of the given walls, or of any)
+    // goes to (toX, toY), so the walls meeting there stay joined.
+    movePoint(from, to, ids, seat) {
+      if (seat.role !== "dm") throw new Error("Only the GM can move walls.");
+      const [x, y, toX, toY] = [from?.x, from?.y, to?.x, to?.y].map(Number);
+      if (![x, y, toX, toY].every(Number.isFinite)) throw new Error("A corner moves from x, y to toX, toY.");
+      const list = wallsHere();
+      const only = Array.isArray(ids) && ids.length ? new Set(ids) : null;
+      const near = (a, b) => Math.abs(a - b) < 0.6;
+      const touched = list.filter((wall) => (!only || only.has(wall.id)) && ((near(wall.x1, x) && near(wall.y1, y)) || (near(wall.x2, x) && near(wall.y2, y))));
+      if (touched.length === 0) throw new Error("No wall ends there.");
+      remember("move a wall corner");
+      for (const wall of touched) {
+        const next = { ...wall };
+        if (near(wall.x1, x) && near(wall.y1, y)) Object.assign(next, { x1: toX, y1: toY });
+        if (near(wall.x2, x) && near(wall.y2, y)) Object.assign(next, { x2: toX, y2: toY });
+        const clean = cleanWall(next);
+        if (clean) list[list.indexOf(wall)] = clean;
+      }
+      changed();
+      return touched.map((wall) => list.find((item) => item.id === wall.id)).filter(Boolean);
     },
     removeWalls(ids, seat) {
       if (seat.role !== "dm") throw new Error("Only the GM can remove walls.");

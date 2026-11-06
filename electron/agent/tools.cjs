@@ -961,10 +961,15 @@ const TOOLS = [
   {
     name: "kraken_wall",
     description:
-      "Walls on the scene (the GM's map editor: FG's line-of-sight layer with Foundry's senses). action list (near: {x, y, r} to narrow, kind); add (points [x1, y1, x2, y2, ...] in scene pixels, or cells [[col, row], ...] for square corners; consecutive points make a chain; closed: true joins the last to the first; kind: wall, terrain (see into, not through), door, secret (a door players never see), toggle (the GM switches it on and off), window (see through, blocks movement; players may open it; windowStyle proximity: see through only within 2 squares, as Foundry), illusion (blocks sight only: curtains), invisible (blocks movement only), ethereal (blocks sight, not movement), shadow (blocks light only); or the senses sight, light, sound (0 none, 10 limited, 20 normal, 30 proximity, 40 distance), move (0, 20), dir (0 both, 1 left, 2 right: one way), door (0, 1, 2), ds (0 closed, 1 open, 2 locked), toggle (none, gm, players), threshold (feet), hidden (toggled off)); update (id or ids, and any field; a new kind brings its senses); remove (id or ids); split (id, x, y); clear; close_doors (every door and window shut, locks kept). Undo with kraken_map_undo.",
+      "Walls on the scene (the GM's map editor: FG's line-of-sight layer with Foundry's senses). action move (ids, dx, dy: walls dragged); move_point (from {x, y}, to {x, y}, ids optional: a corner dragged, every wall end there going with it); add with group (a door drawn as a box: its sides open as one); action list (near: {x, y, r} to narrow, kind); add (points [x1, y1, x2, y2, ...] in scene pixels, or cells [[col, row], ...] for square corners; consecutive points make a chain; closed: true joins the last to the first; kind: wall, terrain (see into, not through), door, secret (a door players never see), toggle (the GM switches it on and off), window (see through, blocks movement; players may open it; windowStyle proximity: see through only within 2 squares, as Foundry), illusion (blocks sight only: curtains), invisible (blocks movement only), ethereal (blocks sight, not movement), shadow (blocks light only); or the senses sight, light, sound (0 none, 10 limited, 20 normal, 30 proximity, 40 distance), move (0, 20), dir (0 both, 1 left, 2 right: one way), door (0, 1, 2), ds (0 closed, 1 open, 2 locked), toggle (none, gm, players), threshold (feet), hidden (toggled off)); update (id or ids, and any field; a new kind brings its senses); remove (id or ids); split (id, x, y); clear; close_doors (every door and window shut, locks kept). Undo with kraken_map_undo.",
     inputSchema: object({
-      action: { type: "string", enum: ["list", "add", "update", "remove", "split", "clear", "close_doors"] },
+      action: { type: "string", enum: ["list", "add", "update", "remove", "split", "move", "move_point", "clear", "close_doors"] },
       id: string("Wall id"),
+      dx: number("move: scene pixels right (the walls in ids, dragged)"),
+      dy: number("move: scene pixels down"),
+      from: { type: "object", properties: { x: { type: "number" }, y: { type: "number" } }, description: "move_point: the corner (every wall end there, of ids or of any)" },
+      to: { type: "object", properties: { x: { type: "number" }, y: { type: "number" } }, description: "move_point: where it goes" },
+      group: string("add: the door these sides make (a door box opens as one)"),
       ids: { type: "array", items: { type: "string" } },
       points: { type: "array", items: { type: "number" }, description: "x1, y1, x2, y2, ... in scene pixels" },
       cells: { type: "array", items: { type: "array", items: { type: "number" } }, description: "[[col, row], ...] grid corners, instead of points" },
@@ -987,7 +992,7 @@ const TOOLS = [
     }, ["action"]),
     run(args, ctx) {
       const { map, seat } = needTable(ctx);
-      const { action, id, ids, cells, near, windowStyle, ...rest } = args;
+      const { action, id, ids, cells, near, windowStyle, dx: _dx, dy: _dy, from: _from, to: _to, ...rest } = args;
       const which = ids ?? (id ? [id] : []);
       if (action === "list") {
         let list = map.walls();
@@ -1021,6 +1026,8 @@ const TOOLS = [
         return out({ removed: which });
       }
       if (action === "split") return out({ walls: map.splitWall(which[0], args.x, args.y, seat) });
+      if (action === "move") return out({ walls: map.moveWalls(which, args.dx, args.dy, seat) });
+      if (action === "move_point") return out({ walls: map.movePoint(args.from, args.to, which, seat) });
       if (action === "clear") {
         map.clearWalls(seat);
         return out({ cleared: true });

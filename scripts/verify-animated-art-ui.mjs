@@ -100,9 +100,20 @@ try {
     return Math.abs(frame.width - box.width) < 3 && Math.abs(frame.height - box.height) < 3 && getComputedStyle(video).objectFit === "cover";
   });
   assert(onSheet.loop && onSheet.moved && onSheet.width === 512 && fits, `the sheet's portrait is a playing loop that fills its frame: ${JSON.stringify({ onSheet, fits })}`);
+  // A character with no picture of its own (made by hand): its race and class's token on the map.
+  const nim = await tool("kraken_record_create", { type: "character", name: "Nim", visibility: "all", data: { race: "Elf", packages: { "id-1": { name: "Illusionist", packagetype: "class", levels: { 1: {} } } } } });
+  await tool("kraken_token_place", { recordId: nim.id, col: 10, row: 4 });
+  const nimToken = (await tool("kraken_map", {})).tokens.find((item) => item.name === "Nim");
+  assert(/Elf%20Illusionist/.test(nimToken.art ?? ""), `Nim's token is the Elf Illusionist's: ${nimToken.art}`);
+  await page.waitForSelector(`[data-token="${nimToken.id}"] img, [data-token="${nimToken.id}"] video`, { timeout: 15000 });
+  // The token list shows each one's picture (a still), not initials.
+  await page.waitForFunction((ids) => ids.every((id) => {
+    const image = document.querySelector(`.token-tray [data-tray="${id}"] .tray-chip img`);
+    return image && image.complete && image.naturalWidth > 0;
+  }), [hero.id, nim.id], { timeout: 15000 });
   await page.screenshot({ path: path.join(tmpdir(), "kraken-animated-art.png") });
   assert(failures.length === 0, `page errors: ${failures.join(" | ")}`);
-  console.log(`ok animated art ui: the animated Elf Illusionist (portrait 512, token 256 with transparency) is in the art library; the token on the map and the portrait on the sheet are looping videos, playing, the sheet's filling its frame; the portrait bar shows the still. ${path.join(tmpdir(), "kraken-animated-art.png")}`);
+  console.log(`ok animated art ui: the animated Elf Illusionist (portrait 512, token 256 with transparency) is in the art library; the token on the map and the portrait on the sheet are looping videos, playing, the sheet's filling its frame; the portrait bar shows the still; a character with no art of its own has its race and class's token on the map; the token list shows each one's picture. ${path.join(tmpdir(), "kraken-animated-art.png")}`);
 } finally {
   child.kill();
   await app.close();

@@ -40,6 +40,7 @@ export function SceneGraphics({
   showCreatures,
   doorStates,
   onToggleDoor,
+  doorsInert = false,
 }: {
   worldWidth: number;
   worldHeight: number;
@@ -54,6 +55,8 @@ export function SceneGraphics({
   showCreatures: boolean;
   doorStates: Record<string, number>;
   onToggleDoor: (wallId: string, doorState: number) => void;
+  // While the walls are edited with a tool, a door's button lets the press through (to pick or move the door).
+  doorsInert?: boolean;
 }) {
   const stroke = 2 / scale;
   return (
@@ -112,6 +115,7 @@ export function SceneGraphics({
                     fill={state === 1 ? "#66CC66" : state === 2 ? "#EE4444" : wall.door === 2 ? "#A612D4" : "#6666EE"}
                     stroke="#000"
                     strokeWidth={stroke}
+                    style={doorsInert ? { pointerEvents: "none" } : undefined}
                     onPointerDown={(event) => event.stopPropagation()}
                     onClick={(event) => {
                       event.stopPropagation();
