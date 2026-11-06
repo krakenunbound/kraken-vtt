@@ -54,7 +54,15 @@ const HAZE_SHADER = `
         c += abs(sin(p.x * (1.3 + fi * 0.4) + t + sin(p.y * 1.7 + t * 0.7 + fi)) * sin(p.y * (1.1 + fi * 0.3) - t * 0.8));
       }
       c = pow(c / 3.0, 3.0);
-      gl_FragColor = vec4(0.65, 0.85, 1.0, c * 0.45 * uIntensity);
+      // A water surface (a river, a lake where the GM painted it): deep
+      // blue-green, slow ripples drifting with the Direction, light playing
+      // on it. Intensity: how much of the map shows through.
+      vec2 flow = uWind * uTime * 0.05;
+      float waves = fbm(world / 240.0 - flow + fbm(world / 400.0 + uTime * 0.02));
+      vec3 deep = vec3(0.07, 0.25, 0.34);
+      vec3 shallow = vec3(0.20, 0.50, 0.58);
+      vec3 colour = mix(deep, shallow, smoothstep(0.25, 0.8, waves)) + vec3(0.55, 0.75, 0.85) * c * 0.7;
+      gl_FragColor = vec4(colour, 0.38 + 0.42 * uIntensity);
       return;
     }
     vec2 p = world / 520.0 - uWind * uTime * 0.03;
@@ -124,7 +132,7 @@ export function Weather({ type, intensity, direction, camera, amount = 1, speed 
         fragmentShader: HAZE_SHADER,
         transparent: true,
         depthTest: false,
-        blending: kind.caustic ? THREE.AdditiveBlending : THREE.NormalBlending,
+        blending: THREE.NormalBlending,
       });
       const quad = new THREE.Mesh(geometry, material);
       quad.frustumCulled = false;
