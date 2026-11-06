@@ -119,6 +119,14 @@ try {
   await settle(1200);
   await page.screenshot({ path: path.join(tmpdir(), "kraken-descending-map.png") });
 
+  // An encounter from the adventure (its creatures from the Bestiary) onto the tracker, then cleared.
+  const encounters = await tool("kraken_library", { action: "list", module: "The Empty Watchtower", kind: "battle" });
+  const wolves = (encounters.items ?? encounters).find((item) => /Ash Wolves/.test(item.name));
+  await tool("kraken_library", { action: "battle", path: wolves.path });
+  const pack = (await tool("kraken_combat", { action: "view" })).entries.filter((entry) => /Ash Wolf/.test(entry.name));
+  assert(pack.length === 3 && pack.every((entry) => entry.hp === 11 && entry.ac === 13), `the Ash Wolves encounter: ${JSON.stringify(pack.map((entry) => [entry.name, entry.hp, entry.ac]))}`);
+  for (const entry of pack) await tool("kraken_combat", { action: "remove", id: entry.id });
+
   // The Grave Hound fight: Brenna falls, bleeds, is steadied.
   const hound = (await tool("kraken_records_list", { type: "npc", name: "Grave Hound" })).records?.[0] ?? (await tool("kraken_records_list", { type: "npc" })).records?.find?.((item) => item.name === "Grave Hound");
   await tool("kraken_combat", { action: "add", recordId: hound.id });
@@ -147,7 +155,7 @@ try {
   const chat = (await tool("kraken_chat_log", { lines: 40 }).catch(() => ({ lines: [] }))).lines ?? [];
   await page.screenshot({ path: path.join(tmpdir(), "kraken-descending-combat.png") });
   assert(failures.length === 0, `page errors: ${failures.join(" | ")}`);
-  console.log(`ok descending ui: a Descending Darkness campaign's shelf has its three books (no other game's), made active (7 classes); a test player makes a dwarf fighter in the wizard (only Cleric, Fighter, Thief offered; 17 to start; Con 15, Cha 7; Health 13, Defense 18; Defense, Health, Kin and Dread on the sheet; Shaken at 3); The Empty Watchtower's maps with ${walls.total} walls and ${(map.doors ?? []).length} doors on the yard; the Grave Hound (Health 32, Defense 13); at 0 Health she is Dying, bleeds 1 at her turn, is steadied (Wisdom 12) and bleeds no more. ${path.join(tmpdir(), "kraken-descending-sheet.png")} ${chat.length ? "" : ""}`);
+  console.log(`ok descending ui: a Descending Darkness campaign's shelf has its three books (no other game's), made active (7 classes); a test player makes a dwarf fighter in the wizard (only Cleric, Fighter, Thief offered; 17 to start; Con 15, Cha 7; Health 13, Defense 18; Defense, Health, Kin and Dread on the sheet; Shaken at 3); The Empty Watchtower's maps with ${walls.total} walls and ${(map.doors ?? []).length} doors on the yard; the Ash Wolves encounter onto the tracker (three, Health 11, Defense 13); the Grave Hound (Health 32, Defense 13); at 0 Health she is Dying, bleeds 1 at her turn, is steadied (Wisdom 12) and bleeds no more. ${path.join(tmpdir(), "kraken-descending-sheet.png")} ${chat.length ? "" : ""}`);
 } finally {
   await browser?.close();
   child.kill();

@@ -84,3 +84,7 @@ The app starts the MCP server when it opens. `electron/agent/mcp-stdio.cjs` is t
 ## Processes
 
 The GM's app is two processes: `electron/main.cjs` (the window: it draws, opens dialogs, keeps the assistant key, and forwards every other call) and `electron/backend.cjs` (Electron's utility process: the table server, campaigns, libraries, books, the agent bridge and its tools, the assistant). Agent tools run in the backend; `ctx.ui` and `ctx.windowOp` reach the window through main. Heavy work belongs in the backend, never in main.
+
+## Kraken's own games
+
+Descending Darkness (d20 family, `shared/dnd5e/rules.mjs` profile `descending`) and Apeira Astra (`shared/astra/rules.mjs`, `electron/astra.cjs`) ship their books in `games/modules`, built from `games/<game>/*.mjs` by `node scripts/build-content.mjs`. A campaign made with either ruleset sees only its own books. Tools: `kraken_build_character` builds for the campaign's game (Apeira Astra spec: origin, major, minor, characteristics, majorSkills, minorSkills, gear); `kraken_character_improve` spends Apeira Astra experience; `kraken_combat stabilize` steadies a dying Descending Darkness character. See games/README.md.
