@@ -62,6 +62,27 @@ try {
   await page.waitForSelector("text=Hosting");
   await tool("kraken_open_adventure", { path: bundle });
   await page.waitForSelector(".map-toolbar");
+  // The map in its own window (FG's image window), with its tools and the scene pickers, clear of the sidebar.
+  const mapWindow = page.locator('.window[data-window="map"]');
+  assert((await mapWindow.locator(".viewport .map-toolbar").count()) === 1 && (await mapWindow.locator(".scene-bar").count()) === 1, "the map, its tools and the scene's pickers are in the map window");
+  const frame = await mapWindow.boundingBox();
+  const side = await page.locator(".sidebar").boundingBox();
+  assert(frame && side && frame.x + frame.width <= side.x + 1, `the map window leaves the sidebar clear: ${JSON.stringify({ frame, side })}`);
+  assert(!(await mapWindow.locator('[aria-label^="Pop out"]').count()), "the map window does not pop out");
+  await page.click(`[aria-label="Close ${await mapWindow.getAttribute("aria-label")}"]`);
+  await page.waitForSelector('.window[data-window="map"]', { state: "detached" });
+  await page.click('.sidebar [data-launch="map"]');
+  await page.waitForSelector('.window[data-window="map"] .viewport');
+  // Another window sits over it, and stays over it when the map is clicked.
+  await page.click('.sidebar [data-launch="combat"]');
+  await page.waitForSelector('.window[data-window="combat"]');
+  await page.mouse.click(frame.x + 40, frame.y + frame.height - 60);
+  const zs = await page.evaluate(() => ["map", "combat"].map((kind) => Number(getComputedStyle(document.querySelector(`.window[data-window="${kind}"]`)).zIndex)));
+  assert(zs[0] < zs[1], `the map stays behind the other windows: ${zs}`);
+  await page.click('.sidebar [data-launch="combat"]');
+  await page.click(`[aria-label="Close ${await mapWindow.getAttribute("aria-label")}"]`);
+  await tool("kraken_windows", { action: "open", kind: "map" });
+  await page.waitForSelector('.window[data-window="map"] .viewport');
   const hero = await tool("kraken_record_create", { type: "character", name: "Aldric", owner: "A test player", visibility: "owner", data: {} });
   // Far from the middle, where a lost player would not find it.
   await tool("kraken_token_place", { recordId: hero.id, col: 4, row: 4 });

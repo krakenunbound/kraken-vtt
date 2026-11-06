@@ -289,6 +289,7 @@ button .icon { vertical-align: -3px; }
 
 /* --- Floating windows ------------------------------------------------------ */
 .window-layer { position: absolute; inset: 0; z-index: 30; pointer-events: none; }
+.window-layer.map-layer { z-index: 8; }
 
 .window {
   position: fixed;
@@ -323,6 +324,11 @@ button .icon { vertical-align: -3px; }
 .window-body { flex: 1; min-height: 0; overflow: auto; display: flex; flex-direction: column; }
 .window-body > * { flex: 1; min-height: 0; }
 .window-body > .characters { padding: 12px; }
+/* The map's window: the scene's name and pickers along the top, the map under them. */
+.window[data-window="map"] .window-body { overflow: hidden; }
+.map-window { position: relative; display: flex; flex-direction: column; min-height: 0; }
+.map-window > .scene-bar { flex: none; padding: 4px 10px; border-bottom: 1px solid var(--panel-edge); background: rgba(10, 12, 16, 0.6); }
+.map-window > .viewport { flex: 1; min-height: 0; }
 .window-body .party-sheet { padding: 12px 14px; }
 .window-body .dock-characters { padding: 12px; }
 

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import type { ChatLine, RollResult, Session } from "../session/useSession";
-import { diceStore, rolling, setThrow, tower as towerDrops, type DiceLook } from "../dice/diceStore";
+import { characterDice, diceStore, rolling, setThrow, tower as towerDrops, type DiceLook } from "../dice/diceStore";
 import { commandsFor, runChat, type Command } from "./chatCommands";
 import { DieShape, Icon } from "./icons";
 import { useWindows } from "./Windows";
@@ -160,6 +160,7 @@ function Line({ line, gmIcon, session }: { line: ChatLine; gmIcon: string; sessi
       className={classes}
       data-from={line.from}
       data-kind={line.kind ?? (line.roll ? "roll" : "say")}
+      data-dice-body={(line.roll as { look?: { body?: string } } | undefined)?.look?.body}
       // A damage or healing roll is dragged onto a creature (the tracker, its token) to apply it, as in FG.
       {...(applied
         ? {
@@ -266,7 +267,9 @@ export function ChatDock({ session }: { session: Session }) {
   const diceSettings = useSyncExternalStore(diceStore.subscribe, diceStore.settings);
   // The GM's chat picture, beside everything the GM says.
   const gmIconUrl = session.options.gmIcon ? session.decalUrl(session.options.gmIcon, "gmicon") : "";
-  const mine = diceSettings.look;
+  // Speaking as one of my characters: its own dice (the character tier), if it has them.
+  const speaking = speakAs && session.role !== "dm" ? Object.values(session.records).find((record) => record.type === "character" && record.owner === me && record.name === speakAs) : undefined;
+  const mine = characterDice(speaking)?.look ?? diceSettings.look;
   const mineCommands = commandsFor(session.role === "dm");
   const typedCommand = /^\/(\S*)$/.exec(draft);
   const suggestions: Command[] = typedCommand ? mineCommands.filter((command) => command.names.some((name) => name.startsWith(typedCommand[1].toLowerCase()))) : [];

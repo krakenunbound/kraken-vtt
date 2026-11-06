@@ -1358,10 +1358,10 @@ const TOOLS = [
   {
     name: "kraken_windows",
     description:
-      "The GM's windows: list them, or open, close, pop out (to a window of its own, for another monitor) or dock back a window. Kinds: assistant (the GM's DM assistant chat), characters, party, combat, players, settings, decals (the background decal picker), wallpapers (the desktop wallpaper picker), gmicons (the GM icon picker), krits (critical hits and fumbles), dice (this seat's dice: sets, colours, design, material, effects), sound (one-shots, effects, ambience, music, chat triggers, volumes), sheet (a character's sheet: give record, its id or name), charselect (Character Selection), records (FG's campaign lists: NPCs, items, spells, classes...; the GM shares one with kraken_record_update visibility all, hides it with gm), record (one record: give record, its id or name).",
+      "The GM's windows: list them, or open, close, pop out (to a window of its own, for another monitor) or dock back a window. Kinds: map (the open map in its own window, as FG's image window, with its tools and settings; it opens by itself when a map opens and never pops out), assistant (the GM's DM assistant chat), characters, party, combat, players, settings, decals (the background decal picker), wallpapers (the desktop wallpaper picker), gmicons (the GM icon picker), krits (critical hits and fumbles), dice (this seat's dice: sets, colours, design, material, effects), sound (one-shots, effects, ambience, music, chat triggers, volumes), sheet (a character's sheet: give record, its id or name), charselect (Character Selection), records (FG's campaign lists: NPCs, items, spells, classes...; the GM shares one with kraken_record_update visibility all, hides it with gm), record (one record: give record, its id or name).",
     inputSchema: object({
       action: { type: "string", enum: ["list", "open", "close", "popout", "dock"] },
-      kind: { type: "string", enum: ["assistant", "characters", "party", "combat", "players", "settings", "decals", "wallpapers", "gmicons", "krits", "library", "dice", "sound", "sheet", "books", "book", "images", "picture", "notes", "note", "charselect", "records", "record", "adventure"] },
+      kind: { type: "string", enum: ["assistant", "characters", "party", "combat", "players", "settings", "decals", "wallpapers", "gmicons", "krits", "library", "dice", "sound", "sheet", "books", "book", "images", "picture", "notes", "note", "charselect", "records", "record", "adventure", "story", "map"] },
       record: string("For a sheet: the character's record id or name; for a record: its id or name"),
     }),
     run: async (args, ctx) => out(await ctx.ui({ kind: "windows", action: args.action ?? "list", window: args.kind, record: args.record })),
@@ -1398,9 +1398,36 @@ const TOOLS = [
       effect: { type: "string", enum: ["none", "sparkles", "fire", "frost", "arcane", "shadow", "glow", "aura", "wisp", "spark", "embers", "holy", "charge", "notes", "ion"] },
       crit: { type: "boolean" },
       set: { type: "string", enum: ["mine", "npc", "damage"] },
-      same: { type: "boolean", description: "With set npc or damage: back to as my dice" },
+      same: { type: "boolean", description: "With set npc or damage: back to as my dice (with character: back to its player's dice)" },
+      color: string("Your colour on the map (pings and ink), #rrggbb; empty for the table's colour for your name"),
+      character: string("A character (record id or name): set that character's own dice (the character tier, kept on it; every roll made as it uses them) instead of the GM's. Takes preset and the look parts, set mine or damage, same"),
+      who: string("With color: a player's name, to set that player's colour (their user settings) instead of the GM's"),
     }),
-    run: async (args, ctx) => out(await ctx.ui({ kind: "dice-settings", patch: args })),
+    async run(args, ctx) {
+      if (args.character) {
+        const table = needTable(ctx);
+        const wanted = String(args.character).toLowerCase();
+        const record = table.records.get(args.character) ?? table.records.list({ type: "character" }).find((item) => item.name.toLowerCase() === wanted);
+        if (!record || record.type !== "character") throw new Error(`No character "${args.character}".`);
+        const key = args.set === "damage" ? "damage" : "look";
+        if (args.same) {
+          const updated = table.records.update(record.id, { data: { dice: { [key]: null } } }, table.seat);
+          return out({ character: updated.name, dice: updated.data.dice ?? null });
+        }
+        // The GM's screen works the look out (presets and parts, from what the character has now).
+        const base = record.data?.dice?.[key] ?? record.data?.dice?.look ?? null;
+        const { look: worked } = await ctx.ui({ kind: "dice-settings", patch: { ...args, resolve: true, base } });
+        const look = table.diceLook(worked);
+        if (!look) throw new Error("That is not a whole dice look: give a preset, or body, ink and design.");
+        const updated = table.records.update(record.id, { data: { dice: { [key]: look } } }, table.seat);
+        return out({ character: updated.name, dice: updated.data.dice });
+      }
+      if (args.who !== undefined && args.who !== "" && args.who !== "GM") {
+        const table = needTable(ctx);
+        return out({ who: args.who, prefs: table.prefs(args.who, { color: args.color ? args.color : null }) });
+      }
+      return out(await ctx.ui({ kind: "dice-settings", patch: args }));
+    },
   },
   {
     name: "kraken_assistant",

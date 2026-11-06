@@ -37,6 +37,7 @@ const MESSAGES = {
   "character-import": "kraken_character_import",
   "class-change": "kraken_class_change",
   "character-drop": "kraken_character_drop",
+  prefs: "kraken_dice_settings",
   library: "kraken_library",
   "token-place": "kraken_token_place",
   "token-move": "kraken_token_move",

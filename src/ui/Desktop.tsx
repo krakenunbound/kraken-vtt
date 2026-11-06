@@ -176,6 +176,8 @@ function wallpaperStyle(session: Session) {
 export function Desktop({
   session,
   scene,
+  sceneId = "",
+  sceneName = "",
   sceneBar,
   emptyGM,
   onOpenAdventure,
@@ -184,6 +186,9 @@ export function Desktop({
 }: {
   session: Session;
   scene: ReactNode | null;
+  // The open map's scene: its window opens when a new one does (FG's image window).
+  sceneId?: string;
+  sceneName?: string;
   sceneBar: ReactNode;
   emptyGM: ReactNode;
   onOpenAdventure: () => void;
@@ -209,14 +214,18 @@ export function Desktop({
     .map((item) => listEntry(item.id, item.label, characterIcon[item.id] ?? "shield"));
   const hasPackages = Object.values(session.records).some((record) => record.type === "siegepackage" && listOf(record) === "siegepackage");
   const combatBadge = session.combat.round > 0 ? session.combat.round : undefined;
+  // The map's own window, opened again from here when it was closed.
+  const mapTool: SidebarEntry[] = scene ? [{ kind: "map", label: "Map", icon: "map", title: sceneName || "Map" }] : [];
   const tools: SidebarEntry[] = gm
     ? [
+        ...mapTool,
         { kind: "combat", label: "Combat", icon: "combat", title: "Combat Tracker", badge: combatBadge },
         { kind: "assistant", label: "Assistant", icon: "sparkle", title: "DM Assistant" },
         { kind: "players", label: "Players", icon: "players", title: "Players" },
         { kind: "settings", label: "Settings", icon: "settings", title: "Settings" },
       ]
     : [
+        ...mapTool,
         { kind: "combat", label: "Combat", icon: "combat", title: "Combat Tracker", badge: combatBadge },
         { kind: "settings", label: "Settings", icon: "settings", title: "Settings" },
       ];
@@ -271,6 +280,22 @@ export function Desktop({
   useEffect(() => {
     for (const item of windows.windows) if (item.kind === "sheet" && item.payload && !session.records[item.payload]) windows.close(item.key);
   }, [session.records]);
+  // The map opens in its own window (FG's image window), with its tools and
+  // settings: when a map is opened, or the GM changes the scene; it goes when
+  // the map does. Closed, it stays shut until the next scene or the Map button.
+  const shownMap = useRef("");
+  const mapOpenKey = scene ? sceneId || sceneName || "map" : "";
+  useEffect(() => {
+    if (!mapOpenKey) {
+      shownMap.current = "";
+      for (const item of windows.windows) if (item.kind === "map") windows.close(item.key);
+      return;
+    }
+    if (shownMap.current !== mapOpenKey) {
+      shownMap.current = mapOpenKey;
+      windows.open("map", sceneName || "Map");
+    }
+  }, [mapOpenKey, sceneName]);
   // A player who holds no character is shown Character Selection on joining, as in FG.
   const offered = useRef(false);
   useEffect(() => {
@@ -389,7 +414,6 @@ export function Desktop({
             );
           })}
         </div>
-        <div className="scene-bar">{sceneBar}</div>
         <div className="session-status">
           {myTurn ? <span className="turn-flag">Your turn</span> : null}
           <span className="where">{gm ? `Hosting · ${session.players.length - 1} player${session.players.length === 2 ? "" : "s"}` : `At ${session.remoteLabel}`}</span>
@@ -406,20 +430,36 @@ export function Desktop({
 
       <div className="desktop">
         <div className="desktop-surface" style={wallpaperStyle(session)}>
-          {scene ?? (
-            <div className="desktop-empty">
-              <TableDecal session={session} />
-              {gm ? emptyGM : <p className="desktop-hint">The GM has not opened a map yet.</p>}
-            </div>
-          )}
+          <div className="desktop-empty">
+            <TableDecal session={session} />
+            {scene ? null : gm ? emptyGM : <p className="desktop-hint">The GM has not opened a map yet.</p>}
+          </div>
         </div>
 
         <Sidebar tools={tools} groups={groups} isOpen={entryOpen} onLaunch={launch} />
 
         <ChatDock session={session} />
 
+        {/* The map's window: over the desktop, under the chat, the sidebar and every other window. */}
+        <div className="window-layer map-layer">
+          {windows.windows
+            .filter((item) => item.kind === "map")
+            .map((item) => (
+              <FloatingWindow key={item.key} item={item}>
+                {scene ? (
+                  <div className="map-window">
+                    <div className="scene-bar">{sceneBar}</div>
+                    {scene}
+                  </div>
+                ) : (
+                  <p className="desktop-hint">No map is open.</p>
+                )}
+              </FloatingWindow>
+            ))}
+        </div>
+
         <div className="window-layer">
-          {windows.windows.map((item) => (
+          {windows.windows.filter((item) => item.kind !== "map").map((item) => (
             <FloatingWindow key={item.key} item={item}>
               {item.kind === "characters" ? <CharacterPanel session={session} dock={!gm} create={item.payload === "new"} /> : null}
               {item.kind === "records" ? <RecordsWindow session={session} only={item.payload} onOpen={(record) => windows.open("record", record.name, record.id)} /> : null}

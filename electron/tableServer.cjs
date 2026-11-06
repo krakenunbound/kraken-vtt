@@ -11,6 +11,7 @@ const { defaultTriggers, TRIGGERS_VERSION } = require("./soundCatalog.cjs");
 const { createDice } = require("./dice.cjs");
 const { siege, siegeLibrary, siegeCheck, levelUp, changeClass, dropOnCharacter, editCharacter, importCharacter } = require("./siege.cjs");
 const { createMapState, playerColor } = require("./mapState.cjs");
+const { createPrefsStore } = require("./prefs.cjs");
 const party = require("./party.cjs");
 const { createCombat } = require("./combat.cjs");
 const { modulePicture, importModule } = require("./importers/fgModule.cjs");
@@ -290,7 +291,10 @@ function serveWeb(url, res, root) {
 // decals, wallpapers: the background decals and desktop tiles the GM can
 // choose from (decals.cjs).
 // sounds: the GM's sounds (sounds.cjs): one-shots, effects, ambience and music.
-function createTableServer({ saved = {}, onChange = () => undefined, webRoot = WEB_ROOT, art = null, decals = null, wallpapers = null, gmIcons = null, tiles = null, sounds = null, books = null, ruleset = "", accounts = null } = {}) {
+function createTableServer({ saved = {}, onChange = () => undefined, webRoot = WEB_ROOT, art = null, decals = null, wallpapers = null, gmIcons = null, tiles = null, sounds = null, books = null, ruleset = "", accounts = null, prefs: prefsStore = null } = {}) {
+  // Each person's own settings (prefs.cjs): their colour and dice. Kept by the app for every campaign; in memory without a file.
+  const prefs = prefsStore ?? createPrefsStore(null, diceLook);
+  const prefsKey = (client) => (client.role === "dm" ? "@gm" : client.name);
   let password = "";
   let hostToken = "";
   let image = null;
@@ -498,7 +502,8 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
   }
 
   function seatOf(client) {
-    return { role: client.role, name: client.name };
+    const color = prefs.get(prefsKey(client)).color;
+    return { role: client.role, name: client.name, ...(color ? { color } : {}) };
   }
 
   // A secret line (FG's GM-only message: a hidden creature's turn) reaches the
@@ -523,9 +528,15 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
   // character); else their own.
   function lookFor(entry, roller, hand) {
     const label = String(entry.roll?.label ?? "");
-    if (hand.looks?.damage && /^\[DAMAGE\]/.test(label)) return hand.looks.damage;
     // Who the roll is for: a tracker roll names its actor (by); else who it is from. The tracker's own voice decides nothing.
     const from = String(entry.roll?.by || entry.from || "");
+    // A character's own dice (the character tier, kept on its record) for a roll as that character.
+    const character = from ? records.list({ type: "character" }).find((record) => sameName(record.name, from) && (roller.role === "dm" || sameName(record.owner, roller.name))) : null;
+    const own = character?.data?.dice;
+    const damage = /^\[DAMAGE\]/.test(label);
+    if (own && damage && diceLook(own.damage)) return diceLook(own.damage);
+    if (hand.looks?.damage && damage) return hand.looks.damage;
+    if (own && diceLook(own.look)) return diceLook(own.look);
     const asCreature =
       roller.role === "dm" && from && !sameName(from, roller.name) && !/^(gm|dm|agent|combat)$/i.test(from) && !records.list({ type: "character" }).some((record) => sameName(record.name, from));
     if (hand.looks?.npc && asCreature) return hand.looks.npc;
@@ -934,7 +945,10 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     let done = null;
     if (action === "create") done = accounts.create(name, String(input?.password ?? ""), { signIn: false }).name;
     else if (action === "password") done = accounts.setPassword(name, String(input?.password ?? "")).name;
-    else if (action === "remove") done = accounts.remove(name).name;
+    else if (action === "remove") {
+      done = accounts.remove(name).name;
+      prefs.remove(done);
+    }
     else if (action !== "list") throw new Error("action is list, create, password or remove.");
     const seated = new Set([...clients.values()].filter((item) => item.role === "player").map((item) => item.name.toLowerCase()));
     return { ...(done ? { done: `${action} ${done}` } : {}), accounts: accounts.list().map((row) => ({ ...row, seated: seated.has(row.name.toLowerCase()) })) };
@@ -1122,6 +1136,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
           soundscape,
           books: shelfView(),
           quickSlots: slotsFor(client),
+          prefs: prefs.get(prefsKey(client)),
           ...(client.role === "dm" ? { bookSounds: Object.fromEntries(bookSounds), sceneSound: sceneSoundView() } : {}),
           records: records.list({ seat: seatOf(client) }),
           scene: client.role === "player" ? sceneFor(client) : null,
@@ -1196,6 +1211,14 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         } catch (error) {
           send(ws, { type: "op-result", req: msg.req, ok: false, error: error.message });
         }
+        return;
+      }
+
+      // A person's own settings (their colour, dice, how dice show), kept for them
+      // by name; every browser they sit at gets them.
+      if (msg.type === "prefs") {
+        const next = prefs.set(prefsKey(client), msg.patch);
+        for (const [other, seat] of clients) if (prefsKey(seat) === prefsKey(client)) send(other, { type: "prefs", prefs: next });
         return;
       }
 
@@ -1787,6 +1810,15 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     storeTiles,
     // Books: what there is, a book's contents and pages, and sharing.
     books: () => shelfFor({ role: "dm" }),
+    // A person's own settings (the GM's, or a player's by name), read or set.
+    prefs(who = "@gm", patch) {
+      const key = who === "GM" || who === "" ? "@gm" : who;
+      if (patch === undefined) return prefs.get(key);
+      const next = prefs.set(key, patch);
+      for (const [ws, seat] of clients) if (prefsKey(seat) === key) send(ws, { type: "prefs", prefs: next });
+      return next;
+    },
+    diceLook,
     // A seat's quick slots (the GM's, or a player's by name), read or set.
     quickSlots(who = "@gm", slots) {
       const key = who === "GM" || who === "" ? "@gm" : who;
@@ -1893,7 +1925,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
   }
 
   function playerColorOf(client) {
-    return client.role === "dm" ? "#f4f1ea" : playerColor(client.name);
+    return prefs.get(prefsKey(client)).color ?? (client.role === "dm" ? "#f4f1ea" : playerColor(client.name));
   }
 
   return {
@@ -1978,4 +2010,4 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
   };
 }
 
-module.exports = { createTableServer, decideRole, lanAddresses, eachAddress };
+module.exports = { createTableServer, decideRole, lanAddresses, eachAddress, diceLook };

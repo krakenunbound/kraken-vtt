@@ -941,7 +941,7 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       if (!scene) throw new Error("No scene is open.");
       // Players draw free lines; the GM's paint has shapes, fills and groups.
       const own = seat.role === "dm" ? input : { points: input?.points, color: input?.color, width: input?.width };
-      const line = cleanDrawing({ ...own, id: undefined, by: seat.role === "dm" ? "" : seat.name, color: input?.color ?? playerColor(seat.name) });
+      const line = cleanDrawing({ ...own, id: undefined, by: seat.role === "dm" ? "" : seat.name, color: input?.color ?? seat.color ?? playerColor(seat.name) });
       if (line?.group && groupsHere().find((group) => group.name === line.group)?.locked) throw new Error(`The group ${line.group} is locked.`);
       if (line?.group) groupOf(line.group);
       if (!line) throw new Error("A line needs two points or more.");

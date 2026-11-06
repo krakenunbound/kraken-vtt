@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { MapScene } from "../table/MapView";
 import { sound, type Soundscape } from "../sound/soundEngine";
-import { rolling, throwIntent } from "../dice/diceStore";
+import { diceStore, rolling, throwIntent } from "../dice/diceStore";
 
 export type Seat = { id: string; name: string; role: "dm" | "player" };
 // The map as the host shows it to this seat (electron/mapState.cjs viewFor).
@@ -455,6 +455,11 @@ export function useSession() {
             setChat((msg.chat as ChatLine[]) ?? []);
             if (msg.books) setBookShelf(msg.books as BookShelf);
             if (Array.isArray(msg.quickSlots)) setQuickSlotsState(msg.quickSlots as (QuickSlot | null)[]);
+            // This person's own settings (their colour and dice), kept by the GM's app.
+            diceStore.connect((patch) => {
+              const open = socketRef.current;
+              if (open && open.readyState === WebSocket.OPEN) open.send(JSON.stringify({ type: "prefs", patch }));
+            }, msg.prefs);
             if (msg.bookSounds && typeof msg.bookSounds === "object") setBookSounds(msg.bookSounds as Record<string, PageSounds>);
             setRecords(Object.fromEntries(((msg.records as TableRecord[]) ?? []).map((record) => [record.id, record])));
             setRemoteLabel(label);
@@ -476,7 +481,7 @@ export function useSession() {
           if (msg.type === "ping") {
             const ping = { id: ++pingCounter.current, x: Number(msg.x), y: Number(msg.y), from: String(msg.from ?? ""), color: String(msg.color ?? "#fff") };
             setPings((current) => [...current, ping].slice(-12));
-            window.setTimeout(() => setPings((current) => current.filter((item) => item.id !== ping.id)), 2600);
+            window.setTimeout(() => setPings((current) => current.filter((item) => item.id !== ping.id)), 4200);
           }
           if (msg.type === "notice" && typeof msg.text === "string") {
             const text = msg.text;
@@ -505,6 +510,7 @@ export function useSession() {
           if (msg.type === "books") setBookShelf({ active: (msg.active as string[]) ?? [], shared: (msg.shared as string[]) ?? [], images: (msg.images as ShownImage[]) ?? [] });
           if (msg.type === "image-shown" && typeof msg.id === "string") setImageShown({ id: msg.id, at: Date.now() });
           if (msg.type === "book-sounds" && msg.sounds && typeof msg.sounds === "object") setBookSounds(msg.sounds as Record<string, PageSounds>);
+          if (msg.type === "prefs") diceStore.adopt(msg.prefs);
           if (msg.type === "quickslots" && Array.isArray(msg.slots)) setQuickSlotsState(msg.slots as (QuickSlot | null)[]);
           if (msg.type === "chat-cleared") {
             setChat([]);
