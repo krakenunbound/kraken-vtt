@@ -104,6 +104,32 @@ function FileButtons({ files, current }: { files: ReturnType<typeof useCharacter
   );
 }
 
+// A blank character (FG's Create): scores of 10, nothing else; the GM's or
+// this player's. It is filled by hand: a race, a class, spells and gear
+// dragged onto it from the sidebar's lists, scores typed. C&C (SIEGE) only:
+// a 5E character is made with its wizard.
+export const canMakeBlank = (session: Session) => session.ruleset !== "D&D 5E";
+export async function createBlank(session: Session, name = "New character") {
+  const gm = session.role === "dm";
+  const attributes = Object.fromEntries(["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"].map((stat) => [stat, { score: 10, prime: 0 }]));
+  return session.op({ op: "create", input: { type: "character", name, visibility: gm ? "gm" : "owner", data: { attributes, level: 0, hp: { total: 0, wounds: 0 } } } });
+}
+function BlankButton({ session, onMade }: { session: Session; onMade: (id: string) => void }) {
+  if (!canMakeBlank(session)) return null;
+  return (
+    <button
+      type="button"
+      className="character-file-button"
+      title="A blank sheet: fill it by hand (drag a race, a class, spells and gear onto it from the sidebar's lists)"
+      aria-label="Blank character"
+      data-action="blank-character"
+      onClick={() => void createBlank(session).then(onMade).catch(() => undefined)}
+    >
+      <Icon name="character" size={18} />
+    </button>
+  );
+}
+
 // dock: the player's side panel beside the map, with a picker in place of the list.
 // create: open on the creation wizard (Character Selection's Character Wizard).
 export function CharacterPanel({ session, dock = false, selected: chosen, create = false }: { session: Session; dock?: boolean; selected?: string | null; create?: boolean }) {
@@ -142,6 +168,13 @@ export function CharacterPanel({ session, dock = false, selected: chosen, create
           <button type="button" className="new-character-button" title="New character" aria-label="New character" onClick={() => setCreating(true)} data-action="new-character">
             <Icon name="add-character" size={22} />
           </button>
+          <BlankButton
+            session={session}
+            onMade={(id) => {
+              setCreating(false);
+              setSelected(id);
+            }}
+          />
           <FileButtons files={files} current={current} />
         </div>
         {status}
@@ -179,6 +212,13 @@ export function CharacterPanel({ session, dock = false, selected: chosen, create
           <button type="button" className="new-character-button" title="New character" aria-label="New character" onClick={() => setCreating(true)} data-action="new-character">
             <Icon name="add-character" size={22} />
           </button>
+          <BlankButton
+            session={session}
+            onMade={(id) => {
+              setCreating(false);
+              setSelected(id);
+            }}
+          />
           <FileButtons files={files} current={current} />
         </div>
         {status}
