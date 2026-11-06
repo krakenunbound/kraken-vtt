@@ -8,7 +8,7 @@ import { openPopOut, PopOutWindow, screenOffset, type ScreenPlace } from "./PopO
 // the edge of the main window, or sent out with its pop-out button, becomes a
 // window of its own that can go on another monitor.
 
-export type WindowKind = "assistant" | "characters" | "party" | "combat" | "players" | "sheet" | "settings" | "decals" | "wallpapers" | "gmicons" | "krits" | "library" | "dice" | "sound" | "books" | "book" | "images" | "picture" | "notes" | "note" | "charselect" | "records" | "record" | "adventure" | "story";
+export type WindowKind = "assistant" | "characters" | "party" | "combat" | "players" | "sheet" | "settings" | "decals" | "wallpapers" | "gmicons" | "krits" | "library" | "dice" | "sound" | "books" | "book" | "images" | "picture" | "notes" | "note" | "charselect" | "records" | "record" | "adventure" | "story" | "map";
 type Placement = { x: number; y: number; w: number; h: number; out?: ScreenPlace | null };
 export type OpenWindow = { key: string; kind: WindowKind; title: string; payload?: string; z: number; popped: boolean } & Placement;
 
@@ -38,7 +38,21 @@ const DEFAULTS: Record<WindowKind, Placement> = {
   picture: { x: 560, y: 70, w: 720, h: 600 },
   notes: { x: 260, y: 80, w: 420, h: 480 },
   note: { x: 700, y: 70, w: 420, h: 620 },
+  // The map (FG's image window): as big as the desktop leaves room for.
+  map: { x: 12, y: 52, w: 1600, h: 1100 },
 };
+// Kinds that stay in the main window (the map's 3D dice, lighting and weather draw in its own page).
+const STAYS_IN: WindowKind[] = ["map"];
+// Kinds that stay behind every other window: the map is what the other windows sit over.
+const AT_BACK: WindowKind[] = ["map"];
+// Where a kind opens the first time: the map fills the desktop between the menu bar and the sidebar.
+function firstPlace(kind: WindowKind): Placement {
+  if (kind === "map" && typeof document !== "undefined") {
+    const surface = document.querySelector(".desktop-surface")?.getBoundingClientRect();
+    if (surface && surface.width > 200 && surface.height > 200) return { x: Math.round(surface.left + 6), y: Math.round(surface.top + 6), w: Math.round(surface.width - 12), h: Math.round(surface.height - 12) };
+  }
+  return DEFAULTS[kind];
+}
 
 // The height of a window's own title bar, which a window of its own does not need.
 const TITLE = 34;
@@ -50,7 +64,7 @@ function remembered(kind: WindowKind): Placement {
   } catch {
     /* no memory: defaults */
   }
-  return DEFAULTS[kind];
+  return firstPlace(kind);
 }
 
 function remember(kind: WindowKind, placement: Placement) {
@@ -114,8 +128,9 @@ export function WindowProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const focus = useCallback((key: string) => {
-    setWindows((current) => current.map((item) => (item.key === key ? { ...item, z: ++top.current } : item)));
+    setWindows((current) => current.map((item) => (item.key === key && !AT_BACK.includes(item.kind) ? { ...item, z: ++top.current } : item)));
   }, []);
+  const zFor = (kind: WindowKind) => (AT_BACK.includes(kind) ? 0 : ++top.current);
 
   const open = useCallback(
     (kind: WindowKind, title: string, payload?: string) => {
@@ -126,7 +141,7 @@ export function WindowProvider({ children }: { children: ReactNode }) {
         return;
       }
       if (existing) {
-        setWindows((current) => current.map((item) => (item.key === key ? { ...item, title, z: ++top.current } : item)));
+        setWindows((current) => current.map((item) => (item.key === key ? { ...item, title, z: AT_BACK.includes(item.kind) ? item.z : ++top.current } : item)));
         return;
       }
       // Opened here, not in a state update, so the browser sees the click that asked for it.
@@ -134,7 +149,7 @@ export function WindowProvider({ children }: { children: ReactNode }) {
       const offset = windows.filter((item) => item.kind === kind).length * 28;
       const out = saved.out ? { ...saved.out, sx: saved.out.sx + offset, sy: saved.out.sy + offset } : null;
       const placed = place(key, title, { ...saved, x: saved.x + offset, y: saved.y + offset, out });
-      setWindows((current) => (current.some((item) => item.key === key) ? current : [...current, { key, kind, title, payload, z: ++top.current, ...placed }]));
+      setWindows((current) => (current.some((item) => item.key === key) ? current : [...current, { key, kind, title, payload, z: zFor(kind), ...placed }]));
     },
     [windows, place],
   );
@@ -153,7 +168,7 @@ export function WindowProvider({ children }: { children: ReactNode }) {
         popups.current.get(key)?.focus();
         return;
       }
-      if (existing && existing.z === top.current) {
+      if (existing && (existing.z === top.current || AT_BACK.includes(existing.kind))) {
         close(key);
         return;
       }
@@ -162,7 +177,7 @@ export function WindowProvider({ children }: { children: ReactNode }) {
         return;
       }
       const placed = place(key, title, remembered(kind));
-      setWindows((current) => (current.some((item) => item.key === key) ? current : [...current, { key, kind, title, payload, z: ++top.current, ...placed }]));
+      setWindows((current) => (current.some((item) => item.key === key) ? current : [...current, { key, kind, title, payload, z: zFor(kind), ...placed }]));
     },
     [windows, place, close, focus],
   );
@@ -181,7 +196,7 @@ export function WindowProvider({ children }: { children: ReactNode }) {
   const popOut = useCallback(
     (key: string, at?: ScreenPlace) => {
       const item = windows.find((entry) => entry.key === key);
-      if (!item) return false;
+      if (!item || STAYS_IN.includes(item.kind)) return false;
       if (item.popped) return true;
       const offset = screenOffset();
       const out = at ?? { sx: offset.x + item.x, sy: offset.y + item.y, w: item.w, h: Math.max(200, item.h - TITLE) };
@@ -320,11 +335,13 @@ export function FloatingWindow({ item, children }: { item: OpenWindow; children:
       style={{ left: item.x, top: item.y, width: item.w, height: item.h, zIndex: 100 + item.z }}
       onPointerDown={() => focus(item.key)}
     >
-      <header className="window-title" onPointerDown={begin("move")} onDoubleClick={() => move(item.key, fitToScreen(DEFAULTS[item.kind]))}>
+      <header className="window-title" onPointerDown={begin("move")} onDoubleClick={() => move(item.key, fitToScreen(firstPlace(item.kind)))}>
         <span>{item.title}</span>
-        <button type="button" className="window-close" title="Out to a window of its own (for another monitor)" aria-label={`Pop out ${item.title}`} onClick={() => popOut(item.key)}>
-          <Icon name="popout" size={16} />
-        </button>
+        {STAYS_IN.includes(item.kind) ? null : (
+          <button type="button" className="window-close" title="Out to a window of its own (for another monitor)" aria-label={`Pop out ${item.title}`} onClick={() => popOut(item.key)}>
+            <Icon name="popout" size={16} />
+          </button>
+        )}
         <button type="button" className="window-close" aria-label={`Close ${item.title}`} onClick={() => close(item.key)}>
           <Icon name="close" size={16} />
         </button>

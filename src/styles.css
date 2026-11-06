@@ -579,25 +579,59 @@ select {
   position: absolute;
   z-index: 6;
   transform: translate(-50%, -50%);
-  border: 4px solid;
-  border-radius: 50%;
   pointer-events: none;
-  animation: ping 1.3s ease-out 2;
+  animation: ping-fade 4.2s ease-in forwards;
 }
-
+.ping > i { position: absolute; left: 50%; top: 50%; border-radius: 50%; transform: translate(-50%, -50%); }
+.ping-ring {
+  width: 100%;
+  height: 100%;
+  border: var(--ping-line) solid var(--ping);
+  box-shadow: 0 0 calc(var(--ping-line) * 3) var(--ping), inset 0 0 calc(var(--ping-line) * 3) var(--ping);
+  opacity: 0;
+  animation: ping-ring 1.4s ease-out 3;
+}
+.ping-ring:nth-of-type(3) { animation-delay: 0.45s; }
+.ping-ring:nth-of-type(4) { animation-delay: 0.9s; }
+.ping-dot {
+  width: 16%;
+  height: 16%;
+  background: radial-gradient(circle, #fff 0 28%, var(--ping) 30% 100%);
+  box-shadow: 0 0 calc(var(--ping-line) * 5) calc(var(--ping-line) * 1.5) var(--ping);
+  animation: ping-dot 0.7s ease-in-out infinite alternate;
+}
+.ping-beam {
+  width: 22%;
+  height: 22%;
+  background: radial-gradient(circle, var(--ping), transparent 70%);
+  opacity: 0.55;
+  filter: blur(calc(var(--ping-line) * 2));
+}
 .ping span {
   position: absolute;
-  top: 100%;
+  top: calc(50% + 12%);
   left: 50%;
   transform: translateX(-50%);
+  padding: 0.1em 0.55em;
+  border-radius: 999px;
+  border: 1px solid var(--ping);
+  background: rgba(0, 0, 0, 0.72);
   color: #fff;
-  text-shadow: 0 1px 2px #000;
+  font-weight: 700;
   white-space: nowrap;
 }
 
-@keyframes ping {
-  from { transform: translate(-50%, -50%) scale(0.2); opacity: 1; }
+@keyframes ping-ring {
+  from { transform: translate(-50%, -50%) scale(0.12); opacity: 1; }
   to { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+}
+@keyframes ping-dot {
+  from { transform: translate(-50%, -50%) scale(0.85); }
+  to { transform: translate(-50%, -50%) scale(1.2); }
+}
+@keyframes ping-fade {
+  0%, 80% { opacity: 1; }
+  100% { opacity: 0; }
 }
 
 .token-tray {

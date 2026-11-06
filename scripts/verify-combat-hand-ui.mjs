@@ -138,7 +138,7 @@ try {
         const x = viewport.left + viewport.width * fx;
         const y = viewport.top + viewport.height * fy;
         const element = document.elementFromPoint(x, y);
-        if (element && element.closest(".viewport[data-scene]") && !element.closest(".floating-window, .window, .chat-dock, .map-toolbar, button, input")) return { x, y };
+        if (element && element.closest(".viewport[data-scene]") && !element.closest(".floating-window, .window:not([data-window=map]), .chat-dock, .map-toolbar, button, input")) return { x, y };
       }
     return null;
   });
@@ -160,7 +160,7 @@ try {
   await tool("kraken_combat", { action: "next" });
   await seat.waitForSelector(`[data-token="${goblinToken.id}"]`, { timeout: 10000 });
   // The sheet is moved out of the way (closed), the goblin brought into view.
-  for (const button of await seat.$$('.window-layer .window-close')) await button.click().catch(() => undefined);
+  for (const button of await seat.$$('.window-layer .window:not([data-window=map]) .window-close')) await button.click().catch(() => undefined);
   await seat.locator(`[data-token="${goblinToken.id}"]`).scrollIntoViewIfNeeded();
   await seat.click(`[data-token="${goblinToken.id}"]`, { modifiers: ["Control"] });
   for (let wait = 0; wait < 40; wait++) {

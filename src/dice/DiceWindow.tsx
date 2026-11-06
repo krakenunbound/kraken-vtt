@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useState, useSyncExternalStore } from "react";
 import type { Session } from "../session/useSession";
-import { DESIGNS, diceStore, EFFECTS, FONTS, MATERIALS, PRESETS, SET_GROUPS, type DiceLook, type DiceSet } from "./diceStore";
+import { characterDice, DESIGNS, diceStore, EFFECTS, FONTS, MATERIALS, PRESETS, SET_GROUPS, type DiceLook, type DiceSet } from "./diceStore";
 
 // The preview's three.js loads with the window.
 const DicePreview = lazy(() => import("./DicePreview"));
@@ -16,7 +16,8 @@ const FONT_STYLE: Record<DiceLook["font"], React.CSSProperties> = {
 };
 const TRAY_DICE = [20, 12, 10, 8, 6, 4, 100];
 
-const lookOf = ({ name: _name, ...look }: { name: string } & DiceLook): DiceLook => look;
+// A preset is the whole look: pips only where it has them (not left over from the set before).
+const lookOf = ({ name: _name, ...look }: { name: string } & DiceLook): DiceLook => ({ ...look, pips: Boolean(look.pips) });
 function sameLook(a: DiceLook, b: DiceLook) {
   return (["theme", "body", "ink", "accent", "material", "effect", "font"] as const).every((key) => a[key] === b[key]) && Boolean(a.pips) === Boolean(b.pips);
 }
@@ -73,14 +74,32 @@ function Stepper({ label, value, onChange, low, high }: { label: string; value: 
 // its colours), the dice as they show in the tray with the Tray and Roll
 // sizes, every set to choose from, and the parts to make a set of your own.
 // Everyone at the table sees your dice as you set them here.
+// Two tiers: your own (the user tier: your dice and your colour, kept for you
+// by the GM's app under your name) and each of your characters' (kept on the
+// character: every roll made as that character uses them).
+const PALETTE = ["#e8c46a", "#ff5a5a", "#ff9f43", "#ffe066", "#6ee7a0", "#4fd6d0", "#5aa9ff", "#a78bfa", "#ff7ad9", "#f4f1ea"];
 export function DiceWindow({ session }: { session: Session }) {
   const settings = useSyncExternalStore(diceStore.subscribe, diceStore.settings);
+  // Whose dice: "" mine, else one of my characters (its record id).
+  const me = session.players.find((seat) => seat.id === session.selfId)?.name ?? "";
+  const characters = session.role === "dm" ? [] : Object.values(session.records).filter((record) => record.type === "character" && record.owner === me).sort((a, b) => a.name.localeCompare(b.name));
+  const [whose, setWhose] = useState("");
+  const character = whose ? (characters.find((record) => record.id === whose) ?? null) : null;
+  const theirs = characterDice(character);
   // FG's dice sets: my dice; the GM's NPC dice; damage dice. A set left "as my dice" follows mine.
-  const [editing, setEditing] = useState<DiceSet>("look");
-  const own = editing === "look" ? null : settings[editing];
-  const look = own ?? settings.look;
-  const setLook = (patch: Partial<DiceLook>) => diceStore.update({ [editing]: patch });
-  const following = editing !== "look" && own === null;
+  const [chosen, setEditing] = useState<DiceSet>("look");
+  const editing: DiceSet = character && chosen === "npc" ? "look" : chosen;
+  const charSet = editing === "damage" ? "damage" : "look";
+  const mineFor = editing === "damage" ? (settings.damage ?? settings.look) : settings.look;
+  const own = character ? (charSet === "look" ? (theirs?.look ?? null) : (theirs?.damage ?? null)) : editing === "look" ? null : settings[editing];
+  const look = own ?? (character ? (charSet === "damage" ? (theirs?.look ?? mineFor) : mineFor) : settings.look);
+  const saveCharacter = (dice: Record<string, unknown>) => {
+    if (character) void session.op({ op: "update", id: character.id, patch: { data: { dice } } }).catch(() => undefined);
+  };
+  const setLook = (patch: Partial<DiceLook>) => (character ? saveCharacter({ [charSet]: { ...look, ...patch } }) : diceStore.update({ [editing]: patch }));
+  const following = character ? own === null : editing !== "look" && own === null;
+  const followLabel = character ? `${character.name} uses ${charSet === "damage" ? "my damage dice" : "my dice"}` : editing === "npc" ? "NPC dice are my dice" : "Damage dice are my dice";
+  const setFollowing = (on: boolean) => (character ? saveCharacter({ [charSet]: on ? null : { ...look } }) : diceStore.update({ [editing]: on ? null : { ...settings.look } }));
   const [group, setGroup] = useState(SET_GROUPS.find((item) => item.sets.includes(nameOf(look) ?? ""))?.name ?? "All");
   const tray = usePictures(() => import("./trayArt").then(({ renderTray }) => renderTray(look)), JSON.stringify(look), {} as Record<number, string>);
   const sets = usePictures(() => import("./trayArt").then(({ renderSets }) => renderSets(PRESETS.map(lookOf))), "sets", [] as string[]);
@@ -89,11 +108,20 @@ export function DiceWindow({ session }: { session: Session }) {
 
   return (
     <div className="dice-window">
+      {characters.length > 0 ? (
+        <div className="dice-groups dice-whose" role="tablist" aria-label="Whose dice">
+          {[{ id: "", name: "Mine", tip: "Your own dice: every roll you make as yourself, and your characters' until they have their own" }, ...characters.map((record) => ({ id: record.id, name: record.name, tip: `${record.name}'s dice: every roll made as ${record.name}` }))].map((item) => (
+            <button key={item.id || "mine"} type="button" role="tab" aria-selected={whose === item.id} className={whose === item.id ? "dice-chip on" : "dice-chip"} title={item.tip} data-dice-whose={item.id || "mine"} onClick={() => setWhose(item.id)}>
+              {item.name}
+            </button>
+          ))}
+        </div>
+      ) : null}
       <div className="dice-groups dice-which" role="tablist" aria-label="Which dice">
         {(
           [
             ["look", "My dice", "Your rolls"],
-            ...(session.role === "dm" ? ([["npc", "NPC dice", "Your rolls for the creatures: their attacks, saves and checks from the tracker"]] as const) : []),
+            ...(session.role === "dm" && !character ? ([["npc", "NPC dice", "Your rolls for the creatures: their attacks, saves and checks from the tracker"]] as const) : []),
             ["damage", "Damage dice", "Every damage roll you make"],
           ] as const
         ).map(([id, label, tip]) => (
@@ -102,14 +130,14 @@ export function DiceWindow({ session }: { session: Session }) {
           </button>
         ))}
       </div>
-      {editing !== "look" ? (
+      {editing !== "look" || character ? (
         <label className="check dice-follow">
-          <input type="checkbox" checked={following} data-dice-follow onChange={(event) => diceStore.update({ [editing]: event.target.checked ? null : { ...settings.look } })} />
-          {editing === "npc" ? "NPC dice are my dice" : "Damage dice are my dice"} (untick to give them their own set)
+          <input type="checkbox" checked={following} data-dice-follow onChange={(event) => setFollowing(event.target.checked)} />
+          {followLabel} (untick to give them their own set)
         </label>
       ) : null}
       <section className="dice-panel active-set" data-editing={editing}>
-        <h3>{editing === "npc" ? "NPC dice" : editing === "damage" ? "Damage dice" : "Active dice set"}</h3>
+        <h3>{character ? `${character.name}'s ${charSet === "damage" ? "damage dice" : "dice"}` : editing === "npc" ? "NPC dice" : editing === "damage" ? "Damage dice" : "Active dice set"}</h3>
         <div className="active-body">
           <Suspense fallback={<div className="dice-preview" />}>
             <DicePreview look={look} />
@@ -134,7 +162,7 @@ export function DiceWindow({ session }: { session: Session }) {
                 Numbers
               </label>
             </div>
-            <p className="hint">{editing === "npc" ? "The table sees the creatures' rolls in these." : editing === "damage" ? "The table sees your damage rolls in these." : "Everyone at the table sees your dice like this."}</p>
+            <p className="hint">{character ? `Every roll made as ${character.name} uses these; they stay with ${character.name}.` : editing === "npc" ? "The table sees the creatures' rolls in these." : editing === "damage" ? "The table sees your damage rolls in these." : "Everyone at the table sees your dice like this."}</p>
           </div>
         </div>
       </section>
@@ -197,6 +225,23 @@ export function DiceWindow({ session }: { session: Session }) {
           <input type="checkbox" checked={Boolean(look.pips)} onChange={(event) => setLook({ pips: event.target.checked })} data-dice="pips" />
           Pips on the d6
         </label>
+      </section>
+
+      <section className="dice-panel your-colour">
+        <h3>Your colour</h3>
+        <p className="hint">Your pings and your ink on the map, for everyone at the table. Kept with your name.</p>
+        <div className="dice-colors" role="radiogroup" aria-label="Your colour">
+          <button type="button" role="radio" aria-checked={settings.color === null} className={settings.color === null ? "swatch mine on" : "swatch mine"} title="The table's colour for your name" data-ping-color="default" onClick={() => diceStore.update({ color: null })}>
+            Auto
+          </button>
+          {PALETTE.map((color) => (
+            <button key={color} type="button" role="radio" aria-checked={settings.color === color} aria-label={`Colour ${color}`} className={settings.color === color ? "swatch on" : "swatch"} style={{ background: color }} data-ping-color={color} onClick={() => diceStore.update({ color })} />
+          ))}
+          <label>
+            <input type="color" aria-label="Pick your colour" value={settings.color ?? "#e8c46a"} onChange={(event) => diceStore.update({ color: event.target.value })} />
+            Other
+          </label>
+        </div>
       </section>
 
       <section className="dice-panel">

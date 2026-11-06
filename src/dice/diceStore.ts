@@ -152,11 +152,14 @@ export const PRESETS: ({ name: string } & DiceLook)[] = [
 // tray, roll: how big the tray's dice and the dice on the table are (FG's Tray and Roll sizes), 1 = 100%.
 // npc, damage: FG's other dice sets, the GM's dice for the creatures they roll
 // for, and the dice for damage rolls (anyone's); null is "as my dice".
-export type DiceSettings = { show: boolean; sound: boolean; volume: number; tray: number; roll: number; look: DiceLook; npc: DiceLook | null; damage: DiceLook | null };
+// color: this person's colour on the map (their pings and their ink); null is the table's colour for their name.
+// These are the user tier: kept by the GM's app under the person's name (prefs.cjs), so
+// they follow them to any browser, past a reload, a restart and signing in again.
+export type DiceSettings = { show: boolean; sound: boolean; volume: number; tray: number; roll: number; look: DiceLook; npc: DiceLook | null; damage: DiceLook | null; color: string | null };
 export type DiceSet = "look" | "npc" | "damage";
 type SettingsPatch = Partial<Omit<DiceSettings, "look" | "npc" | "damage">> & { look?: Partial<DiceLook>; npc?: Partial<DiceLook> | null; damage?: Partial<DiceLook> | null };
 const { name: _first, ...firstLook } = PRESETS.find((preset) => preset.name === "Classic Ruby") ?? PRESETS[0];
-const DEFAULTS: DiceSettings = { show: true, sound: true, volume: 0.7, tray: 1, roll: 1, look: firstLook, npc: null, damage: null };
+const DEFAULTS: DiceSettings = { show: true, sound: true, volume: 0.7, tray: 1, roll: 1, look: firstLook, npc: null, damage: null, color: null };
 
 // A look from another seat (or an older one) with whatever it leaves out filled in.
 export function fullLook(look: Partial<DiceLook>): DiceLook {
@@ -173,7 +176,7 @@ function load(): DiceSettings {
   try {
     const saved = JSON.parse(window.localStorage.getItem("kraken-dice") ?? "null");
     if (saved && typeof saved === "object")
-      return { ...DEFAULTS, ...saved, look: { ...DEFAULTS.look, ...(saved.look ?? {}) }, npc: saved.npc ? fullLook(saved.npc) : null, damage: saved.damage ? fullLook(saved.damage) : null };
+      return { ...DEFAULTS, ...saved, look: { ...DEFAULTS.look, ...(saved.look ?? {}) }, npc: saved.npc ? fullLook(saved.npc) : null, damage: saved.damage ? fullLook(saved.damage) : null, color: typeof saved.color === "string" ? saved.color : null };
   } catch {
     /* defaults */
   }
@@ -183,6 +186,34 @@ function load(): DiceSettings {
 let settings: DiceSettings = typeof window === "undefined" ? DEFAULTS : load();
 const listeners = new Set<() => void>();
 const changed = () => listeners.forEach((listener) => listener());
+const keep = () => {
+  try {
+    window.localStorage.setItem("kraken-dice", JSON.stringify(settings));
+  } catch {
+    /* only this browser forgets */
+  }
+};
+// The GM's app, which keeps these for this person (set when the seat is taken).
+let sink: ((patch: Record<string, unknown>) => void) | null = null;
+const SERVER_KEYS = ["show", "sound", "volume", "tray", "roll", "look", "npc", "damage", "color"] as const;
+const forServer = (from: Partial<DiceSettings>) => Object.fromEntries(SERVER_KEYS.filter((key) => from[key] !== undefined).map((key) => [key, from[key]]));
+function adopt(saved: Record<string, unknown>) {
+  const look = saved.look && typeof saved.look === "object" ? fullLook(saved.look as Partial<DiceLook>) : DEFAULTS.look;
+  const other = (value: unknown) => (value && typeof value === "object" ? fullLook(value as Partial<DiceLook>) : null);
+  settings = {
+    show: typeof saved.show === "boolean" ? saved.show : DEFAULTS.show,
+    sound: typeof saved.sound === "boolean" ? saved.sound : DEFAULTS.sound,
+    volume: typeof saved.volume === "number" ? saved.volume : DEFAULTS.volume,
+    tray: typeof saved.tray === "number" ? saved.tray : DEFAULTS.tray,
+    roll: typeof saved.roll === "number" ? saved.roll : DEFAULTS.roll,
+    look,
+    npc: other(saved.npc),
+    damage: other(saved.damage),
+    color: typeof saved.color === "string" ? saved.color : null,
+  };
+  keep();
+  changed();
+}
 
 export const diceStore = {
   subscribe(listener: () => void) {
@@ -194,14 +225,35 @@ export const diceStore = {
     // A set given parts starts from what it was, or from my dice.
     const other = (key: "npc" | "damage") => (patch[key] === undefined ? settings[key] : patch[key] === null ? null : { ...(settings[key] ?? settings.look), ...patch[key] });
     settings = { ...settings, ...patch, look: { ...settings.look, ...(patch.look ?? {}) }, npc: other("npc"), damage: other("damage") };
-    try {
-      window.localStorage.setItem("kraken-dice", JSON.stringify(settings));
-    } catch {
-      /* only this browser forgets */
-    }
+    keep();
     changed();
+    // What changed goes to the GM's app, which keeps it under this person's name.
+    const touched = Object.fromEntries(Object.keys(patch).map((key) => [key, settings[key as keyof DiceSettings]]));
+    sink?.(forServer(touched as Partial<DiceSettings>));
+  },
+  // A seat taken: the person's own settings come from the GM's app. Someone it
+  // keeps nothing for yet (their first sitting, or settings made before it kept
+  // them) gives it what this browser has, so nothing they chose is lost.
+  connect(send: (patch: Record<string, unknown>) => void, saved: unknown) {
+    sink = send;
+    if (saved && typeof saved === "object" && Object.keys(saved).length > 0) adopt(saved as Record<string, unknown>);
+    else send(forServer(settings));
+  },
+  // The GM's app says what this person's settings are now (changed at another browser, or by the agent).
+  adopt: (saved: unknown) => (saved && typeof saved === "object" ? adopt(saved as Record<string, unknown>) : undefined),
+  disconnect() {
+    sink = null;
   },
 };
+
+// The character tier: a character's own dice, kept on its record (data.dice),
+// used for every roll made as that character; null when it uses its player's dice.
+export type CharacterDice = { look?: DiceLook; damage?: DiceLook };
+export function characterDice(record: { data?: unknown } | null | undefined): CharacterDice | null {
+  const dice = (record?.data as { dice?: { look?: Partial<DiceLook>; damage?: Partial<DiceLook> } } | undefined)?.dice;
+  if (!dice || typeof dice !== "object" || (!dice.look && !dice.damage)) return null;
+  return { ...(dice.look ? { look: fullLook(dice.look) } : {}), ...(dice.damage ? { damage: fullLook(dice.damage) } : {}) };
+}
 
 // --- How this seat's next roll is thrown ------------------------------------
 

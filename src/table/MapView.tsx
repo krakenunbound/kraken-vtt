@@ -1474,11 +1474,21 @@ export function MapView({
               return token ? <div key={found.at} className="found-ring" style={{ left: token.x, top: token.y, width: size * 3, height: size * 3 }} /> : null;
             })()
           : null}
-        {pings.map((item) => (
-          <div key={item.id} className="ping" style={{ left: item.x, top: item.y, width: size * 2, height: size * 2, borderColor: item.color }}>
-            <span style={{ fontSize: 14 / camera.scale }}>{item.from}</span>
-          </div>
-        ))}
+        {/* A ping: a bright dot in the person's colour, three rings going out from it and a
+            beam of light, never smaller on screen than about 180 px however far out the map is. */}
+        {pings.map((item) => {
+          const reach = Math.max(size * 3, 180 / camera.scale);
+          return (
+            <div key={item.id} className="ping" data-ping-from={item.from} style={{ left: item.x, top: item.y, width: reach, height: reach, ["--ping" as string]: item.color, ["--ping-line" as string]: `${Math.max(3, 5 / camera.scale)}px` }}>
+              <i className="ping-beam" />
+              <i className="ping-ring" />
+              <i className="ping-ring" />
+              <i className="ping-ring" />
+              <i className="ping-dot" />
+              <span style={{ fontSize: 15 / camera.scale }}>{item.from}</span>
+            </div>
+          );
+        })}
         {vision ? (
           <svg className="overlay sight" width={frame.worldWidth} height={frame.worldHeight} viewBox={`0 0 ${frame.worldWidth} ${frame.worldHeight}`}>
             <defs>

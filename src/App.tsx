@@ -5,7 +5,7 @@ import { imageMime, inspectZip, PICTURE, pictureBundle, type ImportCandidate, ty
 import { useSession } from "./session/useSession";
 import { SetupScreen } from "./setup/SetupScreen";
 import { MapView, type MapScene } from "./table/MapView";
-import { DESIGNS, EFFECTS, FONTS, MATERIALS, PRESETS, diceStore, type DiceLook } from "./dice/diceStore";
+import { DESIGNS, EFFECTS, FONTS, MATERIALS, PRESETS, diceStore, fullLook, type DiceLook } from "./dice/diceStore";
 import type { DiceSettingsPatch } from "./kraken";
 import { agentCommands } from "./ui/agentCommands";
 import { Desktop } from "./ui/Desktop";
@@ -39,6 +39,9 @@ function diceSettings(patch: DiceSettingsPatch) {
   };
   // A preset is the whole look: pips only where it has them.
   const look = { ...(found ? { pips: Boolean((preset as Partial<DiceLook>).pips) } : {}), ...preset, ...parts };
+  // A character's own dice (kraken_dice_settings character): the whole look, worked out from what it has; the host keeps it on the character.
+  if (patch.resolve) return { look: fullLook({ ...(patch.base ?? diceStore.settings().look), ...look }) };
+  if (patch.color !== undefined && patch.color !== "" && !COLOUR.test(String(patch.color))) throw new Error("color must be a colour like #e8c46a.");
   if (patch.set !== undefined && !["mine", "npc", "damage"].includes(patch.set)) throw new Error("set is mine, npc or damage.");
   const key = patch.set === "npc" ? "npc" : patch.set === "damage" ? "damage" : "look";
   const changes = Object.keys(look).length > 0;
@@ -46,6 +49,7 @@ function diceSettings(patch: DiceSettingsPatch) {
     ...(typeof patch.show === "boolean" ? { show: patch.show } : {}),
     ...(typeof patch.sound === "boolean" ? { sound: patch.sound } : {}),
     ...(typeof patch.volume === "number" ? { volume: Math.min(1, Math.max(0, patch.volume)) } : {}),
+    ...(patch.color !== undefined ? { color: patch.color ? String(patch.color).toLowerCase() : null } : {}),
     ...(key === "look" ? { look } : patch.same ? { [key]: null } : changes ? { [key]: look } : {}),
   });
   const now = diceStore.settings();
@@ -409,6 +413,8 @@ export function App() {
               <MapView scene={scene} gm={dm} map={session.map} records={Object.values(session.records)} pings={session.pings} notice={session.notice} actions={session} targeted={targetedTokens(session)} me={session.players.find((seat) => seat.id === session.selfId)?.name ?? ""} />
             ) : null
           }
+          sceneId={scene?.id ?? ""}
+          sceneName={scene?.name ?? ""}
           sceneBar={sceneBar}
           emptyGM={emptyGM}
           onOpenAdventure={() => fileInput.current?.click()}
