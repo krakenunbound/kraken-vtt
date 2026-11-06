@@ -14,6 +14,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import readline from "node:readline";
 import { _electron as electron, chromium } from "playwright-core";
+import { CHROME } from "./lib/chrome.mjs";
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -122,7 +123,7 @@ try {
     await tool("kraken_open_adventure", { path: bundle });
     await page.waitForSelector(".map-toolbar", { timeout: 60000 });
   }
-  browser = await chromium.launch({ executablePath: String.raw`C:\Program Files\Google\Chrome\Application\chrome.exe`, headless: true });
+  browser = await chromium.launch({ executablePath: CHROME, headless: true });
   const laptop = await browser.newContext({ viewport: { width: 1400, height: 900 } });
   let ann = await sit(laptop, "secret1");
   const rogue = await tool("kraken_record_create", { type: "character", name: "Ann's Rogue", owner: "Ann", visibility: "owner", data: { level: 1 } });
@@ -186,7 +187,7 @@ try {
   page.on("pageerror", (error) => failures.push(error.message));
   await tool("kraken_host", { campaignId: campaign.id, port, password: "" });
   await page.waitForSelector("text=Hosting");
-  browser = await chromium.launch({ executablePath: String.raw`C:\Program Files\Google\Chrome\Application\chrome.exe`, headless: true });
+  browser = await chromium.launch({ executablePath: CHROME, headless: true });
   const fresh = await browser.newContext({ viewport: { width: 1400, height: 900 } });
   ann = await sit(fresh, "secret1");
   same(await shown(ann, rogue.id), "after the GM's app restarted");

@@ -2,7 +2,7 @@
 
 ## Setup
 
-Windows, Node.js 22 or newer, Git.
+Windows or Linux, Node.js 22 or newer, Git.
 
 ```
 npm install
@@ -10,9 +10,14 @@ npm run build      # typecheck and build the interface into dist/
 npm start          # open the app on the last build
 npm run dev        # the interface alone in a browser, with hot reload
 npm run exe        # the Windows installer (Kraken VTT Setup.exe)
+npm run linux      # the Linux AppImage and .deb (on Linux or in WSL)
 ```
 
-`Kraken VTT.bat` does install, build-when-changed and start in one.
+`Kraken VTT.bat` (Windows) does install, build-when-changed and start in one.
+
+To build the Linux packages from Windows, copy the source into a WSL
+distribution's own file system (not `/mnt/c`), then `npm ci` and
+`npm run linux` there; the packages land in its `release/` folder.
 
 ## Tests
 

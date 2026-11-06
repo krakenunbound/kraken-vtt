@@ -8,6 +8,7 @@ import { mkdtempSync } from "node:fs";
 import { networkInterfaces, tmpdir } from "node:os";
 import path from "node:path";
 import { _electron as electron, chromium } from "playwright-core";
+import { CHROME } from "./lib/chrome.mjs";
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -64,7 +65,7 @@ try {
   await gm.waitForSelector('.roster-list li[data-role="player"]:has-text("A test player")', { timeout: 10000 });
 
   // A test player in Chrome at the same address.
-  browser = await chromium.launch({ executablePath: String.raw`C:\Program Files\Google\Chrome\Application\chrome.exe`, headless: true });
+  browser = await chromium.launch({ executablePath: CHROME, headless: true });
   const seat = await browser.newPage();
   seat.on("pageerror", (error) => failures.push(`chrome: ${error.message}`));
   await seat.goto(`http://${address}:${port}/`);

@@ -13,6 +13,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import readline from "node:readline";
 import { _electron as electron, chromium } from "playwright-core";
+import { CHROME } from "./lib/chrome.mjs";
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -69,7 +70,7 @@ try {
   assert((Array.isArray(classes) ? classes : []).length === 7, `seven classes: ${JSON.stringify(classes).slice(0, 200)}`);
 
   // A test player makes a dwarf in the wizard.
-  browser = await chromium.launch({ executablePath: String.raw`C:\Program Files\Google\Chrome\Application\chrome.exe`, headless: true });
+  browser = await chromium.launch({ executablePath: CHROME, headless: true });
   const seat = await (await browser.newContext({ viewport: { width: 1400, height: 950 } })).newPage();
   seat.on("pageerror", (error) => failures.push(`player: ${error.message}`));
   await seat.goto("http://127.0.0.1:47447/");

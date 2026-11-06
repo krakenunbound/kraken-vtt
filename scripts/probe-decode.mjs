@@ -6,10 +6,11 @@ import { readdirSync, statSync } from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { chromium } from "playwright-core";
+import { CHROME } from "./lib/chrome.mjs";
 
 const folder = process.argv[2];
 const files = readdirSync(folder).filter((name) => /\.(webp|jpe?g|png|avif)$/i.test(name));
-const browser = await chromium.launch({ executablePath: String.raw`C:\Program Files\Google\Chrome\Application\chrome.exe`, headless: true, args: ["--allow-file-access-from-files"] });
+const browser = await chromium.launch({ executablePath: CHROME, headless: true, args: ["--allow-file-access-from-files"] });
 const page = await browser.newPage();
 await page.goto(pathToFileURL(path.join(folder, files[0])).href);
 for (const name of files) {

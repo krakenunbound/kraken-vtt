@@ -10,6 +10,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import readline from "node:readline";
 import { _electron as electron, chromium } from "playwright-core";
+import { CHROME } from "./lib/chrome.mjs";
 
 const OUT = path.join(process.cwd(), "docs", "screenshots");
 mkdirSync(OUT, { recursive: true });
@@ -91,7 +92,7 @@ try {
   for (const book of ddBooks) await tool("kraken_books", { action: "activate", book: book.id });
 
   // A test player joins and makes a character in the wizard.
-  browser = await chromium.launch({ executablePath: String.raw`C:\Program Files\Google\Chrome\Application\chrome.exe`, headless: true });
+  browser = await chromium.launch({ executablePath: CHROME, headless: true });
   const seat = await (await browser.newContext({ viewport: SCREEN })).newPage();
   await seat.goto("http://127.0.0.1:47461/");
   await seat.fill('input[name="name"]', "Ann");

@@ -10,6 +10,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import readline from "node:readline";
 import { _electron as electron, chromium } from "playwright-core";
+import { CHROME } from "./lib/chrome.mjs";
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -157,7 +158,7 @@ try {
   // Far from the middle, where a lost player would not find it.
   await tool("kraken_token_place", { recordId: hero.id, col: 4, row: 4 });
 
-  browser = await chromium.launch({ executablePath: String.raw`C:\Program Files\Google\Chrome\Application\chrome.exe`, headless: true });
+  browser = await chromium.launch({ executablePath: CHROME, headless: true });
   const seat = await browser.newPage({ viewport: { width: 1400, height: 900 } });
   seat.on("pageerror", (error) => failures.push(`player: ${error.message}`));
   await seat.goto(`http://127.0.0.1:${port}/`);

@@ -10,6 +10,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import readline from "node:readline";
 import { _electron as electron, chromium } from "playwright-core";
+import { CHROME } from "./lib/chrome.mjs";
 
 const B1 = "B1 In Search of the Unknown (C&C)";
 const profile = process.env.PROFILE || mkdtempSync(path.join(tmpdir(), "kraken-map-probe-"));
@@ -81,7 +82,7 @@ try {
   for (let index = 0; index < 8; index++) await tool("kraken_token_place", { name: `Goblin ${index + 1}`, col: 36 + (index % 4), row: 24 + Math.floor(index / 4), faction: "foe" });
   await tool("kraken_scene_settings", { darkness: 0.8 });
   if ((await page.getAttribute('[data-action="sight"]', "aria-pressed")) !== "true") await page.click('[data-action="sight"]');
-  browser = await chromium.launch({ executablePath: String.raw`C:\Program Files\Google\Chrome\Application\chrome.exe`, headless: true });
+  browser = await chromium.launch({ executablePath: CHROME, headless: true });
   const seat = await (await browser.newContext({ viewport: { width: 1400, height: 900 } })).newPage();
   await seat.goto("http://127.0.0.1:47449/");
   await seat.fill('input[name="name"]', "A test player");
