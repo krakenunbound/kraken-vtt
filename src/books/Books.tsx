@@ -335,6 +335,9 @@ export function BooksWindow({ session, onOpenAdventure, start = "books" }: { ses
   );
 }
 
+// A page with no sounds of its own (one object, so it never looks changed).
+const NO_SOUNDS = { links: {}, blocks: [] };
+
 export function BookWindow({ session, book }: { session: Session; book: string }) {
   const gm = session.role === "dm";
   const { openBook, openPicture } = useBookWindows();
@@ -352,7 +355,7 @@ export function BookWindow({ session, book }: { session: Session; book: string }
   useEffect(() => {
     if (gm) session.soundList().then(setLibrary).catch(() => setLibrary(null));
   }, [gm]);
-  const pageSounds = session.bookSounds[`${book}|${pageId}`] ?? { links: {}, blocks: [] };
+  const pageSounds = session.bookSounds[`${book}|${pageId}`] ?? NO_SOUNDS;
   // A sound link's sound: the one the GM dropped on it, else Kraken's of that kind and name.
   const linkSound = (link: HTMLElement): BookSoundRef | null => {
     const key = link.dataset.soundKey ?? "";
@@ -370,7 +373,9 @@ export function BookWindow({ session, book }: { session: Session; book: string }
       link.classList.toggle("none", gm && !ref);
       link.title = !gm ? "" : ref ? `Plays ${ref.sound} for the table (drop a sound here to change it)` : "No sound yet: drop one here from the Sound window";
     }
-  });
+    // Only when the page, its sounds or the library change (not on every change at the table).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, library, pageSounds, gm]);
   const dropSound = (event: React.DragEvent) => {
     if (!gm || !pageId) return;
     let ref: BookSoundRef;

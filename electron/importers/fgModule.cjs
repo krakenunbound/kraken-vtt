@@ -346,27 +346,67 @@ function convertXml(text) {
 }
 
 // A picture a record names, read from inside its module: "images/mt-101.webp"
-// (the record's own module) or "tokens/mt-ogre.webp@Other Module". The last
-// few modules opened stay in memory.
-const opened = new Map();
+// (the record's own module) or "tokens/mt-ogre.webp@Other Module". Only that
+// picture is unpacked (a module's maps can be hundreds of megabytes; unpacking
+// all of it for one cover froze the app). The last few modules' files stay in
+// memory as they are on disk, and the pictures last asked for, unpacked.
+const raw = new Map(); // module file -> { bytes, size, mtime }
+const pictures = new Map(); // module file|picture -> bytes
+let pictureBytes = 0;
 const PICTURE_TYPES = { ".png": "image/png", ".webp": "image/webp", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".gif": "image/gif" };
 function modulePicture(reference, ownModule) {
   const [inner, other] = String(reference ?? "").split("@");
   const moduleName = (other || ownModule || "").trim();
   const mime = PICTURE_TYPES[path.extname(inner).toLowerCase()];
   if (!inner || !moduleName || !mime) return null;
-  let files = opened.get(moduleName);
-  if (!files) {
-    try {
-      files = readFiles(resolveModule(moduleName));
-    } catch {
-      return null;
-    }
-    opened.set(moduleName, files);
-    if (opened.size > 4) opened.delete(opened.keys().next().value);
+  const wanted = inner.replace(/^\/+/, "").replaceAll("\\", "/");
+  let source;
+  let stat;
+  try {
+    source = resolveModule(moduleName);
+    stat = fs.statSync(source);
+  } catch {
+    return null;
   }
-  const bytes = files.get(inner.replace(/^\/+/, ""));
-  return bytes ? { bytes: Buffer.from(bytes), mime } : null;
+  const key = `${source}|${stat.size}|${Math.round(stat.mtimeMs)}|${wanted.toLowerCase()}`;
+  const kept = pictures.get(key);
+  if (kept) {
+    pictures.delete(key);
+    pictures.set(key, kept);
+    return { bytes: Buffer.from(kept), mime };
+  }
+  let bytes = null;
+  try {
+    if (stat.isDirectory()) {
+      const file = path.join(source, wanted);
+      bytes = fs.existsSync(file) ? fs.readFileSync(file) : null;
+    } else {
+      let zip = raw.get(source);
+      if (!zip || zip.size !== stat.size || zip.mtime !== stat.mtimeMs) {
+        zip = { bytes: new Uint8Array(fs.readFileSync(source)), size: stat.size, mtime: stat.mtimeMs };
+        raw.set(source, zip);
+        if (raw.size > 4) raw.delete(raw.keys().next().value);
+      } else {
+        raw.delete(source);
+        raw.set(source, zip);
+      }
+      const lower = wanted.toLowerCase();
+      const found = Object.values(unzipSync(zip.bytes, { filter: (entry) => entry.name.replaceAll("\\", "/").toLowerCase() === lower }));
+      bytes = found[0] ?? null;
+    }
+  } catch {
+    return null;
+  }
+  if (!bytes) return null;
+  pictures.set(key, bytes);
+  pictureBytes += bytes.length;
+  // About 300 MB of pictures at most, the oldest let go first.
+  while (pictureBytes > 300 * 1024 * 1024 && pictures.size > 1) {
+    const [oldest, value] = pictures.entries().next().value;
+    pictures.delete(oldest);
+    pictureBytes -= value.length;
+  }
+  return { bytes: Buffer.from(bytes), mime };
 }
 
 module.exports = { readModule, importModule, listModules, fgDataFolder, convertXml, modulePicture };
