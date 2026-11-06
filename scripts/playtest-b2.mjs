@@ -13,6 +13,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import readline from "node:readline";
 import { _electron as electron, chromium } from "playwright-core";
+import { CHROME } from "./lib/chrome.mjs";
 
 const OUT = process.argv[2] ?? path.join(tmpdir(), "kraken-playtest-b2.json");
 const B2 = "B2 The Keep on the Borderlands (C&C)";
@@ -361,7 +362,7 @@ try {
   if (thorinToken) await attempt("map", "Thorin lights a torch", "kraken_token_update", { id: thorinToken.id, light: "torch" });
 
   // --- A test player in Chrome ------------------------------------------------------
-  browser = await chromium.launch({ executablePath: String.raw`C:\Program Files\Google\Chrome\Application\chrome.exe`, headless: true });
+  browser = await chromium.launch({ executablePath: CHROME, headless: true });
   const seat = await browser.newPage({ viewport: { width: 1400, height: 900 } });
   const seatErrors = [];
   seat.on("pageerror", (error) => seatErrors.push(error.message));

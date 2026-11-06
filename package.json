@@ -2,7 +2,7 @@
   "name": "kraken-vtt",
   "private": true,
   "license": "PolyForm-Shield-1.0.0",
-  "version": "0.1.0-alpha.56",
+  "version": "0.1.0-alpha.57",
   "description": "A free virtual tabletop: the GM hosts, players join from a browser.",
   "author": "Kraken VTT",
   "type": "module",
@@ -78,7 +78,8 @@
     "demo": "node scripts/demo-host.mjs",
     "start": "electron .",
     "launch": "node scripts/launch.mjs",
-    "exe": "npm run build && electron-builder --win nsis && node scripts/copy-exe.mjs"
+    "exe": "npm run build && electron-builder --win nsis && node scripts/copy-exe.mjs",
+    "linux": "npm run build && electron-builder --linux AppImage deb"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.4.0",
@@ -141,6 +142,29 @@
       "runAfterFinish": true,
       "installerIcon": "build/icon.ico",
       "uninstallerIcon": "build/icon.ico"
+    },
+    "linux": {
+      "icon": "build/icon.png",
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Game",
+      "synopsis": "A virtual tabletop: the GM hosts, players join from a browser",
+      "maintainer": "The Kraken <krakenunbound@users.noreply.github.com>",
+      "executableName": "kraken-vtt",
+      "artifactName": "Kraken-VTT-${version}-${arch}.${ext}",
+      "desktop": {
+        "entry": {
+          "Name": "Kraken VTT"
+        }
+      },
+      "syncDesktopName": true
+    },
+    "deb": {
+      "artifactName": "kraken-vtt_${version}_${arch}.${ext}"
     }
-  }
+  },
+  "homepage": "https://github.com/krakenunbound/kraken-vtt",
+  "desktopName": "kraken-vtt.desktop"
 }

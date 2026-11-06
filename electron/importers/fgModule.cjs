@@ -20,8 +20,14 @@ const { DOMParser, XMLSerializer } = require("@xmldom/xmldom");
 // Roots that are not records: the library index, and FG's list views.
 const SKIP_ROOTS = new Set(["library", "list"]);
 
+// Fantasy Grounds' default data folder on each system (the user may have moved it).
 function fgDataFolder() {
-  return path.join(process.env.APPDATA || path.join(os.homedir(), "AppData", "Roaming"), "SmiteWorks", "Fantasy Grounds");
+  const home = os.homedir();
+  if (process.platform === "win32") return path.join(process.env.APPDATA || path.join(home, "AppData", "Roaming"), "SmiteWorks", "Fantasy Grounds");
+  const candidates = process.platform === "darwin"
+    ? [path.join(home, "SmiteWorks", "Fantasy Grounds"), path.join(home, "Library", "Application Support", "SmiteWorks", "Fantasy Grounds")]
+    : [path.join(home, ".smiteworks", "fgdata"), path.join(home, "SmiteWorks", "Fantasy Grounds")];
+  return candidates.find((dir) => fs.existsSync(dir)) ?? candidates[0];
 }
 
 function elements(node) {

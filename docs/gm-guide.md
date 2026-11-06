@@ -1,6 +1,6 @@
 # The GM's guide
 
-Kraken runs on the GM's Windows PC. The GM's copy is the table: it keeps the
+Kraken runs on the GM's Windows or Linux PC. The GM's copy is the table: it keeps the
 campaign, decides what each player may see, and serves the players' browsers.
 
 ## Campaigns
@@ -32,7 +32,9 @@ Select a campaign, then:
 
 **Players on the internet** need your router to forward the port (47300 by
 default, TCP) to this PC. The Windows installer adds the firewall rule for
-you; running from source, Windows asks once, the first time you host.
+you; running from source, Windows asks once, the first time you host. On
+Linux, if a firewall is on (such as `ufw`), allow the port yourself:
+`sudo ufw allow 47300/tcp`.
 
 ## The table
 

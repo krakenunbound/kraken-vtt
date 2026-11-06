@@ -1,7 +1,7 @@
 # Kraken VTT
 
 A free virtual tabletop, with its source open to read. The game master runs Kraken on
-their Windows PC and hosts the table; players join from Chrome and install
+their Windows or Linux PC and hosts the table; players join from Chrome and install
 nothing. It aims for Foundry-level presentation with Fantasy Grounds-level ease
 of use, and a built-in AI agent that can do anything the GM can.
 
@@ -57,11 +57,17 @@ of use, and a built-in AI agent that can do anything the GM can.
 
 ## Getting started
 
-1. **Install.** Download `Kraken.VTT.Setup.exe` from
-   [Releases](https://github.com/krakenunbound/kraken-vtt/releases) and run it
-   (it is not code-signed yet: if Windows SmartScreen stops it, choose
-   *More info*, then *Run anyway*). Or run from the
-   source with `Kraken VTT.bat` (see [Development](#development)).
+1. **Install.** From [Releases](https://github.com/krakenunbound/kraken-vtt/releases):
+   - **Windows:** download `Kraken.VTT.Setup.exe` and run it (it is not
+     code-signed: if Windows SmartScreen stops it, choose *More info*, then
+     *Run anyway*).
+   - **Linux (x64):** download the `.AppImage`, make it executable
+     (`chmod +x Kraken-VTT-*.AppImage`) and run it; or on Debian and Ubuntu
+     install the `.deb` (`sudo apt install ./kraken-vtt_*_amd64.deb`). If
+     your firewall is on, allow the port your table uses (for example
+     `sudo ufw allow 47300/tcp`).
+
+   Or run from the source (see [Development](#development)).
 2. **Make a campaign.** On the start screen choose **My Campaigns**, name it,
    and pick its game. Choose *Descending Darkness* or *Apeira Astra* to try
    Kraken with no other content.
@@ -84,7 +90,7 @@ The full guides:
 
 ## Development
 
-You need Windows, [Node.js](https://nodejs.org) 22 or newer, and Git.
+You need Windows or Linux, [Node.js](https://nodejs.org) 22 or newer, and Git.
 
 ```
 git clone https://github.com/krakenunbound/kraken-vtt.git
@@ -96,7 +102,8 @@ npm start
 
 Or double-click **`Kraken VTT.bat`**: it installs packages the first time,
 rebuilds when the code has changed, and opens the app. `npm run exe` builds the
-installer. More in [docs/development.md](docs/development.md).
+Windows installer and `npm run linux` the Linux AppImage and `.deb` (build
+them on Linux, or in WSL). More in [docs/development.md](docs/development.md).
 
 ## Reporting problems
 
