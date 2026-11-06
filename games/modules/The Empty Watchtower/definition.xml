@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root version="4.6" release="1">
+	<name type="string">The Empty Watchtower</name>
+	<displayname type="string">The Empty Watchtower (Descending Darkness)</displayname>
+	<category type="string">Descending Darkness Adventures</category>
+	<author type="string">Kraken VTT</author>
+	<ruleset type="string">Descending Darkness</ruleset>
+</root>

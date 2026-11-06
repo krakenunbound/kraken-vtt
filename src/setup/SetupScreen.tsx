@@ -40,6 +40,8 @@ function rememberGame(game: RecentGame) {
 const RULESETS = [
   { name: "Castles & Crusades", blurb: "SiegeCore rules: character sheets, the SIEGE engine, combat and spells." },
   { name: "D&D 5E", blurb: "The SRD 5.2.1: 5E sheets and character building, d20 combat with criticals, saves, spells and death saves." },
+  { name: "Descending Darkness", blurb: "Kraken's dark fantasy: d20, fragile heroes, light that runs out, dread that builds. Its books and a first adventure come with Kraken." },
+  { name: "Apeira Astra", blurb: "Kraken's science fiction: 2d6 and skills, Paths to make a crew in minutes, armour that soaks. Its books and a first adventure come with Kraken." },
   { name: "Worldbuilding", blurb: "No game rules: maps, tokens, chat and dice for any system." },
 ];
 

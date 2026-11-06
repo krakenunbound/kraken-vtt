@@ -111,6 +111,7 @@
       "electron/**/*",
       "sounds/**/*",
       "shared/**/*",
+      "games/modules/**/*",
       "skills/**/*",
       "build/icon.png",
       "package.json",

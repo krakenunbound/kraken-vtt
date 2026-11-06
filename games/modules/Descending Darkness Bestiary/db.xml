@@ -1,0 +1,1391 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root version="4.6" release="1">
+	<npc>
+		<category name="Creatures">
+			<gravehound>
+				<name type="string">Grave Hound</name>
+				<type type="string">Undead</type>
+				<size type="string">Medium</size>
+				<cr type="string">1</cr>
+				<xp type="number">200</xp>
+				<ac type="number">13</ac>
+				<hp type="number">32</hp>
+				<hd type="string">(5d8 + 10)</hd>
+				<speed type="string">40 ft.</speed>
+				<abilities>
+					<strength>
+						<score type="number">15</score>
+						<bonus type="number">2</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</strength>
+					<dexterity>
+						<score type="number">14</score>
+						<bonus type="number">2</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</dexterity>
+					<constitution>
+						<score type="number">14</score>
+						<bonus type="number">2</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</constitution>
+					<intelligence>
+						<score type="number">3</score>
+						<bonus type="number">-4</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</intelligence>
+					<wisdom>
+						<score type="number">12</score>
+						<bonus type="number">1</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</wisdom>
+					<charisma>
+						<score type="number">6</score>
+						<bonus type="number">-2</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</charisma>
+				</abilities>
+				<senses type="string">Smells the living 120 ft.; Passive Perception 13</senses>
+				<skills type="string"></skills>
+				<languages type="string"></languages>
+				<alignment type="string"></alignment>
+				<initiative>
+					<misc type="number">0</misc>
+				</initiative>
+				<traits>
+					<id-00001>
+						<name type="string">Hunting Howl</name>
+						<desc type="string">When it first sees the living, it howls: every adventurer who hears it gains 1 Dread (once a day).</desc>
+					</id-00001>
+					<id-00002>
+						<name type="string">Grave Sense</name>
+						<desc type="string">It knows where every living creature within 120 feet is, light or no light.</desc>
+					</id-00002>
+				</traits>
+				<actions>
+					<id-00001>
+						<name type="string">Bite</name>
+						<desc type="string">Melee Attack Roll: +4, reach 5 ft.. Hit: 9 (2d6 + 2) Piercing damage. A Medium or smaller target makes a Strength save (DC 12) or is knocked prone.</desc>
+					</id-00001>
+				</actions>
+				<text type="formattedtext"><p>A hound of the barrow-lords, buried with its master and risen with him. Patchy fur over grey bone, eyes like coals in ash. It does not tire, and it does not lose a scent.</p></text>
+			</gravehound>
+			<hollowman>
+				<name type="string">Hollow Man</name>
+				<type type="string">Undead</type>
+				<size type="string">Medium</size>
+				<cr type="string">1/4</cr>
+				<xp type="number">50</xp>
+				<ac type="number">8</ac>
+				<hp type="number">22</hp>
+				<hd type="string">(3d8 + 9)</hd>
+				<speed type="string">20 ft.</speed>
+				<abilities>
+					<strength>
+						<score type="number">13</score>
+						<bonus type="number">1</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</strength>
+					<dexterity>
+						<score type="number">6</score>
+						<bonus type="number">-2</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</dexterity>
+					<constitution>
+						<score type="number">16</score>
+						<bonus type="number">3</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</constitution>
+					<intelligence>
+						<score type="number">3</score>
+						<bonus type="number">-4</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</intelligence>
+					<wisdom>
+						<score type="number">6</score>
+						<bonus type="number">-2</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</wisdom>
+					<charisma>
+						<score type="number">5</score>
+						<bonus type="number">-3</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</charisma>
+				</abilities>
+				<senses type="string">Passive Perception 8</senses>
+				<skills type="string"></skills>
+				<languages type="string"></languages>
+				<alignment type="string"></alignment>
+				<initiative>
+					<misc type="number">0</misc>
+				</initiative>
+				<traits>
+					<id-00001>
+						<name type="string">Unfinished</name>
+						<desc type="string">When damage drops it to 0 Health, it makes a Constitution save (DC 5 + the damage) unless the damage was radiant or a critical hit; on a success it stays at 1 Health.</desc>
+					</id-00001>
+				</traits>
+				<actions>
+					<id-00001>
+						<name type="string">Slam</name>
+						<desc type="string">Melee Attack Roll: +3, reach 5 ft.. Hit: 4 (1d6 + 1) Bludgeoning damage.</desc>
+					</id-00001>
+				</actions>
+				<text type="formattedtext"><p>A body that got up again. It remembers nothing but the way home, and it is going there through anyone in its path.</p></text>
+			</hollowman>
+			<bonesentinel>
+				<name type="string">Bone Sentinel</name>
+				<type type="string">Undead</type>
+				<size type="string">Medium</size>
+				<cr type="string">1/4</cr>
+				<xp type="number">50</xp>
+				<ac type="number">13</ac>
+				<hp type="number">13</hp>
+				<hd type="string">(2d8 + 4)</hd>
+				<speed type="string">30 ft.</speed>
+				<abilities>
+					<strength>
+						<score type="number">10</score>
+						<bonus type="number">0</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</strength>
+					<dexterity>
+						<score type="number">14</score>
+						<bonus type="number">2</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</dexterity>
+					<constitution>
+						<score type="number">15</score>
+						<bonus type="number">2</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</constitution>
+					<intelligence>
+						<score type="number">6</score>
+						<bonus type="number">-2</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</intelligence>
+					<wisdom>
+						<score type="number">8</score>
+						<bonus type="number">-1</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</wisdom>
+					<charisma>
+						<score type="number">5</score>
+						<bonus type="number">-3</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</charisma>
+				</abilities>
+				<senses type="string">Passive Perception 9</senses>
+				<skills type="string"></skills>
+				<languages type="string"></languages>
+				<alignment type="string"></alignment>
+				<initiative>
+					<misc type="number">0</misc>
+				</initiative>
+				<traits>
+					<id-00001>
+						<name type="string">Brittle</name>
+						<desc type="string">Bludgeoning damage against it is doubled.</desc>
+					</id-00001>
+					<id-00002>
+						<name type="string">Old Orders</name>
+						<desc type="string">It guards one place and does not leave it.</desc>
+					</id-00002>
+				</traits>
+				<actions>
+					<id-00001>
+						<name type="string">Rusted Blade</name>
+						<desc type="string">Melee Attack Roll: +4, reach 5 ft.. Hit: 5 (1d6 + 2) Slashing damage.</desc>
+					</id-00001>
+					<id-00002>
+						<name type="string">Old Bow</name>
+						<desc type="string">Ranged Attack Roll: +4, range 80/320 ft.. Hit: 5 (1d6 + 2) Piercing damage.</desc>
+					</id-00002>
+				</actions>
+				<text type="formattedtext"><p>The skeleton of a soldier still at its post, in the scraps of a uniform nobody alive remembers.</p></text>
+			</bonesentinel>
+			<lanternwight>
+				<name type="string">Lantern Wight</name>
+				<type type="string">Undead</type>
+				<size type="string">Medium</size>
+				<cr type="string">3</cr>
+				<xp type="number">700</xp>
+				<ac type="number">14</ac>
+				<hp type="number">60</hp>
+				<hd type="string">(8d8 + 24)</hd>
+				<speed type="string">30 ft.</speed>
+				<abilities>
+					<strength>
+						<score type="number">15</score>
+						<bonus type="number">2</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</strength>
+					<dexterity>
+						<score type="number">14</score>
+						<bonus type="number">2</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</dexterity>
+					<constitution>
+						<score type="number">16</score>
+						<bonus type="number">3</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</constitution>
+					<intelligence>
+						<score type="number">10</score>
+						<bonus type="number">0</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</intelligence>
+					<wisdom>
+						<score type="number">13</score>
+						<bonus type="number">1</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</wisdom>
+					<charisma>
+						<score type="number">15</score>
+						<bonus type="number">2</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</charisma>
+				</abilities>
+				<senses type="string">Passive Perception 13</senses>
+				<skills type="string"></skills>
+				<languages type="string">the languages it knew in life</languages>
+				<alignment type="string"></alignment>
+				<initiative>
+					<misc type="number">0</misc>
+				</initiative>
+				<traits>
+					<id-00001>
+						<name type="string">Drinker of Light</name>
+						<desc type="string">Non-magical light within 30 feet of it gutters to dim; torches carried near it burn twice as fast.</desc>
+					</id-00001>
+					<id-00002>
+						<name type="string">Sunlight Hurts</name>
+						<desc type="string">In sunlight it has disadvantage on attacks.</desc>
+					</id-00002>
+				</traits>
+				<actions>
+					<id-00001>
+						<name type="string">Cold Hand</name>
+						<desc type="string">Melee Attack Roll: +4, reach 5 ft.. Hit: 6 (1d8 + 2) Necrotic damage. The target's maximum Health drops by the same amount until a safe rest, and it gains 1 Dread.</desc>
+					</id-00001>
+					<id-00002>
+						<name type="string">Longsword</name>
+						<desc type="string">Melee Attack Roll: +4, reach 5 ft.. Hit: 6 (1d8 + 2) Slashing damage.</desc>
+					</id-00002>
+				</actions>
+				<text type="formattedtext"><p>It carries a lantern full of cold blue fire, and wherever it walks the warm light dies. Once it was a lamplighter; it is still lighting the way, to somewhere else.</p></text>
+			</lanternwight>
+			<murkling>
+				<name type="string">Murkling</name>
+				<type type="string">Humanoid (Deep Folk)</type>
+				<size type="string">Small</size>
+				<cr type="string">1/4</cr>
+				<xp type="number">50</xp>
+				<ac type="number">13</ac>
+				<hp type="number">7</hp>
+				<hd type="string">(2d6)</hd>
+				<speed type="string">30 ft.</speed>
+				<abilities>
+					<strength>
+						<score type="number">8</score>
+						<bonus type="number">-1</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</strength>
+					<dexterity>
+						<score type="number">14</score>
+						<bonus type="number">2</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</dexterity>
+					<constitution>
+						<score type="number">10</score>
+						<bonus type="number">0</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</constitution>
+					<intelligence>
+						<score type="number">10</score>
+						<bonus type="number">0</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</intelligence>
+					<wisdom>
+						<score type="number">8</score>
+						<bonus type="number">-1</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</wisdom>
+					<charisma>
+						<score type="number">8</score>
+						<bonus type="number">-1</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</charisma>
+				</abilities>
+				<senses type="string">Dimsight 120 ft.; Passive Perception 9</senses>
+				<skills type="string">Stealth +6</skills>
+				<languages type="string">Deepspeech</languages>
+				<alignment type="string"></alignment>
+				<initiative>
+					<misc type="number">0</misc>
+				</initiative>
+				<traits>
+					<id-00001>
+						<name type="string">Light-Blind</name>
+						<desc type="string">In bright light it has disadvantage on attacks and on Perception that relies on sight.</desc>
+					</id-00001>
+					<id-00002>
+						<name type="string">Scatter</name>
+						<desc type="string">It can Disengage or Hide as a bonus action.</desc>
+					</id-00002>
+				</traits>
+				<actions>
+					<id-00001>
+						<name type="string">Notched Knife</name>
+						<desc type="string">Melee Attack Roll: +4, reach 5 ft.. Hit: 5 (1d6 + 2) Slashing damage.</desc>
+					</id-00001>
+					<id-00002>
+						<name type="string">Sling</name>
+						<desc type="string">Ranged Attack Roll: +4, range 30/120 ft.. Hit: 4 (1d4 + 2) Bludgeoning damage.</desc>
+					</id-00002>
+				</actions>
+				<text type="formattedtext"><p>Grey, thin and wide-eyed, the deep folk live where the sun never reaches and come up at night to steal. Alone they flee; in a pack they are brave.</p></text>
+			</murkling>
+			<murklingfirecaller>
+				<name type="string">Murkling Firecaller</name>
+				<type type="string">Humanoid (Deep Folk)</type>
+				<size type="string">Small</size>
+				<cr type="string">1</cr>
+				<xp type="number">200</xp>
+				<ac type="number">12</ac>
+				<hp type="number">21</hp>
+				<hd type="string">(6d6)</hd>
+				<speed type="string">30 ft.</speed>
+				<abilities>
+					<strength>
+						<score type="number">8</score>
+						<bonus type="number">-1</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</strength>
+					<dexterity>
+						<score type="number">14</score>
+						<bonus type="number">2</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</dexterity>
+					<constitution>
+						<score type="number">10</score>
+						<bonus type="number">0</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</constitution>
+					<intelligence>
+						<score type="number">12</score>
+						<bonus type="number">1</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</intelligence>
+					<wisdom>
+						<score type="number">13</score>
+						<bonus type="number">1</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</wisdom>
+					<charisma>
+						<score type="number">12</score>
+						<bonus type="number">1</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</charisma>
+				</abilities>
+				<senses type="string">Dimsight 120 ft.; Passive Perception 11</senses>
+				<skills type="string"></skills>
+				<languages type="string">Deepspeech</languages>
+				<alignment type="string"></alignment>
+				<initiative>
+					<misc type="number">0</misc>
+				</initiative>
+				<traits>
+					<id-00001>
+						<name type="string">Snuff</name>
+						<desc type="string">As a bonus action, it puts out every non-magical flame within 30 feet. Once per fight.</desc>
+					</id-00001>
+				</traits>
+				<actions>
+					<id-00001>
+						<name type="string">Witchfire</name>
+						<desc type="string">Ranged Attack Roll: +4, range 60 ft.. Hit: 9 (2d8) Fire damage.</desc>
+					</id-00001>
+					<id-00002>
+						<name type="string">Staff</name>
+						<desc type="string">Melee Attack Roll: +1, reach 5 ft.. Hit: 2 (1d6 - 1) Bludgeoning damage.</desc>
+					</id-00002>
+				</actions>
+				<text type="formattedtext"><p>The deep folk hate fire, and fear those of their own who can call it. A firecaller leads by fear, and puts out your torches first.</p></text>
+			</murklingfirecaller>
+			<murkbrute>
+				<name type="string">Murk Brute</name>
+				<type type="string">Humanoid (Deep Folk)</type>
+				<size type="string">Large</size>
+				<cr type="string">1</cr>
+				<xp type="number">200</xp>
+				<ac type="number">12</ac>
+				<hp type="number">30</hp>
+				<hd type="string">(4d10 + 8)</hd>
+				<speed type="string">30 ft.</speed>
+				<abilities>
+					<strength>
+						<score type="number">17</score>
+						<bonus type="number">3</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</strength>
+					<dexterity>
+						<score type="number">10</score>
+						<bonus type="number">0</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</dexterity>
+					<constitution>
+						<score type="number">14</score>
+						<bonus type="number">2</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</constitution>
+					<intelligence>
+						<score type="number">6</score>
+						<bonus type="number">-2</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</intelligence>
+					<wisdom>
+						<score type="number">9</score>
+						<bonus type="number">-1</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</wisdom>
+					<charisma>
+						<score type="number">6</score>
+						<bonus type="number">-2</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</charisma>
+				</abilities>
+				<senses type="string">Dimsight 60 ft.; Passive Perception 9</senses>
+				<skills type="string"></skills>
+				<languages type="string"></languages>
+				<alignment type="string"></alignment>
+				<initiative>
+					<misc type="number">0</misc>
+				</initiative>
+				<traits>
+				</traits>
+				<actions>
+					<id-00001>
+						<name type="string">Great Club</name>
+						<desc type="string">Melee Attack Roll: +5, reach 5 ft.. Hit: 12 (2d8 + 3) Bludgeoning damage.</desc>
+					</id-00001>
+				</actions>
+				<text type="formattedtext"><p>Bred big by the deep folk to carry loads and break doors. It does both well.</p></text>
+			</murkbrute>
+			<barrowrats>
+				<name type="string">Barrow Rats</name>
+				<type type="string">Swarm of Beasts</type>
+				<size type="string">Medium</size>
+				<cr type="string">1/4</cr>
+				<xp type="number">50</xp>
+				<ac type="number">10</ac>
+				<hp type="number">24</hp>
+				<hd type="string">(7d8 - 7)</hd>
+				<speed type="string">30 ft.</speed>
+				<abilities>
+					<strength>
+						<score type="number">9</score>
+						<bonus type="number">-1</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</strength>
+					<dexterity>
+						<score type="number">11</score>
+						<bonus type="number">0</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</dexterity>
+					<constitution>
+						<score type="number">9</score>
+						<bonus type="number">-1</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</constitution>
+					<intelligence>
+						<score type="number">2</score>
+						<bonus type="number">-4</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</intelligence>
+					<wisdom>
+						<score type="number">10</score>
+						<bonus type="number">0</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</wisdom>
+					<charisma>
+						<score type="number">3</score>
+						<bonus type="number">-4</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</charisma>
+				</abilities>
+				<senses type="string">Passive Perception 10</senses>
+				<skills type="string"></skills>
+				<languages type="string"></languages>
+				<alignment type="string"></alignment>
+				<initiative>
+					<misc type="number">0</misc>
+				</initiative>
+				<traits>
+					<id-00001>
+						<name type="string">Swarm</name>
+						<desc type="string">It can enter another creature's space and squeeze through rat-sized gaps. It cannot regain Health.</desc>
+					</id-00001>
+				</traits>
+				<actions>
+					<id-00001>
+						<name type="string">Bites</name>
+						<desc type="string">Melee Attack Roll: +2, reach 0 ft.. Hit: 7 (2d6) Piercing damage. Half as much if the swarm has half its Health or less.</desc>
+					</id-00001>
+				</actions>
+				<text type="formattedtext"><p>A carpet of rats that have eaten well in the old tombs and want more.</p></text>
+			</barrowrats>
+			<gloomcrawler>
+				<name type="string">Gloomcrawler</name>
+				<type type="string">Beast</type>
+				<size type="string">Medium</size>
+				<cr type="string">1/4</cr>
+				<xp type="number">50</xp>
+				<ac type="number">13</ac>
+				<hp type="number">14</hp>
+				<hd type="string">(4d6)</hd>
+				<speed type="string">30 ft., climb 30 ft.</speed>
+				<abilities>
+					<strength>
+						<score type="number">5</score>
+						<bonus type="number">-3</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</strength>
+					<dexterity>
+						<score type="number">14</score>
+						<bonus type="number">2</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</dexterity>
+					<constitution>
+						<score type="number">12</score>
+						<bonus type="number">1</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</constitution>
+					<intelligence>
+						<score type="number">1</score>
+						<bonus type="number">-5</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</intelligence>
+					<wisdom>
+						<score type="number">7</score>
+						<bonus type="number">-2</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</wisdom>
+					<charisma>
+						<score type="number">3</score>
+						<bonus type="number">-4</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</charisma>
+				</abilities>
+				<senses type="string">Feels vibration 30 ft.; Passive Perception 8</senses>
+				<skills type="string"></skills>
+				<languages type="string"></languages>
+				<alignment type="string"></alignment>
+				<initiative>
+					<misc type="number">0</misc>
+				</initiative>
+				<traits>
+				</traits>
+				<actions>
+					<id-00001>
+						<name type="string">Bite</name>
+						<desc type="string">Melee Attack Roll: +4, reach 5 ft.. Hit: 4 (1d4 + 2) Piercing damage. The target makes a Constitution save (DC 11) or is poisoned for an hour.</desc>
+					</id-00001>
+				</actions>
+				<text type="formattedtext"><p>A centipede as long as a man, black and glistening. It lives on the ceilings of old places and drops on what passes below.</p></text>
+			</gloomcrawler>
+			<palespider>
+				<name type="string">Pale Spider</name>
+				<type type="string">Beast</type>
+				<size type="string">Large</size>
+				<cr type="string">1</cr>
+				<xp type="number">200</xp>
+				<ac type="number">14</ac>
+				<hp type="number">26</hp>
+				<hd type="string">(4d10 + 4)</hd>
+				<speed type="string">30 ft., climb 30 ft.</speed>
+				<abilities>
+					<strength>
+						<score type="number">14</score>
+						<bonus type="number">2</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</strength>
+					<dexterity>
+						<score type="number">16</score>
+						<bonus type="number">3</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</dexterity>
+					<constitution>
+						<score type="number">12</score>
+						<bonus type="number">1</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</constitution>
+					<intelligence>
+						<score type="number">2</score>
+						<bonus type="number">-4</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</intelligence>
+					<wisdom>
+						<score type="number">11</score>
+						<bonus type="number">0</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</wisdom>
+					<charisma>
+						<score type="number">4</score>
+						<bonus type="number">-3</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</charisma>
+				</abilities>
+				<senses type="string">Feels the web 60 ft.; Passive Perception 10</senses>
+				<skills type="string">Stealth +7</skills>
+				<languages type="string"></languages>
+				<alignment type="string"></alignment>
+				<initiative>
+					<misc type="number">0</misc>
+				</initiative>
+				<traits>
+					<id-00001>
+						<name type="string">Web Walker</name>
+						<desc type="string">It ignores webs and climbs anything.</desc>
+					</id-00001>
+				</traits>
+				<actions>
+					<id-00001>
+						<name type="string">Bite</name>
+						<desc type="string">Melee Attack Roll: +5, reach 5 ft.. Hit: 7 (1d8 + 3) Piercing damage. The target makes a Constitution save (DC 11) or takes 2d8 poison damage.</desc>
+					</id-00001>
+					<id-00002>
+						<name type="string">Web</name>
+						<desc type="string">Ranged, 30/60 ft.: a creature hit (the spider's attack against its Defense) is held fast by webbing; Strength (DC 12) to break free.</desc>
+					</id-00002>
+				</actions>
+				<text type="formattedtext"><p>White as a corpse's hand and the size of a pony, it weaves the empty halls shut.</p></text>
+			</palespider>
+			<ashwolf>
+				<name type="string">Ash Wolf</name>
+				<type type="string">Beast</type>
+				<size type="string">Medium</size>
+				<cr type="string">1/4</cr>
+				<xp type="number">50</xp>
+				<ac type="number">13</ac>
+				<hp type="number">11</hp>
+				<hd type="string">(2d8 + 2)</hd>
+				<speed type="string">40 ft.</speed>
+				<abilities>
+					<strength>
+						<score type="number">12</score>
+						<bonus type="number">1</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</strength>
+					<dexterity>
+						<score type="number">15</score>
+						<bonus type="number">2</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</dexterity>
+					<constitution>
+						<score type="number">12</score>
+						<bonus type="number">1</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</constitution>
+					<intelligence>
+						<score type="number">3</score>
+						<bonus type="number">-4</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</intelligence>
+					<wisdom>
+						<score type="number">12</score>
+						<bonus type="number">1</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</wisdom>
+					<charisma>
+						<score type="number">6</score>
+						<bonus type="number">-2</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</charisma>
+				</abilities>
+				<senses type="string">Passive Perception 13</senses>
+				<skills type="string"></skills>
+				<languages type="string"></languages>
+				<alignment type="string"></alignment>
+				<initiative>
+					<misc type="number">0</misc>
+				</initiative>
+				<traits>
+					<id-00001>
+						<name type="string">Pack Hunter</name>
+						<desc type="string">Advantage on attacks against a creature an ally of it stands beside.</desc>
+					</id-00001>
+				</traits>
+				<actions>
+					<id-00001>
+						<name type="string">Bite</name>
+						<desc type="string">Melee Attack Roll: +4, reach 5 ft.. Hit: 7 (2d4 + 2) Piercing damage. A target that is hit makes a Strength save (DC 11) or is knocked prone.</desc>
+					</id-00001>
+				</actions>
+				<text type="formattedtext"><p>Grey wolves of the burned forests, thin with hunger. They follow travellers for days before they strike.</p></text>
+			</ashwolf>
+			<drownedone>
+				<name type="string">Drowned One</name>
+				<type type="string">Undead</type>
+				<size type="string">Medium</size>
+				<cr type="string">2</cr>
+				<xp type="number">450</xp>
+				<ac type="number">12</ac>
+				<hp type="number">52</hp>
+				<hd type="string">(8d8 + 16)</hd>
+				<speed type="string">20 ft., swim 40 ft.</speed>
+				<abilities>
+					<strength>
+						<score type="number">16</score>
+						<bonus type="number">3</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</strength>
+					<dexterity>
+						<score type="number">10</score>
+						<bonus type="number">0</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</dexterity>
+					<constitution>
+						<score type="number">14</score>
+						<bonus type="number">2</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</constitution>
+					<intelligence>
+						<score type="number">6</score>
+						<bonus type="number">-2</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</intelligence>
+					<wisdom>
+						<score type="number">10</score>
+						<bonus type="number">0</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</wisdom>
+					<charisma>
+						<score type="number">8</score>
+						<bonus type="number">-1</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</charisma>
+				</abilities>
+				<senses type="string">Passive Perception 10</senses>
+				<skills type="string"></skills>
+				<languages type="string"></languages>
+				<alignment type="string"></alignment>
+				<initiative>
+					<misc type="number">0</misc>
+				</initiative>
+				<traits>
+					<id-00001>
+						<name type="string">Waterlogged</name>
+						<desc type="string">Resistant to fire damage. Advantage on Stealth underwater.</desc>
+					</id-00001>
+				</traits>
+				<actions>
+					<id-00001>
+						<name type="string">Clutch</name>
+						<desc type="string">Melee Attack Roll: +5, reach 5 ft.. Hit: 10 (2d6 + 3) Bludgeoning damage. The target is grappled (escape DC 13); a grappled creature in water cannot breathe.</desc>
+					</id-00001>
+				</actions>
+				<text type="formattedtext"><p>Swollen, pale and patient, it waits under black water for someone to lean too close.</p></text>
+			</drownedone>
+			<towershade>
+				<name type="string">Tower Shade</name>
+				<type type="string">Undead</type>
+				<size type="string">Medium</size>
+				<cr type="string">2</cr>
+				<xp type="number">450</xp>
+				<ac type="number">12</ac>
+				<hp type="number">27</hp>
+				<hd type="string">(6d8)</hd>
+				<speed type="string">0 ft., fly 40 ft. (hover)</speed>
+				<abilities>
+					<strength>
+						<score type="number">6</score>
+						<bonus type="number">-2</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</strength>
+					<dexterity>
+						<score type="number">14</score>
+						<bonus type="number">2</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</dexterity>
+					<constitution>
+						<score type="number">10</score>
+						<bonus type="number">0</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</constitution>
+					<intelligence>
+						<score type="number">10</score>
+						<bonus type="number">0</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</intelligence>
+					<wisdom>
+						<score type="number">12</score>
+						<bonus type="number">1</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</wisdom>
+					<charisma>
+						<score type="number">16</score>
+						<bonus type="number">3</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</charisma>
+				</abilities>
+				<senses type="string">Passive Perception 11</senses>
+				<skills type="string"></skills>
+				<languages type="string"></languages>
+				<alignment type="string"></alignment>
+				<initiative>
+					<misc type="number">0</misc>
+				</initiative>
+				<traits>
+					<id-00001>
+						<name type="string">Incorporeal</name>
+						<desc type="string">It moves through walls and creatures; non-magical weapons deal half damage to it.</desc>
+					</id-00001>
+					<id-00002>
+						<name type="string">Grief</name>
+						<desc type="string">Any adventurer who starts a turn within 10 feet of it makes a Wisdom save (DC 13) or gains 1 Dread.</desc>
+					</id-00002>
+				</traits>
+				<actions>
+					<id-00001>
+						<name type="string">Withering Touch</name>
+						<desc type="string">Melee Attack Roll: +4, reach 5 ft.. Hit: 10 (3d6) Necrotic damage.</desc>
+					</id-00001>
+				</actions>
+				<text type="formattedtext"><p>The last watcher of a tower that fell: it still walks the battlements, still waiting for the relief that never came.</p></text>
+			</towershade>
+			<mirewitch>
+				<name type="string">Mire Witch</name>
+				<type type="string">Fey</type>
+				<size type="string">Medium</size>
+				<cr type="string">3</cr>
+				<xp type="number">700</xp>
+				<ac type="number">15</ac>
+				<hp type="number">82</hp>
+				<hd type="string">(11d8 + 33)</hd>
+				<speed type="string">30 ft.</speed>
+				<abilities>
+					<strength>
+						<score type="number">16</score>
+						<bonus type="number">3</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</strength>
+					<dexterity>
+						<score type="number">13</score>
+						<bonus type="number">1</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</dexterity>
+					<constitution>
+						<score type="number">16</score>
+						<bonus type="number">3</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</constitution>
+					<intelligence>
+						<score type="number">13</score>
+						<bonus type="number">1</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</intelligence>
+					<wisdom>
+						<score type="number">14</score>
+						<bonus type="number">2</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</wisdom>
+					<charisma>
+						<score type="number">16</score>
+						<bonus type="number">3</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</charisma>
+				</abilities>
+				<senses type="string">Dimsight 60 ft.; Passive Perception 14</senses>
+				<skills type="string"></skills>
+				<languages type="string">Common, Sylvan</languages>
+				<alignment type="string"></alignment>
+				<initiative>
+					<misc type="number">0</misc>
+				</initiative>
+				<traits>
+					<id-00001>
+						<name type="string">Bog Mask</name>
+						<desc type="string">She can look like a lost child, an old woman with a lamp, or a lantern in the fog.</desc>
+					</id-00001>
+				</traits>
+				<actions>
+					<id-00001>
+						<name type="string">Claws</name>
+						<desc type="string">Melee Attack Roll: +5, reach 5 ft.. Hit: 12 (2d8 + 3) Slashing damage.</desc>
+					</id-00001>
+					<id-00002>
+						<name type="string">Marsh Light</name>
+						<desc type="string">Ranged Attack Roll: +5, range 60 ft.. Hit: 11 (2d10) Psychic damage. The target gains 1 Dread.</desc>
+					</id-00002>
+				</actions>
+				<text type="formattedtext"><p>She leads travellers into the marsh with a light like a window, and keeps what she catches.</p></text>
+			</mirewitch>
+		</category>
+		<category name="People">
+			<roadbandit>
+				<name type="string">Road Bandit</name>
+				<type type="string">Humanoid</type>
+				<size type="string">Medium</size>
+				<cr type="string">1/8</cr>
+				<xp type="number">25</xp>
+				<ac type="number">12</ac>
+				<hp type="number">11</hp>
+				<hd type="string">(2d8 + 2)</hd>
+				<speed type="string">30 ft.</speed>
+				<abilities>
+					<strength>
+						<score type="number">11</score>
+						<bonus type="number">0</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</strength>
+					<dexterity>
+						<score type="number">12</score>
+						<bonus type="number">1</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</dexterity>
+					<constitution>
+						<score type="number">12</score>
+						<bonus type="number">1</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</constitution>
+					<intelligence>
+						<score type="number">10</score>
+						<bonus type="number">0</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</intelligence>
+					<wisdom>
+						<score type="number">10</score>
+						<bonus type="number">0</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</wisdom>
+					<charisma>
+						<score type="number">10</score>
+						<bonus type="number">0</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</charisma>
+				</abilities>
+				<senses type="string">Passive Perception 10</senses>
+				<skills type="string"></skills>
+				<languages type="string">Common</languages>
+				<alignment type="string"></alignment>
+				<initiative>
+					<misc type="number">0</misc>
+				</initiative>
+				<traits>
+				</traits>
+				<actions>
+					<id-00001>
+						<name type="string">Shortsword</name>
+						<desc type="string">Melee Attack Roll: +3, reach 5 ft.. Hit: 4 (1d6 + 1) Piercing damage.</desc>
+					</id-00001>
+					<id-00002>
+						<name type="string">Light Crossbow</name>
+						<desc type="string">Ranged Attack Roll: +3, range 80/320 ft.. Hit: 5 (1d8 + 1) Piercing damage.</desc>
+					</id-00002>
+				</actions>
+				<text type="formattedtext"><p>Hungry, desperate and armed. Most would rather rob you than kill you, if you let them.</p></text>
+			</roadbandit>
+			<banditcaptain>
+				<name type="string">Bandit Captain</name>
+				<type type="string">Humanoid</type>
+				<size type="string">Medium</size>
+				<cr type="string">2</cr>
+				<xp type="number">450</xp>
+				<ac type="number">15</ac>
+				<hp type="number">65</hp>
+				<hd type="string">(10d8 + 20)</hd>
+				<speed type="string">30 ft.</speed>
+				<abilities>
+					<strength>
+						<score type="number">15</score>
+						<bonus type="number">2</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</strength>
+					<dexterity>
+						<score type="number">16</score>
+						<bonus type="number">3</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</dexterity>
+					<constitution>
+						<score type="number">14</score>
+						<bonus type="number">2</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</constitution>
+					<intelligence>
+						<score type="number">14</score>
+						<bonus type="number">2</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</intelligence>
+					<wisdom>
+						<score type="number">11</score>
+						<bonus type="number">0</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</wisdom>
+					<charisma>
+						<score type="number">14</score>
+						<bonus type="number">2</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</charisma>
+				</abilities>
+				<senses type="string">Passive Perception 10</senses>
+				<skills type="string"></skills>
+				<languages type="string">Common</languages>
+				<alignment type="string"></alignment>
+				<initiative>
+					<misc type="number">0</misc>
+				</initiative>
+				<traits>
+					<id-00001>
+						<name type="string">Two Blades</name>
+						<desc type="string">It attacks twice with its sabre and once with its dagger as one action.</desc>
+					</id-00001>
+				</traits>
+				<actions>
+					<id-00001>
+						<name type="string">Sabre</name>
+						<desc type="string">Melee Attack Roll: +5, reach 5 ft.. Hit: 7 (1d8 + 3) Slashing damage.</desc>
+					</id-00001>
+					<id-00002>
+						<name type="string">Dagger</name>
+						<desc type="string">Melee Attack Roll: +5, reach 5 ft.. Hit: 5 (1d4 + 3) Piercing damage.</desc>
+					</id-00002>
+				</actions>
+				<text type="formattedtext"><p>A former soldier with a band of her own, a sharp mind, and debts.</p></text>
+			</banditcaptain>
+			<hollowstarcultist>
+				<name type="string">Hollow Star Cultist</name>
+				<type type="string">Humanoid</type>
+				<size type="string">Medium</size>
+				<cr type="string">1/8</cr>
+				<xp type="number">25</xp>
+				<ac type="number">12</ac>
+				<hp type="number">9</hp>
+				<hd type="string">(2d8)</hd>
+				<speed type="string">30 ft.</speed>
+				<abilities>
+					<strength>
+						<score type="number">11</score>
+						<bonus type="number">0</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</strength>
+					<dexterity>
+						<score type="number">12</score>
+						<bonus type="number">1</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</dexterity>
+					<constitution>
+						<score type="number">10</score>
+						<bonus type="number">0</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</constitution>
+					<intelligence>
+						<score type="number">10</score>
+						<bonus type="number">0</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</intelligence>
+					<wisdom>
+						<score type="number">11</score>
+						<bonus type="number">0</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</wisdom>
+					<charisma>
+						<score type="number">10</score>
+						<bonus type="number">0</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</charisma>
+				</abilities>
+				<senses type="string">Passive Perception 10</senses>
+				<skills type="string"></skills>
+				<languages type="string">Common</languages>
+				<alignment type="string"></alignment>
+				<initiative>
+					<misc type="number">0</misc>
+				</initiative>
+				<traits>
+					<id-00001>
+						<name type="string">Faith in the Void</name>
+						<desc type="string">Advantage on saves against being frightened.</desc>
+					</id-00001>
+				</traits>
+				<actions>
+					<id-00001>
+						<name type="string">Sickle</name>
+						<desc type="string">Melee Attack Roll: +3, reach 5 ft.. Hit: 3 (1d4 + 1) Slashing damage.</desc>
+					</id-00001>
+				</actions>
+				<text type="formattedtext"><p>The cult of the Hollow Star believes the dark is a door, and that something waits on the other side to be let in.</p></text>
+			</hollowstarcultist>
+		</category>
+		<category name="The Empty Watchtower">
+			<wardensaranth>
+				<name type="string">Warden Saranth</name>
+				<type type="string">Undead</type>
+				<size type="string">Medium</size>
+				<cr type="string">4</cr>
+				<xp type="number">1100</xp>
+				<ac type="number">17</ac>
+				<hp type="number">75</hp>
+				<hd type="string">(10d8 + 30)</hd>
+				<speed type="string">30 ft.</speed>
+				<abilities>
+					<strength>
+						<score type="number">17</score>
+						<bonus type="number">3</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</strength>
+					<dexterity>
+						<score type="number">10</score>
+						<bonus type="number">0</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</dexterity>
+					<constitution>
+						<score type="number">16</score>
+						<bonus type="number">3</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</constitution>
+					<intelligence>
+						<score type="number">12</score>
+						<bonus type="number">1</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</intelligence>
+					<wisdom>
+						<score type="number">14</score>
+						<bonus type="number">2</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</wisdom>
+					<charisma>
+						<score type="number">15</score>
+						<bonus type="number">2</bonus>
+						<savemodifier type="number">0</savemodifier>
+					</charisma>
+				</abilities>
+				<senses type="string">Passive Perception 12</senses>
+				<skills type="string"></skills>
+				<languages type="string">Common</languages>
+				<alignment type="string"></alignment>
+				<initiative>
+					<misc type="number">0</misc>
+				</initiative>
+				<traits>
+					<id-00001>
+						<name type="string">Oathbound</name>
+						<desc type="string">While its tower stands, Saranth rises again at dusk after it is destroyed, unless its oath-ring is taken from the tower or its bones are burned.</desc>
+					</id-00001>
+					<id-00002>
+						<name type="string">Commander</name>
+						<desc type="string">Bone Sentinels within 30 feet of it add 2 to their attack rolls.</desc>
+					</id-00002>
+					<id-00003>
+						<name type="string">Two Strikes</name>
+						<desc type="string">It attacks twice with its longsword as one action.</desc>
+					</id-00003>
+				</traits>
+				<actions>
+					<id-00001>
+						<name type="string">Longsword</name>
+						<desc type="string">Melee Attack Roll: +5, reach 5 ft.. Hit: 7 (1d8 + 3) Slashing damage. And 1d6 necrotic.</desc>
+					</id-00001>
+					<id-00002>
+						<name type="string">Call the Watch</name>
+						<desc type="string">Once per day: two Bone Sentinels climb from the floor within 30 feet and fight at its command.</desc>
+					</id-00002>
+				</actions>
+				<text type="formattedtext"><p>The last commander of the Empty Watchtower, who swore to hold it until relieved. Nobody came. He held it anyway.</p></text>
+			</wardensaranth>
+		</category>
+	</npc>
+	<reference>
+		<refmanualindex>
+			<chapters>
+				<chapter_000>
+					<name type="string">The Bestiary</name>
+					<subchapters>
+						<sub_000>
+							<name type="string">Using This Book</name>
+							<refpages>
+								<page_000>
+									<name type="string">Reading a Creature</name>
+									<keywords type="string"></keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0001@Descending Darkness Bestiary</recordname></listlink>
+								</page_000>
+							</refpages>
+						</sub_000>
+						<sub_001>
+							<name type="string">Creatures</name>
+							<refpages>
+								<page_000>
+									<name type="string">Grave Hound</name>
+									<keywords type="string"></keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0002@Descending Darkness Bestiary</recordname></listlink>
+								</page_000>
+								<page_001>
+									<name type="string">Hollow Man</name>
+									<keywords type="string"></keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0003@Descending Darkness Bestiary</recordname></listlink>
+								</page_001>
+								<page_002>
+									<name type="string">Bone Sentinel</name>
+									<keywords type="string"></keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0004@Descending Darkness Bestiary</recordname></listlink>
+								</page_002>
+								<page_003>
+									<name type="string">Lantern Wight</name>
+									<keywords type="string"></keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0005@Descending Darkness Bestiary</recordname></listlink>
+								</page_003>
+								<page_004>
+									<name type="string">Murkling</name>
+									<keywords type="string"></keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0006@Descending Darkness Bestiary</recordname></listlink>
+								</page_004>
+								<page_005>
+									<name type="string">Murkling Firecaller</name>
+									<keywords type="string"></keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0007@Descending Darkness Bestiary</recordname></listlink>
+								</page_005>
+								<page_006>
+									<name type="string">Murk Brute</name>
+									<keywords type="string"></keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0008@Descending Darkness Bestiary</recordname></listlink>
+								</page_006>
+								<page_007>
+									<name type="string">Barrow Rats</name>
+									<keywords type="string"></keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0009@Descending Darkness Bestiary</recordname></listlink>
+								</page_007>
+								<page_008>
+									<name type="string">Gloomcrawler</name>
+									<keywords type="string"></keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0010@Descending Darkness Bestiary</recordname></listlink>
+								</page_008>
+								<page_009>
+									<name type="string">Pale Spider</name>
+									<keywords type="string"></keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0011@Descending Darkness Bestiary</recordname></listlink>
+								</page_009>
+								<page_010>
+									<name type="string">Ash Wolf</name>
+									<keywords type="string"></keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0012@Descending Darkness Bestiary</recordname></listlink>
+								</page_010>
+								<page_011>
+									<name type="string">Road Bandit</name>
+									<keywords type="string"></keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0013@Descending Darkness Bestiary</recordname></listlink>
+								</page_011>
+								<page_012>
+									<name type="string">Bandit Captain</name>
+									<keywords type="string"></keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0014@Descending Darkness Bestiary</recordname></listlink>
+								</page_012>
+								<page_013>
+									<name type="string">Hollow Star Cultist</name>
+									<keywords type="string"></keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0015@Descending Darkness Bestiary</recordname></listlink>
+								</page_013>
+								<page_014>
+									<name type="string">Drowned One</name>
+									<keywords type="string"></keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0016@Descending Darkness Bestiary</recordname></listlink>
+								</page_014>
+								<page_015>
+									<name type="string">Tower Shade</name>
+									<keywords type="string"></keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0017@Descending Darkness Bestiary</recordname></listlink>
+								</page_015>
+								<page_016>
+									<name type="string">Mire Witch</name>
+									<keywords type="string"></keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0018@Descending Darkness Bestiary</recordname></listlink>
+								</page_016>
+								<page_017>
+									<name type="string">Warden Saranth</name>
+									<keywords type="string"></keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0019@Descending Darkness Bestiary</recordname></listlink>
+								</page_017>
+							</refpages>
+						</sub_001>
+					</subchapters>
+				</chapter_000>
+			</chapters>
+		</refmanualindex>
+		<refmanualdata>
+			<p0001>
+				<name type="string">Reading a Creature</name>
+				<text type="formattedtext"><p>Each creature has its <b>Defense</b>, <b>Health</b> (and the dice to roll it), speed, abilities, senses, and what it does on its turn. Its <b>level of challenge</b> says how dangerous it is: a party of four can usually face creatures whose challenges add up to their levels, if they are careful and have light.</p><p>Every creature in this book is in Kraken's NPC list once the book is active: drag one onto the combat tracker or the map. Its attacks roll themselves against the target's Defense.</p></text>
+			</p0001>
+			<p0002>
+				<name type="string">Grave Hound</name>
+				<text type="formattedtext"><p><i>Undead, challenge 1.</i> A hound of the barrow-lords, buried with its master and risen with him. Patchy fur over grey bone, eyes like coals in ash. It does not tire, and it does not lose a scent.</p><p><b>Defense</b> 13. <b>Health</b> 32 (5d8 + 10). <b>Speed</b> 40 ft..</p></text>
+			</p0002>
+			<p0003>
+				<name type="string">Hollow Man</name>
+				<text type="formattedtext"><p><i>Undead, challenge 1/4.</i> A body that got up again. It remembers nothing but the way home, and it is going there through anyone in its path.</p><p><b>Defense</b> 8. <b>Health</b> 22 (3d8 + 9). <b>Speed</b> 20 ft..</p></text>
+			</p0003>
+			<p0004>
+				<name type="string">Bone Sentinel</name>
+				<text type="formattedtext"><p><i>Undead, challenge 1/4.</i> The skeleton of a soldier still at its post, in the scraps of a uniform nobody alive remembers.</p><p><b>Defense</b> 13. <b>Health</b> 13 (2d8 + 4). <b>Speed</b> 30 ft..</p></text>
+			</p0004>
+			<p0005>
+				<name type="string">Lantern Wight</name>
+				<text type="formattedtext"><p><i>Undead, challenge 3.</i> It carries a lantern full of cold blue fire, and wherever it walks the warm light dies. Once it was a lamplighter; it is still lighting the way, to somewhere else.</p><p><b>Defense</b> 14. <b>Health</b> 60 (8d8 + 24). <b>Speed</b> 30 ft..</p></text>
+			</p0005>
+			<p0006>
+				<name type="string">Murkling</name>
+				<text type="formattedtext"><p><i>Humanoid (Deep Folk), challenge 1/4.</i> Grey, thin and wide-eyed, the deep folk live where the sun never reaches and come up at night to steal. Alone they flee; in a pack they are brave.</p><p><b>Defense</b> 13. <b>Health</b> 7 (2d6). <b>Speed</b> 30 ft..</p></text>
+			</p0006>
+			<p0007>
+				<name type="string">Murkling Firecaller</name>
+				<text type="formattedtext"><p><i>Humanoid (Deep Folk), challenge 1.</i> The deep folk hate fire, and fear those of their own who can call it. A firecaller leads by fear, and puts out your torches first.</p><p><b>Defense</b> 12. <b>Health</b> 21 (6d6). <b>Speed</b> 30 ft..</p></text>
+			</p0007>
+			<p0008>
+				<name type="string">Murk Brute</name>
+				<text type="formattedtext"><p><i>Humanoid (Deep Folk), challenge 1.</i> Bred big by the deep folk to carry loads and break doors. It does both well.</p><p><b>Defense</b> 12. <b>Health</b> 30 (4d10 + 8). <b>Speed</b> 30 ft..</p></text>
+			</p0008>
+			<p0009>
+				<name type="string">Barrow Rats</name>
+				<text type="formattedtext"><p><i>Swarm of Beasts, challenge 1/4.</i> A carpet of rats that have eaten well in the old tombs and want more.</p><p><b>Defense</b> 10. <b>Health</b> 24 (7d8 - 7). <b>Speed</b> 30 ft..</p></text>
+			</p0009>
+			<p0010>
+				<name type="string">Gloomcrawler</name>
+				<text type="formattedtext"><p><i>Beast, challenge 1/4.</i> A centipede as long as a man, black and glistening. It lives on the ceilings of old places and drops on what passes below.</p><p><b>Defense</b> 13. <b>Health</b> 14 (4d6). <b>Speed</b> 30 ft., climb 30 ft..</p></text>
+			</p0010>
+			<p0011>
+				<name type="string">Pale Spider</name>
+				<text type="formattedtext"><p><i>Beast, challenge 1.</i> White as a corpse's hand and the size of a pony, it weaves the empty halls shut.</p><p><b>Defense</b> 14. <b>Health</b> 26 (4d10 + 4). <b>Speed</b> 30 ft., climb 30 ft..</p></text>
+			</p0011>
+			<p0012>
+				<name type="string">Ash Wolf</name>
+				<text type="formattedtext"><p><i>Beast, challenge 1/4.</i> Grey wolves of the burned forests, thin with hunger. They follow travellers for days before they strike.</p><p><b>Defense</b> 13. <b>Health</b> 11 (2d8 + 2). <b>Speed</b> 40 ft..</p></text>
+			</p0012>
+			<p0013>
+				<name type="string">Road Bandit</name>
+				<text type="formattedtext"><p><i>Humanoid, challenge 1/8.</i> Hungry, desperate and armed. Most would rather rob you than kill you, if you let them.</p><p><b>Defense</b> 12. <b>Health</b> 11 (2d8 + 2). <b>Speed</b> 30 ft..</p></text>
+			</p0013>
+			<p0014>
+				<name type="string">Bandit Captain</name>
+				<text type="formattedtext"><p><i>Humanoid, challenge 2.</i> A former soldier with a band of her own, a sharp mind, and debts.</p><p><b>Defense</b> 15. <b>Health</b> 65 (10d8 + 20). <b>Speed</b> 30 ft..</p></text>
+			</p0014>
+			<p0015>
+				<name type="string">Hollow Star Cultist</name>
+				<text type="formattedtext"><p><i>Humanoid, challenge 1/8.</i> The cult of the Hollow Star believes the dark is a door, and that something waits on the other side to be let in.</p><p><b>Defense</b> 12. <b>Health</b> 9 (2d8). <b>Speed</b> 30 ft..</p></text>
+			</p0015>
+			<p0016>
+				<name type="string">Drowned One</name>
+				<text type="formattedtext"><p><i>Undead, challenge 2.</i> Swollen, pale and patient, it waits under black water for someone to lean too close.</p><p><b>Defense</b> 12. <b>Health</b> 52 (8d8 + 16). <b>Speed</b> 20 ft., swim 40 ft..</p></text>
+			</p0016>
+			<p0017>
+				<name type="string">Tower Shade</name>
+				<text type="formattedtext"><p><i>Undead, challenge 2.</i> The last watcher of a tower that fell: it still walks the battlements, still waiting for the relief that never came.</p><p><b>Defense</b> 12. <b>Health</b> 27 (6d8). <b>Speed</b> 0 ft., fly 40 ft. (hover).</p></text>
+			</p0017>
+			<p0018>
+				<name type="string">Mire Witch</name>
+				<text type="formattedtext"><p><i>Fey, challenge 3.</i> She leads travellers into the marsh with a light like a window, and keeps what she catches.</p><p><b>Defense</b> 15. <b>Health</b> 82 (11d8 + 33). <b>Speed</b> 30 ft..</p></text>
+			</p0018>
+			<p0019>
+				<name type="string">Warden Saranth</name>
+				<text type="formattedtext"><p><i>Undead, challenge 4.</i> The last commander of the Empty Watchtower, who swore to hold it until relieved. Nobody came. He held it anyway.</p><p><b>Defense</b> 17. <b>Health</b> 75 (10d8 + 30). <b>Speed</b> 30 ft..</p></text>
+			</p0019>
+		</refmanualdata>
+	</reference>
+</root>

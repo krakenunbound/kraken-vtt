@@ -1373,3 +1373,9 @@ textarea.cc-field.tall { min-height: 220px; }
 .chat-line[draggable="true"] { cursor: grab; }
 .ct-row[draggable="true"] { cursor: grab; }
 .ct-row input, .ct-row button { cursor: auto; }
+
+/* Descending Darkness: the Dread track (six marks; 3 shaken, 6 broken). */
+.five-dread-track { display: flex; gap: 4px; justify-content: center; }
+.five-dread-track button { width: 18px; height: 18px; padding: 0; border-radius: 50%; border: 1px solid #6b3a26; background: #1b1416; }
+.five-dread-track button.on { background: radial-gradient(circle at 40% 35%, #b14a3a, #4a1410); border-color: #c0392b; box-shadow: 0 0 6px rgba(192, 57, 43, 0.6); }
+.five-dread-track button:nth-child(n + 3).on { box-shadow: 0 0 9px rgba(192, 57, 43, 0.9); }

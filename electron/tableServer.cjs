@@ -1325,7 +1325,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       // spec with the campaign's books. A player's character is theirs.
       if (msg.type === "build-character") {
         const answer = (body) => send(ws, { type: "op-result", req: msg.req ?? null, ...body });
-        if (ruleset === require("./dnd5e.cjs").RULESET_NAME) {
+        if (require("./dnd5e.cjs").isD20Ruleset(ruleset)) {
           // A 5E character from its wizard's spec.
           const owner = client.role === "dm" ? text(msg.owner, "").slice(0, 24) : client.name;
           require("./dnd5e.cjs")
@@ -1682,6 +1682,9 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
             case "death-save":
               // 5E: a Dying character's death saving throw (the player rolls their own).
               return combat.deathSave(String(msg.id), seat);
+            case "stabilize":
+              // Descending Darkness: an ally steadies the dying (Wisdom 12).
+              return combat.stabilize(String(msg.id), msg.recordId ? String(msg.recordId) : "", seat);
             case "clear-targets":
               return combat.clearTargets(String(msg.id), seat);
             case "target-area": {
