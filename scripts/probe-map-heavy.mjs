@@ -87,7 +87,7 @@ try {
   await seat.fill('input[name="name"]', "A test player");
   await seat.fill('input[name="account-password"]', "probe-pass");
   await seat.click('button[type="submit"]');
-  await seat.waitForSelector(".viewport .world", { state: "attached", timeout: 30000 }).catch(async (error) => { await seat.screenshot({ path: "C:/Users/THEKRA~1/AppData/Local/Temp/claude/0cf0f3268f2fac66/66e8579b-5a7e-4c06-9929-944d5d6eb983/scratchpad/seat.png" }); throw error; });
+  await seat.waitForSelector(".viewport .world", { state: "attached", timeout: 30000 }).catch(async (error) => { await seat.screenshot({ path: path.join(tmpdir(), "kraken-probe-seat.png") }); throw error; });
   await new Promise((resolve) => setTimeout(resolve, 3000));
   const pan = (on) => async () => {
     const box = await on.locator(".viewport").boundingBox();

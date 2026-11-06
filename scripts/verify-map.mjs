@@ -1,8 +1,10 @@
+import { tmpdir } from "node:os";
+import path from "node:path";
 import { chromium } from "playwright-core";
 
 const zipPath = String.raw`G:\TTRPG Books (pdf)\Professional Maps\Troll Trouble (prepared Foundry).zip`;
-const shotFit = String.raw`C:\Users\THEKRA~1\AppData\Local\Temp\kraken-vtt-fit.png`;
-const shotZoom = String.raw`C:\Users\THEKRA~1\AppData\Local\Temp\kraken-vtt-zoom.png`;
+const shotFit = path.join(tmpdir(), "kraken-vtt-fit.png");
+const shotZoom = path.join(tmpdir(), "kraken-vtt-zoom.png");
 const chrome = String.raw`C:\Program Files\Google\Chrome\Application\chrome.exe`;
 
 function assert(condition, message) {
