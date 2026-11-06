@@ -57,7 +57,10 @@ of use, and a built-in AI agent that can do anything the GM can.
 
 ## Getting started
 
-1. **Install.** Run `Kraken VTT Setup.exe` (from a release), or run from the
+1. **Install.** Download `Kraken.VTT.Setup.exe` from
+   [Releases](https://github.com/krakenunbound/kraken-vtt/releases) and run it
+   (it is not code-signed yet: if Windows SmartScreen stops it, choose
+   *More info*, then *Run anyway*). Or run from the
    source with `Kraken VTT.bat` (see [Development](#development)).
 2. **Make a campaign.** On the start screen choose **My Campaigns**, name it,
    and pick its game. Choose *Descending Darkness* or *Apeira Astra* to try
