@@ -46,6 +46,8 @@
 }
 .backdrop-light.flame { animation: flame 2.6s infinite; }
 .backdrop-light.moon { animation: moon 9s ease-in-out infinite; opacity: 0.55; }
+.backdrop-light.beacon { animation: beacon 3.2s ease-in-out infinite; }
+@keyframes beacon { 0%, 100% { opacity: 0.25; scale: 0.8; } 45% { opacity: 1; scale: 1.15; } 60% { opacity: 0.9; scale: 1; } }
 @keyframes flame {
   0%, 100% { opacity: 0.85; scale: 1; }
   11% { opacity: 0.62; scale: 0.94; }
@@ -57,7 +59,9 @@
 }
 @keyframes moon { 0%, 100% { opacity: 0.4; scale: 1; } 50% { opacity: 0.65; scale: 1.08; } }
 
-.backdrop-lightning { position: absolute; inset: 0; opacity: 0; mix-blend-mode: screen; background: radial-gradient(ellipse 45% 35% at 24% 18%, rgba(190, 225, 255, 0.55), transparent 70%); }
+.backdrop-lightning { position: absolute; inset: 0; opacity: 0; mix-blend-mode: screen; background: radial-gradient(ellipse 45% 35% at var(--flash-x, 24%) var(--flash-y, 18%), rgba(var(--flash, 190, 225, 255), 0.55), transparent 70%); }
+.backdrop.flash .backdrop-lightning.pulse { animation: pulse-light 5s ease-in-out; }
+@keyframes pulse-light { 0%, 100% { opacity: 0; } 40% { opacity: 0.55; } 60% { opacity: 0.45; } }
 .backdrop.flash .backdrop-lightning { animation: lightning 1.4s ease-out; }
 @keyframes lightning { 0% { opacity: 0; } 3% { opacity: 0.9; } 7% { opacity: 0.15; } 11% { opacity: 0.7; } 35% { opacity: 0; } }
 
@@ -68,30 +72,77 @@
   height: 55%;
   bottom: -8%;
   background:
-    radial-gradient(ellipse 18% 40% at 20% 60%, rgba(170, 210, 220, 0.09), transparent 70%),
-    radial-gradient(ellipse 22% 35% at 55% 70%, rgba(170, 210, 220, 0.07), transparent 70%),
-    radial-gradient(ellipse 16% 30% at 82% 55%, rgba(170, 210, 220, 0.08), transparent 70%);
+    radial-gradient(ellipse 18% 40% at 20% 60%, rgba(var(--mist, 170, 210, 220), 0.09), transparent 70%),
+    radial-gradient(ellipse 22% 35% at 55% 70%, rgba(var(--mist, 170, 210, 220), 0.07), transparent 70%),
+    radial-gradient(ellipse 16% 30% at 82% 55%, rgba(var(--mist, 170, 210, 220), 0.08), transparent 70%);
   filter: blur(8px);
   animation: mist 90s linear infinite alternate;
 }
-.backdrop-mist.two { bottom: 18%; height: 40%; opacity: 0.6; animation-duration: 140s; animation-direction: alternate-reverse; }
-.backdrop-hall .backdrop-mist { opacity: 0.35; }
+.backdrop-mist.one { opacity: min(1, var(--mist-opacity, 1)); }
+.backdrop-mist.one::after { content: ""; position: absolute; inset: 0; background: inherit; opacity: max(0, calc(var(--mist-opacity, 1) - 1)); }
+.backdrop-mist.two { bottom: 18%; height: 40%; opacity: calc(0.6 * var(--mist-opacity, 1)); animation-duration: 140s; animation-direction: alternate-reverse; }
 @keyframes mist { from { transform: translateX(-18%); } to { transform: translateX(18%); } }
 
 .backdrop-motes { position: absolute; inset: 0; width: 100%; height: 100%; mix-blend-mode: screen; }
 
-.backdrop-keep .backdrop-shade {
+.shade-left .backdrop-shade {
   position: absolute;
   inset: 0;
   background:
     linear-gradient(90deg, rgba(3, 6, 10, 0.9) 0%, rgba(3, 6, 10, 0.62) 34%, rgba(3, 6, 10, 0.18) 62%, rgba(3, 6, 10, 0) 78%),
     radial-gradient(ellipse at 70% 40%, transparent 40%, rgba(0, 0, 0, 0.55) 100%);
 }
-.backdrop-hall .backdrop-shade {
+.shade-centre .backdrop-shade {
   position: absolute;
   inset: 0;
   background: radial-gradient(ellipse 42% 60% at 50% 52%, rgba(4, 5, 8, 0.66), rgba(4, 5, 8, 0.28) 70%), radial-gradient(ellipse at center, transparent 45%, rgba(0, 0, 0, 0.7) 100%);
 }
+
+
+
+/* --- The dots: one for each scene --------------------------------------------- */
+.backdrop-dots {
+  position: fixed;
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%);
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(3, 6, 10, 0.45);
+  backdrop-filter: blur(4px);
+}
+.backdrop-dot {
+  width: 10px;
+  height: 10px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(232, 200, 130, 0.7);
+  background: rgba(232, 200, 130, 0.12);
+  cursor: pointer;
+  transition: background 0.25s, transform 0.25s, box-shadow 0.25s;
+}
+.backdrop-dot:hover { transform: scale(1.25); background: rgba(232, 200, 130, 0.45); }
+.backdrop-dot.on { background: var(--gold, #e8c882); box-shadow: 0 0 10px rgba(232, 200, 130, 0.75); }
+.backdrop-dot:focus-visible { outline: 2px solid var(--sea, #7fd0d8); outline-offset: 2px; }
+.backdrop-dot-name {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: rgba(232, 220, 200, 0.85);
+  text-shadow: 0 0 8px #000, 0 0 3px #000;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+.backdrop-dots:hover .backdrop-dot-name, .backdrop-dots:focus-within .backdrop-dot-name { opacity: 1; }
 
 /* --- Bar ------------------------------------------------------------------- */
 .setup-bar { position: relative; z-index: 2; display: flex; align-items: center; padding: 14px 22px 0; }

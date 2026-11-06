@@ -65,6 +65,7 @@
     "walls-ui": "node scripts/verify-walls-ui.mjs",
     "descending-ui": "node scripts/verify-descending-ui.mjs",
     "astra-ui": "node scripts/verify-astra-ui.mjs",
+    "backdrops": "node scripts/verify-backdrops.mjs",
     "build-games": "node scripts/build-content.mjs",
     "responsive-ui": "node scripts/verify-responsive-ui.mjs",
     "maptiles-ui": "node scripts/verify-maptiles-ui.mjs",
