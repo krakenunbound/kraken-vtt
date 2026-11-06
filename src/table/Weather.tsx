@@ -185,7 +185,10 @@ export function Weather({ type, intensity, direction, camera, amount = 1, speed 
       scene.add(particles);
     }
 
-    const observer = new ResizeObserver(resize);
+    const Observer = (element.ownerDocument.defaultView as (Window & typeof globalThis) | null)?.ResizeObserver ?? ResizeObserver;
+    const observer = new Observer(resize);
+    // Its frames come from the window it is in (a popped-out map's own).
+    const win = (element.ownerDocument.defaultView ?? window) as Window;
     observer.observe(element);
     let frame = 0;
     let last = performance.now();
@@ -193,7 +196,7 @@ export function Weather({ type, intensity, direction, camera, amount = 1, speed 
     const start = last;
     const fall = type === "embers" ? -1 : 1;
     const tick = (now: number) => {
-      frame = requestAnimationFrame(tick);
+      frame = win.requestAnimationFrame(tick);
       const dt = Math.min(0.05, (now - last) / 1000);
       last = now;
       const t = (now - start) / 1000;
@@ -228,9 +231,9 @@ export function Weather({ type, intensity, direction, camera, amount = 1, speed 
       }
       renderer.render(scene, view);
     };
-    frame = requestAnimationFrame(tick);
+    frame = win.requestAnimationFrame(tick);
     return () => {
-      cancelAnimationFrame(frame);
+      win.cancelAnimationFrame(frame);
       observer.disconnect();
       element.style.backgroundColor = "transparent";
       for (const item of disposables) item.dispose();

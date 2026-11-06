@@ -51,6 +51,9 @@ export type MapScene = {
 };
 
 type Camera = { x: number; y: number; scale: number };
+// Where each scene was being looked at (this screen): the map put into a window of
+// its own, or back, or drawn again, shows just what it showed, never framed anew.
+const views = new Map<string, { camera: Camera; framed: string }>();
 type Point = { x: number; y: number };
 
 const MIN_SCALE = 0.02;
@@ -302,7 +305,7 @@ function MapViewInner({
   // Shift+wheel over a token turns it (FG's token orientation): set each render, read by the wheel handler.
   const turnRef = useRef<(tokenId: string, direction: number, fine: boolean) => boolean>(() => false);
   const [menu, setMenu] = useState<Menu | null>(null);
-  const [camera, setCamera] = useState<Camera>({ x: 0, y: 0, scale: 0.1 });
+  const [camera, setCamera] = useState<Camera>(() => views.get(sceneIn.id)?.camera ?? { x: 0, y: 0, scale: 0.1 });
   const cameraRef = useRef(camera);
   cameraRef.current = camera;
   const [panning, setPanning] = useState(false);
@@ -406,7 +409,11 @@ function MapViewInner({
 
   // The first view of a scene: the GM sees all of it; a player starts on
   // their own token, close enough to see the squares.
-  const framedFor = useRef("");
+  const framedFor = useRef(views.get(sceneIn.id)?.framed ?? "");
+  // The view kept as it changes, for when the map moves to another window.
+  useEffect(() => {
+    if (framedFor.current.startsWith(`${scene.id}|`)) views.set(scene.id, { camera, framed: framedFor.current });
+  }, [camera, scene.id]);
   useLayoutEffect(() => {
     const element = viewport.current;
     if (!element) return;
@@ -421,7 +428,9 @@ function MapViewInner({
       else setCamera(fitCamera(rect.width, rect.height, sceneFrame(scene), scene.width, scene.height));
     };
     apply();
-    const observer = new ResizeObserver(apply);
+    // Watched from the window the map is in (its own, on another monitor, tells of its size only to its own observer).
+    const Observer = (element.ownerDocument.defaultView as (Window & typeof globalThis) | null)?.ResizeObserver ?? ResizeObserver;
+    const observer = new Observer(apply);
     observer.observe(element);
     return () => observer.disconnect();
   }, [scene.id, scene.width, scene.height, scene.padding, scene.grid.size, gm, mine[0]?.id]);

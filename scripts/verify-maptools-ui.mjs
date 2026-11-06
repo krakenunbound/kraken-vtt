@@ -100,6 +100,30 @@ try {
   await own.screenshot({ path: path.join(tmpdir(), "kraken-map-popout.png") });
   await tool("kraken_windows", { action: "dock", kind: "map" });
   await page.waitForSelector('.window[data-window="map"] .viewport', { timeout: 10000 });
+  // Dragged by its title bar past the edge of the main window, as the GM does: one window of its own (not two), the map in view in it.
+  const viewBefore = await page.getAttribute('.window[data-window="map"] .world', "style");
+  const bar = await page.locator('.window[data-window="map"] .window-title').boundingBox();
+  await page.mouse.move(bar.x + 120, bar.y + bar.height / 2);
+  await page.mouse.down();
+  for (let x = bar.x + 100; x >= 0; x -= 40) await page.mouse.move(Math.max(0, x), bar.y + bar.height / 2);
+  for (let step = 0; step < 6; step++) await page.mouse.move(0, bar.y + bar.height / 2 + step);
+  await page.mouse.up();
+  await new Promise((resolve) => setTimeout(resolve, 1500));
+  const others = app.windows().filter((other) => other !== page);
+  assert(others.length === 1, `one window of its own, not ${others.length}`);
+  const dragged = others[0];
+  await dragged.waitForSelector(".viewport .world img", { timeout: 10000 });
+  // Just as it was: not framed anew, not moved.
+  await new Promise((resolve) => setTimeout(resolve, 800));
+  const viewOut = await dragged.getAttribute(".viewport .world", "style");
+  assert(viewOut === viewBefore, `the map in its own window shows just what it showed: ${viewBefore} -> ${viewOut}`);
+  await dragged.screenshot({ path: path.join(tmpdir(), "kraken-map-dragged-out.png") });
+  await tool("kraken_windows", { action: "dock", kind: "map" });
+  await page.waitForSelector('.window[data-window="map"] .viewport', { timeout: 10000 });
+  assert(app.windows().length === 1, `docked back: ${app.windows().length} windows`);
+  await new Promise((resolve) => setTimeout(resolve, 500));
+  const viewBack = await page.getAttribute('.window[data-window="map"] .world', "style");
+  assert(viewBack === viewBefore, `docked back, still just as it was: ${viewBefore} -> ${viewBack}`);
 
   // The pointer says what a press does, and the toolbar's tools work while the editor is open.
   const pointer = () => page.$eval('.window[data-window="map"] .viewport', (element) => [element.dataset.pointer, getComputedStyle(element).cursor]);
