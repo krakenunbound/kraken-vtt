@@ -225,6 +225,22 @@ try {
   await tool("kraken_sidebar", { action: "press", entry: "Races" });
   await page.waitForSelector('[data-records-only="siegepackage:race"]');
 
+  // An adventure made active: its encounters under Campaign, its story entries under World (each opens its text).
+  const b1 = (shelf.books ?? shelf).find((item) => /^B1 In Search of the Unknown/.test(item.name ?? item.title ?? ""));
+  let adventure = "no B1 here";
+  if (b1) {
+    await tool("kraken_books", { action: "activate", book: b1.id });
+    await page.click('.sidebar [data-launch="adventure:battle"]');
+    await page.waitForSelector(`[data-adventure-list="battle"] [data-records-book="${b1.name}"] [data-library-item]`, { timeout: 30000 });
+    await page.click('.sidebar [data-launch="adventure:story"]');
+    const entry = '[data-adventure-list="story"] [data-library-item="00.03 Introduction"] [data-action="library-story"]';
+    await page.waitForSelector(entry, { timeout: 30000 });
+    await page.click(entry);
+    await page.waitForSelector('.story-window .book-text:has-text("IN SEARCH OF THE UNKNOWN")', { timeout: 15000 });
+    assert(!(await page.$(".story-window script")), "no markup from the entry runs");
+    adventure = `B1's encounters and its story (the Introduction read)`;
+  }
+
   // A test player: the same Character lists (the book is shared), and a race dropped on their own character.
   const mine = await tool("kraken_record_create", { type: "character", name: "Wren", owner: "A test player", visibility: "owner", data: { attributes: scores } });
   browser = await chromium.launch({ executablePath: String.raw`C:\Program Files\Google\Chrome\Application\chrome.exe`, headless: true });
@@ -235,7 +251,7 @@ try {
   await seat.fill('input[name="account-password"]', "test-pass");
   await seat.click('button[type="submit"]');
   await seat.waitForSelector('.sidebar [data-launch="records:siegepackage:race"]', { timeout: 20000 });
-  assert(!(await seat.$('.sidebar [data-launch="books:activation"]')) && !(await seat.$('.sidebar [data-launch="adventure:battle"]')), "a player has no Modules or Encounters");
+  assert(!(await seat.$('.sidebar [data-launch="books:activation"]')) && !(await seat.$('.sidebar [data-launch="adventure:battle"]')) && !(await seat.$('.sidebar [data-launch="adventure:story"]')), "a player has no Modules, Encounters or Story");
   await seat.click('.sidebar [data-launch="records:siegepackage:race"]');
   await seat.waitForSelector('[data-records-only="siegepackage:race"] .records-name:text-is("Elf")');
   const elf = await byName("Elf", "race");
@@ -249,7 +265,7 @@ try {
   assert(!/Brannoc/.test(heard) && /Elf/.test(heard), `the player hears their own drop, not the GM's hidden character's: ${heard.slice(-400)}`);
   await seat.screenshot({ path: path.join(tmpdir(), "kraken-sidebar-player.png") });
   assert(failures.length === 0, `page errors: ${failures.join(" | ")}`);
-  console.log(`ok sidebar ui: FG's categories under the tools; the Player's Handbook active fills Character (Classes, Races, Spells), each its own list under the book's name; the Fighter dragged onto a sheet (1st level, 11 hit points, Strength prime), a race and then another replacing it, a long sword equipped, a spell by the tool, a second class refused; Campaign folds away and back; the arrow steps icons and names (${Math.round(full)}px), icons (${Math.round(icons)}px), a thin strip (${Math.round(strip)}px) and back; a test player has the lists and drops a race on their own character. ${path.join(tmpdir(), "kraken-sidebar-0.png")}`);
+  console.log(`ok sidebar ui: FG's categories under the tools; the Player's Handbook active fills Character (Classes, Races, Spells), each its own list under the book's name; the Fighter dragged onto a sheet (1st level, 11 hit points, Strength prime), a race and then another replacing it, a long sword equipped, a spell by the tool, a second class refused; Campaign folds away and back; the arrow steps icons and names (${Math.round(full)}px), icons (${Math.round(icons)}px), a thin strip (${Math.round(strip)}px) and back; ${adventure}; a test player has the lists and drops a race on their own character. ${path.join(tmpdir(), "kraken-sidebar-0.png")}`);
 } finally {
   await browser?.close();
   child.kill();

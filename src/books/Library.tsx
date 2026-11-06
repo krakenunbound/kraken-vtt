@@ -4,7 +4,7 @@ import type { BookInfo, Session } from "../session/useSession";
 // FG's Library for an adventure module (the GM's): its maps onto the table,
 // its NPCs, encounters (battles), treasure parcels and tables, each with
 // FG's action: to the combat tracker, to the map, to the party, rolled.
-export type Kind = "battle" | "npc" | "parcel" | "table";
+export type Kind = "battle" | "npc" | "parcel" | "table" | "story";
 const TABS: [Kind, string][] = [
   ["battle", "Encounters"],
   ["npc", "NPCs"],
@@ -116,7 +116,9 @@ export function LibraryWindow({ session, openMaps }: { session: Session; openMap
 // The sidebar's Encounters, Parcels and Tables (FG's Campaign lists): every
 // active adventure's, each under the adventure's name, as FG lists an active
 // module's records under the module. The same actions as the Library's.
-export function AdventureList({ session, kind }: { session: Session; kind: Kind }) {
+const LABELS: Record<Kind, string> = { battle: "Encounters", npc: "NPCs", parcel: "Parcels", table: "Tables", story: "Story" };
+
+export function AdventureList({ session, kind, onStory }: { session: Session; kind: Kind; onStory?: (path: string, name: string) => void }) {
   const [modules, setModules] = useState<BookInfo[] | null>(null);
   const [search, setSearch] = useState("");
   useEffect(() => {
@@ -130,7 +132,7 @@ export function AdventureList({ session, kind }: { session: Session; kind: Kind 
     for (const book of modules ?? []) session.libraryAction("list", { module: book.name, kind, search });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [modules, kind, search]);
-  const label = TABS.find(([id]) => id === kind)?.[1] ?? kind;
+  const label = LABELS[kind];
   return (
     <div className="records-window single adventure-list" data-adventure-list={kind}>
       <section className="records-main">
@@ -152,11 +154,17 @@ export function AdventureList({ session, kind }: { session: Session; kind: Kind 
                     {category ? <h5 className="records-category">{category}</h5> : null}
                     {list.map((item) => (
                       <div key={item.path} className="records-row library-row" data-library-item={item.name}>
-                        <span className="records-name">
-                          {item.name}
-                          <small className="hint"> {item.npcs ?? item.summary ?? ""}</small>
-                        </span>
-                        {kind === "battle" ? (
+                        {kind === "story" ? (
+                          <button type="button" className="records-name" data-action="library-story" title={`Read ${item.name}`} onClick={() => onStory?.(item.path, item.name)}>
+                            {item.name}
+                          </button>
+                        ) : (
+                          <span className="records-name">
+                            {item.name}
+                            <small className="hint"> {item.npcs ?? item.summary ?? ""}</small>
+                          </span>
+                        )}
+                        {kind === "story" ? null : kind === "battle" ? (
                           <button type="button" data-action="library-battle" title="Onto the combat tracker; on the open map, tokens where FG placed them (hidden)" onClick={() => session.libraryAction("battle", { path: item.path })}>
                             ⚔ Add
                           </button>
@@ -182,6 +190,29 @@ export function AdventureList({ session, kind }: { session: Session; kind: Kind 
           })}
         </div>
       </section>
+    </div>
+  );
+}
+
+// One story entry (FG's story record), read by the GM: its text from the module.
+export function StoryWindow({ session, path }: { session: Session; path: string }) {
+  const module = path.split("@").slice(1).join("@");
+  useEffect(() => {
+    session.libraryAction("story", { module, path });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [path]);
+  const entry = session.library[`${module}|story:${path}`]?.[0];
+  return (
+    <div className="record-window story-window" data-story={path}>
+      {entry ? (
+        <>
+          <h3>{entry.name}</h3>
+          {entry.category ? <p className="hint">{entry.category}</p> : null}
+          <div className="book-text" dangerouslySetInnerHTML={{ __html: entry.html ?? "" }} />
+        </>
+      ) : (
+        <p className="hint">Reading…</p>
+      )}
     </div>
   );
 }

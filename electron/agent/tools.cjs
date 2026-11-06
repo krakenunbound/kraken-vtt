@@ -1291,11 +1291,11 @@ const TOOLS = [
   {
     name: "kraken_library",
     description:
-      "FG's Library of an adventure module (B1, B2... read in place): action list (kind npc, battle (FG's encounters), parcel (treasure parcels) or table; search); npc (path: put the NPC on the combat tracker, count); battle (path: the encounter's NPCs onto the tracker, and when its FG map is open (kraken_open_fg_module) their tokens where FG placed them, hidden until revealed; place false: tracker only); parcel (path: its coins and items into the party sheet's parcel to hand out); table (path: roll it on the host's dice; the result goes to chat).",
+      "FG's Library of an adventure module (B1, B2... read in place): action list (kind npc, battle (FG's encounters), parcel (treasure parcels), table or story (FG's story entries); search); story (path: a story entry's text); npc (path: put the NPC on the combat tracker, count); battle (path: the encounter's NPCs onto the tracker, and when its FG map is open (kraken_open_fg_module) their tokens where FG placed them, hidden until revealed; place false: tracker only); parcel (path: its coins and items into the party sheet's parcel to hand out); table (path: roll it on the host's dice; the result goes to chat).",
     inputSchema: object({
-      action: { type: "string", enum: ["list", "npc", "battle", "parcel", "table"] },
+      action: { type: "string", enum: ["list", "npc", "battle", "parcel", "table", "story"] },
       module: string("The module's name (list)"),
-      kind: { type: "string", enum: ["npc", "battle", "parcel", "table"] },
+      kind: { type: "string", enum: ["npc", "battle", "parcel", "table", "story"] },
       search: string("Part of the name (list)"),
       path: string("The record's FG path, as list gives it"),
       count: number("npc: how many"),
@@ -1305,6 +1305,7 @@ const TOOLS = [
       const table = needTable(ctx);
       const library = require("../library.cjs");
       if (args.action === "list") return out(library.list(String(args.module ?? ""), args.kind, args.search ?? ""));
+      if (args.action === "story") return out(library.storyEntry(String(args.path ?? "")));
       if (args.action === "npc") {
         const record = library.ensureNpc(table, String(args.path));
         return out({ added: await table.combat.add({ recordId: record.id, count: args.count }, table.seat), record: record.id });
@@ -1345,11 +1346,11 @@ const TOOLS = [
   {
     name: "kraken_sidebar",
     description:
-      "The sidebar on the right of the GM's screen, as FG's: the tools along the top (combat tracker, assistant, players, settings), then categories that fold away: Library (Modules = book activation, Books, Sound Sets), Player (Characters, Packages, Party, Notes), Campaign (Encounters, Images, Items, NPCs, Parcels, Tables: every active book's or adventure's, each under the book's name) and Character (Classes, Races, Spells...: drag one onto a character sheet, or kraken_character_drop). action list: the buttons and categories, which are open or folded, and the state; state: 0 icons and names, 1 icons only (categories cut to four letters), 2 a thin strip (one letter), as the arrow at the bottom steps through; fold: fold a category (group, its name) away, or open it again with folded false; press: press a button (entry: its id from list, such as records:npc or adventure:battle, or its name) to open or close its window.",
+      "The sidebar on the right of the GM's screen, as FG's: the tools along the top (combat tracker, assistant, players, settings), then categories that fold away: Library (Modules = book activation, Books, Sound Sets), Player (Characters, Packages, Party, Notes), Campaign (Encounters, Images, Items, NPCs, Parcels, Tables: every active book's or adventure's, each under the book's name), World (Story: every active adventure's story entries, each opening its text) and Character (Classes, Races, Spells...: drag one onto a character sheet, or kraken_character_drop). action list: the buttons and categories, which are open or folded, and the state; state: 0 icons and names, 1 icons only (categories cut to four letters), 2 a thin strip (one letter), as the arrow at the bottom steps through; fold: fold a category (group, its name) away, or open it again with folded false; press: press a button (entry: its id from list, such as records:npc or adventure:battle, or its name) to open or close its window.",
     inputSchema: object({
       action: { type: "string", enum: ["list", "state", "fold", "press"] },
       state: { type: "number", enum: [0, 1, 2] },
-      group: string("A category: Library, Player, Campaign or Character"),
+      group: string("A category: Library, Player, Campaign, World or Character"),
       folded: { type: "boolean" },
       entry: string("A button: its id (list) or its name"),
     }),

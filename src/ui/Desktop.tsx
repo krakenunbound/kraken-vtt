@@ -15,7 +15,7 @@ import { DiceWindow } from "../dice/DiceWindow";
 import { SoundWindow } from "../sound/SoundWindow";
 import { QuickSlots, slotDrag } from "./QuickSlots";
 import { KritsWindow } from "../combat/KritsWindow";
-import { AdventureList, LibraryWindow, type Kind as AdventureKind } from "../books/Library";
+import { AdventureList, LibraryWindow, StoryWindow, type Kind as AdventureKind } from "../books/Library";
 import { NotesWindow, NoteWindow } from "../notes/Notes";
 import { BooksWindow, BookWindow, ImagesWindow, PictureWindow } from "../books/Books";
 import { Icon } from "./icons";
@@ -260,6 +260,7 @@ export function Desktop({
           ]
         : [listEntry("item", "Items", "bag"), listEntry("npc", "NPCs", "skull")],
     },
+    ...(gm ? [{ id: "world", label: "World", entries: [{ kind: "adventure" as const, payload: "story", label: "Story", icon: "scroll", title: "Story: every active adventure's story entries" }] }] : []),
     { id: "character", label: "Character", entries: characterLists },
   ];
   const launchers = [...tools, ...groups.flatMap((group) => group.entries)];
@@ -422,7 +423,8 @@ export function Desktop({
             <FloatingWindow key={item.key} item={item}>
               {item.kind === "characters" ? <CharacterPanel session={session} dock={!gm} create={item.payload === "new"} /> : null}
               {item.kind === "records" ? <RecordsWindow session={session} only={item.payload} onOpen={(record) => windows.open("record", record.name, record.id)} /> : null}
-              {item.kind === "adventure" && item.payload && gm ? <AdventureList session={session} kind={item.payload as AdventureKind} /> : null}
+              {item.kind === "adventure" && item.payload && gm ? <AdventureList session={session} kind={item.payload as AdventureKind} onStory={(path, name) => windows.open("story", name, path)} /> : null}
+              {item.kind === "story" && item.payload && gm ? <StoryWindow session={session} path={item.payload} /> : null}
               {item.kind === "record" && item.payload ? <RecordWindow session={session} id={item.payload} /> : null}
               {item.kind === "charselect" ? <CharacterSelect session={session} onSheet={(id, name) => windows.open("sheet", name, id)} onWizard={() => windows.open("characters", "Character Wizard", "new")} onClose={() => windows.close(item.key)} /> : null}
               {item.kind === "sheet" ? <CharacterPanel session={session} dock selected={item.payload ?? null} /> : null}
