@@ -3,10 +3,11 @@ const { readModule } = require("./importers/fgModule.cjs");
 // FG's Library for an adventure module, on the host: its NPCs (to the combat
 // tracker), its encounters (FG's battles: their NPCs on the tracker, their
 // tokens where FG placed them on the map that is open), its treasure parcels
-// (to the party sheet's parcel) and its tables (rolled by the host's dice).
+// (to the party sheet's parcel), its tables (rolled by the host's dice) and
+// its story entries (FG's Story list: the adventure's text, read by the GM).
 // The module is read in place, its records kept in memory a few at a time.
 
-const KINDS = { npc: "npc", battle: "battle", parcel: "treasureparcels", table: "tables" };
+const KINDS = { npc: "npc", battle: "battle", parcel: "treasureparcels", table: "tables", story: "encounter" };
 const cache = new Map();
 function moduleRecords(moduleName) {
   let records = cache.get(moduleName);
@@ -22,7 +23,7 @@ const plain = (html) => String(html ?? "").replace(/<[^>]+>/g, " ").replace(/\s+
 
 function list(moduleName, kind, search = "") {
   const type = KINDS[kind];
-  if (!type) throw new Error("Which list? npc, battle, parcel or table.");
+  if (!type) throw new Error("Which list? npc, battle, parcel, table or story.");
   const want = String(search).toLowerCase();
   return moduleRecords(moduleName)
     .filter((record) => record.type === type && (!want || String(record.name).toLowerCase().includes(want)))
@@ -104,4 +105,12 @@ function rollTable(table, fgPath, from = "GM") {
   return { table: record.name, roll: roll.total, result };
 }
 
-module.exports = { list, ensureNpc, addBattle, giveParcel, rollTable, KINDS };
+// A story entry's text, as safe HTML (FG's formatted text; its links are not followed).
+function storyEntry(fgPath) {
+  const record = find(moduleOf(fgPath), fgPath);
+  const { toHtml } = require("./books.cjs");
+  const html = typeof record.data.text === "string" ? toHtml(record.data.text, () => null) : "";
+  return { path: fgPath, name: record.name, category: record.data.fgCategory ?? "", html };
+}
+
+module.exports = { list, ensureNpc, addBattle, giveParcel, rollTable, storyEntry, KINDS };

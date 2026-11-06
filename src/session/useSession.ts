@@ -74,7 +74,7 @@ export type MapTile = { id: string; name: string; src: string; url: string; x: n
 // Text on the map (FG's text layers): labels, numbers, pins.
 export type MapLabel = { id: string; x: number; y: number; text: string; font: string; size: number; color: string; rotation: number; anchor: string; outline: { width: number; color: string }; shadow: { offset: number; blur: number; color: string }; hidden: boolean; group: string; number: number | null; icon: string; link: { kind: string; id: string } | null };
 export type MapGroup = { name: string; shown?: boolean; players?: boolean; locked?: boolean; nextNumber?: number; prefix?: string };
-export type LibraryItem = { path: string; name: string; category: string; npcs?: string; summary?: string };
+export type LibraryItem = { path: string; name: string; category: string; npcs?: string; summary?: string; html?: string };
 export type MapMask = { on: boolean; shapes: { id: string; mode: "reveal" | "hide"; points: number[] }[] };
 export type Ping = { id: number; x: number; y: number; from: string; color: string };
 // A line drawn on the map, for everyone (by "" is the GM's).

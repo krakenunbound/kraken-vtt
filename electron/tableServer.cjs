@@ -1351,6 +1351,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
           else if (msg.action === "battle") await library.addBattle(agentHandle, String(msg.path), { place: msg.place !== false });
           else if (msg.action === "parcel") library.giveParcel(agentHandle, String(msg.path), party);
           else if (msg.action === "table") library.rollTable(agentHandle, String(msg.path), client.name);
+          else if (msg.action === "story") send(ws, { type: "library", module: moduleName, kind: `story:${msg.path}`, items: [library.storyEntry(String(msg.path))] });
           else throw new Error("What should the Library do?");
         })().catch((error) => send(ws, { type: "error", reason: error instanceof Error ? error.message : "The Library could not do that." }));
         return;
