@@ -175,24 +175,12 @@ export function SceneLegend({
   tokens,
   markers,
   regions,
-  showWalls,
-  showLights,
-  showCreatures,
-  onShowWalls,
-  onShowLights,
-  onShowCreatures,
 }: {
   walls: SceneWall[];
   lights: SceneLight[];
   tokens: OverlayToken[];
   markers: SceneMarker[];
   regions: SceneRegion[];
-  showWalls: boolean;
-  showLights: boolean;
-  showCreatures: boolean;
-  onShowWalls: (value: boolean) => void;
-  onShowLights: (value: boolean) => void;
-  onShowCreatures: (value: boolean) => void;
 }) {
   const counts = countCategories(walls);
   const traps = markers.filter((marker) => marker.kind === "trap").length + regions.filter((region) => region.trap).length;
@@ -211,20 +199,9 @@ export function SceneLegend({
       data-lights={lights.length}
       data-tokens={tokens.length}
       data-traps={traps}
-      onPointerDown={(event) => event.stopPropagation()}
+      aria-label="This scene"
     >
-      <label>
-        <input type="checkbox" checked={showWalls} onChange={(event) => onShowWalls(event.target.checked)} />
-        Walls and doors
-      </label>
-      <label>
-        <input type="checkbox" checked={showLights} onChange={(event) => onShowLights(event.target.checked)} />
-        Lights ({lights.length})
-      </label>
-      <label>
-        <input type="checkbox" checked={showCreatures} onChange={(event) => onShowCreatures(event.target.checked)} />
-        Creatures ({tokens.length})
-      </label>
+      <h4>This scene</h4>
       {LEGEND_ORDER.filter((category) => counts[category] > 0).map((category) => (
         <div key={category} className="legend-row" title={CATEGORY_HINT[category]}>
           <span className="swatch" style={{ background: CATEGORY_COLOR[category] }} />
@@ -233,6 +210,8 @@ export function SceneLegend({
           </span>
         </div>
       ))}
+      <div className="legend-row">Lights {lights.length}</div>
+      <div className="legend-row">Creatures {tokens.length}</div>
       {traps > 0 ? <div className="legend-row">Traps {traps}</div> : null}
       {missingPrep ? <p className="legend-empty">No doors, windows, creatures, or traps in this scene.</p> : null}
     </aside>

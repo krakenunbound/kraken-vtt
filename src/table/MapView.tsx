@@ -272,13 +272,11 @@ export function MapView({
   const [panning, setPanning] = useState(false);
   const [natural, setNatural] = useState<{ width: number; height: number } | null>(null);
   const [imageFailed, setImageFailed] = useState(false);
-  // FG's play mode by default: the lines (walls, doors, windows) show only
-  // while they are being edited (the map editor's Line of Sight tab), or
-  // when the GM ticks Walls and doors in the legend.
-  const [showWalls, setShowWalls] = useState(false);
-  const linesShown = gm && (showWalls || (editorOpen && editTab === "walls"));
-  const [showLights, setShowLights] = useState(true);
-  const [showCreatures, setShowCreatures] = useState(true);
+  // FG's play mode, and Foundry's layers: the lines (walls, doors, windows)
+  // show only while they are being edited (the map editor's Walls tab), the
+  // light handles only on its Lights tab; the scene's counts sit in the
+  // Walls tab, not over the map.
+  const linesShown = gm && editorOpen && editTab === "walls";
   const [trayOpen, setTrayOpen] = useState(true);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [lightMenu, setLightMenu] = useState<{ id: string; left: number; top: number } | null>(null);
@@ -1158,7 +1156,7 @@ export function MapView({
           regions={gm ? scene.regions : []}
           scale={camera.scale}
           showWalls={linesShown}
-          showLights={showLights}
+          showLights={false}
           showCreatures={false}
           doorStates={doorStates}
           onToggleDoor={(wallId) => actions.setDoor(wallId)}
@@ -1331,7 +1329,6 @@ export function MapView({
           </svg>
         ) : null}
         {tokens.map((token) => {
-          if (gm && !showCreatures && !token.owner) return null;
           const canDrag = gm || (token.mine && !map.locked);
           const span = token.squares * size;
           const isDragged = drag?.id === token.id && drag.moved;
@@ -1801,7 +1798,6 @@ export function MapView({
               onClick={() => {
                 const center = viewCenter();
                 if (center) actions.placeLight({ x: center.x, y: center.y, preset: "torch", color: "#FFB347" });
-                setShowLights(true);
               }}
             >
               <Icon name="sun" />
@@ -1867,21 +1863,7 @@ export function MapView({
           selectedLabel={selectedLabel}
           actions={{ tile: actions.tile ?? (() => undefined), fx: actions.fx ?? (() => undefined), clearDrawings: actions.clearDrawings, label: actions.label ?? (() => undefined), mapGroup: actions.mapGroup ?? (() => undefined), mask: actions.mask ?? (() => undefined), wall: actions.wall, mapUndo: actions.mapUndo, updateSettings: actions.updateSettings, updateLight: actions.updateLight, removeLight: actions.removeLight }}
           onClose={() => setEditorOpen(false)}
-        />
-      ) : null}
-      {gm && !settingsOpen && !editorOpen ? (
-        <SceneLegend
-          walls={wallsShown}
-          lights={scene.lights}
-          tokens={scene.tokens}
-          markers={scene.markers}
-          regions={scene.regions}
-          showWalls={showWalls}
-          showLights={showLights}
-          showCreatures={showCreatures}
-          onShowWalls={setShowWalls}
-          onShowLights={setShowLights}
-          onShowCreatures={setShowCreatures}
+          summary={<SceneLegend walls={wallsShown} lights={scene.lights} tokens={scene.tokens} markers={scene.markers} regions={scene.regions} />}
         />
       ) : null}
       {notice ? (
