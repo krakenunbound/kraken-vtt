@@ -1,6 +1,8 @@
 // Descending Darkness Player's Handbook: the rules a player needs, and the
 // records the character wizard and the sheets use (classes, kin,
 // backgrounds, spells, gear).
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { md } from "../lib/fg.mjs";
 import { BACKGROUNDS, CLASSES, KIN } from "./classes.mjs";
 import { ARMOUR, GEAR, WEAPONS } from "./gear.mjs";
@@ -40,6 +42,7 @@ export const PLAYERS_HANDBOOK = {
   ruleset: RULESET,
   author: "Kraken VTT",
   playersBook: true,
+  thumbnail: path.join(path.dirname(fileURLToPath(import.meta.url)), "art", "cover-handbook.webp"),
   players: {
     class: CLASSES,
     race: KIN,

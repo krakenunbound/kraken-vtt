@@ -5,7 +5,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { ids, imageRecord, link, md, slug } from "../lib/fg.mjs";
+import { handout, ids, imageRecord, link, md, slug } from "../lib/fg.mjs";
 import { RULESET } from "./players-handbook.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -31,7 +31,9 @@ const STORY = [
 Aldous had been reading the tower's old records, and found that its last commander, **Warden Saranth**, was buried in the crypt below with his oath-ring: he had sworn to hold the tower *until relieved*. No relief ever came; the realm that built the tower forgot it. Aldous went down to pray for the Warden's rest and opened the tomb. Saranth woke, still holding his post, and everything buried with him woke too. Aldous fled upstairs and died there, of his wounds and his fear; the Warden's hound now guards the beacon.
 
 **What the characters can do.** Fight their way down and destroy Saranth (hard: he rises again at dusk unless his ring is taken or his bones burned), or **relieve him**: relight the beacon, and tell the Warden, with his ring placed in his hand, that his watch is over. Aldous's journal says how.`),
-  story("01 Hollowmere", `*Read or tell:* **Hollowmere is a village of thirty roofs around a muddy green, with the ridge and its dark tower above it. The reeve, a tired woman called Mother Hesk, meets you at the well. "Aldous lit that fire every night for thirty years," she says. "Three nights now, nothing. And the dogs won't stop howling."**
+  story("01 Hollowmere", `*Handout: Hollowmere and the Ridge.*
+
+*Read or tell:* **Hollowmere is a village of thirty roofs around a muddy green, with the ridge and its dark tower above it. The reeve, a tired woman called Mother Hesk, meets you at the well. "Aldous lit that fire every night for thirty years," she says. "Three nights now, nothing. And the dogs won't stop howling."**
 
 Mother Hesk offers **40 gc** and the village's thanks for relighting the beacon and finding out what became of Aldous. A Persuasion check (DC 12) gets 20 more, or a mule for the road.
 
@@ -79,12 +81,12 @@ A **Gloomcrawler** lives in the webs on the ceiling and drops on the last climbe
 
 **Aldous's room: a narrow bed, a table piled with old letters, a chest. And Aldous himself, on the floor beside the bed, eyes open.** Aldous is dead; he is not risen (he died praying, and the Warden spared him that). Seeing him: 1 Dread each, Wisdom save (DC 10) to resist.
 
-On the table: **Aldous's journal** (give the players the handout) and the tower's old muster roll with Saranth's name.
+On the table: **Aldous's journal** (give the players the handout, and show them the picture *Aldous's Journal*) and the tower's old muster roll with Saranth's name.
 
 Through the door, the **beacon platform**: the great iron basket, full of wood and old pitch, cold. And the **Grave Hound**, which has made its den among the barrels. It is Saranth's hound, buried with him; it attacks anyone who comes near the beacon. If the party lit the hall's brazier, the hound's Hunting Howl brings Saranth's attention: he will be waiting, sword drawn, when they go below.
 
 **Relighting the beacon** takes an action with a torch or flame. When it catches, the whole valley sees it, and so does the crypt: read entry 08's *"when the beacon burns"*.`),
-  story("08 The Crypt of the Watch", `*Map: The Crypt of the Watch.*
+  story("08 The Crypt of the Watch", `*Map: The Crypt of the Watch. Handout: Warden Saranth.*
 
 **The stairs come down into a long hall of tombs: six soldiers of the watch in their stone beds, the lids pushed aside. At the end of the hall a door stands open, and beyond it, by the light of two braziers burning blue, an armoured figure walks slowly up and down before an empty coffin.**
 
@@ -126,7 +128,8 @@ export const EMPTY_WATCHTOWER = {
   gm: {
     encounter: [...STORY, ...HANDOUTS.map((item) => ({ ...item, name: `10 Handout: ${item.name}`, __category: "The Empty Watchtower" }))],
     battle: [battle("Ash Wolves on the Ridge Road", [["Ash Wolf", 3]]), battle("Barrow Rats in the Storeroom", [["Barrow Rats", 1]]), battle("Gloomcrawler on the Stair", [["Gloomcrawler", 1]]), battle("The Grave Hound", [["Grave Hound", 1]]), battle("The Watch in the Crypt", [["Bone Sentinel", 4]]), battle("Warden Saranth", [["Warden Saranth", 1]])],
-    image: [map("The Watchtower Yard", "watchtower-yard"), map("The Watchtower Upper Floor", "watchtower-upper"), map("The Crypt of the Watch", "watchtower-crypt")],
+    image: [map("The Watchtower Yard", "watchtower-yard"), map("The Watchtower Upper Floor", "watchtower-upper"), map("The Crypt of the Watch", "watchtower-crypt"), handout("Hollowmere and the Ridge", "handout-hollowmere"), handout("Aldous's Journal", "handout-journal"), handout("Warden Saranth", "handout-warden")],
   },
-  pictures: Object.fromEntries(["watchtower-yard", "watchtower-upper", "watchtower-crypt"].map((file) => [`images/${file}.webp`, path.join(here, "art", `${file}.webp`)])),
+  thumbnail: path.join(here, "art", "cover-watchtower.webp"),
+  pictures: Object.fromEntries(["watchtower-yard", "watchtower-upper", "watchtower-crypt", "handout-hollowmere", "handout-journal", "handout-warden"].map((file) => [`images/${file}.webp`, path.join(here, "art", `${file}.webp`)])),
 };

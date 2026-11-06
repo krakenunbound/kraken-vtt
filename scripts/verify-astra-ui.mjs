@@ -66,6 +66,7 @@ try {
   const ours = ["Apeira Astra Crew Handbook", "Apeira Astra Threat Dossier", "Salvage Rights (Apeira Astra)"].map((title) => shelf.find((item) => item.title === title));
   assert(ours.every(Boolean), `its three books on the shelf: ${shelf.map((item) => item.title).join(", ")}`);
   assert(!shelf.some((item) => /Descending Darkness|5E SRD/.test(item.title)), "no other game's books");
+  assert(ours.every((book) => book.cover), `each book has its cover: ${JSON.stringify(ours.map((book) => book.cover))}`);
   for (const book of ours) await tool("kraken_books", { action: "activate", book: book.id });
 
   // A test player makes a crew member.
@@ -133,6 +134,11 @@ try {
   const foe = view.find((entry) => entry.name === "Gull Crewman");
   const hers = view.find((entry) => entry.recordId === rook.id);
   assert(foe.hp === 24 && foe.ac === 4, `the crewman's Stamina and Armour: ${foe.hp}, ${foe.ac}`);
+  // The creature's portrait from its book, in the tracker.
+  await tool("kraken_windows", { action: "open", kind: "combat" });
+  await page.waitForFunction(() => [...document.querySelectorAll(".ct-face img")].some((img) => img.complete && img.naturalWidth > 0), null, { timeout: 15000 });
+  const art = await dataOf(foe.recordId);
+  assert(/^tokens\/[a-z-]+\.webp@/.test(art?.token ?? "") && /^images\/npc\//.test(art?.picture ?? ""), `its token and portrait: ${art?.token}, ${art?.picture}`);
   await tool("kraken_combat", { action: "init", which: "all" });
   view = (await tool("kraken_combat", { action: "view" })).entries;
   assert(view.every((entry) => entry.initresult >= 1 && entry.initresult <= 15), `initiative on 2d6: ${view.map((entry) => entry.initresult)}`);

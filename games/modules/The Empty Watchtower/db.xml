@@ -8,7 +8,7 @@
 			</e00aboutthisadventure>
 			<e01hollowmere>
 				<name type="string">01 Hollowmere</name>
-				<text type="formattedtext"><p><i>Read or tell:</i> <b>Hollowmere is a village of thirty roofs around a muddy green, with the ridge and its dark tower above it. The reeve, a tired woman called Mother Hesk, meets you at the well. &quot;Aldous lit that fire every night for thirty years,&quot; she says. &quot;Three nights now, nothing. And the dogs won't stop howling.&quot;</b></p><p>Mother Hesk offers <b>40 gc</b> and the village's thanks for relighting the beacon and finding out what became of Aldous. A Persuasion check (DC 12) gets 20 more, or a mule for the road.</p><p>What the villagers know (one each, for asking around): - Aldous kept to himself and read a lot of &quot;old soldier's letters&quot;. - A shepherd saw grey wolves on the ridge road two nights ago, thin and bold. - The tower is older than the village; &quot;soldiers built it for a king nobody remembers&quot;. - Old Tam, the drunk, says his grandmother told him a knight is buried under the tower, &quot;waiting for somebody&quot;.</p><p>Before they go, ask each player what their character carries for light, and how many torches. Write it down.</p></text>
+				<text type="formattedtext"><p><i>Handout: Hollowmere and the Ridge.</i></p><p><i>Read or tell:</i> <b>Hollowmere is a village of thirty roofs around a muddy green, with the ridge and its dark tower above it. The reeve, a tired woman called Mother Hesk, meets you at the well. &quot;Aldous lit that fire every night for thirty years,&quot; she says. &quot;Three nights now, nothing. And the dogs won't stop howling.&quot;</b></p><p>Mother Hesk offers <b>40 gc</b> and the village's thanks for relighting the beacon and finding out what became of Aldous. A Persuasion check (DC 12) gets 20 more, or a mule for the road.</p><p>What the villagers know (one each, for asking around): - Aldous kept to himself and read a lot of &quot;old soldier's letters&quot;. - A shepherd saw grey wolves on the ridge road two nights ago, thin and bold. - The tower is older than the village; &quot;soldiers built it for a king nobody remembers&quot;. - Old Tam, the drunk, says his grandmother told him a knight is buried under the tower, &quot;waiting for somebody&quot;.</p><p>Before they go, ask each player what their character carries for light, and how many torches. Write it down.</p></text>
 			</e01hollowmere>
 			<e02theridgeroad>
 				<name type="string">02 The Ridge Road</name>
@@ -32,11 +32,11 @@
 			</e06thestairroom>
 			<e07theupperfloorandthebeacon>
 				<name type="string">07 The Upper Floor and the Beacon</name>
-				<text type="formattedtext"><p><i>Map: The Watchtower Upper Floor.</i></p><p><b>Aldous's room: a narrow bed, a table piled with old letters, a chest. And Aldous himself, on the floor beside the bed, eyes open.</b> Aldous is dead; he is not risen (he died praying, and the Warden spared him that). Seeing him: 1 Dread each, Wisdom save (DC 10) to resist.</p><p>On the table: <b>Aldous's journal</b> (give the players the handout) and the tower's old muster roll with Saranth's name.</p><p>Through the door, the <b>beacon platform</b>: the great iron basket, full of wood and old pitch, cold. And the <b>Grave Hound</b>, which has made its den among the barrels. It is Saranth's hound, buried with him; it attacks anyone who comes near the beacon. If the party lit the hall's brazier, the hound's Hunting Howl brings Saranth's attention: he will be waiting, sword drawn, when they go below.</p><p><b>Relighting the beacon</b> takes an action with a torch or flame. When it catches, the whole valley sees it, and so does the crypt: read entry 08's <i>&quot;when the beacon burns&quot;</i>.</p></text>
+				<text type="formattedtext"><p><i>Map: The Watchtower Upper Floor.</i></p><p><b>Aldous's room: a narrow bed, a table piled with old letters, a chest. And Aldous himself, on the floor beside the bed, eyes open.</b> Aldous is dead; he is not risen (he died praying, and the Warden spared him that). Seeing him: 1 Dread each, Wisdom save (DC 10) to resist.</p><p>On the table: <b>Aldous's journal</b> (give the players the handout, and show them the picture <i>Aldous's Journal</i>) and the tower's old muster roll with Saranth's name.</p><p>Through the door, the <b>beacon platform</b>: the great iron basket, full of wood and old pitch, cold. And the <b>Grave Hound</b>, which has made its den among the barrels. It is Saranth's hound, buried with him; it attacks anyone who comes near the beacon. If the party lit the hall's brazier, the hound's Hunting Howl brings Saranth's attention: he will be waiting, sword drawn, when they go below.</p><p><b>Relighting the beacon</b> takes an action with a torch or flame. When it catches, the whole valley sees it, and so does the crypt: read entry 08's <i>&quot;when the beacon burns&quot;</i>.</p></text>
 			</e07theupperfloorandthebeacon>
 			<e08thecryptofthewatch>
 				<name type="string">08 The Crypt of the Watch</name>
-				<text type="formattedtext"><p><i>Map: The Crypt of the Watch.</i></p><p><b>The stairs come down into a long hall of tombs: six soldiers of the watch in their stone beds, the lids pushed aside. At the end of the hall a door stands open, and beyond it, by the light of two braziers burning blue, an armoured figure walks slowly up and down before an empty coffin.</b></p><p><b>Four Bone Sentinels</b> — Saranth's watch — have climbed from their tombs and stand in the hall; they attack anyone who enters without the <b>badge of the watch</b>. With the badge shown, they stand aside.</p><p><b>Warden Saranth</b> walks his post before his coffin. He speaks, in an old form of the common tongue: <i>&quot;Who comes? Give the word, or give your name to the dark.&quot;</i></p><p><b>Ways it can go:</b> - <b>Fight.</b> Saranth and any sentinels left fight to the end; he is too strong for most 1st-level parties. If destroyed, he rises at the next dusk unless his oath-ring is taken from the tower or his bones burned with oil. - <b>Talk.</b> He is not evil; he is faithful. He asks who relieves him. Showing the badge, telling him truthfully that the realm is gone (Persuasion or Religion DC 15; with Aldous's journal, DC 12), and placing the oath-ring from the altar in his hand convinces him. If the beacon is burning when they do it, they need no roll. - <b><i>When the beacon burns:</i></b> <i>Saranth stops pacing. He turns his face up toward the ceiling, and for a long moment says nothing. &quot;The fire,&quot; he says. &quot;They have come at last.&quot; He lays his sword on the coffin, lies down, and is still. His sentinels fall with him.</i></p><p><b>The treasure niche.</b> Behind the tomb, a secret door (Investigation DC 15, or the tomb's inscription: <i>&quot;The watch keeps what the watch is given&quot;</i>) hides the tower's last pay-chest: <b>210 gc</b>, a silver flask of <b>healing water</b> (heals 2d4+2), and Saranth's sword, <b>Watchkeeper</b> (a longsword +1; once per day its wielder ignores a point of Dread).</p></text>
+				<text type="formattedtext"><p><i>Map: The Crypt of the Watch. Handout: Warden Saranth.</i></p><p><b>The stairs come down into a long hall of tombs: six soldiers of the watch in their stone beds, the lids pushed aside. At the end of the hall a door stands open, and beyond it, by the light of two braziers burning blue, an armoured figure walks slowly up and down before an empty coffin.</b></p><p><b>Four Bone Sentinels</b> — Saranth's watch — have climbed from their tombs and stand in the hall; they attack anyone who enters without the <b>badge of the watch</b>. With the badge shown, they stand aside.</p><p><b>Warden Saranth</b> walks his post before his coffin. He speaks, in an old form of the common tongue: <i>&quot;Who comes? Give the word, or give your name to the dark.&quot;</i></p><p><b>Ways it can go:</b> - <b>Fight.</b> Saranth and any sentinels left fight to the end; he is too strong for most 1st-level parties. If destroyed, he rises at the next dusk unless his oath-ring is taken from the tower or his bones burned with oil. - <b>Talk.</b> He is not evil; he is faithful. He asks who relieves him. Showing the badge, telling him truthfully that the realm is gone (Persuasion or Religion DC 15; with Aldous's journal, DC 12), and placing the oath-ring from the altar in his hand convinces him. If the beacon is burning when they do it, they need no roll. - <b><i>When the beacon burns:</i></b> <i>Saranth stops pacing. He turns his face up toward the ceiling, and for a long moment says nothing. &quot;The fire,&quot; he says. &quot;They have come at last.&quot; He lays his sword on the coffin, lies down, and is still. His sentinels fall with him.</i></p><p><b>The treasure niche.</b> Behind the tomb, a secret door (Investigation DC 15, or the tomb's inscription: <i>&quot;The watch keeps what the watch is given&quot;</i>) hides the tower's last pay-chest: <b>210 gc</b>, a silver flask of <b>healing water</b> (heals 2d4+2), and Saranth's sword, <b>Watchkeeper</b> (a longsword +1; once per day its wielder ignores a point of Dread).</p></text>
 			</e08thecryptofthewatch>
 			<e09aftermath>
 				<name type="string">09 Aftermath</name>
@@ -636,6 +636,62 @@
 					</layers>
 				</image>
 			</thecryptofthewatch>
+		</category>
+		<category name="Handouts">
+			<hollowmereandtheridge>
+				<name type="string">Hollowmere and the Ridge</name>
+				<image>
+					<grid type="string">off</grid>
+					<gridsize type="string">70,70</gridsize>
+					<gridoffset type="string">0,0</gridoffset>
+					<layers>
+						<layer>
+							<name type="string">Hollowmere and the Ridge</name>
+							<id type="string">0</id>
+							<parentid type="string">-1</parentid>
+							<type type="string">image</type>
+							<bitmap type="string">images/handout-hollowmere.webp</bitmap>
+							<matrix type="string">1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1</matrix>
+						</layer>
+					</layers>
+				</image>
+			</hollowmereandtheridge>
+			<aldoussjournal>
+				<name type="string">Aldous's Journal</name>
+				<image>
+					<grid type="string">off</grid>
+					<gridsize type="string">70,70</gridsize>
+					<gridoffset type="string">0,0</gridoffset>
+					<layers>
+						<layer>
+							<name type="string">Aldous's Journal</name>
+							<id type="string">0</id>
+							<parentid type="string">-1</parentid>
+							<type type="string">image</type>
+							<bitmap type="string">images/handout-journal.webp</bitmap>
+							<matrix type="string">1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1</matrix>
+						</layer>
+					</layers>
+				</image>
+			</aldoussjournal>
+			<wardensaranth>
+				<name type="string">Warden Saranth</name>
+				<image>
+					<grid type="string">off</grid>
+					<gridsize type="string">70,70</gridsize>
+					<gridoffset type="string">0,0</gridoffset>
+					<layers>
+						<layer>
+							<name type="string">Warden Saranth</name>
+							<id type="string">0</id>
+							<parentid type="string">-1</parentid>
+							<type type="string">image</type>
+							<bitmap type="string">images/handout-warden.webp</bitmap>
+							<matrix type="string">1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1</matrix>
+						</layer>
+					</layers>
+				</image>
+			</wardensaranth>
 		</category>
 	</image>
 </root>

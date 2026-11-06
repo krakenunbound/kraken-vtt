@@ -2,7 +2,9 @@
 // shape Kraken's d20 engine reads (ac, hp, hd, abilities, actions whose text
 // says "Melee Attack Roll: +4, reach 5 ft. Hit: 5 (1d6 + 2) Slashing damage."
 // so the tracker rolls them).
-import { ids, md } from "../lib/fg.mjs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { creatureArt, creaturePictures, ids, md } from "../lib/fg.mjs";
 import { RULESET } from "./players-handbook.mjs";
 
 const STATS = ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"];
@@ -40,6 +42,7 @@ const creature = ({ name, type, size = "Medium", cr, ac, hd, speed = "30 ft.", s
     traits: ids(traits.map(([trait, body]) => ({ name: trait, desc: body }))),
     actions: ids(actions),
     text: md(text),
+    ...creatureArt(name, "Descending Darkness Bestiary"),
     ...(token ? { token } : {}),
     __category: category,
   };
@@ -297,6 +300,8 @@ export const BESTIARY = {
   ruleset: RULESET,
   author: "Kraken VTT",
   gm: { npc: CREATURES },
+  thumbnail: path.join(path.dirname(fileURLToPath(import.meta.url)), "art", "cover-bestiary.webp"),
+  pictures: creaturePictures(CREATURES, path.join(path.dirname(fileURLToPath(import.meta.url)), "art")),
   reference: [
     {
       name: "The Bestiary",

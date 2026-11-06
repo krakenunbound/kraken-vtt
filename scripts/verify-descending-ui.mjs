@@ -63,6 +63,7 @@ try {
   const ours = ["Descending Darkness Player's Handbook", "Descending Darkness Bestiary", "The Empty Watchtower (Descending Darkness)"].map((title) => shelf.find((item) => item.title === title));
   assert(ours.every(Boolean), `its three books on the shelf: ${shelf.map((item) => item.title).join(", ")}`);
   assert(!shelf.some((item) => /5E SRD|Castles|Player's Handbook v1/.test(item.title)), "no other game's books");
+  assert(ours.every((book) => book.cover), `each book has its cover: ${JSON.stringify(ours.map((book) => book.cover))}`);
   for (const book of ours) await tool("kraken_books", { action: "activate", book: book.id });
   const classes = (await tool("kraken_records_list", { type: "class" })).records ?? (await tool("kraken_records_list", { type: "class" }));
   assert((Array.isArray(classes) ? classes : []).length === 7, `seven classes: ${JSON.stringify(classes).slice(0, 200)}`);
@@ -135,6 +136,12 @@ try {
   const foe = view.find((entry) => entry.name === "Grave Hound");
   const hers = view.find((entry) => entry.recordId === record.id);
   assert(foe.hp === 32 && foe.ac === 13, `the hound's Health and Defense: ${foe.hp}, ${foe.ac}`);
+  // The creature's portrait from its book, in the tracker.
+  await tool("kraken_windows", { action: "open", kind: "combat" });
+  await page.waitForFunction(() => [...document.querySelectorAll(".ct-face img")].some((img) => img.complete && img.naturalWidth > 0), null, { timeout: 15000 });
+  const got = await tool("kraken_record_get", { id: foe.recordId });
+  const art = got.data ?? got.record?.data;
+  assert(/^tokens\/[a-z-]+\.webp@/.test(art?.token ?? "") && /^images\/npc\//.test(art?.picture ?? ""), `its token and portrait: ${art?.token}, ${art?.picture}`);
   await tool("kraken_combat", { action: "update", id: foe.id, patch: { initresult: 15 } });
   await tool("kraken_combat", { action: "update", id: hers.id, patch: { initresult: 5 } });
   await tool("kraken_combat", { action: "damage", id: hers.id, amount: 13 });

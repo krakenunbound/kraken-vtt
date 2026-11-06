@@ -38,6 +38,8 @@
 				<traits>
 				</traits>
 				<text type="formattedtext"><p>Muscle for hire on any station, paid in drink.</p></text>
+				<token type="string">tokens/dock-tough.webp@Apeira Astra Threat Dossier</token>
+				<picture type="string">images/npc/dock-tough.webp@Apeira Astra Threat Dossier</picture>
 			</docktough>
 			<combinesecurity>
 				<name type="string">Combine Security</name>
@@ -79,6 +81,8 @@
 				<traits>
 				</traits>
 				<text type="formattedtext"><p>The Halvard Combine's guards: well paid, badly briefed, and never alone.</p></text>
+				<token type="string">tokens/combine-security.webp@Apeira Astra Threat Dossier</token>
+				<picture type="string">images/npc/combine-security.webp@Apeira Astra Threat Dossier</picture>
 			</combinesecurity>
 			<pirateraider>
 				<name type="string">Pirate Raider</name>
@@ -120,6 +124,8 @@
 				<traits>
 				</traits>
 				<text type="formattedtext"><p>Reach pirates rarely kill a crew that surrenders: dead crews make bad customers.</p></text>
+				<token type="string">tokens/pirate-raider.webp@Apeira Astra Threat Dossier</token>
+				<picture type="string">images/npc/pirate-raider.webp@Apeira Astra Threat Dossier</picture>
 			</pirateraider>
 		</category>
 		<category name="Salvage Rights">
@@ -163,6 +169,8 @@
 				<traits>
 				</traits>
 				<text type="formattedtext"><p>Captain of the salvage tug <i>Pale Gull</i>: charming, ruthless and always fifteen minutes behind you. She would rather deal than shoot, if the deal is good.</p></text>
+				<token type="string">tokens/mags-orrin.webp@Apeira Astra Threat Dossier</token>
+				<picture type="string">images/npc/mags-orrin.webp@Apeira Astra Threat Dossier</picture>
 			</magsorrin>
 			<gullcrewman>
 				<name type="string">Gull Crewman</name>
@@ -204,6 +212,8 @@
 				<traits>
 				</traits>
 				<text type="formattedtext"><p>Mags Orrin's salvagers, in patched vac suits.</p></text>
+				<token type="string">tokens/gull-crewman.webp@Apeira Astra Threat Dossier</token>
+				<picture type="string">images/npc/gull-crewman.webp@Apeira Astra Threat Dossier</picture>
 			</gullcrewman>
 			<holloweyedsurvivor>
 				<name type="string">Hollow-Eyed Survivor</name>
@@ -241,6 +251,8 @@
 				<traits>
 				</traits>
 				<text type="formattedtext"><p>Someone who has been alone on a dead ship too long. Scared, starving, and armed with whatever was to hand.</p></text>
+				<token type="string">tokens/hollow-eyed-survivor.webp@Apeira Astra Threat Dossier</token>
+				<picture type="string">images/npc/hollow-eyed-survivor.webp@Apeira Astra Threat Dossier</picture>
 			</holloweyedsurvivor>
 		</category>
 		<category name="Machines">
@@ -284,6 +296,8 @@
 					</id-00001>
 				</traits>
 				<text type="formattedtext"><p>A boxy drone with magnetic treads and a cutting arm, built to strip wrecks. A damaged control core makes it treat everything as scrap.</p></text>
+				<token type="string">tokens/salvage-drone.webp@Apeira Astra Threat Dossier</token>
+				<picture type="string">images/npc/salvage-drone.webp@Apeira Astra Threat Dossier</picture>
 			</salvagedrone>
 			<sentryturret>
 				<name type="string">Sentry Turret</name>
@@ -325,6 +339,8 @@
 					</id-00001>
 				</traits>
 				<text type="formattedtext"><p>A ceiling-mounted defence gun, guarding a ship's bridge or vault.</p></text>
+				<token type="string">tokens/sentry-turret.webp@Apeira Astra Threat Dossier</token>
+				<picture type="string">images/npc/sentry-turret.webp@Apeira Astra Threat Dossier</picture>
 			</sentryturret>
 		</category>
 		<category name="Creatures">
@@ -368,6 +384,8 @@
 					</id-00001>
 				</traits>
 				<text type="formattedtext"><p>Spiny metal-eaters from the asteroid belts that get into hulls and chew through cabling. Annoying alone; dangerous in a swarm.</p></text>
+				<token type="string">tokens/rust-crawler.webp@Apeira Astra Threat Dossier</token>
+				<picture type="string">images/npc/rust-crawler.webp@Apeira Astra Threat Dossier</picture>
 			</rustcrawler>
 			<voidlamprey>
 				<name type="string">Void Lamprey</name>
@@ -409,6 +427,8 @@
 					</id-00001>
 				</traits>
 				<text type="formattedtext"><p>Three metres of muscle and teeth that drift between asteroids and latch on to anything warm.</p></text>
+				<token type="string">tokens/void-lamprey.webp@Apeira Astra Threat Dossier</token>
+				<picture type="string">images/npc/void-lamprey.webp@Apeira Astra Threat Dossier</picture>
 			</voidlamprey>
 		</category>
 	</npc>

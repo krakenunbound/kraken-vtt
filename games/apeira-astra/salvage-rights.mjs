@@ -4,7 +4,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { ids, imageRecord, link, md, slug } from "../lib/fg.mjs";
+import { handout, ids, imageRecord, link, md, slug } from "../lib/fg.mjs";
 import { RULESET } from "./crew-handbook.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -24,7 +24,9 @@ const STORY = [
 One of the crew, the engineer **Pell Okafor**, woke when her pod failed two weeks ago. She has been alive alone aboard since, scared and nearly starved.
 
 **The problem.** By Accord law (*Crew Handbook: Salvage Law*), the *Kestrel* is a derelict: it belongs to whoever docks first and files. But if anyone aboard is alive, it is a **rescue**: no salvage, just a reward. And **Mags Orrin** of the *Pale Gull* is racing the crew for it.`),
-  story("01 Tessaly Station", `*Read or tell:* **Tessaly Station is ice, scrap and bad coffee, a ring of hab modules around an ice-mining dock at the edge of the Heron belt. In the bar called the Lamp, a tug pilot with a burned hand is telling anyone who will listen about the ship he saw: a freighter adrift in the belt, dark, its name still on the hull. *Kestrel's Due*.**
+  story("01 Tessaly Station", `*Handout: The Lamp, Tessaly Station.*
+
+*Read or tell:* **Tessaly Station is ice, scrap and bad coffee, a ring of hab modules around an ice-mining dock at the edge of the Heron belt. In the bar called the Lamp, a tug pilot with a burned hand is telling anyone who will listen about the ship he saw: a freighter adrift in the belt, dark, its name still on the hull. *Kestrel's Due*.**
 
 The crew can learn (each a task, Standard, with the skill named):
 - **Streetwise**: the *Kestrel* went missing 140 days ago. 40 days past derelict. Its cargo was reactor parts: worth **40,000 credits** to the Combine yard here.
@@ -40,7 +42,7 @@ Run the race as three tasks, each by whoever is best at it:
 3. **Electronics** (Standard): find the *Kestrel* among the rocks by its cold hull. Failure: an hour lost searching.
 
 Count the hours ahead: that is how long the crew has aboard before the *Pale Gull* docks (entry 06). At least one; at most four.`),
-  story("03 Docking and the Airlock", `*Map: Kestrel's Due, Deck 1.*
+  story("03 Docking and the Airlock", `*Map: Kestrel's Due, Deck 1. Handout: Kestrel's Due, Adrift.*
 
 **The Kestrel hangs dark against the stars, tumbling slowly, frost on her hull. No lights, no beacon. Her port airlock answers your docking clamp with a dull clang.**
 
@@ -61,7 +63,7 @@ Whoever forced the locker took painkillers and stims, and left blood on the latc
 The **salvage drone** has wedged itself in the corridor by the lift. It turns its cutting arm on anything that moves. An Electronics task (Hard) at its access panel (which means getting close) shuts it down; so does enough damage.
 
 **The lift** to Deck 2 is dead. Its shaft can be climbed in zero-g (Athletics or Zero-G, Standard).`),
-  story("06 Deck 2: The Bridge and the Pods", `*Map: Kestrel's Due, Deck 2.*
+  story("06 Deck 2: The Bridge and the Pods", `*Map: Kestrel's Due, Deck 2. Handout: The Cryo Bay.*
 
 **The bridge: frost on the consoles, the captain's chair turned to face the door. Through a hatch, the cryo bay: four pods in a row, their lids frosted. Three are still humming faintly. One is open and empty.**
 
@@ -70,7 +72,9 @@ Three of the crew are alive in their pods (the captain and two others). A Medici
 The open pod is **Pell Okafor's**. She is hiding in **engineering**, past the radiation hatch.
 
 **If the crew wants to claim salvage**, they will have to leave three living people to die, or wake them and lie. (They can do that. It is that kind of universe. Ask the players what their characters do, and let the consequences come.)`),
-  story("07 Engineering and Pell", `**Behind the sealed hatch, the reactor glows a sick blue. Radiation warnings strobe silently. Curled behind the coolant pumps, a thin woman in a stained vac suit is pointing a wrench at you. "Don't," she says. "Don't touch the reactor. It's going to go."**
+  story("07 Engineering and Pell", `*Handout: The Reactor.*
+
+**Behind the sealed hatch, the reactor glows a sick blue. Radiation warnings strobe silently. Curled behind the coolant pumps, a thin woman in a stained vac suit is pointing a wrench at you. "Don't," she says. "Don't touch the reactor. It's going to go."**
 
 **Pell Okafor** (*Threat Dossier: Hollow-Eyed Survivor*) has not eaten in four days and has been dosing herself with stims. Persuade (Standard; Hard if anyone draws a weapon) talks her down. She knows: the reactor's coolant is failing, and in **about six hours** it will breach.
 
@@ -98,7 +102,8 @@ export const SALVAGE_RIGHTS = {
   gm: {
     encounter: STORY,
     battle: [battle("Rust Crawlers in the Hold", [["Rust Crawler", 4]]), battle("The Salvage Drone", [["Salvage Drone", 1]]), battle("Pell Okafor", [["Hollow-Eyed Survivor", 1]]), battle("The Pale Gull Boards", [["Mags Orrin", 1], ["Gull Crewman", 3]])],
-    image: [map("Kestrel's Due, Deck 1", "kestrel-deck1"), map("Kestrel's Due, Deck 2", "kestrel-deck2")],
+    image: [map("Kestrel's Due, Deck 1", "kestrel-deck1"), map("Kestrel's Due, Deck 2", "kestrel-deck2"), handout("The Lamp, Tessaly Station", "handout-lamp"), handout("Kestrel's Due, Adrift", "handout-kestrel"), handout("The Cryo Bay", "handout-cryo"), handout("The Reactor", "handout-reactor")],
   },
-  pictures: Object.fromEntries(["kestrel-deck1", "kestrel-deck2"].map((file) => [`images/${file}.webp`, path.join(here, "art", `${file}.webp`)])),
+  thumbnail: path.join(here, "art", "cover-salvage.webp"),
+  pictures: Object.fromEntries(["kestrel-deck1", "kestrel-deck2", "handout-lamp", "handout-kestrel", "handout-cryo", "handout-reactor"].map((file) => [`images/${file}.webp`, path.join(here, "art", `${file}.webp`)])),
 };

@@ -8,7 +8,7 @@
 			</e00aboutthisadventure>
 			<e01tessalystation>
 				<name type="string">01 Tessaly Station</name>
-				<text type="formattedtext"><p><i>Read or tell:</i> <b>Tessaly Station is ice, scrap and bad coffee, a ring of hab modules around an ice-mining dock at the edge of the Heron belt. In the bar called the Lamp, a tug pilot with a burned hand is telling anyone who will listen about the ship he saw: a freighter adrift in the belt, dark, its name still on the hull. <i>Kestrel's Due</i>.</b></p><p>The crew can learn (each a task, Standard, with the skill named): - <b>Streetwise</b>: the <i>Kestrel</i> went missing 140 days ago. 40 days past derelict. Its cargo was reactor parts: worth <b>40,000 credits</b> to the Combine yard here. - <b>Electronics</b> (the station's records): the <i>Kestrel</i> last reported a &quot;minor reactor fault&quot;. Its crew of six included an engineer, Pell Okafor, whose brother runs the station's water plant. - <b>Persuade</b> (the tug pilot, Dovan): the exact position, for a drink and a share. He has also told <b>Mags Orrin</b>, whose tug <i>Pale Gull</i> is fuelling at berth 9.</p><p>The crew needs a ship: their own, or the station's launch <i>Gnat</i> rented for 500 credits (or a Persuade task, Hard, against the dockmaster).</p></text>
+				<text type="formattedtext"><p><i>Handout: The Lamp, Tessaly Station.</i></p><p><i>Read or tell:</i> <b>Tessaly Station is ice, scrap and bad coffee, a ring of hab modules around an ice-mining dock at the edge of the Heron belt. In the bar called the Lamp, a tug pilot with a burned hand is telling anyone who will listen about the ship he saw: a freighter adrift in the belt, dark, its name still on the hull. <i>Kestrel's Due</i>.</b></p><p>The crew can learn (each a task, Standard, with the skill named): - <b>Streetwise</b>: the <i>Kestrel</i> went missing 140 days ago. 40 days past derelict. Its cargo was reactor parts: worth <b>40,000 credits</b> to the Combine yard here. - <b>Electronics</b> (the station's records): the <i>Kestrel</i> last reported a &quot;minor reactor fault&quot;. Its crew of six included an engineer, Pell Okafor, whose brother runs the station's water plant. - <b>Persuade</b> (the tug pilot, Dovan): the exact position, for a drink and a share. He has also told <b>Mags Orrin</b>, whose tug <i>Pale Gull</i> is fuelling at berth 9.</p><p>The crew needs a ship: their own, or the station's launch <i>Gnat</i> rented for 500 credits (or a Persuade task, Hard, against the dockmaster).</p></text>
 			</e01tessalystation>
 			<e02therace>
 				<name type="string">02 The Race</name>
@@ -16,7 +16,7 @@
 			</e02therace>
 			<e03dockingandtheairlock>
 				<name type="string">03 Docking and the Airlock</name>
-				<text type="formattedtext"><p><i>Map: Kestrel's Due, Deck 1.</i></p><p><b>The Kestrel hangs dark against the stars, tumbling slowly, frost on her hull. No lights, no beacon. Her port airlock answers your docking clamp with a dull clang.</b></p><p>The airlock is on manual: a Mechanics task (Standard) cycles it; a Toolkit gives a Boon. Inside, the air is thin and cold (breather masks advised) and there is <b>no gravity</b>: Zero-G tasks (<i>Crew Handbook: Vacuum and Hazards</i>) unless the crew wears mag boots.</p><p>The airlock's panel still works on battery. An Electronics task (Standard) reads the ship's last log: <i>&quot;Reactor fault, engine room sealed. Crew to cryo. Waiting for a tow. — Capt. Ines Vale.&quot;</i> The crew was alive when the log was written.</p></text>
+				<text type="formattedtext"><p><i>Map: Kestrel's Due, Deck 1. Handout: Kestrel's Due, Adrift.</i></p><p><b>The Kestrel hangs dark against the stars, tumbling slowly, frost on her hull. No lights, no beacon. Her port airlock answers your docking clamp with a dull clang.</b></p><p>The airlock is on manual: a Mechanics task (Standard) cycles it; a Toolkit gives a Boon. Inside, the air is thin and cold (breather masks advised) and there is <b>no gravity</b>: Zero-G tasks (<i>Crew Handbook: Vacuum and Hazards</i>) unless the crew wears mag boots.</p><p>The airlock's panel still works on battery. An Electronics task (Standard) reads the ship's last log: <i>&quot;Reactor fault, engine room sealed. Crew to cryo. Waiting for a tow. — Capt. Ines Vale.&quot;</i> The crew was alive when the log was written.</p></text>
 			</e03dockingandtheairlock>
 			<e04thecargohold>
 				<name type="string">04 The Cargo Hold</name>
@@ -28,11 +28,11 @@
 			</e05thecrewdeck>
 			<e06deck2thebridgeandthepods>
 				<name type="string">06 Deck 2: The Bridge and the Pods</name>
-				<text type="formattedtext"><p><i>Map: Kestrel's Due, Deck 2.</i></p><p><b>The bridge: frost on the consoles, the captain's chair turned to face the door. Through a hatch, the cryo bay: four pods in a row, their lids frosted. Three are still humming faintly. One is open and empty.</b></p><p>Three of the crew are alive in their pods (the captain and two others). A Medicine task (Standard) says the pods will last another two weeks on battery; an Engineering task (Standard) at the bridge restores power to them for good.</p><p>The open pod is <b>Pell Okafor's</b>. She is hiding in <b>engineering</b>, past the radiation hatch.</p><p><b>If the crew wants to claim salvage</b>, they will have to leave three living people to die, or wake them and lie. (They can do that. It is that kind of universe. Ask the players what their characters do, and let the consequences come.)</p></text>
+				<text type="formattedtext"><p><i>Map: Kestrel's Due, Deck 2. Handout: The Cryo Bay.</i></p><p><b>The bridge: frost on the consoles, the captain's chair turned to face the door. Through a hatch, the cryo bay: four pods in a row, their lids frosted. Three are still humming faintly. One is open and empty.</b></p><p>Three of the crew are alive in their pods (the captain and two others). A Medicine task (Standard) says the pods will last another two weeks on battery; an Engineering task (Standard) at the bridge restores power to them for good.</p><p>The open pod is <b>Pell Okafor's</b>. She is hiding in <b>engineering</b>, past the radiation hatch.</p><p><b>If the crew wants to claim salvage</b>, they will have to leave three living people to die, or wake them and lie. (They can do that. It is that kind of universe. Ask the players what their characters do, and let the consequences come.)</p></text>
 			</e06deck2thebridgeandthepods>
 			<e07engineeringandpell>
 				<name type="string">07 Engineering and Pell</name>
-				<text type="formattedtext"><p><b>Behind the sealed hatch, the reactor glows a sick blue. Radiation warnings strobe silently. Curled behind the coolant pumps, a thin woman in a stained vac suit is pointing a wrench at you. &quot;Don't,&quot; she says. &quot;Don't touch the reactor. It's going to go.&quot;</b></p><p><b>Pell Okafor</b> (<i>Threat Dossier: Hollow-Eyed Survivor</i>) has not eaten in four days and has been dosing herself with stims. Persuade (Standard; Hard if anyone draws a weapon) talks her down. She knows: the reactor's coolant is failing, and in <b>about six hours</b> it will breach.</p><p><b>The reactor:</b> standing beside it costs a Grit check each turn (1d6 damage on a failure). Fixing it is an extended job: three Engineering tasks (Hard), each taking ten minutes; a Toolkit gives a Boon, and Pell helping gives another. Three successes and it is safe. Three failures and it breaches: everyone aboard has ten minutes to get off.</p></text>
+				<text type="formattedtext"><p><i>Handout: The Reactor.</i></p><p><b>Behind the sealed hatch, the reactor glows a sick blue. Radiation warnings strobe silently. Curled behind the coolant pumps, a thin woman in a stained vac suit is pointing a wrench at you. &quot;Don't,&quot; she says. &quot;Don't touch the reactor. It's going to go.&quot;</b></p><p><b>Pell Okafor</b> (<i>Threat Dossier: Hollow-Eyed Survivor</i>) has not eaten in four days and has been dosing herself with stims. Persuade (Standard; Hard if anyone draws a weapon) talks her down. She knows: the reactor's coolant is failing, and in <b>about six hours</b> it will breach.</p><p><b>The reactor:</b> standing beside it costs a Grit check each turn (1d6 damage on a failure). Fixing it is an extended job: three Engineering tasks (Hard), each taking ten minutes; a Toolkit gives a Boon, and Pell helping gives another. Three successes and it is safe. Three failures and it breaches: everyone aboard has ten minutes to get off.</p></text>
 			</e07engineeringandpell>
 			<e08thepalegull>
 				<name type="string">08 The Pale Gull</name>
@@ -604,6 +604,80 @@
 					</layers>
 				</image>
 			</kestrelsduedeck2>
+		</category>
+		<category name="Handouts">
+			<thelamptessalystation>
+				<name type="string">The Lamp, Tessaly Station</name>
+				<image>
+					<grid type="string">off</grid>
+					<gridsize type="string">70,70</gridsize>
+					<gridoffset type="string">0,0</gridoffset>
+					<layers>
+						<layer>
+							<name type="string">The Lamp, Tessaly Station</name>
+							<id type="string">0</id>
+							<parentid type="string">-1</parentid>
+							<type type="string">image</type>
+							<bitmap type="string">images/handout-lamp.webp</bitmap>
+							<matrix type="string">1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1</matrix>
+						</layer>
+					</layers>
+				</image>
+			</thelamptessalystation>
+			<kestrelsdueadrift>
+				<name type="string">Kestrel's Due, Adrift</name>
+				<image>
+					<grid type="string">off</grid>
+					<gridsize type="string">70,70</gridsize>
+					<gridoffset type="string">0,0</gridoffset>
+					<layers>
+						<layer>
+							<name type="string">Kestrel's Due, Adrift</name>
+							<id type="string">0</id>
+							<parentid type="string">-1</parentid>
+							<type type="string">image</type>
+							<bitmap type="string">images/handout-kestrel.webp</bitmap>
+							<matrix type="string">1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1</matrix>
+						</layer>
+					</layers>
+				</image>
+			</kestrelsdueadrift>
+			<thecryobay>
+				<name type="string">The Cryo Bay</name>
+				<image>
+					<grid type="string">off</grid>
+					<gridsize type="string">70,70</gridsize>
+					<gridoffset type="string">0,0</gridoffset>
+					<layers>
+						<layer>
+							<name type="string">The Cryo Bay</name>
+							<id type="string">0</id>
+							<parentid type="string">-1</parentid>
+							<type type="string">image</type>
+							<bitmap type="string">images/handout-cryo.webp</bitmap>
+							<matrix type="string">1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1</matrix>
+						</layer>
+					</layers>
+				</image>
+			</thecryobay>
+			<thereactor>
+				<name type="string">The Reactor</name>
+				<image>
+					<grid type="string">off</grid>
+					<gridsize type="string">70,70</gridsize>
+					<gridoffset type="string">0,0</gridoffset>
+					<layers>
+						<layer>
+							<name type="string">The Reactor</name>
+							<id type="string">0</id>
+							<parentid type="string">-1</parentid>
+							<type type="string">image</type>
+							<bitmap type="string">images/handout-reactor.webp</bitmap>
+							<matrix type="string">1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1</matrix>
+						</layer>
+					</layers>
+				</image>
+			</thereactor>
 		</category>
 	</image>
 </root>
