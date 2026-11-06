@@ -1,0 +1,19 @@
+{ "cell": 70, "cols": 28, "rows": 16, "ground": "space", "seed": 63, "autoSolid": true, "solidTex": "hull", "wallColor": [70, 78, 86],
+  "floors": [
+    { "x": 2, "y": 5, "w": 5, "h": 6, "tex": "metal" },
+    { "x": 7, "y": 7, "w": 1, "h": 2, "tex": "grate" },
+    { "x": 8, "y": 6, "w": 12, "h": 4, "tex": "grate" },
+    { "x": 9, "y": 2, "w": 5, "h": 3, "tex": "metal" }, { "x": 11, "y": 5, "w": 1, "h": 1, "tex": "metal" },
+    { "x": 9, "y": 11, "w": 5, "h": 3, "tex": "metal" }, { "x": 11, "y": 10, "w": 1, "h": 1, "tex": "metal" },
+    { "x": 20, "y": 7, "w": 1, "h": 2, "tex": "grate" },
+    { "x": 21, "y": 4, "w": 5, "h": 8, "tex": "metal" },
+    { "x": 16, "y": 2, "w": 3, "h": 3, "tex": "grate" }, { "x": 17, "y": 5, "w": 1, "h": 1, "tex": "grate" }
+  ],
+  "doors": [ { "x": 7, "y": 7, "side": "w" }, { "x": 7, "y": 8, "side": "w" }, { "x": 11, "y": 5, "side": "n" }, { "x": 11, "y": 10, "side": "s" }, { "x": 20, "y": 7, "side": "e" }, { "x": 20, "y": 8, "side": "e" }, { "x": 17, "y": 5, "side": "n" } ],
+  "features": [
+    { "kind": "console", "x": 2, "y": 5, "w": 2, "h": 1 }, { "kind": "console", "x": 2, "y": 9, "w": 2, "h": 1 }, { "kind": "console", "x": 2, "y": 7, "w": 1, "h": 2 }, { "kind": "lamp", "x": 5, "y": 7 },
+    { "kind": "cryopod", "x": 9, "y": 2, "w": 1, "h": 2 }, { "kind": "cryopod", "x": 10, "y": 2, "w": 1, "h": 2 }, { "kind": "cryopod", "x": 12, "y": 2, "w": 1, "h": 2 }, { "kind": "cryopod", "x": 13, "y": 2, "w": 1, "h": 2 },
+    { "kind": "locker", "x": 9, "y": 12, "w": 1, "h": 2 }, { "kind": "table", "x": 11, "y": 12, "w": 2, "h": 1 }, { "kind": "bones", "x": 12, "y": 13 },
+    { "kind": "reactor", "x": 22, "y": 6, "w": 3, "h": 3 }, { "kind": "console", "x": 21, "y": 4, "w": 2, "h": 1 }, { "kind": "barrel", "x": 25, "y": 10 }, { "kind": "rubble", "x": 24, "y": 10, "w": 1, "h": 1 },
+    { "kind": "stairs", "x": 16, "y": 2, "w": 2, "h": 2, "dir": "w" }, { "kind": "rubble", "x": 14, "y": 7, "w": 2, "h": 1 }, { "kind": "blood", "x": 18, "y": 8 }
+  ] }

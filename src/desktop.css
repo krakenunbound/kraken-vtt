@@ -1379,3 +1379,10 @@ textarea.cc-field.tall { min-height: 220px; }
 .five-dread-track button { width: 18px; height: 18px; padding: 0; border-radius: 50%; border: 1px solid #6b3a26; background: #1b1416; }
 .five-dread-track button.on { background: radial-gradient(circle at 40% 35%, #b14a3a, #4a1410); border-color: #c0392b; box-shadow: 0 0 6px rgba(192, 57, 43, 0.6); }
 .five-dread-track button:nth-child(n + 3).on { box-shadow: 0 0 9px rgba(192, 57, 43, 0.9); }
+
+/* Apeira Astra: a skill row is its level, its name and characteristic, its roll. */
+.sheet-astra .five-skill { display: grid; grid-template-columns: 2.4rem 1fr auto; align-items: center; gap: 8px; }
+.sheet-astra .five-skill .cc-num { text-align: center; }
+.sheet-astra .five-skill small.hint { margin-left: 6px; }
+.sheet-astra .astra-stats .five-ability { grid-template-columns: 1fr 3.5rem 3rem; }
+.sheet-astra .astra-stats .five-ability-head { grid-template-columns: 1fr 3.5rem 3rem; }

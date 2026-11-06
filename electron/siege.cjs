@@ -1,6 +1,7 @@
 const path = require("path");
 const { pathToFileURL } = require("url");
 const dnd5e = require("./dnd5e.cjs");
+const astra = require("./astra.cjs");
 
 // Host side of the SIEGE engine (shared/siege, ES modules shared with the
 // app window): the game library from the campaign's imported records, and
@@ -27,6 +28,8 @@ const ATTRIBUTES = ["strength", "dexterity", "constitution", "intelligence", "wi
 async function siegeCheck(table, record, { attribute, cl = 0, bonus = 0, addLevel, label, kind, skill, dc, advantage } = {}, from) {
   // A 5E character: its ruleset's check, save or skill (dc, advantage).
   if (dnd5e.is5e(record)) return dnd5e.check5e(table, record, { kind: kind ?? (/save/i.test(String(label ?? "")) ? "save" : "check"), attribute, skill, dc: dc ?? cl, bonus, advantage, label: kind ? label : undefined }, from);
+  // Apeira Astra: a task (2d6 + skill + characteristic against 8); dc is the difficulty's shift, advantage boon/bane.
+  if (astra.isAstra(record)) return astra.taskAstra(table, record, { skill, attribute, difficulty: Number(bonus) || 0, boon: advantage, label: kind ? label : undefined }, from);
   if (!ATTRIBUTES.includes(attribute)) throw new Error("Pick an attribute.");
   const { engine } = await siege();
   const game = siegeLibrary(table.records).game;
@@ -50,6 +53,7 @@ async function siegeCheck(table, record, { attribute, cl = 0, bonus = 0, addLeve
 // says so.
 async function levelUp(table, record, packageKey, from) {
   if (dnd5e.is5e(record)) return dnd5e.levelUp5e(table, record, from);
+  if (astra.isAstra(record)) throw new Error("Apeira Astra has no levels: spend experience on a skill or a characteristic (Improve).");
   const { engine } = await siege();
   const game = siegeLibrary(table.records).game;
   const found = engine.levelUpPackage(record.data, packageKey);
@@ -143,6 +147,7 @@ function setPath(data, path, value) {
 }
 async function editCharacter(table, record, changes, seat) {
   if (dnd5e.is5e(record)) return dnd5e.edit5e(table, record, changes, seat);
+  if (astra.isAstra(record)) return astra.editAstra(table, record, changes, seat);
   if (seat.role !== "dm" && record.owner !== seat.name) throw new Error("You can only change your own character.");
   if (!Array.isArray(changes) || changes.length === 0) throw new Error("What changes?");
   const { engine } = await siege();
@@ -210,6 +215,19 @@ async function exportCharacter(record, format = "kraken") {
 async function dropOnCharacter(table, record, source, from) {
   if (!source) throw new Error("Nothing to drop.");
   const who = from || record.name;
+  if (astra.isAstra(record)) {
+    if (source.type !== "item") throw new Error("An Apeira Astra sheet takes gear; Origins and Paths come with the character wizard.");
+    const data = structuredClone(record.data);
+    const list = (data.inventorylist = data.inventorylist ?? {});
+    const { fgPath: _path, ...copy } = source.data ?? {};
+    const rules = await astra.rulesAstra();
+    const key = `id-${String(Object.keys(list).length + 1).padStart(5, "0")}`;
+    list[key] = { ...copy, name: source.name, count: 1, carried: rules.isArmour(copy) || rules.isWeapon(copy) ? 2 : 1 };
+    const updated = table.records.update(record.id, { data: rules.derive(data) }, table.seat, { replace: true });
+    const summary = `${record.name} gets ${source.name}.`;
+    table.say(summary, who, record.visibility === "gm");
+    return { record: updated, added: "item", summary };
+  }
   if (dnd5e.is5e(record)) {
     if (source.type !== "item") throw new Error("A 5E sheet takes items; classes, species and spells come with the Character Wizard and level up.");
     const data = structuredClone(record.data);

@@ -1,0 +1,920 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root version="4.6" release="1">
+	<race>
+		<coreborn>
+			<name type="string">Coreborn</name>
+			<skills type="string">Persuade 0, Electronics 0, Science 0</skills>
+			<text type="formattedtext"><p>Raised on one of the old, crowded worlds of the Core: schools, networks and manners.</p></text>
+			<traits>
+				<id-00001>
+					<name type="string">Credentials</name>
+					<text type="formattedtext"><p>You have a citizen's papers that open doors, and a family name someone recognises.</p></text>
+				</id-00001>
+			</traits>
+		</coreborn>
+		<spacer>
+			<name type="string">Spacer</name>
+			<skills type="string">Zero-G 1, Pilot 0</skills>
+			<text type="formattedtext"><p>Born aboard a ship or a station, you learned to walk in a corridor and swim in the air.</p></text>
+			<traits>
+				<id-00001>
+					<name type="string">Hull Sense</name>
+					<text type="formattedtext"><p>You feel when a ship is wrong: a Boon on tasks to notice a failing system or a breach.</p></text>
+				</id-00001>
+			</traits>
+		</spacer>
+		<frontier>
+			<name type="string">Frontier</name>
+			<skills type="string">Survival 1, Drive 0, Recon 0</skills>
+			<text type="formattedtext"><p>From a hard world at the edge of the Reach, where help is a long way off.</p></text>
+			<traits>
+				<id-00001>
+					<name type="string">Hardened</name>
+					<text type="formattedtext"><p>Once per session, ignore being Down for one turn.</p></text>
+				</id-00001>
+			</traits>
+		</frontier>
+		<undercity>
+			<name type="string">Undercity</name>
+			<skills type="string">Streetwise 1, Stealth 0, Melee 0</skills>
+			<text type="formattedtext"><p>From the levels beneath a city, where the light is borrowed and everything is for sale.</p></text>
+			<traits>
+				<id-00001>
+					<name type="string">Know a Guy</name>
+					<text type="formattedtext"><p>On any station or city, a Streetwise task (Standard) finds someone who can get what you need, for a price.</p></text>
+				</id-00001>
+			</traits>
+		</undercity>
+		<belter>
+			<name type="string">Belter</name>
+			<skills type="string">Mechanics 1, Zero-G 0, Engineering 0</skills>
+			<text type="formattedtext"><p>Raised in the asteroid habitats, where everything breaks and you fix it or die.</p></text>
+			<traits>
+				<id-00001>
+					<name type="string">Make Do</name>
+					<text type="formattedtext"><p>No Bane for working without the right tools.</p></text>
+				</id-00001>
+			</traits>
+		</belter>
+	</race>
+	<class>
+		<fleet>
+			<name type="string">Fleet</name>
+			<signature type="string">Pilot</signature>
+			<skills type="string">Pilot, Astrogation, Gunnery, Electronics, Leadership, Tactics, Zero-G</skills>
+			<credits type="number">1500</credits>
+			<startingequipmentlist>
+				<id-00001>
+					<items>
+						<id-00001>
+							<name type="string">Flight Jacket</name>
+							<type type="string">Armour</type>
+							<subtype type="string">Armour</subtype>
+							<cost type="string">100 cr</cost>
+							<protection type="number">1</protection>
+							<description type="formattedtext"><p>Padded and lined: a little protection, a lot of pockets.</p></description>
+							<count type="number">1</count>
+						</id-00001>
+						<id-00002>
+							<name type="string">Snub Pistol</name>
+							<type type="string">Weapon</type>
+							<subtype type="string">Pistol</subtype>
+							<cost type="string">150 cr</cost>
+							<damage type="string">2d6</damage>
+							<skill type="string">Firearms</skill>
+							<range type="string">10 m</range>
+							<description type="formattedtext"><p>Low-velocity rounds that will not hole a hull. The spacer's sidearm.</p></description>
+							<count type="number">1</count>
+						</id-00002>
+						<id-00003>
+							<name type="string">Comm Bead</name>
+							<type type="string">Gear</type>
+							<subtype type="string">Equipment</subtype>
+							<cost type="string">150 cr</cost>
+							<description type="formattedtext"><p>An earpiece radio with a 10 km range, or ship-to-crew anywhere within a ship.</p></description>
+							<count type="number">1</count>
+						</id-00003>
+						<id-00004>
+							<name type="string">Data Slate</name>
+							<type type="string">Gear</type>
+							<subtype type="string">Equipment</subtype>
+							<cost type="string">200 cr</cost>
+							<description type="formattedtext"><p>A tablet for maps, records and hacking tools: needed for Electronics tasks on a system.</p></description>
+							<count type="number">1</count>
+						</id-00004>
+					</items>
+				</id-00001>
+			</startingequipmentlist>
+			<startingequipment type="string">Flight Jacket, Snub Pistol, Comm Bead, Data Slate</startingequipment>
+			<text type="formattedtext"><p>You served aboard a warship or a patrol cutter: watch rotations, drills, and the long silence of a skein transit.</p><p><b>Signature skill:</b> Pilot 1. <b>Choose from:</b> Pilot, Astrogation, Gunnery, Electronics, Leadership, Tactics, Zero-G. <b>Starting credits:</b> 1500.</p><p><i>Former ranks:</i> rating, ensign, lieutenant.</p></text>
+			<hp>
+				<hitdice>
+					<text type="string"></text>
+				</hitdice>
+			</hp>
+			<proficiencies>
+			</proficiencies>
+		</fleet>
+		<marine>
+			<name type="string">Marine</name>
+			<signature type="string">Firearms</signature>
+			<skills type="string">Firearms, Melee, Athletics, Heavy Weapons, Tactics, Recon, Zero-G, Leadership</skills>
+			<credits type="number">1000</credits>
+			<startingequipmentlist>
+				<id-00001>
+					<items>
+						<id-00001>
+							<name type="string">Flak Vest</name>
+							<type type="string">Armour</type>
+							<subtype type="string">Armour</subtype>
+							<cost type="string">400 cr</cost>
+							<protection type="number">5</protection>
+							<description type="formattedtext"><p>Heavy plates front and back. Obvious.</p></description>
+							<count type="number">1</count>
+						</id-00001>
+						<id-00002>
+							<name type="string">Carbine</name>
+							<type type="string">Weapon</type>
+							<subtype type="string">Long Gun</subtype>
+							<cost type="string">400 cr</cost>
+							<damage type="string">3d6</damage>
+							<skill type="string">Firearms</skill>
+							<range type="string">100 m</range>
+							<description type="formattedtext"><p>A short rifle that fits through a hatch.</p></description>
+							<count type="number">1</count>
+						</id-00002>
+						<id-00003>
+							<name type="string">Knife</name>
+							<type type="string">Weapon</type>
+							<subtype type="string">Melee</subtype>
+							<cost type="string">20 cr</cost>
+							<damage type="string">1d6</damage>
+							<skill type="string">Melee</skill>
+							<range type="string">Melee</range>
+							<description type="formattedtext"><p>A utility blade. Everyone carries one; few admit they have used it.</p></description>
+							<count type="number">1</count>
+						</id-00003>
+						<id-00004>
+							<name type="string">Medkit</name>
+							<type type="string">Gear</type>
+							<subtype type="string">Equipment</subtype>
+							<cost type="string">300 cr</cost>
+							<description type="formattedtext"><p>Dressings, stims and a diagnostic cuff: +2 to Medicine tasks. A Medicine task (Standard) with it restores 1d6 Stamina plus the Effect, once per wound.</p></description>
+							<count type="number">1</count>
+						</id-00004>
+					</items>
+				</id-00001>
+			</startingequipmentlist>
+			<startingequipment type="string">Flak Vest, Carbine, Knife, Medkit</startingequipment>
+			<text type="formattedtext"><p>You were the one sent through the airlock first. Boarding actions, station security, and things you do not talk about.</p><p><b>Signature skill:</b> Firearms 1. <b>Choose from:</b> Firearms, Melee, Athletics, Heavy Weapons, Tactics, Recon, Zero-G, Leadership. <b>Starting credits:</b> 1000.</p><p><i>Former ranks:</i> trooper, corporal, sergeant.</p></text>
+			<hp>
+				<hitdice>
+					<text type="string"></text>
+				</hitdice>
+			</hp>
+			<proficiencies>
+			</proficiencies>
+		</marine>
+		<scout>
+			<name type="string">Scout</name>
+			<signature type="string">Recon</signature>
+			<skills type="string">Recon, Pilot, Survival, Astrogation, Stealth, Drive, Science, Mechanics</skills>
+			<credits type="number">1200</credits>
+			<startingequipmentlist>
+				<id-00001>
+					<items>
+						<id-00001>
+							<name type="string">Flight Jacket</name>
+							<type type="string">Armour</type>
+							<subtype type="string">Armour</subtype>
+							<cost type="string">100 cr</cost>
+							<protection type="number">1</protection>
+							<description type="formattedtext"><p>Padded and lined: a little protection, a lot of pockets.</p></description>
+							<count type="number">1</count>
+						</id-00001>
+						<id-00002>
+							<name type="string">Service Pistol</name>
+							<type type="string">Weapon</type>
+							<subtype type="string">Pistol</subtype>
+							<cost type="string">250 cr</cost>
+							<damage type="string">3d6</damage>
+							<skill type="string">Firearms</skill>
+							<range type="string">20 m</range>
+							<description type="formattedtext"><p>A reliable slug-thrower. Do not fire it at the windows.</p></description>
+							<count type="number">1</count>
+						</id-00002>
+						<id-00003>
+							<name type="string">Hand Scanner</name>
+							<type type="string">Gear</type>
+							<subtype type="string">Equipment</subtype>
+							<cost type="string">900 cr</cost>
+							<description type="formattedtext"><p>Reads radiation, atmosphere, life signs and power within 50 m: +2 to Recon in the dark or behind bulkheads.</p></description>
+							<count type="number">1</count>
+						</id-00003>
+						<id-00004>
+							<name type="string">Breather Mask</name>
+							<type type="string">Gear</type>
+							<subtype type="string">Equipment</subtype>
+							<cost type="string">100 cr</cost>
+							<description type="formattedtext"><p>Filters a thin or tainted atmosphere for 12 hours.</p></description>
+							<count type="number">1</count>
+						</id-00004>
+					</items>
+				</id-00001>
+			</startingequipmentlist>
+			<startingequipment type="string">Flight Jacket, Service Pistol, Hand Scanner, Breather Mask</startingequipment>
+			<text type="formattedtext"><p>You charted the empty places: survey runs, first landings, months alone with the ship's voice.</p><p><b>Signature skill:</b> Recon 1. <b>Choose from:</b> Recon, Pilot, Survival, Astrogation, Stealth, Drive, Science, Mechanics. <b>Starting credits:</b> 1200.</p><p><i>Former ranks:</i> surveyor, pathfinder.</p></text>
+			<hp>
+				<hitdice>
+					<text type="string"></text>
+				</hitdice>
+			</hp>
+			<proficiencies>
+			</proficiencies>
+		</scout>
+		<merchant>
+			<name type="string">Merchant</name>
+			<signature type="string">Trade</signature>
+			<skills type="string">Trade, Persuade, Deceive, Streetwise, Pilot, Electronics, Leadership</skills>
+			<credits type="number">3000</credits>
+			<startingequipmentlist>
+				<id-00001>
+					<items>
+						<id-00001>
+							<name type="string">Mesh Undersuit</name>
+							<type type="string">Armour</type>
+							<subtype type="string">Armour</subtype>
+							<cost type="string">500 cr</cost>
+							<protection type="number">3</protection>
+							<description type="formattedtext"><p>Woven ballistic fibre, worn under clothing.</p></description>
+							<count type="number">1</count>
+						</id-00001>
+						<id-00002>
+							<name type="string">Snub Pistol</name>
+							<type type="string">Weapon</type>
+							<subtype type="string">Pistol</subtype>
+							<cost type="string">150 cr</cost>
+							<damage type="string">2d6</damage>
+							<skill type="string">Firearms</skill>
+							<range type="string">10 m</range>
+							<description type="formattedtext"><p>Low-velocity rounds that will not hole a hull. The spacer's sidearm.</p></description>
+							<count type="number">1</count>
+						</id-00002>
+						<id-00003>
+							<name type="string">Comm Bead</name>
+							<type type="string">Gear</type>
+							<subtype type="string">Equipment</subtype>
+							<cost type="string">150 cr</cost>
+							<description type="formattedtext"><p>An earpiece radio with a 10 km range, or ship-to-crew anywhere within a ship.</p></description>
+							<count type="number">1</count>
+						</id-00003>
+						<id-00004>
+							<name type="string">Data Slate</name>
+							<type type="string">Gear</type>
+							<subtype type="string">Equipment</subtype>
+							<cost type="string">200 cr</cost>
+							<description type="formattedtext"><p>A tablet for maps, records and hacking tools: needed for Electronics tasks on a system.</p></description>
+							<count type="number">1</count>
+						</id-00004>
+					</items>
+				</id-00001>
+			</startingequipmentlist>
+			<startingequipment type="string">Mesh Undersuit, Snub Pistol, Comm Bead, Data Slate</startingequipment>
+			<text type="formattedtext"><p>You bought low and sold far away: cargo manifests, port fees and handshakes in bad bars.</p><p><b>Signature skill:</b> Trade 1. <b>Choose from:</b> Trade, Persuade, Deceive, Streetwise, Pilot, Electronics, Leadership. <b>Starting credits:</b> 3000.</p><p><i>Former ranks:</i> purser, factor, master.</p></text>
+			<hp>
+				<hitdice>
+					<text type="string"></text>
+				</hitdice>
+			</hp>
+			<proficiencies>
+			</proficiencies>
+		</merchant>
+		<engineer>
+			<name type="string">Engineer</name>
+			<signature type="string">Engineering</signature>
+			<skills type="string">Engineering, Mechanics, Electronics, Zero-G, Science, Pilot, Gunnery</skills>
+			<credits type="number">1200</credits>
+			<startingequipmentlist>
+				<id-00001>
+					<items>
+						<id-00001>
+							<name type="string">Vac Suit</name>
+							<type type="string">Armour</type>
+							<subtype type="string">Armour</subtype>
+							<cost type="string">1500 cr</cost>
+							<protection type="number">4</protection>
+							<description type="formattedtext"><p>A sealed suit with 6 hours of air. In vacuum without one: 1d6 damage a turn.</p></description>
+							<count type="number">1</count>
+						</id-00001>
+						<id-00002>
+							<name type="string">Toolkit</name>
+							<type type="string">Gear</type>
+							<subtype type="string">Equipment</subtype>
+							<cost type="string">400 cr</cost>
+							<description type="formattedtext"><p>Spanners, drivers, a multimeter and a cutting torch: needed for most Mechanics and Engineering tasks.</p></description>
+							<count type="number">1</count>
+						</id-00002>
+						<id-00003>
+							<name type="string">Cutting Laser</name>
+							<type type="string">Weapon</type>
+							<subtype type="string">Tool</subtype>
+							<cost type="string">600 cr</cost>
+							<damage type="string">2d6</damage>
+							<skill type="string">Melee</skill>
+							<range type="string">Melee</range>
+							<description type="formattedtext"><p>A hull-cutting tool. As a weapon it is clumsy; through a bulkhead it is a door.</p></description>
+							<count type="number">1</count>
+						</id-00003>
+						<id-00004>
+							<name type="string">Mag Boots</name>
+							<type type="string">Gear</type>
+							<subtype type="string">Equipment</subtype>
+							<cost type="string">250 cr</cost>
+							<description type="formattedtext"><p>Keep your feet on the deck in zero gravity: no Zero-G task to stand, fight or walk.</p></description>
+							<count type="number">1</count>
+						</id-00004>
+					</items>
+				</id-00001>
+			</startingequipmentlist>
+			<startingequipment type="string">Vac Suit, Toolkit, Cutting Laser, Mag Boots</startingequipment>
+			<text type="formattedtext"><p>You kept the drive lit and the air flowing. You know what every noise a ship makes means.</p><p><b>Signature skill:</b> Engineering 1. <b>Choose from:</b> Engineering, Mechanics, Electronics, Zero-G, Science, Pilot, Gunnery. <b>Starting credits:</b> 1200.</p><p><i>Former ranks:</i> mate, chief.</p></text>
+			<hp>
+				<hitdice>
+					<text type="string"></text>
+				</hitdice>
+			</hp>
+			<proficiencies>
+			</proficiencies>
+		</engineer>
+		<medic>
+			<name type="string">Medic</name>
+			<signature type="string">Medicine</signature>
+			<skills type="string">Medicine, Science, Electronics, Persuade, Survival, Recon</skills>
+			<credits type="number">1500</credits>
+			<startingequipmentlist>
+				<id-00001>
+					<items>
+						<id-00001>
+							<name type="string">Flight Jacket</name>
+							<type type="string">Armour</type>
+							<subtype type="string">Armour</subtype>
+							<cost type="string">100 cr</cost>
+							<protection type="number">1</protection>
+							<description type="formattedtext"><p>Padded and lined: a little protection, a lot of pockets.</p></description>
+							<count type="number">1</count>
+						</id-00001>
+						<id-00002>
+							<name type="string">Snub Pistol</name>
+							<type type="string">Weapon</type>
+							<subtype type="string">Pistol</subtype>
+							<cost type="string">150 cr</cost>
+							<damage type="string">2d6</damage>
+							<skill type="string">Firearms</skill>
+							<range type="string">10 m</range>
+							<description type="formattedtext"><p>Low-velocity rounds that will not hole a hull. The spacer's sidearm.</p></description>
+							<count type="number">1</count>
+						</id-00002>
+						<id-00003>
+							<name type="string">Medkit</name>
+							<type type="string">Gear</type>
+							<subtype type="string">Equipment</subtype>
+							<cost type="string">300 cr</cost>
+							<description type="formattedtext"><p>Dressings, stims and a diagnostic cuff: +2 to Medicine tasks. A Medicine task (Standard) with it restores 1d6 Stamina plus the Effect, once per wound.</p></description>
+							<count type="number">1</count>
+						</id-00003>
+						<id-00004>
+							<name type="string">Stim Patch</name>
+							<type type="string">Gear</type>
+							<subtype type="string">Equipment</subtype>
+							<cost type="string">60 cr</cost>
+							<description type="formattedtext"><p>Shrugs off pain: ignore being Down for 3 turns, then take 1d6 damage. One use.</p></description>
+							<count type="number">3</count>
+						</id-00004>
+					</items>
+				</id-00001>
+			</startingequipmentlist>
+			<startingequipment type="string">Flight Jacket, Snub Pistol, Medkit, Stim Patch (3)</startingequipment>
+			<text type="formattedtext"><p>Ship's doctor, field medic or clinic worker: you have kept people alive with less than you needed.</p><p><b>Signature skill:</b> Medicine 1. <b>Choose from:</b> Medicine, Science, Electronics, Persuade, Survival, Recon. <b>Starting credits:</b> 1500.</p><p><i>Former ranks:</i> orderly, doctor.</p></text>
+			<hp>
+				<hitdice>
+					<text type="string"></text>
+				</hitdice>
+			</hp>
+			<proficiencies>
+			</proficiencies>
+		</medic>
+		<drifter>
+			<name type="string">Drifter</name>
+			<signature type="string">Streetwise</signature>
+			<skills type="string">Streetwise, Stealth, Deceive, Melee, Firearms, Drive, Athletics, Persuade</skills>
+			<credits type="number">600</credits>
+			<startingequipmentlist>
+				<id-00001>
+					<items>
+						<id-00001>
+							<name type="string">Flight Jacket</name>
+							<type type="string">Armour</type>
+							<subtype type="string">Armour</subtype>
+							<cost type="string">100 cr</cost>
+							<protection type="number">1</protection>
+							<description type="formattedtext"><p>Padded and lined: a little protection, a lot of pockets.</p></description>
+							<count type="number">1</count>
+						</id-00001>
+						<id-00002>
+							<name type="string">Service Pistol</name>
+							<type type="string">Weapon</type>
+							<subtype type="string">Pistol</subtype>
+							<cost type="string">250 cr</cost>
+							<damage type="string">3d6</damage>
+							<skill type="string">Firearms</skill>
+							<range type="string">20 m</range>
+							<description type="formattedtext"><p>A reliable slug-thrower. Do not fire it at the windows.</p></description>
+							<count type="number">1</count>
+						</id-00002>
+						<id-00003>
+							<name type="string">Knife</name>
+							<type type="string">Weapon</type>
+							<subtype type="string">Melee</subtype>
+							<cost type="string">20 cr</cost>
+							<damage type="string">1d6</damage>
+							<skill type="string">Melee</skill>
+							<range type="string">Melee</range>
+							<description type="formattedtext"><p>A utility blade. Everyone carries one; few admit they have used it.</p></description>
+							<count type="number">1</count>
+						</id-00003>
+						<id-00004>
+							<name type="string">Grapple Line</name>
+							<type type="string">Gear</type>
+							<subtype type="string">Equipment</subtype>
+							<cost type="string">80 cr</cost>
+							<description type="formattedtext"><p>50 m of line and a magnetic grapple, rated for zero-g work.</p></description>
+							<count type="number">1</count>
+						</id-00004>
+					</items>
+				</id-00001>
+			</startingequipmentlist>
+			<startingequipment type="string">Flight Jacket, Service Pistol, Knife, Grapple Line</startingequipment>
+			<text type="formattedtext"><p>You moved on whenever it got complicated: odd jobs, borrowed names and quick exits.</p><p><b>Signature skill:</b> Streetwise 1. <b>Choose from:</b> Streetwise, Stealth, Deceive, Melee, Firearms, Drive, Athletics, Persuade. <b>Starting credits:</b> 600.</p><p><i>Former ranks:</i> none worth mentioning.</p></text>
+			<hp>
+				<hitdice>
+					<text type="string"></text>
+				</hitdice>
+			</hp>
+			<proficiencies>
+			</proficiencies>
+		</drifter>
+	</class>
+	<item>
+		<category name="Weapons">
+			<knife>
+				<name type="string">Knife</name>
+				<type type="string">Weapon</type>
+				<subtype type="string">Melee</subtype>
+				<cost type="string">20 cr</cost>
+				<damage type="string">1d6</damage>
+				<skill type="string">Melee</skill>
+				<range type="string">Melee</range>
+				<description type="formattedtext"><p>A utility blade. Everyone carries one; few admit they have used it.</p></description>
+			</knife>
+			<shockbaton>
+				<name type="string">Shock Baton</name>
+				<type type="string">Weapon</type>
+				<subtype type="string">Melee</subtype>
+				<cost type="string">150 cr</cost>
+				<damage type="string">2d6</damage>
+				<skill type="string">Melee</skill>
+				<range type="string">Melee</range>
+				<description type="formattedtext"><p>A security officer's stun stick. A target hit makes a Grit check (Standard) or loses its next turn.</p></description>
+			</shockbaton>
+			<cutlass>
+				<name type="string">Cutlass</name>
+				<type type="string">Weapon</type>
+				<subtype type="string">Melee</subtype>
+				<cost type="string">200 cr</cost>
+				<damage type="string">2d6</damage>
+				<skill type="string">Melee</skill>
+				<range type="string">Melee</range>
+				<description type="formattedtext"><p>The boarding blade of the old navies: no ricochets inside a hull.</p></description>
+			</cutlass>
+			<snubpistol>
+				<name type="string">Snub Pistol</name>
+				<type type="string">Weapon</type>
+				<subtype type="string">Pistol</subtype>
+				<cost type="string">150 cr</cost>
+				<damage type="string">2d6</damage>
+				<skill type="string">Firearms</skill>
+				<range type="string">10 m</range>
+				<description type="formattedtext"><p>Low-velocity rounds that will not hole a hull. The spacer's sidearm.</p></description>
+			</snubpistol>
+			<servicepistol>
+				<name type="string">Service Pistol</name>
+				<type type="string">Weapon</type>
+				<subtype type="string">Pistol</subtype>
+				<cost type="string">250 cr</cost>
+				<damage type="string">3d6</damage>
+				<skill type="string">Firearms</skill>
+				<range type="string">20 m</range>
+				<description type="formattedtext"><p>A reliable slug-thrower. Do not fire it at the windows.</p></description>
+			</servicepistol>
+			<laserpistol>
+				<name type="string">Laser Pistol</name>
+				<type type="string">Weapon</type>
+				<subtype type="string">Pistol</subtype>
+				<cost type="string">1200 cr</cost>
+				<damage type="string">3d6</damage>
+				<skill type="string">Firearms</skill>
+				<range type="string">30 m</range>
+				<description type="formattedtext"><p>A focused beam from a palm-sized power pack (20 shots).</p></description>
+			</laserpistol>
+			<scattergun>
+				<name type="string">Scattergun</name>
+				<type type="string">Weapon</type>
+				<subtype type="string">Long Gun</subtype>
+				<cost type="string">300 cr</cost>
+				<damage type="string">4d6</damage>
+				<skill type="string">Firearms</skill>
+				<range type="string">10 m</range>
+				<description type="formattedtext"><p>A short shotgun for close corridors. Past 10 m, halve the damage.</p></description>
+			</scattergun>
+			<carbine>
+				<name type="string">Carbine</name>
+				<type type="string">Weapon</type>
+				<subtype type="string">Long Gun</subtype>
+				<cost type="string">400 cr</cost>
+				<damage type="string">3d6</damage>
+				<skill type="string">Firearms</skill>
+				<range type="string">100 m</range>
+				<description type="formattedtext"><p>A short rifle that fits through a hatch.</p></description>
+			</carbine>
+			<rifle>
+				<name type="string">Rifle</name>
+				<type type="string">Weapon</type>
+				<subtype type="string">Long Gun</subtype>
+				<cost type="string">500 cr</cost>
+				<damage type="string">4d6</damage>
+				<skill type="string">Firearms</skill>
+				<range type="string">300 m</range>
+				<description type="formattedtext"><p>A frontier rifle: long range, heavy recoil, too much gun for a ship.</p></description>
+			</rifle>
+			<laserrifle>
+				<name type="string">Laser Rifle</name>
+				<type type="string">Weapon</type>
+				<subtype type="string">Long Gun</subtype>
+				<cost type="string">3500 cr</cost>
+				<damage type="string">4d6</damage>
+				<skill type="string">Firearms</skill>
+				<range type="string">500 m</range>
+				<description type="formattedtext"><p>Silent, recoilless, and expensive to power.</p></description>
+			</laserrifle>
+			<rotarycannon>
+				<name type="string">Rotary Cannon</name>
+				<type type="string">Weapon</type>
+				<subtype type="string">Heavy</subtype>
+				<cost type="string">6000 cr</cost>
+				<damage type="string">5d6</damage>
+				<skill type="string">Heavy Weapons</skill>
+				<range type="string">400 m</range>
+				<description type="formattedtext"><p>A spinning-barrel heavy gun. Needs a Brawn of 9, or a mount.</p></description>
+			</rotarycannon>
+			<cuttinglaser>
+				<name type="string">Cutting Laser</name>
+				<type type="string">Weapon</type>
+				<subtype type="string">Tool</subtype>
+				<cost type="string">600 cr</cost>
+				<damage type="string">2d6</damage>
+				<skill type="string">Melee</skill>
+				<range type="string">Melee</range>
+				<description type="formattedtext"><p>A hull-cutting tool. As a weapon it is clumsy; through a bulkhead it is a door.</p></description>
+			</cuttinglaser>
+		</category>
+		<category name="Armour">
+			<flightjacket>
+				<name type="string">Flight Jacket</name>
+				<type type="string">Armour</type>
+				<subtype type="string">Armour</subtype>
+				<cost type="string">100 cr</cost>
+				<protection type="number">1</protection>
+				<description type="formattedtext"><p>Padded and lined: a little protection, a lot of pockets.</p></description>
+			</flightjacket>
+			<meshundersuit>
+				<name type="string">Mesh Undersuit</name>
+				<type type="string">Armour</type>
+				<subtype type="string">Armour</subtype>
+				<cost type="string">500 cr</cost>
+				<protection type="number">3</protection>
+				<description type="formattedtext"><p>Woven ballistic fibre, worn under clothing.</p></description>
+			</meshundersuit>
+			<flakvest>
+				<name type="string">Flak Vest</name>
+				<type type="string">Armour</type>
+				<subtype type="string">Armour</subtype>
+				<cost type="string">400 cr</cost>
+				<protection type="number">5</protection>
+				<description type="formattedtext"><p>Heavy plates front and back. Obvious.</p></description>
+			</flakvest>
+			<vacsuit>
+				<name type="string">Vac Suit</name>
+				<type type="string">Armour</type>
+				<subtype type="string">Armour</subtype>
+				<cost type="string">1500 cr</cost>
+				<protection type="number">4</protection>
+				<description type="formattedtext"><p>A sealed suit with 6 hours of air. In vacuum without one: 1d6 damage a turn.</p></description>
+			</vacsuit>
+			<combatarmour>
+				<name type="string">Combat Armour</name>
+				<type type="string">Armour</type>
+				<subtype type="string">Armour</subtype>
+				<cost type="string">15000 cr</cost>
+				<protection type="number">10</protection>
+				<description type="formattedtext"><p>Military plate with a sealed helmet and 6 hours of air. Not sold to just anyone.</p></description>
+			</combatarmour>
+		</category>
+		<category name="Gear">
+			<medkit>
+				<name type="string">Medkit</name>
+				<type type="string">Gear</type>
+				<subtype type="string">Equipment</subtype>
+				<cost type="string">300 cr</cost>
+				<description type="formattedtext"><p>Dressings, stims and a diagnostic cuff: +2 to Medicine tasks. A Medicine task (Standard) with it restores 1d6 Stamina plus the Effect, once per wound.</p></description>
+			</medkit>
+			<toolkit>
+				<name type="string">Toolkit</name>
+				<type type="string">Gear</type>
+				<subtype type="string">Equipment</subtype>
+				<cost type="string">400 cr</cost>
+				<description type="formattedtext"><p>Spanners, drivers, a multimeter and a cutting torch: needed for most Mechanics and Engineering tasks.</p></description>
+			</toolkit>
+			<handscanner>
+				<name type="string">Hand Scanner</name>
+				<type type="string">Gear</type>
+				<subtype type="string">Equipment</subtype>
+				<cost type="string">900 cr</cost>
+				<description type="formattedtext"><p>Reads radiation, atmosphere, life signs and power within 50 m: +2 to Recon in the dark or behind bulkheads.</p></description>
+			</handscanner>
+			<commbead>
+				<name type="string">Comm Bead</name>
+				<type type="string">Gear</type>
+				<subtype type="string">Equipment</subtype>
+				<cost type="string">150 cr</cost>
+				<description type="formattedtext"><p>An earpiece radio with a 10 km range, or ship-to-crew anywhere within a ship.</p></description>
+			</commbead>
+			<dataslate>
+				<name type="string">Data Slate</name>
+				<type type="string">Gear</type>
+				<subtype type="string">Equipment</subtype>
+				<cost type="string">200 cr</cost>
+				<description type="formattedtext"><p>A tablet for maps, records and hacking tools: needed for Electronics tasks on a system.</p></description>
+			</dataslate>
+			<breathermask>
+				<name type="string">Breather Mask</name>
+				<type type="string">Gear</type>
+				<subtype type="string">Equipment</subtype>
+				<cost type="string">100 cr</cost>
+				<description type="formattedtext"><p>Filters a thin or tainted atmosphere for 12 hours.</p></description>
+			</breathermask>
+			<magboots>
+				<name type="string">Mag Boots</name>
+				<type type="string">Gear</type>
+				<subtype type="string">Equipment</subtype>
+				<cost type="string">250 cr</cost>
+				<description type="formattedtext"><p>Keep your feet on the deck in zero gravity: no Zero-G task to stand, fight or walk.</p></description>
+			</magboots>
+			<flashlight>
+				<name type="string">Flashlight</name>
+				<type type="string">Gear</type>
+				<subtype type="string">Equipment</subtype>
+				<cost type="string">20 cr</cost>
+				<description type="formattedtext"><p>A bright beam 30 m long. Dark ships are very dark.</p></description>
+			</flashlight>
+			<emergencybeacon>
+				<name type="string">Emergency Beacon</name>
+				<type type="string">Gear</type>
+				<subtype type="string">Equipment</subtype>
+				<cost type="string">300 cr</cost>
+				<description type="formattedtext"><p>Broadcasts a distress call on every band for 30 days.</p></description>
+			</emergencybeacon>
+			<rationpacks5>
+				<name type="string">Ration Packs (5)</name>
+				<type type="string">Gear</type>
+				<subtype type="string">Equipment</subtype>
+				<cost type="string">25 cr</cost>
+				<description type="formattedtext"><p>Five days of food that tastes of the packet.</p></description>
+			</rationpacks5>
+			<grappleline>
+				<name type="string">Grapple Line</name>
+				<type type="string">Gear</type>
+				<subtype type="string">Equipment</subtype>
+				<cost type="string">80 cr</cost>
+				<description type="formattedtext"><p>50 m of line and a magnetic grapple, rated for zero-g work.</p></description>
+			</grappleline>
+			<stimpatch>
+				<name type="string">Stim Patch</name>
+				<type type="string">Gear</type>
+				<subtype type="string">Equipment</subtype>
+				<cost type="string">60 cr</cost>
+				<description type="formattedtext"><p>Shrugs off pain: ignore being Down for 3 turns, then take 1d6 damage. One use.</p></description>
+			</stimpatch>
+		</category>
+	</item>
+	<reference>
+		<refmanualindex>
+			<chapters>
+				<chapter_000>
+					<name type="string">The Reach</name>
+					<subchapters>
+						<sub_000>
+							<name type="string">Welcome Aboard</name>
+							<refpages>
+								<page_000>
+									<name type="string">The Boundless Stars</name>
+									<keywords type="string"></keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0001@Apeira Astra Crew Handbook</recordname></listlink>
+								</page_000>
+								<page_001>
+									<name type="string">Salvage Law</name>
+									<keywords type="string">salvage law claim derelict</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0002@Apeira Astra Crew Handbook</recordname></listlink>
+								</page_001>
+							</refpages>
+						</sub_000>
+					</subchapters>
+				</chapter_000>
+				<chapter_001>
+					<name type="string">Playing</name>
+					<subchapters>
+						<sub_000>
+							<name type="string">Tasks</name>
+							<refpages>
+								<page_000>
+									<name type="string">The Roll</name>
+									<keywords type="string">task roll 2d6 effect difficulty</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0003@Apeira Astra Crew Handbook</recordname></listlink>
+								</page_000>
+								<page_001>
+									<name type="string">Characteristics</name>
+									<keywords type="string">characteristic modifier brawn reflex grit intellect training presence</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0004@Apeira Astra Crew Handbook</recordname></listlink>
+								</page_001>
+							</refpages>
+						</sub_000>
+						<sub_001>
+							<name type="string">A Crew Member</name>
+							<refpages>
+								<page_000>
+									<name type="string">Making a Crew Member</name>
+									<keywords type="string">character creation path origin wizard</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0005@Apeira Astra Crew Handbook</recordname></listlink>
+								</page_000>
+								<page_001>
+									<name type="string">Origins</name>
+									<keywords type="string">origin</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0006@Apeira Astra Crew Handbook</recordname></listlink>
+								</page_001>
+								<page_002>
+									<name type="string">Fleet</name>
+									<keywords type="string">path</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0007@Apeira Astra Crew Handbook</recordname></listlink>
+								</page_002>
+								<page_003>
+									<name type="string">Marine</name>
+									<keywords type="string">path</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0008@Apeira Astra Crew Handbook</recordname></listlink>
+								</page_003>
+								<page_004>
+									<name type="string">Scout</name>
+									<keywords type="string">path</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0009@Apeira Astra Crew Handbook</recordname></listlink>
+								</page_004>
+								<page_005>
+									<name type="string">Merchant</name>
+									<keywords type="string">path</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0010@Apeira Astra Crew Handbook</recordname></listlink>
+								</page_005>
+								<page_006>
+									<name type="string">Engineer</name>
+									<keywords type="string">path</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0011@Apeira Astra Crew Handbook</recordname></listlink>
+								</page_006>
+								<page_007>
+									<name type="string">Medic</name>
+									<keywords type="string">path</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0012@Apeira Astra Crew Handbook</recordname></listlink>
+								</page_007>
+								<page_008>
+									<name type="string">Drifter</name>
+									<keywords type="string">path</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0013@Apeira Astra Crew Handbook</recordname></listlink>
+								</page_008>
+								<page_009>
+									<name type="string">Improving</name>
+									<keywords type="string">experience improve advance</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0014@Apeira Astra Crew Handbook</recordname></listlink>
+								</page_009>
+							</refpages>
+						</sub_001>
+						<sub_002>
+							<name type="string">Danger</name>
+							<refpages>
+								<page_000>
+									<name type="string">Combat</name>
+									<keywords type="string">combat initiative attack damage armour</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0015@Apeira Astra Crew Handbook</recordname></listlink>
+								</page_000>
+								<page_001>
+									<name type="string">Vacuum and Hazards</name>
+									<keywords type="string">vacuum radiation zero-g hazard</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0016@Apeira Astra Crew Handbook</recordname></listlink>
+								</page_001>
+							</refpages>
+						</sub_002>
+					</subchapters>
+				</chapter_001>
+				<chapter_002>
+					<name type="string">Credits</name>
+					<subchapters>
+						<sub_000>
+							<name type="string">About This Book</name>
+							<refpages>
+								<page_000>
+									<name type="string">Credits and License</name>
+									<keywords type="string"></keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0017@Apeira Astra Crew Handbook</recordname></listlink>
+								</page_000>
+							</refpages>
+						</sub_000>
+					</subchapters>
+				</chapter_002>
+			</chapters>
+		</refmanualindex>
+		<refmanualdata>
+			<p0001>
+				<name type="string">The Boundless Stars</name>
+				<text type="formattedtext"><p><i>Apeira Astra</i> — &quot;the boundless stars&quot; — is a game of small crews in a big, cold Reach: freighters running cargo between frontier stations, salvagers picking over dead ships, scouts mapping the places the charts leave blank.</p><p><b>The Reach</b> is a sprawl of a few hundred inhabited systems at the edge of settled space. The old Core worlds are far away and do not much care. Out here, the <b>Accord</b> keeps a few patrol cutters and a lot of paperwork; the <b>Halvard Combine</b> and its rivals own the shipyards, the mines and most of the debt; and everyone else gets by.</p><p>Ships cross between stars on <b>skein drives</b>, slipping along threads of folded space: a jump takes about a week, whatever the distance, and nobody can call for help in the middle of one.</p><p>One player is the <b>Game Master</b>; the rest play a <b>crew</b>: people with a ship (or the loan on one), a job, and not quite enough money.</p></text>
+			</p0001>
+			<p0002>
+				<name type="string">Salvage Law</name>
+				<text type="formattedtext"><p>By Accord law, a ship that has broadcast no signal for <b>100 days</b> is a <b>derelict</b>. The first crew to <b>dock with it and file a claim</b> at an Accord registry owns its hull and cargo — unless anyone aboard is still alive, in which case it is a rescue, and the rescuers are owed a reward instead.</p><p>This one law keeps half the Reach's crews in business, and is behind most of its knife fights.</p></text>
+			</p0002>
+			<p0003>
+				<name type="string">The Roll</name>
+				<text type="formattedtext"><p>When the outcome is uncertain, roll <b>2d6</b>, add your <b>skill level</b> and your <b>characteristic modifier</b>, and aim for <b>8 or more</b>.</p><p>The amount you beat (or miss) 8 by is the <b>Effect</b>. An Effect of 0 is just enough; 2 or more is clean; 6 or more is remarkable. In a fight, the Effect adds to your damage.</p><p><b>Untrained:</b> a skill you do not have: -3.</p><p><b>Difficulty</b> shifts the roll:</p><table><tr decoration="underline"><td><b>Trivial</b></td><td><b>Easy</b></td><td><b>Standard</b></td><td><b>Hard</b></td><td><b>Daunting</b></td><td><b>Desperate</b></td></tr><tr><td>+4</td><td>+2</td><td>0</td><td>-2</td><td>-4</td><td>-6</td></tr></table><p><b>Boon and Bane.</b> When something helps you (good tools, time, an ally), roll <b>3d6 and keep the best two</b>. When something hinders you, keep the worst two.</p><p>In Kraken, set the difficulty and any Boon on your sheet's strip, then click a skill or characteristic. The roll card says success or failure and the Effect.</p></text>
+			</p0003>
+			<p0004>
+				<name type="string">Characteristics</name>
+				<text type="formattedtext"><p>Six characteristics, from 2 to 12 (15 at most):</p><list><li><b>Brawn</b>: strength and size.</li><li><b>Reflex</b>: speed, coordination, aim.</li><li><b>Grit</b>: endurance, nerve, how much you can take.</li><li><b>Intellect</b>: wits and reasoning.</li><li><b>Training</b>: schooling and technical learning.</li><li><b>Presence</b>: bearing, charm, social weight.</li></list><table><tr decoration="underline"><td><b>Score</b></td><td><b>2</b></td><td><b>3-5</b></td><td><b>6-8</b></td><td><b>9-11</b></td><td><b>12-14</b></td><td><b>15</b></td></tr><tr><td>Modifier</td><td>-2</td><td>-1</td><td>0</td><td>+1</td><td>+2</td><td>+3</td></tr></table></text>
+			</p0004>
+			<p0005>
+				<name type="string">Making a Crew Member</name>
+				<text type="formattedtext"><list><li>1. <b>Characteristics</b>: place <b>10, 9, 8, 7, 6 and 5</b> as you like, or roll 2d6 for each.</li><li>2. <b>Origin</b>: where you grew up. It gives a few skills and a trait.</li><li>3. <b>Major Path</b>: what you did for most of your life. Its <b>signature skill</b> at 1, and <b>four picks</b> from its list (each +1).</li><li>4. <b>Minor Path</b>: what you did before or after. <b>Two picks</b> from its list.</li><li>5. <b>Kit and credits</b>: your major Path's kit and credits, half your minor Path's credits.</li></list><p>No skill starts above 3. <b>Stamina</b> is Brawn + Reflex + Grit.</p><p>In Kraken, the Characters window's <b>Character Wizard</b> does all of this.</p></text>
+			</p0005>
+			<p0006>
+				<name type="string">Origins</name>
+				<text type="formattedtext"><p><b>Coreborn</b> (Persuade 0, Electronics 0, Science 0). Raised on one of the old, crowded worlds of the Core: schools, networks and manners. <i>Credentials:</i> You have a citizen's papers that open doors, and a family name someone recognises.</p><p><b>Spacer</b> (Zero-G 1, Pilot 0). Born aboard a ship or a station, you learned to walk in a corridor and swim in the air. <i>Hull Sense:</i> You feel when a ship is wrong: a Boon on tasks to notice a failing system or a breach.</p><p><b>Frontier</b> (Survival 1, Drive 0, Recon 0). From a hard world at the edge of the Reach, where help is a long way off. <i>Hardened:</i> Once per session, ignore being Down for one turn.</p><p><b>Undercity</b> (Streetwise 1, Stealth 0, Melee 0). From the levels beneath a city, where the light is borrowed and everything is for sale. <i>Know a Guy:</i> On any station or city, a Streetwise task (Standard) finds someone who can get what you need, for a price.</p><p><b>Belter</b> (Mechanics 1, Zero-G 0, Engineering 0). Raised in the asteroid habitats, where everything breaks and you fix it or die. <i>Make Do:</i> No Bane for working without the right tools.</p></text>
+			</p0006>
+			<p0007>
+				<name type="string">Fleet</name>
+				<text type="formattedtext"><p>You served aboard a warship or a patrol cutter: watch rotations, drills, and the long silence of a skein transit.</p><p><b>Signature skill:</b> Pilot 1. <b>Choose from:</b> Pilot, Astrogation, Gunnery, Electronics, Leadership, Tactics, Zero-G. <b>Starting credits:</b> 1500.</p><p><i>Former ranks:</i> rating, ensign, lieutenant.</p></text>
+			</p0007>
+			<p0008>
+				<name type="string">Marine</name>
+				<text type="formattedtext"><p>You were the one sent through the airlock first. Boarding actions, station security, and things you do not talk about.</p><p><b>Signature skill:</b> Firearms 1. <b>Choose from:</b> Firearms, Melee, Athletics, Heavy Weapons, Tactics, Recon, Zero-G, Leadership. <b>Starting credits:</b> 1000.</p><p><i>Former ranks:</i> trooper, corporal, sergeant.</p></text>
+			</p0008>
+			<p0009>
+				<name type="string">Scout</name>
+				<text type="formattedtext"><p>You charted the empty places: survey runs, first landings, months alone with the ship's voice.</p><p><b>Signature skill:</b> Recon 1. <b>Choose from:</b> Recon, Pilot, Survival, Astrogation, Stealth, Drive, Science, Mechanics. <b>Starting credits:</b> 1200.</p><p><i>Former ranks:</i> surveyor, pathfinder.</p></text>
+			</p0009>
+			<p0010>
+				<name type="string">Merchant</name>
+				<text type="formattedtext"><p>You bought low and sold far away: cargo manifests, port fees and handshakes in bad bars.</p><p><b>Signature skill:</b> Trade 1. <b>Choose from:</b> Trade, Persuade, Deceive, Streetwise, Pilot, Electronics, Leadership. <b>Starting credits:</b> 3000.</p><p><i>Former ranks:</i> purser, factor, master.</p></text>
+			</p0010>
+			<p0011>
+				<name type="string">Engineer</name>
+				<text type="formattedtext"><p>You kept the drive lit and the air flowing. You know what every noise a ship makes means.</p><p><b>Signature skill:</b> Engineering 1. <b>Choose from:</b> Engineering, Mechanics, Electronics, Zero-G, Science, Pilot, Gunnery. <b>Starting credits:</b> 1200.</p><p><i>Former ranks:</i> mate, chief.</p></text>
+			</p0011>
+			<p0012>
+				<name type="string">Medic</name>
+				<text type="formattedtext"><p>Ship's doctor, field medic or clinic worker: you have kept people alive with less than you needed.</p><p><b>Signature skill:</b> Medicine 1. <b>Choose from:</b> Medicine, Science, Electronics, Persuade, Survival, Recon. <b>Starting credits:</b> 1500.</p><p><i>Former ranks:</i> orderly, doctor.</p></text>
+			</p0012>
+			<p0013>
+				<name type="string">Drifter</name>
+				<text type="formattedtext"><p>You moved on whenever it got complicated: odd jobs, borrowed names and quick exits.</p><p><b>Signature skill:</b> Streetwise 1. <b>Choose from:</b> Streetwise, Stealth, Deceive, Melee, Firearms, Drive, Athletics, Persuade. <b>Starting credits:</b> 600.</p><p><i>Former ranks:</i> none worth mentioning.</p></text>
+			</p0013>
+			<p0014>
+				<name type="string">Improving</name>
+				<text type="formattedtext"><p>Apeira Astra has no levels. The Game Master awards <b>experience</b> at the end of a session (1 to 3 each, more for a big job), and you spend it:</p><table><tr decoration="underline"><td><b>Purchase</b></td><td><b>Cost</b></td></tr><tr><td>A new skill at 0</td><td>1</td></tr><tr><td>A skill's next level</td><td>that level x 2 (level 1: 2, level 2: 4, level 3: 6, level 4: 8)</td></tr><tr><td>A characteristic +1</td><td>6</td></tr></table><p>In Kraken, the Skills page's <b>Improve</b> spends it.</p></text>
+			</p0014>
+			<p0015>
+				<name type="string">Combat</name>
+				<text type="formattedtext"><p><b>Initiative:</b> 2d6 + Reflex modifier + Tactics. Highest first.</p><p><b>On your turn:</b> move (about 6 m) and take one action: attack, a task, reload, aid someone.</p><p><b>Attacking:</b> 2d6 + the weapon's skill (Firearms, Melee, Heavy Weapons) + Reflex (ranged) or Brawn (melee) against <b>8</b>.</p><p><b>Damage:</b> the weapon's dice <b>+ the attack's Effect</b>, minus the target's <b>Armour</b>. A hit that does not beat the armour is stopped.</p><p><b>Stamina:</b> at 0 you are <b>Down</b>: out of the fight, unconscious or close to it. At <b>minus your Grit</b> you are dead. A Medicine task brings you back from Down.</p><p>In Kraken, target a creature (Ctrl+click its token) and use the weapon's attack and damage on your sheet's Combat page.</p></text>
+			</p0015>
+			<p0016>
+				<name type="string">Vacuum and Hazards</name>
+				<text type="formattedtext"><p><b>Vacuum:</b> without a sealed suit, 1d6 damage each turn (armour does not help), and you are Down within a minute.</p><p><b>Zero-G:</b> without mag boots, every physical task takes a Bane unless you make a Zero-G task (Standard) at the start of the scene.</p><p><b>Radiation:</b> a hot reactor or a flare: a Grit check each hour (or each turn, close in), 1d6 damage on a failure.</p><p><b>Fire in a hull</b> eats the air: put it out in three turns or vent the compartment.</p></text>
+			</p0016>
+			<p0017>
+				<name type="string">Credits and License</name>
+				<text type="formattedtext"><p><b>Apeira Astra</b> is an original game made for Kraken VTT: its rules text, setting, names and art are original, and it may be shared freely with Kraken.</p><p>It belongs to the family of &quot;2d6 and skills&quot; science fiction roleplaying games, whose shared idea — two dice, a skill, a target of 8 — is a game mechanic common to many games and owned by none. Apeira Astra is not affiliated with or endorsed by any other game's publisher.</p></text>
+			</p0017>
+		</refmanualdata>
+	</reference>
+</root>

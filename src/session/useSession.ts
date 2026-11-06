@@ -842,6 +842,13 @@ export function useSession() {
     if (socket && socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify({ type: "class-change", id, mode, className }));
   }, []);
 
+  // Apeira Astra: experience spent on a skill's next level or a characteristic +1 (the host checks the cost).
+  const improveCharacter = useCallback((id: string, what: { skill?: string; attribute?: string }) => {
+    const socket = socketRef.current;
+    if (!socket || socket.readyState !== WebSocket.OPEN) return Promise.reject(new Error("Not connected."));
+    socket.send(JSON.stringify({ type: "character-improve", id, ...what }));
+    return Promise.resolve();
+  }, []);
   const levelUp = useCallback((id: string, packageKey?: string) => {
     const socket = socketRef.current;
     if (!socket || socket.readyState !== WebSocket.OPEN) return;
@@ -1101,6 +1108,7 @@ export function useSession() {
     siegeCheck,
     buildCharacter,
     levelUp,
+    improveCharacter,
     wall,
     mapUndo,
     mask,

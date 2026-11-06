@@ -1,0 +1,523 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root version="4.6" release="1">
+	<npc>
+		<category name="People">
+			<docktough>
+				<name type="string">Dock Tough</name>
+				<type type="string">Human</type>
+				<characteristics>
+					<brawn>
+						<score type="number">8</score>
+					</brawn>
+					<reflex>
+						<score type="number">7</score>
+					</reflex>
+					<grit>
+						<score type="number">8</score>
+					</grit>
+					<intellect>
+						<score type="number">6</score>
+					</intellect>
+					<training>
+						<score type="number">5</score>
+					</training>
+					<presence>
+						<score type="number">6</score>
+					</presence>
+				</characteristics>
+				<hp type="number">23</hp>
+				<armour type="number">1</armour>
+				<ac type="number">1</ac>
+				<skills type="string">Melee 1, Streetwise 0</skills>
+				<actions>
+					<id-00001>
+						<name type="string">Pipe</name>
+						<desc type="string">Attack +1 (2d6), melee.</desc>
+					</id-00001>
+				</actions>
+				<traits>
+				</traits>
+				<text type="formattedtext"><p>Muscle for hire on any station, paid in drink.</p></text>
+			</docktough>
+			<combinesecurity>
+				<name type="string">Combine Security</name>
+				<type type="string">Human</type>
+				<characteristics>
+					<brawn>
+						<score type="number">8</score>
+					</brawn>
+					<reflex>
+						<score type="number">8</score>
+					</reflex>
+					<grit>
+						<score type="number">8</score>
+					</grit>
+					<intellect>
+						<score type="number">7</score>
+					</intellect>
+					<training>
+						<score type="number">7</score>
+					</training>
+					<presence>
+						<score type="number">6</score>
+					</presence>
+				</characteristics>
+				<hp type="number">24</hp>
+				<armour type="number">5</armour>
+				<ac type="number">5</ac>
+				<skills type="string">Firearms 1, Melee 1, Tactics 0</skills>
+				<actions>
+					<id-00001>
+						<name type="string">Service Pistol</name>
+						<desc type="string">Attack +1 (3d6), 20 m.</desc>
+					</id-00001>
+					<id-00002>
+						<name type="string">Shock Baton</name>
+						<desc type="string">Attack +1 (2d6), melee; a target hit makes a Grit check or loses its next turn.</desc>
+					</id-00002>
+				</actions>
+				<traits>
+				</traits>
+				<text type="formattedtext"><p>The Halvard Combine's guards: well paid, badly briefed, and never alone.</p></text>
+			</combinesecurity>
+			<pirateraider>
+				<name type="string">Pirate Raider</name>
+				<type type="string">Human</type>
+				<characteristics>
+					<brawn>
+						<score type="number">8</score>
+					</brawn>
+					<reflex>
+						<score type="number">8</score>
+					</reflex>
+					<grit>
+						<score type="number">7</score>
+					</grit>
+					<intellect>
+						<score type="number">6</score>
+					</intellect>
+					<training>
+						<score type="number">5</score>
+					</training>
+					<presence>
+						<score type="number">5</score>
+					</presence>
+				</characteristics>
+				<hp type="number">23</hp>
+				<armour type="number">3</armour>
+				<ac type="number">3</ac>
+				<skills type="string">Firearms 1, Melee 1, Zero-G 1</skills>
+				<actions>
+					<id-00001>
+						<name type="string">Carbine</name>
+						<desc type="string">Attack +1 (3d6), 100 m.</desc>
+					</id-00001>
+					<id-00002>
+						<name type="string">Cutlass</name>
+						<desc type="string">Attack +1 (2d6), melee.</desc>
+					</id-00002>
+				</actions>
+				<traits>
+				</traits>
+				<text type="formattedtext"><p>Reach pirates rarely kill a crew that surrenders: dead crews make bad customers.</p></text>
+			</pirateraider>
+		</category>
+		<category name="Salvage Rights">
+			<magsorrin>
+				<name type="string">Mags Orrin</name>
+				<type type="string">Human</type>
+				<characteristics>
+					<brawn>
+						<score type="number">7</score>
+					</brawn>
+					<reflex>
+						<score type="number">10</score>
+					</reflex>
+					<grit>
+						<score type="number">9</score>
+					</grit>
+					<intellect>
+						<score type="number">9</score>
+					</intellect>
+					<training>
+						<score type="number">7</score>
+					</training>
+					<presence>
+						<score type="number">10</score>
+					</presence>
+				</characteristics>
+				<hp type="number">26</hp>
+				<armour type="number">3</armour>
+				<ac type="number">3</ac>
+				<skills type="string">Firearms 2, Pilot 2, Deceive 2, Leadership 1, Zero-G 1</skills>
+				<actions>
+					<id-00001>
+						<name type="string">Laser Pistol</name>
+						<desc type="string">Attack +3 (3d6), 30 m.</desc>
+					</id-00001>
+					<id-00002>
+						<name type="string">Knife</name>
+						<desc type="string">Attack +1 (1d6), melee.</desc>
+					</id-00002>
+				</actions>
+				<traits>
+				</traits>
+				<text type="formattedtext"><p>Captain of the salvage tug <i>Pale Gull</i>: charming, ruthless and always fifteen minutes behind you. She would rather deal than shoot, if the deal is good.</p></text>
+			</magsorrin>
+			<gullcrewman>
+				<name type="string">Gull Crewman</name>
+				<type type="string">Human</type>
+				<characteristics>
+					<brawn>
+						<score type="number">8</score>
+					</brawn>
+					<reflex>
+						<score type="number">8</score>
+					</reflex>
+					<grit>
+						<score type="number">8</score>
+					</grit>
+					<intellect>
+						<score type="number">6</score>
+					</intellect>
+					<training>
+						<score type="number">6</score>
+					</training>
+					<presence>
+						<score type="number">5</score>
+					</presence>
+				</characteristics>
+				<hp type="number">24</hp>
+				<armour type="number">4</armour>
+				<ac type="number">4</ac>
+				<skills type="string">Firearms 1, Zero-G 1, Mechanics 1</skills>
+				<actions>
+					<id-00001>
+						<name type="string">Snub Pistol</name>
+						<desc type="string">Attack +1 (2d6), 10 m.</desc>
+					</id-00001>
+					<id-00002>
+						<name type="string">Cutting Laser</name>
+						<desc type="string">Attack +0 (2d6), melee.</desc>
+					</id-00002>
+				</actions>
+				<traits>
+				</traits>
+				<text type="formattedtext"><p>Mags Orrin's salvagers, in patched vac suits.</p></text>
+			</gullcrewman>
+			<holloweyedsurvivor>
+				<name type="string">Hollow-Eyed Survivor</name>
+				<type type="string">Human</type>
+				<characteristics>
+					<brawn>
+						<score type="number">6</score>
+					</brawn>
+					<reflex>
+						<score type="number">6</score>
+					</reflex>
+					<grit>
+						<score type="number">5</score>
+					</grit>
+					<intellect>
+						<score type="number">8</score>
+					</intellect>
+					<training>
+						<score type="number">8</score>
+					</training>
+					<presence>
+						<score type="number">6</score>
+					</presence>
+				</characteristics>
+				<hp type="number">17</hp>
+				<armour type="number">0</armour>
+				<ac type="number">0</ac>
+				<skills type="string">Engineering 1, Electronics 1</skills>
+				<actions>
+					<id-00001>
+						<name type="string">Wrench</name>
+						<desc type="string">Attack -1 (1d6), melee.</desc>
+					</id-00001>
+				</actions>
+				<traits>
+				</traits>
+				<text type="formattedtext"><p>Someone who has been alone on a dead ship too long. Scared, starving, and armed with whatever was to hand.</p></text>
+			</holloweyedsurvivor>
+		</category>
+		<category name="Machines">
+			<salvagedrone>
+				<name type="string">Salvage Drone</name>
+				<type type="string">Robot</type>
+				<characteristics>
+					<brawn>
+						<score type="number">9</score>
+					</brawn>
+					<reflex>
+						<score type="number">7</score>
+					</reflex>
+					<grit>
+						<score type="number">10</score>
+					</grit>
+					<intellect>
+						<score type="number">4</score>
+					</intellect>
+					<training>
+						<score type="number">4</score>
+					</training>
+					<presence>
+						<score type="number">1</score>
+					</presence>
+				</characteristics>
+				<hp type="number">18</hp>
+				<armour type="number">6</armour>
+				<ac type="number">6</ac>
+				<skills type="string">Melee 1, Recon 1</skills>
+				<actions>
+					<id-00001>
+						<name type="string">Cutting Arm</name>
+						<desc type="string">Attack +1 (2d6), melee.</desc>
+					</id-00001>
+				</actions>
+				<traits>
+					<id-00001>
+						<name type="string">Machine</name>
+						<desc type="string">Does not breathe; immune to vacuum, poison and fear.</desc>
+					</id-00001>
+				</traits>
+				<text type="formattedtext"><p>A boxy drone with magnetic treads and a cutting arm, built to strip wrecks. A damaged control core makes it treat everything as scrap.</p></text>
+			</salvagedrone>
+			<sentryturret>
+				<name type="string">Sentry Turret</name>
+				<type type="string">Robot</type>
+				<characteristics>
+					<brawn>
+						<score type="number">6</score>
+					</brawn>
+					<reflex>
+						<score type="number">8</score>
+					</reflex>
+					<grit>
+						<score type="number">12</score>
+					</grit>
+					<intellect>
+						<score type="number">3</score>
+					</intellect>
+					<training>
+						<score type="number">3</score>
+					</training>
+					<presence>
+						<score type="number">1</score>
+					</presence>
+				</characteristics>
+				<hp type="number">16</hp>
+				<armour type="number">8</armour>
+				<ac type="number">8</ac>
+				<skills type="string">Firearms 2</skills>
+				<actions>
+					<id-00001>
+						<name type="string">Twin Guns</name>
+						<desc type="string">Attack +2 (3d6), 50 m.</desc>
+					</id-00001>
+				</actions>
+				<traits>
+					<id-00001>
+						<name type="string">Fixed</name>
+						<desc type="string">It cannot move. Electronics (Hard) at its panel shuts it down.</desc>
+					</id-00001>
+				</traits>
+				<text type="formattedtext"><p>A ceiling-mounted defence gun, guarding a ship's bridge or vault.</p></text>
+			</sentryturret>
+		</category>
+		<category name="Creatures">
+			<rustcrawler>
+				<name type="string">Rust Crawler</name>
+				<type type="string">Creature</type>
+				<characteristics>
+					<brawn>
+						<score type="number">5</score>
+					</brawn>
+					<reflex>
+						<score type="number">9</score>
+					</reflex>
+					<grit>
+						<score type="number">6</score>
+					</grit>
+					<intellect>
+						<score type="number">1</score>
+					</intellect>
+					<training>
+						<score type="number">6</score>
+					</training>
+					<presence>
+						<score type="number">1</score>
+					</presence>
+				</characteristics>
+				<hp type="number">12</hp>
+				<armour type="number">2</armour>
+				<ac type="number">2</ac>
+				<skills type="string">Stealth 2, Athletics 1</skills>
+				<actions>
+					<id-00001>
+						<name type="string">Mandibles</name>
+						<desc type="string">Attack +1 (1d6), melee; a vac suit hit springs a slow leak.</desc>
+					</id-00001>
+				</actions>
+				<traits>
+					<id-00001>
+						<name type="string">Swarm</name>
+						<desc type="string">Usually 2d6 of them, in the ducts.</desc>
+					</id-00001>
+				</traits>
+				<text type="formattedtext"><p>Spiny metal-eaters from the asteroid belts that get into hulls and chew through cabling. Annoying alone; dangerous in a swarm.</p></text>
+			</rustcrawler>
+			<voidlamprey>
+				<name type="string">Void Lamprey</name>
+				<type type="string">Creature</type>
+				<characteristics>
+					<brawn>
+						<score type="number">11</score>
+					</brawn>
+					<reflex>
+						<score type="number">8</score>
+					</reflex>
+					<grit>
+						<score type="number">10</score>
+					</grit>
+					<intellect>
+						<score type="number">2</score>
+					</intellect>
+					<training>
+						<score type="number">8</score>
+					</training>
+					<presence>
+						<score type="number">1</score>
+					</presence>
+				</characteristics>
+				<hp type="number">26</hp>
+				<armour type="number">3</armour>
+				<ac type="number">3</ac>
+				<skills type="string">Athletics 2, Stealth 1</skills>
+				<actions>
+					<id-00001>
+						<name type="string">Rasping Maw</name>
+						<desc type="string">Attack +2 (3d6), melee; it holds on: 1d6 each turn until pulled off (Brawn, Hard).</desc>
+					</id-00001>
+				</actions>
+				<traits>
+					<id-00001>
+						<name type="string">Vacuum-born</name>
+						<desc type="string">It lives in vacuum and lurks on hulls, drawn to warmth and light.</desc>
+					</id-00001>
+				</traits>
+				<text type="formattedtext"><p>Three metres of muscle and teeth that drift between asteroids and latch on to anything warm.</p></text>
+			</voidlamprey>
+		</category>
+	</npc>
+	<reference>
+		<refmanualindex>
+			<chapters>
+				<chapter_000>
+					<name type="string">The Dossier</name>
+					<subchapters>
+						<sub_000>
+							<name type="string">Threats</name>
+							<refpages>
+								<page_000>
+									<name type="string">Dock Tough</name>
+									<keywords type="string"></keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0001@Apeira Astra Threat Dossier</recordname></listlink>
+								</page_000>
+								<page_001>
+									<name type="string">Combine Security</name>
+									<keywords type="string"></keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0002@Apeira Astra Threat Dossier</recordname></listlink>
+								</page_001>
+								<page_002>
+									<name type="string">Pirate Raider</name>
+									<keywords type="string"></keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0003@Apeira Astra Threat Dossier</recordname></listlink>
+								</page_002>
+								<page_003>
+									<name type="string">Mags Orrin</name>
+									<keywords type="string"></keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0004@Apeira Astra Threat Dossier</recordname></listlink>
+								</page_003>
+								<page_004>
+									<name type="string">Gull Crewman</name>
+									<keywords type="string"></keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0005@Apeira Astra Threat Dossier</recordname></listlink>
+								</page_004>
+								<page_005>
+									<name type="string">Salvage Drone</name>
+									<keywords type="string"></keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0006@Apeira Astra Threat Dossier</recordname></listlink>
+								</page_005>
+								<page_006>
+									<name type="string">Sentry Turret</name>
+									<keywords type="string"></keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0007@Apeira Astra Threat Dossier</recordname></listlink>
+								</page_006>
+								<page_007>
+									<name type="string">Rust Crawler</name>
+									<keywords type="string"></keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0008@Apeira Astra Threat Dossier</recordname></listlink>
+								</page_007>
+								<page_008>
+									<name type="string">Void Lamprey</name>
+									<keywords type="string"></keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0009@Apeira Astra Threat Dossier</recordname></listlink>
+								</page_008>
+								<page_009>
+									<name type="string">Hollow-Eyed Survivor</name>
+									<keywords type="string"></keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0010@Apeira Astra Threat Dossier</recordname></listlink>
+								</page_009>
+							</refpages>
+						</sub_000>
+					</subchapters>
+				</chapter_000>
+			</chapters>
+		</refmanualindex>
+		<refmanualdata>
+			<p0001>
+				<name type="string">Dock Tough</name>
+				<text type="formattedtext"><p><i>Human.</i> Muscle for hire on any station, paid in drink.</p><p><b>Stamina</b> 23. <b>Armour</b> 1. <b>Skills</b> Melee 1, Streetwise 0.</p><p><b>Pipe.</b> Attack +1 (2d6), melee.</p></text>
+			</p0001>
+			<p0002>
+				<name type="string">Combine Security</name>
+				<text type="formattedtext"><p><i>Human.</i> The Halvard Combine's guards: well paid, badly briefed, and never alone.</p><p><b>Stamina</b> 24. <b>Armour</b> 5. <b>Skills</b> Firearms 1, Melee 1, Tactics 0.</p><p><b>Service Pistol.</b> Attack +1 (3d6), 20 m.</p><p><b>Shock Baton.</b> Attack +1 (2d6), melee; a target hit makes a Grit check or loses its next turn.</p></text>
+			</p0002>
+			<p0003>
+				<name type="string">Pirate Raider</name>
+				<text type="formattedtext"><p><i>Human.</i> Reach pirates rarely kill a crew that surrenders: dead crews make bad customers.</p><p><b>Stamina</b> 23. <b>Armour</b> 3. <b>Skills</b> Firearms 1, Melee 1, Zero-G 1.</p><p><b>Carbine.</b> Attack +1 (3d6), 100 m.</p><p><b>Cutlass.</b> Attack +1 (2d6), melee.</p></text>
+			</p0003>
+			<p0004>
+				<name type="string">Mags Orrin</name>
+				<text type="formattedtext"><p><i>Human.</i> Captain of the salvage tug Pale Gull: charming, ruthless and always fifteen minutes behind you. She would rather deal than shoot, if the deal is good.</p><p><b>Stamina</b> 26. <b>Armour</b> 3. <b>Skills</b> Firearms 2, Pilot 2, Deceive 2, Leadership 1, Zero-G 1.</p><p><b>Laser Pistol.</b> Attack +3 (3d6), 30 m.</p><p><b>Knife.</b> Attack +1 (1d6), melee.</p></text>
+			</p0004>
+			<p0005>
+				<name type="string">Gull Crewman</name>
+				<text type="formattedtext"><p><i>Human.</i> Mags Orrin's salvagers, in patched vac suits.</p><p><b>Stamina</b> 24. <b>Armour</b> 4. <b>Skills</b> Firearms 1, Zero-G 1, Mechanics 1.</p><p><b>Snub Pistol.</b> Attack +1 (2d6), 10 m.</p><p><b>Cutting Laser.</b> Attack +0 (2d6), melee.</p></text>
+			</p0005>
+			<p0006>
+				<name type="string">Salvage Drone</name>
+				<text type="formattedtext"><p><i>Robot.</i> A boxy drone with magnetic treads and a cutting arm, built to strip wrecks. A damaged control core makes it treat everything as scrap.</p><p><b>Stamina</b> 18. <b>Armour</b> 6. <b>Skills</b> Melee 1, Recon 1.</p><p><b>Cutting Arm.</b> Attack +1 (2d6), melee.</p></text>
+			</p0006>
+			<p0007>
+				<name type="string">Sentry Turret</name>
+				<text type="formattedtext"><p><i>Robot.</i> A ceiling-mounted defence gun, guarding a ship's bridge or vault.</p><p><b>Stamina</b> 16. <b>Armour</b> 8. <b>Skills</b> Firearms 2.</p><p><b>Twin Guns.</b> Attack +2 (3d6), 50 m.</p></text>
+			</p0007>
+			<p0008>
+				<name type="string">Rust Crawler</name>
+				<text type="formattedtext"><p><i>Creature.</i> Spiny metal-eaters from the asteroid belts that get into hulls and chew through cabling. Annoying alone; dangerous in a swarm.</p><p><b>Stamina</b> 12. <b>Armour</b> 2. <b>Skills</b> Stealth 2, Athletics 1.</p><p><b>Mandibles.</b> Attack +1 (1d6), melee; a vac suit hit springs a slow leak.</p></text>
+			</p0008>
+			<p0009>
+				<name type="string">Void Lamprey</name>
+				<text type="formattedtext"><p><i>Creature.</i> Three metres of muscle and teeth that drift between asteroids and latch on to anything warm.</p><p><b>Stamina</b> 26. <b>Armour</b> 3. <b>Skills</b> Athletics 2, Stealth 1.</p><p><b>Rasping Maw.</b> Attack +2 (3d6), melee; it holds on: 1d6 each turn until pulled off (Brawn, Hard).</p></text>
+			</p0009>
+			<p0010>
+				<name type="string">Hollow-Eyed Survivor</name>
+				<text type="formattedtext"><p><i>Human.</i> Someone who has been alone on a dead ship too long. Scared, starving, and armed with whatever was to hand.</p><p><b>Stamina</b> 17. <b>Armour</b> 0. <b>Skills</b> Engineering 1, Electronics 1.</p><p><b>Wrench.</b> Attack -1 (1d6), melee.</p></text>
+			</p0010>
+		</refmanualdata>
+	</reference>
+</root>

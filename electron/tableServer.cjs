@@ -1325,6 +1325,18 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       // spec with the campaign's books. A player's character is theirs.
       if (msg.type === "build-character") {
         const answer = (body) => send(ws, { type: "op-result", req: msg.req ?? null, ...body });
+        if (ruleset === require("./astra.cjs").RULESET_NAME) {
+          // An Apeira Astra character from its wizard's spec.
+          const owner = client.role === "dm" ? text(msg.owner, "").slice(0, 24) : client.name;
+          require("./astra.cjs")
+            .buildAstra(agentHandle, msg.spec ?? {}, owner, client.role === "dm" ? seatOf(client) : { role: "dm", name: client.name })
+            .then(({ record, problems }) => {
+              addChat({ id: client.id, from: client.name, text: `Created ${record.name}: ${record.data.origin ?? ""} ${(record.data.paths ?? []).join(" / ")}.`, at: Date.now() });
+              answer({ ok: true, id: record.id, problems });
+            })
+            .catch((error) => answer({ ok: false, error: error instanceof Error ? error.message : "Could not build that character." }));
+          return;
+        }
         if (require("./dnd5e.cjs").isD20Ruleset(ruleset)) {
           // A 5E character from its wizard's spec.
           const owner = client.role === "dm" ? text(msg.owner, "").slice(0, 24) : client.name;
@@ -1378,6 +1390,19 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         levelUp(agentHandle, record, msg.package, client.role === "dm" ? record.name : client.name).catch((error) =>
           send(ws, { type: "error", reason: error instanceof Error ? error.message : "Could not level up." }),
         );
+        return;
+      }
+
+      // Apeira Astra: experience spent on a skill or a characteristic.
+      if (msg.type === "character-improve") {
+        const record = records.get(msg.id, seatOf(client));
+        if (!record || (client.role !== "dm" && record.owner !== client.name)) {
+          send(ws, { type: "error", reason: "You cannot improve that character." });
+          return;
+        }
+        require("./astra.cjs")
+          .improveAstra(agentHandle, record, { skill: msg.skill ? String(msg.skill) : "", attribute: msg.attribute ? String(msg.attribute) : "" }, seatOf(client), client.role === "dm" ? record.name : client.name)
+          .catch((error) => send(ws, { type: "error", reason: error instanceof Error ? error.message : "Could not improve." }));
         return;
       }
 
