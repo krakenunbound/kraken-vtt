@@ -117,6 +117,8 @@
       "sounds/**/*",
       "shared/**/*",
       "games/modules/**/*",
+      "games/portraits/**/*",
+      "games/tokens/**/*",
       "skills/**/*",
       "build/icon.png",
       "package.json",

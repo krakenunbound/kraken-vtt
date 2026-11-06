@@ -3,7 +3,9 @@
     "dd": "dark fantasy oil painting, painterly, moody candlelit atmosphere, muted earthy palette, detailed, no text, no watermark",
     "ddcreature": "dark fantasy creature portrait, oil painting, dramatic rim lighting, dark misty background, head and shoulders filling the frame, centered, detailed, no text, no watermark",
     "aa": "gritty retro science fiction painting, worn industrial spacecraft, cinematic lighting, muted teal and amber palette, detailed, no text, no watermark",
-    "aacreature": "gritty science fiction character portrait, cinematic lighting, dark industrial background, head and shoulders filling the frame, centered, detailed, no text, no watermark"
+    "aacreature": "gritty science fiction character portrait, cinematic lighting, dark industrial background, head and shoulders filling the frame, centered, detailed, no text, no watermark",
+    "ddhero": "dark fantasy adventurer character portrait, oil painting, head and shoulders, three-quarter view, dramatic warm rim lighting, dark misty background, centered, detailed face, no text, no watermark",
+    "aahero": "gritty science fiction crew member character portrait, cinematic lighting, head and shoulders, three-quarter view, dark starship interior background, centered, detailed face, no text, no watermark"
   },
   "pictures": [
     {
@@ -239,5 +241,128 @@
       "hollow-eyed-survivor",
       "a gaunt starving woman in a stained vac suit with hollow eyes, holding a wrench, scared and desperate"
     ]
-  ]
+  ],
+  "heroes": {
+    "dd": {
+      "kin": {
+        "Human": [
+          "Fighter",
+          "Cleric",
+          "Wizard",
+          "Thief",
+          "Paladin",
+          "Ranger",
+          "Bard"
+        ],
+        "Elf": [
+          "Fighter",
+          "Cleric",
+          "Wizard",
+          "Thief",
+          "Ranger",
+          "Bard"
+        ],
+        "Half-Elf": [
+          "Fighter",
+          "Cleric",
+          "Wizard",
+          "Thief",
+          "Ranger",
+          "Bard"
+        ],
+        "Dwarf": [
+          "Fighter",
+          "Cleric",
+          "Thief"
+        ],
+        "Gnome": [
+          "Cleric",
+          "Wizard",
+          "Thief",
+          "Bard"
+        ]
+      },
+      "look": {
+        "Human": "human",
+        "Elf": "elf with long pointed ears and fine features",
+        "Half-Elf": "half-elf with slightly pointed ears",
+        "Dwarf": "stocky dwarf with a thick braided beard",
+        "Gnome": "small gnome with a big nose and bright curious eyes"
+      },
+      "role": {
+        "Fighter": "a fighter in battered chain mail with a sword",
+        "Cleric": "a cleric in a hooded robe over mail with a holy symbol",
+        "Wizard": "a wizard in worn robes holding a staff with a faint glow",
+        "Thief": "a thief in a dark hood and leather with a dagger",
+        "Paladin": "a paladin in plate armour with a tabard and a shield",
+        "Ranger": "a ranger in a green cloak with a longbow",
+        "Bard": "a bard in a travel coat with a lute on the back"
+      }
+    },
+    "aa": {
+      "kin": {
+        "Coreborn": [
+          "Fleet",
+          "Marine",
+          "Scout",
+          "Merchant",
+          "Engineer",
+          "Medic",
+          "Drifter"
+        ],
+        "Spacer": [
+          "Fleet",
+          "Marine",
+          "Scout",
+          "Merchant",
+          "Engineer",
+          "Medic",
+          "Drifter"
+        ],
+        "Frontier": [
+          "Fleet",
+          "Marine",
+          "Scout",
+          "Merchant",
+          "Engineer",
+          "Medic",
+          "Drifter"
+        ],
+        "Undercity": [
+          "Fleet",
+          "Marine",
+          "Scout",
+          "Merchant",
+          "Engineer",
+          "Medic",
+          "Drifter"
+        ],
+        "Belter": [
+          "Fleet",
+          "Marine",
+          "Scout",
+          "Merchant",
+          "Engineer",
+          "Medic",
+          "Drifter"
+        ]
+      },
+      "look": {
+        "Coreborn": "polished core-world citizen",
+        "Spacer": "pale lean spacer born aboard ships",
+        "Frontier": "weathered frontier colonist with sun-lined skin",
+        "Undercity": "street-hardened undercity survivor with a scar",
+        "Belter": "tall thin asteroid belter with a buzz cut and tattoos"
+      },
+      "role": {
+        "Fleet": "in a navy flight officer's jacket with plain unmarked rank tabs",
+        "Marine": "in a combat armour vest with a carbine slung",
+        "Scout": "in a survey jumpsuit with a hand scanner",
+        "Merchant": "in a smart trader's long coat with a data slate",
+        "Engineer": "in a grease-stained vac suit with tools on the belt",
+        "Medic": "in a teal medic's jacket with a plain white caduceus-free medical armband and a medkit",
+        "Drifter": "in a worn leather jacket with a pistol at the hip"
+      }
+    }
+  }
 }

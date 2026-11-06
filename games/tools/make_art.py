@@ -23,6 +23,17 @@ GAME = {"dd": "games/descending-darkness/art", "aa": "games/apeira-astra/art"}
 for game, key, prompt in spec["creatures"]:
     jobs.append((f"{GAME[game]}/npc/{key}.webp", 1024, 1024, f'{prompt}, {spec["style"][game + "creature"]}'))
 
+# Character portraits: games/portraits/<Kin>/<Kin> <Class>.webp, Kraken's
+# own pair for a new character of that kin and class (characterArt.cjs).
+n = 0
+for game, set_ in spec.get("heroes", {}).items():
+    for kin, classes in set_["kin"].items():
+        for cls in classes:
+            n += 1
+            who = "woman" if n % 2 else "man"
+            prompt = f'a {set_["look"][kin]} {who}, {set_["role"][cls]}'
+            jobs.append((f"games/portraits/{kin}/{kin} {cls}.webp", 1024, 1024, f'{prompt}, {spec["style"][game + "hero"]}'))
+
 for out, width, height, prompt in jobs:
     if only not in out:
         continue
@@ -30,8 +41,8 @@ for out, width, height, prompt in jobs:
     os.makedirs(os.path.dirname(target), exist_ok=True)
     if not os.path.exists(target):
         picture(target, width, height, prompt, zlib.crc32(out.encode()) % 2**31)
-    if "/npc/" in out:
-        token = target.replace(os.sep + "npc" + os.sep, os.sep + "tokens" + os.sep).replace("/npc/", "/tokens/")
+    if "/npc/" in out or out.startswith("games/portraits/"):
+        token = target.replace(os.sep + "npc" + os.sep, os.sep + "tokens" + os.sep).replace("/npc/", "/tokens/").replace("games/portraits/", "games/tokens/")
         os.makedirs(os.path.dirname(token), exist_ok=True)
         if not os.path.exists(token):
             Image.open(target).convert("RGB").resize((256, 256), Image.LANCZOS).save(token, "WEBP", quality=86)

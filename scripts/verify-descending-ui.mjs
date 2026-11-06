@@ -99,6 +99,8 @@ try {
   const full = await tool("kraken_record_get", { id: record.id });
   const data = full.data ?? full.record?.data;
   assert(data.ruleset === "descending" && data.abilities.constitution.score === 15 && data.abilities.charisma.score === 7, `the dwarf's scores: con ${data.abilities.constitution.score}, cha ${data.abilities.charisma.score}`);
+  // A portrait and token for every new character (Kraken's own when the GM has none of that kin).
+  assert(typeof data.portrait === "string" && data.portrait && typeof data.token === "string" && data.token, `the dwarf has a portrait and token: ${data.portrait}, ${data.token}`);
   assert(data.hp.total === 13 && data.ac.total === 18, `Health 13 (d10 + 2 + Hardy 1) and Defense 18 (chain and shield): ${data.hp.total}, ${data.ac.total}`);
   // Dread from the sheet.
   await sheet.locator('[data-stat="dread"] button').nth(2).click();
