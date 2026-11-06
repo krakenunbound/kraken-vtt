@@ -6,10 +6,9 @@ import type { WindowKind } from "./Windows";
 // FG's sidebar (CoreRPG's desktop dock): a row of tools at the top, then the
 // categories (Library, Player, Campaign, Character), each a header that folds
 // its buttons away; a button opens its window (a list opens on its own, as
-// FG's master index for that record type). The arrow at the bottom steps
-// through FG's three sidebar states: icons and names; icons only, the
-// categories cut to four letters; a thin strip, the categories cut to one
-// letter (the arrow turns round there: press it to open the sidebar again).
+// FG's master index for that record type). The arrow at the bottom collapses
+// it to icons only, the categories cut to four letters, and opens it again
+// (FG has a third, thinner strip; too close to icons only to be worth it).
 // The state and the folded categories are kept on this screen.
 
 export type SidebarEntry = {
@@ -25,7 +24,7 @@ export type SidebarEntry = {
   launch?: string;
 };
 export type SidebarGroup = { id: string; label: string; entries: SidebarEntry[] };
-export type SidebarState = 0 | 1 | 2;
+export type SidebarState = 0 | 1;
 
 export const entryId = (entry: SidebarEntry) => entry.launch ?? (entry.payload ? `${entry.kind}:${entry.payload}` : entry.kind);
 
@@ -34,7 +33,7 @@ type Saved = { state: SidebarState; closed: string[] };
 function read(): Saved {
   try {
     const saved = JSON.parse(localStorage.getItem(STORE) ?? "{}") as Partial<Saved>;
-    const state = saved.state === 1 || saved.state === 2 ? saved.state : 0;
+    const state: SidebarState = saved.state === 1 || (saved.state as number) === 2 ? 1 : 0;
     return { state, closed: Array.isArray(saved.closed) ? saved.closed.filter((item) => typeof item === "string") : [] };
   } catch {
     return { state: 0, closed: [] };
@@ -62,7 +61,7 @@ export function Sidebar({
     }
   };
   const { state, closed } = saved;
-  const name = (label: string) => (state === 2 ? label.slice(0, 1) : state === 1 ? label.slice(0, 4) : label);
+  const name = (label: string) => (state === 1 ? label.slice(0, 4) : label);
   // The agent's handle on it (kraken_sidebar): the state, a category folded, a button pressed.
   const live = useRef({ saved, groups, tools, onLaunch, isOpen });
   live.current = { saved, groups, tools, onLaunch, isOpen };
@@ -73,14 +72,14 @@ export function Sidebar({
         const { saved: now, groups: all, tools: top, onLaunch: launch, isOpen: open } = live.current;
         const view = () => ({
           state: now.state,
-          states: ["icons and names", "icons", "thin strip"],
+          states: ["icons and names", "icons"],
           tools: top.map((entry) => ({ id: entryId(entry), label: entry.label, open: open(entry) })),
           groups: all.map((group) => ({ id: group.id, label: group.label, folded: now.closed.includes(group.id), entries: group.entries.map((entry) => ({ id: entryId(entry), label: entry.label, open: open(entry) })) })),
         });
         if (command.action === "list") return view();
         if (command.action === "state") {
           const next = Number(command.state);
-          if (next !== 0 && next !== 1 && next !== 2) throw new Error("state: 0 (icons and names), 1 (icons) or 2 (thin strip).");
+          if (next !== 0 && next !== 1) throw new Error("state: 0 (icons and names) or 1 (icons only).");
           save({ ...now, state: next as SidebarState });
           return { state: next };
         }
@@ -148,11 +147,11 @@ export function Sidebar({
         type="button"
         className="sidebar-visibility"
         data-action="sidebar-visibility"
-        title={state === 0 ? "Icons only" : state === 1 ? "A thin strip" : "Icons and names again"}
-        aria-label={state === 2 ? "Expand the sidebar" : "Collapse the sidebar"}
-        onClick={() => save({ ...saved, state: ((state + 1) % 3) as SidebarState })}
+        title={state === 0 ? "Icons only" : "Icons and names again"}
+        aria-label={state === 1 ? "Expand the sidebar" : "Collapse the sidebar"}
+        onClick={() => save({ ...saved, state: state === 0 ? 1 : 0 })}
       >
-        <Icon name={state === 2 ? "sidebar-expand" : "sidebar-collapse"} size={18} />
+        <Icon name={state === 1 ? "sidebar-expand" : "sidebar-collapse"} size={18} />
       </button>
     </nav>
   );
