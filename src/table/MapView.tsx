@@ -7,6 +7,7 @@ import type { DecalItem, EditWall, MapDoor, MapTile, MapToken, Ping, PictureKind
 import { useBookWindows } from "../books/Books";
 import { MapEditor, kindColor, placePicture, type EditTab, type EditTool, type LabelStyle, type PaintStyle } from "./MapEditor";
 import { Lighting } from "./Lighting";
+import { fxMaskImage, fxMaskStyle } from "./fxMask";
 import { SceneGraphics, SceneLegend, type OverlayToken } from "./SceneOverlay";
 import { SceneSettings, type SceneSettingsPatch } from "./SceneSettings";
 // three.js only loads when a scene has weather.
@@ -242,11 +243,13 @@ export function MapView({
   const [selectedLabel, setSelectedLabel] = useState<string | null>(null);
   const [paintStyle, setPaintStyle] = useState<PaintStyle>({ color: "#c0392b", width: 6, alpha: 1, fill: null, fillAlpha: 0.4, group: "" });
   const [selectedFx, setSelectedFx] = useState<string | null>(null);
+  // The FX tab's brush: how wide it paints an effect's area, in map pixels.
+  const [fxBrush, setFxBrush] = useState(90);
   // Image layers: the one selected in the Images tab, and a move or resize under way.
   const [selectedTile, setSelectedTile] = useState<string | null>(null);
   const tileDrag = useRef<{ pointerId: number; id: string; mode: "move" | "resize"; start: Point; tile: MapTile } | null>(null);
   const [tileDraft, setTileDraft] = useState<MapTile | null>(null);
-  const paintStroke = useRef<{ pointerId: number; points: number[] } | null>(null);
+  const paintStroke = useRef<{ pointerId: number; points: number[]; fx?: string } | null>(null);
   const [hover, setHover] = useState<{ x: number; y: number } | null>(null);
   const [drawColor, setDrawColor] = useState<string | null>(null);
   const [stroke, setStroke] = useState<{ pointerId: number; points: number[] } | null>(null);
@@ -282,6 +285,15 @@ export function MapView({
   const lightDrag = useRef<{ pointerId: number; id: string } | null>(null);
   const explored = useRef<{ sceneId: string; polygons: number[][] }>({ sceneId: "", polygons: [] });
   const frame = sceneFrame(scene);
+  // Each FX layer's mask picture, made again only when its painted areas change.
+  const fxMasks = useMemo(() => {
+    const out = new Map<string, string>();
+    for (const layer of map.fx ?? []) {
+      const image = fxMaskImage(layer.mask, frame.worldWidth, frame.worldHeight);
+      if (image) out.set(layer.id, image);
+    }
+    return out;
+  }, [map.fx, frame.worldWidth, frame.worldHeight]);
   const size = scene.grid.size > 0 ? scene.grid.size : 100;
   const gridSettings = map.sceneId === scene.id ? map.settings.grid : { show: true, alpha: null, color: null };
   const gridStroke = colorWithAlpha(gridSettings.color ?? scene.grid.color, gridSettings.alpha ?? scene.grid.alpha);
@@ -658,7 +670,29 @@ export function MapView({
     }
     return best;
   }
+  // One more painted area for the chosen effect's mask (the areas add up; the mask turns on).
+  function paintFxArea(area: { polygon: number[] } | { stroke: { width: number; points: number[] } }) {
+    const layer = (map.fx ?? []).find((item) => item.id === selectedFx);
+    if (!layer || !actions.fx) return;
+    // A double-click leaves its corner twice: the same corner once.
+    const corners: number[] = [];
+    if ("polygon" in area) {
+      for (let i = 0; i + 1 < area.polygon.length; i += 2) {
+        const [x, y] = [area.polygon[i], area.polygon[i + 1]];
+        if (corners.length < 2 || corners[corners.length - 2] !== x || corners[corners.length - 1] !== y) corners.push(x, y);
+      }
+    }
+    const polygons = "polygon" in area ? [...layer.mask.polygons, corners] : layer.mask.polygons;
+    const strokes = "stroke" in area ? [...(layer.mask.strokes ?? []), area.stroke] : layer.mask.strokes ?? [];
+    actions.fx("update", { id: layer.id, patch: { mask: { use: true, polygons, strokes } } });
+  }
   function finishShape() {
+    if (editTab === "fx" && editTool === "poly" && pending.length >= 6 && selectedFx) {
+      paintFxArea({ polygon: pending });
+      setPending([]);
+      setHover(null);
+      return;
+    }
     if (editTab === "paint" && editTool === "poly" && pending.length >= 6 && actions.paint) {
       actions.paint({ shape: "poly", points: pending, color: paintStyle.color, width: paintStyle.width, alpha: paintStyle.alpha, ...(paintStyle.fill ? { fill: paintStyle.fill, fillAlpha: paintStyle.fillAlpha } : {}), ...(paintStyle.group ? { group: paintStyle.group } : {}) });
       setPending([]);
@@ -735,15 +769,24 @@ export function MapView({
           return;
         }
         setPicked([]);
-        if (gm && editorOpen && editTool && editTab === "fx" && editTool === "fxmask" && actions.fx && selectedFx) {
-          // The FX layer's mask: a rectangle, two clicks.
+        if (gm && editorOpen && editTool && editTab === "fx" && actions.fx && selectedFx) {
+          // The FX layer's mask: the GM paints its areas, as many as wanted:
+          // a rectangle (two clicks), a shape (its corners, double-click to
+          // close) or the brush (drag along a river, round a pond).
           const raw = worldAt(event.clientX, event.clientY);
           if (!raw) return;
-          if (pending.length >= 2) {
-            const [x1, y1] = pending;
-            actions.fx("update", { id: selectedFx, patch: { mask: { use: true, polygons: [[x1, y1, raw.x, y1, raw.x, raw.y, x1, raw.y].map(Math.round)] } } });
-            setPending([]);
-          } else setPending([Math.round(raw.x), Math.round(raw.y)]);
+          const point = { x: Math.round(raw.x), y: Math.round(raw.y) };
+          if (editTool === "free") {
+            capture(event.currentTarget, event.pointerId);
+            paintStroke.current = { pointerId: event.pointerId, points: [point.x, point.y], fx: selectedFx };
+            setStroke({ pointerId: -1, points: [point.x, point.y] });
+          } else if (editTool === "rect") {
+            if (pending.length >= 2) {
+              const [x1, y1] = pending;
+              paintFxArea({ polygon: [x1, y1, point.x, y1, point.x, point.y, x1, point.y] });
+              setPending([]);
+            } else setPending([point.x, point.y]);
+          } else if (editTool === "poly") setPending((current) => [...current, point.x, point.y]);
           return;
         }
         if (gm && editorOpen && editTool && editTab === "paint" && actions.paint) {
@@ -941,6 +984,12 @@ export function MapView({
             actions.tile?.("update", { id, patch: { x: tileDraft.x, y: tileDraft.y, width: tileDraft.width, height: tileDraft.height } });
           }
           setTileDraft(null);
+          return;
+        }
+        if (paintStroke.current && paintStroke.current.pointerId === event.pointerId && paintStroke.current.fx) {
+          paintFxArea({ stroke: { width: fxBrush, points: paintStroke.current.points } });
+          paintStroke.current = null;
+          setStroke(null);
           return;
         }
         if (paintStroke.current && paintStroke.current.pointerId === event.pointerId) {
@@ -1185,6 +1234,24 @@ export function MapView({
                 {wall.hidden ? <line x1={wall.x1} y1={wall.y1} x2={wall.x2} y2={wall.y2} stroke="#ff4444" strokeWidth={2 / camera.scale} strokeDasharray={`${4 / camera.scale} ${4 / camera.scale}`} /> : null}
               </g>
             ))}
+            {editTab === "fx"
+              ? (() => {
+                  // The chosen effect's painted areas, outlined while the FX tab is open; the brush as it paints.
+                  const layer = (map.fx ?? []).find((item) => item.id === selectedFx);
+                  const line = { fill: "rgba(90, 200, 255, 0.12)", stroke: "#5ac8ff", strokeWidth: 2 / camera.scale, strokeDasharray: `${8 / camera.scale} ${5 / camera.scale}` };
+                  return (
+                    <g className="fx-areas" data-fx-areas={layer ? layer.mask.polygons.length + (layer.mask.strokes?.length ?? 0) : 0}>
+                      {(layer?.mask.polygons ?? []).map((points, index) => (
+                        <polygon key={`p${index}`} points={points.join(" ")} {...line} />
+                      ))}
+                      {(layer?.mask.strokes ?? []).map((item, index) => (
+                        <polyline key={`s${index}`} points={item.points.join(" ")} fill="none" stroke="rgba(90, 200, 255, 0.28)" strokeWidth={item.width} strokeLinecap="round" strokeLinejoin="round" />
+                      ))}
+                      {stroke ? <polyline points={stroke.points.join(" ")} fill="none" stroke="rgba(90, 200, 255, 0.45)" strokeWidth={fxBrush} strokeLinecap="round" strokeLinejoin="round" /> : null}
+                    </g>
+                  );
+                })()
+              : null}
             {pending.length >= 2 ? (
               <>
                 <polyline points={[...pending, ...(hover ? [hover.x, hover.y] : [])].join(" ")} fill="none" stroke={kindColor(wallKind)} strokeWidth={3 / camera.scale} strokeDasharray={`${8 / camera.scale} ${4 / camera.scale}`} />
@@ -1401,7 +1468,7 @@ export function MapView({
                 if (line.shape === "poly") return <polygon {...common} points={line.points.join(" ")} />;
                 return <polyline {...common} fill="none" points={line.points.join(" ")} />;
               })}
-            {stroke ? <polyline points={stroke.points.join(" ")} fill="none" stroke={drawColor ?? "#ffcc33"} strokeWidth={Math.max(2, Math.round(4 / camera.scale))} strokeLinecap="round" strokeLinejoin="round" opacity={0.8} /> : null}
+            {stroke && !(editorOpen && editTab === "fx") ? <polyline points={stroke.points.join(" ")} fill="none" stroke={drawColor ?? "#ffcc33"} strokeWidth={Math.max(2, Math.round(4 / camera.scale))} strokeLinecap="round" strokeLinejoin="round" opacity={0.8} /> : null}
           </svg>
         ) : null}
         {found
@@ -1449,19 +1516,12 @@ export function MapView({
         ? (map.fx ?? [])
             .filter((layer) => layer.shown && (!layer.group || (map.groups ?? []).find((group) => group.name === layer.group)?.shown !== false))
             .map((layer) => {
-              // The FX layer's mask, in screen pixels: only inside, or everywhere but inside.
-              let clip: string | undefined;
-              if (layer.mask.use && layer.mask.polygons.length) {
-                const shapes = layer.mask.polygons.map((points) => {
-                  const xy: string[] = [];
-                  for (let i = 0; i < points.length; i += 2) xy.push(`${Math.round(points[i] * camera.scale + camera.x)} ${Math.round(points[i + 1] * camera.scale + camera.y)}`);
-                  return `M${xy.join(" L")} Z`;
-                });
-                clip = layer.mask.mode === "outside" ? `path(evenodd, "M-99999 -99999 H99999 V99999 H-99999 Z ${shapes.join(" ")}")` : `path("${shapes.join(" ")}")`;
-              }
+              // The FX layer's mask: its painted areas, as a picture in map pixels placed with the camera.
+              const image = fxMasks.get(layer.id);
+              const masked = image ? fxMaskStyle(image, frame.worldWidth, frame.worldHeight, camera) : undefined;
               return (
                 <Suspense key={layer.id} fallback={null}>
-                  <Weather type={layer.type} intensity={layer.intensity} direction={layer.direction} amount={layer.amount} speed={layer.speed} camera={camera} clip={clip} />
+                  <Weather type={layer.type} intensity={layer.intensity} direction={layer.direction} amount={layer.amount} speed={layer.speed} camera={camera} mask={masked} />
                 </Suspense>
               );
             })
@@ -1797,6 +1857,8 @@ export function MapView({
           setPaintStyle={setPaintStyle}
           selectedFx={selectedFx}
           setSelectedFx={setSelectedFx}
+          fxBrush={fxBrush}
+          setFxBrush={setFxBrush}
           selectedTile={selectedTile}
           setSelectedTile={setSelectedTile}
           viewCenter={() => viewCenter()}

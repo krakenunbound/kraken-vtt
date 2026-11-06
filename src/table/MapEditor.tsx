@@ -10,7 +10,7 @@ import { LIGHT_PRESETS } from "../../shared/map/geometry.mjs";
 // kraken_map_undo).
 
 export type EditTab = "walls" | "lights" | "mask" | "text" | "grid" | "paint" | "fx" | "images";
-export type EditTool = "select" | "line" | "rect" | "poly" | "light" | "cell" | "text" | "number" | "free" | "ellipse" | "fxmask" | null;
+export type EditTool = "select" | "line" | "rect" | "poly" | "light" | "cell" | "text" | "number" | "free" | "ellipse" | null;
 // What the Paint tab draws next.
 export type PaintStyle = { color: string; width: number; alpha: number; fill: string | null; fillAlpha: number; group: string };
 export const LABEL_FONTS = ["Bebas Neue", "Cinzel", "Georgia", "Signika", "Arial", "Courier New"];
@@ -62,6 +62,9 @@ type Props = {
   setPaintStyle: (style: PaintStyle) => void;
   selectedFx: string | null;
   setSelectedFx: (id: string | null) => void;
+  // The FX tab's brush width (map pixels).
+  fxBrush: number;
+  setFxBrush: (width: number) => void;
   labelStyle: LabelStyle;
   setLabelStyle: (style: LabelStyle) => void;
   selectedLabel: string | null;
@@ -650,8 +653,10 @@ const FX_LIST = ["rain", "storm", "snow", "blizzard", "fog", "clouds", "sandstor
 
 // FG's FX tab: FX layers (several at once), FX Type, Amount, Intensity, Speed
 // and Direction (0 to 100 as FG shows them), and a mask the effect fills or leaves.
+// the GM paints its areas on the map, as many as wanted (a rectangle, a
+// shape, the brush along a river), and removes one again from the list.
 function FxTab(props: Props) {
-  const { map, actions, selectedFx, setSelectedFx, tool, setTool } = props;
+  const { map, actions, selectedFx, setSelectedFx, tool, setTool, fxBrush, setFxBrush } = props;
   const layers = map.fx ?? [];
   const layer = layers.find((item) => item.id === selectedFx) ?? null;
   const set = (patch: Record<string, unknown>) => layer && actions.fx("update", { id: layer.id, patch });
@@ -669,11 +674,17 @@ function FxTab(props: Props) {
         <button type="button" className="me-tool" title="New FX layer (rain)" aria-label="New FX layer" data-action="fx-add" onClick={() => actions.fx("add", { fx: { type: "rain", name: `FX ${layers.length + 1}` } })}>
           ✚
         </button>
-        {layer ? (
-          <button type="button" className={tool === "fxmask" ? "me-tool on" : "me-tool"} aria-pressed={tool === "fxmask"} title="Mask this effect to a rectangle: click two corners" aria-label="Mask the effect" data-edit-tool="fxmask" onClick={() => setTool(tool === "fxmask" ? null : "fxmask")}>
-            ▭
-          </button>
-        ) : null}
+        {layer
+          ? ([
+              ["rect", "▭", "Paint an area: a rectangle, click two corners"],
+              ["poly", "⬠", "Paint an area: a shape, click its corners, double-click to close"],
+              ["free", "🖌", "Paint an area with the brush: drag along a river, round a pond"],
+            ] as const).map(([id, glyph, title]) => (
+              <button key={id} type="button" className={tool === id ? "me-tool on" : "me-tool"} aria-pressed={tool === id} title={title} aria-label={title} data-edit-tool={`fx-${id}`} onClick={() => setTool(tool === id ? null : id)}>
+                {glyph}
+              </button>
+            ))
+          : null}
       </div>
       <div className="me-box">
         {layer ? (
@@ -704,10 +715,49 @@ function FxTab(props: Props) {
                 <option value="inside">Only inside</option>
                 <option value="outside">Everywhere but inside</option>
               </select>
-              <button type="button" onClick={() => set({ mask: { use: false, polygons: [] } })} disabled={!layer.mask.polygons.length}>
+              <button type="button" data-action="fx-clear-mask" onClick={() => set({ mask: { use: false, polygons: [], strokes: [] } })} disabled={!layer.mask.polygons.length && !layer.mask.strokes?.length}>
                 Clear mask
               </button>
             </div>
+            <label className="me-slider">
+              Brush
+              <input type="range" min={10} max={400} step={5} value={fxBrush} onChange={(event) => setFxBrush(Number(event.target.value))} aria-label="FX brush width" />
+              <span>{fxBrush}px</span>
+            </label>
+            <label className="me-slider">
+              Soft edge
+              <input type="range" min={0} max={120} step={2} value={layer.mask.soft ?? 12} onChange={(event) => set({ mask: { soft: Number(event.target.value) } })} aria-label="FX mask soft edge" />
+              <span>{layer.mask.soft ?? 12}px</span>
+            </label>
+            {(() => {
+              const areas = [...layer.mask.polygons.map((points) => (points.length === 8 && points[1] === points[3] && points[2] === points[4] && points[5] === points[7] && points[6] === points[0] ? "Rectangle" : `Shape (${points.length / 2} corners)`)), ...(layer.mask.strokes ?? []).map((item) => `Brush (${item.width}px)`)];
+              return (
+                <div className="me-areas" aria-label="Painted areas">
+                  {areas.length === 0 ? <p className="me-caption">No areas yet: paint where the effect shows (or, with Everywhere but inside, where it does not) with the tools above.</p> : null}
+                  {areas.map((label, index) => (
+                    <div key={index} className="me-area-row" data-fx-area={index}>
+                      <span>
+                        {index + 1}. {label}
+                      </span>
+                      <button
+                        type="button"
+                        title="Remove this area"
+                        aria-label={`Remove area ${index + 1}`}
+                        onClick={() => {
+                          const polygons = [...layer.mask.polygons];
+                          const strokes = [...(layer.mask.strokes ?? [])];
+                          if (index < polygons.length) polygons.splice(index, 1);
+                          else strokes.splice(index - polygons.length, 1);
+                          set({ mask: { use: polygons.length + strokes.length > 0 && layer.mask.use, polygons, strokes } });
+                        }}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
             <div className="me-row">
               <label>
                 <input type="checkbox" checked={layer.players} onChange={(event) => set({ players: event.target.checked })} /> Players see it
@@ -733,7 +783,7 @@ function FxTab(props: Props) {
         </div>
         {layers.map((item) => (
           <button key={item.id} type="button" className={item.id === selectedFx ? "me-layer-row on" : "me-layer-row"} data-fx={item.id} onClick={() => setSelectedFx(item.id)}>
-            ƒx {item.name || item.type} <small className="hint">{item.type}{item.mask.use ? ` · masked ${item.mask.mode}` : ""}{item.players ? "" : " · GM only"}</small>
+            ƒx {item.name || item.type} <small className="hint">{item.type}{item.mask.use ? ` · ${item.mask.polygons.length + (item.mask.strokes?.length ?? 0)} areas, ${item.mask.mode}` : ""}{item.players ? "" : " · GM only"}</small>
           </button>
         ))}
       </div>

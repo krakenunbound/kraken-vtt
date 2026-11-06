@@ -1175,9 +1175,9 @@ const TOOLS = [
   {
     name: "kraken_fx",
     description:
-      "FX layers on the scene (FG's FX tab): several at once, each rain, storm, snow, blizzard, fog, clouds, sandstorm, embers, ash, leaves or water, with FG's sliders amount, intensity, speed (0..1) and direction (degrees the wind blows toward), and a mask it fills (mode inside: only there, as water in a river) or leaves clear (outside: everywhere but there, as rain not under a roof). action list; add (type, name, amount, intensity, speed, direction, mask {use, mode, polygons: [[x1, y1, ...], ...]} or maskRect {x, y, width, height}, group, players false for the GM's eyes only); update (id and fields); remove (id).",
+      "FX layers on the scene (FG's FX tab): several at once, each rain, storm, snow, blizzard, fog, clouds, sandstorm, embers, ash, leaves or water, with FG's sliders amount, intensity, speed (0..1) and direction (degrees the wind blows toward), and a mask it fills (mode inside: only there, as water in a river) or leaves clear (outside: everywhere but there, as rain not under a roof). action list; add (type, name, amount, intensity, speed, direction, mask {use, mode, polygons: [[x1, y1, ...], ...]} or maskRect {x, y, width, height}, group, players false for the GM's eyes only); update (id and fields); remove (id); paint (id, area: one more painted area for its mask, as the FX tab's tools: {polygon: [x1, y1, ...]} a shape, {rect: {x, y, width, height}}, or {stroke: {width, points: [x1, y1, ...]}} a brush stroke; the areas add up, the mask turns on; soft: the edge's fade in map pixels); erase-area (id, area: the index of a painted area, shapes first then strokes, or \"last\"). A river or lake: type water, painted with the brush along it.",
     inputSchema: object({
-      action: { type: "string", enum: ["list", "add", "update", "remove"] },
+      action: { type: "string", enum: ["list", "add", "update", "remove", "paint", "erase-area"] },
       id: string("FX layer id"),
       type: { type: "string", enum: ["rain", "storm", "snow", "blizzard", "fog", "clouds", "sandstorm", "embers", "ash", "leaves", "water"] },
       name: string("A name for the list"),
@@ -1188,13 +1188,36 @@ const TOOLS = [
       mask: { type: "object" },
       maskRect: { type: "object", properties: { x: { type: "number" }, y: { type: "number" }, width: { type: "number" }, height: { type: "number" } } },
       maskMode: { type: "string", enum: ["inside", "outside"] },
+      area: { description: "paint: {polygon} | {rect} | {stroke: {width, points}}; erase-area: an index or \"last\"" },
+      soft: number("paint: the mask's soft edge, map pixels (0..200)"),
       group: string("Layer group"),
       players: { type: "boolean" },
       shown: { type: "boolean" },
     }, ["action"]),
     run(args, ctx) {
       const { map, seat } = needTable(ctx);
-      const { action, id, maskRect, maskMode, ...fields } = args;
+      const { action, id, maskRect, maskMode, area, soft, ...fields } = args;
+      if (action === "paint" || action === "erase-area") {
+        const layer = map.fx().find((item) => item.id === id);
+        if (!layer) throw new Error(`No effect ${id}.`);
+        const polygons = [...layer.mask.polygons];
+        const strokes = [...(layer.mask.strokes ?? [])];
+        if (action === "paint") {
+          if (area?.rect) {
+            const { x, y, width, height } = area.rect;
+            polygons.push([x, y, x + width, y, x + width, y + height, x, y + height]);
+          } else if (Array.isArray(area?.polygon)) polygons.push(area.polygon);
+          else if (area?.stroke) strokes.push({ width: area.stroke.width ?? 60, points: area.stroke.points ?? [] });
+          else throw new Error("What area? {polygon}, {rect} or {stroke: {width, points}}.");
+          return out(map.updateFx(id, { mask: { use: true, polygons, strokes, ...(soft !== undefined ? { soft } : {}), ...(maskMode ? { mode: maskMode } : {}) } }, seat));
+        }
+        const total = polygons.length + strokes.length;
+        const index = area === "last" || area === undefined ? total - 1 : Number(area);
+        if (!(index >= 0 && index < total)) throw new Error(`No area ${area}: the mask has ${total}.`);
+        if (index < polygons.length) polygons.splice(index, 1);
+        else strokes.splice(index - polygons.length, 1);
+        return out(map.updateFx(id, { mask: { use: polygons.length + strokes.length > 0, polygons, strokes } }, seat));
+      }
       if (maskRect) {
         const { x, y, width, height } = maskRect;
         fields.mask = { use: true, mode: maskMode ?? "inside", polygons: [[x, y, x + width, y, x + width, y + height, x, y + height]] };

@@ -80,7 +80,7 @@ export type Ping = { id: number; x: number; y: number; from: string; color: stri
 // A line drawn on the map, for everyone (by "" is the GM's).
 export type MapDrawing = { id: string; by: string; color: string; width: number; points: number[]; shape?: "line" | "rect" | "ellipse" | "poly"; fill?: string; fillAlpha?: number; alpha?: number; group?: string };
 // An FX layer (FG's FX tab).
-export type MapFx = { id: string; name: string; type: import("../table/Weather").WeatherType; amount: number; intensity: number; speed: number; direction: number; mask: { use: boolean; mode: "inside" | "outside"; polygons: number[][] }; group: string; players: boolean; shown: boolean };
+export type MapFx = { id: string; name: string; type: import("../table/Weather").WeatherType; amount: number; intensity: number; speed: number; direction: number; mask: { use: boolean; mode: "inside" | "outside"; polygons: number[][]; strokes?: { width: number; points: number[] }[]; soft?: number }; group: string; players: boolean; shown: boolean };
 const EMPTY_MAP: TableMap = { sceneId: null, tokens: [], doors: [], vision: null,
   sight: false,
   locked: false,

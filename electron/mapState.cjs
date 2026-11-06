@@ -253,6 +253,9 @@ function cleanDrawing(raw) {
 
 // An FX layer (FG's FX tab): rain, snow, fog... with FG's sliders (0..1) and
 // a mask it fills (inside) or leaves (outside). players false: the GM's only.
+// The mask is the GM's painted areas, as many as wanted: shapes (polygons:
+// rectangles, corners clicked) and brush strokes (a line of points with a
+// width), all together; soft: how far its edge fades, in map pixels.
 const FX_TYPES = ["rain", "storm", "snow", "blizzard", "fog", "clouds", "sandstorm", "embers", "ash", "leaves", "water"];
 function cleanFx(raw) {
   if (!raw || typeof raw !== "object") return null;
@@ -260,7 +263,12 @@ function cleanFx(raw) {
   const polygons = (Array.isArray(raw.mask?.polygons) ? raw.mask.polygons : [])
     .map((points) => (Array.isArray(points) ? points.slice(0, 2000).map(Number) : []))
     .filter((points) => points.length >= 6 && points.length % 2 === 0 && points.every(Number.isFinite))
-    .slice(0, 50);
+    .slice(0, 200);
+  const strokes = (Array.isArray(raw.mask?.strokes) ? raw.mask.strokes : [])
+    .map((stroke) => ({ width: Math.round(Math.min(800, Math.max(4, num(stroke?.width, 60)))), points: Array.isArray(stroke?.points) ? stroke.points.slice(0, 4000).map((value) => Math.round(Number(value))) : [] }))
+    .filter((stroke) => stroke.points.length >= 2 && stroke.points.length % 2 === 0 && stroke.points.every(Number.isFinite))
+    .slice(0, 200);
+  const painted = polygons.length > 0 || strokes.length > 0;
   return {
     id: text(raw.id, "").slice(0, 40) || `fx-${crypto.randomBytes(5).toString("hex")}`,
     name: text(raw.name, "").slice(0, 40),
@@ -269,7 +277,7 @@ function cleanFx(raw) {
     intensity: unit(raw.intensity, 0.5),
     speed: unit(raw.speed, 0.5),
     direction: ((num(raw.direction, 250) % 360) + 360) % 360,
-    mask: { use: Boolean(raw.mask?.use) && polygons.length > 0, mode: raw.mask?.mode === "outside" ? "outside" : "inside", polygons },
+    mask: { use: Boolean(raw.mask?.use) && painted, mode: raw.mask?.mode === "outside" ? "outside" : "inside", polygons, strokes, soft: Math.round(Math.min(200, Math.max(0, num(raw.mask?.soft, 12)))) },
     group: text(raw.group, "").slice(0, 40),
     players: raw.players !== false,
     shown: raw.shown !== false,

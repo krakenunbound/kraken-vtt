@@ -176,6 +176,49 @@ try {
   await page.selectOption('[aria-label="FX type"]', "snow");
   await page.waitForSelector('[data-weather="snow"]');
 
+  // Water where the GM paints it: the brush along a stream, a rectangle, a shape; the areas add up.
+  await page.selectOption('[aria-label="FX type"]', "water");
+  await page.waitForSelector('[data-weather="water"]');
+  await page.click('[data-edit-tool="fx-free"]');
+  const from = await screenOf(page, cx - 300, cy + 120);
+  await page.mouse.move(from.x, from.y);
+  await page.mouse.down();
+  for (let step = 1; step <= 12; step += 1) {
+    const at3 = await screenOf(page, cx - 300 + step * 40, cy + 120 + Math.sin(step / 2) * 40);
+    await page.mouse.move(at3.x, at3.y);
+  }
+  await page.mouse.up();
+  await page.waitForSelector('[data-fx-areas="1"]');
+  await page.click('[data-edit-tool="fx-rect"]');
+  for (const [x, y] of [[cx + 200, cy - 250], [cx + 320, cy - 150]]) {
+    const at3 = await screenOf(page, x, y);
+    await page.mouse.click(at3.x, at3.y);
+    await settle(200);
+  }
+  await page.waitForSelector('[data-fx-areas="2"]');
+  await page.click('[data-edit-tool="fx-poly"]');
+  const corners = [[cx - 250, cy - 250], [cx - 150, cy - 280], [cx - 120, cy - 180]];
+  for (const [x, y] of corners) {
+    const at3 = await screenOf(page, x, y);
+    await page.mouse.click(at3.x, at3.y);
+    await settle(200);
+  }
+  const last = await screenOf(page, cx - 220, cy - 160);
+  await page.mouse.dblclick(last.x, last.y);
+  await page.waitForSelector('[data-fx-areas="3"]');
+  await page.waitForSelector('.weather[data-weather="water"][data-masked="true"]');
+  let waterLayer = (await tool("kraken_fx", { action: "list" })).find((layer) => layer.type === "water");
+  assert(waterLayer.mask.use && waterLayer.mask.mode === "inside" && waterLayer.mask.strokes.length === 1 && waterLayer.mask.polygons.length === 2 && waterLayer.mask.strokes[0].points.length >= 20, `three painted areas: ${JSON.stringify(waterLayer.mask).slice(0, 300)}`);
+  await page.screenshot({ path: path.join(tmpdir(), "kraken-fx-water.png") });
+  // One removed from the list; one more by the tool, then erased by it.
+  await page.click('[aria-label="Remove area 1"]');
+  await page.waitForSelector('[data-fx-areas="2"]');
+  await tool("kraken_fx", { action: "paint", id: waterLayer.id, area: { stroke: { width: 120, points: [cx, cy, cx + 200, cy + 50] } }, soft: 30 });
+  waterLayer = (await tool("kraken_fx", { action: "list" })).find((layer) => layer.id === waterLayer.id);
+  assert(waterLayer.mask.polygons.length === 1 && waterLayer.mask.strokes.length === 2 && waterLayer.mask.soft === 30, `the list removed one, the tool painted one: ${JSON.stringify(waterLayer.mask).slice(0, 200)}`);
+  await tool("kraken_fx", { action: "erase-area", id: waterLayer.id, area: "last" });
+  await page.waitForSelector('[data-fx-areas="2"]');
+
   // Images tab: a picture copied into the tile library (as Browse does), added from the + list, dragged.
   const decal = path.join(process.cwd(), "public", "decals", "Arcane Circle.webp");
   await tool("kraken_tile", { action: "add", file: decal, x: cx - 380, y: cy - 280, width: 100, height: 100, name: "From the agent" });
@@ -224,7 +267,9 @@ try {
   await seat.waitForSelector('[data-label-text="Bandit Chief"]', { timeout: 10000 });
   await seat.waitForSelector('[data-label-text="1"]', { timeout: 10000 });
   await seat.waitForSelector("rect[data-drawing]", { timeout: 10000 });
-  await seat.waitForSelector('[data-weather="snow"]', { timeout: 10000 });
+  // The water, only where the GM painted it (the same mask picture).
+  await seat.waitForSelector('.weather[data-weather="water"][data-masked="true"]', { timeout: 10000 });
+  await seat.screenshot({ path: path.join(tmpdir(), "kraken-fx-water-player.png") });
   // The image layers, their pictures loaded from the host under the player's own token.
   await seat.waitForFunction(() => [...document.querySelectorAll(".map-tile img")].filter((img) => img.complete && img.naturalWidth > 0).length === 2, null, { timeout: 15000 });
   // Every frame the player got (the join reply carries the first map and scene): no walls anywhere.
