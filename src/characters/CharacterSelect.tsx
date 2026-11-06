@@ -2,13 +2,14 @@ import { useState } from "react";
 import type { RosterEntry, Session } from "../session/useSession";
 import { slotDrag } from "../ui/QuickSlots";
 import { Picture } from "./ArtPicker";
-import { useCharacterFiles } from "./CharacterPanel";
+import { canMakeBlank, createBlank, useCharacterFiles } from "./CharacterPanel";
 
 // FG's Character Selection (charselect_client): what a player is shown on
 // joining. Every character at the table as a card (portrait, name, level, and
 // who holds it: "Server" when no one does). A card no one holds is taken with
 // a click and becomes the player's; their own opens its sheet; one another
 // player holds is shown but cannot be picked. Character Wizard makes a new one,
+// Create a blank one to fill by hand,
 // Import reads one from a file; the filter finds one by name.
 // onWizard: the Character Wizard opens in the Characters window (it needs the room).
 export function CharacterSelect({ session, onSheet, onWizard, onClose }: { session: Session; onSheet: (id: string, name: string) => void; onWizard: () => void; onClose: () => void }) {
@@ -44,6 +45,21 @@ export function CharacterSelect({ session, onSheet, onWizard, onClose }: { sessi
           }}>
           Character Wizard
         </button>
+        {canMakeBlank(session) ? (
+          <button
+            type="button"
+            className="ghost"
+            data-action="charselect-create"
+            title="A blank sheet, filled by hand: drag a race, a class, spells and gear onto it from the sidebar's lists (FG's Create)"
+            onClick={() =>
+              void createBlank(session)
+                .then((id) => done(id, "New character"))
+                .catch((error) => setStatus(error instanceof Error ? error.message : "Could not make the character."))
+            }
+          >
+            Create
+          </button>
+        ) : null}
         <button type="button" className="ghost" data-action="charselect-import" onClick={files.open} title="Import a character (Kraken, Fantasy Grounds, Foundry or Roll20 file)">
           Import
         </button>

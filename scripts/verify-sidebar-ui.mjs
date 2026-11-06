@@ -260,12 +260,23 @@ try {
   await seat.waitForSelector(`.cc-sheet[data-character="${mine.id}"]`, { timeout: 15000 });
   await dropLink(seat, `.cc-sheet[data-character="${mine.id}"] .cc-body`, { kind: "record", record: elf.id, label: "Elf" });
   await until("the player's Elf", async () => (await tool("kraken_record_get", { id: mine.id })).data.race === "Elf");
+  // A blank sheet (FG's Create), the player's own, to fill by hand.
+  await seat.click('[data-action="blank-character"]');
+  const blank = await until("the player's blank character", async () =>
+    listOf(await tool("kraken_records_list", { type: "character", owner: "A test player" })).find((item) => item.name === "New character"),
+  );
+  const blankRecord = await tool("kraken_record_get", { id: blank.id });
+  assert(blankRecord.visibility === "owner" && blankRecord.data.attributes.strength.score === 10 && !blankRecord.data.packages, `a blank sheet, scores of 10: ${JSON.stringify(blankRecord.data).slice(0, 200)}`);
+  await seat.waitForSelector(`.cc-sheet[data-character="${blank.id}"]`, { timeout: 10000 });
+  await dropLink(seat, `.cc-sheet[data-character="${blank.id}"] .cc-body`, { kind: "record", record: elf.id, label: "Elf" });
+  await until("the Elf on the blank sheet", async () => (await tool("kraken_record_get", { id: blank.id })).data.race === "Elf");
+
   // What the GM's hidden character got stays with the GM; the player's Elf is said to all.
   const heard = await seat.textContent(".chat-dock");
   assert(!/Brannoc/.test(heard) && /Elf/.test(heard), `the player hears their own drop, not the GM's hidden character's: ${heard.slice(-400)}`);
   await seat.screenshot({ path: path.join(tmpdir(), "kraken-sidebar-player.png") });
   assert(failures.length === 0, `page errors: ${failures.join(" | ")}`);
-  console.log(`ok sidebar ui: FG's categories under the tools; the Player's Handbook active fills Character (Classes, Races, Spells), each its own list under the book's name; the Fighter dragged onto a sheet (1st level, 11 hit points, Strength prime), a race and then another replacing it, a long sword equipped, a spell by the tool, a second class refused; Campaign folds away and back; the arrow steps icons and names (${Math.round(full)}px), icons (${Math.round(icons)}px), a thin strip (${Math.round(strip)}px) and back; ${adventure}; a test player has the lists and drops a race on their own character. ${path.join(tmpdir(), "kraken-sidebar-0.png")}`);
+  console.log(`ok sidebar ui: FG's categories under the tools; the Player's Handbook active fills Character (Classes, Races, Spells), each its own list under the book's name; the Fighter dragged onto a sheet (1st level, 11 hit points, Strength prime), a race and then another replacing it, a long sword equipped, a spell by the tool, a second class refused; Campaign folds away and back; the arrow steps icons and names (${Math.round(full)}px), icons (${Math.round(icons)}px), a thin strip (${Math.round(strip)}px) and back; ${adventure}; a test player has the lists, drops a race on their own character, and makes a blank sheet (FG's Create) and fills it by a drop. ${path.join(tmpdir(), "kraken-sidebar-0.png")}`);
 } finally {
   await browser?.close();
   child.kill();
