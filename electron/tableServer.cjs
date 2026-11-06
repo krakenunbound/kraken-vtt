@@ -14,7 +14,7 @@ const { createMapState, playerColor } = require("./mapState.cjs");
 const { createPrefsStore } = require("./prefs.cjs");
 const party = require("./party.cjs");
 const { createCombat } = require("./combat.cjs");
-const { modulePicture, importModule } = require("./importers/fgModule.cjs");
+const { modulePicture, importModule, prepareModule } = require("./importers/fgModule.cjs");
 const { fitsRuleset } = require("./books.cjs");
 
 const MAX_CLIENTS = 16;
@@ -616,9 +616,12 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       /* a module whose records cannot be read is still a book to read */
     }
   }
-  function activateBook(book, on = true) {
+  // Its module converted first (off this thread, once), so its records load in milliseconds.
+  async function activateBook(book, on = true) {
     const info = bookFor(book);
     if (on && !shelf.active.has(info.id)) {
+      const file = books?.file?.(info.id);
+      if (file) await prepareModule(file);
       shelf.active.add(info.id);
       if (info.forPlayers) shelf.shared.add(info.id);
       loadRecords(info);
@@ -633,11 +636,15 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
   // The books already active when the campaign opens have their records too:
   // after the table is open, a book at a time, so Play never waits for them.
   const pendingBooks = [...shelf.active];
-  const loadNextBook = () => {
+  const loadNextBook = async () => {
     const id = pendingBooks.shift();
     if (id === undefined) return;
     const info = books?.info(id);
-    if (info && fits(info)) loadRecords(info);
+    if (info && fits(info)) {
+      const file = books?.file?.(info.id);
+      if (file) await prepareModule(file);
+      loadRecords(info);
+    }
     setTimeout(loadNextBook, 50);
   };
   if (pendingBooks.length > 0 && books) setTimeout(loadNextBook, 300);
@@ -728,9 +735,11 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         res.end();
         return;
       }
+      const wanted = String(url.searchParams.get("module") || "");
+      prepareModule(wanted).then(() => {
       try {
         const { fgModuleBundle } = require("./importers/fgMaps.cjs");
-        const bundle = fgModuleBundle(String(url.searchParams.get("module") || ""));
+        const bundle = fgModuleBundle(wanted);
         for (const [id, extra] of Object.entries(bundle.extras)) map.seed(id, { ...extra, tiles: storeTiles(extra.tiles) });
         res.writeHead(200, { "Content-Type": "application/zip", "Content-Length": bundle.bytes.length, "Cache-Control": "no-store" });
         res.end(Buffer.from(bundle.bytes));
@@ -738,6 +747,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         res.writeHead(404, { "Content-Type": "text/plain", "Cache-Control": "no-store" });
         res.end(error instanceof Error ? error.message : "No maps.");
       }
+      });
       return;
     }
     if (req.method === "GET" && url.pathname === "/table/image") {
@@ -815,8 +825,14 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         if (url.pathname === "/book/cover") return canRead(client, book) ? picture(books.cover(book)) : nothing();
         if (url.pathname === "/book/picture") return canSeePicture(client, book, url.searchParams.get("file") || "") ? picture(books.picture(book, url.searchParams.get("file") || "")) : nothing();
         if (!canRead(client, book)) return nothing();
-        if (url.pathname === "/book/contents") return json(books.contents(book));
-        if (url.pathname === "/book/page") return json(books.page(book, url.searchParams.get("page") || ""));
+        if (url.pathname === "/book/contents" || url.pathname === "/book/page") {
+          // A book's module converted first, off this thread (once), so the table never waits on it.
+          const file = books.file?.(book);
+          (file ? prepareModule(file) : Promise.resolve())
+            .then(() => json(url.pathname === "/book/contents" ? books.contents(book) : books.page(book, url.searchParams.get("page") || "")))
+            .catch(() => nothing());
+          return;
+        }
       } catch {
         return nothing();
       }
@@ -1193,7 +1209,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
           return;
         }
         try {
-          if (msg.type === "book-activate") activateBook(msg.book, msg.active !== false);
+          if (msg.type === "book-activate") activateBook(msg.book, msg.active !== false).catch((error) => send(ws, { type: "error", reason: error instanceof Error ? error.message : "Could not do that." }));
           else if (msg.type === "book-share") shareBook(msg.book, msg.shared !== false);
           else if (msg.type === "image-share") showImage(msg.book, msg.file, msg.name);
           else hideImage(msg.id);
@@ -1390,6 +1406,8 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         const library = require("./library.cjs");
         (async () => {
           const moduleName = String(msg.module ?? "");
+          // Its module converted first, off this thread (once).
+          await prepareModule(moduleName);
           if (msg.action === "list") send(ws, { type: "library", module: moduleName, kind: msg.kind, items: library.list(moduleName, String(msg.kind ?? ""), String(msg.search ?? "")) });
           else if (msg.action === "npc") await combat.add({ recordId: library.ensureNpc(agentHandle, String(msg.path)).id, count: msg.count }, seatOf(client));
           else if (msg.action === "battle") await library.addBattle(agentHandle, String(msg.path), { place: msg.place !== false });
@@ -1854,12 +1872,16 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       return quickSlots.get(key) ?? cleanSlots([]);
     },
     activateBook,
-    bookContents: (book) => {
+    bookContents: async (book) => {
       if (!books) throw new Error("There are no books here.");
+      const file = books.file?.(book);
+      if (file) await prepareModule(file);
       return books.contents(book);
     },
-    bookPage: (book, page) => {
+    bookPage: async (book, page) => {
       if (!books) throw new Error("There are no books here.");
+      const file = books.file?.(book);
+      if (file) await prepareModule(file);
       return books.page(book, page);
     },
     shelf: shelfView,
