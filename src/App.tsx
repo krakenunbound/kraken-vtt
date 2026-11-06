@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { gridLabel, preferredCandidateIndex, preferredSceneIndex } from "./foundry/geometry";
 import { withGrid } from "../shared/map/geometry.mjs";
 import { imageMime, inspectZip, PICTURE, pictureBundle, type ImportCandidate, type LoadedAdventure } from "./foundry/importBundle";
@@ -109,6 +109,15 @@ function toTable(loaded: LoadedAdventure, urls: string[]): TableAdventure {
 
 export function App() {
   const session = useSession();
+  // What the map is given stays the same object until it changes, so the map
+  // (walls, lighting, tokens) is not drawn again for every chat line or roll.
+  // Its actions are the session's own, always the latest.
+  const sessionRef = useRef(session);
+  sessionRef.current = session;
+  const mapActions = useMemo(() => new Proxy({} as typeof session, { get: (_target, key) => (sessionRef.current as unknown as Record<string | symbol, unknown>)[key] }), []);
+  const recordList = useMemo(() => Object.values(session.records), [session.records]);
+  const targeted = useMemo(() => targetedTokens(session), [session.combat, session.map.tokens, session.role]);
+  const myName = session.players.find((seat) => seat.id === session.selfId)?.name ?? "";
   const urls = useRef<string[]>([]);
   const fileInput = useRef<HTMLInputElement>(null);
   const [candidates, setCandidates] = useState<ImportCandidate[]>([]);
@@ -130,8 +139,6 @@ export function App() {
   }, []);
 
   // The agent bridge drives the window like a GM would: host a campaign, leave.
-  const sessionRef = useRef(session);
-  sessionRef.current = session;
   useEffect(() => {
     const kraken = window.kraken;
     if (!kraken?.onAgentCommand) return;
@@ -410,7 +417,7 @@ export function App() {
           session={session}
           scene={
             scene ? (
-              <MapView scene={scene} gm={dm} map={session.map} records={Object.values(session.records)} pings={session.pings} notice={session.notice} actions={session} targeted={targetedTokens(session)} me={session.players.find((seat) => seat.id === session.selfId)?.name ?? ""} />
+              <MapView scene={scene} gm={dm} map={session.map} records={recordList} pings={session.pings} notice={session.notice} actions={mapActions} targeted={targeted} me={myName} />
             ) : null
           }
           sceneId={scene?.id ?? ""}

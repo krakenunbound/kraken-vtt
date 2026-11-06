@@ -1,5 +1,5 @@
 import { Icon } from "../ui/icons";
-import { lazy, Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { lazy, memo, Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { backgroundRect, colorWithAlpha, gridStops, sceneFrame, type BackgroundFit, type SceneFrame } from "../foundry/geometry";
 import { type SceneLight, type SceneMarker, type SceneRegion, type SceneWall } from "../foundry/sceneObjects";
 import { gridDistance, gridKind, gridOrigin, hexCorners, hexOf, LIGHT_PRESETS, snapCenter, withGrid } from "../../shared/map/geometry.mjs";
@@ -188,7 +188,12 @@ function doorShapes(doors: MapDoor[]): DoorShape[] {
   });
 }
 
-export function MapView({
+// Drawn again only when what it shows changes (its scene, the map, the records,
+// pings, targets), not on every chat line or roll: the table's busiest parts
+// (walls, lighting, animated tokens) live here.
+export const MapView = memo(MapViewInner);
+
+function MapViewInner({
   scene: sceneIn,
   gm = true,
   map,
@@ -445,8 +450,10 @@ export function MapView({
         actions.updateToken(token.id, { hidden: !token.hidden });
       }
     };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    // The window the map is in: the main one, or its own on another monitor.
+    const view = viewport.current?.ownerDocument.defaultView ?? window;
+    view.addEventListener("keydown", onKey);
+    return () => view.removeEventListener("keydown", onKey);
   }, [tokens, selected, picked, gm, size, actions]);
 
   useEffect(() => {
@@ -722,8 +729,9 @@ export function MapView({
         actions.mapUndo();
       }
     };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    const view = viewport.current?.ownerDocument.defaultView ?? window;
+    view.addEventListener("keydown", onKey);
+    return () => view.removeEventListener("keydown", onKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gm, editorOpen, selectedWalls, pending, editTool, wallKind, editTab, selectedLabel]);
   useEffect(() => {
@@ -735,11 +743,16 @@ export function MapView({
   const dragging = drag ? tokens.find((token) => token.id === drag.id) : null;
   const ghost = drag && drag.moved ? (drag.snap ? snapCenter(scene, drag.at.x, drag.at.y, drag.squares) : drag.at) : null;
 
+  // What a press on the map does now, shown by the pointer: the hand pans; a
+  // crosshair draws, pings, aims an area or draws walls; the arrow picks.
+  const editing = gm && editorOpen && editTool;
+  const pointerMode = editing ? (editTool === "select" ? "select" : "place") : tool === "pan" ? "pan" : tool === "erase" ? "erase" : "place";
   return (
     <div
       className={panning ? "viewport dragging" : "viewport"}
       ref={viewport}
       tabIndex={-1}
+      data-pointer={pointerMode}
       data-scene={scene.name}
       data-gm={gm ? "true" : "false"}
       data-sight={map.sight ? "on" : "off"}
@@ -1771,7 +1784,13 @@ export function MapView({
               ["area", "target", "Area target: click a spot, give a radius; your creature (the GM's: whose turn it is) targets everyone in it"],
             ] as const
           ).map(([id, icon, title]) => (
-            <button key={id} type="button" className={tool === id ? "tool on" : "tool"} role="radio" aria-checked={tool === id} aria-label={title} title={title} data-tool={id} onClick={() => setTool(id)}>
+            <button key={id} type="button" className={tool === id ? "tool on" : "tool"} role="radio" aria-checked={tool === id} aria-label={title} title={title} data-tool={id} onClick={() => {
+              setTool(id);
+              if (id !== "pan") {
+                setEditTool(null);
+                setPending([]);
+              }
+            }}>
               <Icon name={icon} />
             </button>
           ))}
@@ -1793,8 +1812,9 @@ export function MapView({
         </div>
         {gm ? (
           <div className="tool-group">
-            <button type="button" className={editorOpen ? "tool on" : "tool"} data-action="map-editor" aria-pressed={editorOpen} aria-label="Edit map" title="Edit the map: walls, doors, windows, lights and the grid (FG's layer panel)" onClick={() => setEditorOpen(!editorOpen)}>
-              <Icon name="pen" />
+            <button type="button" className={editorOpen ? "tool on" : "tool"} data-action="map-editor" aria-pressed={editorOpen} aria-label="Edit map" title="Edit the map: line of sight (walls, doors, windows), lights, masks, paint, text, the grid and weather (FG's layer panel)" onClick={() => setEditorOpen(!editorOpen)}>
+              <Icon name="walls" />
+              <span className="tool-label">Edit map</span>
             </button>
             <button type="button" className={settingsOpen ? "tool on" : "tool"} data-action="scene-settings" aria-pressed={settingsOpen} aria-label="Scene" onClick={() => setSettingsOpen(!settingsOpen)} title="Scene: lighting, players, grid and weather">
               <Icon name="settings" />
@@ -1842,7 +1862,10 @@ export function MapView({
           tab={editTab}
           setTab={setEditTab}
           tool={editTool}
-          setTool={setEditTool}
+          setTool={(next) => {
+            setEditTool(next);
+            if (next) setTool("pan");
+          }}
           kind={wallKind}
           setKind={setWallKind}
           snap={gridSnap}

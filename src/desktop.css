@@ -848,6 +848,7 @@ span.ct-init { display: inline-block; }
 .map-toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .map-toolbar .tool-group { display: flex; align-items: center; gap: 4px; padding: 3px 6px; border-radius: 999px; background: rgba(12, 16, 22, 0.85); border: 1px solid var(--brass-dim); box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45); }
 .map-toolbar .tool { width: 34px; height: 34px; padding: 0; display: grid; place-items: center; border-radius: 50%; border: 1px solid transparent; background: transparent; color: #e8d9b5; }
+.map-toolbar .tool:has(.tool-label) { width: auto; padding: 0 12px 0 9px; display: flex; align-items: center; border-radius: 999px; }
 .map-toolbar .tool:hover { background: var(--brass-soft); border-color: var(--brass-dim); }
 .map-toolbar .tool.on { background: var(--brass); color: #1a1408; }
 .map-toolbar .tool.find { color: #7cc4ef; }
@@ -921,12 +922,12 @@ span.ct-init { display: inline-block; }
 .cc-body { display: flex; flex-direction: column; gap: 8px; min-height: 0; overflow: auto; padding-right: 6px; }
 .cc-head { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 12px; align-items: stretch; padding: 8px; border: 1px solid rgba(214, 170, 92, 0.35); border-radius: 8px; background: rgba(12, 18, 26, 0.6); }
 .cc-portrait { width: 150px; height: 150px; padding: 0; border-radius: 6px; overflow: hidden; border: 1px solid rgba(214, 170, 92, 0.45); background: #1b222c; display: grid; place-items: center; cursor: pointer; }
-.cc-portrait img { width: 100%; height: 100%; object-fit: cover; }
+.cc-portrait img, .cc-portrait video { width: 100%; height: 100%; object-fit: cover; }
 .cc-portrait span { font-size: 3rem; color: var(--brass); }
 .cc-identity { display: flex; flex-direction: column; gap: 10px; justify-content: center; min-width: 0; }
 .cc-name-row { display: flex; gap: 10px; align-items: flex-end; }
 .cc-token { width: 46px; height: 46px; padding: 0; flex: none; border-radius: 4px; overflow: hidden; border: 1px solid var(--line); background: #1b222c; display: grid; place-items: center; }
-.cc-token img { width: 100%; height: 100%; object-fit: cover; }
+.cc-token img, .cc-token video { width: 100%; height: 100%; object-fit: cover; }
 .cc-boxes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .cc-box { padding: 4px 8px; border: 1px solid rgba(214, 170, 92, 0.35); border-radius: 6px; }
 .cc-labelled { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
@@ -1118,7 +1119,7 @@ textarea.cc-field.tall { min-height: 220px; }
 /* The token: a small round badge on the portrait's bottom-right corner, as before. */
 .cc-portrait-frame { position: relative; width: 150px; height: 150px; }
 .cc-portrait-frame .cc-token { position: absolute; right: -8px; bottom: -8px; width: 54px; height: 54px; border-radius: 50%; border: 2px solid var(--brass); background: #1b222c; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6); z-index: 1; }
-.cc-portrait-frame .cc-token img { border-radius: 50%; }
+.cc-portrait-frame .cc-token img, .cc-portrait-frame .cc-token video { border-radius: 50%; }
 
 .krits-window { display: flex; flex-direction: column; gap: 10px; padding: 14px; }
 .krits-row { display: grid; grid-template-columns: 200px minmax(0, 1fr); align-items: center; gap: 10px; }

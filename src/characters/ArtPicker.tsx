@@ -4,10 +4,19 @@ import type { Session } from "../session/useSession";
 export type ArtItem = { id: string; kind: "portrait" | "token"; group: string; name: string; video: boolean };
 
 // A picture from the GM's art library: an image, or a looping video portrait.
-export function Picture({ session, id, alt = "" }: { session: Session; id: string; alt?: string }) {
+// still: a small picture (the top bar, lists, the tracker) shows a video
+// portrait's still (the picture beside it, as it was made from), so only
+// sheets and tokens play: every video playing costs the table frames.
+export function Picture({ session, id, alt = "", still = false }: { session: Session; id: string; alt?: string; still?: boolean }) {
+  const video = id.toLowerCase().endsWith(".webm");
+  const [noStill, setNoStill] = useState(false);
   const url = session.artUrl(id);
   if (!url) return null;
-  return id.toLowerCase().endsWith(".webm") ? (
+  if (video && still && !noStill) {
+    const stillUrl = session.artUrl(id.replace(/\.webm$/i, ".png"));
+    if (stillUrl) return <img src={stillUrl} alt={alt} loading="lazy" draggable={false} onError={() => setNoStill(true)} />;
+  }
+  return video ? (
     <video src={url} autoPlay loop muted playsInline aria-label={alt} />
   ) : (
     <img src={url} alt={alt} loading="lazy" draggable={false} />
@@ -105,7 +114,7 @@ export function ArtPicker({
               title={`${item.name} (${item.group})`}
               onClick={() => onPick(item.id)}
             >
-              <Picture session={session} id={item.id} alt={item.name} />
+              <Picture session={session} id={item.id} alt={item.name} still />
               <span>{item.name}</span>
             </button>
           ))}

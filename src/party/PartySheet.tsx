@@ -78,7 +78,7 @@ export function PartySheet({ session, compact = false }: { session: Session; com
               const current = member.hp - member.wounds;
               return (
                 <li key={member.id} data-member={member.id}>
-                  <span className="party-face">{member.portrait ? <Picture session={session} id={member.portrait} alt="" /> : member.name.slice(0, 1)}</span>
+                  <span className="party-face">{member.portrait ? <Picture session={session} id={member.portrait} alt="" still /> : member.name.slice(0, 1)}</span>
                   <span className="party-who">
                     <b>{member.name}</b>
                     <small>
@@ -320,7 +320,7 @@ function OrderTab({ session, party }: { session: Session; party: PartyView }) {
   const byId = new Map(party.members.map((member) => [member.id, member]));
   const token = (member: PartyMember, size = 44) => (
     <span className="order-token" style={{ width: size, height: size }} title={member.name}>
-      {member.portrait ? <Picture session={session} id={member.portrait} alt="" /> : <b>{member.name.slice(0, 1)}</b>}
+      {member.portrait ? <Picture session={session} id={member.portrait} alt="" still /> : <b>{member.name.slice(0, 1)}</b>}
     </span>
   );
   const draggable = (member: PartyMember) =>

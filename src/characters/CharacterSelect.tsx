@@ -85,7 +85,7 @@ export function CharacterSelect({ session, onSheet, onWizard, onClose }: { sessi
                 onClick={() => void pick(entry)}
                 {...(mine ? slotDrag({ kind: "sheet", record: entry.id, label: entry.name }) : {})}
               >
-                <span className="charselect-face">{entry.portrait ? <Picture session={session} id={entry.portrait} alt="" /> : null}</span>
+                <span className="charselect-face">{entry.portrait ? <Picture session={session} id={entry.portrait} alt="" still /> : null}</span>
                 <span className="charselect-text">
                   <b>{entry.name}</b>
                   <small>Level {entry.level}</small>

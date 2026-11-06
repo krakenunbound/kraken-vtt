@@ -299,7 +299,11 @@ export function ChatDock({ session }: { session: Session }) {
       view.removeEventListener("keydown", close);
     };
   }, [menu]);  // A die being dragged from the tray, to throw or to drop in the tower.
+  // The dice in the hand while a die is dragged from the tray. Only what they are
+  // (and whether they are over the tower) is state; where they are is moved on
+  // the element itself, so a drag never draws the chat again on every move.
   const [ghost, setGhost] = useState<{ x: number; y: number; sides: number | null; overTower: boolean } | null>(null);
+  const ghostEl = useRef<HTMLSpanElement | null>(null);
   const dragged = useRef(false);
   const towerButton = useRef<HTMLButtonElement>(null);
   const log = useRef<HTMLDivElement>(null);
@@ -402,14 +406,38 @@ export function ChatDock({ session }: { session: Session }) {
     // monitor throws onto the table as the docked one does).
     let samples: { x: number; y: number; t: number }[] = [];
     const overTower = (x: number, y: number) => Boolean(view.document.elementFromPoint(x, y)?.closest(".tower"));
+    let over = false;
+    let frame = 0;
+    let last = { x: startX, y: startY };
+    // Once a frame at most: the ghost moved, and the tower asked about.
+    const place = () => {
+      frame = 0;
+      const element = ghostEl.current;
+      if (element) {
+        element.style.left = `${last.x}px`;
+        element.style.top = `${last.y}px`;
+      }
+      const nowOver = overTower(last.x, last.y);
+      if (nowOver !== over) {
+        over = nowOver;
+        setGhost((current) => (current ? { ...current, overTower: nowOver } : current));
+      }
+    };
     const move = (moveEvent: PointerEvent) => {
-      if (!dragging && Math.hypot(moveEvent.clientX - startX, moveEvent.clientY - startY) > 10) dragging = true;
+      if (!dragging && Math.hypot(moveEvent.clientX - startX, moveEvent.clientY - startY) > 10) {
+        dragging = true;
+        over = overTower(moveEvent.clientX, moveEvent.clientY);
+        setGhost({ x: moveEvent.clientX, y: moveEvent.clientY, sides, overTower: over });
+      }
       if (!dragging) return;
       const now = performance.now();
-      samples = [...samples.filter((sample) => now - sample.t < 140), { x: moveEvent.screenX, y: moveEvent.screenY, t: now }];
-      setGhost({ x: moveEvent.clientX, y: moveEvent.clientY, sides, overTower: overTower(moveEvent.clientX, moveEvent.clientY) });
+      samples.push({ x: moveEvent.screenX, y: moveEvent.screenY, t: now });
+      while (samples.length > 2 && now - samples[0].t > 140) samples.shift();
+      last = { x: moveEvent.clientX, y: moveEvent.clientY };
+      if (!frame) frame = view.requestAnimationFrame(place);
     };
     const up = (upEvent: PointerEvent) => {
+      if (frame) view.cancelAnimationFrame(frame);
       view.removeEventListener("pointermove", move);
       view.removeEventListener("pointerup", up);
       view.removeEventListener("pointercancel", up);
@@ -654,7 +682,7 @@ export function ChatDock({ session }: { session: Session }) {
         </button>
       </div>
       {ghost ? (
-        <span className={ghost.overTower ? "dice-ghost over-tower" : "dice-ghost"} style={{ left: ghost.x, top: ghost.y }} aria-hidden="true">
+        <span ref={ghostEl} className={ghost.overTower ? "dice-ghost over-tower" : "dice-ghost"} style={{ left: ghost.x, top: ghost.y }} aria-hidden="true">
           {(ghost.sides ? [...pool, ghost.sides] : pool).slice(-6).map((sides, index) => (
             <span key={index}>{trayDie(sides, 46)}</span>
           ))}
