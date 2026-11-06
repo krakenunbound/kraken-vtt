@@ -1,6 +1,6 @@
 # Kraken VTT: Plan
 
-A free, open-source (MIT) virtual tabletop that runs in the web browser. It aims for Foundry-level presentation with Fantasy Grounds-level ease of use, and a rules engine that matches FG's behavior.
+A free, source-available virtual tabletop (PolyForm Shield 1.0.0 from 0.1.0-alpha.55; MIT before) that runs in the web browser. It aims for Foundry-level presentation with Fantasy Grounds-level ease of use, and a rules engine that matches FG's behavior.
 
 Status: alpha test (see `package.json` for the version; `npm run bump` moves it on, one step per pushed build, tagged `v<version>`). Backed up at https://github.com/krakenunbound/kraken-vtt (private).
 

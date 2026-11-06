@@ -314,7 +314,7 @@ export const COMMANDS: Command[] = [
     group: "Screen",
     run: (_rest, context) => {
       const at = context.session.role === "dm" ? `hosting, ${context.session.players.length} at the table` : `at ${context.session.remoteLabel}`;
-      context.session.note(`Kraken VTT ${__KRAKEN_VERSION__}: a free, open-source virtual tabletop. You are ${at}. /help lists the commands.`);
+      context.session.note(`Kraken VTT ${__KRAKEN_VERSION__}: a free virtual tabletop (PolyForm Shield License 1.0.0). You are ${at}. /help lists the commands.`);
     },
   },
   { names: ["reload"], args: "", help: "Reload this screen", group: "Screen", run: () => window.location.reload() },
