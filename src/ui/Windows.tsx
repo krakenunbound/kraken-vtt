@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Icon } from "./icons";
 import { openPopOut, PopOutWindow, screenOffset, type ScreenPlace } from "./PopOut";
 
@@ -19,7 +19,7 @@ const DEFAULTS: Record<WindowKind, Placement> = {
   party: { x: 180, y: 60, w: 760, h: 720 },
   combat: { x: 260, y: 70, w: 640, h: 520 },
   players: { x: 300, y: 120, w: 420, h: 360 },
-  settings: { x: 340, y: 110, w: 460, h: 170 },
+  settings: { x: 340, y: 110, w: 460, h: 300 },
   decals: { x: 220, y: 70, w: 720, h: 600 },
   wallpapers: { x: 240, y: 80, w: 720, h: 600 },
   dice: { x: 220, y: 56, w: 600, h: 780 },
@@ -43,6 +43,8 @@ const DEFAULTS: Record<WindowKind, Placement> = {
 };
 // Kinds that stay in the main window (none now: the map pops out as the rest do).
 const STAYS_IN: WindowKind[] = [];
+// Kinds that open tall enough to show all they hold (a short list of settings), never cut off with a scroll bar.
+const FIT_CONTENT: WindowKind[] = ["settings", "players"];
 // Kinds that stay behind every other window: the map is what the other windows sit over.
 const AT_BACK: WindowKind[] = ["map"];
 // Where a kind opens the first time: the map fills the desktop between the menu bar and the sidebar.
@@ -265,6 +267,16 @@ export function FloatingWindow({ item, children }: { item: OpenWindow; children:
   const live = useRef({ item, move, popOut, popup });
   live.current = { item, move, popOut, popup };
 
+  // A window that shows all it holds: grown on opening until nothing is cut off (as far as the screen allows).
+  const body = useRef<HTMLDivElement | null>(null);
+  useLayoutEffect(() => {
+    if (item.popped || !FIT_CONTENT.includes(item.kind) || !body.current) return;
+    const element = body.current;
+    const short = element.scrollHeight - element.clientHeight;
+    if (short > 1) move(item.key, fitToScreen({ ...item, h: item.h + short + 2 }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [item.key, item.popped]);
+
   useEffect(() => {
     if (item.popped) return;
     const onResize = () => move(item.key, fitToScreen(item));
@@ -348,7 +360,9 @@ export function FloatingWindow({ item, children }: { item: OpenWindow; children:
           <Icon name="close" size={16} />
         </button>
       </header>
-      <div className="window-body">{children}</div>
+      <div className="window-body" ref={body}>
+        {children}
+      </div>
       <div className="window-resize" onPointerDown={begin("size")} aria-hidden="true" />
     </section>
   );

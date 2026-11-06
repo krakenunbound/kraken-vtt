@@ -278,9 +278,33 @@ function createBookShelf({ folder, cache = "" }) {
       known = null;
       opened.clear();
     },
+    // A book's cover: kept on disk once read (beside the shelf's list), so the
+    // Books window never opens every module again to show them.
     cover(id) {
       const found = info(id);
-      return found?.cover ? modulePicture(found.cover, found.file) : null;
+      if (!found?.cover) return null;
+      const mime = { ".png": "image/png", ".webp": "image/webp", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".gif": "image/gif" }[path.extname(found.cover).toLowerCase()];
+      let kept = "";
+      if (cache && mime) {
+        try {
+          const stat = fs.statSync(found.file);
+          const name = require("crypto").createHash("sha1").update(`${found.file}|${stat.size}|${Math.round(stat.mtimeMs)}|${found.cover}`).digest("hex");
+          kept = path.join(path.dirname(cache), "book-covers", `${name}${path.extname(found.cover).toLowerCase()}`);
+          if (fs.existsSync(kept)) return { bytes: fs.readFileSync(kept), mime };
+        } catch {
+          kept = "";
+        }
+      }
+      const picture = modulePicture(found.cover, found.file);
+      if (picture && kept) {
+        try {
+          fs.mkdirSync(path.dirname(kept), { recursive: true });
+          fs.writeFileSync(kept, picture.bytes);
+        } catch {
+          /* read from the module next time */
+        }
+      }
+      return picture;
     },
     // The book's contents: chapters, their sections, and the pages in each.
     contents(id) {
