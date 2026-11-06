@@ -1336,6 +1336,7 @@ textarea.cc-field.tall { min-height: 220px; }
 .records-share.on { color: var(--brass); }
 .records-share.some { color: #9fc6e0; }
 .record-window { padding: 12px 14px; overflow: auto; height: 100%; box-sizing: border-box; }
+.record-portrait { float: right; width: min(42%, 180px); aspect-ratio: 1; object-fit: cover; margin: 0 0 10px 12px; border-radius: 6px; border: 1px solid var(--panel-edge); box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45); }
 .record-window header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin-bottom: 8px; }
 .record-window header h3 { margin: 0; width: 100%; cursor: grab; }
 .record-window header .records-share { margin-left: auto; border-color: var(--panel-edge); }

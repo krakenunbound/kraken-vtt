@@ -218,9 +218,14 @@ export function RecordWindow({ session, id }: { session: Session; id: string }) 
         lists.push([key, rows.map((row) => ({ name: String(row.name), desc: String(row.desc ?? row.description ?? row.text ?? "") }))]);
     }
   }
+  // An NPC's description (FG's text), first; and its portrait from its book.
+  const npc = record.type === "npc";
+  if (npc && typeof data.text === "string" && data.text.trim()) texts.unshift(["description", data.text]);
+  const portrait = npc && (data.picture || data.token) ? session.recordArtUrl(record.id, "portrait") : "";
   const abilities = data.abilities && typeof data.abilities === "object" ? (data.abilities as Record<string, { score?: number; bonus?: number } | undefined>) : null;
   return (
     <article className="record-window" data-record={record.id}>
+      {portrait ? <img className="record-portrait" src={portrait} alt={record.name} draggable={false} onError={(event) => (event.currentTarget.style.display = "none")} /> : null}
       <header>
         <h3 {...slotDrag({ kind: "record", record: record.id, label: record.name })}>{record.name}</h3>
         <small className="hint">

@@ -138,6 +138,13 @@ try {
   await tool("kraken_windows", { action: "open", kind: "combat" });
   await page.waitForFunction(() => [...document.querySelectorAll(".ct-face img")].some((img) => img.complete && img.naturalWidth > 0), null, { timeout: 15000 });
   const art = await dataOf(foe.recordId);
+  // Its record window: the portrait and what the book says of it.
+  await tool("kraken_windows", { action: "open", kind: "record", record: "Gull Crewman" });
+  await page.waitForFunction(() => {
+    const view = document.querySelector('.record-window img.record-portrait');
+    return view && view.complete && view.naturalWidth > 0 && /patched vac suits/.test(view.closest(".record-window").textContent);
+  }, null, { timeout: 15000 });
+  await page.screenshot({ path: path.join(tmpdir(), "kraken-astra-record.png") });
   assert(/^tokens\/[a-z-]+\.webp@/.test(art?.token ?? "") && /^images\/npc\//.test(art?.picture ?? ""), `its token and portrait: ${art?.token}, ${art?.picture}`);
   await tool("kraken_combat", { action: "init", which: "all" });
   view = (await tool("kraken_combat", { action: "view" })).entries;
