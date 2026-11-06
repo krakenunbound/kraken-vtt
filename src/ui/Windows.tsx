@@ -41,8 +41,8 @@ const DEFAULTS: Record<WindowKind, Placement> = {
   // The map (FG's image window): as big as the desktop leaves room for.
   map: { x: 12, y: 52, w: 1600, h: 1100 },
 };
-// Kinds that stay in the main window (the map's 3D dice, lighting and weather draw in its own page).
-const STAYS_IN: WindowKind[] = ["map"];
+// Kinds that stay in the main window (none now: the map pops out as the rest do).
+const STAYS_IN: WindowKind[] = [];
 // Kinds that stay behind every other window: the map is what the other windows sit over.
 const AT_BACK: WindowKind[] = ["map"];
 // Where a kind opens the first time: the map fills the desktop between the menu bar and the sidebar.

@@ -68,7 +68,6 @@ try {
   const frame = await mapWindow.boundingBox();
   const side = await page.locator(".sidebar").boundingBox();
   assert(frame && side && frame.x + frame.width <= side.x + 1, `the map window leaves the sidebar clear: ${JSON.stringify({ frame, side })}`);
-  assert(!(await mapWindow.locator('[aria-label^="Pop out"]').count()), "the map window does not pop out");
   await page.click(`[aria-label="Close ${await mapWindow.getAttribute("aria-label")}"]`);
   await page.waitForSelector('.window[data-window="map"]', { state: "detached" });
   await page.click('.sidebar [data-launch="map"]');
@@ -83,6 +82,53 @@ try {
   await page.click(`[aria-label="Close ${await mapWindow.getAttribute("aria-label")}"]`);
   await tool("kraken_windows", { action: "open", kind: "map" });
   await page.waitForSelector('.window[data-window="map"] .viewport');
+  // Out to a window of its own (another monitor), the map and its tools working there; then back.
+  await tool("kraken_windows", { action: "popout", kind: "map" });
+  let own = null;
+  for (let wait = 0; wait < 40 && !own; wait++) {
+    for (const other of app.windows()) if (other !== page && (await other.$(".viewport .map-toolbar").catch(() => null))) own = other;
+    if (!own) await new Promise((resolve) => setTimeout(resolve, 250));
+  }
+  assert(own, "the map popped out into a window of its own, with its toolbar");
+  const zoomBefore = Number(await own.getAttribute(".world", "data-scale"));
+  await own.click('[aria-label="Zoom in"]');
+  const zoomAfter = Number(await own.getAttribute(".world", "data-scale"));
+  assert(zoomAfter > zoomBefore, `its tools work there: zoom ${zoomBefore} -> ${zoomAfter}`);
+  await own.waitForTimeout(800);
+  await own.click('[aria-label="Fit"]');
+  await own.waitForTimeout(500);
+  await own.screenshot({ path: path.join(tmpdir(), "kraken-map-popout.png") });
+  await tool("kraken_windows", { action: "dock", kind: "map" });
+  await page.waitForSelector('.window[data-window="map"] .viewport', { timeout: 10000 });
+
+  // The pointer says what a press does, and the toolbar's tools work while the editor is open.
+  const pointer = () => page.$eval('.window[data-window="map"] .viewport', (element) => [element.dataset.pointer, getComputedStyle(element).cursor]);
+  assert((await pointer()).join() === "pan,grab", `the hand pans: ${await pointer()}`);
+  await page.click('[data-action="map-editor"]');
+  await page.click('[data-edit-tool="line"]');
+  assert((await pointer()).join() === "place,crosshair", `drawing walls, a crosshair: ${await pointer()}`);
+  await page.click('[data-edit-tool="select"]');
+  assert((await pointer()).join() === "select,default", `selecting walls, the arrow: ${await pointer()}`);
+  // Draw on the map, with the editor still open: it draws at once (the editor's tool is put down).
+  await page.click('.window[data-window="map"] [data-tool="draw"]');
+  assert((await pointer()).join() === "place,crosshair", `drawing, a crosshair: ${await pointer()}`);
+  assert((await page.getAttribute('[data-edit-tool="select"]', "aria-pressed")) === "false", "the editor's tool is put down");
+  const area = await page.locator('.window[data-window="map"] .viewport').boundingBox();
+  const drawnBefore = await page.locator(".overlay.drawings polyline[data-drawing]").count();
+  await page.mouse.move(area.x + area.width * 0.6, area.y + area.height * 0.6);
+  await page.mouse.down();
+  for (let step = 1; step <= 8; step++) await page.mouse.move(area.x + area.width * 0.6 + step * 12, area.y + area.height * 0.6 + step * 6);
+  await page.mouse.up();
+  await page.waitForFunction((count) => document.querySelectorAll(".overlay.drawings polyline[data-drawing]").length > count, drawnBefore, { timeout: 8000 });
+  // A wall tool picked again puts the toolbar back to the hand.
+  await page.click('[data-edit-tool="line"]');
+  assert((await page.getAttribute('.window[data-window="map"] [data-tool="pan"]', "aria-checked")) === "true", "an editor tool puts the toolbar back to pan");
+  await page.keyboard.press("Escape");
+  await page.click('[data-action="map-editor"]');
+  await page.click('.window[data-window="map"] [data-tool="erase"]');
+  await page.mouse.click(area.x + area.width * 0.6 + 48, area.y + area.height * 0.6 + 24);
+  await page.waitForFunction((count) => document.querySelectorAll(".overlay.drawings polyline[data-drawing]").length === count, drawnBefore, { timeout: 8000 });
+  await page.click('.window[data-window="map"] [data-tool="pan"]');
   const hero = await tool("kraken_record_create", { type: "character", name: "Aldric", owner: "A test player", visibility: "owner", data: {} });
   // Far from the middle, where a lost player would not find it.
   await tool("kraken_token_place", { recordId: hero.id, col: 4, row: 4 });

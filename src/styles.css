@@ -216,6 +216,11 @@ select {
 }
 
 .viewport.dragging { cursor: grabbing; }
+.tool .tool-label { margin-left: 5px; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.02em; white-space: nowrap; }
+/* The pointer says what a press does: pan (hand), draw or place (crosshair), pick (arrow), rub out. */
+.viewport[data-pointer="place"], .viewport[data-pointer="erase"] { cursor: crosshair; }
+.viewport[data-pointer="select"] { cursor: default; }
+.viewport[data-pointer="place"] .token-draggable, .viewport[data-pointer="erase"] .token-draggable { cursor: crosshair; }
 
 .world {
   position: absolute;

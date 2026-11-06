@@ -407,7 +407,7 @@ export function Desktop({
                 onClick={() => (opens ? windows.open("sheet", entry.name, entry.id) : !entry.owner ? windows.open("charselect", "Character Selection") : undefined)}
                 {...(opens ? slotDrag({ kind: "sheet", record: entry.id, label: entry.name }) : {})}
               >
-                <span className="chip-face">{entry.portrait ? <Picture session={session} id={entry.portrait} alt="" /> : entry.name.slice(0, 1)}</span>
+                <span className="chip-face">{entry.portrait ? <Picture session={session} id={entry.portrait} alt="" still /> : entry.name.slice(0, 1)}</span>
                 <span className="chip-name">{entry.name}</span>
                 <span className="chip-holder">{entry.owner || "Server"}</span>
               </button>

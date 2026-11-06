@@ -68,7 +68,7 @@ The app starts the MCP server when it opens. `electron/agent/mcp-stdio.cjs` is t
 | Dice tower: players see their own result | `kraken_table_options` |
 | Settings: Background Decal, Desktop Wallpaper and GM Icon (pick, a set for each game, Browse to import a picture, none) | `kraken_decal` (`kind` decal, wallpaper or gmicon) |
 | The Dice window: sets, dice, accent and number colours, design, material, lettering, effects, crit flare, 3D, sound; NPC dice and damage dice | `kraken_dice_settings` (`set` npc or damage) |
-| The map's window (FG's image window: the map, its tools and settings, the scene pickers; behind the other windows; the sidebar's Map button opens it again) | `kraken_windows` kind map |
+| The map's window (FG's image window: the map, its tools and settings, the scene pickers; behind the other windows; pops out to another monitor; the sidebar's Map button opens it again) | `kraken_windows` kind map (open, close, popout, dock) |
 | Two tiers, both kept by the GM's app: a person's own (their colour for pings and ink, their dice, how dice show: `prefs.json` in the app's data, by name, the GM as `@gm`) and each character's dice (on the character, `data.dice`; every roll made as it uses them). The Dice window's Whose dice row and Your colour | `kraken_dice_settings` (`color`, `who` for a player's colour, `character` for a character's dice) |
 | Fix the next dice (tests, parity runs) | `kraken_dice_force`, `kraken_dice_clear` |
 | **Windows** | |

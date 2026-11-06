@@ -228,7 +228,7 @@ export function CharacterPanel({ session, dock = false, selected: chosen, create
             <li key={record.id}>
               <button type="button" className={record.id === current?.id ? "selected" : ""} onClick={() => setSelected(record.id)} {...slotDrag({ kind: "sheet", record: record.id, label: record.name })}>
                 <span className="chip-face">
-                  {typeof record.data.portrait === "string" && record.data.portrait ? <Picture session={session} id={record.data.portrait} alt="" /> : record.name.slice(0, 1)}
+                  {typeof record.data.portrait === "string" && record.data.portrait ? <Picture session={session} id={record.data.portrait} alt="" still /> : record.name.slice(0, 1)}
                 </span>
                 <span className="list-name">
                   {record.name}

@@ -73,7 +73,7 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
         )}
         <button type="button" className="ct-face" title="Find on the map" onClick={() => focusToken(entry.tokenId ?? session.map.tokens.find((token) => token.recordId === entry.recordId)?.id ?? null)}>
           {portrait ? (
-            <Picture session={session} id={portrait} alt="" />
+            <Picture session={session} id={portrait} alt="" still />
           ) : tokenArt ? (
             <img src={tokenArt} alt="" />
           ) : record && record.type === "npc" && (record.data.token || record.data.picture) ? (
