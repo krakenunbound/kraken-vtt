@@ -209,7 +209,7 @@ export function Desktop({
   // active book's records under the book's name.
   const listEntry = (id: string, label: string, icon: string): SidebarEntry => ({ kind: "records", payload: id, label, icon, title: label });
   const characterIcon: Record<string, string> = { "siegepackage:class": "shield", class: "shield", "siegepackage:race": "crown", race: "crown", siegepower: "wand", spell: "wand", feat: "sparkle", background: "scroll", skill: "check", class_specialization: "shield", race_subrace: "crown" };
-  const characterLists = sidebarLists(session.records, "Character")
+  const characterLists = sidebarLists(session.records, "Character", session.ruleset)
     .filter((item) => item.id !== "siegepackage")
     .map((item) => listEntry(item.id, item.label, characterIcon[item.id] ?? "shield"));
   const hasPackages = Object.values(session.records).some((record) => record.type === "siegepackage" && listOf(record) === "siegepackage");

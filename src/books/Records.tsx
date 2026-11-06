@@ -48,10 +48,12 @@ const LIMIT = 400;
 
 // The lists the sidebar shows in a group (FG's Campaign and Character
 // categories): those this table has records for, in FG's order.
-export function sidebarLists(records: Record<string, TableRecord>, group: string) {
+// A game's own word for a list (Descending Darkness calls species "Kin").
+const GAME_WORDS: Record<string, Record<string, string>> = { "Descending Darkness": { race: "Kin" }, "Apeira Astra": { race: "Origins", class: "Paths", item: "Gear", npc: "Threats" } };
+export function sidebarLists(records: Record<string, TableRecord>, group: string, ruleset = "") {
   const present = new Set<string>();
   for (const record of Object.values(records)) if (!NOT_LISTED.has(record.type)) present.add(listOf(record));
-  return LISTS.filter((item) => item.group === group && present.has(item.id)).map((item) => ({ id: item.id, label: item.label }));
+  return LISTS.filter((item) => item.group === group && present.has(item.id)).map((item) => ({ id: item.id, label: GAME_WORDS[ruleset]?.[item.id] ?? item.label }));
 }
 export { listLabel };
 

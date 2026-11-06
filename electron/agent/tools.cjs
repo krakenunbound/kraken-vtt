@@ -234,6 +234,10 @@ const TOOLS = [
     ),
     async run(args, ctx) {
       const agent = needTable(ctx);
+      if (agent.ruleset?.() === "Apeira Astra") {
+        const { record, problems } = await require("../astra.cjs").buildAstra(agent, args.spec, args.owner ?? "", agent.seat);
+        return out({ created: true, id: record.id, stamina: record.data.hp.total, armour: record.data.ac.total, skills: record.data.skills, problems });
+      }
       if (dnd5e.isD20Ruleset(agent.ruleset?.())) {
         const { record, problems } = await dnd5e.build5e(agent, args.spec, args.owner ?? "", agent.seat);
         return out({ created: true, id: record.id, hp: record.data.hp.total, ac: record.data.ac.total, problems });
@@ -279,6 +283,19 @@ const TOOLS = [
       if (!record) throw new Error(`No record ${args.id}.`);
       const { record: updated, gain, level } = await levelUp(agent, record, args.package);
       return out({ id: updated.id, level, gain, hp: updated.data.hp.total, ...(dnd5e.is5e(updated) ? { prof: updated.data.prof } : { bth: updated.data.bth }), expnext: updated.data.expnext });
+    },
+  },
+  {
+    name: "kraken_character_improve",
+    description:
+      "Apeira Astra: spend a character's experience to improve it (the sheet's Improve): skill (its next level: costs that level x 2, a new skill at 0 costs 1; at most 4) or attribute (a characteristic +1: costs 6; at most 15). The character must have the experience (the GM gives it with kraken_character_edit exp). Chat says what was bought.",
+    inputSchema: object({ id: string("Character record id"), skill: string("A skill's name, as Pilot or Zero-G"), attribute: { type: "string", enum: ["brawn", "reflex", "grit", "intellect", "training", "presence"] } }, ["id"]),
+    async run(args, ctx) {
+      const agent = needTable(ctx);
+      const record = agent.records.get(args.id);
+      if (!record) throw new Error(`No record ${args.id}.`);
+      const { record: updated, cost, now } = await require("../astra.cjs").improveAstra(agent, record, { skill: args.skill ?? "", attribute: args.attribute ?? "" }, agent.seat, "Agent");
+      return out({ id: updated.id, now, cost, exp: updated.data.exp, skills: updated.data.skills, characteristics: updated.data.characteristics });
     },
   },
   {

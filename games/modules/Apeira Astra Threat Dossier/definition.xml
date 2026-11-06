@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root version="4.6" release="1">
+	<name type="string">Apeira Astra Threat Dossier</name>
+	<displayname type="string">Apeira Astra Threat Dossier</displayname>
+	<category type="string">Apeira Astra</category>
+	<author type="string">Kraken VTT</author>
+	<ruleset type="string">Apeira Astra</ruleset>
+</root>

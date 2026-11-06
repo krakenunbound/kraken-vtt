@@ -131,6 +131,15 @@ def texture(kind, width, height, cell, rng):
             x, y = rng.random() * width, rng.random() * height
             tone = rng.integers(-26, 26)
             draw.line([x, y, x + rng.integers(-3, 4), y - rng.integers(3, 9)], fill=(int(max(0, base[0] + tone)), int(max(0, base[1] + tone + 10)), int(max(0, base[2] + tone))), width=1)
+    elif kind == "space":
+        # Deep space: black, a faint nebula, stars.
+        img = Image.fromarray(tinted((8, 10, 16), 10, noise(width, height, cell * 4, rng)))
+        draw = ImageDraw.Draw(img)
+        for _ in range(int(width * height / 900)):
+            x, y = rng.random() * width, rng.random() * height
+            b = int(120 + rng.random() * 135)
+            r = 0.6 if rng.random() < 0.9 else 1.4
+            draw.ellipse([x - r, y - r, x + r, y + r], fill=(b, b, min(255, b + 20)))
     elif kind in ("rock", "dirt", "sand"):
         for _ in range(int(width * height / (cell * cell) * (3 if kind == "rock" else 6))):
             x, y = rng.random() * width, rng.random() * height
@@ -319,6 +328,16 @@ def main(layout_path, out_image, out_walls):
         for x, y in rect_cells(area):
             if 0 <= x < cols and 0 <= y < rows:
                 floor[y][x] = False
+    # A hull (a ship, a station): every cell next to a floor that is not floor becomes solid.
+    if spec.get("autoSolid"):
+        auto = []
+        for y in range(rows):
+            for x in range(cols):
+                if floor[y][x]:
+                    continue
+                if any(0 <= x + dx < cols and 0 <= y + dy < rows and floor[y + dy][x + dx] for dx in (-1, 0, 1) for dy in (-1, 0, 1)):
+                    auto.append({"x": x, "y": y, "w": 1, "h": 1})
+        spec.setdefault("solids", []).extend(auto)
     # The ground everywhere, then each floor's texture in its cells.
     img = texture(spec.get("ground", "rock"), width, height, cell, rng)
     textures = {}

@@ -1,0 +1,27 @@
+{ "cell": 70, "cols": 30, "rows": 18, "ground": "space", "seed": 51, "autoSolid": true, "solidTex": "hull", "wallColor": [70, 78, 86],
+  "floors": [
+    { "x": 2, "y": 7, "w": 3, "h": 4, "tex": "metal" },
+    { "x": 5, "y": 8, "w": 1, "h": 2, "tex": "metal" },
+    { "x": 6, "y": 2, "w": 11, "h": 14, "tex": "deck" },
+    { "x": 17, "y": 8, "w": 1, "h": 2, "tex": "grate" },
+    { "x": 18, "y": 7, "w": 9, "h": 4, "tex": "grate" },
+    { "x": 18, "y": 2, "w": 4, "h": 4, "tex": "metal" }, { "x": 19, "y": 6, "w": 1, "h": 1, "tex": "metal" },
+    { "x": 23, "y": 2, "w": 4, "h": 4, "tex": "metal" }, { "x": 24, "y": 6, "w": 1, "h": 1, "tex": "metal" },
+    { "x": 18, "y": 12, "w": 4, "h": 4, "tex": "metal" }, { "x": 19, "y": 11, "w": 1, "h": 1, "tex": "metal" },
+    { "x": 23, "y": 12, "w": 3, "h": 3, "tex": "grate" }, { "x": 24, "y": 11, "w": 1, "h": 1, "tex": "grate" }
+  ],
+  "doors": [
+    { "x": 5, "y": 8, "side": "w" }, { "x": 5, "y": 9, "side": "w" },
+    { "x": 17, "y": 8, "side": "e" }, { "x": 17, "y": 9, "side": "e" },
+    { "x": 19, "y": 6, "side": "s" }, { "x": 24, "y": 6, "side": "s" }, { "x": 19, "y": 11, "side": "n" }, { "x": 24, "y": 11, "side": "n" }
+  ],
+  "features": [
+    { "kind": "crate", "x": 7, "y": 3, "w": 2, "h": 2 }, { "kind": "crate", "x": 9, "y": 3, "w": 2, "h": 2 }, { "kind": "crate", "x": 7, "y": 5, "w": 2, "h": 1 },
+    { "kind": "crate", "x": 13, "y": 3, "w": 3, "h": 2 }, { "kind": "crate", "x": 13, "y": 12, "w": 3, "h": 3 }, { "kind": "crate", "x": 7, "y": 12, "w": 2, "h": 3 },
+    { "kind": "barrel", "x": 10, "y": 13 }, { "kind": "barrel", "x": 11, "y": 13 }, { "kind": "barrel", "x": 10, "y": 14 },
+    { "kind": "rubble", "x": 11, "y": 8, "w": 2, "h": 2 }, { "kind": "blood", "x": 15, "y": 9 }, { "kind": "console", "x": 2, "y": 7, "w": 1, "h": 1 },
+    { "kind": "bunk", "x": 18, "y": 2, "w": 1, "h": 2 }, { "kind": "bunk", "x": 21, "y": 2, "w": 1, "h": 2 }, { "kind": "locker", "x": 18, "y": 5, "w": 2, "h": 1 },
+    { "kind": "table", "x": 24, "y": 3, "w": 2, "h": 1 }, { "kind": "locker", "x": 23, "y": 2, "w": 1, "h": 1 },
+    { "kind": "bed", "x": 18, "y": 13, "w": 2, "h": 1 }, { "kind": "locker", "x": 21, "y": 12, "w": 1, "h": 2 }, { "kind": "console", "x": 20, "y": 15, "w": 2, "h": 1 },
+    { "kind": "stairs", "x": 23, "y": 12, "w": 2, "h": 2, "dir": "e" }, { "kind": "lamp", "x": 22, "y": 8 }
+  ] }
