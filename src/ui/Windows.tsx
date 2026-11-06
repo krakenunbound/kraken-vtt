@@ -197,7 +197,9 @@ export function WindowProvider({ children }: { children: ReactNode }) {
     (key: string, at?: ScreenPlace) => {
       const item = windows.find((entry) => entry.key === key);
       if (!item || STAYS_IN.includes(item.kind)) return false;
-      if (item.popped) return true;
+      // Once: a drag past the edge asks on every move until the window's state catches up.
+      const open = popups.current.get(key);
+      if (item.popped || (open && !open.closed)) return true;
       const offset = screenOffset();
       const out = at ?? { sx: offset.x + item.x, sy: offset.y + item.y, w: item.w, h: Math.max(200, item.h - TITLE) };
       const child = openPopOut(item.title, out);
