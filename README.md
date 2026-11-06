@@ -1,6 +1,6 @@
 # Kraken VTT
 
-A free, open-source (MIT) virtual tabletop. The game master runs Kraken on
+A free virtual tabletop, with its source open to read. The game master runs Kraken on
 their Windows PC and hosts the table; players join from Chrome and install
 nothing. It aims for Foundry-level presentation with Fantasy Grounds-level ease
 of use, and a built-in AI agent that can do anything the GM can.
@@ -103,7 +103,20 @@ browser they used.
 
 ## Licence and credits
 
-Kraken VTT is released under the [MIT licence](LICENSE).
+Kraken VTT is free to use and its source is public, under the
+[PolyForm Shield License 1.0.0](LICENSE). In short (the licence's own text
+decides):
+
+- **You may** use Kraken for anything, including running paid games,
+  streaming, and teaching; change it; and share it, with the licence and its
+  copyright notice.
+- **You may not** use Kraken, or a changed copy of it, to make a product that
+  competes with it, such as selling it, repackaging it as your own virtual
+  tabletop, or offering it as a hosted service.
+
+Versions up to and including 0.1.0-alpha.54 were released under the MIT
+licence, and copies of those versions keep it. For permission beyond the
+licence, open an issue on GitHub.
 
 The included games (Descending Darkness and Apeira Astra), their books, maps
 and art are original to Kraken. Some of Descending Darkness's mechanics are

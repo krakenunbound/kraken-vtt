@@ -1,7 +1,7 @@
 {
   "name": "kraken-vtt",
   "private": true,
-  "license": "MIT",
+  "license": "PolyForm-Shield-1.0.0",
   "version": "0.1.0-alpha.55",
   "description": "A free virtual tabletop: the GM hosts, players join from a browser.",
   "author": "Kraken VTT",

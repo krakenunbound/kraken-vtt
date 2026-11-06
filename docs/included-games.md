@@ -61,7 +61,7 @@ and four handouts.
 ## Licensing
 
 Both games, their text, names, settings, maps and art are original to Kraken
-and MIT-licensed with it. Some of Descending Darkness's mechanics are based on
+and licensed with it under the PolyForm Shield License 1.0.0 (see [LICENSE](../LICENSE)). Some of Descending Darkness's mechanics are based on
 the System Reference Document 5.1 (Wizards of the Coast LLC, CC-BY-4.0); no
 SRD text is reproduced. Apeira Astra's 2d6 task roll is a mechanic common to
 many games. How the books are built: [games/README.md](../games/README.md).
