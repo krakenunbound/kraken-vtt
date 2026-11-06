@@ -234,6 +234,10 @@ select {
   display: block;
   user-select: none;
 }
+/* A big map's tiles (mapTiles.ts): placed in the world, a hair larger so no seam shows between them. */
+.map-picture { position: absolute; inset: 0; pointer-events: none; }
+.map-picture img { position: absolute; display: block; user-select: none; outline: 0.6px solid transparent; }
+.map-picture img:not(.map-tile-under) { margin: -0.5px; padding: 0.5px; box-sizing: content-box; }
 
 .world svg.grid,
 .overlay {

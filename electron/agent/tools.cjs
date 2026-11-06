@@ -388,16 +388,16 @@ const TOOLS = [
       },
       ["action"],
     ),
-    run(args, ctx) {
+    async run(args, ctx) {
       const table = needTable(ctx);
       const action = args.action;
       if (action === "list") {
         const wanted = String(args.search ?? "").toLowerCase();
         return out(table.books().filter((item) => !wanted || `${item.title} ${item.category}`.toLowerCase().includes(wanted)));
       }
-      if (action === "activate" || action === "deactivate") return out(table.activateBook(args.book, action === "activate"));
-      if (action === "contents") return out(table.bookContents(args.book));
-      if (action === "page") return out(table.bookPage(args.book, args.page));
+      if (action === "activate" || action === "deactivate") return out(await table.activateBook(args.book, action === "activate"));
+      if (action === "contents") return out(await table.bookContents(args.book));
+      if (action === "page") return out(await table.bookPage(args.book, args.page));
       if (action === "share" || action === "unshare") return out(table.shareBook(args.book, action === "share"));
       if (action === "show") return out(table.showImage(args.book, args.file, args.name));
       if (action === "sound") return out(table.setBookSound({ ...args, action: args.soundAction, id: args.id }));
