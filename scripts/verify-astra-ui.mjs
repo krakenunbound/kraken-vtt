@@ -97,6 +97,7 @@ try {
   const rook = (listedCharacters.records ?? listedCharacters).find((item) => item.name === "Rook Tamsin");
   const data = await dataOf(rook.id);
   assert(data.ruleset === "astra" && data.skills.firearms.level === 2 && data.skills.zerog.level === 2 && data.hp.total === 27 && data.ac.total === 5, `Rook's numbers: ${JSON.stringify({ skills: data.skills, hp: data.hp, ac: data.ac })}`);
+  assert(/^kraken-games\/portraits\/Spacer\/Spacer Marine\./.test(data.portrait ?? "") && /^kraken-games\/tokens\/Spacer\//.test(data.token ?? ""), `Kraken's Spacer Marine portrait and token: ${data.portrait}, ${data.token}`);
   // A task from the sheet: Zero-G, Hard.
   await sheet.locator('[data-sheet-tab="skills"]').click();
   await sheet.locator('select[aria-label="Difficulty"]').selectOption("-2");

@@ -132,6 +132,11 @@ function krakenArtRoots() {
   return [
     { dir: path.join(assets, "portraits"), kind: "portrait", group: "Kraken", prefix: "kraken/portraits/" },
     { dir: path.join(assets, "tokens"), kind: "token", group: "Kraken", prefix: "kraken/tokens/" },
+    // Kraken's own games' heroes, shipped with the app: a portrait and token
+    // for each kin and class (Descending Darkness) and Origin and Path (Apeira
+    // Astra), so a tester's new character has one with nothing else installed.
+    { dir: path.join(APP_DIR, "games", "portraits"), kind: "portrait", group: "Kraken", prefix: "kraken-games/portraits/" },
+    { dir: path.join(APP_DIR, "games", "tokens"), kind: "token", group: "Kraken", prefix: "kraken-games/tokens/" },
   ];
 }
 // Image layers' pictures (map tiles): the GM's assets folder, shared by every

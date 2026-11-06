@@ -21,8 +21,9 @@ async function buildAstra(table, spec, owner, seat) {
   const lib = libraryAstra(table.records);
   if (lib.paths.length === 0) throw new Error("No Paths in this campaign: make the Apeira Astra Crew Handbook active (Books).");
   const built = rules.buildFromSpec(spec ?? {}, lib);
-  // No automatic portrait: Kraken's own art is fantasy; the player picks one (spec.portrait / spec.token).
-  const data = { ...built.data, ...(typeof spec?.portrait === "string" ? { portrait: spec.portrait } : {}), ...(typeof spec?.token === "string" ? { token: spec.token } : {}) };
+  // A portrait and token: the player's choice (spec.portrait / spec.token), or
+  // Kraken's own for the Origin and major Path ("Spacer Marine").
+  const data = require("./characterArt.cjs").withArt(built.data, { ...spec, race: built.data.origin, class: spec?.major ?? built.data.paths?.[0] }, table.art);
   const record = table.records.create({ type: "character", name: built.name, owner: owner ?? "", visibility: owner ? "owner" : "gm", data }, seat ?? table.seat);
   return { record, problems: built.problems };
 }

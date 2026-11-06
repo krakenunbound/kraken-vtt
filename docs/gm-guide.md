@@ -1,0 +1,118 @@
+# The GM's guide
+
+Kraken runs on the GM's Windows PC. The GM's copy is the table: it keeps the
+campaign, decides what each player may see, and serves the players' browsers.
+
+## Campaigns
+
+On the start screen choose **My Campaigns**.
+
+- **New campaign:** give it a name and choose its game (ruleset). The game
+  decides the character sheets, the rules the combat tracker uses, and which
+  books fit the campaign.
+  - *Descending Darkness* and *Apeira Astra* come with Kraken, with their books
+    and a first adventure ([included-games.md](included-games.md)).
+  - *Castles & Crusades* and *D&D 5E* use your own Fantasy Grounds books for
+    their content.
+  - *Worldbuilding* has no rules: maps, tokens, chat and dice for any game.
+- Campaigns are saved as you play, in Kraken's data folder
+  (`%APPDATA%\kraken-vtt`).
+
+## Hosting
+
+Select a campaign, then:
+
+- **Your name**: what players see you called.
+- **Port**: 47300 unless you change it.
+- **Password**: leave it blank for an open table.
+- **Players connect over**: **LAN** for players on your home network,
+  **Cloud** for players on the internet.
+- Press **Play**. *Addresses to give your players* lists the addresses to
+  share, written as `http://address:port`.
+
+**Players on the internet** need your router to forward the port (47300 by
+default, TCP) to this PC. The Windows installer adds the firewall rule for
+you; running from source, Windows asks once, the first time you host.
+
+## The table
+
+The **sidebar** on the right holds everything, as Fantasy Grounds' does:
+
+- **Tools along the top:** the combat tracker, the assistant (the AI agent),
+  the players, settings.
+- **Library:** Modules (which books are active in this campaign), Books (read
+  them), Sound Sets.
+- **Player:** Characters, Party (the party sheet), Notes.
+- **Campaign:** Encounters, Images (maps and handouts), Items, NPCs, Parcels,
+  Tables.
+- **World:** Story (each active adventure's story entries).
+- **Character:** the game's own lists (classes and races, or Paths and Origins)
+  to drag onto a character.
+
+Every window can be moved, resized and **popped out** to its own window on
+another monitor. Anything that looks like a link can be dragged: onto a
+sheet, into chat, into a story entry, onto the hotbar.
+
+## Books and modules
+
+- **Kraken's own games' books** are always on the shelf for their campaigns.
+- **Your Fantasy Grounds modules:** Kraken reads them in place from your
+  Fantasy Grounds data folder's `modules` folder (set `KRAKEN_BOOKS` to read
+  another folder). Nothing is copied. A campaign's game decides which modules
+  fit it.
+- In **Modules**, make a book active to bring its records (NPCs, items,
+  encounters, maps, story) into the campaign. A players' book can be shared
+  with the players.
+- **Share** a record with the players from its window (*Share with the
+  players*), or a picture from its menu. Players never see what you have not
+  shared.
+
+## Maps
+
+- Open a map from **Images**, from a story entry, or by dropping a picture on
+  the table. The map opens in its own window, which can pop out.
+- **Tokens:** drag a character or NPC onto the map. A token's right-click menu
+  holds its options; a hidden token never reaches the players.
+- **Walls, doors and lights:** maps from your modules and Kraken's own
+  adventures bring their walls and doors. Players see only what their tokens
+  can see, with light and darkness as the scene sets them.
+- The **map editor** (the map window's tools) draws walls, doors and windows,
+  sets the grid, places lights, paints, adds text and image layers, and masks
+  what players see.
+
+## Combat
+
+- Add creatures and characters to the **combat tracker** by dragging them in,
+  from an encounter, or from its search box.
+- **Roll initiative**, then step through turns with **Next round** and the
+  turn controls. Effects tick at each turn.
+- **Attacks and damage** roll from the sheet or the tracker against the
+  targeted token and apply to it. Saves, healing and conditions work the same
+  way, by each game's rules.
+
+## Characters
+
+- Players make their own in the character **wizard** (or you make one for
+  them). Each game has its own sheet.
+- Give items and treasure through the **party sheet** and **parcels**.
+- Experience and levelling follow the game's rules.
+
+## Sound
+
+The **Sound** window plays one-shots, ambience loops and music in every
+player's browser, each player with their own volumes. Chat triggers play sound
+effects (a sword's hit, a fireball). Add your own sounds in
+`%APPDATA%\kraken-vtt\assets\sounds`, in folders `oneshots`, `sfx`, `ambience`
+and `music`.
+
+## Chat and dice
+
+Type in chat to talk; `/` lists the commands (Fantasy Grounds' and Foundry's),
+and `/help` shows all of them. `/r 1d20+2` rolls. The modifier box below the
+chat adds to the next roll. Click the dice to roll them; the 3D dice tower is
+the GM's by default.
+
+## The AI assistant
+
+Every GM action is also a tool an AI agent can use, through MCP or the
+assistant window. See [AGENT.md](../AGENT.md).
