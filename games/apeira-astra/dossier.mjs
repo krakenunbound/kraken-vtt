@@ -1,7 +1,9 @@
 // Apeira Astra Threat Dossier: the people and things a crew meets. NPC
 // records the engine reads: characteristics, Stamina (hp), Armour, and
 // actions whose text says "Attack +2 (3d6)" so the tracker rolls them.
-import { ids, md } from "../lib/fg.mjs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { creatureArt, creaturePictures, ids, md } from "../lib/fg.mjs";
 import { RULESET } from "./crew-handbook.mjs";
 
 const STATS = ["brawn", "reflex", "grit", "intellect", "training", "presence"];
@@ -19,6 +21,7 @@ const threat = ({ name, kind, scores, armour = 0, stamina, skills, actions, text
     actions: ids(actions),
     traits: ids(traits.map(([trait, body]) => ({ name: trait, desc: body }))),
     text: md(text),
+    ...creatureArt(name, "Apeira Astra Threat Dossier"),
     __category: category,
   };
 };
@@ -43,6 +46,8 @@ export const DOSSIER = {
   ruleset: RULESET,
   author: "Kraken VTT",
   gm: { npc: THREATS },
+  thumbnail: path.join(path.dirname(fileURLToPath(import.meta.url)), "art", "cover-dossier.webp"),
+  pictures: creaturePictures(THREATS, path.join(path.dirname(fileURLToPath(import.meta.url)), "art")),
   reference: [
     {
       name: "The Dossier",

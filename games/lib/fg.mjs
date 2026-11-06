@@ -112,8 +112,8 @@ export function imageRecord({ name, file, width, height, grid = 70, walls = [], 
     name,
     ...(category ? { __category: category } : {}),
     image: {
-      grid: "on",
-      gridsize: `${grid},${grid}`,
+      grid: grid ? "on" : "off",
+      gridsize: `${grid || 70},${grid || 70}`,
       gridoffset: "0,0",
       layers: {
         layer: [
@@ -131,6 +131,16 @@ export function imageRecord({ name, file, width, height, grid = 70, walls = [], 
     },
   };
 }
+
+// A creature's art: its portrait and its map token, inside its own module
+// (named with the module, so a copy of the record in a campaign or an
+// adventure's encounter still finds them).
+export const artKey = (name) => String(name).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+export const creatureArt = (name, moduleName) => ({ token: `tokens/${artKey(name)}.webp@${moduleName}`, picture: `images/npc/${artKey(name)}.webp@${moduleName}` });
+export const creaturePictures = (records, artFolder) =>
+  Object.fromEntries(records.flatMap((record) => [[`tokens/${artKey(record.name)}.webp`, `${artFolder}/tokens/${artKey(record.name)}.webp`], [`images/npc/${artKey(record.name)}.webp`, `${artFolder}/npc/${artKey(record.name)}.webp`]]));
+// A picture to show the players (no grid).
+export const handout = (name, file, category = "Handouts") => imageRecord({ name, file: `images/${file}.webp`, width: 0, height: 0, grid: 0, category });
 
 // Writes one module. spec: { name, displayName, category, ruleset, author,
 // gm: { type: [records] }, players: { type: [records] }, reference: chapters

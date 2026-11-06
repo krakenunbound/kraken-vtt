@@ -39,6 +39,21 @@ where the picture shows them:
 Grounds: rock, grass, dirt, space. Floors: flag, cobble, wood, dirt, grass,
 metal, deck, grate. `autoSolid` wraps every room in a hull or rock wall.
 
+## Pictures
+
+Covers, handouts and creature portraits are made in the local ComfyUI (Z-Image
+Turbo) from the prompts in `games/tools/art-list.json`:
+
+    python games/tools/make_art.py [part-of-a-file-name]
+
+Pictures already made are kept; delete one to make it again. A creature's
+portrait goes to `art/npc/`, with a 256-pixel copy as its map token in
+`art/tokens/`; its record names both inside its book (`creatureArt` in
+games/lib/fg.mjs), so a copy in a campaign or an adventure's encounter still
+finds them. A book's cover is its `thumbnail`; a handout is an image record
+without a grid (`handout`). Check each picture by eye: no lettering, nothing
+that looks like another work's characters.
+
 ## Licensing
 
 Everything here is original: text, names, setting and pictures. Descending

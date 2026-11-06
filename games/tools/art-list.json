@@ -1,0 +1,243 @@
+{
+  "style": {
+    "dd": "dark fantasy oil painting, painterly, moody candlelit atmosphere, muted earthy palette, detailed, no text, no watermark",
+    "ddcreature": "dark fantasy creature portrait, oil painting, dramatic rim lighting, dark misty background, head and shoulders filling the frame, centered, detailed, no text, no watermark",
+    "aa": "gritty retro science fiction painting, worn industrial spacecraft, cinematic lighting, muted teal and amber palette, detailed, no text, no watermark",
+    "aacreature": "gritty science fiction character portrait, cinematic lighting, dark industrial background, head and shoulders filling the frame, centered, detailed, no text, no watermark"
+  },
+  "pictures": [
+    {
+      "out": "games/descending-darkness/art/cover-handbook.webp",
+      "w": 832,
+      "h": 1152,
+      "style": "dd",
+      "prompt": "book cover painting: a lone adventurer with a lantern descending a spiral stone stair into deep darkness, faint blue light far below, ancient carved arches, ominous"
+    },
+    {
+      "out": "games/descending-darkness/art/cover-bestiary.webp",
+      "w": 832,
+      "h": 1152,
+      "style": "dd",
+      "prompt": "book cover painting: monstrous shapes in a dark crypt, glowing coal eyes of an undead hound, a pale giant spider in webs above, a ghostly lantern bearer with cold blue fire, menacing"
+    },
+    {
+      "out": "games/descending-darkness/art/cover-watchtower.webp",
+      "w": 832,
+      "h": 1152,
+      "style": "dd",
+      "prompt": "book cover painting: a ruined stone watchtower on a ridge above a burned forest at dusk, its beacon dark, wolves on the ridge road, a small village with lit windows far below in the valley"
+    },
+    {
+      "out": "games/descending-darkness/art/handout-journal.webp",
+      "w": 1024,
+      "h": 1024,
+      "style": "dd",
+      "prompt": "an open old leather journal on a wooden table beside a guttering candle, pages of faded handwritten ink, a bronze soldier's badge and a ring resting on the page, illegible script"
+    },
+    {
+      "out": "games/descending-darkness/art/handout-hollowmere.webp",
+      "w": 1344,
+      "h": 768,
+      "style": "dd",
+      "prompt": "a muddy village green with thatched cottages around a stone well at evening, a tired older woman in a shawl by the well, a dark ruined watchtower on the ridge above"
+    },
+    {
+      "out": "games/descending-darkness/art/handout-warden.webp",
+      "w": 1024,
+      "h": 1024,
+      "style": "dd",
+      "prompt": "an undead knight commander in rusted plate armour seated on a stone throne in a crypt, cold blue eyes in a skull face, a sword across his knees, faithful and sorrowful, banners rotted"
+    },
+    {
+      "out": "games/apeira-astra/art/cover-handbook.webp",
+      "w": 832,
+      "h": 1152,
+      "style": "aa",
+      "prompt": "book cover painting: a small crew of spacers in worn vac suits standing in the open cargo ramp of a battered freighter, a gas giant and stars beyond, hopeful frontier mood"
+    },
+    {
+      "out": "games/apeira-astra/art/cover-dossier.webp",
+      "w": 832,
+      "h": 1152,
+      "style": "aa",
+      "prompt": "vertical painting of a dim spaceship corridor: a boxy yellow salvage drone with a glowing cutting arm in the foreground, a spiny metal crab-like creature clinging to the wall pipes, an armed raider in an armoured vac suit with a dark helmet visor behind, red emergency lights"
+    },
+    {
+      "out": "games/apeira-astra/art/cover-salvage.webp",
+      "w": 832,
+      "h": 1152,
+      "style": "aa",
+      "prompt": "vertical painting of a dark boxy derelict cargo spaceship with frost on its hull tumbling in outer space among grey asteroids, a small winged salvage shuttle spacecraft with blue thrusters and floodlights approaching it, stars"
+    },
+    {
+      "out": "games/apeira-astra/art/handout-kestrel.webp",
+      "w": 1344,
+      "h": 768,
+      "style": "aa",
+      "prompt": "a dark boxy derelict cargo spaceship adrift in outer space in an asteroid belt, engines cold, frost on its hull plates, a faded registry stripe on its side, stars and drifting rocks, no water, no ocean"
+    },
+    {
+      "out": "games/apeira-astra/art/handout-lamp.webp",
+      "w": 1344,
+      "h": 768,
+      "style": "aa",
+      "prompt": "a dim cramped bar on an ice mining space station, steam, mismatched stools, a tug pilot with a bandaged burned hand telling a story to spacers, warm lamp light, frost on a porthole"
+    },
+    {
+      "out": "games/apeira-astra/art/handout-cryo.webp",
+      "w": 1344,
+      "h": 768,
+      "style": "aa",
+      "prompt": "a cold cryo bay on a dark spaceship, four cryopods in a row with frosted lids, three humming faintly with blue light, one pod open and empty, emergency lighting"
+    },
+    {
+      "out": "games/apeira-astra/art/handout-reactor.webp",
+      "w": 1344,
+      "h": 768,
+      "style": "aa",
+      "prompt": "a ship's engine room with a reactor glowing sickly blue, strobing radiation warnings, a thin frightened woman in a stained vac suit holding a wrench behind coolant pumps"
+    }
+  ],
+  "creatures": [
+    [
+      "dd",
+      "grave-hound",
+      "an undead hound, patchy fur over grey bone, eyes like burning coals in ash, snarling"
+    ],
+    [
+      "dd",
+      "hollow-man",
+      "a risen corpse of a peasant in rotten clothes, blank staring eyes, grey skin, shambling"
+    ],
+    [
+      "dd",
+      "bone-sentinel",
+      "a skeleton soldier in scraps of an ancient uniform and a dented helmet, holding a spear at its post"
+    ],
+    [
+      "dd",
+      "lantern-wight",
+      "a gaunt undead lamplighter in a long coat carrying a lantern of cold blue fire, hollow eyes"
+    ],
+    [
+      "dd",
+      "murkling",
+      "a small thin grey goblin-like creature of the deep with huge pale eyes, ragged, holding a crude knife"
+    ],
+    [
+      "dd",
+      "murkling-firecaller",
+      "a small thin grey deep-dwelling creature with huge eyes holding a flame in its clawed hand, bone fetishes"
+    ],
+    [
+      "dd",
+      "murk-brute",
+      "a huge hulking grey brute of the deep folk, tiny eyes, scarred, carrying a heavy maul"
+    ],
+    [
+      "dd",
+      "barrow-rats",
+      "a swarm of fat black rats spilling over old tomb bones, red eyes"
+    ],
+    [
+      "dd",
+      "gloomcrawler",
+      "a giant black glistening centipede curling down from a stone ceiling, mandibles open"
+    ],
+    [
+      "dd",
+      "pale-spider",
+      "a huge white corpse-pale spider in thick webs in a ruined hall, many black eyes"
+    ],
+    [
+      "dd",
+      "ash-wolf",
+      "a thin hungry grey wolf in a burned forest, ash on its fur, amber eyes"
+    ],
+    [
+      "dd",
+      "road-bandit",
+      "a hungry desperate road bandit in a hooded cloak and leather, holding a short sword, wary"
+    ],
+    [
+      "dd",
+      "bandit-captain",
+      "a hard-faced woman bandit captain, former soldier, scar on her cheek, worn armour and a sabre"
+    ],
+    [
+      "dd",
+      "hollow-star-cultist",
+      "a cultist in black robes with a hollow star symbol on the chest, pale fervent face, ritual dagger"
+    ],
+    [
+      "dd",
+      "drowned-one",
+      "a swollen pale drowned man in a sodden rotting coat, head and shoulders rising from black water, weeds in his hair, patient dead eyes"
+    ],
+    [
+      "dd",
+      "tower-shade",
+      "a translucent ghost of a watchman in a cloak on a crumbling battlement, faint blue glow"
+    ],
+    [
+      "dd",
+      "mire-witch",
+      "a fey marsh witch with mossy hair and green eyes holding a small glowing light, reeds and fog"
+    ],
+    [
+      "dd",
+      "warden-saranth",
+      "an undead knight commander in rusted plate with a skull face and cold blue eyes, an oath ring on a bony finger"
+    ],
+    [
+      "aa",
+      "dock-tough",
+      "a burly station dock worker thug with a shaved head, tattoos and a pipe wrench, grimy jacket"
+    ],
+    [
+      "aa",
+      "combine-security",
+      "a corporate security guard in grey body armour and a visored helmet, holding a stun baton, company logo"
+    ],
+    [
+      "aa",
+      "pirate-raider",
+      "a hard-faced raider with a buzz cut and a scarred jaw in a battered armoured vac suit, helmet under one arm, holding a carbine, clean shaven"
+    ],
+    [
+      "aa",
+      "mags-orrin",
+      "a charming ruthless woman salvage captain in her forties, short grey streaked hair, leather flight jacket, sly smile"
+    ],
+    [
+      "aa",
+      "gull-crewman",
+      "a salvager in a patched orange vac suit with the helmet off, tired and rough, holding a cutting tool"
+    ],
+    [
+      "aa",
+      "salvage-drone",
+      "a boxy industrial salvage robot drone with magnetic treads and a glowing plasma cutting arm, scratched yellow paint"
+    ],
+    [
+      "aa",
+      "sentry-turret",
+      "a ceiling-mounted automated gun turret with a red sensor eye in a dark ship corridor"
+    ],
+    [
+      "aa",
+      "rust-crawler",
+      "a spiny metallic crab-like creature chewing through ship cables, rust coloured plates"
+    ],
+    [
+      "aa",
+      "void-lamprey",
+      "a huge segmented eel-like space worm with no eyes and a round sucker mouth ringed with circles of hooked teeth, grey leathery hide, drifting among asteroids"
+    ],
+    [
+      "aa",
+      "hollow-eyed-survivor",
+      "a gaunt starving woman in a stained vac suit with hollow eyes, holding a wrench, scared and desperate"
+    ]
+  ]
+}

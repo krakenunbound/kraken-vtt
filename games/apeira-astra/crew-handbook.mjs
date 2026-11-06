@@ -1,5 +1,7 @@
 // Apeira Astra Crew Handbook: the rules a player needs and the records the
 // crew wizard uses (Origins, Paths, gear).
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { md } from "../lib/fg.mjs";
 import { ARMOUR, GEAR, ORIGINS, PATHS, WEAPONS } from "./crew.mjs";
 
@@ -13,6 +15,7 @@ export const CREW_HANDBOOK = {
   ruleset: RULESET,
   author: "Kraken VTT",
   playersBook: true,
+  thumbnail: path.join(path.dirname(fileURLToPath(import.meta.url)), "art", "cover-handbook.webp"),
   players: { race: ORIGINS, class: PATHS, item: [...WEAPONS, ...ARMOUR, ...GEAR] },
   reference: [
     {

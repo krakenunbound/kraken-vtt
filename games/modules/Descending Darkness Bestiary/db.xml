@@ -68,6 +68,8 @@
 					</id-00001>
 				</actions>
 				<text type="formattedtext"><p>A hound of the barrow-lords, buried with its master and risen with him. Patchy fur over grey bone, eyes like coals in ash. It does not tire, and it does not lose a scent.</p></text>
+				<token type="string">tokens/grave-hound.webp@Descending Darkness Bestiary</token>
+				<picture type="string">images/npc/grave-hound.webp@Descending Darkness Bestiary</picture>
 			</gravehound>
 			<hollowman>
 				<name type="string">Hollow Man</name>
@@ -131,6 +133,8 @@
 					</id-00001>
 				</actions>
 				<text type="formattedtext"><p>A body that got up again. It remembers nothing but the way home, and it is going there through anyone in its path.</p></text>
+				<token type="string">tokens/hollow-man.webp@Descending Darkness Bestiary</token>
+				<picture type="string">images/npc/hollow-man.webp@Descending Darkness Bestiary</picture>
 			</hollowman>
 			<bonesentinel>
 				<name type="string">Bone Sentinel</name>
@@ -202,6 +206,8 @@
 					</id-00002>
 				</actions>
 				<text type="formattedtext"><p>The skeleton of a soldier still at its post, in the scraps of a uniform nobody alive remembers.</p></text>
+				<token type="string">tokens/bone-sentinel.webp@Descending Darkness Bestiary</token>
+				<picture type="string">images/npc/bone-sentinel.webp@Descending Darkness Bestiary</picture>
 			</bonesentinel>
 			<lanternwight>
 				<name type="string">Lantern Wight</name>
@@ -273,6 +279,8 @@
 					</id-00002>
 				</actions>
 				<text type="formattedtext"><p>It carries a lantern full of cold blue fire, and wherever it walks the warm light dies. Once it was a lamplighter; it is still lighting the way, to somewhere else.</p></text>
+				<token type="string">tokens/lantern-wight.webp@Descending Darkness Bestiary</token>
+				<picture type="string">images/npc/lantern-wight.webp@Descending Darkness Bestiary</picture>
 			</lanternwight>
 			<murkling>
 				<name type="string">Murkling</name>
@@ -344,6 +352,8 @@
 					</id-00002>
 				</actions>
 				<text type="formattedtext"><p>Grey, thin and wide-eyed, the deep folk live where the sun never reaches and come up at night to steal. Alone they flee; in a pack they are brave.</p></text>
+				<token type="string">tokens/murkling.webp@Descending Darkness Bestiary</token>
+				<picture type="string">images/npc/murkling.webp@Descending Darkness Bestiary</picture>
 			</murkling>
 			<murklingfirecaller>
 				<name type="string">Murkling Firecaller</name>
@@ -411,6 +421,8 @@
 					</id-00002>
 				</actions>
 				<text type="formattedtext"><p>The deep folk hate fire, and fear those of their own who can call it. A firecaller leads by fear, and puts out your torches first.</p></text>
+				<token type="string">tokens/murkling-firecaller.webp@Descending Darkness Bestiary</token>
+				<picture type="string">images/npc/murkling-firecaller.webp@Descending Darkness Bestiary</picture>
 			</murklingfirecaller>
 			<murkbrute>
 				<name type="string">Murk Brute</name>
@@ -470,6 +482,8 @@
 					</id-00001>
 				</actions>
 				<text type="formattedtext"><p>Bred big by the deep folk to carry loads and break doors. It does both well.</p></text>
+				<token type="string">tokens/murk-brute.webp@Descending Darkness Bestiary</token>
+				<picture type="string">images/npc/murk-brute.webp@Descending Darkness Bestiary</picture>
 			</murkbrute>
 			<barrowrats>
 				<name type="string">Barrow Rats</name>
@@ -533,6 +547,8 @@
 					</id-00001>
 				</actions>
 				<text type="formattedtext"><p>A carpet of rats that have eaten well in the old tombs and want more.</p></text>
+				<token type="string">tokens/barrow-rats.webp@Descending Darkness Bestiary</token>
+				<picture type="string">images/npc/barrow-rats.webp@Descending Darkness Bestiary</picture>
 			</barrowrats>
 			<gloomcrawler>
 				<name type="string">Gloomcrawler</name>
@@ -592,6 +608,8 @@
 					</id-00001>
 				</actions>
 				<text type="formattedtext"><p>A centipede as long as a man, black and glistening. It lives on the ceilings of old places and drops on what passes below.</p></text>
+				<token type="string">tokens/gloomcrawler.webp@Descending Darkness Bestiary</token>
+				<picture type="string">images/npc/gloomcrawler.webp@Descending Darkness Bestiary</picture>
 			</gloomcrawler>
 			<palespider>
 				<name type="string">Pale Spider</name>
@@ -659,6 +677,8 @@
 					</id-00002>
 				</actions>
 				<text type="formattedtext"><p>White as a corpse's hand and the size of a pony, it weaves the empty halls shut.</p></text>
+				<token type="string">tokens/pale-spider.webp@Descending Darkness Bestiary</token>
+				<picture type="string">images/npc/pale-spider.webp@Descending Darkness Bestiary</picture>
 			</palespider>
 			<ashwolf>
 				<name type="string">Ash Wolf</name>
@@ -722,6 +742,8 @@
 					</id-00001>
 				</actions>
 				<text type="formattedtext"><p>Grey wolves of the burned forests, thin with hunger. They follow travellers for days before they strike.</p></text>
+				<token type="string">tokens/ash-wolf.webp@Descending Darkness Bestiary</token>
+				<picture type="string">images/npc/ash-wolf.webp@Descending Darkness Bestiary</picture>
 			</ashwolf>
 			<drownedone>
 				<name type="string">Drowned One</name>
@@ -785,6 +807,8 @@
 					</id-00001>
 				</actions>
 				<text type="formattedtext"><p>Swollen, pale and patient, it waits under black water for someone to lean too close.</p></text>
+				<token type="string">tokens/drowned-one.webp@Descending Darkness Bestiary</token>
+				<picture type="string">images/npc/drowned-one.webp@Descending Darkness Bestiary</picture>
 			</drownedone>
 			<towershade>
 				<name type="string">Tower Shade</name>
@@ -852,6 +876,8 @@
 					</id-00001>
 				</actions>
 				<text type="formattedtext"><p>The last watcher of a tower that fell: it still walks the battlements, still waiting for the relief that never came.</p></text>
+				<token type="string">tokens/tower-shade.webp@Descending Darkness Bestiary</token>
+				<picture type="string">images/npc/tower-shade.webp@Descending Darkness Bestiary</picture>
 			</towershade>
 			<mirewitch>
 				<name type="string">Mire Witch</name>
@@ -919,6 +945,8 @@
 					</id-00002>
 				</actions>
 				<text type="formattedtext"><p>She leads travellers into the marsh with a light like a window, and keeps what she catches.</p></text>
+				<token type="string">tokens/mire-witch.webp@Descending Darkness Bestiary</token>
+				<picture type="string">images/npc/mire-witch.webp@Descending Darkness Bestiary</picture>
 			</mirewitch>
 		</category>
 		<category name="People">
@@ -984,6 +1012,8 @@
 					</id-00002>
 				</actions>
 				<text type="formattedtext"><p>Hungry, desperate and armed. Most would rather rob you than kill you, if you let them.</p></text>
+				<token type="string">tokens/road-bandit.webp@Descending Darkness Bestiary</token>
+				<picture type="string">images/npc/road-bandit.webp@Descending Darkness Bestiary</picture>
 			</roadbandit>
 			<banditcaptain>
 				<name type="string">Bandit Captain</name>
@@ -1051,6 +1081,8 @@
 					</id-00002>
 				</actions>
 				<text type="formattedtext"><p>A former soldier with a band of her own, a sharp mind, and debts.</p></text>
+				<token type="string">tokens/bandit-captain.webp@Descending Darkness Bestiary</token>
+				<picture type="string">images/npc/bandit-captain.webp@Descending Darkness Bestiary</picture>
 			</banditcaptain>
 			<hollowstarcultist>
 				<name type="string">Hollow Star Cultist</name>
@@ -1114,6 +1146,8 @@
 					</id-00001>
 				</actions>
 				<text type="formattedtext"><p>The cult of the Hollow Star believes the dark is a door, and that something waits on the other side to be let in.</p></text>
+				<token type="string">tokens/hollow-star-cultist.webp@Descending Darkness Bestiary</token>
+				<picture type="string">images/npc/hollow-star-cultist.webp@Descending Darkness Bestiary</picture>
 			</hollowstarcultist>
 		</category>
 		<category name="The Empty Watchtower">
@@ -1191,6 +1225,8 @@
 					</id-00002>
 				</actions>
 				<text type="formattedtext"><p>The last commander of the Empty Watchtower, who swore to hold it until relieved. Nobody came. He held it anyway.</p></text>
+				<token type="string">tokens/warden-saranth.webp@Descending Darkness Bestiary</token>
+				<picture type="string">images/npc/warden-saranth.webp@Descending Darkness Bestiary</picture>
 			</wardensaranth>
 		</category>
 	</npc>
