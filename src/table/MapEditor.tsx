@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import type { DecalItem, EditWall, MapLabel, MapTile, SceneLightRecord, TableMap, WallKind } from "../session/useSession";
 import type { SceneSettingsPatch } from "./SceneSettings";
 import { LIGHT_PRESETS } from "../../shared/map/geometry.mjs";
@@ -90,6 +90,8 @@ type Props = {
     removeLight: (id: string) => void;
   };
   onClose: () => void;
+  // The scene's count of walls, doors, windows, lights, creatures and traps (shown under Walls).
+  summary?: ReactNode;
 };
 
 export function MapEditor(props: Props) {
@@ -245,6 +247,7 @@ export function MapEditor(props: Props) {
               Clear walls
             </button>
           </div>
+          {props.summary}
         </>
       ) : null}
 

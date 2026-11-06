@@ -38,13 +38,18 @@ const gridLabel = (await page.locator(".grid-label").textContent())?.trim();
 assert(gridLabel === "Square · 150 px · 5 ft", `grid label ${gridLabel}`);
 const lines = await page.locator("svg.grid line").count();
 assert(lines === 114, `grid lines ${lines}`);
-const legend = page.locator(".legend");
+// The scene's counts are in the map editor's Walls tab (Foundry's walls layer), not over the map.
+const editMap = page.getByRole("button", { name: "Edit map" });
+await editMap.click();
+const legend = page.locator(".map-editor .legend");
 assert((await legend.getAttribute("data-walls")) === "141", "wall count");
 assert((await legend.getAttribute("data-normal")) === "20", "normal walls");
 assert((await legend.getAttribute("data-invisible")) === "56", "see-through");
 assert((await legend.getAttribute("data-terrain")) === "51", "terrain");
 assert((await legend.getAttribute("data-ethereal")) === "14", "los walls");
 assert((await page.locator("g.wall").count()) === 141, "drawn walls");
+await editMap.click();
+assert((await page.locator(".legend").count()) === 0, "no counts box over the map in play");
 
 const aligned = await page.evaluate(() => {
   const image = document.querySelector(".world img")?.getBoundingClientRect();
@@ -108,6 +113,7 @@ await page.waitForFunction(
 );
 
 await page.getByLabel("Adventure").selectOption({ label: "Troll's Pot Night" });
+await editMap.click();
 await page.waitForFunction(() => document.querySelector(".legend")?.getAttribute("data-lights") === "2");
 await page.waitForFunction(() => document.querySelectorAll(".light").length === 2);
 
@@ -115,6 +121,7 @@ await page.getByLabel("Map bundle").setInputFiles(String.raw`G:\TTRPG Books (pdf
 await page.waitForFunction(() => Number(document.querySelector(".legend")?.getAttribute("data-door") ?? 0) > 0, null, {
   timeout: 60000,
 });
+await editMap.click();
 const door = page.locator(".door").first();
 const fillBefore = await door.getAttribute("fill");
 await door.click({ force: true });
