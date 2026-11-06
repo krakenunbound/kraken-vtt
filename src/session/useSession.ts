@@ -1075,6 +1075,8 @@ export function useSession() {
     importCharacter,
     takeCharacter,
     editCharacter: (id: string, changes: { path: string; value: unknown }[]) => send({ type: "character-edit", id, changes }),
+    // A record dropped on the sheet (FG's sheet drop): a race or class, a spell, an item.
+    dropOnCharacter: (id: string, recordId: string) => send({ type: "character-drop", id, recordId }),
     activateBook: (book: string, active: boolean) => send({ type: "book-activate", book, active }),
     // The party's watch order and formation (a player moves their own characters).
     partyOrder: (change: { action: "place" | "remove" | "watch" | "fill" | "rotate" | "clear"; id?: string; x?: number; y?: number; watch?: number; columns?: number; direction?: "left" | "right" }) => send({ type: "party-order", ...change }),

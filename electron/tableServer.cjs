@@ -9,7 +9,7 @@ const { withArt } = require("./characterArt.cjs");
 const { soundFor, cleanTriggers } = require("./soundTriggers.cjs");
 const { defaultTriggers, TRIGGERS_VERSION } = require("./soundCatalog.cjs");
 const { createDice } = require("./dice.cjs");
-const { siege, siegeLibrary, siegeCheck, levelUp, changeClass, editCharacter, importCharacter } = require("./siege.cjs");
+const { siege, siegeLibrary, siegeCheck, levelUp, changeClass, dropOnCharacter, editCharacter, importCharacter } = require("./siege.cjs");
 const { createMapState, playerColor } = require("./mapState.cjs");
 const party = require("./party.cjs");
 const { createCombat } = require("./combat.cjs");
@@ -1365,6 +1365,21 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         }
         changeClass(agentHandle, record, String(msg.mode), String(msg.className ?? ""), client.role === "dm" ? record.name : client.name).catch((error) =>
           send(ws, { type: "error", reason: error instanceof Error ? error.message : "Could not change the class." }),
+        );
+        return;
+      }
+
+      // A record dropped on a character sheet (FG's sheet drop): a race or
+      // class, a spell, an item. The owner or the GM, with a record this seat sees.
+      if (msg.type === "character-drop") {
+        const record = records.get(String(msg.id ?? ""), seatOf(client));
+        const source = records.get(String(msg.recordId ?? ""), seatOf(client));
+        if (!record || record.type !== "character" || (client.role !== "dm" && record.owner !== client.name)) {
+          send(ws, { type: "error", reason: "You cannot change that character." });
+          return;
+        }
+        dropOnCharacter(agentHandle, record, source, client.name).catch((error) =>
+          send(ws, { type: "error", reason: error instanceof Error ? error.message : "That does not go on the sheet." }),
         );
         return;
       }

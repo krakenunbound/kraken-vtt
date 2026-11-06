@@ -9,7 +9,7 @@
 //   window()         the main BrowserWindow, for screenshots and page text
 
 const fgModule = require("../importers/fgModule.cjs");
-const { siege, siegeLibrary, siegeCheck, levelUp, changeClass } = require("../siege.cjs");
+const { siege, siegeLibrary, siegeCheck, levelUp, changeClass, dropOnCharacter } = require("../siege.cjs");
 const dnd5e = require("../dnd5e.cjs");
 const party = require("../party.cjs");
 const { editCharacter: siegeEdit, importCharacter, exportCharacter } = require("../siege.cjs");
@@ -477,6 +477,24 @@ const TOOLS = [
       if (!record || record.type !== "character") throw new Error(`No character "${args.id}".`);
       const { record: updated, summary } = await changeClass(table, record, args.mode, args.className, "Agent");
       return out({ summary, level: updated.data.level, exp: updated.data.exp, expnext: updated.data.expnext, expnextsource: updated.data.expnextsource, hp: updated.data.hp, packages: Object.values(updated.data.packages ?? {}).map((pkg) => ({ name: pkg.name, level: pkg.level })) });
+    },
+  },
+  {
+    name: "kraken_character_drop",
+    description:
+      "Drop a record on a character sheet, as dragging it from a list (Classes, Races, Spells, Items) onto the sheet in FG: a race or class package goes into the packages at 1st level (its primes set; a class gives 1st level's hit points; a race replaces the old race), a spell or power into the powers (bound to the one class that casts it), an item into the gear (equipped when it is worn or a weapon). Chat says what was added. A second class is refused (that is dual class or reclass at a level up: kraken_class_change). A 5E sheet takes items only. record: the record's id, or its name (with type to tell same-named records apart).",
+    inputSchema: object({ id: string("The character's record id"), record: string("The record to drop: its id or name"), type: { type: "string", enum: ["siegepackage", "siegepower", "item"] } }, ["id", "record"]),
+    async run(args, ctx) {
+      const table = needTable(ctx);
+      const character = table.records.get(args.id);
+      if (!character || character.type !== "character") throw new Error(`No character "${args.id}".`);
+      const wanted = String(args.record).toLowerCase();
+      const source =
+        table.records.get(args.record) ??
+        table.records.list(args.type ? { type: args.type } : {}).find((item) => item.type !== "character" && item.name.toLowerCase() === wanted);
+      if (!source) throw new Error(`No record "${args.record}".`);
+      const { record: updated, added, summary } = await dropOnCharacter(table, character, source, "Agent");
+      return out({ added, summary, race: updated.data.race, level: updated.data.level, hp: updated.data.hp, packages: Object.values(updated.data.packages ?? {}).map((pkg) => ({ name: pkg.name, type: pkg.packagetype, level: pkg.level })), powers: Object.values(updated.data.powers ?? {}).map((power) => power.name), gear: Object.values(updated.data.inventorylist ?? {}).map((item) => `${item.name} x${item.count}${Number(item.carried) === 2 ? " (equipped)" : ""}`) });
     },
   },
   {
@@ -1319,10 +1337,23 @@ const TOOLS = [
       "The GM's windows: list them, or open, close, pop out (to a window of its own, for another monitor) or dock back a window. Kinds: assistant (the GM's DM assistant chat), characters, party, combat, players, settings, decals (the background decal picker), wallpapers (the desktop wallpaper picker), gmicons (the GM icon picker), krits (critical hits and fumbles), dice (this seat's dice: sets, colours, design, material, effects), sound (one-shots, effects, ambience, music, chat triggers, volumes), sheet (a character's sheet: give record, its id or name), charselect (Character Selection), records (FG's campaign lists: NPCs, items, spells, classes...; the GM shares one with kraken_record_update visibility all, hides it with gm), record (one record: give record, its id or name).",
     inputSchema: object({
       action: { type: "string", enum: ["list", "open", "close", "popout", "dock"] },
-      kind: { type: "string", enum: ["assistant", "characters", "party", "combat", "players", "settings", "decals", "wallpapers", "gmicons", "krits", "library", "dice", "sound", "sheet", "books", "book", "images", "picture", "notes", "note", "charselect", "records", "record"] },
+      kind: { type: "string", enum: ["assistant", "characters", "party", "combat", "players", "settings", "decals", "wallpapers", "gmicons", "krits", "library", "dice", "sound", "sheet", "books", "book", "images", "picture", "notes", "note", "charselect", "records", "record", "adventure"] },
       record: string("For a sheet: the character's record id or name; for a record: its id or name"),
     }),
     run: async (args, ctx) => out(await ctx.ui({ kind: "windows", action: args.action ?? "list", window: args.kind, record: args.record })),
+  },
+  {
+    name: "kraken_sidebar",
+    description:
+      "The sidebar on the right of the GM's screen, as FG's: the tools along the top (combat tracker, assistant, players, settings), then categories that fold away: Library (Modules = book activation, Books, Sound Sets), Player (Characters, Packages, Party, Notes), Campaign (Encounters, Images, Items, NPCs, Parcels, Tables: every active book's or adventure's, each under the book's name) and Character (Classes, Races, Spells...: drag one onto a character sheet, or kraken_character_drop). action list: the buttons and categories, which are open or folded, and the state; state: 0 icons and names, 1 icons only (categories cut to four letters), 2 a thin strip (one letter), as the arrow at the bottom steps through; fold: fold a category (group, its name) away, or open it again with folded false; press: press a button (entry: its id from list, such as records:npc or adventure:battle, or its name) to open or close its window.",
+    inputSchema: object({
+      action: { type: "string", enum: ["list", "state", "fold", "press"] },
+      state: { type: "number", enum: [0, 1, 2] },
+      group: string("A category: Library, Player, Campaign or Character"),
+      folded: { type: "boolean" },
+      entry: string("A button: its id (list) or its name"),
+    }),
+    run: async (args, ctx) => out(await ctx.ui({ kind: "sidebar", action: args.action ?? "list", state: args.state, group: args.group, folded: args.folded, entry: args.entry })),
   },
   {
     name: "kraken_dice_settings",

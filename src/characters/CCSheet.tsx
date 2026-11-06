@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { ClassLevel } from "./ClassLevel";
 import type { Session, TableRecord } from "../session/useSession";
 import { Icon } from "../ui/icons";
-import { slotDrag } from "../ui/QuickSlots";
+import { hasLink, linkFrom, slotDrag } from "../ui/QuickSlots";
 import { ArtPicker, Picture } from "./ArtPicker";
 
 // The Castles & Crusades character sheet, laid out as FG's SC C&C sheet: the
@@ -66,6 +66,7 @@ export function CCSheet({ record, session }: { record: TableRecord; session: Ses
   const [picking, setPicking] = useState<"portrait" | "token" | null>(null);
   const [language, setLanguage] = useState("");
   const [classPanel, setClassPanel] = useState(false);
+  const [dropping, setDropping] = useState(false);
   const data = record.data as Row;
   const me = session.players.find((seat) => seat.id === session.selfId)?.name;
   const editable = session.role === "dm" || (record.owner !== "" && record.owner === me);
@@ -95,7 +96,27 @@ export function CCSheet({ record, session }: { record: TableRecord; session: Ses
   const portraitUrl = typeof data.portrait === "string" ? data.portrait : "";
 
   return (
-    <article className="cc-sheet" data-character={record.id}>
+    <article
+      className={dropping ? "cc-sheet dropping" : "cc-sheet"}
+      data-character={record.id}
+      // A race, class, spell or item from a list, dropped anywhere on the sheet, goes where it belongs (FG's sheet drop).
+      onDragOver={(event) => {
+        if (!editable || !hasLink(event)) return;
+        event.preventDefault();
+        event.dataTransfer.dropEffect = "copy";
+        setDropping(true);
+      }}
+      onDragLeave={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setDropping(false);
+      }}
+      onDrop={(event) => {
+        setDropping(false);
+        const link = linkFrom(event);
+        if (!editable || !link || link.kind !== "record" || link.record === record.id) return;
+        event.preventDefault();
+        session.dropOnCharacter(record.id, link.record);
+      }}
+    >
       <div className="cc-body">
         <header className="cc-head">
           {/* The token as a small round badge on the portrait's corner. */}
