@@ -1,17 +1,13 @@
-const { app, BrowserWindow, Menu, ipcMain, clipboard, dialog, shell, safeStorage } = require("electron");
+const { app, BrowserWindow, Menu, ipcMain, clipboard, dialog, shell, safeStorage, utilityProcess } = require("electron");
 const fs = require("fs");
-const https = require("https");
 const os = require("os");
 const path = require("path");
-const { createTableServer, eachAddress } = require("./tableServer.cjs");
-const { createArtLibrary, defaultRoots } = require("./artLibrary.cjs");
-const { createDecalLibrary } = require("./decals.cjs");
-const { createSoundLibrary } = require("./sounds.cjs");
-const { createBookShelf } = require("./books.cjs");
-const { fgDataFolder } = require("./importers/fgModule.cjs");
-const campaigns = require("./campaigns.cjs");
-const { startAgentServer } = require("./agent/mcpServer.cjs");
 const assistantModule = require("./assistant.cjs");
+
+// The window's process: it draws the GM's window and forwards everything else
+// to the backend (backend.cjs: the table server, campaigns, libraries, books,
+// the agent bridge, the assistant), which runs in a process of its own so
+// nothing it does can freeze this one, and so the window.
 
 // The development copy (Kraken VTT.bat) and the installed app keep their
 // campaigns and assets in one place, whichever is opened.
@@ -31,330 +27,145 @@ if (process.env.KRAKEN_E2E === "1" || process.env.KRAKEN_SMOKE === "1") {
 
 Menu.setApplicationMenu(null);
 
-function campaignFile() {
-  return path.join(app.getPath("userData"), "campaigns.json");
-}
+// --- The backend ------------------------------------------------------------------
+let backend = null;
+let backendReady = null;
+let quitting = false;
+let called = 0;
+const waiting = new Map();
 
-let networkCache = { at: 0, v4: [], v6: [], externalV4: "", externalV6: "" };
-
-function fetchText(url) {
-  return new Promise((resolve) => {
-    const req = https.get(url, { timeout: 2500 }, (res) => {
-      const chunks = [];
-      res.on("data", (chunk) => chunks.push(chunk));
-      res.on("end", () => {
-        const body = Buffer.concat(chunks).toString("utf8").trim();
-        resolve(res.statusCode === 200 ? body : "");
-      });
-    });
-    req.on("error", () => resolve(""));
-    req.on("timeout", () => {
-      req.destroy();
-      resolve("");
-    });
+function startBackend() {
+  const child = utilityProcess.fork(path.join(__dirname, "backend.cjs"), [], {
+    serviceName: "Kraken backend",
+    stdio: "inherit",
+    env: { ...process.env, KRAKEN_USER_DATA: app.getPath("userData"), KRAKEN_VERSION: app.getVersion() },
+  });
+  backend = child;
+  backendReady = new Promise((resolve) => {
+    const onReady = (message) => {
+      if (message?.type !== "ready") return;
+      child.off("message", onReady);
+      resolve();
+    };
+    child.on("message", onReady);
+  });
+  child.on("message", (message) => onBackend(child, message));
+  child.on("exit", (code) => {
+    for (const [, wait] of waiting) wait.reject(new Error("The backend stopped."));
+    waiting.clear();
+    if (backend !== child || quitting) return;
+    // It should never stop: if it does, start it again (the table must be hosted again).
+    console.error(`the backend stopped (${code}); starting it again`);
+    startBackend();
+    backendReady.then(sendTypedKey);
   });
 }
 
-function ipv4(value) {
-  if (!/^(?:\d{1,3}\.){3}\d{1,3}$/.test(value)) return "";
-  const parts = value.split(".").map(Number);
-  return parts.every((part) => part <= 255) ? value : "";
+async function call(name, ...args) {
+  await backendReady;
+  const id = ++called;
+  return new Promise((resolve, reject) => {
+    waiting.set(id, { resolve, reject });
+    backend.postMessage({ type: "call", id, name, args });
+  });
 }
 
-function ipv6(value) {
-  return /^[0-9a-f:]+$/i.test(value) && value.includes(":") ? value : "";
-}
-
-async function networkSnapshot() {
-  const local = eachAddress();
-  if (Date.now() - networkCache.at < 60000 && networkCache.v4.join() === local.v4.join()) return { ...networkCache, v4: local.v4, v6: local.v6 };
-  const [externalV4, externalV6] = await Promise.all([
-    fetchText("https://api.ipify.org"),
-    fetchText("https://api6.ipify.org"),
-  ]);
-  networkCache = {
-    at: Date.now(),
-    v4: local.v4,
-    v6: local.v6,
-    externalV4: ipv4(externalV4),
-    externalV6: ipv6(externalV6),
-  };
-  return networkCache;
-}
-
-let table = null;
-let quitting = false;
-
-// Background decals: Kraken's own, the GM's assets folder (shared by every
-// campaign; a picture the GM picks is copied in), and FG's decals.
-let decalLibrary = null;
-let wallpaperLibrary = null;
-let gmIconLibrary = null;
-let soundLibrary = null;
-let bookShelf = null;
-// The GM's books: the FG modules on this computer, read in place.
-function books() {
-  if (!bookShelf) bookShelf = createBookShelf({ folder: process.env.KRAKEN_BOOKS || path.join(fgDataFolder(), "modules"), cache: path.join(app.getPath("userData"), "books-index.json") });
-  return bookShelf;
-}
-// The GM's sounds (one-shots, effects, ambience, music), shared by every campaign.
-function sounds() {
-  if (!soundLibrary) soundLibrary = createSoundLibrary({ folder: path.join(app.getPath("userData"), "assets", "sounds"), builtin: path.join(__dirname, "..", "sounds") });
-  return soundLibrary;
-}
-// The GM's chat pictures: the Kraken GM Icon set and the GM's own.
-function gmIcons() {
-  if (!gmIconLibrary) {
-    gmIconLibrary = createDecalLibrary({
-      folder: path.join(app.getPath("userData"), "assets", "gm-icons"),
-      builtin: path.join(__dirname, "..", "dist", "gm-icons"),
-      own: [],
-    });
-  }
-  return gmIconLibrary;
-}
-// Image layers' pictures (map tiles): the GM's assets folder, shared by every
-// campaign; a module's or bundle's pictures are copied in once, named by content.
-// Players' accounts: one list for every campaign this GM runs (accounts.cjs).
-let accountStore = null;
-let prefsStore = null;
-function prefs() {
-  if (!prefsStore) prefsStore = require("./prefs.cjs").createPrefsStore(path.join(app.getPath("userData"), "prefs.json"), require("./tableServer.cjs").diceLook);
-  return prefsStore;
-}
-function accounts() {
-  if (!accountStore) accountStore = require("./accounts.cjs").createAccountStore(path.join(app.getPath("userData"), "accounts.json"));
-  return accountStore;
-}
-// Kraken's own portraits and tokens (a race and class set, round tokens made
-// from them), in the assets folder beside the GM's FG collection; by race.
-function krakenArtRoots() {
-  const assets = path.join(app.getPath("userData"), "assets");
-  return [
-    { dir: path.join(assets, "portraits"), kind: "portrait", group: "Kraken", prefix: "kraken/portraits/" },
-    { dir: path.join(assets, "tokens"), kind: "token", group: "Kraken", prefix: "kraken/tokens/" },
-  ];
-}
-let tileLibrary = null;
-function tiles() {
-  if (!tileLibrary) tileLibrary = createDecalLibrary({ folder: path.join(app.getPath("userData"), "assets", "tiles"), own: [], hashNames: true });
-  return tileLibrary;
-}
-// The GM's own choices that follow them into every campaign (the GM icon), on this computer.
-function preferencesFile() {
-  return path.join(app.getPath("userData"), "preferences.json");
-}
-function preferences() {
-  try {
-    return JSON.parse(fs.readFileSync(preferencesFile(), "utf8")) ?? {};
-  } catch {
-    return {};
-  }
-}
-function savePreference(key, value) {
-  try {
-    fs.writeFileSync(preferencesFile(), JSON.stringify({ ...preferences(), [key]: value }));
-  } catch {
-    /* the campaign still has it */
-  }
-}
-// The desktop's wallpapers (FG's desktop theme): Kraken's own, one per game,
-// and the GM's own, in the assets folder too.
-function wallpapers() {
-  if (!wallpaperLibrary) {
-    wallpaperLibrary = createDecalLibrary({
-      folder: path.join(app.getPath("userData"), "assets", "wallpapers"),
-      builtin: path.join(__dirname, "..", "dist", "wallpapers"),
-      own: [],
-      named: true,
-    });
-  }
-  return wallpaperLibrary;
-}
-function decals() {
-  if (!decalLibrary) {
-    decalLibrary = createDecalLibrary({
-      folder: path.join(app.getPath("userData"), "assets", "decals"),
-      builtin: path.join(__dirname, "..", "dist", "decals"),
-      fgData: fgDataFolder(),
-    });
-  }
-  return decalLibrary;
-}
-
-// The campaign being hosted. Its table (view, chat, tokens and doors) is saved to disk
-// when something changes (after a short pause), every 30 seconds while dirty,
-// when the DM leaves, and when the app quits.
-const SAVE_EVERY_MS = 30000;
-const SAVE_AFTER_CHANGE_MS = 2000;
-let hosted = null;
-
-function flushCampaign() {
-  if (!hosted || !hosted.dirty) return;
-  const persisted = table ? table.persisted() : {};
-  const state = { ...hosted.state, ...persisted, view: hosted.state.view ?? null, savedAt: Date.now() };
-  try {
-    campaigns.writeState(campaignFile(), hosted.id, state, { records: hosted.recordsDirty });
-    hosted.state = state;
-    hosted.dirty = false;
-    hosted.recordsDirty = false;
-  } catch (error) {
-    console.error("could not save campaign", error);
-  }
-}
-
-function markDirty(kind) {
-  if (!hosted) return;
-  // A GM icon just chosen goes with the GM into every campaign.
-  const icon = table?.agent?.options?.().gmIcon;
-  if (typeof icon === "string" && icon !== preferences().gmIcon) savePreference("gmIcon", icon);
-  hosted.dirty = true;
-  if (kind === "records") hosted.recordsDirty = true;
-  // FG's /save: now, not after the usual pause.
-  if (kind === "save") {
-    hosted.recordsDirty = true;
-    clearTimeout(hosted.soon);
-    flushCampaign();
+// The backend asks for what only this process can do: the window (a command
+// for it, a screenshot, its text, a script), answered back.
+async function onBackend(child, message) {
+  if (!message || typeof message !== "object") return;
+  if (message.type === "result") {
+    const wait = waiting.get(message.id);
+    if (!wait) return;
+    waiting.delete(message.id);
+    if (message.ok) wait.resolve(message.value);
+    else wait.reject(new Error(message.error));
     return;
   }
-  clearTimeout(hosted.soon);
-  hosted.soon = setTimeout(flushCampaign, SAVE_AFTER_CHANGE_MS);
-}
-
-function closeCampaign() {
-  if (!hosted) return;
-  flushCampaign();
-  clearInterval(hosted.timer);
-  clearTimeout(hosted.soon);
-  hosted = null;
-}
-
-function openCampaign(id) {
-  closeCampaign();
-  if (!id) return null;
-  if (!campaigns.exists(campaignFile(), id)) throw new Error("That campaign is missing.");
-  hosted = { id, state: campaigns.readState(campaignFile(), id), dirty: false, recordsDirty: false, soon: null, timer: null };
-  hosted.timer = setInterval(flushCampaign, SAVE_EVERY_MS);
-  return hosted.state;
-}
-
-// A campaign's ruleset is chosen before it is hosted (it decides its books).
-function setCampaignRuleset(input) {
-  if (hosted && hosted.id === String(input?.id ?? "")) throw new Error("Leave the table first: a campaign's ruleset is changed before it is hosted.");
-  return campaigns.setRuleset(campaignFile(), input);
-}
-
-function requireHosted(id) {
-  if (!hosted || hosted.id !== String(id ?? "")) throw new Error("That campaign is not being hosted.");
-  return hosted;
-}
-
-async function stopTable() {
-  // Save first: table.persisted() needs the server that is about to stop.
-  if (hosted) {
-    hosted.dirty = true;
-    hosted.recordsDirty = true;
-    flushCampaign();
+  if (message.type === "event") {
+    if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send(message.channel, message.payload);
+    return;
   }
-  const current = table;
-  table = null;
-  if (current) await current.stop();
-  closeCampaign();
+  if (message.type !== "ask") return;
+  const answer = (ok, value) => child.postMessage({ type: "answer", id: message.id, ok, ...(ok ? { value } : { error: value }) });
+  try {
+    if (message.op === "ui") answer(true, await askWindow(message.payload, message.timeout));
+    else if (message.op === "window") answer(true, await windowOp(message.payload));
+    else answer(false, `No such request: ${message.op}`);
+  } catch (error) {
+    answer(false, error instanceof Error ? error.message : String(error));
+  }
 }
 
-function plain(error) {
-  if (error && error.code === "EADDRINUSE") return "That port is already in use.";
-  return error instanceof Error ? error.message : "Could not host.";
+async function windowOp({ op, code }) {
+  const win = mainWindow && !mainWindow.isDestroyed() ? mainWindow : null;
+  if (!win) throw new Error("The app window is closed.");
+  if (op === "screenshot") {
+    const image = await win.webContents.capturePage();
+    const size = image.getSize();
+    const scaled = size.width > 1600 ? image.resize({ width: 1600 }) : image;
+    return scaled.toPNG().toString("base64");
+  }
+  if (op === "text") return win.webContents.executeJavaScript("document.body ? document.body.innerText : ''");
+  if (op === "eval") {
+    // Try the code as an expression; only if that does not parse, as statements.
+    const source = JSON.stringify(String(code ?? ""));
+    const value = await win.webContents.executeJavaScript(
+      `(async () => {
+        const AsyncFunction = (async () => {}).constructor;
+        let fn;
+        try { fn = new AsyncFunction("return (" + ${source} + ");"); }
+        catch (error) { if (!(error instanceof SyntaxError)) throw error; fn = new AsyncFunction(${source}); }
+        return await fn();
+      })()`,
+      true,
+    );
+    return value === undefined ? "undefined" : value;
+  }
+  throw new Error(`No such window request: ${op}`);
 }
 
-ipcMain.handle("addresses", () => eachAddress().v4);
-ipcMain.handle("network", () => networkSnapshot());
-ipcMain.handle("campaigns", () => campaigns.read(campaignFile()));
-ipcMain.handle("save-campaign", (_event, input) => campaigns.create(campaignFile(), input));
-ipcMain.handle("touch-campaign", (_event, input) => campaigns.touch(campaignFile(), input));
-ipcMain.handle("campaign-ruleset", (_event, input) => setCampaignRuleset(input));
+// --- The window's calls, forwarded ---------------------------------------------------
+for (const name of [
+  "addresses",
+  "network",
+  "campaigns",
+  "save-campaign",
+  "touch-campaign",
+  "campaign-ruleset",
+  "start-host",
+  "stop-host",
+  "campaign-view",
+  "campaign-bundle",
+  "save-bundle",
+  "save-view",
+  "set-token-art",
+  "decal-add",
+  "sound-add",
+  "set-scene-image",
+  "assistant-status",
+  "assistant-ask",
+  "assistant-stop",
+  "assistant-reset",
+])
+  ipcMain.handle(name, (_event, ...args) => call(name, ...args));
+
 // True when the text is on the clipboard afterwards.
 ipcMain.handle("copy", (_event, text) => {
   const value = String(text ?? "").slice(0, 200);
   clipboard.writeText(value);
   return clipboard.readText() === value;
 });
-
-ipcMain.handle("start-host", async (_event, options) => {
-  const port = Number(options?.port);
-  const password = String(options?.password ?? "");
-  if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error("Port must be from 1 to 65535.");
-  if (!options?.lan && !options?.cloud) throw new Error("Turn on LAN or Cloud.");
-  await stopTable();
-  const campaignId = typeof options?.campaignId === "string" ? options.campaignId : "";
-  const saved = openCampaign(campaignId) ?? {};
-  // The GM's icon follows them: a campaign that has none yet takes the last one chosen.
-  const remembered = preferences().gmIcon;
-  if (typeof remembered === "string" && !(saved.options && "gmIcon" in saved.options)) saved.options = { ...(saved.options ?? {}), gmIcon: remembered };
-  const dataFolder = fgDataFolder();
-  const ruleset = campaigns.read(campaignFile()).find((item) => item.id === campaignId)?.ruleset ?? "";
-  const next = createTableServer({ saved, ruleset, onChange: markDirty, art: createArtLibrary({ base: dataFolder, roots: [...defaultRoots(dataFolder), ...krakenArtRoots()] }), decals: decals(), wallpapers: wallpapers(), gmIcons: gmIcons(), tiles: tiles(), sounds: sounds(), books: books(), accounts: accounts(), prefs: prefs() });
-  try {
-    const info = await next.listen({ port, password });
-    table = next;
-    if (hosted) hosted.port = info.port;
-    const net = await networkSnapshot();
-    return { ...info, v6: net.v6, externalV4: net.externalV4, externalV6: net.externalV6 };
-  } catch (error) {
-    await next.stop().catch(() => undefined);
-    closeCampaign();
-    throw new Error(plain(error));
-  }
-});
-
-ipcMain.handle("stop-host", () => stopTable());
-
-ipcMain.handle("campaign-view", (_event, id) => {
-  const current = requireHosted(id);
-  return { view: current.state.view ?? null, hasBundle: Boolean(campaigns.readBundle(campaignFile(), id)) };
-});
-
-ipcMain.handle("campaign-bundle", (_event, id) => {
-  requireHosted(id);
-  return campaigns.readBundle(campaignFile(), id);
-});
-
-ipcMain.handle("save-bundle", (_event, id, bytes) => {
-  requireHosted(id);
-  const buffer = Buffer.isBuffer(bytes) ? bytes : Buffer.from(bytes ?? []);
-  if (buffer.length === 0) throw new Error("That adventure was empty.");
-  campaigns.writeBundle(campaignFile(), id, buffer);
-});
-
-ipcMain.handle("save-view", (_event, id, view) => {
-  const current = requireHosted(id);
-  const adventure = typeof view?.adventure === "string" ? view.adventure.slice(0, 200) : "";
-  const sceneId = typeof view?.sceneId === "string" ? view.sceneId.slice(0, 80) : "";
-  current.state.view = adventure ? { adventure, sceneId } : null;
-  markDirty();
-});
-
-ipcMain.handle("set-token-art", (_event, list) => {
-  if (!table) throw new Error("Not hosting.");
-  table.setTokenArt(
-    (Array.isArray(list) ? list : []).map((item) => ({ id: item?.id, mime: item?.mime, bytes: item?.bytes ? Buffer.from(item.bytes) : null })),
-  );
-});
-
 // The decal picker's Browse: a picture from anywhere, copied into the assets folder.
-const libraryOf = (kind) => (kind === "wallpaper" ? wallpapers() : kind === "gmicon" ? gmIcons() : kind === "tile" ? tiles() : decals());
 ipcMain.handle("decal-pick", async (_event, kind) => {
-  const library = libraryOf(kind);
   const picked = await dialog.showOpenDialog(mainWindow, {
     title: kind === "wallpaper" ? "Choose a desktop wallpaper (a picture that tiles)" : kind === "gmicon" ? "Choose your GM icon" : kind === "tile" ? "Choose a picture to place on the map" : "Choose a background decal",
     properties: ["openFile"],
     filters: [{ name: "Pictures", extensions: ["png", "webp", "jpg", "jpeg", "gif"] }],
   });
   if (picked.canceled || picked.filePaths.length === 0) return null;
-  return library.addFile(picked.filePaths[0]);
+  return call("decal-add-file", kind, picked.filePaths[0]);
 });
-// A picture dropped on the picker.
-ipcMain.handle("decal-add", (_event, name, bytes, kind) => libraryOf(kind).add(String(name ?? ""), Buffer.from(bytes ?? [])));
 // Sounds from anywhere, copied into a kind and folder of the sounds library.
 ipcMain.handle("sound-pick", async (_event, kind, group) => {
   const picked = await dialog.showOpenDialog(mainWindow, {
@@ -363,28 +174,22 @@ ipcMain.handle("sound-pick", async (_event, kind, group) => {
     filters: [{ name: "Sounds", extensions: ["mp3", "ogg", "wav", "m4a", "webm", "flac", "opus"] }],
   });
   if (picked.canceled) return [];
-  return picked.filePaths.map((file) => sounds().addFile(String(kind), String(group ?? ""), file));
+  return call("sound-add-files", kind, group, picked.filePaths);
 });
-ipcMain.handle("sound-add", (_event, kind, group, name, bytes) => sounds().add(String(kind), String(group ?? ""), String(name ?? ""), Buffer.from(bytes ?? [])));
-ipcMain.handle("sound-folder", async () => {
-  fs.mkdirSync(sounds().folder, { recursive: true });
-  return shell.openPath(sounds().folder);
-});
-ipcMain.handle("decal-folder", async (_event, kind) => {
-  const folder = libraryOf(kind).folder;
-  fs.mkdirSync(folder, { recursive: true });
-  return shell.openPath(folder);
+ipcMain.handle("sound-folder", async () => shell.openPath(await call("sound-folder")));
+ipcMain.handle("decal-folder", async (_event, kind) => shell.openPath(await call("decal-folder", kind)));
+
+// The DM assistant's key the GM typed: kept encrypted on this computer, known to the backend for the run.
+const assistantKeys = assistantModule.keyStore(path.join(app.getPath("userData"), "assistant-key.bin"), safeStorage);
+const sendTypedKey = () => call("assistant-typed-key", assistantKeys.get() ?? "").catch(() => undefined);
+ipcMain.handle("assistant-key", (_event, key) => {
+  assistantKeys.set(typeof key === "string" ? key : "");
+  return call("assistant-typed-key", typeof key === "string" ? key : "");
 });
 
-ipcMain.handle("set-scene-image", (_event, bytes, mime) => {
-  if (!table) throw new Error("Not hosting.");
-  const buffer = bytes == null ? Buffer.alloc(0) : Buffer.isBuffer(bytes) ? bytes : Buffer.from(bytes);
-  if (buffer.length > 80 * 1024 * 1024) throw new Error("Map image is too large.");
-  table.setImage(buffer, typeof mime === "string" ? mime : "");
-});
-
-// The agent bridge asks the app window to do what a GM would do with the
-// mouse (host, leave), and waits for the window's answer.
+// --- The agent bridge's commands for the window -------------------------------------------
+// The agent asks the app window to do what a GM would do with the mouse (host,
+// leave), and waits for the window's answer.
 let mainWindow = null;
 let agentRequest = 0;
 const agentWaits = new Map();
@@ -420,68 +225,15 @@ function askWindow(command, timeout = 60000) {
   });
 }
 
-const agentContext = {
-  table: () => table,
-  hosting: () => (hosted && table ? { campaignId: hosted.id, port: hosted.port ?? null } : null),
-  campaigns: {
-    list: () => campaigns.read(campaignFile()),
-    create: (input) => campaigns.create(campaignFile(), input),
-    setRuleset: (input) => setCampaignRuleset(input),
-  },
-  ui: (command, timeout) => askWindow(command, timeout),
-  window: () => (mainWindow && !mainWindow.isDestroyed() ? mainWindow : null),
-  assistant: () => assistant,
-};
-
-// The DM assistant (GM only): the key from the environment or .env.local, or
-// one the GM typed into its window (kept encrypted on this computer).
-const assistantKeys = assistantModule.keyStore(path.join(app.getPath("userData"), "assistant-key.bin"), safeStorage);
-function assistantKey() {
-  const typed = assistantKeys.get();
-  if (typed) return { key: typed, from: "app" };
-  return assistantModule.envKey(path.join(__dirname, ".."));
-}
-const assistant = assistantModule.createAssistant({
-  ctx: agentContext,
-  key: () => assistantKey()?.key ?? null,
-  makeClient: (key) => {
-    const Anthropic = require("@anthropic-ai/sdk").default;
-    return new Anthropic({ apiKey: key });
-  },
-  onEvent: (event) => {
-    if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send("assistant-event", event);
-  },
-});
-function assistantStatus() {
-  const found = assistantKey();
-  return { ...assistant.view(), hasKey: Boolean(found), keyFrom: found?.from ?? null };
-}
-// Only the GM's own window asks: players never reach the assistant (they are browsers on the table server).
-ipcMain.handle("assistant-status", () => assistantStatus());
-ipcMain.handle("assistant-ask", (_event, text) => assistant.ask(String(text ?? "")));
-ipcMain.handle("assistant-stop", () => assistant.stop());
-ipcMain.handle("assistant-reset", () => assistant.reset());
-ipcMain.handle("assistant-key", (_event, key) => {
-  assistantKeys.set(typeof key === "string" ? key : "");
-  return assistantStatus();
-});
-
-let agentServer = null;
-
-async function startAgent() {
-  try {
-    const port = process.env.KRAKEN_AGENT_PORT === undefined ? undefined : Number(process.env.KRAKEN_AGENT_PORT);
-    agentServer = await startAgentServer(agentContext, { version: app.getVersion(), ...(Number.isInteger(port) ? { port } : {}) });
-  } catch (error) {
-    console.error("agent bridge did not start", error instanceof Error ? error.message : error);
-  }
-}
-
+// --- The window -------------------------------------------------------------------------------
 function createWindow() {
   const headless = process.env.KRAKEN_SMOKE === "1" || process.env.KRAKEN_E2E === "1";
+  // Where it opens, when told (test runs on another monitor while the GM plays): "x,y".
+  const at = /^(-?\d+),(-?\d+)$/.exec(process.env.KRAKEN_WINDOW_AT ?? "");
   const win = new BrowserWindow({
     width: 1440,
     height: 900,
+    ...(at ? { x: Number(at[1]), y: Number(at[2]) } : {}),
     minWidth: 1024,
     minHeight: 700,
     show: false,
@@ -571,9 +323,11 @@ function createWindow() {
 }
 
 app.whenReady().then(async () => {
+  startBackend();
   const win = createWindow();
   mainWindow = win;
-  await startAgent();
+  await backendReady;
+  await sendTypedKey();
   if (process.env.KRAKEN_E2E !== "1") return;
   try {
     await require("./e2e.cjs").run(win, createWindow);
@@ -591,9 +345,16 @@ app.on("window-all-closed", () => {
   app.quit();
 });
 
+// Quitting: the backend saves and stops the table first (at most 10 seconds), then goes.
 app.on("before-quit", (event) => {
-  if ((!table && !hosted) || quitting) return;
+  if (quitting || !backend) return;
   event.preventDefault();
   quitting = true;
-  stopTable().finally(() => app.quit());
+  const stop = backend;
+  Promise.race([call("quit"), new Promise((resolve) => setTimeout(resolve, 10000))])
+    .catch(() => undefined)
+    .finally(() => {
+      stop.kill();
+      app.quit();
+    });
 });
