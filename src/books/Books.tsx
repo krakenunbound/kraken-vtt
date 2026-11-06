@@ -229,7 +229,7 @@ function ShareButton({ shared, onClick, what }: { shared: boolean; onClick: () =
   );
 }
 
-export function BooksWindow({ session, onOpenAdventure }: { session: Session; onOpenAdventure?: () => void }) {
+export function BooksWindow({ session, onOpenAdventure, start = "books" }: { session: Session; onOpenAdventure?: () => void; start?: "books" | "activation" }) {
   const gm = session.role === "dm";
   const { openBook } = useBookWindows();
   const [list, setList] = useState<BookInfo[] | null>(null);
@@ -237,7 +237,7 @@ export function BooksWindow({ session, onOpenAdventure }: { session: Session; on
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   // The GM's: the campaign's books, or Activation (every module that fits the ruleset).
-  const [tab, setTab] = useState<"books" | "activation">("books");
+  const [tab, setTab] = useState<"books" | "activation">(start);
   const shelfKey = `${session.bookShelf.active.join("|")}/${session.bookShelf.shared.join("|")}`;
   useEffect(() => {
     session

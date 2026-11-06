@@ -74,11 +74,10 @@ try {
   const goblin = listOf(await tool("kraken_records_list", { type: "npc" })).find((item) => item.name === "Goblin Warrior");
   assert(goblin && goblin.visibility === "gm", `the bestiary's Goblin Warrior is hidden: ${JSON.stringify(goblin)}`);
 
-  // The GM's Lists: NPCs, items, spells...; the goblin hidden.
-  await page.click('.sidebar [data-launch="records"]');
-  await page.waitForSelector('[data-records-list="npc"]');
-  for (const list of ["npc", "item", "spell", "class"]) assert(await page.$(`[data-records-list="${list}"]`), `the GM has the ${list} list`);
-  await page.click('[data-records-list="npc"]');
+  // The GM's lists in the sidebar (FG's Campaign and Character categories): NPCs, items, spells, classes...; the goblin hidden.
+  for (const list of ["npc", "item", "spell", "class"]) await page.waitForSelector(`.sidebar [data-launch="records:${list}"]`, { timeout: 10000 });
+  await page.click('.sidebar [data-launch="records:npc"]');
+  await page.waitForSelector('[data-records-only="npc"]');
   await page.fill('[aria-label="Search the list"]', "Goblin Warrior");
   const row = `[data-record-row="${goblin.id}"]`;
   await page.waitForSelector(row);
@@ -93,18 +92,19 @@ try {
   await seat.fill('input[name="account-password"]', "test-pass");
   await seat.click('button[type="submit"]');
   await seat.waitForSelector(".sidebar");
-  await seat.click('.sidebar [data-launch="records"]');
-  await seat.waitForSelector('[data-records-list="item"]');
-  assert(!(await seat.$('[data-records-list="npc"]')), "the player has no NPCs list before the GM shares one");
+  await seat.click('.sidebar [data-launch="records:item"]');
+  await seat.waitForSelector('[data-records-only="item"] .records-row');
+  await seat.click('.sidebar [data-launch="records:npc"]');
+  await seat.waitForSelector('[data-records-only="npc"]');
+  assert((await seat.$$('[data-records-only="npc"] .records-row')).length === 0, "the player's NPCs list is empty before the GM shares one");
   assert(!(await seat.$('[data-action="record-share"]')), "a player has no sharing icons");
 
   // The GM shares the goblin (FG's Share): the player's NPCs list holds it, and only it.
   await page.click(`${row} [data-action="record-share"]`);
   await page.waitForFunction((selector) => document.querySelector(selector)?.getAttribute("aria-pressed") === "true", `${row} [data-action="record-share"]`);
   assert((await tool("kraken_record_get", { id: goblin.id })).visibility === "all", "the goblin's record is shared");
-  await seat.waitForSelector('[data-records-list="npc"]', { timeout: 10000 });
-  await seat.click('[data-records-list="npc"]');
-  const names = await seat.$$eval(".records-row .records-name", (list) => list.map((item) => item.textContent));
+  await seat.waitForSelector('[data-records-only="npc"] .records-row', { timeout: 10000 });
+  const names = await seat.$$eval('[data-records-only="npc"] .records-row .records-name', (list) => list.map((item) => item.textContent));
   assert(names.length === 1 && names[0] === "Goblin Warrior", `the player's NPCs: ${JSON.stringify(names)}`);
 
   // Open it: its abilities and actions, read only.
@@ -132,7 +132,7 @@ try {
   // The GM's All / Shared filter.
   await page.fill('[aria-label="Search the list"]', "");
   await page.click('[data-action="records-shared-only"]');
-  await page.waitForFunction(() => document.querySelectorAll(".records-row").length === 1, null, { timeout: 10000 });
+  await page.waitForFunction(() => document.querySelectorAll('[data-records-only="npc"] .records-row').length === 1, null, { timeout: 10000 });
   await page.click('[data-action="records-shared-only"]');
   await seat.screenshot({ path: path.join(tmpdir(), "kraken-records-player.png") });
   await page.screenshot({ path: path.join(tmpdir(), "kraken-records-gm.png") });

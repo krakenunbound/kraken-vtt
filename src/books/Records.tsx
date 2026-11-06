@@ -27,7 +27,7 @@ const LISTS: { id: string; label: string; group: string }[] = [
   { id: "siegepackage:class", label: "Classes", group: "Character" },
   { id: "siegepackage:race", label: "Races", group: "Character" },
   { id: "siegepackage", label: "Packages", group: "Character" },
-  { id: "siegepower", label: "Powers", group: "Character" },
+  { id: "siegepower", label: "Spells", group: "Character" },
 ];
 // Not lists: what has its own window (characters, the party, notes) or is the game's own setup.
 const NOT_LISTED = new Set(["character", "party", "note", "siegegame"]);
@@ -46,7 +46,18 @@ function listLabel(id: string) {
 const shared = (record: TableRecord) => record.visibility === "all";
 const LIMIT = 400;
 
-export function RecordsWindow({ session, onOpen }: { session: Session; onOpen: (record: TableRecord) => void }) {
+// The lists the sidebar shows in a group (FG's Campaign and Character
+// categories): those this table has records for, in FG's order.
+export function sidebarLists(records: Record<string, TableRecord>, group: string) {
+  const present = new Set<string>();
+  for (const record of Object.values(records)) if (!NOT_LISTED.has(record.type)) present.add(listOf(record));
+  return LISTS.filter((item) => item.group === group && present.has(item.id)).map((item) => ({ id: item.id, label: item.label }));
+}
+export { listLabel };
+
+// only: the sidebar's list (one window a list, as FG's); without it, every
+// list with a button for each.
+export function RecordsWindow({ session, onOpen, only }: { session: Session; onOpen: (record: TableRecord) => void; only?: string }) {
   const gm = session.role === "dm";
   const all = useMemo(() => Object.values(session.records).filter((record) => !NOT_LISTED.has(record.type)), [session.records]);
   const counts = useMemo(() => {
@@ -56,7 +67,7 @@ export function RecordsWindow({ session, onOpen }: { session: Session; onOpen: (
   }, [all]);
   const lists = [...LISTS.filter((item) => counts.has(item.id)).map((item) => item.id), ...[...counts.keys()].filter((id) => !LISTS.some((item) => item.id === id)).sort()];
   const [chosen, setChosen] = useState("");
-  const list = lists.includes(chosen) ? chosen : lists[0] ?? "";
+  const list = only ?? (lists.includes(chosen) ? chosen : lists[0] ?? "");
   const [search, setSearch] = useState("");
   const [sharedOnly, setSharedOnly] = useState(false);
   const [status, setStatus] = useState("");
@@ -64,11 +75,17 @@ export function RecordsWindow({ session, onOpen }: { session: Session; onOpen: (
   const rows = all
     .filter((record) => listOf(record) === list && (!wanted || record.name.toLowerCase().includes(wanted)) && (!sharedOnly || shared(record)))
     .sort((a, b) => a.name.localeCompare(b.name));
-  const groups = new Map<string, TableRecord[]>();
+  // FG's master index: under each book's name (the campaign's own first),
+  // then the book's own categories.
+  const groups = new Map<string, Map<string, TableRecord[]>>();
   for (const record of rows.slice(0, LIMIT)) {
-    const category = typeof record.data.fgCategory === "string" ? record.data.fgCategory : record.source || "Campaign";
-    groups.set(category, [...(groups.get(category) ?? []), record]);
+    const book = record.source || "Campaign";
+    const category = typeof record.data.fgCategory === "string" && record.data.fgCategory !== book ? record.data.fgCategory : "";
+    const inBook = groups.get(book) ?? new Map<string, TableRecord[]>();
+    inBook.set(category, [...(inBook.get(category) ?? []), record]);
+    groups.set(book, inBook);
   }
+  const books = [...groups.keys()].sort((a, b) => (a === "Campaign" ? -1 : b === "Campaign" ? 1 : a.localeCompare(b)));
   const share = async (record: TableRecord, on: boolean) => {
     try {
       await session.op({ op: "update", id: record.id, patch: { visibility: on ? "all" : "gm" } });
@@ -79,15 +96,15 @@ export function RecordsWindow({ session, onOpen }: { session: Session; onOpen: (
   };
 
   return (
-    <div className="records-window" data-window="records">
-      <nav className="records-lists" aria-label="Lists">
+    <div className={only ? "records-window single" : "records-window"} data-window="records" data-records-only={only}>
+      {only ? null : <nav className="records-lists" aria-label="Lists">
         {lists.length === 0 ? <p className="hint">{gm ? "Nothing yet: make a book active (Books) or add NPCs and items." : "The GM has shared nothing yet."}</p> : null}
         {lists.map((id) => (
           <button key={id} type="button" className={id === list ? "on" : ""} aria-pressed={id === list} data-records-list={id} onClick={() => setChosen(id)}>
             {listLabel(id)} <small>{counts.get(id)}</small>
           </button>
         ))}
-      </nav>
+      </nav>}
       <section className="records-main">
         <div className="records-head">
           <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search" aria-label="Search the list" />
@@ -103,9 +120,12 @@ export function RecordsWindow({ session, onOpen }: { session: Session; onOpen: (
           </p>
         ) : null}
         <div className="records-list">
-          {[...groups].map(([category, items]) => (
-            <section key={category}>
-              <h4>{category}</h4>
+          {books.map((book) => (
+            <section key={book} data-records-book={book}>
+              <h4>{book}</h4>
+              {[...(groups.get(book) ?? [])].map(([category, items]) => (
+              <Fragment key={category}>
+              {category ? <h5 className="records-category">{category}</h5> : null}
               {items.map((record) => (
                 <div key={record.id} className="records-row" data-record-row={record.id}>
                   {gm ? (
@@ -125,10 +145,12 @@ export function RecordsWindow({ session, onOpen }: { session: Session; onOpen: (
                   </button>
                 </div>
               ))}
+              </Fragment>
+              ))}
             </section>
           ))}
           {rows.length > LIMIT ? <p className="hint">{rows.length - LIMIT} more: search to narrow the list.</p> : null}
-          {list && rows.length === 0 ? <p className="hint">{sharedOnly ? "Nothing in this list is shared." : "Nothing by that name."}</p> : null}
+          {list && rows.length === 0 ? <p className="hint">{sharedOnly ? "Nothing in this list is shared." : wanted ? "Nothing by that name." : gm ? "Nothing here yet: make a book active (Modules)." : "The GM has shared nothing here yet."}</p> : null}
         </div>
       </section>
     </div>

@@ -2,7 +2,7 @@ import { lazy, Suspense, useEffect, useRef, useState, useSyncExternalStore, type
 import { Picture } from "../characters/ArtPicker";
 import { CharacterPanel } from "../characters/CharacterPanel";
 import { CharacterSelect } from "../characters/CharacterSelect";
-import { RecordsWindow, RecordWindow } from "../books/Records";
+import { listOf, RecordsWindow, RecordWindow, sidebarLists } from "../books/Records";
 import { CombatTracker } from "../combat/CombatTracker";
 import { PartySheet } from "../party/PartySheet";
 import { savedSignIn, type Session } from "../session/useSession";
@@ -15,19 +15,19 @@ import { DiceWindow } from "../dice/DiceWindow";
 import { SoundWindow } from "../sound/SoundWindow";
 import { QuickSlots, slotDrag } from "./QuickSlots";
 import { KritsWindow } from "../combat/KritsWindow";
-import { LibraryWindow } from "../books/Library";
+import { AdventureList, LibraryWindow, type Kind as AdventureKind } from "../books/Library";
 import { NotesWindow, NoteWindow } from "../notes/Notes";
 import { BooksWindow, BookWindow, ImagesWindow, PictureWindow } from "../books/Books";
 import { Icon } from "./icons";
 import { sound } from "../sound/soundEngine";
-import { FloatingWindow, useWindows, type WindowKind } from "./Windows";
+import { FloatingWindow, useWindows } from "./Windows";
 import { AssistantWindow } from "./AssistantWindow";
+import { entryId, Sidebar, type SidebarEntry, type SidebarGroup } from "./Sidebar";
 
 // The 3D dice (three.js and cannon) load when the table first shows them.
 const DiceLayer = lazy(() => import("../dice/DiceLayer"));
 
 // launch: the button's data-launch when it is not the kind (the player's Characters button opening Character Selection).
-type Launcher = { kind: WindowKind; label: string; icon: string; title: string; launch?: string };
 
 // Everyone at the table, and how players connect (the GM's).
 function PlayersWindow({ session }: { session: Session }) {
@@ -199,33 +199,72 @@ export function Desktop({
   // FG's character list along the top: every character at the table, for both sides.
   const me = session.players.find((seat) => seat.id === session.selfId)?.name ?? "";
   const portraits = session.roster;
-  const launchers: Launcher[] = gm
+  // FG's sidebar: the tools along the top, then the categories. A list
+  // (Items, NPCs, Classes, Races, Spells...) opens on its own window, every
+  // active book's records under the book's name.
+  const listEntry = (id: string, label: string, icon: string): SidebarEntry => ({ kind: "records", payload: id, label, icon, title: label });
+  const characterIcon: Record<string, string> = { "siegepackage:class": "shield", class: "shield", "siegepackage:race": "crown", race: "crown", siegepower: "wand", spell: "wand", feat: "sparkle", background: "scroll", skill: "check", class_specialization: "shield", race_subrace: "crown" };
+  const characterLists = sidebarLists(session.records, "Character")
+    .filter((item) => item.id !== "siegepackage")
+    .map((item) => listEntry(item.id, item.label, characterIcon[item.id] ?? "shield"));
+  const hasPackages = Object.values(session.records).some((record) => record.type === "siegepackage" && listOf(record) === "siegepackage");
+  const combatBadge = session.combat.round > 0 ? session.combat.round : undefined;
+  const tools: SidebarEntry[] = gm
     ? [
-        { kind: "characters", label: "Characters", icon: "character", title: "Characters" },
-        { kind: "party", label: "Party", icon: "party", title: "Party Sheet" },
-        { kind: "combat", label: "Combat", icon: "combat", title: "Combat Tracker" },
-        { kind: "books", label: "Books", icon: "book", title: "Books" },
-        { kind: "library", label: "Library", icon: "map", title: "Library: an adventure's maps, encounters, NPCs, parcels and tables" },
-        { kind: "records", label: "Lists", icon: "shield", title: "Lists" },
-        { kind: "notes", label: "Notes", icon: "chat", title: "Notes" },
+        { kind: "combat", label: "Combat", icon: "combat", title: "Combat Tracker", badge: combatBadge },
         { kind: "assistant", label: "Assistant", icon: "sparkle", title: "DM Assistant" },
         { kind: "players", label: "Players", icon: "players", title: "Players" },
-        { kind: "sound", label: "Sound", icon: "music", title: "Sound" },
         { kind: "settings", label: "Settings", icon: "settings", title: "Settings" },
       ]
     : [
-        // With no character yet, FG's Characters button opens Character Selection.
-        characters.length === 0
-          ? { kind: "charselect", label: "Characters", icon: "character", title: "Character Selection", launch: "characters" }
-          : { kind: "characters", label: characters.length === 1 ? "Character" : "Characters", icon: "character", title: characters.length === 1 ? characters[0].name : "My characters" },
-        { kind: "party", label: "Party", icon: "party", title: "Party Sheet" },
-        { kind: "combat", label: "Combat", icon: "combat", title: "Combat Tracker" },
-        { kind: "books", label: "Books", icon: "book", title: "Books" },
-        { kind: "records", label: "Lists", icon: "shield", title: "Lists" },
-        { kind: "notes", label: "Notes", icon: "chat", title: "Player Notes" },
-        { kind: "sound", label: "Sound", icon: "music", title: "Sound" },
+        { kind: "combat", label: "Combat", icon: "combat", title: "Combat Tracker", badge: combatBadge },
         { kind: "settings", label: "Settings", icon: "settings", title: "Settings" },
       ];
+  const charactersEntry: SidebarEntry = gm
+    ? { kind: "characters", label: "Characters", icon: "character", title: "Characters" }
+    : // With no character yet, FG's Characters button opens Character Selection.
+      characters.length === 0
+      ? { kind: "charselect", label: "Characters", icon: "character", title: "Character Selection", launch: "characters", openOnly: true }
+      : { kind: "characters", label: characters.length === 1 ? "Character" : "Characters", icon: "character", title: characters.length === 1 ? characters[0].name : "My characters" };
+  const groups: SidebarGroup[] = [
+    {
+      id: "library",
+      label: "Library",
+      entries: [
+        ...(gm ? [{ kind: "books" as const, payload: "activation", label: "Modules", icon: "package", title: "Modules: make a book active for this campaign (Activation)" }] : []),
+        { kind: "books", label: "Books", icon: "book", title: "Books" },
+        { kind: "sound", label: "Sound Sets", icon: "music", title: "Sound" },
+      ],
+    },
+    {
+      id: "player",
+      label: "Player",
+      entries: [
+        charactersEntry,
+        ...(hasPackages ? [listEntry("siegepackage", "Packages", "package")] : []),
+        { kind: "party", label: "Party", icon: "party", title: "Party Sheet" },
+        { kind: "notes", label: gm ? "Notes" : "Player Notes", icon: "chat", title: gm ? "Notes" : "Player Notes" },
+      ],
+    },
+    {
+      id: "campaign",
+      label: "Campaign",
+      entries: gm
+        ? [
+            { kind: "adventure", payload: "battle", label: "Encounters", icon: "encounter", title: "Encounters: every active adventure's" },
+            { kind: "library", label: "Images", icon: "image", title: "Images and maps: an adventure's maps onto the table (Library)" },
+            listEntry("item", "Items", "bag"),
+            listEntry("npc", "NPCs", "skull"),
+            { kind: "adventure", payload: "parcel", label: "Parcels", icon: "coins", title: "Treasure parcels: every active adventure's" },
+            { kind: "adventure", payload: "table", label: "Tables", icon: "table", title: "Random tables: every active adventure's" },
+          ]
+        : [listEntry("item", "Items", "bag"), listEntry("npc", "NPCs", "skull")],
+    },
+    { id: "character", label: "Character", entries: characterLists },
+  ];
+  const launchers = [...tools, ...groups.flatMap((group) => group.entries)];
+  const entryOpen = (entry: SidebarEntry) => windows.windows.some((item) => item.key === (entry.payload ? `${entry.kind}:${entry.payload}` : entry.kind));
+  const launch = (entry: SidebarEntry) => (entry.openOnly ? windows.open(entry.kind, entry.title, entry.payload) : windows.toggle(entry.kind, entry.title, entry.payload));
   const dice = useSyncExternalStore(diceStore.subscribe, diceStore.settings);
   // A sheet whose character this seat may no longer see (the GM took it back) closes.
   useEffect(() => {
@@ -252,7 +291,7 @@ export function Desktop({
         if (command.kind !== "windows") return null;
         const { windows: manager, launchers: kinds, characters: sheets } = live.current;
         const list = () => manager.windows.map((item) => ({ key: item.key, kind: item.kind, title: item.title, poppedOut: item.popped }));
-        if (command.action === "list") return { open: list(), kinds: [...kinds.map((item) => item.kind), "sheet", "book", "images", "picture", "note", "decals", "wallpapers", "gmicons", "krits", "dice", "charselect"] };
+        if (command.action === "list") return { open: list(), kinds: [...kinds.map((item) => entryId(item)), "sheet", "book", "images", "picture", "note", "decals", "wallpapers", "gmicons", "krits", "dice", "charselect"] };
         let key: string = command.window ?? "";
         if (command.window === "note") {
           const id = String(command.record ?? "");
@@ -297,9 +336,10 @@ export function Desktop({
                     ? { kind: "charselect" as const, title: "Character Selection" }
                   : command.window === "krits"
                     ? { kind: "krits" as const, title: "Critical Hits & Fumbles" }
-                  : kinds.find((item) => item.kind === command.window);
-          if (!launcher) throw new Error(`No window "${command.window ?? ""}". Kinds: ${kinds.map((item) => item.kind).join(", ")}, sheet.`);
-          if (command.action === "open") manager.open(launcher.kind, launcher.title);
+                  : kinds.find((item) => entryId(item) === command.window || (item.kind === command.window && !item.payload)) ?? kinds.find((item) => item.kind === command.window);
+          if (!launcher) throw new Error(`No window "${command.window ?? ""}". Kinds: ${kinds.map((item) => entryId(item)).join(", ")}, sheet.`);
+          if (command.action === "open") manager.open(launcher.kind, launcher.title, "payload" in launcher ? launcher.payload : undefined);
+          if ("payload" in launcher && launcher.payload) key = `${launcher.kind}:${launcher.payload}`;
         }
         if (command.action === "open") return { opened: key };
         if (!manager.windows.some((item) => item.key === key)) throw new Error(`${key} is not open.`);
@@ -373,22 +413,7 @@ export function Desktop({
           )}
         </div>
 
-        <nav className="sidebar" aria-label="Open">
-          {launchers.map((item) => (
-            <button
-              key={item.kind}
-              type="button"
-              className={windows.isOpen(item.kind) ? "launcher open" : "launcher"}
-              data-launch={item.launch ?? item.kind}
-              title={item.title}
-              onClick={() => (item.kind === "charselect" ? windows.open(item.kind, item.title) : windows.toggle(item.kind, item.title))}
-            >
-              <Icon name={item.icon} size={22} />
-              <span>{item.label}</span>
-              {item.kind === "combat" && session.combat.round > 0 ? <i className="launcher-badge">{session.combat.round}</i> : null}
-            </button>
-          ))}
-        </nav>
+        <Sidebar tools={tools} groups={groups} isOpen={entryOpen} onLaunch={launch} />
 
         <ChatDock session={session} />
 
@@ -396,7 +421,8 @@ export function Desktop({
           {windows.windows.map((item) => (
             <FloatingWindow key={item.key} item={item}>
               {item.kind === "characters" ? <CharacterPanel session={session} dock={!gm} create={item.payload === "new"} /> : null}
-              {item.kind === "records" ? <RecordsWindow session={session} onOpen={(record) => windows.open("record", record.name, record.id)} /> : null}
+              {item.kind === "records" ? <RecordsWindow session={session} only={item.payload} onOpen={(record) => windows.open("record", record.name, record.id)} /> : null}
+              {item.kind === "adventure" && item.payload && gm ? <AdventureList session={session} kind={item.payload as AdventureKind} /> : null}
               {item.kind === "record" && item.payload ? <RecordWindow session={session} id={item.payload} /> : null}
               {item.kind === "charselect" ? <CharacterSelect session={session} onSheet={(id, name) => windows.open("sheet", name, id)} onWizard={() => windows.open("characters", "Character Wizard", "new")} onClose={() => windows.close(item.key)} /> : null}
               {item.kind === "sheet" ? <CharacterPanel session={session} dock selected={item.payload ?? null} /> : null}
@@ -407,7 +433,7 @@ export function Desktop({
               {item.kind === "dice" ? <DiceWindow session={session} /> : null}
               {item.kind === "assistant" && gm ? <AssistantWindow /> : null}
               {item.kind === "sound" ? <SoundWindow session={session} /> : null}
-              {item.kind === "books" ? <BooksWindow session={session} onOpenAdventure={gm ? onOpenAdventure : undefined} /> : null}
+              {item.kind === "books" ? <BooksWindow session={session} start={item.payload === "activation" ? "activation" : "books"} onOpenAdventure={gm ? onOpenAdventure : undefined} /> : null}
               {item.kind === "book" && item.payload ? <BookWindow session={session} book={item.payload} /> : null}
               {item.kind === "images" ? <ImagesWindow session={session} /> : null}
               {item.kind === "picture" && item.payload ? <PictureWindow session={session} payload={item.payload} /> : null}

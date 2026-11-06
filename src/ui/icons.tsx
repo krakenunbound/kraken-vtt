@@ -1,6 +1,21 @@
 import { useId } from "react";
 // Line icons for the sidebar, windows and chat (24 x 24, drawn with currentColor).
 const PATHS: Record<string, string> = {
+  // FG's sidebar: its record lists and the collapse arrow.
+  "bag": "M8 8V6.5a4 4 0 0 1 8 0V8M5 8h14l-1.2 12H6.2Z",
+  "skull": "M12 3a7.5 7.5 0 0 0-5 13.1V20h10v-3.9A7.5 7.5 0 0 0 12 3ZM9 11.5h.01M15 11.5h.01M10 20v-3M14 20v-3",
+  "coins": "M4 7c0-1.4 3.1-2.5 7-2.5s7 1.1 7 2.5-3.1 2.5-7 2.5S4 8.4 4 7Zm0 0v4c0 1.4 3.1 2.5 7 2.5M4 11v4c0 1.4 3.1 2.5 7 2.5m2-5.8c0-1.4 3.1-2.5 7-2.5v6c-3.9 0-7-1.1-7-2.5Zm0 0v4c0 1.4 3.1 2.5 7 2.5",
+  "table": "M4 4.5h16v15H4ZM4 9.5h16M4 14.5h16M10 4.5v15",
+  "image": "M4 5h16v14H4ZM4 16l5-5 4 4 2.5-2.5L20 17M15.5 9.5h.01",
+  "scroll": "M7 4h11a2 2 0 0 1 2 2v1h-4M7 4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2V7M7 4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2M11 10h4M11 14h4",
+  "crown": "M4 18h16M4.5 15.5 3 7l5 3.5L12 5l4 5.5L21 7l-1.5 8.5Z",
+  "wand": "M4 20 15 9M14 4v2M18 6l-1.4 1.4M20 10h-2M17 3l.7 2M21 7l-2 .7",
+  "package": "M12 3 20 7.5v9L12 21l-8-4.5v-9ZM4 7.5l8 4.5 8-4.5M12 12v9",
+  "encounter": "M5 19 15 9M9 5l10 10M5 5l4 4M15 15l4 4M14.5 4.5h5v5",
+  "chevron-down": "M6 9l6 6 6-6",
+  "chevron-right": "M9 6l6 6-6 6",
+  "sidebar-collapse": "M13 6l6 6-6 6M5 6l6 6-6 6",
+  "sidebar-expand": "M11 6l-6 6 6 6M19 6l-6 6 6 6",
   // Chat: what a line is.
   damage: "M12 2.5 13.8 8.6 19.8 6.2 16.2 11.3 21.5 13.8 15.4 14.9 16.8 21 12 17 7.2 21 8.6 14.9 2.5 13.8 7.8 11.3 4.2 6.2 10.2 8.6Z",
   check: "M10.5 17a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13ZM15.3 15.3 21 21",

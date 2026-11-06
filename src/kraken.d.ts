@@ -67,6 +67,7 @@ export type KrakenAgentCommand =
   | { kind: "open-adventure"; name: string; bytes: Uint8Array }
   | { kind: "scenes"; adventure?: string; scene?: string }
   | { kind: "windows"; action: "list" | "open" | "close" | "popout" | "dock"; window?: string; record?: string }
+  | { kind: "sidebar"; action: "list" | "state" | "fold" | "press"; state?: number; group?: string; folded?: boolean; entry?: string }
   | { kind: "dice-settings"; patch: DiceSettingsPatch };
 
 export type DiceSettingsPatch = { show?: boolean; sound?: boolean; volume?: number; preset?: string; body?: string; accent?: string; ink?: string; design?: string; material?: string; font?: string; effect?: string; crit?: boolean; pips?: boolean; set?: "mine" | "npc" | "damage"; same?: boolean };

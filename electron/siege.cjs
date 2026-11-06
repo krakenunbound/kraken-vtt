@@ -202,4 +202,93 @@ async function exportCharacter(record, format = "kraken") {
   return { text: interchange.toKrakenFile(record), file: `${record.name}.kraken.json`, type: "application/json" };
 }
 
-module.exports = { siege, siegeLibrary, siegeCheck, levelUp, changeClass, editCharacter, importCharacter, exportCharacter, ATTRIBUTES };
+// A record dropped on a character sheet goes where it belongs, as FG's
+// SiegeChar.handleSheetDrop: a package (race or class) into the packages at
+// 1st level, its primes set; a power (a spell) into the powers, bound to the
+// one class that casts it; an item into the gear. The sheet is worked out
+// again and chat says what was added. A 5E sheet takes items.
+async function dropOnCharacter(table, record, source, from) {
+  if (!source) throw new Error("Nothing to drop.");
+  const who = from || record.name;
+  if (dnd5e.is5e(record)) {
+    if (source.type !== "item") throw new Error("A 5E sheet takes items; classes, species and spells come with the Character Wizard and level up.");
+    const data = structuredClone(record.data);
+    const list = (data.inventorylist = data.inventorylist ?? {});
+    const { engine } = await siege();
+    list[engine.nextId(list)] = { ...structuredClone(source.data), name: source.name, count: 1, carried: 1 };
+    const updated = table.records.update(record.id, { data: (await dnd5e.rules5e()).derive(data) }, table.seat, { replace: true });
+    table.say(`${record.name} gets ${source.name}.`, who, record.visibility === "gm");
+    return { record: updated, added: "item" };
+  }
+  const { engine, builder } = await siege();
+  const game = siegeLibrary(table.records).game;
+  const data = structuredClone(record.data);
+  const copy = { ...structuredClone(source.data), name: source.data?.name ?? source.name };
+  delete copy.public;
+  let summary;
+  let added;
+  if (source.type === "siegepackage") {
+    const kind = String(copy.packagetype ?? "").toLowerCase();
+    const packages = (data.packages = data.packages ?? {});
+    const same = Object.values(packages).find((pkg) => engine.plainName(pkg?.name) === engine.plainName(copy.name));
+    if (same) throw new Error(`${record.name} already has ${copy.name}.`);
+    if (kind === "race") {
+      for (const [key, pkg] of Object.entries(packages)) if (String(pkg?.packagetype ?? "").toLowerCase() === "race") delete packages[key];
+      data.race = copy.name;
+      for (const field of ["size", "speed", "senses"]) if (copy[field]) data[field] = copy[field];
+    }
+    const classLike = Object.keys(copy.levels ?? {}).length > 0;
+    if (classLike && Object.values(packages).some((pkg) => Object.keys(pkg?.levels ?? {}).length > 0)) {
+      throw new Error(`${record.name} already has a class. A second class comes at a level up (dual class or reclass), as the Player's Handbook says.`);
+    }
+    const pkg = { ...copy, level: 1 };
+    if (classLike) {
+      // 1st level's hit points: the die's highest, plus the Constitution bonus (at least 1), as the wizard does.
+      const { dice, flat } = engine.levelGain(copy, 1);
+      const con = engine.abilityBonus(Number(data.attributes?.constitution?.score ?? 10), game);
+      let gain = flat;
+      if (dice.length > 0) gain = Math.max(1, dice.reduce((sum, die) => sum + (Number(String(die).slice(1)) || 0), flat) + con);
+      pkg.hproll = 1;
+      pkg.hplog = { l1: gain };
+      data.hp = { ...(data.hp ?? {}), total: (Number(data.hp?.total) || 0) + gain };
+    }
+    packages[engine.nextId(packages)] = pkg;
+    data.attributes = data.attributes ?? {};
+    const primes = [];
+    for (const stat of engine.STATS) {
+      if (Number(copy.primes?.[stat]) === 1) {
+        data.attributes[stat] = { ...(data.attributes[stat] ?? {}), prime: 1 };
+        primes.push(stat);
+      }
+    }
+    added = kind || "package";
+    summary = `${record.name}: ${kind ? kind[0].toUpperCase() + kind.slice(1) : "Package"}: ${copy.name}${classLike ? ` (level 1, ${pkg.hplog.l1} hit points)` : ""}${primes.length ? `; prime ${primes.map((stat) => stat[0].toUpperCase() + stat.slice(1)).join(", ")}` : ""}.`;
+    if (Number(copy.primechoice) > 0) summary += ` ${copy.name} lets ${record.name} choose ${copy.primechoice} more prime${Number(copy.primechoice) > 1 ? "s" : ""} (tick them on the sheet).`;
+  } else if (source.type === "siegepower") {
+    const powers = (data.powers = data.powers ?? {});
+    if (Object.values(powers).some((power) => engine.plainName(power?.name) === engine.plainName(copy.name))) throw new Error(`${record.name} already has ${copy.name}.`);
+    const row = { ...copy, used: 0 };
+    // Bound only when exactly one of the character's classes casts it (FG's getPowerPoolChoices).
+    const pools = Object.values(data.packages ?? {})
+      .map((pkg) => ({ pool: String(pkg?.spellclass ?? "").replace(/[^A-Za-z0-9_]/g, "").toLowerCase(), level: pkg?.spellclass ? builder.powerLevelFor(copy, pkg.spellclass) : null }))
+      .filter((item) => item.pool && item.level !== null);
+    if (pools.length === 1) {
+      row.spellpool = pools[0].pool;
+      row.spelllevel = pools[0].level;
+      row.level = pools[0].level;
+    }
+    powers[engine.nextId(powers)] = row;
+    added = "power";
+    summary = `${record.name} adds ${copy.name}${pools.length === 1 ? ` (level ${pools[0].level})` : ""}.`;
+  } else if (source.type === "item") {
+    const row = engine.addItem(data, copy, game);
+    added = "item";
+    summary = `${record.name} gets ${copy.name}${Number(row.carried) === 2 ? " (equipped)" : ""}.`;
+  } else throw new Error(`A ${source.type} does not go on a character sheet.`);
+  const updated = table.records.update(record.id, { data: engine.derive(data, game) }, table.seat, { replace: true });
+  // A character the players do not see: only the GM hears what it got.
+  table.say(summary, who, record.visibility === "gm");
+  return { record: updated, added, summary };
+}
+
+module.exports = { siege, siegeLibrary, siegeCheck, levelUp, changeClass, dropOnCharacter, editCharacter, importCharacter, exportCharacter, ATTRIBUTES };
