@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
 import * as THREE from "three";
 
 import type { WeatherType } from "./weatherTypes";
@@ -71,7 +71,8 @@ const HAZE_SHADER = `
 // Weather over the map (three.js). Particles fall in screen space with the
 // wind; haze, cloud shadows and water are anchored to the map, so they move
 // when the view is panned or zoomed.
-export function Weather({ type, intensity, direction, camera, amount = 1, speed = 0.5, clip }: { type: WeatherType; intensity: number; direction: number; camera: Camera; amount?: number; speed?: number; clip?: string }) {
+// mask: the GM's painted areas as a picture (CSS mask-image) and where it sits on screen.
+export function Weather({ type, intensity, direction, camera, amount = 1, speed = 0.5, mask }: { type: WeatherType; intensity: number; direction: number; camera: Camera; amount?: number; speed?: number; mask?: CSSProperties }) {
   const host = useRef<HTMLDivElement>(null);
   const cameraRef = useRef(camera);
   cameraRef.current = camera;
@@ -231,5 +232,5 @@ export function Weather({ type, intensity, direction, camera, amount = 1, speed 
   }, [type, intensity, direction, amount, speed]);
 
   if (type === "none") return null;
-  return <div className="weather" ref={host} data-weather={type} aria-hidden="true" style={clip ? { clipPath: clip } : undefined} />;
+  return <div className="weather" ref={host} data-weather={type} data-masked={mask ? "true" : undefined} aria-hidden="true" style={mask} />;
 }
