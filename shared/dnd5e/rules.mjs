@@ -19,6 +19,42 @@
 
 export const RULESET = "dnd5e";
 export const RULESET_NAME = "D&D 5E";
+
+// The games built on this engine (the d20 family): D&D 5E from the SRD, and
+// Kraken's own Descending Darkness (dark fantasy: Defense and Health, a
+// harsher array, levels 1-10, bleeding out at 0 Health, Dread). A record's
+// data.ruleset says which; the campaign's ruleset name picks it for a new one.
+export const PROFILES = {
+  dnd5e: {
+    id: "dnd5e",
+    name: "D&D 5E",
+    standardArray: [15, 14, 13, 12, 10, 8],
+    xp: [0, 300, 900, 2700, 6500, 14000, 23000, 34000, 48000, 64000, 85000, 100000, 120000, 140000, 165000, 195000, 225000, 265000, 305000, 355000],
+    maxLevel: 20,
+    labels: { ac: "AC", acLong: "Armor Class", hp: "Hit Points", hpShort: "HP", species: "Species", game: "5E", hitDice: "Hit Dice" },
+    dying: "saves",
+    dread: false,
+    dcs: [5, 10, 15, 20, 25, 30],
+  },
+  descending: {
+    id: "descending",
+    name: "Descending Darkness",
+    standardArray: [17, 14, 14, 13, 12, 8],
+    xp: [0, 250, 750, 1750, 3500, 6500, 11000, 17000, 25000, 35000],
+    maxLevel: 10,
+    labels: { ac: "Defense", acLong: "Defense", hp: "Health", hpShort: "Health", species: "Kin", game: "Descending Darkness", hitDice: "Recovery Dice" },
+    // At 0 Health: dying, a Health lost at the end of each of its turns; dead at minus its maximum.
+    dying: "bleed",
+    // Dread 0-6: 3 or more, disadvantage on Wisdom; 6, the character breaks.
+    dread: true,
+    dcs: [10, 12, 15, 18],
+  },
+};
+export const profileFor = (thing) => {
+  const key = typeof thing === "string" ? thing : thing?.ruleset;
+  return PROFILES[key] ?? Object.values(PROFILES).find((profile) => profile.name === key) ?? PROFILES.dnd5e;
+};
+export const isD20 = (thing) => Boolean(PROFILES[typeof thing === "string" ? thing : thing?.ruleset] ?? Object.values(PROFILES).find((profile) => profile.name === thing));
 export const STATS = ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"];
 export const SHORT = { strength: "STR", dexterity: "DEX", constitution: "CON", intelligence: "INT", wisdom: "WIS", charisma: "CHA" };
 
@@ -54,7 +90,7 @@ export const proficiency = (level) => 2 + Math.floor((Math.max(1, Number(level) 
 export const signed = (n) => (n >= 0 ? `+${n}` : `${n}`);
 const num = (value, fallback = 0) => (Number.isFinite(Number(value)) ? Number(value) : fallback);
 const rows = (value) => (value && typeof value === "object" ? Object.entries(value) : []);
-const statOf = (word) => STATS.find((stat) => String(word ?? "").toLowerCase().startsWith(stat.slice(0, 3))) ?? null;
+const statOf = (word) => STATS.find((stat) => String(word ?? "").trim().toLowerCase().startsWith(stat.slice(0, 3))) ?? null;
 
 // Spellcasting classes: their ability and how fast slots come (SRD class tables).
 export const CASTERS = {
@@ -226,8 +262,9 @@ const martialClass = (classRecord) => /martial/i.test(String(classRecord?.data?.
 // skills, AC, initiative, attacks, passive Perception, spellcasting, the next
 // level's XP. Base fields are kept as they are.
 export function derive(input) {
-  const data = { ...input, ruleset: RULESET };
-  const level = Math.min(20, Math.max(1, Math.round(num(data.level, 1))));
+  const profile = profileFor(input?.ruleset in PROFILES ? input.ruleset : RULESET);
+  const data = { ...input, ruleset: profile.id };
+  const level = Math.min(profile.maxLevel, Math.max(1, Math.round(num(data.level, 1))));
   data.level = level;
   data.prof = proficiency(level);
   data.abilities = Object.fromEntries(
@@ -267,8 +304,9 @@ export function derive(input) {
   }
   data.hp = { total: Math.max(1, Math.round(num(data.hp?.total, 1))), wounds: Math.max(0, Math.round(num(data.hp?.wounds, 0))), temp: Math.max(0, Math.round(num(data.hp?.temp, 0))) };
   data.exp = Math.max(0, Math.round(num(data.exp, 0)));
-  data.expnext = XP[level] ?? 0;
+  data.expnext = profile.xp[level] ?? 0;
   data.deathsaves = { success: Math.min(3, num(data.deathsaves?.success, 0)), failure: Math.min(3, num(data.deathsaves?.failure, 0)) };
+  if (profile.dread) data.dread = Math.min(6, Math.max(0, Math.round(num(data.dread, 0))));
   return data;
 }
 
@@ -291,7 +329,20 @@ export const titled = (word) => String(word ?? "").replace(/^\w/, (letter) => le
 // lib: { classes, species, backgrounds, items, spells } (records). Hit points:
 // the hit die's maximum at level 1 plus CON, then the fixed value (half the
 // die + 1) each level (FG's default; a level up from the sheet rolls).
-export function buildFromSpec(spec, lib) {
+// A kin's ability adjustments ("Dexterity +1, Constitution -1"): {stat: n}.
+export function abilityAdjustments(speciesRecord) {
+  const out = {};
+  for (const match of String(speciesRecord?.data?.abilityadjust ?? "").matchAll(/([a-z]+)\s*([+-]\d+)/gi)) {
+    const stat = statOf(match[1]);
+    if (stat) out[stat] = (out[stat] ?? 0) + Number(match[2]);
+  }
+  return out;
+}
+// Extra hit points each level from the species (SRD 5E's dwarven toughness).
+export const toughnessOf = (speciesRecord) => (/hit point maximum increases by 1/i.test(Object.values(speciesRecord?.data?.traits ?? {}).map((trait) => trait?.text ?? "").join(" ")) ? 1 : num(speciesRecord?.data?.hpperlevel, 0));
+
+export function buildFromSpec(spec, lib, rulesetId = RULESET) {
+  const profile = profileFor(rulesetId);
   const problems = [];
   const find = (list, name) => list.find((record) => String(record.name).toLowerCase() === String(name ?? "").toLowerCase()) ?? null;
   const cls = find(lib.classes, spec.class);
@@ -300,8 +351,10 @@ export function buildFromSpec(spec, lib) {
   if ((spec.species || spec.race) && !species) problems.push(`No species ${spec.species ?? spec.race}.`);
   const background = spec.background ? find(lib.backgrounds, spec.background) : null;
   if (spec.background && !background) problems.push(`No background ${spec.background}.`);
-  const level = Math.min(20, Math.max(1, Math.round(num(spec.level, 1))));
-  const scores = spec.scores ?? {};
+  const level = Math.min(profile.maxLevel, Math.max(1, Math.round(num(spec.level, 1))));
+  // The scores chosen, with the kin's adjustments (Descending Darkness's kin; SRD species have none).
+  const adjust = abilityAdjustments(species);
+  const scores = Object.fromEntries(STATS.map((stat) => [stat, num(spec.scores?.[stat], 10) + (adjust[stat] ?? 0)]));
   const saves = classSaves(cls);
   const abilities = Object.fromEntries(STATS.map((stat) => [stat, { score: num(scores[stat], 10), saveprof: saves.includes(stat) ? 1 : 0 }]));
   // Skills: the background's two, and the class's choices (the spec's, else the first allowed).
@@ -326,13 +379,16 @@ export function buildFromSpec(spec, lib) {
   }
   const die = hitDie(cls);
   const con = mod(abilities.constitution.score);
-  const toughness = /dwarf/i.test(String(species?.name ?? "")) ? level : 0;
+  const perLevel = toughnessOf(species);
+  const toughness = perLevel * level;
   const hp = die + con + (level - 1) * (Math.floor(die / 2) + 1 + con) + toughness;
   const senses = (() => {
     const dark = /Darkvision with a range of (\d+) feet/i.exec(Object.values(species?.data?.traits ?? {}).map((trait) => trait.text ?? "").join(" "));
     return dark ? `Darkvision ${dark[1]} ft` : "";
   })();
   const data = derive({
+    ruleset: profile.id,
+    hpperlevel: perLevel,
     level,
     species: species?.name ?? String(spec.species ?? spec.race ?? ""),
     race: species?.name ?? String(spec.species ?? spec.race ?? ""),
@@ -350,7 +406,7 @@ export function buildFromSpec(spec, lib) {
     inventorylist,
     coins: num(spec.gold, 0) > 0 ? { "id-00001": { name: "gp", amount: Math.round(num(spec.gold, 0)) } } : {},
     spells: (spec.spells ?? []).map((name) => find(lib.spells, name)?.name ?? (problems.push(`No spell ${name}.`), null)).filter(Boolean),
-    exp: XP[level - 1],
+    exp: profile.xp[level - 1] ?? 0,
   });
   return { name: String(spec.name ?? "").trim() || "Adventurer", data, problems };
 }
@@ -358,10 +414,11 @@ export function buildFromSpec(spec, lib) {
 // A level up: the hit die rolled (rolled: the die's number) + CON, at least 1; the next level's numbers.
 export function levelUp(input, rolled) {
   const data = derive(input);
-  if (data.level >= 20) throw new Error("Already level 20.");
+  const top = profileFor(data).maxLevel;
+  if (data.level >= top) throw new Error(`Already level ${top}.`);
   const pkg = rows(data.packages).find(([, item]) => String(item.packagetype).toLowerCase() === "class");
   const die = num(pkg?.[1]?.hitdie, num(data.hitdice?.die, 8));
-  const gain = Math.max(1, Math.round(num(rolled, Math.floor(die / 2) + 1)) + data.abilities.constitution.bonus + (/dwarf/i.test(String(data.species ?? "")) ? 1 : 0));
+  const gain = Math.max(1, Math.round(num(rolled, Math.floor(die / 2) + 1)) + data.abilities.constitution.bonus + num(data.hpperlevel, /dwarf/i.test(String(data.species ?? "")) && data.ruleset === RULESET ? 1 : 0));
   const next = { ...data, level: data.level + 1, hp: { ...data.hp, total: data.hp.total + gain } };
   if (pkg) next.packages = { ...data.packages, [pkg[0]]: { ...pkg[1], level: data.level + 1 } };
   next.hitdice = { die, total: data.level + 1, used: num(data.hitdice?.used, 0) };

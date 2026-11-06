@@ -1,0 +1,641 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root version="4.6" release="1">
+	<encounter>
+		<category name="The Empty Watchtower">
+			<e00aboutthisadventure>
+				<name type="string">00 About This Adventure</name>
+				<text type="formattedtext"><p><b>The Empty Watchtower</b> is a first adventure for <i>Descending Darkness</i>: three to five characters of 1st level, two or three sessions. It teaches the game's heart: light runs out, the dark is listening, and not every fight has to be fought.</p><p><b>What has happened.</b> On the ridge above the village of <b>Hollowmere</b> stands an old watchtower. Its beacon once warned the valley of raiders; for thirty years only <b>Brother Aldous</b>, a hermit-priest, has kept it, lighting it every dusk out of habit. Three nights ago the beacon stayed dark. Since then the village has heard howling from the ridge.</p><p>Aldous had been reading the tower's old records, and found that its last commander, <b>Warden Saranth</b>, was buried in the crypt below with his oath-ring: he had sworn to hold the tower <i>until relieved</i>. No relief ever came; the realm that built the tower forgot it. Aldous went down to pray for the Warden's rest and opened the tomb. Saranth woke, still holding his post, and everything buried with him woke too. Aldous fled upstairs and died there, of his wounds and his fear; the Warden's hound now guards the beacon.</p><p><b>What the characters can do.</b> Fight their way down and destroy Saranth (hard: he rises again at dusk unless his ring is taken or his bones burned), or <b>relieve him</b>: relight the beacon, and tell the Warden, with his ring placed in his hand, that his watch is over. Aldous's journal says how.</p></text>
+			</e00aboutthisadventure>
+			<e01hollowmere>
+				<name type="string">01 Hollowmere</name>
+				<text type="formattedtext"><p><i>Read or tell:</i> <b>Hollowmere is a village of thirty roofs around a muddy green, with the ridge and its dark tower above it. The reeve, a tired woman called Mother Hesk, meets you at the well. &quot;Aldous lit that fire every night for thirty years,&quot; she says. &quot;Three nights now, nothing. And the dogs won't stop howling.&quot;</b></p><p>Mother Hesk offers <b>40 gc</b> and the village's thanks for relighting the beacon and finding out what became of Aldous. A Persuasion check (DC 12) gets 20 more, or a mule for the road.</p><p>What the villagers know (one each, for asking around): - Aldous kept to himself and read a lot of &quot;old soldier's letters&quot;. - A shepherd saw grey wolves on the ridge road two nights ago, thin and bold. - The tower is older than the village; &quot;soldiers built it for a king nobody remembers&quot;. - Old Tam, the drunk, says his grandmother told him a knight is buried under the tower, &quot;waiting for somebody&quot;.</p><p>Before they go, ask each player what their character carries for light, and how many torches. Write it down.</p></text>
+			</e01hollowmere>
+			<e02theridgeroad>
+				<name type="string">02 The Ridge Road</name>
+				<text type="formattedtext"><p>The ridge road climbs for an hour through burned forest. <b>Three Ash Wolves</b> have followed the smell of Aldous's death up the ridge and now hunt the road; they shadow the party and attack where the road narrows, near the tower's ruined outer wall.</p><p>Wolves that lose two of their pack flee. A character who throws them food (a day's rations) with an Animal Handling check (DC 12) sends them off without a fight.</p><p>When the party first sees the tower, read: <b>The tower stands black against the sky, square and heavy, its curtain wall fallen in places. At its top, where the beacon basket should be burning, there is nothing. No smoke. No light. A dog is barking somewhere inside — a deep, hoarse sound, and it does not stop.</b></p><p>Hearing the hound gives each character 1 Dread unless they succeed on a Wisdom save (DC 10).</p></text>
+			</e02theridgeroad>
+			<e03theyardandthestonedoor>
+				<name type="string">03 The Yard and the Stone Door</name>
+				<text type="formattedtext"><p><i>Map: The Watchtower Yard.</i></p><p>The tower's only door is a slab of stone on iron pins, and it is <b>jammed</b>: a Strength check (DC 12) heaves it open, with a grind of stone that everything in the tower hears. A crowbar gives advantage. Two characters working together give advantage too.</p><p>The <b>well</b> in the yard is deep and dry; at its bottom is a dead mule and Aldous's lost bucket. The <b>cart</b> by the west wall holds a week of rotting supplies sent up from the village.</p><p>Behind the tower, by the east wall, lies a human skeleton in a soldier's rotten coat: one of Saranth's watch, long dead. In its fist is a tin badge of a tower with a flame above it — the <b>badge of the watch</b>. Saranth will listen to whoever carries it (see entry 08).</p></text>
+			</e03theyardandthestonedoor>
+			<e04thehall>
+				<name type="string">04 The Hall</name>
+				<text type="formattedtext"><p><b>A long hall with a table and benches, a cold brazier in the corner. Blood has dried in a long smear across the floor toward the stairs.</b></p><p>The blood is Aldous's, three days old. A Medicine or Investigation check (DC 12) reads it: someone wounded walked from the north side of the hall toward the stair room, fell once, got up.</p><p>The brazier still has wood in it; lighting it gives bright light 20 feet for the rest of the day, and the hall is a safe place to rest <b>once the hound above is dealt with</b>.</p><p>On the table: a cracked lamp, a bowl of mouldy porridge, and a scrap of paper under the bowl: <i>&quot;Fed the hound. It is not a hound. God forgive me. — A.&quot;</i></p></text>
+			</e04thehall>
+			<e05thestoreroom>
+				<name type="string">05 The Storeroom</name>
+				<text type="formattedtext"><p><b>Barrels, crates, a floor of fallen plaster. In the far corner, stone steps lead down into a darkness that breathes out cold air.</b></p><p><b>Barrow Rats</b> have come up from the crypt and swarm the stores; they boil out of a broken crate when anyone comes near (one swarm; two if the party is five).</p><p>The barrels hold lamp oil (<b>6 flasks</b>, worth having), salt pork and flour. A crate holds a soldier's kit: a mail shirt, a shield and a spear, old but sound.</p><p>The steps down lead to the <b>crypt</b> (entry 08). The cold from below is wrong — colder than any cellar — and a character who stands at the top of the stair and listens hears, very faintly, a slow footstep, pacing.</p></text>
+			</e05thestoreroom>
+			<e06thestairroom>
+				<name type="string">06 The Stair Room</name>
+				<text type="formattedtext"><p><b>A spiral stair of worn stone climbs into the dark. Rubble has fallen from above, and something has spun webs in the corner.</b></p><p>The stair is <b>unsafe</b>: three steps near the top have cracked. A Wisdom (Perception) check (DC 12) notices them; crossing them needs a Dexterity check (DC 12) for each character — or none at all if they rope themselves together or test each step. A failure means a fall of 15 feet back to the stair room (2d6 bludgeoning damage) and a lot of noise.</p><p>A <b>Gloomcrawler</b> lives in the webs on the ceiling and drops on the last climber.</p></text>
+			</e06thestairroom>
+			<e07theupperfloorandthebeacon>
+				<name type="string">07 The Upper Floor and the Beacon</name>
+				<text type="formattedtext"><p><i>Map: The Watchtower Upper Floor.</i></p><p><b>Aldous's room: a narrow bed, a table piled with old letters, a chest. And Aldous himself, on the floor beside the bed, eyes open.</b> Aldous is dead; he is not risen (he died praying, and the Warden spared him that). Seeing him: 1 Dread each, Wisdom save (DC 10) to resist.</p><p>On the table: <b>Aldous's journal</b> (give the players the handout) and the tower's old muster roll with Saranth's name.</p><p>Through the door, the <b>beacon platform</b>: the great iron basket, full of wood and old pitch, cold. And the <b>Grave Hound</b>, which has made its den among the barrels. It is Saranth's hound, buried with him; it attacks anyone who comes near the beacon. If the party lit the hall's brazier, the hound's Hunting Howl brings Saranth's attention: he will be waiting, sword drawn, when they go below.</p><p><b>Relighting the beacon</b> takes an action with a torch or flame. When it catches, the whole valley sees it, and so does the crypt: read entry 08's <i>&quot;when the beacon burns&quot;</i>.</p></text>
+			</e07theupperfloorandthebeacon>
+			<e08thecryptofthewatch>
+				<name type="string">08 The Crypt of the Watch</name>
+				<text type="formattedtext"><p><i>Map: The Crypt of the Watch.</i></p><p><b>The stairs come down into a long hall of tombs: six soldiers of the watch in their stone beds, the lids pushed aside. At the end of the hall a door stands open, and beyond it, by the light of two braziers burning blue, an armoured figure walks slowly up and down before an empty coffin.</b></p><p><b>Four Bone Sentinels</b> — Saranth's watch — have climbed from their tombs and stand in the hall; they attack anyone who enters without the <b>badge of the watch</b>. With the badge shown, they stand aside.</p><p><b>Warden Saranth</b> walks his post before his coffin. He speaks, in an old form of the common tongue: <i>&quot;Who comes? Give the word, or give your name to the dark.&quot;</i></p><p><b>Ways it can go:</b> - <b>Fight.</b> Saranth and any sentinels left fight to the end; he is too strong for most 1st-level parties. If destroyed, he rises at the next dusk unless his oath-ring is taken from the tower or his bones burned with oil. - <b>Talk.</b> He is not evil; he is faithful. He asks who relieves him. Showing the badge, telling him truthfully that the realm is gone (Persuasion or Religion DC 15; with Aldous's journal, DC 12), and placing the oath-ring from the altar in his hand convinces him. If the beacon is burning when they do it, they need no roll. - <b><i>When the beacon burns:</i></b> <i>Saranth stops pacing. He turns his face up toward the ceiling, and for a long moment says nothing. &quot;The fire,&quot; he says. &quot;They have come at last.&quot; He lays his sword on the coffin, lies down, and is still. His sentinels fall with him.</i></p><p><b>The treasure niche.</b> Behind the tomb, a secret door (Investigation DC 15, or the tomb's inscription: <i>&quot;The watch keeps what the watch is given&quot;</i>) hides the tower's last pay-chest: <b>210 gc</b>, a silver flask of <b>healing water</b> (heals 2d4+2), and Saranth's sword, <b>Watchkeeper</b> (a longsword +1; once per day its wielder ignores a point of Dread).</p></text>
+			</e08thecryptofthewatch>
+			<e09aftermath>
+				<name type="string">09 Aftermath</name>
+				<text type="formattedtext"><p><b>Rewards.</b> Each character gains <b>150 experience</b> for relieving or destroying Saranth, <b>50</b> for relighting the beacon, and <b>1 per gold crown</b> brought back to Hollowmere. Most parties reach 2nd level.</p><p>If the beacon is lit, Hollowmere sees it from below and rings its bell; Mother Hesk pays, and the village asks whether the party will keep the tower. Someone has to light it now.</p><p><b>Threads to follow:</b> Aldous's letters mention the tower's sister towers along the ridge, all forgotten, all with their own wardens. One of them is still burning a beacon — and nobody has kept it in eighty years.</p></text>
+			</e09aftermath>
+			<e10handoutaldoussjournal>
+				<name type="string">10 Handout: Aldous's Journal</name>
+				<text type="formattedtext"><p><i>The last pages of a cracked leather journal, in an old man's careful hand.</i></p><p><b>Day 3.</b> The muster roll names him: Saranth, Warden of the Watch, buried below with his ring, &quot;until relieved&quot;. Relieved by whom? The kingdom that built this tower fell before my grandfather's grandfather was born. He is still waiting.</p><p><b>Day 5.</b> I have found the stair to the crypt. The cold is terrible. I will go down tomorrow and pray for him. Perhaps that is relief enough.</p><p><b>Day 6.</b> God forgive me. He asked me for the word, and I had no word. He asked who relieves him, and I had no answer. His dog — it is not a dog — followed me up the stairs.</p><p><b>Day 7.</b> I cannot light the beacon. My hands will not stop shaking. If anyone reads this: he is a soldier. He wants to be told his watch is over. Light the fire. Show him the badge of the watch. Give him his ring. Tell him the truth.</p></text>
+			</e10handoutaldoussjournal>
+		</category>
+	</encounter>
+	<battle>
+		<category name="Encounters">
+			<ashwolvesontheridgeroad>
+				<name type="string">Ash Wolves on the Ridge Road</name>
+				<npclist>
+					<id-00001>
+						<name type="string">Ash Wolf</name>
+						<count type="number">3</count>
+						<faction type="string">foe</faction>
+						<isidentified type="number">1</isidentified>
+						<link type="windowreference"><class>npc</class><recordname>npc.ashwolf@Descending Darkness Bestiary</recordname></link>
+					</id-00001>
+				</npclist>
+			</ashwolvesontheridgeroad>
+			<barrowratsinthestoreroom>
+				<name type="string">Barrow Rats in the Storeroom</name>
+				<npclist>
+					<id-00001>
+						<name type="string">Barrow Rats</name>
+						<count type="number">1</count>
+						<faction type="string">foe</faction>
+						<isidentified type="number">1</isidentified>
+						<link type="windowreference"><class>npc</class><recordname>npc.barrowrats@Descending Darkness Bestiary</recordname></link>
+					</id-00001>
+				</npclist>
+			</barrowratsinthestoreroom>
+			<gloomcrawleronthestair>
+				<name type="string">Gloomcrawler on the Stair</name>
+				<npclist>
+					<id-00001>
+						<name type="string">Gloomcrawler</name>
+						<count type="number">1</count>
+						<faction type="string">foe</faction>
+						<isidentified type="number">1</isidentified>
+						<link type="windowreference"><class>npc</class><recordname>npc.gloomcrawler@Descending Darkness Bestiary</recordname></link>
+					</id-00001>
+				</npclist>
+			</gloomcrawleronthestair>
+			<thegravehound>
+				<name type="string">The Grave Hound</name>
+				<npclist>
+					<id-00001>
+						<name type="string">Grave Hound</name>
+						<count type="number">1</count>
+						<faction type="string">foe</faction>
+						<isidentified type="number">1</isidentified>
+						<link type="windowreference"><class>npc</class><recordname>npc.gravehound@Descending Darkness Bestiary</recordname></link>
+					</id-00001>
+				</npclist>
+			</thegravehound>
+			<thewatchinthecrypt>
+				<name type="string">The Watch in the Crypt</name>
+				<npclist>
+					<id-00001>
+						<name type="string">Bone Sentinel</name>
+						<count type="number">4</count>
+						<faction type="string">foe</faction>
+						<isidentified type="number">1</isidentified>
+						<link type="windowreference"><class>npc</class><recordname>npc.bonesentinel@Descending Darkness Bestiary</recordname></link>
+					</id-00001>
+				</npclist>
+			</thewatchinthecrypt>
+			<wardensaranth>
+				<name type="string">Warden Saranth</name>
+				<npclist>
+					<id-00001>
+						<name type="string">Warden Saranth</name>
+						<count type="number">1</count>
+						<faction type="string">foe</faction>
+						<isidentified type="number">1</isidentified>
+						<link type="windowreference"><class>npc</class><recordname>npc.wardensaranth@Descending Darkness Bestiary</recordname></link>
+					</id-00001>
+				</npclist>
+			</wardensaranth>
+		</category>
+	</battle>
+	<image>
+		<category name="Maps">
+			<thewatchtoweryard>
+				<name type="string">The Watchtower Yard</name>
+				<image>
+					<grid type="string">on</grid>
+					<gridsize type="string">70,70</gridsize>
+					<gridoffset type="string">0,0</gridoffset>
+					<layers>
+						<layer>
+							<name type="string">The Watchtower Yard</name>
+							<id type="string">0</id>
+							<parentid type="string">-1</parentid>
+							<type type="string">image</type>
+							<bitmap type="string">images/watchtower-yard.webp</bitmap>
+							<matrix type="string">1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1</matrix>
+							<occluders>
+								<occluder>
+									<id type="string">0</id>
+									<points type="string">-770,630,-280,630</points>
+								</occluder>
+								<occluder>
+									<id type="string">1</id>
+									<points type="string">560,630,770,630</points>
+								</occluder>
+								<occluder>
+									<id type="string">2</id>
+									<points type="string">-700,560,-280,560</points>
+								</occluder>
+								<occluder>
+									<id type="string">3</id>
+									<points type="string">560,560,700,560</points>
+								</occluder>
+								<occluder>
+									<id type="string">4</id>
+									<points type="string">-280,490,490,490</points>
+								</occluder>
+								<occluder>
+									<id type="string">5</id>
+									<points type="string">-210,420,420,420</points>
+								</occluder>
+								<occluder>
+									<id type="string">6</id>
+									<points type="string">-770,210,-700,210</points>
+								</occluder>
+								<occluder>
+									<id type="string">7</id>
+									<points type="string">700,210,770,210</points>
+								</occluder>
+								<occluder>
+									<id type="string">8</id>
+									<points type="string">-210,70,70,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">9</id>
+									<points type="string">140,70,420,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">10</id>
+									<points type="string">-770,0,-700,0</points>
+								</occluder>
+								<occluder>
+									<id type="string">11</id>
+									<points type="string">-210,0,420,0</points>
+								</occluder>
+								<occluder>
+									<id type="string">12</id>
+									<points type="string">70,-140,140,-140</points>
+								</occluder>
+								<occluder>
+									<id type="string">13</id>
+									<points type="string">700,-140,770,-140</points>
+								</occluder>
+								<occluder>
+									<id type="string">14</id>
+									<points type="string">70,-210,140,-210</points>
+								</occluder>
+								<occluder>
+									<id type="string">15</id>
+									<points type="string">-210,-350,70,-350</points>
+								</occluder>
+								<occluder>
+									<id type="string">16</id>
+									<points type="string">140,-350,420,-350</points>
+								</occluder>
+								<occluder>
+									<id type="string">17</id>
+									<points type="string">-280,-420,70,-420</points>
+								</occluder>
+								<occluder>
+									<id type="string">18</id>
+									<points type="string">140,-420,490,-420</points>
+								</occluder>
+								<occluder>
+									<id type="string">19</id>
+									<points type="string">-770,-560,-420,-560</points>
+								</occluder>
+								<occluder>
+									<id type="string">20</id>
+									<points type="string">420,-560,700,-560</points>
+								</occluder>
+								<occluder>
+									<id type="string">21</id>
+									<points type="string">-700,-630,-420,-630</points>
+								</occluder>
+								<occluder>
+									<id type="string">22</id>
+									<points type="string">420,-630,770,-630</points>
+								</occluder>
+								<occluder>
+									<id type="string">23</id>
+									<points type="string">-770,630,-770,210</points>
+								</occluder>
+								<occluder>
+									<id type="string">24</id>
+									<points type="string">-770,0,-770,-560</points>
+								</occluder>
+								<occluder>
+									<id type="string">25</id>
+									<points type="string">-700,560,-700,210</points>
+								</occluder>
+								<occluder>
+									<id type="string">26</id>
+									<points type="string">-700,0,-700,-630</points>
+								</occluder>
+								<occluder>
+									<id type="string">27</id>
+									<points type="string">-420,-560,-420,-630</points>
+								</occluder>
+								<occluder>
+									<id type="string">28</id>
+									<points type="string">-280,630,-280,560</points>
+								</occluder>
+								<occluder>
+									<id type="string">29</id>
+									<points type="string">-280,490,-280,-420</points>
+								</occluder>
+								<occluder>
+									<id type="string">30</id>
+									<points type="string">-210,420,-210,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">31</id>
+									<points type="string">-210,0,-210,-350</points>
+								</occluder>
+								<occluder>
+									<id type="string">32</id>
+									<points type="string">70,70,70,-140</points>
+								</occluder>
+								<occluder>
+									<id type="string">33</id>
+									<points type="string">70,-210,70,-420</points>
+								</occluder>
+								<occluder>
+									<id type="string">34</id>
+									<points type="string">140,70,140,-140</points>
+								</occluder>
+								<occluder>
+									<id type="string">35</id>
+									<points type="string">140,-210,140,-420</points>
+								</occluder>
+								<occluder>
+									<id type="string">36</id>
+									<points type="string">420,420,420,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">37</id>
+									<points type="string">420,0,420,-350</points>
+								</occluder>
+								<occluder>
+									<id type="string">38</id>
+									<points type="string">420,-560,420,-630</points>
+								</occluder>
+								<occluder>
+									<id type="string">39</id>
+									<points type="string">490,490,490,-420</points>
+								</occluder>
+								<occluder>
+									<id type="string">40</id>
+									<points type="string">560,630,560,560</points>
+								</occluder>
+								<occluder>
+									<id type="string">41</id>
+									<points type="string">700,560,700,210</points>
+								</occluder>
+								<occluder>
+									<id type="string">42</id>
+									<points type="string">700,-140,700,-560</points>
+								</occluder>
+								<occluder>
+									<id type="string">43</id>
+									<points type="string">770,630,770,210</points>
+								</occluder>
+								<occluder>
+									<id type="string">44</id>
+									<points type="string">770,-140,770,-630</points>
+								</occluder>
+								<occluder>
+									<id type="string">45</id>
+									<points type="string">70,-350,140,-350</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+								<occluder>
+									<id type="string">46</id>
+									<points type="string">70,70,140,70</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+								<occluder>
+									<id type="string">47</id>
+									<points type="string">70,-140,70,-210</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+							</occluders>
+						</layer>
+					</layers>
+				</image>
+			</thewatchtoweryard>
+			<thewatchtowerupperfloor>
+				<name type="string">The Watchtower Upper Floor</name>
+				<image>
+					<grid type="string">on</grid>
+					<gridsize type="string">70,70</gridsize>
+					<gridoffset type="string">0,0</gridoffset>
+					<layers>
+						<layer>
+							<name type="string">The Watchtower Upper Floor</name>
+							<id type="string">0</id>
+							<parentid type="string">-1</parentid>
+							<type type="string">image</type>
+							<bitmap type="string">images/watchtower-upper.webp</bitmap>
+							<matrix type="string">1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1</matrix>
+							<occluders>
+								<occluder>
+									<id type="string">0</id>
+									<points type="string">-490,350,-70,350</points>
+								</occluder>
+								<occluder>
+									<id type="string">1</id>
+									<points type="string">70,350,490,350</points>
+								</occluder>
+								<occluder>
+									<id type="string">2</id>
+									<points type="string">0,70,70,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">3</id>
+									<points type="string">0,0,70,0</points>
+								</occluder>
+								<occluder>
+									<id type="string">4</id>
+									<points type="string">-490,-350,-70,-350</points>
+								</occluder>
+								<occluder>
+									<id type="string">5</id>
+									<points type="string">70,-350,490,-350</points>
+								</occluder>
+								<occluder>
+									<id type="string">6</id>
+									<points type="string">-490,350,-490,-350</points>
+								</occluder>
+								<occluder>
+									<id type="string">7</id>
+									<points type="string">-70,350,-70,-350</points>
+								</occluder>
+								<occluder>
+									<id type="string">8</id>
+									<points type="string">0,70,0,0</points>
+								</occluder>
+								<occluder>
+									<id type="string">9</id>
+									<points type="string">70,350,70,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">10</id>
+									<points type="string">70,0,70,-350</points>
+								</occluder>
+								<occluder>
+									<id type="string">11</id>
+									<points type="string">490,350,490,-350</points>
+								</occluder>
+								<occluder>
+									<id type="string">12</id>
+									<points type="string">70,70,70,0</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+							</occluders>
+						</layer>
+					</layers>
+				</image>
+			</thewatchtowerupperfloor>
+			<thecryptofthewatch>
+				<name type="string">The Crypt of the Watch</name>
+				<image>
+					<grid type="string">on</grid>
+					<gridsize type="string">70,70</gridsize>
+					<gridoffset type="string">0,0</gridoffset>
+					<layers>
+						<layer>
+							<name type="string">The Crypt of the Watch</name>
+							<id type="string">0</id>
+							<parentid type="string">-1</parentid>
+							<type type="string">image</type>
+							<bitmap type="string">images/watchtower-crypt.webp</bitmap>
+							<matrix type="string">1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1</matrix>
+							<occluders>
+								<occluder>
+									<id type="string">0</id>
+									<points type="string">-700,490,-420,490</points>
+								</occluder>
+								<occluder>
+									<id type="string">1</id>
+									<points type="string">350,350,700,350</points>
+								</occluder>
+								<occluder>
+									<id type="string">2</id>
+									<points type="string">-700,210,-630,210</points>
+								</occluder>
+								<occluder>
+									<id type="string">3</id>
+									<points type="string">-490,210,-350,210</points>
+								</occluder>
+								<occluder>
+									<id type="string">4</id>
+									<points type="string">-210,210,-140,210</points>
+								</occluder>
+								<occluder>
+									<id type="string">5</id>
+									<points type="string">0,210,70,210</points>
+								</occluder>
+								<occluder>
+									<id type="string">6</id>
+									<points type="string">-490,70,-420,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">7</id>
+									<points type="string">-350,70,-210,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">8</id>
+									<points type="string">-140,70,0,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">9</id>
+									<points type="string">70,70,280,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">10</id>
+									<points type="string">280,0,350,0</points>
+								</occluder>
+								<occluder>
+									<id type="string">11</id>
+									<points type="string">280,-70,350,-70</points>
+								</occluder>
+								<occluder>
+									<id type="string">12</id>
+									<points type="string">-630,-140,-420,-140</points>
+								</occluder>
+								<occluder>
+									<id type="string">13</id>
+									<points type="string">-350,-140,-210,-140</points>
+								</occluder>
+								<occluder>
+									<id type="string">14</id>
+									<points type="string">-140,-140,0,-140</points>
+								</occluder>
+								<occluder>
+									<id type="string">15</id>
+									<points type="string">70,-140,280,-140</points>
+								</occluder>
+								<occluder>
+									<id type="string">16</id>
+									<points type="string">-420,-280,-350,-280</points>
+								</occluder>
+								<occluder>
+									<id type="string">17</id>
+									<points type="string">-210,-280,-140,-280</points>
+								</occluder>
+								<occluder>
+									<id type="string">18</id>
+									<points type="string">0,-280,70,-280</points>
+								</occluder>
+								<occluder>
+									<id type="string">19</id>
+									<points type="string">350,-420,490,-420</points>
+								</occluder>
+								<occluder>
+									<id type="string">20</id>
+									<points type="string">560,-420,700,-420</points>
+								</occluder>
+								<occluder>
+									<id type="string">21</id>
+									<points type="string">420,-490,490,-490</points>
+								</occluder>
+								<occluder>
+									<id type="string">22</id>
+									<points type="string">560,-490,630,-490</points>
+								</occluder>
+								<occluder>
+									<id type="string">23</id>
+									<points type="string">420,-560,630,-560</points>
+								</occluder>
+								<occluder>
+									<id type="string">24</id>
+									<points type="string">-700,490,-700,210</points>
+								</occluder>
+								<occluder>
+									<id type="string">25</id>
+									<points type="string">-630,210,-630,-140</points>
+								</occluder>
+								<occluder>
+									<id type="string">26</id>
+									<points type="string">-490,210,-490,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">27</id>
+									<points type="string">-420,490,-420,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">28</id>
+									<points type="string">-420,-140,-420,-280</points>
+								</occluder>
+								<occluder>
+									<id type="string">29</id>
+									<points type="string">-350,210,-350,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">30</id>
+									<points type="string">-350,-140,-350,-280</points>
+								</occluder>
+								<occluder>
+									<id type="string">31</id>
+									<points type="string">-210,210,-210,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">32</id>
+									<points type="string">-210,-140,-210,-280</points>
+								</occluder>
+								<occluder>
+									<id type="string">33</id>
+									<points type="string">-140,210,-140,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">34</id>
+									<points type="string">-140,-140,-140,-280</points>
+								</occluder>
+								<occluder>
+									<id type="string">35</id>
+									<points type="string">0,210,0,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">36</id>
+									<points type="string">0,-140,0,-280</points>
+								</occluder>
+								<occluder>
+									<id type="string">37</id>
+									<points type="string">70,210,70,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">38</id>
+									<points type="string">70,-140,70,-280</points>
+								</occluder>
+								<occluder>
+									<id type="string">39</id>
+									<points type="string">280,70,280,0</points>
+								</occluder>
+								<occluder>
+									<id type="string">40</id>
+									<points type="string">280,-70,280,-140</points>
+								</occluder>
+								<occluder>
+									<id type="string">41</id>
+									<points type="string">350,350,350,0</points>
+								</occluder>
+								<occluder>
+									<id type="string">42</id>
+									<points type="string">350,-70,350,-420</points>
+								</occluder>
+								<occluder>
+									<id type="string">43</id>
+									<points type="string">420,-490,420,-560</points>
+								</occluder>
+								<occluder>
+									<id type="string">44</id>
+									<points type="string">490,-420,490,-490</points>
+								</occluder>
+								<occluder>
+									<id type="string">45</id>
+									<points type="string">560,-420,560,-490</points>
+								</occluder>
+								<occluder>
+									<id type="string">46</id>
+									<points type="string">630,-490,630,-560</points>
+								</occluder>
+								<occluder>
+									<id type="string">47</id>
+									<points type="string">700,350,700,-420</points>
+								</occluder>
+								<occluder>
+									<id type="string">48</id>
+									<points type="string">350,0,350,-70</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+								<occluder>
+									<id type="string">49</id>
+									<points type="string">490,-420,560,-420</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+							</occluders>
+						</layer>
+					</layers>
+				</image>
+			</thecryptofthewatch>
+		</category>
+	</image>
+</root>

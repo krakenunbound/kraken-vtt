@@ -1,0 +1,8 @@
+{ "cell": 70, "cols": 18, "rows": 14, "ground": "rock", "seed": 23,
+  "floors": [ { "x": 2, "y": 2, "w": 6, "h": 10, "tex": "wood" }, { "x": 9, "y": 6, "w": 1, "h": 1, "tex": "wood" }, { "x": 10, "y": 2, "w": 6, "h": 10, "tex": "flag" } ],
+  "doors": [ { "x": 9, "y": 6, "side": "e" } ],
+  "features": [
+    { "kind": "spiral", "x": 2, "y": 9, "w": 2, "h": 2 }, { "kind": "bed", "x": 6, "y": 2, "w": 2, "h": 1 }, { "kind": "table", "x": 3, "y": 3, "w": 2, "h": 1 }, { "kind": "chest", "x": 7, "y": 9 },
+    { "kind": "blood", "x": 5, "y": 6 }, { "kind": "bones", "x": 4, "y": 7 },
+    { "kind": "beacon", "x": 12, "y": 5, "w": 3, "h": 3 }, { "kind": "barrel", "x": 15, "y": 2 }, { "kind": "barrel", "x": 15, "y": 3 }, { "kind": "rubble", "x": 10, "y": 10, "w": 2, "h": 1 }, { "kind": "bones", "x": 13, "y": 9 }
+  ] }

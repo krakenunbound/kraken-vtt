@@ -23,6 +23,9 @@ const FG_RULESETS = {
   "Castles & Crusades": ["SiegeCore", "CnCRPG"],
   // FG's 5E ruleset's modules (the SRD 5.2.1's player book, bestiary, magic items).
   "D&D 5E": ["5E"],
+  // Kraken's own games, with their books shipped in the app (games/modules).
+  "Descending Darkness": ["Descending Darkness"],
+  "Apeira Astra": ["Apeira Astra"],
   Worldbuilding: [],
 };
 const ANY = new Set(["", "any", "corerpg"]);
@@ -163,7 +166,8 @@ function bitmapIn(value) {
 
 const byOrder = (object) => Object.values(object && typeof object === "object" ? object : {}).sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0));
 
-function createBookShelf({ folder, cache = "" }) {
+// also: more folders of modules (the books Kraken ships, content/modules).
+function createBookShelf({ folder, cache = "", also = [] }) {
   let known = null;
   const opened = new Map(); // id -> the read book, the last few
 
@@ -176,14 +180,16 @@ function createBookShelf({ folder, cache = "" }) {
       /* first time */
     }
     const next = {};
-    let entries = [];
-    try {
-      entries = fs.readdirSync(folder, { withFileTypes: true });
-    } catch {
-      entries = [];
+    const entries = [];
+    for (const dir of [folder, ...also]) {
+      try {
+        for (const entry of fs.readdirSync(dir, { withFileTypes: true })) entries.push({ entry, dir });
+      } catch {
+        /* a folder not there */
+      }
     }
-    for (const entry of entries) {
-      const file = path.join(folder, entry.name);
+    for (const { entry, dir } of entries) {
+      const file = path.join(dir, entry.name);
       if (!(entry.isFile() && /\.mod$/i.test(entry.name)) && !(entry.isDirectory() && fs.existsSync(path.join(file, "definition.xml")))) continue;
       let stat;
       try {
@@ -191,7 +197,9 @@ function createBookShelf({ folder, cache = "" }) {
       } catch {
         continue;
       }
-      const key = `${entry.name}|${stat.size}|${Math.round(stat.mtimeMs)}`;
+      // A folder module (Kraken's own books) changes inside: its XML files' times say so.
+      const inner = entry.isDirectory() ? ["definition.xml", "db.xml", "client.xml"].map((name) => (fs.existsSync(path.join(file, name)) ? Math.round(fs.statSync(path.join(file, name)).mtimeMs) : 0)).join(".") : "";
+      const key = `${entry.name}|${stat.size}|${Math.round(stat.mtimeMs)}${inner ? `|${inner}` : ""}`;
       if (saved[key]) {
         next[key] = saved[key];
         continue;

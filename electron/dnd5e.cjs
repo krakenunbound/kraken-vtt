@@ -9,7 +9,10 @@ const { pathToFileURL } = require("url");
 let loaded = null;
 const rules5e = () => (loaded ??= import(pathToFileURL(path.join(__dirname, "..", "shared", "dnd5e", "rules.mjs")).href));
 const RULESET_NAME = "D&D 5E";
-const is5e = (thing) => thing?.data?.ruleset === "dnd5e";
+// The d20 family's games (shared/dnd5e/rules.mjs PROFILES): their campaign names and record ids.
+const D20 = { "D&D 5E": "dnd5e", "Descending Darkness": "descending" };
+const isD20Ruleset = (name) => Object.prototype.hasOwnProperty.call(D20, String(name ?? ""));
+const is5e = (thing) => Object.values(D20).includes(thing?.data?.ruleset);
 // The record types a 5E book's activation copies in (beside items, NPCs and spells).
 const TYPES_5E = ["class", "race", "race_subrace", "background", "feat", "skill", "class_specialization"];
 
@@ -21,8 +24,8 @@ function library5e(records) {
 async function build5e(table, spec, owner, seat) {
   const rules = await rules5e();
   const lib = library5e(table.records);
-  if (lib.classes.length === 0) throw new Error("No 5E classes in this campaign: make the SRD player book active (Books).");
-  const built = rules.buildFromSpec(spec ?? {}, lib);
+  if (lib.classes.length === 0) throw new Error(table.ruleset?.() === "Descending Darkness" ? "No classes in this campaign: make the Descending Darkness Player's Handbook active (Books)." : "No 5E classes in this campaign: make the SRD player book active (Books).");
+  const built = rules.buildFromSpec(spec ?? {}, lib, D20[table.ruleset?.()] ?? "dnd5e");
   const data = require("./characterArt.cjs").withArt(built.data, spec, table.art);
   const record = table.records.create({ type: "character", name: built.name, owner: owner ?? "", visibility: owner ? "owner" : "gm", data }, seat ?? table.seat);
   return { record, problems: built.problems };
@@ -70,6 +73,7 @@ const NUMBERS = [
   /^slots\.l\d\.used$/,
   /^deathsaves\.(success|failure)$/,
   /^hitdice\.used$/,
+  /^dread$/,
   /^coins\.id-\d+\.amount$/,
   /^inventorylist\.id-\d+\.(count|carried)$/,
 ];
@@ -100,4 +104,4 @@ async function edit5e(table, record, changes, seat) {
   return table.records.update(record.id, { name, data: rules.derive(data) }, table.seat, { replace: true });
 }
 
-module.exports = { rules5e, library5e, build5e, check5e, levelUp5e, edit5e, is5e, RULESET_NAME, TYPES_5E };
+module.exports = { rules5e, library5e, build5e, check5e, levelUp5e, edit5e, is5e, isD20Ruleset, D20, RULESET_NAME, TYPES_5E };

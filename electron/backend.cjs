@@ -101,7 +101,7 @@ let soundLibrary = null;
 let bookShelf = null;
 // The GM's books: the FG modules on this computer, read in place.
 function books() {
-  if (!bookShelf) bookShelf = createBookShelf({ folder: process.env.KRAKEN_BOOKS || path.join(fgDataFolder(), "modules"), cache: path.join(USER_DATA, "books-index.json") });
+  if (!bookShelf) bookShelf = createBookShelf({ folder: process.env.KRAKEN_BOOKS || path.join(fgDataFolder(), "modules"), cache: path.join(USER_DATA, "books-index.json"), also: [path.join(APP_DIR, "games", "modules")] });
   return bookShelf;
 }
 // The GM's sounds (one-shots, effects, ambience, music), shared by every campaign.

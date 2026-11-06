@@ -142,7 +142,9 @@ function resolveModule(nameOrPath) {
   if (!given) throw new Error("Give a module name or path.");
   if (fs.existsSync(given)) return given;
   const folder = path.join(fgDataFolder(), "modules");
-  for (const candidate of [path.join(folder, `${given}.mod`), path.join(folder, given)]) {
+  // The GM's FG modules, then the books Kraken ships (games/modules).
+  const bundled = path.join(__dirname, "..", "..", "games", "modules");
+  for (const candidate of [path.join(folder, `${given}.mod`), path.join(folder, given), path.join(bundled, `${given}.mod`), path.join(bundled, given)]) {
     if (fs.existsSync(candidate)) return candidate;
   }
   throw new Error(`No module "${given}" in ${folder}.`);

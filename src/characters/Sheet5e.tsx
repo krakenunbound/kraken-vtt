@@ -1,10 +1,10 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Session, TableRecord } from "../session/useSession";
 import { Icon } from "../ui/icons";
 import { slotDrag } from "../ui/QuickSlots";
 import { ArtChoice, ArtPicker, Picture } from "./ArtPicker";
 import { Field } from "./CCSheet";
-import { CASTERS, classSkillChoices, SKILLS, skillKey, STANDARD_ARRAY, STATS, mod, signed } from "../../shared/dnd5e/rules.mjs";
+import { abilityAdjustments, CASTERS, classSkillChoices, profileFor, SKILLS, skillKey, STATS, mod, signed } from "../../shared/dnd5e/rules.mjs";
 
 // The D&D 5E character sheet (SRD 5.2.1), laid out as FG's 5E sheet in
 // Kraken's sheet style: portrait and who they are on top; tabs down the right
@@ -27,6 +27,9 @@ export function Sheet5e({ record, session }: { record: TableRecord; session: Ses
   const [advantage, setAdvantage] = useState("");
   const [picking, setPicking] = useState<"portrait" | "token" | null>(null);
   const data = record.data as Row;
+  // The game it is (D&D 5E, Descending Darkness): its words and its rules.
+  const profile = profileFor(String(data.ruleset ?? "dnd5e"));
+  const words = profile.labels;
   const me = session.players.find((seat) => seat.id === session.selfId)?.name;
   const editable = session.role === "dm" || (record.owner !== "" && record.owner === me);
   const change = (path: string, value: unknown) => session.editCharacter(record.id, [{ path, value }]);
@@ -50,7 +53,7 @@ export function Sheet5e({ record, session }: { record: TableRecord; session: Ses
   const current = num(hp.total) - num(hp.wounds);
 
   return (
-    <article className="cc-sheet sheet-5e" data-character={record.id} data-ruleset="dnd5e">
+    <article className="cc-sheet sheet-5e" data-character={record.id} data-ruleset={profile.id}>
       <div className="cc-body">
         <header className="cc-head">
           <div className="cc-portrait-frame">
@@ -69,7 +72,7 @@ export function Sheet5e({ record, session }: { record: TableRecord; session: Ses
             <div className="cc-boxes">
               <label className="cc-labelled cc-box">
                 <span className="cc-value">{String(data.species ?? "")}</span>
-                <small>Species</small>
+                <small>{words.species}</small>
               </label>
               <label className="cc-labelled cc-box">
                 <span className="cc-value" data-stat="class">{className ? `${String(className.name)} ${level}` : ""}</span>
@@ -99,7 +102,7 @@ export function Sheet5e({ record, session }: { record: TableRecord; session: Ses
         <section className="cc-panel cc-row five-strip">
           <span className="cc-inline">
             <b>Level</b> <span className="cc-num" data-stat="level">{level}</span>
-            {editable && (ready || session.role === "dm") && level < 20 ? (
+            {editable && (ready || session.role === "dm") && level < profile.maxLevel ? (
               <button type="button" className="cc-levelup" data-action="level-up" title="Level up: the host rolls the hit die" onClick={() => session.levelUp(record.id)}>
                 <Icon name="add" size={14} />
               </button>
@@ -150,12 +153,12 @@ export function Sheet5e({ record, session }: { record: TableRecord; session: Ses
                 })}
               </section>
               <section className="cc-panel five-defence">
-                <div className="five-big" title={`Armor Class${ac.armor ? `: ${String(ac.armor)}` : ""}${num(ac.shield) ? ` and a shield` : ""}`}>
-                  <small>AC</small>
+                <div className="five-big" title={`${words.acLong}${ac.armor ? `: ${String(ac.armor)}` : ""}${num(ac.shield) ? ` and a shield` : ""}`}>
+                  <small>{words.ac}</small>
                   <span className="cc-shield" data-stat="ac">{num(ac.total)}</span>
                 </div>
                 <div className="five-big">
-                  <small>Hit points</small>
+                  <small>{words.hp}</small>
                   <span data-stat="hp" style={{ color: current <= 0 ? "#c0392b" : undefined }}>
                     {current} / {num(hp.total)}
                   </span>
@@ -163,7 +166,7 @@ export function Sheet5e({ record, session }: { record: TableRecord; session: Ses
                     Wounds <Field value={num(hp.wounds)} number editable={editable} label="Wounds" onSave={numberAt("hp.wounds")} />
                   </span>
                   <span className="cc-inline">
-                    Temp <Field value={num(hp.temp)} number editable={editable} label="Temporary hit points" onSave={numberAt("hp.temp")} />
+                    Temp <Field value={num(hp.temp)} number editable={editable} label={`Temporary ${words.hp.toLowerCase()}`} onSave={numberAt("hp.temp")} />
                   </span>
                 </div>
                 <div className="five-big">
@@ -178,7 +181,32 @@ export function Sheet5e({ record, session }: { record: TableRecord; session: Ses
                   <small>Passive Perception</small>
                   <span data-stat="passive">{num(data.passive)}</span>
                 </div>
-                {current <= 0 ? (
+                {profile.dread ? (
+                  // Descending Darkness's Dread: 3 or more, disadvantage on Wisdom; 6, the character breaks.
+                  <div className="five-big five-dread" data-stat="dread" title="Dread: horrors, darkness and loss build it; a night's rest by a fire lowers it by 1. At 3 or more, disadvantage on Wisdom checks and saves; at 6 the character breaks (the GM says how).">
+                    <small>Dread</small>
+                    <span className="five-dread-track">
+                      {Array.from({ length: 6 }, (_, index) => (
+                        <button
+                          key={index}
+                          type="button"
+                          className={index < num(data.dread) ? "on" : ""}
+                          disabled={!editable}
+                          aria-label={`Dread ${index + 1}`}
+                          onClick={() => change("dread", num(data.dread) === index + 1 ? index : index + 1)}
+                        />
+                      ))}
+                    </span>
+                    <span className="hint">{num(data.dread) >= 6 ? "Broken" : num(data.dread) >= 3 ? "Shaken: disadvantage on Wisdom" : ""}</span>
+                  </div>
+                ) : null}
+                {current <= 0 && profile.dying === "bleed" ? (
+                  <div className="five-big five-death" data-dying>
+                    <small>Dying</small>
+                    <span className="hint">Loses 1 {words.hp} each turn until an ally steadies them (Wisdom 12); dead at {-num(hp.total)}.</span>
+                  </div>
+                ) : null}
+                {current <= 0 && profile.dying === "saves" ? (
                   <div className="five-big five-death" data-death-saves>
                     <small>Death saves</small>
                     <span>
@@ -355,7 +383,9 @@ export function Wizard5e({ session, onDone }: { session: Session; onDone: (id: s
   const [cls, setCls] = useState(classes[0]?.name ?? "");
   const [kind, setKind] = useState(species[0]?.name ?? "");
   const [background, setBackground] = useState(backgrounds[0]?.name ?? "");
-  const [scores, setScores] = useState<Record<string, number>>(() => Object.fromEntries(STATS.map((stat, index) => [stat, STANDARD_ARRAY[index]])));
+  const profile = profileFor(session.ruleset);
+  const words = profile.labels;
+  const [scores, setScores] = useState<Record<string, number>>(() => Object.fromEntries(STATS.map((stat, index) => [stat, profile.standardArray[index]])));
   const [skills, setSkills] = useState<string[]>([]);
   const [spells, setSpells] = useState<string[]>([]);
   const [gear, setGear] = useState(true);
@@ -365,7 +395,23 @@ export function Wizard5e({ session, onDone }: { session: Session; onDone: (id: s
   const classRecord = classes.find((item) => item.name === cls);
   const choices = classRecord ? classSkillChoices(classRecord) : { count: 0, names: [] as string[] };
   const caster = CASTERS[skillKey(cls) as keyof typeof CASTERS];
-  const spellList = useMemo(() => of("spell").filter((item) => num(item.data.level) <= 1), [records.length]); // eslint-disable-line react-hooks/exhaustive-deps
+  // The class's own spells (a spell names who casts it), cantrips and 1st level.
+  const spellList = useMemo(
+    () => of("spell").filter((item) => num(item.data.level) <= 1 && (!item.data.source || new RegExp(`\\b${cls}\\b`, "i").test(String(item.data.source)))),
+    [records.length, cls], // eslint-disable-line react-hooks/exhaustive-deps
+  );
+  const kinRecord = species.find((item) => item.name === kind);
+  const adjust = abilityAdjustments(kinRecord) as Record<string, number>;
+  // A kin may limit the classes (Descending Darkness: a dwarf is a fighter, cleric or thief).
+  const allowed = kinRecord?.data.classes ? String(kinRecord.data.classes).split(/,\s*/).map((item) => item.trim().toLowerCase()) : null;
+  const classOptions = allowed ? classes.filter((item) => allowed.includes(item.name.toLowerCase())) : classes;
+  useEffect(() => {
+    if (classOptions.length && !classOptions.some((item) => item.name === cls)) {
+      setCls(classOptions[0].name);
+      setSkills([]);
+      setSpells([]);
+    }
+  }, [kind]); // eslint-disable-line react-hooks/exhaustive-deps
   const startingGear = (): [string, number][] => {
     const option = rows(classRecord?.data.startingequipmentlist)[0]?.[1];
     return rows(option?.items).map(([, item]) => [String(item.name), num(item.count) || 1]);
@@ -382,11 +428,11 @@ export function Wizard5e({ session, onDone }: { session: Session; onDone: (id: s
       setBusy(false);
     }
   };
-  if (classes.length === 0) return <p className="hint">No 5E classes yet: the GM makes the SRD player book active (Books).</p>;
+  if (classes.length === 0) return <p className="hint">No classes yet: the GM makes the {profile.id === "dnd5e" ? "SRD player book" : `${profile.name} Player's Handbook`} active (Books).</p>;
   return (
-    <section className="wizard-5e cc-panel" aria-label="5E character wizard" data-wizard="dnd5e">
+    <section className="wizard-5e cc-panel" aria-label={`${words.game} character wizard`} data-wizard={profile.id}>
       <header className="cc-row">
-        <b>New 5E character</b>
+        <b>New {words.game} character</b>
         <span className="me-spacer" />
         <button type="button" className="ghost" onClick={() => onDone(null)}>
           Cancel
@@ -401,7 +447,7 @@ export function Wizard5e({ session, onDone }: { session: Session; onDone: (id: s
           Name <input value={name} onChange={(event) => setName(event.target.value)} aria-label="Character name" />
         </label>
         <label>
-          Species
+          {words.species}
           <select value={kind} onChange={(event) => setKind(event.target.value)} aria-label="Species">
             {species.map((item) => (
               <option key={item.id}>{item.name}</option>
@@ -419,7 +465,7 @@ export function Wizard5e({ session, onDone }: { session: Session; onDone: (id: s
               setSpells([]);
             }}
           >
-            {classes.map((item) => (
+            {classOptions.map((item) => (
               <option key={item.id}>{item.name}</option>
             ))}
           </select>
@@ -433,13 +479,18 @@ export function Wizard5e({ session, onDone }: { session: Session; onDone: (id: s
           </select>
         </label>
       </div>
-      <h4>Ability scores <small className="hint">the standard array 15, 14, 13, 12, 10, 8 to start; type your own</small></h4>
+      <h4>
+        Ability scores <small className="hint">the array {profile.standardArray.join(", ")} to start; type your own{Object.keys(adjust).length ? `; then the ${kind}'s adjustments` : ""}</small>
+      </h4>
       <div className="wizard-5e-scores">
         {STATS.map((stat) => (
           <label key={stat}>
             {stat.slice(0, 3).toUpperCase()}
             <input type="number" min={3} max={20} value={scores[stat]} aria-label={`${stat} score`} onChange={(event) => setScores({ ...scores, [stat]: Number(event.target.value) || 10 })} />
-            <small>{signed(mod(scores[stat]))}</small>
+            <small>
+              {adjust[stat] ? <b data-adjust={stat}>{signed(adjust[stat])} = {scores[stat] + adjust[stat]} </b> : null}
+              {signed(mod(scores[stat] + (adjust[stat] ?? 0)))}
+            </small>
           </label>
         ))}
       </div>

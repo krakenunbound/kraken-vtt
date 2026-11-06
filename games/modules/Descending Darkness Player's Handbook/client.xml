@@ -1,0 +1,3521 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root version="4.6" release="1">
+	<class>
+		<fighter>
+			<name type="string">Fighter</name>
+			<ability type="string">Strength or Dexterity</ability>
+			<hp>
+				<hitdice>
+					<text type="string">D10 per Fighter level</text>
+				</hitdice>
+			</hp>
+			<proficiencies>
+				<armor>
+					<text type="string">All armour and shields</text>
+				</armor>
+				<weapons>
+					<text type="string">Simple and Martial weapons</text>
+				</weapons>
+				<savingthrows>
+					<text type="string">Strength and Constitution</text>
+				</savingthrows>
+				<skills>
+					<text type="string">Choose 2: Acrobatics, Athletics, History, Insight, Intimidation, Perception, Survival</text>
+				</skills>
+			</proficiencies>
+			<startingequipment type="string">Chain hauberk, longsword, shield, light crossbow and 20 bolts, a delver's pack.</startingequipment>
+			<startingequipmentlist>
+				<id-00001>
+					<items>
+						<id-00001>
+							<name type="string">Chain Hauberk</name>
+							<type type="string">Armor</type>
+							<subtype type="string">Heavy Armor</subtype>
+							<cost type="string">75 gc</cost>
+							<ac type="number">16</ac>
+							<dexbonus type="string">No</dexbonus>
+							<stealth type="string">Disadvantage</stealth>
+							<weight type="number">55</weight>
+							<bonus type="number">0</bonus>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>Mail from neck to knee over a padded coat. Strength 13.</p></description>
+							<count type="number">1</count>
+						</id-00001>
+						<id-00002>
+							<name type="string">Longsword</name>
+							<type type="string">Weapon</type>
+							<subtype type="string">Martial Melee Weapons</subtype>
+							<cost type="string">15 gc</cost>
+							<damage type="string">1d8 Slashing</damage>
+							<properties type="string">Versatile (1d10)</properties>
+							<weight type="number">3</weight>
+							<bonus type="number">0</bonus>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>The knight's blade: long enough to keep death an arm away.</p></description>
+							<count type="number">1</count>
+						</id-00002>
+						<id-00003>
+							<name type="string">Shield</name>
+							<type type="string">Armor</type>
+							<subtype type="string">Shield</subtype>
+							<cost type="string">10 gc</cost>
+							<ac type="number">2</ac>
+							<dexbonus type="string">-</dexbonus>
+							<stealth type="string">-</stealth>
+							<weight type="number">6</weight>
+							<bonus type="number">0</bonus>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>Wood or metal on the arm: +2 Defense.</p></description>
+							<count type="number">1</count>
+						</id-00003>
+						<id-00004>
+							<name type="string">Light Crossbow</name>
+							<type type="string">Weapon</type>
+							<subtype type="string">Simple Ranged Weapons</subtype>
+							<cost type="string">25 gc</cost>
+							<damage type="string">1d8 Piercing</damage>
+							<properties type="string">Ammunition (Range 80/320), Loading, Two-Handed</properties>
+							<weight type="number">5</weight>
+							<bonus type="number">0</bonus>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>A light crossbow. Properties: Ammunition (Range 80/320), Loading, Two-Handed.</p></description>
+							<count type="number">1</count>
+						</id-00004>
+						<id-00005>
+							<name type="string">Bolts (20)</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Ammunition</subtype>
+							<cost type="string">1 gc</cost>
+							<weight type="number">1.5</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>Ammunition for crossbows.</p></description>
+							<count type="number">1</count>
+						</id-00005>
+						<id-00006>
+							<name type="string">Backpack</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">2 gc</cost>
+							<weight type="number">5</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>Holds 30 pounds of gear.</p></description>
+							<count type="number">1</count>
+						</id-00006>
+						<id-00007>
+							<name type="string">Bedroll</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">1 gc</cost>
+							<weight type="number">7</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>A safe rest needs one (or a bed).</p></description>
+							<count type="number">1</count>
+						</id-00007>
+						<id-00008>
+							<name type="string">Tinderbox</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">0.5 gc</cost>
+							<weight type="number">1</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>Flint, steel and tinder. Lighting a torch takes an action; in the wind or wet, a Dexterity check (DC 12).</p></description>
+							<count type="number">1</count>
+						</id-00008>
+						<id-00009>
+							<name type="string">Torch</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">0.01 gc</cost>
+							<weight type="number">1</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>A torch burns for <b>six exploration turns</b> (an hour). It sheds bright light 20 feet and dim light 20 feet beyond. Lit, it shows everyone where you are.</p></description>
+							<count type="number">6</count>
+						</id-00009>
+						<id-00010>
+							<name type="string">Rations (1 day)</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">0.5 gc</cost>
+							<weight type="number">2</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>Dried meat, hard bread, an onion. A safe rest needs food and water.</p></description>
+							<count type="number">5</count>
+						</id-00010>
+						<id-00011>
+							<name type="string">Waterskin</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">0.2 gc</cost>
+							<weight type="number">5</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>Holds a day's water.</p></description>
+							<count type="number">1</count>
+						</id-00011>
+						<id-00012>
+							<name type="string">Rope, Hempen (50 feet)</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">1 gc</cost>
+							<weight type="number">10</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>Strong enough for two climbers. A Strength check (DC 18) breaks it.</p></description>
+							<count type="number">1</count>
+						</id-00012>
+						<id-00013>
+							<name type="string">Chalk (5 sticks)</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">0.01 gc</cost>
+							<weight type="number">0</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>For marking the way back. Every dungeon has someone who forgot to.</p></description>
+							<count type="number">1</count>
+						</id-00013>
+					</items>
+				</id-00001>
+			</startingequipmentlist>
+			<text type="formattedtext"><p>Fighters stand between the party and what comes out of the dark. They wear the heaviest armour, use every weapon, and keep going when others fall.</p></text>
+			<features>
+				<id-00001>
+					<level type="number">1</level>
+					<name type="string">Hard Lessons</name>
+					<text type="formattedtext"><p>Choose a way of fighting: <b>Shieldwall</b> (+1 Defense with a shield), <b>Bladework</b> (+2 to damage with a one-handed weapon and nothing in the other hand), <b>Marksman</b> (+2 to ranged attack rolls) or <b>Brute</b> (reroll 1s and 2s on the damage dice of a two-handed weapon, once).</p></text>
+				</id-00001>
+				<id-00002>
+					<level type="number">1</level>
+					<name type="string">Second Breath</name>
+					<text type="formattedtext"><p>Once per safe rest, as a bonus action, you regain 1d10 + your Fighter level Health.</p></text>
+				</id-00002>
+				<id-00003>
+					<level type="number">2</level>
+					<name type="string">Press On</name>
+					<text type="formattedtext"><p>Once per safe rest, on your turn, you take one more action.</p></text>
+				</id-00003>
+				<id-00004>
+					<level type="number">3</level>
+					<name type="string">Battle-Scarred</name>
+					<text type="formattedtext"><p>You score a critical hit on a 19 or 20. Your first point of Dread each fight is ignored.</p></text>
+				</id-00004>
+				<id-00005>
+					<level type="number">4</level>
+					<name type="string">Ability Improvement</name>
+					<text type="formattedtext"><p>Add 2 to one ability score, or 1 to two (to a most of 20). Again at 8th level.</p></text>
+				</id-00005>
+				<id-00006>
+					<level type="number">5</level>
+					<name type="string">Extra Attack</name>
+					<text type="formattedtext"><p>When you take the Attack action you attack twice.</p></text>
+				</id-00006>
+				<id-00007>
+					<level type="number">6</level>
+					<name type="string">Hold the Line</name>
+					<text type="formattedtext"><p>When a creature within 5 feet of you hits an ally, you may use your reaction to make one weapon attack against it.</p></text>
+				</id-00007>
+				<id-00008>
+					<level type="number">7</level>
+					<name type="string">Iron Nerve</name>
+					<text type="formattedtext"><p>You have advantage on saves against being frightened, and a safe rest lowers your Dread by 2, not 1.</p></text>
+				</id-00008>
+				<id-00009>
+					<level type="number">9</level>
+					<name type="string">Indomitable</name>
+					<text type="formattedtext"><p>Once per safe rest, reroll a saving throw you failed; you must use the new roll.</p></text>
+				</id-00009>
+				<id-00010>
+					<level type="number">10</level>
+					<name type="string">Champion of the Lost</name>
+					<text type="formattedtext"><p>Allies within 10 feet of you who can see you add 1 to their saves. Second Breath heals 2d10 + your level.</p></text>
+				</id-00010>
+			</features>
+		</fighter>
+		<cleric>
+			<name type="string">Cleric</name>
+			<ability type="string">Wisdom</ability>
+			<hp>
+				<hitdice>
+					<text type="string">D8 per Cleric level</text>
+				</hitdice>
+			</hp>
+			<proficiencies>
+				<armor>
+					<text type="string">Light and medium armour and shields</text>
+				</armor>
+				<weapons>
+					<text type="string">Simple weapons</text>
+				</weapons>
+				<savingthrows>
+					<text type="string">Wisdom and Charisma</text>
+				</savingthrows>
+				<skills>
+					<text type="string">Choose 2: History, Insight, Medicine, Persuasion, Religion</text>
+				</skills>
+			</proficiencies>
+			<startingequipment type="string">Scale hauberk, mace, shield, holy symbol, healer's satchel, a delver's pack.</startingequipment>
+			<startingequipmentlist>
+				<id-00001>
+					<items>
+						<id-00001>
+							<name type="string">Scale Hauberk</name>
+							<type type="string">Armor</type>
+							<subtype type="string">Medium Armor</subtype>
+							<cost type="string">50 gc</cost>
+							<ac type="number">14</ac>
+							<dexbonus type="string">Max 2</dexbonus>
+							<stealth type="string">Disadvantage</stealth>
+							<weight type="number">45</weight>
+							<bonus type="number">0</bonus>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>Overlapping plates of steel on a leather coat.</p></description>
+							<count type="number">1</count>
+						</id-00001>
+						<id-00002>
+							<name type="string">Mace</name>
+							<type type="string">Weapon</type>
+							<subtype type="string">Simple Melee Weapons</subtype>
+							<cost type="string">5 gc</cost>
+							<damage type="string">1d6 Bludgeoning</damage>
+							<properties type="string">-</properties>
+							<weight type="number">4</weight>
+							<bonus type="number">0</bonus>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>A mace.</p></description>
+							<count type="number">1</count>
+						</id-00002>
+						<id-00003>
+							<name type="string">Shield</name>
+							<type type="string">Armor</type>
+							<subtype type="string">Shield</subtype>
+							<cost type="string">10 gc</cost>
+							<ac type="number">2</ac>
+							<dexbonus type="string">-</dexbonus>
+							<stealth type="string">-</stealth>
+							<weight type="number">6</weight>
+							<bonus type="number">0</bonus>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>Wood or metal on the arm: +2 Defense.</p></description>
+							<count type="number">1</count>
+						</id-00003>
+						<id-00004>
+							<name type="string">Holy Symbol</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Focus</subtype>
+							<cost type="string">5 gc</cost>
+							<weight type="number">1</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>A cleric's or paladin's focus: an amulet, a reliquary, a sigil painted on a shield.</p></description>
+							<count type="number">1</count>
+						</id-00004>
+						<id-00005>
+							<name type="string">Healer's Satchel</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">5 gc</cost>
+							<weight type="number">3</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>Bandages, salves and splints for ten uses. An action and a use steadies a dying creature without a check, or lets a creature spend one Recovery Die outside a rest.</p></description>
+							<count type="number">1</count>
+						</id-00005>
+						<id-00006>
+							<name type="string">Backpack</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">2 gc</cost>
+							<weight type="number">5</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>Holds 30 pounds of gear.</p></description>
+							<count type="number">1</count>
+						</id-00006>
+						<id-00007>
+							<name type="string">Bedroll</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">1 gc</cost>
+							<weight type="number">7</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>A safe rest needs one (or a bed).</p></description>
+							<count type="number">1</count>
+						</id-00007>
+						<id-00008>
+							<name type="string">Tinderbox</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">0.5 gc</cost>
+							<weight type="number">1</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>Flint, steel and tinder. Lighting a torch takes an action; in the wind or wet, a Dexterity check (DC 12).</p></description>
+							<count type="number">1</count>
+						</id-00008>
+						<id-00009>
+							<name type="string">Torch</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">0.01 gc</cost>
+							<weight type="number">1</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>A torch burns for <b>six exploration turns</b> (an hour). It sheds bright light 20 feet and dim light 20 feet beyond. Lit, it shows everyone where you are.</p></description>
+							<count type="number">6</count>
+						</id-00009>
+						<id-00010>
+							<name type="string">Rations (1 day)</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">0.5 gc</cost>
+							<weight type="number">2</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>Dried meat, hard bread, an onion. A safe rest needs food and water.</p></description>
+							<count type="number">5</count>
+						</id-00010>
+						<id-00011>
+							<name type="string">Waterskin</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">0.2 gc</cost>
+							<weight type="number">5</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>Holds a day's water.</p></description>
+							<count type="number">1</count>
+						</id-00011>
+						<id-00012>
+							<name type="string">Rope, Hempen (50 feet)</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">1 gc</cost>
+							<weight type="number">10</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>Strong enough for two climbers. A Strength check (DC 18) breaks it.</p></description>
+							<count type="number">1</count>
+						</id-00012>
+						<id-00013>
+							<name type="string">Chalk (5 sticks)</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">0.01 gc</cost>
+							<weight type="number">0</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>For marking the way back. Every dungeon has someone who forgot to.</p></description>
+							<count type="number">1</count>
+						</id-00013>
+					</items>
+				</id-00001>
+			</startingequipmentlist>
+			<text type="formattedtext"><p>Clerics carry a light that is not a lantern's. They mend the wounded, steady the afraid, and turn back the dead that should not walk.</p></text>
+			<features>
+				<id-00001>
+					<level type="number">1</level>
+					<name type="string">Spellcasting</name>
+					<text type="formattedtext"><p>You cast cleric spells with Wisdom: spell save DC 8 + your proficiency + Wisdom; spell attack your proficiency + Wisdom. You know every cleric spell of a circle you can cast; prepare a number of them equal to your Wisdom modifier + your level after a safe rest.</p></text>
+				</id-00001>
+				<id-00002>
+					<level type="number">1</level>
+					<name type="string">Lantern of Faith</name>
+					<text type="formattedtext"><p>Your holy symbol is a light: as a bonus action it sheds bright light 20 feet and dim 20 beyond until you douse it, burning no oil.</p></text>
+				</id-00002>
+				<id-00003>
+					<level type="number">2</level>
+					<name type="string">Turn the Dead</name>
+					<text type="formattedtext"><p>Once per safe rest (twice from 6th level), as an action, present your symbol: each undead within 30 feet that can see it makes a Wisdom save against your spell DC or flees for a minute.</p></text>
+				</id-00003>
+				<id-00004>
+					<level type="number">2</level>
+					<name type="string">Steadying Word</name>
+					<text type="formattedtext"><p>As an action, a companion within 30 feet loses 1 Dread. Once per safe rest; twice from 6th level.</p></text>
+				</id-00004>
+				<id-00005>
+					<level type="number">4</level>
+					<name type="string">Ability Improvement</name>
+					<text type="formattedtext"><p>Add 2 to one ability score, or 1 to two (to a most of 20). Again at 8th level.</p></text>
+				</id-00005>
+				<id-00006>
+					<level type="number">5</level>
+					<name type="string">Burn the Dead</name>
+					<text type="formattedtext"><p>When an undead of low power (the GM says) fails its save against Turn the Dead, it is destroyed.</p></text>
+				</id-00006>
+				<id-00007>
+					<level type="number">6</level>
+					<name type="string">Sanctuary of Light</name>
+					<text type="formattedtext"><p>Within your Lantern of Faith's bright light, companions have advantage on saves against being frightened.</p></text>
+				</id-00007>
+				<id-00008>
+					<level type="number">8</level>
+					<name type="string">Blessed Strikes</name>
+					<text type="formattedtext"><p>Once on each of your turns, a weapon hit or cantrip deals 1d8 radiant damage more.</p></text>
+				</id-00008>
+				<id-00009>
+					<level type="number">10</level>
+					<name type="string">Miracle</name>
+					<text type="formattedtext"><p>Once per week, call on your faith for something only a god could do; the GM decides how it is answered.</p></text>
+				</id-00009>
+			</features>
+		</cleric>
+		<wizard>
+			<name type="string">Wizard</name>
+			<ability type="string">Intelligence</ability>
+			<hp>
+				<hitdice>
+					<text type="string">D6 per Wizard level</text>
+				</hitdice>
+			</hp>
+			<proficiencies>
+				<armor>
+					<text type="string">None</text>
+				</armor>
+				<weapons>
+					<text type="string">Daggers, quarterstaffs, slings and light crossbows</text>
+				</weapons>
+				<savingthrows>
+					<text type="string">Intelligence and Wisdom</text>
+				</savingthrows>
+				<skills>
+					<text type="string">Choose 2: Arcana, History, Insight, Investigation, Medicine, Religion</text>
+				</skills>
+			</proficiencies>
+			<startingequipment type="string">Quarterstaff, dagger, spellbook, arcane focus, a scholar's pack.</startingequipment>
+			<startingequipmentlist>
+				<id-00001>
+					<items>
+						<id-00001>
+							<name type="string">Quarterstaff</name>
+							<type type="string">Weapon</type>
+							<subtype type="string">Simple Melee Weapons</subtype>
+							<cost type="string">0.2 gc</cost>
+							<damage type="string">1d6 Bludgeoning</damage>
+							<properties type="string">Versatile (1d8)</properties>
+							<weight type="number">4</weight>
+							<bonus type="number">0</bonus>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>A quarterstaff. Properties: Versatile (1d8).</p></description>
+							<count type="number">1</count>
+						</id-00001>
+						<id-00002>
+							<name type="string">Dagger</name>
+							<type type="string">Weapon</type>
+							<subtype type="string">Simple Melee Weapons</subtype>
+							<cost type="string">2 gc</cost>
+							<damage type="string">1d4 Piercing</damage>
+							<properties type="string">Finesse, Light, Thrown (Range 20/60)</properties>
+							<weight type="number">1</weight>
+							<bonus type="number">0</bonus>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>A long knife, the last weapon anyone gives up.</p></description>
+							<count type="number">1</count>
+						</id-00002>
+						<id-00003>
+							<name type="string">Spellbook</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">50 gc</cost>
+							<weight type="number">3</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>A wizard's book of spells: 100 vellum pages, a lock, and the smell of old candle smoke.</p></description>
+							<count type="number">1</count>
+						</id-00003>
+						<id-00004>
+							<name type="string">Arcane Focus</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Focus</subtype>
+							<cost type="string">10 gc</cost>
+							<weight type="number">1</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>A wizard's or bard's focus: a wand, a crystal, a worn instrument.</p></description>
+							<count type="number">1</count>
+						</id-00004>
+						<id-00005>
+							<name type="string">Backpack</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">2 gc</cost>
+							<weight type="number">5</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>Holds 30 pounds of gear.</p></description>
+							<count type="number">1</count>
+						</id-00005>
+						<id-00006>
+							<name type="string">Bedroll</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">1 gc</cost>
+							<weight type="number">7</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>A safe rest needs one (or a bed).</p></description>
+							<count type="number">1</count>
+						</id-00006>
+						<id-00007>
+							<name type="string">Tinderbox</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">0.5 gc</cost>
+							<weight type="number">1</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>Flint, steel and tinder. Lighting a torch takes an action; in the wind or wet, a Dexterity check (DC 12).</p></description>
+							<count type="number">1</count>
+						</id-00007>
+						<id-00008>
+							<name type="string">Candle</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">0.01 gc</cost>
+							<weight type="number">0</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>Burns for six turns: dim light 5 feet. Enough to read by, not enough to fight by.</p></description>
+							<count type="number">6</count>
+						</id-00008>
+						<id-00009>
+							<name type="string">Rations (1 day)</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">0.5 gc</cost>
+							<weight type="number">2</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>Dried meat, hard bread, an onion. A safe rest needs food and water.</p></description>
+							<count type="number">3</count>
+						</id-00009>
+						<id-00010>
+							<name type="string">Waterskin</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">0.2 gc</cost>
+							<weight type="number">5</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>Holds a day's water.</p></description>
+							<count type="number">1</count>
+						</id-00010>
+					</items>
+				</id-00001>
+			</startingequipmentlist>
+			<text type="formattedtext"><p>Wizards read the dark, and sometimes it reads back. They are fragile, and the most dangerous people in any room.</p></text>
+			<features>
+				<id-00001>
+					<level type="number">1</level>
+					<name type="string">Spellcasting</name>
+					<text type="formattedtext"><p>You cast wizard spells with Intelligence: spell save DC 8 + your proficiency + Intelligence; spell attack your proficiency + Intelligence. Your spellbook holds six 1st-circle spells and you learn two more each level; prepare Intelligence modifier + level of them after a safe rest.</p></text>
+				</id-00001>
+				<id-00002>
+					<level type="number">1</level>
+					<name type="string">Quiet Study</name>
+					<text type="formattedtext"><p>Once per safe rest, after a short rest of an exploration turn, you regain spell slots whose circles add up to half your level (rounded up), none higher than 5th.</p></text>
+				</id-00002>
+				<id-00003>
+					<level type="number">2</level>
+					<name type="string">Lorekeeper</name>
+					<text type="formattedtext"><p>Choose Arcana, History or Religion: your proficiency bonus doubles for it.</p></text>
+				</id-00003>
+				<id-00004>
+					<level type="number">4</level>
+					<name type="string">Ability Improvement</name>
+					<text type="formattedtext"><p>Add 2 to one ability score, or 1 to two (to a most of 20). Again at 8th level.</p></text>
+				</id-00004>
+				<id-00005>
+					<level type="number">5</level>
+					<name type="string">Sculpted Spells</name>
+					<text type="formattedtext"><p>When you cast a spell that makes several creatures save, choose up to your Intelligence modifier of them: they succeed automatically and take no damage.</p></text>
+				</id-00005>
+				<id-00006>
+					<level type="number">6</level>
+					<name type="string">Words of Warding</name>
+					<text type="formattedtext"><p>Once per safe rest, when a creature you can see would gain Dread from magic, it does not.</p></text>
+				</id-00006>
+				<id-00007>
+					<level type="number">9</level>
+					<name type="string">Spell Mastery</name>
+					<text type="formattedtext"><p>Choose a 1st-circle spell you know: you can cast it without a slot.</p></text>
+				</id-00007>
+				<id-00008>
+					<level type="number">10</level>
+					<name type="string">Unweaving Hand</name>
+					<text type="formattedtext"><p>You learn Unweave and always have it prepared; once per safe rest you cast it without a slot.</p></text>
+				</id-00008>
+			</features>
+		</wizard>
+		<thief>
+			<name type="string">Thief</name>
+			<ability type="string">Dexterity</ability>
+			<hp>
+				<hitdice>
+					<text type="string">D8 per Thief level</text>
+				</hitdice>
+			</hp>
+			<proficiencies>
+				<armor>
+					<text type="string">Light armour</text>
+				</armor>
+				<weapons>
+					<text type="string">Simple weapons, hand crossbows, rapiers and shortswords</text>
+				</weapons>
+				<savingthrows>
+					<text type="string">Dexterity and Intelligence</text>
+				</savingthrows>
+				<skills>
+					<text type="string">Choose 4: Acrobatics, Athletics, Deception, Insight, Intimidation, Investigation, Perception, Performance, Persuasion, Sleight of Hand, Stealth</text>
+				</skills>
+			</proficiencies>
+			<startingequipment type="string">Leather jerkin, shortsword, two daggers, shortbow and 20 arrows, thieves' tools, a delver's pack.</startingequipment>
+			<startingequipmentlist>
+				<id-00001>
+					<items>
+						<id-00001>
+							<name type="string">Leather Jerkin</name>
+							<type type="string">Armor</type>
+							<subtype type="string">Light Armor</subtype>
+							<cost type="string">10 gc</cost>
+							<ac type="number">11</ac>
+							<dexbonus type="string">Yes</dexbonus>
+							<stealth type="string">-</stealth>
+							<weight type="number">10</weight>
+							<bonus type="number">0</bonus>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>Boiled and oiled leather over the chest and shoulders.</p></description>
+							<count type="number">1</count>
+						</id-00001>
+						<id-00002>
+							<name type="string">Shortsword</name>
+							<type type="string">Weapon</type>
+							<subtype type="string">Martial Melee Weapons</subtype>
+							<cost type="string">10 gc</cost>
+							<damage type="string">1d6 Piercing</damage>
+							<properties type="string">Finesse, Light</properties>
+							<weight type="number">2</weight>
+							<bonus type="number">0</bonus>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>A shortsword. Properties: Finesse, Light.</p></description>
+							<count type="number">1</count>
+						</id-00002>
+						<id-00003>
+							<name type="string">Dagger</name>
+							<type type="string">Weapon</type>
+							<subtype type="string">Simple Melee Weapons</subtype>
+							<cost type="string">2 gc</cost>
+							<damage type="string">1d4 Piercing</damage>
+							<properties type="string">Finesse, Light, Thrown (Range 20/60)</properties>
+							<weight type="number">1</weight>
+							<bonus type="number">0</bonus>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>A long knife, the last weapon anyone gives up.</p></description>
+							<count type="number">2</count>
+						</id-00003>
+						<id-00004>
+							<name type="string">Shortbow</name>
+							<type type="string">Weapon</type>
+							<subtype type="string">Simple Ranged Weapons</subtype>
+							<cost type="string">25 gc</cost>
+							<damage type="string">1d6 Piercing</damage>
+							<properties type="string">Ammunition (Range 80/320), Two-Handed</properties>
+							<weight type="number">2</weight>
+							<bonus type="number">0</bonus>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>A shortbow. Properties: Ammunition (Range 80/320), Two-Handed.</p></description>
+							<count type="number">1</count>
+						</id-00004>
+						<id-00005>
+							<name type="string">Arrows (20)</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Ammunition</subtype>
+							<cost type="string">1 gc</cost>
+							<weight type="number">1</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>Ammunition for bows.</p></description>
+							<count type="number">1</count>
+						</id-00005>
+						<id-00006>
+							<name type="string">Thieves' Tools</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">25 gc</cost>
+							<weight type="number">1</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>Picks, a small file, a mirror on a stick and a pair of narrow pliers. Needed to pick locks and disarm traps.</p></description>
+							<count type="number">1</count>
+						</id-00006>
+						<id-00007>
+							<name type="string">Backpack</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">2 gc</cost>
+							<weight type="number">5</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>Holds 30 pounds of gear.</p></description>
+							<count type="number">1</count>
+						</id-00007>
+						<id-00008>
+							<name type="string">Bedroll</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">1 gc</cost>
+							<weight type="number">7</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>A safe rest needs one (or a bed).</p></description>
+							<count type="number">1</count>
+						</id-00008>
+						<id-00009>
+							<name type="string">Tinderbox</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">0.5 gc</cost>
+							<weight type="number">1</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>Flint, steel and tinder. Lighting a torch takes an action; in the wind or wet, a Dexterity check (DC 12).</p></description>
+							<count type="number">1</count>
+						</id-00009>
+						<id-00010>
+							<name type="string">Torch</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">0.01 gc</cost>
+							<weight type="number">1</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>A torch burns for <b>six exploration turns</b> (an hour). It sheds bright light 20 feet and dim light 20 feet beyond. Lit, it shows everyone where you are.</p></description>
+							<count type="number">6</count>
+						</id-00010>
+						<id-00011>
+							<name type="string">Rations (1 day)</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">0.5 gc</cost>
+							<weight type="number">2</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>Dried meat, hard bread, an onion. A safe rest needs food and water.</p></description>
+							<count type="number">5</count>
+						</id-00011>
+						<id-00012>
+							<name type="string">Waterskin</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">0.2 gc</cost>
+							<weight type="number">5</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>Holds a day's water.</p></description>
+							<count type="number">1</count>
+						</id-00012>
+						<id-00013>
+							<name type="string">Rope, Hempen (50 feet)</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">1 gc</cost>
+							<weight type="number">10</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>Strong enough for two climbers. A Strength check (DC 18) breaks it.</p></description>
+							<count type="number">1</count>
+						</id-00013>
+						<id-00014>
+							<name type="string">Chalk (5 sticks)</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">0.01 gc</cost>
+							<weight type="number">0</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>For marking the way back. Every dungeon has someone who forgot to.</p></description>
+							<count type="number">1</count>
+						</id-00014>
+					</items>
+				</id-00001>
+			</startingequipmentlist>
+			<text type="formattedtext"><p>Thieves go first into the dark and come back with what was in it. Locks, traps and unwary throats are their trade.</p></text>
+			<features>
+				<id-00001>
+					<level type="number">1</level>
+					<name type="string">Sneak Strike</name>
+					<text type="formattedtext"><p>Once per turn, a hit with a finesse or ranged weapon deals 1d6 more damage when you have advantage, or when an ally stands within 5 feet of your target. The bonus grows by 1d6 at every odd level (2d6 at 3rd, 3d6 at 5th, and so on).</p></text>
+				</id-00001>
+				<id-00002>
+					<level type="number">1</level>
+					<name type="string">Cant and Craft</name>
+					<text type="formattedtext"><p>You speak the thieves' cant, and you are proficient with thieves' tools: double your proficiency bonus for them.</p></text>
+				</id-00002>
+				<id-00003>
+					<level type="number">2</level>
+					<name type="string">Slip Away</name>
+					<text type="formattedtext"><p>As a bonus action on your turn: Dash, Disengage or Hide.</p></text>
+				</id-00003>
+				<id-00004>
+					<level type="number">3</level>
+					<name type="string">Light Fingers</name>
+					<text type="formattedtext"><p>You can pick a lock, disarm a trap or use a healer's satchel as a bonus action.</p></text>
+				</id-00004>
+				<id-00005>
+					<level type="number">4</level>
+					<name type="string">Ability Improvement</name>
+					<text type="formattedtext"><p>Add 2 to one ability score, or 1 to two (to a most of 20). Again at 8th level.</p></text>
+				</id-00005>
+				<id-00006>
+					<level type="number">5</level>
+					<name type="string">Duck and Weave</name>
+					<text type="formattedtext"><p>When an attacker you can see hits you, use your reaction to halve the damage.</p></text>
+				</id-00006>
+				<id-00007>
+					<level type="number">7</level>
+					<name type="string">Evasion</name>
+					<text type="formattedtext"><p>When a spell or trap lets you make a Dexterity save for half damage, you take none on a success and half on a failure.</p></text>
+				</id-00007>
+				<id-00008>
+					<level type="number">9</level>
+					<name type="string">Shadow-Born</name>
+					<text type="formattedtext"><p>In dim light or darkness you have advantage on Stealth, and a creature that does not see you does not gain advantage against you.</p></text>
+				</id-00008>
+				<id-00009>
+					<level type="number">10</level>
+					<name type="string">Thief's Luck</name>
+					<text type="formattedtext"><p>Once per safe rest, turn a miss into a hit, or a failed check into a 20.</p></text>
+				</id-00009>
+			</features>
+		</thief>
+		<paladin>
+			<name type="string">Paladin</name>
+			<ability type="string">Strength and Charisma</ability>
+			<hp>
+				<hitdice>
+					<text type="string">D10 per Paladin level</text>
+				</hitdice>
+			</hp>
+			<proficiencies>
+				<armor>
+					<text type="string">All armour and shields</text>
+				</armor>
+				<weapons>
+					<text type="string">Simple and Martial weapons</text>
+				</weapons>
+				<savingthrows>
+					<text type="string">Wisdom and Charisma</text>
+				</savingthrows>
+				<skills>
+					<text type="string">Choose 2: Athletics, Insight, Intimidation, Medicine, Persuasion, Religion</text>
+				</skills>
+			</proficiencies>
+			<startingequipment type="string">Chain hauberk, longsword, shield, two spears, holy symbol, a delver's pack.</startingequipment>
+			<startingequipmentlist>
+				<id-00001>
+					<items>
+						<id-00001>
+							<name type="string">Chain Hauberk</name>
+							<type type="string">Armor</type>
+							<subtype type="string">Heavy Armor</subtype>
+							<cost type="string">75 gc</cost>
+							<ac type="number">16</ac>
+							<dexbonus type="string">No</dexbonus>
+							<stealth type="string">Disadvantage</stealth>
+							<weight type="number">55</weight>
+							<bonus type="number">0</bonus>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>Mail from neck to knee over a padded coat. Strength 13.</p></description>
+							<count type="number">1</count>
+						</id-00001>
+						<id-00002>
+							<name type="string">Longsword</name>
+							<type type="string">Weapon</type>
+							<subtype type="string">Martial Melee Weapons</subtype>
+							<cost type="string">15 gc</cost>
+							<damage type="string">1d8 Slashing</damage>
+							<properties type="string">Versatile (1d10)</properties>
+							<weight type="number">3</weight>
+							<bonus type="number">0</bonus>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>The knight's blade: long enough to keep death an arm away.</p></description>
+							<count type="number">1</count>
+						</id-00002>
+						<id-00003>
+							<name type="string">Shield</name>
+							<type type="string">Armor</type>
+							<subtype type="string">Shield</subtype>
+							<cost type="string">10 gc</cost>
+							<ac type="number">2</ac>
+							<dexbonus type="string">-</dexbonus>
+							<stealth type="string">-</stealth>
+							<weight type="number">6</weight>
+							<bonus type="number">0</bonus>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>Wood or metal on the arm: +2 Defense.</p></description>
+							<count type="number">1</count>
+						</id-00003>
+						<id-00004>
+							<name type="string">Spear</name>
+							<type type="string">Weapon</type>
+							<subtype type="string">Simple Melee Weapons</subtype>
+							<cost type="string">1 gc</cost>
+							<damage type="string">1d6 Piercing</damage>
+							<properties type="string">Thrown (Range 20/60), Versatile (1d8)</properties>
+							<weight type="number">3</weight>
+							<bonus type="number">0</bonus>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>A spear. Properties: Thrown (Range 20/60), Versatile (1d8).</p></description>
+							<count type="number">2</count>
+						</id-00004>
+						<id-00005>
+							<name type="string">Holy Symbol</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Focus</subtype>
+							<cost type="string">5 gc</cost>
+							<weight type="number">1</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>A cleric's or paladin's focus: an amulet, a reliquary, a sigil painted on a shield.</p></description>
+							<count type="number">1</count>
+						</id-00005>
+						<id-00006>
+							<name type="string">Backpack</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">2 gc</cost>
+							<weight type="number">5</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>Holds 30 pounds of gear.</p></description>
+							<count type="number">1</count>
+						</id-00006>
+						<id-00007>
+							<name type="string">Bedroll</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">1 gc</cost>
+							<weight type="number">7</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>A safe rest needs one (or a bed).</p></description>
+							<count type="number">1</count>
+						</id-00007>
+						<id-00008>
+							<name type="string">Tinderbox</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">0.5 gc</cost>
+							<weight type="number">1</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>Flint, steel and tinder. Lighting a torch takes an action; in the wind or wet, a Dexterity check (DC 12).</p></description>
+							<count type="number">1</count>
+						</id-00008>
+						<id-00009>
+							<name type="string">Torch</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">0.01 gc</cost>
+							<weight type="number">1</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>A torch burns for <b>six exploration turns</b> (an hour). It sheds bright light 20 feet and dim light 20 feet beyond. Lit, it shows everyone where you are.</p></description>
+							<count type="number">6</count>
+						</id-00009>
+						<id-00010>
+							<name type="string">Rations (1 day)</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">0.5 gc</cost>
+							<weight type="number">2</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>Dried meat, hard bread, an onion. A safe rest needs food and water.</p></description>
+							<count type="number">5</count>
+						</id-00010>
+						<id-00011>
+							<name type="string">Waterskin</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">0.2 gc</cost>
+							<weight type="number">5</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>Holds a day's water.</p></description>
+							<count type="number">1</count>
+						</id-00011>
+						<id-00012>
+							<name type="string">Rope, Hempen (50 feet)</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">1 gc</cost>
+							<weight type="number">10</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>Strong enough for two climbers. A Strength check (DC 18) breaks it.</p></description>
+							<count type="number">1</count>
+						</id-00012>
+						<id-00013>
+							<name type="string">Chalk (5 sticks)</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">0.01 gc</cost>
+							<weight type="number">0</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>For marking the way back. Every dungeon has someone who forgot to.</p></description>
+							<count type="number">1</count>
+						</id-00013>
+					</items>
+				</id-00001>
+			</startingequipmentlist>
+			<text type="formattedtext"><p>Paladins have sworn to stand against the dark, and their oath stands with them: it heals by their hands, and burns in their blade.</p></text>
+			<features>
+				<id-00001>
+					<level type="number">1</level>
+					<name type="string">Laying On of Hands</name>
+					<text type="formattedtext"><p>You have a pool of healing equal to five times your Paladin level, refilled by a safe rest. As an action, touch a creature and give it Health from the pool, or spend 5 to end a disease or poison.</p></text>
+				</id-00001>
+				<id-00002>
+					<level type="number">1</level>
+					<name type="string">Sense the Unholy</name>
+					<text type="formattedtext"><p>As an action, you know where undead and fiends are within 60 feet, until the end of your next turn. Once per safe rest, plus your Charisma modifier.</p></text>
+				</id-00002>
+				<id-00003>
+					<level type="number">2</level>
+					<name type="string">Spellcasting</name>
+					<text type="formattedtext"><p>From 2nd level you cast paladin spells with Charisma; slots as a half-caster (Kraken counts them).</p></text>
+				</id-00003>
+				<id-00004>
+					<level type="number">2</level>
+					<name type="string">Smite</name>
+					<text type="formattedtext"><p>When you hit with a melee weapon, spend a spell slot: 2d8 radiant damage more, +1d8 per circle above the first, +1d8 against undead or fiends.</p></text>
+				</id-00004>
+				<id-00005>
+					<level type="number">3</level>
+					<name type="string">Oath's Shelter</name>
+					<text type="formattedtext"><p>You and companions within 10 feet of you cannot be frightened while you are conscious.</p></text>
+				</id-00005>
+				<id-00006>
+					<level type="number">4</level>
+					<name type="string">Ability Improvement</name>
+					<text type="formattedtext"><p>Add 2 to one ability score, or 1 to two (to a most of 20). Again at 8th level.</p></text>
+				</id-00006>
+				<id-00007>
+					<level type="number">5</level>
+					<name type="string">Extra Attack</name>
+					<text type="formattedtext"><p>When you take the Attack action you attack twice.</p></text>
+				</id-00007>
+				<id-00008>
+					<level type="number">6</level>
+					<name type="string">Aura of Resolve</name>
+					<text type="formattedtext"><p>You and companions within 10 feet add your Charisma modifier (at least 1) to their saving throws while you are conscious.</p></text>
+				</id-00008>
+				<id-00009>
+					<level type="number">10</level>
+					<name type="string">Radiant Arms</name>
+					<text type="formattedtext"><p>Every melee weapon hit you make deals 1d8 radiant damage more.</p></text>
+				</id-00009>
+			</features>
+		</paladin>
+		<ranger>
+			<name type="string">Ranger</name>
+			<ability type="string">Dexterity and Wisdom</ability>
+			<hp>
+				<hitdice>
+					<text type="string">D10 per Ranger level</text>
+				</hitdice>
+			</hp>
+			<proficiencies>
+				<armor>
+					<text type="string">Light and medium armour and shields</text>
+				</armor>
+				<weapons>
+					<text type="string">Simple and Martial weapons</text>
+				</weapons>
+				<savingthrows>
+					<text type="string">Strength and Dexterity</text>
+				</savingthrows>
+				<skills>
+					<text type="string">Choose 3: Animal Handling, Athletics, Insight, Investigation, Nature, Perception, Stealth, Survival</text>
+				</skills>
+			</proficiencies>
+			<startingequipment type="string">Hide coat, two shortswords, longbow and 40 arrows, a delver's pack.</startingequipment>
+			<startingequipmentlist>
+				<id-00001>
+					<items>
+						<id-00001>
+							<name type="string">Hide Coat</name>
+							<type type="string">Armor</type>
+							<subtype type="string">Medium Armor</subtype>
+							<cost type="string">10 gc</cost>
+							<ac type="number">12</ac>
+							<dexbonus type="string">Max 2</dexbonus>
+							<stealth type="string">-</stealth>
+							<weight type="number">12</weight>
+							<bonus type="number">0</bonus>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>Thick furs and hides, the hunter's armour.</p></description>
+							<count type="number">1</count>
+						</id-00001>
+						<id-00002>
+							<name type="string">Shortsword</name>
+							<type type="string">Weapon</type>
+							<subtype type="string">Martial Melee Weapons</subtype>
+							<cost type="string">10 gc</cost>
+							<damage type="string">1d6 Piercing</damage>
+							<properties type="string">Finesse, Light</properties>
+							<weight type="number">2</weight>
+							<bonus type="number">0</bonus>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>A shortsword. Properties: Finesse, Light.</p></description>
+							<count type="number">2</count>
+						</id-00002>
+						<id-00003>
+							<name type="string">Longbow</name>
+							<type type="string">Weapon</type>
+							<subtype type="string">Martial Ranged Weapons</subtype>
+							<cost type="string">50 gc</cost>
+							<damage type="string">1d8 Piercing</damage>
+							<properties type="string">Ammunition (Range 150/600), Heavy, Two-Handed</properties>
+							<weight type="number">2</weight>
+							<bonus type="number">0</bonus>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>A longbow. Properties: Ammunition (Range 150/600), Heavy, Two-Handed.</p></description>
+							<count type="number">1</count>
+						</id-00003>
+						<id-00004>
+							<name type="string">Arrows (20)</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Ammunition</subtype>
+							<cost type="string">1 gc</cost>
+							<weight type="number">1</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>Ammunition for bows.</p></description>
+							<count type="number">2</count>
+						</id-00004>
+						<id-00005>
+							<name type="string">Backpack</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">2 gc</cost>
+							<weight type="number">5</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>Holds 30 pounds of gear.</p></description>
+							<count type="number">1</count>
+						</id-00005>
+						<id-00006>
+							<name type="string">Bedroll</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">1 gc</cost>
+							<weight type="number">7</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>A safe rest needs one (or a bed).</p></description>
+							<count type="number">1</count>
+						</id-00006>
+						<id-00007>
+							<name type="string">Tinderbox</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">0.5 gc</cost>
+							<weight type="number">1</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>Flint, steel and tinder. Lighting a torch takes an action; in the wind or wet, a Dexterity check (DC 12).</p></description>
+							<count type="number">1</count>
+						</id-00007>
+						<id-00008>
+							<name type="string">Torch</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">0.01 gc</cost>
+							<weight type="number">1</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>A torch burns for <b>six exploration turns</b> (an hour). It sheds bright light 20 feet and dim light 20 feet beyond. Lit, it shows everyone where you are.</p></description>
+							<count type="number">6</count>
+						</id-00008>
+						<id-00009>
+							<name type="string">Rations (1 day)</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">0.5 gc</cost>
+							<weight type="number">2</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>Dried meat, hard bread, an onion. A safe rest needs food and water.</p></description>
+							<count type="number">5</count>
+						</id-00009>
+						<id-00010>
+							<name type="string">Waterskin</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">0.2 gc</cost>
+							<weight type="number">5</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>Holds a day's water.</p></description>
+							<count type="number">1</count>
+						</id-00010>
+						<id-00011>
+							<name type="string">Rope, Hempen (50 feet)</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">1 gc</cost>
+							<weight type="number">10</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>Strong enough for two climbers. A Strength check (DC 18) breaks it.</p></description>
+							<count type="number">1</count>
+						</id-00011>
+						<id-00012>
+							<name type="string">Chalk (5 sticks)</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">0.01 gc</cost>
+							<weight type="number">0</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>For marking the way back. Every dungeon has someone who forgot to.</p></description>
+							<count type="number">1</count>
+						</id-00012>
+					</items>
+				</id-00001>
+			</startingequipmentlist>
+			<text type="formattedtext"><p>Rangers know the wild places between the towns and the ruins, and what hunts there. They track it, and they hunt it back.</p></text>
+			<features>
+				<id-00001>
+					<level type="number">1</level>
+					<name type="string">Pathfinder</name>
+					<text type="formattedtext"><p>You and companions travelling with you cannot be lost by anything but magic, and you always know which way is north and how far you have come. Foraging finds food for two more people.</p></text>
+				</id-00001>
+				<id-00002>
+					<level type="number">1</level>
+					<name type="string">Favoured Prey</name>
+					<text type="formattedtext"><p>Choose beasts, the undead, or the folk of the deep (goblins and their kin): advantage to track them and recall what you know of them, and +2 damage against them.</p></text>
+				</id-00002>
+				<id-00003>
+					<level type="number">2</level>
+					<name type="string">Spellcasting</name>
+					<text type="formattedtext"><p>From 2nd level you cast ranger spells with Wisdom; slots as a half-caster.</p></text>
+				</id-00003>
+				<id-00004>
+					<level type="number">2</level>
+					<name type="string">Fighting Style</name>
+					<text type="formattedtext"><p><b>Archer</b> (+2 to ranged attack rolls) or <b>Twin Blades</b> (add your ability modifier to the off-hand attack's damage).</p></text>
+				</id-00004>
+				<id-00005>
+					<level type="number">3</level>
+					<name type="string">Hunter's Eye</name>
+					<text type="formattedtext"><p>Once per turn, a weapon hit on a creature you have marked with Hunter's Quarry deals 1d8 more damage.</p></text>
+				</id-00005>
+				<id-00006>
+					<level type="number">4</level>
+					<name type="string">Ability Improvement</name>
+					<text type="formattedtext"><p>Add 2 to one ability score, or 1 to two (to a most of 20). Again at 8th level.</p></text>
+				</id-00006>
+				<id-00007>
+					<level type="number">5</level>
+					<name type="string">Extra Attack</name>
+					<text type="formattedtext"><p>When you take the Attack action you attack twice.</p></text>
+				</id-00007>
+				<id-00008>
+					<level type="number">6</level>
+					<name type="string">Night Eyes</name>
+					<text type="formattedtext"><p>You see in dim light as if it were bright, and in darkness 30 feet as if it were dim.</p></text>
+				</id-00008>
+				<id-00009>
+					<level type="number">10</level>
+					<name type="string">Unseen Hunter</name>
+					<text type="formattedtext"><p>Hiding is a bonus action for you, and you stay hidden after a missed attack.</p></text>
+				</id-00009>
+			</features>
+		</ranger>
+		<bard>
+			<name type="string">Bard</name>
+			<ability type="string">Charisma</ability>
+			<hp>
+				<hitdice>
+					<text type="string">D8 per Bard level</text>
+				</hitdice>
+			</hp>
+			<proficiencies>
+				<armor>
+					<text type="string">Light armour</text>
+				</armor>
+				<weapons>
+					<text type="string">Simple weapons, hand crossbows, longswords, rapiers and shortswords</text>
+				</weapons>
+				<savingthrows>
+					<text type="string">Dexterity and Charisma</text>
+				</savingthrows>
+				<skills>
+					<text type="string">Choose any 3</text>
+				</skills>
+			</proficiencies>
+			<startingequipment type="string">Leather jerkin, rapier, dagger, a worn instrument (arcane focus), a delver's pack.</startingequipment>
+			<startingequipmentlist>
+				<id-00001>
+					<items>
+						<id-00001>
+							<name type="string">Leather Jerkin</name>
+							<type type="string">Armor</type>
+							<subtype type="string">Light Armor</subtype>
+							<cost type="string">10 gc</cost>
+							<ac type="number">11</ac>
+							<dexbonus type="string">Yes</dexbonus>
+							<stealth type="string">-</stealth>
+							<weight type="number">10</weight>
+							<bonus type="number">0</bonus>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>Boiled and oiled leather over the chest and shoulders.</p></description>
+							<count type="number">1</count>
+						</id-00001>
+						<id-00002>
+							<name type="string">Rapier</name>
+							<type type="string">Weapon</type>
+							<subtype type="string">Martial Melee Weapons</subtype>
+							<cost type="string">25 gc</cost>
+							<damage type="string">1d8 Piercing</damage>
+							<properties type="string">Finesse</properties>
+							<weight type="number">2</weight>
+							<bonus type="number">0</bonus>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>A rapier. Properties: Finesse.</p></description>
+							<count type="number">1</count>
+						</id-00002>
+						<id-00003>
+							<name type="string">Dagger</name>
+							<type type="string">Weapon</type>
+							<subtype type="string">Simple Melee Weapons</subtype>
+							<cost type="string">2 gc</cost>
+							<damage type="string">1d4 Piercing</damage>
+							<properties type="string">Finesse, Light, Thrown (Range 20/60)</properties>
+							<weight type="number">1</weight>
+							<bonus type="number">0</bonus>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>A long knife, the last weapon anyone gives up.</p></description>
+							<count type="number">1</count>
+						</id-00003>
+						<id-00004>
+							<name type="string">Arcane Focus</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Focus</subtype>
+							<cost type="string">10 gc</cost>
+							<weight type="number">1</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>A wizard's or bard's focus: a wand, a crystal, a worn instrument.</p></description>
+							<count type="number">1</count>
+						</id-00004>
+						<id-00005>
+							<name type="string">Backpack</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">2 gc</cost>
+							<weight type="number">5</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>Holds 30 pounds of gear.</p></description>
+							<count type="number">1</count>
+						</id-00005>
+						<id-00006>
+							<name type="string">Bedroll</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">1 gc</cost>
+							<weight type="number">7</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>A safe rest needs one (or a bed).</p></description>
+							<count type="number">1</count>
+						</id-00006>
+						<id-00007>
+							<name type="string">Tinderbox</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">0.5 gc</cost>
+							<weight type="number">1</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>Flint, steel and tinder. Lighting a torch takes an action; in the wind or wet, a Dexterity check (DC 12).</p></description>
+							<count type="number">1</count>
+						</id-00007>
+						<id-00008>
+							<name type="string">Torch</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">0.01 gc</cost>
+							<weight type="number">1</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>A torch burns for <b>six exploration turns</b> (an hour). It sheds bright light 20 feet and dim light 20 feet beyond. Lit, it shows everyone where you are.</p></description>
+							<count type="number">6</count>
+						</id-00008>
+						<id-00009>
+							<name type="string">Rations (1 day)</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">0.5 gc</cost>
+							<weight type="number">2</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>Dried meat, hard bread, an onion. A safe rest needs food and water.</p></description>
+							<count type="number">5</count>
+						</id-00009>
+						<id-00010>
+							<name type="string">Waterskin</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">0.2 gc</cost>
+							<weight type="number">5</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>Holds a day's water.</p></description>
+							<count type="number">1</count>
+						</id-00010>
+						<id-00011>
+							<name type="string">Rope, Hempen (50 feet)</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">1 gc</cost>
+							<weight type="number">10</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>Strong enough for two climbers. A Strength check (DC 18) breaks it.</p></description>
+							<count type="number">1</count>
+						</id-00011>
+						<id-00012>
+							<name type="string">Chalk (5 sticks)</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">0.01 gc</cost>
+							<weight type="number">0</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>For marking the way back. Every dungeon has someone who forgot to.</p></description>
+							<count type="number">1</count>
+						</id-00012>
+					</items>
+				</id-00001>
+			</startingequipmentlist>
+			<text type="formattedtext"><p>Bards are lorekeepers: they remember the old songs, the names of the dead, and where the stairs go. Their stories keep the dark at bay.</p></text>
+			<features>
+				<id-00001>
+					<level type="number">1</level>
+					<name type="string">Spellcasting</name>
+					<text type="formattedtext"><p>You cast bard spells with Charisma: spell save DC 8 + your proficiency + Charisma. You know four spells and learn one more each level.</p></text>
+				</id-00001>
+				<id-00002>
+					<level type="number">1</level>
+					<name type="string">Inspiration</name>
+					<text type="formattedtext"><p>Three times per safe rest (more with Charisma: your modifier, at least 3), when a companion who can hear you rolls a d20, add 1d4 to it after seeing the roll but before the outcome is told. The die is 1d6 at 5th level and 1d8 at 9th.</p></text>
+				</id-00002>
+				<id-00003>
+					<level type="number">1</level>
+					<name type="string">Fireside Tales</name>
+					<text type="formattedtext"><p>During a safe rest, every companion who listens regains 1 more Health per Recovery Die spent, and loses 1 Dread more.</p></text>
+				</id-00003>
+				<id-00004>
+					<level type="number">2</level>
+					<name type="string">Jack of All Trades</name>
+					<text type="formattedtext"><p>Add half your proficiency bonus to checks you are not proficient in.</p></text>
+				</id-00004>
+				<id-00005>
+					<level type="number">3</level>
+					<name type="string">Expertise</name>
+					<text type="formattedtext"><p>Choose two skills you are proficient in: double your proficiency bonus for them. Two more at 10th level.</p></text>
+				</id-00005>
+				<id-00006>
+					<level type="number">4</level>
+					<name type="string">Ability Improvement</name>
+					<text type="formattedtext"><p>Add 2 to one ability score, or 1 to two (to a most of 20). Again at 8th level.</p></text>
+				</id-00006>
+				<id-00007>
+					<level type="number">6</level>
+					<name type="string">Song of Courage</name>
+					<text type="formattedtext"><p>As an action, until the end of your next turn, companions who can hear you have advantage on saves against being frightened and ignore new Dread.</p></text>
+				</id-00007>
+				<id-00008>
+					<level type="number">10</level>
+					<name type="string">Lore of the Lost</name>
+					<text type="formattedtext"><p>Learn two spells from any class's list; they are bard spells for you.</p></text>
+				</id-00008>
+			</features>
+		</bard>
+	</class>
+	<race>
+		<human>
+			<name type="string">Human</name>
+			<size type="string">Medium</size>
+			<speed type="string">30 feet</speed>
+			<abilityadjust type="string"></abilityadjust>
+			<classes type="string">Fighter, Cleric, Wizard, Thief, Paladin, Ranger, Bard</classes>
+			<text type="formattedtext"><p>The most numerous folk, and the most stubborn. Humans build towns on the bones of older towns and swear this time will be different.</p></text>
+			<traits>
+				<id-00001>
+					<name type="string">Any Path</name>
+					<text type="formattedtext"><p>A human may take any class.</p></text>
+				</id-00001>
+				<id-00002>
+					<name type="string">Stubborn</name>
+					<text type="formattedtext"><p>Once per safe rest, when you would gain Dread, ignore one point of it.</p></text>
+				</id-00002>
+				<id-00003>
+					<name type="string">Quick Study</name>
+					<text type="formattedtext"><p>You are proficient in one skill of your choice.</p></text>
+				</id-00003>
+			</traits>
+		</human>
+		<elf>
+			<name type="string">Elf</name>
+			<size type="string">Medium</size>
+			<speed type="string">30 feet</speed>
+			<abilityadjust type="string">Dexterity +1, Constitution -1</abilityadjust>
+			<classes type="string">Fighter, Cleric, Wizard, Thief, Ranger, Bard</classes>
+			<text type="formattedtext"><p>Elves live long and remember longer. They were old when the first towers fell, and they have watched the dark rise before.</p></text>
+			<traits>
+				<id-00001>
+					<name type="string">Dimsight</name>
+					<text type="formattedtext"><p>In faint light you make out shapes and find your way as well as in daylight, 60 feet around you; you cannot read fine writing or see detail at a distance. In total darkness you see nothing, like anyone.</p></text>
+				</id-00001>
+				<id-00002>
+					<name type="string">Keen Senses</name>
+					<text type="formattedtext"><p>You are proficient in Perception.</p></text>
+				</id-00002>
+				<id-00003>
+					<name type="string">Long Memory</name>
+					<text type="formattedtext"><p>Advantage on checks to recall the history of a place or a thing older than a human lifetime.</p></text>
+				</id-00003>
+			</traits>
+		</elf>
+		<halfelf>
+			<name type="string">Half-Elf</name>
+			<size type="string">Medium</size>
+			<speed type="string">30 feet</speed>
+			<abilityadjust type="string"></abilityadjust>
+			<classes type="string">Fighter, Cleric, Wizard, Thief, Ranger, Bard</classes>
+			<text type="formattedtext"><p>Born of two peoples and at home in neither, half-elves make their own way, and are often very good at it.</p></text>
+			<traits>
+				<id-00001>
+					<name type="string">Dimsight</name>
+					<text type="formattedtext"><p>As an elf's, to 30 feet.</p></text>
+				</id-00001>
+				<id-00002>
+					<name type="string">Two Worlds</name>
+					<text type="formattedtext"><p>You are proficient in two skills of your choice.</p></text>
+				</id-00002>
+			</traits>
+		</halfelf>
+		<dwarf>
+			<name type="string">Dwarf</name>
+			<size type="string">Medium</size>
+			<speed type="string">25 feet</speed>
+			<abilityadjust type="string">Constitution +1, Charisma -1</abilityadjust>
+			<classes type="string">Fighter, Cleric, Thief</classes>
+			<hpperlevel type="number">1</hpperlevel>
+			<text type="formattedtext"><p>Dwarves dug the first deep halls, and lost most of them. They are hard, slow to trust, and slower to forgive.</p></text>
+			<traits>
+				<id-00001>
+					<name type="string">Dimsight</name>
+					<text type="formattedtext"><p>As an elf's, to 60 feet.</p></text>
+				</id-00001>
+				<id-00002>
+					<name type="string">Hardy</name>
+					<text type="formattedtext"><p>+1 Health at each level. Advantage on saves against poison.</p></text>
+				</id-00002>
+				<id-00003>
+					<name type="string">Stonewise</name>
+					<text type="formattedtext"><p>Advantage on checks about stonework: its age, who made it, where it is weak, and where a passage leads.</p></text>
+				</id-00003>
+			</traits>
+		</dwarf>
+		<gnome>
+			<name type="string">Gnome</name>
+			<size type="string">Small</size>
+			<speed type="string">25 feet</speed>
+			<abilityadjust type="string">Intelligence +1, Wisdom -1</abilityadjust>
+			<classes type="string">Cleric, Wizard, Thief, Bard</classes>
+			<text type="formattedtext"><p>Small, curious and impossible to bore, gnomes take apart locks, clocks and spells to see how they work, and usually put them back together.</p></text>
+			<traits>
+				<id-00001>
+					<name type="string">Dimsight</name>
+					<text type="formattedtext"><p>As an elf's, to 60 feet.</p></text>
+				</id-00001>
+				<id-00002>
+					<name type="string">Tinker's Eye</name>
+					<text type="formattedtext"><p>Advantage on checks to understand, open or disable a mechanism: a lock, a trap, a clockwork.</p></text>
+				</id-00002>
+				<id-00003>
+					<name type="string">Small and Quick</name>
+					<text type="formattedtext"><p>You can move through the space of a creature larger than you.</p></text>
+				</id-00003>
+			</traits>
+		</gnome>
+	</race>
+	<background>
+		<gravedigger>
+			<name type="string">Grave Digger</name>
+			<skill type="string">Athletics, Religion</skill>
+			<text type="formattedtext"><p>You buried the dead of a town that had too many. You know the old rites, and what a disturbed grave looks like.</p></text>
+			<equipment type="string">A shovel, a holy symbol of the dead, 10 gc</equipment>
+		</gravedigger>
+		<lamplighter>
+			<name type="string">Lamplighter</name>
+			<skill type="string">Perception, Investigation</skill>
+			<text type="formattedtext"><p>You kept the street lamps of a city burning through the long nights. You know how long a flame lasts, and what moves when it goes out.</p></text>
+			<equipment type="string">A hooded lantern, two flasks of oil, 10 gc</equipment>
+		</lamplighter>
+		<deserter>
+			<name type="string">Deserter</name>
+			<skill type="string">Athletics, Stealth</skill>
+			<text type="formattedtext"><p>You fled a war you did not believe in, and they are still looking for you.</p></text>
+			<equipment type="string">A worn sword-belt, a forged pass, 5 gc</equipment>
+		</deserter>
+		<acolyteoftheash>
+			<name type="string">Acolyte of the Ash</name>
+			<skill type="string">Religion, Insight</skill>
+			<text type="formattedtext"><p>You served a temple that keeps vigil fires against the dark. Its priests will give you a meal and a bed, and ask questions.</p></text>
+			<equipment type="string">A holy symbol, prayer beads, incense, 10 gc</equipment>
+		</acolyteoftheash>
+		<smuggler>
+			<name type="string">Smuggler</name>
+			<skill type="string">Deception, Sleight of Hand</skill>
+			<text type="formattedtext"><p>You moved what was not allowed across borders that were not watched. You know who to pay, and how much.</p></text>
+			<equipment type="string">A coat with hidden pockets, 15 gc</equipment>
+		</smuggler>
+		<hedgescholar>
+			<name type="string">Hedge Scholar</name>
+			<skill type="string">Arcana, History</skill>
+			<text type="formattedtext"><p>You learned from books nobody else wanted, in libraries nobody else visited.</p></text>
+			<equipment type="string">Ink, a quill, a book of half-remembered lore, 10 gc</equipment>
+		</hedgescholar>
+		<hunter>
+			<name type="string">Hunter</name>
+			<skill type="string">Survival, Nature</skill>
+			<text type="formattedtext"><p>You fed your family from the forest's edge, and learned which tracks to follow and which to run from.</p></text>
+			<equipment type="string">A hunting trap, a skinning knife, 10 gc</equipment>
+		</hunter>
+		<streetrat>
+			<name type="string">Street Rat</name>
+			<skill type="string">Stealth, Sleight of Hand</skill>
+			<text type="formattedtext"><p>You grew up on the streets and the rooftops, fed by quick hands and quicker feet.</p></text>
+			<equipment type="string">A map of a city's back ways, a lucky charm, 5 gc</equipment>
+		</streetrat>
+	</background>
+	<spell>
+		<category name="Cantrips">
+			<kindle>
+				<name type="string">Kindle</name>
+				<level type="number">0</level>
+				<school type="string">Evocation</school>
+				<castingtime type="string">Action</castingtime>
+				<range type="string">Touch</range>
+				<components type="string">V, S</components>
+				<duration type="string">1 hour</duration>
+				<ritual type="number">0</ritual>
+				<source type="string">Cleric, Wizard, Bard</source>
+				<description type="formattedtext"><p>A small object you touch sheds bright light 20 feet and dim light 20 feet beyond, for an hour or until you kindle another. The light is cold; it burns nothing and no wind puts it out. In the Darkness, it is the first spell every apprentice learns and the last one they forget.</p></description>
+			</kindle>
+			<sparklash>
+				<name type="string">Spark Lash</name>
+				<level type="number">0</level>
+				<school type="string">Evocation</school>
+				<castingtime type="string">Action</castingtime>
+				<range type="string">120 feet</range>
+				<components type="string">V, S</components>
+				<duration type="string">Instantaneous</duration>
+				<ritual type="number">0</ritual>
+				<source type="string">Wizard</source>
+				<description type="formattedtext"><p>A whip of sparks cracks at a creature you can see. Make a ranged spell attack: on a hit, 1d10 fire damage, and a flammable object it strikes catches. The damage grows by 1d10 at 5th level and again at 11th.</p></description>
+				<actions>
+					<id-00001>
+						<type type="string">cast</type>
+						<targeting type="string">targets</targeting>
+						<targetingval type="number">1</targetingval>
+					</id-00001>
+					<id-00002>
+						<type type="string">attack</type>
+						<atktype type="string">ranged</atktype>
+					</id-00002>
+					<id-00003>
+						<type type="string">damage</type>
+						<damagelist>
+							<id-00001>
+								<dice type="string">d10</dice>
+								<type type="string">fire</type>
+								<scalestat type="string">cantrip</scalestat>
+								<scaledice type="string">d10</scaledice>
+							</id-00001>
+						</damagelist>
+					</id-00003>
+				</actions>
+			</sparklash>
+			<gravetouch>
+				<name type="string">Grave Touch</name>
+				<level type="number">0</level>
+				<school type="string">Necromancy</school>
+				<castingtime type="string">Action</castingtime>
+				<range type="string">Touch</range>
+				<components type="string">V, S</components>
+				<duration type="string">Instantaneous</duration>
+				<ritual type="number">0</ritual>
+				<source type="string">Wizard</source>
+				<description type="formattedtext"><p>Your hand carries the cold of a burial vault. Make a melee spell attack: on a hit, 1d8 necrotic damage, and the target cannot regain Health until the start of your next turn. More dice at 5th and 11th level.</p></description>
+				<actions>
+					<id-00001>
+						<type type="string">cast</type>
+						<targeting type="string">targets</targeting>
+						<targetingval type="number">1</targetingval>
+					</id-00001>
+					<id-00002>
+						<type type="string">attack</type>
+						<atktype type="string">melee</atktype>
+					</id-00002>
+					<id-00003>
+						<type type="string">damage</type>
+						<damagelist>
+							<id-00001>
+								<dice type="string">d8</dice>
+								<type type="string">necrotic</type>
+								<scalestat type="string">cantrip</scalestat>
+								<scaledice type="string">d8</scaledice>
+							</id-00001>
+						</damagelist>
+					</id-00003>
+					<id-00004>
+						<type type="string">effect</type>
+						<label type="string">No healing</label>
+						<durmod type="number">1</durmod>
+						<durunit type="string">round</durunit>
+					</id-00004>
+				</actions>
+			</gravetouch>
+			<sacredember>
+				<name type="string">Sacred Ember</name>
+				<level type="number">0</level>
+				<school type="string">Evocation</school>
+				<castingtime type="string">Action</castingtime>
+				<range type="string">60 feet</range>
+				<components type="string">V, S</components>
+				<duration type="string">Instantaneous</duration>
+				<ritual type="number">0</ritual>
+				<source type="string">Cleric</source>
+				<description type="formattedtext"><p>A mote of holy fire falls on a creature you can see. It makes a Dexterity save or takes 1d8 radiant damage; cover does not help it. More dice at 5th and 11th level.</p></description>
+				<actions>
+					<id-00001>
+						<type type="string">cast</type>
+						<targeting type="string">targets</targeting>
+						<targetingval type="number">1</targetingval>
+					</id-00001>
+					<id-00002>
+						<type type="string">powersave</type>
+						<savetype type="string">dexterity</savetype>
+					</id-00002>
+					<id-00003>
+						<type type="string">damage</type>
+						<damagelist>
+							<id-00001>
+								<dice type="string">d8</dice>
+								<type type="string">radiant</type>
+								<scalestat type="string">cantrip</scalestat>
+								<scaledice type="string">d8</scaledice>
+							</id-00001>
+						</damagelist>
+					</id-00003>
+				</actions>
+			</sacredember>
+			<cuttingwords>
+				<name type="string">Cutting Words</name>
+				<level type="number">0</level>
+				<school type="string">Enchantment</school>
+				<castingtime type="string">Action</castingtime>
+				<range type="string">60 feet</range>
+				<components type="string">V, S</components>
+				<duration type="string">Instantaneous</duration>
+				<ritual type="number">0</ritual>
+				<source type="string">Bard</source>
+				<description type="formattedtext"><p>You find the thing a creature fears to hear. It makes a Wisdom save or takes 1d6 psychic damage and has disadvantage on its next attack. More dice at 5th and 11th level.</p></description>
+				<actions>
+					<id-00001>
+						<type type="string">cast</type>
+						<targeting type="string">targets</targeting>
+						<targetingval type="number">1</targetingval>
+					</id-00001>
+					<id-00002>
+						<type type="string">powersave</type>
+						<savetype type="string">wisdom</savetype>
+					</id-00002>
+					<id-00003>
+						<type type="string">damage</type>
+						<damagelist>
+							<id-00001>
+								<dice type="string">d6</dice>
+								<type type="string">psychic</type>
+								<scalestat type="string">cantrip</scalestat>
+								<scaledice type="string">d6</scaledice>
+							</id-00001>
+						</damagelist>
+					</id-00003>
+					<id-00004>
+						<type type="string">effect</type>
+						<label type="string">DISATK</label>
+						<durmod type="number">1</durmod>
+						<durunit type="string">round</durunit>
+					</id-00004>
+				</actions>
+			</cuttingwords>
+			<guidingglimmer>
+				<name type="string">Guiding Glimmer</name>
+				<level type="number">0</level>
+				<school type="string">Divination</school>
+				<castingtime type="string">Action</castingtime>
+				<range type="string">Touch</range>
+				<components type="string">V, S</components>
+				<duration type="string">1 minute</duration>
+				<ritual type="number">0</ritual>
+				<source type="string">Cleric, Bard</source>
+				<description type="formattedtext"><p>A creature you touch carries a small certainty: once before the spell ends it adds 1d4 to an ability check of its choice.</p></description>
+				<actions>
+					<id-00001>
+						<type type="string">cast</type>
+						<targeting type="string">targets</targeting>
+						<targetingval type="number">1</targetingval>
+					</id-00001>
+					<id-00002>
+						<type type="string">effect</type>
+						<label type="string">Guiding Glimmer; CHECK: 1d4</label>
+						<durmod type="number">1</durmod>
+						<durunit type="string">minute</durunit>
+					</id-00002>
+				</actions>
+			</guidingglimmer>
+			<mendingword>
+				<name type="string">Mending Word</name>
+				<level type="number">0</level>
+				<school type="string">Transmutation</school>
+				<castingtime type="string">1 minute</castingtime>
+				<range type="string">Touch</range>
+				<components type="string">V, S</components>
+				<duration type="string">1 minute</duration>
+				<ritual type="number">0</ritual>
+				<source type="string">Cleric, Wizard, Bard</source>
+				<description type="formattedtext"><p>One break or tear in an object you touch closes: a broken chain link, a torn cloak, a cracked lamp. Magic items are beyond it.</p></description>
+			</mendingword>
+			<unseengrip>
+				<name type="string">Unseen Grip</name>
+				<level type="number">0</level>
+				<school type="string">Conjuration</school>
+				<castingtime type="string">Action</castingtime>
+				<range type="string">30 feet</range>
+				<components type="string">V, S</components>
+				<duration type="string">1 minute</duration>
+				<ritual type="number">0</ritual>
+				<source type="string">Wizard, Bard</source>
+				<description type="formattedtext"><p>An invisible hand does simple work within range: opens an unlocked door, carries 10 pounds, pulls a lever. It cannot attack.</p></description>
+			</unseengrip>
+			<whisperacross>
+				<name type="string">Whisper Across</name>
+				<level type="number">0</level>
+				<school type="string">Transmutation</school>
+				<castingtime type="string">Action</castingtime>
+				<range type="string">120 feet</range>
+				<components type="string">V, S</components>
+				<duration type="string">Instantaneous</duration>
+				<ritual type="number">0</ritual>
+				<source type="string">Wizard, Bard</source>
+				<description type="formattedtext"><p>You whisper to a creature you can see; only it hears, and it may whisper back. Stone a foot thick, or metal, stops it.</p></description>
+			</whisperacross>
+		</category>
+		<category name="Circle 1">
+			<arcanedarts>
+				<name type="string">Arcane Darts</name>
+				<level type="number">1</level>
+				<school type="string">Evocation</school>
+				<castingtime type="string">Action</castingtime>
+				<range type="string">120 feet</range>
+				<components type="string">V, S</components>
+				<duration type="string">Instantaneous</duration>
+				<ritual type="number">0</ritual>
+				<source type="string">Wizard</source>
+				<description type="formattedtext"><p>Three darts of force fly at creatures of your choice and never miss: each deals 1d4 + 1 force damage. A higher-circle casting adds a dart per circle above the first.</p></description>
+				<actions>
+					<id-00001>
+						<type type="string">cast</type>
+						<targeting type="string">multihit</targeting>
+						<targetingval type="number">3</targetingval>
+						<allowupcast type="number">1</allowupcast>
+					</id-00001>
+					<id-00002>
+						<type type="string">damage</type>
+						<damagelist>
+							<id-00001>
+								<dice type="string">1d4</dice>
+								<type type="string">force</type>
+								<bonus type="number">1</bonus>
+							</id-00001>
+						</damagelist>
+					</id-00002>
+				</actions>
+			</arcanedarts>
+			<mendwounds>
+				<name type="string">Mend Wounds</name>
+				<level type="number">1</level>
+				<school type="string">Abjuration</school>
+				<castingtime type="string">Action</castingtime>
+				<range type="string">Touch</range>
+				<components type="string">V, S</components>
+				<duration type="string">Instantaneous</duration>
+				<ritual type="number">0</ritual>
+				<source type="string">Cleric, Paladin, Ranger, Bard</source>
+				<description type="formattedtext"><p>A creature you touch regains 1d8 + your spellcasting modifier Health. Each circle above the first heals 1d8 more. It cannot mend the dead.</p></description>
+				<actions>
+					<id-00001>
+						<type type="string">cast</type>
+						<targeting type="string">targets</targeting>
+						<targetingval type="number">1</targetingval>
+						<allowupcast type="number">1</allowupcast>
+					</id-00001>
+					<id-00002>
+						<type type="string">heal</type>
+						<heallist>
+							<id-00001>
+								<dice type="string">1d8</dice>
+								<stat type="string">base</stat>
+								<scalestat type="string">upcast</scalestat>
+								<scaledice type="string">1d8</scaledice>
+							</id-00001>
+						</heallist>
+					</id-00002>
+				</actions>
+			</mendwounds>
+			<wordofrest>
+				<name type="string">Word of Rest</name>
+				<level type="number">1</level>
+				<school type="string">Abjuration</school>
+				<castingtime type="string">Bonus Action</castingtime>
+				<range type="string">60 feet</range>
+				<components type="string">V, S</components>
+				<duration type="string">Instantaneous</duration>
+				<ritual type="number">0</ritual>
+				<source type="string">Cleric, Bard</source>
+				<description type="formattedtext"><p>A word of comfort carries across the fight: a creature you can see regains 1d4 + your spellcasting modifier Health. Each circle above the first heals 1d4 more.</p></description>
+				<actions>
+					<id-00001>
+						<type type="string">cast</type>
+						<targeting type="string">targets</targeting>
+						<targetingval type="number">1</targetingval>
+						<allowupcast type="number">1</allowupcast>
+					</id-00001>
+					<id-00002>
+						<type type="string">heal</type>
+						<heallist>
+							<id-00001>
+								<dice type="string">1d4</dice>
+								<stat type="string">base</stat>
+								<scalestat type="string">upcast</scalestat>
+								<scaledice type="string">1d4</scaledice>
+							</id-00001>
+						</heallist>
+					</id-00002>
+				</actions>
+			</wordofrest>
+			<wardoffaith>
+				<name type="string">Ward of Faith</name>
+				<level type="number">1</level>
+				<school type="string">Abjuration</school>
+				<castingtime type="string">Bonus Action</castingtime>
+				<range type="string">60 feet</range>
+				<components type="string">V, S</components>
+				<duration type="string">Concentration, up to 10 minutes</duration>
+				<ritual type="number">0</ritual>
+				<source type="string">Cleric, Paladin</source>
+				<description type="formattedtext"><p>A shimmer of faith stands between a creature you choose and harm: +2 Defense while the spell lasts.</p></description>
+				<actions>
+					<id-00001>
+						<type type="string">cast</type>
+						<targeting type="string">targets</targeting>
+						<targetingval type="number">1</targetingval>
+					</id-00001>
+					<id-00002>
+						<type type="string">effect</type>
+						<label type="string">Ward of Faith; AC: 2</label>
+						<durmod type="number">10</durmod>
+						<durunit type="string">minute</durunit>
+					</id-00002>
+				</actions>
+			</wardoffaith>
+			<blessing>
+				<name type="string">Blessing</name>
+				<level type="number">1</level>
+				<school type="string">Enchantment</school>
+				<castingtime type="string">Action</castingtime>
+				<range type="string">30 feet</range>
+				<components type="string">V, S</components>
+				<duration type="string">Concentration, up to 1 minute</duration>
+				<ritual type="number">0</ritual>
+				<source type="string">Cleric, Paladin</source>
+				<description type="formattedtext"><p>Up to three creatures of your choice add 1d4 to their attack rolls and saving throws while it lasts.</p></description>
+				<actions>
+					<id-00001>
+						<type type="string">cast</type>
+						<targeting type="string">targets</targeting>
+						<targetingval type="number">3</targetingval>
+					</id-00001>
+					<id-00002>
+						<type type="string">effect</type>
+						<label type="string">Blessing; ATK: 1d4; SAVE: 1d4</label>
+						<durmod type="number">1</durmod>
+						<durunit type="string">minute</durunit>
+					</id-00002>
+				</actions>
+			</blessing>
+			<burningfan>
+				<name type="string">Burning Fan</name>
+				<level type="number">1</level>
+				<school type="string">Evocation</school>
+				<castingtime type="string">Action</castingtime>
+				<range type="string">Self (15-foot cone)</range>
+				<components type="string">V, S</components>
+				<duration type="string">Instantaneous</duration>
+				<ritual type="number">0</ritual>
+				<source type="string">Wizard</source>
+				<description type="formattedtext"><p>Fire spreads from your fingers in a fan. Each creature in a 15-foot cone makes a Dexterity save: 3d6 fire damage, half on a success. Each circle above the first adds 1d6.</p></description>
+				<actions>
+					<id-00001>
+						<type type="string">cast</type>
+						<targeting type="string">targets</targeting>
+						<targetingval type="number">1</targetingval>
+					</id-00001>
+					<id-00002>
+						<type type="string">powersave</type>
+						<savetype type="string">dexterity</savetype>
+						<onmissdamage type="string">half</onmissdamage>
+					</id-00002>
+					<id-00003>
+						<type type="string">damage</type>
+						<damagelist>
+							<id-00001>
+								<dice type="string">3d6</dice>
+								<type type="string">fire</type>
+								<scalestat type="string">upcast</scalestat>
+								<scaledice type="string">1d6</scaledice>
+							</id-00001>
+						</damagelist>
+					</id-00003>
+				</actions>
+			</burningfan>
+			<slumber>
+				<name type="string">Slumber</name>
+				<level type="number">1</level>
+				<school type="string">Enchantment</school>
+				<castingtime type="string">Action</castingtime>
+				<range type="string">60 feet</range>
+				<components type="string">V, S</components>
+				<duration type="string">1 minute</duration>
+				<ritual type="number">0</ritual>
+				<source type="string">Wizard, Bard</source>
+				<description type="formattedtext"><p>A heavy drowsiness rolls over a creature. It makes a Wisdom save or falls asleep for a minute, until it takes damage or someone shakes it awake. Creatures that do not sleep are not affected.</p></description>
+				<actions>
+					<id-00001>
+						<type type="string">cast</type>
+						<targeting type="string">targets</targeting>
+						<targetingval type="number">1</targetingval>
+					</id-00001>
+					<id-00002>
+						<type type="string">powersave</type>
+						<savetype type="string">wisdom</savetype>
+					</id-00002>
+					<id-00003>
+						<type type="string">effect</type>
+						<label type="string">Asleep; Unconscious</label>
+						<durmod type="number">1</durmod>
+						<durunit type="string">minute</durunit>
+					</id-00003>
+				</actions>
+			</slumber>
+			<colddread>
+				<name type="string">Cold Dread</name>
+				<level type="number">1</level>
+				<school type="string">Enchantment</school>
+				<castingtime type="string">Action</castingtime>
+				<range type="string">60 feet</range>
+				<components type="string">V, S</components>
+				<duration type="string">1 minute</duration>
+				<ritual type="number">0</ritual>
+				<source type="string">Wizard, Bard, Cleric</source>
+				<description type="formattedtext"><p>You show a creature the dark it came from. It makes a Wisdom save or is frightened of you for a minute (it repeats the save at the end of each of its turns). A player character who fails also gains 1 Dread.</p></description>
+				<actions>
+					<id-00001>
+						<type type="string">cast</type>
+						<targeting type="string">targets</targeting>
+						<targetingval type="number">1</targetingval>
+					</id-00001>
+					<id-00002>
+						<type type="string">powersave</type>
+						<savetype type="string">wisdom</savetype>
+					</id-00002>
+					<id-00003>
+						<type type="string">effect</type>
+						<label type="string">Frightened</label>
+						<durmod type="number">1</durmod>
+						<durunit type="string">minute</durunit>
+					</id-00003>
+				</actions>
+			</colddread>
+			<ironwill>
+				<name type="string">Iron Will</name>
+				<level type="number">1</level>
+				<school type="string">Abjuration</school>
+				<castingtime type="string">Reaction, when you are hit</castingtime>
+				<range type="string">Self</range>
+				<components type="string">V, S</components>
+				<duration type="string">1 round</duration>
+				<ritual type="number">0</ritual>
+				<source type="string">Wizard</source>
+				<description type="formattedtext"><p>An unseen barrier of will snaps into place: +5 Defense until your next turn, including against the attack that triggered it.</p></description>
+				<actions>
+					<id-00001>
+						<type type="string">cast</type>
+						<targeting type="string">targets</targeting>
+						<targetingval type="number">1</targetingval>
+					</id-00001>
+					<id-00002>
+						<type type="string">effect</type>
+						<label type="string">Iron Will; AC: 5</label>
+						<durmod type="number">1</durmod>
+						<durunit type="string">round</durunit>
+					</id-00002>
+				</actions>
+			</ironwill>
+			<thunderclap>
+				<name type="string">Thunder Clap</name>
+				<level type="number">1</level>
+				<school type="string">Evocation</school>
+				<castingtime type="string">Action</castingtime>
+				<range type="string">Self (15-foot cube)</range>
+				<components type="string">V, S</components>
+				<duration type="string">Instantaneous</duration>
+				<ritual type="number">0</ritual>
+				<source type="string">Wizard, Bard</source>
+				<description type="formattedtext"><p>A peal of thunder rolls out from you. Each creature in a 15-foot cube makes a Constitution save: 2d8 thunder damage and pushed 10 feet away, or half damage and not pushed on a success. Heard 300 feet away.</p></description>
+				<actions>
+					<id-00001>
+						<type type="string">cast</type>
+						<targeting type="string">targets</targeting>
+						<targetingval type="number">1</targetingval>
+					</id-00001>
+					<id-00002>
+						<type type="string">powersave</type>
+						<savetype type="string">constitution</savetype>
+						<onmissdamage type="string">half</onmissdamage>
+					</id-00002>
+					<id-00003>
+						<type type="string">damage</type>
+						<damagelist>
+							<id-00001>
+								<dice type="string">2d8</dice>
+								<type type="string">thunder</type>
+								<scalestat type="string">upcast</scalestat>
+								<scaledice type="string">1d8</scaledice>
+							</id-00001>
+						</damagelist>
+					</id-00003>
+				</actions>
+			</thunderclap>
+			<featherfall>
+				<name type="string">Feather Fall</name>
+				<level type="number">1</level>
+				<school type="string">Transmutation</school>
+				<castingtime type="string">Reaction, when a creature falls</castingtime>
+				<range type="string">60 feet</range>
+				<components type="string">V, S</components>
+				<duration type="string">1 minute</duration>
+				<ritual type="number">0</ritual>
+				<source type="string">Wizard, Bard</source>
+				<description type="formattedtext"><p>Up to five falling creatures drift down at 60 feet a round and land unhurt.</p></description>
+			</featherfall>
+			<huntersquarry>
+				<name type="string">Hunter's Quarry</name>
+				<level type="number">1</level>
+				<school type="string">Divination</school>
+				<castingtime type="string">Bonus Action</castingtime>
+				<range type="string">90 feet</range>
+				<components type="string">V, S</components>
+				<duration type="string">Concentration, up to 1 hour</duration>
+				<ritual type="number">0</ritual>
+				<source type="string">Ranger</source>
+				<description type="formattedtext"><p>You mark a creature as your quarry: your weapon hits on it deal 1d6 more damage, and you have advantage to track or spot it.</p></description>
+				<actions>
+					<id-00001>
+						<type type="string">cast</type>
+						<targeting type="string">targets</targeting>
+						<targetingval type="number">1</targetingval>
+					</id-00001>
+					<id-00002>
+						<type type="string">effect</type>
+						<label type="string">Quarry; DMG: 1d6</label>
+						<durmod type="number">60</durmod>
+						<durunit type="string">minute</durunit>
+					</id-00002>
+				</actions>
+			</huntersquarry>
+			<lighttheway>
+				<name type="string">Light the Way</name>
+				<level type="number">1</level>
+				<school type="string">Evocation</school>
+				<castingtime type="string">Action</castingtime>
+				<range type="string">Self</range>
+				<components type="string">V, S</components>
+				<duration type="string">1 hour</duration>
+				<ritual type="number">0</ritual>
+				<source type="string">Cleric, Paladin, Ranger</source>
+				<description type="formattedtext"><p>A steady glow surrounds you: bright light 30 feet and dim 30 beyond, for an hour. While it lasts, you and companions within its bright light ignore the first point of Dread you would each gain.</p></description>
+			</lighttheway>
+			<sensethehidden>
+				<name type="string">Sense the Hidden</name>
+				<level type="number">1</level>
+				<school type="string">Divination</school>
+				<castingtime type="string">Action</castingtime>
+				<range type="string">Self</range>
+				<components type="string">V, S</components>
+				<duration type="string">Concentration, up to 10 minutes</duration>
+				<ritual type="number">0</ritual>
+				<source type="string">Cleric, Wizard, Paladin, Ranger, Bard</source>
+				<description type="formattedtext"><p>You sense magic within 30 feet, and the hidden: secret doors, concealed traps and invisible creatures show as a faint outline to you. Stone a foot thick blocks it.</p></description>
+			</sensethehidden>
+		</category>
+		<category name="Circle 2">
+			<emberray>
+				<name type="string">Ember Ray</name>
+				<level type="number">2</level>
+				<school type="string">Evocation</school>
+				<castingtime type="string">Action</castingtime>
+				<range type="string">120 feet</range>
+				<components type="string">V, S</components>
+				<duration type="string">Instantaneous</duration>
+				<ritual type="number">0</ritual>
+				<source type="string">Wizard</source>
+				<description type="formattedtext"><p>A beam of white fire. Make a ranged spell attack: on a hit, 4d6 fire damage. Each circle above the second adds 1d6.</p></description>
+				<actions>
+					<id-00001>
+						<type type="string">cast</type>
+						<targeting type="string">targets</targeting>
+						<targetingval type="number">1</targetingval>
+						<allowupcast type="number">1</allowupcast>
+					</id-00001>
+					<id-00002>
+						<type type="string">attack</type>
+						<atktype type="string">ranged</atktype>
+					</id-00002>
+					<id-00003>
+						<type type="string">damage</type>
+						<damagelist>
+							<id-00001>
+								<dice type="string">4d6</dice>
+								<type type="string">fire</type>
+								<scalestat type="string">upcast</scalestat>
+								<scaledice type="string">1d6</scaledice>
+							</id-00001>
+						</damagelist>
+					</id-00003>
+				</actions>
+			</emberray>
+			<holdfoe>
+				<name type="string">Hold Foe</name>
+				<level type="number">2</level>
+				<school type="string">Enchantment</school>
+				<castingtime type="string">Action</castingtime>
+				<range type="string">60 feet</range>
+				<components type="string">V, S</components>
+				<duration type="string">Concentration, up to 1 minute</duration>
+				<ritual type="number">0</ritual>
+				<source type="string">Cleric, Wizard, Paladin, Bard</source>
+				<description type="formattedtext"><p>A humanoid you can see makes a Wisdom save or is held fast, unable to move or act, for a minute (it repeats the save at the end of each turn).</p></description>
+				<actions>
+					<id-00001>
+						<type type="string">cast</type>
+						<targeting type="string">targets</targeting>
+						<targetingval type="number">1</targetingval>
+					</id-00001>
+					<id-00002>
+						<type type="string">powersave</type>
+						<savetype type="string">wisdom</savetype>
+					</id-00002>
+					<id-00003>
+						<type type="string">effect</type>
+						<label type="string">Held; Paralyzed</label>
+						<durmod type="number">1</durmod>
+						<durunit type="string">minute</durunit>
+					</id-00003>
+				</actions>
+			</holdfoe>
+			<silverbrand>
+				<name type="string">Silver Brand</name>
+				<level type="number">2</level>
+				<school type="string">Evocation</school>
+				<castingtime type="string">Bonus Action</castingtime>
+				<range type="string">Self</range>
+				<components type="string">V, S</components>
+				<duration type="string">Concentration, up to 1 minute</duration>
+				<ritual type="number">0</ritual>
+				<source type="string">Paladin, Cleric</source>
+				<description type="formattedtext"><p>Your weapon burns with pale silver: its hits deal 2d6 radiant damage more, and the undead and fiends you strike shed dim light 5 feet and cannot hide.</p></description>
+				<actions>
+					<id-00001>
+						<type type="string">cast</type>
+						<targeting type="string">targets</targeting>
+						<targetingval type="number">1</targetingval>
+					</id-00001>
+					<id-00002>
+						<type type="string">effect</type>
+						<label type="string">Silver Brand; DMG: 2d6 radiant</label>
+						<durmod type="number">1</durmod>
+						<durunit type="string">minute</durunit>
+					</id-00002>
+				</actions>
+			</silverbrand>
+			<shroudofdark>
+				<name type="string">Shroud of Dark</name>
+				<level type="number">2</level>
+				<school type="string">Evocation</school>
+				<castingtime type="string">Action</castingtime>
+				<range type="string">60 feet</range>
+				<components type="string">V, S</components>
+				<duration type="string">Concentration, up to 10 minutes</duration>
+				<ritual type="number">0</ritual>
+				<source type="string">Wizard, Bard</source>
+				<description type="formattedtext"><p>Magical darkness fills a 15-foot sphere. No light but magic of the third circle or higher shows anything inside it; creatures there are unseen. Every adventurer in it gains 1 Dread the first time.</p></description>
+			</shroudofdark>
+			<restore>
+				<name type="string">Restore</name>
+				<level type="number">2</level>
+				<school type="string">Abjuration</school>
+				<castingtime type="string">Action</castingtime>
+				<range type="string">Touch</range>
+				<components type="string">V, S</components>
+				<duration type="string">Instantaneous</duration>
+				<ritual type="number">0</ritual>
+				<source type="string">Cleric, Paladin, Ranger, Bard</source>
+				<description type="formattedtext"><p>You end one disease or one condition on a creature you touch: blinded, deafened, paralyzed or poisoned. Or you take 1 Dread from it.</p></description>
+			</restore>
+			<mistwalk>
+				<name type="string">Mist Walk</name>
+				<level type="number">2</level>
+				<school type="string">Conjuration</school>
+				<castingtime type="string">Bonus Action</castingtime>
+				<range type="string">Self</range>
+				<components type="string">V, S</components>
+				<duration type="string">Instantaneous</duration>
+				<ritual type="number">0</ritual>
+				<source type="string">Wizard, Bard</source>
+				<description type="formattedtext"><p>You become mist and reform up to 30 feet away in a space you can see.</p></description>
+			</mistwalk>
+			<mendmany>
+				<name type="string">Mend Many</name>
+				<level type="number">2</level>
+				<school type="string">Abjuration</school>
+				<castingtime type="string">Action</castingtime>
+				<range type="string">30 feet</range>
+				<components type="string">V, S</components>
+				<duration type="string">Instantaneous</duration>
+				<ritual type="number">0</ritual>
+				<source type="string">Cleric, Bard</source>
+				<description type="formattedtext"><p>Up to five creatures of your choice regain 1d8 + your spellcasting modifier Health each.</p></description>
+				<actions>
+					<id-00001>
+						<type type="string">cast</type>
+						<targeting type="string">targets</targeting>
+						<targetingval type="number">5</targetingval>
+						<allowupcast type="number">1</allowupcast>
+					</id-00001>
+					<id-00002>
+						<type type="string">heal</type>
+						<heallist>
+							<id-00001>
+								<dice type="string">1d8</dice>
+								<stat type="string">base</stat>
+								<scalestat type="string">upcast</scalestat>
+								<scaledice type="string">1d8</scaledice>
+							</id-00001>
+						</heallist>
+					</id-00002>
+				</actions>
+			</mendmany>
+		</category>
+		<category name="Circle 3">
+			<fireburst>
+				<name type="string">Fire Burst</name>
+				<level type="number">3</level>
+				<school type="string">Evocation</school>
+				<castingtime type="string">Action</castingtime>
+				<range type="string">150 feet</range>
+				<components type="string">V, S</components>
+				<duration type="string">Instantaneous</duration>
+				<ritual type="number">0</ritual>
+				<source type="string">Wizard</source>
+				<description type="formattedtext"><p>A bead of flame bursts at a point you choose. Each creature in a 20-foot sphere makes a Dexterity save: 8d6 fire damage, half on a success. Fire spreads around corners and lights what will burn.</p></description>
+				<actions>
+					<id-00001>
+						<type type="string">cast</type>
+						<targeting type="string">targets</targeting>
+						<targetingval type="number">1</targetingval>
+					</id-00001>
+					<id-00002>
+						<type type="string">powersave</type>
+						<savetype type="string">dexterity</savetype>
+						<onmissdamage type="string">half</onmissdamage>
+					</id-00002>
+					<id-00003>
+						<type type="string">damage</type>
+						<damagelist>
+							<id-00001>
+								<dice type="string">8d6</dice>
+								<type type="string">fire</type>
+								<scalestat type="string">upcast</scalestat>
+								<scaledice type="string">1d6</scaledice>
+							</id-00001>
+						</damagelist>
+					</id-00003>
+				</actions>
+			</fireburst>
+			<stormlance>
+				<name type="string">Storm Lance</name>
+				<level type="number">3</level>
+				<school type="string">Evocation</school>
+				<castingtime type="string">Action</castingtime>
+				<range type="string">Self (100-foot line)</range>
+				<components type="string">V, S</components>
+				<duration type="string">Instantaneous</duration>
+				<ritual type="number">0</ritual>
+				<source type="string">Wizard</source>
+				<description type="formattedtext"><p>A spear of lightning 100 feet long and 5 feet wide. Each creature in it makes a Dexterity save: 8d6 lightning damage, half on a success.</p></description>
+				<actions>
+					<id-00001>
+						<type type="string">cast</type>
+						<targeting type="string">targets</targeting>
+						<targetingval type="number">1</targetingval>
+					</id-00001>
+					<id-00002>
+						<type type="string">powersave</type>
+						<savetype type="string">dexterity</savetype>
+						<onmissdamage type="string">half</onmissdamage>
+					</id-00002>
+					<id-00003>
+						<type type="string">damage</type>
+						<damagelist>
+							<id-00001>
+								<dice type="string">8d6</dice>
+								<type type="string">lightning</type>
+								<scalestat type="string">upcast</scalestat>
+								<scaledice type="string">1d6</scaledice>
+							</id-00001>
+						</damagelist>
+					</id-00003>
+				</actions>
+			</stormlance>
+			<banishfear>
+				<name type="string">Banish Fear</name>
+				<level type="number">3</level>
+				<school type="string">Abjuration</school>
+				<castingtime type="string">Action</castingtime>
+				<range type="string">30 feet</range>
+				<components type="string">V, S</components>
+				<duration type="string">Instantaneous</duration>
+				<ritual type="number">0</ritual>
+				<source type="string">Cleric, Paladin, Bard</source>
+				<description type="formattedtext"><p>Up to six creatures you can see lose 2 Dread each and cannot gain Dread for the next hour. A creature that is frightened is no longer.</p></description>
+			</banishfear>
+			<callback>
+				<name type="string">Call Back</name>
+				<level type="number">3</level>
+				<school type="string">Necromancy</school>
+				<castingtime type="string">Action</castingtime>
+				<range type="string">Touch</range>
+				<components type="string">V, S</components>
+				<duration type="string">Instantaneous</duration>
+				<ritual type="number">0</ritual>
+				<source type="string">Cleric, Paladin</source>
+				<description type="formattedtext"><p>You touch a creature that died within the last minute and call it back: it returns to life with 1 Health and 2 Dread. It cannot return if it was not willing, or if its body was destroyed.</p></description>
+			</callback>
+			<unweave>
+				<name type="string">Unweave</name>
+				<level type="number">3</level>
+				<school type="string">Abjuration</school>
+				<castingtime type="string">Reaction, when a creature you can see casts a spell</castingtime>
+				<range type="string">60 feet</range>
+				<components type="string">V, S</components>
+				<duration type="string">Instantaneous</duration>
+				<ritual type="number">0</ritual>
+				<source type="string">Wizard, Bard</source>
+				<description type="formattedtext"><p>You pull the threads of a spell apart as it is cast. A spell of the third circle or lower fails; a higher one fails if you succeed on an ability check with your spellcasting ability (DC 10 + its circle).</p></description>
+			</unweave>
+			<wardensoflight>
+				<name type="string">Wardens of Light</name>
+				<level type="number">3</level>
+				<school type="string">Conjuration</school>
+				<castingtime type="string">Action</castingtime>
+				<range type="string">Self (15-foot radius)</range>
+				<components type="string">V, S</components>
+				<duration type="string">Concentration, up to 10 minutes</duration>
+				<ritual type="number">0</ritual>
+				<source type="string">Cleric</source>
+				<description type="formattedtext"><p>Shining spirits circle you. A foe that starts its turn within 15 feet of you, or enters the area, makes a Wisdom save: 3d8 radiant damage, half on a success. The area is bright light.</p></description>
+				<actions>
+					<id-00001>
+						<type type="string">cast</type>
+						<targeting type="string">targets</targeting>
+						<targetingval type="number">1</targetingval>
+					</id-00001>
+					<id-00002>
+						<type type="string">powersave</type>
+						<savetype type="string">wisdom</savetype>
+						<onmissdamage type="string">half</onmissdamage>
+					</id-00002>
+					<id-00003>
+						<type type="string">damage</type>
+						<damagelist>
+							<id-00001>
+								<dice type="string">3d8</dice>
+								<type type="string">radiant</type>
+								<scalestat type="string">upcast</scalestat>
+								<scaledice type="string">1d8</scaledice>
+							</id-00001>
+						</damagelist>
+					</id-00003>
+				</actions>
+			</wardensoflight>
+		</category>
+	</spell>
+	<item>
+		<category name="Weapons">
+			<dagger>
+				<name type="string">Dagger</name>
+				<type type="string">Weapon</type>
+				<subtype type="string">Simple Melee Weapons</subtype>
+				<cost type="string">2 gc</cost>
+				<damage type="string">1d4 Piercing</damage>
+				<properties type="string">Finesse, Light, Thrown (Range 20/60)</properties>
+				<weight type="number">1</weight>
+				<bonus type="number">0</bonus>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>A long knife, the last weapon anyone gives up.</p></description>
+			</dagger>
+			<club>
+				<name type="string">Club</name>
+				<type type="string">Weapon</type>
+				<subtype type="string">Simple Melee Weapons</subtype>
+				<cost type="string">0.1 gc</cost>
+				<damage type="string">1d4 Bludgeoning</damage>
+				<properties type="string">Light</properties>
+				<weight type="number">2</weight>
+				<bonus type="number">0</bonus>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>A club. Properties: Light.</p></description>
+			</club>
+			<cudgel>
+				<name type="string">Cudgel</name>
+				<type type="string">Weapon</type>
+				<subtype type="string">Simple Melee Weapons</subtype>
+				<cost type="string">2 gc</cost>
+				<damage type="string">1d8 Bludgeoning</damage>
+				<properties type="string">Two-Handed</properties>
+				<weight type="number">10</weight>
+				<bonus type="number">0</bonus>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>A heavy length of oak bound in iron at one end.</p></description>
+			</cudgel>
+			<handaxe>
+				<name type="string">Handaxe</name>
+				<type type="string">Weapon</type>
+				<subtype type="string">Simple Melee Weapons</subtype>
+				<cost type="string">5 gc</cost>
+				<damage type="string">1d6 Slashing</damage>
+				<properties type="string">Light, Thrown (Range 20/60)</properties>
+				<weight type="number">2</weight>
+				<bonus type="number">0</bonus>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>A handaxe. Properties: Light, Thrown (Range 20/60).</p></description>
+			</handaxe>
+			<mace>
+				<name type="string">Mace</name>
+				<type type="string">Weapon</type>
+				<subtype type="string">Simple Melee Weapons</subtype>
+				<cost type="string">5 gc</cost>
+				<damage type="string">1d6 Bludgeoning</damage>
+				<properties type="string">-</properties>
+				<weight type="number">4</weight>
+				<bonus type="number">0</bonus>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>A mace.</p></description>
+			</mace>
+			<spear>
+				<name type="string">Spear</name>
+				<type type="string">Weapon</type>
+				<subtype type="string">Simple Melee Weapons</subtype>
+				<cost type="string">1 gc</cost>
+				<damage type="string">1d6 Piercing</damage>
+				<properties type="string">Thrown (Range 20/60), Versatile (1d8)</properties>
+				<weight type="number">3</weight>
+				<bonus type="number">0</bonus>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>A spear. Properties: Thrown (Range 20/60), Versatile (1d8).</p></description>
+			</spear>
+			<quarterstaff>
+				<name type="string">Quarterstaff</name>
+				<type type="string">Weapon</type>
+				<subtype type="string">Simple Melee Weapons</subtype>
+				<cost type="string">0.2 gc</cost>
+				<damage type="string">1d6 Bludgeoning</damage>
+				<properties type="string">Versatile (1d8)</properties>
+				<weight type="number">4</weight>
+				<bonus type="number">0</bonus>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>A quarterstaff. Properties: Versatile (1d8).</p></description>
+			</quarterstaff>
+			<sickle>
+				<name type="string">Sickle</name>
+				<type type="string">Weapon</type>
+				<subtype type="string">Simple Melee Weapons</subtype>
+				<cost type="string">1 gc</cost>
+				<damage type="string">1d4 Slashing</damage>
+				<properties type="string">Light</properties>
+				<weight type="number">2</weight>
+				<bonus type="number">0</bonus>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>A sickle. Properties: Light.</p></description>
+			</sickle>
+			<sling>
+				<name type="string">Sling</name>
+				<type type="string">Weapon</type>
+				<subtype type="string">Simple Ranged Weapons</subtype>
+				<cost type="string">0.1 gc</cost>
+				<damage type="string">1d4 Bludgeoning</damage>
+				<properties type="string">Ammunition (Range 30/120)</properties>
+				<weight type="number">0</weight>
+				<bonus type="number">0</bonus>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>A sling. Properties: Ammunition (Range 30/120).</p></description>
+			</sling>
+			<shortbow>
+				<name type="string">Shortbow</name>
+				<type type="string">Weapon</type>
+				<subtype type="string">Simple Ranged Weapons</subtype>
+				<cost type="string">25 gc</cost>
+				<damage type="string">1d6 Piercing</damage>
+				<properties type="string">Ammunition (Range 80/320), Two-Handed</properties>
+				<weight type="number">2</weight>
+				<bonus type="number">0</bonus>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>A shortbow. Properties: Ammunition (Range 80/320), Two-Handed.</p></description>
+			</shortbow>
+			<lightcrossbow>
+				<name type="string">Light Crossbow</name>
+				<type type="string">Weapon</type>
+				<subtype type="string">Simple Ranged Weapons</subtype>
+				<cost type="string">25 gc</cost>
+				<damage type="string">1d8 Piercing</damage>
+				<properties type="string">Ammunition (Range 80/320), Loading, Two-Handed</properties>
+				<weight type="number">5</weight>
+				<bonus type="number">0</bonus>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>A light crossbow. Properties: Ammunition (Range 80/320), Loading, Two-Handed.</p></description>
+			</lightcrossbow>
+			<shortsword>
+				<name type="string">Shortsword</name>
+				<type type="string">Weapon</type>
+				<subtype type="string">Martial Melee Weapons</subtype>
+				<cost type="string">10 gc</cost>
+				<damage type="string">1d6 Piercing</damage>
+				<properties type="string">Finesse, Light</properties>
+				<weight type="number">2</weight>
+				<bonus type="number">0</bonus>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>A shortsword. Properties: Finesse, Light.</p></description>
+			</shortsword>
+			<longsword>
+				<name type="string">Longsword</name>
+				<type type="string">Weapon</type>
+				<subtype type="string">Martial Melee Weapons</subtype>
+				<cost type="string">15 gc</cost>
+				<damage type="string">1d8 Slashing</damage>
+				<properties type="string">Versatile (1d10)</properties>
+				<weight type="number">3</weight>
+				<bonus type="number">0</bonus>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>The knight's blade: long enough to keep death an arm away.</p></description>
+			</longsword>
+			<rapier>
+				<name type="string">Rapier</name>
+				<type type="string">Weapon</type>
+				<subtype type="string">Martial Melee Weapons</subtype>
+				<cost type="string">25 gc</cost>
+				<damage type="string">1d8 Piercing</damage>
+				<properties type="string">Finesse</properties>
+				<weight type="number">2</weight>
+				<bonus type="number">0</bonus>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>A rapier. Properties: Finesse.</p></description>
+			</rapier>
+			<battleaxe>
+				<name type="string">Battleaxe</name>
+				<type type="string">Weapon</type>
+				<subtype type="string">Martial Melee Weapons</subtype>
+				<cost type="string">10 gc</cost>
+				<damage type="string">1d8 Slashing</damage>
+				<properties type="string">Versatile (1d10)</properties>
+				<weight type="number">4</weight>
+				<bonus type="number">0</bonus>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>A battleaxe. Properties: Versatile (1d10).</p></description>
+			</battleaxe>
+			<warhammer>
+				<name type="string">Warhammer</name>
+				<type type="string">Weapon</type>
+				<subtype type="string">Martial Melee Weapons</subtype>
+				<cost type="string">15 gc</cost>
+				<damage type="string">1d8 Bludgeoning</damage>
+				<properties type="string">Versatile (1d10)</properties>
+				<weight type="number">2</weight>
+				<bonus type="number">0</bonus>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>A warhammer. Properties: Versatile (1d10).</p></description>
+			</warhammer>
+			<flail>
+				<name type="string">Flail</name>
+				<type type="string">Weapon</type>
+				<subtype type="string">Martial Melee Weapons</subtype>
+				<cost type="string">10 gc</cost>
+				<damage type="string">1d8 Bludgeoning</damage>
+				<properties type="string">-</properties>
+				<weight type="number">2</weight>
+				<bonus type="number">0</bonus>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>A flail.</p></description>
+			</flail>
+			<morningstar>
+				<name type="string">Morningstar</name>
+				<type type="string">Weapon</type>
+				<subtype type="string">Martial Melee Weapons</subtype>
+				<cost type="string">15 gc</cost>
+				<damage type="string">1d8 Piercing</damage>
+				<properties type="string">-</properties>
+				<weight type="number">4</weight>
+				<bonus type="number">0</bonus>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>A morningstar.</p></description>
+			</morningstar>
+			<greatsword>
+				<name type="string">Greatsword</name>
+				<type type="string">Weapon</type>
+				<subtype type="string">Martial Melee Weapons</subtype>
+				<cost type="string">50 gc</cost>
+				<damage type="string">2d6 Slashing</damage>
+				<properties type="string">Heavy, Two-Handed</properties>
+				<weight type="number">6</weight>
+				<bonus type="number">0</bonus>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>A greatsword. Properties: Heavy, Two-Handed.</p></description>
+			</greatsword>
+			<greataxe>
+				<name type="string">Greataxe</name>
+				<type type="string">Weapon</type>
+				<subtype type="string">Martial Melee Weapons</subtype>
+				<cost type="string">30 gc</cost>
+				<damage type="string">1d12 Slashing</damage>
+				<properties type="string">Heavy, Two-Handed</properties>
+				<weight type="number">7</weight>
+				<bonus type="number">0</bonus>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>A greataxe. Properties: Heavy, Two-Handed.</p></description>
+			</greataxe>
+			<halberd>
+				<name type="string">Halberd</name>
+				<type type="string">Weapon</type>
+				<subtype type="string">Martial Melee Weapons</subtype>
+				<cost type="string">20 gc</cost>
+				<damage type="string">1d10 Slashing</damage>
+				<properties type="string">Heavy, Reach, Two-Handed</properties>
+				<weight type="number">6</weight>
+				<bonus type="number">0</bonus>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>A halberd. Properties: Heavy, Reach, Two-Handed.</p></description>
+			</halberd>
+			<longbow>
+				<name type="string">Longbow</name>
+				<type type="string">Weapon</type>
+				<subtype type="string">Martial Ranged Weapons</subtype>
+				<cost type="string">50 gc</cost>
+				<damage type="string">1d8 Piercing</damage>
+				<properties type="string">Ammunition (Range 150/600), Heavy, Two-Handed</properties>
+				<weight type="number">2</weight>
+				<bonus type="number">0</bonus>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>A longbow. Properties: Ammunition (Range 150/600), Heavy, Two-Handed.</p></description>
+			</longbow>
+			<handcrossbow>
+				<name type="string">Hand Crossbow</name>
+				<type type="string">Weapon</type>
+				<subtype type="string">Martial Ranged Weapons</subtype>
+				<cost type="string">75 gc</cost>
+				<damage type="string">1d6 Piercing</damage>
+				<properties type="string">Ammunition (Range 30/120), Light, Loading</properties>
+				<weight type="number">3</weight>
+				<bonus type="number">0</bonus>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>A hand crossbow. Properties: Ammunition (Range 30/120), Light, Loading.</p></description>
+			</handcrossbow>
+			<heavycrossbow>
+				<name type="string">Heavy Crossbow</name>
+				<type type="string">Weapon</type>
+				<subtype type="string">Martial Ranged Weapons</subtype>
+				<cost type="string">50 gc</cost>
+				<damage type="string">1d10 Piercing</damage>
+				<properties type="string">Ammunition (Range 100/400), Heavy, Loading, Two-Handed</properties>
+				<weight type="number">18</weight>
+				<bonus type="number">0</bonus>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>A heavy crossbow. Properties: Ammunition (Range 100/400), Heavy, Loading, Two-Handed.</p></description>
+			</heavycrossbow>
+		</category>
+		<category name="Armour">
+			<quiltedcoat>
+				<name type="string">Quilted Coat</name>
+				<type type="string">Armor</type>
+				<subtype type="string">Light Armor</subtype>
+				<cost type="string">5 gc</cost>
+				<ac type="number">11</ac>
+				<dexbonus type="string">Yes</dexbonus>
+				<stealth type="string">Disadvantage</stealth>
+				<weight type="number">8</weight>
+				<bonus type="number">0</bonus>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>Layers of stitched cloth. Better than nothing, and warm.</p></description>
+			</quiltedcoat>
+			<leatherjerkin>
+				<name type="string">Leather Jerkin</name>
+				<type type="string">Armor</type>
+				<subtype type="string">Light Armor</subtype>
+				<cost type="string">10 gc</cost>
+				<ac type="number">11</ac>
+				<dexbonus type="string">Yes</dexbonus>
+				<stealth type="string">-</stealth>
+				<weight type="number">10</weight>
+				<bonus type="number">0</bonus>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>Boiled and oiled leather over the chest and shoulders.</p></description>
+			</leatherjerkin>
+			<ringedleather>
+				<name type="string">Ringed Leather</name>
+				<type type="string">Armor</type>
+				<subtype type="string">Light Armor</subtype>
+				<cost type="string">45 gc</cost>
+				<ac type="number">12</ac>
+				<dexbonus type="string">Yes</dexbonus>
+				<stealth type="string">-</stealth>
+				<weight type="number">13</weight>
+				<bonus type="number">0</bonus>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>Leather sewn with iron rings, quiet enough for thieves.</p></description>
+			</ringedleather>
+			<hidecoat>
+				<name type="string">Hide Coat</name>
+				<type type="string">Armor</type>
+				<subtype type="string">Medium Armor</subtype>
+				<cost type="string">10 gc</cost>
+				<ac type="number">12</ac>
+				<dexbonus type="string">Max 2</dexbonus>
+				<stealth type="string">-</stealth>
+				<weight type="number">12</weight>
+				<bonus type="number">0</bonus>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>Thick furs and hides, the hunter's armour.</p></description>
+			</hidecoat>
+			<mailshirt>
+				<name type="string">Mail Shirt</name>
+				<type type="string">Armor</type>
+				<subtype type="string">Medium Armor</subtype>
+				<cost type="string">50 gc</cost>
+				<ac type="number">13</ac>
+				<dexbonus type="string">Max 2</dexbonus>
+				<stealth type="string">-</stealth>
+				<weight type="number">20</weight>
+				<bonus type="number">0</bonus>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>A shirt of interlocking rings under a tunic.</p></description>
+			</mailshirt>
+			<scalehauberk>
+				<name type="string">Scale Hauberk</name>
+				<type type="string">Armor</type>
+				<subtype type="string">Medium Armor</subtype>
+				<cost type="string">50 gc</cost>
+				<ac type="number">14</ac>
+				<dexbonus type="string">Max 2</dexbonus>
+				<stealth type="string">Disadvantage</stealth>
+				<weight type="number">45</weight>
+				<bonus type="number">0</bonus>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>Overlapping plates of steel on a leather coat.</p></description>
+			</scalehauberk>
+			<cuirass>
+				<name type="string">Cuirass</name>
+				<type type="string">Armor</type>
+				<subtype type="string">Medium Armor</subtype>
+				<cost type="string">400 gc</cost>
+				<ac type="number">14</ac>
+				<dexbonus type="string">Max 2</dexbonus>
+				<stealth type="string">-</stealth>
+				<weight type="number">20</weight>
+				<bonus type="number">0</bonus>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>A fitted steel breast and back.</p></description>
+			</cuirass>
+			<ringmail>
+				<name type="string">Ring Mail</name>
+				<type type="string">Armor</type>
+				<subtype type="string">Heavy Armor</subtype>
+				<cost type="string">30 gc</cost>
+				<ac type="number">14</ac>
+				<dexbonus type="string">No</dexbonus>
+				<stealth type="string">Disadvantage</stealth>
+				<weight type="number">40</weight>
+				<bonus type="number">0</bonus>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>Heavy leather with iron rings sewn close.</p></description>
+			</ringmail>
+			<chainhauberk>
+				<name type="string">Chain Hauberk</name>
+				<type type="string">Armor</type>
+				<subtype type="string">Heavy Armor</subtype>
+				<cost type="string">75 gc</cost>
+				<ac type="number">16</ac>
+				<dexbonus type="string">No</dexbonus>
+				<stealth type="string">Disadvantage</stealth>
+				<weight type="number">55</weight>
+				<bonus type="number">0</bonus>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>Mail from neck to knee over a padded coat. Strength 13.</p></description>
+			</chainhauberk>
+			<plateharness>
+				<name type="string">Plate Harness</name>
+				<type type="string">Armor</type>
+				<subtype type="string">Heavy Armor</subtype>
+				<cost type="string">1500 gc</cost>
+				<ac type="number">18</ac>
+				<dexbonus type="string">No</dexbonus>
+				<stealth type="string">Disadvantage</stealth>
+				<weight type="number">65</weight>
+				<bonus type="number">0</bonus>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>Shaped steel plates over every part of the body. Strength 15.</p></description>
+			</plateharness>
+			<shield>
+				<name type="string">Shield</name>
+				<type type="string">Armor</type>
+				<subtype type="string">Shield</subtype>
+				<cost type="string">10 gc</cost>
+				<ac type="number">2</ac>
+				<dexbonus type="string">-</dexbonus>
+				<stealth type="string">-</stealth>
+				<weight type="number">6</weight>
+				<bonus type="number">0</bonus>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>Wood or metal on the arm: +2 Defense.</p></description>
+			</shield>
+		</category>
+		<category name="Gear">
+			<torch>
+				<name type="string">Torch</name>
+				<type type="string">Adventuring Gear</type>
+				<subtype type="string">Standard</subtype>
+				<cost type="string">0.01 gc</cost>
+				<weight type="number">1</weight>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>A torch burns for <b>six exploration turns</b> (an hour). It sheds bright light 20 feet and dim light 20 feet beyond. Lit, it shows everyone where you are.</p></description>
+			</torch>
+			<lanternhooded>
+				<name type="string">Lantern, Hooded</name>
+				<type type="string">Adventuring Gear</type>
+				<subtype type="string">Standard</subtype>
+				<cost type="string">5 gc</cost>
+				<weight type="number">2</weight>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>Burns a flask of oil for <b>24 turns</b> (four hours): bright light 30 feet, dim 30 beyond. Hooded, it gives only dim light 5 feet.</p></description>
+			</lanternhooded>
+			<lanternbullseye>
+				<name type="string">Lantern, Bullseye</name>
+				<type type="string">Adventuring Gear</type>
+				<subtype type="string">Standard</subtype>
+				<cost type="string">10 gc</cost>
+				<weight type="number">2</weight>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>Burns a flask of oil for 24 turns: a 60-foot cone of bright light and 60 feet of dim beyond. The cone must point somewhere.</p></description>
+			</lanternbullseye>
+			<oilflask>
+				<name type="string">Oil, Flask</name>
+				<type type="string">Adventuring Gear</type>
+				<subtype type="string">Standard</subtype>
+				<cost type="string">0.1 gc</cost>
+				<weight type="number">1</weight>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>Fuel for a lantern (24 turns). Thrown and set alight, it burns a creature for 1d4 fire a turn for two turns.</p></description>
+			</oilflask>
+			<candle>
+				<name type="string">Candle</name>
+				<type type="string">Adventuring Gear</type>
+				<subtype type="string">Standard</subtype>
+				<cost type="string">0.01 gc</cost>
+				<weight type="number">0</weight>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>Burns for six turns: dim light 5 feet. Enough to read by, not enough to fight by.</p></description>
+			</candle>
+			<tinderbox>
+				<name type="string">Tinderbox</name>
+				<type type="string">Adventuring Gear</type>
+				<subtype type="string">Standard</subtype>
+				<cost type="string">0.5 gc</cost>
+				<weight type="number">1</weight>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>Flint, steel and tinder. Lighting a torch takes an action; in the wind or wet, a Dexterity check (DC 12).</p></description>
+			</tinderbox>
+			<ropehempen50feet>
+				<name type="string">Rope, Hempen (50 feet)</name>
+				<type type="string">Adventuring Gear</type>
+				<subtype type="string">Standard</subtype>
+				<cost type="string">1 gc</cost>
+				<weight type="number">10</weight>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>Strong enough for two climbers. A Strength check (DC 18) breaks it.</p></description>
+			</ropehempen50feet>
+			<grapplinghook>
+				<name type="string">Grappling Hook</name>
+				<type type="string">Adventuring Gear</type>
+				<subtype type="string">Standard</subtype>
+				<cost type="string">2 gc</cost>
+				<weight type="number">4</weight>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>An iron hook for a rope's end.</p></description>
+			</grapplinghook>
+			<crowbar>
+				<name type="string">Crowbar</name>
+				<type type="string">Adventuring Gear</type>
+				<subtype type="string">Standard</subtype>
+				<cost type="string">2 gc</cost>
+				<weight type="number">5</weight>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>Advantage on Strength checks where leverage helps: a jammed door, a coffin lid.</p></description>
+			</crowbar>
+			<ironspikes10>
+				<name type="string">Iron Spikes (10)</name>
+				<type type="string">Adventuring Gear</type>
+				<subtype type="string">Standard</subtype>
+				<cost type="string">1 gc</cost>
+				<weight type="number">5</weight>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>For wedging doors shut, or open.</p></description>
+			</ironspikes10>
+			<chalk5sticks>
+				<name type="string">Chalk (5 sticks)</name>
+				<type type="string">Adventuring Gear</type>
+				<subtype type="string">Standard</subtype>
+				<cost type="string">0.01 gc</cost>
+				<weight type="number">0</weight>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>For marking the way back. Every dungeon has someone who forgot to.</p></description>
+			</chalk5sticks>
+			<pole10feet>
+				<name type="string">Pole (10 feet)</name>
+				<type type="string">Adventuring Gear</type>
+				<subtype type="string">Standard</subtype>
+				<cost type="string">0.05 gc</cost>
+				<weight type="number">7</weight>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>For prodding what you would rather not step on.</p></description>
+			</pole10feet>
+			<caltropsbagof20>
+				<name type="string">Caltrops (bag of 20)</name>
+				<type type="string">Adventuring Gear</type>
+				<subtype type="string">Standard</subtype>
+				<cost type="string">1 gc</cost>
+				<weight type="number">2</weight>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>Scattered over a 5-foot square: whoever enters stops and makes a Dexterity save (DC 15) or takes 1 piercing damage and moves at half speed until healed.</p></description>
+			</caltropsbagof20>
+			<bedroll>
+				<name type="string">Bedroll</name>
+				<type type="string">Adventuring Gear</type>
+				<subtype type="string">Standard</subtype>
+				<cost type="string">1 gc</cost>
+				<weight type="number">7</weight>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>A safe rest needs one (or a bed).</p></description>
+			</bedroll>
+			<rations1day>
+				<name type="string">Rations (1 day)</name>
+				<type type="string">Adventuring Gear</type>
+				<subtype type="string">Standard</subtype>
+				<cost type="string">0.5 gc</cost>
+				<weight type="number">2</weight>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>Dried meat, hard bread, an onion. A safe rest needs food and water.</p></description>
+			</rations1day>
+			<waterskin>
+				<name type="string">Waterskin</name>
+				<type type="string">Adventuring Gear</type>
+				<subtype type="string">Standard</subtype>
+				<cost type="string">0.2 gc</cost>
+				<weight type="number">5</weight>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>Holds a day's water.</p></description>
+			</waterskin>
+			<backpack>
+				<name type="string">Backpack</name>
+				<type type="string">Adventuring Gear</type>
+				<subtype type="string">Standard</subtype>
+				<cost type="string">2 gc</cost>
+				<weight type="number">5</weight>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>Holds 30 pounds of gear.</p></description>
+			</backpack>
+			<healerssatchel>
+				<name type="string">Healer's Satchel</name>
+				<type type="string">Adventuring Gear</type>
+				<subtype type="string">Standard</subtype>
+				<cost type="string">5 gc</cost>
+				<weight type="number">3</weight>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>Bandages, salves and splints for ten uses. An action and a use steadies a dying creature without a check, or lets a creature spend one Recovery Die outside a rest.</p></description>
+			</healerssatchel>
+			<holysymbol>
+				<name type="string">Holy Symbol</name>
+				<type type="string">Adventuring Gear</type>
+				<subtype type="string">Focus</subtype>
+				<cost type="string">5 gc</cost>
+				<weight type="number">1</weight>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>A cleric's or paladin's focus: an amulet, a reliquary, a sigil painted on a shield.</p></description>
+			</holysymbol>
+			<arcanefocus>
+				<name type="string">Arcane Focus</name>
+				<type type="string">Adventuring Gear</type>
+				<subtype type="string">Focus</subtype>
+				<cost type="string">10 gc</cost>
+				<weight type="number">1</weight>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>A wizard's or bard's focus: a wand, a crystal, a worn instrument.</p></description>
+			</arcanefocus>
+			<spellbook>
+				<name type="string">Spellbook</name>
+				<type type="string">Adventuring Gear</type>
+				<subtype type="string">Standard</subtype>
+				<cost type="string">50 gc</cost>
+				<weight type="number">3</weight>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>A wizard's book of spells: 100 vellum pages, a lock, and the smell of old candle smoke.</p></description>
+			</spellbook>
+			<thievestools>
+				<name type="string">Thieves' Tools</name>
+				<type type="string">Adventuring Gear</type>
+				<subtype type="string">Standard</subtype>
+				<cost type="string">25 gc</cost>
+				<weight type="number">1</weight>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>Picks, a small file, a mirror on a stick and a pair of narrow pliers. Needed to pick locks and disarm traps.</p></description>
+			</thievestools>
+			<mirrorsteel>
+				<name type="string">Mirror, Steel</name>
+				<type type="string">Adventuring Gear</type>
+				<subtype type="string">Standard</subtype>
+				<cost type="string">5 gc</cost>
+				<weight type="number">0.5</weight>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>For looking round corners, and at what you should not look at directly.</p></description>
+			</mirrorsteel>
+			<manacles>
+				<name type="string">Manacles</name>
+				<type type="string">Adventuring Gear</type>
+				<subtype type="string">Standard</subtype>
+				<cost type="string">2 gc</cost>
+				<weight type="number">6</weight>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>Iron cuffs. Escaping them: Dexterity (DC 18); breaking them: Strength (DC 20).</p></description>
+			</manacles>
+			<luckycharm>
+				<name type="string">Lucky Charm</name>
+				<type type="string">Adventuring Gear</type>
+				<subtype type="string">Standard</subtype>
+				<cost type="string">1 gc</cost>
+				<weight type="number">0</weight>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>A rabbit's foot, a saint's bone, a coin with a hole in it. Once per safe rest, when you gain Dread, you may ignore one point of it.</p></description>
+			</luckycharm>
+			<arrows20>
+				<name type="string">Arrows (20)</name>
+				<type type="string">Adventuring Gear</type>
+				<subtype type="string">Ammunition</subtype>
+				<cost type="string">1 gc</cost>
+				<weight type="number">1</weight>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>Ammunition for bows.</p></description>
+			</arrows20>
+			<bolts20>
+				<name type="string">Bolts (20)</name>
+				<type type="string">Adventuring Gear</type>
+				<subtype type="string">Ammunition</subtype>
+				<cost type="string">1 gc</cost>
+				<weight type="number">1.5</weight>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>Ammunition for crossbows.</p></description>
+			</bolts20>
+			<slingbullets20>
+				<name type="string">Sling Bullets (20)</name>
+				<type type="string">Adventuring Gear</type>
+				<subtype type="string">Ammunition</subtype>
+				<cost type="string">0.04 gc</cost>
+				<weight type="number">1.5</weight>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>Ammunition for slings.</p></description>
+			</slingbullets20>
+		</category>
+	</item>
+	<reference>
+		<refmanualindex>
+			<chapters>
+				<chapter_000>
+					<name type="string">Getting Started</name>
+					<subchapters>
+						<sub_000>
+							<name type="string">The Game</name>
+							<refpages>
+								<page_000>
+									<name type="string">Welcome to the Dark</name>
+									<keywords type="string"></keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0001@Descending Darkness Player's Handbook</recordname></listlink>
+								</page_000>
+								<page_001>
+									<name type="string">The Core Roll</name>
+									<keywords type="string">check difficulty dc</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0002@Descending Darkness Player's Handbook</recordname></listlink>
+								</page_001>
+								<page_002>
+									<name type="string">Abilities and Proficiency</name>
+									<keywords type="string">ability score modifier proficiency</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0003@Descending Darkness Player's Handbook</recordname></listlink>
+								</page_002>
+							</refpages>
+						</sub_000>
+						<sub_001>
+							<name type="string">Making a Character</name>
+							<refpages>
+								<page_000>
+									<name type="string">Five Steps</name>
+									<keywords type="string">character creation wizard</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0004@Descending Darkness Player's Handbook</recordname></listlink>
+								</page_000>
+								<page_001>
+									<name type="string">Advancement</name>
+									<keywords type="string">experience level</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0005@Descending Darkness Player's Handbook</recordname></listlink>
+								</page_001>
+							</refpages>
+						</sub_001>
+					</subchapters>
+				</chapter_000>
+				<chapter_001>
+					<name type="string">Kin and Classes</name>
+					<subchapters>
+						<sub_000>
+							<name type="string">Kin</name>
+							<refpages>
+								<page_000>
+									<name type="string">Human</name>
+									<keywords type="string">kin</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0006@Descending Darkness Player's Handbook</recordname></listlink>
+								</page_000>
+								<page_001>
+									<name type="string">Elf</name>
+									<keywords type="string">kin</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0007@Descending Darkness Player's Handbook</recordname></listlink>
+								</page_001>
+								<page_002>
+									<name type="string">Half-Elf</name>
+									<keywords type="string">kin</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0008@Descending Darkness Player's Handbook</recordname></listlink>
+								</page_002>
+								<page_003>
+									<name type="string">Dwarf</name>
+									<keywords type="string">kin</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0009@Descending Darkness Player's Handbook</recordname></listlink>
+								</page_003>
+								<page_004>
+									<name type="string">Gnome</name>
+									<keywords type="string">kin</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0010@Descending Darkness Player's Handbook</recordname></listlink>
+								</page_004>
+							</refpages>
+						</sub_000>
+						<sub_001>
+							<name type="string">Classes</name>
+							<refpages>
+								<page_000>
+									<name type="string">Fighter</name>
+									<keywords type="string">class</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0011@Descending Darkness Player's Handbook</recordname></listlink>
+								</page_000>
+								<page_001>
+									<name type="string">Cleric</name>
+									<keywords type="string">class</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0012@Descending Darkness Player's Handbook</recordname></listlink>
+								</page_001>
+								<page_002>
+									<name type="string">Wizard</name>
+									<keywords type="string">class</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0013@Descending Darkness Player's Handbook</recordname></listlink>
+								</page_002>
+								<page_003>
+									<name type="string">Thief</name>
+									<keywords type="string">class</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0014@Descending Darkness Player's Handbook</recordname></listlink>
+								</page_003>
+								<page_004>
+									<name type="string">Paladin</name>
+									<keywords type="string">class</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0015@Descending Darkness Player's Handbook</recordname></listlink>
+								</page_004>
+								<page_005>
+									<name type="string">Ranger</name>
+									<keywords type="string">class</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0016@Descending Darkness Player's Handbook</recordname></listlink>
+								</page_005>
+								<page_006>
+									<name type="string">Bard</name>
+									<keywords type="string">class</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0017@Descending Darkness Player's Handbook</recordname></listlink>
+								</page_006>
+							</refpages>
+						</sub_001>
+						<sub_002>
+							<name type="string">Backgrounds</name>
+							<refpages>
+								<page_000>
+									<name type="string">Backgrounds</name>
+									<keywords type="string">background</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0018@Descending Darkness Player's Handbook</recordname></listlink>
+								</page_000>
+							</refpages>
+						</sub_002>
+					</subchapters>
+				</chapter_001>
+				<chapter_002>
+					<name type="string">Danger and Exploration</name>
+					<subchapters>
+						<sub_000>
+							<name type="string">The Dark</name>
+							<refpages>
+								<page_000>
+									<name type="string">Light and Time</name>
+									<keywords type="string">light torch lantern exploration turn</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0019@Descending Darkness Player's Handbook</recordname></listlink>
+								</page_000>
+								<page_001>
+									<name type="string">Dread</name>
+									<keywords type="string">dread fear horror sanity</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0020@Descending Darkness Player's Handbook</recordname></listlink>
+								</page_001>
+								<page_002>
+									<name type="string">Resting</name>
+									<keywords type="string">rest recovery dice</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0021@Descending Darkness Player's Handbook</recordname></listlink>
+								</page_002>
+							</refpages>
+						</sub_000>
+						<sub_001>
+							<name type="string">Combat</name>
+							<refpages>
+								<page_000>
+									<name type="string">Fighting</name>
+									<keywords type="string">combat initiative attack defense</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0022@Descending Darkness Player's Handbook</recordname></listlink>
+								</page_000>
+								<page_001>
+									<name type="string">Dying</name>
+									<keywords type="string">dying death zero health stabilize</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0023@Descending Darkness Player's Handbook</recordname></listlink>
+								</page_001>
+								<page_002>
+									<name type="string">Spells</name>
+									<keywords type="string">spells magic slots circle</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0024@Descending Darkness Player's Handbook</recordname></listlink>
+								</page_002>
+							</refpages>
+						</sub_001>
+					</subchapters>
+				</chapter_002>
+				<chapter_003>
+					<name type="string">Credits</name>
+					<subchapters>
+						<sub_000>
+							<name type="string">About This Book</name>
+							<refpages>
+								<page_000>
+									<name type="string">Credits and License</name>
+									<keywords type="string">license credits</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0025@Descending Darkness Player's Handbook</recordname></listlink>
+								</page_000>
+							</refpages>
+						</sub_000>
+					</subchapters>
+				</chapter_003>
+			</chapters>
+		</refmanualindex>
+		<refmanualdata>
+			<p0001>
+				<name type="string">Welcome to the Dark</name>
+				<text type="formattedtext"><p><i>Descending Darkness</i> is a game of fragile people going into dangerous places, and some of them coming back.</p><p>The towns hold. Past their walls the old roads run into ruins, barrows and drowned halls, where the light of a torch is the whole world and the dark beyond it is listening. Your characters go there for gold, for answers, for someone who did not come home.</p><p>One player is the <b>Game Master</b>: they describe the world, play everyone who lives in it, and decide what the dice mean. The others each play an adventurer. Together you find out what happens.</p><p>This book is for everyone. The <b>Game Master's Guide</b> and the <b>Bestiary</b> are for the Game Master.</p></text>
+			</p0001>
+			<p0002>
+				<name type="string">The Core Roll</name>
+				<text type="formattedtext"><p>When the outcome is uncertain and something is at stake, roll a <b>d20</b>, add the ability modifier that fits (and your <b>proficiency bonus</b> if you are trained in what you are doing), and compare the total to the <b>difficulty</b>:</p><table><tr decoration="underline"><td><b>Difficulty</b></td><td><b>Number</b></td></tr><tr><td>Routine pressure</td><td>10</td></tr><tr><td>Risky</td><td>12</td></tr><tr><td>Hard</td><td>15</td></tr><tr><td>Severe</td><td>18</td></tr></table><p>Meet or beat it and you succeed. Before you roll, the Game Master tells you what failing would cost: time, light, position, Health, or attention from something in the dark.</p><p><b>Advantage</b> (something helps you): roll two d20 and keep the higher. <b>Disadvantage</b>: keep the lower. They cancel each other.</p><p>In Kraken, click any number on your sheet to roll it in front of the table; set the DC on the sheet first and the result says success or failure.</p></text>
+			</p0002>
+			<p0003>
+				<name type="string">Abilities and Proficiency</name>
+				<text type="formattedtext"><p>Six abilities describe every character: <b>Strength</b>, <b>Dexterity</b>, <b>Constitution</b>, <b>Intelligence</b>, <b>Wisdom</b> and <b>Charisma</b>. The modifier is the score minus 10, halved and rounded down.</p><table><tr decoration="underline"><td><b>Score</b></td><td><b>8</b></td><td><b>10</b></td><td><b>12</b></td><td><b>13</b></td><td><b>14</b></td><td><b>16</b></td><td><b>17</b></td><td><b>18</b></td></tr><tr><td>Modifier</td><td>-1</td><td>+0</td><td>+1</td><td>+1</td><td>+2</td><td>+3</td><td>+3</td><td>+4</td></tr></table><p>Your <b>proficiency bonus</b> is +2 at levels 1 to 4, +3 at 5 to 8 and +4 at 9 and 10. Add it to checks with skills you are trained in, to saves your class knows, and to attacks with weapons you know.</p></text>
+			</p0003>
+			<p0004>
+				<name type="string">Five Steps</name>
+				<text type="formattedtext"><list><li>1. <b>Choose a kin</b>: human, elf, half-elf, dwarf or gnome. Your kin limits your class.</li><li>2. <b>Choose a class</b>: fighter, cleric, wizard, thief, paladin, ranger or bard.</li><li>3. <b>Assign ability scores</b>: put <b>17, 14, 14, 13, 12 and 8</b> where you like, then apply your kin's adjustments.</li><li>4. <b>Choose a background</b> (two skills) and your class's skills.</li><li>5. <b>Take your class's starting gear</b>, name your character, and say one thing they are afraid of.</li></list><p>Your <b>Health</b> at 1st level is your class's hit die at its highest plus your Constitution modifier. Each level after adds the die rolled (or its average, rounded up) plus your Constitution modifier.</p><p>In Kraken, the Characters window's <b>Character Wizard</b> does all of this: it knows your kin's adjustments and which classes your kin may take.</p></text>
+			</p0004>
+			<p0005>
+				<name type="string">Advancement</name>
+				<text type="formattedtext"><p>You gain <b>experience</b> for treasure brought back to safety, for dangers overcome, and for discoveries. The Game Master awards it at the end of a session.</p><table><tr decoration="underline"><td><b>Level</b></td><td><b>Experience</b></td><td><b>Proficiency</b></td></tr><tr><td>1</td><td>0</td><td>+2</td></tr><tr><td>2</td><td>250</td><td>+2</td></tr><tr><td>3</td><td>750</td><td>+2</td></tr><tr><td>4</td><td>1,750</td><td>+2</td></tr><tr><td>5</td><td>3,500</td><td>+3</td></tr><tr><td>6</td><td>6,500</td><td>+3</td></tr><tr><td>7</td><td>11,000</td><td>+3</td></tr><tr><td>8</td><td>17,000</td><td>+3</td></tr><tr><td>9</td><td>25,000</td><td>+4</td></tr><tr><td>10</td><td>35,000</td><td>+4</td></tr></table><p>Tenth level is the height of a mortal career. Beyond it lie stories, not levels.</p></text>
+			</p0005>
+			<p0006>
+				<name type="string">Human</name>
+				<text type="formattedtext"><p><i>The most numerous folk, and the most stubborn. Humans build towns on the bones of older towns and swear this time will be different.</i></p><p><b>Size</b> Medium. <b>Speed</b> 30 feet. <b>Abilities</b> no adjustment. <b>Classes</b> Fighter, Cleric, Wizard, Thief, Paladin, Ranger, Bard.</p><p><b>Any Path.</b> A human may take any class.</p><p><b>Stubborn.</b> Once per safe rest, when you would gain Dread, ignore one point of it.</p><p><b>Quick Study.</b> You are proficient in one skill of your choice.</p></text>
+			</p0006>
+			<p0007>
+				<name type="string">Elf</name>
+				<text type="formattedtext"><p><i>Elves live long and remember longer. They were old when the first towers fell, and they have watched the dark rise before.</i></p><p><b>Size</b> Medium. <b>Speed</b> 30 feet. <b>Abilities</b> Dexterity +1, Constitution -1. <b>Classes</b> Fighter, Cleric, Wizard, Thief, Ranger, Bard.</p><p><b>Dimsight.</b> In faint light you make out shapes and find your way as well as in daylight, 60 feet around you; you cannot read fine writing or see detail at a distance. In total darkness you see nothing, like anyone.</p><p><b>Keen Senses.</b> You are proficient in Perception.</p><p><b>Long Memory.</b> Advantage on checks to recall the history of a place or a thing older than a human lifetime.</p></text>
+			</p0007>
+			<p0008>
+				<name type="string">Half-Elf</name>
+				<text type="formattedtext"><p><i>Born of two peoples and at home in neither, half-elves make their own way, and are often very good at it.</i></p><p><b>Size</b> Medium. <b>Speed</b> 30 feet. <b>Abilities</b> no adjustment. <b>Classes</b> Fighter, Cleric, Wizard, Thief, Ranger, Bard.</p><p><b>Dimsight.</b> As an elf's, to 30 feet.</p><p><b>Two Worlds.</b> You are proficient in two skills of your choice.</p></text>
+			</p0008>
+			<p0009>
+				<name type="string">Dwarf</name>
+				<text type="formattedtext"><p><i>Dwarves dug the first deep halls, and lost most of them. They are hard, slow to trust, and slower to forgive.</i></p><p><b>Size</b> Medium. <b>Speed</b> 25 feet. <b>Abilities</b> Constitution +1, Charisma -1. <b>Classes</b> Fighter, Cleric, Thief.</p><p><b>Dimsight.</b> As an elf's, to 60 feet.</p><p><b>Hardy.</b> +1 Health at each level. Advantage on saves against poison.</p><p><b>Stonewise.</b> Advantage on checks about stonework: its age, who made it, where it is weak, and where a passage leads.</p></text>
+			</p0009>
+			<p0010>
+				<name type="string">Gnome</name>
+				<text type="formattedtext"><p><i>Small, curious and impossible to bore, gnomes take apart locks, clocks and spells to see how they work, and usually put them back together.</i></p><p><b>Size</b> Small. <b>Speed</b> 25 feet. <b>Abilities</b> Intelligence +1, Wisdom -1. <b>Classes</b> Cleric, Wizard, Thief, Bard.</p><p><b>Dimsight.</b> As an elf's, to 60 feet.</p><p><b>Tinker's Eye.</b> Advantage on checks to understand, open or disable a mechanism: a lock, a trap, a clockwork.</p><p><b>Small and Quick.</b> You can move through the space of a creature larger than you.</p></text>
+			</p0010>
+			<p0011>
+				<name type="string">Fighter</name>
+				<text type="formattedtext"><p><i>Fighters stand between the party and what comes out of the dark. They wear the heaviest armour, use every weapon, and keep going when others fall.</i></p><table><tr decoration="underline"><td><b>Hit Die</b></td><td><b>Saves</b></td><td><b>Armour</b></td><td><b>Weapons</b></td></tr><tr><td>d10</td><td>Strength and Constitution</td><td>All armour and shields</td><td>Simple and Martial weapons</td></tr></table><p><b>Skills.</b> Choose 2: Acrobatics, Athletics, History, Insight, Intimidation, Perception, Survival. <b>Starting gear.</b> Chain hauberk, longsword, shield, light crossbow and 20 bolts, a delver's pack.</p><p><b>Hard Lessons</b> (level 1). Choose a way of fighting: Shieldwall (+1 Defense with a shield), Bladework (+2 to damage with a one-handed weapon and nothing in the other hand), Marksman (+2 to ranged attack rolls) or Brute (reroll 1s and 2s on the damage dice of a two-handed weapon, once).</p><p><b>Second Breath</b> (level 1). Once per safe rest, as a bonus action, you regain 1d10 + your Fighter level Health.</p><p><b>Press On</b> (level 2). Once per safe rest, on your turn, you take one more action.</p><p><b>Battle-Scarred</b> (level 3). You score a critical hit on a 19 or 20. Your first point of Dread each fight is ignored.</p><p><b>Ability Improvement</b> (level 4). Add 2 to one ability score, or 1 to two (to a most of 20). Again at 8th level.</p><p><b>Extra Attack</b> (level 5). When you take the Attack action you attack twice.</p><p><b>Hold the Line</b> (level 6). When a creature within 5 feet of you hits an ally, you may use your reaction to make one weapon attack against it.</p><p><b>Iron Nerve</b> (level 7). You have advantage on saves against being frightened, and a safe rest lowers your Dread by 2, not 1.</p><p><b>Indomitable</b> (level 9). Once per safe rest, reroll a saving throw you failed; you must use the new roll.</p><p><b>Champion of the Lost</b> (level 10). Allies within 10 feet of you who can see you add 1 to their saves. Second Breath heals 2d10 + your level.</p></text>
+			</p0011>
+			<p0012>
+				<name type="string">Cleric</name>
+				<text type="formattedtext"><p><i>Clerics carry a light that is not a lantern's. They mend the wounded, steady the afraid, and turn back the dead that should not walk.</i></p><table><tr decoration="underline"><td><b>Hit Die</b></td><td><b>Saves</b></td><td><b>Armour</b></td><td><b>Weapons</b></td></tr><tr><td>d8</td><td>Wisdom and Charisma</td><td>Light and medium armour and shields</td><td>Simple weapons</td></tr></table><p><b>Skills.</b> Choose 2: History, Insight, Medicine, Persuasion, Religion. <b>Starting gear.</b> Scale hauberk, mace, shield, holy symbol, healer's satchel, a delver's pack.</p><p><b>Spellcasting</b> (level 1). You cast cleric spells with Wisdom: spell save DC 8 + your proficiency + Wisdom; spell attack your proficiency + Wisdom. You know every cleric spell of a circle you can cast; prepare a number of them equal to your Wisdom modifier + your level after a safe rest.</p><p><b>Lantern of Faith</b> (level 1). Your holy symbol is a light: as a bonus action it sheds bright light 20 feet and dim 20 beyond until you douse it, burning no oil.</p><p><b>Turn the Dead</b> (level 2). Once per safe rest (twice from 6th level), as an action, present your symbol: each undead within 30 feet that can see it makes a Wisdom save against your spell DC or flees for a minute.</p><p><b>Steadying Word</b> (level 2). As an action, a companion within 30 feet loses 1 Dread. Once per safe rest; twice from 6th level.</p><p><b>Ability Improvement</b> (level 4). Add 2 to one ability score, or 1 to two (to a most of 20). Again at 8th level.</p><p><b>Burn the Dead</b> (level 5). When an undead of low power (the GM says) fails its save against Turn the Dead, it is destroyed.</p><p><b>Sanctuary of Light</b> (level 6). Within your Lantern of Faith's bright light, companions have advantage on saves against being frightened.</p><p><b>Blessed Strikes</b> (level 8). Once on each of your turns, a weapon hit or cantrip deals 1d8 radiant damage more.</p><p><b>Miracle</b> (level 10). Once per week, call on your faith for something only a god could do; the GM decides how it is answered.</p></text>
+			</p0012>
+			<p0013>
+				<name type="string">Wizard</name>
+				<text type="formattedtext"><p><i>Wizards read the dark, and sometimes it reads back. They are fragile, and the most dangerous people in any room.</i></p><table><tr decoration="underline"><td><b>Hit Die</b></td><td><b>Saves</b></td><td><b>Armour</b></td><td><b>Weapons</b></td></tr><tr><td>d6</td><td>Intelligence and Wisdom</td><td>None</td><td>Daggers, quarterstaffs, slings and light crossbows</td></tr></table><p><b>Skills.</b> Choose 2: Arcana, History, Insight, Investigation, Medicine, Religion. <b>Starting gear.</b> Quarterstaff, dagger, spellbook, arcane focus, a scholar's pack.</p><p><b>Spellcasting</b> (level 1). You cast wizard spells with Intelligence: spell save DC 8 + your proficiency + Intelligence; spell attack your proficiency + Intelligence. Your spellbook holds six 1st-circle spells and you learn two more each level; prepare Intelligence modifier + level of them after a safe rest.</p><p><b>Quiet Study</b> (level 1). Once per safe rest, after a short rest of an exploration turn, you regain spell slots whose circles add up to half your level (rounded up), none higher than 5th.</p><p><b>Lorekeeper</b> (level 2). Choose Arcana, History or Religion: your proficiency bonus doubles for it.</p><p><b>Ability Improvement</b> (level 4). Add 2 to one ability score, or 1 to two (to a most of 20). Again at 8th level.</p><p><b>Sculpted Spells</b> (level 5). When you cast a spell that makes several creatures save, choose up to your Intelligence modifier of them: they succeed automatically and take no damage.</p><p><b>Words of Warding</b> (level 6). Once per safe rest, when a creature you can see would gain Dread from magic, it does not.</p><p><b>Spell Mastery</b> (level 9). Choose a 1st-circle spell you know: you can cast it without a slot.</p><p><b>Unweaving Hand</b> (level 10). You learn Unweave and always have it prepared; once per safe rest you cast it without a slot.</p></text>
+			</p0013>
+			<p0014>
+				<name type="string">Thief</name>
+				<text type="formattedtext"><p><i>Thieves go first into the dark and come back with what was in it. Locks, traps and unwary throats are their trade.</i></p><table><tr decoration="underline"><td><b>Hit Die</b></td><td><b>Saves</b></td><td><b>Armour</b></td><td><b>Weapons</b></td></tr><tr><td>d8</td><td>Dexterity and Intelligence</td><td>Light armour</td><td>Simple weapons, hand crossbows, rapiers and shortswords</td></tr></table><p><b>Skills.</b> Choose 4: Acrobatics, Athletics, Deception, Insight, Intimidation, Investigation, Perception, Performance, Persuasion, Sleight of Hand, Stealth. <b>Starting gear.</b> Leather jerkin, shortsword, two daggers, shortbow and 20 arrows, thieves' tools, a delver's pack.</p><p><b>Sneak Strike</b> (level 1). Once per turn, a hit with a finesse or ranged weapon deals 1d6 more damage when you have advantage, or when an ally stands within 5 feet of your target. The bonus grows by 1d6 at every odd level (2d6 at 3rd, 3d6 at 5th, and so on).</p><p><b>Cant and Craft</b> (level 1). You speak the thieves' cant, and you are proficient with thieves' tools: double your proficiency bonus for them.</p><p><b>Slip Away</b> (level 2). As a bonus action on your turn: Dash, Disengage or Hide.</p><p><b>Light Fingers</b> (level 3). You can pick a lock, disarm a trap or use a healer's satchel as a bonus action.</p><p><b>Ability Improvement</b> (level 4). Add 2 to one ability score, or 1 to two (to a most of 20). Again at 8th level.</p><p><b>Duck and Weave</b> (level 5). When an attacker you can see hits you, use your reaction to halve the damage.</p><p><b>Evasion</b> (level 7). When a spell or trap lets you make a Dexterity save for half damage, you take none on a success and half on a failure.</p><p><b>Shadow-Born</b> (level 9). In dim light or darkness you have advantage on Stealth, and a creature that does not see you does not gain advantage against you.</p><p><b>Thief's Luck</b> (level 10). Once per safe rest, turn a miss into a hit, or a failed check into a 20.</p></text>
+			</p0014>
+			<p0015>
+				<name type="string">Paladin</name>
+				<text type="formattedtext"><p><i>Paladins have sworn to stand against the dark, and their oath stands with them: it heals by their hands, and burns in their blade.</i></p><table><tr decoration="underline"><td><b>Hit Die</b></td><td><b>Saves</b></td><td><b>Armour</b></td><td><b>Weapons</b></td></tr><tr><td>d10</td><td>Wisdom and Charisma</td><td>All armour and shields</td><td>Simple and Martial weapons</td></tr></table><p><b>Skills.</b> Choose 2: Athletics, Insight, Intimidation, Medicine, Persuasion, Religion. <b>Starting gear.</b> Chain hauberk, longsword, shield, two spears, holy symbol, a delver's pack.</p><p><b>Laying On of Hands</b> (level 1). You have a pool of healing equal to five times your Paladin level, refilled by a safe rest. As an action, touch a creature and give it Health from the pool, or spend 5 to end a disease or poison.</p><p><b>Sense the Unholy</b> (level 1). As an action, you know where undead and fiends are within 60 feet, until the end of your next turn. Once per safe rest, plus your Charisma modifier.</p><p><b>Spellcasting</b> (level 2). From 2nd level you cast paladin spells with Charisma; slots as a half-caster (Kraken counts them).</p><p><b>Smite</b> (level 2). When you hit with a melee weapon, spend a spell slot: 2d8 radiant damage more, +1d8 per circle above the first, +1d8 against undead or fiends.</p><p><b>Oath's Shelter</b> (level 3). You and companions within 10 feet of you cannot be frightened while you are conscious.</p><p><b>Ability Improvement</b> (level 4). Add 2 to one ability score, or 1 to two (to a most of 20). Again at 8th level.</p><p><b>Extra Attack</b> (level 5). When you take the Attack action you attack twice.</p><p><b>Aura of Resolve</b> (level 6). You and companions within 10 feet add your Charisma modifier (at least 1) to their saving throws while you are conscious.</p><p><b>Radiant Arms</b> (level 10). Every melee weapon hit you make deals 1d8 radiant damage more.</p></text>
+			</p0015>
+			<p0016>
+				<name type="string">Ranger</name>
+				<text type="formattedtext"><p><i>Rangers know the wild places between the towns and the ruins, and what hunts there. They track it, and they hunt it back.</i></p><table><tr decoration="underline"><td><b>Hit Die</b></td><td><b>Saves</b></td><td><b>Armour</b></td><td><b>Weapons</b></td></tr><tr><td>d10</td><td>Strength and Dexterity</td><td>Light and medium armour and shields</td><td>Simple and Martial weapons</td></tr></table><p><b>Skills.</b> Choose 3: Animal Handling, Athletics, Insight, Investigation, Nature, Perception, Stealth, Survival. <b>Starting gear.</b> Hide coat, two shortswords, longbow and 40 arrows, a delver's pack.</p><p><b>Pathfinder</b> (level 1). You and companions travelling with you cannot be lost by anything but magic, and you always know which way is north and how far you have come. Foraging finds food for two more people.</p><p><b>Favoured Prey</b> (level 1). Choose beasts, the undead, or the folk of the deep (goblins and their kin): advantage to track them and recall what you know of them, and +2 damage against them.</p><p><b>Spellcasting</b> (level 2). From 2nd level you cast ranger spells with Wisdom; slots as a half-caster.</p><p><b>Fighting Style</b> (level 2). Archer (+2 to ranged attack rolls) or Twin Blades (add your ability modifier to the off-hand attack's damage).</p><p><b>Hunter's Eye</b> (level 3). Once per turn, a weapon hit on a creature you have marked with Hunter's Quarry deals 1d8 more damage.</p><p><b>Ability Improvement</b> (level 4). Add 2 to one ability score, or 1 to two (to a most of 20). Again at 8th level.</p><p><b>Extra Attack</b> (level 5). When you take the Attack action you attack twice.</p><p><b>Night Eyes</b> (level 6). You see in dim light as if it were bright, and in darkness 30 feet as if it were dim.</p><p><b>Unseen Hunter</b> (level 10). Hiding is a bonus action for you, and you stay hidden after a missed attack.</p></text>
+			</p0016>
+			<p0017>
+				<name type="string">Bard</name>
+				<text type="formattedtext"><p><i>Bards are lorekeepers: they remember the old songs, the names of the dead, and where the stairs go. Their stories keep the dark at bay.</i></p><table><tr decoration="underline"><td><b>Hit Die</b></td><td><b>Saves</b></td><td><b>Armour</b></td><td><b>Weapons</b></td></tr><tr><td>d8</td><td>Dexterity and Charisma</td><td>Light armour</td><td>Simple weapons, hand crossbows, longswords, rapiers and shortswords</td></tr></table><p><b>Skills.</b> Choose any 3. <b>Starting gear.</b> Leather jerkin, rapier, dagger, a worn instrument (arcane focus), a delver's pack.</p><p><b>Spellcasting</b> (level 1). You cast bard spells with Charisma: spell save DC 8 + your proficiency + Charisma. You know four spells and learn one more each level.</p><p><b>Inspiration</b> (level 1). Three times per safe rest (more with Charisma: your modifier, at least 3), when a companion who can hear you rolls a d20, add 1d4 to it after seeing the roll but before the outcome is told. The die is 1d6 at 5th level and 1d8 at 9th.</p><p><b>Fireside Tales</b> (level 1). During a safe rest, every companion who listens regains 1 more Health per Recovery Die spent, and loses 1 Dread more.</p><p><b>Jack of All Trades</b> (level 2). Add half your proficiency bonus to checks you are not proficient in.</p><p><b>Expertise</b> (level 3). Choose two skills you are proficient in: double your proficiency bonus for them. Two more at 10th level.</p><p><b>Ability Improvement</b> (level 4). Add 2 to one ability score, or 1 to two (to a most of 20). Again at 8th level.</p><p><b>Song of Courage</b> (level 6). As an action, until the end of your next turn, companions who can hear you have advantage on saves against being frightened and ignore new Dread.</p><p><b>Lore of the Lost</b> (level 10). Learn two spells from any class's list; they are bard spells for you.</p></text>
+			</p0017>
+			<p0018>
+				<name type="string">Backgrounds</name>
+				<text type="formattedtext"><p><b>Grave Digger</b> (Athletics, Religion). You buried the dead of a town that had too many. You know the old rites, and what a disturbed grave looks like. <i>Gear:</i> A shovel, a holy symbol of the dead, 10 gc.</p><p><b>Lamplighter</b> (Perception, Investigation). You kept the street lamps of a city burning through the long nights. You know how long a flame lasts, and what moves when it goes out. <i>Gear:</i> A hooded lantern, two flasks of oil, 10 gc.</p><p><b>Deserter</b> (Athletics, Stealth). You fled a war you did not believe in, and they are still looking for you. <i>Gear:</i> A worn sword-belt, a forged pass, 5 gc.</p><p><b>Acolyte of the Ash</b> (Religion, Insight). You served a temple that keeps vigil fires against the dark. Its priests will give you a meal and a bed, and ask questions. <i>Gear:</i> A holy symbol, prayer beads, incense, 10 gc.</p><p><b>Smuggler</b> (Deception, Sleight of Hand). You moved what was not allowed across borders that were not watched. You know who to pay, and how much. <i>Gear:</i> A coat with hidden pockets, 15 gc.</p><p><b>Hedge Scholar</b> (Arcana, History). You learned from books nobody else wanted, in libraries nobody else visited. <i>Gear:</i> Ink, a quill, a book of half-remembered lore, 10 gc.</p><p><b>Hunter</b> (Survival, Nature). You fed your family from the forest's edge, and learned which tracks to follow and which to run from. <i>Gear:</i> A hunting trap, a skinning knife, 10 gc.</p><p><b>Street Rat</b> (Stealth, Sleight of Hand). You grew up on the streets and the rooftops, fed by quick hands and quicker feet. <i>Gear:</i> A map of a city's back ways, a lucky charm, 5 gc.</p></text>
+			</p0018>
+			<p0019>
+				<name type="string">Light and Time</name>
+				<text type="formattedtext"><p>Below ground, time is kept in <b>exploration turns</b> of ten minutes. Each turn the party moves, searches, rests a little, or works at something; the Game Master tracks the turns, and every so often rolls to see whether something finds you.</p><p><b>Nobody sees in total darkness.</b> Elves, half-elves, dwarves and gnomes have <b>Dimsight</b>: in faint light they find their way and see shapes, but cannot read or see detail far off. In darkness they are as blind as anyone.</p><table><tr decoration="underline"><td><b>Light source</b></td><td><b>Bright</b></td><td><b>Dim</b></td><td><b>Lasts</b></td></tr><tr><td>Candle</td><td>-</td><td>5 feet</td><td>6 turns</td></tr><tr><td>Torch</td><td>20 feet</td><td>20 feet more</td><td>6 turns (an hour)</td></tr><tr><td>Hooded lantern</td><td>30 feet</td><td>30 feet more</td><td>24 turns per flask</td></tr><tr><td>Kindle (cantrip)</td><td>20 feet</td><td>20 feet more</td><td>1 hour</td></tr></table><p><b>Light is seen.</b> A lit torch can be seen far further than it lights. In the dark, the creatures that live there see you coming long before you see them.</p><p>In Kraken, the map shows light as it falls: carry a torch on your token and your light moves with you. When the light runs out, it is dark.</p></text>
+			</p0019>
+			<p0020>
+				<name type="string">Dread</name>
+				<text type="formattedtext"><p>Every adventurer has a <b>Dread</b> track from 0 to 6. The dark gets into people.</p><p><b>Gaining Dread.</b> The Game Master gives you 1 Dread when your light goes out in a dangerous place, when you see something no one should, when a companion falls, or when magic of fear touches you. Truly horrible things give 2.</p><p><b>Shaken (3 or more).</b> You have disadvantage on Wisdom checks and saves.</p><p><b>Broken (6).</b> Something in you gives way. You choose with the Game Master: you flee, freeze, or fight blindly for a few rounds, and you gain a lasting fear, a nightmare, or a scar. Your Dread then drops to 3.</p><p><b>Losing Dread.</b> A safe rest by a fire lowers Dread by 1. A cleric's Steadying Word, a bard's tales, and some spells lower it more. Some things only time and home can heal.</p><p>In Kraken, Dread is the row of six marks on your sheet's main page: click to set it.</p></text>
+			</p0020>
+			<p0021>
+				<name type="string">Resting</name>
+				<text type="formattedtext"><p><b>A short rest</b> is one exploration turn of quiet. You may spend <b>Recovery Dice</b> (one per level; the die is your class's hit die) and regain the roll plus your Constitution modifier each.</p><p><b>A safe rest</b> is eight hours somewhere safe, with <b>food, water and a bedroll</b>. You regain half your maximum Health (at least 1), half your Recovery Dice, your spell slots and your class's uses, and lose 1 Dread.</p><p>Without food, water or safety, a rest does not count as safe.</p></text>
+			</p0021>
+			<p0022>
+				<name type="string">Fighting</name>
+				<text type="formattedtext"><p><b>Initiative.</b> Everyone rolls d20 + Dexterity. Highest first.</p><p><b>Your turn.</b> Move up to your speed and take one action: attack, cast a spell, dash, dodge, help, hide, or use something. Some features give you a bonus action, and you have one reaction a round.</p><p><b>Attacking.</b> Roll d20 + Strength (melee) or Dexterity (ranged or finesse), + your proficiency bonus if you know the weapon, against the target's <b>Defense</b>. A natural 20 is a <b>critical hit</b>: roll the damage dice twice. A natural 1 always misses.</p><p><b>Defense</b> is 10 + Dexterity, or your armour's value (+ Dexterity, as the armour allows), + 2 with a shield.</p><p>In Kraken, target a creature (Ctrl+click its token) and use the weapon on your sheet's Combat page or the tracker: the roll, the hit and the damage are worked out for you.</p></text>
+			</p0022>
+			<p0023>
+				<name type="string">Dying</name>
+				<text type="formattedtext"><p>At <b>0 Health</b> a character is <b>dying</b>: they fall, and cannot act.</p><p>At each of their turns a dying character <b>loses 1 Health</b>. An ally beside them may use an action to <b>steady</b> them: a Wisdom check against 12 (a healer's satchel does it without a roll). A steadied character stops bleeding and stays unconscious until healed.</p><p>Any healing brings a dying character back from 0.</p><p>A character dies when their Health reaches <b>minus their maximum</b>. Monsters die at 0.</p><p>In Kraken, a dying character's tracker row has a <b>Steady</b> button: an ally presses it, and their Wisdom is rolled.</p></text>
+			</p0023>
+			<p0024>
+				<name type="string">Spells</name>
+				<text type="formattedtext"><p>Clerics, wizards and bards cast spells from 1st level; paladins and rangers from 2nd. Spells come in <b>circles</b> (1st to 3rd in this book) and <b>cantrips</b>, which cost nothing.</p><p>Casting a spell of a circle uses a <b>slot</b> of that circle or higher; slots return after a safe rest. A spell cast in a higher slot is often stronger.</p><p>Your <b>spell save DC</b> is 8 + your proficiency + your casting ability; your <b>spell attack</b> is your proficiency + your casting ability.</p><p>Magic does not light the dark unless it says so, and it is noticed: the Game Master may roll for wandering things after loud or bright magic.</p></text>
+			</p0024>
+			<p0025>
+				<name type="string">Credits and License</name>
+				<text type="formattedtext"><p><b>Descending Darkness</b> is an original game made for Kraken VTT. Its text and setting are original, and it may be shared freely with Kraken.</p><p>Its game mechanics are in the family of the world's most played fantasy roleplaying game. Some of those mechanics are based on the <b>System Reference Document 5.1</b> by Wizards of the Coast LLC, available at dndbeyond.com/srd and licensed under the <b>Creative Commons Attribution 4.0 International License</b> (creativecommons.org/licenses/by/4.0). No text of that document is reproduced here. <i>Descending Darkness</i> is not affiliated with or endorsed by Wizards of the Coast.</p></text>
+			</p0025>
+		</refmanualdata>
+	</reference>
+</root>

@@ -20,6 +20,9 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
   const [saveStat, setSaveStat] = useState("wisdom");
   const [saveCl, setSaveCl] = useState("0");
   const record = entry.recordId ? session.records[entry.recordId] : null;
+  // A player's own character (the one that steadies a dying ally in Descending Darkness).
+  const me = session.players.find((seat) => seat.id === session.selfId)?.name ?? "";
+  const myCharacterId = gm ? "" : (Object.values(session.records).find((item) => item.type === "character" && item.owner === me)?.id ?? "");
   const portrait = typeof record?.data?.portrait === "string" ? (record.data.portrait as string) : null;
   const tokenArt = session.map.tokens.find((token) => token.id === entry.tokenId || (entry.recordId && token.recordId === entry.recordId))?.art;
   const apply = (kind: "damage" | "heal") => {
@@ -105,6 +108,12 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
             {entry.health.status}
           </span>
         )}
+        {session.ruleset === "Descending Darkness" && entry.health.status === "Dying" && (gm || myCharacterId) ? (
+          // Descending Darkness: an ally steadies the dying (Wisdom 12); the GM's call without one.
+          <button type="button" className="ct-death-save" data-action="stabilize" title="Steady them: an ally's Wisdom check against 12 stops the bleeding" onClick={() => session.ct("stabilize", { id: entry.id, ...(myCharacterId ? { recordId: myCharacterId } : {}) })}>
+            Steady
+          </button>
+        ) : null}
         {session.ruleset === "D&D 5E" && entry.health.status === "Dying" && (gm || entry.mine) ? (
           // 5E: a Dying character's death saving throw.
           <button type="button" className="ct-death-save" data-action="death-save" title={`Death saves: ${entry.deathsaves?.success ?? 0} successes, ${entry.deathsaves?.failure ?? 0} failures`} onClick={() => session.ct("death-save", { id: entry.id })}>
@@ -235,7 +244,7 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
               ))}
             </select>
             <label>
-              {session.ruleset === "D&D 5E" ? "DC" : "CL"}
+              {session.ruleset === "D&D 5E" || session.ruleset === "Descending Darkness" ? "DC" : "CL"}
               <input type="number" value={saveCl} onChange={(event) => setSaveCl(event.target.value)} style={{ width: "3.6rem" }} aria-label={session.ruleset === "D&D 5E" ? "Save DC" : "Save CL"} />
             </label>
             <button type="button" onClick={() => session.ct("save", { id: entry.id, attribute: saveStat, cl: Number(saveCl) || 0 })}>

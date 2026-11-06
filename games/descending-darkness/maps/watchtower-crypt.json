@@ -1,0 +1,20 @@
+{ "cell": 70, "cols": 24, "rows": 18, "ground": "rock", "seed": 37,
+  "floors": [
+    { "x": 2, "y": 2, "w": 4, "h": 4, "tex": "flag" }, { "x": 3, "y": 6, "w": 2, "h": 3, "tex": "flag" },
+    { "x": 3, "y": 8, "w": 13, "h": 3, "tex": "flag" },
+    { "x": 6, "y": 6, "w": 1, "h": 2, "tex": "flag" }, { "x": 9, "y": 6, "w": 1, "h": 2, "tex": "flag" }, { "x": 12, "y": 6, "w": 1, "h": 2, "tex": "flag" },
+    { "x": 6, "y": 11, "w": 1, "h": 2, "tex": "flag" }, { "x": 9, "y": 11, "w": 1, "h": 2, "tex": "flag" }, { "x": 12, "y": 11, "w": 1, "h": 2, "tex": "flag" },
+    { "x": 16, "y": 9, "w": 1, "h": 1, "tex": "flag" },
+    { "x": 17, "y": 4, "w": 5, "h": 11, "tex": "flag" },
+    { "x": 19, "y": 15, "w": 1, "h": 1, "tex": "flag" }, { "x": 18, "y": 16, "w": 3, "h": 1, "tex": "flag" }
+  ],
+  "doors": [ { "x": 16, "y": 9, "side": "e" }, { "x": 19, "y": 15, "side": "n", "secret": true } ],
+  "features": [
+    { "kind": "stairs", "x": 2, "y": 2, "w": 2, "h": 2, "dir": "n" }, { "kind": "bones", "x": 4, "y": 4 },
+    { "kind": "coffin", "x": 6, "y": 6, "w": 1, "h": 2 }, { "kind": "coffin", "x": 9, "y": 6, "w": 1, "h": 2 }, { "kind": "coffin", "x": 12, "y": 6, "w": 1, "h": 2 },
+    { "kind": "coffin", "x": 6, "y": 11, "w": 1, "h": 2 }, { "kind": "coffin", "x": 9, "y": 11, "w": 1, "h": 2 }, { "kind": "coffin", "x": 12, "y": 11, "w": 1, "h": 2 },
+    { "kind": "web", "x": 14, "y": 8 }, { "kind": "rubble", "x": 8, "y": 9, "w": 1, "h": 1 },
+    { "kind": "pillar", "x": 17, "y": 5 }, { "kind": "pillar", "x": 21, "y": 5 }, { "kind": "pillar", "x": 17, "y": 12 }, { "kind": "pillar", "x": 21, "y": 12 },
+    { "kind": "altar", "x": 19, "y": 5, "w": 1, "h": 1 }, { "kind": "coffin", "x": 19, "y": 8, "w": 1, "h": 2 }, { "kind": "brazier", "x": 18, "y": 7 }, { "kind": "brazier", "x": 20, "y": 7 },
+    { "kind": "chest", "x": 19, "y": 16 }, { "kind": "bones", "x": 20, "y": 13 }
+  ] }

@@ -1,3 +1,4 @@
+import { isD20 } from "../../shared/dnd5e/rules.mjs";
 import { Icon } from "../ui/icons";
 import { slotDrag } from "../ui/QuickSlots";
 import { useEffect, useRef, useState } from "react";
@@ -108,7 +109,7 @@ function FileButtons({ files, current }: { files: ReturnType<typeof useCharacter
 // this player's. It is filled by hand: a race, a class, spells and gear
 // dragged onto it from the sidebar's lists, scores typed. C&C (SIEGE) only:
 // a 5E character is made with its wizard.
-export const canMakeBlank = (session: Session) => session.ruleset !== "D&D 5E";
+export const canMakeBlank = (session: Session) => !isD20(session.ruleset);
 export async function createBlank(session: Session, name = "New character") {
   const gm = session.role === "dm";
   const attributes = Object.fromEntries(["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"].map((stat) => [stat, { score: 10, prime: 0 }]));
@@ -179,7 +180,7 @@ export function CharacterPanel({ session, dock = false, selected: chosen, create
         </div>
         {status}
         {creating ? (
-          session.ruleset === "D&D 5E" ? (
+          isD20(session.ruleset) ? (
             <Wizard5e
               session={session}
               onDone={(id) => {
@@ -197,7 +198,7 @@ export function CharacterPanel({ session, dock = false, selected: chosen, create
             />
           )
         ) : current ? (
-          current.data.ruleset === "dnd5e" ? <Sheet5e record={current} session={session} /> : <CCSheet record={current} session={session} />
+          isD20(String(current.data.ruleset ?? "")) ? <Sheet5e record={current} session={session} /> : <CCSheet record={current} session={session} />
         ) : (
           <p className="hint">You have no character yet. Make one with the new character button.</p>
         )}
@@ -240,7 +241,7 @@ export function CharacterPanel({ session, dock = false, selected: chosen, create
         </ul>
       </aside>
       {creating ? (
-        session.ruleset === "D&D 5E" ? (
+        isD20(session.ruleset) ? (
           <Wizard5e
             session={session}
             onDone={(id) => {
@@ -258,7 +259,7 @@ export function CharacterPanel({ session, dock = false, selected: chosen, create
           />
         )
       ) : current ? (
-        current.data.ruleset === "dnd5e" ? <Sheet5e record={current} session={session} /> : <CCSheet record={current} session={session} />
+        isD20(String(current.data.ruleset ?? "")) ? <Sheet5e record={current} session={session} /> : <CCSheet record={current} session={session} />
       ) : null}
     </section>
   );

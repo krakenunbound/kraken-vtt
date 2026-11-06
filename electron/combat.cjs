@@ -214,7 +214,11 @@ function savedCombat(value) {
 // table: the table server's agent handle (records, roll, say, map).
 function createCombat({ saved, table, onChange = () => undefined }) {
   const state = savedCombat(saved);
-  const five = () => table().ruleset?.() === "D&D 5E";
+  // The d20 family (D&D 5E, Descending Darkness) plays FG 5E's way.
+  const five = () => require("./dnd5e.cjs").isD20Ruleset(table().ruleset?.());
+  // Descending Darkness: no death saves; the dying bleed a Health each turn
+  // until an ally steadies them (Wisdom 12) or they reach minus their maximum.
+  const bleeds = () => table().ruleset?.() === "Descending Darkness";
 
   function changed() {
     onChange();
@@ -364,6 +368,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     if (!geometry) return { status: "Healthy", percent: 0, color: "#00C000" };
     const status = geometry.healthStatus(hp, wounds, thresholdsFor(entry));
     // 5E: three failed death saves kill; three successes leave the character stable (Unconscious).
+    if (bleeds() && status.status === "Dying") return entry.stabilized ? { ...status, status: "Unconscious", color: "#6C2DC7" } : status;
     if (five() && status.status === "Dying") {
       const saves = deathSaves(entry);
       if (saves.failure >= 3) return { ...status, status: "Dead" };
@@ -436,6 +441,11 @@ function createCombat({ saved, table, onChange = () => undefined }) {
         await applyWounds(entry, Math.max(1, rolled.total), "[DAMAGE] Ongoing damage", opts);
       }
     }
+    // Descending Darkness: a dying character loses a Health at its turn, once a round.
+    if (bleeds() && health(entry).status === "Dying" && !entry.stabilized && state.round > 0 && entry.bleedRound < state.round) {
+      entry.bleedRound = state.round;
+      await applyWounds(entry, 1, "[DAMAGE] Bleeding out", opts);
+    }
     // The dying bleed at the start of their turn, once a round.
     if (String(opts?.SIEGE_NEGATIVE_HP_BLEED ?? "off").toLowerCase() === "on" && !entry.stabilized && state.round > 0 && entry.bleedRound < state.round) {
       const { hp, wounds } = vitals(entry);
@@ -462,7 +472,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
         entry.stabilized = false;
       }
       // Damage to a Dying character is a failed death save (FG 5E).
-      if (delta > 0 && character && before.wounds >= before.hp && wounds < before.hp * 2) {
+      if (!bleeds() && delta > 0 && character && before.wounds >= before.hp && wounds < before.hp * 2) {
         const saves = deathSaves(entry);
         setDeathSaves(entry, { ...saves, failure: Math.min(3, saves.failure + 1) });
       }
@@ -716,10 +726,32 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     return { die, deathsaves: deathSaves(entry), status: health(entry).status };
   }
 
+  // Descending Darkness: steadying the dying. An ally (a character's record,
+  // else the GM's call) rolls Wisdom against 12; a success and they are
+  // stable (unconscious until healed).
+  async function stabilize(entryId, helperRecordId, seat) {
+    const entry = find(entryId);
+    if (health(entry).status !== "Dying") throw new Error(`${entry.name} is not dying.`);
+    const helper = helperRecordId ? table().records.get(String(helperRecordId)) : null;
+    if (helper && seat.role !== "dm" && helper.owner !== seat.name) throw new Error("Steady them with your own character.");
+    if (!helper && seat.role !== "dm") throw new Error("Which of your characters steadies them?");
+    const wis = helper ? num(helper.data?.abilities?.wisdom?.bonus, 0) : 0;
+    const rolled = table().dice.roll(`1d20${wis ? (wis > 0 ? `+${wis}` : wis) : ""}`);
+    const ok = rolled.total >= 12;
+    table().postRoll(rolled, `[CHECK] Wisdom: steadying ${entry.name} [DC 12] [${ok ? "SUCCESS" : "FAILURE"} ${rolled.total} vs 12]`, helper?.name ?? "Combat", entry.hidden, { by: helper?.name ?? "Combat", result: ok ? "SUCCESS" : "FAILURE", against: 12 });
+    if (ok) {
+      entry.stabilized = true;
+      table().say(`${entry.name} is steadied: unconscious, no longer bleeding.`, "Combat", entry.hidden);
+    }
+    changed();
+    return { total: rolled.total, success: ok, status: health(entry).status };
+  }
+
   return {
     ready: geometryReady,
     sorted,
     deathSave,
+    stabilize,
     ruleset5e: five,
     // What a seat sees of the tracker. The GM sees everything; players do not
     // see hidden entries or GM-only effects, and see foes' health as a status.
