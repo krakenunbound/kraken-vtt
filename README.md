@@ -114,9 +114,7 @@ decides):
   competes with it, such as selling it, repackaging it as your own virtual
   tabletop, or offering it as a hosted service.
 
-Versions up to and including 0.1.0-alpha.54 were released under the MIT
-licence, and copies of those versions keep it. For permission beyond the
-licence, open an issue on GitHub.
+For permission beyond the licence, open an issue on GitHub.
 
 The included games (Descending Darkness and Apeira Astra), their books, maps
 and art are original to Kraken. Some of Descending Darkness's mechanics are
