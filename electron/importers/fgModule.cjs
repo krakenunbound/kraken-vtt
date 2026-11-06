@@ -265,8 +265,89 @@ function priced(item) {
   return { ...item, cost: KRAKEN_PRICES[name], ...(cost ? { bookcost: cost } : {}), krakenprice: 1 };
 }
 
+// Modules converted once, as Foundry's packs: a module's records (and the
+// pictures it holds) kept on disk as JSON, by the module file's size and time
+// and by this converter's own code, so reading one again takes milliseconds
+// (C&C Monsters & Treasure: 7 s parsed, 12 ms from its copy). The folder is
+// the app's (KRAKEN_MODULE_CACHE, else the backend's KRAKEN_USER_DATA); with
+// none, modules are parsed each time.
+const crypto = require("crypto");
+const CONVERTER = crypto.createHash("sha1").update(fs.readFileSync(__filename)).digest("hex").slice(0, 12);
+function cacheFolder() {
+  if (process.env.KRAKEN_MODULE_CACHE) return process.env.KRAKEN_MODULE_CACHE;
+  return process.env.KRAKEN_USER_DATA ? path.join(process.env.KRAKEN_USER_DATA, "module-cache") : "";
+}
+const converted = new Map(); // cache file -> the read module, the last few
+function cachedPath(file) {
+  const folder = cacheFolder();
+  if (!folder) return "";
+  const stat = fs.statSync(file);
+  const key = crypto.createHash("sha1").update(`${path.resolve(file)}|${stat.size}|${Math.round(stat.mtimeMs)}|${CONVERTER}`).digest("hex");
+  return path.join(folder, `${key}.json`);
+}
+// The sections a record came from (its FG path's first part), for a reader that wants only some.
+const sectionOf = (record) => String(record.data?.fgPath ?? "").split(/[.@]/)[0].toLowerCase();
 function readModule(nameOrPath, { only = null } = {}) {
   const file = resolveModule(nameOrPath);
+  const cached = cachedPath(file);
+  if (cached) {
+    let whole = converted.get(cached);
+    if (!whole && fs.existsSync(cached)) {
+      try {
+        whole = JSON.parse(fs.readFileSync(cached, "utf8"));
+        whole.info.file = file;
+      } catch {
+        whole = null;
+      }
+    }
+    if (!whole) {
+      whole = parseModule(file, null);
+      try {
+        fs.mkdirSync(path.dirname(cached), { recursive: true });
+        fs.writeFileSync(`${cached}.tmp`, JSON.stringify(whole));
+        fs.renameSync(`${cached}.tmp`, cached);
+      } catch {
+        /* read again next time */
+      }
+    }
+    converted.set(cached, whole);
+    if (converted.size > 6) converted.delete(converted.keys().next().value);
+    return only ? { ...whole, records: whole.records.filter((record) => only.has(sectionOf(record))) } : whole;
+  }
+  return parseModule(file, only);
+}
+
+// A module made ready to read in milliseconds: converted in a worker thread
+// (one module at a time) if its copy is not on disk yet, so the backend's own
+// thread (the table server) never parses one. Resolves when it is ready.
+let converting = Promise.resolve();
+const preparing = new Map();
+function prepareModule(nameOrPath) {
+  let file;
+  let cached;
+  try {
+    file = resolveModule(nameOrPath);
+    cached = cachedPath(file);
+  } catch {
+    return Promise.resolve(false);
+  }
+  if (!cached || fs.existsSync(cached)) return Promise.resolve(true);
+  if (preparing.has(cached)) return preparing.get(cached);
+  const { Worker } = require("worker_threads");
+  const done = (converting = converting.then(
+    () =>
+      new Promise((resolve) => {
+        const worker = new Worker(path.join(__dirname, "convertWorker.cjs"), { workerData: { file } });
+        worker.once("message", (message) => resolve(Boolean(message?.ok)));
+        worker.once("error", () => resolve(false));
+        worker.once("exit", () => resolve(fs.existsSync(cached)));
+      }),
+  )).finally(() => preparing.delete(cached));
+  preparing.set(cached, done);
+  return done;
+}
+
+function parseModule(file, only) {
   const files = readFiles(file, { xmlOnly: true });
   const definitionBytes = files.get("definition.xml");
   if (!definitionBytes) throw new Error("That is not a Fantasy Grounds module (no definition.xml).");
@@ -409,4 +490,4 @@ function modulePicture(reference, ownModule) {
   return { bytes: Buffer.from(bytes), mime };
 }
 
-module.exports = { readModule, importModule, listModules, fgDataFolder, convertXml, modulePicture };
+module.exports = { readModule, prepareModule, importModule, listModules, fgDataFolder, convertXml, modulePicture };
