@@ -4,7 +4,7 @@ import type { KrakenCampaign, KrakenNetwork } from "../kraken";
 import "@fontsource/cinzel/latin-500.css";
 import "@fontsource/cinzel/latin-600.css";
 import "@fontsource/cinzel/latin-700.css";
-import { Backdrop } from "./Backdrop";
+import { Backdrop, BackdropDots, randomTheme } from "./Backdrop";
 import { forgetSignIn, savedSignIn } from "../session/useSession";
 import "./setup.css";
 
@@ -161,6 +161,8 @@ export function SetupScreen({
   const [signIn, setSignIn] = useState(() => (browserTable ? savedSignIn(browserTable) : null));
   // Home: the two ways in, side by side; then a campaign to run, or a game to join.
   const [mode, setMode] = useState<"home" | "campaigns" | "join">(inBrowser ? "join" : "home");
+  // A different painted scene each time Kraken opens; the dots show them all.
+  const [theme, setTheme] = useState(randomTheme);
   const [recent, setRecent] = useState<RecentGame[]>(() => recentGames());
   const [joinFill, setJoinFill] = useState<RecentGame | null>(null);
   const [rows, setRows] = useState<KrakenCampaign[]>([]);
@@ -328,7 +330,8 @@ export function SetupScreen({
 
   return (
     <div className={`setup setup-${mode}`}>
-      <Backdrop scene={mode === "join" ? "hall" : "keep"} />
+      <Backdrop theme={theme} />
+      <BackdropDots theme={theme} onPick={setTheme} />
       <header className="setup-bar">
         <div className="brand">
           <Mark /> Kraken <span className="brand-sub">VTT</span> <span className="brand-version" title="Alpha test version">{__KRAKEN_VERSION__}</span>
