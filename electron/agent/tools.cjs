@@ -1369,10 +1369,10 @@ const TOOLS = [
   {
     name: "kraken_sidebar",
     description:
-      "The sidebar on the right of the GM's screen, as FG's: the tools along the top (combat tracker, assistant, players, settings), then categories that fold away: Library (Modules = book activation, Books, Sound Sets), Player (Characters, Packages, Party, Notes), Campaign (Encounters, Images, Items, NPCs, Parcels, Tables: every active book's or adventure's, each under the book's name), World (Story: every active adventure's story entries, each opening its text) and Character (Classes, Races, Spells...: drag one onto a character sheet, or kraken_character_drop). action list: the buttons and categories, which are open or folded, and the state; state: 0 icons and names, 1 icons only (categories cut to four letters), 2 a thin strip (one letter), as the arrow at the bottom steps through; fold: fold a category (group, its name) away, or open it again with folded false; press: press a button (entry: its id from list, such as records:npc or adventure:battle, or its name) to open or close its window.",
+      "The sidebar on the right of the GM's screen, as FG's: the tools along the top (combat tracker, assistant, players, settings), then categories that fold away: Library (Modules = book activation, Books, Sound Sets), Player (Characters, Packages, Party, Notes), Campaign (Encounters, Images, Items, NPCs, Parcels, Tables: every active book's or adventure's, each under the book's name), World (Story: every active adventure's story entries, each opening its text) and Character (Classes, Races, Spells...: drag one onto a character sheet, or kraken_character_drop). action list: the buttons and categories, which are open or folded, and the state; state: 0 icons and names, 1 icons only (categories cut to four letters), as the arrow at the bottom toggles; fold: fold a category (group, its name) away, or open it again with folded false; press: press a button (entry: its id from list, such as records:npc or adventure:battle, or its name) to open or close its window.",
     inputSchema: object({
       action: { type: "string", enum: ["list", "state", "fold", "press"] },
-      state: { type: "number", enum: [0, 1, 2] },
+      state: { type: "number", enum: [0, 1] },
       group: string("A category: Library, Player, Campaign, World or Character"),
       folded: { type: "boolean" },
       entry: string("A button: its id (list) or its name"),

@@ -5,8 +5,7 @@
 // race dragged from those lists onto a character's sheet go into its packages
 // (1st level, primes, hit points), an item into its gear, a spell (the tool)
 // into its powers; a second class is refused. A category folds away; the
-// arrow at the bottom steps through FG's three states (icons and names,
-// icons, a thin strip) and back. A test player in Chrome has the same lists
+// arrow at the bottom collapses it to icons and opens it again. A test player in Chrome has the same lists
 // (the book's shared records) and drags a race onto their own character.
 // Skipped without the C&C Player's Handbook.
 import "./loopback.mjs";
@@ -197,7 +196,7 @@ try {
   await tool("kraken_sidebar", { action: "fold", group: "Campaign", folded: false });
   await page.waitForSelector('.sidebar [data-launch="records:npc"]');
 
-  // The arrow: icons only, then a thin strip, then icons and names again.
+  // The arrow: icons only, then icons and names again.
   const width = () => page.$eval(".sidebar", (element) => element.getBoundingClientRect().width);
   const full = await width();
   await page.screenshot({ path: path.join(tmpdir(), "kraken-sidebar-0.png") });
@@ -208,13 +207,8 @@ try {
   const heading = await page.$eval('.sidebar [data-sidebar-group="campaign"] .sidebar-category span', (element) => element.textContent);
   assert(heading === "Camp" && !(await page.isVisible('.sidebar [data-launch="records:npc"] .sidebar-label')), `icons only, the category cut to four letters: ${heading}`);
   await page.screenshot({ path: path.join(tmpdir(), "kraken-sidebar-1.png") });
-  await page.click('[data-action="sidebar-visibility"]');
-  await page.waitForSelector('.sidebar[data-sidebar-state="2"]');
-  await new Promise((resolve) => setTimeout(resolve, 300));
-  const strip = await width();
-  assert((await page.getAttribute('[data-action="sidebar-visibility"]', "aria-label")) === "Expand the sidebar", "the arrow turns round on the thin strip");
-  await page.screenshot({ path: path.join(tmpdir(), "kraken-sidebar-2.png") });
-  assert(full > icons && icons > strip, `the sidebar narrows: ${full}, ${icons}, ${strip}`);
+  assert((await page.getAttribute('[data-action="sidebar-visibility"]', "aria-label")) === "Expand the sidebar", "the arrow turns round when collapsed");
+  assert(full > icons, `the sidebar narrows: ${full}, ${icons}`);
   await page.click('.sidebar [data-launch="records:npc"]');
   await page.waitForSelector('[data-records-only="npc"]');
   await page.click('[data-action="sidebar-visibility"]');
@@ -276,7 +270,7 @@ try {
   assert(!/Brannoc/.test(heard) && /Elf/.test(heard), `the player hears their own drop, not the GM's hidden character's: ${heard.slice(-400)}`);
   await seat.screenshot({ path: path.join(tmpdir(), "kraken-sidebar-player.png") });
   assert(failures.length === 0, `page errors: ${failures.join(" | ")}`);
-  console.log(`ok sidebar ui: FG's categories under the tools; the Player's Handbook active fills Character (Classes, Races, Spells), each its own list under the book's name; the Fighter dragged onto a sheet (1st level, 11 hit points, Strength prime), a race and then another replacing it, a long sword equipped, a spell by the tool, a second class refused; Campaign folds away and back; the arrow steps icons and names (${Math.round(full)}px), icons (${Math.round(icons)}px), a thin strip (${Math.round(strip)}px) and back; ${adventure}; a test player has the lists, drops a race on their own character, and makes a blank sheet (FG's Create) and fills it by a drop. ${path.join(tmpdir(), "kraken-sidebar-0.png")}`);
+  console.log(`ok sidebar ui: FG's categories under the tools; the Player's Handbook active fills Character (Classes, Races, Spells), each its own list under the book's name; the Fighter dragged onto a sheet (1st level, 11 hit points, Strength prime), a race and then another replacing it, a long sword equipped, a spell by the tool, a second class refused; Campaign folds away and back; the arrow collapses it from icons and names (${Math.round(full)}px) to icons (${Math.round(icons)}px) and back; ${adventure}; a test player has the lists, drops a race on their own character, and makes a blank sheet (FG's Create) and fills it by a drop. ${path.join(tmpdir(), "kraken-sidebar-0.png")}`);
 } finally {
   await browser?.close();
   child.kill();
