@@ -117,6 +117,8 @@ function polygonPoints(points: number[]): string {
 }
 
 export type MapActions = {
+  // A record's picture (a character's token or portrait, a creature's from its module), from the host.
+  recordArtUrl?: (recordId: string, kind?: "token" | "portrait") => string;
   placeToken: (recordId: string | null, x?: number, y?: number, name?: string) => void;
   // The combat tracker's entries (a damage roll dropped on a token finds its creature).
   combat?: { entries: { id: string; tokenId?: string | null; recordId?: string | null }[] };
@@ -188,6 +190,16 @@ function doorShapes(doors: MapDoor[]): DoorShape[] {
   });
 }
 
+// A token list row's picture: the record's token, else its initials.
+function TrayFace({ url, name }: { url: string; name: string }) {
+  const [failed, setFailed] = useState(false);
+  return (
+    <span className={url && !failed ? "tray-chip has-art" : "tray-chip"}>
+      {url && !failed ? <img src={url} alt="" draggable={false} onError={() => setFailed(true)} /> : initials(name)}
+    </span>
+  );
+}
+
 // Drawn again only when what it shows changes (its scene, the map, the records,
 // pings, targets), not on every chat line or roll: the table's busiest parts
 // (walls, lighting, animated tokens) live here.
@@ -237,7 +249,26 @@ function MapViewInner({
   const [editTab, setEditTab] = useState<EditTab>("walls");
   const [editTool, setEditTool] = useState<EditTool>(null);
   const [wallKind, setWallKind] = useState<WallKind>("wall");
-  const [gridSnap, setGridSnap] = useState(true);
+  // Grid snap for walls is off unless the GM turns it on (kept on this screen): a
+  // wall goes where it is drawn. Point snap (to the ends of walls) stays on.
+  const [gridSnap, setGridSnapState] = useState(() => {
+    try {
+      return window.localStorage.getItem("kraken-wall-snap") === "on";
+    } catch {
+      return false;
+    }
+  });
+  const setGridSnap = (on: boolean) => {
+    setGridSnapState(on);
+    try {
+      window.localStorage.setItem("kraken-wall-snap", on ? "on" : "off");
+    } catch {
+      /* for this visit */
+    }
+  };
+  // A box drawn by dragging (press, drag, let go), and walls or a corner being dragged.
+  const boxDrag = useRef<{ pointerId: number; x: number; y: number } | null>(null);
+  const [wallDrag, setWallDrag] = useState<{ pointerId: number; mode: "walls" | "corner"; ids: string[]; start: Point; at: Point; moved: boolean } | null>(null);
   const [pointSnap, setPointSnap] = useState(true);
   const [selectedWalls, setSelectedWalls] = useState<string[]>([]);
   const [selectedLight, setSelectedLight] = useState<string | null>(null);
@@ -615,13 +646,14 @@ function MapViewInner({
 
   // Wall points snap to the grid's corners (hex corners on a hex grid) and to
   // existing wall ends (FG's Grid Snap and Point Snap); Shift draws free.
-  function snapPoint(point: Point, snapping: boolean): Point {
+  function snapPoint(point: Point, snapping: boolean, leaveOut: string[] = []): Point {
     const round = (value: number) => Math.round(value * 10) / 10;
     if (snapping && pointSnap) {
       const reach = 10 / camera.scale;
       let best: Point | null = null;
       let bestDistance = reach;
       for (const wall of map.walls ?? []) {
+        if (leaveOut.includes(wall.id)) continue;
         for (const end of [
           { x: wall.x1, y: wall.y1 },
           { x: wall.x2, y: wall.y2 },
@@ -658,6 +690,53 @@ function MapViewInner({
       }
     }
     return { x: round(point.x), y: round(point.y) };
+  }
+  // Where a drag puts the walls: a corner snaps (to other walls' ends, or the
+  // grid when it is on); walls moved keep their shape, their first end snapped.
+  function movedWalls(drag: { mode: "walls" | "corner"; ids: string[]; start: Point; at: Point }) {
+    if (drag.mode === "corner") {
+      const leaveOut = (map.walls ?? []).filter((wall) => (Math.abs(wall.x1 - drag.start.x) < 0.6 && Math.abs(wall.y1 - drag.start.y) < 0.6) || (Math.abs(wall.x2 - drag.start.x) < 0.6 && Math.abs(wall.y2 - drag.start.y) < 0.6)).map((wall) => wall.id);
+      const to = snapPoint(drag.at, true, leaveOut);
+      return { dx: to.x - drag.start.x, dy: to.y - drag.start.y, to };
+    }
+    const first = (map.walls ?? []).find((wall) => drag.ids.includes(wall.id));
+    let dx = drag.at.x - drag.start.x;
+    let dy = drag.at.y - drag.start.y;
+    if (first) {
+      const landed = snapPoint({ x: first.x1 + dx, y: first.y1 + dy }, true, drag.ids);
+      dx = landed.x - first.x1;
+      dy = landed.y - first.y1;
+    }
+    return { dx: Math.round(dx * 10) / 10, dy: Math.round(dy * 10) / 10, to: drag.at };
+  }
+  // A door drawn as a box or shape is one door (FG's): its sides share a group.
+  function doorGroupFor(kind: string): { group?: string } {
+    return kind === "door" || kind === "secret" ? { group: `door-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}` } : {};
+  }
+  // A door's sides go together: picking one picks the whole door.
+  function withDoorSides(ids: string[]): string[] {
+    const walls = map.walls ?? [];
+    const groupOf = (wall: EditWall) => wall.group ?? /^(fg-.+)-\d+$/.exec(wall.id)?.[1] ?? null;
+    const groups = new Set(walls.filter((wall) => ids.includes(wall.id)).map(groupOf).filter(Boolean));
+    return [...new Set([...ids, ...walls.filter((wall) => groups.has(groupOf(wall))).map((wall) => wall.id)])];
+  }
+  // A wall end near a point (to drag a corner).
+  function cornerAt(point: Point): Point | null {
+    const reach = 9 / camera.scale;
+    let best: Point | null = null;
+    let bestDistance = reach;
+    for (const wall of map.walls ?? [])
+      for (const end of [
+        { x: wall.x1, y: wall.y1 },
+        { x: wall.x2, y: wall.y2 },
+      ]) {
+        const distance = Math.hypot(end.x - point.x, end.y - point.y);
+        if (distance < bestDistance) {
+          best = end;
+          bestDistance = distance;
+        }
+      }
+    return best;
   }
   function wallAt(point: Point): string | null {
     let best: string | null = null;
@@ -705,7 +784,7 @@ function MapViewInner({
       return;
     }
     if (editTab === "mask" && editTool === "poly" && pending.length >= 6 && actions.mask) actions.mask(maskMode, { points: pending });
-    else if (editTool === "poly" && pending.length >= 6 && actions.wall) actions.wall("add", { wall: { points: pending, closed: true, kind: wallKind } });
+    else if (editTool === "poly" && pending.length >= 6 && actions.wall) actions.wall("add", { wall: { points: pending, closed: true, kind: wallKind, ...doorGroupFor(wallKind) } });
     setPending([]);
     setHover(null);
   }
@@ -858,8 +937,20 @@ function MapViewInner({
           if (!raw) return;
           const point = snapPoint(raw, !event.shiftKey);
           if (editTool === "select") {
+            // A corner (a wall end) dragged moves every wall end there; a wall dragged moves the picked walls.
+            const corner = event.shiftKey ? null : cornerAt(raw);
+            if (corner) {
+              capture(event.currentTarget, event.pointerId);
+              setWallDrag({ pointerId: event.pointerId, mode: "corner", ids: [], start: corner, at: corner, moved: false });
+              return;
+            }
             const id = wallAt(raw);
-            setSelectedWalls((current) => (id ? (event.shiftKey ? (current.includes(id) ? current.filter((item) => item !== id) : [...current, id]) : [id]) : event.shiftKey ? current : []));
+            const next = id ? (event.shiftKey ? (selectedWalls.includes(id) ? selectedWalls.filter((item) => item !== id) : [...selectedWalls, id]) : selectedWalls.includes(id) ? selectedWalls : withDoorSides([id])) : event.shiftKey ? selectedWalls : [];
+            setSelectedWalls(next);
+            if (id && !event.shiftKey && next.includes(id)) {
+              capture(event.currentTarget, event.pointerId);
+              setWallDrag({ pointerId: event.pointerId, mode: "walls", ids: next, start: raw, at: raw, moved: false });
+            }
           } else if (editTool === "light") {
             actions.placeLight({ x: Math.round(raw.x), y: Math.round(raw.y), preset: lightPreset });
           } else if (editTool === "line") {
@@ -867,11 +958,16 @@ function MapViewInner({
             if (pending.length >= 2) actions.wall("add", { wall: { points: [pending[0], pending[1], point.x, point.y], kind: wallKind } });
             setPending([point.x, point.y]);
           } else if (editTool === "rect") {
+            // Drag the box (press, drag, let go) or click its two corners.
             if (pending.length >= 2) {
               const [x1, y1] = pending;
-              actions.wall("add", { wall: { points: [x1, y1, point.x, y1, point.x, point.y, x1, point.y], closed: true, kind: wallKind } });
+              actions.wall("add", { wall: { points: [x1, y1, point.x, y1, point.x, point.y, x1, point.y], closed: true, kind: wallKind, ...doorGroupFor(wallKind) } });
               setPending([]);
-            } else setPending([point.x, point.y]);
+            } else {
+              setPending([point.x, point.y]);
+              capture(event.currentTarget, event.pointerId);
+              boxDrag.current = { pointerId: event.pointerId, x: event.clientX, y: event.clientY };
+            }
           } else if (editTool === "poly") {
             setPending((current) => [...current, point.x, point.y]);
           }
@@ -945,7 +1041,13 @@ function MapViewInner({
           }
           return;
         }
-        if (gm && editorOpen && pending.length >= 2) {
+        if (wallDrag && wallDrag.pointerId === event.pointerId) {
+          const point = worldAt(event.clientX, event.clientY);
+          if (point) setWallDrag({ ...wallDrag, at: point, moved: wallDrag.moved || Math.hypot(point.x - wallDrag.start.x, point.y - wallDrag.start.y) > 4 / camera.scale });
+          return;
+        }
+        if (gm && editorOpen && (pending.length >= 2 || (editTab === "walls" && (editTool === "line" || editTool === "rect" || editTool === "poly")))) {
+          // Where the next point goes (snapped), shown before it is placed.
           const point = worldAt(event.clientX, event.clientY);
           if (point) setHover(snapPoint(point, !event.shiftKey));
         }
@@ -977,6 +1079,31 @@ function MapViewInner({
         setCamera((camera) => ({ ...camera, x: camera.x + dx, y: camera.y + dy }));
       }}
       onPointerUp={(event) => {
+        if (boxDrag.current && boxDrag.current.pointerId === event.pointerId) {
+          const start = boxDrag.current;
+          boxDrag.current = null;
+          // Dragged far enough, the box is drawn where the drag ended; a click leaves its first corner for a second click.
+          if (Math.hypot(event.clientX - start.x, event.clientY - start.y) > 6 && pending.length >= 2 && actions.wall) {
+            const raw = worldAt(event.clientX, event.clientY);
+            if (raw) {
+              const point = snapPoint(raw, !event.shiftKey);
+              const [x1, y1] = pending;
+              if (Math.abs(point.x - x1) > 1 && Math.abs(point.y - y1) > 1) actions.wall("add", { wall: { points: [x1, y1, point.x, y1, point.x, point.y, x1, point.y], closed: true, kind: wallKind, ...doorGroupFor(wallKind) } });
+              setPending([]);
+              setHover(null);
+            }
+          }
+          return;
+        }
+        if (wallDrag && wallDrag.pointerId === event.pointerId) {
+          const drag = wallDrag;
+          setWallDrag(null);
+          if (!drag.moved || !actions.wall) return;
+          const moved = movedWalls(drag);
+          if (drag.mode === "corner") actions.wall("move-point", { from: drag.start, to: moved.to });
+          else actions.wall("move", { ids: drag.ids, dx: moved.dx, dy: moved.dy });
+          return;
+        }
         if (box && box.pointerId === event.pointerId) {
           const left = Math.min(box.start.x, box.at.x);
           const right = Math.max(box.start.x, box.at.x);
@@ -1173,6 +1300,7 @@ function MapViewInner({
           showCreatures={false}
           doorStates={doorStates}
           onToggleDoor={(wallId) => actions.setDoor(wallId)}
+          doorsInert={Boolean(gm && editorOpen && editTab === "walls" && editTool)}
         />
         {map.sceneId === scene.id ? (
           <Lighting
@@ -1263,6 +1391,28 @@ function MapViewInner({
                   );
                 })()
               : null}
+            {wallDrag && wallDrag.moved
+              ? (() => {
+                  // The walls as they will land.
+                  const { dx, dy, to } = movedWalls(wallDrag);
+                  const near = (a: number, b: number) => Math.abs(a - b) < 0.6;
+                  return (map.walls ?? [])
+                    .filter((wall) => (wallDrag.mode === "walls" ? wallDrag.ids.includes(wall.id) : (near(wall.x1, wallDrag.start.x) && near(wall.y1, wallDrag.start.y)) || (near(wall.x2, wallDrag.start.x) && near(wall.y2, wallDrag.start.y))))
+                    .map((wall) => {
+                      const end = (x: number, y: number) => (wallDrag.mode === "walls" ? { x: x + dx, y: y + dy } : near(x, wallDrag.start.x) && near(y, wallDrag.start.y) ? to : { x, y });
+                      const a = end(wall.x1, wall.y1);
+                      const b = end(wall.x2, wall.y2);
+                      return <line key={`drag-${wall.id}`} className="wall-dragging" x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke={kindColor(wall.kind)} strokeWidth={4 / camera.scale} strokeDasharray={`${6 / camera.scale} ${4 / camera.scale}`} strokeLinecap="round" />;
+                    });
+                })()
+              : null}
+            {editTab === "walls" && hover && (editTool === "line" || editTool === "rect" || editTool === "poly") ? (
+              // Where the next point goes, before it is placed.
+              <g className="wall-aim" data-aim={`${hover.x},${hover.y}`}>
+                <circle cx={hover.x} cy={hover.y} r={6 / camera.scale} fill="none" stroke="#ffffff" strokeWidth={2 / camera.scale} />
+                <circle cx={hover.x} cy={hover.y} r={2 / camera.scale} fill={kindColor(wallKind)} />
+              </g>
+            ) : null}
             {pending.length >= 2 ? (
               <>
                 <polyline points={[...pending, ...(hover ? [hover.x, hover.y] : [])].join(" ")} fill="none" stroke={kindColor(wallKind)} strokeWidth={3 / camera.scale} strokeDasharray={`${8 / camera.scale} ${4 / camera.scale}`} />
@@ -1733,7 +1883,7 @@ function MapViewInner({
                         }
                       }}
                     >
-                      <span className="tray-chip">{initials(record.name)}</span>
+                      <TrayFace url={actions.recordArtUrl?.(record.id) ?? ""} name={record.name} />
                       <span className="tray-name">{record.name}</span>
                       <span className="tray-state">{onMap ? "on map" : "place"}</span>
                     </li>
@@ -1865,6 +2015,8 @@ function MapViewInner({
           setTool={(next) => {
             setEditTool(next);
             if (next) setTool("pan");
+            // A drawing tool lets go of the picked walls (else the next wall type picked would change them).
+            if (next && next !== "select") setSelectedWalls([]);
           }}
           kind={wallKind}
           setKind={setWallKind}

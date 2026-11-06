@@ -42,7 +42,7 @@ export type MapSettings = {
 export type MapDoor = { id: string; group?: string; x1: number; y1: number; x2: number; y2: number; state: number; secret?: boolean; kind?: string };
 // A wall in the GM's map editor (FG's kinds with Foundry's senses).
 export type WallKind = "wall" | "terrain" | "door" | "secret" | "toggle" | "window" | "illusion" | "invisible" | "ethereal" | "shadow" | "custom";
-export type EditWall = { id: string; x1: number; y1: number; x2: number; y2: number; kind: WallKind; sight: number; light: number; sound: number; move: number; dir: number; door: number; ds: number; toggle: "none" | "gm" | "players"; threshold: number | null; hidden: boolean };
+export type EditWall = { id: string; x1: number; y1: number; x2: number; y2: number; kind: WallKind; sight: number; light: number; sound: number; move: number; dir: number; door: number; ds: number; toggle: "none" | "gm" | "players"; threshold: number | null; hidden: boolean; group?: string };
 export type TableMap = {
   sceneId: string | null;
   tokens: MapToken[];
