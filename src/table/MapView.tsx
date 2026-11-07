@@ -1256,9 +1256,14 @@ function MapViewInner({
           const target = hit ? actions.combat?.entries.find((item) => item.tokenId === hit.id || (hit.recordId && item.recordId === hit.recordId)) : null;
           try {
             const used = JSON.parse(card) as { recordId: string; entryId: string; kind: string; name: string; weapon: string; id?: string };
-            if (!used.entryId) setHint("Your character is not in the fight: add them to the combat tracker first.");
-            else if (!target) setHint(hit ? `${hit.name} is not on the combat tracker.` : "Drop the card on a creature's token.");
+            const refuse = (why: string) => {
+              setHint(why);
+              window.setTimeout(() => setHint((now) => (now === why ? "" : now)), 4000);
+            };
+            if (!used.entryId) refuse("Your character is not in the fight: add them to the combat tracker first.");
+            else if (!target) refuse(hit ? `${hit.name} is not on the combat tracker.` : "Drop the card on a creature's token.");
             else {
+              setHint("");
               actions.ct("clear-targets", { id: used.entryId });
               actions.ct("target", { sourceId: used.entryId, targetId: target.id, on: true });
               if (used.kind === "spell") actions.ct("cast", { recordId: used.recordId, power: used.name });

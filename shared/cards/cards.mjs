@@ -109,9 +109,31 @@ export function cardsFor(data, spells = []) {
       known: true,
       damage: String(attack.damage ?? attack.dice ?? ""),
       bonus,
+      weaponKind: weaponKind(String(attack.name), String(attack.type ?? "")),
     });
   }
   return out;
+}
+
+// The kind of weapon a card's picture shows, from its name (the pictures are
+// src/assets/cards/<kind>.webp): a ranged weapon with no better match is a bow.
+/** @type {[string, RegExp][]} */
+const WEAPON_KINDS = [
+  ["firearm", /pistol|rifle|blaster|carbine|gun|laser|shotgun|revolver|musket|needler|stunner/],
+  ["crossbow", /crossbow/],
+  ["bow", /bow|longbow|shortbow/],
+  ["sling", /sling|dart|stone/],
+  ["axe", /axe|hatchet/],
+  ["hammer", /hammer|mace|maul|morning ?star|flail|club|cudgel/],
+  ["spear", /spear|javelin|trident|pike|halberd|glaive|lance|polearm|partisan/],
+  ["staff", /staff|quarterstaff|rod|cane/],
+  ["fist", /unarmed|fist|punch|claw|bite|gauntlet|knuckle/],
+  ["blade", /sword|dagger|knife|rapier|scimitar|sabre|saber|blade|sickle|cutlass|machete|katana|dirk/],
+];
+export function weaponKind(name, type = "") {
+  const text = name.toLowerCase();
+  for (const [kind, pattern] of WEAPON_KINDS) if (pattern.test(text)) return kind;
+  return type === "ranged" ? "bow" : "blade";
 }
 
 // A long rest's change to the sheet: every slot back, concentration dropped.

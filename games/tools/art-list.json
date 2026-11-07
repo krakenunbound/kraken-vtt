@@ -6,7 +6,7 @@
     "aacreature": "gritty science fiction character portrait, cinematic lighting, dark industrial background, head and shoulders filling the frame, centered, detailed, no text, no watermark",
     "ddhero": "dark fantasy adventurer character portrait, oil painting, head and shoulders, three-quarter view, dramatic warm rim lighting, dark misty background, centered, detailed face, no text, no watermark",
     "aahero": "gritty science fiction crew member character portrait, cinematic lighting, head and shoulders, three-quarter view, dark starship interior background, centered, detailed face, no text, no watermark",
-    "ddspell": "dark fantasy spell card illustration, oil painting, glowing magical light against deep darkness, one clear subject centered, strong silhouette, painterly, detailed, no text, no letters, no border, no frame, no watermark"
+    "ddspell": "dark fantasy spell card illustration, oil painting, glowing magical light against deep darkness, one clear subject centered, strong silhouette, painterly, detailed, full-bleed painting reaching every edge of the canvas, no text"
   },
   "pictures": [
     {
@@ -410,7 +410,7 @@
     [
       "dd",
       "Whisper Across",
-      "a thread of silver whispering light flowing from lips to a distant ear across a dark hall"
+      "a hooded mage in a dark stone hall cupping a hand to their mouth, a long thread of silver light flying away from them toward a far distant doorway"
     ],
     [
       "dd",
@@ -470,7 +470,7 @@
     [
       "dd",
       "Hunter's Quarry",
-      "a ranger's eye with a glowing green crosshair mark over a distant beast in a dark forest"
+      "a hooded ranger drawing a longbow in a dark forest, a distant wolf marked by a glowing green rune of light hovering over it"
     ],
     [
       "dd",
@@ -547,5 +547,17 @@
       "Wardens of Light",
       "shining spectral guardian spirits with spears circling a priest in the dark"
     ]
+  ],
+  "weapons": [
+    ["blade", "a gleaming steel sword and a dagger crossed, edges catching cold candlelight, sparks"],
+    ["axe", "a heavy battle axe with a notched steel head, embers drifting past the blade"],
+    ["bow", "a drawn longbow with an arrow nocked, its point glinting, a ranger's gloved hand on the string"],
+    ["crossbow", "close view of a medieval crossbow lying on a dark wooden table, its steel bolt loaded and string drawn, lantern light on the wooden stock"],
+    ["staff", "a gnarled wooden quarterstaff bound with iron rings, faint dust in a beam of light"],
+    ["hammer", "a dwarven war hammer with a square blunt iron head like a blacksmith's hammer, resting head down on a stone floor in a dark forge, orange firelight"],
+    ["spear", "a long spear with a leaf-shaped steel head and a fluttering ribbon, thrust forward"],
+    ["sling", "a leather sling whirling a stone, motion trail of the stone in dim light"],
+    ["fist", "a clenched fist wrapped in cloth, raised to strike, dust rising around it"],
+    ["firearm", "a sleek science fiction pistol with glowing blue energy coils on a dark metal table, cold neon light"]
   ]
 }

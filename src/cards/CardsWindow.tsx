@@ -14,6 +14,10 @@ import "./cards.css";
 export type Card = ReturnType<typeof cardsFor>[number];
 export const CARD_DRAG = "application/x-kraken-card";
 const SPARK_COUNT = 14;
+// A weapon card's picture, by its kind (shared/cards weaponKind).
+const WEAPON_ART = Object.fromEntries(
+  Object.entries(import.meta.glob("../assets/cards/*.webp", { eager: true, query: "?url", import: "default" }) as Record<string, string>).map(([file, url]) => [file.replace(/^.*\/|\.webp$/g, ""), url]),
+);
 
 function useMine(session: Session) {
   const me = session.players.find((seat) => seat.id === session.selfId)?.name ?? "";
@@ -127,7 +131,7 @@ export function AbilityCard({ session, character, card, index, restoredAt = -1 }
   const face = useRef<HTMLDivElement | null>(null);
   const video = useRef<HTMLVideoElement | null>(null);
   const school = SCHOOLS[card.school as keyof typeof SCHOOLS] ?? SCHOOLS.evocation;
-  const still = card.art && card.recordId ? session.recordArtUrl(card.recordId, "portrait") : "";
+  const still = card.kind === "weapon" ? (WEAPON_ART[card.weaponKind ?? ""] ?? "") : card.art && card.recordId ? session.recordArtUrl(card.recordId, "portrait") : "";
   const moving = card.art && card.recordId ? session.recordArtUrl(card.recordId, "card") : "";
 
   useEffect(() => {

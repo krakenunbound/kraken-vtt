@@ -1698,6 +1698,7 @@
 						</damagelist>
 					</id-00003>
 				</actions>
+				<picture type="string">images/spells/spark-lash.webp@Descending Darkness Player's Handbook</picture>
 			</sparklash>
 			<gravetouch>
 				<name type="string">Grave Touch</name>
@@ -1738,6 +1739,7 @@
 						<durunit type="string">round</durunit>
 					</id-00004>
 				</actions>
+				<picture type="string">images/spells/grave-touch.webp@Descending Darkness Player's Handbook</picture>
 			</gravetouch>
 			<sacredember>
 				<name type="string">Sacred Ember</name>
@@ -1772,6 +1774,7 @@
 						</damagelist>
 					</id-00003>
 				</actions>
+				<picture type="string">images/spells/sacred-ember.webp@Descending Darkness Player's Handbook</picture>
 			</sacredember>
 			<cuttingwords>
 				<name type="string">Cutting Words</name>
@@ -1812,6 +1815,7 @@
 						<durunit type="string">round</durunit>
 					</id-00004>
 				</actions>
+				<picture type="string">images/spells/cutting-words.webp@Descending Darkness Player's Handbook</picture>
 			</cuttingwords>
 			<guidingglimmer>
 				<name type="string">Guiding Glimmer</name>
@@ -1837,6 +1841,7 @@
 						<durunit type="string">minute</durunit>
 					</id-00002>
 				</actions>
+				<picture type="string">images/spells/guiding-glimmer.webp@Descending Darkness Player's Handbook</picture>
 			</guidingglimmer>
 			<mendingword>
 				<name type="string">Mending Word</name>
@@ -1849,6 +1854,7 @@
 				<ritual type="number">0</ritual>
 				<source type="string">Cleric, Wizard, Bard</source>
 				<description type="formattedtext"><p>One break or tear in an object you touch closes: a broken chain link, a torn cloak, a cracked lamp. Magic items are beyond it.</p></description>
+				<picture type="string">images/spells/mending-word.webp@Descending Darkness Player's Handbook</picture>
 			</mendingword>
 			<unseengrip>
 				<name type="string">Unseen Grip</name>
@@ -1861,6 +1867,7 @@
 				<ritual type="number">0</ritual>
 				<source type="string">Wizard, Bard</source>
 				<description type="formattedtext"><p>An invisible hand does simple work within range: opens an unlocked door, carries 10 pounds, pulls a lever. It cannot attack.</p></description>
+				<picture type="string">images/spells/unseen-grip.webp@Descending Darkness Player's Handbook</picture>
 			</unseengrip>
 			<whisperacross>
 				<name type="string">Whisper Across</name>
@@ -1873,6 +1880,7 @@
 				<ritual type="number">0</ritual>
 				<source type="string">Wizard, Bard</source>
 				<description type="formattedtext"><p>You whisper to a creature you can see; only it hears, and it may whisper back. Stone a foot thick, or metal, stops it.</p></description>
+				<picture type="string">images/spells/whisper-across.webp@Descending Darkness Player's Handbook</picture>
 			</whisperacross>
 		</category>
 		<category name="Circle 1">
@@ -1905,6 +1913,7 @@
 						</damagelist>
 					</id-00002>
 				</actions>
+				<picture type="string">images/spells/arcane-darts.webp@Descending Darkness Player's Handbook</picture>
 			</arcanedarts>
 			<mendwounds>
 				<name type="string">Mend Wounds</name>
@@ -1936,6 +1945,7 @@
 						</heallist>
 					</id-00002>
 				</actions>
+				<picture type="string">images/spells/mend-wounds.webp@Descending Darkness Player's Handbook</picture>
 			</mendwounds>
 			<wordofrest>
 				<name type="string">Word of Rest</name>
@@ -1967,6 +1977,7 @@
 						</heallist>
 					</id-00002>
 				</actions>
+				<picture type="string">images/spells/word-of-rest.webp@Descending Darkness Player's Handbook</picture>
 			</wordofrest>
 			<wardoffaith>
 				<name type="string">Ward of Faith</name>
@@ -1992,6 +2003,7 @@
 						<durunit type="string">minute</durunit>
 					</id-00002>
 				</actions>
+				<picture type="string">images/spells/ward-of-faith.webp@Descending Darkness Player's Handbook</picture>
 			</wardoffaith>
 			<blessing>
 				<name type="string">Blessing</name>
@@ -2017,6 +2029,7 @@
 						<durunit type="string">minute</durunit>
 					</id-00002>
 				</actions>
+				<picture type="string">images/spells/blessing.webp@Descending Darkness Player's Handbook</picture>
 			</blessing>
 			<burningfan>
 				<name type="string">Burning Fan</name>
@@ -2052,6 +2065,7 @@
 						</damagelist>
 					</id-00003>
 				</actions>
+				<picture type="string">images/spells/burning-fan.webp@Descending Darkness Player's Handbook</picture>
 			</burningfan>
 			<slumber>
 				<name type="string">Slumber</name>
@@ -2081,6 +2095,7 @@
 						<durunit type="string">minute</durunit>
 					</id-00003>
 				</actions>
+				<picture type="string">images/spells/slumber.webp@Descending Darkness Player's Handbook</picture>
 			</slumber>
 			<colddread>
 				<name type="string">Cold Dread</name>
@@ -2110,6 +2125,7 @@
 						<durunit type="string">minute</durunit>
 					</id-00003>
 				</actions>
+				<picture type="string">images/spells/cold-dread.webp@Descending Darkness Player's Handbook</picture>
 			</colddread>
 			<ironwill>
 				<name type="string">Iron Will</name>
@@ -2136,6 +2152,7 @@
 						<targeting type="string">self</targeting>
 					</id-00002>
 				</actions>
+				<picture type="string">images/spells/iron-will.webp@Descending Darkness Player's Handbook</picture>
 			</ironwill>
 			<thunderclap>
 				<name type="string">Thunder Clap</name>
@@ -2171,6 +2188,7 @@
 						</damagelist>
 					</id-00003>
 				</actions>
+				<picture type="string">images/spells/thunder-clap.webp@Descending Darkness Player's Handbook</picture>
 			</thunderclap>
 			<featherfall>
 				<name type="string">Feather Fall</name>
@@ -2183,6 +2201,7 @@
 				<ritual type="number">0</ritual>
 				<source type="string">Wizard, Bard</source>
 				<description type="formattedtext"><p>Up to five falling creatures drift down at 60 feet a round and land unhurt.</p></description>
+				<picture type="string">images/spells/feather-fall.webp@Descending Darkness Player's Handbook</picture>
 			</featherfall>
 			<huntersquarry>
 				<name type="string">Hunter's Quarry</name>
@@ -2210,6 +2229,7 @@
 						<targeted type="number">1</targeted>
 					</id-00002>
 				</actions>
+				<picture type="string">images/spells/hunter-s-quarry.webp@Descending Darkness Player's Handbook</picture>
 			</huntersquarry>
 			<lighttheway>
 				<name type="string">Light the Way</name>
@@ -2222,6 +2242,7 @@
 				<ritual type="number">0</ritual>
 				<source type="string">Cleric, Paladin, Ranger</source>
 				<description type="formattedtext"><p>A steady glow surrounds you: bright light 30 feet and dim 30 beyond, for an hour. While it lasts, you and companions within its bright light ignore the first point of Dread you would each gain.</p></description>
+				<picture type="string">images/spells/light-the-way.webp@Descending Darkness Player's Handbook</picture>
 			</lighttheway>
 			<sensethehidden>
 				<name type="string">Sense the Hidden</name>
@@ -2234,6 +2255,7 @@
 				<ritual type="number">0</ritual>
 				<source type="string">Cleric, Wizard, Paladin, Ranger, Bard</source>
 				<description type="formattedtext"><p>You sense magic within 30 feet, and the hidden: secret doors, concealed traps and invisible creatures show as a faint outline to you. Stone a foot thick blocks it.</p></description>
+				<picture type="string">images/spells/sense-the-hidden.webp@Descending Darkness Player's Handbook</picture>
 			</sensethehidden>
 		</category>
 		<category name="Circle 2">
@@ -2271,6 +2293,7 @@
 						</damagelist>
 					</id-00003>
 				</actions>
+				<picture type="string">images/spells/ember-ray.webp@Descending Darkness Player's Handbook</picture>
 			</emberray>
 			<holdfoe>
 				<name type="string">Hold Foe</name>
@@ -2300,6 +2323,7 @@
 						<durunit type="string">minute</durunit>
 					</id-00003>
 				</actions>
+				<picture type="string">images/spells/hold-foe.webp@Descending Darkness Player's Handbook</picture>
 			</holdfoe>
 			<silverbrand>
 				<name type="string">Silver Brand</name>
@@ -2326,6 +2350,7 @@
 						<targeting type="string">self</targeting>
 					</id-00002>
 				</actions>
+				<picture type="string">images/spells/silver-brand.webp@Descending Darkness Player's Handbook</picture>
 			</silverbrand>
 			<shroudofdark>
 				<name type="string">Shroud of Dark</name>
@@ -2338,6 +2363,7 @@
 				<ritual type="number">0</ritual>
 				<source type="string">Wizard, Bard</source>
 				<description type="formattedtext"><p>Magical darkness fills a 15-foot sphere. No light but magic of the third circle or higher shows anything inside it; creatures there are unseen. Every adventurer in it gains 1 Dread the first time.</p></description>
+				<picture type="string">images/spells/shroud-of-dark.webp@Descending Darkness Player's Handbook</picture>
 			</shroudofdark>
 			<restore>
 				<name type="string">Restore</name>
@@ -2350,6 +2376,7 @@
 				<ritual type="number">0</ritual>
 				<source type="string">Cleric, Paladin, Ranger, Bard</source>
 				<description type="formattedtext"><p>You end one disease or one condition on a creature you touch: blinded, deafened, paralyzed or poisoned. Or you take 1 Dread from it.</p></description>
+				<picture type="string">images/spells/restore.webp@Descending Darkness Player's Handbook</picture>
 			</restore>
 			<mistwalk>
 				<name type="string">Mist Walk</name>
@@ -2362,6 +2389,7 @@
 				<ritual type="number">0</ritual>
 				<source type="string">Wizard, Bard</source>
 				<description type="formattedtext"><p>You become mist and reform up to 30 feet away in a space you can see.</p></description>
+				<picture type="string">images/spells/mist-walk.webp@Descending Darkness Player's Handbook</picture>
 			</mistwalk>
 			<mendmany>
 				<name type="string">Mend Many</name>
@@ -2393,6 +2421,7 @@
 						</heallist>
 					</id-00002>
 				</actions>
+				<picture type="string">images/spells/mend-many.webp@Descending Darkness Player's Handbook</picture>
 			</mendmany>
 		</category>
 		<category name="Circle 3">
@@ -2430,6 +2459,7 @@
 						</damagelist>
 					</id-00003>
 				</actions>
+				<picture type="string">images/spells/fire-burst.webp@Descending Darkness Player's Handbook</picture>
 			</fireburst>
 			<stormlance>
 				<name type="string">Storm Lance</name>
@@ -2465,6 +2495,7 @@
 						</damagelist>
 					</id-00003>
 				</actions>
+				<picture type="string">images/spells/storm-lance.webp@Descending Darkness Player's Handbook</picture>
 			</stormlance>
 			<banishfear>
 				<name type="string">Banish Fear</name>
@@ -2477,6 +2508,7 @@
 				<ritual type="number">0</ritual>
 				<source type="string">Cleric, Paladin, Bard</source>
 				<description type="formattedtext"><p>Up to six creatures you can see lose 2 Dread each and cannot gain Dread for the next hour. A creature that is frightened is no longer.</p></description>
+				<picture type="string">images/spells/banish-fear.webp@Descending Darkness Player's Handbook</picture>
 			</banishfear>
 			<callback>
 				<name type="string">Call Back</name>
@@ -2489,6 +2521,7 @@
 				<ritual type="number">0</ritual>
 				<source type="string">Cleric, Paladin</source>
 				<description type="formattedtext"><p>You touch a creature that died within the last minute and call it back: it returns to life with 1 Health and 2 Dread. It cannot return if it was not willing, or if its body was destroyed.</p></description>
+				<picture type="string">images/spells/call-back.webp@Descending Darkness Player's Handbook</picture>
 			</callback>
 			<unweave>
 				<name type="string">Unweave</name>
@@ -2501,6 +2534,7 @@
 				<ritual type="number">0</ritual>
 				<source type="string">Wizard, Bard</source>
 				<description type="formattedtext"><p>You pull the threads of a spell apart as it is cast. A spell of the third circle or lower fails; a higher one fails if you succeed on an ability check with your spellcasting ability (DC 10 + its circle).</p></description>
+				<picture type="string">images/spells/unweave.webp@Descending Darkness Player's Handbook</picture>
 			</unweave>
 			<wardensoflight>
 				<name type="string">Wardens of Light</name>
@@ -2536,6 +2570,7 @@
 						</damagelist>
 					</id-00003>
 				</actions>
+				<picture type="string">images/spells/wardens-of-light.webp@Descending Darkness Player's Handbook</picture>
 			</wardensoflight>
 		</category>
 	</spell>
