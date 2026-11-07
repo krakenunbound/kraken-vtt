@@ -12,6 +12,10 @@
 //  9 Descending Darkness refuses a death save
 // 10 Apeira Astra initiative: no Tactics is -3, Tactics 0 is +0
 // 11 d20 damage can be 0
+// And the alpha.58 review (R): R1 the dying and the unconscious cannot act;
+// R2 effect damage dice count (Hunter's Quarry against its quarry only);
+// R3 a critical on a dying character is two failed death saves; R5 attacks on
+// the unconscious have advantage and a melee hit is a critical.
 import "./loopback.mjs";
 import path from "node:path";
 import { createRequire } from "node:module";
@@ -292,6 +296,106 @@ try {
   done.push(`3 Astra Down skips turns${weapon ? " and cannot attack" : ""}`);
 } finally {
   await aa.server.close?.();
+}
+
+// --- The alpha.58 review (Codex): d20 conditions, effect damage, critical death saves ---
+// Descending Darkness: Hunter's Quarry, acting while down, attacks on the unconscious.
+const dd2 = await table("Descending Darkness", ["Descending Darkness Player's Handbook", "Descending Darkness Bestiary"]);
+try {
+  const { tool, refused, agent, force, last, view } = dd2;
+  const ranger = await tool("kraken_build_character", { owner: "Ann", spec: { name: "Vesna", species: "Human", class: "Ranger", level: 2, scores: { strength: 12, dexterity: 16, constitution: 13, intelligence: 10, wisdom: 14, charisma: 8 }, spells: ["Hunter's Quarry"], gear: [["Dagger", 1]] } });
+  const knife = Object.entries(agent.records.get(ranger.id).data.attacks).find(([, attack]) => attack.name === "Dagger");
+  assert(knife, `Vesna has a dagger: ${JSON.stringify(agent.records.get(ranger.id).data.attacks)}`);
+  const sentinel = agent.records.list({ type: "npc" }).find((record) => record.name === "Bone Sentinel");
+  await tool("kraken_combat", { action: "add", recordId: ranger.id });
+  await tool("kraken_combat", { action: "add", recordId: sentinel.id, count: 2 });
+  let entries = await view();
+  const vesna = entries.find((entry) => entry.name === "Vesna");
+  const s1 = entries.find((entry) => entry.name === "Bone Sentinel 1");
+  const s2 = entries.find((entry) => entry.name === "Bone Sentinel 2");
+  const aim = async (target) => {
+    for (const other of [s1, s2]) await tool("kraken_combat", { action: "target", id: vesna.id, targetId: other.id, on: other === target });
+  };
+  const attack = () => tool("kraken_combat", { action: "attack", recordId: ranger.id, weapon: knife[0] });
+  const damage = async () => (await tool("kraken_combat", { action: "damage-roll", recordId: ranger.id, weapon: knife[0] })).damage;
+
+  // Hunter's Quarry: needs a target; then on Vesna, aimed at it: its 1d6 on hits against the quarry only, doubled on a critical.
+  await aim(null);
+  const untargeted = await refused("kraken_combat", { action: "cast", recordId: ranger.id, power: "Hunter's Quarry" });
+  assert(untargeted && /Target the creature/.test(untargeted) && !Object.values(agent.records.get(ranger.id).data.slots ?? {}).some((slot) => slot.used), `Hunter's Quarry with no target is refused, no slot spent: ${untargeted}`);
+  await aim(s1);
+  await tool("kraken_combat", { action: "cast", recordId: ranger.id, power: "Hunter's Quarry" });
+  entries = await view();
+  const quarry = entries.find((entry) => entry.id === vesna.id).effects.find((effect) => /Quarry/.test(effect.label));
+  assert(quarry && /-> Bone Sentinel 1/.test(quarry.label) && !entries.find((entry) => entry.id === s1.id).effects.length, `Quarry sits on Vesna, aimed at Sentinel 1: ${JSON.stringify(quarry)}`);
+  force(15);
+  await attack();
+  force(1, 1);
+  await damage();
+  assert(/^1d4\+3\+1d6$/.test(last(/^\[DAMAGE\]/).roll.formula), `a hit on the quarry adds 1d6: ${last(/^\[DAMAGE\]/).roll.formula}`);
+  force(20);
+  await attack();
+  force(1, 1, 1, 1);
+  await damage();
+  assert(last(/^\[DAMAGE\]/).roll.formula === "2d4+3+2d6", `a critical doubles the quarry's dice: ${last(/^\[DAMAGE\]/).roll.formula}`);
+  await aim(s2);
+  force(15);
+  await attack();
+  force(1);
+  await damage();
+  assert(last(/^\[DAMAGE\]/).roll.formula === "1d4+3", `no quarry dice against another creature: ${last(/^\[DAMAGE\]/).roll.formula}`);
+  done.push("R2 Hunter's Quarry adds its dice against its quarry only");
+
+  // Attacks on an Unconscious creature: advantage, and a melee hit is a critical.
+  await tool("kraken_combat", { action: "effect", id: s2.id, effect: { label: "Asleep; Unconscious" } });
+  force(3, 12);
+  const asleep = (await attack()).results[0];
+  const roll = last(/^\[ATTACK\]/).roll;
+  assert(/^2d20kh1/.test(roll.formula) && /ADVANTAGE/.test(roll.label) && asleep.natural === 12 && asleep.crit && /CONVERTED TO CRIT/.test(roll.label), `advantage and a critical against the unconscious: ${roll.formula} ${roll.label}`);
+  done.push("R5 attacks on the unconscious have advantage, melee hits are critical");
+
+  // Vesna at 0 Health (Dying) cannot attack or cast; Unconscious from a spell cannot either.
+  await tool("kraken_combat", { action: "damage", id: vesna.id, amount: agent.records.get(ranger.id).data.hp.total });
+  const noAttack = await refused("kraken_combat", { action: "attack", recordId: ranger.id, weapon: knife[0] });
+  const noCast = await refused("kraken_combat", { action: "cast", recordId: ranger.id, power: "Hunter's Quarry" });
+  assert(noAttack && /dying and cannot act/.test(noAttack) && noCast && /cannot act/.test(noCast), `the dying cannot act: ${noAttack} / ${noCast}`);
+  const s2attacks = Object.keys((await import("../shared/dnd5e/rules.mjs")).npcAttacks(sentinel.data));
+  const asleepAttack = await refused("kraken_combat", { action: "attack", id: s2.id, weapon: s2attacks[0] });
+  assert(asleepAttack && /unconscious and cannot act/.test(asleepAttack), `an Unconscious creature cannot attack: ${asleepAttack}`);
+  done.push("R1 the dying and the unconscious cannot act");
+} finally {
+  await dd2.server.close?.();
+}
+
+// D&D 5E (Kraken's own books under the 5E rules): a critical on a dying character is two failed death saves.
+const five = await table("D&D 5E", ["Descending Darkness Player's Handbook", "Descending Darkness Bestiary"]);
+try {
+  const { tool, agent, force, view } = five;
+  const hero = await tool("kraken_build_character", { owner: "Ann", spec: { name: "Ilse", species: "Human", class: "Wizard", level: 3, scores: { strength: 8, dexterity: 14, constitution: 13, intelligence: 17, wisdom: 12, charisma: 10 } } });
+  const sentinel = agent.records.list({ type: "npc" }).find((record) => record.name === "Bone Sentinel");
+  await tool("kraken_combat", { action: "add", recordId: hero.id });
+  await tool("kraken_combat", { action: "add", recordId: sentinel.id });
+  const entries = await view();
+  const ilse = entries.find((entry) => entry.name === "Ilse");
+  const foe = entries.find((entry) => entry.id !== ilse.id);
+  await tool("kraken_combat", { action: "damage", id: ilse.id, amount: agent.records.get(hero.id).data.hp.total });
+  assert((await view()).find((entry) => entry.id === ilse.id).health.status === "Dying", "Ilse at 0 is dying");
+  const saves = () => agent.records.get(hero.id).data.deathsaves ?? {};
+  // A plain hit: one failure.
+  await tool("kraken_combat", { action: "damage", id: ilse.id, amount: 1 });
+  assert(saves().failure === 1, `damage at 0: one failure: ${JSON.stringify(saves())}`);
+  // The sentinel's melee attack on her: advantage (she is unconscious), the hit a critical, two failures.
+  const key = Object.entries((await import("../shared/dnd5e/rules.mjs")).npcAttacks(sentinel.data)).find(([, attack]) => attack.type === "melee")?.[0];
+  assert(key, "the Bone Sentinel has a melee attack");
+  await tool("kraken_combat", { action: "target", id: foe.id, targetId: ilse.id, on: true });
+  force(2, 18);
+  await tool("kraken_combat", { action: "attack", id: foe.id, weapon: key });
+  force(1, 1, 1, 1);
+  await tool("kraken_combat", { action: "damage-roll", id: foe.id, weapon: key });
+  assert(saves().failure === 3 && (await view()).find((entry) => entry.id === ilse.id).health.status === "Dead", `a critical at 0 is two failures (1 + 2 = 3, dead): ${JSON.stringify(saves())}`);
+  done.push("R3 a critical on the dying is two failed death saves");
+} finally {
+  await five.server.close?.();
 }
 
 console.log(`ok audit: ${done.join("; ")}`);

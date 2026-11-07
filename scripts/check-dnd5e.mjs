@@ -152,6 +152,8 @@ try {
   await tool("kraken_combat", { action: "clear-targets", id: tam.id });
   await tool("kraken_combat", { action: "target", id: tam.id, targetId: bru.id, on: true });
   await tool("kraken_combat", { action: "cast", recordId: cleric.id, power: "Bless" });
+  // No target: the goblin Bruenor had targeted is dead, and attacks on the dead have advantage (FG: Unconscious).
+  await tool("kraken_combat", { action: "clear-targets", id: bru.id });
   force(10, 4);
   await tool("kraken_combat", { action: "attack", recordId: fighter.id, weapon: sword[0] });
   const blessed = last(/^\[ATTACK\]/).roll;

@@ -2132,6 +2132,7 @@
 						<label type="string">Iron Will; AC: 5</label>
 						<durmod type="number">1</durmod>
 						<durunit type="string">round</durunit>
+						<targeting type="string">self</targeting>
 					</id-00002>
 				</actions>
 			</ironwill>
@@ -2204,6 +2205,8 @@
 						<label type="string">Quarry; DMG: 1d6</label>
 						<durmod type="number">60</durmod>
 						<durunit type="string">minute</durunit>
+						<targeting type="string">self</targeting>
+						<targeted type="number">1</targeted>
 					</id-00002>
 				</actions>
 			</huntersquarry>
@@ -2319,6 +2322,7 @@
 						<label type="string">Silver Brand; DMG: 2d6 radiant</label>
 						<durmod type="number">1</durmod>
 						<durunit type="string">minute</durunit>
+						<targeting type="string">self</targeting>
 					</id-00002>
 				</actions>
 			</silverbrand>

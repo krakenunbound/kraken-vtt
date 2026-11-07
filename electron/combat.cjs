@@ -78,7 +78,21 @@ function cleanEffect(raw) {
     duration: Math.max(0, Math.round(num(raw.duration, 0))),
     init: num(raw.init, 0),
     gmOnly: Boolean(raw.gmOnly),
+    // FG's effect targets: an effect aimed at creatures counts only on rolls
+    // against them (Hunter's Quarry on the ranger, aimed at the quarry).
+    ...(Array.isArray(raw.targets) && raw.targets.length ? { targets: raw.targets.map((id) => text(id, "")).filter(Boolean).slice(0, 20) } : {}),
   };
+}
+
+// Whether an effect counts on a roll against `against` (an entry, or none).
+function effectAppliesTo(effect, against) {
+  return !effect.targets?.length || Boolean(against && effect.targets.includes(against.id));
+}
+
+// A creature's conditions from its effects' parts: "Asleep; Unconscious" has Unconscious.
+function hasCondition(entry, name) {
+  const want = name.toLowerCase();
+  return (entry?.effects ?? []).some((effect) => effect.label.split(";").some((part) => part.trim().toLowerCase() === want));
 }
 
 function cleanEntry(raw) {
@@ -110,11 +124,13 @@ function cleanEntry(raw) {
 }
 
 // 5E: the dice an effect adds to a tag ("Bless; ATK: 1d4; SAVE: 1d4" gives "+1d4").
-function effectDice(entry, tag) {
+// A damage effect may name its type after the dice ("DMG: 2d6 radiant").
+function effectDice(entry, tag, against) {
   const out = [];
   for (const effect of entry?.effects ?? []) {
+    if (!effectAppliesTo(effect, against)) continue;
     for (const part of effect.label.split(";")) {
-      const match = /^\s*([A-Z]+)\s*:\s*([+-]?\d*d\d+)\s*$/i.exec(part);
+      const match = /^\s*([A-Z]+)\s*:\s*([+-]?\d*d\d+)(?:\s+[a-z][a-z ,]*)?\s*$/i.exec(part);
       if (match && match[1].toUpperCase() === tag) out.push(match[2].startsWith("-") ? match[2] : `+${match[2].replace(/^\+/, "")}`);
     }
   }
@@ -123,11 +139,12 @@ function effectDice(entry, tag) {
 
 // The number an effect's components add for a tag: "Bless; ATK: 1; AC: -2"
 // gives ATK 1, AC -2 (CoreRPG effect components, numeric ones only).
-function effectBonus(entry, tag) {
+function effectBonus(entry, tag, against) {
   let total = 0;
   for (const effect of entry?.effects ?? []) {
+    if (!effectAppliesTo(effect, against)) continue;
     for (const part of effect.label.split(";")) {
-      const match = /^\s*([A-Z]+)\s*:\s*([+-]?\d+)\s*$/i.exec(part);
+      const match = /^\s*([A-Z]+)\s*:\s*([+-]?\d+)(?:\s+[a-z][a-z ,]*)?\s*$/i.exec(part);
       if (match && match[1].toUpperCase() === tag) total += Number(match[2]);
     }
   }
@@ -247,9 +264,9 @@ function createCombat({ saved, table, onChange = () => undefined }) {
   }
 
   // An effect the tracker puts on by itself (no GM seat needed).
-  function putEffect(entry, label, duration = 0, gmOnly = false) {
+  function putEffect(entry, label, duration = 0, gmOnly = false, targets = []) {
     const active = state.entries.find((item) => item.id === state.active);
-    const effect = cleanEffect({ label, duration, gmOnly, init: active ? active.initresult : entry.initresult });
+    const effect = cleanEffect({ label, duration, gmOnly, init: active ? active.initresult : entry.initresult, targets });
     if (effect) entry.effects.push(effect);
     return effect;
   }
@@ -510,10 +527,10 @@ function createCombat({ saved, table, onChange = () => undefined }) {
         setDeathSaves(entry, { success: 0, failure: 0 });
         entry.stabilized = false;
       }
-      // Damage to a Dying character is a failed death save (FG 5E).
+      // Damage to a Dying character is a failed death save, a critical hit two (FG 5E).
       if (!bleeds() && delta > 0 && character && before.wounds >= before.hp && wounds < before.hp * 2) {
         const saves = deathSaves(entry);
-        setDeathSaves(entry, { ...saves, failure: Math.min(3, saves.failure + 1) });
+        setDeathSaves(entry, { ...saves, failure: Math.min(3, saves.failure + (opts?.critical ? 2 : 1)) });
       }
     }
     if (linked && linked.type === "character") table().records.update(linked.id, { data: { hp: { wounds } } }, table().seat);
@@ -624,31 +641,61 @@ function createCombat({ saved, table, onChange = () => undefined }) {
   function targetsOf(entry) {
     return (entry?.targets ?? []).map((id) => state.entries.find((item) => item.id === id)).filter(Boolean);
   }
+  // 5E conditions (FG's 5E): a creature that drops to 0 gets Unconscious, so the
+  // Dying, the stable and the dead count as unconscious; these cannot act, and
+  // attacks against them (and the Paralyzed, Petrified, Stunned) have advantage.
+  const FROZEN = ["paralyzed", "petrified", "stunned", "unconscious"];
+  function downStatus(entry) {
+    return entry ? ["Dying", "Unconscious", "Dead"].includes(health(entry).status) : false;
+  }
+  function frozen(entry) {
+    return downStatus(entry) || FROZEN.some((name) => hasCondition(entry, name));
+  }
+  function mustAct(entry) {
+    if (!entry || !five()) return;
+    const status = health(entry).status;
+    const why = ["Dying", "Unconscious", "Dead"].includes(status) ? status : [...FROZEN, "incapacitated"].find((name) => hasCondition(entry, name));
+    if (why) throw new Error(`${entry.name} is ${why.toLowerCase()} and cannot act.`);
+  }
+  // The d20 a roll kept (with advantage, the higher of two).
+  const natural = (rolled) => {
+    const term = rolled.terms[0];
+    return term.kept ? term.rolls.find((_, i) => term.kept[i]) : term.rolls[0];
+  };
   async function attack5e(plan, from) {
     await r5Ready;
     const source = plan.entry;
-    const atk = plan.bonus + effectBonus(source, "ATK");
-    const formula = `1d20${atk ? `${atk > 0 ? "+" : ""}${atk}` : ""}${effectDice(source, "ATK")}`;
+    mustAct(source);
+    const formulaFor = (target, advantage) => {
+      const atk = plan.bonus + effectBonus(source, "ATK", target);
+      return `${advantage ? "2d20kh1" : "1d20"}${atk ? `${atk > 0 ? "+" : ""}${atk}` : ""}${effectDice(source, "ATK", target)}`;
+    };
     const kind = SHORT_TYPE[plan.type] ? ` (${SHORT_TYPE[plan.type]})` : "";
     const results = [];
     const targets = targetsOf(source);
     // A new attack forgets the last one's hits and criticals (FG clears its crit state here).
     if (source) source.hitOn = targets.length ? {} : null;
     if (targets.length === 0) {
-      const roll = table().roll(formula, `[ATTACK]${kind} ${plan.name}`, from, false, { result: "NO TARGET", by: plan.actor });
-      results.push({ total: roll.total, hit: null, natural: roll.terms[0].rolls[0] });
+      const roll = table().roll(formulaFor(null, false), `[ATTACK]${kind} ${plan.name}`, from, false, { result: "NO TARGET", by: plan.actor });
+      results.push({ total: roll.total, hit: null, natural: natural(roll) });
     }
     for (const target of targets) {
       const ac = vitals(target).ac + effectBonus(target, "AC");
-      const rolled = table().dice.roll(formula);
-      const die = rolled.terms[0].rolls[0];
-      const crit = die === 20;
+      // FG's getDefenseAdvantage: attacks on a frozen creature have advantage.
+      const advantage = frozen(target);
+      const rolled = table().dice.roll(formulaFor(target, advantage));
+      const die = natural(rolled);
+      let crit = die === 20;
       const hit = crit || (die !== 1 && rolled.total >= ac);
+      // FG: a hit on a Paralyzed or Unconscious creature within 5 feet is a critical
+      // (Kraken takes a melee attack as within 5 feet).
+      const converted = hit && !crit && plan.type === "melee" && (downStatus(target) || hasCondition(target, "unconscious") || hasCondition(target, "paralyzed"));
+      if (converted) crit = true;
       const verdict = crit ? "CRITICAL HIT" : die === 1 ? "AUTOMATIC MISS" : hit ? "HIT" : "MISS";
-      const label = `[ATTACK]${kind} ${plan.name} [AC ${ac}] [${verdict} ${rolled.total} vs ${ac}] -> [at ${target.name}]`;
+      const label = `[ATTACK]${kind} ${plan.name}${advantage ? " [ADVANTAGE]" : ""} [AC ${ac}] [${verdict} ${rolled.total} vs ${ac}]${converted ? " [CONVERTED TO CRIT]" : ""} -> [at ${target.name}]`;
       table().postRoll(rolled, label, from, Boolean(target.hidden), { result: crit ? "CRITICAL" : hit ? "HIT" : "MISS", by: plan.actor, against: ac, target: target.name });
       if (source) source.hitOn[target.id] = crit ? "crit" : hit ? "hit" : "miss";
-      results.push({ target: target.name, total: rolled.total, ac, hit, crit, natural: die });
+      results.push({ target: target.name, total: rolled.total, ac, hit, crit, natural: die, advantage });
     }
     changed();
     return results;
@@ -658,9 +705,14 @@ function createCombat({ saved, table, onChange = () => undefined }) {
   // Damage after an attack lands only on the targets it hit (FG's attack-then-damage
   // action); a critical doubles the dice for the targets it critted. With no attack
   // since the last damage, it lands on every target. 5E's damage is at least 0.
+  // The attacker's DMG effects add to it (Silver Brand: 2d6), those aimed at a
+  // creature only against it (Hunter's Quarry); a critical doubles their dice too.
   async function damage5e(plan, from, opts) {
-    const bonus = plan.damageBonus + effectBonus(plan.entry, "DMG");
-    const base = `${plan.damage.replace(/\s+/g, "")}${bonus ? `${bonus > 0 ? "+" : ""}${bonus}` : ""}`;
+    mustAct(plan.entry);
+    const baseFor = (target) => {
+      const bonus = plan.damageBonus + effectBonus(plan.entry, "DMG", target);
+      return `${plan.damage.replace(/\s+/g, "")}${bonus ? `${bonus > 0 ? "+" : ""}${bonus}` : ""}${effectDice(plan.entry, "DMG", target)}`;
+    };
     const kind = SHORT_TYPE[plan.type] ? ` (${SHORT_TYPE[plan.type]})` : "";
     const hitOn = plan.entry?.hitOn ?? null;
     const all = targetsOf(plan.entry);
@@ -668,19 +720,28 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     const landed = all.filter((target) => !missed.includes(target));
     if (plan.entry) plan.entry.hitOn = null;
     for (const target of missed) table().say(`[DAMAGE]${kind} ${plan.name} -> ${target.name}: the attack missed`, "Combat", Boolean(target.hidden));
-    const groups = [false, true].map((crit) => ({ crit, targets: landed.filter((target) => (hitOn?.[target.id] === "crit") === crit) })).filter((group) => group.targets.length);
+    // One roll for each different damage: critted or not, and each target's own effects.
+    const groups = [];
+    for (const target of landed) {
+      const crit = hitOn?.[target.id] === "crit";
+      const formula = crit ? doubled(baseFor(target)) : baseFor(target);
+      const group = groups.find((item) => item.crit === crit && item.formula === formula);
+      if (group) group.targets.push(target);
+      else groups.push({ crit, formula, targets: [target] });
+    }
+    groups.sort((a, b) => a.crit - b.crit);
     // No targets at all: the roll alone, for the table to apply.
-    if (all.length === 0) groups.push({ crit: false, targets: [] });
+    if (all.length === 0) groups.push({ crit: false, formula: baseFor(null), targets: [] });
     let total = 0;
     let anyCrit = false;
     for (const group of groups) {
-      const formula = group.crit ? doubled(base) : base;
+      const formula = group.formula;
       const roll = table().roll(formula, `[DAMAGE]${kind} ${plan.name}${group.crit ? " [CRITICAL]" : ""}${plan.dmgtype ? ` [TYPE: ${plan.dmgtype}]` : ""}`, from, false, { by: plan.actor });
       const amount = Math.max(0, roll.total);
       total = Math.max(total, amount);
       anyCrit ||= group.crit;
       for (const target of group.targets) {
-        if (amount > 0) await applyWounds(target, amount, `[DAMAGE] ${plan.name}`, opts);
+        if (amount > 0) await applyWounds(target, amount, `[DAMAGE] ${plan.name}`, { ...opts, critical: group.crit });
         else table().say(`[DAMAGE] ${plan.name} -> ${target.name}: no damage`, "Combat", Boolean(target.hidden));
       }
     }
@@ -726,6 +787,9 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     const data = caster.data ?? {};
     const level = Math.max(0, Math.round(num(spell.data?.level, 0)));
     const casterEntry = npcEntry ?? state.entries.find((entry) => entry.recordId === caster.id) ?? null;
+    mustAct(casterEntry);
+    // An effect aimed at a creature (Hunter's Quarry) needs one targeted, before a slot is spent.
+    if (casterEntry && !targetsOf(casterEntry).length && Object.values(spell.data?.actions ?? {}).some((row) => row?.type === "effect" && row.targeting === "self" && row.targeted)) throw new Error(`Target the creature for ${spell.name} first.`);
     const isCharacter = caster.type === "character";
     if (isCharacter && Array.isArray(data.spells) && data.spells.length && !data.spells.some((name) => String(name).toLowerCase() === spell.name.toLowerCase())) throw new Error(`${caster.name} does not have ${spell.name}.`);
     // A slot: the spell's level, else the lowest free one above it.
@@ -791,12 +855,16 @@ function createCombat({ saved, table, onChange = () => undefined }) {
         let half = false;
         let crit = false;
         if (attackRow) {
-          const rolled = table().dice.roll(`1d20${attackBonus >= 0 ? "+" : ""}${attackBonus}`);
-          const die = rolled.terms[0].rolls[0];
+          // Attacks on a frozen creature have advantage; a melee hit on one Paralyzed or Unconscious is a critical (FG).
+          const advantage = frozen(target);
+          const rolled = table().dice.roll(`${advantage ? "2d20kh1" : "1d20"}${attackBonus >= 0 ? "+" : ""}${attackBonus}`);
+          const die = natural(rolled);
           const ac = vitals(target).ac + effectBonus(target, "AC");
           landed = die === 20 || (die !== 1 && rolled.total >= ac);
-          table().postRoll(rolled, `[ATTACK] (${String(attackRow.atktype ?? "ranged")[0].toUpperCase()}) ${spell.name} [AC ${ac}] [${die === 20 ? "CRITICAL HIT" : landed ? "HIT" : "MISS"} ${rolled.total} vs ${ac}] -> [at ${target.name}]`, say, Boolean(target.hidden), { result: landed ? "HIT" : "MISS", by: caster.name, against: ac, target: target.name });
           crit = die === 20;
+          const converted = landed && !crit && attackRow.atktype === "melee" && (downStatus(target) || hasCondition(target, "unconscious") || hasCondition(target, "paralyzed"));
+          if (converted) crit = true;
+          table().postRoll(rolled, `[ATTACK] (${String(attackRow.atktype ?? "ranged")[0].toUpperCase()}) ${spell.name}${advantage ? " [ADVANTAGE]" : ""} [AC ${ac}] [${crit ? "CRITICAL HIT" : landed ? "HIT" : "MISS"} ${rolled.total} vs ${ac}]${converted ? " [CONVERTED TO CRIT]" : ""} -> [at ${target.name}]`, say, Boolean(target.hidden), { result: crit ? "CRITICAL" : landed ? "HIT" : "MISS", by: caster.name, against: ac, target: target.name });
         }
         if (saveRow) {
           const saved = await save5e(target, String(saveRow.savetype ?? "dexterity").toLowerCase(), dc, null, spell.name);
@@ -812,17 +880,23 @@ function createCombat({ saved, table, onChange = () => undefined }) {
           const roll = attackRow || !shared ? table().roll(formula, `[DAMAGE] ${spell.name}${crit ? " [CRITICAL]" : ""} [TYPE: ${Object.values(damageRow.damagelist ?? {})[0]?.type ?? ""}]`, say, false, { by: caster.name }) : shared;
           if (!attackRow) shared = roll;
           const amount = half ? Math.floor(roll.total / 2) : roll.total;
-          if (amount > 0) await applyWounds(target, amount, `[DAMAGE] ${spell.name}${half ? " (half)" : ""}`, {});
+          if (amount > 0) await applyWounds(target, amount, `[DAMAGE] ${spell.name}${half ? " (half)" : ""}`, { critical: crit });
           out.push({ target: target.name, damage: amount, half });
         }
-        if (effectRow && (saveRow ? !landed || half ? false : true : landed)) {
+        if (effectRow && effectRow.targeting !== "self" && (saveRow ? !landed || half ? false : true : landed)) {
           const label = String(effectRow.label ?? spell.name).replace(/\[SDC\]/g, `DC ${dc}`);
           putEffect(target, label, minutes(effectRow));
           out.push({ target: target.name, effect: label, rounds: minutes(effectRow) });
         }
       }
       // An effect on the caster's allies with no save and no targets (Bless with none picked): the caster.
-      if (effectRow && !saveRow && targets.length === 0 && casterEntry) {
+      // An effect on the caster (FG's self targeting: Silver Brand), aimed at the
+      // caster's targets where the row says so (Hunter's Quarry on its quarry).
+      if (effectRow && effectRow.targeting === "self" && casterEntry) {
+        const aimed = effectRow.targeted ? targets.map((target) => target.id) : [];
+        putEffect(casterEntry, String(effectRow.label ?? spell.name), minutes(effectRow), false, aimed);
+        out.push({ target: casterEntry.name, effect: effectRow.label, ...(aimed.length ? { against: targets.map((target) => target.name) } : {}) });
+      } else if (effectRow && !saveRow && targets.length === 0 && casterEntry) {
         putEffect(casterEntry, String(effectRow.label ?? spell.name), minutes(effectRow));
         out.push({ target: casterEntry.name, effect: effectRow.label });
       }
@@ -919,7 +993,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
             mine: seat.role === "player" && owner(entry) === seat.name,
             health: status,
             ...(numbers ? { hp, wounds, ac, ...(temp ? { temp } : {}) } : {}),
-            effects: entry.effects.filter((effect) => seat.role === "dm" || !effect.gmOnly).map(({ id, label, duration }) => ({ id, label, duration })),
+            effects: entry.effects.filter((effect) => seat.role === "dm" || !effect.gmOnly).map(({ id, label, duration, targets }) => ({ id, label: targets?.length ? `${label} [-> ${targets.map((tid) => state.entries.find((item) => item.id === tid)?.name ?? "?").join(", ")}]` : label, duration })),
             targets: seat.role === "dm" || owner(entry) === seat.name ? entry.targets.filter((id) => shown.some((item) => item.id === id)) : [],
             ...(five() ? { deathsaves: record(entry)?.type === "character" || numbers ? deathSaves(entry) : undefined } : {}),
             attacks:
