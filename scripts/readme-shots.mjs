@@ -1,6 +1,7 @@
 // Screenshots for the README (docs/screenshots): the start screens, a
 // Descending Darkness table (the crypt in torchlight, the combat tracker, a
-// sheet), what a test player sees in Chrome, a book, an Apeira Astra table
+// sheet), what a test player sees in Chrome, ability cards (the player's and
+// the GM's), a book, an Apeira Astra table
 // (the derelict's deck, a threat's record), the map editor.
 // Run: node scripts/readme-shots.mjs (KRAKEN_WINDOW_AT places the window).
 import "./loopback.mjs";
@@ -178,6 +179,34 @@ try {
   await seat.locator('button[aria-label="Close Character Selection"]').click().catch(() => {});
   await settle(5000);
   await shot(seat, "player-crypt");
+
+  // Ability cards: Ann's hand (Brenna's hammer and axes) in Chrome, and the
+  // GM's window with Tomas's spells, one turned over.
+  await seat.click('[data-launch="settings"]');
+  await seat.check('[data-setting="cards"]');
+  await seat.click('[data-launch="settings"]');
+  await seat.click('[data-launch="cards"]');
+  await seat.waitForSelector(".kcard", { timeout: 10000 });
+  await settle(2500);
+  await seat.locator(".kcard").first().hover();
+  await settle(900);
+  await shot(seat, "cards-player");
+  await page.click('[data-launch="settings"]');
+  await page.check('[data-setting="cards"]');
+  await page.click('[data-launch="settings"]');
+  await tool("kraken_windows", { action: "open", kind: "cards" });
+  await page.waitForSelector(".cards-window[data-cards]", { timeout: 10000 });
+  await page.selectOption('[data-action="cards-character"]', tomasId);
+  await page.waitForSelector('[data-card^="spell:"]', { timeout: 10000 });
+  await settle(2500);
+  const flip = page.locator('[data-card^="spell:"]').nth(1);
+  await flip.hover();
+  await flip.click({ position: { x: 70, y: 60 } });
+  await settle(1500);
+  await page.locator('[data-card^="spell:"]').nth(2).hover();
+  await settle(900);
+  await shot(page, "cards-gm");
+  await tool("kraken_windows", { action: "close", kind: "cards" });
 
   // A book: the Bestiary's Warden, and the handbook.
   await tool("kraken_windows", { action: "open", kind: "record", record: "Warden Saranth" });
