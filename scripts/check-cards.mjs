@@ -8,7 +8,7 @@ import "./loopback.mjs";
 import path from "node:path";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
-import { cardsFor, freeSlot, restChanges } from "../shared/cards/cards.mjs";
+import { cardsFor, freeSlot, restChanges, weaponKind } from "../shared/cards/cards.mjs";
 
 const require = createRequire(import.meta.url);
 const { createTableServer } = require("../electron/tableServer.cjs");
@@ -28,6 +28,7 @@ const model = cardsFor(
   [{ id: "s1", name: "Kindle", data: { level: 0, school: "Evocation", description: "<p>Light.</p>" } }],
 );
 assert(model.length === 3 && model[0].id === "spell:kindle" && !model[0].spent && model[1].known === false && model[2].kind === "weapon" && /\+2 to hit, 1d6/.test(model[2].text), `cards from a sheet: ${JSON.stringify(model)}`);
+assert(model[2].weaponKind === "staff" && weaponKind("Light Crossbow") === "crossbow" && weaponKind("Laser Pistol") === "firearm" && weaponKind("Odd Thing", "ranged") === "bow", "a weapon card's picture by its kind");
 assert(restChanges({ slots: { l1: { max: 2, used: 2 }, l2: { max: 1, used: 0 } }, concentration: "Blessing" }).length === 2, "a rest: the used level and concentration");
 
 const server = createTableServer({ ruleset: "Descending Darkness" });

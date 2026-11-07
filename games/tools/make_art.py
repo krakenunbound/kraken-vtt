@@ -30,6 +30,11 @@ for game, name, prompt in spec.get("spells", []):
     key = re.sub(r"^-|-$", "", re.sub(r"[^a-z0-9]+", "-", name.lower()))
     jobs.append((f"{GAME[game]}/spells/{key}.webp", 768, 832, f'{prompt}, {spec["style"][game + "spell"]}'))
 
+# Weapon cards: one picture for each kind of weapon (src/assets/cards/<kind>.webp),
+# bundled with the app, since weapons on a sheet are not book records.
+for kind, prompt in spec.get("weapons", []):
+    jobs.append((f"src/assets/cards/{kind}.webp", 768, 832, f'{prompt}, {spec["style"]["ddspell"]}'))
+
 # Character portraits: games/portraits/<Kin>/<Kin> <Class>.webp, Kraken's
 # own pair for a new character of that kin and class (characterArt.cjs).
 n = 0
@@ -47,7 +52,7 @@ for out, width, height, prompt in jobs:
     target = os.path.join(root, out)
     os.makedirs(os.path.dirname(target), exist_ok=True)
     if not os.path.exists(target):
-        picture(target, width, height, prompt, zlib.crc32(out.encode()) % 2**31)
+        picture(target, width, height, prompt, zlib.crc32(out.encode()) % 2**31 + 7)
     if "/npc/" in out or out.startswith("games/portraits/"):
         token = target.replace(os.sep + "npc" + os.sep, os.sep + "tokens" + os.sep).replace("/npc/", "/tokens/").replace("games/portraits/", "games/tokens/")
         os.makedirs(os.path.dirname(token), exist_ok=True)
