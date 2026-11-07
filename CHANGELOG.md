@@ -4,6 +4,74 @@ What changed in each release of Kraken VTT. Downloads are on the
 [Releases](https://github.com/krakenunbound/kraken-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
+## Next: the alpha.60 audit's fixes
+
+A blind audit of the whole app (the table server, combat, maps and saving)
+found these; each is fixed and checked (`scripts/check-security-fixes.mjs`,
+`check-combat-fixes.mjs`, `check-map-fixes.mjs`).
+
+**The table and your files**
+
+- One malformed request could crash the table and drop every player. It is
+  now answered with an error and the table plays on.
+- A player could read pictures from anywhere on the GM's computer, or from an
+  adventure not shared with them, through a note's picture. Pictures now come
+  only from inside a module, and a player's own records only from modules
+  shared with them.
+- A damaged save (a power cut, a file held by OneDrive) opened as an empty
+  campaign, and quitting wrote the empty one over the real one. Saves now keep
+  the previous copy, read it when the newest is damaged, and refuse to open
+  rather than lose a campaign.
+- Five wrong passwords and that address waits before it may try again. New
+  account passwords are at least 6 characters. Another website's page cannot
+  open a seat at your table. Names starting with `@` are the table's own.
+- Players can no longer choose a record's id (they could take over the party
+  sheet), keep endless or huge notes, give their character another
+  character's name (whispers go by name), or push out the GM's map paint with
+  their drawings. A player's import tells the GM its level in chat.
+- The DM assistant no longer reads or writes files by a path, nor touches
+  players' accounts: it reads what players write, which could ask it to.
+- A book made active after the Library had added one of its creatures loaded
+  only partly; it now loads whole.
+
+**Combat**
+
+- Removing the creature whose turn it is no longer restarts the round.
+- Dead creatures lose their turns.
+- A player's End Turn on someone else's turn no longer clears that
+  creature's targets.
+- Damage ends "stable" (5E, Descending Darkness, Castles & Crusades).
+- D&D 5E: hit points stop at 0; damage at 0 is a failed death save, and
+  only damage left over of at least your maximum kills outright.
+- Concentration: a new concentration spell ends the last one's effects;
+  damage asks for a Constitution save (DC 10 or half the damage); falling
+  ends it; ending it from the sheet or a card ends its effects too.
+- D&D 5E damage follows resistance, immunity and vulnerability; paralyzed,
+  stunned, petrified and unconscious creatures fail Strength and Dexterity
+  saves.
+- A spell with a minus bonus and no dice no longer fails after spending its
+  slot; a Castles & Crusades NPC's daily use is spent only on a real action.
+- Used slots and death saves can no longer be set below 0.
+- Apeira Astra: an attack with no targets no longer stops the next damage.
+- Bleeding starts fresh in each fight.
+
+**Maps**
+
+- Sight no longer slips through room corners.
+- A player can no longer take their token off and put it back past walls or
+  while movement is locked.
+- A hidden creature's torch, lights in rooms no one has seen, and GM drawings
+  under the mask are no longer sent to players.
+- Undo keeps door locks and group visibility.
+- A click on a large token no longer moves it; dropping damage or a card on
+  overlapping tokens hits the one on top, and the right one of two alike.
+- Explored areas no longer go dark again after a long crawl; editing never
+  carries over from one map to the next.
+
+**Ability cards**: a spell listed twice is one card; switching characters
+plays no false long rest; a level with no slots left but a higher one free
+shows an arrow; Blowguns and "Moonstone" daggers get the right picture.
+
 ## 0.1.0-alpha.60: ability cards
 
 Some tables lay out printed spell cards and turn them over as they are used.

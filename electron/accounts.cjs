@@ -9,7 +9,7 @@ const crypto = require("crypto");
 
 const MAX_ACCOUNTS = 500;
 const MAX_TOKENS = 10;
-const MIN_PASSWORD = 4;
+const MIN_PASSWORD = 6;
 
 const clean = (value, max) =>
   String(value ?? "")

@@ -414,6 +414,9 @@ function importModule(store, seat, nameOrPath, { only = null } = {}) {
   for (const old of store.list({ source: info.name })) store.remove(old.id, seat);
   const counts = {};
   for (const record of records) {
+    // One already there under this id (a creature the Library added from this
+    // module before it was a book): the book's copy takes its place, same id.
+    if (store.get(record.id)) store.remove(record.id, seat);
     store.create(record, seat);
     counts[record.type] = (counts[record.type] ?? 0) + 1;
   }
@@ -443,16 +446,37 @@ const raw = new Map(); // module file -> { bytes, size, mtime }
 const pictures = new Map(); // module file|picture -> bytes
 let pictureBytes = 0;
 const PICTURE_TYPES = { ".png": "image/png", ".webp": "image/webp", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".gif": "image/gif", ".webm": "video/webm" };
+// Whether a picture's path stays inside its module: no "..", no drive, no
+// absolute path (a record's picture is words anyone may have written).
+function insideModule(wanted) {
+  return wanted !== "" && !/^[a-z]:/i.test(wanted) && !wanted.split("/").some((part) => part === ".." || part === ".");
+}
+// "<file>@<module>" names another module by its name only: a record's words
+// never point at a folder or file of the GM's disk (only the module the record
+// came from, set by the GM's import, may be a path).
+function namedModule(name) {
+  const given = String(name || "").trim();
+  if (!given || /[\\/:]/.test(given) || given.startsWith(".")) throw new Error("Not a module name.");
+  const bundled = path.join(__dirname, "..", "..", "games", "modules");
+  for (const candidate of [path.join(fgDataFolder(), "modules", `${given}.mod`), path.join(fgDataFolder(), "modules", given), path.join(bundled, `${given}.mod`), path.join(bundled, given)]) {
+    if (fs.existsSync(candidate)) return candidate;
+  }
+  throw new Error(`No module "${given}".`);
+}
+
 function modulePicture(reference, ownModule) {
-  const [inner, other] = String(reference ?? "").split("@");
+  const parts = String(reference ?? "").split("@");
+  if (parts.length > 2) return null;
+  const [inner, other] = parts;
   const moduleName = (other || ownModule || "").trim();
   const mime = PICTURE_TYPES[path.extname(inner).toLowerCase()];
   if (!inner || !moduleName || !mime) return null;
   const wanted = inner.replace(/^\/+/, "").replaceAll("\\", "/");
+  if (!insideModule(wanted)) return null;
   let source;
   let stat;
   try {
-    source = resolveModule(moduleName);
+    source = other && other.trim() !== String(ownModule ?? "").trim() ? namedModule(other) : resolveModule(moduleName);
     stat = fs.statSync(source);
   } catch {
     return null;
@@ -467,8 +491,8 @@ function modulePicture(reference, ownModule) {
   let bytes = null;
   try {
     if (stat.isDirectory()) {
-      const file = path.join(source, wanted);
-      bytes = fs.existsSync(file) ? fs.readFileSync(file) : null;
+      const file = path.resolve(source, wanted);
+      bytes = file.startsWith(path.resolve(source) + path.sep) && fs.existsSync(file) ? fs.readFileSync(file) : null;
     } else {
       let zip = raw.get(source);
       if (!zip || zip.size !== stat.size || zip.mtime !== stat.mtimeMs) {

@@ -50,7 +50,9 @@ export function cardsFor(data, spells = []) {
   const slots = data?.slots ?? {};
   const byName = new Map(spells.map((spell) => [String(spell.name).toLowerCase(), spell]));
   const concentration = String(data?.concentration ?? "");
-  for (const name of Array.isArray(data?.spells) ? data.spells.map(String) : []) {
+  // A spell listed twice (from two classes, say) is one card.
+  const names = [...new Map((Array.isArray(data?.spells) ? data.spells.map(String) : []).map((name) => [cardKey(name), name])).values()];
+  for (const name of names) {
     const spell = byName.get(name.toLowerCase());
     const sd = spell?.data ?? {};
     const level = Math.max(0, Math.round(num(sd.level)));
@@ -119,10 +121,12 @@ export function cardsFor(data, spells = []) {
 // src/assets/cards/<kind>.webp): a ranged weapon with no better match is a bow.
 /** @type {[string, RegExp][]} */
 const WEAPON_KINDS = [
-  ["firearm", /pistol|rifle|blaster|carbine|gun|laser|shotgun|revolver|musket|needler|stunner/],
+  // Whole words: a blowgun is not a gun, an elbow not a bow, a moonstone dagger not a sling stone.
+  ["firearm", /pistol|rifle|blaster|carbine|\b(?:hand|shot|machine|ray|stun|rail|needle)?guns?\b|laser|revolver|musket|needler|stunner/],
   ["crossbow", /crossbow/],
-  ["bow", /bow|longbow|shortbow/],
-  ["sling", /sling|dart|stone/],
+  ["bow", /\b(?:long|short|great|war|hand)?bows?\b/],
+  // A blowgun is a simple ranged weapon: a sling's picture, not a firearm's.
+  ["sling", /\bslings?\b|\bdarts?\b|\bblowguns?\b|\bblowpipes?\b|\bsling ?stones?\b/],
   ["axe", /axe|hatchet/],
   ["hammer", /hammer|mace|maul|morning ?star|flail|club|cudgel/],
   ["spear", /spear|javelin|trident|pike|halberd|glaive|lance|polearm|partisan/],

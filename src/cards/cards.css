@@ -14,6 +14,7 @@
 .cards-pips { display: inline-flex; gap: 4px; }
 .cards-pips i { width: 9px; height: 9px; border-radius: 50%; border: 1px solid var(--brass-dim); background: transparent; transition: background 300ms, box-shadow 300ms; }
 .cards-pips i.on { background: var(--brass); box-shadow: 0 0 6px var(--brass); }
+.cards-pips[data-higher="yes"]::after { content: "↑"; margin-left: 2px; font-size: 11px; line-height: 9px; color: var(--brass); }
 .cards-row-cards { display: flex; flex-wrap: wrap; gap: 14px; perspective: 1100px; padding: 8px 4px; }
 
 /* The fan: one overlapping row per group, each card turned a little, lifted under the pointer. */

@@ -3,7 +3,7 @@ import { tilesInView, watchTiles, type MapTile as PictureTile, type TileSet } fr
 import { lazy, memo, Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { backgroundRect, colorWithAlpha, gridStops, sceneFrame, type BackgroundFit, type SceneFrame } from "../foundry/geometry";
 import { type SceneLight, type SceneMarker, type SceneRegion, type SceneWall } from "../foundry/sceneObjects";
-import { gridDistance, gridKind, gridOrigin, hexCorners, hexOf, LIGHT_PRESETS, snapCenter, withGrid } from "../../shared/map/geometry.mjs";
+import { gridDistance, gridKind, gridOrigin, hexCorners, hexOf, LIGHT_PRESETS, pointInPolygon, snapCenter, withGrid } from "../../shared/map/geometry.mjs";
 import type { DecalItem, EditWall, MapDoor, MapTile, MapToken, Ping, PictureKind, SceneLightRecord, TableMap, TableRecord, WallKind } from "../session/useSession";
 import { useBookWindows } from "../books/Books";
 import { MapEditor, kindColor, placePicture, type EditTab, type EditTool, type LabelStyle, type PaintStyle } from "./MapEditor";
@@ -114,6 +114,48 @@ function polygonKey(points: number[]): string {
   return `${points.length}:${hash}`;
 }
 
+// The explored areas with a new view added: one already known (the same, or
+// inside one known) adds nothing, and known ones inside a new one give way to
+// it, so a long crawl keeps every room; only past the cap do the oldest go.
+// Returns the same array when nothing was added.
+const EXPLORED_CAP = 500;
+function polygonBox(points: number[]): [number, number, number, number] {
+  let x0 = Infinity;
+  let y0 = Infinity;
+  let x1 = -Infinity;
+  let y1 = -Infinity;
+  for (let index = 0; index + 1 < points.length; index += 2) {
+    x0 = Math.min(x0, points[index]);
+    x1 = Math.max(x1, points[index]);
+    y0 = Math.min(y0, points[index + 1]);
+    y1 = Math.max(y1, points[index + 1]);
+  }
+  return [x0, y0, x1, y1];
+}
+function polygonInside(inner: number[], innerBox: number[], outer: number[], outerBox: number[]): boolean {
+  if (innerBox[0] < outerBox[0] || innerBox[1] < outerBox[1] || innerBox[2] > outerBox[2] || innerBox[3] > outerBox[3]) return false;
+  for (let index = 0; index + 1 < inner.length; index += 2) if (!pointInPolygon(inner[index], inner[index + 1], outer)) return false;
+  return true;
+}
+function mergeExplored(known: number[][], views: number[][]): number[][] {
+  let out = known;
+  const keys = new Set(known.map(polygonKey));
+  for (const view of views) {
+    if (view.length < 6) continue;
+    // Compare whole polygons: a door opened from the same spot gives a view
+    // that starts like the old one but reaches further.
+    const key = polygonKey(view);
+    if (keys.has(key)) continue;
+    const box = polygonBox(view);
+    const boxes = out.map(polygonBox);
+    if (out.some((item, index) => polygonInside(view, box, item, boxes[index]))) continue;
+    out = [...out.filter((item, index) => !polygonInside(item, boxes[index], view, box)), view];
+    keys.add(key);
+  }
+  if (out.length > EXPLORED_CAP) out = out.slice(out.length - EXPLORED_CAP);
+  return out;
+}
+
 function polygonPoints(points: number[]): string {
   const pairs: string[] = [];
   for (let index = 0; index + 1 < points.length; index += 2) pairs.push(`${points[index]},${points[index + 1]}`);
@@ -160,7 +202,9 @@ type Tool = "pan" | "ping" | "draw" | "erase" | "area";
 const DRAW_COLORS = ["#ffcc33", "#ff5a5a", "#5ad1ff", "#7dff7a", "#d38cff", "#ffffff", "#111111"];
 
 // group: the other picked tokens dragged with it (their places when the drag began).
-type Drag = { pointerId: number; id: string; start: Point; at: Point; moved: boolean; snap: boolean; squares: number; group?: { id: string; x: number; y: number; squares: number }[] };
+// start: the token's centre; grab: where the pointer pressed; at: the pointer now.
+// The token goes where its centre would be moved by the pointer's own travel.
+type Drag = { pointerId: number; id: string; start: Point; grab: Point; at: Point; moved: boolean; snap: boolean; squares: number; group?: { id: string; x: number; y: number; squares: number }[] };
 type Measure = { pointerId: number; start: Point; at: Point };
 type Menu = { id: string; left: number; top: number };
 
@@ -384,22 +428,20 @@ function MapViewInner({
   // Areas a player has seen stay dimly shown after their tokens move on,
   // and after a reload (kept in this browser).
   const exploredKey = `kraken-explored:${scene.id}:${mine[0]?.owner ?? ""}`;
-  if (explored.current.sceneId !== exploredKey) explored.current = { sceneId: exploredKey, polygons: vision ? loadExplored(exploredKey) : [] };
-  if (vision) {
-    const known = explored.current.polygons;
+  // Merged only when the view changes (not every render), and saved after the render.
+  const exploredNow = useMemo(() => {
+    if (explored.current.sceneId !== exploredKey) explored.current = { sceneId: exploredKey, polygons: vision ? loadExplored(exploredKey) : [] };
     let added = false;
-    // Compare whole polygons: a door opened from the same spot gives a view
-    // that starts like the old one but reaches further.
-    for (const polygon of vision) {
-      const key = polygonKey(polygon);
-      if (!known.some((item) => polygonKey(item) === key)) {
-        known.push(polygon);
-        added = true;
-      }
+    if (vision) {
+      const merged = mergeExplored(explored.current.polygons, vision);
+      added = merged !== explored.current.polygons;
+      explored.current = { sceneId: exploredKey, polygons: merged };
     }
-    if (known.length > 200) known.splice(0, known.length - 200);
-    if (added) saveExplored(exploredKey, known);
-  }
+    return { key: exploredKey, polygons: explored.current.polygons, added };
+  }, [exploredKey, vision]);
+  useEffect(() => {
+    if (exploredNow.added) saveExplored(exploredNow.key, exploredNow.polygons);
+  }, [exploredNow]);
 
   useEffect(() => {
     setNatural(null);
@@ -812,38 +854,79 @@ function MapViewInner({
     setHover(null);
   }
   // Esc ends a chain, Enter closes a shape, Delete removes the selection, Ctrl+Z undoes.
+  // The handler is this render's (through a ref), so Enter uses the mask mode,
+  // paint style and effect chosen now, not those when the editor opened.
+  const editorKey = useRef<(event: KeyboardEvent) => void>(() => undefined);
+  editorKey.current = (event: KeyboardEvent) => {
+    if ((event.target as HTMLElement)?.closest?.("input, textarea, select")) return;
+    if (event.key === "Escape") {
+      setPending([]);
+      setHover(null);
+    } else if (event.key === "Enter") finishShape();
+    else if ((event.key === "Delete" || event.key === "Backspace") && editTab === "text" && selectedLabel && actions.label) {
+      actions.label("remove", { id: selectedLabel });
+      setSelectedLabel(null);
+    } else if ((event.key === "Delete" || event.key === "Backspace") && selectedWalls.length && actions.wall) {
+      actions.wall("remove", { ids: selectedWalls });
+      setSelectedWalls([]);
+    } else if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "z" && actions.mapUndo) {
+      event.preventDefault();
+      actions.mapUndo();
+    }
+  };
   useEffect(() => {
     if (!gm || !editorOpen) return;
-    const onKey = (event: KeyboardEvent) => {
-      if ((event.target as HTMLElement)?.closest?.("input, textarea, select")) return;
-      if (event.key === "Escape") {
-        setPending([]);
-        setHover(null);
-      } else if (event.key === "Enter") finishShape();
-      else if ((event.key === "Delete" || event.key === "Backspace") && editTab === "text" && selectedLabel && actions.label) {
-        actions.label("remove", { id: selectedLabel });
-        setSelectedLabel(null);
-      } else if ((event.key === "Delete" || event.key === "Backspace") && selectedWalls.length && actions.wall) {
-        actions.wall("remove", { ids: selectedWalls });
-        setSelectedWalls([]);
-      } else if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "z" && actions.mapUndo) {
-        event.preventDefault();
-        actions.mapUndo();
-      }
-    };
+    const onKey = (event: KeyboardEvent) => editorKey.current(event);
     const view = viewport.current?.ownerDocument.defaultView ?? window;
     view.addEventListener("keydown", onKey);
     return () => view.removeEventListener("keydown", onKey);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gm, editorOpen, selectedWalls, pending, editTool, wallKind, editTab, selectedLabel]);
+  }, [gm, editorOpen]);
   useEffect(() => {
     setPending([]);
     setHover(null);
   }, [editTool, editorOpen]);
+  // Another scene: nothing half-made or chosen on the last one carries over
+  // (a wall chain's points, chosen walls, tokens, lights, text, effects, images).
+  useEffect(() => {
+    setPending([]);
+    setHover(null);
+    setWallDrag(null);
+    setSelectedWalls([]);
+    setSelectedLight(null);
+    setSelectedLabel(null);
+    setSelectedFx(null);
+    setSelectedTile(null);
+    setTileDraft(null);
+    tileDrag.current = null;
+    paintStroke.current = null;
+    boxDrag.current = null;
+    setStroke(null);
+    setDrag(null);
+    setMeasure(null);
+    setPicked([]);
+    setBox(null);
+  }, [scene.id]);
 
   const placeable = records.filter((record) => record.type === "character" && (gm || record.owner !== ""));
   const dragging = drag ? tokens.find((token) => token.id === drag.id) : null;
-  const ghost = drag && drag.moved ? (drag.snap ? snapCenter(scene, drag.at.x, drag.at.y, drag.squares) : drag.at) : null;
+  const dragTo = drag ? { x: drag.start.x + drag.at.x - drag.grab.x, y: drag.start.y + drag.at.y - drag.grab.y } : null;
+  // The token under a point: the top-most one (the last drawn), as a click finds it.
+  const tokenAt = (at: Point | null) => {
+    if (!at) return null;
+    for (let index = tokens.length - 1; index >= 0; index -= 1) {
+      const token = tokens[index];
+      if (Math.abs(at.x - token.x) <= (token.squares * size) / 2 && Math.abs(at.y - token.y) <= (token.squares * size) / 2) return token;
+    }
+    return null;
+  };
+  // A token's combat tracker entry: the one tied to that very token, else (a
+  // token placed before the fight) the first for its record.
+  const entryFor = (hit: MapToken | null) => {
+    if (!hit) return null;
+    const entries = actions.combat?.entries ?? [];
+    return entries.find((item) => item.tokenId === hit.id) ?? (hit.recordId ? entries.find((item) => item.recordId === hit.recordId) : undefined) ?? null;
+  };
+  const ghost = drag && dragTo && drag.moved ? (drag.snap ? snapCenter(scene, dragTo.x, dragTo.y, drag.squares) : dragTo) : null;
 
   // What a press on the map does now, shown by the pointer: the hand pans; a
   // crosshair draws, pings, aims an area or draws walls; the arrow picks.
@@ -1078,7 +1161,8 @@ function MapViewInner({
         if (drag && drag.pointerId === event.pointerId) {
           const point = worldAt(event.clientX, event.clientY);
           if (!point) return;
-          const moved = drag.moved || Math.hypot(point.x - drag.start.x, point.y - drag.start.y) > size * 0.2;
+          // Pointer to pointer: a plain click on a big token (its centre away from the pointer) is not a move.
+          const moved = drag.moved || Math.hypot(point.x - drag.grab.x, point.y - drag.grab.y) > size * 0.2;
           setDrag({ ...drag, at: point, moved, snap: !event.altKey });
           return;
         }
@@ -1169,11 +1253,12 @@ function MapViewInner({
         if (drag && drag.pointerId === event.pointerId) {
           if (drag.moved && drag.group?.length && actions.moveTokens) {
             // The others move as far as the one held; each snaps and is stopped by walls on its own.
-            const lead = ghost ?? drag.at;
+            const target = dragTo ?? drag.start;
+            const lead = ghost ?? target;
             const dx = lead.x - drag.start.x;
             const dy = lead.y - drag.start.y;
-            actions.moveTokens([{ id: drag.id, x: drag.at.x, y: drag.at.y }, ...drag.group.map((item) => ({ id: item.id, x: item.x + dx, y: item.y + dy }))], !event.altKey);
-          } else if (drag.moved) actions.moveToken(drag.id, drag.at.x, drag.at.y, !event.altKey);
+            actions.moveTokens([{ id: drag.id, x: target.x, y: target.y }, ...drag.group.map((item) => ({ id: item.id, x: item.x + dx, y: item.y + dy }))], !event.altKey);
+          } else if (drag.moved && dragTo) actions.moveToken(drag.id, dragTo.x, dragTo.y, !event.altKey);
           setDrag(null);
           return;
         }
@@ -1234,8 +1319,8 @@ function MapViewInner({
           event.preventDefault();
           event.stopPropagation();
           const at = worldAt(event.clientX, event.clientY);
-          const hit = at ? tokens.find((token) => Math.abs(at.x - token.x) <= (token.squares * size) / 2 && Math.abs(at.y - token.y) <= (token.squares * size) / 2) : null;
-          const entry = hit ? actions.combat?.entries.find((item) => item.tokenId === hit.id || (hit.recordId && item.recordId === hit.recordId)) : null;
+          const hit = tokenAt(at);
+          const entry = entryFor(hit);
           try {
             const roll = JSON.parse(damage) as { amount: number; heal?: boolean };
             if (entry && roll.amount > 0) actions.ct(roll.heal ? "heal" : "damage", { id: entry.id, amount: roll.amount });
@@ -1252,10 +1337,15 @@ function MapViewInner({
           event.preventDefault();
           event.stopPropagation();
           const at = worldAt(event.clientX, event.clientY);
-          const hit = at ? tokens.find((token) => Math.abs(at.x - token.x) <= (token.squares * size) / 2 && Math.abs(at.y - token.y) <= (token.squares * size) / 2) : null;
-          const target = hit ? actions.combat?.entries.find((item) => item.tokenId === hit.id || (hit.recordId && item.recordId === hit.recordId)) : null;
+          const hit = tokenAt(at);
+          const target = entryFor(hit);
+          let used: { recordId: string; entryId: string; kind: string; name: string; weapon: string; id?: string };
           try {
-            const used = JSON.parse(card) as { recordId: string; entryId: string; kind: string; name: string; weapon: string; id?: string };
+            used = JSON.parse(card) as typeof used;
+          } catch {
+            return; // not a card
+          }
+          {
             const refuse = (why: string) => {
               setHint(why);
               window.setTimeout(() => setHint((now) => (now === why ? "" : now)), 4000);
@@ -1270,8 +1360,6 @@ function MapViewInner({
               else actions.ct("attack", { recordId: used.recordId, weapon: used.weapon });
               window.dispatchEvent(new CustomEvent("kraken-card-used", { detail: used.id ?? "" }));
             }
-          } catch {
-            /* not a card */
           }
           return;
         }
@@ -1605,7 +1693,7 @@ function MapViewInner({
                 const point = worldAt(event.clientX, event.clientY);
                 if (!point) return;
                 if (viewport.current) capture(viewport.current, event.pointerId);
-                setDrag({ pointerId: event.pointerId, id: token.id, start: { x: token.x, y: token.y }, at: point, moved: false, snap: !event.altKey, squares: token.squares, group: group.map((item) => ({ id: item.id, x: item.x, y: item.y, squares: item.squares })) });
+                setDrag({ pointerId: event.pointerId, id: token.id, start: { x: token.x, y: token.y }, grab: point, at: point, moved: false, snap: !event.altKey, squares: token.squares, group: group.map((item) => ({ id: item.id, x: item.x, y: item.y, squares: item.squares })) });
               }}
               onContextMenu={(event) => {
                 event.preventDefault();
@@ -1740,7 +1828,7 @@ function MapViewInner({
               <mask id="sight-explored">
                 <rect width={frame.worldWidth} height={frame.worldHeight} fill="#fff" />
                 <g filter="url(#sight-soft)">
-                  {[...explored.current.polygons, ...vision].map((polygon, index) => (
+                  {[...exploredNow.polygons, ...vision].map((polygon, index) => (
                     <polygon key={index} points={polygonPoints(polygon)} fill="#000" />
                   ))}
                 </g>

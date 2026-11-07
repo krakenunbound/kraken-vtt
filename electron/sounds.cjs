@@ -92,8 +92,10 @@ function createSoundLibrary({ folder, builtin = "" }) {
       const parts = String(group ?? "").split(/[\\/]+/).map((part) => part.replace(/[^\w .()&'-]+/g, "_").trim()).filter((part) => part && part !== "." && part !== "..");
       const dir = path.join(folder, kind, ...parts);
       fs.mkdirSync(dir, { recursive: true });
-      let target = path.basename(String(name)).replace(/[^\w .()&'-]+/g, "_");
-      for (let n = 2; fs.existsSync(path.join(dir, target)); n++) target = `${path.basename(name, path.extname(name))} (${n})${path.extname(name)}`;
+      const safe = path.basename(String(name)).replace(/[^\w .()&'-]+/g, "_");
+      let target = safe;
+      // A second sound of the same name: "<name> (2)", from the cleaned name (never the raw one).
+      for (let n = 2; fs.existsSync(path.join(dir, target)); n++) target = `${path.basename(safe, path.extname(safe))} (${n})${path.extname(safe)}`;
       fs.writeFileSync(path.join(dir, target), data);
       index = null;
       const id = [kind, ...parts, target].join("/");

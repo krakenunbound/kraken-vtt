@@ -401,15 +401,21 @@ export function BookWindow({ session, book }: { session: Session; book: string }
           .filter((item) => item.block === block)
           .map((item) => <BookSound key={item.id} session={session} item={item} onRemove={() => session.setBookSound({ book, page: pageId, action: "remove", id: item.id })} />)
       : null;
+  // A slower answer for a book or page no longer wanted is dropped (quick clicks).
   useEffect(() => {
+    let wantedStill = true;
     session
       .bookFetch<BookContents>("contents", { book })
       .then((found) => {
+        if (!wantedStill) return;
         setContents(found);
         if (!found.chapters.length) setView("pictures");
         setPageId((current) => current || found.chapters[0]?.sections[0]?.pages[0]?.id || "");
       })
-      .catch((reason: Error) => setError(reason.message));
+      .catch((reason: Error) => wantedStill && setError(reason.message));
+    return () => {
+      wantedStill = false;
+    };
   }, [book, session.bookFetch]);
   // A link from another book asks for a page here.
   useEffect(() => {
@@ -422,13 +428,18 @@ export function BookWindow({ session, book }: { session: Session; book: string }
   });
   useEffect(() => {
     if (!pageId) return;
+    let wantedStill = true;
     session
       .bookFetch<BookPage>("page", { book, page: pageId })
       .then((found) => {
+        if (!wantedStill) return;
         setPage(found);
         body.current?.scrollTo({ top: 0 });
       })
-      .catch((reason: Error) => setError(reason.message));
+      .catch((reason: Error) => wantedStill && setError(reason.message));
+    return () => {
+      wantedStill = false;
+    };
   }, [book, pageId, session.bookFetch]);
   const pages = useMemo(() => contents?.chapters.flatMap((chapter) => chapter.sections.flatMap((section) => section.pages)) ?? [], [contents]);
   const at = pages.findIndex((item) => item.id === pageId);

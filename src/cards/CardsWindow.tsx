@@ -53,7 +53,8 @@ export function CardsWindow({ session, characterId }: { session: Session; charac
         </button>
         <RestButton session={session} character={character} />
       </header>
-      <Hand session={session} character={character} />
+      {/* A hand per character: another one's cards never "stand up again" from this one's. */}
+      <Hand key={character.id} session={session} character={character} />
     </div>
   );
 }
@@ -100,7 +101,7 @@ function Hand({ session, character }: { session: Session; character: TableRecord
         <section key={group} className="cards-row" data-group={group}>
           <h4>
             {group}
-            {list[0].pool ? <Pips pool={list[0].pool} /> : null}
+            {list[0].pool ? <Pips pool={list[0].pool} higher={list.some((card) => !card.spent && card.slot !== null && card.slot > card.level)} /> : null}
           </h4>
           <div className="cards-row-cards" style={{ ["--count" as string]: list.length }}>
             {list.map((card, index) => (
@@ -113,9 +114,10 @@ function Hand({ session, character }: { session: Session; character: TableRecord
   );
 }
 
-function Pips({ pool }: { pool: { max: number; used: number } }) {
+// A level's slots. None left but a higher one free: its cards still stand, cast with that slot.
+function Pips({ pool, higher }: { pool: { max: number; used: number }; higher: boolean }) {
   return (
-    <span className="cards-pips" title={`${pool.max - pool.used} of ${pool.max} slots left`}>
+    <span className="cards-pips" data-higher={higher ? "yes" : "no"} title={`${Math.max(0, pool.max - pool.used)} of ${pool.max} slots left${higher ? ": a higher slot casts these" : ""}`}>
       {Array.from({ length: pool.max }, (_, i) => (
         <i key={i} className={i < pool.max - pool.used ? "on" : ""} />
       ))}

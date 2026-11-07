@@ -119,7 +119,7 @@ function AccountsPanel({ session }: { session: Session }) {
                   setEditing(null);
                 }}
               >
-                <input type="password" aria-label={`New password for ${account.name}`} value={password} minLength={4} required onChange={(event) => setPassword(event.target.value)} placeholder="New password" />
+                <input type="password" aria-label={`New password for ${account.name}`} value={password} minLength={6} required onChange={(event) => setPassword(event.target.value)} placeholder="New password" />
                 <button type="submit">Set</button>
                 <button type="button" className="ghost" onClick={() => setEditing(null)}>
                   Cancel
@@ -157,7 +157,7 @@ function AccountsPanel({ session }: { session: Session }) {
         }}
       >
         <input aria-label="New account name" placeholder="Player's name" value={name} maxLength={24} required onChange={(event) => setName(event.target.value)} />
-        <input aria-label="New account password" type="password" placeholder="Password" value={makePassword} minLength={4} required onChange={(event) => setMakePassword(event.target.value)} />
+        <input aria-label="New account password" type="password" placeholder="Password" value={makePassword} minLength={6} required onChange={(event) => setMakePassword(event.target.value)} />
         <button type="submit" data-action="account-create">
           Make account
         </button>
@@ -368,7 +368,11 @@ export function Desktop({
                   : command.window === "krits"
                     ? { kind: "krits" as const, title: "Critical Hits & Fumbles" }
                   : command.window === "cards"
-                    ? { kind: "cards" as const, title: "Cards" }
+                    ? cardsStore.settings().on
+                      ? { kind: "cards" as const, title: "Cards" }
+                      : (() => {
+                          throw new Error("Ability cards are off at this seat: turn them on in Settings first.");
+                        })()
                   : kinds.find((item) => entryId(item) === command.window || (item.kind === command.window && !item.payload)) ?? kinds.find((item) => item.kind === command.window);
           if (!launcher) throw new Error(`No window "${command.window ?? ""}". Kinds: ${kinds.map((item) => entryId(item)).join(", ")}, sheet.`);
           if (command.action === "open") manager.open(launcher.kind, launcher.title, "payload" in launcher ? launcher.payload : undefined);

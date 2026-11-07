@@ -138,21 +138,25 @@ async function distribute(table, from) {
         failed.push(name);
         continue;
       }
-      const data = structuredClone(table.records.get(member.id).data);
       const source = item.item && typeof item.item === "object" ? { ...item.item, name: item.name } : { name: item.name };
-      if (data.ruleset === "astra") {
+      // The rules load first, then the sheet is read: nothing changed meanwhile is written over.
+      const current = table.records.get(member.id).data;
+      const astra = current?.ruleset === "astra" ? await require("./astra.cjs").rulesAstra() : null;
+      const five = !astra && require("./dnd5e.cjs").is5e({ data: current }) ? await require("./dnd5e.cjs").rules5e() : null;
+      const data = structuredClone(table.records.get(member.id).data);
+      if (astra) {
         // An Apeira Astra character: the item into the gear, the sheet worked out again.
         const list = (data.inventorylist = data.inventorylist ?? {});
         list[engine.nextId(list)] = { ...source, count: each, carried: 1 };
-        table.records.update(member.id, { data: (await require("./astra.cjs").rulesAstra()).derive(data) }, table.seat, { replace: true });
+        table.records.update(member.id, { data: astra.derive(data) }, table.seat, { replace: true });
         given.push(`${item.name} (${each}) -> ${member.name}`);
         continue;
       }
-      if (require("./dnd5e.cjs").is5e({ data })) {
+      if (five) {
         // A 5E character: the item into the pack (carried), the sheet worked out again.
         const list = (data.inventorylist = data.inventorylist ?? {});
         list[engine.nextId(list)] = { ...source, count: each, carried: 1 };
-        table.records.update(member.id, { data: (await require("./dnd5e.cjs").rules5e()).derive(data) }, table.seat, { replace: true });
+        table.records.update(member.id, { data: five.derive(data) }, table.seat, { replace: true });
         given.push(`${item.name} (${each}) -> ${member.name}`);
         continue;
       }

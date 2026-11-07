@@ -215,7 +215,11 @@ export function sightEdges(origin, walls, doors, distancePixels = 1, externalRad
   return edges;
 }
 
-// Where along a -> b (0..1) it first crosses segment c -> d, or null.
+// Where along a -> b (0..1) it first crosses segment c -> d, or null. A ray
+// aimed at a wall's end counts as hitting it: without the slack (END_SLACK of
+// the wall's length) floating point can put a corner just off both walls that
+// meet there, and the ray runs on through the corner (a spike out of the room).
+const END_SLACK = 1e-7;
 function crossing(ax, ay, bx, by, cx, cy, dx, dy) {
   const rx = bx - ax;
   const ry = by - ay;
@@ -227,7 +231,7 @@ function crossing(ax, ay, bx, by, cx, cy, dx, dy) {
   const qy = cy - ay;
   const t = (qx * sy - qy * sx) / denom;
   const u = (qx * ry - qy * rx) / denom;
-  if (t < 0 || t > 1 || u < 0 || u > 1) return null;
+  if (t < 0 || t > 1 || u < -END_SLACK || u > 1 + END_SLACK) return null;
   return t;
 }
 
@@ -320,10 +324,13 @@ export function visibilityPolygon(origin, walls, doors, bounds, distancePixels =
   if (grid) {
     segments.forEach((segment, index) => {
       const [x1, y1, x2, y2] = segment;
-      const c0 = Math.max(0, Math.min(cells - 1, Math.floor((Math.min(x1, x2) - bx) / cw)));
-      const c1 = Math.max(0, Math.min(cells - 1, Math.floor((Math.max(x1, x2) - bx) / cw)));
-      const r0 = Math.max(0, Math.min(cells - 1, Math.floor((Math.min(y1, y2) - by) / ch)));
-      const r1 = Math.max(0, Math.min(cells - 1, Math.floor((Math.max(y1, y2) - by) / ch)));
+      // A hair wider, so a wall ending on a cell's edge is listed in the cells on both sides.
+      const px = cw * 1e-6;
+      const py = ch * 1e-6;
+      const c0 = Math.max(0, Math.min(cells - 1, Math.floor((Math.min(x1, x2) - px - bx) / cw)));
+      const c1 = Math.max(0, Math.min(cells - 1, Math.floor((Math.max(x1, x2) + px - bx) / cw)));
+      const r0 = Math.max(0, Math.min(cells - 1, Math.floor((Math.min(y1, y2) - py - by) / ch)));
+      const r1 = Math.max(0, Math.min(cells - 1, Math.floor((Math.max(y1, y2) + py - by) / ch)));
       for (let r = r0; r <= r1; r += 1) for (let c = c0; c <= c1; c += 1) grid[r * cells + c].push(index);
     });
   }
@@ -405,6 +412,53 @@ export function pointInPolygon(x, y, polygon) {
     if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside;
   }
   return inside;
+}
+
+// Whether two polygons [x0, y0, ...] overlap by more than a touch: a corner
+// of one inside the other (more than `margin` from its sides), or two of
+// their sides crossing properly. Polygons that only share a wall line (two
+// rooms either side of it) do not overlap. Two that are the same outline do
+// not either: test a point known inside one (a light's own place) as well.
+export function polygonsOverlap(a, b, margin = 1) {
+  if (!a || !b || a.length < 6 || b.length < 6) return false;
+  const box = (p) => {
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    for (let i = 0; i < p.length; i += 2) {
+      if (p[i] < x0) x0 = p[i];
+      if (p[i] > x1) x1 = p[i];
+      if (p[i + 1] < y0) y0 = p[i + 1];
+      if (p[i + 1] > y1) y1 = p[i + 1];
+    }
+    return [x0, y0, x1, y1];
+  };
+  const ba = box(a);
+  const bb = box(b);
+  if (ba[2] < bb[0] || bb[2] < ba[0] || ba[3] < bb[1] || bb[3] < ba[1]) return false;
+  const deepIn = (x, y, polygon) => {
+    if (!pointInPolygon(x, y, polygon)) return false;
+    for (let i = 0, j = polygon.length - 2; i < polygon.length; j = i, i += 2) if (distanceToSegment(x, y, polygon[j], polygon[j + 1], polygon[i], polygon[i + 1]) <= margin) return false;
+    return true;
+  };
+  for (let i = 0; i < a.length; i += 2) if (deepIn(a[i], a[i + 1], b)) return true;
+  for (let i = 0; i < b.length; i += 2) if (deepIn(b[i], b[i + 1], a)) return true;
+  for (let i = 0, j = a.length - 2; i < a.length; j = i, i += 2) {
+    for (let k = 0, l = b.length - 2; k < b.length; l = k, k += 2) {
+      if (properCrossing(a[j], a[j + 1], a[i], a[i + 1], b[l], b[l + 1], b[k], b[k + 1])) return true;
+    }
+  }
+  return false;
+}
+// Two segments crossing in both their middles (not at an end, not along each other).
+function properCrossing(ax, ay, bx, by, cx, cy, dx, dy) {
+  const rx = bx - ax;
+  const ry = by - ay;
+  const sx = dx - cx;
+  const sy = dy - cy;
+  const denom = rx * sy - ry * sx;
+  if (Math.abs(denom) < 1e-9) return false;
+  const t = ((cx - ax) * sy - (cy - ay) * sx) / denom;
+  const u = ((cx - ax) * ry - (cy - ay) * rx) / denom;
+  return t > 1e-6 && t < 1 - 1e-6 && u > 1e-6 && u < 1 - 1e-6;
 }
 
 // Whether any of these polygons shows point x, y. A point on a polygon's

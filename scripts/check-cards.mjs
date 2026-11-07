@@ -29,6 +29,7 @@ const model = cardsFor(
 );
 assert(model.length === 3 && model[0].id === "spell:kindle" && !model[0].spent && model[1].known === false && model[2].kind === "weapon" && /\+2 to hit, 1d6/.test(model[2].text), `cards from a sheet: ${JSON.stringify(model)}`);
 assert(model[2].weaponKind === "staff" && weaponKind("Light Crossbow") === "crossbow" && weaponKind("Laser Pistol") === "firearm" && weaponKind("Odd Thing", "ranged") === "bow", "a weapon card's picture by its kind");
+assert(weaponKind("Blowgun", "ranged") === "sling" && weaponKind("Moonstone Dagger") === "blade" && weaponKind("Elbow Spike") !== "bow" && weaponKind("Longbow") === "bow" && weaponKind("Sling") === "sling" && weaponKind("Shotgun") === "firearm", `whole words: ${["Blowgun", "Moonstone Dagger", "Elbow Spike", "Longbow", "Sling", "Shotgun"].map((name) => weaponKind(name)).join(", ")}`);
 assert(restChanges({ slots: { l1: { max: 2, used: 2 }, l2: { max: 1, used: 0 } }, concentration: "Blessing" }).length === 2, "a rest: the used level and concentration");
 
 const server = createTableServer({ ruleset: "Descending Darkness" });

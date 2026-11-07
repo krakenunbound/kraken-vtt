@@ -298,8 +298,20 @@ const WEB_TYPES = {
   ".woff2": "font/woff2",
 };
 
+// A file streamed to a seat; one that vanished or failed halfway ends that answer only.
+function streamFile(file, res, range) {
+  const stream = fs.createReadStream(file, range);
+  stream.on("error", () => res.destroy());
+  stream.pipe(res);
+}
+
 function serveWeb(url, res, root) {
-  const wanted = url.pathname === "/" ? "/index.html" : decodeURIComponent(url.pathname);
+  let wanted;
+  try {
+    wanted = url.pathname === "/" ? "/index.html" : decodeURIComponent(url.pathname);
+  } catch {
+    return false;
+  }
   const file = path.normalize(path.join(root, wanted));
   if (!file.startsWith(root + path.sep) && file !== path.join(root, "index.html")) return false;
   let bytes;
@@ -386,7 +398,13 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     (books ? books.list() : [])
       .filter((item) => fits(item) && (client.role === "dm" || canRead(client, item.id)))
       .map((item) => ({ ...item, active: shelf.active.has(item.id), shared: shelf.active.has(item.id) && shelf.shared.has(item.id) }));
-  const canSeePicture = (client, book, file) => canRead(client, book) || shelf.images.some((item) => item.book === book && item.file === file);
+  const canSeePicture = (client, book, file) => {
+    // A picture named from another module ("<file>@<module>") needs that module shared too.
+    if (shelf.images.some((item) => item.book === book && item.file === file)) return true;
+    const other = String(file).split("@")[1]?.trim();
+    if (other && other !== book && client.role !== "dm" && !canRead(client, other)) return false;
+    return canRead(client, book);
+  };
   // When each seat last cleared its chat (/clear), by name (the GM's as "@gm"):
   // its screen shows only newer lines, also after a restart. The table's own
   // record (the agent's chat log) keeps them.
@@ -738,6 +756,8 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     if (map.tokens().some((token) => token.recordId === record.id)) sendMaps();
     if (record.id === party.PARTY_ID || record.type === "character") sendParty();
     if (record.type === "character" || before?.type === "character") sendRoster();
+    // Concentration ended on the sheet (or a card, or a long rest): its effects end too.
+    if (kind === "upsert" && record.type === "character" && String(before?.data?.concentration ?? "").trim() && !String(record.data?.concentration ?? "").trim()) combat.concentrationCleared(record.id);
     if (combat.entries().some((entry) => entry.recordId === record.id)) sendCombat();
   });
 
@@ -746,7 +766,9 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
   function storeTiles(list) {
     if (!tiles || !Array.isArray(list)) return [];
     const out = [];
-    for (const { bytes, file, ...tile } of list) {
+    for (const entry of list) {
+      if (!entry || typeof entry !== "object") continue;
+      const { bytes, file, ...tile } = entry;
       try {
         if (bytes && file) out.push({ ...tile, src: tiles.add(file, Buffer.from(bytes)).id });
         else if (tile.src && tiles.has(tile.src)) out.push(tile);
@@ -757,7 +779,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     return out;
   }
 
-  const server = http.createServer((req, res) => {
+  const onRequest = (req, res) => {
     const url = new URL(req.url || "/", "http://127.0.0.1");
     // An FG module's maps as a map bundle, for the GM's Library (its scenes' pins and FX seeded here).
     if (req.method === "GET" && url.pathname === "/table/fg-maps") {
@@ -829,7 +851,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
           return;
         }
         res.writeHead(200, { "Content-Type": found.mime, "Content-Length": stat.size, "Cache-Control": "private, max-age=3600", "X-Content-Type-Options": "nosniff" });
-        fs.createReadStream(found.path).pipe(res);
+        streamFile(found.path, res);
       });
       return;
     }
@@ -907,11 +929,11 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
             return;
           }
           res.writeHead(206, { "Content-Type": found.mime, "Content-Length": end - start + 1, "Content-Range": `bytes ${start}-${end}/${stat.size}`, "Accept-Ranges": "bytes", "Cache-Control": "private, max-age=3600" });
-          fs.createReadStream(found.path, { start, end }).pipe(res);
+          streamFile(found.path, res, { start, end });
           return;
         }
         res.writeHead(200, { "Content-Type": found.mime, "Content-Length": stat.size, "Accept-Ranges": "bytes", "Cache-Control": "private, max-age=3600" });
-        fs.createReadStream(found.path).pipe(res);
+        streamFile(found.path, res);
       });
       return;
     }
@@ -954,13 +976,25 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         const still = id && /\.webm$/i.test(id) && art.has(id.replace(/\.webm$/i, ".png")) ? id.replace(/\.webm$/i, ".png") : id;
         const file = still ? art.file(still) : null;
         if (file) {
-          const bytes = fs.readFileSync(file.path);
+          let bytes;
+          try {
+            bytes = fs.readFileSync(file.path);
+          } catch {
+            res.writeHead(404, { "Cache-Control": "no-store" });
+            res.end();
+            return;
+          }
           res.writeHead(200, { "Content-Type": file.mime, "Content-Length": bytes.length, "Cache-Control": "private, max-age=300" });
           res.end(bytes);
           return;
         }
       }
-      const picture = allowed ? modulePicture(record.data?.[kind] || record.data?.picture || record.data?.token, record.source) : null;
+      // A player's own record (a note, their character) may show a picture from
+      // the module it came from or a book shared with them, never from the GM's other modules.
+      const reference = record?.data?.[kind] || record?.data?.picture || record?.data?.token;
+      const named = String(reference ?? "").split("@")[1]?.trim() ?? "";
+      const reaches = !named || client?.role === "dm" || !record.owner || named === record.source || canRead(client, named);
+      const picture = allowed && reaches ? modulePicture(reference, record.source) : null;
       if (!picture) {
         res.writeHead(404, { "Cache-Control": "no-store" });
         res.end();
@@ -986,6 +1020,16 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     if (req.method === "GET" && serveWeb(url, res, webRoot)) return;
     res.writeHead(404, { "Access-Control-Allow-Origin": "*" });
     res.end();
+  };
+  // No request can take the table down: a bad one (a malformed address, a file
+  // gone from the disk) gets an error answer, and the table plays on.
+  const server = http.createServer((req, res) => {
+    try {
+      onRequest(req, res);
+    } catch {
+      if (!res.headersSent) res.writeHead(400, { "Cache-Control": "no-store" });
+      res.end();
+    }
   });
 
   const wss = new WebSocketServer({ server, maxPayload: 8 * 1024 * 1024 });
@@ -1100,8 +1144,35 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     if (client.role === "player") sendRoster();
   }
 
+  // Wrong passwords (the table's or an account's), by address: after five
+  // in a row, that address waits before it may try again, longer each time.
+  const misses = new Map();
+  const waitFor = (address) => Math.max(0, (misses.get(address)?.until ?? 0) - Date.now());
+  const missed = (address) => {
+    const miss = misses.get(address) ?? { count: 0, until: 0 };
+    miss.count += 1;
+    if (miss.count >= 5) miss.until = Date.now() + Math.min(5 * 60_000, 15_000 * 2 ** (miss.count - 5));
+    misses.set(address, miss);
+    if (misses.size > 2000) misses.delete(misses.keys().next().value);
+  };
+
   wss.on("connection", (ws, request) => {
     const remote = request.socket?.remoteAddress || ws._socket?.remoteAddress || "";
+    // A browser joins from this table's own page: another website's page may
+    // not open a seat here. (Kraken's own app, joining from its window, is no website.)
+    const origin = String(request.headers?.origin ?? "");
+    if (/^https?:/i.test(origin) && !isLoopback(remote)) {
+      let host = "";
+      try {
+        host = new URL(origin).host;
+      } catch {
+        /* not an address */
+      }
+      if (host !== String(request.headers?.host ?? "")) {
+        ws.close();
+        return;
+      }
+    }
     const client = {
       id: crypto.randomBytes(8).toString("hex"),
       name: "",
@@ -1137,7 +1208,14 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
           ws.close();
           return;
         }
+        const wait = waitFor(remote);
+        if (wait > 0) {
+          send(ws, { type: "no", reason: `Too many wrong passwords: try again in ${Math.ceil(wait / 1000)} seconds.` });
+          ws.close();
+          return;
+        }
         if (password && !sameSecret(msg.password ?? "", password)) {
+          missed(remote);
           send(ws, { type: "no", reason: "Wrong password." });
           ws.close();
           return;
@@ -1150,6 +1228,12 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         const dmSeated = [...clients.values()].some((seat) => seat.role === "dm");
         client.role = decideRole(remote, hostToken, msg.hostToken, dmSeated);
         client.name = text(msg.name, client.role === "dm" ? "DM" : "Player").slice(0, 24);
+        // "@..." names are the table's own keys (the GM's settings are kept as "@gm").
+        if (client.role === "player" && client.name.startsWith("@")) {
+          send(ws, { type: "no", reason: "A name cannot start with @." });
+          ws.close();
+          return;
+        }
         // A player's account (accounts.cjs): a name with one needs its password,
         // or the token this browser kept; a new name with a password makes one.
         // A name already at the table cannot sit twice.
@@ -1164,6 +1248,8 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
           const accountToken = typeof account.token === "string" ? account.token.slice(0, 100) : "";
           if (accounts?.has(client.name)) {
             const signed = accounts.signIn(client.name, { password: accountPassword, token: accountToken });
+            if (!signed && accountPassword) missed(remote);
+            if (signed) misses.delete(remote);
             if (!signed)
               return refuse(
                 accountPassword
@@ -1287,8 +1373,12 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       // A person's own settings (their colour, dice, how dice show), kept for them
       // by name; every browser they sit at gets them.
       if (msg.type === "prefs") {
-        const next = prefs.set(prefsKey(client), msg.patch);
-        for (const [other, seat] of clients) if (prefsKey(seat) === prefsKey(client)) send(other, { type: "prefs", prefs: next });
+        try {
+          const next = prefs.set(prefsKey(client), msg.patch);
+          for (const [other, seat] of clients) if (prefsKey(seat) === prefsKey(client)) send(other, { type: "prefs", prefs: next });
+        } catch (error) {
+          send(ws, { type: "error", reason: error instanceof Error ? error.message : "Your settings could not be kept." });
+        }
         return;
       }
 
@@ -1422,7 +1512,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         const owner = client.role === "dm" ? text(msg.owner, "").slice(0, 24) : client.name;
         importCharacter(agentHandle, msg.text, { owner, seat: client.role === "dm" ? seatOf(client) : { role: "dm", name: client.name } })
           .then(({ record, format, report }) => {
-            addChat({ id: client.id, from: client.name, text: `Imported ${record.name} (${format === "fg" ? "Fantasy Grounds" : format === "foundry" ? "Foundry VTT" : format === "roll20" ? "Roll20" : format === "kraken" ? "Kraken" : "a file"}).`, at: Date.now() });
+            addChat({ id: client.id, from: client.name, text: `Imported ${record.name}${client.role === "dm" ? "" : `, level ${Number(record.data?.level) || 0}`} (${format === "fg" ? "Fantasy Grounds" : format === "foundry" ? "Foundry VTT" : format === "roll20" ? "Roll20" : format === "kraken" ? "Kraken" : "a file"}).`, at: Date.now() });
             answer({ ok: true, id: record.id, report });
           })
           .catch((error) => answer({ ok: false, error: error instanceof Error ? error.message : "Could not import that character." }));

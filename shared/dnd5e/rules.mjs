@@ -297,7 +297,7 @@ export function derive(input) {
     const bonus = data.abilities[caster.stat].bonus;
     data.spellcasting = { stat: caster.stat, dc: 8 + data.prof + bonus, attack: data.prof + bonus };
     const fresh = slotsFor(className, level);
-    data.slots = Object.fromEntries(Object.entries(fresh).map(([key, slot]) => [key, { max: slot.max, used: Math.min(slot.max, num(data.slots?.[key]?.used, 0)) }]));
+    data.slots = Object.fromEntries(Object.entries(fresh).map(([key, slot]) => [key, { max: slot.max, used: Math.max(0, Math.min(slot.max, Math.round(num(data.slots?.[key]?.used, 0)))) }]));
   } else {
     delete data.spellcasting;
     data.slots = {};
@@ -305,7 +305,8 @@ export function derive(input) {
   data.hp = { total: Math.max(1, Math.round(num(data.hp?.total, 1))), wounds: Math.max(0, Math.round(num(data.hp?.wounds, 0))), temp: Math.max(0, Math.round(num(data.hp?.temp, 0))) };
   data.exp = Math.max(0, Math.round(num(data.exp, 0)));
   data.expnext = profile.xp[level] ?? 0;
-  data.deathsaves = { success: Math.min(3, num(data.deathsaves?.success, 0)), failure: Math.min(3, num(data.deathsaves?.failure, 0)) };
+  data.deathsaves = { success: Math.max(0, Math.min(3, Math.round(num(data.deathsaves?.success, 0)))), failure: Math.max(0, Math.min(3, Math.round(num(data.deathsaves?.failure, 0)))) };
+  if (data.hitdice && typeof data.hitdice === "object") data.hitdice = { ...data.hitdice, used: Math.max(0, Math.round(num(data.hitdice.used, 0))) };
   if (profile.dread) data.dread = Math.min(6, Math.max(0, Math.round(num(data.dread, 0))));
   return data;
 }

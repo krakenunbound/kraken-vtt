@@ -17,8 +17,18 @@ const path = require("node:path");
 const { listTools, callTool } = require("./agent/tools.cjs");
 
 const MODEL = "claude-opus-5-5";
-// Tools the assistant does not get: running code in the GM's window.
-const WITHHELD = new Set(["kraken_ui_eval"]);
+// Tools the assistant does not get: running code in the GM's window, and
+// players' accounts (it reads what players write, so it never resets a password).
+const WITHHELD = new Set(["kraken_ui_eval", "kraken_accounts"]);
+// Nor does it read or write the GM's files by a path: what players write (a
+// note, a backstory, chat) could ask it to. It works on the table's own records,
+// books and libraries; the GM imports and exports files themself.
+function touchesDisk(name, input) {
+  if (typeof input?.path === "string" && input.path.trim()) return true;
+  if (name === "kraken_tile" && typeof input?.file === "string" && input.file.trim()) return true;
+  if (typeof input?.module === "string" && /[\\/:]/.test(input.module)) return true;
+  return false;
+}
 // One request at most runs this many tool rounds before it stops and says so.
 const MAX_ROUNDS = 40;
 const SKILL_FILE = path.join(__dirname, "..", "skills", "kraken-dm-assistant", "SKILL.md");
@@ -156,6 +166,7 @@ function createAssistant({ ctx, onEvent = () => {}, makeClient, key }) {
           emit({ kind: "tool", name: use.name, input: use.input });
           let result;
           if (WITHHELD.has(use.name)) result = { isError: true, content: [{ type: "text", text: `${use.name} is not available to the assistant.` }] };
+          else if (touchesDisk(use.name, use.input)) result = { isError: true, content: [{ type: "text", text: "The assistant does not read or write files on this computer by a path: ask the GM to import or export it." }] };
           else
             try {
               result = await callTool(use.name, use.input && typeof use.input === "object" ? use.input : {}, ctx);
@@ -204,4 +215,4 @@ function createAssistant({ ctx, onEvent = () => {}, makeClient, key }) {
   };
 }
 
-module.exports = { createAssistant, keyStore, envKey, MODEL, WITHHELD };
+module.exports = { createAssistant, keyStore, envKey, MODEL, WITHHELD, touchesDisk };

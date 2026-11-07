@@ -28,19 +28,38 @@ function asCampaign(value) {
   };
 }
 
-function read(file) {
-  try {
-    const parsed = JSON.parse(fs.readFileSync(file, "utf8"));
-    const rows = Array.isArray(parsed?.campaigns) ? parsed.campaigns : [];
-    return rows.map(asCampaign).filter(Boolean);
-  } catch {
-    return [];
+// A saved file, read safely: missing is nothing (null); damaged (a crash or a
+// power cut mid-write) falls back to the copy kept before the last save; if
+// that is damaged too, it is an error, never an empty campaign that the next
+// save would write over the real one.
+function readJson(target) {
+  const backup = `${target}.bak`;
+  for (const candidate of [target, backup]) {
+    let text;
+    try {
+      text = fs.readFileSync(candidate, "utf8");
+    } catch (error) {
+      if (error && error.code === "ENOENT") continue;
+      throw new Error(`Kraken could not read ${path.basename(candidate)} (${error?.code ?? error}); close whatever has it open and try again.`);
+    }
+    try {
+      return JSON.parse(text);
+    } catch {
+      /* damaged: the copy from before the last save */
+    }
   }
+  if (fs.existsSync(target) || fs.existsSync(backup)) throw new Error(`${target} is damaged and has no good copy; nothing was changed.`);
+  return null;
+}
+
+function read(file) {
+  const parsed = readJson(file);
+  const rows = Array.isArray(parsed?.campaigns) ? parsed.campaigns : [];
+  return rows.map(asCampaign).filter(Boolean);
 }
 
 function write(file, campaigns) {
-  fs.mkdirSync(path.dirname(file), { recursive: true });
-  fs.writeFileSync(file, JSON.stringify({ campaigns }));
+  writeAtomic(file, JSON.stringify({ campaigns }));
 }
 
 function create(file, input) {
@@ -98,10 +117,19 @@ function exists(file, id) {
   return read(file).some((campaign) => campaign.id === String(id ?? ""));
 }
 
-function writeAtomic(target, data) {
+// Written whole to a temporary file and flushed to the disk, then swapped in;
+// the last good file stays beside it as <name>.bak until the next save.
+function writeAtomic(target, data, { backup = true } = {}) {
   fs.mkdirSync(path.dirname(target), { recursive: true });
   const temp = `${target}.tmp`;
-  fs.writeFileSync(temp, data);
+  const handle = fs.openSync(temp, "w");
+  try {
+    fs.writeFileSync(handle, data);
+    fs.fsyncSync(handle);
+  } finally {
+    fs.closeSync(handle);
+  }
+  if (backup && fs.existsSync(target)) fs.renameSync(target, `${target}.bak`);
   fs.renameSync(temp, target);
 }
 
@@ -109,19 +137,11 @@ function writeAtomic(target, data) {
 // are only rewritten when records change, not on every chat line.
 function readState(file, id) {
   const dir = folder(file, id);
-  let state = {};
-  try {
-    const parsed = JSON.parse(fs.readFileSync(path.join(dir, "state.json"), "utf8"));
-    if (parsed && typeof parsed === "object") state = parsed;
-  } catch {
-    /* A new campaign has no state yet. */
-  }
-  try {
-    const records = JSON.parse(fs.readFileSync(path.join(dir, "records.json"), "utf8"));
-    if (Array.isArray(records)) state.records = records;
-  } catch {
-    /* Older saves kept records inside state.json. */
-  }
+  // A new campaign has no state yet; older saves kept records inside state.json.
+  const parsed = readJson(path.join(dir, "state.json"));
+  const state = parsed && typeof parsed === "object" ? parsed : {};
+  const records = readJson(path.join(dir, "records.json"));
+  if (Array.isArray(records)) state.records = records;
   return state;
 }
 
@@ -141,7 +161,7 @@ function readBundle(file, id) {
 }
 
 function writeBundle(file, id, bytes) {
-  writeAtomic(path.join(folder(file, id), "bundle.zip"), bytes);
+  writeAtomic(path.join(folder(file, id), "bundle.zip"), bytes, { backup: false });
 }
 
 module.exports = { read, create, touch, setRuleset, exists, readState, writeState, readBundle, writeBundle };

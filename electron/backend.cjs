@@ -159,7 +159,10 @@ function preferences() {
 }
 function savePreference(key, value) {
   try {
-    fs.writeFileSync(preferencesFile(), JSON.stringify({ ...preferences(), [key]: value }));
+    // Whole or not at all: a crash mid-write never leaves half a file.
+    const temp = `${preferencesFile()}.tmp`;
+    fs.writeFileSync(temp, JSON.stringify({ ...preferences(), [key]: value }));
+    fs.renameSync(temp, preferencesFile());
   } catch {
     /* the campaign still has it */
   }

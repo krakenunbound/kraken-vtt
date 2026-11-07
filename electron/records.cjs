@@ -13,6 +13,9 @@ const crypto = require("crypto");
 
 const VISIBILITY = ["gm", "owner", "all"];
 const MAX_RECORDS = 50000;
+// What one player may keep: notes and characters, and the size of each.
+const MAX_PLAYER_RECORDS = 300;
+const MAX_PLAYER_DATA = 256 * 1024;
 const MAX_DATA_BYTES = 2 * 1024 * 1024;
 
 function clean(value, max) {
@@ -136,7 +139,15 @@ function createRecordStore({ saved = [], onChange = () => undefined } = {}) {
       if (!seat) throw new Error("Not allowed.");
       if (records.size >= MAX_RECORDS) throw new Error("This campaign has too many records.");
       const owner = seat.role === "dm" ? clean(input?.owner, 24) : seat.name;
-      const id = clean(input?.id, 160) || `${cleanType(input?.type)}-${crypto.randomBytes(6).toString("hex")}`;
+      if (seat.role !== "dm") {
+        // A player's records: a fair number each, of a fair size, and never an
+        // id of their choosing (the party sheet's, a book's records' ids).
+        let theirs = 0;
+        for (const record of records.values()) if (record.owner === seat.name) theirs += 1;
+        if (theirs >= MAX_PLAYER_RECORDS) throw new Error(`You have ${MAX_PLAYER_RECORDS} notes and characters already.`);
+        if (JSON.stringify(input?.data ?? {}).length > MAX_PLAYER_DATA) throw new Error("That is too big to keep.");
+      }
+      const id = (seat.role === "dm" ? clean(input?.id, 160) : "") || `${cleanType(input?.type)}-${crypto.randomBytes(6).toString("hex")}`;
       if (records.has(id)) throw new Error(`Record ${id} already exists.`);
       const record = {
         id,
@@ -159,6 +170,12 @@ function createRecordStore({ saved = [], onChange = () => undefined } = {}) {
       if (!canEdit(before, seat)) throw new Error("You cannot change that record.");
       const next = { ...before };
       if (patch?.name !== undefined) next.name = clean(patch.name, 120);
+      // Whispers go to a character by name: a player's character never takes another's.
+      if (seat.role !== "dm" && before.type === "character" && next.name !== before.name) {
+        const taken = next.name.toLowerCase();
+        for (const record of records.values()) if (record.id !== before.id && record.type === "character" && record.name.toLowerCase() === taken) throw new Error(`${record.name} is another character's name.`);
+      }
+      if (seat.role !== "dm" && patch?.data !== undefined && JSON.stringify(patch.data).length > MAX_PLAYER_DATA) throw new Error("That is too big to keep.");
       if (seat.role === "dm") {
         if (patch?.owner !== undefined) next.owner = clean(patch.owner, 24);
         if (patch?.visibility !== undefined) {

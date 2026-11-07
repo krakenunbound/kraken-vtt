@@ -99,7 +99,8 @@ async function edit5e(table, record, changes, seat) {
     else if (NUMBERS.some((pattern) => pattern.test(key))) {
       const n = Math.round(Number(value));
       if (!Number.isFinite(n) || Math.abs(n) > 1e7) throw new Error(`${key} needs a number.`);
-      setPath(data, key, n);
+      // Counts of things used (slots, hit dice, death saves) never go below 0 (-5 used is not 5 extra casts).
+      setPath(data, key, /(^slots\.l\d\.used|^hitdice\.used|^deathsaves\.)/.test(key) ? Math.max(0, n) : n);
     } else if (/^inventorylist\.id-\d+$/.test(key) && value === null) delete data.inventorylist?.[key.split(".")[1]];
     else throw new Error(`The sheet cannot change ${key}.`);
   }
