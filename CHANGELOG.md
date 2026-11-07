@@ -4,6 +4,32 @@ What changed in each release of Kraken VTT. Downloads are on the
 [Releases](https://github.com/krakenunbound/kraken-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
+## 0.1.0-alpha.60: ability cards
+
+Some tables lay out printed spell cards and turn them over as they are used.
+Kraken now has them, as an option each player turns on.
+
+- **Ability cards.** Turn on **Ability cards** in **Settings** and a **Cards**
+  button appears in the sidebar. It opens your spells and weapons as cards,
+  grouped by level, with your slots as pips. The window moves and pops out like
+  any other. It is off until you turn it on, and each player chooses for
+  themselves.
+- **Turn a card over** (click it) for its full text and **Cast**, or
+  **Attack** and **Damage** for a weapon. A cast flares the card with sparks
+  in the colour of its damage, and a foil shimmer follows your pointer.
+- **Drag a card onto a creature's token** to make it your only target and
+  cast or attack in one move.
+- **Spent cards tip over and go grey** when no slot of their level or higher
+  is left. **Long rest** gives the slots back and stands them up one after
+  another. The spell you are concentrating on glows; **End** stops it.
+- **Pictures.** Every Descending Darkness spell has its own painted card, and
+  weapon cards show their kind: blade, axe, bow, crossbow, staff, hammer,
+  spear, sling, fist or firearm.
+- **Fan or Spread** lays the cards out as a hand or in rows. **Card effects**
+  in Settings turns the movement off (so does your system's reduced motion).
+- The cards are a view of your sheet: spending a slot on the sheet tips the
+  card, and the other way round. AI agents use them with `kraken_cards`.
+
 ## 0.1.0-alpha.59: bug fixes
 
 Four findings from a review of alpha.58, each fixed and checked in
