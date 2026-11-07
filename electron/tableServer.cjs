@@ -945,7 +945,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       const allowed =
         record &&
         (canSee(record, seatOf(client)) || map.tokens().some((item) => item.recordId === record.id && !item.hidden) || client.role === "dm");
-      const kind = url.searchParams.get("kind") === "portrait" ? "picture" : "token";
+      const kind = url.searchParams.get("kind") === "portrait" ? "picture" : url.searchParams.get("kind") === "card" ? "card" : "token";
       // A character's: its token (or portrait, or its race and class's), from the art library, as a still.
       if (allowed && record.type === "character" && art) {
         const data = record.data ?? {};

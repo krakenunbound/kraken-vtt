@@ -5,7 +5,8 @@
     "aa": "gritty retro science fiction painting, worn industrial spacecraft, cinematic lighting, muted teal and amber palette, detailed, no text, no watermark",
     "aacreature": "gritty science fiction character portrait, cinematic lighting, dark industrial background, head and shoulders filling the frame, centered, detailed, no text, no watermark",
     "ddhero": "dark fantasy adventurer character portrait, oil painting, head and shoulders, three-quarter view, dramatic warm rim lighting, dark misty background, centered, detailed face, no text, no watermark",
-    "aahero": "gritty science fiction crew member character portrait, cinematic lighting, head and shoulders, three-quarter view, dark starship interior background, centered, detailed face, no text, no watermark"
+    "aahero": "gritty science fiction crew member character portrait, cinematic lighting, head and shoulders, three-quarter view, dark starship interior background, centered, detailed face, no text, no watermark",
+    "ddspell": "dark fantasy spell card illustration, oil painting, glowing magical light against deep darkness, one clear subject centered, strong silhouette, painterly, detailed, no text, no letters, no border, no frame, no watermark"
   },
   "pictures": [
     {
@@ -364,5 +365,187 @@
         "Drifter": "in a worn leather jacket with a pistol at the hip"
       }
     }
-  }
+  },
+  "spells": [
+    [
+      "dd",
+      "Kindle",
+      "a small iron lantern-stone in a cupped palm bursting into cold steady white flame, dark crypt behind"
+    ],
+    [
+      "dd",
+      "Spark Lash",
+      "a crackling whip of orange sparks lashing through the dark from a wizard's hand"
+    ],
+    [
+      "dd",
+      "Grave Touch",
+      "a pale skeletal hand wreathed in green-black frost reaching out of shadow, burial vault"
+    ],
+    [
+      "dd",
+      "Sacred Ember",
+      "a single mote of golden holy fire falling from above like a star onto a dark figure"
+    ],
+    [
+      "dd",
+      "Cutting Words",
+      "a bard's mouth whispering, ribbons of violet psychic light like blades spiralling outward"
+    ],
+    [
+      "dd",
+      "Guiding Glimmer",
+      "a tiny pale blue star of light resting on a fingertip, faint runes orbiting it"
+    ],
+    [
+      "dd",
+      "Mending Word",
+      "a broken iron chain link fusing back together in a glow of golden light"
+    ],
+    [
+      "dd",
+      "Unseen Grip",
+      "a ghostly translucent amber hand turning a rusted key in a heavy dungeon door"
+    ],
+    [
+      "dd",
+      "Whisper Across",
+      "a thread of silver whispering light flowing from lips to a distant ear across a dark hall"
+    ],
+    [
+      "dd",
+      "Arcane Darts",
+      "three glowing violet-white darts of pure force streaking through darkness"
+    ],
+    [
+      "dd",
+      "Mend Wounds",
+      "hands pressed on a bleeding wound, soft green and gold healing light seeping into it"
+    ],
+    [
+      "dd",
+      "Word of Rest",
+      "a priest raising one hand, a ripple of warm gentle light travelling across a battlefield"
+    ],
+    [
+      "dd",
+      "Ward of Faith",
+      "a shimmering translucent blue shield of holy light standing before a kneeling warrior"
+    ],
+    [
+      "dd",
+      "Blessing",
+      "three upturned faces bathed in a falling column of soft golden light"
+    ],
+    [
+      "dd",
+      "Burning Fan",
+      "a fan-shaped sheet of roaring orange fire spraying from spread fingers"
+    ],
+    [
+      "dd",
+      "Slumber",
+      "a soldier slumping asleep as drifting pink and violet motes of drowsy light swirl around him"
+    ],
+    [
+      "dd",
+      "Cold Dread",
+      "a hooded figure showing a terrified man a reflection of endless black void, cold blue mist"
+    ],
+    [
+      "dd",
+      "Iron Will",
+      "a wizard behind a sudden hexagonal barrier of blue force as a sword strikes it, sparks"
+    ],
+    [
+      "dd",
+      "Thunder Clap",
+      "a shockwave ring of thunder bursting outward from a caster, dust and stones blown away"
+    ],
+    [
+      "dd",
+      "Feather Fall",
+      "adventurers drifting gently down a dark chasm like falling feathers, soft light around them"
+    ],
+    [
+      "dd",
+      "Hunter's Quarry",
+      "a ranger's eye with a glowing green crosshair mark over a distant beast in a dark forest"
+    ],
+    [
+      "dd",
+      "Light the Way",
+      "a cleric holding up a radiant staff, a warm dome of light pushing back the dark around companions"
+    ],
+    [
+      "dd",
+      "Sense the Hidden",
+      "a secret door outlined in faint glowing blue lines in a stone wall, a trap revealed beneath"
+    ],
+    [
+      "dd",
+      "Ember Ray",
+      "a searing beam of white-hot fire lancing across a dark cavern"
+    ],
+    [
+      "dd",
+      "Hold Foe",
+      "a snarling man frozen mid-step, bound by glowing pink chains of enchantment"
+    ],
+    [
+      "dd",
+      "Silver Brand",
+      "a longsword blade burning with pale silver radiant flame"
+    ],
+    [
+      "dd",
+      "Shroud of Dark",
+      "a sphere of absolute magical darkness swallowing a torchlit corridor"
+    ],
+    [
+      "dd",
+      "Restore",
+      "a cleric's hand on a sick man's brow, black poison smoke lifting away into golden light"
+    ],
+    [
+      "dd",
+      "Mist Walk",
+      "a cloaked wizard dissolving into silver mist and reforming a few steps away"
+    ],
+    [
+      "dd",
+      "Mend Many",
+      "five wounded adventurers each touched by a ribbon of green-gold healing light from above"
+    ],
+    [
+      "dd",
+      "Fire Burst",
+      "a bead of flame exploding into a huge sphere of fire in a dark ruined hall"
+    ],
+    [
+      "dd",
+      "Storm Lance",
+      "a long straight spear of blue-white lightning tearing through a stone corridor"
+    ],
+    [
+      "dd",
+      "Banish Fear",
+      "terrified villagers lifting their heads as a wave of warm dawn light sweeps away black shadows"
+    ],
+    [
+      "dd",
+      "Call Back",
+      "a fallen warrior on a stone slab, a thread of white light drawing his soul back into his chest"
+    ],
+    [
+      "dd",
+      "Unweave",
+      "a spell's glowing threads of light being pulled apart and unravelling in the air"
+    ],
+    [
+      "dd",
+      "Wardens of Light",
+      "shining spectral guardian spirits with spears circling a priest in the dark"
+    ]
+  ]
 }

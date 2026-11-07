@@ -64,7 +64,7 @@ async function levelUp5e(table, record, from) {
 }
 
 // What the 5E sheet may change, then every number worked out again.
-const TEXT = new Set(["playername", "alignment", "appearance", "notes", "senses", "speed", "background", "species", "gender", "age", "height", "weight"]);
+const TEXT = new Set(["playername", "alignment", "appearance", "notes", "senses", "speed", "background", "species", "gender", "age", "height", "weight", "concentration"]);
 const NUMBERS = [
   /^abilities\.(strength|dexterity|constitution|intelligence|wisdom|charisma)\.(score|saveprof)$/,
   /^skills\.[a-z]+\.prof$/,

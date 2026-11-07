@@ -23,6 +23,13 @@ GAME = {"dd": "games/descending-darkness/art", "aa": "games/apeira-astra/art"}
 for game, key, prompt in spec["creatures"]:
     jobs.append((f"{GAME[game]}/npc/{key}.webp", 1024, 1024, f'{prompt}, {spec["style"][game + "creature"]}'))
 
+# Spell cards: a picture for each spell's card (art/spells/<key>.webp), the
+# key as games/lib/fg.mjs artKey makes it.
+import re  # noqa: E402
+for game, name, prompt in spec.get("spells", []):
+    key = re.sub(r"^-|-$", "", re.sub(r"[^a-z0-9]+", "-", name.lower()))
+    jobs.append((f"{GAME[game]}/spells/{key}.webp", 768, 832, f'{prompt}, {spec["style"][game + "spell"]}'))
+
 # Character portraits: games/portraits/<Kin>/<Kin> <Class>.webp, Kraken's
 # own pair for a new character of that kin and class (characterArt.cjs).
 n = 0
