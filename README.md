@@ -86,6 +86,7 @@ The full guides:
 | [docs/included-games.md](docs/included-games.md) | Descending Darkness and Apeira Astra, and running their adventures |
 | [docs/development.md](docs/development.md) | Building from source, tests, how the code is laid out |
 | [AGENT.md](AGENT.md) | The AI agent and its tools |
+| [CHANGELOG.md](CHANGELOG.md) | What changed in each release |
 | [PLAN.md](PLAN.md) | The plan and the progress log |
 
 ## Development

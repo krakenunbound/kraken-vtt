@@ -131,7 +131,7 @@ In Kraken, the Skills page's **Improve** spends it.`,
             {
               name: "Combat",
               keywords: "combat initiative attack damage armour",
-              text: `**Initiative:** 2d6 + Reflex modifier + Tactics. Highest first.
+              text: `**Initiative:** 2d6 + Reflex modifier + Tactics (-3 without Tactics, as any skill you do not have; Tactics 0 adds 0). Highest first.
 
 **On your turn:** move (about 6 m) and take one action: attack, a task, reload, aid someone.
 

@@ -714,7 +714,8 @@ const TOOLS = [
       on: { type: "boolean", description: "target: add (true) or drop (false)" },
       weapon: string("attack / damage-roll: inventory key (character) or attack key (NPC)"),
       attribute: string("save: strength, dexterity, constitution, intelligence, wisdom or charisma"),
-      cl: number("save: the challenge level"),
+      cl: number("save: the challenge level (5E: the DC)"),
+      advantage: { type: "string", enum: ["", "advantage", "disadvantage"], description: "save (5E): roll with advantage or disadvantage; the tracker's effects still count" },
       power: string("cast: the powers key of the character (recordId) or of the NPC on the tracker (id); an NPC's caster level is its hit dice and its uses per day are counted"),
       castAction: string("cast: the power's actions key"),
       id: string("Tracker entry id"),
@@ -782,7 +783,7 @@ const TOOLS = [
         return out({ targets: combat.targetArea(args.id, { x: args.x, y: args.y, radius: (args.radius ?? 0) * per, faction: args.faction ?? null }, seat, (entry) => map.tokens().find((token) => token.id === entry.tokenId) ?? map.tokens().find((token) => entry.recordId && token.recordId === entry.recordId) ?? null), combat: combat.viewFor(seat) });
       }
       else if (action === "attack") return out({ results: await combat.attack(args.recordId ? { recordId: args.recordId } : { entryId: args.id }, args.weapon, seat, "Agent"), combat: combat.viewFor(seat) });
-      else if (action === "save") return out({ save: await combat.save(args.id, args.attribute, args.cl ?? 0, "Agent"), combat: combat.viewFor(seat) });
+      else if (action === "save") return out({ save: await combat.save(args.id, args.attribute, args.cl ?? 0, "Agent", undefined, args.advantage ?? ""), combat: combat.viewFor(seat) });
       else if (action === "cast") return out({ cast: await combat.cast(args.recordId ? { recordId: args.recordId } : { entryId: args.id }, args.power, args.castAction ?? "", seat, "Agent"), combat: combat.viewFor(seat) });
       else if (action === "krits") return out(await combat.krits(args.settings, seat));
       else if (action === "krit-test") return out({ krit: await combat.kritTest(args.kind, args.id, args.targetId, seat, args.table || args.roll ? { table: args.table, roll: args.roll } : undefined), combat: combat.viewFor(seat) });

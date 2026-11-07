@@ -320,6 +320,14 @@ export function testModifier(data, kind, key) {
   }
   return { modifier: num(data.abilities?.[key]?.bonus, 0), label: `[CHECK] ${titled(key)}` };
 }
+// Descending Darkness: at 3 Dread or more, Wisdom checks and saves (and Wisdom
+// skills) have disadvantage; chosen advantage cancels it to one die, as in 5E.
+export function dreadAdvantage(data, kind, key, advantage = "") {
+  if (!profileFor(data).dread || num(data?.dread, 0) < 3) return { advantage, dread: false };
+  const stat = kind === "skill" ? SKILLS[skillKey(key)]?.[1] : String(key ?? "").toLowerCase();
+  if (stat !== "wisdom") return { advantage, dread: false };
+  return { advantage: advantage === "advantage" ? "" : "disadvantage", dread: true };
+}
 export const titled = (word) => String(word ?? "").replace(/^\w/, (letter) => letter.toUpperCase());
 
 // Builds a character from a spec, as FG's 5E character wizard does (SRD 5.2.1):

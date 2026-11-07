@@ -1,6 +1,6 @@
 # Kraken VTT: source audit, 0.1.0-alpha.56
 
-Audit only. Nothing in this list has been patched in the tree.
+**All eleven are fixed in 0.1.0-alpha.58** (see [CHANGELOG.md](CHANGELOG.md)), each checked by `npm run audit` (`scripts/check-audit.mjs`). Two fixes differ from the suggestion here: for 1, damage with no attack since the last damage still lands on every target (Fantasy Grounds' Damage button does the same); for 10, the untrained −3 is the rule and the Crew Handbook says so.
 
 Reviewed on 2026-11-06 against commit [`41617678`](https://github.com/krakenunbound/kraken-vtt/commit/41617678e903a2cc758a67045bb23ada8e85982d) (`main`). This is a reading of the host, combat, the two included games, accounts, and the sheet paths. It is not a live Windows playtest, so installer, multi-monitor, and GPU bugs are out of scope.
 
@@ -8,19 +8,19 @@ Reviewed on 2026-11-06 against commit [`41617678`](https://github.com/krakenunbo
 
 Severity: **high** (wrong rules in a normal click, or a player can rewrite the sheet), **medium** (wrong in a real case, or easy to miss), **low** (edge or only with a crafted client).
 
-| # | Severity | Bug | Where |
-|---|---|---|---|
-| 1 | high | 5E and Descending Darkness damage still lands on a miss, and a crit sticks to the next swing | `electron/combat.cjs` `attack5e`, `damage5e` |
-| 2 | medium | A player can skip the sheet whitelist and replace their character | `electron/tableServer.cjs` `op`, `electron/records.cjs` `canEdit` |
-| 3 | medium | An Apeira Astra character at 0 Stamina is Down but still acts | `electron/combat.cjs` `health`, `skips` |
-| 4 | medium | Descending Darkness Dread is stored and labeled, never rolled | `src/characters/Sheet5e.tsx`, `electron/dnd5e.cjs` `check5e` |
-| 5 | medium | Advantage or disadvantage on an in-combat save skips tracker effects | `src/characters/Sheet5e.tsx` |
-| 6 | medium | A spell critical sticks to that target's next damaging spell | `electron/combat.cjs` `cast5e` |
-| 7 | medium | Temporary hit points never absorb damage | `electron/combat.cjs` `vitals`, `applyWounds` |
-| 8 | low | A creature with 0 max Health is always Healthy | `shared/map/geometry.mjs` `healthStatus` |
-| 9 | low | Descending Darkness still accepts a 5E death save | `electron/combat.cjs` `deathSave` |
-| 10 | low | Untrained Tactics adds 0 to Apeira Astra initiative, not −3 | `shared/astra/rules.mjs` `derive` |
-| 11 | low | 5E weapon damage is forced to at least 1 | `electron/combat.cjs` `damage5e` |
+| # | Severity | Bug | Where | Status |
+|---|---|---|---|---|
+| 1 | high | 5E and Descending Darkness damage still lands on a miss, and a crit sticks to the next swing | `electron/combat.cjs` `attack5e`, `damage5e` | Fixed (alpha.58) |
+| 2 | medium | A player can skip the sheet whitelist and replace their character | `electron/tableServer.cjs` `op`, `electron/records.cjs` `canEdit` | Fixed (alpha.58) |
+| 3 | medium | An Apeira Astra character at 0 Stamina is Down but still acts | `electron/combat.cjs` `health`, `skips` | Fixed (alpha.58) |
+| 4 | medium | Descending Darkness Dread is stored and labeled, never rolled | `src/characters/Sheet5e.tsx`, `electron/dnd5e.cjs` `check5e` | Fixed (alpha.58) |
+| 5 | medium | Advantage or disadvantage on an in-combat save skips tracker effects | `src/characters/Sheet5e.tsx` | Fixed (alpha.58) |
+| 6 | medium | A spell critical sticks to that target's next damaging spell | `electron/combat.cjs` `cast5e` | Fixed (alpha.58) |
+| 7 | medium | Temporary hit points never absorb damage | `electron/combat.cjs` `vitals`, `applyWounds` | Fixed (alpha.58) |
+| 8 | low | A creature with 0 max Health is always Healthy | `shared/map/geometry.mjs` `healthStatus` | Fixed (alpha.58) |
+| 9 | low | Descending Darkness still accepts a 5E death save | `electron/combat.cjs` `deathSave` | Fixed (alpha.58) |
+| 10 | low | Untrained Tactics adds 0 to Apeira Astra initiative, not −3 | `shared/astra/rules.mjs` `derive` | Fixed (alpha.58) |
+| 11 | low | 5E weapon damage is forced to at least 1 | `electron/combat.cjs` `damage5e` | Fixed (alpha.58) |
 
 Suggested order: 1, then 6, then 3, then 4, then 2. Each fix wants a check next to the code it changes (`dnd5e`, `descending-ui`, `astra-ui`, `session`).
 

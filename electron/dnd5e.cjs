@@ -39,13 +39,15 @@ async function check5e(table, record, { kind = "check", attribute, skill, dc, bo
   if (kind !== "skill" && !rules.STATS.includes(key)) throw new Error("Pick an ability.");
   const { modifier, label: tag } = rules.testModifier(record.data, kind, key);
   const total = modifier + (Number(bonus) || 0);
+  const shaken = rules.dreadAdvantage(record.data, kind, key, advantage);
+  advantage = shaken.advantage;
   const dice = advantage === "advantage" ? "2d20kh1" : advantage === "disadvantage" ? "2d20kl1" : "1d20";
   const formula = `${dice}${total ? rules.signed(total) : ""}`;
   const against = Number(dc) > 0 ? Math.round(Number(dc)) : null;
   // The result goes with the roll card (FG's [SUCCESS] / [FAILURE] after the roll).
   const rolled = table.dice.roll(formula);
   const success = against === null ? null : rolled.total >= against;
-  const words = `${label ? `${label} ` : ""}${tag}${advantage ? ` [${advantage.toUpperCase()}]` : ""}${against !== null ? ` [DC ${against}] [${success ? "SUCCESS" : "FAILURE"} ${rolled.total} vs ${against}]` : ""}`;
+  const words = `${label ? `${label} ` : ""}${tag}${shaken.dread ? " [DREAD]" : ""}${advantage ? ` [${advantage.toUpperCase()}]` : ""}${against !== null ? ` [DC ${against}] [${success ? "SUCCESS" : "FAILURE"} ${rolled.total} vs ${against}]` : ""}`;
   table.postRoll(rolled, words, from || record.name, false, { by: record.name, ...(against !== null ? { result: success ? "SUCCESS" : "FAILURE", against } : {}) });
   return { total: rolled.total, d20: rolled.terms[0].rolls, modifier: total, dc: against, success };
 }

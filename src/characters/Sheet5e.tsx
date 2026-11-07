@@ -43,8 +43,8 @@ export function Sheet5e({ record, session }: { record: TableRecord; session: Ses
   const targetNames = (inFight?.targets ?? []).map((id) => session.combat.entries.find((entry) => entry.id === id)?.name).filter(Boolean);
   const roll = (kind: "check" | "save" | "skill", key: string) => {
     if (!editable) return;
-    // A save in a fight goes through the tracker (its effects count); else straight to chat.
-    if (kind === "save" && inFight && !advantage) session.ct("save", { id: inFight.id, attribute: key, cl: dc });
+    // A save in a fight goes through the tracker (its effects count, with advantage or not); else straight to chat.
+    if (kind === "save" && inFight) session.ct("save", { id: inFight.id, attribute: key, cl: dc, advantage });
     else session.siegeCheck(record.id, kind === "skill" ? "" : key, 0, false, { kind, ...(kind === "skill" ? { skill: key } : {}), dc, advantage });
   };
   const level = num(data.level);

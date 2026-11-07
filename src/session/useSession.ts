@@ -172,6 +172,7 @@ export type CombatEntry = {
   health: TokenHealth;
   hp?: number;
   wounds?: number;
+  temp?: number;
   ac?: number;
   effects: { id: string; label: string; duration: number }[];
   targets: string[];

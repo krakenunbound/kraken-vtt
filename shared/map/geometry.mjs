@@ -437,7 +437,8 @@ export function healthStatus(total, wounds, { dead = -10, dying = -7 } = {}) {
   const hurt = Number(wounds) || 0;
   const percent = hp > 0 ? Math.min(Math.max(hurt / hp, 0), 1) : 0;
   let status;
-  if (hp <= 0 || hurt <= 0) status = "Healthy";
+  if (hurt <= 0) status = "Healthy";
+  else if (hp <= 0) status = "Dead";
   else if (hp - hurt <= dead) status = "Dead";
   else if (hp - hurt <= dying) status = "Dying";
   else if (hp - hurt <= 0) status = "Unconscious";
