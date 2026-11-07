@@ -41,6 +41,25 @@ seat.
 - In Descending Darkness, when a friend is dying, the **Steady** button in the
   tracker tries to stop the bleeding.
 
+## Ability cards
+
+If you like spell cards on the table, turn on **Ability cards** in
+**Settings**. A **Cards** button appears in the sidebar. It opens your
+spells and weapons as cards, grouped by level.
+
+- **Click a card** to turn it over: its full text, and **Cast** (or **Attack**
+  and **Damage** for a weapon).
+- **Drag a card onto a creature's token** to target it and cast or attack in
+  one move.
+- A spell card **tips over and goes grey** when you have no slot of its level
+  or higher left. **Long rest** gives every slot back and stands the cards up.
+- The spell you are concentrating on **glows**. Turn it over and press
+  **End** to stop.
+- **Fan** shows the cards as a hand; **Spread** lays them out in rows.
+- The cards only show your sheet: spending a slot on the sheet tips the card,
+  and the other way round. **Card effects** in Settings turns the movement
+  off.
+
 ## On the map
 
 You see the map the GM shares, through your token's eyes: walls block your
