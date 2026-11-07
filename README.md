@@ -19,6 +19,8 @@ of use, and a built-in AI agent that can do anything the GM can.
 | **The GM's table.** *The Empty Watchtower*'s crypt in torchlight, with the party, the Warden and his Bone Sentinels. | **Combat.** Initiative, Defense and Health, each creature's attacks ready to roll, with the rolls in chat. |
 | ![What a player sees](docs/screenshots/player-crypt.jpg) | ![A Descending Darkness character sheet](docs/screenshots/sheet-descending.jpg) |
 | **A player's view, in Chrome.** Only what their character can see: walls block sight, and the dark hides what the light does not reach. | **Character sheets.** A Descending Darkness cleric, with Defense, Health and the Dread track. Every new character gets a portrait for its kin and class, or Origin and Path. |
+| ![Ability cards: the GM's window, with a cleric's spells and one card turned over](docs/screenshots/cards-gm.jpg) | ![Ability cards: a player's hand, in Chrome](docs/screenshots/cards-player.jpg) |
+| **Ability cards.** Turn them on in Settings and a character's spells and weapons become cards with painted pictures. Click one to turn it over and cast; drag it onto a token to target and cast in one move. | **A player's hand.** Spent cards tip over and go grey; a long rest stands them up again. |
 | ![Apeira Astra: the derelict's deck and a threat's record](docs/screenshots/gm-kestrel.jpg) | ![An Apeira Astra crew sheet](docs/screenshots/sheet-astra.jpg) |
 | **Apeira Astra.** *Salvage Rights*: boarding the *Kestrel's Due*, with Mags Orrin's record from the Threat Dossier. | **A crew member.** 2d6 tasks with Difficulty and Boon or Bane, Stamina and Armour. |
 | ![Books](docs/screenshots/books.jpg) | ![Start screen scenes](docs/screenshots/start-station.jpg) |
