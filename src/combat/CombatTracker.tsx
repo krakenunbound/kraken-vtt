@@ -99,9 +99,10 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
           </span>
         ) : null}
         {entry.hp !== undefined ? (
-          <span className="ct-stat ct-hp" title={`${entry.health.status}: ${(entry.hp ?? 0) - (entry.wounds ?? 0)} of ${entry.hp}`} style={{ color: entry.health.color }}>
+          <span className="ct-stat ct-hp" title={`${entry.health.status}: ${(entry.hp ?? 0) - (entry.wounds ?? 0)} of ${entry.hp}${entry.temp ? `, ${entry.temp} temporary` : ""}`} style={{ color: entry.health.color }}>
             <Icon name="heart" size={14} />
             {(entry.hp ?? 0) - (entry.wounds ?? 0)}/{entry.hp}
+            {entry.temp ? <span className="ct-temp"> (+{entry.temp})</span> : null}
           </span>
         ) : (
           <span className="ct-status" style={{ borderColor: entry.health.color, color: entry.health.color }}>

@@ -19,6 +19,39 @@ const { fitsRuleset } = require("./books.cjs");
 
 const MAX_CLIENTS = 16;
 
+
+// What a player may do with raw record changes (the GM and the agent may do
+// anything). Rules records change only through their sheet's own edits, which
+// allow a list of fields and work every number out again: a player's raw
+// change to a character may set its pictures, dice, spent slots and its
+// words (notes, appearance...), never a number the rules read, and a new
+// character starts blank. Notes are the player's own.
+const PLAYER_CHARACTER_PATHS = [/^portrait$/, /^token$/, /^dice(\..+)?$/, /^slots\.[^.]+\.used$/, /^(notes|appearance|playername|gender|age|height|weight|alignment|personality|ideals|bonds|flaws|backstory)$/];
+function leafPaths(value, prefix = "") {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return [prefix];
+  const keys = Object.keys(value);
+  if (keys.length === 0) return [prefix];
+  return keys.flatMap((key) => leafPaths(value[key], prefix ? `${prefix}.${key}` : key));
+}
+function playerOp(msg, records) {
+  if (msg.op === "create") {
+    const type = String(msg.input?.type ?? "");
+    if (type === "note") return;
+    if (type !== "character") throw new Error("Players can make notes and characters only.");
+    const attributes = Object.fromEntries(["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"].map((stat) => [stat, { score: 10, prime: 0 }]));
+    msg.input = { type: "character", name: msg.input?.name, visibility: msg.input?.visibility === "all" ? "all" : "owner", data: { attributes, level: 0, hp: { total: 0, wounds: 0 } } };
+    return;
+  }
+  if (msg.op !== "update") return;
+  const before = records.get(String(msg.id ?? ""));
+  if (!before || before.type === "note") return;
+  if (msg.replace === true) throw new Error("Change your character on its sheet.");
+  if (before.type !== "character") return;
+  const data = msg.patch?.data;
+  const paths = data === undefined ? [] : leafPaths(data);
+  if (paths.some((path) => !PLAYER_CHARACTER_PATHS.some((pattern) => pattern.test(path)))) throw new Error("Change your character on its sheet.");
+}
+
 function eachAddress() {
   const v4 = [];
   const v6 = [];
@@ -1501,6 +1534,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       if (msg.type === "op") {
         const seat = seatOf(client);
         try {
+          if (seat?.role !== "dm") playerOp(msg, records);
           let record;
           if (msg.op === "create") record = records.create(msg.input, seat);
           else if (msg.op === "update") record = records.update(msg.id, msg.patch, seat, { replace: msg.replace === true });
@@ -1718,7 +1752,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
               const entry = combat.entries().find((item) => item.id === msg.id);
               if (!entry) throw new Error("No one like that is in the fight.");
               if (client.role !== "dm" && !combat.viewFor(seat).entries.find((item) => item.id === entry.id)?.mine) throw new Error("You can roll saves for your own character.");
-              return combat.save(entry.id, String(msg.attribute), msg.cl, client.role === "dm" ? entry.name : client.name);
+              return combat.save(entry.id, String(msg.attribute), msg.cl, client.role === "dm" ? entry.name : client.name, undefined, String(msg.advantage ?? ""));
             }
             case "cast":
               return combat.cast(msg.recordId ? { recordId: String(msg.recordId) } : { entryId: String(msg.id) }, String(msg.power), msg.action ? String(msg.action) : "", seat, client.role === "dm" ? "Combat" : client.name);

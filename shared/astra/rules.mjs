@@ -130,7 +130,10 @@ export function derive(input) {
     }
   }
   data.ac = { total: protection + num(input.ac?.misc, 0), armor: wearing, misc: num(input.ac?.misc, 0) };
-  data.initiative = { misc: num(input.initiative?.misc, 0), total: data.characteristics.reflex.dm + num(data.skills.tactics?.level, 0) + num(input.initiative?.misc, 0) };
+  // Initiative: 2d6 + Reflex modifier + Tactics (untrained, -3, like any skill you do not have).
+  const tactics = data.skills.tactics?.level;
+  const tacticsBonus = tactics !== undefined && tactics !== null ? num(tactics, 0) : UNTRAINED;
+  data.initiative = { misc: num(input.initiative?.misc, 0), tactics: tacticsBonus, total: data.characteristics.reflex.dm + tacticsBonus + num(input.initiative?.misc, 0) };
   data.attacks = {};
   for (const [key, item] of rows(data.inventorylist)) {
     if (!isWeapon(item) || num(item.carried, 1) === 0) continue;
