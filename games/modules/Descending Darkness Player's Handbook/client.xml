@@ -1663,6 +1663,7 @@
 				<ritual type="number">0</ritual>
 				<source type="string">Cleric, Wizard, Bard</source>
 				<description type="formattedtext"><p>A small object you touch sheds bright light 20 feet and dim light 20 feet beyond, for an hour or until you kindle another. The light is cold; it burns nothing and no wind puts it out. In the Darkness, it is the first spell every apprentice learns and the last one they forget.</p></description>
+				<picture type="string">images/spells/kindle.webp@Descending Darkness Player's Handbook</picture>
 			</kindle>
 			<sparklash>
 				<name type="string">Spark Lash</name>
