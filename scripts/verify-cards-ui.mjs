@@ -57,7 +57,7 @@ try {
   await page.waitForSelector("text=Hosting");
   const listed = await tool("kraken_books", { action: "list" });
   for (const book of (Array.isArray(listed) ? listed : listed.books ?? []).filter((item) => /Descending Darkness (Player's Handbook|Bestiary)/.test(item.title))) await tool("kraken_books", { action: "activate", book: book.id });
-  const wizard = await tool("kraken_build_character", { owner: "A test player", spec: { name: "Ilse", species: "Human", class: "Wizard", level: 1, scores: { strength: 8, dexterity: 14, constitution: 13, intelligence: 17, wisdom: 12, charisma: 10 }, spells: ["Spark Lash", "Burning Fan", "Ember Ray", "Iron Will"], gear: [["Dagger", 1]] } });
+  const wizard = await tool("kraken_build_character", { owner: "A test player", spec: { name: "Ilse", species: "Human", class: "Wizard", level: 1, scores: { strength: 8, dexterity: 14, constitution: 13, intelligence: 17, wisdom: 12, charisma: 10 }, spells: ["Kindle", "Spark Lash", "Burning Fan", "Ember Ray", "Iron Will"], gear: [["Dagger", 1]] } });
   const slots = async () => (await tool("kraken_record_get", { id: wizard.id })).data?.slots?.l1?.used ?? (await tool("kraken_record_get", { id: wizard.id })).record?.data?.slots?.l1?.used;
 
   browser = await chromium.launch({ executablePath: CHROME, headless: true });
@@ -79,6 +79,8 @@ try {
   const ids = await seat.$$eval(".kcard", (cards) => cards.map((card) => card.getAttribute("data-card")));
   assert(["spell:spark-lash", "spell:burning-fan", "spell:ember-ray", "spell:iron-will"].every((id) => ids.includes(id)) && ids.some((id) => id.startsWith("weapon:")), `the wizard's spells and dagger as cards: ${ids.join(", ")}`);
   assert((await seat.getAttribute('[data-card="spell:ember-ray"]', "data-spent")) === "yes", "a 2nd-level spell with no 2nd-level slot is spent");
+  // A spell with its picture shows it (Kindle's, from the handbook).
+  await seat.waitForFunction(() => { const img = document.querySelector('[data-card="spell:kindle"] .kcard-art img'); return img && img.complete && img.naturalWidth > 0; }, null, { timeout: 8000 });
   await seat.locator('[data-launch="settings"]').click();
   await seat.screenshot({ path: shot("hand") });
 
