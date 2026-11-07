@@ -4,6 +4,38 @@ What changed in each release of Kraken VTT. Downloads are on the
 [Releases](https://github.com/krakenunbound/kraken-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
+## 0.1.0-alpha.59: bug fixes
+
+Four findings from a review of alpha.58, each fixed and checked in
+`npm run audit` (D&D 5E and Descending Darkness).
+
+- **The fallen cannot act.** A creature that is Dying, Unconscious or Dead, or
+  Paralyzed, Stunned, Petrified or Incapacitated by an effect (Slumber, Hold
+  Foe), cannot attack, roll an attack's damage or cast. A dying character
+  still gets their turn, for their death save.
+- **Damage dice from effects count.** An effect's `DMG: 1d6` (or
+  `DMG: 2d6 radiant`) adds its dice to the attacker's damage, doubled on a
+  critical hit. Silver Brand and Iron Will go on the caster.
+- **Hunter's Quarry works.** It goes on the ranger, aimed at the targeted
+  creature (the tracker shows `Quarry; DMG: 1d6 [-> Bone Sentinel 1]`), and
+  adds its 1d6 only to hits on that creature. It needs a target before a slot
+  is spent.
+- **A critical hit on a dying character is two failed death saves**, as in
+  Fantasy Grounds, from a weapon or a spell.
+- **Attacks on the helpless have advantage.** Against a creature that is
+  Dying, Unconscious, Paralyzed, Stunned or Petrified, weapon and spell attacks
+  roll two d20s and keep the higher, marked `[ADVANTAGE]`. A melee hit on an
+  Unconscious or Paralyzed creature is a critical hit, marked
+  `[CONVERTED TO CRIT]`. (Fantasy Grounds converts only within 5 feet; Kraken
+  converts every melee hit.)
+
+Not changed: damage that temporary hit points absorb completely does not
+count as a failed death save, as in Fantasy Grounds.
+
+Campaigns made before this version keep their copy of Hunter's Quarry, Silver
+Brand and Iron Will. To get the new ones, make the Descending Darkness
+Player's Handbook inactive and then active again in the Books window.
+
 ## 0.1.0-alpha.58: bug fixes
 
 The eleven findings of the alpha.56 source audit ([bugslist.md](bugslist.md)),
