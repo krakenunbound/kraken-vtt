@@ -2,7 +2,23 @@
 // of 10th level casts no higher yet). Each names who casts it (source), and
 // carries the actions Kraken's tracker plays (shared/dnd5e: cast, attack,
 // damage with dice that scale, a save for half, healing, an effect).
-import { ids, md } from "../lib/fg.mjs";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { artKey, ids, md } from "../lib/fg.mjs";
+
+// Each spell's card picture (art/spells/<key>.webp) and its moving loop
+// (<key>.webm), when made (games/tools/make_art.py); a spell without them is a
+// card with its school's frame.
+const SPELL_ART = path.join(path.dirname(fileURLToPath(import.meta.url)), "art", "spells");
+const HANDBOOK = "Descending Darkness Player's Handbook";
+const cardArt = (name) => {
+  const key = artKey(name);
+  return {
+    ...(fs.existsSync(path.join(SPELL_ART, `${key}.webp`)) ? { picture: `images/spells/${key}.webp@${HANDBOOK}` } : {}),
+    ...(fs.existsSync(path.join(SPELL_ART, `${key}.webm`)) ? { card: `images/spells/${key}.webm@${HANDBOOK}` } : {}),
+  };
+};
 
 const actions = (...list) => ids(list);
 const cast = (extra = {}) => ({ type: "cast", targeting: "targets", targetingval: 1, ...extra });
@@ -26,6 +42,7 @@ const spell = ({ name, level, school, time = "Action", range, components = "V, S
   source,
   description: md(text),
   ...(act ? { actions: act } : {}),
+  ...cardArt(name),
   __category: level === 0 ? "Cantrips" : `Circle ${level}`,
 });
 
@@ -71,3 +88,13 @@ export const SPELLS = [
   spell({ name: "Unweave", level: 3, school: "Abjuration", time: "Reaction, when a creature you can see casts a spell", range: "60 feet", source: "Wizard, Bard", text: "You pull the threads of a spell apart as it is cast. A spell of the third circle or lower fails; a higher one fails if you succeed on an ability check with your spellcasting ability (DC 10 + its circle)." }),
   spell({ name: "Wardens of Light", level: 3, school: "Conjuration", range: "Self (15-foot radius)", duration: "Concentration, up to 10 minutes", source: "Cleric", text: "Shining spirits circle you. A foe that starts its turn within 15 feet of you, or enters the area, makes a Wisdom save: 3d8 radiant damage, half on a success. The area is bright light.", act: actions(cast(), save("wisdom", true), damage("3d8", "radiant", "1d8")) }),
 ];
+
+// The card pictures to pack into the handbook: { "images/spells/x.webp": source }.
+export const SPELL_PICTURES = Object.fromEntries(
+  SPELLS.flatMap((spell) =>
+    ["webp", "webm"]
+      .map((ext) => `${artKey(spell.name)}.${ext}`)
+      .filter((file) => fs.existsSync(path.join(SPELL_ART, file)))
+      .map((file) => [`images/spells/${file}`, path.join(SPELL_ART, file)]),
+  ),
+);

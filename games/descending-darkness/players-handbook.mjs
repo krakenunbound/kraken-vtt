@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 import { md } from "../lib/fg.mjs";
 import { BACKGROUNDS, CLASSES, KIN } from "./classes.mjs";
 import { ARMOUR, GEAR, WEAPONS } from "./gear.mjs";
-import { SPELLS } from "./spells.mjs";
+import { SPELL_PICTURES, SPELLS } from "./spells.mjs";
 
 export const RULESET = "Descending Darkness";
 const plain = (html) => String(html?.__rich ?? html ?? "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
@@ -43,6 +43,7 @@ export const PLAYERS_HANDBOOK = {
   author: "Kraken VTT",
   playersBook: true,
   thumbnail: path.join(path.dirname(fileURLToPath(import.meta.url)), "art", "cover-handbook.webp"),
+  pictures: SPELL_PICTURES,
   players: {
     class: CLASSES,
     race: KIN,

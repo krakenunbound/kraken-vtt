@@ -442,7 +442,7 @@ function convertXml(text) {
 const raw = new Map(); // module file -> { bytes, size, mtime }
 const pictures = new Map(); // module file|picture -> bytes
 let pictureBytes = 0;
-const PICTURE_TYPES = { ".png": "image/png", ".webp": "image/webp", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".gif": "image/gif" };
+const PICTURE_TYPES = { ".png": "image/png", ".webp": "image/webp", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".gif": "image/gif", ".webm": "video/webm" };
 function modulePicture(reference, ownModule) {
   const [inner, other] = String(reference ?? "").split("@");
   const moduleName = (other || ownModule || "").trim();

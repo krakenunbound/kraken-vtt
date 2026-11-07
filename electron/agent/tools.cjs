@@ -484,6 +484,55 @@ const TOOLS = [
     },
   },
   {
+    name: "kraken_cards",
+    description:
+      "Ability cards (the Cards window, a player's option in Settings): a character's spells and weapons as cards. list: the cards, each { id, kind spell|weapon, name, level, school, spent (no slot of its level or higher left), slot (the slot a cast would use), pool (that level's slots), concentration, concentrating }. use: a card as its Cast or Attack button does (targetId: make that tracker entry the character's only target first, as dropping the card on its token). damage: a weapon card's Damage. rest: a long rest from the window (every slot back, concentration ends). end-concentration: stop concentrating. Open the window with kraken_windows window cards.",
+    inputSchema: object(
+      {
+        action: { type: "string", enum: ["list", "use", "damage", "rest", "end-concentration"] },
+        id: string("The character's record id, or its name"),
+        card: string("use / damage: the card's id from list (spell:<name> or weapon:<key>)"),
+        targetId: string("use: a combat tracker entry to target first"),
+      },
+      ["action", "id"],
+    ),
+    async run(args, ctx) {
+      const agent = needTable(ctx);
+      const { combat, seat } = agent;
+      const wanted = String(args.id ?? "").toLowerCase();
+      const record = agent.records.get(args.id) ?? agent.records.list({ type: "character" }).find((item) => item.name.toLowerCase() === wanted);
+      if (!record || record.type !== "character") throw new Error(`No character "${args.id}".`);
+      const cards = await import(require("url").pathToFileURL(require("path").join(__dirname, "..", "..", "shared", "cards", "cards.mjs")).href);
+      const list = () => cards.cardsFor(agent.records.get(record.id).data, agent.records.list({ type: "spell" }));
+      const action = args.action;
+      if (action === "list") return out({ character: record.name, cards: list().map(({ text, ...card }) => card) });
+      if (action === "rest") {
+        const changes = cards.restChanges(record.data);
+        if (changes.length) await siegeEdit(agent, record, changes, seat);
+        return out({ rested: record.name, cards: list().map(({ id, spent }) => ({ id, spent })) });
+      }
+      if (action === "end-concentration") {
+        await siegeEdit(agent, record, [{ path: "concentration", value: "" }], seat);
+        return out({ concentration: "" });
+      }
+      const card = list().find((item) => item.id === args.card);
+      if (!card) throw new Error(`No card "${args.card ?? ""}". Cards: ${list().map((item) => item.id).join(", ")}`);
+      if (action === "damage") {
+        if (card.kind !== "weapon") throw new Error("Damage is a weapon card's.");
+        return out({ damage: await combat.damageRoll({ recordId: record.id }, card.weapon, seat, "Agent") });
+      }
+      if (card.spent) throw new Error(`${record.name} has no slot of level ${card.level} or higher left for ${card.name}.`);
+      if (args.targetId) {
+        const entry = combat.entries().find((item) => item.recordId === record.id);
+        if (!entry) throw new Error(`${record.name} is not on the combat tracker.`);
+        combat.clearTargets(entry.id, seat);
+        combat.target(entry.id, args.targetId, true, seat);
+      }
+      const result = card.kind === "spell" ? await combat.cast({ recordId: record.id }, card.name, "", seat, "Agent") : await combat.attack({ recordId: record.id }, card.weapon, seat, "Agent");
+      return out({ used: card.id, result, cards: list().map(({ id, spent, concentrating }) => ({ id, spent, concentrating })) });
+    },
+  },
+  {
     name: "kraken_class_change",
     description:
       "Change a character's classes at a level up (the Adventurer's Backpack, as FG's level-up wizard). mode dual: keep the class and add another at 1st level (the combination table must allow it, and the character must already have one of its primes); from then on experience is split between the classes and only the original class gains hit points (on the Multi-Class Hit Die). mode reclass: abandon the class for another (no table or prime needed; primes swap); the old class loses a level (two when leaving a cleric, druid or paladin for a class serving no deity) and that level's hit points; the new class starts at 1st with fixed hit points (the Reclass Hit Point Modification) until it passes the old one. Only for a character with one class.",
@@ -1384,10 +1433,10 @@ const TOOLS = [
   {
     name: "kraken_windows",
     description:
-      "The GM's windows: list them, or open, close, pop out (to a window of its own, for another monitor) or dock back a window. Kinds: map (the open map in its own window, as FG's image window, with its tools and settings; it opens by itself when a map opens and never pops out), assistant (the GM's DM assistant chat), characters, party, combat, players, settings, decals (the background decal picker), wallpapers (the desktop wallpaper picker), gmicons (the GM icon picker), krits (critical hits and fumbles), dice (this seat's dice: sets, colours, design, material, effects), sound (one-shots, effects, ambience, music, chat triggers, volumes), sheet (a character's sheet: give record, its id or name), charselect (Character Selection), records (FG's campaign lists: NPCs, items, spells, classes...; the GM shares one with kraken_record_update visibility all, hides it with gm), record (one record: give record, its id or name).",
+      "The GM's windows: list them, or open, close, pop out (to a window of its own, for another monitor) or dock back a window. Kinds: map (the open map in its own window, as FG's image window, with its tools and settings; it opens by itself when a map opens and never pops out), assistant (the GM's DM assistant chat), characters, party, combat, players, settings, decals (the background decal picker), wallpapers (the desktop wallpaper picker), gmicons (the GM icon picker), krits (critical hits and fumbles), dice (this seat's dice: sets, colours, design, material, effects), sound (one-shots, effects, ambience, music, chat triggers, volumes), sheet (a character's sheet: give record, its id or name), charselect (Character Selection), records (FG's campaign lists: NPCs, items, spells, classes...; the GM shares one with kraken_record_update visibility all, hides it with gm), record (one record: give record, its id or name). cards (the ability cards, when this seat turned them on in Settings).",
     inputSchema: object({
       action: { type: "string", enum: ["list", "open", "close", "popout", "dock"] },
-      kind: { type: "string", enum: ["assistant", "characters", "party", "combat", "players", "settings", "decals", "wallpapers", "gmicons", "krits", "library", "dice", "sound", "sheet", "books", "book", "images", "picture", "notes", "note", "charselect", "records", "record", "adventure", "story", "map"] },
+      kind: { type: "string", enum: ["assistant", "characters", "party", "combat", "players", "settings", "decals", "wallpapers", "gmicons", "krits", "library", "dice", "sound", "sheet", "books", "book", "images", "picture", "notes", "note", "charselect", "records", "record", "adventure", "story", "map", "cards"] },
       record: string("For a sheet: the character's record id or name; for a record: its id or name"),
     }),
     run: async (args, ctx) => out(await ctx.ui({ kind: "windows", action: args.action ?? "list", window: args.kind, record: args.record })),

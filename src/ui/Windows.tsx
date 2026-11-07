@@ -8,7 +8,7 @@ import { openPopOut, PopOutWindow, screenOffset, type ScreenPlace } from "./PopO
 // the edge of the main window, or sent out with its pop-out button, becomes a
 // window of its own that can go on another monitor.
 
-export type WindowKind = "assistant" | "characters" | "party" | "combat" | "players" | "sheet" | "settings" | "decals" | "wallpapers" | "gmicons" | "krits" | "library" | "dice" | "sound" | "books" | "book" | "images" | "picture" | "notes" | "note" | "charselect" | "records" | "record" | "adventure" | "story" | "map";
+export type WindowKind = "assistant" | "characters" | "party" | "combat" | "players" | "sheet" | "settings" | "decals" | "wallpapers" | "gmicons" | "krits" | "library" | "dice" | "sound" | "books" | "book" | "images" | "picture" | "notes" | "note" | "charselect" | "records" | "record" | "adventure" | "story" | "map" | "cards";
 type Placement = { x: number; y: number; w: number; h: number; out?: ScreenPlace | null };
 export type OpenWindow = { key: string; kind: WindowKind; title: string; payload?: string; z: number; popped: boolean } & Placement;
 
@@ -38,6 +38,8 @@ const DEFAULTS: Record<WindowKind, Placement> = {
   picture: { x: 560, y: 70, w: 720, h: 600 },
   notes: { x: 260, y: 80, w: 420, h: 480 },
   note: { x: 700, y: 70, w: 420, h: 620 },
+  // Ability cards: wide and low, a hand along the bottom of the table.
+  cards: { x: 240, y: 250, w: 1000, h: 560 },
   // The map (FG's image window): as big as the desktop leaves room for.
   map: { x: 12, y: 52, w: 1600, h: 1100 },
 };

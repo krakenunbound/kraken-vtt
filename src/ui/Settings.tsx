@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState, type DragEvent } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore, type DragEvent } from "react";
+import { cardsStore } from "../cards/cardsStore";
 import type { DecalItem, PictureKind, Session } from "../session/useSession";
 import { Emblem } from "./Emblem";
 import { useWindows } from "./Windows";
@@ -31,6 +32,7 @@ export function SettingsWindow({ session }: { session: Session }) {
           </>
         ) : null}
       </div>
+      <CardsSetting />
       {gm ? <label className="settings-check">
         <input type="checkbox" checked={session.options.towerReveal} onChange={(event) => session.setTableOptions({ towerReveal: event.target.checked })} />
         Let players see their own dice-tower rolls (unticked: only the GM sees them, as in FG)
@@ -46,6 +48,25 @@ export function SettingsWindow({ session }: { session: Session }) {
         </label>
       ) : null}
     </div>
+  );
+}
+
+// Ability cards: off unless this player wants them (kept in this browser).
+function CardsSetting() {
+  const cards = useSyncExternalStore(cardsStore.subscribe, cardsStore.settings);
+  return (
+    <>
+      <label className="settings-check">
+        <input type="checkbox" data-setting="cards" checked={cards.on} onChange={(event) => cardsStore.set({ on: event.target.checked })} />
+        Ability cards: my spells and weapons as cards (a Cards button in the sidebar)
+      </label>
+      {cards.on ? (
+        <label className="settings-check">
+          <input type="checkbox" data-setting="card-effects" checked={cards.effects} onChange={(event) => cardsStore.set({ effects: event.target.checked })} />
+          Card effects (flips, foil, sparks)
+        </label>
+      ) : null}
+    </>
   );
 }
 

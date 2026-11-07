@@ -22,6 +22,8 @@ import { Icon } from "./icons";
 import { sound } from "../sound/soundEngine";
 import { FloatingWindow, useWindows } from "./Windows";
 import { AssistantWindow } from "./AssistantWindow";
+import { CardsWindow } from "../cards/CardsWindow";
+import { cardsStore } from "../cards/cardsStore";
 import { entryId, Sidebar, type SidebarEntry, type SidebarGroup } from "./Sidebar";
 
 // The 3D dice (three.js and cannon) load when the table first shows them.
@@ -235,6 +237,7 @@ export function Desktop({
       characters.length === 0
       ? { kind: "charselect", label: "Characters", icon: "character", title: "Character Selection", launch: "characters", openOnly: true }
       : { kind: "characters", label: characters.length === 1 ? "Character" : "Characters", icon: "character", title: characters.length === 1 ? characters[0].name : "My characters" };
+  const cardsOn = useSyncExternalStore(cardsStore.subscribe, cardsStore.settings).on;
   const groups: SidebarGroup[] = [
     {
       id: "library",
@@ -251,6 +254,8 @@ export function Desktop({
       entries: [
         charactersEntry,
         ...(hasPackages ? [listEntry("siegepackage", "Packages", "package")] : []),
+        // Ability cards, for whoever turned them on in Settings (this browser's choice).
+        ...(cardsOn ? [{ kind: "cards" as const, label: "Cards", icon: "wand", title: "Cards" }] : []),
         { kind: "party", label: "Party", icon: "party", title: "Party Sheet" },
         { kind: "notes", label: gm ? "Notes" : "Player Notes", icon: "chat", title: gm ? "Notes" : "Player Notes" },
       ],
@@ -317,7 +322,7 @@ export function Desktop({
         if (command.kind !== "windows") return null;
         const { windows: manager, launchers: kinds, characters: sheets } = live.current;
         const list = () => manager.windows.map((item) => ({ key: item.key, kind: item.kind, title: item.title, poppedOut: item.popped }));
-        if (command.action === "list") return { open: list(), kinds: [...kinds.map((item) => entryId(item)), "sheet", "book", "images", "picture", "note", "decals", "wallpapers", "gmicons", "krits", "dice", "charselect"] };
+        if (command.action === "list") return { open: list(), kinds: [...kinds.map((item) => entryId(item)), "sheet", "book", "images", "picture", "note", "decals", "wallpapers", "gmicons", "krits", "dice", "charselect", "cards"] };
         let key: string = command.window ?? "";
         if (command.window === "note") {
           const id = String(command.record ?? "");
@@ -362,6 +367,8 @@ export function Desktop({
                     ? { kind: "charselect" as const, title: "Character Selection" }
                   : command.window === "krits"
                     ? { kind: "krits" as const, title: "Critical Hits & Fumbles" }
+                  : command.window === "cards"
+                    ? { kind: "cards" as const, title: "Cards" }
                   : kinds.find((item) => entryId(item) === command.window || (item.kind === command.window && !item.payload)) ?? kinds.find((item) => item.kind === command.window);
           if (!launcher) throw new Error(`No window "${command.window ?? ""}". Kinds: ${kinds.map((item) => entryId(item)).join(", ")}, sheet.`);
           if (command.action === "open") manager.open(launcher.kind, launcher.title, "payload" in launcher ? launcher.payload : undefined);
@@ -469,6 +476,7 @@ export function Desktop({
               {item.kind === "charselect" ? <CharacterSelect session={session} onSheet={(id, name) => windows.open("sheet", name, id)} onWizard={() => windows.open("characters", "Character Wizard", "new")} onClose={() => windows.close(item.key)} /> : null}
               {item.kind === "sheet" ? <CharacterPanel session={session} dock selected={item.payload ?? null} /> : null}
               {item.kind === "party" ? <PartySheet session={session} /> : null}
+              {item.kind === "cards" ? <CardsWindow session={session} characterId={item.payload} /> : null}
               {item.kind === "combat" ? <CombatTracker session={session} /> : null}
               {item.kind === "players" ? <PlayersWindow session={session} /> : null}
               {item.kind === "settings" ? <SettingsWindow session={session} /> : null}

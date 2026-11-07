@@ -801,6 +801,8 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       slotLevel = free[0];
       table().records.update(caster.id, { data: { slots: { [`l${slotLevel}`]: { used: num(free[1].used, 0) + 1 } } } }, table().seat);
     }
+    // A concentration spell: the caster holds it (one at a time; the new one ends the last).
+    if (isCharacter && /concentration/i.test(String(spell.data?.duration ?? ""))) table().records.update(caster.id, { data: { concentration: spell.name } }, table().seat);
     const castStat = isCharacter ? data.spellcasting?.stat : null;
     const castMod = isCharacter ? num(data.abilities?.[castStat]?.bonus, 0) : 0;
     const dc = isCharacter ? num(data.spellcasting?.dc, 10) : Number(/spell save DC (\d+)/i.exec(JSON.stringify(data))?.[1] ?? 12);

@@ -886,7 +886,7 @@ export function useSession() {
   const artUrl = useCallback((id: string) => (id && assetRef.current ? `${originRef.current}/art/file?token=${assetRef.current}&id=${encodeURIComponent(id)}` : ""), []);
   // A creature's picture from its module (NPCs), served by the host.
   const recordArtUrl = useCallback(
-    (recordId: string, kind: "token" | "portrait" = "token") =>
+    (recordId: string, kind: "token" | "portrait" | "card" = "token") =>
       assetRef.current ? `${originRef.current}/table/record-art?token=${assetRef.current}&record=${encodeURIComponent(recordId)}&kind=${kind}` : "",
     [],
   );

@@ -1208,7 +1208,7 @@ function MapViewInner({
           event.stopPropagation();
           return;
         }
-        if (["application/x-kraken-record", "application/x-kraken-ct", "application/x-kraken-damage"].some((type) => [...event.dataTransfer.types].includes(type))) {
+        if (["application/x-kraken-record", "application/x-kraken-ct", "application/x-kraken-damage", "application/x-kraken-card"].some((type) => [...event.dataTransfer.types].includes(type))) {
           event.preventDefault();
           event.stopPropagation();
         }
@@ -1242,6 +1242,31 @@ function MapViewInner({
             else setHint(hit ? `${hit.name} is not on the combat tracker.` : "Drop it on a creature's token.");
           } catch {
             /* not a roll */
+          }
+          return;
+        }
+        // An ability card dropped on a creature's token: that creature becomes the
+        // only target, then the spell is cast or the weapon attacks (as FG's drag of a power onto a token).
+        const card = event.dataTransfer.getData("application/x-kraken-card");
+        if (card) {
+          event.preventDefault();
+          event.stopPropagation();
+          const at = worldAt(event.clientX, event.clientY);
+          const hit = at ? tokens.find((token) => Math.abs(at.x - token.x) <= (token.squares * size) / 2 && Math.abs(at.y - token.y) <= (token.squares * size) / 2) : null;
+          const target = hit ? actions.combat?.entries.find((item) => item.tokenId === hit.id || (hit.recordId && item.recordId === hit.recordId)) : null;
+          try {
+            const used = JSON.parse(card) as { recordId: string; entryId: string; kind: string; name: string; weapon: string; id?: string };
+            if (!used.entryId) setHint("Your character is not in the fight: add them to the combat tracker first.");
+            else if (!target) setHint(hit ? `${hit.name} is not on the combat tracker.` : "Drop the card on a creature's token.");
+            else {
+              actions.ct("clear-targets", { id: used.entryId });
+              actions.ct("target", { sourceId: used.entryId, targetId: target.id, on: true });
+              if (used.kind === "spell") actions.ct("cast", { recordId: used.recordId, power: used.name });
+              else actions.ct("attack", { recordId: used.recordId, weapon: used.weapon });
+              window.dispatchEvent(new CustomEvent("kraken-card-used", { detail: used.id ?? "" }));
+            }
+          } catch {
+            /* not a card */
           }
           return;
         }
