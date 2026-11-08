@@ -4,7 +4,7 @@ What changed in each release of Kraken VTT. Downloads are on the
 [Releases](https://github.com/krakenunbound/kraken-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
-## Next: the alpha.60 audit's fixes
+## 0.1.0-alpha.61: the alpha.60 audit's fixes
 
 A blind audit of the whole app (the table server, combat, maps and saving)
 found these; each is fixed and checked (`scripts/check-security-fixes.mjs`,
