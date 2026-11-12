@@ -23,6 +23,7 @@ for (const book of shelf.list().filter((item) => !wanted || item.title.toLowerCa
     contents = shelf.contents(book.id);
   } catch (error) {
     rows.push({ title: book.title, error: error.message });
+    report({ title: book.title, error: error.message });
     continue;
   }
   const pages = contents.chapters.flatMap((chapter) => chapter.sections.flatMap((section) => section.pages));
@@ -63,11 +64,12 @@ for (const book of shelf.list().filter((item) => !wanted || item.title.toLowerCa
   totals.missingPictures += row.missingPictures;
   totals.leaked += row.leaked;
   rows.push(row);
+  report(row);
 }
-for (const row of rows) {
+function report(row) {
   if (row.error) {
     console.log(`! ${row.title}: ${row.error}`);
-    continue;
+    return;
   }
   const dead = Object.entries(row.dead).map(([kind, count]) => `${kind} ${count}`).join(", ");
   console.log(`${row.title} [${row.ruleset}]: ${row.pages} pages, ${row.pictures} pictures${row.missingPictures ? ` (${row.missingPictures} missing)` : ""}${row.empty ? `, ${row.empty} empty` : ""}${dead ? `; dead links: ${dead}` : ""}${row.leaked ? `; markup showing ${row.leaked}` : ""}`);

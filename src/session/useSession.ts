@@ -942,7 +942,7 @@ export function useSession() {
     [],
   );
   // Books: a route of the host's (the list, a book's contents, a page), and pictures.
-  const bookFetch = useCallback(async <T,>(route: "list" | "contents" | "page", params: Record<string, string> = {}): Promise<T> => {
+  const bookFetch = useCallback(async <T,>(route: "list" | "contents" | "page" | "record", params: Record<string, string> = {}): Promise<T> => {
     const query = new URLSearchParams({ token: assetRef.current, ...params });
     const response = await fetch(`${originRef.current}/book/${route}?${query}`);
     if (!response.ok) throw new Error(route === "list" ? "No books here." : "That book is not open to you.");

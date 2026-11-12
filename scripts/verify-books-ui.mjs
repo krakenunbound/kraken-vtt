@@ -112,6 +112,11 @@ try {
   await page.waitForFunction(() => document.querySelector(".book-page h2")?.textContent === "The Gate");
   await page.click('[aria-label="Next page"]');
   await page.waitForFunction(() => document.querySelector(".book-page h2")?.textContent === "The Inn");
+  // A link to a creature the book holds opens it in a window (FG's link window); one to nothing is plain text.
+  await page.click('.book-text a.book-link.record[data-record="npc.guard@Test Keep"]');
+  await page.waitForFunction(() => [...document.querySelectorAll('[data-window="bookrecord"] .record-window h3')].some((h) => h.textContent === "Gate Guard"), null, { timeout: 10000 });
+  assert(await page.$('.book-text span.book-link.dead[data-kind="npc"]'), "a link to nothing stays text");
+  await page.click('[data-window="bookrecord"] button[aria-label^="Close"]');
 
   // Sounds in the story, as FG's: the book's own sound link plays Kraken's
   // sound of its kind and name; a sound dropped on it changes it; a sound

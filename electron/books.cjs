@@ -168,6 +168,7 @@ function toHtml(formatted, resolve) {
         const target = resolve(linkClass, recordname);
         if (target?.page) out += `<a class="book-link" data-book="${escape(target.book)}" data-page="${escape(target.page)}">${text}</a>`;
         else if (target?.file) out += `<a class="book-link picture" data-book="${escape(target.book)}" data-file="${escape(target.file)}" data-name="${escape(target.name)}">${text}</a>`;
+        else if (target?.record) out += `<a class="book-link record" data-book="${escape(target.book)}" data-record="${escape(target.record)}" data-kind="${escape(linkClass)}" data-name="${escape(target.name)}">${text}</a>`;
         else out += `<span class="book-link dead" data-kind="${escape(linkClass)}">${text}</span>`;
         continue;
       }
@@ -311,8 +312,24 @@ function createBookShelf({ folder, cache = "", also = [], packsFolder = "" }) {
         const file = bitmapIn(record?.data?.image);
         return file ? { book: other.id, file, name: record.name } : null;
       }
-      return null;
+      // Any other record the book holds (a creature, spell, item, class, encounter, table): opened as FG opens it.
+      const target = other.id === book.info.id ? book : (() => {
+        try {
+          return read(other.id);
+        } catch {
+          return null;
+        }
+      })();
+      const record = target?.records.get(`${inner}@${other.name}`);
+      return record ? { book: other.id, record: record.data.fgPath, name: record.name } : null;
     };
+  }
+  // One record of a book, by its FG path (a link's target): its name, type and fields.
+  function bookRecord(id, fgPath) {
+    const book = read(id);
+    const record = book.records.get(String(fgPath ?? ""));
+    if (!record) return null;
+    return { id: record.data.fgPath, type: record.type, name: record.name, source: book.info.title, data: record.data };
   }
 
   function publicInfo(id) {
@@ -405,6 +422,7 @@ function createBookShelf({ folder, cache = "", also = [], packsFolder = "" }) {
       }
       return { book: book.info.id, id: pageId, name: record.name, blocks };
     },
+    record: bookRecord,
     // A picture from a book (a page's, or one of its maps).
     picture(id, file) {
       const found = info(id);

@@ -3,7 +3,7 @@ import { lazy, Suspense, useEffect, useRef, useState, useSyncExternalStore, type
 import { Picture } from "../characters/ArtPicker";
 import { CharacterPanel } from "../characters/CharacterPanel";
 import { CharacterSelect } from "../characters/CharacterSelect";
-import { listOf, RecordsWindow, RecordWindow, sidebarLists } from "../books/Records";
+import { BookRecordWindow, listOf, RecordsWindow, RecordWindow, sidebarLists } from "../books/Records";
 import { CombatTracker } from "../combat/CombatTracker";
 import { PartySheet } from "../party/PartySheet";
 import { savedSignIn, type Session } from "../session/useSession";
@@ -488,6 +488,7 @@ export function Desktop({
               {item.kind === "adventure" && item.payload && gm ? <AdventureList session={session} kind={item.payload as AdventureKind} onStory={(path, name) => windows.open("story", name, path)} /> : null}
               {item.kind === "story" && item.payload && gm ? <StoryWindow session={session} path={item.payload} /> : null}
               {item.kind === "record" && item.payload ? <RecordWindow session={session} id={item.payload} /> : null}
+              {item.kind === "bookrecord" && item.payload ? <BookRecordWindow session={session} book={item.payload.split("|")[0]} path={item.payload.split("|").slice(1).join("|")} /> : null}
               {item.kind === "charselect" ? <CharacterSelect session={session} onSheet={(id, name) => windows.open("sheet", name, id)} onWizard={() => windows.open("characters", "Character Wizard", "new")} onClose={() => windows.close(item.key)} /> : null}
               {item.kind === "sheet" ? <CharacterPanel session={session} dock selected={item.payload ?? null} /> : null}
               {item.kind === "party" ? <PartySheet session={session} /> : null}

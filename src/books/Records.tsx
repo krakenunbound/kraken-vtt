@@ -1,8 +1,9 @@
-import { Fragment, useMemo, useState, type ReactNode } from "react";
+import { Fragment, useEffect, useMemo, useState, type ReactNode } from "react";
 import type { Session, TableRecord } from "../session/useSession";
 import { Icon } from "../ui/icons";
 import { slotDrag } from "../ui/QuickSlots";
 import { NpcMgt2 } from "../characters/NpcMgt2";
+import { useBookWindows } from "./Books";
 
 // FG's campaign lists (the sidebar's Campaign and Character groups, each a
 // master index): the records of this campaign and its active books, a list per
@@ -38,6 +39,43 @@ function recordFor(list: string, name: string) {
   const [type, kind] = list.split(":");
   return { type, name, visibility: "gm" as const, data: kind ? { packagetype: kind[0].toUpperCase() + kind.slice(1) } : {} };
 }
+// A record a book's page links to (FG opens it from the book): the campaign's
+// copy when the book is active (its live record), else the book's own.
+export function BookRecordWindow({ session, book, path }: { session: Session; book: string; path: string }) {
+  const live = Object.values(session.records).find((item) => item.data?.fgPath === path);
+  const [read, setRead] = useState<TableRecord | null>(null);
+  const [problem, setProblem] = useState("");
+  useEffect(() => {
+    if (live) return;
+    let current = true;
+    session
+      .bookFetch<{ id: string; type: string; name: string; source: string; data: Record<string, unknown> }>("record", { book, path })
+      .then((found) => current && setRead({ id: found.id, type: found.type, name: found.name, source: found.source, data: found.data, owner: "", visibility: "gm" } as unknown as TableRecord))
+      .catch((error) => current && setProblem(error instanceof Error ? error.message : String(error)));
+    return () => {
+      current = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [book, path, Boolean(live)]);
+  if (live) return <RecordWindow session={session} id={live.id} />;
+  if (problem) return <p className="hint record-window">{problem}</p>;
+  if (!read) return <p className="hint record-window">Opening…</p>;
+  return <RecordWindow session={session} id={read.id} record={read} book={book} />;
+}
+
+// An FG table (its column labels, die and rows of results), as FG's table window shows it.
+const TABLE_FIELDS = /^(tablerows|labelcol[0-9]+|resultscols|dice|mod|hiderollresults|output|table_positionoffset|description)$/;
+function tableOf(data: Record<string, unknown>) {
+  const rowsIn = data.tablerows;
+  if (!rowsIn || typeof rowsIn !== "object") return null;
+  const columns = Math.max(1, Number(data.resultscols) || 1);
+  const labels = Array.from({ length: columns }, (_, index) => String(data[`labelcol${index + 1}`] ?? (columns === 1 ? "Result" : "")));
+  const rows = Object.values(rowsIn as Record<string, { fromrange?: number; torange?: number; results?: Record<string, { result?: string }> }>)
+    .map((row) => ({ from: Number(row.fromrange) || 0, to: Number(row.torange) || Number(row.fromrange) || 0, results: Object.keys(row.results ?? {}).sort().map((key) => String(row.results?.[key]?.result ?? "")) }))
+    .sort((a, b) => a.from - b.from);
+  return { dice: String(data.dice ?? "").trim(), labels, rows };
+}
+
 export function listOf(record: TableRecord) {
   if (record.type === "siegepackage") {
     const kind = String(record.data.packagetype ?? "").toLowerCase();
@@ -192,7 +230,9 @@ export function RecordsWindow({ session, onOpen, only }: { session: Session; onO
 // FG's formatted text, as elements: only the tags FG's text uses, never raw
 // HTML (a record's text comes from a module or another seat).
 const TAGS: Record<string, string> = { p: "p", b: "b", strong: "b", i: "i", em: "i", u: "u", h: "h4", list: "ul", ul: "ul", ol: "ol", li: "li", table: "table", tr: "tr", td: "td", th: "th", frame: "blockquote", linklist: "ul" };
-function nodes(parent: Node, key = "n"): ReactNode[] {
+// A link in a record's text: followed when the record is a book's (onLink), else shown as its words.
+type OnLink = (linkClass: string, recordname: string, words: string) => void;
+function nodes(parent: Node, key = "n", onLink?: OnLink): ReactNode[] {
   const out: ReactNode[] = [];
   parent.childNodes.forEach((child, index) => {
     const id = `${key}.${index}`;
@@ -200,21 +240,35 @@ function nodes(parent: Node, key = "n"): ReactNode[] {
     if (child.nodeType !== 1) return;
     const tag = (child as Element).tagName.toLowerCase();
     if (tag === "br") return void out.push(<br key={id} />);
-    const inner = nodes(child, id);
-    if (tag === "link") return void out.push(<span key={id} className="record-link">{inner.length ? inner : "Link"}</span>);
+    const inner = nodes(child, id, onLink);
+    if (tag === "link") {
+      const element = child as Element;
+      const words = element.textContent?.trim() || "Link";
+      return void out.push(
+        onLink ? (
+          <a key={id} href="#" className="record-link" onClick={(event) => (event.preventDefault(), onLink(element.getAttribute("class") ?? "", element.getAttribute("recordname") ?? "", words))}>
+            {inner.length ? inner : "Link"}
+          </a>
+        ) : (
+          <span key={id} className="record-link">{inner.length ? inner : "Link"}</span>
+        ),
+      );
+    }
     const html = TAGS[tag];
     if (!html) return void out.push(<Fragment key={id}>{inner}</Fragment>);
-    if (tag === "linklist") return void out.push(<ul key={id}>{inner.map((item, n) => <li key={n}>{item}</li>)}</ul>);
+    // A list of links: one row a link (the spaces between them are not rows).
+    if (tag === "linklist") return void out.push(<ul key={id}>{inner.filter((item) => typeof item !== "string" || item.trim()).map((item, n) => <li key={n}>{item}</li>)}</ul>);
     const Tag = html as "p";
     out.push(tag === "table" ? <table key={id}><tbody>{inner}</tbody></table> : <Tag key={id}>{inner}</Tag>);
   });
   return out;
 }
-export function FormattedText({ text }: { text: string }) {
+export function FormattedText({ text, onLink }: { text: string; onLink?: OnLink }) {
   const content = useMemo(() => {
     const xml = new DOMParser().parseFromString(`<root>${text}</root>`, "application/xml");
     const root = xml.getElementsByTagName("parsererror").length ? new DOMParser().parseFromString(text, "text/html").body : xml.documentElement;
-    return nodes(root);
+    return nodes(root, "n", onLink);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [text]);
   return <div className="formatted-text">{content}</div>;
 }
@@ -229,17 +283,29 @@ const STATS = ["strength", "dexterity", "constitution", "intelligence", "wisdom"
 // One record, read only (FG's record window as a player sees it; the GM's
 // with the share button). Its short fields as a table, a creature's abilities
 // in a row, its actions and traits as lists, its text as FG wrote it.
-export function RecordWindow({ session, id }: { session: Session; id: string }) {
-  const record = session.records[id];
+export function RecordWindow({ session, id, record: given, book }: { session: Session; id: string; record?: TableRecord; book?: string }) {
+  const record = given ?? session.records[id];
+  const { openBook, openRecord } = useBookWindows();
+  // A book's record: its links go where the book's own do (a page, or another record of the book).
+  const onLink: OnLink | undefined = book
+    ? (linkClass, recordname, words) => {
+        const [inner, moduleName] = recordname.split("@");
+        if (moduleName && given?.source && moduleName !== given.source && !String(given.id).endsWith(`@${moduleName}`)) return;
+        const page = /^reference\.refmanualdata\.([^.]+)$/.exec(inner);
+        if (page) openBook(book, given?.source ?? "Book", page[1]);
+        else if (!/^image\./.test(inner) && linkClass !== "imagewindow") openRecord(book, `${inner}@${String(given?.id ?? "").split("@").slice(1).join("@")}`, words);
+      }
+    : undefined;
   if (!record) return <p className="hint record-window">This is not shown to you any more.</p>;
-  const gm = session.role === "dm";
+  // A record read from a book (a page's link) is the book's: shown, not shared or edited.
+  const gm = session.role === "dm" && !given;
   const data = record.data ?? {};
   const fields: [string, string][] = [];
   const texts: [string, string][] = [];
   const lists: [string, { name: string; desc: string }[]][] = [];
   for (const [key, value] of Object.entries(data)) {
     // FG's bookkeeping as values: a list it keeps elsewhere (true), an unused number (0).
-    if (HIDDEN.has(key) || value === null || value === undefined || value === "" || value === true || value === 0) continue;
+    if ((data.tablerows && TABLE_FIELDS.test(key)) || HIDDEN.has(key) || value === null || value === undefined || value === "" || value === true || value === 0) continue;
     if (isText(value)) texts.push([key, String(value)]);
     else if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") fields.push([key, String(value === false ? "No" : value)]);
     else if (typeof value === "object") {
@@ -252,6 +318,7 @@ export function RecordWindow({ session, id }: { session: Session; id: string }) 
   const npc = record.type === "npc";
   if (npc && typeof data.text === "string" && data.text.trim()) texts.unshift(["description", data.text]);
   const portrait = npc && (data.picture || data.token) ? session.recordArtUrl(record.id, "portrait") : "";
+  const table = tableOf(data);
   const abilities = data.abilities && typeof data.abilities === "object" ? (data.abilities as Record<string, { score?: number; bonus?: number } | undefined>) : null;
   return (
     <article className="record-window" data-record={record.id}>
@@ -276,6 +343,28 @@ export function RecordWindow({ session, id }: { session: Session; id: string }) 
         ) : null}
       </header>
       {gm && npc && session.ruleset === "Traveller" ? <NpcMgt2 session={session} record={record} /> : null}
+      {table ? (
+        <table className="record-table" data-record-table>
+          <thead>
+            <tr>
+              {table.dice ? <th>{table.dice}</th> : null}
+              {table.labels.map((label, index) => (
+                <th key={index}>{label}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {table.rows.map((row, index) => (
+              <tr key={index}>
+                {table.dice ? <td className="record-table-roll">{row.from === row.to ? row.from : `${row.from}-${row.to}`}</td> : null}
+                {row.results.map((result, column) => (
+                  <td key={column}>{result}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : null}
       {gm && npc && session.ruleset === "Traveller" ? null : abilities && STATS.some((stat) => abilities[stat]) ? (
         <div className="record-abilities">
           {STATS.map((stat) => (
@@ -301,7 +390,7 @@ export function RecordWindow({ session, id }: { session: Session; id: string }) 
           <h4>{labelOf(key)}</h4>
           {rows.map((row, index) => (
             <p key={index}>
-              <b>{row.name}.</b> {isText(row.desc) ? <FormattedText text={row.desc} /> : row.desc}
+              <b>{row.name}.</b> {isText(row.desc) ? <FormattedText text={row.desc} onLink={onLink} /> : row.desc}
             </p>
           ))}
         </section>
@@ -309,7 +398,7 @@ export function RecordWindow({ session, id }: { session: Session; id: string }) 
       {(gm && npc && session.ruleset === "Traveller" ? [] : texts).map(([key, value]) => (
         <section key={key} className="record-text">
           {texts.length > 1 || key !== "description" ? <h4>{labelOf(key)}</h4> : null}
-          <FormattedText text={value} />
+          <FormattedText text={value} onLink={onLink} />
         </section>
       ))}
     </article>

@@ -938,6 +938,17 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         if (url.pathname === "/book/cover") return canRead(client, book) ? picture(books.cover(book)) : nothing();
         if (url.pathname === "/book/picture") return canSeePicture(client, book, url.searchParams.get("file") || "") ? picture(books.picture(book, url.searchParams.get("file") || "")) : nothing();
         if (!canRead(client, book)) return nothing();
+        // A record a page links to (a creature, spell, item...), as FG opens it from the book.
+        if (url.pathname === "/book/record") {
+          const file = books.file?.(book);
+          (file ? prepareModule(file) : Promise.resolve())
+            .then(() => {
+              const found = books.record(book, url.searchParams.get("path") || "");
+              return found ? json(found) : nothing();
+            })
+            .catch(() => nothing());
+          return;
+        }
         if (url.pathname === "/book/contents" || url.pathname === "/book/page") {
           // A book's module converted first, off this thread (once), so the table never waits on it.
           const file = books.file?.(book);

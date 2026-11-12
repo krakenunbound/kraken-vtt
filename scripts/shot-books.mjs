@@ -9,7 +9,10 @@ import path from "node:path";
 import readline from "node:readline";
 import { _electron as electron } from "playwright-core";
 
+// KRAKEN_BOOK: the book (title); KRAKEN_RULESET: its game; KRAKEN_PAGE: a page whose name has this; KRAKEN_LINK: then follow the page's first record link.
 const book = process.env.KRAKEN_BOOK || "B1 In Search of the Unknown (C&C)";
+const ruleset = process.env.KRAKEN_RULESET || "Castles & Crusades";
+const pageName = process.env.KRAKEN_PAGE || "";
 const profile = mkdtempSync(path.join(tmpdir(), "kraken-books-shot-"));
 const env = { ...process.env, KRAKEN_AGENT_FILE: path.join(profile, "agent.json"), KRAKEN_AGENT_PORT: "0" };
 const app = await electron.launch({ args: [".", "--mute-audio", `--user-data-dir=${profile}`], cwd: process.cwd(), env });
@@ -33,21 +36,35 @@ const tool = async (name, args = {}) => JSON.parse((await rpc("tools/call", { na
 const shot = (name) => page.screenshot({ path: path.join(tmpdir(), `kraken-books-${name}.png`) });
 try {
   await rpc("initialize", { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "shot", version: "1" } });
-  const campaign = await tool("kraken_campaign_create", { name: "Books shot", ruleset: "Castles & Crusades" });
+  const campaign = await tool("kraken_campaign_create", { name: "Books shot", ruleset });
   await tool("kraken_host", { campaignId: campaign.id, port: 47396, password: "" });
   await page.waitForSelector("text=Hosting");
   await page.click('.sidebar [data-launch="books"]');
   await page.click('[data-books-tab="activation"]');
   await page.waitForSelector("[data-activate]", { timeout: 60000 });
   await shot("activation");
-  for (const id of [book, "SC C&C Player's Handbook", "SC C&C Monsters & Treasure"]) await page.click(`[data-activate="${id}"]`).catch(() => undefined);
+  const shelf = [].concat(await tool("kraken_books", { action: "list" }));
+  const found = shelf.find((item) => item.title === book || item.name === book);
+  if (!found) throw new Error(`No ${book} on the ${ruleset} shelf: ${shelf.map((item) => item.title).join(" | ")}`);
+  const bookId = found.id;
+  await page.click(`[data-activate="${bookId}"]`).catch(() => undefined);
   await page.click('[data-books-tab="books"]');
   await page.waitForTimeout(800);
   await shot("list");
-  await page.click(`.books-window [data-book="${book}"]`);
+  await page.click(`.books-window [data-book="${bookId}"]`);
   await page.waitForSelector(".book-page h2", { timeout: 60000 });
+  if (pageName) {
+    await page.locator(".book-toc [data-page]", { hasText: pageName }).first().click();
+    await page.waitForFunction((name) => document.querySelector(".book-page h2")?.textContent?.includes(name), pageName, { timeout: 20000 });
+  }
   await page.waitForFunction(() => [...document.querySelectorAll(".book-figure img")].every((img) => img.complete));
   await shot("page");
+  if (process.env.KRAKEN_LINK) {
+    await page.locator(".book-text a.book-link.record").first().click();
+    await page.waitForSelector('[data-window="bookrecord"] .record-window', { timeout: 20000 });
+    await page.waitForTimeout(600);
+    await shot("record");
+  }
   console.log(`saved ${["activation", "list", "page"].map((name) => path.join(tmpdir(), `kraken-books-${name}.png`)).join(", ")}`);
 } finally {
   child.kill();

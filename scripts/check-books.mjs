@@ -37,6 +37,13 @@ assert(gate.blocks[0].kind === "picture" && gate.blocks[0].file === "images/keep
 assert(text.includes("<b>guards</b>") && text.includes('<blockquote class="frame">Halt!'), `formatted text as HTML: ${text}`);
 assert(!/<script/i.test(text) && text.includes("&lt;script&gt;"), "no script gets through; its text is escaped");
 assert(text.includes('data-page="inn"') && text.includes('data-file="images/keep.png"'), "links go to a page and to a picture");
+// A link to a record the book holds opens it (FG's link to a creature, spell, item); one to nothing is dead.
+{
+  const inn = books.page("Test Keep", "inn").blocks.map((block) => block.html ?? "").join("");
+  assert(inn.includes('class="book-link record"') && inn.includes('data-record="npc.guard@Test Keep"') && /book-link dead" data-kind="npc">nobody/.test(inn), `a record link, and a dead one: ${inn}`);
+  const guard = books.record("Test Keep", "npc.guard@Test Keep");
+  assert(guard?.name === "Gate Guard" && guard.type === "npc" && guard.data.hp === 7 && books.record("Test Keep", "npc.nobody@Test Keep") === null, `the record behind the link: ${JSON.stringify(guard)}`);
+}
 
 // Worldbuilding (no rules) takes the books for any game and for games Kraken has no rules for, never another of Kraken's games'.
 {

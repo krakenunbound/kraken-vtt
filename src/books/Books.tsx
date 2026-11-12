@@ -211,6 +211,10 @@ export function useBookWindows() {
       if (page) startAt.set(book, page);
       windows.open("book", title, book);
     },
+    // A record a page links to (a creature, spell, item...), in a window of its own (FG's link window).
+    openRecord(book: string, path: string, name: string) {
+      windows.open("bookrecord", name || "Record", `${book}|${path}`);
+    },
     openPicture(tab: Tab) {
       // Out on its own already: that window comes to the front.
       if (pictures.get().out.has(keyOf(tab))) windows.open("picture", tab.name, keyOf(tab));
@@ -350,7 +354,7 @@ const NO_SOUNDS = { links: {}, blocks: [] };
 
 export function BookWindow({ session, book }: { session: Session; book: string }) {
   const gm = session.role === "dm";
-  const { openBook, openPicture } = useBookWindows();
+  const { openBook, openPicture, openRecord } = useBookWindows();
   const actions = usePictureActions(session);
   const menu = useContextMenu();
   const [contents, setContents] = useState<BookContents | null>(null);
@@ -480,6 +484,7 @@ export function BookWindow({ session, book }: { session: Session; book: string }
       setView("book");
     } else if (target.page && target.book) openBook(target.book, target.book, target.page);
     else if (target.file && target.book) openPicture({ book: target.book, file: target.file, name: target.name || link.textContent || "Picture" });
+    else if (target.record && target.book) openRecord(target.book, target.record, target.name || link.textContent || "Record");
   };
   if (error && !contents) return <p className="hint">{error}</p>;
   if (!contents) return <p className="hint">Opening the book…</p>;

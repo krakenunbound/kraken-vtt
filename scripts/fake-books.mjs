@@ -27,9 +27,10 @@ export function makeBooks() {
           <id-00001><blocktype type="string">image</blocktype><order type="number">1</order><caption type="string">The keep from the road</caption><image type="image"><layers><layer><bitmap>images/keep.png</bitmap></layer></layers></image><imagelink type="windowreference"><class>imagewindow</class><recordname>image.keep@${NAME}</recordname></imagelink></id-00001>
           <id-00002><blocktype type="string">singletext</blocktype><order type="number">2</order><text type="formattedtext"><p>Two <b>guards</b> stand at the gate. &lt;script&gt;alert(1)&lt;/script&gt;</p><frame>Halt! Who goes there?</frame><linklist><link class="sound_context" recordname="">Sound: Context</link><link class="soundplay" recordname="ss|6041|mood||Forest ambience">Sound - Forest ambience</link></linklist><linklist><link class="reference_manualtextwide" recordname="reference.refmanualdata.inn@${NAME}">Page: The Inn</link><link class="imagewindow" recordname="image.keep@${NAME}">Map: The Keep</link></linklist><script>alert(2)</script></text></id-00002>
         </blocks></gate>
-        <inn><name type="string">The Inn</name><blocks><id-00001><blocktype type="string">singletext</blocktype><order type="number">1</order><text type="formattedtext"><p>A warm fire.</p></text></id-00001></blocks></inn>
+        <inn><name type="string">The Inn</name><blocks><id-00001><blocktype type="string">singletext</blocktype><order type="number">1</order><text type="formattedtext"><p>A warm fire. <link class="npc" recordname="npc.guard@${NAME}">The gate guard</link> drinks here; <link class="npc" recordname="npc.nobody@${NAME}">nobody</link> else.</p></text></id-00001></blocks></inn>
       </refmanualdata>
     </reference>
+    <npc><guard><name type="string">Gate Guard</name><hp type="number">7</hp></guard></npc>
   </root>`;
   const definition = `<?xml version="1.0" encoding="UTF-8"?><root><name>${NAME}</name><displayname>The Test Keep</displayname><category>Test Adventures</category><author>Kraken</author><ruleset>CnCRPG</ruleset></root>`;
   writeFileSync(path.join(folder, "Test Keep.mod"), zipSync({ "definition.xml": strToU8(definition), "db.xml": strToU8(db), "thumbnail.png": PNG, "images/keep.png": PNG }));

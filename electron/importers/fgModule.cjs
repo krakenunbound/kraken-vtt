@@ -369,7 +369,7 @@ function prepareModule(nameOrPath) {
 // not as records of their own: each becomes a record of its type here
 // (reference.classes.id-00001, type "class"), as a 5E book's are, so a
 // campaign's activation and the 3.5E rules find them.
-const REFERENCE_TYPES = { classes: "class", races: "race", feats: "feat", skills: "skill", spells: "spell", equipment: "item" };
+const REFERENCE_TYPES = { classes: "class", races: "race", feats: "feat", skills: "skill", spells: "spell", equipment: "item", tables: "table" };
 function spreadReference(records) {
   const out = [];
   for (const record of records) {
@@ -425,7 +425,7 @@ function parseModule(file, only) {
     if (!bytes) continue;
     const text = strFromU8(bytes);
     // A 3.5E book keeps its classes, races, gear... under <reference>: that section too, when they are wanted.
-    const wanted = only && [...only].some((type) => Object.values(REFERENCE_TYPES).includes(type)) && /<reference[\s>][\s\S]*?<(classes|races|equipment|feats|skills|spells)[\s>]/.test(text) ? new Set([...only, "reference"]) : only;
+    const wanted = only && [...only].some((type) => Object.values(REFERENCE_TYPES).includes(type)) && /<reference[\s>][\s\S]*?<(classes|races|equipment|feats|skills|spells|tables)[\s>]/.test(text) ? new Set([...only, "reference"]) : only;
     const root = parseXml(wanted ? pickRoots(text, wanted) : text);
     for (const typeNode of elements(root)) {
       const type = typeNode.tagName.toLowerCase();
