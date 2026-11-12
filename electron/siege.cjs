@@ -4,6 +4,7 @@ const dnd5e = require("./dnd5e.cjs");
 const dnd35 = require("./dnd35.cjs");
 const adnd2e = require("./adnd2e.cjs");
 const astra = require("./astra.cjs");
+const mgt2 = require("./mgt2.cjs");
 
 // Host side of the SIEGE engine (shared/siege, ES modules shared with the
 // app window): the game library from the campaign's imported records, and
@@ -36,6 +37,8 @@ async function siegeCheck(table, record, { attribute, cl = 0, bonus = 0, addLeve
   if (dnd5e.is5e(record)) return dnd5e.check5e(table, record, { kind: kind ?? (/save/i.test(String(label ?? "")) ? "save" : "check"), attribute, skill, dc: dc ?? cl, bonus, advantage, label: kind ? label : undefined }, from);
   // Apeira Astra: a task (2d6 + skill + characteristic against 8); dc is the difficulty's shift, advantage boon/bane.
   if (astra.isAstra(record)) return astra.taskAstra(table, record, { skill, attribute, difficulty: Number(bonus) || 0, boon: advantage, label: kind ? label : undefined }, from);
+  // Traveller: a task (2d6 + DM + skill against the difficulty's number: dc, Average 8); bonus a modifier, advantage boon/bane.
+  if (mgt2.isMgt2(record)) return mgt2.taskMgt2(table, record, { skill, attribute, difficulty: Number(dc ?? cl) || 8, modifier: Number(bonus) || 0, boon: advantage, label: kind ? label : undefined }, from);
   if (!ATTRIBUTES.includes(attribute)) throw new Error("Pick an attribute.");
   const { engine } = await siege();
   const game = siegeLibrary(table.records).game;
@@ -62,6 +65,7 @@ async function levelUp(table, record, packageKey, from) {
   if (dnd35.is35(record)) return dnd35.levelUp35(table, record, from);
   if (adnd2e.is2e(record)) return adnd2e.levelUp2e(table, record, from, packageKey);
   if (astra.isAstra(record)) throw new Error("Apeira Astra has no levels: spend experience on a skill or a characteristic (Improve).");
+  if (mgt2.isMgt2(record)) throw new Error("Traveller has no levels: change a skill or a characteristic on the sheet (training, a new term).");
   const { engine } = await siege();
   const game = siegeLibrary(table.records).game;
   const found = engine.levelUpPackage(record.data, packageKey);
@@ -158,6 +162,7 @@ async function editCharacter(table, record, changes, seat) {
   if (dnd35.is35(record)) return dnd35.edit35(table, record, changes, seat);
   if (adnd2e.is2e(record)) return adnd2e.edit2e(table, record, changes, seat);
   if (astra.isAstra(record)) return astra.editAstra(table, record, changes, seat);
+  if (mgt2.isMgt2(record)) return mgt2.editMgt2(table, record, changes, seat);
   if (seat.role !== "dm" && record.owner !== seat.name) throw new Error("You can only change your own character.");
   if (!Array.isArray(changes) || changes.length === 0) throw new Error("What changes?");
   const { engine } = await siege();
@@ -225,12 +230,12 @@ async function exportCharacter(record, format = "kraken") {
 async function dropOnCharacter(table, record, source, from) {
   if (!source) throw new Error("Nothing to drop.");
   const who = from || record.name;
-  if (astra.isAstra(record)) {
-    if (source.type !== "item") throw new Error("An Apeira Astra sheet takes gear; Origins and Paths come with the character wizard.");
+  if (astra.isAstra(record) || mgt2.isMgt2(record)) {
+    if (source.type !== "item") throw new Error(astra.isAstra(record) ? "An Apeira Astra sheet takes gear; Origins and Paths come with the character wizard." : "A Traveller sheet takes gear.");
     const data = structuredClone(record.data);
     const list = (data.inventorylist = data.inventorylist ?? {});
     const { fgPath: _path, ...copy } = source.data ?? {};
-    const rules = await astra.rulesAstra();
+    const rules = astra.isAstra(record) ? await astra.rulesAstra() : await mgt2.rulesMgt2();
     const key = `id-${String(Object.keys(list).length + 1).padStart(5, "0")}`;
     list[key] = { ...copy, name: source.name, count: 1, carried: rules.isArmour(copy) || rules.isWeapon(copy) ? 2 : 1 };
     const updated = table.records.update(record.id, { data: rules.derive(data) }, table.seat, { replace: true });

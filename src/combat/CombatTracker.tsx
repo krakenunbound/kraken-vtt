@@ -5,7 +5,7 @@ import { Icon } from "../ui/icons";
 
 const FACTION_LABEL = { friend: "Friend", neutral: "Neutral", foe: "Foe" } as const;
 // AD&D 2E's five saving throws.
-const SAVE_LABELS: Record<string, string> = { paralyzation: "Paralyzation, Poison, Death", rod: "Rod, Staff, Wand", petrification: "Petrification, Polymorph", breath: "Breath Weapon", spell: "Spell" };
+const SAVE_LABELS: Record<string, string> = { paralyzation: "Paralyzation, Poison, Death", rod: "Rod, Staff, Wand", petrification: "Petrification, Polymorph", breath: "Breath Weapon", spell: "Spell", str: "STR check", dex: "DEX check", end: "END check", int: "INT check", edu: "EDU check", soc: "SOC check", brawn: "Brawn check", reflex: "Reflex check", grit: "Grit check", intellect: "Intellect check", training: "Training check", presence: "Presence check" };
 
 function focusToken(tokenId: string | null) {
   if (tokenId) window.dispatchEvent(new CustomEvent("kraken:focus-token", { detail: tokenId }));
@@ -20,7 +20,7 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
   const [rounds, setRounds] = useState("");
   const [open, setOpen] = useState(false);
   const [saveStat, setSaveStat] = useState("wisdom");
-  const saveChoices = session.ruleset === "D&D 3.5E" ? ["fortitude", "reflex", "will"] : session.ruleset === "AD&D 2E" ? ["paralyzation", "rod", "petrification", "breath", "spell"] : ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"];
+  const saveChoices = session.ruleset === "D&D 3.5E" ? ["fortitude", "reflex", "will"] : session.ruleset === "AD&D 2E" ? ["paralyzation", "rod", "petrification", "breath", "spell"] : session.ruleset === "Traveller" ? ["str", "dex", "end", "int", "edu", "soc"] : session.ruleset === "Apeira Astra" ? ["brawn", "reflex", "grit", "intellect", "training", "presence"] : ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"];
   const saveChoice = saveChoices.includes(saveStat) ? saveStat : saveChoices[saveChoices.length - 1];
   const [saveCl, setSaveCl] = useState("0");
   const record = entry.recordId ? session.records[entry.recordId] : null;
@@ -283,11 +283,11 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
               ))}
             </select>
             <label>
-              {session.ruleset === "AD&D 2E" ? "Mod" : session.ruleset === "D&D 5E" || session.ruleset === "Descending Darkness" || session.ruleset === "D&D 3.5E" ? "DC" : "CL"}
-              <input type="number" value={saveCl} onChange={(event) => setSaveCl(event.target.value)} style={{ width: "3.6rem" }} aria-label={session.ruleset === "AD&D 2E" ? "Save modifier" : session.ruleset === "D&D 5E" || session.ruleset === "D&D 3.5E" ? "Save DC" : "Save CL"} />
+              {session.ruleset === "AD&D 2E" ? "Mod" : session.ruleset === "Traveller" || session.ruleset === "Apeira Astra" ? "DM" : session.ruleset === "D&D 5E" || session.ruleset === "Descending Darkness" || session.ruleset === "D&D 3.5E" ? "DC" : "CL"}
+              <input type="number" value={saveCl} onChange={(event) => setSaveCl(event.target.value)} style={{ width: "3.6rem" }} aria-label={session.ruleset === "AD&D 2E" ? "Save modifier" : session.ruleset === "Traveller" || session.ruleset === "Apeira Astra" ? "Check DM" : session.ruleset === "D&D 5E" || session.ruleset === "D&D 3.5E" ? "Save DC" : "Save CL"} />
             </label>
             <button type="button" onClick={() => session.ct("save", { id: entry.id, attribute: saveChoice, cl: Number(saveCl) || 0 })}>
-              Roll save
+              {session.ruleset === "Traveller" || session.ruleset === "Apeira Astra" ? "Roll check" : "Roll save"}
             </button>
           </div>
           <div className="ct-adjust">

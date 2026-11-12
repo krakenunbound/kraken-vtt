@@ -1388,6 +1388,10 @@ textarea.cc-field.tall { min-height: 220px; }
 .sheet-astra .five-skill { display: grid; grid-template-columns: 2.4rem 1fr auto; align-items: center; gap: 8px; }
 .sheet-astra .five-skill .cc-num { text-align: center; }
 .sheet-astra .five-skill small.hint { margin-left: 6px; }
+.sheet-mgt2 .five-skill { grid-template-columns: 3.2rem 1fr auto auto; }
+.sheet-mgt2 .five-skill .cc-field { width: 2.6rem; text-align: center; }
+.sheet-mgt2 [data-stat="hp"] { font-size: 1rem; white-space: nowrap; }
+.mgt2-upp { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; letter-spacing: 0.12em; font-weight: 700; }
 .sheet-astra .astra-stats .five-ability { grid-template-columns: 1fr 3.5rem 3rem; }
 .sheet-astra .astra-stats .five-ability-head { grid-template-columns: 1fr 3.5rem 3rem; }
 /* Kraken packs (the Books window's Packs tab). */

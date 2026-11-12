@@ -43,8 +43,10 @@ of use, and a built-in AI agent that can do anything the GM can.
   (base attack and iterative attacks, criticals by threat and confirmation,
   Fortitude, Reflex and Will, skills by ranks), **AD&D 2E** (THAC0 and
   descending Armor Class, the five saving throws, thief skills,
-  multi-classing, your books' pregens) and a rules-free **Worldbuilding**
-  mode for any system.
+  multi-classing, your books' pregens), **Traveller** (Mongoose Traveller 2E:
+  the UPP, skills and specialities, 2d6 tasks with Effect, careers and terms,
+  damage to Endurance, Strength and Dexterity, armour and AP) and a
+  rules-free **Worldbuilding** mode for any system.
 - **Your Fantasy Grounds library.** If you own Fantasy Grounds modules, Kraken
   reads them in place: books to read, story, encounters, NPCs, items, and maps
   with their walls, doors and lights.

@@ -4,6 +4,30 @@ What changed in each release of Kraken VTT. Downloads are on the
 [Releases](https://github.com/krakenunbound/kraken-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
+## 0.1.0-alpha.67: Traveller
+
+- A new ruleset: **Traveller** (Mongoose Traveller 2nd Edition, as FG's MGT2
+  ruleset plays it). Kraken's own code for its mechanics; your Traveller books
+  (FG MGT2 modules or packs) add their content.
+- The Traveller wizard: name, species, homeworld, the six characteristics (2d6
+  each, rolled or typed), a career and its terms (age 18 + 4 a term) and rank,
+  skills and specialities with their levels, a kit from Kraken's weapon and
+  armour list, credits. A human Traveller gets one of Kraken's science fiction
+  portraits by career.
+- The Traveller sheet: the UPP, characteristics and DMs (a wounded one's
+  current value), skills and specialities, tasks from any number (2d6 + DM +
+  skill against Simple 2 ... Formidable 14, a DM, a Boon or a Bane; the
+  Effect said), untrained -3 less Jack-of-all-Trades, weapons with their
+  traits and AP, armour.
+- The tracker plays Traveller: initiative 2d6 + the better of DEX and INT DM;
+  attacks 2d6 + skill + DM against 8, the Effect added to the damage, armour
+  taken off less the weapon's AP; damage off Endurance, then Strength, then
+  Dexterity (Endurance and one more at 0 unconscious, all three dead); an
+  animal's Hits; characteristic checks by a creature's current values.
+- Apeira Astra: a sheet's Boon or Bane now reaches the dice (it was dropped on
+  the way to the host), and the tracker's checks offer its own six
+  characteristics.
+
 ## 0.1.0-alpha.66: dice that stay as long as you say, and knock each other
 
 - Settings (the GM's): **Dice stay on the table for** a number of seconds

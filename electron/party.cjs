@@ -141,11 +141,11 @@ async function distribute(table, from) {
       const source = item.item && typeof item.item === "object" ? { ...item.item, name: item.name } : { name: item.name };
       // The rules load first, then the sheet is read: nothing changed meanwhile is written over.
       const current = table.records.get(member.id).data;
-      const astra = current?.ruleset === "astra" ? await require("./astra.cjs").rulesAstra() : null;
+      const astra = current?.ruleset === "astra" ? await require("./astra.cjs").rulesAstra() : current?.ruleset === "mgt2" ? await require("./mgt2.cjs").rulesMgt2() : null;
       const five = !astra && require("./dnd5e.cjs").is5e({ data: current }) ? await require("./dnd5e.cjs").rules5e() : !astra && require("./dnd35.cjs").is35({ data: current }) ? await require("./dnd35.cjs").rules35() : !astra && require("./adnd2e.cjs").is2e({ data: current }) ? await require("./adnd2e.cjs").rules2e() : null;
       const data = structuredClone(table.records.get(member.id).data);
       if (astra) {
-        // An Apeira Astra character: the item into the gear, the sheet worked out again.
+        // An Apeira Astra character or a Traveller: the item into the gear, the sheet worked out again.
         const list = (data.inventorylist = data.inventorylist ?? {});
         list[engine.nextId(list)] = { ...source, count: each, carried: 1 };
         table.records.update(member.id, { data: astra.derive(data) }, table.seat, { replace: true });

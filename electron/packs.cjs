@@ -46,6 +46,7 @@ const KRAKEN_RULESET = {
   cncrpg: "Castles & Crusades",
   "3.5e": "D&D 3.5E",
   "2e": "AD&D 2E",
+  mgt2: "Traveller",
   "5e": "D&D 5E",
   descendingdarkness: "Descending Darkness",
   "descending darkness": "Descending Darkness",

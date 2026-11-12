@@ -30,6 +30,8 @@ const FG_RULESETS = {
   "D&D 3.5E": ["3.5E", "Kraken35E", "d20"],
   // FG's AD&D 2E ruleset's modules (the GM's B-series, Greyhawk, pregens).
   "AD&D 2E": ["2E"],
+  // FG's Mongoose Traveller 2E ruleset's modules.
+  Traveller: ["MGT2"],
   // Kraken's own games, with their books shipped in the app (games/modules).
   "Descending Darkness": ["Descending Darkness"],
   "Apeira Astra": ["Apeira Astra"],

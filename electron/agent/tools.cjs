@@ -66,7 +66,7 @@ const TOOLS = [
   {
     name: "kraken_campaign_create",
     description: "Create a campaign. Returns its id.",
-    inputSchema: object({ name: string("Campaign name"), ruleset: string("Ruleset: Castles & Crusades, D&D 5E (the SRD 5.2.1), D&D 3.5E (the SRD 3.5), AD&D 2E, Descending Darkness, Apeira Astra or Worldbuilding") }, ["name"]),
+    inputSchema: object({ name: string("Campaign name"), ruleset: string("Ruleset: Castles & Crusades, D&D 5E (the SRD 5.2.1), D&D 3.5E (the SRD 3.5), AD&D 2E, Traveller (Mongoose 2E), Descending Darkness, Apeira Astra or Worldbuilding") }, ["name"]),
     run: (args, ctx) => out(ctx.campaigns.create({ name: args.name, ruleset: args.ruleset })),
   },
   {
@@ -226,7 +226,7 @@ const TOOLS = [
   {
     name: "kraken_build_character",
     description:
-      "Build a character into the hosted campaign by its ruleset. AD&D 2E: spec { name, race (Human, Dwarf, Elf, Gnome, Half-Elf, Halfling), class (Fighter, Paladin, Ranger, Cleric, Druid, Thief, Bard, Mage, or a multi-class: Fighter/Thief), level, scores {strength..charisma, strengthPercent for a warrior's 18} (or array: six scores, put in the class's order; else 16,15,14,13,12,10, the class's minimums met), alignment, gear [names: the books' items or Kraken's weapons and armor: Long sword, Chain mail, Shield], weapons [proficiencies], nonweapon [proficiencies], skills {openlocks: points...}, spells [names] }, or { pregen: the id of a book's pregenerated character (type pregencharsheet), name } to take it as it is; returns hp, ac, thaco, saves. D&D 3.5E: spec { name, race, class, level, scores {strength..charisma} (or array: six scores, put in the class's order; else the standard 15,14,13,12,10,8), feats [names], skills {name: ranks}, gear [item names, as the books' or in other words: Heavy steel shield], spells [names], alignment }, from the campaign's active 3.5E Player's Handbook (its classes, races and gear): hit points the die's highest then its average + Con, the class's feats and skills when not given, the class's kit; returns hp, ac, bab, saves. Castles & Crusades: build a SIEGE character from a spec, like the FG SC C&C wizard's buildFromSpec, into the hosted campaign. Needs the game's modules imported (kraken_import_fg_module: the Player's Handbook, and the Adventurer's Backpack for its classes). Spec: { name, race, class, level, scores: { strength: final score, ... }, primes: [chosen primes; the class prime is added], gold (gp before buying), gear: [[item name, count]], worn: [names], packed: [names], container, spells: [names in preference order], alignment, deity, gender, age, height, weight, appearance, notes }. owner: the player who plays it.",
+      "Build a character into the hosted campaign by its ruleset. Traveller (Mongoose 2E): spec { name, species, homeworld, characteristics {str, dex, end, int, edu, soc: 2 to 15}, careers [{name (Agent, Army, Citizen, Drifter, Entertainer, Marine, Merchant, Navy, Noble, Prisoner, Rogue, Scholar, Scout), terms, rank}] (or career, terms, rank), skills {'Gun Combat (Slug)': 1, 'Pilot (Small Craft)': 2, 'Vacc Suit': 0} or 'Gun Combat (Slug) 1, Vacc Suit 0', gear [names: the books' items or Kraken's weapons and armour: Autopistol, Laser Rifle, Blade, Cloth, Vacc Suit, Combat Armour...], credits, age (else 18 + 4 a term), notes }; returns upp, physical (STR + DEX + END), armour, initiative, skills, attacks. AD&D 2E: spec { name, race (Human, Dwarf, Elf, Gnome, Half-Elf, Halfling), class (Fighter, Paladin, Ranger, Cleric, Druid, Thief, Bard, Mage, or a multi-class: Fighter/Thief), level, scores {strength..charisma, strengthPercent for a warrior's 18} (or array: six scores, put in the class's order; else 16,15,14,13,12,10, the class's minimums met), alignment, gear [names: the books' items or Kraken's weapons and armor: Long sword, Chain mail, Shield], weapons [proficiencies], nonweapon [proficiencies], skills {openlocks: points...}, spells [names] }, or { pregen: the id of a book's pregenerated character (type pregencharsheet), name } to take it as it is; returns hp, ac, thaco, saves. D&D 3.5E: spec { name, race, class, level, scores {strength..charisma} (or array: six scores, put in the class's order; else the standard 15,14,13,12,10,8), feats [names], skills {name: ranks}, gear [item names, as the books' or in other words: Heavy steel shield], spells [names], alignment }, from the campaign's active 3.5E Player's Handbook (its classes, races and gear): hit points the die's highest then its average + Con, the class's feats and skills when not given, the class's kit; returns hp, ac, bab, saves. Castles & Crusades: build a SIEGE character from a spec, like the FG SC C&C wizard's buildFromSpec, into the hosted campaign. Needs the game's modules imported (kraken_import_fg_module: the Player's Handbook, and the Adventurer's Backpack for its classes). Spec: { name, race, class, level, scores: { strength: final score, ... }, primes: [chosen primes; the class prime is added], gold (gp before buying), gear: [[item name, count]], worn: [names], packed: [names], container, spells: [names in preference order], alignment, deity, gender, age, height, weight, appearance, notes }. owner: the player who plays it.",
     inputSchema: object(
       {
         spec: { type: "object", description: "The character spec" },
@@ -239,6 +239,10 @@ const TOOLS = [
       if (agent.ruleset?.() === "Apeira Astra") {
         const { record, problems } = await require("../astra.cjs").buildAstra(agent, args.spec, args.owner ?? "", agent.seat);
         return out({ created: true, id: record.id, stamina: record.data.hp.total, armour: record.data.ac.total, skills: record.data.skills, problems });
+      }
+      if (require("../mgt2.cjs").isMgt2Ruleset(agent.ruleset?.())) {
+        const { record, problems } = await require("../mgt2.cjs").buildMgt2(agent, args.spec, args.owner ?? "", agent.seat);
+        return out({ created: true, id: record.id, upp: record.data.upp, age: record.data.age, physical: record.data.hp.total, armour: record.data.ac.total, initiative: record.data.initiative.total, skills: Object.fromEntries(Object.entries(record.data.skills).map(([key, row]) => [row.name ?? key, row.level])), attacks: Object.values(record.data.attacks).map((attack) => `${attack.name} ${attack.bonus >= 0 ? "+" : ""}${attack.bonus} ${attack.damage}`), problems });
       }
       if (adnd2e.is2eRuleset(agent.ruleset?.())) {
         const { record, problems } = await adnd2e.build2e(agent, args.spec, args.owner ?? "", agent.seat);
@@ -320,11 +324,11 @@ const TOOLS = [
   },
   {
     name: "kraken_siege_check",
-    description: "Make a check or save for a character in front of the table, by the campaign's ruleset. Castles & Crusades: a SIEGE attribute check or save, d20 + attribute modifier + level (when added) + bonus, against the challenge base (prime 12 / secondary 18 by default) + challenge level. D&D 5E: kind check (an ability), save, or skill (skill: its name), d20 + modifier (+ proficiency) + bonus, against dc; advantage or disadvantage rolls 2d20. AD&D 2E: kind save (attribute paralyzation, rod, petrification, breath or spell: d20 + bonus at or above the number), check (attribute an ability: d20 at or under the score, a bonus comes off the die) or skill (skill a thief skill's key: openlocks, pickpockets...: d100 at or under). Goes to chat.",
+    description: "Make a check or save for a character in front of the table, by the campaign's ruleset. Traveller: a task, 2d6 + the characteristic's DM + the skill's level (untrained -3, less Jack-of-all-Trades) + bonus, against dc (the difficulty's number: Simple 2, Easy 4, Routine 6, Average 8 (default), Difficult 10, Very Difficult 12, Formidable 14); skill its name ('Gun Combat (Slug)', 'Pilot (Small Craft)'), attribute a characteristic (str, dex, end, int, edu, soc) to roll alone or to use instead of the skill's usual one; advantage boon or bane (3d6, the best or worst two); returns the Effect. Apeira Astra: a task, 2d6 + skill + characteristic against 8. Castles & Crusades: a SIEGE attribute check or save, d20 + attribute modifier + level (when added) + bonus, against the challenge base (prime 12 / secondary 18 by default) + challenge level. D&D 5E: kind check (an ability), save, or skill (skill: its name), d20 + modifier (+ proficiency) + bonus, against dc; advantage or disadvantage rolls 2d20. AD&D 2E: kind save (attribute paralyzation, rod, petrification, breath or spell: d20 + bonus at or above the number), check (attribute an ability: d20 at or under the score, a bonus comes off the die) or skill (skill a thief skill's key: openlocks, pickpockets...: d100 at or under). Goes to chat.",
     inputSchema: object(
       {
         id: string("Character record id"),
-        attribute: { type: "string", enum: ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"] },
+        attribute: string("The attribute: strength..charisma (d20 games), a 2E save, Traveller's str, dex, end, int, edu, soc, Apeira Astra's brawn..presence"),
         cl: number("C&C: challenge level, default 0"),
         bonus: number("Extra modifier, default 0"),
         addLevel: { type: "boolean", description: "Add the character's level (default: the game's SIEGE_ADD_LEVEL)" },
@@ -332,7 +336,7 @@ const TOOLS = [
         kind: { type: "string", enum: ["check", "save", "skill"], description: "5E: an ability check, a saving throw, or a skill" },
         skill: string("5E: the skill (Perception, Stealth...)"),
         dc: number("5E: the difficulty class"),
-        advantage: { type: "string", enum: ["", "advantage", "disadvantage"] },
+        advantage: { type: "string", enum: ["", "advantage", "disadvantage", "boon", "bane"] },
       },
       ["id"],
     ),

@@ -24,6 +24,12 @@ On the start screen choose **My Campaigns**.
     cleric (or a paladin from 3rd level) has a Turn undead button on its
     turn. Make your Krits & Fumbles 2E book active and natural 20s and 1s
     roll its tables, by the attack's kind, and apply what they can.
+  - *Traveller* is Mongoose Traveller 2E: its wizard takes the six
+    characteristics, a career's terms, skills with specialities and a kit;
+    the sheet rolls tasks against a difficulty with Effect, Boon and Bane;
+    the tracker runs 2d6 initiative, attacks against 8 with the Effect on the
+    damage, armour less AP, and damage off Endurance, then Strength, then
+    Dexterity. Your Traveller books add their content.
   - *Worldbuilding* has no rules: maps, tokens, chat and dice for any game.
     It reads the books of games Kraken has no rules for yet (Pathfinder,
     say): their pages, story and maps with walls.
