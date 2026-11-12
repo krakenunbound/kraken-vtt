@@ -245,6 +245,8 @@ function savedOptions(value) {
     clearTargets: ["never", "action", "turn"].includes(options.clearTargets) ? options.clearTargets : "never",
     // The same sound again only after this many seconds.
     soundRepeat: Math.min(30, Math.max(0, Number.isFinite(Number(options.soundRepeat)) ? Number(options.soundRepeat) : 1)),
+    // How long landed dice lie on the table before they fade, in seconds (the GM's choice, for every seat).
+    diceHold: Math.round(Math.min(60, Math.max(0.5, Number.isFinite(Number(options.diceHold)) ? Number(options.diceHold) : 2.6)) * 10) / 10,
   };
 }
 

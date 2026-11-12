@@ -147,7 +147,7 @@ export type QuickSlot =
 export type KrakenLink = QuickSlot;
 export type SoundItem = { id: string; kind: string; group: string; name: string };
 export type SoundLibrary = { sounds: SoundItem[]; groups: { id: string; count: number }[]; folder: string; triggers?: SoundTrigger[] };
-export type TableOptions = { towerReveal: boolean; decal: string; wallpaper: string; gmIcon: string; soundHidden: "off" | "combat" | "all"; soundRepeat: number };
+export type TableOptions = { towerReveal: boolean; decal: string; wallpaper: string; gmIcon: string; soundHidden: "off" | "combat" | "all"; soundRepeat: number; diceHold?: number };
 export type DecalItem = { id: string; name: string; group: string; ruleset?: string };
 export type PictureKind = "decal" | "wallpaper" | "gmicon" | "tile";
 // The combat tracker as the host shows it to this seat (electron/combat.cjs viewFor).

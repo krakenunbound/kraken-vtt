@@ -7,7 +7,7 @@ import { bottomFace, buildDie, model, pulseDice, tensLook, topFace, type ShapeKi
 import { sparkColors, studioScene } from "./gilded";
 import { TRAILS } from "./effects";
 import { playHit } from "./sound";
-import { defaultThrow, diceOf, labelsFor, MAX_DICE, simulate, type Die, type Hit } from "./throw";
+import { defaultThrow, diceOf, labelsFor, MAX_DICE, simulate, type Die, type Hit, type OnTable } from "./throw";
 
 // 3D dice thrown across the whole table, as FG's. The host has already
 // decided each number: every screen simulates its own throw first, then puts
@@ -31,7 +31,8 @@ type Throwing = {
 type Flight = { groups: THREE.Group[]; from: THREE.Vector3[]; to: THREE.Vector3; spin: THREE.Vector3[]; start: number; look: DiceLook; last: THREE.Vector3[] };
 
 const FRAME_MS = 1000 / 60;
-const HOLD_MS = 2600;
+// How long landed dice lie on the table (the GM's Dice on the table setting).
+let HOLD_MS = 2600;
 const MAX_ON_TABLE = 16;
 const SHRINK_MS = 380;
 
@@ -157,6 +158,7 @@ function createEngine(host: HTMLDivElement) {
       }
       if (at >= item.count - 1 && !item.landed) {
         item.landed = now;
+        host.dataset.landedAt = String(now);
         if (item.line) rolling.landed(item.line);
         // What the dice on the table show, read off them as they lie (checks read it).
         host.dataset.landed = item.groups
@@ -193,6 +195,8 @@ function createEngine(host: HTMLDivElement) {
         } else item.groups.forEach((group) => group.scale.setScalar(left));
       }
     }
+    // How many throws lie on the table (checks read it).
+    host.dataset.onTable = String(throws.length);
     for (let index = flights.length - 1; index >= 0; index--) {
       const flight = flights[index];
       const t = Math.min(1, (now - flight.start) / 900);
@@ -228,7 +232,14 @@ function createEngine(host: HTMLDivElement) {
         return;
       }
       const thrown = (line.roll as { throw?: DiceThrow } | undefined)?.throw ?? defaultThrow();
-      const result = simulate(dice, thrown, width, depth, table());
+      // The dice already on the table, where they are now and where they go, until they fade.
+      const now = performance.now();
+      const already: OnTable[] = throws.map((item) => {
+        const from = Math.max(0, Math.floor((now - item.start) / FRAME_MS));
+        const landsAt = item.landed || item.start + item.count * FRAME_MS;
+        return { kinds: item.dice.map((die) => die.kind), frames: item.frames, count: item.count, from, until: Math.max(0, Math.floor((landsAt + HOLD_MS + SHRINK_MS - now) / FRAME_MS)) };
+      });
+      const result = simulate(dice, thrown, width, depth, table(), already);
       const look = lookOf(line);
       const labels = dice.map((die, index) => labelsFor(die, result.rest[index]));
       const groups = dice.map((die, index) => {
@@ -293,8 +304,12 @@ function createEngine(host: HTMLDivElement) {
 }
 
 // The layer over the whole window that the dice roll on. Clicks go through it.
-export default function DiceLayer() {
+export default function DiceLayer({ holdSeconds }: { holdSeconds?: number }) {
   const host = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const seconds = Number(holdSeconds);
+    HOLD_MS = Number.isFinite(seconds) && seconds > 0 ? seconds * 1000 : 2600;
+  }, [holdSeconds]);
   useEffect(() => {
     const element = host.current;
     if (!element) return;

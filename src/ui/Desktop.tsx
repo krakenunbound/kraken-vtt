@@ -507,7 +507,7 @@ export function Desktop({
       </div>
       {dice.show ? (
         <Suspense fallback={null}>
-          <DiceLayer />
+          <DiceLayer holdSeconds={session.options.diceHold} />
         </Suspense>
       ) : null}
     </div>

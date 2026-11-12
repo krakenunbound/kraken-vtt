@@ -4,6 +4,15 @@ What changed in each release of Kraken VTT. Downloads are on the
 [Releases](https://github.com/krakenunbound/kraken-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
+## 0.1.0-alpha.66: dice that stay as long as you say, and knock each other
+
+- Settings (the GM's): **Dice stay on the table for** a number of seconds
+  before they fade, from half a second to a minute (a slider up to 15, or type
+  it). Every seat's dice follow it. It was fixed at 2.6 seconds.
+- Dice from different rolls no longer pass through each other or settle
+  inside or on top of each other: a new throw knocks against the dice already
+  on the table, rolling or at rest, and comes to rest beside them.
+
 ## 0.1.0-alpha.65: 2E turning undead and Krits & Fumbles
 
 - Turning undead in AD&D 2E: a cleric (or a paladin from 3rd level, as a

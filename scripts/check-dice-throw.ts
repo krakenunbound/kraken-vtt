@@ -5,7 +5,7 @@
 // flick (which carries the hand's speed and bounces off the rails).
 import * as THREE from "three";
 import { bottomFace, model, topFace } from "../src/dice/models";
-import { diceOf, labelsFor, simulate } from "../src/dice/throw";
+import { diceOf, labelsFor, simulate, type Die } from "../src/dice/throw";
 import type { ChatLine, RollTerm } from "../src/session/useSession";
 
 function assert(condition: unknown, message: string): asserts condition {
@@ -56,6 +56,31 @@ for (const side of sides) {
 const one = (side: number, value: number) =>
   diceOf({ id: "x", from: "", text: "", at: 0, roll: { formula: "", label: "", total: value, terms: [{ kind: "dice", sign: 1, count: 1, sides: side, rolls: [value], kept: [true], sum: value }] } } as ChatLine).map((die) => die.label).join(" ");
 assert(one(100, 100) === "00 0" && one(100, 7) === "00 7" && one(100, 42) === "40 2" && one(10, 10) === "0", "percentile and d10 labels");
+// Dice already on the table: a second throw at the same spot knocks against
+// them and never comes to rest inside or on top of them (they are where they lie).
+const restOf = (result: ReturnType<typeof simulate>, n: number) =>
+  Array.from({ length: n }, (_, die) => {
+    const at = ((result.count - 1) * n + die) * 7;
+    return { x: result.frames[at], y: result.frames[at + 1], z: result.frames[at + 2] };
+  });
+let knocks = 0;
+for (let round = 0; round < 12; round++) {
+  const first: Die[] = Array.from({ length: 4 }, () => ({ kind: "d6", label: "3" }));
+  const toss = { x: 0.5, y: 0.5, vx: 0.05, vy: 0.02 };
+  const a = simulate(first, toss, width, depth);
+  const second: Die[] = Array.from({ length: 4 }, () => ({ kind: "d20", label: "7" }));
+  const b = simulate(second, { x: 0.38, y: 0.5, vx: 0.9, vy: 0.05 }, width, depth, undefined, [{ kinds: first.map((die) => die.kind), frames: a.frames, count: a.count, from: a.count, until: 100000 }]);
+  if (b.hits.some((hit) => hit.onDie)) knocks += 1;
+  const lying = restOf(a, first.length);
+  for (const die of restOf(b, second.length)) {
+    assert(die.y < 1.2, `a die thrown into others rests on the table, not on them: y ${die.y.toFixed(2)}`);
+    for (const other of lying) assert(Math.hypot(die.x - other.x, die.z - other.z) > 0.85, `a die never ends inside another: ${Math.hypot(die.x - other.x, die.z - other.z).toFixed(2)} apart`);
+  }
+  // Rolling at the same time (the first throw just leaving the hand): still never inside it at rest.
+  const c = simulate(second, { x: 0.45, y: 0.52, vx: 0.4, vy: 0 }, width, depth, undefined, [{ kinds: first.map((die) => die.kind), frames: a.frames, count: a.count, from: 0, until: 100000 }]);
+  for (const die of restOf(c, second.length)) for (const other of lying) assert(Math.hypot(die.x - other.x, die.z - other.z) > 0.85, `a die thrown with others in flight ends clear of them: ${Math.hypot(die.x - other.x, die.z - other.z).toFixed(2)}`);
+}
+assert(knocks >= 6, `a throw into dice on the table knocks against them: ${knocks}/12`);
 // (A rare throw runs to the limit; it still ends on its last frame, showing the right number.)
 assert(still >= throws - 1, `throws come to rest within 6 s: ${still}/${throws}`);
-console.log(`ok ${throws} throws: every die shows the host's number (${still} settled before the limit)`);
+console.log(`ok ${throws} throws: every die shows the host's number (${still} settled before the limit); a throw into dice already on the table knocks against them (${knocks}/12) and none ends inside or on another`);

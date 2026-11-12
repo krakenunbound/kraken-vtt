@@ -43,9 +43,16 @@ export function defaultThrow(): DiceThrow {
 // The part of the window the dice roll in (world units, x across, z down).
 export type Area = { left: number; top: number; right: number; bottom: number };
 
+// Dice already on the table (an earlier throw, rolling or at rest): their
+// recorded flight, from frame `from` of it at this throw's first frame, until
+// `until` (this throw's frame when they fade away).
+export type OnTable = { kinds: ShapeKind[]; frames: Float32Array; count: number; from: number; until: number };
+
 // The throw in its own physics world, recorded frame by frame. width, depth:
-// the whole window (the throw is in fractions of it); area: the table's rails.
-export function simulate(dice: Die[], thrown: DiceThrow, width: number, depth: number, area: Area = { left: 0, top: 0, right: width, bottom: depth }) {
+// the whole window (the throw is in fractions of it); area: the table's rails;
+// onTable: the dice already there, which the new dice knock against and
+// cannot pass through or come to rest inside (they move as they were recorded).
+export function simulate(dice: Die[], thrown: DiceThrow, width: number, depth: number, area: Area = { left: 0, top: 0, right: width, bottom: depth }, onTable: OnTable[] = []) {
   // A die is a little over a unit across, so gravity this strong makes it fall
   // as a real one does, not drift down as through water. The felt takes some
   // of a bounce, the rails throw the dice back, and the dice clack off each other.
@@ -107,12 +114,40 @@ export function simulate(dice: Die[], thrown: DiceThrow, width: number, depth: n
     return body;
   });
 
+  // The dice already on the table: bodies that follow their recorded flight.
+  const others = onTable.flatMap((item) =>
+    item.kinds.map((kind, die) => {
+      const body = new CANNON.Body({ type: CANNON.Body.KINEMATIC, shape: collider(kind), material: diceStuff });
+      world.addBody(body);
+      return { body, item, die };
+    }),
+  );
+  const gone = -500;
+  const placeOthers = (count: number) => {
+    for (const { body, item, die } of others) {
+      if (count >= item.until) {
+        body.position.set(0, gone, 0);
+        body.velocity.set(0, 0, 0);
+        continue;
+      }
+      const at = Math.min(item.count - 1, item.from + count);
+      const next = Math.min(item.count - 1, at + 1);
+      const n = item.kinds.length;
+      const a = (at * n + die) * 7;
+      const b = (next * n + die) * 7;
+      body.position.set(item.frames[a], item.frames[a + 1], item.frames[a + 2]);
+      body.quaternion.set(item.frames[a + 3], item.frames[a + 4], item.frames[a + 5], item.frames[a + 6]);
+      // Moving as it was recorded, so a knock from it carries its speed.
+      body.velocity.set((item.frames[b] - item.frames[a]) * 60, (item.frames[b + 1] - item.frames[a + 1]) * 60, (item.frames[b + 2] - item.frames[a + 2]) * 60);
+    }
+  };
+
   const hits: Hit[] = [];
   let frame = 0;
   bodies.forEach((body) =>
     body.addEventListener("collide", (event: { body: CANNON.Body; contact: CANNON.ContactEquation }) => {
-      const onDie = bodies.includes(event.body);
-      if (onDie && event.body.id < body.id) return; // each knock between two dice once
+      const onDie = bodies.includes(event.body) || others.some((other) => other.body === event.body);
+      if (bodies.includes(event.body) && event.body.id < body.id) return; // each knock between two dice once
       hits.push({ frame, strength: Math.abs(event.contact.getImpactVelocityAlongNormal()), onDie });
     }),
   );
@@ -129,6 +164,7 @@ export function simulate(dice: Die[], thrown: DiceThrow, width: number, depth: n
       const spin = body.angularVelocity.length();
       if (spin > 24) body.angularVelocity.scale(24 / spin, body.angularVelocity);
     });
+    if (others.length) placeOthers(count);
     for (let step = 0; step < 4; step++) world.step(STEP);
     bodies.forEach((body, index) => {
       const at = (count * bodies.length + index) * 7;
@@ -141,15 +177,17 @@ export function simulate(dice: Die[], thrown: DiceThrow, width: number, depth: n
       frames[at + 6] = body.quaternion.w;
     });
     if (count > 20 && bodies.every((body) => body.sleepState === CANNON.Body.SLEEPING)) {
-      // A die left lying on another is knocked off it, so every die is read flat on the table.
+      // A die left lying on another (of this throw or one already there) is
+      // knocked off it, so every die is read flat on the table.
       const perched = bodies.filter((body) => body.position.y > 1);
+      const under = [...bodies, ...others.filter((other) => other.body.position.y > gone / 2).map((other) => other.body)];
       if (perched.length === 0 || count > limit - 40) {
         count += 1;
         break;
       }
       perched.forEach((body) => {
         // It slides off the die it rests on, away from that die's middle.
-        const below = bodies.filter((other) => other !== body).sort((a, b) => a.position.distanceTo(body.position) - b.position.distanceTo(body.position))[0];
+        const below = under.filter((other) => other !== body).sort((a, b) => a.position.distanceTo(body.position) - b.position.distanceTo(body.position))[0];
         let dx = below ? body.position.x - below.position.x : 1;
         let dz = below ? body.position.z - below.position.z : 0;
         const length = Math.hypot(dx, dz);

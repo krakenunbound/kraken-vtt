@@ -550,6 +550,9 @@ span.ct-init { display: inline-block; }
 .settings-button { padding: 0.55rem 0.6rem; border-radius: 6px; border: 1px solid var(--brass-dim); background: linear-gradient(180deg, #1d3a44, #12262d); color: #eef3f2; font-weight: 600; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06); }
 .settings-button:hover { border-color: var(--brass); background: linear-gradient(180deg, #23495a, #163038); }
 .settings-check { display: flex; align-items: center; gap: 8px; color: var(--muted); }
+.settings-dice-hold { flex-wrap: wrap; }
+.settings-dice-hold input[type="range"] { flex: 1 1 160px; min-width: 120px; accent-color: var(--accent, #d8b46a); }
+.settings-dice-hold input[type="number"] { width: 4.5em; }
 
 .decal-picker { display: flex; flex-direction: column; gap: 10px; height: 100%; padding: 12px; min-height: 0; border-radius: 8px; transition: box-shadow 0.2s; }
 .decal-picker.dropping { box-shadow: inset 0 0 0 2px var(--brass), inset 0 0 40px rgba(210, 161, 90, 0.18); }

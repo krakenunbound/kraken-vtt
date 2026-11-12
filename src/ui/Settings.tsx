@@ -37,6 +37,7 @@ export function SettingsWindow({ session }: { session: Session }) {
         <input type="checkbox" checked={session.options.towerReveal} onChange={(event) => session.setTableOptions({ towerReveal: event.target.checked })} />
         Let players see their own dice-tower rolls (unticked: only the GM sees them, as in FG)
       </label> : null}
+      {gm ? <DiceHoldSetting session={session} /> : null}
       {gm ? (
         <label className="settings-check">
           Clear targets{" "}
@@ -48,6 +49,27 @@ export function SettingsWindow({ session }: { session: Session }) {
         </label>
       ) : null}
     </div>
+  );
+}
+
+// How long landed dice stay on the table before they fade, for every seat:
+// the GM's to set (a slider and the seconds), sent when the slider is let go.
+function DiceHoldSetting({ session }: { session: Session }) {
+  const saved = session.options.diceHold ?? 2.6;
+  const [seconds, setSeconds] = useState(saved);
+  useEffect(() => setSeconds(saved), [saved]);
+  const send = (value: number) => {
+    const clean = Math.round(Math.min(60, Math.max(0.5, value)) * 10) / 10;
+    setSeconds(clean);
+    if (clean !== saved) session.setTableOptions({ diceHold: clean } as never);
+  };
+  return (
+    <label className="settings-check settings-dice-hold">
+      Dice stay on the table for{" "}
+      <input type="range" min={0.5} max={15} step={0.1} value={Math.min(15, seconds)} aria-label="Dice on the table (slider)" data-setting="dice-hold-slider" onChange={(event) => setSeconds(Number(event.target.value))} onPointerUp={() => send(seconds)} onKeyUp={() => send(seconds)} onBlur={() => send(seconds)} />
+      <input type="number" min={0.5} max={60} step={0.1} value={seconds} aria-label="Dice on the table (seconds)" data-setting="dice-hold" style={{ width: "4.5em" }} onChange={(event) => setSeconds(Number(event.target.value))} onBlur={(event) => send(Number(event.target.value))} onKeyDown={(event) => event.key === "Enter" && send(Number((event.target as HTMLInputElement).value))} />{" "}
+      seconds before they fade
+    </label>
   );
 }
 

@@ -133,6 +133,10 @@ Type in chat to talk; `/` lists the commands (Fantasy Grounds' and Foundry's),
 and `/help` shows all of them. `/r 1d20+2` rolls. The modifier box below the
 chat adds to the next roll. Click the dice to roll them; the 3D dice tower is
 the GM's by default.
+Settings (the cog) has **Dice stay on the table for**: how many seconds the
+3D dice lie there after they land before they fade, for everyone at the
+table. Dice from different rolls knock against each other and come to rest
+side by side.
 
 ## The AI assistant
 
