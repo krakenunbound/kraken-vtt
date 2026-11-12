@@ -505,6 +505,12 @@ export function CCSheet({ record, session }: { record: TableRecord; session: Ses
                   </div>
                 );
               })}
+              {editable ? (
+                // FG's + on the list: an item by name (or drag one in from the Items list).
+                <p className="cc-inline cc-item-add">
+                  <Field value="" editable label="Add an item" onSave={(value) => value.trim() && change("inventory.add", value.trim())} />
+                </p>
+              ) : null}
               <p className="hint">C: carried · E: worn or in hand (click to switch) · right-click: left behind or carried again.</p>
             </section>
             <div className="cc-main-grid even">

@@ -15,6 +15,8 @@
 //   inventorylist (weapons: damage "3d6", skill; armour: protection), coins
 //   (credits), exp, attacks {key: {name, bonus, damage, skill, type}}.
 
+import { priceOf } from "../shop.mjs";
+
 export const RULESET = "astra";
 export const RULESET_NAME = "Apeira Astra";
 export const STATS = ["brawn", "reflex", "grit", "intellect", "training", "presence"];
@@ -222,7 +224,19 @@ export function buildFromSpec(spec, lib) {
     delete data.fgPath;
     inventorylist[`id-${String(n++).padStart(5, "0")}`] = { ...data, name: data.name ?? String(name), count: Math.max(1, Math.round(num(count, 1))), carried: isArmour(data) || isWeapon(data) ? 2 : 1 };
   }
-  const credits = Math.round(num(spec.credits, num(major.data?.credits, 0) + num(minor?.data?.credits, 0) / 2));
+  let credits = Math.round(num(spec.credits, num(major.data?.credits, 0) + num(minor?.data?.credits, 0) / 2));
+  // Starting gear bought with the credits (the wizard's shop): priced from the books, never past the purse.
+  for (const [name, countIn = 1] of Array.isArray(spec.buy) ? spec.buy : []) {
+    const item = find(lib.items, name);
+    const price = item ? priceOf(item.data?.cost, true) : null;
+    const count = Math.max(1, Math.min(20, Math.round(num(countIn, 1))));
+    if (!item || price === null) throw new Error(`${name} is not for sale.`);
+    if (price * count > credits) throw new Error(`${item.name} costs ${price * count} cr; ${credits} cr is left.`);
+    credits -= price * count;
+    const data = { ...item.data };
+    delete data.fgPath;
+    inventorylist[`id-${String(n++).padStart(5, "0")}`] = { ...data, name: data.name ?? item.name, count, carried: isArmour(data) || isWeapon(data) ? 2 : 1 };
+  }
   const data = derive({
     origin: origin?.name ?? String(spec.origin ?? ""),
     race: origin?.name ?? "",

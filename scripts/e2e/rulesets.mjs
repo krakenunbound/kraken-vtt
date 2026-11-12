@@ -3,6 +3,11 @@
 // enemy and a parcel. The GM's real library: FG modules and Kraken packs.
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+// A sidebar window opened (its button toggles: pressed again it would close).
+async function openSide(where, launch) {
+  if (await where.$(`.sidebar [data-launch="${launch}"].open`)) return;
+  await where.click(`.sidebar [data-launch="${launch}"]`);
+}
 // Close every window but the map (the Close buttons, never Pop out).
 async function closeWindows(where) {
   for (const button of await where.$$('[data-window]:not([data-window="map"]) button[aria-label^="Close"]')) await button.click().catch(() => undefined);
@@ -13,7 +18,7 @@ async function bookMap(ctx, title) {
   const { page, shelf, tool } = ctx;
   const book = shelf.find((item) => item.title === title || item.name === title);
   if (!book) throw new Error(`No ${title} on the shelf.`);
-  await page.click('.sidebar [data-launch="library"]');
+  await openSide(page, "library");
   await page.waitForSelector('[aria-label="Library module"]');
   await page.selectOption('[aria-label="Library module"]', book.name);
   await page.click('[data-action="library-maps"]');
@@ -29,7 +34,7 @@ async function libraryNpc(ctx, title, search) {
   const { page, shelf, tool } = ctx;
   const book = shelf.find((item) => item.title === title || item.name === title);
   if (!book) throw new Error(`No ${title} on the shelf.`);
-  await page.click('.sidebar [data-launch="library"]');
+  await openSide(page, "library");
   await page.selectOption('[aria-label="Library module"]', book.name);
   await page.click('[data-library-tab="npc"]');
   await page.fill('[aria-label="Library search"]', search);
@@ -44,7 +49,7 @@ async function libraryNpc(ctx, title, search) {
 }
 async function trackerNpc(ctx, name) {
   const { page } = ctx;
-  await page.click('.sidebar [data-launch="combat"]');
+  await openSide(page, "combat");
   await page.fill('[aria-label="Search NPCs"]', name);
   await page.click('.combat-tracker button:has-text("Add")');
   await wait(800);
@@ -53,7 +58,7 @@ async function trackerNpc(ctx, name) {
 async function libraryParcel(ctx, title) {
   const { page, shelf, tool } = ctx;
   const book = shelf.find((item) => item.title === title || item.name === title);
-  await page.click('.sidebar [data-launch="library"]');
+  await openSide(page, "library");
   await page.selectOption('[aria-label="Library module"]', book.name);
   await page.click('[data-library-tab="parcel"]');
   await page.waitForSelector('[data-library-item] [data-action="library-parcel"]', { timeout: 15000 });
@@ -70,13 +75,13 @@ async function libraryParcel(ctx, title) {
   }
   await wait(800);
   const party = await tool("kraken_party");
-  ctx.parcelItems = (party.parcel?.items ?? []).map((item) => item.name);
+  ctx.parcelItems = Object.values(party.parcel?.items ?? {}).map((item) => item.name);
   ctx.check(Object.values(party.parcel?.coins ?? {}).some((value) => Number(value) > 0) || ctx.parcelItems.length, "the parcel has something in it", JSON.stringify(party.parcel).slice(0, 200));
 }
 // The GM: a parcel made by hand on the party sheet (coins, an item).
 async function handParcel(ctx, { coin = "GP", amount = 50, item }) {
   const { page, tool } = ctx;
-  await page.click('.sidebar [data-launch="party"]');
+  await openSide(page, "party");
   await page.click('[role="tab"]:has-text("Inventory")');
   const coinBox = page.locator(`[data-parcel-coin="${coin}"], label:has-text("${coin}") input[type="number"]`).first();
   await coinBox.fill(String(amount));
@@ -86,7 +91,7 @@ async function handParcel(ctx, { coin = "GP", amount = 50, item }) {
   }
   await wait(600);
   const party = await tool("kraken_party");
-  ctx.parcelItems = (party.parcel?.items ?? []).map((row) => row.name);
+  ctx.parcelItems = Object.values(party.parcel?.items ?? {}).map((row) => row.name);
 }
 // The shop every wizard shares: roll (or take) the starting money, buy by name.
 async function buy(ctx, names) {
@@ -135,7 +140,7 @@ async function wizard5e(ctx, { root, cls, species, background, name }) {
   await tab("species");
   await seat.click(`${w} [data-species="${species}"]`);
   await tab("abilities");
-  const methods = await seat.$eval(`${w} select[aria-label="Ability method"] option`, (list) => list.map((option) => option.value || option.textContent));
+  const methods = await seat.$$eval(`${w} select[aria-label="Ability method"] option`, (list) => list.map((option) => option.value || option.textContent));
   if (methods.includes("Dice Roll")) {
     await seat.selectOption(`${w} select[aria-label="Ability method"]`, "Dice Roll");
     await seat.click(`${w} [data-action="roll-abilities"]`);
@@ -147,7 +152,7 @@ async function wizard5e(ctx, { root, cls, species, background, name }) {
   for (const page of ["class", "species", "background", "abilities"]) {
     await tab(page);
     for (let guard = 0; guard < 20; guard++) {
-      const open = await seat.$eval(`${w} select[data-decision]`, (list) => list.filter((select) => !select.value && select.options.length > 1).map((select) => select.getAttribute("data-decision")));
+      const open = await seat.$$eval(`${w} select[data-decision]`, (list) => list.filter((select) => !select.value && select.options.length > 1).map((select) => select.getAttribute("data-decision")));
       if (!open.length) break;
       await seat.selectOption(`${w} select[data-decision="${open[0]}"]`, { index: 1 });
       await wait(120);
@@ -197,23 +202,26 @@ async function wizard35(ctx, { race, cls, name, gear }) {
   }
   // Feats: those the character qualifies for, until the count is met (a target where one is asked).
   await tab("feats");
+  const picked = new Set();
   for (let guard = 0; guard < 12; guard++) {
     const text = (await seat.textContent("[data-feat-count]").catch(() => "")) ?? "";
     const count = /Selected (\d+) \/ (\d+)/.exec(text);
     if (!count || Number(count[1]) >= Number(count[2])) break;
-    const choose = seat.locator('button[aria-label^="Choose "]:not([disabled])');
+    const choose = seat.locator('[data-feat-targets] button[aria-label^="Choose "]:not([disabled])');
     if (await choose.count()) {
       await choose.first().click();
       continue;
     }
-    const feats = await seat.$eval("[data-feat]:not([disabled])", (list) => list.filter((item) => !item.closest(".ccw-pick")?.textContent?.includes("Needs") && !item.classList.contains("on")).map((item) => item.getAttribute("data-feat")));
-    const pick = ["Power Attack", "Toughness", "Improved Initiative", "Alertness", "Weapon Focus", ...feats].find((feat) => feats.includes(feat));
+    const feats = await seat.$$eval("[data-feat]:not([disabled])", (list) => list.filter((item) => !item.closest(".ccw-pick")?.textContent?.includes("Needs") && !item.classList.contains("on")).map((item) => item.getAttribute("data-feat")));
+    // Never the same feat twice (a second click takes it back).
+    const pick = ["Power Attack", "Toughness", "Improved Initiative", "Alertness", "Weapon Focus", ...feats].find((feat) => feats.includes(feat) && !picked.has(feat));
     if (!pick) break;
+    picked.add(pick);
     await seat.click(`[data-feat="${pick}"]`);
     await wait(150);
   }
   await tab("languages");
-  for (const box of await seat.$('[data-language]:not(:checked):not([disabled])')) {
+  for (const box of await seat.$$('[data-language]:not(:checked):not([disabled])')) {
     if ((await seat.getAttribute('[data-wizard-tab="languages"] [data-tab-done]', "data-tab-done")) === "yes") break;
     await box.click().catch(() => undefined);
   }
@@ -223,8 +231,8 @@ async function wizard35(ctx, { race, cls, name, gear }) {
   await seat.fill('[aria-label="Character name"]', name);
   await seat.fill('[aria-label="gender"]', "Male").catch(() => undefined);
   await tab("commit");
-  const warnings = await seat.textContent("[data-warnings]").catch(() => "");
-  ctx.check(Boolean(await seat.$("[data-warnings-none]")), "the wizard has nothing left to choose", warnings ?? "");
+  const warnings = await seat.$$eval("[data-warning]", (list) => list.map((item) => `${item.getAttribute("data-warning")}: ${item.textContent}`).join(" | "));
+  ctx.check(Boolean(await seat.$("[data-warnings-none]")), "the wizard has nothing left to choose", warnings);
   await finish(ctx);
 }
 // The GM's KrakenCharWizard2E: Abilities, Race, Class, Kit, Alignment, Equipment, Profs, Commit.
@@ -242,8 +250,10 @@ async function wizard2e(ctx, { race, cls, name, gear }) {
   await seat.click(`[data-race="${race}"]`);
   await tab("class");
   await seat.click(`[data-class="${cls}"]`);
+  // A kit from the active books, or No Kit where none fits (as in FG).
   await tab("kit");
-  await seat.locator("[data-kit]").first().click();
+  if (await seat.locator("[data-kit]").count()) await seat.locator("[data-kit]").first().click();
+  else await seat.click('[data-action="no-kit"]');
   await tab("alignment");
   await seat.click('[data-alignment="Lawful Good"]');
   await tab("equipment");
@@ -261,7 +271,7 @@ async function wizard2e(ctx, { race, cls, name, gear }) {
   await tab("commit");
   await seat.fill('[aria-label="Character name"]', name);
   await seat.waitForFunction(() => Boolean(document.querySelector('[aria-label="weight"]')?.value), null, { timeout: 15000 }).catch(() => undefined);
-  const undone = await seat.$eval("[data-wizard-tab]", (list) => list.filter((item) => item.getAttribute("data-done") !== "1").map((item) => item.getAttribute("data-wizard-tab")));
+  const undone = await seat.$$eval("[data-wizard-tab]", (list) => list.filter((item) => item.getAttribute("data-done") !== "1").map((item) => item.getAttribute("data-wizard-tab")));
   ctx.check(undone.length === 0, "every tab of the wizard is done", undone.join(", "));
   await finish(ctx);
 }
@@ -285,6 +295,7 @@ export const RULESETS = {
       await buy(ctx, ["Sword, Long", "Leather Armor", "Shield, Medium Steel", "Backpack", "Torch"]);
       await seat.click('[data-wizard-tab="finish"]');
       await seat.getByLabel("Character name").fill("Aldous Vane");
+      await seat.selectOption('select[aria-label="alignment"]', { index: 1 });
       await seat.click('[data-action="create-character"]');
       await seat.waitForSelector("[data-character]", { timeout: 20000 });
     },
@@ -326,7 +337,7 @@ export const RULESETS = {
       const { page, tool } = ctx;
       const ship = await tool("kraken_starship", { action: "create", name: "Rusty Lark", design: "Free Trader" });
       ctx.ship = ship;
-      await page.click('.sidebar [data-launch="ships"]');
+      await openSide(page, "ships");
       await page.click(`[data-ship="${ship.id}"]`);
       await page.click('[data-action="ship-deck-plans"]');
       for (let i = 0; i < 60 && !(await tool("kraken_map")).scene; i++) await wait(500);
@@ -354,12 +365,21 @@ export const RULESETS = {
       await seat.fill('[aria-label="Homeworld"]', "Regina");
       await seat.click('[data-wizard-tab="careers"]');
       await seat.waitForSelector("[data-life-task]");
+      let tookCash = false;
       for (let guard = 0; guard < 400; guard++) {
         if ((await seat.getAttribute("[data-wizard]", "data-life-done")) === "yes") break;
         const age = Number(await seat.getAttribute("[data-wizard]", "data-life-age"));
         const options = await seat.$$eval("[data-tc-option]:not(:disabled)", (list) => list.map((button) => ({ n: button.getAttribute("data-tc-option"), label: button.getAttribute("data-life-choice") })));
         if (!options.length) {
           await wait(200);
+          continue;
+        }
+        // Mustering out: one roll on the Cash table first (so there is money to spend), as most players do.
+        const cashOption = !tookCash && options.find((option) => /cash/i.test(option.label ?? ""));
+        if (cashOption) {
+          tookCash = true;
+          await seat.click(`[data-tc-option="${cashOption.n}"]`);
+          await wait(120);
           continue;
         }
         const finishOption = options.find((option) => /finish|stop/i.test(option.label ?? ""));
@@ -404,7 +424,7 @@ export const RULESETS = {
     async newNpc(ctx) {
       const { page } = ctx;
       // The GM's NPCs list: a new NPC (FG's +), filled in on its Traveller NPC sheet.
-      await page.click('.sidebar [data-launch="records:npc"]');
+      await openSide(page, "records:npc");
       await page.fill('[aria-label="New NPC name"]', "Pirate Raider");
       await page.click('[data-action="record-new"]');
       await page.waitForSelector("[data-npc-mgt2]", { timeout: 10000 });
@@ -432,8 +452,9 @@ export const RULESETS = {
     map: (ctx) => bookMap(ctx, "The Empty Watchtower"),
     wizard: (ctx) => wizard5e(ctx, { root: '[data-wizard="descending"]', cls: "Fighter", species: "Dwarf", background: "Grave Digger", name: "Wren Hallow" }),
     bought: checkKit,
-    enemy: (ctx) => libraryNpc(ctx, "The Empty Watchtower", ""),
-    parcel: (ctx) => libraryParcel(ctx, "The Empty Watchtower"),
+    // The Empty Watchtower keeps its creatures in the Bestiary, and has no parcels: the GM hands one out.
+    enemy: (ctx) => trackerNpc(ctx, "Bone Sentinel"),
+    parcel: (ctx) => handParcel(ctx, { coin: "GC", amount: 40, item: "Torch" }),
     xp: 150,
   },
   "Apeira Astra": {
@@ -448,7 +469,10 @@ export const RULESETS = {
         const need = tag === "major" ? 4 : 2;
         for (let i = 0; i < need; i++) await boxes.nth(i).check().catch(() => undefined);
       }
-      await buy(ctx, ["Carbine", "Mesh Undersuit", "Medkit", "Comm Bead"]);
+      // 2d6 each on the host's dice.
+      await seat.click('[data-action="astra-roll"]');
+      await seat.waitForFunction(() => !document.querySelector('[data-action="astra-roll"]')?.hasAttribute("disabled"), null, { timeout: 20000 });
+      await buy(ctx, ["Carbine", "Mesh Undersuit", "Medkit", "Comm Bead", "Stim Patch"]);
       await finish(ctx);
     },
     bought: checkBought,
@@ -480,8 +504,40 @@ export const RULESETS = {
         await seat.click('[data-action="blank-character"]');
       });
       await seat.waitForSelector("[data-character]", { timeout: 20000 });
+      // No wizard in a game of the GM's own (FG's CoreRPG has none): the player writes the gear in.
+      await seat.click('[data-sheet-tab="inventory"]');
+      ctx.bought = [];
+      for (const item of ["Lantern", "Rope", "Short sword"]) {
+        await seat.fill('[aria-label="Add an item"]', item);
+        await seat.press('[aria-label="Add an item"]', "Enter");
+        await wait(400);
+        ctx.bought.push(item);
+      }
     },
-    enemy: (ctx) => trackerNpc(ctx, "Bandit"),
+    bought: checkBought,
+    // FG's CoreRPG has no attack on the sheet: the player rolls in chat, the GM takes the damage off on the tracker.
+    async playerAttack(ctx) {
+      const { seat, tool } = ctx;
+      const say = seat.locator('textarea[placeholder*="ay something"], input[placeholder*="ay something"]').first();
+      await say.fill("/r 1d20+2 [ATTACK] Short sword");
+      await say.press("Enter");
+      await wait(600);
+      await say.fill("/r 1d6 [DAMAGE] Short sword");
+      await say.press("Enter");
+      await wait(600);
+      await tool("kraken_combat", { action: "damage", id: ctx.foe.id, amount: 4 });
+      return true;
+    },
+    async enemy(ctx) {
+      // The GM's NPCs list: a new NPC (FG's +), then onto the tracker.
+      const { page } = ctx;
+      await openSide(page, "records:npc");
+      await page.fill('[aria-label="New NPC name"]', "Bandit");
+      await page.click('[data-action="record-new"]');
+      await wait(800);
+      await closeWindows(page);
+      await trackerNpc(ctx, "Bandit");
+    },
     parcel: (ctx) => handParcel(ctx, { coin: "GP", amount: 30, item: "Rope" }),
     xp: 50,
   },

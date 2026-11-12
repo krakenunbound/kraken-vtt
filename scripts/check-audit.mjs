@@ -165,6 +165,13 @@ try {
   assert(/CRITICAL/.test(crit.label) && !/CRITICAL/.test(plain.label) && plain.formula !== crit.formula, `a spell's critical stays with its cast: ${crit.formula} then ${plain.formula}`);
   done.push("6 spell criticals per cast");
 
+  // 6b. FG's + on the sheet's inventory: an item by name, carried.
+  const plainCharacter = await tool("kraken_record_create", { type: "character", name: "Wren Plain", data: {} });
+  await tool("kraken_character_edit", { id: plainCharacter.id, changes: [{ path: "inventory.add", value: "Silver mirror" }] });
+  const mirror = Object.values(agent.records.get(plainCharacter.id).data.inventorylist ?? {}).find((item) => item.name === "Silver mirror");
+  assert(mirror && mirror.carried === 1 && mirror.count === 1, `an item added by name: ${JSON.stringify(mirror)}`);
+  done.push("6b an item added to the sheet by name");
+
   // 7. Temporary hit points first.
   await tool("kraken_character_edit", { id: ilseId, changes: [{ path: "hp.temp", value: 5 }] });
   entries = await view();

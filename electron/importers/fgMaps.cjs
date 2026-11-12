@@ -86,7 +86,8 @@ const FX_MAP = { rain: "rain", snow: "snow", blizzard: "blizzard", myst: "fog", 
 function imageScene(record, moduleName, sceneId) {
   const image = record.data?.image ?? {};
   const layers = list(image.layers?.layer);
-  const base = layers.find((layer) => layer.type === "image" && layer.bitmap) ?? null;
+  // FG Unity's layers; an older module's image is its bitmap alone (no layers).
+  const base = layers.find((layer) => layer.type === "image" && layer.bitmap) ?? (image.bitmap ? { type: "image", bitmap: image.bitmap } : null);
   const picture = base ? modulePicture(base.bitmap, moduleName) : null;
   if (!picture) return null;
   const size = pictureSize(picture.bytes);
@@ -261,6 +262,8 @@ function isMap(record) {
   if (/^(maps|region map)$/i.test(category)) return true;
   const image = record.data?.image ?? {};
   if (image.grid === "on") return true;
+  // An older module's map: a grid size and no grid switch.
+  if (image.grid !== "off" && Number(String(image.gridsize ?? "").split(",")[0]) > 0) return true;
   return list(image.layers?.layer).some((layer) => layer.occluders);
 }
 

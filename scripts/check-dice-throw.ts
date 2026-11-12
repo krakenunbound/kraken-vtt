@@ -84,3 +84,16 @@ assert(knocks >= 6, `a throw into dice on the table knocks against them: ${knock
 // (A rare throw runs to the limit; it still ends on its last frame, showing the right number.)
 assert(still >= throws - 1, `throws come to rest within 6 s: ${still}/${throws}`);
 console.log(`ok ${throws} throws: every die shows the host's number (${still} settled before the limit); a throw into dice already on the table knocks against them (${knocks}/12) and none ends inside or on another`);
+
+// A natural 20 and a 1, heard: the sad trombone steps down and ends on its
+// longest, sagging note; the fanfare climbs and ends on its highest, held.
+{
+  const { naturalTune } = await import("../src/dice/critSound");
+  const low = naturalTune("low");
+  const high = naturalTune("high");
+  assert(low.every((note, index) => index === 0 || note.freq < low[index - 1].freq), "the trombone steps down");
+  const last = low[low.length - 1];
+  assert(last.length === Math.max(...low.map((note) => note.length)) && (last.slideTo ?? last.freq) < last.freq && last.wobble, "its last note is the longest, sagging and wobbling");
+  assert(high[high.length - 1].freq === Math.max(...high.map((note) => note.freq)) && high[high.length - 1].length === Math.max(...high.map((note) => note.length)), "the fanfare ends on its highest note, held");
+  console.log("ok a natural 20's fanfare and a natural 1's sad trombone");
+}

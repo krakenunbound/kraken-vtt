@@ -89,6 +89,18 @@ try {
   await wizard.locator('select[aria-label="Minor Path"]').selectOption("Engineer");
   for (const key of ["firearms", "melee", "athletics", "zerog"]) await seat.check(`[data-astra-skill="major:${key}"]`);
   for (const key of ["mechanics", "engineering"]) await seat.check(`[data-astra-skill="minor:${key}"]`);
+  // 2d6 each, the host's dice in chat; then the placed spread again for Rook's numbers.
+  await seat.click('[data-wizard="astra"] [data-action="astra-roll"]');
+  await page.waitForFunction(() => document.body.textContent.includes("Presence (characteristic)"), null, { timeout: 20000 });
+  for (const [stat, score] of [["brawn", 10], ["reflex", 9], ["grit", 8], ["intellect", 7], ["training", 6], ["presence", 5]]) await seat.fill(`[data-wizard="astra"] input[aria-label="${stat} score"]`, String(score));
+  // The shop: Marine 1000 + half of Engineer's 1200 = 1600 cr; two stim patches (60 each) and a medkit (300).
+  assert((await seat.getAttribute("[data-coin-left]", "data-coin-left")) === "1600", `the purse: ${await seat.getAttribute("[data-coin-left]", "data-coin-left")}`);
+  await seat.fill('[aria-label="Shop search"]', "Stim");
+  await seat.click('[aria-label="Buy Stim Patch"]');
+  await seat.click('[aria-label="Buy Stim Patch"]');
+  await seat.fill('[aria-label="Shop search"]', "Medkit");
+  await seat.click('[aria-label="Buy Medkit"]');
+  assert((await seat.getAttribute("[data-coin-left]", "data-coin-left")) === "1180", "1600 - 120 - 300 = 1180 left");
   await seat.click('[data-wizard="astra"] [data-action="wizard-finish"]');
   await seat.waitForSelector('[data-ruleset="astra"]', { timeout: 15000 });
   const sheet = seat.locator('[data-ruleset="astra"]');
@@ -97,6 +109,10 @@ try {
   const listedCharacters = await tool("kraken_records_list", { type: "character" });
   const rook = (listedCharacters.records ?? listedCharacters).find((item) => item.name === "Rook Tamsin");
   const data = await dataOf(rook.id);
+  // What was bought, and the credits left.
+  const bought = Object.values(data.inventorylist ?? {});
+  const credits = Object.values(data.coins ?? {}).reduce((sum, coin) => sum + Number(coin.amount || 0), 0);
+  assert(bought.some((item) => item.name === "Stim Patch" && item.count === 2) && bought.some((item) => item.name === "Medkit") && credits === 1180, `the shop's gear and 1180 cr left: ${credits} ${bought.map((item) => item.name).join(", ")}`);
   assert(data.ruleset === "astra" && data.skills.firearms.level === 2 && data.skills.zerog.level === 2 && data.hp.total === 27 && data.ac.total === 5, `Rook's numbers: ${JSON.stringify({ skills: data.skills, hp: data.hp, ac: data.ac })}`);
   assert(/^kraken-games\/portraits\/Spacer\/Spacer Marine\./.test(data.portrait ?? "") && /^kraken-games\/tokens\/Spacer\//.test(data.token ?? ""), `Kraken's Spacer Marine portrait and token: ${data.portrait}, ${data.token}`);
   // A task from the sheet: Zero-G, Hard.

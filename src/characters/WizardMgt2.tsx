@@ -52,6 +52,25 @@ type Life = {
   why: string;
 };
 const TITLES: Record<string, string> = { characteristics: "Characteristics", species: "Species", background: "Background", careers: "Careers", benefits: "Benefits", skills: "Skills", finish: "Finish" };
+// The extension's own instructions for a page (its strings), as FG's Instructions panel.
+const EXT = "KrakenCharWizardMGT2";
+function Instructions({ session, tab }: { session: Session; tab: string }) {
+  const [text, setText] = useState("");
+  useEffect(() => {
+    let live = true;
+    void session.wizardText(EXT, "@string", [`tcwiz_steps_${tab}`]).then((result) => live && setText(result.values[0] ?? ""));
+    return () => {
+      live = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab]);
+  return text ? (
+    <details className="life-instructions" data-life-instructions={tab}>
+      <summary>Instructions</summary>
+      <p>{text}</p>
+    </details>
+  ) : null;
+}
 const list = <T,>(value: T[] | Record<string, T> | undefined | null): T[] => (Array.isArray(value) ? value : value && typeof value === "object" ? Object.values(value) : []);
 
 export function WizardMgt2({ session, onDone }: { session: Session; onDone: (id: string | null) => void }) {
@@ -138,7 +157,8 @@ export function WizardMgt2({ session, onDone }: { session: Session; onDone: (id:
         ))}
       </nav>
       <div className="life-grid">
-        <div className="life-page" data-life-page={tab}>
+        <div className="life-page" data-life-page={tab} style={{ ["--life-art" as string]: `url(${session.wizardArtUrl(EXT, `art_${tab}.webp`)})` }}>
+          <Instructions session={session} tab={tab} />
           {tab === "characteristics" ? (
             <>
               <p className="hint">Roll 2D six times, then swap any two scores (click one, then the other) until the first term begins.</p>

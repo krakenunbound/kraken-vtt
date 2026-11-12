@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { useHostRolls } from "./Wizard2e";
+import { priceOf } from "../../shared/shop.mjs";
 import type { Session, TableRecord } from "../session/useSession";
 import { Icon } from "../ui/icons";
 import { slotDrag } from "../ui/QuickSlots";
@@ -327,12 +329,40 @@ export function WizardAstra({ session, onDone }: { session: Session; onDone: (id
     const option = rows(majorRecord?.data.startingequipmentlist)[0]?.[1];
     return rows(option?.items).map(([, item]) => [String(item.name), num(item.count) || 1]);
   };
-  const roll = () => setScores(Object.fromEntries(STATS.map((stat: string) => [stat, 2 + Math.floor(Math.random() * 6) + Math.floor(Math.random() * 6)])));
+  // 2d6 each, the host's dice (in chat for the table).
+  const hostRoll = useHostRolls(session);
+  const [rolling, setRolling] = useState(false);
+  const roll = async () => {
+    setRolling(true);
+    try {
+      const next: Record<string, number> = {};
+      for (const stat of STATS as string[]) next[stat] = (await hostRoll("2d6", `${STAT_NAMES[stat as keyof typeof STAT_NAMES]} (characteristic)`)).total;
+      setScores(next);
+    } finally {
+      setRolling(false);
+    }
+  };
+  // The shop: the books' gear at its price in credits, paid from the major Path's credits.
+  const wares = useMemo(
+    () =>
+      records
+        .filter((item) => item.type === "item")
+        .map((item) => ({ name: item.name, price: priceOf(item.data.cost, true), kind: String(item.data.type ?? item.data.__category ?? "") }))
+        .filter((item): item is { name: string; price: number; kind: string } => item.price !== null)
+        .sort((a, b) => a.name.localeCompare(b.name)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [session.records],
+  );
+  const [cart, setCart] = useState<Record<string, number>>({});
+  const [search, setSearch] = useState("");
+  const purse = Math.round(num(majorRecord?.data.credits) + (minor && minor !== major ? num(minorRecord?.data.credits) / 2 : 0));
+  const spent = Object.entries(cart).reduce((sum, [ware, count]) => sum + (wares.find((item) => item.name === ware)?.price ?? 0) * count, 0);
+  const left = purse - spent;
   const finish = async () => {
     setBusy(true);
     setProblem("");
     try {
-      const id = await session.buildCharacter({ name: name || "Spacer", origin, major, minor: minor === major ? "" : minor, characteristics: scores, majorSkills: majorSkills.map((key) => SKILLS[key as keyof typeof SKILLS][0]), minorSkills: minorSkills.map((key) => SKILLS[key as keyof typeof SKILLS][0]), gear: kit() });
+      const id = await session.buildCharacter({ name: name || "Spacer", origin, major, minor: minor === major ? "" : minor, characteristics: scores, majorSkills: majorSkills.map((key) => SKILLS[key as keyof typeof SKILLS][0]), minorSkills: minorSkills.map((key) => SKILLS[key as keyof typeof SKILLS][0]), gear: kit(), buy: Object.entries(cart) });
       onDone(id);
     } catch (error) {
       setProblem(error instanceof Error ? error.message : String(error));
@@ -398,7 +428,7 @@ export function WizardAstra({ session, onDone }: { session: Session; onDone: (id
       </p>
       <h4>
         Characteristics <small className="hint">place 10, 9, 8, 7, 6, 5, or roll 2d6 each</small>{" "}
-        <button type="button" className="ghost" data-action="astra-roll" onClick={roll}>
+        <button type="button" className="ghost" data-action="astra-roll" disabled={rolling} onClick={() => void roll()}>
           Roll 2d6 each
         </button>
       </h4>
@@ -423,6 +453,35 @@ export function WizardAstra({ session, onDone }: { session: Session; onDone: (id
           {picker(minorRecord, minorSkills, setMinorSkills, 2, "minor")}
         </>
       ) : null}
+      <h4>
+        Starting gear <small className="hint">the {major} kit, and what you buy with its credits</small>
+      </h4>
+      <p className="hint">Kit: {kit().map(([item, count]) => `${count > 1 ? `${count} x ` : ""}${item}`).join(", ") || "none"}</p>
+      <p className="cc-inline">
+        Credits {purse} · spent {spent} · <b data-coin-left={left}>{left} cr left</b>
+      </p>
+      <input aria-label="Shop search" placeholder="Search the shop" value={search} onChange={(event) => setSearch(event.target.value)} />
+      <ul className="life-shop">
+        {wares
+          .filter((item) => item.name.toLowerCase().includes(search.toLowerCase()))
+          .slice(0, 60)
+          .map((item) => (
+            <li key={item.name}>
+              <span>
+                {item.name} <small className="hint">{item.price} cr{item.kind ? ` · ${item.kind}` : ""}</small>
+              </span>
+              {cart[item.name] ? <b>x{cart[item.name]}</b> : null}
+              <button type="button" aria-label={`Buy ${item.name}`} disabled={item.price > left} onClick={() => setCart({ ...cart, [item.name]: (cart[item.name] ?? 0) + 1 })}>
+                Buy
+              </button>
+              {cart[item.name] ? (
+                <button type="button" aria-label={`Return ${item.name}`} onClick={() => setCart(Object.fromEntries(Object.entries({ ...cart, [item.name]: cart[item.name] - 1 }).filter(([, count]) => count > 0)))}>
+                  Return
+                </button>
+              ) : null}
+            </li>
+          ))}
+      </ul>
       {problem ? <p className="error">{problem}</p> : null}
     </section>
   );

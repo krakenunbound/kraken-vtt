@@ -189,7 +189,13 @@ async function editCharacter(table, record, changes, seat) {
       const text = String(value ?? "").trim().slice(0, 60);
       if (text && !Object.values(list).some((row) => String(row?.name).toLowerCase() === text.toLowerCase())) list[engine.nextId(list)] = { name: text };
     } else if (/^languagelist\.id-\d+$/.test(path) && value === null) delete data.languagelist?.[path.split(".")[1]];
-    else throw new Error(`The sheet cannot change ${path}.`);
+    else if (path === "inventory.add") {
+      // FG's + on the inventory list: an item by name, carried.
+      const itemName = String(value ?? "").trim().slice(0, 120);
+      if (!itemName) throw new Error("Which item?");
+      const list = (data.inventorylist = data.inventorylist ?? {});
+      list[engine.nextId(list)] = { name: itemName, count: 1, carried: 1 };
+    } else throw new Error(`The sheet cannot change ${path}.`);
   }
   data.name = name;
   const derived = engine.derive(data, game);

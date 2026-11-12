@@ -812,7 +812,8 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         res.end();
         return;
       }
-      const wanted = String(url.searchParams.get("module") || "");
+      // The book by id, name or title, as the Library reads it (the shelf's file).
+      const wanted = require("./library.cjs").resolved(String(url.searchParams.get("module") || ""));
       prepareModule(wanted).then(() => {
       try {
         const { fgModuleBundle } = require("./importers/fgMaps.cjs");
@@ -845,6 +846,41 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       return;
     }
     // The art library: a list for the pickers, and the files themselves.
+    // The GM's FG character wizards' pictures (electron/wizardArt.cjs), to every seat.
+    if (req.method === "GET" && url.pathname === "/wizard-art") {
+      const token = url.searchParams.get("token") || "";
+      const allowed = token.length > 0 && [...clients.values()].some((client) => client.assetToken === token);
+      const found = allowed ? require("./wizardArt.cjs").wizardArt(url.searchParams.get("ext") || "", url.searchParams.get("file") || "") : null;
+      if (!found) {
+        res.writeHead(404, { "Cache-Control": "no-store" });
+        res.end();
+        return;
+      }
+      res.writeHead(200, { "Content-Type": found.mime, "Content-Length": found.bytes.length, "Cache-Control": "private, max-age=86400", "X-Content-Type-Options": "nosniff" });
+      res.end(found.bytes);
+      return;
+    }
+    // The GM's FG character wizards' words (electron/extLua.cjs): a call of the
+    // extension's own script, its icon names resolved to pictures (files).
+    if (req.method === "GET" && url.pathname === "/wizard-text") {
+      const token = url.searchParams.get("token") || "";
+      const allowed = token.length > 0 && [...clients.values()].some((client) => client.assetToken === token);
+      let body = null;
+      try {
+        const ext = url.searchParams.get("ext") || "";
+        const { callExtension, iconFile, extensionString } = require("./extLua.cjs");
+        const fn = url.searchParams.get("fn") || "";
+        const args = JSON.parse(url.searchParams.get("args") || "[]");
+        // "@string": one of the extension's strings by name.
+        const values = !allowed ? null : fn === "@string" ? [extensionString(ext, String(args[0] ?? ""))] : callExtension(ext, fn, args);
+        if (values) body = { values, files: values.map((value) => (value ? iconFile(ext, value) : null)) };
+      } catch {
+        body = null;
+      }
+      res.writeHead(body ? 200 : 404, { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "private, max-age=3600" });
+      res.end(JSON.stringify(body ?? { values: [] }));
+      return;
+    }
     if (req.method === "GET" && (url.pathname === "/art/list" || url.pathname === "/art/file")) {
       const token = url.searchParams.get("token") || "";
       const allowed = token.length > 0 && [...clients.values()].some((client) => client.assetToken === token);

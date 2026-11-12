@@ -43,7 +43,7 @@ const LORE: Record<Page, string> = {
 };
 
 // Waits for the host's answer to a roll this window asked for.
-function useHostRolls(session: Session) {
+export function useHostRolls(session: Session) {
   const waiting = useRef(new Map<string, (roll: RollResult) => void>());
   const seen = useRef(0);
   useEffect(() => {
@@ -75,6 +75,36 @@ function Plate({ children, action }: { children: React.ReactNode; action?: React
     </div>
   );
 }
+
+// The extension's own words and picture for a race, class or alignment (its
+// bio_charwizard2e.lua, run by the host: electron/extLua.cjs), as FG's page
+// shows them: the portrait beside the first block, the rest below.
+const EXT = "KrakenCharWizard2E";
+function Lore({ session, title, top, below, image, args }: { session: Session; title: string; top: string; below?: string; image?: string; args: unknown[] }) {
+  const [lore, setLore] = useState<{ top: string; below: string; picture: string }>({ top: "", below: "", picture: "" });
+  const key = JSON.stringify(args);
+  useEffect(() => {
+    let live = true;
+    void Promise.all([session.wizardText(EXT, top, args), below ? session.wizardText(EXT, below, args) : Promise.resolve({ values: [], files: [] }), image ? session.wizardText(EXT, image, args) : Promise.resolve({ values: [], files: [] })]).then(([a, b, c]) => {
+      if (live) setLore({ top: a.values[0] ?? "", below: b.values[0] ?? "", picture: c.files[0] ? session.wizardArtUrl(EXT, c.files[0]) : "" });
+    });
+    return () => {
+      live = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key, top, below, image]);
+  if (!lore.top && !lore.below) return null;
+  return (
+    <div className="ccw-lore" data-lore={title}>
+      <Plate>{title}</Plate>
+      {lore.picture ? <img className="ccw-lore-picture" src={lore.picture} alt="" /> : null}
+      {lore.top ? <p className="ccw-lore-text">{lore.top}</p> : null}
+      {lore.below ? <p className="ccw-lore-text ccw-lore-below">{lore.below}</p> : null}
+    </div>
+  );
+}
+// Each page's art, faint behind it (the extension's graphics).
+const PAGE_ART: Record<string, string> = { abilities: "abilities_art.png", race: "race_art.png", class: "class_art.png", kit: "kit_art.png", alignment: "alignment_art.png", equipment: "equipment_art.png", proficiencies: "proficiencies_art.png", spells: "class_art.png", commit: "commit_art.png" };
 
 type Kit = { name: string; book: string; data: Row };
 type CartRow = { name: string; cp: number; count: number };
@@ -537,7 +567,7 @@ export function Wizard2e({ session, onDone }: { session: Session; onDone: (id: s
               </button>
             </p>
           ) : null}
-          <div className="ccw-page" style={{ ["--ccw-art" as string]: "none" }}>
+          <div className="ccw-page" style={{ ["--ccw-art" as string]: PAGE_ART[page] ? `url(${session.wizardArtUrl(EXT, PAGE_ART[page])})` : "none" }}>
             <p className="hint">{LORE[page]}</p>
 
             {page === "abilities" ? (
@@ -650,6 +680,7 @@ export function Wizard2e({ session, onDone }: { session: Session; onDone: (id: s
                       );
                     })()}
                   </div>
+                  <Lore session={session} title="About this Race" top="getRaceDescTop" below="getRaceDescBelow" image="getRaceImage" args={[race]} />
                 </>
               ) : (
                 <>
@@ -739,6 +770,9 @@ export function Wizard2e({ session, onDone }: { session: Session; onDone: (id: s
                       );
                     })}
                   </div>
+                  {entries.map((entry) => (
+                    <Lore key={entry.name} session={session} title={entries.length > 1 ? `About the ${entry.name}` : "About this Class"} top="getClassDescTop" below="getClassDescBelow" image="getClassImage" args={[entry.name]} />
+                  ))}
                 </>
               ) : (
                 <>
@@ -880,6 +914,7 @@ export function Wizard2e({ session, onDone }: { session: Session; onDone: (id: s
                     {alignment ? alignment.toUpperCase() : "Alignment"}
                   </Plate>
                   {W.alignmentHint(words) ? <p className="hint">{W.alignmentHint(words)}</p> : null}
+                  {alignment ? <Lore session={session} title={alignment} top="getAlignmentDescription" args={[alignment]} /> : <Lore session={session} title="About Alignment" top="getAlignmentOverview" args={[]} />}
                   {alignment ? null : (
                     <div className="ccw-picklist">
                       {(W.alignmentOptions(words) as string[]).map((item) => (

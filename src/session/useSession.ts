@@ -923,6 +923,19 @@ export function useSession() {
       assetRef.current ? `${originRef.current}/table/record-art?token=${assetRef.current}&record=${encodeURIComponent(recordId)}&kind=${kind}` : "",
     [],
   );
+  // A picture of the GM's FG character wizard (its extension's graphics folder, served by the host).
+  const wizardArtUrl = useCallback(
+    (extension: string, file: string) => (assetRef.current ? `${originRef.current}/wizard-art?token=${assetRef.current}&ext=${encodeURIComponent(extension)}&file=${encodeURIComponent(file)}` : ""),
+    [],
+  );
+  // A call of the GM's FG character wizard's own script (its race, class and alignment words): values, and pictures for icon names.
+  const wizardText = useCallback(async (extension: string, fn: string, args: unknown[] = []): Promise<{ values: (string | null)[]; files: (string | null)[] }> => {
+    if (!assetRef.current) return { values: [], files: [] };
+    const response = await fetch(`${originRef.current}/wizard-text?token=${assetRef.current}&ext=${encodeURIComponent(extension)}&fn=${encodeURIComponent(fn)}&args=${encodeURIComponent(JSON.stringify(args))}`);
+    if (!response.ok) return { values: [], files: [] };
+    const body = (await response.json()) as { values?: (string | null)[]; files?: (string | null)[] };
+    return { values: body.values ?? [], files: body.files ?? [] };
+  }, []);
   // Background decals and wallpapers: a picture (any seat), and the list to choose from (the GM's).
   const decalUrl = useCallback(
     (id: string, kind: PictureKind = "decal") => (id && assetRef.current ? `${originRef.current}/${kind}/file?token=${assetRef.current}&id=${encodeURIComponent(id)}` : ""),
@@ -1141,6 +1154,8 @@ export function useSession() {
     decalUrl,
     decalList,
     recordArtUrl,
+    wizardArtUrl,
+    wizardText,
     roll,
     op,
     siegeCheck,

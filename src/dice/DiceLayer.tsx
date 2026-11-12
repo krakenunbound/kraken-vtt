@@ -7,6 +7,7 @@ import { bottomFace, buildDie, model, pulseDice, tensLook, topFace, type ShapeKi
 import { sparkColors, studioScene } from "./gilded";
 import { TRAILS } from "./effects";
 import { playHit } from "./sound";
+import { playNatural } from "./critSound";
 import { defaultThrow, diceOf, labelsFor, MAX_DICE, simulate, type Die, type Hit, type OnTable } from "./throw";
 
 // 3D dice thrown across the whole table, as FG's. The host has already
@@ -184,7 +185,11 @@ function createEngine(host: HTMLDivElement) {
           item.groups.forEach((group, die) => {
             if (item.dice[die].kind !== "d20") return;
             const shown = item.labels[die][topFace("d20", group.quaternion)];
-            if (shown === "20" || shown === "1") effects.flare(shown === "20" ? "high" : "low", group.position.x, group.position.y, group.position.z);
+            if (shown === "20" || shown === "1") {
+              effects.flare(shown === "20" ? "high" : "low", group.position.x, group.position.y, group.position.z);
+              // And heard: a fanfare for a 20, the sad trombone for a 1 (the dice sound's setting and volume).
+              playNatural(shown === "20" ? "high" : "low", volume);
+            }
           });
       }
       if (item.landed && now - item.landed > HOLD_MS) {

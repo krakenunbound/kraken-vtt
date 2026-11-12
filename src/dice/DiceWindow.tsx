@@ -219,7 +219,7 @@ export function DiceWindow({ session }: { session: Session }) {
         <Chips label="Effect" items={EFFECTS} value={look.effect} onPick={(effect) => setLook({ effect })} />
         <label className="check">
           <input type="checkbox" checked={look.crit !== false} onChange={(event) => setLook({ crit: event.target.checked })} />
-          A natural 20 flares gold, a 1 red
+          A natural 20 flares gold to a fanfare, a 1 red to a sad trombone (with dice sound on)
         </label>
         <label className="check">
           <input type="checkbox" checked={Boolean(look.pips)} onChange={(event) => setLook({ pips: event.target.checked })} data-dice="pips" />

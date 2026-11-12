@@ -1334,6 +1334,7 @@ textarea.cc-field.tall { min-height: 220px; }
 .sheet-5e .five-slots { display: flex; flex-wrap: wrap; gap: 12px; margin: 6px 0; }
 .sheet-5e .five-coins { display: flex; gap: 12px; margin-top: 8px; }
 .wizard-5e { display: flex; flex-direction: column; gap: 8px; padding: 12px; overflow: auto; }
+.wizard-5e > * { flex-shrink: 0; }
 .wizard-5e-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
 .wizard-5e-grid label, .wizard-5e-scores label { display: flex; flex-direction: column; gap: 3px; }
 .wizard-5e-scores { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
@@ -1530,3 +1531,17 @@ textarea.cc-field.tall { min-height: 220px; }
 .wizard-mgt2 .life-shop { list-style: none; margin: 0; padding: 0; max-height: 240px; overflow: auto; display: flex; flex-direction: column; gap: 3px; }
 .wizard-mgt2 .life-shop li { display: grid; grid-template-columns: 1fr auto auto auto; gap: 6px; align-items: center; }
 .wizard-mgt2 .life-warnings { color: #e0a24a; font-size: 0.85rem; }
+
+/* The FG wizard's own words for a race, class or alignment: the portrait to the left, the text wrapping beside it, the rest below. */
+.ccw-lore { margin-top: 8px; }
+.ccw-lore::after { content: ""; display: block; clear: both; }
+.ccw-lore-picture { float: left; max-width: min(220px, 34%); max-height: 300px; object-fit: contain; margin: 4px 14px 8px 4px; }
+.ccw-lore-text { white-space: pre-line; line-height: 1.45; margin: 6px 4px; }
+.ccw-lore-below { clear: both; }
+
+/* The Traveller wizard's pages: the extension's art covering the page, faint (FG: 16:9, colour 30FFFFFF). */
+.life-page { position: relative; isolation: isolate; }
+.life-page::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--life-art) center / cover no-repeat; opacity: 0.19; pointer-events: none; border-radius: inherit; }
+.life-instructions { margin-bottom: 8px; }
+.life-instructions > summary { cursor: pointer; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; font-size: 0.85em; }
+.life-instructions > p { white-space: pre-line; line-height: 1.45; }

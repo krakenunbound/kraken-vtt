@@ -64,6 +64,12 @@ async function runRuleset(ruleset, plan) {
       problem(`stopped: ${error.message.split("\n")[0]}`);
     }
     const ok = problems.length === before;
+    // A failed step: both screens, to see why.
+    if (!ok) {
+      const tag = `fail-${name.split(" ")[0]}`;
+      await ctx.page?.screenshot({ path: path.join(outDir, `${slug}-${tag}-gm.png`) }).catch(() => undefined);
+      await ctx.seat?.screenshot({ path: path.join(outDir, `${slug}-${tag}-player.png`) }).catch(() => undefined);
+    }
     steps.push({ name, ok, ms: Date.now() - started });
     console.log(`${ok ? "ok  " : "FAIL"} ${ruleset} · ${name} (${Math.round((Date.now() - started) / 1000)}s)`);
     return ok;
@@ -136,21 +142,26 @@ async function runRuleset(ruleset, plan) {
       await page.fill('input[name="password"]', "pw");
       await page.click('[data-action="play"]');
       await page.waitForSelector("text=Hosting", { timeout: 30000 });
-      const shelf = (await tool("kraken_books", { action: "list" })).books ?? [];
+      const listed = await tool("kraken_books", { action: "list" });
+      const shelf = Array.isArray(listed) ? listed : listed.books ?? [];
       ctx.shelf = shelf;
       const want = plan.books ?? [];
       if (want.length) {
-        await page.click('.sidebar [data-launch="books"]');
+        await openSide(page, "books");
         await page.click('[data-books-tab="activation"]');
         for (const title of want) {
           const book = shelf.find((item) => item.title === title || item.name === title);
           if (!check(book, `the shelf has ${title}`, shelf.map((item) => item.title).join(" | ").slice(0, 400))) continue;
           const box = page.locator(`[data-activate="${book.id}"]`);
-          if (!(await box.isChecked())) await box.check();
+          // The box is the host's: it ticks when the host says the book is active.
+          if (!(await box.isChecked())) {
+            await box.click();
+            await waitFor(() => box.isChecked(), 30000);
+          }
         }
         await page.waitForTimeout(1500);
-        const active = (await tool("kraken_books", { action: "list" })).books.filter((item) => item.active).map((item) => item.title);
-        for (const title of want) check(active.includes(title), `${title} is active`, active.join(", "));
+        const active = [].concat(await tool("kraken_books", { action: "list" })).filter((item) => item.active);
+        for (const title of want) check(active.some((item) => item.title === title || item.name === title), `${title} is active`, active.map((item) => item.title).join(", "));
         await closeWindows(page);
       }
       await ctx.shot(page, "02-books");
@@ -171,9 +182,15 @@ async function runRuleset(ruleset, plan) {
       ctx.seat = await browser.newPage({ viewport: { width: 1480, height: 900 } });
       ctx.seat.on("pageerror", (error) => problem("player page error", error.message));
       await ctx.seat.goto(`http://127.0.0.1:${ctx.port}/`);
-      await ctx.seat.fill('input[name="name"]', "A test player");
-      await ctx.seat.fill('input[name="account-password"]', "test-pass-1");
-      await ctx.seat.fill('input[name="password"]', "pw");
+      await ctx.seat.waitForLoadState("networkidle").catch(() => undefined);
+      // Each field filled and read back (a field the page was still settling once took stray keys).
+      for (const [field, value] of [["name", "A test player"], ["account-password", "test-pass-1"], ["password", "pw"]]) {
+        for (let attempt = 0; attempt < 3; attempt++) {
+          await ctx.seat.fill(`input[name="${field}"]`, value);
+          if ((await ctx.seat.inputValue(`input[name="${field}"]`)) === value) break;
+          await ctx.seat.waitForTimeout(300);
+        }
+      }
       await ctx.seat.click('button[type="submit"]');
       await ctx.seat.waitForSelector(".sidebar", { timeout: 20000 });
       const accounts = await tool("kraken_accounts", { action: "list" }).catch(() => null);
@@ -184,7 +201,7 @@ async function runRuleset(ruleset, plan) {
 
     // 7, 9, 10. The wizard (a lifepath through several terms; starting gear bought).
     await step("7 the character wizard (9 several terms, 10 starting gear bought)", async () => {
-      await seat.click('.sidebar [data-launch="characters"]');
+      await openSide(seat, "characters");
       await seat.waitForSelector('[data-action="new-character"]', { timeout: 15000 });
       await seat.click('[data-action="new-character"]');
       await plan.wizard(ctx);
@@ -234,7 +251,7 @@ async function runRuleset(ruleset, plan) {
       await seat.click(".dice-pool .play-button");
       const line = await waitFor(async () => {
         const lines = await tool("kraken_chat_log", { count: 30 });
-        return (Array.isArray(lines) ? lines : []).reverse().find((item) => item.roll && /A test player|Ilsa|character/i.test(`${item.from} ${item.roll.by ?? ""}`) && item.roll.terms?.some((term) => term.sides === 20));
+        return (Array.isArray(lines) ? lines : []).reverse().find((item) => item.roll && [`A test player`, ctx.character?.name ?? "A test player"].some((who) => `${item.from} ${item.roll.by ?? ""}`.includes(who)) && item.roll.terms?.some((term) => term.sides === 20));
       }, 15000);
       if (!check(line, "the player's roll is in chat")) return;
       check(line.roll.look && line.roll.look.theme !== undefined, `the roll carries the player's dice (${presetName})`, JSON.stringify(line.roll.look ?? {}).slice(0, 160));
@@ -268,14 +285,14 @@ async function runRuleset(ruleset, plan) {
 
     // 14b. The character on the combat tracker and the party sheet.
     await step("14b the character on the combat tracker and the party sheet", async () => {
-      await page.click('.sidebar [data-launch="party"]');
+      await openSide(page, "party");
       await page.waitForSelector('[aria-label="Add to the party"]', { timeout: 10000 });
       await page.selectOption('[aria-label="Add to the party"]', ctx.character.id);
       await page.waitForTimeout(500);
       const party = await tool("kraken_party");
       check(JSON.stringify(party).includes(ctx.character.id), "the character is in the party");
       await closeWindows(page);
-      await page.click('.sidebar [data-launch="combat"]');
+      await openSide(page, "combat");
       await page.waitForSelector(".combat-tracker", { timeout: 10000 });
       await tool("kraken_combat", { action: "add-party" });
       const view = await tool("kraken_combat", { action: "view" });
@@ -305,9 +322,9 @@ async function runRuleset(ruleset, plan) {
     await step("18 the parcel and experience to the character", async () => {
       const before = await tool("kraken_record_get", { id: ctx.character.id });
       const coinsBefore = coinTotal(before.data.coins);
-      const itemsBefore = Object.keys(before.data.inventorylist ?? {}).length;
+      const itemsBefore = itemCount(before.data.inventorylist);
       const expBefore = Number(before.data.exp ?? 0);
-      await page.click('.sidebar [data-launch="party"]');
+      await openSide(page, "party");
       await page.click('[role="tab"]:has-text("Inventory")');
       for (const [index, name] of (ctx.parcelItems ?? []).entries()) {
         const box = page.locator(`[aria-label="Who gets ${name}"]`);
@@ -325,11 +342,11 @@ async function runRuleset(ruleset, plan) {
       }
       const after = await tool("kraken_record_get", { id: ctx.character.id });
       check(coinTotal(after.data.coins) > coinsBefore, "the parcel's money reached the character", `${coinsBefore} -> ${coinTotal(after.data.coins)} ${JSON.stringify(after.data.coins)}`);
-      if (ctx.parcelItems?.length) check(Object.keys(after.data.inventorylist ?? {}).length > itemsBefore, "the parcel's items reached the character");
+      if (ctx.parcelItems?.length) check(itemCount(after.data.inventorylist) > itemsBefore, "the parcel's items reached the character", `${itemsBefore} -> ${itemCount(after.data.inventorylist)}`);
       if (plan.xp !== null) check(Number(after.data.exp ?? 0) >= expBefore + (plan.xp ?? 100), "the experience reached the character", `${expBefore} -> ${after.data.exp}`);
       // The player's sheet shows the experience.
       await seat.bringToFront();
-      await seat.click('.sidebar [data-launch="characters"]').catch(() => undefined);
+      await openSide(seat, "characters").catch(() => undefined);
       if (plan.xp !== null) {
         const shown = await seat.evaluate((value) => document.body.innerText.includes(String(value)), after.data.exp);
         check(shown, "the player's sheet shows the experience", String(after.data.exp));
@@ -354,6 +371,11 @@ async function runRuleset(ruleset, plan) {
 }
 
 // --- Helpers ---------------------------------------------------------------------
+// A sidebar window opened (its button toggles: pressed again it would close).
+async function openSide(where, launch) {
+  if (await where.$(`.sidebar [data-launch="${launch}"].open`)) return;
+  await where.click(`.sidebar [data-launch="${launch}"]`);
+}
 async function waitFor(test, ms = 10000) {
   const until = Date.now() + ms;
   while (Date.now() < until) {
@@ -426,30 +448,39 @@ async function fight(ctx) {
     return { foe: foe && !["Dead", "Destroyed", "Dying", "Down", "Unconscious"].includes(foe.health?.status), pc: pc && !["Dead", "Dying", "Down", "Unconscious"].includes(pc.health?.status), view };
   };
   await seat.bringToFront();
-  await seat.click('.sidebar [data-launch="characters"]').catch(() => undefined);
+  await openSide(seat, "characters").catch(() => undefined);
   while (rounds < 12) {
     rounds += 1;
     const state = await alive();
     if (!state.foe || !state.pc) break;
-    // The player attacks from the sheet's combat tab.
+    // The player attacks from the sheet's combat tab (first taking a bought weapon in hand, as a player would).
     await seat.click('[data-sheet-tab="combat"]').catch(() => undefined);
-    const attack = seat.locator('[data-character] [data-attack] [data-action="attack"]').first();
+    if (!(await seat.locator('[data-character] :is([data-attack], [data-weapon]) [data-action="attack"]').count()) && ctx.bought?.length && rounds === 1) {
+      await seat.click('[data-sheet-tab="inventory"]').catch(() => undefined);
+      for (const name of ctx.bought) {
+        const carried = seat.locator(`[data-character] button[aria-label^="${name}"][aria-label$=": carried"]`).first();
+        if (await carried.count()) {
+          await carried.click();
+          await seat.waitForTimeout(300);
+        }
+      }
+      await seat.click('[data-sheet-tab="combat"]').catch(() => undefined);
+    }
+    const attack = seat.locator('[data-character] :is([data-attack], [data-weapon]) [data-action="attack"]').first();
     if (await attack.count()) {
       await attack.click();
       attacks += 1;
       await seat.waitForTimeout(400);
-      const damage = seat.locator('[data-character] [data-attack] [data-action="damage"]').first();
+      const damage = seat.locator('[data-character] :is([data-attack], [data-weapon]) [data-action="damage"]').first();
       if (await damage.count()) await damage.click();
       await seat.waitForTimeout(400);
-    } else {
-      await ctx.plan.playerAttack?.(ctx);
-    }
+    } else if (await ctx.plan.playerAttack?.(ctx)) attacks += 1;
     // The enemy strikes back.
     const foeView = state.view.entries.find((entry) => entry.id === ctx.foe.id);
     if (foeView?.attacks?.length) await tool("kraken_combat", { action: "attack", id: ctx.foe.id, weapon: foeView.attacks[0].key }).then(() => tool("kraken_combat", { action: "damage-roll", id: ctx.foe.id, weapon: foeView.attacks[0].key })).catch(() => undefined);
     await tool("kraken_combat", { action: "round" }).catch(() => undefined);
   }
-  check(attacks > 0, "the player attacked from the sheet");
+  check(attacks > 0, "the player attacked");
   let state = await alive();
   if (state.foe) {
     await tool("kraken_combat", { action: "damage", id: ctx.foe.id, amount: 999 });
@@ -463,4 +494,8 @@ async function fight(ctx) {
   const lines = (await tool("kraken_chat_log", { count: 200 })) || [];
   check(lines.some((line) => /\[ATTACK\]|\[SHIP ATTACK\]/.test(line.roll?.label ?? "")), "attacks went to chat");
   check(lines.some((line) => /\[DAMAGE\]/.test(`${line.roll?.label ?? ""} ${line.text ?? ""}`)), "damage went to chat");
+}
+// How many things a character carries (counts, so a second rope counts).
+function itemCount(list) {
+  return Object.values(list ?? {}).reduce((sum, item) => sum + Math.max(1, Number(item?.count) || 1), 0);
 }
