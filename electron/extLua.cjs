@@ -53,12 +53,10 @@ const toLua = (value) => (typeof value === "number" && Number.isFinite(value) ? 
 const machines = new Map();
 function machine(extension) {
   if (machines.has(extension)) return machines.get(extension);
-  const spec = SCRIPTS[extension];
+  // Only the extensions Kraken knows, and only once found (installed later, it is read then).
+  const spec = Object.hasOwn(SCRIPTS, extension) ? SCRIPTS[extension] : null;
   const source = spec ? extensionText(extension, spec.file) : null;
-  if (!source) {
-    machines.set(extension, null);
-    return null;
-  }
+  if (!source) return null;
   const L = lauxlib.luaL_newstate();
   lualib.luaL_openlibs(L);
   const run = (code, name) => {
@@ -86,7 +84,7 @@ function callExtension(extension, fn, args = []) {
   if (!made) return null;
   if (!made.calls.has(fn)) throw new Error(`The wizard has no ${fn}.`);
   const list = (Array.isArray(args) ? args : [args]).slice(0, 4).map(toLua).join(",");
-  const text = made.run(`local out = { PKG.${fn}(${list}) }; local parts = {}; for i = 1, select("#", table.unpack(out)) do local v = out[i]; parts[i] = v == nil and "\\0" or tostring(v) end; return table.concat(parts, "\\1")`, fn);
+  const text = made.run(`local out = table.pack(PKG.${fn}(${list})); local parts = {}; for i = 1, out.n do local v = out[i]; parts[i] = v == nil and "\\0" or tostring(v) end; return table.concat(parts, "\\1")`, fn);
   return String(text ?? "")
     .split("\u0001")
     .map((part) => (part === "\u0000" ? null : part));
@@ -95,6 +93,7 @@ function callExtension(extension, fn, args = []) {
 // The extension's icon names -> picture files ("charwizard2e_race_dwarf" -> "race_dwarf.png").
 const iconMaps = new Map();
 function iconFile(extension, icon) {
+  if (!Object.hasOwn(SCRIPTS, extension) && !Object.hasOwn(STRING_FILES, extension)) return null;
   if (!iconMaps.has(extension)) {
     const map = {};
     for (const file of ["graphics/graphics_charwizard2e.xml", "graphics/graphics_charwizard35e.xml", "graphics/graphics_tcwiz.xml", "graphics/graphics_ccwiz.xml"]) {
@@ -111,10 +110,11 @@ function iconFile(extension, icon) {
 const STRING_FILES = { KrakenCharWizardMGT2: "strings/strings_tcwiz.xml", KrakenCharWizard2E: "strings/strings_charwizard2e.xml", KrakenCharWizard35E: "strings/strings_charwizard35e.xml", KrakenCharWizardCC: "strings/strings_ccwiz.xml" };
 const stringMaps = new Map();
 function extensionString(extension, key) {
-  if (!STRING_FILES[extension]) return null;
+  if (!Object.hasOwn(STRING_FILES, extension)) return null;
   if (!stringMaps.has(extension)) {
     const map = {};
-    const text = extensionText(extension, STRING_FILES[extension]) ?? "";
+    const text = extensionText(extension, STRING_FILES[extension]);
+    if (text === null) return null;
     const unescape = (value) => value.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&#(\d+);/g, (_, n) => String.fromCharCode(Number(n))).replace(/&amp;/g, "&");
     for (const match of text.matchAll(/<string\s+name="([^"]+)"\s*>([\s\S]*?)<\/string>/g)) map[match[1]] = unescape(match[2]);
     stringMaps.set(extension, map);

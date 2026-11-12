@@ -110,7 +110,8 @@ async function buy(ctx, names) {
   for (const name of names) {
     await seat.getByLabel("Shop search").fill(name);
     const button = seat.getByRole("button", { name: new RegExp(`^Buy ${name.replace(/[()]/g, ".")}`, "i") }).first();
-    if (await button.count()) {
+    // What the purse can still pay for (a greyed Buy is too dear now).
+    if ((await button.count()) && (await button.isEnabled())) {
       await button.click();
       bought.push(name);
     }
@@ -476,7 +477,8 @@ export const RULESETS = {
       await finish(ctx);
     },
     bought: checkBought,
-    enemy: (ctx) => libraryNpc(ctx, "Salvage Rights", ""),
+    // Salvage Rights keeps its creatures in the Threat Dossier.
+    enemy: (ctx) => trackerNpc(ctx, "Pirate Raider"),
     parcel: (ctx) => handParcel(ctx, { coin: "Cr", amount: 800, item: "Toolkit" }),
     xp: 4,
   },

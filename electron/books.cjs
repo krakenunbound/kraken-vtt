@@ -168,7 +168,7 @@ function toHtml(formatted, resolve) {
         const target = resolve(linkClass, recordname);
         if (target?.page) out += `<a class="book-link" data-book="${escape(target.book)}" data-page="${escape(target.page)}">${text}</a>`;
         else if (target?.file) out += `<a class="book-link picture" data-book="${escape(target.book)}" data-file="${escape(target.file)}" data-name="${escape(target.name)}">${text}</a>`;
-        else out += `<span class="book-link dead">${text}</span>`;
+        else out += `<span class="book-link dead" data-kind="${escape(linkClass)}">${text}</span>`;
         continue;
       }
       const html = TAGS[tag];
@@ -179,7 +179,7 @@ function toHtml(formatted, resolve) {
       const span = tag === "td" && /^\d+$/.test(child.getAttribute("colspan") || "") ? ` colspan="${child.getAttribute("colspan")}"` : "";
       const className = tag === "frame" ? ' class="frame"' : tag === "linklist" ? ' class="links"' : "";
       const inner = walk(child);
-      out += tag === "linklist" ? `<ul${className}>${inner.replace(/(<a [^]*?<\/a>|<span class="book-link dead">[^]*?<\/span>)/g, "<li>$1</li>")}</ul>` : `<${html}${className}${span}>${inner}</${html}>`;
+      out += tag === "linklist" ? `<ul${className}>${inner.replace(/(<a [^]*?<\/a>|<span class="book-link dead"[^>]*>[^]*?<\/span>)/g, "<li>$1</li>")}</ul>` : `<${html}${className}${span}>${inner}</${html}>`;
     }
     return out;
   };

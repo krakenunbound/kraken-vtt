@@ -33,6 +33,31 @@ const agent = server.agent;
 const wiz = (action, more = {}) => tool("kraken_traveller_lifepath", { action, owner: "Ann", ...more }).then((result) => result.life ?? result);
 const any = (list) => list[Math.floor(Math.random() * list.length)];
 
+// A player (not the GM) rolls the characteristics once (FG: only the host may re-roll), and the
+// steps take only what the wizard's pages offer.
+{
+  const { lifeAction } = require("../electron/mgt2.cjs");
+  const seat = { role: "dm", name: "Bo", player: true };
+  const as = (body) => lifeAction(agent, "Bo", body, seat).then((result) => result.life);
+  const refused = (body) => as(body).then(() => false, () => true);
+  let life = await as({ action: "start", name: "Bo" });
+  life = await as({ action: "call", fn: "rollCharacteristics" });
+  assert(life.rolled === 6 && !life.canReroll, `a player cannot re-roll: ${life.canReroll}`);
+  assert(await refused({ action: "call", fn: "selectSpecies", args: ["item.id-2"] }), "a species from the list only");
+  assert(await refused({ action: "call", fn: "applyConnection", args: [3, "Pilot"] }), "Connections 1 and 2 only");
+  assert(await refused({ action: "call", fn: "setConnection", args: [1, "applied", false] }), "a Connection's name only");
+  assert(await refused({ action: "call", fn: "chooseOption", args: [99] }), "an answer the page shows");
+  assert(await refused({ action: "call", fn: "chooseBenefitItem", args: [1, "item.id-1"] }), "a benefit item from its own choices");
+  // The GM's own wizard (and the agent's) may re-roll; a player named "GM" has a wizard of their own.
+  const gm = (await lifeAction(agent, "", { action: "start" }, agent.seat)).life;
+  const gmRolled = (await lifeAction(agent, "", { action: "call", fn: "rollCharacteristics" }, agent.seat)).life;
+  assert(gm && gmRolled.canReroll, "the GM may re-roll");
+  const named = (await lifeAction(agent, "GM", { action: "view" }, { role: "dm", name: "GM", player: true })).life;
+  assert(named === null, "a player called GM does not see the GM's wizard");
+  await as({ action: "cancel" });
+  await lifeAction(agent, "", { action: "cancel" }, agent.seat);
+}
+
 let made = 0;
 let terms = 0;
 const careersSeen = new Set();

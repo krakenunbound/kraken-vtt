@@ -61,7 +61,8 @@ async function runRuleset(ruleset, plan) {
     try {
       await fn();
     } catch (error) {
-      problem(`stopped: ${error.message.split("\n")[0]}`);
+      // The first line, and what it waited for (the element a timed-out click wanted).
+      problem(`stopped: ${error.message.split("\n")[0]}`, (/waiting for ([^\n]*)/.exec(error.message)?.[1] ?? "").slice(0, 200));
     }
     const ok = problems.length === before;
     // A failed step: both screens, to see why.

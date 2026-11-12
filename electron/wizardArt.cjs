@@ -49,8 +49,12 @@ function readAll(extension) {
     }
     return found;
   }
-  const copy = copyFolder(extension);
-  if (fs.existsSync(copy)) walk(copy, "");
+  try {
+    const copy = copyFolder(extension);
+    if (fs.existsSync(copy)) walk(copy, "");
+  } catch {
+    /* Kraken's copy unreadable: no pictures */
+  }
   return found;
 }
 
@@ -59,7 +63,12 @@ function wizardArt(extension, name) {
   if (!EXTENSIONS.has(extension)) return null;
   const clean = String(name ?? "").replaceAll("\\", "/").replace(/^\/+/, "");
   if (!PICTURE.test(clean) || clean.split("/").includes("..")) return null;
-  if (!cache.has(extension)) cache.set(extension, readAll(extension));
+  // Kept once found (an extension installed later is read then).
+  if (!cache.has(extension)) {
+    const found = readAll(extension);
+    if (!Object.keys(found).length) return null;
+    cache.set(extension, found);
+  }
   const bytes = cache.get(extension)[clean];
   return bytes ? { bytes, mime: MIME[clean.split(".").pop().toLowerCase()] } : null;
 }

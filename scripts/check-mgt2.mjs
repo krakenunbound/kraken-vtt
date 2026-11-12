@@ -143,6 +143,11 @@ await tool("kraken_combat", { action: "end", removeNpcs: true });
 
 // Books: FG's MGT2 modules and packs on a Traveller shelf.
 assert(fitsRuleset({ ruleset: "MGT2" }, "Traveller") && !fitsRuleset({ ruleset: "MGT2" }, "Apeira Astra") && fitsRuleset({ kraken: "Traveller", ruleset: "MGT2" }, "Traveller"), "Traveller books on a Traveller shelf");
+// A malformed price is no price (a purchase cannot turn the purse into NaN).
+{
+  const { priceOf } = await import("../shared/shop.mjs");
+  assert(priceOf("1.2.3 cr", true) === null && priceOf("Cr.", true) === null && priceOf("Cr300", true) === 300 && priceOf("MCr 1.5", true) === 1500000, "prices: malformed ones are not for sale");
+}
 await server.close?.();
 console.log("ok mgt2: characteristic DMs and the UPP, skills and specialities, Jack-of-all-Trades, Traveller's dice and AP, damage off END, STR, DEX; a Scout built; tasks against Difficult and Average with Effect, a Boon, a characteristic check; the sheet's edits; initiative, attacks against 8 with Effect, AP through armour, Cloth stopping a blade, a wounded END's DM, unconscious and dead, an animal's Hits, healing; the shelf");
 process.exit(0);

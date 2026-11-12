@@ -148,7 +148,7 @@ const DONE = String.raw`
   local stats = {}
   for _, s in ipairs(TCData.STATS) do stats[s] = W.getStat(s) end
   local items = {}
-  for _, b in ipairs(S.benefits) do if b.kind == "item" and b.item then items[#items + 1] = b.item end end
+  for _, b in ipairs(S.benefits) do if b.kind == "item" and b.item then items[#items + 1] = { path = b.item, name = b.itemname } end end
   local debts = {}
   for _, d in ipairs(S.debts) do debts[#debts + 1] = string.format("Cr%d %s", d.amount, d.what) end
   local species = W.getSpeciesNode()
@@ -169,8 +169,41 @@ async function wizardRecords(table) {
   };
 }
 const FIELDS = ["name", "gender", "homeworld", "appearance", "why"];
+// A step's arguments, as the FG pages could send them (the extension trusts its
+// own window): a choice from the page's own list, a slot that exists.
+function checkCall(fn, args, life) {
+  const no = (why) => {
+    throw new Error(`Not a choice the wizard offers: ${why}.`);
+  };
+  const int = (value) => (Number.isInteger(value) ? value : NaN);
+  const stats = new Set((life.stats ?? []).map((stat) => stat.key));
+  if (fn === "swapScores" && !(stats.has(args[0]) && stats.has(args[1]))) no("those characteristics");
+  if (fn === "selectSpecies" && !(life.species ?? []).some((item) => item.path === args[0])) no("that species");
+  if (fn === "toggleBackground" && !(life.background ?? []).includes(args[0])) no("that background skill");
+  if (fn === "showTab" && !(life.tabs ?? []).some((tab) => tab.key === args[0])) no("that page");
+  if (fn === "chooseOption") {
+    const option = life.task?.options?.[int(args[0]) - 1];
+    if (!option || option.disabled) no("that answer");
+  }
+  if (fn === "chooseBenefitItem") {
+    const benefit = (life.benefits ?? []).find((item) => item.index === int(args[0]));
+    if (!benefit || (args[1] !== null && args[1] !== undefined && !(benefit.choices ?? []).some((choice) => choice.path === args[1]))) no("that item");
+  }
+  if (["rollMedical", "settleMedical"].includes(fn)) {
+    const injury = (life.injuries ?? [])[int(args[0]) - 1];
+    if (!injury) no("that injury");
+    if (fn === "settleMedical" && injury.cover === undefined) no("roll the medical bills first");
+  }
+  if (["applyConnection", "setConnection"].includes(fn) && ![1, 2].includes(int(args[0]))) no("a Connection is 1 or 2");
+  if (fn === "setConnection" && args[1] !== "who") no("a Connection's name");
+  if (fn === "setPackage" && args[0] !== "" && !(life.packages ?? []).some((item) => item.name === args[0])) no("that package");
+}
 // A price in credits: "Cr200", "MCr 1.5", "1,000".
 function priceCr(text) {
+  const value = priceCrRaw(text);
+  return Number.isFinite(value) && value >= 0 ? value : null;
+}
+function priceCrRaw(text) {
   const source = String(text ?? "").replace(/,/g, "").trim();
   const mcr = /^MCr\s*([\d.]+)/i.exec(source);
   if (mcr) return Math.round(Number(mcr[1]) * 1e6);
@@ -182,15 +215,18 @@ async function lifeAction(table, owner, { action = "view", name, fn, args, build
   const wizards = require("./tcwizard.cjs");
   const rules = await rulesMgt2();
   const lives = livesOf(table);
-  const key = String(owner || "GM");
+  // The GM's own wizard under a key no player's name can be.
+  const key = owner ? `player:${owner}` : "@gm";
   const view = (wizard) => (wizard ? wizard.eval(VIEW) : null);
   const setDetails = (wizard, input) => {
     for (const field of FIELDS) if (input?.[field] !== undefined) wizard.eval(`TCWizard.getState().${field} = ${wizards.toLua(String(input[field]).slice(0, 2000))}`);
   };
   if (action === "start") {
-    lives.get(key)?.close();
     const player = String(owner || "GM");
+    // The GM (and the agent) may re-roll the characteristics; a player may not (FG: Session.IsHost).
+    const isHost = !seat?.player;
     const wizard = wizards.createWizard({
+      isHost,
       roll: (formula, label, mod) => {
         const rolled = table.dice.roll(`${formula}${mod ? (mod > 0 ? `+${mod}` : mod) : ""}`);
         table.postRoll(rolled, String(label).replace(/^\[Traveller creation\]\s*/, "[TRAVELLER CREATION] "), player, false, { by: player });
@@ -201,6 +237,8 @@ async function lifeAction(table, owner, { action = "view", name, fn, args, build
       records: await wizardRecords(table),
     });
     if (name) setDetails(wizard, { name });
+    // The old one goes only once the new one is made.
+    lives.get(key)?.close();
     lives.set(key, wizard);
     return { life: view(wizard) };
   }
@@ -217,7 +255,9 @@ async function lifeAction(table, owner, { action = "view", name, fn, args, build
   if (action === "view") return { life: view(wizard) };
   if (action === "call") {
     if (!CALLS.has(String(fn))) throw new Error(`The wizard has no step ${fn}.`);
-    wizard.call(String(fn), ...(Array.isArray(args) ? args.slice(0, 4) : []));
+    const list = Array.isArray(args) ? args.slice(0, 4) : [];
+    checkCall(String(fn), list, view(wizard));
+    wizard.call(String(fn), ...list);
     return { life: view(wizard) };
   }
   if (action === "details") {
@@ -231,7 +271,11 @@ async function lifeAction(table, owner, { action = "view", name, fn, args, build
     const records = await wizardRecords(table);
     // The items the benefits gave (the wizard's database: Kraken's list and the campaign's items).
     const byPath = (text) => records.item[Number(/id-(\d+)$/.exec(String(text))?.[1]) - 1];
-    const gear = (done.items ?? []).map(byPath).filter(Boolean).map((item) => [item.name, 1]);
+    // By the item's name (the records list is made again here: a book made active since would move its places).
+    const gear = (done.items ?? [])
+      .map((entry) => (entry?.name ? (records.item.find((item) => item.name === entry.name) ?? { name: entry.name }) : byPath(entry?.path ?? entry)))
+      .filter(Boolean)
+      .map((item) => [item.name, 1]);
     // Starting gear bought with the final cash (Kraken's shop, after the wizard's Benefits).
     let cash = Math.max(0, Math.round(Number(done.cash) || 0));
     const bought = [];

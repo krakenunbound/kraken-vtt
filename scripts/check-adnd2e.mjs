@@ -377,6 +377,8 @@ await tool("kraken_combat", { action: "end", removeNpcs: true });
 
 // The shelf: 2E books for a 2E campaign (a pack made as "2E" before Kraken played it, too), not Worldbuilding's.
 assert(fitsRuleset({ ruleset: "2E" }, "AD&D 2E") && fitsRuleset({ kraken: "2E", ruleset: "2E" }, "AD&D 2E") && !fitsRuleset({ kraken: "2E", ruleset: "2E" }, "Worldbuilding") && !fitsRuleset({ ruleset: "2E" }, "D&D 3.5E"), "2E books on a 2E shelf");
+// Prices with more than one coin add up (PHB: 1 pp = 5 gp, 1 ep = 1/2 gp).
+assert(wz.costCp("2 gp 5 sp") === 250 && wz.costCp("1 pp") === 500 && wz.costCp("3 ep") === 150 && wz.costCp("-") === null, "2E prices: every coin added up");
 await server.close?.();
 console.log("ok adnd2e: the character wizard's rules (the FG extension's: Methods I-VI, race ranges and classes, level limits, multi- and dual-class, alignments, starting wealth, proficiency slots and kits, the class's shop, languages, spells by class and sphere or school) and the host building what it chose (hit dice rolled, coins, a kit, specialization, a priest's 3 gp, a dual-class); the ability tables, exceptional Strength, THAC0 and saves by group, experience, spells a day, damage S/M and L, creatures' blocks; a fighter, an elf fighter/mage, a halfling thief, a pregen; d10 initiative lowest first, THAC0 hits and misses, Large damage, claw/claw/bite, the five saves, effect rounds, Death's Door, bound wounds; a save, a check and a thief skill from the sheet, level ups, the sheet's edits; turning undead; krits and fumbles from the GM's book; the shelf");
 process.exit(0);

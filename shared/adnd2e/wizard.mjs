@@ -920,12 +920,18 @@ export function spellGuidance(caster, wisdom) {
 // --- The shop -------------------------------------------------------------------
 // A price in copper ("5 gp", "2 sp", "10 cp", "1 pp"; no unit: gp); null without a number.
 export function costCp(cost) {
+  // Every amount and its coin, added up ("2 gp 5 sp" is 250 cp); a bare number is gold.
   const s = lower(cost).replace(/,/g, "");
-  const match = /([\d.]+)/.exec(s);
-  if (!match) return null;
-  const n = Number(match[1]);
-  const per = s.includes("pp") ? 500 : s.includes("ep") ? 50 : s.includes("sp") ? 10 : s.includes("cp") ? 1 : 100;
-  return Math.round(n * per);
+  const PER = { pp: 500, gp: 100, ep: 50, sp: 10, cp: 1 };
+  let total = 0;
+  let found = false;
+  for (const match of s.matchAll(/(\d+(?:\.\d+)?)\s*(pp|gp|ep|sp|cp)?/g)) {
+    const n = Number(match[1]);
+    if (!Number.isFinite(n)) continue;
+    total += n * (PER[match[2]] ?? 100);
+    found = true;
+  }
+  return found ? Math.round(total) : null;
 }
 export const copperText = (cp) => {
   const gp = Math.floor(cp / 100);

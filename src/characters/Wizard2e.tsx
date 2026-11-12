@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useHostRolls as useSharedHostRolls } from "./hostRolls";
 import type { RollResult, Session } from "../session/useSession";
 import { ArtChoice } from "./ArtPicker";
 import { CLASSES, GROUPS, RACES, raceKey, signed, STATS } from "../../shared/adnd2e/rules.mjs";
@@ -44,26 +45,7 @@ const LORE: Record<Page, string> = {
 
 // Waits for the host's answer to a roll this window asked for.
 export function useHostRolls(session: Session) {
-  const waiting = useRef(new Map<string, (roll: RollResult) => void>());
-  const seen = useRef(0);
-  useEffect(() => {
-    const lines = session.chat;
-    for (const line of lines.slice(Math.max(0, seen.current - 1))) {
-      const tag = line.roll?.tag;
-      const done = tag ? waiting.current.get(tag) : undefined;
-      if (tag && done && line.roll) {
-        waiting.current.delete(tag);
-        done(line.roll);
-      }
-    }
-    seen.current = lines.length;
-  }, [session.chat]);
-  return (formula: string, label: string) =>
-    new Promise<RollResult>((resolve) => {
-      const tag = `wiz2e-${Math.random().toString(36).slice(2)}`;
-      waiting.current.set(tag, resolve);
-      session.roll(formula, `[CHARGEN] ${label}`, tag);
-    });
+  return useSharedHostRolls(session, (label) => `[CHARGEN] ${label}`);
 }
 const diceOf = (roll: RollResult) => roll.terms.flatMap((term) => (term.kind === "dice" ? term.rolls : []));
 

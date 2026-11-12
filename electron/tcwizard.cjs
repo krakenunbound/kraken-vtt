@@ -80,7 +80,9 @@ local function esc(s) return (s:gsub('[%c"\\]', function(c) return string.format
 function TOJSON(v, seen)
   local t = type(v)
   if t == "nil" then return "null" end
-  if t == "boolean" or t == "number" then return tostring(v) end
+  if t == "boolean" then return tostring(v) end
+  -- JSON has no NaN or infinity.
+  if t == "number" then if v ~= v or v == math.huge or v == -math.huge then return "null" end return tostring(v) end
   if t == "string" then return '"' .. esc(v) .. '"' end
   if t == "function" then return "null" end
   if t ~= "table" then return "null" end
@@ -129,7 +131,7 @@ GameManager = nil
 Comm = { deliverChatMessage = noop }
 ChatManager = { SystemMessage = function(s) Host:say(tostring(s or "")) end }
 OptionsManager = { registerOptionData = noop, getOption = function(k) return Host:option(k) end, isOption = function(k, v) return Host:option(k) == v end }
-Session = { IsHost = true }
+Session = { IsHost = Host:isHost() and true or false }
 User = { getUsername = function() return Host:user() end }
 StringManager = { trim = function(s) return (tostring(s or "")):match("^%s*(.-)%s*$") end }
 local function deepcopy(v) if type(v) ~= "table" then return v end local t = {} for k, item in pairs(v) do t[k] = deepcopy(item) end return t end
@@ -192,7 +194,7 @@ end
 `;
 
 // One wizard (one player's Traveller in the making).
-function createWizard({ roll, say, user = "", options = {}, records = {} }) {
+function createWizard({ roll, say, user = "", options = {}, records = {}, isHost = true }) {
   const scripts = readScripts();
   if (!scripts) throw new Error(`Traveller's character wizard needs the GM's FG extension ${EXTENSION} (in the FG extensions folder, or its copy beside the packs).`);
   const L = lauxlib.luaL_newstate();
@@ -206,6 +208,7 @@ function createWizard({ roll, say, user = "", options = {}, records = {} }) {
     say: (text) => say(String(text)),
     option: (key) => options[String(key)] ?? (String(key) === "TCWIZ_RULES" ? "2016" : "off"),
     user: () => user,
+    isHost: () => Boolean(isHost),
   };
   interop.push(L, host);
   lua.lua_setglobal(L, to_luastring("Host"));

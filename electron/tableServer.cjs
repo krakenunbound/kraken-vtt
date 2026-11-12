@@ -877,7 +877,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       } catch {
         body = null;
       }
-      res.writeHead(body ? 200 : 404, { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "private, max-age=3600" });
+      res.writeHead(body ? 200 : 404, { "Content-Type": "application/json; charset=utf-8", "Cache-Control": body ? "private, max-age=3600" : "no-store" });
       res.end(JSON.stringify(body ?? { values: [] }));
       return;
     }
@@ -1713,7 +1713,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         const answer = (body) => send(ws, { type: "op-result", req: msg.req ?? null, ...body });
         const owner = client.role === "dm" ? text(msg.owner, "").slice(0, 24) : client.name;
         require("./mgt2.cjs")
-          .lifeAction(agentHandle, owner, { action: text(msg.action, "view"), name: text(msg.name, ""), fn: text(msg.fn, ""), args: Array.isArray(msg.args) ? msg.args.slice(0, 4) : [], build: msg.build && typeof msg.build === "object" ? msg.build : undefined }, client.role === "dm" ? seatOf(client) : { role: "dm", name: client.name })
+          .lifeAction(agentHandle, owner, { action: text(msg.action, "view"), name: text(msg.name, ""), fn: text(msg.fn, ""), args: Array.isArray(msg.args) ? msg.args.slice(0, 4) : [], build: msg.build && typeof msg.build === "object" ? msg.build : undefined }, client.role === "dm" ? seatOf(client) : { role: "dm", name: client.name, player: true })
           .then((result) => answer({ ok: true, id: result.id ?? "", life: result.life ?? null, problems: result.problems ?? [] }))
           .catch((error) => answer({ ok: false, error: error instanceof Error ? error.message : "Could not do that." }));
         return;

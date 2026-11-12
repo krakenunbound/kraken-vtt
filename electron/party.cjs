@@ -181,9 +181,11 @@ async function distribute(table, from) {
       handed.push(`${each * members.length} ${coin}`);
       for (const member of members) {
         const current = table.records.get(member.id).data.coins ?? {};
-        const found = rows(current).find(([, row]) => String(row.name).toLowerCase() === coin.toLowerCase());
+        // Megacredits land as credits (Traveller's sheet keeps Cr): 1 MCr = 1,000,000 Cr.
+        const [name, factor] = coin.toLowerCase() === "mcr" ? ["Cr", 1e6] : [coin, 1];
+        const found = rows(current).find(([, row]) => String(row.name).toLowerCase() === name.toLowerCase());
         const key = found ? found[0] : engine.nextId(current);
-        table.records.update(member.id, { data: { coins: { [key]: { name: found ? found[1].name : coin, amount: (Number(found?.[1].amount) || 0) + each } } } }, table.seat);
+        table.records.update(member.id, { data: { coins: { [key]: { name: found ? found[1].name : name, amount: (Number(found?.[1].amount) || 0) + each * factor } } } }, table.seat);
         perMember.get(member.id).push(`${each} ${coin}`);
       }
     }

@@ -33,6 +33,11 @@ const LISTS: { id: string; label: string; group: string }[] = [
 // Not lists: what has its own window (characters, the party, notes) or is the game's own setup.
 const NOT_LISTED = new Set(["character", "party", "note", "siegegame"]);
 
+// A new record for a list: its type, and for C&C's Classes and Races the package's kind.
+function recordFor(list: string, name: string) {
+  const [type, kind] = list.split(":");
+  return { type, name, visibility: "gm" as const, data: kind ? { packagetype: kind[0].toUpperCase() + kind.slice(1) } : {} };
+}
 export function listOf(record: TableRecord) {
   if (record.type === "siegepackage") {
     const kind = String(record.data.packagetype ?? "").toLowerCase();
@@ -127,7 +132,7 @@ export function RecordsWindow({ session, onOpen, only }: { session: Session; onO
               const name = newName.trim();
               if (!name) return;
               void session
-                .op({ op: "create", input: { type: only, name, visibility: "gm", data: {} } })
+                .op({ op: "create", input: recordFor(only, name) })
                 .then((id) => {
                   setNewName("");
                   if (id) onOpen({ id: String(id), name, type: only } as TableRecord);

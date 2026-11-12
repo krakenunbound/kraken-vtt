@@ -8,7 +8,12 @@
 export const COIN = { pp: 1000, gp: 100, gc: 100, ep: 50, sp: 10, cp: 1 };
 
 // "15 gp" -> 1500 (copper); "300 cr" / "Cr300" / "MCr 1" -> 300 credits. null: no price.
+// A price that is not a finite, non-negative number ("1.2.3 cr") is no price.
 export function priceOf(text, credits = false) {
+  const value = rawPrice(text, credits);
+  return Number.isFinite(value) && value >= 0 ? value : null;
+}
+function rawPrice(text, credits) {
   const source = String(text ?? "").toLowerCase().replace(/,/g, "").trim();
   if (!source) return null;
   if (credits) {

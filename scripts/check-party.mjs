@@ -111,6 +111,11 @@ try {
   assert(!carries(ann, "Potion of Healing") && Object.values(after.parcel.items).some((item) => item.name === "Potion of Healing"), "one potion for two names stays in the parcel");
   assert(after.inventory.find((row) => row.name === "Rope, Silk (50 ft.)")?.count === 2, "party inventory counts the rope twice");
   assert(agent.chatLog(20).some((line) => line.text === "[10 GP] -> Borin") && agent.chatLog(20).some((line) => line.text === "Distributed across the Party. [30 GP]"), "coin chat lines");
+  // Megacredits land as credits: 3 MCr across three is 1,000,000 Cr each.
+  await tool("kraken_party_edit", { coins: { GP: 0, SP: 0, MCr: 3 } });
+  await tool("kraken_party_distribute");
+  const cr = (record) => Object.values(agent.records.get(record.id).data.coins).find((coin) => coin.name === "Cr")?.amount;
+  assert(cr(ann) === 1000000 && !Object.values(agent.records.get(ann.id).data.coins).some((coin) => coin.name === "MCr"), `MCr as Cr: ${cr(ann)}`);
 
   // Group check: Wisdom (secondary for all, CC 18 + CL 2 = 20). d20 10, 3, 18 with
   // level 1: Aldric 10+1+1 = 12 fails, Borin 3-1+1 fails, Cyra 18+2+1 = 21 succeeds.
