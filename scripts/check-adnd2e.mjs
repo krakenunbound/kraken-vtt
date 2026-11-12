@@ -9,7 +9,9 @@
 // rounds counted the lowest-first way, Death's Door (a point lost a round,
 // bound wounds, dead at -10; a creature dead at 0); a save, an ability check
 // and a thief skill from the sheet, a level up, the sheet's edits; 2E books
-// on a 2E shelf. Made-up records in FG 2E's shapes: no licensed content.
+// on a 2E shelf; the 2E character wizard's rules (Kraken's FG extension
+// KrakenCharWizard2E's tables) and the character the host builds from what
+// it chose. Made-up records in FG 2E's shapes: no licensed content.
 import "./loopback.mjs";
 import { createRequire } from "node:module";
 import * as r2 from "../shared/adnd2e/rules.mjs";
@@ -45,6 +47,57 @@ const goblin = r2.npcStats({ ac: 6, hitDice: "1-1", damage: "1d6" });
 assert(goblin.thaco === 20 && goblin.hp === 3 && goblin.saves.breath === 20, `no THAC0 or saves given: worked out from the hit dice (under one die: THAC0 20, saves at 0): ${JSON.stringify(goblin)}`);
 assert(r2.monsterThaco(r2.hitDiceOf("4+1")) === 17 && r2.monsterThaco(r2.hitDiceOf("2")) === 19 && r2.monsterThaco(r2.hitDiceOf("7")) === 13 && r2.monsterThaco(r2.hitDiceOf("20")) === 3, "a monster's THAC0 by hit dice");
 
+// --- The 2E character wizard's rules (the FG extension's tables) -------------
+const wz = await import("../shared/adnd2e/wizard.mjs");
+assert(same(wz.allowedMethods(undefined), [1, 2, 3, 4, 5, 6]) && same(wz.allowedMethods({ methods: [] }), [5]) && wz.methodFor(1, { methods: [2, 5] }) === 5 && wz.methodFor(3, { methods: [3] }) === 3, "the GM's ability methods: all by default, Method V when none, V preferred");
+assert(wz.bestGroup([1, 2, 3, 6, 5, 6]) === 17 && same(wz.collectScores([9, 14, 7, 16, 12, 11, 15, 8, 13, 10, 6, 17], "keepbest6"), [17, 16, 15, 14, 13, 12]), "Method II's better 3d6; Method IV keeps the best six");
+assert(same(wz.placeViDie([3, 6, 5], 8), { pool: [5, 3], score: 14 }) && wz.placeViDie([6], 13) === null && wz.placeViDie([6, 5], 13).score === 18, "Method VI: the largest die that still fits under 18");
+const rolled = { strength: 15, dexterity: 12, constitution: 10, intelligence: 14, wisdom: 13, charisma: 9 };
+assert(wz.raceBlocked("Dwarf", rolled) && !wz.raceBlocked("Human", rolled) && !wz.raceBlocked("Elf", rolled) && !wz.raceBlocked("Dwarf", {}), "PHB Table 7's ranges: a Con 10 dwarf ruled out (only once all six are rolled)");
+assert(!wz.classAllowedForRace("Mage", "Dwarf") && wz.classAllowedForRace("Illusionist", "Gnome") && wz.classAllowedForRace("Bard", "Half-Elf") && !wz.classAllowedForRace("Bard", "Elf"), "the classes a race may take");
+assert(wz.classBlockedByAbilities("Paladin", rolled, "Human") && !wz.classBlockedByAbilities("Fighter", rolled, "Human") && wz.classBlockedByAbilities("Illusionist", rolled, "Human"), "class minimums (a paladin's Charisma 17, an illusionist's Dexterity 16)");
+assert(wz.maxLevelFor("Halfling", "fighter") === 9 && wz.maxLevelFor("Elf", "thief") === 20 && wz.maxLevelFor("Human", "fighter") === 20 && wz.targetLevel({ race: "Halfling", cls: "Fighter", level: 12 }) === 9, "demihuman level limits cap the starting level");
+const elfBuild = { abilities: { ...rolled, constitution: 12 }, race: "Elf", cls: "Fighter", level: 1 };
+assert(wz.classTypeOptions(elfBuild).some((option) => option.label === "Multi-class: Fighter/Mage") && wz.classTypeOptions(elfBuild).some((option) => option.label === "Multi-class: Fighter/Mage/Thief"), `an elf fighter's multi-classes: ${JSON.stringify(wz.classTypeOptions(elfBuild).map((o) => o.label))}`);
+const dualBuild = { abilities: { strength: 16, dexterity: 12, constitution: 14, intelligence: 10, wisdom: 17, charisma: 9 }, race: "Human", cls: "Fighter", level: 3 };
+assert(wz.classTypeOptions(dualBuild).some((option) => option.label === "Dual-class: then Cleric") && !wz.classTypeOptions(dualBuild).some((option) => option.label === "Dual-class: then Mage"), "a human fighter (Str 16) dual-classes into cleric (Wis 17), not mage");
+assert(same(wz.alignmentOptions("paladin"), ["Lawful Good"]) && !wz.alignmentOptions("thief").includes("Lawful Good") && wz.alignmentOptions("bard").every((a) => a.includes("Neutral")) && same(wz.alignmentOptions("druid"), ["True Neutral"]), "class alignments");
+const fighter = { abilities: rolled, race: "Human", cls: "Fighter", level: 1, mode: "single", classList: [] };
+assert(wz.wealthInfo(fighter).dice === "5d4" && wz.wealthInfo(fighter).mult === 10 && wz.wealthInfo({ ...fighter, level: 3 }, { gold: "perlevel" }).dice === "15d4" && wz.wealthInfo({ ...fighter, level: 3 }, { gold: "xlevel" }).mult === 30 && wz.wealthInfo({ ...fighter, cls: "Mage" }).plus === 1, "starting wealth: 5d4 x 10 gp, per level, times the level, a wizard's 1d4+1");
+assert(wz.weaponSlots(fighter) === 4 && wz.weaponSlots({ ...fighter, level: 3 }) === 5 && wz.nonweaponSlots(fighter) === 3 && wz.weaponSlots({ ...fighter, cls: "Mage" }) === 1 && wz.nonweaponSlots({ ...fighter, cls: "Mage" }) === 4, "proficiency slots (PHB Table 34)");
+assert(wz.weaponSlots({ ...fighter, cls: "Mage", kit: { name: "Witch", book: "" } }) === 0 && wz.weaponSlots({ ...fighter, kit: { name: "Swashbuckler", book: "Complete Fighter's Handbook" } }) === 6, "a kit's own slots: a witch none, a fighter swashbuckler two more");
+assert(wz.weaponSlots({ ...elfBuild, mode: "multi", classList: ["Fighter", "Mage"] }) === 4 && wz.nonweaponSlots({ ...elfBuild, mode: "multi", classList: ["Fighter", "Mage"] }) === 4, "a multi-class: the largest initial slots");
+const names = (build) => wz.starterCatalog([], build).map((item) => item.name);
+assert(!names({ ...fighter, cls: "Mage" }).some((name) => /armor|mail|shield/i.test(name)) && names({ ...fighter, cls: "Mage" }).includes("Dagger") && !names({ ...fighter, cls: "Mage" }).includes("Long sword"), "a mage's shop: no armor, a dagger, no sword");
+assert(names({ ...fighter, cls: "Cleric" }).includes("Mace") && !names({ ...fighter, cls: "Cleric" }).includes("Long sword") && names({ ...fighter, cls: "Cleric" }).includes("Plate mail"), "a cleric's shop: blunt weapons, any armor");
+assert(names({ ...fighter, cls: "Thief" }).includes("Leather armor") && !names({ ...fighter, cls: "Thief" }).includes("Chain mail") && !names({ ...fighter, cls: "Thief" }).some((name) => /shield|buckler/i.test(name)) && names({ ...fighter, cls: "Thief" }).includes("Arrows (12)"), "a thief's shop: leather, no shield, arrows for a bow");
+assert(wz.starterCatalog([{ name: "Sword, Long", type: "Weapon", cost: "15 gp", fgPath: "item.x@Some Book" }, { name: "Cloak of Elvenkind", type: "Gear", subtype: "Magic", cost: "100 gp" }], fighter).filter((item) => /long/i.test(item.name) && /sword/i.test(item.name)).length === 1 && !wz.starterCatalog([{ name: "Cloak of Elvenkind", type: "Gear", subtype: "Magic", cost: "100 gp" }], fighter).some((item) => item.name === "Cloak of Elvenkind"), "a book's long sword stands for Kraken's; magic items are never starting gear");
+assert(wz.languageCount(12) === 3 && wz.languageCount(18) === 7 && same(wz.raceLanguages("Dwarf"), ["Common", "Dwarvish"]), "languages by Intelligence and race");
+const mageCaster = wz.casterEntries({ ...fighter, cls: "Mage" })[0];
+const illusionist = wz.casterEntries({ ...fighter, cls: "Illusionist" })[0];
+const clericCaster = wz.casterEntries({ ...fighter, cls: "Cleric" })[0];
+assert(wz.spellSlots(mageCaster, 1) === 1 && wz.spellSlots(illusionist, 1) === 2 && wz.spellSlots(clericCaster, 1, 15) === 3 && wz.casterEntries({ ...fighter, cls: "Paladin" }).every((c) => wz.maxSpellLevel(c) === 0), "spells to pick: a mage's 1, a specialist's 2, a cleric's 1 + Wisdom 15's 2, a paladin's none at 1st");
+const spellBook = [{ name: "Magic Missile", level: 1, school: "Evocation" }, { name: "Sleep", level: 1, school: "Enchantment/Charm" }, { name: "Cure Light Wounds", level: 1, sphere: "Healing" }, { name: "Entangle", level: 1, sphere: "Plant" }];
+assert(same(wz.spellCatalog(spellBook, mageCaster).map((s) => s.name), ["Magic Missile", "Sleep"]) && same(wz.spellCatalog(spellBook, clericCaster).map((s) => s.name), ["Cure Light Wounds"]) && wz.spellCatalog(spellBook, wz.casterEntries({ ...fighter, cls: "Enchanter" })[0]).every((s) => s.name !== "Magic Missile") && wz.spellCatalog(spellBook, illusionist).every((s) => s.name !== "Magic Missile"), "the spell list: a wizard's schools, a cleric's spheres (no plant), a specialist's opposition barred");
+assert(wz.kitBlocked({ name: "Swashbuckler", book: "Complete Fighter's Handbook", data: {} }, { ...fighter, cls: "Thief" }) && !wz.kitBlocked({ name: "Swashbuckler", book: "Complete Fighter's Handbook", data: {} }, fighter) && wz.kitBlocked({ name: "Test", book: "", data: { text: "<p>Requirements: Strength 17</p>" } }, fighter), "kits by their book and their requirements");
+assert(wz.kitProfAllowed("Dagger", { name: "Thespian" }) && !wz.kitProfAllowed("Long sword", { name: "Thespian" }) && !wz.kitProfAllowed("Long bow", { name: "Berserker" }), "a kit's weapon limits");
+// The host builds what the wizard chose.
+const wizBuilt = r2.buildFromSpec({ wizard: true, name: "Corwin", race: "Human", class: "Fighter", level: 3, scores: { strength: 17, dexterity: 13, constitution: 16, intelligence: 12, wisdom: 10, charisma: 11 }, hpRolls: { Fighter: [7, 4] }, alignment: "Lawful Neutral", kit: "Swashbuckler", gear: [["Long sword", 1], ["Arrows (12)", 2], "Leather armor"], money: 12.34, weapons: ["Long sword", "Short bow"], specialize: "Long sword", weaponSlots: 7, nonweapon: ["Endurance"], languages: ["Common", "Orcish"], gender: "Male", age: "19", height: "6' 1\"", personalitytraits: "Quick to laugh." });
+const wb = wizBuilt.data;
+assert(wizBuilt.problems.length === 0 && wb.hp.total === 12 + 9 + 6 && wb.exp === 4000 && wb.profs.weaponslots === 7 && wb.profs.specialized === "Long sword", `the wizard's fighter: hit points 10+2, 7+2, 4+2; 4000 XP; a kit's 7 slots: ${wizBuilt.problems} ${wb.hp.total} ${wb.exp} ${JSON.stringify(wb.profs)}`);
+const coin = (name) => Object.values(wb.coins).find((row) => row.name === name)?.amount;
+assert(coin("GP") === 12 && coin("SP") === 3 && coin("CP") === 4 && coin("PP") === 0, `the purse laid out as coins: ${JSON.stringify(wb.coins)}`);
+const arrows = Object.values(wb.inventorylist).find((item) => item.name === "Arrows (12)");
+const swordAttack = Object.values(wb.attacks).find((attack) => attack.name === "Long sword");
+assert(arrows?.count === 24 && arrows.cost === "3 sp" && swordAttack.tohit === 1 + 1 && swordAttack.damage === "1d8+3" && swordAttack.specialized, `two dozen arrows; the specialized long sword +1 hit, +2 damage: ${JSON.stringify(swordAttack)}`);
+assert(wb.background === "Swashbuckler" && wb.languages === "Common, Orcish" && wb.gender === "Male" && wb.height === "6' 1\"" && /Personality: Quick to laugh/.test(wb.notes) && wb.profs.nonweapon[0] === "Endurance", "the kit, languages and details on the sheet");
+const priest = r2.buildFromSpec({ wizard: true, race: "Human", class: "Cleric", scores: { strength: 12, dexterity: 10, constitution: 12, intelligence: 10, wisdom: 15, charisma: 10 }, money: 25 });
+assert(Object.values(priest.data.coins).find((row) => row.name === "GP").amount === 3 && /3 gp/.test(priest.data.notes), "a priest keeps 3 gp; the rest goes to his order");
+const dual = r2.buildFromSpec({ wizard: true, race: "Human", class: "Cleric", level: 5, dual: { class: "Fighter", level: 4 }, scores: { strength: 16, dexterity: 12, constitution: 14, intelligence: 10, wisdom: 17, charisma: 9 }, hpRolls: { Fighter: [5, 5, 5], Cleric: [4, 4, 4, 6] } });
+assert(dual.problems.length === 0 && dual.data.classes.length === 2 && dual.data.classes[0].active === false && dual.data.hp.total === 10 + 15 + 6 && dual.data.exp === r2.xpFor("Fighter", 4) + r2.xpFor("Cleric", 5), `a dual-class: fighter 4 (inactive), then cleric 5; hit points only past the fighter's level: ${dual.problems} ${dual.data.hp.total} ${JSON.stringify(dual.data.classes)}`);
+const gnome = r2.buildFromSpec({ race: "Gnome", class: "Illusionist/Thief", scores: { strength: 10, dexterity: 16, constitution: 12, intelligence: 14, wisdom: 10, charisma: 10 } });
+assert(gnome.problems.length === 0 && gnome.data.spellcasting[0].perday[0] === 2, `a gnome illusionist/thief (the extension's combinations), a specialist's extra spell: ${gnome.problems} ${JSON.stringify(gnome.data.spellcasting)}`);
+
 // --- A table of AD&D 2E ------------------------------------------------------
 const server = createTableServer({ ruleset: "AD&D 2E" });
 await server.listen({ port: 0, password: "" });
@@ -59,6 +112,11 @@ const force = (...values) => agent.dice.force(values);
 const last = (pattern) => [...agent.chatLog(300)].reverse().find((line) => line.roll && pattern.test(line.roll.label ?? ""));
 const said = (pattern) => agent.chatLog(300).some((line) => pattern.test(line.text ?? ""));
 const make = (type, name, data) => agent.records.create({ type, name, visibility: "gm", data }, agent.seat);
+// The GM's options for the 2E character wizard (the FG extension's): roll lock, the methods, gold above 1st level.
+const wizardOptions = await tool("kraken_table_options", { wizard2e: { rollLock: true, methods: [1, 5, 9] } });
+const wizardGold = await tool("kraken_table_options", { wizard2e: { gold: "perlevel" } });
+assert(wizardOptions.wizard2e.rollLock && same(wizardOptions.wizard2e.methods, [1, 5]) && wizardOptions.wizard2e.gold === "phb" && wizardGold.wizard2e.gold === "perlevel" && same(wizardGold.wizard2e.methods, [1, 5]) && wizardGold.wizard2e.rollLock, `the wizard's table options, a partial change keeps the rest: ${JSON.stringify(wizardGold.wizard2e)}`);
+await tool("kraken_table_options", { wizard2e: { rollLock: false, methods: [1, 2, 3, 4, 5, 6], gold: "phb" } });
 const ogreRecord = make("npc", "Ogre", ogreData);
 const lionRecord = make("npc", "Mountain Lion", lionData);
 
@@ -320,5 +378,5 @@ await tool("kraken_combat", { action: "end", removeNpcs: true });
 // The shelf: 2E books for a 2E campaign (a pack made as "2E" before Kraken played it, too), not Worldbuilding's.
 assert(fitsRuleset({ ruleset: "2E" }, "AD&D 2E") && fitsRuleset({ kraken: "2E", ruleset: "2E" }, "AD&D 2E") && !fitsRuleset({ kraken: "2E", ruleset: "2E" }, "Worldbuilding") && !fitsRuleset({ ruleset: "2E" }, "D&D 3.5E"), "2E books on a 2E shelf");
 await server.close?.();
-console.log("ok adnd2e: the ability tables, exceptional Strength, THAC0 and saves by group, experience, spells a day, damage S/M and L, creatures' blocks; a fighter, an elf fighter/mage, a halfling thief, a pregen; d10 initiative lowest first, THAC0 hits and misses, Large damage, claw/claw/bite, the five saves, effect rounds, Death's Door, bound wounds; a save, a check and a thief skill from the sheet, level ups, the sheet's edits; turning undead; krits and fumbles from the GM's book; the shelf");
+console.log("ok adnd2e: the character wizard's rules (the FG extension's: Methods I-VI, race ranges and classes, level limits, multi- and dual-class, alignments, starting wealth, proficiency slots and kits, the class's shop, languages, spells by class and sphere or school) and the host building what it chose (hit dice rolled, coins, a kit, specialization, a priest's 3 gp, a dual-class); the ability tables, exceptional Strength, THAC0 and saves by group, experience, spells a day, damage S/M and L, creatures' blocks; a fighter, an elf fighter/mage, a halfling thief, a pregen; d10 initiative lowest first, THAC0 hits and misses, Large damage, claw/claw/bite, the five saves, effect rounds, Death's Door, bound wounds; a save, a check and a thief skill from the sheet, level ups, the sheet's edits; turning undead; krits and fumbles from the GM's book; the shelf");
 process.exit(0);

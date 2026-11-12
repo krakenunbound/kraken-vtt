@@ -247,7 +247,15 @@ function savedOptions(value) {
     soundRepeat: Math.min(30, Math.max(0, Number.isFinite(Number(options.soundRepeat)) ? Number(options.soundRepeat) : 1)),
     // How long landed dice lie on the table before they fade, in seconds (the GM's choice, for every seat).
     diceHold: Math.round(Math.min(60, Math.max(0.5, Number.isFinite(Number(options.diceHold)) ? Number(options.diceHold) : 2.6)) * 10) / 10,
+    // The AD&D 2E character wizard's options (the FG extension's Options): ability
+    // rolls once only, the PHB methods (I to VI) players may use, gold above 1st level.
+    wizard2e: wizard2eOptions(options.wizard2e),
   };
+}
+function wizard2eOptions(value) {
+  const raw = value && typeof value === "object" ? value : {};
+  const methods = Array.isArray(raw.methods) ? [...new Set(raw.methods.map((n) => Math.round(Number(n))).filter((n) => n >= 1 && n <= 6))].sort() : [1, 2, 3, 4, 5, 6];
+  return { rollLock: Boolean(raw.rollLock), methods, gold: ["phb", "perlevel", "xlevel"].includes(raw.gold) ? raw.gold : "phb" };
 }
 
 // What a chat line is (FG's and Foundry's chat commands): said, an emote
@@ -481,7 +489,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     if (next.decal !== undefined && !(next.decal === "" || next.decal === "kraken" || (decals && decals.has(String(next.decal))))) throw new Error(`No decal "${next.decal}".`);
     if (next.wallpaper !== undefined && !(next.wallpaper === "" || (wallpapers && wallpapers.has(String(next.wallpaper))))) throw new Error(`No wallpaper "${next.wallpaper}".`);
     if (next.gmIcon !== undefined && !(next.gmIcon === "" || (gmIcons && gmIcons.has(String(next.gmIcon))))) throw new Error(`No GM icon "${next.gmIcon}".`);
-    options = savedOptions({ ...options, ...next });
+    options = savedOptions({ ...options, ...next, ...(next.wizard2e && typeof next.wizard2e === "object" ? { wizard2e: { ...options.wizard2e, ...next.wizard2e } } : {}) });
     broadcast({ type: "options", options });
     onChange("table");
     return options;

@@ -258,6 +258,17 @@ export const CLASSES = {
   thief: { name: "Thief", group: "rogue", prime: ["dexterity"], needs: { dexterity: 9 }, races: ["human", "dwarf", "elf", "gnome", "half-elf", "halfling"] },
   bard: { name: "Bard", group: "rogue", prime: ["dexterity", "charisma"], needs: { dexterity: 12, intelligence: 13, charisma: 15 }, races: ["human", "half-elf"] },
   mage: { name: "Mage", group: "wizard", prime: ["intelligence"], needs: { intelligence: 9 }, races: ["human", "elf", "half-elf"] },
+  // The specialist wizards (a mage's experience, spells and hit dice; one
+  // more spell of each level; the opposition schools barred). Their needs
+  // and races as Kraken's FG 2E character wizard has them.
+  abjurer: { name: "Abjurer", group: "wizard", prime: ["intelligence"], needs: { intelligence: 9, wisdom: 15 }, races: ["human", "elf", "half-elf"], specialist: true },
+  conjurer: { name: "Conjurer", group: "wizard", prime: ["intelligence"], needs: { intelligence: 9, constitution: 15 }, races: ["human", "elf", "half-elf"], specialist: true },
+  diviner: { name: "Diviner", group: "wizard", prime: ["intelligence"], needs: { intelligence: 9, wisdom: 16 }, races: ["human", "elf", "half-elf"], specialist: true },
+  enchanter: { name: "Enchanter", group: "wizard", prime: ["intelligence"], needs: { intelligence: 9, charisma: 16 }, races: ["human", "elf", "half-elf"], specialist: true },
+  illusionist: { name: "Illusionist", group: "wizard", prime: ["intelligence"], needs: { intelligence: 9, dexterity: 16 }, races: ["human", "elf", "half-elf", "gnome"], specialist: true },
+  invoker: { name: "Invoker", group: "wizard", prime: ["intelligence"], needs: { intelligence: 9, constitution: 16 }, races: ["human", "elf", "half-elf"], specialist: true },
+  necromancer: { name: "Necromancer", group: "wizard", prime: ["intelligence"], needs: { intelligence: 9, wisdom: 16 }, races: ["human", "elf", "half-elf"], specialist: true },
+  transmuter: { name: "Transmuter", group: "wizard", prime: ["intelligence"], needs: { intelligence: 9, dexterity: 15 }, races: ["human", "elf", "half-elf"], specialist: true },
 };
 export const classKey = (name) => {
   const key = String(name ?? "").toLowerCase().replace(/[^a-z]/g, "");
@@ -268,7 +279,7 @@ export const classKey = (name) => {
   return key;
 };
 export function xpFor(className, level) {
-  const table = XP[classKey(className)] ?? XP.fighter;
+  const table = XP[classKey(className)] ?? (CLASSES[classKey(className)]?.group === "wizard" ? XP.mage : XP.fighter);
   if (level <= 1) return 0;
   if (level - 2 < table.length) return table[level - 2];
   const step = table[table.length - 1] - table[table.length - 2];
@@ -334,8 +345,8 @@ export const RACES = {
   human: { name: "Human", adjust: {}, movement: 12, infravision: 0, classes: null, multi: [] },
   dwarf: { name: "Dwarf", adjust: { constitution: 1, charisma: -1 }, movement: 6, infravision: 60, conSaves: ["rod", "spell"], conPoison: true, multi: ["Fighter/Thief", "Fighter/Cleric"], languages: "Common, Dwarf, Gnome, Goblin, Kobold, Orc" },
   elf: { name: "Elf", adjust: { dexterity: 1, constitution: -1 }, movement: 12, infravision: 60, multi: ["Fighter/Mage", "Fighter/Thief", "Mage/Thief", "Fighter/Mage/Thief"], languages: "Common, Elf, Gnome, Halfling, Goblin, Hobgoblin, Orc, Gnoll", sleepCharm: 90 },
-  gnome: { name: "Gnome", adjust: { intelligence: 1, wisdom: -1 }, movement: 6, infravision: 60, conSaves: ["rod", "spell"], multi: ["Fighter/Thief", "Fighter/Cleric", "Cleric/Thief"], languages: "Common, Dwarf, Gnome, Halfling, Goblin, Kobold" },
-  "half-elf": { name: "Half-Elf", adjust: {}, movement: 12, infravision: 60, multi: ["Fighter/Cleric", "Fighter/Thief", "Fighter/Druid", "Fighter/Mage", "Cleric/Ranger", "Cleric/Mage", "Thief/Mage", "Fighter/Mage/Cleric", "Fighter/Mage/Thief"], languages: "Common, Elf, Gnome, Halfling, Goblin, Hobgoblin, Orc, Gnoll", sleepCharm: 30 },
+  gnome: { name: "Gnome", adjust: { intelligence: 1, wisdom: -1 }, movement: 6, infravision: 60, conSaves: ["rod", "spell"], multi: ["Fighter/Cleric", "Fighter/Illusionist", "Fighter/Thief", "Cleric/Illusionist", "Cleric/Thief", "Illusionist/Thief"], languages: "Common, Dwarf, Gnome, Halfling, Goblin, Kobold" },
+  "half-elf": { name: "Half-Elf", adjust: {}, movement: 12, infravision: 60, multi: ["Fighter/Cleric", "Fighter/Druid", "Fighter/Thief", "Fighter/Mage", "Cleric/Ranger", "Druid/Ranger", "Cleric/Mage", "Druid/Mage", "Thief/Mage", "Fighter/Mage/Cleric", "Fighter/Mage/Druid", "Fighter/Mage/Thief"], languages: "Common, Elf, Gnome, Halfling, Goblin, Hobgoblin, Orc, Gnoll", sleepCharm: 30 },
   halfling: { name: "Halfling", adjust: { dexterity: 1, strength: -1 }, movement: 6, infravision: 30, conSaves: ["rod", "spell"], conPoison: true, multi: ["Fighter/Thief"], languages: "Common, Halfling, Dwarf, Elf, Gnome, Goblin, Orc" },
 };
 export const raceKey = (name) => {
@@ -440,58 +451,76 @@ export const CASTERS = {
   paladin: { kind: "divine", table: PALADIN_SPELLS, levels: 4 },
   ranger: { kind: "divine", table: RANGER_SPELLS, levels: 3 },
 };
+// A class's spell table: its own, a specialist wizard's the mage's.
+export const casterOf = (className) => CASTERS[classKey(className)] ?? (CLASSES[classKey(className)]?.specialist ? CASTERS.mage : undefined);
 export function spellsPerDay(className, level, wisdom = 10) {
-  const caster = CASTERS[classKey(className)];
+  const caster = casterOf(className);
   if (!caster) return [];
   const row = caster.table[Math.min(caster.table.length, Math.max(1, Math.round(num(level, 1)))) - 1] ?? [];
   const bonus = caster.wisdom ? bonusPriestSpells(wisdom) : [];
+  // A specialist: one more spell of each level he can cast.
+  const extra = CLASSES[classKey(className)]?.specialist ? 1 : 0;
   const out = Array.from({ length: caster.levels }, (_, index) => num(row[index], 0));
   // Wisdom's bonus spells only at the levels the priest can already cast.
-  return out.map((count, index) => (count > 0 ? count + num(bonus[index], 0) : 0));
+  return out.map((count, index) => (count > 0 ? count + num(bonus[index], 0) + extra : 0));
 }
 
 // --- Weapons and armor (the Player's Handbook's mechanics) --------------------
 // name, damage vs Small/Medium, vs Large, speed factor, type (S/P/B), ranged
-// ("missile": thrown or fired), rate of fire, weight.
+// ("missile": thrown or fired), cost (the Player's Handbook's price; "0":
+// free, not sold).
 export const WEAPONS = [
-  ["Battle axe", "1d8", "1d8", 7, "S", false],
-  ["Club", "1d6", "1d3", 4, "B", false],
-  ["Dagger", "1d4", "1d3", 2, "P", false],
-  ["Dart", "1d3", "1d2", 2, "P", true],
-  ["Flail", "1d6+1", "2d4", 7, "B", false],
-  ["Hand axe", "1d6", "1d4", 4, "S", false],
-  ["Halberd", "1d10", "2d6", 9, "P/S", false],
-  ["Javelin", "1d6", "1d6", 4, "P", true],
-  ["Mace", "1d6+1", "1d6", 7, "B", false],
-  ["Morning star", "2d4", "1d6+1", 7, "B", false],
-  ["Quarterstaff", "1d6", "1d6", 4, "B", false],
-  ["Scimitar", "1d8", "1d8", 5, "S", false],
-  ["Spear", "1d6", "1d8", 6, "P", false],
-  ["Long sword", "1d8", "1d12", 5, "S", false],
-  ["Short sword", "1d6", "1d8", 3, "P", false],
-  ["Bastard sword", "1d8", "1d12", 6, "S", false],
-  ["Two-handed sword", "1d10", "3d6", 10, "S", false],
-  ["Warhammer", "1d4+1", "1d4", 4, "B", false],
-  ["Sling", "1d4", "1d4", 6, "B", true],
-  ["Short bow", "1d6", "1d6", 7, "P", true],
-  ["Long bow", "1d6", "1d6", 8, "P", true],
-  ["Light crossbow", "1d4", "1d4", 7, "P", true],
-  ["Heavy crossbow", "1d4+1", "1d6+1", 10, "P", true],
+  ["Battle axe", "1d8", "1d8", 7, "S", false, "5 gp"],
+  ["Club", "1d6", "1d3", 4, "B", false, "0"],
+  ["Dagger", "1d4", "1d3", 2, "P", false, "2 gp"],
+  ["Dart", "1d3", "1d2", 2, "P", true, "5 sp"],
+  ["Flail", "1d6+1", "2d4", 7, "B", false, "15 gp"],
+  ["Hand axe", "1d6", "1d4", 4, "S", false, "1 gp"],
+  ["Halberd", "1d10", "2d6", 9, "P/S", false, "10 gp"],
+  ["Javelin", "1d6", "1d6", 4, "P", true, "5 sp"],
+  ["Mace", "1d6+1", "1d6", 7, "B", false, "8 gp"],
+  ["Morning star", "2d4", "1d6+1", 7, "B", false, "10 gp"],
+  ["Quarterstaff", "1d6", "1d6", 4, "B", false, "0"],
+  ["Scimitar", "1d8", "1d8", 5, "S", false, "15 gp"],
+  ["Spear", "1d6", "1d8", 6, "P", false, "8 sp"],
+  ["Long sword", "1d8", "1d12", 5, "S", false, "15 gp"],
+  ["Short sword", "1d6", "1d8", 3, "P", false, "10 gp"],
+  ["Bastard sword", "1d8", "1d12", 6, "S", false, "25 gp"],
+  ["Two-handed sword", "1d10", "3d6", 10, "S", false, "50 gp"],
+  ["Warhammer", "1d4+1", "1d4", 4, "B", false, "2 gp"],
+  ["Sling", "1d4", "1d4", 6, "B", true, "5 cp"],
+  ["Short bow", "1d6", "1d6", 7, "P", true, "30 gp"],
+  ["Long bow", "1d6", "1d6", 8, "P", true, "75 gp"],
+  ["Light crossbow", "1d4", "1d4", 7, "P", true, "35 gp"],
+  ["Heavy crossbow", "1d4+1", "1d6+1", 10, "P", true, "50 gp"],
 ];
-// name, AC, weight; a shield is -1 to AC.
+// name, AC, weight, cost; a shield is -1 to AC.
 export const ARMOR = [
-  ["Padded armor", 8, 10],
-  ["Leather armor", 8, 15],
-  ["Studded leather", 7, 25],
-  ["Ring mail", 7, 30],
-  ["Hide armor", 6, 30],
-  ["Scale mail", 6, 40],
-  ["Chain mail", 5, 40],
-  ["Splint mail", 4, 40],
-  ["Banded mail", 4, 35],
-  ["Plate mail", 3, 50],
-  ["Field plate", 2, 60],
-  ["Full plate", 1, 70],
+  ["Padded armor", 8, 10, "4 gp"],
+  ["Leather armor", 8, 15, "5 gp"],
+  ["Studded leather", 7, 25, "20 gp"],
+  ["Ring mail", 7, 30, "100 gp"],
+  ["Hide armor", 6, 30, "15 gp"],
+  ["Scale mail", 6, 40, "120 gp"],
+  ["Chain mail", 5, 40, "75 gp"],
+  ["Splint mail", 4, 40, "80 gp"],
+  ["Banded mail", 4, 35, "200 gp"],
+  ["Plate mail", 3, 50, "600 gp"],
+  ["Field plate", 2, 60, "2000 gp"],
+  ["Full plate", 1, 70, "4000 gp"],
+];
+// name, weight, cost.
+export const SHIELDS = [
+  ["Buckler", 3, "1 gp"],
+  ["Small shield", 5, "3 gp"],
+  ["Medium shield", 10, "7 gp"],
+  ["Body shield", 15, "10 gp"],
+];
+// name (a dozen), cost.
+export const AMMO = [
+  ["Arrows (12)", "3 sp"],
+  ["Bolts (12)", "1 gp"],
+  ["Sling bullets (12)", "1 sp"],
 ];
 const wordsOf = (text) => String(text ?? "").toLowerCase().replace(/[^a-z0-9 ]/g, " ").split(/\s+/).filter(Boolean);
 const same = (a, b) => wordsOf(a).join("") === wordsOf(b).join("");
@@ -504,13 +533,19 @@ const DTYPE = { S: "slashing", P: "piercing", B: "bludgeoning", "P/S": "piercing
 export function makeItem(name) {
   const weapon = weaponByName(name);
   if (weapon && same(weapon[0], name)) {
-    const [title, small, large, speed, type, missile] = weapon;
-    return { name: title, type: "Weapon", subtype: missile ? "Ranged" : "Melee", damage: `${small} ${DTYPE[type]};${large} ${DTYPE[type]}, large;`, speedfactor: speed, dtype: type, count: 1 };
+    const [title, small, large, speed, type, missile, cost] = weapon;
+    return { name: title, type: "Weapon", subtype: missile ? "Ranged" : "Melee", damage: `${small} ${DTYPE[type]};${large} ${DTYPE[type]}, large;`, speedfactor: speed, dtype: type, cost, count: 1 };
   }
   const armor = ARMOR.find(([title]) => same(title, name));
-  if (armor) return { name: armor[0], type: "Armor", subtype: "Armor", ac: armor[1], weight: armor[2], count: 1 };
-  if (/^shield$|^(small|medium|body) shield$|^buckler$/i.test(String(name).trim())) return { name: String(name).trim().replace(/^\w/, (c) => c.toUpperCase()), type: "Armor", subtype: "Shield", ac: 1, weight: 5, count: 1 };
-  if (/^(arrows|bolts|sling bullets|crossbow bolts)/i.test(String(name).trim())) return { name: String(name).trim(), type: "Gear", subtype: "Ammunition", count: 20 };
+  if (armor) return { name: armor[0], type: "Armor", subtype: "Armor", ac: armor[1], weight: armor[2], cost: armor[3], count: 1 };
+  if (/^shield$|^(small|medium|body) shield$|^buckler$/i.test(String(name).trim())) {
+    const shield = SHIELDS.find(([title]) => same(title, name)) ?? SHIELDS[2];
+    return { name: String(name).trim().replace(/^\w/, (c) => c.toUpperCase()), type: "Armor", subtype: "Shield", ac: 1, weight: shield[1], cost: shield[2], count: 1 };
+  }
+  if (/^(arrows|bolts|sling bullets|crossbow bolts)/i.test(String(name).trim())) {
+    const ammo = AMMO.find(([title]) => same(title, name));
+    return { name: String(name).trim(), type: "Gear", subtype: "Ammunition", ...(ammo ? { cost: ammo[1] } : {}), count: num(/\((\d+)\)/.exec(String(name))?.[1], 20) || 20 };
+  }
   return null;
 }
 export const isWeapon = (item) => /weapon/i.test(String(item?.type ?? "")) && Boolean(weaponDamage(item).small);
@@ -590,10 +625,13 @@ export function weaponAttack(data, item, key) {
   // Proficient: a proficiency naming the weapon, or its kind ("Swords", "Bows", "Sling").
   const stem = (word) => word.replace(/(es|s)$/, "");
   const itemWords = [...wordsOf(item.name), ...wordsOf(known?.[0])].map(stem);
-  const proficient = (data.profs?.weapon ?? []).some((name) => same(name, item.name) || (known && same(name, known[0])) || (wordsOf(name).length > 0 && wordsOf(name).every((word) => itemWords.includes(stem(word)))));
+  const names = (name) => same(name, item.name) || (known && same(name, known[0])) || (wordsOf(name).length > 0 && wordsOf(name).every((word) => itemWords.includes(stem(word))));
+  const proficient = (data.profs?.weapon ?? []).some(names);
   const penalty = proficient || (data.profs?.weapon ?? []).length === 0 ? 0 : num(data.profs?.penalty, 0);
-  const tohit = (missile ? dex.missileadj : str.hitadj) + magic + racial + penalty + num(item.attackbonus, 0);
-  const dmg = (missile && fired ? 0 : str.dmgadj) + magic;
+  // A fighter's weapon specialization: +1 to hit, +2 damage.
+  const special = data.profs?.specialized && names(data.profs.specialized) ? 1 : 0;
+  const tohit = (missile ? dex.missileadj : str.hitadj) + magic + racial + penalty + special + num(item.attackbonus, 0);
+  const dmg = (missile && fired ? 0 : str.dmgadj) + magic + 2 * special;
   const add = (dice) => (dice ? `${dice}${dmg ? signed(dmg) : ""}`.replace(/([+-]\d+)([+-]\d+)$/, (_, a, b) => signed(Number(a) + Number(b))) : "");
   return {
     name: String(item.name ?? known?.[0] ?? "Weapon"),
@@ -607,6 +645,7 @@ export function weaponAttack(data, item, key) {
     dmgtype: known?.[4] ?? (/slash|pierc|bludg/i.exec(String(item.damage ?? ""))?.[0] ?? ""),
     rate: data.rate,
     proficient: penalty === 0,
+    ...(special ? { specialized: true } : {}),
   };
 }
 
@@ -625,7 +664,7 @@ export function derive(input) {
   if (!data.classes?.some?.((cls) => groupOf(cls) === "warrior")) data.abilities.strength = { score: data.abilities.strength.score, percent: 0, ...strengthOf(data.abilities.strength.score, 0) };
   data.classes = (Array.isArray(data.classes) ? data.classes : [])
     .filter((item) => item && item.name)
-    .map((item) => ({ name: CLASSES[classKey(item.name)]?.name ?? String(item.name), level: Math.min(MAX_LEVEL, Math.max(1, Math.round(num(item.level, 1)))), group: groupOf(item) }));
+    .map((item) => ({ name: CLASSES[classKey(item.name)]?.name ?? String(item.name), level: Math.min(MAX_LEVEL, Math.max(1, Math.round(num(item.level, 1)))), group: groupOf(item), ...(item.active === false ? { active: false } : {}) }));
   data.level = Math.max(1, ...data.classes.map((item) => item.level), 1);
   const race = RACES[raceKey(data.race)];
   data.race = data.race || race.name;
@@ -653,13 +692,18 @@ export function derive(input) {
   const warrior = Math.max(0, ...data.classes.filter((item) => item.group === "warrior").map((item) => item.level));
   data.rate = warrior >= 13 ? "2/1" : warrior >= 7 ? "3/2" : "1/1";
   // Proficiencies: slots by the class group's (the best of a multi-class's), the nonproficient penalty its smallest.
+  // A new slot at each level the group's number divides (PHB Table 34, as the FG wizard counts them);
+  // weaponbonus: a kit's extra slots (or fewer).
   const groups = [...new Set(data.classes.map((item) => item.group))];
-  const slots = (kind) => Math.max(0, ...data.classes.map((item) => GROUPS[item.group][kind][0] + Math.floor((item.level - 1) / GROUPS[item.group][kind][1])));
+  const slots = (kind) => Math.max(0, ...data.classes.map((item) => GROUPS[item.group][kind][0] + Math.floor(item.level / GROUPS[item.group][kind][1])));
+  const weaponbonus = Math.round(num(input.profs?.weaponbonus, 0));
   data.profs = {
     weapon: (Array.isArray(data.profs?.weapon) ? data.profs.weapon : []).map((name) => String(name).slice(0, 60)).filter(Boolean),
     nonweapon: (Array.isArray(data.profs?.nonweapon) ? data.profs.nonweapon : []).map((name) => String(name).slice(0, 60)).filter(Boolean),
-    weaponslots: slots("weapon"),
+    weaponslots: Math.max(0, slots("weapon") + weaponbonus),
     nonweaponslots: slots("nonweapon"),
+    ...(weaponbonus ? { weaponbonus } : {}),
+    ...(input.profs?.specialized ? { specialized: String(input.profs.specialized).slice(0, 60) } : {}),
     penalty: groups.length ? Math.max(...groups.map((group) => GROUPS[group].penalty)) : -2,
   };
   data.ac = armorClass(data);
@@ -702,11 +746,11 @@ export function derive(input) {
   }
   // Spells: each casting class's slots a day.
   data.spellcasting = data.classes
-    .filter((item) => CASTERS[classKey(item.name)])
+    .filter((item) => casterOf(item.name))
     .map((item) => {
       const perday = spellsPerDay(item.name, item.level, data.abilities.wisdom.score);
       const before = (Array.isArray(input.spellcasting) ? input.spellcasting : []).find((row) => row?.class === item.name);
-      return { class: item.name, kind: CASTERS[classKey(item.name)].kind, perday, used: perday.map((max, index) => Math.max(0, Math.min(max, Math.round(num(before?.used?.[index], 0))))) };
+      return { class: item.name, kind: casterOf(item.name).kind, perday, used: perday.map((max, index) => Math.max(0, Math.min(max, Math.round(num(before?.used?.[index], 0))))) };
     })
     .filter((row) => row.perday.some((count) => count > 0));
   data.packages = {
@@ -888,13 +932,20 @@ export function turnAgainst(level, row) {
 }
 
 // --- Building a character -----------------------------------------------------
-// spec: { name, race, class ("Fighter", or "Fighter/Thief"), level, scores
-// {stat: n} (strengthPercent for 18), or array (six scores, put in the
-// class's order), alignment, gear [item names], weapons [proficiencies],
-// nonweapon [proficiencies], skills {key: points}, spells [names] }. lib:
-// { items } (the campaign's records, for gear the books have). Hit points:
-// the die's highest at 1st level, then its average (rounded up) to the level
-// hit dice stop, then the fixed number; Constitution each hit-die level; a
+// spec: { name, race, class ("Fighter", or "Fighter/Thief"), level, levels
+// {class: n} (a multi-class's own levels), dual {class, level} (a human's
+// first class; class is then the new one), scores {stat: n before the race's
+// adjustments} (strengthPercent for 18), or array (six scores, put in the
+// class's order), hpRolls {class: [2nd level's roll, 3rd's...]}, alignment,
+// kit, gear [item names or [name, count]], money (gp left, or coins {pp, gp,
+// ep, sp, cp}), weapons [proficiencies], specialize (a weapon), weaponSlots
+// (a kit's own count), nonweapon [proficiencies], languages [names], skills
+// {key: points}, spells [names], deity, gender, age, agemax, height, weight,
+// size, appearance, personalitytraits, ideals, bonds, flaws, notes, wizard
+// (true: empty lists stay empty) }. lib: { items } (the campaign's records,
+// for gear the books have). Hit points: the die's highest at 1st level, then
+// the rolls given, else the die's average (rounded up), to the level hit dice
+// stop, then the fixed number; Constitution each hit-die level; a
 // multi-class character's divided by its classes.
 export const CLASS_ORDER = {
   fighter: ["strength", "constitution", "dexterity", "wisdom", "charisma", "intelligence"],
@@ -910,7 +961,7 @@ export const CLASS_ORDER = {
 // character's puts each class's first prime requisite first.
 export function orderFor(classText) {
   const classes = splitClasses(classText);
-  const base = CLASS_ORDER[classKey(classes[0]?.name)] ?? STATS;
+  const base = CLASS_ORDER[classKey(classes[0]?.name)] ?? (classes[0]?.group === "wizard" ? CLASS_ORDER.mage : STATS);
   return classes.length > 1 ? [...new Set([...classes.map((cls) => cls.prime[0]), ...base])] : base;
 }
 const KITS = {
@@ -941,11 +992,12 @@ const byName = (list, name) => {
   return list.find((item) => String(item.name).toLowerCase() === wanted) ?? list.find((item) => same(item.name, wanted));
 };
 const average = (die) => Math.ceil((die + 1) / 2);
-export function hitPointsFor(cls, level, con, { first = "max", rolls = [] } = {}) {
+// from: the first level that counts (a dual-class character's new class: past the old one's level).
+export function hitPointsFor(cls, level, con, { first = "max", rolls = [], from = 1 } = {}) {
   const kind = GROUPS[cls.group];
   const conAdj = cls.group === "warrior" ? constitutionOf(con).warriorhpadj : constitutionOf(con).hitpointadj;
   let hp = 0;
-  for (let l = 1; l <= level; l++) {
+  for (let l = Math.max(1, from); l <= level; l++) {
     if (l <= kind.top) hp += Math.max(1, (l === 1 && first === "max" ? kind.die : num(rolls[l - 1], average(kind.die))) + conAdj);
     else hp += kind.after;
   }
@@ -958,10 +1010,18 @@ export function buildFromSpec(spec, lib = {}) {
   const race = RACES[raceId];
   let classes = splitClasses(spec?.class);
   if (classes.length === 0) classes = [CLASSES.fighter];
+  // Dual-class (humans): dual { class: the first class, level: its level }; class is the new one.
+  const dualFrom = spec?.dual && typeof spec.dual === "object" ? CLASSES[classKey(spec.dual.class)] : null;
+  const dualLevel = dualFrom ? Math.min(MAX_LEVEL, Math.max(2, Math.round(num(spec.dual.level, 2)))) : 0;
+  if (dualFrom && classes.length > 1) problems.push("A dual-class character takes up one class at a time.");
   const label = classes.map((cls) => cls.name).join("/");
-  if (classes.length > 1 && !race.multi.some((combo) => same(combo, label))) problems.push(`${race.name}: ${label} is not one of its multi-classes (${race.multi.join(", ") || "none"}).`);
-  for (const cls of classes) if (!cls.races.includes(raceId)) problems.push(`A ${race.name.toLowerCase()} cannot be a ${cls.name.toLowerCase()} by the book.`);
+  const sameCombo = (combo) => wordsOf(combo.replace(/\//g, " ")).sort().join() === wordsOf(label.replace(/\//g, " ")).sort().join();
+  if (classes.length > 1 && !race.multi.some(sameCombo)) problems.push(`${race.name}: ${label} is not one of its multi-classes (${race.multi.join(", ") || "none"}).`);
+  if (dualFrom && raceId !== "human") problems.push("Only humans dual-class (PHB).");
+  for (const cls of [...classes, ...(dualFrom ? [dualFrom] : [])]) if (!cls.races.includes(raceId)) problems.push(`A ${race.name.toLowerCase()} cannot be a ${cls.name.toLowerCase()} by the book.`);
   const level = Math.min(MAX_LEVEL, Math.max(1, Math.round(num(spec?.level, 1))));
+  // Each class's level: levels {class: n} (a multi-class's, each capped by the race), else the level.
+  const levelOf = (cls) => Math.min(MAX_LEVEL, Math.max(1, Math.round(num(spec?.levels?.[cls.name] ?? spec?.levels?.[classKey(cls.name)], level))));
   const order = orderFor(label);
   const given = spec?.scores && typeof spec.scores === "object" ? spec.scores : null;
   const array = Array.isArray(spec?.array) && spec.array.length === 6 ? spec.array.map((value) => num(value, 10)) : STANDARD_ARRAY;
@@ -978,41 +1038,65 @@ export function buildFromSpec(spec, lib = {}) {
   }
   for (const [stat, change] of Object.entries(race.adjust)) scores[stat] = Math.max(3, Math.min(19, (scores[stat] ?? 10) + change));
   for (const cls of classes) for (const [stat, need] of Object.entries(cls.needs)) if (scores[stat] < need) problems.push(`A ${cls.name.toLowerCase()} needs ${titled(stat)} ${need} (has ${scores[stat]}).`);
-  const percent = scores.strength === 18 && classes.some((cls) => cls.group === "warrior") ? Math.min(100, Math.max(1, Math.round(num(spec?.strengthPercent ?? given?.strengthPercent, 50)))) : 0;
-  // Multi-class: every class at the same level (the book's slower classes trail, the GM may set them).
-  const hpEach = classes.map((cls) => hitPointsFor(cls, level, scores.constitution));
-  const hp = Math.max(1, Math.floor(hpEach.reduce((sum, value) => sum + value, 0) / classes.length));
-  const exp = Math.max(...classes.map((cls) => xpFor(cls.name, level))) * classes.length;
-  // Gear: the books' items by name, else Kraken's table of weapons and armor.
+  const warriorAny = [...classes, ...(dualFrom ? [dualFrom] : [])].some((cls) => cls.group === "warrior");
+  const percent = scores.strength === 18 && warriorAny ? Math.min(100, Math.max(1, Math.round(num(spec?.strengthPercent ?? given?.strengthPercent, 50)))) : 0;
+  // Hit points: the die's highest at 1st level, then the rolls the wizard made on
+  // the host (hpRolls {class: [2nd level's, 3rd's...]}), else the die's average;
+  // a multi-class character's divided by its classes; a dual-class character
+  // gains none in the new class until it passes the old one's level.
+  const rollsOf = (cls) => {
+    const list = spec?.hpRolls?.[cls.name] ?? spec?.hpRolls?.[classKey(cls.name)];
+    return Array.isArray(list) ? [0, ...list.map((value) => num(value, 0) || undefined)] : [];
+  };
+  const con = scores.constitution;
+  let hp;
+  const entries = dualFrom ? [{ cls: dualFrom, level: dualLevel, active: false }, { cls: classes[0], level, active: true }] : classes.map((cls) => ({ cls, level: levelOf(cls), active: true }));
+  if (dualFrom) hp = hitPointsFor(dualFrom, dualLevel, con, { rolls: rollsOf(dualFrom) }) + hitPointsFor(classes[0], level, con, { rolls: rollsOf(classes[0]), from: dualLevel + 1 });
+  else hp = Math.floor(entries.reduce((sum, entry) => sum + hitPointsFor(entry.cls, entry.level, con, { rolls: rollsOf(entry.cls) }), 0) / entries.length);
+  hp = Math.max(1, hp);
+  // Experience: each class's least for its level, added up (the FG wizard's).
+  const exp = entries.reduce((sum, entry) => sum + xpFor(entry.cls.name, entry.level), 0);
+  // Gear: the books' items by name, else Kraken's table of weapons and armor; [name, count] buys several.
   const inventorylist = {};
   const items = lib.items ?? [];
   const gear = Array.isArray(spec?.gear) && spec.gear.length ? spec.gear : [...new Set(classes.flatMap((cls) => KITS[classKey(cls.name)] ?? []))].slice(0, 6);
-  for (const name of gear) {
+  for (const entry of gear) {
+    const [name, count] = Array.isArray(entry) ? [String(entry[0] ?? ""), Math.max(1, Math.round(num(entry[1], 1)))] : [String(entry ?? ""), 1];
     const found = byName(items, name);
     const made = found ? { ...Object.fromEntries(Object.entries(found.data ?? {}).filter(([field]) => field !== "fgPath")), name: found.name } : makeItem(name);
     if (!made) {
       problems.push(`No item "${name}".`);
       continue;
     }
+    // Starting gear is gear the character knows.
+    if (made.isidentified !== undefined) made.isidentified = 1;
     const id = `id-${String(Object.keys(inventorylist).length + 1).padStart(5, "0")}`;
     // Worn: the best armor and one shield; weapons in hand.
-    inventorylist[id] = { ...made, count: num(made.count, 1) || 1, carried: isWeapon(made) || isShield(made) || isArmor(made) ? 2 : 1 };
+    inventorylist[id] = { ...made, count: (num(made.count, 1) || 1) * count, carried: isWeapon(made) || isShield(made) || isArmor(made) ? 2 : 1 };
   }
   const armors = Object.values(inventorylist).filter(isArmor);
   for (const extra of armors.sort((a, b) => num(a.ac, 10) - num(b.ac, 10)).slice(1)) extra.carried = 1;
+  const shields = Object.values(inventorylist).filter(isShield);
+  for (const extra of shields.slice(1)) extra.carried = 1;
   // Proficiencies: the given, else the kit's weapons, as many as the slots allow.
   const group = classes[0].group;
-  const weaponSlots = Math.max(...classes.map((cls) => GROUPS[cls.group].weapon[0] + Math.floor((level - 1) / GROUPS[cls.group].weapon[1])));
-  const nonweaponSlots = Math.max(...classes.map((cls) => GROUPS[cls.group].nonweapon[0] + Math.floor((level - 1) / GROUPS[cls.group].nonweapon[1])));
+  const slotsOf = (kind) => Math.max(...entries.map((entry) => GROUPS[entry.cls.group][kind][0] + Math.floor(entry.level / GROUPS[entry.cls.group][kind][1])));
+  const weaponSlots = Number.isFinite(Number(spec?.weaponSlots)) ? Math.max(0, Math.round(Number(spec.weaponSlots))) : slotsOf("weapon");
+  const nonweaponSlots = Number.isFinite(Number(spec?.nonweaponSlots)) ? Math.max(0, Math.round(Number(spec.nonweaponSlots))) : slotsOf("nonweapon");
   const kitWeapons = Object.values(inventorylist).filter(isWeapon).map((item) => item.name);
-  const weapons = (Array.isArray(spec?.weapons) && spec.weapons.length ? spec.weapons.map(String) : kitWeapons).slice(0, weaponSlots);
-  const nonweapon = (Array.isArray(spec?.nonweapon) && spec.nonweapon.length ? spec.nonweapon.map(String) : NONWEAPON[group]).slice(0, nonweaponSlots);
+  const specialized = spec?.specialize ? String(spec.specialize) : "";
+  // The wizard's choices stand as made (none is none); otherwise none given takes the defaults.
+  const chosen = (list) => Array.isArray(list) && (list.length > 0 || spec?.wizard === true);
+  const weapons = (chosen(spec?.weapons) ? spec.weapons.map(String) : kitWeapons).slice(0, Math.max(0, weaponSlots - (specialized ? 1 : 0)));
+  if (specialized && !weapons.some((name) => same(name, specialized))) problems.push(`Specialized in ${specialized} without its proficiency.`);
+  const nonweapon = chosen(spec?.nonweapon) ? spec.nonweapon.map(String) : NONWEAPON[group].slice(0, nonweaponSlots);
   // Thief and bard skills: the given points, else spent in the class's order (30 at most in one at 1st).
   const skilled = classes.find((cls) => ["thief", "bard"].includes(classKey(cls.name)));
   const thiefskills = {};
   if (skilled) {
-    let points = skillPoints(skilled.name, level);
-    const cap = (classKey(skilled.name) === "bard" ? 15 : 30) + 15 * (level - 1);
+    const skillLevel = levelOf(skilled);
+    let points = skillPoints(skilled.name, skillLevel);
+    const cap = (classKey(skilled.name) === "bard" ? 15 : 30) + 15 * (skillLevel - 1);
     const wanted = spec?.skills && typeof spec.skills === "object" ? Object.entries(spec.skills) : [];
     for (const [skill, value] of wanted) {
       if (!THIEF_SKILLS[skill]) {
@@ -1035,20 +1119,52 @@ export function buildFromSpec(spec, lib = {}) {
       }
     }
   }
+  // Money: coins {pp, gp, ep, sp, cp}, or money (gp, the purse left after shopping, laid out as
+  // gold, silver and copper). A priest keeps 3 gp of it; the rest goes to his order (PHB Table 43).
+  const coinsIn = spec?.coins && typeof spec.coins === "object" ? spec.coins : null;
+  let copper = coinsIn ? Math.round(num(coinsIn.pp, 0) * 500 + num(coinsIn.gp, 0) * 100 + num(coinsIn.ep, 0) * 50 + num(coinsIn.sp, 0) * 10 + num(coinsIn.cp, 0)) : Math.round(Math.max(0, num(spec?.money, 0)) * 100);
+  let priestNote = "";
+  const allPriest = entries.every((entry) => entry.cls.group === "priest");
+  if (allPriest && copper > 300 && !coinsIn) {
+    priestNote = `${(copper - 300) / 100} gp left after shopping went back to the priest's order; he keeps 3 gp (PHB Table 43).`;
+    copper = 300;
+  }
+  const coins = coinsIn
+    ? { "id-00001": { name: "PP", amount: Math.round(num(coinsIn.pp, 0)) }, "id-00002": { name: "GP", amount: Math.round(num(coinsIn.gp, 0)) }, "id-00003": { name: "EP", amount: Math.round(num(coinsIn.ep, 0)) }, "id-00004": { name: "SP", amount: Math.round(num(coinsIn.sp, 0)) }, "id-00005": { name: "CP", amount: Math.round(num(coinsIn.cp, 0)) } }
+    : { "id-00001": { name: "PP", amount: 0 }, "id-00002": { name: "GP", amount: Math.floor(copper / 100) }, "id-00003": { name: "EP", amount: 0 }, "id-00004": { name: "SP", amount: Math.floor((copper % 100) / 10) }, "id-00005": { name: "CP", amount: copper % 10 } };
+  // Languages: the race's own and the ones chosen for Intelligence.
+  const languages = Array.isArray(spec?.languages) ? [...new Set(spec.languages.map(String).filter(Boolean))].join(", ") : undefined;
+  const text = (key) => String(spec?.[key] ?? "").slice(0, 8000);
+  const notes = [
+    ["Personality", text("personalitytraits")],
+    ["Ideals", text("ideals")],
+    ["Bonds", text("bonds")],
+    ["Flaws", text("flaws")],
+  ]
+    .filter(([, value]) => value)
+    .map(([title, value]) => `${title}: ${value}`);
+  if (text("notes")) notes.push(text("notes"));
+  if (priestNote) notes.push(priestNote);
   const data = derive({
     race: race.name,
     alignment: String(spec?.alignment ?? classes.find((cls) => cls.alignment)?.alignment ?? ""),
-    classes: classes.map((cls) => ({ name: cls.name, level, group: cls.group })),
+    classes: entries.map((entry) => ({ name: entry.cls.name, level: entry.level, group: entry.cls.group, ...(entry.active ? {} : { active: false }) })),
     abilities: Object.fromEntries(STATS.map((stat) => [stat, { score: scores[stat], ...(stat === "strength" ? { percent } : {}) }])),
     hp: { total: hp, wounds: 0 },
     inventorylist,
-    coins: { "id-00001": { name: "GP", amount: 0 }, "id-00002": { name: "SP", amount: 0 }, "id-00003": { name: "CP", amount: 0 } },
-    profs: { weapon: weapons, nonweapon },
+    coins,
+    // A kit's own weapon slots (more or fewer than the class's): the difference kept as weaponbonus.
+    profs: { weapon: weapons, nonweapon, ...(specialized ? { specialized } : {}), ...(weaponSlots !== slotsOf("weapon") ? { weaponbonus: weaponSlots - slotsOf("weapon") } : {}) },
     thiefskills,
     spells: Array.isArray(spec?.spells) ? spec.spells.map(String) : [],
     exp,
+    ...(spec?.kit ? { background: String(spec.kit).slice(0, 200), kit: String(spec.kit).slice(0, 200) } : {}),
+    ...(languages ? { languages } : {}),
+    ...Object.fromEntries(["deity", "gender", "age", "agemax", "height", "weight", "size", "appearance"].filter((key) => text(key)).map((key) => [key, text(key)])),
+    ...(notes.length ? { notes: notes.join("\n\n") } : {}),
   });
-  return { name: String(spec?.name ?? "").trim() || `${race.name} ${label}`, data, problems };
+  const name = String(spec?.name ?? "").trim() || `${race.name} ${dualFrom ? `${dualFrom.name}/` : ""}${label}`;
+  return { name, data, problems, ...(priestNote ? { notes: [priestNote] } : {}) };
 }
 
 // A level gained in one class (the first, or the one named): its hit points
