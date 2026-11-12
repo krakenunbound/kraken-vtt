@@ -470,6 +470,11 @@ export function BookWindow({ session, book }: { session: Session; book: string }
     const link = (event.target as HTMLElement).closest("a.book-link") as HTMLAnchorElement | null;
     if (!link) return;
     event.preventDefault();
+    // A web link: the browser (a new tab; on the GM's app, the system's browser).
+    if (link.classList.contains("url")) {
+      if (/^https?:\/\//i.test(link.href)) window.open(link.href, "_blank", "noopener,noreferrer");
+      return;
+    }
     if (link.classList.contains("sound")) {
       const ref = gm ? linkSound(link) : null;
       if (ref) {

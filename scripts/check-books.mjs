@@ -37,10 +37,20 @@ assert(gate.blocks[0].kind === "picture" && gate.blocks[0].file === "images/keep
 assert(text.includes("<b>guards</b>") && text.includes('<blockquote class="frame">Halt!'), `formatted text as HTML: ${text}`);
 assert(!/<script/i.test(text) && text.includes("&lt;script&gt;"), "no script gets through; its text is escaped");
 assert(text.includes('data-page="inn"') && text.includes('data-file="images/keep.png"'), "links go to a page and to a picture");
+// Typed superscripts and line breaks in a book's text read as such; nothing else does.
+{
+  const { toHtml } = require("../electron/books.cjs");
+  const html = toHtml("<p>Quarterstaff&lt;sup&gt;2&lt;/sup&gt; a&lt;br&gt;b &lt;script&gt;x&lt;/script&gt;</p>", () => null);
+  assert(html === "<p>Quarterstaff<sup>2</sup> a<br>b &lt;script&gt;x&lt;/script&gt;</p>", `typed sup and br: ${html}`);
+}
 // A link to a record the book holds opens it (FG's link to a creature, spell, item); one to nothing is dead.
 {
   const inn = books.page("Test Keep", "inn").blocks.map((block) => block.html ?? "").join("");
   assert(inn.includes('class="book-link record"') && inn.includes('data-record="npc.guard@Test Keep"') && /book-link dead" data-kind="npc">nobody/.test(inn), `a record link, and a dead one: ${inn}`);
+  assert(inn.includes('<a class="book-link url" href="https://example.com/keep" target="_blank" rel="noopener noreferrer">') && !inn.includes("javascript:"), `a web link opens in the browser, never a script: ${inn}`);
+  // A record kept inside another (a 5E book's races in reference.racedata).
+  const dwarf = books.record("Test Keep", "reference.racedata.dwarf@Test Keep");
+  assert(inn.includes('data-record="reference.racedata.dwarf@Test Keep"') && dwarf?.name === "Dwarf" && dwarf.data.speed === "25 ft.", `a race inside the book's race list: ${JSON.stringify(dwarf)}`);
   const guard = books.record("Test Keep", "npc.guard@Test Keep");
   assert(guard?.name === "Gate Guard" && guard.type === "npc" && guard.data.hp === 7 && books.record("Test Keep", "npc.nobody@Test Keep") === null, `the record behind the link: ${JSON.stringify(guard)}`);
 }

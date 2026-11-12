@@ -37,7 +37,9 @@ const { unzipSync, strFromU8, strToU8, Zip, ZipPassThrough, ZipDeflate } = requi
 const MANIFEST = "kraken-pack.json";
 const RECORDS = "records.json";
 const FORMAT = "kraken-pack";
-const VERSION = 1;
+// 2: a book's pages kept in categories (a 3.5E Monster Manual's creatures)
+// and a rulebook's tables are read; a pack made before is remade from its module.
+const VERSION = 2;
 const EXTENSION = ".kpack";
 
 // Which Kraken ruleset an FG module's ruleset is for.
@@ -125,10 +127,29 @@ function packIndex() {
 function packFor(name) {
   return packIndex().get(String(name ?? "").trim()) ?? null;
 }
-// The pack, unless the FG module it was made from is newer (the GM changed it since).
+// A pack's format version (its manifest's), read once a file.
+function packVersion(file) {
+  try {
+    const stat = fs.statSync(file);
+    const key = `${stat.size}|${Math.round(stat.mtimeMs)}`;
+    let known = described.get(file);
+    if (known?.key !== key) {
+      known = { key, manifest: readManifest(file) };
+      described.set(file, known);
+    }
+    return Number(known.manifest.version) || 1;
+  } catch {
+    return 0;
+  }
+}
+// Whether a pack is as Kraken makes them now (else its module is read, until the pack is made again).
+const packCurrent = (file) => packVersion(file) >= VERSION;
+// The pack, unless the FG module it was made from is newer (the GM changed it
+// since), or the pack was made by an older Kraken.
 function preferPack(pack, module) {
   if (!pack) return module;
   if (!module) return pack;
+  if (!packCurrent(pack)) return module;
   try {
     return fs.statSync(module).mtimeMs > fs.statSync(pack).mtimeMs + 1000 ? module : pack;
   } catch {
@@ -241,4 +262,4 @@ function makePack(source, { read, describe, folder = packFolder(), onProgress = 
   return { file: target, name: manifest.name, title: manifest.title, ruleset: manifest.ruleset, records: records.length, pictures: kept.length, bytes: fs.statSync(target).size };
 }
 
-module.exports = { packFolder, isPack, fileName, readManifest, readPack, packFor, packIndex, preferPack, makePack, krakenRuleset, EXTENSION, FORMAT, VERSION };
+module.exports = { packVersion, packCurrent, packFolder, isPack, fileName, readManifest, readPack, packFor, packIndex, preferPack, makePack, krakenRuleset, EXTENSION, FORMAT, VERSION };

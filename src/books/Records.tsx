@@ -63,6 +63,32 @@ export function BookRecordWindow({ session, book, path }: { session: Session; bo
   return <RecordWindow session={session} id={read.id} record={read} book={book} />;
 }
 
+// FG's grouped list (a 5E book's Armor Table, Weapons Table): sections, each a
+// table of its items' short fields, an item's name its link.
+type GroupRow = { name: string; link: string; cells: Record<string, string> };
+function groupsOf(data: Record<string, unknown>) {
+  const groupsIn = data.groups;
+  if (!groupsIn || typeof groupsIn !== "object") return null;
+  const groups = Object.keys(groupsIn as object)
+    .sort()
+    .map((key) => {
+      const group = (groupsIn as Record<string, Record<string, unknown>>)[key] ?? {};
+      const listKey = Object.keys(group).find((name) => group[name] && typeof group[name] === "object" && name !== "link");
+      const rowsIn = (listKey ? group[listKey] : {}) as Record<string, Record<string, unknown>>;
+      const rows: GroupRow[] = Object.values(rowsIn)
+        .filter((row) => row && typeof row === "object")
+        .map((row) => ({
+          name: String(row.name ?? ""),
+          link: String((row.link as { recordname?: string } | undefined)?.recordname ?? ""),
+          cells: Object.fromEntries(Object.entries(row).filter(([name, value]) => name !== "name" && name !== "link" && (typeof value === "string" || typeof value === "number")).map(([name, value]) => [name, String(value)])),
+        }));
+      const columns = [...new Set(rows.flatMap((row) => Object.keys(row.cells)))];
+      return { title: String(group.description ?? ""), columns, rows };
+    })
+    .filter((group) => group.rows.length);
+  return groups.length ? groups : null;
+}
+
 // An FG table (its column labels, die and rows of results), as FG's table window shows it.
 const TABLE_FIELDS = /^(tablerows|labelcol[0-9]+|resultscols|dice|mod|hiderollresults|output|table_positionoffset|description)$/;
 function tableOf(data: Record<string, unknown>) {
@@ -229,7 +255,7 @@ export function RecordsWindow({ session, onOpen, only }: { session: Session; onO
 
 // FG's formatted text, as elements: only the tags FG's text uses, never raw
 // HTML (a record's text comes from a module or another seat).
-const TAGS: Record<string, string> = { p: "p", b: "b", strong: "b", i: "i", em: "i", u: "u", h: "h4", list: "ul", ul: "ul", ol: "ol", li: "li", table: "table", tr: "tr", td: "td", th: "th", frame: "blockquote", linklist: "ul" };
+const TAGS: Record<string, string> = { p: "p", b: "b", strong: "b", i: "i", em: "i", u: "u", h: "h4", list: "ul", ul: "ul", ol: "ol", li: "li", table: "table", tr: "tr", td: "td", th: "th", frame: "blockquote", linklist: "ul", sup: "sup", sub: "sub" };
 // A link in a record's text: followed when the record is a book's (onLink), else shown as its words.
 type OnLink = (linkClass: string, recordname: string, words: string) => void;
 function nodes(parent: Node, key = "n", onLink?: OnLink): ReactNode[] {
@@ -305,7 +331,7 @@ export function RecordWindow({ session, id, record: given, book }: { session: Se
   const lists: [string, { name: string; desc: string }[]][] = [];
   for (const [key, value] of Object.entries(data)) {
     // FG's bookkeeping as values: a list it keeps elsewhere (true), an unused number (0).
-    if ((data.tablerows && TABLE_FIELDS.test(key)) || HIDDEN.has(key) || value === null || value === undefined || value === "" || value === true || value === 0) continue;
+    if ((data.tablerows && TABLE_FIELDS.test(key)) || (data.groups && (key === "groups" || key === "description")) || HIDDEN.has(key) || value === null || value === undefined || value === "" || value === true || value === 0) continue;
     if (isText(value)) texts.push([key, String(value)]);
     else if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") fields.push([key, String(value === false ? "No" : value)]);
     else if (typeof value === "object") {
@@ -319,6 +345,7 @@ export function RecordWindow({ session, id, record: given, book }: { session: Se
   if (npc && typeof data.text === "string" && data.text.trim()) texts.unshift(["description", data.text]);
   const portrait = npc && (data.picture || data.token) ? session.recordArtUrl(record.id, "portrait") : "";
   const table = tableOf(data);
+  const grouped = groupsOf(data);
   const abilities = data.abilities && typeof data.abilities === "object" ? (data.abilities as Record<string, { score?: number; bonus?: number } | undefined>) : null;
   return (
     <article className="record-window" data-record={record.id}>
@@ -343,6 +370,41 @@ export function RecordWindow({ session, id, record: given, book }: { session: Se
         ) : null}
       </header>
       {gm && npc && session.ruleset === "Traveller" ? <NpcMgt2 session={session} record={record} /> : null}
+      {grouped
+        ? grouped.map((group, index) => (
+            <section key={index} className="record-grouped" data-record-group={group.title}>
+              {group.title ? <h4>{group.title}</h4> : null}
+              <table className="record-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    {group.columns.map((column) => (
+                      <th key={column}>{labelOf(column)}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {group.rows.map((row, rowIndex) => (
+                    <tr key={rowIndex}>
+                      <td>
+                        {row.link && onLink ? (
+                          <a href="#" className="record-link" onClick={(event) => (event.preventDefault(), onLink("", row.link.replace(/@\*$/, ""), row.name))}>
+                            {row.name}
+                          </a>
+                        ) : (
+                          row.name
+                        )}
+                      </td>
+                      {group.columns.map((column) => (
+                        <td key={column}>{row.cells[column] ?? ""}</td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </section>
+          ))
+        : null}
       {table ? (
         <table className="record-table" data-record-table>
           <thead>

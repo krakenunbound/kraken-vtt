@@ -136,18 +136,26 @@ function describe(file) {
 
 // FG's formatted text, as HTML Kraken shows: only these tags, text escaped,
 // and links turned into Kraken's own (a page, a picture, or plain text).
-const TAGS = { p: "p", b: "b", strong: "b", i: "i", em: "i", u: "u", h: "h3", list: "ul", li: "li", table: "table", tr: "tr", td: "td", th: "th", frame: "blockquote", linklist: "ul" };
+const TAGS = { p: "p", b: "b", strong: "b", i: "i", em: "i", u: "u", h: "h3", list: "ul", li: "li", table: "table", tr: "tr", td: "td", th: "th", frame: "blockquote", linklist: "ul", sup: "sup", sub: "sub" };
 const escape = (text) => String(text).replace(/[&<>"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[char]);
 
+// A book's text that carries a superscript, subscript or line break as
+// typed text ("Quarterstaff<sup>2</sup>", escaped in the module): shown as
+// one, as the book meant (a fixed few, so nothing else gets through).
+const typeset = (escaped) => escaped.replace(/&lt;(\/?)(sup|sub)&gt;/gi, (_, close, tag) => `<${close}${tag.toLowerCase()}>`).replace(/&lt;br\s*\/?&gt;/gi, "<br>");
 function toHtml(formatted, resolve) {
   const root = parse(`<root>${formatted ?? ""}</root>`);
   if (!root) return `<p>${escape(formatted ?? "")}</p>`;
   const walk = (node) => {
     let out = "";
     for (let child = node.firstChild; child; child = child.nextSibling) {
-      if (child.nodeType === 3 || child.nodeType === 4) out += escape(child.nodeValue);
+      if (child.nodeType === 3 || child.nodeType === 4) out += typeset(escape(child.nodeValue));
       if (child.nodeType !== 1) continue;
       const tag = child.tagName;
+      if (tag === "br") {
+        out += "<br>";
+        continue;
+      }
       if (tag === "link") {
         const linkClass = child.getAttribute("class") || "";
         const recordname = child.getAttribute("recordname") || "";
@@ -159,6 +167,12 @@ function toHtml(formatted, resolve) {
           const [, , type = "", subtype = "", ...name] = recordname.split("|");
           const kind = type === "mood" ? "ambience" : subtype === "music" ? "music" : type === "oneshot" ? "oneshots" : "sfx";
           out += `<a class="book-link sound" data-sound-key="${escape(recordname || text)}" data-sound-kind="${kind}" data-sound-name="${escape(name.join("|") || text)}">${text}</a>`;
+          continue;
+        }
+        // A web link (FG's url class): the browser opens it (http and https only).
+        if (linkClass === "url") {
+          if (/^https?:\/\//i.test(recordname)) out += `<a class="book-link url" href="${escape(recordname)}" target="_blank" rel="noopener noreferrer">${text}</a>`;
+          else out += `<span class="book-link dead" data-kind="url">${text}</span>`;
           continue;
         }
         if (linkClass === "sound_context") {
@@ -292,6 +306,30 @@ function createBookShelf({ folder, cache = "", also = [], packsFolder = "" }) {
     return book;
   }
 
+  // A record by its FG path: one of its own, or one kept inside another (a
+  // 5E book's races in reference.racedata: reference.racedata.dwarf), found
+  // under the container's categories too.
+  function findRecord(book, fgPath) {
+    const own = book.records.get(fgPath);
+    if (own) return own;
+    const [inner, moduleName = book.info.name] = String(fgPath).split("@");
+    const cut = inner.lastIndexOf(".");
+    if (cut < 0) return null;
+    const container = book.records.get(`${inner.slice(0, cut)}@${moduleName}`);
+    const key = inner.slice(cut + 1);
+    const data = container?.data;
+    if (!data || typeof data !== "object") return null;
+    const groups = [data, ...[].concat(data.category ?? []).flatMap((group) => (group && typeof group === "object" ? [group] : []))];
+    for (const group of groups) {
+      const child = group[key];
+      const title = child && typeof child === "object" ? child.name ?? child.description ?? child.title : null;
+      if (typeof title === "string" && title.trim()) {
+        const kind = inner.slice(0, cut).split(".").pop().replace(/data$|lists?$/, "") || container.type;
+        return { id: `${container.id}:${key}`, type: kind, name: title.trim(), data: { ...child, fgPath: `${inner}@${moduleName}` } };
+      }
+    }
+    return null;
+  }
   // A link's target: a page of this book or another, or a picture.
   function resolver(book) {
     return (linkClass, recordname) => {
@@ -320,14 +358,14 @@ function createBookShelf({ folder, cache = "", also = [], packsFolder = "" }) {
           return null;
         }
       })();
-      const record = target?.records.get(`${inner}@${other.name}`);
+      const record = target ? findRecord(target, `${inner}@${other.name}`) : null;
       return record ? { book: other.id, record: record.data.fgPath, name: record.name } : null;
     };
   }
   // One record of a book, by its FG path (a link's target): its name, type and fields.
   function bookRecord(id, fgPath) {
     const book = read(id);
-    const record = book.records.get(String(fgPath ?? ""));
+    const record = findRecord(book, String(fgPath ?? ""));
     if (!record) return null;
     return { id: record.data.fgPath, type: record.type, name: record.name, source: book.info.title, data: record.data };
   }

@@ -1553,3 +1553,4 @@ textarea.cc-field.tall { min-height: 220px; }
 .record-table td { padding: 3px 6px; border-bottom: 1px solid rgba(255, 255, 255, 0.06); vertical-align: top; }
 .record-table tbody tr:nth-child(even) td { background: rgba(255, 255, 255, 0.025); }
 .record-table-roll { white-space: nowrap; width: 1%; color: var(--muted, #9aa3b2); }
+.record-grouped h4 { margin: 12px 0 2px; color: var(--accent, #d6aa5c); }

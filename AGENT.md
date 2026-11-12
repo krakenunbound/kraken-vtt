@@ -33,7 +33,7 @@ The app starts the MCP server when it opens. `electron/agent/mcp-stdio.cjs` is t
 | Line of sight, token movement lock, what a player sees | `kraken_line_of_sight` |
 | Place, change, remove lights | `kraken_light` |
 | Ping the map | `kraken_ping` |
-| Read the map: grid, tokens, doors | `kraken_map` |
+| Read the map: grid, tokens, doors; share it with the players (opens on every screen, as FG's Share) | `kraken_map` (`share: true`) |
 | The map editor: walls, doors, windows (drawn where the hand puts them, grid snap off unless on; dragged to move, a corner dragged; a door box is one door); mask; text, numbers and pins; paint; FX layers; layer groups; undo | `kraken_wall`, `kraken_mask`, `kraken_label`, `kraken_draw`, `kraken_fx`, `kraken_map_group`, `kraken_map_undo` |
 | FX masks: paint an effect's areas on the map (rectangle, shape, brush; several, added together; a soft edge), remove one from the list | `kraken_fx` paint / erase-area |
 | The map editor's Images tab: image layers (pictures placed on the map, below or above the tokens, ordered, hidden, locked, grouped; Browse or drop a picture into the tile library) | `kraken_tile` |
@@ -68,7 +68,7 @@ The app starts the MCP server when it opens. `electron/agent/mcp-stdio.cjs` is t
 | GM-only roll (the GM's dice tower) | `kraken_roll` with `secret` |
 | Dice tower: players see their own result | `kraken_table_options` |
 | How long dice stay on the table before they fade (the GM's Settings) | `kraken_table_options` diceHold |
-| Traveller's lifepath (the Traveller wizard): characteristics, background, education, careers term by term, mustering out, then the character | `kraken_traveller_lifepath` |
+| Traveller's wizard (the GM's KrakenCharWizardMGT2 run in Kraken): start, view, call a page's step (fn, args), details, build with gear bought, cancel | `kraken_traveller_lifepath` |
 | Starships (Traveller, Apeira Astra): make a ship from a design, its sheet (hull, armour, weapons, criticals), crew stations | `kraken_starship` |
 | Ship combat: a gunner fires a ship's weapon at a ship (range, criticals) | `kraken_combat` ship-attack |
 | A ship's token on the map (range by the map); its deck plans as maps | `kraken_starship` place, deck-plan |

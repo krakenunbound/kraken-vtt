@@ -132,7 +132,7 @@ function packsView({ ruleset = "" } = {}) {
         ruleset: kraken,
         fgRuleset: item.ruleset,
         hasBook: item.hasBook,
-        pack: pack ? { file: path.basename(pack.file), current: (pack.mtime ?? 0) + 1000 >= (item.mtime ?? 0) } : null,
+        pack: pack ? { file: path.basename(pack.file), current: (pack.mtime ?? 0) + 1000 >= (item.mtime ?? 0) && packs.packCurrent(pack.file) } : null,
         state: packJob.current === item.id ? "making" : packJob.queue.includes(item.id) ? "waiting" : packJob.failed.find((failed) => failed.id === item.id) ? "failed" : "",
       };
     })

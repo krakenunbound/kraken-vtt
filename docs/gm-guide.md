@@ -101,6 +101,13 @@ sheet, into chat, into a story entry, onto the hotbar.
 - **Share** a record with the players from its window (*Share with the
   players*), or a picture from its menu. Players never see what you have not
   shared.
+- **Links in a book** work as in Fantasy Grounds: a page, a picture, or a
+  record the book holds (a creature, spell, item, class, race, feat, table,
+  encounter) opens in its own window. A table shows as a table, an
+  equipment list as its sections, and a web link opens in your browser.
+- **New** (on the NPCs, Items and other lists, as Fantasy Grounds' +) makes
+  a record and opens it. A Traveller NPC opens on its own sheet: its six
+  characteristics, skills, armour and weapons, which the tracker fights with.
 
 ## Maps
 
@@ -114,6 +121,9 @@ sheet, into chat, into a story entry, onto the hotbar.
 - The **map editor** (the map window's tools) draws walls, doors and windows,
   sets the grid, places lights, paints, adds text and image layers, and masks
   what players see.
+- **Share with players** (the map window's share button, as Fantasy Grounds'
+  Share) opens the map on every player's screen, even where a player closed
+  it.
 
 ## Combat
 
@@ -129,6 +139,15 @@ sheet, into chat, into a story entry, onto the hotbar.
 
 - Players make their own in the character **wizard** (or you make one for
   them). Each game has its own sheet.
+- The wizards are your own Fantasy Grounds ones, page for page: Traveller's is
+  your KrakenCharWizardMGT2 extension itself, run inside Kraken (it needs the
+  extension in Fantasy Grounds' extensions folder once; Kraken keeps a copy
+  beside the packs), and 2E's, 3.5E's, 5E's and C&C's follow your extensions
+  and FG's 5E wizard, art and words included. Only you may re-roll a
+  Traveller's characteristics.
+- A character's wizard rolls are the host's, in chat for the table. Starting
+  gear is bought with the starting money in each wizard's shop (5E takes its
+  class and background kits, as Fantasy Grounds does).
 - Give items and treasure through the **party sheet** and **parcels**.
 - Experience and levelling follow the game's rules.
 
@@ -150,6 +169,9 @@ Settings (the cog) has **Dice stay on the table for**: how many seconds the
 3D dice lie there after they land before they fade, for everyone at the
 table. Dice from different rolls knock against each other and come to rest
 side by side.
+A natural 20 on a d20 flares gold to a bugle's fanfare, a natural 1 red to a
+sad trombone, on every screen that sees the dice (with dice sound on; the
+flare's switch in **Dice** turns both off).
 
 ## The AI assistant
 

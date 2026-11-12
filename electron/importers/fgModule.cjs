@@ -129,7 +129,11 @@ function rootRecords(root) {
   if (root.tagName === "reference") {
     for (const container of elements(root)) {
       if (container.tagName === "refmanualdata") {
-        for (const page of elements(container)) out.push({ node: page, category: "", type: "refpage", parent: "reference.refmanualdata" });
+        // Pages, and pages kept in categories (FG flattens them: a 3.5E Monster Manual's creatures).
+        for (const page of elements(container)) {
+          if (page.tagName === "category") for (const inner of elements(page)) out.push({ node: inner, category: page.getAttribute("name") || "", type: "refpage", parent: "reference.refmanualdata" });
+          else out.push({ node: page, category: "", type: "refpage", parent: "reference.refmanualdata" });
+        }
       } else out.push({ node: container, category: "", type: "refindex", parent: "reference" });
     }
     return out;

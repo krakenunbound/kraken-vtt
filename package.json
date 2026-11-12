@@ -142,7 +142,12 @@
       "package.json",
       "node_modules/ws/**/*",
       "node_modules/fflate/**/*",
-      "node_modules/@xmldom/**/*"
+      "node_modules/@xmldom/**/*",
+      "node_modules/fengari/**/*",
+      "node_modules/fengari-interop/**/*",
+      "node_modules/readline-sync/**/*",
+      "node_modules/sprintf-js/**/*",
+      "node_modules/tmp/**/*"
     ],
     "win": {
       "icon": "build/icon.ico",

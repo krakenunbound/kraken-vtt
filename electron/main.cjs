@@ -262,6 +262,11 @@ function createWindow() {
   // Panels popped out of the table (the renderer draws into them), so they can
   // go on another monitor. Nothing else may open a window.
   win.webContents.setWindowOpenHandler(({ url, frameName }) => {
+    // A book's web link (FG's url links): the system's browser, never a Kraken window.
+    if (/^https?:\/\//i.test(url) && frameName !== "kraken-popout") {
+      void require("electron").shell.openExternal(url);
+      return { action: "deny" };
+    }
     if (url !== "about:blank" || !frameName.startsWith("kraken-popout-")) return { action: "deny" };
     return {
       action: "allow",
