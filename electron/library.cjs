@@ -9,10 +9,16 @@ const { readModule } = require("./importers/fgModule.cjs");
 
 const KINDS = { npc: "npc", battle: "battle", parcel: "treasureparcels", table: "tables", story: "encounter" };
 const cache = new Map();
+// The GM's shelf: a book named by its id, its name or its title is read from
+// its own file (a pack, a module whose file name is not its name, a bundled book).
+let resolveBook = (name) => name;
+function useShelf(resolve) {
+  resolveBook = (name) => resolve(name) ?? name;
+}
 function moduleRecords(moduleName) {
   let records = cache.get(moduleName);
   if (!records) {
-    records = readModule(moduleName, { only: new Set(Object.values(KINDS)) }).records;
+    records = readModule(resolveBook(moduleName), { only: new Set(Object.values(KINDS)) }).records;
     cache.set(moduleName, records);
     if (cache.size > 4) cache.delete(cache.keys().next().value);
   }
@@ -118,4 +124,4 @@ function tables(moduleName) {
   return moduleRecords(moduleName).filter((record) => record.type === KINDS.table);
 }
 
-module.exports = { tables, list, ensureNpc, addBattle, giveParcel, rollTable, storyEntry, KINDS };
+module.exports = { useShelf, resolved: (name) => resolveBook(name), tables, list, ensureNpc, addBattle, giveParcel, rollTable, storyEntry, KINDS };

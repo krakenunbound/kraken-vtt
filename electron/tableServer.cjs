@@ -1593,7 +1593,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         (async () => {
           const moduleName = String(msg.module ?? "");
           // Its module converted first, off this thread (once).
-          await prepareModule(moduleName);
+          await prepareModule(library.resolved(moduleName));
           if (msg.action === "list") send(ws, { type: "library", module: moduleName, kind: msg.kind, items: library.list(moduleName, String(msg.kind ?? ""), String(msg.search ?? "")) });
           else if (msg.action === "npc") await combat.add({ recordId: library.ensureNpc(agentHandle, String(msg.path)).id, count: msg.count }, seatOf(client));
           else if (msg.action === "battle") await library.addBattle(agentHandle, String(msg.path), { place: msg.place !== false });
@@ -2025,6 +2025,14 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     });
   });
 
+  // The Library reads a book by its id, name or title from the shelf's own file.
+  if (books) {
+    require("./library.cjs").useShelf((given) => {
+      const wanted = String(given ?? "");
+      const found = books.list().find((info) => info.id === wanted || info.name === wanted || info.title === wanted);
+      return found ? books.file?.(found.id) ?? null : null;
+    });
+  }
   let bookTablesCache = { key: null, tables: [] };
   // What agents (the MCP server, the in-app assistant) use. They act as the GM.
   const agentHandle = {
