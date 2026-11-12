@@ -37,6 +37,21 @@ assert(gate.blocks[0].kind === "picture" && gate.blocks[0].file === "images/keep
 assert(text.includes("<b>guards</b>") && text.includes('<blockquote class="frame">Halt!'), `formatted text as HTML: ${text}`);
 assert(!/<script/i.test(text) && text.includes("&lt;script&gt;"), "no script gets through; its text is escaped");
 assert(text.includes('data-page="inn"') && text.includes('data-file="images/keep.png"'), "links go to a page and to a picture");
+// A homebrew module with story entries is an adventure, whatever its name (its story shows in Story).
+{
+  const { mkdtempSync, writeFileSync } = await import("node:fs");
+  const { tmpdir } = await import("node:os");
+  const { zipSync, strToU8 } = await import("fflate");
+  const dir = mkdtempSync(path.join(tmpdir(), "kraken-homebrew-"));
+  const db = '<root><encounter><id-00001><name type="string">Arrival</name><text type="formattedtext"><p>The road ends here.</p></text></id-00001></encounter><image><id-00001><name type="string">Map</name></id-00001></image></root>';
+  writeFileSync(path.join(dir, "Duanes Keep.mod"), zipSync({ "definition.xml": strToU8("<root><name>Duanes Keep</name><category>Homebrew</category><ruleset>CnCRPG</ruleset></root>"), "db.xml": strToU8(db) }));
+  const shelf = createBookShelf({ folder: dir });
+  const homebrew = shelf.list().find((item) => item.name === "Duanes Keep");
+  assert(homebrew?.adventure === true, `a module with story entries is an adventure: ${JSON.stringify(homebrew)}`);
+  const library = require("../electron/library.cjs");
+  library.useShelf((name) => shelf.file(name));
+  assert(library.list("Duanes Keep", "story").some((entry) => entry.name === "Arrival"), "its story entries are listed");
+}
 // Typed superscripts and line breaks in a book's text read as such; nothing else does.
 {
   const { toHtml } = require("../electron/books.cjs");

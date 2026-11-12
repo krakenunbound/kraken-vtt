@@ -273,8 +273,11 @@ function fgModuleBundle(moduleName, { only, all = false } = {}) {
   const scenes = [];
   const extras = {};
   const slug = (text) => String(text).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 40);
-  for (const record of module.records.filter((item) => item.type === "image")) {
-    if (only && !only.some((name) => String(record.name).toLowerCase().includes(String(name).toLowerCase()))) continue;
+  const images = module.records.filter((item) => item.type === "image");
+  // A name asked for: that map exactly, when there is one by that name; else those whose names hold it.
+  const exact = only ? images.filter((record) => only.some((name) => String(record.name).toLowerCase() === String(name).toLowerCase())) : [];
+  for (const record of exact.length ? exact : images) {
+    if (only && !exact.length && !only.some((name) => String(record.name).toLowerCase().includes(String(name).toLowerCase()))) continue;
     if (!only && !all && !isMap(record)) continue;
     const id = `fg-${slug(moduleName).slice(0, 16)}-${slug(record.name)}`.slice(0, 70);
     const made = imageScene(record, moduleName, id);
@@ -288,4 +291,11 @@ function fgModuleBundle(moduleName, { only, all = false } = {}) {
   return { bytes: zipSync(files, { level: 0 }), name: `${moduleName}.zip`, scenes: scenes.map((scene) => ({ id: scene._id, name: scene.name, walls: scene.walls.length, lights: scene.lights.length })), extras };
 }
 
-module.exports = { fgModuleBundle, pictureSize, imageScene };
+// A map record's picture file (its base layer's, or an older module's bitmap).
+function mapPicture(record) {
+  const image = record?.data?.image ?? {};
+  const layer = list(image.layers?.layer).find((item) => item.type === "image" && item.bitmap);
+  return String(layer?.bitmap ?? image.bitmap ?? "");
+}
+
+module.exports = { fgModuleBundle, pictureSize, imageScene, isMap, mapPicture };

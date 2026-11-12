@@ -817,7 +817,9 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       prepareModule(wanted).then(() => {
       try {
         const { fgModuleBundle } = require("./importers/fgMaps.cjs");
-        const bundle = fgModuleBundle(wanted);
+        // One map (the Library's choice), or the module's maps.
+        const one = String(url.searchParams.get("only") || "");
+        const bundle = fgModuleBundle(wanted, one ? { only: [one], all: true } : {});
         for (const [id, extra] of Object.entries(bundle.extras)) map.seed(id, { ...extra, tiles: storeTiles(extra.tiles) });
         res.writeHead(200, { "Content-Type": "application/zip", "Content-Length": bundle.bytes.length, "Cache-Control": "no-store" });
         res.end(Buffer.from(bundle.bytes));

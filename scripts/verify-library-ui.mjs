@@ -80,13 +80,28 @@ try {
   await page.click('.sidebar [data-launch="library"]');
   await page.waitForSelector(".library-window");
   await page.selectOption('[aria-label="Library module"]', B2);
+  // The Maps tab: each map a picture, clicked to see it large (only the GM), then one put on the table.
+  await page.waitForSelector('[data-action="library-map"][data-library-item="The Caves of Chaos"]', { timeout: 60000 });
+  assert((await page.$$('[data-action="library-map"][data-library-item^="Handout"]')).length === 0, "the Maps tab lists maps, not handouts");
+  await page.click('[data-action="library-map"][data-library-item="The Caves of Chaos"]');
+  await page.waitForFunction(() => {
+    const img = document.querySelector('[data-library-preview="The Caves of Chaos"] img');
+    return img && img.complete && img.naturalWidth > 0;
+  }, null, { timeout: 30000 });
+  await page.click('[data-action="library-map-open"]');
+  await page.waitForSelector("text=The Caves of Chaos is on the table", { timeout: 60000 });
+  const one = (await tool("kraken_scenes", {})).scenes.map((scene) => scene.name);
+  assert(one.length === 1 && one[0] === "The Caves of Chaos", `one map on the table: ${one.join(", ")}`);
+  // All: every adventure's lists together.
+  assert(await page.$('[aria-label="Library module"] option[value="*"]'), "an All choice");
   await page.click('[data-action="library-maps"]');
   await page.waitForSelector("text=The maps are on the table", { timeout: 60000 });
   const scenes = JSON.stringify(await tool("kraken_scenes", {}));
   assert(scenes.includes("The Caves of Chaos") && !scenes.includes("Handout - The Caves of Chaos"), "playable maps only, no handouts");
   await tool("kraken_scenes", { scene: "The Caves of Chaos" });
   await settle(1500);
-  // An encounter onto the tracker.
+  // An encounter onto the tracker (the Encounters tab).
+  await page.click('[data-library-tab="battle"]');
   await page.fill('[aria-label="Library search"]', "Kobold ambush");
   await page.waitForSelector('[data-library-item*="Kobold ambush"]');
   await page.click('[data-library-item*="Kobold ambush"] [data-action="library-battle"]');

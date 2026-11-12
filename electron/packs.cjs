@@ -210,6 +210,7 @@ function makePack(source, { read, describe, folder = packFolder(), onProgress = 
     author: info.author || "",
     cover: about.cover || "",
     hasBook: Boolean(about.hasBook),
+    hasStory: records.some((record) => record.type === "encounter"),
     records: records.length,
     pictures: kept.map((item) => item.name),
     made: new Date().toISOString(),

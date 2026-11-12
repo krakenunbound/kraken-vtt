@@ -1466,11 +1466,11 @@ const TOOLS = [
   {
     name: "kraken_library",
     description:
-      "FG's Library of an adventure module (B1, B2... read in place): action list (kind npc, battle (FG's encounters), parcel (treasure parcels), table or story (FG's story entries); search); story (path: a story entry's text); npc (path: put the NPC on the combat tracker, count); battle (path: the encounter's NPCs onto the tracker, and when its FG map is open (kraken_open_fg_module) their tokens where FG placed them, hidden until revealed; place false: tracker only); parcel (path: its coins and items into the party sheet's parcel to hand out); table (path: roll it on the host's dice; the result goes to chat).",
+      "FG's Library of an adventure module (B1, B2... read in place): action list (kind map (its maps: name, picture file, grid; kraken_open_fg_module with maps: [its name] puts that one on the table), npc, battle (FG's encounters), parcel (treasure parcels), table or story (FG's story entries); search); story (path: a story entry's text); npc (path: put the NPC on the combat tracker, count); battle (path: the encounter's NPCs onto the tracker, and when its FG map is open (kraken_open_fg_module) their tokens where FG placed them, hidden until revealed; place false: tracker only); parcel (path: its coins and items into the party sheet's parcel to hand out); table (path: roll it on the host's dice; the result goes to chat).",
     inputSchema: object({
       action: { type: "string", enum: ["list", "npc", "battle", "parcel", "table", "story"] },
       module: string("The module's name (list)"),
-      kind: { type: "string", enum: ["npc", "battle", "parcel", "table", "story"] },
+      kind: { type: "string", enum: ["map", "npc", "battle", "parcel", "table", "story"] },
       search: string("Part of the name (list)"),
       path: string("The record's FG path, as list gives it"),
       count: number("npc: how many"),

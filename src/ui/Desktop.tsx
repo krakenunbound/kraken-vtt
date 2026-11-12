@@ -269,7 +269,7 @@ export function Desktop({
       entries: gm
         ? [
             { kind: "adventure", payload: "battle", label: "Encounters", icon: "encounter", title: "Encounters: every active adventure's" },
-            { kind: "library", label: "Images", icon: "image", title: "Images and maps: an adventure's maps onto the table (Library)" },
+            { kind: "library", label: "Adventures", icon: "image", title: "Library" },
             listEntry("item", "Items", "bag"),
             listEntry("npc", "NPCs", "skull"),
             { kind: "adventure", payload: "parcel", label: "Parcels", icon: "coins", title: "Treasure parcels: every active adventure's" },

@@ -93,6 +93,15 @@ try {
   assert(again.decal === "lib/My Banner.png" && readdirSync(folder).length === 1, "the same picture twice is kept once");
   assert((await tool({ action: "list" })).decals.some((item) => item.id === "lib/My Banner.png" && item.group === "Kraken assets"), "and offered from then on");
   assert(server.persisted().options.decal === "lib/My Banner.png", "saved with the campaign");
+  // The GM's own for a game, in a folder named for it: under that game's filter.
+  {
+    const { mkdirSync, copyFileSync } = await import("node:fs");
+    mkdirSync(path.join(folder, "D&D 3.5e"), { recursive: true });
+    copyFileSync(mine, path.join(folder, "D&D 3.5e", "Kraken 3.5E.png"));
+    const fresh = createDecalLibrary({ folder, builtin: path.join(process.cwd(), "public", "decals") });
+    const own = fresh.list().find((item) => item.id === "lib/D&D 3.5e/Kraken 3.5E.png");
+    assert(own?.ruleset === "D&D 3.5e" && own.group === "Kraken assets" && own.name === "Kraken 3.5E", `a game's own decal: ${JSON.stringify(own)}`);
+  }
   let refused = "";
   try {
     await tool({ action: "import", path: path.join(work, "notes.txt") });

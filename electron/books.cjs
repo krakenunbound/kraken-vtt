@@ -61,7 +61,9 @@ function fitsRuleset(info, ruleset) {
 const ADVENTURE = /\badventures?\b|\bmodules?\b|one-shot|scenario|encounters?\b|campaign\b/i;
 function isAdventure(info) {
   const words = `${info.title} ${info.category}`;
-  return ADVENTURE.test(words) && !/player'?s'? (guide|handbook)/i.test(words);
+  if (/player'?s'? (guide|handbook)/i.test(words)) return false;
+  // By its name, or by what it holds: a module with story entries is an adventure, whatever it is called.
+  return ADVENTURE.test(words) || Boolean(info.hasStory);
 }
 const GM_ONLY = /monster|bestiary|creature|codex|keeper|dungeon ?master|\bdm\b|\bgm\b|game ?master|\badventures?\b|module|encounter|scenario|campaign|one-shot|treasure|developer/i;
 const PLAYERS = /player|handbook|adventurer|backpack|common room|character|pregen/i;
@@ -84,6 +86,7 @@ function parse(text) {
 
 // What a module is, from its definition.xml (and whether it has a book); a
 // Kraken pack, from its own description.
+const DESCRIBED = 2;
 function describe(file) {
   if (packs.isPack(file)) {
     const manifest = packs.readManifest(file);
@@ -96,6 +99,7 @@ function describe(file) {
       kraken: String(manifest.ruleset || "Any"),
       author: String(manifest.author ?? ""),
       hasBook: Boolean(manifest.hasBook),
+      hasStory: manifest.hasStory !== undefined ? Boolean(manifest.hasStory) : packHasStory(file),
       cover: String(manifest.cover ?? ""),
       pack: true,
     };
@@ -121,6 +125,11 @@ function describe(file) {
     const bytes = get(part);
     return bytes ? strFromU8(bytes).includes("<refmanualindex") : false;
   });
+  // Story entries (FG's encounter records): the module is an adventure, whatever its name.
+  const hasStory = ["db.xml", "client.xml"].some((part) => {
+    const bytes = get(part);
+    return bytes ? /<encounter[\s>]/.test(strFromU8(bytes)) : false;
+  });
   const cover = ["thumbnail.png", "thumbnail.jpg", "thumbnail.webp"].find((item) => get(item)) ?? "";
   return {
     id: path.basename(file).replace(/\.mod$/i, ""),
@@ -130,8 +139,17 @@ function describe(file) {
     ruleset: field("ruleset"),
     author: field("author"),
     hasBook,
+    hasStory,
     cover,
   };
+}
+// A pack made before packs said so: whether its records hold story entries.
+function packHasStory(file) {
+  try {
+    return packs.readPack(file).records.some((record) => record.type === "encounter");
+  } catch {
+    return false;
+  }
 }
 
 // FG's formatted text, as HTML Kraken shows: only these tags, text escaped,
@@ -249,7 +267,8 @@ function createBookShelf({ folder, cache = "", also = [], packsFolder = "" }) {
       }
       // A folder module (Kraken's own books) changes inside: its XML files' times say so.
       const inner = entry.isDirectory() ? ["definition.xml", "db.xml", "client.xml"].map((name) => (fs.existsSync(path.join(file, name)) ? Math.round(fs.statSync(path.join(file, name)).mtimeMs) : 0)).join(".") : "";
-      const key = `${entry.name}|${stat.size}|${Math.round(stat.mtimeMs)}${inner ? `|${inner}` : ""}`;
+      // DESCRIBED: what a description holds (a new field reads every book again).
+      const key = `${DESCRIBED}|${entry.name}|${stat.size}|${Math.round(stat.mtimeMs)}${inner ? `|${inner}` : ""}`;
       if (saved[key]) {
         next[key] = saved[key];
         continue;

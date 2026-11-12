@@ -140,6 +140,10 @@ function createDecalLibrary({ folder, builtin = "", fgData = "", own = ["kraken"
       }
     }
     for (const name of filesIn(folder)) items.set(`lib/${name}`, { id: `lib/${name}`, name: prettyName(hashNames ? name.replace(/^[0-9a-f]{12}-/, "") : name), group: "Kraken assets", file: path.join(folder, name), mime: mimeOf(name) });
+    // The GM's own for a game, in a folder named for it ("D&D 3.5e/"): under that game's filter too.
+    for (const game of foldersIn(folder)) {
+      for (const name of filesIn(path.join(folder, game))) items.set(`lib/${game}/${name}`, { id: `lib/${game}/${name}`, name: prettyName(name), group: "Kraken assets", ruleset: game, file: path.join(folder, game, name), mime: mimeOf(name) });
+    }
     if (fgData) {
       const fgDecals = path.join(fgData, "decals");
       for (const name of filesIn(fgDecals)) items.set(`fg/${name}`, { id: `fg/${name}`, name: prettyName(name), group: "Fantasy Grounds", file: path.join(fgDecals, name), mime: mimeOf(name) });
