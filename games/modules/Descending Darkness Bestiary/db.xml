@@ -1352,75 +1352,489 @@
 			</p0001>
 			<p0002>
 				<name type="string">Grave Hound</name>
-				<text type="formattedtext"><p><i>Undead, challenge 1.</i> A hound of the barrow-lords, buried with its master and risen with him. Patchy fur over grey bone, eyes like coals in ash. It does not tire, and it does not lose a scent.</p><p><b>Defense</b> 13. <b>Health</b> 32 (5d8 + 10). <b>Speed</b> 40 ft..</p></text>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Grave Hound</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Grave Hound</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/npc/grave-hound.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><p><i>Undead, challenge 1.</i> A hound of the barrow-lords, buried with its master and risen with him. Patchy fur over grey bone, eyes like coals in ash. It does not tire, and it does not lose a scent.</p><p><b>Defense</b> 13. <b>Health</b> 32 (5d8 + 10). <b>Speed</b> 40 ft..</p></text>
+					</id-00002>
+				</blocks>
 			</p0002>
 			<p0003>
 				<name type="string">Hollow Man</name>
-				<text type="formattedtext"><p><i>Undead, challenge 1/4.</i> A body that got up again. It remembers nothing but the way home, and it is going there through anyone in its path.</p><p><b>Defense</b> 8. <b>Health</b> 22 (3d8 + 9). <b>Speed</b> 20 ft..</p></text>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Hollow Man</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Hollow Man</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/npc/hollow-man.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><p><i>Undead, challenge 1/4.</i> A body that got up again. It remembers nothing but the way home, and it is going there through anyone in its path.</p><p><b>Defense</b> 8. <b>Health</b> 22 (3d8 + 9). <b>Speed</b> 20 ft..</p></text>
+					</id-00002>
+				</blocks>
 			</p0003>
 			<p0004>
 				<name type="string">Bone Sentinel</name>
-				<text type="formattedtext"><p><i>Undead, challenge 1/4.</i> The skeleton of a soldier still at its post, in the scraps of a uniform nobody alive remembers.</p><p><b>Defense</b> 13. <b>Health</b> 13 (2d8 + 4). <b>Speed</b> 30 ft..</p></text>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Bone Sentinel</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Bone Sentinel</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/npc/bone-sentinel.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><p><i>Undead, challenge 1/4.</i> The skeleton of a soldier still at its post, in the scraps of a uniform nobody alive remembers.</p><p><b>Defense</b> 13. <b>Health</b> 13 (2d8 + 4). <b>Speed</b> 30 ft..</p></text>
+					</id-00002>
+				</blocks>
 			</p0004>
 			<p0005>
 				<name type="string">Lantern Wight</name>
-				<text type="formattedtext"><p><i>Undead, challenge 3.</i> It carries a lantern full of cold blue fire, and wherever it walks the warm light dies. Once it was a lamplighter; it is still lighting the way, to somewhere else.</p><p><b>Defense</b> 14. <b>Health</b> 60 (8d8 + 24). <b>Speed</b> 30 ft..</p></text>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Lantern Wight</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Lantern Wight</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/npc/lantern-wight.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><p><i>Undead, challenge 3.</i> It carries a lantern full of cold blue fire, and wherever it walks the warm light dies. Once it was a lamplighter; it is still lighting the way, to somewhere else.</p><p><b>Defense</b> 14. <b>Health</b> 60 (8d8 + 24). <b>Speed</b> 30 ft..</p></text>
+					</id-00002>
+				</blocks>
 			</p0005>
 			<p0006>
 				<name type="string">Murkling</name>
-				<text type="formattedtext"><p><i>Humanoid (Deep Folk), challenge 1/4.</i> Grey, thin and wide-eyed, the deep folk live where the sun never reaches and come up at night to steal. Alone they flee; in a pack they are brave.</p><p><b>Defense</b> 13. <b>Health</b> 7 (2d6). <b>Speed</b> 30 ft..</p></text>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Murkling</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Murkling</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/npc/murkling.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><p><i>Humanoid (Deep Folk), challenge 1/4.</i> Grey, thin and wide-eyed, the deep folk live where the sun never reaches and come up at night to steal. Alone they flee; in a pack they are brave.</p><p><b>Defense</b> 13. <b>Health</b> 7 (2d6). <b>Speed</b> 30 ft..</p></text>
+					</id-00002>
+				</blocks>
 			</p0006>
 			<p0007>
 				<name type="string">Murkling Firecaller</name>
-				<text type="formattedtext"><p><i>Humanoid (Deep Folk), challenge 1.</i> The deep folk hate fire, and fear those of their own who can call it. A firecaller leads by fear, and puts out your torches first.</p><p><b>Defense</b> 12. <b>Health</b> 21 (6d6). <b>Speed</b> 30 ft..</p></text>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Murkling Firecaller</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Murkling Firecaller</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/npc/murkling-firecaller.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><p><i>Humanoid (Deep Folk), challenge 1.</i> The deep folk hate fire, and fear those of their own who can call it. A firecaller leads by fear, and puts out your torches first.</p><p><b>Defense</b> 12. <b>Health</b> 21 (6d6). <b>Speed</b> 30 ft..</p></text>
+					</id-00002>
+				</blocks>
 			</p0007>
 			<p0008>
 				<name type="string">Murk Brute</name>
-				<text type="formattedtext"><p><i>Humanoid (Deep Folk), challenge 1.</i> Bred big by the deep folk to carry loads and break doors. It does both well.</p><p><b>Defense</b> 12. <b>Health</b> 30 (4d10 + 8). <b>Speed</b> 30 ft..</p></text>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Murk Brute</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Murk Brute</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/npc/murk-brute.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><p><i>Humanoid (Deep Folk), challenge 1.</i> Bred big by the deep folk to carry loads and break doors. It does both well.</p><p><b>Defense</b> 12. <b>Health</b> 30 (4d10 + 8). <b>Speed</b> 30 ft..</p></text>
+					</id-00002>
+				</blocks>
 			</p0008>
 			<p0009>
 				<name type="string">Barrow Rats</name>
-				<text type="formattedtext"><p><i>Swarm of Beasts, challenge 1/4.</i> A carpet of rats that have eaten well in the old tombs and want more.</p><p><b>Defense</b> 10. <b>Health</b> 24 (7d8 - 7). <b>Speed</b> 30 ft..</p></text>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Barrow Rats</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Barrow Rats</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/npc/barrow-rats.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><p><i>Swarm of Beasts, challenge 1/4.</i> A carpet of rats that have eaten well in the old tombs and want more.</p><p><b>Defense</b> 10. <b>Health</b> 24 (7d8 - 7). <b>Speed</b> 30 ft..</p></text>
+					</id-00002>
+				</blocks>
 			</p0009>
 			<p0010>
 				<name type="string">Gloomcrawler</name>
-				<text type="formattedtext"><p><i>Beast, challenge 1/4.</i> A centipede as long as a man, black and glistening. It lives on the ceilings of old places and drops on what passes below.</p><p><b>Defense</b> 13. <b>Health</b> 14 (4d6). <b>Speed</b> 30 ft., climb 30 ft..</p></text>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Gloomcrawler</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Gloomcrawler</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/npc/gloomcrawler.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><p><i>Beast, challenge 1/4.</i> A centipede as long as a man, black and glistening. It lives on the ceilings of old places and drops on what passes below.</p><p><b>Defense</b> 13. <b>Health</b> 14 (4d6). <b>Speed</b> 30 ft., climb 30 ft..</p></text>
+					</id-00002>
+				</blocks>
 			</p0010>
 			<p0011>
 				<name type="string">Pale Spider</name>
-				<text type="formattedtext"><p><i>Beast, challenge 1.</i> White as a corpse's hand and the size of a pony, it weaves the empty halls shut.</p><p><b>Defense</b> 14. <b>Health</b> 26 (4d10 + 4). <b>Speed</b> 30 ft., climb 30 ft..</p></text>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Pale Spider</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Pale Spider</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/npc/pale-spider.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><p><i>Beast, challenge 1.</i> White as a corpse's hand and the size of a pony, it weaves the empty halls shut.</p><p><b>Defense</b> 14. <b>Health</b> 26 (4d10 + 4). <b>Speed</b> 30 ft., climb 30 ft..</p></text>
+					</id-00002>
+				</blocks>
 			</p0011>
 			<p0012>
 				<name type="string">Ash Wolf</name>
-				<text type="formattedtext"><p><i>Beast, challenge 1/4.</i> Grey wolves of the burned forests, thin with hunger. They follow travellers for days before they strike.</p><p><b>Defense</b> 13. <b>Health</b> 11 (2d8 + 2). <b>Speed</b> 40 ft..</p></text>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Ash Wolf</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Ash Wolf</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/npc/ash-wolf.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><p><i>Beast, challenge 1/4.</i> Grey wolves of the burned forests, thin with hunger. They follow travellers for days before they strike.</p><p><b>Defense</b> 13. <b>Health</b> 11 (2d8 + 2). <b>Speed</b> 40 ft..</p></text>
+					</id-00002>
+				</blocks>
 			</p0012>
 			<p0013>
 				<name type="string">Road Bandit</name>
-				<text type="formattedtext"><p><i>Humanoid, challenge 1/8.</i> Hungry, desperate and armed. Most would rather rob you than kill you, if you let them.</p><p><b>Defense</b> 12. <b>Health</b> 11 (2d8 + 2). <b>Speed</b> 30 ft..</p></text>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Road Bandit</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Road Bandit</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/npc/road-bandit.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><p><i>Humanoid, challenge 1/8.</i> Hungry, desperate and armed. Most would rather rob you than kill you, if you let them.</p><p><b>Defense</b> 12. <b>Health</b> 11 (2d8 + 2). <b>Speed</b> 30 ft..</p></text>
+					</id-00002>
+				</blocks>
 			</p0013>
 			<p0014>
 				<name type="string">Bandit Captain</name>
-				<text type="formattedtext"><p><i>Humanoid, challenge 2.</i> A former soldier with a band of her own, a sharp mind, and debts.</p><p><b>Defense</b> 15. <b>Health</b> 65 (10d8 + 20). <b>Speed</b> 30 ft..</p></text>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Bandit Captain</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Bandit Captain</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/npc/bandit-captain.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><p><i>Humanoid, challenge 2.</i> A former soldier with a band of her own, a sharp mind, and debts.</p><p><b>Defense</b> 15. <b>Health</b> 65 (10d8 + 20). <b>Speed</b> 30 ft..</p></text>
+					</id-00002>
+				</blocks>
 			</p0014>
 			<p0015>
 				<name type="string">Hollow Star Cultist</name>
-				<text type="formattedtext"><p><i>Humanoid, challenge 1/8.</i> The cult of the Hollow Star believes the dark is a door, and that something waits on the other side to be let in.</p><p><b>Defense</b> 12. <b>Health</b> 9 (2d8). <b>Speed</b> 30 ft..</p></text>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Hollow Star Cultist</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Hollow Star Cultist</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/npc/hollow-star-cultist.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><p><i>Humanoid, challenge 1/8.</i> The cult of the Hollow Star believes the dark is a door, and that something waits on the other side to be let in.</p><p><b>Defense</b> 12. <b>Health</b> 9 (2d8). <b>Speed</b> 30 ft..</p></text>
+					</id-00002>
+				</blocks>
 			</p0015>
 			<p0016>
 				<name type="string">Drowned One</name>
-				<text type="formattedtext"><p><i>Undead, challenge 2.</i> Swollen, pale and patient, it waits under black water for someone to lean too close.</p><p><b>Defense</b> 12. <b>Health</b> 52 (8d8 + 16). <b>Speed</b> 20 ft., swim 40 ft..</p></text>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Drowned One</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Drowned One</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/npc/drowned-one.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><p><i>Undead, challenge 2.</i> Swollen, pale and patient, it waits under black water for someone to lean too close.</p><p><b>Defense</b> 12. <b>Health</b> 52 (8d8 + 16). <b>Speed</b> 20 ft., swim 40 ft..</p></text>
+					</id-00002>
+				</blocks>
 			</p0016>
 			<p0017>
 				<name type="string">Tower Shade</name>
-				<text type="formattedtext"><p><i>Undead, challenge 2.</i> The last watcher of a tower that fell: it still walks the battlements, still waiting for the relief that never came.</p><p><b>Defense</b> 12. <b>Health</b> 27 (6d8). <b>Speed</b> 0 ft., fly 40 ft. (hover).</p></text>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Tower Shade</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Tower Shade</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/npc/tower-shade.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><p><i>Undead, challenge 2.</i> The last watcher of a tower that fell: it still walks the battlements, still waiting for the relief that never came.</p><p><b>Defense</b> 12. <b>Health</b> 27 (6d8). <b>Speed</b> 0 ft., fly 40 ft. (hover).</p></text>
+					</id-00002>
+				</blocks>
 			</p0017>
 			<p0018>
 				<name type="string">Mire Witch</name>
-				<text type="formattedtext"><p><i>Fey, challenge 3.</i> She leads travellers into the marsh with a light like a window, and keeps what she catches.</p><p><b>Defense</b> 15. <b>Health</b> 82 (11d8 + 33). <b>Speed</b> 30 ft..</p></text>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Mire Witch</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Mire Witch</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/npc/mire-witch.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><p><i>Fey, challenge 3.</i> She leads travellers into the marsh with a light like a window, and keeps what she catches.</p><p><b>Defense</b> 15. <b>Health</b> 82 (11d8 + 33). <b>Speed</b> 30 ft..</p></text>
+					</id-00002>
+				</blocks>
 			</p0018>
 			<p0019>
 				<name type="string">Warden Saranth</name>
-				<text type="formattedtext"><p><i>Undead, challenge 4.</i> The last commander of the Empty Watchtower, who swore to hold it until relieved. Nobody came. He held it anyway.</p><p><b>Defense</b> 17. <b>Health</b> 75 (10d8 + 30). <b>Speed</b> 30 ft..</p></text>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Warden Saranth</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Warden Saranth</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/npc/warden-saranth.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><p><i>Undead, challenge 4.</i> The last commander of the Empty Watchtower, who swore to hold it until relieved. Nobody came. He held it anyway.</p><p><b>Defense</b> 17. <b>Health</b> 75 (10d8 + 30). <b>Speed</b> 30 ft..</p></text>
+					</id-00002>
+				</blocks>
 			</p0019>
 		</refmanualdata>
 	</reference>

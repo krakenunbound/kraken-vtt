@@ -4,7 +4,7 @@
 // so the tracker rolls them).
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { creatureArt, creaturePictures, ids, md } from "../lib/fg.mjs";
+import { artKey, creatureArt, creaturePictures, ids, md, pictured } from "../lib/fg.mjs";
 import { RULESET } from "./players-handbook.mjs";
 
 const STATS = ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"];
@@ -319,7 +319,8 @@ Every creature in this book is in Kraken's NPC list once the book is active: dra
         },
         {
           name: "Creatures",
-          pages: CREATURES.map((record) => ({ name: record.name, text: md(`*${record.type}, challenge ${record.cr}.* ${String(record.text.__rich).replace(/<[^>]+>/g, "")}\n\n**Defense** ${record.ac}. **Health** ${record.hp} ${record.hd}. **Speed** ${record.speed}.`) })),
+          // Each creature's page opens with its picture.
+          pages: CREATURES.map((record) => ({ name: record.name, blocks: pictured(md(`*${record.type}, challenge ${record.cr}.* ${String(record.text.__rich).replace(/<[^>]+>/g, "")}\n\n**Defense** ${record.ac}. **Health** ${record.hp} ${record.hd}. **Speed** ${record.speed}.`), `images/npc/${artKey(record.name)}.webp`, record.name) })),
         },
       ],
     },

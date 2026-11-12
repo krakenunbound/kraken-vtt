@@ -3,7 +3,7 @@
 // actions whose text says "Attack +2 (3d6)" so the tracker rolls them.
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { creatureArt, creaturePictures, ids, md } from "../lib/fg.mjs";
+import { artKey, creatureArt, creaturePictures, ids, md, pictured } from "../lib/fg.mjs";
 import { RULESET } from "./crew-handbook.mjs";
 
 const STATS = ["brawn", "reflex", "grit", "intellect", "training", "presence"];
@@ -56,7 +56,8 @@ export const DOSSIER = {
           name: "Threats",
           pages: THREATS.map((record) => ({
             name: record.name,
-            text: md(`*${record.type}.* ${String(record.text.__rich).replace(/<[^>]+>/g, "")}\n\n**Stamina** ${record.hp}. **Armour** ${record.armour}. **Skills** ${record.skills}.\n\n${Object.values(record.actions).map((action) => `**${action.name}.** ${action.desc}`).join("\n\n")}`),
+            // Each threat's page opens with its picture.
+            blocks: pictured(md(`*${record.type}.* ${String(record.text.__rich).replace(/<[^>]+>/g, "")}\n\n**Stamina** ${record.hp}. **Armour** ${record.armour}. **Skills** ${record.skills}.\n\n${Object.values(record.actions).map((action) => `**${action.name}.** ${action.desc}`).join("\n\n")}`), `images/npc/${artKey(record.name)}.webp`, record.name),
           })),
         },
       ],

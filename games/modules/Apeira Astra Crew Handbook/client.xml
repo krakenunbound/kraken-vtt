@@ -864,11 +864,57 @@
 		<refmanualdata>
 			<p0001>
 				<name type="string">The Boundless Stars</name>
-				<text type="formattedtext"><p><i>Apeira Astra</i> — &quot;the boundless stars&quot; — is a game of small crews in a big, cold Reach: freighters running cargo between frontier stations, salvagers picking over dead ships, scouts mapping the places the charts leave blank.</p><p><b>The Reach</b> is a sprawl of a few hundred inhabited systems at the edge of settled space. The old Core worlds are far away and do not much care. Out here, the <b>Accord</b> keeps a few patrol cutters and a lot of paperwork; the <b>Halvard Combine</b> and its rivals own the shipyards, the mines and most of the debt; and everyone else gets by.</p><p>Ships cross between stars on <b>skein drives</b>, slipping along threads of folded space: a jump takes about a week, whatever the distance, and nobody can call for help in the middle of one.</p><p>One player is the <b>Game Master</b>; the rest play a <b>crew</b>: people with a ship (or the loan on one), a job, and not quite enough money.</p></text>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Apeira Astra</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Apeira Astra</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/cover-handbook.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><p><i>Apeira Astra</i> — &quot;the boundless stars&quot; — is a game of small crews in a big, cold Reach: freighters running cargo between frontier stations, salvagers picking over dead ships, scouts mapping the places the charts leave blank.</p><p><b>The Reach</b> is a sprawl of a few hundred inhabited systems at the edge of settled space. The old Core worlds are far away and do not much care. Out here, the <b>Accord</b> keeps a few patrol cutters and a lot of paperwork; the <b>Halvard Combine</b> and its rivals own the shipyards, the mines and most of the debt; and everyone else gets by.</p><p>Ships cross between stars on <b>skein drives</b>, slipping along threads of folded space: a jump takes about a week, whatever the distance, and nobody can call for help in the middle of one.</p><p>One player is the <b>Game Master</b>; the rest play a <b>crew</b>: people with a ship (or the loan on one), a job, and not quite enough money.</p></text>
+					</id-00002>
+				</blocks>
 			</p0001>
 			<p0002>
 				<name type="string">Salvage Law</name>
-				<text type="formattedtext"><p>By Accord law, a ship that has broadcast no signal for <b>100 days</b> is a <b>derelict</b>. The first crew to <b>dock with it and file a claim</b> at an Accord registry owns its hull and cargo — unless anyone aboard is still alive, in which case it is a rescue, and the rescuers are owed a reward instead.</p><p>This one law keeps half the Reach's crews in business, and is behind most of its knife fights.</p></text>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Salvage Law</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Salvage Law</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/rules-salvage.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><p>By Accord law, a ship that has broadcast no signal for <b>100 days</b> is a <b>derelict</b>. The first crew to <b>dock with it and file a claim</b> at an Accord registry owns its hull and cargo — unless anyone aboard is still alive, in which case it is a rescue, and the rescuers are owed a reward instead.</p><p>This one law keeps half the Reach's crews in business, and is behind most of its knife fights.</p></text>
+					</id-00002>
+				</blocks>
 			</p0002>
 			<p0003>
 				<name type="string">The Roll</name>
@@ -880,39 +926,314 @@
 			</p0004>
 			<p0005>
 				<name type="string">Making a Crew Member</name>
-				<text type="formattedtext"><list><li>1. <b>Characteristics</b>: place <b>10, 9, 8, 7, 6 and 5</b> as you like, or roll 2d6 for each.</li><li>2. <b>Origin</b>: where you grew up. It gives a few skills and a trait.</li><li>3. <b>Major Path</b>: what you did for most of your life. Its <b>signature skill</b> at 1, and <b>four picks</b> from its list (each +1).</li><li>4. <b>Minor Path</b>: what you did before or after. <b>Two picks</b> from its list.</li><li>5. <b>Kit and credits</b>: your major Path's kit and credits, half your minor Path's credits.</li></list><p>No skill starts above 3. <b>Stamina</b> is Brawn + Reflex + Grit.</p><p>In Kraken, the Characters window's <b>Character Wizard</b> does all of this.</p></text>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">A crew</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">A crew</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/rules-crew.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><list><li>1. <b>Characteristics</b>: place <b>10, 9, 8, 7, 6 and 5</b> as you like, or roll 2d6 for each.</li><li>2. <b>Origin</b>: where you grew up. It gives a few skills and a trait.</li><li>3. <b>Major Path</b>: what you did for most of your life. Its <b>signature skill</b> at 1, and <b>four picks</b> from its list (each +1).</li><li>4. <b>Minor Path</b>: what you did before or after. <b>Two picks</b> from its list.</li><li>5. <b>Kit and credits</b>: your major Path's kit and credits, half your minor Path's credits.</li></list><p>No skill starts above 3. <b>Stamina</b> is Brawn + Reflex + Grit.</p><p>In Kraken, the Characters window's <b>Character Wizard</b> does all of this.</p></text>
+					</id-00002>
+				</blocks>
 			</p0005>
 			<p0006>
 				<name type="string">Origins</name>
-				<text type="formattedtext"><p><b>Coreborn</b> (Persuade 0, Electronics 0, Science 0). Raised on one of the old, crowded worlds of the Core: schools, networks and manners. <i>Credentials:</i> You have a citizen's papers that open doors, and a family name someone recognises.</p><p><b>Spacer</b> (Zero-G 1, Pilot 0). Born aboard a ship or a station, you learned to walk in a corridor and swim in the air. <i>Hull Sense:</i> You feel when a ship is wrong: a Boon on tasks to notice a failing system or a breach.</p><p><b>Frontier</b> (Survival 1, Drive 0, Recon 0). From a hard world at the edge of the Reach, where help is a long way off. <i>Hardened:</i> Once per session, ignore being Down for one turn.</p><p><b>Undercity</b> (Streetwise 1, Stealth 0, Melee 0). From the levels beneath a city, where the light is borrowed and everything is for sale. <i>Know a Guy:</i> On any station or city, a Streetwise task (Standard) finds someone who can get what you need, for a price.</p><p><b>Belter</b> (Mechanics 1, Zero-G 0, Engineering 0). Raised in the asteroid habitats, where everything breaks and you fix it or die. <i>Make Do:</i> No Bane for working without the right tools.</p></text>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Coreborn</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Coreborn</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/portraits/coreborn-merchant.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">image</blocktype>
+						<order type="number">2</order>
+						<align type="string">center</align>
+						<caption type="string">Spacer</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Spacer</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/portraits/spacer-fleet.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00002>
+					<id-00003>
+						<blocktype type="string">image</blocktype>
+						<order type="number">3</order>
+						<align type="string">center</align>
+						<caption type="string">Frontier</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Frontier</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/portraits/frontier-scout.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00003>
+					<id-00004>
+						<blocktype type="string">image</blocktype>
+						<order type="number">4</order>
+						<align type="string">center</align>
+						<caption type="string">Undercity</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Undercity</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/portraits/undercity-drifter.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00004>
+					<id-00005>
+						<blocktype type="string">image</blocktype>
+						<order type="number">5</order>
+						<align type="string">center</align>
+						<caption type="string">Belter</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Belter</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/portraits/belter-engineer.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00005>
+					<id-00006>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">6</order>
+						<text type="formattedtext"><p><b>Coreborn</b> (Persuade 0, Electronics 0, Science 0). Raised on one of the old, crowded worlds of the Core: schools, networks and manners. <i>Credentials:</i> You have a citizen's papers that open doors, and a family name someone recognises.</p><p><b>Spacer</b> (Zero-G 1, Pilot 0). Born aboard a ship or a station, you learned to walk in a corridor and swim in the air. <i>Hull Sense:</i> You feel when a ship is wrong: a Boon on tasks to notice a failing system or a breach.</p><p><b>Frontier</b> (Survival 1, Drive 0, Recon 0). From a hard world at the edge of the Reach, where help is a long way off. <i>Hardened:</i> Once per session, ignore being Down for one turn.</p><p><b>Undercity</b> (Streetwise 1, Stealth 0, Melee 0). From the levels beneath a city, where the light is borrowed and everything is for sale. <i>Know a Guy:</i> On any station or city, a Streetwise task (Standard) finds someone who can get what you need, for a price.</p><p><b>Belter</b> (Mechanics 1, Zero-G 0, Engineering 0). Raised in the asteroid habitats, where everything breaks and you fix it or die. <i>Make Do:</i> No Bane for working without the right tools.</p></text>
+					</id-00006>
+				</blocks>
 			</p0006>
 			<p0007>
 				<name type="string">Fleet</name>
-				<text type="formattedtext"><p>You served aboard a warship or a patrol cutter: watch rotations, drills, and the long silence of a skein transit.</p><p><b>Signature skill:</b> Pilot 1. <b>Choose from:</b> Pilot, Astrogation, Gunnery, Electronics, Leadership, Tactics, Zero-G. <b>Starting credits:</b> 1500.</p><p><i>Former ranks:</i> rating, ensign, lieutenant.</p></text>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Spacer Fleet</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Spacer Fleet</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/portraits/spacer-fleet.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><p>You served aboard a warship or a patrol cutter: watch rotations, drills, and the long silence of a skein transit.</p><p><b>Signature skill:</b> Pilot 1. <b>Choose from:</b> Pilot, Astrogation, Gunnery, Electronics, Leadership, Tactics, Zero-G. <b>Starting credits:</b> 1500.</p><p><i>Former ranks:</i> rating, ensign, lieutenant.</p></text>
+					</id-00002>
+				</blocks>
 			</p0007>
 			<p0008>
 				<name type="string">Marine</name>
-				<text type="formattedtext"><p>You were the one sent through the airlock first. Boarding actions, station security, and things you do not talk about.</p><p><b>Signature skill:</b> Firearms 1. <b>Choose from:</b> Firearms, Melee, Athletics, Heavy Weapons, Tactics, Recon, Zero-G, Leadership. <b>Starting credits:</b> 1000.</p><p><i>Former ranks:</i> trooper, corporal, sergeant.</p></text>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Coreborn Marine</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Coreborn Marine</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/portraits/coreborn-marine.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><p>You were the one sent through the airlock first. Boarding actions, station security, and things you do not talk about.</p><p><b>Signature skill:</b> Firearms 1. <b>Choose from:</b> Firearms, Melee, Athletics, Heavy Weapons, Tactics, Recon, Zero-G, Leadership. <b>Starting credits:</b> 1000.</p><p><i>Former ranks:</i> trooper, corporal, sergeant.</p></text>
+					</id-00002>
+				</blocks>
 			</p0008>
 			<p0009>
 				<name type="string">Scout</name>
-				<text type="formattedtext"><p>You charted the empty places: survey runs, first landings, months alone with the ship's voice.</p><p><b>Signature skill:</b> Recon 1. <b>Choose from:</b> Recon, Pilot, Survival, Astrogation, Stealth, Drive, Science, Mechanics. <b>Starting credits:</b> 1200.</p><p><i>Former ranks:</i> surveyor, pathfinder.</p></text>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Frontier Scout</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Frontier Scout</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/portraits/frontier-scout.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><p>You charted the empty places: survey runs, first landings, months alone with the ship's voice.</p><p><b>Signature skill:</b> Recon 1. <b>Choose from:</b> Recon, Pilot, Survival, Astrogation, Stealth, Drive, Science, Mechanics. <b>Starting credits:</b> 1200.</p><p><i>Former ranks:</i> surveyor, pathfinder.</p></text>
+					</id-00002>
+				</blocks>
 			</p0009>
 			<p0010>
 				<name type="string">Merchant</name>
-				<text type="formattedtext"><p>You bought low and sold far away: cargo manifests, port fees and handshakes in bad bars.</p><p><b>Signature skill:</b> Trade 1. <b>Choose from:</b> Trade, Persuade, Deceive, Streetwise, Pilot, Electronics, Leadership. <b>Starting credits:</b> 3000.</p><p><i>Former ranks:</i> purser, factor, master.</p></text>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Undercity Merchant</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Undercity Merchant</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/portraits/undercity-merchant.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><p>You bought low and sold far away: cargo manifests, port fees and handshakes in bad bars.</p><p><b>Signature skill:</b> Trade 1. <b>Choose from:</b> Trade, Persuade, Deceive, Streetwise, Pilot, Electronics, Leadership. <b>Starting credits:</b> 3000.</p><p><i>Former ranks:</i> purser, factor, master.</p></text>
+					</id-00002>
+				</blocks>
 			</p0010>
 			<p0011>
 				<name type="string">Engineer</name>
-				<text type="formattedtext"><p>You kept the drive lit and the air flowing. You know what every noise a ship makes means.</p><p><b>Signature skill:</b> Engineering 1. <b>Choose from:</b> Engineering, Mechanics, Electronics, Zero-G, Science, Pilot, Gunnery. <b>Starting credits:</b> 1200.</p><p><i>Former ranks:</i> mate, chief.</p></text>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Belter Engineer</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Belter Engineer</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/portraits/belter-engineer.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><p>You kept the drive lit and the air flowing. You know what every noise a ship makes means.</p><p><b>Signature skill:</b> Engineering 1. <b>Choose from:</b> Engineering, Mechanics, Electronics, Zero-G, Science, Pilot, Gunnery. <b>Starting credits:</b> 1200.</p><p><i>Former ranks:</i> mate, chief.</p></text>
+					</id-00002>
+				</blocks>
 			</p0011>
 			<p0012>
 				<name type="string">Medic</name>
-				<text type="formattedtext"><p>Ship's doctor, field medic or clinic worker: you have kept people alive with less than you needed.</p><p><b>Signature skill:</b> Medicine 1. <b>Choose from:</b> Medicine, Science, Electronics, Persuade, Survival, Recon. <b>Starting credits:</b> 1500.</p><p><i>Former ranks:</i> orderly, doctor.</p></text>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Frontier Medic</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Frontier Medic</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/portraits/frontier-medic.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><p>Ship's doctor, field medic or clinic worker: you have kept people alive with less than you needed.</p><p><b>Signature skill:</b> Medicine 1. <b>Choose from:</b> Medicine, Science, Electronics, Persuade, Survival, Recon. <b>Starting credits:</b> 1500.</p><p><i>Former ranks:</i> orderly, doctor.</p></text>
+					</id-00002>
+				</blocks>
 			</p0012>
 			<p0013>
 				<name type="string">Drifter</name>
-				<text type="formattedtext"><p>You moved on whenever it got complicated: odd jobs, borrowed names and quick exits.</p><p><b>Signature skill:</b> Streetwise 1. <b>Choose from:</b> Streetwise, Stealth, Deceive, Melee, Firearms, Drive, Athletics, Persuade. <b>Starting credits:</b> 600.</p><p><i>Former ranks:</i> none worth mentioning.</p></text>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Undercity Drifter</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Undercity Drifter</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/portraits/undercity-drifter.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><p>You moved on whenever it got complicated: odd jobs, borrowed names and quick exits.</p><p><b>Signature skill:</b> Streetwise 1. <b>Choose from:</b> Streetwise, Stealth, Deceive, Melee, Firearms, Drive, Athletics, Persuade. <b>Starting credits:</b> 600.</p><p><i>Former ranks:</i> none worth mentioning.</p></text>
+					</id-00002>
+				</blocks>
 			</p0013>
 			<p0014>
 				<name type="string">Improving</name>
@@ -920,19 +1241,111 @@
 			</p0014>
 			<p0015>
 				<name type="string">Combat</name>
-				<text type="formattedtext"><p><b>Initiative:</b> 2d6 + Reflex modifier + Tactics (-3 without Tactics, as any skill you do not have; Tactics 0 adds 0). Highest first.</p><p><b>On your turn:</b> move (about 6 m) and take one action: attack, a task, reload, aid someone.</p><p><b>Attacking:</b> 2d6 + the weapon's skill (Firearms, Melee, Heavy Weapons) + Reflex (ranged) or Brawn (melee) against <b>8</b>.</p><p><b>Damage:</b> the weapon's dice <b>+ the attack's Effect</b>, minus the target's <b>Armour</b>. A hit that does not beat the armour is stopped.</p><p><b>Stamina:</b> at 0 you are <b>Down</b>: out of the fight, unconscious or close to it. At <b>minus your Grit</b> you are dead. A Medicine task brings you back from Down.</p><p>In Kraken, target a creature (Ctrl+click its token) and use the weapon's attack and damage on your sheet's Combat page.</p></text>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Combat</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Combat</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/rules-combat.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><p><b>Initiative:</b> 2d6 + Reflex modifier + Tactics (-3 without Tactics, as any skill you do not have; Tactics 0 adds 0). Highest first.</p><p><b>On your turn:</b> move (about 6 m) and take one action: attack, a task, reload, aid someone.</p><p><b>Attacking:</b> 2d6 + the weapon's skill (Firearms, Melee, Heavy Weapons) + Reflex (ranged) or Brawn (melee) against <b>8</b>.</p><p><b>Damage:</b> the weapon's dice <b>+ the attack's Effect</b>, minus the target's <b>Armour</b>. A hit that does not beat the armour is stopped.</p><p><b>Stamina:</b> at 0 you are <b>Down</b>: out of the fight, unconscious or close to it. At <b>minus your Grit</b> you are dead. A Medicine task brings you back from Down.</p><p>In Kraken, target a creature (Ctrl+click its token) and use the weapon's attack and damage on your sheet's Combat page.</p></text>
+					</id-00002>
+				</blocks>
 			</p0015>
 			<p0016>
 				<name type="string">Vacuum and Hazards</name>
-				<text type="formattedtext"><p><b>Vacuum:</b> without a sealed suit, 1d6 damage each turn (armour does not help), and you are Down within a minute.</p><p><b>Zero-G:</b> without mag boots, every physical task takes a Bane unless you make a Zero-G task (Standard) at the start of the scene.</p><p><b>Radiation:</b> a hot reactor or a flare: a Grit check each hour (or each turn, close in), 1d6 damage on a failure.</p><p><b>Fire in a hull</b> eats the air: put it out in three turns or vent the compartment.</p></text>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Vacuum and Hazards</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Vacuum and Hazards</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/rules-vacuum.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><p><b>Vacuum:</b> without a sealed suit, 1d6 damage each turn (armour does not help), and you are Down within a minute.</p><p><b>Zero-G:</b> without mag boots, every physical task takes a Bane unless you make a Zero-G task (Standard) at the start of the scene.</p><p><b>Radiation:</b> a hot reactor or a flare: a Grit check each hour (or each turn, close in), 1d6 damage on a failure.</p><p><b>Fire in a hull</b> eats the air: put it out in three turns or vent the compartment.</p></text>
+					</id-00002>
+				</blocks>
 			</p0016>
 			<p0017>
 				<name type="string">Your Ship</name>
-				<text type="formattedtext"><p>A ship is a <b>hull</b> (its tonnage), <b>hull points</b> (tons / 2.5: a ship is destroyed at 0), <b>armour</b> (it comes off every hit), <b>Thrust</b> (how hard it can push), <b>Jump</b> (how many threads of the skein it can cross at once), <b>sensors</b> and a <b>computer</b> (together its <b>fire control</b>, added to every shot).</p><p>Its crew take <b>stations</b>: the <b>pilot</b> at the helm, a <b>gunner</b> at each weapon, someone on <b>sensors</b>, an <b>engineer</b>, the <b>captain</b>. In Kraken, open <b>Starships</b> in the sidebar and take a station with your character.</p><p>The GM has six ready designs: the <b>Courier</b>, the <b>Free Trader</b>, the <b>Salvage Tug</b>, the <b>Patrol Cutter</b>, the <b>Fighter</b> and the <b>Corsair</b>.</p><p>On the map, a ship has its own token, and its <b>deck plans</b> open as maps: bridge, staterooms, galley, turrets, airlock, holds and engineering, with their walls and doors.</p></text>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Your Ship</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Your Ship</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/rules-ship.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><p>A ship is a <b>hull</b> (its tonnage), <b>hull points</b> (tons / 2.5: a ship is destroyed at 0), <b>armour</b> (it comes off every hit), <b>Thrust</b> (how hard it can push), <b>Jump</b> (how many threads of the skein it can cross at once), <b>sensors</b> and a <b>computer</b> (together its <b>fire control</b>, added to every shot).</p><p>Its crew take <b>stations</b>: the <b>pilot</b> at the helm, a <b>gunner</b> at each weapon, someone on <b>sensors</b>, an <b>engineer</b>, the <b>captain</b>. In Kraken, open <b>Starships</b> in the sidebar and take a station with your character.</p><p>The GM has six ready designs: the <b>Courier</b>, the <b>Free Trader</b>, the <b>Salvage Tug</b>, the <b>Patrol Cutter</b>, the <b>Fighter</b> and the <b>Corsair</b>.</p><p>On the map, a ship has its own token, and its <b>deck plans</b> open as maps: bridge, staterooms, galley, turrets, airlock, holds and engineering, with their walls and doors.</p></text>
+					</id-00002>
+				</blocks>
 			</p0017>
 			<p0018>
 				<name type="string">Ship Combat</name>
-				<text type="formattedtext"><p><b>Initiative:</b> 2d6 + the pilot's Pilot task modifier (Pilot + Reflex) + the ship's Thrust.</p><p><b>Range:</b> Adjacent, Close, Short (+1), Medium, Long (-2), Very Long (-4), Distant (-6). A weapon reaches only so far (a pulse laser to Long, a missile rack to Distant).</p><p><b>Firing:</b> 2d6 + the gunner's Gunnery + Intellect (-3 with no one at the gun) + the weapon's modifier + fire control + the range, against <b>8</b>.</p><p><b>Damage:</b> the weapon's dice + the Effect, minus the target's armour, off its hull.</p><p><b>Critical hits:</b> a shot with an Effect of 6 or more that does damage strikes a system (2d6): 2 sensors, 3 power plant, 4 fuel, 5 a weapon, 6 armour, 7 the hull itself, 8 the drive, 9 cargo, 10 the skein drive, 11 the crew, 12 the computer. Each hit on a system makes it worse.</p><p>In Kraken, the GM puts the ships on the combat tracker; a gunner picks the target and the range on the ship's sheet and presses <b>Fire</b>.</p></text>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Ship Combat</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Ship Combat</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/rules-ship-combat.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><p><b>Initiative:</b> 2d6 + the pilot's Pilot task modifier (Pilot + Reflex) + the ship's Thrust.</p><p><b>Range:</b> Adjacent, Close, Short (+1), Medium, Long (-2), Very Long (-4), Distant (-6). A weapon reaches only so far (a pulse laser to Long, a missile rack to Distant).</p><p><b>Firing:</b> 2d6 + the gunner's Gunnery + Intellect (-3 with no one at the gun) + the weapon's modifier + fire control + the range, against <b>8</b>.</p><p><b>Damage:</b> the weapon's dice + the Effect, minus the target's armour, off its hull.</p><p><b>Critical hits:</b> a shot with an Effect of 6 or more that does damage strikes a system (2d6): 2 sensors, 3 power plant, 4 fuel, 5 a weapon, 6 armour, 7 the hull itself, 8 the drive, 9 cargo, 10 the skein drive, 11 the crew, 12 the computer. Each hit on a system makes it worse.</p><p>In Kraken, the GM puts the ships on the combat tracker; a gunner picks the target and the range on the ship's sheet and presses <b>Fire</b>.</p></text>
+					</id-00002>
+				</blocks>
 			</p0018>
 			<p0019>
 				<name type="string">Credits and License</name>

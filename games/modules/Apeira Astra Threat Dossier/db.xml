@@ -500,43 +500,273 @@
 		<refmanualdata>
 			<p0001>
 				<name type="string">Dock Tough</name>
-				<text type="formattedtext"><p><i>Human.</i> Muscle for hire on any station, paid in drink.</p><p><b>Stamina</b> 23. <b>Armour</b> 1. <b>Skills</b> Melee 1, Streetwise 0.</p><p><b>Pipe.</b> Attack +1 (2d6), melee.</p></text>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Dock Tough</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Dock Tough</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/npc/dock-tough.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><p><i>Human.</i> Muscle for hire on any station, paid in drink.</p><p><b>Stamina</b> 23. <b>Armour</b> 1. <b>Skills</b> Melee 1, Streetwise 0.</p><p><b>Pipe.</b> Attack +1 (2d6), melee.</p></text>
+					</id-00002>
+				</blocks>
 			</p0001>
 			<p0002>
 				<name type="string">Combine Security</name>
-				<text type="formattedtext"><p><i>Human.</i> The Halvard Combine's guards: well paid, badly briefed, and never alone.</p><p><b>Stamina</b> 24. <b>Armour</b> 5. <b>Skills</b> Firearms 1, Melee 1, Tactics 0.</p><p><b>Service Pistol.</b> Attack +1 (3d6), 20 m.</p><p><b>Shock Baton.</b> Attack +1 (2d6), melee; a target hit makes a Grit check or loses its next turn.</p></text>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Combine Security</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Combine Security</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/npc/combine-security.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><p><i>Human.</i> The Halvard Combine's guards: well paid, badly briefed, and never alone.</p><p><b>Stamina</b> 24. <b>Armour</b> 5. <b>Skills</b> Firearms 1, Melee 1, Tactics 0.</p><p><b>Service Pistol.</b> Attack +1 (3d6), 20 m.</p><p><b>Shock Baton.</b> Attack +1 (2d6), melee; a target hit makes a Grit check or loses its next turn.</p></text>
+					</id-00002>
+				</blocks>
 			</p0002>
 			<p0003>
 				<name type="string">Pirate Raider</name>
-				<text type="formattedtext"><p><i>Human.</i> Reach pirates rarely kill a crew that surrenders: dead crews make bad customers.</p><p><b>Stamina</b> 23. <b>Armour</b> 3. <b>Skills</b> Firearms 1, Melee 1, Zero-G 1.</p><p><b>Carbine.</b> Attack +1 (3d6), 100 m.</p><p><b>Cutlass.</b> Attack +1 (2d6), melee.</p></text>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Pirate Raider</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Pirate Raider</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/npc/pirate-raider.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><p><i>Human.</i> Reach pirates rarely kill a crew that surrenders: dead crews make bad customers.</p><p><b>Stamina</b> 23. <b>Armour</b> 3. <b>Skills</b> Firearms 1, Melee 1, Zero-G 1.</p><p><b>Carbine.</b> Attack +1 (3d6), 100 m.</p><p><b>Cutlass.</b> Attack +1 (2d6), melee.</p></text>
+					</id-00002>
+				</blocks>
 			</p0003>
 			<p0004>
 				<name type="string">Mags Orrin</name>
-				<text type="formattedtext"><p><i>Human.</i> Captain of the salvage tug Pale Gull: charming, ruthless and always fifteen minutes behind you. She would rather deal than shoot, if the deal is good.</p><p><b>Stamina</b> 26. <b>Armour</b> 3. <b>Skills</b> Firearms 2, Pilot 2, Deceive 2, Leadership 1, Zero-G 1.</p><p><b>Laser Pistol.</b> Attack +3 (3d6), 30 m.</p><p><b>Knife.</b> Attack +1 (1d6), melee.</p></text>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Mags Orrin</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Mags Orrin</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/npc/mags-orrin.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><p><i>Human.</i> Captain of the salvage tug Pale Gull: charming, ruthless and always fifteen minutes behind you. She would rather deal than shoot, if the deal is good.</p><p><b>Stamina</b> 26. <b>Armour</b> 3. <b>Skills</b> Firearms 2, Pilot 2, Deceive 2, Leadership 1, Zero-G 1.</p><p><b>Laser Pistol.</b> Attack +3 (3d6), 30 m.</p><p><b>Knife.</b> Attack +1 (1d6), melee.</p></text>
+					</id-00002>
+				</blocks>
 			</p0004>
 			<p0005>
 				<name type="string">Gull Crewman</name>
-				<text type="formattedtext"><p><i>Human.</i> Mags Orrin's salvagers, in patched vac suits.</p><p><b>Stamina</b> 24. <b>Armour</b> 4. <b>Skills</b> Firearms 1, Zero-G 1, Mechanics 1.</p><p><b>Snub Pistol.</b> Attack +1 (2d6), 10 m.</p><p><b>Cutting Laser.</b> Attack +0 (2d6), melee.</p></text>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Gull Crewman</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Gull Crewman</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/npc/gull-crewman.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><p><i>Human.</i> Mags Orrin's salvagers, in patched vac suits.</p><p><b>Stamina</b> 24. <b>Armour</b> 4. <b>Skills</b> Firearms 1, Zero-G 1, Mechanics 1.</p><p><b>Snub Pistol.</b> Attack +1 (2d6), 10 m.</p><p><b>Cutting Laser.</b> Attack +0 (2d6), melee.</p></text>
+					</id-00002>
+				</blocks>
 			</p0005>
 			<p0006>
 				<name type="string">Salvage Drone</name>
-				<text type="formattedtext"><p><i>Robot.</i> A boxy drone with magnetic treads and a cutting arm, built to strip wrecks. A damaged control core makes it treat everything as scrap.</p><p><b>Stamina</b> 18. <b>Armour</b> 6. <b>Skills</b> Melee 1, Recon 1.</p><p><b>Cutting Arm.</b> Attack +1 (2d6), melee.</p></text>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Salvage Drone</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Salvage Drone</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/npc/salvage-drone.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><p><i>Robot.</i> A boxy drone with magnetic treads and a cutting arm, built to strip wrecks. A damaged control core makes it treat everything as scrap.</p><p><b>Stamina</b> 18. <b>Armour</b> 6. <b>Skills</b> Melee 1, Recon 1.</p><p><b>Cutting Arm.</b> Attack +1 (2d6), melee.</p></text>
+					</id-00002>
+				</blocks>
 			</p0006>
 			<p0007>
 				<name type="string">Sentry Turret</name>
-				<text type="formattedtext"><p><i>Robot.</i> A ceiling-mounted defence gun, guarding a ship's bridge or vault.</p><p><b>Stamina</b> 16. <b>Armour</b> 8. <b>Skills</b> Firearms 2.</p><p><b>Twin Guns.</b> Attack +2 (3d6), 50 m.</p></text>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Sentry Turret</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Sentry Turret</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/npc/sentry-turret.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><p><i>Robot.</i> A ceiling-mounted defence gun, guarding a ship's bridge or vault.</p><p><b>Stamina</b> 16. <b>Armour</b> 8. <b>Skills</b> Firearms 2.</p><p><b>Twin Guns.</b> Attack +2 (3d6), 50 m.</p></text>
+					</id-00002>
+				</blocks>
 			</p0007>
 			<p0008>
 				<name type="string">Rust Crawler</name>
-				<text type="formattedtext"><p><i>Creature.</i> Spiny metal-eaters from the asteroid belts that get into hulls and chew through cabling. Annoying alone; dangerous in a swarm.</p><p><b>Stamina</b> 12. <b>Armour</b> 2. <b>Skills</b> Stealth 2, Athletics 1.</p><p><b>Mandibles.</b> Attack +1 (1d6), melee; a vac suit hit springs a slow leak.</p></text>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Rust Crawler</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Rust Crawler</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/npc/rust-crawler.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><p><i>Creature.</i> Spiny metal-eaters from the asteroid belts that get into hulls and chew through cabling. Annoying alone; dangerous in a swarm.</p><p><b>Stamina</b> 12. <b>Armour</b> 2. <b>Skills</b> Stealth 2, Athletics 1.</p><p><b>Mandibles.</b> Attack +1 (1d6), melee; a vac suit hit springs a slow leak.</p></text>
+					</id-00002>
+				</blocks>
 			</p0008>
 			<p0009>
 				<name type="string">Void Lamprey</name>
-				<text type="formattedtext"><p><i>Creature.</i> Three metres of muscle and teeth that drift between asteroids and latch on to anything warm.</p><p><b>Stamina</b> 26. <b>Armour</b> 3. <b>Skills</b> Athletics 2, Stealth 1.</p><p><b>Rasping Maw.</b> Attack +2 (3d6), melee; it holds on: 1d6 each turn until pulled off (Brawn, Hard).</p></text>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Void Lamprey</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Void Lamprey</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/npc/void-lamprey.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><p><i>Creature.</i> Three metres of muscle and teeth that drift between asteroids and latch on to anything warm.</p><p><b>Stamina</b> 26. <b>Armour</b> 3. <b>Skills</b> Athletics 2, Stealth 1.</p><p><b>Rasping Maw.</b> Attack +2 (3d6), melee; it holds on: 1d6 each turn until pulled off (Brawn, Hard).</p></text>
+					</id-00002>
+				</blocks>
 			</p0009>
 			<p0010>
 				<name type="string">Hollow-Eyed Survivor</name>
-				<text type="formattedtext"><p><i>Human.</i> Someone who has been alone on a dead ship too long. Scared, starving, and armed with whatever was to hand.</p><p><b>Stamina</b> 17. <b>Armour</b> 0. <b>Skills</b> Engineering 1, Electronics 1.</p><p><b>Wrench.</b> Attack -1 (1d6), melee.</p></text>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Hollow-Eyed Survivor</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Hollow-Eyed Survivor</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/npc/hollow-eyed-survivor.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><p><i>Human.</i> Someone who has been alone on a dead ship too long. Scared, starving, and armed with whatever was to hand.</p><p><b>Stamina</b> 17. <b>Armour</b> 0. <b>Skills</b> Engineering 1, Electronics 1.</p><p><b>Wrench.</b> Attack -1 (1d6), melee.</p></text>
+					</id-00002>
+				</blocks>
 			</p0010>
 		</refmanualdata>
 	</reference>

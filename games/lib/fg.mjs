@@ -139,6 +139,27 @@ export const artKey = (name) => String(name).toLowerCase().replace(/[^a-z0-9]+/g
 export const creatureArt = (name, moduleName) => ({ token: `tokens/${artKey(name)}.webp@${moduleName}`, picture: `images/npc/${artKey(name)}.webp@${moduleName}` });
 export const creaturePictures = (records, artFolder) =>
   Object.fromEntries(records.flatMap((record) => [[`tokens/${artKey(record.name)}.webp`, `${artFolder}/tokens/${artKey(record.name)}.webp`], [`images/npc/${artKey(record.name)}.webp`, `${artFolder}/npc/${artKey(record.name)}.webp`]]));
+// A page with pictures above its text (FG's image blocks, then a text block):
+// files are paths inside the module ("images/npc/grave-hound.webp"), caption
+// under each. Several pictures sit side by side.
+export function pictured(text, files, caption = "") {
+  const list = [].concat(files);
+  const captions = [].concat(caption);
+  const blocks = {};
+  list.forEach((file, index) => {
+    const name = captions[index] ?? captions[0] ?? "";
+    blocks[`id-${String(index + 1).padStart(5, "0")}`] = {
+      blocktype: "image",
+      order: index + 1,
+      align: "center",
+      caption: name,
+      image: { layers: { layer: [{ name: name || "Picture", id: "0", parentid: "-1", type: "image", bitmap: file }] } },
+    };
+  });
+  blocks[`id-${String(list.length + 1).padStart(5, "0")}`] = { blocktype: "singletext", order: list.length + 1, text: typeof text === "string" ? md(text) : text };
+  return blocks;
+}
+
 // A picture to show the players (no grid).
 export const handout = (name, file, category = "Handouts") => imageRecord({ name, file: `images/${file}.webp`, width: 0, height: 0, grid: 0, category });
 

@@ -2,11 +2,17 @@
 // crew wizard uses (Origins, Paths, gear).
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { md } from "../lib/fg.mjs";
+import { artKey, md, pictured } from "../lib/fg.mjs";
 import { ARMOUR, GEAR, ORIGINS, PATHS, WEAPONS } from "./crew.mjs";
 
 export const RULESET = "Apeira Astra";
 const plain = (html) => String(html?.__rich ?? html ?? "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+const GAMES = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
+// The portraits the book shows (Kraken's own, games/portraits): an origin's, and a path's (a different origin each, for variety).
+const ORIGIN_PORTRAIT = { Coreborn: "Coreborn Merchant", Spacer: "Spacer Fleet", Frontier: "Frontier Scout", Undercity: "Undercity Drifter", Belter: "Belter Engineer" };
+const PATH_PORTRAIT = { Fleet: "Spacer Fleet", Marine: "Coreborn Marine", Scout: "Frontier Scout", Merchant: "Undercity Merchant", Engineer: "Belter Engineer", Medic: "Frontier Medic", Drifter: "Undercity Drifter" };
+const portraitFile = (name) => `images/portraits/${artKey(name)}.webp`;
+const PORTRAITS = Object.fromEntries([...Object.values(ORIGIN_PORTRAIT), ...Object.values(PATH_PORTRAIT)].map((name) => [portraitFile(name), path.join(GAMES, "portraits", name.split(" ")[0], `${name}.webp`)]));
 
 export const CREW_HANDBOOK = {
   name: "Apeira Astra Crew Handbook",
@@ -16,6 +22,10 @@ export const CREW_HANDBOOK = {
   author: "Kraken VTT",
   playersBook: true,
   thumbnail: path.join(path.dirname(fileURLToPath(import.meta.url)), "art", "cover-handbook.webp"),
+  pictures: { ...PORTRAITS, "images/cover-handbook.webp": path.join(path.dirname(fileURLToPath(import.meta.url)), "art", "cover-handbook.webp"),
+    // The rules chapters' illustrations.
+    ...Object.fromEntries(["rules-salvage","rules-vacuum","rules-ship","rules-ship-combat","rules-crew","rules-combat"].map((name) => [`images/${name}.webp`, path.join(path.dirname(fileURLToPath(import.meta.url)), "art", `${name}.webp`)])),
+  },
   players: { race: ORIGINS, class: PATHS, item: [...WEAPONS, ...ARMOUR, ...GEAR] },
   reference: [
     {
@@ -26,20 +36,20 @@ export const CREW_HANDBOOK = {
           pages: [
             {
               name: "The Boundless Stars",
-              text: `*Apeira Astra* — "the boundless stars" — is a game of small crews in a big, cold Reach: freighters running cargo between frontier stations, salvagers picking over dead ships, scouts mapping the places the charts leave blank.
+              blocks: pictured(`*Apeira Astra* — "the boundless stars" — is a game of small crews in a big, cold Reach: freighters running cargo between frontier stations, salvagers picking over dead ships, scouts mapping the places the charts leave blank.
 
 **The Reach** is a sprawl of a few hundred inhabited systems at the edge of settled space. The old Core worlds are far away and do not much care. Out here, the **Accord** keeps a few patrol cutters and a lot of paperwork; the **Halvard Combine** and its rivals own the shipyards, the mines and most of the debt; and everyone else gets by.
 
 Ships cross between stars on **skein drives**, slipping along threads of folded space: a jump takes about a week, whatever the distance, and nobody can call for help in the middle of one.
 
-One player is the **Game Master**; the rest play a **crew**: people with a ship (or the loan on one), a job, and not quite enough money.`,
+One player is the **Game Master**; the rest play a **crew**: people with a ship (or the loan on one), a job, and not quite enough money.`, "images/cover-handbook.webp", "Apeira Astra"),
             },
             {
               name: "Salvage Law",
               keywords: "salvage law claim derelict",
-              text: `By Accord law, a ship that has broadcast no signal for **100 days** is a **derelict**. The first crew to **dock with it and file a claim** at an Accord registry owns its hull and cargo — unless anyone aboard is still alive, in which case it is a rescue, and the rescuers are owed a reward instead.
+              blocks: pictured(`By Accord law, a ship that has broadcast no signal for **100 days** is a **derelict**. The first crew to **dock with it and file a claim** at an Accord registry owns its hull and cargo — unless anyone aboard is still alive, in which case it is a rescue, and the rescuers are owed a reward instead.
 
-This one law keeps half the Reach's crews in business, and is behind most of its knife fights.`,
+This one law keeps half the Reach's crews in business, and is behind most of its knife fights.`, "images/rules-salvage.webp", "Salvage Law"),
             },
           ],
         },
@@ -94,7 +104,7 @@ In Kraken, set the difficulty and any Boon on your sheet's strip, then click a s
             {
               name: "Making a Crew Member",
               keywords: "character creation path origin wizard",
-              text: `1. **Characteristics**: place **10, 9, 8, 7, 6 and 5** as you like, or roll 2d6 for each.
+              blocks: pictured(`1. **Characteristics**: place **10, 9, 8, 7, 6 and 5** as you like, or roll 2d6 for each.
 2. **Origin**: where you grew up. It gives a few skills and a trait.
 3. **Major Path**: what you did for most of your life. Its **signature skill** at 1, and **four picks** from its list (each +1).
 4. **Minor Path**: what you did before or after. **Two picks** from its list.
@@ -102,14 +112,19 @@ In Kraken, set the difficulty and any Boon on your sheet's strip, then click a s
 
 No skill starts above 3. **Stamina** is Brawn + Reflex + Grit.
 
-In Kraken, the Characters window's **Character Wizard** does all of this.`,
+In Kraken, the Characters window's **Character Wizard** does all of this.`, "images/rules-crew.webp", "A crew"),
             },
             {
               name: "Origins",
               keywords: "origin",
-              text: md(ORIGINS.map((entry) => `**${entry.name}** (${entry.skills}). ${plain(entry.text)} *${Object.values(entry.traits)[0].name}:* ${plain(Object.values(entry.traits)[0].text)}`).join("\n\n")),
+              // A crew member of each origin, then the origins.
+              blocks: pictured(
+                md(ORIGINS.map((entry) => `**${entry.name}** (${entry.skills}). ${plain(entry.text)} *${Object.values(entry.traits)[0].name}:* ${plain(Object.values(entry.traits)[0].text)}`).join("\n\n")),
+                ORIGINS.map((entry) => portraitFile(ORIGIN_PORTRAIT[entry.name])),
+                ORIGINS.map((entry) => entry.name),
+              ),
             },
-            ...PATHS.map((entry) => ({ name: entry.name, keywords: "path", text: entry.text })),
+            ...PATHS.map((entry) => ({ name: entry.name, keywords: "path", blocks: pictured(entry.text, portraitFile(PATH_PORTRAIT[entry.name]), PATH_PORTRAIT[entry.name]) })),
             {
               name: "Improving",
               keywords: "experience improve advance",
@@ -131,7 +146,7 @@ In Kraken, the Skills page's **Improve** spends it.`,
             {
               name: "Combat",
               keywords: "combat initiative attack damage armour",
-              text: `**Initiative:** 2d6 + Reflex modifier + Tactics (-3 without Tactics, as any skill you do not have; Tactics 0 adds 0). Highest first.
+              blocks: pictured(`**Initiative:** 2d6 + Reflex modifier + Tactics (-3 without Tactics, as any skill you do not have; Tactics 0 adds 0). Highest first.
 
 **On your turn:** move (about 6 m) and take one action: attack, a task, reload, aid someone.
 
@@ -141,18 +156,18 @@ In Kraken, the Skills page's **Improve** spends it.`,
 
 **Stamina:** at 0 you are **Down**: out of the fight, unconscious or close to it. At **minus your Grit** you are dead. A Medicine task brings you back from Down.
 
-In Kraken, target a creature (Ctrl+click its token) and use the weapon's attack and damage on your sheet's Combat page.`,
+In Kraken, target a creature (Ctrl+click its token) and use the weapon's attack and damage on your sheet's Combat page.`, "images/rules-combat.webp", "Combat"),
             },
             {
               name: "Vacuum and Hazards",
               keywords: "vacuum radiation zero-g hazard",
-              text: `**Vacuum:** without a sealed suit, 1d6 damage each turn (armour does not help), and you are Down within a minute.
+              blocks: pictured(`**Vacuum:** without a sealed suit, 1d6 damage each turn (armour does not help), and you are Down within a minute.
 
 **Zero-G:** without mag boots, every physical task takes a Bane unless you make a Zero-G task (Standard) at the start of the scene.
 
 **Radiation:** a hot reactor or a flare: a Grit check each hour (or each turn, close in), 1d6 damage on a failure.
 
-**Fire in a hull** eats the air: put it out in three turns or vent the compartment.`,
+**Fire in a hull** eats the air: put it out in three turns or vent the compartment.`, "images/rules-vacuum.webp", "Vacuum and Hazards"),
             },
           ],
         },
@@ -162,18 +177,18 @@ In Kraken, target a creature (Ctrl+click its token) and use the weapon's attack 
             {
               name: "Your Ship",
               keywords: "ship starship hull armour thrust jump crew station",
-              text: `A ship is a **hull** (its tonnage), **hull points** (tons / 2.5: a ship is destroyed at 0), **armour** (it comes off every hit), **Thrust** (how hard it can push), **Jump** (how many threads of the skein it can cross at once), **sensors** and a **computer** (together its **fire control**, added to every shot).
+              blocks: pictured(`A ship is a **hull** (its tonnage), **hull points** (tons / 2.5: a ship is destroyed at 0), **armour** (it comes off every hit), **Thrust** (how hard it can push), **Jump** (how many threads of the skein it can cross at once), **sensors** and a **computer** (together its **fire control**, added to every shot).
 
 Its crew take **stations**: the **pilot** at the helm, a **gunner** at each weapon, someone on **sensors**, an **engineer**, the **captain**. In Kraken, open **Starships** in the sidebar and take a station with your character.
 
 The GM has six ready designs: the **Courier**, the **Free Trader**, the **Salvage Tug**, the **Patrol Cutter**, the **Fighter** and the **Corsair**.
 
-On the map, a ship has its own token, and its **deck plans** open as maps: bridge, staterooms, galley, turrets, airlock, holds and engineering, with their walls and doors.`,
+On the map, a ship has its own token, and its **deck plans** open as maps: bridge, staterooms, galley, turrets, airlock, holds and engineering, with their walls and doors.`, "images/rules-ship.webp", "Your Ship"),
             },
             {
               name: "Ship Combat",
               keywords: "ship combat gunnery range critical",
-              text: `**Initiative:** 2d6 + the pilot's Pilot task modifier (Pilot + Reflex) + the ship's Thrust.
+              blocks: pictured(`**Initiative:** 2d6 + the pilot's Pilot task modifier (Pilot + Reflex) + the ship's Thrust.
 
 **Range:** Adjacent, Close, Short (+1), Medium, Long (-2), Very Long (-4), Distant (-6). A weapon reaches only so far (a pulse laser to Long, a missile rack to Distant).
 
@@ -183,7 +198,7 @@ On the map, a ship has its own token, and its **deck plans** open as maps: bridg
 
 **Critical hits:** a shot with an Effect of 6 or more that does damage strikes a system (2d6): 2 sensors, 3 power plant, 4 fuel, 5 a weapon, 6 armour, 7 the hull itself, 8 the drive, 9 cargo, 10 the skein drive, 11 the crew, 12 the computer. Each hit on a system makes it worse.
 
-In Kraken, the GM puts the ships on the combat tracker; a gunner picks the target and the range on the ship's sheet and presses **Fire**.`,
+In Kraken, the GM puts the ships on the combat tracker; a gunner picks the target and the range on the ship's sheet and presses **Fire**.`, "images/rules-ship-combat.webp", "Ship Combat"),
             },
           ],
         },
