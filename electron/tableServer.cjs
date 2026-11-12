@@ -1652,12 +1652,12 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         return;
       }
 
-      // Traveller's lifepath: a player's Traveller made term by term, the host's dice rolling.
+      // Traveller's character wizard (the GM's KrakenCharWizardMGT2): a player's Traveller made term by term, the host's dice rolling.
       if (msg.type === "mgt2-life") {
         const answer = (body) => send(ws, { type: "op-result", req: msg.req ?? null, ...body });
         const owner = client.role === "dm" ? text(msg.owner, "").slice(0, 24) : client.name;
         require("./mgt2.cjs")
-          .lifeAction(agentHandle, owner, { action: text(msg.action, "state"), name: text(msg.name, ""), input: msg.input && typeof msg.input === "object" ? msg.input : {}, build: msg.build && typeof msg.build === "object" ? msg.build : undefined }, client.role === "dm" ? seatOf(client) : { role: "dm", name: client.name })
+          .lifeAction(agentHandle, owner, { action: text(msg.action, "view"), name: text(msg.name, ""), fn: text(msg.fn, ""), args: Array.isArray(msg.args) ? msg.args.slice(0, 4) : [], build: msg.build && typeof msg.build === "object" ? msg.build : undefined }, client.role === "dm" ? seatOf(client) : { role: "dm", name: client.name })
           .then((result) => answer({ ok: true, id: result.id ?? "", life: result.life ?? null, problems: result.problems ?? [] }))
           .catch((error) => answer({ ok: false, error: error instanceof Error ? error.message : "Could not do that." }));
         return;

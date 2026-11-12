@@ -56,7 +56,7 @@ async function taskMgt2(table, record, { skill = "", attribute = "", difficulty 
 }
 
 // What the sheet may change, then every number worked out again.
-const TEXT = new Set(["playername", "notes", "appearance", "species", "homeworld", "contacts", "allies", "enemies", "ship", "background"]);
+const TEXT = new Set(["playername", "notes", "appearance", "gender", "species", "homeworld", "contacts", "allies", "enemies", "ship", "background"]);
 const NUMBERS = [/^characteristics\.(str|dex|end|int|edu|soc)\.score$/, /^skills\.[a-z0-9-]+\.level$/, /^hp\.wounds$/, /^age$/, /^ac\.misc$/, /^initiative\.misc$/, /^careers\.\d+\.(terms|rank)$/, /^coins\.id-\d+\.amount$/, /^inventorylist\.id-\d+\.(count|carried)$/];
 function setPath(data, key, value) {
   const keys = key.split(".");
@@ -91,86 +91,194 @@ async function editMgt2(table, record, changes, seat) {
   return table.records.update(record.id, { name, data: rules.derive(data) }, table.seat, { replace: true });
 }
 
-// --- The lifepath ---------------------------------------------------------------
-// A Traveller made term by term (shared/mgt2/lifepath.mjs), one at a time for
-// each player, every roll the table's dice. The view: what the wizard shows.
-let lifeLoaded = null;
-const lifepath = () => (lifeLoaded ??= import(pathToFileURL(path.join(__dirname, "..", "shared", "mgt2", "lifepath.mjs")).href));
-// Each table's lifepaths under way, by owner.
+// --- The character wizard --------------------------------------------------------
+// The GM's FG extension KrakenCharWizardMGT2 itself (electron/tcwizard.cjs):
+// one wizard a player, its term engine run as it runs in FG, every roll the
+// table's. The window shows its pages; Create makes a Kraken Traveller from it.
 const tables = new WeakMap();
 const livesOf = (table) => {
   if (!tables.has(table)) tables.set(table, new Map());
   return tables.get(table);
 };
-const keyOf = (_table, owner) => String(owner || "GM");
-function lifeView(state) {
-  if (!state) return null;
+// What the wizard's pages may call (the FG pages' own calls).
+const CALLS = new Set(["rollCharacteristics", "swapScores", "selectSpecies", "toggleBackground", "showTab", "chooseOption", "retryRoll", "chooseBenefitItem", "rollMedical", "settleMedical", "setConnection", "applyConnection", "setPackage", "togglePackageSkill", "applyPackage", "startOver"]);
+// The page data, gathered in the wizard's own Lua.
+const VIEW = String.raw`
+  local W, D, S = TCWizard, TCData, TCWizard.getState()
+  local stats = {}
+  for _, s in ipairs(D.STATS) do stats[#stats + 1] = { key = s, short = W.statShort(s), name = W.statName(s), base = S.base[s], value = W.getStat(s), dm = W.getStatDM(s) } end
+  local species = {}
+  for _, node in ipairs(W.getSpeciesList()) do species[#species + 1] = { path = node._path, name = node.name, mods = node.characteristics or "", text = node.text or "" } end
+  local chosen, allowed = W.getBackgroundCounts()
+  local task = nil
+  if S.task then
+    task = { title = S.task.title, text = S.task.text, options = {} }
+    for i, o in ipairs(S.task.options or {}) do task.options[i] = { label = o.label, tip = o.tip, disabled = o.disabled and true or false, roll = o.roll and { dice = o.roll.dice, mod = o.roll.mod, target = o.roll.target, desc = o.roll.desc } or nil } end
+  end
+  local benefits = {}
+  for i, b in ipairs(S.benefits) do
+    local entry = { index = i, name = b.name, kind = b.kind, item = b.item, itemname = b.itemname, declined = b.declined, skilltaken = b.skilltaken }
+    if b.kind == "item" then
+      entry.choices = {}
+      for _, node in ipairs(W.getBenefitItems(b)) do entry.choices[#entry.choices + 1] = { path = node._path, name = node.name, cost = node.cost, tl = node.tl } end
+    end
+    benefits[#benefits + 1] = entry
+  end
+  local tabs = {}
+  for _, t in ipairs(W.TABS) do tabs[#tabs + 1] = { key = t, alerts = W.getTabAlerts(t) } end
+  local packages = {}
+  for _, p in ipairs(D.SKILL_PACKAGES) do packages[#packages + 1] = { name = p.name, text = p.text, skills = p.skills } end
   return {
-    name: state.name,
-    pending: state.pending,
-    log: state.log.slice(-400),
-    stats: state.stats,
-    rolled: state.rolled ?? null,
-    skills: state.skills,
-    age: state.age,
-    terms: state.terms,
-    careers: state.careers,
-    current: state.current ? { career: state.current.career, assignment: state.current.assignment, term: state.current.term, rank: state.current.rank, officer: state.current.officer } : null,
-    cash: state.cash,
-    benefits: state.benefits,
-    connections: { contacts: state.contacts.length, allies: state.allies.length, rivals: state.rivals.length, enemies: state.enemies.length },
-    items: state.items,
-    done: state.done,
+    tab = S.tab, tabs = tabs, started = S.started, done = S.done, canReroll = W.canReroll(), rolled = #S.rolls,
+    stats = stats, upp = W.getUPP(), age = W.getAge(),
+    species = species, speciesChosen = S.species,
+    background = D.BACKGROUND_SKILLS, bg = S.bg, bgChosen = chosen, bgAllowed = allowed, homeworld = S.homeworld,
+    task = task, waiting = S.waiting and true or false, log = S.log,
+    careers = W.getCareerSummary(), skills = S.skills, skillText = W.getSkillListText(), skillWarnings = W.getSkillWarnings(),
+    benefits = benefits, benefitsText = W.getBenefitsText(), injuries = S.injuries, debts = S.debts, cash = S.cash, finalCash = W.getFinalCash(), shares = S.shares, pension = S.pension,
+    connections = S.connections, packages = packages, package = S.package, packagePicks = S.packagePicks,
+    assoc = W.getAssocText(), warnings = W.getAllWarnings(),
+    name = S.name, gender = S.gender, appearance = S.appearance, why = S.why,
+  }
+`;
+const DONE = String.raw`
+  local W, S = TCWizard, TCWizard.getState()
+  local visits = {}
+  for _, v in ipairs(S.visits) do visits[#visits + 1] = { name = TCData.CAREERS[v.key].name, assignment = W.getAssignment(v).name, terms = v.terms, rank = v.officer and v.orank or v.rank, officer = v.officer and true or false, title = W.getRankTitle(v) } end
+  local stats = {}
+  for _, s in ipairs(TCData.STATS) do stats[s] = W.getStat(s) end
+  local items = {}
+  for _, b in ipairs(S.benefits) do if b.kind == "item" and b.item then items[#items + 1] = b.item end end
+  local debts = {}
+  for _, d in ipairs(S.debts) do debts[#debts + 1] = string.format("Cr%d %s", d.amount, d.what) end
+  local species = W.getSpeciesNode()
+  return { stats = stats, skills = S.skills, talents = S.talents, visits = visits, age = W.getAge(), upp = W.getUPP(), assoc = W.getAssocText(), cash = W.getFinalCash(),
+    benefits = W.getBenefitsText(), debts = debts, notes = S.notes, log = W.getLogText(), items = items, species = species and species.name or "Human",
+    name = S.name, gender = S.gender, homeworld = S.homeworld, appearance = S.appearance, why = S.why, summary = W.getCareerSummary() }
+`;
+// The wizard's database: species, skills and items from the campaign's books;
+// Kraken's weapons, armour and gear priced as FG's MGT2 items are.
+async function wizardRecords(table) {
+  const rules = await rulesMgt2();
+  const list = (type) => table.records.list({ type });
+  const species = list("race").map((record) => ({ name: record.name, characteristics: String(record.data?.characteristics ?? ""), text: String(record.data?.text ?? ""), traits: [] }));
+  return {
+    race: species.length ? species : [{ name: "Human", characteristics: "", text: "Humans (no characteristic modifiers).", traits: [] }],
+    "reference.skilldata": list("skill").map((record) => ({ name: record.name, text: String(record.data?.text ?? "") })),
+    item: [...rules.catalog(), ...list("item").map((record) => ({ ...record.data, name: record.name }))],
   };
 }
-async function lifeAction(table, owner, { action = "state", name, input, build } = {}, seat) {
-  if (!isMgt2Ruleset(table.ruleset?.())) throw new Error("The lifepath is Traveller's.");
-  const life = await lifepath();
-  const key = keyOf(table, owner);
+const FIELDS = ["name", "gender", "homeworld", "appearance", "why"];
+// A price in credits: "Cr200", "MCr 1.5", "1,000".
+function priceCr(text) {
+  const source = String(text ?? "").replace(/,/g, "").trim();
+  const mcr = /^MCr\s*([\d.]+)/i.exec(source);
+  if (mcr) return Math.round(Number(mcr[1]) * 1e6);
+  const cr = /^(?:Cr)?\s*([\d.]+)$/i.exec(source);
+  return cr ? Math.round(Number(cr[1])) : null;
+}
+async function lifeAction(table, owner, { action = "view", name, fn, args, build } = {}, seat) {
+  if (!isMgt2Ruleset(table.ruleset?.())) throw new Error("This is Traveller's character wizard.");
+  const wizards = require("./tcwizard.cjs");
+  const rules = await rulesMgt2();
   const lives = livesOf(table);
-  const roll = (formula) => table.dice.roll(formula).total;
+  const key = String(owner || "GM");
+  const view = (wizard) => (wizard ? wizard.eval(VIEW) : null);
+  const setDetails = (wizard, input) => {
+    for (const field of FIELDS) if (input?.[field] !== undefined) wizard.eval(`TCWizard.getState().${field} = ${wizards.toLua(String(input[field]).slice(0, 2000))}`);
+  };
   if (action === "start") {
-    lives.set(key, life.start(String(name ?? "").trim().slice(0, 60) || "Traveller", roll));
-    return { life: lifeView(lives.get(key)) };
+    lives.get(key)?.close();
+    const player = String(owner || "GM");
+    const wizard = wizards.createWizard({
+      roll: (formula, label, mod) => {
+        const rolled = table.dice.roll(`${formula}${mod ? (mod > 0 ? `+${mod}` : mod) : ""}`);
+        table.postRoll(rolled, String(label).replace(/^\[Traveller creation\]\s*/, "[TRAVELLER CREATION] "), player, false, { by: player });
+        return rolled.terms.filter((term) => term.kind === "dice").flatMap((term) => term.rolls);
+      },
+      say: (text) => table.say(text, player),
+      user: player,
+      records: await wizardRecords(table),
+    });
+    if (name) setDetails(wizard, { name });
+    lives.set(key, wizard);
+    return { life: view(wizard) };
   }
-  const state = lives.get(key);
+  const wizard = lives.get(key);
   if (action === "cancel") {
+    wizard?.close();
     lives.delete(key);
     return { life: null };
   }
-  if (!state) {
-    if (action === "state") return { life: null };
-    throw new Error("No lifepath under way: start one.");
+  if (!wizard) {
+    if (action === "view") return { life: null };
+    throw new Error("No Traveller under way: start one.");
   }
-  if (action === "state") return { life: lifeView(state) };
-  if (action === "answer") {
-    const next = life.answer(input ?? {}, state, roll);
-    lives.set(key, next);
-    return { life: lifeView(next) };
+  if (action === "view") return { life: view(wizard) };
+  if (action === "call") {
+    if (!CALLS.has(String(fn))) throw new Error(`The wizard has no step ${fn}.`);
+    wizard.call(String(fn), ...(Array.isArray(args) ? args.slice(0, 4) : []));
+    return { life: view(wizard) };
+  }
+  if (action === "details") {
+    setDetails(wizard, build);
+    return { life: view(wizard) };
   }
   if (action === "build") {
-    if (!state.done) throw new Error("The lifepath is not finished.");
-    const spec = { ...life.toSpec(state), ...(build ?? {}), name: String(build?.name ?? "").trim() || state.name };
-    // Benefits' weapons and armour: the player's picks from Kraken's lists, one each.
-    const rules = await rulesMgt2();
-    const wanted = Array.isArray(build?.gear) ? build.gear.map(String) : [];
-    const kinds = state.items.slice();
-    const gear = [];
-    for (const item of wanted) {
-      const made = rules.makeItem(item);
-      if (!made) continue;
-      const kind = made.type === "Armour" ? "armour" : /Melee/.test(made.subtype) ? "blade" : "gun";
-      const at = kinds.findIndex((have) => have === kind || have === "weapon" && kind !== "armour");
-      if (at < 0) throw new Error(`${item}: no benefit gives that (${kinds.join(", ") || "no weapons or armour left"}).`);
-      kinds.splice(at, 1);
-      gear.push(item);
+    if (!view(wizard).done) throw new Error("Play the careers and muster out first.");
+    setDetails(wizard, build);
+    const done = wizard.eval(DONE);
+    const records = await wizardRecords(table);
+    // The items the benefits gave (the wizard's database: Kraken's list and the campaign's items).
+    const byPath = (text) => records.item[Number(/id-(\d+)$/.exec(String(text))?.[1]) - 1];
+    const gear = (done.items ?? []).map(byPath).filter(Boolean).map((item) => [item.name, 1]);
+    // Starting gear bought with the final cash (Kraken's shop, after the wizard's Benefits).
+    let cash = Math.max(0, Math.round(Number(done.cash) || 0));
+    const bought = [];
+    for (const [itemName, countIn] of Array.isArray(build?.buy) ? build.buy : []) {
+      const item = records.item.find((entry) => String(entry.name).toLowerCase() === String(itemName).toLowerCase());
+      const count = Math.max(1, Math.min(20, Math.round(Number(countIn) || 1)));
+      const price = priceCr(item?.cost);
+      if (!item || price === null) throw new Error(`${itemName} is not for sale.`);
+      if (price * count > cash) throw new Error(`${itemName} costs Cr${price * count}; Cr${cash} is left.`);
+      cash -= price * count;
+      bought.push([item.name, count]);
     }
-    const built = await buildMgt2(table, { ...spec, gear }, owner, seat);
+    const notes = [
+      done.benefits ? `BENEFITS\n${done.benefits}` : "",
+      done.debts?.length ? `PAID OUT OF CASH\n${done.debts.join("\n")}` : "",
+      bought.length ? `BOUGHT\n${bought.map(([item, count]) => `${count} x ${item}`).join("\n")}` : "",
+      done.notes?.length ? `FOR THE REFEREE\n${done.notes.join("\n")}` : "",
+      `CREATION LOG\n${done.log}`,
+    ]
+      .filter(Boolean)
+      .join("\n\n");
+    const careers = (done.visits ?? []).map((visit) => ({ name: visit.name, terms: visit.terms, rank: visit.rank, title: visit.title, assignment: visit.assignment }));
+    const spec = {
+      lifepath: true,
+      name: String(done.name || build?.name || "Traveller").trim() || "Traveller",
+      species: done.species,
+      homeworld: done.homeworld,
+      characteristics: done.stats,
+      careers,
+      age: done.age,
+      skills: done.skills ?? {},
+      gear: [...gear, ...bought],
+      credits: cash,
+      contacts: done.assoc,
+      gender: done.gender,
+      notes,
+      appearance: [done.appearance, done.why ? `Why travelling: ${done.why}` : "", `UPP ${done.upp}. ${String(done.summary ?? "").replace(/\n/g, ". ")}`].filter(Boolean).join("\n"),
+      catalog: records.item,
+    };
+    void rules;
+    const made = await buildMgt2(table, spec, owner, seat);
+    wizard.close();
     lives.delete(key);
-    table.say(`[LIFEPATH] ${built.record.name}: ${built.record.data.upp}, age ${built.record.data.age}, ${spec.careers.map((career) => `${career.name} ${career.terms}${career.title ? ` (${career.title})` : ""}`).join(", ") || "no career"}.`, owner || "GM");
-    return { id: built.record.id, problems: built.problems };
+    table.say(`[TRAVELLER CREATION] ${made.record.name}: ${made.record.data.upp}, age ${made.record.data.age}${careers.length ? `, ${careers.map((career) => `${career.name} ${career.terms}${career.title ? ` (${career.title})` : ""}`).join(", ")}` : ""}.`, owner || "GM");
+    return { id: made.record.id, problems: made.problems };
   }
-  throw new Error("Which action? start, answer, state, build or cancel.");
+  throw new Error("Which action? start, view, call, details, build or cancel.");
 }
 
 module.exports = { rulesMgt2, buildMgt2, taskMgt2, editMgt2, isMgt2, isMgt2Ruleset, lifeAction, RULESET_NAME };

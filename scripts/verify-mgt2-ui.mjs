@@ -77,7 +77,7 @@ try {
 
   browser = await chromium.launch({ executablePath: CHROME, headless: true });
   const seat = await browser.newPage({ viewport: { width: 1400, height: 950 } });
-  seat.on("pageerror", (error) => failures.push(`player: ${error.message}`));
+  seat.on("pageerror", (error) => failures.push(`player: ${error.message} ${error.stack}`));
   await seat.goto(`http://127.0.0.1:${port}/`);
   await seat.fill('input[name="name"]', "A test player");
   await seat.fill('input[name="account-password"]', "test-pass");
@@ -85,59 +85,75 @@ try {
   await seat.click('button[type="submit"]');
   await seat.waitForSelector(".sidebar");
 
-  // The lifepath wizard, every roll the host's (fixed here): Mira Sol, a Scout (Courier) of one term.
-  const force = (...values) => tool("kraken_dice_force", { values });
-  const answered = (text) => seat.waitForFunction((wanted) => document.querySelector("[data-life-log]")?.textContent.includes(wanted), text, { timeout: 10000 });
+  // The Traveller wizard (the GM's KrakenCharWizardMGT2 run on the host): every page, every roll the table's.
   await seat.click('.sidebar [data-launch="characters"]');
   await seat.click('[data-action="new-character"]');
   await seat.waitForSelector('[data-wizard="mgt2"]');
   await seat.fill('[aria-label="Character name"]', "Mira Sol");
-  await force(4, 4, 5, 5, 3, 4, 6, 5, 5, 4, 3, 3);
   await seat.click('[data-action="life-start"]');
-  await seat.waitForSelector('[data-life-question="arrange"]');
-  await seat.click('[data-life-answer="keep"]');
-  await seat.waitForSelector('[data-life-question="pick"]');
-  for (const skill of ["Vacc Suit", "Electronics", "Athletics", "Carouse"]) await seat.check(`[data-life-pick="${skill}"]`);
-  await seat.click('[data-life-answer="pick"]');
-  await seat.click('[data-life-choice="Straight into a career"]');
-  await seat.click('[data-life-career="Scout"]');
-  await seat.check('[data-life-assignment="courier"]');
-  await force(3, 3);
-  await seat.click('[data-life-answer="career"]');
-  await answered("Scout qualification: INT 5+: rolled 7. Qualified.");
-  // Service Skills 1: Pilot (Spacecraft); survival END 5+ (8); event 6: alone for months: Mechanic.
-  await force(1, 4, 4, 3, 3);
-  await seat.click('[data-life-choice="Service Skills"]');
-  await answered("Survival: END 5+, rolled 8: survived");
-  await seat.screenshot({ path: path.join(tmpdir(), "kraken-mgt2-lifepath-mid.png") });
-  // Advancement EDU 9+ (EDU 9, +1): 5 + 4 + 1 = 10: rank 1, Vacc Suit 1, another roll: Personal Development 6: Jack-of-all-Trades.
-  await force(5, 4);
-  await seat.click('[data-life-choice="Mechanic"]');
-  await answered("Skill: Mechanic 1");
-  await seat.waitForSelector('[data-life-choice="Personal Development"]');
-  await force(6);
-  await seat.click('[data-life-choice="Personal Development"]');
-  await answered("Jack-of-all-Trades 1");
-  await seat.click('[data-life-choice="Leave the career"]');
-  await force(1);
-  await seat.click('[data-life-choice="Cash"]');
-  await answered("Cash (1): Cr20000.");
-  await force(4);
-  await seat.click('[data-life-choice="Benefits"]');
-  await answered("Benefit (4): Weapon.");
-  await seat.click('[data-life-choice="Finish"]');
-  await seat.waitForSelector('[data-life-question="build"]');
-  assert((await seat.textContent("[data-life-upp]"))?.trim() === "8A7B96", "the summary's UPP");
+  await seat.click('[data-action="tc-roll"]');
+  await seat.waitForFunction(() => [...document.querySelectorAll("[data-tc-stat] b")].every((b) => /\d/.test(b.textContent ?? "")));
+  // Swap two scores.
+  const before = await seat.$$eval("[data-tc-stat] b", (list) => list.map((b) => b.textContent));
+  await seat.click('[data-tc-stat="str"]');
+  await seat.click('[data-tc-stat="soc"]');
+  await seat.waitForFunction((first) => document.querySelector('[data-tc-stat="soc"] b')?.textContent === first, before[0]);
+  await seat.click('[data-wizard-tab="species"]');
+  await seat.locator("label:has([data-tc-species])").first().click();
+  await seat.waitForFunction(() => document.querySelector("[data-tc-species]")?.checked);
+  await seat.click('[data-wizard-tab="background"]');
+  for (let i = 0; i < 8; i++) {
+    const free = seat.locator("[data-tc-bg]:not(:checked):not(:disabled)");
+    if (!(await free.count())) break;
+    const skill = await free.first().getAttribute("data-tc-bg");
+    await seat.locator(`label:has([data-tc-bg="${skill}"])`).click();
+    await seat.waitForFunction((name) => document.querySelector(`[data-tc-bg="${name}"]`)?.checked, skill, { timeout: 5000 });
+  }
   await seat.fill('[aria-label="Homeworld"]', "Regina");
-  await seat.selectOption('[aria-label="Benefit 1"]', "Autopistol");
+  await seat.click('[data-wizard-tab="careers"]');
+  await seat.waitForSelector("[data-life-task]", { timeout: 8000 }).catch(async (error) => {
+
+    throw error;
+  });
+  // The terms, until the careers are done (staying until 30).
+  for (let guard = 0; guard < 400; guard++) {
+    if ((await seat.getAttribute("[data-wizard]", "data-life-done")) === "yes") break;
+    const age = Number(await seat.getAttribute("[data-wizard]", "data-life-age"));
+    const options = await seat.$$eval("[data-tc-option]:not(:disabled)", (list) => list.map((button) => ({ n: button.getAttribute("data-tc-option"), label: button.getAttribute("data-life-choice") })));
+    if (!options.length) {
+      await seat.waitForTimeout(200);
+      continue;
+    }
+    const finish = options.find((option) => /finish|stop/i.test(option.label ?? ""));
+    const rest = options.filter((option) => option !== finish);
+    const pick = finish && (age >= 30 || !rest.length) ? finish : rest[Math.floor(Math.random() * rest.length)];
+    await seat.click(`[data-tc-option="${pick.n}"]`);
+    await seat.waitForTimeout(120);
+  }
+  assert((await seat.getAttribute("[data-wizard]", "data-life-done")) === "yes", "the careers played to mustering out");
+  const age = Number(await seat.getAttribute("[data-wizard]", "data-life-age"));
+  assert(age >= 26, `several terms: age ${age}`);
+  await seat.click('[data-wizard-tab="benefits"]');
+  for (const select of await seat.$$("[data-tc-benefit]")) {
+    const value = await select.$$eval("option", (list) => list.map((option) => option.value).find(Boolean));
+    if (value) await select.selectOption(value);
+  }
+  await seat.click('[data-wizard-tab="skills"]');
+  await seat.fill('[aria-label="Connection 1 skill"]', "Streetwise");
+  await seat.click('[data-tc-connection="1"] button');
+  await seat.click('[data-wizard-tab="finish"]');
+  await seat.fill('[aria-label="Traveller name"]', "Mira Sol");
+  await seat.fill('[aria-label="Gender"]', "Female");
+  const cash = Number(await seat.getAttribute("[data-coin-left]", "data-coin-left"));
+  if (cash >= 25) await seat.click('[aria-label="Buy Backpack"]');
+  await seat.screenshot({ path: path.join(tmpdir(), "kraken-mgt2-lifepath.png") });
   await seat.click('[data-action="wizard-finish"]');
   await seat.waitForSelector('.sheet-mgt2 [data-stat="upp"]', { timeout: 15000 });
   const miraRow = listOf(await tool("kraken_records_list", { type: "character" })).find((item) => item.name === "Mira Sol");
   const mira = await tool("kraken_record_get", { id: miraRow.id });
-  assert(mira.owner === "A test player" && mira.data.upp === "8A7B96" && mira.data.age === 22 && mira.data.skills["pilot-spacecraft"].level === 1 && mira.data.skills.mechanic.level === 1 && mira.data.skills.vaccsuit.level === 1 && mira.data.skills.jackofalltrades.level === 1 && mira.data.careers[0].title === "Scout" && Object.values(mira.data.inventorylist).some((item) => item.name === "Autopistol") && Object.values(mira.data.coins)[0].amount === 20000, `the lifepath built Mira: ${JSON.stringify({ owner: mira.owner, upp: mira.data.upp, age: mira.data.age, skills: mira.data.skills, careers: mira.data.careers })}`);
-  assert(/Frontier Scout/.test(String(mira.data.portrait ?? "")), `a Scout from the Frontier: Kraken's science fiction portrait: ${mira.data.portrait}`);
-  assert((await seat.textContent('.sheet-mgt2 [data-stat="upp"]'))?.trim() === "8A7B96" && (await seat.textContent('.sheet-mgt2 [data-stat="careers"]'))?.includes("Scout 1"), "the sheet: the UPP and the career");
-  await seat.screenshot({ path: path.join(tmpdir(), "kraken-mgt2-lifepath.png") });
+  assert(mira.owner === "A test player" && mira.data.age === age && /CREATION LOG/.test(mira.data.notes) && mira.data.careers.length >= 1 && mira.data.gender === "Female", `the wizard built Mira: ${JSON.stringify({ owner: mira.owner, upp: mira.data.upp, age: mira.data.age, careers: mira.data.careers })}`);
+  if (cash >= 25) assert(Object.values(mira.data.inventorylist).some((item) => item.name === "Backpack"), "the backpack bought");
+  assert((await seat.textContent('.sheet-mgt2 [data-stat="upp"]'))?.trim() === mira.data.upp, "the sheet shows the UPP");
 
   // Ilsa Varn (the agent's build) for the rest: her sheet from the list.
   const built = await tool("kraken_build_character", { owner: "A test player", spec: { name: "Ilsa Varn", homeworld: "Regina", characteristics: { str: 7, dex: 10, end: 8, int: 11, edu: 9, soc: 6 }, career: "Scout", terms: 2, skills: { "Pilot (Small Craft)": 2, "Gun Combat (Slug)": 1, "Vacc Suit": 0 }, gear: ["Autopistol", "Cloth"] } });
@@ -203,7 +219,7 @@ try {
   await seat.screenshot({ path: path.join(tmpdir(), "kraken-mgt2-player.png") });
   await page.screenshot({ path: path.join(tmpdir(), "kraken-mgt2-gm.png") });
   assert(failures.length === 0, `page errors: ${failures.join(" | ")}`);
-  console.log(`ok mgt2 ui: a campaign switched to Traveller; a test player makes Mira Sol in the lifepath wizard (the host's dice: a Scout's term, survival, an event, a promotion, Cr20000 and an autopistol; UPP 8A7B96, age 22); with Ilsa Varn the sheet rolls a Difficult task and an INT check with a Boon from the sheet; the autopistol hits the GM's pirate (11, Effect +3) for 6 + 3 - Mesh 2 = 7, its Endurance gone (an END check from the tracker at DM -3). ${path.join(tmpdir(), "kraken-mgt2-player.png")}`);
+  console.log(`ok mgt2 ui: a campaign switched to Traveller; a test player makes Mira Sol in the GM's Traveller wizard (characteristics rolled and swapped, species, background, careers to mustering out, benefits, a Connection, a backpack bought); with Ilsa Varn the sheet rolls a Difficult task and an INT check with a Boon from the sheet; the autopistol hits the GM's pirate (11, Effect +3) for 6 + 3 - Mesh 2 = 7, its Endurance gone (an END check from the tracker at DM -3). ${path.join(tmpdir(), "kraken-mgt2-player.png")}`);
 } finally {
   await browser?.close();
   child.kill();

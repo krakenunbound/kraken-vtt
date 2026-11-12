@@ -189,12 +189,57 @@ export const ARMOUR = [
   ["Battle Dress", 13, 22],
 ];
 const byName = (list, name) => list.find((row) => slug(row[0]) === slug(name)) ?? null;
+// Prices (credits) for Kraken's lists, and general gear: Kraken's own figures
+// (the GM's Traveller books, when loaded, bring the game's own items).
+export const PRICES = {
+  Unarmed: 0, Dagger: 10, Blade: 100, Cutlass: 200, Broadsword: 500, Club: 10, Stunstick: 300,
+  "Body Pistol": 500, "Snub Pistol": 150, Revolver: 150, Autopistol: 200, "Gauss Pistol": 500, Shotgun: 200,
+  "Submachine Gun": 400, Rifle: 200, Autorifle: 750, "Assault Rifle": 500, "Gauss Rifle": 1500,
+  "Laser Pistol": 2000, "Laser Carbine": 2500, "Laser Rifle": 3500, "Frag Grenade": 30,
+  Jack: 50, Mesh: 150, "Flak Jacket": 100, "Vacc Suit": 12000, Cloth: 250, "Hostile Environment Vacc Suit": 24000, "Combat Armour": 96000, "Battle Dress": 200000,
+};
+// General gear: name, TL, price, what it is.
+export const GEAR = [
+  ["Medikit", 8, 1000, "Medical supplies and diagnostic tools: DM+2 to Medic checks."],
+  ["Comm", 8, 500, "A personal communicator with a planetary range through the net."],
+  ["Hand Computer", 8, 500, "A computer that fits in a pocket."],
+  ["Binoculars", 3, 75, "Magnification for watching from afar."],
+  ["Toolkit", 8, 1000, "Mechanical and electronic tools: needed for most repairs."],
+  ["Backpack", 1, 25, "Carries 30 kg comfortably."],
+  ["Rope (10m)", 1, 10, "Synthetic climbing rope."],
+  ["Torch", 4, 10, "A hand light; batteries for a day."],
+  ["Filter Mask", 3, 100, "Breathes a tainted atmosphere."],
+  ["Respirator", 5, 100, "Breathes a very thin atmosphere."],
+  ["Rations (1 week)", 1, 50, "Travel food for a week."],
+  ["Survival Kit", 5, 100, "Shelter, fire and water for a week in the wilds."],
+];
+// Everything for sale: Kraken's weapons, armour and gear as FG's MGT2 item
+// records have them (type Weapons / Armour / Equipment, subtype, skill, cost "Cr200", tl).
+export function catalog() {
+  const weapons = WEAPONS.filter((row) => row[0] !== "Unarmed").map((row) => ({
+    name: row[0],
+    type: "Weapons",
+    subtype: row[5].includes("Energy") ? "Energy Weapons" : row[5].includes("Slug") ? "Slug Weapons" : row[5].includes("Blade") ? "Blades" : row[5].includes("Bludgeon") ? "Bludgeons" : "Grenades",
+    skill: row[5],
+    tl: row[1],
+    cost: `Cr${PRICES[row[0]] ?? 0}`,
+    range: row[2],
+    damage: row[3],
+    magazine: row[4],
+    traits: row[6],
+  }));
+  const armour = ARMOUR.map((row) => ({ name: row[0], type: "Armour", tl: row[1], protection: row[2], cost: `Cr${PRICES[row[0]] ?? 0}` }));
+  const gear = GEAR.map(([name, tl, price, text]) => ({ name, type: "Equipment", tl, cost: `Cr${price}`, description: text }));
+  return [...weapons, ...armour, ...gear];
+}
 // A weapon or armour as an inventory item.
 export function makeItem(name) {
   const weapon = byName(WEAPONS, name);
-  if (weapon) return { name: weapon[0], type: "Weapon", subtype: weapon[2] === "Melee" ? "Melee" : "Ranged", tl: weapon[1], range: weapon[2], damage: weapon[3], magazine: weapon[4], skill: weapon[5], traits: weapon[6] };
+  if (weapon) return { name: weapon[0], type: "Weapon", subtype: weapon[2] === "Melee" ? "Melee" : "Ranged", tl: weapon[1], range: weapon[2], damage: weapon[3], magazine: weapon[4], skill: weapon[5], traits: weapon[6], cost: `Cr${PRICES[weapon[0]] ?? 0}` };
   const armour = byName(ARMOUR, name);
-  if (armour) return { name: armour[0], type: "Armour", tl: armour[1], protection: armour[2] };
+  if (armour) return { name: armour[0], type: "Armour", tl: armour[1], protection: armour[2], cost: `Cr${PRICES[armour[0]] ?? 0}` };
+  const gear = byName(GEAR, name);
+  if (gear) return { name: gear[0], type: "Equipment", tl: gear[1], cost: `Cr${gear[2]}`, description: gear[3] };
   return null;
 }
 export const isWeapon = (item) => /weapon/i.test(String(item?.type ?? "")) && /\d*\s*d/i.test(String(item?.damage ?? ""));
@@ -397,6 +442,8 @@ export function buildFromSpec(spec, lib = {}) {
     coins: credits > 0 ? { "id-00001": { name: "Cr", amount: credits } } : {},
     notes: String(spec?.notes ?? ""),
     contacts: String(spec?.contacts ?? ""),
+    appearance: String(spec?.appearance ?? ""),
+    gender: String(spec?.gender ?? ""),
     exp: 0,
   });
   // A career's rank title, kept with it.

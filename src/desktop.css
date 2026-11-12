@@ -1472,3 +1472,13 @@ textarea.cc-field.tall { min-height: 220px; }
 .wizard-mgt2 .life-career-list button { text-align: left; display: flex; justify-content: space-between; padding: 4px 8px; }
 .wizard-mgt2 .life-career-list button.active { border-color: var(--brass); }
 .wizard-mgt2 .life-assignments { display: flex; flex-direction: column; gap: 6px; }
+.wizard-mgt2 .life-tabs { display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 0; }
+.wizard-mgt2 .life-tabs .alert { border-color: #c79a3b; }
+.wizard-mgt2 .life-page { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.wizard-mgt2 .life-stats.big { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.wizard-mgt2 .life-stats.big button.active { border-color: var(--brass); }
+.wizard-mgt2 .life-text { white-space: pre-wrap; font-family: inherit; font-size: 0.86rem; margin: 0; }
+.wizard-mgt2 .life-text.small { font-size: 0.78rem; }
+.wizard-mgt2 .life-shop { list-style: none; margin: 0; padding: 0; max-height: 240px; overflow: auto; display: flex; flex-direction: column; gap: 3px; }
+.wizard-mgt2 .life-shop li { display: grid; grid-template-columns: 1fr auto auto auto; gap: 6px; align-items: center; }
+.wizard-mgt2 .life-warnings { color: #e0a24a; font-size: 0.85rem; }

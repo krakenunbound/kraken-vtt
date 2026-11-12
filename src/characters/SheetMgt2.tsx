@@ -307,6 +307,11 @@ export function SheetMgt2({ record, session }: { record: TableRecord; session: S
               <Field value={String(data.contacts ?? "")} editable={editable} label="Allies, contacts, rivals and enemies" onSave={(value) => change("contacts", value)} />
               <small>Allies, contacts, rivals and enemies</small>
             </label>
+            <label className="cc-labelled">
+              <Field value={String(data.gender ?? "")} editable={editable} label="Gender" onSave={(value) => change("gender", value)} />
+              <small>Gender</small>
+            </label>
+            <Field value={String(data.appearance ?? "")} area editable={editable} label="Appearance and background" onSave={(value) => change("appearance", value)} />
             <Field value={String(data.notes ?? "")} area editable={editable} label="Notes" onSave={(value) => change("notes", value)} />
           </section>
         ) : null}

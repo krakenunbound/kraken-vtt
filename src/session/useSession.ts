@@ -792,8 +792,8 @@ export function useSession() {
     });
   }, []);
 
-  // Traveller's lifepath: start, answer the question it asks, build the finished Traveller.
-  const lifeAction = useCallback((body: { action: "start" | "answer" | "state" | "build" | "cancel"; name?: string; input?: unknown; build?: unknown }) => {
+  // Traveller's character wizard (the GM's KrakenCharWizardMGT2, run on the host): start, call its steps, build.
+  const lifeAction = useCallback((body: { action: "start" | "view" | "call" | "details" | "build" | "cancel"; name?: string; fn?: string; args?: unknown[]; build?: unknown }) => {
     const socket = socketRef.current;
     if (!socket || socket.readyState !== WebSocket.OPEN) return Promise.reject(new Error("Not connected."));
     const req = ++opCounter.current;
