@@ -2,6 +2,7 @@ import { Fragment, useMemo, useState, type ReactNode } from "react";
 import type { Session, TableRecord } from "../session/useSession";
 import { Icon } from "../ui/icons";
 import { slotDrag } from "../ui/QuickSlots";
+import { NpcMgt2 } from "../characters/NpcMgt2";
 
 // FG's campaign lists (the sidebar's Campaign and Character groups, each a
 // master index): the records of this campaign and its active books, a list per
@@ -73,6 +74,7 @@ export function RecordsWindow({ session, onOpen, only }: { session: Session; onO
   const [search, setSearch] = useState("");
   const [sharedOnly, setSharedOnly] = useState(false);
   const [status, setStatus] = useState("");
+  const [newName, setNewName] = useState("");
   const wanted = search.trim().toLowerCase();
   const rows = all
     .filter((record) => listOf(record) === list && (!wanted || record.name.toLowerCase().includes(wanted)) && (!sharedOnly || shared(record)))
@@ -116,6 +118,29 @@ export function RecordsWindow({ session, onOpen, only }: { session: Session; onO
             </button>
           ) : null}
         </div>
+        {gm && only ? (
+          // FG's + on a campaign list: a new record of the list's kind, opened to fill in.
+          <form
+            className="records-new cc-inline"
+            onSubmit={(event) => {
+              event.preventDefault();
+              const name = newName.trim();
+              if (!name) return;
+              void session
+                .op({ op: "create", input: { type: only, name, visibility: "gm", data: {} } })
+                .then((id) => {
+                  setNewName("");
+                  if (id) onOpen({ id: String(id), name, type: only } as TableRecord);
+                })
+                .catch((error) => setStatus(error instanceof Error ? error.message : "Could not make that."));
+            }}
+          >
+            <input value={newName} onChange={(event) => setNewName(event.target.value)} placeholder={`New ${listLabel(only).replace(/s$/, "")}`} aria-label={`New ${listLabel(only).replace(/s$/, "")} name`} />
+            <button type="submit" data-action="record-new" title={`Make a new ${listLabel(only).replace(/s$/, "").toLowerCase()} (FG's +)`} disabled={!newName.trim()}>
+              <Icon name="plus" size={15} /> New
+            </button>
+          </form>
+        ) : null}
         {status ? (
           <p className="hint" role="status">
             {status}
@@ -245,7 +270,8 @@ export function RecordWindow({ session, id }: { session: Session; id: string }) 
           </button>
         ) : null}
       </header>
-      {abilities && STATS.some((stat) => abilities[stat]) ? (
+      {gm && npc && session.ruleset === "Traveller" ? <NpcMgt2 session={session} record={record} /> : null}
+      {gm && npc && session.ruleset === "Traveller" ? null : abilities && STATS.some((stat) => abilities[stat]) ? (
         <div className="record-abilities">
           {STATS.map((stat) => (
             <span key={stat}>
@@ -255,7 +281,7 @@ export function RecordWindow({ session, id }: { session: Session; id: string }) 
           ))}
         </div>
       ) : null}
-      {fields.length ? (
+      {fields.length && !(gm && npc && session.ruleset === "Traveller") ? (
         <dl className="record-fields">
           {fields.map(([key, value]) => (
             <Fragment key={key}>
@@ -275,7 +301,7 @@ export function RecordWindow({ session, id }: { session: Session; id: string }) 
           ))}
         </section>
       ))}
-      {texts.map(([key, value]) => (
+      {(gm && npc && session.ruleset === "Traveller" ? [] : texts).map(([key, value]) => (
         <section key={key} className="record-text">
           {texts.length > 1 || key !== "description" ? <h4>{labelOf(key)}</h4> : null}
           <FormattedText text={value} />

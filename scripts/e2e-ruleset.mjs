@@ -243,6 +243,10 @@ async function runRuleset(ruleset, plan) {
 
     // 13. The map shared; the player sees it.
     await step("13 the map shared with the player", async () => {
+      // The GM: the map on the table, shared (FG's Share), even with a player who closed it.
+      await page.bringToFront();
+      await closeWindows(page);
+      await page.click('[data-action="map-share"]');
       await plan.share?.(ctx);
       const playerSees = await waitFor(() => seat.evaluate(() => Boolean(document.querySelector(".map-view, [data-scene], canvas.map-canvas, .scene-overlay"))), 15000);
       check(playerSees, "the player's screen shows the map");
@@ -312,19 +316,24 @@ async function runRuleset(ruleset, plan) {
       }
       await page.click('button:has-text("Distribute")');
       await page.waitForTimeout(800);
-      await page.click('[role="tab"]:has-text("XP")');
-      await page.fill('[aria-label="XP"], .party-xp input[type="number"]', String(plan.xp ?? 100)).catch(async () => page.locator('input[type="number"]').first().fill(String(plan.xp ?? 100)));
-      await page.click('button:has-text("Award to the party")');
-      await page.waitForTimeout(800);
+      // Experience, where the game has it (Traveller has none: FG's MGT2 neither).
+      if (plan.xp !== null) {
+        await page.click('[role="tab"]:has-text("XP")');
+        await page.fill('[aria-label="XP"], .party-xp input[type="number"]', String(plan.xp ?? 100)).catch(async () => page.locator('input[type="number"]').first().fill(String(plan.xp ?? 100)));
+        await page.click('button:has-text("Award to the party")');
+        await page.waitForTimeout(800);
+      }
       const after = await tool("kraken_record_get", { id: ctx.character.id });
       check(coinTotal(after.data.coins) > coinsBefore, "the parcel's money reached the character", `${coinsBefore} -> ${coinTotal(after.data.coins)} ${JSON.stringify(after.data.coins)}`);
       if (ctx.parcelItems?.length) check(Object.keys(after.data.inventorylist ?? {}).length > itemsBefore, "the parcel's items reached the character");
-      check(Number(after.data.exp ?? 0) >= expBefore + (plan.xp ?? 100), "the experience reached the character", `${expBefore} -> ${after.data.exp}`);
+      if (plan.xp !== null) check(Number(after.data.exp ?? 0) >= expBefore + (plan.xp ?? 100), "the experience reached the character", `${expBefore} -> ${after.data.exp}`);
       // The player's sheet shows the experience.
       await seat.bringToFront();
       await seat.click('.sidebar [data-launch="characters"]').catch(() => undefined);
-      const shown = await seat.evaluate((value) => document.body.innerText.includes(String(value)), after.data.exp);
-      check(shown, "the player's sheet shows the experience", String(after.data.exp));
+      if (plan.xp !== null) {
+        const shown = await seat.evaluate((value) => document.body.innerText.includes(String(value)), after.data.exp);
+        check(shown, "the player's sheet shows the experience", String(after.data.exp));
+      }
       await ctx.shot(seat, "18-after");
       await closeWindows(page);
     });
@@ -359,7 +368,7 @@ async function waitFor(test, ms = 10000) {
   return null;
 }
 async function closeWindows(where) {
-  for (const button of await where.$$('[data-window] button[aria-label="Close"], [data-window] .window-close')) await button.click().catch(() => undefined);
+  for (const button of await where.$$('[data-window]:not([data-window="map"]) button[aria-label^="Close"]')) await button.click().catch(() => undefined);
 }
 function coinTotal(coins) {
   return Object.values(coins ?? {}).reduce((sum, coin) => sum + (Number(coin?.amount) || 0) * ({ pp: 10, gp: 1, gc: 1, ep: 0.5, sp: 0.1, cp: 0.01, cr: 1 }[String(coin?.name ?? "gp").toLowerCase()] ?? 1), 0);
@@ -371,6 +380,7 @@ function coinTotal(coins) {
 async function fillSheet(ctx) {
   const { seat, tool, check } = ctx;
   const filled = [];
+  const seen = [];
   const tabs = await seat.$$eval("[data-sheet-tab]", (list) => list.map((tab) => tab.getAttribute("data-sheet-tab")));
   for (const tab of tabs) {
     await seat.click(`[data-sheet-tab="${tab}"]`);
@@ -380,6 +390,7 @@ async function fillSheet(ctx) {
     );
     for (const field of fields) {
       if (/^Name$|search|filter|Add a language/i.test(field.label)) continue;
+      seen.push(field.label);
       if (field.value && field.value.trim()) continue;
       const text = `E2E ${field.label}`;
       const box = seat.locator(`[data-character] [aria-label="${field.label}"]`).first();
@@ -393,7 +404,7 @@ async function fillSheet(ctx) {
   const record = await tool("kraken_record_get", { id: ctx.character.id });
   const blob = JSON.stringify(record);
   const missing = filled.filter((label) => !blob.includes(`E2E ${label}`));
-  check(filled.length > 0, "there were fields to fill");
+  check(seen.length > 0, "the sheet has fields to fill", `${filled.length} of ${seen.length} were empty after the wizard`);
   check(missing.length === 0, "every field filled was saved", missing.join(", "));
   ctx.filled = filled;
 }

@@ -92,7 +92,8 @@
     "start": "electron .",
     "launch": "node scripts/launch.mjs",
     "exe": "npm run build && electron-builder --win nsis && node scripts/copy-exe.mjs",
-    "linux": "npm run build && electron-builder --linux AppImage deb"
+    "linux": "npm run build && electron-builder --linux AppImage deb",
+    "map-share-ui": "node scripts/verify-map-share-ui.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.4.0",

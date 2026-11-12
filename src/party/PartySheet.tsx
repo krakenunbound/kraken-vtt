@@ -29,7 +29,8 @@ export type PartyView = {
 };
 
 const ATTRIBUTES = ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"];
-const COINS = ["PP", "GP", "EP", "SP", "CP"];
+// A parcel's coins in the ruleset's money (FG's coin list): credits for Traveller (MCr and Cr, as FG's MGT2) and Apeira Astra, gold crowns for Descending Darkness.
+const coinsFor = (ruleset: string) => (ruleset === "Traveller" ? ["MCr", "Cr"] : ruleset === "Apeira Astra" ? ["Cr"] : ruleset === "Descending Darkness" ? ["GC"] : ["PP", "GP", "EP", "SP", "CP"]);
 const TABS = [
   { id: "main", label: "Main" },
   { id: "inventory", label: "Inventory" },
@@ -156,10 +157,10 @@ export function PartySheet({ session, compact = false }: { session: Session; com
             <div className="party-parcel">
               <h3>Parcel to hand out</h3>
               <div className="parcel-coins">
-                {COINS.map((coin) => (
+                {[...new Set([...coinsFor(session.ruleset), ...Object.keys(party.parcel.coins ?? {}).filter((coin) => Number(party.parcel.coins?.[coin]) > 0)])].map((coin) => (
                   <label key={coin}>
                     {coin}
-                    <input type="number" min={0} value={party.parcel.coins?.[coin] ?? 0} onChange={(event) => patch({ parcel: { coins: { [coin]: Math.max(0, Number(event.target.value) || 0) } } })} />
+                    <input type="number" min={0} data-parcel-coin={coin} aria-label={`Parcel ${coin}`} value={party.parcel.coins?.[coin] ?? 0} onChange={(event) => patch({ parcel: { coins: { [coin]: Math.max(0, Number(event.target.value) || 0) } } })} />
                   </label>
                 ))}
               </div>

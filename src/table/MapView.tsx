@@ -180,6 +180,7 @@ export type MapActions = {
   updateLight: (id: string, patch: Partial<SceneLightRecord>) => void;
   removeLight: (id: string) => void;
   ping: (x: number, y: number) => void;
+  shareMap?: () => void;
   draw: (points: number[], color: string | null, width: number) => void;
   eraseDrawing: (id: string) => void;
   clearDrawings: () => void;
@@ -2131,6 +2132,9 @@ function MapViewInner({
             <button type="button" className={editorOpen ? "tool on" : "tool"} data-action="map-editor" aria-pressed={editorOpen} aria-label="Edit map" title="Edit the map: line of sight (walls, doors, windows), lights, masks, paint, text, the grid and weather (FG's layer panel)" onClick={() => setEditorOpen(!editorOpen)}>
               <Icon name="walls" />
               <span className="tool-label">Edit map</span>
+            </button>
+            <button type="button" className="tool" data-action="map-share" aria-label="Share with players" title="Share with players: the map opens on every player's screen, even where it was closed (FG's Share)" onClick={() => actions.shareMap?.()}>
+              <Icon name="share" />
             </button>
             <button type="button" className={settingsOpen ? "tool on" : "tool"} data-action="scene-settings" aria-pressed={settingsOpen} aria-label="Scene" onClick={() => setSettingsOpen(!settingsOpen)} title="Scene: lighting, players, grid and weather">
               <Icon name="settings" />

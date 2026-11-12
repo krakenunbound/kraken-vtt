@@ -2010,6 +2010,13 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         return;
       }
 
+      // The GM shares the map (FG's Share on an image): it opens on every player's screen, closed or not.
+      if (msg.type === "map-share") {
+        if (client.role !== "dm" || !scene) return;
+        broadcast({ type: "map-share", name: scene.name });
+        return;
+      }
+
       if (msg.type === "ping") {
         const x = num(msg.x, NaN);
         const y = num(msg.y, NaN);
@@ -2165,6 +2172,12 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     setTriggers,
     // The GM's portraits and tokens (artLibrary.cjs), as the pickers show them.
     art: (kind) => (art ? art.list(kind) : []),
+    // The map shared: open on every player's screen (the GM's Share with players).
+    shareMap() {
+      if (!scene) throw new Error("No scene is on the table.");
+      broadcast({ type: "map-share", name: scene.name });
+      return { shared: scene.name };
+    },
     // A ping on the map at a square, as a GM's click would make.
     ping(col, row, from = "Agent") {
       if (!scene) throw new Error("No scene is on the table.");

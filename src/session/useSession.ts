@@ -344,6 +344,8 @@ export function useSession() {
   const [soundTriggers, setSoundTriggers] = useState<SoundTrigger[]>([]);
   const [options, setOptions] = useState<TableOptions>({ towerReveal: false, decal: "kraken", wallpaper: "", gmIcon: "", soundHidden: "combat", soundRepeat: 1 });
   const [pings, setPings] = useState<Ping[]>([]);
+  // How many times the GM has shared the map (each one opens the map window).
+  const [mapShared, setMapShared] = useState(0);
   const [notice, setNotice] = useState<string | null>(null);
   const [chat, setChat] = useState<ChatLine[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -487,6 +489,7 @@ export function useSession() {
           if (msg.type === "party" && msg.party) setParty(msg.party as import("../party/PartySheet").PartyView);
           if (msg.type === "combat" && msg.combat) setCombat(msg.combat as CombatView);
           if (msg.type === "options" && msg.options) setOptions(msg.options as TableOptions);
+          if (msg.type === "map-share") setMapShared((count) => count + 1);
           if (msg.type === "ping") {
             const ping = { id: ++pingCounter.current, x: Number(msg.x), y: Number(msg.y), from: String(msg.from ?? ""), color: String(msg.color ?? "#fff") };
             setPings((current) => [...current, ping].slice(-12));
@@ -1016,6 +1019,8 @@ export function useSession() {
   const setSight = useCallback((on: boolean) => send({ type: "sight", on }), [send]);
   const setLocked = useCallback((on: boolean) => send({ type: "lock", on }), [send]);
   const ping = useCallback((x: number, y: number) => send({ type: "ping", x, y }), [send]);
+  // The GM: the map opens on every player's screen.
+  const shareMap = useCallback(() => send({ type: "map-share" }), [send]);
 
   useEffect(() => {
     window.__kraken = {
@@ -1063,6 +1068,7 @@ export function useSession() {
     fgMaps,
     combat,
     pings,
+    mapShared,
     notice,
     chat,
     records,
@@ -1083,6 +1089,7 @@ export function useSession() {
     setSight,
     setLocked,
     ping,
+    shareMap,
     updateSettings,
     placeLight,
     draw,

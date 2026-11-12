@@ -734,10 +734,12 @@ const TOOLS = [
   {
     name: "kraken_map",
     description:
-      "The scene on the table: its grid, whether line of sight is on, every token (id, name, square col/row, size in squares, owner, faction, hidden, health) and every door (id, state 0 closed / 1 open / 2 locked, secret). Squares count from the top-left of the map, col across and row down.",
-    inputSchema: object({}),
-    run(_args, ctx) {
-      const { map } = needTable(ctx);
+      "The scene on the table: its grid, whether line of sight is on, every token (id, name, square col/row, size in squares, owner, faction, hidden, health) and every door (id, state 0 closed / 1 open / 2 locked, secret). Squares count from the top-left of the map, col across and row down. share: true shares the map with the players, as the GM's Share with players button (FG's Share): it opens on every player's screen, even where a player closed it.",
+    inputSchema: object({ share: { type: "boolean" } }),
+    run(args, ctx) {
+      const table = needTable(ctx);
+      const { map } = table;
+      if (args?.share) return out(table.shareMap());
       const scene = map.scene();
       if (!scene) return out({ scene: null });
       const view = map.viewFor({ role: "dm", name: "Agent" }, "");

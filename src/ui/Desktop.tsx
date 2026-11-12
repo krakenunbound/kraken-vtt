@@ -304,6 +304,14 @@ export function Desktop({
       windows.open("map", sceneName || "Map");
     }
   }, [mapOpenKey, sceneName]);
+  // The GM shared the map: it opens again, closed or not.
+  const sharedSeen = useRef(session.mapShared);
+  useEffect(() => {
+    if (session.mapShared === sharedSeen.current) return;
+    sharedSeen.current = session.mapShared;
+    if (scene) windows.open("map", sceneName || "Map");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session.mapShared]);
   // A player who holds no character is shown Character Selection on joining, as in FG.
   const offered = useRef(false);
   useEffect(() => {
