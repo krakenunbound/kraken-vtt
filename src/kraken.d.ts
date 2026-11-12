@@ -92,6 +92,7 @@ export type KrakenAgentCommand =
   | { kind: "leave" }
   | { kind: "open-adventure"; name: string; bytes: Uint8Array }
   | { kind: "scenes"; adventure?: string; scene?: string }
+  | { kind: "deck-plan"; ship: { id: string; name: string; data: Record<string, unknown> } }
   | { kind: "windows"; action: "list" | "open" | "close" | "popout" | "dock"; window?: string; record?: string }
   | { kind: "sidebar"; action: "list" | "state" | "fold" | "press"; state?: number; group?: string; folded?: boolean; entry?: string }
   | { kind: "dice-settings"; patch: DiceSettingsPatch };

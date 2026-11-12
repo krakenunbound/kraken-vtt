@@ -15,7 +15,9 @@ const rows = (node: unknown): [string, Row][] =>
   node && typeof node === "object" ? Object.entries(node as Record<string, unknown>).filter((entry): entry is [string, Row] => Boolean(entry[1]) && typeof entry[1] === "object") : [];
 const STATIONS = ["pilot", "engineer", "sensors", "captain"] as const;
 
-export function ShipsWindow({ session }: { session: Session }) {
+type OpenMaps = (bytes: Uint8Array, name: string) => Promise<unknown>;
+
+export function ShipsWindow({ session, openMaps }: { session: Session; openMaps?: OpenMaps }) {
   const gm = session.role === "dm";
   const ships = Object.values(session.records)
     .filter((record) => record.type === "starship")
@@ -68,19 +70,19 @@ export function ShipsWindow({ session }: { session: Session }) {
           </div>
         ) : null}
       </aside>
-      {current ? <ShipSheet key={current.id} session={session} ship={current} /> : null}
+      {current ? <ShipSheet key={current.id} session={session} ship={current} openMaps={openMaps} /> : null}
     </section>
   );
 }
 
-function ShipSheet({ session, ship }: { session: Session; ship: TableRecord }) {
+function ShipSheet({ session, ship, openMaps }: { session: Session; ship: TableRecord; openMaps?: OpenMaps }) {
   const gm = session.role === "dm";
   const me = session.players.find((seat) => seat.id === session.selfId)?.name ?? "";
   const data = ship.data as Row;
   const hull = (data.hull ?? {}) as Row;
   const crew = (data.crew ?? {}) as Record<string, string>;
   const criticals = (data.criticals ?? {}) as Record<string, number>;
-  const [range, setRange] = useState("Short");
+  const [rangeChoice, setRange] = useState("");
   const [targetId, setTargetId] = useState("");
   const [adding, setAdding] = useState("");
   const [problem, setProblem] = useState("");
@@ -97,6 +99,9 @@ function ShipSheet({ session, ship }: { session: Session; ship: TableRecord }) {
   const targets = session.combat.entries.filter((item) => item.ship && item.id !== entry?.id);
   const target = targets.find((item) => item.id === targetId) ?? targets[0];
   const left = num(hull.max) - num(hull.damage);
+  // With both ships' tokens on the map, the range is the map's (unless the GM picks a band).
+  const onMap = (recordId?: string | null) => Boolean(recordId) && session.map.tokens.some((token) => token.recordId === recordId);
+  const range = rangeChoice || (onMap(ship.id) && onMap(target?.recordId) ? "map" : "Short");
   // The players' ship goes on the tracker as a friend.
   const crewedByPlayers = [...Object.values(crew), ...rows(data.weapons).map(([, weapon]) => String(weapon.gunner ?? ""))].some((id) => Boolean(id) && Boolean(characters.find((who) => who.id === id)?.owner));
   const fire = (key: string) => {
@@ -122,6 +127,27 @@ function ShipSheet({ session, ship }: { session: Session; ship: TableRecord }) {
           {String(data.class ?? "")} · {num(data.tons)} tons · TL{num(data.tl)}
         </span>
         <span className="me-spacer" />
+        {gm && openMaps ? (
+          <button
+            type="button"
+            data-action="ship-deck-plans"
+            title="Its decks as maps, with walls and doors (the same each time: tokens placed on them stay)"
+            onClick={() => {
+              setProblem("");
+              void import("./deckRender")
+                .then(({ makeDeckBundle }) => makeDeckBundle({ id: ship.id, name: ship.name, data: ship.data as Record<string, unknown> }))
+                .then((made) => openMaps(made.bytes, made.name))
+                .catch((error) => setProblem(error instanceof Error ? error.message : String(error)));
+            }}
+          >
+            Deck plans
+          </button>
+        ) : null}
+        {gm && session.map.sceneId && !session.map.tokens.some((token) => token.recordId === ship.id) ? (
+          <button type="button" data-action="ship-to-map" title="Its token on the open map (by its tonnage: 1 to 3 squares)" onClick={() => session.placeToken(ship.id)}>
+            On the map
+          </button>
+        ) : null}
         {gm && !entry ? (
           <button type="button" data-action="ship-to-tracker" onClick={() => session.ct("add", { recordId: ship.id, faction: crewedByPlayers ? "friend" : "foe" })}>
             To the tracker
@@ -185,6 +211,7 @@ function ShipSheet({ session, ship }: { session: Session; ship: TableRecord }) {
               ))}
             </select>{" "}
             <select className="cc-field" value={range} aria-label="Range" onChange={(event) => setRange(event.target.value)}>
+              <option value="map">By the map</option>
               {(RANGES as [string, number][]).map(([band, dm]) => (
                 <option key={band} value={band}>
                   {band} {dm ? signed(dm) : ""}

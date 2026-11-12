@@ -37,6 +37,10 @@ export const RANGES = [
 ];
 export const rangeIndex = (band) => Math.max(0, RANGES.findIndex(([name]) => name.toLowerCase() === String(band ?? "").toLowerCase()));
 export const rangeDm = (band) => RANGES[rangeIndex(band)][1];
+// On a space map, the squares between two ships' tokens as a band (a square
+// is a thousand kilometres or so: 0 alongside, then 1, 3, 8, 20, 50, beyond).
+export const RANGE_SQUARES = [0, 1, 3, 8, 20, 50];
+export const bandForSquares = (squares) => RANGES[Math.min(6, RANGE_SQUARES.filter((limit) => squares > limit).length)][0];
 
 // Ship weapons: name, damage, longest range, DM, AP, traits.
 export const WEAPONS = [

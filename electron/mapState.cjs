@@ -870,7 +870,9 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       }
       if (player && state.locked[scene.id]) throw new Error("The GM has locked token movement.");
       if (tokensHere().length >= MAX_TOKENS) throw new Error("This scene has too many tokens.");
-      const squares = Math.min(10, Math.max(0.25, num(input.squares, record ? geometry.tokenSquares(record.data?.space, units()) : 1)));
+      // A starship's by its tonnage; anyone else's by its space.
+      const sized = record?.type === "starship" ? require("./starships.cjs").shipSquares(record.data?.tons) : record ? geometry.tokenSquares(record.data?.space, units()) : 1;
+      const squares = Math.min(10, Math.max(0.25, num(input.squares, sized)));
       let point;
       if (Number.isFinite(input.col) && Number.isFinite(input.row)) point = squareCenter(input.col, input.row, squares);
       else if (Number.isFinite(input.x) && Number.isFinite(input.y)) point = { x: input.x, y: input.y };

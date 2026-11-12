@@ -885,6 +885,12 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     if (seat.role !== "dm" && (!gunner || gunner.owner !== seat.name)) throw new Error("Only the weapon's gunner (or the GM) fires it.");
     const target = targetId ? find(targetId) : targetsOf(source)[0];
     if (!target) throw new Error("Target a ship first.");
+    // "By the map": the two ships' tokens, the squares between them as a band.
+    if (!range || String(range).toLowerCase() === "map") {
+      const squares = shipDistance(source, target);
+      if (squares === null) throw new Error("Both ships need tokens on the map for its range (or give the range band).");
+      range = rs.bandForSquares(squares);
+    }
     if (rs.rangeIndex(range) > rs.rangeIndex(weapon.range)) throw new Error(`${weapon.name} reaches ${weapon.range} at most.`);
     const crew = await ships.stationDm(table(), "gunner", weapon.gunner);
     const band = rs.RANGES[rs.rangeIndex(range)][0];
@@ -930,6 +936,19 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     return { hit: true, total: rolled.total, effect, damage: amount, critical };
   }
 
+  // The squares between two creatures' tokens on the open map (null: one has none).
+  function shipDistance(a, b) {
+    const map = table().map;
+    if (!map?.scene?.()) return null;
+    const tokens = map.tokens();
+    const tokenOf = (entry) => tokens.find((token) => token.id === entry.tokenId) ?? tokens.find((token) => entry.recordId && token.recordId === entry.recordId);
+    const [one, two] = [tokenOf(a), tokenOf(b)];
+    if (!one || !two) return null;
+    const [p, q] = [map.squareOf(one), map.squareOf(two)];
+    // Edge to edge: a big ship's token is several squares across.
+    const gap = (from, size, to, other) => Math.max(0, Math.max(to - (from + size), from - (to + other)));
+    return Math.max(gap(p.col, one.squares ?? 1, q.col, two.squares ?? 1), gap(p.row, one.squares ?? 1, q.row, two.squares ?? 1));
+  }
   function shipView(ship, seat) {
     const data = ship.data ?? {};
     const nameOf = (id) => (id ? table().records.get(id)?.name ?? "" : "");

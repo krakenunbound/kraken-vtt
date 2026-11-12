@@ -34,7 +34,9 @@ On the start screen choose **My Campaigns**.
   - In *Traveller* and *Apeira Astra*, **Starships** (sidebar) holds the
     campaign's ships: make one from a design, let the crew take stations with
     their characters, put the ships on the tracker, and the gunners fire from
-    the ship's sheet (target, range, Fire).
+    the ship's sheet (target, range, Fire). **On the map** puts a ship's
+    token on the open map (the range is then read from the map), and
+    **Deck plans** opens its decks as maps with walls and doors.
   - *Worldbuilding* has no rules: maps, tokens, chat and dice for any game.
     It reads the books of games Kraken has no rules for yet (Pathfinder,
     say): their pages, story and maps with walls.

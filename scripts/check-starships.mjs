@@ -8,6 +8,7 @@
 import "./loopback.mjs";
 import { createRequire } from "node:module";
 import * as s from "../shared/starships/rules.mjs";
+import { layout } from "../shared/starships/deckplan.mjs";
 
 const require = createRequire(import.meta.url);
 const { createTableServer } = require("../electron/tableServer.cjs");
@@ -24,6 +25,32 @@ const trader = s.fromDesign("Rusty Lark", "Free Trader");
 assert(trader.data.hull.max === 80 && trader.data.armour === 2 && trader.data.thrust === 1 && Object.values(trader.data.weapons)[0].name === "Pulse Laser" && trader.data.fireControl === 0, `a Free Trader: ${JSON.stringify(trader.data)}`);
 const hit = s.derive({ ...trader.data, criticals: { armour: 1, mdrive: 1, sensors: 2 } });
 assert(hit.armour === 1 && hit.thrust === 0 && hit.fireControl === -2, "criticals: armour -1, thrust -1, sensors -2 to fire control");
+
+// Range from the map: the squares between two ships' tokens.
+assert([0, 1, 2, 3, 5, 8, 15, 20, 40, 50, 80].map(s.bandForSquares).join() === "Adjacent,Close,Short,Short,Medium,Medium,Long,Long,Very Long,Very Long,Distant", "bands by squares");
+// Deck plans: every design's decks, the same each time; every room but a sealed tank has a door; the lift on the same square of every deck; an airlock opens to space.
+for (const design of s.DESIGNS.map((item) => item.class)) {
+  const plan = layout(s.fromDesign("Plan", design));
+  assert(JSON.stringify(plan) === JSON.stringify(layout(s.fromDesign("Plan", design))), `${design}: the same plan each time`);
+  for (const deck of plan.decks) {
+    const doors = deck.walls.filter((wall) => wall.door);
+    for (const room of deck.rooms) {
+      if (room.kind === "fuel" || room.kind === "lift" || (room.kind === "bridge" && design === "Fighter")) continue;
+      const touches = doors.some((wall) => wall.x1 >= room.x && wall.x1 <= room.x + room.w && wall.y1 >= room.y && wall.y1 <= room.y + room.h);
+      assert(touches, `${design} ${deck.name}: ${room.name} has a door`);
+    }
+    for (const fuel of deck.rooms.filter((room) => room.kind === "fuel")) assert(!doors.some((wall) => wall.x1 > fuel.x && wall.x1 < fuel.x + fuel.w && (wall.y1 === fuel.y || wall.y1 === fuel.y + fuel.h)), `${design}: the fuel tank is sealed`);
+    assert(deck.walls.length > 8, `${design} ${deck.name}: walls`);
+  }
+  if (plan.decks.length > 1) {
+    const lifts = plan.decks.map((deck) => deck.rooms.find((room) => room.kind === "lift"));
+    assert(lifts.every((lift) => lift && lift.x === lifts[0].x && lift.y === lifts[0].y), `${design}: the lift on the same square of every deck`);
+  }
+  const lock = plan.decks.flatMap((deck) => deck.rooms).find((room) => room.kind === "airlock");
+  if (design !== "Fighter") assert(lock?.outer, `${design}: an airlock with an outer door`);
+}
+const traderPlan = layout(s.fromDesign("Rusty Lark", "Free Trader"));
+assert(traderPlan.decks.length === 2 && traderPlan.decks[0].rooms.filter((room) => room.kind === "stateroom").length === 9 && traderPlan.decks[0].rooms.some((room) => room.kind === "turret") && traderPlan.decks[1].rooms.some((room) => room.kind === "cargo"), "a trader: two decks, nine staterooms (crew and passengers), a turret, a hold");
 
 for (const ruleset of ["Traveller", "Apeira Astra"]) {
   const server = createTableServer({ ruleset });
@@ -144,5 +171,5 @@ for (const ruleset of ["Traveller", "Apeira Astra"]) {
   await tool("kraken_combat", { action: "end", removeNpcs: true });
   await server.close?.();
 }
-console.log("ok starships: hull points, range bands, Kraken's six designs, criticals off armour, thrust and fire control; in Traveller and Apeira Astra: stations taken (a player's only with their own character), a missile rack added, ships on the tracker, initiative by pilot and Thrust, gunnery against 8 with the Effect, armour off the damage, out of range, a hull critical's more damage, a weapon critical, a miss with no gunner, destroyed at 0 hull");
+console.log("ok starships: hull points, range bands (and by squares on the map), every design's deck plans (a door to every room, sealed tanks, the lift aligned, an airlock to space), Kraken's six designs, criticals off armour, thrust and fire control; in Traveller and Apeira Astra: stations taken (a player's only with their own character), a missile rack added, ships on the tracker, initiative by pilot and Thrust, gunnery against 8 with the Effect, armour off the damage, out of range, a hull critical's more damage, a weapon critical, a miss with no gunner, destroyed at 0 hull");
 process.exit(0);

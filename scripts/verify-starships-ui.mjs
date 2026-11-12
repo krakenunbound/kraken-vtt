@@ -50,6 +50,8 @@ async function tool(name, args = {}) {
 const failures = [];
 page.on("pageerror", (error) => failures.push(error.message));
 const chat = (where, text) => where.waitForFunction((wanted) => document.body.textContent.includes(wanted), text, { timeout: 10000 });
+// A token's picture (its art URL names the art id).
+const agentArt = (tokens, recordId) => decodeURIComponent(String(tokens.find((token) => token.recordId === recordId)?.art ?? ""));
 const until = async (test, what) => {
   for (let wait = 0; wait < 60; wait++) {
     const value = await test();
@@ -136,12 +138,38 @@ try {
   await seat.click(`[data-ship="${gull.id}"]`);
   assert(await seat.$$eval('[data-action="ship-fire"]', (buttons) => buttons.every((button) => button.disabled)), "not the player's guns");
 
+  // Deck plans: the GM's button draws the Lark's two decks as maps, with walls and doors.
+  await page.click(`[data-ship="${lark.id}"]`);
+  await page.click('[data-action="ship-deck-plans"]');
+  const deck = await until(async () => {
+    const shown = (await tool("kraken_map")).scene;
+    return shown && shown.id === `deck-${lark.id}-1` ? shown : null;
+  }, "the deck plan on the table");
+  const mapView = await tool("kraken_map");
+  assert(deck.walls > 40 && mapView.doors.length >= 10 && deck.grid.size === 100, `Deck 1 with its walls and doors: ${JSON.stringify(deck)} doors ${mapView.doors.length}`);
+  // (The Starships window set aside a moment, for a picture of the plan.)
+  await page.evaluate(() => document.querySelectorAll("[data-ships]").forEach((element) => ((element.closest("[data-window]") ?? element).style.visibility = "hidden")));
+  await new Promise((resolve) => setTimeout(resolve, 600));
+  await page.screenshot({ path: path.join(tmpdir(), "kraken-ships-deckplan.png") });
+  await page.evaluate(() => document.querySelectorAll("[data-ships]").forEach((element) => ((element.closest("[data-window]") ?? element).style.visibility = "")));
+  // Ship tokens: the GM's On the map; the Corsair by the agent, 6 squares off. Kraken's pictures, sized by tonnage.
+  await page.click('[data-action="ship-to-map"]');
+  const larkToken = await until(async () => (await tool("kraken_map")).tokens.find((token) => token.recordId === lark.id), "the Lark's token");
+  const placed = await tool("kraken_starship", { action: "place", id: gull.id, col: Math.max(0, larkToken.col + larkToken.squares + 6), row: larkToken.row });
+  const tokens = (await tool("kraken_map")).tokens;
+  const gullToken = tokens.find((token) => token.recordId === gull.id);
+  assert(larkToken.squares === 2 && gullToken.squares === 3 && /Ships/.test(String(agentArt(tokens, lark.id))) && /Ships/.test(String(agentArt(tokens, gull.id))), `tokens: ${JSON.stringify({ larkToken, gullToken, placed })}`);
+  // Firing by the map: the gap is 6 squares: Medium (no DM): 4 + 4 + 5 = 13, Effect +5.
   await seat.click(`[data-ship="${lark.id}"]`);
+  assert((await seat.inputValue('[aria-label="Range"]')) === "map", "both ships on the map: the range is the map's");
+  await tool("kraken_dice_force", { values: [4, 4, 5, 5] });
+  await seat.click(`[data-ship-weapon="${laserKey}"] [data-action="ship-fire"]`);
+  await chat(page, "[Medium] [HIT 13 vs 8, Effect +5]");
   await seat.screenshot({ path: path.join(tmpdir(), "kraken-ships-player.png") });
   await page.click(`[data-ship="${gull.id}"]`);
   await page.screenshot({ path: path.join(tmpdir(), "kraken-ships-gm.png") });
   assert(failures.length === 0, `page errors: ${failures.join(" | ")}`);
-  console.log(`ok starships ui: the GM makes a Free Trader and a Corsair in Starships; a test player takes the laser with their own Traveller (not someone else's); both ships on the tracker (the crew's a friend); the player's shot hits (14, Effect +6) for 11 off the Corsair's hull and an armour critical. ${path.join(tmpdir(), "kraken-ships-player.png")}`);
+  console.log(`ok starships ui: the GM makes a Free Trader and a Corsair in Starships; a test player takes the laser with their own Traveller (not someone else's); both ships on the tracker (the crew's a friend); the player's shot hits (14, Effect +6) for 11 off the Corsair's hull and an armour critical; the Lark's deck plans open as a map with walls and doors; both ships' tokens (Kraken's pictures, 2 and 3 squares) and a shot at Medium range read from the map. ${path.join(tmpdir(), "kraken-ships-player.png")}`);
 } finally {
   await browser?.close();
   child.kill();

@@ -507,8 +507,8 @@ const TOOLS = [
   {
     name: "kraken_starship",
     description:
-      "Starships in a Traveller or Apeira Astra campaign (Kraken's own designs and ship combat). action designs (the designs: class, tons, armour, thrust, jump, weapons), list (the campaign's ships), create (name, design: Courier, Free Trader, Salvage Tug, Patrol Cutter, Fighter, Corsair; visibility all or gm), edit (id, changes [{path, value}]: name, class, notes, cargo, tons, hull.max, hull.damage, armour, thrust, jump, sensors, computer, fuel, criticals.<system> (sensors, power, fuel, weapon, armour, hull, mdrive, cargo, jdrive, crew, computer: severity), weapons.add {name: Pulse Laser, Beam Laser, Particle Beam, Missile Rack, Railgun Barbette, Mass Driver; mount}, weapons.<key> null (remove), weapons.<key>.disabled, weapons.<key>.gunner (a character's id), crew.pilot / crew.engineer / crew.sensors / crew.captain (a character's id)). A ship goes on the tracker with kraken_combat add (recordId); it fights with kraken_combat ship-attack (id: the ship's entry, weapon: its weapons key, targetId: the ship it fires at, range: Adjacent ... Distant): 2d6 + the gunner's task DM (Traveller: Gunner (Turret) + DEX; Apeira Astra: Gunnery + Intellect; no gunner -3) + the weapon's DM + fire control (sensors + computer) + the range's DM, against 8; damage the weapon's dice + Effect - armour (less AP) off the hull; an Effect of 6+ that does damage is a critical hit (2d6: the system; severity up). Its initiative is 2d6 + the pilot's Pilot task DM + Thrust.",
-    inputSchema: object({ action: { type: "string", enum: ["designs", "list", "create", "edit"] }, id: string("edit: the ship's record id"), name: string("create: the ship's name"), design: string("create: the design"), visibility: { type: "string", enum: ["all", "gm"] }, changes: { type: "array", items: { type: "object" } } }, ["action"]),
+      "Starships in a Traveller or Apeira Astra campaign (Kraken's own designs and ship combat). action designs (the designs: class, tons, armour, thrust, jump, weapons), list (the campaign's ships), create (name, design: Courier, Free Trader, Salvage Tug, Patrol Cutter, Fighter, Corsair; visibility all or gm), edit (id, changes [{path, value}]: name, class, notes, cargo, tons, hull.max, hull.damage, armour, thrust, jump, sensors, computer, fuel, criticals.<system> (sensors, power, fuel, weapon, armour, hull, mdrive, cargo, jdrive, crew, computer: severity), weapons.add {name: Pulse Laser, Beam Laser, Particle Beam, Missile Rack, Railgun Barbette, Mass Driver; mount}, weapons.<key> null (remove), weapons.<key>.disabled, weapons.<key>.gunner (a character's id), crew.pilot / crew.engineer / crew.sensors / crew.captain (a character's id)). A ship goes on the tracker with kraken_combat add (recordId); it fights with kraken_combat ship-attack (id: the ship's entry, weapon: its weapons key, targetId: the ship it fires at, range: Adjacent ... Distant): 2d6 + the gunner's task DM (Traveller: Gunner (Turret) + DEX; Apeira Astra: Gunnery + Intellect; no gunner -3) + the weapon's DM + fire control (sensors + computer) + the range's DM, against 8; damage the weapon's dice + Effect - armour (less AP) off the hull; an Effect of 6+ that does damage is a critical hit (2d6: the system; severity up). Its initiative is 2d6 + the pilot's Pilot task DM + Thrust. place (id, col, row) puts its token on the open map (Kraken's picture of the design, 1 to 3 squares by tonnage); ship-attack range map reads the range from the two tokens. deck-plan (id) draws the ship's decks as maps (bridge, staterooms, galley, turrets, airlock, holds, engineering, a lift between decks; walls and doors) and opens them in the GM's Kraken.",
+    inputSchema: object({ action: { type: "string", enum: ["designs", "list", "create", "edit", "deck-plan", "place"] }, id: string("edit, deck-plan, place: the ship's record id"), name: string("create: the ship's name"), design: string("create: the design"), visibility: { type: "string", enum: ["all", "gm"] }, changes: { type: "array", items: { type: "object" } }, col: number("place: the token's left square"), row: number("place: its top square") }, ["action"]),
     async run(args, ctx) {
       const agent = needTable(ctx);
       const ships = require("../starships.cjs");
@@ -521,6 +521,13 @@ const TOOLS = [
       }
       const record = agent.records.get(String(args.id ?? ""));
       if (!record || record.type !== "starship") throw new Error("No such ship.");
+      // Its deck plans, drawn by the GM's Kraken and opened as a map (one scene a deck).
+      if (args.action === "deck-plan") return out(await ctx.ui({ kind: "deck-plan", ship: { id: record.id, name: record.name, data: record.data } }, 60000));
+      // Its token on the open map (sized by its tonnage).
+      if (args.action === "place") {
+        const token = agent.map.place({ recordId: record.id, ...(Number.isFinite(args.col) ? { col: args.col, row: args.row } : {}) }, agent.seat);
+        return out({ token: { id: token.id, squares: token.squares, ...agent.map.squareOf(token) } });
+      }
       const updated = await ships.editShip(agent, record, args.changes, agent.seat);
       return out({ id: updated.id, name: updated.name, data: updated.data });
     },
@@ -842,7 +849,7 @@ const TOOLS = [
       entryRoll: number("krit-test, 2E: the Critical Hit / Fumble entry table's roll (5-6: a complication)"),
       attackKind: { type: "string", enum: ["slashing", "piercing", "bludgeoning", "missile", "natural"], description: "krit-test, 2E: which kind's table" },
       undead: { type: "array", items: { type: "string" }, description: "turn-undead: the undead entries' ids (default: the turner's targets, else every undead foe)" },
-      range: { type: "string", enum: ["Adjacent", "Close", "Short", "Medium", "Long", "Very Long", "Distant"], description: "ship-attack: the range band" },
+      range: { type: "string", enum: ["map", "Adjacent", "Close", "Short", "Medium", "Long", "Very Long", "Distant"], description: "ship-attack: the range band, or map: from the squares between the two ships' tokens (0 Adjacent, 1 Close, up to 3 Short, 8 Medium, 20 Long, 50 Very Long, more Distant)" },
       x: number("target-area: scene pixels across"),
       y: number("target-area: scene pixels down"),
       radius: number("target-area: feet (Sleep: 15 ft radius, a fireball 20)"),

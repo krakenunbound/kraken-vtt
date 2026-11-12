@@ -163,6 +163,13 @@ export function App() {
         return live.current.openBytes(new Uint8Array(command.bytes), command.name);
       }
       if (command.kind === "scenes") return live.current.scenes(command.adventure, command.scene);
+      if (command.kind === "deck-plan") {
+        // A ship's deck plans, drawn here and opened as a map (its decks the scenes).
+        if (!current.connected || current.role !== "dm") throw new Error("Not hosting.");
+        const { makeDeckBundle } = await import("./ships/deckRender");
+        const made = await makeDeckBundle(command.ship);
+        return live.current.openBytes(made.bytes, made.name);
+      }
       return agentCommands.run(command);
     });
   }, []);

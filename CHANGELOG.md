@@ -4,6 +4,22 @@ What changed in each release of Kraken VTT. Downloads are on the
 [Releases](https://github.com/krakenunbound/kraken-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
+## 0.1.0-alpha.70: Ships on the map, and their deck plans
+
+- Ship tokens: each of Kraken's six designs has its own top-down picture, and
+  a new ship takes its design's. **On the map** (the ship's sheet) puts its
+  token on the open map, 1 to 3 squares by its tonnage.
+- Range from the map: with both ships' tokens on the map, a shot's range band
+  is read from the squares between them (alongside, then 1, 3, 8, 20, 50,
+  beyond); the GM can still pick a band.
+- Deck plans: **Deck plans** (the ship's sheet) draws the ship's decks as maps
+  and opens them: the bridge forward, staterooms for the crew (and a trader's
+  passengers), the galley, a medbay, turrets for its guns, armoury and cells
+  on warships, an airlock with an outer door, holds, small craft and vehicle
+  bays, sealed fuel tanks, engineering aft, and a lift on the same square of
+  every deck; with their walls and doors, 1.5 m squares. The same ship gets
+  the same plans every time, so tokens placed on them stay.
+
 ## 0.1.0-alpha.69: Traveller's lifepath
 
 - The Traveller wizard is now the game's own character creation, term by

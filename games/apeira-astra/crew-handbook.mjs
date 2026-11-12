@@ -166,7 +166,9 @@ In Kraken, target a creature (Ctrl+click its token) and use the weapon's attack 
 
 Its crew take **stations**: the **pilot** at the helm, a **gunner** at each weapon, someone on **sensors**, an **engineer**, the **captain**. In Kraken, open **Starships** in the sidebar and take a station with your character.
 
-The GM has six ready designs: the **Courier**, the **Free Trader**, the **Salvage Tug**, the **Patrol Cutter**, the **Fighter** and the **Corsair**.`,
+The GM has six ready designs: the **Courier**, the **Free Trader**, the **Salvage Tug**, the **Patrol Cutter**, the **Fighter** and the **Corsair**.
+
+On the map, a ship has its own token, and its **deck plans** open as maps: bridge, staterooms, galley, turrets, airlock, holds and engineering, with their walls and doors.`,
             },
             {
               name: "Ship Combat",

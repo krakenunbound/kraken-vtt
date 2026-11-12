@@ -18,7 +18,10 @@ async function createShip(table, { name, design = "Free Trader", visibility = "a
   const rules = await rulesShips();
   if (!rules.designByName(design)) throw new Error(`No design ${design}: ${rules.DESIGNS.map((item) => item.class).join(", ")}.`);
   const built = rules.fromDesign(name, design);
-  return table.records.create({ type: "starship", name: built.name, visibility: ["gm", "all"].includes(visibility) ? visibility : "all", data: built.data }, table.seat);
+  // Its token: Kraken's picture of the design (games/tokens/Ships).
+  const art = typeof table.art === "function" ? (table.art("token") ?? []).find((item) => item.name.toLowerCase() === `ships ${String(design).toLowerCase()}`) : null;
+  const data = art ? { ...built.data, token: art.id } : built.data;
+  return table.records.create({ type: "starship", name: built.name, visibility: ["gm", "all"].includes(visibility) ? visibility : "all", data }, table.seat);
 }
 
 // What the ship's sheet may change. The GM: everything here; a player: a
@@ -98,4 +101,7 @@ async function stationDm(table, station, characterId) {
   return { dm: modifier, label: `${who.name}'s ${plan[0]}`, who };
 }
 
-module.exports = { rulesShips, createShip, editShip, stationDm, isShip, shipsRuleset };
+// A ship's token size: a fighter or a courier 1 square, a trader 2, 300 tons and up 3.
+const shipSquares = (tons) => (Number(tons) >= 300 ? 3 : Number(tons) >= 150 ? 2 : 1);
+
+module.exports = { rulesShips, createShip, editShip, stationDm, isShip, shipsRuleset, shipSquares };

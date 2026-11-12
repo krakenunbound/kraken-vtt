@@ -499,7 +499,7 @@ export function Desktop({
               {item.kind === "decals" ? <DecalPicker session={session} onClose={() => windows.close(item.key)} /> : null}
               {item.kind === "wallpapers" ? <DecalPicker session={session} kind="wallpaper" onClose={() => windows.close(item.key)} /> : null}
               {item.kind === "krits" ? <KritsWindow session={session} /> : null}
-              {item.kind === "ships" ? <ShipsWindow session={session} /> : null}
+              {item.kind === "ships" ? <ShipsWindow session={session} openMaps={openMaps} /> : null}
               {item.kind === "library" ? <LibraryWindow session={session} openMaps={openMaps} /> : null}
               {item.kind === "gmicons" ? <DecalPicker session={session} kind="gmicon" onClose={() => windows.close(item.key)} /> : null}
             </FloatingWindow>
