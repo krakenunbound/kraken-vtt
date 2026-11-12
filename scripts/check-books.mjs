@@ -38,11 +38,12 @@ assert(text.includes("<b>guards</b>") && text.includes('<blockquote class="frame
 assert(!/<script/i.test(text) && text.includes("&lt;script&gt;"), "no script gets through; its text is escaped");
 assert(text.includes('data-page="inn"') && text.includes('data-file="images/keep.png"'), "links go to a page and to a picture");
 
-// Worldbuilding (no rules) takes only the books for any game, never another game's.
+// Worldbuilding (no rules) takes the books for any game and for games Kraken has no rules for, never another of Kraken's games'.
 {
   const { fitsRuleset } = require("../electron/books.cjs");
   const fits = (ruleset) => list.filter((item) => fitsRuleset(item, ruleset)).map((item) => item.id).sort().join();
   assert(fits("Worldbuilding") === "Not A Book", `Worldbuilding: only any game's (${fits("Worldbuilding")})`);
+  assert(fitsRuleset({ ruleset: "2E" }, "Worldbuilding") && fitsRuleset({ kraken: "2E", ruleset: "2E" }, "Worldbuilding") && !fitsRuleset({ ruleset: "2E" }, "Castles & Crusades") && !fitsRuleset({ kraken: "D&D 3.5E", ruleset: "3.5E" }, "Worldbuilding"), "a game Kraken has no rules for (AD&D 2E) is read in Worldbuilding, not elsewhere; a played game's book is not");
   assert(fits("Castles & Crusades") === "Not A Book,Test Handbook,Test Keep", `C&C: its own and any game's (${fits("Castles & Crusades")})`);
 }
 const server = createTableServer({ books, ruleset: "Castles & Crusades" });

@@ -17,6 +17,8 @@ On the start screen choose **My Campaigns**.
     content: a 3.5E campaign takes your 3.5E Player's Handbook's classes,
     races, feats, spells and gear, and your Monster Manual's creatures.
   - *Worldbuilding* has no rules: maps, tokens, chat and dice for any game.
+    It reads the books of games Kraken has no rules for yet (AD&D 2E, say):
+    their pages, story and maps with walls.
 - Campaigns are saved as you play, in Kraken's data folder
   (`%APPDATA%\kraken-vtt`).
 

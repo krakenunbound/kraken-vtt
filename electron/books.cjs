@@ -19,7 +19,9 @@ const PICTURES = /\.(png|webp|jpe?g|gif)$/i;
 
 // Which FG rulesets' modules fit a Kraken campaign's ruleset: the ruleset
 // decides the books. A module for "Any" (or CoreRPG, or none named) fits every
-// campaign; Worldbuilding (no rules) takes only those, never another game's.
+// campaign; Worldbuilding (no rules) takes those, and the books of games
+// Kraken has no rules for yet (AD&D 2E, Pathfinder...: their pages, story and
+// maps), never the books of another of Kraken's games.
 const FG_RULESETS = {
   "Castles & Crusades": ["SiegeCore", "CnCRPG"],
   // FG's 5E ruleset's modules (the SRD 5.2.1's player book, bestiary, magic items).
@@ -32,9 +34,14 @@ const FG_RULESETS = {
   Worldbuilding: [],
 };
 const ANY = new Set(["", "any", "corerpg"]);
+const PLAYED = new Set(Object.entries(FG_RULESETS).flatMap(([name, fg]) => (name === "Worldbuilding" ? [] : [name, ...fg])).map((name) => name.toLowerCase()));
 function fitsRuleset(info, ruleset) {
   // A Kraken pack says which Kraken ruleset it is for.
-  if (info?.kraken) return info.kraken === "Any" || info.kraken === ruleset;
+  if (info?.kraken) return info.kraken === "Any" || info.kraken === ruleset || (ruleset === "Worldbuilding" && !PLAYED.has(info.kraken.toLowerCase()) && !PLAYED.has(String(info.ruleset ?? "").toLowerCase()));
+  if (ruleset === "Worldbuilding") {
+    const theirs = String(info.ruleset ?? "").toLowerCase();
+    return ANY.has(theirs) || !PLAYED.has(theirs);
+  }
   const wanted = FG_RULESETS[ruleset] ?? [String(ruleset ?? "")];
   const theirs = String(info.ruleset ?? "").toLowerCase();
   return ANY.has(theirs) || wanted.some((name) => name.toLowerCase() === theirs);

@@ -4,7 +4,7 @@ What changed in each release of Kraken VTT. Downloads are on the
 [Releases](https://github.com/krakenunbound/kraken-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
-## 0.1.0-alpha.62: Kraken packs and D&D 3.5E
+## 0.1.0-alpha.63: Kraken packs and D&D 3.5E
 
 **Kraken packs: your books without Fantasy Grounds**
 
@@ -17,6 +17,9 @@ full log of the work is in [PLAN.md](PLAN.md).
 - Kraken reads a pack anywhere it reads a book: the Books window, activation,
   the Library, story, encounters and maps. If the FG module is newer than its
   pack, the module is read until you make the pack again.
+
+- A Worldbuilding campaign reads the books of games Kraken has no rules for
+  yet (AD&D 2E, Pathfinder...): their pages, story and maps with walls.
 
 **D&D 3.5E**
 
