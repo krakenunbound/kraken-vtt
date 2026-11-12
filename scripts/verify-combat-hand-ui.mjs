@@ -103,13 +103,18 @@ try {
   await seat.click('button[type="submit"]');
   await seat.waitForSelector(".sidebar");
   await seat.click('[data-action="new-character"]');
+  // The 5E wizard (FG's tabs): a dwarf fighter, the standard array, the class's kit A; the art on Commit.
+  await seat.waitForSelector('[data-wizard="dnd5e"]');
+  await seat.click('[data-wizard="dnd5e"] [data-class="Fighter"]');
+  await seat.click('[data-wizard-tab="species"]');
+  await seat.click('[data-wizard="dnd5e"] [data-species="Dwarf"]');
+  await seat.click('[data-wizard-tab="abilities"]');
+  await seat.selectOption('[aria-label="Ability method"]', "Standard Array");
+  await seat.click('[data-wizard-tab="equipment"]');
+  await seat.click('[data-kit="class:A"]');
+  await seat.click('[data-wizard-tab="commit"]');
   await seat.waitForSelector('[data-wizard="dnd5e"] [data-art-choice]');
   await seat.fill('[aria-label="Character name"]', "Brunhild");
-  await seat.selectOption('[aria-label="Species"]', "Dwarf");
-  await seat.selectOption('[aria-label="Class"]', "Fighter");
-  for (const [stat, score] of [["strength", 16], ["dexterity", 12], ["constitution", 15], ["intelligence", 8], ["wisdom", 13], ["charisma", 10]]) await seat.fill(`[aria-label="${stat} score"]`, String(score));
-  await seat.check('[data-wizard-skill="perception"]');
-  await seat.check('[data-wizard-skill="survival"]');
   await seat.waitForFunction(() => document.querySelector('[data-action="choose-portrait"] img, [data-action="choose-portrait"] video'), null, { timeout: 10000 }).catch(() => undefined);
   const offered = await seat.$('[data-action="choose-portrait"] img, [data-action="choose-portrait"] video');
   await seat.click('[data-action="wizard-finish"]');

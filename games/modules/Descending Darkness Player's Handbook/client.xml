@@ -23,9 +23,10 @@
 					<text type="string">Choose 2: Acrobatics, Athletics, History, Insight, Intimidation, Perception, Survival</text>
 				</skills>
 			</proficiencies>
-			<startingequipment type="string">Chain hauberk, longsword, shield, light crossbow and 20 bolts, a delver's pack.</startingequipment>
+			<startingequipment type="string">Choose A or B: (A) Chain hauberk, longsword, shield, light crossbow and 20 bolts, a delver's pack; or (B) 135 gc.</startingequipment>
 			<startingequipmentlist>
 				<id-00001>
+					<option type="string">Option 1</option>
 					<items>
 						<id-00001>
 							<name type="string">Chain Hauberk</name>
@@ -173,6 +174,10 @@
 						</id-00013>
 					</items>
 				</id-00001>
+				<id-00002>
+					<option type="string">Option 2</option>
+					<wealth type="number">135</wealth>
+				</id-00002>
 			</startingequipmentlist>
 			<text type="formattedtext"><p>Fighters stand between the party and what comes out of the dark. They wear the heaviest armour, use every weapon, and keep going when others fall.</p></text>
 			<features>
@@ -250,9 +255,10 @@
 					<text type="string">Choose 2: History, Insight, Medicine, Persuasion, Religion</text>
 				</skills>
 			</proficiencies>
-			<startingequipment type="string">Scale hauberk, mace, shield, holy symbol, healer's satchel, a delver's pack.</startingequipment>
+			<startingequipment type="string">Choose A or B: (A) Scale hauberk, mace, shield, holy symbol, healer's satchel, a delver's pack; or (B) 85 gc.</startingequipment>
 			<startingequipmentlist>
 				<id-00001>
+					<option type="string">Option 1</option>
 					<items>
 						<id-00001>
 							<name type="string">Scale Hauberk</name>
@@ -397,6 +403,10 @@
 						</id-00013>
 					</items>
 				</id-00001>
+				<id-00002>
+					<option type="string">Option 2</option>
+					<wealth type="number">85</wealth>
+				</id-00002>
 			</startingequipmentlist>
 			<text type="formattedtext"><p>Clerics carry a light that is not a lantern's. They mend the wounded, steady the afraid, and turn back the dead that should not walk.</p></text>
 			<features>
@@ -469,9 +479,10 @@
 					<text type="string">Choose 2: Arcana, History, Insight, Investigation, Medicine, Religion</text>
 				</skills>
 			</proficiencies>
-			<startingequipment type="string">Quarterstaff, dagger, spellbook, arcane focus, a scholar's pack.</startingequipment>
+			<startingequipment type="string">Choose A or B: (A) Quarterstaff, dagger, spellbook, arcane focus, a scholar's pack; or (B) 70 gc.</startingequipment>
 			<startingequipmentlist>
 				<id-00001>
+					<option type="string">Option 1</option>
 					<items>
 						<id-00001>
 							<name type="string">Quarterstaff</name>
@@ -581,6 +592,10 @@
 						</id-00010>
 					</items>
 				</id-00001>
+				<id-00002>
+					<option type="string">Option 2</option>
+					<wealth type="number">70</wealth>
+				</id-00002>
 			</startingequipmentlist>
 			<text type="formattedtext"><p>Wizards read the dark, and sometimes it reads back. They are fragile, and the most dangerous people in any room.</p></text>
 			<features>
@@ -648,9 +663,10 @@
 					<text type="string">Choose 4: Acrobatics, Athletics, Deception, Insight, Intimidation, Investigation, Perception, Performance, Persuasion, Sleight of Hand, Stealth</text>
 				</skills>
 			</proficiencies>
-			<startingequipment type="string">Leather jerkin, shortsword, two daggers, shortbow and 20 arrows, thieves' tools, a delver's pack.</startingequipment>
+			<startingequipment type="string">Choose A or B: (A) Leather jerkin, shortsword, two daggers, shortbow and 20 arrows, thieves' tools, a delver's pack; or (B) 85 gc.</startingequipment>
 			<startingequipmentlist>
 				<id-00001>
+					<option type="string">Option 1</option>
 					<items>
 						<id-00001>
 							<name type="string">Leather Jerkin</name>
@@ -807,6 +823,10 @@
 						</id-00014>
 					</items>
 				</id-00001>
+				<id-00002>
+					<option type="string">Option 2</option>
+					<wealth type="number">85</wealth>
+				</id-00002>
 			</startingequipmentlist>
 			<text type="formattedtext"><p>Thieves go first into the dark and come back with what was in it. Locks, traps and unwary throats are their trade.</p></text>
 			<features>
@@ -879,9 +899,10 @@
 					<text type="string">Choose 2: Athletics, Insight, Intimidation, Medicine, Persuasion, Religion</text>
 				</skills>
 			</proficiencies>
-			<startingequipment type="string">Chain hauberk, longsword, shield, two spears, holy symbol, a delver's pack.</startingequipment>
+			<startingequipment type="string">Choose A or B: (A) Chain hauberk, longsword, shield, two spears, holy symbol, a delver's pack; or (B) 115 gc.</startingequipment>
 			<startingequipmentlist>
 				<id-00001>
+					<option type="string">Option 1</option>
 					<items>
 						<id-00001>
 							<name type="string">Chain Hauberk</name>
@@ -1029,6 +1050,10 @@
 						</id-00013>
 					</items>
 				</id-00001>
+				<id-00002>
+					<option type="string">Option 2</option>
+					<wealth type="number">115</wealth>
+				</id-00002>
 			</startingequipmentlist>
 			<text type="formattedtext"><p>Paladins have sworn to stand against the dark, and their oath stands with them: it heals by their hands, and burns in their blade.</p></text>
 			<features>
@@ -1101,9 +1126,10 @@
 					<text type="string">Choose 3: Animal Handling, Athletics, Insight, Investigation, Nature, Perception, Stealth, Survival</text>
 				</skills>
 			</proficiencies>
-			<startingequipment type="string">Hide coat, two shortswords, longbow and 40 arrows, a delver's pack.</startingequipment>
+			<startingequipment type="string">Choose A or B: (A) Hide coat, two shortswords, longbow and 40 arrows, a delver's pack; or (B) 90 gc.</startingequipment>
 			<startingequipmentlist>
 				<id-00001>
+					<option type="string">Option 1</option>
 					<items>
 						<id-00001>
 							<name type="string">Hide Coat</name>
@@ -1237,6 +1263,10 @@
 						</id-00012>
 					</items>
 				</id-00001>
+				<id-00002>
+					<option type="string">Option 2</option>
+					<wealth type="number">90</wealth>
+				</id-00002>
 			</startingequipmentlist>
 			<text type="formattedtext"><p>Rangers know the wild places between the towns and the ruins, and what hunts there. They track it, and they hunt it back.</p></text>
 			<features>
@@ -1309,9 +1339,10 @@
 					<text type="string">Choose any 3</text>
 				</skills>
 			</proficiencies>
-			<startingequipment type="string">Leather jerkin, rapier, dagger, a worn instrument (arcane focus), a delver's pack.</startingequipment>
+			<startingequipment type="string">Choose A or B: (A) Leather jerkin, rapier, dagger, a worn instrument (arcane focus), a delver's pack; or (B) 55 gc.</startingequipment>
 			<startingequipmentlist>
 				<id-00001>
+					<option type="string">Option 1</option>
 					<items>
 						<id-00001>
 							<name type="string">Leather Jerkin</name>
@@ -1445,6 +1476,10 @@
 						</id-00012>
 					</items>
 				</id-00001>
+				<id-00002>
+					<option type="string">Option 2</option>
+					<wealth type="number">55</wealth>
+				</id-00002>
 			</startingequipmentlist>
 			<text type="formattedtext"><p>Bards are lorekeepers: they remember the old songs, the names of the dead, and where the stairs go. Their stories keep the dark at bay.</p></text>
 			<features>
@@ -1605,49 +1640,245 @@
 			<name type="string">Grave Digger</name>
 			<skill type="string">Athletics, Religion</skill>
 			<text type="formattedtext"><p>You buried the dead of a town that had too many. You know the old rites, and what a disturbed grave looks like.</p></text>
-			<equipment type="string">A shovel, a holy symbol of the dead, 10 gc</equipment>
+			<equipment type="string">Choose A or B: (A) Shovel, Holy Symbol, 10 gc; or (B) 20 gc. A shovel, a holy symbol of the dead, 10 gc</equipment>
+			<equipmentlist>
+				<id-00001>
+					<option type="string">Option 1</option>
+					<items>
+						<id-00001>
+							<name type="string">Shovel</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">2 gc</cost>
+							<weight type="number">5</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>For graves, latrines, and digging out what the earth took back.</p></description>
+							<count type="number">1</count>
+						</id-00001>
+						<id-00002>
+							<name type="string">Holy Symbol</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Focus</subtype>
+							<cost type="string">5 gc</cost>
+							<weight type="number">1</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>A cleric's or paladin's focus: an amulet, a reliquary, a sigil painted on a shield.</p></description>
+							<count type="number">1</count>
+						</id-00002>
+					</items>
+					<wealth type="number">10</wealth>
+				</id-00001>
+				<id-00002>
+					<option type="string">Option 2</option>
+					<wealth type="number">20</wealth>
+				</id-00002>
+			</equipmentlist>
 		</gravedigger>
 		<lamplighter>
 			<name type="string">Lamplighter</name>
 			<skill type="string">Perception, Investigation</skill>
 			<text type="formattedtext"><p>You kept the street lamps of a city burning through the long nights. You know how long a flame lasts, and what moves when it goes out.</p></text>
-			<equipment type="string">A hooded lantern, two flasks of oil, 10 gc</equipment>
+			<equipment type="string">Choose A or B: (A) Lantern, Hooded, 2 Oil, Flask, 10 gc; or (B) 20 gc. A hooded lantern, two flasks of oil, 10 gc</equipment>
+			<equipmentlist>
+				<id-00001>
+					<option type="string">Option 1</option>
+					<items>
+						<id-00001>
+							<name type="string">Lantern, Hooded</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">5 gc</cost>
+							<weight type="number">2</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>Burns a flask of oil for <b>24 turns</b> (four hours): bright light 30 feet, dim 30 beyond. Hooded, it gives only dim light 5 feet.</p></description>
+							<count type="number">1</count>
+						</id-00001>
+						<id-00002>
+							<name type="string">Oil, Flask</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">0.1 gc</cost>
+							<weight type="number">1</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>Fuel for a lantern (24 turns). Thrown and set alight, it burns a creature for 1d4 fire a turn for two turns.</p></description>
+							<count type="number">2</count>
+						</id-00002>
+					</items>
+					<wealth type="number">10</wealth>
+				</id-00001>
+				<id-00002>
+					<option type="string">Option 2</option>
+					<wealth type="number">20</wealth>
+				</id-00002>
+			</equipmentlist>
 		</lamplighter>
 		<deserter>
 			<name type="string">Deserter</name>
 			<skill type="string">Athletics, Stealth</skill>
 			<text type="formattedtext"><p>You fled a war you did not believe in, and they are still looking for you.</p></text>
-			<equipment type="string">A worn sword-belt, a forged pass, 5 gc</equipment>
+			<equipment type="string">Choose A or B: (A) Dagger, 5 gc; or (B) 10 gc. A worn sword-belt, a forged pass, 5 gc</equipment>
+			<equipmentlist>
+				<id-00001>
+					<option type="string">Option 1</option>
+					<items>
+						<id-00001>
+							<name type="string">Dagger</name>
+							<type type="string">Weapon</type>
+							<subtype type="string">Simple Melee Weapons</subtype>
+							<cost type="string">2 gc</cost>
+							<damage type="string">1d4 Piercing</damage>
+							<properties type="string">Finesse, Light, Thrown (Range 20/60)</properties>
+							<weight type="number">1</weight>
+							<bonus type="number">0</bonus>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>A long knife, the last weapon anyone gives up.</p></description>
+							<count type="number">1</count>
+						</id-00001>
+					</items>
+					<wealth type="number">5</wealth>
+				</id-00001>
+				<id-00002>
+					<option type="string">Option 2</option>
+					<wealth type="number">10</wealth>
+				</id-00002>
+			</equipmentlist>
 		</deserter>
 		<acolyteoftheash>
 			<name type="string">Acolyte of the Ash</name>
 			<skill type="string">Religion, Insight</skill>
 			<text type="formattedtext"><p>You served a temple that keeps vigil fires against the dark. Its priests will give you a meal and a bed, and ask questions.</p></text>
-			<equipment type="string">A holy symbol, prayer beads, incense, 10 gc</equipment>
+			<equipment type="string">Choose A or B: (A) Holy Symbol, 10 gc; or (B) 15 gc. A holy symbol, prayer beads, incense, 10 gc</equipment>
+			<equipmentlist>
+				<id-00001>
+					<option type="string">Option 1</option>
+					<items>
+						<id-00001>
+							<name type="string">Holy Symbol</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Focus</subtype>
+							<cost type="string">5 gc</cost>
+							<weight type="number">1</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>A cleric's or paladin's focus: an amulet, a reliquary, a sigil painted on a shield.</p></description>
+							<count type="number">1</count>
+						</id-00001>
+					</items>
+					<wealth type="number">10</wealth>
+				</id-00001>
+				<id-00002>
+					<option type="string">Option 2</option>
+					<wealth type="number">15</wealth>
+				</id-00002>
+			</equipmentlist>
 		</acolyteoftheash>
 		<smuggler>
 			<name type="string">Smuggler</name>
 			<skill type="string">Deception, Sleight of Hand</skill>
 			<text type="formattedtext"><p>You moved what was not allowed across borders that were not watched. You know who to pay, and how much.</p></text>
-			<equipment type="string">A coat with hidden pockets, 15 gc</equipment>
+			<equipment type="string">15 gc. A coat with hidden pockets, 15 gc</equipment>
+			<equipmentlist>
+				<id-00001>
+					<option type="string">Option 1</option>
+					<wealth type="number">15</wealth>
+				</id-00001>
+			</equipmentlist>
 		</smuggler>
 		<hedgescholar>
 			<name type="string">Hedge Scholar</name>
 			<skill type="string">Arcana, History</skill>
 			<text type="formattedtext"><p>You learned from books nobody else wanted, in libraries nobody else visited.</p></text>
-			<equipment type="string">Ink, a quill, a book of half-remembered lore, 10 gc</equipment>
+			<equipment type="string">Choose A or B: (A) Ink and Quill, 10 gc; or (B) 15 gc. Ink, a quill, a book of half-remembered lore, 10 gc</equipment>
+			<equipmentlist>
+				<id-00001>
+					<option type="string">Option 1</option>
+					<items>
+						<id-00001>
+							<name type="string">Ink and Quill</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">1 gc</cost>
+							<weight type="number">0</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>A small bottle of ink and a quill: enough for a map, a letter, or a copied page.</p></description>
+							<count type="number">1</count>
+						</id-00001>
+					</items>
+					<wealth type="number">10</wealth>
+				</id-00001>
+				<id-00002>
+					<option type="string">Option 2</option>
+					<wealth type="number">15</wealth>
+				</id-00002>
+			</equipmentlist>
 		</hedgescholar>
 		<hunter>
 			<name type="string">Hunter</name>
 			<skill type="string">Survival, Nature</skill>
 			<text type="formattedtext"><p>You fed your family from the forest's edge, and learned which tracks to follow and which to run from.</p></text>
-			<equipment type="string">A hunting trap, a skinning knife, 10 gc</equipment>
+			<equipment type="string">Choose A or B: (A) Hunting Trap, Dagger, 10 gc; or (B) 20 gc. A hunting trap, a skinning knife, 10 gc</equipment>
+			<equipmentlist>
+				<id-00001>
+					<option type="string">Option 1</option>
+					<items>
+						<id-00001>
+							<name type="string">Hunting Trap</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">5 gc</cost>
+							<weight type="number">25</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>Iron jaws on a chain. A creature that steps in makes a Dexterity save (DC 13) or takes 1d4 piercing damage and is held until it or someone else breaks free (Strength, DC 13).</p></description>
+							<count type="number">1</count>
+						</id-00001>
+						<id-00002>
+							<name type="string">Dagger</name>
+							<type type="string">Weapon</type>
+							<subtype type="string">Simple Melee Weapons</subtype>
+							<cost type="string">2 gc</cost>
+							<damage type="string">1d4 Piercing</damage>
+							<properties type="string">Finesse, Light, Thrown (Range 20/60)</properties>
+							<weight type="number">1</weight>
+							<bonus type="number">0</bonus>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>A long knife, the last weapon anyone gives up.</p></description>
+							<count type="number">1</count>
+						</id-00002>
+					</items>
+					<wealth type="number">10</wealth>
+				</id-00001>
+				<id-00002>
+					<option type="string">Option 2</option>
+					<wealth type="number">20</wealth>
+				</id-00002>
+			</equipmentlist>
 		</hunter>
 		<streetrat>
 			<name type="string">Street Rat</name>
 			<skill type="string">Stealth, Sleight of Hand</skill>
 			<text type="formattedtext"><p>You grew up on the streets and the rooftops, fed by quick hands and quicker feet.</p></text>
-			<equipment type="string">A map of a city's back ways, a lucky charm, 5 gc</equipment>
+			<equipment type="string">Choose A or B: (A) Lucky Charm, 5 gc; or (B) 10 gc. A map of a city's back ways, a lucky charm, 5 gc</equipment>
+			<equipmentlist>
+				<id-00001>
+					<option type="string">Option 1</option>
+					<items>
+						<id-00001>
+							<name type="string">Lucky Charm</name>
+							<type type="string">Adventuring Gear</type>
+							<subtype type="string">Standard</subtype>
+							<cost type="string">1 gc</cost>
+							<weight type="number">0</weight>
+							<rarity type="string">common</rarity>
+							<description type="formattedtext"><p>A rabbit's foot, a saint's bone, a coin with a hole in it. Once per safe rest, when you gain Dread, you may ignore one point of it.</p></description>
+							<count type="number">1</count>
+						</id-00001>
+					</items>
+					<wealth type="number">5</wealth>
+				</id-00001>
+				<id-00002>
+					<option type="string">Option 2</option>
+					<wealth type="number">10</wealth>
+				</id-00002>
+			</equipmentlist>
 		</streetrat>
 	</background>
 	<spell>
@@ -3227,6 +3458,33 @@
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>Iron cuffs. Escaping them: Dexterity (DC 18); breaking them: Strength (DC 20).</p></description>
 			</manacles>
+			<shovel>
+				<name type="string">Shovel</name>
+				<type type="string">Adventuring Gear</type>
+				<subtype type="string">Standard</subtype>
+				<cost type="string">2 gc</cost>
+				<weight type="number">5</weight>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>For graves, latrines, and digging out what the earth took back.</p></description>
+			</shovel>
+			<huntingtrap>
+				<name type="string">Hunting Trap</name>
+				<type type="string">Adventuring Gear</type>
+				<subtype type="string">Standard</subtype>
+				<cost type="string">5 gc</cost>
+				<weight type="number">25</weight>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>Iron jaws on a chain. A creature that steps in makes a Dexterity save (DC 13) or takes 1d4 piercing damage and is held until it or someone else breaks free (Strength, DC 13).</p></description>
+			</huntingtrap>
+			<inkandquill>
+				<name type="string">Ink and Quill</name>
+				<type type="string">Adventuring Gear</type>
+				<subtype type="string">Standard</subtype>
+				<cost type="string">1 gc</cost>
+				<weight type="number">0</weight>
+				<rarity type="string">common</rarity>
+				<description type="formattedtext"><p>A small bottle of ink and a quill: enough for a map, a letter, or a copied page.</p></description>
+			</inkandquill>
 			<luckycharm>
 				<name type="string">Lucky Charm</name>
 				<type type="string">Adventuring Gear</type>
@@ -3498,35 +3756,35 @@
 			</p0010>
 			<p0011>
 				<name type="string">Fighter</name>
-				<text type="formattedtext"><p><i>Fighters stand between the party and what comes out of the dark. They wear the heaviest armour, use every weapon, and keep going when others fall.</i></p><table><tr decoration="underline"><td><b>Hit Die</b></td><td><b>Saves</b></td><td><b>Armour</b></td><td><b>Weapons</b></td></tr><tr><td>d10</td><td>Strength and Constitution</td><td>All armour and shields</td><td>Simple and Martial weapons</td></tr></table><p><b>Skills.</b> Choose 2: Acrobatics, Athletics, History, Insight, Intimidation, Perception, Survival. <b>Starting gear.</b> Chain hauberk, longsword, shield, light crossbow and 20 bolts, a delver's pack.</p><p><b>Hard Lessons</b> (level 1). Choose a way of fighting: Shieldwall (+1 Defense with a shield), Bladework (+2 to damage with a one-handed weapon and nothing in the other hand), Marksman (+2 to ranged attack rolls) or Brute (reroll 1s and 2s on the damage dice of a two-handed weapon, once).</p><p><b>Second Breath</b> (level 1). Once per safe rest, as a bonus action, you regain 1d10 + your Fighter level Health.</p><p><b>Press On</b> (level 2). Once per safe rest, on your turn, you take one more action.</p><p><b>Battle-Scarred</b> (level 3). You score a critical hit on a 19 or 20. Your first point of Dread each fight is ignored.</p><p><b>Ability Improvement</b> (level 4). Add 2 to one ability score, or 1 to two (to a most of 20). Again at 8th level.</p><p><b>Extra Attack</b> (level 5). When you take the Attack action you attack twice.</p><p><b>Hold the Line</b> (level 6). When a creature within 5 feet of you hits an ally, you may use your reaction to make one weapon attack against it.</p><p><b>Iron Nerve</b> (level 7). You have advantage on saves against being frightened, and a safe rest lowers your Dread by 2, not 1.</p><p><b>Indomitable</b> (level 9). Once per safe rest, reroll a saving throw you failed; you must use the new roll.</p><p><b>Champion of the Lost</b> (level 10). Allies within 10 feet of you who can see you add 1 to their saves. Second Breath heals 2d10 + your level.</p></text>
+				<text type="formattedtext"><p><i>Fighters stand between the party and what comes out of the dark. They wear the heaviest armour, use every weapon, and keep going when others fall.</i></p><table><tr decoration="underline"><td><b>Hit Die</b></td><td><b>Saves</b></td><td><b>Armour</b></td><td><b>Weapons</b></td></tr><tr><td>d10</td><td>Strength and Constitution</td><td>All armour and shields</td><td>Simple and Martial weapons</td></tr></table><p><b>Skills.</b> Choose 2: Acrobatics, Athletics, History, Insight, Intimidation, Perception, Survival. <b>Starting gear.</b> Choose A or B: (A) Chain hauberk, longsword, shield, light crossbow and 20 bolts, a delver's pack; or (B) 135 gc.</p><p><b>Hard Lessons</b> (level 1). Choose a way of fighting: Shieldwall (+1 Defense with a shield), Bladework (+2 to damage with a one-handed weapon and nothing in the other hand), Marksman (+2 to ranged attack rolls) or Brute (reroll 1s and 2s on the damage dice of a two-handed weapon, once).</p><p><b>Second Breath</b> (level 1). Once per safe rest, as a bonus action, you regain 1d10 + your Fighter level Health.</p><p><b>Press On</b> (level 2). Once per safe rest, on your turn, you take one more action.</p><p><b>Battle-Scarred</b> (level 3). You score a critical hit on a 19 or 20. Your first point of Dread each fight is ignored.</p><p><b>Ability Improvement</b> (level 4). Add 2 to one ability score, or 1 to two (to a most of 20). Again at 8th level.</p><p><b>Extra Attack</b> (level 5). When you take the Attack action you attack twice.</p><p><b>Hold the Line</b> (level 6). When a creature within 5 feet of you hits an ally, you may use your reaction to make one weapon attack against it.</p><p><b>Iron Nerve</b> (level 7). You have advantage on saves against being frightened, and a safe rest lowers your Dread by 2, not 1.</p><p><b>Indomitable</b> (level 9). Once per safe rest, reroll a saving throw you failed; you must use the new roll.</p><p><b>Champion of the Lost</b> (level 10). Allies within 10 feet of you who can see you add 1 to their saves. Second Breath heals 2d10 + your level.</p></text>
 			</p0011>
 			<p0012>
 				<name type="string">Cleric</name>
-				<text type="formattedtext"><p><i>Clerics carry a light that is not a lantern's. They mend the wounded, steady the afraid, and turn back the dead that should not walk.</i></p><table><tr decoration="underline"><td><b>Hit Die</b></td><td><b>Saves</b></td><td><b>Armour</b></td><td><b>Weapons</b></td></tr><tr><td>d8</td><td>Wisdom and Charisma</td><td>Light and medium armour and shields</td><td>Simple weapons</td></tr></table><p><b>Skills.</b> Choose 2: History, Insight, Medicine, Persuasion, Religion. <b>Starting gear.</b> Scale hauberk, mace, shield, holy symbol, healer's satchel, a delver's pack.</p><p><b>Spellcasting</b> (level 1). You cast cleric spells with Wisdom: spell save DC 8 + your proficiency + Wisdom; spell attack your proficiency + Wisdom. You know every cleric spell of a circle you can cast; prepare a number of them equal to your Wisdom modifier + your level after a safe rest.</p><p><b>Lantern of Faith</b> (level 1). Your holy symbol is a light: as a bonus action it sheds bright light 20 feet and dim 20 beyond until you douse it, burning no oil.</p><p><b>Turn the Dead</b> (level 2). Once per safe rest (twice from 6th level), as an action, present your symbol: each undead within 30 feet that can see it makes a Wisdom save against your spell DC or flees for a minute.</p><p><b>Steadying Word</b> (level 2). As an action, a companion within 30 feet loses 1 Dread. Once per safe rest; twice from 6th level.</p><p><b>Ability Improvement</b> (level 4). Add 2 to one ability score, or 1 to two (to a most of 20). Again at 8th level.</p><p><b>Burn the Dead</b> (level 5). When an undead of low power (the GM says) fails its save against Turn the Dead, it is destroyed.</p><p><b>Sanctuary of Light</b> (level 6). Within your Lantern of Faith's bright light, companions have advantage on saves against being frightened.</p><p><b>Blessed Strikes</b> (level 8). Once on each of your turns, a weapon hit or cantrip deals 1d8 radiant damage more.</p><p><b>Miracle</b> (level 10). Once per week, call on your faith for something only a god could do; the GM decides how it is answered.</p></text>
+				<text type="formattedtext"><p><i>Clerics carry a light that is not a lantern's. They mend the wounded, steady the afraid, and turn back the dead that should not walk.</i></p><table><tr decoration="underline"><td><b>Hit Die</b></td><td><b>Saves</b></td><td><b>Armour</b></td><td><b>Weapons</b></td></tr><tr><td>d8</td><td>Wisdom and Charisma</td><td>Light and medium armour and shields</td><td>Simple weapons</td></tr></table><p><b>Skills.</b> Choose 2: History, Insight, Medicine, Persuasion, Religion. <b>Starting gear.</b> Choose A or B: (A) Scale hauberk, mace, shield, holy symbol, healer's satchel, a delver's pack; or (B) 85 gc.</p><p><b>Spellcasting</b> (level 1). You cast cleric spells with Wisdom: spell save DC 8 + your proficiency + Wisdom; spell attack your proficiency + Wisdom. You know every cleric spell of a circle you can cast; prepare a number of them equal to your Wisdom modifier + your level after a safe rest.</p><p><b>Lantern of Faith</b> (level 1). Your holy symbol is a light: as a bonus action it sheds bright light 20 feet and dim 20 beyond until you douse it, burning no oil.</p><p><b>Turn the Dead</b> (level 2). Once per safe rest (twice from 6th level), as an action, present your symbol: each undead within 30 feet that can see it makes a Wisdom save against your spell DC or flees for a minute.</p><p><b>Steadying Word</b> (level 2). As an action, a companion within 30 feet loses 1 Dread. Once per safe rest; twice from 6th level.</p><p><b>Ability Improvement</b> (level 4). Add 2 to one ability score, or 1 to two (to a most of 20). Again at 8th level.</p><p><b>Burn the Dead</b> (level 5). When an undead of low power (the GM says) fails its save against Turn the Dead, it is destroyed.</p><p><b>Sanctuary of Light</b> (level 6). Within your Lantern of Faith's bright light, companions have advantage on saves against being frightened.</p><p><b>Blessed Strikes</b> (level 8). Once on each of your turns, a weapon hit or cantrip deals 1d8 radiant damage more.</p><p><b>Miracle</b> (level 10). Once per week, call on your faith for something only a god could do; the GM decides how it is answered.</p></text>
 			</p0012>
 			<p0013>
 				<name type="string">Wizard</name>
-				<text type="formattedtext"><p><i>Wizards read the dark, and sometimes it reads back. They are fragile, and the most dangerous people in any room.</i></p><table><tr decoration="underline"><td><b>Hit Die</b></td><td><b>Saves</b></td><td><b>Armour</b></td><td><b>Weapons</b></td></tr><tr><td>d6</td><td>Intelligence and Wisdom</td><td>None</td><td>Daggers, quarterstaffs, slings and light crossbows</td></tr></table><p><b>Skills.</b> Choose 2: Arcana, History, Insight, Investigation, Medicine, Religion. <b>Starting gear.</b> Quarterstaff, dagger, spellbook, arcane focus, a scholar's pack.</p><p><b>Spellcasting</b> (level 1). You cast wizard spells with Intelligence: spell save DC 8 + your proficiency + Intelligence; spell attack your proficiency + Intelligence. Your spellbook holds six 1st-circle spells and you learn two more each level; prepare Intelligence modifier + level of them after a safe rest.</p><p><b>Quiet Study</b> (level 1). Once per safe rest, after a short rest of an exploration turn, you regain spell slots whose circles add up to half your level (rounded up), none higher than 5th.</p><p><b>Lorekeeper</b> (level 2). Choose Arcana, History or Religion: your proficiency bonus doubles for it.</p><p><b>Ability Improvement</b> (level 4). Add 2 to one ability score, or 1 to two (to a most of 20). Again at 8th level.</p><p><b>Sculpted Spells</b> (level 5). When you cast a spell that makes several creatures save, choose up to your Intelligence modifier of them: they succeed automatically and take no damage.</p><p><b>Words of Warding</b> (level 6). Once per safe rest, when a creature you can see would gain Dread from magic, it does not.</p><p><b>Spell Mastery</b> (level 9). Choose a 1st-circle spell you know: you can cast it without a slot.</p><p><b>Unweaving Hand</b> (level 10). You learn Unweave and always have it prepared; once per safe rest you cast it without a slot.</p></text>
+				<text type="formattedtext"><p><i>Wizards read the dark, and sometimes it reads back. They are fragile, and the most dangerous people in any room.</i></p><table><tr decoration="underline"><td><b>Hit Die</b></td><td><b>Saves</b></td><td><b>Armour</b></td><td><b>Weapons</b></td></tr><tr><td>d6</td><td>Intelligence and Wisdom</td><td>None</td><td>Daggers, quarterstaffs, slings and light crossbows</td></tr></table><p><b>Skills.</b> Choose 2: Arcana, History, Insight, Investigation, Medicine, Religion. <b>Starting gear.</b> Choose A or B: (A) Quarterstaff, dagger, spellbook, arcane focus, a scholar's pack; or (B) 70 gc.</p><p><b>Spellcasting</b> (level 1). You cast wizard spells with Intelligence: spell save DC 8 + your proficiency + Intelligence; spell attack your proficiency + Intelligence. Your spellbook holds six 1st-circle spells and you learn two more each level; prepare Intelligence modifier + level of them after a safe rest.</p><p><b>Quiet Study</b> (level 1). Once per safe rest, after a short rest of an exploration turn, you regain spell slots whose circles add up to half your level (rounded up), none higher than 5th.</p><p><b>Lorekeeper</b> (level 2). Choose Arcana, History or Religion: your proficiency bonus doubles for it.</p><p><b>Ability Improvement</b> (level 4). Add 2 to one ability score, or 1 to two (to a most of 20). Again at 8th level.</p><p><b>Sculpted Spells</b> (level 5). When you cast a spell that makes several creatures save, choose up to your Intelligence modifier of them: they succeed automatically and take no damage.</p><p><b>Words of Warding</b> (level 6). Once per safe rest, when a creature you can see would gain Dread from magic, it does not.</p><p><b>Spell Mastery</b> (level 9). Choose a 1st-circle spell you know: you can cast it without a slot.</p><p><b>Unweaving Hand</b> (level 10). You learn Unweave and always have it prepared; once per safe rest you cast it without a slot.</p></text>
 			</p0013>
 			<p0014>
 				<name type="string">Thief</name>
-				<text type="formattedtext"><p><i>Thieves go first into the dark and come back with what was in it. Locks, traps and unwary throats are their trade.</i></p><table><tr decoration="underline"><td><b>Hit Die</b></td><td><b>Saves</b></td><td><b>Armour</b></td><td><b>Weapons</b></td></tr><tr><td>d8</td><td>Dexterity and Intelligence</td><td>Light armour</td><td>Simple weapons, hand crossbows, rapiers and shortswords</td></tr></table><p><b>Skills.</b> Choose 4: Acrobatics, Athletics, Deception, Insight, Intimidation, Investigation, Perception, Performance, Persuasion, Sleight of Hand, Stealth. <b>Starting gear.</b> Leather jerkin, shortsword, two daggers, shortbow and 20 arrows, thieves' tools, a delver's pack.</p><p><b>Sneak Strike</b> (level 1). Once per turn, a hit with a finesse or ranged weapon deals 1d6 more damage when you have advantage, or when an ally stands within 5 feet of your target. The bonus grows by 1d6 at every odd level (2d6 at 3rd, 3d6 at 5th, and so on).</p><p><b>Cant and Craft</b> (level 1). You speak the thieves' cant, and you are proficient with thieves' tools: double your proficiency bonus for them.</p><p><b>Slip Away</b> (level 2). As a bonus action on your turn: Dash, Disengage or Hide.</p><p><b>Light Fingers</b> (level 3). You can pick a lock, disarm a trap or use a healer's satchel as a bonus action.</p><p><b>Ability Improvement</b> (level 4). Add 2 to one ability score, or 1 to two (to a most of 20). Again at 8th level.</p><p><b>Duck and Weave</b> (level 5). When an attacker you can see hits you, use your reaction to halve the damage.</p><p><b>Evasion</b> (level 7). When a spell or trap lets you make a Dexterity save for half damage, you take none on a success and half on a failure.</p><p><b>Shadow-Born</b> (level 9). In dim light or darkness you have advantage on Stealth, and a creature that does not see you does not gain advantage against you.</p><p><b>Thief's Luck</b> (level 10). Once per safe rest, turn a miss into a hit, or a failed check into a 20.</p></text>
+				<text type="formattedtext"><p><i>Thieves go first into the dark and come back with what was in it. Locks, traps and unwary throats are their trade.</i></p><table><tr decoration="underline"><td><b>Hit Die</b></td><td><b>Saves</b></td><td><b>Armour</b></td><td><b>Weapons</b></td></tr><tr><td>d8</td><td>Dexterity and Intelligence</td><td>Light armour</td><td>Simple weapons, hand crossbows, rapiers and shortswords</td></tr></table><p><b>Skills.</b> Choose 4: Acrobatics, Athletics, Deception, Insight, Intimidation, Investigation, Perception, Performance, Persuasion, Sleight of Hand, Stealth. <b>Starting gear.</b> Choose A or B: (A) Leather jerkin, shortsword, two daggers, shortbow and 20 arrows, thieves' tools, a delver's pack; or (B) 85 gc.</p><p><b>Sneak Strike</b> (level 1). Once per turn, a hit with a finesse or ranged weapon deals 1d6 more damage when you have advantage, or when an ally stands within 5 feet of your target. The bonus grows by 1d6 at every odd level (2d6 at 3rd, 3d6 at 5th, and so on).</p><p><b>Cant and Craft</b> (level 1). You speak the thieves' cant, and you are proficient with thieves' tools: double your proficiency bonus for them.</p><p><b>Slip Away</b> (level 2). As a bonus action on your turn: Dash, Disengage or Hide.</p><p><b>Light Fingers</b> (level 3). You can pick a lock, disarm a trap or use a healer's satchel as a bonus action.</p><p><b>Ability Improvement</b> (level 4). Add 2 to one ability score, or 1 to two (to a most of 20). Again at 8th level.</p><p><b>Duck and Weave</b> (level 5). When an attacker you can see hits you, use your reaction to halve the damage.</p><p><b>Evasion</b> (level 7). When a spell or trap lets you make a Dexterity save for half damage, you take none on a success and half on a failure.</p><p><b>Shadow-Born</b> (level 9). In dim light or darkness you have advantage on Stealth, and a creature that does not see you does not gain advantage against you.</p><p><b>Thief's Luck</b> (level 10). Once per safe rest, turn a miss into a hit, or a failed check into a 20.</p></text>
 			</p0014>
 			<p0015>
 				<name type="string">Paladin</name>
-				<text type="formattedtext"><p><i>Paladins have sworn to stand against the dark, and their oath stands with them: it heals by their hands, and burns in their blade.</i></p><table><tr decoration="underline"><td><b>Hit Die</b></td><td><b>Saves</b></td><td><b>Armour</b></td><td><b>Weapons</b></td></tr><tr><td>d10</td><td>Wisdom and Charisma</td><td>All armour and shields</td><td>Simple and Martial weapons</td></tr></table><p><b>Skills.</b> Choose 2: Athletics, Insight, Intimidation, Medicine, Persuasion, Religion. <b>Starting gear.</b> Chain hauberk, longsword, shield, two spears, holy symbol, a delver's pack.</p><p><b>Laying On of Hands</b> (level 1). You have a pool of healing equal to five times your Paladin level, refilled by a safe rest. As an action, touch a creature and give it Health from the pool, or spend 5 to end a disease or poison.</p><p><b>Sense the Unholy</b> (level 1). As an action, you know where undead and fiends are within 60 feet, until the end of your next turn. Once per safe rest, plus your Charisma modifier.</p><p><b>Spellcasting</b> (level 2). From 2nd level you cast paladin spells with Charisma; slots as a half-caster (Kraken counts them).</p><p><b>Smite</b> (level 2). When you hit with a melee weapon, spend a spell slot: 2d8 radiant damage more, +1d8 per circle above the first, +1d8 against undead or fiends.</p><p><b>Oath's Shelter</b> (level 3). You and companions within 10 feet of you cannot be frightened while you are conscious.</p><p><b>Ability Improvement</b> (level 4). Add 2 to one ability score, or 1 to two (to a most of 20). Again at 8th level.</p><p><b>Extra Attack</b> (level 5). When you take the Attack action you attack twice.</p><p><b>Aura of Resolve</b> (level 6). You and companions within 10 feet add your Charisma modifier (at least 1) to their saving throws while you are conscious.</p><p><b>Radiant Arms</b> (level 10). Every melee weapon hit you make deals 1d8 radiant damage more.</p></text>
+				<text type="formattedtext"><p><i>Paladins have sworn to stand against the dark, and their oath stands with them: it heals by their hands, and burns in their blade.</i></p><table><tr decoration="underline"><td><b>Hit Die</b></td><td><b>Saves</b></td><td><b>Armour</b></td><td><b>Weapons</b></td></tr><tr><td>d10</td><td>Wisdom and Charisma</td><td>All armour and shields</td><td>Simple and Martial weapons</td></tr></table><p><b>Skills.</b> Choose 2: Athletics, Insight, Intimidation, Medicine, Persuasion, Religion. <b>Starting gear.</b> Choose A or B: (A) Chain hauberk, longsword, shield, two spears, holy symbol, a delver's pack; or (B) 115 gc.</p><p><b>Laying On of Hands</b> (level 1). You have a pool of healing equal to five times your Paladin level, refilled by a safe rest. As an action, touch a creature and give it Health from the pool, or spend 5 to end a disease or poison.</p><p><b>Sense the Unholy</b> (level 1). As an action, you know where undead and fiends are within 60 feet, until the end of your next turn. Once per safe rest, plus your Charisma modifier.</p><p><b>Spellcasting</b> (level 2). From 2nd level you cast paladin spells with Charisma; slots as a half-caster (Kraken counts them).</p><p><b>Smite</b> (level 2). When you hit with a melee weapon, spend a spell slot: 2d8 radiant damage more, +1d8 per circle above the first, +1d8 against undead or fiends.</p><p><b>Oath's Shelter</b> (level 3). You and companions within 10 feet of you cannot be frightened while you are conscious.</p><p><b>Ability Improvement</b> (level 4). Add 2 to one ability score, or 1 to two (to a most of 20). Again at 8th level.</p><p><b>Extra Attack</b> (level 5). When you take the Attack action you attack twice.</p><p><b>Aura of Resolve</b> (level 6). You and companions within 10 feet add your Charisma modifier (at least 1) to their saving throws while you are conscious.</p><p><b>Radiant Arms</b> (level 10). Every melee weapon hit you make deals 1d8 radiant damage more.</p></text>
 			</p0015>
 			<p0016>
 				<name type="string">Ranger</name>
-				<text type="formattedtext"><p><i>Rangers know the wild places between the towns and the ruins, and what hunts there. They track it, and they hunt it back.</i></p><table><tr decoration="underline"><td><b>Hit Die</b></td><td><b>Saves</b></td><td><b>Armour</b></td><td><b>Weapons</b></td></tr><tr><td>d10</td><td>Strength and Dexterity</td><td>Light and medium armour and shields</td><td>Simple and Martial weapons</td></tr></table><p><b>Skills.</b> Choose 3: Animal Handling, Athletics, Insight, Investigation, Nature, Perception, Stealth, Survival. <b>Starting gear.</b> Hide coat, two shortswords, longbow and 40 arrows, a delver's pack.</p><p><b>Pathfinder</b> (level 1). You and companions travelling with you cannot be lost by anything but magic, and you always know which way is north and how far you have come. Foraging finds food for two more people.</p><p><b>Favoured Prey</b> (level 1). Choose beasts, the undead, or the folk of the deep (goblins and their kin): advantage to track them and recall what you know of them, and +2 damage against them.</p><p><b>Spellcasting</b> (level 2). From 2nd level you cast ranger spells with Wisdom; slots as a half-caster.</p><p><b>Fighting Style</b> (level 2). Archer (+2 to ranged attack rolls) or Twin Blades (add your ability modifier to the off-hand attack's damage).</p><p><b>Hunter's Eye</b> (level 3). Once per turn, a weapon hit on a creature you have marked with Hunter's Quarry deals 1d8 more damage.</p><p><b>Ability Improvement</b> (level 4). Add 2 to one ability score, or 1 to two (to a most of 20). Again at 8th level.</p><p><b>Extra Attack</b> (level 5). When you take the Attack action you attack twice.</p><p><b>Night Eyes</b> (level 6). You see in dim light as if it were bright, and in darkness 30 feet as if it were dim.</p><p><b>Unseen Hunter</b> (level 10). Hiding is a bonus action for you, and you stay hidden after a missed attack.</p></text>
+				<text type="formattedtext"><p><i>Rangers know the wild places between the towns and the ruins, and what hunts there. They track it, and they hunt it back.</i></p><table><tr decoration="underline"><td><b>Hit Die</b></td><td><b>Saves</b></td><td><b>Armour</b></td><td><b>Weapons</b></td></tr><tr><td>d10</td><td>Strength and Dexterity</td><td>Light and medium armour and shields</td><td>Simple and Martial weapons</td></tr></table><p><b>Skills.</b> Choose 3: Animal Handling, Athletics, Insight, Investigation, Nature, Perception, Stealth, Survival. <b>Starting gear.</b> Choose A or B: (A) Hide coat, two shortswords, longbow and 40 arrows, a delver's pack; or (B) 90 gc.</p><p><b>Pathfinder</b> (level 1). You and companions travelling with you cannot be lost by anything but magic, and you always know which way is north and how far you have come. Foraging finds food for two more people.</p><p><b>Favoured Prey</b> (level 1). Choose beasts, the undead, or the folk of the deep (goblins and their kin): advantage to track them and recall what you know of them, and +2 damage against them.</p><p><b>Spellcasting</b> (level 2). From 2nd level you cast ranger spells with Wisdom; slots as a half-caster.</p><p><b>Fighting Style</b> (level 2). Archer (+2 to ranged attack rolls) or Twin Blades (add your ability modifier to the off-hand attack's damage).</p><p><b>Hunter's Eye</b> (level 3). Once per turn, a weapon hit on a creature you have marked with Hunter's Quarry deals 1d8 more damage.</p><p><b>Ability Improvement</b> (level 4). Add 2 to one ability score, or 1 to two (to a most of 20). Again at 8th level.</p><p><b>Extra Attack</b> (level 5). When you take the Attack action you attack twice.</p><p><b>Night Eyes</b> (level 6). You see in dim light as if it were bright, and in darkness 30 feet as if it were dim.</p><p><b>Unseen Hunter</b> (level 10). Hiding is a bonus action for you, and you stay hidden after a missed attack.</p></text>
 			</p0016>
 			<p0017>
 				<name type="string">Bard</name>
-				<text type="formattedtext"><p><i>Bards are lorekeepers: they remember the old songs, the names of the dead, and where the stairs go. Their stories keep the dark at bay.</i></p><table><tr decoration="underline"><td><b>Hit Die</b></td><td><b>Saves</b></td><td><b>Armour</b></td><td><b>Weapons</b></td></tr><tr><td>d8</td><td>Dexterity and Charisma</td><td>Light armour</td><td>Simple weapons, hand crossbows, longswords, rapiers and shortswords</td></tr></table><p><b>Skills.</b> Choose any 3. <b>Starting gear.</b> Leather jerkin, rapier, dagger, a worn instrument (arcane focus), a delver's pack.</p><p><b>Spellcasting</b> (level 1). You cast bard spells with Charisma: spell save DC 8 + your proficiency + Charisma. You know four spells and learn one more each level.</p><p><b>Inspiration</b> (level 1). Three times per safe rest (more with Charisma: your modifier, at least 3), when a companion who can hear you rolls a d20, add 1d4 to it after seeing the roll but before the outcome is told. The die is 1d6 at 5th level and 1d8 at 9th.</p><p><b>Fireside Tales</b> (level 1). During a safe rest, every companion who listens regains 1 more Health per Recovery Die spent, and loses 1 Dread more.</p><p><b>Jack of All Trades</b> (level 2). Add half your proficiency bonus to checks you are not proficient in.</p><p><b>Expertise</b> (level 3). Choose two skills you are proficient in: double your proficiency bonus for them. Two more at 10th level.</p><p><b>Ability Improvement</b> (level 4). Add 2 to one ability score, or 1 to two (to a most of 20). Again at 8th level.</p><p><b>Song of Courage</b> (level 6). As an action, until the end of your next turn, companions who can hear you have advantage on saves against being frightened and ignore new Dread.</p><p><b>Lore of the Lost</b> (level 10). Learn two spells from any class's list; they are bard spells for you.</p></text>
+				<text type="formattedtext"><p><i>Bards are lorekeepers: they remember the old songs, the names of the dead, and where the stairs go. Their stories keep the dark at bay.</i></p><table><tr decoration="underline"><td><b>Hit Die</b></td><td><b>Saves</b></td><td><b>Armour</b></td><td><b>Weapons</b></td></tr><tr><td>d8</td><td>Dexterity and Charisma</td><td>Light armour</td><td>Simple weapons, hand crossbows, longswords, rapiers and shortswords</td></tr></table><p><b>Skills.</b> Choose any 3. <b>Starting gear.</b> Choose A or B: (A) Leather jerkin, rapier, dagger, a worn instrument (arcane focus), a delver's pack; or (B) 55 gc.</p><p><b>Spellcasting</b> (level 1). You cast bard spells with Charisma: spell save DC 8 + your proficiency + Charisma. You know four spells and learn one more each level.</p><p><b>Inspiration</b> (level 1). Three times per safe rest (more with Charisma: your modifier, at least 3), when a companion who can hear you rolls a d20, add 1d4 to it after seeing the roll but before the outcome is told. The die is 1d6 at 5th level and 1d8 at 9th.</p><p><b>Fireside Tales</b> (level 1). During a safe rest, every companion who listens regains 1 more Health per Recovery Die spent, and loses 1 Dread more.</p><p><b>Jack of All Trades</b> (level 2). Add half your proficiency bonus to checks you are not proficient in.</p><p><b>Expertise</b> (level 3). Choose two skills you are proficient in: double your proficiency bonus for them. Two more at 10th level.</p><p><b>Ability Improvement</b> (level 4). Add 2 to one ability score, or 1 to two (to a most of 20). Again at 8th level.</p><p><b>Song of Courage</b> (level 6). As an action, until the end of your next turn, companions who can hear you have advantage on saves against being frightened and ignore new Dread.</p><p><b>Lore of the Lost</b> (level 10). Learn two spells from any class's list; they are bard spells for you.</p></text>
 			</p0017>
 			<p0018>
 				<name type="string">Backgrounds</name>
-				<text type="formattedtext"><p><b>Grave Digger</b> (Athletics, Religion). You buried the dead of a town that had too many. You know the old rites, and what a disturbed grave looks like. <i>Gear:</i> A shovel, a holy symbol of the dead, 10 gc.</p><p><b>Lamplighter</b> (Perception, Investigation). You kept the street lamps of a city burning through the long nights. You know how long a flame lasts, and what moves when it goes out. <i>Gear:</i> A hooded lantern, two flasks of oil, 10 gc.</p><p><b>Deserter</b> (Athletics, Stealth). You fled a war you did not believe in, and they are still looking for you. <i>Gear:</i> A worn sword-belt, a forged pass, 5 gc.</p><p><b>Acolyte of the Ash</b> (Religion, Insight). You served a temple that keeps vigil fires against the dark. Its priests will give you a meal and a bed, and ask questions. <i>Gear:</i> A holy symbol, prayer beads, incense, 10 gc.</p><p><b>Smuggler</b> (Deception, Sleight of Hand). You moved what was not allowed across borders that were not watched. You know who to pay, and how much. <i>Gear:</i> A coat with hidden pockets, 15 gc.</p><p><b>Hedge Scholar</b> (Arcana, History). You learned from books nobody else wanted, in libraries nobody else visited. <i>Gear:</i> Ink, a quill, a book of half-remembered lore, 10 gc.</p><p><b>Hunter</b> (Survival, Nature). You fed your family from the forest's edge, and learned which tracks to follow and which to run from. <i>Gear:</i> A hunting trap, a skinning knife, 10 gc.</p><p><b>Street Rat</b> (Stealth, Sleight of Hand). You grew up on the streets and the rooftops, fed by quick hands and quicker feet. <i>Gear:</i> A map of a city's back ways, a lucky charm, 5 gc.</p></text>
+				<text type="formattedtext"><p><b>Grave Digger</b> (Athletics, Religion). You buried the dead of a town that had too many. You know the old rites, and what a disturbed grave looks like. <i>Gear:</i> Choose A or B: (A) Shovel, Holy Symbol, 10 gc; or (B) 20 gc. A shovel, a holy symbol of the dead, 10 gc.</p><p><b>Lamplighter</b> (Perception, Investigation). You kept the street lamps of a city burning through the long nights. You know how long a flame lasts, and what moves when it goes out. <i>Gear:</i> Choose A or B: (A) Lantern, Hooded, 2 Oil, Flask, 10 gc; or (B) 20 gc. A hooded lantern, two flasks of oil, 10 gc.</p><p><b>Deserter</b> (Athletics, Stealth). You fled a war you did not believe in, and they are still looking for you. <i>Gear:</i> Choose A or B: (A) Dagger, 5 gc; or (B) 10 gc. A worn sword-belt, a forged pass, 5 gc.</p><p><b>Acolyte of the Ash</b> (Religion, Insight). You served a temple that keeps vigil fires against the dark. Its priests will give you a meal and a bed, and ask questions. <i>Gear:</i> Choose A or B: (A) Holy Symbol, 10 gc; or (B) 15 gc. A holy symbol, prayer beads, incense, 10 gc.</p><p><b>Smuggler</b> (Deception, Sleight of Hand). You moved what was not allowed across borders that were not watched. You know who to pay, and how much. <i>Gear:</i> 15 gc. A coat with hidden pockets, 15 gc.</p><p><b>Hedge Scholar</b> (Arcana, History). You learned from books nobody else wanted, in libraries nobody else visited. <i>Gear:</i> Choose A or B: (A) Ink and Quill, 10 gc; or (B) 15 gc. Ink, a quill, a book of half-remembered lore, 10 gc.</p><p><b>Hunter</b> (Survival, Nature). You fed your family from the forest's edge, and learned which tracks to follow and which to run from. <i>Gear:</i> Choose A or B: (A) Hunting Trap, Dagger, 10 gc; or (B) 20 gc. A hunting trap, a skinning knife, 10 gc.</p><p><b>Street Rat</b> (Stealth, Sleight of Hand). You grew up on the streets and the rooftops, fed by quick hands and quicker feet. <i>Gear:</i> Choose A or B: (A) Lucky Charm, 5 gc; or (B) 10 gc. A map of a city's back ways, a lucky charm, 5 gc.</p></text>
 			</p0018>
 			<p0019>
 				<name type="string">Light and Time</name>

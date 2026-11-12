@@ -17,6 +17,8 @@
 //   spellcasting {stat, dc, attack}, slots {l1: {max, used}}, spells [names],
 //   deathsaves {success, failure}, hitdice {die, total, used}.
 
+import { backgroundInfo, classInfo, currenciesOf, mainCurrency, speciesInfo, totalWealth } from "./wizard.mjs";
+
 export const RULESET = "dnd5e";
 export const RULESET_NAME = "D&D 5E";
 
@@ -331,13 +333,22 @@ export function dreadAdvantage(data, kind, key, advantage = "") {
 }
 export const titled = (word) => String(word ?? "").replace(/^\w/, (letter) => letter.toUpperCase());
 
-// Builds a character from a spec, as FG's 5E character wizard does (SRD 5.2.1):
-//   { name, species, class, background, level, scores {stat: final score},
-//     skills [names], gear [[item name, count]] (worn: armor and shield are
-//     equipped), gold, spells [names], alignment, notes }
-// lib: { classes, species, backgrounds, items, spells } (records). Hit points:
-// the hit die's maximum at level 1 plus CON, then the fixed value (half the
-// die + 1) each level (FG's default; a level up from the sheet rolls).
+// Builds a character from a spec, as FG's 5E character wizard commits one
+// (commitCharacter: basics, ability scores, skills, proficiencies, languages,
+// feats, species, background, classes, spells, inventory, currency):
+//   { name, species, ancestry, size, class, subclass, background, level,
+//     scores {stat: score before the kin's adjustments}, increases {stat: n}
+//     (a background's +2/+1, an Ability Score Improvement, misc),
+//     skills [the class's choices], backgroundSkills, speciesSkills, expertise,
+//     languages, tools, feats [names] (a background's own feat is added),
+//     kits { class: "A" | "B" | "C", background: "A" | ... } (the books' starting
+//     kits: items and wealth), gear [[item name, count]] (more items, free;
+//     armor and shields worn, weapons in hand), coins { GP: n, ... } (custom),
+//     wealth (a rolled Legacy starting wealth: kits then give nothing),
+//     gold (the main coin, as before), spells [names], alignment, notes, warnings }
+// lib: { classes, species, ancestries, backgrounds, subclasses, feats, items, spells }.
+// Hit points: the hit die's maximum at level 1 plus CON, then the fixed value
+// (half the die + 1) each level (FG's default; a level up from the sheet rolls).
 // A kin's ability adjustments ("Dexterity +1, Constitution -1"): {stat: n}.
 export function abilityAdjustments(speciesRecord) {
   const out = {};
@@ -353,72 +364,133 @@ export const toughnessOf = (speciesRecord) => (/hit point maximum increases by 1
 export function buildFromSpec(spec, lib, rulesetId = RULESET) {
   const profile = profileFor(rulesetId);
   const problems = [];
-  const find = (list, name) => list.find((record) => String(record.name).toLowerCase() === String(name ?? "").toLowerCase()) ?? null;
+  const find = (list, name) => (list ?? []).find((record) => String(record.name).toLowerCase() === String(name ?? "").toLowerCase()) ?? null;
   const cls = find(lib.classes, spec.class);
   if (!cls) throw new Error(`No class ${spec.class} in the books (make the SRD player module active).`);
   const species = spec.species || spec.race ? find(lib.species, spec.species ?? spec.race) : null;
   if ((spec.species || spec.race) && !species) problems.push(`No species ${spec.species ?? spec.race}.`);
+  const ancestry = spec.ancestry ? find(lib.ancestries, spec.ancestry) : null;
+  if (spec.ancestry && !ancestry) problems.push(`No ancestry ${spec.ancestry}.`);
   const background = spec.background ? find(lib.backgrounds, spec.background) : null;
   if (spec.background && !background) problems.push(`No background ${spec.background}.`);
+  const subclass = spec.subclass ? find(lib.subclasses, spec.subclass) : null;
+  if (spec.subclass && !subclass) problems.push(`No subclass ${spec.subclass}.`);
   const level = Math.min(profile.maxLevel, Math.max(1, Math.round(num(spec.level, 1))));
-  // The scores chosen, with the kin's adjustments (Descending Darkness's kin; SRD species have none).
+  const kin = speciesInfo(species, ancestry);
+  const bg = backgroundInfo(background, lib.items ?? []);
+  const klass = classInfo(cls, level, subclass);
+  // The scores chosen, the kin's adjustments (Descending Darkness's kin; SRD species have none), the increases.
   const adjust = abilityAdjustments(species);
-  const scores = Object.fromEntries(STATS.map((stat) => [stat, num(spec.scores?.[stat], 10) + (adjust[stat] ?? 0)]));
+  // A Legacy species' own increases count unless a 2024 background gives them (updateAbilities).
+  if (!bg?.is2024) for (const [stat, n] of Object.entries(kin?.increases ?? {})) adjust[stat] = (adjust[stat] ?? 0) + n;
+  const scores = Object.fromEntries(STATS.map((stat) => [stat, num(spec.scores?.[stat], 10) + (adjust[stat] ?? 0) + num(spec.increases?.[stat], 0)]));
   const saves = classSaves(cls);
   const abilities = Object.fromEntries(STATS.map((stat) => [stat, { score: num(scores[stat], 10), saveprof: saves.includes(stat) ? 1 : 0 }]));
-  // Skills: the background's two, and the class's choices (the spec's, else the first allowed).
+  // Skills: the background's and the species' own and chosen, the class's choices (the spec's, else the first allowed), expertise.
   const skills = {};
-  const fromBackground = String(background?.data?.skill ?? "").split(/,|\band\b/i).map(skillKey).filter((key) => SKILLS[key]);
-  for (const key of fromBackground) skills[key] = { prof: 1 };
+  const listed = (value) => (Array.isArray(value) ? value : value ? [value] : []);
+  for (const key of [...(bg?.skills.base ?? []), ...(kin?.skills.base ?? []), ...listed(spec.backgroundSkills).map(skillKey), ...listed(spec.speciesSkills).map(skillKey)]) if (SKILLS[key]) skills[key] = { prof: 1 };
   const choices = classSkillChoices(cls);
-  const wanted = (spec.skills ?? []).map(skillKey).filter((key) => SKILLS[key] && !skills[key]);
+  const wanted = listed(spec.skills).map(skillKey).filter((key) => SKILLS[key] && !skills[key]);
   const allowed = wanted.filter((key) => choices.names.includes(key));
   for (const key of wanted.filter((key) => !choices.names.includes(key))) problems.push(`${SKILLS[key][0]} is not a ${cls.name} skill.`);
   for (const key of choices.names) if (allowed.length < choices.count && !skills[key] && !allowed.includes(key) && !wanted.length) allowed.push(key);
   for (const key of allowed.slice(0, choices.count)) skills[key] = { prof: 1 };
-  // Gear: by name from the books (or a plain line), armor and shields worn, weapons in hand.
+  for (const key of listed(spec.expertise).map(skillKey)) if (SKILLS[key]) skills[key] = { prof: 2 };
+  // Inventory: the starting kits (FG's addCommitInventory: a 2024 class's kit,
+  // or a Legacy class's when no wealth was rolled; the background's), then the
+  // items added. Armor and shields worn, weapons in hand.
   const inventorylist = {};
   let n = 1;
+  const add = (name, count, data) => {
+    const existing = Object.values(inventorylist).find((item) => String(item.name).toLowerCase() === String(name).toLowerCase());
+    if (existing) {
+      existing.count += Math.max(1, Math.round(num(count, 1)));
+      return;
+    }
+    const copy = { ...data };
+    delete copy.fgPath;
+    delete copy.count;
+    inventorylist[`id-${String(n++).padStart(5, "0")}`] = { ...copy, name: copy.name ?? String(name), count: Math.max(1, Math.round(num(count, 1))), carried: isArmor(copy) || isWeapon(copy) ? 2 : 1 };
+  };
+  const rolled = Math.max(0, Math.round(num(spec.wealth, 0)));
+  const processKits = klass.kits.length > 0 || rolled === 0;
+  const pickKit = (options, letter, what) => {
+    if (!letter) return null;
+    const option = options.find((item) => item.letter === String(letter).toUpperCase());
+    if (!option) problems.push(`No ${what} kit ${letter}.`);
+    return option ?? null;
+  };
+  const classKit = processKits ? pickKit(klass.kits, spec.kits?.class, `${cls.name}`) : null;
+  const backgroundKit = processKits && bg ? pickKit(bg.kits, spec.kits?.background, `${bg.name}`) : null;
+  for (const item of [...(classKit?.items ?? []), ...(backgroundKit?.items ?? [])]) add(item.name, item.count, item.data);
   for (const [name, count = 1] of spec.gear ?? []) {
     const item = find(lib.items, name);
     if (!item) problems.push(`No item ${name}.`);
-    const data = item ? { ...item.data } : { name: String(name) };
-    delete data.fgPath;
-    inventorylist[`id-${String(n++).padStart(5, "0")}`] = { ...data, name: data.name ?? String(name), count: Math.max(1, Math.round(num(count, 1))), carried: isArmor(data) || isWeapon(data) ? 2 : 1 };
+    add(item?.name ?? String(name), count, item ? item.data : { name: String(name) });
   }
+  // Coins (updateTotalWealth): custom amounts, the main coin plus the rolled wealth, or the kits' wealth.
+  const main = mainCurrency(profile.id);
+  const custom = { ...(spec.coins ?? {}) };
+  const coinKey = (name) => currenciesOf(profile.id).find((coin) => coin.toLowerCase() === String(name).toLowerCase()) ?? String(name).toUpperCase();
+  const customByCoin = {};
+  for (const [name, amount] of Object.entries(custom)) customByCoin[coinKey(name)] = (customByCoin[coinKey(name)] ?? 0) + num(amount, 0);
+  customByCoin[main] = (customByCoin[main] ?? 0) + Math.max(0, num(spec.gold, 0));
+  const backgroundGold = processKits ? (backgroundKit?.wealth ?? 0) + (bg && !bg.kits.length ? bg.gold : 0) : 0;
+  const totals = totalWealth({ custom: customByCoin, rolled, classGold: classKit?.wealth ?? 0, backgroundGold, profileId: profile.id });
+  for (const [name, amount] of Object.entries(customByCoin)) if (!(name in totals)) totals[name] = amount;
+  const coins = {};
+  let c = 1;
+  for (const [name, amount] of Object.entries(totals)) if (Math.round(amount) > 0) coins[`id-${String(c++).padStart(5, "0")}`] = { name, amount: Math.round(amount) };
+  // Feats: the background's own, then those chosen (species, background, class).
+  const feats = [...new Set([...(bg?.feat ? [bg.feat] : []), ...listed(spec.feats).map(String)].filter(Boolean))];
+  for (const feat of feats) if (lib.feats && !find(lib.feats, feat)) problems.push(`No feat ${feat}.`);
+  // Languages: a 2024 species's Common and those chosen; tools.
+  const languages = [...new Set([...(kin?.languages.base ?? []), ...(bg?.languages.base ?? []), ...listed(spec.languages).map(String)].filter(Boolean))];
+  const tools = [...new Set([...(bg?.tools.base ?? []), ...listed(spec.tools).map(String)].filter(Boolean))];
   const die = hitDie(cls);
   const con = mod(abilities.constitution.score);
   const perLevel = toughnessOf(species);
   const toughness = perLevel * level;
   const hp = die + con + (level - 1) * (Math.floor(die / 2) + 1 + con) + toughness;
   const senses = (() => {
-    const dark = /Darkvision with a range of (\d+) feet/i.exec(Object.values(species?.data?.traits ?? {}).map((trait) => trait.text ?? "").join(" "));
+    const dark = /Darkvision with a range of (\d+) feet/i.exec([...Object.values(species?.data?.traits ?? {}), ...Object.values(ancestry?.data?.traits ?? {})].map((trait) => trait.text ?? "").join(" "));
     return dark ? `Darkvision ${dark[1]} ft` : "";
   })();
+  const warnings = listed(spec.warnings).map(String).filter(Boolean);
   const data = derive({
     ruleset: profile.id,
     hpperlevel: perLevel,
     level,
     species: species?.name ?? String(spec.species ?? spec.race ?? ""),
     race: species?.name ?? String(spec.species ?? spec.race ?? ""),
+    ...(ancestry ? { ancestry: ancestry.name } : {}),
+    size: String(spec.size ?? kin?.size ?? "Medium"),
     background: background?.name ?? String(spec.background ?? ""),
     alignment: String(spec.alignment ?? ""),
-    notes: String(spec.notes ?? ""),
+    notes: [warnings.join("\n"), String(spec.notes ?? "")].filter(Boolean).join("\n\n"),
     abilities,
     skills,
     proficiencies: { martial: martialClass(cls) },
-    packages: { "id-00001": { name: cls.name, packagetype: "Class", level, hitdie: die } },
+    proficiencylist: { armor: klass.armor, weapons: klass.weapons, tools },
+    languages,
+    feats,
+    traits: (kin?.traits ?? []).map((trait) => String(trait.name)),
+    features: klass.features.map((feature) => `${feature.name} (${feature.subclass || cls.name} ${feature.level})`),
+    ...(subclass ? { subclass: subclass.name } : {}),
+    packages: { "id-00001": { name: cls.name, packagetype: "Class", level, hitdie: die, ...(subclass ? { subclass: subclass.name } : {}) } },
     hitdice: { die, total: level, used: 0 },
     hp: { total: Math.max(1, hp), wounds: 0 },
     speed: String(species?.data?.speed ?? "30 feet").replace(/\s*feet/i, " ft."),
     senses,
     inventorylist,
-    coins: num(spec.gold, 0) > 0 ? { "id-00001": { name: "gp", amount: Math.round(num(spec.gold, 0)) } } : {},
+    coins,
     spells: (spec.spells ?? []).map((name) => find(lib.spells, name)?.name ?? (problems.push(`No spell ${name}.`), null)).filter(Boolean),
     exp: profile.xp[level - 1] ?? 0,
   });
   return { name: String(spec.name ?? "").trim() || "Adventurer", data, problems };
 }
+
 
 // A level up: the hit die rolled (rolled: the die's number) + CON, at least 1; the next level's numbers.
 export function levelUp(input, rolled) {

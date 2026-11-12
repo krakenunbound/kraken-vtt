@@ -87,22 +87,78 @@ try {
   await seat.click('button[type="submit"]');
   await seat.waitForSelector(".sidebar");
 
-  // The 5E wizard: a dwarf fighter, the scores typed, two skills, the starting gear.
+  // The 5E wizard, tab by tab as FG's: it opens on Class.
   await seat.click('.sidebar [data-launch="characters"]');
   await seat.click('[data-action="new-character"]');
-  await seat.waitForSelector('[data-wizard="dnd5e"]');
-  await seat.fill('[aria-label="Character name"]', "Brundar");
-  await seat.selectOption('[aria-label="Species"]', "Dwarf");
-  await seat.selectOption('[aria-label="Class"]', "Fighter");
-  await seat.selectOption('[aria-label="Background"]', "Soldier");
-  for (const [stat, score] of [["strength", 16], ["dexterity", 12], ["constitution", 15], ["intelligence", 8], ["wisdom", 13], ["charisma", 10]]) await seat.fill(`[aria-label="${stat} score"]`, String(score));
-  await seat.check('[data-wizard-skill="perception"]');
-  await seat.check('[data-wizard-skill="survival"]');
-  await seat.click('[data-action="wizard-finish"]');
+  await seat.waitForSelector('[data-wizard="dnd5e"][data-page="class"]');
+  const wizard = '[data-wizard="dnd5e"]';
+  const badge = (tab) => seat.getAttribute(`${wizard} [data-wizard-tab="${tab}"] [data-alert]`, "data-alert");
+  for (const tab of ["species", "class", "abilities", "background"]) assert((await badge(tab)) === "todo", `${tab} starts with its alert`);
+  const choose = async (id, label) => {
+    await seat.selectOption(`${wizard} select[data-decision="${id}"]`, label ? { label } : { index: 1 });
+  };
+  // Class: the Fighter, its two skills, its Fighting Style feat.
+  await seat.click(`${wizard} [data-class="Fighter"]`);
+  await choose("class:proficiencies:skill:0", "Perception");
+  await choose("class:proficiencies:skill:1", "Survival");
+  assert(!(await seat.$$eval(`${wizard} select[data-decision="class:proficiencies:skill:1"] option`, (options) => options.map((o) => o.textContent))).includes("Perception"), "a skill taken is gone from the other choice");
+  await choose("class:fightingstyle:1:feat", "Defense");
+  assert((await badge("class")) === "done" && (await badge("equipment")) === "todo", "the class is done; its kit is to choose");
+  // Species: a dwarf, Common and two languages.
+  await seat.click(`${wizard} [data-wizard-tab="species"]`);
+  await seat.click(`${wizard} [data-species="Dwarf"]`);
+  await choose("species:language:0", "Elvish");
+  await choose("species:language:1", "Dwarvish");
+  assert((await badge("species")) === "done", "the species is done");
+  // Abilities: the standard array's swap, point buy's points, then 4d6 drop the lowest rolled by the host.
+  await seat.click(`${wizard} [data-wizard-tab="abilities"]`);
+  await seat.selectOption(`${wizard} select[aria-label="Ability method"]`, "Standard Array");
+  await seat.click(`${wizard} [data-swap="strength:right"]`);
+  assert((await seat.textContent(`${wizard} b[data-base="strength"]`)) === "14" && (await seat.textContent(`${wizard} b[data-base="dexterity"]`)) === "15", "the array's arrows swap Strength and Dexterity");
+  await seat.selectOption(`${wizard} select[aria-label="Ability method"]`, "Point Buy");
+  for (let step = 0; step < 7; step++) await seat.click(`${wizard} [data-point="strength:up"]`);
+  assert((await seat.textContent(`${wizard} [data-points-used]`)) === "9" && (await seat.isDisabled(`${wizard} [data-point="strength:up"]`)), "point buy: 15 costs 9, no higher");
+  assert((await badge("abilities")) === "todo", "point buy waits for all 27 points");
+  await seat.selectOption(`${wizard} select[aria-label="Ability method"]`, "Dice Roll");
+  // 15, 12, 13, 8, 13, 10 after dropping each lowest die.
+  await tool("kraken_dice_force", { values: [5, 5, 5, 1, 4, 4, 4, 1, 5, 4, 4, 1, 3, 3, 2, 1, 5, 4, 4, 1, 4, 3, 3, 1] });
+  await seat.click(`${wizard} [data-action="roll-abilities"]`);
+  await seat.waitForFunction(() => document.querySelector('[data-wizard="dnd5e"] input[data-base="charisma"]')?.value === "10", null, { timeout: 20000 });
+  await page.waitForFunction(() => document.body.textContent.includes("[ABILITY SCORE GENERATION] Charisma"), null, { timeout: 10000 });
+  assert((await seat.inputValue(`${wizard} input[data-base="strength"]`)) === "15" && (await seat.inputValue(`${wizard} input[data-base="intelligence"]`)) === "8", "the host's 4d6 drop the lowest in the Base column");
+  await seat.screenshot({ path: path.join(tmpdir(), "kraken-dnd5e-wizard-abilities.png") });
+  // Background: the Soldier, +2 Constitution and +1 Strength, a gaming set.
+  await seat.click(`${wizard} [data-wizard-tab="background"]`);
+  await seat.click(`${wizard} [data-background="Soldier"]`);
+  await choose("background:asioption", "Option 1: One +2, One +1");
+  await choose("background:asi:0", "Constitution");
+  await choose("background:asi:1", "Strength");
+  if (await seat.$(`${wizard} select[data-decision="background:toolprof:0"] option:nth-child(2)`)) await choose("background:toolprof:0");
+  await seat.click(`${wizard} [data-wizard-tab="abilities"]`);
+  assert((await seat.textContent(`${wizard} [data-total="strength"]`)).startsWith("16") && (await seat.textContent(`${wizard} [data-total="constitution"]`)).startsWith("15"), "the background's increases in the totals");
+  // Equipment: the class's kit A and the background's kit A (their coin), a rope added.
+  await seat.click(`${wizard} [data-wizard-tab="equipment"]`);
+  await seat.click(`${wizard} [data-kit="class:A"]`);
+  await seat.click(`${wizard} [data-kit="background:A"]`);
+  await seat.fill(`${wizard} input[aria-label="Item name filter"]`, "Rope");
+  await seat.click(`${wizard} [data-add-item="Rope"]`);
+  assert((await seat.textContent(`${wizard} [data-total-coin="GP"] b`)) === "18", "4 GP (class kit A) + 14 GP (background kit A)");
+  assert((await badge("equipment")) === "done" && (await badge("background")) === "done", "equipment and background done");
+  await seat.screenshot({ path: path.join(tmpdir(), "kraken-dnd5e-wizard-equipment.png") });
+  // Commit: no warnings left, the name, Save.
+  await seat.click(`${wizard} [data-wizard-tab="commit"]`);
+  assert(!(await seat.$(`${wizard} [data-warnings]`)), `no warnings: ${await seat.textContent(`${wizard} [data-warnings]`).catch(() => "")}`);
+  await seat.fill(`${wizard} [aria-label="Character name"]`, "Brundar");
+  await seat.screenshot({ path: path.join(tmpdir(), "kraken-dnd5e-wizard-commit.png") });
+  await seat.click(`${wizard} [data-action="wizard-finish"]`);
   await seat.waitForSelector('.sheet-5e [data-stat="ac"]', { timeout: 15000 });
   const row = listOf(await tool("kraken_records_list", { type: "character" })).find((item) => item.name === "Brundar");
   const hero = await tool("kraken_record_get", { id: row.id });
+  const carried = Object.values(hero.data.inventorylist).map((item) => item.name);
+  const gp = Object.values(hero.data.coins).find((item) => item.name === "GP")?.amount;
   assert(hero.owner === "A test player" && hero.data.ruleset === "dnd5e" && hero.data.hp.total === 13 && hero.data.ac.total === 16, `the wizard built Brundar (13 HP; chain mail AC 16): ${JSON.stringify({ owner: hero.owner, hp: hero.data.hp, ac: hero.data.ac })}`);
+  assert(["Chain Mail", "Greatsword", "Spear", "Rope"].every((item) => carried.includes(item)) && gp === 18, `kits and coin on the sheet: ${JSON.stringify({ carried, coins: hero.data.coins })}`);
+  assert(hero.data.abilities.strength.score === 16 && hero.data.abilities.constitution.score === 15 && hero.data.skills.perception.prof === 1 && hero.data.skills.athletics.prof === 1 && hero.data.feats.includes("Savage Attacker") && hero.data.feats.includes("Defense") && hero.data.languages.join() === "Common,Elvish,Dwarvish", `scores, skills, feats, languages: ${JSON.stringify({ feats: hero.data.feats, languages: hero.data.languages })}`);
   assert((await seat.textContent('.sheet-5e [data-stat="ac"]')).trim() === "16", "the sheet shows AC 16");
 
   // A skill and a save from the sheet, both in the GM's chat.
@@ -141,7 +197,7 @@ try {
   await seat.screenshot({ path: path.join(tmpdir(), "kraken-dnd5e-player.png") });
   await page.screenshot({ path: path.join(tmpdir(), "kraken-dnd5e-gm.png") });
   assert(failures.length === 0, `page errors: ${failures.join(" | ")}`);
-  console.log(`ok dnd5e ui: a D&D 5E campaign's shelf holds the SRD books (no C&C); a test player makes Brundar with the 5E wizard (13 HP, AC 16), rolls Athletics and a Constitution save from the sheet, and hits a goblin warrior with the ${weapon} from the sheet's Combat tab (${hurt.wounds} damage). ${path.join(tmpdir(), "kraken-dnd5e-player.png")}`);
+  console.log(`ok dnd5e ui: a D&D 5E campaign's shelf holds the SRD books (no C&C); a test player makes Brundar tab by tab in the 5E wizard (Class, Species, Abilities rolled 4d6 drop lowest by the host, Background +2/+1, kits A and 18 GP; 13 HP, AC 16), rolls Athletics and a Constitution save from the sheet, and hits a goblin warrior with the ${weapon} from the sheet's Combat tab (${hurt.wounds} damage). ${path.join(tmpdir(), "kraken-dnd5e-player.png")}`);
 } finally {
   await browser?.close();
   child.kill();
