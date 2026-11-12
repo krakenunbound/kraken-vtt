@@ -119,6 +119,8 @@ try {
   // A pin opens its story entry.
   await page.evaluate(() => [...document.querySelectorAll("[data-label-text]")].find((node) => node.getAttribute("data-label-text") === "A. Kobold Lair")?.dispatchEvent(new MouseEvent("click", { bubbles: true })));
   await page.waitForSelector('[data-window="book"]', { timeout: 15000 });
+  // The adventure and its windows go by the book's name, never its file on disk.
+  assert(!/\.kpack|\.mod\b|[A-Z]:\\/.test(await page.evaluate(() => [...document.querySelectorAll(".window-title, [data-window] header, .viewport-title")].map((node) => node.textContent).join(" | "))), "no file paths in window titles");
   await page.screenshot({ path: path.join(tmpdir(), "kraken-library-ui.png") });
   assert(failures.length === 0, `page errors: ${failures.join(" | ")}`);
   console.log(`ok library ui: B2's playable maps on the table, the kobold ambush on the tracker, the rumor table rolled, a pin opens its story entry. ${path.join(tmpdir(), "kraken-library-ui.png")}`);

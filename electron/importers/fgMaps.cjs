@@ -83,7 +83,7 @@ function fgFont(file) {
 const FX_MAP = { rain: "rain", snow: "snow", blizzard: "blizzard", myst: "fog", clouds: "clouds", water: "water", ocean: "water" };
 
 // One FG image record as a scene for the bundle, and Kraken's extras for it.
-function imageScene(record, moduleName, sceneId) {
+function imageScene(record, moduleName, sceneId, label = moduleName) {
   const image = record.data?.image ?? {};
   const layers = list(image.layers?.layer);
   // FG Unity's layers; an older module's image is its bitmap alone (no layers).
@@ -155,7 +155,7 @@ function imageScene(record, moduleName, sceneId) {
       icon: encounter ? "trap" : "pin",
       size: 0.4,
       group: encounter ? "Encounters" : "Map keys",
-      link: { kind: "fg", id: `${layer.shortcut.record}@${moduleName}`, class: String(layer.shortcut.class ?? "") },
+      link: { kind: "fg", id: `${layer.shortcut.record}@${label}`, class: String(layer.shortcut.class ?? "") },
     });
   }
   const fx = layers
@@ -269,6 +269,8 @@ function isMap(record) {
 
 function fgModuleBundle(moduleName, { only, all = false } = {}) {
   const module = readModule(moduleName, { only: new Set(["image"]) });
+  // The book's own name (moduleName may be its file, as the shelf resolves it): scene ids, pins and the adventure go by the name.
+  const label = String(module.info?.name || moduleName);
   const files = {};
   const scenes = [];
   const extras = {};
@@ -279,16 +281,16 @@ function fgModuleBundle(moduleName, { only, all = false } = {}) {
   for (const record of exact.length ? exact : images) {
     if (only && !exact.length && !only.some((name) => String(record.name).toLowerCase().includes(String(name).toLowerCase()))) continue;
     if (!only && !all && !isMap(record)) continue;
-    const id = `fg-${slug(moduleName).slice(0, 16)}-${slug(record.name)}`.slice(0, 70);
-    const made = imageScene(record, moduleName, id);
+    const id = `fg-${slug(label).slice(0, 16)}-${slug(record.name)}`.slice(0, 70);
+    const made = imageScene(record, moduleName, id, label);
     if (!made) continue;
     files[made.file] = new Uint8Array(made.bytes);
     scenes.push(made.scene);
-    extras[id] = { pins: [...made.pins, ...made.texts], fx: made.fx, tiles: made.tiles, groups: made.groups, gridOffset: made.gridOffset, walls: made.scene.walls.length, lights: made.scene.lights.length, frame: { image: String(record.data.fgPath ?? "").replace(/@.*$/, ""), module: moduleName, width: made.scene.width, height: made.scene.height } };
+    extras[id] = { pins: [...made.pins, ...made.texts], fx: made.fx, tiles: made.tiles, groups: made.groups, gridOffset: made.gridOffset, walls: made.scene.walls.length, lights: made.scene.lights.length, frame: { image: String(record.data.fgPath ?? "").replace(/@.*$/, ""), module: label, width: made.scene.width, height: made.scene.height } };
   }
-  if (scenes.length === 0) throw new Error(`No maps in ${moduleName}.`);
-  files["bundle.json"] = strToU8(JSON.stringify({ adventureData: { name: module.name ?? moduleName, scenes } }));
-  return { bytes: zipSync(files, { level: 0 }), name: `${moduleName}.zip`, scenes: scenes.map((scene) => ({ id: scene._id, name: scene.name, walls: scene.walls.length, lights: scene.lights.length })), extras };
+  if (scenes.length === 0) throw new Error(`No maps in ${label}.`);
+  files["bundle.json"] = strToU8(JSON.stringify({ adventureData: { name: label, scenes } }));
+  return { bytes: zipSync(files, { level: 0 }), name: `${label}.zip`, scenes: scenes.map((scene) => ({ id: scene._id, name: scene.name, walls: scene.walls.length, lights: scene.lights.length })), extras };
 }
 
 // A map record's picture file (its base layer's, or an older module's bitmap).

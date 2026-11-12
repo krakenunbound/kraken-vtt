@@ -105,14 +105,17 @@ sheet, into chat, into a story entry, onto the hotbar.
   record the book holds (a creature, spell, item, class, race, feat, table,
   encounter) opens in its own window. A table shows as a table, an
   equipment list as its sections, and a web link opens in your browser.
+- Your own background decals go in `%APPDATA%kraken-vttassetsdecals`;
+  in a folder named for a game (`D&D 3.5e`), they show under its filter.
 - **New** (on the NPCs, Items and other lists, as Fantasy Grounds' +) makes
   a record and opens it. A Traveller NPC opens on its own sheet: its six
   characteristics, skills, armour and weapons, which the tracker fights with.
 
 ## Maps
 
-- Open a map from **Images**, from a story entry, or by dropping a picture on
-  the table. The map opens in its own window, which can pop out.
+- Open a map from the **Library** (the sidebar's Adventures: its Maps tab
+  shows each map, and a click lets you see it before it goes to the table or
+  the players), from a story entry, or by dropping a picture on the table. The map opens in its own window, which can pop out.
 - **Tokens:** drag a character or NPC onto the map. A token's right-click menu
   holds its options; a hidden token never reaches the players.
 - **Walls, doors and lights:** maps from your modules and Kraken's own

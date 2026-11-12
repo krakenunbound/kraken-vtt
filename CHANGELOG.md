@@ -4,6 +4,26 @@ What changed in each release of Kraken VTT. Downloads are on the
 [Releases](https://github.com/krakenunbound/kraken-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
+## 0.1.0-alpha.72: The Library, homebrew adventures, your decals
+
+- **The Library** (the sidebar's Adventures) has each kind in its own tab:
+  **Maps**, Encounters, NPCs, Parcels, Tables. The Maps tab shows each map as
+  a picture; click one to see it large (for your eyes only), then **Put on the
+  table** (that map alone, with its walls, doors, lights and pins) or **Show
+  the players the picture**. **All maps to the table** is still there.
+- **All** in the Library's module list: every active adventure's maps,
+  encounters, NPCs, parcels and tables together, under each adventure's name.
+- **Homebrew adventures:** a module with story entries is an adventure,
+  whatever it is called, so its story shows in Story (a GM's own module, named
+  without "adventure" or "module", showed its pictures but not its story).
+- **Your decals:** your own Fantasy Grounds background decals (the Kraken
+  emblems for AD&D 2E, D&D 3.5e, D&D and Castles & Crusades) copied into
+  Kraken's assets, and a game's own decals kept in a folder named for it
+  (assets/decals/D&D 3.5e/) show under that game's filter.
+- Fixed: a map put on the table from a book read from a pack or a renamed
+  module was named by its file on disk (shown in the map's window, and a map
+  pin then opened an empty book).
+
 ## 0.1.0-alpha.71: Your FG character wizards, every ruleset played end to end
 
 Every ruleset's character wizard is now the one built and tested in Fantasy
