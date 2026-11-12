@@ -13,14 +13,23 @@ const RULESET_NAME = "D&D 3.5E";
 const is35Ruleset = (name) => String(name ?? "") === RULESET_NAME;
 const is35 = (thing) => thing?.data?.ruleset === "dnd35";
 
-function library35(records) {
+let wizardLoaded = null;
+const wizard35 = () => (wizardLoaded ??= import(pathToFileURL(path.join(__dirname, "..", "shared", "dnd35", "wizard.mjs")).href));
+
+// The books a 3.5E character is built from: classes, races, gear, feats, the
+// spells (a book's "spell" or the 3.5E Spells book's "spelldesc" records) and
+// the cleric domains (its "spelllists").
+async function library35(records) {
   const list = (type) => records.list({ type });
-  return { classes: list("class"), races: list("race"), items: list("item"), feats: list("feat"), spells: list("spell") };
+  const spells = [...list("spell"), ...list("spelldesc")];
+  const { makeLib } = await wizard35();
+  const { domains } = makeLib([...spells, ...list("spelllists")]);
+  return { classes: list("class"), races: list("race"), items: list("item"), feats: list("feat"), spells, domains };
 }
 
 async function build35(table, spec, owner, seat) {
   const rules = await rules35();
-  const lib = library35(table.records);
+  const lib = await library35(table.records);
   if (lib.classes.length === 0) throw new Error("No 3.5E classes in this campaign: make the 3.5E Player's Handbook active (Books).");
   const built = rules.buildFromSpec(spec ?? {}, lib);
   const data = require("./characterArt.cjs").withArt(built.data, spec, table.art);

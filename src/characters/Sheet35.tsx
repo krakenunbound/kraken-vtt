@@ -1,10 +1,10 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import type { Session, TableRecord } from "../session/useSession";
 import { Icon } from "../ui/icons";
 import { slotDrag } from "../ui/QuickSlots";
-import { ArtChoice, ArtPicker, Picture } from "./ArtPicker";
+import { ArtPicker, Picture } from "./ArtPicker";
 import { Field } from "./CCSheet";
-import { CASTERS, classInfo, MAX_LEVEL, mod, raceInfo, SAVE_NAMES, SAVES, signed, SKILLS, STANDARD_ARRAY, STATS } from "../../shared/dnd35/rules.mjs";
+import { MAX_LEVEL, SAVE_NAMES, SAVES, signed, SKILLS, STATS } from "../../shared/dnd35/rules.mjs";
 
 // The D&D 3.5E character sheet (SRD 3.5), laid out as FG's 3.5E sheet in
 // Kraken's sheet style: portrait and who they are on top; tabs down the right
@@ -380,129 +380,5 @@ export function Sheet35({ record, session }: { record: TableRecord; session: Ses
         ))}
       </nav>
     </article>
-  );
-}
-
-// The 3.5E character wizard: name, race, class and level, ability scores (the
-// standard array put in the class's order, or your own), then the host builds
-// the rest from the campaign's 3.5E Player's Handbook: hit points, the class's
-// feats and skills, its kit.
-const ORDER: Record<string, string[]> = {
-  barbarian: ["strength", "constitution", "dexterity", "wisdom", "charisma", "intelligence"],
-  bard: ["charisma", "dexterity", "constitution", "intelligence", "wisdom", "strength"],
-  cleric: ["wisdom", "constitution", "strength", "charisma", "dexterity", "intelligence"],
-  druid: ["wisdom", "constitution", "dexterity", "intelligence", "charisma", "strength"],
-  fighter: ["strength", "constitution", "dexterity", "wisdom", "intelligence", "charisma"],
-  monk: ["wisdom", "dexterity", "strength", "constitution", "intelligence", "charisma"],
-  paladin: ["charisma", "strength", "constitution", "wisdom", "dexterity", "intelligence"],
-  ranger: ["dexterity", "wisdom", "strength", "constitution", "intelligence", "charisma"],
-  rogue: ["dexterity", "intelligence", "constitution", "charisma", "wisdom", "strength"],
-  sorcerer: ["charisma", "dexterity", "constitution", "intelligence", "wisdom", "strength"],
-  wizard: ["intelligence", "dexterity", "constitution", "wisdom", "charisma", "strength"],
-};
-const arrayFor = (cls: string) => {
-  const order = ORDER[cls.toLowerCase().replace(/[^a-z]/g, "")] ?? STATS;
-  return Object.fromEntries(STATS.map((stat) => [stat, STANDARD_ARRAY[order.indexOf(stat)]])) as Record<string, number>;
-};
-
-export function Wizard35({ session, onDone }: { session: Session; onDone: (id: string | null) => void }) {
-  const records = Object.values(session.records);
-  const of = (type: string) => records.filter((item) => item.type === type).sort((a, b) => a.name.localeCompare(b.name));
-  const classes = useMemo(() => of("class"), [records.length]); // eslint-disable-line react-hooks/exhaustive-deps
-  const races = useMemo(() => of("race"), [records.length]); // eslint-disable-line react-hooks/exhaustive-deps
-  const [name, setName] = useState("");
-  const [race, setRace] = useState(races.find((item) => item.name === "Human")?.name ?? races[0]?.name ?? "Human");
-  const [cls, setCls] = useState(classes.find((item) => item.name === "Fighter")?.name ?? classes[0]?.name ?? "");
-  const [level, setLevel] = useState(1);
-  const [scores, setScores] = useState<Record<string, number>>(() => arrayFor(cls));
-  const [art, setArt] = useState<Record<string, string>>({});
-  const [busy, setBusy] = useState(false);
-  const [problem, setProblem] = useState("");
-  const raceRecord = races.find((item) => item.name === race);
-  const adjust = (raceRecord ? raceInfo(raceRecord).adjust : {}) as Record<string, number>;
-  const classRecord = classes.find((item) => item.name === cls);
-  const info = classRecord ? classInfo(classRecord) : null;
-  const caster = CASTERS[cls.toLowerCase().replace(/[^a-z]/g, "") as keyof typeof CASTERS];
-  const finish = async () => {
-    setBusy(true);
-    setProblem("");
-    try {
-      const id = await session.buildCharacter({ name: name || "Adventurer", class: cls, race, level, scores, ...art });
-      onDone(id);
-    } catch (error) {
-      setProblem(error instanceof Error ? error.message : String(error));
-    } finally {
-      setBusy(false);
-    }
-  };
-  if (classes.length === 0) return <p className="hint">No classes yet: the GM makes the 3.5E Player's Handbook active (Books).</p>;
-  return (
-    <section className="wizard-5e wizard-35 cc-panel" aria-label="D&D 3.5E character wizard" data-wizard="dnd35">
-      <header className="cc-row">
-        <b>New D&amp;D 3.5E character</b>
-        <span className="me-spacer" />
-        <button type="button" className="ghost" onClick={() => onDone(null)}>
-          Cancel
-        </button>
-        <button type="button" data-action="wizard-finish" disabled={busy || !cls} title="Make the character" onClick={() => void finish()}>
-          Finish
-        </button>
-      </header>
-      <div className="wizard-5e-grid">
-        <ArtChoice session={session} race={race} cls={cls} value={art} onChange={setArt} />
-        <label>
-          Name <input value={name} onChange={(event) => setName(event.target.value)} aria-label="Character name" />
-        </label>
-        <label>
-          Race
-          <select value={race} onChange={(event) => setRace(event.target.value)} aria-label="Race">
-            {races.map((item) => (
-              <option key={item.id}>{item.name}</option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Class
-          <select
-            value={cls}
-            aria-label="Class"
-            onChange={(event) => {
-              setCls(event.target.value);
-              setScores(arrayFor(event.target.value));
-            }}
-          >
-            {classes.map((item) => (
-              <option key={item.id}>{item.name}</option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Level
-          <input type="number" min={1} max={MAX_LEVEL} value={level} aria-label="Level" onChange={(event) => setLevel(Math.min(MAX_LEVEL, Math.max(1, Number(event.target.value) || 1)))} />
-        </label>
-      </div>
-      {info ? (
-        <p className="hint" data-class-info>
-          {info.name}: hit die d{info.hitdie}, base attack {info.bab.toLowerCase()}, Fortitude {info.fort.toLowerCase()}, Reflex {info.ref.toLowerCase()}, Will {info.will.toLowerCase()}, {info.skillranks} + Int skill points a level{caster ? `, casts with ${caster.stat}` : ""}.
-        </p>
-      ) : null}
-      <h4>
-        Ability scores <small className="hint">the standard array {STANDARD_ARRAY.join(", ")} in the class's order; type your own{Object.keys(adjust).length ? `; then the ${race}'s adjustments` : ""}</small>
-      </h4>
-      <div className="wizard-5e-scores">
-        {STATS.map((stat) => (
-          <label key={stat}>
-            {stat.slice(0, 3).toUpperCase()}
-            <input type="number" min={3} max={20} value={scores[stat]} aria-label={`${stat} score`} onChange={(event) => setScores({ ...scores, [stat]: Number(event.target.value) || 10 })} />
-            <small>
-              {adjust[stat] ? <b data-adjust={stat}>{signed(adjust[stat])} = {scores[stat] + adjust[stat]} </b> : null}
-              {signed(mod(scores[stat] + (adjust[stat] ?? 0)))}
-            </small>
-          </label>
-        ))}
-      </div>
-      <p className="hint">The host works out the rest from the books: hit points (the die's highest, then its average), the class's feats and skills, and its starting kit. Change any of it on the sheet.</p>
-      {problem ? <p className="error">{problem}</p> : null}
-    </section>
   );
 }

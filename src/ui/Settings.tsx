@@ -38,6 +38,7 @@ export function SettingsWindow({ session }: { session: Session }) {
         Let players see their own dice-tower rolls (unticked: only the GM sees them, as in FG)
       </label> : null}
       {gm ? <DiceHoldSetting session={session} /> : null}
+      {gm && session.ruleset === "D&D 3.5E" ? <Wizard35Setting session={session} /> : null}
       {gm ? (
         <label className="settings-check">
           Clear targets{" "}
@@ -70,6 +71,47 @@ function DiceHoldSetting({ session }: { session: Session }) {
       <input type="number" min={0.5} max={60} step={0.1} value={seconds} aria-label="Dice on the table (seconds)" data-setting="dice-hold" style={{ width: "4.5em" }} onChange={(event) => setSeconds(Number(event.target.value))} onBlur={(event) => send(Number(event.target.value))} onKeyDown={(event) => event.key === "Enter" && send(Number((event.target as HTMLInputElement).value))} />{" "}
       seconds before they fade
     </label>
+  );
+}
+
+// The D&D 3.5E character wizard's options, as the GM's FG extension has them
+// (CW35M1-4, CW35RL, CW35LOW, CW35VOTK): for every player who makes a character.
+const WIZARD35_METHODS: [number, string][] = [
+  [1, "PHB Default (4d6 drop lowest, arrange)"],
+  [2, "Classic (3d6 in order)"],
+  [3, "Standard Array (15, 14, 13, 12, 10, 8)"],
+  [4, "Manual Entry (type scores directly)"],
+];
+function Wizard35Setting({ session }: { session: Session }) {
+  const options = session.options.wizard35 ?? { methods: [1, 2, 3, 4], rollLock: false, lowReroll: false, vault: false };
+  const set = (patch: Partial<typeof options>) => session.setTableOptions({ wizard35: { ...options, ...patch } });
+  return (
+    <fieldset className="settings-group" data-setting="wizard35">
+      <legend>D&amp;D 3.5E Character Wizard</legend>
+      {WIZARD35_METHODS.map(([id, label]) => (
+        <label key={id} className="settings-check">
+          <input
+            type="checkbox"
+            data-setting={`wizard35-method-${id}`}
+            checked={options.methods.includes(id)}
+            onChange={(event) => set({ methods: event.target.checked ? [...options.methods, id].sort() : options.methods.filter((item) => item !== id) })}
+          />
+          Ability method: {label}
+        </label>
+      ))}
+      <label className="settings-check">
+        <input type="checkbox" data-setting="wizard35-roll-lock" checked={options.rollLock} onChange={(event) => set({ rollLock: event.target.checked })} />
+        Lock ability scores after the first roll
+      </label>
+      <label className="settings-check">
+        <input type="checkbox" data-setting="wizard35-low-reroll" checked={options.lowReroll} onChange={(event) => set({ lowReroll: event.target.checked })} />
+        House rule: a 4d6 score under 8 may be rerolled once with 3d6 (the new result stands)
+      </label>
+      <label className="settings-check">
+        <input type="checkbox" data-setting="wizard35-vault" checked={options.vault} onChange={(event) => set({ vault: event.target.checked })} />
+        Vault of the Kraken hand-me-downs: its poor or secondhand gear is free in the wizard&apos;s shop
+      </label>
+    </fieldset>
   );
 }
 

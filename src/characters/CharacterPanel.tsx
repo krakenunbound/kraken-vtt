@@ -11,7 +11,8 @@ import { Picture } from "./ArtPicker";
 import { Wizard } from "./Wizard";
 import { CCSheet } from "./CCSheet";
 import { Sheet5e, Wizard5e } from "./Sheet5e";
-import { Sheet35, Wizard35 } from "./Sheet35";
+import { Sheet35 } from "./Sheet35";
+import { Wizard35 } from "./Wizard35";
 import { Sheet2e, Wizard2e } from "./Sheet2e";
 
 // Characters in and out: Import reads a file from another table (Kraken,

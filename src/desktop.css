@@ -1096,6 +1096,35 @@ textarea.cc-field.tall { min-height: 220px; }
 .ccw-details input.short { width: 70px; flex: none; }
 .ccw .ccw-create { font-size: 1rem; font-weight: 700; padding: 6px 20px; }
 
+/* The D&D 3.5E wizard (the GM's KrakenCharWizard35E): the same parchment,
+   with its own ability table, skill rows, storefront and spell groups. */
+.ccw35-abilities { display: grid; grid-template-columns: 110px 70px 64px 64px 56px minmax(0, 1fr); align-items: center; gap: 6px 10px; margin: 8px 0; }
+.ccw35-abilities > small { color: #6b5536; text-align: center; }
+.ccw35-ability { display: contents; }
+.ccw35-ability input { width: 60px; }
+.ccw35-ability-buttons { display: inline-flex; gap: 4px; }
+.ccw .ccw35-ability-buttons button { padding: 1px 6px; }
+.ccw35-total { font-weight: 700; }
+.ccw35-prose { white-space: pre-wrap; line-height: 1.45; color: #4a3520; }
+.ccw35-skills { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 2px 18px; }
+.ccw35-skill { display: grid; grid-template-columns: 24px 34px 24px minmax(0, 1fr) auto; align-items: center; gap: 6px; padding: 1px 0; border-bottom: 1px solid rgba(138, 106, 60, 0.18); }
+.ccw .ccw35-skill button { padding: 0; width: 24px; height: 22px; }
+.ccw35-skill.class-skill span { font-weight: 700; }
+.ccw35-ranks { text-align: center; }
+.ccw35-shop { display: flex; flex-direction: column; gap: 1px; margin-top: 6px; }
+.ccw35-shop-row { display: grid; grid-template-columns: 26px 26px minmax(0, 1fr) 90px 34px 160px; align-items: center; gap: 6px; padding: 1px 0; border-bottom: 1px solid rgba(138, 106, 60, 0.18); }
+.ccw35-shop-row.on { background: rgba(242, 213, 138, 0.4); }
+.ccw35-shop-row.closed span { color: #8a7a62; }
+.ccw35-bucket { margin-top: 8px; }
+.ccw35-bucket-head { margin: 0 0 4px; color: #6b1e0e; }
+.ccw35-bucket-head.done { color: #2e7d32; }
+.ccw .ccw-remove { padding: 0 6px; font-weight: 700; }
+.ccw .ccw35-warning { display: flex; width: 100%; text-align: left; background: transparent; border: none; padding: 2px 4px; }
+.ccw .ccw35-warning:hover { background: rgba(242, 213, 138, 0.4); }
+.ccw35-summary p { margin: 3px 0; }
+.settings-group { display: flex; flex-direction: column; gap: 4px; margin: 8px 0 0; padding: 6px 10px; border: 1px solid var(--brass-dim); border-radius: 6px; }
+.settings-group legend { color: var(--brass); padding: 0 4px; }
+
 /* Characters in and out: import and export beside the new character button. */
 .character-list-buttons { display: flex; align-items: center; gap: 6px; }
 .character-files { position: relative; display: inline-flex; gap: 4px; }
