@@ -4,6 +4,104 @@ What changed in each release of Kraken VTT. Downloads are on the
 [Releases](https://github.com/krakenunbound/kraken-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
+## 0.1.0-alpha.71: Your FG character wizards, every ruleset played end to end
+
+Every ruleset's character wizard is now the one built and tested in Fantasy
+Grounds, page for page, art and words included; and every one of Kraken's
+eight rulesets passes an end-to-end run of a whole game, from the GM's app and
+a player in Chrome to experience and treasure after a fight.
+
+### Character wizards
+
+- **Traveller:** the GM's KrakenCharWizardMGT2 itself (its term engine and
+  career tables) runs inside Kraken: characteristics rolled and swapped,
+  species, background skills, careers a term at a time (qualification,
+  survival, events, mishaps, commissions, promotions, ageing), mustering out
+  with cash and benefit rolls, benefit items chosen, medical bills,
+  Connections and skill packages, then a shop with the cash left. Every roll is
+  the table's, in chat. Kraken reads the extension from FG's extensions folder
+  and keeps a copy beside the packs, so it works on a computer without FG; the
+  extension is never shipped with Kraken. Only the GM may re-roll the
+  characteristics, as in FG. The invented career tables of alpha.69 are gone.
+- **D&D 5E and Descending Darkness:** FG 5E's wizard, tab by tab (Species,
+  Class, Abilities, Background, Equipment, Commit), each tab marked until its
+  choices are made. Abilities by standard array, point buy or 4d6 drop the
+  lowest (the host's dice); background +2/+1 or three +1s; Ability Score
+  Improvements or feats; class and background kits A/B/C with their coin, or a
+  Legacy class's rolled wealth. Descending Darkness's classes and backgrounds
+  have kits in gold crowns; a kin limits the classes.
+- **D&D 3.5E:** the GM's KrakenCharWizard35E, eleven pages (Abilities, Race,
+  Class, Languages, Alignment, Skills, Feats, Gear, Spells, Details, Commit):
+  the GM's ability methods and roll lock, the low-score reroll house rule,
+  multiclass plans, skill points and rank caps, feats with their
+  prerequisites and targets, starting gold spent in the class's storefront,
+  spells known, a cleric's deity and domains, a wizard's school and familiar.
+- **AD&D 2E:** the GM's KrakenCharWizard2E: Abilities by the PHB's Methods I to
+  VI with 18/xx Strength, Race, Class (level limits, multi- and dual-class,
+  specialist wizards), Kit, Alignment, Equipment (starting wealth by class
+  group, a shop of what the class may use), weapon and nonweapon
+  proficiencies, Spells, Commit. The GM's options are in Settings.
+- **Their art and words:** each page shows its picture faint behind it, as
+  in FG. The 2E wizard's Race and Class pages show the chosen race's and
+  class's portrait and the extension's own narration, and Alignment its
+  descriptions, read from the extension at run time. Traveller's pages have
+  their art and an Instructions panel from the extension's own text.
+- **Apeira Astra:** a shop in the crew wizard (the Crew Handbook's gear at its
+  price in credits, paid from the Path's credits), and "Roll 2d6 each" on the
+  host's dice in chat.
+
+### At the table
+
+- **Share with players** on the map window (FG's Share): the map opens on
+  every player's screen, even where a player closed it.
+- **New** on the GM's NPCs, Items and other lists (FG's +): a new record,
+  opened to fill in. A Traveller NPC opens on its own sheet: the six
+  characteristics, skills, armour, weapons from Kraken's list and notes; its
+  hits and attacks are worked out as the tracker uses them.
+- A parcel's coins are the ruleset's money: MCr and Cr for Traveller (a
+  megacredit lands as a million credits), Cr for Apeira Astra, gold crowns for
+  Descending Darkness.
+- **Add an item** on the sheet's Inventory tab (FG's +), for games with no
+  wizard of their own.
+- **A natural 20** on the 3D dice plays a bugle's "Charge!" as it flares gold,
+  and **a natural 1** a sad trombone (wah wah wah-waaah) as it flares red, for
+  everyone who sees the dice land. Made on the spot, no sound files; they
+  follow your dice sound and volume, and the flare's switch in Dice.
+
+### Books, as Fantasy Grounds reads them
+
+- A page's link to a record the book holds opens it in a window: creatures,
+  spells, items, classes, races, feats, skills, tables, encounters (the
+  campaign's own copy when the book is active). Links inside a record's text
+  work too.
+- FG's tables show as tables (their roll and columns), and equipment lists
+  (a 5E Armor Table, Weapons Table) as their sections.
+- Records kept inside a book's lists are found (a 5E book's races, classes,
+  backgrounds, monsters): the legacy SRD books' dead links all work now.
+- The 3.5E Monster Manual's creature pages (645 of them, kept in a category)
+  open; a 3.5E rulebook's tables are read.
+- Web links open in your browser; superscripts and line breaks typed into a
+  book's text read as such.
+- Older maps (FG modules that mark a map by its grid size alone) open on the
+  table: The Secrets of Skyhorn Lighthouse's four maps.
+- Kraken packs are made in a new format; an older pack gives way to its FG
+  module until it is made again (Books, Packs).
+
+### Fixed
+
+- The Traveller wizard's Careers page crashed in current Chrome.
+- From a review of the new code: a player could send the Traveller wizard
+  steps its pages never offer (free items, extra Connections, skipping
+  medical bills); benefit items could change if a book was activated
+  mid-wizard; a wizard could wait forever for a roll the host never answered;
+  New on C&C's Classes and Races made a broken record; a malformed price let a
+  purchase through; 2E prices of more than one coin ("2 gp 5 sp") read wrong;
+  Library maps of a book named by its title failed; the Apeira Astra wizard's
+  skills were squeezed out of sight by a long shop, and its Finish button out
+  of reach.
+- The installer now carries the Lua engine the Traveller wizard and the
+  extensions' words need.
+
 ## 0.1.0-alpha.70: Ships on the map, and their deck plans
 
 - Ship tokens: each of Kraken's six designs has its own top-down picture, and

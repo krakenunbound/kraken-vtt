@@ -56,7 +56,9 @@ of use, and a built-in AI agent that can do anything the GM can.
 - **Maps.** Image maps and animated tokens, square and hex grids, walls and doors,
   line of sight and fog, lights and darkness, weather, drawing, and a full map
   editor.
-- **Character sheets and wizards** for each game, a combat tracker that rolls
+- **Character sheets and wizards** for each game (with your own Fantasy
+  Grounds character wizard extensions, Kraken runs or follows them page for
+  page), a combat tracker that rolls
   attacks, damage, saves and initiative and applies the results, 3D dice,
   effects, a party sheet and treasure parcels.
 - **Sound.** One-shots, sound effects triggered by the chat (a sword hit, a
