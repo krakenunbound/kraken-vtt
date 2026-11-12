@@ -179,6 +179,8 @@ export type CombatEntry = {
   attacks?: { key: string; name: string; bonus: number; bonuses?: number[]; thaco?: number; damage: string }[];
   /** AD&D 2E: the level this character turns undead at. */
   turns?: number;
+  /** A starship (the 2d6 games): its weapons and who mans them. */
+  ship?: { record: string; thrust: number; criticals: Record<string, number>; weapons: { key: string; name: string; damage: string; range: string; gunner: string; gunnerName: string; mine: boolean; disabled: boolean }[] };
   powers?: { key: string; name: string; uses: number; used: number; damage: string; save: string }[];
 };
 export type CombatView = { round: number; active: string | null; entries: CombatEntry[] };
@@ -790,6 +792,17 @@ export function useSession() {
     });
   }, []);
 
+  // Starships (the 2d6 games): the GM makes one from a design; its sheet's edits (a player takes a station).
+  const shipAction = useCallback((body: { action: "create"; name: string; design: string } | { action: "edit"; id: string; changes: { path: string; value: unknown }[] }) => {
+    const socket = socketRef.current;
+    if (!socket || socket.readyState !== WebSocket.OPEN) return Promise.reject(new Error("Not connected."));
+    const req = ++opCounter.current;
+    return new Promise<string>((resolve, reject) => {
+      opWaits.current.set(req, { resolve, reject });
+      socket.send(JSON.stringify({ type: "starship", req, ...body }));
+    });
+  }, []);
+
   // The GM's account controls: list, create (name, password), password (a new one), remove.
   const accountAction = useCallback((input: { action: "list" | "create" | "password" | "remove"; name?: string; password?: string }) => {
     const socket = socketRef.current;
@@ -1110,6 +1123,7 @@ export function useSession() {
     op,
     siegeCheck,
     buildCharacter,
+    shipAction,
     levelUp,
     improveCharacter,
     wall,

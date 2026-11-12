@@ -30,6 +30,10 @@ On the start screen choose **My Campaigns**.
     the tracker runs 2d6 initiative, attacks against 8 with the Effect on the
     damage, armour less AP, and damage off Endurance, then Strength, then
     Dexterity. Your Traveller books add their content.
+  - In *Traveller* and *Apeira Astra*, **Starships** (sidebar) holds the
+    campaign's ships: make one from a design, let the crew take stations with
+    their characters, put the ships on the tracker, and the gunners fire from
+    the ship's sheet (target, range, Fire).
   - *Worldbuilding* has no rules: maps, tokens, chat and dice for any game.
     It reads the books of games Kraken has no rules for yet (Pathfinder,
     say): their pages, story and maps with walls.

@@ -86,6 +86,13 @@ let rm = null;
 const rmReady = import(pathToFileURL(path.join(__dirname, "..", "shared", "mgt2", "rules.mjs")).href).then((module) => {
   rm = module;
 });
+// Starships (shared/starships/rules.mjs) in the 2d6 games: a ship on the
+// tracker is its record's hull and armour; its initiative 2d6 + the pilot's
+// task DM + Thrust; its weapons fired by their gunners (ship-attack).
+let rs = null;
+const rsReady = import(pathToFileURL(path.join(__dirname, "..", "shared", "starships", "rules.mjs")).href).then((module) => {
+  rs = module;
+});
 
 let geometry = null;
 const geometryReady = import(pathToFileURL(path.join(__dirname, "..", "shared", "map", "geometry.mjs")).href).then((module) => {
@@ -569,6 +576,10 @@ function createCombat({ saved, table, onChange = () => undefined }) {
   // A character's entry reads its sheet; an NPC's keeps its own numbers.
   function vitals(entry) {
     const linked = record(entry);
+    if (linked && linked.type === "starship") {
+      const data = linked.data ?? {};
+      return { hp: num(data.hull?.max, 1), wounds: num(data.hull?.damage, 0), temp: 0, ac: num(data.armour, 0) };
+    }
     if (linked && linked.type === "character") {
       const data = linked.data ?? {};
       return { hp: Number(data.hp?.total) || 0, wounds: Number(data.hp?.wounds) || 0, temp: Math.max(0, Number(data.hp?.temp) || 0), ac: Number(data.ac?.total) || entry.ac };
@@ -583,6 +594,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
   let cachedThresholds = { dead: -10, dying: -7 };
   // 5E: a creature dies at 0; a character is Dying at 0, dead three failed death saves on or when the damage past 0 reaches its maximum.
   function thresholdsFor(entry) {
+    if (record(entry)?.type === "starship") return { dead: 0, dying: 0 };
     if (astraOn()) {
       const linked = record(entry);
       if (linked?.type !== "character") return { dead: 0, dying: 0 };
@@ -603,6 +615,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     if (!geometry) return { status: "Healthy", percent: 0, color: "#00C000" };
     const status = geometry.healthStatus(hp, wounds, thresholdsFor(entry));
     // 5E: three failed death saves kill; three successes leave the character stable (Unconscious).
+    if (record(entry)?.type === "starship") return status.status === "Dead" ? { ...status, status: "Destroyed" } : status;
     if (astraOn() && status.status === "Dying") return { ...status, status: "Down", color: "#6C2DC7" };
     // Traveller: Endurance and one more at 0, Unconscious (all three: Dead, at 0 as above).
     if (mgtOn() && status.status !== "Dead" && status.status !== "Healthy") {
@@ -754,7 +767,11 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     // Damage ends being stable (steadied, three death-save successes, healed in the
     // dying range): at or below 0 the creature is dying again.
     if (delta > 0) entry.stabilized = false;
-    if (mgtOn()) {
+    if (linked?.type === "starship") {
+      // A ship: its hull, 0 to its hull points.
+      if (delta < 0 && before.wounds > before.hp) wounds = before.hp + delta;
+      wounds = Math.max(0, Math.min(before.hp, wounds));
+    } else if (mgtOn()) {
       // Traveller: no damage past the body's total (all three at 0).
       if (delta < 0 && before.wounds > before.hp) wounds = before.hp + delta;
       wounds = Math.max(0, Math.min(before.hp, wounds));
@@ -796,6 +813,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       }
     }
     if (linked && linked.type === "character") table().records.update(linked.id, { data: { hp: { wounds } } }, table().seat);
+    else if (linked && linked.type === "starship") table().records.update(linked.id, { data: { hull: { damage: wounds }, state: wounds >= before.hp ? "Destroyed" : wounds > 0 ? "Damaged" : "Intact" } }, table().seat);
     else entry.wounds = wounds;
     cachedThresholds = thresholds(opts);
     const status = health(entry).status;
@@ -844,6 +862,84 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     const dc = Math.max(10, Math.floor(taken / 2));
     const saved = await save5e(entry, "constitution", dc, "Combat", `Concentration: ${held.spell}`);
     if (!saved.success) endConcentration(held.recordId, "failed save");
+  }
+
+  // --- Starships ----------------------------------------------------------------
+  // A ship's weapon fired at the ship it targets: 2d6 + the gunner's task DM
+  // (else -3) + the weapon's DM + fire control (sensors and computer, less
+  // their criticals) + the range's DM, against 8. A hit does the weapon's dice
+  // + the Effect - the target's armour (less AP) to its hull; an Effect of 6+
+  // that does damage is a critical hit (2d6: the system, one more severity).
+  async function shipAttack(shipId, weaponKey, targetId, range, seat, from) {
+    await rsReady;
+    const ships = require("./starships.cjs");
+    const source = find(shipId);
+    const ship = record(source);
+    if (ship?.type !== "starship") throw new Error("That is not a ship on the tracker.");
+    const data = rs.derive(ship.data);
+    const weapon = data.weapons[weaponKey];
+    if (!weapon) throw new Error("No such weapon on that ship.");
+    if (weapon.disabled) throw new Error(`${weapon.name} is disabled.`);
+    if (health(source).status === "Destroyed") throw new Error(`${ship.name} is destroyed.`);
+    const gunner = weapon.gunner ? table().records.get(weapon.gunner) : null;
+    if (seat.role !== "dm" && (!gunner || gunner.owner !== seat.name)) throw new Error("Only the weapon's gunner (or the GM) fires it.");
+    const target = targetId ? find(targetId) : targetsOf(source)[0];
+    if (!target) throw new Error("Target a ship first.");
+    if (rs.rangeIndex(range) > rs.rangeIndex(weapon.range)) throw new Error(`${weapon.name} reaches ${weapon.range} at most.`);
+    const crew = await ships.stationDm(table(), "gunner", weapon.gunner);
+    const band = rs.RANGES[rs.rangeIndex(range)][0];
+    const dm = crew.dm + weapon.dm + data.fireControl + rs.rangeDm(band) + effectBonus(source, "ATK");
+    const rolled = table().dice.roll(`2d6${dm ? `${dm > 0 ? "+" : ""}${dm}` : ""}`);
+    const effect = rolled.total - 8;
+    const hit = effect >= 0;
+    const name = from || crew.who?.name || ship.name;
+    table().postRoll(rolled, `[SHIP ATTACK] ${ship.name}: ${weapon.name} (${crew.who ? crew.label : "no gunner"}) [${band}${rs.rangeDm(band) ? ` ${rs.signed(rs.rangeDm(band))}` : ""}] [${hit ? "HIT" : "MISS"} ${rolled.total} vs 8, Effect ${rs.signed(effect)}] -> [at ${target.name}]`, name, Boolean(target.hidden), { result: hit ? "HIT" : "MISS", by: ship.name, against: 8, target: target.name });
+    if (!hit) {
+      changed();
+      return { hit: false, total: rolled.total, effect };
+    }
+    const armour = Math.max(0, vitals(target).ac - weapon.ap);
+    const damage = table().roll(rs.diceOf(weapon.damage), `[SHIP DAMAGE] ${weapon.name} -> [at ${target.name}]`, name, Boolean(target.hidden), { by: ship.name });
+    const amount = Math.max(0, damage.total + effect - armour);
+    const { options: opts } = await options();
+    if (amount > 0) await applyWounds(target, amount, `[SHIP DAMAGE] ${weapon.name} (+${effect} Effect${armour ? `, -${armour} armour` : ""})`, opts);
+    else table().say(`[SHIP DAMAGE] ${weapon.name} -> ${target.name}: stopped by its armour`, "Combat", Boolean(target.hidden));
+    let critical = null;
+    const struck = record(target);
+    if (effect >= 6 && amount > 0 && struck?.type === "starship" && health(target).status !== "Destroyed") {
+      const where = table().dice.roll("2d6").total;
+      const [, system, label] = rs.criticalFor(where);
+      const severity = Math.min(6, num(struck.data?.criticals?.[system], 0) + 1);
+      const update = { criticals: { ...(struck.data?.criticals ?? {}), [system]: severity } };
+      // A weapon critical: a weapon of the target's disabled (destroyed from severity 2).
+      if (system === "weapon") {
+        const live = Object.entries(struck.data?.weapons ?? {}).filter(([, item]) => !item.disabled);
+        if (live.length) update.weapons = { ...struck.data.weapons, [live[0][0]]: { ...live[0][1], disabled: true } };
+      }
+      table().records.update(struck.id, { data: rs.derive({ ...struck.data, ...update }) }, table().seat, { replace: true });
+      critical = { roll: where, system, severity };
+      table().say(`[CRITICAL HIT] ${target.name}: ${label} (2d6 = ${where}), severity ${severity}: ${rs.CRITICAL_WORDS[system](severity)}.`, "Combat", Boolean(target.hidden));
+      // A hull critical: its severity in dice of more hull damage.
+      if (system === "hull") {
+        const more = table().roll(`${severity}d6`, `[SHIP DAMAGE] ${target.name}: hull critical`, "Combat", Boolean(target.hidden));
+        await applyWounds(target, more.total, "[SHIP DAMAGE] hull critical", opts);
+      }
+    }
+    if (table().options?.().clearTargets === "action") source.targets = [];
+    changed();
+    return { hit: true, total: rolled.total, effect, damage: amount, critical };
+  }
+
+  function shipView(ship, seat) {
+    const data = ship.data ?? {};
+    const nameOf = (id) => (id ? table().records.get(id)?.name ?? "" : "");
+    const ownerOf = (id) => (id ? table().records.get(id)?.owner ?? "" : "");
+    return {
+      record: ship.id,
+      thrust: num(data.thrust, 0),
+      criticals: data.criticals ?? {},
+      weapons: Object.entries(data.weapons ?? {}).map(([key, weapon]) => ({ key, name: weapon.name, damage: weapon.damage, range: weapon.range, gunner: weapon.gunner ?? "", gunnerName: nameOf(weapon.gunner), mine: seat.role === "player" && ownerOf(weapon.gunner) === seat.name, disabled: Boolean(weapon.disabled) })),
+    };
   }
 
   // --- Traveller ----------------------------------------------------------------
@@ -1682,6 +1778,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     deathSave,
     stabilize,
     turnUndead,
+    shipAttack,
     ruleset5e: five,
     // What a seat sees of the tracker. The GM sees everything; players do not
     // see hidden entries or GM-only effects, and see foes' health as a status.
@@ -1710,6 +1807,8 @@ function createCombat({ saved, table, onChange = () => undefined }) {
             effects: entry.effects.filter((effect) => seat.role === "dm" || !effect.gmOnly).map(({ id, label, duration, targets }) => ({ id, label: targets?.length ? `${label} [-> ${targets.map((tid) => state.entries.find((item) => item.id === tid)?.name ?? "?").join(", ")}]` : label, duration })),
             targets: seat.role === "dm" || owner(entry) === seat.name ? entry.targets.filter((id) => shown.some((item) => item.id === id)) : [],
             ...(five() ? { deathsaves: record(entry)?.type === "character" || numbers ? deathSaves(entry) : undefined } : {}),
+            // A ship: its weapons (and who mans them), Thrust, criticals.
+            ...(record(entry)?.type === "starship" ? { ship: shipView(record(entry), seat) } : {}),
             // 2E: the level a cleric (or a paladin from 3rd) turns undead at.
             ...(d2e() && r2e && record(entry)?.type === "character" && r2e.turnLevel(r2e.derive(record(entry).data)) > 0 ? { turns: r2e.turnLevel(r2e.derive(record(entry).data)) } : {}),
             attacks:
@@ -1756,6 +1855,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
         let hp = Math.max(0, Math.round(num(input.hp, 0)));
         const npc5 = d2e() && source && source.type !== "character" ? (await r2eReady, r2e.npcStats(source.data)) : d35() && source && source.type !== "character" ? (await r35Ready, r35.npcStats(source.data)) : astraOn() && source && source.type !== "character" ? (await raReady, ra.npcStats(source.data)) : mgtOn() && source && source.type !== "character" ? (await rmReady, rm.npcStats(source.data)) : five() && source && source.type !== "character" ? (await r5Ready, r5.npcStats(source.data)) : null;
         if (npc5 && !hp) hp = npc5.hp;
+        if (source?.type === "starship") hp = Math.max(1, num(source.data?.hull?.max, 1));
         if (source && source.type !== "character" && !hp) {
           // SiegeCore getNPCHitPoints: the listed total, else the hit dice rolled (at least 1).
           hp = Math.round(num(source.data?.hptotal, 0));
@@ -1776,7 +1876,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
           faction: input.faction ?? (source?.type === "character" ? "friend" : "foe"),
           init: num(input.init, npc5 ? npc5.init : five() || twoSix() || d35() || d2e() ? 0 : num(source?.data?.initiative?.misc, 0)),
           hp,
-          ac: num(input.ac, npc5 ? npc5.ac : num(source?.data?.ac?.total, twoSix() ? 0 : 10)),
+          ac: num(input.ac, source?.type === "starship" ? num(source.data?.armour, 0) : npc5 ? npc5.ac : num(source?.data?.ac?.total, twoSix() ? 0 : 10)),
           hidden: Boolean(input.hidden),
         });
         // NNPC "append": the same name twice numbers them all.
@@ -1841,7 +1941,9 @@ function createCombat({ saved, table, onChange = () => undefined }) {
         await rmReady;
         for (const entry of pick) {
           const linked = record(entry);
-          const bonus = linked?.type === "character" ? num((mgtOn() ? rm.derive(linked.data) : linked.data)?.initiative?.total, 0) : entry.init;
+          let bonus = linked?.type === "character" ? num((mgtOn() ? rm.derive(linked.data) : linked.data)?.initiative?.total, 0) : entry.init;
+          // A ship: the pilot's task DM + its Thrust.
+          if (linked?.type === "starship") bonus = (await require("./starships.cjs").stationDm(table(), "pilot", linked.data?.crew?.pilot)).dm + num(linked.data?.thrust, 0) + num(entry.init, 0);
           const roll = table().roll(`2d6${bonus ? `${bonus > 0 ? "+" : ""}${bonus}` : ""}`, `[INIT] ${entry.name}`, seat.role === "dm" ? "Combat" : seat.name, entry.hidden);
           entry.initresult = roll.total;
         }

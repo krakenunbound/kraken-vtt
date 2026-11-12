@@ -827,6 +827,21 @@
 								</page_001>
 							</refpages>
 						</sub_002>
+						<sub_003>
+							<name type="string">Ships</name>
+							<refpages>
+								<page_000>
+									<name type="string">Your Ship</name>
+									<keywords type="string">ship starship hull armour thrust jump crew station</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0017@Apeira Astra Crew Handbook</recordname></listlink>
+								</page_000>
+								<page_001>
+									<name type="string">Ship Combat</name>
+									<keywords type="string">ship combat gunnery range critical</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0018@Apeira Astra Crew Handbook</recordname></listlink>
+								</page_001>
+							</refpages>
+						</sub_003>
 					</subchapters>
 				</chapter_001>
 				<chapter_002>
@@ -838,7 +853,7 @@
 								<page_000>
 									<name type="string">Credits and License</name>
 									<keywords type="string"></keywords>
-									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0017@Apeira Astra Crew Handbook</recordname></listlink>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0019@Apeira Astra Crew Handbook</recordname></listlink>
 								</page_000>
 							</refpages>
 						</sub_000>
@@ -912,9 +927,17 @@
 				<text type="formattedtext"><p><b>Vacuum:</b> without a sealed suit, 1d6 damage each turn (armour does not help), and you are Down within a minute.</p><p><b>Zero-G:</b> without mag boots, every physical task takes a Bane unless you make a Zero-G task (Standard) at the start of the scene.</p><p><b>Radiation:</b> a hot reactor or a flare: a Grit check each hour (or each turn, close in), 1d6 damage on a failure.</p><p><b>Fire in a hull</b> eats the air: put it out in three turns or vent the compartment.</p></text>
 			</p0016>
 			<p0017>
+				<name type="string">Your Ship</name>
+				<text type="formattedtext"><p>A ship is a <b>hull</b> (its tonnage), <b>hull points</b> (tons / 2.5: a ship is destroyed at 0), <b>armour</b> (it comes off every hit), <b>Thrust</b> (how hard it can push), <b>Jump</b> (how many threads of the skein it can cross at once), <b>sensors</b> and a <b>computer</b> (together its <b>fire control</b>, added to every shot).</p><p>Its crew take <b>stations</b>: the <b>pilot</b> at the helm, a <b>gunner</b> at each weapon, someone on <b>sensors</b>, an <b>engineer</b>, the <b>captain</b>. In Kraken, open <b>Starships</b> in the sidebar and take a station with your character.</p><p>The GM has six ready designs: the <b>Courier</b>, the <b>Free Trader</b>, the <b>Salvage Tug</b>, the <b>Patrol Cutter</b>, the <b>Fighter</b> and the <b>Corsair</b>.</p></text>
+			</p0017>
+			<p0018>
+				<name type="string">Ship Combat</name>
+				<text type="formattedtext"><p><b>Initiative:</b> 2d6 + the pilot's Pilot task modifier (Pilot + Reflex) + the ship's Thrust.</p><p><b>Range:</b> Adjacent, Close, Short (+1), Medium, Long (-2), Very Long (-4), Distant (-6). A weapon reaches only so far (a pulse laser to Long, a missile rack to Distant).</p><p><b>Firing:</b> 2d6 + the gunner's Gunnery + Intellect (-3 with no one at the gun) + the weapon's modifier + fire control + the range, against <b>8</b>.</p><p><b>Damage:</b> the weapon's dice + the Effect, minus the target's armour, off its hull.</p><p><b>Critical hits:</b> a shot with an Effect of 6 or more that does damage strikes a system (2d6): 2 sensors, 3 power plant, 4 fuel, 5 a weapon, 6 armour, 7 the hull itself, 8 the drive, 9 cargo, 10 the skein drive, 11 the crew, 12 the computer. Each hit on a system makes it worse.</p><p>In Kraken, the GM puts the ships on the combat tracker; a gunner picks the target and the range on the ship's sheet and presses <b>Fire</b>.</p></text>
+			</p0018>
+			<p0019>
 				<name type="string">Credits and License</name>
 				<text type="formattedtext"><p><b>Apeira Astra</b> is an original game made for Kraken VTT: its rules text, setting, names and art are original, and it may be shared freely with Kraken.</p><p>It belongs to the family of &quot;2d6 and skills&quot; science fiction roleplaying games, whose shared idea — two dice, a skill, a target of 8 — is a game mechanic common to many games and owned by none. Apeira Astra is not affiliated with or endorsed by any other game's publisher.</p></text>
-			</p0017>
+			</p0019>
 		</refmanualdata>
 	</reference>
 </root>

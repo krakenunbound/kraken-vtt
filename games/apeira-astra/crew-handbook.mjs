@@ -156,6 +156,35 @@ In Kraken, target a creature (Ctrl+click its token) and use the weapon's attack 
             },
           ],
         },
+        {
+          name: "Ships",
+          pages: [
+            {
+              name: "Your Ship",
+              keywords: "ship starship hull armour thrust jump crew station",
+              text: `A ship is a **hull** (its tonnage), **hull points** (tons / 2.5: a ship is destroyed at 0), **armour** (it comes off every hit), **Thrust** (how hard it can push), **Jump** (how many threads of the skein it can cross at once), **sensors** and a **computer** (together its **fire control**, added to every shot).
+
+Its crew take **stations**: the **pilot** at the helm, a **gunner** at each weapon, someone on **sensors**, an **engineer**, the **captain**. In Kraken, open **Starships** in the sidebar and take a station with your character.
+
+The GM has six ready designs: the **Courier**, the **Free Trader**, the **Salvage Tug**, the **Patrol Cutter**, the **Fighter** and the **Corsair**.`,
+            },
+            {
+              name: "Ship Combat",
+              keywords: "ship combat gunnery range critical",
+              text: `**Initiative:** 2d6 + the pilot's Pilot task modifier (Pilot + Reflex) + the ship's Thrust.
+
+**Range:** Adjacent, Close, Short (+1), Medium, Long (-2), Very Long (-4), Distant (-6). A weapon reaches only so far (a pulse laser to Long, a missile rack to Distant).
+
+**Firing:** 2d6 + the gunner's Gunnery + Intellect (-3 with no one at the gun) + the weapon's modifier + fire control + the range, against **8**.
+
+**Damage:** the weapon's dice + the Effect, minus the target's armour, off its hull.
+
+**Critical hits:** a shot with an Effect of 6 or more that does damage strikes a system (2d6): 2 sensors, 3 power plant, 4 fuel, 5 a weapon, 6 armour, 7 the hull itself, 8 the drive, 9 cargo, 10 the skein drive, 11 the crew, 12 the computer. Each hit on a system makes it worse.
+
+In Kraken, the GM puts the ships on the combat tracker; a gunner picks the target and the range on the ship's sheet and presses **Fire**.`,
+            },
+          ],
+        },
       ],
     },
     {

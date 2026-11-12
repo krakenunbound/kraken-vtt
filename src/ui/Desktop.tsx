@@ -1,3 +1,4 @@
+import { ShipsWindow } from "../ships/ShipsWindow";
 import { lazy, Suspense, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { Picture } from "../characters/ArtPicker";
 import { CharacterPanel } from "../characters/CharacterPanel";
@@ -257,6 +258,8 @@ export function Desktop({
         // Ability cards, for whoever turned them on in Settings (this browser's choice).
         ...(cardsOn ? [{ kind: "cards" as const, label: "Cards", icon: "wand", title: "Cards" }] : []),
         { kind: "party", label: "Party", icon: "party", title: "Party Sheet" },
+        // Starships, in the 2d6 games (Traveller, Apeira Astra).
+        ...(session.ruleset === "Traveller" || session.ruleset === "Apeira Astra" ? [{ kind: "ships" as const, label: "Starships", icon: "ship", title: "Starships" }] : []),
         { kind: "notes", label: gm ? "Notes" : "Player Notes", icon: "chat", title: gm ? "Notes" : "Player Notes" },
       ],
     },
@@ -496,6 +499,7 @@ export function Desktop({
               {item.kind === "decals" ? <DecalPicker session={session} onClose={() => windows.close(item.key)} /> : null}
               {item.kind === "wallpapers" ? <DecalPicker session={session} kind="wallpaper" onClose={() => windows.close(item.key)} /> : null}
               {item.kind === "krits" ? <KritsWindow session={session} /> : null}
+              {item.kind === "ships" ? <ShipsWindow session={session} /> : null}
               {item.kind === "library" ? <LibraryWindow session={session} openMaps={openMaps} /> : null}
               {item.kind === "gmicons" ? <DecalPicker session={session} kind="gmicon" onClose={() => windows.close(item.key)} /> : null}
             </FloatingWindow>

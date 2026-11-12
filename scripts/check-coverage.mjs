@@ -35,6 +35,7 @@ const MESSAGES = {
   "party-group": "kraken_party_group_check",
   "party-order": "kraken_party_order",
   "character-edit": "kraken_character_edit",
+  starship: "kraken_starship",
   "character-import": "kraken_character_import",
   "class-change": "kraken_class_change",
   "character-drop": "kraken_character_drop",

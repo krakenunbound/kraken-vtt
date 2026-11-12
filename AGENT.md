@@ -68,6 +68,8 @@ The app starts the MCP server when it opens. `electron/agent/mcp-stdio.cjs` is t
 | GM-only roll (the GM's dice tower) | `kraken_roll` with `secret` |
 | Dice tower: players see their own result | `kraken_table_options` |
 | How long dice stay on the table before they fade (the GM's Settings) | `kraken_table_options` diceHold |
+| Starships (Traveller, Apeira Astra): make a ship from a design, its sheet (hull, armour, weapons, criticals), crew stations | `kraken_starship` |
+| Ship combat: a gunner fires a ship's weapon at a ship (range, criticals) | `kraken_combat` ship-attack |
 | Settings: Background Decal, Desktop Wallpaper and GM Icon (pick, a set for each game, Browse to import a picture, none) | `kraken_decal` (`kind` decal, wallpaper or gmicon) |
 | The Dice window: sets, dice, accent and number colours, design, material, lettering, effects, crit flare, 3D, sound; NPC dice and damage dice | `kraken_dice_settings` (`set` npc or damage) |
 | The map's window (FG's image window: the map, its tools and settings, the scene pickers; behind the other windows; pops out to another monitor; the sidebar's Map button opens it again) | `kraken_windows` kind map (open, close, popout, dock) |

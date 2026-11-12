@@ -1434,3 +1434,23 @@ textarea.cc-field.tall { min-height: 220px; }
 .sheet-2e .d2e-saves .d35-save { grid-template-columns: 1fr 3.4rem 3rem; }
 .sheet-2e .d2e-skills .five-skill { grid-template-columns: 3.4rem 1fr 3.4rem; }
 .wizard-2e .wizard-2e-pregen { display: flex; flex-direction: column; gap: 3px; margin-bottom: 8px; }
+
+/* Starships (the 2d6 games): the list, the ship's sheet. */
+.ships-window { display: grid; grid-template-columns: 200px 1fr; gap: 10px; height: 100%; padding: 10px; min-height: 0; overflow: auto; }
+.ships-list ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.ships-list li button { width: 100%; text-align: left; display: flex; flex-direction: column; gap: 2px; padding: 6px 8px; }
+.ships-list li button.active { border-color: var(--brass); }
+.ships-new { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; }
+.ship-sheet { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.ship-numbers { display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; }
+.ship-hull { display: flex; flex-direction: column; gap: 4px; min-width: 150px; }
+.ship-hull > span[data-ship-stat="hull"] { font-size: 1.3rem; font-weight: 700; }
+.ship-bar { display: block; height: 6px; border-radius: 3px; background: rgba(255, 255, 255, 0.08); overflow: hidden; }
+.ship-bar > span { display: block; height: 100%; background: linear-gradient(90deg, #2e8b57, #9acd32); }
+.ship-stations { display: flex; flex-wrap: wrap; gap: 8px 14px; }
+.ship-weapons, .ship-criticals { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.ship-weapons li { display: grid; grid-template-columns: minmax(150px, 1fr) auto auto auto auto; gap: 8px; align-items: center; }
+.ship-weapon-name { display: flex; flex-direction: column; min-width: 0; }
+.ship-weapons li.disabled .ship-weapon-name b { text-decoration: line-through; opacity: 0.6; }
+.ship-criticals li.hit { color: #e67e22; }
+.ship-criticals .cc-field { width: 2.6rem; }

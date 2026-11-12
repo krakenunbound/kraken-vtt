@@ -1635,6 +1635,23 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
 
       // A SIEGE check from a sheet: the owner or the GM rolls it.
       // The character sheet: fields typed on it, then every number worked out again.
+      // Starships (the 2d6 games): the GM makes one from a design; its sheet's
+      // edits (a player takes a station with their own character).
+      if (msg.type === "starship") {
+        const answer = (body) => send(ws, { type: "op-result", req: msg.req ?? null, ...body });
+        const ships = require("./starships.cjs");
+        const work =
+          msg.action === "create"
+            ? ships.createShip(agentHandle, { name: text(msg.name, ""), design: text(msg.design, "Free Trader"), visibility: msg.visibility === "gm" ? "gm" : "all" }, seatOf(client))
+            : (async () => {
+                const record = records.get(String(msg.id ?? ""), seatOf(client));
+                if (!record || record.type !== "starship") throw new Error("No such ship.");
+                return ships.editShip(agentHandle, record, msg.changes, seatOf(client));
+              })();
+        work.then((record) => answer({ ok: true, id: record.id })).catch((error) => answer({ ok: false, error: error instanceof Error ? error.message : "Could not do that." }));
+        return;
+      }
+
       if (msg.type === "character-edit") {
         const record = records.get(String(msg.id ?? ""), seatOf(client));
         if (!record || record.type !== "character") {
@@ -1890,6 +1907,9 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
             case "stabilize":
               // Descending Darkness: an ally steadies the dying (Wisdom 12).
               return combat.stabilize(String(msg.id), msg.recordId ? String(msg.recordId) : "", seat);
+            case "ship-attack":
+              // A ship's weapon fired by its gunner (or the GM) at a ship (Traveller, Apeira Astra).
+              return combat.shipAttack(String(msg.id), String(msg.weapon), msg.targetId ? String(msg.targetId) : "", text(msg.range, "Short"), seat, client.role === "dm" ? "" : client.name);
             case "turn-undead":
               // 2E: a cleric (or paladin) turns the undead it targets.
               return combat.turnUndead(msg.id ? String(msg.id) : "", msg.recordId ? String(msg.recordId) : "", Array.isArray(msg.undead) ? msg.undead.map(String).slice(0, 50) : null, seat);

@@ -4,6 +4,25 @@ What changed in each release of Kraken VTT. Downloads are on the
 [Releases](https://github.com/krakenunbound/kraken-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
+## 0.1.0-alpha.68: Starships
+
+- Starships for Traveller and Apeira Astra: **Starships** in the sidebar. The
+  GM makes a ship from one of Kraken's six designs (Courier, Free Trader,
+  Salvage Tug, Patrol Cutter, Fighter, Corsair) and can change anything: hull,
+  armour, Thrust, Jump, sensors, computer, weapons (pulse and beam lasers,
+  particle beams, missile racks, railguns, mass drivers), critical hits.
+- The crew take stations with their own characters: the helm, each gun,
+  sensors, engineering, the captain's chair.
+- Ship combat on the tracker: a ship's initiative is 2d6 + its pilot's Pilot +
+  Thrust; a gunner fires at a ship at a range band (2d6 + Gunner (Turret) and
+  DEX in Traveller, Gunnery and Intellect in Apeira Astra, + the weapon's DM +
+  fire control + the range, against 8); the damage + the Effect, less armour
+  and AP, comes off the hull; an Effect of 6 or more that does damage is a
+  critical hit on a system (sensors, power, a weapon, armour, the hull, the
+  drives, the crew, the computer), each one worse; a ship is destroyed at 0.
+- The Apeira Astra Crew Handbook has a Ships chapter: your ship and ship
+  combat.
+
 ## 0.1.0-alpha.67: Traveller
 
 - A new ruleset: **Traveller** (Mongoose Traveller 2nd Edition, as FG's MGT2
