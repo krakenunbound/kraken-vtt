@@ -1,5 +1,6 @@
 import { SheetAstra, WizardAstra } from "./SheetAstra";
-import { SheetMgt2, WizardMgt2 } from "./SheetMgt2";
+import { SheetMgt2 } from "./SheetMgt2";
+import { WizardMgt2 } from "./WizardMgt2";
 import { isD20 } from "../../shared/dnd5e/rules.mjs";
 import { Icon } from "../ui/icons";
 import { slotDrag } from "../ui/QuickSlots";

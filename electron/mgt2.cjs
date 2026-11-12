@@ -91,4 +91,86 @@ async function editMgt2(table, record, changes, seat) {
   return table.records.update(record.id, { name, data: rules.derive(data) }, table.seat, { replace: true });
 }
 
-module.exports = { rulesMgt2, buildMgt2, taskMgt2, editMgt2, isMgt2, isMgt2Ruleset, RULESET_NAME };
+// --- The lifepath ---------------------------------------------------------------
+// A Traveller made term by term (shared/mgt2/lifepath.mjs), one at a time for
+// each player, every roll the table's dice. The view: what the wizard shows.
+let lifeLoaded = null;
+const lifepath = () => (lifeLoaded ??= import(pathToFileURL(path.join(__dirname, "..", "shared", "mgt2", "lifepath.mjs")).href));
+// Each table's lifepaths under way, by owner.
+const tables = new WeakMap();
+const livesOf = (table) => {
+  if (!tables.has(table)) tables.set(table, new Map());
+  return tables.get(table);
+};
+const keyOf = (_table, owner) => String(owner || "GM");
+function lifeView(state) {
+  if (!state) return null;
+  return {
+    name: state.name,
+    pending: state.pending,
+    log: state.log.slice(-400),
+    stats: state.stats,
+    rolled: state.rolled ?? null,
+    skills: state.skills,
+    age: state.age,
+    terms: state.terms,
+    careers: state.careers,
+    current: state.current ? { career: state.current.career, assignment: state.current.assignment, term: state.current.term, rank: state.current.rank, officer: state.current.officer } : null,
+    cash: state.cash,
+    benefits: state.benefits,
+    connections: { contacts: state.contacts.length, allies: state.allies.length, rivals: state.rivals.length, enemies: state.enemies.length },
+    items: state.items,
+    done: state.done,
+  };
+}
+async function lifeAction(table, owner, { action = "state", name, input, build } = {}, seat) {
+  if (!isMgt2Ruleset(table.ruleset?.())) throw new Error("The lifepath is Traveller's.");
+  const life = await lifepath();
+  const key = keyOf(table, owner);
+  const lives = livesOf(table);
+  const roll = (formula) => table.dice.roll(formula).total;
+  if (action === "start") {
+    lives.set(key, life.start(String(name ?? "").trim().slice(0, 60) || "Traveller", roll));
+    return { life: lifeView(lives.get(key)) };
+  }
+  const state = lives.get(key);
+  if (action === "cancel") {
+    lives.delete(key);
+    return { life: null };
+  }
+  if (!state) {
+    if (action === "state") return { life: null };
+    throw new Error("No lifepath under way: start one.");
+  }
+  if (action === "state") return { life: lifeView(state) };
+  if (action === "answer") {
+    const next = life.answer(input ?? {}, state, roll);
+    lives.set(key, next);
+    return { life: lifeView(next) };
+  }
+  if (action === "build") {
+    if (!state.done) throw new Error("The lifepath is not finished.");
+    const spec = { ...life.toSpec(state), ...(build ?? {}), name: String(build?.name ?? "").trim() || state.name };
+    // Benefits' weapons and armour: the player's picks from Kraken's lists, one each.
+    const rules = await rulesMgt2();
+    const wanted = Array.isArray(build?.gear) ? build.gear.map(String) : [];
+    const kinds = state.items.slice();
+    const gear = [];
+    for (const item of wanted) {
+      const made = rules.makeItem(item);
+      if (!made) continue;
+      const kind = made.type === "Armour" ? "armour" : /Melee/.test(made.subtype) ? "blade" : "gun";
+      const at = kinds.findIndex((have) => have === kind || have === "weapon" && kind !== "armour");
+      if (at < 0) throw new Error(`${item}: no benefit gives that (${kinds.join(", ") || "no weapons or armour left"}).`);
+      kinds.splice(at, 1);
+      gear.push(item);
+    }
+    const built = await buildMgt2(table, { ...spec, gear }, owner, seat);
+    lives.delete(key);
+    table.say(`[LIFEPATH] ${built.record.name}: ${built.record.data.upp}, age ${built.record.data.age}, ${spec.careers.map((career) => `${career.name} ${career.terms}${career.title ? ` (${career.title})` : ""}`).join(", ") || "no career"}.`, owner || "GM");
+    return { id: built.record.id, problems: built.problems };
+  }
+  throw new Error("Which action? start, answer, state, build or cancel.");
+}
+
+module.exports = { rulesMgt2, buildMgt2, taskMgt2, editMgt2, isMgt2, isMgt2Ruleset, lifeAction, RULESET_NAME };

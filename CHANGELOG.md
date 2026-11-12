@@ -4,6 +4,24 @@ What changed in each release of Kraken VTT. Downloads are on the
 [Releases](https://github.com/krakenunbound/kraken-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
+## 0.1.0-alpha.69: Traveller's lifepath
+
+- The Traveller wizard is now the game's own character creation, term by
+  term, every roll the table's dice: six characteristics rolled on 2D and
+  arranged; background skills (3 + EDU DM); a university or a military academy
+  (or neither); then careers: qualification (or the draft, or the Drifters),
+  basic training, a skill roll each term on the table you choose (Personal
+  Development, Service Skills, your assignment's Specialist table, Advanced
+  Education, Officer), survival or a mishap, an event, a commission or
+  advancement (with the rank's skill and another roll), aging from the fourth
+  term, prison when a roll says so; and when a career ends, its benefit rolls
+  (cash or benefits). The log keeps the whole life; the Traveller is built
+  from it, with the weapons and armour its benefits gave.
+- Thirteen careers with three assignments each: Agent, Army, Citizen, Drifter,
+  Entertainer, Marine, Merchant, Navy, Noble, Rogue, Scholar, Scout, and
+  Prisoner. Their tables (skills, ranks, events, mishaps, benefits) are
+  Kraken's own, in the game's shape; your Traveller books are the game's.
+
 ## 0.1.0-alpha.68: Starships
 
 - Starships for Traveller and Apeira Astra: **Starships** in the sidebar. The

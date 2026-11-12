@@ -24,8 +24,9 @@ On the start screen choose **My Campaigns**.
     cleric (or a paladin from 3rd level) has a Turn undead button on its
     turn. Make your Krits & Fumbles 2E book active and natural 20s and 1s
     roll its tables, by the attack's kind, and apply what they can.
-  - *Traveller* is Mongoose Traveller 2E: its wizard takes the six
-    characteristics, a career's terms, skills with specialities and a kit;
+  - *Traveller* is Mongoose Traveller 2E: its wizard is the lifepath, term
+    by term with the table's dice (characteristics, background skills,
+    education, careers, events, mishaps, promotions, aging, benefits);
     the sheet rolls tasks against a difficulty with Effect, Boon and Bane;
     the tracker runs 2d6 initiative, attacks against 8 with the Effect on the
     damage, armour less AP, and damage off Endurance, then Strength, then

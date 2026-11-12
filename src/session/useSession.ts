@@ -345,7 +345,7 @@ export function useSession() {
   const [error, setError] = useState<string | null>(null);
   const [playerScene, setPlayerScene] = useState<MapScene | null>(null);
   const [records, setRecords] = useState<Record<string, TableRecord>>({});
-  const opWaits = useRef(new Map<number, { resolve: (id: string) => void; reject: (error: Error) => void }>());
+  const opWaits = useRef(new Map<number, { resolve: (id: string, payload?: unknown) => void; reject: (error: Error) => void }>());
   const opCounter = useRef(0);
   const socketRef = useRef<WebSocket | null>(null);
   const generation = useRef(0);
@@ -544,7 +544,7 @@ export function useSession() {
           if (msg.type === "op-result" && typeof msg.req === "number") {
             const wait = opWaits.current.get(msg.req);
             opWaits.current.delete(msg.req);
-            if (wait && msg.ok) wait.resolve(String(msg.id ?? ""));
+            if (wait && msg.ok) wait.resolve(String(msg.id ?? ""), msg);
             else if (wait) wait.reject(new Error(typeof msg.error === "string" ? msg.error : "Not allowed."));
           }
           if (msg.type === "error" && typeof msg.reason === "string") setError(msg.reason);
@@ -789,6 +789,17 @@ export function useSession() {
     return new Promise<string>((resolve, reject) => {
       opWaits.current.set(req, { resolve, reject });
       socket.send(JSON.stringify({ type: "build-character", req, spec, owner }));
+    });
+  }, []);
+
+  // Traveller's lifepath: start, answer the question it asks, build the finished Traveller.
+  const lifeAction = useCallback((body: { action: "start" | "answer" | "state" | "build" | "cancel"; name?: string; input?: unknown; build?: unknown }) => {
+    const socket = socketRef.current;
+    if (!socket || socket.readyState !== WebSocket.OPEN) return Promise.reject(new Error("Not connected."));
+    const req = ++opCounter.current;
+    return new Promise<{ id: string; life: unknown }>((resolve, reject) => {
+      opWaits.current.set(req, { resolve: (id, payload) => resolve({ id, life: (payload as { life?: unknown } | undefined)?.life ?? null }), reject });
+      socket.send(JSON.stringify({ type: "mgt2-life", req, ...body }));
     });
   }, []);
 
@@ -1124,6 +1135,7 @@ export function useSession() {
     siegeCheck,
     buildCharacter,
     shipAction,
+    lifeAction,
     levelUp,
     improveCharacter,
     wall,

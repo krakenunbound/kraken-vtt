@@ -36,6 +36,7 @@ const MESSAGES = {
   "party-order": "kraken_party_order",
   "character-edit": "kraken_character_edit",
   starship: "kraken_starship",
+  "mgt2-life": "kraken_traveller_lifepath",
   "character-import": "kraken_character_import",
   "class-change": "kraken_class_change",
   "character-drop": "kraken_character_drop",

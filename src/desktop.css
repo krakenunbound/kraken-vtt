@@ -1454,3 +1454,21 @@ textarea.cc-field.tall { min-height: 220px; }
 .ship-weapons li.disabled .ship-weapon-name b { text-decoration: line-through; opacity: 0.6; }
 .ship-criticals li.hit { color: #e67e22; }
 .ship-criticals .cc-field { width: 2.6rem; }
+
+/* Traveller's lifepath wizard. */
+.wizard-mgt2 .life-grid { display: grid; grid-template-columns: 1fr 260px; gap: 10px; min-height: 0; }
+.wizard-mgt2 .life-log { margin: 0; padding: 6px 8px 6px 26px; max-height: 300px; overflow: auto; font-size: 0.86rem; line-height: 1.35; background: rgba(0, 0, 0, 0.18); border-radius: 6px; }
+.wizard-mgt2 .life-log li.life-term { list-style: none; margin: 6px 0 2px -18px; font-weight: 700; color: var(--brass); }
+.wizard-mgt2 .life-summary { display: flex; flex-direction: column; gap: 6px; font-size: 0.86rem; }
+.wizard-mgt2 .life-upp b { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; letter-spacing: 0.14em; font-size: 1.2rem; }
+.wizard-mgt2 .life-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px 8px; }
+.wizard-mgt2 .life-skills { list-style: none; margin: 0; padding: 0; columns: 2; font-size: 0.8rem; }
+.wizard-mgt2 .life-question { margin-top: 10px; padding: 10px; border: 1px solid var(--brass-dim); border-radius: 8px; background: rgba(255, 255, 255, 0.03); }
+.wizard-mgt2 .life-choices { flex-wrap: wrap; gap: 6px; }
+.wizard-mgt2 .life-tables { display: flex; flex-wrap: wrap; gap: 14px; font-size: 0.8rem; }
+.wizard-mgt2 .life-tables ol { margin: 2px 0 0; padding-left: 18px; }
+.wizard-mgt2 .life-careers-pick { display: grid; grid-template-columns: 220px 1fr; gap: 10px; }
+.wizard-mgt2 .life-career-list { display: flex; flex-direction: column; gap: 3px; max-height: 300px; overflow: auto; }
+.wizard-mgt2 .life-career-list button { text-align: left; display: flex; justify-content: space-between; padding: 4px 8px; }
+.wizard-mgt2 .life-career-list button.active { border-color: var(--brass); }
+.wizard-mgt2 .life-assignments { display: flex; flex-direction: column; gap: 6px; }

@@ -495,6 +495,16 @@ const TOOLS = [
     },
   },
   {
+    name: "kraken_traveller_lifepath",
+    description:
+      "Traveller's character creation, the game's way (the Traveller wizard's): a lifepath for an owner (a player's name; empty for the GM), every roll the table's dice. action start (name) rolls the characteristics; then answer the question in life.pending with input: kind arrange {assign: {str, dex, end, int, edu, soc: each roll once}} or {keep: true}; kind pick {picks: [names]} (background skills, university subjects); kind career {career, assignment (a key from the list)}; kind choose {choice: one of the options} (education, the draft, a skill table, a speciality, a commission, another term, cash or benefits, another career or Finish, a characteristic an injury or aging takes). state shows it; cancel drops it; build (when life.done) makes the character: build {name, species, homeworld, gear [weapons and armour the benefits gave: Kraken's names]}. Kraken's own career tables (13 careers with three assignments each, events, mishaps, ranks, benefits) in Traveller's procedure: qualification or the draft, basic training, survival or a mishap, events, commission and advancement, aging from the fourth term, mustering out.",
+    inputSchema: object({ action: { type: "string", enum: ["start", "answer", "state", "build", "cancel"] }, owner: string("The player's name; empty for the GM"), name: string("start: the Traveller's name"), input: { type: "object" }, build: { type: "object" } }, ["action"]),
+    async run(args, ctx) {
+      const agent = needTable(ctx);
+      return out(await require("../mgt2.cjs").lifeAction(agent, args.owner ?? "", { action: args.action, name: args.name, input: args.input, build: args.build }, agent.seat));
+    },
+  },
+  {
     name: "kraken_starship",
     description:
       "Starships in a Traveller or Apeira Astra campaign (Kraken's own designs and ship combat). action designs (the designs: class, tons, armour, thrust, jump, weapons), list (the campaign's ships), create (name, design: Courier, Free Trader, Salvage Tug, Patrol Cutter, Fighter, Corsair; visibility all or gm), edit (id, changes [{path, value}]: name, class, notes, cargo, tons, hull.max, hull.damage, armour, thrust, jump, sensors, computer, fuel, criticals.<system> (sensors, power, fuel, weapon, armour, hull, mdrive, cargo, jdrive, crew, computer: severity), weapons.add {name: Pulse Laser, Beam Laser, Particle Beam, Missile Rack, Railgun Barbette, Mass Driver; mount}, weapons.<key> null (remove), weapons.<key>.disabled, weapons.<key>.gunner (a character's id), crew.pilot / crew.engineer / crew.sensors / crew.captain (a character's id)). A ship goes on the tracker with kraken_combat add (recordId); it fights with kraken_combat ship-attack (id: the ship's entry, weapon: its weapons key, targetId: the ship it fires at, range: Adjacent ... Distant): 2d6 + the gunner's task DM (Traveller: Gunner (Turret) + DEX; Apeira Astra: Gunnery + Intellect; no gunner -3) + the weapon's DM + fire control (sensors + computer) + the range's DM, against 8; damage the weapon's dice + Effect - armour (less AP) off the hull; an Effect of 6+ that does damage is a critical hit (2d6: the system; severity up). Its initiative is 2d6 + the pilot's Pilot task DM + Thrust.",

@@ -351,9 +351,11 @@ export function npcStats(data) {
 export function buildFromSpec(spec, lib = {}) {
   const problems = [];
   const characteristics = {};
+  // A lifepath's Traveller is as its rolls made it (an injury can leave a 1).
+  const lifepath = Boolean(spec?.lifepath);
   for (const stat of STATS) {
     const value = Math.round(num(spec?.characteristics?.[stat], 7));
-    if (value < 2 || value > 15) problems.push(`${STAT_NAMES[stat]} ${value}: a new Traveller's are 2 to 15.`);
+    if (!lifepath && (value < 2 || value > 15)) problems.push(`${STAT_NAMES[stat]} ${value}: a new Traveller's are 2 to 15.`);
     characteristics[stat] = { score: Math.min(15, Math.max(1, value)) };
   }
   const careers = Array.isArray(spec?.careers) ? spec.careers : spec?.career ? [{ name: spec.career, terms: spec.terms ?? 1, rank: spec.rank ?? 0 }] : [];
@@ -365,7 +367,7 @@ export function buildFromSpec(spec, lib = {}) {
       problems.push(`No skill ${key}.`);
       continue;
     }
-    if (level > 4) problems.push(`${skillName(key)} ${level}: above 4 is rare for a new Traveller.`);
+    if (level > 4 && !lifepath) problems.push(`${skillName(key)} ${level}: above 4 is rare for a new Traveller.`);
     skills[key] = { level: Math.max(0, Math.round(level)) };
   }
   const inventorylist = {};
@@ -394,7 +396,10 @@ export function buildFromSpec(spec, lib = {}) {
     inventorylist,
     coins: credits > 0 ? { "id-00001": { name: "Cr", amount: credits } } : {},
     notes: String(spec?.notes ?? ""),
+    contacts: String(spec?.contacts ?? ""),
     exp: 0,
   });
+  // A career's rank title, kept with it.
+  data.careers = data.careers.map((career, index) => ({ ...career, title: String(careers[index]?.title ?? "") }));
   return { name: String(spec?.name ?? "").trim() || "Traveller", data, problems };
 }

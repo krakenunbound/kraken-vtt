@@ -4,7 +4,7 @@ import { Icon } from "../ui/icons";
 import { slotDrag } from "../ui/QuickSlots";
 import { ArtPicker, Picture } from "./ArtPicker";
 import { Field } from "./CCSheet";
-import { ARMOUR, CAREERS, DIFFICULTIES, PHYSICAL, SHORT, SKILLS, STAT_NAMES, STATS, WEAPONS, bodyState, dm, physicalNow, signed, skillName } from "../../shared/mgt2/rules.mjs";
+import { DIFFICULTIES, PHYSICAL, SHORT, SKILLS, STAT_NAMES, STATS, bodyState, dm, physicalNow, signed, skillName } from "../../shared/mgt2/rules.mjs";
 
 // The Traveller sheet, in Kraken's sheet style: who they are on top (name,
 // species, homeworld, UPP, age, careers), tabs down the right (Main, Skills,
@@ -93,7 +93,7 @@ export function SheetMgt2({ record, session }: { record: TableRecord; session: S
                 <small>Age</small>
               </label>
               <label className="cc-labelled cc-box">
-                <span className="cc-value" data-stat="careers">{careers.map((career) => `${String(career.name)} ${num(career.terms)}${num(career.rank) ? ` (rank ${num(career.rank)})` : ""}`).join(", ") || "-"}</span>
+                <span className="cc-value" data-stat="careers">{careers.map((career) => `${String(career.name)} ${num(career.terms)}${career.title ? ` (${String(career.title)})` : num(career.rank) ? ` (rank ${num(career.rank)})` : ""}`).join(", ") || "-"}</span>
                 <small>Careers (terms)</small>
               </label>
             </div>
@@ -322,143 +322,3 @@ export function SheetMgt2({ record, session }: { record: TableRecord; session: S
   );
 }
 
-// The Traveller wizard: name, species, homeworld, the characteristics (2d6
-// each, rolled or typed), careers and terms (age 18 + 4 a term), the skills
-// the careers gave (picked with their levels), and a kit from Kraken's weapon
-// and armour table.
-export function WizardMgt2({ session, onDone }: { session: Session; onDone: (id: string | null) => void }) {
-  const [name, setName] = useState("");
-  const [species, setSpecies] = useState("Human");
-  const [homeworld, setHomeworld] = useState("");
-  const [scores, setScores] = useState<Record<string, number>>(() => Object.fromEntries(STATS.map((stat: string) => [stat, 7])));
-  const [career, setCareer] = useState(CAREERS[11]);
-  const [terms, setTerms] = useState(1);
-  const [rank, setRank] = useState(0);
-  const [skills, setSkills] = useState<Record<string, number>>({});
-  const [skillPick, setSkillPick] = useState("");
-  const [gear, setGear] = useState<string[]>([]);
-  const [credits, setCredits] = useState(1000);
-  const [problem, setProblem] = useState("");
-  const [busy, setBusy] = useState(false);
-  const roll = () => setScores(Object.fromEntries(STATS.map((stat: string) => [stat, 2 + Math.floor(Math.random() * 6) + Math.floor(Math.random() * 6)])));
-  const finish = async () => {
-    setBusy(true);
-    setProblem("");
-    try {
-      const id = await session.buildCharacter({ name: name || "Traveller", species, homeworld, characteristics: scores, careers: [{ name: career, terms, rank }], skills: Object.fromEntries(Object.entries(skills).map(([key, level]) => [skillName(key), level])), gear, credits });
-      onDone(id);
-    } catch (error) {
-      setProblem(error instanceof Error ? error.message : String(error));
-    } finally {
-      setBusy(false);
-    }
-  };
-  const kit = [...(WEAPONS as unknown[][]).filter((row) => row[0] !== "Unarmed").map((row) => String(row[0])), ...(ARMOUR as unknown[][]).map((row) => String(row[0]))];
-  return (
-    <section className="wizard-5e cc-panel" aria-label="Traveller wizard" data-wizard="mgt2">
-      <header className="cc-row">
-        <b>New Traveller</b>
-        <span className="me-spacer" />
-        <button type="button" className="ghost" onClick={() => onDone(null)}>
-          Cancel
-        </button>
-        <button type="button" data-action="wizard-finish" disabled={busy} onClick={() => void finish()}>
-          Finish
-        </button>
-      </header>
-      <div className="wizard-5e-grid">
-        <label>
-          Name <input value={name} onChange={(event) => setName(event.target.value)} aria-label="Character name" />
-        </label>
-        <label>
-          Species <input value={species} onChange={(event) => setSpecies(event.target.value)} aria-label="Species" />
-        </label>
-        <label>
-          Homeworld <input value={homeworld} onChange={(event) => setHomeworld(event.target.value)} aria-label="Homeworld" />
-        </label>
-        <label>
-          Career
-          <select value={career} aria-label="Career" onChange={(event) => setCareer(event.target.value)}>
-            {(CAREERS as string[]).map((item) => (
-              <option key={item}>{item}</option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Terms <input type="number" min={0} max={12} value={terms} aria-label="Terms" onChange={(event) => setTerms(Math.max(0, Number(event.target.value) || 0))} />
-        </label>
-        <label>
-          Rank <input type="number" min={0} max={6} value={rank} aria-label="Rank" onChange={(event) => setRank(Math.max(0, Number(event.target.value) || 0))} />
-        </label>
-      </div>
-      <p className="hint" data-age>
-        Age {18 + 4 * terms} after {terms} term{terms === 1 ? "" : "s"}.
-      </p>
-      <h4>
-        Characteristics <small className="hint">2d6 each</small>{" "}
-        <button type="button" className="ghost" data-action="mgt2-roll" onClick={roll}>
-          Roll 2d6 each
-        </button>
-      </h4>
-      <div className="wizard-5e-scores">
-        {STATS.map((stat: string) => (
-          <label key={stat} title={STAT_NAMES[stat as StatKey]}>
-            {SHORT[stat as StatKey]}
-            <input type="number" min={2} max={15} value={scores[stat]} aria-label={`${stat} score`} onChange={(event) => setScores({ ...scores, [stat]: Number(event.target.value) || 7 })} />
-            <small>{signed(dm(scores[stat]))}</small>
-          </label>
-        ))}
-      </div>
-      <h4>
-        Skills <small className="hint">background skills and what the careers gave</small>
-      </h4>
-      <div className="wizard-5e-skills" data-mgt2-skills>
-        {Object.entries(skills).map(([key, level]) => (
-          <label key={key}>
-            {skillName(key)}
-            <input type="number" min={0} max={4} value={level} aria-label={`${skillName(key)} level`} style={{ width: "3.5em" }} onChange={(event) => setSkills({ ...skills, [key]: Math.max(0, Number(event.target.value) || 0) })} />
-            <button type="button" className="ghost" aria-label={`Remove ${skillName(key)}`} onClick={() => setSkills(Object.fromEntries(Object.entries(skills).filter(([item]) => item !== key)))}>
-              ×
-            </button>
-          </label>
-        ))}
-      </div>
-      <p className="cc-inline">
-        <select value={skillPick} aria-label="Add a skill" onChange={(event) => setSkillPick(event.target.value)}>
-          <option value="">Add a skill…</option>
-          {ALL_SKILLS.filter(([key]) => skills[key] === undefined).map(([key, label]) => (
-            <option key={key} value={key}>
-              {label}
-            </option>
-          ))}
-        </select>
-        <button
-          type="button"
-          data-action="mgt2-add-skill"
-          disabled={!skillPick}
-          onClick={() => {
-            setSkills({ ...skills, [skillPick]: skillPick.includes("-") ? 1 : 0 });
-            setSkillPick("");
-          }}
-        >
-          Add
-        </button>
-      </p>
-      <h4>
-        Kit <small className="hint">Kraken's weapons and armour (the books' gear can be dropped on the sheet later)</small>
-      </h4>
-      <div className="wizard-5e-skills" data-mgt2-kit>
-        {kit.map((item) => (
-          <label key={item}>
-            <input type="checkbox" checked={gear.includes(item)} data-mgt2-gear={item} onChange={(event) => setGear(event.target.checked ? [...gear, item] : gear.filter((name) => name !== item))} />
-            {item}
-          </label>
-        ))}
-      </div>
-      <p className="cc-inline">
-        Credits <input type="number" min={0} value={credits} aria-label="Credits" onChange={(event) => setCredits(Math.max(0, Number(event.target.value) || 0))} />
-      </p>
-      {problem ? <p className="error">{problem}</p> : null}
-    </section>
-  );
-}

@@ -85,31 +85,66 @@ try {
   await seat.click('button[type="submit"]');
   await seat.waitForSelector(".sidebar");
 
-  // The wizard: Ilsa, a Scout of two terms, UPP 7A8B96.
+  // The lifepath wizard, every roll the host's (fixed here): Mira Sol, a Scout (Courier) of one term.
+  const force = (...values) => tool("kraken_dice_force", { values });
+  const answered = (text) => seat.waitForFunction((wanted) => document.querySelector("[data-life-log]")?.textContent.includes(wanted), text, { timeout: 10000 });
   await seat.click('.sidebar [data-launch="characters"]');
   await seat.click('[data-action="new-character"]');
   await seat.waitForSelector('[data-wizard="mgt2"]');
-  await seat.fill('[aria-label="Character name"]', "Ilsa Varn");
+  await seat.fill('[aria-label="Character name"]', "Mira Sol");
+  await force(4, 4, 5, 5, 3, 4, 6, 5, 5, 4, 3, 3);
+  await seat.click('[data-action="life-start"]');
+  await seat.waitForSelector('[data-life-question="arrange"]');
+  await seat.click('[data-life-answer="keep"]');
+  await seat.waitForSelector('[data-life-question="pick"]');
+  for (const skill of ["Vacc Suit", "Electronics", "Athletics", "Carouse"]) await seat.check(`[data-life-pick="${skill}"]`);
+  await seat.click('[data-life-answer="pick"]');
+  await seat.click('[data-life-choice="Straight into a career"]');
+  await seat.click('[data-life-career="Scout"]');
+  await seat.check('[data-life-assignment="courier"]');
+  await force(3, 3);
+  await seat.click('[data-life-answer="career"]');
+  await answered("Scout qualification: INT 5+: rolled 7. Qualified.");
+  // Service Skills 1: Pilot (Spacecraft); survival END 5+ (8); event 6: alone for months: Mechanic.
+  await force(1, 4, 4, 3, 3);
+  await seat.click('[data-life-choice="Service Skills"]');
+  await answered("Survival: END 5+, rolled 8: survived");
+  await seat.screenshot({ path: path.join(tmpdir(), "kraken-mgt2-lifepath-mid.png") });
+  // Advancement EDU 9+ (EDU 9, +1): 5 + 4 + 1 = 10: rank 1, Vacc Suit 1, another roll: Personal Development 6: Jack-of-all-Trades.
+  await force(5, 4);
+  await seat.click('[data-life-choice="Mechanic"]');
+  await answered("Skill: Mechanic 1");
+  await seat.waitForSelector('[data-life-choice="Personal Development"]');
+  await force(6);
+  await seat.click('[data-life-choice="Personal Development"]');
+  await answered("Jack-of-all-Trades 1");
+  await seat.click('[data-life-choice="Leave the career"]');
+  await force(1);
+  await seat.click('[data-life-choice="Cash"]');
+  await answered("Cash (1): Cr20000.");
+  await force(4);
+  await seat.click('[data-life-choice="Benefits"]');
+  await answered("Benefit (4): Weapon.");
+  await seat.click('[data-life-choice="Finish"]');
+  await seat.waitForSelector('[data-life-question="build"]');
+  assert((await seat.textContent("[data-life-upp]"))?.trim() === "8A7B96", "the summary's UPP");
   await seat.fill('[aria-label="Homeworld"]', "Regina");
-  await seat.selectOption('[aria-label="Career"]', "Scout");
-  await seat.fill('[aria-label="Terms"]', "2");
-  assert((await seat.textContent("[data-age]"))?.includes("Age 26"), "two terms: age 26");
-  for (const [stat, value] of Object.entries({ str: 7, dex: 10, end: 8, int: 11, edu: 9, soc: 6 })) await seat.fill(`[aria-label="${stat} score"]`, String(value));
-  for (const skill of ["pilot-smallcraft", "guncombat-slug", "vaccsuit"]) {
-    await seat.selectOption('[aria-label="Add a skill"]', skill);
-    await seat.click('[data-action="mgt2-add-skill"]');
-  }
-  await seat.fill('[aria-label="Pilot (Small Craft) level"]', "2");
-  await seat.check('[data-mgt2-gear="Autopistol"]');
-  await seat.check('[data-mgt2-gear="Cloth"]');
+  await seat.selectOption('[aria-label="Benefit 1"]', "Autopistol");
   await seat.click('[data-action="wizard-finish"]');
   await seat.waitForSelector('.sheet-mgt2 [data-stat="upp"]', { timeout: 15000 });
-  const row = listOf(await tool("kraken_records_list", { type: "character" })).find((item) => item.name === "Ilsa Varn");
-  const ilsa = await tool("kraken_record_get", { id: row.id });
-  assert(ilsa.owner === "A test player" && ilsa.data.upp === "7A8B96" && ilsa.data.age === 26 && ilsa.data.skills["pilot-smallcraft"].level === 2 && ilsa.data.skills["guncombat-slug"].level === 1 && ilsa.data.ac.total === 5, `the wizard built Ilsa: ${JSON.stringify({ owner: ilsa.owner, upp: ilsa.data.upp, age: ilsa.data.age, skills: ilsa.data.skills, ac: ilsa.data.ac })}`);
-  assert(/Frontier Scout/.test(String(ilsa.data.portrait ?? "")), `a Scout from the Frontier: Kraken's science fiction portrait: ${ilsa.data.portrait}`);
-  assert((await seat.textContent('.sheet-mgt2 [data-stat="upp"]'))?.trim() === "7A8B96" && (await seat.textContent('.sheet-mgt2 [data-stat="careers"]'))?.includes("Scout 2"), "the sheet: the UPP and the career");
+  const miraRow = listOf(await tool("kraken_records_list", { type: "character" })).find((item) => item.name === "Mira Sol");
+  const mira = await tool("kraken_record_get", { id: miraRow.id });
+  assert(mira.owner === "A test player" && mira.data.upp === "8A7B96" && mira.data.age === 22 && mira.data.skills["pilot-spacecraft"].level === 1 && mira.data.skills.mechanic.level === 1 && mira.data.skills.vaccsuit.level === 1 && mira.data.skills.jackofalltrades.level === 1 && mira.data.careers[0].title === "Scout" && Object.values(mira.data.inventorylist).some((item) => item.name === "Autopistol") && Object.values(mira.data.coins)[0].amount === 20000, `the lifepath built Mira: ${JSON.stringify({ owner: mira.owner, upp: mira.data.upp, age: mira.data.age, skills: mira.data.skills, careers: mira.data.careers })}`);
+  assert(/Frontier Scout/.test(String(mira.data.portrait ?? "")), `a Scout from the Frontier: Kraken's science fiction portrait: ${mira.data.portrait}`);
+  assert((await seat.textContent('.sheet-mgt2 [data-stat="upp"]'))?.trim() === "8A7B96" && (await seat.textContent('.sheet-mgt2 [data-stat="careers"]'))?.includes("Scout 1"), "the sheet: the UPP and the career");
+  await seat.screenshot({ path: path.join(tmpdir(), "kraken-mgt2-lifepath.png") });
 
+  // Ilsa Varn (the agent's build) for the rest: her sheet from the list.
+  const built = await tool("kraken_build_character", { owner: "A test player", spec: { name: "Ilsa Varn", homeworld: "Regina", characteristics: { str: 7, dex: 10, end: 8, int: 11, edu: 9, soc: 6 }, career: "Scout", terms: 2, skills: { "Pilot (Small Craft)": 2, "Gun Combat (Slug)": 1, "Vacc Suit": 0 }, gear: ["Autopistol", "Cloth"] } });
+  const row = { id: built.id };
+  await seat.waitForFunction((id) => [...document.querySelectorAll('select[aria-label="Character"] option')].some((option) => option.value === id), built.id);
+  await seat.selectOption('select[aria-label="Character"]', built.id);
+  await seat.waitForFunction(() => document.querySelector('.sheet-mgt2 [data-stat="upp"]')?.textContent.trim() === "7A8B96");
   // A Difficult Pilot (Small Craft) task from the sheet: 2 + DEX 1 = +3; 4 + 3 = 7 against 10.
   await seat.selectOption('[aria-label="Difficulty"]', "10");
   await seat.click('[data-sheet-tab="skills"]');
@@ -168,7 +203,7 @@ try {
   await seat.screenshot({ path: path.join(tmpdir(), "kraken-mgt2-player.png") });
   await page.screenshot({ path: path.join(tmpdir(), "kraken-mgt2-gm.png") });
   assert(failures.length === 0, `page errors: ${failures.join(" | ")}`);
-  console.log(`ok mgt2 ui: a campaign switched to Traveller; a test player makes Ilsa Varn in the wizard (UPP 7A8B96, a Scout of 2 terms, age 26, Pilot (Small Craft) 2, Cloth 5), rolls a Difficult task and an INT check with a Boon from the sheet; the autopistol hits the GM's pirate (11, Effect +3) for 6 + 3 - Mesh 2 = 7, its Endurance gone (an END check from the tracker at DM -3). ${path.join(tmpdir(), "kraken-mgt2-player.png")}`);
+  console.log(`ok mgt2 ui: a campaign switched to Traveller; a test player makes Mira Sol in the lifepath wizard (the host's dice: a Scout's term, survival, an event, a promotion, Cr20000 and an autopistol; UPP 8A7B96, age 22); with Ilsa Varn the sheet rolls a Difficult task and an INT check with a Boon from the sheet; the autopistol hits the GM's pirate (11, Effect +3) for 6 + 3 - Mesh 2 = 7, its Endurance gone (an END check from the tracker at DM -3). ${path.join(tmpdir(), "kraken-mgt2-player.png")}`);
 } finally {
   await browser?.close();
   child.kill();
