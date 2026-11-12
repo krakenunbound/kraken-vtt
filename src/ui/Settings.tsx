@@ -39,6 +39,7 @@ export function SettingsWindow({ session }: { session: Session }) {
       </label> : null}
       {gm ? <DiceHoldSetting session={session} /> : null}
       {gm && session.ruleset === "D&D 3.5E" ? <Wizard35Setting session={session} /> : null}
+      {gm && session.ruleset === "AD&D 2E" ? <Wizard2eSetting session={session} /> : null}
       {gm ? (
         <label className="settings-check">
           Clear targets{" "}
@@ -110,6 +111,42 @@ function Wizard35Setting({ session }: { session: Session }) {
       <label className="settings-check">
         <input type="checkbox" data-setting="wizard35-vault" checked={options.vault} onChange={(event) => set({ vault: event.target.checked })} />
         Vault of the Kraken hand-me-downs: its poor or secondhand gear is free in the wizard&apos;s shop
+      </label>
+    </fieldset>
+  );
+}
+
+// The AD&D 2E character wizard's options, as the FG extension's (Options >
+// Kraken Character Wizard): ability rolls once only, the PHB methods players
+// may pick from, starting gold above 1st level.
+const METHOD_NAMES = ["Method I (3d6, in order)", "Method II (3d6 twice each, keep higher)", "Method III (3d6 x6, arrange)", "Method IV (3d6 x12, keep best 6)", "Method V (4d6, drop lowest)", "Method VI (all 8s, then place 7d6)"];
+function Wizard2eSetting({ session }: { session: Session }) {
+  const options = session.options.wizard2e ?? { rollLock: false, methods: [1, 2, 3, 4, 5, 6], gold: "phb" as const };
+  const set = (patch: Partial<typeof options>) => session.setTableOptions({ wizard2e: { ...options, ...patch } });
+  return (
+    <fieldset className="settings-check" data-setting="wizard2e">
+      <legend>AD&amp;D 2E Character Wizard</legend>
+      <label>
+        <input type="checkbox" checked={options.rollLock} data-setting="wizard2e-lock" onChange={(event) => set({ rollLock: event.target.checked })} /> Lock ability rolls (one roll only)
+      </label>
+      {METHOD_NAMES.map((label, index) => (
+        <label key={label}>
+          <input
+            type="checkbox"
+            checked={options.methods.includes(index + 1)}
+            data-setting={`wizard2e-method${index + 1}`}
+            onChange={(event) => set({ methods: event.target.checked ? [...options.methods, index + 1].sort() : options.methods.filter((n) => n !== index + 1) })}
+          />{" "}
+          Allow ability {label}
+        </label>
+      ))}
+      <label>
+        Starting gold above 1st level{" "}
+        <select value={options.gold} aria-label="Starting gold above 1st level" data-setting="wizard2e-gold" onChange={(event) => set({ gold: event.target.value as typeof options.gold })}>
+          <option value="phb">PHB (one roll)</option>
+          <option value="perlevel">One roll per level</option>
+          <option value="xlevel">Roll x level</option>
+        </select>
       </label>
     </fieldset>
   );

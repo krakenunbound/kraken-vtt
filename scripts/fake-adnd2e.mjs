@@ -1,6 +1,8 @@
 // A small FG AD&D 2E module for the 2E tests, in the shapes of the GM's 2E
 // adventures (NPC blocks: AC, THAC0, hit dice, a weapon list, the saves) and
-// pregens (an FG 2E character sheet in client.xml): made up, no licensed text.
+// pregens (an FG 2E character sheet in client.xml), and for the character
+// wizard a few priced items (one magic), two kits and four nonweapon
+// proficiencies: made up, no licensed text.
 import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -37,6 +39,22 @@ export function makeAdnd2eBooks() {
   <pregencharsheet>
     <id-00001>${s("name", "Sister Mara")}${s("race", "Human")}${s("alignment", "Lawful Good")}<abilities><strength>${ability(12)}</strength><dexterity>${ability(9)}</dexterity><constitution>${ability(15)}</constitution><intelligence>${ability(10)}</intelligence><wisdom>${ability(17)}</wisdom><charisma>${ability(13)}</charisma></abilities><classes><id-00001>${s("name", "Cleric")}${n("level", 2)}</id-00001></classes><hp>${n("total", 14)}${n("wounds", 0)}</hp><inventorylist><id-00001>${s("name", "Mace")}${s("type", "Weapon")}${n("carried", 2)}${s("damage", "1d6+1 bludgeoning;1d6 bludgeoning, large;")}${n("speedfactor", 7)}</id-00001><id-00002>${s("name", "Banded mail")}${s("type", "Armor")}${s("subtype", "Armor")}${n("ac", 4)}${n("carried", 2)}</id-00002></inventorylist><proficiencylist><id-00001>${s("name", "Mace")}</id-00001></proficiencylist><skilllist><id-00001>${s("name", "Healing")}</id-00001></skilllist>${n("exp", 1600)}</id-00001>
   </pregencharsheet>
+  <item>
+    <id-00001>${s("name", "Backpack")}${s("type", "Adventuring Gear")}${s("subtype", "Container")}${s("cost", "2 gp")}</id-00001>
+    <id-00002>${s("name", "Rations, iron (1 week)")}${s("type", "Gear")}${s("subtype", "Provisions")}${s("cost", "5 sp")}</id-00002>
+    <id-00003>${s("name", "Sword, Short")}${s("type", "Weapon")}${s("cost", "10 gp")}${s("damage", "1d6 piercing;1d8 piercing, large;")}${n("speedfactor", 3)}</id-00003>
+    <id-00004>${s("name", "Ring of Testing")}${s("type", "Gear")}${s("subtype", "Magic")}${s("cost", "50 gp")}</id-00004>
+  </item>
+  <background>
+    <id-00001>${s("name", "Test Swordsman")}${s("class", "Fighter")}${s("text", "&lt;p&gt;A made-up kit. Requirements: Strength 12&lt;/p&gt;")}</id-00001>
+    <id-00002>${s("name", "Test Hedge Wizard")}${s("class", "Mage")}${s("text", "&lt;p&gt;A made-up kit.&lt;/p&gt;")}</id-00002>
+  </background>
+  <skill>
+    <id-00001>${s("name", "Endurance")}</id-00001>
+    <id-00002>${s("name", "Survival [2]")}</id-00002>
+    <id-00003>${s("name", "Spellcraft")}</id-00003>
+    <id-00004>${s("name", "Cooking")}</id-00004>
+  </skill>
 </root>
 `;
   writeFileSync(path.join(module, "db.xml"), db);

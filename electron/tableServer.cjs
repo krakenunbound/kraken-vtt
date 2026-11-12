@@ -248,7 +248,15 @@ function savedOptions(value) {
     // How long landed dice lie on the table before they fade, in seconds (the GM's choice, for every seat).
     diceHold: Math.round(Math.min(60, Math.max(0.5, Number.isFinite(Number(options.diceHold)) ? Number(options.diceHold) : 2.6)) * 10) / 10,
     wizard35: wizard35Options(options.wizard35),
+    // The AD&D 2E character wizard's options (the FG extension's Options): ability
+    // rolls once only, the PHB methods (I to VI) players may use, gold above 1st level.
+    wizard2e: wizard2eOptions(options.wizard2e),
   };
+}
+function wizard2eOptions(value) {
+  const raw = value && typeof value === "object" ? value : {};
+  const methods = Array.isArray(raw.methods) ? [...new Set(raw.methods.map((n) => Math.round(Number(n))).filter((n) => n >= 1 && n <= 6))].sort() : [1, 2, 3, 4, 5, 6];
+  return { rollLock: Boolean(raw.rollLock), methods, gold: ["phb", "perlevel", "xlevel"].includes(raw.gold) ? raw.gold : "phb" };
 }
 
 // The D&D 3.5E character wizard's options, as the GM's FG extension has them:
@@ -493,7 +501,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     if (next.decal !== undefined && !(next.decal === "" || next.decal === "kraken" || (decals && decals.has(String(next.decal))))) throw new Error(`No decal "${next.decal}".`);
     if (next.wallpaper !== undefined && !(next.wallpaper === "" || (wallpapers && wallpapers.has(String(next.wallpaper))))) throw new Error(`No wallpaper "${next.wallpaper}".`);
     if (next.gmIcon !== undefined && !(next.gmIcon === "" || (gmIcons && gmIcons.has(String(next.gmIcon))))) throw new Error(`No GM icon "${next.gmIcon}".`);
-    options = savedOptions({ ...options, ...next, ...(next.wizard35 && typeof next.wizard35 === "object" ? { wizard35: { ...options.wizard35, ...next.wizard35 } } : {}) });
+    options = savedOptions({ ...options, ...next, ...(next.wizard35 && typeof next.wizard35 === "object" ? { wizard35: { ...options.wizard35, ...next.wizard35 } } : {}), ...(next.wizard2e && typeof next.wizard2e === "object" ? { wizard2e: { ...options.wizard2e, ...next.wizard2e } } : {}) });
     broadcast({ type: "options", options });
     onChange("table");
     return options;

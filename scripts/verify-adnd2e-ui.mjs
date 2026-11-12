@@ -1,7 +1,10 @@
 // AD&D 2E in the real app: a campaign made as AD&D 2E picked on the campaign
 // screen, a 2E adventure (made up, in the shapes of the GM's 2E books: NPC
 // blocks and a pregen) on its shelf and made active; a test player in Chrome
-// makes a human fighter with the 2E wizard (18/76 Strength), opens the 2E
+// makes a human fighter with the 2E wizard, Kraken's FG extension tab for
+// tab (Method V on the host's dice, 18/76 Strength, a race and class the
+// scores allow, the book's kit, an alignment, 5d4 x 10 gp spent in the
+// class's shop, proficiency slots and a language, details rolled), opens the 2E
 // sheet (THAC0 20, AC 2, 12 HP, the five saves), rolls a Strength check and
 // a Paralyzation save from it, then takes the book's pregen as a second
 // character; the GM puts an ogre and a mountain lion on the tracker
@@ -99,22 +102,85 @@ try {
   await seat.click('button[type="submit"]');
   await seat.waitForSelector(".sidebar");
 
-  // The 2E wizard: a human fighter, Strength 18/76.
+  // The 2E wizard (Kraken's FG extension, tab for tab): a human fighter, Method V
+  // rolled on the host (Strength 18/76), the book's kit, Lawful Good, 5d4 x 10 gp
+  // spent in the class's shop, proficiencies, languages, then Commit.
   await seat.click('.sidebar [data-launch="characters"]');
   await seat.click('[data-action="new-character"]');
   await seat.waitForSelector('[data-wizard="adnd2e"]');
+  const tab = async (id) => {
+    await seat.click(`[data-wizard-tab="${id}"]`);
+    await seat.waitForSelector(`[data-wizard="adnd2e"][data-page="${id}"]`);
+  };
+  const isDone = async (id) => (await seat.getAttribute(`[data-wizard-tab="${id}"]`, "data-done")) === "1";
+  assert((await seat.inputValue('[aria-label="Ability method"]')) === "5", "Method V (4d6, drop the lowest) by default");
+  // 4d6 drop lowest: 18, 16, 16, 10, 12, 11; then the d100: 76.
+  await tool("kraken_dice_force", { values: [6, 6, 6, 1, 6, 5, 5, 1, 6, 5, 5, 1, 4, 3, 3, 1, 4, 4, 4, 1, 4, 4, 3, 1] });
+  await seat.click('[data-action="roll-abilities"]');
+  await seat.waitForSelector('[data-stat="charisma"][data-score="11"]', { timeout: 15000 });
+  await chat(page, "[CHARGEN] Strength (Method V)");
+  assert((await seat.getAttribute('[data-stat="strength"]', "data-score")) === "18" && (await isDone("abilities")), "the six scores from the host's dice; the Abilities tab done");
+  // Method V arranges: swap Intelligence and Wisdom, and back.
+  await seat.click('[data-stat="intelligence"]');
+  await seat.click('[data-stat="wisdom"]');
+  assert((await seat.getAttribute('[data-stat="intelligence"]', "data-score")) === "12", "a click, another click: the scores swapped");
+  await seat.click('[data-stat="intelligence"]');
+  await seat.click('[data-stat="wisdom"]');
+  await tool("kraken_dice_force", { values: [76] });
+  await seat.click('[data-action="roll-strength-percent"]');
+  await seat.waitForSelector('[data-str-percent="76"]');
+  await tab("race");
+  assert((await seat.$$("[data-race]")).length === 6, "every PHB race allows these scores");
+  await seat.click('[data-race="Human"]');
+  assert(await isDone("race"), "the Race tab done");
+  await tab("class");
+  assert(!(await seat.$('[data-class="Paladin"]')) && (await seat.$('[data-class="Fighter"]')), "classes the scores allow (no paladin with Charisma 11)");
+  await seat.click('[data-class="Fighter"]');
+  assert((await seat.textContent('[data-class-info="Fighter"]'))?.includes("hit die d10"), "the class's hit die and needs shown");
+  assert(!(await seat.$('[data-wizard-tab="spells"]')), "no Spells tab for a 1st-level fighter");
+  await tab("kit");
+  assert(!(await seat.$('[data-kit="Test Hedge Wizard"]')), "a mage's kit is not offered to a fighter");
+  await seat.click('[data-kit="Test Swordsman"]');
+  assert(await isDone("kit"), "the Kit tab done");
+  await tab("alignment");
+  await seat.click('[data-alignment="Lawful Good"]');
+  await tab("equipment");
+  assert((await seat.textContent("[data-wealth-formula]"))?.includes("5d4"), "the warrior's wealth: 5d4 x 10 gp");
+  await tool("kraken_dice_force", { values: [4, 4, 4, 4, 4] });
+  await seat.click('[data-action="roll-money"]');
+  await seat.waitForSelector('[data-coin-left="20000"]', { timeout: 15000 });
+  await chat(page, "[CHARGEN] Starting wealth");
+  assert(!(await seat.$('[aria-label="Buy Ring of Testing"]')) && !(await seat.$('[aria-label="Buy Backpack"]')) && !(await seat.$('[aria-label="Buy Short sword"]')), "magic items are never starting gear; an adventure's everyday gear is not sold (the PHB's, a class or race book's, the campaign's are); the book's short sword stands for Kraken's");
+  for (const item of ["Long sword", "Chain mail", "Medium shield", "Sword, Short"]) {
+    await seat.fill('[aria-label="Shop search"]', item);
+    await seat.click(`[aria-label="Buy ${item}"]`);
+  }
+  await seat.fill('[aria-label="Shop search"]', "");
+  await seat.waitForSelector('[data-coin-left="9300"]');
+  assert(await isDone("equipment"), "200 gp, 107 spent: 93 gp left");
+  await seat.screenshot({ path: path.join(tmpdir(), "kraken-adnd2e-wizard.png") });
+  await tab("proficiencies");
+  assert((await seat.getAttribute("[data-weapon-slots]", "data-weapon-slots")) === "0/4" && (await seat.getAttribute("[data-nwp-slots]", "data-nwp-slots")) === "0/3", "a fighter's 4 weapon and 3 nonweapon slots");
+  for (const weapon of ["Long sword", "Short bow", "Dagger", "Spear"]) await seat.check(`[aria-label="Weapon proficiency ${weapon}"]`);
+  await seat.check('[aria-label="Nonweapon proficiency Endurance"]');
+  await seat.check('[aria-label="Nonweapon proficiency Survival [2]"]');
+  assert(!(await seat.$('[aria-label="Nonweapon proficiency Spellcraft"]')), "a wizard's proficiency is not a fighter's");
+  await seat.check('[aria-label="Language Orcish"]');
+  assert(await isDone("proficiencies"), "every slot spent: the Profs tab done");
+  await tab("commit");
   await seat.fill('[aria-label="Character name"]', "Brannoc");
-  await seat.selectOption('[aria-label="Race"]', "Human");
-  await seat.selectOption('[aria-label="Class"]', "Fighter");
-  assert((await seat.textContent("[data-class-info]"))?.includes("hit die d10"), "the class's hit die and needs shown");
-  for (const [stat, value] of Object.entries({ strength: 18, dexterity: 16, constitution: 16, intelligence: 10, wisdom: 12, charisma: 11 })) await seat.fill(`[aria-label="${stat} score"]`, String(value));
-  await seat.waitForSelector('[aria-label="Exceptional strength"]');
-  await seat.fill('[aria-label="Exceptional strength"]', "76");
+  // The details filled from the race on the host's dice.
+  await seat.waitForFunction(() => document.querySelector('[aria-label="weight"]')?.value?.includes("lbs"), null, { timeout: 15000 });
+  assert(await isDone("commit"), "ready to commit");
   await seat.click('[data-action="wizard-finish"]');
   await seat.waitForSelector('.sheet-2e [data-stat="thaco"]', { timeout: 15000 });
   const row = listOf(await tool("kraken_records_list", { type: "character" })).find((item) => item.name === "Brannoc");
   const hero = await tool("kraken_record_get", { id: row.id });
   assert(hero.owner === "A test player" && hero.data.ruleset === "adnd2e" && hero.data.hp.total === 12 && hero.data.ac.total === 2 && hero.data.abilities.strength.percent === 76, `the wizard built Brannoc (12 HP; chain mail, a shield and Dex 16: AC 2): ${JSON.stringify({ owner: hero.owner, hp: hero.data.hp, ac: hero.data.ac.total, str: hero.data.abilities.strength })}`);
+  const gp = Object.values(hero.data.coins).find((coin) => coin.name === "GP")?.amount;
+  const gearNames = Object.values(hero.data.inventorylist).map((item) => item.name);
+  assert(gp === 93 && gearNames.includes("Sword, Short") && gearNames.includes("Medium shield") && hero.data.background === "Test Swordsman" && hero.data.alignment === "Lawful Good", `the purse left (93 gp), the bought gear, the kit, the alignment: ${JSON.stringify({ gp, gearNames, kit: hero.data.background })}`);
+  assert(hero.data.profs.weapon.includes("Long sword") && hero.data.profs.nonweapon.includes("Survival [2]") && hero.data.languages.includes("Orcish") && hero.data.gender && hero.data.weight, `proficiencies, languages and details: ${JSON.stringify({ profs: hero.data.profs, languages: hero.data.languages })}`);
   const sheetText = async (stat) => (await seat.textContent(`.sheet-2e [data-stat="${stat}"]`))?.trim();
   assert((await sheetText("thaco")) === "20" && (await sheetText("ac")) === "2" && (await sheetText("init")) === "-1", "the sheet: THAC0 20, AC 2, initiative -1");
   assert((await seat.textContent('.sheet-2e [data-roll-save="paralyzation"]'))?.trim() === "14" && (await seat.textContent('.sheet-2e [data-ability="strength"] .d2e-note'))?.includes("Hit +2, damage +4"), "Paralyzation 14; 18/76's hit +2, damage +4");
@@ -205,7 +271,7 @@ try {
   await seat.screenshot({ path: path.join(tmpdir(), "kraken-adnd2e-player.png") });
   await page.screenshot({ path: path.join(tmpdir(), "kraken-adnd2e-gm.png") });
   assert(failures.length === 0, `page errors: ${failures.join(" | ")}`);
-  console.log(`ok adnd2e ui: an AD&D 2E campaign's shelf holds its 2E book, made active (creatures, a pregen); a test player makes Brannoc with the 2E wizard (18/76, THAC0 20, AC 2, 12 HP, Paralyzation 14), rolls a Strength check and a save from the sheet, takes the book's pregen; initiative lowest first; the sheet's attack hits the ogre (16 vs 16), Large damage 10; the lion's All attacks rolls claw, claw, bite; a natural 20 rolls the book's Critical Hit tables (+1d4); Sister Mara's Turn undead turns a skeleton. ${path.join(tmpdir(), "kraken-adnd2e-player.png")}`);
+  console.log(`ok adnd2e ui: an AD&D 2E campaign's shelf holds its 2E book, made active (creatures, a pregen); a test player makes Brannoc with the 2E wizard through every tab (Method V and 18/76 on the host's dice, the book's kit, Lawful Good, 200 gp rolled and 107 spent in the fighter's shop, 4 weapon and 3 nonweapon slots, Orcish, details rolled; THAC0 20, AC 2, 12 HP, 93 gp, Paralyzation 14), rolls a Strength check and a save from the sheet, takes the book's pregen; initiative lowest first; the sheet's attack hits the ogre (16 vs 16), Large damage 10; the lion's All attacks rolls claw, claw, bite; a natural 20 rolls the book's Critical Hit tables (+1d4); Sister Mara's Turn undead turns a skeleton. ${path.join(tmpdir(), "kraken-adnd2e-player.png")}`);
 } finally {
   await browser?.close();
   child.kill();
