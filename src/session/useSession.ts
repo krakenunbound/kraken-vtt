@@ -123,7 +123,7 @@ export type SoundTrigger = { id: string; name: string; on: string; match: string
 // Books (FG's Library): what the GM has shared, and the pictures shown to the players.
 export type ShownImage = { id: string; book: string; file: string; name: string; at: number };
 export type BookShelf = { active: string[]; shared: string[]; images: ShownImage[] };
-export type BookInfo = { id: string; name: string; title: string; category: string; ruleset: string; author: string; hasBook: boolean; cover: string; adventure: boolean; forPlayers: boolean; active: boolean; shared: boolean };
+export type BookInfo = { id: string; name: string; title: string; category: string; ruleset: string; author: string; hasBook: boolean; cover: string; adventure: boolean; forPlayers: boolean; active: boolean; shared: boolean; pack?: boolean };
 export type BookPageRef = { id: string; name: string; keywords: string };
 export type BookContents = BookInfo & { chapters: { name: string; sections: { name: string; pages: BookPageRef[] }[] }[]; pictures: { name: string; category: string; file: string }[] };
 export type BookBlock = { kind: "text"; html: string; frame?: string } | { kind: "picture"; file: string; caption: string; align: string; scale: number; name: string };
@@ -176,7 +176,7 @@ export type CombatEntry = {
   ac?: number;
   effects: { id: string; label: string; duration: number }[];
   targets: string[];
-  attacks?: { key: string; name: string; bonus: number; damage: string }[];
+  attacks?: { key: string; name: string; bonus: number; bonuses?: number[]; damage: string }[];
   powers?: { key: string; name: string; uses: number; used: number; damage: string; save: string }[];
 };
 export type CombatView = { round: number; active: string | null; entries: CombatEntry[] };

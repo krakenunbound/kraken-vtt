@@ -147,6 +147,8 @@ for (const name of [
   "assistant-ask",
   "assistant-stop",
   "assistant-reset",
+  "packs",
+  "packs-make",
 ])
   ipcMain.handle(name, (_event, ...args) => call(name, ...args));
 
@@ -177,6 +179,7 @@ ipcMain.handle("sound-pick", async (_event, kind, group) => {
   return call("sound-add-files", kind, group, picked.filePaths);
 });
 ipcMain.handle("sound-folder", async () => shell.openPath(await call("sound-folder")));
+ipcMain.handle("packs-folder", async () => shell.openPath(await call("packs-folder")));
 ipcMain.handle("decal-folder", async (_event, kind) => shell.openPath(await call("decal-folder", kind)));
 
 // The DM assistant's key the GM typed: kept encrypted on this computer, known to the backend for the run.

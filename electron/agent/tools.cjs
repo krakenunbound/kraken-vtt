@@ -11,6 +11,7 @@
 const fgModule = require("../importers/fgModule.cjs");
 const { siege, siegeLibrary, siegeCheck, levelUp, changeClass, dropOnCharacter } = require("../siege.cjs");
 const dnd5e = require("../dnd5e.cjs");
+const dnd35 = require("../dnd35.cjs");
 const party = require("../party.cjs");
 const { editCharacter: siegeEdit, importCharacter, exportCharacter } = require("../siege.cjs");
 const fs = require("fs");
@@ -64,7 +65,7 @@ const TOOLS = [
   {
     name: "kraken_campaign_create",
     description: "Create a campaign. Returns its id.",
-    inputSchema: object({ name: string("Campaign name"), ruleset: string("Ruleset: Castles & Crusades, D&D 5E (the SRD 5.2.1) or Worldbuilding") }, ["name"]),
+    inputSchema: object({ name: string("Campaign name"), ruleset: string("Ruleset: Castles & Crusades, D&D 5E (the SRD 5.2.1), D&D 3.5E (the SRD 3.5), Descending Darkness, Apeira Astra or Worldbuilding") }, ["name"]),
     run: (args, ctx) => out(ctx.campaigns.create({ name: args.name, ruleset: args.ruleset })),
   },
   {
@@ -224,7 +225,7 @@ const TOOLS = [
   {
     name: "kraken_build_character",
     description:
-      "Build a SIEGE (Castles & Crusades) character from a spec, like the FG SC C&C wizard's buildFromSpec, into the hosted campaign. Needs the game's modules imported (kraken_import_fg_module: the Player's Handbook, and the Adventurer's Backpack for its classes). Spec: { name, race, class, level, scores: { strength: final score, ... }, primes: [chosen primes; the class prime is added], gold (gp before buying), gear: [[item name, count]], worn: [names], packed: [names], container, spells: [names in preference order], alignment, deity, gender, age, height, weight, appearance, notes }. owner: the player who plays it.",
+      "Build a character into the hosted campaign by its ruleset. D&D 3.5E: spec { name, race, class, level, scores {strength..charisma} (or array: six scores, put in the class's order; else the standard 15,14,13,12,10,8), feats [names], skills {name: ranks}, gear [item names, as the books' or in other words: Heavy steel shield], spells [names], alignment }, from the campaign's active 3.5E Player's Handbook (its classes, races and gear): hit points the die's highest then its average + Con, the class's feats and skills when not given, the class's kit; returns hp, ac, bab, saves. Castles & Crusades: build a SIEGE character from a spec, like the FG SC C&C wizard's buildFromSpec, into the hosted campaign. Needs the game's modules imported (kraken_import_fg_module: the Player's Handbook, and the Adventurer's Backpack for its classes). Spec: { name, race, class, level, scores: { strength: final score, ... }, primes: [chosen primes; the class prime is added], gold (gp before buying), gear: [[item name, count]], worn: [names], packed: [names], container, spells: [names in preference order], alignment, deity, gender, age, height, weight, appearance, notes }. owner: the player who plays it.",
     inputSchema: object(
       {
         spec: { type: "object", description: "The character spec" },
@@ -237,6 +238,10 @@ const TOOLS = [
       if (agent.ruleset?.() === "Apeira Astra") {
         const { record, problems } = await require("../astra.cjs").buildAstra(agent, args.spec, args.owner ?? "", agent.seat);
         return out({ created: true, id: record.id, stamina: record.data.hp.total, armour: record.data.ac.total, skills: record.data.skills, problems });
+      }
+      if (dnd35.is35Ruleset(agent.ruleset?.())) {
+        const { record, problems } = await dnd35.build35(agent, args.spec, args.owner ?? "", agent.seat);
+        return out({ created: true, id: record.id, hp: record.data.hp.total, ac: record.data.ac.total, bab: record.data.bab, saves: Object.fromEntries(Object.entries(record.data.saves).map(([key, save]) => [key, save.total])), problems });
       }
       if (dnd5e.isD20Ruleset(agent.ruleset?.())) {
         const { record, problems } = await dnd5e.build5e(agent, args.spec, args.owner ?? "", agent.seat);
@@ -262,6 +267,11 @@ const TOOLS = [
       const agent = needTable(ctx);
       const record = agent.records.get(args.id);
       if (!record) throw new Error(`No record ${args.id}.`);
+      if (dnd35.is35(record)) {
+        const derived = (await dnd35.rules35()).derive(record.data);
+        const updated = agent.records.update(args.id, { data: derived }, agent.seat, { replace: true });
+        return out({ id: updated.id, level: derived.level, bab: derived.bab, hp: derived.hp.total, ac: derived.ac.total, expnext: derived.expnext });
+      }
       if (dnd5e.is5e(record)) {
         const derived = (await dnd5e.rules5e()).derive(record.data);
         const updated = agent.records.update(args.id, { data: derived }, agent.seat, { replace: true });
@@ -282,7 +292,7 @@ const TOOLS = [
       const record = agent.records.get(args.id);
       if (!record) throw new Error(`No record ${args.id}.`);
       const { record: updated, gain, level } = await levelUp(agent, record, args.package);
-      return out({ id: updated.id, level, gain, hp: updated.data.hp.total, ...(dnd5e.is5e(updated) ? { prof: updated.data.prof } : { bth: updated.data.bth }), expnext: updated.data.expnext });
+      return out({ id: updated.id, level, gain, hp: updated.data.hp.total, ...(dnd5e.is5e(updated) ? { prof: updated.data.prof } : dnd35.is35(updated) ? { bab: updated.data.bab } : { bth: updated.data.bth }), expnext: updated.data.expnext });
     },
   },
   {
@@ -756,13 +766,14 @@ const TOOLS = [
   {
     name: "kraken_combat",
     description:
-      "The combat tracker (SiegeCore rules: d10 initiative, high to low; unconscious enemies lose their turns; effect durations count down each round; the dying bleed). action view (default); place-token (id, x, y: the entry's token onto the open map at that point, tied to it; moved there if it has one); add (recordId of a character or NPC, count, hidden, place: also put tokens on the map; or entry {name, faction, hp, ac, init}); add-party; init (which: an entry id, npcs or all); next (next turn); round (next round); end (removeNpcs); update (id, patch {name, faction, init, initresult, hp, wounds, ac, hidden}); remove (id); damage / heal (id, amount); effect (id, effect {label, duration in rounds, gmOnly}); effect-remove (id, effectId); target (id: the attacker entry, targetId, on true/false); clear-targets (id); attack / damage-roll (a character: recordId + weapon = its inventory key; an NPC: id + weapon = its attack key from view's attacks): SiegeCore's attack, one d20 per target against its AC (equal hits), damage rolled once and put on every target; save (id, attribute, cl): a SIEGE save; cast (recordId, power: its powers key, castAction: the power's actions key): spends a slot, targets save against the caster level, damage halves or cancels on a save, effects land on those who failed, healing goes to the targets. target-area: the source (id) targets everyone whose token is within radius feet of x, y (faction to narrow), for an area spell. krits: critical hits and fumbles (the Castle Keeper's Guide options as Kraken Krits & Fumbles: a natural 20 rolls the critical table, a natural 1 the fumble table, and the result is applied: effects, damage, the next damage roll at maximum or doubled; ranged attacks use up ammunition; spells with spell resistance on are checked first). settings: { mode opt5|opt6|opt1|opt4, crit/fumble always|half|third|off, auto yes|no, npc yes|no, show all|gm, death gm|apply } (omit to read them). krit-test: roll a critical (kind crit) or fumble (kind fumble) for id against targetId (table, roll to fix the result). In a D&D 5E campaign the tracker plays FG's 5E rules instead: init d20 + DEX; attack d20 + bonus against AC, a natural 20 a CRITICAL HIT (the next damage roll doubles its dice), a natural 1 an AUTOMATIC MISS, no krits; save (id, attribute, cl = the DC); cast (recordId or id, power = the spell's name): a slot of its level (or the lowest free above), attack roll or save against the caster's DC, damage (cantrips scale, half on a save where the spell says), healing, effects; a creature at 0 hit points is dead, a character Dying: death-save (id) rolls its death saving throw. In a Descending Darkness campaign the same d20 rules, but a Dying character has no death saves: it loses 1 Health each of its turns, and stabilize (id, recordId: the ally steadying them) rolls that ally's Wisdom against 12 to stop it; dead at minus its maximum Health.",
+      "The combat tracker (SiegeCore rules: d10 initiative, high to low; unconscious enemies lose their turns; effect durations count down each round; the dying bleed). action view (default); place-token (id, x, y: the entry's token onto the open map at that point, tied to it; moved there if it has one); add (recordId of a character or NPC, count, hidden, place: also put tokens on the map; or entry {name, faction, hp, ac, init}); add-party; init (which: an entry id, npcs or all); next (next turn); round (next round); end (removeNpcs); update (id, patch {name, faction, init, initresult, hp, wounds, ac, hidden}); remove (id); damage / heal (id, amount); effect (id, effect {label, duration in rounds, gmOnly}); effect-remove (id, effectId); target (id: the attacker entry, targetId, on true/false); clear-targets (id); attack / damage-roll (a character: recordId + weapon = its inventory key; an NPC: id + weapon = its attack key from view's attacks): SiegeCore's attack, one d20 per target against its AC (equal hits), damage rolled once and put on every target; save (id, attribute, cl): a SIEGE save; cast (recordId, power: its powers key, castAction: the power's actions key): spends a slot, targets save against the caster level, damage halves or cancels on a save, effects land on those who failed, healing goes to the targets. target-area: the source (id) targets everyone whose token is within radius feet of x, y (faction to narrow), for an area spell. krits: critical hits and fumbles (the Castle Keeper's Guide options as Kraken Krits & Fumbles: a natural 20 rolls the critical table, a natural 1 the fumble table, and the result is applied: effects, damage, the next damage roll at maximum or doubled; ranged attacks use up ammunition; spells with spell resistance on are checked first). settings: { mode opt5|opt6|opt1|opt4, crit/fumble always|half|third|off, auto yes|no, npc yes|no, show all|gm, death gm|apply } (omit to read them). krit-test: roll a critical (kind crit) or fumble (kind fumble) for id against targetId (table, roll to fix the result). In a D&D 5E campaign the tracker plays FG's 5E rules instead: init d20 + DEX; attack d20 + bonus against AC, a natural 20 a CRITICAL HIT (the next damage roll doubles its dice), a natural 1 an AUTOMATIC MISS, no krits; save (id, attribute, cl = the DC); cast (recordId or id, power = the spell's name): a slot of its level (or the lowest free above), attack roll or save against the caster's DC, damage (cantrips scale, half on a save where the spell says), healing, effects; a creature at 0 hit points is dead, a character Dying: death-save (id) rolls its death saving throw. In a Descending Darkness campaign the same d20 rules, but a Dying character has no death saves: it loses 1 Health each of its turns, and stabilize (id, recordId: the ally steadying them) rolls that ally's Wisdom against 12 to stop it; dead at minus its maximum Health. In a D&D 3.5E campaign the tracker plays FG's 3.5E rules: init d20 + its bonus; attack (weapon: a character's attacks key, an NPC's attack by its place, 0 the first) d20 + bonus against AC, a natural 20 hits and a 1 misses, a roll in the weapon's threat range (19-20, 18-20) that hits is CONFIRMED by a second roll to be a CRITICAL HIT, full true rolls every iterative bonus at the first target; damage-roll rolls each hit, a critical rolled x2/x3/x4 (dice and bonuses), at least 1; save (id, attribute fortitude, reflex or will, cl = the DC), a natural 20 saves and a 1 fails; at 0 hit points Disabled, -1 to -9 Dying (each turn 10% to become Stable, else 1 more lost), dead at -10; no krits.",
     inputSchema: object({
       action: { type: "string", enum: ["view", "add", "add-party", "init", "next", "round", "end", "update", "remove", "damage", "heal", "effect", "effect-remove", "target", "clear-targets", "attack", "damage-roll", "save", "cast", "krits", "krit-test", "target-area", "death-save", "stabilize", "place-token"] },
       targetId: string("target: the entry to target"),
       on: { type: "boolean", description: "target: add (true) or drop (false)" },
       weapon: string("attack / damage-roll: inventory key (character) or attack key (NPC)"),
-      attribute: string("save: strength, dexterity, constitution, intelligence, wisdom or charisma"),
+      attribute: string("save: strength, dexterity, constitution, intelligence, wisdom or charisma (3.5E: fortitude, reflex or will)"),
+      full: { type: "boolean", description: "attack (3.5E): a full attack, every iterative bonus (+11/+6/+1) at the first target" },
       cl: number("save: the challenge level (5E: the DC)"),
       advantage: { type: "string", enum: ["", "advantage", "disadvantage"], description: "save (5E): roll with advantage or disadvantage; the tracker's effects still count" },
       power: string("cast: the powers key of the character (recordId) or of the NPC on the tracker (id); an NPC's caster level is its hit dice and its uses per day are counted"),
@@ -831,7 +842,7 @@ const TOOLS = [
         const per = map.units() > 0 ? (map.squareCenter(1, 0, 1).x - map.squareCenter(0, 0, 1).x) / map.units() : 10;
         return out({ targets: combat.targetArea(args.id, { x: args.x, y: args.y, radius: (args.radius ?? 0) * per, faction: args.faction ?? null }, seat, (entry) => map.tokens().find((token) => token.id === entry.tokenId) ?? map.tokens().find((token) => entry.recordId && token.recordId === entry.recordId) ?? null), combat: combat.viewFor(seat) });
       }
-      else if (action === "attack") return out({ results: await combat.attack(args.recordId ? { recordId: args.recordId } : { entryId: args.id }, args.weapon, seat, "Agent"), combat: combat.viewFor(seat) });
+      else if (action === "attack") return out({ results: await combat.attack(args.recordId ? { recordId: args.recordId } : { entryId: args.id }, args.weapon, seat, "Agent", { full: Boolean(args.full) }), combat: combat.viewFor(seat) });
       else if (action === "save") return out({ save: await combat.save(args.id, args.attribute, args.cl ?? 0, "Agent", undefined, args.advantage ?? ""), combat: combat.viewFor(seat) });
       else if (action === "cast") return out({ cast: await combat.cast(args.recordId ? { recordId: args.recordId } : { entryId: args.id }, args.power, args.castAction ?? "", seat, "Agent"), combat: combat.viewFor(seat) });
       else if (action === "krits") return out(await combat.krits(args.settings, seat));
@@ -1517,6 +1528,24 @@ const TOOLS = [
       if (action === "stop") return out(assistant.stop());
       if (action === "reset") return out(assistant.reset());
       return out(assistant.view());
+    },
+  },
+  {
+    name: "kraken_packs",
+    description:
+      "Kraken packs (the Books window's Packs tab): the GM's Fantasy Grounds books made into Kraken's own files (.kpack, one per book: its pages, records, maps with walls, pictures), kept in one folder (Documents/Kraken VTT/Packs) that can be copied to any computer, where the books open with no Fantasy Grounds. action list (ruleset: a Kraken ruleset such as \"Castles & Crusades\" or \"D&D 3.5E\", empty for every game: each FG module, its pack (current or older than the module), and packs with no module here; making: the pack being made, how far); make (books: module ids or names, or [\"all\"] for every listed one without a current pack; made one at a time in the background, then they show on the shelf); folder (where the packs are). Packs hold the GM's own books: never share them.",
+    inputSchema: object({ action: { type: "string", enum: ["list", "make", "folder"] }, ruleset: string("A Kraken ruleset (list, make all); empty for every game"), books: { type: "array", items: { type: "string" }, description: "make: module ids or names, or [\"all\"]" } }),
+    async run(args, ctx) {
+      if (!ctx.packs) throw new Error("Packs are made in the Kraken app.");
+      const action = args.action ?? "list";
+      if (action === "folder") return out({ folder: ctx.packs.view({}).folder });
+      if (action === "make") {
+        const wanted = Array.isArray(args.books) ? args.books.map(String) : [];
+        if (wanted.length === 0) throw new Error("Name the books to make packs of, or [\"all\"].");
+        const ids = wanted.includes("all") ? ctx.packs.view({ ruleset: args.ruleset ?? "" }).books.filter((book) => !book.packOnly && !book.pack?.current && !book.state).map((book) => book.id) : wanted;
+        return out(ctx.packs.make(ids));
+      }
+      return out(ctx.packs.view({ ruleset: args.ruleset ?? "" }));
     },
   },
   {

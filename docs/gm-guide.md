@@ -12,8 +12,10 @@ On the start screen choose **My Campaigns**.
   books fit the campaign.
   - *Descending Darkness* and *Apeira Astra* come with Kraken, with their books
     and a first adventure ([included-games.md](included-games.md)).
-  - *Castles & Crusades* and *D&D 5E* use your own Fantasy Grounds books for
-    their content.
+  - *Castles & Crusades*, *D&D 5E* and *D&D 3.5E* use your own books
+    (Fantasy Grounds modules, or Kraken packs made from them) for their
+    content: a 3.5E campaign takes your 3.5E Player's Handbook's classes,
+    races, feats, spells and gear, and your Monster Manual's creatures.
   - *Worldbuilding* has no rules: maps, tokens, chat and dice for any game.
 - Campaigns are saved as you play, in Kraken's data folder
   (`%APPDATA%\kraken-vtt`).
@@ -62,6 +64,14 @@ sheet, into chat, into a story entry, onto the hotbar.
   Fantasy Grounds data folder's `modules` folder (set `KRAKEN_BOOKS` to read
   another folder). Nothing is copied. A campaign's game decides which modules
   fit it.
+- **Kraken packs:** in **Books**, the **Packs** tab makes each of your
+  Fantasy Grounds books into Kraken's own file (`.kpack`: its pages, records,
+  maps with walls and doors, pictures), kept in `Documents/Kraken VTT/Packs`
+  (set `KRAKEN_PACKS` for another folder). Copy that folder to another
+  computer and the books open there with no Fantasy Grounds at all. Kraken
+  reads the pack in place of the module unless the module is newer; *Make
+  again* after you change a module. Packs are your own books: keep them to
+  yourself.
 - In **Modules**, make a book active to bring its records (NPCs, items,
   encounters, maps, story) into the campaign. A players' book can be shared
   with the players.

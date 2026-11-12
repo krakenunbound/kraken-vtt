@@ -1476,6 +1476,18 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
             .catch((error) => answer({ ok: false, error: error instanceof Error ? error.message : "Could not build that character." }));
           return;
         }
+        if (require("./dnd35.cjs").is35Ruleset(ruleset)) {
+          // A 3.5E character from its wizard's spec.
+          const owner = client.role === "dm" ? text(msg.owner, "").slice(0, 24) : client.name;
+          require("./dnd35.cjs")
+            .build35(agentHandle, msg.spec ?? {}, owner, client.role === "dm" ? seatOf(client) : { role: "dm", name: client.name })
+            .then(({ record, problems }) => {
+              addChat({ id: client.id, from: client.name, text: `Created ${record.name}: ${record.data.race ?? ""} ${record.data.classes?.[0]?.name ?? ""} ${record.data.level}.`, at: Date.now() });
+              answer({ ok: true, id: record.id, problems });
+            })
+            .catch((error) => answer({ ok: false, error: error instanceof Error ? error.message : "Could not build that character." }));
+          return;
+        }
         if (require("./dnd5e.cjs").isD20Ruleset(ruleset)) {
           // A 5E character from its wizard's spec.
           const owner = client.role === "dm" ? text(msg.owner, "").slice(0, 24) : client.name;
@@ -1868,7 +1880,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
               return combat.targetArea(sourceId, { x: num(msg.x, 0), y: num(msg.y, 0), radius: num(msg.radius, 0) * per, faction: msg.faction ?? null }, seat, (entry) => map.tokens().find((token) => token.id === entry.tokenId) ?? map.tokens().find((token) => entry.recordId && token.recordId === entry.recordId) ?? null);
             }
             case "attack":
-              return combat.attack(msg.recordId ? { recordId: String(msg.recordId) } : { entryId: String(msg.id) }, String(msg.weapon), seat, client.role === "dm" ? "Combat" : client.name);
+              return combat.attack(msg.recordId ? { recordId: String(msg.recordId) } : { entryId: String(msg.id) }, String(msg.weapon), seat, client.role === "dm" ? "Combat" : client.name, { full: Boolean(msg.full) });
             case "damage-roll":
               return combat.damageRoll(msg.recordId ? { recordId: String(msg.recordId) } : { entryId: String(msg.id) }, String(msg.weapon), seat, client.role === "dm" ? "Combat" : client.name);
             case "heal":

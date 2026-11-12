@@ -35,8 +35,34 @@ export type KrakenAssistantApi = {
   setKey: (key: string) => Promise<{ busy: boolean; model: string; log: never[]; hasKey: boolean; keyFrom: string | null }>;
   onEvent: (handler: (event: never) => void) => () => void;
 };
+export type KrakenPackRow = {
+  id: string;
+  name: string;
+  title: string;
+  category: string;
+  ruleset: string;
+  fgRuleset: string;
+  hasBook: boolean;
+  pack: { file: string; current: boolean } | null;
+  state: "" | "making" | "waiting" | "failed";
+  packOnly?: boolean;
+};
+export type KrakenPacksView = {
+  folder: string;
+  books: KrakenPackRow[];
+  making: { id: string; done?: number; total?: number; waiting: number } | null;
+  made: { id: string; title: string; records: number; pictures: number; bytes: number; at: number }[];
+  failed: { id: string; error: string; at: number }[];
+};
+export type KrakenPacksApi = {
+  view: (input?: { ruleset?: string }) => Promise<KrakenPacksView>;
+  make: (ids: string[]) => Promise<{ queued: string[]; waiting: number }>;
+  openFolder: () => Promise<string>;
+  onEvent: (handler: (event: { id: string; ok: boolean }) => void) => () => void;
+};
 export type KrakenApi = {
   assistant?: KrakenAssistantApi;
+  packs?: KrakenPacksApi;
   addresses: () => Promise<string[]>;
   network: () => Promise<KrakenNetwork>;
   campaigns: () => Promise<KrakenCampaign[]>;

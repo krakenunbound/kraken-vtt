@@ -3,6 +3,7 @@ const path = require("path");
 const { unzipSync, strFromU8 } = require("fflate");
 const { DOMParser } = require("@xmldom/xmldom");
 const { readModule, modulePicture } = require("./importers/fgModule.cjs");
+const packs = require("./packs.cjs");
 
 // The GM's books, as FG's Library: the Fantasy Grounds modules on this
 // computer (the GM's own, read in place, never copied or shipped). A module
@@ -23,6 +24,8 @@ const FG_RULESETS = {
   "Castles & Crusades": ["SiegeCore", "CnCRPG"],
   // FG's 5E ruleset's modules (the SRD 5.2.1's player book, bestiary, magic items).
   "D&D 5E": ["5E"],
+  // The 3.5E ruleset's modules (FG's own and the GM's, Kraken35E's too).
+  "D&D 3.5E": ["3.5E", "Kraken35E", "d20"],
   // Kraken's own games, with their books shipped in the app (games/modules).
   "Descending Darkness": ["Descending Darkness"],
   "Apeira Astra": ["Apeira Astra"],
@@ -30,6 +33,8 @@ const FG_RULESETS = {
 };
 const ANY = new Set(["", "any", "corerpg"]);
 function fitsRuleset(info, ruleset) {
+  // A Kraken pack says which Kraken ruleset it is for.
+  if (info?.kraken) return info.kraken === "Any" || info.kraken === ruleset;
   const wanted = FG_RULESETS[ruleset] ?? [String(ruleset ?? "")];
   const theirs = String(info.ruleset ?? "").toLowerCase();
   return ANY.has(theirs) || wanted.some((name) => name.toLowerCase() === theirs);
@@ -65,8 +70,24 @@ function parse(text) {
   return doc?.documentElement ?? null;
 }
 
-// What a module is, from its definition.xml (and whether it has a book).
+// What a module is, from its definition.xml (and whether it has a book); a
+// Kraken pack, from its own description.
 function describe(file) {
+  if (packs.isPack(file)) {
+    const manifest = packs.readManifest(file);
+    return {
+      id: path.basename(file).slice(0, -packs.EXTENSION.length),
+      name: String(manifest.name ?? ""),
+      title: String(manifest.title || manifest.name || ""),
+      category: String(manifest.category || "Other"),
+      ruleset: String(manifest.from?.ruleset ?? ""),
+      kraken: String(manifest.ruleset || "Any"),
+      author: String(manifest.author ?? ""),
+      hasBook: Boolean(manifest.hasBook),
+      cover: String(manifest.cover ?? ""),
+      pack: true,
+    };
+  }
   const stat = fs.statSync(file);
   let get;
   if (stat.isDirectory()) {
@@ -167,8 +188,10 @@ function bitmapIn(value) {
 const byOrder = (object) => Object.values(object && typeof object === "object" ? object : {}).sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0));
 
 // also: more folders of modules (the books Kraken ships, content/modules).
-function createBookShelf({ folder, cache = "", also = [] }) {
+// packsFolder: the GM's Kraken packs (Documents/Kraken VTT/Packs).
+function createBookShelf({ folder, cache = "", also = [], packsFolder = "" }) {
   let known = null;
+  let every = [];
   const opened = new Map(); // id -> the read book, the last few
 
   function load() {
@@ -181,7 +204,7 @@ function createBookShelf({ folder, cache = "", also = [] }) {
     }
     const next = {};
     const entries = [];
-    for (const dir of [folder, ...also]) {
+    for (const dir of [folder, ...also, ...(packsFolder ? [packsFolder] : [])]) {
       try {
         for (const entry of fs.readdirSync(dir, { withFileTypes: true })) entries.push({ entry, dir });
       } catch {
@@ -190,7 +213,7 @@ function createBookShelf({ folder, cache = "", also = [] }) {
     }
     for (const { entry, dir } of entries) {
       const file = path.join(dir, entry.name);
-      if (!(entry.isFile() && /\.mod$/i.test(entry.name)) && !(entry.isDirectory() && fs.existsSync(path.join(file, "definition.xml")))) continue;
+      if (!(entry.isFile() && /\.(mod|kpack)$/i.test(entry.name)) && !(entry.isDirectory() && fs.existsSync(path.join(file, "definition.xml")))) continue;
       let stat;
       try {
         stat = fs.statSync(file);
@@ -206,7 +229,7 @@ function createBookShelf({ folder, cache = "", also = [] }) {
       }
       try {
         const info = describe(file);
-        if (info) next[key] = { ...info, file };
+        if (info) next[key] = { ...info, file, mtime: stat.mtimeMs };
       } catch {
         /* an unreadable module is left out */
       }
@@ -219,7 +242,19 @@ function createBookShelf({ folder, cache = "", also = [] }) {
         /* the list still works */
       }
     }
-    known = new Map(Object.values(next).map((info) => [info.id, info]));
+    // A book that is both a Kraken pack and an FG module is shown once: the
+    // pack, unless the module is newer (the GM changed it since).
+    every = Object.values(next);
+    const books = new Map();
+    for (const info of every) {
+      const other = books.get(info.name);
+      if (!other) books.set(info.name, info);
+      else {
+        const [pack, module] = info.pack ? [info, other] : [other, info];
+        if (pack.pack && !module.pack) books.set(info.name, packs.preferPack(pack.file, module.file) === pack.file ? pack : module);
+      }
+    }
+    known = new Map([...books.values()].map((info) => [info.id, info]));
     return known;
   }
 
@@ -271,17 +306,23 @@ function createBookShelf({ folder, cache = "", also = [] }) {
   function publicInfo(id) {
     const found = info(id);
     if (!found) return null;
-    const { file, playerBook, ...rest } = found;
+    const { file, playerBook, mtime, ...rest } = found;
     return { ...rest, adventure: isAdventure(rest), forPlayers: !isAdventure(rest) && forPlayers(rest) };
   }
 
   return {
     folder,
     // Every module, as FG's Modules window: by category, with its cover.
-    list: () => [...load().values()].map(({ file, playerBook, ...rest }) => ({ ...rest, adventure: isAdventure(rest), forPlayers: !isAdventure(rest) && forPlayers(rest) })).sort((a, b) => a.category.localeCompare(b.category) || a.title.localeCompare(b.title)),
+    list: () => [...load().values()].map(({ file, playerBook, mtime, ...rest }) => ({ ...rest, adventure: isAdventure(rest), forPlayers: !isAdventure(rest) && forPlayers(rest) })).sort((a, b) => a.category.localeCompare(b.category) || a.title.localeCompare(b.title)),
     info: publicInfo,
     // Where a module is on this computer (to load its records).
     file: (id) => info(id)?.file ?? null,
+    // Every book file found, packs and FG modules alike, before the two are
+    // put together (for the Packs list: which modules have a pack).
+    files: () => {
+      load();
+      return every.map((item) => ({ ...item }));
+    },
     refresh() {
       known = null;
       opened.clear();
@@ -360,4 +401,4 @@ function createBookShelf({ folder, cache = "", also = [] }) {
   };
 }
 
-module.exports = { createBookShelf, toHtml, fitsRuleset, forPlayers, isAdventure };
+module.exports = { createBookShelf, toHtml, fitsRuleset, forPlayers, isAdventure, describe };

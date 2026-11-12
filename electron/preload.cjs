@@ -22,6 +22,17 @@ contextBridge.exposeInMainWorld("kraken", {
   campaignBundle: (id) => ipcRenderer.invoke("campaign-bundle", id),
   saveBundle: (id, bytes) => ipcRenderer.invoke("save-bundle", id, bytes),
   saveView: (id, view) => ipcRenderer.invoke("save-view", id, view),
+  // Kraken packs: the GM's FG books in Kraken's own files (the GM's window only).
+  packs: {
+    view: (input) => ipcRenderer.invoke("packs", input),
+    make: (ids) => ipcRenderer.invoke("packs-make", ids),
+    openFolder: () => ipcRenderer.invoke("packs-folder"),
+    onEvent: (handler) => {
+      const listener = (_event, value) => handler(value);
+      ipcRenderer.on("packs-event", listener);
+      return () => ipcRenderer.removeListener("packs-event", listener);
+    },
+  },
   // The DM assistant (the GM's window only).
   assistant: {
     status: () => ipcRenderer.invoke("assistant-status"),

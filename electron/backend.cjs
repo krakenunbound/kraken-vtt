@@ -20,6 +20,7 @@ const { createDecalLibrary } = require("./decals.cjs");
 const { createSoundLibrary } = require("./sounds.cjs");
 const { createBookShelf } = require("./books.cjs");
 const { fgDataFolder } = require("./importers/fgModule.cjs");
+const packs = require("./packs.cjs");
 const campaigns = require("./campaigns.cjs");
 const { startAgentServer } = require("./agent/mcpServer.cjs");
 const assistantModule = require("./assistant.cjs");
@@ -99,10 +100,96 @@ let wallpaperLibrary = null;
 let gmIconLibrary = null;
 let soundLibrary = null;
 let bookShelf = null;
-// The GM's books: the FG modules on this computer, read in place.
+// The GM's books: the FG modules on this computer, read in place, and the
+// GM's Kraken packs (Documents/Kraken VTT/Packs), which need no FG at all.
+// A test's own shelf of modules (KRAKEN_BOOKS) has its own packs folder too, never the GM's.
+process.env.KRAKEN_PACKS ||= process.env.KRAKEN_BOOKS ? path.join(USER_DATA, "packs") : packs.packFolder();
 function books() {
-  if (!bookShelf) bookShelf = createBookShelf({ folder: process.env.KRAKEN_BOOKS || path.join(fgDataFolder(), "modules"), cache: path.join(USER_DATA, "books-index.json"), also: [path.join(APP_DIR, "games", "modules")] });
+  if (!bookShelf) bookShelf = createBookShelf({ folder: process.env.KRAKEN_BOOKS || path.join(fgDataFolder(), "modules"), cache: path.join(USER_DATA, "books-index.json"), also: [path.join(APP_DIR, "games", "modules")], packsFolder: packs.packFolder() });
   return bookShelf;
+}
+
+// Kraken packs made from the GM's FG modules, one at a time in a worker
+// thread: the books of a ruleset in Kraken's own files, to take to any
+// computer. packsView: each FG module (of a ruleset, or all) and its pack.
+const packJob = { queue: [], current: null, progress: null, made: [], failed: [] };
+const FG_BACKUP = /\.bak[-.\w]*$|\.mod\.|_retired|backup/i;
+function packsView({ ruleset = "" } = {}) {
+  const files = books().files();
+  const packsByName = new Map(files.filter((item) => item.pack).map((item) => [item.name, item]));
+  const bundled = path.join(APP_DIR, "games", "modules");
+  const modules = files.filter((item) => !item.pack && !FG_BACKUP.test(item.file) && !path.resolve(item.file).startsWith(path.resolve(bundled)));
+  const fits = (kraken) => !ruleset || kraken === ruleset || kraken === "Any";
+  const rows = modules
+    .map((item) => {
+      const pack = packsByName.get(item.name);
+      const kraken = packs.krakenRuleset(item.ruleset);
+      return {
+        id: item.id,
+        name: item.name,
+        title: item.title,
+        category: item.category,
+        ruleset: kraken,
+        fgRuleset: item.ruleset,
+        hasBook: item.hasBook,
+        pack: pack ? { file: path.basename(pack.file), current: (pack.mtime ?? 0) + 1000 >= (item.mtime ?? 0) } : null,
+        state: packJob.current === item.id ? "making" : packJob.queue.includes(item.id) ? "waiting" : packJob.failed.find((failed) => failed.id === item.id) ? "failed" : "",
+      };
+    })
+    .filter((row) => fits(row.ruleset));
+  // Packs with no FG module here (made on another computer).
+  const only = [...packsByName.values()].filter((pack) => !modules.some((item) => item.name === pack.name) && fits(pack.kraken)).map((pack) => ({ id: pack.id, name: pack.name, title: pack.title, category: pack.category, ruleset: pack.kraken, fgRuleset: pack.ruleset, hasBook: pack.hasBook, pack: { file: path.basename(pack.file), current: true }, state: "", packOnly: true }));
+  return {
+    folder: packs.packFolder(),
+    books: [...rows, ...only].sort((a, b) => a.ruleset.localeCompare(b.ruleset) || a.title.localeCompare(b.title)),
+    making: packJob.current ? { id: packJob.current, ...packJob.progress, waiting: packJob.queue.length } : null,
+    made: packJob.made.slice(-20),
+    failed: packJob.failed.slice(-20),
+  };
+}
+function makePacks(ids) {
+  const files = books().files();
+  const wanted = (Array.isArray(ids) ? ids : [ids]).map(String);
+  const queued = [];
+  for (const id of wanted) {
+    const found = files.find((item) => !item.pack && (item.id === id || item.name === id || item.title === id));
+    if (!found) throw new Error(`No FG module "${id}" on this computer.`);
+    if (packJob.current === found.id || packJob.queue.includes(found.id)) continue;
+    packJob.failed = packJob.failed.filter((failed) => failed.id !== found.id);
+    packJob.queue.push(found.id);
+    queued.push(found.id);
+  }
+  setImmediate(nextPack);
+  return { queued, waiting: packJob.queue.length + (packJob.current ? 1 : 0) };
+}
+function nextPack() {
+  if (packJob.current || packJob.queue.length === 0) return;
+  const id = packJob.queue.shift();
+  const found = books().files().find((item) => !item.pack && item.id === id);
+  if (!found) return setImmediate(nextPack);
+  packJob.current = id;
+  packJob.progress = { done: 0, total: 0 };
+  const { Worker } = require("worker_threads");
+  const worker = new Worker(path.join(__dirname, "packWorker.cjs"), { workerData: { file: found.file, folder: packs.packFolder() } });
+  let answered = false;
+  const finish = (ok, value) => {
+    if (answered) return;
+    answered = true;
+    if (ok) packJob.made.push({ id, ...value, at: Date.now() });
+    else packJob.failed.push({ id, error: String(value), at: Date.now() });
+    packJob.current = null;
+    packJob.progress = null;
+    books().refresh();
+    emit("packs-event", { id, ok });
+    setImmediate(nextPack);
+  };
+  worker.on("message", (message) => {
+    if (message?.progress) packJob.progress = message.progress;
+    else if (message?.ok) finish(true, message.made);
+    else if (message && message.ok === false) finish(false, message.error);
+  });
+  worker.once("error", (error) => finish(false, error?.message ?? error));
+  worker.once("exit", (code) => finish(false, `The pack maker stopped (${code}).`));
 }
 // The GM's sounds (one-shots, effects, ambience, music), shared by every campaign.
 function sounds() {
@@ -348,6 +435,13 @@ const calls = {
     return assistantStatus();
   },
   hosting: () => Boolean(table || hosted),
+  packs: (input) => packsView(input ?? {}),
+  "packs-make": (ids) => makePacks(ids),
+  // The packs folder (made if new): the window's process opens it.
+  "packs-folder": () => {
+    fs.mkdirSync(packs.packFolder(), { recursive: true });
+    return packs.packFolder();
+  },
   // Quitting: the table saved and stopped.
   quit: () => stopTable(),
 };
@@ -365,6 +459,7 @@ const agentContext = {
   // The window itself (a screenshot, its text, a script in it): done by the window's process.
   windowOp: (op, payload) => ask("window", { op, ...payload }),
   assistant: () => assistant,
+  packs: { view: (input) => packsView(input ?? {}), make: (ids) => makePacks(ids), job: () => packJob },
 };
 
 // The DM assistant (GM only): the key from the environment or .env.local, or

@@ -5,6 +5,7 @@ import { Icon } from "../ui/icons";
 import { useWindows } from "../ui/Windows";
 import { sound } from "../sound/soundEngine";
 import { slotDrag } from "../ui/QuickSlots";
+import { PacksPanel } from "./Packs";
 
 // Books, as FG's Library: the Books window lists the campaign's active books
 // (by category, with their covers), and Activation every module for its game;
@@ -229,7 +230,7 @@ function ShareButton({ shared, onClick, what }: { shared: boolean; onClick: () =
   );
 }
 
-export function BooksWindow({ session, onOpenAdventure, start = "books" }: { session: Session; onOpenAdventure?: () => void; start?: "books" | "activation" }) {
+export function BooksWindow({ session, onOpenAdventure, start = "books" }: { session: Session; onOpenAdventure?: () => void; start?: "books" | "activation" | "packs" }) {
   const gm = session.role === "dm";
   const { openBook } = useBookWindows();
   const [list, setList] = useState<BookInfo[] | null>(null);
@@ -237,7 +238,9 @@ export function BooksWindow({ session, onOpenAdventure, start = "books" }: { ses
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   // The GM's: the campaign's books, or Activation (every module that fits the ruleset).
-  const [tab, setTab] = useState<"books" | "activation">(start);
+  const [tab, setTab] = useState<"books" | "activation" | "packs">(start);
+  // Packs are made by the GM's own app (the host), from the FG modules on its computer.
+  const canPack = gm && typeof window !== "undefined" && Boolean(window.kraken?.packs);
   const shelfKey = `${session.bookShelf.active.join("|")}/${session.bookShelf.shared.join("|")}`;
   useEffect(() => {
     session
@@ -273,6 +276,11 @@ export function BooksWindow({ session, onOpenAdventure, start = "books" }: { ses
             <button type="button" role="tab" aria-selected={tab === "activation"} className={tab === "activation" ? "dice-chip on" : "dice-chip"} data-books-tab="activation" onClick={() => setTab("activation")}>
               Activation
             </button>
+            {canPack ? (
+              <button type="button" role="tab" aria-selected={tab === "packs"} className={tab === "packs" ? "dice-chip on" : "dice-chip"} data-books-tab="packs" title="Your FG books in Kraken's own files, to use on any computer without Fantasy Grounds" onClick={() => setTab("packs")}>
+                Packs
+              </button>
+            ) : null}
           </div>
           {onOpenAdventure ? (
             <button type="button" className="ghost" data-launch="adventure" title="Open a prepared map bundle (.zip, or a zip holding several) on the table. You can also drop one on the table." onClick={onOpenAdventure}>
@@ -281,12 +289,13 @@ export function BooksWindow({ session, onOpenAdventure, start = "books" }: { ses
           ) : null}
         </div>
       ) : null}
-      {activation ? (
+      {gm && tab === "packs" && canPack ? <PacksPanel ruleset={ruleset} /> : null}
+      {gm && tab === "packs" ? null : activation ? (
         <p className="hint">
           The modules for {ruleset || "this campaign's game"}. <b>Active</b>: in this campaign. <b>Players</b>: the players may read the book too (a Player's Handbook starts open to them). Adventures are the GM's alone: show the players their pictures and maps from the book instead.
         </p>
       ) : null}
-      <div className="books-list" role="list">
+      <div className="books-list" role="list" hidden={gm && tab === "packs"}>
         {error ? <p className="hint">{error}</p> : null}
         {list && shown.length === 0 ? <p className="hint">{empty}</p> : null}
         {!list && !error ? <p className="hint">Gathering the books…</p> : null}
@@ -303,6 +312,7 @@ export function BooksWindow({ session, onOpenAdventure, start = "books" }: { ses
                       <b>{item.title}</b>
                       <small>
                         {item.ruleset || "Any game"}
+                        {item.pack ? " · Kraken pack" : ""}
                         {item.hasBook ? "" : " · no book (pictures, tokens)"}
                       </small>
                     </span>
@@ -330,7 +340,7 @@ export function BooksWindow({ session, onOpenAdventure, start = "books" }: { ses
           </section>
         ))}
       </div>
-      <input type="search" className="books-search" placeholder="Search" aria-label="Search books" value={search} onChange={(event) => setSearch(event.target.value)} />
+      <input type="search" className="books-search" hidden={gm && tab === "packs"} placeholder="Search" aria-label="Search books" value={search} onChange={(event) => setSearch(event.target.value)} />
     </div>
   );
 }

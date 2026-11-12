@@ -36,6 +36,19 @@ const r5Ready = import(pathToFileURL(path.join(__dirname, "..", "shared", "dnd5e
   r5 = module;
 });
 
+// D&D 3.5E (SRD 3.5), when the campaign's ruleset is "D&D 3.5E": FG's 3.5E
+// ruleset's way: initiative d20 + its bonus; an attack d20 + bonus against
+// AC (a natural 20 hits, a natural 1 misses); a roll in the weapon's threat
+// range threatens a critical, confirmed by a second roll that hits: the
+// damage rolled as many times as the multiplier; a full attack rolls each
+// iterative bonus; saves Fortitude, Reflex and Will against a DC; at 0 hit
+// points Disabled, -1 to -9 Dying (each turn 10% to become Stable, else 1
+// lost), dead at -10.
+let r35 = null;
+const r35Ready = import(pathToFileURL(path.join(__dirname, "..", "shared", "dnd35", "rules.mjs")).href).then((module) => {
+  r35 = module;
+});
+
 // Apeira Astra (shared/astra/rules.mjs), when the campaign's ruleset is
 // "Apeira Astra": initiative 2d6 + Reflex modifier + Tactics; an attack 2d6 +
 // skill + characteristic against 8, its Effect added to the damage; armour
@@ -257,6 +270,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
   // until an ally steadies them (Wisdom 12) or they reach minus their maximum.
   const bleeds = () => table().ruleset?.() === "Descending Darkness";
   const astraOn = () => table().ruleset?.() === "Apeira Astra";
+  const d35 = () => table().ruleset?.() === "D&D 3.5E";
 
   function changed() {
     onChange();
@@ -401,6 +415,8 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       if (linked?.type !== "character") return { dead: 0, dying: 0 };
       return { dead: -Math.max(1, num(linked.data?.characteristics?.grit?.score, 7)), dying: 0 };
     }
+    // 3.5E: dying at -1 to -9, dead at -10, everyone alike.
+    if (d35()) return { dead: -10, dying: -1 };
     if (!five()) return cachedThresholds;
     if (record(entry)?.type !== "character") return { dead: 0, dying: 0 };
     const { hp } = vitals(entry);
@@ -412,6 +428,9 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     const status = geometry.healthStatus(hp, wounds, thresholdsFor(entry));
     // 5E: three failed death saves kill; three successes leave the character stable (Unconscious).
     if (astraOn() && status.status === "Dying") return { ...status, status: "Down", color: "#6C2DC7" };
+    // 3.5E: at exactly 0 Disabled (one move or standard action a round); dying but steadied, Stable.
+    if (d35() && status.status === "Unconscious") return { ...status, status: "Disabled", color: "#C08000" };
+    if (d35() && status.status === "Dying" && entry.stabilized) return { ...status, status: "Stable", color: "#6C2DC7" };
     if (bleeds() && status.status === "Dying") return entry.stabilized ? { ...status, status: "Unconscious", color: "#6C2DC7" } : status;
     if (five() && status.status === "Dying") {
       const saves = deathSaves(entry);
@@ -497,6 +516,16 @@ function createCombat({ saved, table, onChange = () => undefined }) {
         const ongoing = five() ? Math.max(0, rolled.total) : Math.max(1, rolled.total);
         if (ongoing > 0) await applyWounds(entry, ongoing, "[DAMAGE] Ongoing damage", opts);
       }
+    }
+    // 3.5E: a dying creature has 10% each turn to become stable, else loses a hit point.
+    if (d35() && health(entry).status === "Dying" && !entry.stabilized && state.round > 0 && entry.bleedRound < state.round) {
+      entry.bleedRound = state.round;
+      const chance = table().roll("1d100", `[STABILIZE] ${entry.name} (10%)`, "Combat", entry.hidden);
+      if (chance.total <= 10) {
+        entry.stabilized = true;
+        table().say(`${entry.name} becomes stable: unconscious, no longer losing hit points.`, "Combat", entry.hidden);
+        changed();
+      } else await applyWounds(entry, 1, "[DAMAGE] Dying", opts);
     }
     // Descending Darkness: a dying character loses a Health at its turn, once a round.
     if (bleeds() && health(entry).status === "Dying" && !entry.stabilized && state.round > 0 && entry.bleedRound < state.round) {
@@ -704,6 +733,145 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     return { total: rolled.total, success };
   }
 
+  // --- D&D 3.5E ---------------------------------------------------------------
+  // A creature's attack: a character's weapon (its sheet's attacks: every
+  // iterative bonus, damage, threat range and multiplier) or an NPC's (its
+  // block's attacks, by their place in the list, or by name).
+  const splitDamage = (text) => /^(\d*d\d+)([+-]\d+)?$/.exec(String(text ?? "").replace(/\s+/g, ""));
+  function weapon35(who, key, seat) {
+    if (who.recordId) {
+      const linked = table().records.get(who.recordId);
+      if (!linked || linked.type !== "character") throw new Error("No such character.");
+      if (seat.role !== "dm" && linked.owner !== seat.name) throw new Error("That is not your character.");
+      const data = r35.derive(linked.data);
+      const attack = data.attacks?.[key] ?? Object.values(data.attacks ?? {}).find((item) => item.item === key || item.name.toLowerCase() === String(key).toLowerCase());
+      if (!attack) throw new Error("No such weapon.");
+      const dice = splitDamage(attack.damage);
+      return { actor: linked.name, name: attack.name, type: attack.type, bonus: attack.bonuses[0], bonuses: attack.bonuses, damage: dice ? dice[1] : attack.damage, damageBonus: dice?.[2] ? Number(dice[2]) : 0, crit: attack.crit, dmgtype: attack.dmgtype, entry: state.entries.find((entry) => entry.recordId === linked.id) ?? null, record: linked };
+    }
+    mustGM(seat);
+    const entry = find(who.entryId);
+    const attacks = r35.npcStats(record(entry)?.data ?? {}).attacks;
+    const attack = attacks[Number(key)] ?? attacks.find((item) => item.name.toLowerCase() === String(key).toLowerCase());
+    if (!attack) throw new Error("No such attack.");
+    const dice = splitDamage(attack.damage);
+    return { actor: entry.name, name: attack.name, type: attack.type, bonus: attack.bonuses[0] ?? 0, bonuses: attack.bonuses, damage: dice ? dice[1] : attack.damage, damageBonus: dice?.[2] ? Number(dice[2]) : 0, crit: attack.crit, dmgtype: "", entry };
+  }
+  // One attack roll per target (or, a full attack, one per iterative bonus at
+  // the first target): a natural 20 hits, a natural 1 misses; a threat (the
+  // weapon's range) that hits is confirmed by a second roll against the same
+  // AC; the damage roll that follows multiplies for a confirmed critical.
+  async function attack35(plan, from, { full = false } = {}) {
+    await r35Ready;
+    const source = plan.entry;
+    mustAct(source);
+    const kind = SHORT_TYPE[plan.type] ? ` (${SHORT_TYPE[plan.type]})` : "";
+    const targets = targetsOf(source);
+    const bonuses = full ? plan.bonuses ?? [plan.bonus] : [plan.bonus];
+    const range = num(plan.crit?.range, 20);
+    const mult = Math.max(2, num(plan.crit?.mult, 2));
+    const formulaFor = (bonus, target) => {
+      const atk = bonus + effectBonus(source, "ATK", target);
+      return `1d20${atk ? `${atk > 0 ? "+" : ""}${atk}` : ""}${effectDice(source, "ATK", target)}`;
+    };
+    const results = [];
+    if (source) source.hitOn = targets.length ? {} : null;
+    if (targets.length === 0) {
+      for (const [index, bonus] of bonuses.entries()) {
+        const roll = table().roll(formulaFor(bonus, null), `[ATTACK]${kind} ${plan.name}${bonuses.length > 1 ? ` #${index + 1}` : ""}`, from, false, { result: "NO TARGET", by: plan.actor });
+        results.push({ total: roll.total, hit: null, natural: natural(roll) });
+      }
+      changed();
+      return results;
+    }
+    // A full attack goes at the first target; a single attack at each target.
+    const swings = full ? bonuses.map((bonus) => ({ bonus, target: targets[0] })) : targets.map((target) => ({ bonus: plan.bonus, target }));
+    for (const [index, { bonus, target }] of swings.entries()) {
+      const ac = vitals(target).ac + effectBonus(target, "AC");
+      const rolled = table().dice.roll(formulaFor(bonus, target));
+      const die = natural(rolled);
+      const hit = die === 20 || (die !== 1 && rolled.total >= ac);
+      let crit = false;
+      let confirm = null;
+      if (hit && die >= range) {
+        confirm = table().dice.roll(formulaFor(bonus, target));
+        const confirmDie = natural(confirm);
+        crit = confirmDie === 20 || (confirmDie !== 1 && confirm.total >= ac);
+      }
+      const verdict = crit ? `CRITICAL HIT x${mult}` : die === 1 ? "AUTOMATIC MISS" : hit ? (confirm ? "HIT (threat not confirmed)" : "HIT") : "MISS";
+      const label = `[ATTACK]${kind} ${plan.name}${full && swings.length > 1 ? ` #${index + 1}` : ""} [AC ${ac}] [${verdict} ${rolled.total} vs ${ac}]${confirm ? ` [CONFIRM ${confirm.total}]` : ""} -> [at ${target.name}]`;
+      table().postRoll(rolled, label, from, Boolean(target.hidden), { result: crit ? "CRITICAL" : hit ? "HIT" : "MISS", by: plan.actor, against: ac, target: target.name });
+      if (source) {
+        const now = crit ? { crit: mult } : hit ? "hit" : "miss";
+        // A full attack's hits on one target add up: each hit is its own damage roll.
+        const before = source.hitOn[target.id];
+        source.hitOn[target.id] = full ? [...(Array.isArray(before) ? before : []), now] : now;
+      }
+      results.push({ target: target.name, total: rolled.total, ac, hit, crit, natural: die, ...(confirm ? { confirm: confirm.total } : {}) });
+    }
+    changed();
+    return results;
+  }
+  // Damage after an attack: on each target it hit (each hit of a full attack
+  // its own roll), a confirmed critical rolled as many times as its multiplier
+  // (dice and bonuses alike); at least 1. With no attack since the last
+  // damage, it lands once on every target.
+  async function damage35(plan, from, opts) {
+    mustAct(plan.entry);
+    const kind = SHORT_TYPE[plan.type] ? ` (${SHORT_TYPE[plan.type]})` : "";
+    const baseFor = (target) => {
+      const bonus = plan.damageBonus + effectBonus(plan.entry, "DMG", target);
+      return `${plan.damage.replace(/\s+/g, "")}${bonus ? `${bonus > 0 ? "+" : ""}${bonus}` : ""}${effectDice(plan.entry, "DMG", target)}`;
+    };
+    const hitOn = plan.entry?.hitOn ?? null;
+    const all = targetsOf(plan.entry);
+    if (plan.entry) plan.entry.hitOn = null;
+    const rolls = [];
+    let total = 0;
+    const rollOne = async (target, crit) => {
+      const base = baseFor(target);
+      const formula = crit ? Array(crit).fill(base).join("+") : base;
+      const roll = table().roll(formula, `[DAMAGE]${kind} ${plan.name}${crit ? ` [CRITICAL x${crit}]` : ""}${plan.dmgtype ? ` [TYPE: ${plan.dmgtype}]` : ""}${target ? ` -> [at ${target.name}]` : ""}`, from, false, { by: plan.actor });
+      const amount = Math.max(1, roll.total);
+      total += amount;
+      if (target) await applyWounds(target, amount, `[DAMAGE] ${plan.name}${crit ? " [CRITICAL]" : ""}`, opts);
+      rolls.push({ target: target?.name ?? null, amount, crit: Boolean(crit) });
+    };
+    if (all.length === 0) await rollOne(null, 0);
+    const missed = [];
+    for (const target of all) {
+      const hits = hitOn ? [].concat(hitOn[target.id] ?? "miss") : ["hit"];
+      const landed = hits.filter((hit) => hit !== "miss");
+      if (landed.length === 0) {
+        missed.push(target.name);
+        table().say(`[DAMAGE]${kind} ${plan.name} -> ${target.name}: the attack missed`, "Combat", Boolean(target.hidden));
+      }
+      for (const hit of landed) await rollOne(target, typeof hit === "object" ? hit.crit : 0);
+    }
+    if (plan.entry && table().options?.().clearTargets === "action") plan.entry.targets = [];
+    changed();
+    return { total, rolls, targets: [...new Set(rolls.map((roll) => roll.target).filter(Boolean))], missed };
+  }
+  // A saving throw: Fortitude, Reflex or Will (or the ability each uses), d20 +
+  // its bonus + SAVE effects against a DC; a natural 20 always saves, a 1 fails.
+  async function save35(entry, statIn, dcIn, from, castName) {
+    await r35Ready;
+    const stat = String(statIn ?? "").toLowerCase();
+    const save = r35.SAVES[stat] ? stat : Object.entries(r35.SAVES).find(([, ability]) => ability === stat)?.[0] ?? { fort: "fortitude", ref: "reflex" }[stat];
+    if (!save) throw new Error("Pick a save: fortitude, reflex or will.");
+    const dc = Math.max(0, Math.round(num(dcIn, 0)));
+    const linked = record(entry);
+    const base = linked?.type === "character" ? num(r35.derive(linked.data).saves[save].total, 0) : linked ? num(r35.npcStats(linked.data).saves[save], 0) : 0;
+    const modifier = base + effectBonus(entry, "SAVE");
+    const rolled = table().dice.roll(`1d20${modifier ? `${modifier > 0 ? "+" : ""}${modifier}` : ""}${effectDice(entry, "SAVE")}`);
+    const die = natural(rolled);
+    const success = dc > 0 ? die === 20 || (die !== 1 && rolled.total >= dc) : null;
+    const name = r35.SAVE_NAMES[save];
+    const label = `[SAVE] ${castName ? `${castName} (${name})` : name}${dc ? ` [DC ${dc}] [${success ? "SUCCESS" : "FAILURE"} ${rolled.total} vs ${dc}]` : ""}`;
+    table().postRoll(rolled, label, from ?? entry.name, Boolean(entry.hidden), { ...(dc ? { result: success ? "SAVED" : "FAILED" } : {}), by: entry.name });
+    return { name: entry.name, success, total: rolled.total, dc, save };
+  }
+
   // --- D&D 5E -----------------------------------------------------------------
   // A creature's attack: a character's weapon (its sheet's attacks) or an NPC's action.
   function weapon5e(who, key, seat) {
@@ -736,6 +904,13 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     return downStatus(entry) || FROZEN.some((name) => hasCondition(entry, name));
   }
   function mustAct(entry) {
+    if (entry && d35()) {
+      const status = health(entry).status;
+      if (["Dying", "Stable", "Dead"].includes(status)) throw new Error(`${entry.name} is ${status.toLowerCase()} and cannot act.`);
+      const why = ["paralyzed", "petrified", "stunned", "unconscious", "helpless"].find((name) => hasCondition(entry, name));
+      if (why) throw new Error(`${entry.name} is ${why} and cannot act.`);
+      return;
+    }
     if (!entry || !five()) return;
     const status = health(entry).status;
     const why = ["Dying", "Unconscious", "Dead"].includes(status) ? status : [...FROZEN, "incapacitated"].find((name) => hasCondition(entry, name));
@@ -1153,7 +1328,9 @@ function createCombat({ saved, table, onChange = () => undefined }) {
             targets: seat.role === "dm" || owner(entry) === seat.name ? entry.targets.filter((id) => shown.some((item) => item.id === id)) : [],
             ...(five() ? { deathsaves: record(entry)?.type === "character" || numbers ? deathSaves(entry) : undefined } : {}),
             attacks:
-              five() && seat.role === "dm" && record(entry)?.type === "npc" && r5
+              d35() && seat.role === "dm" && record(entry)?.type === "npc" && r35
+                ? r35.npcStats(record(entry).data).attacks.map((attack, index) => ({ key: String(index), name: attack.name, bonus: attack.bonuses[0] ?? 0, bonuses: attack.bonuses, damage: `${attack.damage}${attack.crit.range < 20 || attack.crit.mult > 2 ? ` (${attack.crit.range < 20 ? `${attack.crit.range}-20` : "20"}/x${attack.crit.mult})` : ""}${attack.extra ? ` ${attack.extra}` : ""}`.trim() }))
+                : five() && seat.role === "dm" && record(entry)?.type === "npc" && r5
                 ? Object.entries(r5.npcAttacks(record(entry).data)).map(([key, attack]) => ({ key, name: attack.name, bonus: attack.bonus, damage: `${attack.damage} ${attack.dmgtype}`.trim() }))
                 : seat.role === "dm" && record(entry)?.type === "npc"
                 ? Object.entries(record(entry).data?.attacks ?? {}).map(([key, attack]) => ({ key, name: String(attack.name ?? "Attack"), bonus: num(record(entry).data?.bth, 0) + num(attack.bth, 0), damage: String(attack.damage ?? "") }))
@@ -1185,7 +1362,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       const count = Math.min(20, Math.max(1, Math.round(num(input.count, 1))));
       for (let index = 0; index < count; index += 1) {
         let hp = Math.max(0, Math.round(num(input.hp, 0)));
-        const npc5 = astraOn() && source && source.type !== "character" ? (await raReady, ra.npcStats(source.data)) : five() && source && source.type !== "character" ? (await r5Ready, r5.npcStats(source.data)) : null;
+        const npc5 = d35() && source && source.type !== "character" ? (await r35Ready, r35.npcStats(source.data)) : astraOn() && source && source.type !== "character" ? (await raReady, ra.npcStats(source.data)) : five() && source && source.type !== "character" ? (await r5Ready, r5.npcStats(source.data)) : null;
         if (npc5 && !hp) hp = npc5.hp;
         if (source && source.type !== "character" && !hp) {
           // SiegeCore getNPCHitPoints: the listed total, else the hit dice rolled (at least 1).
@@ -1205,7 +1382,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
           tokenId: input.tokenId ?? null,
           name: base,
           faction: input.faction ?? (source?.type === "character" ? "friend" : "foe"),
-          init: num(input.init, npc5 ? npc5.init : five() || astraOn() ? 0 : num(source?.data?.initiative?.misc, 0)),
+          init: num(input.init, npc5 ? npc5.init : five() || astraOn() || d35() ? 0 : num(source?.data?.initiative?.misc, 0)),
           hp,
           ac: num(input.ac, npc5 ? npc5.ac : num(source?.data?.ac?.total, astraOn() ? 0 : 10)),
           hidden: Boolean(input.hidden),
@@ -1278,8 +1455,8 @@ function createCombat({ saved, table, onChange = () => undefined }) {
         changed();
         return;
       }
-      if (five()) {
-        // FG 5E: d20 + the initiative bonus (a character's DEX and its misc; a creature's from its block).
+      if (five() || d35()) {
+        // FG 5E and 3.5E: d20 + the initiative bonus (a character's DEX and its misc; a creature's from its block).
         for (const entry of pick) {
           const linked = record(entry);
           const bonus = linked?.type === "character" ? num(linked.data?.initiative?.total, 0) : entry.init;
@@ -1476,12 +1653,13 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     // one roll per target against its AC + AC effects; equal hits.
     // who: { recordId } for a character (weapon: inventory key), or { entryId }
     // for an NPC (weapon: its attacks key).
-    async attack(who, weaponKey, seat, from) {
+    async attack(who, weaponKey, seat, from, attackOptions = {}) {
       const { engine, game, options: opts } = await options();
       const plan = this.weapon(who, weaponKey, engine, game, opts, seat);
       const source = plan.entry;
       if (astraOn()) return attackAstra(plan, from);
       if (five()) return attack5e(plan, from);
+      if (d35()) return attack35(plan, from, attackOptions);
       if (plan.item && plan.record) {
         const fired = fireAmmunition(plan.record, plan.item, opts);
         if (!fired.ok) return [{ refused: `no ${plan.item.ammotype} left` }];
@@ -1525,6 +1703,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       if (!plan.damage) throw new Error(`${plan.name} has no damage.`);
       if (astraOn()) return damageAstra(plan, from, opts);
       if (five()) return damage5e(plan, from, opts);
+      if (d35()) return damage35(plan, from, opts);
       const bonus = plan.damageBonus + effectBonus(plan.entry, "DMG");
       let formula = `${plan.damage.replace(/\s+/g, "")}${bonus ? `${bonus > 0 ? "+" : ""}${bonus}` : ""}`;
       const kind = SHORT_TYPE[plan.type] ? ` (${SHORT_TYPE[plan.type]})` : "";
@@ -1557,6 +1736,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     weapon(who, weaponKey, engine, game, opts, seat) {
       if (astraOn()) return weaponAstra(who, weaponKey, seat);
       if (five()) return weapon5e(who, weaponKey, seat);
+      if (d35()) return weapon35(who, weaponKey, seat);
       if (who.recordId) {
         const record = table().records.get(who.recordId);
         if (!record || record.type !== "character") throw new Error("No such character.");
@@ -1600,6 +1780,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     // is its hit dice and its primes its primeset (physical, mental, both).
     async save(entryId, stat, cl, from, castName, advantage = "") {
       if (astraOn()) return saveAstra(find(entryId), stat, cl, from);
+      if (d35()) return save35(find(entryId), stat, cl, from, castName);
       if (five()) return save5e(find(entryId), stat, cl, from, castName, { advantage: ["advantage", "disadvantage"].includes(advantage) ? advantage : "" });
       const { engine, game, options: opts } = await options();
       if (!STATS.includes(stat)) throw new Error("Pick an attribute.");

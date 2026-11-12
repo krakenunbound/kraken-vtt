@@ -1387,3 +1387,34 @@ textarea.cc-field.tall { min-height: 220px; }
 .sheet-astra .five-skill small.hint { margin-left: 6px; }
 .sheet-astra .astra-stats .five-ability { grid-template-columns: 1fr 3.5rem 3rem; }
 .sheet-astra .astra-stats .five-ability-head { grid-template-columns: 1fr 3.5rem 3rem; }
+/* Kraken packs (the Books window's Packs tab). */
+.packs-panel { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 8px; }
+.packs-bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.packs-bar [data-action="packs-make-all"] { margin-left: auto; }
+.packs-making { margin: 0; font-size: 0.85rem; color: var(--accent, #e8c66a); }
+.packs-list { flex: 1; min-height: 0; overflow: auto; border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; background: rgba(0, 0, 0, 0.25); }
+.packs-row { display: flex; align-items: center; gap: 8px; padding: 5px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.06); }
+.packs-row:last-child { border-bottom: 0; }
+.packs-title { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.packs-title small { opacity: 0.75; }
+.packs-row.done .packs-title small { color: #9fd49a; opacity: 1; }
+.packs-error { color: #f08a7a; }
+/* The 3.5E sheet (beside the 5E sheet's styles). */
+.sheet-35 .d35-ability-head, .sheet-35 .d35-ability { grid-template-columns: 1fr 3.4rem 3rem; }
+.sheet-35 .d35-saves { margin-top: 10px; border-top: 1px solid var(--line); padding-top: 6px; }
+.sheet-35 .d35-save { grid-template-columns: 1fr 3.4rem 3rem; }
+.sheet-35 .d35-skills .five-skill { grid-template-columns: 3.4rem 1fr 3rem; }
+.sheet-35 .d35-skills .class-skill span { font-weight: 600; }
+.sheet-35 .d35-skill-head small { opacity: 0.7; }
+.sheet-35 .d35-perday { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
+.sheet-35 .d35-slots { display: flex; align-items: center; gap: 4px; }
+.sheet-35 .d35-slots b { width: 2.6rem; }
+.sheet-35 .d35-slots button { width: 16px; height: 16px; border-radius: 3px; border: 1px solid var(--line); background: rgba(255, 255, 255, 0.12); padding: 0; }
+.sheet-35 .d35-slots button.used { background: #7a2b2b; }
+.sheet-35 .d35-features { margin: 0; padding-left: 18px; }
+.sheet-35 [data-crit] { margin-left: 6px; }
+/* 3.5E: Armor Class and Hit Points hold more (touch, flat-footed, nonlethal): each takes the full width. */
+.sheet-35 .five-main { grid-template-columns: minmax(240px, 1fr) minmax(220px, 1fr); }
+.sheet-35 .five-defence { grid-template-columns: repeat(2, minmax(0, 1fr)); min-width: 0; }
+.sheet-35 .five-defence > .five-big:nth-child(-n + 2) { grid-column: 1 / -1; }
+.sheet-35 .five-big .cc-inline { flex-wrap: wrap; justify-content: center; }

@@ -1,6 +1,7 @@
 const path = require("path");
 const { pathToFileURL } = require("url");
 const dnd5e = require("./dnd5e.cjs");
+const dnd35 = require("./dnd35.cjs");
 const astra = require("./astra.cjs");
 
 // Host side of the SIEGE engine (shared/siege, ES modules shared with the
@@ -27,6 +28,8 @@ const ATTRIBUTES = ["strength", "dexterity", "constitution", "intelligence", "wi
 // as a roll card. table: the table server's agent handle.
 async function siegeCheck(table, record, { attribute, cl = 0, bonus = 0, addLevel, label, kind, skill, dc, advantage } = {}, from) {
   // A 5E character: its ruleset's check, save or skill (dc, advantage).
+  // A 3.5E character: its check, save (fortitude, reflex, will) or skill against a DC.
+  if (dnd35.is35(record)) return dnd35.check35(table, record, { kind: kind ?? (/save/i.test(String(label ?? "")) ? "save" : "check"), attribute, skill, dc: dc ?? cl, bonus, label: kind ? label : undefined }, from);
   if (dnd5e.is5e(record)) return dnd5e.check5e(table, record, { kind: kind ?? (/save/i.test(String(label ?? "")) ? "save" : "check"), attribute, skill, dc: dc ?? cl, bonus, advantage, label: kind ? label : undefined }, from);
   // Apeira Astra: a task (2d6 + skill + characteristic against 8); dc is the difficulty's shift, advantage boon/bane.
   if (astra.isAstra(record)) return astra.taskAstra(table, record, { skill, attribute, difficulty: Number(bonus) || 0, boon: advantage, label: kind ? label : undefined }, from);
@@ -53,6 +56,7 @@ async function siegeCheck(table, record, { attribute, cl = 0, bonus = 0, addLeve
 // says so.
 async function levelUp(table, record, packageKey, from) {
   if (dnd5e.is5e(record)) return dnd5e.levelUp5e(table, record, from);
+  if (dnd35.is35(record)) return dnd35.levelUp35(table, record, from);
   if (astra.isAstra(record)) throw new Error("Apeira Astra has no levels: spend experience on a skill or a characteristic (Improve).");
   const { engine } = await siege();
   const game = siegeLibrary(table.records).game;
@@ -147,6 +151,7 @@ function setPath(data, path, value) {
 }
 async function editCharacter(table, record, changes, seat) {
   if (dnd5e.is5e(record)) return dnd5e.edit5e(table, record, changes, seat);
+  if (dnd35.is35(record)) return dnd35.edit35(table, record, changes, seat);
   if (astra.isAstra(record)) return astra.editAstra(table, record, changes, seat);
   if (seat.role !== "dm" && record.owner !== seat.name) throw new Error("You can only change your own character.");
   if (!Array.isArray(changes) || changes.length === 0) throw new Error("What changes?");
@@ -227,6 +232,25 @@ async function dropOnCharacter(table, record, source, from) {
     const summary = `${record.name} gets ${source.name}.`;
     table.say(summary, who, record.visibility === "gm");
     return { record: updated, added: "item", summary };
+  }
+  if (dnd35.is35(record)) {
+    // A 3.5E sheet takes items (into the gear, a weapon or armor worn), feats and spells (by name).
+    const data = structuredClone(record.data);
+    let added;
+    if (source.type === "item") {
+      const list = (data.inventorylist = data.inventorylist ?? {});
+      const { engine } = await siege();
+      const rules = await dnd35.rules35();
+      list[engine.nextId(list)] = { ...structuredClone(source.data), name: source.name, count: 1, carried: rules.isWeapon(source.data) || rules.isArmor(source.data) || rules.isShield(source.data) ? 2 : 1 };
+      added = "item";
+    } else if (source.type === "feat" || source.type === "spell") {
+      const key = source.type === "feat" ? "feats" : "spells";
+      data[key] = [...new Set([...(Array.isArray(data[key]) ? data[key] : []), source.name])];
+      added = source.type;
+    } else throw new Error("A 3.5E sheet takes items, feats and spells; race and class come with the Character Wizard and level up.");
+    const updated = table.records.update(record.id, { data: (await dnd35.rules35()).derive(data) }, table.seat, { replace: true });
+    table.say(`${record.name} gets ${source.name}.`, who, record.visibility === "gm");
+    return { record: updated, added };
   }
   if (dnd5e.is5e(record)) {
     if (source.type !== "item") throw new Error("A 5E sheet takes items; classes, species and spells come with the Character Wizard and level up.");

@@ -154,6 +154,11 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
                 {attack.name} {attack.bonus >= 0 ? "+" : ""}
                 {attack.bonus}
               </button>
+              {attack.bonuses && attack.bonuses.length > 1 ? (
+                <button type="button" data-full-attack={attack.key} onClick={() => session.ct("attack", { id: entry.id, weapon: attack.key, full: true })} title={`${attack.name}: full attack (${attack.bonuses.map((bonus) => (bonus >= 0 ? `+${bonus}` : bonus)).join("/")}) at the first target`}>
+                  Full
+                </button>
+              ) : null}
               {attack.damage ? (
                 <button type="button" onClick={() => session.ct("damage-roll", { id: entry.id, weapon: attack.key })} title={`${attack.name}: damage`}>
                   {attack.damage}
@@ -237,18 +242,18 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
             <button type="submit">Add effect</button>
           </form>
           <div className="ct-adjust">
-            <select aria-label="Save" value={saveStat} onChange={(event) => setSaveStat(event.target.value)}>
-              {["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"].map((stat) => (
+            <select aria-label="Save" value={session.ruleset === "D&D 3.5E" && !["fortitude", "reflex", "will"].includes(saveStat) ? "will" : saveStat} onChange={(event) => setSaveStat(event.target.value)}>
+              {(session.ruleset === "D&D 3.5E" ? ["fortitude", "reflex", "will"] : ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"]).map((stat) => (
                 <option key={stat} value={stat}>
                   {stat[0].toUpperCase() + stat.slice(1)} save
                 </option>
               ))}
             </select>
             <label>
-              {session.ruleset === "D&D 5E" || session.ruleset === "Descending Darkness" ? "DC" : "CL"}
-              <input type="number" value={saveCl} onChange={(event) => setSaveCl(event.target.value)} style={{ width: "3.6rem" }} aria-label={session.ruleset === "D&D 5E" ? "Save DC" : "Save CL"} />
+              {session.ruleset === "D&D 5E" || session.ruleset === "Descending Darkness" || session.ruleset === "D&D 3.5E" ? "DC" : "CL"}
+              <input type="number" value={saveCl} onChange={(event) => setSaveCl(event.target.value)} style={{ width: "3.6rem" }} aria-label={session.ruleset === "D&D 5E" || session.ruleset === "D&D 3.5E" ? "Save DC" : "Save CL"} />
             </label>
-            <button type="button" onClick={() => session.ct("save", { id: entry.id, attribute: saveStat, cl: Number(saveCl) || 0 })}>
+            <button type="button" onClick={() => session.ct("save", { id: entry.id, attribute: session.ruleset === "D&D 3.5E" && !["fortitude", "reflex", "will"].includes(saveStat) ? "will" : saveStat, cl: Number(saveCl) || 0 })}>
               Roll save
             </button>
           </div>

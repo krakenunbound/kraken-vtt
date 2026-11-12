@@ -4,6 +4,35 @@ What changed in each release of Kraken VTT. Downloads are on the
 [Releases](https://github.com/krakenunbound/kraken-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
+## 0.1.0-alpha.62: Kraken packs and D&D 3.5E
+
+**Kraken packs: your books without Fantasy Grounds**
+
+- Books has a **Packs** tab: each of your Fantasy Grounds books becomes one
+  Kraken file (`.kpack`) with its pages, records, maps (walls, doors and
+  lights too) and pictures, in `Documents/Kraken VTT/Packs`. Copy that folder
+  to another computer and the books open there in Kraken, with no Fantasy
+  Grounds and no .mod files. Make one, or all of a game's at once; a 400 MB
+  book takes about 7 seconds.
+- Kraken reads a pack anywhere it reads a book: the Books window, activation,
+  the Library, story, encounters and maps. If the FG module is newer than its
+  pack, the module is read until you make the pack again.
+
+**D&D 3.5E**
+
+- A new ruleset for your 3.5E books: the 3.5E character wizard and sheet
+  (abilities, Fortitude, Reflex and Will, AC with touch and flat-footed, base
+  attack and grapple, skills by ranks, feats, spells per day, gear).
+- The combat tracker plays 3.5E: d20 initiative, criticals by threat range and
+  confirmation (damage rolled x2, x3, x4), full attacks with every iterative
+  bonus, saves against a DC, and Disabled at 0, Dying at -1 to -9 (10% a turn
+  to become stable), dead at -10.
+- Fixed: a C&C creature's attacks written "Pole arm (1d10) or dagger (1d4)"
+  were read as one attack; "or" and "and" now split them.
+- A 3.5E Player's Handbook's classes, races, feats, skills, spells and gear,
+  and a Monster Manual's creatures, come into the campaign when the book is
+  made active.
+
 ## 0.1.0-alpha.61: the alpha.60 audit's fixes
 
 A blind audit of the whole app (the table server, combat, maps and saving)

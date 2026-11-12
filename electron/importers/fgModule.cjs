@@ -3,6 +3,7 @@ const os = require("os");
 const path = require("path");
 const { unzipSync, strFromU8 } = require("fflate");
 const { DOMParser, XMLSerializer } = require("@xmldom/xmldom");
+const packs = require("../packs.cjs");
 
 // Reads a Fantasy Grounds module (.mod zip, or an unpacked folder) the user
 // owns and turns its records into Kraken records. Nothing from the module is
@@ -142,18 +143,23 @@ function rootRecords(root) {
   return out;
 }
 
-// Resolve "C&C Player's Handbook" to <FG data>/modules/C&C Player's Handbook.mod.
+// Resolve "C&C Player's Handbook" to its file: a Kraken pack of that name
+// (Documents/Kraken VTT/Packs), the GM's FG module (<FG data>/modules), or a
+// book Kraken ships (games/modules). A pack is read unless the FG module it
+// was made from is newer.
+function moduleFile(given) {
+  const folder = path.join(fgDataFolder(), "modules");
+  const bundled = path.join(__dirname, "..", "..", "games", "modules");
+  const fg = [path.join(folder, `${given}.mod`), path.join(folder, given), path.join(bundled, `${given}.mod`), path.join(bundled, given)].find((candidate) => fs.existsSync(candidate)) ?? null;
+  return packs.preferPack(packs.packFor(given), fg);
+}
 function resolveModule(nameOrPath) {
   const given = String(nameOrPath || "").trim();
   if (!given) throw new Error("Give a module name or path.");
   if (fs.existsSync(given)) return given;
-  const folder = path.join(fgDataFolder(), "modules");
-  // The GM's FG modules, then the books Kraken ships (games/modules).
-  const bundled = path.join(__dirname, "..", "..", "games", "modules");
-  for (const candidate of [path.join(folder, `${given}.mod`), path.join(folder, given), path.join(bundled, `${given}.mod`), path.join(bundled, given)]) {
-    if (fs.existsSync(candidate)) return candidate;
-  }
-  throw new Error(`No module "${given}" in ${folder}.`);
+  const found = moduleFile(given);
+  if (found) return found;
+  throw new Error(`No book "${given}" in ${packs.packFolder()} or ${path.join(fgDataFolder(), "modules")}.`);
 }
 
 // Just the wanted top-level sections of a module's XML (<npc>, <item>...),
@@ -233,7 +239,7 @@ function siegeNpc(data) {
   const attacks = {};
   let n = 1;
   // "2 claws (1d4), bite (1d8)", "Pole arm (1d10), Dagger (1d4)", "Sword (1d8) or bow (1d6)".
-  for (const part of String(data.monsteratk ?? "").split(/,|or|and/i)) {
+  for (const part of String(data.monsteratk ?? "").split(/,|\bor\b|\band\b/i)) {
     const match = /^\s*(?:(\d+)\s+)?([^()]+?)\s*\(([^)]*)\)/.exec(part);
     if (!match) continue;
     const damage = /\d*d\d+(?:\s*[+-]\s*\d+)?/i.exec(match[3])?.[0]?.replace(/\s+/g, "") ?? "";
@@ -295,6 +301,9 @@ function cachedPath(file) {
 }
 // The sections a record came from (its FG path's first part), for a reader that wants only some.
 const sectionOf = (record) => String(record.data?.fgPath ?? "").split(/[.@]/)[0].toLowerCase();
+// A record a reader wants: by its section, or by its type (a 3.5E book's
+// classes come from its <reference> section as records of type "class").
+const wantedRecord = (only, record) => only.has(sectionOf(record)) || only.has(record.type);
 function readModule(nameOrPath, { only = null } = {}) {
   const file = resolveModule(nameOrPath);
   const cached = cachedPath(file);
@@ -320,7 +329,7 @@ function readModule(nameOrPath, { only = null } = {}) {
     }
     converted.set(cached, whole);
     if (converted.size > 6) converted.delete(converted.keys().next().value);
-    return only ? { ...whole, records: whole.records.filter((record) => only.has(sectionOf(record))) } : whole;
+    return only ? { ...whole, records: whole.records.filter((record) => wantedRecord(only, record)) } : whole;
   }
   return parseModule(file, only);
 }
@@ -355,7 +364,45 @@ function prepareModule(nameOrPath) {
   return done;
 }
 
+// FG's 3.5E (and Pathfinder) rulebooks keep their classes, races, feats,
+// skills, spells and gear under <reference> (reference.classes, by category),
+// not as records of their own: each becomes a record of its type here
+// (reference.classes.id-00001, type "class"), as a 5E book's are, so a
+// campaign's activation and the 3.5E rules find them.
+const REFERENCE_TYPES = { classes: "class", races: "race", feats: "feat", skills: "skill", spells: "spell", equipment: "item" };
+function spreadReference(records) {
+  const out = [];
+  for (const record of records) {
+    const match = record.type === "refindex" ? /^reference\.([a-z]+)@(.*)$/.exec(String(record.data?.fgPath ?? "")) : null;
+    const type = match ? REFERENCE_TYPES[match[1]] : null;
+    if (!type) {
+      out.push(record);
+      continue;
+    }
+    const prefix = String(record.id).split(":")[0];
+    const groups = [];
+    const category = record.data.category;
+    if (Array.isArray(category)) groups.push(...category.map((group) => ({ name: "", items: group })));
+    else if (category && typeof category === "object") groups.push({ name: "", items: category });
+    for (const [key, value] of Object.entries(record.data)) if (key !== "category" && key !== "fgPath" && value && typeof value === "object" && typeof value.name === "string") groups.push({ name: "", items: { [key]: value } });
+    for (const group of groups) {
+      for (const [key, value] of Object.entries(group.items ?? {})) {
+        if (!value || typeof value !== "object" || typeof value.name !== "string") continue;
+        const fgPath = `reference.${match[1]}.${key}`;
+        out.push({ id: `${prefix}:${fgPath}`.slice(0, 160), type, name: value.name, visibility: record.visibility, source: record.source, data: { ...value, fgPath: `${fgPath}@${match[2]}` } });
+      }
+    }
+  }
+  return out;
+}
+
 function parseModule(file, only) {
+  // A Kraken pack: its records are already Kraken's, as JSON.
+  if (packs.isPack(file)) {
+    const pack = packs.readPack(file);
+    pack.records = spreadReference(pack.records);
+    return only ? { ...pack, records: pack.records.filter((record) => wantedRecord(only, record)) } : pack;
+  }
   const files = readFiles(file, { xmlOnly: true });
   const definitionBytes = files.get("definition.xml");
   if (!definitionBytes) throw new Error("That is not a Fantasy Grounds module (no definition.xml).");
@@ -377,7 +424,9 @@ function parseModule(file, only) {
     const bytes = files.get(part);
     if (!bytes) continue;
     const text = strFromU8(bytes);
-    const root = parseXml(only ? pickRoots(text, only) : text);
+    // A 3.5E book keeps its classes, races, gear... under <reference>: that section too, when they are wanted.
+    const wanted = only && [...only].some((type) => Object.values(REFERENCE_TYPES).includes(type)) && /<reference[\s>][\s\S]*?<(classes|races|equipment|feats|skills|spells)[\s>]/.test(text) ? new Set([...only, "reference"]) : only;
+    const root = parseXml(wanted ? pickRoots(text, wanted) : text);
     for (const typeNode of elements(root)) {
       const type = typeNode.tagName.toLowerCase();
       if (SKIP_ROOTS.has(type)) continue;
@@ -402,7 +451,7 @@ function parseModule(file, only) {
     }
   }
   const images = files.list().filter((item) => /\.(png|jpe?g|webp|gif)$/i.test(item));
-  return { info, records, images };
+  return { info, records: spreadReference(records), images };
 }
 
 // Put a module's records into a campaign's record store, replacing any
@@ -457,10 +506,8 @@ function insideModule(wanted) {
 function namedModule(name) {
   const given = String(name || "").trim();
   if (!given || /[\\/:]/.test(given) || given.startsWith(".")) throw new Error("Not a module name.");
-  const bundled = path.join(__dirname, "..", "..", "games", "modules");
-  for (const candidate of [path.join(fgDataFolder(), "modules", `${given}.mod`), path.join(fgDataFolder(), "modules", given), path.join(bundled, `${given}.mod`), path.join(bundled, given)]) {
-    if (fs.existsSync(candidate)) return candidate;
-  }
+  const found = moduleFile(given);
+  if (found) return found;
   throw new Error(`No module "${given}".`);
 }
 
@@ -522,4 +569,4 @@ function modulePicture(reference, ownModule) {
   return { bytes: Buffer.from(bytes), mime };
 }
 
-module.exports = { readModule, prepareModule, importModule, listModules, fgDataFolder, convertXml, modulePicture };
+module.exports = { readModule, prepareModule, importModule, listModules, fgDataFolder, convertXml, modulePicture, resolveModule };
