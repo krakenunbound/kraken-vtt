@@ -41,8 +41,10 @@ of use, and a built-in AI agent that can do anything the GM can.
 
   Kraken also plays **Castles & Crusades**, **D&D 5E** (the SRD), **D&D 3.5E**
   (base attack and iterative attacks, criticals by threat and confirmation,
-  Fortitude, Reflex and Will, skills by ranks) and a rules-free
-  **Worldbuilding** mode for any system.
+  Fortitude, Reflex and Will, skills by ranks), **AD&D 2E** (THAC0 and
+  descending Armor Class, the five saving throws, thief skills,
+  multi-classing, your books' pregens) and a rules-free **Worldbuilding**
+  mode for any system.
 - **Your Fantasy Grounds library.** If you own Fantasy Grounds modules, Kraken
   reads them in place: books to read, story, encounters, NPCs, items, and maps
   with their walls, doors and lights.
@@ -140,7 +142,9 @@ based on the System Reference Document 5.1 by Wizards of the Coast LLC,
 available under the Creative Commons Attribution 4.0 International licence;
 no SRD text is reproduced. Kraken's D&D 5E support uses the SRD 5.2.1 under the
 same licence. Kraken's D&D 3.5E rules are its own code, written to play as the
-System Reference Document 3.5 describes; no SRD text is included.
+System Reference Document 3.5 describes; no SRD text is included. Kraken's
+AD&D 2E rules are its own code (the game's mechanics, no book text); the 2E
+content is the GM's own books.
 
 Kraken is not affiliated with SmiteWorks (Fantasy Grounds), Foundry Gaming
 (Foundry VTT), Troll Lord Games (Castles & Crusades) or Wizards of the Coast.

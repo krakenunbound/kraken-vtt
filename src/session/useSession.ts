@@ -176,7 +176,7 @@ export type CombatEntry = {
   ac?: number;
   effects: { id: string; label: string; duration: number }[];
   targets: string[];
-  attacks?: { key: string; name: string; bonus: number; bonuses?: number[]; damage: string }[];
+  attacks?: { key: string; name: string; bonus: number; bonuses?: number[]; thaco?: number; damage: string }[];
   powers?: { key: string; name: string; uses: number; used: number; damage: string; save: string }[];
 };
 export type CombatView = { round: number; active: string | null; entries: CombatEntry[] };

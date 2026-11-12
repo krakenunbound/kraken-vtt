@@ -10,6 +10,7 @@ import { Wizard } from "./Wizard";
 import { CCSheet } from "./CCSheet";
 import { Sheet5e, Wizard5e } from "./Sheet5e";
 import { Sheet35, Wizard35 } from "./Sheet35";
+import { Sheet2e, Wizard2e } from "./Sheet2e";
 
 // Characters in and out: Import reads a file from another table (Kraken,
 // Fantasy Grounds XML, Foundry or Roll20 JSON; dropping one on the list does
@@ -111,7 +112,7 @@ function FileButtons({ files, current }: { files: ReturnType<typeof useCharacter
 // this player's. It is filled by hand: a race, a class, spells and gear
 // dragged onto it from the sidebar's lists, scores typed. C&C (SIEGE) only:
 // a 5E character is made with its wizard.
-export const canMakeBlank = (session: Session) => !isD20(session.ruleset) && session.ruleset !== "Apeira Astra" && session.ruleset !== "D&D 3.5E";
+export const canMakeBlank = (session: Session) => !isD20(session.ruleset) && session.ruleset !== "Apeira Astra" && session.ruleset !== "D&D 3.5E" && session.ruleset !== "AD&D 2E";
 export async function createBlank(session: Session, name = "New character") {
   const gm = session.role === "dm";
   const attributes = Object.fromEntries(["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"].map((stat) => [stat, { score: 10, prime: 0 }]));
@@ -190,6 +191,14 @@ export function CharacterPanel({ session, dock = false, selected: chosen, create
                 if (id) setSelected(id);
               }}
             />
+          ) : session.ruleset === "AD&D 2E" ? (
+            <Wizard2e
+              session={session}
+              onDone={(id) => {
+                setCreating(false);
+                if (id) setSelected(id);
+              }}
+            />
           ) : session.ruleset === "D&D 3.5E" ? (
             <Wizard35
               session={session}
@@ -216,7 +225,7 @@ export function CharacterPanel({ session, dock = false, selected: chosen, create
             />
           )
         ) : current ? (
-          current.data.ruleset === "astra" ? <SheetAstra record={current} session={session} /> : current.data.ruleset === "dnd35" ? <Sheet35 record={current} session={session} /> : isD20(String(current.data.ruleset ?? "")) ? <Sheet5e record={current} session={session} /> : <CCSheet record={current} session={session} />
+          current.data.ruleset === "astra" ? <SheetAstra record={current} session={session} /> : current.data.ruleset === "dnd35" ? <Sheet35 record={current} session={session} /> : current.data.ruleset === "adnd2e" ? <Sheet2e record={current} session={session} /> : isD20(String(current.data.ruleset ?? "")) ? <Sheet5e record={current} session={session} /> : <CCSheet record={current} session={session} />
         ) : (
           <p className="hint">You have no character yet. Make one with the new character button.</p>
         )}
@@ -267,6 +276,14 @@ export function CharacterPanel({ session, dock = false, selected: chosen, create
               if (id) setSelected(id);
             }}
           />
+        ) : session.ruleset === "AD&D 2E" ? (
+          <Wizard2e
+            session={session}
+            onDone={(id) => {
+              setCreating(false);
+              if (id) setSelected(id);
+            }}
+          />
         ) : session.ruleset === "D&D 3.5E" ? (
           <Wizard35
             session={session}
@@ -293,7 +310,7 @@ export function CharacterPanel({ session, dock = false, selected: chosen, create
           />
         )
       ) : current ? (
-        current.data.ruleset === "astra" ? <SheetAstra record={current} session={session} /> : current.data.ruleset === "dnd35" ? <Sheet35 record={current} session={session} /> : isD20(String(current.data.ruleset ?? "")) ? <Sheet5e record={current} session={session} /> : <CCSheet record={current} session={session} />
+        current.data.ruleset === "astra" ? <SheetAstra record={current} session={session} /> : current.data.ruleset === "dnd35" ? <Sheet35 record={current} session={session} /> : current.data.ruleset === "adnd2e" ? <Sheet2e record={current} session={session} /> : isD20(String(current.data.ruleset ?? "")) ? <Sheet5e record={current} session={session} /> : <CCSheet record={current} session={session} />
       ) : null}
     </section>
   );

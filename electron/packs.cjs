@@ -45,6 +45,7 @@ const KRAKEN_RULESET = {
   siegecore: "Castles & Crusades",
   cncrpg: "Castles & Crusades",
   "3.5e": "D&D 3.5E",
+  "2e": "AD&D 2E",
   "5e": "D&D 5E",
   descendingdarkness: "Descending Darkness",
   "descending darkness": "Descending Darkness",

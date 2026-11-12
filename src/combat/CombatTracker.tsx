@@ -4,6 +4,8 @@ import type { CombatEntry, Session } from "../session/useSession";
 import { Icon } from "../ui/icons";
 
 const FACTION_LABEL = { friend: "Friend", neutral: "Neutral", foe: "Foe" } as const;
+// AD&D 2E's five saving throws.
+const SAVE_LABELS: Record<string, string> = { paralyzation: "Paralyzation, Poison, Death", rod: "Rod, Staff, Wand", petrification: "Petrification, Polymorph", breath: "Breath Weapon", spell: "Spell" };
 
 function focusToken(tokenId: string | null) {
   if (tokenId) window.dispatchEvent(new CustomEvent("kraken:focus-token", { detail: tokenId }));
@@ -18,6 +20,8 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
   const [rounds, setRounds] = useState("");
   const [open, setOpen] = useState(false);
   const [saveStat, setSaveStat] = useState("wisdom");
+  const saveChoices = session.ruleset === "D&D 3.5E" ? ["fortitude", "reflex", "will"] : session.ruleset === "AD&D 2E" ? ["paralyzation", "rod", "petrification", "breath", "spell"] : ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"];
+  const saveChoice = saveChoices.includes(saveStat) ? saveStat : saveChoices[saveChoices.length - 1];
   const [saveCl, setSaveCl] = useState("0");
   const record = entry.recordId ? session.records[entry.recordId] : null;
   // A player's own character (the one that steadies a dying ally in Descending Darkness).
@@ -109,6 +113,12 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
             {entry.health.status}
           </span>
         )}
+        {session.ruleset === "AD&D 2E" && entry.health.status === "Dying" && (gm || myCharacterId) ? (
+          // 2E: binding the wounds stops the dying's bleeding.
+          <button type="button" className="ct-death-save" data-action="stabilize" title="Bind their wounds: unconscious, no longer losing a hit point each round" onClick={() => session.ct("stabilize", { id: entry.id, ...(myCharacterId ? { recordId: myCharacterId } : {}) })}>
+            Bind wounds
+          </button>
+        ) : null}
         {session.ruleset === "Descending Darkness" && entry.health.status === "Dying" && (gm || myCharacterId) ? (
           // Descending Darkness: an ally steadies the dying (Wisdom 12); the GM's call without one.
           <button type="button" className="ct-death-save" data-action="stabilize" title="Steady them: an ally's Wisdom check against 12 stops the bleeding" onClick={() => session.ct("stabilize", { id: entry.id, ...(myCharacterId ? { recordId: myCharacterId } : {}) })}>
@@ -150,9 +160,18 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
         <div className="ct-actions">
           {entry.attacks?.map((attack) => (
             <span key={attack.key} className="ct-attack">
-              <button type="button" onClick={() => session.ct("attack", { id: entry.id, weapon: attack.key })} title={`${attack.name}: attack`}>
-                {attack.name} {attack.bonus >= 0 ? "+" : ""}
-                {attack.bonus}
+              <button type="button" onClick={() => session.ct("attack", { id: entry.id, weapon: attack.key })} title={attack.thaco !== undefined ? `${attack.name}: attack (THAC0 ${attack.thaco}${attack.bonus ? `, ${attack.bonus > 0 ? "+" : ""}${attack.bonus} to hit` : ""})` : `${attack.name}: attack`}>
+                {attack.thaco !== undefined ? (
+                  <>
+                    {attack.name}
+                    {attack.bonus ? ` ${attack.bonus > 0 ? "+" : ""}${attack.bonus}` : ""}
+                  </>
+                ) : (
+                  <>
+                    {attack.name} {attack.bonus >= 0 ? "+" : ""}
+                    {attack.bonus}
+                  </>
+                )}
               </button>
               {attack.bonuses && attack.bonuses.length > 1 ? (
                 <button type="button" data-full-attack={attack.key} onClick={() => session.ct("attack", { id: entry.id, weapon: attack.key, full: true })} title={`${attack.name}: full attack (${attack.bonuses.map((bonus) => (bonus >= 0 ? `+${bonus}` : bonus)).join("/")}) at the first target`}>
@@ -166,6 +185,14 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
               ) : null}
             </span>
           ))}
+          {session.ruleset === "AD&D 2E" && gm && (entry.attacks?.length ?? 0) > 1 ? (
+            // 2E: a creature's whole round (claw, claw, bite) at its first target.
+            <span className="ct-attack">
+              <button type="button" data-full-attack="all" onClick={() => session.ct("attack", { id: entry.id, weapon: "0", full: true })} title="Every attack this round, at the first target">
+                All attacks
+              </button>
+            </span>
+          ) : null}
           {entry.powers?.map((power) => (
             <span key={power.key} className="ct-attack ct-power">
               <button
@@ -242,18 +269,18 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
             <button type="submit">Add effect</button>
           </form>
           <div className="ct-adjust">
-            <select aria-label="Save" value={session.ruleset === "D&D 3.5E" && !["fortitude", "reflex", "will"].includes(saveStat) ? "will" : saveStat} onChange={(event) => setSaveStat(event.target.value)}>
-              {(session.ruleset === "D&D 3.5E" ? ["fortitude", "reflex", "will"] : ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"]).map((stat) => (
+            <select aria-label="Save" value={saveChoice} onChange={(event) => setSaveStat(event.target.value)}>
+              {saveChoices.map((stat) => (
                 <option key={stat} value={stat}>
-                  {stat[0].toUpperCase() + stat.slice(1)} save
+                  {SAVE_LABELS[stat] ?? `${stat[0].toUpperCase() + stat.slice(1)} save`}
                 </option>
               ))}
             </select>
             <label>
-              {session.ruleset === "D&D 5E" || session.ruleset === "Descending Darkness" || session.ruleset === "D&D 3.5E" ? "DC" : "CL"}
-              <input type="number" value={saveCl} onChange={(event) => setSaveCl(event.target.value)} style={{ width: "3.6rem" }} aria-label={session.ruleset === "D&D 5E" || session.ruleset === "D&D 3.5E" ? "Save DC" : "Save CL"} />
+              {session.ruleset === "AD&D 2E" ? "Mod" : session.ruleset === "D&D 5E" || session.ruleset === "Descending Darkness" || session.ruleset === "D&D 3.5E" ? "DC" : "CL"}
+              <input type="number" value={saveCl} onChange={(event) => setSaveCl(event.target.value)} style={{ width: "3.6rem" }} aria-label={session.ruleset === "AD&D 2E" ? "Save modifier" : session.ruleset === "D&D 5E" || session.ruleset === "D&D 3.5E" ? "Save DC" : "Save CL"} />
             </label>
-            <button type="button" onClick={() => session.ct("save", { id: entry.id, attribute: session.ruleset === "D&D 3.5E" && !["fortitude", "reflex", "will"].includes(saveStat) ? "will" : saveStat, cl: Number(saveCl) || 0 })}>
+            <button type="button" onClick={() => session.ct("save", { id: entry.id, attribute: saveChoice, cl: Number(saveCl) || 0 })}>
               Roll save
             </button>
           </div>

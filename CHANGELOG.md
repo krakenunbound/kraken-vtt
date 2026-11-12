@@ -4,7 +4,38 @@ What changed in each release of Kraken VTT. Downloads are on the
 [Releases](https://github.com/krakenunbound/kraken-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
-## 0.1.0-alpha.63: Kraken packs and D&D 3.5E
+## 0.1.0-alpha.64: AD&D 2E
+
+- A new ruleset for your AD&D 2E books. Pick **AD&D 2E** for a campaign and
+  its shelf holds your 2E adventures and references (B1, B2, B6, Greyhawk,
+  the pregens...), from Fantasy Grounds modules or Kraken packs.
+- The 2E character wizard: race (human, dwarf, elf, gnome, half-elf,
+  halfling), class (fighter, paladin, ranger, cleric, druid, thief, bard,
+  mage) or a multi-class (fighter/thief, fighter/mage/thief...), level and
+  scores, a warrior's exceptional Strength (18/76). Or take one of your
+  books' pregenerated characters as it is.
+- The 2E sheet: each ability's table (hit and damage, reaction and defense,
+  system shock, bonus spells...), THAC0, descending Armor Class (rear, no
+  shield), the five saving throws, weapons' damage against Small/Medium and
+  Large with speed factors, weapon and nonweapon proficiencies, thief and bard
+  skills by points, priest and wizard spells a day. Click to roll a save, an
+  ability check (d20 under the score) or a thief skill (d100).
+- The combat tracker plays 2E: d10 initiative, the lowest first; attacks
+  against THAC0 - AC (a natural 20 hits, a 1 misses); damage by the
+  target's size; a creature's whole round (claw, claw, bite) in one click; a
+  warrior's 3/2 and 2/1 attacks; saves against the five numbers; a creature
+  dies at 0, a character is dying from 0 (a hit point a round) until someone
+  binds the wounds, and dead at -10.
+
+## 0.1.0-alpha.63: every book as a pack
+
+- The rest of the GM's own conversions and the free SRD rules can be packs
+  too: the SRD 5.2.1 and the 2024 free rules, the AD&D 2E B-series and
+  Greyhawk, Mystara, Kraken's own 5E books.
+- A Worldbuilding campaign reads the books of games Kraken has no rules for
+  yet (Pathfinder, Savage Worlds...): their pages, story and maps with walls.
+
+## 0.1.0-alpha.62: Kraken packs and D&D 3.5E
 
 **Kraken packs: your books without Fantasy Grounds**
 
@@ -17,9 +48,6 @@ full log of the work is in [PLAN.md](PLAN.md).
 - Kraken reads a pack anywhere it reads a book: the Books window, activation,
   the Library, story, encounters and maps. If the FG module is newer than its
   pack, the module is read until you make the pack again.
-
-- A Worldbuilding campaign reads the books of games Kraken has no rules for
-  yet (AD&D 2E, Pathfinder...): their pages, story and maps with walls.
 
 **D&D 3.5E**
 

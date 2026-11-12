@@ -653,7 +653,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
   // read from the module itself (the Books window), as FG reads them, never
   // copied into the campaign (they made it tens of MB, sent to every player).
   const GM_SEAT = { role: "dm", name: "GM" };
-  const RULES_TYPES = new Set(["siegepackage", "siegepower", "siegegame", "item", "npc", "spell", ...require("./dnd5e.cjs").TYPES_5E]);
+  const RULES_TYPES = new Set(["siegepackage", "siegepower", "siegegame", "item", "npc", "spell", "pregencharsheet", ...require("./dnd5e.cjs").TYPES_5E]);
   function loadRecords(info) {
     const file = books?.file?.(info.id);
     if (!file) return;
@@ -1471,6 +1471,18 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
             .buildAstra(agentHandle, msg.spec ?? {}, owner, client.role === "dm" ? seatOf(client) : { role: "dm", name: client.name })
             .then(({ record, problems }) => {
               addChat({ id: client.id, from: client.name, text: `Created ${record.name}: ${record.data.origin ?? ""} ${(record.data.paths ?? []).join(" / ")}.`, at: Date.now() });
+              answer({ ok: true, id: record.id, problems });
+            })
+            .catch((error) => answer({ ok: false, error: error instanceof Error ? error.message : "Could not build that character." }));
+          return;
+        }
+        if (require("./adnd2e.cjs").is2eRuleset(ruleset)) {
+          // A 2E character from its wizard's spec, or a book's pregen.
+          const owner = client.role === "dm" ? text(msg.owner, "").slice(0, 24) : client.name;
+          require("./adnd2e.cjs")
+            .build2e(agentHandle, msg.spec ?? {}, owner, client.role === "dm" ? seatOf(client) : { role: "dm", name: client.name })
+            .then(({ record, problems }) => {
+              addChat({ id: client.id, from: client.name, text: `Created ${record.name}: ${record.data.race ?? ""} ${(record.data.classes ?? []).map((cls) => cls.name).join("/")} ${record.data.level}.`, at: Date.now() });
               answer({ ok: true, id: record.id, problems });
             })
             .catch((error) => answer({ ok: false, error: error instanceof Error ? error.message : "Could not build that character." }));

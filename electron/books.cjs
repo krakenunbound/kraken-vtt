@@ -20,7 +20,7 @@ const PICTURES = /\.(png|webp|jpe?g|gif)$/i;
 // Which FG rulesets' modules fit a Kraken campaign's ruleset: the ruleset
 // decides the books. A module for "Any" (or CoreRPG, or none named) fits every
 // campaign; Worldbuilding (no rules) takes those, and the books of games
-// Kraken has no rules for yet (AD&D 2E, Pathfinder...: their pages, story and
+// Kraken has no rules for yet (Pathfinder, Savage Worlds...: their pages, story and
 // maps), never the books of another of Kraken's games.
 const FG_RULESETS = {
   "Castles & Crusades": ["SiegeCore", "CnCRPG"],
@@ -28,6 +28,8 @@ const FG_RULESETS = {
   "D&D 5E": ["5E"],
   // The 3.5E ruleset's modules (FG's own and the GM's, Kraken35E's too).
   "D&D 3.5E": ["3.5E", "Kraken35E", "d20"],
+  // FG's AD&D 2E ruleset's modules (the GM's B-series, Greyhawk, pregens).
+  "AD&D 2E": ["2E"],
   // Kraken's own games, with their books shipped in the app (games/modules).
   "Descending Darkness": ["Descending Darkness"],
   "Apeira Astra": ["Apeira Astra"],
@@ -37,7 +39,8 @@ const ANY = new Set(["", "any", "corerpg"]);
 const PLAYED = new Set(Object.entries(FG_RULESETS).flatMap(([name, fg]) => (name === "Worldbuilding" ? [] : [name, ...fg])).map((name) => name.toLowerCase()));
 function fitsRuleset(info, ruleset) {
   // A Kraken pack says which Kraken ruleset it is for.
-  if (info?.kraken) return info.kraken === "Any" || info.kraken === ruleset || (ruleset === "Worldbuilding" && !PLAYED.has(info.kraken.toLowerCase()) && !PLAYED.has(String(info.ruleset ?? "").toLowerCase()));
+  // (A pack made before Kraken played its game names the game as FG did: "2E".)
+  if (info?.kraken) return info.kraken === "Any" || info.kraken === ruleset || (FG_RULESETS[ruleset] ?? []).some((name) => name.toLowerCase() === info.kraken.toLowerCase()) || (ruleset === "Worldbuilding" && !PLAYED.has(info.kraken.toLowerCase()) && !PLAYED.has(String(info.ruleset ?? "").toLowerCase()));
   if (ruleset === "Worldbuilding") {
     const theirs = String(info.ruleset ?? "").toLowerCase();
     return ANY.has(theirs) || !PLAYED.has(theirs);

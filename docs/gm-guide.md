@@ -12,13 +12,18 @@ On the start screen choose **My Campaigns**.
   books fit the campaign.
   - *Descending Darkness* and *Apeira Astra* come with Kraken, with their books
     and a first adventure ([included-games.md](included-games.md)).
-  - *Castles & Crusades*, *D&D 5E* and *D&D 3.5E* use your own books
-    (Fantasy Grounds modules, or Kraken packs made from them) for their
+  - *Castles & Crusades*, *D&D 5E*, *D&D 3.5E* and *AD&D 2E* use your own
+    books (Fantasy Grounds modules, or Kraken packs made from them) for their
     content: a 3.5E campaign takes your 3.5E Player's Handbook's classes,
     races, feats, spells and gear, and your Monster Manual's creatures.
+  - *AD&D 2E* builds characters by its own rules (race, class or
+    multi-class, THAC0, the five saves, thief skills) and takes your books'
+    pregenerated characters as they are; its tracker runs initiative lowest
+    first, attacks against THAC0 - AC, damage by the target's size, and
+    Death's Door (dying from 0 until the wounds are bound, dead at -10).
   - *Worldbuilding* has no rules: maps, tokens, chat and dice for any game.
-    It reads the books of games Kraken has no rules for yet (AD&D 2E, say):
-    their pages, story and maps with walls.
+    It reads the books of games Kraken has no rules for yet (Pathfinder,
+    say): their pages, story and maps with walls.
 - Campaigns are saved as you play, in Kraken's data folder
   (`%APPDATA%\kraken-vtt`).
 
