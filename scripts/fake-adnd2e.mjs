@@ -11,6 +11,9 @@ const score = (value) => `<score type="number">${value}</score>`;
 const saves = (death, rod, petri, breath, spell) => `<saves><death>${score(death)}</death><rod>${score(rod)}</rod><petrification>${score(petri)}</petrification><breath>${score(breath)}</breath><spell>${score(spell)}</spell></saves>`;
 const weapon = (id, name, dice, bonus = 0) => `<id-0000${id}>${s("name", name)}${n("attackbonus", 0)}<damagelist><id-00001>${s("dice", dice)}${n("bonus", bonus)}${s("type", "")}</id-00001></damagelist></id-0000${id}>`;
 
+// A made-up Krits & Fumbles table, in FG 2E's table names (the GM's own book has the real ones).
+const krit = (tag, name, dice, rowsIn) => `<${tag}>${s("name", name)}<dice type="dice">${dice}</dice><tablerows>${rowsIn.map(([from, to, title, text], index) => `<id-0000${index + 1}>${n("fromrange", from)}${n("torange", to)}<results><id-00001>${s("result", title)}</id-00001><id-00002>${s("result", text)}</id-00002></results></id-0000${index + 1}>`).join("")}</tablerows></${tag}>`;
+
 export function makeAdnd2eBooks() {
   const folder = mkdtempSync(path.join(tmpdir(), "kraken-2e-"));
   const NAME = "Test 2E Adventure";
@@ -22,7 +25,9 @@ export function makeAdnd2eBooks() {
   <npc>
     <ogre>${s("name", "Ogre")}${n("ac", 4)}${n("thaco", 17)}${n("hp", 25)}${s("hitDice", "4+1")}${s("size", "Large (9'+)")}${s("numberattacks", "1")}${s("damage", "1d10+2")}<weaponlist>${weapon(1, "Club", "1d10", 2)}</weaponlist>${saves(13, 15, 14, 16, 16)}</ogre>
     <lion>${s("name", "Mountain Lion")}${n("ac", 6)}${n("thaco", 17)}${n("hp", 18)}${s("hitDice", "3+1")}${s("size", "M")}${s("numberattacks", "3")}${s("damage", "1d3/1d3/1d6")}<weaponlist>${weapon(1, "Claw", "1d3")}${weapon(2, "Claw", "1d3")}${weapon(3, "Bite", "1d6")}</weaponlist>${saves(14, 16, 15, 17, 17)}</lion>
+    <skeleton>${s("name", "Skeleton")}${n("ac", 7)}${n("thaco", 19)}${n("hp", 6)}${s("hitDice", "1")}${s("size", "M")}${s("damage", "1d6")}${saves(14, 16, 15, 17, 17)}</skeleton>
   </npc>
+  <tables>${krit("crit", "Critical Hit", "d6", [[1, 4, "CRITICAL HIT", "No complication."], [5, 6, "CRITICAL COMPLICATION", "Roll the matching table."]])}${krit("critslashing", "Critical Hit - Slashing", "d1", [[1, 1, "Test gash", "Add 1d4 damage."]])}${krit("fumble", "Fumble", "d6", [[1, 6, "AUTOMATIC MISS", "No complication."]])}</tables>
 </root>
 `;
   // The players' part (FG's client.xml): a pregenerated character.

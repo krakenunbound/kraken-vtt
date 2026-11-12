@@ -119,6 +119,12 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
             Bind wounds
           </button>
         ) : null}
+        {session.ruleset === "AD&D 2E" && entry.turns && (gm || entry.mine) && session.combat.active === entry.id ? (
+          // 2E: a cleric (a paladin from 3rd level) turns the undead it targets, or every undead foe.
+          <button type="button" className="ct-death-save" data-action="turn-undead" title={`Turn undead as a level ${entry.turns} cleric: target the undead first, or every undead foe is tried`} onClick={() => session.ct("turn-undead", { id: entry.id, ...(entry.recordId ? { recordId: entry.recordId } : {}) })}>
+            Turn undead
+          </button>
+        ) : null}
         {session.ruleset === "Descending Darkness" && entry.health.status === "Dying" && (gm || myCharacterId) ? (
           // Descending Darkness: an ally steadies the dying (Wisdom 12); the GM's call without one.
           <button type="button" className="ct-death-save" data-action="stabilize" title="Steady them: an ally's Wisdom check against 12 stops the bleeding" onClick={() => session.ct("stabilize", { id: entry.id, ...(myCharacterId ? { recordId: myCharacterId } : {}) })}>

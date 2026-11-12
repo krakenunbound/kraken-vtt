@@ -20,7 +20,10 @@ On the start screen choose **My Campaigns**.
     multi-class, THAC0, the five saves, thief skills) and takes your books'
     pregenerated characters as they are; its tracker runs initiative lowest
     first, attacks against THAC0 - AC, damage by the target's size, and
-    Death's Door (dying from 0 until the wounds are bound, dead at -10).
+    Death's Door (dying from 0 until the wounds are bound, dead at -10). A
+    cleric (or a paladin from 3rd level) has a Turn undead button on its
+    turn. Make your Krits & Fumbles 2E book active and natural 20s and 1s
+    roll its tables, by the attack's kind, and apply what they can.
   - *Worldbuilding* has no rules: maps, tokens, chat and dice for any game.
     It reads the books of games Kraken has no rules for yet (Pathfinder,
     say): their pages, story and maps with walls.

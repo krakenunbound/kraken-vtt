@@ -113,4 +113,9 @@ function storyEntry(fgPath) {
   return { path: fgPath, name: record.name, category: record.data.fgCategory ?? "", html };
 }
 
-module.exports = { list, ensureNpc, addBattle, giveParcel, rollTable, storyEntry, KINDS };
+// A book's random tables, as records (the 2E krits read their book's).
+function tables(moduleName) {
+  return moduleRecords(moduleName).filter((record) => record.type === KINDS.table);
+}
+
+module.exports = { tables, list, ensureNpc, addBattle, giveParcel, rollTable, storyEntry, KINDS };

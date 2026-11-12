@@ -49,7 +49,7 @@ try {
   const shelf = await tool("kraken_books", { action: "list" });
   const books = shelf.books ?? shelf;
   console.log(`2E shelf: ${books.length} books: ${books.map((book) => book.title).join(" | ")}`);
-  for (const name of ["B2 The Keep on the Borderlands (AD&D 2E)", "Kraken's AD&D 2E One-Shot Pregens"]) {
+  for (const name of ["B2 The Keep on the Borderlands (AD&D 2E)", "Kraken's AD&D 2E One-Shot Pregens", "Kraken's Krits & Fumbles 2E"]) {
     const started = performance.now();
     await tool("kraken_books", { action: "activate", book: name });
     console.log(`  ${name} active in ${Math.round(performance.now() - started)} ms`);
@@ -82,6 +82,26 @@ try {
   await tool("kraken_combat", { action: "target", id: foe.id, targetId: mine.id, on: true });
   console.log(`  ${foe.name} all attacks: ${JSON.stringify((await tool("kraken_combat", { action: "attack", id: foe.id, weapon: "0", full: true })).results)}`);
   console.log(`  save: ${JSON.stringify((await tool("kraken_combat", { action: "save", id: mine.id, attribute: "breath" })).save)}`);
+  // The GM's Krits & Fumbles 2E book: a critical complication and a fumble, by the attack's kind.
+  for (const [kind, attackKind] of [["crit", "slashing"], ["crit", "natural"], ["fumble", "piercing"], ["fumble", "missile"]]) {
+    const krit = (await tool("kraken_combat", { action: "krit-test", kind, id: kind === "crit" ? mine.id : foe.id, targetId: kind === "crit" ? foe.id : mine.id, entryRoll: 6, attackKind })).krit;
+    console.log(`  krit ${kind} ${attackKind}: ${JSON.stringify(krit)}`);
+  }
+  const kritLines = (await tool("kraken_chat_log", { lines: 40 }).catch(() => ({ lines: [] })));
+  console.log(`  chat: ${JSON.stringify(kritLines).match(/\[KRAKEN (CRITICAL|FUMBLE)\][^"]*/g)?.slice(-4).join(" || ")}`);
+  // Turning undead: a 3rd-level cleric against B2's skeletons and zombies.
+  await tool("kraken_combat", { action: "end", removeNpcs: true });
+  const priest = await tool("kraken_build_character", { spec: { name: "Brother Tam", race: "Human", class: "Cleric", level: 3 } });
+  await tool("kraken_combat", { action: "add", recordId: priest.id });
+  for (const name of ["Skeleton", "Zombie", "Ghoul"]) {
+    const found = npcs.find((item) => item.name === name || item.name.startsWith(name));
+    if (found) await tool("kraken_combat", { action: "add", recordId: found.id, count: 2 });
+    else console.log(`  (no ${name} in B2)`);
+  }
+  await tool("kraken_combat", { action: "init", which: "all" });
+  view = (await tool("kraken_combat", { action: "view" })).entries;
+  while ((await tool("kraken_combat", { action: "view" })).active !== view.find((entry) => entry.recordId === priest.id).id) await tool("kraken_combat", { action: "next" });
+  console.log(`  turn undead: ${JSON.stringify((await tool("kraken_combat", { action: "turn-undead", recordId: priest.id })).turn)}`);
   await page.click('.sidebar [data-launch="characters"]');
   await page.waitForSelector(".sheet-2e", { timeout: 15000 }).catch(() => undefined);
   await page.screenshot({ path: path.join(tmpdir(), "kraken-2e-real-sheet.png") });

@@ -4,6 +4,23 @@ What changed in each release of Kraken VTT. Downloads are on the
 [Releases](https://github.com/krakenunbound/kraken-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
+## 0.1.0-alpha.65: 2E turning undead and Krits & Fumbles
+
+- Turning undead in AD&D 2E: a cleric (or a paladin from 3rd level, as a
+  cleric two levels lower) has a **Turn undead** button on its turn. One d20
+  against the turning table for each undead's type (by its name, else its hit
+  dice), 2d6 undead affected, the weakest first; turned undead flee for 3d4
+  rounds, destroyed ones die.
+- Your Krits & Fumbles 2E book in the tracker: make it active and a natural
+  20 that hits rolls its Critical Hit table, a natural 1 its Fumble table; a
+  complication rolls the table for the attack's kind (slashing, piercing,
+  bludgeoning, missile, natural). What the row says is put on the tracker:
+  extra damage, maximum damage or an extra die on the next damage roll, AC and
+  to-hit penalties, an opening that gives the next attacker +2, prone, a save
+  or fall prone, a lost attack. The rest is left to you, with the row's text
+  in chat. The Krits & Fumbles settings (how often, apply or chat only, PCs
+  and NPCs, who sees) work for 2E too.
+
 ## 0.1.0-alpha.64: AD&D 2E
 
 - A new ruleset for your AD&D 2E books. Pick **AD&D 2E** for a campaign and

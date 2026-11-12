@@ -215,8 +215,110 @@ assert(sword2.tohit === 3 && sword2.damage === "1d8+6" && edited.saves.spell.tot
 await tool("kraken_character_edit", { id: thief.id, changes: [{ path: "thiefskills.openlocks.points", value: 20 }] });
 assert(agent.records.get(thief.id).data.thiefskills.openlocks.points === 20, "a thief skill's points from the sheet");
 
+// --- Turning undead -----------------------------------------------------------
+assert(r2.turnLevel(m.data) === 2 && r2.turnLevel(after) === 0, "a cleric turns at its level; a fighter not at all");
+assert(r2.turnLevel({ classes: [{ name: "Paladin", level: 5 }] }) === 3 && r2.turnLevel({ classes: [{ name: "Paladin", level: 2 }] }) === 0, "a paladin turns as a cleric two levels lower, from 3rd");
+assert(r2.undeadRow("Skeleton") === 0 && r2.undeadRow("Ghast") === 5 && r2.undeadRow("Undead Knight", { hitDice: "7" }) === 7 && r2.undeadRow("Ogre", { hitDice: "4+1" }) === null, "the undead's row: by name, else an undead's hit dice; not undead: none");
+assert(r2.turnAgainst(2, 0).need === 7 && r2.turnAgainst(4, 0).auto && !r2.turnAgainst(4, 0).destroy && r2.turnAgainst(9, 0).more && r2.turnAgainst(1, 5).impossible && r2.turnAgainst(14, 11).need === 4, "the turning table: 7, T, D*, no chance, a lich at 14th");
+const undeadData = (hitDice) => ({ ac: 7, thaco: 19, hitDice, damage: "1d6" });
+const skeleton = make("npc", "Skeleton", undeadData("1"));
+const zombie = make("npc", "Zombie", undeadData("2"));
+const ghoul = make("npc", "Ghoul", undeadData("2"));
+await tool("kraken_combat", { action: "add", recordId: m.id });
+for (const undead of [ghoul, zombie, skeleton]) await tool("kraken_combat", { action: "add", recordId: undead.id });
+force(1, 2, 3, 4);
+await tool("kraken_combat", { action: "init", which: "all" });
+await tool("kraken_combat", { action: "next" });
+view = (await tool("kraken_combat", { action: "view" })).entries;
+const maraEntry = view.find((entry) => entry.recordId === m.id);
+assert(maraEntry.turns === 2 && !view.find((entry) => entry.name === "Skeleton").turns, `the tracker shows who turns: ${maraEntry.turns}`);
+// d20 11 against a 2nd-level cleric's 7 (skeleton), 10 (zombie), 13 (ghoul); 2d6 = 3 affected; 3d4 rounds each.
+force(11, 1, 2, 1, 1, 1, 2, 2, 2);
+const turned = (await tool("kraken_combat", { action: "turn-undead", recordId: m.id })).turn;
+view = (await tool("kraken_combat", { action: "view" })).entries;
+const effectsOf = (name) => view.find((entry) => entry.name === name).effects;
+assert(turned.roll === 11 && effectsOf("Skeleton")[0]?.label === "Turned (flees the turner)" && effectsOf("Skeleton")[0].duration === 3 && effectsOf("Zombie")[0]?.duration === 6 && effectsOf("Ghoul").length === 0, `the weakest first: skeleton and zombie turned, the ghoul (13) not: ${JSON.stringify(turned)}`);
+assert(said(/\[TURN UNDEAD\] Sister Mara, turning as a level 2 cleric: d20 = 11/) && said(/Ghoul \(Ghoul\): unaffected \(needs 13\)/), "the turning said in chat");
+let turnRefused = "";
+try {
+  await tool("kraken_combat", { action: "turn-undead", recordId: brannoc.id });
+} catch (error) {
+  turnRefused = error.message;
+}
+assert(/cannot turn undead/.test(turnRefused), `a fighter cannot turn: ${turnRefused}`);
+await tool("kraken_combat", { action: "end", removeNpcs: true });
+
+// --- Krits & Fumbles from the GM's book ---------------------------------------
+// Made-up tables in the shapes of a Krits & Fumbles 2E book (FG 2E's table names).
+const tableOf = (name, dice, rowsIn) => ({ type: "tables", name, data: { name, dice, tablerows: Object.fromEntries(rowsIn.map(([from, to, title, text], index) => [`id-${index}`, { fromrange: from, torange: to, results: { a: { result: title }, b: { result: text } } }])) } });
+const kritBook = [
+  tableOf("Critical Hit", "d6", [[1, 4, "CRITICAL HIT", "No complication."], [5, 6, "CRITICAL COMPLICATION", "Roll the matching Critical Hit - Slashing table."]]),
+  tableOf("Critical Hit - Slashing", "d4", [[1, 1, "Gash", "Add 1d4 damage."], [2, 2, "Clean", "Deal maximum normal weapon damage before modifiers."], [3, 3, "Knocked", "The target must save vs. paralyzation or fall prone."], [4, 4, "Opened", "The next melee attack against the target gains +2 to hit."]]),
+  tableOf("Fumble", "d6", [[1, 4, "AUTOMATIC MISS", "No complication."], [5, 6, "FUMBLE COMPLICATION", "Roll the matching Fumble - Slashing table."]]),
+  tableOf("Fumble - Slashing", "d2", [[1, 1, "Wild", "The attacker suffers a 2-point AC penalty until the start of its next turn."], [2, 2, "Ally", "If an ally is adjacent, make a normal attack roll against that ally. Otherwise lose the next attack."]]),
+];
+const k2 = await import("../shared/adnd2e/krits.mjs");
+assert(k2.attackKind({ name: "Long sword", dmgtype: "S" }) === "slashing" && k2.attackKind({ name: "Bite", npc: true }) === "natural" && k2.attackKind({ name: "Short bow", type: "ranged" }) === "missile" && k2.attackKind({ name: "Mace" }) === "bludgeoning", "the attack's kind");
+assert(sword.dmgtype === "S", `a weapon's damage type from the table: ${sword.dmgtype}`);
+agent.records.update(brannoc.id, { data: { hp: { wounds: 0 } } }, agent.seat);
+const ogre2 = make("npc", "Ogre", ogreData);
+await tool("kraken_combat", { action: "add", recordId: brannoc.id });
+await tool("kraken_combat", { action: "add", recordId: ogre2.id });
+force(1, 9);
+await tool("kraken_combat", { action: "init", which: "all" });
+await tool("kraken_combat", { action: "next" });
+view = (await tool("kraken_combat", { action: "view" })).entries;
+const fighter2 = view.find((entry) => entry.recordId === brannoc.id);
+const ogre2Entry = view.find((entry) => entry.name === "Ogre");
+await tool("kraken_combat", { action: "target", id: fighter2.id, targetId: ogre2Entry.id, on: true });
+// No book active: a natural 20 is only a hit.
+force(20);
+results = (await tool("kraken_combat", { action: "attack", recordId: brannoc.id, weapon: sword.item })).results;
+assert(results[0].hit && !results[0].krit, "no Krits & Fumbles book: no krit");
+force(1);
+await tool("kraken_combat", { action: "damage-roll", recordId: brannoc.id, weapon: sword.item });
+agent.bookTables = () => kritBook;
+// A natural 20: Critical Hit 5 (a complication), Slashing 2: the next damage at maximum (Large: 12 + 6, Strength 18/00 by now).
+force(20, 5, 2);
+results = (await tool("kraken_combat", { action: "attack", recordId: brannoc.id, weapon: sword.item })).results;
+assert(results[0].krit?.title === "Clean" && said(/\[KRAKEN CRITICAL\] Brannoc -> Ogre: Critical Hit d6 = 5: CRITICAL COMPLICATION\. Critical Hit - Slashing d4 = 2: Clean/), `a critical complication by the sword's kind: ${JSON.stringify(results[0].krit)}`);
+damage = await tool("kraken_combat", { action: "damage-roll", recordId: brannoc.id, weapon: sword.item });
+assert(damage.damage.total === 18 && /KRAKEN KRIT: MAX/.test(last(/\[DAMAGE\]/).roll.label), `maximum damage, used up: ${JSON.stringify(damage.damage)} ${last(/\[DAMAGE\]/).roll.label}`);
+force(3);
+damage = await tool("kraken_combat", { action: "damage-roll", recordId: brannoc.id, weapon: sword.item });
+assert(damage.damage.total === 9, "the next roll is normal again");
+// Slashing 3: the ogre saves vs. paralyzation (13) or falls prone; 10 fails.
+force(20, 6, 3, 10);
+results = (await tool("kraken_combat", { action: "attack", recordId: brannoc.id, weapon: sword.item })).results;
+view = (await tool("kraken_combat", { action: "view" })).entries;
+assert(view.find((entry) => entry.id === ogre2Entry.id).effects.some((effect) => effect.label === "Prone") && last(/\[SAVE\]/).roll.label.includes("Paralyzation"), `the save failed: prone: ${JSON.stringify(results[0].krit)}`);
+force(1);
+await tool("kraken_combat", { action: "damage-roll", recordId: brannoc.id, weapon: sword.item });
+// Critical Hit 2: no complication.
+force(20, 2);
+results = (await tool("kraken_combat", { action: "attack", recordId: brannoc.id, weapon: sword.item })).results;
+assert(results[0].krit && results[0].krit.title === "CRITICAL HIT" && results[0].krit.applied.length === 0, `1-4: only the hit: ${JSON.stringify(results[0].krit)}`);
+force(1);
+await tool("kraken_combat", { action: "damage-roll", recordId: brannoc.id, weapon: sword.item });
+// A natural 1: Fumble 5, Slashing 1: the fighter's AC 2 worse until its next turn.
+force(1, 5, 1);
+results = (await tool("kraken_combat", { action: "attack", recordId: brannoc.id, weapon: sword.item })).results;
+view = (await tool("kraken_combat", { action: "view" })).entries;
+assert(view.find((entry) => entry.id === fighter2.id).effects.some((effect) => effect.label === "Kraken Wild; AC: -2" && effect.duration === 1), `a fumble on the attacker: ${JSON.stringify(results[0].krit)}`);
+// "If an ally is adjacent": the GM's call, nothing applied.
+force(1, 5, 2);
+results = (await tool("kraken_combat", { action: "attack", recordId: brannoc.id, weapon: sword.item })).results;
+assert(results[0].krit.applied.every((line) => /GM:/.test(line)), `the GM's call: ${JSON.stringify(results[0].krit)}`);
+// A krit-test: Slashing 4: the next attack against the ogre gains +2 (11 + 3 + 2 = 16 hits, THAC0 20 - AC 4).
+await tool("kraken_combat", { action: "krit-test", kind: "crit", id: fighter2.id, targetId: ogre2Entry.id, entryRoll: 5, attackKind: "slashing", roll: 4 });
+force(11);
+results = (await tool("kraken_combat", { action: "attack", recordId: brannoc.id, weapon: sword.item })).results;
+assert(results[0].hit && results[0].total === 16, `GRANTATK: +2 to the next attack against it: ${JSON.stringify(results)}`);
+delete agent.bookTables;
+await tool("kraken_combat", { action: "end", removeNpcs: true });
+
 // The shelf: 2E books for a 2E campaign (a pack made as "2E" before Kraken played it, too), not Worldbuilding's.
 assert(fitsRuleset({ ruleset: "2E" }, "AD&D 2E") && fitsRuleset({ kraken: "2E", ruleset: "2E" }, "AD&D 2E") && !fitsRuleset({ kraken: "2E", ruleset: "2E" }, "Worldbuilding") && !fitsRuleset({ ruleset: "2E" }, "D&D 3.5E"), "2E books on a 2E shelf");
 await server.close?.();
-console.log("ok adnd2e: the ability tables, exceptional Strength, THAC0 and saves by group, experience, spells a day, damage S/M and L, creatures' blocks; a fighter, an elf fighter/mage, a halfling thief, a pregen; d10 initiative lowest first, THAC0 hits and misses, Large damage, claw/claw/bite, the five saves, effect rounds, Death's Door, bound wounds; a save, a check and a thief skill from the sheet, level ups, the sheet's edits; the shelf");
+console.log("ok adnd2e: the ability tables, exceptional Strength, THAC0 and saves by group, experience, spells a day, damage S/M and L, creatures' blocks; a fighter, an elf fighter/mage, a halfling thief, a pregen; d10 initiative lowest first, THAC0 hits and misses, Large damage, claw/claw/bite, the five saves, effect rounds, Death's Door, bound wounds; a save, a check and a thief skill from the sheet, level ups, the sheet's edits; turning undead; krits and fumbles from the GM's book; the shelf");
 process.exit(0);

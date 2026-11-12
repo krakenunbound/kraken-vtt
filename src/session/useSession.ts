@@ -177,6 +177,8 @@ export type CombatEntry = {
   effects: { id: string; label: string; duration: number }[];
   targets: string[];
   attacks?: { key: string; name: string; bonus: number; bonuses?: number[]; thaco?: number; damage: string }[];
+  /** AD&D 2E: the level this character turns undead at. */
+  turns?: number;
   powers?: { key: string; name: string; uses: number; used: number; damage: string; save: string }[];
 };
 export type CombatView = { round: number; active: string | null; entries: CombatEntry[] };

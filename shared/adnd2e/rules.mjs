@@ -604,6 +604,7 @@ export function weaponAttack(data, item, key) {
     damagelarge: add(large),
     speed: num(item.speedfactor, known?.[3] ?? 0),
     type: missile ? "ranged" : "melee",
+    dmgtype: known?.[4] ?? (/slash|pierc|bludg/i.exec(String(item.damage ?? ""))?.[0] ?? ""),
     rate: data.rate,
     proficient: penalty === 0,
   };
@@ -792,7 +793,7 @@ export function npcStats(data) {
   for (const [, weapon] of rows(data?.weaponlist)) {
     const { small, large } = weaponDamage({ weaponlist: { one: weapon }, name: weapon.name });
     if (!small) continue;
-    attacks.push({ name: titled(String(weapon.name || weapon.itemnote?.name || "Attack")), tohit: num(weapon.attackbonus, 0), damage: small, damagelarge: large, type: num(weapon.type, 0) === 1 || /bow|sling|crossbow/i.test(String(weapon.name)) ? "ranged" : "melee", speed: num(weapon.speedfactor, 0) });
+    attacks.push({ name: titled(String(weapon.name || weapon.itemnote?.name || "Attack")), tohit: num(weapon.attackbonus, 0), damage: small, damagelarge: large, type: num(weapon.type, 0) === 1 || /bow|sling|crossbow/i.test(String(weapon.name)) ? "ranged" : "melee", dmgtype: String(rows(weapon.damagelist)[0]?.[1]?.type ?? ""), speed: num(weapon.speedfactor, 0) });
   }
   if (attacks.length === 0 && data?.damage) {
     const parts = String(data.damage).split(/\s*\/\s*|\s*,\s*/).map(diceOf).filter(Boolean);
@@ -829,6 +830,61 @@ export function npcStats(data) {
     special: [data?.specialAttacks, data?.specialDefense].filter((text) => text && !/^nil$/i.test(String(text))).join("; "),
     magicresistance: String(data?.magicresistance ?? ""),
   };
+}
+
+// --- Turning undead -----------------------------------------------------------
+// A cleric's (a paladin's from 3rd level, as a cleric two levels lower) turning:
+// one d20 against the number for the undead's type and the turner's level; T
+// turns them automatically, D destroys them, D* destroys them and 2d4 more are
+// affected. 2d6 undead are affected, the weakest first. Turned undead flee for
+// 3d4 rounds. An evil priest commands instead (the GM's call).
+// The columns: levels 1-9, then 10-11, 12-13, 14 and up. 0: no chance.
+export const UNDEAD = [
+  ["Skeleton", /skeleton/i, 1, [10, 7, 4, "T", "T", "D", "D", "D*", "D*", "D*", "D*", "D*"]],
+  ["Zombie", /zombie/i, null, [13, 10, 7, "T", "T", "D", "D", "D", "D*", "D*", "D*", "D*"]],
+  ["Ghoul", /ghoul/i, 2, [16, 13, 10, 4, "T", "T", "D", "D", "D", "D*", "D*", "D*"]],
+  ["Shadow", /shadow/i, 3, [19, 16, 13, 7, 4, "T", "T", "D", "D", "D", "D*", "D*"]],
+  ["Wight", /wight/i, 5, [20, 19, 16, 10, 7, 4, "T", "T", "D", "D", "D", "D*"]],
+  ["Ghast", /ghast/i, null, [0, 20, 19, 13, 10, 7, 4, "T", "T", "D", "D", "D"]],
+  ["Wraith", /wraith/i, 6, [0, 0, 20, 16, 13, 10, 7, 4, "T", "D", "D", "D"]],
+  ["Mummy", /mummy/i, 7, [0, 0, 0, 20, 16, 13, 10, 7, 4, "T", "D", "D"]],
+  ["Spectre", /spectre|specter/i, 8, [0, 0, 0, 0, 20, 16, 13, 10, 7, "T", "T", "D"]],
+  ["Vampire", /vampire/i, 9, [0, 0, 0, 0, 0, 20, 16, 13, 10, 4, "T", "T"]],
+  ["Ghost", /ghost|haunt|banshee/i, 10, [0, 0, 0, 0, 0, 0, 20, 16, 13, 7, 4, "T"]],
+  ["Lich", /lich/i, 11, [0, 0, 0, 0, 0, 0, 0, 19, 16, 10, 7, 4]],
+  ["Special", /demilich|dracolich|special/i, null, [0, 0, 0, 0, 0, 0, 0, 20, 19, 13, 10, 7]],
+];
+const UNDEAD_WORDS = /skeleton|zombie|ghoul|ghast|shadow|wight|wraith|mummy|spectre|specter|vampire|ghost|haunt|banshee|lich|undead|revenant|skull|poltergeist|apparition|phantom/i;
+// The level a character turns at (0: none): a cleric's level, a paladin's - 2 from 3rd.
+export function turnLevel(input) {
+  let best = 0;
+  for (const cls of input?.classes ?? []) {
+    const key = classKey(cls.name);
+    if (key === "cleric") best = Math.max(best, num(cls.level, 0));
+    if (key === "paladin" && num(cls.level, 0) >= 3) best = Math.max(best, num(cls.level, 0) - 2);
+  }
+  return best;
+}
+const turnColumn = (level) => (level <= 9 ? level - 1 : level <= 11 ? 9 : level <= 13 ? 10 : 11);
+// An undead creature's row: by its name (a ghoul, a wight), else by its hit
+// dice (1: skeleton, 2: ghoul, 3-4: shadow ... 11+: lich). null: not undead.
+export function undeadRow(name, data = {}) {
+  const text = `${name ?? ""} ${data?.type ?? ""} ${data?.name ?? ""}`;
+  const named = UNDEAD.findIndex(([, pattern]) => pattern.test(String(name ?? "")));
+  if (named >= 0 && UNDEAD[named][0] !== "Special") return named;
+  if (!UNDEAD_WORDS.test(text)) return null;
+  if (named >= 0) return named;
+  const hd = hitDiceOf(data?.hitDice || data?.hdtext || data?.hd)?.hd ?? 1;
+  const at = [...UNDEAD.entries()].reverse().find(([, [, , dice]]) => dice !== null && hd >= dice);
+  return at ? at[0] : 0;
+}
+// What a turner of this level does to that row: { need (a d20 at or above), auto, destroy, more }.
+export function turnAgainst(level, row) {
+  const cell = UNDEAD[row]?.[3]?.[turnColumn(Math.max(1, level))];
+  if (cell === undefined || cell === 0) return { need: 0, impossible: true };
+  if (cell === "T") return { need: 0, auto: true };
+  if (cell === "D" || cell === "D*") return { need: 0, auto: true, destroy: true, more: cell === "D*" };
+  return { need: cell };
 }
 
 // --- Building a character -----------------------------------------------------

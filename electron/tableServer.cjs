@@ -1876,6 +1876,9 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
             case "stabilize":
               // Descending Darkness: an ally steadies the dying (Wisdom 12).
               return combat.stabilize(String(msg.id), msg.recordId ? String(msg.recordId) : "", seat);
+            case "turn-undead":
+              // 2E: a cleric (or paladin) turns the undead it targets.
+              return combat.turnUndead(msg.id ? String(msg.id) : "", msg.recordId ? String(msg.recordId) : "", Array.isArray(msg.undead) ? msg.undead.map(String).slice(0, 50) : null, seat);
             case "clear-targets":
               return combat.clearTargets(String(msg.id), seat);
             case "target-area": {
@@ -1977,6 +1980,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     });
   });
 
+  let bookTablesCache = { key: null, tables: [] };
   // What agents (the MCP server, the in-app assistant) use. They act as the GM.
   const agentHandle = {
     seat: { role: "dm", name: "Agent" },
@@ -1989,6 +1993,24 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     records,
     dice,
     options: () => ({ ...options }),
+    // The active books' random tables (the 2E krits find their Krits & Fumbles book's), read once per set of active books.
+    bookTables: () => {
+      const names = [...shelf.active].map((id) => books?.info(id)).filter((info) => info && fits(info)).map((info) => books?.file?.(info.id) || info.name);
+      const key = names.join("|");
+      if (bookTablesCache.key !== key) {
+        bookTablesCache = {
+          key,
+          tables: names.flatMap((name) => {
+            try {
+              return require("./library.cjs").tables(name);
+            } catch {
+              return [];
+            }
+          }),
+        };
+      }
+      return bookTablesCache.tables;
+    },
     setOptions,
     roll: (formula, label, from = "Agent", secret = false, extra = null) => rollDice(formula, label, from, "agent", undefined, secret, extra),
     // Posts a roll already made (an attack decides HIT or MISS before its card goes out).

@@ -84,7 +84,7 @@ try {
   await tool("kraken_books", { action: "activate", book: book.id });
   const npcs = await until(async () => {
     const list = listOf(await tool("kraken_records_list", { type: "npc" }));
-    return list.length === 2 ? list : null;
+    return list.length === 3 ? list : null;
   }, "the book's creatures");
   const pregens = listOf(await tool("kraken_records_list", { type: "pregencharsheet" }));
   assert(pregens.some((item) => item.name === "Sister Mara"), "the book's pregen is in the campaign");
@@ -155,6 +155,18 @@ try {
   }, "the ogre's wounds");
   assert(hurt.wounds === 10, `the Large damage: 6 + 4 = 10: ${JSON.stringify(hurt)}`);
 
+  // A natural 20 with the book's Krits & Fumbles tables: Critical Hit 5, the sword's slashing table: +1d4.
+  await tool("kraken_combat", { action: "target", id: mine.id, targetId: ogre.id, on: true });
+  await tool("kraken_dice_force", { values: [20, 5, 2] });
+  await seat.click('[data-sheet-tab="combat"]');
+  await seat.click(`${swordRow} [data-action="attack"]`);
+  await chat(page, "Critical Hit - Slashing d1 = 1: Test gash");
+  const gashed = await until(async () => {
+    const entry = (await tool("kraken_combat", { action: "view" })).entries.find((item) => item.id === ogre.id);
+    return entry.wounds > 10 ? entry : null;
+  }, "the krit's damage");
+  assert(gashed.wounds === 12, `the krit's 1d4 (2) on the ogre: ${gashed.wounds}`);
+
   // The GM: the tracker's lion, its All attacks button (claw, claw, bite at the fighter).
   await tool("kraken_combat", { action: "target", id: lion.id, targetId: mine.id, on: true });
   await page.click('.sidebar [data-launch="combat"]');
@@ -172,10 +184,28 @@ try {
   const mara = await tool("kraken_record_get", { id: listOf(await tool("kraken_records_list", { type: "character" })).find((item) => item.name === "Sister Mara").id });
   assert(mara.owner === "A test player" && mara.data.ac.total === 4 && mara.data.hp.total === 14 && mara.data.spellcasting[0].perday[0] === 4, `the pregen as the book made it: ${JSON.stringify({ owner: mara.owner, ac: mara.data.ac.total, hp: mara.data.hp })}`);
 
+  // Turning undead: Sister Mara (a 2nd-level cleric) on the tracker with a skeleton; the player's Turn undead button.
+  const skeletonRecord = npcs.find((item) => item.name === "Skeleton");
+  await tool("kraken_combat", { action: "add", recordId: mara.id });
+  await tool("kraken_combat", { action: "add", recordId: skeletonRecord.id });
+  await tool("kraken_dice_force", { values: [1, 9] });
+  await tool("kraken_combat", { action: "init", which: "npcs" });
+  const maraEntry = (await tool("kraken_combat", { action: "view" })).entries.find((entry) => entry.recordId === mara.id);
+  await tool("kraken_combat", { action: "update", id: maraEntry.id, patch: { initresult: 0 } });
+  await tool("kraken_combat", { action: "next" });
+  await until(async () => (await tool("kraken_combat", { action: "view" })).active === maraEntry.id || (await tool("kraken_combat", { action: "next" }), false), "Sister Mara's turn");
+  await seat.click('.sidebar [data-launch="combat"]');
+  await seat.waitForSelector('[data-action="turn-undead"]', { timeout: 10000 });
+  await tool("kraken_dice_force", { values: [15, 1, 2, 2, 2, 2] });
+  await seat.click('[data-action="turn-undead"]');
+  await chat(page, "Skeleton (Skeleton): TURNED for 6 rounds");
+  const skeletonEntry = (await tool("kraken_combat", { action: "view" })).entries.find((entry) => entry.name === "Skeleton");
+  assert(skeletonEntry.effects.some((effect) => effect.label === "Turned (flees the turner)"), `the skeleton turned: ${JSON.stringify(skeletonEntry.effects)}`);
+
   await seat.screenshot({ path: path.join(tmpdir(), "kraken-adnd2e-player.png") });
   await page.screenshot({ path: path.join(tmpdir(), "kraken-adnd2e-gm.png") });
   assert(failures.length === 0, `page errors: ${failures.join(" | ")}`);
-  console.log(`ok adnd2e ui: an AD&D 2E campaign's shelf holds its 2E book, made active (creatures, a pregen); a test player makes Brannoc with the 2E wizard (18/76, THAC0 20, AC 2, 12 HP, Paralyzation 14), rolls a Strength check and a save from the sheet, takes the book's pregen; initiative lowest first; the sheet's attack hits the ogre (16 vs 16), Large damage 10; the lion's All attacks rolls claw, claw, bite. ${path.join(tmpdir(), "kraken-adnd2e-player.png")}`);
+  console.log(`ok adnd2e ui: an AD&D 2E campaign's shelf holds its 2E book, made active (creatures, a pregen); a test player makes Brannoc with the 2E wizard (18/76, THAC0 20, AC 2, 12 HP, Paralyzation 14), rolls a Strength check and a save from the sheet, takes the book's pregen; initiative lowest first; the sheet's attack hits the ogre (16 vs 16), Large damage 10; the lion's All attacks rolls claw, claw, bite; a natural 20 rolls the book's Critical Hit tables (+1d4); Sister Mara's Turn undead turns a skeleton. ${path.join(tmpdir(), "kraken-adnd2e-player.png")}`);
 } finally {
   await browser?.close();
   child.kill();

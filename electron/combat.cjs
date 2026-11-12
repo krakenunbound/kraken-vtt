@@ -61,6 +61,11 @@ let r2e = null;
 const r2eReady = import(pathToFileURL(path.join(__dirname, "..", "shared", "adnd2e", "rules.mjs")).href).then((module) => {
   r2e = module;
 });
+// 2E criticals and fumbles: the GM's own Krits & Fumbles book's tables, read by shared/adnd2e/krits.mjs.
+let k2e = null;
+const k2eReady = import(pathToFileURL(path.join(__dirname, "..", "shared", "adnd2e", "krits.mjs")).href).then((module) => {
+  k2e = module;
+});
 
 // Apeira Astra (shared/astra/rules.mjs), when the campaign's ruleset is
 // "Apeira Astra": initiative 2d6 + Reflex modifier + Tactics; an attack 2d6 +
@@ -329,11 +334,31 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     const roll = Number(forced?.roll) || (chart.die > 1 ? table().dice.roll(`1d${chart.die}`).total : 1);
     const row = krits.findRow(chart, roll);
     if (!row) return null;
+    const out = await applyKrit(row[4], kind, source, target, settings, opts);
+    const nameOf = (entry) => entry?.name ?? "?";
+    const tag = kind === "fumble" ? "[KRAKEN FUMBLE]" : "[KRAKEN CRITICAL]";
+    const extra = row[3] && row[3] !== row[2] ? ` ${row[3]}` : "";
+    table().say(`${tag} ${nameOf(source)}: ${chart.name} d${chart.die} = ${roll}: ${row[2]}.${extra}${out.length ? `\n[APPLIED] ${out.join("; ")}` : ""}`, "Combat", settings.show === "gm");
+    changed();
+    return { kind, table: key, roll, title: row[2], applied: out };
+  }
+
+  // A krit's parts put on the tracker (or, with Apply results off, only said):
+  // effects, damage rolls, a mark on the attacker's next damage roll, instant
+  // death, a save or else (2E), notes for the GM.
+  async function applyKrit(parts, kind, source, target, settings, opts) {
     const auto = settings.auto !== "no";
     const out = [];
     const nameOf = (entry) => entry?.name ?? "?";
-    for (const fx of row[4]) {
-      const who = fx.who === "a" ? source : kind === "fumble" ? source : target;
+    for (const fx of parts) {
+      const who = fx.who === "a" ? source : fx.who === "v" ? target : kind === "fumble" ? source : target;
+      if (fx.save && who) {
+        if (auto && d2e()) {
+          const saved = await save2e(who, fx.save, 0, "Combat", "Kraken Krit");
+          if (saved.success) out.push(`${nameOf(who)} saves`);
+          else out.push(...(await applyKrit([{ ...fx.fail, who: fx.who }], kind, source, target, settings, opts)));
+        } else out.push(`(${nameOf(who)} saves vs. ${fx.save} or ${fx.fail?.effect ?? "worse"})`);
+      }
       if (fx.effect) {
         if (auto && who) {
           putEffect(who, fx.effect, fx.dur ?? 0);
@@ -363,11 +388,123 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       }
       if (fx.note) out.push(`GM: ${fx.note}`);
     }
+    return out;
+  }
+
+  // AD&D 2E: a natural 20 that hits rolls the GM's Krits & Fumbles book's
+  // "Critical Hit" table, a natural 1 its "Fumble"; a complication rolls the
+  // table for the attack's kind (slashing, piercing, bludgeoning, missile,
+  // natural), and what its words say is applied. No such book active: none.
+  // forced (tests): { entryRoll, kind, roll }.
+  async function resolveKrit2e(kind, source, target, swing, forced) {
+    await Promise.all([kritsReady, k2eReady]);
+    const settings = krits.cleanSettings(state.krits);
+    const isPC = source && record(source)?.type === "character";
+    if (!forced) {
+      if (source && !isPC && settings.npc === "no") return null;
+      const chance = settings[kind === "crit" ? "crit" : "fumble"];
+      if (chance === "off" || (chance === "half" && table().dice.roll("1d2").total !== 1) || (chance === "third" && table().dice.roll("1d3").total !== 1)) return null;
+    }
+    const found = k2e.findTables(table().bookTables?.() ?? []);
+    if (!k2e.hasTables(found)) return null;
+    const { options: opts } = await options();
+    // A table of one row ("d1") needs no roll.
+    const dieRoll = (formula) => (/^1d1$/.test(formula) ? 1 : table().dice.roll(formula).total);
+    const lines = [];
+    const entry = found[kind];
+    let matching = !entry;
+    let roll = 0;
+    let title = "";
+    if (entry) {
+      roll = Number(forced?.entryRoll) || dieRoll(k2e.dieOf(entry));
+      const row = k2e.rowOf(entry, roll);
+      title = row?.title ?? "";
+      lines.push(`${entry.name} ${k2e.dieOf(entry).replace(/^1d/, "d")} = ${roll}: ${title || "?"}.`);
+      matching = k2e.rollsMatching(row?.text);
+    }
+    let applied = [];
+    let sub = 0;
+    if (matching) {
+      const attackKind = forced?.kind ?? k2e.attackKind({ name: swing?.name, type: swing?.type, dmgtype: swing?.dmgtype, npc: Boolean(swing?.npc) });
+      const chart = found[`${kind}_${attackKind}`];
+      if (chart) {
+        sub = Number(forced?.roll) || dieRoll(k2e.dieOf(chart));
+        const row = k2e.rowOf(chart, sub);
+        if (row) {
+          title = row.title;
+          lines.push(`${chart.name} ${k2e.dieOf(chart).replace(/^1d/, "d")} = ${sub}: ${row.title}. ${row.text}`);
+          // The row's text is said once; what the tracker cannot keep is the GM's.
+          const parts = k2e.effectsOf(row.title, row.text, kind).map((fx) => (fx.note ? { note: "the rest is yours to rule" } : fx));
+          applied = await applyKrit(parts, kind, source, target, settings, opts);
+        }
+      }
+    }
     const tag = kind === "fumble" ? "[KRAKEN FUMBLE]" : "[KRAKEN CRITICAL]";
-    const extra = row[3] && row[3] !== row[2] ? ` ${row[3]}` : "";
-    table().say(`${tag} ${nameOf(source)}: ${chart.name} d${chart.die} = ${roll}: ${row[2]}.${extra}${out.length ? `\n[APPLIED] ${out.join("; ")}` : ""}`, "Combat", settings.show === "gm");
+    table().say(`${tag} ${source?.name ?? "?"}${target && kind === "crit" ? ` -> ${target.name}` : ""}: ${lines.join(" ")}${applied.length ? `\n[APPLIED] ${applied.join("; ")}` : ""}`, "Combat", settings.show === "gm");
     changed();
-    return { kind, table: key, roll, title: row[2], applied: out };
+    return { kind, roll, sub, title, applied };
+  }
+
+  // AD&D 2E turning undead: the turner's level (a cleric's; a paladin's - 2
+  // from 3rd) against each undead's row; one d20 for all, 2d6 undead affected,
+  // the weakest first (D*: 2d4 more). Turned undead flee for 3d4 rounds;
+  // destroyed ones die. undeadIds: the undead to turn (else the turner's
+  // targets, else every undead foe in the fight). forced (tests): { roll, count, level }.
+  async function turnUndead(turnerId, recordId, undeadIds, seat, forced) {
+    await r2eReady;
+    if (!d2e()) throw new Error("Turning undead is AD&D 2E's.");
+    const turner = recordId ? state.entries.find((entry) => entry.recordId === String(recordId)) : find(turnerId);
+    if (!turner) throw new Error("The turner is not in the fight.");
+    const linked = record(turner);
+    if (seat.role !== "dm" && linked?.owner !== seat.name) throw new Error("Turn undead with your own character.");
+    const level = linked?.type === "character" ? r2e.turnLevel(r2e.derive(linked.data)) : num(forced?.level, 0);
+    if (level < 1) throw new Error(`${turner.name} cannot turn undead (a cleric, or a paladin from 3rd level).`);
+    mustAct(turner);
+    const alive = (entry) => health(entry).status !== "Dead";
+    const rowOf = (entry) => r2e.undeadRow(entry.name, record(entry)?.data ?? {});
+    const named = Array.isArray(undeadIds) && undeadIds.length ? undeadIds.map((id) => state.entries.find((entry) => entry.id === String(id))).filter(Boolean) : null;
+    const picked = named ?? (targetsOf(turner).length ? targetsOf(turner) : state.entries.filter((entry) => entry.faction === "foe"));
+    const undead = picked.filter((entry) => alive(entry) && rowOf(entry) !== null).sort((a, b) => rowOf(a) - rowOf(b));
+    if (undead.length === 0) throw new Error("No undead to turn: target them first.");
+    const rolled = forced?.roll ? { total: Number(forced.roll) } : table().roll("1d20", `[TURN UNDEAD] ${turner.name} (level ${level})`, linked?.name ?? "Combat", false, { by: turner.name });
+    let count = Number(forced?.count) || table().dice.roll("2d6").total;
+    let bonus = false;
+    const { options: opts } = await options();
+    const lines = [];
+    for (const entry of undead) {
+      const row = rowOf(entry);
+      const result = r2e.turnAgainst(level, row);
+      const type = r2e.UNDEAD[row][0];
+      if (result.impossible) {
+        lines.push(`${entry.name} (${type}): beyond ${turner.name}'s power`);
+        continue;
+      }
+      if (!result.auto && rolled.total < result.need) {
+        lines.push(`${entry.name} (${type}): unaffected (needs ${result.need})`);
+        continue;
+      }
+      if (count <= 0) {
+        lines.push(`${entry.name} (${type}): not reached`);
+        continue;
+      }
+      if (result.more && !bonus) {
+        bonus = true;
+        count += table().dice.roll("2d4").total;
+      }
+      count -= 1;
+      if (result.destroy) {
+        const now = vitals(entry);
+        await applyWounds(entry, Math.max(1, now.hp - now.wounds), `[TURN UNDEAD] ${turner.name} destroys ${entry.name}`, opts);
+        lines.push(`${entry.name} (${type}): DESTROYED`);
+      } else {
+        const rounds = table().dice.roll("3d4").total;
+        putEffect(entry, "Turned (flees the turner)", rounds);
+        lines.push(`${entry.name} (${type}): TURNED for ${rounds} rounds${result.need ? ` (needed ${result.need})` : ""}`);
+      }
+    }
+    table().say(`[TURN UNDEAD] ${turner.name}, turning as a level ${level} cleric: d20 = ${rolled.total}.\n${lines.join("\n")}`, "Combat", false);
+    changed();
+    return { level, roll: rolled.total, results: lines };
   }
 
   // SiegeChar.fireAmmunition: a ranged weapon with an ammunition type fires
@@ -910,7 +1047,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       const data = r2e.derive(linked.data);
       const attack = data.attacks?.[key] ?? Object.values(data.attacks ?? {}).find((item) => item.item === key || item.name.toLowerCase() === String(key).toLowerCase());
       if (!attack) throw new Error("No such weapon.");
-      const swing = { name: attack.name, tohit: attack.tohit, damage: attack.damage, damagelarge: attack.damagelarge };
+      const swing = { name: attack.name, tohit: attack.tohit, damage: attack.damage, damagelarge: attack.damagelarge, type: attack.type, dmgtype: attack.dmgtype ?? "" };
       const times = attack.rate === "2/1" ? 2 : attack.rate === "3/2" && state.round % 2 === 0 ? 2 : 1;
       return { actor: linked.name, name: attack.name, type: attack.type, thaco: data.thaco, swing, swings: Array(times).fill(swing), damage: attack.damage, entry: state.entries.find((entry) => entry.recordId === linked.id) ?? null, record: linked };
     }
@@ -920,8 +1057,8 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     const attacks = stats.attacks.length ? stats.attacks : [{ name: "Attack", tohit: 0, damage: "1d6", damagelarge: "1d6", type: "melee" }];
     const attack = attacks[Number(key)] ?? attacks.find((item) => item.name.toLowerCase() === String(key).toLowerCase());
     if (!attack) throw new Error("No such attack.");
-    const swing = { name: attack.name, tohit: attack.tohit, damage: attack.damage, damagelarge: attack.damagelarge };
-    return { actor: entry.name, name: attack.name, type: attack.type, thaco: entry.recordId ? stats.thaco : num(entry.thaco, 20), swing, swings: attacks.map((item) => ({ name: item.name, tohit: item.tohit, damage: item.damage, damagelarge: item.damagelarge })), damage: attack.damage, entry };
+    const swingOf = (item) => ({ name: item.name, tohit: item.tohit, damage: item.damage, damagelarge: item.damagelarge, type: item.type, dmgtype: item.dmgtype ?? "", npc: true });
+    return { actor: entry.name, name: attack.name, type: attack.type, thaco: entry.recordId ? stats.thaco : num(entry.thaco, 20), swing: swingOf(attack), swings: attacks.map(swingOf), damage: attack.damage, entry };
   }
   // A target's size for a weapon's damage: a creature's block says Large (L, H, G); characters are Small or Medium.
   function large2e(target) {
@@ -938,7 +1075,8 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     const kind = SHORT_TYPE[plan.type] ? ` (${SHORT_TYPE[plan.type]})` : "";
     const targets = targetsOf(source);
     const formulaFor = (swing, target) => {
-      const atk = num(swing.tohit, 0) + effectBonus(source, "ATK", target);
+      // GRANTATK: a krit left the target open (+2 to the next attack against it).
+      const atk = num(swing.tohit, 0) + effectBonus(source, "ATK", target) + (target ? effectBonus(target, "GRANTATK") : 0);
       return `1d20${atk ? `${atk > 0 ? "+" : ""}${atk}` : ""}${effectDice(source, "ATK", target)}`;
     };
     const swingsFor = full ? plan.swings : [plan.swing];
@@ -947,7 +1085,8 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     if (targets.length === 0) {
       for (const [index, swing] of swingsFor.entries()) {
         const roll = table().roll(formulaFor(swing, null), `[ATTACK]${kind} ${swing.name}${swingsFor.length > 1 ? ` #${index + 1}` : ""} [THAC0 ${plan.thaco}]`, from, false, { result: "NO TARGET", by: plan.actor });
-        results.push({ total: roll.total, hit: null, natural: natural(roll) });
+        const krit = natural(roll) === 1 ? await resolveKrit2e("fumble", source, null, swing) : null;
+        results.push({ total: roll.total, hit: null, natural: natural(roll), ...(krit ? { krit } : {}) });
       }
       changed();
       return results;
@@ -967,7 +1106,8 @@ function createCombat({ saved, table, onChange = () => undefined }) {
         const before = source.hitOn[target.id];
         source.hitOn[target.id] = [...(Array.isArray(before) ? before : []), now];
       }
-      results.push({ target: target.name, total: rolled.total, ac, need, hit, natural: die });
+      const krit = die === 20 && hit ? await resolveKrit2e("crit", source, target, swing) : die === 1 ? await resolveKrit2e("fumble", source, target, swing) : null;
+      results.push({ target: target.name, total: rolled.total, ac, need, hit, natural: die, ...(krit ? { krit } : {}) });
     }
     changed();
     return results;
@@ -984,12 +1124,21 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     if (plan.entry) plan.entry.hitOn = null;
     const rolls = [];
     let total = 0;
+    await kritsReady;
     const rollOne = async (target, swing) => {
       const big = target ? large2e(target) : false;
       const dice = String((big ? swing.damagelarge : swing.damage) || swing.damage).replace(/\s+/g, "");
       const bonus = effectBonus(plan.entry, "DMG", target);
-      const formula = `${dice}${bonus ? `${bonus > 0 ? "+" : ""}${bonus}` : ""}${effectDice(plan.entry, "DMG", target)}`;
-      const roll = table().roll(formula, `[DAMAGE]${kind} ${swing.name}${target ? ` [${big ? "LARGE" : "S/M"}] -> [at ${target.name}]` : ""}`, from, false, { by: plan.actor });
+      let formula = `${dice}${bonus ? `${bonus > 0 ? "+" : ""}${bonus}` : ""}${effectDice(plan.entry, "DMG", target)}`;
+      // A critical's mark (maximum damage, an extra die) changes the next hit's roll and is used up.
+      let tag = "";
+      const mark = plan.entry?.effects.find((effect) => krits.isMark(effect.label));
+      if (mark) {
+        const marked = krits.markedFormula(dice, bonus, mark.label);
+        if (marked) [formula, tag] = [marked.formula, ` ${marked.tag}`];
+        plan.entry.effects = plan.entry.effects.filter((effect) => effect !== mark);
+      }
+      const roll = table().roll(formula, `[DAMAGE]${kind} ${swing.name}${target ? ` [${big ? "LARGE" : "S/M"}] -> [at ${target.name}]` : ""}${tag}`, from, false, { by: plan.actor });
       const amount = Math.max(1, roll.total);
       total += amount;
       if (target) await applyWounds(target, amount, `[DAMAGE] ${swing.name}`, opts);
@@ -1470,6 +1619,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     sorted,
     deathSave,
     stabilize,
+    turnUndead,
     ruleset5e: five,
     // What a seat sees of the tracker. The GM sees everything; players do not
     // see hidden entries or GM-only effects, and see foes' health as a status.
@@ -1498,6 +1648,8 @@ function createCombat({ saved, table, onChange = () => undefined }) {
             effects: entry.effects.filter((effect) => seat.role === "dm" || !effect.gmOnly).map(({ id, label, duration, targets }) => ({ id, label: targets?.length ? `${label} [-> ${targets.map((tid) => state.entries.find((item) => item.id === tid)?.name ?? "?").join(", ")}]` : label, duration })),
             targets: seat.role === "dm" || owner(entry) === seat.name ? entry.targets.filter((id) => shown.some((item) => item.id === id)) : [],
             ...(five() ? { deathsaves: record(entry)?.type === "character" || numbers ? deathSaves(entry) : undefined } : {}),
+            // 2E: the level a cleric (or a paladin from 3rd) turns undead at.
+            ...(d2e() && r2e && record(entry)?.type === "character" && r2e.turnLevel(r2e.derive(record(entry).data)) > 0 ? { turns: r2e.turnLevel(r2e.derive(record(entry).data)) } : {}),
             attacks:
               d2e() && seat.role === "dm" && record(entry)?.type === "npc" && r2e
                 ? (() => {
@@ -2180,6 +2332,8 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       mustGM(seat);
       const { options: opts } = await options();
       cachedThresholds = thresholds(opts);
+      // 2E: the GM's Krits & Fumbles book's tables (forced: { entryRoll, kind, roll }).
+      if (d2e()) return resolveKrit2e(kind === "fumble" ? "fumble" : "crit", find(sourceId), targetId ? find(targetId) : null, { name: forced?.weapon ?? "", type: forced?.ranged ? "ranged" : "melee" }, forced ?? {});
       return resolveKrit(kind === "fumble" ? "fumble" : "crit", find(sourceId), targetId ? find(targetId) : null, false, opts, forced);
     },
     round: () => state.round,

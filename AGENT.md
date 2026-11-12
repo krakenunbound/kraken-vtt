@@ -57,7 +57,7 @@ The app starts the MCP server when it opens. `electron/agent/mcp-stdio.cjs` is t
 | Hand out coin and items | `kraken_party_distribute` |
 | Group check or save | `kraken_party_group_check` |
 | **Combat tracker** | |
-| Every tracker action: add, initiative, turns, rounds, damage, healing, effects, targets, attacks, saves, spells; 5E death saves; 3.5E full attacks (`full`), Fortitude / Reflex / Will saves; 2E THAC0 attacks, a creature's whole round (`full`), the five saves, binding wounds (`stabilize`) | `kraken_combat` |
+| Every tracker action: add, initiative, turns, rounds, damage, healing, effects, targets, attacks, saves, spells; 5E death saves; 3.5E full attacks (`full`), Fortitude / Reflex / Will saves; 2E THAC0 attacks, a creature's whole round (`full`), the five saves, binding wounds (`stabilize`), turning undead (`turn-undead`), the GM's Krits & Fumbles 2E book on a natural 20 or 1 | `kraken_combat` |
 | **Chat and dice** | |
 | Chat, `/r` rolls, the chat log | `kraken_chat_send`, `kraken_roll`, `kraken_chat_log` |
 | Chat commands: `/w` whispers, `/me` `/action` `/ooc` `/mood`, the GM's `/story` and `/id` | `kraken_chat_send` (`kind`, `to`, `as`, `mood`) |
