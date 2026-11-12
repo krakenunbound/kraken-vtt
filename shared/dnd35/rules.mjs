@@ -30,6 +30,9 @@
 // dmgtype}}, spellcasting {class, stat, dc, perday [..], used [..]}, spells
 // [names], speed.
 
+import { automaticLanguages, choiceFeatures, classKeyOf, knownRace, maxSpellLevelFor, PREPARED_CASTERS, raceLevelAdjustment, raceMods, alignmentCode, spellLevelForClass, spellSchool, COMBAT_STYLES } from "./wizard.mjs";
+import { coinsOf } from "../shop.mjs";
+
 export const RULESET = "dnd35";
 export const RULESET_NAME = "D&D 3.5E";
 export const STATS = ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"];
@@ -311,10 +314,10 @@ export function classInfo(record) {
 export function raceInfo(record) {
   const traits = rows(record?.data?.racialtraits).map(([, trait]) => ({ name: String(trait.name ?? ""), text: plain(trait.text) }));
   const adjust = {};
-  const scores = traits.find((trait) => /ability score/i.test(trait.name))?.text ?? "";
+  const scores = traits.find((trait) => /ability score|attribute adjust/i.test(trait.name))?.text ?? "";
   for (const match of scores.matchAll(/([+-−–]\s*\d+)\s+(strength|dexterity|constitution|intelligence|wisdom|charisma)/gi)) adjust[match[2].toLowerCase()] = Number(match[1].replace(/[−–]/, "-").replace(/\s/g, ""));
   const size = traits.find((trait) => /^(small|medium|large)$/i.test(trait.name))?.name.toLowerCase() ?? (/\bsmall\b/i.test(traits.map((trait) => trait.text).join(" ")) ? "small" : "medium");
-  const speed = num(/base land speed of (\d+) feet/i.exec(traits.map((trait) => trait.text).join(" "))?.[1], size === "small" ? 20 : 30);
+  const speed = num(/base (?:land )?speed (?:is |of )(\d+) feet/i.exec(traits.map((trait) => trait.text).join(" "))?.[1], size === "small" ? 20 : 30);
   const all = traits.map((trait) => trait.text).join(" ");
   return {
     name: String(record?.name ?? record?.data?.name ?? ""),
@@ -398,7 +401,9 @@ export function derive(input) {
   };
   data.hp = { total: Math.max(1, Math.round(num(data.hp?.total, 1))), wounds: Math.max(0, Math.round(num(data.hp?.wounds, 0))), nonlethal: Math.max(0, Math.round(num(data.hp?.nonlethal, 0))), temp: Math.max(0, Math.round(num(data.hp?.temp, 0))) };
   data.exp = Math.max(0, Math.round(num(data.exp, 0)));
-  data.expnext = data.level >= MAX_LEVEL ? 0 : xpFor(data.level + 1);
+  // A race with a level adjustment levels up as its effective character level.
+  data.la = Math.max(0, Math.round(num(data.la, 0)));
+  data.expnext = data.level + data.la >= MAX_LEVEL ? 0 : xpFor(data.level + data.la + 1);
   data.feats = (Array.isArray(data.feats) ? data.feats : []).map((feat) => String(feat).slice(0, 80)).filter(Boolean);
   data.spells = (Array.isArray(data.spells) ? data.spells : []).map((spell) => String(spell).slice(0, 80)).filter(Boolean);
   return data;
@@ -509,11 +514,19 @@ export function npcStats(data) {
 }
 
 // --- Building a character ---------------------------------------------------
-// spec: { name, race, class, level, scores {stat: n} or array (the standard
-// 15,14,13,12,10,8, put in the class's order), feats, skills {name: ranks},
-// gear [item names], alignment }. lib: { classes, races, items, feats, spells }
-// (the campaign's records). Hit points: the die's highest at 1st level, then
-// its average (rounded up) each level, + Con each level, at least 1.
+// spec: { name, race, class, level (or classes [{name, level}], a multiclass
+// plan), scores {stat: n} or array (the standard 15,14,13,12,10,8, put in the
+// class's order), increases {stat: n} (the level increases; else +1 to the
+// class's first ability every 4th level), feats, skills {name: ranks}, gear
+// [item names or [name, count]], gold (gp left), spells [names or {name,
+// class, level}], languages, alignment, choices {deity, domains, channel,
+// school, prohibited, familiar, companion, mount, combatstyle,
+// favoredenemies, febonus, roguespecials}, deity, gender, age, height,
+// weight, appearance, notes, fill (false: exactly what is given, as the
+// character wizard makes it) }. lib: { classes, races, items, feats, spells,
+// domains } (the campaign's records). Hit points as FG adds each level: the
+// die's highest at the character's 1st level, then its average (rounded) +
+// Con.
 const CLASS_ORDER = {
   barbarian: ["strength", "constitution", "dexterity", "wisdom", "charisma", "intelligence"],
   bard: ["charisma", "dexterity", "constitution", "intelligence", "wisdom", "strength"],
@@ -581,40 +594,68 @@ const fighterBonus = (level) => 1 + Math.floor(Math.max(1, level) / 2);
 
 export function buildFromSpec(spec, lib) {
   const problems = [];
-  const classRecord = byName(lib.classes ?? [], spec?.class) ?? (lib.classes ?? [])[0];
-  if (!classRecord) throw new Error("No classes: make the 3.5E Player's Handbook active (Books).");
+  const classes = lib.classes ?? [];
+  // The class plan: classes [{name, level}] (the wizard's, a multiclass plan), or one class and its level.
+  const wanted = Array.isArray(spec?.classes) && spec.classes.length ? spec.classes.map((entry) => ({ name: entry?.name ?? entry?.class, level: entry?.level ?? entry?.levels })) : [{ name: spec?.class, level: spec?.level }];
+  const planned = wanted
+    .map((entry) => ({ record: byName(classes, entry.name) ?? (wanted.length === 1 ? classes[0] : null), level: Math.min(MAX_LEVEL, Math.max(1, Math.round(num(entry.level, 1)))), asked: entry.name }))
+    .filter((entry) => {
+      if (!entry.record) problems.push(`No class "${entry.asked}" in the campaign's books.`);
+      return Boolean(entry.record);
+    });
+  if (planned.length === 0) throw new Error("No classes: make the 3.5E Player's Handbook active (Books).");
   const raceRecord = byName(lib.races ?? [], spec?.race ?? "Human") ?? byName(lib.races ?? [], "Human") ?? (lib.races ?? [])[0] ?? null;
-  const cls = classInfo(classRecord);
   const race = raceRecord ? raceInfo(raceRecord) : { name: String(spec?.race ?? "Human"), adjust: {}, size: "medium", speed: 30, saves: 0, bonusFeat: true, bonusSkills: 1, traits: [] };
-  const level = Math.min(MAX_LEVEL, Math.max(1, Math.round(num(spec?.level, 1))));
-  const key = classKey(cls.name);
-  // Scores: given, or the standard array in the class's order; then the race's adjustments.
+  const plan = planned.map((entry) => ({ ...entry, info: classInfo(entry.record), key: classKey(entry.record.name) }));
+  const cls = plan[0].info;
+  const key = plan[0].key;
+  const level = Math.min(MAX_LEVEL, plan.reduce((sum, entry) => sum + entry.level, 0));
+  const levels = {};
+  for (const entry of plan) levels[classKeyOf(entry.record.name)] = (levels[classKeyOf(entry.record.name)] ?? 0) + entry.level;
+  const fill = spec?.fill !== false;
+  // Scores: given, or the standard array in the class's order; the level
+  // increases (given, else +1 to the class's first ability every 4th level);
+  // then the race's adjustments (Kraken's table for the races it knows).
   const order = CLASS_ORDER[key] ?? STATS;
   const given = spec?.scores && typeof spec.scores === "object" ? spec.scores : null;
   const array = Array.isArray(spec?.array) && spec.array.length === 6 ? spec.array.map((value) => num(value, 10)) : STANDARD_ARRAY;
   const scores = Object.fromEntries(STATS.map((stat) => [stat, given ? num(given[stat] ?? given[SHORT[stat].toLowerCase()], 10) : array[order.indexOf(stat)]]));
-  // Every 4th level, +1 to the class's first ability.
-  scores[order[0]] += Math.floor(level / 4);
-  for (const [stat, change] of Object.entries(race.adjust)) scores[stat] = Math.max(3, (scores[stat] ?? 10) + change);
+  if (spec?.increases && typeof spec.increases === "object") for (const stat of STATS) scores[stat] += Math.max(0, Math.round(num(spec.increases[stat], 0)));
+  else scores[order[0]] += Math.floor(level / 4);
+  const adjust = knownRace(race.name) ? raceMods(race.name) : race.adjust;
+  for (const [stat, change] of Object.entries(adjust)) scores[stat] = Math.max(3, (scores[stat] ?? 10) + change);
+  // Hit points as FG adds each class level: the die's highest at the
+  // character's 1st level, then its average (rounded) + Con.
   const con = mod(scores.constitution);
-  const average = Math.ceil((cls.hitdie + 1) / 2);
-  let hp = Math.max(1, cls.hitdie + con);
-  for (let l = 2; l <= level; l++) hp += Math.max(1, average + con);
-  // Feats: the given, else the class's usual ones; humans one more, fighters their bonus feats.
+  let hp = 0;
+  let total = 0;
+  for (const entry of plan) {
+    for (let l = 1; l <= entry.level; l++) {
+      total += 1;
+      hp += (total === 1 ? entry.info.hitdie : Math.floor((entry.info.hitdie + 1) / 2 + 0.5)) + con;
+    }
+  }
+  hp = Math.max(1, hp);
+  // Feats: the given (the wizard's, exactly), else filled with the class's usual ones.
   const feats = [];
   const wantedFeats = Array.isArray(spec?.feats) ? spec.feats.map(String) : [];
-  const count = featCount(level) + (race.bonusFeat ? 1 : 0) + (key === "fighter" ? fighterBonus(level) : 0) + (key === "wizard" ? 0 : 0);
-  for (const feat of [...wantedFeats, ...(FEATS_BY_CLASS[key] ?? []), "Toughness", "Alertness", "Iron Will", "Great Fortitude", "Lightning Reflexes"]) {
-    if (feats.length >= count) break;
-    if (!feats.some((had) => had.toLowerCase() === feat.toLowerCase())) feats.push(feat);
+  const count = featCount(level) + (race.bonusFeat ? 1 : 0) + (key === "fighter" ? fighterBonus(level) : 0);
+  for (const feat of fill ? [...wantedFeats, ...(FEATS_BY_CLASS[key] ?? []), "Toughness", "Alertness", "Iron Will", "Great Fortitude", "Lightning Reflexes"] : wantedFeats) {
+    if (fill && feats.length >= count) break;
+    if (!feats.some((had) => had.toLowerCase() === feat.toLowerCase()) || !fill) feats.push(feat);
   }
-  if (key === "wizard") feats.push("Scribe Scroll");
-  if (feats.some((feat) => /^toughness/i.test(feat))) hp += 3;
-  // Skills: points ((class + Int) x 4 at 1st, then each level; humans 4 + 1 a level more), class skills first.
+  const has = (name) => feats.some((feat) => feat.toLowerCase() === name.toLowerCase());
+  if (levels.wizard && !has("Scribe Scroll")) feats.push("Scribe Scroll");
+  // A ranger's combat style feats, as FG's wizard adds them.
+  const choices = spec?.choices && typeof spec.choices === "object" ? spec.choices : {};
+  for (const [at, feat] of COMBAT_STYLES[String(choices.combatstyle ?? "")] ?? []) if ((levels.ranger ?? 0) >= at && !has(feat)) feats.push(feat);
+  hp += 3 * feats.filter((feat) => /^toughness/i.test(feat)).length;
+  // Skills: the given ranks (half ranks too: cross-class), else spent for the class, class skills first.
   const intMod = mod(scores.intelligence);
   const perLevel = Math.max(1, cls.skillranks + intMod) + (race.bonusSkills ? 1 : 0);
-  let points = perLevel * 4 + (race.bonusSkills ? 0 : 0) + perLevel * (level - 1);
+  let points = perLevel * 4 + perLevel * (level - 1);
   const maxRanks = level + 3;
+  const classSkills = new Set(plan.flatMap((entry) => entry.info.classskills));
   const skills = {};
   const wantedSkills = spec?.skills && typeof spec.skills === "object" ? Object.entries(spec.skills) : [];
   for (const [name, ranks] of wantedSkills) {
@@ -623,25 +664,33 @@ export function buildFromSpec(spec, lib) {
       problems.push(`No skill "${name}".`);
       continue;
     }
-    const cost = cls.classskills.includes(skill) ? 1 : 2;
-    const max = cls.classskills.includes(skill) ? maxRanks : maxRanks / 2;
+    if (!fill) {
+      // The wizard checked the costs and caps; Craft (alchemy) and Craft (...) add up.
+      skills[skill] = { ranks: (skills[skill]?.ranks ?? 0) + Math.max(0, Math.round(num(ranks, 0) * 2) / 2) };
+      continue;
+    }
+    const cost = classSkills.has(skill) ? 1 : 2;
+    const max = classSkills.has(skill) ? maxRanks : maxRanks / 2;
     const take = Math.min(max, Math.max(0, num(ranks, 0)), Math.floor(points / cost));
     skills[skill] = { ranks: take };
     points -= take * cost;
   }
-  const first = SKILL_FIRST[key] ?? [];
-  for (const skill of [...first.filter((item) => cls.classskills.includes(item)), ...cls.classskills]) {
-    if (points <= 0) break;
-    if (!SKILLS[skill] || skills[skill]) continue;
-    const take = Math.min(maxRanks, points);
-    skills[skill] = { ranks: take };
-    points -= take;
+  if (fill) {
+    const first = SKILL_FIRST[key] ?? [];
+    for (const skill of [...first.filter((item) => cls.classskills.includes(item)), ...cls.classskills]) {
+      if (points <= 0) break;
+      if (!SKILLS[skill] || skills[skill]) continue;
+      const take = Math.min(maxRanks, points);
+      skills[skill] = { ranks: take };
+      points -= take;
+    }
   }
-  // Gear: the given, else the class's kit, from the campaign's items.
+  // Gear: the given ([name, count] or names), else the class's kit, from the campaign's items.
   const inventorylist = {};
   const items = lib.items ?? [];
-  const gear = Array.isArray(spec?.gear) && spec.gear.length ? spec.gear : KITS[key] ?? [];
-  gear.forEach((name) => {
+  const gear = Array.isArray(spec?.gear) && spec.gear.length ? spec.gear : fill ? KITS[key] ?? [] : [];
+  gear.forEach((entry) => {
+    const [name, qty] = Array.isArray(entry) ? entry : [entry, 0];
     const found = byName(items, name);
     if (!found) {
       problems.push(`No item "${name}" in the campaign's books.`);
@@ -649,28 +698,79 @@ export function buildFromSpec(spec, lib) {
     }
     const id = `id-${String(Object.keys(inventorylist).length + 1).padStart(5, "0")}`;
     const { fgPath, ...fields } = found.data ?? {};
-    inventorylist[id] = { ...fields, name: found.name, count: num(fields.count, 1) || 1, carried: isArmor(found.data) || isShield(found.data) || isWeapon(found.data) ? 2 : 1 };
+    inventorylist[id] = { ...fields, name: found.name, count: Math.max(1, Math.round(num(qty, 0))) || num(fields.count, 1) || 1, carried: isArmor(found.data) || isShield(found.data) || isWeapon(found.data) ? 2 : 1 };
   });
-  const features = cls.features.filter((feature) => feature.level <= level).map((feature) => ({ ...feature, class: cls.name }));
+  // Spells: the chosen (known, or a wizard's spellbook), and what FG's wizard
+  // adds on commit: every 0-level spell to a wizard's spellbook (not of a
+  // prohibited school), a prepared caster's whole class list for the levels it
+  // casts (not of an alignment opposed to its own), a cleric's domain spells.
+  const spells = [];
+  const addSpell = (name) => {
+    const text = String(name ?? "").trim().slice(0, 80);
+    if (text && !spells.some((had) => had.toLowerCase() === text.toLowerCase())) spells.push(text);
+  };
+  for (const spell of Array.isArray(spec?.spells) ? spec.spells : []) addSpell(typeof spell === "object" && spell ? spell.name : spell);
+  for (const name of Array.isArray(choices.advlearning) ? choices.advlearning : []) addSpell(name);
+  const library = lib.spells ?? [];
+  const spellRecords = library.map((record) => ({ name: String(record.name ?? record.data?.name ?? ""), data: record.data ?? {} }));
+  const barred = new Set((Array.isArray(choices.prohibited) ? choices.prohibited : []).map((school) => String(school).toLowerCase()));
+  for (const entry of plan) {
+    const k = classKeyOf(entry.record.name);
+    if (k === "wizard" || k === "necromancer") {
+      for (const spell of spellRecords) if (spellLevelForClass(spell, k) === 0 && !(k === "wizard" && barred.has(spellSchool(spell)))) addSpell(spell.name);
+    }
+  }
+  const code = alignmentCode(spec?.alignment);
+  const opposed = (spell) => {
+    if (!code) return false;
+    const school = String(spell.data?.school ?? "");
+    return (/\[[^\]]*Evil/.test(school) && code[1] === "G") || (/\[[^\]]*Good/.test(school) && code[1] === "E") || (/\[[^\]]*Chaotic/.test(school) && code[0] === "L") || (/\[[^\]]*Lawful/.test(school) && code[0] === "C");
+  };
+  for (const k of Object.keys(levels)) {
+    if (!PREPARED_CASTERS[k]) continue;
+    const max = maxSpellLevelFor(k, levels[k]);
+    const min = k === "cleric" || k === "druid" ? 0 : 1;
+    const found = spellRecords.map((spell) => ({ spell, at: spellLevelForClass(spell, k) })).filter(({ spell, at }) => at !== null && at >= min && at <= max && !opposed(spell));
+    found.sort((a, b) => a.at - b.at || a.spell.name.localeCompare(b.spell.name)).forEach(({ spell }) => addSpell(spell.name));
+  }
+  // Class features the levels reach, and what the class choices add (domains, school, familiar...).
+  const features = plan.flatMap((entry) => entry.info.features.filter((feature) => feature.level <= entry.level).map((feature) => ({ ...feature, class: entry.info.name })));
+  for (const feature of choiceFeatures(choices, levels, lib)) {
+    for (const spell of feature.spells ?? []) addSpell(spell);
+    const { spells: _, ...kept } = feature;
+    features.push(kept);
+  }
+  const la = raceLevelAdjustment(race.name);
+  const speedBonus = (levels.barbarian ? 10 : 0) + ((levels.monk ?? 0) >= 3 ? 10 * Math.floor(levels.monk / 3) : 0);
+  const known = Array.isArray(spec?.languages) ? spec.languages.map(String) : [];
+  const languages = [...new Set([...automaticLanguages(race.name, Object.keys(levels)), ...known])].filter(Boolean);
+  const coins = spec?.gold !== undefined && spec?.gold !== null && Number.isFinite(Number(spec.gold)) ? coinsOf(Math.round(Number(spec.gold) * 100)) : { "id-00001": { name: "GP", amount: 0 } };
+  const text = (value) => String(value ?? "").slice(0, 8000);
   const data = derive({
     race: race.name,
     size: race.size,
-    speed: key === "barbarian" ? race.speed + 10 : key === "monk" && level >= 3 ? race.speed + 10 * Math.floor(level / 3) : race.speed,
+    speed: race.speed + speedBonus,
     racialsaves: race.saves,
-    alignment: String(spec?.alignment ?? ""),
-    classes: [{ name: cls.name, level, hitdie: cls.hitdie, bab: cls.bab, fort: cls.fort, ref: cls.ref, will: cls.will, skillranks: cls.skillranks, classskills: cls.classskills }],
+    alignment: text(spec?.alignment),
+    classes: plan.map((entry) => ({ name: entry.info.name, level: entry.level, hitdie: entry.info.hitdie, bab: entry.info.bab, fort: entry.info.fort, ref: entry.info.ref, will: entry.info.will, skillranks: entry.info.skillranks, classskills: entry.info.classskills })),
     abilities: Object.fromEntries(STATS.map((stat) => [stat, { score: scores[stat] }])),
     hp: { total: hp, wounds: 0 },
     feats,
     features,
     skills,
     inventorylist,
-    coins: { "id-00001": { name: "GP", amount: 0 } },
-    spells: Array.isArray(spec?.spells) ? spec.spells.map(String) : [],
-    exp: xpFor(level),
+    coins,
+    spells,
+    la,
+    exp: xpFor(level + la),
     traits: race.traits.map((trait) => trait.name),
+    ...(languages.length ? { languages: languages.join(", ") } : {}),
+    ...Object.fromEntries(["deity", "gender", "age", "height", "weight", "appearance", "notes"].filter((field) => spec?.[field]).map((field) => [field, text(spec[field])])),
+    ...(choices.deity && !spec?.deity ? { deity: choices.deity === "No deity (devoted to an ideal)" ? "None (devoted to an ideal)" : String(choices.deity) } : {}),
+    ...(Array.isArray(choices.domains) && choices.domains.length ? { domains: choices.domains.join(", ") } : {}),
   });
-  return { name: String(spec?.name ?? "").trim() || `${race.name} ${cls.name}`, data, problems };
+  const plainName = plan.map((entry) => entry.info.name).join("/");
+  return { name: String(spec?.name ?? "").trim() || `${race.name} ${plainName}`, data, problems };
 }
 
 // A level gained in the character's (first) class: hit points rolled (at

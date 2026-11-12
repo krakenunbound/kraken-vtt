@@ -247,7 +247,19 @@ function savedOptions(value) {
     soundRepeat: Math.min(30, Math.max(0, Number.isFinite(Number(options.soundRepeat)) ? Number(options.soundRepeat) : 1)),
     // How long landed dice lie on the table before they fade, in seconds (the GM's choice, for every seat).
     diceHold: Math.round(Math.min(60, Math.max(0.5, Number.isFinite(Number(options.diceHold)) ? Number(options.diceHold) : 2.6)) * 10) / 10,
+    wizard35: wizard35Options(options.wizard35),
   };
+}
+
+// The D&D 3.5E character wizard's options, as the GM's FG extension has them:
+// the ability methods players may use (1 4d6 drop lowest arranged, 2 3d6 in
+// order, 3 the standard array, 4 typed), rolled scores locked after the first
+// roll, one 3d6 reroll of a score under 8, and the Vault of the Kraken's
+// hand-me-down gear free in the shop.
+function wizard35Options(value) {
+  const w = value && typeof value === "object" ? value : {};
+  const methods = Array.isArray(w.methods) ? [...new Set(w.methods.map(Number).filter((n) => Number.isInteger(n) && n >= 1 && n <= 4))].sort() : [1, 2, 3, 4];
+  return { methods: methods.length ? methods : [1], rollLock: Boolean(w.rollLock), lowReroll: Boolean(w.lowReroll), vault: Boolean(w.vault) };
 }
 
 // What a chat line is (FG's and Foundry's chat commands): said, an emote
@@ -481,7 +493,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     if (next.decal !== undefined && !(next.decal === "" || next.decal === "kraken" || (decals && decals.has(String(next.decal))))) throw new Error(`No decal "${next.decal}".`);
     if (next.wallpaper !== undefined && !(next.wallpaper === "" || (wallpapers && wallpapers.has(String(next.wallpaper))))) throw new Error(`No wallpaper "${next.wallpaper}".`);
     if (next.gmIcon !== undefined && !(next.gmIcon === "" || (gmIcons && gmIcons.has(String(next.gmIcon))))) throw new Error(`No GM icon "${next.gmIcon}".`);
-    options = savedOptions({ ...options, ...next });
+    options = savedOptions({ ...options, ...next, ...(next.wizard35 && typeof next.wizard35 === "object" ? { wizard35: { ...options.wizard35, ...next.wizard35 } } : {}) });
     broadcast({ type: "options", options });
     onChange("table");
     return options;

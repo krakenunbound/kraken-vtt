@@ -1,5 +1,5 @@
 // A small FG 3.5E module for the 3.5E tests, in the shapes of the GM's 3.5E
-// Player's Handbook (classes, races, skills and gear under <reference>, by
+// Player's Handbook (classes, races, feats, skills and gear under <reference>, by
 // category) and Monster Manual (an NPC block): made up, no licensed text.
 import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -38,13 +38,20 @@ export function makeDnd35Books() {
       <id-00002>${s("name", "Human")}<racialtraits>${trait(1, "Medium", "Medium.")}${trait(2, "Human Base Speed", "Human base land speed of 30 feet.")}</racialtraits></id-00002>
     </category></races>
     <equipment><category name="" baseicon="0" decalicon="0">
-      ${item(1001, { name: "Longsword", type: "Weapon", subtype: "Martial One-Handed Melee", properties: "One-Handed Melee", damage: "1d8", critical: "19-20/x2", damagetype: "Slashing" })}
-      ${item(1002, { name: "Shortbow", type: "Weapon", subtype: "Martial Ranged", properties: "Ranged", damage: "1d6", critical: "x3", range: 60 })}
-      ${item(1003, { name: "Arrows (20)", type: "Goods and Services", subtype: "Ammunition" })}
-      ${item(1004, { name: "Scale mail", type: "Armor", subtype: "Medium", ac: 4, maxstatbonus: 3, checkpenalty: -4, spellfailure: 25 })}
-      ${item(1005, { name: "Shield, heavy steel", type: "Armor", subtype: "Shield", ac: 2, checkpenalty: -2, spellfailure: 15 })}
-      ${item(1006, { name: "Quarterstaff", type: "Weapon", subtype: "Simple Two-Handed Melee", properties: "Two-Handed Melee", damage: "1d6", critical: "x2" })}
+      ${item(1001, { name: "Longsword", type: "Weapon", subtype: "Martial One-Handed Melee", properties: "One-Handed Melee", damage: "1d8", critical: "19-20/x2", damagetype: "Slashing", cost: "15 gp" })}
+      ${item(1002, { name: "Shortbow", type: "Weapon", subtype: "Martial Ranged", properties: "Ranged", damage: "1d6", critical: "x3", range: 60, cost: "30 gp" })}
+      ${item(1003, { name: "Arrows (20)", type: "Goods and Services", subtype: "Ammunition", cost: "1 gp" })}
+      ${item(1004, { name: "Scale mail", type: "Armor", subtype: "Medium", ac: 4, maxstatbonus: 3, checkpenalty: -4, spellfailure: 25, cost: "50 gp" })}
+      ${item(1005, { name: "Shield, heavy steel", type: "Armor", subtype: "Shield", ac: 2, checkpenalty: -2, spellfailure: 15, cost: "20 gp" })}
+      ${item(1006, { name: "Quarterstaff", type: "Weapon", subtype: "Simple Two-Handed Melee", properties: "Two-Handed Melee", damage: "1d6", critical: "x2", cost: "-" })}
+      ${item(1007, { name: "Backpack", type: "Goods and Services", subtype: "Adventuring Gear", cost: "2 gp" })}
     </category></equipment>
+    <feats><category name="" baseicon="0" decalicon="0">
+      ${item(2001, { name: "Power Attack", type: "General", prerequisites: "Str 13", special: "A fighter may select Power Attack as one of his fighter bonus feats." })}
+      ${item(2002, { name: "Weapon Focus", type: "General", prerequisites: "Proficiency with weapon, base attack bonus +1", special: "You can gain this feat multiple times. A fighter may select Weapon Focus as one of his fighter bonus feats." })}
+      ${item(2003, { name: "Cleave", type: "General", prerequisites: "Str 13, Power Attack", special: "A fighter may select Cleave as one of his fighter bonus feats." })}
+      ${item(2004, { name: "Combat Expertise", type: "General", prerequisites: "Int 13", special: "A fighter may select Combat Expertise as one of his fighter bonus feats." })}
+    </category></feats>
   </reference>
 </root>
 `;
