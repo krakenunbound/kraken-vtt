@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 import type { Session, TableRecord } from "../session/useSession";
 import { Icon } from "../ui/icons";
 import { slotDrag } from "../ui/QuickSlots";
-import { ArtChoice, ArtPicker, Picture } from "./ArtPicker";
+import { ArtPicker, Picture } from "./ArtPicker";
 import { Field } from "./CCSheet";
-import { abilityAdjustments, CASTERS, classSkillChoices, profileFor, SKILLS, skillKey, STATS, mod, signed } from "../../shared/dnd5e/rules.mjs";
+import { profileFor, SKILLS, STATS, signed } from "../../shared/dnd5e/rules.mjs";
 
 // The D&D 5E character sheet (SRD 5.2.1), laid out as FG's 5E sheet in
 // Kraken's sheet style: portrait and who they are on top; tabs down the right
@@ -311,6 +311,22 @@ export function Sheet5e({ record, session }: { record: TableRecord; session: Ses
               <small>Alignment</small>
             </label>
             <Field value={String(data.notes ?? "")} area editable={editable} label="Notes" onSave={(value) => change("notes", value)} />
+            {/* What the character wizard gave: feats, languages, proficiencies, traits and features. */}
+            {(
+              [
+                ["Feats", data.feats],
+                ["Languages", data.languages],
+                ["Proficiencies", data.proficiencylist && typeof data.proficiencylist === "object" ? [String((data.proficiencylist as Row).armor ?? ""), String((data.proficiencylist as Row).weapons ?? ""), ...(Array.isArray((data.proficiencylist as Row).tools) ? ((data.proficiencylist as Row).tools as unknown[]) : [])].filter(Boolean) : []],
+                [`${words.species} traits`, data.traits],
+                ["Features", data.features],
+              ] as [string, unknown][]
+            )
+              .filter(([, list]) => Array.isArray(list) && list.length > 0)
+              .map(([title, list]) => (
+                <p key={title} className="five-list" data-list={title.toLowerCase()}>
+                  <b>{title}:</b> {(list as unknown[]).map(String).join(", ")}
+                </p>
+              ))}
           </section>
         ) : null}
       </div>
@@ -370,164 +386,5 @@ function Spells5e({ record, session, editable }: { record: TableRecord; session:
   );
 }
 
-// The 5E character wizard (FG 5E's wizard, made short): who, species, class,
-// background, the scores (the standard array, or typed), the class's skills,
-// starting gear (the class's option A, or none) and spells; the host builds it.
-export function Wizard5e({ session, onDone }: { session: Session; onDone: (id: string | null) => void }) {
-  const records = Object.values(session.records);
-  const of = (type: string) => records.filter((item) => item.type === type).sort((a, b) => a.name.localeCompare(b.name));
-  const classes = of("class");
-  const species = of("race");
-  const backgrounds = of("background");
-  const [name, setName] = useState("");
-  const [cls, setCls] = useState(classes[0]?.name ?? "");
-  const [kind, setKind] = useState(species[0]?.name ?? "");
-  const [background, setBackground] = useState(backgrounds[0]?.name ?? "");
-  const profile = profileFor(session.ruleset);
-  const words = profile.labels;
-  const [scores, setScores] = useState<Record<string, number>>(() => Object.fromEntries(STATS.map((stat, index) => [stat, profile.standardArray[index]])));
-  const [skills, setSkills] = useState<string[]>([]);
-  const [spells, setSpells] = useState<string[]>([]);
-  const [gear, setGear] = useState(true);
-  const [problem, setProblem] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [art, setArt] = useState<{ portrait?: string; token?: string }>({});
-  const classRecord = classes.find((item) => item.name === cls);
-  const choices = classRecord ? classSkillChoices(classRecord) : { count: 0, names: [] as string[] };
-  const caster = CASTERS[skillKey(cls) as keyof typeof CASTERS];
-  // The class's own spells (a spell names who casts it), cantrips and 1st level.
-  const spellList = useMemo(
-    () => of("spell").filter((item) => num(item.data.level) <= 1 && (!item.data.source || new RegExp(`\\b${cls}\\b`, "i").test(String(item.data.source)))),
-    [records.length, cls], // eslint-disable-line react-hooks/exhaustive-deps
-  );
-  const kinRecord = species.find((item) => item.name === kind);
-  const adjust = abilityAdjustments(kinRecord) as Record<string, number>;
-  // A kin may limit the classes (Descending Darkness: a dwarf is a fighter, cleric or thief).
-  const allowed = kinRecord?.data.classes ? String(kinRecord.data.classes).split(/,\s*/).map((item) => item.trim().toLowerCase()) : null;
-  const classOptions = allowed ? classes.filter((item) => allowed.includes(item.name.toLowerCase())) : classes;
-  useEffect(() => {
-    if (classOptions.length && !classOptions.some((item) => item.name === cls)) {
-      setCls(classOptions[0].name);
-      setSkills([]);
-      setSpells([]);
-    }
-  }, [kind]); // eslint-disable-line react-hooks/exhaustive-deps
-  const startingGear = (): [string, number][] => {
-    const option = rows(classRecord?.data.startingequipmentlist)[0]?.[1];
-    return rows(option?.items).map(([, item]) => [String(item.name), num(item.count) || 1]);
-  };
-  const finish = async () => {
-    setBusy(true);
-    setProblem("");
-    try {
-      const id = await session.buildCharacter({ name: name || "Adventurer", class: cls, species: kind, background, level: 1, scores, skills: skills.map((key) => SKILLS[key as keyof typeof SKILLS][0]), gear: gear ? startingGear() : [], spells, ...art });
-      onDone(id);
-    } catch (error) {
-      setProblem(error instanceof Error ? error.message : String(error));
-    } finally {
-      setBusy(false);
-    }
-  };
-  if (classes.length === 0) return <p className="hint">No classes yet: the GM makes the {profile.id === "dnd5e" ? "SRD player book" : `${profile.name} Player's Handbook`} active (Books).</p>;
-  return (
-    <section className="wizard-5e cc-panel" aria-label={`${words.game} character wizard`} data-wizard={profile.id}>
-      <header className="cc-row">
-        <b>New {words.game} character</b>
-        <span className="me-spacer" />
-        <button type="button" className="ghost" onClick={() => onDone(null)}>
-          Cancel
-        </button>
-        <button type="button" data-action="wizard-finish" disabled={busy || skills.length !== choices.count} title={skills.length !== choices.count ? `Choose ${choices.count} skills` : "Make the character"} onClick={() => void finish()}>
-          Finish
-        </button>
-      </header>
-      <div className="wizard-5e-grid">
-        <ArtChoice session={session} race={kind} cls={cls} value={art} onChange={setArt} />
-        <label>
-          Name <input value={name} onChange={(event) => setName(event.target.value)} aria-label="Character name" />
-        </label>
-        <label>
-          {words.species}
-          <select value={kind} onChange={(event) => setKind(event.target.value)} aria-label="Species">
-            {species.map((item) => (
-              <option key={item.id}>{item.name}</option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Class
-          <select
-            value={cls}
-            aria-label="Class"
-            onChange={(event) => {
-              setCls(event.target.value);
-              setSkills([]);
-              setSpells([]);
-            }}
-          >
-            {classOptions.map((item) => (
-              <option key={item.id}>{item.name}</option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Background
-          <select value={background} onChange={(event) => setBackground(event.target.value)} aria-label="Background">
-            {backgrounds.map((item) => (
-              <option key={item.id}>{item.name}</option>
-            ))}
-          </select>
-        </label>
-      </div>
-      <h4>
-        Ability scores <small className="hint">the array {profile.standardArray.join(", ")} to start; type your own{Object.keys(adjust).length ? `; then the ${kind}'s adjustments` : ""}</small>
-      </h4>
-      <div className="wizard-5e-scores">
-        {STATS.map((stat) => (
-          <label key={stat}>
-            {stat.slice(0, 3).toUpperCase()}
-            <input type="number" min={3} max={20} value={scores[stat]} aria-label={`${stat} score`} onChange={(event) => setScores({ ...scores, [stat]: Number(event.target.value) || 10 })} />
-            <small>
-              {adjust[stat] ? <b data-adjust={stat}>{signed(adjust[stat])} = {scores[stat] + adjust[stat]} </b> : null}
-              {signed(mod(scores[stat] + (adjust[stat] ?? 0)))}
-            </small>
-          </label>
-        ))}
-      </div>
-      <h4>
-        Skills <small className="hint">choose {choices.count} ({skills.length} chosen); the background gives its own</small>
-      </h4>
-      <div className="wizard-5e-skills">
-        {choices.names.map((key) => (
-          <label key={key}>
-            <input
-              type="checkbox"
-              checked={skills.includes(key)}
-              data-wizard-skill={key}
-              disabled={!skills.includes(key) && skills.length >= choices.count}
-              onChange={(event) => setSkills(event.target.checked ? [...skills, key] : skills.filter((item) => item !== key))}
-            />
-            {SKILLS[key as keyof typeof SKILLS]?.[0]}
-          </label>
-        ))}
-      </div>
-      <label className="check">
-        <input type="checkbox" checked={gear} onChange={(event) => setGear(event.target.checked)} /> The class's starting gear (option A)
-      </label>
-      {caster ? (
-        <>
-          <h4>Spells <small className="hint">cantrips and 1st-level spells</small></h4>
-          <div className="wizard-5e-spells">
-            {spellList.map((spell) => (
-              <label key={spell.id}>
-                <input type="checkbox" checked={spells.includes(spell.name)} onChange={(event) => setSpells(event.target.checked ? [...spells, spell.name] : spells.filter((item) => item !== spell.name))} />
-                {spell.name} <small className="hint">{num(spell.data.level) ? "1st" : "cantrip"}</small>
-              </label>
-            ))}
-          </div>
-        </>
-      ) : null}
-      {problem ? <p className="error">{problem}</p> : null}
-    </section>
-  );
-}
+// The 5E character wizard (FG 5E's wizard, tab by tab) lives in Wizard5e.tsx.
+export { Wizard5e } from "./Wizard5e";

@@ -12,7 +12,11 @@ const item = (name, count = 1) => {
   const { __category, ...fields } = found;
   return { ...fields, count };
 };
-const kit = (...lists) => ({ "id-00001": { items: ids(lists.flat(2).map(([name, count]) => item(name, count))) } });
+// A starting kit as the 2024 books give one: (A) the class's gear, or (B)
+// gold crowns to buy your own (the gear's worth, rounded up to 5 gc).
+const worth = (list) => list.reduce((sum, entry) => sum + (Number(String(entry.cost ?? "").replace(/[^0-9.]/g, "")) || 0) * (entry.count ?? 1), 0);
+const kitWealth = (...lists) => Math.ceil(worth(lists.flat(2).map(([name, count]) => item(name, count))) / 5) * 5;
+const kit = (...lists) => ({ "id-00001": { option: "Option 1", items: ids(lists.flat(2).map(([name, count]) => item(name, count))) }, "id-00002": { option: "Option 2", wealth: kitWealth(...lists) } });
 const features = (list) => ids(list.map(([level, name, text]) => ({ level, name, text: md(text) })));
 
 const cls = ({ name, die, saves, armor, weapons, skills, ability, gear, gearText, text, feats }) => ({
@@ -25,7 +29,7 @@ const cls = ({ name, die, saves, armor, weapons, skills, ability, gear, gearText
     savingthrows: { text: saves },
     skills: { text: skills },
   },
-  startingequipment: gearText,
+  startingequipment: `Choose A or B: (A) ${gearText.replace(/\.$/, "")}; or (B) ${kitWealth(gear)} gc.`,
   startingequipmentlist: kit(gear),
   text: md(text),
   features: features(feats),
@@ -273,6 +277,9 @@ export const KIN = [
   }),
 ];
 
+// Each background's kit: [[item, count]], gold crowns.
+const BACKGROUND_KITS = {"Grave Digger":[[["Shovel",1],["Holy Symbol",1]],10],"Lamplighter":[[["Lantern, Hooded",1],["Oil, Flask",2]],10],"Deserter":[[["Dagger",1]],5],"Acolyte of the Ash":[[["Holy Symbol",1]],10],"Smuggler":[[],15],"Hedge Scholar":[[["Ink and Quill",1]],10],"Hunter":[[["Hunting Trap",1],["Dagger",1]],10],"Street Rat":[[["Lucky Charm",1]],5]};
+
 export const BACKGROUNDS = [
   ["Grave Digger", "Athletics, Religion", "You buried the dead of a town that had too many. You know the old rites, and what a disturbed grave looks like.", "A shovel, a holy symbol of the dead, 10 gc"],
   ["Lamplighter", "Perception, Investigation", "You kept the street lamps of a city burning through the long nights. You know how long a flame lasts, and what moves when it goes out.", "A hooded lantern, two flasks of oil, 10 gc"],
@@ -282,4 +289,13 @@ export const BACKGROUNDS = [
   ["Hedge Scholar", "Arcana, History", "You learned from books nobody else wanted, in libraries nobody else visited.", "Ink, a quill, a book of half-remembered lore, 10 gc"],
   ["Hunter", "Survival, Nature", "You fed your family from the forest's edge, and learned which tracks to follow and which to run from.", "A hunting trap, a skinning knife, 10 gc"],
   ["Street Rat", "Stealth, Sleight of Hand", "You grew up on the streets and the rooftops, fed by quick hands and quicker feet.", "A map of a city's back ways, a lucky charm, 5 gc"],
-].map(([name, skill, text, equipment]) => ({ name, skill, text: md(text), equipment }));
+].map(([name, skill, text, flavour]) => {
+  // Its starting kit, as a 2024 background's: (A) its gear and coin, or (B) coin to buy your own.
+  const [gear, coin] = BACKGROUND_KITS[name];
+  const items = gear.map(([itemName, count]) => item(itemName, count));
+  const wealth = Math.ceil((worth(items) + coin) / 5) * 5;
+  const a = [...gear.map(([itemName, count]) => (count > 1 ? `${count} ${itemName}` : itemName)), `${coin} gc`].join(", ");
+  const equipment = items.length ? `Choose A or B: (A) ${a}; or (B) ${wealth} gc. ${flavour}` : `${coin} gc. ${flavour}`;
+  const equipmentlist = items.length ? { "id-00001": { option: "Option 1", items: ids(items), wealth: coin }, "id-00002": { option: "Option 2", wealth } } : { "id-00001": { option: "Option 1", wealth: coin } };
+  return { name, skill, text: md(text), equipment, equipmentlist };
+});

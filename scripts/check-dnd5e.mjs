@@ -53,6 +53,37 @@ try {
   const ilse = agent.records.get(wizard.id).data;
   assert(wizard.hp === 27 && ilse.prof === 3 && ilse.spellcasting.dc === 14 && ilse.slots.l3.max === 2 && ilse.slots.l1.max === 4, `the wizard 5: 6 + 1 + 4 x (4 + 1) = 27 HP, proficiency 3, DC 8 + 3 + 3 = 14, slots 4/3/2: ${JSON.stringify({ hp: wizard.hp, dc: ilse.spellcasting, slots: ilse.slots })}`);
 
+  // The character wizard's rules (FG 5E's wizard, shared/dnd5e/wizard.mjs) on the SRD's own records.
+  const wiz = await import("../shared/dnd5e/wizard.mjs");
+  const byName = (type, name) => agent.records.list({ type }).find((record) => record.name === name);
+  assert(wiz.pointsSpent({ strength: 15, dexterity: 15, constitution: 15, intelligence: 8, wisdom: 8, charisma: 8 }) === 27 && wiz.pointsSpent({ strength: 14, dexterity: 13, constitution: 12, intelligence: 11, wisdom: 10, charisma: 9 }) === 22, "point buy costs (9:1 10:2 11:3 12:4 13:5 14:7 15:9)");
+  assert(JSON.stringify(wiz.swapAbility({ strength: 15, dexterity: 14 }, "strength", "right")) === JSON.stringify({ strength: 14, dexterity: 15 }), "the standard array's swap arrows");
+  const human = wiz.speciesInfo(byName("race", "Human"));
+  assert(human.is2024 && human.decisions.some((item) => item.type === "size") && human.decisions.filter((item) => item.type === "language").length === 2 && human.decisions.some((item) => item.type === "skill" && item.options.length === 18) && human.decisions.some((item) => item.type === "feat" && item.category === "Origin"), `a 2024 Human: size, two languages, Skillful's skill, Versatile's Origin feat: ${JSON.stringify(human.decisions.map((item) => item.id))}`);
+  const elf = wiz.speciesInfo(byName("race", "Elf"), byName("race_subrace", "High Elf"));
+  assert(elf.darkvision === 60 && elf.decisions.some((item) => item.type === "skill" && item.options.join() === "insight,perception,survival") && wiz.ancestriesOf(byName("race", "Elf"), agent.records.list({ type: "race_subrace" })).length === 3, "the Elf: Darkvision 60, Keen Senses (Insight, Perception or Survival), three lineages");
+  const soldier = wiz.backgroundInfo(byName("background", "Soldier"), agent.records.list({ type: "item" }));
+  assert(soldier.is2024 && soldier.abilities.join() === "strength,dexterity,constitution" && soldier.feat === "Savage Attacker" && soldier.kits.length === 2 && soldier.kits[0].wealth === 14 && soldier.kits[1].wealth === 50 && soldier.decisions.some((item) => item.type === "toolprof"), `the Soldier: STR/DEX/CON, Savage Attacker, kits A (… 14 GP) or B (50 GP), a gaming set: ${JSON.stringify({ kits: soldier.kits.map((kit) => wiz.kitText(kit)), decisions: soldier.decisions.map((item) => item.id) })}`);
+  assert(wiz.backgroundAsiDecisions("Option 1: One +2, One +1", soldier.abilities).map((item) => item.adj).join() === "2,1" && Object.keys(wiz.backgroundFixedIncreases("Option 2: Three +1's", soldier.abilities)).length === 3, "the background's +2/+1, or +1 to each of its three abilities");
+  const fighter4 = wiz.classInfo(byName("class", "Fighter"), 4);
+  assert(fighter4.kits.length === 3 && fighter4.decisions.filter((item) => item.type === "skill").length === 2 && fighter4.decisions.some((item) => item.type === "subclass") && fighter4.decisions.some((item) => item.type === "asiorfeat") && fighter4.decisions.some((item) => item.type === "feat" && item.category === "Fighting Style"), `a Fighter 4: kits A/B/C, two skills, a subclass, an Ability Score Improvement, a Fighting Style feat: ${JSON.stringify(fighter4.decisions.map((item) => item.id))}`);
+  assert(wiz.asiOrFeatDecisions("x", "Ability Score Increase", "Option 2: Two +1's").filter((item) => item.type === "asi").length === 2 && wiz.asiOrFeatDecisions("x", "Feat")[0].type === "feat", "an ASI: one +2, two +1s, or a feat");
+  assert(wiz.spellCounts("Wizard", 1).cantrips === 3 && wiz.spellCounts("Wizard", 1).prepared === 4 && wiz.spellCounts("Paladin", 1).prepared === 2 && wiz.spellCounts("Fighter", 1).prepared === 0, "spells known by class table");
+  assert(JSON.stringify(wiz.wealthRoll("5d4x10")) === JSON.stringify({ dice: "5d4", times: 10 }) && wiz.STARTING_WEALTH_2014.monk === "5d4", "a Legacy class's starting wealth roll");
+  // A character as the wizard commits one: kits A (items and coin), the background's ASI and feat, languages, a size.
+  const kitted = await tool("kraken_build_character", { owner: "Dee", spec: { name: "Kit", species: "Human", size: "Small", class: "Fighter", background: "Soldier", level: 1, scores: { strength: 15, dexterity: 14, constitution: 13, intelligence: 12, wisdom: 10, charisma: 8 }, increases: { strength: 2, constitution: 1 }, skills: ["Perception", "Survival"], speciesSkills: ["Stealth"], languages: ["Elvish", "Dwarvish"], tools: ["Dice Set"], feats: ["Alert", "Defense"], kits: { class: "A", background: "A" }, gear: [["Rope", 1]], coins: { SP: 7 } } });
+  const kit = agent.records.get(kitted.id).data;
+  const has = (name) => Object.values(kit.inventorylist).find((item) => item.name === name);
+  const coin = (name) => Object.values(kit.coins).find((item) => item.name === name)?.amount ?? 0;
+  assert(kitted.problems.length === 0 && has("Chain Mail") && has("Javelin")?.count === 8 && has("Spear") && has("Rope") && kit.ac.total === 16, `kits A: the class's chain mail and 8 javelins, the background's spear, a rope added: ${JSON.stringify({ problems: kitted.problems, items: Object.values(kit.inventorylist).map((item) => `${item.count} ${item.name}`) })}`);
+  assert(coin("GP") === 18 && coin("SP") === 7, `4 GP (class) + 14 GP (background) and 7 SP typed: ${JSON.stringify(kit.coins)}`);
+  assert(kit.abilities.strength.score === 17 && kit.abilities.constitution.score === 14 && kit.skills.stealth.prof === 1 && kit.skills.athletics.prof === 1 && kit.size === "Small", "the +2/+1, the species' skill, the background's skills, the size");
+  assert(kit.feats.join() === "Savage Attacker,Alert,Defense" && kit.languages.join() === "Common,Elvish,Dwarvish" && kit.proficiencylist.tools.includes("Dice Set") && kit.features.some((feature) => /^Fighting Style/.test(feature)), `feats, languages (Common and two), tools, features: ${JSON.stringify({ feats: kit.feats, languages: kit.languages, tools: kit.proficiencylist })}`);
+  const wealthy = await tool("kraken_build_character", { owner: "Dee", spec: { name: "Coin", species: "Dwarf", class: "Fighter", background: "Soldier", scores: { strength: 15, dexterity: 14, constitution: 13, intelligence: 12, wisdom: 10, charisma: 8 }, kits: { class: "C", background: "B" } } });
+  const purse = agent.records.get(wealthy.id).data;
+  const classC = fighter4.kits[2].wealth;
+  assert(Object.keys(purse.inventorylist).length === 0 && Object.values(purse.coins).find((item) => item.name === "GP")?.amount === classC + 50, `kits C and B: only coin, ${classC} + 50 GP: ${JSON.stringify(purse.coins)}`);
+
   // The tracker: two goblins and the party; initiative d20 + DEX.
   const goblin = agent.records.list({ type: "npc" }).find((record) => record.name === "Goblin Warrior");
   await tool("kraken_combat", { action: "add", recordId: fighter.id });
@@ -177,7 +208,7 @@ try {
   const party = await tool("kraken_party");
   const member = party.members.find((item) => item.name === "Bruenor");
   assert(member && member.hp === 23 && member.ac === 18 && member.classes === "Fighter 2", `the party sheet: ${JSON.stringify(member)}`);
-  console.log("ok dnd5e: SRD characters (HP, AC, saves, skills, attacks, spell DC and slots); initiative d20 + DEX; hits, automatic misses, a critical's doubled dice; a goblin's stat block attacks; creatures dead at 0; saves against a DC; Fire Bolt, a halved Fireball, Magic Missile's darts, Cure Wounds from 0, Bless's d4; Dying and death saves; advantage; a level up; the party sheet");
+  console.log("ok dnd5e: SRD characters (HP, AC, saves, skills, attacks, spell DC and slots); the character wizard's rules (point buy, swaps, a 2024 species' and background's choices, a class's features and decisions, kits A/B/C with their coin, feats, languages, tools); initiative d20 + DEX; hits, automatic misses, a critical's doubled dice; a goblin's stat block attacks; creatures dead at 0; saves against a DC; Fire Bolt, a halved Fireball, Magic Missile's darts, Cure Wounds from 0, Bless's d4; Dying and death saves; advantage; a level up; the party sheet");
 } finally {
   await server.stop();
 }

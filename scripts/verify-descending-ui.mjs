@@ -81,14 +81,34 @@ try {
   await seat.waitForSelector('[data-action="new-character"]', { timeout: 10000 });
   await seat.click('[data-action="new-character"]');
   await seat.waitForSelector('[data-wizard="descending"]', { timeout: 10000 });
-  assert((await seat.textContent('[data-wizard="descending"] header')).includes("New Descending Darkness character"), "the wizard is Descending Darkness's");
-  await seat.selectOption('[data-wizard="descending"] select[aria-label="Species"]', "Dwarf");
-  await seat.waitForFunction(() => [...document.querySelectorAll('[data-wizard="descending"] select[aria-label="Class"] option')].map((o) => o.textContent).join() === "Cleric,Fighter,Thief", null, { timeout: 5000 });
-  await seat.selectOption('[data-wizard="descending"] select[aria-label="Class"]', "Fighter");
-  assert((await seat.inputValue('[data-wizard="descending"] input[aria-label="strength score"]')) === "17", "the array starts 17");
-  assert(await seat.$('[data-wizard="descending"] [data-adjust="constitution"]'), "the dwarf's Constitution +1 shown");
-  await seat.fill('[data-wizard="descending"] input[aria-label="Character name"]', "Brenna");
-  for (const skill of ["athletics", "perception"]) await seat.check(`[data-wizard-skill="${skill}"]`);
+  const wizard = '[data-wizard="descending"]';
+  assert((await seat.textContent(`${wizard} header`)).includes("New Descending Darkness character"), "the wizard is Descending Darkness's");
+  // FG 5E's wizard, tab by tab: the Kin tab first here (a dwarf), then the classes it may take.
+  await seat.click(`${wizard} [data-wizard-tab="species"]`);
+  assert((await seat.textContent(`${wizard} [data-wizard-tab="species"]`)).includes("Kin"), "the Species tab says Kin");
+  await seat.click(`${wizard} [data-species="Dwarf"]`);
+  await seat.click(`${wizard} [data-wizard-tab="class"]`);
+  const open = await seat.$$eval(`${wizard} button[data-class]:not([disabled])`, (buttons) => buttons.map((button) => button.getAttribute("data-class")).join());
+  assert(open === "Cleric,Fighter,Thief", `a dwarf may be a cleric, fighter or thief: ${open}`);
+  await seat.click(`${wizard} [data-class="Fighter"]`);
+  await seat.selectOption(`${wizard} select[data-decision="class:proficiencies:skill:0"]`, { label: "Athletics" });
+  await seat.selectOption(`${wizard} select[data-decision="class:proficiencies:skill:1"]`, { label: "Perception" });
+  // Abilities: the game's own array, the kin's adjustments in the Kin column.
+  await seat.click(`${wizard} [data-wizard-tab="abilities"]`);
+  await seat.selectOption(`${wizard} select[aria-label="Ability method"]`, "Standard Array");
+  assert((await seat.textContent(`${wizard} b[data-base="strength"]`)) === "17", "the array starts 17");
+  assert((await seat.textContent(`${wizard} [data-ability="constitution"] [data-from="species"]`)) === "+1" && (await seat.textContent(`${wizard} [data-ability="charisma"] [data-from="species"]`)) === "-1", "the dwarf's Constitution +1 and Charisma -1 shown");
+  // Background and its kit; the class's kit A; the coin in gold crowns.
+  await seat.click(`${wizard} [data-wizard-tab="background"]`);
+  await seat.click(`${wizard} [data-background="Grave Digger"]`);
+  await seat.click(`${wizard} [data-wizard-tab="equipment"]`);
+  assert(await seat.$(`${wizard} [data-kit="class:B"]`), "the class's kit B (coin) is offered");
+  await seat.click(`${wizard} [data-kit="class:A"]`);
+  await seat.click(`${wizard} [data-kit="background:A"]`);
+  assert((await seat.textContent(`${wizard} [data-total-coin="GC"] b`)) === "10", "the Grave Digger's 10 gc");
+  await seat.click(`${wizard} [data-wizard-tab="commit"]`);
+  assert(!(await seat.$(`${wizard} [data-warnings]`)), `nothing left to choose: ${await seat.textContent(`${wizard} [data-warnings]`).catch(() => "")}`);
+  await seat.fill(`${wizard} input[aria-label="Character name"]`, "Brenna");
   await seat.click('[data-action="wizard-finish"]');
   await seat.waitForSelector('[data-ruleset="descending"]', { timeout: 15000 });
   const sheet = seat.locator('[data-ruleset="descending"]');
@@ -103,6 +123,8 @@ try {
   // A portrait and token for every new character (Kraken's own when the GM has none of that kin).
   assert(typeof data.portrait === "string" && data.portrait && typeof data.token === "string" && data.token, `the dwarf has a portrait and token: ${data.portrait}, ${data.token}`);
   assert(data.hp.total === 13 && data.ac.total === 18, `Health 13 (d10 + 2 + Hardy 1) and Defense 18 (chain and shield): ${data.hp.total}, ${data.ac.total}`);
+  const carried = Object.values(data.inventorylist).map((item) => item.name);
+  assert(carried.includes("Chain Hauberk") && carried.includes("Shovel") && Object.values(data.coins).find((coin) => coin.name === "GC")?.amount === 10, `the kits and 10 gc: ${JSON.stringify({ carried, coins: data.coins })}`);
   // Dread from the sheet.
   await sheet.locator('[data-stat="dread"] button').nth(2).click();
   await seat.waitForFunction(() => document.querySelector('[data-stat="dread"]')?.textContent?.includes("Shaken"), null, { timeout: 8000 });
@@ -165,7 +187,7 @@ try {
   const chat = (await tool("kraken_chat_log", { lines: 40 }).catch(() => ({ lines: [] }))).lines ?? [];
   await page.screenshot({ path: path.join(tmpdir(), "kraken-descending-combat.png") });
   assert(failures.length === 0, `page errors: ${failures.join(" | ")}`);
-  console.log(`ok descending ui: a Descending Darkness campaign's shelf has its three books (no other game's), made active (7 classes); a test player makes a dwarf fighter in the wizard (only Cleric, Fighter, Thief offered; 17 to start; Con 15, Cha 7; Health 13, Defense 18; Defense, Health, Kin and Dread on the sheet; Shaken at 3); The Empty Watchtower's maps with ${walls.total} walls and ${(map.doors ?? []).length} doors on the yard; the Ash Wolves encounter onto the tracker (three, Health 11, Defense 13); the Grave Hound (Health 32, Defense 13); at 0 Health she is Dying, bleeds 1 at her turn, is steadied (Wisdom 12) and bleeds no more. ${path.join(tmpdir(), "kraken-descending-sheet.png")} ${chat.length ? "" : ""}`);
+  console.log(`ok descending ui: a Descending Darkness campaign's shelf has its three books (no other game's), made active (7 classes); a test player makes a dwarf fighter tab by tab in the 5E wizard (only Cleric, Fighter, Thief offered; 17 to start; Con 15, Cha 7; kits A and 10 gc; Health 13, Defense 18; Defense, Health, Kin and Dread on the sheet; Shaken at 3); The Empty Watchtower's maps with ${walls.total} walls and ${(map.doors ?? []).length} doors on the yard; the Ash Wolves encounter onto the tracker (three, Health 11, Defense 13); the Grave Hound (Health 32, Defense 13); at 0 Health she is Dying, bleeds 1 at her turn, is steadied (Wisdom 12) and bleeds no more. ${path.join(tmpdir(), "kraken-descending-sheet.png")} ${chat.length ? "" : ""}`);
 } finally {
   await browser?.close();
   child.kill();

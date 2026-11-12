@@ -217,7 +217,7 @@ const instructions = (() => {
 })();
 
 // Waits for the host's answer to a roll this window asked for.
-function useHostRolls(session: Session) {
+export function useHostRolls(session: Session) {
   const waiting = useRef(new Map<string, (roll: RollResult) => void>());
   const seen = useRef(0);
   useEffect(() => {

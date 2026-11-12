@@ -18,7 +18,7 @@ const TYPES_5E = ["class", "race", "race_subrace", "background", "feat", "skill"
 
 function library5e(records) {
   const list = (type) => records.list({ type });
-  return { classes: list("class"), species: list("race"), backgrounds: list("background"), items: list("item"), spells: list("spell") };
+  return { classes: list("class"), species: list("race"), ancestries: list("race_subrace"), backgrounds: list("background"), subclasses: list("class_specialization"), feats: list("feat"), items: list("item"), spells: list("spell") };
 }
 
 async function build5e(table, spec, owner, seat) {
