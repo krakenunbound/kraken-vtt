@@ -33,6 +33,7 @@
     "rulesets-ui": "node scripts/verify-rulesets-ui.mjs",
     "image-window-ui": "node scripts/verify-image-window-ui.mjs",
     "studio-ui": "node scripts/verify-studio-ui.mjs",
+    "tower-ui": "node scripts/verify-tower-ui.mjs",
     "packs-ui": "node scripts/verify-packs-ui.mjs",
     "dnd35": "node scripts/check-dnd35.mjs",
     "dnd35-ui": "node scripts/verify-dnd35-ui.mjs",

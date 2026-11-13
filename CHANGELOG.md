@@ -6,6 +6,11 @@ full log of the work is in [PLAN.md](PLAN.md).
 
 ## Next
 
+- **External dice tower** (the GM's Settings): the dice tower stands on the
+  table apart from the chat, for every seat (drag it anywhere; each screen
+  keeps its place). A little stone tower: dark when off, its door glowing and
+  dice tumbling inside when on. Click to turn it on or off; drop dice on it.
+  Unticked, it is docked in the chat as before.
 - Hosting's **Cloud** choice is now called **Internet** (players anywhere,
   once the port is open on your router): there is no rented cloud server.
 

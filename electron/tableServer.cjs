@@ -235,6 +235,8 @@ function savedOptions(value) {
   const id = (text, fallback) => (typeof text === "string" && text.length <= 400 ? text : fallback);
   return {
     towerReveal: Boolean(options.towerReveal),
+    // The dice tower on the table, apart from the chat (the GM's choice, for every seat); else docked in the chat's tray.
+    towerExternal: Boolean(options.towerExternal),
     decal: id(options.decal, "kraken"),
     wallpaper: id(options.wallpaper, ""),
     gmIcon: id(options.gmIcon, GM_ICON),

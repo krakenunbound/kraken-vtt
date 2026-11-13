@@ -1,9 +1,11 @@
+import { createPortal } from "react-dom";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import type { ChatLine, RollResult, Session } from "../session/useSession";
 import { characterDice, diceStore, rolling, setThrow, tower as towerDrops, type DiceLook } from "../dice/diceStore";
 import { commandsFor, runChat, type Command } from "./chatCommands";
 import { slotDrag } from "./QuickSlots";
 import { chatRunner } from "./chatRunner";
+import { TowerArt } from "./TowerArt";
 import { DieShape, Icon } from "./icons";
 import { useWindows } from "./Windows";
 import { openPopOut, PopOutWindow, screenOffset, type ScreenPlace } from "./PopOut";
@@ -225,6 +227,66 @@ function withModifier(formula: string, modifier: number) {
 // The chat window (FG's, bottom left): the log, a line to type in, the dice
 // tray (click dice to gather a pool, then roll), the modifier box, and the
 // dice tower (a roll only the GM sees).
+// Where this screen keeps the tower apart from the chat (by screen, not by table).
+const TOWER_PLACE = "kraken-tower-place";
+function towerPlace() {
+  try {
+    const saved = JSON.parse(window.localStorage.getItem(TOWER_PLACE) ?? "null");
+    if (saved && Number.isFinite(saved.x) && Number.isFinite(saved.y)) return { x: Math.min(window.innerWidth - 80, Math.max(0, saved.x)), y: Math.min(window.innerHeight - 100, Math.max(0, saved.y)) };
+  } catch {
+    /* the default place */
+  }
+  return { x: window.innerWidth - 300, y: window.innerHeight - 190 };
+}
+// The dice tower standing on the table: a click turns it on or off, a drag
+// moves it (kept on this screen), and dice dropped on it go in.
+function ExternalTower({ on, drop, title, towerRef, onToggle }: { on: boolean; drop: boolean; title: string; towerRef: React.RefObject<HTMLButtonElement | null>; onToggle: () => void }) {
+  const [place, setPlace] = useState(towerPlace);
+  const [dragging, setDragging] = useState(false);
+  const grab = (event: React.PointerEvent) => {
+    if (event.button !== 0) return;
+    const start = { x: event.clientX, y: event.clientY, left: place.x, top: place.y };
+    let moved = false;
+    let last = place;
+    const move = (next: PointerEvent) => {
+      if (!moved && Math.hypot(next.clientX - start.x, next.clientY - start.y) < 5) return;
+      moved = true;
+      setDragging(true);
+      last = { x: Math.min(window.innerWidth - 80, Math.max(0, start.left + next.clientX - start.x)), y: Math.min(window.innerHeight - 100, Math.max(0, start.top + next.clientY - start.y)) };
+      setPlace(last);
+    };
+    const up = () => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
+      setDragging(false);
+      if (!moved) return onToggle();
+      try {
+        window.localStorage.setItem(TOWER_PLACE, JSON.stringify(last));
+      } catch {
+        /* this visit only */
+      }
+    };
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
+  };
+  return (
+    <button
+      type="button"
+      ref={towerRef}
+      className={["tower", "tower-external", on ? "on" : "", drop ? "drop" : "", dragging ? "dragging" : ""].filter(Boolean).join(" ")}
+      data-action="tower-external"
+      aria-pressed={on}
+      aria-label={on ? "Dice tower on" : "Dice tower off"}
+      title={`${title}; drag it to move it`}
+      style={{ left: place.x, top: place.y }}
+      onPointerDown={grab}
+    >
+      <TowerArt on={on} size={80} />
+      <span className="tower-label">{on ? "Tower on" : "Tower off"}</span>
+    </button>
+  );
+}
+
 export function ChatDock({ session }: { session: Session }) {
   const [draft, setDraft] = useState("");
   const [pool, setPool] = useState<number[]>([]);
@@ -428,6 +490,14 @@ export function ChatDock({ session }: { session: Session }) {
     setModifier(0);
   };
   const rollPool = () => rollDice(pool, tower);
+  // The tower apart from the chat (the GM's Settings, for every seat), or in the tray.
+  const external = Boolean(session.options.towerExternal);
+  const towerTitle =
+    session.role === "dm"
+      ? "Dice tower: your rolls stay hidden from players. Drop dice here, or click to turn it on or off"
+      : session.options.towerReveal
+        ? "Dice tower: the GM and you see the roll. Drop dice here, or click to turn it on or off"
+        : "Dice tower: only the GM sees the roll. Drop dice here, or click to turn it on or off";
   // A quick slot under the pointer (the bar is in the main window).
   const slotAt = (view: Window, x: number, y: number) => {
     if (view !== window) return -1;
@@ -795,23 +865,18 @@ export function ChatDock({ session }: { session: Session }) {
             +
           </button>
         </div>
-        <button
-          type="button"
-          ref={towerButton}
-          className={["tower", tower ? "on" : "", ghost?.overTower ? "drop" : ""].filter(Boolean).join(" ")}
-          aria-pressed={tower}
-          title={
-            session.role === "dm"
-              ? "Dice tower: your rolls stay hidden from players. Drop dice here, or click to roll everything in it"
-              : session.options.towerReveal
-                ? "Dice tower: the GM and you see the roll. Drop dice here, or click to roll everything in it"
-                : "Dice tower: only the GM sees the roll. Drop dice here, or click to roll everything in it"
-          }
-          onClick={() => setTower(!tower)}
-        >
-          <Icon name="tower" size={20} />
-        </button>
+        {external ? null : (
+          <button type="button" ref={towerButton} className={["tower", tower ? "on" : "", ghost?.overTower ? "drop" : ""].filter(Boolean).join(" ")} aria-pressed={tower} title={towerTitle} onClick={() => setTower(!tower)}>
+            <Icon name="tower" size={20} />
+          </button>
+        )}
       </div>
+      {external
+        ? createPortal(
+            <ExternalTower on={tower} drop={Boolean(ghost?.overTower)} title={towerTitle} towerRef={towerButton} onToggle={() => setTower(!tower)} />,
+            document.body,
+          )
+        : null}
       {ghost ? (
         <span ref={ghostEl} className={["dice-ghost", ghost.overTower ? "over-tower" : "", ghost.held ? "held" : ""].filter(Boolean).join(" ")} style={{ left: ghost.x, top: ghost.y }} aria-hidden="true" data-held={ghost.held ? formulaOf(ghost.held) : undefined}>
           {(ghost.held ?? (ghost.sides ? [...pool, ghost.sides] : pool)).slice(-6).map((sides, index) => (

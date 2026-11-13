@@ -1590,3 +1590,28 @@ textarea.cc-field.tall { min-height: 220px; }
 .studio-folder { display: inline-flex; align-items: center; gap: 4px; padding: 2px 4px 2px 8px; border: 1px solid var(--panel-edge); border-radius: 6px; font-size: 0.8rem; }
 .studio-folder.missing { border-color: #a0443a; color: #e08a7a; }
 .studio-folder button { padding: 0 6px; border: 0; background: transparent; }
+/* The dice tower apart from the chat (the GM's Settings): a stone tower on the
+   table, dragged where this seat likes; dark when off, its door glowing and
+   dice tumbling down inside it when on. */
+.tower-external { position: fixed; z-index: 410; padding: 0; border: 0; background: transparent; cursor: pointer; touch-action: none; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.55)); transition: transform 0.15s; }
+.tower-external:hover { transform: translateY(-2px); }
+.tower-external.drop { transform: scale(1.08); filter: drop-shadow(0 0 14px rgba(210, 161, 90, 0.75)); }
+.tower-external.dragging { cursor: grabbing; transition: none; }
+.tower-external .tower-label { display: block; margin-top: -4px; font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); text-align: center; }
+.tower-external[aria-pressed="true"] .tower-label { color: var(--brass); }
+.tower-art { display: block; }
+.tower-art:not(.on) { filter: saturate(0.4) brightness(0.72); transition: filter 0.3s; }
+.tower-art.on .tower-door { animation: tower-glow 1.8s ease-in-out infinite; }
+.tower-art .tower-die { fill: #f4efe4; stroke: #6a4a24; stroke-width: 0.4; opacity: 0; transform-box: fill-box; transform-origin: center; }
+.tower-art.on .tower-die { animation: tower-tumble 1.8s cubic-bezier(0.5, 0, 0.7, 1) infinite; }
+.tower-art.on .tower-die.d2 { animation-delay: 0.6s; }
+.tower-art.on .tower-die.d3 { animation-delay: 1.2s; }
+@keyframes tower-glow { 0%, 100% { opacity: 0.8; } 50% { opacity: 1; } }
+@keyframes tower-tumble {
+  0% { opacity: 0; transform: translate(0, 0) rotate(0deg); }
+  10% { opacity: 1; }
+  45% { transform: translate(-3px, 13px) rotate(190deg); }
+  75% { opacity: 1; transform: translate(2px, 26px) rotate(400deg); }
+  100% { opacity: 0; transform: translate(-1px, 34px) rotate(560deg); }
+}
+@media (prefers-reduced-motion: reduce) { .tower-art.on .tower-die, .tower-art.on .tower-door { animation: none; } .tower-art.on .tower-die.d1 { opacity: 1; transform: translate(0, 30px); } }

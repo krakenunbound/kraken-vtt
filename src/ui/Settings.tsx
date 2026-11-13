@@ -38,6 +38,12 @@ export function SettingsWindow({ session }: { session: Session }) {
         <input type="checkbox" checked={session.options.towerReveal} onChange={(event) => session.setTableOptions({ towerReveal: event.target.checked })} />
         Let players see their own dice-tower rolls (unticked: only the GM sees them, as in FG)
       </label> : null}
+      {gm ? (
+        <label className="settings-check">
+          <input type="checkbox" data-setting="tower-external" checked={Boolean(session.options.towerExternal)} onChange={(event) => session.setTableOptions({ towerExternal: event.target.checked })} />
+          External dice tower: it stands on the table, apart from the chat (for everyone; each places it where they like). Unticked, it is docked in the chat.
+        </label>
+      ) : null}
       {gm ? <DiceHoldSetting session={session} /> : null}
       {gm ? <StudioFoldersSetting /> : null}
       {gm && session.ruleset === "D&D 3.5E" ? <Wizard35Setting session={session} /> : null}

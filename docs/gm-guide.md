@@ -222,6 +222,10 @@ Type in chat to talk; `/` lists the commands (Fantasy Grounds' and Foundry's),
 and `/help` shows all of them. `/r 1d20+2` rolls. The modifier box below the
 chat adds to the next roll. Click the dice to roll them; the 3D dice tower is
 the GM's by default.
+**External dice tower** (Settings, the GM's): the tower stands on the table
+apart from the chat, for everyone, each placing it where they like (drag it).
+It is dark when off; on, its door glows and dice tumble inside. Click it to
+turn it on or off, or drop dice on it. Unticked, it is docked in the chat.
 **Dice in your hand**, as in Fantasy Grounds: right-click a die and pick how
 many (3× picks up three). They follow the pointer: click the table to throw
 them, the tower to roll them there, or a **quick slot** to keep them there
