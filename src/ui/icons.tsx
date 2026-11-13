@@ -67,6 +67,7 @@ const PATHS: Record<string, string> = {
   chat: "M4 5h16v11H9l-5 4Z",
   tower: "M7 21V9l-2-2V3h3v2h2V3h4v2h2V3h3v4l-2 2v12ZM10 21v-4a2 2 0 0 1 4 0v4",
   flag: "M5 21V4m0 0h11l-2 4 2 4H5",
+  calendar: "M4 6.5h16V20H4ZM4 10.5h16M8.5 4v4M15.5 4v4M7.5 14h2M11 14h2M14.5 14h2M7.5 17h2M11 17h2",
   next: "M6 5l7 7-7 7M13 5l7 7-7 7",
   heart: "M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10Z",
   eye: "M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Zm9.5 3a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z",

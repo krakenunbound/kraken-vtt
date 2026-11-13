@@ -4,6 +4,7 @@ import { Icon } from "../ui/icons";
 import { slotDrag } from "../ui/QuickSlots";
 import { NpcMgt2 } from "../characters/NpcMgt2";
 import { useBookWindows } from "./Books";
+import { ReadAloudButton } from "./readAloud";
 
 // FG's campaign lists (the sidebar's Campaign and Character groups, each a
 // master index): the records of this campaign and its active books, a list per
@@ -284,6 +285,16 @@ function nodes(parent: Node, key = "n", onLink?: OnLink): ReactNode[] {
     if (!html) return void out.push(<Fragment key={id}>{inner}</Fragment>);
     // A list of links: one row a link (the spaces between them are not rows).
     if (tag === "linklist") return void out.push(<ul key={id}>{inner.filter((item) => typeof item !== "string" || item.trim()).map((item, n) => <li key={n}>{item}</li>)}</ul>);
+    // FG's boxed text (read-aloud): the GM reads it to the table with a click.
+    if (tag === "frame") {
+      const words = (child as Element).textContent ?? "";
+      return void out.push(
+        <blockquote key={id} className="read-aloud-frame">
+          <ReadAloudButton text={() => words} />
+          {inner}
+        </blockquote>,
+      );
+    }
     const Tag = html as "p";
     out.push(tag === "table" ? <table key={id}><tbody>{inner}</tbody></table> : <Tag key={id}>{inner}</Tag>);
   });

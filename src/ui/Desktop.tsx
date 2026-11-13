@@ -19,6 +19,10 @@ import { KritsWindow } from "../combat/KritsWindow";
 import { DeathMarkersWindow } from "../combat/DeathMarkersWindow";
 import { AdventureList, LibraryWindow, StoryWindow, type Kind as AdventureKind } from "../books/Library";
 import { NotesWindow, NoteWindow } from "../notes/Notes";
+import { CalendarWindow } from "../notes/CalendarWindow";
+import { MotdWindow } from "../notes/MotdWindow";
+import { ReadAloudBubble, useAnyMapShown } from "../books/ReadAloudBubble";
+import { readAloud } from "../books/readAloud";
 import { BooksWindow, BookWindow, ImagesWindow, PictureWindow } from "../books/Books";
 import { ImagesList } from "../books/ImagesList";
 import { AssetsWindow } from "../books/AssetsWindow";
@@ -275,6 +279,8 @@ export function Desktop({
         // Starships, in the 2d6 games (Traveller, Apeira Astra).
         ...(session.ruleset === "Traveller" || session.ruleset === "Apeira Astra" ? [{ kind: "ships" as const, label: "Starships", icon: "ship", title: "Starships" }] : []),
         { kind: "notes", label: gm ? "Notes" : "Player Notes", icon: "chat", title: gm ? "Notes" : "Player Notes" },
+        { kind: "calendar", label: "Calendar", icon: "calendar", title: "Calendar" },
+        ...(gm || session.options.motd?.text || session.options.motd?.links?.length ? [{ kind: "motd" as const, label: "Message of the Day", icon: "flag", title: "Message of the Day" }] : []),
       ],
     },
     {
@@ -455,7 +461,21 @@ export function Desktop({
   // turn): a bell, and a banner across the screen, each as they chose
   // (Settings > You at the table; kept with their name).
   const alerts = useSyncExternalStore(diceStore.subscribe, diceStore.settings);
+  const anyMapShown = useAnyMapShown();
   const turnRang = useRef("");
+  // FG's Message of the Day: it opens on a player's screen as they join (once a sitting).
+  const motdShown = useRef(false);
+  useEffect(() => {
+    const motd = session.options.motd;
+    if (gm || motdShown.current || !(motd?.text || motd?.links?.length)) return;
+    motdShown.current = true;
+    windows.open("motd", "Message of the Day");
+  }, [gm, session.options.motd]);
+  // The GM reads boxed text aloud (books, stories, records): the buttons show on the GM's screen only.
+  useEffect(() => {
+    readAloud.register(gm ? session.sendReadAloud : null);
+    return () => readAloud.register(null);
+  }, [gm, session.sendReadAloud]);
   const [banner, setBanner] = useState<{ key: string; name: string } | null>(null);
   useEffect(() => {
     const key = myTurn ? `${session.combat.round}:${session.combat.active}` : "";
@@ -514,6 +534,8 @@ export function Desktop({
           </button>
         </div>
       </header>
+      {/* The GM's read-aloud with no map up: over the table. */}
+      {!anyMapShown ? <ReadAloudBubble now={session.readAloudNow} onDone={session.dismissReadAloud} floating /> : null}
       {banner ? (
         <div key={banner.key} className="turn-banner" role="alert" data-turn-banner={banner.name} onClick={() => setBanner(null)}>
           <span className="turn-banner-glow" aria-hidden="true" />
@@ -574,6 +596,8 @@ export function Desktop({
               {item.kind === "images" ? <ImagesWindow session={session} /> : null}
               {item.kind === "picture" && item.payload ? <PictureWindow session={session} payload={item.payload} /> : null}
               {item.kind === "notes" ? <NotesWindow session={session} /> : null}
+              {item.kind === "calendar" ? <CalendarWindow session={session} /> : null}
+              {item.kind === "motd" ? <MotdWindow session={session} /> : null}
               {item.kind === "note" && item.payload ? <NoteWindow session={session} id={item.payload} /> : null}
               {item.kind === "decals" ? <DecalPicker session={session} onClose={() => windows.close(item.key)} /> : null}
               {item.kind === "wallpapers" ? <DecalPicker session={session} kind="wallpaper" onClose={() => windows.close(item.key)} /> : null}

@@ -7,6 +7,7 @@ import { sound } from "../sound/soundEngine";
 import { slotDrag } from "../ui/QuickSlots";
 import { PacksPanel } from "./Packs";
 import { imageWindow } from "../table/imageWindow";
+import { READ_FRAMES, ReadAloudButton, useReadAloudFrames } from "./readAloud";
 
 // Books, as FG's Library: the Books window lists the campaign's active books
 // (by category, with their covers), and Activation every module for its game;
@@ -475,6 +476,8 @@ export function BookWindow({ session, book }: { session: Session; book: string }
   }, [book, pageId, session.bookFetch]);
   const pages = useMemo(() => contents?.chapters.flatMap((chapter) => chapter.sections.flatMap((section) => section.pages)) ?? [], [contents]);
   const at = pages.findIndex((item) => item.id === pageId);
+  // The page's boxed text (FG's <frame>), read aloud by the GM.
+  useReadAloudFrames(body, [page], page?.name);
   const wanted = search.toLowerCase();
   const fits = (item: { name: string; keywords: string }) => !wanted || `${item.name} ${item.keywords}`.toLowerCase().includes(wanted);
   const shownPicture = (file: string) => session.bookShelf.images.find((item) => item.book === book && item.file === file);
@@ -599,7 +602,10 @@ export function BookWindow({ session, book }: { session: Session; book: string }
                   {gm ? <ShareButton shared={Boolean(shownPicture(block.file))} what={block.name || block.caption || "this picture"} onClick={() => toggleShown(block.file, block.name || block.caption || page.name)} /> : null}
                 </figure>
               ) : (
-                <div className={block.frame ? `book-text framed ${block.frame}` : "book-text"} dangerouslySetInnerHTML={{ __html: block.html }} />
+                <div className={block.frame ? `book-text framed ${block.frame}${READ_FRAMES.has(block.frame) ? " read-aloud-frame" : ""}` : "book-text"}>
+                  {block.frame && READ_FRAMES.has(block.frame) ? <ReadAloudButton text={() => new DOMParser().parseFromString(block.html, "text/html").body.innerText || (new DOMParser().parseFromString(block.html, "text/html").body.textContent ?? "")} title={page.name} /> : null}
+                  <div dangerouslySetInnerHTML={{ __html: block.html }} />
+                </div>
               )}
                 {inlineSounds(index)}
               </div>

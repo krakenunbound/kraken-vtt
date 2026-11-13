@@ -31,8 +31,26 @@ export function NotesWindow({ session }: { session: Session }) {
     const id = await session.op({ op: "create", input: { type: "note", name: "New note", visibility: gm ? "gm" : "owner", data: { text: "", links: [] } } });
     windows.open("note", "New note", id);
   };
+  // A chat line (or any words) dropped on the list: a new note holding them.
+  const fromWords = async (words: string) => {
+    const name = words.replace(/\s+/g, " ").trim().slice(0, 40) || "New note";
+    const id = await session.op({ op: "create", input: { type: "note", name, visibility: gm ? "gm" : "owner", data: { text: words, links: [] } } });
+    windows.open("note", name, id);
+  };
   return (
-    <div className="notes-window">
+    <div
+      className="notes-window"
+      data-notes-drop
+      onDragOver={(event) => {
+        if ([...event.dataTransfer.types].includes("application/x-kraken-chat")) event.preventDefault();
+      }}
+      onDrop={(event) => {
+        const words = event.dataTransfer.getData("application/x-kraken-chat");
+        if (!words || (event.target as HTMLElement).closest?.(".note-window")) return;
+        event.preventDefault();
+        void fromWords(words);
+      }}
+    >
       <div className="notes-list" role="list">
         {notes.length === 0 ? <p className="hint">{search ? "No note says that." : "No notes yet. The + makes one."}</p> : null}
         {notes.map((record) => (
@@ -139,6 +157,23 @@ export function NoteWindow({ session, id }: { session: Session; id: string }) {
         onBlur={() => {
           typing.current = false;
           if (text !== (noteOf(record).text ?? "")) save({ data: { text } });
+        }}
+        // Words dragged in (a chat line, text from a book) go where they fall, and are kept at once.
+        onDragOver={(event) => {
+          if (editable && [...event.dataTransfer.types].includes("text/plain") && !hasLink(event)) event.preventDefault();
+        }}
+        onDrop={(event) => {
+          if (!editable || hasLink(event)) return;
+          const words = event.dataTransfer.getData("text/plain");
+          if (!words) return;
+          event.preventDefault();
+          const area = event.currentTarget;
+          const at = document.activeElement === area ? area.selectionStart : text.length;
+          const before = text.slice(0, at);
+          const next = `${before}${before && !before.endsWith("\n") ? "\n" : ""}${words}${text.slice(at)}`;
+          setText(next);
+          typing.current = false;
+          save({ data: { text: next } });
         }}
       />
       <div

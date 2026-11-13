@@ -69,6 +69,8 @@ const MESSAGES = {
   "draw-erase": "kraken_draw",
   "draw-update": "kraken_draw",
   "death-marker": "kraken_death_markers",
+  calendar: "kraken_calendar",
+  "read-aloud": "kraken_read_aloud",
   "draw-clear": "kraken_draw",
   scene: "kraken_scenes",
   "table-options": "kraken_table_options",

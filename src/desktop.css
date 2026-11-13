@@ -1728,3 +1728,57 @@ span.flip { display: inline-flex; transform: scaleX(-1); }
 .marker-set-name i { width: 12px; height: 12px; border-radius: 50%; border: 1px solid #fff4; }
 .marker-set-pictures { display: flex; flex-wrap: wrap; gap: 4px; }
 .marker-set-pictures svg { background: #3a3830; border: 1px solid var(--brass-dim, #6b5530); border-radius: 4px; }
+/* The Calendar (FG's): the year's months, today marked, notes underlined; a day's page beside it. */
+.calendar-window { display: grid; grid-template-rows: auto 1fr; gap: 8px; height: 100%; min-height: 0; }
+.cal-head { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 6px 8px; border: 1px solid var(--line, #3a3a44); border-radius: 8px; }
+.cal-today { display: grid; gap: 2px; flex: 1 1 220px; }
+.cal-label { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+.cal-today strong { font-family: Cinzel, Georgia, serif; font-size: 1.02rem; }
+.cal-gm { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.cal-time input { width: 46px; text-align: center; }
+.cal-time-shown { font-variant-numeric: tabular-nums; color: var(--brass); }
+.icon-button { min-width: 28px; display: inline-grid; place-items: center; }
+.cal-body { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 10px; min-height: 0; }
+.cal-year { display: grid; grid-template-rows: auto 1fr; gap: 6px; min-height: 0; }
+.cal-year-nav { display: flex; align-items: center; gap: 8px; font-family: Cinzel, Georgia, serif; }
+.cal-months { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; overflow: auto; align-content: start; padding-right: 4px; }
+.cal-month { padding: 6px; border: 1px solid var(--line, #3a3a44); border-radius: 6px; background: rgba(255, 255, 255, 0.02); }
+.cal-month.festival { background: rgba(210, 161, 90, 0.06); }
+.cal-month h4 { margin: 0 0 4px; text-align: center; font-family: Cinzel, Georgia, serif; font-size: 0.9rem; color: var(--brass); }
+.cal-week, .cal-days { display: grid; gap: 1px; text-align: center; }
+.cal-week span { font-size: 0.66rem; color: var(--muted); }
+.cal-day { padding: 2px 0; border: 1px solid transparent; border-radius: 4px; background: transparent; color: inherit; font-size: 0.8rem; cursor: pointer; font-variant-numeric: tabular-nums; }
+.cal-day:hover { background: rgba(255, 255, 255, 0.06); }
+.cal-day.noted { font-weight: 700; text-decoration: underline 2px; text-underline-offset: 2px; }
+.cal-day.today { color: #ff9f43; font-weight: 800; }
+.cal-day.chosen { border-color: var(--brass); background: rgba(210, 161, 90, 0.16); }
+.cal-page { display: flex; flex-direction: column; gap: 6px; padding: 8px; border: 1px solid var(--line, #3a3a44); border-radius: 8px; overflow: auto; }
+.cal-page h3 { margin: 0; font-family: Cinzel, Georgia, serif; font-size: 0.98rem; }
+.cal-page h4 { margin: 6px 0 0; padding-bottom: 2px; border-bottom: 1px solid var(--line, #3a3a44); text-align: center; font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; }
+.cal-notes { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.cal-note { position: relative; display: flex; align-items: flex-start; gap: 4px; padding: 4px 4px 4px 6px; border: 1px solid rgba(210, 161, 90, 0.35); border-radius: 4px; font-size: 0.86rem; white-space: pre-wrap; }
+.cal-note.kept { border-style: dashed; opacity: 0.8; }
+.cal-note > span:not(.cal-note-tools) { flex: 1; min-width: 0; }
+.cal-note-tools { flex: none; display: flex; gap: 0; margin-left: auto; }
+.cal-note-tools .icon-button { min-width: 22px; padding: 2px; }
+.cal-draft { min-height: 64px; resize: vertical; }
+.cal-add { display: flex; align-items: center; justify-content: space-between; gap: 6px; font-size: 0.82rem; }
+@media (max-width: 760px) { .cal-body { grid-template-columns: 1fr; } }
+/* FG's read-aloud: the button on boxed text (the GM's), the line in chat, the bubble over the map. */
+.read-aloud-frame { position: relative; }
+.read-aloud-button { float: right; margin: 0 0 4px 8px; padding: 3px 6px; border: 1px solid var(--brass-dim, #6b5530); border-radius: 6px; background: rgba(210, 161, 90, 0.14); color: var(--brass); cursor: pointer; line-height: 0; }
+.read-aloud-button:hover { background: rgba(210, 161, 90, 0.3); }
+.chat-readaloud { display: block; padding: 6px 8px; border-left: 3px solid var(--brass); background: rgba(210, 161, 90, 0.08); font-style: italic; white-space: pre-wrap; }
+.read-aloud-title { display: block; font-style: normal; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--brass); margin-bottom: 2px; }
+.read-aloud-bubble { position: absolute; z-index: 30; top: 54px; left: 50%; transform: translateX(-50%); width: min(640px, 86%); max-height: 46%; overflow: auto; padding: 12px 16px; border: 2px solid #c9a35c; border-radius: 16px; background: #f3e7c9; color: #2a1d10; font-family: Georgia, serif; font-size: 1.02rem; line-height: 1.45; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55); cursor: pointer; animation: read-aloud-in 0.35s ease-out; white-space: pre-wrap; }
+.read-aloud-bubble::after { content: ""; position: absolute; bottom: -14px; left: 48px; border: 14px solid transparent; border-bottom: 0; border-top-color: #c9a35c; }
+.read-aloud-bubble .read-aloud-title { color: #7a5320; }
+.read-aloud-bubble p { margin: 0; }
+.read-aloud-bubble.floating { position: fixed; top: 80px; z-index: 965; }
+@keyframes read-aloud-in { from { opacity: 0; transform: translate(-50%, -10px) scale(0.96); } to { opacity: 1; transform: translateX(-50%); } }
+
+/* FG's Message of the Day. */
+.motd-window { display: grid; grid-template-rows: auto 1fr auto; gap: 8px; height: 100%; min-height: 240px; }
+.motd-head { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border: 1px solid var(--line, #3a3a44); border-radius: 8px; font-family: Cinzel, Georgia, serif; }
+.motd-icon { display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: rgba(210, 161, 90, 0.16); color: var(--brass); }
+.motd-text { min-height: 160px; resize: none; padding: 10px; border: 1px solid var(--line, #3a3a44); border-radius: 8px; font-size: 0.98rem; line-height: 1.45; white-space: pre-wrap; overflow: auto; }

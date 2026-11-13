@@ -151,6 +151,12 @@ function iconOf(line: ChatLine): { icon: string; tone: string } | null {
   return null;
 }
 
+// A chat line in words (for a note): who said it, and what, or the roll and its total.
+function chatWords(line: ChatLine) {
+  const roll = line.roll as { label?: string; total?: number | string; formula?: string } | undefined;
+  const said = roll ? `${roll.label ?? ""} ${roll.formula ? `(${roll.formula}) ` : ""}= ${roll.total ?? ""}`.trim() : (line.text ?? "");
+  return line.from && !line.local && line.from !== "Combat" ? `${line.from}: ${said}` : said;
+}
 function Line({ line, gmIcon, session }: { line: ChatLine; gmIcon: string; session: Session }) {
   useSyncExternalStore(rolling.subscribe, rolling.version);
   const system = line.from === "Combat" || line.local;
@@ -166,17 +172,18 @@ function Line({ line, gmIcon, session }: { line: ChatLine; gmIcon: string; sessi
       data-from={line.from}
       data-kind={line.kind ?? (line.roll ? "roll" : "say")}
       data-dice-body={(line.roll as { look?: { body?: string } } | undefined)?.look?.body}
-      // A damage or healing roll is dragged onto a creature (the tracker, its token) to apply it, as in FG.
-      {...(applied
-        ? {
-            draggable: true,
-            onDragStart: (event: React.DragEvent) => {
-              event.dataTransfer.setData("application/x-kraken-damage", JSON.stringify(applied));
-              event.dataTransfer.effectAllowed = "copy";
-            },
-            title: `Drag onto a creature to ${applied.heal ? "heal" : "deal"} ${applied.amount}`,
-          }
-        : {})}
+      // Every line drags (FG's chat entries): its words into a note (or the Notes
+      // list, a new note); a damage or healing roll also onto a creature (the
+      // tracker, its token) to apply it, as in FG.
+      draggable
+      onDragStart={(event: React.DragEvent) => {
+        if ((event.target as HTMLElement).closest?.("button, a, input")) return;
+        event.dataTransfer.setData("text/plain", chatWords(line));
+        event.dataTransfer.setData("application/x-kraken-chat", chatWords(line));
+        if (applied) event.dataTransfer.setData("application/x-kraken-damage", JSON.stringify(applied));
+        event.dataTransfer.effectAllowed = "copy";
+      }}
+      title={applied ? `Drag onto a creature to ${applied.heal ? "heal" : "deal"} ${applied.amount}, or into a note` : "Drag into a note to keep it"}
     >
       {mark ? (
         <span className={`chat-kind tone-${mark.tone}`} aria-hidden="true">
@@ -192,6 +199,11 @@ function Line({ line, gmIcon, session }: { line: ChatLine; gmIcon: string; sessi
       {line.tower ? <span className="chat-tag">To the GM</span> : null}
       {line.roll ? (
         <RollCard roll={line.roll} pending={rolling.has(line)} />
+      ) : line.kind === "readaloud" ? (
+        <span className="chat-text chat-readaloud">
+          <span className="read-aloud-title">{line.title ? `Read aloud · ${line.title}` : "Read aloud"}</span>
+          {line.text}
+        </span>
       ) : line.kind === "emote" ? (
         <span className="chat-text">
           <b className="chat-from">{line.from}</b> {line.text}

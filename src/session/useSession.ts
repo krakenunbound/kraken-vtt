@@ -87,6 +87,8 @@ export type LibraryItem = { path: string; name: string; category: string; npcs?:
 export type MapMask = { on: boolean; shapes: { id: string; mode: "reveal" | "hide"; points: number[] }[] };
 export type Ping = { id: number; x: number; y: number; from: string; color: string };
 // A line drawn on the map, for everyone (by "" is the GM's).
+export type CalendarNote = { id: string; year: number; day: number; by: string; color: string | null; text: string; shown: boolean; at: number };
+export type CalendarView = { id: string; year: number; day: number; hour: number; minute: number; today: string; calendars: { id: string; name: string }[]; notes: CalendarNote[] };
 export type DeathMarker = { id: string; x: number; y: number; set: string; variant: number; rotation: number; size: number; name: string };
 export type MapDrawing = { id: string; by: string; color: string; width: number; points: number[]; shape?: "line" | "arrow" | "rect" | "ellipse" | "circle" | "cone" | "poly"; fill?: string; fillAlpha?: number; alpha?: number; group?: string };
 // An FX layer (FG's FX tab).
@@ -105,7 +107,7 @@ export type RollTerm =
   | { kind: "dice"; sign: number; count: number; sides: number; rolls: number[]; kept: boolean[]; sum: number };
 export type RollResult = { formula: string; label: string; total: number; terms: RollTerm[]; tag?: string; result?: string; target?: string; against?: number; by?: string };
 // kind: what the line is (FG's chat commands): said, an emote, an action, out of character, the GM's story, a mood.
-export type ChatKind = "say" | "emote" | "action" | "ooc" | "story" | "mood";
+export type ChatKind = "say" | "emote" | "action" | "ooc" | "story" | "mood" | "readaloud";
 export type ChatVote = { id: string; question: string; yes: string[]; no: string[] };
 export type ChatLine = {
   id: string;
@@ -124,7 +126,11 @@ export type ChatLine = {
   vote?: ChatVote;
   // Shown on this screen only (/help, /info): never sent.
   local?: boolean;
+  // Read aloud: where the words are from (a page, a story).
+  title?: string;
 };
+// The GM's read-aloud, shown over the map as a speech bubble for everyone.
+export type ReadAloud = { text: string; title: string; at: number };
 // Who sees a roll (Foundry's roll modes): everyone, the GM and you, the GM alone, you alone.
 export type RollMode = "public" | "gm" | "blind" | "self";
 export type ChatSend = { kind?: ChatKind; mood?: string; to?: string[]; as?: string };
@@ -161,7 +167,7 @@ export type QuickSlot =
 export type KrakenLink = QuickSlot;
 export type SoundItem = { id: string; kind: string; group: string; name: string };
 export type SoundLibrary = { sounds: SoundItem[]; groups: { id: string; count: number }[]; folder: string; triggers?: SoundTrigger[] };
-export type TableOptions = { towerReveal: boolean; towerExternal?: boolean; towerStyle?: string; deathMarkers?: { on: boolean; default: string; byType: Record<string, string> }; decal: string; wallpaper: string; gmIcon: string; soundHidden: "off" | "combat" | "all"; soundRepeat: number; diceHold?: number; wizard35?: Wizard35Options; wizard2e?: Wizard2eOptions };
+export type TableOptions = { towerReveal: boolean; towerExternal?: boolean; towerStyle?: string; deathMarkers?: { on: boolean; default: string; byType: Record<string, string> }; motd?: { text: string; links: QuickSlot[] }; decal: string; wallpaper: string; gmIcon: string; soundHidden: "off" | "combat" | "all"; soundRepeat: number; diceHold?: number; wizard35?: Wizard35Options; wizard2e?: Wizard2eOptions };
 // The D&D 3.5E character wizard's options (the GM's, as FG's KrakenCharWizard35E).
 export type Wizard35Options = { methods: number[]; rollLock: boolean; lowReroll: boolean; vault: boolean };
 // The AD&D 2E character wizard's options (the GM's): ability rolls once only, the PHB methods allowed, gold above 1st level.
@@ -345,6 +351,9 @@ export function useSession() {
   // FG's Library lists, as the host sends them (module|kind -> items).
   const [library, setLibrary] = useState<Record<string, LibraryItem[]>>({});
   const [combat, setCombat] = useState<CombatView>({ round: 0, active: null, entries: [] });
+  // The campaign's calendar: today, the time, and the notes this seat may read.
+  const [calendar, setCalendar] = useState<CalendarView | null>(null);
+  const [readAloudNow, setReadAloudNow] = useState<ReadAloud | null>(null);
   const [soundscape, setSoundscape] = useState<Soundscape>({ ambience: [], music: null });
   // The campaign's ruleset ("Castles & Crusades", "D&D 5E", "Worldbuilding"): it picks the sheet.
   const [ruleset, setRuleset] = useState("");
@@ -478,6 +487,7 @@ export function useSession() {
             setRoster(Array.isArray(msg.roster) ? (msg.roster as RosterEntry[]) : []);
             applyMap(msg.map as TableMap);
             if (msg.combat) setCombat(msg.combat as CombatView);
+            if (msg.calendar) setCalendar(msg.calendar as CalendarView);
             if (msg.options) setOptions(msg.options as TableOptions);
             setChat((msg.chat as ChatLine[]) ?? []);
             if (msg.books) setBookShelf(msg.books as BookShelf);
@@ -504,6 +514,8 @@ export function useSession() {
           if (msg.type === "krits" && msg.settings) setKrits(msg.settings as Record<string, string>);
           if (msg.type === "party" && msg.party) setParty(msg.party as import("../party/PartySheet").PartyView);
           if (msg.type === "combat" && msg.combat) setCombat(msg.combat as CombatView);
+          if (msg.type === "calendar" && msg.calendar) setCalendar(msg.calendar as CalendarView);
+          if (msg.type === "read-aloud" && typeof msg.text === "string") setReadAloudNow({ text: msg.text, title: String(msg.title ?? ""), at: Number(msg.at) || Date.now() });
           if (msg.type === "options" && msg.options) setOptions(msg.options as TableOptions);
           if (msg.type === "map-share") setMapShared((count) => count + 1);
           if (msg.type === "ping") {
@@ -1024,6 +1036,11 @@ export function useSession() {
   // A shape's two points moved (its handles dragged): the drawer's own, or the GM's any.
   const updateDrawing = useCallback((id: string, points: number[]) => send({ type: "draw-update", id, points }), [send]);
   const eraseDrawing = useCallback((id: string) => send({ type: "draw-erase", id }), [send]);
+  // The calendar: the GM sets or moves the date; anyone writes notes on a day (calendar.cjs).
+  // The GM reads boxed text aloud: to chat, and over the map as a bubble for everyone.
+  const sendReadAloud = useCallback((text: string, title?: string) => send({ type: "read-aloud", text, title }), [send]);
+  const dismissReadAloud = useCallback(() => setReadAloudNow(null), []);
+  const calendarOp = useCallback((message: Record<string, unknown>) => send({ type: "calendar", ...message }), [send]);
   const clearDrawings = useCallback(() => send({ type: "draw-clear" }), [send]);
   // Death markers: the GM removes one (right-click) or clears them all.
   const removeDeathMarker = useCallback((id: string) => send({ type: "death-marker", action: "remove", id }), [send]);
@@ -1114,6 +1131,11 @@ export function useSession() {
     libraryAction,
     fgMaps,
     combat,
+    calendar,
+    calendarOp,
+    readAloudNow,
+    sendReadAloud,
+    dismissReadAloud,
     pings,
     mapShared,
     notice,

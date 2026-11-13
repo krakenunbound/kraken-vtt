@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useReadAloudFrames } from "./readAloud";
 import type { BookInfo, LibraryItem, Session } from "../session/useSession";
 import { imageWindow } from "../table/imageWindow";
 
@@ -256,13 +257,16 @@ export function StoryWindow({ session, path }: { session: Session; path: string 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [path]);
   const entry = session.library[`${module}|story:${path}`]?.[0];
+  // Its boxed text, read aloud by the GM.
+  const storyText = useRef<HTMLDivElement>(null);
+  useReadAloudFrames(storyText, [entry?.html], entry?.name);
   return (
     <div className="record-window story-window" data-story={path}>
       {entry ? (
         <>
           <h3>{entry.name}</h3>
           {entry.category ? <p className="hint">{entry.category}</p> : null}
-          <div className="book-text" dangerouslySetInnerHTML={{ __html: entry.html ?? "" }} />
+          <div className="book-text" ref={storyText} dangerouslySetInnerHTML={{ __html: entry.html ?? "" }} />
         </>
       ) : (
         <p className="hint">Reading…</p>

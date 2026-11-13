@@ -1030,11 +1030,12 @@ const TOOLS = [
   {
     name: "kraken_table_options",
     description:
-      "The table's own options. towerReveal: a roll a player drops in the dice tower is shown to that player too (as FG, it is otherwise the GM's alone; the player sees only what went in). towerExternal: the dice tower stands on the table apart from the chat (every seat; each places it where they like), else it is docked in the chat's dice tray. towerStyle: how the tower looks for every seat (kraken_tower lists the looks). decal: the background decal (kraken_decal chooses one). clearTargets: when a creature's targets clear: never (FG), action (after its spell, or its attack's damage), turn (at the end of its turn). diceHold: how long landed 3D dice lie on the table before they fade, in seconds (0.5 to 60, default 2.6), for every seat. wizard35: the D&D 3.5E character wizard's options (FG's KrakenCharWizard35E options): methods, the ability score methods players may pick (1 4d6 drop lowest arranged, 2 3d6 in order, 3 the standard array 15,14,13,12,10,8, 4 typed by hand; default all four); rollLock: the scores cannot be rolled again; lowReroll: a 4d6 score under 8 may be rerolled once with 3d6, the result stands; vault: the Vault of the Kraken's poor or secondhand gear is free in the wizard's shop. wizard2e: the AD&D 2E character wizard's options, as the FG extension's: rollLock (abilities rolled once only, no re-rolls), methods (the PHB ability methods players may pick: 1 = 3d6 in order, 2 = 3d6 twice keep higher, 3 = 3d6 x6 arrange, 4 = 3d6 x12 keep best 6, 5 = 4d6 drop lowest, 6 = all 8s then place 7d6; none: Method V), gold (starting gold above 1st level: phb one roll, perlevel one roll a level, xlevel one roll times the level). A partial wizard35 or wizard2e changes only what it names. Call with nothing to read them.",
+      "The table's own options. towerReveal: a roll a player drops in the dice tower is shown to that player too (as FG, it is otherwise the GM's alone; the player sees only what went in). towerExternal: the dice tower stands on the table apart from the chat (every seat; each places it where they like), else it is docked in the chat's dice tray. towerStyle: how the tower looks for every seat (kraken_tower lists the looks). motd: the message of the day (FG's), shown to each player as they join: { text, links: quick-slot links (a map: {kind: picture, book, file, label}, a record: {kind: record, record, label}, a book page, a note) }; text \"\" for none. decal: the background decal (kraken_decal chooses one). clearTargets: when a creature's targets clear: never (FG), action (after its spell, or its attack's damage), turn (at the end of its turn). diceHold: how long landed 3D dice lie on the table before they fade, in seconds (0.5 to 60, default 2.6), for every seat. wizard35: the D&D 3.5E character wizard's options (FG's KrakenCharWizard35E options): methods, the ability score methods players may pick (1 4d6 drop lowest arranged, 2 3d6 in order, 3 the standard array 15,14,13,12,10,8, 4 typed by hand; default all four); rollLock: the scores cannot be rolled again; lowReroll: a 4d6 score under 8 may be rerolled once with 3d6, the result stands; vault: the Vault of the Kraken's poor or secondhand gear is free in the wizard's shop. wizard2e: the AD&D 2E character wizard's options, as the FG extension's: rollLock (abilities rolled once only, no re-rolls), methods (the PHB ability methods players may pick: 1 = 3d6 in order, 2 = 3d6 twice keep higher, 3 = 3d6 x6 arrange, 4 = 3d6 x12 keep best 6, 5 = 4d6 drop lowest, 6 = all 8s then place 7d6; none: Method V), gold (starting gold above 1st level: phb one roll, perlevel one roll a level, xlevel one roll times the level). A partial wizard35 or wizard2e changes only what it names. Call with nothing to read them.",
     inputSchema: object({
       towerReveal: { type: "boolean" },
       towerExternal: { type: "boolean" },
       towerStyle: { type: "string" },
+      motd: { type: "object", properties: { text: { type: "string" }, links: { type: "array" } } },
       clearTargets: { type: "string", enum: ["never", "action", "turn"] },
       diceHold: { type: "number" },
       wizard35: { type: "object", properties: { methods: { type: "array", items: { type: "number" } }, rollLock: { type: "boolean" }, lowReroll: { type: "boolean" }, vault: { type: "boolean" } } },
@@ -1158,6 +1159,64 @@ const TOOLS = [
         return out({ cleared: true });
       }
       return out({ settings: table.options().deathMarkers, markers: table.map.deathMarkers() });
+    },
+  },
+  {
+    name: "kraken_calendar",
+    description:
+      "The campaign's calendar (FG's Calendar, with Kraken Calendar Notes): which calendar (each game's own by default: gregorian, greyhawk (2E, 3.5E, C&C), harptos (5E), golarion (Pathfinder), imperial (Traveller: 045-1105), waning (Descending Darkness), astra (Apeira Astra)), today's date and the time, and notes on days. action view (default): the date (year; day: the day of the year, 0 the first), the time, today in words, the notes (each: year, day, by: \"\" the GM's or a player's name, colour, text, shown: a GM note the players see / a player's note the whole table sees); set (calendar, year, month (1-based, a festival counts as a month as FG lists it), day (1-based in the month), hour, minute); advance (days, hours, minutes; negative goes back; midnight turns the day); note-add (text, and year, month, day: today if left out; shown false: the GM's alone); note-update (id, text, shown); note-remove (id); say (today's date and time in chat).",
+    inputSchema: object({
+      action: { type: "string", enum: ["view", "set", "advance", "note-add", "note-update", "note-remove", "say"] },
+      calendar: string("A calendar id"),
+      year: number("Year"),
+      month: number("Month, 1-based"),
+      day: number("Day of the month, 1-based"),
+      hour: number("0-23"),
+      minute: number("0-59"),
+      days: number("advance: days"),
+      hours: number("advance: hours"),
+      minutes: number("advance: minutes"),
+      text: string("A note's words"),
+      shown: { type: "boolean", description: "A GM note: the players see it (default true)" },
+      id: string("A note's id"),
+    }),
+    run(args, ctx) {
+      const table = needTable(ctx);
+      const cal = table.calendar();
+      const seat = table.seat;
+      const lib = require("../../shared/calendars.mjs");
+      const now = cal.view(seat);
+      // A month and day (1-based) as the day of the year, in the calendar named or the one in use.
+      const dayOf = (calendarId, year) => (args.month !== undefined || args.day !== undefined ? lib.dayOfYear(lib.calendarOf(calendarId), year, (args.month ?? 1) - 1, args.day ?? 1) : undefined);
+      const action = args.action ?? "view";
+      if (action === "set") {
+        const id = args.calendar ?? now.id;
+        const year = args.year ?? (args.calendar ? lib.calendarOf(id).year : now.year);
+        return out(cal.set({ ...(args.calendar ? { id } : {}), ...(args.year !== undefined ? { year } : {}), ...(dayOf(id, year) !== undefined ? { day: dayOf(id, year) } : {}), hour: args.hour, minute: args.minute }, seat));
+      }
+      if (action === "advance") return out(cal.advance({ days: args.days, hours: args.hours, minutes: args.minutes }, seat));
+      if (action === "note-add") {
+        const year = args.year ?? now.year;
+        return out(cal.addNote({ year, day: dayOf(now.id, year) ?? now.day, text: args.text, shown: args.shown }, seat));
+      }
+      if (action === "note-update") return out(cal.updateNote(String(args.id ?? ""), { ...(args.text !== undefined ? { text: args.text } : {}), ...(args.shown !== undefined ? { shown: args.shown } : {}) }, seat));
+      if (action === "note-remove") {
+        cal.removeNote(String(args.id ?? ""), seat);
+        return out({ removed: args.id });
+      }
+      if (action === "say") {
+        table.say(`[DATE] ${now.today}`, "Calendar");
+        return out({ said: now.today });
+      }
+      return out(now);
+    },
+  },
+  {
+    name: "kraken_read_aloud",
+    description: "FG's read-aloud: read boxed text to the table (an adventure's <frame> text, or any words): it goes to chat as read-aloud and shows over the map for everyone as a speech bubble. text; title (the page or story it is from, optional).",
+    inputSchema: object({ text: string("The words to read"), title: string("Where they are from") }, ["text"]),
+    run(args, ctx) {
+      return out(needTable(ctx).readAloud(args.text, args.title));
     },
   },
   {
@@ -1638,7 +1697,7 @@ const TOOLS = [
       "The GM's windows: list them, or open, close, pop out (to a window of its own, for another monitor) or dock back a window. Kinds: map (the open map in its own window, as FG's image window, with its tools and settings; it opens by itself when a map opens and never pops out), assistant (the GM's DM assistant chat), characters, party, combat, players, settings, decals (the background decal picker), wallpapers (the desktop wallpaper picker), gmicons (the GM icon picker), krits (critical hits and fumbles), dice (this seat's dice: sets, colours, design, material, effects), sound (one-shots, effects, ambience, music, chat triggers, volumes), sheet (a character's sheet: give record, its id or name), charselect (Character Selection), records (FG's campaign lists: NPCs, items, spells, classes...; the GM shares one with kraken_record_update visibility all, hides it with gm), record (one record: give record, its id or name). cards (the ability cards, when this seat turned them on in Settings).",
     inputSchema: object({
       action: { type: "string", enum: ["list", "open", "close", "popout", "dock"] },
-      kind: { type: "string", enum: ["assistant", "characters", "party", "combat", "players", "settings", "decals", "wallpapers", "gmicons", "krits", "library", "dice", "sound", "sheet", "books", "book", "images", "picture", "notes", "note", "charselect", "records", "record", "adventure", "story", "map", "cards", "imagelist", "studio", "assets"] },
+      kind: { type: "string", enum: ["assistant", "characters", "party", "combat", "players", "settings", "decals", "wallpapers", "gmicons", "krits", "library", "dice", "sound", "sheet", "books", "book", "images", "picture", "notes", "note", "charselect", "records", "record", "adventure", "story", "map", "cards", "imagelist", "studio", "assets", "towers", "deathmarkers", "calendar", "motd"] },
       record: string("For a sheet: the character's record id or name; for a record: its id or name"),
     }),
     run: async (args, ctx) => out(await ctx.ui({ kind: "windows", action: args.action ?? "list", window: args.kind, record: args.record })),

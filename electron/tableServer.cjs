@@ -262,6 +262,8 @@ function savedOptions(value) {
     towerStyle: id(options.towerStyle, "stone") || "stone",
     // Death markers (FG's): on, and the set for each creature type ("" is the default's).
     deathMarkers: cleanDeathMarkerOptions(options.deathMarkers),
+    // The message of the day (FG's): what a player sees when they join: words, and links (a map, an NPC, a page).
+    motd: options.motd && typeof options.motd === "object" ? { text: id(options.motd.text, "").slice(0, 8000), links: Array.isArray(options.motd.links) ? options.motd.links.filter((link) => link && typeof link === "object").slice(0, 40) : [] } : { text: "", links: [] },
     decal: id(options.decal, "kraken"),
     wallpaper: id(options.wallpaper, ""),
     gmIcon: id(options.gmIcon, GM_ICON),
@@ -556,6 +558,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     if (next.wallpaper !== undefined && !(next.wallpaper === "" || (wallpapers && wallpapers.has(String(next.wallpaper))))) throw new Error(`No wallpaper "${next.wallpaper}".`);
     if (next.gmIcon !== undefined && !(next.gmIcon === "" || (gmIcons && gmIcons.has(String(next.gmIcon))))) throw new Error(`No GM icon "${next.gmIcon}".`);
     if (next.towerStyle !== undefined && !(TOWER_STYLES.includes(String(next.towerStyle)) || (towers && towers.has(String(next.towerStyle))))) throw new Error(`No dice tower look "${next.towerStyle}" (${TOWER_STYLES.join(", ")}, or a picture in the towers folder).`);
+    if (next.motd !== undefined) next.motd = { text: String(next.motd?.text ?? "").slice(0, 8000), links: (Array.isArray(next.motd?.links) ? next.motd.links : []).map(cleanSlot).filter(Boolean).slice(0, 40) };
     options = savedOptions({ ...options, ...next, ...(next.wizard35 && typeof next.wizard35 === "object" ? { wizard35: { ...options.wizard35, ...next.wizard35 } } : {}), ...(next.wizard2e && typeof next.wizard2e === "object" ? { wizard2e: { ...options.wizard2e, ...next.wizard2e } } : {}) });
     broadcast({ type: "options", options });
     onChange("table");
@@ -664,6 +667,15 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     deadReady = true;
   }
   let combatPending = false;
+  // The campaign's calendar (calendar.cjs): today's date, the time, and the notes on its days.
+  const calendar = require("./calendar.cjs").createCalendar({
+    saved: saved.calendar,
+    ruleset,
+    onChange: () => {
+      onChange("table");
+      for (const [ws, client] of clients) send(ws, { type: "calendar", calendar: calendar.view(seatOf(client)) });
+    },
+  });
   function sendCombat() {
     if (combatPending) return;
     combatPending = true;
@@ -1529,6 +1541,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
           players: playerList(),
           map: client.role !== "dm" && sceneHiddenNow() ? emptyView() : map.viewFor(seatOf(client), client.assetToken),
           combat: combat.viewFor(seatOf(client)),
+          calendar: calendar.view(seatOf(client)),
           chat: chatFor(client),
           options,
           soundscape,
@@ -1608,6 +1621,33 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
           send(ws, { type: "op-result", req: msg.req, ok: true, id: record.id });
         } catch (error) {
           send(ws, { type: "op-result", req: msg.req, ok: false, error: error.message });
+        }
+        return;
+      }
+
+      // FG's read-aloud: the GM reads an adventure's boxed text to the table: to
+      // chat, and over the map for everyone as a speech bubble.
+      if (msg.type === "read-aloud") {
+        if (client.role !== "dm") return send(ws, { type: "error", reason: "Only the GM reads aloud." });
+        readAloud(text(msg.text, ""), text(msg.title, ""), client);
+        return;
+      }
+
+      // The calendar: the GM sets the date and time (or moves them on); anyone writes notes on a day.
+      if (msg.type === "calendar") {
+        try {
+          const seat = seatOf(client);
+          if (msg.action === "set") calendar.set(msg.patch ?? {}, seat);
+          else if (msg.action === "advance") calendar.advance({ days: msg.days, hours: msg.hours, minutes: msg.minutes }, seat);
+          else if (msg.action === "note-add") calendar.addNote({ year: msg.year, day: msg.day, text: msg.text, shown: msg.shown }, seat, client.role === "dm" ? null : tokenColorOf(client.name));
+          else if (msg.action === "note-update") calendar.updateNote(String(msg.id ?? ""), msg.patch ?? {}, seat);
+          else if (msg.action === "note-remove") calendar.removeNote(String(msg.id ?? ""), seat);
+          else if (msg.action === "say") {
+            // Today's date and time, said in chat (FG's calendar chat buttons).
+            addChat({ id: client.id, from: client.role === "dm" ? "Calendar" : client.name, text: `[DATE] ${calendar.view(seat).today}`, at: Date.now() });
+          } else throw new Error("set, advance, note-add, note-update, note-remove or say?");
+        } catch (error) {
+          send(ws, { type: "error", reason: error instanceof Error ? error.message : "The calendar could not change." });
         }
         return;
       }
@@ -2418,6 +2458,8 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     gmIcons: () => gmIcons,
     towers: () => towers,
     dicePacks: () => dicePacks,
+    calendar: () => calendar,
+    readAloud: (words, title) => readAloud(words, title),
     sounds: () => sounds,
     playSound,
     stopSounds: () => (broadcast({ type: "sound-stop" }), { stopped: true }),
@@ -2562,6 +2604,13 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
   function tokenColorOf(name) {
     return prefs.get(String(name)).color ?? playerColor(String(name));
   }
+  function readAloud(words, title, by = { id: "agent", name: "GM" }) {
+    const said = String(words).trim().slice(0, 6000);
+    if (!said) throw new Error("Nothing to read.");
+    addChat({ id: by.id, from: text(by.name, "GM").slice(0, 24), text: said, at: Date.now(), kind: "readaloud", ...(title ? { title: String(title).slice(0, 120) } : {}) });
+    broadcast({ type: "read-aloud", text: said, title: String(title ?? "").slice(0, 120), at: Date.now() });
+    return { read: said.length };
+  }
   function playerColorOf(client) {
     return prefs.get(prefsKey(client)).color ?? (client.role === "dm" ? "#f4f1ea" : playerColor(client.name));
   }
@@ -2611,6 +2660,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         map: map.persisted(),
         hiddenSceneId,
         combat: combat.persisted(),
+        calendar: calendar.persisted(),
         records: records.toJSON(),
         dice: dice.toJSON(),
         sound: soundscape,

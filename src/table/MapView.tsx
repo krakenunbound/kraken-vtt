@@ -2,6 +2,7 @@ import { Icon } from "../ui/icons";
 import { tilesInView, watchTiles, type MapTile as PictureTile, type TileSet } from "./mapTiles";
 import { lazy, memo, Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { diceStore } from "../dice/diceStore";
+import { ReadAloudBubble, useMapShown } from "../books/ReadAloudBubble";
 import { MARKER_SETS, markerShapes } from "../../shared/map/deathMarkers.mjs";
 import { backgroundRect, colorWithAlpha, gridStops, sceneFrame, type BackgroundFit, type SceneFrame } from "../foundry/geometry";
 import { type SceneLight, type SceneMarker, type SceneRegion, type SceneWall } from "../foundry/sceneObjects";
@@ -346,7 +347,12 @@ function MapViewInner({
   me = "",
   startEditing = false,
   gmSeat = gm,
+  readAloud = null,
+  onReadAloudDone = () => undefined,
 }: {
+  // The GM's read-aloud, as a speech bubble over the map.
+  readAloud?: import("../session/useSession").ReadAloud | null;
+  onReadAloudDone?: () => void;
   // The GM's own screen (also while it is drawn as a player's: a play test, the player vision preview).
   gmSeat?: boolean;
   // FG's image opened unlocked: its editor open from the start.
@@ -438,6 +444,8 @@ function MapViewInner({
     }
   });
   // This seat's colour (Settings > You at the table): its drawings' colour unless another is picked.
+  // This map on screen: a read-aloud shows over it (not floating over the table).
+  useMapShown();
   const myColor = useSyncExternalStore(diceStore.subscribe, diceStore.settings).color ?? (gmSeat ? "#f4f1ea" : "#ffcc33");
   const [resizing, setResizing] = useState<{ pointerId: number; id: string; index: 0 | 1; points: number[] } | null>(null);
   const [found, setFound] = useState<{ id: string; at: number } | null>(null);
@@ -2268,7 +2276,8 @@ function MapViewInner({
         </aside>
       ) : null}
 
-      <div className="map-corner" role="toolbar" aria-label="Image">
+      <ReadAloudBubble now={readAloud} onDone={onReadAloudDone} />
+        <div className="map-corner" role="toolbar" aria-label="Image">
         {gm ? (
           <button type="button" className={editorOpen ? "tool on" : "tool"} data-action="map-editor" aria-pressed={editorOpen} aria-label={editorOpen ? "Unlocked: editing. Lock it" : "Locked. Unlock to edit"} title={editorOpen ? "Unlocked: editing (line of sight, doors, windows, lights, masks, paint, text, grid, weather). Lock it to play." : "Locked: playing. Unlock to edit it: walls, doors, lights, paint and more, the same image wherever it is opened."} onClick={() => setEditorOpen(!editorOpen)}>
             <Icon name={editorOpen ? "unlock" : "lock"} />
