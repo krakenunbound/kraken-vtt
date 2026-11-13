@@ -37,6 +37,8 @@ contextBridge.exposeInMainWorld("kraken", {
   pickDecal: (kind) => ipcRenderer.invoke("decal-pick", kind),
   addDecal: (name, bytes, kind) => ipcRenderer.invoke("decal-add", name, bytes, kind),
   openDecalFolder: (kind) => ipcRenderer.invoke("decal-folder", kind),
+  // Documents/Kraken VTT, or one of its folders (dice, towers, gmicons, decals, wallpapers, packs).
+  openKrakenFolder: (kind) => ipcRenderer.invoke("kraken-folder", kind),
   pickSounds: (kind, group) => ipcRenderer.invoke("sound-pick", kind, group),
   addSound: (kind, group, name, bytes) => ipcRenderer.invoke("sound-add", kind, group, name, bytes),
   openSoundFolder: () => ipcRenderer.invoke("sound-folder"),

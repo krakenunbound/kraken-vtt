@@ -245,8 +245,17 @@ chat adds to the next roll. Click the dice to roll them; the 3D dice tower is
 the GM's by default.
 **External dice tower** (Settings, the GM's): the tower stands on the table
 apart from the chat, for everyone, each placing it where they like (drag it).
-It is dark when off; on, its door glows and dice tumble inside. Click it to
-turn it on or off, or drop dice on it. Unticked, it is docked in the chat.
+It is dark when off; on, or while you hold dice over it, its door glows and
+dice tumble inside. Click it to turn it on or off, or drop dice on it.
+Right-click it for its menu, beside it: **Lock it where it stands**,
+**Fix it at** x,y, turn it on or off, **Change its look…** (for everyone: six
+drawn towers, the Kraken Lighthouse, painted towers, or your own picture in
+Documents/Kraken VTT/Dice Towers) and **Dock it in the chat**. Unticked, it is
+docked in the chat.
+**Dice packs:** drop a pack (a folder or .zip with `dice.json`) in
+Documents/Kraken VTT/Dice and its sets appear in everyone's Dice window, as a
+group of their own. The README in that folder gives the format, with an
+example pack to copy.
 **Dice in your hand**, as in Fantasy Grounds: right-click a die and pick how
 many (3× picks up three). They follow the pointer: click the table to throw
 them, the tower to roll them there, or a **quick slot** to keep them there
@@ -266,3 +275,22 @@ flare's switch in **Dice** turns both off).
 
 Every GM action is also a tool an AI agent can use, through MCP or the
 assistant window. See [AGENT.md](../AGENT.md).
+
+## Your Kraken VTT folder
+
+Everything you add to Kraken lives in `Documents/Kraken VTT` (Settings >
+Kraken VTT Folder opens it), one folder for each kind of thing:
+
+| Folder | What goes in it |
+|---|---|
+| Packs | Your books (`.kpack`) |
+| Dice | Dice packs: more dice sets for everyone |
+| Dice Towers | Tower pictures (with a `lit` twin if you like) |
+| GM Icons | Your picture beside what you say in chat |
+| Background Decals | The emblem in the middle of the table |
+| Wallpapers | Seamless tiles behind the desktop |
+
+Each folder's README says what goes in it and how to make one. `AGENTS.md`
+says the same for an AI agent, so you can ask one to make dice, towers or
+wallpapers for you. Pictures you add with Browse… are copied into the right
+folder. Back up the whole folder to keep what you made.

@@ -3,6 +3,7 @@ import * as CANNON from "cannon-es";
 import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import type { DiceFont, DiceLook, DiceTheme } from "./diceStore";
+import { dicePacks } from "./dicePacks";
 import { applyGilded, boundaryLoop, createInlayMaterial, crystalGeometry, gemGeometry, getGemMaterial, gildedMaps, gildedNumber, inclusionMaterial, insetFaceGeometry, isGilded, jewelAnchor, KRAKEN_PAINTED, themeProfile, type GildedTheme, type NumberStyle } from "./gilded";
 
 // The dice themselves, from The Gilded Die (F:\dice_table): rounded convex
@@ -158,6 +159,40 @@ function engravedTexture(value: string, color: string, font: DiceFont = "classic
   texture.colorSpace = THREE.SRGBColorSpace;
   texture.anisotropy = 4;
   return texture;
+}
+
+// A dice pack's picture as a texture: drawn once loaded (the body colour until then).
+const pictures = new Map<string, THREE.Texture>();
+function pictureTexture(id: string, until: string) {
+  let texture = pictures.get(id);
+  if (!texture) {
+    const blank = document.createElement("canvas");
+    blank.width = blank.height = 4;
+    const ctx = blank.getContext("2d")!;
+    ctx.fillStyle = until;
+    ctx.fillRect(0, 0, 4, 4);
+    const made = new THREE.Texture(blank);
+    made.colorSpace = THREE.SRGBColorSpace;
+    made.wrapS = made.wrapT = THREE.RepeatWrapping;
+    made.anisotropy = 4;
+    made.needsUpdate = true;
+    void dicePacks
+      .image(id)
+      .then((image) => {
+        made.image = image;
+        made.needsUpdate = true;
+      })
+      .catch(() => undefined);
+    pictures.set(id, made);
+    texture = made;
+  }
+  return texture;
+}
+function pictureMaps(look: DiceLook): { map?: THREE.Texture; bumpMap?: THREE.Texture; emissiveMap?: THREE.Texture } {
+  if (!look.texture) return {};
+  const map = pictureTexture(look.texture, look.body);
+  const emissiveMap = look.glowTexture ? pictureTexture(look.glowTexture, "#000000") : undefined;
+  return { map, bumpMap: map, emissiveMap };
 }
 
 function themeMaps(theme: DiceTheme, color: string, accentColor = "#d8b46a"): { map?: THREE.Texture; bumpMap?: THREE.Texture; emissiveMap?: THREE.Texture } {
@@ -547,7 +582,7 @@ export function collider(kind: ShapeKind) {
 // room; pearl shimmers; stone and wood are matte. A glowing set shines on its own.
 function shellMaterial(look: DiceLook) {
   const material_ = look.material ?? "plastic";
-  const key = `${look.theme}|${look.body}|${look.accent}|${material_}|${look.effect === "glow" ? "glow" : ""}`;
+  const key = `${look.theme}|${look.body}|${look.accent}|${material_}|${look.effect === "glow" ? "glow" : ""}|${look.texture ?? ""}|${look.glowTexture ?? ""}`;
   let material = shells.get(key);
   if (!material && material_ === "design" && isGilded(look.theme)) {
     // Made as its design is: the Gilded Die's own finish for it.
@@ -558,7 +593,7 @@ function shellMaterial(look: DiceLook) {
     shells.set(key, material);
   }
   if (!material) {
-    const maps = themeMaps(look.theme, look.body, look.accent);
+    const maps = look.theme === "picture" ? pictureMaps(look) : themeMaps(look.theme, look.body, look.accent);
     const solid = look.theme === "classic";
     const base = {
       color: solid ? look.body : "#ffffff",
@@ -598,7 +633,7 @@ function shellMaterial(look: DiceLook) {
       // A theme's own glow (stars, veins, runes) shines through any material.
       physical.emissive = new THREE.Color("#ffffff");
       physical.emissiveMap = maps.emissiveMap;
-      physical.emissiveIntensity = 0.45;
+      physical.emissiveIntensity = look.theme === "picture" ? 0.9 : 0.45;
     }
     if (look.effect === "glow") {
       physical.emissive = new THREE.Color(look.body).lerp(new THREE.Color(look.accent ?? "#ffffff"), 0.35);

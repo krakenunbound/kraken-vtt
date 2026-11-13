@@ -10,14 +10,16 @@ export type DiceTheme =
   | "classic" | "dragonhide" | "starfall" | "bone" | "magma" | "leviathan" | "marble" | "swirl" | "speckle" | "wood" | "runes" | "stripes"
   // The Gilded Die's newer themes (gilded.ts draws them).
   | "aether" | "reliquary" | "rosewindow" | "gilded" | "emerald" | "frost" | "obsidian" | "bloodstone" | "arcane" | "void" | "hero"
-  | "monster" | "wizard" | "bard" | "necromancer" | "goblin" | "wyrm" | "ghost" | "undead" | "traveller" | "mythos";
+  | "monster" | "wizard" | "bard" | "necromancer" | "goblin" | "wyrm" | "ghost" | "undead" | "traveller" | "mythos"
+  // A dice pack's own picture on the faces (texture, and glowTexture: what shines), dicePacks.ts.
+  | "picture";
 // design: the theme's own finish (the Gilded Die's: its glass, metal or enamel, inner crystal, gems).
 export type DiceMaterial = "plastic" | "glass" | "metal" | "pearl" | "stone" | "wood" | "design";
 export type DiceEffect = "none" | "sparkles" | "fire" | "frost" | "arcane" | "shadow" | "glow" | "aura" | "wisp" | "spark" | "embers" | "holy" | "charge" | "notes" | "ion";
 export type DiceFont = "classic" | "bold" | "runic" | "script" | "glow" | "metal" | "engrave";
 // accent: the second colour of two-colour designs. crit: a natural 20 bursts gold, a 1 red.
 // pips: a d6 shows pips, not numbers.
-export type DiceLook = { theme: DiceTheme; body: string; ink: string; accent: string; material: DiceMaterial; effect: DiceEffect; font: DiceFont; crit: boolean; pips?: boolean };
+export type DiceLook = { theme: DiceTheme; body: string; ink: string; accent: string; material: DiceMaterial; effect: DiceEffect; font: DiceFont; crit: boolean; pips?: boolean; texture?: string; glowTexture?: string };
 
 export const DESIGNS: { id: DiceTheme; name: string }[] = [
   { id: "classic", name: "Solid" },

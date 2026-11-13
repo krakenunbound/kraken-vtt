@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { studioScene } from "./gilded";
 import type { DiceLook } from "./diceStore";
 import { buildDie, model, type ShapeKind } from "./models";
+import { dicePacks } from "./dicePacks";
 
 // The dice in the chat's tray, as FG's: real dice in this seat's set (its
 // design, material and lettering), lit and turned to show their highest
@@ -74,6 +75,7 @@ function render(jobs: { look: DiceLook; sides: number }[]): string[] {
 
 // The seven dice of the tray, in this look.
 export async function renderTray(look: DiceLook): Promise<Record<number, string>> {
+  await dicePacks.preload([look]);
   const sides = Object.keys(KINDS).map(Number);
   const pictures = render(sides.map((count) => ({ look, sides: count })));
   return Object.fromEntries(sides.map((count, index) => [count, pictures[index]]));
@@ -81,5 +83,6 @@ export async function renderTray(look: DiceLook): Promise<Record<number, string>
 
 // A d20 of each look, for choosing a set.
 export async function renderSets(looks: DiceLook[]): Promise<string[]> {
+  await dicePacks.preload(looks);
   return render(looks.map((look) => ({ look, sides: 20 })));
 }

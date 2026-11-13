@@ -194,7 +194,7 @@ function sanitizeScene(input) {
 // How a seat's dice leave its hand (fractions of its window, and per second)
 // and how its dice look, for the 3D dice every screen throws.
 // The Gilded Die's themes, finishes ("design": the theme's own), trails and lettering too.
-const DICE_THEMES = new Set(["classic", "dragonhide", "starfall", "bone", "magma", "leviathan", "marble", "swirl", "speckle", "wood", "runes", "stripes", "aether", "reliquary", "rosewindow", "gilded", "emerald", "frost", "obsidian", "bloodstone", "arcane", "void", "hero", "monster", "wizard", "bard", "necromancer", "goblin", "wyrm", "ghost", "undead", "traveller", "mythos"]);
+const DICE_THEMES = new Set(["classic", "dragonhide", "starfall", "bone", "magma", "leviathan", "marble", "swirl", "speckle", "wood", "runes", "stripes", "aether", "reliquary", "rosewindow", "gilded", "emerald", "frost", "obsidian", "bloodstone", "arcane", "void", "hero", "monster", "wizard", "bard", "necromancer", "goblin", "wyrm", "ghost", "undead", "traveller", "mythos", "picture"]);
 const DICE_MATERIALS = new Set(["plastic", "glass", "metal", "pearl", "stone", "wood", "design"]);
 const DICE_EFFECTS = new Set(["none", "sparkles", "fire", "frost", "arcane", "shadow", "glow", "aura", "wisp", "spark", "embers", "holy", "charge", "notes", "ion"]);
 const DICE_FONTS = new Set(["classic", "bold", "runic", "script", "glow", "metal", "engrave"]);
@@ -219,6 +219,13 @@ function diceLook(value) {
   if (DICE_FONTS.has(value.font)) look.font = value.font;
   if (typeof value.crit === "boolean") look.crit = value.crit;
   if (typeof value.pips === "boolean") look.pips = value.pips;
+  // A dice pack's picture dice: the picture on their faces, and its glowing part ("<pack>/<file>", dicePacks.cjs).
+  const picture = (item) => (typeof item === "string" && item.length <= 300 && /^[^/\\]+\/[^\\]+$/.test(item) && !item.split("/").includes("..") ? item : null);
+  if (value.theme === "picture") {
+    if (!picture(value.texture)) return null;
+    look.texture = value.texture;
+    if (picture(value.glowTexture)) look.glowTexture = value.glowTexture;
+  }
   return look;
 }
 
@@ -229,6 +236,9 @@ function diceLook(value) {
 // desktop, as FG's desktop theme: "" (plain) or a wallpaper id.
 // The GM's chat picture (the Kraken GM Icon extension's): "" for the name alone.
 const GM_ICON = "kraken/01 The Kraken.png";
+// The dice tower's looks drawn by Kraken (src/ui/TowerArt.tsx); any other
+// towerStyle is a picture from the GM's towers folder (assets/towers).
+const TOWER_STYLES = ["stone", "oak", "obsidian", "frost", "brass", "bone"];
 
 function savedOptions(value) {
   const options = value && typeof value === "object" ? value : {};
@@ -237,6 +247,8 @@ function savedOptions(value) {
     towerReveal: Boolean(options.towerReveal),
     // The dice tower on the table, apart from the chat (the GM's choice, for every seat); else docked in the chat's tray.
     towerExternal: Boolean(options.towerExternal),
+    // How the tower looks, for every seat: one of TOWER_STYLES, or a tower picture's id.
+    towerStyle: id(options.towerStyle, "stone") || "stone",
     decal: id(options.decal, "kraken"),
     wallpaper: id(options.wallpaper, ""),
     gmIcon: id(options.gmIcon, GM_ICON),
@@ -360,7 +372,7 @@ function serveWeb(url, res, root) {
 // decals, wallpapers: the background decals and desktop tiles the GM can
 // choose from (decals.cjs).
 // sounds: the GM's sounds (sounds.cjs): one-shots, effects, ambience and music.
-function createTableServer({ saved = {}, onChange = () => undefined, webRoot = WEB_ROOT, art = null, decals = null, wallpapers = null, gmIcons = null, tiles = null, sounds = null, books = null, ruleset = "", accounts = null, prefs: prefsStore = null, studioPicture = null } = {}) {
+function createTableServer({ saved = {}, onChange = () => undefined, webRoot = WEB_ROOT, art = null, decals = null, wallpapers = null, gmIcons = null, towers = null, dicePacks = null, tiles = null, sounds = null, books = null, ruleset = "", accounts = null, prefs: prefsStore = null, studioPicture = null } = {}) {
   // Each person's own settings (prefs.cjs): their colour and dice. Kept by the app for every campaign; in memory without a file.
   const prefs = prefsStore ?? createPrefsStore(null, diceLook);
   const prefsKey = (client) => (client.role === "dm" ? "@gm" : client.name);
@@ -530,6 +542,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     if (next.decal !== undefined && !(next.decal === "" || next.decal === "kraken" || (decals && decals.has(String(next.decal))))) throw new Error(`No decal "${next.decal}".`);
     if (next.wallpaper !== undefined && !(next.wallpaper === "" || (wallpapers && wallpapers.has(String(next.wallpaper))))) throw new Error(`No wallpaper "${next.wallpaper}".`);
     if (next.gmIcon !== undefined && !(next.gmIcon === "" || (gmIcons && gmIcons.has(String(next.gmIcon))))) throw new Error(`No GM icon "${next.gmIcon}".`);
+    if (next.towerStyle !== undefined && !(TOWER_STYLES.includes(String(next.towerStyle)) || (towers && towers.has(String(next.towerStyle))))) throw new Error(`No dice tower look "${next.towerStyle}" (${TOWER_STYLES.join(", ")}, or a picture in the towers folder).`);
     options = savedOptions({ ...options, ...next, ...(next.wizard35 && typeof next.wizard35 === "object" ? { wizard35: { ...options.wizard35, ...next.wizard35 } } : {}), ...(next.wizard2e && typeof next.wizard2e === "object" ? { wizard2e: { ...options.wizard2e, ...next.wizard2e } } : {}) });
     broadcast({ type: "options", options });
     onChange("table");
@@ -1098,8 +1111,27 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       });
       return;
     }
+    // Dice packs (Documents/Kraken VTT/Dice): their sets and pictures, for every seat (each picks its own dice).
+    if (req.method === "GET" && (url.pathname === "/dice/packs" || url.pathname === "/dice/file")) {
+      const token = url.searchParams.get("token") || "";
+      const client = token ? [...clients.values()].find((item) => item.assetToken === token) : null;
+      const found = client && dicePacks ? (url.pathname === "/dice/packs" ? { list: dicePacks.list().map(({ problems, ...pack }) => (client.role === "dm" ? { ...pack, problems } : pack)) } : dicePacks.file(url.searchParams.get("id") || "")) : null;
+      if (!found) {
+        res.writeHead(404, { "Cache-Control": "no-store" });
+        res.end();
+        return;
+      }
+      if (found.list) {
+        res.writeHead(200, { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" });
+        res.end(JSON.stringify(found.list));
+        return;
+      }
+      res.writeHead(200, { "Content-Type": found.mime, "Content-Length": found.bytes.length, "Cache-Control": "private, max-age=600", "X-Content-Type-Options": "nosniff" });
+      res.end(found.bytes);
+      return;
+    }
     // Background decals and wallpapers: the list for the GM's picker, and the pictures for every seat.
-    const pictures = { "/decal/list": decals, "/decal/file": decals, "/wallpaper/list": wallpapers, "/wallpaper/file": wallpapers, "/gmicon/list": gmIcons, "/gmicon/file": gmIcons, "/tile/list": tiles, "/tile/file": tiles };
+    const pictures = { "/decal/list": decals, "/decal/file": decals, "/wallpaper/list": wallpapers, "/wallpaper/file": wallpapers, "/gmicon/list": gmIcons, "/gmicon/file": gmIcons, "/tower/list": towers, "/tower/file": towers, "/tile/list": tiles, "/tile/file": tiles };
     if (req.method === "GET" && Object.hasOwn(pictures, url.pathname)) {
       const library = pictures[url.pathname];
       const token = url.searchParams.get("token") || "";
@@ -2323,6 +2355,8 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     tiles: () => tiles,
     wallpapers: () => wallpapers,
     gmIcons: () => gmIcons,
+    towers: () => towers,
+    dicePacks: () => dicePacks,
     sounds: () => sounds,
     playSound,
     stopSounds: () => (broadcast({ type: "sound-stop" }), { stopped: true }),

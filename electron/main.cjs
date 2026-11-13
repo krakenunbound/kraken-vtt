@@ -178,7 +178,7 @@ ipcMain.handle("copy", (_event, text) => {
 // The decal picker's Browse: a picture from anywhere, copied into the assets folder.
 ipcMain.handle("decal-pick", async (_event, kind) => {
   const picked = await dialog.showOpenDialog(mainWindow, {
-    title: kind === "wallpaper" ? "Choose a desktop wallpaper (a picture that tiles)" : kind === "gmicon" ? "Choose your GM icon" : kind === "tile" ? "Choose a picture to place on the map" : "Choose a background decal",
+    title: kind === "wallpaper" ? "Choose a desktop wallpaper (a picture that tiles)" : kind === "gmicon" ? "Choose your GM icon" : kind === "tower" ? "Choose a picture of a dice tower" : kind === "tile" ? "Choose a picture to place on the map" : "Choose a background decal",
     properties: ["openFile"],
     filters: [{ name: "Pictures", extensions: ["png", "webp", "jpg", "jpeg", "gif"] }],
   });
@@ -206,6 +206,7 @@ ipcMain.handle("sound-pick", async (_event, kind, group) => {
 ipcMain.handle("sound-folder", async () => shell.openPath(await call("sound-folder")));
 ipcMain.handle("packs-folder", async () => shell.openPath(await call("packs-folder")));
 ipcMain.handle("decal-folder", async (_event, kind) => shell.openPath(await call("decal-folder", kind)));
+ipcMain.handle("kraken-folder", async (_event, kind) => shell.openPath(await call("kraken-folder", kind ?? "")));
 
 // The DM assistant's key the GM typed: kept encrypted on this computer, known to the backend for the run.
 const assistantKeys = assistantModule.keyStore(path.join(app.getPath("userData"), "assistant-key.bin"), safeStorage);

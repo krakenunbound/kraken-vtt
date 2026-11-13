@@ -198,10 +198,34 @@ function sounds() {
   if (!soundLibrary) soundLibrary = createSoundLibrary({ folder: path.join(USER_DATA, "assets", "sounds"), builtin: path.join(APP_DIR, "sounds") });
   return soundLibrary;
 }
+// Kraken's folders in Documents/Kraken VTT (kfolders.cjs), made with their
+// guides before any library reads them; what the app's data folder held before is copied in.
+const kraken = (() => {
+  const folders = require("./kfolders.cjs");
+  const legacy = { decals: path.join(USER_DATA, "assets", "decals"), wallpapers: path.join(USER_DATA, "assets", "wallpapers"), gmicons: path.join(USER_DATA, "assets", "gm-icons"), towers: path.join(USER_DATA, "assets", "towers") };
+  return { ...folders, folderOf: (kind) => (folders.ready({ legacy }), folders.folderOf(kind)) };
+})();
 // The GM's chat pictures: the Kraken GM Icon set and the GM's own.
 function gmIcons() {
-  if (!gmIconLibrary) gmIconLibrary = createDecalLibrary({ folder: path.join(USER_DATA, "assets", "gm-icons"), builtin: path.join(APP_DIR, "dist", "gm-icons"), own: [] });
+  if (!gmIconLibrary) gmIconLibrary = createDecalLibrary({ folder: kraken.folderOf("gmicons"), builtin: path.join(APP_DIR, "dist", "gm-icons"), own: [] });
   return gmIconLibrary;
+}
+// The GM's own dice tower pictures (a tower look for the table), shared by every campaign.
+let towerLibrary = null;
+function towers() {
+  if (!towerLibrary) {
+    towerLibrary = createDecalLibrary({ folder: kraken.folderOf("towers"), builtin: path.join(APP_DIR, "dist", "towers"), own: [] });
+    // A picture named "<name> lit" is <name>'s look when the tower is on (FG's dice tower on and off): not a look of its own.
+    const list = towerLibrary.list.bind(towerLibrary);
+    towerLibrary.list = () => list().filter((item) => !/ lit\.[a-z]+$/i.test(item.id));
+  }
+  return towerLibrary;
+}
+// Dice packs: more dice sets for every seat, from Documents/Kraken VTT/Dice.
+let dicePackLibrary = null;
+function dicePacks() {
+  if (!dicePackLibrary) dicePackLibrary = require("./dicePacks.cjs").createDicePacks({ folder: kraken.folderOf("dice"), lookOf: require("./tableServer.cjs").diceLook });
+  return dicePackLibrary;
 }
 // Players' accounts and everyone's own settings: one for every campaign this GM runs.
 let accountStore = null;
@@ -258,14 +282,14 @@ function savePreference(key, value) {
 }
 // The desktop's wallpapers (FG's desktop theme): Kraken's own, one per game, and the GM's own.
 function wallpapers() {
-  if (!wallpaperLibrary) wallpaperLibrary = createDecalLibrary({ folder: path.join(USER_DATA, "assets", "wallpapers"), builtin: path.join(APP_DIR, "dist", "wallpapers"), own: [], named: true });
+  if (!wallpaperLibrary) wallpaperLibrary = createDecalLibrary({ folder: kraken.folderOf("wallpapers"), builtin: path.join(APP_DIR, "dist", "wallpapers"), own: [], named: true });
   return wallpaperLibrary;
 }
 function decals() {
-  if (!decalLibrary) decalLibrary = createDecalLibrary({ folder: path.join(USER_DATA, "assets", "decals"), builtin: path.join(APP_DIR, "dist", "decals"), fgData: fgDataFolder() });
+  if (!decalLibrary) decalLibrary = createDecalLibrary({ folder: kraken.folderOf("decals"), builtin: path.join(APP_DIR, "dist", "decals"), fgData: fgDataFolder() });
   return decalLibrary;
 }
-const libraryOf = (kind) => (kind === "wallpaper" ? wallpapers() : kind === "gmicon" ? gmIcons() : kind === "tile" ? tiles() : decals());
+const libraryOf = (kind) => (kind === "wallpaper" ? wallpapers() : kind === "gmicon" ? gmIcons() : kind === "tile" ? tiles() : kind === "tower" ? towers() : decals());
 
 // --- The campaign being hosted --------------------------------------------------
 // Its table (view, chat, tokens and doors) is saved to disk when something
@@ -507,7 +531,7 @@ const calls = {
     if (typeof remembered === "string" && !(saved.options && "gmIcon" in saved.options)) saved.options = { ...(saved.options ?? {}), gmIcon: remembered };
     const dataFolder = fgDataFolder();
     const ruleset = campaigns.read(campaignFile()).find((item) => item.id === campaignId)?.ruleset ?? "";
-    const next = createTableServer({ saved, ruleset, onChange: markDirty, art: createArtLibrary({ base: dataFolder, roots: [...defaultRoots(dataFolder), ...krakenArtRoots()] }), decals: decals(), wallpapers: wallpapers(), gmIcons: gmIcons(), tiles: tiles(), sounds: sounds(), books: books(), accounts: accounts(), prefs: prefs(), studioPicture: (sceneId) => studioPicture(sceneId) });
+    const next = createTableServer({ saved, ruleset, onChange: markDirty, art: createArtLibrary({ base: dataFolder, roots: [...defaultRoots(dataFolder), ...krakenArtRoots()] }), decals: decals(), wallpapers: wallpapers(), gmIcons: gmIcons(), towers: towers(), dicePacks: dicePacks(), tiles: tiles(), sounds: sounds(), books: books(), accounts: accounts(), prefs: prefs(), studioPicture: (sceneId) => studioPicture(sceneId) });
     try {
       const info = await next.listen({ port: wanted, password });
       table = next;
@@ -554,6 +578,12 @@ const calls = {
   "sound-folder": () => {
     fs.mkdirSync(sounds().folder, { recursive: true });
     return sounds().folder;
+  },
+  // A folder of Documents/Kraken VTT (kfolders.cjs), to open: "" is the top.
+  "kraken-folder": (kind) => {
+    const folder = kind ? kraken.folderOf(String(kind)) : (kraken.folderOf("dice"), kraken.root());
+    fs.mkdirSync(folder, { recursive: true });
+    return folder;
   },
   "decal-folder": (kind) => {
     const folder = libraryOf(kind).folder;

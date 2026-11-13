@@ -37,6 +37,8 @@ The app starts the MCP server when it opens. `electron/agent/mcp-stdio.cjs` is t
 | Open, close, lock doors | `kraken_door` |
 | Line of sight, token movement lock, what a player sees | `kraken_line_of_sight` |
 | Place, change, remove lights | `kraken_light` |
+| The dice tower: its look for everyone (Kraken's six drawn, the tower pictures, a picture imported); on the GM's screen, lock it, fix it at x,y, move it, turn it on or off (its right-click menu) | `kraken_tower` |
+| Dice packs (Documents/Kraken VTT/Dice): list them with their sets and problems, check a pack being made, the folder; a pack's set by name | `kraken_dice_packs`; `kraken_dice_settings` preset |
 | Ping the map | `kraken_ping` |
 | Read the map: grid, tokens, doors; share it with the players (opens on every screen, as FG's Share) | `kraken_map` (`share: true`) |
 | The map editor: walls, doors, windows (drawn where the hand puts them, grid snap off unless on; dragged to move, a corner dragged; a door box is one door); mask; text, numbers and pins; paint; FX layers; layer groups; undo | `kraken_wall`, `kraken_mask`, `kraken_label`, `kraken_draw`, `kraken_fx`, `kraken_map_group`, `kraken_map_undo` |

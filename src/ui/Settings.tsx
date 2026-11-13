@@ -1,4 +1,5 @@
 import type { StudioSettings } from "../kraken";
+import { TOWER_LOOKS, TowerArt, towerLook } from "./TowerArt";
 import { useEffect, useMemo, useState, useSyncExternalStore, type DragEvent } from "react";
 import { cardsStore } from "../cards/cardsStore";
 import type { DecalItem, PictureKind, Session } from "../session/useSession";
@@ -30,6 +31,11 @@ export function SettingsWindow({ session }: { session: Session }) {
             <button type="button" className="settings-button" data-setting="krits" onClick={() => windows.open("krits", "Critical Hits & Fumbles")}>
               Critical Hits &amp; Fumbles
             </button>
+            {window.kraken?.openKrakenFolder ? (
+              <button type="button" className="settings-button" data-setting="kraken-folder" title="Documents/Kraken VTT: a folder for each kind of thing you add (books, dice packs, dice towers, GM icons, decals, wallpapers), each with a README on what goes in it and how to make one" onClick={() => void window.kraken?.openKrakenFolder?.("")}>
+                Kraken VTT Folder
+              </button>
+            ) : null}
           </>
         ) : null}
       </div>
@@ -41,8 +47,13 @@ export function SettingsWindow({ session }: { session: Session }) {
       {gm ? (
         <label className="settings-check">
           <input type="checkbox" data-setting="tower-external" checked={Boolean(session.options.towerExternal)} onChange={(event) => session.setTableOptions({ towerExternal: event.target.checked })} />
-          External dice tower: it stands on the table, apart from the chat (for everyone; each places it where they like). Unticked, it is docked in the chat.
+          External dice tower: it stands on the table, apart from the chat (for everyone; each places it where they like, right-click it to lock it there). Unticked, it is docked in the chat.
         </label>
+      ) : null}
+      {gm && session.options.towerExternal ? (
+        <button type="button" className="settings-button" data-setting="tower-look" onClick={() => windows.open("towers", "Dice Tower")}>
+          Dice Tower Look
+        </button>
       ) : null}
       {gm ? <DiceHoldSetting session={session} /> : null}
       {gm ? <StudioFoldersSetting /> : null}
@@ -268,7 +279,9 @@ function useCampaignRuleset(session: Session) {
 export function DecalPicker({ session, kind = "decal", onClose }: { session: Session; kind?: PictureKind; onClose: () => void }) {
   const wallpaper = kind === "wallpaper";
   const gmIcon = kind === "gmicon";
-  const current = wallpaper ? session.options.wallpaper : gmIcon ? session.options.gmIcon : session.options.decal;
+  // The dice tower: Kraken's drawn looks first, then the GM's own tower pictures.
+  const tower = kind === "tower";
+  const current = wallpaper ? session.options.wallpaper : gmIcon ? session.options.gmIcon : tower ? session.options.towerStyle || "stone" : session.options.decal;
   const [items, setItems] = useState<DecalItem[] | null>(null);
   const [failed, setFailed] = useState("");
   const [search, setSearch] = useState("");
@@ -289,7 +302,10 @@ export function DecalPicker({ session, kind = "decal", onClose }: { session: Ses
     };
   }, [session.decalList, kind]);
 
-  const all = useMemo(() => [...(wallpaper || gmIcon ? [] : [KRAKEN]), ...(items ?? [])], [items, wallpaper, gmIcon]);
+  const all = useMemo(
+    () => [...(tower ? TOWER_LOOKS.map((look): DecalItem => ({ id: look.id, name: look.name, group: "Kraken" })) : wallpaper || gmIcon ? [] : [KRAKEN]), ...(items ?? [])],
+    [items, wallpaper, gmIcon, tower],
+  );
   // A chip for each set: this campaign's game first, then Kraken's, then the rest.
   const sets = useMemo(() => {
     const names = [...new Set(all.map((item) => item.ruleset ?? item.group))];
@@ -305,7 +321,7 @@ export function DecalPicker({ session, kind = "decal", onClose }: { session: Ses
   }, [all, group, search, ruleset]);
 
   function apply(id: string) {
-    session.setTableOptions(wallpaper ? { wallpaper: id } : gmIcon ? { gmIcon: id } : { decal: id });
+    session.setTableOptions(wallpaper ? { wallpaper: id } : gmIcon ? { gmIcon: id } : tower ? { towerStyle: id || "stone" } : { decal: id });
     onClose();
   }
 
@@ -381,8 +397,8 @@ export function DecalPicker({ session, kind = "decal", onClose }: { session: Ses
             {wallpaper ? (
               <span className="decal-thumb wall" style={{ backgroundImage: `url("${session.decalUrl(item.id, "wallpaper")}")` }} />
             ) : (
-              <span className={gmIcon ? "decal-thumb icon" : "decal-thumb"}>
-                {item.id === "kraken" ? <Emblem className="decal-image" /> : <img className="decal-image" src={session.decalUrl(item.id, kind)} alt="" loading="lazy" draggable={false} />}
+              <span className={gmIcon ? "decal-thumb icon" : tower ? "decal-thumb tower" : "decal-thumb"}>
+                {tower && towerLook(item.id) ? <TowerArt on={chosen === item.id} style={item.id} size={52} /> : item.id === "kraken" ? <Emblem className="decal-image" /> : <img className="decal-image" src={session.decalUrl(item.id, kind)} alt="" loading="lazy" draggable={false} />}
               </span>
             )}
             <span className="decal-name">{item.name}</span>
@@ -393,13 +409,14 @@ export function DecalPicker({ session, kind = "decal", onClose }: { session: Ses
         {items !== null && shown.length === 0 ? <p className="hint decal-empty">Nothing by that name.</p> : null}
       </div>
       <div className="decal-search">
-        <input type="search" placeholder={wallpaper ? "Search wallpapers" : gmIcon ? "Search icons" : "Search decals"} aria-label="Search" value={search} onChange={(event) => setSearch(event.target.value)} />
+        <input type="search" placeholder={wallpaper ? "Search wallpapers" : gmIcon ? "Search icons" : tower ? "Search towers" : "Search decals"} aria-label="Search" value={search} onChange={(event) => setSearch(event.target.value)} />
         {kraken ? (
           <button type="button" className="ghost" title="Open the folder Kraken keeps these in" onClick={() => void kraken.openDecalFolder(kind)}>
             Assets folder
           </button>
         ) : null}
       </div>
+      {tower ? <p className="hint">How the dice tower looks on the table, for everyone. Browse or drop a picture of your own (a PNG with a clear background stands best); it is kept in your assets folder for every campaign.</p> : null}
       {gmIcon ? <p className="hint">Your picture beside everything you say in chat, for the whole table. It follows you into every new campaign.</p> : null}
       {wallpaper ? <p className="hint">A wallpaper repeats across the desktop, so a picture that tiles works best. A picture you add is kept in your assets folder for every campaign.</p> : null}
       {failed ? (
@@ -413,9 +430,11 @@ export function DecalPicker({ session, kind = "decal", onClose }: { session: Ses
             Browse…
           </button>
         ) : null}
-        <button type="button" data-action="decal-empty" onClick={() => apply("")}>
-          {wallpaper ? "Plain Desktop" : gmIcon ? "Name Only" : "Use Empty Decal"}
-        </button>
+        {tower ? null : (
+          <button type="button" data-action="decal-empty" onClick={() => apply("")}>
+            {wallpaper ? "Plain Desktop" : gmIcon ? "Name Only" : "Use Empty Decal"}
+          </button>
+        )}
         <span className="spacer" />
         <button type="button" className="primary" data-action="decal-ok" onClick={() => apply(chosen)}>
           OK

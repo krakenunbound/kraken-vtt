@@ -1593,7 +1593,7 @@ textarea.cc-field.tall { min-height: 220px; }
 /* The dice tower apart from the chat (the GM's Settings): a stone tower on the
    table, dragged where this seat likes; dark when off, its door glowing and
    dice tumbling down inside it when on. */
-.tower-external { position: fixed; z-index: 410; padding: 0; border: 0; background: transparent; cursor: pointer; touch-action: none; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.55)); transition: transform 0.15s; }
+.tower-external { position: fixed; z-index: 410; margin: 0; padding: 0; border: 0; background: transparent; cursor: pointer; touch-action: none; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.55)); transition: transform 0.15s; }
 .tower-external:hover { transform: translateY(-2px); }
 .tower-external.drop { transform: scale(1.08); filter: drop-shadow(0 0 14px rgba(210, 161, 90, 0.75)); }
 .tower-external.dragging { cursor: grabbing; transition: none; }
@@ -1602,7 +1602,7 @@ textarea.cc-field.tall { min-height: 220px; }
 .tower-art { display: block; }
 .tower-art:not(.on) { filter: saturate(0.4) brightness(0.72); transition: filter 0.3s; }
 .tower-art.on .tower-door { animation: tower-glow 1.8s ease-in-out infinite; }
-.tower-art .tower-die { fill: #f4efe4; stroke: #6a4a24; stroke-width: 0.4; opacity: 0; transform-box: fill-box; transform-origin: center; }
+.tower-art .tower-die { stroke-width: 0.4; opacity: 0; transform-box: fill-box; transform-origin: center; }
 .tower-art.on .tower-die { animation: tower-tumble 1.8s cubic-bezier(0.5, 0, 0.7, 1) infinite; }
 .tower-art.on .tower-die.d2 { animation-delay: 0.6s; }
 .tower-art.on .tower-die.d3 { animation-delay: 1.2s; }
@@ -1614,6 +1614,40 @@ textarea.cc-field.tall { min-height: 220px; }
   75% { opacity: 1; transform: translate(2px, 26px) rotate(400deg); }
   100% { opacity: 0; transform: translate(-1px, 34px) rotate(560deg); }
 }
+/* Dice held over it: quicker, brighter, the tower leaning to meet them. */
+.tower-art.busy .tower-die { animation-duration: 0.9s; }
+.tower-art.busy .tower-die.d2 { animation-delay: 0.3s; }
+.tower-art.busy .tower-die.d3 { animation-delay: 0.6s; }
+.tower-art.busy .tower-door { animation: tower-glow 0.5s ease-in-out infinite; }
+.tower-art.busy { animation: tower-eager 0.5s ease-in-out infinite; transform-origin: 50% 90%; }
+.tower-art .tower-spill { animation: tower-glow 1.8s ease-in-out infinite; }
+.tower-art.on .tower-gear { animation: tower-gear 4s linear infinite; }
+.tower-art.busy .tower-gear { animation-duration: 1.2s; }
+.tower-art.on .tower-runes { animation: tower-glow 1.4s ease-in-out infinite; }
+@keyframes tower-gear { from { transform: translate(27px, 49px) rotate(0deg); } to { transform: translate(27px, 49px) rotate(360deg); } }
+@keyframes tower-eager { 0%, 100% { transform: rotate(0deg) scale(1); } 50% { transform: rotate(-2deg) scale(1.03); } }
+/* The GM's own tower picture, with the dice falling in front of it. */
+.tower-art.picture { position: relative; display: block; }
+.tower-art.picture img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+.tower-art.picture svg { position: absolute; inset: 0; }
+.tower-art.picture .tower-lit { opacity: 0; transition: opacity 0.35s; }
+.tower-art.picture[data-lit="true"] .tower-lit { opacity: 1; }
+.tower-art.picture.paired.on img { filter: none; }
+.tower-art.picture.paired.on .tower-lit { animation: tower-glow 1.8s ease-in-out infinite; }
+.tower-art.picture.paired.busy .tower-lit { animation: tower-glow 0.5s ease-in-out infinite; filter: drop-shadow(0 0 10px rgba(255, 210, 120, 0.8)) brightness(1.1); }
+.tower-art.picture.on:not(.paired) img { filter: drop-shadow(0 0 6px rgba(255, 190, 90, 0.75)); }
+.tower-art.picture.busy:not(.paired) img { filter: drop-shadow(0 0 12px rgba(255, 190, 90, 0.95)) brightness(1.12); }
+/* Locked in place: a padlock at its foot, and no grabbing it. */
+.tower-external.locked { cursor: pointer; }
+.tower-external .tower-lock { position: absolute; right: 2px; bottom: 14px; display: grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: rgba(20, 16, 12, 0.85); border: 1px solid var(--brass); color: var(--brass); }
+/* Its right-click menu, beside it. */
+.tower-menu { position: fixed; z-index: 960; min-width: 200px; padding: 6px; border: 1px solid var(--line, #3a3a44); border-radius: 8px; background: var(--panel, #1b1b22); box-shadow: 0 10px 24px rgba(0, 0, 0, 0.55); display: grid; gap: 4px; }
+.tower-menu > button { text-align: left; padding: 6px 10px; border: 0; border-radius: 5px; background: transparent; color: inherit; cursor: pointer; }
+.tower-menu > button:hover, .tower-menu > button:focus-visible { background: rgba(210, 161, 90, 0.18); }
+.tower-menu .tower-at { display: flex; align-items: center; gap: 4px; padding: 4px 6px; font-size: 0.8rem; color: var(--muted); }
+.tower-menu .tower-at input { width: 58px; }
+.tower-menu hr { border: 0; border-top: 1px solid var(--line, #3a3a44); margin: 2px 0; }
+.decal-thumb.tower { display: grid; place-items: center; }
 @media (prefers-reduced-motion: reduce) { .tower-art.on .tower-die, .tower-art.on .tower-door { animation: none; } .tower-art.on .tower-die.d1 { opacity: 1; transform: translate(0, 30px); } }
 /* The image window's own controls (FG's image window): the lock and the tools
    toggle in the corner; the navigation pad; with the tools hidden and locked,

@@ -373,7 +373,7 @@ export function Desktop({
         if (command.kind !== "windows") return null;
         const { windows: manager, launchers: kinds, characters: sheets } = live.current;
         const list = () => manager.windows.map((item) => ({ key: item.key, kind: item.kind, title: item.title, poppedOut: item.popped }));
-        if (command.action === "list") return { open: list(), kinds: [...kinds.map((item) => entryId(item)), "sheet", "book", "images", "picture", "note", "decals", "wallpapers", "gmicons", "krits", "dice", "charselect", "cards"] };
+        if (command.action === "list") return { open: list(), kinds: [...kinds.map((item) => entryId(item)), "sheet", "book", "images", "picture", "note", "decals", "wallpapers", "gmicons", "towers", "krits", "dice", "charselect", "cards"] };
         let key: string = command.window ?? "";
         if (command.window === "note") {
           const id = String(command.record ?? "");
@@ -420,6 +420,8 @@ export function Desktop({
                         })()
                   : command.window === "gmicons"
                     ? { kind: "gmicons" as const, title: "GM Icon" }
+                  : command.window === "towers"
+                    ? { kind: "towers" as const, title: "Dice Tower" }
                   : command.window === "charselect"
                     ? { kind: "charselect" as const, title: "Character Selection" }
                   : command.window === "krits"
@@ -555,6 +557,7 @@ export function Desktop({
               {item.kind === "ships" ? <ShipsWindow session={session} openMaps={openMaps} /> : null}
               {item.kind === "library" ? <LibraryWindow session={session} openMaps={openMaps} /> : null}
               {item.kind === "gmicons" ? <DecalPicker session={session} kind="gmicon" onClose={() => windows.close(item.key)} /> : null}
+              {item.kind === "towers" ? <DecalPicker session={session} kind="tower" onClose={() => windows.close(item.key)} /> : null}
             </FloatingWindow>
             ),
           )}

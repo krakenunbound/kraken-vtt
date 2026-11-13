@@ -67,6 +67,10 @@ of use, and a built-in AI agent that can do anything the GM can.
   effects, a party sheet and treasure parcels.
 - **Sound.** One-shots, sound effects triggered by the chat (a sword hit, a
   fireball), ambience and music, each with its own volume for every player.
+- **Make it yours.** `Documents/Kraken VTT` has a folder for each thing you
+  can add: dice packs, dice towers, GM icons, background decals, wallpapers
+  and books. Each holds a README on what goes in it and how to make one, for
+  you or for an AI agent.
 - **A multi-monitor GM.** Every window can pop out to another monitor.
 - **AI-first.** Every GM action is also a tool for an AI agent (MCP), so an
   assistant can build characters, run combat or set up a map. See

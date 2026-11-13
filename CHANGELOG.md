@@ -4,6 +4,37 @@ What changed in each release of Kraken VTT. Downloads are on the
 [Releases](https://github.com/krakenunbound/kraken-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
+## 0.1.0-alpha.84: Dice towers, dice packs, and your Kraken VTT folder
+
+- **The dice tower has a menu.** Right-click the tower on the table: **Lock
+  it where it stands** (a padlock; dragging no longer moves it, a click still
+  turns it on and off), **Fix it at** an exact x,y (put there and locked), turn
+  it on or off, and, for the GM, **Change its look…** or **Dock it in the
+  chat**. Each screen keeps its own place and lock.
+- **The tower comes alive when you hold dice over it,** on or off: the dice
+  tumble twice as fast and the door blazes. Before, only a click lit it.
+- **Tower looks, chosen by the GM for everyone:** six drawn towers (Castle
+  stone, Ironbound oak, Obsidian runes, Frost spire, Clockwork brass, Bone
+  ossuary), the **Kraken Lighthouse** from your Fantasy Grounds Kraken Ocean
+  Theme (dark when off, lit when on, as in FG), and five painted towers (Wizard
+  Spire, Dwarven Forge, Haunted Belfry, Elven Birch, Dragon Skull). Add your
+  own picture, with a `lit` twin if you like.
+- **Dice packs.** A folder (or .zip) with `dice.json` and its pictures, dropped
+  in the Dice folder, adds dice sets for everyone at the table. Sets can wear
+  pictures on their faces, with a glowing part. The **Kraken Sea Glass**
+  example comes with the folder.
+- **A Kraken VTT folder you can find:** `DocumentsKraken VTT` holds a folder
+  for each kind of thing you add: Packs, Dice, Dice Towers, GM Icons, Background
+  Decals and Wallpapers. Each has a README saying what goes in it and how to make
+  one. `AGENTS.md` explains the same for an AI agent. What you added before is
+  copied in. **Settings > Kraken VTT Folder** opens it.
+- **Eight new desktop wallpapers** (Patterns): deep sea slate, tooled leather,
+  Kraken damask, star field, ship deck, dragon scales, old parchment and
+  engraved waves, all seamless.
+- **Checked: the map editor is the GM's alone.** A test player has no Lock,
+  preview, editor or pins on a shared map, and the host refuses a player's
+  walls and lights even when they are sent behind the interface's back.
+
 ## 0.1.0-alpha.83: Updates
 
 - **Kraken updates itself.** When it starts, it looks once for a newer

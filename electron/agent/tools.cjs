@@ -1026,10 +1026,11 @@ const TOOLS = [
   {
     name: "kraken_table_options",
     description:
-      "The table's own options. towerReveal: a roll a player drops in the dice tower is shown to that player too (as FG, it is otherwise the GM's alone; the player sees only what went in). towerExternal: the dice tower stands on the table apart from the chat (every seat; each places it where they like), else it is docked in the chat's dice tray. decal: the background decal (kraken_decal chooses one). clearTargets: when a creature's targets clear: never (FG), action (after its spell, or its attack's damage), turn (at the end of its turn). diceHold: how long landed 3D dice lie on the table before they fade, in seconds (0.5 to 60, default 2.6), for every seat. wizard35: the D&D 3.5E character wizard's options (FG's KrakenCharWizard35E options): methods, the ability score methods players may pick (1 4d6 drop lowest arranged, 2 3d6 in order, 3 the standard array 15,14,13,12,10,8, 4 typed by hand; default all four); rollLock: the scores cannot be rolled again; lowReroll: a 4d6 score under 8 may be rerolled once with 3d6, the result stands; vault: the Vault of the Kraken's poor or secondhand gear is free in the wizard's shop. wizard2e: the AD&D 2E character wizard's options, as the FG extension's: rollLock (abilities rolled once only, no re-rolls), methods (the PHB ability methods players may pick: 1 = 3d6 in order, 2 = 3d6 twice keep higher, 3 = 3d6 x6 arrange, 4 = 3d6 x12 keep best 6, 5 = 4d6 drop lowest, 6 = all 8s then place 7d6; none: Method V), gold (starting gold above 1st level: phb one roll, perlevel one roll a level, xlevel one roll times the level). A partial wizard35 or wizard2e changes only what it names. Call with nothing to read them.",
+      "The table's own options. towerReveal: a roll a player drops in the dice tower is shown to that player too (as FG, it is otherwise the GM's alone; the player sees only what went in). towerExternal: the dice tower stands on the table apart from the chat (every seat; each places it where they like), else it is docked in the chat's dice tray. towerStyle: how the tower looks for every seat (kraken_tower lists the looks). decal: the background decal (kraken_decal chooses one). clearTargets: when a creature's targets clear: never (FG), action (after its spell, or its attack's damage), turn (at the end of its turn). diceHold: how long landed 3D dice lie on the table before they fade, in seconds (0.5 to 60, default 2.6), for every seat. wizard35: the D&D 3.5E character wizard's options (FG's KrakenCharWizard35E options): methods, the ability score methods players may pick (1 4d6 drop lowest arranged, 2 3d6 in order, 3 the standard array 15,14,13,12,10,8, 4 typed by hand; default all four); rollLock: the scores cannot be rolled again; lowReroll: a 4d6 score under 8 may be rerolled once with 3d6, the result stands; vault: the Vault of the Kraken's poor or secondhand gear is free in the wizard's shop. wizard2e: the AD&D 2E character wizard's options, as the FG extension's: rollLock (abilities rolled once only, no re-rolls), methods (the PHB ability methods players may pick: 1 = 3d6 in order, 2 = 3d6 twice keep higher, 3 = 3d6 x6 arrange, 4 = 3d6 x12 keep best 6, 5 = 4d6 drop lowest, 6 = all 8s then place 7d6; none: Method V), gold (starting gold above 1st level: phb one roll, perlevel one roll a level, xlevel one roll times the level). A partial wizard35 or wizard2e changes only what it names. Call with nothing to read them.",
     inputSchema: object({
       towerReveal: { type: "boolean" },
       towerExternal: { type: "boolean" },
+      towerStyle: { type: "string" },
       clearTargets: { type: "string", enum: ["never", "action", "turn"] },
       diceHold: { type: "number" },
       wizard35: { type: "object", properties: { methods: { type: "array", items: { type: "number" } }, rollLock: { type: "boolean" }, lowReroll: { type: "boolean" }, vault: { type: "boolean" } } },
@@ -1071,6 +1072,49 @@ const TOOLS = [
         return out({ imported: item, [key]: item.id });
       }
       return out({ [key]: agent.options()[key] });
+    },
+  },
+  {
+    name: "kraken_tower",
+    description:
+      "The dice tower. Its look, for every seat (the GM's choice, saved with the campaign): action list (Kraken's drawn looks: stone, oak, obsidian, frost, brass, bone; and the GM's own tower pictures, from the towers assets folder), style (id: one of those), import (path: a picture on this computer, copied into the towers folder and put up). The external tower on the GM's own screen (Settings: External dice tower), as its right-click menu: view (its place x,y in screen pixels, locked, on); lock (fixed where it stands, or at x,y when given: it cannot be dragged); unlock; place (x, y: move it there); on and off (the tower itself, as a click on it).",
+    inputSchema: object({
+      action: { type: "string", enum: ["view", "list", "style", "import", "lock", "unlock", "place", "on", "off"] },
+      id: string("style: a look's id from list"),
+      path: string("import: full path of a .png, .webp, .jpg or .gif"),
+      x: number("lock or place: screen pixels from the left"),
+      y: number("lock or place: screen pixels from the top"),
+    }),
+    async run(args, ctx) {
+      const agent = needTable(ctx);
+      const action = args.action ?? "view";
+      const looks = ["stone", "oak", "obsidian", "frost", "brass", "bone"];
+      if (action === "list") {
+        const library = agent.towers();
+        return out({ style: agent.options().towerStyle, drawn: looks, pictures: library ? library.list() : [], folder: library?.folder ?? null });
+      }
+      if (action === "style") return out({ style: agent.setOptions({ towerStyle: String(args.id ?? "") }).towerStyle });
+      if (action === "import") {
+        const library = agent.towers();
+        if (!library) throw new Error("This table has no towers folder.");
+        const item = library.addFile(String(args.path ?? ""));
+        return out({ imported: item, style: agent.setOptions({ towerStyle: item.id }).towerStyle });
+      }
+      return out(await ctx.ui({ kind: "tower", action, x: args.x, y: args.y }));
+    },
+  },
+  {
+    name: "kraken_dice_packs",
+    description:
+      "Dice packs: more dice sets for every seat, made by the GM or an agent and dropped in Documents/Kraken VTT/Dice (a folder, or a .zip of one, holding dice.json and the pictures its sets wear; the format, with examples, is that folder's README.md and the kraken-content skill). action list: the installed packs, each with its sets (each a whole dice look, usable as kraken_dice_settings preset by name) and its problems; check (path): read a pack anywhere (a folder or .zip being made) as Kraken would, its sets and problems, without installing it; folder: the Dice folder's path.",
+    inputSchema: object({ action: { type: "string", enum: ["list", "check", "folder"] }, path: string("check: a pack folder or .zip") }),
+    run(args, ctx) {
+      const packs = needTable(ctx).dicePacks();
+      if (!packs) throw new Error("This table has no dice packs folder.");
+      if (args.action === "check") return out(packs.check(args.path));
+      if (args.action === "folder") return out({ folder: packs.folder });
+      packs.refresh();
+      return out({ folder: packs.folder, packs: packs.list() });
     },
   },
   {
@@ -1577,7 +1621,7 @@ const TOOLS = [
       show: { type: "boolean" },
       sound: { type: "boolean" },
       volume: number("0 to 1"),
-      preset: string("Preset name"),
+      preset: string("Preset name, or a dice pack set's name (kraken_dice_packs list)"),
       body: string("Dice colour, #rrggbb"),
       accent: string("Second colour, #rrggbb"),
       ink: string("Numbers colour, #rrggbb"),

@@ -90,9 +90,10 @@ export type KrakenApi = {
   campaignBundle: (id: string) => Promise<Uint8Array | null>;
   saveBundle: (id: string, bytes: Uint8Array) => Promise<void>;
   saveView: (id: string, view: KrakenView | null) => Promise<void>;
-  pickDecal: (kind?: "decal" | "wallpaper" | "gmicon" | "tile") => Promise<KrakenDecal | null>;
-  addDecal: (name: string, bytes: Uint8Array, kind?: "decal" | "wallpaper" | "gmicon" | "tile") => Promise<KrakenDecal>;
-  openDecalFolder: (kind?: "decal" | "wallpaper" | "gmicon" | "tile") => Promise<string>;
+  pickDecal: (kind?: "decal" | "wallpaper" | "gmicon" | "tile" | "tower") => Promise<KrakenDecal | null>;
+  addDecal: (name: string, bytes: Uint8Array, kind?: "decal" | "wallpaper" | "gmicon" | "tile" | "tower") => Promise<KrakenDecal>;
+  openDecalFolder: (kind?: "decal" | "wallpaper" | "gmicon" | "tile" | "tower") => Promise<string>;
+  openKrakenFolder?: (kind?: "" | "dice" | "towers" | "gmicons" | "decals" | "wallpapers" | "packs") => Promise<string>;
   pickSounds: (kind: string, group: string) => Promise<KrakenSound[]>;
   addSound: (kind: string, group: string, name: string, bytes: Uint8Array) => Promise<KrakenSound>;
   openSoundFolder: () => Promise<string>;
@@ -115,6 +116,7 @@ export type KrakenAgentCommand =
   | { kind: "sidebar"; action: "list" | "state" | "fold" | "press"; state?: number; group?: string; folded?: boolean; entry?: string }
   | { kind: "dice-settings"; patch: DiceSettingsPatch }
   | { kind: "quickslots"; action: "press"; index: number }
+  | { kind: "tower"; action: "view" | "lock" | "unlock" | "place" | "on" | "off"; x?: number; y?: number }
   | { kind: "image"; action: "open" | "make" | "play" | "test" | "preview" | "close" | "studio"; book?: string; name?: string; file?: string; on?: boolean };
 
 export type DiceSettingsPatch = { show?: boolean; sound?: boolean; volume?: number; preset?: string; body?: string; accent?: string; ink?: string; design?: string; material?: string; font?: string; effect?: string; crit?: boolean; pips?: boolean; set?: "mine" | "npc" | "damage"; same?: boolean; color?: string; character?: string; resolve?: boolean; base?: Partial<import("./dice/diceStore").DiceLook> | null };

@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useState, useSyncExternalStore } from "react";
 import type { Session } from "../session/useSession";
+import { dicePacks } from "./dicePacks";
 import { characterDice, DESIGNS, diceStore, EFFECTS, FONTS, MATERIALS, PRESETS, SET_GROUPS, type DiceLook, type DiceSet } from "./diceStore";
 
 // The preview's three.js loads with the window.
@@ -17,11 +18,14 @@ const FONT_STYLE: Record<DiceLook["font"], React.CSSProperties> = {
 const TRAY_DICE = [20, 12, 10, 8, 6, 4, 100];
 
 // A preset is the whole look: pips only where it has them (not left over from the set before).
-const lookOf = ({ name: _name, ...look }: { name: string } & DiceLook): DiceLook => ({ ...look, pips: Boolean(look.pips) });
+// (and its picture only where it has one).
+const lookOf = ({ name: _name, ...look }: { name: string } & DiceLook): DiceLook => ({ ...look, pips: Boolean(look.pips), texture: look.texture, glowTexture: look.glowTexture });
 function sameLook(a: DiceLook, b: DiceLook) {
-  return (["theme", "body", "ink", "accent", "material", "effect", "font"] as const).every((key) => a[key] === b[key]) && Boolean(a.pips) === Boolean(b.pips);
+  return (["theme", "body", "ink", "accent", "material", "effect", "font", "texture", "glowTexture"] as const).every((key) => a[key] === b[key]) && Boolean(a.pips) === Boolean(b.pips);
 }
-const nameOf = (look: DiceLook) => PRESETS.find((preset) => sameLook(look, preset))?.name ?? null;
+// Kraken's sets, then each dice pack's (a group of its own).
+type Shown = { name: string } & DiceLook;
+const nameIn = (all: Shown[], look: DiceLook) => all.find((preset) => sameLook(look, preset))?.name ?? null;
 
 // 3D pictures of dice (the tray's renderer), drawn when the window opens.
 function usePictures<T>(load: () => Promise<T>, key: string, empty: T) {
@@ -100,11 +104,17 @@ export function DiceWindow({ session }: { session: Session }) {
   const following = character ? own === null : editing !== "look" && own === null;
   const followLabel = character ? `${character.name} uses ${charSet === "damage" ? "my damage dice" : "my dice"}` : editing === "npc" ? "NPC dice are my dice" : "Damage dice are my dice";
   const setFollowing = (on: boolean) => (character ? saveCharacter({ [charSet]: on ? null : { ...look } }) : diceStore.update({ [editing]: on ? null : { ...settings.look } }));
-  const [group, setGroup] = useState(SET_GROUPS.find((item) => item.sets.includes(nameOf(look) ?? ""))?.name ?? "All");
+  const packs = useSyncExternalStore(dicePacks.subscribe, dicePacks.list);
+  const all: Shown[] = [...PRESETS, ...packs.flatMap((pack) => pack.sets)];
+  // Each set's group: Kraken's by name, a pack's by the pack (two packs may share a set's name).
+  const groupOf = [...PRESETS.map((preset) => SET_GROUPS.find((item) => item.sets.includes(preset.name))?.name ?? ""), ...packs.flatMap((pack) => pack.sets.map(() => pack.name))];
+  const groups = [...SET_GROUPS, ...packs.map((pack) => ({ name: pack.name, sets: pack.sets.map((set) => set.name), pack: pack.id }))];
+  const nameOf = (shown: DiceLook) => nameIn(all, shown);
+  const [group, setGroup] = useState(groups.find((item) => item.sets.includes(nameOf(look) ?? ""))?.name ?? "All");
   const tray = usePictures(() => import("./trayArt").then(({ renderTray }) => renderTray(look)), JSON.stringify(look), {} as Record<number, string>);
-  const sets = usePictures(() => import("./trayArt").then(({ renderSets }) => renderSets(PRESETS.map(lookOf))), "sets", [] as string[]);
+  const sets = usePictures(() => import("./trayArt").then(({ renderSets }) => renderSets(all.map(lookOf))), `sets|${packs.map((pack) => `${pack.id}:${pack.sets.length}`).join(",")}`, [] as string[]);
   const name = nameOf(look);
-  const shown = PRESETS.map((preset, index) => ({ preset, picture: sets[index] })).filter(({ preset }) => group === "All" || SET_GROUPS.find((item) => item.name === group)?.sets.includes(preset.name));
+  const shown = all.map((preset, index) => ({ preset, picture: sets[index], index })).filter(({ index }) => group === "All" || groupOf[index] === group);
 
   return (
     <div className="dice-window">
@@ -183,18 +193,25 @@ export function DiceWindow({ session }: { session: Session }) {
       </section>
 
       <section className="dice-panel">
-        <h3>Dice sets</h3>
+        <h3>
+          Dice sets
+          {session.role === "dm" && window.kraken?.openKrakenFolder ? (
+            <button type="button" className="ghost dice-packs-folder" data-action="dice-packs-folder" title="Dice packs: a folder (or .zip) with dice.json and its pictures, dropped here, adds its sets for everyone at the table. The README there says how to make one." onClick={() => void window.kraken?.openKrakenFolder?.("dice")}>
+              Dice packs folder
+            </button>
+          ) : null}
+        </h3>
         <div className="dice-groups" role="tablist" aria-label="Groups">
-          {["All", ...SET_GROUPS.map((item) => item.name)].map((item) => (
+          {["All", ...groups.map((item) => item.name)].map((item) => (
             <button key={item} type="button" role="tab" aria-selected={group === item} className={group === item ? "dice-chip on" : "dice-chip"} onClick={() => setGroup(item)}>
               {item}
             </button>
           ))}
         </div>
         <div className="dice-sets">
-          {shown.map(({ preset, picture }) => (
+          {shown.map(({ preset, picture, index }) => (
             <button
-              key={preset.name}
+              key={`${index}-${preset.name}`}
               type="button"
               className={sameLook(look, preset) ? "dice-set on" : "dice-set"}
               title={preset.name}

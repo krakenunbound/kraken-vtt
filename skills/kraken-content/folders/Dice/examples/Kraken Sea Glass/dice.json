@@ -1,0 +1,48 @@
+{
+  "kraken": "dice-pack",
+  "version": 1,
+  "name": "Kraken Sea Glass",
+  "author": "Kraken VTT",
+  "description": "An example dice pack: two picture sets and two painted ones. Copy this folder, rename it, and make it your own.",
+  "sets": [
+    {
+      "name": "Kraken Hide",
+      "texture": "kraken-hide.webp",
+      "glow": "kraken-hide-glow.webp",
+      "body": "#3a1a5c",
+      "ink": "#ffd77a",
+      "material": "stone",
+      "effect": "embers",
+      "font": "metal"
+    },
+    {
+      "name": "Sea Glass",
+      "texture": "sea-glass.webp",
+      "body": "#5fb8b0",
+      "ink": "#0e2a33",
+      "material": "glass",
+      "effect": "aura",
+      "font": "bold"
+    },
+    {
+      "name": "Tidepool",
+      "theme": "swirl",
+      "body": "#0f5a66",
+      "accent": "#7fe7d8",
+      "ink": "#f4fbff",
+      "material": "glass",
+      "effect": "aura",
+      "font": "glow"
+    },
+    {
+      "name": "Barnacle",
+      "theme": "speckle",
+      "body": "#6b6150",
+      "accent": "#e9e1cf",
+      "ink": "#1d1a14",
+      "material": "stone",
+      "font": "engrave",
+      "pips": true
+    }
+  ]
+}

@@ -18,6 +18,7 @@ function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 const settle = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const wallCount = (listed) => (Array.isArray(listed) ? listed : (listed?.walls ?? [])).length;
 
 const profile = mkdtempSync(path.join(tmpdir(), "kraken-image-chrome-ui-"));
 const env = { ...process.env, KRAKEN_AGENT_FILE: path.join(profile, "agent.json"), KRAKEN_AGENT_PORT: "0", KRAKEN_BOOKS: path.join(profile, "no-fg-modules"), KRAKEN_PACKS: path.join(profile, "packs") };
@@ -125,6 +126,19 @@ try {
   browser = await chromium.launch({ executablePath: CHROME, headless: true });
   const seat = await browser.newPage({ viewport: { width: 1300, height: 900 } });
   seat.on("pageerror", (error) => failures.push(`player: ${error.message}`));
+  // The player's own socket, to try the map editor's messages behind the interface's back.
+  await seat.addInitScript(() => {
+    const Native = window.WebSocket;
+    window.__sockets = [];
+    window.WebSocket = class extends Native {
+      constructor(...args) {
+        super(...args);
+        window.__sockets.push(this);
+      }
+    };
+  });
+  const heard = [];
+  seat.on("websocket", (ws) => ws.on("framereceived", (frame) => heard.push(typeof frame.payload === "string" ? frame.payload : "")));
   await seat.goto(`http://127.0.0.1:${port}/`);
   await seat.fill('input[name="name"]', "A test player");
   await seat.fill('input[name="account-password"]', "test-pass");
@@ -142,6 +156,28 @@ try {
   await page.waitForSelector('[data-action="table-share"][aria-pressed="true"]');
   await seat.waitForSelector('.window[data-window="map"] .viewport', { timeout: 20000 });
   report.push("Share: the test player sees the table map, not when it is stopped sharing, and again when shared");
+
+  // The map editor is the GM's alone: the player has no Lock (editor), no
+  // player vision preview, no editor panel, even with the tools shown; and the
+  // host refuses the editor's messages from a player's seat.
+  const playerWindow = '.window[data-window="map"]';
+  assert(!(await seat.$(`${playerWindow} [data-action="map-editor"]`)), "the player has no map editor (Lock)");
+  assert(!(await seat.$(`${playerWindow} [data-action="vision-preview"]`)), "the player has no vision preview");
+  if (await seat.$(`${playerWindow} [data-action="map-tools"][aria-pressed="false"]`)) await seat.click(`${playerWindow} [data-action="map-tools"]`);
+  assert(!(await seat.$(".map-editor")) && !(await seat.$(`${playerWindow} [data-action="map-pins"]`)), "with the tools shown, still no editor or pins");
+  await seat.keyboard.press("e").catch(() => undefined);
+  assert(!(await seat.$(".map-editor")), "no editor by key either");
+  const wallsBefore = wallCount(await tool("kraken_wall", { action: "list" }));
+  await seat.evaluate(() => {
+    const socket = window.__sockets.find((item) => item.readyState === 1);
+    socket.send(JSON.stringify({ type: "wall", action: "add", wall: { points: [0, 0, 300, 0] } }));
+    socket.send(JSON.stringify({ type: "light-place", light: { x: 50, y: 50, bright: 20, dim: 40 } }));
+  });
+  for (let wait = 0; wait < 20 && !heard.some((text) => text.includes("Only the GM can place lights")); wait++) await settle(150);
+  assert(heard.some((text) => text.includes("Only the GM can draw walls")) && heard.some((text) => text.includes("Only the GM can place lights")), "the host refuses a player's wall and light");
+  assert(wallCount(await tool("kraken_wall", { action: "list" })) === wallsBefore, "no wall added by the player");
+  await seat.screenshot({ path: path.join(tmpdir(), "kraken-player-map-no-editor.png") });
+  report.push("the map editor is the GM's alone: the test player has no Lock, preview, editor or pins, and the host refuses a player's wall and light");
 
   // Assets: a picture of the handbook made a map.
   await page.click('.sidebar [data-launch="assets"]');

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { dicePacks } from "../dice/dicePacks";
 import type { MapScene } from "../table/MapView";
 import { sound, type Soundscape } from "../sound/soundEngine";
 import { diceStore, rolling, throwIntent } from "../dice/diceStore";
@@ -157,13 +158,13 @@ export type QuickSlot =
 export type KrakenLink = QuickSlot;
 export type SoundItem = { id: string; kind: string; group: string; name: string };
 export type SoundLibrary = { sounds: SoundItem[]; groups: { id: string; count: number }[]; folder: string; triggers?: SoundTrigger[] };
-export type TableOptions = { towerReveal: boolean; towerExternal?: boolean; decal: string; wallpaper: string; gmIcon: string; soundHidden: "off" | "combat" | "all"; soundRepeat: number; diceHold?: number; wizard35?: Wizard35Options; wizard2e?: Wizard2eOptions };
+export type TableOptions = { towerReveal: boolean; towerExternal?: boolean; towerStyle?: string; decal: string; wallpaper: string; gmIcon: string; soundHidden: "off" | "combat" | "all"; soundRepeat: number; diceHold?: number; wizard35?: Wizard35Options; wizard2e?: Wizard2eOptions };
 // The D&D 3.5E character wizard's options (the GM's, as FG's KrakenCharWizard35E).
 export type Wizard35Options = { methods: number[]; rollLock: boolean; lowReroll: boolean; vault: boolean };
 // The AD&D 2E character wizard's options (the GM's): ability rolls once only, the PHB methods allowed, gold above 1st level.
 export type Wizard2eOptions = { rollLock: boolean; methods: number[]; gold: "phb" | "perlevel" | "xlevel" };
 export type DecalItem = { id: string; name: string; group: string; ruleset?: string };
-export type PictureKind = "decal" | "wallpaper" | "gmicon" | "tile";
+export type PictureKind = "decal" | "wallpaper" | "gmicon" | "tile" | "tower";
 // The combat tracker as the host shows it to this seat (electron/combat.cjs viewFor).
 // A character's face as everyone is told it (FG's character list).
 // A player's account as the GM is shown it (never a password).
@@ -459,6 +460,8 @@ export function useSession() {
             assetRef.current = you.assetToken ?? "";
             // Sounds come from the host, for this seat.
             sound.setSource((id) => `${originRef.current}/sound/file?token=${assetRef.current}&id=${encodeURIComponent(id)}`);
+            // The GM's dice packs (Documents/Kraken VTT/Dice): more sets for this seat to choose from.
+            void dicePacks.connect(originRef.current, assetRef.current);
             setRuleset(typeof msg.ruleset === "string" ? msg.ruleset : "");
             if (msg.sceneSound && typeof msg.sceneSound === "object") setSceneSound(msg.sceneSound as { sceneId: string | null; kept: Soundscape | null });
             if (msg.soundscape) {

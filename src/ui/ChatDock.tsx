@@ -5,7 +5,8 @@ import { characterDice, diceStore, rolling, setThrow, tower as towerDrops, type 
 import { commandsFor, runChat, type Command } from "./chatCommands";
 import { slotDrag } from "./QuickSlots";
 import { chatRunner } from "./chatRunner";
-import { TowerArt } from "./TowerArt";
+import { TowerArt, towerLook } from "./TowerArt";
+import { agentCommands } from "./agentCommands";
 import { DieShape, Icon } from "./icons";
 import { useWindows } from "./Windows";
 import { openPopOut, PopOutWindow, screenOffset, type ScreenPlace } from "./PopOut";
@@ -227,63 +228,182 @@ function withModifier(formula: string, modifier: number) {
 // The chat window (FG's, bottom left): the log, a line to type in, the dice
 // tray (click dice to gather a pool, then roll), the modifier box, and the
 // dice tower (a roll only the GM sees).
-// Where this screen keeps the tower apart from the chat (by screen, not by table).
+// Where this screen keeps the tower apart from the chat (by screen, not by
+// table), and whether it is locked there (it cannot be dragged).
 const TOWER_PLACE = "kraken-tower-place";
-function towerPlace() {
+type TowerPlace = { x: number; y: number; locked: boolean };
+const towerFits = (x: number, y: number) => ({ x: Math.round(Math.min(window.innerWidth - 80, Math.max(0, x))), y: Math.round(Math.min(window.innerHeight - 100, Math.max(0, y))) });
+function towerPlace(): TowerPlace {
   try {
     const saved = JSON.parse(window.localStorage.getItem(TOWER_PLACE) ?? "null");
-    if (saved && Number.isFinite(saved.x) && Number.isFinite(saved.y)) return { x: Math.min(window.innerWidth - 80, Math.max(0, saved.x)), y: Math.min(window.innerHeight - 100, Math.max(0, saved.y)) };
+    if (saved && Number.isFinite(saved.x) && Number.isFinite(saved.y)) return { ...towerFits(saved.x, saved.y), locked: saved.locked === true };
   } catch {
     /* the default place */
   }
-  return { x: window.innerWidth - 300, y: window.innerHeight - 190 };
+  return { ...towerFits(window.innerWidth - 300, window.innerHeight - 190), locked: false };
+}
+function keepTowerPlace(place: TowerPlace) {
+  try {
+    window.localStorage.setItem(TOWER_PLACE, JSON.stringify(place));
+  } catch {
+    /* this visit only */
+  }
 }
 // The dice tower standing on the table: a click turns it on or off, a drag
-// moves it (kept on this screen), and dice dropped on it go in.
-function ExternalTower({ on, drop, title, towerRef, onToggle }: { on: boolean; drop: boolean; title: string; towerRef: React.RefObject<HTMLButtonElement | null>; onToggle: () => void }) {
-  const [place, setPlace] = useState(towerPlace);
+// moves it (kept on this screen) unless it is locked, dice dropped on it go in,
+// and a right-click opens its menu beside it: on or off, lock or unlock, fix it
+// at x,y; the GM's also change its look (for everyone) or dock it in the chat.
+function ExternalTower({ session, on, drop, title, towerRef, onToggle }: { session: Session; on: boolean; drop: boolean; title: string; towerRef: React.RefObject<HTMLButtonElement | null>; onToggle: () => void }) {
+  const [place, setPlaceState] = useState(towerPlace);
   const [dragging, setDragging] = useState(false);
+  const [menu, setMenu] = useState<{ x: number; y: number } | null>(null);
+  const [at, setAt] = useState({ x: "", y: "" });
+  const windows = useWindows();
+  const gm = session.role === "dm";
+  const style = session.options.towerStyle || "stone";
+  const picture = towerLook(style) ? "" : session.decalUrl(style, "tower");
+  const litPicture = picture ? session.decalUrl(style.replace(/(\.[a-z0-9]+)$/i, " lit$1"), "tower") : "";
+  const placeRef = useRef(place);
+  const setPlace = (next: TowerPlace) => {
+    placeRef.current = next;
+    setPlaceState(next);
+    keepTowerPlace(next);
+  };
+  const live = useRef({ on, onToggle, setPlace });
+  live.current = { on, onToggle, setPlace };
+  placeRef.current = place;
+  // The agent's hands on it (kraken_tower), as this menu.
+  useEffect(
+    () =>
+      agentCommands.register("tower", (command) => {
+        if (command.kind !== "tower") return null;
+        const current = live.current;
+        const xy = Number.isFinite(command.x) && Number.isFinite(command.y) ? towerFits(Number(command.x), Number(command.y)) : null;
+        let lit = current.on;
+        if (command.action === "lock") current.setPlace({ ...(xy ?? placeRef.current), locked: true });
+        else if (command.action === "unlock") current.setPlace({ ...placeRef.current, locked: false });
+        else if (command.action === "place") {
+          if (!xy) throw new Error("Give x and y (screen pixels).");
+          current.setPlace({ ...placeRef.current, ...xy });
+        } else if ((command.action === "on" && !current.on) || (command.action === "off" && current.on)) {
+          current.onToggle();
+          lit = !lit;
+        }
+        const shown = placeRef.current;
+        return { x: shown.x, y: shown.y, locked: shown.locked, on: lit };
+      }),
+    [],
+  );
+  // The menu closes on a click elsewhere, or Escape.
+  useEffect(() => {
+    if (!menu) return;
+    const away = (event: Event) => {
+      if (event instanceof KeyboardEvent && event.key !== "Escape") return;
+      if (event.target instanceof Element && event.target.closest(".tower-menu")) return;
+      setMenu(null);
+    };
+    window.addEventListener("pointerdown", away);
+    window.addEventListener("keydown", away);
+    return () => {
+      window.removeEventListener("pointerdown", away);
+      window.removeEventListener("keydown", away);
+    };
+  }, [menu]);
   const grab = (event: React.PointerEvent) => {
     if (event.button !== 0) return;
     const start = { x: event.clientX, y: event.clientY, left: place.x, top: place.y };
     let moved = false;
     let last = place;
     const move = (next: PointerEvent) => {
+      // Locked: it stays where it is (a click still turns it on or off).
+      if (place.locked) return;
       if (!moved && Math.hypot(next.clientX - start.x, next.clientY - start.y) < 5) return;
       moved = true;
       setDragging(true);
-      last = { x: Math.min(window.innerWidth - 80, Math.max(0, start.left + next.clientX - start.x)), y: Math.min(window.innerHeight - 100, Math.max(0, start.top + next.clientY - start.y)) };
-      setPlace(last);
+      last = { ...towerFits(start.left + next.clientX - start.x, start.top + next.clientY - start.y), locked: false };
+      setPlaceState(last);
     };
     const up = () => {
       window.removeEventListener("pointermove", move);
       window.removeEventListener("pointerup", up);
       setDragging(false);
       if (!moved) return onToggle();
-      try {
-        window.localStorage.setItem(TOWER_PLACE, JSON.stringify(last));
-      } catch {
-        /* this visit only */
-      }
+      setPlace(last);
     };
     window.addEventListener("pointermove", move);
     window.addEventListener("pointerup", up);
   };
+  const openMenu = (event: React.MouseEvent) => {
+    event.preventDefault();
+    setAt({ x: String(place.x), y: String(place.y) });
+    // Beside it: to its right, or to its left near the screen's right edge.
+    const right = place.x + 96;
+    setMenu({ x: right + 230 > window.innerWidth ? Math.max(4, place.x - 236) : right, y: Math.min(window.innerHeight - 270, Math.max(4, place.y)) });
+  };
+  const fixAt = () => {
+    const x = Number(at.x);
+    const y = Number(at.y);
+    if (at.x.trim() === "" || at.y.trim() === "" || !Number.isFinite(x) || !Number.isFinite(y)) return;
+    setPlace({ ...towerFits(x, y), locked: true });
+    setMenu(null);
+  };
+  const choose = (run: () => void) => () => {
+    run();
+    setMenu(null);
+  };
   return (
-    <button
-      type="button"
-      ref={towerRef}
-      className={["tower", "tower-external", on ? "on" : "", drop ? "drop" : "", dragging ? "dragging" : ""].filter(Boolean).join(" ")}
-      data-action="tower-external"
-      aria-pressed={on}
-      aria-label={on ? "Dice tower on" : "Dice tower off"}
-      title={`${title}; drag it to move it`}
-      style={{ left: place.x, top: place.y }}
-      onPointerDown={grab}
-    >
-      <TowerArt on={on} size={80} />
-      <span className="tower-label">{on ? "Tower on" : "Tower off"}</span>
-    </button>
+    <>
+      <button
+        type="button"
+        ref={towerRef}
+        className={["tower", "tower-external", on ? "on" : "", drop ? "drop" : "", dragging ? "dragging" : "", place.locked ? "locked" : ""].filter(Boolean).join(" ")}
+        data-action="tower-external"
+        data-locked={place.locked ? "true" : "false"}
+        aria-pressed={on}
+        aria-label={on ? "Dice tower on" : "Dice tower off"}
+        title={`${title}; ${place.locked ? "locked in place" : "drag it to move it"}; right-click for its menu`}
+        style={{ left: place.x, top: place.y }}
+        onPointerDown={grab}
+        onContextMenu={openMenu}
+      >
+        <TowerArt on={on} busy={drop} style={style} picture={picture} litPicture={litPicture} size={picture ? 104 : 80} />
+        {place.locked ? (
+          <span className="tower-lock" aria-hidden="true">
+            <Icon name="lock" size={11} />
+          </span>
+        ) : null}
+        <span className="tower-label">{on ? "Tower on" : "Tower off"}</span>
+      </button>
+      {menu ? (
+        <div className="tower-menu" role="menu" aria-label="Dice tower" style={{ left: menu.x, top: menu.y }}>
+          <button type="button" role="menuitem" data-action="tower-toggle" onClick={choose(onToggle)}>
+            {on ? "Turn the tower off" : "Turn the tower on"}
+          </button>
+          <button type="button" role="menuitem" data-action="tower-lock" onClick={choose(() => setPlace({ ...place, locked: !place.locked }))}>
+            {place.locked ? "Unlock (drag it again)" : "Lock it where it stands"}
+          </button>
+          <div className="tower-at">
+            <span>Fix it at</span>
+            <input type="number" aria-label="x" data-field="tower-x" value={at.x} onChange={(event) => setAt({ ...at, x: event.target.value })} onKeyDown={(event) => event.key === "Enter" && fixAt()} />
+            <input type="number" aria-label="y" data-field="tower-y" value={at.y} onChange={(event) => setAt({ ...at, y: event.target.value })} onKeyDown={(event) => event.key === "Enter" && fixAt()} />
+            <button type="button" className="ghost" data-action="tower-fix" title="Put it there and lock it" onClick={fixAt}>
+              Set
+            </button>
+          </div>
+          {gm ? (
+            <>
+              <hr />
+              <button type="button" role="menuitem" data-action="tower-look" onClick={choose(() => windows.open("towers", "Dice Tower"))}>
+                Change its look…
+              </button>
+              <button type="button" role="menuitem" data-action="tower-dock" onClick={choose(() => session.setTableOptions({ towerExternal: false }))}>
+                Dock it in the chat
+              </button>
+            </>
+          ) : null}
+        </div>
+      ) : null}
+    </>
   );
 }
 
@@ -873,7 +993,7 @@ export function ChatDock({ session }: { session: Session }) {
       </div>
       {external
         ? createPortal(
-            <ExternalTower on={tower} drop={Boolean(ghost?.overTower)} title={towerTitle} towerRef={towerButton} onToggle={() => setTower(!tower)} />,
+            <ExternalTower session={session} on={tower} drop={Boolean(ghost?.overTower)} title={towerTitle} towerRef={towerButton} onToggle={() => setTower(!tower)} />,
             document.body,
           )
         : null}

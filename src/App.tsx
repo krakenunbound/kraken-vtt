@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { dicePacks } from "./dice/dicePacks";
 import { restoreAllowed } from "../shared/table/restore.mjs";
 import { Icon } from "./ui/icons";
 import { imageWindow, mapWindow, studioOpener, type ImageRef } from "./table/imageWindow";
@@ -25,8 +26,10 @@ function oneOf<T extends string>(what: string, value: string | undefined, items:
 }
 
 function diceSettings(patch: DiceSettingsPatch) {
-  const found = patch.preset ? PRESETS.find((item) => item.name.toLowerCase() === String(patch.preset).toLowerCase()) : null;
-  if (patch.preset && !found) throw new Error(`No dice preset "${patch.preset}". Presets: ${PRESETS.map((item) => item.name).join(", ")}.`);
+  // Kraken's presets, then the dice packs' sets (Documents/Kraken VTT/Dice).
+  const sets = [...PRESETS, ...dicePacks.list().flatMap((pack) => pack.sets)];
+  const found = patch.preset ? sets.find((item) => item.name.toLowerCase() === String(patch.preset).toLowerCase()) : null;
+  if (patch.preset && !found) throw new Error(`No dice preset "${patch.preset}". Presets: ${sets.map((item) => item.name).join(", ")}.`);
   for (const key of ["body", "accent", "ink"] as const) if (patch[key] !== undefined && !COLOUR.test(String(patch[key]))) throw new Error(`${key} must be a colour like #9d2136.`);
   const { name: _name, ...preset } = found ?? { name: "" };
   const parts: Partial<DiceLook> = {
@@ -41,7 +44,7 @@ function diceSettings(patch: DiceSettingsPatch) {
     ...(typeof patch.pips === "boolean" ? { pips: patch.pips } : {}),
   };
   // A preset is the whole look: pips only where it has them.
-  const look = { ...(found ? { pips: Boolean((preset as Partial<DiceLook>).pips) } : {}), ...preset, ...parts };
+  const look = { ...(found ? { pips: Boolean((preset as Partial<DiceLook>).pips), texture: undefined, glowTexture: undefined } : {}), ...preset, ...parts };
   // A character's own dice (kraken_dice_settings character): the whole look, worked out from what it has; the host keeps it on the character.
   if (patch.resolve) return { look: fullLook({ ...(patch.base ?? diceStore.settings().look), ...look }) };
   if (patch.color !== undefined && patch.color !== "" && !COLOUR.test(String(patch.color))) throw new Error("color must be a colour like #e8c46a.");
