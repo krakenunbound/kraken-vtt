@@ -644,6 +644,89 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     else entry.deathsaves = saves;
   }
 
+  // --- The turn steps, undone (Back, Round back) -------------------------------
+  // Each step (Next turn, Next round, a turn given by hand) keeps what the
+  // tracker was before it and after it; undone, the differences it made are
+  // reversed on the tracker as it is now, so whatever happened since (an
+  // attack, damage by hand, an effect added) stays. Kept for this sitting.
+  const steps = [];
+  let stepping = 0;
+  const MAX_STEPS = 40;
+  function stepSnapshot() {
+    return {
+      round: state.round,
+      active: state.active,
+      resume: state.resume ? { ...state.resume } : null,
+      entries: Object.fromEntries(
+        state.entries.map((entry) => {
+          const life = vitals(entry);
+          return [entry.id, { wounds: life.wounds, temp: life.temp, saves: { ...(deathSaves(entry) ?? { success: 0, failure: 0 }) }, stabilized: Boolean(entry.stabilized), bleedRound: entry.bleedRound ?? -1, targets: [...(entry.targets ?? [])], effects: entry.effects.map((effect) => ({ ...effect })) }];
+        }),
+      ),
+    };
+  }
+  async function asStep(label, run) {
+    if (stepping > 0) return run();
+    const before = stepSnapshot();
+    stepping += 1;
+    try {
+      const result = await run();
+      steps.push({ label, before, after: stepSnapshot() });
+      if (steps.length > MAX_STEPS) steps.shift();
+      return result;
+    } finally {
+      stepping -= 1;
+    }
+  }
+  // A creature's wounds (and a character's temporary hit points) set back, where they are kept.
+  function setVitals(entry, wounds, temp) {
+    const linked = record(entry);
+    if (linked && linked.type === "character") table().records.update(linked.id, { data: { hp: { wounds: Math.max(0, wounds), ...(temp !== undefined ? { temp: Math.max(0, temp) } : {}) } } }, table().seat);
+    else if (linked && linked.type === "starship") table().records.update(linked.id, { data: { hull: { damage: Math.max(0, wounds) } } }, table().seat);
+    else entry.wounds = Math.max(0, wounds);
+  }
+  // One step undone: what it did, reversed; what came after it kept.
+  function undoStep(step) {
+    const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+    const restored = [];
+    for (const entry of state.entries) {
+      const was = step.before.entries[entry.id];
+      const then = step.after.entries[entry.id];
+      if (!was || !then) continue;
+      const now = vitals(entry);
+      const woundsBy = then.wounds - was.wounds;
+      const tempBy = then.temp - was.temp;
+      if (woundsBy !== 0 || tempBy !== 0) {
+        setVitals(entry, now.wounds - woundsBy, tempBy !== 0 ? now.temp - tempBy : undefined);
+        if (woundsBy > 0) restored.push(`${entry.name} +${woundsBy} HP`);
+      }
+      if (!same(deathSaves(entry), then.saves) || !same(was.saves, then.saves)) {
+        if (same(deathSaves(entry), then.saves)) setDeathSaves(entry, { ...was.saves });
+      }
+      if (Boolean(entry.stabilized) === then.stabilized) entry.stabilized = was.stabilized;
+      if ((entry.bleedRound ?? -1) === then.bleedRound) entry.bleedRound = was.bleedRound;
+      if (same(entry.targets ?? [], then.targets) && !same(was.targets, then.targets)) entry.targets = [...was.targets];
+      // Effects: those the step ended come back; durations it counted down go back up; any it added go.
+      for (const effect of was.effects) {
+        const after = then.effects.find((item) => item.id === effect.id);
+        const current = entry.effects.find((item) => item.id === effect.id);
+        if (!after && !current) {
+          entry.effects.push({ ...effect });
+          restored.push(`${effect.label.split(";")[0].trim()} on ${entry.name}`);
+        } else if (after && current && after.duration !== effect.duration) current.duration += effect.duration - after.duration;
+      }
+      for (const effect of then.effects) if (!was.effects.some((item) => item.id === effect.id)) entry.effects = entry.effects.filter((item) => item.id !== effect.id);
+    }
+    state.round = step.before.round;
+    state.active = step.before.active;
+    state.resume = step.before.resume ? { ...step.before.resume } : null;
+    return restored;
+  }
+  function undoSay(label, restored) {
+    const entry = state.entries.find((item) => item.id === state.active);
+    table().say(`[${label}] Round ${state.round}${entry ? `, ${entry.name}'s turn` : ""}${restored.length ? `. Restored: ${restored.join(", ")}` : ""}`, "Combat", Boolean(entry?.hidden));
+  }
+
   function sorted() {
     return [...state.entries].sort(order);
   }
@@ -2004,6 +2087,9 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     },
     // Next turn (CombatManager.nextActor). A player may end their own turn.
     async next(seat) {
+      return asStep("turn", () => this.nextStep(seat));
+    },
+    async nextStep(seat) {
       const { options: opts } = await options();
       cachedThresholds = thresholds(opts);
       const list = sorted();
@@ -2035,7 +2121,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
         }
         await startTurn(upcoming, opts);
       } else {
-        await this.nextRound({ role: "dm", name: "Combat" }, opts);
+        await this.nextRoundStep({ role: "dm", name: "Combat" }, opts);
       }
       changed();
     },
@@ -2043,6 +2129,9 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     // "[ROUND n]", and the first actor starts.
     async nextRound(seat, known) {
       mustGM(seat);
+      return asStep("round", () => this.nextRoundStep(seat, known));
+    },
+    async nextRoundStep(seat, known) {
       const opts = known ?? (await options()).options;
       const list = sorted();
       const active = list.find((entry) => entry.id === state.active) ?? null;
@@ -2067,6 +2156,13 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     // damage, durations) is not run again, so a correction costs nothing twice.
     previous(seat) {
       mustGM(seat);
+      const step = steps.pop();
+      if (step) {
+        const restored = undoStep(step);
+        undoSay("BACK", restored);
+        changed();
+        return { round: state.round, active: state.active, undone: step.label, restored };
+      }
       const list = sorted();
       if (list.length === 0) throw new Error("No one is on the tracker.");
       const at = list.findIndex((entry) => entry.id === state.active);
@@ -2085,6 +2181,14 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     roundBack(seat) {
       mustGM(seat);
       if (state.round <= 1) throw new Error("This is the first round.");
+      const target = state.round - 1;
+      if (steps.length && steps.some((step) => step.before.round <= target)) {
+        const restored = [];
+        while (steps.length && state.round > target) restored.push(...undoStep(steps.pop()));
+        undoSay("ROUND BACK", restored);
+        changed();
+        return { round: state.round, active: state.active, restored };
+      }
       state.round -= 1;
       table().say(`[ROUND ${state.round}] (back)`, "Combat");
       changed();
@@ -2092,6 +2196,14 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     },
     setTurn(id, seat) {
       mustGM(seat);
+      find(id);
+      let result = null;
+      asStep("set", () => {
+        result = this.setTurnStep(id, seat);
+      }).catch(() => undefined);
+      return result;
+    },
+    setTurnStep(id, seat) {
       const entry = find(id);
       state.active = entry.id;
       state.resume = null;
@@ -2106,6 +2218,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     // Ends the fight: the round goes to 0; optionally the NPCs leave.
     end(seat, { removeNpcs = false } = {}) {
       mustGM(seat);
+      steps.length = 0;
       state.round = 0;
       state.active = null;
       state.resume = null;

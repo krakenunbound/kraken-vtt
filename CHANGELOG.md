@@ -4,6 +4,21 @@ What changed in each release of Kraken VTT. Downloads are on the
 [Releases](https://github.com/krakenunbound/kraken-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
+## 0.1.0-alpha.86: Back really goes back
+
+- **Back and Round back now undo the turn change** on the combat tracker,
+  rather than only moving the arrow and the round number:
+  - effects that ran out come back, with their rounds;
+  - durations that counted down go back up;
+  - ongoing damage, and the hit points the dying lost, are healed;
+  - death saves and cleared targets go back as they were.
+
+  Whatever happened during the turn stays: an attack, damage you put on by
+  hand, a new effect. Press Next again and it runs normally, so nothing
+  counts twice. The chat says what came back. Kraken keeps the last 40 turn
+  changes of the sitting, so you can step back several times. FG can't do
+  this: its tracker keeps no history.
+
 ## 0.1.0-alpha.85: At the table
 
 - **Your turn, unmissable.** When a player's turn comes round in combat, a

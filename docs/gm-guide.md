@@ -307,8 +307,9 @@ folder. Back up the whole folder to keep what you made.
 - **The tracker's corrections:** **Back** returns to the turn before, **‹ ›**
   beside the round moves it back or on, and clicking a row's arrow space (or
   dragging the arrow there) makes it that creature's turn. **Next turn** and
-  **Next round** run the rules (durations, ongoing damage); the corrections
-  don't, so nothing happens twice.
+  **Next round** run the rules (durations, ongoing damage). **Back** and
+  **Round back** undo those turn changes: effects that ran out come back and
+  ongoing damage is healed, while what happened during the turn stays.
 - **Death markers** (Settings > Death Markers): the set each creature type
   leaves where it dies. Right-click a marker to remove it; the map's skull
   button clears them all.

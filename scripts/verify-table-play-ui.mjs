@@ -159,6 +159,35 @@ try {
   assert(await seat.$(".turn-flag"), "the Your turn flag still shows");
   report.push("the banner unticked in Settings: no banner on their next turn (the Your turn flag stays)");
 
+  // Back as a true undo: a round passes (Bless runs out, Burning burns Wren for 3), then Back puts both back.
+  await tool("kraken_combat", { action: "effect", id: heroEntry.id, effect: { label: "Bless; ATK: 1", duration: 1 } });
+  await tool("kraken_combat", { action: "effect", id: heroEntry.id, effect: { label: "Burning; DMGO: 3" } });
+  const woundsOf = async () => Number((await tool("kraken_record_get", { id: hero.id })).data?.hp?.wounds ?? 0);
+  const woundsBefore = await woundsOf();
+  const roundBefore = (await tool("kraken_combat")).round;
+  await tool("kraken_combat", { action: "round" });
+  const passed = await tool("kraken_combat");
+  const heroAfter = passed.entries.find((entry) => entry.id === heroEntry.id);
+  assert(passed.round === roundBefore + 1 && !heroAfter.effects.some((effect) => /Bless/.test(effect.label)), `a round passed: Bless ran out (${JSON.stringify(heroAfter.effects)})`);
+  assert((await woundsOf()) === woundsBefore + 3, `Burning: 3 damage at the start of Wren's turn (${woundsBefore} -> ${await woundsOf()})`);
+  await page.click('.combat-tracker [data-action="prev-turn"]');
+  const undone = await until(async () => {
+    const view = await tool("kraken_combat");
+    return view.round === roundBefore ? view : null;
+  }, "Back undoes the round");
+  const heroBack = undone.entries.find((entry) => entry.id === heroEntry.id);
+  const bless = heroBack.effects.find((effect) => /Bless/.test(effect.label));
+  assert(bless && bless.duration === 1, `Back: Bless is back, with its round (${JSON.stringify(heroBack.effects)})`);
+  assert((await woundsOf()) === woundsBefore, `Back: the burning damage healed (${await woundsOf()} wounds, ${woundsBefore} before)`);
+  assert(heroBack.effects.some((effect) => /Burning/.test(effect.label)), "Burning (not ended by the round) is still on Wren");
+  const said = (await tool("kraken_chat_log", { count: 5 })).map((line) => line.text ?? "").join(" | ");
+  assert(/\[BACK\].*Restored: .*Wren \+3 HP.*Bless on Wren|\[BACK\].*Bless on Wren.*Wren \+3 HP|\[BACK\].*Restored/.test(said), `the chat says what came back (${said})`);
+  // Next round again: it runs normally (Bless runs out once more, Burning burns again), so nothing counts twice.
+  await tool("kraken_combat", { action: "round" });
+  assert((await woundsOf()) === woundsBefore + 3, "Next round again: Burning burns once (not twice)");
+  await tool("kraken_combat", { action: "effect-remove", id: heroEntry.id, effectId: (await tool("kraken_combat")).entries.find((entry) => entry.id === heroEntry.id).effects.find((effect) => /Burning/.test(effect.label)).id });
+  report.push("Back as an undo: a round passed (Bless ran out, Burning did 3 to Wren); Back brought Bless back with its round and healed the 3, the chat saying so; Next round again counted once");
+
   // The pen's shapes, drawn by the player: a circle, measured as drawn, then resized.
   await seat.click('.window[data-window="settings"] [aria-label="Close Settings"]').catch(() => seat.click('[data-launch="settings"]'));
   await seat.waitForSelector('.window[data-window="settings"]', { state: "detached", timeout: 5000 }).catch(() => undefined);

@@ -392,7 +392,7 @@ export function CombatTracker({ session }: { session: Session }) {
       <header className="ct-head">
         <span className="ct-round" data-round={combat.round}>
           {gm && combat.round > 1 ? (
-            <button type="button" className="ghost ct-round-step" data-action="round-back" title="The round counter back one (a mistake undone; nothing is run again)" aria-label="Round back" onClick={() => session.ct("round-back")}>
+            <button type="button" className="ghost ct-round-step" data-action="round-back" title="Round back: undo the turn changes back to the last turn of the round before (effects that ran out come back, ongoing damage is healed)" aria-label="Round back" onClick={() => session.ct("round-back")}>
               ‹
             </button>
           ) : null}
@@ -412,7 +412,7 @@ export function CombatTracker({ session }: { session: Session }) {
               Roll all
             </button>
             {combat.round > 0 ? (
-              <button type="button" data-action="prev-turn" title="Back to the turn before (its start is not run again)" onClick={() => session.ct("prev")}>
+              <button type="button" data-action="prev-turn" title="Back: undo the last turn change (effects that ran out come back, ongoing damage is healed); what happened during the turn stays" onClick={() => session.ct("prev")}>
                 <span className="flip"><Icon name="next" size={14} /></span> Back
               </button>
             ) : null}
