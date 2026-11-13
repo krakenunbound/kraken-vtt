@@ -67,6 +67,10 @@ of use, and a built-in AI agent that can do anything the GM can.
   effects, a party sheet and treasure parcels.
 - **Sound.** One-shots, sound effects triggered by the chat (a sword hit, a
   fireball), ambience and music, each with its own volume for every player.
+- **At the table.** A banner and a bell when it is your turn, your colour on
+  your tokens, pings and drawings, shapes on the map (arrows, circles, cones,
+  measured as you draw), death markers where creatures fall, a calendar with
+  notes for each game, a message of the day, and FG's read-aloud boxes.
 - **Make it yours.** `Documents/Kraken VTT` has a folder for each thing you
   can add: dice packs, dice towers, GM icons, background decals, wallpapers
   and books. Each holds a README on what goes in it and how to make one, for

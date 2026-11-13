@@ -4,6 +4,52 @@ What changed in each release of Kraken VTT. Downloads are on the
 [Releases](https://github.com/krakenunbound/kraken-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
+## 0.1.0-alpha.85: At the table
+
+- **Your turn, unmissable.** When a player's turn comes round in combat, a
+  banner sweeps across their screen and a bell rings. Each player chooses which
+  in **Settings > You at the table**.
+- **Your colour, everywhere.** In **Settings > You at the table**, each person
+  picks a colour. It rings their tokens, and colours their pings and their
+  drawings, so everyone knows who is who.
+- **Shapes on the map, for everyone.** The pen draws free lines, straight
+  lines, **arrows** (direction and aim), **squares**, **circles** (from their
+  centre) and **cones** (from their point). Each shape is measured in feet as
+  you draw it, drawn in your colour, and resized by dragging its two handles.
+- **The combat tracker's corrections:**
+  - **Back** returns to the previous turn;
+  - **‹ Round ›** moves the round back or on;
+  - click a row's arrow space, or drag the turn arrow onto a creature, to make it their turn.
+
+  **Next turn** and **Next round** still run the rules (durations count down
+  and expire, ongoing damage, start-of-turn effects). The corrections only move
+  the counter and the arrow, so fixing a mistake never applies anything twice.
+- **Death markers** (FG's). A creature that dies leaves a marker where it
+  stood: blood in its colour, a skull, a tombstone, bones or a scorch mark.
+  **Settings > Death Markers** picks a set for each creature type of your game
+  (undead start violet, constructs black). Right-click a marker to remove it.
+- **The Calendar** (FG's, with your Kraken Calendar Notes):
+  - each game has its own calendar: Greyhawk for AD&D, 3.5E and C&C, Harptos
+    for 5E, Golarion, Traveller's Imperial date, and Kraken's own for
+    Descending Darkness and Apeira Astra;
+  - the GM sets the date and time, moves the day on, adds 8 hours for a rest,
+    and says the date in chat;
+  - anyone writes notes on a day. A player's note is signed in their colour; a
+    GM's note is shown to the players or kept private.
+- **The Message of the Day** (FG's): the GM's words and links (a map, an NPC,
+  a page). It opens on each player's screen as they join.
+- **Read aloud** (FG's boxed text). An adventure's boxed text has a button for
+  the GM: the words go to chat and appear over everyone's map as a speech
+  bubble.
+- **Chat into notes:** drag any chat line into a note, or onto Player Notes to
+  start a new one.
+- **Hex grid on black, and more game-table wallpapers.** The **Tabletop** set
+  has hex grids (slate, black), a battle mat, a dungeon map and an old world
+  map. The **Sci-Fi** set has an amber hex grid, a star chart and starship deck
+  plating. Big pictures now show at their own size, as FG's desktop does. Five
+  sci-fi **background decals** too. The plain Patterns set from alpha.84 is gone.
+- The map's Lock button is an icon only; its tooltip says whether it's locked.
+
 ## 0.1.0-alpha.84: Dice towers, dice packs, and your Kraken VTT folder
 
 - **The dice tower has a menu.** Right-click the tower on the table: **Lock

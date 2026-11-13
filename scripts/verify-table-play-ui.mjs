@@ -245,6 +245,16 @@ try {
   await seat.waitForSelector("[data-death-marker]", { state: "detached" });
   report.push("Settings > Death Markers: undead set to Skull, the wight leaves a skull; a character leaves none; right-click removes one, kraken_death_markers clear the rest");
 
+  // The hex grid on black (the Tabletop wallpapers), at its own size as FG's desktop.
+  const hex = (await tool("kraken_decal", { kind: "wallpaper", action: "list", search: "Hex Grid Slate" })).wallpapers[0];
+  assert(hex, "the Tabletop set has Hex Grid - Slate");
+  await tool("kraken_decal", { kind: "wallpaper", action: "set", id: hex.id });
+  await page.click('[aria-label="Close Great Hall"]').catch(() => undefined);
+  await until(() => page.evaluate(() => /auto, auto/.test(document.querySelector(".desktop-surface")?.style.backgroundSize ?? "")), "the big wallpaper at its own size");
+  await settle(800);
+  await page.screenshot({ path: path.join(SHOTS, "kraken-hex-wallpaper.png") });
+  report.push(`the Tabletop wallpaper ${hex.name}: shown at its own size (a big seamless picture, as FG's desktop)`);
+
   assert(failures.length === 0, `page errors: ${failures.join(" | ")}`);
   console.log(`ok table play ui${process.env.KRAKEN_APP ? " (the built app)" : ""}:\n  ${report.join("\n  ")}`);
 } finally {

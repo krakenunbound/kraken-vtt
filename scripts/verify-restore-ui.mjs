@@ -29,6 +29,12 @@ if (!existsSync(path.join(source, "campaigns", id, "state.json")) || !existsSync
 }
 const saved = JSON.parse(readFileSync(path.join(source, "campaigns", id, "state.json"), "utf8")).view;
 const VAULT = String(saved?.adventure ?? "").split(/[\\/]/).pop()?.replace(/\.(mod|kpack|zip)$/i, "") ?? "";
+// The case this tests needs the campaign as it was (a map remembered from a
+// book not active in it); played on since, it may hold no such map.
+if (!VAULT) {
+  console.log("skip restore ui: the campaign no longer remembers a book's map (it has been played since); nothing to test here");
+  process.exit(0);
+}
 
 // A copy of the GM's campaign in a profile of its own.
 function copyProfile(activate = []) {

@@ -22,7 +22,7 @@ checklist. **Read that README before making something for it.**
 | `Dice Towers` | Tower pictures | A transparent PNG of a tower standing at the bottom middle, about 512 to 1024 pixels; optionally `<Name> lit.png`, the same picture lit. |
 | `GM Icons` | Chat pictures | A square transparent PNG, 256 to 512 pixels, bold enough to read at 36 pixels. |
 | `Background Decals` | Table emblems | A transparent PNG or WebP, about 1024 pixels, one centred emblem; a subfolder named for a game groups it with that game. |
-| `Wallpapers` | Desktop tiles | A seamless, dark, quiet square texture, 512 to 1024 pixels. |
+| `Wallpapers` | Desktop tiles | Game-table art (a hex grid, a battle mat, a map, a star chart): seamless, dark and quiet, about 2048 pixels across (shown at its own size). |
 | `Packs` | Books (.kpack) | Made by Kraken from FG modules; not by hand. |
 
 ## Rules for every picture

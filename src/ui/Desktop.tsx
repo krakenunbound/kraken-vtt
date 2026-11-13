@@ -176,10 +176,23 @@ function AccountsPanel({ session }: { session: Session }) {
   );
 }
 
-// The GM's wallpaper tiles the desktop, darkened so the decal and windows stand out.
-function wallpaperStyle(session: Session) {
+// The GM's wallpaper tiles the desktop, darkened so the decal and windows stand
+// out. A small tile (Kraken's game patterns, 768 drawn at 384 for sharpness)
+// repeats at 384; a big picture (a hex grid on black, 2048 across, as FG's
+// desktop) shows at its own size, so the repeat hardly shows and a grid keeps
+// its scale.
+function useWallpaperStyle(session: Session) {
   const url = session.options.wallpaper ? session.decalUrl(session.options.wallpaper, "wallpaper") : "";
-  return url ? { backgroundImage: `linear-gradient(rgba(6, 8, 10, 0.42), rgba(6, 8, 10, 0.42)), url("${url}")`, backgroundSize: "auto, 384px 384px", backgroundRepeat: "repeat" } : undefined;
+  const [big, setBig] = useState<Record<string, boolean>>({});
+  useEffect(() => {
+    if (!url || url in big) return;
+    const image = new Image();
+    image.onload = () => setBig((known) => ({ ...known, [url]: image.naturalWidth >= 1500 }));
+    image.src = url;
+  }, [url]);
+  if (!url) return undefined;
+  const size = big[url] ? "auto" : "384px 384px";
+  return { backgroundImage: `linear-gradient(rgba(6, 8, 10, ${big[url] ? 0.2 : 0.42}), rgba(6, 8, 10, ${big[url] ? 0.2 : 0.42})), url("${url}")`, backgroundSize: `auto, ${size}`, backgroundRepeat: "repeat" };
 }
 
 // The table for both sides, laid out as FG's desktop: the map (or the emblem)
@@ -462,6 +475,7 @@ export function Desktop({
   // (Settings > You at the table; kept with their name).
   const alerts = useSyncExternalStore(diceStore.subscribe, diceStore.settings);
   const anyMapShown = useAnyMapShown();
+  const wallpaperStyle = useWallpaperStyle(session);
   const turnRang = useRef("");
   // FG's Message of the Day: it opens on a player's screen as they join (once a sitting).
   const motdShown = useRef(false);
@@ -545,7 +559,7 @@ export function Desktop({
       ) : null}
 
       <div className="desktop">
-        <div className="desktop-surface" style={wallpaperStyle(session)}>
+        <div className="desktop-surface" style={wallpaperStyle}>
           <div className="desktop-empty">
             <TableDecal session={session} />
             {scene ? null : gm ? emptyGM : <p className="desktop-hint">The GM has not opened a map yet.</p>}

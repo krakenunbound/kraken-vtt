@@ -37,6 +37,13 @@ The app starts the MCP server when it opens. `electron/agent/mcp-stdio.cjs` is t
 | Open, close, lock doors | `kraken_door` |
 | Line of sight, token movement lock, what a player sees | `kraken_line_of_sight` |
 | Place, change, remove lights | `kraken_light` |
+| The calendar: which calendar, the date and time (set, move on), notes on days (the GM's shown or private; players' signed), the date in chat | `kraken_calendar` |
+| Read an adventure's boxed text aloud (to chat and as a bubble over everyone's map) | `kraken_read_aloud` |
+| Death markers: settings (a set per creature type), place, remove, clear | `kraken_death_markers` |
+| The message of the day (words and links, shown to players as they join) | `kraken_table_options` motd |
+| A person's turn alerts (bell, banner) and colour | `kraken_dice_settings` turnSound, turnBanner, color (who: a player) |
+| The tracker's corrections: back a turn, a round back, a turn given to anyone | `kraken_combat` prev, round-back, set-turn |
+| Shapes on the map (line, arrow, square, circle, cone), resized | `kraken_draw` shape, resize |
 | The dice tower: its look for everyone (Kraken's six drawn, the tower pictures, a picture imported); on the GM's screen, lock it, fix it at x,y, move it, turn it on or off (its right-click menu) | `kraken_tower` |
 | Dice packs (Documents/Kraken VTT/Dice): list them with their sets and problems, check a pack being made, the folder; a pack's set by name | `kraken_dice_packs`; `kraken_dice_settings` preset |
 | Ping the map | `kraken_ping` |

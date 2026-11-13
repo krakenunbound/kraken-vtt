@@ -294,3 +294,31 @@ Each folder's README says what goes in it and how to make one. `AGENTS.md`
 says the same for an AI agent, so you can ask one to make dice, towers or
 wallpapers for you. Pictures you add with Browse… are copied into the right
 folder. Back up the whole folder to keep what you made.
+
+## At the table
+
+- **You at the table** (Settings, every seat): your colour (your tokens' ring,
+  your pings and drawings) and, when your turn comes round in combat, a bell
+  and a banner across your screen (each can be turned off).
+- **Shapes:** with the pen, choose a free line, a straight line, an arrow, a
+  square, a circle (drag from its centre) or a cone (drag from its point). Each
+  is measured in feet as you draw it. With the pen out, drag a shape's handles
+  to resize it.
+- **The tracker's corrections:** **Back** returns to the turn before, **‹ ›**
+  beside the round moves it back or on, and clicking a row's arrow space (or
+  dragging the arrow there) makes it that creature's turn. **Next turn** and
+  **Next round** run the rules (durations, ongoing damage); the corrections
+  don't, so nothing happens twice.
+- **Death markers** (Settings > Death Markers): the set each creature type
+  leaves where it dies. Right-click a marker to remove it; the map's skull
+  button clears them all.
+- **The Calendar** (sidebar): your game's calendar. Move the day on, add 8
+  hours for a rest, set the time, say the date in chat. Click a day for its
+  page: write a note there (players see it, or tick GM only). Players write
+  their own, signed in their colour.
+- **Message of the Day** (sidebar): what players see as they join. Drag a map,
+  an NPC or a page into it to link it.
+- **Read aloud:** boxed text in an adventure (FG's frames) has a speech button
+  for you. Its words go to chat and appear over everyone's map.
+- **Notes from chat:** drag any chat line into a note, or onto Player Notes to
+  start one.

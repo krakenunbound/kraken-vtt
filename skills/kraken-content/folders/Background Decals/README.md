@@ -5,7 +5,9 @@ The emblem in the middle of the table, behind everything when no map is up,
 as FG's Background Decal. The GM chooses it, and every seat sees it.
 
 To choose one, use **Settings > Background Decal**. Kraken ships a set, with
-one for each game it plays. Any picture you put here is added to it.
+one for each game it plays, and a **Sci-Fi** set (a ringed world, a star navy
+crest, a circuit d20, a void kraken, an explorer's helmet). Any picture you put
+here is added to it.
 
 ## A decal
 
