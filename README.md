@@ -52,7 +52,8 @@ of use, and a built-in AI agent that can do anything the GM can.
   with their walls, doors and lights.
 - **Kraken packs.** Make each of your books into Kraken's own file (`.kpack`)
   once, in Books > Packs. Copy the packs folder to any computer and your books
-  open there in Kraken, with no Fantasy Grounds installed.
+  open there in Kraken, with no Fantasy Grounds installed. Kraken's own books
+  ship as packs too ([the format](docs/kraken-pack-format.md)).
 - **Maps.** Image maps and animated tokens, square and hex grids, walls and doors,
   line of sight and fog, lights and darkness, weather, drawing, and a full map
   editor.

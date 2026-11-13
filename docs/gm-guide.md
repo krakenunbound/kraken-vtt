@@ -94,7 +94,10 @@ sheet, into chat, into a story entry, onto the hotbar.
   computer and the books open there with no Fantasy Grounds at all. Kraken
   reads the pack in place of the module unless the module is newer; *Make
   again* after you change a module. Packs are your own books: keep them to
-  yourself.
+  yourself. On a new computer, install Kraken, create that folder, and copy
+  the `.kpack` files into it (on Linux, `~/Documents/Kraken VTT/Packs`).
+  Kraken's own games' books are packs too. They come with Kraken. The format
+  is in [kraken-pack-format.md](kraken-pack-format.md).
 - In **Modules**, make a book active to bring its records (NPCs, items,
   encounters, maps, story) into the campaign. A players' book can be shared
   with the players.

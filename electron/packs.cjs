@@ -62,6 +62,10 @@ const krakenRuleset = (fgRuleset) => KRAKEN_RULESET[String(fgRuleset ?? "").trim
 function packFolder() {
   return process.env.KRAKEN_PACKS || path.join(os.homedir(), "Documents", "Kraken VTT", "Packs");
 }
+// Kraken's own games' books, shipped as packs like any other (games/packs,
+// made from games/modules by npm run build-packs): the app holds no book of
+// its own in any other form.
+const BUNDLED = path.join(__dirname, "..", "games", "packs");
 const isPack = (file) => String(file).toLowerCase().endsWith(EXTENSION);
 // A book's file name, safe on every system (the pack keeps its own name inside).
 const fileName = (name) => `${String(name).replace(/[<>:"/\\|?*\x00-\x1f]/g, "_").replace(/[. ]+$/, "").slice(0, 120) || "Book"}${EXTENSION}`;
@@ -96,8 +100,7 @@ function readPack(file) {
 // name (without .kpack): each pack's description is read once, again only
 // when its file changes.
 const described = new Map(); // file -> { key, manifest }
-function packIndex() {
-  const folder = packFolder();
+function packIndex(folder = packFolder()) {
   const byName = new Map();
   let entries = [];
   try {
@@ -124,8 +127,10 @@ function packIndex() {
   return byName;
 }
 // The pack of a book's name (or file name) in the packs folder, if there is one.
+// The GM's own packs first, then the ones Kraken ships.
 function packFor(name) {
-  return packIndex().get(String(name ?? "").trim()) ?? null;
+  const wanted = String(name ?? "").trim();
+  return packIndex().get(wanted) ?? packIndex(BUNDLED).get(wanted) ?? null;
 }
 // A pack's format version (its manifest's), read once a file.
 function packVersion(file) {
@@ -263,4 +268,4 @@ function makePack(source, { read, describe, folder = packFolder(), onProgress = 
   return { file: target, name: manifest.name, title: manifest.title, ruleset: manifest.ruleset, records: records.length, pictures: kept.length, bytes: fs.statSync(target).size };
 }
 
-module.exports = { packVersion, packCurrent, packFolder, isPack, fileName, readManifest, readPack, packFor, packIndex, preferPack, makePack, krakenRuleset, EXTENSION, FORMAT, VERSION };
+module.exports = { BUNDLED, packVersion, packCurrent, packFolder, isPack, fileName, readManifest, readPack, packFor, packIndex, preferPack, makePack, krakenRuleset, EXTENSION, FORMAT, VERSION };

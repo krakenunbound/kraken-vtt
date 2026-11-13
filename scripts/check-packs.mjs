@@ -20,7 +20,7 @@ process.env.KRAKEN_MODULE_CACHE = path.join(work, "cache");
 const { zipSync, strToU8 } = require("fflate");
 const { readModule, modulePicture, resolveModule } = require("../electron/importers/fgModule.cjs");
 const { createBookShelf, describe } = require("../electron/books.cjs");
-const { makePack, readManifest, packFor } = require("../electron/packs.cjs");
+const { makePack, readManifest, packFor, VERSION } = require("../electron/packs.cjs");
 const { fgModuleBundle } = require("../electron/importers/fgMaps.cjs");
 
 function assert(condition, message) {
@@ -61,7 +61,7 @@ const madeBook = makePack(at(`${HANDBOOK}.mod`), { read: readModule, describe, f
 assert(made.file.endsWith(`${NAME}.kpack`) && made.records === before.records.length && made.pictures > 0, `a pack of the adventure: ${JSON.stringify(made)}`);
 assert(madeBook.records === beforeBook.records.length, "a pack of the handbook (.mod)");
 const manifest = readManifest(made.file);
-assert(manifest.format === "kraken-pack" && manifest.version === 1 && manifest.name === NAME && manifest.ruleset === "Descending Darkness" && manifest.from.kind === "fg-module" && manifest.hasBook === false && readManifest(madeBook.file).hasBook === true, `the pack describes itself: ${JSON.stringify(manifest).slice(0, 300)}`);
+assert(manifest.format === "kraken-pack" && manifest.version === VERSION && manifest.name === NAME && manifest.ruleset === "Descending Darkness" && manifest.from.kind === "fg-module" && manifest.hasBook === false && readManifest(madeBook.file).hasBook === true, `the pack describes itself: ${JSON.stringify(manifest).slice(0, 300)}`);
 assert(!fs.readFileSync(made.file).includes(Buffer.from(work)), "a pack names no folder of the GM's computer");
 
 // The FG modules gone: everything from the packs.

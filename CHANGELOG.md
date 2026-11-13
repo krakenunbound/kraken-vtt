@@ -4,6 +4,18 @@ What changed in each release of Kraken VTT. Downloads are on the
 [Releases](https://github.com/krakenunbound/kraken-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
+## 0.1.0-alpha.74: Every book a Kraken pack
+
+- **Kraken's own books ship as Kraken packs** (`.kpack`), the same files as
+  your own: the app holds no book in any other form. Descending Darkness's
+  and Apeira Astra's six books load from them like any pack you copy in.
+- **A clean computer needs only the packs.** Install Kraken, copy `.kpack`
+  files into `Documents\Kraken VTT\Packs` (on Linux,
+  `~/Documents/Kraken VTT/Packs`), and the books are there: no Fantasy
+  Grounds, nothing else. Packs copied in while Kraken is open show up without
+  a restart.
+- The format is written up in [docs/kraken-pack-format.md](docs/kraken-pack-format.md).
+
 ## 0.1.0-alpha.73: Kraken's own games illustrated
 
 - **Descending Darkness and Apeira Astra's books have pictures throughout:**

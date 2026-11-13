@@ -105,7 +105,7 @@ let bookShelf = null;
 // A test's own shelf of modules (KRAKEN_BOOKS) has its own packs folder too, never the GM's.
 process.env.KRAKEN_PACKS ||= process.env.KRAKEN_BOOKS ? path.join(USER_DATA, "packs") : packs.packFolder();
 function books() {
-  if (!bookShelf) bookShelf = createBookShelf({ folder: process.env.KRAKEN_BOOKS || path.join(fgDataFolder(), "modules"), cache: path.join(USER_DATA, "books-index.json"), also: [path.join(APP_DIR, "games", "modules")], packsFolder: packs.packFolder() });
+  if (!bookShelf) bookShelf = createBookShelf({ folder: process.env.KRAKEN_BOOKS || path.join(fgDataFolder(), "modules"), cache: path.join(USER_DATA, "books-index.json"), also: [packs.BUNDLED, path.join(APP_DIR, "games", "modules")], packsFolder: packs.packFolder() });
   return bookShelf;
 }
 
@@ -116,9 +116,11 @@ const packJob = { queue: [], current: null, progress: null, made: [], failed: []
 const FG_BACKUP = /\.bak[-.\w]*$|\.mod\.|_retired|backup/i;
 function packsView({ ruleset = "" } = {}) {
   const files = books().files();
-  const packsByName = new Map(files.filter((item) => item.pack).map((item) => [item.name, item]));
-  const bundled = path.join(APP_DIR, "games", "modules");
-  const modules = files.filter((item) => !item.pack && !FG_BACKUP.test(item.file) && !path.resolve(item.file).startsWith(path.resolve(bundled)));
+  // Kraken's own books (shipped, as packs) are not the GM's to make.
+  const bundled = [path.join(APP_DIR, "games", "modules"), packs.BUNDLED].map((folder) => path.resolve(folder));
+  const ours = (item) => bundled.some((folder) => path.resolve(item.file).startsWith(folder));
+  const packsByName = new Map(files.filter((item) => item.pack && !ours(item)).map((item) => [item.name, item]));
+  const modules = files.filter((item) => !item.pack && !FG_BACKUP.test(item.file) && !ours(item));
   const fits = (kraken) => !ruleset || kraken === ruleset || kraken === "Any";
   const rows = modules
     .map((item) => {

@@ -239,8 +239,25 @@ function createBookShelf({ folder, cache = "", also = [], packsFolder = "" }) {
   let every = [];
   const opened = new Map(); // id -> the read book, the last few
 
+  // The folders' own times: a book copied in or taken out changes them, so
+  // the shelf reads again (a pack dropped into the packs folder shows at once).
+  const folders = () => [folder, ...also, ...(packsFolder ? [packsFolder] : [])];
+  const stamp = () => folders().map((dir) => {
+    try {
+      return Math.round(fs.statSync(dir).mtimeMs);
+    } catch {
+      return 0;
+    }
+  }).join("|");
+  let stamped = "";
   function load() {
-    if (known) return known;
+    if (known) {
+      const now = stamp();
+      if (now === stamped) return known;
+      known = null;
+      opened.clear();
+    }
+    stamped = stamp();
     let saved = {};
     try {
       saved = cache ? JSON.parse(fs.readFileSync(cache, "utf8")) : {};
@@ -249,7 +266,7 @@ function createBookShelf({ folder, cache = "", also = [], packsFolder = "" }) {
     }
     const next = {};
     const entries = [];
-    for (const dir of [folder, ...also, ...(packsFolder ? [packsFolder] : [])]) {
+    for (const dir of folders()) {
       try {
         for (const entry of fs.readdirSync(dir, { withFileTypes: true })) entries.push({ entry, dir });
       } catch {

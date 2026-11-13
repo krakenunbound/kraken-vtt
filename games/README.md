@@ -15,6 +15,11 @@ Fantasy Grounds module folder in `games/modules`:
 
     node scripts/build-content.mjs     (npm run build-games)
 
+`npm run build-packs` then makes each folder a Kraken pack in `games/packs`
+(the installer runs it): Kraken ships the packs, not the folders, and reads
+them as it reads the GM's own packs. In a checkout, Kraken reads both, and the
+newer one wins.
+
 Kraken reads those folders exactly as it reads the GM's own FG modules
 (`electron/books.cjs` takes `games/modules` as a second shelf, and
 `electron/importers/fgModule.cjs` resolves module names there too): the Books

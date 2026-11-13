@@ -17,3 +17,6 @@ agent.json
 # The installer, copied here by npm run exe (and the old portable build).
 /Kraken VTT Setup.exe
 /Kraken VTT.exe
+
+# Kraken's own books as packs, made from games/modules (npm run build-packs).
+games/packs/
