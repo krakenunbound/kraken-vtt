@@ -4,7 +4,7 @@ What changed in each release of Kraken VTT. Downloads are on the
 [Releases](https://github.com/krakenunbound/kraken-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
-## Next: The ruleset picker
+## 0.1.0-alpha.76: The ruleset picker
 
 - **The ruleset picker uses the whole screen:** it fills as many columns as
   the window holds (six at 1920 wide), each ruleset's blurb in three lines,
