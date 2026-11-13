@@ -4,6 +4,11 @@ What changed in each release of Kraken VTT. Downloads are on the
 [Releases](https://github.com/krakenunbound/kraken-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
+## Next
+
+- Hosting's **Cloud** choice is now called **Internet** (players anywhere,
+  once the port is open on your router): there is no rented cloud server.
+
 ## 0.1.0-alpha.78: Map Studio, Kraken's map maker
 
 - **Map Studio is part of Kraken** (the pen along the top of the sidebar):

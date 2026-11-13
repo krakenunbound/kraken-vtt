@@ -88,7 +88,7 @@ of use, and a built-in AI agent that can do anything the GM can.
 2. **Make a campaign.** On the start screen choose **My Campaigns**, name it,
    and pick its game. Choose *Descending Darkness* or *Apeira Astra* to try
    Kraken with no other content.
-3. **Host.** Choose LAN, Cloud or both, set a password if you like, and press
+3. **Host.** Choose LAN, Internet or both, set a password if you like, and press
    **Play**. *Addresses to give your players* lists the addresses.
 4. **Players join.** They open the address in Chrome, type their name and a
    password of their own (Chrome remembers it), plus the table's password if

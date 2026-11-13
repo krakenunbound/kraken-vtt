@@ -626,7 +626,7 @@ export function useSession() {
       try {
         if (!window.kraken) throw new Error("Hosting runs in the Kraken VTT app.");
         checkPort(input.port);
-        if (!input.lan && !input.cloud) throw new Error("Turn on LAN or Cloud.");
+        if (!input.lan && !input.cloud) throw new Error("Turn on LAN or Internet.");
         const password = input.password.trim();
         const info = await window.kraken.startHost({
           port: input.port,

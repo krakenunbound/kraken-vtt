@@ -256,7 +256,7 @@ export function SetupScreen({
     const name = String(data.get("dm-name") || "").trim() || "DM";
     setLocalError(null);
     if (!lanOn && !cloudOn) {
-      setLocalError("Turn on LAN or Cloud.");
+      setLocalError("Turn on LAN or Internet.");
       return;
     }
     try {
@@ -566,8 +566,8 @@ export function SetupScreen({
                     </label>
                     <label className={cloudOn ? "toggle on" : "toggle"}>
                       <input type="checkbox" name="cloud" checked={cloudOn} onChange={(event) => setCloudOn(event.target.checked)} />
-                      <strong>Cloud</strong>
-                      <small>The internet, when the port is open</small>
+                      <strong>Internet</strong>
+                      <small>Players anywhere, once the port is open on your router</small>
                     </label>
                   </div>
                 </div>

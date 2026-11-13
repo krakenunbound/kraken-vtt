@@ -498,7 +498,7 @@ const calls = {
     const wanted = Number(options?.port);
     const password = String(options?.password ?? "");
     if (!Number.isInteger(wanted) || wanted < 1 || wanted > 65535) throw new Error("Port must be from 1 to 65535.");
-    if (!options?.lan && !options?.cloud) throw new Error("Turn on LAN or Cloud.");
+    if (!options?.lan && !options?.cloud) throw new Error("Turn on LAN or Internet.");
     await stopTable();
     const campaignId = typeof options?.campaignId === "string" ? options.campaignId : "";
     const saved = openCampaign(campaignId) ?? {};

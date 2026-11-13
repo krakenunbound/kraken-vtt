@@ -59,7 +59,7 @@ Select a campaign, then:
 - **Port**: 47300 unless you change it.
 - **Password**: leave it blank for an open table.
 - **Players connect over**: **LAN** for players on your home network,
-  **Cloud** for players on the internet.
+  **Internet** for players on the internet.
 - Press **Play**. *Addresses to give your players* lists the addresses to
   share, written as `http://address:port`.
 
