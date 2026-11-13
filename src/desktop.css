@@ -1678,3 +1678,53 @@ textarea.cc-field.tall { min-height: 220px; }
 .asset-preview dd { margin: 0; word-break: break-word; }
 .asset-preview img { width: 100%; max-height: 260px; object-fit: contain; background: #0b0d11; border-radius: 6px; }
 .asset-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+
+/* A player's turn: a banner across the screen (their choice, Settings > You at the table). */
+.turn-banner { position: fixed; left: 0; right: 0; top: 34%; z-index: 970; display: grid; justify-items: center; gap: 4px; padding: 22px 0 18px; cursor: pointer; pointer-events: auto; color: #fff3d6; text-align: center; background: linear-gradient(90deg, transparent, rgba(18, 12, 6, 0.88) 18%, rgba(18, 12, 6, 0.88) 82%, transparent); border-top: 2px solid var(--player-color, var(--brass)); border-bottom: 2px solid var(--player-color, var(--brass)); animation: turn-banner-in 4.2s ease-in-out forwards; }
+.turn-banner strong { font-family: Cinzel, Georgia, serif; font-size: clamp(2.2rem, 5vw, 4rem); letter-spacing: 0.12em; text-transform: uppercase; text-shadow: 0 0 18px rgba(255, 196, 92, 0.85), 0 2px 0 #000; }
+.turn-banner span { font-size: 1.15rem; letter-spacing: 0.06em; color: var(--brass); }
+.turn-banner-glow { position: absolute; inset: 0; background: radial-gradient(ellipse at center, rgba(255, 190, 90, 0.28), transparent 60%); animation: turn-banner-glow 1.2s ease-in-out infinite alternate; pointer-events: none; }
+@keyframes turn-banner-in { 0% { opacity: 0; transform: scaleY(0.2); } 8% { opacity: 1; transform: scaleY(1.06); } 12% { transform: scaleY(1); } 82% { opacity: 1; } 100% { opacity: 0; transform: translateY(-12px); } }
+@keyframes turn-banner-glow { from { opacity: 0.55; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .turn-banner, .turn-banner-glow { animation: none; } }
+
+/* Settings: you at the table (your colour, your turn). */
+.settings-you { display: grid; gap: 6px; margin: 4px 0; padding: 8px 10px 10px; border: 1px solid var(--line, #3a3a44); border-radius: 8px; }
+.settings-you legend { padding: 0 6px; color: var(--brass); font-family: Cinzel, Georgia, serif; }
+.settings-you .you-colours { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.settings-you .you-label { font-weight: 600; margin-right: 4px; }
+.settings-you .swatch { width: 24px; height: 24px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; padding: 0; }
+.settings-you .swatch.mine { width: auto; padding: 0 8px; border-radius: 12px; background: transparent; border-color: var(--line, #3a3a44); color: inherit; }
+.settings-you .swatch.on { border-color: #fff; box-shadow: 0 0 0 2px var(--brass); }
+.settings-you .you-other { display: inline-flex; align-items: center; gap: 4px; font-size: 0.85rem; }
+/* The pen's shapes, and their handles (one's own shapes, while the pen is out). */
+.draw-shapes { display: inline-flex; gap: 2px; margin: 0 4px; padding: 0 4px; border-left: 1px solid var(--line, #3a3a44); border-right: 1px solid var(--line, #3a3a44); }
+.draw-handle { pointer-events: all; cursor: grab; }
+.draw-measure { pointer-events: none; }
+
+/* The tracker's turn arrow (the GM's: click or drag it to make it someone's turn) and round steps. */
+button.ct-turn { width: 20px; min-height: 20px; padding: 0; border: 1px dashed transparent; border-radius: 4px; background: transparent; color: var(--brass); cursor: pointer; }
+button.ct-turn:not(.on):hover { border-color: var(--brass-dim); background: rgba(210, 161, 90, 0.12); }
+button.ct-turn.on { cursor: grab; }
+.ct-round { display: inline-flex; align-items: center; gap: 4px; }
+.ct-round-step { padding: 0 6px; font-size: 1.1rem; line-height: 1.2; }
+span.flip { display: inline-flex; transform: scaleX(-1); }
+
+/* Death markers: under the tokens; the GM right-clicks one to remove it. */
+.overlay.death-markers g[data-death-marker] { pointer-events: visiblePainted; }
+.marker-glow { filter: drop-shadow(0 0 4px rgba(92, 255, 157, 0.8)); }
+
+/* The GM's Death Markers window (FG's): a set for each creature type, and every set's pictures. */
+.death-markers-window { display: grid; gap: 10px; padding: 4px; }
+.marker-types { width: 100%; border-collapse: collapse; }
+.marker-types th { text-align: left; padding: 4px 6px; color: var(--brass); font-family: Cinzel, Georgia, serif; border-bottom: 1px solid var(--line, #3a3a44); }
+.marker-types td { padding: 3px 6px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+.marker-types td:last-child { display: flex; align-items: center; gap: 8px; }
+.marker-types select { min-width: 180px; }
+.marker-preview { flex: none; background: #2a2a24; border-radius: 4px; }
+.marker-sets { display: grid; gap: 8px; }
+.marker-set { display: grid; gap: 4px; padding: 6px; border: 1px solid var(--line, #3a3a44); border-radius: 6px; }
+.marker-set-name { display: flex; align-items: center; gap: 6px; font-weight: 600; }
+.marker-set-name i { width: 12px; height: 12px; border-radius: 50%; border: 1px solid #fff4; }
+.marker-set-pictures { display: flex; flex-wrap: wrap; gap: 4px; }
+.marker-set-pictures svg { background: #3a3830; border: 1px solid var(--brass-dim, #6b5530); border-radius: 4px; }

@@ -235,6 +235,25 @@ function cleanSettings(raw) {
 
 // A line drawn on a scene, for everyone: who drew it, its colour and width
 // (scene pixels), and its points (x, y, x, y, ...).
+// A death marker: where a creature died, its set (shared/map/deathMarkers.mjs), which of the set's pictures, turned and sized.
+function cleanDeathMarker(raw) {
+  if (!raw || typeof raw !== "object") return null;
+  const x = num(raw.x, NaN);
+  const y = num(raw.y, NaN);
+  if (!Number.isFinite(x) || !Number.isFinite(y) || Math.abs(x) > 1e7 || Math.abs(y) > 1e7) return null;
+  return {
+    id: text(raw.id, "") || crypto.randomBytes(5).toString("hex"),
+    x: Math.round(x),
+    y: Math.round(y),
+    set: text(raw.set, "blood-red").slice(0, 40),
+    variant: Math.max(0, Math.min(63, Math.round(num(raw.variant, 0)))),
+    rotation: Math.round(num(raw.rotation, 0)) % 360,
+    size: Math.min(3, Math.max(0.5, num(raw.size, 1))),
+    name: text(raw.name, "").slice(0, 60),
+  };
+}
+const MAX_DEATH_MARKERS = 300;
+const TWO_POINT = new Set(["line", "arrow", "rect", "ellipse", "circle", "cone"]);
 function cleanDrawing(raw) {
   if (!raw || typeof raw !== "object" || !Array.isArray(raw.points)) return null;
   const points = raw.points.slice(0, 4000).map(Number);
@@ -242,8 +261,10 @@ function cleanDrawing(raw) {
   const color = /^#[0-9a-f]{6}$/i.test(String(raw.color)) ? String(raw.color) : "#ffcc33";
   const line = { id: text(raw.id, "") || crypto.randomBytes(6).toString("hex"), by: text(raw.by, "").slice(0, 24), color, width: Math.min(80, Math.max(1, num(raw.width, 6))), points: points.map((value) => Math.round(value * 10) / 10) };
   // The GM's paint (FG's Paint tab, Foundry's drawings): a shape, a fill, an opacity, a group.
-  const shape = ["free", "line", "rect", "ellipse", "poly"].includes(raw.shape) ? raw.shape : "free";
+  const shape = ["free", "line", "arrow", "rect", "ellipse", "circle", "cone", "poly"].includes(raw.shape) ? raw.shape : "free";
   if (shape !== "free") line.shape = shape;
+  // A two-point shape (a line, an arrow, a square, a circle from its centre, a cone from its point) keeps two points.
+  if (TWO_POINT.has(shape)) line.points = line.points.slice(0, 4);
   if (raw.fill && /^#[0-9a-f]{6}$/i.test(String(raw.fill))) {
     line.fill = String(raw.fill);
     line.fillAlpha = Math.min(1, Math.max(0, num(raw.fillAlpha, 0.5)));
@@ -326,6 +347,7 @@ function savedMap(value) {
   const settings = {};
   const lights = {};
   const drawings = {};
+  const deathMarkers = {};
   const walls = {};
   const masks = {};
   const labels = {};
@@ -340,7 +362,10 @@ function savedMap(value) {
   // next open is exact) and the picture it painted (a file kept beside the
   // campaign: its name and version), by scene id.
   const studio = value && typeof value === "object" && value.studio && typeof value.studio === "object" ? Object.fromEntries(Object.entries(value.studio).slice(0, 500).filter(([, item]) => item && typeof item === "object")) : {};
-  if (!value || typeof value !== "object") return { tokens, doors, sight, locked, settings, lights, drawings, walls, masks, labels, groups, fx, tiles, frames, entered, studio };
+  if (!value || typeof value !== "object") return { tokens, doors, sight, locked, settings, lights, drawings, deathMarkers, walls, masks, labels, groups, fx, tiles, frames, entered, studio };
+  for (const [sceneId, list] of Object.entries(value.deathMarkers ?? {}).slice(0, 500)) {
+    if (Array.isArray(list)) deathMarkers[sceneId.slice(0, 80)] = list.map(cleanDeathMarker).filter(Boolean).slice(-MAX_DEATH_MARKERS);
+  }
   for (const [sceneId, list] of Object.entries(value.entered ?? {}).slice(0, 500)) if (Array.isArray(list)) entered[sceneId.slice(0, 80)] = list.map((id) => text(id, "").slice(0, 160)).filter(Boolean).slice(0, 1000);
   for (const [sceneId, list] of Object.entries(value.tiles ?? {}).slice(0, 500)) if (Array.isArray(list)) tiles[sceneId.slice(0, 80)] = list.map(cleanTile).filter(Boolean).slice(0, MAX_TILES);
   for (const [sceneId, list] of Object.entries(value.fx ?? {}).slice(0, 500)) if (Array.isArray(list)) fx[sceneId.slice(0, 80)] = list.map(cleanFx).filter(Boolean).slice(0, 20);
@@ -371,7 +396,7 @@ function savedMap(value) {
   for (const [sceneId, list] of Object.entries(value.drawings ?? {}).slice(0, 500)) {
     if (Array.isArray(list)) drawings[sceneId.slice(0, 80)] = list.map(cleanDrawing).filter(Boolean).slice(-MAX_DRAWINGS);
   }
-  return { tokens, doors, sight, locked, settings, lights, drawings, walls, masks, labels, groups, fx, tiles, frames, entered, studio };
+  return { tokens, doors, sight, locked, settings, lights, drawings, deathMarkers, walls, masks, labels, groups, fx, tiles, frames, entered, studio };
 }
 const MAX_DRAWINGS = 400;
 const MAX_PLAYER_DRAWINGS = 60;
@@ -390,7 +415,7 @@ function presetLight(name, profiles = []) {
 // Walls an image may hold from Map Studio (FG maps run to many thousands of segments).
 const MAX_WALLS_STUDIO = 20000;
 
-function createMapState({ saved, records, onChange = () => undefined, hasArt = () => false, hasPicture = () => false, artFor = () => null, hasTile = () => true, combatFor = () => null, activeRecord = () => null, sharedWith = null }) {
+function createMapState({ saved, records, onChange = () => undefined, hasArt = () => false, hasPicture = () => false, artFor = () => null, hasTile = () => true, combatFor = () => null, activeRecord = () => null, sharedWith = null, colorOf = playerColor }) {
   // One master per map: a second state (the GM's private image window) works on
   // the very same walls, lights, tokens, paint and effects as the table's.
   const state = sharedWith ? sharedWith.rawState() : savedMap(saved);
@@ -531,6 +556,12 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
     return set == null ? (scene?.darkness ?? 0) : set;
   }
 
+  function deathMarkersHere() {
+    if (!scene) return [];
+    state.deathMarkers = state.deathMarkers ?? {};
+    state.deathMarkers[scene.id] = state.deathMarkers[scene.id] ?? [];
+    return state.deathMarkers[scene.id];
+  }
   function drawingsHere() {
     if (!scene) return [];
     state.drawings[scene.id] = state.drawings[scene.id] ?? [];
@@ -666,7 +697,8 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       squares: token.squares,
       owner: token.owner,
       faction: token.faction,
-      color: token.owner ? playerColor(token.owner) : FACTION_COLOR[token.faction],
+      // A player's token rings in the colour they chose (Settings > You at the table), as their pings and drawings.
+      color: token.owner ? colorOf(token.owner) : FACTION_COLOR[token.faction],
       hidden: token.hidden,
       mine: seat.role === "player" && token.owner === seat.name,
       health: health(token),
@@ -722,7 +754,7 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       .map((wall) => ({ id: wall.id, group: doorGroup(wall), x1: wall.x1, y1: wall.y1, x2: wall.x2, y2: wall.y2, secret: wall.door === 2 || wall.toggle === "gm", kind: wall.door > 0 ? "door" : wall.kind, state: wall.id in doors ? doors[wall.id] : wall.ds }));
     const mask = maskHere();
     const groups = groupsHere();
-    const shared = { sceneId: scene.id, sight: sightOn(), locked, darkness: dark, settings: { grid: settings.grid, weather: settings.weather, darkness: settings.darkness }, drawings: drawingsHere(), mask: mask.on || mask.shapes.length ? mask : null, groups, fx: fxHere() };
+    const shared = { sceneId: scene.id, sight: sightOn(), locked, darkness: dark, settings: { grid: settings.grid, weather: settings.weather, darkness: settings.darkness }, drawings: drawingsHere(), deathMarkers: deathMarkersHere(), mask: mask.on || mask.shapes.length ? mask : null, groups, fx: fxHere() };
     const lightOut = (list) => list.map(({ id, x, y, brightPx, dimPx, color, polygon, animation, speed }) => ({ id, x, y, brightPx, dimPx, color, polygon, ...(animation ? { animation, speed } : {}) }));
     if (seat.role === "dm") {
       return {
@@ -782,6 +814,7 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       // Paint in a group players may not see, and the GM's own FX, stay with the GM.
       // Paint wholly under the mask stays with the GM too (a player's own lines are theirs).
       drawings: drawingsHere().filter((line) => groupLets(line.group, seat) && (line.by === seat.name || !drawnUnderMask(line))),
+      deathMarkers: deathMarkersHere().filter((marker) => !masked(marker.x, marker.y)),
       fx: fxHere().filter((layer) => layer.players && layer.shown && groupLets(layer.group, seat)),
       labels: labelsHere()
         .filter((label) => !label.hidden && groupLets(label.group, seat) && !masked(label.x, label.y))
@@ -1024,9 +1057,12 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
     drawings: () => drawingsHere(),
     draw(input, seat) {
       if (!scene) throw new Error("No scene is open.");
-      // Players draw free lines; the GM's paint has shapes, fills and groups.
-      const own = seat.role === "dm" ? input : { points: input?.points, color: input?.color, width: input?.width };
-      const line = cleanDrawing({ ...own, id: undefined, by: seat.role === "dm" ? "" : seat.name, color: input?.color ?? seat.color ?? playerColor(seat.name) });
+      // Players draw free lines and shapes (line, arrow, square, circle, cone; a
+      // faint fill in their colour); the GM's paint also has polygons, fills and groups.
+      const playerShape = ["line", "arrow", "rect", "circle", "cone"].includes(input?.shape) ? input.shape : undefined;
+      const playerColor_ = input?.color ?? seat.color ?? colorOf(seat.name);
+      const own = seat.role === "dm" ? input : { points: input?.points, color: input?.color, width: input?.width, shape: playerShape, ...(playerShape && playerShape !== "line" && playerShape !== "arrow" ? { fill: playerColor_, fillAlpha: 0.15 } : {}) };
+      const line = cleanDrawing({ ...own, id: undefined, by: seat.role === "dm" ? "" : seat.name, color: input?.color ?? seat.color ?? colorOf(seat.name) });
       if (line?.group && groupsHere().find((group) => group.name === line.group)?.locked) throw new Error(`The group ${line.group} is locked.`);
       if (line?.group) groupOf(line.group);
       if (!line) throw new Error("A line needs two points or more.");
@@ -1043,12 +1079,52 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       changed();
       return line;
     },
+    // A shape's two points moved (its handles dragged): its drawer's, or the GM's any.
+    reshape(id, points, seat) {
+      const list = drawingsHere();
+      const line = list.find((item) => item.id === id);
+      if (!line) throw new Error("That drawing is gone.");
+      if (seat.role !== "dm" && line.by !== seat.name) throw new Error("You can only change your own drawings.");
+      if (!TWO_POINT.has(line.shape)) throw new Error("Only a line, arrow, square, circle or cone can be resized.");
+      const next = cleanDrawing({ ...line, points });
+      if (!next) throw new Error("A shape needs two points.");
+      line.points = next.points;
+      changed();
+      return line;
+    },
     erase(id, seat) {
       const list = drawingsHere();
       const at = list.findIndex((line) => line.id === id);
       if (at < 0) throw new Error("That line is gone.");
       if (seat.role !== "dm" && list[at].by !== seat.name) throw new Error("You can only rub out your own lines.");
       list.splice(at, 1);
+      changed();
+    },
+    // Death markers: one left where a creature died (the table's hook), the GM's to place, remove or clear.
+    deathMarkers: () => deathMarkersHere(),
+    addDeathMarker(input, seat) {
+      if (seat.role !== "dm") throw new Error("Only the GM places death markers.");
+      if (!scene) throw new Error("No scene is open.");
+      const marker = cleanDeathMarker({ ...input, id: undefined });
+      if (!marker) throw new Error("Where? Give x and y.");
+      const list = deathMarkersHere();
+      list.push(marker);
+      if (list.length > MAX_DEATH_MARKERS) list.splice(0, list.length - MAX_DEATH_MARKERS);
+      changed();
+      return marker;
+    },
+    removeDeathMarker(id, seat) {
+      if (seat.role !== "dm") throw new Error("Only the GM removes death markers.");
+      const list = deathMarkersHere();
+      const at = list.findIndex((item) => item.id === id);
+      if (at < 0) throw new Error("That marker is gone.");
+      list.splice(at, 1);
+      changed();
+    },
+    clearDeathMarkers(seat) {
+      if (seat.role !== "dm") throw new Error("Only the GM clears death markers.");
+      if (!scene) return;
+      state.deathMarkers[scene.id] = [];
       changed();
     },
     clearDrawings(seat, who = null) {

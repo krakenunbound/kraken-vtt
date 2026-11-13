@@ -56,6 +56,8 @@ function diceSettings(patch: DiceSettingsPatch) {
     ...(typeof patch.sound === "boolean" ? { sound: patch.sound } : {}),
     ...(typeof patch.volume === "number" ? { volume: Math.min(1, Math.max(0, patch.volume)) } : {}),
     ...(patch.color !== undefined ? { color: patch.color ? String(patch.color).toLowerCase() : null } : {}),
+    ...(typeof patch.turnSound === "boolean" ? { turnSound: patch.turnSound } : {}),
+    ...(typeof patch.turnBanner === "boolean" ? { turnBanner: patch.turnBanner } : {}),
     ...(key === "look" ? { look } : patch.same ? { [key]: null } : changes ? { [key]: look } : {}),
   });
   const now = diceStore.settings();

@@ -81,7 +81,7 @@ function Stepper({ label, value, onChange, low, high }: { label: string; value: 
 // Two tiers: your own (the user tier: your dice and your colour, kept for you
 // by the GM's app under your name) and each of your characters' (kept on the
 // character: every roll made as that character uses them).
-const PALETTE = ["#e8c46a", "#ff5a5a", "#ff9f43", "#ffe066", "#6ee7a0", "#4fd6d0", "#5aa9ff", "#a78bfa", "#ff7ad9", "#f4f1ea"];
+export const PALETTE = ["#e8c46a", "#ff5a5a", "#ff9f43", "#ffe066", "#6ee7a0", "#4fd6d0", "#5aa9ff", "#a78bfa", "#ff7ad9", "#f4f1ea"];
 export function DiceWindow({ session }: { session: Session }) {
   const settings = useSyncExternalStore(diceStore.subscribe, diceStore.settings);
   // Whose dice: "" mine, else one of my characters (its record id).

@@ -2061,6 +2061,48 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       }
       changed();
     },
+    // The GM's corrections (FG's round counter and turn arrow): the turn
+    // before this one (the last of the round before, from the first), the
+    // round back by one, or the turn given to anyone. A turn's start (ongoing
+    // damage, durations) is not run again, so a correction costs nothing twice.
+    previous(seat) {
+      mustGM(seat);
+      const list = sorted();
+      if (list.length === 0) throw new Error("No one is on the tracker.");
+      const at = list.findIndex((entry) => entry.id === state.active);
+      if (at > 0) state.active = list[at - 1].id;
+      else if (state.round > 1) {
+        state.round -= 1;
+        state.active = list[list.length - 1].id;
+        table().say(`[ROUND ${state.round}] (back)`, "Combat");
+      } else throw new Error("This is the first turn of the fight.");
+      state.resume = null;
+      const entry = list.find((item) => item.id === state.active);
+      table().say(`[TURN] ${entry.name} (back)`, "Combat", entry.hidden);
+      changed();
+      return { round: state.round, active: state.active };
+    },
+    roundBack(seat) {
+      mustGM(seat);
+      if (state.round <= 1) throw new Error("This is the first round.");
+      state.round -= 1;
+      table().say(`[ROUND ${state.round}] (back)`, "Combat");
+      changed();
+      return { round: state.round, active: state.active };
+    },
+    setTurn(id, seat) {
+      mustGM(seat);
+      const entry = find(id);
+      state.active = entry.id;
+      state.resume = null;
+      if (state.round === 0) {
+        state.round = 1;
+        table().say(`[ROUND ${state.round}]`, "Combat");
+      }
+      table().say(`[TURN] ${entry.name}`, "Combat", entry.hidden);
+      changed();
+      return { round: state.round, active: state.active };
+    },
     // Ends the fight: the round goes to 0; optionally the NPCs leave.
     end(seat, { removeNpcs = false } = {}) {
       mustGM(seat);

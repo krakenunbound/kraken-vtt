@@ -16,6 +16,7 @@ import { DiceWindow } from "../dice/DiceWindow";
 import { SoundWindow } from "../sound/SoundWindow";
 import { QuickSlots, slotDrag } from "./QuickSlots";
 import { KritsWindow } from "../combat/KritsWindow";
+import { DeathMarkersWindow } from "../combat/DeathMarkersWindow";
 import { AdventureList, LibraryWindow, StoryWindow, type Kind as AdventureKind } from "../books/Library";
 import { NotesWindow, NoteWindow } from "../notes/Notes";
 import { BooksWindow, BookWindow, ImagesWindow, PictureWindow } from "../books/Books";
@@ -373,7 +374,7 @@ export function Desktop({
         if (command.kind !== "windows") return null;
         const { windows: manager, launchers: kinds, characters: sheets } = live.current;
         const list = () => manager.windows.map((item) => ({ key: item.key, kind: item.kind, title: item.title, poppedOut: item.popped }));
-        if (command.action === "list") return { open: list(), kinds: [...kinds.map((item) => entryId(item)), "sheet", "book", "images", "picture", "note", "decals", "wallpapers", "gmicons", "towers", "krits", "dice", "charselect", "cards"] };
+        if (command.action === "list") return { open: list(), kinds: [...kinds.map((item) => entryId(item)), "sheet", "book", "images", "picture", "note", "decals", "wallpapers", "gmicons", "towers", "deathmarkers", "krits", "dice", "charselect", "cards"] };
         let key: string = command.window ?? "";
         if (command.window === "note") {
           const id = String(command.record ?? "");
@@ -422,6 +423,8 @@ export function Desktop({
                     ? { kind: "gmicons" as const, title: "GM Icon" }
                   : command.window === "towers"
                     ? { kind: "towers" as const, title: "Dice Tower" }
+                  : command.window === "deathmarkers"
+                    ? { kind: "deathmarkers" as const, title: "Death Markers" }
                   : command.window === "charselect"
                     ? { kind: "charselect" as const, title: "Character Selection" }
                   : command.window === "krits"
@@ -446,14 +449,28 @@ export function Desktop({
       }),
     [],
   );
-  const myTurn = session.combat.entries.some((entry) => entry.mine && entry.id === session.combat.active);
-  // A player's turn coming round rings once, on their screen alone (the GM runs every turn).
+  const myEntry = session.combat.entries.find((entry) => entry.mine && entry.id === session.combat.active) ?? null;
+  const myTurn = Boolean(myEntry);
+  // A player's turn coming round, on their screen alone (the GM runs every
+  // turn): a bell, and a banner across the screen, each as they chose
+  // (Settings > You at the table; kept with their name).
+  const alerts = useSyncExternalStore(diceStore.subscribe, diceStore.settings);
   const turnRang = useRef("");
+  const [banner, setBanner] = useState<{ key: string; name: string } | null>(null);
   useEffect(() => {
     const key = myTurn ? `${session.combat.round}:${session.combat.active}` : "";
-    if (!gm && key && key !== turnRang.current) sound.yourTurn();
+    if (!gm && key && key !== turnRang.current) {
+      if (alerts.turnSound !== false) sound.yourTurn();
+      if (alerts.turnBanner !== false) setBanner({ key, name: myEntry?.name ?? "" });
+    }
+    if (!key) setBanner(null);
     turnRang.current = key;
   }, [myTurn, session.combat.round, session.combat.active]);
+  useEffect(() => {
+    if (!banner) return;
+    const timer = window.setTimeout(() => setBanner(null), 4200);
+    return () => window.clearTimeout(timer);
+  }, [banner]);
 
   return (
     <div className="shell desktop-shell" data-session={session.role}>
@@ -497,6 +514,13 @@ export function Desktop({
           </button>
         </div>
       </header>
+      {banner ? (
+        <div key={banner.key} className="turn-banner" role="alert" data-turn-banner={banner.name} onClick={() => setBanner(null)}>
+          <span className="turn-banner-glow" aria-hidden="true" />
+          <strong>Your turn</strong>
+          {banner.name ? <span>{banner.name}</span> : null}
+        </div>
+      ) : null}
 
       <div className="desktop">
         <div className="desktop-surface" style={wallpaperStyle(session)}>
@@ -557,6 +581,7 @@ export function Desktop({
               {item.kind === "ships" ? <ShipsWindow session={session} openMaps={openMaps} /> : null}
               {item.kind === "library" ? <LibraryWindow session={session} openMaps={openMaps} /> : null}
               {item.kind === "gmicons" ? <DecalPicker session={session} kind="gmicon" onClose={() => windows.close(item.key)} /> : null}
+              {item.kind === "deathmarkers" ? <DeathMarkersWindow session={session} /> : null}
               {item.kind === "towers" ? <DecalPicker session={session} kind="tower" onClose={() => windows.close(item.key)} /> : null}
             </FloatingWindow>
             ),

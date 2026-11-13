@@ -48,9 +48,17 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
       }}
       // A damage or healing roll from chat dropped here applies to this creature (FG's drop on the tracker).
       onDragOver={(event) => {
-        if (gm && [...event.dataTransfer.types].includes("application/x-kraken-damage")) event.preventDefault();
+        if (gm && [...event.dataTransfer.types].some((type) => type === "application/x-kraken-damage" || type === "application/x-kraken-turn")) event.preventDefault();
       }}
       onDrop={(event) => {
+        // The turn arrow dropped here: their turn now.
+        const turn = event.dataTransfer.getData("application/x-kraken-turn");
+        if (gm && turn) {
+          event.preventDefault();
+          event.stopPropagation();
+          if (turn !== entry.id) session.ct("set-turn", { id: entry.id });
+          return;
+        }
         const raw = event.dataTransfer.getData("application/x-kraken-damage");
         if (!gm || !raw) return;
         event.preventDefault();
@@ -64,9 +72,29 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
       }}
     >
       <div className="ct-main">
-        <span className="ct-turn" aria-label={active ? "Their turn" : undefined}>
-          {active ? <Icon name="next" size={16} /> : null}
-        </span>
+        {gm ? (
+          // FG's turn arrow: the GM drags it to anyone, or clicks here, to make it their turn.
+          <button
+            type="button"
+            className={active ? "ct-turn on" : "ct-turn"}
+            data-action="set-turn"
+            aria-label={active ? `${entry.name}'s turn` : `Make it ${entry.name}'s turn`}
+            title={active ? "Their turn: drag the arrow to someone else to make it theirs" : "Make it their turn"}
+            draggable={active}
+            onDragStart={(event) => {
+              event.stopPropagation();
+              event.dataTransfer.setData("application/x-kraken-turn", entry.id);
+              event.dataTransfer.effectAllowed = "move";
+            }}
+            onClick={() => !active && session.ct("set-turn", { id: entry.id })}
+          >
+            {active ? <Icon name="next" size={16} /> : null}
+          </button>
+        ) : (
+          <span className="ct-turn" aria-label={active ? "Their turn" : undefined}>
+            {active ? <Icon name="next" size={16} /> : null}
+          </span>
+        )}
         {gm ? (
           <input
             className="ct-init"
@@ -362,8 +390,18 @@ export function CombatTracker({ session }: { session: Session }) {
       }}
     >
       <header className="ct-head">
-        <span className="ct-round">
+        <span className="ct-round" data-round={combat.round}>
+          {gm && combat.round > 1 ? (
+            <button type="button" className="ghost ct-round-step" data-action="round-back" title="The round counter back one (a mistake undone; nothing is run again)" aria-label="Round back" onClick={() => session.ct("round-back")}>
+              ‹
+            </button>
+          ) : null}
           <Icon name="flag" size={16} /> {combat.round > 0 ? `Round ${combat.round}` : "Not started"}
+          {gm && combat.round > 0 ? (
+            <button type="button" className="ghost ct-round-step" data-action="round-next" title="Next round: the rest of this round passes, and the first in the order starts" aria-label="Next round" onClick={() => session.ct("round")}>
+              ›
+            </button>
+          ) : null}
         </span>
         {gm ? (
           <span className="ct-head-tools">
@@ -373,6 +411,11 @@ export function CombatTracker({ session }: { session: Session }) {
             <button type="button" onClick={() => session.ct("init", { which: "all" })} disabled={combat.entries.length === 0}>
               Roll all
             </button>
+            {combat.round > 0 ? (
+              <button type="button" data-action="prev-turn" title="Back to the turn before (its start is not run again)" onClick={() => session.ct("prev")}>
+                <span className="flip"><Icon name="next" size={14} /></span> Back
+              </button>
+            ) : null}
             <button type="button" className="play-button" data-action="next-turn" onClick={() => session.ct("next")} disabled={combat.entries.length === 0}>
               {combat.round > 0 ? "Next turn" : "Start combat"} <Icon name="next" size={14} />
             </button>

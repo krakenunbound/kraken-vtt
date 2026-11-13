@@ -67,6 +67,8 @@ const MESSAGES = {
   "playtest": "kraken_image",
   draw: "kraken_draw",
   "draw-erase": "kraken_draw",
+  "draw-update": "kraken_draw",
+  "death-marker": "kraken_death_markers",
   "draw-clear": "kraken_draw",
   scene: "kraken_scenes",
   "table-options": "kraken_table_options",

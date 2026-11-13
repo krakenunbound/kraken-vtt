@@ -38,6 +38,9 @@ function cleanPrefs(input, before, lookOf) {
   }
   if (typeof input.show === "boolean") out.show = input.show;
   if (typeof input.sound === "boolean") out.sound = input.sound;
+  // When their turn comes round: a bell, and a banner across their screen.
+  if (typeof input.turnSound === "boolean") out.turnSound = input.turnSound;
+  if (typeof input.turnBanner === "boolean") out.turnBanner = input.turnBanner;
   if (input.volume !== undefined) out.volume = clamp(input.volume, 0, 1, 0.7);
   if (input.tray !== undefined) out.tray = clamp(input.tray, 0.6, 1.6, 1);
   if (input.roll !== undefined) out.roll = clamp(input.roll, 0.5, 2.5, 1);

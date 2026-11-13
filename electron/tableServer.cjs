@@ -240,6 +240,17 @@ const GM_ICON = "kraken/01 The Kraken.png";
 // towerStyle is a picture from the GM's towers folder (assets/towers).
 const TOWER_STYLES = ["stone", "oak", "obsidian", "frost", "brass", "bone"];
 
+function cleanDeathMarkerOptions(value) {
+  const { MARKER_SETS } = require("../shared/map/deathMarkers.mjs");
+  const raw = value && typeof value === "object" ? value : {};
+  const sets = new Set(MARKER_SETS.map((set) => set.id));
+  const byType = {};
+  for (const [type, set] of Object.entries(raw.byType && typeof raw.byType === "object" ? raw.byType : {}).slice(0, 60)) {
+    if (set === "" || sets.has(set)) byType[String(type).toLowerCase().slice(0, 40)] = set;
+  }
+  return { on: raw.on !== false, default: sets.has(raw.default) ? raw.default : "blood-red", byType };
+}
+
 function savedOptions(value) {
   const options = value && typeof value === "object" ? value : {};
   const id = (text, fallback) => (typeof text === "string" && text.length <= 400 ? text : fallback);
@@ -249,6 +260,8 @@ function savedOptions(value) {
     towerExternal: Boolean(options.towerExternal),
     // How the tower looks, for every seat: one of TOWER_STYLES, or a tower picture's id.
     towerStyle: id(options.towerStyle, "stone") || "stone",
+    // Death markers (FG's): on, and the set for each creature type ("" is the default's).
+    deathMarkers: cleanDeathMarkerOptions(options.deathMarkers),
     decal: id(options.decal, "kraken"),
     wallpaper: id(options.wallpaper, ""),
     gmIcon: id(options.gmIcon, GM_ICON),
@@ -575,6 +588,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       return entry ? { health: combat.health(entry), active: combat.active() === entry.id } : null;
     },
     activeRecord: () => combat.entries().find((item) => item.id === combat.active())?.recordId ?? null,
+    colorOf: (name) => tokenColorOf(name),
   });
 
   // The GM's image window (FG's: any image opened from the Images list, a book
@@ -595,6 +609,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     hasTile: (id) => Boolean(tiles && tiles.has(id)),
     combatFor: () => null,
     activeRecord: () => null,
+    colorOf: (name) => tokenColorOf(name),
   });
   // FG's play test: the GM sees the image as a player would, through a test
   // token's eyes ("@test" owns it), and moves it as a player moves.
@@ -611,11 +626,43 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     saved: saved.combat,
     table: () => agentHandle,
     onChange: () => {
+      leaveDeathMarkers();
       onChange("table");
       sendCombat();
       sendMaps();
     },
   });
+  // A creature that dies on the tracker leaves a death marker where its token
+  // stands (FG's Death Markers): its type's set, the default's else; a
+  // character does not. Those dead already when the table opens are known.
+  const deadKnown = new Set();
+  let deadReady = false;
+  function leaveDeathMarkers() {
+    const { markerFor } = require("../shared/map/deathMarkers.mjs");
+    for (const entry of combat.entries()) {
+      const dead = ["Dead", "Destroyed"].includes(combat.health(entry).status);
+      if (!dead) {
+        deadKnown.delete(entry.id);
+        continue;
+      }
+      if (deadKnown.has(entry.id)) continue;
+      deadKnown.add(entry.id);
+      if (!deadReady) continue;
+      const settings = options.deathMarkers;
+      const record = entry.recordId ? records.get(entry.recordId) : null;
+      if (!settings?.on || record?.type === "character" || entry.faction === "friend") continue;
+      const token = map.tokens().find((item) => item.id === entry.tokenId) ?? (entry.recordId ? map.tokens().find((item) => item.recordId === entry.recordId) : null);
+      if (!token || !map.scene()) continue;
+      const marker = markerFor(settings, record, entry.name);
+      if (!marker) continue;
+      try {
+        map.addDeathMarker({ ...marker, x: token.x, y: token.y, size: Math.max(1, token.squares ?? 1), name: entry.name }, { role: "dm", name: "Combat" });
+      } catch {
+        /* no scene */
+      }
+    }
+    deadReady = true;
+  }
   let combatPending = false;
   function sendCombat() {
     if (combatPending) return;
@@ -1569,8 +1616,11 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       // by name; every browser they sit at gets them.
       if (msg.type === "prefs") {
         try {
+          const before = prefs.get(prefsKey(client)).color;
           const next = prefs.set(prefsKey(client), msg.patch);
           for (const [other, seat] of clients) if (prefsKey(seat) === prefsKey(client)) send(other, { type: "prefs", prefs: next });
+          // A new colour: everyone sees their tokens ringed in it.
+          if (next.color !== before) sendMaps();
         } catch (error) {
           send(ws, { type: "error", reason: error instanceof Error ? error.message : "Your settings could not be kept." });
         }
@@ -1981,7 +2031,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
 
       // The map: tokens, doors, line of sight and pings (mapState.cjs decides
       // who may do what).
-      if (["token-place", "token-move", "token-remove", "token-update", "door", "sight", "lock", "scene-settings", "light-place", "light-update", "light-remove", "draw", "draw-erase", "draw-clear", "wall", "map-undo", "mask", "label", "map-group", "fx", "tile"].includes(msg.type)) {
+      if (["token-place", "token-move", "token-remove", "token-update", "door", "sight", "lock", "scene-settings", "light-place", "light-update", "light-remove", "draw", "draw-update", "draw-erase", "draw-clear", "death-marker", "wall", "map-undo", "mask", "label", "map-group", "fx", "tile"].includes(msg.type)) {
         const working = mapOf(client);
         // Testing: the GM's moves of the test token are a player's (walls, locks).
         const testToken = (id) => testing && client.role === "dm" && working.tokens().some((token) => token.id === id && token.owner === TEST_SEAT.name);
@@ -2011,8 +2061,13 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
             working.updateSettings(msg.patch ?? {}, seat);
           } else if (msg.type === "draw") {
             working.draw({ points: msg.points, color: msg.color, width: msg.width, shape: msg.shape, fill: msg.fill, fillAlpha: msg.fillAlpha, alpha: msg.alpha, group: msg.group }, seat);
+          } else if (msg.type === "draw-update") {
+            working.reshape(String(msg.id ?? ""), Array.isArray(msg.points) ? msg.points : [], seat);
           } else if (msg.type === "draw-erase") {
             working.erase(String(msg.id ?? ""), seat);
+          } else if (msg.type === "death-marker") {
+            if (msg.action === "clear") working.clearDeathMarkers(seat);
+            else working.removeDeathMarker(String(msg.id ?? ""), seat);
           } else if (msg.type === "draw-clear") {
             working.clearDrawings(seat);
           } else if (msg.type === "light-place") {
@@ -2110,6 +2165,12 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
               return combat.next(seat);
             case "round":
               return combat.nextRound(seat);
+            case "prev":
+              return combat.previous(seat);
+            case "round-back":
+              return combat.roundBack(seat);
+            case "set-turn":
+              return combat.setTurn(String(msg.id ?? ""), seat);
             case "end":
               return combat.end(seat, { removeNpcs: Boolean(msg.removeNpcs) });
             case "effect":
@@ -2371,8 +2432,10 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     prefs(who = "@gm", patch) {
       const key = who === "GM" || who === "" ? "@gm" : who;
       if (patch === undefined) return prefs.get(key);
+      const before = prefs.get(key).color;
       const next = prefs.set(key, patch);
       for (const [ws, seat] of clients) if (prefsKey(seat) === key) send(ws, { type: "prefs", prefs: next });
+      if (next.color !== before) sendMaps();
       return next;
     },
     diceLook,
@@ -2495,6 +2558,10 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     return vote;
   }
 
+  // A player's chosen colour by name (their tokens' ring), else the table's for that name.
+  function tokenColorOf(name) {
+    return prefs.get(String(name)).color ?? playerColor(String(name));
+  }
   function playerColorOf(client) {
     return prefs.get(prefsKey(client)).color ?? (client.role === "dm" ? "#f4f1ea" : playerColor(client.name));
   }

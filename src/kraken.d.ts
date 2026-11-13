@@ -119,7 +119,7 @@ export type KrakenAgentCommand =
   | { kind: "tower"; action: "view" | "lock" | "unlock" | "place" | "on" | "off"; x?: number; y?: number }
   | { kind: "image"; action: "open" | "make" | "play" | "test" | "preview" | "close" | "studio"; book?: string; name?: string; file?: string; on?: boolean };
 
-export type DiceSettingsPatch = { show?: boolean; sound?: boolean; volume?: number; preset?: string; body?: string; accent?: string; ink?: string; design?: string; material?: string; font?: string; effect?: string; crit?: boolean; pips?: boolean; set?: "mine" | "npc" | "damage"; same?: boolean; color?: string; character?: string; resolve?: boolean; base?: Partial<import("./dice/diceStore").DiceLook> | null };
+export type DiceSettingsPatch = { show?: boolean; sound?: boolean; volume?: number; preset?: string; body?: string; accent?: string; ink?: string; design?: string; material?: string; font?: string; effect?: string; crit?: boolean; pips?: boolean; set?: "mine" | "npc" | "damage"; same?: boolean; color?: string; turnSound?: boolean; turnBanner?: boolean; character?: string; resolve?: boolean; base?: Partial<import("./dice/diceStore").DiceLook> | null };
 
 export type KrakenSound = { id: string; kind: string; group: string; name: string };
 

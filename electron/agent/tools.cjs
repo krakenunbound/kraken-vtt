@@ -456,15 +456,15 @@ const TOOLS = [
   },
   {
     name: "kraken_draw",
-    description: "Drawing on the open scene, for everyone, as the map toolbar's pen, and the GM's paint (the map editor's Paint tab): action list (the lines: id, who drew it, colour, width, points, shape, fill, group), draw (points: [x, y, x, y, ...] in scene pixels, colour #rrggbb, width; the GM also: shape free, line, rect or ellipse (points: two corners), poly (closed), fill #rrggbb and fillAlpha 0..1, alpha 0..1, group: a layer group (made if new; a group players may not see keeps its paint with the GM)), erase (id), clear (every line).",
+    description: "Drawing on the open scene, for everyone, as the map toolbar's pen, and the GM's paint (the map editor's Paint tab): action list (the lines: id, who drew it, colour, width, points, shape, fill, group), draw (points: [x, y, x, y, ...] in scene pixels, colour #rrggbb, width; the GM also: shape free, line, rect or ellipse (points: two corners), poly (closed), fill #rrggbb and fillAlpha 0..1, alpha 0..1, group: a layer group (made if new; a group players may not see keeps its paint with the GM)), resize (id, points: a shape's two points moved, as its handles dragged), erase (id), clear (every line). Shapes, for players too (the pen's shapes, in their colour, measured as drawn): line, arrow (direction and aim), rect (a square: two corners), circle (its centre, then a point on its edge: the radius), cone (its point, then the middle of its far end; as wide there as it is long).",
     inputSchema: object(
       {
-        action: { type: "string", enum: ["list", "draw", "erase", "clear"] },
+        action: { type: "string", enum: ["list", "draw", "resize", "erase", "clear"] },
         points: { type: "array", items: { type: "number" }, description: "x, y, x, y, ... in scene pixels" },
         color: string("#rrggbb"),
         width: number("Line width in scene pixels"),
         id: string("A line's id (erase)"),
-        shape: { type: "string", enum: ["free", "line", "rect", "ellipse", "poly"] },
+        shape: { type: "string", enum: ["free", "line", "arrow", "rect", "ellipse", "circle", "cone", "poly"] },
         fill: string("#rrggbb fill (rect, ellipse, poly)"),
         fillAlpha: number("0..1"),
         alpha: number("Line opacity 0..1"),
@@ -475,6 +475,7 @@ const TOOLS = [
     run(args, ctx) {
       const table = needTable(ctx);
       if (args.action === "draw") return out(table.map.draw({ points: args.points, color: args.color, width: args.width, shape: args.shape, fill: args.fill, fillAlpha: args.fillAlpha, alpha: args.alpha, group: args.group }, table.seat));
+      if (args.action === "resize") return out(table.map.reshape(String(args.id ?? ""), args.points, table.seat));
       if (args.action === "erase") {
         table.map.erase(String(args.id ?? ""), table.seat);
         return out({ erased: args.id });
@@ -822,9 +823,9 @@ const TOOLS = [
   {
     name: "kraken_combat",
     description:
-      "The combat tracker (SiegeCore rules: d10 initiative, high to low; unconscious enemies lose their turns; effect durations count down each round; the dying bleed). action view (default); place-token (id, x, y: the entry's token onto the open map at that point, tied to it; moved there if it has one); add (recordId of a character or NPC, count, hidden, place: also put tokens on the map; or entry {name, faction, hp, ac, init}); add-party; init (which: an entry id, npcs or all); next (next turn); round (next round); end (removeNpcs); update (id, patch {name, faction, init, initresult, hp, wounds, ac, hidden}); remove (id); damage / heal (id, amount); effect (id, effect {label, duration in rounds, gmOnly}); effect-remove (id, effectId); target (id: the attacker entry, targetId, on true/false); clear-targets (id); attack / damage-roll (a character: recordId + weapon = its inventory key; an NPC: id + weapon = its attack key from view's attacks): SiegeCore's attack, one d20 per target against its AC (equal hits), damage rolled once and put on every target; save (id, attribute, cl): a SIEGE save; cast (recordId, power: its powers key, castAction: the power's actions key): spends a slot, targets save against the caster level, damage halves or cancels on a save, effects land on those who failed, healing goes to the targets. target-area: the source (id) targets everyone whose token is within radius feet of x, y (faction to narrow), for an area spell. krits: critical hits and fumbles (the Castle Keeper's Guide options as Kraken Krits & Fumbles: a natural 20 rolls the critical table, a natural 1 the fumble table, and the result is applied: effects, damage, the next damage roll at maximum or doubled; ranged attacks use up ammunition; spells with spell resistance on are checked first). settings: { mode opt5|opt6|opt1|opt4, crit/fumble always|half|third|off, auto yes|no, npc yes|no, show all|gm, death gm|apply } (omit to read them). krit-test: roll a critical (kind crit) or fumble (kind fumble) for id against targetId (table, roll to fix the result). In a D&D 5E campaign the tracker plays FG's 5E rules instead: init d20 + DEX; attack d20 + bonus against AC, a natural 20 a CRITICAL HIT (the next damage roll doubles its dice), a natural 1 an AUTOMATIC MISS, no krits; save (id, attribute, cl = the DC); cast (recordId or id, power = the spell's name): a slot of its level (or the lowest free above), attack roll or save against the caster's DC, damage (cantrips scale, half on a save where the spell says), healing, effects; a creature at 0 hit points is dead, a character Dying: death-save (id) rolls its death saving throw. In a Descending Darkness campaign the same d20 rules, but a Dying character has no death saves: it loses 1 Health each of its turns, and stabilize (id, recordId: the ally steadying them) rolls that ally's Wisdom against 12 to stop it; dead at minus its maximum Health. In a D&D 3.5E campaign the tracker plays FG's 3.5E rules: init d20 + its bonus; attack (weapon: a character's attacks key, an NPC's attack by its place, 0 the first) d20 + bonus against AC, a natural 20 hits and a 1 misses, a roll in the weapon's threat range (19-20, 18-20) that hits is CONFIRMED by a second roll to be a CRITICAL HIT, full true rolls every iterative bonus at the first target; damage-roll rolls each hit, a critical rolled x2/x3/x4 (dice and bonuses), at least 1; save (id, attribute fortitude, reflex or will, cl = the DC), a natural 20 saves and a 1 fails; at 0 hit points Disabled, -1 to -9 Dying (each turn 10% to become Stable, else 1 more lost), dead at -10; no krits. In an AD&D 2E campaign the tracker plays 2E: init d10 + modifiers, the LOWEST first; attack d20 + to-hit against THAC0 - the target's AC (AC effects lower it), a natural 20 hits and a 1 misses; full true: an NPC's every attack (claw, claw, bite) or a warrior's 3/2 or 2/1 at the first target; damage-roll rolls each hit's damage by the target's size (Small or Medium, or Large for an NPC whose size is L, H or G), at least 1; save (id, attribute paralyzation, rod, petrification, breath or spell, cl = a modifier added to the roll), d20 at or above the save's number; a creature dies at 0, a character at 0 to -9 is Dying (a hit point lost each round), stabilize (id, recordId) binds the wounds (no roll); dead at -10; turn-undead (recordId of a cleric, or a paladin from 3rd level, or id; undead: entry ids, else its targets, else every undead foe): one d20 against the turning table for each undead's type (by name, else its hit dice), 2d6 undead affected weakest first, T turned for 3d4 rounds (an effect), D destroyed (D*: 2d4 more); krits come from the GM's Krits & Fumbles 2E book when it is active (its Critical Hit and Fumble tables, then the attack kind's table: slashing, piercing, bludgeoning, missile, natural), the row applied (extra damage, maximum or an extra die on the next damage roll, AC and to-hit penalties, GRANTATK: the next attack against it gains, prone or a save against it), the rest left to the GM; krit-test takes entryRoll, attackKind and roll.",
+      "The combat tracker (SiegeCore rules: d10 initiative, high to low; unconscious enemies lose their turns; effect durations count down each round; the dying bleed). action view (default); place-token (id, x, y: the entry's token onto the open map at that point, tied to it; moved there if it has one); add (recordId of a character or NPC, count, hidden, place: also put tokens on the map; or entry {name, faction, hp, ac, init}); add-party; init (which: an entry id, npcs or all); next (next turn); round (next round); prev (the turn before: the GM's correction, its start not run again); round-back (the round counter back one); set-turn (id: make it that entry's turn, as FG's turn arrow dragged to it); end (removeNpcs); update (id, patch {name, faction, init, initresult, hp, wounds, ac, hidden}); remove (id); damage / heal (id, amount); effect (id, effect {label, duration in rounds, gmOnly}); effect-remove (id, effectId); target (id: the attacker entry, targetId, on true/false); clear-targets (id); attack / damage-roll (a character: recordId + weapon = its inventory key; an NPC: id + weapon = its attack key from view's attacks): SiegeCore's attack, one d20 per target against its AC (equal hits), damage rolled once and put on every target; save (id, attribute, cl): a SIEGE save; cast (recordId, power: its powers key, castAction: the power's actions key): spends a slot, targets save against the caster level, damage halves or cancels on a save, effects land on those who failed, healing goes to the targets. target-area: the source (id) targets everyone whose token is within radius feet of x, y (faction to narrow), for an area spell. krits: critical hits and fumbles (the Castle Keeper's Guide options as Kraken Krits & Fumbles: a natural 20 rolls the critical table, a natural 1 the fumble table, and the result is applied: effects, damage, the next damage roll at maximum or doubled; ranged attacks use up ammunition; spells with spell resistance on are checked first). settings: { mode opt5|opt6|opt1|opt4, crit/fumble always|half|third|off, auto yes|no, npc yes|no, show all|gm, death gm|apply } (omit to read them). krit-test: roll a critical (kind crit) or fumble (kind fumble) for id against targetId (table, roll to fix the result). In a D&D 5E campaign the tracker plays FG's 5E rules instead: init d20 + DEX; attack d20 + bonus against AC, a natural 20 a CRITICAL HIT (the next damage roll doubles its dice), a natural 1 an AUTOMATIC MISS, no krits; save (id, attribute, cl = the DC); cast (recordId or id, power = the spell's name): a slot of its level (or the lowest free above), attack roll or save against the caster's DC, damage (cantrips scale, half on a save where the spell says), healing, effects; a creature at 0 hit points is dead, a character Dying: death-save (id) rolls its death saving throw. In a Descending Darkness campaign the same d20 rules, but a Dying character has no death saves: it loses 1 Health each of its turns, and stabilize (id, recordId: the ally steadying them) rolls that ally's Wisdom against 12 to stop it; dead at minus its maximum Health. In a D&D 3.5E campaign the tracker plays FG's 3.5E rules: init d20 + its bonus; attack (weapon: a character's attacks key, an NPC's attack by its place, 0 the first) d20 + bonus against AC, a natural 20 hits and a 1 misses, a roll in the weapon's threat range (19-20, 18-20) that hits is CONFIRMED by a second roll to be a CRITICAL HIT, full true rolls every iterative bonus at the first target; damage-roll rolls each hit, a critical rolled x2/x3/x4 (dice and bonuses), at least 1; save (id, attribute fortitude, reflex or will, cl = the DC), a natural 20 saves and a 1 fails; at 0 hit points Disabled, -1 to -9 Dying (each turn 10% to become Stable, else 1 more lost), dead at -10; no krits. In an AD&D 2E campaign the tracker plays 2E: init d10 + modifiers, the LOWEST first; attack d20 + to-hit against THAC0 - the target's AC (AC effects lower it), a natural 20 hits and a 1 misses; full true: an NPC's every attack (claw, claw, bite) or a warrior's 3/2 or 2/1 at the first target; damage-roll rolls each hit's damage by the target's size (Small or Medium, or Large for an NPC whose size is L, H or G), at least 1; save (id, attribute paralyzation, rod, petrification, breath or spell, cl = a modifier added to the roll), d20 at or above the save's number; a creature dies at 0, a character at 0 to -9 is Dying (a hit point lost each round), stabilize (id, recordId) binds the wounds (no roll); dead at -10; turn-undead (recordId of a cleric, or a paladin from 3rd level, or id; undead: entry ids, else its targets, else every undead foe): one d20 against the turning table for each undead's type (by name, else its hit dice), 2d6 undead affected weakest first, T turned for 3d4 rounds (an effect), D destroyed (D*: 2d4 more); krits come from the GM's Krits & Fumbles 2E book when it is active (its Critical Hit and Fumble tables, then the attack kind's table: slashing, piercing, bludgeoning, missile, natural), the row applied (extra damage, maximum or an extra die on the next damage roll, AC and to-hit penalties, GRANTATK: the next attack against it gains, prone or a save against it), the rest left to the GM; krit-test takes entryRoll, attackKind and roll.",
     inputSchema: object({
-      action: { type: "string", enum: ["view", "add", "add-party", "init", "next", "round", "end", "update", "remove", "damage", "heal", "effect", "effect-remove", "target", "clear-targets", "attack", "damage-roll", "save", "cast", "krits", "krit-test", "target-area", "death-save", "stabilize", "turn-undead", "ship-attack", "place-token"] },
+      action: { type: "string", enum: ["view", "add", "add-party", "init", "next", "round", "prev", "round-back", "set-turn", "end", "update", "remove", "damage", "heal", "effect", "effect-remove", "target", "clear-targets", "attack", "damage-roll", "save", "cast", "krits", "krit-test", "target-area", "death-save", "stabilize", "turn-undead", "ship-attack", "place-token"] },
       targetId: string("target: the entry to target"),
       on: { type: "boolean", description: "target: add (true) or drop (false)" },
       weapon: string("attack / damage-roll: inventory key (character) or attack key (NPC)"),
@@ -877,6 +878,9 @@ const TOOLS = [
       } else if (action === "init") await combat.rollInit(args.which ?? "all", seat);
       else if (action === "next") await combat.next(seat);
       else if (action === "round") await combat.nextRound(seat);
+      else if (action === "prev") combat.previous(seat);
+      else if (action === "round-back") combat.roundBack(seat);
+      else if (action === "set-turn") combat.setTurn(String(args.id ?? ""), seat);
       else if (action === "end") combat.end(seat, { removeNpcs: Boolean(args.removeNpcs) });
       else if (action === "update") combat.update(args.id, args.patch ?? {}, seat);
       else if (action === "remove") combat.remove(args.id, seat);
@@ -1115,6 +1119,45 @@ const TOOLS = [
       if (args.action === "folder") return out({ folder: packs.folder });
       packs.refresh();
       return out({ folder: packs.folder, packs: packs.list() });
+    },
+  },
+  {
+    name: "kraken_death_markers",
+    description:
+      "Death markers (FG's): when a creature dies on the combat tracker, a marker is left on the map where its token stood, for everyone, under the tokens: blood in a colour, a skull or a tombstone. Characters and friends leave none. action view (default): the settings (on; default: the set for a type not named; byType: creature type -> set, as in Settings > Death Markers) and the markers on the open map; sets: the marker sets (id, name, tint, how many pictures); set: settings (on, default, byType: {undead: \"blood-violet\", construct: \"blood-black\", ...}; \"\" for the default's); place (x, y, set, variant, rotation, size: one by hand); remove (id); clear (every marker on the open map).",
+    inputSchema: object({
+      action: { type: "string", enum: ["view", "sets", "set", "place", "remove", "clear"] },
+      on: { type: "boolean" },
+      default: string("The set for a creature type not named"),
+      byType: { type: "object", description: "Creature type (lower case) -> set id" },
+      id: string("A marker's id (remove)"),
+      x: number("Scene pixels"),
+      y: number("Scene pixels"),
+      set: string("A set id (place)"),
+      variant: number("Which of the set's pictures"),
+      rotation: number("Degrees"),
+      size: number("In squares"),
+    }),
+    run(args, ctx) {
+      const table = needTable(ctx);
+      const { MARKER_SETS } = require("../../shared/map/deathMarkers.mjs");
+      const action = args.action ?? "view";
+      if (action === "sets") return out(MARKER_SETS.map(({ id, name, tint, count }) => ({ id, name, tint, count })));
+      if (action === "set") {
+        const now = table.options().deathMarkers;
+        const patch = { ...now, ...(typeof args.on === "boolean" ? { on: args.on } : {}), ...(args.default ? { default: args.default } : {}), ...(args.byType ? { byType: { ...now.byType, ...args.byType } } : {}) };
+        return out(table.setOptions({ deathMarkers: patch }).deathMarkers);
+      }
+      if (action === "place") return out(table.map.addDeathMarker({ x: args.x, y: args.y, set: args.set, variant: args.variant, rotation: args.rotation, size: args.size }, table.seat));
+      if (action === "remove") {
+        table.map.removeDeathMarker(String(args.id ?? ""), table.seat);
+        return out({ removed: args.id });
+      }
+      if (action === "clear") {
+        table.map.clearDeathMarkers(table.seat);
+        return out({ cleared: true });
+      }
+      return out({ settings: table.options().deathMarkers, markers: table.map.deathMarkers() });
     },
   },
   {
@@ -1635,7 +1678,9 @@ const TOOLS = [
       same: { type: "boolean", description: "With set npc or damage: back to as my dice (with character: back to its player's dice)" },
       color: string("Your colour on the map (pings and ink), #rrggbb; empty for the table's colour for your name"),
       character: string("A character (record id or name): set that character's own dice (the character tier, kept on it; every roll made as it uses them) instead of the GM's. Takes preset and the look parts, set mine or damage, same"),
-      who: string("With color: a player's name, to set that player's colour (their user settings) instead of the GM's"),
+      who: string("With color, turnSound or turnBanner: a player's name, to set that player's (their user settings) instead of the GM's"),
+      turnSound: { type: "boolean", description: "When this person's turn comes round on the combat tracker: a bell (Settings > You at the table)" },
+      turnBanner: { type: "boolean", description: "When this person's turn comes round: a banner across their screen" },
     }),
     async run(args, ctx) {
       if (args.character) {
@@ -1658,7 +1703,8 @@ const TOOLS = [
       }
       if (args.who !== undefined && args.who !== "" && args.who !== "GM") {
         const table = needTable(ctx);
-        return out({ who: args.who, prefs: table.prefs(args.who, { color: args.color ? args.color : null }) });
+        const patch = { ...(args.color !== undefined ? { color: args.color ? args.color : null } : {}), ...(typeof args.turnSound === "boolean" ? { turnSound: args.turnSound } : {}), ...(typeof args.turnBanner === "boolean" ? { turnBanner: args.turnBanner } : {}) };
+        return out({ who: args.who, prefs: table.prefs(args.who, patch) });
       }
       return out(await ctx.ui({ kind: "dice-settings", patch: args }));
     },

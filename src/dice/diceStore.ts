@@ -157,11 +157,12 @@ export const PRESETS: ({ name: string } & DiceLook)[] = [
 // color: this person's colour on the map (their pings and their ink); null is the table's colour for their name.
 // These are the user tier: kept by the GM's app under the person's name (prefs.cjs), so
 // they follow them to any browser, past a reload, a restart and signing in again.
-export type DiceSettings = { show: boolean; sound: boolean; volume: number; tray: number; roll: number; look: DiceLook; npc: DiceLook | null; damage: DiceLook | null; color: string | null };
+// turnSound, turnBanner: when this person's turn comes round on the combat tracker, a bell, and a banner across the screen.
+export type DiceSettings = { show: boolean; sound: boolean; volume: number; tray: number; roll: number; look: DiceLook; npc: DiceLook | null; damage: DiceLook | null; color: string | null; turnSound: boolean; turnBanner: boolean };
 export type DiceSet = "look" | "npc" | "damage";
 type SettingsPatch = Partial<Omit<DiceSettings, "look" | "npc" | "damage">> & { look?: Partial<DiceLook>; npc?: Partial<DiceLook> | null; damage?: Partial<DiceLook> | null };
 const { name: _first, ...firstLook } = PRESETS.find((preset) => preset.name === "Classic Ruby") ?? PRESETS[0];
-const DEFAULTS: DiceSettings = { show: true, sound: true, volume: 0.7, tray: 1, roll: 1, look: firstLook, npc: null, damage: null, color: null };
+const DEFAULTS: DiceSettings = { show: true, sound: true, volume: 0.7, tray: 1, roll: 1, look: firstLook, npc: null, damage: null, color: null, turnSound: true, turnBanner: true };
 
 // A look from another seat (or an older one) with whatever it leaves out filled in.
 export function fullLook(look: Partial<DiceLook>): DiceLook {
@@ -197,7 +198,7 @@ const keep = () => {
 };
 // The GM's app, which keeps these for this person (set when the seat is taken).
 let sink: ((patch: Record<string, unknown>) => void) | null = null;
-const SERVER_KEYS = ["show", "sound", "volume", "tray", "roll", "look", "npc", "damage", "color"] as const;
+const SERVER_KEYS = ["show", "sound", "volume", "tray", "roll", "look", "npc", "damage", "color", "turnSound", "turnBanner"] as const;
 const forServer = (from: Partial<DiceSettings>) => Object.fromEntries(SERVER_KEYS.filter((key) => from[key] !== undefined).map((key) => [key, from[key]]));
 function adopt(saved: Record<string, unknown>) {
   const look = saved.look && typeof saved.look === "object" ? fullLook(saved.look as Partial<DiceLook>) : DEFAULTS.look;
@@ -212,6 +213,8 @@ function adopt(saved: Record<string, unknown>) {
     npc: other(saved.npc),
     damage: other(saved.damage),
     color: typeof saved.color === "string" ? saved.color : null,
+    turnSound: typeof saved.turnSound === "boolean" ? saved.turnSound : DEFAULTS.turnSound,
+    turnBanner: typeof saved.turnBanner === "boolean" ? saved.turnBanner : DEFAULTS.turnBanner,
   };
   keep();
   changed();

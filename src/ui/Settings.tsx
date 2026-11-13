@@ -1,4 +1,6 @@
 import type { StudioSettings } from "../kraken";
+import { diceStore } from "../dice/diceStore";
+import { PALETTE } from "../dice/DiceWindow";
 import { TOWER_LOOKS, TowerArt, towerLook } from "./TowerArt";
 import { useEffect, useMemo, useState, useSyncExternalStore, type DragEvent } from "react";
 import { cardsStore } from "../cards/cardsStore";
@@ -8,6 +10,41 @@ import { useWindows } from "./Windows";
 
 // Settings, as FG's settings cog: a button for each thing to set. Everyone
 // sets their own dice; the GM also sets what the whole table sees.
+// You at the table (every seat): your colour (your token's ring, your pings,
+// your drawings on the map, for everyone) and what happens when your turn
+// comes round. Kept with your name by the GM's app, so they follow you.
+function YouAtTheTable() {
+  const settings = useSyncExternalStore(diceStore.subscribe, diceStore.settings);
+  return (
+    <fieldset className="settings-you" data-setting="you">
+      <legend>You at the table</legend>
+      <div className="you-colours" role="radiogroup" aria-label="Your colour">
+        <span className="you-label">Your colour</span>
+        <button type="button" role="radio" aria-checked={settings.color === null} className={settings.color === null ? "swatch mine on" : "swatch mine"} title="The table's colour for your name" data-you-color="default" onClick={() => diceStore.update({ color: null })}>
+          Auto
+        </button>
+        {PALETTE.map((color) => (
+          <button key={color} type="button" role="radio" aria-checked={settings.color === color} aria-label={`Colour ${color}`} className={settings.color === color ? "swatch on" : "swatch"} style={{ background: color }} data-you-color={color} onClick={() => diceStore.update({ color })} />
+        ))}
+        <label className="you-other">
+          <input type="color" aria-label="Pick your colour" value={settings.color ?? "#e8c46a"} onChange={(event) => diceStore.update({ color: event.target.value })} />
+          Other
+        </label>
+      </div>
+      <p className="hint">The ring around your tokens, your pings and your drawings on the map, so everyone knows who is who.</p>
+      <span className="you-label">When it is your turn in combat</span>
+      <label className="settings-check">
+        <input type="checkbox" data-setting="turn-sound" checked={settings.turnSound !== false} onChange={(event) => diceStore.update({ turnSound: event.target.checked })} />
+        Ring a bell
+      </label>
+      <label className="settings-check">
+        <input type="checkbox" data-setting="turn-banner" checked={settings.turnBanner !== false} onChange={(event) => diceStore.update({ turnBanner: event.target.checked })} />
+        Show a banner across my screen
+      </label>
+    </fieldset>
+  );
+}
+
 export function SettingsWindow({ session }: { session: Session }) {
   const windows = useWindows();
   const gm = session.role === "dm";
@@ -31,6 +68,9 @@ export function SettingsWindow({ session }: { session: Session }) {
             <button type="button" className="settings-button" data-setting="krits" onClick={() => windows.open("krits", "Critical Hits & Fumbles")}>
               Critical Hits &amp; Fumbles
             </button>
+            <button type="button" className="settings-button" data-setting="death-markers" onClick={() => windows.open("deathmarkers", "Death Markers")}>
+              Death Markers
+            </button>
             {window.kraken?.openKrakenFolder ? (
               <button type="button" className="settings-button" data-setting="kraken-folder" title="Documents/Kraken VTT: a folder for each kind of thing you add (books, dice packs, dice towers, GM icons, decals, wallpapers), each with a README on what goes in it and how to make one" onClick={() => void window.kraken?.openKrakenFolder?.("")}>
                 Kraken VTT Folder
@@ -39,6 +79,7 @@ export function SettingsWindow({ session }: { session: Session }) {
           </>
         ) : null}
       </div>
+      <YouAtTheTable />
       <CardsSetting />
       {gm ? <label className="settings-check">
         <input type="checkbox" checked={session.options.towerReveal} onChange={(event) => session.setTableOptions({ towerReveal: event.target.checked })} />

@@ -67,6 +67,8 @@ export type TableMap = {
   sceneLights: SceneLightRecord[];
   settings: MapSettings;
   drawings?: MapDrawing[];
+  // Where creatures died (FG's death markers): drawn under the tokens, for everyone.
+  deathMarkers?: DeathMarker[];
   // The GM's: the scene's walls as the table keeps them.
   walls?: EditWall[];
   // FG's mask: on, and the shapes that reveal or hide again, in order.
@@ -85,7 +87,8 @@ export type LibraryItem = { path: string; name: string; category: string; npcs?:
 export type MapMask = { on: boolean; shapes: { id: string; mode: "reveal" | "hide"; points: number[] }[] };
 export type Ping = { id: number; x: number; y: number; from: string; color: string };
 // A line drawn on the map, for everyone (by "" is the GM's).
-export type MapDrawing = { id: string; by: string; color: string; width: number; points: number[]; shape?: "line" | "rect" | "ellipse" | "poly"; fill?: string; fillAlpha?: number; alpha?: number; group?: string };
+export type DeathMarker = { id: string; x: number; y: number; set: string; variant: number; rotation: number; size: number; name: string };
+export type MapDrawing = { id: string; by: string; color: string; width: number; points: number[]; shape?: "line" | "arrow" | "rect" | "ellipse" | "circle" | "cone" | "poly"; fill?: string; fillAlpha?: number; alpha?: number; group?: string };
 // An FX layer (FG's FX tab).
 export type MapFx = { id: string; name: string; type: import("../table/Weather").WeatherType; amount: number; intensity: number; speed: number; direction: number; mask: { use: boolean; mode: "inside" | "outside"; polygons: number[][]; strokes?: { width: number; points: number[] }[]; soft?: number }; group: string; players: boolean; shown: boolean };
 const EMPTY_MAP: TableMap = { sceneId: null, tokens: [], doors: [], vision: null,
@@ -158,7 +161,7 @@ export type QuickSlot =
 export type KrakenLink = QuickSlot;
 export type SoundItem = { id: string; kind: string; group: string; name: string };
 export type SoundLibrary = { sounds: SoundItem[]; groups: { id: string; count: number }[]; folder: string; triggers?: SoundTrigger[] };
-export type TableOptions = { towerReveal: boolean; towerExternal?: boolean; towerStyle?: string; decal: string; wallpaper: string; gmIcon: string; soundHidden: "off" | "combat" | "all"; soundRepeat: number; diceHold?: number; wizard35?: Wizard35Options; wizard2e?: Wizard2eOptions };
+export type TableOptions = { towerReveal: boolean; towerExternal?: boolean; towerStyle?: string; deathMarkers?: { on: boolean; default: string; byType: Record<string, string> }; decal: string; wallpaper: string; gmIcon: string; soundHidden: "off" | "combat" | "all"; soundRepeat: number; diceHold?: number; wizard35?: Wizard35Options; wizard2e?: Wizard2eOptions };
 // The D&D 3.5E character wizard's options (the GM's, as FG's KrakenCharWizard35E).
 export type Wizard35Options = { methods: number[]; rollLock: boolean; lowReroll: boolean; vault: boolean };
 // The AD&D 2E character wizard's options (the GM's): ability rolls once only, the PHB methods allowed, gold above 1st level.
@@ -1017,9 +1020,14 @@ export function useSession() {
     [send],
   );
   const updateSettings = useCallback((patch: import("../table/SceneSettings").SceneSettingsPatch) => send({ type: "scene-settings", patch }), [send]);
-  const draw = useCallback((points: number[], color: string | null, width: number) => send({ type: "draw", points, ...(color ? { color } : {}), width }), [send]);
+  const draw = useCallback((points: number[], color: string | null, width: number, shape?: string) => send({ type: "draw", points, ...(color ? { color } : {}), width, ...(shape && shape !== "free" ? { shape } : {}) }), [send]);
+  // A shape's two points moved (its handles dragged): the drawer's own, or the GM's any.
+  const updateDrawing = useCallback((id: string, points: number[]) => send({ type: "draw-update", id, points }), [send]);
   const eraseDrawing = useCallback((id: string) => send({ type: "draw-erase", id }), [send]);
   const clearDrawings = useCallback(() => send({ type: "draw-clear" }), [send]);
+  // Death markers: the GM removes one (right-click) or clears them all.
+  const removeDeathMarker = useCallback((id: string) => send({ type: "death-marker", action: "remove", id }), [send]);
+  const clearDeathMarkers = useCallback(() => send({ type: "death-marker", action: "clear" }), [send]);
   // The GM's map editor: walls and undo.
   const wall = useCallback((action: string, payload: Record<string, unknown> = {}) => send({ type: "wall", action, ...payload }), [send]);
   const mapUndo = useCallback(() => send({ type: "map-undo" }), [send]);
@@ -1132,8 +1140,11 @@ export function useSession() {
     updateSettings,
     placeLight,
     draw,
+    updateDrawing,
     eraseDrawing,
     clearDrawings,
+    removeDeathMarker,
+    clearDeathMarkers,
     updateLight,
     removeLight,
     ct,

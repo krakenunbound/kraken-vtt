@@ -1,6 +1,8 @@
 import { Icon } from "../ui/icons";
 import { tilesInView, watchTiles, type MapTile as PictureTile, type TileSet } from "./mapTiles";
-import { lazy, memo, Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { lazy, memo, Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { diceStore } from "../dice/diceStore";
+import { MARKER_SETS, markerShapes } from "../../shared/map/deathMarkers.mjs";
 import { backgroundRect, colorWithAlpha, gridStops, sceneFrame, type BackgroundFit, type SceneFrame } from "../foundry/geometry";
 import { type SceneLight, type SceneMarker, type SceneRegion, type SceneWall } from "../foundry/sceneObjects";
 import { gridDistance, gridKind, gridOrigin, hexCorners, hexOf, LIGHT_PRESETS, pointInPolygon, snapCenter, withGrid } from "../../shared/map/geometry.mjs";
@@ -183,9 +185,12 @@ export type MapActions = {
   shareMap?: () => void;
   // The GM's player vision preview (the players' view of this map).
   visionPreview?: (on: boolean) => void;
-  draw: (points: number[], color: string | null, width: number) => void;
+  draw: (points: number[], color: string | null, width: number, shape?: DrawShape) => void;
+  updateDrawing?: (id: string, points: number[]) => void;
   eraseDrawing: (id: string) => void;
   clearDrawings: () => void;
+  removeDeathMarker?: (id: string) => void;
+  clearDeathMarkers?: () => void;
   ct: (action: string, payload?: Record<string, unknown>) => void;
   // The GM's map editor.
   wall?: (action: string, payload?: Record<string, unknown>) => void;
@@ -202,6 +207,62 @@ export type MapActions = {
 };
 // What a left-drag does on the map: pan it, ping, draw, or rub a line out.
 type Tool = "pan" | "ping" | "draw" | "erase" | "area";
+// What a drag with the pen draws: a free line, or a shape from where it starts to where it ends
+// (a circle from its centre, a cone from its point), measured as it is drawn.
+export type DrawShape = "free" | "line" | "arrow" | "rect" | "circle" | "cone";
+const DRAW_SHAPES: { id: DrawShape; name: string; glyph: string }[] = [
+  { id: "free", name: "Free line", glyph: "M3 15c3-8 6 4 9-3s5 2 6-2" },
+  { id: "line", name: "Straight line", glyph: "M4 16L16 4" },
+  { id: "arrow", name: "Arrow: direction and aim", glyph: "M4 16L15 5M9 5h6v6" },
+  { id: "rect", name: "Square", glyph: "M4 4h12v12H4z" },
+  { id: "circle", name: "Circle (from its centre)", glyph: "M10 3a7 7 0 1 0 0.01 0z" },
+  { id: "cone", name: "Cone (from its point)", glyph: "M3 10L17 4v12z" },
+];
+const SHAPED = new Set(["line", "arrow", "rect", "ellipse", "circle", "cone"]);
+// A drawing as SVG: free lines, the GM's paint, and the shapes.
+function drawingElement(line: { id?: string; color: string; width: number; points: number[]; shape?: string; fill?: string; fillAlpha?: number; alpha?: number }, extra: Record<string, unknown> = {}) {
+  const common = { stroke: line.color, strokeWidth: line.width, strokeOpacity: line.alpha ?? 1, fill: line.fill ?? "none", fillOpacity: line.fill ? (line.fillAlpha ?? 0.5) : 0, strokeLinecap: "round" as const, strokeLinejoin: "round" as const, ...extra };
+  const [x1, y1, x2 = x1, y2 = y1] = line.points;
+  const length = Math.hypot(x2 - x1, y2 - y1);
+  if (line.shape === "rect") return <rect {...common} x={Math.min(x1, x2)} y={Math.min(y1, y2)} width={Math.abs(x2 - x1)} height={Math.abs(y2 - y1)} />;
+  if (line.shape === "ellipse") return <ellipse {...common} cx={(x1 + x2) / 2} cy={(y1 + y2) / 2} rx={Math.abs(x2 - x1) / 2} ry={Math.abs(y2 - y1) / 2} />;
+  if (line.shape === "circle") return <circle {...common} cx={x1} cy={y1} r={length} />;
+  if (line.shape === "cone") {
+    // A cone as wide at its end as it is long (the d20 games' cone).
+    const nx = length ? -(y2 - y1) / length : 0;
+    const ny = length ? (x2 - x1) / length : 0;
+    return <polygon {...common} points={[x1, y1, x2 + (nx * length) / 2, y2 + (ny * length) / 2, x2 - (nx * length) / 2, y2 - (ny * length) / 2].join(" ")} />;
+  }
+  if (line.shape === "arrow") {
+    const angle = Math.atan2(y2 - y1, x2 - x1);
+    const head = Math.max(line.width * 4, Math.min(length * 0.35, line.width * 9));
+    const wing = (side: number) => [x2 - head * Math.cos(angle + side * 0.45), y2 - head * Math.sin(angle + side * 0.45)];
+    return (
+      <g {...extra}>
+        <line {...common} {...{ "data-drawing": undefined }} x1={x1} y1={y1} x2={x2 - Math.cos(angle) * head * 0.6} y2={y2 - Math.sin(angle) * head * 0.6} />
+        <polygon {...common} {...{ "data-drawing": undefined }} fill={line.color} fillOpacity={line.alpha ?? 1} points={[x2, y2, ...wing(1), ...wing(-1)].join(" ")} />
+      </g>
+    );
+  }
+  if (line.shape === "line") return <line {...common} x1={x1} y1={y1} x2={x2} y2={y2} />;
+  if (line.shape === "poly") return <polygon {...common} points={line.points.join(" ")} />;
+  return <polyline {...common} fill="none" points={line.points.join(" ")} />;
+}
+// A death marker's picture, in a 100 x 100 box (shared/map/deathMarkers.mjs draws every set).
+export function DeathMarkerArt({ set, variant }: { set: string; variant: number }) {
+  const found = MARKER_SETS.find((item) => item.id === set) ?? MARKER_SETS[0];
+  const tint = found.tint;
+  const dark = "#000000";
+  const light = "#ffffff";
+  const paint = (value: string | undefined) => (value === "tint" ? tint : value === "dark" ? dark : value === "light" ? light : value);
+  return (
+    <g className={found.kind === "blood" && found.id === "ichor" ? "marker-glow" : undefined}>
+      {markerShapes(set, variant).map((shape, index) => (
+        <path key={index} d={shape.d} fill={shape.fill === "none" ? "none" : paint(shape.fill)} fillOpacity={shape.opacity} stroke={shape.stroke ? paint(shape.stroke) : "none"} strokeWidth={shape.width ?? 0} strokeLinecap="round" fillRule="evenodd" />
+      ))}
+    </g>
+  );
+}
 const DRAW_COLORS = ["#ffcc33", "#ff5a5a", "#5ad1ff", "#7dff7a", "#d38cff", "#ffffff", "#111111"];
 
 // group: the other picked tokens dragged with it (their places when the drag began).
@@ -366,7 +427,19 @@ function MapViewInner({
   const paintStroke = useRef<{ pointerId: number; points: number[]; fx?: string } | null>(null);
   const [hover, setHover] = useState<{ x: number; y: number } | null>(null);
   const [drawColor, setDrawColor] = useState<string | null>(null);
-  const [stroke, setStroke] = useState<{ pointerId: number; points: number[] } | null>(null);
+  const [stroke, setStroke] = useState<{ pointerId: number; points: number[]; shape?: DrawShape } | null>(null);
+  // What the pen draws (kept on this screen), and a shape's handle being dragged.
+  const [drawShape, setDrawShape] = useState<DrawShape>(() => {
+    try {
+      const kept = window.localStorage.getItem("kraken-draw-shape") as DrawShape | null;
+      return kept && DRAW_SHAPES.some((item) => item.id === kept) ? kept : "free";
+    } catch {
+      return "free";
+    }
+  });
+  // This seat's colour (Settings > You at the table): its drawings' colour unless another is picked.
+  const myColor = useSyncExternalStore(diceStore.subscribe, diceStore.settings).color ?? (gmSeat ? "#f4f1ea" : "#ffcc33");
+  const [resizing, setResizing] = useState<{ pointerId: number; id: string; index: 0 | 1; points: number[] } | null>(null);
   const [found, setFound] = useState<{ id: string; at: number } | null>(null);
   const [hint, setHint] = useState("");
   const viewport = useRef<HTMLDivElement>(null);
@@ -660,6 +733,14 @@ function MapViewInner({
     let best: { id: string; distance: number } | null = null;
     for (const line of map.drawings ?? []) {
       if (!gm && line.by !== me) continue;
+      const [ax, ay, bx = ax, by = ay] = line.points;
+      const inside =
+        line.shape === "circle"
+          ? Math.hypot(point.x - ax, point.y - ay) <= Math.hypot(bx - ax, by - ay)
+          : line.shape === "rect" || line.shape === "cone" || line.shape === "ellipse"
+            ? point.x >= Math.min(ax, bx) - reach && point.x <= Math.max(ax, bx) + reach && point.y >= Math.min(ay, by) - reach && point.y <= Math.max(ay, by) + reach
+            : false;
+      if (inside && (!best || best.distance > 0)) best = { id: line.id, distance: 0 };
       for (let index = 0; index + 3 < line.points.length; index += 2) {
         const [x1, y1, x2, y2] = line.points.slice(index, index + 4);
         const length = Math.hypot(x2 - x1, y2 - y1) || 1;
@@ -995,6 +1076,12 @@ function MapViewInner({
         setMenu(null);
         setLightMenu(null);
         if (event.button === 2) {
+          // The GM's right-click on a death marker takes it away.
+          const marker = gm ? (event.target as Element).closest?.("[data-death-marker]") : null;
+          if (marker) {
+            actions.removeDeathMarker?.(marker.getAttribute("data-death-marker") ?? "");
+            return;
+          }
           // Right-drag measures, as FG's pointer does.
           const point = worldAt(event.clientX, event.clientY);
           if (!point) return;
@@ -1142,7 +1229,10 @@ function MapViewInner({
             if (id) actions.eraseDrawing(id);
           } else {
             capture(event.currentTarget, event.pointerId);
-            setStroke({ pointerId: event.pointerId, points: [Math.round(point.x), Math.round(point.y)] });
+            const handle = (event.target as Element).closest?.("[data-handle]");
+            const held = handle ? (map.drawings ?? []).find((line) => line.id === handle.getAttribute("data-handle-of")) : null;
+            if (held) setResizing({ pointerId: event.pointerId, id: held.id, index: handle?.getAttribute("data-handle") === "1" ? 1 : 0, points: held.points.slice(0, 4) });
+            else setStroke({ pointerId: event.pointerId, points: [Math.round(point.x), Math.round(point.y)], shape: drawShape });
           }
           return;
         }
@@ -1217,6 +1307,21 @@ function MapViewInner({
         if (measure && measure.pointerId === event.pointerId) {
           const point = worldAt(event.clientX, event.clientY);
           if (point) setMeasure({ ...measure, at: point });
+          return;
+        }
+        if (resizing && resizing.pointerId === event.pointerId) {
+          const point = worldAt(event.clientX, event.clientY);
+          if (point) {
+            const next = [...resizing.points];
+            next[resizing.index * 2] = Math.round(point.x);
+            next[resizing.index * 2 + 1] = Math.round(point.y);
+            setResizing({ ...resizing, points: next });
+          }
+          return;
+        }
+        if (stroke && stroke.pointerId === event.pointerId && stroke.shape && stroke.shape !== "free") {
+          const point = worldAt(event.clientX, event.clientY);
+          if (point) setStroke({ ...stroke, points: [stroke.points[0], stroke.points[1], Math.round(point.x), Math.round(point.y)] });
           return;
         }
         if (stroke && stroke.pointerId === event.pointerId) {
@@ -1314,10 +1419,20 @@ function MapViewInner({
           setMeasure(null);
           return;
         }
+        if (resizing && resizing.pointerId === event.pointerId) {
+          actions.updateDrawing?.(resizing.id, resizing.points);
+          setResizing(null);
+          return;
+        }
         if (stroke && stroke.pointerId === event.pointerId) {
-          // A click is a dot: a short line where it was.
+          const shaped = stroke.shape && stroke.shape !== "free";
+          // A click is a dot: a short line where it was (a shape needs a drag).
+          if (shaped && (stroke.points.length < 4 || Math.hypot(stroke.points[2] - stroke.points[0], stroke.points[3] - stroke.points[1]) < 4 / camera.scale)) {
+            setStroke(null);
+            return;
+          }
           const points = stroke.points.length >= 4 ? stroke.points : [...stroke.points, stroke.points[0] + 1, stroke.points[1] + 1];
-          actions.draw(points, drawColor, Math.max(2, Math.round(4 / camera.scale)));
+          actions.draw(points, drawColor, Math.max(2, Math.round(4 / camera.scale)), stroke.shape ?? "free");
           setStroke(null);
           return;
         }
@@ -1706,6 +1821,24 @@ function MapViewInner({
             })}
           </svg>
         ) : null}
+        {(map.deathMarkers?.length ?? 0) > 0 ? (
+          <svg className="overlay death-markers" width={frame.worldWidth} height={frame.worldHeight} viewBox={`0 0 ${frame.worldWidth} ${frame.worldHeight}`}>
+            {(map.deathMarkers ?? []).map((marker) => {
+              const span = size * marker.size * 1.15;
+              return (
+                <g key={marker.id} onContextMenu={(event) => {
+                    if (!gm) return;
+                    event.preventDefault();
+                    event.stopPropagation();
+                    actions.removeDeathMarker?.(marker.id);
+                  }} data-death-marker={marker.id} data-marker-set={marker.set} transform={`translate(${marker.x - span / 2} ${marker.y - span / 2}) scale(${span / 100}) rotate(${marker.rotation} 50 50)`}>
+                  {gm ? <title>{`${marker.name || "A creature"} died here. Right-click to remove`}</title> : marker.name ? <title>{marker.name}</title> : null}
+                  <DeathMarkerArt set={marker.set} variant={marker.variant} />
+                </g>
+              );
+            })}
+          </svg>
+        ) : null}
         {tokens.map((token) => {
           const canDrag = gm || (token.mine && !map.locked);
           const span = token.squares * size;
@@ -1831,20 +1964,32 @@ function MapViewInner({
             </span>
           </>
         ) : null}
-        {(map.drawings?.length ?? 0) > 0 || stroke ? (
+        {(map.drawings?.length ?? 0) > 0 || stroke || resizing ? (
           <svg className="overlay drawings" width={frame.worldWidth} height={frame.worldHeight} viewBox={`0 0 ${frame.worldWidth} ${frame.worldHeight}`}>
             {(map.drawings ?? [])
               .filter((line) => !line.group || (map.groups ?? []).find((group) => group.name === line.group)?.shown !== false)
               .map((line) => {
-                const common = { key: line.id, "data-drawing": line.id, stroke: line.color, strokeWidth: line.width, strokeOpacity: line.alpha ?? 1, fill: line.fill ?? "none", fillOpacity: line.fill ? (line.fillAlpha ?? 0.5) : 0, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
-                const [x1, y1, x2, y2] = line.points;
-                if (line.shape === "rect") return <rect {...common} x={Math.min(x1, x2)} y={Math.min(y1, y2)} width={Math.abs(x2 - x1)} height={Math.abs(y2 - y1)} />;
-                if (line.shape === "ellipse") return <ellipse {...common} cx={(x1 + x2) / 2} cy={(y1 + y2) / 2} rx={Math.abs(x2 - x1) / 2} ry={Math.abs(y2 - y1) / 2} />;
-                if (line.shape === "poly") return <polygon {...common} points={line.points.join(" ")} />;
-                return <polyline {...common} fill="none" points={line.points.join(" ")} />;
+                const shown = resizing?.id === line.id ? { ...line, points: resizing.points } : line;
+                return <g key={line.id}>{drawingElement(shown, { "data-drawing": line.id, "data-shape": line.shape ?? "free", "data-by": line.by })}</g>;
               })}
-            {stroke && !(editorOpen && editTab === "fx") ? <polyline points={stroke.points.join(" ")} fill="none" stroke={drawColor ?? "#ffcc33"} strokeWidth={Math.max(2, Math.round(4 / camera.scale))} strokeLinecap="round" strokeLinejoin="round" opacity={0.8} /> : null}
+            {stroke && !(editorOpen && editTab === "fx")
+              ? drawingElement({ color: drawColor ?? myColor, width: Math.max(2, Math.round(4 / camera.scale)), points: stroke.points, shape: stroke.shape && stroke.shape !== "free" ? stroke.shape : undefined, ...(stroke.shape === "rect" || stroke.shape === "circle" || stroke.shape === "cone" ? { fill: drawColor ?? myColor, fillAlpha: 0.15 } : {}) }, { opacity: 0.85, "data-drawing-now": stroke.shape ?? "free" })
+              : null}
+            {tool === "draw"
+              ? (map.drawings ?? [])
+                  .filter((line) => (gm || line.by === me) && SHAPED.has(line.shape ?? "") && line.points.length >= 4)
+                  .flatMap((line) => {
+                    const points = resizing?.id === line.id ? resizing.points : line.points;
+                    return [0, 1].map((index) => <circle key={`${line.id}-${index}`} className="draw-handle" data-handle={index} data-handle-of={line.id} cx={points[index * 2]} cy={points[index * 2 + 1]} r={Math.max(5, 7 / camera.scale)} fill="#fff" stroke={line.color} strokeWidth={Math.max(1.5, 2.5 / camera.scale)} />);
+                  })
+              : null}
           </svg>
+        ) : null}
+        {stroke && stroke.shape && stroke.shape !== "free" && stroke.points.length >= 4 ? (
+          <span className="measure-label draw-measure" style={{ left: stroke.points[2], top: stroke.points[3], fontSize: 15 / camera.scale }}>
+            {stroke.shape === "circle" ? "radius " : ""}
+            {distanceLabel({ x: stroke.points[0], y: stroke.points[1] }, { x: stroke.points[2], y: stroke.points[3] })}
+          </span>
         ) : null}
         {found
           ? (() => {
@@ -2125,9 +2270,8 @@ function MapViewInner({
 
       <div className="map-corner" role="toolbar" aria-label="Image">
         {gm ? (
-          <button type="button" className={editorOpen ? "tool on" : "tool"} data-action="map-editor" aria-pressed={editorOpen} aria-label="Edit map" title={editorOpen ? "Unlocked: editing (line of sight, doors, windows, lights, masks, paint, text, grid, weather). Lock it to play." : "Locked: playing. Unlock to edit it: walls, doors, lights, paint and more, the same image wherever it is opened."} onClick={() => setEditorOpen(!editorOpen)}>
+          <button type="button" className={editorOpen ? "tool on" : "tool"} data-action="map-editor" aria-pressed={editorOpen} aria-label={editorOpen ? "Unlocked: editing. Lock it" : "Locked. Unlock to edit"} title={editorOpen ? "Unlocked: editing (line of sight, doors, windows, lights, masks, paint, text, grid, weather). Lock it to play." : "Locked: playing. Unlock to edit it: walls, doors, lights, paint and more, the same image wherever it is opened."} onClick={() => setEditorOpen(!editorOpen)}>
             <Icon name={editorOpen ? "unlock" : "lock"} />
-            <span className="tool-label">{editorOpen ? "Unlocked" : "Locked"}</span>
           </button>
         ) : null}
         {gmSeat ? (
@@ -2210,6 +2354,24 @@ function MapViewInner({
             </button>
           ))}
           {tool === "draw" ? (
+            <span className="draw-shapes" role="radiogroup" aria-label="What to draw">
+              {DRAW_SHAPES.map((item) => (
+                <button key={item.id} type="button" role="radio" aria-checked={drawShape === item.id} className={drawShape === item.id ? "tool on" : "tool"} title={item.name} aria-label={item.name} data-draw-shape={item.id} onClick={() => {
+                  setDrawShape(item.id);
+                  try {
+                    window.localStorage.setItem("kraken-draw-shape", item.id);
+                  } catch {
+                    /* this visit only */
+                  }
+                }}>
+                  <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true">
+                    <path d={item.glyph} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+              ))}
+            </span>
+          ) : null}
+          {tool === "draw" ? (
             <span className="draw-colors" aria-label="Line colour">
               <button type="button" className={drawColor === null ? "swatch mine on" : "swatch mine"} title="Your own colour" aria-label="Your own colour" onClick={() => setDrawColor(null)}>
                 ●
@@ -2218,6 +2380,11 @@ function MapViewInner({
                 <button key={color} type="button" className={drawColor === color ? "swatch on" : "swatch"} style={{ background: color }} aria-label={`Colour ${color}`} data-color={color} onClick={() => setDrawColor(color)} />
               ))}
             </span>
+          ) : null}
+          {gm && (map.deathMarkers?.length ?? 0) > 0 ? (
+            <button type="button" className="tool" data-action="clear-death-markers" aria-label="Clear the death markers" title="Clear the death markers on this map (right-click one to remove just it)" onClick={() => actions.clearDeathMarkers?.()}>
+              <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M10 3c-4 0-6 3-6 6 0 2 1 3 2 4v2h8v-2c1-1 2-2 2-4 0-3-2-6-6-6Zm-2.5 6a1.2 1.4 0 1 0 0.1 0Zm5 0a1.2 1.4 0 1 0 0.1 0ZM3 17l14-14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" /></svg>
+            </button>
           ) : null}
           {gm && (map.drawings?.length ?? 0) > 0 ? (
             <button type="button" className="tool" data-action="clear-drawings" aria-label="Clear every drawing" title="Clear every drawing" onClick={actions.clearDrawings}>
