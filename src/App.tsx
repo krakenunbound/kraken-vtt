@@ -135,6 +135,8 @@ export function App() {
   // kept to put it in play. The same master as the table's (one per picture).
   const [prep, setPrep] = useState<{ scene: MapScene; bytes: Uint8Array; book: string } | null>(null);
   const prepUrls = useRef<string[]>([]);
+  // The table map whose window the GM closed: not opened again by itself (until another map is).
+  const [mapHeld, setMapHeld] = useState("");
 
   useEffect(() => {
     const owned = urls.current;
@@ -215,9 +217,9 @@ export function App() {
     urls.current.length = 0;
   }
 
-  function saveView(adventure: string, sceneId: string) {
+  function saveView(adventure: string, sceneId: string, closed = false) {
     if (!campaignId) return;
-    void window.kraken?.saveView(campaignId, { adventure, sceneId }).catch(() => undefined);
+    void window.kraken?.saveView(campaignId, { adventure, sceneId, ...(closed ? { closed } : {}) }).catch(() => undefined);
   }
 
   function showAdventure(candidate: ImportCandidate, sceneId?: string) {
@@ -246,6 +248,19 @@ export function App() {
       try {
         const { view, hasBundle } = await kraken.campaignView(campaignId);
         if (!hasBundle || cancel) return;
+        // A book's map comes back only while that book is active in the campaign
+        // (an inactive book's maps are off limits); the GM's own picture or bundle always.
+        if (view?.adventure) {
+          const listed = await session.bookFetch<{ books: { id: string; name: string; title: string; active?: boolean }[] }>("list").catch(() => ({ books: [] }));
+          const tail = view.adventure.split(/[\/]/).pop()?.replace(/\.(mod|kpack|zip)$/i, "") ?? "";
+          const book = listed.books.find((item) => [item.id, item.name, item.title].includes(view.adventure) || [item.id, item.name, item.title].includes(tail));
+          if (book && !book.active) {
+            void kraken.saveView(campaignId, null).catch(() => undefined);
+            return;
+          }
+        }
+        // The GM closed its window last time: it stays closed until a map is opened.
+        if (view?.closed) setMapHeld(view.sceneId);
         setBusy(true);
         const bytes = await kraken.campaignBundle(campaignId);
         if (!bytes || cancel) return;
@@ -383,6 +398,9 @@ export function App() {
     const onTable = pack?.scenes[sceneIndex]?.id === chosen.id;
     if (onTable) {
       if (prep) closeImage();
+      // Opened by the GM: no longer held closed.
+      setMapHeld("");
+      saveView(candidates[adventureIndex]?.name ?? pack?.name ?? "", chosen.id);
       mapWindow.front?.();
       return { opened: chosen.name, id: chosen.id, onTable: true };
     }
@@ -406,6 +424,11 @@ export function App() {
       if (open && open.scene.id === saved.sceneId && saved.picture) void live.current.openImage({ book: open.book, name: open.scene.name }).catch(() => undefined);
     });
   }, []);
+  // The GM closed the table map's window: remembered, so hosting again does not open it.
+  function closeTableMap(sceneId: string) {
+    setMapHeld(sceneId);
+    saveView(candidates[adventureIndex]?.name ?? pack?.name ?? "", sceneId, true);
+  }
   function closeImage() {
     session.prepClose();
     setPrep(null);
@@ -575,7 +598,8 @@ export function App() {
           sceneId={scene?.id ?? ""}
           sceneName={scene?.name ?? ""}
           sceneBar={sceneBar}
-          onMapClosed={prep ? closeImage : undefined}
+          onMapClosed={prep ? closeImage : dm && tableScene ? () => closeTableMap(tableScene.id) : undefined}
+          mapHeld={mapHeld}
           emptyGM={emptyGM}
           onOpenAdventure={() => fileInput.current?.click()}
           openMaps={(bytes, name) => openBytes(bytes, name)}

@@ -321,7 +321,14 @@ export function BooksWindow({ session, onOpenAdventure, start = "books" }: { ses
               .filter((item) => item.category === category)
               .map((item) => (
                 <div key={item.id} className={activation && !item.active ? "books-row off" : "books-row"} role="listitem">
-                  <button type="button" className="books-open" data-book={item.id} title={item.author || item.title} onClick={() => openBook(item.id, item.title)} {...slotDrag({ kind: "book", book: item.id, label: item.title })}>
+                  <button
+                    type="button"
+                    className={activation && !item.active ? "books-open inactive" : "books-open"}
+                    data-book={item.id}
+                    title={activation && !item.active ? `${item.title}: make it active to open it (an inactive book's pages, pictures and maps are off limits)` : item.author || item.title}
+                    onClick={() => (!activation || item.active) && openBook(item.id, item.title)}
+                    {...(!activation || item.active ? slotDrag({ kind: "book", book: item.id, label: item.title }) : {})}
+                  >
                     {item.cover ? <img src={session.bookUrl("cover", item.id)} alt="" loading="lazy" /> : <span className="books-cover-none"><Icon name="book" size={22} /></span>}
                     <span>
                       <b>{item.title}</b>

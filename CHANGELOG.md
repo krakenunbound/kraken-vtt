@@ -4,6 +4,18 @@ What changed in each release of Kraken VTT. Downloads are on the
 [Releases](https://github.com/krakenunbound/kraken-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
+## 0.1.0-alpha.80: Only active books; a closed map stays closed
+
+- **Only the books active in the campaign give their maps, pictures and
+  records** (as Fantasy Grounds loads a module): opening a map, the Library,
+  reading a book and the agent's tools all refuse a book that is not active.
+  In Modules, an inactive book's title says to make it active first.
+- **A table map from a book no longer active is not brought back** when you
+  host the campaign again.
+- **A table map whose window you closed stays closed** when you host again
+  (it is still the table's: open it from where you see it).
+- The image window's bar names the book, never a file's path.
+
 ## 0.1.0-alpha.79: Every picture opens its image; an external dice tower; Internet hosting
 
 - **Every picture opens its image, wherever you click it** (the GM): a

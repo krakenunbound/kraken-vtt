@@ -1478,6 +1478,8 @@ const TOOLS = [
     inputSchema: object({ module: string("The module's name, as FG lists it"), maps: { type: "array", items: { type: "string" } }, all: { type: "boolean" } }, ["module"]),
     async run(args, ctx) {
       const table = needTable(ctx);
+      // Only an active book's maps.
+      table.requireActiveBook?.(String(args.module ?? ""));
       const { fgModuleBundle } = require("../importers/fgMaps.cjs");
       const bundle = fgModuleBundle(String(args.module), { only: args.maps, all: Boolean(args.all) });
       // The maps' image layers: their pictures into the tile library first.
@@ -1502,6 +1504,8 @@ const TOOLS = [
     async run(args, ctx) {
       const table = needTable(ctx);
       const library = require("../library.cjs");
+      // Only an active book's lists and records.
+      table.requireActiveBook?.(args.action === "list" ? String(args.module ?? "") : String(args.path ?? "").split("@").slice(1).join("@") || String(args.module ?? ""));
       if (args.action === "list") return out(library.list(String(args.module ?? ""), args.kind, args.search ?? ""));
       if (args.action === "story") return out(library.storyEntry(String(args.path ?? "")));
       if (args.action === "npc") {

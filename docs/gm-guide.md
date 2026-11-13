@@ -116,7 +116,8 @@ any other way).
   Kraken's own games' books are packs too. They come with Kraken. The format
   is in [kraken-pack-format.md](kraken-pack-format.md).
 - In **Modules**, make a book active to bring its records (NPCs, items,
-  encounters, maps, story) into the campaign. A players' book can be shared
+  encounters, maps, story) into the campaign. A book that is not active is
+  off limits: its pages, pictures, maps and records open only once it is. A players' book can be shared
   with the players.
 - **Share** a record with the players from its window (*Share with the
   players*), or a picture from its menu. Players never see what you have not

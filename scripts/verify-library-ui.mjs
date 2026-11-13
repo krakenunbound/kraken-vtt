@@ -76,6 +76,9 @@ try {
   }
   const campaign = await tool("kraken_campaign_create", { name: "Library UI", ruleset: "Castles & Crusades" });
   await tool("kraken_host", { campaignId: campaign.id, port: 47411, password: "" });
+  // Its maps and lists are there once B2 is active in the campaign.
+  const b2 = (await tool("kraken_books", { action: "list" })).find((book) => book.name === B2);
+  await tool("kraken_books", { action: "activate", book: b2.id });
   await page.waitForSelector("text=Hosting");
   await page.click('.sidebar [data-launch="library"]');
   await page.waitForSelector(".library-window");
@@ -93,7 +96,8 @@ try {
   const one = (await tool("kraken_scenes", {})).scenes.map((scene) => scene.name);
   assert(one.length === 1 && one[0] === "The Caves of Chaos", `one map on the table: ${one.join(", ")}`);
   // All: every adventure's lists together.
-  assert(await page.$('[aria-label="Library module"] option[value="*"]'), "an All choice");
+  // Only the campaign's active adventures are listed: B2 alone here, so no All choice.
+  assert(!(await page.$('[aria-label="Library module"] option[value="*"]')) && (await page.$$('[aria-label="Library module"] option')).length === 1, "only the active adventure");
   // The map window came to the front when the map opened; the Library is clicked back over it.
   assert(await page.evaluate(() => {
     const z = (kind) => Number(getComputedStyle(document.querySelector(`[data-window="${kind}"]`)).zIndex);

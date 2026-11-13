@@ -539,7 +539,7 @@ const calls = {
     const current = requireHosted(id);
     const adventure = typeof view?.adventure === "string" ? view.adventure.slice(0, 200) : "";
     const sceneId = typeof view?.sceneId === "string" ? view.sceneId.slice(0, 80) : "";
-    current.state.view = adventure ? { adventure, sceneId } : null;
+    current.state.view = adventure ? { adventure, sceneId, ...(view?.closed ? { closed: true } : {}) } : null;
     markDirty();
   },
   "set-token-art": (list) => {

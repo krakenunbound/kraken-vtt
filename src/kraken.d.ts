@@ -114,7 +114,8 @@ export type KrakenSound = { id: string; kind: string; group: string; name: strin
 
 export type KrakenDecal = { id: string; name: string; group: string; ruleset?: string };
 
-export type KrakenView = { adventure: string; sceneId: string };
+// The campaign's table map (its adventure and scene), and whether the GM closed its window.
+export type KrakenView = { adventure: string; sceneId: string; closed?: boolean };
 
 export type KrakenHandle = {
   publish: (scene: MapScene) => Promise<void>;

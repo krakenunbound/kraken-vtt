@@ -272,7 +272,8 @@ function isMap(record) {
 function fgModuleBundle(moduleName, { only, all = false, file = "", picture = () => null } = {}) {
   const module = readModule(moduleName, { only: new Set(["image"]) });
   // The book's own name (moduleName may be its file, as the shelf resolves it): scene ids, pins and the adventure go by the name.
-  const label = String(module.info?.name || moduleName);
+  // Never a file's whole path (a book with no name of its own goes by its file's name).
+  const label = String(module.info?.name || require("path").basename(String(moduleName)).replace(/\.(mod|kpack)$/i, ""));
   const files = {};
   const scenes = [];
   const extras = {};

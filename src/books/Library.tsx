@@ -29,16 +29,17 @@ export function LibraryWindow({ session, openMaps }: { session: Session; openMap
     session
       .bookFetch<{ books: BookInfo[] }>("list")
       .then(({ books }) => {
-        const adventures = books.filter((book) => book.adventure);
+        // Only the campaign's active adventures (an inactive book's content is off limits).
+        const adventures = books.filter((book) => book.adventure && book.active);
         setModules(adventures);
         setModule((current) => current || adventures.find((book) => book.active)?.name || adventures[0]?.name || "");
       })
       .catch(() => setModules([]));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  // All: every active adventure (else every adventure on the shelf).
-  const active = modules.filter((book) => book.active);
-  const shown = module === ALL ? (active.length ? active : modules) : modules.filter((book) => book.name === module);
+  // All: every active adventure.
+  const active = modules;
+  const shown = module === ALL ? modules : modules.filter((book) => book.name === module);
   useEffect(() => {
     for (const book of shown) session.libraryAction("list", { module: book.name, kind, search });
     setPreview(null);
@@ -81,6 +82,7 @@ export function LibraryWindow({ session, openMaps }: { session: Session; openMap
         <input value={search} placeholder="Search" onChange={(event) => setSearch(event.target.value)} aria-label="Library search" />
       </nav>
       {status ? <p className="hint">{status}</p> : null}
+      {modules.length === 0 ? <p className="hint">No adventure is active: make one active in Modules.</p> : null}
       {preview ? (
         <figure className="library-preview" data-library-preview={preview.item.name}>
           <img src={session.bookUrl("picture", preview.book.id, preview.item.file ?? "")} alt={preview.item.name} />

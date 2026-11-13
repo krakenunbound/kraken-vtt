@@ -189,6 +189,7 @@ export function Desktop({
   onOpenAdventure,
   openMaps = async () => undefined,
   onMapClosed,
+  mapHeld = "",
   overlay,
 }: {
   session: Session;
@@ -203,6 +204,8 @@ export function Desktop({
   openMaps?: (bytes: Uint8Array, name: string) => Promise<unknown>;
   // The image window's image: its map window closed closes it (the table's map again).
   onMapClosed?: () => void;
+  // The table map the GM closed: its window is not opened by itself again.
+  mapHeld?: string;
   overlay: ReactNode;
 }) {
   const gm = session.role === "dm";
@@ -310,6 +313,7 @@ export function Desktop({
     }
     if (shownMap.current !== mapOpenKey) {
       shownMap.current = mapOpenKey;
+      if (mapHeld && (mapOpenKey === mapHeld || sceneId === mapHeld)) return;
       windows.open("map", sceneName || "Map");
     }
   }, [mapOpenKey, sceneName]);

@@ -413,9 +413,28 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     onChange("table");
     return here;
   }
+  // A book's maps, pictures and records are opened only when it is active in
+  // this campaign (FG: a module's content is there once it is loaded). The
+  // book named by its id, name, title or file.
+  function activeBookId(given) {
+    const wanted = String(given ?? "").trim();
+    if (!books || !wanted) return null;
+    const direct = books.info(wanted);
+    const found = direct ?? books.list().find((item) => books.file?.(item.id) === wanted || require("path").basename(String(books.file?.(item.id) ?? "")) === require("path").basename(wanted));
+    return found && shelf.active.has(found.id) ? found.id : null;
+  }
+  function requireActiveBook(given) {
+    // A table with no shelf (a test's bare server) has no active books to judge by.
+    if (!books || activeBookId(given)) return;
+    const named = books?.info(String(given ?? ""))?.title ?? String(given ?? "").split(/[\/]/).pop();
+    throw new Error(`${named || "That book"} is not active in this campaign: make it active in Modules first.`);
+  }
+  // A record path's book (npc.goblin@C&C Monsters & Treasure).
+  const bookOfPath = (fgPath) => String(fgPath ?? "").split("@").slice(1).join("@");
   const shelfView = () => ({ active: [...shelf.active], shared: [...shelf.shared].filter((id) => shelf.active.has(id)), images: shelf.images });
   const fits = (info) => Boolean(info) && fitsRuleset(info, ruleset);
-  const canRead = (client, book) => (client.role === "dm" ? fits(books?.info(book)) : shelf.active.has(book) && shelf.shared.has(book));
+  // The GM reads the campaign's active books; a player, those the GM opened to them.
+  const canRead = (client, book) => (client.role === "dm" ? fits(books?.info(book)) && shelf.active.has(books?.info(book)?.id ?? book) : shelf.active.has(book) && shelf.shared.has(book));
   // A seat's shelf: the GM's, every module that fits (with whether it is
   // active and shared); a player's, the active books shared with them.
   const shelfFor = (client) =>
@@ -866,8 +885,14 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         res.end();
         return;
       }
-      // The book by id, name or title, as the Library reads it (the shelf's file).
-      const wanted = require("./library.cjs").resolved(String(url.searchParams.get("module") || ""));
+      // The book by id, name or title, as the Library reads it (the shelf's file); active books only.
+      const asked = String(url.searchParams.get("module") || "");
+      if (books && !activeBookId(asked)) {
+        res.writeHead(403, { "Content-Type": "text/plain", "Cache-Control": "no-store" });
+        res.end(`${books?.info(asked)?.title ?? (asked.split(/[\\/]/).pop() || "That book")} is not active in this campaign: make it active in Modules first.`);
+        return;
+      }
+      const wanted = require("./library.cjs").resolved(asked);
       prepareModule(wanted).then(() => {
       try {
         const { fgModuleBundle } = require("./importers/fgMaps.cjs");
@@ -994,7 +1019,8 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       };
       try {
         if (url.pathname === "/book/list") return json({ books: shelfFor(client), ruleset, ...shelfView() });
-        if (url.pathname === "/book/cover") return canRead(client, book) ? picture(books.cover(book)) : nothing();
+        // A book's cover, for Modules (the GM chooses what to make active); its content needs it active.
+        if (url.pathname === "/book/cover") return canRead(client, book) || (client.role === "dm" && fits(books?.info(book))) ? picture(books.cover(book)) : nothing();
         if (url.pathname === "/book/picture") return canSeePicture(client, book, url.searchParams.get("file") || "") ? picture(books.picture(book, url.searchParams.get("file") || "")) : nothing();
         if (!canRead(client, book)) return nothing();
         // A record a page links to (a creature, spell, item...), as FG opens it from the book.
@@ -1718,6 +1744,8 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         const library = require("./library.cjs");
         (async () => {
           const moduleName = String(msg.module ?? "");
+          // Only an active book's lists and records.
+          requireActiveBook(msg.action === "list" ? moduleName : bookOfPath(msg.path) || moduleName);
           // Its module converted first, off this thread (once).
           await prepareModule(library.resolved(moduleName));
           if (msg.action === "list") send(ws, { type: "library", module: moduleName, kind: msg.kind, items: library.list(moduleName, String(msg.kind ?? ""), String(msg.search ?? "")) });
@@ -2200,6 +2228,9 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
   let bookTablesCache = { key: null, tables: [] };
   // What agents (the MCP server, the in-app assistant) use. They act as the GM.
   const agentHandle = {
+    // Whether a book is active here, and a refusal when it is not (its maps, pictures and records are off limits).
+    activeBookId,
+    requireActiveBook,
     seat: { role: "dm", name: "Agent" },
     // The campaign's ruleset ("Castles & Crusades", "D&D 5E", "Worldbuilding").
     ruleset: () => ruleset,
