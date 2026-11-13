@@ -4,6 +4,12 @@ What changed in each release of Kraken VTT. Downloads are on the
 [Releases](https://github.com/krakenunbound/kraken-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
+## Next
+
+- **The map window comes to the front when it opens** (a map put on the
+  table, an image opened from Images, a book or the Library), as Fantasy
+  Grounds' image windows do; clicking another window brings that one forward.
+
 ## 0.1.0-alpha.77: Images, as in Fantasy Grounds
 
 - **Campaign > Images** lists every picture of every active book, maps and

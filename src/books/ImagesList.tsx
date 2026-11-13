@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import type { BookInfo, Session } from "../session/useSession";
 import { imageWindow } from "../table/imageWindow";
-import { useWindows } from "../ui/Windows";
 
 // FG's Images & Maps (the sidebar's Campaign > Images): every picture of
 // every active book, maps and handouts, each under its book. A click opens it
@@ -12,7 +11,6 @@ export function ImagesList({ session }: { session: Session }) {
   const [search, setSearch] = useState("");
   const [mapsOnly, setMapsOnly] = useState(false);
   const [status, setStatus] = useState("");
-  const windows = useWindows();
   const shelfKey = session.bookShelf.active.join("|");
   useEffect(() => {
     session
@@ -30,8 +28,6 @@ export function ImagesList({ session }: { session: Session }) {
     try {
       const opened = await imageWindow.open?.({ book: book.name, name });
       setStatus(opened?.onTable ? `${name} is the table's map now: it is open there.` : "");
-      // The image in view: the list steps aside (the map window is under every other window).
-      if (opened && !opened.onTable) for (const item of windows.windows.filter((entry) => entry.kind === "imagelist")) windows.close(item.key);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Could not open it.");
     }

@@ -94,25 +94,33 @@ try {
   assert(one.length === 1 && one[0] === "The Caves of Chaos", `one map on the table: ${one.join(", ")}`);
   // All: every adventure's lists together.
   assert(await page.$('[aria-label="Library module"] option[value="*"]'), "an All choice");
+  // The map window came to the front when the map opened; the Library is clicked back over it.
+  assert(await page.evaluate(() => {
+    const z = (kind) => Number(getComputedStyle(document.querySelector(`[data-window="${kind}"]`)).zIndex);
+    return z("map") > z("library");
+  }), "the map window opens in front");
+  await tool("kraken_windows", { action: "open", kind: "library" });
   await page.click('[data-action="library-maps"]');
   await page.waitForSelector("text=The maps are on the table", { timeout: 60000 });
+  await new Promise((resolve) => setTimeout(resolve, 800));
+  await tool("kraken_windows", { action: "open", kind: "library" });
   const scenes = JSON.stringify(await tool("kraken_scenes", {}));
   assert(scenes.includes("The Caves of Chaos") && !scenes.includes("Handout - The Caves of Chaos"), "playable maps only, no handouts");
   await tool("kraken_scenes", { scene: "The Caves of Chaos" });
   await settle(1500);
   // An encounter onto the tracker (the Encounters tab).
-  await page.click('[data-library-tab="battle"]');
+  await page.$eval('[data-library-tab="battle"]', (element) => element.click());
   await page.fill('[aria-label="Library search"]', "Kobold ambush");
   await page.waitForSelector('[data-library-item*="Kobold ambush"]');
-  await page.click('[data-library-item*="Kobold ambush"] [data-action="library-battle"]');
+  await page.$eval('[data-library-item*="Kobold ambush"] [data-action="library-battle"]', (element) => element.click());
   await settle(1200);
   const combat = await tool("kraken_combat", { action: "view" });
   assert(combat.entries.filter((entry) => entry.name.startsWith("Kobold")).length >= 4, `kobolds on the tracker: ${combat.entries.map((entry) => entry.name).join(", ")}`);
   // A table rolled.
-  await page.click('[data-library-tab="table"]');
+  await page.$eval('[data-library-tab="table"]', (element) => element.click());
   await page.fill('[aria-label="Library search"]', "Rumor");
   await page.waitForSelector('[data-library-item="Rumor Table"]');
-  await page.click('[data-library-item="Rumor Table"] [data-action="library-table"]');
+  await page.$eval('[data-library-item="Rumor Table"] [data-action="library-table"]', (element) => element.click());
   await settle(800);
   const chat = await tool("kraken_chat_log", { count: 10 });
   assert(chat.some((line) => (line.roll?.label ?? "").startsWith("[TABLE] Rumor Table")), "the rumor table rolled in chat");

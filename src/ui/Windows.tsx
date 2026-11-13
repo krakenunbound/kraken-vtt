@@ -50,8 +50,9 @@ const DEFAULTS: Record<WindowKind, Placement> = {
 const STAYS_IN: WindowKind[] = [];
 // Kinds that open tall enough to show all they hold (a short list of settings), never cut off with a scroll bar.
 const FIT_CONTENT: WindowKind[] = ["settings", "players"];
-// Kinds that stay behind every other window: the map is what the other windows sit over.
-const AT_BACK: WindowKind[] = ["map"];
+// Kinds that stay behind every other window (none now: the map window comes to
+// the front when it opens, and goes behind another window clicked, as FG's image windows do).
+const AT_BACK: WindowKind[] = [];
 // Where a kind opens the first time: the map fills the desktop between the menu bar and the sidebar.
 function firstPlace(kind: WindowKind): Placement {
   if (kind === "map" && typeof document !== "undefined") {

@@ -475,11 +475,10 @@ export function Desktop({
 
         <ChatDock session={session} />
 
-        {/* The map's window: over the desktop, under the chat, the sidebar and every other window. */}
-        <div className="window-layer map-layer">
-          {windows.windows
-            .filter((item) => item.kind === "map")
-            .map((item) => (
+        <div className="window-layer">
+          {windows.windows.map((item) =>
+            item.kind === "map" ? (
+              // The map's window (FG's image window): a window like the others, in front when it opens.
               <FloatingWindow key={item.key} item={item}>
                 {scene ? (
                   <div className="map-window">
@@ -490,11 +489,7 @@ export function Desktop({
                   <p className="desktop-hint">No map is open.</p>
                 )}
               </FloatingWindow>
-            ))}
-        </div>
-
-        <div className="window-layer">
-          {windows.windows.filter((item) => item.kind !== "map").map((item) => (
+            ) : (
             <FloatingWindow key={item.key} item={item}>
               {item.kind === "characters" ? <CharacterPanel session={session} dock={!gm} create={item.payload === "new"} /> : null}
               {item.kind === "records" ? <RecordsWindow session={session} only={item.payload} onOpen={(record) => windows.open("record", record.name, record.id)} /> : null}
@@ -526,7 +521,8 @@ export function Desktop({
               {item.kind === "library" ? <LibraryWindow session={session} openMaps={openMaps} /> : null}
               {item.kind === "gmicons" ? <DecalPicker session={session} kind="gmicon" onClose={() => windows.close(item.key)} /> : null}
             </FloatingWindow>
-          ))}
+            ),
+          )}
         </div>
         {/* Above the windows, as FG's hotkey bar: always there to drop onto. */}
         <QuickSlots session={session} />
