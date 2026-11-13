@@ -4,6 +4,17 @@ What changed in each release of Kraken VTT. Downloads are on the
 [Releases](https://github.com/krakenunbound/kraken-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
+## 0.1.0-alpha.73: Kraken's own games illustrated
+
+- **Descending Darkness and Apeira Astra's books have pictures throughout:**
+  every creature and threat in the Bestiary and the Dossier has its picture on
+  its page; every kin, class, origin and path has its portrait; each Player's
+  and Crew Handbook opens on its cover; and thirteen new paintings illustrate
+  the rules chapters (light and dread, resting, fighting, dying, spells and
+  backgrounds; salvage, vacuum, the ship, ship combat, the crew and combat).
+- Books' pages can carry a picture above their text (a game's book source
+  says `blocks: pictured(text, picture, caption)`).
+
 ## 0.1.0-alpha.72: The Library, homebrew adventures, your decals
 
 - **The Library** (the sidebar's Adventures) has each kind in its own tab:
