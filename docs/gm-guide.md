@@ -142,11 +142,22 @@ lights, paint, effects and tokens are kept in the campaign, and every place
 that opens it (Images, the book's pictures, the Library, the table) opens the
 same one.
 
-- An image you open is **yours alone**: the players keep their map until you
-  choose **Put in play**.
-- It opens **unlocked** (the editor), as a picture's **Unlock to edit**
-  opens it. The map window's **Locked / Unlocked** button switches between
-  editing and play.
+- An image you open is **yours alone** (**Not shared**) until you choose
+  **Share**: then it is the players' map. The table's map has **Shared** too:
+  click it to stop sharing (the players see no map) and again to share.
+- **The image window's corner:** **Locked / Unlocked** (unlocked: the editor
+  at the side), the **eye** (player vision preview: what your players see,
+  their tokens' sight, the light and the dark) and the **tools** button,
+  which shows or hides the tool strip. Locked with the tools hidden, the
+  picture alone.
+- **The tool strip:** zoom, fit, the **navigation pad** (buttons to pan and
+  zoom), find a token, pan, ping, draw, erase, area target, and for you
+  share, pins (the map's shortcuts shown or hidden), scene settings, a light,
+  line of sight and token movement lock.
+- **Assets** (Library > Assets): every picture of your active books and art
+  packs, by folder. A picture's preview: **Make it a map** (it joins
+  Campaign > Images under *This campaign* and opens to edit), **Share** (the
+  players see the picture) or **Set as background**.
 - **Play test:** puts a test token on the image and shows it as a player
   sees it (walls, doors, light, darkness). Drag the token to look for gaps,
   then **End play test** (the token goes). The table's map has Play test too.

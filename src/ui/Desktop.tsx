@@ -20,6 +20,7 @@ import { AdventureList, LibraryWindow, StoryWindow, type Kind as AdventureKind }
 import { NotesWindow, NoteWindow } from "../notes/Notes";
 import { BooksWindow, BookWindow, ImagesWindow, PictureWindow } from "../books/Books";
 import { ImagesList } from "../books/ImagesList";
+import { AssetsWindow } from "../books/AssetsWindow";
 import { StudioWindow } from "../studio/StudioWindow";
 import { mapWindow, studioOpener } from "../table/imageWindow";
 import { Icon } from "./icons";
@@ -258,6 +259,7 @@ export function Desktop({
         ...(gm ? [{ kind: "books" as const, payload: "activation", label: "Modules", icon: "package", title: "Modules: make a book active for this campaign (Activation)" }] : []),
         { kind: "books", label: "Books", icon: "book", title: "Books" },
         { kind: "sound", label: "Sound Sets", icon: "music", title: "Sound" },
+        ...(gm ? [{ kind: "assets" as const, label: "Assets", icon: "image", title: "Assets" }] : []),
       ],
     },
     {
@@ -532,6 +534,7 @@ export function Desktop({
               {item.kind === "sheet" ? <CharacterPanel session={session} dock selected={item.payload ?? null} /> : null}
               {item.kind === "party" ? <PartySheet session={session} /> : null}
               {item.kind === "imagelist" && gm ? <ImagesList session={session} /> : null}
+              {item.kind === "assets" && gm ? <AssetsWindow session={session} /> : null}
               {item.kind === "studio" && gm ? <StudioWindow project={item.payload} /> : null}
               {item.kind === "cards" ? <CardsWindow session={session} characterId={item.payload} /> : null}
               {item.kind === "combat" ? <CombatTracker session={session} /> : null}

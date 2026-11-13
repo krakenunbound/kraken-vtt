@@ -4,6 +4,23 @@ What changed in each release of Kraken VTT. Downloads are on the
 [Releases](https://github.com/krakenunbound/kraken-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
+## 0.1.0-alpha.81: The image window, and Assets
+
+- **The image window works as Fantasy Grounds' does, in Kraken's own way:**
+  its corner holds **Locked / Unlocked** (unlocked: the editor at the side),
+  the **player vision preview** (what the players see: their tokens' sight,
+  the light and the dark) and **Tools**, which shows or hides the tool strip.
+  Locked with the tools hidden, the picture alone.
+- The tool strip adds the **navigation pad** (pan and zoom by buttons) and
+  **pins** shown or hidden, beside zoom, fit, ping, draw and erase.
+- **Share, or not:** an image you open says *Not shared · Share*; the table's
+  map says *Shared*, and a click stops sharing it (the players see no map)
+  until you share it again.
+- **Assets** (Library > Assets): every picture of your active books and art
+  packs by folder, records or not (an art pack's props too). Preview one to
+  **Make it a map** (it joins Images under *This campaign* and opens to edit),
+  **Share** it, or **Set it as the background**.
+
 ## 0.1.0-alpha.80: Only active books; a closed map stays closed
 
 - **Only the books active in the campaign give their maps, pictures and

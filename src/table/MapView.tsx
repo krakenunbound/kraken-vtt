@@ -181,6 +181,8 @@ export type MapActions = {
   removeLight: (id: string) => void;
   ping: (x: number, y: number) => void;
   shareMap?: () => void;
+  // The GM's player vision preview (the players' view of this map).
+  visionPreview?: (on: boolean) => void;
   draw: (points: number[], color: string | null, width: number) => void;
   eraseDrawing: (id: string) => void;
   clearDrawings: () => void;
@@ -254,6 +256,23 @@ function TrayFace({ url, name }: { url: string; name: string }) {
 // (walls, lighting, animated tokens) live here.
 export const MapView = memo(MapViewInner);
 
+// The image window's own choices, kept on this screen (not the table's).
+function readFlag(key: string, fallback: boolean) {
+  try {
+    const value = window.localStorage.getItem(key);
+    return value === null ? fallback : value === "1";
+  } catch {
+    return fallback;
+  }
+}
+function keepFlag(key: string, on: boolean) {
+  try {
+    window.localStorage.setItem(key, on ? "1" : "0");
+  } catch {
+    /* this visit only */
+  }
+}
+
 function MapViewInner({
   scene: sceneIn,
   gm = true,
@@ -265,7 +284,10 @@ function MapViewInner({
   targeted = [],
   me = "",
   startEditing = false,
+  gmSeat = gm,
 }: {
+  // The GM's own screen (also while it is drawn as a player's: a play test, the player vision preview).
+  gmSeat?: boolean;
   // FG's image opened unlocked: its editor open from the start.
   startEditing?: boolean;
   scene: MapScene;
@@ -371,6 +393,16 @@ function MapViewInner({
   const linesShown = gm && editorOpen && editTab === "walls";
   const [trayOpen, setTrayOpen] = useState(true);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  // The image window's own controls (FG's): the tool strip shown or not (kept
+  // on this screen; locked with it hidden, the picture alone), the navigation
+  // pad (pan and zoom by buttons), and the map's pins shown or hidden.
+  const [stripOpen, setStripOpenState] = useState(() => readFlag("kraken-map-strip", true));
+  const setStripOpen = (on: boolean) => {
+    setStripOpenState(on);
+    keepFlag("kraken-map-strip", on);
+  };
+  const [navOpen, setNavOpen] = useState(() => readFlag("kraken-map-nav", false));
+  const [pinsShown, setPinsShown] = useState(() => readFlag("kraken-map-pins", true));
   const [lightMenu, setLightMenu] = useState<{ id: string; left: number; top: number } | null>(null);
   const lightDrag = useRef<{ pointerId: number; id: string } | null>(null);
   const explored = useRef<{ sceneId: string; polygons: number[][] }>({ sceneId: "", polygons: [] });
@@ -584,6 +616,14 @@ function MapViewInner({
       const worldY = (rect.height / 2 - current.y) / current.scale;
       return { scale, x: rect.width / 2 - worldX * scale, y: rect.height / 2 - worldY * scale };
     });
+  }
+
+  // The navigation pad: a step of a fifth of the view.
+  function panBy(dx: number, dy: number) {
+    const element = viewport.current;
+    if (!element) return;
+    const rect = element.getBoundingClientRect();
+    setCamera((current) => ({ ...current, x: current.x - dx * rect.width * 0.2, y: current.y - dy * rect.height * 0.2 }));
   }
 
   function fit() {
@@ -951,7 +991,7 @@ function MapViewInner({
       data-sight={map.sight ? "on" : "off"}
       onContextMenu={(event) => event.preventDefault()}
       onPointerDown={(event) => {
-        if ((event.target as HTMLElement).closest(".map-controls, .legend, .token-tray, .token-menu, .scene-settings, .map-editor")) return;
+        if ((event.target as HTMLElement).closest(".map-controls, .map-corner, .map-nav, .legend, .token-tray, .token-menu, .scene-settings, .map-editor")) return;
         setMenu(null);
         setLightMenu(null);
         if (event.button === 2) {
@@ -1287,7 +1327,7 @@ function MapViewInner({
         }
       }}
       onDoubleClick={(event) => {
-        if ((event.target as HTMLElement).closest(".map-controls, .legend, .token-tray, .token, .token-menu, .scene-settings, .light-handle, .map-editor")) return;
+        if ((event.target as HTMLElement).closest(".map-controls, .map-corner, .map-nav, .legend, .token-tray, .token, .token-menu, .scene-settings, .light-handle, .map-editor")) return;
         if (gm && editorOpen && editTool && editTool !== "select" && editTool !== "light") {
           finishShape();
           return;
@@ -1502,6 +1542,7 @@ function MapViewInner({
             </defs>
             {(map.labels ?? [])
               .filter((label) => (map.groups ?? []).find((group) => group.name === label.group)?.shown !== false)
+              .filter((label) => pinsShown || !label.link)
               .map((label) => {
                 const fontSize = label.size * size * 0.8;
                 const anchor = label.anchor === "left" ? "start" : label.anchor === "right" ? "end" : "middle";
@@ -2082,6 +2123,53 @@ function MapViewInner({
         </aside>
       ) : null}
 
+      <div className="map-corner" role="toolbar" aria-label="Image">
+        {gm ? (
+          <button type="button" className={editorOpen ? "tool on" : "tool"} data-action="map-editor" aria-pressed={editorOpen} aria-label="Edit map" title={editorOpen ? "Unlocked: editing (line of sight, doors, windows, lights, masks, paint, text, grid, weather). Lock it to play." : "Locked: playing. Unlock to edit it: walls, doors, lights, paint and more, the same image wherever it is opened."} onClick={() => setEditorOpen(!editorOpen)}>
+            <Icon name={editorOpen ? "unlock" : "lock"} />
+            <span className="tool-label">{editorOpen ? "Unlocked" : "Locked"}</span>
+          </button>
+        ) : null}
+        {gmSeat ? (
+            <button
+            type="button"
+            className={map.previewing ? "tool on" : "tool"}
+            data-action="vision-preview"
+            aria-pressed={Boolean(map.previewing)}
+            aria-label="Player vision preview"
+            title={map.previewing ? "Player vision preview on: you see what the players see (their tokens' sight, the light and the dark). Click to see it all again." : "Player vision preview: see what the players would see, their tokens' sight, the light and the dark"}
+            onClick={() => actions.visionPreview?.(!map.previewing)}
+          >
+            <Icon name="eye" />
+          </button>
+        ) : null}
+        <button type="button" className={stripOpen ? "tool on" : "tool"} data-action="map-tools" aria-pressed={stripOpen} aria-label="Tools" title={stripOpen ? "Hide the tools (the picture alone)" : "Show the tools: zoom to fit, navigation, draw, erase, ping" + (gm ? ", player vision preview, pins" : "")} onClick={() => setStripOpen(!stripOpen)}>
+          <Icon name="settings" />
+        </button>
+      </div>
+      {navOpen ? (
+        <div className="map-nav" role="group" aria-label="Navigation">
+          <button type="button" className="tool" aria-label="Zoom in" onClick={() => zoomAboutCenter(1.25)}>
+            <Icon name="zoom-in" size={16} />
+          </button>
+          <button type="button" className="tool" aria-label="Pan up" data-nav="up" onClick={() => panBy(0, -1)}>
+            ▲
+          </button>
+          <button type="button" className="tool" aria-label="Zoom out" onClick={() => zoomAboutCenter(1 / 1.25)}>
+            <Icon name="zoom-out" size={16} />
+          </button>
+          <button type="button" className="tool" aria-label="Pan left" data-nav="left" onClick={() => panBy(-1, 0)}>
+            ◀
+          </button>
+          <button type="button" className="tool" aria-label="Pan down" data-nav="down" onClick={() => panBy(0, 1)}>
+            ▼
+          </button>
+          <button type="button" className="tool" aria-label="Pan right" data-nav="right" onClick={() => panBy(1, 0)}>
+            ▶
+          </button>
+        </div>
+      ) : null}
+      {stripOpen ? (
       <div className="map-controls map-toolbar" role="toolbar" aria-label="Map tools">
         <div className="tool-group">
           <button type="button" className="tool" onClick={() => zoomAboutCenter(1 / 1.25)} aria-label="Zoom out" title="Zoom out">
@@ -2093,6 +2181,9 @@ function MapViewInner({
           </button>
           <button type="button" className="tool" onClick={fit} aria-label="Fit" title="See the whole map">
             <Icon name="fit" />
+          </button>
+          <button type="button" className={navOpen ? "tool on" : "tool"} data-action="map-nav" aria-pressed={navOpen} aria-label="Navigation" title="Navigation: buttons to pan and zoom (without the mouse)" onClick={() => (setNavOpen(!navOpen), keepFlag("kraken-map-nav", !navOpen))}>
+            <Icon name="hand" />
           </button>
           <button type="button" className="tool find" data-action="find-token" onClick={findMine} aria-label={gm ? "Find the selected token" : "Find my token"} title={gm ? "Centre and zoom on the selected token" : "Where am I? Centre and zoom on my token"}>
             <Icon name="locate" />
@@ -2136,12 +2227,11 @@ function MapViewInner({
         </div>
         {gm ? (
           <div className="tool-group">
-            <button type="button" className={editorOpen ? "tool on" : "tool"} data-action="map-editor" aria-pressed={editorOpen} aria-label="Edit map" title={editorOpen ? "Unlocked: editing (line of sight, doors, windows, lights, masks, paint, text, grid, weather). Lock it to play." : "Locked: playing. Unlock to edit it (FG's image lock): walls, doors, lights, paint and more, the same image wherever it is opened."} onClick={() => setEditorOpen(!editorOpen)}>
-              <Icon name={editorOpen ? "unlock" : "lock"} />
-              <span className="tool-label">{editorOpen ? "Unlocked" : "Locked"}</span>
-            </button>
             <button type="button" className="tool" data-action="map-share" aria-label="Share with players" title="Share with players: the map opens on every player's screen, even where it was closed (FG's Share)" onClick={() => actions.shareMap?.()}>
               <Icon name="share" />
+            </button>
+            <button type="button" className={pinsShown ? "tool on" : "tool"} data-action="map-pins" aria-pressed={pinsShown} aria-label="Pins" title={pinsShown ? "Pins shown (the map's shortcuts to its story and encounters): click to hide them" : "Pins hidden: click to show the map's shortcuts"} onClick={() => (setPinsShown(!pinsShown), keepFlag("kraken-map-pins", !pinsShown))}>
+              <Icon name="flag" />
             </button>
             <button type="button" className={settingsOpen ? "tool on" : "tool"} data-action="scene-settings" aria-pressed={settingsOpen} aria-label="Scene" onClick={() => setSettingsOpen(!settingsOpen)} title="Scene: lighting, players, grid and weather">
               <Icon name="settings" />
@@ -2172,6 +2262,7 @@ function MapViewInner({
           </span>
         ) : null}
       </div>
+      ) : null}
       {hint ? (
         <p className="map-toast" role="status">
           {hint}

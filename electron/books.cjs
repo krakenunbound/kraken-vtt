@@ -475,7 +475,9 @@ function createBookShelf({ folder, cache = "", also = [], packsFolder = "" }) {
         .filter((record) => record.type === "image")
         .map((record) => ({ name: record.name, category: record.data.fgCategory ?? "", file: bitmapIn(record.data.image) }))
         .filter((item) => item.file);
-      return { ...publicInfo(id), chapters, pictures };
+      // Every picture file the book holds (FG's Assets: an art pack's pictures too, record or not).
+      const assets = (book.module.images ?? []).filter((name) => PICTURES.test(name));
+      return { ...publicInfo(id), chapters, pictures, assets };
     },
     // One page: its blocks, text as safe HTML, pictures by file.
     page(id, pageId) {

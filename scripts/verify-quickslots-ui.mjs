@@ -89,8 +89,11 @@ try {
   await page.waitForFunction(() => document.querySelectorAll('[data-window="books"]').length === 1);
   report.push("Modules (Activation, Packs) and Books (active books only) apart");
 
-  // A book from Modules onto slot 2; Modules still opens and closes.
-  await page.dragAndDrop('[data-window="books"] .books-open >> nth=0', slot(2));
+  // A book from Modules onto slot 2 (an active one: an inactive book is off limits); Modules still opens and closes.
+  const first = await page.getAttribute('[data-window="books"] .books-open >> nth=0', "data-book");
+  await tool("kraken_books", { action: "activate", book: first });
+  await page.waitForSelector(`[data-window="books"] .books-open[data-book="${first}"]:not(.inactive)`);
+  await page.dragAndDrop(`[data-window="books"] .books-open[data-book="${first}"]`, slot(2));
   await page.waitForSelector(`${slot(2)}.full`);
   assert(await modulesOpen(), "Modules still open after the drop");
   await page.click('[data-launch="books:activation"]');

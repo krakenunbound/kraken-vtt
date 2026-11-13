@@ -45,9 +45,12 @@ export type WallKind = "wall" | "terrain" | "door" | "secret" | "toggle" | "wind
 export type EditWall = { id: string; x1: number; y1: number; x2: number; y2: number; kind: WallKind; sight: number; light: number; sound: number; move: number; dir: number; door: number; ds: number; toggle: "none" | "gm" | "players"; threshold: number | null; hidden: boolean; group?: string };
 export type TableMap = {
   sceneId: string | null;
-  // The GM's: the image open privately in the image window (its scene id), and whether a play test runs.
+  // The GM's: the image open privately in the image window (its scene id), whether a play test runs,
+  // whether the player vision preview is on, and whether the table map is held back from the players.
   prep?: string | null;
   testing?: boolean;
+  previewing?: boolean;
+  sceneHidden?: boolean;
   tokens: MapToken[];
   doors: MapDoor[];
   vision: number[][] | null;
@@ -128,7 +131,7 @@ export type ShownImage = { id: string; book: string; file: string; name: string;
 export type BookShelf = { active: string[]; shared: string[]; images: ShownImage[] };
 export type BookInfo = { id: string; name: string; title: string; category: string; ruleset: string; author: string; hasBook: boolean; cover: string; adventure: boolean; forPlayers: boolean; active: boolean; shared: boolean; pack?: boolean };
 export type BookPageRef = { id: string; name: string; keywords: string };
-export type BookContents = BookInfo & { chapters: { name: string; sections: { name: string; pages: BookPageRef[] }[] }[]; pictures: { name: string; category: string; file: string }[] };
+export type BookContents = BookInfo & { chapters: { name: string; sections: { name: string; pages: BookPageRef[] }[] }[]; pictures: { name: string; category: string; file: string }[]; assets?: string[] };
 export type BookBlock = { kind: "text"; html: string; frame?: string } | { kind: "picture"; file: string; caption: string; align: string; scale: number; name: string };
 export type BookPage = { book: string; id: string; name: string; blocks: BookBlock[] };
 // A quick slot: something kept at hand, opened with a click.
@@ -562,8 +565,9 @@ export function useSession() {
             else if (wait) wait.reject(new Error(typeof msg.error === "string" ? msg.error : "Not allowed."));
           }
           if (msg.type === "error" && typeof msg.reason === "string") setError(msg.reason);
-          if (msg.type === "scene" && roleRef.current === "player" && msg.scene) {
-            setPlayerScene(toPlayerScene(msg.scene as NetScene, originRef.current));
+          if (msg.type === "scene" && roleRef.current === "player") {
+            // No scene: the GM stopped sharing the map (or none is up): the player has no map.
+            setPlayerScene(msg.scene ? toPlayerScene(msg.scene as NetScene, originRef.current) : null);
           }
         };
 
@@ -1019,6 +1023,9 @@ export function useSession() {
   // The GM's image window: closed, or a play test (a test token, the players' view) on or off.
   const prepClose = useCallback(() => send({ type: "prep-close" }), [send]);
   const playtest = useCallback((on: boolean, at?: { x: number; y: number }) => send({ type: "playtest", on, ...(at ? { at } : {}) }), [send]);
+  // The player vision preview (the players' view of the GM's map), and the table map shared or not.
+  const visionPreview = useCallback((on: boolean) => send({ type: "playtest", preview: on }), [send]);
+  const shareTableMap = useCallback((on: boolean) => send(on ? { type: "map-share" } : { type: "scene-share", on: false }), [send]);
   const mask = useCallback((action: string, payload: Record<string, unknown> = {}) => send({ type: "mask", action, ...payload }), [send]);
   const libraryAction = useCallback((action: string, payload: Record<string, unknown> = {}) => send({ type: "library", action, ...payload }), [send]);
   // The GM's: an FG module's maps as a bundle to open on the table.
@@ -1184,6 +1191,8 @@ export function useSession() {
     mapUndo,
     prepClose,
     playtest,
+    visionPreview,
+    shareTableMap,
     mask,
     label,
     mapGroup,

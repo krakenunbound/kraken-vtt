@@ -23,6 +23,21 @@ export function ImagesList({ session }: { session: Session }) {
     for (const book of books ?? []) session.libraryAction("list", { module: book.name, kind: "image", search });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [books, search]);
+  // The campaign's own images (Assets' Make it a map): a picture of an active book.
+  const campaignImages = Object.values(session.records)
+    .filter((record) => record.type === "image" && typeof (record.data as { file?: unknown })?.file === "string")
+    .map((record) => record as typeof record & { data: { book: string; file: string } })
+    .filter((record) => (!search || record.name.toLowerCase().includes(search.toLowerCase())) && (books ?? []).some((book) => book.id === record.data.book))
+    .sort((a, b) => a.name.localeCompare(b.name));
+  const openRecord = async (record: { name: string; data: { book: string; file: string } }) => {
+    setStatus(`Opening ${record.name}…`);
+    try {
+      await imageWindow.open?.({ book: record.data.book, file: record.data.file, name: record.name });
+      setStatus("");
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "Could not open it.");
+    }
+  };
   const open = async (book: BookInfo, name: string) => {
     setStatus(`Opening ${name}…`);
     try {
@@ -43,6 +58,19 @@ export function ImagesList({ session }: { session: Session }) {
         </div>
         {status ? <p className="hint">{status}</p> : null}
         <div className="records-list">
+          {campaignImages.length ? (
+            <section data-images-book="campaign">
+              <h4>This campaign</h4>
+              <div className="library-maps">
+                {campaignImages.map((record) => (
+                  <button key={record.id} type="button" className="library-map" data-image={record.name} data-image-record={record.id} title={`Open ${record.name}`} onClick={() => void openRecord(record)}>
+                    <img src={session.bookUrl("picture", record.data.book, record.data.file)} alt="" loading="lazy" />
+                    <span>{record.name}</span>
+                  </button>
+                ))}
+              </div>
+            </section>
+          ) : null}
           {books && books.length === 0 ? <p className="hint">No book is active: make one active in Modules.</p> : null}
           {(books ?? []).map((book) => {
             const items = (session.library[`${book.name}|image`] ?? []).filter((item) => !mapsOnly || item.map);

@@ -90,6 +90,7 @@ try {
 
   // Edit map, Walls tab, line tool, draw three points: two walls in a chain.
   await page.click('[data-action="map-editor"]');
+  if (process.env.DEBUG_EDITOR) console.log("DEBUG", await page.evaluate(() => JSON.stringify({ pressed: [...document.querySelectorAll('[data-action="map-editor"]')].map((b) => b.getAttribute("aria-pressed")), editor: Boolean(document.querySelector(".map-editor")), corner: document.querySelector(".map-corner")?.getBoundingClientRect() })));
   await page.waitForSelector(".map-editor");
   await page.click('[data-edit-tab="walls"]');
   await page.click('[data-wall-kind="wall"]');

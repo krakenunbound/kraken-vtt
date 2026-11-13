@@ -739,7 +739,8 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       };
     }
     const shown = all.filter((token) => !token.hidden);
-    const mine = shown.filter((token) => token.owner === seat.name);
+    // Player vision preview (the GM's): every player's tokens at once, as the table sees them.
+    const mine = shown.filter((token) => token.owner === seat.name || (seat.everyone && token.owner && !token.owner.startsWith("@")));
     const vision = sightOn() && mine.length > 0 ? mine.map(polygonFor) : null;
     const slack = geometry.gridSize(scene) * 0.05;
     // A hidden token's light neither reaches a player nor lights anything for them.
@@ -759,7 +760,7 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
     const visibleInDark = (x, y) =>
       !needsLight || geometry.lit(x, y, shining) || seeing.some((item) => Math.hypot(x - item.x, y - item.y) <= item.radiusPx && (!item.polygon || geometry.pointInPolygon(x, y, item.polygon)));
     // Nothing under the GM's mask reaches a player (FG: tokens under the mask are hidden), but their own tokens.
-    const tokens = shown.filter((token) => token.owner === seat.name || ((!vision || geometry.seen(token.x, token.y, vision, slack)) && visibleInDark(token.x, token.y) && !masked(token.x, token.y)));
+    const tokens = shown.filter((token) => token.owner === seat.name || mine.includes(token) || ((!vision || geometry.seen(token.x, token.y, vision, slack)) && visibleInDark(token.x, token.y) && !masked(token.x, token.y)));
     // A door a player sees any side of is shown whole (all its sides).
     const seenSide = (door) => !door.secret && !masked((door.x1 + door.x2) / 2, (door.y1 + door.y2) / 2) && (!vision || geometry.seen((door.x1 + door.x2) / 2, (door.y1 + door.y2) / 2, vision, slack));
     const seenGroups = new Set(doorList.filter(seenSide).map((door) => door.group));

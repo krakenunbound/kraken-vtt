@@ -186,6 +186,21 @@ export function App() {
           await live.current.openInStudio(open.scene);
           return { studio: open.scene.name };
         }
+        // Assets' Make it a map: the picture joins Campaign > Images (a record of the campaign's own) and opens to edit.
+        if (command.action === "make") {
+          const file = String(command.file ?? "");
+          const book = String(command.book ?? "");
+          if (!file || !book) throw new Error("Give the book and the picture's file (kraken_books contents lists a book's assets).");
+          const name = command.name || file.split("/").pop()?.replace(/\.[a-z0-9]+$/i, "") || "Map";
+          const known = Object.values(current.records).find((record) => record.type === "image" && (record.data as { file?: string; book?: string })?.file === file && (record.data as { book?: string })?.book === book);
+          const id = known?.id ?? (await current.op({ op: "create", input: { type: "image", name, visibility: "gm", data: { book, file } } }));
+          const opened = await live.current.openImage({ book, file, name });
+          return { record: id, ...opened };
+        }
+        if (command.action === "preview") {
+          current.visionPreview(Boolean(command.on));
+          return { previewing: Boolean(command.on) };
+        }
         if (command.action === "test") {
           current.playtest(Boolean(command.on));
           return { testing: Boolean(command.on) };
@@ -478,16 +493,15 @@ export function App() {
   // The GM's map window shows the image window's image while one is open.
   const scene = dm && prep ? prep.scene : tableScene;
   const testing = dm && Boolean(session.map.testing);
+  // The player vision preview: the GM's window draws the map as the players see it.
+  const previewing = dm && Boolean(session.map.previewing);
   // The image window's bar: whose it is (the GM's alone), put in play, a play test, close.
   const imageBar =
     dm && prep ? (
       <div className="toolbar image-bar" data-image-window={prep.scene.name}>
         <strong className="adventure-name">{prep.scene.name}</strong>
-        <span className="image-private" title="The players do not see this image; its walls, lights and paint are the same wherever it is opened">
-          <Icon name="eye-off" size={14} /> Only you see this
-        </span>
-        <button type="button" data-action="image-play" title="Put it on the table: the players see it (their map)" onClick={() => void playImage().catch((caught: Error) => setError(caught.message))}>
-          Put in play
+        <button type="button" className="share-toggle" data-action="image-play" aria-pressed={false} title="Not shared: only you see it. Share it: it is the players' map (on their screens)" onClick={() => void playImage().catch((caught: Error) => setError(caught.message))}>
+          <Icon name="eye-off" size={14} /> Not shared · Share
         </button>
         <button
           type="button"
@@ -559,6 +573,18 @@ export function App() {
       ) : null}
       <span className="grid-label">{gridLabel(withGrid({ ...scene, grid: scene.baseGrid ?? scene.grid }, session.map.sceneId === scene.id ? session.map.settings.grid : null).grid)}</span>
       {dm ? (
+        <button
+          type="button"
+          className={session.map.sceneHidden ? "share-toggle" : "share-toggle on"}
+          data-action="table-share"
+          aria-pressed={!session.map.sceneHidden}
+          title={session.map.sceneHidden ? "Not shared: the players see no map. Share it: it opens on their screens" : "Shared: the players see this map. Click to stop sharing it (they see no map)"}
+          onClick={() => session.shareTableMap(Boolean(session.map.sceneHidden))}
+        >
+          <Icon name={session.map.sceneHidden ? "eye-off" : "share"} size={14} /> {session.map.sceneHidden ? "Not shared · Share" : "Shared"}
+        </button>
+      ) : null}
+      {dm ? (
         <button type="button" className="ghost" data-action="table-test" aria-pressed={testing} title={testing ? "End the play test" : "Play test: a test token on this map, seen as a player sees it"} onClick={() => session.playtest(!testing)}>
           {testing ? "End play test" : "Play test"}
         </button>
@@ -592,7 +618,7 @@ export function App() {
           session={session}
           scene={
             scene ? (
-              <MapView scene={scene} gm={dm && !testing} map={session.map} records={recordList} pings={session.pings} notice={session.notice} actions={mapActions} targeted={targeted} me={testing ? "@test" : myName} startEditing={dm && Boolean(prep) && !testing} />
+              <MapView scene={scene} gm={dm && !testing && !previewing} map={session.map} records={recordList} pings={session.pings} notice={session.notice} actions={mapActions} targeted={targeted} me={testing ? "@test" : myName} startEditing={dm && Boolean(prep) && !testing} gmSeat={dm} />
             ) : null
           }
           sceneId={scene?.id ?? ""}

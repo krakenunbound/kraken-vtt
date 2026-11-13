@@ -369,6 +369,10 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
   let image = null;
   let imageVersion = 0;
   let scene = null;
+  // The table map the GM stopped sharing (FG's Share off): the players are sent no map while it is.
+  let hiddenSceneId = typeof saved.hiddenSceneId === "string" ? saved.hiddenSceneId.slice(0, 80) : null;
+  const sceneHiddenNow = () => Boolean(scene && hiddenSceneId === scene.id);
+  const emptyView = () => ({ sceneId: null, tokens: [], doors: [], vision: null, sight: false, locked: false, darkness: 0, lights: [], seeing: [], sceneLights: [], drawings: [], labels: [], tiles: [], fx: [], groups: [] });
   const clients = new Map();
   const tokenArt = new Map();
   const chat = savedChat(saved.chat);
@@ -582,7 +586,10 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
   // FG's play test: the GM sees the image as a player would, through a test
   // token's eyes ("@test" owns it), and moves it as a player moves.
   const TEST_SEAT = { role: "player", name: "@test" };
+  // Player vision preview: the players' view (all their tokens), no test token.
+  const PREVIEW_SEAT = { role: "player", name: "@preview", everyone: true };
   let testing = false;
+  let previewing = false;
   const gmMap = () => (prep.scene() ? prep : map);
   const mapOf = (client) => (client.role === "dm" ? gmMap() : map);
 
@@ -644,12 +651,12 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       mapsPending = false;
       for (const [ws, client] of clients) {
         if (client.role !== "dm") {
-          send(ws, { type: "map", ...map.viewFor(seatOf(client), client.assetToken) });
+          send(ws, { type: "map", ...(sceneHiddenNow() ? emptyView() : map.viewFor(seatOf(client), client.assetToken)) });
           continue;
         }
         const working = gmMap();
-        const view = working.viewFor(testing ? TEST_SEAT : seatOf(client), client.assetToken);
-        send(ws, { type: "map", ...view, prep: working === prep ? working.scene()?.id ?? null : null, testing });
+        const view = working.viewFor(testing ? TEST_SEAT : previewing ? PREVIEW_SEAT : seatOf(client), client.assetToken);
+        send(ws, { type: "map", ...view, prep: working === prep ? working.scene()?.id ?? null : null, testing, previewing, sceneHidden: sceneHiddenNow() });
       }
     });
   }
@@ -1276,6 +1283,8 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
   // and tokens come with the player's map view.
   function sceneFor(client) {
     if (!scene) return null;
+    // Not shared: a player is sent no map.
+    if (client.role !== "dm" && sceneHiddenNow()) return null;
     const { walls, tokens, lights, ...shown } = scene;
     return {
       ...shown,
@@ -1439,7 +1448,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
           ruleset,
           you: { id: client.id, name: client.name, role: client.role, assetToken: client.assetToken, ...(client.accountToken ? { accountToken: client.accountToken } : {}), account: Boolean(accounts?.has(client.name)) },
           players: playerList(),
-          map: map.viewFor(seatOf(client), client.assetToken),
+          map: client.role !== "dm" && sceneHiddenNow() ? emptyView() : map.viewFor(seatOf(client), client.assetToken),
           combat: combat.viewFor(seatOf(client)),
           chat: chatFor(client),
           options,
@@ -1905,14 +1914,32 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         return;
       }
 
+      // FG's Share: the table map shown to the players, or not (they are sent no map).
+      if (msg.type === "scene-share") {
+        if (client.role !== "dm" || !scene) return;
+        hiddenSceneId = msg.on ? null : scene.id;
+        onChange("table");
+        broadcastScene();
+        sendMaps();
+        return;
+      }
+
       // The GM's image window: an image opened privately, closed, or a test.
       if (msg.type === "prep-close" || msg.type === "playtest") {
         if (client.role !== "dm") return;
         try {
           if (msg.type === "prep-close") {
             testing = false;
+            previewing = false;
             prep.clearScene();
-          } else setPlaytest(Boolean(msg.on), msg.at);
+          } else if (msg.preview !== undefined) {
+            // Player vision preview on or off (a play test ends first).
+            if (testing) setPlaytest(false);
+            previewing = Boolean(msg.preview);
+          } else {
+            previewing = false;
+            setPlaytest(Boolean(msg.on), msg.at);
+          }
           sendMaps();
         } catch (error) {
           send(ws, { type: "error", reason: error instanceof Error ? error.message : "Not allowed." });
@@ -2165,6 +2192,11 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       // The GM shares the map (FG's Share on an image): it opens on every player's screen, closed or not.
       if (msg.type === "map-share") {
         if (client.role !== "dm" || !scene) return;
+        // Shared: no longer held back, and open on every player's screen.
+        hiddenSceneId = null;
+        onChange("table");
+        broadcastScene();
+        sendMaps();
         broadcast({ type: "map-share", name: scene.name });
         return;
       }
@@ -2345,10 +2377,14 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     // The GM's portraits and tokens (artLibrary.cjs), as the pickers show them.
     art: (kind) => (art ? art.list(kind) : []),
     // The map shared: open on every player's screen (the GM's Share with players).
-    shareMap() {
+    shareMap(on = true) {
       if (!scene) throw new Error("No scene is on the table.");
-      broadcast({ type: "map-share", name: scene.name });
-      return { shared: scene.name };
+      hiddenSceneId = on ? null : scene.id;
+      onChange("table");
+      broadcastScene();
+      sendMaps();
+      if (on) broadcast({ type: "map-share", name: scene.name });
+      return on ? { shared: scene.name } : { notShared: scene.name };
     },
     // A ping on the map at a square, as a GM's click would make.
     ping(col, row, from = "Agent") {
@@ -2472,6 +2508,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         chat: chat.slice(),
         options,
         map: map.persisted(),
+        hiddenSceneId,
         combat: combat.persisted(),
         records: records.toJSON(),
         dice: dice.toJSON(),

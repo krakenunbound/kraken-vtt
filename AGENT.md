@@ -19,6 +19,7 @@ The app starts the MCP server when it opens. `electron/agent/mcp-stdio.cjs` is t
 |---|---|
 | **The DM assistant** (GM only; skill: [skills/kraken-dm-assistant/SKILL.md](skills/kraken-dm-assistant/SKILL.md)) | |
 | Modules, Packs tab: list the FG modules and their Kraken packs, Make pack, Make N packs, open the packs folder | `kraken_packs` (list, make, folder) |
+| The image window's corner and strip: lock, player vision preview, tools, navigation pad, pins; Share on/off for the table map; Assets' Make it a map | `kraken_image` (preview, make), `kraken_map` share true/false, `kraken_windows` kind assets |
 | Images (Campaign > Images): open a book's picture in the image window (the GM's alone, the same master everywhere: the map tools then work on it), put it in play, play test, close | `kraken_image` (open, play, test, close); `kraken_library` list kind image |
 | Map Studio (Kraken's map maker, studio/web served by electron/studio/server.cjs): open the open image in it; its Save to Kraken writes walls, lights, weather and the painted picture into the image's master | `kraken_image` action studio; `kraken_windows` kind studio |
 | Quick slots: read or set a seat's ten (books, pages, pictures, sheets, sounds, notes, records, dice `{kind: dice, formula}`, chat macros `{kind: macro, text}`); use one as its click or number key does | `kraken_quickslots` (slots; press) |
