@@ -20,3 +20,6 @@ agent.json
 
 # Kraken's own books as packs, made from games/modules (npm run build-packs).
 games/packs/
+
+# Map Studio's own packs ship with Kraken (Kraken's art, Battle Map Forge with its author's go-ahead).
+!studio/packs/*.mod

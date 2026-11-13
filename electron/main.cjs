@@ -134,6 +134,9 @@ for (const name of [
   "touch-campaign",
   "campaign-ruleset",
   "ruleset-logos",
+  "studio-url",
+  "studio-open-image",
+  "studio-settings",
   "start-host",
   "stop-host",
   "campaign-view",
@@ -168,6 +171,14 @@ ipcMain.handle("decal-pick", async (_event, kind) => {
   });
   if (picked.canceled || picked.filePaths.length === 0) return null;
   return call("decal-add-file", kind, picked.filePaths[0]);
+});
+// A folder of Map Studio's asset packs (Settings > Map Studio art), from the GM's own disk.
+ipcMain.handle("studio-pick-folder", async (_event, kind) => {
+  const picked = await dialog.showOpenDialog(mainWindow, {
+    title: kind === "dd" ? "Choose a folder of Dungeondraft packs" : "Choose a folder of art packs (.mod)",
+    properties: ["openDirectory"],
+  });
+  return picked.canceled || picked.filePaths.length === 0 ? null : picked.filePaths[0];
 });
 // Sounds from anywhere, copied into a kind and folder of the sounds library.
 ipcMain.handle("sound-pick", async (_event, kind, group) => {

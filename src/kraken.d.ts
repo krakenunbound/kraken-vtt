@@ -70,6 +70,11 @@ export type KrakenApi = {
   touchCampaign: (input: { id: string; port: number; gmName?: string }) => Promise<KrakenCampaign | null>;
   setCampaignRuleset: (input: { id: string; ruleset: string }) => Promise<KrakenCampaign>;
   rulesetLogos?: () => Promise<{ folder: string; logos: Record<string, string> }>;
+  studioUrl?: () => Promise<{ url: string }>;
+  studioSettings?: (input?: { dungeondraftFolders?: string[]; packFolders?: string[] }) => Promise<StudioSettings>;
+  studioPickFolder?: (kind: "dd" | "pack") => Promise<string | null>;
+  studioOpenImage?: (input: { sceneId: string; name: string; picture: Uint8Array }) => Promise<{ url: string }>;
+  onStudioSaved?: (handler: (event: { sceneId: string; picture: boolean }) => void) => () => void;
   copy: (text: string) => Promise<boolean | void>;
   startHost: (options: { port: number; password: string; lan: boolean; cloud: boolean; campaignId?: string }) => Promise<KrakenHostInfo>;
   stopHost: () => Promise<void>;
@@ -88,6 +93,9 @@ export type KrakenApi = {
   onAgentCommand: (handler: (command: KrakenAgentCommand) => Promise<unknown>) => () => void;
 };
 
+// Map Studio's asset pack folders, and whether each is there.
+export type StudioSettings = { dungeondraftFolders: string[]; packFolders: string[]; found: Record<string, boolean> };
+
 export type KrakenAgentCommand =
   | { kind: "host"; campaignId: string; port: number; password: string }
   | { kind: "leave" }
@@ -98,7 +106,7 @@ export type KrakenAgentCommand =
   | { kind: "sidebar"; action: "list" | "state" | "fold" | "press"; state?: number; group?: string; folded?: boolean; entry?: string }
   | { kind: "dice-settings"; patch: DiceSettingsPatch }
   | { kind: "quickslots"; action: "press"; index: number }
-  | { kind: "image"; action: "open" | "play" | "test" | "close"; book?: string; name?: string; file?: string; on?: boolean };
+  | { kind: "image"; action: "open" | "play" | "test" | "close" | "studio"; book?: string; name?: string; file?: string; on?: boolean };
 
 export type DiceSettingsPatch = { show?: boolean; sound?: boolean; volume?: number; preset?: string; body?: string; accent?: string; ink?: string; design?: string; material?: string; font?: string; effect?: string; crit?: boolean; pips?: boolean; set?: "mine" | "npc" | "damage"; same?: boolean; color?: string; character?: string; resolve?: boolean; base?: Partial<import("./dice/diceStore").DiceLook> | null };
 

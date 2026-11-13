@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Kraken Map Studio</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%23e4b84e' d='M32 4 40 24 60 32 40 40 32 60 24 40 4 32 24 24z'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="rail.css" /><link rel="stylesheet" href="beta2.css" /><link rel="stylesheet" href="dialogs.css" /><link rel="stylesheet" href="kraken.css" /><link rel="stylesheet" href="generate.css" /><link rel="stylesheet" href="shell.css" />
+  </head>
+  <body>
+    <header>
+      <div class="brand">
+        <span class="kraken">✦</span>
+        <div>
+          <b>KRAKEN</b> <em>MAP STUDIO</em
+          ><small>Kraken VTT's map maker</small>
+        </div>
+      </div>
+      <nav class="menus" aria-label="Main menu">
+        <details class="menu"><summary>New</summary><div class="menu-items">
+          <button id="newBtn" title="An empty map you build from scratch">Blank map</button>
+          <button class="open-picture" title="Use a map picture (PNG, JPG or WebP) from your computer">Map from a picture on this computer…</button>
+          <button id="layoutBtn" title="Rooms, corridors, walls and doors from a seed">Generate a dungeon…</button>
+          <button id="demoBtn" title="A small example map to try things on">Example map</button>
+        </div></details>
+        <details class="menu"><summary>Open</summary><div class="menu-items">
+          <button class="open-picture" title="Use a map picture (PNG, JPG or WebP) from your computer">Map picture from this computer…</button>
+          <button id="projectsBtn" title="Projects you saved in Map Studio">Saved project…</button>
+          <button id="openBtn" title="A .json or portable .zip project file">Project file (.json or .zip)…</button>
+        </div></details>
+        <details class="menu"><summary>Save</summary><div class="menu-items">
+          <button id="saveProjectBtn" title="Keep this map in Map Studio's project list (Ctrl+S)">Save project</button>
+          <button id="saveBtn" title="Download the project as a .json file">Download project file (.json)</button>
+          <button id="portableBtn" title="Download the project with all of its art, to move it to another computer">Download portable ZIP (with art)</button>
+          <button id="closeMapBtn" title="Close this map (asks first if it has changes that are not saved)">Close this map</button>
+        </div></details>
+      </nav>
+      <div class="project-name">
+        <label for="projectName">Map name</label>
+        <input id="projectName" value="Untitled Map" aria-label="Map name" /><span id="savedState">SAVED</span>
+      </div>
+      <div class="actions">
+        <button id="libraryBtn" title="Show or hide the art library">Art library</button>
+        <input id="fileInput" type="file" accept=".json,.zip" hidden />
+        <input id="artInput" type="file" accept="image/png,image/jpeg,image/webp" multiple hidden />
+        <input id="mapPictureInput" type="file" accept="image/png,image/jpeg,image/webp" hidden />
+      </div>
+    </header>
+    <nav id="tabBar" aria-label="Open maps"></nav>
+    <main>
+      <aside class="assets panel">
+        <div class="panel-title">
+          ART LIBRARY <span><button id="artBtn" title="Adds pictures to this library so you can place them on maps. To open a picture as a whole map, use New &gt; Map from a picture.">＋ Add your own art</button><button id="refreshAssets" title="Reload the library">↻</button></span>
+        </div>
+        <input id="assetSearch" class="search" placeholder="Search art…" />
+        <p class="library-help">Click a picture, then click the map to place it.</p>
+        <div class="asset-filters"><button id="allAssets">All</button><button id="favoriteAssets">Favorites</button><button id="recentAssets">Recent</button><button id="favoriteCurrent" title="Favorite the selected asset">☆</button></div><button id="subscriptionBtn" class="subtle">FG subscription packs</button><select id="ddPack" class="dd-pack" aria-label="Dungeondraft packs"><option value="">Dungeondraft packs...</option></select><div id="ddStatus" class="dd-status"></div><select id="assetSource" class="dd-pack" aria-label="Show art from" title="Show art from one source, or from all of them"></select><div id="categories" class="categories"></div>
+        <div id="assetStatus" class="muted">Loading asset library…</div>
+        <div id="assetGrid" class="asset-grid"></div>
+      </aside>
+      <section class="work">
+        <div class="toolbar">
+          <span id="modeLabel">VIEW</span>
+          <div>
+            <button id="undoBtn" title="Undo">↶</button
+            ><button id="redoBtn" title="Redo">↷</button
+            ><button id="viewCloseBtn" class="view-close" title="Close this map (asks first if it has changes that are not saved)" aria-label="Close this map">✕</button>
+          </div>
+        </div>
+        <div id="startScreen" hidden>
+          <h2>What would you like to do?</h2>
+          <div class="start-cards">
+            <button data-start="picture"><b>Open a map picture</b><span>A PNG, JPG or WebP from your computer. You can also drag it onto this window.</span></button>
+            <button data-start="generate"><b>Generate a dungeon</b><span>Rooms, corridors, walls and doors from a seed.</span></button>
+            <button data-start="blank"><b>Start a blank map</b><span>Build it from the art library.</span></button>
+            <button data-start="project"><b>Open a saved project</b><span>Maps you saved in Map Studio.</span></button>
+            <button data-start="file"><b>Open a project file</b><span>A .json or portable .zip file.</span></button>
+          </div>
+        </div>
+        <div id="viewport">
+          <canvas id="mapCanvas" width="1600" height="1000"></canvas>
+          <div class="canvas-hint" id="canvasHint">
+            Choose an asset, then click to place it
+          </div>
+          <div id="zoomReadout">100%</div>
+        </div>
+        <footer>
+          <span id="coordReadout">X 0 · Y 0</span
+          ><span id="mapReadout">1600 × 1000 · Grid 50</span
+          ><span>Preview effects are approximate</span>
+        </footer>
+      </section>
+      <aside class="inspector panel fg-rail">
+        <div class="fg-icons">
+          <button data-mode="view" aria-label="View" title="View">
+            <img src="icons/view.svg" /><span class="rail-label">Select &amp; move</span></button
+          ><button data-mode="layers" aria-label="Layers" title="Layers">
+            <img src="icons/layers.svg" /><span class="rail-label">Layers</span></button
+          ><button
+            data-mode="paint"
+            aria-label="Paint assets"
+            title="Paint assets"
+          >
+            <img src="icons/brush.svg" /><span class="rail-label">Paint &amp; place art</span></button
+          ><button data-mode="fx" aria-label="Effects" title="Effects">
+            <img src="icons/fx.svg" /><span class="rail-label">Weather effects</span></button
+          ><button
+            data-mode="los"
+            aria-label="Line of sight"
+            title="Line of sight"
+          >
+            <img src="icons/los.svg" /><span class="rail-label">Walls &amp; doors</span></button
+          ><button data-mode="regions" aria-label="Traps and regions" title="Traps, pits and difficult terrain">
+            <img src="icons/regions.svg" /><span class="rail-label">Traps &amp; regions</span></button
+          ><button data-mode="lighting" aria-label="Lighting" title="Lighting">
+            <img src="icons/light.svg" /><span class="rail-label">Lights</span></button
+          ><button data-mode="play" aria-label="Play test" title="Walk a test token round the map: doors, windows, line of sight, lights and vision">
+            <img src="icons/vision.svg" /><span class="rail-label">Play test</span></button
+          ><button
+            data-mode="grid"
+            aria-label="Grid settings"
+            title="Grid settings"
+          >
+            <img src="icons/grid.svg" /><span class="rail-label">Grid &amp; map size</span></button
+          ><button disabled hidden title="Text labels are not available yet">
+            <img src="icons/text.svg" />
+          </button>
+        </div>
+        <div class="fg-icons second" hidden>
+          <button
+            id="panTool"
+            aria-label="Pan"
+            title="Pan: hold Space or middle mouse"
+          >
+            <img src="icons/hand.svg" /></button
+          ><button
+            data-tool="select"
+            class="active"
+            title="Select / place assets"
+          >
+            <img src="icons/select.svg" /></button
+          ><button data-tool="select" title="Move selected item">
+            <img src="icons/move.svg" /></button
+          ><button
+            id="drawTool"
+            aria-label="Draw"
+            title="Draw current wall or effect"
+          >
+            <img src="icons/pencil.svg" /></button
+          ><button
+            id="eraseTool"
+            aria-label="Delete selected item"
+            title="Delete selected item"
+          >
+            <img src="icons/eraser.svg" /></button
+          ><button
+            disabled
+            title="Circle drawing is not available in this version"
+          >
+            <img src="icons/circle.svg" />
+          </button>
+        </div>
+        <div class="fg-settings">
+          <button id="railFit">
+            <span>Fit map to window</span><img src="icons/fit.svg" /></button
+          ><label><input id="visionToggle" type="checkbox" /> Player vision preview</label
+          ><label
+            ><input id="previewLighting" type="checkbox" checked /> Preview
+            Lighting</label
+          ><label
+            ><input id="snapToggle" type="checkbox" checked /> Use Grid
+            Snap</label
+          >
+        </div>
+        <div class="mode-controls">
+        </div>
+        <div data-panel="paint" class="beta-settings" hidden><label>Tool <select id="paintTool"><option value="stamp">Stamp artwork</option><option value="texture">Texture brush</option><option value="scatter">Scatter brush</option><option value="wall">Wall (draw a path)</option></select></label><label class="brush-only">Brush size <input id="brushSize" type="number" min="10" max="500" value="100"></label><label class="brush-only">Soft edge <input id="brushSoftness" type="range" min="0" max="80" value="30"></label><div id="wallOptions" hidden><p class="muted">Pick wall art in the library (Dungeondraft walls, or a wall brush), then click along the wall. Double-click or Enter finishes; click the first point to close it.</p><label style="justify-content:flex-start" title="Adds a line-of-sight wall along the same path, grouped with the art."><input id="wallLos" type="checkbox" checked style="width:auto"> Also block line of sight</label></div></div>
+        <div data-panel="los" id="losPanel" class="los-panel" hidden></div><div data-panel="grid" id="gridPanel" class="los-panel" hidden></div><div data-panel="fx" id="weatherPanel" class="los-panel" hidden></div><div data-panel="regions" id="regionsPanel" class="los-panel" hidden></div><div data-panel="play" id="playPanel" class="los-panel" hidden></div><div data-panel="lighting" id="lightingPanel" class="los-panel" hidden></div>
+        <div data-panel="vision" class="beta-settings" hidden><label>Sight range (ft) <input id="visionRange" type="number" min="5" max="500" value="60"></label><span>Click or drag the test token. Geometry preview; FG remains authoritative.</span></div>
+        <div class="selection-actions"><button id="duplicateBtn" title="Duplicate (Ctrl+D)">Duplicate</button><button id="groupBtn">Group</button><button id="ungroupBtn">Ungroup</button><button id="lockBtn">Lock</button><button id="alignBtn">Align top</button><button id="prefabSaveBtn">Save assembly</button><select id="prefabSelect" aria-label="Reusable assemblies"><option value="">Assemblies...</option></select><button id="prefabPlaceBtn">Place</button></div>
+        <label class="export-setting" title="Off: all art is flattened into one map picture in FG"><input id="layeredExport" type="checkbox"> Keep each piece of art as its own layer in FG</label>
+        <div class="layers-title">LAYERS</div>
+        <div id="layerList"></div>
+        <div class="layer-bottom">
+          <button id="addAsset" title="Add asset">＋</button
+          ><button id="railDelete" title="Delete selected">
+            <img src="icons/delete.svg" />
+          </button>
+        </div>
+        <div id="properties" class="tab-content">
+          <div class="empty">Select an item to edit its properties.</div>
+        </div>
+        <div id="layers" class="tab-content hidden"></div>
+      </aside>
+    </main>
+    <dialog id="projectDialog"><div class="dialog-head"><b>Saved projects and recovery</b><button id="closeProjects">Close</button></div><div id="projectList"></div></dialog><dialog id="subscriptionDialog"><div class="dialog-head"><b>Fantasy Grounds asset packs</b><button id="closeSubscription">Close</button></div><div id="subscriptionContent"></div></dialog><dialog id="layoutDialog"><form method="dialog" id="layoutForm"><div class="dialog-head"><b>Generate layout</b><button type="button" id="closeLayout">Close</button></div>
+      <p class="layout-note">Makes a new map: floor for every room and corridor, walls on every edge, doors on every opening, and stairs. The same seed and settings always give the same layout. It opens in a new tab.</p>
+      <div class="layout-grid">
+        <label>Setting <select id="layoutSetting"></select></label>
+        <label>Seed <span class="layout-seed"><input id="layoutSeed" maxlength="80" required><button type="button" id="layoutDice" title="New random seed">Random</button></span></label>
+        <label>Rooms <input id="layoutRooms" type="number" min="4" max="12" value="8"></label>
+        <label>Composition <select id="layoutComposition"><option value="compact">Compact</option><option value="sprawling">Exploratory (long corridors)</option></select></label>
+        <label>Loops <input id="layoutLoops" type="number" min="0" max="5" value="2"></label>
+        <label>Dead ends <input id="layoutDeadEnds" type="number" min="0" max="4" value="0"></label>
+        <label>Room floor <select id="layoutRoomFloor"></select></label>
+        <label>Corridor floor <select id="layoutCorridorFloor"></select></label>
+      </div>
+      <label class="layout-check"><input id="layoutDoorsOpen" type="checkbox"> Doors start open</label>
+      <label class="layout-check"><input id="layoutStairs" type="checkbox" checked> Place stairs where rooms change level</label>
+      <div class="layout-actions"><span id="layoutStatus"></span><button type="submit" class="gold" id="layoutGo">Generate</button></div>
+    </form></dialog><dialog id="pictureDialog"><form method="dialog" id="pictureForm"><div class="dialog-head"><b>New map from a picture</b><button type="button" id="pictureCancel">Cancel</button></div>
+      <div class="picture-body"><img id="picturePreview" alt="Map picture preview"><div class="picture-fields">
+        <label>Map name <input id="pictureName" maxlength="120" required></label>
+        <label>Each grid square is <span><input id="pictureGrid" type="number" min="5" max="1000" required> pixels</span></label>
+        <p id="pictureInfo"></p>
+        <p class="picture-note">Most battle maps use 50, 70, 100 or 140 pixels per square. Not sure? Leave it, then use Grid &amp; map size &gt; Set grid from the picture to drag over one square. The picture goes on its own locked layer so it can't be moved by accident.</p>
+        <button class="gold" id="pictureCreate">Create map</button></div></div></form></dialog>
+    <dialog id="closeDialog"><div class="dialog-head"><b id="closeTitle">Save changes?</b></div><p id="closeText"></p>
+      <div class="close-actions"><button class="gold" id="closeSave">Save project</button><button id="closeDiscard">Close without saving</button><button id="closeCancel">Cancel</button></div></dialog>
+    <div id="dropHint">Drop a map picture to open it, or a .json / .zip project</div>
+    <div id="toast"></div>
+    <script src="editor-core.js"></script><script src="library-sort.js"></script><script src="layers.js"></script><script src="los.js"></script><script src="grid.js"></script><script src="regions.js"></script><script src="weather.js"></script><script src="lighting.js"></script><script src="play.js"></script><script src="app.js"></script><script src="beta2.js"></script><script src="wallart.js"></script><script src="dd.js"></script>
+    <script src="vendor/battle-map-forge.js"></script><script src="layout-generator.js"></script><script src="generate.js"></script>
+    <script src="enhance.js"></script>
+    <script src="shell.js"></script><script src="kraken.js"></script>
+  </body>
+</html>

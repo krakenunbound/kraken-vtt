@@ -267,7 +267,9 @@ function isMap(record) {
   return list(image.layers?.layer).some((layer) => layer.occluders);
 }
 
-function fgModuleBundle(moduleName, { only, all = false, file = "" } = {}) {
+// picture(sceneId): the picture Map Studio painted for that image in this
+// campaign (its bytes, WebP), used in place of the book's.
+function fgModuleBundle(moduleName, { only, all = false, file = "", picture = () => null } = {}) {
   const module = readModule(moduleName, { only: new Set(["image"]) });
   // The book's own name (moduleName may be its file, as the shelf resolves it): scene ids, pins and the adventure go by the name.
   const label = String(module.info?.name || moduleName);
@@ -285,7 +287,12 @@ function fgModuleBundle(moduleName, { only, all = false, file = "" } = {}) {
     const id = `fg-${slug(label).slice(0, 16)}-${slug(record.name)}`.slice(0, 70);
     const made = imageScene(record, moduleName, id, label);
     if (!made) continue;
-    files[made.file] = new Uint8Array(made.bytes);
+    const painted = picture(id);
+    if (painted) {
+      made.file = made.file.replace(/\.[^./]+$/, "") + ".studio.webp";
+      made.scene.background = { ...made.scene.background, src: made.file };
+      files[made.file] = new Uint8Array(painted);
+    } else files[made.file] = new Uint8Array(made.bytes);
     scenes.push(made.scene);
     extras[id] = { pins: [...made.pins, ...made.texts], fx: made.fx, tiles: made.tiles, groups: made.groups, gridOffset: made.gridOffset, walls: made.scene.walls.length, lights: made.scene.lights.length, frame: { image: String(record.data.fgPath ?? "").replace(/@.*$/, ""), module: label, width: made.scene.width, height: made.scene.height } };
   }

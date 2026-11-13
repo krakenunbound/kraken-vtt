@@ -20,6 +20,8 @@ import { AdventureList, LibraryWindow, StoryWindow, type Kind as AdventureKind }
 import { NotesWindow, NoteWindow } from "../notes/Notes";
 import { BooksWindow, BookWindow, ImagesWindow, PictureWindow } from "../books/Books";
 import { ImagesList } from "../books/ImagesList";
+import { StudioWindow } from "../studio/StudioWindow";
+import { studioOpener } from "../table/imageWindow";
 import { Icon } from "./icons";
 import { sound } from "../sound/soundEngine";
 import { FloatingWindow, useWindows } from "./Windows";
@@ -228,6 +230,7 @@ export function Desktop({
         ...mapTool,
         { kind: "combat", label: "Combat", icon: "combat", title: "Combat Tracker", badge: combatBadge },
         { kind: "assistant", label: "Assistant", icon: "sparkle", title: "DM Assistant" },
+        { kind: "studio", label: "Map Studio", icon: "pen", title: "Map Studio" },
         { kind: "players", label: "Players", icon: "players", title: "Players" },
         { kind: "settings", label: "Settings", icon: "settings", title: "Settings" },
       ]
@@ -309,6 +312,16 @@ export function Desktop({
       windows.open("map", sceneName || "Map");
     }
   }, [mapOpenKey, sceneName]);
+  // Map Studio opened on an image (its page made by Kraken): one window, at that page.
+  useEffect(() => {
+    studioOpener.open = (url) => {
+      for (const item of windows.windows.filter((entry) => entry.kind === "studio" && entry.payload !== url)) windows.close(item.key);
+      windows.open("studio", "Map Studio", url);
+    };
+    return () => {
+      studioOpener.open = null;
+    };
+  });
   // The image window's map window closed by the GM: the image closes too.
   const mapWindowOpen = windows.windows.some((item) => item.kind === "map");
   const hadMapWindow = useRef(mapWindowOpen);
@@ -501,6 +514,7 @@ export function Desktop({
               {item.kind === "sheet" ? <CharacterPanel session={session} dock selected={item.payload ?? null} /> : null}
               {item.kind === "party" ? <PartySheet session={session} /> : null}
               {item.kind === "imagelist" && gm ? <ImagesList session={session} /> : null}
+              {item.kind === "studio" && gm ? <StudioWindow project={item.payload} /> : null}
               {item.kind === "cards" ? <CardsWindow session={session} characterId={item.payload} /> : null}
               {item.kind === "combat" ? <CombatTracker session={session} /> : null}
               {item.kind === "players" ? <PlayersWindow session={session} /> : null}

@@ -7,3 +7,6 @@ export type ImageRef = { book: string; name?: string; file?: string };
 export type ImageOpened = { opened: string; id: string; onTable: boolean };
 
 export const imageWindow: { open: ((image: ImageRef) => Promise<ImageOpened>) | null } = { open: null };
+
+// Map Studio's window, opened at a page Kraken made for an image (the desktop sets it).
+export const studioOpener: { open: ((url: string) => void) | null } = { open: null };

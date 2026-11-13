@@ -54,6 +54,9 @@ of use, and a built-in AI agent that can do anything the GM can.
   once, in Books > Packs. Copy the packs folder to any computer and your books
   open there in Kraken, with no Fantasy Grounds installed. Kraken's own books
   ship as packs too ([the format](docs/kraken-pack-format.md)).
+- **Map Studio, Kraken's map maker.** Paint maps from art packs, walls and
+  doors with art along them, lights, weather with masks, traps and regions,
+  a dungeon generator and play testing, saved straight into Kraken's images.
 - **Maps.** Image maps and animated tokens, square and hex grids, walls and doors,
   line of sight and fog, lights and darkness, weather, drawing, and a full map
   editor.
@@ -140,6 +143,9 @@ decides):
   tabletop, or offering it as a hosted service.
 
 For permission beyond the licence, open an issue on GitHub.
+
+Map Studio's art pack (Kraken Map Art) is original to Kraken; Battle Map
+Forge's generator and pack are included with its author's permission.
 
 The included games (Descending Darkness and Apeira Astra), their books, maps
 and art are original to Kraken. Some of Descending Darkness's mechanics are

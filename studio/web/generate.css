@@ -1,0 +1,6 @@
+#layoutDialog{width:560px}.layout-note{font-size:12px;line-height:1.5;color:#444;margin:10px 0}
+.layout-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 16px}.layout-grid label{display:flex;flex-direction:column;gap:3px;font-size:11px;color:#333}
+.layout-grid input,.layout-grid select{padding:5px;color:#222;background:#f7f6ef;border:1px solid #999;border-radius:2px;min-width:0}
+.layout-seed{display:flex;gap:4px}.layout-seed input{flex:1}.layout-seed button{background:#d3d0c3;color:#222;border-color:#999;padding:2px 8px}
+.layout-check{display:block;font-size:12px;margin:8px 0}.layout-actions{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:12px;padding-top:10px;border-top:1px solid #aaa}
+#layoutStatus{font-size:11px;color:#555}#layoutStatus.bad{color:#a53a2f}

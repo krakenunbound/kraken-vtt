@@ -358,7 +358,7 @@ function serveWeb(url, res, root) {
 // decals, wallpapers: the background decals and desktop tiles the GM can
 // choose from (decals.cjs).
 // sounds: the GM's sounds (sounds.cjs): one-shots, effects, ambience and music.
-function createTableServer({ saved = {}, onChange = () => undefined, webRoot = WEB_ROOT, art = null, decals = null, wallpapers = null, gmIcons = null, tiles = null, sounds = null, books = null, ruleset = "", accounts = null, prefs: prefsStore = null } = {}) {
+function createTableServer({ saved = {}, onChange = () => undefined, webRoot = WEB_ROOT, art = null, decals = null, wallpapers = null, gmIcons = null, tiles = null, sounds = null, books = null, ruleset = "", accounts = null, prefs: prefsStore = null, studioPicture = null } = {}) {
   // Each person's own settings (prefs.cjs): their colour and dice. Kept by the app for every campaign; in memory without a file.
   const prefs = prefsStore ?? createPrefsStore(null, diceLook);
   const prefsKey = (client) => (client.role === "dm" ? "@gm" : client.name);
@@ -872,7 +872,9 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         // One map (the Library's choice), or the module's maps.
         const one = String(url.searchParams.get("only") || "");
         const file = String(url.searchParams.get("file") || "").slice(0, 300);
-        const bundle = fgModuleBundle(wanted, file ? { file, all: true, ...(one ? { only: [one] } : {}) } : one ? { only: [one], all: true } : {});
+        // An image Map Studio painted shows its painted picture, wherever it is opened.
+        const picture = (id) => studioPicture?.(id) ?? null;
+        const bundle = fgModuleBundle(wanted, file ? { file, all: true, picture, ...(one ? { only: [one] } : {}) } : one ? { only: [one], all: true, picture } : { picture });
         for (const [id, extra] of Object.entries(bundle.extras)) map.seed(id, { ...extra, tiles: storeTiles(extra.tiles) });
         res.writeHead(200, { "Content-Type": "application/zip", "Content-Length": bundle.bytes.length, "Cache-Control": "no-store" });
         res.end(Buffer.from(bundle.bytes));

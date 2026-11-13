@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Icon } from "./ui/icons";
-import { imageWindow, type ImageRef } from "./table/imageWindow";
+import { imageWindow, studioOpener, type ImageRef } from "./table/imageWindow";
 import { gridLabel, preferredCandidateIndex, preferredSceneIndex } from "./foundry/geometry";
 import { withGrid } from "../shared/map/geometry.mjs";
 import { imageMime, inspectZip, PICTURE, pictureBundle, type ImportCandidate, type LoadedAdventure } from "./foundry/importBundle";
@@ -177,6 +177,12 @@ export function App() {
         if (command.action === "close") {
           live.current.closeImage();
           return { closed: true };
+        }
+        if (command.action === "studio") {
+          const open = live.current.prepNow;
+          if (!open) throw new Error("Open the image first (action open).");
+          await live.current.openInStudio(open.scene);
+          return { studio: open.scene.name };
         }
         if (command.action === "test") {
           current.playtest(Boolean(command.on));
@@ -364,6 +370,22 @@ export function App() {
     await session.publish(chosen, { prep: true });
     return { opened: chosen.name, id: chosen.id, onTable: false };
   }
+  // Map Studio on this image: its picture (as this window has it) and its master.
+  async function openInStudio(shown: MapScene) {
+    const kraken = window.kraken;
+    if (!kraken?.studioOpenImage) throw new Error("Map Studio runs in the Kraken VTT app.");
+    if (!shown.imageUrl) throw new Error("This map has no picture to paint on.");
+    const picture = new Uint8Array(await (await fetch(shown.imageUrl)).arrayBuffer());
+    const { url } = await kraken.studioOpenImage({ sceneId: shown.id, name: shown.name, picture });
+    studioOpener.open?.(url);
+  }
+  // Saved from Map Studio: the image open here is read again (its picture may be new).
+  useEffect(() => {
+    return window.kraken?.onStudioSaved?.((saved) => {
+      const open = live.current.prepNow;
+      if (open && open.scene.id === saved.sceneId && saved.picture) void live.current.openImage({ book: open.book, name: open.scene.name }).catch(() => undefined);
+    });
+  }, []);
   function closeImage() {
     session.prepClose();
     setPrep(null);
@@ -376,8 +398,8 @@ export function App() {
     setPrep(null);
     return { onTable: shown.name };
   }
-  const live = useRef({ openBytes, scenes, openImage, closeImage, playImage });
-  live.current = { openBytes, scenes, openImage, closeImage, playImage };
+  const live = useRef({ openBytes, scenes, openImage, closeImage, playImage, openInStudio, prepNow: prep });
+  live.current = { openBytes, scenes, openImage, closeImage, playImage, openInStudio, prepNow: prep };
   useEffect(() => {
     imageWindow.open = (image) => live.current.openImage(image);
     return () => {
@@ -432,6 +454,9 @@ export function App() {
           onClick={() => session.playtest(!testing)}
         >
           {testing ? "End play test" : "Play test"}
+        </button>
+        <button type="button" data-action="image-studio" title="Open it in Map Studio: paint art, walls, doors, lights and weather; Save to Kraken writes them into this image" onClick={() => void openInStudio(prep.scene).catch((caught: Error) => setError(caught.message))}>
+          Open in Map Studio
         </button>
         <button type="button" className="ghost" data-action="image-close" title="Close the image (back to the table's map)" onClick={closeImage}>
           Close

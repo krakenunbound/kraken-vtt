@@ -4,8 +4,21 @@ What changed in each release of Kraken VTT. Downloads are on the
 [Releases](https://github.com/krakenunbound/kraken-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
-## Next
+## 0.1.0-alpha.78: Map Studio, Kraken's map maker
 
+- **Map Studio is part of Kraken** (the pen along the top of the sidebar):
+  paint art from Kraken's art pack, Battle Map Forge's, and your own Fantasy
+  Grounds art packs and Dungeondraft packs; walls, doors and windows with art
+  along them; lights and time of day; weather with masks; traps and regions;
+  a dungeon generator; play testing.
+- **Open in Map Studio** on any image (its image window's bar) opens it with
+  its walls, doors, lights and weather. **Save to Kraken** writes them back
+  into the image, and what you painted becomes its picture, wherever the
+  image is opened. Opened again, it is as you left it.
+- **Settings > Map Studio art** (the GM's): point Map Studio at your own
+  Dungeondraft pack folders and art pack folders; nothing is assumed.
+- It makes maps for Kraken only: exporting to Fantasy Grounds or Foundry
+  stays with the stand-alone Map Studio.
 - **The map window comes to the front when it opens** (a map put on the
   table, an image opened from Images, a book or the Library), as Fantasy
   Grounds' image windows do; clicking another window brings that one forward.

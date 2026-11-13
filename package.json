@@ -2,7 +2,7 @@
   "name": "kraken-vtt",
   "private": true,
   "license": "PolyForm-Shield-1.0.0",
-  "version": "0.1.0-alpha.77",
+  "version": "0.1.0-alpha.78",
   "description": "A free virtual tabletop: the GM hosts, players join from a browser.",
   "author": "Kraken VTT",
   "type": "module",
@@ -32,6 +32,7 @@
     "quickslots-ui": "node scripts/verify-quickslots-ui.mjs",
     "rulesets-ui": "node scripts/verify-rulesets-ui.mjs",
     "image-window-ui": "node scripts/verify-image-window-ui.mjs",
+    "studio-ui": "node scripts/verify-studio-ui.mjs",
     "packs-ui": "node scripts/verify-packs-ui.mjs",
     "dnd35": "node scripts/check-dnd35.mjs",
     "dnd35-ui": "node scripts/verify-dnd35-ui.mjs",
@@ -112,6 +113,7 @@
     "fflate": "^0.8.2",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
+    "sharp": "^0.34.5",
     "three": "^0.170.0",
     "ws": "^8.22.1"
   },
@@ -153,7 +155,16 @@
       "node_modules/fengari-interop/**/*",
       "node_modules/readline-sync/**/*",
       "node_modules/sprintf-js/**/*",
-      "node_modules/tmp/**/*"
+      "node_modules/tmp/**/*",
+      "node_modules/sharp/**/*",
+      "node_modules/@img/**/*",
+      "node_modules/detect-libc/**/*",
+      "node_modules/semver/**/*",
+      "studio/**/*"
+    ],
+    "asarUnpack": [
+      "node_modules/sharp/**/*",
+      "node_modules/@img/**/*"
     ],
     "win": {
       "icon": "build/icon.ico",

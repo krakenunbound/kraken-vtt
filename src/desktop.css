@@ -1581,3 +1581,12 @@ textarea.cc-field.tall { min-height: 220px; }
 .image-bar button.on { border-color: var(--brass); color: var(--brass); box-shadow: 0 0 8px rgba(210, 161, 90, 0.35); }
 .image-unlock { display: inline-flex; align-items: center; gap: 5px; margin-left: 8px; padding: 2px 10px; font-size: 0.78rem; }
 .images-maps-only { display: flex; align-items: center; gap: 5px; font-size: 0.82rem; color: var(--muted); white-space: nowrap; }
+/* Map Studio, in a window of its own: its editor fills the window. */
+.studio-frame { display: block; width: 100%; height: 100%; border: 0; background: #0d1014; }
+[data-window="studio"] .window-body { padding: 0; overflow: hidden; }
+/* Settings > Map Studio art: the GM's folders of asset packs. */
+.studio-folder-list { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 4px 0; }
+.studio-folder-list b { min-width: 9rem; }
+.studio-folder { display: inline-flex; align-items: center; gap: 4px; padding: 2px 4px 2px 8px; border: 1px solid var(--panel-edge); border-radius: 6px; font-size: 0.8rem; }
+.studio-folder.missing { border-color: #a0443a; color: #e08a7a; }
+.studio-folder button { padding: 0 6px; border: 0; background: transparent; }

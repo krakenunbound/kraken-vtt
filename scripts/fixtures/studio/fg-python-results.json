@@ -1,0 +1,1704 @@
+{
+ "fg": {
+  "sources": {
+   "campaigns": [
+    {
+     "kind": "campaign",
+     "key": "Rich Campaign",
+     "name": "Rich Campaign"
+    },
+    {
+     "kind": "campaign",
+     "key": "Grid Campaign",
+     "name": "Grid Campaign"
+    },
+    {
+     "kind": "campaign",
+     "key": "Mask Campaign",
+     "name": "Mask Campaign"
+    },
+    {
+     "kind": "campaign",
+     "key": "Test Campaign",
+     "name": "Test Campaign"
+    }
+   ],
+   "modules": [
+    {
+     "kind": "module",
+     "key": "Folder Module",
+     "name": "Folder Module Shown"
+    },
+    {
+     "kind": "module",
+     "key": "Test Module.mod",
+     "name": "Test Module"
+    }
+   ],
+   "vaultPacks": 2,
+   "encryptedModules": 2
+  },
+  "maps": {
+   "campaign|Rich Campaign": {
+    "maps": [
+     {
+      "file": "db.xml",
+      "path": [
+       "image",
+       "category[Dungeons]",
+       "id-00003"
+      ],
+      "n": 0,
+      "name": "Crypt of Château",
+      "map": true
+     }
+    ],
+    "all": [
+     {
+      "file": "db.xml",
+      "path": [
+       "image",
+       "category[Dungeons]",
+       "id-00003"
+      ],
+      "n": 0,
+      "name": "Crypt of Château",
+      "map": true
+     },
+     {
+      "file": "db.xml",
+      "path": [
+       "image",
+       "category[Dungeons]",
+       "id-00004"
+      ],
+      "n": 0,
+      "name": "Handout",
+      "map": false
+     }
+    ],
+    "open": [
+     {
+      "ok": {
+       "version": 1,
+       "name": "Crypt of Château",
+       "width": 600,
+       "height": 300,
+       "grid": 70,
+       "peek": 0.3,
+       "gridOffset": {
+        "x": 62.5,
+        "y": 30
+       },
+       "fgGrid": {
+        "grid": 70,
+        "x": 62.5,
+        "y": 30
+       },
+       "background": "#000000",
+       "objects": [
+        {
+         "id": "fg-layer-0",
+         "assetId": "fg1ea8b0e2ec7edec12b04f7",
+         "name": "Floor",
+         "x": 0,
+         "y": 0,
+         "width": 600,
+         "height": 300,
+         "rotation": 0,
+         "visible": true,
+         "fgLayer": 0
+        },
+        {
+         "id": "fg-layer-1",
+         "assetId": "fgc0ea06b95a55e6784cd5ce",
+         "name": "Prop",
+         "x": 270.45000032790585,
+         "y": 152.1000001643626,
+         "width": 200.09999934418826,
+         "height": 100.29999967127478,
+         "rotation": -30.00000010841618,
+         "visible": false,
+         "fgLayer": 1
+        }
+       ],
+       "walls": [
+        {
+         "id": "fg-wall-0-0",
+         "type": "terrain",
+         "points": [
+          75,
+          225,
+          225,
+          225,
+          225,
+          75
+         ],
+         "flags": [
+          "toggleable",
+          "hidden",
+          "single_sided",
+          "terrain",
+          "allow_move",
+          "closed",
+          "counterclockwise"
+         ],
+         "extraFlags": [],
+         "fgLayer": 0,
+         "fgOcc": "0"
+        },
+        {
+         "id": "fg-wall-0-1",
+         "type": "pit",
+         "points": [
+          315,
+          135,
+          360,
+          135,
+          360,
+          90,
+          315,
+          90
+         ],
+         "flags": [
+          "toggleable",
+          "hidden",
+          "single_sided",
+          "pit",
+          "closed",
+          "counterclockwise"
+         ],
+         "extraFlags": [],
+         "fgLayer": 0,
+         "fgOcc": "1"
+        },
+        {
+         "id": "fg-wall-0-2",
+         "type": "secret",
+         "points": [
+          300,
+          150,
+          345,
+          150
+         ],
+         "flags": [
+          "toggleable",
+          "hidden"
+         ],
+         "extraFlags": [],
+         "fgLayer": 0,
+         "fgOcc": "2"
+        },
+        {
+         "id": "fg-wall-0-3",
+         "type": "door",
+         "points": [
+          300,
+          135,
+          345,
+          135
+         ],
+         "flags": [
+          "toggleable",
+          "open",
+          "locked"
+         ],
+         "extraFlags": [],
+         "fgLayer": 0,
+         "fgOcc": "3"
+        },
+        {
+         "id": "fg-wall-0-4",
+         "type": "illusion",
+         "points": [
+          300,
+          120,
+          345,
+          120
+         ],
+         "flags": [
+          "allow_move"
+         ],
+         "extraFlags": [],
+         "fgLayer": 0,
+         "fgOcc": "4"
+        },
+        {
+         "id": "fg-wall-0-5",
+         "type": "invisible",
+         "points": [
+          300,
+          105,
+          345,
+          105
+         ],
+         "flags": [
+          "allow_vision"
+         ],
+         "extraFlags": [],
+         "fgLayer": 0,
+         "fgOcc": "5"
+        },
+        {
+         "id": "fg-wall-0-6",
+         "type": "shadow",
+         "points": [
+          300,
+          90,
+          345,
+          90,
+          345,
+          60
+         ],
+         "flags": [
+          "shadow"
+         ],
+         "extraFlags": [
+          "weird_flag"
+         ],
+         "fgLayer": 0,
+         "fgOcc": "6"
+        }
+       ],
+       "lights": [
+        {
+         "id": "fg-light-0-0",
+         "x": 300,
+         "y": 150,
+         "fgLayer": 0,
+         "fgLight": "0",
+         "bright": 20,
+         "dim": 40,
+         "color": "#fff3e1",
+         "strength": 50,
+         "falloff": 75,
+         "dimFalloff": 50,
+         "animation": "flicker",
+         "speed": 25
+        },
+        {
+         "id": "fg-light-0-1",
+         "x": 375,
+         "y": 225,
+         "fgLayer": 0,
+         "fgLight": "1",
+         "bright": 15,
+         "dim": 15,
+         "color": "#000000",
+         "strength": 100,
+         "falloff": 25,
+         "dimFalloff": 50,
+         "inverse": true
+        },
+        {
+         "id": "fg-light-0-2",
+         "x": 210,
+         "y": 120,
+         "fgLayer": 0,
+         "fgLight": "2",
+         "bright": 10,
+         "dim": 20,
+         "color": "#ffaa00",
+         "strength": 100,
+         "falloff": 25,
+         "dimFalloff": 50,
+         "animation": "pulse",
+         "speed": 70,
+         "on": false
+        }
+       ],
+       "effects": [
+        {
+         "id": "fg-fx-3",
+         "type": "rain",
+         "name": "Rain",
+         "x": 0,
+         "y": 0,
+         "width": 600,
+         "height": 300,
+         "settings": {
+          "RainFade": 0.9,
+          "RainIntensity": 0.25,
+          "RainSpeed": 0.6,
+          "RainDirection": 0.5,
+          "maskblur": 20
+         },
+         "fgLayer": 3,
+         "mask": null,
+         "polygons": null
+        },
+        {
+         "id": "fg-fx-8",
+         "type": "snow",
+         "name": "Snow",
+         "x": 130,
+         "y": 90,
+         "width": 200,
+         "height": 200,
+         "settings": {
+          "SnowFade": 0.5
+         },
+         "fgLayer": 8,
+         "mask": {
+          "base": "none",
+          "ops": [
+           {
+            "op": "show",
+            "shape": "paths",
+            "paths": [
+             [
+              130,
+              90,
+              130,
+              290,
+              330,
+              290,
+              330,
+              90
+             ],
+             [
+              180,
+              140,
+              280,
+              140,
+              280,
+              240
+             ]
+            ]
+           }
+          ]
+         },
+         "polygons": [
+          [
+           130,
+           90,
+           130,
+           290,
+           330,
+           290,
+           330,
+           90
+          ],
+          [
+           180,
+           140,
+           280,
+           140,
+           280,
+           240
+          ]
+         ],
+         "visible": false
+        }
+       ],
+       "exportLayers": true,
+       "ambient": {
+        "preset": "moonlight",
+        "color": "#c9e7ff",
+        "alpha": 0.5686274509803921,
+        "shadows": true,
+        "shadowColor": "#195263",
+        "shadowAlpha": 0.4549019607843137,
+        "angle": 220,
+        "length": 0.6
+       },
+       "fgSource": {
+        "kind": "campaign",
+        "key": "Rich Campaign",
+        "file": "db.xml",
+        "path": [
+         "image",
+         "category[Dungeons]",
+         "id-00003"
+        ],
+        "n": 0,
+        "sourceName": "Rich Campaign",
+        "recordName": "Crypt of Château",
+        "grid": 70
+       },
+       "fgOrigin": [
+        -330,
+        190
+       ],
+       "fgImage": "<image type=\"image\">\n\t\t\t\t\t<grid>on</grid>\n\t\t\t\t\t<gridsize>70,70</gridsize>\n\t\t\t\t\t<gridoffset>12.5,-20</gridoffset>\n\t\t\t\t\t<uselos>on</uselos>\n\t\t\t\t\t<layers>\n\t\t\t\t\t\t<layer>\n\t\t\t\t\t\t\t<name>Floor</name>\n\t\t\t\t\t\t\t<id>0</id>\n\t\t\t\t\t\t\t<parentid>-7</parentid>\n\t\t\t\t\t\t\t<type>image</type>\n\t\t\t\t\t\t\t<bitmap>campaign/images/art.png</bitmap>\n\t\t\t\t\t\t\t<matrix>1.5,0,0,0,0,1.5,0,0,0,0,1,0,-30,40,0,1</matrix>\n\t\t\t\t\t\t\t<occluders>\n\t\t\t\t\t\t\t\t<occluder><id>0</id><points>-150,-50,-50,-50,-50,50</points><toggleable /><hidden /><single_sided /><terrain /><allow_move /><closed /><counterclockwise /></occluder>\n\t\t\t\t\t\t\t\t<occluder><id>1</id><points>10,10,40,10,40,40,10,40</points><toggleable /><hidden /><single_sided /><pit /><closed /><counterclockwise /></occluder>\n\t\t\t\t\t\t\t\t<occluder><id>2</id><points>0,0,30,0</points><toggleable /><hidden /></occluder>\n\t\t\t\t\t\t\t\t<occluder><id>3</id><points>0,10,30,10</points><toggleable /><open /><locked /></occluder>\n\t\t\t\t\t\t\t\t<occluder><id>4</id><points>0,20,30,20</points><allow_move /></occluder>\n\t\t\t\t\t\t\t\t<occluder><id>5</id><points>0,30,30,30</points><allow_vision /></occluder>\n\t\t\t\t\t\t\t\t<occluder><id>6</id><points>0,40,30,40,30,60</points><shadow /><weird_flag /></occluder>\n\t\t\t\t\t\t\t\t<occluder><id>7</id><points>5,5</points></occluder>\n\t\t\t\t\t\t\t</occluders>\n\t\t\t\t\t\t\t<lights>\n\t\t\t\t\t\t\t\t<light><id>0</id><position>0,0</position><range>4,0.75,8,0.5</range><color>#80FFF3E1</color><on /><animtype>1</animtype><animspeed>0.25</animspeed></light>\n\t\t\t\t\t\t\t\t<light><id>1</id><position>50,-50</position><range>3,0.25,3,0.5</range><color>#FF000000</color><on /><inverse /></light>\n\t\t\t\t\t\t\t\t<light><id>2</id><position>-60,20</position><range>2</range><color>#FFAA00</color><animtype>2</animtype><animspeed>0.7</animspeed><sound>wind</sound></light>\n\t\t\t\t\t\t\t</lights>\n\t\t\t\t\t\t</layer>\n\t\t\t\t\t\t<layer><name>Prop</name><id>1</id><parentid>-6</parentid><type>image</type><bitmap>images/photo.jpg@Test Module</bitmap><matrix>0.08660254,0.05,0,0,-0.05,0.08660254,0,0,0,0,1,0,40.5,-12.25,0,1</matrix><invisible /></layer>\n\t\t\t\t\t\t<layer><name>Missing</name><id>2</id><parentid>-5</parentid><type>image</type><bitmap>campaign/images/missing.png</bitmap></layer>\n\t\t\t\t\t\t<layer><name>Rain</name><id>3</id><parentid>-4</parentid><type>fx</type><fx><type>rain</type><RainFade>0.9</RainFade><RainIntensity>0.25</RainIntensity><RainSpeed>0.6</RainSpeed><RainDirection>0.5</RainDirection><maskblur>20</maskblur></fx></layer>\n\t\t\t\t\t\t<layer><name>Fire</name><id>4</id><parentid>-3</parentid><type>fx</type><fx><type>fire</type></fx></layer>\n\t\t\t\t\t\t<layer><name>Moved fog</name><id>5</id><parentid>-2</parentid><type>fx</type><fx><type>myst</type></fx><matrix>1,0,0,0,0,1,0,0,0,0,1,0,5,5,0,1</matrix></layer>\n\t\t\t\t\t\t<layer><name>Snow</name><id>8</id><parentid>-1</parentid><type>fx</type><invisible /><fx><type>snow</type><SnowFade>0.5</SnowFade><usemask /><mask><points>-200,100,-200,-100,0,-100,0,100</points><points>-150,50,-50,50,-50,-50</points><points>1,2</points></mask></fx></layer>\n\t\t\t\t\t\t<layer><name>Paint</name><id>7</id><parentid>-8</parentid><type>paint</type></layer>\n\t\t\t\t\t</layers>\n\t\t\t\t\t<peekthru>0.3</peekthru>\n\t\t\t\t\t<ambient><on /><ambientcolor>#91C9E7FF</ambientcolor><shadows /><shadowcolor>#74195263</shadowcolor><lightdir>0.6111111</lightdir><shadowlength>0.03</shadowlength></ambient>\n\t\t\t\t</image>",
+       "fgConverted": [
+        0,
+        1,
+        3,
+        8
+       ],
+       "fgHolders": [],
+       "fgKept": {
+        "image": 1,
+        "fx": 2,
+        "paint": 1
+       },
+       "fgUnreadableArt": 1
+      }
+     },
+     {
+      "ok": {
+       "version": 1,
+       "name": "Handout",
+       "width": 400,
+       "height": 200,
+       "grid": 50,
+       "peek": 0,
+       "gridOffset": {
+        "x": 0,
+        "y": 0
+       },
+       "fgGrid": {
+        "grid": 50,
+        "x": 0,
+        "y": 0
+       },
+       "background": "#000000",
+       "objects": [
+        {
+         "id": "fg-layer-0",
+         "assetId": "fg1ea8b0e2ec7edec12b04f7",
+         "name": "Portrait",
+         "x": 0,
+         "y": 0,
+         "width": 400,
+         "height": 200,
+         "rotation": 0,
+         "visible": true,
+         "fgLayer": 0
+        }
+       ],
+       "walls": [],
+       "lights": [],
+       "effects": [],
+       "exportLayers": true,
+       "fgSource": {
+        "kind": "campaign",
+        "key": "Rich Campaign",
+        "file": "db.xml",
+        "path": [
+         "image",
+         "category[Dungeons]",
+         "id-00004"
+        ],
+        "n": 0,
+        "sourceName": "Rich Campaign",
+        "recordName": "Handout",
+        "grid": 50
+       },
+       "fgOrigin": [
+        -200,
+        100
+       ],
+       "fgImage": "<image type=\"image\"><layers><layer><name>Portrait</name><id>0</id><parentid>-1</parentid><type>image</type><bitmap>campaign/images/art.png</bitmap></layer></layers></image>",
+       "fgConverted": [
+        0
+       ],
+       "fgHolders": [],
+       "fgKept": {},
+       "fgUnreadableArt": 0
+      }
+     }
+    ],
+    "thumbs": [
+     {
+      "ok": [
+       240,
+       120
+      ]
+     },
+     {
+      "ok": [
+       240,
+       120
+      ]
+     }
+    ]
+   },
+   "campaign|Grid Campaign": {
+    "maps": [
+     {
+      "file": "db.xml",
+      "path": [
+       "image",
+       "id-00001"
+      ],
+      "n": 0,
+      "name": "Test Map",
+      "map": true
+     }
+    ],
+    "all": [
+     {
+      "file": "db.xml",
+      "path": [
+       "image",
+       "id-00001"
+      ],
+      "n": 0,
+      "name": "Test Map",
+      "map": true
+     }
+    ],
+    "open": [
+     {
+      "ok": {
+       "version": 1,
+       "name": "Test Map",
+       "width": 400,
+       "height": 200,
+       "grid": 50,
+       "peek": 0,
+       "gridOffset": {
+        "x": 12.5,
+        "y": 30
+       },
+       "fgGrid": {
+        "grid": 50,
+        "x": 12.5,
+        "y": 30
+       },
+       "background": "#000000",
+       "objects": [
+        {
+         "id": "fg-layer-0",
+         "assetId": "fgf7b356ef29e6498d0db69a",
+         "name": "Art",
+         "x": 0,
+         "y": 0,
+         "width": 400,
+         "height": 200,
+         "rotation": 0,
+         "visible": true,
+         "fgLayer": 0
+        }
+       ],
+       "walls": [
+        {
+         "id": "fg-wall-0-0",
+         "type": "door",
+         "points": [
+          100,
+          100,
+          200,
+          100
+         ],
+         "flags": [
+          "toggleable"
+         ],
+         "extraFlags": [],
+         "fgLayer": 0,
+         "fgOcc": "0"
+        },
+        {
+         "id": "fg-wall-0-1",
+         "type": "window",
+         "points": [
+          200,
+          50,
+          250,
+          50
+         ],
+         "flags": [
+          "toggleable",
+          "allow_vision"
+         ],
+         "extraFlags": [],
+         "fgLayer": 0,
+         "fgOcc": "1"
+        },
+        {
+         "id": "fg-wall-1-0",
+         "type": "wall",
+         "points": [
+          50,
+          100,
+          150,
+          100,
+          150,
+          0,
+          50,
+          0
+         ],
+         "flags": [
+          "closed",
+          "counterclockwise",
+          "single_sided",
+          "locked"
+         ],
+         "extraFlags": [],
+         "fgLayer": 1,
+         "fgOcc": "0"
+        }
+       ],
+       "lights": [
+        {
+         "id": "fg-light-0-0",
+         "x": 210,
+         "y": 80,
+         "fgLayer": 0,
+         "fgLight": "0",
+         "bright": 10,
+         "dim": 20,
+         "color": "#ffaa44",
+         "strength": 50,
+         "falloff": 100,
+         "dimFalloff": 100
+        }
+       ],
+       "effects": [
+        {
+         "id": "fg-fx-2",
+         "type": "water",
+         "name": "Water",
+         "x": 0,
+         "y": -50,
+         "width": 100,
+         "height": 100,
+         "settings": {
+          "WaterSpeed": 0.6
+         },
+         "fgLayer": 2,
+         "mask": {
+          "base": "none",
+          "ops": [
+           {
+            "op": "show",
+            "shape": "paths",
+            "paths": [
+             [
+              0,
+              -50,
+              100,
+              -50,
+              100,
+              50,
+              0,
+              50
+             ]
+            ]
+           }
+          ]
+         },
+         "polygons": [
+          [
+           0,
+           -50,
+           100,
+           -50,
+           100,
+           50,
+           0,
+           50
+          ]
+         ]
+        },
+        {
+         "id": "fg-fx-3",
+         "type": "clouds",
+         "name": "Clouds",
+         "x": 0,
+         "y": 0,
+         "width": 400,
+         "height": 200,
+         "settings": {},
+         "fgLayer": 3,
+         "mask": null,
+         "polygons": null
+        }
+       ],
+       "exportLayers": true,
+       "fgSource": {
+        "kind": "campaign",
+        "key": "Grid Campaign",
+        "file": "db.xml",
+        "path": [
+         "image",
+         "id-00001"
+        ],
+        "n": 0,
+        "sourceName": "Grid Campaign",
+        "recordName": "Test Map",
+        "grid": 50
+       },
+       "fgOrigin": [
+        -100,
+        50
+       ],
+       "fgImage": "<image type=\"image\">\n\t\t\t\t<grid>on</grid><gridoffset>12.5,-20</gridoffset>\n\t\t\t\t<gridsize>50,50</gridsize>\n\t\t\t\t<layers>\n\t\t\t\t\t<layer><name>Art</name><id>0</id><parentid>-5</parentid><type>image</type><bitmap>campaign/images/art.png</bitmap><matrix>1,0,0,0,0,1,0,0,0,0,1,0,100,-50,0,1</matrix>\n\t\t\t\t\t\t<occluders><occluder><id>0</id><points>-100,0,0,0</points><toggleable /></occluder><occluder><id>1</id><points>0,50,50,50</points><toggleable /><allow_vision /></occluder></occluders>\n\t\t\t\t\t\t<lights><light><id>0</id><position>10,20</position><range>2,1,4,1</range><color>#80FFAA44</color><on /><animtype>flicker</animtype><animspeed>3</animspeed></light></lights>\n\t\t\t\t\t</layer>\n\t\t\t\t\t<layer><name>Walls</name><id>1</id><parentid>-4</parentid><type>image</type><bitmap />\n\t\t\t\t\t\t<occluders><occluder><id>0</id><points>-50,-50,50,-50,50,50,-50,50</points><closed /><counterclockwise /><single_sided /><locked /></occluder></occluders>\n\t\t\t\t\t</layer>\n\t\t\t\t\t<layer><name>Water</name><id>2</id><parentid>-3</parentid><type>fx</type><fx><type>water</type><WaterSpeed>0.6</WaterSpeed><usemask /><mask><points>-100,100,0,100,0,0,-100,0</points></mask></fx></layer>\n\t\t\t\t\t<layer><name>Clouds</name><id>3</id><parentid>-2</parentid><type>fx</type><fx><type>clouds</type></fx></layer>\n\t\t\t\t\t<layer><name>Labels</name><id>4</id><parentid>-1</parentid><type>folder</type></layer>\n\t\t\t\t\t<layer><name>1</name><id>5</id><parentid>4</parentid><type>text</type><displayText>1</displayText><matrix>1,0,0,0,0,1,0,0,0,0,1,0,7,8,0,1</matrix></layer>\n\t\t\t\t\t<layer><name>Pin</name><id>6</id><parentid>4</parentid><type>shortcut</type><shortcut><class>note</class></shortcut><matrix>1,0,0,0,0,1,0,0,0,0,1,0,-20,30,0,1</matrix></layer>\n\t\t\t\t</layers>\n\t\t\t</image>",
+       "fgConverted": [
+        0,
+        2,
+        3
+       ],
+       "fgHolders": [
+        1
+       ],
+       "fgKept": {
+        "folder": 1,
+        "text": 1,
+        "shortcut": 1
+       },
+       "fgUnreadableArt": 0
+      }
+     }
+    ],
+    "thumbs": [
+     {
+      "ok": [
+       240,
+       120
+      ]
+     }
+    ]
+   },
+   "campaign|Mask Campaign": {
+    "maps": [
+     {
+      "file": "db.xml",
+      "path": [
+       "image",
+       "id-00001"
+      ],
+      "n": 0,
+      "name": "Test Map",
+      "map": true
+     }
+    ],
+    "all": [
+     {
+      "file": "db.xml",
+      "path": [
+       "image",
+       "id-00001"
+      ],
+      "n": 0,
+      "name": "Test Map",
+      "map": true
+     }
+    ],
+    "open": [
+     {
+      "ok": {
+       "version": 1,
+       "name": "Test Map",
+       "width": 400,
+       "height": 200,
+       "grid": 50,
+       "peek": 0,
+       "gridOffset": {
+        "x": 0,
+        "y": 0
+       },
+       "fgGrid": {
+        "grid": 50,
+        "x": 0,
+        "y": 0
+       },
+       "background": "#000000",
+       "objects": [
+        {
+         "id": "fg-layer-0",
+         "assetId": "fg2e707624c524707e63971f",
+         "name": "Art",
+         "x": 0,
+         "y": 0,
+         "width": 400,
+         "height": 200,
+         "rotation": 0,
+         "visible": true,
+         "fgLayer": 0
+        }
+       ],
+       "walls": [
+        {
+         "id": "fg-wall-0-0",
+         "type": "door",
+         "points": [
+          100,
+          100,
+          200,
+          100
+         ],
+         "flags": [
+          "toggleable"
+         ],
+         "extraFlags": [],
+         "fgLayer": 0,
+         "fgOcc": "0"
+        },
+        {
+         "id": "fg-wall-0-1",
+         "type": "window",
+         "points": [
+          200,
+          50,
+          250,
+          50
+         ],
+         "flags": [
+          "toggleable",
+          "allow_vision"
+         ],
+         "extraFlags": [],
+         "fgLayer": 0,
+         "fgOcc": "1"
+        },
+        {
+         "id": "fg-wall-1-0",
+         "type": "wall",
+         "points": [
+          50,
+          100,
+          150,
+          100,
+          150,
+          0,
+          50,
+          0
+         ],
+         "flags": [
+          "closed",
+          "counterclockwise",
+          "single_sided",
+          "locked"
+         ],
+         "extraFlags": [],
+         "fgLayer": 1,
+         "fgOcc": "0"
+        }
+       ],
+       "lights": [
+        {
+         "id": "fg-light-0-0",
+         "x": 210,
+         "y": 80,
+         "fgLayer": 0,
+         "fgLight": "0",
+         "bright": 10,
+         "dim": 20,
+         "color": "#ffaa44",
+         "strength": 50,
+         "falloff": 100,
+         "dimFalloff": 100
+        }
+       ],
+       "effects": [
+        {
+         "id": "fg-fx-2",
+         "type": "water",
+         "name": "Water",
+         "x": -50,
+         "y": -100,
+         "width": 200,
+         "height": 200,
+         "settings": {
+          "WaterSpeed": 0.6
+         },
+         "fgLayer": 2,
+         "mask": {
+          "base": "none",
+          "ops": [
+           {
+            "op": "show",
+            "shape": "paths",
+            "paths": [
+             [
+              -50,
+              -100,
+              -50,
+              100,
+              150,
+              100,
+              150,
+              -100
+             ],
+             [
+              0,
+              -50,
+              100,
+              -50,
+              100,
+              50,
+              0,
+              50
+             ]
+            ]
+           }
+          ]
+         },
+         "polygons": [
+          [
+           -50,
+           -100,
+           -50,
+           100,
+           150,
+           100,
+           150,
+           -100
+          ],
+          [
+           0,
+           -50,
+           100,
+           -50,
+           100,
+           50,
+           0,
+           50
+          ]
+         ]
+        },
+        {
+         "id": "fg-fx-3",
+         "type": "clouds",
+         "name": "Clouds",
+         "x": 0,
+         "y": 0,
+         "width": 400,
+         "height": 200,
+         "settings": {},
+         "fgLayer": 3,
+         "mask": null,
+         "polygons": null
+        }
+       ],
+       "exportLayers": true,
+       "fgSource": {
+        "kind": "campaign",
+        "key": "Mask Campaign",
+        "file": "db.xml",
+        "path": [
+         "image",
+         "id-00001"
+        ],
+        "n": 0,
+        "sourceName": "Mask Campaign",
+        "recordName": "Test Map",
+        "grid": 50
+       },
+       "fgOrigin": [
+        -100,
+        50
+       ],
+       "fgImage": "<image type=\"image\">\n\t\t\t\t<grid>on</grid>\n\t\t\t\t<gridsize>50,50</gridsize>\n\t\t\t\t<layers>\n\t\t\t\t\t<layer><name>Art</name><id>0</id><parentid>-5</parentid><type>image</type><bitmap>campaign/images/art.png</bitmap><matrix>1,0,0,0,0,1,0,0,0,0,1,0,100,-50,0,1</matrix>\n\t\t\t\t\t\t<occluders><occluder><id>0</id><points>-100,0,0,0</points><toggleable /></occluder><occluder><id>1</id><points>0,50,50,50</points><toggleable /><allow_vision /></occluder></occluders>\n\t\t\t\t\t\t<lights><light><id>0</id><position>10,20</position><range>2,1,4,1</range><color>#80FFAA44</color><on /><animtype>flicker</animtype><animspeed>3</animspeed></light></lights>\n\t\t\t\t\t</layer>\n\t\t\t\t\t<layer><name>Walls</name><id>1</id><parentid>-4</parentid><type>image</type><bitmap />\n\t\t\t\t\t\t<occluders><occluder><id>0</id><points>-50,-50,50,-50,50,50,-50,50</points><closed /><counterclockwise /><single_sided /><locked /></occluder></occluders>\n\t\t\t\t\t</layer>\n\t\t\t\t\t<layer><name>Water</name><id>2</id><parentid>-3</parentid><type>fx</type><fx><type>water</type><WaterSpeed>0.6</WaterSpeed><usemask /><mask><points>-150,150,-150,-50,50,-50,50,150</points><points>-100,100,0,100,0,0,-100,0</points></mask></fx></layer>\n\t\t\t\t\t<layer><name>Clouds</name><id>3</id><parentid>-2</parentid><type>fx</type><fx><type>clouds</type></fx></layer>\n\t\t\t\t\t<layer><name>Labels</name><id>4</id><parentid>-1</parentid><type>folder</type></layer>\n\t\t\t\t\t<layer><name>1</name><id>5</id><parentid>4</parentid><type>text</type><displayText>1</displayText><matrix>1,0,0,0,0,1,0,0,0,0,1,0,7,8,0,1</matrix></layer>\n\t\t\t\t\t<layer><name>Pin</name><id>6</id><parentid>4</parentid><type>shortcut</type><shortcut><class>note</class></shortcut><matrix>1,0,0,0,0,1,0,0,0,0,1,0,-20,30,0,1</matrix></layer>\n\t\t\t\t</layers>\n\t\t\t</image>",
+       "fgConverted": [
+        0,
+        2,
+        3
+       ],
+       "fgHolders": [
+        1
+       ],
+       "fgKept": {
+        "folder": 1,
+        "text": 1,
+        "shortcut": 1
+       },
+       "fgUnreadableArt": 0
+      }
+     }
+    ],
+    "thumbs": [
+     {
+      "ok": [
+       240,
+       120
+      ]
+     }
+    ]
+   },
+   "campaign|Test Campaign": {
+    "maps": [
+     {
+      "file": "db.xml",
+      "path": [
+       "image",
+       "id-00001"
+      ],
+      "n": 0,
+      "name": "Test Map",
+      "map": true
+     }
+    ],
+    "all": [
+     {
+      "file": "db.xml",
+      "path": [
+       "image",
+       "id-00001"
+      ],
+      "n": 0,
+      "name": "Test Map",
+      "map": true
+     }
+    ],
+    "open": [
+     {
+      "ok": {
+       "version": 1,
+       "name": "Test Map",
+       "width": 400,
+       "height": 200,
+       "grid": 50,
+       "peek": 0,
+       "gridOffset": {
+        "x": 0,
+        "y": 0
+       },
+       "fgGrid": {
+        "grid": 50,
+        "x": 0,
+        "y": 0
+       },
+       "background": "#000000",
+       "objects": [
+        {
+         "id": "fg-layer-0",
+         "assetId": "fgbb1b4663ea7216e1480728",
+         "name": "Art",
+         "x": 0,
+         "y": 0,
+         "width": 400,
+         "height": 200,
+         "rotation": 0,
+         "visible": true,
+         "fgLayer": 0
+        }
+       ],
+       "walls": [
+        {
+         "id": "fg-wall-0-0",
+         "type": "door",
+         "points": [
+          100,
+          100,
+          200,
+          100
+         ],
+         "flags": [
+          "toggleable"
+         ],
+         "extraFlags": [],
+         "fgLayer": 0,
+         "fgOcc": "0"
+        },
+        {
+         "id": "fg-wall-0-1",
+         "type": "window",
+         "points": [
+          200,
+          50,
+          250,
+          50
+         ],
+         "flags": [
+          "toggleable",
+          "allow_vision"
+         ],
+         "extraFlags": [],
+         "fgLayer": 0,
+         "fgOcc": "1"
+        },
+        {
+         "id": "fg-wall-1-0",
+         "type": "wall",
+         "points": [
+          50,
+          100,
+          150,
+          100,
+          150,
+          0,
+          50,
+          0
+         ],
+         "flags": [
+          "closed",
+          "counterclockwise",
+          "single_sided",
+          "locked"
+         ],
+         "extraFlags": [],
+         "fgLayer": 1,
+         "fgOcc": "0"
+        }
+       ],
+       "lights": [
+        {
+         "id": "fg-light-0-0",
+         "x": 210,
+         "y": 80,
+         "fgLayer": 0,
+         "fgLight": "0",
+         "bright": 10,
+         "dim": 20,
+         "color": "#ffaa44",
+         "strength": 50,
+         "falloff": 100,
+         "dimFalloff": 100
+        }
+       ],
+       "effects": [
+        {
+         "id": "fg-fx-2",
+         "type": "water",
+         "name": "Water",
+         "x": 0,
+         "y": -50,
+         "width": 100,
+         "height": 100,
+         "settings": {
+          "WaterSpeed": 0.6
+         },
+         "fgLayer": 2,
+         "mask": {
+          "base": "none",
+          "ops": [
+           {
+            "op": "show",
+            "shape": "paths",
+            "paths": [
+             [
+              0,
+              -50,
+              100,
+              -50,
+              100,
+              50,
+              0,
+              50
+             ]
+            ]
+           }
+          ]
+         },
+         "polygons": [
+          [
+           0,
+           -50,
+           100,
+           -50,
+           100,
+           50,
+           0,
+           50
+          ]
+         ]
+        },
+        {
+         "id": "fg-fx-3",
+         "type": "clouds",
+         "name": "Clouds",
+         "x": 0,
+         "y": 0,
+         "width": 400,
+         "height": 200,
+         "settings": {},
+         "fgLayer": 3,
+         "mask": null,
+         "polygons": null
+        }
+       ],
+       "exportLayers": true,
+       "fgSource": {
+        "kind": "campaign",
+        "key": "Test Campaign",
+        "file": "db.xml",
+        "path": [
+         "image",
+         "id-00001"
+        ],
+        "n": 0,
+        "sourceName": "Test Campaign",
+        "recordName": "Test Map",
+        "grid": 50
+       },
+       "fgOrigin": [
+        -100,
+        50
+       ],
+       "fgImage": "<image type=\"image\">\n\t\t\t\t<grid>on</grid>\n\t\t\t\t<gridsize>50,50</gridsize>\n\t\t\t\t<layers>\n\t\t\t\t\t<layer><name>Art</name><id>0</id><parentid>-5</parentid><type>image</type><bitmap>campaign/images/art.png</bitmap><matrix>1,0,0,0,0,1,0,0,0,0,1,0,100,-50,0,1</matrix>\n\t\t\t\t\t\t<occluders><occluder><id>0</id><points>-100,0,0,0</points><toggleable /></occluder><occluder><id>1</id><points>0,50,50,50</points><toggleable /><allow_vision /></occluder></occluders>\n\t\t\t\t\t\t<lights><light><id>0</id><position>10,20</position><range>2,1,4,1</range><color>#80FFAA44</color><on /><animtype>flicker</animtype><animspeed>3</animspeed></light></lights>\n\t\t\t\t\t</layer>\n\t\t\t\t\t<layer><name>Walls</name><id>1</id><parentid>-4</parentid><type>image</type><bitmap />\n\t\t\t\t\t\t<occluders><occluder><id>0</id><points>-50,-50,50,-50,50,50,-50,50</points><closed /><counterclockwise /><single_sided /><locked /></occluder></occluders>\n\t\t\t\t\t</layer>\n\t\t\t\t\t<layer><name>Water</name><id>2</id><parentid>-3</parentid><type>fx</type><fx><type>water</type><WaterSpeed>0.6</WaterSpeed><usemask /><mask><points>-100,100,0,100,0,0,-100,0</points></mask></fx></layer>\n\t\t\t\t\t<layer><name>Clouds</name><id>3</id><parentid>-2</parentid><type>fx</type><fx><type>clouds</type></fx></layer>\n\t\t\t\t\t<layer><name>Labels</name><id>4</id><parentid>-1</parentid><type>folder</type></layer>\n\t\t\t\t\t<layer><name>1</name><id>5</id><parentid>4</parentid><type>text</type><displayText>1</displayText><matrix>1,0,0,0,0,1,0,0,0,0,1,0,7,8,0,1</matrix></layer>\n\t\t\t\t\t<layer><name>Pin</name><id>6</id><parentid>4</parentid><type>shortcut</type><shortcut><class>note</class></shortcut><matrix>1,0,0,0,0,1,0,0,0,0,1,0,-20,30,0,1</matrix></layer>\n\t\t\t\t</layers>\n\t\t\t</image>",
+       "fgConverted": [
+        0,
+        2,
+        3
+       ],
+       "fgHolders": [
+        1
+       ],
+       "fgKept": {
+        "folder": 1,
+        "text": 1,
+        "shortcut": 1
+       },
+       "fgUnreadableArt": 0
+      }
+     }
+    ],
+    "thumbs": [
+     {
+      "ok": [
+       240,
+       120
+      ]
+     }
+    ]
+   },
+   "module|Folder Module": {
+    "maps": [
+     {
+      "file": "db.xml",
+      "path": [
+       "image",
+       "map-1"
+      ],
+      "n": 0,
+      "name": "Folder Map",
+      "map": true
+     },
+     {
+      "file": "client.xml",
+      "path": [
+       "image",
+       "map-1"
+      ],
+      "n": 0,
+      "name": "Player Map",
+      "map": true
+     }
+    ],
+    "all": [
+     {
+      "file": "db.xml",
+      "path": [
+       "image",
+       "map-1"
+      ],
+      "n": 0,
+      "name": "Folder Map",
+      "map": true
+     },
+     {
+      "file": "client.xml",
+      "path": [
+       "image",
+       "map-1"
+      ],
+      "n": 0,
+      "name": "Player Map",
+      "map": true
+     }
+    ],
+    "open": [
+     {
+      "ok": {
+       "version": 1,
+       "name": "Folder Map",
+       "width": 400,
+       "height": 200,
+       "grid": 50,
+       "peek": 0,
+       "gridOffset": {
+        "x": 0,
+        "y": 0
+       },
+       "fgGrid": {
+        "grid": 50,
+        "x": 0,
+        "y": 0
+       },
+       "background": "#000000",
+       "objects": [
+        {
+         "id": "fg-layer-0",
+         "assetId": "fg892abdbf9cfe00452d7599",
+         "name": "Ground",
+         "x": 0,
+         "y": 0,
+         "width": 400,
+         "height": 200,
+         "rotation": 0,
+         "visible": true,
+         "fgLayer": 0
+        }
+       ],
+       "walls": [
+        {
+         "id": "fg-wall-0-0",
+         "type": "wall",
+         "points": [
+          0,
+          100,
+          400,
+          100
+         ],
+         "flags": [],
+         "extraFlags": [],
+         "fgLayer": 0,
+         "fgOcc": "0"
+        }
+       ],
+       "lights": [],
+       "effects": [],
+       "exportLayers": true,
+       "fgSource": {
+        "kind": "module",
+        "key": "Folder Module",
+        "file": "db.xml",
+        "path": [
+         "image",
+         "map-1"
+        ],
+        "n": 0,
+        "sourceName": "Folder Module Shown",
+        "recordName": "Folder Map",
+        "grid": 50
+       },
+       "fgOrigin": [
+        -200,
+        100
+       ],
+       "fgImage": "<image type=\"image\">\n\t\t\t\t<layers>\n\t\t\t\t\t<layer><name>Ground</name><id>0</id><parentid>-1</parentid><type>image</type><bitmap>images/art.png</bitmap><occluders><occluder><id>0</id><points>-200,0,200,0</points></occluder></occluders></layer>\n\t\t\t\t</layers>\n\t\t\t</image>",
+       "fgConverted": [
+        0
+       ],
+       "fgHolders": [],
+       "fgKept": {},
+       "fgUnreadableArt": 0
+      }
+     },
+     {
+      "ok": {
+       "version": 1,
+       "name": "Player Map",
+       "width": 2002,
+       "height": 1004,
+       "grid": 40,
+       "peek": 0,
+       "gridOffset": {
+        "x": 1,
+        "y": 22
+       },
+       "fgGrid": {
+        "grid": 40,
+        "x": 1,
+        "y": 22
+       },
+       "background": "#000000",
+       "objects": [
+        {
+         "id": "fg-layer-0",
+         "assetId": "fgc1a75d0e856371598c0026",
+         "name": "Ground",
+         "x": 0.5,
+         "y": 0.5,
+         "width": 2001,
+         "height": 1003,
+         "rotation": 0,
+         "visible": true,
+         "fgLayer": 0
+        }
+       ],
+       "walls": [],
+       "lights": [],
+       "effects": [],
+       "exportLayers": true,
+       "fgSource": {
+        "kind": "module",
+        "key": "Folder Module",
+        "file": "client.xml",
+        "path": [
+         "image",
+         "map-1"
+        ],
+        "n": 0,
+        "sourceName": "Folder Module Shown",
+        "recordName": "Player Map",
+        "grid": 40
+       },
+       "fgOrigin": [
+        -1001,
+        502
+       ],
+       "fgImage": "<image type=\"image\">\n\t\t\t\t<gridsize>40</gridsize><layers>\n\t\t\t\t\t<layer><name>Ground</name><id>0</id><parentid>-1</parentid><type>image</type><bitmap>images/photo.jpg@Test Module</bitmap></layer>\n\t\t\t\t</layers>\n\t\t\t</image>",
+       "fgConverted": [
+        0
+       ],
+       "fgHolders": [],
+       "fgKept": {},
+       "fgUnreadableArt": 0
+      }
+     }
+    ],
+    "thumbs": [
+     {
+      "ok": [
+       240,
+       120
+      ]
+     },
+     {
+      "ok": [
+       240,
+       120
+      ]
+     }
+    ]
+   },
+   "module|Test Module.mod": {
+    "maps": [
+     {
+      "file": "db.xml",
+      "path": [
+       "image",
+       "id-00001"
+      ],
+      "n": 0,
+      "name": "Test Map",
+      "map": true
+     }
+    ],
+    "all": [
+     {
+      "file": "db.xml",
+      "path": [
+       "image",
+       "id-00001"
+      ],
+      "n": 0,
+      "name": "Test Map",
+      "map": true
+     }
+    ],
+    "open": [
+     {
+      "ok": {
+       "version": 1,
+       "name": "Test Map",
+       "width": 400,
+       "height": 200,
+       "grid": 50,
+       "peek": 0,
+       "gridOffset": {
+        "x": 0,
+        "y": 0
+       },
+       "fgGrid": {
+        "grid": 50,
+        "x": 0,
+        "y": 0
+       },
+       "background": "#000000",
+       "objects": [
+        {
+         "id": "fg-layer-0",
+         "assetId": "fgba9413d16747d292ba7f56",
+         "name": "Art",
+         "x": 0,
+         "y": 0,
+         "width": 400,
+         "height": 200,
+         "rotation": 0,
+         "visible": true,
+         "fgLayer": 0
+        }
+       ],
+       "walls": [
+        {
+         "id": "fg-wall-0-0",
+         "type": "door",
+         "points": [
+          100,
+          100,
+          200,
+          100
+         ],
+         "flags": [
+          "toggleable"
+         ],
+         "extraFlags": [],
+         "fgLayer": 0,
+         "fgOcc": "0"
+        },
+        {
+         "id": "fg-wall-0-1",
+         "type": "window",
+         "points": [
+          200,
+          50,
+          250,
+          50
+         ],
+         "flags": [
+          "toggleable",
+          "allow_vision"
+         ],
+         "extraFlags": [],
+         "fgLayer": 0,
+         "fgOcc": "1"
+        },
+        {
+         "id": "fg-wall-1-0",
+         "type": "wall",
+         "points": [
+          50,
+          100,
+          150,
+          100,
+          150,
+          0,
+          50,
+          0
+         ],
+         "flags": [
+          "closed",
+          "counterclockwise",
+          "single_sided",
+          "locked"
+         ],
+         "extraFlags": [],
+         "fgLayer": 1,
+         "fgOcc": "0"
+        }
+       ],
+       "lights": [
+        {
+         "id": "fg-light-0-0",
+         "x": 210,
+         "y": 80,
+         "fgLayer": 0,
+         "fgLight": "0",
+         "bright": 10,
+         "dim": 20,
+         "color": "#ffaa44",
+         "strength": 50,
+         "falloff": 100,
+         "dimFalloff": 100
+        }
+       ],
+       "effects": [
+        {
+         "id": "fg-fx-2",
+         "type": "water",
+         "name": "Water",
+         "x": 0,
+         "y": -50,
+         "width": 100,
+         "height": 100,
+         "settings": {
+          "WaterSpeed": 0.6
+         },
+         "fgLayer": 2,
+         "mask": {
+          "base": "none",
+          "ops": [
+           {
+            "op": "show",
+            "shape": "paths",
+            "paths": [
+             [
+              0,
+              -50,
+              100,
+              -50,
+              100,
+              50,
+              0,
+              50
+             ]
+            ]
+           }
+          ]
+         },
+         "polygons": [
+          [
+           0,
+           -50,
+           100,
+           -50,
+           100,
+           50,
+           0,
+           50
+          ]
+         ]
+        },
+        {
+         "id": "fg-fx-3",
+         "type": "clouds",
+         "name": "Clouds",
+         "x": 0,
+         "y": 0,
+         "width": 400,
+         "height": 200,
+         "settings": {},
+         "fgLayer": 3,
+         "mask": null,
+         "polygons": null
+        }
+       ],
+       "exportLayers": true,
+       "fgSource": {
+        "kind": "module",
+        "key": "Test Module.mod",
+        "file": "db.xml",
+        "path": [
+         "image",
+         "id-00001"
+        ],
+        "n": 0,
+        "sourceName": "Test Module",
+        "recordName": "Test Map",
+        "grid": 50
+       },
+       "fgOrigin": [
+        -100,
+        50
+       ],
+       "fgImage": "<image type=\"image\">\n\t\t\t\t<grid>on</grid>\n\t\t\t\t<gridsize>50,50</gridsize>\n\t\t\t\t<layers>\n\t\t\t\t\t<layer><name>Art</name><id>0</id><parentid>-5</parentid><type>image</type><bitmap>images/art.png</bitmap><matrix>1,0,0,0,0,1,0,0,0,0,1,0,100,-50,0,1</matrix>\n\t\t\t\t\t\t<occluders><occluder><id>0</id><points>-100,0,0,0</points><toggleable /></occluder><occluder><id>1</id><points>0,50,50,50</points><toggleable /><allow_vision /></occluder></occluders>\n\t\t\t\t\t\t<lights><light><id>0</id><position>10,20</position><range>2,1,4,1</range><color>#80FFAA44</color><on /><animtype>flicker</animtype><animspeed>3</animspeed></light></lights>\n\t\t\t\t\t</layer>\n\t\t\t\t\t<layer><name>Walls</name><id>1</id><parentid>-4</parentid><type>image</type><bitmap />\n\t\t\t\t\t\t<occluders><occluder><id>0</id><points>-50,-50,50,-50,50,50,-50,50</points><closed /><counterclockwise /><single_sided /><locked /></occluder></occluders>\n\t\t\t\t\t</layer>\n\t\t\t\t\t<layer><name>Water</name><id>2</id><parentid>-3</parentid><type>fx</type><fx><type>water</type><WaterSpeed>0.6</WaterSpeed><usemask /><mask><points>-100,100,0,100,0,0,-100,0</points></mask></fx></layer>\n\t\t\t\t\t<layer><name>Clouds</name><id>3</id><parentid>-2</parentid><type>fx</type><fx><type>clouds</type></fx></layer>\n\t\t\t\t\t<layer><name>Labels</name><id>4</id><parentid>-1</parentid><type>folder</type></layer>\n\t\t\t\t\t<layer><name>1</name><id>5</id><parentid>4</parentid><type>text</type><displayText>1</displayText><matrix>1,0,0,0,0,1,0,0,0,0,1,0,7,8,0,1</matrix></layer>\n\t\t\t\t\t<layer><name>Pin</name><id>6</id><parentid>4</parentid><type>shortcut</type><shortcut><class>note</class></shortcut><matrix>1,0,0,0,0,1,0,0,0,0,1,0,-20,30,0,1</matrix></layer>\n\t\t\t\t</layers>\n\t\t\t</image>",
+       "fgConverted": [
+        0,
+        2,
+        3
+       ],
+       "fgHolders": [
+        1
+       ],
+       "fgKept": {
+        "folder": 1,
+        "text": 1,
+        "shortcut": 1
+       },
+       "fgUnreadableArt": 0
+      }
+     }
+    ],
+    "thumbs": [
+     {
+      "ok": [
+       240,
+       120
+      ]
+     }
+    ]
+   },
+   "bad|campaign|Nope": {
+    "error": "Campaign not found: Nope"
+   },
+   "bad|campaign|../x": {
+    "error": "Invalid campaign or module name."
+   },
+   "bad|module|Locked.mod": {
+    "error": "This module is encrypted by FG and cannot be opened."
+   },
+   "bad|module|Broken.mod": {
+    "error": "Module not found: Broken.mod"
+   },
+   "bad|other|x": {
+    "error": "Unknown source type."
+   }
+  }
+ }
+}

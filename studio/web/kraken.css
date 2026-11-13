@@ -1,0 +1,4 @@
+/* Map Studio inside Kraken VTT: maps made for Kraken, so what only served
+   Fantasy Grounds (its subscription vault, art kept as FG layers) is not shown. */
+#subscriptionBtn,
+.export-setting { display: none !important; }

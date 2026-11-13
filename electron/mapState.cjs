@@ -336,7 +336,11 @@ function savedMap(value) {
   // The characters that have had a token on each scene (a player cannot take
   // theirs off and put it back somewhere else: the GM places it again).
   const entered = {};
-  if (!value || typeof value !== "object") return { tokens, doors, sight, locked, settings, lights, drawings, walls, masks, labels, groups, fx, tiles, frames, entered };
+  // Map Studio's project for an image (its editor's own record, kept so the
+  // next open is exact) and the picture it painted (a file kept beside the
+  // campaign: its name and version), by scene id.
+  const studio = value && typeof value === "object" && value.studio && typeof value.studio === "object" ? Object.fromEntries(Object.entries(value.studio).slice(0, 500).filter(([, item]) => item && typeof item === "object")) : {};
+  if (!value || typeof value !== "object") return { tokens, doors, sight, locked, settings, lights, drawings, walls, masks, labels, groups, fx, tiles, frames, entered, studio };
   for (const [sceneId, list] of Object.entries(value.entered ?? {}).slice(0, 500)) if (Array.isArray(list)) entered[sceneId.slice(0, 80)] = list.map((id) => text(id, "").slice(0, 160)).filter(Boolean).slice(0, 1000);
   for (const [sceneId, list] of Object.entries(value.tiles ?? {}).slice(0, 500)) if (Array.isArray(list)) tiles[sceneId.slice(0, 80)] = list.map(cleanTile).filter(Boolean).slice(0, MAX_TILES);
   for (const [sceneId, list] of Object.entries(value.fx ?? {}).slice(0, 500)) if (Array.isArray(list)) fx[sceneId.slice(0, 80)] = list.map(cleanFx).filter(Boolean).slice(0, 20);
@@ -367,7 +371,7 @@ function savedMap(value) {
   for (const [sceneId, list] of Object.entries(value.drawings ?? {}).slice(0, 500)) {
     if (Array.isArray(list)) drawings[sceneId.slice(0, 80)] = list.map(cleanDrawing).filter(Boolean).slice(-MAX_DRAWINGS);
   }
-  return { tokens, doors, sight, locked, settings, lights, drawings, walls, masks, labels, groups, fx, tiles, frames, entered };
+  return { tokens, doors, sight, locked, settings, lights, drawings, walls, masks, labels, groups, fx, tiles, frames, entered, studio };
 }
 const MAX_DRAWINGS = 400;
 const MAX_PLAYER_DRAWINGS = 60;
@@ -382,6 +386,9 @@ function presetLight(name, profiles = []) {
   const preset = geometry.LIGHT_PRESETS[key];
   return preset ? cleanCarried({ name: preset.name, bright: preset.bright * 5, dim: preset.dim * 5, color: preset.color }) : null;
 }
+
+// Walls an image may hold from Map Studio (FG maps run to many thousands of segments).
+const MAX_WALLS_STUDIO = 20000;
 
 function createMapState({ saved, records, onChange = () => undefined, hasArt = () => false, hasPicture = () => false, artFor = () => null, hasTile = () => true, combatFor = () => null, activeRecord = () => null, sharedWith = null }) {
   // One master per map: a second state (the GM's private image window) works on
@@ -1080,6 +1087,27 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
     },
     // Walls (the GM's map editor): drawn as chains of segments, changed, removed, undone.
     walls: () => wallsHere(),
+    // Map Studio (electron/studio/krakenBridge.cjs): the open image's master as
+    // the editor needs it, and the editor's work written back into it. The
+    // walls, lights and weather replace the image's own; tokens, labels, paint
+    // and image layers made in Kraken stay.
+    studioView() {
+      if (!scene) return null;
+      return { scene, walls: wallsHere(), lights: lightsHere(), fx: fxHere(), studio: state.studio[scene.id] ?? null };
+    },
+    fromStudio({ walls = [], lights = [], fx = [], project = null, picture = null }) {
+      if (!scene) throw new Error("No scene is open.");
+      state.walls[scene.id] = walls.map(cleanWall).filter(Boolean).slice(0, MAX_WALLS_STUDIO);
+      state.lights[scene.id] = lights.map(cleanLight).filter(Boolean).slice(0, 500);
+      state.fx[scene.id] = fx.map(cleanFx).filter(Boolean).slice(0, 20);
+      const before = state.studio[scene.id] ?? {};
+      state.studio[scene.id] = { project, picture: picture ?? before.picture ?? null, saved: Date.now() };
+      liveScene();
+      changed();
+      return { walls: state.walls[scene.id].length, lights: state.lights[scene.id].length, fx: state.fx[scene.id].length };
+    },
+    // The picture Map Studio painted for a scene (its file name and version), if any.
+    studioPicture: (sceneId) => state.studio[sceneId]?.picture ?? null,
     addWalls(input, seat) {
       if (seat.role !== "dm") throw new Error("Only the GM can draw walls.");
       if (!scene) throw new Error("No scene is open.");

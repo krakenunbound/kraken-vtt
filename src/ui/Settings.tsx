@@ -1,3 +1,4 @@
+import type { StudioSettings } from "../kraken";
 import { useEffect, useMemo, useState, useSyncExternalStore, type DragEvent } from "react";
 import { cardsStore } from "../cards/cardsStore";
 import type { DecalItem, PictureKind, Session } from "../session/useSession";
@@ -38,6 +39,7 @@ export function SettingsWindow({ session }: { session: Session }) {
         Let players see their own dice-tower rolls (unticked: only the GM sees them, as in FG)
       </label> : null}
       {gm ? <DiceHoldSetting session={session} /> : null}
+      {gm ? <StudioFoldersSetting /> : null}
       {gm && session.ruleset === "D&D 3.5E" ? <Wizard35Setting session={session} /> : null}
       {gm && session.ruleset === "AD&D 2E" ? <Wizard2eSetting session={session} /> : null}
       {gm ? (
@@ -51,6 +53,58 @@ export function SettingsWindow({ session }: { session: Session }) {
         </label>
       ) : null}
     </div>
+  );
+}
+
+// Map Studio's asset packs (the GM's): the folders of Dungeondraft packs and
+// of art packs (.mod) it reads. Nothing is assumed: each GM points at their
+// own (Fantasy Grounds' modules folder is read anyway). Changed, Map Studio's
+// library is read again.
+function StudioFoldersSetting() {
+  const kraken = window.kraken;
+  const [settings, setSettings] = useState<StudioSettings | null>(null);
+  const [error, setError] = useState("");
+  useEffect(() => {
+    void kraken?.studioSettings?.().then(setSettings).catch((reason: Error) => setError(reason.message));
+  }, []);
+  if (!kraken?.studioSettings) return null;
+  const save = (patch: { dungeondraftFolders?: string[]; packFolders?: string[] }) =>
+    void kraken.studioSettings?.(patch).then(setSettings).catch((reason: Error) => setError(reason.message));
+  const lists: [keyof Pick<StudioSettings, "dungeondraftFolders" | "packFolders">, "dd" | "pack", string, string][] = [
+    ["dungeondraftFolders", "dd", "Dungeondraft packs", "Folders holding .dungeondraft_pack files"],
+    ["packFolders", "pack", "Art packs", "Folders holding art packs (.mod); Fantasy Grounds' modules folder is read anyway"],
+  ];
+  return (
+    <fieldset className="settings-group studio-folders" data-setting="studio-folders">
+      <legend>Map Studio art</legend>
+      {error ? <p className="error">{error}</p> : null}
+      {lists.map(([key, kind, label, hint]) => (
+        <div key={key} className="studio-folder-list" data-studio-folders={key}>
+          <b title={hint}>{label}</b>
+          {(settings?.[key] ?? []).length === 0 ? <span className="hint">None yet.</span> : null}
+          {(settings?.[key] ?? []).map((folder) => (
+            <span key={folder} className={settings?.found[folder] === false ? "studio-folder missing" : "studio-folder"} data-folder={folder} title={settings?.found[folder] === false ? "This folder is not there" : folder}>
+              {folder}
+              <button type="button" aria-label={`Stop reading ${folder}`} onClick={() => save({ [key]: (settings?.[key] ?? []).filter((item) => item !== folder) })}>
+                ×
+              </button>
+            </span>
+          ))}
+          <button
+            type="button"
+            data-action={`studio-add-${kind}`}
+            title={hint}
+            onClick={() => {
+              void kraken.studioPickFolder?.(kind).then((folder) => {
+                if (folder) save({ [key]: [...(settings?.[key] ?? []), folder] });
+              });
+            }}
+          >
+            Add a folder…
+          </button>
+        </div>
+      ))}
+    </fieldset>
   );
 }
 

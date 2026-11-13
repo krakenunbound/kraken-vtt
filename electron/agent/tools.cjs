@@ -1452,11 +1452,22 @@ const TOOLS = [
   {
     name: "kraken_image",
     description:
-      "FG's image window (the GM's): any picture of a book opened to edit, the same master wherever it is opened (its walls, doors, lights, paint and effects are kept by its id in the campaign; kraken_wall, kraken_light, kraken_draw and the other map tools work on it while it is open). The players do not see it until it is put in play. action open (book: the book's name or id; name: the picture's name as the Images list (kraken_library action list kind image) shows it, or file: its picture file in the book); play (put it on the table: the players see it); test (on: a play test, a test token on it and the GM's view a player's: walls, doors and light as a player meets them; off ends it); close (back to the table's map).",
-    inputSchema: object({ action: { type: "string", enum: ["open", "play", "test", "close"] }, book: string("open: the book's name or id"), name: string("open: the picture's name"), file: string("open: the picture's file in the book"), on: { type: "boolean" } }, ["action"]),
+      "FG's image window (the GM's): any picture of a book opened to edit, the same master wherever it is opened (its walls, doors, lights, paint and effects are kept by its id in the campaign; kraken_wall, kraken_light, kraken_draw and the other map tools work on it while it is open). The players do not see it until it is put in play. action open (book: the book's name or id; name: the picture's name as the Images list (kraken_library action list kind image) shows it, or file: its picture file in the book); play (put it on the table: the players see it); test (on: a play test, a test token on it and the GM's view a player's: walls, doors and light as a player meets them; off ends it); close (back to the table's map); studio (open the open image in Map Studio, Kraken's map maker: art, walls, doors, lights, weather; its Save to Kraken writes them into the image).",
+    inputSchema: object({ action: { type: "string", enum: ["open", "play", "test", "close", "studio"] }, book: string("open: the book's name or id"), name: string("open: the picture's name"), file: string("open: the picture's file in the book"), on: { type: "boolean" } }, ["action"]),
     async run(args, ctx) {
       needTable(ctx);
       return out(await ctx.ui({ kind: "image", action: args.action, book: args.book, name: args.name, file: args.file, on: args.on }, 60000));
+    },
+  },
+  {
+    name: "kraken_studio",
+    description:
+      "Map Studio's asset packs (the GM's Settings > Map Studio art): which folders it reads. action settings: read them; with dungeondraftFolders and/or packFolders (lists of folder paths on the GM's computer), set them and read the art again. dungeondraftFolders: folders of Dungeondraft packs (.dungeondraft_pack); packFolders: folders of art packs (.mod) beyond Fantasy Grounds' modules folder (which is read anyway). Nothing is assumed: a GM with none has none. found says which folders exist.",
+    inputSchema: object({ action: { type: "string", enum: ["settings"] }, dungeondraftFolders: { type: "array", items: { type: "string" } }, packFolders: { type: "array", items: { type: "string" } } }, ["action"]),
+    async run(args, ctx) {
+      if (!ctx.studio) throw new Error("Map Studio runs in the Kraken app.");
+      const change = args.dungeondraftFolders !== undefined || args.packFolders !== undefined ? { ...(args.dungeondraftFolders !== undefined ? { dungeondraftFolders: args.dungeondraftFolders } : {}), ...(args.packFolders !== undefined ? { packFolders: args.packFolders } : {}) } : null;
+      return out(await ctx.studio.settings(change));
     },
   },
   {
@@ -1524,7 +1535,7 @@ const TOOLS = [
       "The GM's windows: list them, or open, close, pop out (to a window of its own, for another monitor) or dock back a window. Kinds: map (the open map in its own window, as FG's image window, with its tools and settings; it opens by itself when a map opens and never pops out), assistant (the GM's DM assistant chat), characters, party, combat, players, settings, decals (the background decal picker), wallpapers (the desktop wallpaper picker), gmicons (the GM icon picker), krits (critical hits and fumbles), dice (this seat's dice: sets, colours, design, material, effects), sound (one-shots, effects, ambience, music, chat triggers, volumes), sheet (a character's sheet: give record, its id or name), charselect (Character Selection), records (FG's campaign lists: NPCs, items, spells, classes...; the GM shares one with kraken_record_update visibility all, hides it with gm), record (one record: give record, its id or name). cards (the ability cards, when this seat turned them on in Settings).",
     inputSchema: object({
       action: { type: "string", enum: ["list", "open", "close", "popout", "dock"] },
-      kind: { type: "string", enum: ["assistant", "characters", "party", "combat", "players", "settings", "decals", "wallpapers", "gmicons", "krits", "library", "dice", "sound", "sheet", "books", "book", "images", "picture", "notes", "note", "charselect", "records", "record", "adventure", "story", "map", "cards", "imagelist"] },
+      kind: { type: "string", enum: ["assistant", "characters", "party", "combat", "players", "settings", "decals", "wallpapers", "gmicons", "krits", "library", "dice", "sound", "sheet", "books", "book", "images", "picture", "notes", "note", "charselect", "records", "record", "adventure", "story", "map", "cards", "imagelist", "studio"] },
       record: string("For a sheet: the character's record id or name; for a record: its id or name"),
     }),
     run: async (args, ctx) => out(await ctx.ui({ kind: "windows", action: args.action ?? "list", window: args.kind, record: args.record })),

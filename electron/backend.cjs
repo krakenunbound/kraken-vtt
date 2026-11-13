@@ -347,6 +347,122 @@ function plain(error) {
 }
 const bytesOf = (value) => (value == null ? Buffer.alloc(0) : Buffer.isBuffer(value) ? value : Buffer.from(value));
 
+// Kraken Map Studio (studio/web, its server electron/studio/server.cjs): the
+// map maker, started the first time its window opens, on 127.0.0.1 only. Its
+// port stays the same from run to run (47821, else another), so its own saved
+// tabs and autosave (kept by address in the window) are found again.
+let studioServer = null;
+// Where Map Studio's asset packs are (the GM's, set in Settings; nothing is
+// assumed): Dungeondraft pack folders, and folders of art packs (.mod) beyond
+// FG's modules folder. Kept in settings.json in the studio folder.
+const STUDIO_SETTINGS = () => path.join(USER_DATA, "studio", "settings.json");
+const folderList = (value) => (Array.isArray(value) ? [...new Set(value.filter((folder) => typeof folder === "string" && folder.trim()).map((folder) => folder.trim().slice(0, 400)))].slice(0, 30) : []);
+function studioSettings() {
+  try {
+    const settings = JSON.parse(fs.readFileSync(STUDIO_SETTINGS(), "utf8"));
+    return { dungeondraftFolders: folderList(settings.dungeondraftFolders), packFolders: folderList(settings.packFolders) };
+  } catch {
+    return { dungeondraftFolders: [], packFolders: [] };
+  }
+}
+// Changed by the GM: kept, and Map Studio's library read again with them.
+async function setStudioSettings(input) {
+  const now = studioSettings();
+  const next = {
+    dungeondraftFolders: input?.dungeondraftFolders !== undefined ? folderList(input.dungeondraftFolders) : now.dungeondraftFolders,
+    packFolders: input?.packFolders !== undefined ? folderList(input.packFolders) : now.packFolders,
+  };
+  fs.mkdirSync(path.dirname(STUDIO_SETTINGS()), { recursive: true });
+  fs.writeFileSync(STUDIO_SETTINGS(), JSON.stringify(next, null, 1));
+  if (studioServer) {
+    const studio = studioAssets();
+    const { config } = studio;
+    await studio.configure({ ...config, ddFolders: next.dungeondraftFolders, packFolders: next.packFolders });
+  }
+  return { ...next, found: Object.fromEntries([...next.dungeondraftFolders, ...next.packFolders].map((folder) => [folder, fs.existsSync(folder)])) };
+}
+async function studioUrl() {
+  if (!studioServer) {
+    const { createStudioServer } = require("./studio/server.cjs");
+    const options = {
+      webRoot: path.join(APP_DIR, "studio", "web"),
+      packsDir: path.join(APP_DIR, "studio", "packs"),
+      examplesDir: path.join(APP_DIR, "studio", "examples"),
+      dataDir: path.join(USER_DATA, "studio"),
+      fgDataFolder: fgDataFolder(),
+      // The GM's Dungeondraft asset folders: settings.json in the studio folder ({ "dungeondraftFolders": [...] }).
+      ddFolders: studioSettings().dungeondraftFolders,
+      packFolders: studioSettings().packFolders,
+    };
+    options.kraken = { open: studioOpen, save: studioSave };
+    studioServer = createStudioServer({ ...options, port: 47821 }).catch(() => createStudioServer({ ...options, port: 0 }));
+    studioServer.catch(() => {
+      studioServer = null;
+    });
+  }
+  const server = await studioServer;
+  return { url: server.url };
+}
+
+// An image opened in Map Studio from Kraken (its image window or the table):
+// the master the GM has open now. Its picture (from the GM's window) goes into
+// Map Studio's library; a token names it for the editor's page.
+const bridge = () => require("./studio/krakenBridge.cjs");
+const studioAssets = () => require("./studio/assets.cjs");
+function openMaster(sceneId) {
+  if (!table || !hosted) throw new Error("Host the campaign first: Map Studio saves into its images.");
+  const view = table.agent.map.studioView();
+  if (!view || (sceneId && view.scene.id !== sceneId)) throw new Error("That image is no longer open in Kraken: open it again, then Map Studio.");
+  return view;
+}
+async function studioOpenImage({ sceneId, name, picture }) {
+  const { url } = await studioUrl();
+  const view = openMaster(sceneId);
+  const studio = studioAssets();
+  await studio.whenReady();
+  const asset = await studio.imageImport(Buffer.from(picture), String(name || view.scene.name || "Map picture"));
+  const token = bridge().openSession({ sceneId: view.scene.id, name: String(name || view.scene.name || ""), pictureId: asset.id, size: { width: asset.width, height: asset.height }, campaignId: hosted.id });
+  return { url: `${url}/?kraken=${token}` };
+}
+async function studioOpen(token) {
+  const found = bridge().session(token);
+  if (!found) throw new Error("Open the image in Map Studio from Kraken again.");
+  const view = openMaster(found.sceneId);
+  return { project: bridge().projectFor({ view, pictureId: found.pictureId, size: found.size, name: found.name }), kraken: { scene: view.scene.name } };
+}
+// Map Studio's pictures for an image, kept with the GM's data by campaign and scene.
+const studioPictureFile = (campaignId, picture) => path.join(USER_DATA, "studio", "pictures", String(campaignId).replace(/[^\w.-]/g, "_"), String(picture?.file ?? "").replace(/[^\w.-]/g, "_"));
+async function studioSave(token, project, image) {
+  const found = bridge().session(token);
+  if (!found) throw new Error("Open the image in Map Studio from Kraken again.");
+  const view = openMaster(found.sceneId);
+  const master = bridge().masterFrom(project, view.scene);
+  let picture = null;
+  // Art painted on the map: the rendered map is the image's picture now.
+  if (bridge().paintsArt(project)) {
+    const match = /^data:image\/(png|jpeg|webp);base64,(.+)$/.exec(image);
+    if (!match) throw new Error("Map Studio sent no picture of the map.");
+    picture = { file: `${view.scene.id.replace(/[^\w.-]/g, "_")}.webp`, version: Date.now(), width: project.width, height: project.height };
+    const target = studioPictureFile(found.campaignId, picture);
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    await require("sharp")(Buffer.from(match[2], "base64"), { limitInputPixels: 200_000_000 }).webp({ quality: 92 }).toFile(target);
+  }
+  const counts = table.agent.map.fromStudio({ ...master, project, picture });
+  emit("studio-saved", { sceneId: view.scene.id, picture: Boolean(picture) });
+  return { saved: true, ...counts, picture: Boolean(picture) };
+}
+// The picture Map Studio painted for a scene of the hosted campaign, if any.
+function studioPicture(sceneId) {
+  if (!table || !hosted) return null;
+  const picture = table.agent.map.studioPicture?.(sceneId) ?? table.agent.tableMap?.studioPicture?.(sceneId);
+  if (!picture?.file) return null;
+  try {
+    return fs.readFileSync(studioPictureFile(hosted.id, picture));
+  } catch {
+    return null;
+  }
+}
+
 // The GM's own pictures for the rulesets on the campaign screen (a game's logo
 // from their own books, say): assets/rulesets/<ruleset>.png in their data,
 // never shipped. Keyed by the ruleset's name in letters and digits only.
@@ -375,6 +491,9 @@ const calls = {
   "touch-campaign": (input) => campaigns.touch(campaignFile(), input),
   "campaign-ruleset": (input) => setCampaignRuleset(input),
   "ruleset-logos": () => rulesetLogos(),
+  "studio-url": () => studioUrl(),
+  "studio-open-image": (input) => studioOpenImage(input ?? {}),
+  "studio-settings": (input) => (input ? setStudioSettings(input) : { ...studioSettings(), found: Object.fromEntries([...studioSettings().dungeondraftFolders, ...studioSettings().packFolders].map((folder) => [folder, fs.existsSync(folder)])) }),
   async "start-host"(options) {
     const wanted = Number(options?.port);
     const password = String(options?.password ?? "");
@@ -388,7 +507,7 @@ const calls = {
     if (typeof remembered === "string" && !(saved.options && "gmIcon" in saved.options)) saved.options = { ...(saved.options ?? {}), gmIcon: remembered };
     const dataFolder = fgDataFolder();
     const ruleset = campaigns.read(campaignFile()).find((item) => item.id === campaignId)?.ruleset ?? "";
-    const next = createTableServer({ saved, ruleset, onChange: markDirty, art: createArtLibrary({ base: dataFolder, roots: [...defaultRoots(dataFolder), ...krakenArtRoots()] }), decals: decals(), wallpapers: wallpapers(), gmIcons: gmIcons(), tiles: tiles(), sounds: sounds(), books: books(), accounts: accounts(), prefs: prefs() });
+    const next = createTableServer({ saved, ruleset, onChange: markDirty, art: createArtLibrary({ base: dataFolder, roots: [...defaultRoots(dataFolder), ...krakenArtRoots()] }), decals: decals(), wallpapers: wallpapers(), gmIcons: gmIcons(), tiles: tiles(), sounds: sounds(), books: books(), accounts: accounts(), prefs: prefs(), studioPicture: (sceneId) => studioPicture(sceneId) });
     try {
       const info = await next.listen({ port: wanted, password });
       table = next;
@@ -482,6 +601,8 @@ const agentContext = {
   windowOp: (op, payload) => ask("window", { op, ...payload }),
   assistant: () => assistant,
   packs: { view: (input) => packsView(input ?? {}), make: (ids) => makePacks(ids), job: () => packJob },
+  // Map Studio's asset pack folders (Settings > Map Studio art).
+  studio: { settings: (input) => (input ? setStudioSettings(input) : calls["studio-settings"]()) },
 };
 
 // The DM assistant (GM only): the key from the environment or .env.local, or

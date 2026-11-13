@@ -150,6 +150,23 @@ same one.
   then **End play test** (the token goes). The table's map has Play test too.
 - **Close** goes back to the table's map.
 
+**Map Studio** (the pen along the top of the sidebar) is Kraken's map maker:
+paint art from your packs (Kraken's own, Battle Map Forge's, and your Fantasy
+Grounds art packs and Dungeondraft packs, read where they are), draw walls,
+doors and windows with art along them, place lights and time of day, paint
+weather with masks, mark traps and regions, generate a dungeon, and play test.
+
+- On an image, **Open in Map Studio** (its image window's bar) opens that
+  image with its walls, doors, lights and weather. **Save to Kraken** writes
+  them back into the image, and what you painted becomes the image's picture,
+  wherever it is opened. The next time, Map Studio opens it as you left it.
+- **Settings > Map Studio art** (the GM's): add the folders that hold your
+  Dungeondraft packs and your art packs (`.mod`). Nothing is assumed; your
+  Fantasy Grounds modules folder is read anyway. Kraken's own art and Battle
+  Map Forge's come with it.
+- Map Studio inside Kraken makes maps for Kraken; exporting to Fantasy
+  Grounds or Foundry is the stand-alone Map Studio's job.
+
 - Open a map from the **Library** (the sidebar's Adventures: its Maps tab
   shows each map, and a click lets you see it before it goes to the table or
   the players), from a story entry, or by dropping a picture on the table. The map opens in its own window, which can pop out.
