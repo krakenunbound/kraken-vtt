@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
+import { emblemKey, RulesetEmblem } from "./RulesetEmblem";
 import { LivingEmblem, Mark } from "../ui/Emblem";
 import type { KrakenCampaign, KrakenNetwork } from "../kraken";
 import "@fontsource/cinzel/latin-500.css";
@@ -173,6 +174,18 @@ export function SetupScreen({
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [ruleset, setRuleset] = useState(RULESETS[0].name);
+  // The rulesets: found by a part of the name or blurb once there are many;
+  // each with the GM's own picture for it, if they keep one.
+  const [rulesetQuery, setRulesetQuery] = useState("");
+  const [rulesetLogos, setRulesetLogos] = useState<Record<string, string>>({});
+  useEffect(() => {
+    void window.kraken
+      ?.rulesetLogos?.()
+      .then((found) => setRulesetLogos(found.logos))
+      .catch(() => undefined);
+  }, []);
+  const rulesetsShown = RULESETS.filter((item) => !rulesetQuery || `${item.name} ${item.blurb}`.toLowerCase().includes(rulesetQuery.toLowerCase()));
+  const chosen = RULESETS.find((item) => item.name === ruleset);
   const [beckon, setBeckon] = useState(0);
   const newName = useRef<HTMLInputElement>(null);
   const [lanOn, setLanOn] = useState(true);
@@ -481,7 +494,7 @@ export function SetupScreen({
                   <span className="card-words">
                     <span className="card-name">{campaign.name}</span>
                     <span className="card-meta">
-                      <span className="ruleset-chip">{campaign.ruleset}</span>
+                      <span className="ruleset-chip"><RulesetEmblem name={campaign.ruleset} picture={rulesetLogos[emblemKey(campaign.ruleset)]} size={16} />{campaign.ruleset}</span>
                       <span>{campaign.playedAt ? `played ${ago(campaign.playedAt)}` : "not played yet"}</span>
                     </span>
                   </span>
@@ -501,6 +514,7 @@ export function SetupScreen({
               <form key={selected.id} className="campaign-detail glass rise" data-form="play" onSubmit={(event) => void play(event, selected)}>
                 <div className="detail-head">
                   <Crest name={selected.name} />
+                  <RulesetEmblem name={selected.ruleset} picture={rulesetLogos[emblemKey(selected.ruleset)]} size={40} />
                   <div>
                     <h2>{selected.name}</h2>
                     <p>
@@ -588,10 +602,13 @@ export function SetupScreen({
                   <input ref={newName} name="new-campaign" placeholder="The Keep on the Borderlands" aria-label="New campaign name" maxLength={80} required />
                 </label>
                 <div className="field">
-                  <span>Ruleset</span>
+                  <span className="ruleset-head">
+                    Ruleset
+                    {RULESETS.length > 9 ? <input className="ruleset-search" aria-label="Find a ruleset" placeholder="Find a ruleset…" value={rulesetQuery} onChange={(event) => setRulesetQuery(event.target.value)} /> : null}
+                  </span>
                   <input type="hidden" name="new-ruleset" value={ruleset} />
                   <div className="ruleset-tiles" role="radiogroup" aria-label="Ruleset">
-                    {RULESETS.map((item) => (
+                    {rulesetsShown.map((item) => (
                       <button
                         key={item.name}
                         type="button"
@@ -599,13 +616,23 @@ export function SetupScreen({
                         aria-checked={ruleset === item.name}
                         className={ruleset === item.name ? "ruleset-tile on" : "ruleset-tile"}
                         data-ruleset={item.name}
+                        title={item.blurb}
                         onClick={() => setRuleset(item.name)}
                       >
-                        <strong>{item.name}</strong>
-                        <small>{item.blurb}</small>
+                        <RulesetEmblem name={item.name} picture={rulesetLogos[emblemKey(item.name)]} />
+                        <span className="ruleset-words">
+                          <strong>{item.name}</strong>
+                          <small>{item.blurb}</small>
+                        </span>
                       </button>
                     ))}
+                    {rulesetsShown.length === 0 ? <p className="hint">No ruleset by that name.</p> : null}
                   </div>
+                  {chosen ? (
+                    <p className="ruleset-about" data-ruleset-about={chosen.name}>
+                      <b>{chosen.name}.</b> {chosen.blurb}
+                    </p>
+                  ) : null}
                 </div>
                 <button type="submit" className="play-button grand" data-action="create">
                   Create campaign

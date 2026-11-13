@@ -347,6 +347,25 @@ function plain(error) {
 }
 const bytesOf = (value) => (value == null ? Buffer.alloc(0) : Buffer.isBuffer(value) ? value : Buffer.from(value));
 
+// The GM's own pictures for the rulesets on the campaign screen (a game's logo
+// from their own books, say): assets/rulesets/<ruleset>.png in their data,
+// never shipped. Keyed by the ruleset's name in letters and digits only.
+const RULESET_PICTURE = { ".png": "image/png", ".webp": "image/webp", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".gif": "image/gif", ".svg": "image/svg+xml" };
+function rulesetLogos() {
+  const folder = path.join(USER_DATA, "assets", "rulesets");
+  fs.mkdirSync(folder, { recursive: true });
+  const logos = {};
+  for (const name of fs.readdirSync(folder)) {
+    const type = RULESET_PICTURE[path.extname(name).toLowerCase()];
+    if (!type) continue;
+    const file = path.join(folder, name);
+    if (fs.statSync(file).size > 2 * 1024 * 1024) continue;
+    const key = path.basename(name, path.extname(name)).toLowerCase().replace(/[^a-z0-9]/g, "");
+    if (key) logos[key] = `data:${type};base64,${fs.readFileSync(file).toString("base64")}`;
+  }
+  return { folder, logos };
+}
+
 // --- What the window's process may call -------------------------------------------
 const calls = {
   addresses: () => eachAddress().v4,
@@ -355,6 +374,7 @@ const calls = {
   "save-campaign": (input) => campaigns.create(campaignFile(), input),
   "touch-campaign": (input) => campaigns.touch(campaignFile(), input),
   "campaign-ruleset": (input) => setCampaignRuleset(input),
+  "ruleset-logos": () => rulesetLogos(),
   async "start-host"(options) {
     const wanted = Number(options?.port);
     const password = String(options?.password ?? "");

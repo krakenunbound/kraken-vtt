@@ -133,6 +133,7 @@ for (const name of [
   "save-campaign",
   "touch-campaign",
   "campaign-ruleset",
+  "ruleset-logos",
   "start-host",
   "stop-host",
   "campaign-view",

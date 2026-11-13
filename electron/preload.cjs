@@ -7,6 +7,7 @@ contextBridge.exposeInMainWorld("kraken", {
   saveCampaign: (input) => ipcRenderer.invoke("save-campaign", input),
   touchCampaign: (input) => ipcRenderer.invoke("touch-campaign", input),
   setCampaignRuleset: (input) => ipcRenderer.invoke("campaign-ruleset", input),
+  rulesetLogos: () => ipcRenderer.invoke("ruleset-logos"),
   copy: (text) => ipcRenderer.invoke("copy", text),
   startHost: (options) => ipcRenderer.invoke("start-host", options),
   stopHost: () => ipcRenderer.invoke("stop-host"),

@@ -4,6 +4,19 @@ What changed in each release of Kraken VTT. Downloads are on the
 [Releases](https://github.com/krakenunbound/kraken-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
+## Next: The ruleset picker
+
+- **The ruleset picker uses the whole screen:** it fills as many columns as
+  the window holds (six at 1920 wide), each ruleset's blurb in three lines,
+  the chosen one's full description below. A search box appears once there
+  are many rulesets.
+- **An emblem for each ruleset**, Kraken's own, on the tiles and in the
+  campaign list. Put a picture of your own (a logo from your books) in
+  `assets/rulesets` in your Kraken data folder, named as the ruleset, and it
+  shows instead, on your computer only.
+- D&D 3.5E and 5E are described as played from your own rulebooks, not "the
+  SRD" (an SRD is just one of the books you may make active).
+
 ## 0.1.0-alpha.75: Dice and macros on the quick slots; Modules and Books apart
 
 - **Dice in your hand, as in Fantasy Grounds:** right-click a die and pick how

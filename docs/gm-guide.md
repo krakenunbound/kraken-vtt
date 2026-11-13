@@ -9,7 +9,14 @@ On the start screen choose **My Campaigns**.
 
 - **New campaign:** give it a name and choose its game (ruleset). The game
   decides the character sheets, the rules the combat tracker uses, and which
-  books fit the campaign.
+  books fit the campaign. The rulesets fill as many columns as the window
+  holds; the chosen one's full description is below them.
+  - **Your own ruleset pictures:** each ruleset shows Kraken's own emblem.
+    To show a picture of your own instead (a logo from your books, say), put
+    it in `%APPDATA%\kraken-vttssetsulesets` (on Linux,
+    `~/.config/kraken-vtt/assets/rulesets`), named as the ruleset:
+    `D&D 3.5E.png`, `Castles & Crusades.webp`. It shows on your computer
+    only; Kraken never ships a game's official logo.
   - *Descending Darkness* and *Apeira Astra* come with Kraken, with their books
     and a first adventure ([included-games.md](included-games.md)).
   - *Castles & Crusades*, *D&D 5E*, *D&D 3.5E* and *AD&D 2E* use your own
