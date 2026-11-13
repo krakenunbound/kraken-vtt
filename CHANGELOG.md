@@ -4,6 +4,17 @@ What changed in each release of Kraken VTT. Downloads are on the
 [Releases](https://github.com/krakenunbound/kraken-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
+## 0.1.0-alpha.83: Updates
+
+- **Kraken updates itself.** When it starts, it looks once for a newer
+  release on GitHub. If there is one, the start screen (and only the start
+  screen, before a campaign is opened) says so, with what's new: **Download**,
+  then **Restart and install**. Nothing about updates ever appears during a
+  game, Kraken never looks again while it runs, and it never downloads or
+  installs while a campaign is hosted. The download is checked against its
+  SHA-512 before it can be installed.
+- The Linux AppImage updates the same way; the .deb is installed by hand.
+
 ## 0.1.0-alpha.82: A stray table map no longer comes back
 
 - **Fixed: a table map from a book that is not active kept coming back**

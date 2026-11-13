@@ -71,6 +71,12 @@ export type KrakenApi = {
   setCampaignRuleset: (input: { id: string; ruleset: string }) => Promise<KrakenCampaign>;
   rulesetLogos?: () => Promise<{ folder: string; logos: Record<string, string> }>;
   studioUrl?: () => Promise<{ url: string }>;
+  updater?: {
+    state: () => Promise<UpdaterState>;
+    download: () => Promise<UpdaterState>;
+    install: () => Promise<UpdaterState>;
+    onEvent: (handler: (state: UpdaterState) => void) => () => void;
+  };
   studioSettings?: (input?: { dungeondraftFolders?: string[]; packFolders?: string[] }) => Promise<StudioSettings>;
   studioPickFolder?: (kind: "dd" | "pack") => Promise<string | null>;
   studioOpenImage?: (input: { sceneId: string; name: string; picture: Uint8Array }) => Promise<{ url: string }>;
@@ -95,6 +101,9 @@ export type KrakenApi = {
 
 // Map Studio's asset pack folders, and whether each is there.
 export type StudioSettings = { dungeondraftFolders: string[]; packFolders: string[]; found: Record<string, boolean> };
+
+// Kraken's updater: looked for once at launch; off from the source; what it found.
+export type UpdaterState = { status: "idle" | "off" | "checking" | "current" | "available" | "downloading" | "ready" | "installing" | "error"; current: string; version?: string; notes?: string; percent?: number; error?: string | null; reason?: string };
 
 export type KrakenAgentCommand =
   | { kind: "host"; campaignId: string; port: number; password: string }

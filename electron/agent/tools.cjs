@@ -1473,6 +1473,16 @@ const TOOLS = [
     },
   },
   {
+    name: "kraken_updates",
+    description:
+      "Kraken's updater, as the start screen shows it (the GM's rules: it looks for a new version once, when Kraken starts, never during a game; downloads and installs only when asked, never while a campaign is hosted). action status: what it found (status off, checking, current, available (version, notes), downloading (percent), ready, error); download: fetch the new version; install: Kraken closes, the installer runs and the new version opens.",
+    inputSchema: object({ action: { type: "string", enum: ["status", "download", "install"] } }, ["action"]),
+    async run(args, ctx) {
+      if (!ctx.updater) throw new Error("Updates are the Kraken app's.");
+      return out(await ctx.updater(args.action ?? "status"));
+    },
+  },
+  {
     name: "kraken_open_fg_module",
     description:
       "Put an FG adventure module's maps on the table (B1 In Search of the Unknown, B2 The Keep on the Borderlands...): every map becomes a scene with its picture, FG's walls (doors, see-through and one-way walls), lights, grid, FX layers (rain, clouds, water in its mask) and FG's shortcuts as map pins in two GM-only layer groups (Map keys, Encounters) linked to the story entries and encounters. maps: names to take only some (part of the name); without, the module's playable maps (FG's Maps and Region map, or with a grid or walls; handouts and portraits stay in Images & Maps), all: true for every picture. The first map goes on the table; kraken_scenes switches.",

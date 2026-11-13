@@ -475,3 +475,13 @@
 /* Signed in at this table: the name, and a way out. */
 .join-signed-in { margin: 4px 0 10px; }
 .link-button { background: none; border: 0; padding: 0; color: var(--gold); text-decoration: underline; cursor: pointer; font: inherit; }
+/* A new Kraken (the start screen only). */
+.update-notice { position: relative; z-index: 2; margin: 0 auto 8px; width: min(760px, calc(100% - 32px)); display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; padding: 12px 16px; border-radius: 14px; border: 1px solid var(--gold); background: linear-gradient(150deg, rgba(227, 189, 120, 0.16), rgba(4, 7, 11, 0.82)); box-shadow: 0 0 22px rgba(227, 189, 120, 0.18); }
+.update-line { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 220px; }
+.update-line b { color: var(--gold); font-family: var(--display); letter-spacing: 0.05em; }
+.update-current { color: var(--muted); font-size: 0.85rem; }
+.update-actions { display: flex; gap: 8px; }
+.update-progress { position: relative; flex: 1; min-width: 220px; height: 26px; border-radius: 999px; background: rgba(4, 7, 11, 0.6); border: 1px solid rgba(227, 189, 120, 0.3); overflow: hidden; }
+.update-progress i { position: absolute; inset: 0 auto 0 0; background: linear-gradient(90deg, #8a6a2c, var(--gold)); }
+.update-progress span { position: relative; display: block; text-align: center; line-height: 24px; font-size: 0.82rem; }
+.update-notes { flex-basis: 100%; max-height: 220px; overflow: auto; margin: 0; padding: 10px; white-space: pre-wrap; font-family: inherit; font-size: 0.84rem; color: #d6ccb8; background: rgba(4, 7, 11, 0.5); border-radius: 8px; }

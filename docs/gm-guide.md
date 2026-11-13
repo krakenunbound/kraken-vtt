@@ -3,6 +3,14 @@
 Kraken runs on the GM's Windows or Linux PC. The GM's copy is the table: it keeps the
 campaign, decides what each player may see, and serves the players' browsers.
 
+## Updates
+
+When Kraken starts, it looks once for a newer release. If there is one, the
+start screen says so (only the start screen, before you open a campaign):
+**Download**, then **Restart and install** (Windows asks to allow the
+installer). Nothing about updates appears during a game, and Kraken never
+downloads or installs while a campaign is hosted.
+
 ## Campaigns
 
 On the start screen choose **My Campaigns**.

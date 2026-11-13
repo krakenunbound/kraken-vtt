@@ -5,7 +5,8 @@
 import { copyFileSync } from "node:fs";
 
 try {
-  copyFileSync("release/Kraken VTT Setup.exe", "Kraken VTT Setup.exe");
+  // Built as Kraken-VTT-Setup.exe (no spaces: the updater finds it on GitHub by that name).
+  copyFileSync("release/Kraken-VTT-Setup.exe", "Kraken VTT Setup.exe");
   console.log("Kraken VTT Setup.exe is in the main folder.");
 } catch (error) {
   console.error(error.code === "EBUSY" || error.code === "EPERM"

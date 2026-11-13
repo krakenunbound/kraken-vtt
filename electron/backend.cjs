@@ -599,6 +599,8 @@ const agentContext = {
   ui: (command, timeout) => ask("ui", command, timeout ?? 60000),
   // The window itself (a screenshot, its text, a script in it): done by the window's process.
   windowOp: (op, payload) => ask("window", { op, ...payload }),
+  // Kraken's updater (in the main process): its state, a download, an install.
+  updater: (action) => ask("updater", { action }),
   assistant: () => assistant,
   packs: { view: (input) => packsView(input ?? {}), make: (ids) => makePacks(ids), job: () => packJob },
   // Map Studio's asset pack folders (Settings > Map Studio art).

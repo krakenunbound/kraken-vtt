@@ -11,6 +11,17 @@ contextBridge.exposeInMainWorld("kraken", {
   studioUrl: () => ipcRenderer.invoke("studio-url"),
   studioOpenImage: (input) => ipcRenderer.invoke("studio-open-image", input),
   studioSettings: (input) => ipcRenderer.invoke("studio-settings", input),
+  // Kraken's updates (looked for once, at launch; the start screen shows them).
+  updater: {
+    state: () => ipcRenderer.invoke("updater-state"),
+    download: () => ipcRenderer.invoke("updater-download"),
+    install: () => ipcRenderer.invoke("updater-install"),
+    onEvent: (handler) => {
+      const listener = (_event, value) => handler(value);
+      ipcRenderer.on("updater-event", listener);
+      return () => ipcRenderer.removeListener("updater-event", listener);
+    },
+  },
   studioPickFolder: (kind) => ipcRenderer.invoke("studio-pick-folder", kind),
   // Map Studio saved into an image of the hosted campaign (its picture may be new).
   onStudioSaved: (handler) => {

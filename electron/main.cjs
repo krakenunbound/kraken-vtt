@@ -91,11 +91,24 @@ async function onBackend(child, message) {
   try {
     if (message.op === "ui") answer(true, await askWindow(message.payload, message.timeout));
     else if (message.op === "window") answer(true, await windowOp(message.payload));
+    else if (message.op === "updater") answer(true, await updaterOp(message.payload));
     else answer(false, `No such request: ${message.op}`);
   } catch (error) {
     answer(false, error instanceof Error ? error.message : String(error));
   }
 }
+
+// The agent's view of the updater (kraken_updates): the same as the start screen's buttons.
+let updates = null;
+async function updaterOp({ action }) {
+  if (!updates) throw new Error("The updater has not started.");
+  if (action === "download") return invokeUpdater("updater-download");
+  if (action === "install") return invokeUpdater("updater-install");
+  return updates.state();
+}
+// The updater's own handlers, called as the window calls them.
+const updaterCalls = new Map();
+const invokeUpdater = (channel) => updaterCalls.get(channel)?.() ?? Promise.reject(new Error("The updater is off."));
 
 async function windowOp({ op, code }) {
   const win = mainWindow && !mainWindow.isDestroyed() ? mainWindow : null;
@@ -365,6 +378,11 @@ app.whenReady().then(async () => {
   startBackend();
   const win = createWindow();
   mainWindow = win;
+  // A new Kraken looked for once, now (shown on the start screen alone).
+  updates = require("./updater.cjs").startUpdater({ hosting: () => call("hosting").catch(() => false), register: (channel, run) => updaterCalls.set(channel, run) });
+  updates.onChange((state) => {
+    if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send("updater-event", state);
+  });
   await backendReady;
   await sendTypedKey();
   if (process.env.KRAKEN_E2E !== "1") return;
