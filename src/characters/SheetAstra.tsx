@@ -370,7 +370,7 @@ export function WizardAstra({ session, onDone }: { session: Session; onDone: (id
       setBusy(false);
     }
   };
-  if (paths.length === 0) return <p className="hint">No Paths yet: the GM makes the Apeira Astra Crew Handbook active (Books).</p>;
+  if (paths.length === 0) return <p className="hint">No Paths yet: the GM makes the Apeira Astra Crew Handbook active (Modules).</p>;
   const picker = (record: TableRecord | undefined, chosen: string[], set: (list: string[]) => void, count: number, tag: string) => (
     <div className="wizard-5e-skills" data-path-skills={tag}>
       {listOf(record).map((key) => (

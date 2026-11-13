@@ -1,7 +1,7 @@
 const path = require("path");
 const { pathToFileURL } = require("url");
 
-// Host side of the D&D 5E ruleset (shared/dnd5e/rules.mjs, SRD 5.2.1):
+// Host side of the D&D 5E ruleset (shared/dnd5e/rules.mjs; the GM's 5E books):
 // characters built from the campaign's active books, checks, saves and skills
 // rolled in front of the table, level ups, and the sheet's edits. A 5E
 // character's record data has ruleset "dnd5e"; the SIEGE paths hand those here.
@@ -24,7 +24,7 @@ function library5e(records) {
 async function build5e(table, spec, owner, seat) {
   const rules = await rules5e();
   const lib = library5e(table.records);
-  if (lib.classes.length === 0) throw new Error(table.ruleset?.() === "Descending Darkness" ? "No classes in this campaign: make the Descending Darkness Player's Handbook active (Books)." : "No 5E classes in this campaign: make the SRD player book active (Books).");
+  if (lib.classes.length === 0) throw new Error(table.ruleset?.() === "Descending Darkness" ? "No classes in this campaign: make the Descending Darkness Player's Handbook active (Modules)." : "No 5E classes in this campaign: make a 5E Player's Handbook active (Modules).");
   const built = rules.buildFromSpec(spec ?? {}, lib, D20[table.ruleset?.()] ?? "dnd5e");
   const data = require("./characterArt.cjs").withArt(built.data, spec, table.art);
   const record = table.records.create({ type: "character", name: built.name, owner: owner ?? "", visibility: owner ? "owner" : "gm", data }, seat ?? table.seat);

@@ -318,7 +318,7 @@ export function Wizard35({ session, onDone }: { session: Session; onDone: (id: s
     return (
       <section className="ccw" data-wizard="dnd35">
         <h2>D&amp;D 3.5E Character Wizard</h2>
-        <p className="hint">No class records found. The GM makes the 3.5E books active first (Books): the Player's Handbook or the 3.5E Basic Rules.</p>
+        <p className="hint">No class records found. The GM makes the 3.5E Player's Handbook active first (Modules).</p>
         <button type="button" onClick={() => onDone(null)}>
           Close
         </button>

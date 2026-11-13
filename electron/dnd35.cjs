@@ -1,7 +1,7 @@
 const path = require("path");
 const { pathToFileURL } = require("url");
 
-// Host side of the D&D 3.5E ruleset (shared/dnd35/rules.mjs, the SRD 3.5):
+// Host side of the D&D 3.5E ruleset (shared/dnd35/rules.mjs; the GM's 3.5E books):
 // characters built from the campaign's active books (the 3.5E Player's
 // Handbook's classes, races and gear), checks, saves and skills rolled in
 // front of the table, level ups, and the sheet's edits. A 3.5E character's
@@ -30,7 +30,7 @@ async function library35(records) {
 async function build35(table, spec, owner, seat) {
   const rules = await rules35();
   const lib = await library35(table.records);
-  if (lib.classes.length === 0) throw new Error("No 3.5E classes in this campaign: make the 3.5E Player's Handbook active (Books).");
+  if (lib.classes.length === 0) throw new Error("No 3.5E classes in this campaign: make the 3.5E Player's Handbook active (Modules).");
   const built = rules.buildFromSpec(spec ?? {}, lib);
   const data = require("./characterArt.cjs").withArt(built.data, spec, table.art);
   const record = table.records.create({ type: "character", name: built.name, owner: owner ?? "", visibility: owner ? "owner" : "gm", data }, seat ?? table.seat);

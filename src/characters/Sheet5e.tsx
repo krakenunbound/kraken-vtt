@@ -6,7 +6,7 @@ import { ArtPicker, Picture } from "./ArtPicker";
 import { Field } from "./CCSheet";
 import { profileFor, SKILLS, STATS, signed } from "../../shared/dnd5e/rules.mjs";
 
-// The D&D 5E character sheet (SRD 5.2.1), laid out as FG's 5E sheet in
+// The D&D 5E character sheet, laid out as FG's 5E sheet in
 // Kraken's sheet style: portrait and who they are on top; tabs down the right
 // (Main, Skills, Combat, Spells, Inventory, Notes). Click a number to roll it
 // in front of the table; the host works every number out again from what is

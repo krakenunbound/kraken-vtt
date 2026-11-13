@@ -39,8 +39,8 @@ function rememberGame(game: RecentGame) {
 // The rulesets a campaign can be made with.
 const RULESETS = [
   { name: "Castles & Crusades", blurb: "SiegeCore rules: character sheets, the SIEGE engine, combat and spells." },
-  { name: "D&D 5E", blurb: "The SRD 5.2.1: 5E sheets and character building, d20 combat with criticals, saves, spells and death saves." },
-  { name: "D&D 3.5E", blurb: "The SRD 3.5 with your 3.5E books: 3.5E sheets and character building, base attack and iterative attacks, criticals by threat and confirmation, Fortitude, Reflex and Will, skills by ranks." },
+  { name: "D&D 5E", blurb: "Played from your 5E books (the rulebooks you own, or the free SRD): 5E sheets and character building, d20 combat with criticals, saves, spells and death saves." },
+  { name: "D&D 3.5E", blurb: "Played from your 3.5E books (the Player's Handbook, Dungeon Master's Guide and Monster Manual): 3.5E sheets and character building, base attack and iterative attacks, criticals by threat and confirmation, Fortitude, Reflex and Will, skills by ranks." },
   { name: "AD&D 2E", blurb: "Second Edition with your 2E books: THAC0 and descending Armor Class, the five saving throws, d10 initiative lowest first, thief skills, multi-classing, your books' pregenerated characters." },
   { name: "Traveller", blurb: "Mongoose Traveller 2nd Edition: the UPP's six characteristics, skills and specialities, 2d6 tasks with Effect, Boon and Bane, careers and terms, damage to Endurance, Strength and Dexterity, armour and AP. Its rules are Kraken's own code; your Traveller books add their content." },
   { name: "Descending Darkness", blurb: "Kraken's dark fantasy: d20, fragile heroes, light that runs out, dread that builds. Its books and a first adventure come with Kraken." },

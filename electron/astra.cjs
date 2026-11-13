@@ -19,7 +19,7 @@ function libraryAstra(records) {
 async function buildAstra(table, spec, owner, seat) {
   const rules = await rulesAstra();
   const lib = libraryAstra(table.records);
-  if (lib.paths.length === 0) throw new Error("No Paths in this campaign: make the Apeira Astra Crew Handbook active (Books).");
+  if (lib.paths.length === 0) throw new Error("No Paths in this campaign: make the Apeira Astra Crew Handbook active (Modules).");
   const built = rules.buildFromSpec(spec ?? {}, lib);
   // A portrait and token: the player's choice (spec.portrait / spec.token), or
   // Kraken's own for the Origin and major Path ("Spacer Marine").

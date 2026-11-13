@@ -415,7 +415,7 @@ export function Wizard5e({ session, onDone }: { session: Session; onDone: (id: s
     }
   };
 
-  if (classes.length === 0) return <p className="hint">No classes yet: the GM makes the {profile.id === "dnd5e" ? "SRD player book" : `${profile.name} Player's Handbook`} active (Books).</p>;
+  if (classes.length === 0) return <p className="hint">No classes yet: the GM makes the {profile.id === "dnd5e" ? "5E Player's Handbook" : `${profile.name} Player's Handbook`} active (Modules).</p>;
   const next = TABS[Math.min(TABS.length - 1, TABS.indexOf(tab) + 1)];
   const scoreLine = (stat: Stat) => {
     const value = total(stat);

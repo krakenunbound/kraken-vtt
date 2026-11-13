@@ -90,7 +90,7 @@ export const SIZES = {
 };
 const sizeOf = (name) => SIZES[String(name ?? "medium").toLowerCase()] ?? SIZES.medium;
 
-// The SRD's skills, as the Player's Handbook lists them (a book's own skill
+// The skills as the Player's Handbook lists them (a book's own skill
 // records, when active, win: their ability, trained only and armor check).
 export const SKILLS = {
   appraise: ["Appraise", "intelligence", 0, 0],

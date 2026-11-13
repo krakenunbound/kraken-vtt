@@ -6,7 +6,7 @@ import { ArtPicker, Picture } from "./ArtPicker";
 import { Field } from "./CCSheet";
 import { MAX_LEVEL, SAVE_NAMES, SAVES, signed, SKILLS, STATS } from "../../shared/dnd35/rules.mjs";
 
-// The D&D 3.5E character sheet (SRD 3.5), laid out as FG's 3.5E sheet in
+// The D&D 3.5E character sheet, laid out as FG's 3.5E sheet in
 // Kraken's sheet style: portrait and who they are on top; tabs down the right
 // (Main, Skills, Combat, Spells, Feats, Inventory, Notes). Click a number to
 // roll it in front of the table; the host works every number out again from

@@ -366,7 +366,7 @@ export function buildFromSpec(spec, lib, rulesetId = RULESET) {
   const problems = [];
   const find = (list, name) => (list ?? []).find((record) => String(record.name).toLowerCase() === String(name ?? "").toLowerCase()) ?? null;
   const cls = find(lib.classes, spec.class);
-  if (!cls) throw new Error(`No class ${spec.class} in the books (make the SRD player module active).`);
+  if (!cls) throw new Error(`No class ${spec.class} in the books (make a 5E Player's Handbook active in Modules).`);
   const species = spec.species || spec.race ? find(lib.species, spec.species ?? spec.race) : null;
   if ((spec.species || spec.race) && !species) problems.push(`No species ${spec.species ?? spec.race}.`);
   const ancestry = spec.ancestry ? find(lib.ancestries, spec.ancestry) : null;

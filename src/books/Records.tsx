@@ -171,7 +171,7 @@ export function RecordsWindow({ session, onOpen, only }: { session: Session; onO
   return (
     <div className={only ? "records-window single" : "records-window"} data-window="records" data-records-only={only}>
       {only ? null : <nav className="records-lists" aria-label="Lists">
-        {lists.length === 0 ? <p className="hint">{gm ? "Nothing yet: make a book active (Books) or add NPCs and items." : "The GM has shared nothing yet."}</p> : null}
+        {lists.length === 0 ? <p className="hint">{gm ? "Nothing yet: make a book active (Modules) or add NPCs and items." : "The GM has shared nothing yet."}</p> : null}
         {lists.map((id) => (
           <button key={id} type="button" className={id === list ? "on" : ""} aria-pressed={id === list} data-records-list={id} onClick={() => setChosen(id)}>
             {listLabel(id)} <small>{counts.get(id)}</small>

@@ -20,7 +20,7 @@ async function build2e(table, spec, owner, seat) {
   let built;
   if (spec?.pregen) {
     const sheet = table.records.get(String(spec.pregen));
-    if (!sheet || sheet.type !== "pregencharsheet") throw new Error("No such pregenerated character: make its book active (Books).");
+    if (!sheet || sheet.type !== "pregencharsheet") throw new Error("No such pregenerated character: make its book active (Modules).");
     built = { name: String(spec.name ?? "").trim() || sheet.name, data: rules.fromFG(sheet.data), problems: [] };
     // (Its FG portrait path is the book's, not Kraken's art: the GM's art by race and class instead.)
   } else built = rules.buildFromSpec(spec ?? {}, { items: table.records.list({ type: "item" }) });

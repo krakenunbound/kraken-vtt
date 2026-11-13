@@ -66,7 +66,7 @@ const TOOLS = [
   {
     name: "kraken_campaign_create",
     description: "Create a campaign. Returns its id.",
-    inputSchema: object({ name: string("Campaign name"), ruleset: string("Ruleset: Castles & Crusades, D&D 5E (the SRD 5.2.1), D&D 3.5E (the SRD 3.5), AD&D 2E, Traveller (Mongoose 2E), Descending Darkness, Apeira Astra or Worldbuilding") }, ["name"]),
+    inputSchema: object({ name: string("Campaign name"), ruleset: string("Ruleset: Castles & Crusades, D&D 5E, D&D 3.5E (each played from the campaign's active books: the GM's rulebooks, or an SRD), AD&D 2E, Traveller (Mongoose 2E), Descending Darkness, Apeira Astra or Worldbuilding") }, ["name"]),
     run: (args, ctx) => out(ctx.campaigns.create({ name: args.name, ruleset: args.ruleset })),
   },
   {
