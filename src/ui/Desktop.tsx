@@ -479,9 +479,15 @@ export function Desktop({
   const turnRang = useRef("");
   // FG's Message of the Day: it opens on a player's screen as they join (once a sitting).
   const motdShown = useRef(false);
+  // Only as they join (the first moments at the table): a message the GM writes mid-game waits for the sidebar.
+  const joinedAt = useRef(Date.now());
   useEffect(() => {
     const motd = session.options.motd;
     if (gm || motdShown.current || !(motd?.text || motd?.links?.length)) return;
+    if (Date.now() - joinedAt.current > 8000) {
+      motdShown.current = true;
+      return;
+    }
     motdShown.current = true;
     windows.open("motd", "Message of the Day");
   }, [gm, session.options.motd]);

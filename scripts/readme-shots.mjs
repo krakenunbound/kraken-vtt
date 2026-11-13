@@ -2,7 +2,13 @@
 // Descending Darkness table (the crypt in torchlight, the combat tracker, a
 // sheet), what a test player sees in Chrome, ability cards (the player's and
 // the GM's), a book, an Apeira Astra table
-// (the derelict's deck, a threat's record), the map editor.
+// (the derelict's deck, a threat's record), the map editor; and the table in
+// play: a player's turn banner, shapes drawn in a player's colour, death
+// markers, the Calendar, the Message of the Day, read-aloud, the external dice
+// tower (the Kraken Lighthouse) with picture dice from a dice pack, the Dice
+// window, the hex-grid desktop, the map editor, Map Studio, the sci-fi desktop.
+// Only Kraken's own games: the GM's FG modules and packs are kept out
+// (KRAKEN_BOOKS and KRAKEN_PACKS point at empty folders).
 // Run: node scripts/readme-shots.mjs (KRAKEN_WINDOW_AT places the window).
 import "./loopback.mjs";
 import { spawn } from "node:child_process";
@@ -16,7 +22,10 @@ import { CHROME } from "./lib/chrome.mjs";
 const OUT = path.join(process.cwd(), "docs", "screenshots");
 mkdirSync(OUT, { recursive: true });
 const profile = mkdtempSync(path.join(tmpdir(), "kraken-shots-"));
-const env = { ...process.env, KRAKEN_AGENT_FILE: path.join(profile, "agent.json"), KRAKEN_AGENT_PORT: "0" };
+const env = { ...process.env, KRAKEN_AGENT_FILE: path.join(profile, "agent.json"), KRAKEN_AGENT_PORT: "0", KRAKEN_BOOKS: path.join(profile, "no-fg-modules"), KRAKEN_PACKS: path.join(profile, "Kraken VTT", "Packs") };
+delete env.KRAKEN_HOME;
+// Only the scenes named (SHOTS=crypt,calendar,...), or all.
+const ONLY = (process.env.SHOTS_ONLY || "").split(",").filter(Boolean);
 const app = await electron.launch({ args: [".", "--mute-audio", `--user-data-dir=${profile}`], cwd: process.cwd(), env });
 const page = await app.firstWindow();
 const SCREEN = await app.evaluate(async ({ BrowserWindow, screen }) => {
@@ -58,6 +67,21 @@ async function tool(name, args = {}) {
   }
 }
 const settle = (ms = 800) => new Promise((resolve) => setTimeout(resolve, ms));
+// Every window but the map closed (a clear table for the next shot).
+const clearWindows = async (where) => {
+  await where.evaluate(() => document.querySelectorAll('section.window:not([data-window="map"]) button[aria-label^="Close "]').forEach((button) => button.click()));
+  await settle(500);
+};
+// A scene of its own: shot if it can be, logged if not.
+async function scene(name, run) {
+  if (ONLY.length && !ONLY.includes(name)) return;
+  try {
+    await clearWindows(page);
+    await run();
+  } catch (error) {
+    console.log("scene failed:", name, String(error?.message ?? error).split("\n")[0]);
+  }
+}
 const shot = async (target, name) => {
   await target.screenshot({ path: path.join(OUT, `${name}.jpg`), type: "jpeg", quality: 86 });
   console.log("shot", name);
@@ -216,6 +240,164 @@ try {
   await settle(3000);
   await shot(page, "books");
   await tool("kraken_windows", { action: "close", kind: "record", record: "Warden Saranth" });
+  await tool("kraken_windows", { action: "close", kind: "book", book: handbook }).catch(() => undefined);
+  await page.keyboard.press("Escape").catch(() => undefined);
+  const mapBox = async (where) => where.locator('.window[data-window="map"] .viewport').boundingBox();
+  const entries = async () => (await tool("kraken_combat")).entries;
+  const entryOf = async (recordId) => (await entries()).find((entry) => entry.recordId === recordId);
+  // Ann's colour (Settings > You at the table): her token's ring, her pings and drawings.
+  await tool("kraken_dice_settings", { who: "Ann", color: "#5aa9ff" });
+
+  // Ann's turn: the banner across her screen.
+  await scene("turn", async () => {
+    await clearWindows(seat);
+    await tool("kraken_combat", { action: "set-turn", id: (await entryOf(warden)).id });
+    await settle(800);
+    await tool("kraken_combat", { action: "set-turn", id: (await entryOf(brennaId)).id });
+    await seat.waitForSelector(".turn-banner", { timeout: 10000 });
+    await settle(700);
+    await shot(seat, "player-turn");
+    await seat.waitForSelector(".turn-banner", { state: "detached", timeout: 10000 }).catch(() => undefined);
+  });
+
+  // Ann aims: a cone, an arrow and a circle drawn in her colour, measured as drawn.
+  await scene("shapes", async () => {
+    const box = await mapBox(seat);
+    await seat.click('.window[data-window="map"] [data-tool="draw"]');
+    const draw = async (shape, from, to, hold = false) => {
+      await seat.click(`.window[data-window="map"] [data-draw-shape="${shape}"]`);
+      await seat.mouse.move(box.x + box.width * from[0], box.y + box.height * from[1]);
+      await seat.mouse.down();
+      await seat.mouse.move(box.x + box.width * to[0], box.y + box.height * to[1], { steps: 8 });
+      if (hold) return;
+      await seat.mouse.up();
+      await settle(300);
+    };
+    await draw("arrow", [0.36, 0.62], [0.55, 0.47]);
+    await draw("cone", [0.33, 0.58], [0.47, 0.4]);
+    await draw("circle", [0.62, 0.42], [0.69, 0.47], true);
+    await settle(600);
+    await shot(seat, "player-shapes");
+    await seat.mouse.up();
+    await seat.click('.window[data-window="map"] [data-tool="pan"]').catch(() => undefined);
+  });
+
+  // The Bone Sentinels fall: death markers where they stood (their tokens cleared).
+  await scene("markers", async () => {
+    const view = await tool("kraken_combat");
+    const fallen = view.entries.filter((entry) => entry.recordId === sentinel);
+    for (const entry of fallen) await tool("kraken_combat", { action: "damage", id: entry.id, amount: 99 });
+    await settle(800);
+    const map = await tool("kraken_map", {});
+    for (const token of (map.tokens ?? []).filter((item) => item.recordId === sentinel)) await tool("kraken_token_remove", { id: token.id });
+    await tool("kraken_death_markers", { action: "place", x: (map.tokens ?? []).find((item) => item.recordId === warden)?.x - 140, y: (map.tokens ?? []).find((item) => item.recordId === warden)?.y + 90, set: "skull-round", variant: 1, size: 1 }).catch(() => undefined);
+    await tool("kraken_windows", { action: "open", kind: "deathmarkers" });
+    await settle(2500);
+    await shot(page, "death-markers");
+    await tool("kraken_windows", { action: "close", kind: "deathmarkers" });
+  });
+
+  // The Calendar: the Waning Count, notes from the GM and from Ann on the days ahead.
+  await scene("calendar", async () => {
+    const cal = await tool("kraken_calendar");
+    await tool("kraken_calendar", { action: "set", month: 5, day: 12, hour: 21, minute: 40 });
+    await tool("kraken_calendar", { action: "note-add", month: 5, day: 14, text: "Mother Hesk's tonic is ready to collect from the herbalist." });
+    await tool("kraken_calendar", { action: "note-add", month: 5, day: 19, text: "New moon: the dead walk the old road.", shown: false });
+    await page.evaluate(() => undefined);
+    await seat.click('[data-launch="calendar"]');
+    await seat.waitForSelector(".calendar-window [data-cal-today]");
+    void cal;
+    const day = (await tool("kraken_calendar")).day + 1;
+    await seat.click(`.calendar-window [data-cal-day="${day}"]`);
+    await seat.fill('.calendar-window [data-field="cal-note"]', "Brenna owes the smith 3 silver for the new shield strap.");
+    await seat.click('.calendar-window [data-action="cal-note-add"]');
+    await settle(800);
+    await seat.click('[aria-label="Close Calendar"]');
+    await tool("kraken_windows", { action: "open", kind: "calendar" });
+    await page.waitForSelector(".calendar-window [data-cal-today]");
+    await page.click(`.calendar-window [data-cal-day="${day + 1}"]`);
+    await settle(1500);
+    await shot(page, "calendar");
+    await tool("kraken_windows", { action: "close", kind: "calendar" });
+  });
+
+  // The Message of the Day: what a second player sees as they join.
+  await scene("motd", async () => {
+    await tool("kraken_table_options", { motd: { text: "Welcome back to Hollowmere.\n\nLast time: you broke the seal on the Watchtower's crypt and the Warden woke. Brenna is hurt; Tomas has two Mend Wounds left.\n\nTonight: the crypt, and whatever is still moving down there. Bring torches.", links: [{ kind: "picture", book: adventure, file: "images/watchtower-crypt.webp", label: "The crypt" }, { kind: "picture", book: adventure, file: "images/handout-journal.webp", label: "Aldous's journal" }, { kind: "book", book: handbook, page: globalThis.dreadPage?.page, label: "Dread" }] } });
+    const second = await (await browser.newContext({ viewport: SCREEN })).newPage();
+    await second.goto("http://127.0.0.1:47461/");
+    await second.fill('input[name="name"]', "Cal");
+    await second.fill('input[name="account-password"]', "test-pass");
+    await second.click('button[type="submit"]');
+    await second.waitForSelector(".motd-window", { timeout: 20000 });
+    await second.locator('button[aria-label="Close Character Selection"]').click().catch(() => {});
+    await settle(3000);
+    await shot(second, "player-motd");
+    await second.close();
+  });
+
+  // Read aloud: the adventure's boxed text, over Ann's map.
+  await scene("readaloud", async () => {
+    await tool("kraken_read_aloud", { title: "The Crypt", text: "The stair ends in cold dark. Your torchlight finds a long vault of niches, each holding a shape wrapped in grey cloth. At the far end a lantern burns with a blue flame that gives no warmth, and beneath it something tall turns its head toward you." });
+    await clearWindows(seat);
+    await seat.waitForSelector(".read-aloud-bubble", { timeout: 10000 });
+    await settle(1200);
+    await shot(seat, "player-read-aloud");
+    await seat.click(".read-aloud-bubble").catch(() => undefined);
+    await page.click(".read-aloud-bubble").catch(() => undefined);
+  });
+
+  // The dice tower on the table (the Kraken Lighthouse, lit), and picture dice from a dice pack rolling.
+  await scene("tower", async () => {
+    await tool("kraken_table_options", { towerExternal: true });
+    const looks = await tool("kraken_tower", { action: "list" });
+    const lighthouse = looks.pictures.find((item) => /Lighthouse/.test(item.id));
+    if (lighthouse) await tool("kraken_tower", { action: "style", id: lighthouse.id });
+    await tool("kraken_tower", { action: "lock", x: SCREEN.width - 470, y: SCREEN.height - 330 });
+    await tool("kraken_tower", { action: "on" });
+    await tool("kraken_dice_settings", { preset: "Kraken Hide" }).catch(() => tool("kraken_dice_settings", { preset: "Aether Core" }));
+    await tool("kraken_table_options", { diceHold: 12 });
+    await settle(1500);
+    await tool("kraken_roll", { formula: "1d20+4", label: "Brenna: attack the Warden" });
+    await tool("kraken_roll", { formula: "2d6+3", label: "[DAMAGE] Warhammer" });
+    await settle(2600);
+    await shot(page, "dice-tower");
+  });
+
+  // The Dice window: Kraken's sets and a dice pack's.
+  await scene("dicewindow", async () => {
+    await tool("kraken_windows", { action: "open", kind: "dice" });
+    await page.waitForSelector(".dice-window");
+    await page.click('.dice-window [aria-label="Groups"] >> text=Kraken Sea Glass').catch(() => undefined);
+    await settle(3500);
+    await shot(page, "dice-window");
+    await tool("kraken_windows", { action: "close", kind: "dice" });
+  });
+
+  // The map editor, unlocked: walls, doors, lights.
+  await scene("editor", async () => {
+    await page.click('.window[data-window="map"] [data-action="map-editor"]');
+    await settle(2500);
+    await shot(page, "map-editor");
+    await page.click('.window[data-window="map"] [data-action="map-editor"]');
+  });
+
+  // The desktop with no map up: the hex grid on black, the Kraken decal, the tower.
+  await scene("desktop", async () => {
+    const hex = (await tool("kraken_decal", { kind: "wallpaper", action: "list", search: "Hex Grid Slate" })).wallpapers[0];
+    await tool("kraken_decal", { kind: "wallpaper", action: "set", id: hex.id });
+    await page.click('.window[data-window="map"] [aria-label^="Close"]').catch(() => undefined);
+    await settle(3000);
+    await shot(page, "desktop-hex");
+  });
+
+  // Map Studio, Kraken's map maker.
+  await scene("studio", async () => {
+    await tool("kraken_windows", { action: "open", kind: "studio" });
+    await settle(9000);
+    await shot(page, "map-studio");
+    await tool("kraken_windows", { action: "close", kind: "studio" });
+  });
 
   // Apeira Astra: the Kestrel's deck.
   await tool("kraken_leave", {});
@@ -266,6 +448,17 @@ try {
   await tool("kraken_windows", { action: "open", kind: "sheet", record: rookId });
   await settle(2500);
   await shot(page, "sheet-astra");
+  await tool("kraken_windows", { action: "close", kind: "sheet", record: rookId }).catch(() => undefined);
+  await scene("scifi", async () => {
+    const amber = (await tool("kraken_decal", { kind: "wallpaper", action: "list", search: "Hex Grid Amber" })).wallpapers[0];
+    if (amber) await tool("kraken_decal", { kind: "wallpaper", action: "set", id: amber.id });
+    const ringed = (await tool("kraken_decal", { action: "list", search: "Ringed World" })).decals[0];
+    if (ringed) await tool("kraken_decal", { action: "set", id: ringed.id });
+    await page.click('.window[data-window="map"] [aria-label^="Close"]').catch(() => undefined);
+    await clearWindows(page);
+    await settle(3500);
+    await shot(page, "desktop-scifi");
+  });
   console.log("done");
 } finally {
   await browser?.close();

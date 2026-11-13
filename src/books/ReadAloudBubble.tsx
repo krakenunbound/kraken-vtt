@@ -20,9 +20,16 @@ export const useAnyMapShown = () => useSyncExternalStore((listener) => (mapListe
 // of the map with the words in it, gone after the time it takes to read them
 // (or a click).
 export function ReadAloudBubble({ now, onDone, floating = false }: { now: ReadAloud | null; onDone: () => void; floating?: boolean }) {
+  // Its time counts from when it came (at: when this screen got it), however
+  // often the map it sits over opens and closes in the meantime.
   useEffect(() => {
     if (!now) return;
-    const timer = window.setTimeout(onDone, Math.min(45000, Math.max(8000, 6000 + now.text.length * 55)));
+    const left = Math.min(45000, Math.max(8000, 6000 + now.text.length * 55)) - (Date.now() - now.at);
+    if (left <= 0) {
+      onDone();
+      return;
+    }
+    const timer = window.setTimeout(onDone, left);
     return () => window.clearTimeout(timer);
   }, [now?.at]);
   if (!now) return null;

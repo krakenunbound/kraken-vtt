@@ -171,7 +171,10 @@ try {
   await seat.waitForSelector('.window[data-window="map"]', { state: "detached" });
   await tool("kraken_read_aloud", { text: "The bridge sways under your weight.", title: "The Rope Bridge" });
   await seat.waitForSelector('.read-aloud-bubble.floating:has-text("The bridge sways")', { timeout: 8000 });
-  await seat.click(".read-aloud-bubble");
+  // It goes by itself once it has been up long enough to read (8 s for so few words), whatever opens meanwhile.
+  await seat.click('[data-launch="calendar"]');
+  await seat.click('[aria-label="Close Calendar"]');
+  await seat.waitForSelector(".read-aloud-bubble", { state: "detached", timeout: 12000 });
   report.push("read-aloud: the NPC's boxed text has the GM's button (not the player's); read, it shows in chat and as a bubble over the test player's map; kraken_read_aloud with the player's map closed: floating over their table");
 
   // A chat line into a note: the player says something, drags it into a new note, and onto the Notes list.

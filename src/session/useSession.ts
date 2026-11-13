@@ -488,6 +488,8 @@ export function useSession() {
             applyMap(msg.map as TableMap);
             if (msg.combat) setCombat(msg.combat as CombatView);
             if (msg.calendar) setCalendar(msg.calendar as CalendarView);
+            // A new table: no read-aloud left over from the last.
+            setReadAloudNow(null);
             if (msg.options) setOptions(msg.options as TableOptions);
             setChat((msg.chat as ChatLine[]) ?? []);
             if (msg.books) setBookShelf(msg.books as BookShelf);
@@ -515,7 +517,7 @@ export function useSession() {
           if (msg.type === "party" && msg.party) setParty(msg.party as import("../party/PartySheet").PartyView);
           if (msg.type === "combat" && msg.combat) setCombat(msg.combat as CombatView);
           if (msg.type === "calendar" && msg.calendar) setCalendar(msg.calendar as CalendarView);
-          if (msg.type === "read-aloud" && typeof msg.text === "string") setReadAloudNow({ text: msg.text, title: String(msg.title ?? ""), at: Number(msg.at) || Date.now() });
+          if (msg.type === "read-aloud" && typeof msg.text === "string") setReadAloudNow({ text: msg.text, title: String(msg.title ?? ""), at: Date.now() });
           if (msg.type === "options" && msg.options) setOptions(msg.options as TableOptions);
           if (msg.type === "map-share") setMapShared((count) => count + 1);
           if (msg.type === "ping") {

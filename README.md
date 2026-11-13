@@ -13,18 +13,119 @@ of use, and a built-in AI agent that can do anything the GM can.
 
 ## Screenshots
 
+Full-screen captures from Kraken's own games, *Descending Darkness* and *Apeira Astra*. Shots marked "in Chrome" are what a player sees in a browser.
+
+### The GM's table
+![The GM's table: the crypt of The Empty Watchtower in torchlight](docs/screenshots/gm-crypt.jpg)
+*The Empty Watchtower*'s crypt in torchlight: the party, the Warden and his Bone Sentinels, a blue lantern, and ash drifting in the dark. The quick slots along the bottom hold sheets, books, handouts and maps, one click away.
+
+### What a player sees (in Chrome)
+![A player's view in Chrome](docs/screenshots/player-crypt.jpg)
+Only what their character can see. Walls block sight, and the dark hides whatever the light doesn't reach. The GM's walls, doors and hidden creatures never reach the player's browser.
+
+### Combat
+![The combat tracker](docs/screenshots/combat.jpg)
+Initiative, Defense and Health, each creature's attacks ready to roll, and the results applied for you.
+- **Back** undoes the last turn change: effects that ran out come back, and ongoing damage is healed.
+- **‹ Round ›** moves the round back or on.
+- Click or drag the turn arrow to give anyone the turn.
+
+### Your turn (in Chrome)
+![Your turn: a banner across the player's screen](docs/screenshots/player-turn.jpg)
+When a player's turn comes round, a banner sweeps across their screen and a bell rings. Each player turns either on or off in **Settings > You at the table**, where they also pick their colour.
+
+### Shapes on the map (in Chrome)
+![A player's arrow, cone and circle, measured as drawn](docs/screenshots/player-shapes.jpg)
+Anyone can draw arrows for direction and aim, cones from their point, circles from their centre, squares and lines.
+- Each shape is measured in feet as you draw it, and drawn in your colour, so everyone knows who drew what.
+- Drag a shape's handles to resize it.
+
+### Death markers
+![Death markers where the Bone Sentinels fell, and the GM's Death Markers window](docs/screenshots/death-markers.jpg)
+A creature that dies leaves a mark where it fell: blood in its colour, a skull, a tombstone, bones or a scorch mark. The GM chooses the set for each creature type of the game. Undead start violet; constructs start black.
+
+### The map editor
+![The map editor: walls, doors and lights](docs/screenshots/map-editor.jpg)
+Unlock a map to edit it.
+- **Walls and doors:** drawn where your hand puts them, with snapping to the grid and to wall ends.
+- **Lights and masks.**
+- **Paint, text and pins.**
+- **Weather and effects.**
+- **Image layers.**
+
+All of it applies to the same master image wherever it's opened. Lock it again to play.
+
+### The dice tower, and dice packs
+![The Kraken Lighthouse dice tower and picture dice from a dice pack](docs/screenshots/dice-tower.jpg)
+**The dice tower** can stand anywhere on the table.
+- Right-click it to lock it in place or fix it at an exact spot.
+- It has six drawn looks and several painted towers. This one is the Kraken Lighthouse, lit while it's on.
+- Hold dice over it and it comes alive.
+
+**The dice** here are picture dice from a **dice pack**: a folder holding `dice.json` and its textures. Drop one in `Documents/Kraken VTT/Dice` and everyone at the table can use it.
+
+### The Dice window
+![The Dice window: sets, a dice pack, the 3D preview](docs/screenshots/dice-window.jpg)
+Dozens of 3D dice sets in glass, metal, stone and enchanted finishes, plus each dice pack's sets in a group of their own. Each person keeps their own dice, their NPC dice and their damage dice.
+
+### The Calendar
+![The Calendar: the Waning Count, with notes on the days ahead](docs/screenshots/calendar.jpg)
+Each game has its own calendar: Greyhawk, Harptos, Golarion, Traveller's Imperial date, and Kraken's own.
+- The GM moves the day on, adds eight hours for a rest, and posts the date in chat.
+- Anyone writes notes on a day. A player's note is signed in their colour; a GM's note is shown to the players or kept private.
+
+### Message of the Day (in Chrome)
+![The Message of the Day, opened as a player joins](docs/screenshots/player-motd.jpg)
+The GM's words for the session, with links to a map, a handout or a rules page. It opens on each player's screen as they join.
+
+### Read aloud (in Chrome)
+![Read-aloud text in a speech bubble over the map](docs/screenshots/player-read-aloud.jpg)
+An adventure's boxed text has a button for the GM. The words go to chat and appear over every player's map as a speech bubble.
+
+### Books
+![The Player's Handbook open on Dread, beside the Warden's record](docs/screenshots/books.jpg)
+Every book is read in Kraken: rulebooks, bestiaries and adventures, with their pictures, maps and links. The Player's Handbook is open here on Dread, beside the Warden's record from the Bestiary.
+
+### Character sheets
+![A Descending Darkness character sheet](docs/screenshots/sheet-descending.jpg)
+A Descending Darkness cleric, with Defense, Health and the Dread track. Every roll on the sheet goes to the table's 3D dice.
+
+### Ability cards
+![Ability cards: the GM's window, with a cleric's spells and one card turned over](docs/screenshots/cards-gm.jpg)
+A character's spells and weapons as painted cards. Click one to turn it over and cast, or drag it onto a token to target and cast in one move.
+
+![Ability cards: a player's hand, in Chrome](docs/screenshots/cards-player.jpg)
+A player's hand. Spent cards tip over and go grey, and a long rest stands them up again.
+
+### The desktop: a hex grid on black
+![The hex grid wallpaper, the Kraken decal and the dice tower](docs/screenshots/desktop-hex.jpg)
+Game-table wallpapers: hex grids, a battle mat, a dungeon map, an old world map, and a sci-fi set. They're big and seamless, so the repeat hardly shows. Your own go in `Documents/Kraken VTT`, beside your dice packs, dice towers, GM icons and decals. Each folder has a guide for you, and one for an AI agent.
+
+### Map Studio
+![Map Studio, Kraken's map maker](docs/screenshots/map-studio.jpg)
+Kraken's own map maker.
+- **Painting:** paint from art packs, generate a dungeon.
+- **Walls and doors:** drawn with art along them.
+- **Lighting and weather:** add lights and weather.
+- **Play testing:** try the map out, then save it straight into the campaign's images.
+
+### Apeira Astra
+![Apeira Astra: the derelict's deck and a threat's record](docs/screenshots/gm-kestrel.jpg)
+*Salvage Rights*: boarding the *Kestrel's Due*, with Mags Orrin's record from the Threat Dossier and the crew in combat.
+
+![An Apeira Astra crew sheet](docs/screenshots/sheet-astra.jpg)
+A crew member's sheet: 2d6 tasks with Difficulty and Boon or Bane, Stamina and Armour.
+
+![The sci-fi desktop: an amber hex grid and the Ringed World decal](docs/screenshots/desktop-scifi.jpg)
+The sci-fi set: an amber hex grid on black, with the Ringed World decal.
+
+### Start screens
+![The start screen: a keep](docs/screenshots/start-keep.jpg)
+Six start screens, fantasy, science fiction and horror, one at random each time. Updates are offered here, and only here: never during a game.
+
 | | |
 |---|---|
-| ![The GM's table: the crypt of The Empty Watchtower in torchlight](docs/screenshots/gm-crypt.jpg) | ![The combat tracker](docs/screenshots/combat.jpg) |
-| **The GM's table.** *The Empty Watchtower*'s crypt in torchlight, with the party, the Warden and his Bone Sentinels. | **Combat.** Initiative, Defense and Health, each creature's attacks ready to roll, with the rolls in chat. |
-| ![What a player sees](docs/screenshots/player-crypt.jpg) | ![A Descending Darkness character sheet](docs/screenshots/sheet-descending.jpg) |
-| **A player's view, in Chrome.** Only what their character can see: walls block sight, and the dark hides what the light does not reach. | **Character sheets.** A Descending Darkness cleric, with Defense, Health and the Dread track. Every new character gets a portrait for its kin and class, or Origin and Path. |
-| ![Ability cards: the GM's window, with a cleric's spells and one card turned over](docs/screenshots/cards-gm.jpg) | ![Ability cards: a player's hand, in Chrome](docs/screenshots/cards-player.jpg) |
-| **Ability cards.** Turn them on in Settings and a character's spells and weapons become cards with painted pictures. Click one to turn it over and cast; drag it onto a token to target and cast in one move. | **A player's hand.** Spent cards tip over and go grey; a long rest stands them up again. |
-| ![Apeira Astra: the derelict's deck and a threat's record](docs/screenshots/gm-kestrel.jpg) | ![An Apeira Astra crew sheet](docs/screenshots/sheet-astra.jpg) |
-| **Apeira Astra.** *Salvage Rights*: boarding the *Kestrel's Due*, with Mags Orrin's record from the Threat Dossier. | **A crew member.** 2d6 tasks with Difficulty and Boon or Bane, Stamina and Armour. |
-| ![Books](docs/screenshots/books.jpg) | ![Start screen scenes](docs/screenshots/start-station.jpg) |
-| **Books.** The Player's Handbook open on Dread, beside the Warden's record and portrait from the Bestiary. | **Six start screens.** Fantasy, science fiction and horror, one at random each time. |
+| ![The start screen: a station](docs/screenshots/start-station.jpg) | ![The start screen: a graveyard](docs/screenshots/start-graveyard.jpg) |
 
 ## What it does
 
