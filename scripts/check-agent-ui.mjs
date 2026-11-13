@@ -103,12 +103,14 @@ try {
   await tool("kraken_dice_settings", { set: "damage", same: true });
   await tool("kraken_windows", { action: "close", kind: "dice" });
   await tool("kraken_windows", { action: "close", kind: "settings" });
-  // FG's tray: the dice are 3D in this seat's set; a right-click rolls several, the modifier's quick values add up.
+  // FG's tray: the dice are 3D in this seat's set; a right-click picks up several (a click on the table throws them), the modifier's quick values add up.
   await page.waitForSelector(".tray-die img.tray-die-3d");
   await page.locator(".modifier-box").click({ button: "right" });
   await page.click('.tray-menu button:has-text("+2")');
   await page.click('.tray-die[aria-label="d6"]', { button: "right" });
   await page.click('[data-many="3"]');
+  await page.mouse.move(640, 380, { steps: 3 });
+  await page.mouse.click(640, 380);
   await settle(600);
   const thrown = (await tool("kraken_chat_log", { count: 3 })).at(-1);
   assert(thrown.roll?.formula === "3d6+2", `right-click rolled 3d6 with the +2: ${JSON.stringify(thrown.roll?.formula)}`);

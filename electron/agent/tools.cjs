@@ -488,9 +488,10 @@ const TOOLS = [
   },
   {
     name: "kraken_quickslots",
-    description: "A seat's quick slots (the bar along the bottom of the table: ten things kept at hand, opened with a click): the GM's, or a player's by name. Read them, or set slots to a list of ten (null for an empty slot): { kind: book, book (id), page (id, optional), label } | { kind: picture, book, file, label } | { kind: sheet, record (character id), label }.",
-    inputSchema: object({ seat: string("A player's name; empty for the GM"), slots: { type: "array", description: "Ten slots, or leave out to read" } }),
-    run(args, ctx) {
+    description: "A seat's quick slots (the bar along the bottom of the table: ten things kept at hand, opened with a click): the GM's, or a player's by name. Read them, or set slots to a list of ten (null for an empty slot): { kind: book, book (id), page (id, optional), label } | { kind: picture, book, file, label } | { kind: sheet, record (character id), label } | { kind: dice, formula (3d6, 1d20+2), label } (rolled with a click, as dice dropped on it from the tray) | { kind: macro, text (a chat line: /roll 4d6k3), label } (run as if typed). press: a slot's index (0-9; the key 1-9, 0) uses it as the seat's click does (the GM's own bar).",
+    inputSchema: object({ seat: string("A player's name; empty for the GM"), slots: { type: "array", description: "Ten slots, or leave out to read" }, press: number("The GM's slot to use (0-9), as its click or number key") }),
+    async run(args, ctx) {
+      if (Number.isInteger(args.press)) return out(await ctx.ui({ kind: "quickslots", action: "press", index: args.press }));
       return out(needTable(ctx).quickSlots(args.seat || "@gm", args.slots));
     },
   },

@@ -148,8 +148,8 @@ async function runRuleset(ruleset, plan) {
       ctx.shelf = shelf;
       const want = plan.books ?? [];
       if (want.length) {
-        await openSide(page, "books");
-        await page.click('[data-books-tab="activation"]');
+        await openSide(page, "books:activation");
+        await page.waitForSelector('[data-books-tab="activation"]');
         for (const title of want) {
           const book = shelf.find((item) => item.title === title || item.name === title);
           if (!check(book, `the shelf has ${title}`, shelf.map((item) => item.title).join(" | ").slice(0, 400))) continue;

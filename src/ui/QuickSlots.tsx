@@ -4,12 +4,16 @@ import { Icon } from "./icons";
 import { useWindows } from "./Windows";
 import { useBookWindows } from "../books/Books";
 import { sound } from "../sound/soundEngine";
+import { chatRunner } from "./chatRunner";
+import { agentCommands } from "./agentCommands";
 
 // Quick slots: a bar along the bottom of the table, ten things this seat
 // keeps at hand (a book, or a page of one; a picture or map; a character's
-// sheet), opened again with a click. Drag a book, a page, a picture or a
-// character onto a slot; right-click a slot to empty it. The host keeps each
-// seat's own, with the campaign.
+// sheet; dice; a chat line such as /roll 4d6k3), used again with a click or
+// its number key (1-9, 0). Drag a link onto a slot, drop dice on it from the
+// tray (or put down dice held in the hand), or drag a line from the chat's
+// entry. A right-click opens the slot's menu: use it, rename it, or clear it.
+// The host keeps each seat's own, with the campaign.
 export const SLOT_DRAG = "text/kraken-slot";
 
 // What a thing gives a drag, so it can be dropped on a quick slot, into a
@@ -29,7 +33,7 @@ export function slotDrag(slot: QuickSlot) {
   };
 }
 
-export const LINK_ICON: Record<QuickSlot["kind"], string> = { book: "book", picture: "map", sheet: "character", sound: "sound", note: "chat", record: "shield" };
+export const LINK_ICON: Record<QuickSlot["kind"], string> = { book: "book", picture: "map", sheet: "character", sound: "sound", note: "chat", record: "shield", dice: "tower", macro: "scroll" };
 // A link read from a drop, if it is one.
 export function linkFrom(event: React.DragEvent): QuickSlot | null {
   try {
@@ -40,6 +44,12 @@ export function linkFrom(event: React.DragEvent): QuickSlot | null {
   }
 }
 export const hasLink = (event: React.DragEvent) => [...event.dataTransfer.types].includes(SLOT_DRAG);
+// A chat command dragged as text (the words selected in the chat's entry, as
+// FG's macro): a slot takes it as a macro.
+function macroFrom(event: React.DragEvent): QuickSlot | null {
+  const text = event.dataTransfer.getData("text/plain").trim();
+  return /^\/\S/.test(text) && text.length <= 300 ? { kind: "macro", text, label: text.slice(0, 80) } : null;
+}
 
 // Opens a link, wherever it was dropped: a book at its page, a picture, a
 // sheet, a note; a sound plays (for the table, from the GM; here, for a player).
@@ -52,6 +62,11 @@ export function useOpenLink(session: Session) {
     else if (link.kind === "sheet") windows.open("sheet", link.label, link.record);
     else if (link.kind === "note") windows.open("note", link.label, link.record);
     else if (link.kind === "record") windows.open("record", link.label, link.record);
+    // Dice and macros run as the chat would run them (who speaks, the tower).
+    else if (link.kind === "dice") {
+      if (chatRunner.run) chatRunner.run(`/roll ${link.formula}`);
+      else session.roll(link.formula, "", "", false, "public", "");
+    } else if (link.kind === "macro") chatRunner.run?.(link.text);
     else if (link.kind === "sound") {
       if (sound.isPlaying(link.sound)) {
         if (session.role === "dm") stopSoundForTable(session, link.sound, link.soundKind);
@@ -93,14 +108,64 @@ function keepPlace(place: Place) {
   }
 }
 
+const USE_LABEL: Record<QuickSlot["kind"], string> = { book: "Open", picture: "Open", sheet: "Open", note: "Open", record: "Open", sound: "Play", dice: "Roll", macro: "Run" };
+
 export function QuickSlots({ session }: { session: Session }) {
   const openLink = useOpenLink(session);
   const [over, setOver] = useState(-1);
+  // A slot's right-click menu (where it opened), and a rename being typed.
+  const [menu, setMenu] = useState<{ index: number; x: number; y: number; rename?: string } | null>(null);
   const [place, setPlace] = useState<Place>(readPlace);
   const bar = useRef<HTMLDivElement>(null);
   const slots = session.quickSlots;
   const set = (index: number, slot: QuickSlot | null) => session.setQuickSlots(slots.map((item, at) => (at === index ? slot : item)));
   const open = openLink;
+  // The number keys use the slots (1-9, then 0), unless something is being typed.
+  const live = useRef({ slots, open });
+  live.current = { slots, open };
+  useEffect(() => {
+    const key = (event: KeyboardEvent) => {
+      if (event.ctrlKey || event.altKey || event.metaKey || event.repeat) return;
+      const index = "1234567890".indexOf(event.key);
+      if (index < 0) return;
+      const target = event.target as HTMLElement | null;
+      if (target && (target.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName))) return;
+      const slot = live.current.slots[index];
+      if (!slot) return;
+      event.preventDefault();
+      live.current.open(slot);
+    };
+    window.addEventListener("keydown", key);
+    return () => window.removeEventListener("keydown", key);
+  }, []);
+  // The agent's press (kraken_quickslots press): the slot used as a click uses it.
+  useEffect(
+    () =>
+      agentCommands.register("quickslots", (command) => {
+        if (command.kind !== "quickslots") return null;
+        const slot = live.current.slots[command.index];
+        if (!slot) throw new Error(`Quick slot ${command.index + 1 === 10 ? 0 : command.index + 1} is empty.`);
+        live.current.open(slot);
+        return { used: command.index, slot };
+      }),
+    [],
+  );
+  // The menu closes on a click elsewhere, or Escape.
+  useEffect(() => {
+    if (!menu) return;
+    const away = (event: Event) => {
+      if (event instanceof KeyboardEvent && event.key !== "Escape") return;
+      if (event.target instanceof Element && event.target.closest(".quick-slot-menu")) return;
+      setMenu(null);
+    };
+    window.addEventListener("pointerdown", away, true);
+    window.addEventListener("keydown", away);
+    return () => {
+      window.removeEventListener("pointerdown", away, true);
+      window.removeEventListener("keydown", away);
+    };
+  }, [menu]);
+  const menuSlot = menu ? slots[menu.index] : null;
   // Inside the table area, whatever the window's size.
   const clamp = (x: number, y: number) => {
     const parent = bar.current?.offsetParent as HTMLElement | null;
@@ -153,16 +218,17 @@ export function QuickSlots({ session }: { session: Session }) {
           type="button"
           className={`quick-slot${slot ? " full" : ""}${over === index ? " over" : ""}`}
           data-quick-slot={index}
-          title={slot ? `${slot.label} (right-click to empty; drag it on to a note)` : "Drag anything here: a book, a page, a map, a character, a sound, a note"}
+          title={slot ? `${slot.label}${slot.kind === "macro" ? ` (${slot.text})` : slot.kind === "dice" && slot.label !== slot.formula ? ` (${slot.formula})` : ""}: click or press ${index + 1 === 10 ? 0 : index + 1}; right-click for its menu` : "Drag anything here: a book, a page, a map, a character, a sound, a note, dice from the tray, or a line from the chat's entry"}
           {...(slot ? slotDrag(slot) : {})}
           aria-label={slot ? `Open ${slot.label}` : `Empty quick slot ${index + 1}`}
           onClick={() => slot && open(slot)}
           onContextMenu={(event) => {
             event.preventDefault();
-            if (slot) set(index, null);
+            if (slot) setMenu({ index, x: event.clientX, y: event.clientY });
           }}
           onDragOver={(event) => {
-            if (![...event.dataTransfer.types].includes(SLOT_DRAG)) return;
+            const types = [...event.dataTransfer.types];
+            if (!types.includes(SLOT_DRAG) && !types.includes("text/plain")) return;
             event.preventDefault();
             setOver(index);
           }}
@@ -170,7 +236,7 @@ export function QuickSlots({ session }: { session: Session }) {
           onDrop={(event) => {
             event.preventDefault();
             setOver(-1);
-            const slot = linkFrom(event);
+            const slot = linkFrom(event) ?? macroFrom(event);
             if (slot) set(index, slot);
           }}
         >
@@ -184,6 +250,39 @@ export function QuickSlots({ session }: { session: Session }) {
           )}
         </button>
       ))}
+      {menu && menuSlot ? (
+        <div className="quick-slot-menu tray-menu" role="menu" aria-label={`Quick slot ${menu.index + 1 === 10 ? 0 : menu.index + 1}`} style={{ left: menu.x, top: menu.y }}>
+          <span className="quick-slot-menu-head">{menuSlot.label}</span>
+          {menu.rename === undefined ? (
+            <>
+              <button type="button" role="menuitem" data-slot-action="use" onClick={() => (setMenu(null), open(menuSlot))}>
+                {USE_LABEL[menuSlot.kind] ?? "Open"}
+              </button>
+              <button type="button" role="menuitem" data-slot-action="rename" onClick={() => setMenu({ ...menu, rename: menuSlot.label })}>
+                Rename…
+              </button>
+              <button type="button" role="menuitem" data-slot-action="clear" className="danger" onClick={() => (setMenu(null), set(menu.index, null))}>
+                Clear this slot
+              </button>
+            </>
+          ) : (
+            <form
+              className="quick-slot-rename"
+              onSubmit={(event) => {
+                event.preventDefault();
+                const label = (menu.rename ?? "").trim().slice(0, 80);
+                if (label) set(menu.index, { ...menuSlot, label });
+                setMenu(null);
+              }}
+            >
+              <input autoFocus aria-label="The slot's name" value={menu.rename} maxLength={80} onChange={(event) => setMenu({ ...menu, rename: event.target.value })} />
+              <button type="submit" data-slot-action="rename-save">
+                Save
+              </button>
+            </form>
+          )}
+        </div>
+      ) : null}
       {place ? (
         <button type="button" className="quick-slots-dock" title="Dock the quick slots at the bottom" aria-label="Dock quick slots" data-action="quickslots-dock" onClick={dock}>
           <Icon name="dock" size={14} />

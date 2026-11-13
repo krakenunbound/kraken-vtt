@@ -143,7 +143,11 @@ export type QuickSlot =
   | { kind: "sound"; sound: string; soundKind: string; label: string }
   | { kind: "note"; record: string; label: string }
   // A record in the campaign's lists (an NPC, an item, a spell...).
-  | { kind: "record"; record: string; label: string };
+  | { kind: "record"; record: string; label: string }
+  // Dice held in the hand (3d6, 1d20+2): rolled with a click.
+  | { kind: "dice"; formula: string; label: string }
+  // A chat line run again with a click (/roll 4d6k3, /emote ..., or words said).
+  | { kind: "macro"; text: string; label: string };
 export type KrakenLink = QuickSlot;
 export type SoundItem = { id: string; kind: string; group: string; name: string };
 export type SoundLibrary = { sounds: SoundItem[]; groups: { id: string; count: number }[]; folder: string; triggers?: SoundTrigger[] };

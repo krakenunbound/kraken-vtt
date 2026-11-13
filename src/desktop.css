@@ -248,6 +248,10 @@ button .icon { vertical-align: -3px; }
 .chat-tag { margin-right: 6px; padding: 0 5px; border-radius: 4px; background: rgba(166, 18, 212, 0.25); color: #e0b8f2; font-size: 0.7rem; }
 .chat-entry { display: flex; gap: 6px; padding: 8px 10px 6px; border-top: 1px solid var(--line); }
 .chat-entry input { flex: 1; }
+.chat-macro-grip { display: flex; align-items: center; padding: 0 4px; color: var(--brass); cursor: grab; border: 1px solid var(--panel-edge); border-radius: 6px; }
+.chat-macro-grip:active { cursor: grabbing; }
+.dice-ghost.held { transform: translate(-30%, -30%) rotate(-8deg); }
+.dice-ghost-count { align-self: flex-end; color: var(--brass); font-size: 0.9rem; text-shadow: 0 1px 3px #000; }
 
 .dice-tray { display: flex; align-items: center; gap: 2px; padding: 4px 8px 8px; }
 .tray-die { padding: 2px; background: transparent; border-color: transparent; }
@@ -1565,3 +1569,9 @@ textarea.cc-field.tall { min-height: 220px; }
 .library-preview figcaption { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .library-preview-actions { margin-left: auto; display: flex; gap: 6px; flex-wrap: wrap; }
 .library-module { margin: 10px 0 4px; color: var(--accent, #d6aa5c); }
+/* A quick slot's right-click menu: use it, rename it, or clear it (on purpose). */
+.quick-slot-menu { min-width: 170px; }
+.quick-slot-menu-head { padding: 4px 10px 6px; color: var(--brass); font-weight: 700; font-size: 0.82rem; border-bottom: 1px solid var(--panel-edge); margin-bottom: 2px; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.quick-slot-menu button.danger { color: #e08a7a; }
+.quick-slot-rename { display: flex; gap: 6px; padding: 4px; }
+.quick-slot-rename input { flex: 1; min-width: 0; }

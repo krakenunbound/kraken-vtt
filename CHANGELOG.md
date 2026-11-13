@@ -4,6 +4,25 @@ What changed in each release of Kraken VTT. Downloads are on the
 [Releases](https://github.com/krakenunbound/kraken-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
+## 0.1.0-alpha.75: Dice and macros on the quick slots; Modules and Books apart
+
+- **Dice in your hand, as in Fantasy Grounds:** right-click a die and pick how
+  many. The dice follow the pointer. Click the table to throw them, the tower
+  to roll there, or a quick slot to keep them there. Right-click or Escape
+  puts them back. A die dragged from the tray onto a slot works too.
+- **Macros:** type `/roll 4d6k3` (or any chat line) and drag the hand beside
+  the chat's entry onto a quick slot; the slot runs it again.
+- **Number keys** use the quick slots: 1 to 9, then 0 (not while typing).
+- **A right-click on a quick slot opens its menu** (use, rename, clear). It
+  no longer empties the slot by itself.
+- **Modules and Books are two windows, as in Fantasy Grounds:** Modules has
+  every module for the game (Activation, Packs); Books has only the active
+  books.
+- **Fixed:** a window popped out of the main window could end up out of
+  sight, leaving its sidebar button lit and doing nothing (Modules after a
+  drag to a quick slot). The button now closes it, a window of its own always
+  opens on a screen, and Modules and Books remember their places apart.
+
 ## 0.1.0-alpha.74: Every book a Kraken pack
 
 - **Kraken's own books ship as Kraken packs** (`.kpack`), the same files as

@@ -18,7 +18,8 @@ The app starts the MCP server when it opens. `electron/agent/mcp-stdio.cjs` is t
 | In the app | Tool |
 |---|---|
 | **The DM assistant** (GM only; skill: [skills/kraken-dm-assistant/SKILL.md](skills/kraken-dm-assistant/SKILL.md)) | |
-| Books, Packs tab: list the FG modules and their Kraken packs, Make pack, Make N packs, open the packs folder | `kraken_packs` (list, make, folder) |
+| Modules, Packs tab: list the FG modules and their Kraken packs, Make pack, Make N packs, open the packs folder | `kraken_packs` (list, make, folder) |
+| Quick slots: read or set a seat's ten (books, pages, pictures, sheets, sounds, notes, records, dice `{kind: dice, formula}`, chat macros `{kind: macro, text}`); use one as its click or number key does | `kraken_quickslots` (slots; press) |
 | Sidebar Assistant: ask, stop, new chat (its key is set in its window or ANTHROPIC_API_KEY, never by a tool) | `kraken_assistant`, `kraken_windows` kind assistant |
 | **Campaigns** | |
 | List campaigns, make one | `kraken_campaigns`, `kraken_campaign_create` |

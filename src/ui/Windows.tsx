@@ -63,9 +63,12 @@ function firstPlace(kind: WindowKind): Placement {
 // The height of a window's own title bar, which a window of its own does not need.
 const TITLE = 34;
 
-function remembered(kind: WindowKind): Placement {
+// Where a window was left, kept per kind (Modules, the Books window opened
+// at Activation, is a window of its own, apart from Books).
+const memoryOf = (kind: WindowKind, payload?: string) => (kind === "books" && payload === "activation" ? "modules" : kind);
+function remembered(kind: WindowKind, payload?: string): Placement {
   try {
-    const saved = JSON.parse(window.localStorage.getItem(`kraken-window:${kind}`) ?? "null");
+    const saved = JSON.parse(window.localStorage.getItem(`kraken-window:${memoryOf(kind, payload)}`) ?? "null");
     if (saved && [saved.x, saved.y, saved.w, saved.h].every((value) => Number.isFinite(value))) return { x: saved.x, y: saved.y, w: saved.w, h: saved.h, out: saved.out ?? null };
   } catch {
     /* no memory: defaults */
@@ -73,9 +76,9 @@ function remembered(kind: WindowKind): Placement {
   return firstPlace(kind);
 }
 
-function remember(kind: WindowKind, placement: Placement) {
+function remember(kind: WindowKind, placement: Placement, payload?: string) {
   try {
-    window.localStorage.setItem(`kraken-window:${kind}`, JSON.stringify({ x: placement.x, y: placement.y, w: placement.w, h: placement.h, out: placement.out ?? null }));
+    window.localStorage.setItem(`kraken-window:${memoryOf(kind, payload)}`, JSON.stringify({ x: placement.x, y: placement.y, w: placement.w, h: placement.h, out: placement.out ?? null }));
   } catch {
     /* only the position is lost */
   }
@@ -151,7 +154,7 @@ export function WindowProvider({ children }: { children: ReactNode }) {
         return;
       }
       // Opened here, not in a state update, so the browser sees the click that asked for it.
-      const saved = remembered(kind);
+      const saved = remembered(kind, payload);
       const offset = windows.filter((item) => item.kind === kind).length * 28;
       const out = saved.out ? { ...saved.out, sx: saved.out.sx + offset, sy: saved.out.sy + offset } : null;
       const placed = place(key, title, { ...saved, x: saved.x + offset, y: saved.y + offset, out });
@@ -170,8 +173,10 @@ export function WindowProvider({ children }: { children: ReactNode }) {
     (kind: WindowKind, title: string, payload?: string) => {
       const key = payload ? `${kind}:${payload}` : kind;
       const existing = windows.find((item) => item.key === key);
+      // Out in a window of its own: the button closes it, as it closes any
+      // window (a window of its own out of sight never holds the button).
       if (existing?.popped) {
-        popups.current.get(key)?.focus();
+        close(key);
         return;
       }
       if (existing && (existing.z === top.current || AT_BACK.includes(existing.kind))) {
@@ -182,7 +187,7 @@ export function WindowProvider({ children }: { children: ReactNode }) {
         focus(key);
         return;
       }
-      const placed = place(key, title, remembered(kind));
+      const placed = place(key, title, remembered(kind, payload));
       setWindows((current) => (current.some((item) => item.key === key) ? current : [...current, { key, kind, title, payload, z: zFor(kind), ...placed }]));
     },
     [windows, place, close, focus],
@@ -193,7 +198,7 @@ export function WindowProvider({ children }: { children: ReactNode }) {
       current.map((item) => {
         if (item.key !== key) return item;
         const next = { ...item, ...placement };
-        remember(item.kind, next);
+        remember(item.kind, next, item.payload);
         return next;
       }),
     );
@@ -212,7 +217,7 @@ export function WindowProvider({ children }: { children: ReactNode }) {
       if (!child) return false;
       popups.current.set(key, child);
       setWindows((current) => current.map((entry) => (entry.key === key ? { ...entry, popped: true, out } : entry)));
-      remember(item.kind, { ...item, out });
+      remember(item.kind, { ...item, out }, item.payload);
       return true;
     },
     [windows],
@@ -230,7 +235,7 @@ export function WindowProvider({ children }: { children: ReactNode }) {
         if (item.key !== key) return item;
         const from = at ?? item;
         const next = { ...item, ...fitToScreen({ x: from.x, y: from.y, w: Math.max(320, from.w), h: Math.max(220, from.h) }), popped: false, out: null, z: ++top.current };
-        remember(item.kind, next);
+        remember(item.kind, next, item.payload);
         return next;
       }),
     );

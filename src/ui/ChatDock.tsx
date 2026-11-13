@@ -2,6 +2,8 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import type { ChatLine, RollResult, Session } from "../session/useSession";
 import { characterDice, diceStore, rolling, setThrow, tower as towerDrops, type DiceLook } from "../dice/diceStore";
 import { commandsFor, runChat, type Command } from "./chatCommands";
+import { slotDrag } from "./QuickSlots";
+import { chatRunner } from "./chatRunner";
 import { DieShape, Icon } from "./icons";
 import { useWindows } from "./Windows";
 import { openPopOut, PopOutWindow, screenOffset, type ScreenPlace } from "./PopOut";
@@ -302,7 +304,11 @@ export function ChatDock({ session }: { session: Session }) {
   // The dice in the hand while a die is dragged from the tray. Only what they are
   // (and whether they are over the tower) is state; where they are is moved on
   // the element itself, so a drag never draws the chat again on every move.
-  const [ghost, setGhost] = useState<{ x: number; y: number; sides: number | null; overTower: boolean } | null>(null);
+  const [ghost, setGhost] = useState<{ x: number; y: number; sides: number | null; overTower: boolean; held?: number[] } | null>(null);
+  // Dice held in the hand (FG's: right-click a die, pick how many): they follow
+  // the pointer until a click throws them, drops them in the tower, or puts
+  // them on a quick slot; a right-click or Escape puts them back.
+  const [held, setHeld] = useState<number[] | null>(null);
   const ghostEl = useRef<HTMLSpanElement | null>(null);
   const dragged = useRef(false);
   const towerButton = useRef<HTMLButtonElement>(null);
@@ -375,6 +381,35 @@ export function ChatDock({ session }: { session: Session }) {
 
   const poolFormula = () => formulaOf(pool);
 
+  // A chat line run as if typed here: from the entry, or from a quick slot
+  // (a macro such as /roll 4d6k3, or dice kept on one).
+  const runLine = (line: string) => {
+    runChat(line, {
+      session,
+      openWindow: (kind, title) => windows.open(kind, title),
+      closeWindow: (kind) => windows.windows.filter((item) => item.kind === kind).forEach((item) => windows.close(item.key)),
+      modifier,
+      setModifier,
+      tower,
+      speakAs: speakAs || (session.role === "dm" ? gmName : ""),
+      setSpeakAs,
+      setGmName,
+      lastWhisperFrom,
+      showHelp: () => setHelpOpen(true),
+    });
+    // Dice into the tower, or a blind roll: they drop in, as from the tray.
+    const towerRoll = /^\/(?:(r|roll|die)|blindroll|br|tower)\s+(\S+)/i.exec(line.trim());
+    if (towerRoll && (!towerRoll[1] || tower)) dropInTower([...towerRoll[2].matchAll(/d(\d+|%)/gi)].map((match) => (match[1] === "%" ? 100 : Number(match[1]))));
+  };
+  const runner = useRef(runLine);
+  runner.current = runLine;
+  useEffect(() => {
+    chatRunner.run = (line) => runner.current(line);
+    return () => {
+      chatRunner.run = null;
+    };
+  }, []);
+
   // A roll into the tower the roller will not see: the dice still drop in.
   const dropInTower = (dice: number[], from?: { x: number; y: number }) => {
     if (session.role === "dm" || session.options.towerReveal || out) return;
@@ -393,6 +428,101 @@ export function ChatDock({ session }: { session: Session }) {
     setModifier(0);
   };
   const rollPool = () => rollDice(pool, tower);
+  // A quick slot under the pointer (the bar is in the main window).
+  const slotAt = (view: Window, x: number, y: number) => {
+    if (view !== window) return -1;
+    const slot = document.elementFromPoint(x, y)?.closest<HTMLElement>("[data-quick-slot]");
+    return slot ? Number(slot.dataset.quickSlot) : -1;
+  };
+  // Dice kept on a quick slot: a click on it rolls them again.
+  const keepOnSlot = (index: number, dice: number[]) => {
+    const formula = withModifier(formulaOf(dice), modifier);
+    session.setQuickSlots(session.quickSlots.map((slot, at) => (at === index ? { kind: "dice", formula, label: formula } : slot)));
+    setPool([]);
+    setModifier(0);
+  };
+  // Thrown on the table from a point: toward the middle when let go without a throw.
+  const throwFrom = (view: Window, screenX: number, screenY: number, clientX: number, clientY: number, vx = 0, vy = 0) => {
+    const offset = view === window ? { x: screenX - clientX, y: screenY - clientY } : screenOffset();
+    const x = Math.min(0.98, Math.max(0.02, (screenX - offset.x) / window.innerWidth));
+    const y = Math.min(0.98, Math.max(0.02, (screenY - offset.y) / window.innerHeight));
+    if (Math.hypot(vx, vy) < 0.15) {
+      const dx = 0.5 - x;
+      const dy = 0.45 - y;
+      const length = Math.hypot(dx, dy) || 1;
+      vx = (dx / length) * 0.5;
+      vy = (dy / length) * 0.5;
+    }
+    setThrow({ x, y, vx, vy });
+  };
+  // The hand follows the pointer; the next click says where the dice go.
+  useEffect(() => {
+    if (!held) return;
+    const view = dock.current?.ownerDocument.defaultView ?? window;
+    let frame = 0;
+    let last = { x: 0, y: 0 };
+    const overTower = (x: number, y: number) => Boolean(view.document.elementFromPoint(x, y)?.closest(".tower"));
+    const place = () => {
+      frame = 0;
+      const element = ghostEl.current;
+      if (element) {
+        element.style.left = `${last.x}px`;
+        element.style.top = `${last.y}px`;
+      }
+      const nowOver = overTower(last.x, last.y);
+      setGhost((current) => (current && current.overTower !== nowOver ? { ...current, overTower: nowOver } : current));
+    };
+    const move = (event: PointerEvent) => {
+      last = { x: event.clientX, y: event.clientY };
+      if (!frame) frame = view.requestAnimationFrame(place);
+    };
+    const done = () => {
+      setHeld(null);
+      setGhost(null);
+    };
+    const down = (event: PointerEvent) => {
+      event.preventDefault();
+      event.stopPropagation();
+      done();
+      // A right-click puts them back.
+      if (event.button !== 0) return;
+      const slot = slotAt(view, event.clientX, event.clientY);
+      if (slot >= 0) return keepOnSlot(slot, held);
+      if (overTower(event.clientX, event.clientY)) return rollDice(held, true, { x: event.clientX, y: event.clientY });
+      throwFrom(view, event.screenX, event.screenY, event.clientX, event.clientY);
+      rollDice(held, tower, { x: event.clientX, y: event.clientY });
+    };
+    const swallow = (event: Event) => {
+      event.preventDefault();
+      event.stopPropagation();
+    };
+    const key = (event: KeyboardEvent) => {
+      if (event.key === "Escape") done();
+    };
+    view.addEventListener("pointermove", move, true);
+    view.addEventListener("pointerdown", down, true);
+    view.addEventListener("click", swallow, true);
+    view.addEventListener("contextmenu", swallow, true);
+    view.addEventListener("keydown", key);
+    return () => {
+      if (frame) view.cancelAnimationFrame(frame);
+      view.removeEventListener("pointermove", move, true);
+      view.removeEventListener("pointerdown", down, true);
+      view.removeEventListener("keydown", key);
+      // The click (or right-click) that put them down goes by first.
+      view.setTimeout(() => {
+        view.removeEventListener("click", swallow, true);
+        view.removeEventListener("contextmenu", swallow, true);
+      }, 0);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [held]);
+  const pickUp = (dice: number[], at: { x: number; y: number }) => {
+    setMenu(null);
+    setPool([]);
+    setHeld(dice);
+    setGhost({ x: at.x, y: at.y, sides: null, overTower: false, held: dice });
+  };
 
   // FG's tray: drag a die (or the pool) out and let go to throw it the way
   // the hand moved, or drop it on the dice tower. A click adds it to the pool.
@@ -446,6 +576,11 @@ export function ChatDock({ session }: { session: Session }) {
       dragged.current = true;
       view.setTimeout(() => (dragged.current = false), 0);
       const dice = sides ? [...pool, sides] : pool;
+      const slot = slotAt(view, upEvent.clientX, upEvent.clientY);
+      if (slot >= 0) {
+        keepOnSlot(slot, dice);
+        return;
+      }
       if (overTower(upEvent.clientX, upEvent.clientY)) {
         rollDice(dice, true, { x: upEvent.clientX, y: upEvent.clientY });
         return;
@@ -543,25 +678,21 @@ export function ChatDock({ session }: { session: Session }) {
             setDraft(`/${finish(suggestions[0])} `);
             return;
           }
-          runChat(draft, {
-            session,
-            openWindow: (kind, title) => windows.open(kind, title),
-            closeWindow: (kind) => windows.windows.filter((item) => item.kind === kind).forEach((item) => windows.close(item.key)),
-            modifier,
-            setModifier,
-            tower,
-            speakAs: speakAs || (session.role === "dm" ? gmName : ""),
-            setSpeakAs,
-            setGmName,
-            lastWhisperFrom,
-            showHelp: () => setHelpOpen(true),
-          });
-          // Dice into the tower, or a blind roll: they drop in, as from the tray.
-          const towerRoll = /^\/(?:(r|roll|die)|blindroll|br|tower)\s+(\S+)/i.exec(draft.trim());
-          if (towerRoll && (!towerRoll[1] || tower)) dropInTower([...towerRoll[2].matchAll(/d(\d+|%)/gi)].map((match) => (match[1] === "%" ? 100 : Number(match[1]))));
+          runLine(draft);
           setDraft("");
         }}
       >
+        {draft.trim() ? (
+          <span
+            className="chat-macro-grip"
+            data-action="chat-macro"
+            title="Drag this line to a quick slot: a click on the slot (or its number key) runs it again"
+            aria-label="Drag this line to a quick slot"
+            {...slotDrag({ kind: "macro", text: draft.trim(), label: draft.trim().slice(0, 80) })}
+          >
+            <Icon name="hand" size={15} />
+          </span>
+        ) : null}
         <input
           aria-label="Message"
           value={draft}
@@ -630,7 +761,7 @@ export function ChatDock({ session }: { session: Session }) {
             key={sides}
             type="button"
             className="tray-die"
-            title={`Pick up a d${sides} and throw it: drag out and let go, or drop it on the dice tower. Click adds it to the pool; right-click rolls several.`}
+            title={`Pick up a d${sides} and throw it: drag out and let go, or drop it on the dice tower. Click adds it to the pool; right-click picks up several (then click the table to throw them, or a quick slot to keep them there).`}
             aria-label={`d${sides}`}
             onPointerDown={(event) => startDrag(event, sides)}
             onClick={() => {
@@ -682,10 +813,11 @@ export function ChatDock({ session }: { session: Session }) {
         </button>
       </div>
       {ghost ? (
-        <span ref={ghostEl} className={ghost.overTower ? "dice-ghost over-tower" : "dice-ghost"} style={{ left: ghost.x, top: ghost.y }} aria-hidden="true">
-          {(ghost.sides ? [...pool, ghost.sides] : pool).slice(-6).map((sides, index) => (
+        <span ref={ghostEl} className={["dice-ghost", ghost.overTower ? "over-tower" : "", ghost.held ? "held" : ""].filter(Boolean).join(" ")} style={{ left: ghost.x, top: ghost.y }} aria-hidden="true" data-held={ghost.held ? formulaOf(ghost.held) : undefined}>
+          {(ghost.held ?? (ghost.sides ? [...pool, ghost.sides] : pool)).slice(-6).map((sides, index) => (
             <span key={index}>{trayDie(sides, 46)}</span>
           ))}
+          {ghost.held && ghost.held.length > 6 ? <b className="dice-ghost-count">×{ghost.held.length}</b> : null}
         </span>
       ) : null}
       {menu ? (
@@ -707,8 +839,8 @@ export function ChatDock({ session }: { session: Session }) {
                 ‹ Custom Dice
               </button>
               {CUSTOM.map((sides) => (
-                <button key={sides} type="button" role="menuitem" onClick={() => (rollDice([sides], tower), setMenu(null))}>
-                  Roll a d{sides}
+                <button key={sides} type="button" role="menuitem" onClick={(event) => pickUp([...pool, sides], { x: event.clientX, y: event.clientY })}>
+                  Pick up a d{sides}
                 </button>
               ))}
             </>
@@ -718,8 +850,8 @@ export function ChatDock({ session }: { session: Session }) {
                 Custom Dice ›
               </button>
               {MANY.map((count) => (
-                <button key={count} type="button" role="menuitem" data-many={count} onClick={() => (rollDice(Array(count).fill(menu.sides), tower), setMenu(null))}>
-                  <b>{count}×</b> Roll {count} d{menu.sides === 100 ? "%" : menu.sides}
+                <button key={count} type="button" role="menuitem" data-many={count} title="Pick them up: click the table to throw them, the tower to roll there, or a quick slot to keep them there; a right-click puts them back" onClick={(event) => pickUp([...pool, ...Array<number>(count).fill(menu.sides as number)], { x: event.clientX, y: event.clientY })}>
+                  <b>{count}×</b> Pick up {count} d{menu.sides === 100 ? "%" : menu.sides}
                 </button>
               ))}
             </>

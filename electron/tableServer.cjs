@@ -445,6 +445,10 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     if (raw.kind === "note" && typeof raw.record === "string") return { kind: "note", record: raw.record.slice(0, 80), label: label || "Note" };
     if (raw.kind === "record" && typeof raw.record === "string") return { kind: "record", record: raw.record.slice(0, 160), label: label || "Record" };
     if (raw.kind === "sound" && typeof raw.sound === "string" && ["oneshots", "sfx", "ambience", "music"].includes(raw.soundKind)) return { kind: "sound", sound: raw.sound.slice(0, 300), soundKind: raw.soundKind, label: label || "Sound" };
+    // Dice held in the hand (FG's: right-click a die, pick how many, drop them on a slot): a formula.
+    if (raw.kind === "dice" && typeof raw.formula === "string" && /^[\dd%f+\-khl!xrocs<>= ]{1,60}$/i.test(raw.formula.trim())) return { kind: "dice", formula: raw.formula.trim(), label: label || raw.formula.trim() };
+    // A chat line kept to run again (FG's macro: /roll 4d6k3 dragged from the chat's entry).
+    if (raw.kind === "macro" && typeof raw.text === "string" && raw.text.trim()) return { kind: "macro", text: raw.text.trim().slice(0, 300), label: label || raw.text.trim().slice(0, 80) };
     return null;
   };
   const cleanSlots = (list) => Array.from({ length: SLOTS }, (_, index) => (Array.isArray(list) ? cleanSlot(list[index]) : null));

@@ -56,8 +56,8 @@ try {
   await tool("kraken_host", { campaignId: campaign.id, port: 47396, password: "pw" });
   await page.waitForSelector("text=Hosting");
 
-  // Books, the Packs tab: this game's modules, none with a pack yet.
-  await page.click('.sidebar [data-launch="books"]');
+  // Modules, the Packs tab: this game's modules, none with a pack yet.
+  await page.click('.sidebar [data-launch="books:activation"]');
   await page.click('[data-books-tab="packs"]');
   await page.waitForSelector('[data-packs] [data-pack-book="Test Keep"][data-pack-state="none"]');
   assert((await page.$('[data-packs] [data-pack-book="Other Game"]')) === null, "another game's module is not listed");

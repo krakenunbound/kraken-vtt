@@ -283,6 +283,25 @@ function createWindow() {
   });
   win.webContents.on("did-create-window", (child) => {
     child.webContents.on("will-navigate", (event) => event.preventDefault());
+    // A window of its own always lands where it can be seen: one remembered on
+    // a monitor no longer there (or off every screen) comes up beside Kraken's.
+    try {
+      const { screen } = require("electron");
+      const bounds = child.getBounds();
+      const seen = screen.getAllDisplays().some(({ workArea: area }) => {
+        const wide = Math.min(bounds.x + bounds.width, area.x + area.width) - Math.max(bounds.x, area.x);
+        const high = Math.min(bounds.y + 40, area.y + area.height) - Math.max(bounds.y, area.y);
+        return wide >= 120 && high >= 30;
+      });
+      if (!seen) {
+        const area = screen.getDisplayMatching(win.getBounds()).workArea;
+        const width = Math.min(bounds.width, area.width - 40);
+        const height = Math.min(bounds.height, area.height - 40);
+        child.setBounds({ x: Math.round(area.x + (area.width - width) / 2), y: Math.round(area.y + (area.height - height) / 2), width, height });
+      }
+    } catch {
+      /* placed as asked */
+    }
     child.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
   });
 

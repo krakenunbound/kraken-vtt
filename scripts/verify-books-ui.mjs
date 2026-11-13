@@ -80,19 +80,22 @@ try {
   // players, the adventure not.
   await page.click('.sidebar [data-launch="books"]');
   await page.waitForSelector("text=No books are active in this campaign yet.");
-  await page.click('[data-books-tab="activation"]');
+  assert((await page.$('[data-window="books"] [data-books-tab]')) === null, "Books has no tabs: activation is in Modules");
+  await page.click('.sidebar [data-launch="books"]');
+  await page.click('.sidebar [data-launch="books:activation"]');
   await page.waitForSelector('.books-window [data-activate="Test Keep"]');
+  assert(await page.$('.books-window [data-launch="adventure"]'), "map bundles open from Modules");
   assert((await page.$('.books-window [data-book="Other Game"]')) === null, "another game's book is not listed");
   assert(await page.$('.books-window [data-book="Not A Book"]'), "Activation lists modules without a book too");
   await page.click('[data-activate="Test Keep"]');
   await page.click('[data-activate="Test Handbook"]');
   await page.waitForSelector('[data-players="Test Handbook"]:checked');
   assert((await page.$('[data-players="Test Keep"]')) === null, "an adventure has no Players tick: it is the GM's alone");
-  await page.click('[data-books-tab="books"]');
+  await page.click('.sidebar [data-launch="books:activation"]');
+  await page.click('.sidebar [data-launch="books"]');
   await page.waitForSelector('.books-window [data-book="Test Keep"]');
   assert((await page.$$eval(".books-category h3", (heads) => heads.map((head) => head.textContent))).join() === "Core Rules,Test Adventures", "books by category");
   assert((await page.$('.books-window [data-book="Not A Book"]')) === null, "a module without a book is not under Books");
-  assert(await page.$('.books-window [data-launch="adventure"]'), "map bundles open from Books");
   await page.waitForFunction(() => {
     const img = document.querySelector('[data-book="Test Keep"] img');
     return img?.complete && img.naturalWidth > 0;
@@ -164,6 +167,7 @@ try {
   await page.dragAndDrop('[data-picture="images/keep.png"]', '[data-quick-slot="1"]');
   await page.waitForSelector('[data-quick-slot="1"].full');
   await page.click('[data-quick-slot="1"]', { button: "right" });
+  await page.click('[data-slot-action="clear"]');
   await page.waitForSelector('[data-quick-slot="1"]:not(.full)');
   const slots = await tool("kraken_quickslots", {});
   assert(slots[0]?.kind === "book" && slots[0].page === "inn" && slots[1] === null, `the GM's slots, kept by the host (${JSON.stringify(slots.slice(0, 2))})`);

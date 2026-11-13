@@ -67,8 +67,9 @@ The **sidebar** on the right holds everything, as Fantasy Grounds' does:
 
 - **Tools along the top:** the combat tracker, the assistant (the AI agent),
   the players, settings.
-- **Library:** Modules (which books are active in this campaign), Books (read
-  them), Sound Sets.
+- **Library:** Modules (every module and pack for the campaign's game: make
+  them active, make packs), Books (only the active books, to read; a player
+  sees only the ones you open to them), Sound Sets.
 - **Player:** Characters, Party (the party sheet), Notes.
 - **Campaign:** Encounters, Images (maps and handouts), Items, NPCs, Parcels,
   Tables.
@@ -77,8 +78,16 @@ The **sidebar** on the right holds everything, as Fantasy Grounds' does:
   to drag onto a character.
 
 Every window can be moved, resized and **popped out** to its own window on
-another monitor. Anything that looks like a link can be dragged: onto a
-sheet, into chat, into a story entry, onto the hotbar.
+another monitor. Its sidebar button closes it wherever it is, and a window
+of its own always opens on a screen you can see. Anything that looks like a
+link can be dragged: onto a sheet, into chat, into a story entry, onto the
+quick slots.
+
+The **quick slots** along the bottom keep ten things at hand: a book or a
+page, a map, a character, a sound, a note, dice, or a chat line. Click a slot,
+or press its number key (1 to 9, then 0), to use it. Right-click a slot for
+its menu: use it, rename it, or **Clear this slot** (a slot is never emptied
+any other way).
 
 ## Books and modules
 
@@ -87,7 +96,7 @@ sheet, into chat, into a story entry, onto the hotbar.
   Fantasy Grounds data folder's `modules` folder (set `KRAKEN_BOOKS` to read
   another folder). Nothing is copied. A campaign's game decides which modules
   fit it.
-- **Kraken packs:** in **Books**, the **Packs** tab makes each of your
+- **Kraken packs:** in **Modules**, the **Packs** tab makes each of your
   Fantasy Grounds books into Kraken's own file (`.kpack`: its pages, records,
   maps with walls and doors, pictures), kept in `Documents/Kraken VTT/Packs`
   (set `KRAKEN_PACKS` for another folder). Copy that folder to another
@@ -171,6 +180,13 @@ Type in chat to talk; `/` lists the commands (Fantasy Grounds' and Foundry's),
 and `/help` shows all of them. `/r 1d20+2` rolls. The modifier box below the
 chat adds to the next roll. Click the dice to roll them; the 3D dice tower is
 the GM's by default.
+**Dice in your hand**, as in Fantasy Grounds: right-click a die and pick how
+many (3× picks up three). They follow the pointer: click the table to throw
+them, the tower to roll them there, or a **quick slot** to keep them there
+(that slot then rolls 3d6 with a click or its number key). A right-click or
+Escape puts them back. You can also drag a single die straight onto a slot.
+**Macros:** type a line in chat, such as `/roll 4d6k3`, and drag the hand
+beside the entry onto a quick slot. The slot runs that line again.
 Settings (the cog) has **Dice stay on the table for**: how many seconds the
 3D dice lie there after they land before they fade, for everyone at the
 table. Dice from different rolls knock against each other and come to rest

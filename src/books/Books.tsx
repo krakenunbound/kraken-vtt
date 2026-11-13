@@ -241,7 +241,10 @@ export function BooksWindow({ session, onOpenAdventure, start = "books" }: { ses
   const [ruleset, setRuleset] = useState("");
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
-  // The GM's: the campaign's books, or Activation (every module that fits the ruleset).
+  // Two windows, as FG's: Modules (the GM's: Activation, every module that
+  // fits the ruleset, and Packs) and Books (only the campaign's active books;
+  // a player, only those the GM opened to them).
+  const modules = start !== "books";
   const [tab, setTab] = useState<"books" | "activation" | "packs">(start);
   // Packs are made by the GM's own app (the host), from the FG modules on its computer.
   const canPack = gm && typeof window !== "undefined" && Boolean(window.kraken?.packs);
@@ -268,15 +271,12 @@ export function BooksWindow({ session, onOpenAdventure, start = "books" }: { ses
       ? "No book has that name."
       : activation
         ? "No Fantasy Grounds modules for this campaign's game were found on this computer."
-        : "No books are active in this campaign yet. Tick the ones to use under Activation.";
+        : "No books are active in this campaign yet. Make them active in Modules.";
   return (
     <div className="books-window">
-      {gm ? (
+      {gm && modules ? (
         <div className="books-top">
           <div className="sound-tabs" role="tablist">
-            <button type="button" role="tab" aria-selected={tab === "books"} className={tab === "books" ? "dice-chip on" : "dice-chip"} data-books-tab="books" onClick={() => setTab("books")}>
-              Books
-            </button>
             <button type="button" role="tab" aria-selected={tab === "activation"} className={tab === "activation" ? "dice-chip on" : "dice-chip"} data-books-tab="activation" onClick={() => setTab("activation")}>
               Activation
             </button>
