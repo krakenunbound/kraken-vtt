@@ -4,8 +4,16 @@ What changed in each release of Kraken VTT. Downloads are on the
 [Releases](https://github.com/krakenunbound/kraken-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
-## Next
+## 0.1.0-alpha.79: Every picture opens its image; an external dice tower; Internet hosting
 
+- **Every picture opens its image, wherever you click it** (the GM): a
+  picture on a book's page, in its Images & Maps tab, in Images, the Library
+  or a quick slot opens the image window, its one master, to share, edit and
+  play test. A book's map opens as the map with its walls (The Caves of Chaos
+  with its 4,916), even where the page also shows a handout of it; any other
+  picture opens as an image of its own. Players still see only what is shared.
+- The GM's **Map** button along the top of the sidebar is gone (maps open from
+  where you see them, and the map window comes to the front); players keep it.
 - **External dice tower** (the GM's Settings): the dice tower stands on the
   table apart from the chat, for every seat (drag it anywhere; each screen
   keeps its place). A little stone tower: dark when off, its door glowing and

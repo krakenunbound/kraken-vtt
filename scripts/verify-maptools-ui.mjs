@@ -71,15 +71,20 @@ try {
   assert(frame && side && frame.x + frame.width <= side.x + 1, `the map window leaves the sidebar clear: ${JSON.stringify({ frame, side })}`);
   await page.click(`[aria-label="Close ${await mapWindow.getAttribute("aria-label")}"]`);
   await page.waitForSelector('.window[data-window="map"]', { state: "detached" });
-  await page.click('.sidebar [data-launch="map"]');
+  // Opened again (the GM's way: Images, the Library, a book; the agent here). No Map button for the GM.
+  assert(!(await page.$('.sidebar [data-launch="map"]')), "the GM has no Map button");
+  await tool("kraken_windows", { action: "open", kind: "map" });
   await page.waitForSelector('.window[data-window="map"] .viewport');
-  // Another window sits over it, and stays over it when the map is clicked.
+  // A window opened after it sits over it; the map clicked comes to the front, as any window does.
   await page.click('.sidebar [data-launch="combat"]');
   await page.waitForSelector('.window[data-window="combat"]');
+  const order = () => page.evaluate(() => ["map", "combat"].map((kind) => Number(getComputedStyle(document.querySelector(`.window[data-window="${kind}"]`)).zIndex)));
+  let zs = await order();
+  assert(zs[0] < zs[1], `the combat tracker opens over the map: ${zs}`);
   await page.mouse.click(frame.x + 40, frame.y + frame.height - 60);
-  const zs = await page.evaluate(() => ["map", "combat"].map((kind) => Number(getComputedStyle(document.querySelector(`.window[data-window="${kind}"]`)).zIndex)));
-  assert(zs[0] < zs[1], `the map stays behind the other windows: ${zs}`);
-  await page.click('.sidebar [data-launch="combat"]');
+  zs = await order();
+  assert(zs[0] > zs[1], `the map clicked comes to the front: ${zs}`);
+  await tool("kraken_windows", { action: "close", kind: "combat" });
   await page.click(`[aria-label="Close ${await mapWindow.getAttribute("aria-label")}"]`);
   await tool("kraken_windows", { action: "open", kind: "map" });
   await page.waitForSelector('.window[data-window="map"] .viewport');

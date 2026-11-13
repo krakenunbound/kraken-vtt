@@ -133,9 +133,10 @@ any other way).
 
 ## Maps
 
-**Images, as in Fantasy Grounds.** Campaign > **Images** lists every picture
-of every active book (maps and handouts, under their book). Click one to open
-it in the image window. Each picture has one master: its walls, doors,
+**Images, as in Fantasy Grounds.** Every picture you see opens in the image
+window when you click it: on a book's page, in its Images & Maps tab, in
+Campaign > **Images** (every picture of every active book), the Library, a
+quick slot. Nothing shown is a dead end. Each picture has one master: its walls, doors,
 lights, paint, effects and tokens are kept in the campaign, and every place
 that opens it (Images, the book's pictures, the Library, the table) opens the
 same one.

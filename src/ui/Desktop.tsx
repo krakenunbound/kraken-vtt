@@ -21,7 +21,7 @@ import { NotesWindow, NoteWindow } from "../notes/Notes";
 import { BooksWindow, BookWindow, ImagesWindow, PictureWindow } from "../books/Books";
 import { ImagesList } from "../books/ImagesList";
 import { StudioWindow } from "../studio/StudioWindow";
-import { studioOpener } from "../table/imageWindow";
+import { mapWindow, studioOpener } from "../table/imageWindow";
 import { Icon } from "./icons";
 import { sound } from "../sound/soundEngine";
 import { FloatingWindow, useWindows } from "./Windows";
@@ -223,11 +223,12 @@ export function Desktop({
     .map((item) => listEntry(item.id, item.label, characterIcon[item.id] ?? "shield"));
   const hasPackages = Object.values(session.records).some((record) => record.type === "siegepackage" && listOf(record) === "siegepackage");
   const combatBadge = session.combat.round > 0 ? session.combat.round : undefined;
-  // The map's own window, opened again from here when it was closed.
+  // A player's way back to the table's map after closing its window (the GM
+  // opens maps from Images, the Library or a book, and the map window comes to
+  // the front by itself: no button for it).
   const mapTool: SidebarEntry[] = scene ? [{ kind: "map", label: "Map", icon: "map", title: sceneName || "Map" }] : [];
   const tools: SidebarEntry[] = gm
     ? [
-        ...mapTool,
         { kind: "combat", label: "Combat", icon: "combat", title: "Combat Tracker", badge: combatBadge },
         { kind: "assistant", label: "Assistant", icon: "sparkle", title: "DM Assistant" },
         { kind: "studio", label: "Map Studio", icon: "pen", title: "Map Studio" },
@@ -312,6 +313,13 @@ export function Desktop({
       windows.open("map", sceneName || "Map");
     }
   }, [mapOpenKey, sceneName]);
+  // The map window to the front (an image clicked that is the table's map already).
+  useEffect(() => {
+    mapWindow.front = () => windows.open("map", sceneName || "Map");
+    return () => {
+      mapWindow.front = null;
+    };
+  });
   // Map Studio opened on an image (its page made by Kraken): one window, at that page.
   useEffect(() => {
     studioOpener.open = (url) => {
@@ -351,8 +359,8 @@ export function Desktop({
   }, [session.imageShown]);
 
   // The agent opens, closes, pops out and docks windows as the GM's clicks do.
-  const live = useRef({ windows, launchers, characters, records: session.records });
-  live.current = { windows, launchers, characters, records: session.records };
+  const live = useRef({ windows, launchers, characters, records: session.records, mapTitle: scene ? sceneName || "Map" : "" });
+  live.current = { windows, launchers, characters, records: session.records, mapTitle: scene ? sceneName || "Map" : "" };
   useEffect(
     () =>
       agentCommands.register("windows", (command) => {
@@ -398,6 +406,12 @@ export function Desktop({
                 ? { kind: "wallpapers" as const, title: "Desktop Wallpaper" }
                 : command.window === "dice"
                   ? { kind: "dice" as const, title: "Dice" }
+                  : command.window === "map"
+                    ? live.current.mapTitle
+                      ? { kind: "map" as const, title: live.current.mapTitle }
+                      : (() => {
+                          throw new Error("No map is open on the table.");
+                        })()
                   : command.window === "gmicons"
                     ? { kind: "gmicons" as const, title: "GM Icon" }
                   : command.window === "charselect"

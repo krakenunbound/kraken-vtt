@@ -217,6 +217,16 @@ export function useBookWindows() {
       windows.open("bookrecord", name || "Record", `${book}|${path}`);
     },
     openPicture(tab: Tab) {
+      // The GM: every picture opens in the image window, its one master (to
+      // share, edit and test), wherever it was clicked. A player: the viewer.
+      if (imageWindow.open) {
+        // Should it fail, the picture still opens (in the viewer): never a dead end.
+        void imageWindow.open({ book: tab.book, file: tab.file, name: tab.name }).catch(() => {
+          pictures.open(tab);
+          windows.open("images", "Pictures");
+        });
+        return;
+      }
       // Out on its own already: that window comes to the front.
       if (pictures.get().out.has(keyOf(tab))) windows.open("picture", tab.name, keyOf(tab));
       else {
@@ -575,7 +585,7 @@ export function BookWindow({ session, book }: { session: Session; book: string }
                 {
               block.kind === "picture" ? (
                 <figure className={`book-figure ${block.align}`} onContextMenu={(event) => menu.show(event, actions.items({ book, file: block.file, name: block.name || block.caption || page.name }, "book"))}>
-                  <button type="button" className="book-figure-open" title="Open it in Pictures" onClick={() => openPicture({ book, file: block.file, name: block.name || block.caption || page.name })} {...slotDrag({ kind: "picture", book, file: block.file, label: block.name || block.caption || page.name })}>
+                  <button type="button" className="book-figure-open" data-figure={block.file} title="Open this image: share it, edit it (walls, doors, lights), play test it" onClick={() => openPicture({ book, file: block.file, name: block.name || block.caption || page.name })} {...slotDrag({ kind: "picture", book, file: block.file, label: block.name || block.caption || page.name })}>
                     <img src={session.bookUrl("picture", book, block.file)} alt={block.caption} loading="lazy" style={{ maxWidth: `${Math.min(100, block.scale)}%` }} />
                   </button>
                   {block.caption ? <figcaption>{block.caption}</figcaption> : null}

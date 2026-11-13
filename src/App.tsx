@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Icon } from "./ui/icons";
-import { imageWindow, studioOpener, type ImageRef } from "./table/imageWindow";
+import { imageWindow, mapWindow, studioOpener, type ImageRef } from "./table/imageWindow";
 import { gridLabel, preferredCandidateIndex, preferredSceneIndex } from "./foundry/geometry";
 import { withGrid } from "../shared/map/geometry.mjs";
 import { imageMime, inspectZip, PICTURE, pictureBundle, type ImportCandidate, type LoadedAdventure } from "./foundry/importBundle";
@@ -352,18 +352,38 @@ export function App() {
   // Library, the agent. Already on the table: the table's map is that image.
   async function openImage(image: ImageRef) {
     if (!dm) throw new Error("Only the GM opens images to edit.");
-    const bytes = await session.fgMaps(image.book, image.name ?? "", image.file ?? "");
+    let bytes: Uint8Array;
+    try {
+      // A map or picture the book keeps as an image record (its walls, lights, pins).
+      // By its file when the book names one (a caption need not be the record's name).
+      bytes = await session.fgMaps(image.book, image.file ? "" : (image.name ?? ""), image.file ?? "");
+    } catch (caught) {
+      // Any other picture the book shows (a handout, a painting in its text):
+      // an image of its own, its master kept by the picture itself.
+      if (!image.file) throw caught;
+      const response = await fetch(session.bookUrl("picture", image.book, image.file));
+      if (!response.ok) throw caught;
+      const raw = new Uint8Array(await response.arrayBuffer());
+      const shown = await createImageBitmap(new Blob([raw as Uint8Array<ArrayBuffer>]));
+      const ext = /\.[a-z0-9]+$/i.exec(image.file)?.[0] ?? ".png";
+      bytes = pictureBundle(raw, `${image.name || image.file.split("/").pop()?.replace(/\.[a-z0-9]+$/i, "") || "Picture"}${ext}`, { width: shown.width, height: shown.height });
+      shown.close();
+    }
     const found = inspectZip(bytes);
     if (found.length === 0) throw new Error("That picture could not be opened.");
     for (const url of prepUrls.current) URL.revokeObjectURL(url);
     prepUrls.current = [];
     const opened = toTable(found[0].load(), prepUrls.current);
     const wanted = (image.name ?? "").toLowerCase();
-    const chosen = opened.scenes.find((item) => wanted && item.name.toLowerCase() === wanted) ?? opened.scenes[0];
+    // By name when asked so; by file, the record that is the map (most walls, then lights:
+    // a book often keeps a handout of the same picture beside its map).
+    const byName = image.file ? null : opened.scenes.find((item) => wanted && item.name.toLowerCase() === wanted);
+    const chosen = byName ?? [...opened.scenes].sort((a, b) => (b.walls?.length ?? 0) - (a.walls?.length ?? 0) || (b.lights?.length ?? 0) - (a.lights?.length ?? 0))[0];
     if (!chosen) throw new Error("That picture could not be opened.");
     const onTable = pack?.scenes[sceneIndex]?.id === chosen.id;
     if (onTable) {
       if (prep) closeImage();
+      mapWindow.front?.();
       return { opened: chosen.name, id: chosen.id, onTable: true };
     }
     setPrep({ scene: chosen, bytes, book: image.book });
@@ -400,12 +420,13 @@ export function App() {
   }
   const live = useRef({ openBytes, scenes, openImage, closeImage, playImage, openInStudio, prepNow: prep });
   live.current = { openBytes, scenes, openImage, closeImage, playImage, openInStudio, prepNow: prep };
+  // The GM's screen opens every picture in the image window; a player's keeps its viewer.
   useEffect(() => {
-    imageWindow.open = (image) => live.current.openImage(image);
+    imageWindow.open = dm ? (image) => live.current.openImage(image) : null;
     return () => {
       imageWindow.open = null;
     };
-  }, []);
+  }, [dm]);
   // The table left: the image window goes with it.
   useEffect(() => {
     if (!session.connected) setPrep(null);

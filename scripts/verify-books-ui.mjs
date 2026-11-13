@@ -172,12 +172,14 @@ try {
   const slots = await tool("kraken_quickslots", {});
   assert(slots[0]?.kind === "book" && slots[0].page === "inn" && slots[1] === null, `the GM's slots, kept by the host (${JSON.stringify(slots.slice(0, 2))})`);
 
-  // The GM opens the adventure's map (not shared yet).
+  // The GM opens the adventure's map: its image (FG's: the one master, to share, edit and test), the GM's alone.
   assert((await page.$('.book-window [data-share="The Test Keep"]')) === null && (await page.$('.books-window [data-share]')) === null, "no share symbol for a book");
   await page.click('[data-book-view="pictures"]');
-  await page.click('[data-picture="images/keep.png"]');
-  await page.waitForSelector('.images-window [data-image="images/keep.png"]');
-  assert((await page.textContent(".images-share span")) === "Not shared", "a picture the GM opens is not shared until shared");
+  await page.$eval('[data-picture="images/keep.png"]', (button) => button.click());
+  await page.waitForSelector("[data-image-window]", { timeout: 30000 });
+  await page.waitForSelector('[data-action="map-editor"][aria-pressed="true"]');
+  await tool("kraken_image", { action: "close" });
+  await page.waitForSelector("[data-image-window]", { state: "detached" });
 
   // Right-click on a map: out on its own, so the map stays up beside the book;
   // back in; shared and unshared from the menu.
