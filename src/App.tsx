@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Icon } from "./ui/icons";
+import { imageWindow, type ImageRef } from "./table/imageWindow";
 import { gridLabel, preferredCandidateIndex, preferredSceneIndex } from "./foundry/geometry";
 import { withGrid } from "../shared/map/geometry.mjs";
 import { imageMime, inspectZip, PICTURE, pictureBundle, type ImportCandidate, type LoadedAdventure } from "./foundry/importBundle";
@@ -129,6 +131,10 @@ export function App() {
   const dm = session.role === "dm";
   const campaignId = dm ? (session.hostInfo?.campaignId ?? "") : "";
   const restored = useRef("");
+  // FG's image window: an image opened privately (the GM's alone), its bundle
+  // kept to put it in play. The same master as the table's (one per picture).
+  const [prep, setPrep] = useState<{ scene: MapScene; bytes: Uint8Array; book: string } | null>(null);
+  const prepUrls = useRef<string[]>([]);
 
   useEffect(() => {
     const owned = urls.current;
@@ -163,6 +169,21 @@ export function App() {
         return live.current.openBytes(new Uint8Array(command.bytes), command.name);
       }
       if (command.kind === "scenes") return live.current.scenes(command.adventure, command.scene);
+      // FG's image window: open an image (the GM's alone), put it in play, a play test, close it.
+      if (command.kind === "image") {
+        if (!current.connected || current.role !== "dm") throw new Error("Not hosting.");
+        if (command.action === "open") return live.current.openImage({ book: command.book ?? "", name: command.name, file: command.file });
+        if (command.action === "play") return live.current.playImage();
+        if (command.action === "close") {
+          live.current.closeImage();
+          return { closed: true };
+        }
+        if (command.action === "test") {
+          current.playtest(Boolean(command.on));
+          return { testing: Boolean(command.on) };
+        }
+        throw new Error("open, play, test or close?");
+      }
       if (command.kind === "deck-plan") {
         // A ship's deck plans, drawn here and opened as a map (its decks the scenes).
         if (!current.connected || current.role !== "dm") throw new Error("Not hosting.");
@@ -321,8 +342,52 @@ export function App() {
       onTable: shown ? { id: shown.id, name: shown.name } : null,
     };
   }
-  const live = useRef({ openBytes, scenes });
-  live.current = { openBytes, scenes };
+  // An image opened in the image window: from the Images list, a book, the
+  // Library, the agent. Already on the table: the table's map is that image.
+  async function openImage(image: ImageRef) {
+    if (!dm) throw new Error("Only the GM opens images to edit.");
+    const bytes = await session.fgMaps(image.book, image.name ?? "", image.file ?? "");
+    const found = inspectZip(bytes);
+    if (found.length === 0) throw new Error("That picture could not be opened.");
+    for (const url of prepUrls.current) URL.revokeObjectURL(url);
+    prepUrls.current = [];
+    const opened = toTable(found[0].load(), prepUrls.current);
+    const wanted = (image.name ?? "").toLowerCase();
+    const chosen = opened.scenes.find((item) => wanted && item.name.toLowerCase() === wanted) ?? opened.scenes[0];
+    if (!chosen) throw new Error("That picture could not be opened.");
+    const onTable = pack?.scenes[sceneIndex]?.id === chosen.id;
+    if (onTable) {
+      if (prep) closeImage();
+      return { opened: chosen.name, id: chosen.id, onTable: true };
+    }
+    setPrep({ scene: chosen, bytes, book: image.book });
+    await session.publish(chosen, { prep: true });
+    return { opened: chosen.name, id: chosen.id, onTable: false };
+  }
+  function closeImage() {
+    session.prepClose();
+    setPrep(null);
+  }
+  // Put in play: the image window's image becomes the table's (the players see it).
+  async function playImage() {
+    if (!prep) throw new Error("No image is open in the image window.");
+    const { bytes, book, scene: shown } = prep;
+    await openBytes(bytes, `${book}.zip`);
+    setPrep(null);
+    return { onTable: shown.name };
+  }
+  const live = useRef({ openBytes, scenes, openImage, closeImage, playImage });
+  live.current = { openBytes, scenes, openImage, closeImage, playImage };
+  useEffect(() => {
+    imageWindow.open = (image) => live.current.openImage(image);
+    return () => {
+      imageWindow.open = null;
+    };
+  }, []);
+  // The table left: the image window goes with it.
+  useEffect(() => {
+    if (!session.connected) setPrep(null);
+  }, [session.connected]);
 
   function onDrop(event: React.DragEvent) {
     event.preventDefault();
@@ -343,8 +408,37 @@ export function App() {
     );
   }
 
-  const scene = dm ? (pack?.scenes[sceneIndex] ?? null) : session.playerScene;
-  const sceneBar = scene ? (
+  const tableScene = dm ? (pack?.scenes[sceneIndex] ?? null) : session.playerScene;
+  // The GM's map window shows the image window's image while one is open.
+  const scene = dm && prep ? prep.scene : tableScene;
+  const testing = dm && Boolean(session.map.testing);
+  // The image window's bar: whose it is (the GM's alone), put in play, a play test, close.
+  const imageBar =
+    dm && prep ? (
+      <div className="toolbar image-bar" data-image-window={prep.scene.name}>
+        <strong className="adventure-name">{prep.scene.name}</strong>
+        <span className="image-private" title="The players do not see this image; its walls, lights and paint are the same wherever it is opened">
+          <Icon name="eye-off" size={14} /> Only you see this
+        </span>
+        <button type="button" data-action="image-play" title="Put it on the table: the players see it (their map)" onClick={() => void playImage().catch((caught: Error) => setError(caught.message))}>
+          Put in play
+        </button>
+        <button
+          type="button"
+          className={testing ? "on" : ""}
+          data-action="image-test"
+          aria-pressed={testing}
+          title={testing ? "End the play test: back to the GM's view" : "Play test: a test token on the image, seen as a player sees it (walls, doors, light); drag it to find problems"}
+          onClick={() => session.playtest(!testing)}
+        >
+          {testing ? "End play test" : "Play test"}
+        </button>
+        <button type="button" className="ghost" data-action="image-close" title="Close the image (back to the table's map)" onClick={closeImage}>
+          Close
+        </button>
+      </div>
+    ) : null;
+  const sceneBar = imageBar ?? (scene ? (
     <div className="toolbar" data-adventure={dm ? pack?.name ?? scene.name : scene.name}>
       {dm && pack && candidates.length > 1 ? (
         <select
@@ -395,8 +489,13 @@ export function App() {
         </select>
       ) : null}
       <span className="grid-label">{gridLabel(withGrid({ ...scene, grid: scene.baseGrid ?? scene.grid }, session.map.sceneId === scene.id ? session.map.settings.grid : null).grid)}</span>
+      {dm ? (
+        <button type="button" className="ghost" data-action="table-test" aria-pressed={testing} title={testing ? "End the play test" : "Play test: a test token on this map, seen as a player sees it"} onClick={() => session.playtest(!testing)}>
+          {testing ? "End play test" : "Play test"}
+        </button>
+      ) : null}
     </div>
-  ) : null;
+  ) : null);
 
   // The table before a map is open: the decal alone (maps and books open from
   // the Books window, or a map bundle dropped on the table).
@@ -424,12 +523,13 @@ export function App() {
           session={session}
           scene={
             scene ? (
-              <MapView scene={scene} gm={dm} map={session.map} records={recordList} pings={session.pings} notice={session.notice} actions={mapActions} targeted={targeted} me={myName} />
+              <MapView scene={scene} gm={dm && !testing} map={session.map} records={recordList} pings={session.pings} notice={session.notice} actions={mapActions} targeted={targeted} me={testing ? "@test" : myName} startEditing={dm && Boolean(prep) && !testing} />
             ) : null
           }
           sceneId={scene?.id ?? ""}
           sceneName={scene?.name ?? ""}
           sceneBar={sceneBar}
+          onMapClosed={prep ? closeImage : undefined}
           emptyGM={emptyGM}
           onOpenAdventure={() => fileInput.current?.click()}
           openMaps={(bytes, name) => openBytes(bytes, name)}

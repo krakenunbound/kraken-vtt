@@ -45,6 +45,9 @@ export type WallKind = "wall" | "terrain" | "door" | "secret" | "toggle" | "wind
 export type EditWall = { id: string; x1: number; y1: number; x2: number; y2: number; kind: WallKind; sight: number; light: number; sound: number; move: number; dir: number; door: number; ds: number; toggle: "none" | "gm" | "players"; threshold: number | null; hidden: boolean; group?: string };
 export type TableMap = {
   sceneId: string | null;
+  // The GM's: the image open privately in the image window (its scene id), and whether a play test runs.
+  prep?: string | null;
+  testing?: boolean;
   tokens: MapToken[];
   doors: MapDoor[];
   vision: number[][] | null;
@@ -74,7 +77,7 @@ export type MapTile = { id: string; name: string; src: string; url: string; x: n
 // Text on the map (FG's text layers): labels, numbers, pins.
 export type MapLabel = { id: string; x: number; y: number; text: string; font: string; size: number; color: string; rotation: number; anchor: string; outline: { width: number; color: string }; shadow: { offset: number; blur: number; color: string }; hidden: boolean; group: string; number: number | null; icon: string; link: { kind: string; id: string } | null };
 export type MapGroup = { name: string; shown?: boolean; players?: boolean; locked?: boolean; nextNumber?: number; prefix?: string };
-export type LibraryItem = { path: string; name: string; category: string; npcs?: string; summary?: string; html?: string; file?: string };
+export type LibraryItem = { path: string; name: string; category: string; npcs?: string; summary?: string; html?: string; file?: string; map?: boolean };
 export type MapMask = { on: boolean; shapes: { id: string; mode: "reveal" | "hide"; points: number[] }[] };
 export type Ping = { id: number; x: number; y: number; from: string; color: string };
 // A line drawn on the map, for everyone (by "" is the GM's).
@@ -694,13 +697,18 @@ export function useSession() {
     [connect],
   );
 
-  const publish = useCallback(async (scene: MapScene) => {
+  // An image put on the table, or (prep) opened in the GM's image window alone:
+  // the same master either way (its walls, lights and paint kept by its id).
+  const publish = useCallback(async (scene: MapScene, options: { prep?: boolean } = {}) => {
     const socket = socketRef.current;
     if (!window.kraken || roleRef.current !== "dm" || !socket || socket.readyState !== WebSocket.OPEN) {
       throw new Error("The table is not hosting.");
     }
     try {
-      if (scene.imageUrl) {
+      // The players' picture stays the table's while the GM works on another image.
+      if (options.prep) {
+        /* the GM's window draws its own picture */
+      } else if (scene.imageUrl) {
         const response = await fetch(scene.imageUrl);
         if (!response.ok) throw new Error("Could not read the map image.");
         const bytes = await response.arrayBuffer();
@@ -748,6 +756,7 @@ export function useSession() {
     socket.send(
       JSON.stringify({
         type: "scene",
+        ...(options.prep ? { prep: true } : {}),
         scene: {
           ...(tiles.length ? { tiles } : {}),
           id: scene.id,
@@ -1007,11 +1016,14 @@ export function useSession() {
   // The GM's map editor: walls and undo.
   const wall = useCallback((action: string, payload: Record<string, unknown> = {}) => send({ type: "wall", action, ...payload }), [send]);
   const mapUndo = useCallback(() => send({ type: "map-undo" }), [send]);
+  // The GM's image window: closed, or a play test (a test token, the players' view) on or off.
+  const prepClose = useCallback(() => send({ type: "prep-close" }), [send]);
+  const playtest = useCallback((on: boolean, at?: { x: number; y: number }) => send({ type: "playtest", on, ...(at ? { at } : {}) }), [send]);
   const mask = useCallback((action: string, payload: Record<string, unknown> = {}) => send({ type: "mask", action, ...payload }), [send]);
   const libraryAction = useCallback((action: string, payload: Record<string, unknown> = {}) => send({ type: "library", action, ...payload }), [send]);
   // The GM's: an FG module's maps as a bundle to open on the table.
-  const fgMaps = useCallback(async (module: string, only = "") => {
-    const response = await fetch(`${originRef.current}/table/fg-maps?token=${assetRef.current}&module=${encodeURIComponent(module)}${only ? `&only=${encodeURIComponent(only)}` : ""}`);
+  const fgMaps = useCallback(async (module: string, only = "", file = "") => {
+    const response = await fetch(`${originRef.current}/table/fg-maps?token=${assetRef.current}&module=${encodeURIComponent(module)}${only ? `&only=${encodeURIComponent(only)}` : ""}${file ? `&file=${encodeURIComponent(file)}` : ""}`);
     if (!response.ok) throw new Error(await response.text());
     return new Uint8Array(await response.arrayBuffer());
   }, []);
@@ -1170,6 +1182,8 @@ export function useSession() {
     improveCharacter,
     wall,
     mapUndo,
+    prepClose,
+    playtest,
     mask,
     label,
     mapGroup,

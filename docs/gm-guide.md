@@ -13,7 +13,8 @@ On the start screen choose **My Campaigns**.
   holds; the chosen one's full description is below them.
   - **Your own ruleset pictures:** each ruleset shows Kraken's own emblem.
     To show a picture of your own instead (a logo from your books, say), put
-    it in `%APPDATA%\kraken-vttssetsulesets` (on Linux,
+    it in `%APPDATA%\kraken-vttssets
+ulesets` (on Linux,
     `~/.config/kraken-vtt/assets/rulesets`), named as the ruleset:
     `D&D 3.5E.png`, `Castles & Crusades.webp`. It shows on your computer
     only; Kraken never ships a game's official logo.
@@ -131,6 +132,23 @@ any other way).
   characteristics, skills, armour and weapons, which the tracker fights with.
 
 ## Maps
+
+**Images, as in Fantasy Grounds.** Campaign > **Images** lists every picture
+of every active book (maps and handouts, under their book). Click one to open
+it in the image window. Each picture has one master: its walls, doors,
+lights, paint, effects and tokens are kept in the campaign, and every place
+that opens it (Images, the book's pictures, the Library, the table) opens the
+same one.
+
+- An image you open is **yours alone**: the players keep their map until you
+  choose **Put in play**.
+- It opens **unlocked** (the editor), as a picture's **Unlock to edit**
+  opens it. The map window's **Locked / Unlocked** button switches between
+  editing and play.
+- **Play test:** puts a test token on the image and shows it as a player
+  sees it (walls, doors, light, darkness). Drag the token to look for gaps,
+  then **End play test** (the token goes). The table's map has Play test too.
+- **Close** goes back to the table's map.
 
 - Open a map from the **Library** (the sidebar's Adventures: its Maps tab
   shows each map, and a click lets you see it before it goes to the table or

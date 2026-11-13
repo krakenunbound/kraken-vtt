@@ -7,7 +7,8 @@ const { readModule } = require("./importers/fgModule.cjs");
 // its story entries (FG's Story list: the adventure's text, read by the GM).
 // The module is read in place, its records kept in memory a few at a time.
 
-const KINDS = { map: "image", npc: "npc", battle: "battle", parcel: "treasureparcels", table: "tables", story: "encounter" };
+// image: every picture (FG's Images & Maps: maps, handouts, portraits); map: only the maps.
+const KINDS = { image: "image", map: "image", npc: "npc", battle: "battle", parcel: "treasureparcels", table: "tables", story: "encounter" };
 const cache = new Map();
 // The GM's shelf: a book named by its id, its name or its title is read from
 // its own file (a pack, a module whose file name is not its name, a bundled book).
@@ -29,18 +30,22 @@ const plain = (html) => String(html ?? "").replace(/<[^>]+>/g, " ").replace(/\s+
 
 function list(moduleName, kind, search = "") {
   const type = KINDS[kind];
-  if (!type) throw new Error("Which list? map, npc, battle, parcel, table or story.");
+  if (!type) throw new Error("Which list? image, map, npc, battle, parcel, table or story.");
   const want = String(search).toLowerCase();
-  const maps = kind === "map" ? require("./importers/fgMaps.cjs") : null;
+  const maps = kind === "map" || kind === "image" ? require("./importers/fgMaps.cjs") : null;
   return moduleRecords(moduleName)
     .filter((record) => record.type === type && (!want || String(record.name).toLowerCase().includes(want)))
     // A module's maps (not its handouts and portraits), each with its picture.
-    .filter((record) => !maps || (maps.isMap(record) && maps.mapPicture(record)))
+    .filter((record) => !maps || ((kind === "image" || maps.isMap(record)) && maps.mapPicture(record)))
     .map((record) => {
       const out = { path: record.data.fgPath, name: record.name, category: record.data.fgCategory ?? "" };
       if (kind === "battle") out.npcs = rows(record.data.npclist).map((row) => `${row.count ?? 1} ${row.name}`).join(", ");
       if (kind === "npc") out.summary = [record.data.hdtext ? `HD ${record.data.hdtext}` : "", record.data.ac ? `AC ${record.data.ac.total}` : "", record.data.attackstext ?? ""].filter(Boolean).join(" · ");
       if (kind === "parcel") out.summary = [...rows(record.data.itemlist).map((item) => item.name), ...rows(record.data.coinlist).map((coin) => `${coin.amount} ${coin.description ?? coin.name ?? ""}`)].join(", ").slice(0, 200);
+      if (kind === "image") {
+        out.file = maps.mapPicture(record);
+        out.map = maps.isMap(record);
+      }
       if (kind === "map") {
         out.file = maps.mapPicture(record);
         const grid = Number(String(record.data.image?.gridsize ?? "").split(",")[0]) || 0;

@@ -1450,6 +1450,16 @@ const TOOLS = [
     },
   },
   {
+    name: "kraken_image",
+    description:
+      "FG's image window (the GM's): any picture of a book opened to edit, the same master wherever it is opened (its walls, doors, lights, paint and effects are kept by its id in the campaign; kraken_wall, kraken_light, kraken_draw and the other map tools work on it while it is open). The players do not see it until it is put in play. action open (book: the book's name or id; name: the picture's name as the Images list (kraken_library action list kind image) shows it, or file: its picture file in the book); play (put it on the table: the players see it); test (on: a play test, a test token on it and the GM's view a player's: walls, doors and light as a player meets them; off ends it); close (back to the table's map).",
+    inputSchema: object({ action: { type: "string", enum: ["open", "play", "test", "close"] }, book: string("open: the book's name or id"), name: string("open: the picture's name"), file: string("open: the picture's file in the book"), on: { type: "boolean" } }, ["action"]),
+    async run(args, ctx) {
+      needTable(ctx);
+      return out(await ctx.ui({ kind: "image", action: args.action, book: args.book, name: args.name, file: args.file, on: args.on }, 60000));
+    },
+  },
+  {
     name: "kraken_open_fg_module",
     description:
       "Put an FG adventure module's maps on the table (B1 In Search of the Unknown, B2 The Keep on the Borderlands...): every map becomes a scene with its picture, FG's walls (doors, see-through and one-way walls), lights, grid, FX layers (rain, clouds, water in its mask) and FG's shortcuts as map pins in two GM-only layer groups (Map keys, Encounters) linked to the story entries and encounters. maps: names to take only some (part of the name); without, the module's playable maps (FG's Maps and Region map, or with a grid or walls; handouts and portraits stay in Images & Maps), all: true for every picture. The first map goes on the table; kraken_scenes switches.",
@@ -1471,7 +1481,7 @@ const TOOLS = [
     inputSchema: object({
       action: { type: "string", enum: ["list", "npc", "battle", "parcel", "table", "story"] },
       module: string("The module's name (list)"),
-      kind: { type: "string", enum: ["map", "npc", "battle", "parcel", "table", "story"] },
+      kind: { type: "string", enum: ["image", "map", "npc", "battle", "parcel", "table", "story"] },
       search: string("Part of the name (list)"),
       path: string("The record's FG path, as list gives it"),
       count: number("npc: how many"),
@@ -1514,7 +1524,7 @@ const TOOLS = [
       "The GM's windows: list them, or open, close, pop out (to a window of its own, for another monitor) or dock back a window. Kinds: map (the open map in its own window, as FG's image window, with its tools and settings; it opens by itself when a map opens and never pops out), assistant (the GM's DM assistant chat), characters, party, combat, players, settings, decals (the background decal picker), wallpapers (the desktop wallpaper picker), gmicons (the GM icon picker), krits (critical hits and fumbles), dice (this seat's dice: sets, colours, design, material, effects), sound (one-shots, effects, ambience, music, chat triggers, volumes), sheet (a character's sheet: give record, its id or name), charselect (Character Selection), records (FG's campaign lists: NPCs, items, spells, classes...; the GM shares one with kraken_record_update visibility all, hides it with gm), record (one record: give record, its id or name). cards (the ability cards, when this seat turned them on in Settings).",
     inputSchema: object({
       action: { type: "string", enum: ["list", "open", "close", "popout", "dock"] },
-      kind: { type: "string", enum: ["assistant", "characters", "party", "combat", "players", "settings", "decals", "wallpapers", "gmicons", "krits", "library", "dice", "sound", "sheet", "books", "book", "images", "picture", "notes", "note", "charselect", "records", "record", "adventure", "story", "map", "cards"] },
+      kind: { type: "string", enum: ["assistant", "characters", "party", "combat", "players", "settings", "decals", "wallpapers", "gmicons", "krits", "library", "dice", "sound", "sheet", "books", "book", "images", "picture", "notes", "note", "charselect", "records", "record", "adventure", "story", "map", "cards", "imagelist"] },
       record: string("For a sheet: the character's record id or name; for a record: its id or name"),
     }),
     run: async (args, ctx) => out(await ctx.ui({ kind: "windows", action: args.action ?? "list", window: args.kind, record: args.record })),

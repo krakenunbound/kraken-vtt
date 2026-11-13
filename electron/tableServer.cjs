@@ -539,6 +539,32 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     activeRecord: () => combat.entries().find((item) => item.id === combat.active())?.recordId ?? null,
   });
 
+  // The GM's image window (FG's: any image opened from the Images list, a book
+  // or the Library): the same master as the table's (one state, keyed by the
+  // image's scene id), shown to the GM alone until it is put in play. While
+  // it is open, the GM's map tools work on it; the players keep the table's.
+  const prep = createMapState({
+    saved: null,
+    records,
+    sharedWith: map,
+    onChange: () => {
+      onChange("table");
+      sendMaps();
+    },
+    hasArt: (id) => tokenArt.has(id),
+    hasPicture: (id) => Boolean(art && art.has(id)),
+    artFor: (data) => artForCharacter(data),
+    hasTile: (id) => Boolean(tiles && tiles.has(id)),
+    combatFor: () => null,
+    activeRecord: () => null,
+  });
+  // FG's play test: the GM sees the image as a player would, through a test
+  // token's eyes ("@test" owns it), and moves it as a player moves.
+  const TEST_SEAT = { role: "player", name: "@test" };
+  let testing = false;
+  const gmMap = () => (prep.scene() ? prep : map);
+  const mapOf = (client) => (client.role === "dm" ? gmMap() : map);
+
   // The combat tracker: each seat is sent its own view (combat.cjs viewFor).
   const combat = createCombat({
     saved: saved.combat,
@@ -576,12 +602,34 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
   // Each seat is sent its own view of the map (mapState viewFor), once per
   // burst of changes.
   let mapsPending = false;
+  // The play test: a test token (a player's, "@test") on the GM's map, and the
+  // GM's view becomes that player's; off, the test token goes.
+  function setPlaytest(on, at) {
+    const working = gmMap();
+    if (!working.scene()) throw new Error("Open an image first.");
+    const seat = { role: "dm", name: "GM" };
+    for (const token of working.tokens().filter((item) => item.owner === TEST_SEAT.name)) working.remove(token.id, seat);
+    testing = Boolean(on);
+    if (!testing) return;
+    const x = Number(at?.x);
+    const y = Number(at?.y);
+    working.place({ name: "Test player", owner: TEST_SEAT.name, faction: "friend", ...(Number.isFinite(x) && Number.isFinite(y) ? { x, y } : {}) }, seat);
+  }
+
   function sendMaps() {
     if (mapsPending) return;
     mapsPending = true;
     setImmediate(() => {
       mapsPending = false;
-      for (const [ws, client] of clients) send(ws, { type: "map", ...map.viewFor(seatOf(client), client.assetToken) });
+      for (const [ws, client] of clients) {
+        if (client.role !== "dm") {
+          send(ws, { type: "map", ...map.viewFor(seatOf(client), client.assetToken) });
+          continue;
+        }
+        const working = gmMap();
+        const view = working.viewFor(testing ? TEST_SEAT : seatOf(client), client.assetToken);
+        send(ws, { type: "map", ...view, prep: working === prep ? working.scene()?.id ?? null : null, testing });
+      }
     });
   }
 
@@ -823,7 +871,8 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         const { fgModuleBundle } = require("./importers/fgMaps.cjs");
         // One map (the Library's choice), or the module's maps.
         const one = String(url.searchParams.get("only") || "");
-        const bundle = fgModuleBundle(wanted, one ? { only: [one], all: true } : {});
+        const file = String(url.searchParams.get("file") || "").slice(0, 300);
+        const bundle = fgModuleBundle(wanted, file ? { file, all: true, ...(one ? { only: [one] } : {}) } : one ? { only: [one], all: true } : {});
         for (const [id, extra] of Object.entries(bundle.extras)) map.seed(id, { ...extra, tiles: storeTiles(extra.tiles) });
         res.writeHead(200, { "Content-Type": "application/zip", "Content-Length": bundle.bytes.length, "Cache-Control": "no-store" });
         res.end(Buffer.from(bundle.bytes));
@@ -1824,84 +1873,102 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         return;
       }
 
+      // The GM's image window: an image opened privately, closed, or a test.
+      if (msg.type === "prep-close" || msg.type === "playtest") {
+        if (client.role !== "dm") return;
+        try {
+          if (msg.type === "prep-close") {
+            testing = false;
+            prep.clearScene();
+          } else setPlaytest(Boolean(msg.on), msg.at);
+          sendMaps();
+        } catch (error) {
+          send(ws, { type: "error", reason: error instanceof Error ? error.message : "Not allowed." });
+        }
+        return;
+      }
+
       // The map: tokens, doors, line of sight and pings (mapState.cjs decides
       // who may do what).
       if (["token-place", "token-move", "token-remove", "token-update", "door", "sight", "lock", "scene-settings", "light-place", "light-update", "light-remove", "draw", "draw-erase", "draw-clear", "wall", "map-undo", "mask", "label", "map-group", "fx", "tile"].includes(msg.type)) {
+        const working = mapOf(client);
+        // Testing: the GM's moves of the test token are a player's (walls, locks).
+        const testToken = (id) => testing && client.role === "dm" && working.tokens().some((token) => token.id === id && token.owner === TEST_SEAT.name);
         const seat = seatOf(client);
         try {
           if (msg.type === "token-place") {
-            map.place({ recordId: msg.recordId, name: msg.name, x: num(msg.x, NaN), y: num(msg.y, NaN), hidden: msg.hidden }, seat);
+            working.place({ recordId: msg.recordId, name: msg.name, x: num(msg.x, NaN), y: num(msg.y, NaN), hidden: msg.hidden }, seat);
           } else if (msg.type === "token-move" && Array.isArray(msg.moves)) {
             // A group dragged together.
-            const moved = map.moveMany(msg.moves.slice(0, 400), seat, { snap: msg.snap !== false });
+            const moved = working.moveMany(msg.moves.slice(0, 400), seat, { snap: msg.snap !== false });
             if (moved.some((item) => item.blocked)) send(ws, { type: "notice", text: "A wall is in the way." });
           } else if (msg.type === "token-move") {
             const to = { x: num(msg.x, NaN), y: num(msg.y, NaN) };
             if (!Number.isFinite(to.x) || !Number.isFinite(to.y) || Math.abs(to.x) > 1e7 || Math.abs(to.y) > 1e7) throw new Error("Where to?");
-            const { blocked } = map.move(String(msg.id ?? ""), to, seat, { snap: msg.snap !== false });
+            const { blocked } = working.move(String(msg.id ?? ""), to, testToken(String(msg.id ?? "")) ? TEST_SEAT : seat, { snap: msg.snap !== false });
             if (blocked) send(ws, { type: "notice", text: "A wall is in the way." });
           } else if (msg.type === "token-remove") {
-            map.remove(String(msg.id ?? ""), seat);
+            working.remove(String(msg.id ?? ""), seat);
           } else if (msg.type === "token-update") {
-            map.update(String(msg.id ?? ""), msg.patch ?? {}, seat);
+            working.update(String(msg.id ?? ""), msg.patch ?? {}, seat);
           } else if (msg.type === "door") {
-            map.setDoor(String(msg.id ?? ""), msg.state === undefined ? undefined : num(msg.state, -1), seat);
+            working.setDoor(String(msg.id ?? ""), msg.state === undefined ? undefined : num(msg.state, -1), seat);
           } else if (msg.type === "sight") {
             if (client.role !== "dm") throw new Error("Only the GM can change line of sight.");
-            map.setSight(Boolean(msg.on));
+            working.setSight(Boolean(msg.on));
           } else if (msg.type === "scene-settings") {
-            map.updateSettings(msg.patch ?? {}, seat);
+            working.updateSettings(msg.patch ?? {}, seat);
           } else if (msg.type === "draw") {
-            map.draw({ points: msg.points, color: msg.color, width: msg.width, shape: msg.shape, fill: msg.fill, fillAlpha: msg.fillAlpha, alpha: msg.alpha, group: msg.group }, seat);
+            working.draw({ points: msg.points, color: msg.color, width: msg.width, shape: msg.shape, fill: msg.fill, fillAlpha: msg.fillAlpha, alpha: msg.alpha, group: msg.group }, seat);
           } else if (msg.type === "draw-erase") {
-            map.erase(String(msg.id ?? ""), seat);
+            working.erase(String(msg.id ?? ""), seat);
           } else if (msg.type === "draw-clear") {
-            map.clearDrawings(seat);
+            working.clearDrawings(seat);
           } else if (msg.type === "light-place") {
-            map.placeLight(msg.light ?? {}, seat);
+            working.placeLight(msg.light ?? {}, seat);
           } else if (msg.type === "light-update") {
-            map.updateLight(String(msg.id ?? ""), msg.patch ?? {}, seat);
+            working.updateLight(String(msg.id ?? ""), msg.patch ?? {}, seat);
           } else if (msg.type === "light-remove") {
-            map.removeLight(String(msg.id ?? ""), seat);
+            working.removeLight(String(msg.id ?? ""), seat);
           } else if (msg.type === "wall") {
             // The GM's map editor: walls drawn, changed, split, removed, cleared; every door closed.
             const ids = Array.isArray(msg.ids) ? msg.ids.map(String) : msg.id ? [String(msg.id)] : [];
-            if (msg.action === "add") map.addWalls(msg.wall ?? {}, seat);
-            else if (msg.action === "update") map.updateWalls(ids, msg.patch ?? {}, seat);
-            else if (msg.action === "remove") map.removeWalls(ids, seat);
-            else if (msg.action === "move") map.moveWalls(ids, num(msg.dx, NaN), num(msg.dy, NaN), seat);
-            else if (msg.action === "move-point") map.movePoint(msg.from, msg.to, ids, seat);
-            else if (msg.action === "split") map.splitWall(ids[0], num(msg.x, NaN), num(msg.y, NaN), seat);
-            else if (msg.action === "clear") map.clearWalls(seat);
-            else if (msg.action === "close-doors") map.closeDoors(seat);
+            if (msg.action === "add") working.addWalls(msg.wall ?? {}, seat);
+            else if (msg.action === "update") working.updateWalls(ids, msg.patch ?? {}, seat);
+            else if (msg.action === "remove") working.removeWalls(ids, seat);
+            else if (msg.action === "move") working.moveWalls(ids, num(msg.dx, NaN), num(msg.dy, NaN), seat);
+            else if (msg.action === "move-point") working.movePoint(msg.from, msg.to, ids, seat);
+            else if (msg.action === "split") working.splitWall(ids[0], num(msg.x, NaN), num(msg.y, NaN), seat);
+            else if (msg.action === "clear") working.clearWalls(seat);
+            else if (msg.action === "close-doors") working.closeDoors(seat);
             else throw new Error("What should the walls do?");
           } else if (msg.type === "map-undo") {
-            map.undo(seat);
+            working.undo(seat);
           } else if (msg.type === "label") {
-            if (msg.action === "add") map.addLabel(msg.label ?? {}, seat);
-            else if (msg.action === "update") map.updateLabel(String(msg.id ?? ""), msg.patch ?? {}, seat);
-            else if (msg.action === "remove") map.removeLabel(String(msg.id ?? ""), seat);
-            else if (msg.action === "renumber") map.renumber(String(msg.group ?? ""), seat, num(msg.start, 1));
+            if (msg.action === "add") working.addLabel(msg.label ?? {}, seat);
+            else if (msg.action === "update") working.updateLabel(String(msg.id ?? ""), msg.patch ?? {}, seat);
+            else if (msg.action === "remove") working.removeLabel(String(msg.id ?? ""), seat);
+            else if (msg.action === "renumber") working.renumber(String(msg.group ?? ""), seat, num(msg.start, 1));
             else throw new Error("What should the text do?");
           } else if (msg.type === "fx") {
-            if (msg.action === "add") map.addFx(msg.fx ?? {}, seat);
-            else if (msg.action === "update") map.updateFx(String(msg.id ?? ""), msg.patch ?? {}, seat);
-            else if (msg.action === "remove") map.removeFx(String(msg.id ?? ""), seat);
+            if (msg.action === "add") working.addFx(msg.fx ?? {}, seat);
+            else if (msg.action === "update") working.updateFx(String(msg.id ?? ""), msg.patch ?? {}, seat);
+            else if (msg.action === "remove") working.removeFx(String(msg.id ?? ""), seat);
             else throw new Error("What should the effect do?");
           } else if (msg.type === "tile") {
-            if (msg.action === "add") map.addTile(msg.tile ?? {}, seat);
-            else if (msg.action === "update") map.updateTile(String(msg.id ?? ""), msg.patch ?? {}, seat);
-            else if (msg.action === "order") map.orderTile(String(msg.id ?? ""), typeof msg.where === "number" ? Math.round(msg.where) : String(msg.where ?? ""), seat);
-            else if (msg.action === "remove") map.removeTile(String(msg.id ?? ""), seat);
+            if (msg.action === "add") working.addTile(msg.tile ?? {}, seat);
+            else if (msg.action === "update") working.updateTile(String(msg.id ?? ""), msg.patch ?? {}, seat);
+            else if (msg.action === "order") working.orderTile(String(msg.id ?? ""), typeof msg.where === "number" ? Math.round(msg.where) : String(msg.where ?? ""), seat);
+            else if (msg.action === "remove") working.removeTile(String(msg.id ?? ""), seat);
             else throw new Error("What should the image layer do?");
           } else if (msg.type === "map-group") {
-            if (msg.action === "remove") map.removeGroup(String(msg.name ?? ""), seat);
-            else map.updateGroup(String(msg.name ?? ""), msg.patch ?? {}, seat);
+            if (msg.action === "remove") working.removeGroup(String(msg.name ?? ""), seat);
+            else working.updateGroup(String(msg.name ?? ""), msg.patch ?? {}, seat);
           } else if (msg.type === "mask") {
-            map.setMask({ action: String(msg.action ?? ""), points: msg.points, id: msg.id }, seat);
+            working.setMask({ action: String(msg.action ?? ""), points: msg.points, id: msg.id }, seat);
           } else if (msg.type === "lock") {
             if (client.role !== "dm") throw new Error("Only the GM can lock token movement.");
-            map.setLocked(Boolean(msg.on));
+            working.setLocked(Boolean(msg.on));
           }
         } catch (error) {
           send(ws, { type: "error", reason: error instanceof Error ? error.message : "Not allowed." });
@@ -2082,6 +2149,19 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         if (client.role !== "dm") return;
         const next = sanitizeScene(msg.scene);
         if (!next) return;
+        // An image opened in the GM's image window: theirs alone, same master.
+        if (msg.prep) {
+          testing = false;
+          if (Array.isArray(msg.scene?.tiles) && msg.scene.tiles.length) prep.seed(next.id, { tiles: storeTiles(msg.scene.tiles.slice(0, 300)) });
+          prep.setScene(next);
+          sendMaps();
+          return;
+        }
+        // Put in play: the image window's image is the table's now.
+        if (prep.scene()?.id === next.id) {
+          testing = false;
+          prep.clearScene();
+        }
         const opened = scene?.id !== next.id;
         scene = next;
         // A scene with its own sound starts it (the soundscape goes on otherwise).
@@ -2165,7 +2245,11 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     chatLog: (count = 20) => chat.slice(-Math.max(1, Math.min(MAX_CHAT, Number(count) || 20))),
     players: () => playerList(),
     scene: () => scene,
-    map,
+    // The map the GM works on: the image window's while one is open (the same master), else the table's.
+    get map() {
+      return gmMap();
+    },
+    tableMap: map,
     combat,
     viewFor: (name) => map.viewFor({ role: "player", name }, ""),
     decals: () => decals,

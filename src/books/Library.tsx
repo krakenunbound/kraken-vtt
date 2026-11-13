@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { BookInfo, LibraryItem, Session } from "../session/useSession";
+import { imageWindow } from "../table/imageWindow";
 
 // FG's Library for the GM's adventures: each kind in its own tab (Maps,
 // Encounters, NPCs, Parcels, Tables), for one adventure or all the active
@@ -91,6 +92,9 @@ export function LibraryWindow({ session, openMaps }: { session: Session; openMap
               </button>
               <button type="button" data-action="library-map-show" title="Show the players this picture alone (a tab on their screens)" onClick={() => (session.showImage(preview.book.id, preview.item.file ?? "", preview.item.name), setStatus(`The players see ${preview.item.name} as a picture.`))}>
                 Show the players the picture
+              </button>
+              <button type="button" data-action="library-map-edit" title="Unlock: open it in the image window to edit (only you see it), the same image wherever it is opened" onClick={() => void imageWindow.open?.({ book: preview.book.name, name: preview.item.name }).catch((error: Error) => setStatus(error.message))}>
+                Unlock to edit
               </button>
               <button type="button" className="ghost" onClick={() => setPreview(null)}>
                 Close

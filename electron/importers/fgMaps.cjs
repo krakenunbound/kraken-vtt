@@ -267,7 +267,7 @@ function isMap(record) {
   return list(image.layers?.layer).some((layer) => layer.occluders);
 }
 
-function fgModuleBundle(moduleName, { only, all = false } = {}) {
+function fgModuleBundle(moduleName, { only, all = false, file = "" } = {}) {
   const module = readModule(moduleName, { only: new Set(["image"]) });
   // The book's own name (moduleName may be its file, as the shelf resolves it): scene ids, pins and the adventure go by the name.
   const label = String(module.info?.name || moduleName);
@@ -275,7 +275,8 @@ function fgModuleBundle(moduleName, { only, all = false } = {}) {
   const scenes = [];
   const extras = {};
   const slug = (text) => String(text).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 40);
-  const images = module.records.filter((item) => item.type === "image");
+  // A picture asked for by its file (a book page's picture): the image record that draws it.
+  const images = module.records.filter((item) => item.type === "image" && (!file || JSON.stringify(item.data).includes(file)));
   // A name asked for: that map exactly, when there is one by that name; else those whose names hold it.
   const exact = only ? images.filter((record) => only.some((name) => String(record.name).toLowerCase() === String(name).toLowerCase())) : [];
   for (const record of exact.length ? exact : images) {

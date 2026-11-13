@@ -383,8 +383,10 @@ function presetLight(name, profiles = []) {
   return preset ? cleanCarried({ name: preset.name, bright: preset.bright * 5, dim: preset.dim * 5, color: preset.color }) : null;
 }
 
-function createMapState({ saved, records, onChange = () => undefined, hasArt = () => false, hasPicture = () => false, artFor = () => null, hasTile = () => true, combatFor = () => null, activeRecord = () => null }) {
-  const state = savedMap(saved);
+function createMapState({ saved, records, onChange = () => undefined, hasArt = () => false, hasPicture = () => false, artFor = () => null, hasTile = () => true, combatFor = () => null, activeRecord = () => null, sharedWith = null }) {
+  // One master per map: a second state (the GM's private image window) works on
+  // the very same walls, lights, tokens, paint and effects as the table's.
+  const state = sharedWith ? sharedWith.rawState() : savedMap(saved);
   let scene = null;
   const visionCache = new Map();
   // The last edits on each scene's walls, to undo (FG has none; Foundry Ctrl+Z).
@@ -1435,6 +1437,12 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       return last.label;
     },
     persisted: () => JSON.parse(JSON.stringify(state)),
+    rawState: () => state,
+    // The GM's private window closed: no scene.
+    clearScene() {
+      scene = null;
+      visionCache.clear();
+    },
   };
 }
 

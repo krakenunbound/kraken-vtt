@@ -19,6 +19,7 @@ import { KritsWindow } from "../combat/KritsWindow";
 import { AdventureList, LibraryWindow, StoryWindow, type Kind as AdventureKind } from "../books/Library";
 import { NotesWindow, NoteWindow } from "../notes/Notes";
 import { BooksWindow, BookWindow, ImagesWindow, PictureWindow } from "../books/Books";
+import { ImagesList } from "../books/ImagesList";
 import { Icon } from "./icons";
 import { sound } from "../sound/soundEngine";
 import { FloatingWindow, useWindows } from "./Windows";
@@ -185,6 +186,7 @@ export function Desktop({
   emptyGM,
   onOpenAdventure,
   openMaps = async () => undefined,
+  onMapClosed,
   overlay,
 }: {
   session: Session;
@@ -197,6 +199,8 @@ export function Desktop({
   onOpenAdventure: () => void;
   // Opens a map bundle on the table (an FG module's maps from the Library).
   openMaps?: (bytes: Uint8Array, name: string) => Promise<unknown>;
+  // The image window's image: its map window closed closes it (the table's map again).
+  onMapClosed?: () => void;
   overlay: ReactNode;
 }) {
   const gm = session.role === "dm";
@@ -269,7 +273,8 @@ export function Desktop({
       entries: gm
         ? [
             { kind: "adventure", payload: "battle", label: "Encounters", icon: "encounter", title: "Encounters: every active adventure's" },
-            { kind: "library", label: "Adventures", icon: "image", title: "Library" },
+            { kind: "imagelist", label: "Images", icon: "image", title: "Images" },
+            { kind: "library", label: "Adventures", icon: "map", title: "Library" },
             listEntry("item", "Items", "bag"),
             listEntry("npc", "NPCs", "skull"),
             { kind: "adventure", payload: "parcel", label: "Parcels", icon: "coins", title: "Treasure parcels: every active adventure's" },
@@ -304,6 +309,14 @@ export function Desktop({
       windows.open("map", sceneName || "Map");
     }
   }, [mapOpenKey, sceneName]);
+  // The image window's map window closed by the GM: the image closes too.
+  const mapWindowOpen = windows.windows.some((item) => item.kind === "map");
+  const hadMapWindow = useRef(mapWindowOpen);
+  useEffect(() => {
+    if (hadMapWindow.current && !mapWindowOpen) onMapClosed?.();
+    hadMapWindow.current = mapWindowOpen;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mapWindowOpen]);
   // The GM shared the map: it opens again, closed or not.
   const sharedSeen = useRef(session.mapShared);
   useEffect(() => {
@@ -492,6 +505,7 @@ export function Desktop({
               {item.kind === "charselect" ? <CharacterSelect session={session} onSheet={(id, name) => windows.open("sheet", name, id)} onWizard={() => windows.open("characters", "Character Wizard", "new")} onClose={() => windows.close(item.key)} /> : null}
               {item.kind === "sheet" ? <CharacterPanel session={session} dock selected={item.payload ?? null} /> : null}
               {item.kind === "party" ? <PartySheet session={session} /> : null}
+              {item.kind === "imagelist" && gm ? <ImagesList session={session} /> : null}
               {item.kind === "cards" ? <CardsWindow session={session} characterId={item.payload} /> : null}
               {item.kind === "combat" ? <CombatTracker session={session} /> : null}
               {item.kind === "players" ? <PlayersWindow session={session} /> : null}

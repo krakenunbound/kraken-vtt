@@ -62,6 +62,8 @@ const MESSAGES = {
   tile: "kraken_tile",
   ping: "kraken_ping",
   "map-share": "kraken_map",
+  "prep-close": "kraken_image",
+  "playtest": "kraken_image",
   draw: "kraken_draw",
   "draw-erase": "kraken_draw",
   "draw-clear": "kraken_draw",

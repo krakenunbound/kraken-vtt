@@ -6,6 +6,7 @@ import { useWindows } from "../ui/Windows";
 import { sound } from "../sound/soundEngine";
 import { slotDrag } from "../ui/QuickSlots";
 import { PacksPanel } from "./Packs";
+import { imageWindow } from "../table/imageWindow";
 
 // Books, as FG's Library: the Books window lists the campaign's active books
 // (by category, with their covers), and Activation every module for its game;
@@ -663,6 +664,31 @@ export function PictureWindow({ session, payload }: { session: Session; payload:
   );
 }
 
+// FG's lock on every image: unlocked, the image opens in the image window to
+// edit (walls, doors, lights, paint, effects, a play test), the same master
+// wherever it is opened.
+function UnlockButton({ tab }: { tab: Tab }) {
+  const [state, setState] = useState("");
+  return (
+    <button
+      type="button"
+      className="image-unlock"
+      data-action="image-unlock"
+      title={state || "Locked: unlock to edit it in the image window (walls, doors, lights, paint), the same image wherever it is opened"}
+      aria-label={`Unlock ${tab.name} to edit`}
+      onClick={() => {
+        setState("Opening…");
+        void imageWindow
+          .open?.({ book: tab.book, file: tab.file, name: tab.name })
+          .then(() => setState(""))
+          .catch((error: Error) => setState(error.message));
+      }}
+    >
+      <Icon name="lock" size={14} /> {state ? state : "Unlock to edit"}
+    </button>
+  );
+}
+
 function PictureView({ session, tab, shown, onMenu }: { session: Session; tab: Tab; shown?: ShownImage; onMenu: (event: React.MouseEvent) => void }) {
   const gm = session.role === "dm";
   return (
@@ -671,6 +697,7 @@ function PictureView({ session, tab, shown, onMenu }: { session: Session; tab: T
         <div className="images-share">
           <ShareButton shared={Boolean(shown)} what={tab.name} onClick={() => (shown ? session.hideImage(shown.id) : session.showImage(tab.book, tab.file, tab.name))} />
           <span>{shown ? "Shown to the players" : "Not shared"}</span>
+          <UnlockButton tab={tab} />
         </div>
       ) : null}
       <img src={session.bookUrl("picture", tab.book, tab.file)} alt={tab.name} data-image={tab.file} />

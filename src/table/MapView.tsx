@@ -264,7 +264,10 @@ function MapViewInner({
   actions,
   targeted = [],
   me = "",
+  startEditing = false,
 }: {
+  // FG's image opened unlocked: its editor open from the start.
+  startEditing?: boolean;
   scene: MapScene;
   gm?: boolean;
   map: TableMap;
@@ -294,7 +297,11 @@ function MapViewInner({
     else if (/^battle\./.test(record) && gm && actions.libraryAction && window.confirm("Put this encounter on the combat tracker (its tokens on this map, hidden)?")) actions.libraryAction("battle", { path: link.id });
   }
   // The GM's map editor (FG's image layer panel).
-  const [editorOpen, setEditorOpen] = useState(false);
+  const [editorOpen, setEditorOpen] = useState(startEditing);
+  // An image opened unlocked (from a picture's lock): its editor opens.
+  useEffect(() => {
+    if (startEditing) setEditorOpen(true);
+  }, [startEditing, sceneIn.id]);
   const [editTab, setEditTab] = useState<EditTab>("walls");
   const [editTool, setEditTool] = useState<EditTool>(null);
   const [wallKind, setWallKind] = useState<WallKind>("wall");
@@ -2129,9 +2136,9 @@ function MapViewInner({
         </div>
         {gm ? (
           <div className="tool-group">
-            <button type="button" className={editorOpen ? "tool on" : "tool"} data-action="map-editor" aria-pressed={editorOpen} aria-label="Edit map" title="Edit the map: line of sight (walls, doors, windows), lights, masks, paint, text, the grid and weather (FG's layer panel)" onClick={() => setEditorOpen(!editorOpen)}>
-              <Icon name="walls" />
-              <span className="tool-label">Edit map</span>
+            <button type="button" className={editorOpen ? "tool on" : "tool"} data-action="map-editor" aria-pressed={editorOpen} aria-label="Edit map" title={editorOpen ? "Unlocked: editing (line of sight, doors, windows, lights, masks, paint, text, grid, weather). Lock it to play." : "Locked: playing. Unlock to edit it (FG's image lock): walls, doors, lights, paint and more, the same image wherever it is opened."} onClick={() => setEditorOpen(!editorOpen)}>
+              <Icon name={editorOpen ? "unlock" : "lock"} />
+              <span className="tool-label">{editorOpen ? "Unlocked" : "Locked"}</span>
             </button>
             <button type="button" className="tool" data-action="map-share" aria-label="Share with players" title="Share with players: the map opens on every player's screen, even where it was closed (FG's Share)" onClick={() => actions.shareMap?.()}>
               <Icon name="share" />
@@ -2156,7 +2163,7 @@ function MapViewInner({
               <Icon name={map.sight ? "eye" : "eye-off"} />
             </button>
             <button type="button" className={map.locked ? "tool on" : "tool"} data-action="lock" aria-pressed={map.locked} aria-label={map.locked ? "Movement locked" : "Lock movement"} onClick={() => actions.setLocked(!map.locked)} title={map.locked ? "Movement locked: players cannot move their tokens" : "Lock movement"}>
-              <Icon name={map.locked ? "lock" : "unlock"} />
+              <Icon name={map.locked ? "shield" : "hand"} />
             </button>
           </div>
         ) : map.locked ? (

@@ -1575,3 +1575,9 @@ textarea.cc-field.tall { min-height: 220px; }
 .quick-slot-menu button.danger { color: #e08a7a; }
 .quick-slot-rename { display: flex; gap: 6px; padding: 4px; }
 .quick-slot-rename input { flex: 1; min-width: 0; }
+/* FG's image window: an image open for the GM alone, its bar (put in play, play test, close). */
+.image-bar { gap: 8px; }
+.image-private { display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--brass-dim); color: var(--brass); font-size: 0.78rem; }
+.image-bar button.on { border-color: var(--brass); color: var(--brass); box-shadow: 0 0 8px rgba(210, 161, 90, 0.35); }
+.image-unlock { display: inline-flex; align-items: center; gap: 5px; margin-left: 8px; padding: 2px 10px; font-size: 0.78rem; }
+.images-maps-only { display: flex; align-items: center; gap: 5px; font-size: 0.82rem; color: var(--muted); white-space: nowrap; }

@@ -4,6 +4,20 @@ What changed in each release of Kraken VTT. Downloads are on the
 [Releases](https://github.com/krakenunbound/kraken-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
+## 0.1.0-alpha.77: Images, as in Fantasy Grounds
+
+- **Campaign > Images** lists every picture of every active book, maps and
+  handouts. A click opens it in the image window.
+- **One master per picture:** its walls, doors, lights, paint, effects and
+  tokens are kept in the campaign, and Images, the book's pictures, the
+  Library and the table all open that same image.
+- **An image you open is yours alone** until you choose **Put in play**; the
+  players keep their map meanwhile.
+- **Lock / unlock:** every picture has **Unlock to edit**, and the map
+  window's **Locked / Unlocked** button switches between editing and play.
+- **Play test:** a test token on the image, seen as a player sees it (walls,
+  doors, light). Drag it to find problems; End play test removes it.
+
 ## 0.1.0-alpha.76: The ruleset picker
 
 - **The ruleset picker uses the whole screen:** it fills as many columns as
