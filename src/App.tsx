@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { restoreAllowed } from "../shared/table/restore.mjs";
 import { Icon } from "./ui/icons";
 import { imageWindow, mapWindow, studioOpener, type ImageRef } from "./table/imageWindow";
 import { gridLabel, preferredCandidateIndex, preferredSceneIndex } from "./foundry/geometry";
@@ -64,6 +65,9 @@ type TableAdventure = {
   name: string;
   scenes: MapScene[];
 };
+
+// A book as the shelf lists it (its names, and whether it is active here).
+type ShelfBook = { id: string; name: string; title: string; active?: boolean };
 
 function blobUrl(bytes: Uint8Array, mime: string): string {
   const copy = new Uint8Array(bytes.byteLength);
@@ -265,14 +269,9 @@ export function App() {
         if (!hasBundle || cancel) return;
         // A book's map comes back only while that book is active in the campaign
         // (an inactive book's maps are off limits); the GM's own picture or bundle always.
-        if (view?.adventure) {
-          const listed = await session.bookFetch<{ books: { id: string; name: string; title: string; active?: boolean }[] }>("list").catch(() => ({ books: [] }));
-          const tail = view.adventure.split(/[\/]/).pop()?.replace(/\.(mod|kpack|zip)$/i, "") ?? "";
-          const book = listed.books.find((item) => [item.id, item.name, item.title].includes(view.adventure) || [item.id, item.name, item.title].includes(tail));
-          if (book && !book.active) {
-            void kraken.saveView(campaignId, null).catch(() => undefined);
-            return;
-          }
+        if (view && !restoreAllowed(view, (await session.bookFetch<{ books: ShelfBook[] }>("list").catch(() => ({ books: [] }))).books)) {
+          void kraken.saveView(campaignId, null).catch(() => undefined);
+          return;
         }
         // The GM closed its window last time: it stays closed until a map is opened.
         if (view?.closed) setMapHeld(view.sceneId);

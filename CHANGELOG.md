@@ -4,6 +4,14 @@ What changed in each release of Kraken VTT. Downloads are on the
 [Releases](https://github.com/krakenunbound/kraken-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
+## 0.1.0-alpha.82: A stray table map no longer comes back
+
+- **Fixed: a table map from a book that is not active kept coming back**
+  when a campaign was hosted (a map saved by its book file's Windows path was
+  taken for the GM's own picture). A book's map now comes back only while its
+  book is active, however it was saved; otherwise it is forgotten. Checked on
+  a copy of the campaign it happened in, in the built app.
+
 ## 0.1.0-alpha.81: The image window, and Assets
 
 - **The image window works as Fantasy Grounds' does, in Kraken's own way:**
