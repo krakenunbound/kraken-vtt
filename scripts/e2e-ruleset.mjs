@@ -247,9 +247,10 @@ async function runRuleset(ruleset, plan) {
       await preset.click();
       await seat.waitForTimeout(500);
       await closeWindows(seat);
-      await seat.click('.dice-tray button[aria-label="d20"]');
-      await seat.click('.dice-tray button[aria-label="d6"]');
-      await seat.click(".dice-pool .play-button");
+      // (The map the GM put on the table can lie over the chat dock: its buttons are pressed as clicks on them.)
+      await seat.locator('.dice-tray button[aria-label="d20"]').dispatchEvent("click");
+      await seat.locator('.dice-tray button[aria-label="d6"]').dispatchEvent("click");
+      await seat.locator(".dice-pool .play-button").dispatchEvent("click");
       const line = await waitFor(async () => {
         const lines = await tool("kraken_chat_log", { count: 30 });
         return (Array.isArray(lines) ? lines : []).reverse().find((item) => item.roll && [`A test player`, ctx.character?.name ?? "A test player"].some((who) => `${item.from} ${item.roll.by ?? ""}`.includes(who)) && item.roll.terms?.some((term) => term.sides === 20));
