@@ -2120,6 +2120,7 @@ label.set-row { cursor: pointer; }
 .party-controls { margin-top: 4px; padding: 8px; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--raise); }
 .party-group { margin-left: auto; }
 .party-group label, .xp-award label { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 0.84rem; }
+.party-group label input, .xp-award label input { color: var(--text); font-size: 1rem; }
 .party-parcel { background: var(--raise); }
 .parcel-coins label { text-transform: uppercase; letter-spacing: 0.06em; font-size: 0.72rem; }
 .party-xp { display: flex; flex-direction: column; gap: 8px; }

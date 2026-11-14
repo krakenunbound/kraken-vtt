@@ -13,9 +13,10 @@
 //
 // --compare makes before/after contact sheets (each shot's before beside its
 // after) of the shots in both folders, or only those whose names contain one
-// of the names given. The GM's window opens on the left monitor
-// (KRAKEN_WINDOW_AT, -2500,40 by default); the test player's Chrome runs
-// headless and muted. Every window is closed at the end.
+// of the names given. The GM's window opens full screen on the left monitor
+// (KRAKEN_WINDOW_AT, -2500,40 by default) and each window at the size and
+// place it opens at; the test player's Chrome runs headless and muted at
+// 2560x1440 (SHOTS_PLAYER=w,h). Every window is closed at the end.
 import "./loopback.mjs";
 import { spawn } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync } from "node:fs";
@@ -61,6 +62,8 @@ if (argv[0] === "--compare") {
 const OUT = flag("--out") ?? path.join(tmpdir(), "kraken-shots", new Date().toISOString().slice(0, 16).replace(/[:T]/g, "-"));
 mkdirSync(OUT, { recursive: true });
 const AT = (process.env.KRAKEN_WINDOW_AT ?? "-2500,40").split(",").map(Number);
+// The test player's browser viewport (a 1440p monitor, as the GM's).
+const PLAYER = (process.env.SHOTS_PLAYER ?? "2560,1440").split(",").map(Number);
 // The games: Kraken's own two first (the richest), then one of each kind shipped in the box.
 const GAMES = (flag("--games") ?? "Descending Darkness,Apeira Astra,D&D 5E (SRD),Forged in the Dark,Fate Core,Ironsworn,Cairn,Basic Fantasy").split(",").map((name) => name.trim());
 const notes = [];
@@ -116,7 +119,15 @@ async function audit(game) {
   let child = null;
   try {
     const page = await app.firstWindow();
-    await app.evaluate(({ BrowserWindow }, [x, y]) => BrowserWindow.getAllWindows()[0].setBounds({ x, y, width: 1680, height: 1020 }), AT);
+    // Full screen on its monitor, as a GM plays (readme-shots does the same): layouts squeezed into a small window look different.
+    const screenSize = await app.evaluate(async ({ BrowserWindow, screen }) => {
+      const win = BrowserWindow.getAllWindows()[0];
+      const display = screen.getDisplayMatching(win.getBounds());
+      win.setFullScreen(true);
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      return `${display.size.width}x${display.size.height}`;
+    });
+    console.log(`  the GM's screen: ${screenSize}`);
     await page.waitForSelector("text=My Campaigns", { timeout: 60000 });
     child = spawn(process.execPath, ["electron/agent/mcp-stdio.cjs"], { env, stdio: ["pipe", "pipe", "inherit"] });
     const answers = new Map();
@@ -196,7 +207,8 @@ async function audit(game) {
 
     // A test player, in Chrome (headless, muted).
     browser = await chromium.launch({ executablePath: CHROME, headless: true, args: ["--mute-audio"] });
-    const seat = await browser.newPage({ viewport: { width: 1480, height: 920 } });
+    // The player at a full-size screen too.
+    const seat = await browser.newPage({ viewport: { width: PLAYER[0], height: PLAYER[1] } });
     ctx.seat = seat;
     await step("player joins", async () => {
       await seat.goto(`http://127.0.0.1:${port}/`);

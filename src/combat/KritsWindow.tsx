@@ -14,7 +14,7 @@ export function KritsWindow({ session }: { session: Session }) {
   const settings = session.krits;
   return (
     <div className="krits-window settings-window">
-      <SettingsSection title="Critical hits and fumbles" note="On an attack a natural 20 is a critical hit and a natural 1 a fumble (Castle Keeper's Guide, Chapter 17). The host rolls the table and applies the result on the combat tracker.">
+      <SettingsSection title="On a natural 20 or 1" note="On an attack a natural 20 is a critical hit and a natural 1 a fumble (Castle Keeper's Guide, Chapter 17). The host rolls the table and applies the result on the combat tracker.">
         {settings ? (
           (Object.entries(OPTIONS) as [keyof typeof OPTIONS, (typeof OPTIONS)[keyof typeof OPTIONS]][]).map(([key, spec]) => (
             <SettingRow key={key} label={spec.label} className="krits-row">
