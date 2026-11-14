@@ -10,10 +10,14 @@ import { EMPTY_WATCHTOWER } from "../games/descending-darkness/empty-watchtower.
 import { CREW_HANDBOOK } from "../games/apeira-astra/crew-handbook.mjs";
 import { DOSSIER } from "../games/apeira-astra/dossier.mjs";
 import { SALVAGE_RIGHTS } from "../games/apeira-astra/salvage-rights.mjs";
+// Basic Fantasy (CC BY-SA 4.0: games/basic-fantasy/LICENSE.md).
+import { PLAYERS_HANDBOOK as BF_PLAYERS } from "../games/basic-fantasy/players-handbook.mjs";
+import { GM_GUIDE as BF_GM } from "../games/basic-fantasy/gm-guide.mjs";
+import { MILL_AT_HOBS_FORD } from "../games/basic-fantasy/mill-at-hobs-ford.mjs";
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 const out = path.join(root, "games", "modules");
-const modules = [PLAYERS_HANDBOOK, BESTIARY, EMPTY_WATCHTOWER, CREW_HANDBOOK, DOSSIER, SALVAGE_RIGHTS];
+const modules = [PLAYERS_HANDBOOK, BESTIARY, EMPTY_WATCHTOWER, CREW_HANDBOOK, DOSSIER, SALVAGE_RIGHTS, BF_PLAYERS, BF_GM, MILL_AT_HOBS_FORD];
 for (const spec of modules) {
   const folder = writeModule(out, spec);
   console.log(`built ${path.relative(root, folder)}`);

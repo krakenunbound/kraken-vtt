@@ -5,7 +5,7 @@ import { Icon } from "../ui/icons";
 
 const FACTION_LABEL = { friend: "Friend", neutral: "Neutral", foe: "Foe" } as const;
 // AD&D 2E's five saving throws.
-const SAVE_LABELS: Record<string, string> = { paralyzation: "Paralyzation, Poison, Death", rod: "Rod, Staff, Wand", petrification: "Petrification, Polymorph", breath: "Breath Weapon", spell: "Spell", str: "STR check", dex: "DEX check", end: "END check", int: "INT check", edu: "EDU check", soc: "SOC check", brawn: "Brawn check", reflex: "Reflex check", grit: "Grit check", intellect: "Intellect check", training: "Training check", presence: "Presence check" };
+const SAVE_LABELS: Record<string, string> = { death: "Death Ray or Poison", wands: "Magic Wands", paralysis: "Paralysis or Petrify", spells: "Spells",paralyzation:"Paralyzation, Poison, Death", rod: "Rod, Staff, Wand", petrification: "Petrification, Polymorph", breath: "Breath Weapon", spell: "Spell", str: "STR check", dex: "DEX check", end: "END check", int: "INT check", edu: "EDU check", soc: "SOC check", brawn: "Brawn check", reflex: "Reflex check", grit: "Grit check", intellect: "Intellect check", training: "Training check", presence: "Presence check" };
 
 function focusToken(tokenId: string | null) {
   if (tokenId) window.dispatchEvent(new CustomEvent("kraken:focus-token", { detail: tokenId }));
@@ -20,7 +20,7 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
   const [rounds, setRounds] = useState("");
   const [open, setOpen] = useState(false);
   const [saveStat, setSaveStat] = useState("wisdom");
-  const saveChoices = session.ruleset === "D&D 3.5E" ? ["fortitude", "reflex", "will"] : session.ruleset === "AD&D 2E" ? ["paralyzation", "rod", "petrification", "breath", "spell"] : session.ruleset === "Traveller" ? ["str", "dex", "end", "int", "edu", "soc"] : session.ruleset === "Apeira Astra" ? ["brawn", "reflex", "grit", "intellect", "training", "presence"] : ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"];
+  const saveChoices = session.ruleset === "D&D 3.5E" ? ["fortitude", "reflex", "will"] : session.ruleset === "Basic Fantasy" ? ["death", "wands", "paralysis", "breath", "spells"] : session.ruleset === "AD&D 2E" ? ["paralyzation", "rod", "petrification", "breath", "spell"] : session.ruleset === "Traveller" ? ["str", "dex", "end", "int", "edu", "soc"] : session.ruleset === "Apeira Astra" ? ["brawn", "reflex", "grit", "intellect", "training", "presence"] : ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"];
   const saveChoice = saveChoices.includes(saveStat) ? saveStat : saveChoices[saveChoices.length - 1];
   const [saveCl, setSaveCl] = useState("0");
   const record = entry.recordId ? session.records[entry.recordId] : null;
@@ -147,6 +147,18 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
             Bind wounds
           </button>
         ) : null}
+        {session.ruleset === "Basic Fantasy" && entry.turns && (gm || entry.mine) && session.combat.active === entry.id ? (
+          // Basic Fantasy: a Cleric turns the undead it targets (or every undead foe): d20 against the table, 2d6 hit dice affected.
+          <button type="button" className="ct-death-save" data-action="turn-undead" title={`Turn undead as a level ${entry.turns} Cleric: target the undead first, or every undead foe is tried`} onClick={() => session.ct("turn-undead", { id: entry.id, ...(entry.recordId ? { recordId: entry.recordId } : {}) })}>
+            Turn undead
+          </button>
+        ) : null}
+        {session.ruleset === "Basic Fantasy" && gm && entry.morale ? (
+          // Basic Fantasy: a monster's morale check, 2d6 at or under its score.
+          <button type="button" className="ct-death-save" data-action="morale" title={`Morale ${entry.morale}: 2d6 at or under it stands${entry.morale >= 12 ? " (12: never fails)" : ""}`} onClick={() => session.ct("morale", { id: entry.id })}>
+            Morale {entry.morale}
+          </button>
+        ) : null}
         {session.ruleset === "AD&D 2E" && entry.turns && (gm || entry.mine) && session.combat.active === entry.id ? (
           // 2E: a cleric (a paladin from 3rd level) turns the undead it targets, or every undead foe.
           <button type="button" className="ct-death-save" data-action="turn-undead" title={`Turn undead as a level ${entry.turns} cleric: target the undead first, or every undead foe is tried`} onClick={() => session.ct("turn-undead", { id: entry.id, ...(entry.recordId ? { recordId: entry.recordId } : {}) })}>
@@ -219,7 +231,7 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
               ) : null}
             </span>
           ))}
-          {session.ruleset === "AD&D 2E" && gm && (entry.attacks?.length ?? 0) > 1 ? (
+          {(session.ruleset === "AD&D 2E" || session.ruleset === "Basic Fantasy") && gm && (entry.attacks?.length ?? 0) > 1 ? (
             // 2E: a creature's whole round (claw, claw, bite) at its first target.
             <span className="ct-attack">
               <button type="button" data-full-attack="all" onClick={() => session.ct("attack", { id: entry.id, weapon: "0", full: true })} title="Every attack this round, at the first target">
@@ -311,8 +323,8 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
               ))}
             </select>
             <label>
-              {session.ruleset === "AD&D 2E" ? "Mod" : session.ruleset === "Traveller" || session.ruleset === "Apeira Astra" ? "DM" : session.ruleset === "D&D 5E" || session.ruleset === "Descending Darkness" || session.ruleset === "D&D 3.5E" ? "DC" : "CL"}
-              <input type="number" value={saveCl} onChange={(event) => setSaveCl(event.target.value)} style={{ width: "3.6rem" }} aria-label={session.ruleset === "AD&D 2E" ? "Save modifier" : session.ruleset === "Traveller" || session.ruleset === "Apeira Astra" ? "Check DM" : session.ruleset === "D&D 5E" || session.ruleset === "D&D 3.5E" ? "Save DC" : "Save CL"} />
+              {session.ruleset === "AD&D 2E" || session.ruleset === "Basic Fantasy" ? "Mod" : session.ruleset === "Traveller" || session.ruleset === "Apeira Astra" ? "DM" : session.ruleset === "D&D 5E" || session.ruleset === "Descending Darkness" || session.ruleset === "D&D 3.5E" ? "DC" : "CL"}
+              <input type="number" value={saveCl} onChange={(event) => setSaveCl(event.target.value)} style={{ width: "3.6rem" }} aria-label={session.ruleset === "AD&D 2E" || session.ruleset === "Basic Fantasy" ? "Save modifier" : session.ruleset === "Traveller" || session.ruleset === "Apeira Astra" ? "Check DM" : session.ruleset === "D&D 5E" || session.ruleset === "D&D 3.5E" ? "Save DC" : "Save CL"} />
             </label>
             <button type="button" onClick={() => session.ct("save", { id: entry.id, attribute: saveChoice, cl: Number(saveCl) || 0 })}>
               {session.ruleset === "Traveller" || session.ruleset === "Apeira Astra" ? "Roll check" : "Roll save"}

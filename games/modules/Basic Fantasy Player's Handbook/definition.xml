@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root version="4.6" release="1">
+	<name type="string">Basic Fantasy Player's Handbook</name>
+	<displayname type="string">Basic Fantasy Player's Handbook</displayname>
+	<category type="string">Basic Fantasy</category>
+	<author type="string">Chris Gonnerman (Basic Fantasy RPG); arranged for Kraken VTT</author>
+	<ruleset type="string">Basic Fantasy</ruleset>
+</root>
