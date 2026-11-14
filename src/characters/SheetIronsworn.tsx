@@ -384,7 +384,8 @@ function MovesPanel({ record, session, editable, act }: { record: TableRecord; s
   const tracks = rows(record.data.tracks).filter(([, track]) => !track.done);
   const foes = session.combat.entries.filter((entry) => entry.iron?.rank && !entry.iron.defeated);
   const progress = md.rolltype === "progress_roll" || md.rolltype === "special_track";
-  const marks = /mark progress|inflict/i.test(`${String(md.strong ?? "")} ${String(md.weak ?? "")}`);
+  // A move that marks progress, or any combat move (made against a foe on the tracker).
+  const marks = /mark progress|inflict/i.test(`${String(md.strong ?? "")} ${String(md.weak ?? "")}`) || /combat/i.test(String(move?.data.fgCategory ?? ""));
   const categories = [...new Set(moves.map((item) => String(item.data.fgCategory ?? "")))];
   const roll = async () => {
     if (!move) return;
