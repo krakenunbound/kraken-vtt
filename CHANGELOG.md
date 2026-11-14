@@ -6,6 +6,13 @@ full log of the work is in [PLAN.md](PLAN.md).
 
 ## Unreleased
 
+- **A gentler "your turn".** The turn alert was a church bell, loud enough to
+  hear from the next room. It is now a soft two-note chime (a starship
+  console's tone in Apeira Astra, Traveller and Starforged), much quieter.
+  Turn it off in **Settings > You at the table**.
+- **Typing in Chinese, Japanese or Korean:** pressing Enter to confirm a
+  word in an input method no longer sends a half-typed line from the
+  assistant, sheets, the Calendar or Ironsworn's lists.
 - **Fate Core and Fate Accelerated come with Kraken.** Make a campaign with
   the *Fate Core* or *Fate Accelerated* ruleset and play with nothing else
   installed: Evil Hat's System Reference Documents (CC BY 3.0) as *Fate Core
