@@ -10,6 +10,9 @@ full log of the work is in [PLAN.md](PLAN.md).
   hear from the next room. It is now a soft two-note chime (a starship
   console's tone in Apeira Astra, Traveller and Starforged), much quieter.
   Turn it off in **Settings > You at the table**.
+- **Forged in the Dark's playbooks have portraits:** the Enforcer, Tracker,
+  Tinker, Burglar, Grifter, Schemer and Occultist, painted for Brackwater,
+  each with its map token. A new scoundrel starts with their playbook's.
 - **Typing in Chinese, Japanese or Korean:** pressing Enter to confirm a
   word in an input method no longer sends a half-typed line from the
   assistant, sheets, the Calendar or Ironsworn's lists.
