@@ -4,7 +4,7 @@ What changed in each release of Kraken VTT. Downloads are on the
 [Releases](https://github.com/krakenunbound/kraken-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
-## Unreleased
+## 0.1.0-alpha.89: Code mode for agents
 
 - **Code mode for AI agents.** A new agent tool, `kraken_code`, takes one
   piece of JavaScript that calls several Kraken tools at once (in parallel,
