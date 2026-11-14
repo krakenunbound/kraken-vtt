@@ -118,7 +118,7 @@ try {
   report.push("the message of the day: written (kraken_table_options motd), in the GM's window");
 
   // The test player joins: the message of the day opens on their screen.
-  browser = await chromium.launch({ executablePath: CHROME, headless: true });
+  browser = await chromium.launch({ args: ["--mute-audio"], executablePath: CHROME, headless: true });
   const seat = await browser.newPage({ viewport: { width: 1400, height: 900 } });
   seat.on("pageerror", (error) => failures.push(`player: ${error.message}`));
   await seat.goto(`http://127.0.0.1:${port}/`);

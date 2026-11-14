@@ -252,7 +252,7 @@ try {
   await page.screenshot({ path: path.join(tmpdir(), "kraken-mapedit-gm.png") });
 
   // A test player in Chrome: the hex grid and the door's handle, never the walls.
-  browser = await chromium.launch({ executablePath: CHROME, headless: true });
+  browser = await chromium.launch({ args: ["--mute-audio"], executablePath: CHROME, headless: true });
   const seat = await browser.newPage({ viewport: { width: 1400, height: 900 } });
   seat.on("pageerror", (error) => failures.push(`player: ${error.message}`));
   const messages = [];

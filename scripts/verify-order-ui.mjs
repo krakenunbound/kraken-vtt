@@ -61,7 +61,7 @@ try {
   await tool("kraken_party_edit", { members: [mine.id, theirs.id, third.id] });
 
   // A player in Chrome opens the party sheet's Order tab and drags their token.
-  browser = await chromium.launch({ executablePath: CHROME, headless: true });
+  browser = await chromium.launch({ args: ["--mute-audio"], executablePath: CHROME, headless: true });
   const seat = await browser.newPage({ viewport: { width: 1400, height: 900 } });
   seat.on("pageerror", (error) => failures.push(`player: ${error.message}`));
   await seat.goto(`http://127.0.0.1:${port}/`);

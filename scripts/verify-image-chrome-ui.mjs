@@ -123,7 +123,7 @@ try {
   // Shared or not: the table map and a test player in Chrome.
   await page.$eval('[data-action="image-play"]', (button) => button.click());
   await page.waitForSelector('[data-action="table-share"][aria-pressed="true"]');
-  browser = await chromium.launch({ executablePath: CHROME, headless: true });
+  browser = await chromium.launch({ args: ["--mute-audio"], executablePath: CHROME, headless: true });
   const seat = await browser.newPage({ viewport: { width: 1300, height: 900 } });
   seat.on("pageerror", (error) => failures.push(`player: ${error.message}`));
   // The player's own socket, to try the map editor's messages behind the interface's back.

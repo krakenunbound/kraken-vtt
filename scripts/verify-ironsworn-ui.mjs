@@ -115,7 +115,7 @@ async function run(game, plan) {
     await until(async () => (await tool("kraken_records_list", { type: "ironmove" })).records?.length > 40, 30000, "the moves");
 
     // A test player makes a character in the wizard.
-    browser = await chromium.launch({ executablePath: CHROME, headless: true });
+    browser = await chromium.launch({ args: ["--mute-audio"], executablePath: CHROME, headless: true });
     const seat = await (await browser.newContext({ viewport: { width: 1500, height: 1000 } })).newPage();
     seat.on("pageerror", (error) => failures.push(`player: ${error.message}`));
     await seat.goto(`http://127.0.0.1:${PORT}/`);

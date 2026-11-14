@@ -181,7 +181,7 @@ async function runRuleset(ruleset, plan) {
 
     // 5-6. A test player in Chrome, a new account.
     await step("5-6 a player in Chrome, a new account", async () => {
-      browser = await chromium.launch({ executablePath: CHROME, headless: false, args: [`--window-position=${AT[0] + 900},${AT[1] + 80}`, "--window-size=1500,1000"] });
+      browser = await chromium.launch({ executablePath: CHROME, headless: false, args: ["--mute-audio", `--window-position=${AT[0] + 900},${AT[1] + 80}`, "--window-size=1500,1000"] });
       ctx.seat = await browser.newPage({ viewport: { width: 1480, height: 900 } });
       ctx.seat.on("pageerror", (error) => problem("player page error", error.message));
       await ctx.seat.goto(`http://127.0.0.1:${ctx.port}/`);

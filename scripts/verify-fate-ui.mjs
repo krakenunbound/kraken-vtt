@@ -117,7 +117,7 @@ const mineOf = async () => {
 
 try {
   await rpc("initialize", { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "check", version: "1" } });
-  browser = await chromium.launch({ executablePath: CHROME, headless: true });
+  browser = await chromium.launch({ args: ["--mute-audio"], executablePath: CHROME, headless: true });
 
   // ---------------------------------------------------------------- Fate Core
   const PORT = 48500 + Math.floor(Math.random() * 300);

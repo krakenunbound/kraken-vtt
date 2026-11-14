@@ -92,7 +92,7 @@ try {
   const pregens = listOf(await tool("kraken_records_list", { type: "pregencharsheet" }));
   assert(pregens.some((item) => item.name === "Sister Mara"), "the book's pregen is in the campaign");
 
-  browser = await chromium.launch({ executablePath: CHROME, headless: true });
+  browser = await chromium.launch({ args: ["--mute-audio"], executablePath: CHROME, headless: true });
   const seat = await browser.newPage({ viewport: { width: 1400, height: 950 } });
   seat.on("pageerror", (error) => failures.push(`player: ${error.message}`));
   await seat.goto(`http://127.0.0.1:${port}/`);

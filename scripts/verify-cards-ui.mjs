@@ -60,7 +60,7 @@ try {
   const wizard = await tool("kraken_build_character", { owner: "A test player", spec: { name: "Ilse", species: "Human", class: "Wizard", level: 1, scores: { strength: 8, dexterity: 14, constitution: 13, intelligence: 17, wisdom: 12, charisma: 10 }, spells: ["Kindle", "Spark Lash", "Burning Fan", "Ember Ray", "Iron Will"], gear: [["Dagger", 1]] } });
   const slots = async () => (await tool("kraken_record_get", { id: wizard.id })).data?.slots?.l1?.used ?? (await tool("kraken_record_get", { id: wizard.id })).record?.data?.slots?.l1?.used;
 
-  browser = await chromium.launch({ executablePath: CHROME, headless: true });
+  browser = await chromium.launch({ args: ["--mute-audio"], executablePath: CHROME, headless: true });
   const seat = await (await browser.newContext({ viewport: { width: 1500, height: 950 } })).newPage();
   seat.on("pageerror", (error) => failures.push(`player: ${error.message}`));
   await seat.goto("http://127.0.0.1:47448/");

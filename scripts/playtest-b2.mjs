@@ -362,7 +362,7 @@ try {
   if (thorinToken) await attempt("map", "Thorin lights a torch", "kraken_token_update", { id: thorinToken.id, light: "torch" });
 
   // --- A test player in Chrome ------------------------------------------------------
-  browser = await chromium.launch({ executablePath: CHROME, headless: true });
+  browser = await chromium.launch({ args: ["--mute-audio"], executablePath: CHROME, headless: true });
   const seat = await browser.newPage({ viewport: { width: 1400, height: 900 } });
   const seatErrors = [];
   seat.on("pageerror", (error) => seatErrors.push(error.message));

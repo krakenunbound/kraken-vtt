@@ -62,7 +62,7 @@ try {
   await tool("kraken_host", { campaignId: campaign.id, port, password: "" });
   await page.waitForSelector("text=Hosting");
   const url = `http://127.0.0.1:${port}/`;
-  browser = await chromium.launch({ executablePath: CHROME, headless: true });
+  browser = await chromium.launch({ args: ["--mute-audio"], executablePath: CHROME, headless: true });
   const watch = (seat, who) => seat.on("pageerror", (error) => failures.push(`${who}: ${error.message}`));
   // What the host says to a join sent straight to it (as anyone could).
   const rawJoin = (seat, join) =>

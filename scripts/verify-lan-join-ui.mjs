@@ -65,7 +65,7 @@ try {
   await gm.waitForSelector('.roster-list li[data-role="player"]:has-text("A test player")', { timeout: 10000 });
 
   // A test player in Chrome at the same address.
-  browser = await chromium.launch({ executablePath: CHROME, headless: true });
+  browser = await chromium.launch({ args: ["--mute-audio"], executablePath: CHROME, headless: true });
   const seat = await browser.newPage();
   seat.on("pageerror", (error) => failures.push(`chrome: ${error.message}`));
   await seat.goto(`http://${address}:${port}/`);
