@@ -156,7 +156,7 @@ export const CREATION_TABLES = creationTables();
 export function chapter(name, file, { level = 2, intro = name } = {}) {
   const { body } = read(file);
   const parts = sections(body.replace(/^#\s.*$/m, ""), level);
-  return { name, sections: [{ name, pages: parts.map((part) => ({ name: part.title || intro, keywords: part.title.toLowerCase(), text: richText(part.body || " ") })) }] };
+  return { name, sections: [{ name, pages: parts.filter((part) => part.body.trim()).map((part) => ({ name: part.title || intro, keywords: part.title.toLowerCase(), text: richText(part.body) })) }] };
 }
 
 export const PLAYERS_GUIDE = {
