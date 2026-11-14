@@ -1,5 +1,11 @@
 import { SheetAstra, WizardAstra } from "./SheetAstra";
+import { SheetCairn, WizardCairn } from "./SheetCairn";
+import { SheetFate, WizardFate } from "./SheetFate";
+import { SheetIronsworn, WizardIronsworn } from "./SheetIronsworn";
+import { isIronswornRuleset } from "../../shared/ironsworn/rules.mjs";
+import { SheetForged, WizardForged } from "./SheetForged";
 import { SheetMgt2 } from "./SheetMgt2";
+import { SheetBf, WizardBf } from "./SheetBf";
 import { WizardMgt2 } from "./WizardMgt2";
 import { isD20 } from "../../shared/dnd5e/rules.mjs";
 import { Icon } from "../ui/icons";
@@ -115,7 +121,7 @@ function FileButtons({ files, current }: { files: ReturnType<typeof useCharacter
 // this player's. It is filled by hand: a race, a class, spells and gear
 // dragged onto it from the sidebar's lists, scores typed. C&C (SIEGE) only:
 // a 5E character is made with its wizard.
-export const canMakeBlank = (session: Session) => !isD20(session.ruleset) && session.ruleset !== "Apeira Astra" && session.ruleset !== "Traveller" && session.ruleset !== "D&D 3.5E" && session.ruleset !== "AD&D 2E";
+export const canMakeBlank = (session: Session) => !isD20(session.ruleset) && session.ruleset !== "Apeira Astra" && session.ruleset !== "Cairn" && !/^Fate /.test(session.ruleset) && !isIronswornRuleset(session.ruleset) && session.ruleset !== "Forged in the Dark" && session.ruleset !== "Traveller" && session.ruleset !== "D&D 3.5E" && session.ruleset !== "AD&D 2E" && session.ruleset !== "Basic Fantasy";
 export async function createBlank(session: Session, name = "New character") {
   const gm = session.role === "dm";
   const attributes = Object.fromEntries(["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"].map((stat) => [stat, { score: 10, prime: 0 }]));
@@ -186,7 +192,39 @@ export function CharacterPanel({ session, dock = false, selected: chosen, create
         </div>
         {status}
         {creating ? (
-          session.ruleset === "Apeira Astra" ? (
+          /^Fate /.test(session.ruleset) ? (
+            <WizardFate
+              session={session}
+              onDone={(id) => {
+                setCreating(false);
+                if (id) setSelected(id);
+              }}
+            />
+          ) : isIronswornRuleset(session.ruleset) ? (
+            <WizardIronsworn
+              session={session}
+              onDone={(id) => {
+                setCreating(false);
+                if (id) setSelected(id);
+              }}
+            />
+          ) : session.ruleset === "Forged in the Dark" ? (
+            <WizardForged
+              session={session}
+              onDone={(id) => {
+                setCreating(false);
+                if (id) setSelected(id);
+              }}
+            />
+          ) : session.ruleset === "Cairn" ? (
+            <WizardCairn
+              session={session}
+              onDone={(id) => {
+                setCreating(false);
+                if (id) setSelected(id);
+              }}
+            />
+          ) : session.ruleset === "Apeira Astra" ? (
             <WizardAstra
               session={session}
               onDone={(id) => {
@@ -196,6 +234,14 @@ export function CharacterPanel({ session, dock = false, selected: chosen, create
             />
           ) : session.ruleset === "Traveller" ? (
             <WizardMgt2
+              session={session}
+              onDone={(id) => {
+                setCreating(false);
+                if (id) setSelected(id);
+              }}
+            />
+          ) : session.ruleset === "Basic Fantasy" ? (
+            <WizardBf
               session={session}
               onDone={(id) => {
                 setCreating(false);
@@ -236,7 +282,7 @@ export function CharacterPanel({ session, dock = false, selected: chosen, create
             />
           )
         ) : current ? (
-          current.data.ruleset === "astra" ? <SheetAstra record={current} session={session} /> : current.data.ruleset === "mgt2" ? <SheetMgt2 record={current} session={session} /> : current.data.ruleset === "dnd35" ? <Sheet35 record={current} session={session} /> : current.data.ruleset === "adnd2e" ? <Sheet2e record={current} session={session} /> : isD20(String(current.data.ruleset ?? "")) ? <Sheet5e record={current} session={session} /> : <CCSheet record={current} session={session} />
+          current.data.ruleset === "fate" ? <SheetFate record={current} session={session} /> : current.data.ruleset === "ironsworn" ? <SheetIronsworn record={current} session={session} /> : current.data.ruleset === "forged" ? <SheetForged record={current} session={session} /> : current.data.ruleset === "cairn" ? <SheetCairn record={current} session={session} /> : current.data.ruleset === "astra" ? <SheetAstra record={current} session={session} /> : current.data.ruleset === "mgt2" ? <SheetMgt2 record={current} session={session} /> : current.data.ruleset === "dnd35" ? <Sheet35 record={current} session={session} /> : current.data.ruleset === "adnd2e" ? <Sheet2e record={current} session={session} /> : current.data.ruleset === "bfrpg" ? <SheetBf record={current} session={session} /> : isD20(String(current.data.ruleset ?? "")) ? <Sheet5e record={current} session={session} /> : <CCSheet record={current} session={session} />
         ) : (
           <p className="hint">You have no character yet. Make one with the new character button.</p>
         )}
@@ -279,7 +325,39 @@ export function CharacterPanel({ session, dock = false, selected: chosen, create
         </ul>
       </aside>
       {creating ? (
-        session.ruleset === "Apeira Astra" ? (
+        /^Fate /.test(session.ruleset) ? (
+          <WizardFate
+            session={session}
+            onDone={(id) => {
+              setCreating(false);
+              if (id) setSelected(id);
+            }}
+          />
+        ) : isIronswornRuleset(session.ruleset) ? (
+          <WizardIronsworn
+            session={session}
+            onDone={(id) => {
+              setCreating(false);
+              if (id) setSelected(id);
+            }}
+          />
+        ) : session.ruleset === "Forged in the Dark" ? (
+          <WizardForged
+            session={session}
+            onDone={(id) => {
+              setCreating(false);
+              if (id) setSelected(id);
+            }}
+          />
+        ) : session.ruleset === "Cairn" ? (
+          <WizardCairn
+            session={session}
+            onDone={(id) => {
+              setCreating(false);
+              if (id) setSelected(id);
+            }}
+          />
+        ) : session.ruleset === "Apeira Astra" ? (
           <WizardAstra
             session={session}
             onDone={(id) => {
@@ -289,6 +367,14 @@ export function CharacterPanel({ session, dock = false, selected: chosen, create
           />
         ) : session.ruleset === "Traveller" ? (
           <WizardMgt2
+            session={session}
+            onDone={(id) => {
+              setCreating(false);
+              if (id) setSelected(id);
+            }}
+          />
+        ) : session.ruleset === "Basic Fantasy" ? (
+          <WizardBf
             session={session}
             onDone={(id) => {
               setCreating(false);
@@ -329,7 +415,7 @@ export function CharacterPanel({ session, dock = false, selected: chosen, create
           />
         )
       ) : current ? (
-        current.data.ruleset === "astra" ? <SheetAstra record={current} session={session} /> : current.data.ruleset === "mgt2" ? <SheetMgt2 record={current} session={session} /> : current.data.ruleset === "dnd35" ? <Sheet35 record={current} session={session} /> : current.data.ruleset === "adnd2e" ? <Sheet2e record={current} session={session} /> : isD20(String(current.data.ruleset ?? "")) ? <Sheet5e record={current} session={session} /> : <CCSheet record={current} session={session} />
+        current.data.ruleset === "fate" ? <SheetFate record={current} session={session} /> : current.data.ruleset === "ironsworn" ? <SheetIronsworn record={current} session={session} /> : current.data.ruleset === "forged" ? <SheetForged record={current} session={session} /> : current.data.ruleset === "cairn" ? <SheetCairn record={current} session={session} /> : current.data.ruleset === "astra" ? <SheetAstra record={current} session={session} /> : current.data.ruleset === "mgt2" ? <SheetMgt2 record={current} session={session} /> : current.data.ruleset === "dnd35" ? <Sheet35 record={current} session={session} /> : current.data.ruleset === "adnd2e" ? <Sheet2e record={current} session={session} /> : current.data.ruleset === "bfrpg" ? <SheetBf record={current} session={session} /> : isD20(String(current.data.ruleset ?? "")) ? <Sheet5e record={current} session={session} /> : <CCSheet record={current} session={session} />
       ) : null}
     </section>
   );

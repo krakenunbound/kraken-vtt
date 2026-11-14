@@ -17,7 +17,7 @@ if (!(await fetch("http://localhost:5173/", { signal: AbortSignal.timeout(3000) 
   console.log("skip verify-map: the dev server is not running (npm run dev, port 5173)");
   process.exit(0);
 }
-const browser = await chromium.launch({ executablePath: chrome, headless: true });
+const browser = await chromium.launch({ args: ["--mute-audio"], executablePath: chrome, headless: true });
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
 const failures = [];
 page.on("pageerror", (error) => failures.push(error.message));

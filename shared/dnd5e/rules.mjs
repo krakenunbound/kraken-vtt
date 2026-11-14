@@ -146,7 +146,18 @@ export function weaponInfo(item) {
     damage,
     versatile: /versatile\s*\((\d*d\d+)\)/i.exec(properties)?.[1] ?? null,
     martial: /martial/i.test(subtype),
+    light: /\blight\b/i.test(properties),
   };
+}
+// Proficiency with a weapon: simple ones always; martial ones when the class
+// has them all (true), or only those with a property (SRD 5.2.1: a Monk's
+// "Martial weapons that have the Light property", a Rogue's "Finesse or Light").
+function proficientWith(data, info) {
+  if (!info.martial) return true;
+  const martial = data.proficiencies?.martial;
+  if (martial === true || martial === 1 || martial === "all") return true;
+  if (typeof martial !== "string" || !martial) return false;
+  return (/light/.test(martial) && info.light) || (/finesse/.test(martial) && info.finesse);
 }
 export const isWeapon = (item) => /weapon/i.test(String(item?.type ?? "")) && Boolean(parseDamage(item?.damage));
 export const isArmor = (item) => /armor/i.test(String(item?.type ?? ""));
@@ -175,6 +186,19 @@ export function armorClass(data) {
       }
     }
   }
+  // Unarmored Defense (SRD 5.2.1): with no armor, a Barbarian is 10 + DEX + CON
+  // (a shield still adds), a Monk 10 + DEX + WIS (and no shield either).
+  if (!wearing) {
+    const features = (Array.isArray(data.features) ? data.features : data.features && typeof data.features === "object" ? Object.values(data.features).map((row) => row?.name ?? row) : data.features ? [data.features] : []).map(String).join(" | ");
+    const score = (stat) => mod(data.abilities?.[stat]?.score ?? 10);
+    if (/Unarmored Defense \(Barbarian/i.test(features)) {
+      base = Math.max(base, 10 + dex + score("constitution"));
+      wearing = "Unarmored Defense";
+    } else if (/Unarmored Defense \(Monk/i.test(features) && !shield) {
+      base = Math.max(base, 10 + dex + score("wisdom"));
+      wearing = "Unarmored Defense";
+    }
+  }
   return { total: base + shield + num(data.ac?.misc, 0), armor: wearing, shield };
 }
 
@@ -186,7 +210,7 @@ export function weaponAttack(data, item) {
   const str = mod(data.abilities?.strength?.score ?? 10);
   const dex = mod(data.abilities?.dexterity?.score ?? 10);
   const ability = info.ranged ? dex : info.finesse ? Math.max(str, dex) : str;
-  const proficient = info.martial ? Boolean(data.proficiencies?.martial) : true;
+  const proficient = proficientWith(data, info);
   const bonus = ability + (proficient ? num(data.prof, 2) : 0) + num(item.bonus, 0);
   const dmg = ability + num(item.bonus, 0);
   return {
@@ -258,7 +282,15 @@ export function classSkillChoices(classRecord) {
   const names = any ? Object.keys(SKILLS) : text.replace(/^[^:]*:/, "").split(/,|\bor\b|\band\b/i).map(skillKey).filter((key) => SKILLS[key]);
   return { count, names };
 }
-const martialClass = (classRecord) => /martial/i.test(String(classRecord?.data?.proficiencies?.weapons?.text ?? ""));
+// true for all martial weapons; "light" or "finesse light" when the class has
+// only those (SRD 5.2.1 Monk and Rogue); false for none.
+const martialClass = (classRecord) => {
+  const text = String(classRecord?.data?.proficiencies?.weapons?.text ?? "");
+  if (!/martial/i.test(text)) return false;
+  const only = /martial weapons? (?:that|with) (?:have |has )?(?:the )?([a-z ,]+?) propert/i.exec(text);
+  if (!only) return true;
+  return ["finesse", "light"].filter((word) => new RegExp(`\\b${word}\\b`, "i").test(only[1])).join(" ") || true;
+};
 
 // Everything worked out from the base fields: modifiers, proficiency, saves,
 // skills, AC, initiative, attacks, passive Perception, spellcasting, the next

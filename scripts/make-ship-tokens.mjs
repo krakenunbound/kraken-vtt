@@ -11,7 +11,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const out = path.join(root, "games", "tokens", "Ships");
 mkdirSync(out, { recursive: true });
 const source = readFileSync(path.join(root, "shared", "starships", "art.mjs"), "utf8").replace(/^export /gm, "");
-const browser = await chromium.launch({ executablePath: CHROME, headless: true });
+const browser = await chromium.launch({ args: ["--mute-audio"], executablePath: CHROME, headless: true });
 try {
   const page = await browser.newPage();
   await page.setContent("<canvas width=512 height=512></canvas>");

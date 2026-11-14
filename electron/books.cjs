@@ -24,7 +24,8 @@ const PICTURES = /\.(png|webp|jpe?g|gif)$/i;
 // maps), never the books of another of Kraken's games.
 const FG_RULESETS = {
   "Castles & Crusades": ["SiegeCore", "CnCRPG"],
-  // FG's 5E ruleset's modules (the SRD 5.2.1's player book, bestiary, magic items).
+  // FG's 5E ruleset's modules (the SRD 5.2.1's player book, bestiary, magic
+  // items), Kraken's own SRD 5.2.1 books among them (games/srd-5e: ruleset 5E).
   "D&D 5E": ["5E"],
   // The 3.5E ruleset's modules (FG's own and the GM's, Kraken35E's too).
   "D&D 3.5E": ["3.5E", "Kraken35E", "d20"],
@@ -35,6 +36,19 @@ const FG_RULESETS = {
   // Kraken's own games, with their books shipped in the app (games/modules).
   "Descending Darkness": ["Descending Darkness"],
   "Apeira Astra": ["Apeira Astra"],
+  // Cairn Second Edition (CC BY-SA 4.0), its books shipped in the app (games/modules).
+  Cairn: ["Cairn"],
+  // Ironsworn (with Delve) and Ironsworn: Starforged (their CC BY 4.0 parts), shipped in the app (games/modules).
+  Ironsworn: ["Ironsworn"],
+  Starforged: ["Starforged"],
+  // Basic Fantasy RPG 4th Edition (CC BY-SA 4.0), its books shipped in the app.
+  "Basic Fantasy": ["Basic Fantasy"],
+  // Fate Core and Fate Accelerated (CC BY 3.0), their books shipped in the app
+  // (games/modules): each its own book, the toolkit and the scenario ("Fate") both.
+  "Fate Core": ["Fate Core", "Fate"],
+  "Fate Accelerated": ["Fate Accelerated", "Fate"],
+  // Forged in the Dark (the Blades in the Dark SRD, CC BY 3.0), its books shipped in the app.
+  "Forged in the Dark": ["Forged in the Dark"],
   Worldbuilding: [],
 };
 const ANY = new Set(["", "any", "corerpg"]);

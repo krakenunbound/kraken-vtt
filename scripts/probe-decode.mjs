@@ -10,7 +10,7 @@ import { CHROME } from "./lib/chrome.mjs";
 
 const folder = process.argv[2];
 const files = readdirSync(folder).filter((name) => /\.(webp|jpe?g|png|avif)$/i.test(name));
-const browser = await chromium.launch({ executablePath: CHROME, headless: true, args: ["--allow-file-access-from-files"] });
+const browser = await chromium.launch({ executablePath: CHROME, headless: true, args: ["--mute-audio", "--allow-file-access-from-files"] });
 const page = await browser.newPage();
 await page.goto(pathToFileURL(path.join(folder, files[0])).href);
 for (const name of files) {

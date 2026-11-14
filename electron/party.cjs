@@ -52,6 +52,12 @@ function summary(record) {
     wounds: Number(data.hp?.wounds) || 0,
     ac: Number(data.ac?.total) || 0,
     exp: Number(data.exp) || 0,
+    // Forged in the Dark: the playbook, stress and trauma, harm, xp tracks, coin and stash.
+    ...(data.ruleset === "forged" ? { forged: { playbook: String(data.playbook ?? ""), alias: String(data.alias ?? ""), stress: Number(data.stress) || 0, stressmax: Number(data.stressmax) || 9, traumas: Array.isArray(data.traumas) ? data.traumas.map(String) : [], harm: [1, 2, 3].flatMap((level) => (Array.isArray(data.harm?.[level]) ? data.harm[level] : []).filter(Boolean).map((text) => `${text} (${level})`)), xp: data.xp ?? {}, stash: Number(data.stash) || 0, status: String(data.status ?? "") } } : {}),
+    // Cairn: no experience; its attributes, Fatigue and what has grown instead.
+    // Fate: no experience or coin; fate points, refresh, the high concept and milestones instead.
+    ...(data.ruleset === "fate" ? { fate: { game: String(data.game ?? "core"), fatepoints: Number(data.fatepoints) || 0, refresh: Number(data.refresh) || 0, highconcept: String(data.aspects?.highconcept ?? ""), trouble: String(data.aspects?.trouble ?? ""), status: String(data.status ?? ""), consequences: rows(data.consequences).map(([, row]) => String(row.text ?? "")).filter(Boolean), milestones: rows(data.milestones).map(([, row]) => `${row.kind ?? "minor"}${row.text ? `: ${row.text}` : ""}`), skillpoints: Number(data.skillpoints) || 0 } } : {}),
+    ...(data.ruleset === "cairn" ? { cairn: { str: Number(data.attributes?.str?.score) || 0, dex: Number(data.attributes?.dex?.score) || 0, wil: Number(data.attributes?.wil?.score) || 0, fatigue: Number(data.fatigue) || 0, slots: Number(data.slots?.used) || 0, status: String(data.status ?? ""), scars: rows(data.scars).map(([, scar]) => String(scar.name ?? "")), growth: rows(data.growth).map(([, entry]) => String(entry.text ?? "")) } } : {}),
     expnext: Number(data.expnext) || 0,
     coins: rows(data.coins)
       .map(([, coin]) => ({ name: String(coin.name ?? ""), amount: Number(coin.amount) || 0 }))
@@ -72,20 +78,44 @@ async function partyView(table) {
     quests: party.data.quests ?? {},
     encounters: party.data.encounters ?? {},
     order: orderOf(party),
+    // Forged in the Dark: the crew (the crew sheet), shared by the whole table.
+    ...(party.data.crew ? { crew: party.data.crew } : {}),
   };
 }
 
 // Awards XP split across the party (PartyXPManager.awardXP), with FG's chat lines.
 async function awardXP(table, xp, from) {
   const { xpShares } = await partyRules();
+  // Forged in the Dark: every scoundrel marks the xp on their playbook track (it is not split).
+  if (table.ruleset?.() === "Forged in the Dark") return require("./forged.cjs").awardForged(table, xp, from);
+  // Cairn has no experience: a character grows from what happens to them (the party sheet's Growth).
+  if (table.ruleset?.() === "Cairn") throw new Error("Cairn has no experience points: record Growth on a character instead.");
+  // Fate has milestones instead (minor, significant, major: kraken_fate milestone).
+  if (require("./fate.cjs").isFateRuleset(table.ruleset?.())) throw new Error("Fate has no experience points: give the party a milestone (minor, significant or major) instead.");
   const amount = Math.round(Number(xp) || 0);
   if (amount <= 0) throw new Error("How much XP?");
   const members = memberRecords(table);
   if (members.length === 0) throw new Error("The party has no members.");
-  for (const { member, amount: share } of xpShares(amount, members)) {
-    if (share <= 0) continue;
+  // Ironsworn and Starforged: experience is each character's own (not split); Starforged keeps it beside its legacy tracks.
+  if (require("./ironsworn.cjs").isIronswornRuleset(table.ruleset?.())) {
+    const rules = await require("./ironsworn.cjs").rulesIron();
+    for (const member of members) {
+      const data = structuredClone(table.records.get(member.id).data);
+      if (data.game === "starforged") data.expbonus = (Number(data.expbonus) || 0) + amount;
+      else data.exp = (Number(data.exp) || 0) + amount;
+      table.records.update(member.id, { data: rules.derive(data) }, table.seat, { replace: true });
+      table.say(`[${amount} XP] -> ${member.name}`, from);
+    }
+    table.say(`Awarded experience to each of the Party. (${amount})`, from);
+    return amount;
+  }
+  for (const { member, amount: shareIn } of xpShares(amount, members)) {
+    if (shareIn <= 0) continue;
+    // Basic Fantasy: a Human learns unusually quickly (+10% to all experience earned).
+    const bonus = member.data?.ruleset === "bfrpg" ? Number(member.data.xpbonus) || 0 : 0;
+    const share = bonus ? Math.round(shareIn * (1 + bonus / 100)) : shareIn;
     table.records.update(member.id, { data: { exp: (Number(member.data.exp) || 0) + share } }, table.seat);
-    table.say(`[${share} XP] -> ${member.name}`, from);
+    table.say(`[${share} XP${bonus ? ` (+${bonus}%)` : ""}] -> ${member.name}`, from);
   }
   table.say(`Awarded XP to the Party. (${amount})`, from);
   return amount;
@@ -107,7 +137,8 @@ async function awardEntries(table, kind, entryId, from) {
   }
   if (Object.keys(marked).length === 0) throw new Error("Nothing left to award.");
   table.records.update(PARTY_ID, { data: { [kind]: marked } }, table.seat);
-  if (xp > 0) await awardXP(table, xp, from);
+  // Cairn: an encounter or a quest is marked done, with no experience to hand out.
+  if (xp > 0 && table.ruleset?.() !== "Cairn" && !require("./fate.cjs").isFateRuleset(table.ruleset?.())) await awardXP(table, xp, from);
   return xp;
 }
 
@@ -141,11 +172,29 @@ async function distribute(table, from) {
       const source = item.item && typeof item.item === "object" ? { ...item.item, name: item.name } : { name: item.name };
       // The rules load first, then the sheet is read: nothing changed meanwhile is written over.
       const current = table.records.get(member.id).data;
-      const astra = current?.ruleset === "astra" ? await require("./astra.cjs").rulesAstra() : current?.ruleset === "mgt2" ? await require("./mgt2.cjs").rulesMgt2() : null;
-      const five = !astra && require("./dnd5e.cjs").is5e({ data: current }) ? await require("./dnd5e.cjs").rules5e() : !astra && require("./dnd35.cjs").is35({ data: current }) ? await require("./dnd35.cjs").rules35() : !astra && require("./adnd2e.cjs").is2e({ data: current }) ? await require("./adnd2e.cjs").rules2e() : null;
+      const astra = current?.ruleset === "astra" ? await require("./astra.cjs").rulesAstra() : current?.ruleset === "mgt2" ? await require("./mgt2.cjs").rulesMgt2() : current?.ruleset === "cairn" ? await require("./cairn.cjs").rulesCairn() : current?.ruleset === "forged" ? await require("./forged.cjs").rulesForged() : null;
+      const five = !astra && current?.ruleset === "bfrpg" ? await require("./bfrpg.cjs").rulesBf() : !astra && require("./dnd5e.cjs").is5e({ data: current }) ? await require("./dnd5e.cjs").rules5e() :!astra && require("./dnd35.cjs").is35({ data: current }) ? await require("./dnd35.cjs").rules35() : !astra && require("./adnd2e.cjs").is2e({ data: current }) ? await require("./adnd2e.cjs").rules2e() : null;
       const data = structuredClone(table.records.get(member.id).data);
+      if (current?.ruleset === "fate") {
+        // Fate has no gear lists: what the party finds is written into the character's extras (an aspect or a stunt to be, as the GM and player agree).
+        const note = `${item.name}${each > 1 ? ` (${each})` : ""}`;
+        data.extras = `${String(data.extras ?? "").trim()}${String(data.extras ?? "").trim() ? "\n" : ""}${note}`.slice(0, 8000);
+        const fateRules = await require("./fate.cjs").rulesFate();
+        table.records.update(member.id, { data: fateRules.derive(data) }, table.seat, { replace: true });
+        given.push(`${item.name} (${each}) -> ${member.name}`);
+        continue;
+      }
+      if (current?.ruleset === "ironsworn") {
+        // Ironsworn: something carried (an asset is bought with experience, not handed out).
+        const rules = await require("./ironsworn.cjs").rulesIron();
+        const list = (data.inventorylist = data.inventorylist ?? {});
+        list[engine.nextId(list)] = { name: item.name, count: each, carried: 1 };
+        table.records.update(member.id, { data: rules.derive(data) }, table.seat, { replace: true });
+        given.push(`${item.name} (${each}) -> ${member.name}`);
+        continue;
+      }
       if (astra) {
-        // An Apeira Astra character or a Traveller: the item into the gear, the sheet worked out again.
+        // An Apeira Astra character, a Traveller or a Cairn character: the item into the gear, the sheet worked out again.
         const list = (data.inventorylist = data.inventorylist ?? {});
         list[engine.nextId(list)] = { ...source, count: each, carried: 1 };
         table.records.update(member.id, { data: astra.derive(data) }, table.seat, { replace: true });
@@ -180,6 +229,14 @@ async function distribute(table, from) {
       if (each <= 0) continue;
       handed.push(`${each * members.length} ${coin}`);
       for (const member of members) {
+        // Ironsworn has no money: a parcel's Supply is the shared supply meter (at most 5).
+        if (table.records.get(member.id).data?.ruleset === "ironsworn" && coin.toLowerCase() === "supply") {
+          const rules = await require("./ironsworn.cjs").rulesIron();
+          const data = rules.adjust(table.records.get(member.id).data, "supply", each);
+          table.records.update(member.id, { data: rules.derive(data) }, table.seat, { replace: true });
+          perMember.get(member.id).push(`${each} ${coin}`);
+          continue;
+        }
         const current = table.records.get(member.id).data.coins ?? {};
         // Megacredits land as credits (Traveller's sheet keeps Cr): 1 MCr = 1,000,000 Cr.
         const [name, factor] = coin.toLowerCase() === "mcr" ? ["Cr", 1e6] : [coin, 1];
@@ -202,7 +259,11 @@ async function distribute(table, from) {
 // SiegeCore's group check or save: every member rolls the same attribute
 // against one CL; chat sums it up (SiegeGroupCheck.record).
 async function groupCheck(table, kind, attribute, cl, from) {
-  if (!ATTRIBUTES.includes(attribute)) throw new Error("Pick an attribute.");
+  // Fate: everyone rolls one skill (or approach) against the opposition (cl, on the ladder).
+  const fateGame = require("./fate.cjs").isFateRuleset(table.ruleset?.());
+  // Cairn: a group save of STR, DEX or WIL.
+  if (!fateGame && !ATTRIBUTES.includes(attribute) && !["str", "dex", "wil"].includes(attribute)) throw new Error("Pick an attribute.");
+  if (fateGame && !String(attribute ?? "").trim()) throw new Error("Pick a skill or an approach.");
   const members = memberRecords(table);
   if (members.length === 0) throw new Error("The party has no members.");
   const label = kind === "save" ? "Group save" : "Group check";

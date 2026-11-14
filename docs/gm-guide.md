@@ -28,6 +28,51 @@ ulesets` (on Linux,
     only; Kraken never ships a game's official logo.
   - *Descending Darkness* and *Apeira Astra* come with Kraken, with their books
     and a first adventure ([included-games.md](included-games.md)).
+  - *D&D 5E* comes with the SRD 5.2.1 as three books (*SRD 5.2.1 Player's
+    Rules*, *Creatures*, *Magic Items*): classes and subclasses, species,
+    backgrounds, feats, gear, spells, every monster and magic item, ready to
+    play with nothing else installed ([included-games.md](included-games.md)).
+    Your own 5E modules or packs sit beside them.
+  - *Descending Darkness*, *Apeira Astra* and *Cairn* (Second Edition, CC BY-SA
+    4.0) come with Kraken, with their books and a first adventure
+    ([included-games.md](included-games.md)). In *Cairn* the tracker's
+    **Sides (DEX saves)** starts a fight, attacks always hit, **Morale** asks
+    the foes' WIL saves, and the party sheet's **Growth** tab takes the place of
+    experience.
+  - *Ironsworn* (with *Delve*) and *Starforged* (Shawn Tomkin's CC BY 4.0
+    moves, assets and oracles; an unofficial adaptation) come with Kraken,
+    each with a Reference, a book of foes and a starter scenario
+    ([included-games.md](included-games.md)). Players make every move from
+    the sheet's **Moves** tab; anyone opens **Oracles**; the GM's **Delve
+    Sites** builds a site from a theme and a domain. On the tracker a foe is
+    its rank and progress track: mark it (+), set its rank, or pick a
+    character under **Harm…** to inflict its harm. The host can play a
+    character too (GM-less play).
+  - *Forged in the Dark* (based on Blades in the Dark, through its SRD, CC BY
+    3.0) comes with Kraken: the *Scoundrel's Handbook*, the *Game Master's
+    Guide* and *The Brine Street Job*. There is no initiative: the **Score**
+    button opens the Score panel (phase, position and effect for every action
+    roll, the plan and the engagement roll, payoff, heat, entanglements,
+    downtime), the **Clocks** window puts progress clocks in the top bar for
+    every seat, and the party sheet's **Crew** tab is the crew sheet
+    ([included-games.md](included-games.md)).
+  - *Basic Fantasy* (the Basic Fantasy RPG 4th Edition, CC BY-SA 4.0) comes
+    with Kraken too: its Player's Handbook, Game Master's Guide and *The Mill
+    at Hob's Ford*. Its character wizard follows the book (3d6 in order, race
+    and class limits, the hit die, 3d6 x 10 gp and the shop); the tracker
+    plays d6 initiative, attacks against ascending AC, the five saves, death at
+    0, Turn undead for clerics and a **Morale** button for monsters.
+  - *Fate Core* and *Fate Accelerated* (Evil Hat, CC BY 3.0) come with Kraken:
+    each its own book, the Toolkit and Adversaries, and the starter scenario
+    *The Lighthouse at Gull's End* ([included-games.md](included-games.md)).
+    Rolls are four Fate dice on the ladder; the **Scene Aspects** strip over
+    the table keeps the scene's aspects and free invokes and your pool of
+    fate points (⚙ for your tools: add an aspect, **New scene**, **Refresh
+    all**); on the tracker choose a physical or mental conflict, **Turn
+    order** sets it without dice, attacks roll against defences in shifts, and
+    a hit on a player's character waits for them to take it (stress,
+    consequences) or **Concede**. The party sheet's **Milestones** tab takes
+    the place of experience, and parcels carry things, not coin.
   - *Castles & Crusades*, *D&D 5E*, *D&D 3.5E* and *AD&D 2E* use your own
     books (Fantasy Grounds modules, or Kraken packs made from them) for their
     content: a 3.5E campaign takes your 3.5E Player's Handbook's classes,
@@ -107,7 +152,8 @@ any other way).
 
 ## Books and modules
 
-- **Kraken's own games' books** are always on the shelf for their campaigns.
+- **Kraken's own games' books** are always on the shelf for their campaigns,
+  and the SRD 5.2.1 books for a D&D 5E campaign.
 - **Your Fantasy Grounds modules:** Kraken reads them in place from your
   Fantasy Grounds data folder's `modules` folder (set `KRAKEN_BOOKS` to read
   another folder). Nothing is copied. A campaign's game decides which modules
@@ -298,8 +344,8 @@ folder. Back up the whole folder to keep what you made.
 ## At the table
 
 - **You at the table** (Settings, every seat): your colour (your tokens' ring,
-  your pings and drawings) and, when your turn comes round in combat, a bell
-  and a banner across your screen (each can be turned off).
+  your pings and drawings) and, when your turn comes round in combat, a soft chime
+  (a console tone in the sci-fi games) and a banner across your screen (each can be turned off).
 - **Shapes:** with the pen, choose a free line, a straight line, an arrow, a
   square, a circle (drag from its centre) or a cone (drag from its point). Each
   is measured in feet as you draw it. With the pen out, drag a shape's handles

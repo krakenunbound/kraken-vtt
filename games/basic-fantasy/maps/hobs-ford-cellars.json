@@ -1,0 +1,22 @@
+{ "cell": 70, "cols": 22, "rows": 16, "ground": "rock", "seed": 41,
+  "floors": [
+    { "x": 2, "y": 2, "w": 4, "h": 4, "tex": "dirt" },
+    { "x": 6, "y": 3, "w": 5, "h": 1, "tex": "dirt" },
+    { "x": 11, "y": 1, "w": 7, "h": 6, "tex": "dirt" },
+    { "x": 14, "y": 7, "w": 1, "h": 3, "tex": "dirt" },
+    { "x": 10, "y": 10, "w": 9, "h": 5, "tex": "flag" },
+    { "x": 3, "y": 6, "w": 1, "h": 5, "tex": "dirt" },
+    { "x": 2, "y": 11, "w": 5, "h": 3, "tex": "dirt" }
+  ],
+  "doors": [
+    { "x": 11, "y": 3, "side": "w" },
+    { "x": 14, "y": 10, "side": "n" },
+    { "x": 3, "y": 11, "side": "n", "secret": true }
+  ],
+  "features": [
+    { "kind": "stairs", "x": 2, "y": 2, "w": 2, "h": 2, "dir": "n" }, { "kind": "web", "x": 5, "y": 5 },
+    { "kind": "bones", "x": 12, "y": 2 }, { "kind": "crate", "x": 16, "y": 1 }, { "kind": "crate", "x": 17, "y": 1 }, { "kind": "barrel", "x": 17, "y": 5 }, { "kind": "bed", "x": 12, "y": 5, "w": 2, "h": 1 }, { "kind": "brazier", "x": 15, "y": 3 }, { "kind": "blood", "x": 13, "y": 4 },
+    { "kind": "altar", "x": 14, "y": 13, "w": 1, "h": 1 }, { "kind": "pillar", "x": 11, "y": 11 }, { "kind": "pillar", "x": 17, "y": 11 }, { "kind": "pillar", "x": 11, "y": 13 }, { "kind": "pillar", "x": 17, "y": 13 },
+    { "kind": "coffin", "x": 12, "y": 11, "w": 1, "h": 2 }, { "kind": "coffin", "x": 16, "y": 11, "w": 1, "h": 2 }, { "kind": "pool", "x": 13, "y": 11, "w": 2, "h": 1 }, { "kind": "rubble", "x": 18, "y": 14, "w": 1, "h": 1 },
+    { "kind": "chest", "x": 5, "y": 12 }, { "kind": "bones", "x": 2, "y": 13 }
+  ] }

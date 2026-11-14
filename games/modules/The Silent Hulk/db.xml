@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root version="4.6" release="1">
+	<encounter>
+		<category name="The Silent Hulk">
+			<e00aboutthisscenario>
+				<name type="string">00 About This Scenario</name>
+				<text type="formattedtext"><p><b>The Silent Hulk</b> is a short starter for <i>Ironsworn: Starforged</i>: one to four characters, one or two sessions, guided or GM-less. It is Kraken's own, an unofficial adaptation (see the Starforged Reference's front page).</p><p>This work is based on Ironsworn, Ironsworn: Delve and Ironsworn: Starforged, created by Shawn Tomkin, and licensed for our use under the Creative Commons Attribution 4.0 International license (https://creativecommons.org/licenses/by/4.0/).</p><p>This is an unofficial adaptation made for Kraken VTT, compatible with Ironsworn and Ironsworn: Starforged. It is not an official Tomkin Press product, and is not affiliated with or endorsed by Shawn Tomkin or Tomkin Press. It uses no Tomkin Press art, icons or trade dress. The full rulebooks (free to download from the publisher) explain the games in far more depth.</p><p><b>The truth.</b> The colony transport <i>Meridian Vow</i> went dark a generation ago on its way to a new settlement. Its crew put the colonists in cryosleep when the reactor failed. The ship drifted into a dead system, and now a salvage beacon has woken on it, broadcasting the same phrase over and over: <i>&quot;We kept our promise. Come and see.&quot;</i></p></text>
+			</e00aboutthisscenario>
+			<e01thesignal>
+				<name type="string">01 The Signal</name>
+				<text type="formattedtext"><p><i>Read or tell:</i> <b>Your ship's comms crackle in the middle of the sleep-shift. A woman's voice, calm and patient: &quot;We kept our promise. Come and see.&quot; The source is a derelict at the edge of the Thessal drift, three jumps out.</b></p><p><b>The inciting vow (dangerous):</b> <i>I will learn what happened aboard the Meridian Vow and bring its people home.</i> Each character makes <b>Swear an Iron Vow</b> (+heart).</p><p>A connection can help: <b>Ashe Varo</b>, a salvage broker at Gantry Station (dangerous, role: Broker), knows the ship's registry. Make a Connection (+heart) if the characters have none.</p></text>
+			</e01thesignal>
+			<e02intothedrift>
+				<name type="string">02 Into the Drift</name>
+				<text type="formattedtext"><p>An <b>expedition</b> (dangerous): Undertake an Expedition, then Finish an Expedition. At each waypoint use the oracles (Space: Sighting, Peril, Opportunity), or: a field of frozen ice shards that ring against the hull; a dead beacon buoy with fresh scorch marks; another ship's wreck, picked clean.</p><p>On a miss: a <b>pirate cutter</b> has heard the signal too (a fight; use a sample foe from Starforged Foes, such as a Pirate Boarding Party).</p></text>
+			</e02intothedrift>
+			<e03themeridianvow>
+				<name type="string">03 The Meridian Vow</name>
+				<text type="formattedtext"><p>The map shows the derelict's habitation ring: the <b>airlock</b> (west) with a dead console, the <b>ready room</b> (lockers, old blood), the <b>spine corridor</b>, the <b>cryo bay</b> (five pods: three dead, two still cold and working), the <b>crew quarters</b>, the <b>cargo hold</b> (sealed crates of colony seed-stock), the <b>reactor room</b> (the reactor, cold but not quite dead), and the <b>bridge</b> (east) where the beacon runs.</p><p>Use the <b>Derelict</b> oracles (Starforged Reference: Derelict: Zone, Feature, Peril, Opportunity) as the characters move from zone to zone. The ship's <b>guardian drone</b> (a Servitor or an Enforcer from Starforged Foes) still guards the bridge.</p></text>
+			</e03themeridianvow>
+			<e04thepromise>
+				<name type="string">04 The Promise</name>
+				<text type="formattedtext"><p>On the bridge sits the captain's last recording: she stayed awake to keep the ship alive for as long as she could, and recorded the beacon's words before she died. The two living colonists can be woken (Repair the cryo bay, +wits; Heal, +wits), or the whole ship towed home (a new, formidable vow).</p><p><b>Fulfill Your Vow</b> when the characters know the truth and the survivors are safe. A strong hit: mark 2 ticks on the quests legacy track (dangerous). Discoveries legacy: a derelict explored is a discovery worth marking.</p></text>
+			</e04thepromise>
+		</category>
+	</encounter>
+	<battle>
+		<category name="Encounters">
+			<pirateboardingparty>
+				<name type="string">Pirate Boarding Party</name>
+				<npclist>
+					<id-00001>
+						<name type="string">Pirate boarding party</name>
+						<count type="number">1</count>
+						<faction type="string">foe</faction>
+						<isidentified type="number">1</isidentified>
+						<link type="windowreference"><class>npc</class><recordname>npc.pirateboardingparty@Starforged Foes</recordname></link>
+					</id-00001>
+				</npclist>
+			</pirateboardingparty>
+		</category>
+	</battle>
+	<image>
+		<category name="Maps">
+			<themeridianvow>
+				<name type="string">The Meridian Vow</name>
+				<image>
+					<grid type="string">on</grid>
+					<gridsize type="string">70,70</gridsize>
+					<gridoffset type="string">0,0</gridoffset>
+					<layers>
+						<layer>
+							<name type="string">The Meridian Vow</name>
+							<id type="string">0</id>
+							<parentid type="string">-1</parentid>
+							<type type="string">image</type>
+							<bitmap type="string">images/silent-hulk.webp</bitmap>
+							<matrix type="string">1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1</matrix>
+							<occluders>
+								<occluder>
+									<id type="string">0</id>
+									<points type="string">-420,490,-70,490</points>
+								</occluder>
+								<occluder>
+									<id type="string">1</id>
+									<points type="string">0,490,350,490</points>
+								</occluder>
+								<occluder>
+									<id type="string">2</id>
+									<points type="string">420,280,980,280</points>
+								</occluder>
+								<occluder>
+									<id type="string">3</id>
+									<points type="string">-840,210,-490,210</points>
+								</occluder>
+								<occluder>
+									<id type="string">4</id>
+									<points type="string">-420,140,-280,140</points>
+								</occluder>
+								<occluder>
+									<id type="string">5</id>
+									<points type="string">-210,140,-70,140</points>
+								</occluder>
+								<occluder>
+									<id type="string">6</id>
+									<points type="string">0,140,140,140</points>
+								</occluder>
+								<occluder>
+									<id type="string">7</id>
+									<points type="string">210,140,350,140</points>
+								</occluder>
+								<occluder>
+									<id type="string">8</id>
+									<points type="string">-1050,70,-840,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">9</id>
+									<points type="string">-490,70,-280,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">10</id>
+									<points type="string">-210,70,140,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">11</id>
+									<points type="string">210,70,420,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">12</id>
+									<points type="string">-1050,-70,-840,-70</points>
+								</occluder>
+								<occluder>
+									<id type="string">13</id>
+									<points type="string">-490,-70,-280,-70</points>
+								</occluder>
+								<occluder>
+									<id type="string">14</id>
+									<points type="string">-210,-70,140,-70</points>
+								</occluder>
+								<occluder>
+									<id type="string">15</id>
+									<points type="string">210,-70,420,-70</points>
+								</occluder>
+								<occluder>
+									<id type="string">16</id>
+									<points type="string">-420,-140,-280,-140</points>
+								</occluder>
+								<occluder>
+									<id type="string">17</id>
+									<points type="string">-210,-140,-70,-140</points>
+								</occluder>
+								<occluder>
+									<id type="string">18</id>
+									<points type="string">0,-140,140,-140</points>
+								</occluder>
+								<occluder>
+									<id type="string">19</id>
+									<points type="string">210,-140,350,-140</points>
+								</occluder>
+								<occluder>
+									<id type="string">20</id>
+									<points type="string">-840,-210,-490,-210</points>
+								</occluder>
+								<occluder>
+									<id type="string">21</id>
+									<points type="string">420,-280,980,-280</points>
+								</occluder>
+								<occluder>
+									<id type="string">22</id>
+									<points type="string">-420,-490,-70,-490</points>
+								</occluder>
+								<occluder>
+									<id type="string">23</id>
+									<points type="string">0,-490,350,-490</points>
+								</occluder>
+								<occluder>
+									<id type="string">24</id>
+									<points type="string">-1050,70,-1050,-70</points>
+								</occluder>
+								<occluder>
+									<id type="string">25</id>
+									<points type="string">-840,210,-840,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">26</id>
+									<points type="string">-840,-70,-840,-210</points>
+								</occluder>
+								<occluder>
+									<id type="string">27</id>
+									<points type="string">-490,210,-490,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">28</id>
+									<points type="string">-490,-70,-490,-210</points>
+								</occluder>
+								<occluder>
+									<id type="string">29</id>
+									<points type="string">-420,490,-420,140</points>
+								</occluder>
+								<occluder>
+									<id type="string">30</id>
+									<points type="string">-420,-140,-420,-490</points>
+								</occluder>
+								<occluder>
+									<id type="string">31</id>
+									<points type="string">-280,140,-280,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">32</id>
+									<points type="string">-280,-70,-280,-140</points>
+								</occluder>
+								<occluder>
+									<id type="string">33</id>
+									<points type="string">-210,140,-210,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">34</id>
+									<points type="string">-210,-70,-210,-140</points>
+								</occluder>
+								<occluder>
+									<id type="string">35</id>
+									<points type="string">-70,490,-70,140</points>
+								</occluder>
+								<occluder>
+									<id type="string">36</id>
+									<points type="string">-70,-140,-70,-490</points>
+								</occluder>
+								<occluder>
+									<id type="string">37</id>
+									<points type="string">0,490,0,140</points>
+								</occluder>
+								<occluder>
+									<id type="string">38</id>
+									<points type="string">0,-140,0,-490</points>
+								</occluder>
+								<occluder>
+									<id type="string">39</id>
+									<points type="string">140,140,140,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">40</id>
+									<points type="string">140,-70,140,-140</points>
+								</occluder>
+								<occluder>
+									<id type="string">41</id>
+									<points type="string">210,140,210,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">42</id>
+									<points type="string">210,-70,210,-140</points>
+								</occluder>
+								<occluder>
+									<id type="string">43</id>
+									<points type="string">350,490,350,140</points>
+								</occluder>
+								<occluder>
+									<id type="string">44</id>
+									<points type="string">350,-140,350,-490</points>
+								</occluder>
+								<occluder>
+									<id type="string">45</id>
+									<points type="string">420,280,420,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">46</id>
+									<points type="string">420,-70,420,-280</points>
+								</occluder>
+								<occluder>
+									<id type="string">47</id>
+									<points type="string">980,280,980,-280</points>
+								</occluder>
+								<occluder>
+									<id type="string">48</id>
+									<points type="string">-840,70,-840,0</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+								<occluder>
+									<id type="string">49</id>
+									<points type="string">-840,0,-840,-70</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+								<occluder>
+									<id type="string">50</id>
+									<points type="string">-490,70,-490,0</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+								<occluder>
+									<id type="string">51</id>
+									<points type="string">-280,140,-210,140</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+								<occluder>
+									<id type="string">52</id>
+									<points type="string">140,140,210,140</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+								<occluder>
+									<id type="string">53</id>
+									<points type="string">-280,-140,-210,-140</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+								<occluder>
+									<id type="string">54</id>
+									<points type="string">140,-140,210,-140</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+								<occluder>
+									<id type="string">55</id>
+									<points type="string">420,70,420,0</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+								<occluder>
+									<id type="string">56</id>
+									<points type="string">420,0,420,-70</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+							</occluders>
+						</layer>
+					</layers>
+				</image>
+			</themeridianvow>
+		</category>
+	</image>
+</root>

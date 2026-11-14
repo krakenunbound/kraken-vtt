@@ -75,7 +75,7 @@ try {
   for (const book of ours) await tool("kraken_books", { action: "activate", book: book.id });
 
   // A test player makes a crew member.
-  browser = await chromium.launch({ executablePath: CHROME, headless: true });
+  browser = await chromium.launch({ args: ["--mute-audio"], executablePath: CHROME, headless: true });
   const seat = await (await browser.newContext({ viewport: { width: 1400, height: 950 } })).newPage();
   seat.on("pageerror", (error) => failures.push(`player: ${error.message}`));
   await seat.goto("http://127.0.0.1:47449/");

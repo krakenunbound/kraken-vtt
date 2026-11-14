@@ -130,7 +130,7 @@ export const CALENDARS = [
 ];
 
 // Each game's own calendar (the GM may choose any).
-const BY_RULESET = { "D&D 5E": "harptos", "D&D 3.5E": "greyhawk", "AD&D 2E": "greyhawk", "Castles & Crusades": "greyhawk", "Pathfinder 1E": "golarion", "Pathfinder 2E": "golarion", Traveller: "imperial", "Descending Darkness": "waning", "Apeira Astra": "astra" };
+const BY_RULESET = { "D&D 5E": "harptos", "D&D 3.5E": "greyhawk", "AD&D 2E": "greyhawk", "Castles & Crusades": "greyhawk", "Pathfinder 1E": "golarion", "Pathfinder 2E": "golarion", Traveller: "imperial", "Descending Darkness": "waning", "Apeira Astra": "astra", "Basic Fantasy": "gregorian" };
 export const calendarFor = (ruleset = "") => BY_RULESET[ruleset] ?? "gregorian";
 export const calendarOf = (id) => CALENDARS.find((item) => item.id === id) ?? CALENDARS[0];
 

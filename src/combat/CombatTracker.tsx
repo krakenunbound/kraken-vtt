@@ -1,11 +1,16 @@
 import { useState } from "react";
+import { ScorePanel } from "./ScorePanel";
 import { Picture } from "../characters/ArtPicker";
 import type { CombatEntry, Session } from "../session/useSession";
 import { Icon } from "../ui/icons";
+import { FateLine } from "./FateLine";
+import { fateTableOf } from "../characters/SheetFate";
+import { ProgressBoxes } from "../characters/SheetIronsworn";
+import { RANK_NAMES, RANKS } from "../../shared/ironsworn/rules.mjs";
 
 const FACTION_LABEL = { friend: "Friend", neutral: "Neutral", foe: "Foe" } as const;
 // AD&D 2E's five saving throws.
-const SAVE_LABELS: Record<string, string> = { paralyzation: "Paralyzation, Poison, Death", rod: "Rod, Staff, Wand", petrification: "Petrification, Polymorph", breath: "Breath Weapon", spell: "Spell", str: "STR check", dex: "DEX check", end: "END check", int: "INT check", edu: "EDU check", soc: "SOC check", brawn: "Brawn check", reflex: "Reflex check", grit: "Grit check", intellect: "Intellect check", training: "Training check", presence: "Presence check" };
+const SAVE_LABELS: Record<string, string> = { death: "Death Ray or Poison", wands: "Magic Wands", paralysis: "Paralysis or Petrify", spells: "Spells",paralyzation:"Paralyzation, Poison, Death", rod: "Rod, Staff, Wand", petrification: "Petrification, Polymorph", breath: "Breath Weapon", spell: "Spell", str: "STR check", dex: "DEX check", end: "END check", int: "INT check", edu: "EDU check", soc: "SOC check", brawn: "Brawn check", reflex: "Reflex check", grit: "Grit check", intellect: "Intellect check", training: "Training check", presence: "Presence check" };
 
 function focusToken(tokenId: string | null) {
   if (tokenId) window.dispatchEvent(new CustomEvent("kraken:focus-token", { detail: tokenId }));
@@ -20,7 +25,7 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
   const [rounds, setRounds] = useState("");
   const [open, setOpen] = useState(false);
   const [saveStat, setSaveStat] = useState("wisdom");
-  const saveChoices = session.ruleset === "D&D 3.5E" ? ["fortitude", "reflex", "will"] : session.ruleset === "AD&D 2E" ? ["paralyzation", "rod", "petrification", "breath", "spell"] : session.ruleset === "Traveller" ? ["str", "dex", "end", "int", "edu", "soc"] : session.ruleset === "Apeira Astra" ? ["brawn", "reflex", "grit", "intellect", "training", "presence"] : ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"];
+  const saveChoices = session.ruleset === "D&D 3.5E" ? ["fortitude", "reflex", "will"] : session.ruleset === "Basic Fantasy" ? ["death", "wands", "paralysis", "breath", "spells"] : session.ruleset === "AD&D 2E" ? ["paralyzation", "rod", "petrification", "breath", "spell"] : session.ruleset === "Traveller" ? ["str", "dex", "end", "int", "edu", "soc"] : session.ruleset === "Apeira Astra" ? ["brawn", "reflex", "grit", "intellect", "training", "presence"] : session.ruleset === "Cairn" ? ["str", "dex", "wil"] : session.ruleset === "Fate Accelerated" ? ["careful", "clever", "flashy", "forceful", "quick", "sneaky"] : session.ruleset === "Fate Core" ? ["Athletics", "Fight", "Notice", "Physique", "Provoke", "Shoot", "Stealth", "Will"] : ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"];
   const saveChoice = saveChoices.includes(saveStat) ? saveStat : saveChoices[saveChoices.length - 1];
   const [saveCl, setSaveCl] = useState("0");
   const record = entry.recordId ? session.records[entry.recordId] : null;
@@ -124,13 +129,71 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
             {entry.hidden ? " · hidden" : ""}
           </small>
         </span>
-        {entry.ac !== undefined ? (
+        {entry.ac !== undefined && !entry.fate && !entry.iron ? (
           <span className="ct-stat" title="Armour class">
             <Icon name="shield" size={14} />
             {entry.ac}
           </span>
         ) : null}
-        {entry.hp !== undefined ? (
+        {entry.cairn ? (
+          // Cairn: STR now (damage past HP comes off it); a detachment is marked.
+          <span className="ct-stat" data-cairn-str={entry.cairn.str} title={`STR ${entry.cairn.str} of ${entry.cairn.max}${entry.cairn.detachment ? " · a detachment" : ""}${entry.cairn.lostTurn ? " · loses the first turn (failed DEX save)" : ""}`}>
+            STR {entry.cairn.str}
+            {entry.cairn.detachment ? " ⚑" : ""}
+          </span>
+        ) : null}
+        {entry.iron && entry.iron.rank ? (
+          // Ironsworn: a foe is its rank and its progress track (harm marks it), not hit points.
+          <span className="ct-iron" data-iron-rank={entry.iron.rank} data-iron-ticks={entry.iron.ticks ?? 0}>
+            {gm ? (
+              <select className="cc-field" value={entry.iron.rank} aria-label={`${entry.name} rank`} title={`Inflicts ${entry.iron.harm ?? 2} harm`} onChange={(event) => void session.ironsworn("foe-rank", "", { target: entry.id, rank: event.target.value })}>
+                {(RANKS as string[]).map((rank) => (
+                  <option key={rank} value={rank}>
+                    {RANK_NAMES[rank as keyof typeof RANK_NAMES]}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <small>{RANK_NAMES[entry.iron.rank as keyof typeof RANK_NAMES]}</small>
+            )}
+            <ProgressBoxes ticks={entry.iron.ticks ?? 0} label={`${entry.name}'s progress`} />
+            {gm && !entry.iron.defeated ? (
+              <>
+                <button type="button" data-action="foe-mark" title="Mark progress (one harm, by its rank)" onClick={() => void session.ironsworn("foe-mark", "", { target: entry.id, times: 1 })}>
+                  +
+                </button>
+                <select
+                  className="cc-field"
+                  value=""
+                  aria-label={`${entry.name} inflicts harm on`}
+                  title={`Inflict its harm (${entry.iron.harm ?? 2}) on a character: health down, then Endure Harm`}
+                  data-action="foe-inflict"
+                  onChange={(event) => event.target.value && void session.ironsworn("inflict", "", { target: entry.id, id: event.target.value })}
+                >
+                  <option value="">Harm…</option>
+                  {session.combat.entries
+                    .filter((item) => item.iron && !item.iron.rank && item.recordId)
+                    .map((item) => (
+                      <option key={item.id} value={item.recordId ?? ""}>
+                        {item.name}
+                      </option>
+                    ))}
+                </select>
+              </>
+            ) : null}
+          </span>
+        ) : entry.iron ? (
+          // Ironsworn: a character's initiative (in control) and momentum.
+          <span className="ct-iron" data-iron-control={entry.iron.control ? "1" : "0"} title={session.ruleset === "Starforged" ? "In control or in a bad spot" : "Initiative"}>
+            <b className={entry.iron.control ? "iron-on" : ""}>{session.ruleset === "Starforged" ? (entry.iron.control ? "In control" : "Bad spot") : entry.iron.control ? "Initiative" : "No initiative"}</b>
+            <small> · momentum {entry.iron.momentum ?? 0} · health {entry.iron.health ?? 0} · spirit {entry.iron.spirit ?? 0}</small>
+          </span>
+        ) : null}
+        {entry.iron ? (
+          <span className="ct-status" style={{ borderColor: entry.health.color, color: entry.health.color }}>
+            {entry.health.status}
+          </span>
+        ) : entry.hp !== undefined && !entry.fate ? (
           <span className="ct-stat ct-hp" title={`${entry.health.status}: ${(entry.hp ?? 0) - (entry.wounds ?? 0)} of ${entry.hp}${entry.temp ? `, ${entry.temp} temporary` : ""}`} style={{ color: entry.health.color }}>
             <Icon name="heart" size={14} />
             {(entry.hp ?? 0) - (entry.wounds ?? 0)}/{entry.hp}
@@ -147,6 +210,18 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
             Bind wounds
           </button>
         ) : null}
+        {session.ruleset === "Basic Fantasy" && entry.turns && (gm || entry.mine) && session.combat.active === entry.id ? (
+          // Basic Fantasy: a Cleric turns the undead it targets (or every undead foe): d20 against the table, 2d6 hit dice affected.
+          <button type="button" className="ct-death-save" data-action="turn-undead" title={`Turn undead as a level ${entry.turns} Cleric: target the undead first, or every undead foe is tried`} onClick={() => session.ct("turn-undead", { id: entry.id, ...(entry.recordId ? { recordId: entry.recordId } : {}) })}>
+            Turn undead
+          </button>
+        ) : null}
+        {session.ruleset === "Basic Fantasy" && gm && entry.morale ? (
+          // Basic Fantasy: a monster's morale check, 2d6 at or under its score.
+          <button type="button" className="ct-death-save" data-action="morale" title={`Morale ${entry.morale}: 2d6 at or under it stands${entry.morale >= 12 ? " (12: never fails)" : ""}`} onClick={() => session.ct("morale", { id: entry.id })}>
+            Morale {entry.morale}
+          </button>
+        ) : null}
         {session.ruleset === "AD&D 2E" && entry.turns && (gm || entry.mine) && session.combat.active === entry.id ? (
           // 2E: a cleric (a paladin from 3rd level) turns the undead it targets, or every undead foe.
           <button type="button" className="ct-death-save" data-action="turn-undead" title={`Turn undead as a level ${entry.turns} cleric: target the undead first, or every undead foe is tried`} onClick={() => session.ct("turn-undead", { id: entry.id, ...(entry.recordId ? { recordId: entry.recordId } : {}) })}>
@@ -157,6 +232,17 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
           // Descending Darkness: an ally steadies the dying (Wisdom 12); the GM's call without one.
           <button type="button" className="ct-death-save" data-action="stabilize" title="Steady them: an ally's Wisdom check against 12 stops the bleeding" onClick={() => session.ct("stabilize", { id: entry.id, ...(myCharacterId ? { recordId: myCharacterId } : {}) })}>
             Steady
+          </button>
+        ) : null}
+        {session.ruleset === "Cairn" && entry.health.status === "Dying" && entry.recordId && (gm || myCharacterId) ? (
+          // Cairn: Critical Damage; aid (bandages) stabilizes, untreated death within the hour.
+          <button type="button" className="ct-death-save" data-action="stabilize" title="Give aid (bandages): stable, out of danger but out of action" onClick={() => void session.cairnAction(entry.recordId ?? "", "stabilize")}>
+            Stabilize
+          </button>
+        ) : null}
+        {session.ruleset === "Cairn" && gm && entry.faction !== "friend" && !["Dead", "Routed", "Fleeing"].includes(entry.health.status) ? (
+          <button type="button" className="ct-death-save" data-action="morale" title="Morale: a WIL save to stand, else the creature flees" onClick={() => session.ct("morale", { id: entry.id })}>
+            Morale
           </button>
         ) : null}
         {session.ruleset === "D&D 5E" && entry.health.status === "Dying" && (gm || entry.mine) ? (
@@ -184,15 +270,31 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
           </span>
         ) : entry.mine ? (
           <span className="ct-tools">
-            <button type="button" title="Roll my initiative" onClick={() => session.ct("init", { which: entry.id })}>
-              d10
+            <button type="button" title={session.ruleset === "Cairn" ? "My DEX save to act in the first round" : entry.fate ? "My place in the turn order (Notice; FAE Quick)" : "Roll my initiative"} onClick={() => session.ct("init", { which: entry.id })}>
+              {session.ruleset === "Cairn" ? "DEX" : entry.fate ? "Order" : "d10"}
             </button>
           </span>
         ) : null}
       </div>
+      {entry.fate ? <FateLine entry={entry} session={session} /> : null}
       {entry.targets.length > 0 || (gm && (entry.attacks?.length || entry.powers?.length)) ? (
         <div className="ct-actions">
-          {entry.attacks?.map((attack) => (
+          {session.ruleset === "Cairn"
+            ? entry.attacks?.map((attack) => (
+                // Cairn: attacks always hit; the die less Armor (impaired d4, enhanced d12).
+                <span key={attack.key} className="ct-attack" data-cairn-attack={attack.key}>
+                  <button type="button" data-action="npc-attack" onClick={() => session.ct("attack", { id: entry.id, weapon: attack.key })} title={`${attack.name}: ${attack.damage}, always hits (less Armor)`}>
+                    {attack.name} {attack.damage}
+                  </button>
+                  <button type="button" data-mode="impaired" onClick={() => session.ct("attack", { id: entry.id, weapon: attack.key, mode: "impaired" })} title="Impaired (cover, bound hands): d4">
+                    d4
+                  </button>
+                  <button type="button" data-mode="enhanced" onClick={() => session.ct("attack", { id: entry.id, weapon: attack.key, mode: "enhanced" })} title="Enhanced (a helpless foe, a daring maneuver): d12">
+                    d12
+                  </button>
+                </span>
+              ))
+            : entry.attacks?.map((attack) => (
             <span key={attack.key} className="ct-attack">
               <button type="button" onClick={() => session.ct("attack", { id: entry.id, weapon: attack.key })} title={attack.thaco !== undefined ? `${attack.name}: attack (THAC0 ${attack.thaco}${attack.bonus ? `, ${attack.bonus > 0 ? "+" : ""}${attack.bonus} to hit` : ""})` : `${attack.name}: attack`}>
                 {attack.thaco !== undefined ? (
@@ -219,7 +321,7 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
               ) : null}
             </span>
           ))}
-          {session.ruleset === "AD&D 2E" && gm && (entry.attacks?.length ?? 0) > 1 ? (
+          {(session.ruleset === "AD&D 2E" || session.ruleset === "Basic Fantasy") && gm && (entry.attacks?.length ?? 0) > 1 ? (
             // 2E: a creature's whole round (claw, claw, bite) at its first target.
             <span className="ct-attack">
               <button type="button" data-full-attack="all" onClick={() => session.ct("attack", { id: entry.id, weapon: "0", full: true })} title="Every attack this round, at the first target">
@@ -311,8 +413,8 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
               ))}
             </select>
             <label>
-              {session.ruleset === "AD&D 2E" ? "Mod" : session.ruleset === "Traveller" || session.ruleset === "Apeira Astra" ? "DM" : session.ruleset === "D&D 5E" || session.ruleset === "Descending Darkness" || session.ruleset === "D&D 3.5E" ? "DC" : "CL"}
-              <input type="number" value={saveCl} onChange={(event) => setSaveCl(event.target.value)} style={{ width: "3.6rem" }} aria-label={session.ruleset === "AD&D 2E" ? "Save modifier" : session.ruleset === "Traveller" || session.ruleset === "Apeira Astra" ? "Check DM" : session.ruleset === "D&D 5E" || session.ruleset === "D&D 3.5E" ? "Save DC" : "Save CL"} />
+              {session.ruleset === "AD&D 2E" || session.ruleset === "Basic Fantasy" ? "Mod" : session.ruleset === "Traveller" || session.ruleset === "Apeira Astra" ? "DM" : session.ruleset === "D&D 5E" || session.ruleset === "Descending Darkness" || session.ruleset === "D&D 3.5E" ? "DC" : "CL"}
+              <input type="number" value={saveCl} onChange={(event) => setSaveCl(event.target.value)} style={{ width: "3.6rem" }} aria-label={session.ruleset === "AD&D 2E" || session.ruleset === "Basic Fantasy" ? "Save modifier" : session.ruleset === "Traveller" || session.ruleset === "Apeira Astra" ? "Check DM" : session.ruleset === "D&D 5E" || session.ruleset === "D&D 3.5E" ? "Save DC" : "Save CL"} />
             </label>
             <button type="button" onClick={() => session.ct("save", { id: entry.id, attribute: saveChoice, cl: Number(saveCl) || 0 })}>
               {session.ruleset === "Traveller" || session.ruleset === "Apeira Astra" ? "Roll check" : "Roll save"}
@@ -356,8 +458,14 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
 // FG's combat tracker: the round, everyone in initiative order with the
 // active one marked, and the GM's controls along the bottom.
 export function CombatTracker({ session }: { session: Session }) {
+  // Forged in the Dark has no initiative: its Combat window is the Score panel.
+  if (session.ruleset === "Forged in the Dark") return <ScorePanel session={session} />;
+  return <InitiativeTracker session={session} />;
+}
+function InitiativeTracker({ session }: { session: Session }) {
   const gm = session.role === "dm";
   const { combat } = session;
+  const fateGame = /^Fate /.test(session.ruleset);
   const [search, setSearch] = useState("");
   const [count, setCount] = useState(1);
   const [place, setPlace] = useState(true);
@@ -408,9 +516,21 @@ export function CombatTracker({ session }: { session: Session }) {
             <button type="button" onClick={() => session.ct("init", { which: "npcs" })} disabled={combat.entries.length === 0}>
               Roll NPC init
             </button>
-            <button type="button" onClick={() => session.ct("init", { which: "all" })} disabled={combat.entries.length === 0}>
-              Roll all
+            <button type="button" data-action="init-all" onClick={() => session.ct("init", { which: "all" })} disabled={combat.entries.length === 0} title={session.ruleset === "Cairn" ? "The PCs first (each saves DEX to act in the first round), then their opponents" : fateGame ? "The turn order, without dice: Notice (FAE Quick) in a physical conflict, Empathy (Careful) in a mental one" : undefined}>
+              {session.ruleset === "Cairn" ? "Sides (DEX saves)" : fateGame ? "Turn order" : "Roll all"}
             </button>
+            {fateGame ? (
+              // Fate: a physical or a mental conflict (which skill orders the turns, which defends).
+              <select aria-label="Conflict" data-action="fate-conflict" value={fateTableOf(session).conflict} onChange={(event) => void session.fateAction(null, "conflict", { kind: event.target.value })}>
+                <option value="physical">Physical conflict</option>
+                <option value="mental">Mental conflict</option>
+              </select>
+            ) : null}
+            {session.ruleset === "Cairn" ? (
+              <button type="button" data-action="morale-foes" title="Morale: every foe still standing saves WIL, or flees" onClick={() => session.ct("morale", { faction: "foe" })} disabled={!combat.entries.some((item) => item.faction === "foe")}>
+                Morale
+              </button>
+            ) : null}
             {combat.round > 0 ? (
               <button type="button" data-action="prev-turn" title="Back: undo the last turn change (effects that ran out come back, ongoing damage is healed); what happened during the turn stays" onClick={() => session.ct("prev")}>
                 <span className="flip"><Icon name="next" size={14} /></span> Back

@@ -1,4 +1,5 @@
 import { ShipsWindow } from "../ships/ShipsWindow";
+import { DelveWindow, OraclesWindow } from "../ironsworn/IronswornWindows";
 import { lazy, Suspense, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { Picture } from "../characters/ArtPicker";
 import { CharacterPanel } from "../characters/CharacterPanel";
@@ -10,6 +11,7 @@ import { savedSignIn, type Session } from "../session/useSession";
 import { diceStore } from "../dice/diceStore";
 import { agentCommands } from "./agentCommands";
 import { ChatDock } from "./ChatDock";
+import { FateStrip } from "./FateStrip";
 import { Mark } from "./Emblem";
 import { DecalPicker, SettingsWindow, TableDecal } from "./Settings";
 import { DiceWindow } from "../dice/DiceWindow";
@@ -20,6 +22,7 @@ import { DeathMarkersWindow } from "../combat/DeathMarkersWindow";
 import { AdventureList, LibraryWindow, StoryWindow, type Kind as AdventureKind } from "../books/Library";
 import { NotesWindow, NoteWindow } from "../notes/Notes";
 import { CalendarWindow } from "../notes/CalendarWindow";
+import { ClocksStrip, ClocksWindow } from "../notes/ClocksWindow";
 import { MotdWindow } from "../notes/MotdWindow";
 import { ReadAloudBubble, useAnyMapShown } from "../books/ReadAloudBubble";
 import { readAloud } from "../books/readAloud";
@@ -251,7 +254,7 @@ export function Desktop({
   const mapTool: SidebarEntry[] = scene ? [{ kind: "map", label: "Map", icon: "map", title: sceneName || "Map" }] : [];
   const tools: SidebarEntry[] = gm
     ? [
-        { kind: "combat", label: "Combat", icon: "combat", title: "Combat Tracker", badge: combatBadge },
+        session.ruleset === "Forged in the Dark" ? { kind: "combat", label: "Score", icon: "combat", title: "Score" } : { kind: "combat", label: "Combat", icon: "combat", title: "Combat Tracker", badge: combatBadge },
         { kind: "assistant", label: "Assistant", icon: "sparkle", title: "DM Assistant" },
         { kind: "studio", label: "Map Studio", icon: "pen", title: "Map Studio" },
         { kind: "players", label: "Players", icon: "players", title: "Players" },
@@ -259,7 +262,7 @@ export function Desktop({
       ]
     : [
         ...mapTool,
-        { kind: "combat", label: "Combat", icon: "combat", title: "Combat Tracker", badge: combatBadge },
+        session.ruleset === "Forged in the Dark" ? { kind: "combat", label: "Score", icon: "combat", title: "Score" } : { kind: "combat", label: "Combat", icon: "combat", title: "Combat Tracker", badge: combatBadge },
         { kind: "settings", label: "Settings", icon: "settings", title: "Settings" },
       ];
   const charactersEntry: SidebarEntry = gm
@@ -291,8 +294,13 @@ export function Desktop({
         { kind: "party", label: "Party", icon: "party", title: "Party Sheet" },
         // Starships, in the 2d6 games (Traveller, Apeira Astra).
         ...(session.ruleset === "Traveller" || session.ruleset === "Apeira Astra" ? [{ kind: "ships" as const, label: "Starships", icon: "ship", title: "Starships" }] : []),
+        // Ironsworn and Starforged: the oracles, for everyone (often played without a GM); Delve's sites, the GM's.
+        ...(session.ruleset === "Ironsworn" || session.ruleset === "Starforged" ? [{ kind: "oracles" as const, label: "Oracles", icon: "sparkle", title: "Oracles" }] : []),
+        ...(session.ruleset === "Ironsworn" && gm ? [{ kind: "delve" as const, label: "Delve Sites", icon: "map", title: "Delve Sites" }] : []),
         { kind: "notes", label: gm ? "Notes" : "Player Notes", icon: "chat", title: gm ? "Notes" : "Player Notes" },
         { kind: "calendar", label: "Calendar", icon: "calendar", title: "Calendar" },
+        // Progress clocks: Forged in the Dark's (shown in any game that has some).
+        ...(session.ruleset === "Forged in the Dark" || session.clocks.clocks.length ? [{ kind: "clocks" as const, label: "Clocks", icon: "hourglass", title: "Clocks" }] : []),
         ...(gm || session.options.motd?.text || session.options.motd?.links?.length ? [{ kind: "motd" as const, label: "Message of the Day", icon: "flag", title: "Message of the Day" }] : []),
       ],
     },
@@ -500,7 +508,7 @@ export function Desktop({
   useEffect(() => {
     const key = myTurn ? `${session.combat.round}:${session.combat.active}` : "";
     if (!gm && key && key !== turnRang.current) {
-      if (alerts.turnSound !== false) sound.yourTurn();
+      if (alerts.turnSound !== false) sound.yourTurn(session.ruleset);
       if (alerts.turnBanner !== false) setBanner({ key, name: myEntry?.name ?? "" });
     }
     if (!key) setBanner(null);
@@ -554,6 +562,8 @@ export function Desktop({
           </button>
         </div>
       </header>
+      {/* Fate: the scene's aspects and the GM's pool, over the table for everyone. */}
+      {/^Fate /.test(session.ruleset) ? <FateStrip session={session} /> : null}
       {/* The GM's read-aloud with no map up: over the table. */}
       {!anyMapShown ? <ReadAloudBubble now={session.readAloudNow} onDone={session.dismissReadAloud} floating /> : null}
       {banner ? (
@@ -575,6 +585,7 @@ export function Desktop({
         <Sidebar tools={tools} groups={groups} isOpen={entryOpen} onLaunch={launch} />
 
         <ChatDock session={session} />
+        <ClocksStrip session={session} />
 
         <div className="window-layer">
           {windows.windows.map((item) =>
@@ -617,12 +628,15 @@ export function Desktop({
               {item.kind === "picture" && item.payload ? <PictureWindow session={session} payload={item.payload} /> : null}
               {item.kind === "notes" ? <NotesWindow session={session} /> : null}
               {item.kind === "calendar" ? <CalendarWindow session={session} /> : null}
+              {item.kind === "clocks" ? <ClocksWindow session={session} /> : null}
               {item.kind === "motd" ? <MotdWindow session={session} /> : null}
               {item.kind === "note" && item.payload ? <NoteWindow session={session} id={item.payload} /> : null}
               {item.kind === "decals" ? <DecalPicker session={session} onClose={() => windows.close(item.key)} /> : null}
               {item.kind === "wallpapers" ? <DecalPicker session={session} kind="wallpaper" onClose={() => windows.close(item.key)} /> : null}
               {item.kind === "krits" ? <KritsWindow session={session} /> : null}
               {item.kind === "ships" ? <ShipsWindow session={session} openMaps={openMaps} /> : null}
+              {item.kind === "oracles" ? <OraclesWindow session={session} /> : null}
+              {item.kind === "delve" && gm ? <DelveWindow session={session} /> : null}
               {item.kind === "library" ? <LibraryWindow session={session} openMaps={openMaps} /> : null}
               {item.kind === "gmicons" ? <DecalPicker session={session} kind="gmicon" onClose={() => windows.close(item.key)} /> : null}
               {item.kind === "deathmarkers" ? <DeathMarkersWindow session={session} /> : null}

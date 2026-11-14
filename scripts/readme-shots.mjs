@@ -117,7 +117,7 @@ try {
   for (const book of ddBooks) await tool("kraken_books", { action: "activate", book: book.id });
 
   // A test player joins and makes a character in the wizard.
-  browser = await chromium.launch({ executablePath: CHROME, headless: true });
+  browser = await chromium.launch({ args: ["--mute-audio"], executablePath: CHROME, headless: true });
   const seat = await (await browser.newContext({ viewport: SCREEN })).newPage();
   await seat.goto("http://127.0.0.1:47461/");
   await seat.fill('input[name="name"]', "Ann");

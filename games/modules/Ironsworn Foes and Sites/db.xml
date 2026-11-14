@@ -1,0 +1,3842 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root version="4.6" release="1">
+	<npc>
+		<category name="Foes">
+			<hungrywolf>
+				<name type="string">Hungry Wolf</name>
+				<foe type="number">1</foe>
+				<game type="string">classic</game>
+				<rank type="string">troublesome</rank>
+				<nature type="string">Animal</nature>
+				<summary type="string">A lean grey shape at the edge of the firelight</summary>
+				<features type="string">Ribs showing through a winter coat; yellow eyes</features>
+				<drives type="string">Feed before the snow deepens</drives>
+				<tactics type="string">Circle and wait; go for the weakest; flee from fire</tactics>
+				<text type="formattedtext"><p><i>A lean grey shape at the edge of the firelight</i> — Troublesome Animal</p><p><b>Features:</b> Ribs showing through a winter coat; yellow eyes</p><p><b>Drives:</b> Feed before the snow deepens</p><p><b>Tactics:</b> Circle and wait; go for the weakest; flee from fire</p></text>
+			</hungrywolf>
+			<wolfpack>
+				<name type="string">Wolf Pack</name>
+				<foe type="number">1</foe>
+				<game type="string">classic</game>
+				<rank type="string">dangerous</rank>
+				<nature type="string">Animal</nature>
+				<summary type="string">Five or six wolves hunting as one</summary>
+				<features type="string">Howls from every side; a scarred leader</features>
+				<drives type="string">Bring down prey; protect the pups</drives>
+				<tactics type="string">Surround; harry and fall back; drag a victim away</tactics>
+				<text type="formattedtext"><p><i>Five or six wolves hunting as one</i> — Dangerous Animal</p><p><b>Features:</b> Howls from every side; a scarred leader</p><p><b>Drives:</b> Bring down prey; protect the pups</p><p><b>Tactics:</b> Surround; harry and fall back; drag a victim away</p></text>
+			</wolfpack>
+			<cavebear>
+				<name type="string">Cave Bear</name>
+				<foe type="number">1</foe>
+				<game type="string">classic</game>
+				<rank type="string">formidable</rank>
+				<nature type="string">Beast</nature>
+				<summary type="string">Shoulders like a boulder, breath like a forge</summary>
+				<features type="string">Matted fur; a roar that shakes dust from the roof</features>
+				<drives type="string">Guard its den; eat its fill before the long sleep</drives>
+				<tactics type="string">Charge; crush and maul; stand tall to terrify</tactics>
+				<text type="formattedtext"><p><i>Shoulders like a boulder, breath like a forge</i> — Formidable Beast</p><p><b>Features:</b> Matted fur; a roar that shakes dust from the roof</p><p><b>Drives:</b> Guard its den; eat its fill before the long sleep</p><p><b>Tactics:</b> Charge; crush and maul; stand tall to terrify</p></text>
+			</cavebear>
+			<raider>
+				<name type="string">Raider</name>
+				<foe type="number">1</foe>
+				<game type="string">classic</game>
+				<rank type="string">troublesome</rank>
+				<nature type="string">Ironlander</nature>
+				<summary type="string">A hard-faced warrior with a notched axe</summary>
+				<features type="string">Mismatched armour; a raid-mark painted on the shield</features>
+				<drives type="string">Take what others have; survive the winter</drives>
+				<tactics type="string">Strike from ambush; fight in pairs; run when the leader falls</tactics>
+				<text type="formattedtext"><p><i>A hard-faced warrior with a notched axe</i> — Troublesome Ironlander</p><p><b>Features:</b> Mismatched armour; a raid-mark painted on the shield</p><p><b>Drives:</b> Take what others have; survive the winter</p><p><b>Tactics:</b> Strike from ambush; fight in pairs; run when the leader falls</p></text>
+			</raider>
+			<raiderchieftain>
+				<name type="string">Raider Chieftain</name>
+				<foe type="number">1</foe>
+				<game type="string">classic</game>
+				<rank type="string">dangerous</rank>
+				<nature type="string">Ironlander</nature>
+				<summary type="string">A raider who has outlived every rival</summary>
+				<features type="string">A cloak of wolfskins; rings taken from the dead</features>
+				<drives type="string">Be feared; hold the band together with plunder</drives>
+				<tactics type="string">Lead from the front; take hostages; offer a bargain and break it</tactics>
+				<text type="formattedtext"><p><i>A raider who has outlived every rival</i> — Dangerous Ironlander</p><p><b>Features:</b> A cloak of wolfskins; rings taken from the dead</p><p><b>Drives:</b> Be feared; hold the band together with plunder</p><p><b>Tactics:</b> Lead from the front; take hostages; offer a bargain and break it</p></text>
+			</raiderchieftain>
+			<marshlurker>
+				<name type="string">Marsh Lurker</name>
+				<foe type="number">1</foe>
+				<game type="string">classic</game>
+				<rank type="string">dangerous</rank>
+				<nature type="string">Beast</nature>
+				<summary type="string">Something long and pale beneath the black water</summary>
+				<features type="string">Webbed claws; skin like wet clay; no eyes</features>
+				<drives type="string">Drag the warm-blooded down into the mud</drives>
+				<tactics type="string">Lie still; seize and pull under; vanish and strike again</tactics>
+				<text type="formattedtext"><p><i>Something long and pale beneath the black water</i> — Dangerous Beast</p><p><b>Features:</b> Webbed claws; skin like wet clay; no eyes</p><p><b>Drives:</b> Drag the warm-blooded down into the mud</p><p><b>Tactics:</b> Lie still; seize and pull under; vanish and strike again</p></text>
+			</marshlurker>
+			<barrowdead>
+				<name type="string">Barrow Dead</name>
+				<foe type="number">1</foe>
+				<game type="string">classic</game>
+				<rank type="string">dangerous</rank>
+				<nature type="string">Horror</nature>
+				<summary type="string">A corpse in rotted mail, risen to guard its tomb</summary>
+				<features type="string">Grave-dirt and rust; a cold blue light in empty sockets</features>
+				<drives type="string">Keep the living from the barrow; take back what was stolen</drives>
+				<tactics type="string">Stand at the threshold; strike without pain or fear; rise again until the barrow's power is broken</tactics>
+				<text type="formattedtext"><p><i>A corpse in rotted mail, risen to guard its tomb</i> — Dangerous Horror</p><p><b>Features:</b> Grave-dirt and rust; a cold blue light in empty sockets</p><p><b>Drives:</b> Keep the living from the barrow; take back what was stolen</p><p><b>Tactics:</b> Stand at the threshold; strike without pain or fear; rise again until the barrow's power is broken</p></text>
+			</barrowdead>
+			<cinderhound>
+				<name type="string">Cinder Hound</name>
+				<foe type="number">1</foe>
+				<game type="string">classic</game>
+				<rank type="string">dangerous</rank>
+				<nature type="string">Horror</nature>
+				<summary type="string">A hound of ash and coals that leaves burning prints</summary>
+				<features type="string">Smoke for breath; an ember glow under cracked hide</features>
+				<drives type="string">Hunt whatever its master names; burn what it cannot catch</drives>
+				<tactics type="string">Run down the fleeing; set the ground alight; break apart into ash when slain</tactics>
+				<text type="formattedtext"><p><i>A hound of ash and coals that leaves burning prints</i> — Dangerous Horror</p><p><b>Features:</b> Smoke for breath; an ember glow under cracked hide</p><p><b>Drives:</b> Hunt whatever its master names; burn what it cannot catch</p><p><b>Tactics:</b> Run down the fleeing; set the ground alight; break apart into ash when slain</p></text>
+			</cinderhound>
+			<theashcrownedwarden>
+				<name type="string">The Ash-Crowned Warden</name>
+				<foe type="number">1</foe>
+				<game type="string">classic</game>
+				<rank type="string">formidable</rank>
+				<nature type="string">Horror</nature>
+				<summary type="string">The barrow's first chieftain, bound to it by a vow he broke</summary>
+				<features type="string">A crown of blackened iron; embers where his heart was; a voice like settling coals</features>
+				<drives type="string">Keep his vow at last, whatever it costs the living; never be forgotten</drives>
+				<tactics type="string">Command his hounds; call the fire in the braziers; bargain with an oath, then demand it be kept</tactics>
+				<text type="formattedtext"><p><i>The barrow's first chieftain, bound to it by a vow he broke</i> — Formidable Horror</p><p><b>Features:</b> A crown of blackened iron; embers where his heart was; a voice like settling coals</p><p><b>Drives:</b> Keep his vow at last, whatever it costs the living; never be forgotten</p><p><b>Tactics:</b> Command his hounds; call the fire in the braziers; bargain with an oath, then demand it be kept</p></text>
+			</theashcrownedwarden>
+			<wildboar>
+				<name type="string">Wild Boar</name>
+				<foe type="number">1</foe>
+				<game type="string">classic</game>
+				<rank type="string">troublesome</rank>
+				<nature type="string">Animal</nature>
+				<summary type="string">Bristled, tusked and furious</summary>
+				<features type="string">Mud-caked hide; small red eyes</features>
+				<drives type="string">Defend its ground</drives>
+				<tactics type="string">Charge; gore; charge again</tactics>
+				<text type="formattedtext"><p><i>Bristled, tusked and furious</i> — Troublesome Animal</p><p><b>Features:</b> Mud-caked hide; small red eyes</p><p><b>Drives:</b> Defend its ground</p><p><b>Tactics:</b> Charge; gore; charge again</p></text>
+			</wildboar>
+			<hillgiant>
+				<name type="string">Hill Giant</name>
+				<foe type="number">1</foe>
+				<game type="string">classic</game>
+				<rank type="string">extreme</rank>
+				<nature type="string">Beast</nature>
+				<summary type="string">A towering hillfolk who wears a dead tree for a club</summary>
+				<features type="string">Patchwork furs; a voice like rockfall</features>
+				<drives type="string">Eat; gather shiny things; drive the small folk off its hills</drives>
+				<tactics type="string">Hurl stones; sweep the field with its club; grab and throw</tactics>
+				<text type="formattedtext"><p><i>A towering hillfolk who wears a dead tree for a club</i> — Extreme Beast</p><p><b>Features:</b> Patchwork furs; a voice like rockfall</p><p><b>Drives:</b> Eat; gather shiny things; drive the small folk off its hills</p><p><b>Tactics:</b> Hurl stones; sweep the field with its club; grab and throw</p></text>
+			</hillgiant>
+			<frostwyrm>
+				<name type="string">Frost Wyrm</name>
+				<foe type="number">1</foe>
+				<game type="string">classic</game>
+				<rank type="string">epic</rank>
+				<nature type="string">Beast</nature>
+				<summary type="string">A serpent of white scales coiled in the glacier's heart</summary>
+				<features type="string">Breath of killing cold; eyes like old ice</features>
+				<drives type="string">Sleep on its hoard; destroy whatever wakes it</drives>
+				<tactics type="string">Burrow through ice; freeze with its breath; crush in its coils</tactics>
+				<text type="formattedtext"><p><i>A serpent of white scales coiled in the glacier's heart</i> — Epic Beast</p><p><b>Features:</b> Breath of killing cold; eyes like old ice</p><p><b>Drives:</b> Sleep on its hoard; destroy whatever wakes it</p><p><b>Tactics:</b> Burrow through ice; freeze with its breath; crush in its coils</p></text>
+			</frostwyrm>
+			<paleflamecultist>
+				<name type="string">Pale Flame Cultist</name>
+				<foe type="number">1</foe>
+				<game type="string">classic</game>
+				<rank type="string">troublesome</rank>
+				<nature type="string">Ironlander</nature>
+				<summary type="string">A gaunt zealot who carries a lamp that burns without heat</summary>
+				<features type="string">Shaven head; ash smeared on the brow</features>
+				<drives type="string">Feed the pale flame; bring others to its light</drives>
+				<tactics type="string">Preach and distract; strike when backs are turned; die gladly</tactics>
+				<text type="formattedtext"><p><i>A gaunt zealot who carries a lamp that burns without heat</i> — Troublesome Ironlander</p><p><b>Features:</b> Shaven head; ash smeared on the brow</p><p><b>Drives:</b> Feed the pale flame; bring others to its light</p><p><b>Tactics:</b> Preach and distract; strike when backs are turned; die gladly</p></text>
+			</paleflamecultist>
+			<swarmofcrows>
+				<name type="string">Swarm of Crows</name>
+				<foe type="number">1</foe>
+				<game type="string">classic</game>
+				<rank type="string">troublesome</rank>
+				<nature type="string">Animal</nature>
+				<summary type="string">A screaming black cloud over the battlefield</summary>
+				<features type="string">A hundred beaks; the smell of carrion</features>
+				<drives type="string">Feast on the dead and the dying</drives>
+				<tactics type="string">Blind and confuse; scatter and return</tactics>
+				<text type="formattedtext"><p><i>A screaming black cloud over the battlefield</i> — Troublesome Animal</p><p><b>Features:</b> A hundred beaks; the smell of carrion</p><p><b>Drives:</b> Feast on the dead and the dying</p><p><b>Tactics:</b> Blind and confuse; scatter and return</p></text>
+			</swarmofcrows>
+		</category>
+	</npc>
+	<irondelve>
+		<category name="Themes">
+			<ancient>
+				<name type="string">Ancient</name>
+				<siteid type="string">delve_site_theme:delve/ancient</siteid>
+				<kind type="string">theme</kind>
+				<summary type="string">This place holds the secrets of a bygone age.</summary>
+				<features>
+					<id-00001>
+						<fromrange type="number">1</fromrange>
+						<torange type="number">4</torange>
+						<results>
+							<id-00001>
+								<result type="string">Evidence of lost knowledge</result>
+							</id-00001>
+						</results>
+					</id-00001>
+					<id-00002>
+						<fromrange type="number">5</fromrange>
+						<torange type="number">8</torange>
+						<results>
+							<id-00001>
+								<result type="string">Inscrutable relics</result>
+							</id-00001>
+						</results>
+					</id-00002>
+					<id-00003>
+						<fromrange type="number">9</fromrange>
+						<torange type="number">12</torange>
+						<results>
+							<id-00001>
+								<result type="string">Ancient artistry or craft</result>
+							</id-00001>
+						</results>
+					</id-00003>
+					<id-00004>
+						<fromrange type="number">13</fromrange>
+						<torange type="number">16</torange>
+						<results>
+							<id-00001>
+								<result type="string">Preserved corpses or fossils</result>
+							</id-00001>
+						</results>
+					</id-00004>
+					<id-00005>
+						<fromrange type="number">17</fromrange>
+						<torange type="number">20</torange>
+						<results>
+							<id-00001>
+								<result type="string">Visions of this place in another time</result>
+							</id-00001>
+						</results>
+					</id-00005>
+				</features>
+				<dangers>
+					<id-00001>
+						<fromrange type="number">1</fromrange>
+						<torange type="number">5</torange>
+						<results>
+							<id-00001>
+								<result type="string">Ancient trap</result>
+							</id-00001>
+						</results>
+					</id-00001>
+					<id-00002>
+						<fromrange type="number">6</fromrange>
+						<torange type="number">10</torange>
+						<results>
+							<id-00001>
+								<result type="string">Hazardous architecture or terrain</result>
+							</id-00001>
+						</results>
+					</id-00002>
+					<id-00003>
+						<fromrange type="number">11</fromrange>
+						<torange type="number">12</torange>
+						<results>
+							<id-00001>
+								<result type="string">Blocked or broken path</result>
+							</id-00001>
+						</results>
+					</id-00003>
+					<id-00004>
+						<fromrange type="number">13</fromrange>
+						<torange type="number">14</torange>
+						<results>
+							<id-00001>
+								<result type="string">Denizen protects an ancient secret</result>
+							</id-00001>
+						</results>
+					</id-00004>
+					<id-00005>
+						<fromrange type="number">15</fromrange>
+						<torange type="number">16</torange>
+						<results>
+							<id-00001>
+								<result type="string">Denizen reveres an ancient power</result>
+							</id-00001>
+						</results>
+					</id-00005>
+					<id-00006>
+						<fromrange type="number">17</fromrange>
+						<torange type="number">18</torange>
+						<results>
+							<id-00001>
+								<result type="string">Living relics of a lost age</result>
+							</id-00001>
+						</results>
+					</id-00006>
+					<id-00007>
+						<fromrange type="number">19</fromrange>
+						<torange type="number">20</torange>
+						<results>
+							<id-00001>
+								<result type="string">Ancient evil resurgent</result>
+							</id-00001>
+						</results>
+					</id-00007>
+					<id-00008>
+						<fromrange type="number">21</fromrange>
+						<torange type="number">22</torange>
+						<results>
+							<id-00001>
+								<result type="string">Dire warnings of a long-buried danger</result>
+							</id-00001>
+						</results>
+					</id-00008>
+					<id-00009>
+						<fromrange type="number">23</fromrange>
+						<torange type="number">24</torange>
+						<results>
+							<id-00001>
+								<result type="string">Ancient disease or contamination</result>
+							</id-00001>
+						</results>
+					</id-00009>
+					<id-00010>
+						<fromrange type="number">25</fromrange>
+						<torange type="number">26</torange>
+						<results>
+							<id-00001>
+								<result type="string">Artifact of terrible meaning or power</result>
+							</id-00001>
+						</results>
+					</id-00010>
+					<id-00011>
+						<fromrange type="number">27</fromrange>
+						<torange type="number">28</torange>
+						<results>
+							<id-00001>
+								<result type="string">Disturbing evidence of ancient wrongs</result>
+							</id-00001>
+						</results>
+					</id-00011>
+					<id-00012>
+						<fromrange type="number">29</fromrange>
+						<torange type="number">30</torange>
+						<results>
+							<id-00001>
+								<result type="string">Others seek power or knowledge</result>
+							</id-00001>
+						</results>
+					</id-00012>
+				</dangers>
+				<text type="formattedtext"><p><i>This place holds the secrets of a bygone age.</i> ### Features</p><list><li>1-4: Evidence of lost knowledge</li><li>5-8: Inscrutable relics</li><li>9-12: Ancient artistry or craft</li><li>13-16: Preserved corpses or fossils</li><li>17-20: Visions of this place in another time</li></list><h>Dangers</h><list><li>1-5: Ancient trap</li><li>6-10: Hazardous architecture or terrain</li><li>11-12: Blocked or broken path</li><li>13-14: Denizen protects an ancient secret</li><li>15-16: Denizen reveres an ancient power</li><li>17-18: Living relics of a lost age</li><li>19-20: Ancient evil resurgent</li><li>21-22: Dire warnings of a long-buried danger</li><li>23-24: Ancient disease or contamination</li><li>25-26: Artifact of terrible meaning or power</li><li>27-28: Disturbing evidence of ancient wrongs</li><li>29-30: Others seek power or knowledge</li></list></text>
+			</ancient>
+			<corrupted>
+				<name type="string">Corrupted</name>
+				<siteid type="string">delve_site_theme:delve/corrupted</siteid>
+				<kind type="string">theme</kind>
+				<summary type="string">This place is tainted by dark magic.</summary>
+				<features>
+					<id-00001>
+						<fromrange type="number">1</fromrange>
+						<torange type="number">4</torange>
+						<results>
+							<id-00001>
+								<result type="string">Mystic focus or conduit</result>
+							</id-00001>
+						</results>
+					</id-00001>
+					<id-00002>
+						<fromrange type="number">5</fromrange>
+						<torange type="number">8</torange>
+						<results>
+							<id-00001>
+								<result type="string">Strange environmental disturbances</result>
+							</id-00001>
+						</results>
+					</id-00002>
+					<id-00003>
+						<fromrange type="number">9</fromrange>
+						<torange type="number">12</torange>
+						<results>
+							<id-00001>
+								<result type="string">Mystic runes or markings</result>
+							</id-00001>
+						</results>
+					</id-00003>
+					<id-00004>
+						<fromrange type="number">13</fromrange>
+						<torange type="number">16</torange>
+						<results>
+							<id-00001>
+								<result type="string">Blight or decay</result>
+							</id-00001>
+						</results>
+					</id-00004>
+					<id-00005>
+						<fromrange type="number">17</fromrange>
+						<torange type="number">20</torange>
+						<results>
+							<id-00001>
+								<result type="string">Evidence of a foul ritual</result>
+							</id-00001>
+						</results>
+					</id-00005>
+				</features>
+				<dangers>
+					<id-00001>
+						<fromrange type="number">1</fromrange>
+						<torange type="number">5</torange>
+						<results>
+							<id-00001>
+								<result type="string">Denizen spawned from dark magic</result>
+							</id-00001>
+						</results>
+					</id-00001>
+					<id-00002>
+						<fromrange type="number">6</fromrange>
+						<torange type="number">10</torange>
+						<results>
+							<id-00001>
+								<result type="string">Denizen controls dark magic</result>
+							</id-00001>
+						</results>
+					</id-00002>
+					<id-00003>
+						<fromrange type="number">11</fromrange>
+						<torange type="number">12</torange>
+						<results>
+							<id-00001>
+								<result type="string">Denizen corrupted by dark magic</result>
+							</id-00001>
+						</results>
+					</id-00003>
+					<id-00004>
+						<fromrange type="number">13</fromrange>
+						<torange type="number">14</torange>
+						<results>
+							<id-00001>
+								<result type="string">Corruption marks you</result>
+							</id-00001>
+						</results>
+					</id-00004>
+					<id-00005>
+						<fromrange type="number">15</fromrange>
+						<torange type="number">16</torange>
+						<results>
+							<id-00001>
+								<result type="string">Innocents held in thrall</result>
+							</id-00001>
+						</results>
+					</id-00005>
+					<id-00006>
+						<fromrange type="number">17</fromrange>
+						<torange type="number">18</torange>
+						<results>
+							<id-00001>
+								<result type="string">Revelations of a terrible truth</result>
+							</id-00001>
+						</results>
+					</id-00006>
+					<id-00007>
+						<fromrange type="number">19</fromrange>
+						<torange type="number">20</torange>
+						<results>
+							<id-00001>
+								<result type="string">Mystic trap or trigger</result>
+							</id-00001>
+						</results>
+					</id-00007>
+					<id-00008>
+						<fromrange type="number">21</fromrange>
+						<torange type="number">22</torange>
+						<results>
+							<id-00001>
+								<result type="string">Mystic barrier or ward</result>
+							</id-00001>
+						</results>
+					</id-00008>
+					<id-00009>
+						<fromrange type="number">23</fromrange>
+						<torange type="number">24</torange>
+						<results>
+							<id-00001>
+								<result type="string">Illusions lead you astray</result>
+							</id-00001>
+						</results>
+					</id-00009>
+					<id-00010>
+						<fromrange type="number">25</fromrange>
+						<torange type="number">26</torange>
+						<results>
+							<id-00001>
+								<result type="string">Dark ritual in progress</result>
+							</id-00001>
+						</results>
+					</id-00010>
+					<id-00011>
+						<fromrange type="number">27</fromrange>
+						<torange type="number">28</torange>
+						<results>
+							<id-00001>
+								<result type="string">Lingering effects of a dark ritual</result>
+							</id-00001>
+						</results>
+					</id-00011>
+					<id-00012>
+						<fromrange type="number">29</fromrange>
+						<torange type="number">30</torange>
+						<results>
+							<id-00001>
+								<result type="string">Dread harbingers of a greater magic</result>
+							</id-00001>
+						</results>
+					</id-00012>
+				</dangers>
+				<text type="formattedtext"><p><i>This place is tainted by dark magic.</i> ### Features</p><list><li>1-4: Mystic focus or conduit</li><li>5-8: Strange environmental disturbances</li><li>9-12: Mystic runes or markings</li><li>13-16: Blight or decay</li><li>17-20: Evidence of a foul ritual</li></list><h>Dangers</h><list><li>1-5: Denizen spawned from dark magic</li><li>6-10: Denizen controls dark magic</li><li>11-12: Denizen corrupted by dark magic</li><li>13-14: Corruption marks you</li><li>15-16: Innocents held in thrall</li><li>17-18: Revelations of a terrible truth</li><li>19-20: Mystic trap or trigger</li><li>21-22: Mystic barrier or ward</li><li>23-24: Illusions lead you astray</li><li>25-26: Dark ritual in progress</li><li>27-28: Lingering effects of a dark ritual</li><li>29-30: Dread harbingers of a greater magic</li></list></text>
+			</corrupted>
+			<fortified>
+				<name type="string">Fortified</name>
+				<siteid type="string">delve_site_theme:delve/fortified</siteid>
+				<kind type="string">theme</kind>
+				<summary type="string">Foes defend this place against intruders.</summary>
+				<features>
+					<id-00001>
+						<fromrange type="number">1</fromrange>
+						<torange type="number">4</torange>
+						<results>
+							<id-00001>
+								<result type="string">Camp or quarters</result>
+							</id-00001>
+						</results>
+					</id-00001>
+					<id-00002>
+						<fromrange type="number">5</fromrange>
+						<torange type="number">8</torange>
+						<results>
+							<id-00001>
+								<result type="string">Guarded location</result>
+							</id-00001>
+						</results>
+					</id-00002>
+					<id-00003>
+						<fromrange type="number">9</fromrange>
+						<torange type="number">12</torange>
+						<results>
+							<id-00001>
+								<result type="string">Storage or repository</result>
+							</id-00001>
+						</results>
+					</id-00003>
+					<id-00004>
+						<fromrange type="number">13</fromrange>
+						<torange type="number">16</torange>
+						<results>
+							<id-00001>
+								<result type="string">Work or training area</result>
+							</id-00001>
+						</results>
+					</id-00004>
+					<id-00005>
+						<fromrange type="number">17</fromrange>
+						<torange type="number">20</torange>
+						<results>
+							<id-00001>
+								<result type="string">Command center or leadership</result>
+							</id-00001>
+						</results>
+					</id-00005>
+				</features>
+				<dangers>
+					<id-00001>
+						<fromrange type="number">1</fromrange>
+						<torange type="number">5</torange>
+						<results>
+							<id-00001>
+								<result type="string">Denizen patrols the area</result>
+							</id-00001>
+						</results>
+					</id-00001>
+					<id-00002>
+						<fromrange type="number">6</fromrange>
+						<torange type="number">10</torange>
+						<results>
+							<id-00001>
+								<result type="string">Denizen on guard</result>
+							</id-00001>
+						</results>
+					</id-00002>
+					<id-00003>
+						<fromrange type="number">11</fromrange>
+						<torange type="number">12</torange>
+						<results>
+							<id-00001>
+								<result type="string">Denizen ready to sound the alarm</result>
+							</id-00001>
+						</results>
+					</id-00003>
+					<id-00004>
+						<fromrange type="number">13</fromrange>
+						<torange type="number">14</torange>
+						<results>
+							<id-00001>
+								<result type="string">Denizen sets an ambush</result>
+							</id-00001>
+						</results>
+					</id-00004>
+					<id-00005>
+						<fromrange type="number">15</fromrange>
+						<torange type="number">16</torange>
+						<results>
+							<id-00001>
+								<result type="string">Denizen lures you into a trap</result>
+							</id-00001>
+						</results>
+					</id-00005>
+					<id-00006>
+						<fromrange type="number">17</fromrange>
+						<torange type="number">18</torange>
+						<results>
+							<id-00001>
+								<result type="string">Denizens converge on this area</result>
+							</id-00001>
+						</results>
+					</id-00006>
+					<id-00007>
+						<fromrange type="number">19</fromrange>
+						<torange type="number">20</torange>
+						<results>
+							<id-00001>
+								<result type="string">Pets or underlings</result>
+							</id-00001>
+						</results>
+					</id-00007>
+					<id-00008>
+						<fromrange type="number">21</fromrange>
+						<torange type="number">22</torange>
+						<results>
+							<id-00001>
+								<result type="string">Unexpected alliance revealed</result>
+							</id-00001>
+						</results>
+					</id-00008>
+					<id-00009>
+						<fromrange type="number">23</fromrange>
+						<torange type="number">24</torange>
+						<results>
+							<id-00001>
+								<result type="string">Nefarious plans revealed</result>
+							</id-00001>
+						</results>
+					</id-00009>
+					<id-00010>
+						<fromrange type="number">25</fromrange>
+						<torange type="number">26</torange>
+						<results>
+							<id-00001>
+								<result type="string">Unexpected leader revealed</result>
+							</id-00001>
+						</results>
+					</id-00010>
+					<id-00011>
+						<fromrange type="number">27</fromrange>
+						<torange type="number">28</torange>
+						<results>
+							<id-00001>
+								<result type="string">Trap</result>
+							</id-00001>
+						</results>
+					</id-00011>
+					<id-00012>
+						<fromrange type="number">29</fromrange>
+						<torange type="number">30</torange>
+						<results>
+							<id-00001>
+								<result type="string">Alarm trigger</result>
+							</id-00001>
+						</results>
+					</id-00012>
+				</dangers>
+				<text type="formattedtext"><p><i>Foes defend this place against intruders.</i> ### Features</p><list><li>1-4: Camp or quarters</li><li>5-8: Guarded location</li><li>9-12: Storage or repository</li><li>13-16: Work or training area</li><li>17-20: Command center or leadership</li></list><h>Dangers</h><list><li>1-5: Denizen patrols the area</li><li>6-10: Denizen on guard</li><li>11-12: Denizen ready to sound the alarm</li><li>13-14: Denizen sets an ambush</li><li>15-16: Denizen lures you into a trap</li><li>17-18: Denizens converge on this area</li><li>19-20: Pets or underlings</li><li>21-22: Unexpected alliance revealed</li><li>23-24: Nefarious plans revealed</li><li>25-26: Unexpected leader revealed</li><li>27-28: Trap</li><li>29-30: Alarm trigger</li></list></text>
+			</fortified>
+			<hallowed>
+				<name type="string">Hallowed</name>
+				<siteid type="string">delve_site_theme:delve/hallowed</siteid>
+				<kind type="string">theme</kind>
+				<summary type="string">The faithful worship here.</summary>
+				<features>
+					<id-00001>
+						<fromrange type="number">1</fromrange>
+						<torange type="number">4</torange>
+						<results>
+							<id-00001>
+								<result type="string">Temple or altar</result>
+							</id-00001>
+						</results>
+					</id-00001>
+					<id-00002>
+						<fromrange type="number">5</fromrange>
+						<torange type="number">8</torange>
+						<results>
+							<id-00001>
+								<result type="string">Offerings or atonements</result>
+							</id-00001>
+						</results>
+					</id-00002>
+					<id-00003>
+						<fromrange type="number">9</fromrange>
+						<torange type="number">12</torange>
+						<results>
+							<id-00001>
+								<result type="string">Religious relic or idol</result>
+							</id-00001>
+						</results>
+					</id-00003>
+					<id-00004>
+						<fromrange type="number">13</fromrange>
+						<torange type="number">16</torange>
+						<results>
+							<id-00001>
+								<result type="string">Consecrated ground</result>
+							</id-00001>
+						</results>
+					</id-00004>
+					<id-00005>
+						<fromrange type="number">17</fromrange>
+						<torange type="number">20</torange>
+						<results>
+							<id-00001>
+								<result type="string">Dwellings or gathering place</result>
+							</id-00001>
+						</results>
+					</id-00005>
+				</features>
+				<dangers>
+					<id-00001>
+						<fromrange type="number">1</fromrange>
+						<torange type="number">5</torange>
+						<results>
+							<id-00001>
+								<result type="string">Denizen defends their sanctum</result>
+							</id-00001>
+						</results>
+					</id-00001>
+					<id-00002>
+						<fromrange type="number">6</fromrange>
+						<torange type="number">10</torange>
+						<results>
+							<id-00001>
+								<result type="string">Denizen enacts the will of their god</result>
+							</id-00001>
+						</results>
+					</id-00002>
+					<id-00003>
+						<fromrange type="number">11</fromrange>
+						<torange type="number">12</torange>
+						<results>
+							<id-00001>
+								<result type="string">Denizen seeks martyrdom</result>
+							</id-00001>
+						</results>
+					</id-00003>
+					<id-00004>
+						<fromrange type="number">13</fromrange>
+						<torange type="number">14</torange>
+						<results>
+							<id-00001>
+								<result type="string">Secret of the faith is revealed</result>
+							</id-00001>
+						</results>
+					</id-00004>
+					<id-00005>
+						<fromrange type="number">15</fromrange>
+						<torange type="number">16</torange>
+						<results>
+							<id-00001>
+								<result type="string">Greater purpose is revealed</result>
+							</id-00001>
+						</results>
+					</id-00005>
+					<id-00006>
+						<fromrange type="number">17</fromrange>
+						<torange type="number">18</torange>
+						<results>
+							<id-00001>
+								<result type="string">Unexpected disciples are revealed</result>
+							</id-00001>
+						</results>
+					</id-00006>
+					<id-00007>
+						<fromrange type="number">19</fromrange>
+						<torange type="number">20</torange>
+						<results>
+							<id-00001>
+								<result type="string">Divine manifestations</result>
+							</id-00001>
+						</results>
+					</id-00007>
+					<id-00008>
+						<fromrange type="number">21</fromrange>
+						<torange type="number">22</torange>
+						<results>
+							<id-00001>
+								<result type="string">Aspect of the faith beguiles you</result>
+							</id-00001>
+						</results>
+					</id-00008>
+					<id-00009>
+						<fromrange type="number">23</fromrange>
+						<torange type="number">24</torange>
+						<results>
+							<id-00001>
+								<result type="string">Unexpected leader is revealed</result>
+							</id-00001>
+						</results>
+					</id-00009>
+					<id-00010>
+						<fromrange type="number">25</fromrange>
+						<torange type="number">26</torange>
+						<results>
+							<id-00001>
+								<result type="string">Embodiment of a god or myth</result>
+							</id-00001>
+						</results>
+					</id-00010>
+					<id-00011>
+						<fromrange type="number">27</fromrange>
+						<torange type="number">28</torange>
+						<results>
+							<id-00001>
+								<result type="string">Protective ward or barrier</result>
+							</id-00001>
+						</results>
+					</id-00011>
+					<id-00012>
+						<fromrange type="number">29</fromrange>
+						<torange type="number">30</torange>
+						<results>
+							<id-00001>
+								<result type="string">Prophecies reveal a dark fate</result>
+							</id-00001>
+						</results>
+					</id-00012>
+				</dangers>
+				<text type="formattedtext"><p><i>The faithful worship here.</i> ### Features</p><list><li>1-4: Temple or altar</li><li>5-8: Offerings or atonements</li><li>9-12: Religious relic or idol</li><li>13-16: Consecrated ground</li><li>17-20: Dwellings or gathering place</li></list><h>Dangers</h><list><li>1-5: Denizen defends their sanctum</li><li>6-10: Denizen enacts the will of their god</li><li>11-12: Denizen seeks martyrdom</li><li>13-14: Secret of the faith is revealed</li><li>15-16: Greater purpose is revealed</li><li>17-18: Unexpected disciples are revealed</li><li>19-20: Divine manifestations</li><li>21-22: Aspect of the faith beguiles you</li><li>23-24: Unexpected leader is revealed</li><li>25-26: Embodiment of a god or myth</li><li>27-28: Protective ward or barrier</li><li>29-30: Prophecies reveal a dark fate</li></list></text>
+			</hallowed>
+			<haunted>
+				<name type="string">Haunted</name>
+				<siteid type="string">delve_site_theme:delve/haunted</siteid>
+				<kind type="string">theme</kind>
+				<summary type="string">Restless spirits are bound to this place.</summary>
+				<features>
+					<id-00001>
+						<fromrange type="number">1</fromrange>
+						<torange type="number">4</torange>
+						<results>
+							<id-00001>
+								<result type="string">Tomb or burial site</result>
+							</id-00001>
+						</results>
+					</id-00001>
+					<id-00002>
+						<fromrange type="number">5</fromrange>
+						<torange type="number">8</torange>
+						<results>
+							<id-00001>
+								<result type="string">Blood was spilled here</result>
+							</id-00001>
+						</results>
+					</id-00002>
+					<id-00003>
+						<fromrange type="number">9</fromrange>
+						<torange type="number">12</torange>
+						<results>
+							<id-00001>
+								<result type="string">Unnatural mists or darkness</result>
+							</id-00001>
+						</results>
+					</id-00003>
+					<id-00004>
+						<fromrange type="number">13</fromrange>
+						<torange type="number">16</torange>
+						<results>
+							<id-00001>
+								<result type="string">Messages from beyond the grave</result>
+							</id-00001>
+						</results>
+					</id-00004>
+					<id-00005>
+						<fromrange type="number">17</fromrange>
+						<torange type="number">20</torange>
+						<results>
+							<id-00001>
+								<result type="string">Apparitions of a person or event</result>
+							</id-00001>
+						</results>
+					</id-00005>
+				</features>
+				<dangers>
+					<id-00001>
+						<fromrange type="number">1</fromrange>
+						<torange type="number">5</torange>
+						<results>
+							<id-00001>
+								<result type="string">Denizen haunts this area</result>
+							</id-00001>
+						</results>
+					</id-00001>
+					<id-00002>
+						<fromrange type="number">6</fromrange>
+						<torange type="number">10</torange>
+						<results>
+							<id-00001>
+								<result type="string">Unsettling sounds or foreboding signs</result>
+							</id-00001>
+						</results>
+					</id-00002>
+					<id-00003>
+						<fromrange type="number">11</fromrange>
+						<torange type="number">12</torange>
+						<results>
+							<id-00001>
+								<result type="string">Denizen attacks without warning</result>
+							</id-00001>
+						</results>
+					</id-00003>
+					<id-00004>
+						<fromrange type="number">13</fromrange>
+						<torange type="number">14</torange>
+						<results>
+							<id-00001>
+								<result type="string">Denizen makes a costly demand</result>
+							</id-00001>
+						</results>
+					</id-00004>
+					<id-00005>
+						<fromrange type="number">15</fromrange>
+						<torange type="number">16</torange>
+						<results>
+							<id-00001>
+								<result type="string">Denizen seizes your body or mind</result>
+							</id-00001>
+						</results>
+					</id-00005>
+					<id-00006>
+						<fromrange type="number">17</fromrange>
+						<torange type="number">18</torange>
+						<results>
+							<id-00001>
+								<result type="string">Denizen taunts or lures you</result>
+							</id-00001>
+						</results>
+					</id-00006>
+					<id-00007>
+						<fromrange type="number">19</fromrange>
+						<torange type="number">20</torange>
+						<results>
+							<id-00001>
+								<result type="string">A disturbing truth is revealed</result>
+							</id-00001>
+						</results>
+					</id-00007>
+					<id-00008>
+						<fromrange type="number">21</fromrange>
+						<torange type="number">22</torange>
+						<results>
+							<id-00001>
+								<result type="string">Frightening visions</result>
+							</id-00001>
+						</results>
+					</id-00008>
+					<id-00009>
+						<fromrange type="number">23</fromrange>
+						<torange type="number">24</torange>
+						<results>
+							<id-00001>
+								<result type="string">The environment is used against you</result>
+							</id-00001>
+						</results>
+					</id-00009>
+					<id-00010>
+						<fromrange type="number">25</fromrange>
+						<torange type="number">26</torange>
+						<results>
+							<id-00001>
+								<result type="string">Trickery leads you astray</result>
+							</id-00001>
+						</results>
+					</id-00010>
+					<id-00011>
+						<fromrange type="number">27</fromrange>
+						<torange type="number">28</torange>
+						<results>
+							<id-00001>
+								<result type="string">True nature of this place is revealed</result>
+							</id-00001>
+						</results>
+					</id-00011>
+					<id-00012>
+						<fromrange type="number">29</fromrange>
+						<torange type="number">30</torange>
+						<results>
+							<id-00001>
+								<result type="string">Sudden, shocking manifestation</result>
+							</id-00001>
+						</results>
+					</id-00012>
+				</dangers>
+				<text type="formattedtext"><p><i>Restless spirits are bound to this place.</i> ### Features</p><list><li>1-4: Tomb or burial site</li><li>5-8: Blood was spilled here</li><li>9-12: Unnatural mists or darkness</li><li>13-16: Messages from beyond the grave</li><li>17-20: Apparitions of a person or event</li></list><h>Dangers</h><list><li>1-5: Denizen haunts this area</li><li>6-10: Unsettling sounds or foreboding signs</li><li>11-12: Denizen attacks without warning</li><li>13-14: Denizen makes a costly demand</li><li>15-16: Denizen seizes your body or mind</li><li>17-18: Denizen taunts or lures you</li><li>19-20: A disturbing truth is revealed</li><li>21-22: Frightening visions</li><li>23-24: The environment is used against you</li><li>25-26: Trickery leads you astray</li><li>27-28: True nature of this place is revealed</li><li>29-30: Sudden, shocking manifestation</li></list></text>
+			</haunted>
+			<infested>
+				<name type="string">Infested</name>
+				<siteid type="string">delve_site_theme:delve/infested</siteid>
+				<kind type="string">theme</kind>
+				<summary type="string">Foul creatures dwell here.</summary>
+				<features>
+					<id-00001>
+						<fromrange type="number">1</fromrange>
+						<torange type="number">4</torange>
+						<results>
+							<id-00001>
+								<result type="string">Inhabited nest</result>
+							</id-00001>
+						</results>
+					</id-00001>
+					<id-00002>
+						<fromrange type="number">5</fromrange>
+						<torange type="number">8</torange>
+						<results>
+							<id-00001>
+								<result type="string">Abandoned nest</result>
+							</id-00001>
+						</results>
+					</id-00002>
+					<id-00003>
+						<fromrange type="number">9</fromrange>
+						<torange type="number">12</torange>
+						<results>
+							<id-00001>
+								<result type="string">Ravaged terrain or architecture</result>
+							</id-00001>
+						</results>
+					</id-00003>
+					<id-00004>
+						<fromrange type="number">13</fromrange>
+						<torange type="number">16</torange>
+						<results>
+							<id-00001>
+								<result type="string">Remains or carrion</result>
+							</id-00001>
+						</results>
+					</id-00004>
+					<id-00005>
+						<fromrange type="number">17</fromrange>
+						<torange type="number">20</torange>
+						<results>
+							<id-00001>
+								<result type="string">Hoarded food</result>
+							</id-00001>
+						</results>
+					</id-00005>
+				</features>
+				<dangers>
+					<id-00001>
+						<fromrange type="number">1</fromrange>
+						<torange type="number">5</torange>
+						<results>
+							<id-00001>
+								<result type="string">Denizens swarm and attack</result>
+							</id-00001>
+						</results>
+					</id-00001>
+					<id-00002>
+						<fromrange type="number">6</fromrange>
+						<torange type="number">10</torange>
+						<results>
+							<id-00001>
+								<result type="string">Toxic or sickening environment</result>
+							</id-00001>
+						</results>
+					</id-00002>
+					<id-00003>
+						<fromrange type="number">11</fromrange>
+						<torange type="number">12</torange>
+						<results>
+							<id-00001>
+								<result type="string">Denizen stalks you</result>
+							</id-00001>
+						</results>
+					</id-00003>
+					<id-00004>
+						<fromrange type="number">13</fromrange>
+						<torange type="number">14</torange>
+						<results>
+							<id-00001>
+								<result type="string">Denizen takes or destroys something</result>
+							</id-00001>
+						</results>
+					</id-00004>
+					<id-00005>
+						<fromrange type="number">15</fromrange>
+						<torange type="number">16</torange>
+						<results>
+							<id-00001>
+								<result type="string">Denizen reveals surprising cleverness</result>
+							</id-00001>
+						</results>
+					</id-00005>
+					<id-00006>
+						<fromrange type="number">17</fromrange>
+						<torange type="number">18</torange>
+						<results>
+							<id-00001>
+								<result type="string">Denizen guided by a greater threat</result>
+							</id-00001>
+						</results>
+					</id-00006>
+					<id-00007>
+						<fromrange type="number">19</fromrange>
+						<torange type="number">20</torange>
+						<results>
+							<id-00001>
+								<result type="string">Denizen blocks the path</result>
+							</id-00001>
+						</results>
+					</id-00007>
+					<id-00008>
+						<fromrange type="number">21</fromrange>
+						<torange type="number">22</torange>
+						<results>
+							<id-00001>
+								<result type="string">Denizen funnels you down a new path</result>
+							</id-00001>
+						</results>
+					</id-00008>
+					<id-00009>
+						<fromrange type="number">23</fromrange>
+						<torange type="number">24</torange>
+						<results>
+							<id-00001>
+								<result type="string">Denizen undermines the path</result>
+							</id-00001>
+						</results>
+					</id-00009>
+					<id-00010>
+						<fromrange type="number">25</fromrange>
+						<torange type="number">26</torange>
+						<results>
+							<id-00001>
+								<result type="string">Denizen lays in wait</result>
+							</id-00001>
+						</results>
+					</id-00010>
+					<id-00011>
+						<fromrange type="number">27</fromrange>
+						<torange type="number">28</torange>
+						<results>
+							<id-00001>
+								<result type="string">Trap or snare</result>
+							</id-00001>
+						</results>
+					</id-00011>
+					<id-00012>
+						<fromrange type="number">29</fromrange>
+						<torange type="number">30</torange>
+						<results>
+							<id-00001>
+								<result type="string">Victim’s horrible fate is revealed</result>
+							</id-00001>
+						</results>
+					</id-00012>
+				</dangers>
+				<text type="formattedtext"><p><i>Foul creatures dwell here.</i> ### Features</p><list><li>1-4: Inhabited nest</li><li>5-8: Abandoned nest</li><li>9-12: Ravaged terrain or architecture</li><li>13-16: Remains or carrion</li><li>17-20: Hoarded food</li></list><h>Dangers</h><list><li>1-5: Denizens swarm and attack</li><li>6-10: Toxic or sickening environment</li><li>11-12: Denizen stalks you</li><li>13-14: Denizen takes or destroys something</li><li>15-16: Denizen reveals surprising cleverness</li><li>17-18: Denizen guided by a greater threat</li><li>19-20: Denizen blocks the path</li><li>21-22: Denizen funnels you down a new path</li><li>23-24: Denizen undermines the path</li><li>25-26: Denizen lays in wait</li><li>27-28: Trap or snare</li><li>29-30: Victim’s horrible fate is revealed</li></list></text>
+			</infested>
+			<ravaged>
+				<name type="string">Ravaged</name>
+				<siteid type="string">delve_site_theme:delve/ravaged</siteid>
+				<kind type="string">theme</kind>
+				<summary type="string">Time, disaster, or strife have taken their toll.</summary>
+				<features>
+					<id-00001>
+						<fromrange type="number">1</fromrange>
+						<torange type="number">4</torange>
+						<results>
+							<id-00001>
+								<result type="string">Path of destruction</result>
+							</id-00001>
+						</results>
+					</id-00001>
+					<id-00002>
+						<fromrange type="number">5</fromrange>
+						<torange type="number">8</torange>
+						<results>
+							<id-00001>
+								<result type="string">Abandoned or ruined dwelling</result>
+							</id-00001>
+						</results>
+					</id-00002>
+					<id-00003>
+						<fromrange type="number">9</fromrange>
+						<torange type="number">12</torange>
+						<results>
+							<id-00001>
+								<result type="string">Untouched or preserved area</result>
+							</id-00001>
+						</results>
+					</id-00003>
+					<id-00004>
+						<fromrange type="number">13</fromrange>
+						<torange type="number">16</torange>
+						<results>
+							<id-00001>
+								<result type="string">Traces of what was lost</result>
+							</id-00001>
+						</results>
+					</id-00004>
+					<id-00005>
+						<fromrange type="number">17</fromrange>
+						<torange type="number">20</torange>
+						<results>
+							<id-00001>
+								<result type="string">Ill-fated victims</result>
+							</id-00001>
+						</results>
+					</id-00005>
+				</features>
+				<dangers>
+					<id-00001>
+						<fromrange type="number">1</fromrange>
+						<torange type="number">5</torange>
+						<results>
+							<id-00001>
+								<result type="string">Precarious architecture or terrain</result>
+							</id-00001>
+						</results>
+					</id-00001>
+					<id-00002>
+						<fromrange type="number">6</fromrange>
+						<torange type="number">10</torange>
+						<results>
+							<id-00001>
+								<result type="string">Imminent collapse or destruction</result>
+							</id-00001>
+						</results>
+					</id-00002>
+					<id-00003>
+						<fromrange type="number">11</fromrange>
+						<torange type="number">12</torange>
+						<results>
+							<id-00001>
+								<result type="string">Path undermined</result>
+							</id-00001>
+						</results>
+					</id-00003>
+					<id-00004>
+						<fromrange type="number">13</fromrange>
+						<torange type="number">14</torange>
+						<results>
+							<id-00001>
+								<result type="string">Blocked or broken path</result>
+							</id-00001>
+						</results>
+					</id-00004>
+					<id-00005>
+						<fromrange type="number">15</fromrange>
+						<torange type="number">16</torange>
+						<results>
+							<id-00001>
+								<result type="string">Vestiges of a destructive force</result>
+							</id-00001>
+						</results>
+					</id-00005>
+					<id-00006>
+						<fromrange type="number">17</fromrange>
+						<torange type="number">18</torange>
+						<results>
+							<id-00001>
+								<result type="string">Unexpected environmental threat</result>
+							</id-00001>
+						</results>
+					</id-00006>
+					<id-00007>
+						<fromrange type="number">19</fromrange>
+						<torange type="number">20</torange>
+						<results>
+							<id-00001>
+								<result type="string">Echoes of a troubling past</result>
+							</id-00001>
+						</results>
+					</id-00007>
+					<id-00008>
+						<fromrange type="number">21</fromrange>
+						<torange type="number">22</torange>
+						<results>
+							<id-00001>
+								<result type="string">Signs of a horrible fate</result>
+							</id-00001>
+						</results>
+					</id-00008>
+					<id-00009>
+						<fromrange type="number">23</fromrange>
+						<torange type="number">24</torange>
+						<results>
+							<id-00001>
+								<result type="string">Denizen seeks retribution</result>
+							</id-00001>
+						</results>
+					</id-00009>
+					<id-00010>
+						<fromrange type="number">25</fromrange>
+						<torange type="number">26</torange>
+						<results>
+							<id-00001>
+								<result type="string">Denizen leverages the environment</result>
+							</id-00001>
+						</results>
+					</id-00010>
+					<id-00011>
+						<fromrange type="number">27</fromrange>
+						<torange type="number">28</torange>
+						<results>
+							<id-00001>
+								<result type="string">Denizen restores what was lost</result>
+							</id-00001>
+						</results>
+					</id-00011>
+					<id-00012>
+						<fromrange type="number">29</fromrange>
+						<torange type="number">30</torange>
+						<results>
+							<id-00001>
+								<result type="string">Ravages return anew</result>
+							</id-00001>
+						</results>
+					</id-00012>
+				</dangers>
+				<text type="formattedtext"><p><i>Time, disaster, or strife have taken their toll.</i> ### Features</p><list><li>1-4: Path of destruction</li><li>5-8: Abandoned or ruined dwelling</li><li>9-12: Untouched or preserved area</li><li>13-16: Traces of what was lost</li><li>17-20: Ill-fated victims</li></list><h>Dangers</h><list><li>1-5: Precarious architecture or terrain</li><li>6-10: Imminent collapse or destruction</li><li>11-12: Path undermined</li><li>13-14: Blocked or broken path</li><li>15-16: Vestiges of a destructive force</li><li>17-18: Unexpected environmental threat</li><li>19-20: Echoes of a troubling past</li><li>21-22: Signs of a horrible fate</li><li>23-24: Denizen seeks retribution</li><li>25-26: Denizen leverages the environment</li><li>27-28: Denizen restores what was lost</li><li>29-30: Ravages return anew</li></list></text>
+			</ravaged>
+			<wild>
+				<name type="string">Wild</name>
+				<siteid type="string">delve_site_theme:delve/wild</siteid>
+				<kind type="string">theme</kind>
+				<summary type="string">Nature prevails in this place.</summary>
+				<features>
+					<id-00001>
+						<fromrange type="number">1</fromrange>
+						<torange type="number">4</torange>
+						<results>
+							<id-00001>
+								<result type="string">Denizen’s lair</result>
+							</id-00001>
+						</results>
+					</id-00001>
+					<id-00002>
+						<fromrange type="number">5</fromrange>
+						<torange type="number">8</torange>
+						<results>
+							<id-00001>
+								<result type="string">Territorial markings</result>
+							</id-00001>
+						</results>
+					</id-00002>
+					<id-00003>
+						<fromrange type="number">9</fromrange>
+						<torange type="number">12</torange>
+						<results>
+							<id-00001>
+								<result type="string">Impressive flora or fauna</result>
+							</id-00001>
+						</results>
+					</id-00003>
+					<id-00004>
+						<fromrange type="number">13</fromrange>
+						<torange type="number">16</torange>
+						<results>
+							<id-00001>
+								<result type="string">Hunting ground or watering hole</result>
+							</id-00001>
+						</results>
+					</id-00004>
+					<id-00005>
+						<fromrange type="number">17</fromrange>
+						<torange type="number">20</torange>
+						<results>
+							<id-00001>
+								<result type="string">Remains or carrion</result>
+							</id-00001>
+						</results>
+					</id-00005>
+				</features>
+				<dangers>
+					<id-00001>
+						<fromrange type="number">1</fromrange>
+						<torange type="number">5</torange>
+						<results>
+							<id-00001>
+								<result type="string">Denizen hunts</result>
+							</id-00001>
+						</results>
+					</id-00001>
+					<id-00002>
+						<fromrange type="number">6</fromrange>
+						<torange type="number">10</torange>
+						<results>
+							<id-00001>
+								<result type="string">Denizen strikes without warning</result>
+							</id-00001>
+						</results>
+					</id-00002>
+					<id-00003>
+						<fromrange type="number">11</fromrange>
+						<torange type="number">12</torange>
+						<results>
+							<id-00001>
+								<result type="string">Denizen leverages the environment</result>
+							</id-00001>
+						</results>
+					</id-00003>
+					<id-00004>
+						<fromrange type="number">13</fromrange>
+						<torange type="number">14</torange>
+						<results>
+							<id-00001>
+								<result type="string">Denizen wields unexpected abilities</result>
+							</id-00001>
+						</results>
+					</id-00004>
+					<id-00005>
+						<fromrange type="number">15</fromrange>
+						<torange type="number">16</torange>
+						<results>
+							<id-00001>
+								<result type="string">Denizen guided by a greater threat</result>
+							</id-00001>
+						</results>
+					</id-00005>
+					<id-00006>
+						<fromrange type="number">17</fromrange>
+						<torange type="number">18</torange>
+						<results>
+							<id-00001>
+								<result type="string">Denizen protects something</result>
+							</id-00001>
+						</results>
+					</id-00006>
+					<id-00007>
+						<fromrange type="number">19</fromrange>
+						<torange type="number">20</torange>
+						<results>
+							<id-00001>
+								<result type="string">Hazardous terrain</result>
+							</id-00001>
+						</results>
+					</id-00007>
+					<id-00008>
+						<fromrange type="number">21</fromrange>
+						<torange type="number">22</torange>
+						<results>
+							<id-00001>
+								<result type="string">Weather or environmental threat</result>
+							</id-00001>
+						</results>
+					</id-00008>
+					<id-00009>
+						<fromrange type="number">23</fromrange>
+						<torange type="number">24</torange>
+						<results>
+							<id-00001>
+								<result type="string">Benign aspect becomes a threat</result>
+							</id-00001>
+						</results>
+					</id-00009>
+					<id-00010>
+						<fromrange type="number">25</fromrange>
+						<torange type="number">26</torange>
+						<results>
+							<id-00001>
+								<result type="string">Overzealous hunter</result>
+							</id-00001>
+						</results>
+					</id-00010>
+					<id-00011>
+						<fromrange type="number">27</fromrange>
+						<torange type="number">28</torange>
+						<results>
+							<id-00001>
+								<result type="string">Disturbing evidence of a victim’s fate</result>
+							</id-00001>
+						</results>
+					</id-00011>
+					<id-00012>
+						<fromrange type="number">29</fromrange>
+						<torange type="number">30</torange>
+						<results>
+							<id-00001>
+								<result type="string">Ill-fated victim in danger</result>
+							</id-00001>
+						</results>
+					</id-00012>
+				</dangers>
+				<text type="formattedtext"><p><i>Nature prevails in this place.</i> ### Features</p><list><li>1-4: Denizen’s lair</li><li>5-8: Territorial markings</li><li>9-12: Impressive flora or fauna</li><li>13-16: Hunting ground or watering hole</li><li>17-20: Remains or carrion</li></list><h>Dangers</h><list><li>1-5: Denizen hunts</li><li>6-10: Denizen strikes without warning</li><li>11-12: Denizen leverages the environment</li><li>13-14: Denizen wields unexpected abilities</li><li>15-16: Denizen guided by a greater threat</li><li>17-18: Denizen protects something</li><li>19-20: Hazardous terrain</li><li>21-22: Weather or environmental threat</li><li>23-24: Benign aspect becomes a threat</li><li>25-26: Overzealous hunter</li><li>27-28: Disturbing evidence of a victim’s fate</li><li>29-30: Ill-fated victim in danger</li></list></text>
+			</wild>
+		</category>
+		<category name="Domains">
+			<barrow>
+				<name type="string">Barrow</name>
+				<siteid type="string">delve_site_domain:delve/barrow</siteid>
+				<kind type="string">domain</kind>
+				<summary type="string">The dead are enshrined here.</summary>
+				<features>
+					<id-00001>
+						<fromrange type="number">21</fromrange>
+						<torange type="number">43</torange>
+						<results>
+							<id-00001>
+								<result type="string">Burial chambers</result>
+							</id-00001>
+						</results>
+					</id-00001>
+					<id-00002>
+						<fromrange type="number">44</fromrange>
+						<torange type="number">56</torange>
+						<results>
+							<id-00001>
+								<result type="string">Maze of narrow passages</result>
+							</id-00001>
+						</results>
+					</id-00002>
+					<id-00003>
+						<fromrange type="number">57</fromrange>
+						<torange type="number">64</torange>
+						<results>
+							<id-00001>
+								<result type="string">Shrine</result>
+							</id-00001>
+						</results>
+					</id-00003>
+					<id-00004>
+						<fromrange type="number">65</fromrange>
+						<torange type="number">68</torange>
+						<results>
+							<id-00001>
+								<result type="string">Stately vault</result>
+							</id-00001>
+						</results>
+					</id-00004>
+					<id-00005>
+						<fromrange type="number">69</fromrange>
+						<torange type="number">72</torange>
+						<results>
+							<id-00001>
+								<result type="string">Offerings to the dead</result>
+							</id-00001>
+						</results>
+					</id-00005>
+					<id-00006>
+						<fromrange type="number">73</fromrange>
+						<torange type="number">76</torange>
+						<results>
+							<id-00001>
+								<result type="string">Statuary or tapestries</result>
+							</id-00001>
+						</results>
+					</id-00006>
+					<id-00007>
+						<fromrange type="number">77</fromrange>
+						<torange type="number">80</torange>
+						<results>
+							<id-00001>
+								<result type="string">Remains of a grave robber</result>
+							</id-00001>
+						</results>
+					</id-00007>
+					<id-00008>
+						<fromrange type="number">81</fromrange>
+						<torange type="number">84</torange>
+						<results>
+							<id-00001>
+								<result type="string">Mass grave</result>
+							</id-00001>
+						</results>
+					</id-00008>
+					<id-00009>
+						<fromrange type="number">85</fromrange>
+						<torange type="number">88</torange>
+						<results>
+							<id-00001>
+								<result type="string">Exhumed corpses</result>
+							</id-00001>
+						</results>
+					</id-00009>
+					<id-00010>
+						<fromrange type="number">89</fromrange>
+						<torange type="number">98</torange>
+						<results>
+							<id-00001>
+								<result type="string">Something unusual or unexpected</result>
+							</id-00001>
+						</results>
+					</id-00010>
+					<id-00011>
+						<fromrange type="number">99</fromrange>
+						<torange type="number">99</torange>
+						<results>
+							<id-00001>
+								<result type="string">You transition into a new theme</result>
+							</id-00001>
+						</results>
+					</id-00011>
+					<id-00012>
+						<fromrange type="number">100</fromrange>
+						<torange type="number">100</torange>
+						<results>
+							<id-00001>
+								<result type="string">You transition into a new domain</result>
+							</id-00001>
+						</results>
+					</id-00012>
+				</features>
+				<dangers>
+					<id-00001>
+						<fromrange type="number">31</fromrange>
+						<torange type="number">33</torange>
+						<results>
+							<id-00001>
+								<result type="string">Denizen guards this area</result>
+							</id-00001>
+						</results>
+					</id-00001>
+					<id-00002>
+						<fromrange type="number">34</fromrange>
+						<torange type="number">36</torange>
+						<results>
+							<id-00001>
+								<result type="string">Trap</result>
+							</id-00001>
+						</results>
+					</id-00002>
+					<id-00003>
+						<fromrange type="number">37</fromrange>
+						<torange type="number">39</torange>
+						<results>
+							<id-00001>
+								<result type="string">Death makes its presence known</result>
+							</id-00001>
+						</results>
+					</id-00003>
+					<id-00004>
+						<fromrange type="number">40</fromrange>
+						<torange type="number">42</torange>
+						<results>
+							<id-00001>
+								<result type="string">Crumbling architecture</result>
+							</id-00001>
+						</results>
+					</id-00004>
+					<id-00005>
+						<fromrange type="number">43</fromrange>
+						<torange type="number">45</torange>
+						<results>
+							<id-00001>
+								<result type="string">Grave goods with hidden dangers</result>
+							</id-00001>
+						</results>
+					</id-00005>
+				</dangers>
+				<text type="formattedtext"><p><i>The dead are enshrined here.</i> ### Features</p><list><li>21-43: Burial chambers</li><li>44-56: Maze of narrow passages</li><li>57-64: Shrine</li><li>65-68: Stately vault</li><li>69-72: Offerings to the dead</li><li>73-76: Statuary or tapestries</li><li>77-80: Remains of a grave robber</li><li>81-84: Mass grave</li><li>85-88: Exhumed corpses</li><li>89-98: Something unusual or unexpected</li><li>99-99: You transition into a new theme</li><li>100-100: You transition into a new domain</li></list><h>Dangers</h><list><li>31-33: Denizen guards this area</li><li>34-36: Trap</li><li>37-39: Death makes its presence known</li><li>40-42: Crumbling architecture</li><li>43-45: Grave goods with hidden dangers</li></list></text>
+			</barrow>
+			<cavern>
+				<name type="string">Cavern</name>
+				<siteid type="string">delve_site_domain:delve/cavern</siteid>
+				<kind type="string">domain</kind>
+				<summary type="string">A place of stone and darkness.</summary>
+				<features>
+					<id-00001>
+						<fromrange type="number">21</fromrange>
+						<torange type="number">43</torange>
+						<results>
+							<id-00001>
+								<result type="string">Twisting passages</result>
+							</id-00001>
+						</results>
+					</id-00001>
+					<id-00002>
+						<fromrange type="number">44</fromrange>
+						<torange type="number">56</torange>
+						<results>
+							<id-00001>
+								<result type="string">Cramped caves</result>
+							</id-00001>
+						</results>
+					</id-00002>
+					<id-00003>
+						<fromrange type="number">57</fromrange>
+						<torange type="number">64</torange>
+						<results>
+							<id-00001>
+								<result type="string">Vast chamber</result>
+							</id-00001>
+						</results>
+					</id-00003>
+					<id-00004>
+						<fromrange type="number">65</fromrange>
+						<torange type="number">68</torange>
+						<results>
+							<id-00001>
+								<result type="string">Subterranean waterway</result>
+							</id-00001>
+						</results>
+					</id-00004>
+					<id-00005>
+						<fromrange type="number">69</fromrange>
+						<torange type="number">72</torange>
+						<results>
+							<id-00001>
+								<result type="string">Cave pool</result>
+							</id-00001>
+						</results>
+					</id-00005>
+					<id-00006>
+						<fromrange type="number">73</fromrange>
+						<torange type="number">76</torange>
+						<results>
+							<id-00001>
+								<result type="string">Natural bridge</result>
+							</id-00001>
+						</results>
+					</id-00006>
+					<id-00007>
+						<fromrange type="number">77</fromrange>
+						<torange type="number">80</torange>
+						<results>
+							<id-00001>
+								<result type="string">Towering stone formations</result>
+							</id-00001>
+						</results>
+					</id-00007>
+					<id-00008>
+						<fromrange type="number">81</fromrange>
+						<torange type="number">84</torange>
+						<results>
+							<id-00001>
+								<result type="string">Natural illumination</result>
+							</id-00001>
+						</results>
+					</id-00008>
+					<id-00009>
+						<fromrange type="number">85</fromrange>
+						<torange type="number">88</torange>
+						<results>
+							<id-00001>
+								<result type="string">Dark pit</result>
+							</id-00001>
+						</results>
+					</id-00009>
+					<id-00010>
+						<fromrange type="number">89</fromrange>
+						<torange type="number">98</torange>
+						<results>
+							<id-00001>
+								<result type="string">Something unusual or unexpected</result>
+							</id-00001>
+						</results>
+					</id-00010>
+					<id-00011>
+						<fromrange type="number">99</fromrange>
+						<torange type="number">99</torange>
+						<results>
+							<id-00001>
+								<result type="string">You transition into a new theme</result>
+							</id-00001>
+						</results>
+					</id-00011>
+					<id-00012>
+						<fromrange type="number">100</fromrange>
+						<torange type="number">100</torange>
+						<results>
+							<id-00001>
+								<result type="string">You transition into a new domain</result>
+							</id-00001>
+						</results>
+					</id-00012>
+				</features>
+				<dangers>
+					<id-00001>
+						<fromrange type="number">31</fromrange>
+						<torange type="number">33</torange>
+						<results>
+							<id-00001>
+								<result type="string">Denizen lairs here</result>
+							</id-00001>
+						</results>
+					</id-00001>
+					<id-00002>
+						<fromrange type="number">34</fromrange>
+						<torange type="number">36</torange>
+						<results>
+							<id-00001>
+								<result type="string">Cave-in</result>
+							</id-00001>
+						</results>
+					</id-00002>
+					<id-00003>
+						<fromrange type="number">37</fromrange>
+						<torange type="number">39</torange>
+						<results>
+							<id-00001>
+								<result type="string">Flooding</result>
+							</id-00001>
+						</results>
+					</id-00003>
+					<id-00004>
+						<fromrange type="number">40</fromrange>
+						<torange type="number">42</torange>
+						<results>
+							<id-00001>
+								<result type="string">Perilous climb or descent</result>
+							</id-00001>
+						</results>
+					</id-00004>
+					<id-00005>
+						<fromrange type="number">43</fromrange>
+						<torange type="number">45</torange>
+						<results>
+							<id-00001>
+								<result type="string">Fissure or sinkhole</result>
+							</id-00001>
+						</results>
+					</id-00005>
+				</dangers>
+				<text type="formattedtext"><p><i>A place of stone and darkness.</i> ### Features</p><list><li>21-43: Twisting passages</li><li>44-56: Cramped caves</li><li>57-64: Vast chamber</li><li>65-68: Subterranean waterway</li><li>69-72: Cave pool</li><li>73-76: Natural bridge</li><li>77-80: Towering stone formations</li><li>81-84: Natural illumination</li><li>85-88: Dark pit</li><li>89-98: Something unusual or unexpected</li><li>99-99: You transition into a new theme</li><li>100-100: You transition into a new domain</li></list><h>Dangers</h><list><li>31-33: Denizen lairs here</li><li>34-36: Cave-in</li><li>37-39: Flooding</li><li>40-42: Perilous climb or descent</li><li>43-45: Fissure or sinkhole</li></list></text>
+			</cavern>
+			<frozencavern>
+				<name type="string">Frozen cavern</name>
+				<siteid type="string">delve_site_domain:delve/frozen_cavern</siteid>
+				<kind type="string">domain</kind>
+				<summary type="string">A place of deep caves and enduring cold.</summary>
+				<features>
+					<id-00001>
+						<fromrange type="number">21</fromrange>
+						<torange type="number">43</torange>
+						<results>
+							<id-00001>
+								<result type="string">Maze of icy tunnels</result>
+							</id-00001>
+						</results>
+					</id-00001>
+					<id-00002>
+						<fromrange type="number">44</fromrange>
+						<torange type="number">56</torange>
+						<results>
+							<id-00001>
+								<result type="string">Glistening cave</result>
+							</id-00001>
+						</results>
+					</id-00002>
+					<id-00003>
+						<fromrange type="number">57</fromrange>
+						<torange type="number">64</torange>
+						<results>
+							<id-00001>
+								<result type="string">Vast chamber</result>
+							</id-00001>
+						</results>
+					</id-00003>
+					<id-00004>
+						<fromrange type="number">65</fromrange>
+						<torange type="number">68</torange>
+						<results>
+							<id-00001>
+								<result type="string">Frigid waterway</result>
+							</id-00001>
+						</results>
+					</id-00004>
+					<id-00005>
+						<fromrange type="number">69</fromrange>
+						<torange type="number">72</torange>
+						<results>
+							<id-00001>
+								<result type="string">Icy pools</result>
+							</id-00001>
+						</results>
+					</id-00005>
+					<id-00006>
+						<fromrange type="number">73</fromrange>
+						<torange type="number">76</torange>
+						<results>
+							<id-00001>
+								<result type="string">Magnificent ice formations</result>
+							</id-00001>
+						</results>
+					</id-00006>
+					<id-00007>
+						<fromrange type="number">77</fromrange>
+						<torange type="number">80</torange>
+						<results>
+							<id-00001>
+								<result type="string">Frozen waterfall</result>
+							</id-00001>
+						</results>
+					</id-00007>
+					<id-00008>
+						<fromrange type="number">81</fromrange>
+						<torange type="number">84</torange>
+						<results>
+							<id-00001>
+								<result type="string">Deep crevasses</result>
+							</id-00001>
+						</results>
+					</id-00008>
+					<id-00009>
+						<fromrange type="number">85</fromrange>
+						<torange type="number">88</torange>
+						<results>
+							<id-00001>
+								<result type="string">Discovery locked in the ice</result>
+							</id-00001>
+						</results>
+					</id-00009>
+					<id-00010>
+						<fromrange type="number">89</fromrange>
+						<torange type="number">98</torange>
+						<results>
+							<id-00001>
+								<result type="string">Something unusual or unexpected</result>
+							</id-00001>
+						</results>
+					</id-00010>
+					<id-00011>
+						<fromrange type="number">99</fromrange>
+						<torange type="number">99</torange>
+						<results>
+							<id-00001>
+								<result type="string">You transition into a new theme</result>
+							</id-00001>
+						</results>
+					</id-00011>
+					<id-00012>
+						<fromrange type="number">100</fromrange>
+						<torange type="number">100</torange>
+						<results>
+							<id-00001>
+								<result type="string">You transition into a new domain</result>
+							</id-00001>
+						</results>
+					</id-00012>
+				</features>
+				<dangers>
+					<id-00001>
+						<fromrange type="number">31</fromrange>
+						<torange type="number">33</torange>
+						<results>
+							<id-00001>
+								<result type="string">Denizen lairs here</result>
+							</id-00001>
+						</results>
+					</id-00001>
+					<id-00002>
+						<fromrange type="number">34</fromrange>
+						<torange type="number">36</torange>
+						<results>
+							<id-00001>
+								<result type="string">Fracturing ice</result>
+							</id-00001>
+						</results>
+					</id-00002>
+					<id-00003>
+						<fromrange type="number">37</fromrange>
+						<torange type="number">39</torange>
+						<results>
+							<id-00001>
+								<result type="string">Crumbling chasm</result>
+							</id-00001>
+						</results>
+					</id-00003>
+					<id-00004>
+						<fromrange type="number">40</fromrange>
+						<torange type="number">42</torange>
+						<results>
+							<id-00001>
+								<result type="string">Bitter chill</result>
+							</id-00001>
+						</results>
+					</id-00004>
+					<id-00005>
+						<fromrange type="number">43</fromrange>
+						<torange type="number">45</torange>
+						<results>
+							<id-00001>
+								<result type="string">Disorienting reflections</result>
+							</id-00001>
+						</results>
+					</id-00005>
+				</dangers>
+				<text type="formattedtext"><p><i>A place of deep caves and enduring cold.</i> ### Features</p><list><li>21-43: Maze of icy tunnels</li><li>44-56: Glistening cave</li><li>57-64: Vast chamber</li><li>65-68: Frigid waterway</li><li>69-72: Icy pools</li><li>73-76: Magnificent ice formations</li><li>77-80: Frozen waterfall</li><li>81-84: Deep crevasses</li><li>85-88: Discovery locked in the ice</li><li>89-98: Something unusual or unexpected</li><li>99-99: You transition into a new theme</li><li>100-100: You transition into a new domain</li></list><h>Dangers</h><list><li>31-33: Denizen lairs here</li><li>34-36: Fracturing ice</li><li>37-39: Crumbling chasm</li><li>40-42: Bitter chill</li><li>43-45: Disorienting reflections</li></list></text>
+			</frozencavern>
+			<icereach>
+				<name type="string">Icereach</name>
+				<siteid type="string">delve_site_domain:delve/icereach</siteid>
+				<kind type="string">domain</kind>
+				<summary type="string">A frigid landscape formed of frozen seas.</summary>
+				<features>
+					<id-00001>
+						<fromrange type="number">21</fromrange>
+						<torange type="number">43</torange>
+						<results>
+							<id-00001>
+								<result type="string">Plains of ice and snow</result>
+							</id-00001>
+						</results>
+					</id-00001>
+					<id-00002>
+						<fromrange type="number">44</fromrange>
+						<torange type="number">56</torange>
+						<results>
+							<id-00001>
+								<result type="string">Seawater channel</result>
+							</id-00001>
+						</results>
+					</id-00002>
+					<id-00003>
+						<fromrange type="number">57</fromrange>
+						<torange type="number">64</torange>
+						<results>
+							<id-00001>
+								<result type="string">Icy highlands</result>
+							</id-00001>
+						</results>
+					</id-00003>
+					<id-00004>
+						<fromrange type="number">65</fromrange>
+						<torange type="number">68</torange>
+						<results>
+							<id-00001>
+								<result type="string">Crevasse</result>
+							</id-00001>
+						</results>
+					</id-00004>
+					<id-00005>
+						<fromrange type="number">69</fromrange>
+						<torange type="number">72</torange>
+						<results>
+							<id-00001>
+								<result type="string">Ice floes</result>
+							</id-00001>
+						</results>
+					</id-00005>
+					<id-00006>
+						<fromrange type="number">73</fromrange>
+						<torange type="number">76</torange>
+						<results>
+							<id-00001>
+								<result type="string">Ship trapped in ice</result>
+							</id-00001>
+						</results>
+					</id-00006>
+					<id-00007>
+						<fromrange type="number">77</fromrange>
+						<torange type="number">80</torange>
+						<results>
+							<id-00001>
+								<result type="string">Animal herd or habitat</result>
+							</id-00001>
+						</results>
+					</id-00007>
+					<id-00008>
+						<fromrange type="number">81</fromrange>
+						<torange type="number">84</torange>
+						<results>
+							<id-00001>
+								<result type="string">Frozen carcass</result>
+							</id-00001>
+						</results>
+					</id-00008>
+					<id-00009>
+						<fromrange type="number">85</fromrange>
+						<torange type="number">88</torange>
+						<results>
+							<id-00001>
+								<result type="string">Camp or outpost</result>
+							</id-00001>
+						</results>
+					</id-00009>
+					<id-00010>
+						<fromrange type="number">89</fromrange>
+						<torange type="number">98</torange>
+						<results>
+							<id-00001>
+								<result type="string">Something unusual or unexpected</result>
+							</id-00001>
+						</results>
+					</id-00010>
+					<id-00011>
+						<fromrange type="number">99</fromrange>
+						<torange type="number">99</torange>
+						<results>
+							<id-00001>
+								<result type="string">You transition into a new theme</result>
+							</id-00001>
+						</results>
+					</id-00011>
+					<id-00012>
+						<fromrange type="number">100</fromrange>
+						<torange type="number">100</torange>
+						<results>
+							<id-00001>
+								<result type="string">You transition into a new domain</result>
+							</id-00001>
+						</results>
+					</id-00012>
+				</features>
+				<dangers>
+					<id-00001>
+						<fromrange type="number">31</fromrange>
+						<torange type="number">33</torange>
+						<results>
+							<id-00001>
+								<result type="string">Denizen hunts</result>
+							</id-00001>
+						</results>
+					</id-00001>
+					<id-00002>
+						<fromrange type="number">34</fromrange>
+						<torange type="number">36</torange>
+						<results>
+							<id-00001>
+								<result type="string">Fragile ice above watery depths</result>
+							</id-00001>
+						</results>
+					</id-00002>
+					<id-00003>
+						<fromrange type="number">37</fromrange>
+						<torange type="number">39</torange>
+						<results>
+							<id-00001>
+								<result type="string">Perilous climb or descent</result>
+							</id-00001>
+						</results>
+					</id-00003>
+					<id-00004>
+						<fromrange type="number">40</fromrange>
+						<torange type="number">42</torange>
+						<results>
+							<id-00001>
+								<result type="string">Avalanche or icefall</result>
+							</id-00001>
+						</results>
+					</id-00004>
+					<id-00005>
+						<fromrange type="number">43</fromrange>
+						<torange type="number">45</torange>
+						<results>
+							<id-00001>
+								<result type="string">Foul weather</result>
+							</id-00001>
+						</results>
+					</id-00005>
+				</dangers>
+				<text type="formattedtext"><p><i>A frigid landscape formed of frozen seas.</i> ### Features</p><list><li>21-43: Plains of ice and snow</li><li>44-56: Seawater channel</li><li>57-64: Icy highlands</li><li>65-68: Crevasse</li><li>69-72: Ice floes</li><li>73-76: Ship trapped in ice</li><li>77-80: Animal herd or habitat</li><li>81-84: Frozen carcass</li><li>85-88: Camp or outpost</li><li>89-98: Something unusual or unexpected</li><li>99-99: You transition into a new theme</li><li>100-100: You transition into a new domain</li></list><h>Dangers</h><list><li>31-33: Denizen hunts</li><li>34-36: Fragile ice above watery depths</li><li>37-39: Perilous climb or descent</li><li>40-42: Avalanche or icefall</li><li>43-45: Foul weather</li></list></text>
+			</icereach>
+			<mine>
+				<name type="string">Mine</name>
+				<siteid type="string">delve_site_domain:delve/mine</siteid>
+				<kind type="string">domain</kind>
+				<summary type="string">Tunnels dug greedily and deep.</summary>
+				<features>
+					<id-00001>
+						<fromrange type="number">21</fromrange>
+						<torange type="number">43</torange>
+						<results>
+							<id-00001>
+								<result type="string">Cramped tunnels</result>
+							</id-00001>
+						</results>
+					</id-00001>
+					<id-00002>
+						<fromrange type="number">44</fromrange>
+						<torange type="number">56</torange>
+						<results>
+							<id-00001>
+								<result type="string">Mine works</result>
+							</id-00001>
+						</results>
+					</id-00002>
+					<id-00003>
+						<fromrange type="number">57</fromrange>
+						<torange type="number">64</torange>
+						<results>
+							<id-00001>
+								<result type="string">Excavated chamber</result>
+							</id-00001>
+						</results>
+					</id-00003>
+					<id-00004>
+						<fromrange type="number">65</fromrange>
+						<torange type="number">68</torange>
+						<results>
+							<id-00001>
+								<result type="string">Mineshaft</result>
+							</id-00001>
+						</results>
+					</id-00004>
+					<id-00005>
+						<fromrange type="number">69</fromrange>
+						<torange type="number">72</torange>
+						<results>
+							<id-00001>
+								<result type="string">Collapsed tunnel</result>
+							</id-00001>
+						</results>
+					</id-00005>
+					<id-00006>
+						<fromrange type="number">73</fromrange>
+						<torange type="number">76</torange>
+						<results>
+							<id-00001>
+								<result type="string">Cluttered storage</result>
+							</id-00001>
+						</results>
+					</id-00006>
+					<id-00007>
+						<fromrange type="number">77</fromrange>
+						<torange type="number">80</torange>
+						<results>
+							<id-00001>
+								<result type="string">Housing or common areas</result>
+							</id-00001>
+						</results>
+					</id-00007>
+					<id-00008>
+						<fromrange type="number">81</fromrange>
+						<torange type="number">84</torange>
+						<results>
+							<id-00001>
+								<result type="string">Flooded chamber</result>
+							</id-00001>
+						</results>
+					</id-00008>
+					<id-00009>
+						<fromrange type="number">85</fromrange>
+						<torange type="number">88</torange>
+						<results>
+							<id-00001>
+								<result type="string">Unearthed secret</result>
+							</id-00001>
+						</results>
+					</id-00009>
+					<id-00010>
+						<fromrange type="number">89</fromrange>
+						<torange type="number">98</torange>
+						<results>
+							<id-00001>
+								<result type="string">Something unusual or unexpected</result>
+							</id-00001>
+						</results>
+					</id-00010>
+					<id-00011>
+						<fromrange type="number">99</fromrange>
+						<torange type="number">99</torange>
+						<results>
+							<id-00001>
+								<result type="string">You transition into a new theme</result>
+							</id-00001>
+						</results>
+					</id-00011>
+					<id-00012>
+						<fromrange type="number">100</fromrange>
+						<torange type="number">100</torange>
+						<results>
+							<id-00001>
+								<result type="string">You transition into a new domain</result>
+							</id-00001>
+						</results>
+					</id-00012>
+				</features>
+				<dangers>
+					<id-00001>
+						<fromrange type="number">31</fromrange>
+						<torange type="number">33</torange>
+						<results>
+							<id-00001>
+								<result type="string">Cave-in</result>
+							</id-00001>
+						</results>
+					</id-00001>
+					<id-00002>
+						<fromrange type="number">34</fromrange>
+						<torange type="number">36</torange>
+						<results>
+							<id-00001>
+								<result type="string">Flooding</result>
+							</id-00001>
+						</results>
+					</id-00002>
+					<id-00003>
+						<fromrange type="number">37</fromrange>
+						<torange type="number">39</torange>
+						<results>
+							<id-00001>
+								<result type="string">Unstable platforms or architecture</result>
+							</id-00001>
+						</results>
+					</id-00003>
+					<id-00004>
+						<fromrange type="number">40</fromrange>
+						<torange type="number">42</torange>
+						<results>
+							<id-00001>
+								<result type="string">Hazardous gas pocket</result>
+							</id-00001>
+						</results>
+					</id-00004>
+					<id-00005>
+						<fromrange type="number">43</fromrange>
+						<torange type="number">45</torange>
+						<results>
+							<id-00001>
+								<result type="string">Weakened terrain</result>
+							</id-00001>
+						</results>
+					</id-00005>
+				</dangers>
+				<text type="formattedtext"><p><i>Tunnels dug greedily and deep.</i> ### Features</p><list><li>21-43: Cramped tunnels</li><li>44-56: Mine works</li><li>57-64: Excavated chamber</li><li>65-68: Mineshaft</li><li>69-72: Collapsed tunnel</li><li>73-76: Cluttered storage</li><li>77-80: Housing or common areas</li><li>81-84: Flooded chamber</li><li>85-88: Unearthed secret</li><li>89-98: Something unusual or unexpected</li><li>99-99: You transition into a new theme</li><li>100-100: You transition into a new domain</li></list><h>Dangers</h><list><li>31-33: Cave-in</li><li>34-36: Flooding</li><li>37-39: Unstable platforms or architecture</li><li>40-42: Hazardous gas pocket</li><li>43-45: Weakened terrain</li></list></text>
+			</mine>
+			<pass>
+				<name type="string">Pass</name>
+				<siteid type="string">delve_site_domain:delve/pass</siteid>
+				<kind type="string">domain</kind>
+				<summary type="string">Treacherous paths over high mountains.</summary>
+				<features>
+					<id-00001>
+						<fromrange type="number">21</fromrange>
+						<torange type="number">43</torange>
+						<results>
+							<id-00001>
+								<result type="string">Winding mountain path</result>
+							</id-00001>
+						</results>
+					</id-00001>
+					<id-00002>
+						<fromrange type="number">44</fromrange>
+						<torange type="number">56</torange>
+						<results>
+							<id-00001>
+								<result type="string">Snowfield or glacial rocks</result>
+							</id-00001>
+						</results>
+					</id-00002>
+					<id-00003>
+						<fromrange type="number">57</fromrange>
+						<torange type="number">64</torange>
+						<results>
+							<id-00001>
+								<result type="string">River gorge</result>
+							</id-00001>
+						</results>
+					</id-00003>
+					<id-00004>
+						<fromrange type="number">65</fromrange>
+						<torange type="number">68</torange>
+						<results>
+							<id-00001>
+								<result type="string">Crashing waterfall</result>
+							</id-00001>
+						</results>
+					</id-00004>
+					<id-00005>
+						<fromrange type="number">69</fromrange>
+						<torange type="number">72</torange>
+						<results>
+							<id-00001>
+								<result type="string">Highland lake</result>
+							</id-00001>
+						</results>
+					</id-00005>
+					<id-00006>
+						<fromrange type="number">73</fromrange>
+						<torange type="number">76</torange>
+						<results>
+							<id-00001>
+								<result type="string">Forgotten cairn</result>
+							</id-00001>
+						</results>
+					</id-00006>
+					<id-00007>
+						<fromrange type="number">77</fromrange>
+						<torange type="number">80</torange>
+						<results>
+							<id-00001>
+								<result type="string">Bridge</result>
+							</id-00001>
+						</results>
+					</id-00007>
+					<id-00008>
+						<fromrange type="number">81</fromrange>
+						<torange type="number">84</torange>
+						<results>
+							<id-00001>
+								<result type="string">Overlook</result>
+							</id-00001>
+						</results>
+					</id-00008>
+					<id-00009>
+						<fromrange type="number">85</fromrange>
+						<torange type="number">88</torange>
+						<results>
+							<id-00001>
+								<result type="string">Camp or outpost</result>
+							</id-00001>
+						</results>
+					</id-00009>
+					<id-00010>
+						<fromrange type="number">89</fromrange>
+						<torange type="number">98</torange>
+						<results>
+							<id-00001>
+								<result type="string">Something unusual or unexpected</result>
+							</id-00001>
+						</results>
+					</id-00010>
+					<id-00011>
+						<fromrange type="number">99</fromrange>
+						<torange type="number">99</torange>
+						<results>
+							<id-00001>
+								<result type="string">You transition into a new theme</result>
+							</id-00001>
+						</results>
+					</id-00011>
+					<id-00012>
+						<fromrange type="number">100</fromrange>
+						<torange type="number">100</torange>
+						<results>
+							<id-00001>
+								<result type="string">You transition into a new domain</result>
+							</id-00001>
+						</results>
+					</id-00012>
+				</features>
+				<dangers>
+					<id-00001>
+						<fromrange type="number">31</fromrange>
+						<torange type="number">33</torange>
+						<results>
+							<id-00001>
+								<result type="string">Denizen lairs here</result>
+							</id-00001>
+						</results>
+					</id-00001>
+					<id-00002>
+						<fromrange type="number">34</fromrange>
+						<torange type="number">36</torange>
+						<results>
+							<id-00001>
+								<result type="string">Denizen hunts</result>
+							</id-00001>
+						</results>
+					</id-00002>
+					<id-00003>
+						<fromrange type="number">37</fromrange>
+						<torange type="number">39</torange>
+						<results>
+							<id-00001>
+								<result type="string">Perilous climb or descent</result>
+							</id-00001>
+						</results>
+					</id-00003>
+					<id-00004>
+						<fromrange type="number">40</fromrange>
+						<torange type="number">42</torange>
+						<results>
+							<id-00001>
+								<result type="string">Avalanche or rockslide</result>
+							</id-00001>
+						</results>
+					</id-00004>
+					<id-00005>
+						<fromrange type="number">43</fromrange>
+						<torange type="number">45</torange>
+						<results>
+							<id-00001>
+								<result type="string">Foul weather</result>
+							</id-00001>
+						</results>
+					</id-00005>
+				</dangers>
+				<text type="formattedtext"><p><i>Treacherous paths over high mountains.</i> ### Features</p><list><li>21-43: Winding mountain path</li><li>44-56: Snowfield or glacial rocks</li><li>57-64: River gorge</li><li>65-68: Crashing waterfall</li><li>69-72: Highland lake</li><li>73-76: Forgotten cairn</li><li>77-80: Bridge</li><li>81-84: Overlook</li><li>85-88: Camp or outpost</li><li>89-98: Something unusual or unexpected</li><li>99-99: You transition into a new theme</li><li>100-100: You transition into a new domain</li></list><h>Dangers</h><list><li>31-33: Denizen lairs here</li><li>34-36: Denizen hunts</li><li>37-39: Perilous climb or descent</li><li>40-42: Avalanche or rockslide</li><li>43-45: Foul weather</li></list></text>
+			</pass>
+			<ruin>
+				<name type="string">Ruin</name>
+				<siteid type="string">delve_site_domain:delve/ruin</siteid>
+				<kind type="string">domain</kind>
+				<summary type="string">The crumbling legacy of a dead civilization.</summary>
+				<features>
+					<id-00001>
+						<fromrange type="number">21</fromrange>
+						<torange type="number">43</torange>
+						<results>
+							<id-00001>
+								<result type="string">Crumbling corridors and chambers</result>
+							</id-00001>
+						</results>
+					</id-00001>
+					<id-00002>
+						<fromrange type="number">44</fromrange>
+						<torange type="number">56</torange>
+						<results>
+							<id-00001>
+								<result type="string">Collapsed architecture</result>
+							</id-00001>
+						</results>
+					</id-00002>
+					<id-00003>
+						<fromrange type="number">57</fromrange>
+						<torange type="number">64</torange>
+						<results>
+							<id-00001>
+								<result type="string">Rubble-choked hall</result>
+							</id-00001>
+						</results>
+					</id-00003>
+					<id-00004>
+						<fromrange type="number">65</fromrange>
+						<torange type="number">68</torange>
+						<results>
+							<id-00001>
+								<result type="string">Courtyard</result>
+							</id-00001>
+						</results>
+					</id-00004>
+					<id-00005>
+						<fromrange type="number">69</fromrange>
+						<torange type="number">72</torange>
+						<results>
+							<id-00001>
+								<result type="string">Archive or library</result>
+							</id-00001>
+						</results>
+					</id-00005>
+					<id-00006>
+						<fromrange type="number">73</fromrange>
+						<torange type="number">76</torange>
+						<results>
+							<id-00001>
+								<result type="string">Broken statuary or fading murals</result>
+							</id-00001>
+						</results>
+					</id-00006>
+					<id-00007>
+						<fromrange type="number">77</fromrange>
+						<torange type="number">80</torange>
+						<results>
+							<id-00001>
+								<result type="string">Preserved vault</result>
+							</id-00001>
+						</results>
+					</id-00007>
+					<id-00008>
+						<fromrange type="number">81</fromrange>
+						<torange type="number">84</torange>
+						<results>
+							<id-00001>
+								<result type="string">Temple to forgotten gods</result>
+							</id-00001>
+						</results>
+					</id-00008>
+					<id-00009>
+						<fromrange type="number">85</fromrange>
+						<torange type="number">88</torange>
+						<results>
+							<id-00001>
+								<result type="string">Mausoleum</result>
+							</id-00001>
+						</results>
+					</id-00009>
+					<id-00010>
+						<fromrange type="number">89</fromrange>
+						<torange type="number">98</torange>
+						<results>
+							<id-00001>
+								<result type="string">Something unusual or unexpected</result>
+							</id-00001>
+						</results>
+					</id-00010>
+					<id-00011>
+						<fromrange type="number">99</fromrange>
+						<torange type="number">99</torange>
+						<results>
+							<id-00001>
+								<result type="string">You transition into a new theme</result>
+							</id-00001>
+						</results>
+					</id-00011>
+					<id-00012>
+						<fromrange type="number">100</fromrange>
+						<torange type="number">100</torange>
+						<results>
+							<id-00001>
+								<result type="string">You transition into a new domain</result>
+							</id-00001>
+						</results>
+					</id-00012>
+				</features>
+				<dangers>
+					<id-00001>
+						<fromrange type="number">31</fromrange>
+						<torange type="number">33</torange>
+						<results>
+							<id-00001>
+								<result type="string">Ancient mechanism or trap</result>
+							</id-00001>
+						</results>
+					</id-00001>
+					<id-00002>
+						<fromrange type="number">34</fromrange>
+						<torange type="number">36</torange>
+						<results>
+							<id-00001>
+								<result type="string">Collapsing wall or ceiling</result>
+							</id-00001>
+						</results>
+					</id-00002>
+					<id-00003>
+						<fromrange type="number">37</fromrange>
+						<torange type="number">39</torange>
+						<results>
+							<id-00001>
+								<result type="string">Blocked or broken passage</result>
+							</id-00001>
+						</results>
+					</id-00003>
+					<id-00004>
+						<fromrange type="number">40</fromrange>
+						<torange type="number">42</torange>
+						<results>
+							<id-00001>
+								<result type="string">Unstable floor above a new danger</result>
+							</id-00001>
+						</results>
+					</id-00004>
+					<id-00005>
+						<fromrange type="number">43</fromrange>
+						<torange type="number">45</torange>
+						<results>
+							<id-00001>
+								<result type="string">Ancient secrets best left buried</result>
+							</id-00001>
+						</results>
+					</id-00005>
+				</dangers>
+				<text type="formattedtext"><p><i>The crumbling legacy of a dead civilization.</i> ### Features</p><list><li>21-43: Crumbling corridors and chambers</li><li>44-56: Collapsed architecture</li><li>57-64: Rubble-choked hall</li><li>65-68: Courtyard</li><li>69-72: Archive or library</li><li>73-76: Broken statuary or fading murals</li><li>77-80: Preserved vault</li><li>81-84: Temple to forgotten gods</li><li>85-88: Mausoleum</li><li>89-98: Something unusual or unexpected</li><li>99-99: You transition into a new theme</li><li>100-100: You transition into a new domain</li></list><h>Dangers</h><list><li>31-33: Ancient mechanism or trap</li><li>34-36: Collapsing wall or ceiling</li><li>37-39: Blocked or broken passage</li><li>40-42: Unstable floor above a new danger</li><li>43-45: Ancient secrets best left buried</li></list></text>
+			</ruin>
+			<seacave>
+				<name type="string">Sea cave</name>
+				<siteid type="string">delve_site_domain:delve/sea_cave</siteid>
+				<kind type="string">domain</kind>
+				<summary type="string">Stone passages carved by ocean waves.</summary>
+				<features>
+					<id-00001>
+						<fromrange type="number">21</fromrange>
+						<torange type="number">43</torange>
+						<results>
+							<id-00001>
+								<result type="string">Watery tunnels</result>
+							</id-00001>
+						</results>
+					</id-00001>
+					<id-00002>
+						<fromrange type="number">44</fromrange>
+						<torange type="number">56</torange>
+						<results>
+							<id-00001>
+								<result type="string">Eroded chamber</result>
+							</id-00001>
+						</results>
+					</id-00002>
+					<id-00003>
+						<fromrange type="number">57</fromrange>
+						<torange type="number">64</torange>
+						<results>
+							<id-00001>
+								<result type="string">Flooded chamber</result>
+							</id-00001>
+						</results>
+					</id-00003>
+					<id-00004>
+						<fromrange type="number">65</fromrange>
+						<torange type="number">68</torange>
+						<results>
+							<id-00001>
+								<result type="string">Vast chamber</result>
+							</id-00001>
+						</results>
+					</id-00004>
+					<id-00005>
+						<fromrange type="number">69</fromrange>
+						<torange type="number">72</torange>
+						<results>
+							<id-00001>
+								<result type="string">Dry passages</result>
+							</id-00001>
+						</results>
+					</id-00005>
+					<id-00006>
+						<fromrange type="number">73</fromrange>
+						<torange type="number">76</torange>
+						<results>
+							<id-00001>
+								<result type="string">Freshwater inlet</result>
+							</id-00001>
+						</results>
+					</id-00006>
+					<id-00007>
+						<fromrange type="number">77</fromrange>
+						<torange type="number">80</torange>
+						<results>
+							<id-00001>
+								<result type="string">Rocky island</result>
+							</id-00001>
+						</results>
+					</id-00007>
+					<id-00008>
+						<fromrange type="number">81</fromrange>
+						<torange type="number">84</torange>
+						<results>
+							<id-00001>
+								<result type="string">Waterborne debris</result>
+							</id-00001>
+						</results>
+					</id-00008>
+					<id-00009>
+						<fromrange type="number">85</fromrange>
+						<torange type="number">88</torange>
+						<results>
+							<id-00001>
+								<result type="string">Shipwreck or boat</result>
+							</id-00001>
+						</results>
+					</id-00009>
+					<id-00010>
+						<fromrange type="number">89</fromrange>
+						<torange type="number">98</torange>
+						<results>
+							<id-00001>
+								<result type="string">Something unusual or unexpected</result>
+							</id-00001>
+						</results>
+					</id-00010>
+					<id-00011>
+						<fromrange type="number">99</fromrange>
+						<torange type="number">99</torange>
+						<results>
+							<id-00001>
+								<result type="string">You transition into a new theme</result>
+							</id-00001>
+						</results>
+					</id-00011>
+					<id-00012>
+						<fromrange type="number">100</fromrange>
+						<torange type="number">100</torange>
+						<results>
+							<id-00001>
+								<result type="string">You transition into a new domain</result>
+							</id-00001>
+						</results>
+					</id-00012>
+				</features>
+				<dangers>
+					<id-00001>
+						<fromrange type="number">31</fromrange>
+						<torange type="number">33</torange>
+						<results>
+							<id-00001>
+								<result type="string">Denizen strikes without warning</result>
+							</id-00001>
+						</results>
+					</id-00001>
+					<id-00002>
+						<fromrange type="number">34</fromrange>
+						<torange type="number">36</torange>
+						<results>
+							<id-00001>
+								<result type="string">Denizen lurks below</result>
+							</id-00001>
+						</results>
+					</id-00002>
+					<id-00003>
+						<fromrange type="number">37</fromrange>
+						<torange type="number">39</torange>
+						<results>
+							<id-00001>
+								<result type="string">Flooding</result>
+							</id-00001>
+						</results>
+					</id-00003>
+					<id-00004>
+						<fromrange type="number">40</fromrange>
+						<torange type="number">42</torange>
+						<results>
+							<id-00001>
+								<result type="string">Rushing current</result>
+							</id-00001>
+						</results>
+					</id-00004>
+					<id-00005>
+						<fromrange type="number">43</fromrange>
+						<torange type="number">45</torange>
+						<results>
+							<id-00001>
+								<result type="string">Claustrophobic squeeze</result>
+							</id-00001>
+						</results>
+					</id-00005>
+				</dangers>
+				<text type="formattedtext"><p><i>Stone passages carved by ocean waves.</i> ### Features</p><list><li>21-43: Watery tunnels</li><li>44-56: Eroded chamber</li><li>57-64: Flooded chamber</li><li>65-68: Vast chamber</li><li>69-72: Dry passages</li><li>73-76: Freshwater inlet</li><li>77-80: Rocky island</li><li>81-84: Waterborne debris</li><li>85-88: Shipwreck or boat</li><li>89-98: Something unusual or unexpected</li><li>99-99: You transition into a new theme</li><li>100-100: You transition into a new domain</li></list><h>Dangers</h><list><li>31-33: Denizen strikes without warning</li><li>34-36: Denizen lurks below</li><li>37-39: Flooding</li><li>40-42: Rushing current</li><li>43-45: Claustrophobic squeeze</li></list></text>
+			</seacave>
+			<shadowfen>
+				<name type="string">Shadowfen</name>
+				<siteid type="string">delve_site_domain:delve/shadowfen</siteid>
+				<kind type="string">domain</kind>
+				<summary type="string">A primeval marsh, cloaked in mist.</summary>
+				<features>
+					<id-00001>
+						<fromrange type="number">21</fromrange>
+						<torange type="number">43</torange>
+						<results>
+							<id-00001>
+								<result type="string">Narrow path through a fetid bog</result>
+							</id-00001>
+						</results>
+					</id-00001>
+					<id-00002>
+						<fromrange type="number">44</fromrange>
+						<torange type="number">56</torange>
+						<results>
+							<id-00001>
+								<result type="string">Stagnant waterway</result>
+							</id-00001>
+						</results>
+					</id-00002>
+					<id-00003>
+						<fromrange type="number">57</fromrange>
+						<torange type="number">64</torange>
+						<results>
+							<id-00001>
+								<result type="string">Flooded thicket</result>
+							</id-00001>
+						</results>
+					</id-00003>
+					<id-00004>
+						<fromrange type="number">65</fromrange>
+						<torange type="number">68</torange>
+						<results>
+							<id-00001>
+								<result type="string">Island of dry land</result>
+							</id-00001>
+						</results>
+					</id-00004>
+					<id-00005>
+						<fromrange type="number">69</fromrange>
+						<torange type="number">72</torange>
+						<results>
+							<id-00001>
+								<result type="string">Submerged discovery</result>
+							</id-00001>
+						</results>
+					</id-00005>
+					<id-00006>
+						<fromrange type="number">73</fromrange>
+						<torange type="number">76</torange>
+						<results>
+							<id-00001>
+								<result type="string">Preserved corpses</result>
+							</id-00001>
+						</results>
+					</id-00006>
+					<id-00007>
+						<fromrange type="number">77</fromrange>
+						<torange type="number">80</torange>
+						<results>
+							<id-00001>
+								<result type="string">Overgrown structure</result>
+							</id-00001>
+						</results>
+					</id-00007>
+					<id-00008>
+						<fromrange type="number">81</fromrange>
+						<torange type="number">84</torange>
+						<results>
+							<id-00001>
+								<result type="string">Tall reeds</result>
+							</id-00001>
+						</results>
+					</id-00008>
+					<id-00009>
+						<fromrange type="number">85</fromrange>
+						<torange type="number">88</torange>
+						<results>
+							<id-00001>
+								<result type="string">Camp or outpost</result>
+							</id-00001>
+						</results>
+					</id-00009>
+					<id-00010>
+						<fromrange type="number">89</fromrange>
+						<torange type="number">98</torange>
+						<results>
+							<id-00001>
+								<result type="string">Something unusual or unexpected</result>
+							</id-00001>
+						</results>
+					</id-00010>
+					<id-00011>
+						<fromrange type="number">99</fromrange>
+						<torange type="number">99</torange>
+						<results>
+							<id-00001>
+								<result type="string">You transition into a new theme</result>
+							</id-00001>
+						</results>
+					</id-00011>
+					<id-00012>
+						<fromrange type="number">100</fromrange>
+						<torange type="number">100</torange>
+						<results>
+							<id-00001>
+								<result type="string">You transition into a new domain</result>
+							</id-00001>
+						</results>
+					</id-00012>
+				</features>
+				<dangers>
+					<id-00001>
+						<fromrange type="number">31</fromrange>
+						<torange type="number">33</torange>
+						<results>
+							<id-00001>
+								<result type="string">Denizen hunts</result>
+							</id-00001>
+						</results>
+					</id-00001>
+					<id-00002>
+						<fromrange type="number">34</fromrange>
+						<torange type="number">36</torange>
+						<results>
+							<id-00001>
+								<result type="string">Deep water blocks the path</result>
+							</id-00001>
+						</results>
+					</id-00002>
+					<id-00003>
+						<fromrange type="number">37</fromrange>
+						<torange type="number">39</torange>
+						<results>
+							<id-00001>
+								<result type="string">Toxic environment</result>
+							</id-00001>
+						</results>
+					</id-00003>
+					<id-00004>
+						<fromrange type="number">40</fromrange>
+						<torange type="number">42</torange>
+						<results>
+							<id-00001>
+								<result type="string">Concealing or disorienting mist</result>
+							</id-00001>
+						</results>
+					</id-00004>
+					<id-00005>
+						<fromrange type="number">43</fromrange>
+						<torange type="number">45</torange>
+						<results>
+							<id-00001>
+								<result type="string">Hidden quagmire</result>
+							</id-00001>
+						</results>
+					</id-00005>
+				</dangers>
+				<text type="formattedtext"><p><i>A primeval marsh, cloaked in mist.</i> ### Features</p><list><li>21-43: Narrow path through a fetid bog</li><li>44-56: Stagnant waterway</li><li>57-64: Flooded thicket</li><li>65-68: Island of dry land</li><li>69-72: Submerged discovery</li><li>73-76: Preserved corpses</li><li>77-80: Overgrown structure</li><li>81-84: Tall reeds</li><li>85-88: Camp or outpost</li><li>89-98: Something unusual or unexpected</li><li>99-99: You transition into a new theme</li><li>100-100: You transition into a new domain</li></list><h>Dangers</h><list><li>31-33: Denizen hunts</li><li>34-36: Deep water blocks the path</li><li>37-39: Toxic environment</li><li>40-42: Concealing or disorienting mist</li><li>43-45: Hidden quagmire</li></list></text>
+			</shadowfen>
+			<stronghold>
+				<name type="string">Stronghold</name>
+				<siteid type="string">delve_site_domain:delve/stronghold</siteid>
+				<kind type="string">domain</kind>
+				<summary type="string">A fortress secured against trespassers.</summary>
+				<features>
+					<id-00001>
+						<fromrange type="number">21</fromrange>
+						<torange type="number">43</torange>
+						<results>
+							<id-00001>
+								<result type="string">Connecting passageways</result>
+							</id-00001>
+						</results>
+					</id-00001>
+					<id-00002>
+						<fromrange type="number">44</fromrange>
+						<torange type="number">56</torange>
+						<results>
+							<id-00001>
+								<result type="string">Barracks or common quarters</result>
+							</id-00001>
+						</results>
+					</id-00002>
+					<id-00003>
+						<fromrange type="number">57</fromrange>
+						<torange type="number">64</torange>
+						<results>
+							<id-00001>
+								<result type="string">Large hall</result>
+							</id-00001>
+						</results>
+					</id-00003>
+					<id-00004>
+						<fromrange type="number">65</fromrange>
+						<torange type="number">68</torange>
+						<results>
+							<id-00001>
+								<result type="string">Workshop or library</result>
+							</id-00001>
+						</results>
+					</id-00004>
+					<id-00005>
+						<fromrange type="number">69</fromrange>
+						<torange type="number">72</torange>
+						<results>
+							<id-00001>
+								<result type="string">Command center or leadership</result>
+							</id-00001>
+						</results>
+					</id-00005>
+					<id-00006>
+						<fromrange type="number">73</fromrange>
+						<torange type="number">76</torange>
+						<results>
+							<id-00001>
+								<result type="string">Ladder or stairwell</result>
+							</id-00001>
+						</results>
+					</id-00006>
+					<id-00007>
+						<fromrange type="number">77</fromrange>
+						<torange type="number">80</torange>
+						<results>
+							<id-00001>
+								<result type="string">Storage</result>
+							</id-00001>
+						</results>
+					</id-00007>
+					<id-00008>
+						<fromrange type="number">81</fromrange>
+						<torange type="number">84</torange>
+						<results>
+							<id-00001>
+								<result type="string">Kitchen or larder</result>
+							</id-00001>
+						</results>
+					</id-00008>
+					<id-00009>
+						<fromrange type="number">85</fromrange>
+						<torange type="number">88</torange>
+						<results>
+							<id-00001>
+								<result type="string">Courtyard</result>
+							</id-00001>
+						</results>
+					</id-00009>
+					<id-00010>
+						<fromrange type="number">89</fromrange>
+						<torange type="number">98</torange>
+						<results>
+							<id-00001>
+								<result type="string">Something unusual or unexpected</result>
+							</id-00001>
+						</results>
+					</id-00010>
+					<id-00011>
+						<fromrange type="number">99</fromrange>
+						<torange type="number">99</torange>
+						<results>
+							<id-00001>
+								<result type="string">You transition into a new theme</result>
+							</id-00001>
+						</results>
+					</id-00011>
+					<id-00012>
+						<fromrange type="number">100</fromrange>
+						<torange type="number">100</torange>
+						<results>
+							<id-00001>
+								<result type="string">You transition into a new domain</result>
+							</id-00001>
+						</results>
+					</id-00012>
+				</features>
+				<dangers>
+					<id-00001>
+						<fromrange type="number">31</fromrange>
+						<torange type="number">33</torange>
+						<results>
+							<id-00001>
+								<result type="string">Blocked or guarded path</result>
+							</id-00001>
+						</results>
+					</id-00001>
+					<id-00002>
+						<fromrange type="number">34</fromrange>
+						<torange type="number">36</torange>
+						<results>
+							<id-00001>
+								<result type="string">Caught in the open</result>
+							</id-00001>
+						</results>
+					</id-00002>
+					<id-00003>
+						<fromrange type="number">37</fromrange>
+						<torange type="number">39</torange>
+						<results>
+							<id-00001>
+								<result type="string">Chokepoint</result>
+							</id-00001>
+						</results>
+					</id-00003>
+					<id-00004>
+						<fromrange type="number">40</fromrange>
+						<torange type="number">42</torange>
+						<results>
+							<id-00001>
+								<result type="string">Trap</result>
+							</id-00001>
+						</results>
+					</id-00004>
+					<id-00005>
+						<fromrange type="number">43</fromrange>
+						<torange type="number">45</torange>
+						<results>
+							<id-00001>
+								<result type="string">Alarm trigger</result>
+							</id-00001>
+						</results>
+					</id-00005>
+				</dangers>
+				<text type="formattedtext"><p><i>A fortress secured against trespassers.</i> ### Features</p><list><li>21-43: Connecting passageways</li><li>44-56: Barracks or common quarters</li><li>57-64: Large hall</li><li>65-68: Workshop or library</li><li>69-72: Command center or leadership</li><li>73-76: Ladder or stairwell</li><li>77-80: Storage</li><li>81-84: Kitchen or larder</li><li>85-88: Courtyard</li><li>89-98: Something unusual or unexpected</li><li>99-99: You transition into a new theme</li><li>100-100: You transition into a new domain</li></list><h>Dangers</h><list><li>31-33: Blocked or guarded path</li><li>34-36: Caught in the open</li><li>37-39: Chokepoint</li><li>40-42: Trap</li><li>43-45: Alarm trigger</li></list></text>
+			</stronghold>
+			<tanglewood>
+				<name type="string">Tanglewood</name>
+				<siteid type="string">delve_site_domain:delve/tanglewood</siteid>
+				<kind type="string">domain</kind>
+				<summary type="string">A perilous forest of eternal shadow.</summary>
+				<features>
+					<id-00001>
+						<fromrange type="number">21</fromrange>
+						<torange type="number">43</torange>
+						<results>
+							<id-00001>
+								<result type="string">Dense thicket</result>
+							</id-00001>
+						</results>
+					</id-00001>
+					<id-00002>
+						<fromrange type="number">44</fromrange>
+						<torange type="number">56</torange>
+						<results>
+							<id-00001>
+								<result type="string">Overgrown path</result>
+							</id-00001>
+						</results>
+					</id-00002>
+					<id-00003>
+						<fromrange type="number">57</fromrange>
+						<torange type="number">64</torange>
+						<results>
+							<id-00001>
+								<result type="string">Waterway</result>
+							</id-00001>
+						</results>
+					</id-00003>
+					<id-00004>
+						<fromrange type="number">65</fromrange>
+						<torange type="number">68</torange>
+						<results>
+							<id-00001>
+								<result type="string">Clearing</result>
+							</id-00001>
+						</results>
+					</id-00004>
+					<id-00005>
+						<fromrange type="number">69</fromrange>
+						<torange type="number">72</torange>
+						<results>
+							<id-00001>
+								<result type="string">Elder tree</result>
+							</id-00001>
+						</results>
+					</id-00005>
+					<id-00006>
+						<fromrange type="number">73</fromrange>
+						<torange type="number">76</torange>
+						<results>
+							<id-00001>
+								<result type="string">Brambles</result>
+							</id-00001>
+						</results>
+					</id-00006>
+					<id-00007>
+						<fromrange type="number">77</fromrange>
+						<torange type="number">80</torange>
+						<results>
+							<id-00001>
+								<result type="string">Overgrown structure</result>
+							</id-00001>
+						</results>
+					</id-00007>
+					<id-00008>
+						<fromrange type="number">81</fromrange>
+						<torange type="number">84</torange>
+						<results>
+							<id-00001>
+								<result type="string">Rocky outcrop</result>
+							</id-00001>
+						</results>
+					</id-00008>
+					<id-00009>
+						<fromrange type="number">85</fromrange>
+						<torange type="number">88</torange>
+						<results>
+							<id-00001>
+								<result type="string">Camp or outpost</result>
+							</id-00001>
+						</results>
+					</id-00009>
+					<id-00010>
+						<fromrange type="number">89</fromrange>
+						<torange type="number">98</torange>
+						<results>
+							<id-00001>
+								<result type="string">Something unusual or unexpected</result>
+							</id-00001>
+						</results>
+					</id-00010>
+					<id-00011>
+						<fromrange type="number">99</fromrange>
+						<torange type="number">99</torange>
+						<results>
+							<id-00001>
+								<result type="string">You transition into a new theme</result>
+							</id-00001>
+						</results>
+					</id-00011>
+					<id-00012>
+						<fromrange type="number">100</fromrange>
+						<torange type="number">100</torange>
+						<results>
+							<id-00001>
+								<result type="string">You transition into a new domain</result>
+							</id-00001>
+						</results>
+					</id-00012>
+				</features>
+				<dangers>
+					<id-00001>
+						<fromrange type="number">31</fromrange>
+						<torange type="number">33</torange>
+						<results>
+							<id-00001>
+								<result type="string">Denizen hunts</result>
+							</id-00001>
+						</results>
+					</id-00001>
+					<id-00002>
+						<fromrange type="number">34</fromrange>
+						<torange type="number">36</torange>
+						<results>
+							<id-00001>
+								<result type="string">Denizen lairs here</result>
+							</id-00001>
+						</results>
+					</id-00002>
+					<id-00003>
+						<fromrange type="number">37</fromrange>
+						<torange type="number">39</torange>
+						<results>
+							<id-00001>
+								<result type="string">Trap or snare</result>
+							</id-00001>
+						</results>
+					</id-00003>
+					<id-00004>
+						<fromrange type="number">40</fromrange>
+						<torange type="number">42</torange>
+						<results>
+							<id-00001>
+								<result type="string">Path leads you astray</result>
+							</id-00001>
+						</results>
+					</id-00004>
+					<id-00005>
+						<fromrange type="number">43</fromrange>
+						<torange type="number">45</torange>
+						<results>
+							<id-00001>
+								<result type="string">Entangling plant life</result>
+							</id-00001>
+						</results>
+					</id-00005>
+				</dangers>
+				<text type="formattedtext"><p><i>A perilous forest of eternal shadow.</i> ### Features</p><list><li>21-43: Dense thicket</li><li>44-56: Overgrown path</li><li>57-64: Waterway</li><li>65-68: Clearing</li><li>69-72: Elder tree</li><li>73-76: Brambles</li><li>77-80: Overgrown structure</li><li>81-84: Rocky outcrop</li><li>85-88: Camp or outpost</li><li>89-98: Something unusual or unexpected</li><li>99-99: You transition into a new theme</li><li>100-100: You transition into a new domain</li></list><h>Dangers</h><list><li>31-33: Denizen hunts</li><li>34-36: Denizen lairs here</li><li>37-39: Trap or snare</li><li>40-42: Path leads you astray</li><li>43-45: Entangling plant life</li></list></text>
+			</tanglewood>
+			<underkeep>
+				<name type="string">Underkeep</name>
+				<siteid type="string">delve_site_domain:delve/underkeep</siteid>
+				<kind type="string">domain</kind>
+				<summary type="string">An age-old subterranean dungeon.</summary>
+				<features>
+					<id-00001>
+						<fromrange type="number">21</fromrange>
+						<torange type="number">43</torange>
+						<results>
+							<id-00001>
+								<result type="string">Carved passages</result>
+							</id-00001>
+						</results>
+					</id-00001>
+					<id-00002>
+						<fromrange type="number">44</fromrange>
+						<torange type="number">56</torange>
+						<results>
+							<id-00001>
+								<result type="string">Hall or chamber</result>
+							</id-00001>
+						</results>
+					</id-00002>
+					<id-00003>
+						<fromrange type="number">57</fromrange>
+						<torange type="number">64</torange>
+						<results>
+							<id-00001>
+								<result type="string">Stairs into the depths</result>
+							</id-00001>
+						</results>
+					</id-00003>
+					<id-00004>
+						<fromrange type="number">65</fromrange>
+						<torange type="number">68</torange>
+						<results>
+							<id-00001>
+								<result type="string">Grand doorway or entrance</result>
+							</id-00001>
+						</results>
+					</id-00004>
+					<id-00005>
+						<fromrange type="number">69</fromrange>
+						<torange type="number">72</torange>
+						<results>
+							<id-00001>
+								<result type="string">Tomb or catacombs</result>
+							</id-00001>
+						</results>
+					</id-00005>
+					<id-00006>
+						<fromrange type="number">73</fromrange>
+						<torange type="number">76</torange>
+						<results>
+							<id-00001>
+								<result type="string">Rough-hewn cave</result>
+							</id-00001>
+						</results>
+					</id-00006>
+					<id-00007>
+						<fromrange type="number">77</fromrange>
+						<torange type="number">80</torange>
+						<results>
+							<id-00001>
+								<result type="string">Foundry or workshop</result>
+							</id-00001>
+						</results>
+					</id-00007>
+					<id-00008>
+						<fromrange type="number">81</fromrange>
+						<torange type="number">84</torange>
+						<results>
+							<id-00001>
+								<result type="string">Shrine or temple</result>
+							</id-00001>
+						</results>
+					</id-00008>
+					<id-00009>
+						<fromrange type="number">85</fromrange>
+						<torange type="number">88</torange>
+						<results>
+							<id-00001>
+								<result type="string">Imposing architecture or artistry</result>
+							</id-00001>
+						</results>
+					</id-00009>
+					<id-00010>
+						<fromrange type="number">89</fromrange>
+						<torange type="number">98</torange>
+						<results>
+							<id-00001>
+								<result type="string">Something unusual or unexpected</result>
+							</id-00001>
+						</results>
+					</id-00010>
+					<id-00011>
+						<fromrange type="number">99</fromrange>
+						<torange type="number">99</torange>
+						<results>
+							<id-00001>
+								<result type="string">You transition into a new theme</result>
+							</id-00001>
+						</results>
+					</id-00011>
+					<id-00012>
+						<fromrange type="number">100</fromrange>
+						<torange type="number">100</torange>
+						<results>
+							<id-00001>
+								<result type="string">You transition into a new domain</result>
+							</id-00001>
+						</results>
+					</id-00012>
+				</features>
+				<dangers>
+					<id-00001>
+						<fromrange type="number">31</fromrange>
+						<torange type="number">33</torange>
+						<results>
+							<id-00001>
+								<result type="string">Ancient mechanism or trap</result>
+							</id-00001>
+						</results>
+					</id-00001>
+					<id-00002>
+						<fromrange type="number">34</fromrange>
+						<torange type="number">36</torange>
+						<results>
+							<id-00001>
+								<result type="string">Crumbling architecture</result>
+							</id-00001>
+						</results>
+					</id-00002>
+					<id-00003>
+						<fromrange type="number">37</fromrange>
+						<torange type="number">39</torange>
+						<results>
+							<id-00001>
+								<result type="string">Blocked or broken passage</result>
+							</id-00001>
+						</results>
+					</id-00003>
+					<id-00004>
+						<fromrange type="number">40</fromrange>
+						<torange type="number">42</torange>
+						<results>
+							<id-00001>
+								<result type="string">Artifact with a hidden danger</result>
+							</id-00001>
+						</results>
+					</id-00004>
+					<id-00005>
+						<fromrange type="number">43</fromrange>
+						<torange type="number">45</torange>
+						<results>
+							<id-00001>
+								<result type="string">Denizen lurks in darkness</result>
+							</id-00001>
+						</results>
+					</id-00005>
+				</dangers>
+				<text type="formattedtext"><p><i>An age-old subterranean dungeon.</i> ### Features</p><list><li>21-43: Carved passages</li><li>44-56: Hall or chamber</li><li>57-64: Stairs into the depths</li><li>65-68: Grand doorway or entrance</li><li>69-72: Tomb or catacombs</li><li>73-76: Rough-hewn cave</li><li>77-80: Foundry or workshop</li><li>81-84: Shrine or temple</li><li>85-88: Imposing architecture or artistry</li><li>89-98: Something unusual or unexpected</li><li>99-99: You transition into a new theme</li><li>100-100: You transition into a new domain</li></list><h>Dangers</h><list><li>31-33: Ancient mechanism or trap</li><li>34-36: Crumbling architecture</li><li>37-39: Blocked or broken passage</li><li>40-42: Artifact with a hidden danger</li><li>43-45: Denizen lurks in darkness</li></list></text>
+			</underkeep>
+		</category>
+	</irondelve>
+	<reference>
+		<refmanualindex>
+			<chapters>
+				<chapter_000>
+					<name type="string">Front Matter</name>
+					<subchapters>
+						<sub_000>
+							<name type="string">About This Book</name>
+							<refpages>
+								<page_000>
+									<name type="string">About This Book</name>
+									<keywords type="string"></keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0001@Ironsworn Foes and Sites</recordname></listlink>
+								</page_000>
+							</refpages>
+						</sub_000>
+					</subchapters>
+				</chapter_000>
+				<chapter_001>
+					<name type="string">For the Guide</name>
+					<subchapters>
+						<sub_000>
+							<name type="string">Running the Game</name>
+							<refpages>
+								<page_000>
+									<name type="string">Running Foes</name>
+									<keywords type="string">foes rank harm tracker</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0002@Ironsworn Foes and Sites</recordname></listlink>
+								</page_000>
+								<page_001>
+									<name type="string">Without a Game Master</name>
+									<keywords type="string">solo co-op guided gm-less</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0003@Ironsworn Foes and Sites</recordname></listlink>
+								</page_001>
+							</refpages>
+						</sub_000>
+						<sub_001>
+							<name type="string">Foes</name>
+							<refpages>
+								<page_000>
+									<name type="string">Hungry Wolf</name>
+									<keywords type="string">foe Animal</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0004@Ironsworn Foes and Sites</recordname></listlink>
+								</page_000>
+								<page_001>
+									<name type="string">Wolf Pack</name>
+									<keywords type="string">foe Animal</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0005@Ironsworn Foes and Sites</recordname></listlink>
+								</page_001>
+								<page_002>
+									<name type="string">Cave Bear</name>
+									<keywords type="string">foe Beast</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0006@Ironsworn Foes and Sites</recordname></listlink>
+								</page_002>
+								<page_003>
+									<name type="string">Raider</name>
+									<keywords type="string">foe Ironlander</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0007@Ironsworn Foes and Sites</recordname></listlink>
+								</page_003>
+								<page_004>
+									<name type="string">Raider Chieftain</name>
+									<keywords type="string">foe Ironlander</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0008@Ironsworn Foes and Sites</recordname></listlink>
+								</page_004>
+								<page_005>
+									<name type="string">Marsh Lurker</name>
+									<keywords type="string">foe Beast</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0009@Ironsworn Foes and Sites</recordname></listlink>
+								</page_005>
+								<page_006>
+									<name type="string">Barrow Dead</name>
+									<keywords type="string">foe Horror</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0010@Ironsworn Foes and Sites</recordname></listlink>
+								</page_006>
+								<page_007>
+									<name type="string">Cinder Hound</name>
+									<keywords type="string">foe Horror</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0011@Ironsworn Foes and Sites</recordname></listlink>
+								</page_007>
+								<page_008>
+									<name type="string">The Ash-Crowned Warden</name>
+									<keywords type="string">foe Horror</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0012@Ironsworn Foes and Sites</recordname></listlink>
+								</page_008>
+								<page_009>
+									<name type="string">Wild Boar</name>
+									<keywords type="string">foe Animal</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0013@Ironsworn Foes and Sites</recordname></listlink>
+								</page_009>
+								<page_010>
+									<name type="string">Hill Giant</name>
+									<keywords type="string">foe Beast</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0014@Ironsworn Foes and Sites</recordname></listlink>
+								</page_010>
+								<page_011>
+									<name type="string">Frost Wyrm</name>
+									<keywords type="string">foe Beast</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0015@Ironsworn Foes and Sites</recordname></listlink>
+								</page_011>
+								<page_012>
+									<name type="string">Pale Flame Cultist</name>
+									<keywords type="string">foe Ironlander</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0016@Ironsworn Foes and Sites</recordname></listlink>
+								</page_012>
+								<page_013>
+									<name type="string">Swarm of Crows</name>
+									<keywords type="string">foe Animal</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0017@Ironsworn Foes and Sites</recordname></listlink>
+								</page_013>
+							</refpages>
+						</sub_001>
+					</subchapters>
+				</chapter_001>
+				<chapter_002>
+					<name type="string">Delve Sites</name>
+					<subchapters>
+						<sub_000>
+							<name type="string">Themes</name>
+							<refpages>
+								<page_000>
+									<name type="string">Ancient</name>
+									<keywords type="string">delve theme Ancient</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0018@Ironsworn Foes and Sites</recordname></listlink>
+								</page_000>
+								<page_001>
+									<name type="string">Corrupted</name>
+									<keywords type="string">delve theme Corrupted</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0019@Ironsworn Foes and Sites</recordname></listlink>
+								</page_001>
+								<page_002>
+									<name type="string">Fortified</name>
+									<keywords type="string">delve theme Fortified</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0020@Ironsworn Foes and Sites</recordname></listlink>
+								</page_002>
+								<page_003>
+									<name type="string">Hallowed</name>
+									<keywords type="string">delve theme Hallowed</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0021@Ironsworn Foes and Sites</recordname></listlink>
+								</page_003>
+								<page_004>
+									<name type="string">Haunted</name>
+									<keywords type="string">delve theme Haunted</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0022@Ironsworn Foes and Sites</recordname></listlink>
+								</page_004>
+								<page_005>
+									<name type="string">Infested</name>
+									<keywords type="string">delve theme Infested</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0023@Ironsworn Foes and Sites</recordname></listlink>
+								</page_005>
+								<page_006>
+									<name type="string">Ravaged</name>
+									<keywords type="string">delve theme Ravaged</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0024@Ironsworn Foes and Sites</recordname></listlink>
+								</page_006>
+								<page_007>
+									<name type="string">Wild</name>
+									<keywords type="string">delve theme Wild</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0025@Ironsworn Foes and Sites</recordname></listlink>
+								</page_007>
+							</refpages>
+						</sub_000>
+						<sub_001>
+							<name type="string">Domains</name>
+							<refpages>
+								<page_000>
+									<name type="string">Barrow</name>
+									<keywords type="string">delve domain Barrow</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0026@Ironsworn Foes and Sites</recordname></listlink>
+								</page_000>
+								<page_001>
+									<name type="string">Cavern</name>
+									<keywords type="string">delve domain Cavern</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0027@Ironsworn Foes and Sites</recordname></listlink>
+								</page_001>
+								<page_002>
+									<name type="string">Frozen cavern</name>
+									<keywords type="string">delve domain Frozen cavern</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0028@Ironsworn Foes and Sites</recordname></listlink>
+								</page_002>
+								<page_003>
+									<name type="string">Icereach</name>
+									<keywords type="string">delve domain Icereach</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0029@Ironsworn Foes and Sites</recordname></listlink>
+								</page_003>
+								<page_004>
+									<name type="string">Mine</name>
+									<keywords type="string">delve domain Mine</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0030@Ironsworn Foes and Sites</recordname></listlink>
+								</page_004>
+								<page_005>
+									<name type="string">Pass</name>
+									<keywords type="string">delve domain Pass</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0031@Ironsworn Foes and Sites</recordname></listlink>
+								</page_005>
+								<page_006>
+									<name type="string">Ruin</name>
+									<keywords type="string">delve domain Ruin</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0032@Ironsworn Foes and Sites</recordname></listlink>
+								</page_006>
+								<page_007>
+									<name type="string">Sea cave</name>
+									<keywords type="string">delve domain Sea cave</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0033@Ironsworn Foes and Sites</recordname></listlink>
+								</page_007>
+								<page_008>
+									<name type="string">Shadowfen</name>
+									<keywords type="string">delve domain Shadowfen</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0034@Ironsworn Foes and Sites</recordname></listlink>
+								</page_008>
+								<page_009>
+									<name type="string">Stronghold</name>
+									<keywords type="string">delve domain Stronghold</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0035@Ironsworn Foes and Sites</recordname></listlink>
+								</page_009>
+								<page_010>
+									<name type="string">Tanglewood</name>
+									<keywords type="string">delve domain Tanglewood</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0036@Ironsworn Foes and Sites</recordname></listlink>
+								</page_010>
+								<page_011>
+									<name type="string">Underkeep</name>
+									<keywords type="string">delve domain Underkeep</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0037@Ironsworn Foes and Sites</recordname></listlink>
+								</page_011>
+							</refpages>
+						</sub_001>
+					</subchapters>
+				</chapter_002>
+			</chapters>
+		</refmanualindex>
+		<refmanualdata>
+			<p0001>
+				<name type="string">About This Book</name>
+				<text type="formattedtext"><p>This work is based on Ironsworn, Ironsworn: Delve and Ironsworn: Starforged, created by Shawn Tomkin, and licensed for our use under the Creative Commons Attribution 4.0 International license (https://creativecommons.org/licenses/by/4.0/).</p><p>This is an unofficial adaptation made for Kraken VTT, compatible with Ironsworn and Ironsworn: Starforged. It is not an official Tomkin Press product, and is not affiliated with or endorsed by Shawn Tomkin or Tomkin Press. It uses no Tomkin Press art, icons or trade dress. The full rulebooks (free to download from the publisher) explain the games in far more depth.</p><p>The foes in this book are Kraken VTT's own. Delve's site themes and domains are Shawn Tomkin's (CC BY 4.0, from Datasworn).</p></text>
+			</p0001>
+			<p0002>
+				<name type="string">Running Foes</name>
+				<text type="formattedtext"><p>A foe is a rank and a story. Its <b>rank</b> says how hard it is to beat (how much each hit marks on its track) and how badly it hurts: troublesome 1 harm, dangerous 2, formidable 3, extreme 4, epic 5.</p><p>Put foes on the <b>combat tracker</b> from the NPC list. In Ironsworn the tracker shows each foe's rank and its ten-box progress track instead of hit points, and each character's initiative. Use <b>Inflict harm</b> on a character (it makes their Endure Harm with the foe's harm), or let the players make their suffer moves themselves.</p><p>A group of weak foes can be one foe of a higher rank. A big fight can be several objectives, each with its own rank.</p></text>
+			</p0002>
+			<p0003>
+				<name type="string">Without a Game Master</name>
+				<text type="formattedtext"><p>Ironsworn games play well with no game master. The players make the moves, ask the oracles, and decide together what the answers mean. In Kraken the host can still be a player: whoever hosts makes a character too, rolls oracles in the Oracles window and puts foes on the tracker when a fight starts.</p><p>When you are the GM, you are a guide more than an opponent: ask the players what they fear and hope, and use the oracles when you want to be surprised as well.</p></text>
+			</p0003>
+			<p0004>
+				<name type="string">Hungry Wolf</name>
+				<text type="formattedtext"><p><i>A lean grey shape at the edge of the firelight</i> — Troublesome Animal</p><p><b>Features:</b> Ribs showing through a winter coat; yellow eyes</p><p><b>Drives:</b> Feed before the snow deepens</p><p><b>Tactics:</b> Circle and wait; go for the weakest; flee from fire</p></text>
+			</p0004>
+			<p0005>
+				<name type="string">Wolf Pack</name>
+				<text type="formattedtext"><p><i>Five or six wolves hunting as one</i> — Dangerous Animal</p><p><b>Features:</b> Howls from every side; a scarred leader</p><p><b>Drives:</b> Bring down prey; protect the pups</p><p><b>Tactics:</b> Surround; harry and fall back; drag a victim away</p></text>
+			</p0005>
+			<p0006>
+				<name type="string">Cave Bear</name>
+				<text type="formattedtext"><p><i>Shoulders like a boulder, breath like a forge</i> — Formidable Beast</p><p><b>Features:</b> Matted fur; a roar that shakes dust from the roof</p><p><b>Drives:</b> Guard its den; eat its fill before the long sleep</p><p><b>Tactics:</b> Charge; crush and maul; stand tall to terrify</p></text>
+			</p0006>
+			<p0007>
+				<name type="string">Raider</name>
+				<text type="formattedtext"><p><i>A hard-faced warrior with a notched axe</i> — Troublesome Ironlander</p><p><b>Features:</b> Mismatched armour; a raid-mark painted on the shield</p><p><b>Drives:</b> Take what others have; survive the winter</p><p><b>Tactics:</b> Strike from ambush; fight in pairs; run when the leader falls</p></text>
+			</p0007>
+			<p0008>
+				<name type="string">Raider Chieftain</name>
+				<text type="formattedtext"><p><i>A raider who has outlived every rival</i> — Dangerous Ironlander</p><p><b>Features:</b> A cloak of wolfskins; rings taken from the dead</p><p><b>Drives:</b> Be feared; hold the band together with plunder</p><p><b>Tactics:</b> Lead from the front; take hostages; offer a bargain and break it</p></text>
+			</p0008>
+			<p0009>
+				<name type="string">Marsh Lurker</name>
+				<text type="formattedtext"><p><i>Something long and pale beneath the black water</i> — Dangerous Beast</p><p><b>Features:</b> Webbed claws; skin like wet clay; no eyes</p><p><b>Drives:</b> Drag the warm-blooded down into the mud</p><p><b>Tactics:</b> Lie still; seize and pull under; vanish and strike again</p></text>
+			</p0009>
+			<p0010>
+				<name type="string">Barrow Dead</name>
+				<text type="formattedtext"><p><i>A corpse in rotted mail, risen to guard its tomb</i> — Dangerous Horror</p><p><b>Features:</b> Grave-dirt and rust; a cold blue light in empty sockets</p><p><b>Drives:</b> Keep the living from the barrow; take back what was stolen</p><p><b>Tactics:</b> Stand at the threshold; strike without pain or fear; rise again until the barrow's power is broken</p></text>
+			</p0010>
+			<p0011>
+				<name type="string">Cinder Hound</name>
+				<text type="formattedtext"><p><i>A hound of ash and coals that leaves burning prints</i> — Dangerous Horror</p><p><b>Features:</b> Smoke for breath; an ember glow under cracked hide</p><p><b>Drives:</b> Hunt whatever its master names; burn what it cannot catch</p><p><b>Tactics:</b> Run down the fleeing; set the ground alight; break apart into ash when slain</p></text>
+			</p0011>
+			<p0012>
+				<name type="string">The Ash-Crowned Warden</name>
+				<text type="formattedtext"><p><i>The barrow's first chieftain, bound to it by a vow he broke</i> — Formidable Horror</p><p><b>Features:</b> A crown of blackened iron; embers where his heart was; a voice like settling coals</p><p><b>Drives:</b> Keep his vow at last, whatever it costs the living; never be forgotten</p><p><b>Tactics:</b> Command his hounds; call the fire in the braziers; bargain with an oath, then demand it be kept</p></text>
+			</p0012>
+			<p0013>
+				<name type="string">Wild Boar</name>
+				<text type="formattedtext"><p><i>Bristled, tusked and furious</i> — Troublesome Animal</p><p><b>Features:</b> Mud-caked hide; small red eyes</p><p><b>Drives:</b> Defend its ground</p><p><b>Tactics:</b> Charge; gore; charge again</p></text>
+			</p0013>
+			<p0014>
+				<name type="string">Hill Giant</name>
+				<text type="formattedtext"><p><i>A towering hillfolk who wears a dead tree for a club</i> — Extreme Beast</p><p><b>Features:</b> Patchwork furs; a voice like rockfall</p><p><b>Drives:</b> Eat; gather shiny things; drive the small folk off its hills</p><p><b>Tactics:</b> Hurl stones; sweep the field with its club; grab and throw</p></text>
+			</p0014>
+			<p0015>
+				<name type="string">Frost Wyrm</name>
+				<text type="formattedtext"><p><i>A serpent of white scales coiled in the glacier's heart</i> — Epic Beast</p><p><b>Features:</b> Breath of killing cold; eyes like old ice</p><p><b>Drives:</b> Sleep on its hoard; destroy whatever wakes it</p><p><b>Tactics:</b> Burrow through ice; freeze with its breath; crush in its coils</p></text>
+			</p0015>
+			<p0016>
+				<name type="string">Pale Flame Cultist</name>
+				<text type="formattedtext"><p><i>A gaunt zealot who carries a lamp that burns without heat</i> — Troublesome Ironlander</p><p><b>Features:</b> Shaven head; ash smeared on the brow</p><p><b>Drives:</b> Feed the pale flame; bring others to its light</p><p><b>Tactics:</b> Preach and distract; strike when backs are turned; die gladly</p></text>
+			</p0016>
+			<p0017>
+				<name type="string">Swarm of Crows</name>
+				<text type="formattedtext"><p><i>A screaming black cloud over the battlefield</i> — Troublesome Animal</p><p><b>Features:</b> A hundred beaks; the smell of carrion</p><p><b>Drives:</b> Feast on the dead and the dying</p><p><b>Tactics:</b> Blind and confuse; scatter and return</p></text>
+			</p0017>
+			<p0018>
+				<name type="string">Ancient</name>
+				<text type="formattedtext"><p><i>This place holds the secrets of a bygone age.</i> ### Features</p><list><li>1-4: Evidence of lost knowledge</li><li>5-8: Inscrutable relics</li><li>9-12: Ancient artistry or craft</li><li>13-16: Preserved corpses or fossils</li><li>17-20: Visions of this place in another time</li></list><h>Dangers</h><list><li>1-5: Ancient trap</li><li>6-10: Hazardous architecture or terrain</li><li>11-12: Blocked or broken path</li><li>13-14: Denizen protects an ancient secret</li><li>15-16: Denizen reveres an ancient power</li><li>17-18: Living relics of a lost age</li><li>19-20: Ancient evil resurgent</li><li>21-22: Dire warnings of a long-buried danger</li><li>23-24: Ancient disease or contamination</li><li>25-26: Artifact of terrible meaning or power</li><li>27-28: Disturbing evidence of ancient wrongs</li><li>29-30: Others seek power or knowledge</li></list></text>
+			</p0018>
+			<p0019>
+				<name type="string">Corrupted</name>
+				<text type="formattedtext"><p><i>This place is tainted by dark magic.</i> ### Features</p><list><li>1-4: Mystic focus or conduit</li><li>5-8: Strange environmental disturbances</li><li>9-12: Mystic runes or markings</li><li>13-16: Blight or decay</li><li>17-20: Evidence of a foul ritual</li></list><h>Dangers</h><list><li>1-5: Denizen spawned from dark magic</li><li>6-10: Denizen controls dark magic</li><li>11-12: Denizen corrupted by dark magic</li><li>13-14: Corruption marks you</li><li>15-16: Innocents held in thrall</li><li>17-18: Revelations of a terrible truth</li><li>19-20: Mystic trap or trigger</li><li>21-22: Mystic barrier or ward</li><li>23-24: Illusions lead you astray</li><li>25-26: Dark ritual in progress</li><li>27-28: Lingering effects of a dark ritual</li><li>29-30: Dread harbingers of a greater magic</li></list></text>
+			</p0019>
+			<p0020>
+				<name type="string">Fortified</name>
+				<text type="formattedtext"><p><i>Foes defend this place against intruders.</i> ### Features</p><list><li>1-4: Camp or quarters</li><li>5-8: Guarded location</li><li>9-12: Storage or repository</li><li>13-16: Work or training area</li><li>17-20: Command center or leadership</li></list><h>Dangers</h><list><li>1-5: Denizen patrols the area</li><li>6-10: Denizen on guard</li><li>11-12: Denizen ready to sound the alarm</li><li>13-14: Denizen sets an ambush</li><li>15-16: Denizen lures you into a trap</li><li>17-18: Denizens converge on this area</li><li>19-20: Pets or underlings</li><li>21-22: Unexpected alliance revealed</li><li>23-24: Nefarious plans revealed</li><li>25-26: Unexpected leader revealed</li><li>27-28: Trap</li><li>29-30: Alarm trigger</li></list></text>
+			</p0020>
+			<p0021>
+				<name type="string">Hallowed</name>
+				<text type="formattedtext"><p><i>The faithful worship here.</i> ### Features</p><list><li>1-4: Temple or altar</li><li>5-8: Offerings or atonements</li><li>9-12: Religious relic or idol</li><li>13-16: Consecrated ground</li><li>17-20: Dwellings or gathering place</li></list><h>Dangers</h><list><li>1-5: Denizen defends their sanctum</li><li>6-10: Denizen enacts the will of their god</li><li>11-12: Denizen seeks martyrdom</li><li>13-14: Secret of the faith is revealed</li><li>15-16: Greater purpose is revealed</li><li>17-18: Unexpected disciples are revealed</li><li>19-20: Divine manifestations</li><li>21-22: Aspect of the faith beguiles you</li><li>23-24: Unexpected leader is revealed</li><li>25-26: Embodiment of a god or myth</li><li>27-28: Protective ward or barrier</li><li>29-30: Prophecies reveal a dark fate</li></list></text>
+			</p0021>
+			<p0022>
+				<name type="string">Haunted</name>
+				<text type="formattedtext"><p><i>Restless spirits are bound to this place.</i> ### Features</p><list><li>1-4: Tomb or burial site</li><li>5-8: Blood was spilled here</li><li>9-12: Unnatural mists or darkness</li><li>13-16: Messages from beyond the grave</li><li>17-20: Apparitions of a person or event</li></list><h>Dangers</h><list><li>1-5: Denizen haunts this area</li><li>6-10: Unsettling sounds or foreboding signs</li><li>11-12: Denizen attacks without warning</li><li>13-14: Denizen makes a costly demand</li><li>15-16: Denizen seizes your body or mind</li><li>17-18: Denizen taunts or lures you</li><li>19-20: A disturbing truth is revealed</li><li>21-22: Frightening visions</li><li>23-24: The environment is used against you</li><li>25-26: Trickery leads you astray</li><li>27-28: True nature of this place is revealed</li><li>29-30: Sudden, shocking manifestation</li></list></text>
+			</p0022>
+			<p0023>
+				<name type="string">Infested</name>
+				<text type="formattedtext"><p><i>Foul creatures dwell here.</i> ### Features</p><list><li>1-4: Inhabited nest</li><li>5-8: Abandoned nest</li><li>9-12: Ravaged terrain or architecture</li><li>13-16: Remains or carrion</li><li>17-20: Hoarded food</li></list><h>Dangers</h><list><li>1-5: Denizens swarm and attack</li><li>6-10: Toxic or sickening environment</li><li>11-12: Denizen stalks you</li><li>13-14: Denizen takes or destroys something</li><li>15-16: Denizen reveals surprising cleverness</li><li>17-18: Denizen guided by a greater threat</li><li>19-20: Denizen blocks the path</li><li>21-22: Denizen funnels you down a new path</li><li>23-24: Denizen undermines the path</li><li>25-26: Denizen lays in wait</li><li>27-28: Trap or snare</li><li>29-30: Victim’s horrible fate is revealed</li></list></text>
+			</p0023>
+			<p0024>
+				<name type="string">Ravaged</name>
+				<text type="formattedtext"><p><i>Time, disaster, or strife have taken their toll.</i> ### Features</p><list><li>1-4: Path of destruction</li><li>5-8: Abandoned or ruined dwelling</li><li>9-12: Untouched or preserved area</li><li>13-16: Traces of what was lost</li><li>17-20: Ill-fated victims</li></list><h>Dangers</h><list><li>1-5: Precarious architecture or terrain</li><li>6-10: Imminent collapse or destruction</li><li>11-12: Path undermined</li><li>13-14: Blocked or broken path</li><li>15-16: Vestiges of a destructive force</li><li>17-18: Unexpected environmental threat</li><li>19-20: Echoes of a troubling past</li><li>21-22: Signs of a horrible fate</li><li>23-24: Denizen seeks retribution</li><li>25-26: Denizen leverages the environment</li><li>27-28: Denizen restores what was lost</li><li>29-30: Ravages return anew</li></list></text>
+			</p0024>
+			<p0025>
+				<name type="string">Wild</name>
+				<text type="formattedtext"><p><i>Nature prevails in this place.</i> ### Features</p><list><li>1-4: Denizen’s lair</li><li>5-8: Territorial markings</li><li>9-12: Impressive flora or fauna</li><li>13-16: Hunting ground or watering hole</li><li>17-20: Remains or carrion</li></list><h>Dangers</h><list><li>1-5: Denizen hunts</li><li>6-10: Denizen strikes without warning</li><li>11-12: Denizen leverages the environment</li><li>13-14: Denizen wields unexpected abilities</li><li>15-16: Denizen guided by a greater threat</li><li>17-18: Denizen protects something</li><li>19-20: Hazardous terrain</li><li>21-22: Weather or environmental threat</li><li>23-24: Benign aspect becomes a threat</li><li>25-26: Overzealous hunter</li><li>27-28: Disturbing evidence of a victim’s fate</li><li>29-30: Ill-fated victim in danger</li></list></text>
+			</p0025>
+			<p0026>
+				<name type="string">Barrow</name>
+				<text type="formattedtext"><p><i>The dead are enshrined here.</i> ### Features</p><list><li>21-43: Burial chambers</li><li>44-56: Maze of narrow passages</li><li>57-64: Shrine</li><li>65-68: Stately vault</li><li>69-72: Offerings to the dead</li><li>73-76: Statuary or tapestries</li><li>77-80: Remains of a grave robber</li><li>81-84: Mass grave</li><li>85-88: Exhumed corpses</li><li>89-98: Something unusual or unexpected</li><li>99-99: You transition into a new theme</li><li>100-100: You transition into a new domain</li></list><h>Dangers</h><list><li>31-33: Denizen guards this area</li><li>34-36: Trap</li><li>37-39: Death makes its presence known</li><li>40-42: Crumbling architecture</li><li>43-45: Grave goods with hidden dangers</li></list></text>
+			</p0026>
+			<p0027>
+				<name type="string">Cavern</name>
+				<text type="formattedtext"><p><i>A place of stone and darkness.</i> ### Features</p><list><li>21-43: Twisting passages</li><li>44-56: Cramped caves</li><li>57-64: Vast chamber</li><li>65-68: Subterranean waterway</li><li>69-72: Cave pool</li><li>73-76: Natural bridge</li><li>77-80: Towering stone formations</li><li>81-84: Natural illumination</li><li>85-88: Dark pit</li><li>89-98: Something unusual or unexpected</li><li>99-99: You transition into a new theme</li><li>100-100: You transition into a new domain</li></list><h>Dangers</h><list><li>31-33: Denizen lairs here</li><li>34-36: Cave-in</li><li>37-39: Flooding</li><li>40-42: Perilous climb or descent</li><li>43-45: Fissure or sinkhole</li></list></text>
+			</p0027>
+			<p0028>
+				<name type="string">Frozen cavern</name>
+				<text type="formattedtext"><p><i>A place of deep caves and enduring cold.</i> ### Features</p><list><li>21-43: Maze of icy tunnels</li><li>44-56: Glistening cave</li><li>57-64: Vast chamber</li><li>65-68: Frigid waterway</li><li>69-72: Icy pools</li><li>73-76: Magnificent ice formations</li><li>77-80: Frozen waterfall</li><li>81-84: Deep crevasses</li><li>85-88: Discovery locked in the ice</li><li>89-98: Something unusual or unexpected</li><li>99-99: You transition into a new theme</li><li>100-100: You transition into a new domain</li></list><h>Dangers</h><list><li>31-33: Denizen lairs here</li><li>34-36: Fracturing ice</li><li>37-39: Crumbling chasm</li><li>40-42: Bitter chill</li><li>43-45: Disorienting reflections</li></list></text>
+			</p0028>
+			<p0029>
+				<name type="string">Icereach</name>
+				<text type="formattedtext"><p><i>A frigid landscape formed of frozen seas.</i> ### Features</p><list><li>21-43: Plains of ice and snow</li><li>44-56: Seawater channel</li><li>57-64: Icy highlands</li><li>65-68: Crevasse</li><li>69-72: Ice floes</li><li>73-76: Ship trapped in ice</li><li>77-80: Animal herd or habitat</li><li>81-84: Frozen carcass</li><li>85-88: Camp or outpost</li><li>89-98: Something unusual or unexpected</li><li>99-99: You transition into a new theme</li><li>100-100: You transition into a new domain</li></list><h>Dangers</h><list><li>31-33: Denizen hunts</li><li>34-36: Fragile ice above watery depths</li><li>37-39: Perilous climb or descent</li><li>40-42: Avalanche or icefall</li><li>43-45: Foul weather</li></list></text>
+			</p0029>
+			<p0030>
+				<name type="string">Mine</name>
+				<text type="formattedtext"><p><i>Tunnels dug greedily and deep.</i> ### Features</p><list><li>21-43: Cramped tunnels</li><li>44-56: Mine works</li><li>57-64: Excavated chamber</li><li>65-68: Mineshaft</li><li>69-72: Collapsed tunnel</li><li>73-76: Cluttered storage</li><li>77-80: Housing or common areas</li><li>81-84: Flooded chamber</li><li>85-88: Unearthed secret</li><li>89-98: Something unusual or unexpected</li><li>99-99: You transition into a new theme</li><li>100-100: You transition into a new domain</li></list><h>Dangers</h><list><li>31-33: Cave-in</li><li>34-36: Flooding</li><li>37-39: Unstable platforms or architecture</li><li>40-42: Hazardous gas pocket</li><li>43-45: Weakened terrain</li></list></text>
+			</p0030>
+			<p0031>
+				<name type="string">Pass</name>
+				<text type="formattedtext"><p><i>Treacherous paths over high mountains.</i> ### Features</p><list><li>21-43: Winding mountain path</li><li>44-56: Snowfield or glacial rocks</li><li>57-64: River gorge</li><li>65-68: Crashing waterfall</li><li>69-72: Highland lake</li><li>73-76: Forgotten cairn</li><li>77-80: Bridge</li><li>81-84: Overlook</li><li>85-88: Camp or outpost</li><li>89-98: Something unusual or unexpected</li><li>99-99: You transition into a new theme</li><li>100-100: You transition into a new domain</li></list><h>Dangers</h><list><li>31-33: Denizen lairs here</li><li>34-36: Denizen hunts</li><li>37-39: Perilous climb or descent</li><li>40-42: Avalanche or rockslide</li><li>43-45: Foul weather</li></list></text>
+			</p0031>
+			<p0032>
+				<name type="string">Ruin</name>
+				<text type="formattedtext"><p><i>The crumbling legacy of a dead civilization.</i> ### Features</p><list><li>21-43: Crumbling corridors and chambers</li><li>44-56: Collapsed architecture</li><li>57-64: Rubble-choked hall</li><li>65-68: Courtyard</li><li>69-72: Archive or library</li><li>73-76: Broken statuary or fading murals</li><li>77-80: Preserved vault</li><li>81-84: Temple to forgotten gods</li><li>85-88: Mausoleum</li><li>89-98: Something unusual or unexpected</li><li>99-99: You transition into a new theme</li><li>100-100: You transition into a new domain</li></list><h>Dangers</h><list><li>31-33: Ancient mechanism or trap</li><li>34-36: Collapsing wall or ceiling</li><li>37-39: Blocked or broken passage</li><li>40-42: Unstable floor above a new danger</li><li>43-45: Ancient secrets best left buried</li></list></text>
+			</p0032>
+			<p0033>
+				<name type="string">Sea cave</name>
+				<text type="formattedtext"><p><i>Stone passages carved by ocean waves.</i> ### Features</p><list><li>21-43: Watery tunnels</li><li>44-56: Eroded chamber</li><li>57-64: Flooded chamber</li><li>65-68: Vast chamber</li><li>69-72: Dry passages</li><li>73-76: Freshwater inlet</li><li>77-80: Rocky island</li><li>81-84: Waterborne debris</li><li>85-88: Shipwreck or boat</li><li>89-98: Something unusual or unexpected</li><li>99-99: You transition into a new theme</li><li>100-100: You transition into a new domain</li></list><h>Dangers</h><list><li>31-33: Denizen strikes without warning</li><li>34-36: Denizen lurks below</li><li>37-39: Flooding</li><li>40-42: Rushing current</li><li>43-45: Claustrophobic squeeze</li></list></text>
+			</p0033>
+			<p0034>
+				<name type="string">Shadowfen</name>
+				<text type="formattedtext"><p><i>A primeval marsh, cloaked in mist.</i> ### Features</p><list><li>21-43: Narrow path through a fetid bog</li><li>44-56: Stagnant waterway</li><li>57-64: Flooded thicket</li><li>65-68: Island of dry land</li><li>69-72: Submerged discovery</li><li>73-76: Preserved corpses</li><li>77-80: Overgrown structure</li><li>81-84: Tall reeds</li><li>85-88: Camp or outpost</li><li>89-98: Something unusual or unexpected</li><li>99-99: You transition into a new theme</li><li>100-100: You transition into a new domain</li></list><h>Dangers</h><list><li>31-33: Denizen hunts</li><li>34-36: Deep water blocks the path</li><li>37-39: Toxic environment</li><li>40-42: Concealing or disorienting mist</li><li>43-45: Hidden quagmire</li></list></text>
+			</p0034>
+			<p0035>
+				<name type="string">Stronghold</name>
+				<text type="formattedtext"><p><i>A fortress secured against trespassers.</i> ### Features</p><list><li>21-43: Connecting passageways</li><li>44-56: Barracks or common quarters</li><li>57-64: Large hall</li><li>65-68: Workshop or library</li><li>69-72: Command center or leadership</li><li>73-76: Ladder or stairwell</li><li>77-80: Storage</li><li>81-84: Kitchen or larder</li><li>85-88: Courtyard</li><li>89-98: Something unusual or unexpected</li><li>99-99: You transition into a new theme</li><li>100-100: You transition into a new domain</li></list><h>Dangers</h><list><li>31-33: Blocked or guarded path</li><li>34-36: Caught in the open</li><li>37-39: Chokepoint</li><li>40-42: Trap</li><li>43-45: Alarm trigger</li></list></text>
+			</p0035>
+			<p0036>
+				<name type="string">Tanglewood</name>
+				<text type="formattedtext"><p><i>A perilous forest of eternal shadow.</i> ### Features</p><list><li>21-43: Dense thicket</li><li>44-56: Overgrown path</li><li>57-64: Waterway</li><li>65-68: Clearing</li><li>69-72: Elder tree</li><li>73-76: Brambles</li><li>77-80: Overgrown structure</li><li>81-84: Rocky outcrop</li><li>85-88: Camp or outpost</li><li>89-98: Something unusual or unexpected</li><li>99-99: You transition into a new theme</li><li>100-100: You transition into a new domain</li></list><h>Dangers</h><list><li>31-33: Denizen hunts</li><li>34-36: Denizen lairs here</li><li>37-39: Trap or snare</li><li>40-42: Path leads you astray</li><li>43-45: Entangling plant life</li></list></text>
+			</p0036>
+			<p0037>
+				<name type="string">Underkeep</name>
+				<text type="formattedtext"><p><i>An age-old subterranean dungeon.</i> ### Features</p><list><li>21-43: Carved passages</li><li>44-56: Hall or chamber</li><li>57-64: Stairs into the depths</li><li>65-68: Grand doorway or entrance</li><li>69-72: Tomb or catacombs</li><li>73-76: Rough-hewn cave</li><li>77-80: Foundry or workshop</li><li>81-84: Shrine or temple</li><li>85-88: Imposing architecture or artistry</li><li>89-98: Something unusual or unexpected</li><li>99-99: You transition into a new theme</li><li>100-100: You transition into a new domain</li></list><h>Dangers</h><list><li>31-33: Ancient mechanism or trap</li><li>34-36: Crumbling architecture</li><li>37-39: Blocked or broken passage</li><li>40-42: Artifact with a hidden danger</li><li>43-45: Denizen lurks in darkness</li></list></text>
+			</p0037>
+		</refmanualdata>
+	</reference>
+</root>

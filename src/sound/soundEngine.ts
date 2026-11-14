@@ -280,9 +280,11 @@ export const sound = {
       once();
     });
   },
-  // Your turn has come (the combat tracker): a bell, on this screen only.
-  yourTurn() {
-    void sound.play(`sfx/Effects/Bell/effects-bell-${1 + Math.floor(Math.random() * 2)}.mp3`, "sfx");
+  // Your turn has come (the combat tracker), on this screen only: a soft
+  // two-note chime, or a starship console's tone in the science-fiction games.
+  yourTurn(ruleset = "") {
+    const scifi = ["Apeira Astra", "Traveller", "Starforged"].includes(ruleset);
+    void sound.play(`sfx/Effects/Turn/${scifi ? "turn-console" : "turn-chime"}.mp3`, "sfx");
   },
   // For tests and the Sound window: what is playing here.
   playingHere: () => ({ ambience: [...ambience.keys()], music: music?.id ?? null, effects: playing.size, running: context?.state === "running" }),

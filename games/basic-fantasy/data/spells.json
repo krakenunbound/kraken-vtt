@@ -1,0 +1,1169 @@
+[
+ {
+  "name": "Animate Dead",
+  "reversible": false,
+  "classes": "Cleric 4, Magic-User 5",
+  "levels": {
+   "cleric": 4,
+   "magicuser": 5
+  },
+  "range": "30'",
+  "duration": "special",
+  "text": "The casting of this spell causes the mortal remains of one or more deceased creatures to arise as animated\nskeletons or zombies. Such undead monsters persist until slain, and obey the verbal commands of the caster.\nA single casting of this spell may animate a number of hit dice of undead equal to twice the caster's level of ability, and no more. Animated skeletons have hit dice equal to the number the creature had in life; for skeletons of members of player character races, this means one hit die, regardless of the character level of the deceased. Zombies have one more hit die than the creature had in life.\n\nThe sort of monsters created depend on the condition of the remains. A reasonably intact corpse may only\narise as a zombie, while similarly intact skeletal remains may only be animated as a skeleton. The caster\nchooses which remains are animated when casting the spell, in any case where there are more bodies than the\ncaster can animate.\n\nNo character may normally control more hit dice of undead than 4 times their level, regardless of how\nmany times this spell is cast."
+ },
+ {
+  "name": "Animate Objects",
+  "reversible": false,
+  "classes": "Cleric 6",
+  "levels": {
+   "cleric": 6
+  },
+  "range": "100'+10'/level",
+  "duration": "1 round/level",
+  "text": "This spell allows the caster to animate objects that are\nnormally inanimate, such that they may move and even\nappear to be alive. Objects to be animated may not be\nin the possession (worn or carried) of any creature, and\nmust be non-magical in nature. The caster can animate\none object per level, up to a maximum of 25 lbs. per\ncaster level (i.e. 300 lbs. at 12th level, 325 lbs. at 13th\nlevel, and so on).\n\nSuch objects are normally used to attack the enemies of the caster, and the GM must rule on their effectiveness in combat. In general, animated objects attack using the same attack bonus as the caster. Small or lightweight objects do no more than 1d4 damage per hit, while larger and/or heavier objects do 1d6 or 1d8 (at the GM's discretion). As a special case, weapons which are animated do damage using the normal die roll for the type, but only up to a maximum 1d8. Animated objects have a movement rate of 10', and generally must move in contact with the ground (walking, hopping, slithering, or bouncing, however\nseems most appropriate to the GM)."
+ },
+ {
+  "name": "Anti-Magic Shell",
+  "reversible": false,
+  "classes": "Magic-User 6",
+  "levels": {
+   "magicuser": 6
+  },
+  "range": "10' radius",
+  "duration": "1 turn/level",
+  "text": "Within a 10' radius around the caster, all magic is negated for the full duration of the spell. Magical attacks will not affect the caster, magic items and spells within the radius are suppressed, and the caster cannot perform further magic until the spell has expired."
+ },
+ {
+  "name": "Blade Barrier",
+  "reversible": false,
+  "classes": "Cleric 6",
+  "levels": {
+   "cleric": 6
+  },
+  "range": "90'",
+  "duration": "1 round/level",
+  "text": "This spell creates a barrier of flying, spinning, flashing\nblades. The caster may choose a barrier up to 20' high\nwhich extends up to 20' long per level of caster, or a\nring-shaped barrier up to 20' high with a radius of up to\n5' per each two full caster levels (so 30' at level 12 or\n13, 35' at level 14 or 15, and so on).\n\nShould any creature pass through the wall, it suffers\n1d6 points of damage per caster level, with a maximum\ndamage of 15d6. A successful save vs. Death Ray\nreduces damage by half.\n\nThe caster may choose to conjure the wall in an area\nwhere creatures are already located; if this is done, all\nsuch creatures are harmed as if they passed through the\nwall, but a successful save vs. Death Ray in this case\nindicates that the creature has avoided all damage by\njumping to one side or the other of the wall as chosen\nby the creature.\n\nAny ranged attacks passing through a blade barrier\nsuffer a penalty of -4 on the attack roll."
+ },
+ {
+  "name": "Bless",
+  "reversible": true,
+  "classes": "Cleric 2",
+  "levels": {
+   "cleric": 2
+  },
+  "range": "50' radius",
+  "duration": "1 minute/level",
+  "text": "This spell gives the caster and their allies within a 50'\nradius a bonus of +1 on all attack rolls, morale checks\n(for monsters or NPCs allied with the caster), and\nsaving throws vs. any kind of magical **fear**. Casters of\nthe 7th or higher level grant a bonus of +2 to attacks\nand saves vs. **fear**, but the morale bonus remains +1.\n\nThe reverse of **bless** is called **bane**. The caster's\nenemies within a 50' radius become fearful and\nuncertain, causing them to suffer a penalty of -1 on\nattack rolls, morale checks, and saving throws vs. any\nkind of magical **fear**. Casters of the 7th or higher level\napply a penalty of -2 to attacks and saves vs. **fear**, but\nthe morale penalty remains -1."
+ },
+ {
+  "name": "Charm Animal",
+  "reversible": false,
+  "classes": "Cleric 2",
+  "levels": {
+   "cleric": 2
+  },
+  "range": "60'",
+  "duration": "level+1d4 rounds",
+  "text": "1d4 =\n\nThis spell allows the caster to charm one or more animals, in much the same fashion as **charm person**, at a rate of 1 hit die per caster level. The caster may decide which individual animals out of a mixed group are to be affected first; excess hit dice of effect are ignored. No saving throw is allowed, either for normal or giant-sized animals, but creatures of more fantastic nature (as determined by the GM) are allowed a save vs. Spells to resist. When the duration expires, the animals will resume normal activity immediately.\n\nThis spell does not grant the caster any special means of communication with the affected animals; if combined with **speak with animals**, this spell becomes significantly more useful."
+ },
+ {
+  "name": "Charm Monster",
+  "reversible": false,
+  "classes": "Magic-User 4",
+  "levels": {
+   "magicuser": 4
+  },
+  "range": "30'",
+  "duration": "special",
+  "text": "This spell functions like **charm person**, except that the effect is not restricted by creature type or size. Undead monsters are unaffected, as are constructs such\nas golems and any creature which is functionally\nmindless (such as any kind of jelly). This spell can affect 3d6 hit dice of creatures of 3 or fewer hit dice, or one creature of more than 3 hit dice. Saving throws are made just as for **charm person**."
+ },
+ {
+  "name": "Charm Person",
+  "reversible": false,
+  "classes": "Magic-User 1",
+  "levels": {
+   "magicuser": 1
+  },
+  "range": "30'",
+  "duration": "special",
+  "text": "This spell causes a humanoid (including all character\nraces as well as creatures such as orcs, goblins, gnolls,\nand so on) of 4 hit dice or less to perceive the caster as\na close friend, love interest, or at the very least as its\ntrusted ally. Normal characters (PC or NPC) may be\naffected regardless of level of ability.\n\nA save vs. Spells will negate the effect. If hostilities\nhave already commenced or the target otherwise feels\nthreatened by the caster, it receives a bonus of +5 on its\nsaving throw.\n\nThe caster does not directly control the target; rather,\norders must be given verbally, in writing, or by means\nof gestures. Obviously, verbal orders will only work if\nthe target and caster share a spoken language, and the\nsame limitation applies to written orders. Also note that\nthe exact perception of the caster by the affected\nindividual is not under the control of the caster; the GM\nshould decide how the subject of this spell perceives its\nrelationship to the caster.\n\nThe target receives a new saving throw each day if it\nhas an Intelligence of 13 or greater, every week if its\nIntelligence is 9-12, or every month if its Intelligence is\n8 or less; the GM must rule on the equivalent\nintelligence of humanoid monsters."
+ },
+ {
+  "name": "Clairvoyance",
+  "reversible": false,
+  "classes": "Magic-User 3",
+  "levels": {
+   "magicuser": 3
+  },
+  "range": "60'",
+  "duration": "12 turns",
+  "text": "This spell enables the caster to see into another area through the eyes of a living creature in that area. The caster must specify the direction and approximate distance, up to a maximum of 60' away. If there is no appropriate creature in that area, the spell fails. No saving throw is allowed, and the target creature is unaware that it is being so used. The caster may choose another subject creature after at least a turn has passed, enabling multiple locations to be viewed. If the subject creature moves out of range, contact is lost, though the caster may be able to choose another target in this case."
+ },
+ {
+  "name": "Cloudkill",
+  "reversible": false,
+  "classes": "Magic-User 5",
+  "levels": {
+   "magicuser": 5
+  },
+  "range": "100'+10'/level",
+  "duration": "6 rounds/level",
+  "text": "This spell creates a 20'x20'x20' cloud of poison gas which moves at a rate of 10' per round under the control of the caster (so long as he or she concentrates on it). The gas kills outright any creatures of 3 or fewer hit dice or levels it comes in contact with; creatures having 4 or more hit dice or levels must save vs. Poison or die. The cloud persists for the entire duration even if the caster ceases to concentrate upon it."
+ },
+ {
+  "name": "Commune",
+  "reversible": false,
+  "classes": "Cleric 5",
+  "levels": {
+   "cleric": 5
+  },
+  "range": "self",
+  "duration": "1 round/level",
+  "text": "This spell puts the caster in contact with his patron deity or an extraplanar servant thereof, who answers one yes-or-no question per caster level. The ritual to cast this spell takes 1 turn to complete. The being contacted may or may not be omniscient, and further, though the being is technically allied with the caster, it may still not answer questions clearly or completely. These details are left to the GM's discretion."
+ },
+ {
+  "name": "Confusion",
+  "reversible": false,
+  "classes": "Magic-User 4",
+  "levels": {
+   "magicuser": 4
+  },
+  "range": "360'",
+  "duration": "2 rounds+1/level",
+  "text": "This spell causes up to 3d6 living creatures within a 30' radius circle around the target point to become confused∗,∗making them unable to independently determine what they will do. A saving throw vs. Spells is allowed to resist the effect. Roll on the following table on each subject's Initiative number each round to see what the subject does.\n\n| d10 | Behavior |\n| 1 | Act Normally |\n| 2 | Move toward the caster, and attack if possible |\n| 3--5 | Take no action except possibly to babble |\n| 6--7 | Move swiftly away from the caster |\n| 8--10 | Attack the nearest creature, regardless of whether it is a friend or foe |\n\nIf the target cannot perform the action indicated, the\nGM should move down the table (going back to the top\nif the table runs out) until an action is found that the\ntarget can perform. If a confused creature is attacked, it\nreturns the attack on its next initiative number (later in\nthis round or in the next round if it has already acted)\nregardless of what is rolled on the table."
+ },
+ {
+  "name": "Conjure Elemental",
+  "reversible": false,
+  "classes": "Magic-User 5",
+  "levels": {
+   "magicuser": 5
+  },
+  "range": "240'",
+  "duration": "special",
+  "text": "A portal to one of the Elemental Planes of Air, Earth, Fire, or Water is opened, allowing the Magic-User to summon an elemental from that plane. Review the Elemental entry in the\nMonsters section for further details regarding the types available and their statistics. At most one elemental of each type may be summoned by the caster in a given day. Once the elemental appears, it serves the conjurer indefinitely, provided the caster concentrates on nothing but controlling the creature; spell casting, combat, or movement over half the normal rate results in loss of concentration. The conjurer, while in control of an elemental, can dismiss it to its native plane at will (doing so on his or her Initiative if in combat). If the Magic-User loses concentration, control of the summoned Elemental is lost and cannot be regained. The creature then seeks to attack the conjurer and all others in its path. Only **dispel magic** or **dispel evil** will banish the elemental once control has been lost. An elemental may, of course, choose to return to its home plane on its own; such creatures will not choose to remain on the material plane for long."
+ },
+ {
+  "name": "Continual Light",
+  "reversible": true,
+  "classes": "Cleric 3, Magic-User 2",
+  "levels": {
+   "cleric": 3,
+   "magicuser": 2
+  },
+  "range": "360'",
+  "duration": "1 year/level",
+  "text": "This spell creates a spherical region of light, as bright as full daylight up to a 30' radius, with light of lesser intensity to a radius of 60'. Continual light can be cast on an object, into the air, or at a creature, just as with the **light** spell, up to a maximum range of 360' from the caster. The spell remains in effect for one year per level of the caster.\n\nAs with **light**, this spell can be used to blind a creature if cast on its visual organs. Creatures targeted by this spell are allowed a save vs. Death Ray; if the save is made, the spell is cast into the air just behind the target creature. A penalty of -4 is applied to the blinded creature's attack rolls if the saving throw fails.\n\nThe reversed spell, **continual darkness**, causes complete absence of light in the area of effect, overpowering normal light sources. Continual darkness may be used to blind in the same way as continual light."
+ },
+ {
+  "name": "Create Food",
+  "reversible": false,
+  "classes": "Cleric 5",
+  "levels": {
+   "cleric": 5
+  },
+  "range": "10'",
+  "duration": "permanent",
+  "text": "This spell creates food sufficient to feed up to 3 men or\none horse per caster level for one day. This food\nremains edible for just a day, but this can be extended\nby a day by casting **purify food and water** on it (and\nthis can be done repeatedly, keeping the food good\nindefinitely). Food created by this spell is nourishing\nand satisfying, but is rather bland."
+ },
+ {
+  "name": "Create Water",
+  "reversible": false,
+  "classes": "Cleric 4",
+  "levels": {
+   "cleric": 4
+  },
+  "range": "10'",
+  "duration": "permanent",
+  "text": "This spell creates one gallon of water per caster level. Note that one or more vessels to contain the water must be available at the time of casting. The water created by this spell is just like clean rain water. Note: Water weighs about 8 pounds per gallon, and one cubic foot of water is roughly 8 gallons."
+ },
+ {
+  "name": "Cure Blindness",
+  "reversible": true,
+  "classes": "Cleric 3",
+  "levels": {
+   "cleric": 3
+  },
+  "range": "touch",
+  "duration": "instantaneous",
+  "text": "With this spell the caster can cure a creature suffering\nblindness (whether caused by injury or by magic,\nincluding **light** or **continual light**). Blindness caused\nby a curse cannot be cured by this spell.\n\nReversed, this spell becomes **cause blindness**, which\ncauses a living creature touched to become blind. A\nsuccessful melee attack roll is required to touch the\nvictim, and no Saving Throw is allowed. Blinded\ncreatures suffer the penalties described in Deafness and Blindness."
+ },
+ {
+  "name": "Cure Disease",
+  "reversible": true,
+  "classes": "Cleric 3",
+  "levels": {
+   "cleric": 3
+  },
+  "range": "touch",
+  "duration": "instantaneous",
+  "text": "Cure disease cures all diseases and kills all parasites\nafflicting the target creature. A magical or otherwise\nspecial disease (as defined by the GM) may be\nunaffected by this spell, or may require a caster of a\ncertain minimum level to cure it. Also note, just\nbecause a disease or parasite is removed does not\nmean that the victim cannot be infected anew should\nthat affliction be encountered again.\n\nThe reverse form of this spell, **cause disease**, causes a\nliving creature touched by the caster to suffer from a\ndebilitating and potentially deadly disease for the next\n1d10 days. A successful melee attack roll is required to\ntouch the victim, and no Saving Throw is allowed. The\ntarget suffers a -2 penalty to attack rolls, Armor Class\nand Saving Throws. While the victim is sick they\ncannot benefit from natural healing of damage or\nConstitution point losses, nor prepare spells or move at\nrunning speed. At the end of each day in which an\ninfected character performed any form of exertion (for\nexample by fighting, traveling, working, or doing\nmagical research), the character must roll a saving\nthrow vs. Spells or suffer 1d6 points of damage. Once\nthe spell duration has elapsed the affected character, if\nstill alive, is free of the illness and can start healing\ndamage and recovering lost Constitution points, and\ncan again prepare spells."
+ },
+ {
+  "name": "Cure Light Wounds",
+  "reversible": true,
+  "classes": "Cleric 1",
+  "levels": {
+   "cleric": 1
+  },
+  "range": "touch",
+  "duration": "instantaneous",
+  "text": "With this spell the caster heals 1d6+1 hit points of damage by laying his or her hand upon the injured creature.\n\nThe reverse form of this spell, **cause light wounds**, causes 1d6+1 damage to the creature affected by it. A successful attack roll is required in this case,  and the spell is wasted if the attack roll fails.\n\nUndead are affected by this spell and its reverse in opposite fashion; they are injured by **cure light wounds** and healed by **cause light wounds**."
+ },
+ {
+  "name": "Cure Serious Wounds",
+  "reversible": true,
+  "classes": "Cleric 4",
+  "levels": {
+   "cleric": 4
+  },
+  "range": "touch",
+  "duration": "instantaneous",
+  "text": "This spell works exactly like **cure light wounds,** save that it heals 2d6 points of damage, plus 1 point per caster level. The reverse, **cause serious wounds**, also works exactly like **cause light wounds**, except that it inflicts 2d6 + 2 points per caster level."
+ },
+ {
+  "name": "Darkvision",
+  "reversible": false,
+  "classes": "Magic-User 3",
+  "levels": {
+   "magicuser": 3
+  },
+  "range": "touch",
+  "duration": "1 hour/level",
+  "text": "The subject receives Darkvision with a range of 60' for the duration of the spell."
+ },
+ {
+  "name": "Death Spell",
+  "reversible": false,
+  "classes": "Magic-User 6",
+  "levels": {
+   "magicuser": 6
+  },
+  "range": "240'",
+  "duration": "instantaneous",
+  "text": "This spell will kill 3d12 hit dice or levels of creatures in a 30' radius sphere centered wherever the caster wishes (within the range limit). Excess levels of effectiveness are lost. Each creature affected is allowed to save vs. Death Ray; those that fail the save die immediately. Creatures of 8 or more hit dice or levels are immune to the spell, as are undead monsters, golems, and any other \"creature\" that is not truly alive."
+ },
+ {
+  "name": "Detect Evil",
+  "reversible": true,
+  "classes": "Cleric 1, Magic-User 2",
+  "levels": {
+   "cleric": 1,
+   "magicuser": 2
+  },
+  "range": "60'",
+  "duration": "1 round/level",
+  "text": "This spell allows the caster to detect evil; specifically, the caster can detect creatures with evil intentions, magic items with evil enchantments, and possibly extraplanar creatures of evil nature. Normal characters, even \"bad\" characters, cannot be detected by this spell, as only overwhelming evil is detectable. The caster sees the \"evil\" creatures or objects with a definite glow around them, but the glow cannot be seen by anyone else.\n\nThe exact definition of evil is left for the GM to decide. Note that items such as ordinary traps or poisons are not \"evil,\" and thus not detectable by this spell.\n\nReversed, this spell becomes **detect good**, which works just as described above with respect to detecting \"good\" enchantments, angelic creatures, and so on."
+ },
+ {
+  "name": "Detect Invisible",
+  "reversible": false,
+  "classes": "Magic-User 2",
+  "levels": {
+   "magicuser": 2
+  },
+  "range": "60'",
+  "duration": "1 turn/level",
+  "text": "By means of this spell the caster is able to see invisible characters, creatures or objects within the given range, seeing them as translucent shapes."
+ },
+ {
+  "name": "Detect Magic",
+  "reversible": false,
+  "classes": "Cleric 1, Magic-User 1",
+  "levels": {
+   "cleric": 1,
+   "magicuser": 1
+  },
+  "range": "60'",
+  "duration": "2 turns",
+  "text": "The caster of this spell is able to detect enchanted or enspelled objects or creatures within the given range by sight, seeing them surrounded by a pale glowing light. Only the caster sees the glow. Invisible creatures or objects are not detected by this spell, but the emanations of the invisibility magic will be seen as an amorphous glowing fog, possibly allowing the caster (only) to attack the invisible creature at an attack penalty of only -2."
+ },
+ {
+  "name": "Dimension Door",
+  "reversible": false,
+  "classes": "Magic-User 4",
+  "levels": {
+   "magicuser": 4
+  },
+  "range": "10'",
+  "duration": "instantaneous",
+  "text": "The caster of this spell instantly transfers himself or herself, or any single target creature within range, to any spot within 200' plus 20' per caster level. The caster or target creature always arrives at exactly the spot desired, whether the caster visualizes the area or states direction and distance. An unwilling target may save vs. Spells to avoid being transported. Anything worn or carried by the caster or target creature will be transported also, including another character or creature if the transportee can lift it. If the target area is within a solid object, the spell fails automatically."
+ },
+ {
+  "name": "Disintegrate",
+  "reversible": false,
+  "classes": "Magic-User 6",
+  "levels": {
+   "magicuser": 6
+  },
+  "range": "60'",
+  "duration": "instantaneous",
+  "text": "This spell causes a green laser-like beam of light to\nspring from the caster's pointing finger. Any single\ncreature or object (up to a 10x10x10 foot cube of\nmaterial) will be completely disintegrated. The target is\nallowed a save vs. Spells to resist. This spell can target\njust one creature per casting, so if the target makes its\nsave the spell is wasted.\n\nEquipment worn or carried by a disintegrated creature\nis not affected, and will naturally fall to the floor as if\ndropped."
+ },
+ {
+  "name": "Dispel Evil",
+  "reversible": false,
+  "classes": "Cleric 5",
+  "levels": {
+   "cleric": 5
+  },
+  "range": "touch",
+  "duration": "1 round/level",
+  "text": "This powerful spell aids the caster in dealing with\ncreatures from the nether planes, hereafter called \"evil\ncreatures.\"\n\nFirst, the caster's Armor Class is improved by 4 points\nwhen attacked by evil creatures; this effect lasts until the\nspell ends, whether by expiration of the duration or\nthrough the employment of one of the following effects.\n\nWith a successful attack roll the caster can drive an evil\ncreature back to the nether planes; the caster must of\ncourse be engaged with the creature (i.e. in melee\nrange). The creature may make a save vs. Spells to\nresist. Any successful attack roll by the caster for this\npurpose ends the spells effects, whether or not the\ncreature saves.\n\nAlternately, by touching the affected creature, item, or area, the caster can immediately dispel any one spell or similar magical effect cast by the evil creature. There is no roll for this effect, except if the target is an unwilling creature in which case an attack roll is needed to actually touch it. The only spells which cannot be ended this way are those which are immune to **dispel magic**. Successfully performing the touch ends the spell, regardless of whether or not any evil magic is actually ended."
+ },
+ {
+  "name": "Dispel Magic",
+  "reversible": false,
+  "classes": "Cleric 4, Magic-User 3",
+  "levels": {
+   "cleric": 4,
+   "magicuser": 3
+  },
+  "range": "120'",
+  "duration": "instantaneous",
+  "text": "The caster can use dispel magic to end ongoing spells that have been cast on a creature or object, or to end ongoing spells (or at least their effects) within a cubic area 20' on a side. The caster must choose whether to dispel magic on a creature or object, or to affect an area.\n\nIf dispel magic is targeted at a creature, all spell effects (including ongoing potion effects) may be canceled. If cast upon an area, all such effects within the area may be canceled. Any spell or effect having a caster level equal to or less than the **dispel magic** caster's level is ended automatically. Those created by higher level casters might not be canceled; there is a 5% chance the dispel magic will fail for each level the spell effect exceeds the caster level. For example, a 10th level caster dispelling magic created by a 14th level caster has a 20% chance of failure.\n\nSome spells cannot be ended by dispel magic; this specifically includes any curse, including those created by **bestow curse** (the reverse of **remove curse**) as well as by cursed items."
+ },
+ {
+  "name": "Feeblemind",
+  "reversible": true,
+  "classes": "Magic-User 5",
+  "levels": {
+   "magicuser": 5
+  },
+  "range": "180'",
+  "duration": "permanent",
+  "text": "This spell allows the caster to inflict a terrible curse on a\nliving creature, reducing both Intelligence and Charisma\nto just 1 point each. A saving throw vs. Spells is\nallowed to resist this effect, but if the target creature is a\nspellcaster a penalty of -4 is applied to the saving throw.\n\nOnce feebleminded, the victim of this spell can no\nlonger cast spells, speak or understand any language, or\nindeed communicate at all as their mind can no longer\nunderstand even such simple things as pointing or\nbeckoning. The victim still knows their friends and\nallies and will follow them and try to help or protect\nthem.\n\nThis effect can be removed with a **heal** spell, or with\nthe reversed form of this spell **restoremind**."
+ },
+ {
+  "name": "Find Traps",
+  "reversible": false,
+  "classes": "Cleric 2",
+  "levels": {
+   "cleric": 2
+  },
+  "range": "30'",
+  "duration": "3 turns",
+  "text": "This spell permits the caster to detect a variety of traps, both mechanical and magical. When the caster moves within 30' of a trap, he or she will see it glow with a faint greenish-blue aura. The caster is not, however, able to detect certain natural hazards such as quicksand, a sinkhole, or unsafe walls of natural rock. The spell also does not bestow the caster with the knowledge needed to disarm the trap, nor any details about its type or nature."
+ },
+ {
+  "name": "Find the Path",
+  "reversible": false,
+  "classes": "Cleric 6",
+  "levels": {
+   "cleric": 6
+  },
+  "range": "touch",
+  "duration": "1 turn/level",
+  "text": "This spell grants the caster, or another subject the caster\ntouches, the ability to find the best and shortest route to\na destination selected by the caster. The caster must\nhave some knowledge about the location; any location\nthe caster has ever visited can be so located, as well as\nlocations described to the caster. Even knowing the\nname of a location (if it has a name) is enough for this\nspell to function.\n\nThis spell works as well indoors or even underground\nas it does in the outdoors. However, **find the path** works with respect to locations, not objects or creatures. It can only lead someone to a destination that is on the same plane of existence as the caster when cast; this can be very limiting if the caster (and subject if any) is in a closed or pocket universe of some kind.\n\nThe subject can sense the approximate direction of the\ndestination, but also knows the best path to get there,\nsensing each turning and knowing which paths or\ncorridors to follow when choices appear (but not\nsooner, unfortunately). The spell even overcomes\nthings such as secret doors, which the subject will sense\nand know how to open, and grants the knowledge of\npasswords or codes at the correct moments.\n\nNote that the spell will always choose the best path.\nFor example, if the shortest way requires the use of a\nkey which the subject does not have, the spell will\nchoose a different, probably longer way if possible. If\nthis is not possible, the subject will be led to the locked\ndoor and will understand that they must find a way to\npass through on their own.\n\nThe spell ends when the subject arrives at the\ndestination or when the duration expires, whichever\ncomes first. If the duration expires before arrival, the\nsubject may still remember the approximate direction to\nthe destination but will no longer know the way."
+ },
+ {
+  "name": "Fireball",
+  "reversible": false,
+  "classes": "Magic-User 3",
+  "levels": {
+   "magicuser": 3
+  },
+  "range": "100'+10'/level",
+  "duration": "instantaneous",
+  "text": "Casting this spell causes a tiny glowing ember about the\nsize of a pea to fly forth from the caster's pointing finger,\nby which the direction of flight is indicated. The ember\nflies as fast as an arrow and explodes into flames filling\na 20' radius sphere when it reaches a distance chosen\nby the caster (up to its maximum range), or sooner if it\nimpacts any solid or liquid surface. Those within the\narea of the flames suffer 1d6 points of damage per\ncaster level, with a saving throw vs. Spells allowed for\nhalf damage.\n\nNo roll is normally required when casting this spell, but\nif the caster wishes to project the ember through a slit or\nother small opening they must roll a missile attack\n(without range adjustments) to hit it; failure indicates\nthe fireball hits an adjacent surface and detonates there.\n\nCombustible objects or substances within the area of\neffect will generally catch fire and possibly be destroyed\n(as determined by the GM). Metals with low melting\npoints such as gold, silver, lead, copper, or bronze may\nbe softened briefly and thus deformed, but the flames\ndo not persist long enough to actually melt the metal\nitems unless they are very small (such as a thin gold\nneck chain for example).\n\nWhile the fireball exerts little if any force or pressure\nwhen exploding, it may still destroy weak or flammable\nbarriers; if such a thing happens (in the determination\nof the GM, of course), the fireball completes its\nexpansion in the space beyond the destroyed barrier."
+ },
+ {
+  "name": "Flesh to Stone",
+  "reversible": true,
+  "classes": "Magic-User 6",
+  "levels": {
+   "magicuser": 6
+  },
+  "range": "30'/level",
+  "duration": "permanent",
+  "text": "This spell causes a living creature, along with all gear it\nwears or carries, to be petrified. This is the same effect\ncaused by the gaze of a medusa or the touch of a\ncockatrice. A saving throw vs. Petrification is allowed to\nresist the spell.\n\nThe petrified victim becomes dormant; its mind cannot\nbe contacted in any way, and it is neither properly alive\nnor dead. Damage inflicted on its statue-like form will\napply to its fleshy form if it is ever restored; simply\nbreaking off an arm or leg is probably enough to result\nin death due to blood loss. The GM should determine\nthe effects of any such injury.\n\nThe reverse spell, **stone to flesh**, acts as a counterspell for **flesh to stone**, restoring the creature just as it was when it was petrified. It does nothing if applied to stone that is not the result of **flesh to stone** or similar petrification effects (such as a medusa's gaze)."
+ },
+ {
+  "name": "Floating Disc",
+  "reversible": false,
+  "classes": "Magic-User 1",
+  "levels": {
+   "magicuser": 1
+  },
+  "range": "0",
+  "duration": "5 turns +1/level",
+  "text": "The casting of this spell causes an invisible platform of\nmagical force to appear. It is about the size of a shield,\nabout 3 feet in diameter and an inch deep at its center.\nIt can support a maximum of 500 pounds of weight.\n(Note that water weighs about 8 pounds per gallon.)\nThe disc floats level to the ground, at about the height\nof the caster's waist. It remains still when within 10' of\nthe caster, and follows at the caster's movement rate if\nthey move away from it. The floating disc can be\npushed as needed to position it but will be dispelled if\nsomehow moved more than 10 feet from the caster.\nWhen the spell duration expires, the disc disappears\nfrom existence and drops whatever was supported to\nthe surface beneath.\n\nThe disc must be loaded so that the items placed upon\nit are properly supported, or they will (of course) fall off.\nFor example, the disc can support just over 62 gallons\nof water, but the water must be in a barrel or other\nreasonable container that can be placed upon the disc.\nSimilarly, a pile of loose coins will tend to slip and slide\nabout, and some will fall off with every step the caster\ntakes; but a large sack full of coins, properly tied, will\nremain stable."
+ },
+ {
+  "name": "Fly",
+  "reversible": false,
+  "classes": "Magic-User 3",
+  "levels": {
+   "magicuser": 3
+  },
+  "range": "touch",
+  "duration": "1 turn/level",
+  "text": "The subject of this spell can fly at a speed equal to his or her normal ground movement rate (as adjusted by encumbrance). The subject can ascend at half speed and descend at double speed, with the same maneuverability as the subject has when moving on the ground. Flying under the effect of this spell requires only as much concentration as walking, so the subject can attack or cast spells normally. The subject of a fly spell can neither charge nor run, nor carry aloft more weight than his or her maximum load.\n\nIf the spell duration expires while the subject is still\nairborne, the magic fails slowly such that the subject\ndescends at a rate of 120 feet per round for 1d10\nrounds. If the subject reaches the ground in that time\nthey land safely; if not, the subject falls the rest of the\ndistance and suffers normal falling damage. However,\nif this spell is ended by **dispel magic** or similar outside\nforces, the subject falls immediately. For any such fall,\nsee Falling Damage for details of the\nconsequences."
+ },
+ {
+  "name": "Geas",
+  "reversible": true,
+  "classes": "Magic-User 6",
+  "levels": {
+   "magicuser": 6
+  },
+  "range": "5' per level",
+  "duration": "special",
+  "text": "By means of this spell the caster compels a living\ncreature to perform some specific action or services, or\nalternately to avoid performing some action. The target\ncreature must be able to hear and understand the\ncaster, or it cannot be affected. This spell will\nautomatically fail if used to compel a creature to engage\nin some obviously self-destructive action.\n\nA saving throw vs. Spells will allow an unwilling target\nto resist a geas when it is first cast. However, the target\nmay choose to accept the geas, typically as part of a\nbargain with the caster for some service. Once\nsubjected to this spell the subject must obey the\ninstructions given by the caster indefinitely, though if\nthe geas is to perform some action the spell effectively\nends when that action has been completed.\n\nFor every 24 hours that the subject chooses not to obey\nthe geas (or is prevented from obeying it), it suffers a\npenalty of -2 to each of its ability scores, up to a\nmaximum penalty of -8. No ability score can be\nreduced to less than 3 by this effect. If the subject\nresumes obeying the geas, all such penalties are\nremoved after 24 hours.\n\nIf the task assigned to the subject of this spell is open-\nended or otherwise unable to be completed, the subject\nis still compelled to try to perform the task, but the spell\nwill end in no more than one day per caster level.\nVery clever creatures may be able to subvert the\ninstructions given; the GM must decide on the results of\nany such attempts\n\nThis spell can be ended by **remove curse** cast by a\ncharacter of higher level than the caster of the geas, but\nis never affected by **dispel magic**."
+ },
+ {
+  "name": "Growth of Animals",
+  "reversible": false,
+  "classes": "Cleric 3",
+  "levels": {
+   "cleric": 3
+  },
+  "range": "60'+10'/level",
+  "duration": "1 turn/level",
+  "text": "This spell causes an animal to grow to twice its normal size and eight times its normal weight. The affected creature will do double normal damage with all physical attacks, and its existing natural Armor Class increases by 2. The animal's carrying capacity is also doubled. Unfriendly animals may save vs. Spells to resist this spell; normally, domesticated animals will not attempt to resist it, though they may become confused or panicky afterward (at the GM's discretion).\n\nAll equipment worn or carried by an animal is similarly enlarged by the spell, though this change has no effect on the magical properties of any such equipment. Any enlarged item that leaves the enlarged creature's possession instantly returns to its normal size.\n\nThe spell gives no means of command or influence over the enlarged animals."
+ },
+ {
+  "name": "Growth of Plants",
+  "reversible": true,
+  "classes": "Magic-User 4",
+  "levels": {
+   "magicuser": 4
+  },
+  "range": "120'",
+  "duration": "permanent",
+  "text": "This spell causes normal vegetation of any sort within\nrange to become thick and overgrown. The area of\neffect is determined by the caster, but cannot exceed\n1,000 square feet (a 10'x100' area or equivalent) per 5\ncaster levels. The plants become densely entangled,\nand characters or creatures wishing to move through\nmust hack or force their way through it. All movement\nwithin the affected area is reduced to no more than 5’\nper round for less than giant sized creatures; giant sized\ncreatures are reduced to half normal movement rate.\n\nThis spell cannot take effect in an area that does not\nalready have some plants present. Any sort of\nanimated plant creature affected by this spell is allowed\na saving throw vs. Spells to resist, but if this save fails it\nis affected as with **growth of animals** above.\n\nThe reverse form, **shrink plants**, may be used to\nrender overgrown areas passable. The area of effect is\nidentical to the normal version. Animated plant\ncreatures are normally unaffected by this spell, but if\nsuch creatures have already been enlarged by **growth of plants** this spell will reverse the effect. In the latter\ncase, a saving throw vs. Spells is allowed to resist.\n\nBoth forms of this spell are permanent until countered,\neither by the reverse of the spell or by **dispel magic**."
+ },
+ {
+  "name": "Hallucinatory Terrain",
+  "reversible": false,
+  "classes": "Magic-User 4",
+  "levels": {
+   "magicuser": 4
+  },
+  "range": "400'+40'/level",
+  "duration": "12 turns/level",
+  "text": "This spell makes one 10 yard cube per level of outdoor terrain appear like a different type (i.e. field into forest, grassland into desert, or the like). This spell requires a full turn to cast.\n\nThe affected terrain looks, sounds, and smells like another sort of natural terrain. Structures, equipment, and creatures within the area are not hidden or changed in appearance. A save vs. Spells is allowed to see through the illusion, but only if the creatures or characters affected actively attempt to do so."
+ },
+ {
+  "name": "Haste",
+  "reversible": true,
+  "classes": "Magic-User 3",
+  "levels": {
+   "magicuser": 3
+  },
+  "range": "30'+10'/level",
+  "duration": "1 round/level",
+  "text": "This spell accelerates the actions of 1 creature per caster\nlevel. The affected creatures move and act twice as fast\nas normal, having double their normal movement rates\nand making twice the normal attacks per round, for the\nduration of the spell. Spellcasting is not accelerated,\nnor is the use of magic items such as wands, which may\nstill be used just once per round. Multiple haste or\nspeed effects don’t combine; only apply the most\npowerful or longest lasting effect.\n\nIn combat, the subject of this spell performs a full round\nof actions (movement followed by attacking) on their\nnormal Initiative; after all combatants have acted, the\nsubject may perform another round of actions as\nbefore. If two or more combatants are under the effect\nof this spell, use the same Initiative numbers to\ndetermine the order of their actions in each of their\n\"extra\" rounds.\n\nReversed, haste becomes **slow**; affected creatures move at half speed, attacking half as often (generally, every other round) and making half a normal move each round. Naturally, target creatures may save vs. Spells to avoid the effect. Haste and slow counter and dispel each other."
+ },
+ {
+  "name": "Heal",
+  "reversible": true,
+  "classes": "Cleric 6",
+  "levels": {
+   "cleric": 6
+  },
+  "range": "touch",
+  "duration": "permanent",
+  "text": "This spell enables the caster to almost totally cure\nwounds, diseases, and other afflictions of a single living\ncreature. With a touch the caster cures blindness,\ndeafness, **confusion**, disease, **feeblemind**, choking,\nnausea, and poison. All but 1d4 hit points are restored\nto the subject, if it has any injuries. Ability points losses\nare fully restored, if and only if those losses would be\nrecoverable without this spell; permanent losses to\nability scores are not recovered. Energy drain is also\nnot affected by this spell.\n\nThe reversed spell, **harm**, injures the creature touched so horribly that it is left with only 1d4 hit points. The caster must succeed at a normal attack roll in this case; failure means the spell is wasted. Note that, if the victim has fewer hit points remaining than the number rolled, he or she will take at least one point of damage (and this is the only case in which **harm** may kill a creature).\n\nGenerally, both **heal** and∗∗ harm∗∗ only affect living creatures. If used against an undead creature, heal instead acts like harm; likewise, harm affects undead like heal. Constructs such as golems are unaffected by either spell."
+ },
+ {
+  "name": "Hold Monster",
+  "reversible": false,
+  "classes": "Magic-User 5",
+  "levels": {
+   "magicuser": 5
+  },
+  "range": "180'",
+  "duration": "2d8 turns",
+  "text": "This spell functions like **hold person**, except that it affects any living creature that fails its save vs. Spells."
+ },
+ {
+  "name": "Hold Person",
+  "reversible": false,
+  "classes": "Cleric 2, Magic-User 3",
+  "levels": {
+   "cleric": 2,
+   "magicuser": 3
+  },
+  "range": "180'",
+  "duration": "2d8 turns",
+  "text": "This spell will render any living (not undead) humanoid\ncreature (as defined in **charm person**) paralyzed.\nCreatures larger than ogres will not be affected by this\nspell. Targets of the spell are conscious and able to\nbreathe, but cannot move, act, or speak in any way. A\nsuccessful save vs. Spells is allowed to resist the effect.\nThe spell may be cast at a single person, who makes\ntheir save at -2, or at a group, in which case 1d4 of the\ncreatures in the group may be affected.\n\nA paralyzed swimmer can’t swim and may drown. A\ncharacter who has somehow gained wings and is then\nparalyzed while airborne will not be able to move its\nwings to fly and will thus fall."
+ },
+ {
+  "name": "Hold Portal",
+  "reversible": false,
+  "classes": "Magic-User 1",
+  "levels": {
+   "magicuser": 1
+  },
+  "range": "100'+10'/level",
+  "duration": "1 round/level",
+  "text": "This spell secures a portal such as a door, gate,\nwindow, or shutter made of normal non-magical\nbuilding materials; the portal behaves as if securely\nlocked for the duration of the spell. The door may be\nopened early only by means of **knock** or a successful\ncasting of **dispel magic**, or by literally destroying the\ndoor (which may well require more time than the\nduration of this spell allows)."
+ },
+ {
+  "name": "Ice Storm",
+  "reversible": false,
+  "classes": "Magic-User 4",
+  "levels": {
+   "magicuser": 4
+  },
+  "range": "300'+30'/level",
+  "duration": "1 round",
+  "text": "This spell causes a powerful storm of sleet and hail to\nfall in a 20' radius around the target spot for a full\nround. This effect causes 5d6 points of damage to\nevery creature within the area, with a save vs. Spells\nallowed to reduce damage by half. The ice storm fills a\nvertical volume of 40', so creatures higher than that\ndistance above the target spot are unaffected. Any\ncreature naturally resistant to cold takes half damage (or\none-quarter damage if it makes its save).\n\nVisibility within the storm is very poor, such that most\ncreatures will attack with a penalty of -2 on the attack\nroll. Walking movement is reduced to half speed, and\nrunning is not possible within the storm; anyone who\ntries will fall down and be forced to remain on the\nground until the spell ends. Flying is likewise\nimpossible, and any flying creature within the area will\nbe driven to the ground. A penalty of -20% is applied\nto any Listen rolls made by those in the storm's area.\n\nWhen the spell ends, the hail and ice deposited by the\nstorm disappears as if it had never existed."
+ },
+ {
+  "name": "Insect Plague",
+  "reversible": false,
+  "classes": "Cleric 5",
+  "levels": {
+   "cleric": 5
+  },
+  "range": "300'+30'/level",
+  "duration": "1 round/level",
+  "text": "This spell summons one swarm of locusts per three caster levels, to a maximum of six swarms at 18th level. See Insect Swarm in the **Monsters** section for the effects of a swarm. As explained there, a normal swarm of insects occupies a contiguous area equal to three 10 foot cubes; all swarms summoned by this spell must be contiguous with each other such that they effectively form a single huge swarm, though the caster may stretch them out in a line, form them into a block, or indeed arrange them in some serpentine form if desired.\n\nThe summoned swarms persist for the duration above,\nor until they are slain, whichever comes first. The\ncaster may summon them in areas where creatures are\nalready located. Once summoned, the swarms are\nstationary until they disappear or are slain, and they\nattack any creatures who are within their area."
+ },
+ {
+  "name": "Invisibility",
+  "reversible": false,
+  "classes": "Magic-User 2",
+  "levels": {
+   "magicuser": 2
+  },
+  "range": "touch",
+  "duration": "special",
+  "text": "This spell causes the creature touched (who may be the\ncaster) to become invisible, undetectable by normal\nvision or Darkvision. Invisible creatures may be\ndetected by those with non-visual sensory abilities.\n\nAll items worn or carried by the target when the spell is\ncast become invisible as well. If the target lays down an invisible item, it instantly becomes visible again; on the  other hand, items picked up do not automatically  become invisible. If the target places a visible item entirely inside its invisible clothing, backpack, pouch, or other container so that if the target were visible the item could not be seen, it will become invisible just as if it\nwere held when the spell was cast.\n\nNote that casting this spell upon another makes the\ntarget invisible to the caster as well as everyone else. A\nparty of invisible characters will likely experience\nproblems with running into or tripping over each other.\nThe spell lasts at most 24 hours if not ended sooner. It\nends instantly if the target attacks an opponent or casts\nany spell. Other actions do not normally end the spell.\nThe target may end the spell at will.\n\nObjects that shed light may be made invisible but the\nlight itself will remain visible, and the source of that light\n(and the character carrying it) can thus be discovered.\nRain, dust, paint, and any other visible substance\nthrown or applied to an invisible creature will also\nrender it detectable."
+ },
+ {
+  "name": "Invisibility 10' Radius",
+  "reversible": false,
+  "classes": "Magic-User 3",
+  "levels": {
+   "magicuser": 3
+  },
+  "range": "touch",
+  "duration": "1 turn/level",
+  "text": "The target of this spell becomes invisible just as with\n**invisibility**, but in addition all other creatures within 10\nfeet of the target at the time of casting (referred to as\nmembers of the group) also become invisible. Unlike\nwith normal invisibility, all members can see each other\nand themselves normally.\n\nIf any member negates the effect by attacking or casting\na spell, it becomes visible but all other members remain\ninvisible. However, if the original subject takes an\naction that negates the invisibility, it ends for the entire\ngroup. If a member negates its own invisibility, that\nmember will no longer be able to see the still-invisible\ngroup members. Moving further than 10 feet from the\ntarget also causes a group member to become visible;\nreturning to the area does not reinstate the invisibility."
+ },
+ {
+  "name": "Invisible Stalker",
+  "reversible": false,
+  "classes": "Magic-User 6",
+  "levels": {
+   "magicuser": 6
+  },
+  "range": "0",
+  "duration": "special",
+  "text": "The caster summons an **invisible stalker** to do his or her bidding (see the Monsters section, below, for details). The spell persists until **dispel evil** is cast on the creature, it is slain, or the task is fulfilled. The GM is advised to review the monster entry for the invisible stalker when this spell is used, as they may not always be reliable servants."
+ },
+ {
+  "name": "Knock",
+  "reversible": false,
+  "classes": "Magic-User 2",
+  "levels": {
+   "magicuser": 2
+  },
+  "range": "30'",
+  "duration": "special",
+  "text": "The knock spell opens stuck, barred, locked, **held**, or **wizard locked** doors. It opens secret doors, as well as locked or trick-opening boxes or chests. It also loosens welds, shackles, or chains (provided they serve to hold shut something which can be opened). If used to open a **wizard locked** door, the spell does not remove the **wizard lock** but simply suspends its functioning for one turn. In all other cases, the door does not relock itself or become stuck again on its own. Knock will not raise a portcullis or operate any other similar mechanism, nor will it affect ropes, vines, and the like.\n\nEach casting undoes a single method of securing the\ndoor or item, so that for example a door which is both\nlocked and stuck can be unlocked but will still be stuck;\na second casting of knock will open such a door."
+ },
+ {
+  "name": "Levitate",
+  "reversible": false,
+  "classes": "Magic-User 2",
+  "levels": {
+   "magicuser": 2
+  },
+  "range": "touch",
+  "duration": "1 turn/level",
+  "text": "When this spell is cast, the caster or any one creature or\nobject they touch begins to levitate. Levitation allows\nthe caster to cause the subject to rise or fall at a rate of\nas much as 20 feet per round.\n\nIf a target creature is unwilling, the caster must roll a\nsuccessful attack roll in order to touch the target, and\neven if this roll succeeds the target is allowed a save vs.\nSpells to resist the magic. Likewise, if the target is an\nobject being held by an unwilling creature, a similar\nattack roll and saving throw will be required.\nUnattended objects are automatically affected when\ntouched.\n\nThe caster controls the levitating subject mentally. If\nthe caster ceases to control the subject, it remains at its\ncurrent altitude until the spell ends, at which point it\nfalls.\n\nLevitation does not provide any means of horizontal\nmovement, but neither is the levitated subject fixed in\nplace. It can be moved by pushing or by towing with a\nrope, for example. A creature being levitated can pull\nitself along a cliff face or across a ceiling, or pull itself\nwith a rope fixed to a solid object. Movement of this\nsort is usually at half normal walking speed. The\nsubject cannot, however, change its own altitude.\n\nIf a levitating creature attempts to attack with most\nweapons it will find that it is unstable. The first such\nattack is made at a penalty of -1 on the attack roll, and\nthis penalty worsens by an additional -1 each round to\na maximum penalty of -5. Should the creature refrain\nfrom making an attack for a full round, it is reduced to\nthe -1 penalty level on the next round. This does not\nusually affect spellcasting while levitated, however."
+ },
+ {
+  "name": "Light",
+  "reversible": true,
+  "classes": "Cleric 1, Magic-User 1",
+  "levels": {
+   "cleric": 1,
+   "magicuser": 1
+  },
+  "range": "120'",
+  "duration": "6 turns + 1/level",
+  "text": "This spell creates a light equal to torchlight which illuminates a 30' radius area (and provides dim light for an additional 20') around the target location or object. The effect is immobile if cast into an area, but it can be cast on a movable object. Light taken into an area of magical darkness does not function.\n\nReversed, **light** becomes **darkness**, creating an area of darkness just as described above. This darkness blocks out Darkvision and negates mundane light sources.\n\nA light spell may be cast to counter and dispel the darkness spell of an equal or lower level caster (and vice versa). Doing so causes both spells to instantly cease, restoring the existing ambient light level.\n\nEither version of this spell may be used to blind an opponent by means of casting it on the target's ocular organs. The target is allowed a saving throw vs. Death Ray to avoid the effect, and if the save is made, the spell does not take effect at all. A **light** or **darkness** spell cast to blind does not have the given area of effect (that is, no light or darkness is shed around the victim)."
+ },
+ {
+  "name": "Lightning Bolt",
+  "reversible": false,
+  "classes": "Magic-User 3",
+  "levels": {
+   "magicuser": 3
+  },
+  "range": "100' + 10'/level",
+  "duration": "instantaneous",
+  "text": "Casting this spell causes a bright thin spark about the\nthickness of a string to fly forth from the caster's\npointing finger, which indicates the direction. The spark\nstretches as fast as an arrow's flight until it reaches the\ncaster's chosen distance (but not more than the range\ngiven above) or strikes a solid or liquid surface, at which\npoint it explodes into a full-fledged bolt of lightning\nextending another 60 feet further. The lightning bolt\npasses through an area 5 feet wide, arcing and jumping,\nso that while it is not actually 5 feet wide, for game\npurposes it is treated as if it were.\n\nThose within the area of the lightning bolt suffer 1d6\npoints of damage per caster level, with a saving throw\nvs. Spells allowed for half damage.\n\nIf a lightning bolt is targeted at a body of water it\nexplodes at the point of impact, as described above, but\nwithin the water volume struck it expands like a fireball\nto a maximum radius of 20 feet instead of performing\nas it does in the air. If a lightning bolt is cast\nunderwater it explodes in the same way, but at the tip\nof the caster's outstretched finger.\n\nThe lightning bolt sets fire to combustibles and damages\nobjects in its path. It can damage metals with a low\nmelting point; metals such as gold, silver, lead, copper,\nor bronze may be softened briefly and thus deformed,\nbut the lightning does not persist long enough to\nactually melt the metal items unless they are very small\n(such as a thin gold neck chain for example).\n\nIf the damage caused to an interposing barrier shatters\nor breaks through it, the bolt may continue beyond the\nbarrier if the spell’s range permits; otherwise, it may\nreflect from the barrier back toward the caster, or in a\nrandom direction at the GM's option. Creatures already\naffected by the lightning bolt do not take additional\ndamage if struck by the reflection of the same bolt."
+ },
+ {
+  "name": "Locate Object",
+  "reversible": false,
+  "classes": "Cleric 3, Magic-User 2",
+  "levels": {
+   "cleric": 3,
+   "magicuser": 2
+  },
+  "range": "360'",
+  "duration": "1 round/level",
+  "text": "This spell grants the caster knowledge of the location of\nan object. The caster must know the object well or be\nable to clearly imagine it. (Viewing an accurate drawing\nor painting will suffice for the latter option.) A general\nitem can be located; if more than one such item is in\nrange, the spell will lead the caster to the nearest one.\n\nUnique or unusual items can only be located if the\ncaster has first-hand knowledge (not merely through\ndivination such as **clairvoyance** or a **crystal ball**). The\nspell cannot be used to locate creatures of any sort. A\nlayer of lead or gold no thicker than foil surrounding the\nitem will prevent it from being located."
+ },
+ {
+  "name": "Lower Water",
+  "reversible": false,
+  "classes": "Magic-User 6",
+  "levels": {
+   "magicuser": 6
+  },
+  "range": "20'/level",
+  "duration": "1 turn/level",
+  "text": "Using this spell the caster lowers the level of the water\nin a river, a lake, or even the sea by up to 2 feet per\ncaster level for the given duration, but to no less than 1\ninch deep. The spell affects an area with radius of at\nmost 10 feet per level centered on the caster's chosen\nlocation (within the range given).\n\nThere will be a steep slope up to the surface of any area\nof un-lowered water that falls outside the spell's radius.\nShips which were already in the area of effect as well as\nany that dare to enter it will be unable to climb the\nslope and thus unable to leave the area (if not outright\nbeached by the spell in the first place).\n\nThis spell has the effect of **slow** (the reverse of **haste**)\nwhen cast upon water elementals and other creatures\nformed from water; a save vs. Spells is allowed, with\nsuccess negating the effect. It cannot be cast upon any\nother kind of creatures."
+ },
+ {
+  "name": "Magic Jar",
+  "reversible": false,
+  "classes": "Magic-User 5",
+  "levels": {
+   "magicuser": 5
+  },
+  "range": "60'",
+  "duration": "special",
+  "text": "This spell allows the caster to attempt to possess the\nbody of another living creature. The caster begins by\nplacing their spirit into a gem, jewel, or large crystal of\nsome sort within the spell range, called the magic jar.\nThe caster needs to know where the magic jar is\nlocated, but does not have to be able to see it. While\nthe caster's spirit is outside their body, that body\nappears to all intents and purposes to be dead, but\ndoes not undergo decay as a normal dead body would.\n\nEach round after entering the magic jar the caster's spirit\ncan attempt to take control of the body of a living\ncreature within the spell range; the target is allowed a\nsave vs. Spells to resist. If the saving throw fails, the\nspirit of the target (now called the host) is trapped in the\nmagic jar and the caster's spirit takes possession of the\nhost's body. Possession of a creature by means of this\nspell is blocked by **protection from evil** or a similar\nward.\n\nIf the attempt to possess a victim fails, the caster's spirit\nremains in the magic jar, and that target creature is\nimmune to further attempts for the duration of the spell.\nThe caster may make an attempt to possess another\ntarget on the following round, if desired.\n\nIf on the other hand the possession attempt is\nsuccessful, the caster may remain in control of the host's\nbody for as long as desired. The caster's spirit may\nreturn to the magic jar at any time when it is within spell\nrange, restoring the host's spirit to its own body. The\ncaster may not return to the same host's body again for\nthe remainder of the duration of this spell, but may\nattempt to possess it again on a subsequent casting.\n\nWhenever the caster's spirit is in the magic jar, it may\nchoose to return to its own body if it is within spell\nrange. If the body is not in range, the caster's spirit may\nbecome trapped if no vulnerable creatures are in range.\n\nWhenever the caster's spirit returns to their own body,\nthe spell ends. There is a 50% chance that the magic\njar will shatter when the spell ends (if the spell did not\nend because it was broken), becoming worthless and\nunusable.\n\nWhen the caster's spirit possesses a host, the caster has\naccess to the physical abilities of the host's body,\nincluding Strength, Dexterity, and Constitution, while\nstill retaining their own Intelligence, Wisdom, and\nCharisma. The caster has access only to their own\nknowledge, class and level, attack bonus, saving\nthrows, spell casting ability, and any other purely\nmental capabilities.\n\nThe caster does not gain access to supernatural or\notherwise extraordinary powers of the host, and may\nnot be able to perform physical actions that the caster\nhas never done before (such as flying, if a winged body\nhas been possessed). The caster does have access to\nthe host's sensory capabilities, such as Darkvision, the\nenhanced sense of smell of a dog, and so on\n\nIf the caster's spirit is in the magic jar, and the jar is\nbroken (whether by **dispel magic** or physical damage),\nthe caster's spirit will return to its own body if it is in\nspell range; if not, the caster's spirit departs (i.e. the\ncaster dies). In either case, the spell ends.\n\nIf the caster's spirit is driven from the host body by\ndispel evil, and the magic jar is in range of the host\nbody, the caster's spirit returns to the jar and the host's\nspirit returns to its body. The caster will not be able to\npossess the same host again for the remaining duration\nof the spell. If the magic jar is not in range of the host\nbody, the caster's spirit departs, the host's spirit is freed\nfrom the jar and also departs, and the host's body dies.\n\nIf the host's spirit is in the magic jar, and the jar is\nbroken while in spell range of the host body, the\ncaster's spirit departs, the host's spirit returns to its body,\nand the spell ends. If the jar is broken while out of\nrange of the host's body, the host's spirit departs, the\ncaster's spirit is stranded in the host body. Note here\nthat the spell has not ended. **Dispel evil** can still be\nused to drive the caster's spirit from the body, which\ndeparts as noted, ending the spell. A stranded caster\nmay use another casting of this spell (with another\nmagic jar, of course) to return to their own body, which\nof course kills the host's body."
+ },
+ {
+  "name": "Magic Missile",
+  "reversible": false,
+  "classes": "Magic-User 1",
+  "levels": {
+   "magicuser": 1
+  },
+  "range": "100'+10'/level",
+  "duration": "instantaneous",
+  "text": "This spell causes a missile of magical energy to dart forth from the caster's fingertip and strike its target, which must be at least partially visible to the caster, dealing 1d6+1 points of damage. The missile strikes unerringly. Specific parts of a creature can't be singled out. Inanimate objects are not damaged by the spell.\n\nFor every three caster levels beyond 1st, an additional missile is fired -- two at 4th level, three at 7th, four at 10th, and the maximum of five missiles at 13th level or higher. If the caster fires multiple missiles, he or she can target a single creature or several creatures. A single missile can strike only one creature. Targets must be designated before damage is rolled."
+ },
+ {
+  "name": "Magic Mouth",
+  "reversible": false,
+  "classes": "Magic-User 1",
+  "levels": {
+   "magicuser": 1
+  },
+  "range": "30'",
+  "duration": "special",
+  "text": "This spell places a simple form of programmed illusion\non a non-living object within range. When triggered,\nthe spell causes the illusion of a mouth to appear on the\nobject and a message to be said aloud. The\nenchantment can remain in place indefinitely, but is\nexpended when triggered (i.e. the message is normally\ndelivered only once).\n\nThe message recounted may be up to three words per\ncaster level in length. The caster may insert pauses in\nthe message, but the entire message must be delivered\nin a time period of no more than a turn. The voice of\nthe spell can be made to speak at any volume\nattainable by a normal human. It will sound enough\nlike the caster's own voice to be recognized by a close\nassociate of the caster, but not identical.\n\nThe illusionary mouth moves as if actually speaking the\nmessage being delivered, and remains visible during\npauses. If placed on an artistic depiction of a creature\nwith a mouth (such as a painting or statue), the spell\ncan be made to appear to animate the mouth of the\nobject.\n\nThis spell cannot be used to activate magic items which\nhave command words, nor to activate any other\nmagical effects.\n\nThe caster must choose the conditions under which this\nspell is triggered. The conditions may be as\ncomplicated or simple as desired, but must depend only\non sight and hearing; the spell has no other sensory\ncapabilities. The spell also has no particular\nintelligence, and can be fooled by disguises or illusions.\nThe spell does have the capability to effectively see in\nnormal darkness, but not in any sort of magical\ndarkness, and it cannot detect invisible creatures nor\nsee through doors, walls, or even opaque curtains.\nLikewise, stealth or magical silence are effective in\npreventing audible triggers. Finally, the spell cannot\ndetect a character's class, level, ability scores, or any\nother feature not obvious to a normal NPC.\n\nTriggers have an effective sensory range of 10 feet per\ncaster level; sounds, sights, or actions outside that range\nwill never trigger the spell."
+ },
+ {
+  "name": "Massmorph",
+  "reversible": false,
+  "classes": "Magic-User 4",
+  "levels": {
+   "magicuser": 4
+  },
+  "range": "100'+10'/level",
+  "duration": "1 hour/level",
+  "text": "With this spell the caster causes 1d4+1 man-sized (or smaller) creatures per four caster levels to appear as if they are natural effects of the terrain (for example, trees in a forest, stalagmites in a cave, coral underwater, boulders in a cavern, etc.). All creatures to be affected must be within a 120' radius of the caster at the time the spell is cast. Only those creatures the caster wishes to hide are affected, and then only if they are willing to be concealed. The caster may include himself or herself among the affected creatures.\n\nThose affected are thus concealed from other creatures passing through the area for so long as they remain still. If an affected creature chooses to move or attack, the illusion is dispelled for that creature, but those who remain still continue to be hidden. The caster may end the spell early if he or she wishes by speaking a single word. The illusion can also be ended by **dispel magic**."
+ },
+ {
+  "name": "Mind Reading",
+  "reversible": false,
+  "classes": "Magic-User 2",
+  "levels": {
+   "magicuser": 2
+  },
+  "range": "60'",
+  "duration": "1 turn/level",
+  "text": "This spell, sometimes incorrectly called **ESP**, permits\nthe caster to hear (and possibly see, if the target\nvisualizes anything) the surface thoughts of one or more\nliving creatures within range. The caster must designate\na direction or select a visible target, and then\nconcentrate for a turn in order to \"hear\" the thoughts.\nEach turn the caster may choose to \"listen\" in a different\ndirection. The caster may stop listening, then resume\nagain later, so long as the duration has not expired.\nThe target creature is not normally aware of being spied\nupon in this way, though any creature already under\nthe effect of this spell or any similar form of telepathy\nwill instantly know and be able to sense the direction of\nthe caster.\n\nRock more than 2 inches thick or even a very thin\ncovering of lead or gold will block the spell. All undead\ncreatures are immune to this effect, as are mindless\ncreatures and constructs such as golems."
+ },
+ {
+  "name": "Mirror Image",
+  "reversible": false,
+  "classes": "Magic-User 2",
+  "levels": {
+   "magicuser": 2
+  },
+  "range": "self",
+  "duration": "1 turn/level",
+  "text": "This spell allows the caster to create multiple illusory\nduplicates (called figments) which seem to swirl and\nmove around and through each other as well as the\ncaster more or less constantly, making it impossible for\nmost creatures to determine which is the real one. A\ntotal of 1d4 images plus one image per three caster\nlevels (maximum eight images total) are created.\n\nThe figments mimic the caster's actions, going through\nthe motions of casting spells, drinking potions,\nlevitating, and so on, just as the caster does. Figments\nalways look exactly like the caster.\n\nAny opponent who attacks or casts spells directly on the\ncaster will always hit a figment instead. Attacking a\nfigment destroys it, whether or not the attack roll is\nsuccessful, as does any attack spell directed at one.\nArea-effect spells are not cast directly on the caster, and\nthus appear to affect all figments exactly as they affect\nthe caster; for instance, if the caster is subjected to a\n**fireball**, all figments will appear to be injured just as the\ncaster was"
+ },
+ {
+  "name": "Neutralize Poison",
+  "reversible": true,
+  "classes": "Cleric 4",
+  "levels": {
+   "cleric": 4
+  },
+  "range": "touch",
+  "duration": "instantaneous",
+  "text": "This spell detoxifies any sort of venom in the creature or object touched. A poisoned creature suffers no additional effects from the poison; if cast upon a creature slain by poison in the last 10 rounds, the creature is revived with 1 hit point. If cast upon a poisonous object (weapon, trap, etc.) the poison is rendered permanently ineffective.\n\nReversed, this spell becomes **poison**. The caster must make a successful attack roll; if the attack is a success, the target must save vs. Poison or die. The caster's touch remains poisonous for 1 round per level of ability, or until discharged (i.e. only one creature can be affected by the reversed spell)."
+ },
+ {
+  "name": "Passwall",
+  "reversible": false,
+  "classes": "Magic-User 5",
+  "levels": {
+   "magicuser": 5
+  },
+  "range": "30'",
+  "duration": "3 turns",
+  "text": "Passwall creates a passage through wooden, plaster, or stone walls, but not through metal or other harder materials. The passage is up to 10 feet deep plus an additional 10 feet deep per three caster levels above 9th (20 feet at 12th, 30 feet deep at 15th, 40 feet deep at 18th). If the wall's thickness is more than the depth of the passage created, then a single passwall simply makes a niche or short tunnel. Several passwall spells can then form a continuing passage to breach very thick walls. When passwall ends (due to duration, **dispel magic**, or caster's choice), creatures within the passage are ejected out the nearest exit."
+ },
+ {
+  "name": "Phantasmal Force",
+  "reversible": false,
+  "classes": "Magic-User 2",
+  "levels": {
+   "magicuser": 2
+  },
+  "range": "180'",
+  "duration": "concentration",
+  "text": "This spell creates the visual illusion of an object, creature (or small group of creatures), or other effect, as visualized by the caster up to a maximum size of 20'x20'x20'. The illusion does not create sound, smell, texture, or temperature. The caster can animate the image within the limits of the area of effect. The image persists so long as the caster concentrates upon it.\n\nIf used to create the illusion of one or more creatures, they will have an Armor Class of 11 and will disappear if hit in combat. Damage done by monsters, spells, etc. simulated by this spell is not real; those \"killed\" or otherwise apparently disabled will wake up uninjured (at least from this spell) after 2d8 rounds. The illusory damage done will be equivalent to the normal damage for any attack form simulated.\n\nAttempting to animate more creatures than the caster's level grants viewing creatures with at least average Intelligence an immediate save vs. Spells to recognize the creatures as illusions; those making the save will be unaffected by any actions taken by the illusions from that point on. A similar save may be granted by the GM any time he or she feels the illusion is likely to be seen through, especially if the player describes an illusion which seems improbable or otherwise poorly conceived."
+ },
+ {
+  "name": "Polymorph Other",
+  "reversible": false,
+  "classes": "Magic-User 4",
+  "levels": {
+   "magicuser": 4
+  },
+  "range": "30'",
+  "duration": "permanent",
+  "text": "This spell allows the caster to change one target into another form of living creature. The assumed form can't have more hit dice than caster's level, or be incorporeal or gaseous. Unlike **polymorph self**, the transformed target also gains the behavioral and mental traits, any physical attacks, special, supernatural or spell-like abilities of the new form, in addition to the physical capabilities and statistics of such. If the new form is substantially less intelligent, the target may not remember its former life.\n\nThe target creature will have the same number of hit points it previously had, regardless of the hit dice of the form assumed. Incorporeal or gaseous creatures are immune to this spell, as noted above. A creature with shape changing abilities such as a doppleganger can revert to its natural form after one round.\n\nEquipment worn or carried will be dropped if the new\nform is unable to wear or carry the items. If any such\nitems would be constricting or physically harmful to the\nnew form, the transformation slows and alters such that\nthey are dropped without damage to the items nor\nharm to the target creature. If the GM determines that\nany items cannot be removed in this way, they must\ndecide on the exact results.\n\nUnwilling targets that successfully save against Polymorph are not affected. The spell is permanent until dispelled or the creature is slain, at which time the target reverts to his or her original form."
+ },
+ {
+  "name": "Polymorph Self",
+  "reversible": false,
+  "classes": "Magic-User 4",
+  "levels": {
+   "magicuser": 4
+  },
+  "range": "self",
+  "duration": "1 hour/level",
+  "text": "This spell allows the caster to change into a different\nform of living creature. The form assumed may not\nhave more hit dice than the caster has levels, nor be\nincorporeal or gaseous.\n\nThe caster assumes the physical nature of the assumed\nform while retaining their mental and spiritual\ncharacteristics. They gain the Armor Class and all\nphysical attacks possessed by the form but does not\ngain any special, supernatural or spell-like abilities.\nDragon breath is a special ability, for instance, so were\nthe caster to assume the form of a dragon they could\nuse the dragon's normal claw, bite, and tail swipe\nattacks, but not the dragon's breath.\n\nIf the form assumed is capable of speaking and making\nappropriate gestures (as determined by the GM) the\ncaster may use their own spells in the assumed form.\n\nEquipment worn or carried will be dropped if the new\nform is unable to wear or carry the items. If any such\nitem would be constricting or physically harmful to the\nnew form, the transformation slows and alters such that\nthe item is dropped without damage to the items nor\nharm to the target creature. If the GM decides that any\nsuch item cannot be removed in this way, the spell fails.\n\nThe caster can remain transformed up to one hour per\nlevel of ability, or may choose to end the spell before\nthat point if they wish."
+ },
+ {
+  "name": "Projected Image",
+  "reversible": false,
+  "classes": "Magic-User 6",
+  "levels": {
+   "magicuser": 6
+  },
+  "range": "240'",
+  "duration": "6 turns",
+  "text": "This spell creates a quasi-real, illusory version of the\ncaster. This illusory projected image looks, sounds, and\nsmells like the caster, in addition to mimicking gestures\nand actions (including speech, which is projected from\nthe caster to the illusory image as if by a form of\n**ventriloquism**). Any further spells cast seem to\noriginate from the illusion, not the actual caster.\n\nA line of sight between the caster and their illusory self\nmust be maintained or the spell ends. Any effect or\naction that breaks the line of sight dispels the image, as\ndoes the illusionary caster being struck in combat. Note\nthat this spell grants no special sensory powers to the\ncaster; for example, if the illusory self is positioned so as\nto be able to see something the caster can't directly see,\nthe caster does not see it. Also, all spell ranges are still\nfigured from the caster's actual position, not the illusory\nself's position."
+ },
+ {
+  "name": "Protection from Evil",
+  "reversible": true,
+  "classes": "Cleric 1, Magic-User 1",
+  "levels": {
+   "cleric": 1,
+   "magicuser": 1
+  },
+  "range": "touch",
+  "duration": "1 turn/level",
+  "text": "This spell protects the caster or a creature touched by\nthe caster (the \"subject\") from evil; specifically, the spell\nwards against summoned creatures, creatures with\nsignificantly evil intentions, and extraplanar creatures of\nevil nature. A magical barrier with a radius of just 1\nfoot is created around the subject. The barrier moves\nwith the subject, and provides three specific forms of\nmagical protection against attacks or other effects\nattempted by the affected creatures against the subject.\n\nFirst, the subject receives a bonus of +2 to their Armor\nClass, and a similar bonus of +2 on all saving throws.\nSecond, the barrier blocks all attempts to **charm** or\notherwise control the subject, or to possess the subject\n(such as with **magic jar**). Such attempts simply fail\nduring the duration of this spell. Note however that a\ncreature who receives this protection after being\npossessed is not cured of the possession.\n\nThird, any and all summoned creatures and extraplanar\ncreatures of evil nature are unable to physically touch\nthe subject. Attacks by such creatures using their\nnatural weapons simply fail. This effect is canceled if\nthe subject performs any form of physical attack (even\nwith a ranged weapon) on any affected creature, but\nthe other features of the spell continue in force.\n\nReversed, this spell becomes **protection from good**. It\nfunctions in all ways as described above, save that\n\"good\" creatures are kept away, rather than \"evil\" ones."
+ },
+ {
+  "name": "Protection from Evil 10' Radius",
+  "reversible": true,
+  "classes": "Cleric 4, Magic-User 3",
+  "levels": {
+   "cleric": 4,
+   "magicuser": 3
+  },
+  "range": "touch",
+  "duration": "1 turn/level",
+  "text": "This spell functions exactly as **protection from evil**, but with a 10' radius rather than a 1' radius. All within the radius receive the protection; those who leave and then re-enter, or who enter after the spell is cast, receive the protection as well.\n\nReversed, this spell becomes **protection from good 10' radius**, and functions exactly as the reversed form of **protection from evil**, except that it covers a 10' radius around the target rather than the normal 1' radius."
+ },
+ {
+  "name": "Protection from Normal Missiles",
+  "reversible": false,
+  "classes": "Magic-User 3",
+  "levels": {
+   "magicuser": 3
+  },
+  "range": "self",
+  "duration": "1 turn/level",
+  "text": "The caster is completely protected from small sized, non-magical missile attacks. Therefore, magic arrows, hurled boulders, or other such are not blocked, but any number of normal arrows, sling bullets, crossbow bolts, thrown daggers, etc. will be fended off. Note that normal missiles projected by magic bows count as magical missiles for the purposes of this spell."
+ },
+ {
+  "name": "Purify Food and Water",
+  "reversible": false,
+  "classes": "Cleric 1",
+  "levels": {
+   "cleric": 1
+  },
+  "range": "10'",
+  "duration": "instantaneous",
+  "text": "With this spell the caster makes contaminated food or\nwater pure and safe to eat or drink. Poison is\nneutralized and spoilage is reversed by this spell. The\nspell does not protect against future decay, however,\nnor does it affect magic potions (including,\nunfortunately, **Potions of Poison**). Unholy water, if it\nexists in your campaign, is ruined by the casting of this\nspell. The spell affects about 2 pounds of food and/or\ndrink per caster level; note that a quart of water or\nsimilar drink weighs just over 2 pounds."
+ },
+ {
+  "name": "Quest",
+  "reversible": true,
+  "classes": "Cleric 5",
+  "levels": {
+   "cleric": 5
+  },
+  "range": "5'/level",
+  "duration": "special",
+  "text": "By means of this spell the caster compels a living\ncreature to perform some specific action or services, or\nalternately to avoid performing some action. The target\ncreature must be able to hear and understand the\ncaster, or it cannot be affected. This spell will\nautomatically fail if used to compel a creature to engage\nin some obviously self-destructive action.\n\nA saving throw vs. Spells will allow an unwilling target\nto resist a quest when it is first cast. However, the\ntarget may choose to accept the quest, typically as part\nof a bargain with the caster to perform some service.\nOnce subjected to this spell, the subject must obey the\ninstructions given by the caster indefinitely, though if\nthe quest is to perform some action the spell effectively\nends when that action has been completed.\n\nFor every 24 hours that an affected creature chooses\nnot to obey the quest (or is prevented from obeying it),\nit suffers 3d6 points of damage. This damage is limited,\nin that it will not kill the target; if the damage is enough\nto do so, roll 1d4 for the number of hit points the\naffected creature retains (similar to the spell **harm**, the\nreverse of **heal**).\n\nIf the task assigned to the subject of this spell is open-\nended or otherwise unable to be completed, the subject\nis still compelled to try to perform the task, but the spell\nwill end in no more than one day per caster level.\n\nVery clever creatures may be able to subvert the\ninstructions given; the GM must decide on the results of\nany such attempts.\n\nA quest (and all effects thereof) can be ended by a\n**remove curse** spell from a caster two or more levels\nhigher than the caster of the quest, or by a wish, or by\nthe reverse of this spell. **Dispel magic** does not affect a\nquest spell."
+ },
+ {
+  "name": "Raise Dead",
+  "reversible": true,
+  "classes": "Cleric 5",
+  "levels": {
+   "cleric": 5
+  },
+  "range": "touch",
+  "duration": "instantaneous",
+  "text": "This spell restores life to a deceased humanoid (as\ndefined in **charm person**). The caster can only raise a\nbeing that has not been dead for more days than the\ncaster has levels. The spirit of the target of this spell\nmust be willing to return. If the target's spirit is trapped\nor contained in any way, the spell will fail. It will also\nfail if the target died of old age, as the body simply has\nno life left in it. Similarly, undead creatures are not\naffected by this spell as they can no longer be returned\nto life in any normal sense.\n\nThe body of the target must be adequately intact to\nsupport life, but all wounds no matter how major are\nhealed. Body parts missing when the target is raised\nare still missing afterward. Normal poison and normal\ndisease are cured in the process of raising the subject,\nbut magical diseases and curses are not undone.\n\nCreatures brought back from the dead always suffer\nsome loss or penalty from the ordeal. Characters lose\none level of ability permanently (i.e. it does not accrue\na negative level, but rather loses an actual level, being\nreduced to the minimum number of experience points\nrequired for the previous level). First level characters\nare reduced to Normal Man status; if the character was\nalready a Normal Man they lose a point of Constitution.\nThese losses are permanent, though of course the\ncharacter may gain levels in the normal fashion.\n(Characters reduced to Normal Man status must gain\n1,000 XP to return to 1st level).\n\nMonstrous humanoids (orcs, goblins, and the like) lose\none hit die, or are reduced to ½ hit dice if the monster\nhas just one to start with. Such humanoids who\nalready have ½ hit dice are reduced to a single hit point.\nThese losses are generally permanent, though the GM\nmay allow such creatures in service to a player\ncharacter to recover by gaining 1,000 XP per hit die the\ncreature would be returning to (so a lizard man who has\nbeen reduced to 1 hit die must earn 2,000 XP to return\nto its original 2 hit dice); treat such a creature as being a\nretainer for this purpose.\n\nUpon being raised, the target has 1 hit point per level or\nhit die (using its current reduced figure, of course), with\na minimum of 1 hit point. A character who died with\nspells prepared has none prepared upon being raised.\n\nThe reverse of this spell, **slay living**, will kill instantly\nthe creature touched (which may be of any sort, not\njust a humanoid) unless a save vs. Spells is made. If\nthe saving throw is successful, 2d6 points of damage is\ndealt to the victim instead. An attack roll is required to\napply this spell in combat."
+ },
+ {
+  "name": "Read Languages",
+  "reversible": false,
+  "classes": "Magic-User 1",
+  "levels": {
+   "magicuser": 1
+  },
+  "range": "0",
+  "duration": "special",
+  "text": "This spell grants the caster the ability to read almost any written language. It may be cast in one of three modes:\n\nIn the first mode, the spell allows the caster to read any number of written works in a variety of languages. This mode lasts for 1 turn per caster level.\n\nIn the second mode, the spell allows the caster to read any one book or tome; this mode lasts 3 hours per caster level.\n\nIn the third mode, the spell allows the caster to read any one non-magical scroll or other single-sheet document; this mode is permanent.\n\nThis spell does not work on any sort of magical text, such as spell scrolls or spellbooks; see **read magic**, below, for the correct spell to use in such cases.\n\nThe spell grants the ability to read the texts, but does not in any way hasten the reading nor grant understanding of concepts the caster doesn't otherwise have the ability to understand. Also, for this spell to function, there must be at least one living creature that can read the given language somewhere on the same plane. The knowledge is not copied from that creature's mind; rather, it is the existence of the knowledge that enables the spell to function."
+ },
+ {
+  "name": "Read Magic",
+  "reversible": false,
+  "classes": "Magic-User 1",
+  "levels": {
+   "magicuser": 1
+  },
+  "range": "0",
+  "duration": "permanent",
+  "text": "When cast upon any magical text, such as a spellbook or magic-user spell scroll, this spell enables the caster to read that text. Casting this spell on a cursed text will generally trigger the curse. All Magic-Users begin play knowing this spell, and it can be prepared even if the Magic-User loses access to his or her spellbook."
+ },
+ {
+  "name": "Regenerate",
+  "reversible": false,
+  "classes": "Cleric 6",
+  "levels": {
+   "cleric": 6
+  },
+  "range": "touch",
+  "duration": "permanent",
+  "text": "This spell causes the subject's severed body members (fingers, toes, hands, feet, arms, legs, tails, or even heads of multiheaded creatures), broken bones, and ruined organs to grow back. After the spell is cast, the physical regeneration is complete in 1 round if the severed members are present and touching the creature. Otherwise, a full turn is required for the regeneration to complete.\n\nThis spell also heals 3d8 points of damage. Regenerate has no effect on nonliving creatures or constructs (including undead)."
+ },
+ {
+  "name": "Reincarnate",
+  "reversible": false,
+  "classes": "Magic-User 6",
+  "levels": {
+   "magicuser": 6
+  },
+  "range": "touch",
+  "duration": "instantaneous",
+  "text": "By touching the body of a deceased humanoid (as\ndefined in **charm person**), the caster brings them back\nin an entirely new body. The whole body is not\nneeded; in fact, even the smallest fragment of body is\nsufficient, so long as that fragment was part of the body\nat the time of the target's death.\n\nThe caster can only reincarnate a being that has not\nbeen dead for more than a week. The spirit of the\ntarget of this spell must be willing to return. If the\ntarget's spirit is trapped or contained in any way, the\nspell will fail.\n\nRoll on the following table to determine what sort of creature the character becomes:\n\n| d% | Incarnation |\n| 01 | Bugbear |\n| 02--15 | Dwarf |\n| 16--29 | Elf |\n| 30 | Gnoll |\n| 31--39 | Gnome |\n| 40--46 | Goblin |\n| 47--60 | Halfling |\n| 61--88 | Human |\n| 89--91 | Kobold |\n| 92--93 | Lizard Man |\n| 94--98 | Orc |\n| 99--100 | Choice∗ |\n\nIf \"choice\" is rolled for a player character being\nreincarnated, the player is allowed to choose the new\nform from among those on the table above. If an NPC\nis being reincarnated, the GM may choose or roll again.\n\nWhen the spell is cast, a new body forms in a nearby\nlocation selected by the caster. The body forms over a\nperiod of 6 turns (i.e. an hour), first as a misty outline,\nthen becoming more solid moment by moment until it\ntakes its first breath and awakens. The new form is a\nyoung adult, unless the target was younger than that\nwhen they died, in which case the new body is the\nsame age as the deceased body.\n\nThe target creature's new body has obviously suffered\nnone of the harm that may have befallen the old one,\nand is completely healthy (at least, to start with).\n\nThe target remembers their previous life, and retains\nthe same class (if possible for the new form) as well as its Intelligence, Wisdom, and Charisma. Strength,\nDexterity, and Constitution scores should be rerolled.\n(If the character's ability scores are outside the allowable\nrange for the new form, they should be adjusted up or\ndown by the GM as needed.) The target loses one\nlevel (or hit die); this is a real reduction, not a negative\nlevel, and is not subject to magical **restoration**. The\ntarget's hit points should be rerolled completely, as this\nis an entirely new body. If the target was 1st level,\ninstead of a hit point reduction its new Constitution\nscore is reduced by 2\n\nCharacters turned into non-character humanoids (such\nas an elf who returns as a kobold) will require\nadjudication by the GM; if the restored target is a player\ncharacter, the GM is counseled to give as much leeway\nto the player as possible with the character's new form.\nConversely, non-character humanoids who return as\ncharacters will need all ability scores rolled; such\ncharacters will usually be fighters with a level equal to\nthe target's previous hit dice minus 1, or as Normal Men\nif the target's previous hit dice were 1 or less.\n\nUndead creatures are not affected by this spell; such\ncreatures can no longer be returned to life in any\nnormal sense."
+ },
+ {
+  "name": "Remove Curse",
+  "reversible": true,
+  "classes": "Cleric 3, Magic-User 4",
+  "levels": {
+   "cleric": 3,
+   "magicuser": 4
+  },
+  "range": "30'",
+  "duration": "instantaneous",
+  "text": "This spell removes any and all ordinary curses afflicting\na creature. It does not generally remove the curse from\na magic item such as a sword or suit of armor, but a\ncharacter afflicted by a cursed item of this type will be\nfreed of it long enough to discard the item (a turn, at\nleast).\n\nSome special curses are more difficult to remove, and\nmay require a caster of a certain minimum level. A\nvery few curses created by godlike beings cannot be\nremoved by this spell at all.\n\nThe reverse of this spell, bestow curse, allows the\ncaster to place a curse on the subject. A save vs. Spells\nis allowed to resist. The caster must choose one of the\nfollowing three effects:\n\n∗ -4 decrease to an ability score (minimum 1).\n\n∗ -4 penalty on attack rolls and saves.\n\n∗ Each round of combat, the target has a 50% chance to act normally; otherwise, it takes no action.\n\nThe caster may also invent his or her own curse, but it should be no more powerful than those described above. The curse thus bestowed cannot be dispelled, but it can be removed with a **remove curse** spell."
+ },
+ {
+  "name": "Remove Fear",
+  "reversible": true,
+  "classes": "Cleric 1",
+  "levels": {
+   "cleric": 1
+  },
+  "range": "touch (120')",
+  "duration": "instantaneous (2 turns)",
+  "text": "This spell will calm the creature touched. If the target creature is currently subject to any sort of magical fear, it is allowed a new save vs. Spells to resist that fear, at a bonus of +1 per level of the caster.\n\nThe reverse of this spell, **cause fear**, causes one target creature within 120' to become frightened; if the target fails to save vs. Spells, it flees for 2 turns. Creatures with 6 or more hit dice are immune to this effect."
+ },
+ {
+  "name": "Resist Cold",
+  "reversible": false,
+  "classes": "Cleric 1",
+  "levels": {
+   "cleric": 1
+  },
+  "range": "touch",
+  "duration": "1 round/level",
+  "text": "This spell makes the caster, or any living creature the\ncaster touches, completely immune to normal cold.\nThe spell also gives protection against magical or\notherwise superior cold such as the breath of an Ice\nDragon or the **ice storm** spell. Specifically, the spell\ngives the protected creature a bonus of +3 on all saving\nthrows against such effects, and reduces any damage\nsuffered by half (so that for example a successful save\nvs. the Ice Dragon's breath would reduce damage to\njust one-fourth normal, and even if the saving throw\nfails the protected creature only takes half damage)."
+ },
+ {
+  "name": "Resist Fire",
+  "reversible": false,
+  "classes": "Cleric 2",
+  "levels": {
+   "cleric": 2
+  },
+  "range": "touch",
+  "duration": "1 round/level",
+  "text": "This spell makes the caster, or any living creature the\ncaster touches, completely immune to normal heat or\nfire. The spell also gives protection against magical or\notherwise superior heat or fire such as the breath of a\nMountain Dragon or the **fireball** spell. Specifically, the\nspell gives the protected creature a bonus of +3 on all\nsaving throws against such effects, and reduces any\ndamage suffered by half (so that for example a\nsuccessful save vs. the **fireball** spell would reduce\ndamage to just one-fourth normal, and even if the\nsaving throw fails the protected creature only takes half\ndamage)."
+ },
+ {
+  "name": "Restoration",
+  "reversible": false,
+  "classes": "Cleric 6",
+  "levels": {
+   "cleric": 6
+  },
+  "range": "touch",
+  "duration": "permanent",
+  "text": "Each casting of the spell removes a single negative level from a creature who has suffered energy drain. At 16th level, two negative levels may be removed. See the rules for Energy Drain (in the Encounter section) for more details.\n\nAlternately, this spell can be used to restore drained ability score points. If applied to a character who has suffered temporary loss of ability points, it will restore up to 1d4 lost points to any one drained ability immediately. If applied to a character who has suffered permanent loss of ability points, 1 point can be restored.\n\nRestoration does not restore levels lost due to death (as described for the spell **raise dead**)."
+ },
+ {
+  "name": "Shield",
+  "reversible": false,
+  "classes": "Magic-User 1",
+  "levels": {
+   "magicuser": 1
+  },
+  "range": "self",
+  "duration": "5 rounds+1/level",
+  "text": "Shield creates an invisible, shield-like mobile disk of force that hovers in front of the caster. It negates **magic missile** attacks directed at the caster, and improves the caster's Armor Class by +3 vs. melee attacks and +6 vs. missile weapons. The Armor Class benefits do not apply to attacks originating from behind the caster, but **magic missiles** are warded off from all directions."
+ },
+ {
+  "name": "Silence 15' Radius",
+  "reversible": false,
+  "classes": "Cleric 2",
+  "levels": {
+   "cleric": 2
+  },
+  "range": "360'",
+  "duration": "2 rounds/level",
+  "text": "This spell creates a spherical area with a 15 foot radius\nwhere no sound will pass. No one within the affected\narea can make nor hear any sound. Neither does\nsound issue from the affected area; those outside\ncannot hear those inside. This effect blocks verbal\ncommunication, of course, as well as spell casting.\n\nThis effect can be cast in a fixed area, upon an item\n(making it portable), or upon a creature. An unwilling\ntarget receives a save vs. Spells to negate the spell. If\nan item in another creature’s possession is targeted, that\ncreature also receives a save vs. Spells to negate.\n\nThis spell can be used to protect against any kind of\nattack or magic where the victims must be able to hear\nthe attacker, for such attacks cannot pass into or out of\nthe affected area"
+ },
+ {
+  "name": "Sleep",
+  "reversible": false,
+  "classes": "Magic-User 1",
+  "levels": {
+   "magicuser": 1
+  },
+  "range": "90'",
+  "duration": "5 rounds/level",
+  "text": "This spell puts several creatures of 3 or fewer hit dice,\nor a single 4 hit die creature, into a magical slumber.\nCreatures of 5 or more hit dice are not affected. The\ncaster chooses a point of origin for the spell (within the\ngiven range, of course), and those creatures within 30'\nof the chosen point may be affected. Each creature in\nthe area of effect is allowed a save vs. Spells to resist.\n\nVictims of this spell can always be hit if attacked.\nInjuring such a creature will cause it to awaken, and it\nmay begin fighting back or defending itself on the very\nnext round. Slapping or shaking such a creature will\nawaken it in 1d4 rounds, but normal noises will not.\n\nSleep does not affect unconscious creatures, constructs,\nor undead creatures.\n\nWhen the duration elapses, the sleeping creatures\nnormally wake up immediately; however, if they are\nmade very comfortable and the surroundings are quiet,\nthe affected creatures may continue sleeping normally\nat the GM's option."
+ },
+ {
+  "name": "Speak with Animals",
+  "reversible": false,
+  "classes": "Cleric 2",
+  "levels": {
+   "cleric": 2
+  },
+  "range": "special",
+  "duration": "1 turn/4 levels",
+  "text": "This spell allows the caster to speak to and understand\nany single animal (normal or giant sized, but not\nmagical or monstrous) that is in sight of the caster and\nable to hear them. The caster may change which\nanimal they are speaking with at will, once per round.\nThe spell doesn’t alter the animal’s reaction or attitude\ntowards the caster; a standard reaction roll should be\nmade to determine this. The GM should ensure that\nthe animal's manner of speaking reflects its intelligence\nand nature"
+ },
+ {
+  "name": "Speak with Monsters",
+  "reversible": false,
+  "classes": "Cleric 6",
+  "levels": {
+   "cleric": 6
+  },
+  "range": "special",
+  "duration": "1 turn/5 levels",
+  "text": "This spell allows the caster to speak to and understand\nany single living monster that is in sight of the caster\nand able to hear them. The caster may change which\nmonster they are speaking with at will, once per round.\nOthers able to understand the language spoken by the\ntarget monster (if any) will be able to understand the\ncaster. The spell doesn’t alter the monster’s reaction or\nattitude towards the caster. Mindless monsters, plant\ncreatures and undead are unaffected by this spell."
+ },
+ {
+  "name": "Speak with Plants",
+  "reversible": false,
+  "classes": "Cleric 4",
+  "levels": {
+   "cleric": 4
+  },
+  "range": "20'",
+  "duration": "1 turn",
+  "text": "This spell allows the caster to speak to and understand\nany single plant (either normal plant or animate plant\ncreature). The GM should remember that normal\nplants have a limited sense of their surroundings, and\nmost never move from the place where they sprouted.\nThe spell doesn’t alter the plant’s reaction or attitude\ntowards the caster; however, normal plants will\ngenerally communicate freely with the caster, as they\nhave nothing else of importance to do. Plant creatures\nwill tend to be slightly more intelligent, and a reaction\nroll should be used to determine how such creatures\nrespond to the caster's words."
+ },
+ {
+  "name": "Speak with Dead",
+  "reversible": false,
+  "classes": "Cleric 3",
+  "levels": {
+   "cleric": 3
+  },
+  "range": "10'",
+  "duration": "3 rounds/level",
+  "text": "With this spell the caster causes the corpse of an\nintelligent creature to become animated and to answer\nthe caster's questions. It does not matter how long the\ncorpse has been dead, but it must be essentially intact\nwith at least a comple\nte mouth in order to answer\nquestions.\nThe corpse will answer at most one question per two\ncaster levels, but if the duration expires any remaining\nquestions are lost. The corpse only knows what it knew\nwhen it was alive; this includes the languages it knew in\nlife. Thus, the caster must share a language with the\ndeceased in order to get any questions answered at all.\n\nThe answers given are drawn from knowledge\n\"imprinted\" on the corpse during life; the caster does\nnot in any case actually communicate with the spirit of\nthe deceased creature. The corpse cannot retain any\ninformation given to it, and does not even remember\nany previous instances of communication via this spell.\n\nThe answers given may not be useful for various\nreasons. If the corpse knew the caster when it was\nalive, or if the caster is a member of a group the\ndeceased disliked, it may choose to lie or mislead the\ncaster. If the caster asks the corpse questions of a\npersonal nature, or questions that indicate the caster\nmay be working against whatever interests the corpse\nhad in life, it will almost certainly seek to mislead the\ncaster.\n\nIf the corpse has been roused by this spell within the\nlast seven days, the spell will fail. Undead creatures\n(including the remains of defeated undead creatures)\ncannot be affected by this spell."
+ },
+ {
+  "name": "Spiritual Hammer",
+  "reversible": false,
+  "classes": "Cleric 2",
+  "levels": {
+   "cleric": 2
+  },
+  "range": "30'",
+  "duration": "1 round/level",
+  "text": "This spell causes a warhammer made of pure force to spring into existence, attacking any foe chosen by the Cleric within range once per round. It deals 1d6 hit points of damage per strike, +1 point per three caster levels (maximum of +5). It uses the caster's normal attack bonus, striking as a magical weapon, and thus can inflict damage upon creatures that are only hit by magic weapons. If the hammer goes beyond the spell range, the Cleric loses sight of it, or the caster ceases to direct it, the hammer disappears. The hammer cannot be attacked or harmed by physical attacks, but **dispel magic**, **disintegrate**, or a **rod of cancellation** will dispel it."
+ },
+ {
+  "name": "Sticks to Snakes",
+  "reversible": false,
+  "classes": "Cleric 4",
+  "levels": {
+   "cleric": 4
+  },
+  "range": "120'",
+  "duration": "6 turns",
+  "text": "This spell transforms normal wooden sticks into 1d4 hit dice worth of normal (not giant) snakes per every four caster levels. (See the **Monsters** section for details on types of snakes.) The snakes follow the commands of the caster. When slain, dispelled, or the spell expires, the snakes return to their original stick form. Magical \"sticks\" such as enchanted staves cannot be affected."
+ },
+ {
+  "name": "Striking",
+  "reversible": false,
+  "classes": "Cleric 3",
+  "levels": {
+   "cleric": 3
+  },
+  "range": "touch",
+  "duration": "1 round/level",
+  "text": "This spell bestows upon one weapon the ability to deal 1d6 points of additional damage. This extra damage is applied on each successful attack for the duration of the spell. It provides no attack bonus, but if cast on a normal weapon, the spell allows monsters only hit by magical weapons to be affected; only the 1d6 points of magical damage applies to such a monster, however."
+ },
+ {
+  "name": "Telekinesis",
+  "reversible": false,
+  "classes": "Magic-User 5",
+  "levels": {
+   "magicuser": 5
+  },
+  "range": "self",
+  "duration": "3 turns",
+  "text": "This spell permits the caster to move objects or\ncreatures by concentration alone; the caster can move\nsuch things weighing up to 50 pounds per caster level\nat a rate of up to 20 feet per round. Creatures targeted\nby this spell are allowed a saving throw vs. Death Ray\nto resist, whether it is the creature itself being affected\nor an object in its possession.\n\nIn order to use this power the caster must maintain\nconcentration, moving no more than normal movement\n(no running), making no attacks and casting no further\nspells. If concentration is lost (whether intentionally or\nnot), the power may be used again on the next round\nbut the target of the effect is allowed a new saving\nthrow."
+ },
+ {
+  "name": "Teleport",
+  "reversible": false,
+  "classes": "Magic-User 5",
+  "levels": {
+   "magicuser": 5
+  },
+  "range": "self",
+  "duration": "instantaneous",
+  "text": "The caster of this spell is instantly transported to\nanother location up to 100 miles away per level of\nability. The spell transports the caster only within their\ncurrent plane of existence.\nOther creatures\n(passengers) and inanimate objects (cargo) may be\ntransported along with the caster, up to a maximum of\n300 pounds plus 100 pounds per level above 10th.\nThe caster must be in contact with all objects and/or\ncreatures to be transported (although creatures to be\ntransported may be in contact with one another, with at\nleast one of those creatures in contact with the caster).\nUnwilling creatures are allowed a saving throw vs.\nSpells to resist the spell, and the caster may need to\nmake an attack roll to make contact with such a\ncreature. Likewise, a successful save vs. Spells will\nprevent items in a creature's possession from being\nteleported.\n\nThe spell is directed by the mind of the caster, who\nmust visualize the destination area; failure to visualize it\nproperly can cause the spell to fail in a variety of ways,\nand destinations heavily saturated with magical energy\n(as defined by the Game Master) will cause the spell to\nfail automatically.\n\nTo determine the results of this spell, roll d% and consult the table below. Below the table is an explanation of the terms used.\n\n| Knows Well | Knows Somewhat | Saw Once | Spell Result |\n| 01 | 01--02 | 01-03 | Disaster |\n| 02 | 03--07 | 04--13 | Wrong Place |\n| 03 | 08--13 | 14--25 | Fell Short |\n| 04--100 | 14--00 | 26--100 | Success! |\n\n**Knows Well** applies when the caster has visited the\ndestination frequently and/or spent a substantial\namount of time there; generally, the caster should have\nspent at least 7 days (not necessarily in a row) at the\ndestination within the last year to qualify for this\ncategory. Any place where the caster lived for more\nthan a month in the last ten years, or more than a year\nin their life, also qualifies.\n\n**Knows Somewhat** applies when the caster has spent\nsubstantial time in the destination area, but not enough\nto qualify for Knows Well. Alternately, the caster may\nhave made an in-depth study of the area, looking at\naccurate drawings, maps, and floorplans or spending\nhours listening to descriptions from one or more people\nwho Know Well the destination.\n\n**Saw Once** applies when the caster has visited a place\nfor as much as a day, but no more, or when the caster\nhas attempted the study required for the second\ndefinition of Knows Somewhat but has failed to acquire\nenough information (in the GM's opinion).\n\n∗∗If the caster attempts to travel to a location that\ndoes not exist∗∗, or perhaps once existed but has been\ndestroyed or otherwise changed so much that the caster\nwould not recognize it, roll 2d20 instead d% for the\nresult of the casting. In this case, if Success! is rolled\nthe spell simply fails and no one is transported\nanywhere.\n\n**Success!** means exactly what it says. The caster,\npassengers, and cargo arrive safely exactly where the\ncaster intended\n\n**Fell Short** indicates that the caster, passengers, and\ncargo arrive safely 1d8x10% of the way to the intended\ndestination. Note that arriving \"safely\" does not mean\nthat the destination is safe, but only the trip\n\n**Wrong Place** means that the caster, passengers, and\ncargo arrive at some place that resembles the intended\ndestination. This means that the caster appears in the\nclosest similar place within range, as decided by the\nGM. If no such area exists within the spell’s range, the\nspell simply fails instead.\n\n**Disaster** indicates that the caster, passengers, and\ncargo have encountered dimensional turbulence and\nhave crashed, becoming separated (if passengers\nand/or cargo accompanied the caster) and being injured\nin the process. Each creature including the caster\nsuffers 1d12 points of damage, and then rolls again on\nthe same column using 2d20 instead of d%. If another\nDisaster is rolled for any creature, apply another 1d12\npoints of damage and roll once more. Cargo objects\nare not normally damaged but the result must be rolled\nfor each such item to determine where it has appeared;\nin this case, if Disaster is rolled the cargo item\ndisappears forever."
+ },
+ {
+  "name": "True Seeing",
+  "reversible": false,
+  "classes": "Cleric 5",
+  "levels": {
+   "cleric": 5
+  },
+  "range": "touch",
+  "duration": "1 round/level",
+  "text": "This spell confers on the target the ability to see all things as they actually are. The subject sees through normal and magical darkness, notices secret doors, sees the exact locations of displaced creatures or objects, sees through normal or magical disguises, sees invisible creatures or objects normally, sees through illusions, and sees the true form of polymorphed, changed, or transmuted things. The range of true seeing conferred is 120 feet.\n\nTrue seeing, however, does not penetrate solid objects. It in no way confers X-ray vision or its equivalent. It does not negate concealment, including that caused by fog and the like. In addition, the spell effects cannot be further enhanced with known magic, so one cannot use true seeing through a **crystal ball** or in conjunction with **clairvoyance**."
+ },
+ {
+  "name": "Ventriloquism",
+  "reversible": false,
+  "classes": "Magic-User 1",
+  "levels": {
+   "magicuser": 1
+  },
+  "range": "60'",
+  "duration": "1 turn/level",
+  "text": "This spell causes the caster's voice to appear to come\nfrom another location within range, for example, from a\ndark alcove or statue. The caster may choose a new\nlocation each round if desired, and can cause the spell\nto temporarily abate without ending it and then resume\nit again at any time within the given duration"
+ },
+ {
+  "name": "Wall of Fire",
+  "reversible": false,
+  "classes": "Cleric 5, Magic-User 4",
+  "levels": {
+   "cleric": 5,
+   "magicuser": 4
+  },
+  "range": "180'",
+  "duration": "1 round/level (or special)",
+  "text": "This spell creates a vertical sheet of flames in an area\nindicated by the caster, which is either a wall of flame\nup to 20' in length per caster level, or a ring with a\nradius up to 5' per caster level. The caster may choose\nto make the wall smaller if desired. The wall may be up\nto 20' tall (as desired by the caster and/or constrained\nby the ceiling). The entire wall must lie within the range\ngiven above. One or both sides of the wall may be hot,\nas determined by the caster at the time of casting.\nOnce created, the wall cannot be moved or changed.\n\nAny creature within 20 feet of a hot side of the wall will\nsuffer 1d4 points of damage each round, or 2d4 points\nif within 10 feet. Damage is applied on the round the\nspell is cast and each round thereafter. Actually passing\nthrough the wall causes 2d6 points of damage, plus 1\nper caster level, even if the side the character or\ncreature entered from was not a hot side.\n\nUndead creatures are particularly susceptible to this\nspell, and suffer twice the damage described above.\n\nIf the caster evokes the wall so that it appears where\ncreatures are, each creature takes damage as if passing\nthrough the wall; a save vs. Spells is allowed, with\nsuccess indicating that damage is rolled as if the\ncreature is within 10' of the wall.\n\nThe caster may choose to maintain the spell indefinitely\n(within reasonable limits of endurance) by\nconcentration, or may cast it with the standard duration\nof 1 round per level, at their option"
+ },
+ {
+  "name": "Wall of Iron",
+  "reversible": false,
+  "classes": "Magic-User 6",
+  "levels": {
+   "magicuser": 6
+  },
+  "range": "90'",
+  "duration": "permanent",
+  "text": "Using this spell the caster creates an iron wall. The wall\nstands upright, and consists of up to one 10'x10' square\nsection, one inch thick, per caster level. The caster can\nincrease the thickness of the wall with a proportionate\nreduction in the area; for example, doubling the\nthickness halves the area. The caster may choose to\nmake the wall smaller than the maximum size if desired.\nThe wall may not be made less than one inch thick, and\nmust always be created in contact with the ground or\nfloor beneath it. It is always a flat plate with no bends,\nbut the edges do not have to be straight; indeed, the\ncaster can cause the wall edge to mold itself around any\nobstructing object very closely. The wall cannot\notherwise be created such that it occupies the space of\nany object or creature.\n\nIf the caster wishes, the wall edges will bond to any\ninanimate materials they touch (stone walls, soil,\nfurnishings, and so on). If this is not done, the wall may\nbe unsupported (as determined by the GM based on\nthe situation) and will thus likely fall. If left unattended,\nthere is an equal chance it will fall in either direction in\n1d6 rounds, but it can be pushed in a specific direction\nby any character having a minimum of Strength score\nof 13, or any monster with 4 or more hit dice. Several\ncreatures can work together to do so if desired. (If the\noptional Ability Roll rule is being used, a Strength roll at\n-3 is sufficient to topple the wall.)\n\nWhen the wall falls, any creatures it falls upon are likely\nto be injured or killed. If it is possible for a character or\ncreature to escape the area (i.e. it has sufficient\nmovement rate and is not otherwise prevented from\ndoing so), it is allowed to roll a save vs. Death Ray (with\nDexterity bonus added). If this save is successful, the\ncreature or character moves by the most direct route to\nthe nearest safe space; if the save fails or it is for some\nreason impossible to flee, 10d6 points of damage are\ninflicted on that victim. Creatures larger than ogre-sized\nare immune to being crushed and will simply be\nknocked down if the save fails.\n\nThe wall is permanent, as indicated, but being made of\niron is susceptible to rust and corrosion"
+ },
+ {
+  "name": "Wall of Stone",
+  "reversible": false,
+  "classes": "Magic-User 5",
+  "levels": {
+   "magicuser": 5
+  },
+  "range": "15' per level",
+  "duration": "permanent",
+  "text": "Using this spell the caster creates a stone wall. The wall\nis composed of up to one 10'x10' square section, one\nfoot thick, per caster level. The caster can form this\nwall into almost any shape, with some restrictions. The\ncaster can increase the thickness of the wall with a\nproportionate reduction in the area; for example,\ndoubling the thickness halves the area. The wall cannot\nbe created such that it occupies the space of any object\nor creature. It must be adequately supported by\nexisting stone, which it will bond with automatically, but\nneed not be supported over its entire area. For\nexample, a wall of stone may be formed into a bridge\nover a stream or chasm, so long as both ends of the\nbridge rest solidly upon (and bond with) existing stone.\n\nBridges longer than 20 feet must be arched, buttressed,\nor both in order to stand; this extra construction\nreduces the wall's usable volume by half, as does\ncreating a wall with battlements, crenelations, and\nsimilar basic structural elements. No complex structural\nelements may be created by this spell.\n\nThough made by magic, the wall is made of stone and\ncan be broken or damaged just as if it were ordinary\nstone.\n\nThe wall can be formed into a container to trap\ncreatures, and if this is attempted the targets of the spell\nare allowed to save vs. Death Ray to avoid being\ntrapped. If the save is successful the targets are able to\nmake up to one full move to a space outside the\ncontainer."
+ },
+ {
+  "name": "Water Breathing",
+  "reversible": false,
+  "classes": "Magic-User 3",
+  "levels": {
+   "magicuser": 3
+  },
+  "range": "touch",
+  "duration": "2 hours/level",
+  "text": "This spell grants living creatures touched by the caster\n(including the caster, if desired) the ability to breath in\nwater as a fish does. The duration may be divided\nevenly if the caster touches multiple targets one after\nanother. Affected targets do not lose the ability to\nbreathe air."
+ },
+ {
+  "name": "Web",
+  "reversible": false,
+  "classes": "Magic-User 2",
+  "levels": {
+   "magicuser": 2
+  },
+  "range": "10' per level",
+  "duration": "2 turns/level",
+  "text": "This spell creates a volume of sticky strands resembling\na spider's web but much larger and thicker. The spell\nfills a volume of up to 8,000 cubic feet (equivalent to\neight 10'x10'x10' cubes). The webs must be attached\nto adjacent solid objects such as walls, pillars, and the\nlike; any unsupported section of webbing collapses to\nthe ground and disappears. Within this limitation, the\ncaster may choose any arrangement of webs they wish,\nup to the limit of range and the given 8,000 cubic foot\nvolume. The caster may choose to create a smaller\nvolume if they wish.\n\nCreatures within the web at the time the spell is cast, as\nwell as anyone entering the area afterward, will become\nentangled. Each should roll a save vs. Death Ray, and\nany creatures who succeed at this save may move\nthrough the webbing but are reduced to one-half\nnormal movement rate. Such creatures may not cast\nspells or perform normal attacks; whether other actions\nare possible is left to the GM to decide. Once an\nentangled creature leaves the area of effect of the web,\nit will be able to act normally again.\n\nThose who fail the save are fully entangled and\ntrapped. They cannot move, cast spells, or perform\nnormal attacks or any other physical action. Speech\nremains possible, however. Creatures with Strength of\n13 or higher (or 4 or more hit dice) may be able to\nbreak loose, however; each round, such creatures are\nallowed another save vs. Death Ray with results as\ngiven above. Creatures failing the initial save and\nhaving Strength of 12 or less (or fewer than 4 hit dice)\nare trapped until the duration expires or the webs are\notherwise removed.\n\nAttacks against an entangled creature by one outside\nthe webbing will not normally entrap the attacker, so\nlong as they do not need to venture into the web to\nreach the entangled target.\n\nThe web can be ignited; any application of fire to the\nwebbing will cause a 10 foot cube to burn away in one\nround, with all 10 foot cubes adjacent to the destroyed\none burning in the next round, and so on. If any part\nof the web becomes unsupported it will collapse and\ndisappear as noted above.\n\nCreatures trapped within the burning web suffer 2d4\npoints of damage when the cube they are trapped in\nburns, but they are thereafter completely free of the\nweb."
+ },
+ {
+  "name": "Wizard Eye",
+  "reversible": false,
+  "classes": "Magic-User 4",
+  "levels": {
+   "magicuser": 4
+  },
+  "range": "240'",
+  "duration": "6 turns",
+  "text": "With this spell the caster creates an invisible magical \"eye\" through which he or she can see. The eye has Darkvision, but otherwise sees exactly as the caster would. It can be created in any place the caster can see, up to a range of 240' away, and thereafter can move at a rate of 40' per round as directed by the caster. The eye will not move more than 240' feet away from the caster under any circumstances. The eye cannot pass through solid objects, but as it is exactly the size of a normal human's eye, it can pass through holes as small as 1 inch in diameter. The caster must concentrate to use the eye."
+ },
+ {
+  "name": "Wizard Lock",
+  "reversible": false,
+  "classes": "Magic-User 2",
+  "levels": {
+   "magicuser": 2
+  },
+  "range": "20'",
+  "duration": "permanent",
+  "text": "This spell magically holds shut a door, gate, window, or\nshutter of wood, metal, or stone. The magic affects the\nportal just as if it were securely closed and normally\nlocked. The effect lasts indefinitely. **Knock** can be\nused to open the doorway without ending the spell, and\n**dispel magic** can be used to end it permanently. The\ncaster of this spell can easily open the door or other\nportal without ending the spell, as can a Magic-User\nthree or more levels higher than the caster."
+ },
+ {
+  "name": "Word of Recall",
+  "reversible": false,
+  "classes": "Cleric 6",
+  "levels": {
+   "cleric": 6
+  },
+  "range": "self (special)",
+  "duration": "instantaneous",
+  "text": "With the utterance of a single word this spell transports\nthe caster to a place of refuge which they designate\nwhen preparing the spell. The place must be Known\nWell (as explained for **teleport**) to the caster to be so\ndesignated. This spell cannot transport the caster\nbeyond their current plane of existence.\n\nThe caster can bring along objects or creatures, not to\nexceed 300 pounds plus 100 pounds per level above\n10th. The caster must be in contact with all objects\nand/or creatures to be transported (although creatures\nto be transported may be in contact with one another,\nwith at least one of those creatures in contact with the\ncaster).\n\nUnwilling creatures cannot be transported by this spell,\nnor can items in their possession. If the caster or one of\ntheir passengers is holding an object that is also being\nheld by an unwilling creature, the latter can retain\npossession of the object with a successful save vs.\nSpells."
+ }
+]

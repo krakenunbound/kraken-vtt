@@ -66,7 +66,7 @@ try {
   await tool("kraken_host", { campaignId: campaign.id, port, password: "pw" });
   await page.waitForSelector("text=Hosting");
   const ship = await tool("kraken_starship", { action: "create", name: "Rusty Lark", design: "Free Trader" });
-  browser = await chromium.launch({ executablePath: CHROME, headless: true });
+  browser = await chromium.launch({ args: ["--mute-audio"], executablePath: CHROME, headless: true });
   const seat = await browser.newPage({ viewport: { width: 1400, height: 950 } });
   seat.on("pageerror", (error) => failures.push(`player: ${error.message}`));
   await seat.goto(`http://127.0.0.1:${port}/`);

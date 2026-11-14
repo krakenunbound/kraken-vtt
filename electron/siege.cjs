@@ -5,6 +5,11 @@ const dnd35 = require("./dnd35.cjs");
 const adnd2e = require("./adnd2e.cjs");
 const astra = require("./astra.cjs");
 const mgt2 = require("./mgt2.cjs");
+const cairn = require("./cairn.cjs");
+const ironsworn = require("./ironsworn.cjs");
+const forged = require("./forged.cjs");
+const bfrpg = require("./bfrpg.cjs");
+const fate = require("./fate.cjs");
 
 // Host side of the SIEGE engine (shared/siege, ES modules shared with the
 // app window): the game library from the campaign's imported records, and
@@ -32,9 +37,20 @@ async function siegeCheck(table, record, { attribute, cl = 0, bonus = 0, addLeve
   // A 5E character: its ruleset's check, save or skill (dc, advantage).
   // A 3.5E character: its check, save (fortitude, reflex, will) or skill against a DC.
   // An AD&D 2E character: a save (d20 at or above its number), an ability check (d20 at or under the score) or a thief skill (d100).
+  // A Basic Fantasy character: a save (d20 at or above), the ability roll (d20 + bonus at or above the level's target), a thief ability (d100) or loyalty (2d6).
+  if (bfrpg.isBf(record)) return bfrpg.checkBf(table, record, { kind: kind ?? (/save/i.test(String(label ?? "")) ? "save" : "check"), attribute, skill, bonus, label: kind ? label : undefined }, from);
   if (adnd2e.is2e(record)) return adnd2e.check2e(table, record, { kind: kind ?? (/save/i.test(String(label ?? "")) ? "save" : "check"), attribute, skill, bonus, label: kind ? label : undefined }, from);
   if (dnd35.is35(record)) return dnd35.check35(table, record, { kind: kind ?? (/save/i.test(String(label ?? "")) ? "save" : "check"), attribute, skill, dc: dc ?? cl, bonus, label: kind ? label : undefined }, from);
   if (dnd5e.is5e(record)) return dnd5e.check5e(table, record, { kind: kind ?? (/save/i.test(String(label ?? "")) ? "save" : "check"), attribute, skill, dc: dc ?? cl, bonus, advantage, label: kind ? label : undefined }, from);
+  // Fate: 4dF + the skill (or approach: attribute or skill) to overcome, against cl (or dc) as the opposition.
+  if (fate.isFate(record)) {
+    const rolled = await fate.rollFate(table, record, { skill: skill ?? attribute, action: "overcome", opposition: dc ?? cl ?? 0, bonus }, from);
+    return { ...rolled, success: rolled.shifts >= 0 };
+  }
+  // Ironsworn and Starforged: a stat rolled on its own (an action roll: d6 + stat + bonus against two d10).
+  if (ironsworn.isIronsworn(record)) return ironsworn.statRoll(table, record, { attribute, bonus, label: kind ? label : undefined }, from);
+  // Cairn: a save, d20 at or under STR, DEX or WIL (a 1 succeeds, a 20 fails).
+  if (cairn.isCairn(record)) return cairn.saveCairn(table, record, { attribute, label: kind ? label : undefined }, from);
   // Apeira Astra: a task (2d6 + skill + characteristic against 8); dc is the difficulty's shift, advantage boon/bane.
   if (astra.isAstra(record)) return astra.taskAstra(table, record, { skill, attribute, difficulty: Number(bonus) || 0, boon: advantage, label: kind ? label : undefined }, from);
   // Traveller: a task (2d6 + DM + skill against the difficulty's number: dc, Average 8); bonus a modifier, advantage boon/bane.
@@ -64,6 +80,11 @@ async function levelUp(table, record, packageKey, from) {
   if (dnd5e.is5e(record)) return dnd5e.levelUp5e(table, record, from);
   if (dnd35.is35(record)) return dnd35.levelUp35(table, record, from);
   if (adnd2e.is2e(record)) return adnd2e.levelUp2e(table, record, from, packageKey);
+  if (ironsworn.isIronsworn(record)) throw new Error("Ironsworn has no levels: spend experience on assets (Advance).");
+  if (forged.isForged(record)) throw new Error("Forged in the Dark has no levels: a full xp track gives an advance (a special ability or an action dot) on the sheet.");
+  if (cairn.isCairn(record)) throw new Error("Cairn has no levels: a character grows from what happens to them (Scars, Growth, Downtime).");
+  if (bfrpg.isBf(record)) return bfrpg.levelUpBf(table, record, from);
+  if (fate.isFate(record)) throw new Error("Fate has no levels: a character grows at milestones (minor, significant, major: the sheet's Milestones).");
   if (astra.isAstra(record)) throw new Error("Apeira Astra has no levels: spend experience on a skill or a characteristic (Improve).");
   if (mgt2.isMgt2(record)) throw new Error("Traveller has no levels: change a skill or a characteristic on the sheet (training, a new term).");
   const { engine } = await siege();
@@ -161,6 +182,11 @@ async function editCharacter(table, record, changes, seat) {
   if (dnd5e.is5e(record)) return dnd5e.edit5e(table, record, changes, seat);
   if (dnd35.is35(record)) return dnd35.edit35(table, record, changes, seat);
   if (adnd2e.is2e(record)) return adnd2e.edit2e(table, record, changes, seat);
+  if (ironsworn.isIronsworn(record)) return ironsworn.editIronsworn(table, record, changes, seat);
+  if (forged.isForged(record)) return forged.editForged(table, record, changes, seat);
+  if (cairn.isCairn(record)) return cairn.editCairn(table, record, changes, seat);
+  if (bfrpg.isBf(record)) return bfrpg.editBf(table, record, changes, seat);
+  if (fate.isFate(record)) return fate.editFate(table, record, changes, seat);
   if (astra.isAstra(record)) return astra.editAstra(table, record, changes, seat);
   if (mgt2.isMgt2(record)) return mgt2.editMgt2(table, record, changes, seat);
   if (seat.role !== "dm" && record.owner !== seat.name) throw new Error("You can only change your own character.");
@@ -236,6 +262,46 @@ async function exportCharacter(record, format = "kraken") {
 async function dropOnCharacter(table, record, source, from) {
   if (!source) throw new Error("Nothing to drop.");
   const who = from || record.name;
+  if (fate.isFate(record)) {
+    // A Fate sheet takes a stunt (from the books' lists); anything else is written into its extras.
+    if (source.type === "fatestunt") {
+      const result = await fate.actionFate(table, record, "stunt-add", { name: source.name, text: String(source.data?.summary ?? source.data?.text ?? "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim(), skill: String(source.data?.skill ?? "") }, table.seat, who);
+      return { record: result.record, added: "stunt", summary: `${record.name} learns ${source.name}.` };
+    }
+    const rules = await fate.rulesFate();
+    const data = structuredClone(record.data);
+    data.extras = `${String(data.extras ?? "").trim()}${String(data.extras ?? "").trim() ? "\n" : ""}${source.name}`.slice(0, 8000);
+    const updated = table.records.update(record.id, { data: rules.derive(data) }, table.seat, { replace: true });
+    const summary = `${record.name} gets ${source.name} (written into the extras).`;
+    table.say(summary, who, record.visibility === "gm");
+    return { record: updated, added: "extra", summary };
+  }
+  if (ironsworn.isIronsworn(record)) {
+    // An asset dropped on the sheet is bought with experience (Advance); anything else is something carried.
+    if (source.type === "ironasset") {
+      const result = await ironsworn.actionIronsworn(table, record, "advance", { asset: source.id }, { role: "dm", name: who }, who);
+      return { ...result, record: table.records.get(record.id), added: "asset", summary: `${record.name} gains ${source.name}.` };
+    }
+    if (source.type !== "item") throw new Error("An Ironsworn sheet takes assets (bought with experience) and things to carry.");
+    const updated = await ironsworn.editIronsworn(table, record, [{ path: "inventory.add", value: source.name }], { role: "dm", name: who });
+    table.say(`${record.name} gets ${source.name}.`, who, record.visibility === "gm");
+    return { record: updated, added: "item", summary: `${record.name} gets ${source.name}.` };
+  }
+  if (forged.isForged(record)) return forged.dropOnForged(table, record, source, from);
+  if (cairn.isCairn(record)) {
+    if (source.type !== "item") throw new Error("A Cairn sheet takes items; a background comes with the character wizard.");
+    const data = structuredClone(record.data);
+    const list = (data.inventorylist = data.inventorylist ?? {});
+    const { fgPath: _path, cost: _cost, ...copy } = source.data ?? {};
+    const rules = await cairn.rulesCairn();
+    let n = Object.keys(list).length + 1;
+    while (list[`id-${String(n).padStart(5, "0")}`]) n += 1;
+    list[`id-${String(n).padStart(5, "0")}`] = { ...copy, name: source.name, count: 1, carried: rules.isArmor(copy) ? 2 : 1 };
+    const updated = table.records.update(record.id, { data: rules.derive(data) }, table.seat, { replace: true });
+    const summary = `${record.name} gets ${source.name}.`;
+    table.say(summary, who, record.visibility === "gm");
+    return { record: updated, added: "item", summary };
+  }
   if (astra.isAstra(record) || mgt2.isMgt2(record)) {
     if (source.type !== "item") throw new Error(astra.isAstra(record) ? "An Apeira Astra sheet takes gear; Origins and Paths come with the character wizard." : "A Traveller sheet takes gear.");
     const data = structuredClone(record.data);
@@ -248,6 +314,26 @@ async function dropOnCharacter(table, record, source, from) {
     const summary = `${record.name} gets ${source.name}.`;
     table.say(summary, who, record.visibility === "gm");
     return { record: updated, added: "item", summary };
+  }
+  if (bfrpg.isBf(record)) {
+    // A Basic Fantasy sheet takes items (a weapon, armor or shield ready) and spells (a Magic-User's into the spellbook, a Cleric's prepared).
+    const data = structuredClone(record.data);
+    const rules = await bfrpg.rulesBf();
+    let added;
+    if (source.type === "item") {
+      const list = (data.inventorylist = data.inventorylist ?? {});
+      const { engine } = await siege();
+      const { fgPath: _path, ...copy } = structuredClone(source.data ?? {});
+      list[engine.nextId(list)] = { ...copy, name: source.name, count: 1, carried: rules.isWeapon(copy) || rules.isArmor(copy) || rules.isShield(copy) ? 2 : 1 };
+      added = "item";
+    } else if (source.type === "spell") {
+      const key = rules.casterOf(data.class)?.kind === "arcane" ? "spellbook" : "prepared";
+      data[key] = [...new Set([...(Array.isArray(data[key]) ? data[key] : []), source.name])];
+      added = "spell";
+    } else throw new Error("A Basic Fantasy sheet takes items and spells; race and class come with the character wizard.");
+    const updated = table.records.update(record.id, { data: rules.derive(data) }, table.seat, { replace: true });
+    table.say(`${record.name} gets ${source.name}.`, who, record.visibility === "gm");
+    return { record: updated, added };
   }
   if (adnd2e.is2e(record)) {
     // A 2E sheet takes items (into the gear: a weapon, armor or shield worn) and spells (by name).

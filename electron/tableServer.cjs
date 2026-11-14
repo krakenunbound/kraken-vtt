@@ -676,6 +676,15 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       for (const [ws, client] of clients) send(ws, { type: "calendar", calendar: calendar.view(seatOf(client)) });
     },
   });
+  // Progress clocks and the Score panel (clocks.cjs): every seat sees the clocks shown to it.
+  const clocks = require("./clocks.cjs").createClocks({
+    saved: saved.clocks,
+    onChange: () => {
+      onChange("table");
+      for (const [ws, client] of clients) send(ws, { type: "clocks", clocks: clocks.view(seatOf(client)) });
+    },
+    say: (line, from, secret) => agentHandle.say(line, from, secret),
+  });
   function sendCombat() {
     if (combatPending) return;
     combatPending = true;
@@ -827,7 +836,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
   // read from the module itself (the Books window), as FG reads them, never
   // copied into the campaign (they made it tens of MB, sent to every player).
   const GM_SEAT = { role: "dm", name: "GM" };
-  const RULES_TYPES = new Set(["siegepackage", "siegepower", "siegegame", "item", "npc", "spell", "pregencharsheet", ...require("./dnd5e.cjs").TYPES_5E]);
+  const RULES_TYPES = new Set(["siegepackage", "siegepower", "siegegame", "item", "npc", "spell", "pregencharsheet", "cairntable", "fateskill", "fatestunt", "ironmove", "ironasset", "ironoracle", "irondelve", "playbook", "crewtype", "forgedtable", ...require("./dnd5e.cjs").TYPES_5E]);
   function loadRecords(info) {
     const file = books?.file?.(info.id);
     if (!file) return;
@@ -1542,6 +1551,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
           map: client.role !== "dm" && sceneHiddenNow() ? emptyView() : map.viewFor(seatOf(client), client.assetToken),
           combat: combat.viewFor(seatOf(client)),
           calendar: calendar.view(seatOf(client)),
+          clocks: clocks.view(seatOf(client)),
           chat: chatFor(client),
           options,
           soundscape,
@@ -1652,6 +1662,41 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         return;
       }
 
+      // Progress clocks: the GM adds, ticks, changes and removes them, and sets the Score panel (position, effect, plan).
+      if (msg.type === "clocks") {
+        try {
+          const seat = seatOf(client);
+          if (seat.role !== "dm") throw new Error("Only the GM changes the clocks.");
+          if (msg.action === "add") clocks.add(msg.clock ?? {}, seat);
+          else if (msg.action === "tick") clocks.tick(String(msg.id ?? ""), Number(msg.amount) || 1, seat, { by: "Clocks" });
+          else if (msg.action === "update") clocks.update(String(msg.id ?? ""), msg.patch ?? {}, seat);
+          else if (msg.action === "remove") clocks.remove(String(msg.id ?? ""), seat);
+          else if (msg.action === "clear") clocks.clear(seat);
+          else if (msg.action === "score") clocks.setScore(msg.patch ?? {}, seat);
+          else throw new Error("add, tick, update, remove, clear or score?");
+        } catch (error) {
+          send(ws, { type: "error", reason: error instanceof Error ? error.message : "The clocks could not change." });
+        }
+        return;
+      }
+
+      // Forged in the Dark: a scoundrel's rolls and sheet actions (id), or the crew's and the Score panel's (no id).
+      if (msg.type === "forged") {
+        const forged = require("./forged.cjs");
+        const seat = seatOf(client);
+        const args = msg.args && typeof msg.args === "object" ? msg.args : {};
+        const fail = (error) => send(ws, { type: "error", reason: error instanceof Error ? error.message : "Could not do that." });
+        if (msg.id) {
+          const record = records.get(String(msg.id), seat);
+          if (!record || !forged.isForged(record) || (client.role !== "dm" && record.owner !== client.name)) {
+            send(ws, { type: "error", reason: "That is not your scoundrel." });
+            return;
+          }
+          forged.actionForged(agentHandle, record, String(msg.action ?? ""), args, seat, client.role === "dm" ? record.name : client.name).catch(fail);
+        } else forged.crewAction(agentHandle, String(msg.action ?? ""), args, seat, client.role === "dm" ? "GM" : client.name).catch(fail);
+        return;
+      }
+
       // A person's own settings (their colour, dice, how dice show), kept for them
       // by name; every browser they sit at gets them.
       if (msg.type === "prefs") {
@@ -1749,6 +1794,55 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       // spec with the campaign's books. A player's character is theirs.
       if (msg.type === "build-character") {
         const answer = (body) => send(ws, { type: "op-result", req: msg.req ?? null, ...body });
+        if (require("./fate.cjs").isFateRuleset(ruleset)) {
+          // A Fate character from its wizard's spec (aspects, skills or approaches, stunts), or a book's pregen.
+          const owner = client.role === "dm" ? text(msg.owner, "").slice(0, 24) : client.name;
+          require("./fate.cjs")
+            .buildFate(agentHandle, msg.spec ?? {}, owner, client.role === "dm" ? seatOf(client) : { role: "dm", name: client.name })
+            .then(({ record, problems }) => {
+              addChat({ id: client.id, from: client.name, text: `Created ${record.name}: ${record.data.aspects.highconcept}${record.data.aspects.trouble ? `, troubled by ${record.data.aspects.trouble}` : ""} (refresh ${record.data.refresh}).`, at: Date.now() });
+              answer({ ok: true, id: record.id, problems });
+            })
+            .catch((error) => answer({ ok: false, error: error instanceof Error ? error.message : "Could not build that character." }));
+          return;
+        }
+        if (require("./ironsworn.cjs").isIronswornRuleset(ruleset)) {
+          // An Ironsworn or Starforged character from its wizard's spec (stats, assets, background vow, bonds or a connection).
+          const owner = client.role === "dm" ? text(msg.owner, "").slice(0, 24) : client.name;
+          require("./ironsworn.cjs")
+            .buildIronsworn(agentHandle, msg.spec ?? {}, owner, client.role === "dm" ? seatOf(client) : { role: "dm", name: client.name })
+            .then(({ record, problems }) => {
+              const stats = record.data.stats;
+              addChat({ id: client.id, from: client.name, text: `Created ${record.name}: Edge ${stats.edge}, Heart ${stats.heart}, Iron ${stats.iron}, Shadow ${stats.shadow}, Wits ${stats.wits}; ${Object.values(record.data.assets ?? {}).map((asset) => asset.name).join(", ")}.`, at: Date.now() });
+              answer({ ok: true, id: record.id, problems });
+            })
+            .catch((error) => answer({ ok: false, error: error instanceof Error ? error.message : "Could not build that character." }));
+          return;
+        }
+        if (require("./forged.cjs").isForgedRuleset(ruleset)) {
+          // A Forged in the Dark scoundrel from its wizard's spec (a playbook from the active books).
+          const owner = client.role === "dm" ? text(msg.owner, "").slice(0, 24) : client.name;
+          require("./forged.cjs")
+            .buildForged(agentHandle, msg.spec ?? {}, owner, client.role === "dm" ? seatOf(client) : { role: "dm", name: client.name })
+            .then(({ record, problems }) => {
+              addChat({ id: client.id, from: client.name, text: `Created ${record.name}${record.data.alias ? ` "${record.data.alias}"` : ""}: ${record.data.playbook}, ${record.data.heritage} ${record.data.background}, ${record.data.abilities?.[0]?.name ?? ""}.`, at: Date.now() });
+              answer({ ok: true, id: record.id, problems });
+            })
+            .catch((error) => answer({ ok: false, error: error instanceof Error ? error.message : "Could not build that scoundrel." }));
+          return;
+        }
+        if (require("./cairn.cjs").isCairnRuleset(ruleset)) {
+          // A Cairn character from its wizard's spec (the background's tables and the rolls made on the host's dice).
+          const owner = client.role === "dm" ? text(msg.owner, "").slice(0, 24) : client.name;
+          require("./cairn.cjs")
+            .buildCairn(agentHandle, msg.spec ?? {}, owner, client.role === "dm" ? seatOf(client) : { role: "dm", name: client.name })
+            .then(({ record, problems }) => {
+              addChat({ id: client.id, from: client.name, text: `Created ${record.name}: ${record.data.background ?? ""}, STR ${record.data.attributes.str.score} DEX ${record.data.attributes.dex.score} WIL ${record.data.attributes.wil.score}, HP ${record.data.hp.max}.${problems.length ? ` ${problems.join(" ")}` : ""}`, at: Date.now() });
+              answer({ ok: true, id: record.id, problems });
+            })
+            .catch((error) => answer({ ok: false, error: error instanceof Error ? error.message : "Could not build that character." }));
+          return;
+        }
         if (ruleset === require("./astra.cjs").RULESET_NAME) {
           // An Apeira Astra character from its wizard's spec.
           const owner = client.role === "dm" ? text(msg.owner, "").slice(0, 24) : client.name;
@@ -1768,6 +1862,18 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
             .buildMgt2(agentHandle, msg.spec ?? {}, owner, client.role === "dm" ? seatOf(client) : { role: "dm", name: client.name })
             .then(({ record, problems }) => {
               addChat({ id: client.id, from: client.name, text: `Created ${record.name}: ${record.data.upp}${record.data.careers?.length ? `, ${record.data.careers.map((career) => `${career.name} (${career.terms} term${career.terms === 1 ? "" : "s"})`).join(", ")}` : ""}.`, at: Date.now() });
+              answer({ ok: true, id: record.id, problems });
+            })
+            .catch((error) => answer({ ok: false, error: error instanceof Error ? error.message : "Could not build that character." }));
+          return;
+        }
+        if (require("./bfrpg.cjs").isBfRuleset(ruleset)) {
+          // A Basic Fantasy character from its wizard's spec (the book's procedure, the shop's purchases).
+          const owner = client.role === "dm" ? text(msg.owner, "").slice(0, 24) : client.name;
+          require("./bfrpg.cjs")
+            .buildBf(agentHandle, msg.spec ?? {}, owner, client.role === "dm" ? seatOf(client) : { role: "dm", name: client.name })
+            .then(({ record, problems }) => {
+              addChat({ id: client.id, from: client.name, text: `Created ${record.name}: ${record.data.race} ${record.data.className} ${record.data.level}.`, at: Date.now() });
               answer({ ok: true, id: record.id, problems });
             })
             .catch((error) => answer({ ok: false, error: error instanceof Error ? error.message : "Could not build that character." }));
@@ -1850,6 +1956,69 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         levelUp(agentHandle, record, msg.package, client.role === "dm" ? record.name : client.name).catch((error) =>
           send(ws, { type: "error", reason: error instanceof Error ? error.message : "Could not level up." }),
         );
+        return;
+      }
+
+      // Fate: a character's rolls, invokes, compels, fate points, stress and
+      // consequences, milestones (id: the character); or the table's own (no
+      // id): the scene's aspects, the GM's pool, the conflict's kind.
+      if (msg.type === "fate") {
+        const fate = require("./fate.cjs");
+        const args = msg.args && typeof msg.args === "object" ? msg.args : {};
+        const fail = (error) => send(ws, { type: "error", reason: error instanceof Error ? error.message : "Could not do that." });
+        if (!fate.isFateRuleset(ruleset)) {
+          send(ws, { type: "error", reason: "This campaign does not play Fate." });
+          return;
+        }
+        if (!msg.id) {
+          fate.tableFate(agentHandle, String(msg.action ?? ""), args, seatOf(client), client.role === "dm" ? "GM" : client.name).catch(fail);
+          return;
+        }
+        const record = records.get(String(msg.id), seatOf(client));
+        if (!record || !fate.isFate(record) || (client.role !== "dm" && record.owner !== client.name)) {
+          send(ws, { type: "error", reason: "That is not your Fate character." });
+          return;
+        }
+        fate.actionFate(agentHandle, record, String(msg.action ?? ""), args, seatOf(client), client.role === "dm" ? record.name : client.name).catch(fail);
+        return;
+      }
+
+      // Ironsworn and Starforged: moves, burning momentum, choices, progress tracks,
+      // assets, the oracles, Delve's sites and the tracker's foes (electron/ironsworn.cjs).
+      if (msg.type === "ironsworn") {
+        const iron = require("./ironsworn.cjs");
+        const answer = (body) => send(ws, { type: "op-result", req: msg.req ?? null, ...body });
+        const action = String(msg.action ?? "");
+        const args = msg.args && typeof msg.args === "object" ? msg.args : {};
+        let run;
+        if (iron.TABLE_ACTIONS.has(action)) run = iron.tableIronsworn(agentHandle, action, args, seatOf(client), client.role === "dm" && !["oracle", "site"].includes(action) ? "Combat" : client.name);
+        else {
+          const record = records.get(String(msg.id ?? ""), seatOf(client));
+          if (!record || !iron.isIronsworn(record) || (client.role !== "dm" && record.owner !== client.name)) {
+            answer({ ok: false, error: "That is not your Ironsworn character." });
+            return;
+          }
+          run = iron.actionIronsworn(agentHandle, record, action, args, seatOf(client), client.role === "dm" ? record.name : client.name);
+        }
+        run
+          .then((result) => answer({ ok: true, id: String(msg.id ?? ""), result: result && typeof result === "object" && "record" in result ? { ...result, record: undefined } : result }))
+          .catch((error) => {
+            answer({ ok: false, error: error instanceof Error ? error.message : "Could not do that." });
+            send(ws, { type: "error", reason: error instanceof Error ? error.message : "Could not do that." });
+          });
+        return;
+      }
+
+      // Cairn: what a character does outside the fight (rest, Fatigue, spells, Scars, Growth).
+      if (msg.type === "cairn") {
+        const record = records.get(msg.id, seatOf(client));
+        if (!record || !require("./cairn.cjs").isCairn(record) || (client.role !== "dm" && record.owner !== client.name)) {
+          send(ws, { type: "error", reason: "That is not your Cairn character." });
+          return;
+        }
+        require("./cairn.cjs")
+          .actionCairn(agentHandle, record, String(msg.action ?? ""), msg.args && typeof msg.args === "object" ? msg.args : {}, seatOf(client), client.role === "dm" ? record.name : client.name)
+          .catch((error) => send(ws, { type: "error", reason: error instanceof Error ? error.message : "Could not do that." }));
         return;
       }
 
@@ -1977,7 +2146,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
           send(ws, { type: "error", reason: "You cannot roll for that character." });
           return;
         }
-        siegeCheck(agentHandle, record, { attribute: msg.attribute, cl: msg.cl, bonus: msg.bonus, label: msg.label, addLevel: typeof msg.addLevel === "boolean" ? msg.addLevel : undefined, ...(["check", "save", "skill"].includes(msg.kind) ? { kind: msg.kind, skill: text(msg.skill, ""), dc: num(msg.dc, 0), advantage: ["advantage", "disadvantage", "boon", "bane"].includes(msg.advantage) ? msg.advantage : "" } : {}) }, client.role === "dm" ? record.name : client.name).catch((error) =>
+        siegeCheck(agentHandle, record, { attribute: msg.attribute, cl: msg.cl, bonus: msg.bonus, label: msg.label, addLevel: typeof msg.addLevel === "boolean" ? msg.addLevel : undefined, ...(["check", "save", "skill", "morale"].includes(msg.kind) ? { kind: msg.kind, skill: text(msg.skill, ""), dc: num(msg.dc, 0), advantage: ["advantage", "disadvantage", "boon", "bane"].includes(msg.advantage) ? msg.advantage : "" } : {}) }, client.role === "dm" ? record.name : client.name).catch((error) =>
           send(ws, { type: "error", reason: error instanceof Error ? error.message : "Could not roll that." }),
         );
         return;
@@ -2269,6 +2438,10 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
             case "turn-undead":
               // 2E: a cleric (or paladin) turns the undead it targets.
               return combat.turnUndead(msg.id ? String(msg.id) : "", msg.recordId ? String(msg.recordId) : "", Array.isArray(msg.undead) ? msg.undead.map(String).slice(0, 50) : null, seat);
+            case "morale":
+              // Basic Fantasy: a monster's (or retainer's) 2d6 at or under its score (bonus: the GM's adjustment).
+              // Cairn: a WIL save to stand, for one creature (id) or a side (faction).
+              return combat.morale(String(msg.id ?? msg.faction ?? "foe"), Number(msg.bonus) || 0, seat);
             case "clear-targets":
               return combat.clearTargets(String(msg.id), seat);
             case "target-area": {
@@ -2285,7 +2458,16 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
               return combat.targetArea(sourceId, { x: num(msg.x, 0), y: num(msg.y, 0), radius: num(msg.radius, 0) * per, faction: msg.faction ?? null }, seat, (entry) => map.tokens().find((token) => token.id === entry.tokenId) ?? map.tokens().find((token) => entry.recordId && token.recordId === entry.recordId) ?? null);
             }
             case "attack":
-              return combat.attack(msg.recordId ? { recordId: String(msg.recordId) } : { entryId: String(msg.id) }, String(msg.weapon), seat, client.role === "dm" ? "Combat" : client.name, { full: Boolean(msg.full) });
+              return combat.attack(msg.recordId ? { recordId: String(msg.recordId) } : { entryId: String(msg.id) }, String(msg.weapon), seat, client.role === "dm" ? "Combat" : client.name, { full: Boolean(msg.full), mode: ["impaired", "enhanced"].includes(msg.mode) ? msg.mode : "", invokes: Array.isArray(msg.invokes) ? msg.invokes.slice(0, 6) : [] });
+            case "absorb":
+              // Fate: a hit's shifts taken by a stress box and consequences, as its player chooses (or taken out).
+              return combat.absorb(String(msg.id ?? ""), msg.choice && typeof msg.choice === "object" ? msg.choice : {}, seat);
+            case "concede":
+              // Fate: out of the conflict before being taken out, for fate points.
+              return combat.concede(String(msg.id ?? ""), seat);
+            case "attack-together":
+              // Cairn: several attackers at one foe, the highest die kept.
+              return combat.attackTogether(Array.isArray(msg.ids) ? msg.ids : [], String(msg.targetId ?? ""), seat, client.role === "dm" ? "Combat" : client.name);
             case "damage-roll":
               return combat.damageRoll(msg.recordId ? { recordId: String(msg.recordId) } : { entryId: String(msg.id) }, String(msg.weapon), seat, client.role === "dm" ? "Combat" : client.name);
             case "heal":
@@ -2472,6 +2654,8 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     towers: () => towers,
     dicePacks: () => dicePacks,
     calendar: () => calendar,
+    // Progress clocks and the Score panel's state (clocks.cjs).
+    clocks: () => clocks,
     readAloud: (words, title) => readAloud(words, title),
     sounds: () => sounds,
     playSound,
@@ -2674,6 +2858,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         hiddenSceneId,
         combat: combat.persisted(),
         calendar: calendar.persisted(),
+        clocks: clocks.persisted(),
         records: records.toJSON(),
         dice: dice.toJSON(),
         sound: soundscape,

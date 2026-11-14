@@ -93,7 +93,7 @@ try {
   const ghoul = await tool("kraken_record_create", { type: "npc", name: "Ghoul", data: { type: "Medium undead", hp: 6 } });
   const heroToken = await tool("kraken_token_place", { recordId: hero.id, col: 6, row: 5 });
   const ghoulToken = await tool("kraken_token_place", { recordId: ghoul.id, col: 9, row: 5 });
-  browser = await chromium.launch({ executablePath: CHROME, headless: true });
+  browser = await chromium.launch({ args: ["--mute-audio"], executablePath: CHROME, headless: true });
   const seat = await browser.newPage({ viewport: { width: 1400, height: 900 } });
   seat.on("pageerror", (error) => failures.push(`player: ${error.message}`));
   const heard = [];

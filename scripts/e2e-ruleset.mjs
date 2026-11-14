@@ -78,7 +78,9 @@ async function runRuleset(ruleset, plan) {
   console.log(`\n=== ${ruleset} ===`);
 
   const profile = mkdtempSync(path.join(tmpdir(), "kraken-e2e-"));
-  const env = { ...process.env, KRAKEN_WINDOW_AT: AT.join(","), KRAKEN_AGENT_FILE: path.join(profile, "agent.json"), KRAKEN_AGENT_PORT: "0" };
+  // A plan may play with only the books Kraken ships (plan.shipped: no FG modules, no Kraken packs of the GM's).
+  const env = { ...process.env, KRAKEN_WINDOW_AT: AT.join(","), KRAKEN_AGENT_FILE: path.join(profile, "agent.json"), KRAKEN_AGENT_PORT: "0", ...(plan.shipped ? { KRAKEN_BOOKS: path.join(profile, "no-fg-modules"), KRAKEN_PACKS: path.join(profile, "Kraken VTT", "Packs") } : {}) };
+  if (plan.shipped) for (const dir of [env.KRAKEN_BOOKS, env.KRAKEN_PACKS]) mkdirSync(dir, { recursive: true });
   let app = null;
   let browser = null;
   let child = null;
@@ -136,7 +138,7 @@ async function runRuleset(ruleset, plan) {
       if (!(await page.$('[data-action="new-campaign"]'))) await page.click('[data-action="campaigns-mode"]').catch(() => undefined);
       await page.click('[data-action="new-campaign"]');
       await page.fill('[aria-label="New campaign name"]', `E2E ${ruleset}`);
-      await page.click(`[data-ruleset="${ruleset}"]`);
+      await page.click(`[data-ruleset="${plan.ruleset ?? ruleset}"]`);
       await page.click('[data-action="create"]');
       await page.waitForSelector('[data-action="play"]', { timeout: 15000 });
       await page.fill('input[name="port"]', String(ctx.port));
@@ -179,7 +181,7 @@ async function runRuleset(ruleset, plan) {
 
     // 5-6. A test player in Chrome, a new account.
     await step("5-6 a player in Chrome, a new account", async () => {
-      browser = await chromium.launch({ executablePath: CHROME, headless: false, args: [`--window-position=${AT[0] + 900},${AT[1] + 80}`, "--window-size=1500,1000"] });
+      browser = await chromium.launch({ executablePath: CHROME, headless: false, args: ["--mute-audio", `--window-position=${AT[0] + 900},${AT[1] + 80}`, "--window-size=1500,1000"] });
       ctx.seat = await browser.newPage({ viewport: { width: 1480, height: 900 } });
       ctx.seat.on("pageerror", (error) => problem("player page error", error.message));
       await ctx.seat.goto(`http://127.0.0.1:${ctx.port}/`);
@@ -212,7 +214,8 @@ async function runRuleset(ruleset, plan) {
       if (!check(listed.length >= 1, "the wizard made a character", JSON.stringify(mine).slice(0, 200))) return;
       ctx.character = await tool("kraken_record_get", { id: listed[listed.length - 1].id });
       const items = Object.values(ctx.character.data.inventorylist ?? {});
-      check(items.length > 0, "the character has gear", JSON.stringify(ctx.character.data.inventorylist ?? {}).slice(0, 200));
+      // (A game without gear lists, Fate, keeps what is found in the extras.)
+      if (!plan.noGear) check(items.length > 0, "the character has gear", JSON.stringify(ctx.character.data.inventorylist ?? {}).slice(0, 200));
       if (plan.bought) await plan.bought(ctx);
       await ctx.shot(seat, "07-sheet");
     });
@@ -247,9 +250,10 @@ async function runRuleset(ruleset, plan) {
       await preset.click();
       await seat.waitForTimeout(500);
       await closeWindows(seat);
-      await seat.click('.dice-tray button[aria-label="d20"]');
-      await seat.click('.dice-tray button[aria-label="d6"]');
-      await seat.click(".dice-pool .play-button");
+      // (The map the GM put on the table can lie over the chat dock: its buttons are pressed as clicks on them.)
+      await seat.locator('.dice-tray button[aria-label="d20"]').dispatchEvent("click");
+      await seat.locator('.dice-tray button[aria-label="d6"]').dispatchEvent("click");
+      await seat.locator(".dice-pool .play-button").dispatchEvent("click");
       const line = await waitFor(async () => {
         const lines = await tool("kraken_chat_log", { count: 30 });
         return (Array.isArray(lines) ? lines : []).reverse().find((item) => item.roll && [`A test player`, ctx.character?.name ?? "A test player"].some((who) => `${item.from} ${item.roll.by ?? ""}`.includes(who)) && item.roll.terms?.some((term) => term.sides === 20));
@@ -294,7 +298,8 @@ async function runRuleset(ruleset, plan) {
       check(JSON.stringify(party).includes(ctx.character.id), "the character is in the party");
       await closeWindows(page);
       await openSide(page, "combat");
-      await page.waitForSelector(".combat-tracker", { timeout: 10000 });
+      // (A game without initiative shows its own panel there: Forged in the Dark's Score panel.)
+      await page.waitForSelector(plan.tracker ?? ".combat-tracker", { timeout: 10000 });
       await tool("kraken_combat", { action: "add-party" });
       const view = await tool("kraken_combat", { action: "view" });
       ctx.pcEntry = view.entries.find((entry) => entry.recordId === ctx.character.id);
@@ -312,7 +317,10 @@ async function runRuleset(ruleset, plan) {
     // 16. The fight.
     await step("16 the fight", async () => {
       if (!ctx.foe) return;
-      await fight(ctx);
+      // A game whose fights are not attack rolls plays its own (plan.fight: Ironsworn's moves;
+      // Forged in the Dark, which does not fight on the tracker: action and resistance rolls).
+      if (plan.fight) await plan.fight(ctx);
+      else await fight(ctx);
       await ctx.shot(page, "16-fight");
     });
 
@@ -342,8 +350,14 @@ async function runRuleset(ruleset, plan) {
         await page.waitForTimeout(800);
       }
       const after = await tool("kraken_record_get", { id: ctx.character.id });
-      check(coinTotal(after.data.coins) > coinsBefore, "the parcel's money reached the character", `${coinsBefore} -> ${coinTotal(after.data.coins)} ${JSON.stringify(after.data.coins)}`);
-      if (ctx.parcelItems?.length) check(itemCount(after.data.inventorylist) > itemsBefore, "the parcel's items reached the character", `${itemsBefore} -> ${itemCount(after.data.inventorylist)}`);
+      // A game's own way of receiving a parcel (Fate: no coin, the finds in the extras), else coin and items.
+      if (plan.received) await plan.received(ctx, before, after);
+      else {
+        // A game with no money says where a parcel's goes (plan.parcelReached: Ironsworn's supply).
+        if (plan.parcelReached) check(...plan.parcelReached(before, after));
+        else check(coinTotal(after.data.coins) > coinsBefore, "the parcel's money reached the character", `${coinsBefore} -> ${coinTotal(after.data.coins)} ${JSON.stringify(after.data.coins)}`);
+        if (ctx.parcelItems?.length) check(itemCount(after.data.inventorylist) > itemsBefore, "the parcel's items reached the character", `${itemsBefore} -> ${itemCount(after.data.inventorylist)}`);
+      }
       if (plan.xp !== null) check(Number(after.data.exp ?? 0) >= expBefore + (plan.xp ?? 100), "the experience reached the character", `${expBefore} -> ${after.data.exp}`);
       // The player's sheet shows the experience.
       await seat.bringToFront();
@@ -408,7 +422,8 @@ async function fillSheet(ctx) {
   for (const tab of tabs) {
     await seat.click(`[data-sheet-tab="${tab}"]`);
     await seat.waitForTimeout(250);
-    const fields = await seat.$$eval('[data-character] input[aria-label]:not([type="checkbox"]):not([type="number"]):not([type="radio"]):not([disabled]), [data-character] textarea[aria-label]:not([disabled])', (list) =>
+    // (data-transient: a roll's own words, not kept on the sheet: a Devil's Bargain.)
+    const fields = await seat.$$eval('[data-character] input[aria-label]:not([type="checkbox"]):not([type="number"]):not([type="radio"]):not([disabled]):not([data-transient]), [data-character] textarea[aria-label]:not([disabled])', (list) =>
       list.map((element) => ({ label: element.getAttribute("aria-label"), value: element.value, tag: element.tagName })),
     );
     for (const field of fields) {
@@ -446,7 +461,9 @@ async function fight(ctx) {
     const view = await tool("kraken_combat", { action: "view" });
     const foe = view.entries.find((entry) => entry.id === ctx.foe.id);
     const pc = view.entries.find((entry) => entry.id === ctx.pcEntry.id);
-    return { foe: foe && !["Dead", "Destroyed", "Dying", "Down", "Unconscious"].includes(foe.health?.status), pc: pc && !["Dead", "Dying", "Down", "Unconscious"].includes(pc.health?.status), view };
+    // (Cairn: the routed and the fleeing are out of the fight; a stabilized PC is out of action.)
+    // (Fate: the taken out and the conceded are out of the conflict.)
+    return { foe: foe && !["Dead", "Destroyed", "Dying", "Down", "Unconscious", "Routed", "Fleeing", "Taken Out", "Conceded"].includes(foe.health?.status), pc: pc && !["Dead", "Dying", "Down", "Unconscious", "Stable", "Taken Out", "Conceded"].includes(pc.health?.status), view };
   };
   await seat.bringToFront();
   await openSide(seat, "characters").catch(() => undefined);
@@ -494,7 +511,8 @@ async function fight(ctx) {
   await tool("kraken_combat", { action: "end", removeNpcs: true });
   const lines = (await tool("kraken_chat_log", { count: 200 })) || [];
   check(lines.some((line) => /\[ATTACK\]|\[SHIP ATTACK\]/.test(line.roll?.label ?? "")), "attacks went to chat");
-  check(lines.some((line) => /\[DAMAGE\]/.test(`${line.roll?.label ?? ""} ${line.text ?? ""}`)), "damage went to chat");
+  // (Fate: harm is shifts, absorbed as stress and consequences, or a creature taken out.)
+  check(lines.some((line) => /\[DAMAGE\]|\[STRESS\]|\[TAKEN OUT\]/.test(`${line.roll?.label ?? ""} ${line.text ?? ""}`)), "damage went to chat");
 }
 // How many things a character carries (counts, so a second rope counts).
 function itemCount(list) {

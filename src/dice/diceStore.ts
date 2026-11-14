@@ -157,7 +157,7 @@ export const PRESETS: ({ name: string } & DiceLook)[] = [
 // color: this person's colour on the map (their pings and their ink); null is the table's colour for their name.
 // These are the user tier: kept by the GM's app under the person's name (prefs.cjs), so
 // they follow them to any browser, past a reload, a restart and signing in again.
-// turnSound, turnBanner: when this person's turn comes round on the combat tracker, a bell, and a banner across the screen.
+// turnSound, turnBanner: when this person's turn comes round on the combat tracker, a chime, and a banner across the screen.
 export type DiceSettings = { show: boolean; sound: boolean; volume: number; tray: number; roll: number; look: DiceLook; npc: DiceLook | null; damage: DiceLook | null; color: string | null; turnSound: boolean; turnBanner: boolean };
 export type DiceSet = "look" | "npc" | "damage";
 type SettingsPatch = Partial<Omit<DiceSettings, "look" | "npc" | "damage">> & { look?: Partial<DiceLook>; npc?: Partial<DiceLook> | null; damage?: Partial<DiceLook> | null };
@@ -174,6 +174,12 @@ export function fullLook(look: Partial<DiceLook>): DiceLook {
 // d2 and d3 are thrown as a d6 numbered 1-2 three times or 1-3 twice, as real ones are.
 export const SHAPED = new Set([2, 3, 4, 6, 8, 10, 12, 20, 100]);
 export const SIX_SIDED: Record<number, string[]> = { 2: ["1", "2", "1", "2", "1", "2"], 3: ["1", "2", "3", "1", "2", "3"] };
+// A Fate die (dF): a d6 with two plus faces, two minus and two blank, a plus
+// opposite each minus (the faces are in the d6's opposite pairs: 0-1, 2-3, 4-5).
+export const FATE_FACES = ["+", "−", "+", "−", " ", " "];
+// The tray's own number for a Fate die (its formula is dF).
+export const FATE_SIDES = -3;
+export const fateFace = (value: number) => (value > 0 ? "+" : value < 0 ? "−" : " ");
 
 function load(): DiceSettings {
   try {

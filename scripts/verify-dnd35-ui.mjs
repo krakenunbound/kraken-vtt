@@ -83,7 +83,7 @@ try {
   }
   assert(classes.length === 2 && listOf(await tool("kraken_records_list", { type: "race" })).length === 2 && listOf(await tool("kraken_records_list", { type: "item" })).length === 7 && listOf(await tool("kraken_records_list", { type: "feat" })).length === 4, "the book's classes, races, gear and feats (kept under <reference>) are records in the campaign");
 
-  browser = await chromium.launch({ executablePath: CHROME, headless: true });
+  browser = await chromium.launch({ args: ["--mute-audio"], executablePath: CHROME, headless: true });
   const seat = await browser.newPage({ viewport: { width: 1400, height: 950 } });
   seat.on("pageerror", (error) => failures.push(`player: ${error.message}`));
   await seat.goto(`http://127.0.0.1:${port}/`);

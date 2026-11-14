@@ -69,7 +69,7 @@ try {
   await page.waitForSelector("text=Hosting");
   assert((await tool("kraken_table_options")).diceHold === 2.6, "2.6 seconds until the GM says otherwise");
 
-  browser = await chromium.launch({ executablePath: CHROME, headless: true });
+  browser = await chromium.launch({ args: ["--mute-audio"], executablePath: CHROME, headless: true });
   const seat = await browser.newPage({ viewport: { width: 1400, height: 900 } });
   seat.on("pageerror", (error) => failures.push(`player: ${error.message}`));
   await seat.goto(`http://127.0.0.1:${port}/`);

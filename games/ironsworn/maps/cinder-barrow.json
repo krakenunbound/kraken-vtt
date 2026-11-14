@@ -1,0 +1,24 @@
+{ "cell": 70, "cols": 30, "rows": 20, "ground": "rock", "seed": 113, "wallColor": [46, 40, 36],
+  "floors": [
+    { "x": 1, "y": 9, "w": 4, "h": 2, "tex": "dirt" },
+    { "x": 5, "y": 9, "w": 4, "h": 2, "tex": "flag" },
+    { "x": 9, "y": 6, "w": 7, "h": 8, "tex": "flag" },
+    { "x": 12, "y": 3, "w": 1, "h": 3, "tex": "flag" }, { "x": 10, "y": 1, "w": 5, "h": 2, "tex": "flag" },
+    { "x": 12, "y": 14, "w": 1, "h": 2, "tex": "flag" }, { "x": 10, "y": 16, "w": 5, "h": 3, "tex": "flag" },
+    { "x": 16, "y": 9, "w": 3, "h": 2, "tex": "dirt" },
+    { "x": 19, "y": 7, "w": 6, "h": 6, "tex": "flag" },
+    { "x": 25, "y": 9, "w": 2, "h": 1, "tex": "dirt" }, { "x": 27, "y": 6, "w": 2, "h": 7, "tex": "dirt" },
+    { "x": 21, "y": 13, "w": 2, "h": 2, "tex": "flag" }, { "x": 19, "y": 15, "w": 6, "h": 4, "tex": "flag" }
+  ],
+  "solids": [ { "x": 11, "y": 8, "w": 1, "h": 1 }, { "x": 13, "y": 8, "w": 1, "h": 1 }, { "x": 11, "y": 11, "w": 1, "h": 1 }, { "x": 13, "y": 11, "w": 1, "h": 1 } ],
+  "doors": [ { "x": 9, "y": 9, "side": "w" }, { "x": 9, "y": 10, "side": "w" }, { "x": 12, "y": 3, "side": "n" }, { "x": 12, "y": 15, "side": "s" }, { "x": 19, "y": 9, "side": "w" }, { "x": 22, "y": 14, "side": "s", "secret": true } ],
+  "features": [
+    { "kind": "rubble", "x": 2, "y": 9, "w": 1, "h": 1 }, { "kind": "bones", "x": 6, "y": 10 },
+    { "kind": "brazier", "x": 12, "y": 9 }, { "kind": "brazier", "x": 12, "y": 10 },
+    { "kind": "coffin", "x": 10, "y": 1, "w": 2, "h": 1 }, { "kind": "coffin", "x": 13, "y": 1, "w": 2, "h": 1 }, { "kind": "coffin", "x": 10, "y": 18, "w": 2, "h": 1 }, { "kind": "coffin", "x": 13, "y": 18, "w": 2, "h": 1 },
+    { "kind": "bones", "x": 14, "y": 6 }, { "kind": "blood", "x": 10, "y": 12 },
+    { "kind": "rubble", "x": 17, "y": 9, "w": 1, "h": 1 },
+    { "kind": "altar", "x": 21, "y": 9, "w": 2, "h": 2 }, { "kind": "brazier", "x": 19, "y": 7 }, { "kind": "brazier", "x": 24, "y": 7 }, { "kind": "brazier", "x": 19, "y": 12 }, { "kind": "brazier", "x": 24, "y": 12 },
+    { "kind": "rubble", "x": 27, "y": 6, "w": 2, "h": 2 }, { "kind": "pool", "x": 28, "y": 10, "w": 1, "h": 1 },
+    { "kind": "chest", "x": 23, "y": 17, "w": 1, "h": 1 }, { "kind": "coffin", "x": 20, "y": 16, "w": 2, "h": 1 }, { "kind": "bones", "x": 22, "y": 17 }, { "kind": "web", "x": 24, "y": 15 }
+  ] }

@@ -15,7 +15,7 @@ function Text({ label, value, onSave, area = false }: { label: string; value: st
   const save = () => {
     if (draft !== value) onSave(draft);
   };
-  return area ? <textarea aria-label={label} value={draft} onChange={(event) => setDraft(event.target.value)} onBlur={save} /> : <input aria-label={label} value={draft} onChange={(event) => setDraft(event.target.value)} onBlur={save} onKeyDown={(event) => event.key === "Enter" && save()} />;
+  return area ? <textarea aria-label={label} value={draft} onChange={(event) => setDraft(event.target.value)} onBlur={save} /> : <input aria-label={label} value={draft} onChange={(event) => setDraft(event.target.value)} onBlur={save} onKeyDown={(event) => event.key === "Enter" && !event.nativeEvent.isComposing && save()} />;
 }
 
 export function NpcMgt2({ session, record }: { session: Session; record: TableRecord }) {

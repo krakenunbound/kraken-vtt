@@ -82,7 +82,7 @@ try {
   for (let index = 0; index < 8; index++) await tool("kraken_token_place", { name: `Goblin ${index + 1}`, col: 36 + (index % 4), row: 24 + Math.floor(index / 4), faction: "foe" });
   await tool("kraken_scene_settings", { darkness: 0.8 });
   if ((await page.getAttribute('[data-action="sight"]', "aria-pressed")) !== "true") await page.click('[data-action="sight"]');
-  browser = await chromium.launch({ executablePath: CHROME, headless: true });
+  browser = await chromium.launch({ args: ["--mute-audio"], executablePath: CHROME, headless: true });
   const seat = await (await browser.newContext({ viewport: { width: 1400, height: 900 } })).newPage();
   await seat.goto("http://127.0.0.1:47449/");
   await seat.fill('input[name="name"]', "A test player");

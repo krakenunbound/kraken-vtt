@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root version="4.6" release="1">
+	<name type="string">Starforged Foes</name>
+	<displayname type="string">Starforged Foes</displayname>
+	<category type="string">Starforged</category>
+	<author type="string">Shawn Tomkin (CC BY 4.0), adapted for Kraken VTT</author>
+	<ruleset type="string">Starforged</ruleset>
+</root>

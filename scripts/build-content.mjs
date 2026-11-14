@@ -11,10 +11,33 @@ import { CREW_HANDBOOK } from "../games/apeira-astra/crew-handbook.mjs";
 import { DOSSIER } from "../games/apeira-astra/dossier.mjs";
 import { SALVAGE_RIGHTS } from "../games/apeira-astra/salvage-rights.mjs";
 import { LAMP_IN_THE_ROCK } from "../games/apeira-astra/lamp-in-the-rock.mjs";
+// The SRD 5.2.1 (CC BY 4.0) as D&D 5E's own books.
+import { PLAYERS_RULES } from "../games/srd-5e/players-rules.mjs";
+import { CREATURES_SPEC } from "../games/srd-5e/creatures.mjs";
+import { MAGIC_ITEMS_SPEC } from "../games/srd-5e/magic-items.mjs";
+// Cairn, Second Edition (CC BY-SA 4.0).
+import { PLAYERS_GUIDE as CAIRN_PLAYERS_GUIDE } from "../games/cairn/players-guide.mjs";
+import { WARDENS_GUIDE as CAIRN_WARDENS_GUIDE } from "../games/cairn/wardens-guide.mjs";
+import { TROUBLE_IN_TWIN_LAKES } from "../games/cairn/trouble-in-twin-lakes.mjs";
+// Ironsworn (with Delve) and Ironsworn: Starforged (Shawn Tomkin, CC BY 4.0 parts only).
+import { IRONSWORN_BOOKS, STARFORGED_BOOKS } from "../games/ironsworn/books.mjs";
+// Basic Fantasy (CC BY-SA 4.0: games/basic-fantasy/LICENSE.md).
+import { PLAYERS_HANDBOOK as BF_PLAYERS } from "../games/basic-fantasy/players-handbook.mjs";
+import { GM_GUIDE as BF_GM } from "../games/basic-fantasy/gm-guide.mjs";
+import { MILL_AT_HOBS_FORD } from "../games/basic-fantasy/mill-at-hobs-ford.mjs";
+// Fate Core and Fate Accelerated (CC BY 3.0, Evil Hat's SRDs), and a starter scenario.
+import { FATE_CORE } from "../games/fate/fate-core.mjs";
+import { FATE_ACCELERATED } from "../games/fate/fate-accelerated.mjs";
+import { TOOLKIT as FATE_TOOLKIT } from "../games/fate/toolkit.mjs";
+import { GULLS_END } from "../games/fate/gulls-end.mjs";
+// Forged in the Dark: the Blades in the Dark SRD (CC BY 3.0: games/forged-dark/LICENSE.md).
+import { SCOUNDRELS_HANDBOOK as FORGED_PLAYERS } from "../games/forged-dark/scoundrels-handbook.mjs";
+import { GM_GUIDE as FORGED_GM } from "../games/forged-dark/gm-guide.mjs";
+import { BRINE_STREET } from "../games/forged-dark/brine-street.mjs";
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 const out = path.join(root, "games", "modules");
-const modules = [PLAYERS_HANDBOOK, BESTIARY, EMPTY_WATCHTOWER, CREW_HANDBOOK, DOSSIER, SALVAGE_RIGHTS, LAMP_IN_THE_ROCK];
+const modules = [PLAYERS_HANDBOOK, BESTIARY, EMPTY_WATCHTOWER, CREW_HANDBOOK, DOSSIER, SALVAGE_RIGHTS, LAMP_IN_THE_ROCK, PLAYERS_RULES, CREATURES_SPEC, MAGIC_ITEMS_SPEC, CAIRN_PLAYERS_GUIDE, CAIRN_WARDENS_GUIDE, TROUBLE_IN_TWIN_LAKES, BF_PLAYERS, BF_GM, MILL_AT_HOBS_FORD, FATE_CORE, FATE_ACCELERATED, FATE_TOOLKIT, GULLS_END, ...IRONSWORN_BOOKS, ...STARFORGED_BOOKS, FORGED_PLAYERS, FORGED_GM, BRINE_STREET];
 for (const spec of modules) {
   const folder = writeModule(out, spec);
   console.log(`built ${path.relative(root, folder)}`);

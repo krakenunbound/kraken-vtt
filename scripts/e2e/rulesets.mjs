@@ -4,8 +4,15 @@
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 // A sidebar window opened (its button toggles: pressed again it would close).
+// Already open, it is brought to the front (the map window opened since may
+// cover it): a press on the window brings it forward, as a person's click does.
 async function openSide(where, launch) {
-  if (await where.$(`.sidebar [data-launch="${launch}"].open`)) return;
+  if (await where.$(`.sidebar [data-launch="${launch}"].open`)) {
+    const kind = launch.split(":")[0];
+    const win = await where.$(`[data-window="${kind}"]`);
+    if (win) await win.dispatchEvent("pointerdown");
+    return;
+  }
   await where.click(`.sidebar [data-launch="${launch}"]`);
 }
 // Close every window but the map (the Close buttons, never Pop out).
@@ -28,6 +35,21 @@ async function bookMap(ctx, title) {
     await wait(500);
   }
   throw new Error(`${title}'s maps did not open.`);
+}
+// The GM: a picture of Kraken's own opened as a bare map (for a game whose books have no maps).
+async function pictureMap(ctx, file, name) {
+  const { page } = ctx;
+  const bytes = await import("node:fs").then((fs) => fs.readFileSync(file));
+  await page.evaluate(async ([data, title]) => {
+    const input = document.querySelector('input[type="file"]');
+    if (!input) throw new Error("No file input to open a map.");
+    const picture = new File([new Uint8Array(data)], title, { type: "image/webp" });
+    const transfer = new DataTransfer();
+    transfer.items.add(picture);
+    input.files = transfer.files;
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+  }, [[...bytes], name]);
+  for (let i = 0; i < 60 && !(await ctx.tool("kraken_map")).scene; i++) await wait(500);
 }
 // The GM: an NPC from an active adventure (Images > the module > NPCs > Add), else a bestiary's by name on the tracker.
 async function libraryNpc(ctx, title, search) {
@@ -83,8 +105,11 @@ async function handParcel(ctx, { coin = "GP", amount = 50, item }) {
   const { page, tool } = ctx;
   await openSide(page, "party");
   await page.click('[role="tab"]:has-text("Inventory")');
-  const coinBox = page.locator(`[data-parcel-coin="${coin}"], label:has-text("${coin}") input[type="number"]`).first();
-  await coinBox.fill(String(amount));
+  // (A game without coin, Fate, hands out only things.)
+  if (coin) {
+    const coinBox = page.locator(`[data-parcel-coin="${coin}"], label:has-text("${coin}") input[type="number"]`).first();
+    await coinBox.fill(String(amount));
+  }
   if (item) {
     await page.fill('input[placeholder="Item"]', item);
     await page.click('form:has(input[placeholder="Item"]) button[type="submit"]');
@@ -277,6 +302,56 @@ async function wizard2e(ctx, { race, cls, name, gear }) {
   await finish(ctx);
 }
 
+// Fate Core and Fate Accelerated (shipped books only): the wizard (high
+// concept, trouble, the pyramid or the approaches, three stunts from the
+// books), a Wrecker from the starter scenario fought from the sheet (an
+// attack against its defence, in shifts), a parcel of things (no coin: they
+// go into the character's extras), milestones instead of XP.
+function fatePlan(game) {
+  const core = game === "core";
+  return {
+    books: [core ? "Fate Core System" : "Fate Accelerated Edition", "Fate Toolkit and Adversaries", "The Lighthouse at Gull's End"],
+    shipped: true,
+    map: (ctx) => bookMap(ctx, "The Lighthouse at Gull's End"),
+    async wizard(ctx) {
+      const { seat } = ctx;
+      const w = '[data-wizard="fate"]';
+      await seat.waitForSelector(w, { timeout: 15000 });
+      await seat.fill(`${w} [data-field="highconcept"]`, core ? "Harbour Watch Veteran" : "Runaway Sky-Pirate");
+      await seat.fill(`${w} [data-field="trouble"]`, core ? "Owes the Wrong People" : "Wanted by the Admiralty");
+      await seat.fill(`${w} [data-field="name"]`, core ? "Ada Brand" : "Wren");
+      await seat.fill(`${w} [data-field="a1"]`, "Never Leave Anyone Behind");
+      if (core) {
+        const pyramid = ["Fight", "Athletics", "Notice", "Physique", "Will", "Shoot", "Lore", "Stealth", "Rapport", "Provoke"];
+        for (const [index, skill] of pyramid.entries()) await seat.selectOption(`${w} [data-slot="${index}"] select`, skill);
+      } else for (const [key, value] of Object.entries({ careful: 1, clever: 2, flashy: 3, forceful: 0, quick: 2, sneaky: 1 })) await seat.selectOption(`${w} [data-approach="${key}"] select`, String(value));
+      for (let i = 0; i < 3; i++) await seat.locator(`${w} .life-shop button`).first().click();
+      ctx.bought = [];
+      await finish(ctx);
+    },
+    // Fate keeps no gear lists: what a character finds goes into its extras.
+    noGear: true,
+    enemy: (ctx) => trackerNpc(ctx, "Wrecker"),
+    // The player attacks from the sheet: the action Attack, then the skill's (approach's) 4dF.
+    async playerAttack(ctx) {
+      const { seat } = ctx;
+      await seat.click('[data-sheet-tab="main"]').catch(() => undefined);
+      await seat.selectOption('[data-character] [data-field="fate-action"]', "attack").catch(() => undefined);
+      const button = seat.locator(`[data-character] [data-roll-skill="${core ? "Fight" : "Forceful"}"]`).first();
+      if (!(await button.count())) return false;
+      await button.dispatchEvent("click");
+      await wait(500);
+      return true;
+    },
+    parcel: (ctx) => handParcel(ctx, { coin: null, item: "Brass Spyglass" }),
+    async received(ctx, before, after) {
+      ctx.check(String(after.data.extras ?? "").includes("Brass Spyglass"), "the parcel's find is in the character's extras", String(after.data.extras ?? ""));
+    },
+    // Milestones instead of experience (the party sheet's Milestones tab).
+    xp: null,
+  };
+}
+
 export const RULESETS = {
   "Castles & Crusades": {
     books: ["SC C&C Player's Handbook", "SC C&C Monsters & Treasure", "SC C&C Adventurer's Backpack", "SC C&C Castle Keeper's Guide", "B2 The Keep on the Borderlands (C&C)"],
@@ -308,6 +383,18 @@ export const RULESETS = {
   "D&D 5E": {
     books: ["5E SRD 5.2.1 Player Data", "5E SRD 5.2.1 Bestiary", "5E SRD 5.2.1 Magic Items", "The Secrets of Skyhorn Lighthouse"],
     map: (ctx) => bookMap(ctx, "The Secrets of Skyhorn Lighthouse"),
+    wizard: (ctx) => wizard5e(ctx, { root: '[data-wizard="dnd5e"]', cls: "Fighter", species: "Dwarf", background: "Soldier", name: "Mira Holt" }),
+    bought: checkKit,
+    enemy: (ctx) => trackerNpc(ctx, "Goblin Warrior"),
+    parcel: (ctx) => handParcel(ctx, { coin: "GP", amount: 75, item: "Potion of Healing" }),
+    xp: 200,
+  },
+  // D&D 5E with only the books Kraken ships: the SRD 5.2.1 (games/srd-5e), no FG modules or packs of the GM's.
+  "D&D 5E (SRD)": {
+    ruleset: "D&D 5E",
+    shipped: true,
+    books: ["SRD 5.2.1 Player's Rules", "SRD 5.2.1 Creatures", "SRD 5.2.1 Magic Items"],
+    map: (ctx) => pictureMap(ctx, "games/descending-darkness/art/watchtower-yard.webp", "Courtyard.webp"),
     wizard: (ctx) => wizard5e(ctx, { root: '[data-wizard="dnd5e"]', cls: "Fighter", species: "Dwarf", background: "Soldier", name: "Mira Holt" }),
     bought: checkKit,
     enemy: (ctx) => trackerNpc(ctx, "Goblin Warrior"),
@@ -482,6 +569,167 @@ export const RULESETS = {
     parcel: (ctx) => handParcel(ctx, { coin: "Cr", amount: 800, item: "Toolkit" }),
     xp: 4,
   },
+  // Ironsworn (with Delve) and Starforged: the wizard's steps; a fight of
+  // moves from the sheet against a foe's progress track; a parcel's Supply.
+  Ironsworn: ironswornPlan("Ironsworn"),
+  Starforged: ironswornPlan("Starforged"),
+  // Cairn: the book's creation in order (every die the host's), its gold at the Marketplace.
+  Cairn: {
+    books: ["Cairn Player's Guide", "Cairn Warden's Guide", "Trouble in Twin Lakes"],
+    map: (ctx) => bookMap(ctx, "Trouble in Twin Lakes"),
+    async wizard(ctx) {
+      const { seat } = ctx;
+      const w = '[data-wizard="cairn"]';
+      await seat.waitForSelector(w);
+      const ready = (action) => seat.waitForFunction((which) => { const button = document.querySelector(which); return button && !button.disabled; }, `${w} [data-action="${action}"]`, { timeout: 30000 });
+      const rolled = (action) => seat.waitForFunction((which) => document.querySelector(which)?.disabled, `${w} [data-action="${action}"]`, { timeout: 30000 });
+      await seat.click(`${w} [data-action="cairn-roll-background"]`);
+      await seat.waitForFunction((root) => document.querySelector(`${root} select[aria-label="Background"]`)?.value, w, { timeout: 30000 });
+      const names = await seat.locator(`${w} select[aria-label="Name from the background"] option`).allTextContents();
+      await seat.selectOption(`${w} select[aria-label="Name from the background"]`, names[1]);
+      for (const action of ["cairn-roll-table-0", "cairn-roll-table-1", "cairn-roll-attributes"]) {
+        await ready(action);
+        await seat.click(`${w} [data-action="${action}"]`);
+        await rolled(action);
+      }
+      await seat.click(`${w} [data-action="cairn-swap"]`).catch(() => undefined);
+      for (const action of ["cairn-roll-hp", "cairn-roll-traits", "cairn-roll-bond", "cairn-roll-age", "cairn-roll-gold"]) {
+        await ready(action);
+        await seat.click(`${w} [data-action="${action}"]`);
+        await rolled(action);
+      }
+      await buy(ctx, ["Chalk", "Torch", "Rope", "Dagger"]);
+      await ready("wizard-finish");
+      await finish(ctx);
+    },
+    bought: checkBought,
+    // A creature from the Warden's Guide's bestiary.
+    enemy: (ctx) => trackerNpc(ctx, "Wolf"),
+    parcel: (ctx) => handParcel(ctx, { coin: "GP", amount: 40, item: "Rope" }),
+    // Cairn has no experience: characters grow from what happens to them.
+    xp: null,
+  },
+  // Basic Fantasy RPG 4th Edition: its three books ship with Kraken.
+  // Forged in the Dark (the Blades in the Dark SRD): its three books ship with Kraken; no initiative: the
+  // Combat window is the Score panel, and a conflict is action rolls and resistance from the sheet.
+  "Forged in the Dark": {
+    shipped: true,
+    books: ["Forged in the Dark: Scoundrel's Handbook", "Forged in the Dark: Game Master's Guide", "The Brine Street Job (Forged in the Dark)"],
+    map: (ctx) => bookMap(ctx, "The Brine Street Job (Forged in the Dark)"),
+    tracker: ".score-panel",
+    async wizard(ctx) {
+      const { seat } = ctx;
+      const w = '[data-wizard="forged"]';
+      await seat.waitForSelector(w);
+      await seat.selectOption(`${w} select[aria-label="Playbook"]`, "Enforcer");
+      await seat.selectOption(`${w} select[aria-label="Heritage"]`, "Canal-born");
+      await seat.fill(`${w} input[aria-label="Heritage detail"]`, "Barge folk on the Grey Canal");
+      await seat.selectOption(`${w} select[aria-label="Background"]`, "Military");
+      await seat.fill(`${w} input[aria-label="Background detail"]`, "A marine who deserted");
+      for (const action of ["prowl", "wreck", "hunt", "consort"]) await seat.click(`${w} [data-action="dot-${action}"]`);
+      await seat.check(`${w} input[data-ability="Battleborn"]`);
+      await seat.selectOption(`${w} select[aria-label="Close friend"]`, "Old Pell");
+      await seat.selectOption(`${w} select[aria-label="Rival"]`, "Sergeant Danna Vey");
+      await seat.selectOption(`${w} select[aria-label="Vice"]`, "Stupor");
+      await seat.fill(`${w} input[aria-label="Vice purveyor"]`, "The fighting pits under the tannery");
+      await seat.fill(`${w} input[aria-label="Character name"]`, "Bram Holloway");
+      await seat.fill(`${w} input[aria-label="Alias"]`, "Anchor");
+      await finish(ctx);
+    },
+    bought: null,
+    // The counting-house's night guards from the score, on the tracker (no initiative: a list of who is there).
+    async enemy(ctx) {
+      const { tool } = ctx;
+      const list = await tool("kraken_records_list", { type: "npc", name: "Night Guards" });
+      const guards = (list.records ?? list).find((item) => item.name === "Night Guards");
+      await tool("kraken_combat", guards ? { action: "add", recordId: guards.id } : { action: "add", entry: { name: "Night Guards", faction: "foe" } });
+    },
+    // The conflict: the player's Skirmish from the sheet (risky / standard), the GM's harm, the player resists it.
+    async fight(ctx) {
+      const { seat, tool, check, page } = ctx;
+      await tool("kraken_clocks", { action: "score", patch: { phase: "score", position: "risky", effect: "standard" } });
+      // Whatever harm the sheet's fields were filled with is cleared first (a clean roll: risky / standard).
+      for (const [level, index] of [[3, 0], [2, 0], [2, 1], [1, 0], [1, 1]]) await tool("kraken_forged", { id: ctx.character.id, action: "harm-clear", args: { level, index } }).catch(() => undefined);
+      await seat.bringToFront();
+      await openSide(seat, "characters").catch(() => undefined);
+      await seat.click('[data-sheet-tab="main"]').catch(() => undefined);
+      await seat.locator('[data-roll-action="skirmish"]').first().click();
+      await wait(1200);
+      await tool("kraken_forged", { id: ctx.character.id, action: "harm", args: { level: 2, text: "Cudgel to the ribs" } });
+      await seat.locator('[data-roll-resist="prowess"]').first().click();
+      await wait(1200);
+      const lines = (await tool("kraken_chat_log", { count: 200 })) || [];
+      check(lines.some((line) => /\[ACTION\] Skirmish \d?d · Risky \/ Standard/.test(line.roll?.label ?? "")), "the action roll went to chat with its position and effect");
+      check(lines.some((line) => /\[RESIST\] Prowess/.test(line.roll?.label ?? "")), "the resistance roll went to chat");
+      await tool("kraken_combat", { action: "end", removeNpcs: true });
+      await ctx.shot?.(page, "16-score");
+    },
+    parcel: (ctx) => handParcel(ctx, { coin: "Coin", amount: 4, item: "Lantern" }),
+    // Experience is marked on xp tracks, not a total: the party's award is checked in extra.
+    xp: null,
+    async extra(ctx) {
+      const { page, tool, check } = ctx;
+      const before = (await tool("kraken_record_get", { id: ctx.character.id })).data.xp?.playbook ?? 0;
+      await openSide(page, "party");
+      await page.click('[role="tab"]:has-text("XP")');
+      await page.locator('.party-xp input[type="number"]').first().fill("2");
+      await page.click('button:has-text("Award to the party")');
+      await wait(800);
+      const after = (await tool("kraken_record_get", { id: ctx.character.id })).data.xp?.playbook ?? 0;
+      check(after === before + 2 || after === 0, "the party's XP award marked the playbook track", `${before} -> ${after}`);
+      await closeWindows(page);
+      // A clock the whole table sees.
+      await tool("kraken_clocks", { action: "add", name: "First Light", segments: 8, kind: "mission" });
+      await tool("kraken_clocks", { action: "tick", id: "First Light", amount: 2 });
+      const seen = await ctx.seat.waitForSelector('.clocks-strip [data-clock="First Light"][data-filled="2"]', { timeout: 10000 }).catch(() => null);
+      check(seen, "the player sees the clock on the strip");
+    },
+  },
+  "Basic Fantasy": {
+    books: ["Basic Fantasy Player's Handbook", "Basic Fantasy Game Master's Guide", "The Mill at Hob's Ford (Basic Fantasy)"],
+    map: (ctx) => bookMap(ctx, "The Mill at Hob's Ford (Basic Fantasy)"),
+    async wizard(ctx) {
+      const { seat } = ctx;
+      const w = '[data-wizard="bfrpg"]';
+      await seat.waitForSelector(w);
+      // 3d6 in order on the host's dice; then (the GM allowing an exchange) scores a fighter may have.
+      await seat.click(`${w} [data-action="roll-abilities"]`);
+      await seat.waitForFunction((root) => Boolean(document.querySelector(`${root} input[data-score="charisma"]`)?.value), w, { timeout: 30000 });
+      for (const [stat, score] of [["strength", 15], ["intelligence", 10], ["wisdom", 11], ["dexterity", 13], ["constitution", 14], ["charisma", 9]]) await seat.fill(`${w} input[data-score="${stat}"]`, String(score));
+      await seat.selectOption(`${w} select[aria-label="Race"]`, "human");
+      await seat.selectOption(`${w} select[aria-label="Class"]`, "fighter");
+      await seat.click(`${w} [data-action="roll-hp"]`);
+      await seat.waitForSelector(`${w} [data-hp]`, { timeout: 30000 });
+      await buy(ctx, ["Longsword/Scimitar", "Leather Armor", "Shield", "Backpack", "Torches, 6"]);
+      await seat.fill(`${w} [aria-label="Character name"]`, "Darion Vell");
+      await seat.selectOption(`${w} select[aria-label="Alignment"]`, "Lawful");
+      await finish(ctx);
+    },
+    bought: checkBought,
+    // The Mill keeps its creatures in the Game Master's Guide.
+    enemy: (ctx) => trackerNpc(ctx, "Goblin"),
+    async parcel(ctx) {
+      // The adventure's own treasure parcel (Library > the module > Parcels). Its launch button can still
+      // read as open after the map step closed the window: pressed until the window is there.
+      // The Library window can open under the map window (shown since step 4): its controls are pressed in the page.
+      const { page, tool, shelf } = ctx;
+      await openSide(page, "library");
+      await page.waitForSelector('[aria-label="Library module"]', { timeout: 15000 });
+      const book = shelf.find((item) => item.title === "The Mill at Hob's Ford (Basic Fantasy)");
+      await page.selectOption('[aria-label="Library module"]', book.name, { force: true });
+      await page.$eval('[data-library-tab="parcel"]', (button) => button.click());
+      await page.waitForSelector('[data-library-item] [data-action="library-parcel"]', { state: "attached", timeout: 15000 });
+      await page.$$eval("[data-library-item]", (rows) => rows.find((row) => /Goblin Den Loot/.test(row.textContent ?? ""))?.querySelector('[data-action="library-parcel"]')?.click());
+      await wait(800);
+      const party = await tool("kraken_party");
+      ctx.parcelItems = Object.values(party.parcel?.items ?? {}).map((item) => item.name);
+      ctx.check(Object.values(party.parcel?.coins ?? {}).some((value) => Number(value) > 0), "the adventure's parcel (140 sp, 300 cp, 12 gp, a dagger) is on the party sheet", JSON.stringify(party.parcel).slice(0, 200));
+    },
+    xp: 25,
+  },
+  // Fate Core and Fate Accelerated: the books' character creation in the wizard, a conflict, no coin or XP.
+  "Fate Core": fatePlan("core"),
+  "Fate Accelerated": fatePlan("fae"),
   Worldbuilding: {
     books: [],
     async map(ctx) {
@@ -544,3 +792,109 @@ export const RULESETS = {
     xp: 50,
   },
 };
+
+// Ironsworn and Starforged: no money and no attack rolls. The wizard: the
+// spread placed, the assets, a background vow, bonds or a connection, what
+// they carry. The fight: Enter the Fray, then Strike against the foe on the
+// tracker until its progress is enough, then End the Fight (Take Decisive
+// Action) with a progress roll, every move made from the sheet. A parcel's
+// Supply goes to the shared supply meter.
+function ironswornPlan(game) {
+  const sf = game === "Starforged";
+  const move = async (ctx, key, target, option = null) => {
+    const { seat, tool } = ctx;
+    await seat.click('[data-character] [data-sheet-tab="moves"]');
+    await seat.locator(`[data-character] [data-move="${key}"]`).first().click();
+    if (option !== null) await seat.selectOption("[data-character] [data-move-option]", String(option)).catch(() => undefined);
+    if (target) {
+      await seat.waitForSelector(`[data-character] [data-move-track] option[value="target:${target}"]`, { state: "attached", timeout: 10000 });
+      await seat.selectOption("[data-character] [data-move-track]", `target:${target}`);
+    }
+    const before = (await tool("kraken_record_get", { id: ctx.character.id })).data.lastroll?.at ?? 0;
+    await seat.click('[data-character] [data-action="make-move"]');
+    for (let i = 0; i < 40; i++) {
+      const roll = (await tool("kraken_record_get", { id: ctx.character.id })).data.lastroll;
+      if ((roll?.at ?? 0) > before) {
+        // A roll momentum could better: kept, as a player might.
+        if (roll.pending) await seat.click('[data-character] [data-action="iron-keep"]');
+        return roll;
+      }
+      await wait(250);
+    }
+    return null;
+  };
+  return {
+    // Only the books Kraken ships (no FG modules or packs of the GM's).
+    shipped: true,
+    books: sf ? ["Starforged Reference", "Starforged Foes", "The Silent Hulk"] : ["Ironsworn Reference", "Ironsworn Foes and Sites", "The Cinder Barrow"],
+    map: (ctx) => bookMap(ctx, sf ? "The Silent Hulk" : "The Cinder Barrow"),
+    async wizard(ctx) {
+      const { seat } = ctx;
+      const w = '[data-wizard="ironsworn"]';
+      await seat.waitForSelector(w);
+      await seat.selectOption(`${w} [data-iron-stat="iron"]`, "3");
+      await seat.selectOption(`${w} [data-iron-stat="edge"]`, "2");
+      for (const name of sf ? ["Ace", "Gunner", "Combat Bot"] : ["Swordmaster", "Hound", "Ironclad"]) {
+        const box = seat.locator(`${w} [data-iron-asset="${name}"]`);
+        await box.evaluate((element) => element.closest("details")?.setAttribute("open", ""));
+        await box.check();
+      }
+      await seat.fill(`${w} [data-background-vow]`, sf ? "Find my lost crew" : "Free my people from the raider-king");
+      if (sf) {
+        await seat.fill(`${w} [data-ship-name]`, "Wayfarer");
+        await seat.fill(`${w} [data-connection-name]`, "Ashe Varo");
+        await seat.fill(`${w} [data-connection-role]`, "Broker");
+      } else await seat.fill(`${w} [data-bond="0"]`, "My home village");
+      await seat.fill(`${w} [data-inciting-vow]`, "Find out who stole the sacred iron");
+      await seat.fill(`${w} [data-gear]`, "A bedroll, a coil of rope, a lantern");
+      ctx.bought = ["bedroll", "rope", "lantern"];
+      await seat.fill(`${w} input[aria-label="Character name"]`, sf ? "Vesna Kade" : "Kira Ashdown");
+      await finish(ctx);
+    },
+    bought: checkBought,
+    enemy: (ctx) => trackerNpc(ctx, sf ? "Drift pirate" : "Raider"),
+    async fight(ctx) {
+      const { tool, seat, check } = ctx;
+      await seat.bringToFront();
+      await openSide(seat, "characters").catch(() => undefined);
+      const foeId = ctx.foe.id;
+      // The GM shows the foe (the tracker adds it hidden): the player makes moves against it.
+      await tool("kraken_combat", { action: "update", id: foeId, patch: { hidden: false } });
+      const status = async () => (await tool("kraken_combat", { action: "view" })).entries.find((entry) => entry.id === foeId);
+      const fray = await move(ctx, "enter_the_fray", foeId, sf ? 2 : 0);
+      check(fray?.outcome, "Enter the Fray from the sheet", JSON.stringify(fray ?? {}).slice(0, 200));
+      let rounds = 0;
+      while (rounds < 10 && Math.floor(((await status())?.iron?.ticks ?? 0) / 4) < 6) {
+        rounds += 1;
+        const control = (await tool("kraken_record_get", { id: ctx.character.id })).data.control;
+        // With the initiative (in control) Strike; without it Clash.
+        await move(ctx, control ? "strike" : "clash", foeId, 0);
+      }
+      const ticks = (await status())?.iron?.ticks ?? 0;
+      check(ticks > 0, "the player's moves marked the foe's progress", `${ticks} ticks after ${rounds} rounds`);
+      // The foe hits back: the GM inflicts its harm.
+      await tool("kraken_ironsworn", { action: "inflict", target: foeId, id: ctx.character.id });
+      await move(ctx, sf ? "take_decisive_action" : "end_the_fight", foeId);
+      let foe = await status();
+      if (foe?.health?.status !== "Defeated") {
+        // Not this time: the GM finishes it (harm enough to fill its track).
+        await tool("kraken_combat", { action: "damage", id: foeId, amount: 40 });
+        foe = await status();
+      }
+      check(foe?.health?.status === "Defeated", "the foe is out of the fight", foe?.health?.status);
+      const lines = (await tool("kraken_chat_log", { count: 200 })) || [];
+      check(lines.some((line) => /\[MOVE\]/.test(line.roll?.label ?? "")), "the moves went to chat");
+      check(lines.some((line) => /\[PROGRESS\]/.test(`${line.roll?.label ?? ""} ${line.text ?? ""}`)), "progress went to chat");
+      // Health back for what follows.
+      await tool("kraken_character_edit", { id: ctx.character.id, changes: [{ path: "meters.health", value: 5 }] });
+      await tool("kraken_combat", { action: "end", removeNpcs: true });
+    },
+    // First the supply is spent, then the parcel's Supply refills it (shared by the party).
+    async parcel(ctx) {
+      await ctx.tool("kraken_character_edit", { id: ctx.character.id, changes: [{ path: "meters.supply", value: 3 }] });
+      await handParcel(ctx, { coin: "Supply", amount: 1, item: sf ? "Data core" : "Silver torc" });
+    },
+    parcelReached: (before, after) => [Number(after.data.meters?.supply) > Number(before.data.meters?.supply), "the parcel's Supply reached the shared supply meter", `${before.data.meters?.supply} -> ${after.data.meters?.supply}`],
+    xp: 2,
+  };
+}

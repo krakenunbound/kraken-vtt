@@ -4186,5 +4186,17 @@
   "file": "weapons-bite-fumble-2.mp3",
   "prompt": "a clumsy fumble with a beast's bite, the weapon slipping from the hand and clattering onto stone, impact sound only, no voice, no vocals, no grunt, no scream, fantasy combat sound effect",
   "at": "2026-11-03T21:32:37.430Z"
+ },
+ {
+  "group": "sfx/Effects/Turn",
+  "file": "turn-chime.mp3",
+  "prompt": "A soft wooden marimba two-note rising cue, warm and mellow, cozy board game notification, short and quiet",
+  "at": "2026-11-14T04:53:45.370Z"
+ },
+ {
+  "group": "sfx/Effects/Turn",
+  "file": "turn-console.mp3",
+  "prompt": "A soft, pleasant starship console notification: two gentle rising synth tones, clean and warm, quiet, short, science fiction interface",
+  "at": "2026-11-14T04:53:45.370Z"
  }
 ]

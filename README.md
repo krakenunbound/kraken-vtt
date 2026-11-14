@@ -32,7 +32,7 @@ Initiative, Defense and Health, each creature's attacks ready to roll, and the r
 
 ### Your turn (in Chrome)
 ![Your turn: a banner across the player's screen](docs/screenshots/player-turn.jpg)
-When a player's turn comes round, a banner sweeps across their screen and a bell rings. Each player turns either on or off in **Settings > You at the table**, where they also pick their colour.
+When a player's turn comes round, a banner sweeps across their screen and a soft chime sounds. Each player turns either on or off in **Settings > You at the table**, where they also pick their colour.
 
 ### Shapes on the map (in Chrome)
 ![A player's arrow, cone and circle, measured as drawn](docs/screenshots/player-shapes.jpg)
@@ -132,15 +132,36 @@ Six start screens, fantasy, science fiction and horror, one at random each time.
 - **Host from your PC, players use a browser.** Create a campaign, press Play,
   and give your players the address, port and password. They see only what you
   let them see: hidden tokens, GM notes and secret doors never reach them.
-- **Games you can play today.** Two original games come with Kraken, each with
-  its rules, books and a first adventure with maps, art and handouts:
-  - **Descending Darkness**: dark fantasy on the d20, with fragile heroes,
-    light that runs out and dread that builds. Adventure: *The Empty
-    Watchtower*.
-  - **Apeira Astra**: science fiction on 2d6 and skills, with crews made in
-    minutes and armour that soaks. Adventure: *Salvage Rights*.
+- **Games you can play today, with nothing else installed.** Ten games come
+  with Kraken, each with its rules, a character wizard, its sheet, its books
+  and a first adventure with maps:
+  - **Descending Darkness** (Kraken's own): dark fantasy on the d20, with
+    fragile heroes, light that runs out and dread that builds. Adventure:
+    *The Empty Watchtower*.
+  - **Apeira Astra** (Kraken's own): science fiction on 2d6 and skills, with
+    crews made in minutes and armour that soaks. Adventure: *Salvage Rights*.
+  - **D&D 5E** from the **SRD 5.2.1** (Wizards of the Coast, CC BY 4.0): the
+    12 classes to level 20, species, backgrounds, feats, equipment, 339
+    spells, 330 creatures and 258 magic items.
+  - **Basic Fantasy RPG**, 4th Edition (Chris Gonnerman, CC BY-SA 4.0):
+    old-school play with ascending Armor Class, 3d6 in order, the five saving
+    throws, thief abilities and turning the undead. Adventure: *The Mill at
+    Hob's Ford*.
+  - **Cairn**, Second Edition (Yochai Gal, CC BY-SA 4.0): saves under a d20,
+    attacks that always hit, Scars and ten inventory slots. Adventure:
+    *Trouble in Twin Lakes*.
+  - **Ironsworn** (with Delve's open parts) and **Starforged** (Shawn Tomkin,
+    CC BY 4.0; an unofficial adaptation): vows, moves, momentum, progress
+    tracks and oracles, with or without a GM. Starters: *The Cinder Barrow*,
+    *The Silent Hulk*.
+  - **Fate Core** and **Fate Accelerated** (Evil Hat, CC BY 3.0): Fate dice
+    on the ladder, aspects and fate points, stress and consequences,
+    conflicts on the tracker. Starter: *The Lighthouse at Gull's End*.
+  - **Forged in the Dark**, based on the Blades in the Dark SRD (John Harper,
+    CC BY 3.0): d6 pools, position and effect, stress, clocks everyone sees,
+    a crew and its scores. Starter: *The Brine Street Job*.
 
-  Kraken also plays **Castles & Crusades**, **D&D 5E**, **D&D 3.5E**
+  With your own books, Kraken also plays **Castles & Crusades**, **D&D 5E**, **D&D 3.5E**
   (base attack and iterative attacks, criticals by threat and confirmation,
   Fortitude, Reflex and Will, skills by ranks), **AD&D 2E** (THAC0 and
   descending Armor Class, the five saving throws, thief skills,
@@ -168,7 +189,7 @@ Six start screens, fantasy, science fiction and horror, one at random each time.
   effects, a party sheet and treasure parcels.
 - **Sound.** One-shots, sound effects triggered by the chat (a sword hit, a
   fireball), ambience and music, each with its own volume for every player.
-- **At the table.** A banner and a bell when it is your turn, your colour on
+- **At the table.** A banner and a chime when it is your turn, your colour on
   your tokens, pings and drawings, shapes on the map (arrows, circles, cones,
   measured as you draw), death markers where creatures fall, a calendar with
   notes for each game, a message of the day, and FG's read-aloud boxes.
@@ -209,7 +230,7 @@ The full guides:
 |---|---|
 | [docs/gm-guide.md](docs/gm-guide.md) | Running a game: campaigns, hosting, books, maps, combat, sound |
 | [docs/players.md](docs/players.md) | Joining a table, making a character, rolling |
-| [docs/included-games.md](docs/included-games.md) | Descending Darkness and Apeira Astra, and running their adventures |
+| [docs/included-games.md](docs/included-games.md) | The ten games that come with Kraken, and running their adventures |
 | [docs/development.md](docs/development.md) | Building from source, tests, how the code is laid out |
 | [AGENT.md](AGENT.md) | The AI agent and its tools |
 | [CHANGELOG.md](CHANGELOG.md) | What changed in each release |
@@ -255,6 +276,52 @@ For permission beyond the licence, open an issue on GitHub.
 
 Map Studio's art pack (Kraken Map Art) is original to Kraken; Battle Map
 Forge's generator and pack are included with its author's permission.
+
+### The open games' credits
+
+Each open game's text stays under its own licence, in its own folder with a
+`LICENSE.md` that says what was taken and what was changed. The share-alike
+licences (Basic Fantasy, Cairn) cover only those folders and the books built
+from them, not Kraken's code. No art from any of these games is included.
+
+- **SRD 5.2.1** ([games/srd-5e/LICENSE.md](games/srd-5e/LICENSE.md)): This
+  work includes material from the System Reference Document 5.2.1 ("SRD
+  5.2.1") by Wizards of the Coast LLC, available at
+  https://www.dndbeyond.com/srd. The SRD 5.2.1 is licensed under the Creative
+  Commons Attribution 4.0 International License, available at
+  https://creativecommons.org/licenses/by/4.0/legalcode.
+- **Basic Fantasy** ([games/basic-fantasy/LICENSE.md](games/basic-fantasy/LICENSE.md)):
+  adapted from the *Basic Fantasy Role-Playing Game, 4th Edition*, Copyright
+  © 2006-2023 Chris Gonnerman (www.basicfantasy.org), under CC BY-SA 4.0.
+- **Cairn** ([games/cairn/LICENSE.md](games/cairn/LICENSE.md)): Cairn Second
+  Edition and *CAS-1: Trouble in Twin Lakes* by Yochai Gal
+  (https://cairnrpg.com), under CC BY-SA 4.0.
+- **Ironsworn and Starforged** ([games/ironsworn/LICENSE.md](games/ironsworn/LICENSE.md)):
+  This work is based on Ironsworn, Ironsworn: Delve and Ironsworn:
+  Starforged, created by Shawn Tomkin, and licensed for our use under the
+  Creative Commons Attribution 4.0 International license
+  (https://creativecommons.org/licenses/by/4.0/). Only the CC BY content is
+  included, from Datasworn (MIT). An unofficial adaptation, not a Tomkin
+  Press product.
+- **Fate** ([games/fate/LICENSE.md](games/fate/LICENSE.md)): This work is
+  based on Fate Core System and Fate Accelerated Edition (found at
+  http://www.faterpg.com/), products of Evil Hat Productions, LLC, developed,
+  authored, and edited by Leonard Balsera, Brian Engard, Jeremy Keller, Ryan
+  Macklin, Mike Olson, Clark Valentine, Amanda Valentine, Fred Hicks, and Rob
+  Donoghue, and licensed for our use under the Creative Commons Attribution
+  3.0 Unported license (http://creativecommons.org/licenses/by/3.0/). Fate™
+  is a trademark of Evil Hat Productions, LLC. (The Toolkit's credits are in
+  the folder's licence.)
+- **Forged in the Dark** ([games/forged-dark/LICENSE.md](games/forged-dark/LICENSE.md)):
+  This work is based on Blades in the Dark (found at
+  http://www.bladesinthedark.com/), product of One Seven Design, developed and
+  authored by John Harper, and licensed for our use under the Creative
+  Commons Attribution 3.0 Unported license
+  (http://creativecommons.org/licenses/by/3.0/).
+
+Kraken is not affiliated with or endorsed by Wizards of the Coast, Chris
+Gonnerman, Yochai Gal or Cairn Press, Shawn Tomkin or Tomkin Press, Evil Hat
+Productions or One Seven Design.
 
 The included games (Descending Darkness and Apeira Astra), their books, maps
 and art are original to Kraken. Some of Descending Darkness's mechanics are

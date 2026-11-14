@@ -88,6 +88,10 @@ export type MapMask = { on: boolean; shapes: { id: string; mode: "reveal" | "hid
 export type Ping = { id: number; x: number; y: number; from: string; color: string };
 // A line drawn on the map, for everyone (by "" is the GM's).
 export type CalendarNote = { id: string; year: number; day: number; by: string; color: string | null; text: string; shown: boolean; at: number };
+// Progress clocks on the table (clocks.cjs) and the GM's Score panel (Forged in the Dark).
+export type TableClock = { id: string; name: string; segments: number; filled: number; kind: string; shown: boolean; rival: string; after: string; note: string; locked: boolean };
+export type ScoreState = { phase: "free" | "score" | "downtime"; position: string; effect: string; target: string; targetTier: number; plan: string; detail: string; engagement: { result: string; highest: number; dice: number; position: string } | null };
+export type ClocksView = { clocks: TableClock[]; score: ScoreState };
 export type CalendarView = { id: string; year: number; day: number; hour: number; minute: number; today: string; calendars: { id: string; name: string }[]; notes: CalendarNote[] };
 export type DeathMarker = { id: string; x: number; y: number; set: string; variant: number; rotation: number; size: number; name: string };
 export type MapDrawing = { id: string; by: string; color: string; width: number; points: number[]; shape?: "line" | "arrow" | "rect" | "ellipse" | "circle" | "cone" | "poly"; fill?: string; fillAlpha?: number; alpha?: number; group?: string };
@@ -201,11 +205,29 @@ export type CombatEntry = {
   effects: { id: string; label: string; duration: number }[];
   targets: string[];
   attacks?: { key: string; name: string; bonus: number; bonuses?: number[]; thaco?: number; damage: string }[];
-  /** AD&D 2E: the level this character turns undead at. */
+  /** AD&D 2E and Basic Fantasy: the level this character turns undead at. */
   turns?: number;
+  /** Basic Fantasy: a monster's morale score (the GM's view). */
+  morale?: number;
   /** A starship (the 2d6 games): its weapons and who mans them. */
   ship?: { record: string; thrust: number; criticals: Record<string, number>; weapons: { key: string; name: string; damage: string; range: string; gunner: string; gunnerName: string; mine: boolean; disabled: boolean }[] };
   powers?: { key: string; name: string; uses: number; used: number; damage: string; save: string }[];
+  /** Cairn: STR now and its maximum, a detachment, a lost first turn. */
+  cairn?: { str: number; max: number; detachment: number; lostTurn: number };
+  /** Ironsworn and Starforged: a foe's rank, progress (ticks) and harm; a character's initiative (in control), momentum, health and spirit. */
+  iron?: { rank?: string; ticks?: number; harm?: number; defeated?: boolean; control?: boolean; momentum?: number; health?: number; spirit?: number };
+  /** Fate: stress boxes, consequences, a hit waiting to be absorbed (its options), taken out or conceded. */
+  fate?: FateEntry;
+};
+export type FateEntry = {
+  out: string;
+  tracks?: { key: string; label: string; boxes: { value: number; marked: boolean }[] }[];
+  consequences?: { key: string; label: string; value: number; text: string }[];
+  pending?: { shifts: number; track: string; by: string; options: { index: number; words: string; box: number; consequences: string[] }[] };
+  fatepoints?: number;
+  kind?: string;
+  aspects?: string[];
+  taken: number;
 };
 export type CombatView = { round: number; active: string | null; entries: CombatEntry[] };
 export type TableRecord = {
@@ -353,6 +375,7 @@ export function useSession() {
   const [combat, setCombat] = useState<CombatView>({ round: 0, active: null, entries: [] });
   // The campaign's calendar: today, the time, and the notes this seat may read.
   const [calendar, setCalendar] = useState<CalendarView | null>(null);
+  const [clocks, setClocks] = useState<ClocksView>({ clocks: [], score: { phase: "free", position: "risky", effect: "standard", target: "", targetTier: 0, plan: "", detail: "", engagement: null } });
   const [readAloudNow, setReadAloudNow] = useState<ReadAloud | null>(null);
   const [soundscape, setSoundscape] = useState<Soundscape>({ ambience: [], music: null });
   // The campaign's ruleset ("Castles & Crusades", "D&D 5E", "Worldbuilding"): it picks the sheet.
@@ -488,6 +511,7 @@ export function useSession() {
             applyMap(msg.map as TableMap);
             if (msg.combat) setCombat(msg.combat as CombatView);
             if (msg.calendar) setCalendar(msg.calendar as CalendarView);
+            if (msg.clocks) setClocks(msg.clocks as ClocksView);
             // A new table: no read-aloud left over from the last.
             setReadAloudNow(null);
             if (msg.options) setOptions(msg.options as TableOptions);
@@ -517,6 +541,7 @@ export function useSession() {
           if (msg.type === "party" && msg.party) setParty(msg.party as import("../party/PartySheet").PartyView);
           if (msg.type === "combat" && msg.combat) setCombat(msg.combat as CombatView);
           if (msg.type === "calendar" && msg.calendar) setCalendar(msg.calendar as CalendarView);
+          if (msg.type === "clocks" && msg.clocks) setClocks(msg.clocks as ClocksView);
           if (msg.type === "read-aloud" && typeof msg.text === "string") setReadAloudNow({ text: msg.text, title: String(msg.title ?? ""), at: Date.now() });
           if (msg.type === "options" && msg.options) setOptions(msg.options as TableOptions);
           if (msg.type === "map-share") setMapShared((count) => count + 1);
@@ -901,7 +926,7 @@ export function useSession() {
   );
 
   // A SIEGE check for a character; the host rolls it and posts the result.
-  const siegeCheck = useCallback((id: string, attribute: string, cl = 0, save = false, extra?: { label?: string; bonus?: number; addLevel?: boolean; kind?: "check" | "save" | "skill"; skill?: string; dc?: number; advantage?: string }) => {
+  const siegeCheck = useCallback((id: string, attribute: string, cl = 0, save = false, extra?: { label?: string; bonus?: number; addLevel?: boolean; kind?: "check" | "save" | "skill" | "morale"; skill?: string; dc?: number; advantage?: string }) => {
     const socket = socketRef.current;
     if (!socket || socket.readyState !== WebSocket.OPEN) return;
     socket.send(JSON.stringify({ type: "siege-check", id, attribute, cl, ...(save ? { label: `${attribute[0].toUpperCase()}${attribute.slice(1)} save` } : {}), ...(extra ?? {}), ...throwIntent() }));
@@ -913,6 +938,32 @@ export function useSession() {
     if (socket && socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify({ type: "class-change", id, mode, className }));
   }, []);
 
+  // Ironsworn and Starforged: a character's moves, tracks and assets (id), or the oracles, Delve's sites and the
+  // tracker's foes (no id). The host does it (electron/ironsworn.cjs) and answers with what happened.
+  const ironsworn = useCallback((action: string, id = "", args: Record<string, unknown> = {}) => {
+    const socket = socketRef.current;
+    if (!socket || socket.readyState !== WebSocket.OPEN) return Promise.reject(new Error("Not connected."));
+    const req = ++opCounter.current;
+    return new Promise<Record<string, unknown>>((resolve, reject) => {
+      opWaits.current.set(req, { resolve: (_id, payload) => resolve(((payload as { result?: Record<string, unknown> } | undefined)?.result ?? {}) as Record<string, unknown>), reject });
+      socket.send(JSON.stringify({ type: "ironsworn", req, id, action, args, ...throwIntent() }));
+    });
+  }, []);
+  // Cairn: rest, Fatigue, spells, Scars, Growth (the host does it: electron/cairn.cjs).
+  const cairnAction = useCallback((id: string, action: string, args: Record<string, unknown> = {}) => {
+    const socket = socketRef.current;
+    if (!socket || socket.readyState !== WebSocket.OPEN) return Promise.reject(new Error("Not connected."));
+    socket.send(JSON.stringify({ type: "cairn", id, action, args, ...throwIntent() }));
+    return Promise.resolve();
+  }, []);
+  // Fate: a character's rolls, invokes, fate points, stress, consequences and
+  // milestones (id), or the table's own (no id: the scene's aspects, the GM's pool).
+  const fateAction = useCallback((id: string | null, action: string, args: Record<string, unknown> = {}) => {
+    const socket = socketRef.current;
+    if (!socket || socket.readyState !== WebSocket.OPEN) return Promise.reject(new Error("Not connected."));
+    socket.send(JSON.stringify({ type: "fate", ...(id ? { id } : {}), action, args, ...throwIntent() }));
+    return Promise.resolve();
+  }, []);
   // Apeira Astra: experience spent on a skill's next level or a characteristic +1 (the host checks the cost).
   const improveCharacter = useCallback((id: string, what: { skill?: string; attribute?: string }) => {
     const socket = socketRef.current;
@@ -1050,6 +1101,10 @@ export function useSession() {
   const sendReadAloud = useCallback((text: string, title?: string) => send({ type: "read-aloud", text, title }), [send]);
   const dismissReadAloud = useCallback(() => setReadAloudNow(null), []);
   const calendarOp = useCallback((message: Record<string, unknown>) => send({ type: "calendar", ...message }), [send]);
+  // The clocks: the GM adds, ticks, changes, removes them; and sets the Score panel (clocks.cjs).
+  const clocksOp = useCallback((message: Record<string, unknown>) => send({ type: "clocks", ...message }), [send]);
+  // Forged in the Dark: a scoundrel's roll or sheet action (id), or the crew's and the Score panel's (id ""): electron/forged.cjs.
+  const forgedAction = useCallback((id: string, action: string, args: Record<string, unknown> = {}) => send({ type: "forged", ...(id ? { id } : {}), action, args, ...throwIntent() }), [send]);
   const clearDrawings = useCallback(() => send({ type: "draw-clear" }), [send]);
   // Death markers: the GM removes one (right-click) or clears them all.
   const removeDeathMarker = useCallback((id: string) => send({ type: "death-marker", action: "remove", id }), [send]);
@@ -1142,6 +1197,9 @@ export function useSession() {
     combat,
     calendar,
     calendarOp,
+    clocks,
+    clocksOp,
+    forgedAction,
     readAloudNow,
     sendReadAloud,
     dismissReadAloud,
@@ -1233,6 +1291,9 @@ export function useSession() {
     levelUp,
     improveCharacter,
     markCharacter,
+    cairnAction,
+    fateAction,
+    ironsworn,
     wall,
     mapUndo,
     prepClose,

@@ -50,6 +50,67 @@ const GLYPHS: Record<string, ReactElement> = {
   ),
   // Apeira Astra: a four-pointed star.
   apeiraastra: <path d="M20 7.5 22.6 17.4 32.5 20 22.6 22.6 20 32.5 17.4 22.6 7.5 20 17.4 17.4z" />,
+  // Cairn: a cairn, stones stacked on a path.
+  cairn: (
+    <>
+      <ellipse cx="20" cy="29" rx="9" ry="2.6" />
+      <ellipse cx="20" cy="23.6" rx="7" ry="2.4" />
+      <ellipse cx="20" cy="18.6" rx="5.2" ry="2.2" />
+      <ellipse cx="20" cy="14" rx="3.6" ry="2" />
+      <ellipse cx="20" cy="10.2" rx="2.2" ry="1.5" />
+    </>
+  ),
+  // Ironsworn: a vow sworn on iron, a ring of iron with a notch.
+  ironsworn: (
+    <>
+      <circle cx="20" cy="20" r="10" fill="none" strokeWidth="3" />
+      <path d="M20 7.5v7M20 25.5v7" />
+    </>
+  ),
+  // Starforged: a star over an iron ring.
+  starforged: (
+    <>
+      <circle cx="20" cy="22" r="9.5" fill="none" strokeWidth="2.5" />
+      <path d="M20 6.5 21.6 12.4 27.5 14 21.6 15.6 20 21.5 18.4 15.6 12.5 14 18.4 12.4z" />
+    </>
+  ),
+  // Basic Fantasy: a six-sided die (3d6 in order).
+  basicfantasy: (
+    <>
+      <path d="M20 8.5 30.5 14v12L20 31.5 9.5 26V14z" fill="none" />
+      <path d="M9.5 14 20 19.5 30.5 14M20 19.5v12" fill="none" />
+      <circle cx="20" cy="13.8" r="1.6" />
+      <circle cx="14" cy="21.5" r="1.4" />
+      <circle cx="16.5" cy="26" r="1.4" />
+      <circle cx="23.5" cy="22" r="1.4" />
+      <circle cx="27" cy="25.5" r="1.4" />
+    </>
+  ),
+  // Fate Core: two Fate dice, a plus and a minus (Kraken's own drawing, no Fate logo).
+  fatecore: (
+    <>
+      <rect x="8.5" y="12" width="11" height="11" rx="2" fill="none" />
+      <path d="M14 14.8v5.4M11.3 17.5h5.4" fill="none" />
+      <rect x="20.5" y="17" width="11" height="11" rx="2" fill="none" />
+      <path d="M23.3 22.5h5.4" fill="none" />
+    </>
+  ),
+  // Fate Accelerated: one Fate die, a plus, thrown fast.
+  fateaccelerated: (
+    <>
+      <rect x="16" y="13" width="13" height="13" rx="2.2" fill="none" />
+      <path d="M22.5 16v7M19 19.5h7M8 15.5h5M9.5 19.5h4M8 23.5h5" fill="none" />
+    </>
+  ),
+  // Forged in the Dark: a progress clock, four segments, two filled.
+  forgedinthedark: (
+    <>
+      <circle cx="20" cy="20" r="11" fill="none" stroke="currentColor" strokeWidth="2" />
+      <path d="M20 20V9a11 11 0 0 1 11 11z" />
+      <path d="M20 20h11a11 11 0 0 1-11 11z" />
+      <path d="M20 9v22M9 20h22" stroke="currentColor" strokeWidth="1.6" fill="none" />
+    </>
+  ),
   // Worldbuilding: a compass rose.
   worldbuilding: (
     <>

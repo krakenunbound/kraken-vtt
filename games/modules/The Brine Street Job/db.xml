@@ -1,0 +1,452 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root version="4.6" release="1">
+	<encounter>
+		<category name="The Brine Street Job">
+			<e00aboutthisscore>
+				<name type="string">00 About This Score</name>
+				<text type="formattedtext"><p><i>A short starter score of Kraken's own for Forged in the Dark, for a new crew of three to five scoundrels at Tier 0.</i> It plays in one session: free play to take the job, a plan and the engagement roll, the score itself, and the first downtime.</p><p>It uses the GM's Score panel (position, effect, the engagement roll) and the Clocks window (its clocks: Counting-house Alert, The Vault Door, First Light, and The Grey Lanterns Strike if the rival gang comes). Its map, Brine Street Counting-house, has its walls and doors.</p></text>
+			</e00aboutthisscore>
+			<e01thejob>
+				<name type="string">01 The Job</name>
+				<text type="formattedtext"><p>Mother Corvane of the Widow's Hand meets the crew in the back room of the Drowned Bell, a smoky canal tavern. She is old, round, and very polite.</p><p><i>&quot;The Tallow Guild keeps two ledgers. One for the city's tax-men, and one for themselves. I want the second one. It sits in the vault of their counting-house on Brine Street, and tomorrow at dawn their auditors carry it away to the Upper Ward, where no one like us will ever reach it.&quot;</i></p><p>She offers <b>6 coin</b> for the ledger, delivered to her before dawn, and <b>+1 status</b> with the Widow's Hand. She knows the counting-house has a night guard of four or five men under <b>Captain Merrow Haske</b>, a canal dock at the back, and an iron vault.</p><p><b>Questions to ask the players:</b> Who among you has crossed the Tallow Guild before? Which of you knows someone who works the Brine Street docks? Why do you trust Mother Corvane, or why don't you?</p></text>
+			</e01thejob>
+			<e02brinestreetcountinghouse>
+				<name type="string">02 Brine Street Counting-house</name>
+				<text type="formattedtext"><p>A two-story brick counting-house on the canal (the map: Brine Street Counting-house). At night the lamps on the dock burn low.</p><list><li><b>The dock:</b> cobbles, barrels, a mooring for a barge. A single door into the loading hall. One guard walks the dock every quarter hour.</li><li><b>The loading hall:</b> crates of lamp-oil and candles, barrels, a lantern on a hook. Two guards dice here.</li><li><b>The guard room:</b> bunks, a brazier, the alarm bell's rope. Captain Haske sleeps here, badly.</li><li><b>The clerks' office:</b> desks, ink, the day ledgers (the false ones). A secret door behind a bookcase leads to the counting room.</li><li><b>The counting room:</b> the master's desk, the stairs up to the Guild's apartments, and a strongbox (4 coin).</li><li><b>The vault:</b> behind an iron door off the corridor (a Tier II lock). Inside: the true ledger, bound in green leather, among crates of fine wax.</li></list></text>
+			</e02brinestreetcountinghouse>
+			<e03planningandengagement>
+				<name type="string">03 Planning and Engagement</name>
+				<text type="formattedtext"><p>Let the players choose a <b>plan</b> and its <b>detail</b>: a stealth plan (the point of infiltration: the canal dock at the tide's turn?), a deception plan (the method: as the Guild's auditors, a day early?), a social plan (the connection: bribing Captain Haske?), an assault (the point of attack). The Score panel keeps the plan, the detail and the target (the Tallow Guild, Tier II).</p><p><b>Engagement roll:</b> 1d, plus a die for each major advantage (a bold plan; a detail that hits the counting-house where it is weak, like the secret door; help from a friend or contact who works the docks), minus a die for each disadvantage (a complex plan; the Grey Lanterns on the same job; a target two Tiers above the crew).</p><p><b>Clocks:</b> put <b>Counting-house Alert</b> (6) and <b>First Light</b> (8) on the table as the score begins; <b>The Vault Door</b> (4) when the crew reaches it. Cut to the action at the first obstacle.</p></text>
+			</e03planningandengagement>
+			<e04complications>
+				<name type="string">04 Complications</name>
+				<text type="formattedtext"><list><li><b>The night guards</b> (a small gang, quality 2): when the alert clock fills, the bell rings, the guards gather, and the Harbor Watch sends a patrol (a medium gang) within minutes.</li><li><b>Captain Merrow Haske</b> sleeps badly and wakes easily. He can be bought (2 coin) if someone reaches him before the alarm, and he hates the Guild's master.</li><li><b>The Grey Lanterns</b> have heard of the ledger too. If the engagement roll is a 1-3, or a consequence calls for it, start <b>The Grey Lanterns Strike</b> (6) racing against First Light: when it fills, three of them break in the dock door, wanting the ledger for themselves.</li><li><b>The true ledger</b> is heavy (load 2), and its last pages name a Harbor Watch magistrate who takes the Guild's money. Who else would pay for that page?</li></list></text>
+			</e04complications>
+			<e05payoffanddowntime>
+				<name type="string">05 Payoff and Downtime</name>
+				<text type="formattedtext"><p><b>Payoff:</b> 6 coin from Mother Corvane (the strongbox adds 4). A score against a Tier II target earns a Tier 0 crew <b>4 rep</b> (2, +2 for a target two Tiers above); a score kept completely quiet earns none.</p><p><b>Heat:</b> 0 if smooth and quiet, 2 if contained, 4 if loud, 6 if wild; +1 for a well-connected target (the Guild is); +2 if anyone was killed.</p><p><b>Faction status:</b> the Tallow Guild -2 if they learn who did it (-1 if they only suspect); the Widow's Hand +1 (+2 if the crew also brings the magistrate's page); the Grey Lanterns -1 if the crew beat them to it.</p><p><b>Entanglements</b> follow as usual. A fine follow-up: Mother Corvane asks for a second job, against the magistrate named in the ledger.</p></text>
+			</e05payoffanddowntime>
+			<e06creditsandlicense>
+				<name type="string">06 Credits and License</name>
+				<text type="formattedtext"><p><b>The Brine Street Job</b></p><p>This work is based on Blades in the Dark (found at http://www.bladesinthedark.com/), product of One Seven Design, developed and authored by John Harper, and licensed for our use under the Creative Commons Attribution 3.0 Unported license (http://creativecommons.org/licenses/by/3.0/).</p><p>Kraken VTT's own text in this book (the playbooks, crew types, items, people and places of Brackwater) is shared under the same licence, CC BY 3.0. See games/forged-dark/LICENSE.md.</p></text>
+			</e06creditsandlicense>
+		</category>
+	</encounter>
+	<npc>
+		<category name="The Brine Street Job">
+			<mothercorvane>
+				<name type="string">Mother Corvane</name>
+				<faction type="string">The Widow's Hand</faction>
+				<quality type="number">2</quality>
+				<type type="string">NPC</type>
+				<text type="string">A round, polite old fence and broker of secrets, who never raises her voice and never forgets a debt. The crew's client.</text>
+				<description type="formattedtext"><p><b>The Widow's Hand.</b> A round, polite old fence and broker of secrets, who never raises her voice and never forgets a debt. The crew's client.</p><p><i>Quality 2.</i> Kraken's own character for The Brine Street Job.</p></description>
+			</mothercorvane>
+			<captainmerrowhaske>
+				<name type="string">Captain Merrow Haske</name>
+				<faction type="string">The Harbor Watch (hired by the Tallow Guild)</faction>
+				<quality type="number">2</quality>
+				<type type="string">NPC</type>
+				<text type="string">The counting-house's night captain: tired, bitter, underpaid, and fond of the bottle. Can be bribed (2 coin) before the alarm; after it, he fights.</text>
+				<description type="formattedtext"><p><b>The Harbor Watch (hired by the Tallow Guild).</b> The counting-house's night captain: tired, bitter, underpaid, and fond of the bottle. Can be bribed (2 coin) before the alarm; after it, he fights.</p><p><i>Quality 2.</i> Kraken's own character for The Brine Street Job.</p></description>
+			</captainmerrowhaske>
+			<masteraldousfenwick>
+				<name type="string">Master Aldous Fenwick</name>
+				<faction type="string">The Tallow Guild</faction>
+				<quality type="number">2</quality>
+				<type type="string">NPC</type>
+				<text type="string">The Guild's ledger-master, who sleeps upstairs over the counting room. Vain, frightened, and the only one with the vault key (on a chain at his neck).</text>
+				<description type="formattedtext"><p><b>The Tallow Guild.</b> The Guild's ledger-master, who sleeps upstairs over the counting room. Vain, frightened, and the only one with the vault key (on a chain at his neck).</p><p><i>Quality 2.</i> Kraken's own character for The Brine Street Job.</p></description>
+			</masteraldousfenwick>
+			<nightguards>
+				<name type="string">Night Guards</name>
+				<faction type="string">The Tallow Guild</faction>
+				<quality type="number">2</quality>
+				<type type="string">NPC</type>
+				<text type="string">Four or five hired guards with cudgels, pistols and a bell. A small gang: quality 2, scale 1.</text>
+				<description type="formattedtext"><p><b>The Tallow Guild.</b> Four or five hired guards with cudgels, pistols and a bell. A small gang: quality 2, scale 1.</p><p><i>Quality 2.</i> Kraken's own character for The Brine Street Job.</p></description>
+				<kind type="string">gang</kind>
+				<scale type="number">1</scale>
+			</nightguards>
+			<greylanternstoughs>
+				<name type="string">Grey Lanterns Toughs</name>
+				<faction type="string">The Grey Lanterns</faction>
+				<quality type="number">1</quality>
+				<type type="string">NPC</type>
+				<text type="string">Three young toughs with knives and lanterns, led by a girl called Wick. A small gang: quality 1, scale 1.</text>
+				<description type="formattedtext"><p><b>The Grey Lanterns.</b> Three young toughs with knives and lanterns, led by a girl called Wick. A small gang: quality 1, scale 1.</p><p><i>Quality 1.</i> Kraken's own character for The Brine Street Job.</p></description>
+				<kind type="string">gang</kind>
+				<scale type="number">1</scale>
+			</greylanternstoughs>
+		</category>
+	</npc>
+	<forgedtable>
+		<category name="Tables">
+			<factionsofbrinestreet>
+				<name type="string">Factions of Brine Street</name>
+				<group type="string">factions</group>
+				<rows>
+					<id-00001>
+						<name type="string">The Harbor Watch</name>
+						<tier type="number">3</tier>
+						<hold type="string">strong</hold>
+						<text type="string">Brackwater's law on the docks and canals, for sale by the hour. Its night captains answer to whoever paid last.</text>
+						<goal type="string">Clean Up Brine Street (8): a show of order before the new magistrate arrives.</goal>
+					</id-00001>
+					<id-00002>
+						<name type="string">The Tallow Guild</name>
+						<tier type="number">2</tier>
+						<hold type="string">strong</hold>
+						<text type="string">The lamp-oil and candle merchants who light the city. Rich, proud, and quietly cheating the city's lamp tax.</text>
+						<goal type="string">Corner the Lamp-oil Trade (8).</goal>
+					</id-00002>
+					<id-00003>
+						<name type="string">The Widow's Hand</name>
+						<tier type="number">2</tier>
+						<hold type="string">weak</hold>
+						<text type="string">An old smuggling family turned brokers of secrets, led by Mother Corvane. They pay well and remember everything.</text>
+						<goal type="string">Leverage over the Guild (6).</goal>
+					</id-00003>
+					<id-00004>
+						<name type="string">The Grey Lanterns</name>
+						<tier type="number">1</tier>
+						<hold type="string">weak</hold>
+						<text type="string">A young, hungry street gang that wants the Brine Street docks, and anyone's coin.</text>
+						<goal type="string">Take the Brine Street Docks (6).</goal>
+					</id-00004>
+				</rows>
+			</factionsofbrinestreet>
+			<thebrinestreetjobclocks>
+				<name type="string">The Brine Street Job: Clocks</name>
+				<group type="string">clocks</group>
+				<rows>
+					<id-00001>
+						<name type="string">Counting-house Alert</name>
+						<segments type="number">6</segments>
+						<kind type="string">danger</kind>
+						<text type="string">The guards' suspicion. Tick it for complications; when it fills, the alarm bell rings and the Watch comes running.</text>
+					</id-00001>
+					<id-00002>
+						<name type="string">The Vault Door</name>
+						<segments type="number">4</segments>
+						<kind type="string">progress</kind>
+						<text type="string">The Guild's iron vault door: a lock of Tier II quality. Tinker, Wreck, or find the key.</text>
+					</id-00002>
+					<id-00003>
+						<name type="string">First Light</name>
+						<segments type="number">8</segments>
+						<kind type="string">mission</kind>
+						<text type="string">The night is short. Tick it as time passes (a long action, a flashback that takes the crew away); at dawn the clerks arrive and the job is scrubbed.</text>
+					</id-00003>
+					<id-00004>
+						<name type="string">The Grey Lanterns Strike</name>
+						<segments type="number">6</segments>
+						<kind type="string">racing</kind>
+						<text type="string">A racing clock against First Light, if the GM brings in the rival gang: when it fills, the Lanterns burst in the dock door.</text>
+					</id-00004>
+				</rows>
+			</thebrinestreetjobclocks>
+		</category>
+	</forgedtable>
+	<treasureparcels>
+		<category name="Payoff">
+			<mothercorvanespayment>
+				<name type="string">Mother Corvane's Payment</name>
+				<coinlist>
+					<id-00001>
+						<description type="string">Coin</description>
+						<amount type="number">6</amount>
+					</id-00001>
+				</coinlist>
+				<itemlist>
+				</itemlist>
+			</mothercorvanespayment>
+			<thestrongboxinthecountingroom>
+				<name type="string">The Strongbox in the Counting Room</name>
+				<coinlist>
+					<id-00001>
+						<description type="string">Coin</description>
+						<amount type="number">4</amount>
+					</id-00001>
+				</coinlist>
+				<itemlist>
+				</itemlist>
+			</thestrongboxinthecountingroom>
+		</category>
+	</treasureparcels>
+	<image>
+		<category name="Maps">
+			<brinestreetcountinghouse>
+				<name type="string">Brine Street Counting-house</name>
+				<image>
+					<grid type="string">on</grid>
+					<gridsize type="string">70,70</gridsize>
+					<gridoffset type="string">0,0</gridoffset>
+					<layers>
+						<layer>
+							<name type="string">Brine Street Counting-house</name>
+							<id type="string">0</id>
+							<parentid type="string">-1</parentid>
+							<type type="string">image</type>
+							<bitmap type="string">images/brine-street-counting-house.webp</bitmap>
+							<matrix type="string">1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1</matrix>
+							<occluders>
+								<occluder>
+									<id type="string">0</id>
+									<points type="string">-770,560,-420,560</points>
+								</occluder>
+								<occluder>
+									<id type="string">1</id>
+									<points type="string">-350,560,140,560</points>
+								</occluder>
+								<occluder>
+									<id type="string">2</id>
+									<points type="string">210,560,770,560</points>
+								</occluder>
+								<occluder>
+									<id type="string">3</id>
+									<points type="string">140,420,210,420</points>
+								</occluder>
+								<occluder>
+									<id type="string">4</id>
+									<points type="string">140,350,210,350</points>
+								</occluder>
+								<occluder>
+									<id type="string">5</id>
+									<points type="string">-770,210,-630,210</points>
+								</occluder>
+								<occluder>
+									<id type="string">6</id>
+									<points type="string">-560,210,-420,210</points>
+								</occluder>
+								<occluder>
+									<id type="string">7</id>
+									<points type="string">-350,210,-210,210</points>
+								</occluder>
+								<occluder>
+									<id type="string">8</id>
+									<points type="string">-140,210,140,210</points>
+								</occluder>
+								<occluder>
+									<id type="string">9</id>
+									<points type="string">210,140,420,140</points>
+								</occluder>
+								<occluder>
+									<id type="string">10</id>
+									<points type="string">490,140,770,140</points>
+								</occluder>
+								<occluder>
+									<id type="string">11</id>
+									<points type="string">-770,70,-630,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">12</id>
+									<points type="string">-560,70,-210,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">13</id>
+									<points type="string">-140,70,0,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">14</id>
+									<points type="string">0,0,420,0</points>
+								</occluder>
+								<occluder>
+									<id type="string">15</id>
+									<points type="string">490,0,770,0</points>
+								</occluder>
+								<occluder>
+									<id type="string">16</id>
+									<points type="string">0,-70,70,-70</points>
+								</occluder>
+								<occluder>
+									<id type="string">17</id>
+									<points type="string">70,-140,490,-140</points>
+								</occluder>
+								<occluder>
+									<id type="string">18</id>
+									<points type="string">560,-140,770,-140</points>
+								</occluder>
+								<occluder>
+									<id type="string">19</id>
+									<points type="string">280,-210,490,-210</points>
+								</occluder>
+								<occluder>
+									<id type="string">20</id>
+									<points type="string">560,-210,770,-210</points>
+								</occluder>
+								<occluder>
+									<id type="string">21</id>
+									<points type="string">-770,-350,-490,-350</points>
+								</occluder>
+								<occluder>
+									<id type="string">22</id>
+									<points type="string">-420,-350,0,-350</points>
+								</occluder>
+								<occluder>
+									<id type="string">23</id>
+									<points type="string">280,-350,770,-350</points>
+								</occluder>
+								<occluder>
+									<id type="string">24</id>
+									<points type="string">-840,-420,-490,-420</points>
+								</occluder>
+								<occluder>
+									<id type="string">25</id>
+									<points type="string">-420,-420,840,-420</points>
+								</occluder>
+								<occluder>
+									<id type="string">26</id>
+									<points type="string">-840,-630,840,-630</points>
+								</occluder>
+								<occluder>
+									<id type="string">27</id>
+									<points type="string">-840,-420,-840,-630</points>
+								</occluder>
+								<occluder>
+									<id type="string">28</id>
+									<points type="string">-770,560,-770,210</points>
+								</occluder>
+								<occluder>
+									<id type="string">29</id>
+									<points type="string">-770,70,-770,-350</points>
+								</occluder>
+								<occluder>
+									<id type="string">30</id>
+									<points type="string">-630,210,-630,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">31</id>
+									<points type="string">-560,210,-560,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">32</id>
+									<points type="string">-490,-350,-490,-420</points>
+								</occluder>
+								<occluder>
+									<id type="string">33</id>
+									<points type="string">-420,560,-420,210</points>
+								</occluder>
+								<occluder>
+									<id type="string">34</id>
+									<points type="string">-420,-350,-420,-420</points>
+								</occluder>
+								<occluder>
+									<id type="string">35</id>
+									<points type="string">-350,560,-350,210</points>
+								</occluder>
+								<occluder>
+									<id type="string">36</id>
+									<points type="string">-210,210,-210,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">37</id>
+									<points type="string">-140,210,-140,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">38</id>
+									<points type="string">0,70,0,0</points>
+								</occluder>
+								<occluder>
+									<id type="string">39</id>
+									<points type="string">0,-70,0,-350</points>
+								</occluder>
+								<occluder>
+									<id type="string">40</id>
+									<points type="string">70,-70,70,-140</points>
+								</occluder>
+								<occluder>
+									<id type="string">41</id>
+									<points type="string">140,560,140,420</points>
+								</occluder>
+								<occluder>
+									<id type="string">42</id>
+									<points type="string">140,350,140,210</points>
+								</occluder>
+								<occluder>
+									<id type="string">43</id>
+									<points type="string">210,560,210,420</points>
+								</occluder>
+								<occluder>
+									<id type="string">44</id>
+									<points type="string">210,350,210,140</points>
+								</occluder>
+								<occluder>
+									<id type="string">45</id>
+									<points type="string">280,-210,280,-350</points>
+								</occluder>
+								<occluder>
+									<id type="string">46</id>
+									<points type="string">420,140,420,0</points>
+								</occluder>
+								<occluder>
+									<id type="string">47</id>
+									<points type="string">490,140,490,0</points>
+								</occluder>
+								<occluder>
+									<id type="string">48</id>
+									<points type="string">490,-140,490,-210</points>
+								</occluder>
+								<occluder>
+									<id type="string">49</id>
+									<points type="string">560,-140,560,-210</points>
+								</occluder>
+								<occluder>
+									<id type="string">50</id>
+									<points type="string">770,560,770,140</points>
+								</occluder>
+								<occluder>
+									<id type="string">51</id>
+									<points type="string">770,0,770,-140</points>
+								</occluder>
+								<occluder>
+									<id type="string">52</id>
+									<points type="string">770,-210,770,-350</points>
+								</occluder>
+								<occluder>
+									<id type="string">53</id>
+									<points type="string">840,-420,840,-630</points>
+								</occluder>
+								<occluder>
+									<id type="string">54</id>
+									<points type="string">-630,210,-560,210</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+								<occluder>
+									<id type="string">55</id>
+									<points type="string">-210,70,-140,70</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+								<occluder>
+									<id type="string">56</id>
+									<points type="string">70,0,70,-70</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+								<occluder>
+									<id type="string">57</id>
+									<points type="string">420,140,490,140</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+								<occluder>
+									<id type="string">58</id>
+									<points type="string">490,-210,560,-210</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+								<occluder>
+									<id type="string">59</id>
+									<points type="string">-490,-350,-420,-350</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+								<occluder>
+									<id type="string">60</id>
+									<points type="string">210,420,210,350</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+							</occluders>
+						</layer>
+					</layers>
+				</image>
+			</brinestreetcountinghouse>
+		</category>
+	</image>
+</root>

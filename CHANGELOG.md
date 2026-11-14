@@ -4,6 +4,181 @@ What changed in each release of Kraken VTT. Downloads are on the
 [Releases](https://github.com/krakenunbound/kraken-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
+## Unreleased
+
+- **A gentler "your turn".** The turn alert was a church bell, loud enough to
+  hear from the next room. It is now a soft two-note chime (a starship
+  console's tone in Apeira Astra, Traveller and Starforged), much quieter.
+  Turn it off in **Settings > You at the table**.
+- **Typing in Chinese, Japanese or Korean:** pressing Enter to confirm a
+  word in an input method no longer sends a half-typed line from the
+  assistant, sheets, the Calendar or Ironsworn's lists.
+- **Fate Core and Fate Accelerated come with Kraken.** Make a campaign with
+  the *Fate Core* or *Fate Accelerated* ruleset and play with nothing else
+  installed: Evil Hat's System Reference Documents (CC BY 3.0) as *Fate Core
+  System* and *Fate Accelerated Edition*, the GM's *Fate Toolkit and
+  Adversaries*, and a starter scenario of Kraken's own, *The Lighthouse at
+  Gull's End* (two zoned battle maps, two conflicts, pregenerated characters
+  for both games).
+  - **Fate dice:** the dice tray has a Fate die (four make a roll); 4dF lands
+    plus, minus and blank on the 3D dice and in the tower, and chat shows the
+    dice and the total on the ladder (Great +4).
+  - **The character wizard** follows each book: high concept and trouble, the
+    phase trio, the skill pyramid (Fate Core) or the six approaches (Fate
+    Accelerated), stunts from the books or your own, refresh, stress and
+    consequences worked out; or a pregenerated character taken as it is.
+  - **The sheet** rolls 4dF with a skill or approach for any of the four
+    actions against an opposition (fail, tie, succeed, with style, and the
+    shifts); invokes an aspect on the last roll for +2 or a reroll (a fate
+    point, or a scene aspect's free invoke); accepts or refuses compels; keeps
+    fate points and refresh, stress boxes and consequences (with recovery),
+    stunts, extras and milestones instead of experience.
+  - **The Scene Aspects strip** shows everyone the scene's aspects and free
+    invokes and the GM's fate points; the GM adds aspects, starts a new scene
+    and refreshes everyone for a new session.
+  - **Fate's conflicts on the combat tracker:** turn order without dice
+    (Notice, or Quick), attacks against defences in shifts, boosts on ties,
+    stress boxes and consequences, NPCs (nameless, supporting, main) taken
+    out, a player's hit taken the way they choose, conceding for fate points.
+  - **The party sheet's** Milestones tab gives the party a minor, significant
+    or major milestone; parcels hand out things (no coin), written into each
+    character's extras.
+- **Ironsworn and Ironsworn: Starforged come with Kraken.** Two new rulesets,
+  *Ironsworn* (with *Delve*) and *Starforged*, on one engine, played from
+  Shawn Tomkin's CC BY 4.0 moves, assets and oracles (an unofficial
+  adaptation; the CC BY-NC-SA rulebook text is not included). Each comes
+  with a Reference (Kraken's own short rules chapters, every move, asset and
+  oracle), a GM's book of foes (Ironsworn's are Kraken's own; Starforged's
+  sample foes; Delve's site themes and domains) and a starter scenario with a
+  map (*The Cinder Barrow*, *The Silent Hulk*).
+  - **The wizard follows each game's steps:** stats 3, 2, 2, 1, 1; three
+    assets (Starforged: two paths, the Starship and one more); a background
+    vow; bonds, or a first connection; an inciting vow; what you carry.
+  - **The sheet:** stats, health, spirit and supply (shared by the party),
+    momentum with its maximum and reset, debilities or impacts, the
+    initiative (in control); every move on the Moves tab, rolled in front of
+    the table (d6 + stat + adds, at most 10, against two d10: strong hit, weak
+    hit, miss, matches; a die cancelled by negative momentum). What the
+    outcome plainly does happens by itself, its choices become buttons, and
+    **Burn momentum** is offered when it would do better. Vows, journeys,
+    expeditions, fights, connections and sites as ten-box progress tracks
+    (marked by rank, rolled against, fulfilled for experience); bonds
+    (Ironsworn) or the legacy tracks (Starforged: experience from them);
+    assets bought and upgraded with experience.
+  - **The Oracles window** (everyone's: these games are often played without
+    a GM) rolls any table, and Ask the Oracle; **Delve Sites** (the GM's)
+    rolls a site's features and dangers from its theme and domain.
+  - **The combat tracker** shows a foe as its rank and progress track (no hit
+    points): Strike and Clash mark it from the sheet, the GM marks it or
+    inflicts its harm from the tracker, End the Fight (Take Decisive Action)
+    rolls against it.
+  - No money: a parcel's **Supply** fills the shared supply meter.
+- **Forged in the Dark comes with Kraken.** Make a campaign with the *Forged
+  in the Dark* ruleset and play a crew of scoundrels with nothing else
+  installed. It is based on Blades in the Dark (John Harper, One Seven Design)
+  through its System Reference Document (CC BY 3.0), with three books:
+  *Forged in the Dark: Scoundrel's Handbook* (every player chapter, seven
+  playbooks, six crew types, the items), *Forged in the Dark: Game Master's
+  Guide* (the faction game, entanglements, magnitude, rituals, crafting,
+  cohorts) and a starter score, *The Brine Street Job*, with a map of its
+  counting-house (walls and doors), its factions, people and clocks.
+  - **Rolls as the game has them:** a pool of d6s on the table's dice, the
+    highest die read (two 6s a critical; with no dice, two dice and the
+    lowest). Action rolls show the GM's **position** and **effect**; a
+    teammate can **assist** (+1d, 1 stress), you can **push** yourself
+    (+1d or +1 effect, 2 stress) or take a **Devil's Bargain**. Resistance
+    rolls cost 6 stress less the highest die. Stress past the last box is
+    trauma; the fourth trauma retires the scoundrel.
+  - **The sheet** has every field: actions and attributes with their xp
+    tracks, stress and trauma, harm and its penalties, the healing clock,
+    armor, load and items, coin and stash, special abilities and advances,
+    friends and rivals, long-term projects, and the downtime activities.
+  - **The character wizard** follows the book: playbook, heritage,
+    background, four action dots, a special ability, a friend and a rival,
+    a vice and its purveyor, a name, an alias and a look.
+  - **The crew** is the party sheet's new **Crew** tab: made with its own
+    wizard (type, reputation, lair, hunting grounds, ability, upgrades,
+    contact), then Tier, hold, rep and turf, heat and wanted level, coin and
+    vault, crew xp, upgrades, cohorts, the claim map and faction status.
+    Parcels pay out in coin; the party's XP award marks each scoundrel's
+    playbook xp.
+  - **The Score panel** takes the Combat button's place (the game has no
+    initiative): the phase, position and effect, the plan and its detail, the
+    engagement roll, fortune rolls, group actions, payoff, heat,
+    entanglements, and the start and end of downtime.
+- **Progress clocks for every table.** A **Clocks** window (and a strip in
+  the top bar that every seat sees): 4, 6 or 8 segments (2 to 12), danger,
+  racing, linked, tug-of-war, mission, project and faction clocks, kept for
+  the GM until shown. An action roll can tick one by its effect.
+- **D&D 5E plays with nothing else installed.** Kraken now ships the System
+  Reference Document 5.2.1 as three books for a D&D 5E campaign, made from
+  the SRD's own PDF:
+  - *SRD 5.2.1 Player's Rules*: every rules chapter to read, and the 12
+    classes (each with its subclass and its features to level 20), 9 species
+    with their lineages, 4 backgrounds, the feats, all the equipment and 339
+    spells for the character wizard and the sheet. Spells that roll play on
+    the Combat Tracker: Fire Bolt's attack, Fireball's save for half, Cure
+    Wounds, Magic Missile's darts, Bless's d4 and 189 more.
+  - *SRD 5.2.1 Creatures*: all 330 monsters and animals, their attacks rolling
+    on the tracker.
+  - *SRD 5.2.1 Magic Items*: the 258 magic items and their rules.
+
+  Make a D&D 5E campaign and the three are on its shelf; your own 5E books
+  sit beside them. Each book carries the SRD's licence notice (CC BY 4.0).
+- **5E sheets:** a Barbarian or Monk without armor gets Unarmored Defense
+  (10 + DEX + CON, or + WIS for a Monk without a shield). A Monk is proficient
+  only with martial weapons that are Light, a Rogue with those that are Finesse
+  or Light, as the SRD 5.2.1 says.
+- **Cairn, Second Edition comes with Kraken.** Make a campaign with the
+  *Cairn* ruleset and play it with nothing else installed: Yochai Gal's game
+  (CC BY-SA 4.0) with its *Player's Guide*, *Warden's Guide* and the adventure
+  *Trouble in Twin Lakes*, made from the official text.
+  - **The character wizard follows the book:** a background rolled on the d20
+    (or chosen), a name from its list, its starting gear and a roll on each of
+    its two tables; STR, DEX and WIL on 3d6 with one swap; Hit Protection 1d6;
+    the traits, a Bond, the age and (for the youngest) an Omen; 3d6 gold
+    pieces to spend at the Marketplace. Every die is rolled in front of the
+    table.
+  - **The sheet:** saves (a d20 at or under; a 1 always succeeds, a 20 always
+    fails), HP and Armor, the ten inventory slots (bulky two, petty none, four
+    on the body and six in the backpack; a full inventory takes HP to 0),
+    Fatigue, rest (a short rest, a night's rest, a week with a healer),
+    deprivation, spellbooks (a Fatigue each cast), scrolls and relics, the
+    traits, Bond and Omen, and a **Growth** tab instead of experience: Scars,
+    what has changed, Downtime milestones.
+  - **Cairn's combat on the tracker:** the PCs act first, each saving DEX to
+    act in the first round; attacks always hit (impaired d4, enhanced d12, two
+    weapons keep the best, blast, detachments); damage past Armor comes off HP
+    and then STR, with a STR save against Critical Damage; HP taken to exactly
+    0 rolls on the Scars table; morale (WIL) at the first casualty and at
+    half; several attackers on one foe keep the highest die.
+  - **The party sheet** hands out gold pieces, and its XP tab is the party's
+    Growth: Cairn has no experience points.
+- **Basic Fantasy comes with Kraken.** The free *Basic Fantasy Role-Playing
+  Game, 4th Edition* (Chris Gonnerman, CC BY-SA 4.0) is a new ruleset on the
+  campaign screen, with its books and a first adventure, so a table can play it
+  with nothing else installed:
+  - **The character wizard follows the book:** 3d6 in order on the host's
+    dice, a race whose limits the scores meet, a class it may take (the Elf's
+    Fighter/Magic-User and Magic-User/Thief too), the hit die, 3d6 x 10 gp and
+    a shop that greys out what the class may not use, a Magic-User's first
+    spell, name and alignment.
+  - **The sheet** works out Armor Class, the attack bonus, the five saving
+    throws, movement, thief abilities and spells a day; saves, ability rolls,
+    thief abilities and loyalty roll from it; level up rolls the hit die to
+    9th level and adds the fixed hit points after. Humans get +10% experience.
+  - **The combat tracker** plays its rules: d6 initiative, highest first; d20
+    + attack bonus against ascending AC; monsters attack by hit dice; dead at
+    0; **Turn undead** for clerics (2d6 hit dice) and a **Morale** button for
+    monsters.
+  - **Books:** the *Basic Fantasy Player's Handbook* (rules chapters, 4 races,
+    6 classes, 105 spells, 85 items), the *Basic Fantasy Game Master's Guide*
+    (245 monsters, 135 magic items, treasure and the GM's chapters) and *The
+    Mill at Hob's Ford*, a first adventure written for Kraken (goblins under a
+    village mill, and what they woke; two maps with walls and doors, three
+    treasure parcels). The books stay under CC BY-SA 4.0, with the notice on
+    each one's first page; no art from the book is included.
+
 ## 0.1.0-alpha.87: Two fixes from the screenshot shoot
 
 - **A read-aloud bubble leaves on time.** It could stay over the map for

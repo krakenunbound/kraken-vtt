@@ -1462,6 +1462,144 @@ textarea.cc-field.tall { min-height: 220px; }
 .sheet-astra .astra-learn { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
 .sheet-astra .astra-learn select { flex: 1; min-width: 12rem; }
 .sheet-astra .astra-trick-note { margin-left: 6px; font-size: 0.75rem; color: var(--accent, #e8c66a); cursor: help; }
+/* Cairn: an attribute is its score now, its maximum and its save; the traits in a grid. */
+.sheet-cairn .cairn-stats .five-ability, .sheet-cairn .cairn-stats .five-ability-head { grid-template-columns: 1fr 3.2rem 3.2rem 3rem; }
+.sheet-cairn .cairn-stats .cc-field { width: 3rem; text-align: center; }
+.sheet-cairn .cairn-traits { display: grid; grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr)); gap: 6px; margin-bottom: 8px; }
+.sheet-cairn .five-big .cc-field { width: 2.6rem; text-align: center; }
+.wizard-5e[data-wizard="cairn"] .cairn-table { margin: 4px 0; }
+.wizard-5e[data-wizard="cairn"] .cc-inline { flex-wrap: wrap; gap: 6px; }
+/* Ironsworn and Starforged: ten-box progress tracks (four ticks a box), the last roll, moves and oracles. */
+.iron-boxes { display: inline-flex; gap: 2px; vertical-align: middle; }
+.iron-box { width: 14px; height: 14px; border: 1px solid var(--panel-edge, #3a3226); background: rgba(0, 0, 0, 0.3); position: relative; }
+.iron-box.fill-1 { background: linear-gradient(135deg, transparent 45%, var(--brass, #c9a227) 46%, var(--brass, #c9a227) 54%, transparent 55%), rgba(0, 0, 0, 0.3); }
+.iron-box.fill-2 { background: linear-gradient(135deg, transparent 45%, var(--brass, #c9a227) 46%, var(--brass, #c9a227) 54%, transparent 55%), linear-gradient(45deg, transparent 45%, var(--brass, #c9a227) 46%, var(--brass, #c9a227) 54%, transparent 55%), rgba(0, 0, 0, 0.3); }
+.iron-box.fill-3 { background: linear-gradient(135deg, transparent 45%, var(--brass, #c9a227) 46%, var(--brass, #c9a227) 54%, transparent 55%), linear-gradient(45deg, transparent 45%, var(--brass, #c9a227) 46%, var(--brass, #c9a227) 54%, transparent 55%), linear-gradient(90deg, transparent 46%, var(--brass, #c9a227) 47%, var(--brass, #c9a227) 53%, transparent 54%), rgba(0, 0, 0, 0.3); }
+.iron-box.fill-4 { background: var(--brass, #c9a227); }
+.sheet-ironsworn .iron-stats .five-ability { grid-template-columns: 1fr 3.2rem; }
+.sheet-ironsworn .iron-control { cursor: pointer; text-align: center; }
+.sheet-ironsworn .iron-control.on .cc-value { color: #9fd49a; }
+.sheet-ironsworn .iron-debilities { display: flex; flex-wrap: wrap; gap: 4px 14px; }
+.sheet-ironsworn .iron-debilities h4 { width: 100%; margin: 0; }
+.iron-last { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.iron-outcome.strong { color: #9fd49a; }
+.iron-outcome.weak { color: #e8c66a; }
+.iron-outcome.miss { color: #f08a7a; }
+.iron-choices { width: 100%; display: flex; flex-wrap: wrap; gap: 6px; }
+.iron-choices button { text-align: left; white-space: normal; }
+.iron-moves { display: grid; grid-template-columns: minmax(10rem, 14rem) 1fr; gap: 10px; align-items: start; }
+.iron-move-list { max-height: 60vh; overflow: auto; display: flex; flex-direction: column; gap: 2px; }
+.iron-move-list h4 { margin: 8px 0 2px; font-size: 0.8rem; opacity: 0.8; }
+.iron-move { display: block; width: 100%; text-align: left; background: transparent; border: 0; padding: 3px 6px; color: inherit; cursor: pointer; }
+.iron-move.on, .iron-move:hover { background: var(--brass-soft, rgba(201, 162, 39, 0.18)); }
+.iron-move-panel { max-height: 60vh; overflow: auto; }
+.iron-move-roll { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 8px; }
+.iron-tracks { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+.iron-tracks li { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding-bottom: 6px; border-bottom: 1px solid rgba(255, 255, 255, 0.06); }
+.iron-tracks li > .cc-inline:first-child { flex: 1 1 100%; }
+.iron-tracks li.done { opacity: 0.6; }
+.iron-progress h4, .iron-assets h4 { text-align: left; }
+.iron-asset { border-bottom: 1px solid rgba(255, 255, 255, 0.06); padding-bottom: 6px; }
+.iron-asset ol { margin: 4px 0; padding-left: 0; list-style: none; }
+.iron-asset li { margin: 3px 0; opacity: 0.65; }
+.iron-asset li.on { opacity: 1; }
+.iron-oracles, .iron-delve { display: flex; flex-direction: column; gap: 8px; height: 100%; min-height: 0; }
+.iron-ask { flex-wrap: wrap; gap: 6px; }
+.iron-oracle-list { flex: 1; min-height: 0; overflow: auto; }
+.iron-oracle { display: block; width: 100%; text-align: left; background: transparent; border: 0; color: inherit; padding: 3px 8px; cursor: pointer; }
+.iron-oracle:hover { background: var(--brass-soft, rgba(201, 162, 39, 0.18)); }
+.iron-oracle-result { margin: 0; padding: 6px 10px; border: 1px solid var(--panel-edge, #3a3226); border-radius: 6px; background: rgba(0, 0, 0, 0.25); }
+.ct-iron { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; order: 10; flex-basis: 100%; padding-left: 4.5rem; }
+.ct-main:has(.ct-iron) { flex-wrap: wrap; }
+.ct-iron .iron-on { color: #9fd49a; }
+.wizard-ironsworn .iron-wizard-assets details { margin: 2px 0; }
+/* Forged in the Dark: boxes (stress, xp, heat, action dots), the roll bar, the attributes in three columns. */
+.forged-boxes { display: inline-flex; gap: 3px; flex-wrap: wrap; vertical-align: middle; }
+.forged-boxes button { width: 14px; height: 14px; min-width: 0; padding: 0; border-radius: 3px; border: 1px solid var(--brass-dim); background: rgba(255, 255, 255, 0.04); }
+.forged-boxes button.on { background: var(--brass); border-color: var(--brass); }
+.forged-boxes.dots button { border-radius: 50%; }
+.forged-boxes.stress button.on, .forged-boxes.heat button.on { background: #c0392b; border-color: #e0604f; }
+.forged-boxes button:disabled { cursor: default; opacity: 1; }
+.forged-rollbar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px; margin-bottom: 8px; }
+.forged-rollbar label { display: flex; flex-direction: column; gap: 2px; }
+.forged-rollbar label.inline-check, .score-row label.inline-check { flex-direction: row; align-items: center; }
+.forged-rollbar .grow, .score-pe .grow, .score-plan .grow { flex: 1; min-width: 10rem; }
+.forged-attributes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.forged-attribute header { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 6px; }
+.forged-resist { font-weight: 700; }
+.forged-action { display: flex; align-items: center; gap: 8px; margin: 3px 0; }
+.forged-roll { flex: 1; text-align: left; }
+.forged-advance button { margin: 2px; }
+.forged-condition { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 8px; }
+.forged-traumas span { display: inline-block; margin: 2px 4px 2px 0; padding: 1px 6px; border-radius: 8px; background: rgba(192, 57, 43, 0.25); }
+.forged-harm-row { display: grid; grid-template-columns: 1.2rem 1fr 1fr 5rem; gap: 4px; align-items: center; margin: 3px 0; }
+.forged-harm-row[data-harm-level="3"] { grid-template-columns: 1.2rem 2fr 5rem; }
+.forged-load { margin-top: 8px; }
+.forged-load h4 select { margin-left: 8px; }
+.forged-items { list-style: none; padding: 0; margin: 0; columns: 2; }
+.forged-items li { display: flex; justify-content: space-between; gap: 6px; break-inside: avoid; }
+.forged-abilities, .forged-friends { padding-left: 1rem; }
+.forged-abilities li, .forged-friends li { margin: 4px 0; }
+.forged-bond { color: var(--brass); }
+.forged-downtime p { margin: 6px 0; }
+.forged-steps { padding-left: 1.4rem; }
+.forged-steps > li { margin: 10px 0; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.forged-steps > li > b:first-child { width: 100%; }
+.forged-choice { display: block; width: 100%; margin: 2px 0; }
+.forged-wizard-dots { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; width: 100%; }
+.forged-wizard-dots > div { display: flex; flex-direction: column; gap: 3px; }
+.forged-wizard-dots button { min-width: 1.6rem; padding: 0 4px; }
+/* Progress clocks: the window, the strip on the table, the Score panel. */
+.clock-face { flex: none; }
+.clock-face.locked { opacity: 0.55; }
+.clocks-window { display: flex; flex-direction: column; gap: 10px; padding: 8px; }
+.clocks-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); gap: 8px; }
+.clock-card { display: flex; gap: 10px; align-items: center; padding: 8px; border-radius: 8px; border: 1px solid var(--panel-edge); background: rgba(255, 255, 255, 0.03); }
+.clock-card.gm-only { border-style: dashed; opacity: 0.85; }
+.clock-card-body { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.clock-card-tools { display: flex; gap: 4px; flex-wrap: wrap; }
+.clock-card-tools button { min-width: 2rem; padding: 2px 6px; }
+.clock-add, .clock-presets { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.clock-add input[aria-label="Clock name"] { flex: 1; min-width: 14rem; }
+/* The strip sits in the top bar's empty middle: seen by every seat, over no window. */
+.clocks-strip { position: fixed; top: 5px; left: 50%; transform: translateX(-50%); max-width: 44vw; z-index: 450; display: flex; gap: 6px; flex-wrap: nowrap; overflow-x: auto; pointer-events: none; }
+.clocks-strip-item { display: flex; flex: none; align-items: center; gap: 5px; padding: 1px 9px 1px 2px; border-radius: 20px; background: rgba(12, 16, 22, 0.85); border: 1px solid var(--brass-dim); color: #e8d9b5; font-size: 0.78rem; pointer-events: auto; }
+.clocks-strip-item.gm-only { border-style: dashed; opacity: 0.8; }
+.score-panel { display: flex; flex-direction: column; gap: 8px; padding: 8px; }
+.score-head { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
+.score-phase { display: flex; gap: 4px; }
+.score-phase button.active { border-color: var(--brass); color: var(--brass); background: var(--brass-soft); }
+.score-pe, .score-plan { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; }
+.score-pe label, .score-plan label { display: flex; flex-direction: column; gap: 2px; }
+.score-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--panel-edge); }
+.score-row > b { min-width: 6rem; }
+.score-clocks { display: flex; flex-wrap: wrap; gap: 10px; }
+.score-clock { display: flex; flex-direction: column; align-items: center; gap: 2px; max-width: 6rem; text-align: center; }
+/* The crew sheet (the party sheet's Crew tab). */
+.crew-sheet { display: flex; flex-direction: column; gap: 8px; }
+.crew-head { gap: 10px; flex-wrap: wrap; }
+.crew-name { font-family: var(--serif); font-size: 1.2rem; }
+.crew-stats { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.crew-track { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 2px 0; }
+.crew-track > b { min-width: 4.5rem; }
+.crew-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.crew-upgrades { padding-left: 1rem; }
+.crew-claims { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; }
+.crew-claim { padding: 6px 4px; font-size: 0.75rem; border-radius: 6px; border: 1px solid var(--panel-edge); background: rgba(255, 255, 255, 0.03); text-align: center; }
+.crew-claim.turf { border-style: dashed; }
+.crew-claim.held { border-color: var(--brass); background: var(--brass-soft); color: var(--brass); }
+.crew-claim.lair { display: grid; place-items: center; font-weight: 700; border-color: var(--brass-dim); }
+.crew-claim:disabled { opacity: 1; cursor: default; }
+.crew-factions { list-style: none; padding: 0; }
+.crew-factions li { display: flex; gap: 6px; align-items: center; margin: 3px 0; }
+.crew-factions .good { color: #5fbf7f; }
+.crew-factions .bad { color: #e0604f; }
+.crew-upgrade-picks { display: flex; flex-wrap: wrap; gap: 4px 10px; width: 100%; }
+@media (max-width: 760px) {
+  .forged-attributes, .forged-condition, .crew-columns, .forged-wizard-dots { grid-template-columns: 1fr; }
+  .crew-claims { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .clocks-strip { top: auto; bottom: 64px; max-width: calc(100vw - 24px); }
+}
 /* Kraken packs (the Books window's Packs tab). */
 .packs-panel { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 8px; }
 .packs-bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
@@ -1796,3 +1934,40 @@ span.flip { display: inline-flex; transform: scaleX(-1); }
 .motd-head { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border: 1px solid var(--line, #3a3a44); border-radius: 8px; font-family: Cinzel, Georgia, serif; }
 .motd-icon { display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: rgba(210, 161, 90, 0.16); color: var(--brass); }
 .motd-text { min-height: 160px; resize: none; padding: 10px; border: 1px solid var(--line, #3a3a44); border-radius: 8px; font-size: 0.98rem; line-height: 1.45; white-space: pre-wrap; overflow: auto; }
+
+/* Fate Core and Fate Accelerated: the sheet, the tracker's line, the Scene Aspects strip. */
+.sheet-fate .fate-aspects { display: grid; grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr)); gap: 6px; }
+.sheet-fate .fate-aspect { font-style: italic; }
+.sheet-fate .fate-rollbar { flex-wrap: wrap; gap: 6px; }
+.sheet-fate .fate-skill { display: grid; grid-template-columns: 2.6rem 1fr auto 3rem; align-items: center; gap: 6px; padding: 2px 0; }
+.sheet-fate .fate-rating { font-family: Cinzel, Georgia, serif; font-weight: 700; color: var(--brass); text-align: center; }
+.sheet-fate .fate-track, .ct-fate-track { display: inline-flex; align-items: center; gap: 4px; margin: 2px 8px 2px 0; }
+.fate-box { display: inline-grid; place-items: center; min-width: 1.6rem; height: 1.6rem; padding: 0; border: 2px solid var(--brass); border-radius: 4px; background: transparent; color: inherit; font-weight: 700; font-size: 0.8rem; }
+.fate-box.marked { background: var(--brass); color: #1a1208; }
+.sheet-fate .fate-consequence { display: grid; grid-template-columns: 8rem 1fr auto; align-items: center; gap: 6px; margin: 2px 0; }
+.sheet-fate .fate-invokes { list-style: none; margin: 0; padding: 0; display: grid; gap: 3px; }
+.sheet-fate .fate-invokes li { display: flex; align-items: center; gap: 6px; }
+.sheet-fate .fate-invokes li span { flex: 1; }
+.wizard-5e[data-wizard="fate"] .fate-wizard-aspects { display: grid; grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr)); gap: 6px; }
+.wizard-5e[data-wizard="fate"] .fate-phase { display: grid; grid-template-columns: 14rem 1fr 1fr 1fr; gap: 6px; align-items: center; margin: 4px 0; }
+.wizard-5e[data-wizard="fate"] .fate-wizard-pyramid, .wizard-5e[data-wizard="fate"] .fate-wizard-approaches { display: grid; grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr)); gap: 6px; }
+.wizard-5e[data-wizard="fate"] textarea { width: 100%; min-height: 3rem; }
+.ct-fate { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 2px 8px 4px 46px; font-size: 0.82rem; }
+.ct-fate .fate-box { min-width: 1.3rem; height: 1.3rem; font-size: 0.7rem; }
+.ct-fate-cons { display: inline-flex; gap: 4px; flex-wrap: wrap; }
+.ct-con { padding: 1px 5px; border: 1px dashed rgba(210, 161, 90, 0.6); border-radius: 4px; opacity: 0.7; }
+.ct-con.taken { border-style: solid; opacity: 1; color: #f0b060; }
+.ct-fate-hit { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; width: 100%; padding: 4px; border: 1px solid #e06000; border-radius: 6px; background: rgba(224, 96, 0, 0.12); }
+.ct-fate-hit input { width: 11rem; }
+.fate-strip { position: fixed; top: 46px; left: 50%; transform: translateX(-50%); z-index: 960; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px; max-width: min(92vw, 1100px); padding: 4px 10px; border: 1px solid rgba(210, 161, 90, 0.5); border-radius: 10px; background: rgba(18, 14, 10, 0.86); color: #f2e6cf; font-size: 0.85rem; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4); }
+.fate-strip-aspects { display: flex; flex-wrap: wrap; gap: 4px; margin: 0; padding: 0; list-style: none; }
+.fate-aspect-chip { display: inline-flex; align-items: center; gap: 3px; padding: 2px 8px; border-radius: 12px; border: 1px solid rgba(210, 161, 90, 0.6); background: rgba(210, 161, 90, 0.12); }
+.fate-aspect-chip.kind-boost { border-style: dashed; }
+.fate-aspect-chip.kind-game { border-color: #8fb3e0; background: rgba(120, 160, 220, 0.14); }
+.fate-aspect-chip button { padding: 0 3px; min-width: 0; }
+.fate-dots { color: var(--brass); letter-spacing: 1px; font-size: 0.7rem; }
+.fate-strip-gm { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.fate-strip-gm input { width: 13rem; }
+.fate-pool { display: inline-flex; align-items: center; gap: 3px; padding: 1px 8px; border-radius: 10px; background: rgba(255, 255, 255, 0.06); }
+.fate-pool b { font-family: Cinzel, Georgia, serif; color: var(--brass); }
+.tray-die.tray-fate { outline: 1px dashed rgba(210, 161, 90, 0.5); border-radius: 6px; }
