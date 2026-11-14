@@ -4,6 +4,15 @@ What changed in each release of Kraken VTT. Downloads are on the
 [Releases](https://github.com/krakenunbound/kraken-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
+## Unreleased
+
+- **Code mode for AI agents.** A new agent tool, `kraken_code`, takes one
+  piece of JavaScript that calls several Kraken tools at once (in parallel,
+  or one result feeding the next) and sends back only what the code returns.
+  An agent can read the tracker, the party and a map in one step instead of
+  three. The code runs in a sandbox of its own, with the same checks on every
+  tool it calls; see AGENT.md.
+
 ## 0.1.0-alpha.88: Ten games in the box
 
 Kraken now comes with ten games you can play with nothing else installed:

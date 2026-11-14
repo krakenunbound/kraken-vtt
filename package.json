@@ -122,7 +122,8 @@
     "linux": "npm run build && node scripts/build-packs.mjs && electron-builder --linux AppImage deb --publish never",
     "map-share-ui": "node scripts/verify-map-share-ui.mjs",
     "natural-sound-ui": "node scripts/verify-natural-sound-ui.mjs",
-    "player-sound-ui": "node scripts/verify-player-sound-ui.mjs"
+    "player-sound-ui": "node scripts/verify-player-sound-ui.mjs",
+    "code-mode": "node scripts/check-code-mode.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.4.0",

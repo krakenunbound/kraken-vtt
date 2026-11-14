@@ -2082,6 +2082,16 @@ const TOOLS = [
     },
   },
   {
+    name: "kraken_code",
+    description:
+      "Code mode: run one piece of JavaScript that calls several Kraken tools and get back only what it returns, instead of one tool call at a time. In the code, `await kraken(\"kraken_tool_name\", { ...args })` calls any other Kraken tool (the same checks as calling it directly) and resolves to its result, parsed from JSON when it is JSON; a failed call throws. Run calls in parallel with Promise.all, use one result in the next call, filter before returning. A lone expression is the result; statements say what they want back with `return`. console.log lines come back too. The code runs in its own sandbox: no require, process, files or network, only kraken(). Example: `const [a, b] = await Promise.all([kraken(\"kraken_combat\", { action: \"view\" }), kraken(\"kraken_party\")]); return { round: a.round, members: b.members?.length };`. Limits: 1000 tool calls, 5 s of computing between awaits, timeoutSeconds in all (default 120, at most 600).",
+    inputSchema: object({ code: string("The JavaScript: the body of an async function (await allowed)"), timeoutSeconds: number("How long it may run in all, in seconds (default 120, at most 600)") }, ["code"]),
+    async run(args, ctx) {
+      const { runCode, report } = require("./codeMode.cjs");
+      return report(await runCode(String(args.code ?? ""), (name, input) => callTool(name, input, ctx), { timeoutMs: (Number(args.timeoutSeconds) || 120) * 1000 }));
+    },
+  },
+  {
     name: "kraken_ui_eval",
     description: "Run JavaScript in the GM's app window and return the result (for driving or inspecting the UI). window.__kraken has the session handle.",
     inputSchema: object({ code: string("An expression, or statements ending in a value") }, ["code"]),

@@ -13,6 +13,31 @@ Kraken VTT is built for an AI agent from the ground up, not with one added after
 
 The app starts the MCP server when it opens. `electron/agent/mcp-stdio.cjs` is the stdio bridge an MCP client runs, and `.mcp.json` registers it for Claude Code. The agent acts as the GM. Start with `kraken_status`.
 
+## Code mode: several tools in one call
+
+`kraken_code` takes one piece of JavaScript that calls other Kraken tools and
+sends back only what the code returns, in the spirit of Claude Code's Code
+Mode. Inside the code, `await kraken("kraken_tool", { ...args })` calls any
+tool through the same path as calling it directly (the same checks, the same
+chat output) and resolves to its result, parsed from JSON; a failed call
+throws. Use `Promise.all` for calls that don't depend on each other, feed one
+result into the next, and filter before returning:
+
+```js
+const [combat, party] = await Promise.all([kraken("kraken_combat", { action: "view" }), kraken("kraken_party")]);
+return { round: combat.round, hurt: combat.entries.filter((entry) => entry.wounds > 0).map((entry) => entry.name) };
+```
+
+A lone expression is the result; `console.log` lines come back too. The code
+runs in a V8 context of its own (`electron/agent/codeMode.cjs`): no
+`require`, `process`, files or network, and no string-to-code (`eval`,
+`Function`), so no way back into Kraken's process. Only JSON strings cross
+the boundary. Each stretch of code between awaits may run 5 seconds, the
+whole run `timeoutSeconds` (default 120, at most 600), with at most 1000
+tool calls. `kraken_code` cannot call itself, and the in-app DM assistant
+doesn't get it (it could reach the tools withheld from the assistant).
+`npm run code-mode` tests it.
+
 ## What the agent can do
 
 | In the app | Tool |

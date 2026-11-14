@@ -70,7 +70,7 @@ try {
   assert(first.model === MODEL && first.model === "claude-opus-5-5", `model: ${first.model}`);
   assert(first.thinking?.type === "adaptive" && first.fallbacks === "default" && first.betas.includes("server-side-fallback-2026-07-01"), "adaptive thinking, refusal fallbacks");
   assert(/DM assistant/.test(first.system) && /Re-rolls/.test(first.system), "the skill document is its system prompt");
-  assert(!first.tools.some((tool) => tool.name === "kraken_ui_eval") && first.tools.some((tool) => tool.name === "kraken_combat") && first.tools.every((tool) => tool.input_schema), "the bridge's tools, without kraken_ui_eval");
+  assert(!first.tools.some((tool) => tool.name === "kraken_ui_eval" || tool.name === "kraken_code") && first.tools.some((tool) => tool.name === "kraken_combat") && first.tools.every((tool) => tool.input_schema), "the bridge's tools, without kraken_ui_eval or kraken_code");
 
   // The roll really happened at the table.
   const chat = JSON.parse((await callTool("kraken_chat_log", {}, ctx)).content[0].text);

@@ -18,8 +18,9 @@ const { listTools, callTool } = require("./agent/tools.cjs");
 
 const MODEL = "claude-opus-5-5";
 // Tools the assistant does not get: running code in the GM's window, and
-// players' accounts (it reads what players write, so it never resets a password).
-const WITHHELD = new Set(["kraken_ui_eval", "kraken_accounts"]);
+// players' accounts (it reads what players write, so it never resets a password),
+// and code mode (kraken_code could call either of the other two).
+const WITHHELD = new Set(["kraken_ui_eval", "kraken_accounts", "kraken_code"]);
 // Nor does it read or write the GM's files by a path: what players write (a
 // note, a backstory, chat) could ask it to. It works on the table's own records,
 // books and libraries; the GM imports and exports files themself.
