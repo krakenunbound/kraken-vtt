@@ -13,6 +13,8 @@
 				<drives type="string">Feed before the snow deepens</drives>
 				<tactics type="string">Circle and wait; go for the weakest; flee from fire</tactics>
 				<text type="formattedtext"><p><i>A lean grey shape at the edge of the firelight</i> — Troublesome Animal</p><p><b>Features:</b> Ribs showing through a winter coat; yellow eyes</p><p><b>Drives:</b> Feed before the snow deepens</p><p><b>Tactics:</b> Circle and wait; go for the weakest; flee from fire</p></text>
+				<picture type="string">images/npc/hungry-wolf.webp@Ironsworn Foes and Sites</picture>
+				<token type="string">tokens/hungry-wolf.webp@Ironsworn Foes and Sites</token>
 			</hungrywolf>
 			<wolfpack>
 				<name type="string">Wolf Pack</name>
@@ -25,6 +27,8 @@
 				<drives type="string">Bring down prey; protect the pups</drives>
 				<tactics type="string">Surround; harry and fall back; drag a victim away</tactics>
 				<text type="formattedtext"><p><i>Five or six wolves hunting as one</i> — Dangerous Animal</p><p><b>Features:</b> Howls from every side; a scarred leader</p><p><b>Drives:</b> Bring down prey; protect the pups</p><p><b>Tactics:</b> Surround; harry and fall back; drag a victim away</p></text>
+				<picture type="string">images/npc/wolf-pack.webp@Ironsworn Foes and Sites</picture>
+				<token type="string">tokens/wolf-pack.webp@Ironsworn Foes and Sites</token>
 			</wolfpack>
 			<cavebear>
 				<name type="string">Cave Bear</name>
@@ -37,6 +41,8 @@
 				<drives type="string">Guard its den; eat its fill before the long sleep</drives>
 				<tactics type="string">Charge; crush and maul; stand tall to terrify</tactics>
 				<text type="formattedtext"><p><i>Shoulders like a boulder, breath like a forge</i> — Formidable Beast</p><p><b>Features:</b> Matted fur; a roar that shakes dust from the roof</p><p><b>Drives:</b> Guard its den; eat its fill before the long sleep</p><p><b>Tactics:</b> Charge; crush and maul; stand tall to terrify</p></text>
+				<picture type="string">images/npc/cave-bear.webp@Ironsworn Foes and Sites</picture>
+				<token type="string">tokens/cave-bear.webp@Ironsworn Foes and Sites</token>
 			</cavebear>
 			<raider>
 				<name type="string">Raider</name>
@@ -49,6 +55,8 @@
 				<drives type="string">Take what others have; survive the winter</drives>
 				<tactics type="string">Strike from ambush; fight in pairs; run when the leader falls</tactics>
 				<text type="formattedtext"><p><i>A hard-faced warrior with a notched axe</i> — Troublesome Ironlander</p><p><b>Features:</b> Mismatched armour; a raid-mark painted on the shield</p><p><b>Drives:</b> Take what others have; survive the winter</p><p><b>Tactics:</b> Strike from ambush; fight in pairs; run when the leader falls</p></text>
+				<picture type="string">images/npc/raider.webp@Ironsworn Foes and Sites</picture>
+				<token type="string">tokens/raider.webp@Ironsworn Foes and Sites</token>
 			</raider>
 			<raiderchieftain>
 				<name type="string">Raider Chieftain</name>
@@ -61,6 +69,8 @@
 				<drives type="string">Be feared; hold the band together with plunder</drives>
 				<tactics type="string">Lead from the front; take hostages; offer a bargain and break it</tactics>
 				<text type="formattedtext"><p><i>A raider who has outlived every rival</i> — Dangerous Ironlander</p><p><b>Features:</b> A cloak of wolfskins; rings taken from the dead</p><p><b>Drives:</b> Be feared; hold the band together with plunder</p><p><b>Tactics:</b> Lead from the front; take hostages; offer a bargain and break it</p></text>
+				<picture type="string">images/npc/raider-chieftain.webp@Ironsworn Foes and Sites</picture>
+				<token type="string">tokens/raider-chieftain.webp@Ironsworn Foes and Sites</token>
 			</raiderchieftain>
 			<marshlurker>
 				<name type="string">Marsh Lurker</name>
@@ -73,6 +83,8 @@
 				<drives type="string">Drag the warm-blooded down into the mud</drives>
 				<tactics type="string">Lie still; seize and pull under; vanish and strike again</tactics>
 				<text type="formattedtext"><p><i>Something long and pale beneath the black water</i> — Dangerous Beast</p><p><b>Features:</b> Webbed claws; skin like wet clay; no eyes</p><p><b>Drives:</b> Drag the warm-blooded down into the mud</p><p><b>Tactics:</b> Lie still; seize and pull under; vanish and strike again</p></text>
+				<picture type="string">images/npc/marsh-lurker.webp@Ironsworn Foes and Sites</picture>
+				<token type="string">tokens/marsh-lurker.webp@Ironsworn Foes and Sites</token>
 			</marshlurker>
 			<barrowdead>
 				<name type="string">Barrow Dead</name>
@@ -85,6 +97,8 @@
 				<drives type="string">Keep the living from the barrow; take back what was stolen</drives>
 				<tactics type="string">Stand at the threshold; strike without pain or fear; rise again until the barrow's power is broken</tactics>
 				<text type="formattedtext"><p><i>A corpse in rotted mail, risen to guard its tomb</i> — Dangerous Horror</p><p><b>Features:</b> Grave-dirt and rust; a cold blue light in empty sockets</p><p><b>Drives:</b> Keep the living from the barrow; take back what was stolen</p><p><b>Tactics:</b> Stand at the threshold; strike without pain or fear; rise again until the barrow's power is broken</p></text>
+				<picture type="string">images/npc/barrow-dead.webp@Ironsworn Foes and Sites</picture>
+				<token type="string">tokens/barrow-dead.webp@Ironsworn Foes and Sites</token>
 			</barrowdead>
 			<cinderhound>
 				<name type="string">Cinder Hound</name>
@@ -97,6 +111,8 @@
 				<drives type="string">Hunt whatever its master names; burn what it cannot catch</drives>
 				<tactics type="string">Run down the fleeing; set the ground alight; break apart into ash when slain</tactics>
 				<text type="formattedtext"><p><i>A hound of ash and coals that leaves burning prints</i> — Dangerous Horror</p><p><b>Features:</b> Smoke for breath; an ember glow under cracked hide</p><p><b>Drives:</b> Hunt whatever its master names; burn what it cannot catch</p><p><b>Tactics:</b> Run down the fleeing; set the ground alight; break apart into ash when slain</p></text>
+				<picture type="string">images/npc/cinder-hound.webp@Ironsworn Foes and Sites</picture>
+				<token type="string">tokens/cinder-hound.webp@Ironsworn Foes and Sites</token>
 			</cinderhound>
 			<theashcrownedwarden>
 				<name type="string">The Ash-Crowned Warden</name>
@@ -109,6 +125,8 @@
 				<drives type="string">Keep his vow at last, whatever it costs the living; never be forgotten</drives>
 				<tactics type="string">Command his hounds; call the fire in the braziers; bargain with an oath, then demand it be kept</tactics>
 				<text type="formattedtext"><p><i>The barrow's first chieftain, bound to it by a vow he broke</i> — Formidable Horror</p><p><b>Features:</b> A crown of blackened iron; embers where his heart was; a voice like settling coals</p><p><b>Drives:</b> Keep his vow at last, whatever it costs the living; never be forgotten</p><p><b>Tactics:</b> Command his hounds; call the fire in the braziers; bargain with an oath, then demand it be kept</p></text>
+				<picture type="string">images/npc/the-ash-crowned-warden.webp@Ironsworn Foes and Sites</picture>
+				<token type="string">tokens/the-ash-crowned-warden.webp@Ironsworn Foes and Sites</token>
 			</theashcrownedwarden>
 			<wildboar>
 				<name type="string">Wild Boar</name>
@@ -121,6 +139,8 @@
 				<drives type="string">Defend its ground</drives>
 				<tactics type="string">Charge; gore; charge again</tactics>
 				<text type="formattedtext"><p><i>Bristled, tusked and furious</i> — Troublesome Animal</p><p><b>Features:</b> Mud-caked hide; small red eyes</p><p><b>Drives:</b> Defend its ground</p><p><b>Tactics:</b> Charge; gore; charge again</p></text>
+				<picture type="string">images/npc/wild-boar.webp@Ironsworn Foes and Sites</picture>
+				<token type="string">tokens/wild-boar.webp@Ironsworn Foes and Sites</token>
 			</wildboar>
 			<hillgiant>
 				<name type="string">Hill Giant</name>
@@ -133,6 +153,8 @@
 				<drives type="string">Eat; gather shiny things; drive the small folk off its hills</drives>
 				<tactics type="string">Hurl stones; sweep the field with its club; grab and throw</tactics>
 				<text type="formattedtext"><p><i>A towering hillfolk who wears a dead tree for a club</i> — Extreme Beast</p><p><b>Features:</b> Patchwork furs; a voice like rockfall</p><p><b>Drives:</b> Eat; gather shiny things; drive the small folk off its hills</p><p><b>Tactics:</b> Hurl stones; sweep the field with its club; grab and throw</p></text>
+				<picture type="string">images/npc/hill-giant.webp@Ironsworn Foes and Sites</picture>
+				<token type="string">tokens/hill-giant.webp@Ironsworn Foes and Sites</token>
 			</hillgiant>
 			<frostwyrm>
 				<name type="string">Frost Wyrm</name>
@@ -145,6 +167,8 @@
 				<drives type="string">Sleep on its hoard; destroy whatever wakes it</drives>
 				<tactics type="string">Burrow through ice; freeze with its breath; crush in its coils</tactics>
 				<text type="formattedtext"><p><i>A serpent of white scales coiled in the glacier's heart</i> — Epic Beast</p><p><b>Features:</b> Breath of killing cold; eyes like old ice</p><p><b>Drives:</b> Sleep on its hoard; destroy whatever wakes it</p><p><b>Tactics:</b> Burrow through ice; freeze with its breath; crush in its coils</p></text>
+				<picture type="string">images/npc/frost-wyrm.webp@Ironsworn Foes and Sites</picture>
+				<token type="string">tokens/frost-wyrm.webp@Ironsworn Foes and Sites</token>
 			</frostwyrm>
 			<paleflamecultist>
 				<name type="string">Pale Flame Cultist</name>
@@ -157,6 +181,8 @@
 				<drives type="string">Feed the pale flame; bring others to its light</drives>
 				<tactics type="string">Preach and distract; strike when backs are turned; die gladly</tactics>
 				<text type="formattedtext"><p><i>A gaunt zealot who carries a lamp that burns without heat</i> — Troublesome Ironlander</p><p><b>Features:</b> Shaven head; ash smeared on the brow</p><p><b>Drives:</b> Feed the pale flame; bring others to its light</p><p><b>Tactics:</b> Preach and distract; strike when backs are turned; die gladly</p></text>
+				<picture type="string">images/npc/pale-flame-cultist.webp@Ironsworn Foes and Sites</picture>
+				<token type="string">tokens/pale-flame-cultist.webp@Ironsworn Foes and Sites</token>
 			</paleflamecultist>
 			<swarmofcrows>
 				<name type="string">Swarm of Crows</name>
@@ -169,6 +195,8 @@
 				<drives type="string">Feast on the dead and the dying</drives>
 				<tactics type="string">Blind and confuse; scatter and return</tactics>
 				<text type="formattedtext"><p><i>A screaming black cloud over the battlefield</i> — Troublesome Animal</p><p><b>Features:</b> A hundred beaks; the smell of carrion</p><p><b>Drives:</b> Feast on the dead and the dying</p><p><b>Tactics:</b> Blind and confuse; scatter and return</p></text>
+				<picture type="string">images/npc/swarm-of-crows.webp@Ironsworn Foes and Sites</picture>
+				<token type="string">tokens/swarm-of-crows.webp@Ironsworn Foes and Sites</token>
 			</swarmofcrows>
 		</category>
 	</npc>
