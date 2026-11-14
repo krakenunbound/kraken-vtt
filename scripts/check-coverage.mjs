@@ -112,8 +112,46 @@ const tracker = new Set([...source.matchAll(/case "([a-z-]+)":/g)].map((match) =
 const combatActions = new Set(listTools().find((tool) => tool.name === "kraken_combat").inputSchema.properties.action.enum);
 for (const action of tracker) if (!combatActions.has(action)) problems.push(`tracker action "${action}" is missing from kraken_combat`);
 
+// Map Studio (studio/web): every button, rail mode, start card and paint tool of
+// the editor is one of kraken_map_studio's actions, or is only about the view
+// (VIEW_ONLY). A new control needs its action (studio/web/agent.js,
+// electron/studio/agentTools.cjs) in the same change.
+const STUDIO = {
+  // buttons by id
+  newBtn: "new", layoutBtn: "generate", demoBtn: "open", projectsBtn: "projects", openBtn: "open", saveProjectBtn: "save",
+  saveBtn: "export", portableBtn: "export", closeMapBtn: "tabs", viewCloseBtn: "tabs", undoBtn: "undo", redoBtn: "redo",
+  artBtn: "library", refreshAssets: "library", allAssets: "library", favoriteAssets: "library", recentAssets: "library",
+  favoriteCurrent: "library", subscriptionBtn: "library", duplicateBtn: "place", groupBtn: "update", ungroupBtn: "update",
+  lockBtn: "update", alignBtn: "update", prefabSaveBtn: "place", prefabPlaceBtn: "place", addAsset: "place", railDelete: "remove",
+  eraseTool: "remove", drawTool: "wall", layoutDice: "generate", layoutGo: "generate", pictureCreate: "new", closeSave: "save",
+  closeDiscard: "tabs", saveKrakenBtn: "kraken",
+  // rail modes
+  "mode:view": "map", "mode:layers": "update", "mode:paint": "place", "mode:fx": "weather", "mode:los": "wall", "mode:regions": "region",
+  "mode:lighting": "light", "mode:play": "render", "mode:grid": "new",
+  // start cards
+  "start:picture": "new", "start:generate": "generate", "start:blank": "new", "start:project": "projects", "start:file": "open",
+  // paint tools
+  "paint:stamp": "place", "paint:texture": "paint", "paint:scatter": "scatter", "paint:wall": "wall",
+};
+// Controls that only change what the GM sees (zoom, panels, dialogs closing), never the map.
+const VIEW_ONLY = new Set(["libraryBtn", "railFit", "panTool", "closeProjects", "closeSubscription", "closeLayout", "pictureCancel", "closeCancel", "mode:vision"]);
+const studioHtml = readFileSync(new URL("../studio/web/index.html", import.meta.url), "utf8");
+const studioControls = new Set([
+  ...[...studioHtml.matchAll(/<button[^>]*\bid="([^"]+)"/g)].map((match) => match[1]),
+  ...[...studioHtml.matchAll(/data-mode="([^"]+)"/g)].map((match) => `mode:${match[1]}`),
+  ...[...studioHtml.matchAll(/data-start="([^"]+)"/g)].map((match) => `start:${match[1]}`),
+  ...[...(studioHtml.match(/<select id="paintTool">([\s\S]*?)<\/select>/)?.[1] ?? "").matchAll(/value="([^"]+)"/g)].map((match) => `paint:${match[1]}`),
+  "saveKrakenBtn",
+]);
+const studioActions = new Set(listTools().find((tool) => tool.name === "kraken_map_studio")?.inputSchema.properties.action.enum ?? []);
+for (const control of studioControls) {
+  if (VIEW_ONLY.has(control)) continue;
+  if (!STUDIO[control]) problems.push(`Map Studio's "${control}" has no kraken_map_studio action`);
+  else if (!studioActions.has(STUDIO[control])) problems.push(`Map Studio's "${control}" maps to action ${STUDIO[control]}, which kraken_map_studio does not have`);
+}
+
 if (problems.length) {
   console.error(problems.join("\n"));
   process.exit(1);
 }
-console.log(`COVERAGE_OK ${handled.size} table messages and ${tracker.size} tracker actions, ${tools.size} tools`);
+console.log(`COVERAGE_OK ${handled.size} table messages, ${tracker.size} tracker actions and ${studioControls.size} Map Studio controls, ${tools.size} tools`);

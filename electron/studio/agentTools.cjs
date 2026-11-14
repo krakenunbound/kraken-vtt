@@ -217,7 +217,7 @@ async function run(args, ctx) {
       fs.writeFileSync(files.project, await studio.portableProject(project));
     }
     const counts = bookWalls(project);
-    return out({ ...files, width: project.width, height: project.height, grid: project.grid, walls: counts.walls.filter((w) => !w.door && !w.window).length, doors: counts.walls.filter((w) => w.door).length, lights: counts.lights.length });
+    return out({ ...files, width: project.width, height: project.height, grid: project.grid, counts: { walls: counts.walls.filter((w) => !w.door && !w.window).length, doors: counts.walls.filter((w) => w.door).length, windows: counts.walls.filter((w) => w.window).length, lights: counts.lights.length } });
   }
   if (action === "kraken") {
     const table = ctx.table();
@@ -226,7 +226,11 @@ async function run(args, ctx) {
       const file = path.join(ctx.studio.folder(), `${slug(rest.name || project.name)}.png`);
       fs.mkdirSync(path.dirname(file), { recursive: true });
       fs.writeFileSync(file, dataUrl(image));
+      const was = table.agent.scene()?.id ?? null;
       await ctx.ui({ kind: "open-adventure", name: path.basename(file), bytes: new Uint8Array(fs.readFileSync(file)) }, 60000);
+      // The window puts the new scene on the table; wait until the table has it.
+      for (let wait = 0; wait < 100 && (!table.agent.scene() || table.agent.scene().id === was); wait++) await new Promise((resolve) => setTimeout(resolve, 150));
+      if (!table.agent.scene() || table.agent.scene().id === was) throw new Error("The new scene did not open on the table.");
       table.agent.map.updateSettings({ grid: { size: project.grid } }, table.agent.seat);
     }
     return out(await ctx.studio.saveOpen(project, image));

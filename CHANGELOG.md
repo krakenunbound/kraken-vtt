@@ -4,6 +4,19 @@ What changed in each release of Kraken VTT. Downloads are on the
 [Releases](https://github.com/krakenunbound/kraken-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
+## Unreleased
+
+- **Map Studio for AI agents.** A new agent tool, `kraken_map_studio`, drives
+  Kraken's map maker the way a GM does, in the GM's own Map Studio window:
+  pick art from the library, lay floors that blend, draw walls with wall art
+  (and their line of sight), put doors in the gaps, place props and the lights
+  on them, set the time of day, add weather and traps, generate a dungeon,
+  then render the map at full size to look at it, play-test a token's view,
+  and save it into the campaign or export it for a book. A new skill,
+  `skills/kraken-map-studio`, teaches an agent how to make a good map with it
+  (and lists the art the packs still lack). The Ironsworn starter's Cinder
+  Barrow was rebuilt with it as a first example (waiting for review).
+
 ## 0.1.0-alpha.89: Code mode for agents
 
 - **Code mode for AI agents.** A new agent tool, `kraken_code`, takes one

@@ -259,6 +259,8 @@ try {
 
   const check = await step("check", "check", {});
   console.log("check:", JSON.stringify(check, null, 1));
+  // A map that ships with Kraken: the shipped packs' art and nothing else.
+  if (check.art.outside.length) throw new Error(`art outside the shipped packs: ${check.art.outside.join(", ")}`);
   const summary = await step("map", "map", { detail: false });
   console.log("map:", JSON.stringify(summary));
   for (const [view, extra] of [["picture", {}], ["editor", { lighting: true }], ["play", { token: [3.5, 10.5], light: "torch", vision: "normal" }], ["play", { token: [21.5, 9.5], light: "none", vision: "normal", file: path.join(RENDERS, "play-burning-hall.png") }]]) {

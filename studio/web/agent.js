@@ -57,7 +57,7 @@ window.KrakenStudioAgent = (() => {
     window.KrakenLayers.ensure(p);
     const found = p.layers.find(l => l.id === id || l.name.toLowerCase() === String(id).toLowerCase());
     if (found) return found.id;
-    const layer = {id: String(id).toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 40) || uid('layer'), name: String(id).slice(0, 60), visible: true, locked: false};
+    const layer = {id: String(id).toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 40) || uid('layer'), name: String(id).slice(0, 60).replace(/^./, c => c.toUpperCase()), visible: true, locked: false};
     p.layers.push(layer);
     return layer.id;
   }
@@ -123,8 +123,13 @@ window.KrakenStudioAgent = (() => {
     const offGrid = p.walls.filter(w => w.points.some((v, i) => { const off = Number(p.gridOffset?.[i % 2 ? 'y' : 'x']) || 0, h = G / 2; return Math.abs(((v - off) / h) - Math.round((v - off) / h)) > 0.02; }));
     if (offGrid.length) notes.push(`${offGrid.length} walls have points off the half-square lines (fine for caves; for built rooms keep walls on the grid so the art lines up).`);
     if (!p.lights.length) notes.push('no lights: a dungeon with no light sources plays pitch dark.');
+    // Where the art came from: maps that ship with Kraken use the shipped packs alone.
+    const sources = new Set(p.objects.map(o => o.wallPath?.assetId || o.sourceArt || o.assetId));
+    const outside = [...sources].map(id => S().assets.find(a => a.id === id)).filter(a => a && !SHIPPED.has(a.sourcePack) && !/^(Layout |Terrain brush|Wall - |Path - )/.test(a.name));
+    const art = {shipped: [...sources].filter(id => SHIPPED.has(S().assets.find(a => a.id === id)?.sourcePack)).length, outside: outside.map(a => `${a.name} (${a.sourcePack || 'own'})`)};
+    if (outside.length) notes.push(`${outside.length} pieces of art are not from the shipped packs (${art.outside.slice(0, 6).join(', ')}): fine for the GM's own maps, never in a map that ships with Kraken.`);
     if (!p.objects.some(o => !o.floor && !o.wallPath)) notes.push('no props at all: the map is bare floor.');
-    return {ok: notes.length === 0, notes};
+    return {ok: notes.length === 0, notes, art};
   }
   const WALLART_PATH = o => window.KrakenWallArt.isPath(S().assets.find(a => a.id === o.wallPath?.assetId));
 
@@ -171,7 +176,7 @@ window.KrakenStudioAgent = (() => {
       const id = uid('floor'), made = await window.KrakenGenerate.floorObject({id, name: name || a.name, bounds: {x: left, y: top, width: right - left, height: bottom - top}, polygons: outlines}, a, await loadArt(a), p.grid, f);
       S().addAsset(made.asset);
       S().snapshot();
-      Object.assign(made.object, {name: name || a.name + ' floor', layer: ensureLayer(layer), floor: true, ...(room ? {room: true} : {}), locked: false});
+      Object.assign(made.object, {name: name || a.name + ' floor', layer: ensureLayer(layer), floor: true, sourceArt: a.id, ...(room ? {room: true} : {}), locked: false});
       S().project.objects.push(made.object);
       done();
       return brief(made.object);
@@ -181,6 +186,7 @@ window.KrakenStudioAgent = (() => {
       const a = art(ref), list = pts(path, 'path');
       await loadArt(a);
       const o = await window.KrakenBeta02.textureStroke({assetId: a.id, path: list, size: Math.min(500, Math.max(10, px(size))), softness: Number(softness), name: name || 'Paint - ' + a.name, layer: ensureLayer(layer)});
+      o.sourceArt = a.id;
       return brief(o);
     },
     // The Scatter brush: copies along a stroke, turned and sized at random from the seed.
