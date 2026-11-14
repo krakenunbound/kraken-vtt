@@ -1448,6 +1448,13 @@ textarea.cc-field.tall { min-height: 220px; }
 .mgt2-upp { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; letter-spacing: 0.12em; font-weight: 700; }
 .sheet-astra .astra-stats .five-ability { grid-template-columns: 1fr 3.5rem 3rem; }
 .sheet-astra .astra-stats .five-ability-head { grid-template-columns: 1fr 3.5rem 3rem; }
+/* Cairn: an attribute is its score now, its maximum and its save; the traits in a grid. */
+.sheet-cairn .cairn-stats .five-ability, .sheet-cairn .cairn-stats .five-ability-head { grid-template-columns: 1fr 3.2rem 3.2rem 3rem; }
+.sheet-cairn .cairn-stats .cc-field { width: 3rem; text-align: center; }
+.sheet-cairn .cairn-traits { display: grid; grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr)); gap: 6px; margin-bottom: 8px; }
+.sheet-cairn .five-big .cc-field { width: 2.6rem; text-align: center; }
+.wizard-5e[data-wizard="cairn"] .cairn-table { margin: 4px 0; }
+.wizard-5e[data-wizard="cairn"] .cc-inline { flex-wrap: wrap; gap: 6px; }
 /* Kraken packs (the Books window's Packs tab). */
 .packs-panel { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 8px; }
 .packs-bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }

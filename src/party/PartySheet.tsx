@@ -16,6 +16,8 @@ export type PartyMember = {
   ac: number;
   exp: number;
   expnext: number;
+  /** Cairn: its attributes, slots, Fatigue, state, Scars and Growth (no experience). */
+  cairn?: { str: number; dex: number; wil: number; fatigue: number; slots: number; status: string; scars: string[]; growth: string[] };
   coins: { name: string; amount: number }[];
 };
 type Entry = { name: string; xp: number; awarded?: number };
@@ -30,7 +32,8 @@ export type PartyView = {
 
 const ATTRIBUTES = ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"];
 // A parcel's coins in the ruleset's money (FG's coin list): credits for Traveller (MCr and Cr, as FG's MGT2) and Apeira Astra, gold crowns for Descending Darkness.
-const coinsFor = (ruleset: string) => (ruleset === "Traveller" ? ["MCr", "Cr"] : ruleset === "Apeira Astra" ? ["Cr"] : ruleset === "Descending Darkness" ? ["GC"] : ["PP", "GP", "EP", "SP", "CP"]);
+// Cairn's books price everything in gold pieces.
+const coinsFor = (ruleset: string) => (ruleset === "Traveller" ? ["MCr", "Cr"] : ruleset === "Apeira Astra" ? ["Cr"] : ruleset === "Descending Darkness" ? ["GC"] : ruleset === "Cairn" ? ["GP"] : ["PP", "GP", "EP", "SP", "CP"]);
 const TABS = [
   { id: "main", label: "Main" },
   { id: "inventory", label: "Inventory" },
@@ -59,7 +62,11 @@ export function PartySheet({ session, compact = false }: { session: Session; com
 
   const characters = Object.values(session.records).filter((record) => record.type === "character");
   const nonMembers = characters.filter((record) => !party.members.some((member) => member.id === record.id));
-  const visibleTabs = gm ? TABS : TABS.filter((item) => item.id !== "xp");
+  // Cairn has no experience: its tab is the party's Growth (Scars and what has changed).
+  const cairn = session.ruleset === "Cairn";
+  const visibleTabs = (gm ? TABS : TABS.filter((item) => item.id !== "xp")).map((item) => (cairn && item.id === "xp" ? { ...item, label: "Growth" } : item));
+  const attributes = cairn ? ["str", "dex", "wil"] : ATTRIBUTES;
+  const groupStat = attributes.includes(checkStat) ? checkStat : attributes[0];
 
   return (
     <section className={compact ? "party-sheet compact" : "party-sheet"} data-party-members={party.members.length}>
@@ -95,11 +102,18 @@ export function PartySheet({ session, compact = false }: { session: Session; com
                     <small>AC</small>
                     {member.ac}
                   </span>
-                  <span className="party-stat" title="Experience / next level">
-                    <small>XP</small>
-                    {member.exp}
-                    {member.expnext ? `/${member.expnext}` : ""}
-                  </span>
+                  {member.cairn ? (
+                    <span className="party-stat" title={`STR ${member.cairn.str}, DEX ${member.cairn.dex}, WIL ${member.cairn.wil}; ${member.cairn.slots} of 10 slots, ${member.cairn.fatigue} Fatigue${member.cairn.status ? `; ${member.cairn.status}` : ""}`} data-cairn-member={member.id}>
+                      <small>STR/DEX/WIL</small>
+                      {member.cairn.str}/{member.cairn.dex}/{member.cairn.wil}
+                    </span>
+                  ) : (
+                    <span className="party-stat" title="Experience / next level">
+                      <small>XP</small>
+                      {member.exp}
+                      {member.expnext ? `/${member.expnext}` : ""}
+                    </span>
+                  )}
                   {gm ? (
                     <button type="button" className="party-remove" title="Take out of the party" onClick={() => patch({ members: party.members.filter((item) => item.id !== member.id).map((item) => item.id) })}>
                       ×
@@ -129,8 +143,8 @@ export function PartySheet({ session, compact = false }: { session: Session; com
                 </select>
               ) : null}
               <div className="party-group" aria-label="Group check">
-                <select aria-label="Attribute" value={checkStat} onChange={(event) => setCheckStat(event.target.value)}>
-                  {ATTRIBUTES.map((stat) => (
+                <select aria-label="Attribute" value={groupStat} onChange={(event) => setCheckStat(event.target.value)}>
+                  {attributes.map((stat) => (
                     <option key={stat} value={stat}>
                       {stat[0].toUpperCase() + stat.slice(1)}
                     </option>
@@ -139,10 +153,10 @@ export function PartySheet({ session, compact = false }: { session: Session; com
                 <label>
                   CL <input type="number" min={0} value={checkCl} onChange={(event) => setCheckCl(Number(event.target.value) || 0)} style={{ width: "3.5rem" }} />
                 </label>
-                <button type="button" onClick={() => session.partyGroup("check", checkStat, checkCl)} disabled={party.members.length === 0}>
+                <button type="button" onClick={() => session.partyGroup("check", groupStat, checkCl)} disabled={party.members.length === 0}>
                   Group check
                 </button>
-                <button type="button" onClick={() => session.partyGroup("save", checkStat, checkCl)} disabled={party.members.length === 0}>
+                <button type="button" onClick={() => session.partyGroup("save", groupStat, checkCl)} disabled={party.members.length === 0}>
                   Group save
                 </button>
               </div>
@@ -239,7 +253,47 @@ export function PartySheet({ session, compact = false }: { session: Session; com
 
       {tab === "order" ? <OrderTab session={session} party={party} /> : null}
 
-      {tab === "xp" && gm ? (
+      {tab === "xp" && gm && cairn ? (
+        <div className="party-xp" data-cairn-growth>
+          <p className="hint">Cairn has no experience points: characters grow from what happens to them. Write a change on a character (its sheet's Growth tab), or here.</p>
+          <ul className="sheet-list">
+            {party.members.map((member) => (
+              <li key={member.id}>
+                <b>{member.name}</b>
+                <small className="hint">
+                  {member.cairn?.scars.length ? `Scars: ${member.cairn.scars.join(", ")}. ` : ""}
+                  {member.cairn?.growth.length ? `Growth: ${member.cairn.growth.join("; ")}` : "No growth yet."}
+                </small>
+              </li>
+            ))}
+          </ul>
+          <form
+            className="parcel-add"
+            onSubmit={(event) => {
+              event.preventDefault();
+              const form = new FormData(event.currentTarget);
+              const who = String(form.get("who") ?? "");
+              const text = String(form.get("text") ?? "").trim();
+              if (who && text) void session.cairnAction(who, "growth", { text });
+              event.currentTarget.reset();
+            }}
+          >
+            <select name="who" aria-label="Who grows">
+              {party.members.map((member) => (
+                <option key={member.id} value={member.id}>
+                  {member.name}
+                </option>
+              ))}
+            </select>
+            <input name="text" placeholder="What changed, and why" aria-label="Growth" />
+            <button type="submit" disabled={party.members.length === 0}>
+              Add growth
+            </button>
+          </form>
+        </div>
+      ) : null}
+
+      {tab === "xp" && gm && !cairn ? (
         <div className="party-xp">
           <form
             className="xp-award"

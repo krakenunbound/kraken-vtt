@@ -206,6 +206,8 @@ export type CombatEntry = {
   /** A starship (the 2d6 games): its weapons and who mans them. */
   ship?: { record: string; thrust: number; criticals: Record<string, number>; weapons: { key: string; name: string; damage: string; range: string; gunner: string; gunnerName: string; mine: boolean; disabled: boolean }[] };
   powers?: { key: string; name: string; uses: number; used: number; damage: string; save: string }[];
+  /** Cairn: STR now and its maximum, a detachment, a lost first turn. */
+  cairn?: { str: number; max: number; detachment: number; lostTurn: number };
 };
 export type CombatView = { round: number; active: string | null; entries: CombatEntry[] };
 export type TableRecord = {
@@ -913,6 +915,13 @@ export function useSession() {
     if (socket && socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify({ type: "class-change", id, mode, className }));
   }, []);
 
+  // Cairn: rest, Fatigue, spells, Scars, Growth (the host does it: electron/cairn.cjs).
+  const cairnAction = useCallback((id: string, action: string, args: Record<string, unknown> = {}) => {
+    const socket = socketRef.current;
+    if (!socket || socket.readyState !== WebSocket.OPEN) return Promise.reject(new Error("Not connected."));
+    socket.send(JSON.stringify({ type: "cairn", id, action, args, ...throwIntent() }));
+    return Promise.resolve();
+  }, []);
   // Apeira Astra: experience spent on a skill's next level or a characteristic +1 (the host checks the cost).
   const improveCharacter = useCallback((id: string, what: { skill?: string; attribute?: string }) => {
     const socket = socketRef.current;
@@ -1225,6 +1234,7 @@ export function useSession() {
     lifeAction,
     levelUp,
     improveCharacter,
+    cairnAction,
     wall,
     mapUndo,
     prepClose,

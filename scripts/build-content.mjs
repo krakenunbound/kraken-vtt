@@ -10,10 +10,13 @@ import { EMPTY_WATCHTOWER } from "../games/descending-darkness/empty-watchtower.
 import { CREW_HANDBOOK } from "../games/apeira-astra/crew-handbook.mjs";
 import { DOSSIER } from "../games/apeira-astra/dossier.mjs";
 import { SALVAGE_RIGHTS } from "../games/apeira-astra/salvage-rights.mjs";
+import { PLAYERS_GUIDE as CAIRN_PLAYERS_GUIDE } from "../games/cairn/players-guide.mjs";
+import { WARDENS_GUIDE as CAIRN_WARDENS_GUIDE } from "../games/cairn/wardens-guide.mjs";
+import { TROUBLE_IN_TWIN_LAKES } from "../games/cairn/trouble-in-twin-lakes.mjs";
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 const out = path.join(root, "games", "modules");
-const modules = [PLAYERS_HANDBOOK, BESTIARY, EMPTY_WATCHTOWER, CREW_HANDBOOK, DOSSIER, SALVAGE_RIGHTS];
+const modules = [PLAYERS_HANDBOOK, BESTIARY, EMPTY_WATCHTOWER, CREW_HANDBOOK, DOSSIER, SALVAGE_RIGHTS, CAIRN_PLAYERS_GUIDE, CAIRN_WARDENS_GUIDE, TROUBLE_IN_TWIN_LAKES];
 for (const spec of modules) {
   const folder = writeModule(out, spec);
   console.log(`built ${path.relative(root, folder)}`);
