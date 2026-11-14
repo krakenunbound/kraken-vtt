@@ -21,6 +21,10 @@ full log of the work is in [PLAN.md](PLAN.md).
 
   Make a D&D 5E campaign and the three are on its shelf; your own 5E books
   sit beside them. Each book carries the SRD's licence notice (CC BY 4.0).
+- **5E sheets:** a Barbarian or Monk without armor gets Unarmored Defense
+  (10 + DEX + CON, or + WIS for a Monk without a shield). A Monk is proficient
+  only with martial weapons that are Light, a Rogue with those that are Finesse
+  or Light, as the SRD 5.2.1 says.
 
 ## 0.1.0-alpha.87: Two fixes from the screenshot shoot
 
