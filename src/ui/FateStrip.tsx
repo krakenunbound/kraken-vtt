@@ -13,6 +13,8 @@ export function FateStrip({ session }: { session: Session }) {
   const gm = session.role === "dm";
   const table = fateTableOf(session);
   const [open, setOpen] = useState(true);
+  // The GM's controls fold away, so the strip stays small over the table.
+  const [tools, setTools] = useState(false);
   const [name, setName] = useState("");
   const [kind, setKind] = useState("situation");
   const act = (action: string, args: Record<string, unknown> = {}) => void session.fateAction(null, action, args).catch(() => undefined);
@@ -30,7 +32,7 @@ export function FateStrip({ session }: { session: Session }) {
               <li key={aspect.id} className={`fate-aspect-chip kind-${aspect.kind}`} data-scene-aspect={aspect.name} data-invokes={aspect.invokes} title={`${aspect.kind === "boost" ? "A boost (gone once invoked)" : aspect.kind === "game" ? "A game aspect" : "A situation aspect"}${aspect.invokes ? `: ${aspect.invokes} free invoke${aspect.invokes === 1 ? "" : "s"}${aspect.by ? ` for ${aspect.by}` : ""}` : ""}`}>
                 <i>{aspect.name}</i>
                 {aspect.invokes ? <span className="fate-dots">{"●".repeat(Math.min(5, aspect.invokes))}</span> : null}
-                {gm ? (
+                {gm && tools ? (
                   <>
                     <button type="button" className="ghost" aria-label={`One more free invoke on ${aspect.name}`} onClick={() => act("aspect-invokes", { id: aspect.id, invokes: aspect.invokes + 1 })}>
                       +
@@ -47,8 +49,18 @@ export function FateStrip({ session }: { session: Session }) {
             ))}
             {table.aspects.length === 0 ? <li className="hint">No aspects on the scene yet.</li> : null}
           </ul>
-          {gm ? (
+          {gm && !tools ? (
+            <span className="fate-pool" title="The GM's fate points for this scene">
+              GM pool <b data-gm-pool-count={table.gmpool}>{table.gmpool}</b>
+              <button type="button" className="ghost" data-action="fate-strip-gm" aria-label="The GM's scene tools" title="Add aspects, the GM's pool, a new scene, a new session" onClick={() => setTools(true)}>
+                <Icon name="settings" size={14} />
+              </button>
+            </span>
+          ) : gm ? (
             <div className="fate-strip-gm">
+              <button type="button" className="ghost" aria-label="Fold the GM's tools" title="Fold the GM's tools away" onClick={() => setTools(false)}>
+                ×
+              </button>
               <form
                 className="cc-inline"
                 onSubmit={(event) => {

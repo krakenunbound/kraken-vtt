@@ -1,7 +1,7 @@
 # The games that come with Kraken
 
 Two original games ship with Kraken, so a table can play with nothing else
-installed. Each has a players' book, a GM's book of creatures, and a first
+installed (and open games: Cairn, and Fate Core and Fate Accelerated, below). Each has a players' book, a GM's book of creatures, and a first
 adventure with story, encounters, maps (with walls and doors), handouts and
 art. Make a campaign with the game as its ruleset, then make its books active
 in **Modules**. D&D 5E comes with its rules too: the SRD 5.2.1 (below).
@@ -142,7 +142,86 @@ entries for every place and person, encounters (night cats, bandits, the
 Surarus), the adventure's relics and treasure, and two battle maps Kraken
 drew from its text: the Temple of the Fungal Lizards and Deadmill.
 
+## Fate Core and Fate Accelerated (any genre)
+
+Evil Hat's Fate, in its two versions: **Fate Core** (skills) and **Fate
+Accelerated** (approaches). Make a campaign with either ruleset; each has
+its players' book, and both share the GM's book and the starter scenario.
+
+- **Four Fate dice and the ladder.** A roll is 4dF (each die plus, minus or
+  blank: −4 to +4) plus a skill or an approach, read on the ladder:
+  Terrible −2, Poor −1, Mediocre +0, Average +1, Fair +2, Good +3, Great +4,
+  Superb +5, Fantastic +6, Epic +7, Legendary +8. The dice tray has a Fate
+  die (dF: four of them make a roll); the 3D dice, the tower and chat show
+  them as plus, minus and blank, and chat gives the total on the ladder.
+- **Four actions, four outcomes.** On the sheet pick the action (overcome,
+  create an advantage, attack, defend) and the opposition, then a skill's
+  **4dF** button: fail, tie, succeed, or succeed with style (by 3 or more),
+  with the shifts. Create an advantage makes its aspect with a free invoke
+  (two with style, a boost on a tie); an overcome with style gives a boost.
+- **Aspects and fate points.** A high concept, a trouble and three more;
+  consequences are aspects too. After a roll, **+2** or **Reroll** on any
+  aspect spends a fate point; a scene aspect's free invoke costs none.
+  Compels: **Accept** gains a fate point, **Refuse** pays one. Refresh is 3,
+  less one for each stunt past three; **Refresh** (or the GM's **Refresh
+  all**, a new session) brings fate points back up to it.
+- **The Scene Aspects strip** over the table shows everyone the scene's
+  situation aspects, boosts and game aspects with their free invokes, and
+  the GM's pool of fate points. The GM's tools on it (⚙): add an aspect,
+  change its free invokes, **New scene** (the pool set to one fate point a
+  player character, the last scene's aspects gone), **Refresh all**.
+- **Stress and consequences.** Fate Core: a physical track from Physique and
+  a mental one from Will (two boxes; Average or Fair adds a 3-box, Good or
+  Great a 3 and a 4; Superb an extra mild consequence); Fate Accelerated:
+  three boxes. A hit's shifts are taken by one stress box (a box of n takes
+  n) and any free consequences (mild 2, moderate 4, severe 6, extreme 8).
+  Consequences recover: **Recover**, then **Clear**.
+- **Conflicts on the combat tracker.** Choose a physical or mental conflict;
+  **Turn order** sets it without dice (Notice, then Athletics; Fate
+  Accelerated Quick; mental Empathy or Careful). An attack from the sheet
+  (the action Attack, at your target) or an NPC's skill on the tracker rolls
+  against the target's best defence. An NPC takes a hit the lightest way, or
+  is **taken out**; a hit on a player's character waits on the tracker until
+  its player (or the GM) picks how to take it and names the consequences, or
+  takes them out. **Concede** leaves the conflict on your own terms, for a
+  fate point and one more for each consequence taken. A tie gives the
+  attacker a boost; a defence with style, the defender. The end of the
+  conflict clears everyone's stress.
+- **Milestones, not experience.** The sheet's Milestones tab (and the party
+  sheet's, for everyone): minor (switch two skills, rename an aspect, swap a
+  stunt), significant (a skill point to spend), major (a refresh more).
+  Fate has no coin: a parcel's finds are written into each character's
+  **extras**.
+- **The character wizard** follows each book: Fate Core's high concept and
+  trouble, the phase trio (an aspect each), the skill pyramid (one Great, two
+  Good, three Fair, four Average) and stunts from the book's skills or your
+  own; Fate Accelerated's aspects, approaches (+3, +2, +2, +1, +1, +0) and
+  stunts. Or take a pregenerated character as it is.
+
+**Books:** *Fate Core System* (the SRD's every chapter; the 18 skills and
+their 54 example stunts as records), *Fate Accelerated Edition* (the SRD's
+every chapter; the six approaches, its example stunts, and its four example
+characters to play), *Fate Toolkit and Adversaries* (the GM's: the Fate
+System Toolkit and the Fate Adversary Toolkit, and the SRDs' example
+opposition as NPCs for the tracker: nameless, supporting and main NPCs from
+Fate Core, mooks from Fate Accelerated, the Adversary Toolkit's enemies).
+
+**Starter scenario: *The Lighthouse at Gull's End*** (Kraken's own, for
+either game). The light on the point has gone dark, and ships are breaking
+on the rocks. Story entries with each scene's aspects, two conflicts
+(wreckers and their chief on the strand; a smuggler captain in the lamp
+room), two battle maps with their zones outlined in colour, and three
+pregenerated characters in both games.
+
 ## Licensing
+
+Fate Core System, Fate Accelerated Edition, the Fate System Toolkit and the
+Fate Adversary Toolkit are Evil Hat Productions' System Reference Documents,
+licensed under the Creative Commons Attribution 3.0 Unported license; each
+book's first page and `games/fate/LICENSE.md` carry their attribution word
+for word. Fate™ is a trademark of Evil Hat Productions, LLC. Kraken uses no
+Fate logo or Evil Hat art and is not endorsed by Evil Hat. *The Lighthouse at
+Gull's End* is Kraken's own.
 
 Cairn Second Edition is by Yochai Gal (https://cairnrpg.com) and licensed
 under CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/); so is

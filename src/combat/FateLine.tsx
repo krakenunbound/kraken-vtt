@@ -29,7 +29,6 @@ export function FateLine({ entry, session }: { entry: CombatEntry; session: Sess
         <span className="ct-fate-cons">
           {fate.consequences.map((item) => (
             <span key={item.key} className={item.text ? "ct-con taken" : "ct-con"} data-ct-consequence={item.key} title={`${item.label} consequence (${item.value})`}>
-              {item.label[0]}
               {item.value}
               {item.text ? `: ${item.text}` : ""}
             </span>

@@ -98,8 +98,11 @@ async function handParcel(ctx, { coin = "GP", amount = 50, item }) {
   const { page, tool } = ctx;
   await openSide(page, "party");
   await page.click('[role="tab"]:has-text("Inventory")');
-  const coinBox = page.locator(`[data-parcel-coin="${coin}"], label:has-text("${coin}") input[type="number"]`).first();
-  await coinBox.fill(String(amount));
+  // (A game without coin, Fate, hands out only things.)
+  if (coin) {
+    const coinBox = page.locator(`[data-parcel-coin="${coin}"], label:has-text("${coin}") input[type="number"]`).first();
+    await coinBox.fill(String(amount));
+  }
   if (item) {
     await page.fill('input[placeholder="Item"]', item);
     await page.click('form:has(input[placeholder="Item"]) button[type="submit"]');
@@ -290,6 +293,56 @@ async function wizard2e(ctx, { race, cls, name, gear }) {
   const undone = await seat.$$eval("[data-wizard-tab]", (list) => list.filter((item) => item.getAttribute("data-done") !== "1").map((item) => item.getAttribute("data-wizard-tab")));
   ctx.check(undone.length === 0, "every tab of the wizard is done", undone.join(", "));
   await finish(ctx);
+}
+
+// Fate Core and Fate Accelerated (shipped books only): the wizard (high
+// concept, trouble, the pyramid or the approaches, three stunts from the
+// books), a Wrecker from the starter scenario fought from the sheet (an
+// attack against its defence, in shifts), a parcel of things (no coin: they
+// go into the character's extras), milestones instead of XP.
+function fatePlan(game) {
+  const core = game === "core";
+  return {
+    books: [core ? "Fate Core System" : "Fate Accelerated Edition", "Fate Toolkit and Adversaries", "The Lighthouse at Gull's End"],
+    shipped: true,
+    map: (ctx) => bookMap(ctx, "The Lighthouse at Gull's End"),
+    async wizard(ctx) {
+      const { seat } = ctx;
+      const w = '[data-wizard="fate"]';
+      await seat.waitForSelector(w, { timeout: 15000 });
+      await seat.fill(`${w} [data-field="highconcept"]`, core ? "Harbour Watch Veteran" : "Runaway Sky-Pirate");
+      await seat.fill(`${w} [data-field="trouble"]`, core ? "Owes the Wrong People" : "Wanted by the Admiralty");
+      await seat.fill(`${w} [data-field="name"]`, core ? "Ada Brand" : "Wren");
+      await seat.fill(`${w} [data-field="a1"]`, "Never Leave Anyone Behind");
+      if (core) {
+        const pyramid = ["Fight", "Athletics", "Notice", "Physique", "Will", "Shoot", "Lore", "Stealth", "Rapport", "Provoke"];
+        for (const [index, skill] of pyramid.entries()) await seat.selectOption(`${w} [data-slot="${index}"] select`, skill);
+      } else for (const [key, value] of Object.entries({ careful: 1, clever: 2, flashy: 3, forceful: 0, quick: 2, sneaky: 1 })) await seat.selectOption(`${w} [data-approach="${key}"] select`, String(value));
+      for (let i = 0; i < 3; i++) await seat.locator(`${w} .life-shop button`).first().click();
+      ctx.bought = [];
+      await finish(ctx);
+    },
+    // Fate keeps no gear lists: what a character finds goes into its extras.
+    noGear: true,
+    enemy: (ctx) => trackerNpc(ctx, "Wrecker"),
+    // The player attacks from the sheet: the action Attack, then the skill's (approach's) 4dF.
+    async playerAttack(ctx) {
+      const { seat } = ctx;
+      await seat.click('[data-sheet-tab="main"]').catch(() => undefined);
+      await seat.selectOption('[data-character] [data-field="fate-action"]', "attack").catch(() => undefined);
+      const button = seat.locator(`[data-character] [data-roll-skill="${core ? "Fight" : "Forceful"}"]`).first();
+      if (!(await button.count())) return false;
+      await button.dispatchEvent("click");
+      await wait(500);
+      return true;
+    },
+    parcel: (ctx) => handParcel(ctx, { coin: null, item: "Brass Spyglass" }),
+    async received(ctx, before, after) {
+      ctx.check(String(after.data.extras ?? "").includes("Brass Spyglass"), "the parcel's find is in the character's extras", String(after.data.extras ?? ""));
+    },
+    // Milestones instead of experience (the party sheet's Milestones tab).
+    xp: null,
+  };
 }
 
 export const RULESETS = {
@@ -545,6 +598,9 @@ export const RULESETS = {
     // Cairn has no experience: characters grow from what happens to them.
     xp: null,
   },
+  // Fate Core and Fate Accelerated: the books' character creation in the wizard, a conflict, no coin or XP.
+  "Fate Core": fatePlan("core"),
+  "Fate Accelerated": fatePlan("fae"),
   Worldbuilding: {
     books: [],
     async map(ctx) {

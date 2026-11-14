@@ -6,6 +6,36 @@ full log of the work is in [PLAN.md](PLAN.md).
 
 ## Unreleased
 
+- **Fate Core and Fate Accelerated come with Kraken.** Make a campaign with
+  the *Fate Core* or *Fate Accelerated* ruleset and play with nothing else
+  installed: Evil Hat's System Reference Documents (CC BY 3.0) as *Fate Core
+  System* and *Fate Accelerated Edition*, the GM's *Fate Toolkit and
+  Adversaries*, and a starter scenario of Kraken's own, *The Lighthouse at
+  Gull's End* (two zoned battle maps, two conflicts, pregenerated characters
+  for both games).
+  - **Fate dice:** the dice tray has a Fate die (four make a roll); 4dF lands
+    plus, minus and blank on the 3D dice and in the tower, and chat shows the
+    dice and the total on the ladder (Great +4).
+  - **The character wizard** follows each book: high concept and trouble, the
+    phase trio, the skill pyramid (Fate Core) or the six approaches (Fate
+    Accelerated), stunts from the books or your own, refresh, stress and
+    consequences worked out; or a pregenerated character taken as it is.
+  - **The sheet** rolls 4dF with a skill or approach for any of the four
+    actions against an opposition (fail, tie, succeed, with style, and the
+    shifts); invokes an aspect on the last roll for +2 or a reroll (a fate
+    point, or a scene aspect's free invoke); accepts or refuses compels; keeps
+    fate points and refresh, stress boxes and consequences (with recovery),
+    stunts, extras and milestones instead of experience.
+  - **The Scene Aspects strip** shows everyone the scene's aspects and free
+    invokes and the GM's fate points; the GM adds aspects, starts a new scene
+    and refreshes everyone for a new session.
+  - **Fate's conflicts on the combat tracker:** turn order without dice
+    (Notice, or Quick), attacks against defences in shifts, boosts on ties,
+    stress boxes and consequences, NPCs (nameless, supporting, main) taken
+    out, a player's hit taken the way they choose, conceding for fate points.
+  - **The party sheet's** Milestones tab gives the party a minor, significant
+    or major milestone; parcels hand out things (no coin), written into each
+    character's extras.
 - **D&D 5E plays with nothing else installed.** Kraken now ships the System
   Reference Document 5.2.1 as three books for a D&D 5E campaign, made from
   the SRD's own PDF:
