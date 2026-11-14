@@ -6,7 +6,8 @@
 // and a handout.
 import fs from "node:fs";
 import path from "node:path";
-import { ids, imageRecord, link, md, slug } from "../lib/fg.mjs";
+import { fileURLToPath } from "node:url";
+import { ids, illustrated, imageRecord, link, md, slug } from "../lib/fg.mjs";
 import { here, NOTICE, RULESET } from "./common.mjs";
 import { MODULE as GM_GUIDE } from "./gm-guide.mjs";
 
@@ -98,7 +99,7 @@ Bring the box back and what is in it is yours, all but the silver ring. That was
   __category: MODULE,
 };
 
-export const MILL_AT_HOBS_FORD = {
+export const MILL_AT_HOBS_FORD = illustrated({
   name: MODULE,
   displayName: "The Mill at Hob's Ford (Basic Fantasy)",
   category: "Basic Fantasy Adventures",
@@ -111,4 +112,4 @@ export const MILL_AT_HOBS_FORD = {
     image: [map("The Mill at Hob's Ford", "hobs-ford-mill"), map("The Cellars under the Mill", "hobs-ford-cellars")],
   },
   pictures: Object.fromEntries(["hobs-ford-mill", "hobs-ford-cellars"].map((file) => [`images/${file}.webp`, path.join(here, "art", `${file}.webp`)])),
-};
+}, path.join(path.dirname(fileURLToPath(import.meta.url)), "art"), "cover-mill-at-hobs-ford.webp");

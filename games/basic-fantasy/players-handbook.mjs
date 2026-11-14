@@ -2,7 +2,9 @@
 // Role-Playing Game, 4th Edition (CC BY-SA 4.0: see LICENSE.md). The rules
 // chapters as pages, and the records the wizard, the sheet and the shop
 // use: races, classes, spells, equipment.
-import { md } from "../lib/fg.mjs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { illustrated, md } from "../lib/fg.mjs";
 import { chapter, credits, data, RULESET } from "./common.mjs";
 import { BASE_CLASSES, CLASSES, RACES } from "../../shared/bfrpg/rules.mjs";
 
@@ -65,7 +67,7 @@ const raceRecord = (race) => ({
   description: md(page("races", RACE_PAGES[race.key])),
 });
 
-export const PLAYERS_HANDBOOK = {
+export const PLAYERS_HANDBOOK = illustrated({
   name: MODULE,
   displayName: MODULE,
   category: "Basic Fantasy",
@@ -88,4 +90,4 @@ In Kraken, a new character is made with the character wizard (it follows *How to
     { name: "Adventure", sections: [chapter(chapters, "dungeon"), chapter(chapters, "wilderness"), chapter(chapters, "hirelings"), chapter(chapters, "advancement")] },
     { name: "Encounters", sections: [chapter(chapters, "combat")] },
   ],
-};
+}, path.join(path.dirname(fileURLToPath(import.meta.url)), "art"), "cover-players-handbook.webp");

@@ -5,6 +5,9 @@
 // records the 5E character wizard, sheet, level up and tracker use: classes,
 // subclasses, species and lineages, backgrounds, feats, equipment and spells.
 // A players' book: it starts open to the players when made active.
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { illustrated } from "../lib/fg.mjs";
 import { CATEGORY, PLAYERS, RULESET, data, frontMatter } from "./common.mjs";
 import { ANCESTRIES, BACKGROUNDS, CLASSES, FEATS, SPECIES, SUBCLASSES } from "./classes.mjs";
 import { ITEMS } from "./gear.mjs";
@@ -13,7 +16,7 @@ import { SPELLS } from "./spells.mjs";
 const reference = data("reference");
 const CHAPTERS = ["Playing the Game", "Character Creation", "Classes", "Character Origins", "Feats", "Equipment", "Spells", "Rules Glossary", "Gameplay Toolbox"];
 
-export const PLAYERS_RULES = {
+export const PLAYERS_RULES = illustrated({
   name: PLAYERS,
   displayName: PLAYERS,
   category: CATEGORY,
@@ -38,4 +41,4 @@ export const PLAYERS_RULES = {
       return chapter;
     }),
   ],
-};
+}, path.join(path.dirname(fileURLToPath(import.meta.url)), "art"), "cover-players-rules.webp");

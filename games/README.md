@@ -157,6 +157,34 @@ Turbo) from the prompts in `games/tools/art-list.json`:
 
     python games/tools/make_art.py [part-of-a-file-name]
 
+With no ComfyUI listening, the same script paints through a running Kraken Art
+(its sidecar, `KRAKEN_ART`, default http://127.0.0.1:7780; `--art` forces it):
+Z-Image Turbo for portraits, Qwen-Image 2.1 for covers.
+
+**The open games** (SRD 5.2.1, Basic Fantasy, Cairn, Ironsworn and
+Starforged, Fate, Forged in the Dark) have a cover for every book and a
+portrait and token for every creature, NPC and pregenerated character:
+
+    python games/tools/make_art.py --open --portraits --art
+    python games/tools/make_art.py --open --covers --art
+
+`games/tools/open-art.mjs` lists the jobs from the books' own records: each
+prompt is the record's name, size, type and the first plain words of its
+description, unless `art-list.json`'s `open.<game>.looks` gives the look by
+art key (needed where a name alone draws the wrong thing, and to keep
+well-known creatures generic); `open.styles` holds each game's look
+(creature, person, cover), `open.<game>.people` the records drawn as
+head-and-shoulders portraits, `open.<game>.seeds` a new seed for a redo, `open.<game>.models` "qwen" for
+the creatures Z-Image cannot compose (centaurs, harpies, nagas, sphinxes,
+ettins: Qwen-Image 2.1 through Kraken Art), and
+`open.<game>.covers` each book's cover scene. They are saved at the
+installer's sizes: portraits 768x768 (WebP 82) in `art/npc/`, tokens 256
+(WebP 84) in `art/tokens/`, covers 768x1024 (WebP 85) as `art/cover-*.webp`.
+Each builder wraps its book in `illustrated(spec, artFolder, cover)`
+(games/lib/fg.mjs), which attaches only the pictures that exist, so a book
+still builds before its art is made; `npm run open-art` checks that every
+book has its cover and every record its portrait and token.
+
 Pictures already made are kept; delete one to make it again. A creature's
 portrait goes to `art/npc/`, with a 256-pixel copy as its map token in
 `art/tokens/`; its record names both inside its book (`creatureArt` in
@@ -187,4 +215,6 @@ other game's terms, setting or text.
 The SRD 5.2.1 books (`games/srd-5e`) are the exception: they are the SRD
 5.2.1's own text, under its Creative Commons Attribution 4.0 licence, with the
 notice it asks for on each book's first page and in `games/srd-5e/LICENSE.md`.
-They have no art, and their names use no trademark.
+Their names use no trademark. Their covers and creature portraits are
+Kraken's own, made from the stat blocks' words (no depiction from any
+published book), as are the pictures of every open game here.

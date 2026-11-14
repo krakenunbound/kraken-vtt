@@ -5,7 +5,8 @@
 // table the Library rolls.
 import fs from "node:fs";
 import path from "node:path";
-import { ids } from "../lib/fg.mjs";
+import { fileURLToPath } from "node:url";
+import { ids, illustrated } from "../lib/fg.mjs";
 import { TEXT, dieTable, plain, read, richText, sections } from "./markdown.mjs";
 import { chapter, noticePage, RULESET } from "./players-guide.mjs";
 import { parseItem, parseStatline } from "../../shared/cairn/rules.mjs";
@@ -122,7 +123,7 @@ const FILES = [
 const TABLE_FILES = ["spellbooks.md", "dungeon-seeds.md", "forest-seeds.md", "setting-seeds.md", "npc-tables.md", "naming-procedures.md", "dungeon-exploration.md", "wilderness-exploration.md", "creating-monsters.md", "creating-backgrounds.md", "vald.md"].filter((file) => fs.existsSync(path.join(TEXT, "wardens-guide", file)));
 export const TABLES = TABLE_FILES.flatMap((file) => fgTables(`wardens-guide/${file}`, ""));
 
-export const WARDENS_GUIDE = {
+export const WARDENS_GUIDE = illustrated({
   name: "Cairn Warden's Guide",
   displayName: "Cairn Warden's Guide",
   category: "Cairn",
@@ -137,4 +138,4 @@ export const WARDENS_GUIDE = {
     ...FILES.slice(2).map(([name, file]) => chapter(name, `wardens-guide/${file}`)),
     { name: "Credits", sections: [{ name: "Credits", pages: [noticePage("Cairn Warden's Guide")] }] },
   ],
-};
+}, path.join(path.dirname(fileURLToPath(import.meta.url)), "art"), "cover-wardens-guide.webp");

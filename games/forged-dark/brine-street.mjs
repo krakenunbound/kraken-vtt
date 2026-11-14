@@ -8,7 +8,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { ids, imageRecord, md } from "../lib/fg.mjs";
+import { ids, illustrated, imageRecord, md } from "../lib/fg.mjs";
 import { CITY } from "./content.mjs";
 import { noticePage, RULESET } from "./scoundrels-handbook.mjs";
 
@@ -53,7 +53,7 @@ const table = (name, group, rows) => ({ name, group, rows: ids(rows), __category
 const walls = JSON.parse(fs.readFileSync(path.join(here, "maps", "counting-house.walls.json"), "utf8"));
 const parcel = (name, coin) => ({ name, coinlist: ids([{ description: "Coin", amount: coin }]), itemlist: ids([]), __category: "Payoff" });
 
-export const BRINE_STREET = {
+export const BRINE_STREET = illustrated({
   name: NAME,
   displayName: "The Brine Street Job (Forged in the Dark)",
   category: "Forged in the Dark Adventures",
@@ -67,5 +67,5 @@ export const BRINE_STREET = {
     image: [imageRecord({ name: "Brine Street Counting-house", file: "images/brine-street-counting-house.webp", width: walls.width, height: walls.height, grid: walls.grid, walls: walls.walls, category: "Maps" })],
   },
   pictures: { "images/brine-street-counting-house.webp": path.join(here, "art", "brine-street-counting-house.webp") },
-};
+}, path.join(path.dirname(fileURLToPath(import.meta.url)), "art"), "cover-brine-street.webp");
 export const SCORE_COUNTS = () => ({ story: STORY.length, npcs: NPCS.length, factions: FACTIONS.length, clocks: CLOCKS.length });

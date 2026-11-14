@@ -4,7 +4,9 @@
 // hit dice, attacks and damage, saves as, morale, treasure type, XP), the
 // magic items as records, and the chapters on monsters, treasure, magic
 // items, encounters and making adventures.
-import { md, slug } from "../lib/fg.mjs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { illustrated, md, slug } from "../lib/fg.mjs";
 import { chapter, credits, data, RULESET } from "./common.mjs";
 import { isUndead } from "../../shared/bfrpg/rules.mjs";
 
@@ -64,7 +66,7 @@ export const MAGIC_ITEMS = [
   ...data("magic-items").map((item) => ({ name: magicName(item), type: "Magic Item", subtype: item.subtype.replace(/:.*$/, ""), description: md(item.text), __category: item.subtype.replace(/:.*$/, "") })),
 ];
 
-export const GM_GUIDE = {
+export const GM_GUIDE = illustrated({
   name: MODULE,
   displayName: MODULE,
   category: "Basic Fantasy",
@@ -79,4 +81,4 @@ In Kraken every monster is an NPC record: drag one onto the combat tracker or th
     { name: "Treasure", sections: [chapter(chapters, "treasure"), chapter(chapters, "magicitems")] },
     { name: "GM Information", sections: [chapter(chapters, "gm01"), chapter(chapters, "gm02")] },
   ],
-};
+}, path.join(path.dirname(fileURLToPath(import.meta.url)), "art"), "cover-gm-guide.webp");

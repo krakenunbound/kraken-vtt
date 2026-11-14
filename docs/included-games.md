@@ -10,6 +10,12 @@ book, its GM's material, and a first adventure with story, encounters and maps
 make its books active in **Modules**. Each open game's text keeps its own
 licence; see its folder's `LICENSE.md` under `games/`.
 
+Every book has a cover in the Books window and the Library, and every
+creature, NPC and pregenerated character has a portrait (on its record) and
+a round map token (on the map and the Combat Tracker), each game in its own
+painted style. That art is Kraken's own, made for these books; none of it
+comes from the games' publishers.
+
 ## D&D 5E: the SRD 5.2.1
 
 The System Reference Document 5.2.1 as three books for a D&D 5E campaign,
@@ -31,7 +37,8 @@ made from the SRD's own PDF:
 - **SRD 5.2.1 Magic Items** (the GM's): the Magic Items chapter and its 258
   items, for parcels and the party sheet.
 
-There is no adventure and no art (the SRD has none). Your own 5E modules and
+There is no adventure. The art is Kraken's own (the SRD has none): a cover
+for each book and a portrait and map token for every creature. Your own 5E modules and
 packs sit beside these books. The books carry the SRD's licence notice:
 This work includes material from the System Reference Document 5.2.1 ("SRD
 5.2.1") by Wizards of the Coast LLC, available at

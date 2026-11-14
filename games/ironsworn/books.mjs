@@ -8,7 +8,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { ids, imageRecord, link, md, slug } from "../lib/fg.mjs";
+import { ids, illustrated, imageRecord, link, md, slug } from "../lib/fg.mjs";
 import { assetRecords, clean, datasets, moveRecords, oracleRecords, siteRecords, starforgedFoes, truthPages } from "./datasworn.mjs";
 import { ATTRIBUTION, frontPage, GM_PAGES, rulesChapter, UNOFFICIAL } from "./rules-text.mjs";
 
@@ -205,7 +205,9 @@ const SF_GM = {
 
 const IRON_REF = reference("classic");
 const SF_REF = reference("starforged");
-export const IRONSWORN_BOOKS = [IRON_REF.spec, IRON_GM, CINDER_BARROW];
-export const STARFORGED_BOOKS = [SF_REF.spec, SF_GM, SILENT_HULK];
+// Each book's cover (art/cover-<book>.webp) and its foes' portraits and tokens.
+const ART = path.join(here, "art");
+export const IRONSWORN_BOOKS = [illustrated(IRON_REF.spec, ART, "cover-ironsworn-reference.webp"), illustrated(IRON_GM, ART, "cover-ironsworn-foes.webp"), illustrated(CINDER_BARROW, ART, "cover-cinder-barrow.webp")];
+export const STARFORGED_BOOKS = [illustrated(SF_REF.spec, ART, "cover-starforged-reference.webp"), illustrated(SF_GM, ART, "cover-starforged-foes.webp"), illustrated(SILENT_HULK, ART, "cover-silent-hulk.webp")];
 export const COUNTS = { classic: IRON_REF.counts, starforged: SF_REF.counts, ironFoes: IRON_FOES.length, sfFoes: SF_FOES.length, sites: siteRecords().length };
 export { clean };

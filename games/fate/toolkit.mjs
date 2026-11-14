@@ -4,7 +4,9 @@
 // supporting and main NPCs of Fate Core's "Creating the Opposition", Fate
 // Accelerated's mooks, and the Adversary Toolkit's enemies. Their aspects,
 // skills, stress and stunts are the books'; each record says which book.
-import { ids, md } from "../lib/fg.mjs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { ids, illustrated, md } from "../lib/fg.mjs";
 import { CREDIT_ADVERSARIES, CREDIT_CORE_FAE, CREDIT_TOOLKIT, chapters, creditsPage } from "./markdown.mjs";
 
 export const NAME = "Fate Toolkit and Adversaries";
@@ -85,7 +87,7 @@ export const NPCS = [
   }),
 ];
 
-export const TOOLKIT = {
+export const TOOLKIT = illustrated({
   name: NAME,
   displayName: "Fate Toolkit and Adversaries (GM)",
   category: "Fate GM",
@@ -105,5 +107,5 @@ export const TOOLKIT = {
     ...chapters("toolkit").map((chapter) => ({ ...chapter, name: `Toolkit: ${chapter.name.replace(/^\d+:\s*/, "")}` })),
     ...chapters("adversaries", { skip: [/^Fate Adversary Toolkit SRD$/i] }).map((chapter) => ({ ...chapter, name: `Adversaries: ${chapter.name}` })),
   ],
-};
+}, path.join(path.dirname(fileURLToPath(import.meta.url)), "art"), "cover-toolkit.webp");
 export const TOOLKIT_COUNTS = () => ({ npcs: NPCS.length, chapters: TOOLKIT.reference.length });
