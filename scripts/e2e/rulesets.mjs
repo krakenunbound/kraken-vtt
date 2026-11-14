@@ -506,7 +506,23 @@ export const RULESETS = {
     bought: checkBought,
     // The Mill keeps its creatures in the Game Master's Guide.
     enemy: (ctx) => trackerNpc(ctx, "Goblin"),
-    parcel: (ctx) => libraryParcel(ctx, "The Mill at Hob's Ford (Basic Fantasy)"),
+    async parcel(ctx) {
+      // The adventure's own treasure parcel (Library > the module > Parcels). Its launch button can still
+      // read as open after the map step closed the window: pressed until the window is there.
+      // The Library window can open under the map window (shown since step 4): its controls are pressed in the page.
+      const { page, tool, shelf } = ctx;
+      await openSide(page, "library");
+      await page.waitForSelector('[aria-label="Library module"]', { timeout: 15000 });
+      const book = shelf.find((item) => item.title === "The Mill at Hob's Ford (Basic Fantasy)");
+      await page.selectOption('[aria-label="Library module"]', book.name, { force: true });
+      await page.$eval('[data-library-tab="parcel"]', (button) => button.click());
+      await page.waitForSelector('[data-library-item] [data-action="library-parcel"]', { state: "attached", timeout: 15000 });
+      await page.$$eval("[data-library-item]", (rows) => rows.find((row) => /Goblin Den Loot/.test(row.textContent ?? ""))?.querySelector('[data-action="library-parcel"]')?.click());
+      await wait(800);
+      const party = await tool("kraken_party");
+      ctx.parcelItems = Object.values(party.parcel?.items ?? {}).map((item) => item.name);
+      ctx.check(Object.values(party.parcel?.coins ?? {}).some((value) => Number(value) > 0), "the adventure's parcel (140 sp, 300 cp, 12 gp, a dagger) is on the party sheet", JSON.stringify(party.parcel).slice(0, 200));
+    },
     xp: 25,
   },
   Worldbuilding: {
