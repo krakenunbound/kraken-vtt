@@ -1455,6 +1455,50 @@ textarea.cc-field.tall { min-height: 220px; }
 .sheet-cairn .five-big .cc-field { width: 2.6rem; text-align: center; }
 .wizard-5e[data-wizard="cairn"] .cairn-table { margin: 4px 0; }
 .wizard-5e[data-wizard="cairn"] .cc-inline { flex-wrap: wrap; gap: 6px; }
+/* Ironsworn and Starforged: ten-box progress tracks (four ticks a box), the last roll, moves and oracles. */
+.iron-boxes { display: inline-flex; gap: 2px; vertical-align: middle; }
+.iron-box { width: 14px; height: 14px; border: 1px solid var(--panel-edge, #3a3226); background: rgba(0, 0, 0, 0.3); position: relative; }
+.iron-box.fill-1 { background: linear-gradient(135deg, transparent 45%, var(--brass, #c9a227) 46%, var(--brass, #c9a227) 54%, transparent 55%), rgba(0, 0, 0, 0.3); }
+.iron-box.fill-2 { background: linear-gradient(135deg, transparent 45%, var(--brass, #c9a227) 46%, var(--brass, #c9a227) 54%, transparent 55%), linear-gradient(45deg, transparent 45%, var(--brass, #c9a227) 46%, var(--brass, #c9a227) 54%, transparent 55%), rgba(0, 0, 0, 0.3); }
+.iron-box.fill-3 { background: linear-gradient(135deg, transparent 45%, var(--brass, #c9a227) 46%, var(--brass, #c9a227) 54%, transparent 55%), linear-gradient(45deg, transparent 45%, var(--brass, #c9a227) 46%, var(--brass, #c9a227) 54%, transparent 55%), linear-gradient(90deg, transparent 46%, var(--brass, #c9a227) 47%, var(--brass, #c9a227) 53%, transparent 54%), rgba(0, 0, 0, 0.3); }
+.iron-box.fill-4 { background: var(--brass, #c9a227); }
+.sheet-ironsworn .iron-stats .five-ability { grid-template-columns: 1fr 3.2rem; }
+.sheet-ironsworn .iron-control { cursor: pointer; text-align: center; }
+.sheet-ironsworn .iron-control.on .cc-value { color: #9fd49a; }
+.sheet-ironsworn .iron-debilities { display: flex; flex-wrap: wrap; gap: 4px 14px; }
+.sheet-ironsworn .iron-debilities h4 { width: 100%; margin: 0; }
+.iron-last { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.iron-outcome.strong { color: #9fd49a; }
+.iron-outcome.weak { color: #e8c66a; }
+.iron-outcome.miss { color: #f08a7a; }
+.iron-choices { width: 100%; display: flex; flex-wrap: wrap; gap: 6px; }
+.iron-choices button { text-align: left; white-space: normal; }
+.iron-moves { display: grid; grid-template-columns: minmax(10rem, 14rem) 1fr; gap: 10px; align-items: start; }
+.iron-move-list { max-height: 60vh; overflow: auto; display: flex; flex-direction: column; gap: 2px; }
+.iron-move-list h4 { margin: 8px 0 2px; font-size: 0.8rem; opacity: 0.8; }
+.iron-move { display: block; width: 100%; text-align: left; background: transparent; border: 0; padding: 3px 6px; color: inherit; cursor: pointer; }
+.iron-move.on, .iron-move:hover { background: var(--brass-soft, rgba(201, 162, 39, 0.18)); }
+.iron-move-panel { max-height: 60vh; overflow: auto; }
+.iron-move-roll { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 8px; }
+.iron-tracks { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+.iron-tracks li { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding-bottom: 6px; border-bottom: 1px solid rgba(255, 255, 255, 0.06); }
+.iron-tracks li > .cc-inline:first-child { flex: 1 1 100%; }
+.iron-tracks li.done { opacity: 0.6; }
+.iron-progress h4, .iron-assets h4 { text-align: left; }
+.iron-asset { border-bottom: 1px solid rgba(255, 255, 255, 0.06); padding-bottom: 6px; }
+.iron-asset ol { margin: 4px 0; padding-left: 0; list-style: none; }
+.iron-asset li { margin: 3px 0; opacity: 0.65; }
+.iron-asset li.on { opacity: 1; }
+.iron-oracles, .iron-delve { display: flex; flex-direction: column; gap: 8px; height: 100%; min-height: 0; }
+.iron-ask { flex-wrap: wrap; gap: 6px; }
+.iron-oracle-list { flex: 1; min-height: 0; overflow: auto; }
+.iron-oracle { display: block; width: 100%; text-align: left; background: transparent; border: 0; color: inherit; padding: 3px 8px; cursor: pointer; }
+.iron-oracle:hover { background: var(--brass-soft, rgba(201, 162, 39, 0.18)); }
+.iron-oracle-result { margin: 0; padding: 6px 10px; border: 1px solid var(--panel-edge, #3a3226); border-radius: 6px; background: rgba(0, 0, 0, 0.25); }
+.ct-iron { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; order: 10; flex-basis: 100%; padding-left: 4.5rem; }
+.ct-main:has(.ct-iron) { flex-wrap: wrap; }
+.ct-iron .iron-on { color: #9fd49a; }
+.wizard-ironsworn .iron-wizard-assets details { margin: 2px 0; }
 /* Kraken packs (the Books window's Packs tab). */
 .packs-panel { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 8px; }
 .packs-bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }

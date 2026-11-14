@@ -47,6 +47,8 @@ const RULESETS = [
   { name: "Traveller", blurb: "Mongoose Traveller 2nd Edition: the UPP's six characteristics, skills and specialities, 2d6 tasks with Effect, Boon and Bane, careers and terms, damage to Endurance, Strength and Dexterity, armour and AP. Its rules are Kraken's own code; your Traveller books add their content." },
   { name: "Descending Darkness", blurb: "Kraken's dark fantasy: d20, fragile heroes, light that runs out, dread that builds. Its books and a first adventure come with Kraken." },
   { name: "Apeira Astra", blurb: "Kraken's science fiction: 2d6 and skills, Paths to make a crew in minutes, armour that soaks. Its books and a first adventure come with Kraken." },
+  { name: "Ironsworn", blurb: "Ironsworn and Ironsworn: Delve (Shawn Tomkin, CC BY 4.0; an unofficial adaptation): vows sworn upon iron, the action die against two challenge dice, momentum, progress tracks, assets, the oracles for play with or without a GM, Delve's sites. Its Reference, Foes and Sites and The Cinder Barrow come with Kraken." },
+  { name: "Starforged", blurb: "Ironsworn: Starforged (Shawn Tomkin, CC BY 4.0; an unofficial adaptation): a spacefarer's vows in the Forge, in control or in a bad spot, legacy tracks for experience, connections, your starship, the Forge's oracles. Its Reference, Foes and The Silent Hulk come with Kraken." },
   { name: "Cairn", blurb: "Cairn, Second Edition (Yochai Gal, CC BY-SA 4.0): three attributes and Hit Protection, saves under a d20, attacks that always hit, Scars, Fatigue and ten inventory slots, backgrounds instead of classes. Its Player's Guide, Warden's Guide and Trouble in Twin Lakes come with Kraken." },
   { name: "Worldbuilding", blurb: "No game rules: maps, tokens, chat and dice for any system." },
 ];

@@ -36,7 +36,8 @@ function library(records) {
 // A move by its record id, Datasworn id, key or name (this game's first).
 function findMove(table, which, game) {
   const want = String(which ?? "").trim();
-  const moves = table.records.list({ type: "ironmove" });
+  // (Starforged's Scene Challenge repeats Face Danger and Secure an Advantage: by key, the main ones first.)
+  const moves = table.records.list({ type: "ironmove" }).sort((a, b) => Number(/scene_challenge/.test(String(a.data?.moveid ?? ""))) - Number(/scene_challenge/.test(String(b.data?.moveid ?? ""))));
   const lower = want.toLowerCase();
   const found =
     moves.find((record) => record.id === want) ??
@@ -63,7 +64,7 @@ async function buildIronsworn(table, spec, owner, seat) {
   const built = rules.buildFromSpec(spec ?? {}, { assets: lib.assets.filter((record) => (record.data?.game ?? game) === game) }, game);
   const serious = built.problems.filter((problem) => /stats|assets|starship|paths/i.test(problem));
   if (serious.length) throw new Error(serious.join(" "));
-  const data = require("./characterArt.cjs").withArt(built.data, { ...spec, race: "Human", class: game === "starforged" ? "Spacer" : "Fighter" }, table.art);
+  const data = require("./characterArt.cjs").withArt(built.data, { ...spec, race: game === "starforged" ? "Spacer" : "Human", class: game === "starforged" ? "Scout" : "Ranger" }, table.art);
   const record = table.records.create({ type: "character", name: built.name, owner: owner ?? "", visibility: owner ? "owner" : "gm", data }, seat ?? table.seat);
   return { record, problems: built.problems };
 }

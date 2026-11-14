@@ -15,7 +15,7 @@ const packs = require("../electron/packs.cjs");
 const wanted = (process.argv.slice(2).find((arg) => !arg.startsWith("--")) ?? "").toLowerCase();
 const showPages = process.argv.includes("--pages");
 // --ours: only the books for Kraken's own rulesets.
-const OURS = new Set(["Castles & Crusades", "D&D 5E", "D&D 3.5E", "AD&D 2E", "Traveller", "Descending Darkness", "Apeira Astra", "Cairn"]);
+const OURS = new Set(["Castles & Crusades", "D&D 5E", "D&D 3.5E", "AD&D 2E", "Traveller", "Descending Darkness", "Apeira Astra", "Cairn", "Ironsworn", "Starforged"]);
 const oursOnly = process.argv.includes("--ours");
 const shelf = createBookShelf({ folder: path.join(fgDataFolder(), "modules"), also: [path.resolve("games/modules")], packsFolder: packs.packFolder() });
 const totals = { books: 0, pages: 0, dead: {}, empty: 0, pictures: 0, missingPictures: 0, leaked: 0 };

@@ -34,9 +34,9 @@ This work includes material from the System Reference Document 5.2.1 ("SRD
 https://www.dndbeyond.com/srd. The SRD 5.2.1 is licensed under the Creative
 Commons Attribution 4.0 International License, available at
 https://creativecommons.org/licenses/by/4.0/legalcode.
-Three games ship with Kraken, so a table can play with nothing else
-installed: two of Kraken's own and *Cairn, Second Edition* (an open game,
-CC BY-SA 4.0). Each has a players' book, a GM's book of creatures, and a first
+Five games ship with Kraken, so a table can play with nothing else
+installed: two of Kraken's own, *Cairn, Second Edition* (an open game,
+CC BY-SA 4.0), and *Ironsworn* and *Starforged* (their CC BY 4.0 parts). Each has a players' book, a GM's book of creatures, and a first
 adventure with story, encounters and maps (with walls and doors). Make a campaign with the game as its ruleset, then make its books active
 in **Modules**.
 
@@ -91,6 +91,54 @@ token).
 the crew to it. But someone aboard may still be alive, and that changes
 everything. Ten story entries, four encounters, two deck maps with hatches,
 and four handouts.
+
+## Ironsworn and Ironsworn: Starforged (vows, with or without a GM)
+
+Two rulesets on one engine: **Ironsworn** (with *Delve*: perilous sites) and
+**Starforged** (a spacefarer in the Forge). Kraken plays them from Shawn
+Tomkin's CC BY 4.0 material: the moves, assets and oracle tables (and
+Delve's themes and domains, Starforged's sample foes and setting truths),
+taken from Datasworn and kept only where their licence is CC BY 4.0. The full
+rulebooks are CC BY-NC-SA and are not included: the books' rules chapters
+are Kraken's own short explanation. This is an unofficial adaptation,
+compatible with the games, not a Tomkin Press product.
+
+- **The action roll:** an action die (d6) + a stat + adds, at most 10,
+  against two challenge dice (d10): a strong hit beats both, a weak hit one,
+  a miss neither; a tie goes to the die; both dice the same is a match.
+- **Momentum** (-6 to +10, starting at +2): burn it when it beats more dice
+  than your score (the sheet offers it before the outcome is resolved); it
+  resets to +2 (+1 with one debility or impact, 0 with more). Negative
+  momentum cancels an action die of its value.
+- **Progress tracks:** vows, journeys, expeditions, fights, connections and
+  sites, ten boxes of four ticks, marked by rank (troublesome 3 boxes ...
+  epic 1 tick); a progress roll is the boxes against the challenge dice.
+- **Experience:** Ironsworn's from fulfilled vows; Starforged's from the
+  quests, bonds and discoveries legacy tracks (2 a box). A new asset costs 3,
+  an asset's next ability 2.
+- **The sheet:** every move on the **Moves** tab (its option, adds, the
+  track or foe it is made against); what an outcome plainly does is applied,
+  its choices are buttons. **Oracles** in the sidebar for everyone; **Delve
+  Sites** for the GM (Ironsworn).
+- **The combat tracker** shows foes as a rank and a progress track, and each
+  character's initiative (Starforged: in control or in a bad spot).
+- **No money:** supply is shared by the party; a parcel's **Supply** refills
+  it.
+
+**Books (Ironsworn):** *Ironsworn Reference* (how to play, 48 moves with
+Delve's, 78 assets, 86 oracle tables), *Ironsworn Foes and Sites* (14 foes of
+Kraken's own, Delve's 8 themes and 12 domains), *The Cinder Barrow* (a
+starter: an inciting vow, a haunted barrow with walls and doors).
+**Books (Starforged):** *Starforged Reference* (how to play, 56 moves, 87
+assets, 262 oracle tables, the setting truths), *Starforged Foes* (55 sample
+foes), *The Silent Hulk* (a starter: a derelict colony ship with walls and
+doors).
+
+> This work is based on Ironsworn, Ironsworn: Delve and Ironsworn:
+> Starforged, created by Shawn Tomkin, and licensed for our use under the
+> Creative Commons Attribution 4.0 International license
+> (https://creativecommons.org/licenses/by/4.0/). Data from Datasworn
+> (schema and code MIT). See `games/ironsworn/LICENSE.md`.
 
 ## Cairn, Second Edition (dark fairy-tale fantasy)
 

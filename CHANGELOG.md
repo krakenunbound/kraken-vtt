@@ -6,6 +6,36 @@ full log of the work is in [PLAN.md](PLAN.md).
 
 ## Unreleased
 
+- **Ironsworn and Ironsworn: Starforged come with Kraken.** Two new rulesets,
+  *Ironsworn* (with *Delve*) and *Starforged*, on one engine, played from
+  Shawn Tomkin's CC BY 4.0 moves, assets and oracles (an unofficial
+  adaptation; the CC BY-NC-SA rulebook text is not included). Each comes
+  with a Reference (Kraken's own short rules chapters, every move, asset and
+  oracle), a GM's book of foes (Ironsworn's are Kraken's own; Starforged's
+  sample foes; Delve's site themes and domains) and a starter scenario with a
+  map (*The Cinder Barrow*, *The Silent Hulk*).
+  - **The wizard follows each game's steps:** stats 3, 2, 2, 1, 1; three
+    assets (Starforged: two paths, the Starship and one more); a background
+    vow; bonds, or a first connection; an inciting vow; what you carry.
+  - **The sheet:** stats, health, spirit and supply (shared by the party),
+    momentum with its maximum and reset, debilities or impacts, the
+    initiative (in control); every move on the Moves tab, rolled in front of
+    the table (d6 + stat + adds, at most 10, against two d10: strong hit, weak
+    hit, miss, matches; a die cancelled by negative momentum). What the
+    outcome plainly does happens by itself, its choices become buttons, and
+    **Burn momentum** is offered when it would do better. Vows, journeys,
+    expeditions, fights, connections and sites as ten-box progress tracks
+    (marked by rank, rolled against, fulfilled for experience); bonds
+    (Ironsworn) or the legacy tracks (Starforged: experience from them);
+    assets bought and upgraded with experience.
+  - **The Oracles window** (everyone's: these games are often played without
+    a GM) rolls any table, and Ask the Oracle; **Delve Sites** (the GM's)
+    rolls a site's features and dangers from its theme and domain.
+  - **The combat tracker** shows a foe as its rank and progress track (no hit
+    points): Strike and Clash mark it from the sheet, the GM marks it or
+    inflicts its harm from the tracker, End the Fight (Take Decisive Action)
+    rolls against it.
+  - No money: a parcel's **Supply** fills the shared supply meter.
 - **D&D 5E plays with nothing else installed.** Kraken now ships the System
   Reference Document 5.2.1 as three books for a D&D 5E campaign, made from
   the SRD's own PDF:

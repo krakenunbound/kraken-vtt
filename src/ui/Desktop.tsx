@@ -1,4 +1,5 @@
 import { ShipsWindow } from "../ships/ShipsWindow";
+import { DelveWindow, OraclesWindow } from "../ironsworn/IronswornWindows";
 import { lazy, Suspense, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { Picture } from "../characters/ArtPicker";
 import { CharacterPanel } from "../characters/CharacterPanel";
@@ -291,6 +292,9 @@ export function Desktop({
         { kind: "party", label: "Party", icon: "party", title: "Party Sheet" },
         // Starships, in the 2d6 games (Traveller, Apeira Astra).
         ...(session.ruleset === "Traveller" || session.ruleset === "Apeira Astra" ? [{ kind: "ships" as const, label: "Starships", icon: "ship", title: "Starships" }] : []),
+        // Ironsworn and Starforged: the oracles, for everyone (often played without a GM); Delve's sites, the GM's.
+        ...(session.ruleset === "Ironsworn" || session.ruleset === "Starforged" ? [{ kind: "oracles" as const, label: "Oracles", icon: "sparkle", title: "Oracles" }] : []),
+        ...(session.ruleset === "Ironsworn" && gm ? [{ kind: "delve" as const, label: "Delve Sites", icon: "map", title: "Delve Sites" }] : []),
         { kind: "notes", label: gm ? "Notes" : "Player Notes", icon: "chat", title: gm ? "Notes" : "Player Notes" },
         { kind: "calendar", label: "Calendar", icon: "calendar", title: "Calendar" },
         ...(gm || session.options.motd?.text || session.options.motd?.links?.length ? [{ kind: "motd" as const, label: "Message of the Day", icon: "flag", title: "Message of the Day" }] : []),
@@ -623,6 +627,8 @@ export function Desktop({
               {item.kind === "wallpapers" ? <DecalPicker session={session} kind="wallpaper" onClose={() => windows.close(item.key)} /> : null}
               {item.kind === "krits" ? <KritsWindow session={session} /> : null}
               {item.kind === "ships" ? <ShipsWindow session={session} openMaps={openMaps} /> : null}
+              {item.kind === "oracles" ? <OraclesWindow session={session} /> : null}
+              {item.kind === "delve" && gm ? <DelveWindow session={session} /> : null}
               {item.kind === "library" ? <LibraryWindow session={session} openMaps={openMaps} /> : null}
               {item.kind === "gmicons" ? <DecalPicker session={session} kind="gmicon" onClose={() => windows.close(item.key)} /> : null}
               {item.kind === "deathmarkers" ? <DeathMarkersWindow session={session} /> : null}
