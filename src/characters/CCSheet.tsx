@@ -57,7 +57,7 @@ export function Field({ value, onSave, number = false, editable, label, wide = f
     onChange: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setText(event.target.value),
     onBlur: commit,
   };
-  return area ? <textarea {...common} /> : <input {...common} inputMode={number ? "numeric" : undefined} onKeyDown={(event) => event.key === "Enter" && (event.target as HTMLInputElement).blur()} />;
+  return area ? <textarea {...common} /> : <input {...common} inputMode={number ? "numeric" : undefined} onKeyDown={(event) => event.key === "Enter" && !event.nativeEvent.isComposing && (event.target as HTMLInputElement).blur()} />;
 }
 
 export function CCSheet({ record, session }: { record: TableRecord; session: Session }) {

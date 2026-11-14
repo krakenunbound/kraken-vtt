@@ -157,7 +157,7 @@ export const PRESETS: ({ name: string } & DiceLook)[] = [
 // color: this person's colour on the map (their pings and their ink); null is the table's colour for their name.
 // These are the user tier: kept by the GM's app under the person's name (prefs.cjs), so
 // they follow them to any browser, past a reload, a restart and signing in again.
-// turnSound, turnBanner: when this person's turn comes round on the combat tracker, a bell, and a banner across the screen.
+// turnSound, turnBanner: when this person's turn comes round on the combat tracker, a chime, and a banner across the screen.
 export type DiceSettings = { show: boolean; sound: boolean; volume: number; tray: number; roll: number; look: DiceLook; npc: DiceLook | null; damage: DiceLook | null; color: string | null; turnSound: boolean; turnBanner: boolean };
 export type DiceSet = "look" | "npc" | "damage";
 type SettingsPatch = Partial<Omit<DiceSettings, "look" | "npc" | "damage">> & { look?: Partial<DiceLook>; npc?: Partial<DiceLook> | null; damage?: Partial<DiceLook> | null };

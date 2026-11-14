@@ -508,7 +508,7 @@ export function Desktop({
   useEffect(() => {
     const key = myTurn ? `${session.combat.round}:${session.combat.active}` : "";
     if (!gm && key && key !== turnRang.current) {
-      if (alerts.turnSound !== false) sound.yourTurn();
+      if (alerts.turnSound !== false) sound.yourTurn(session.ruleset);
       if (alerts.turnBanner !== false) setBanner({ key, name: myEntry?.name ?? "" });
     }
     if (!key) setBanner(null);

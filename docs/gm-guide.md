@@ -344,8 +344,8 @@ folder. Back up the whole folder to keep what you made.
 ## At the table
 
 - **You at the table** (Settings, every seat): your colour (your tokens' ring,
-  your pings and drawings) and, when your turn comes round in combat, a bell
-  and a banner across your screen (each can be turned off).
+  your pings and drawings) and, when your turn comes round in combat, a soft chime
+  (a console tone in the sci-fi games) and a banner across your screen (each can be turned off).
 - **Shapes:** with the pen, choose a free line, a straight line, an arrow, a
   square, a circle (drag from its centre) or a cone (drag from its point). Each
   is measured in feet as you draw it. With the pen out, drag a shape's handles

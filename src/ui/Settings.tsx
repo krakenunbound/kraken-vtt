@@ -35,7 +35,7 @@ function YouAtTheTable() {
       <span className="you-label">When it is your turn in combat</span>
       <label className="settings-check">
         <input type="checkbox" data-setting="turn-sound" checked={settings.turnSound !== false} onChange={(event) => diceStore.update({ turnSound: event.target.checked })} />
-        Ring a bell
+        Play a chime
       </label>
       <label className="settings-check">
         <input type="checkbox" data-setting="turn-banner" checked={settings.turnBanner !== false} onChange={(event) => diceStore.update({ turnBanner: event.target.checked })} />

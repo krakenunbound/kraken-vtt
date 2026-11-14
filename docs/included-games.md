@@ -1,10 +1,14 @@
 # The games that come with Kraken
 
-Two original games ship with Kraken, so a table can play with nothing else
-installed (and open games: Cairn, and Fate Core and Fate Accelerated, below). Each has a players' book, a GM's book of creatures, and a first
-adventure with story, encounters, maps (with walls and doors), handouts and
-art. Make a campaign with the game as its ruleset, then make its books active
-in **Modules**. D&D 5E comes with its rules too: the SRD 5.2.1 (below).
+Ten games ship with Kraken, so a table can play with nothing else installed:
+Kraken's own **Descending Darkness** and **Apeira Astra**, and eight from open
+licences: **D&D 5E** (the SRD 5.2.1), **Basic Fantasy**, **Cairn**,
+**Ironsworn**, **Starforged**, **Fate Core**, **Fate Accelerated** and
+**Forged in the Dark** (from the Blades in the Dark SRD). Each has its rules
+book, its GM's material, and a first adventure with story, encounters and maps
+(with walls and doors). Make a campaign with the game as its ruleset, then
+make its books active in **Modules**. Each open game's text keeps its own
+licence; see its folder's `LICENSE.md` under `games/`.
 
 ## D&D 5E: the SRD 5.2.1
 
@@ -264,7 +268,7 @@ on the rocks. Story entries with each scene's aspects, two conflicts
 room), two battle maps with their zones outlined in colour, and three
 pregenerated characters in both games.
 
-## Licensing
+### Licensing
 
 Fate Core System, Fate Accelerated Edition, the Fate System Toolkit and the
 Fate Adversary Toolkit are Evil Hat Productions' System Reference Documents,
@@ -336,7 +340,7 @@ entries, four factions of Brackwater, its people, four clocks to put on the
 table from the Clocks window, its payoff, and the Brine Street
 Counting-house map with its walls and doors.
 
-## Licensing
+### Licensing
 
 This work is based on Blades in the Dark (found at http://www.bladesinthedark.com/), product of One Seven Design, developed and authored by John Harper, and licensed for our use under the Creative Commons Attribution 3.0 Unported license (http://creativecommons.org/licenses/by/3.0/).
 
@@ -389,7 +393,7 @@ encounters (goblins, their hobgoblin chief, skeletons to turn), three treasure
 parcels, two maps (the mill, the cellars with a secret door) and the miller's
 note as a handout.
 
-## Licensing
+### Licensing
 
 **Basic Fantasy** is not Kraken's: its books are adapted from the *Basic
 Fantasy Role-Playing Game, 4th Edition*, Copyright © 2006-2023 Chris Gonnerman,

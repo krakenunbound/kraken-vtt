@@ -191,7 +191,7 @@ export function CalendarWindow({ session }: { session: Session }) {
             value={draft}
             onChange={(event) => setDraft(event.target.value)}
             onKeyDown={(event) => {
-              if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) add();
+              if (event.key === "Enter" && (event.ctrlKey || event.metaKey) && !event.nativeEvent.isComposing) add();
             }}
             onDragOver={(event) => {
               if ([...event.dataTransfer.types].includes("text/plain")) event.preventDefault();

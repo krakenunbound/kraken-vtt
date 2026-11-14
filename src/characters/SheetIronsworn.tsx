@@ -257,7 +257,7 @@ function AddLine({ placeholder, onAdd, action }: { placeholder: string; onAdd: (
   };
   return (
     <p className="cc-inline">
-      <input placeholder={placeholder} value={text} data-add-line={action ?? placeholder} onChange={(event) => setText(event.target.value)} onKeyDown={(event) => event.key === "Enter" && add()} />
+      <input placeholder={placeholder} value={text} data-add-line={action ?? placeholder} onChange={(event) => setText(event.target.value)} onKeyDown={(event) => event.key === "Enter" && !event.nativeEvent.isComposing && add()} />
       <button type="button" data-action={action ?? "add-line"} disabled={!text.trim()} onClick={add}>
         Add
       </button>

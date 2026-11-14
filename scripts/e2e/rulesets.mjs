@@ -4,8 +4,15 @@
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 // A sidebar window opened (its button toggles: pressed again it would close).
+// Already open, it is brought to the front (the map window opened since may
+// cover it): a press on the window brings it forward, as a person's click does.
 async function openSide(where, launch) {
-  if (await where.$(`.sidebar [data-launch="${launch}"].open`)) return;
+  if (await where.$(`.sidebar [data-launch="${launch}"].open`)) {
+    const kind = launch.split(":")[0];
+    const win = await where.$(`[data-window="${kind}"]`);
+    if (win) await win.dispatchEvent("pointerdown");
+    return;
+  }
   await where.click(`.sidebar [data-launch="${launch}"]`);
 }
 // Close every window but the map (the Close buttons, never Pop out).

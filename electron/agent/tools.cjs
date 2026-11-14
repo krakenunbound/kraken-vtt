@@ -1981,7 +1981,7 @@ const TOOLS = [
       color: string("Your colour on the map (pings and ink), #rrggbb; empty for the table's colour for your name"),
       character: string("A character (record id or name): set that character's own dice (the character tier, kept on it; every roll made as it uses them) instead of the GM's. Takes preset and the look parts, set mine or damage, same"),
       who: string("With color, turnSound or turnBanner: a player's name, to set that player's (their user settings) instead of the GM's"),
-      turnSound: { type: "boolean", description: "When this person's turn comes round on the combat tracker: a bell (Settings > You at the table)" },
+      turnSound: { type: "boolean", description: "When this person's turn comes round on the combat tracker: a soft chime (a console tone in the sci-fi games; Settings > You at the table)" },
       turnBanner: { type: "boolean", description: "When this person's turn comes round: a banner across their screen" },
     }),
     async run(args, ctx) {
