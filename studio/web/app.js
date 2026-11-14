@@ -27,7 +27,9 @@
     undo = [],
     redo = [],
     imgs = new Map(),
-    space = false;
+    space = false,
+    // A picture of the map as the editor shows it (Map Studio's agent tools): which overlays to draw.
+    look = null;
   const id = (k) =>
       k +
       "-" +
@@ -115,13 +117,13 @@
     x.fillStyle = p.background;
     x.fillRect(0, 0, c.width, c.height);
     x.strokeStyle = "rgba(220,210,170,.12)";
-    for (let a = ((Number(p.gridOffset?.x) || 0) % p.grid + p.grid) % p.grid; a <= c.width; a += p.grid) {
+    for (let a = ((Number(p.gridOffset?.x) || 0) % p.grid + p.grid) % p.grid; look?.grid !== false && a <= c.width; a += p.grid) {
       x.beginPath();
       x.moveTo(a, 0);
       x.lineTo(a, c.height);
       x.stroke();
     }
-    for (let a = ((Number(p.gridOffset?.y) || 0) % p.grid + p.grid) % p.grid; a <= c.height; a += p.grid) {
+    for (let a = ((Number(p.gridOffset?.y) || 0) % p.grid + p.grid) % p.grid; look?.grid !== false && a <= c.height; a += p.grid) {
       x.beginPath();
       x.moveTo(0, a);
       x.lineTo(c.width, a);
@@ -144,13 +146,13 @@
     x.save();
     x.strokeStyle = "rgba(220,210,170,.16)";
     x.lineWidth = 1;
-    for (let a = ((Number(p.gridOffset?.x) || 0) % p.grid + p.grid) % p.grid; a <= p.width; a += p.grid) {
+    for (let a = ((Number(p.gridOffset?.x) || 0) % p.grid + p.grid) % p.grid; look?.grid !== false && a <= p.width; a += p.grid) {
       x.beginPath();
       x.moveTo(a, 0);
       x.lineTo(a, p.height);
       x.stroke();
     }
-    for (let a = ((Number(p.gridOffset?.y) || 0) % p.grid + p.grid) % p.grid; a <= p.height; a += p.grid) {
+    for (let a = ((Number(p.gridOffset?.y) || 0) % p.grid + p.grid) % p.grid; look?.grid !== false && a <= p.height; a += p.grid) {
       x.beginPath();
       x.moveTo(0, a);
       x.lineTo(p.width, a);
@@ -160,10 +162,11 @@
     window.KrakenWeather?.draw(x, z);
     window.KrakenLighting?.drawAmbient(x);
     [...p.lights].sort((a, b) => !!a.inverse - !!b.inverse) // darkness last: it takes light away
-      .filter(() => $("#previewLighting").checked && !window.KrakenLayers?.groupHidden("lights") && mode !== "play")
+      .filter(() => (look ? look.lighting : $("#previewLighting").checked) && !window.KrakenLayers?.groupHidden("lights") && mode !== "play")
       .forEach((l) => {
         if (l.on === false) { x.strokeStyle = l.color; x.lineWidth = 2 / z; x.beginPath(); x.arc(l.x, l.y, 5, 0, 7); x.stroke(); return; }
         window.KrakenLighting.paint(x, l, p.grid);
+        if (look) return;
         x.fillStyle = l.inverse ? "#000" : l.color;
         x.beginPath();
         x.arc(l.x, l.y, 5, 0, 7);
@@ -181,10 +184,10 @@
     window.KrakenBeta02?.render(x, p, {zoom:z, selected:sel});
     window.KrakenWallArt?.render(x, z);
     // Walls last of the map's own layers: on top of the lighting preview, so it never washes them out.
-    if (!window.KrakenPlay?.hidesEditing()) window.KrakenLOS.render(x, p, z);
+    if (!window.KrakenPlay?.hidesEditing() && look?.walls !== false) window.KrakenLOS.render(x, p, z);
     window.KrakenLOS?.refresh();
     window.KrakenGrid?.draw(x, z);
-    if (!window.KrakenPlay?.hidesEditing()) window.KrakenRegions?.draw(x, z);
+    if (!window.KrakenPlay?.hidesEditing() && look?.regions !== false) window.KrakenRegions?.draw(x, z);
     window.KrakenPlay?.render(x, z);
     window.KrakenGrid?.refresh();
   }
@@ -614,6 +617,10 @@
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   }
+  // Every picture the map uses, loaded (or failed).
+  async function loaded() {
+    await Promise.all(p.objects.map((o) => { const q = im(o.assetId); return q.complete ? null : new Promise((yes) => { q.addEventListener("load", yes, { once: true }); q.addEventListener("error", yes, { once: true }); }); }));
+  }
   async function flat() {
     let os = p.objects.filter((o) => o.visible !== false && !window.KrakenLayers?.hidden(o));
     await Promise.all(
@@ -892,6 +899,9 @@
     snapshot:snap,save:store,draw,fit,point:pt,snap:grid,image:im,toast,active,switchMode,refreshAssets:getAssets,
     addAsset(value){if(!assets.some(a=>a.id===value.id))assets.push(value);showAssets()},
     showAssets,flat,validate:validProject,
+    // The map as the editor draws it, at full size (walls, lights, grid as asked), once every picture has loaded.
+    async capture(options={}){await loaded();sel=null;look={grid:options.grid!==false,walls:options.walls!==false,regions:options.walls!==false,lighting:!!options.lighting};try{draw();return c.toDataURL("image/png")}finally{look=null;draw()}},
+    loaded,
     replace(value){const next=validProject(value);snap();p=next;sel=asset=null;$('#projectName').value=p.name;store();draw()},
     blank,
     getDocument(){return {project:p,undo,redo,dirty,view:{z,pan:{...pan}}}},

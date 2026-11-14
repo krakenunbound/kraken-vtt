@@ -88,11 +88,20 @@ window.KrakenWallArt = (() => {
     bake(d.assetId, points, closed && points.length > 2);
   }
   async function bake(assetId, points, closed) {
-    const info = texture(assetId), a = assetOf(assetId);
-    if (!info) { S.toast('The wall art has not loaded yet; try again in a moment.', true); return; }
     if (busy) return;
     busy = true;
-    try {
+    try { await bakeWall(assetId, points, closed, {los: $('#wallLos').checked}); }
+    catch (e) { S.toast('Wall failed: ' + e.message, true); } finally { busy = false; }
+  }
+  // A finished wall: the art along the path baked into one picture, with its line-of-sight wall
+  // (options.los, as the tool's checkbox; never for paths). The Wall tool's own way, and Map Studio's
+  // agent tools'. Waits for the art to load; throws on failure. Returns {object, wall}.
+  async function bakeWall(assetId, points, closed, options = {}) {
+    if (!assetOf(assetId)) throw Error('There is no art ' + assetId + ' in the library.');
+    await S.image(assetId).decode().catch(() => {});
+    const info = texture(assetId), a = assetOf(assetId);
+    if (!info) throw Error('The wall art could not be loaded.');
+    {
       if (info.capId) await S.image(info.capId).decode().catch(() => {});
       const p = S.project, cap = capImage(info), pad = cap ? Math.max(cap.naturalWidth, cap.naturalHeight) * info.scale / 2 : 0;
       const corners = K.wallPathSegments(points, closed, info.half, 0.75).flatMap(s => s.clip.concat(pad ? [s.a, s.b].flatMap(v => [{x: v.x - pad, y: v.y - pad}, {x: v.x + pad, y: v.y + pad}]) : []));
@@ -109,11 +118,13 @@ window.KrakenWallArt = (() => {
       const {asset} = await r.json();
       S.addAsset(asset); S.snapshot();
       const groupId = uid('group'), o = {id: uid('wallart'), assetId: asset.id, name, x: left, y: top, width: canvas.width, height: canvas.height,
-        rotation: 0, visible: true, groupId, wallPath: {assetId, points: points.flatMap(v => [v.x, v.y]), closed}};
+        rotation: 0, visible: true, groupId, wallPath: {assetId, points: points.flatMap(v => [v.x, v.y]), closed}, ...(options.layer ? {layer: options.layer} : {})};
       p.objects.push(o);
-      if ($('#wallLos').checked && !isPath(a)) p.walls.push(window.KrakenLOS.normalizeWall({id: uid('wall'), type: 'wall', groupId, points: o.wallPath.points, flags: closed ? ['closed'] : []}));
+      let wall = null;
+      if (options.los !== false && !isPath(a)) p.walls.push(wall = window.KrakenLOS.normalizeWall({id: uid('wall'), type: 'wall', groupId, points: o.wallPath.points, flags: closed ? ['closed'] : []}));
       S.save(); S.draw();
-    } catch (e) { S.toast('Wall failed: ' + e.message, true); } finally { busy = false; }
+      return {object: o, wall};
+    }
   }
 
   function snapped(e) {
@@ -180,5 +191,5 @@ window.KrakenWallArt = (() => {
   $('#paintTool').addEventListener('change', () => { autoPicked = false; drawing = null; showOptions(); S.draw(); });
   $('#mapCanvas').addEventListener('dblclick', dblclick);
   showOptions();
-  return {pointerDown, pointerMove, pointerUp, keyDown, render, assetPicked, isWallArt, modeChanged() { drawing = null; }};
+  return {pointerDown, pointerMove, pointerUp, keyDown, render, assetPicked, isWallArt, isPath, bakeWall, modeChanged() { drawing = null; }};
 })();

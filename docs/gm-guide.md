@@ -240,6 +240,12 @@ weather with masks, mark traps and regions, generate a dungeon, and play test.
   Map Forge's come with it.
 - Map Studio inside Kraken makes maps for Kraken; exporting to Fantasy
   Grounds or Foundry is the stand-alone Map Studio's job.
+- An AI agent (Claude Code, or any agent on Kraken's MCP server) can make maps
+  in Map Studio for you with its `kraken_map_studio` tool: ask it for a map of
+  a place, and it opens Map Studio and builds it in a tab of its own while you
+  watch, from the same art and tools, then saves it into your campaign. Its
+  guide is `skills/kraken-map-studio`. You can take over with the mouse at any
+  point.
 
 - Open a map from the **Library** (the sidebar's Adventures: its Maps tab
   shows each map, and a click lets you see it before it goes to the table or

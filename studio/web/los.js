@@ -124,20 +124,23 @@ window.KrakenLOS = (() => {
 
   // --- creating ------------------------------------------------------------------
   function dedupe(list) { return list.filter((q, i) => !i || dist(q, list[i - 1]) > 0.01); }
-  function addShape(list, closed) {
-    const p = S().project;
+  // A drawn wall, with the panel's type and options; Map Studio's agent tools pass their own
+  // (options.type, options.flags, options.split). Returns the wall made.
+  function addShape(list, closed, options = {}) {
+    const p = S().project, kind = options.type ?? type;
     list = dedupe(list);
     if (closed && list.length > 2 && dist(list[0], list.at(-1)) < 0.01) list.pop();
-    if (list.length < 2 || (list.length === 2 && dist(list[0], list[1]) < 1)) return;
-    if (type === 'razor') { razor(list); return; }
-    const flags = draft.filter(f => f !== 'closed');
+    if (list.length < 2 || (list.length === 2 && dist(list[0], list[1]) < 1)) return null;
+    if (kind === 'razor') { razor(list); return null; }
+    const flags = (options.flags ?? (options.type ? TYPES[kind][1] : draft)).filter(f => f !== 'closed');
     const needClosed = closed || flags.includes('terrain') || flags.includes('pit');
     if (needClosed && list.length >= 3) flags.push('closed');
     S().snapshot();
-    const w = normalizeWall({id: uid(), type, points: list.flatMap(q => [q.x, q.y]), flags});
-    if (split) splitAgainst(w);
+    const w = normalizeWall({id: uid(), type: kind, points: list.flatMap(q => [q.x, q.y]), flags});
+    if (options.split ?? split) splitAgainst(w);
     p.walls.push(w);
     S().save(); S().draw();
+    return w;
   }
   function splitAgainst(w) {  // add a point to existing walls where the new one crosses them
     const segsW = segsOf(w);
@@ -549,7 +552,7 @@ window.KrakenLOS = (() => {
 
   const canvas = $('#mapCanvas');
   canvas.addEventListener('dblclick', dblclick);
-  return {normalizeWall, normalizeAll, visionSegments, render, pointerDown, pointerMove, pointerUp, keyDown, modeChanged, refresh,
+  return {normalizeWall, normalizeAll, visionSegments, addShape, razor, render, pointerDown, pointerMove, pointerUp, keyDown, modeChanged, refresh,
     selectWallById(id) { const w = S().project.walls.find(v => v.id === id); if (w) { selectWall(w); tool = 'select'; } }, TYPES,
     label: w => (TYPES[w.type] || TYPES.wall)[0]};
 })();

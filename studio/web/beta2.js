@@ -136,26 +136,33 @@
       p.objects.push({id:'art-'+w.id,wallArt:true,wallId:w.id,groupId:w.groupId,assetId:wallAsset.id,name:'Room wall',x:(w.x1+w.x2)/2-length/2,y:(w.y1+w.y2)/2-thickness/2,width:length,height:thickness,rotation:Math.atan2(dy,dx)*180/Math.PI,visible:true});
     });
   }
-  async function paintTexture(stroke){
-    if(busy)return;busy=true;
-    try{
+  // The Texture brush: art tiled along a stroke with a soft edge, baked into one picture.
+  // The brush's own path (and Map Studio's agent tools): {assetId, path, size (px), softness 0..80}. Throws on failure.
+  async function textureStroke(stroke){
+      const softness=stroke.softness??Number($('#brushSoftness').value);
       const radius=stroke.size/2,b=bounds(stroke.path.map(p=>({x:p.x-radius,y:p.y-radius,width:stroke.size,height:stroke.size}))),left=Math.floor(b.x),top=Math.floor(b.y),width=Math.ceil(b.right-left),height=Math.ceil(b.bottom-top);
       if(width*height>12000000)throw Error('Use shorter brush strokes for this map.');
       const art=S.image(stroke.assetId);await art.decode();const canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;const ctx=canvas.getContext('2d');
       const source=S.assets.find(v=>v.id===stroke.assetId),tile=document.createElement('canvas');tile.width=tile.height=Math.max(8,Math.round(source?.gridSize?(art.naturalWidth||source.width)*S.project.grid/source.gridSize:S.project.grid*2));tile.getContext('2d').drawImage(art,0,0,tile.width,tile.height);
       ctx.fillStyle=ctx.createPattern(tile,'repeat');ctx.fillRect(0,0,width,height);ctx.globalCompositeOperation='destination-in';
-      const mask=document.createElement('canvas');mask.width=width;mask.height=height;const m=mask.getContext('2d'),soft=Number($('#brushSoftness').value)/100;
+      const mask=document.createElement('canvas');mask.width=width;mask.height=height;const m=mask.getContext('2d'),soft=Math.min(80,Math.max(0,Number(softness)||0))/100;
       const points=K.scatterBrush(stroke.path,{spacing:Math.max(2,radius/5),jitter:0,seed:1});points.push(stroke.path[0],stroke.path.at(-1));
       points.forEach(p=>{const g=m.createRadialGradient(p.x-left,p.y-top,Math.max(.1,radius*(1-soft)),p.x-left,p.y-top,radius);g.addColorStop(0,'white');g.addColorStop(1,'transparent');m.fillStyle=g;m.beginPath();m.arc(p.x-left,p.y-top,radius,0,Math.PI*2);m.fill()});ctx.drawImage(mask,0,0);
       const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/webp',0.92)),r=await fetch('/api/upload?name=Terrain%20brush.webp',{method:'POST',body:blob});if(!r.ok)throw Error((await r.json()).error);
-      const {asset}=await r.json();S.addAsset(asset);S.snapshot();const o={id:uid('terrain'),assetId:asset.id,name:'Terrain brush',x:left,y:top,width,height,rotation:0,visible:true};S.project.objects.push(o);selection=new Set([o.id]);S.selected=o.id;changed();
-    }catch(e){S.toast('Brush failed: '+e.message,true)}finally{busy=false}
+      const {asset}=await r.json();S.addAsset(asset);S.snapshot();const o={id:uid('terrain'),assetId:asset.id,name:stroke.name||'Terrain brush',x:left,y:top,width,height,rotation:0,visible:true,...(stroke.layer?{layer:stroke.layer}:{})};S.project.objects.push(o);selection=new Set([o.id]);S.selected=o.id;changed();
+      return o;
   }
+  async function paintTexture(stroke){
+    if(busy)return;busy=true;
+    try{await textureStroke(stroke)}catch(e){S.toast('Brush failed: '+e.message,true)}finally{busy=false}
+  }
+  // The Scatter brush: copies of one picture along a stroke, turned and sized at random (seeded). Returns them.
   function paintScatter(stroke){
     const a=S.assets.find(a=>a.id===stroke.assetId),q=S.image(stroke.assetId),ratio=(q.naturalHeight||100)/(q.naturalWidth||100);
-    const points=K.scatterBrush(stroke.path,{spacing:stroke.size*.7,jitter:stroke.size*.3,rotationRange:[-180,180],scaleRange:[.7,1.3],seed:uid('seed')});
-    if(S.project.objects.length+points.length>5000){S.toast('Too many artwork objects.',true);return}
-    S.snapshot();selection.clear();for(const point of points){const width=stroke.size*point.scale,height=width*ratio,o={id:uid('scatter'),assetId:stroke.assetId,name:a?.name||'Scatter',x:point.x-width/2,y:point.y-height/2,width,height,rotation:point.rotation,visible:true};S.project.objects.push(o);selection.add(o.id)}S.selected=[...selection][0]||null;changed();
+    const points=K.scatterBrush(stroke.path,{spacing:stroke.spacing||stroke.size*.7,jitter:stroke.size*.3,rotationRange:stroke.rotationRange||[-180,180],scaleRange:stroke.scaleRange||[.7,1.3],seed:stroke.seed??uid('seed')});
+    if(S.project.objects.length+points.length>5000){if(stroke.strict)throw Error('Too many artwork objects.');S.toast('Too many artwork objects.',true);return []}
+    S.snapshot();selection.clear();const made=[];for(const point of points){const width=stroke.size*point.scale,height=width*ratio,o={id:uid('scatter'),assetId:stroke.assetId,name:a?.name||'Scatter',x:point.x-width/2,y:point.y-height/2,width,height,rotation:point.rotation,visible:true,...(stroke.layer?{layer:stroke.layer}:{})};S.project.objects.push(o);selection.add(o.id);made.push(o)}S.selected=[...selection][0]||null;changed();
+    return made;
   }
   function path(ctx,points){ctx.beginPath();points.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.closePath()}
   function render(ctx,p,{zoom,selected:leaderId}){
@@ -237,7 +244,9 @@
     if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='g'){e.preventDefault();e.shiftKey?ungroup():group();return true}
     return false;
   }
-  window.KrakenBeta02={saveProject,render,pointerDown,pointerMove,pointerUp,keyDown,deleteSelection,assetVisible,assetPicked,modeChanged(mode){if(mode==='vision'){visionEnabled=true;$('#visionToggle').checked=true;S.asset=null}}};
+  // The player vision preview (View > Player vision preview): where its test token stands, on or off.
+  function setVision(point,on=true){if(point)vision={x:point.x,y:point.y};visionEnabled=!!on;$('#visionToggle').checked=!!on;S.draw()}
+  window.KrakenBeta02={saveProject,textureStroke,paintScatter,setVision,duplicate,group,render,pointerDown,pointerMove,pointerUp,keyDown,deleteSelection,assetVisible,assetPicked,modeChanged(mode){if(mode==='vision'){visionEnabled=true;$('#visionToggle').checked=true;S.asset=null}}};
   $('#duplicateBtn').onclick=duplicate;$('#groupBtn').onclick=group;$('#ungroupBtn').onclick=ungroup;$('#lockBtn').onclick=toggleLock;$('#alignBtn').onclick=align;
   $('#prefabSaveBtn').onclick=saveAssembly;$('#prefabPlaceBtn').onclick=placeAssembly;prefabList();
   $('#layeredExport').onchange=e=>{S.snapshot();S.project.exportLayers=e.target.checked;changed()};
