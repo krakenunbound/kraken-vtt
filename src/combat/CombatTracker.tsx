@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Picture } from "../characters/ArtPicker";
 import type { CombatEntry, Session } from "../session/useSession";
 import { Icon } from "../ui/icons";
+import { FateLine } from "./FateLine";
+import { fateTableOf } from "../characters/SheetFate";
 
 const FACTION_LABEL = { friend: "Friend", neutral: "Neutral", foe: "Foe" } as const;
 // AD&D 2E's five saving throws.
@@ -20,7 +22,7 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
   const [rounds, setRounds] = useState("");
   const [open, setOpen] = useState(false);
   const [saveStat, setSaveStat] = useState("wisdom");
-  const saveChoices = session.ruleset === "D&D 3.5E" ? ["fortitude", "reflex", "will"] : session.ruleset === "Basic Fantasy" ? ["death", "wands", "paralysis", "breath", "spells"] : session.ruleset === "AD&D 2E" ? ["paralyzation", "rod", "petrification", "breath", "spell"] : session.ruleset === "Traveller" ? ["str", "dex", "end", "int", "edu", "soc"] : session.ruleset === "Apeira Astra" ? ["brawn", "reflex", "grit", "intellect", "training", "presence"] : session.ruleset === "Cairn" ? ["str", "dex", "wil"] : ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"];
+  const saveChoices = session.ruleset === "D&D 3.5E" ? ["fortitude", "reflex", "will"] : session.ruleset === "Basic Fantasy" ? ["death", "wands", "paralysis", "breath", "spells"] : session.ruleset === "AD&D 2E" ? ["paralyzation", "rod", "petrification", "breath", "spell"] : session.ruleset === "Traveller" ? ["str", "dex", "end", "int", "edu", "soc"] : session.ruleset === "Apeira Astra" ? ["brawn", "reflex", "grit", "intellect", "training", "presence"] : session.ruleset === "Cairn" ? ["str", "dex", "wil"] : session.ruleset === "Fate Accelerated" ? ["careful", "clever", "flashy", "forceful", "quick", "sneaky"] : session.ruleset === "Fate Core" ? ["Athletics", "Fight", "Notice", "Physique", "Provoke", "Shoot", "Stealth", "Will"] : ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"];
   const saveChoice = saveChoices.includes(saveStat) ? saveStat : saveChoices[saveChoices.length - 1];
   const [saveCl, setSaveCl] = useState("0");
   const record = entry.recordId ? session.records[entry.recordId] : null;
@@ -124,7 +126,7 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
             {entry.hidden ? " · hidden" : ""}
           </small>
         </span>
-        {entry.ac !== undefined ? (
+        {entry.ac !== undefined && !entry.fate ? (
           <span className="ct-stat" title="Armour class">
             <Icon name="shield" size={14} />
             {entry.ac}
@@ -137,7 +139,7 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
             {entry.cairn.detachment ? " ⚑" : ""}
           </span>
         ) : null}
-        {entry.hp !== undefined ? (
+        {entry.hp !== undefined && !entry.fate ? (
           <span className="ct-stat ct-hp" title={`${entry.health.status}: ${(entry.hp ?? 0) - (entry.wounds ?? 0)} of ${entry.hp}${entry.temp ? `, ${entry.temp} temporary` : ""}`} style={{ color: entry.health.color }}>
             <Icon name="heart" size={14} />
             {(entry.hp ?? 0) - (entry.wounds ?? 0)}/{entry.hp}
@@ -214,12 +216,13 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
           </span>
         ) : entry.mine ? (
           <span className="ct-tools">
-            <button type="button" title={session.ruleset === "Cairn" ? "My DEX save to act in the first round" : "Roll my initiative"} onClick={() => session.ct("init", { which: entry.id })}>
-              {session.ruleset === "Cairn" ? "DEX" : "d10"}
+            <button type="button" title={session.ruleset === "Cairn" ? "My DEX save to act in the first round" : entry.fate ? "My place in the turn order (Notice; FAE Quick)" : "Roll my initiative"} onClick={() => session.ct("init", { which: entry.id })}>
+              {session.ruleset === "Cairn" ? "DEX" : entry.fate ? "Order" : "d10"}
             </button>
           </span>
         ) : null}
       </div>
+      {entry.fate ? <FateLine entry={entry} session={session} /> : null}
       {entry.targets.length > 0 || (gm && (entry.attacks?.length || entry.powers?.length)) ? (
         <div className="ct-actions">
           {session.ruleset === "Cairn"
@@ -403,6 +406,7 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
 export function CombatTracker({ session }: { session: Session }) {
   const gm = session.role === "dm";
   const { combat } = session;
+  const fateGame = /^Fate /.test(session.ruleset);
   const [search, setSearch] = useState("");
   const [count, setCount] = useState(1);
   const [place, setPlace] = useState(true);
@@ -453,9 +457,16 @@ export function CombatTracker({ session }: { session: Session }) {
             <button type="button" onClick={() => session.ct("init", { which: "npcs" })} disabled={combat.entries.length === 0}>
               Roll NPC init
             </button>
-            <button type="button" onClick={() => session.ct("init", { which: "all" })} disabled={combat.entries.length === 0} title={session.ruleset === "Cairn" ? "The PCs first (each saves DEX to act in the first round), then their opponents" : undefined}>
-              {session.ruleset === "Cairn" ? "Sides (DEX saves)" : "Roll all"}
+            <button type="button" data-action="init-all" onClick={() => session.ct("init", { which: "all" })} disabled={combat.entries.length === 0} title={session.ruleset === "Cairn" ? "The PCs first (each saves DEX to act in the first round), then their opponents" : fateGame ? "The turn order, without dice: Notice (FAE Quick) in a physical conflict, Empathy (Careful) in a mental one" : undefined}>
+              {session.ruleset === "Cairn" ? "Sides (DEX saves)" : fateGame ? "Turn order" : "Roll all"}
             </button>
+            {fateGame ? (
+              // Fate: a physical or a mental conflict (which skill orders the turns, which defends).
+              <select aria-label="Conflict" data-action="fate-conflict" value={fateTableOf(session).conflict} onChange={(event) => void session.fateAction(null, "conflict", { kind: event.target.value })}>
+                <option value="physical">Physical conflict</option>
+                <option value="mental">Mental conflict</option>
+              </select>
+            ) : null}
             {session.ruleset === "Cairn" ? (
               <button type="button" data-action="morale-foes" title="Morale: every foe still standing saves WIL, or flees" onClick={() => session.ct("morale", { faction: "foe" })} disabled={!combat.entries.some((item) => item.faction === "foe")}>
                 Morale

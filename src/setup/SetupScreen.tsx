@@ -49,6 +49,8 @@ const RULESETS = [
   { name: "Apeira Astra", blurb: "Kraken's science fiction: 2d6 and skills, Paths to make a crew in minutes, armour that soaks. Its books and a first adventure come with Kraken." },
   { name: "Cairn", blurb: "Cairn, Second Edition (Yochai Gal, CC BY-SA 4.0): three attributes and Hit Protection, saves under a d20, attacks that always hit, Scars, Fatigue and ten inventory slots, backgrounds instead of classes. Its Player's Guide, Warden's Guide and Trouble in Twin Lakes come with Kraken." },
   { name: "Basic Fantasy", blurb: "The Basic Fantasy Role-Playing Game, 4th Edition (free, CC BY-SA): old-school play with ascending Armor Class and an attack bonus, 3d6 in order, four races and four classes, the five saving throws, d6 initiative, thief abilities, turning the undead. Its Player's Handbook, Game Master's Guide and a first adventure come with Kraken." },
+  { name: "Fate Core", blurb: "Fate Core System (Evil Hat, CC BY 3.0): four Fate dice and the ladder, aspects invoked and compelled with fate points, a pyramid of skills, stunts, stress and consequences, conflicts in shifts. Its book, the Toolkit and Adversaries and a starter scenario come with Kraken." },
+  { name: "Fate Accelerated", blurb: "Fate Accelerated Edition (Evil Hat, CC BY 3.0): Fate with six approaches (Careful, Clever, Flashy, Forceful, Quick, Sneaky) instead of skills, three stress boxes, a character in minutes. Its book, the Toolkit and Adversaries and a starter scenario come with Kraken." },
   { name: "Worldbuilding", blurb: "No game rules: maps, tokens, chat and dice for any system." },
 ];
 

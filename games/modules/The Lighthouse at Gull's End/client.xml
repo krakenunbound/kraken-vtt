@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root version="4.6" release="1">
+	<pregencharsheet>
+		<category name="Pregenerated (Fate Core)">
+			<rooktallowfatecore>
+				<name type="string">Rook Tallow (Fate Core)</name>
+				<game type="string">core</game>
+				<aspects>
+					<highconcept type="string">Disgraced Captain of the Harbour Watch</highconcept>
+					<trouble type="string">I Owe the Wrong People</trouble>
+					<a1 type="string">Saltreach Knows My Face</a1>
+					<a2 type="string">Corin Saved My Life Once</a2>
+					<a3 type="string">Never Leave Anyone in the Water</a3>
+				</aspects>
+				<skilllist>
+					<id-00001>
+						<name type="string">Fight</name>
+						<rating type="number">4</rating>
+					</id-00001>
+					<id-00002>
+						<name type="string">Physique</name>
+						<rating type="number">3</rating>
+					</id-00002>
+					<id-00003>
+						<name type="string">Notice</name>
+						<rating type="number">3</rating>
+					</id-00003>
+					<id-00004>
+						<name type="string">Athletics</name>
+						<rating type="number">2</rating>
+					</id-00004>
+					<id-00005>
+						<name type="string">Provoke</name>
+						<rating type="number">2</rating>
+					</id-00005>
+					<id-00006>
+						<name type="string">Will</name>
+						<rating type="number">2</rating>
+					</id-00006>
+					<id-00007>
+						<name type="string">Contacts</name>
+						<rating type="number">1</rating>
+					</id-00007>
+					<id-00008>
+						<name type="string">Investigate</name>
+						<rating type="number">1</rating>
+					</id-00008>
+					<id-00009>
+						<name type="string">Rapport</name>
+						<rating type="number">1</rating>
+					</id-00009>
+					<id-00010>
+						<name type="string">Shoot</name>
+						<rating type="number">1</rating>
+					</id-00010>
+				</skilllist>
+				<stuntlist>
+					<id-00001>
+						<name type="string">Watch Captain's Bark</name>
+						<text type="string">+2 to Provoke to create an advantage when he gives orders in a fight.</text>
+						<skill type="string">Provoke</skill>
+					</id-00001>
+					<id-00002>
+						<name type="string">Shield the Weak</name>
+						<text type="string">When someone in his zone is attacked, he can defend for them with Fight.</text>
+						<skill type="string">Fight</skill>
+					</id-00002>
+					<id-00003>
+						<name type="string">Harbour Brawler</name>
+						<text type="string">+2 to Fight attacks on a deck, a quay or anywhere wet and slippery.</text>
+						<skill type="string">Fight</skill>
+					</id-00003>
+				</stuntlist>
+				<refreshbase type="number">3</refreshbase>
+				<description type="string">Broad, scarred and stubborn, Rook ran the Saltreach watch until a smuggler's bribe he never took got him thrown out.</description>
+				<text type="formattedtext"><p>Broad, scarred and stubborn, Rook ran the Saltreach watch until a smuggler's bribe he never took got him thrown out.</p><p><b>High Concept:</b> _Disgraced Captain of the Harbour Watch_</p><p><b>Trouble:</b> _I Owe the Wrong People_</p><p><b>Aspects:</b> _Saltreach Knows My Face_, _Corin Saved My Life Once_, _Never Leave Anyone in the Water_</p><p><b>Skills:</b> Fight +4, Physique +3, Notice +3, Athletics +2, Provoke +2, Will +2, Contacts +1, Investigate +1, Rapport +1, Shoot +1</p><p><b>Stunts:</b> <b>Watch Captain's Bark.</b> +2 to Provoke to create an advantage when he gives orders in a fight. <b>Shield the Weak.</b> When someone in his zone is attacked, he can defend for them with Fight. <b>Harbour Brawler.</b> +2 to Fight attacks on a deck, a quay or anywhere wet and slippery.</p><p><b>Refresh:</b> 3</p></text>
+			</rooktallowfatecore>
+			<ilsafenwrightfatecore>
+				<name type="string">Ilsa Fenwright (Fate Core)</name>
+				<game type="string">core</game>
+				<aspects>
+					<highconcept type="string">Weather-Witch of the Western Isles</highconcept>
+					<trouble type="string">The Storm Answers Before I Ask</trouble>
+					<a1 type="string">My Grandmother's Sea-Glass Charm</a1>
+					<a2 type="string">Rook Is Too Stubborn to Die</a2>
+					<a3 type="string">Curious About Everything Drowned</a3>
+				</aspects>
+				<skilllist>
+					<id-00001>
+						<name type="string">Lore</name>
+						<rating type="number">4</rating>
+					</id-00001>
+					<id-00002>
+						<name type="string">Will</name>
+						<rating type="number">3</rating>
+					</id-00002>
+					<id-00003>
+						<name type="string">Empathy</name>
+						<rating type="number">3</rating>
+					</id-00003>
+					<id-00004>
+						<name type="string">Notice</name>
+						<rating type="number">2</rating>
+					</id-00004>
+					<id-00005>
+						<name type="string">Rapport</name>
+						<rating type="number">2</rating>
+					</id-00005>
+					<id-00006>
+						<name type="string">Provoke</name>
+						<rating type="number">2</rating>
+					</id-00006>
+					<id-00007>
+						<name type="string">Athletics</name>
+						<rating type="number">1</rating>
+					</id-00007>
+					<id-00008>
+						<name type="string">Crafts</name>
+						<rating type="number">1</rating>
+					</id-00008>
+					<id-00009>
+						<name type="string">Investigate</name>
+						<rating type="number">1</rating>
+					</id-00009>
+					<id-00010>
+						<name type="string">Stealth</name>
+						<rating type="number">1</rating>
+					</id-00010>
+				</skilllist>
+				<stuntlist>
+					<id-00001>
+						<name type="string">Call the Wind</name>
+						<text type="string">Once per scene she can use Lore to attack with a blast of storm wind, against anyone in her zone or the next.</text>
+						<skill type="string">Lore</skill>
+					</id-00001>
+					<id-00002>
+						<name type="string">Read the Sky</name>
+						<text type="string">+2 to Lore to create an advantage about the weather or the sea.</text>
+						<skill type="string">Lore</skill>
+					</id-00002>
+					<id-00003>
+						<name type="string">Calm Water</name>
+						<text type="string">+2 to Empathy to overcome someone's fear or anger.</text>
+						<skill type="string">Empathy</skill>
+					</id-00003>
+				</stuntlist>
+				<refreshbase type="number">3</refreshbase>
+				<description type="string">A young witch from the islands, salt in her hair and questions on her lips, who hears the weather talk.</description>
+				<text type="formattedtext"><p>A young witch from the islands, salt in her hair and questions on her lips, who hears the weather talk.</p><p><b>High Concept:</b> _Weather-Witch of the Western Isles_</p><p><b>Trouble:</b> _The Storm Answers Before I Ask_</p><p><b>Aspects:</b> _My Grandmother's Sea-Glass Charm_, _Rook Is Too Stubborn to Die_, _Curious About Everything Drowned_</p><p><b>Skills:</b> Lore +4, Will +3, Empathy +3, Notice +2, Rapport +2, Provoke +2, Athletics +1, Crafts +1, Investigate +1, Stealth +1</p><p><b>Stunts:</b> <b>Call the Wind.</b> Once per scene she can use Lore to attack with a blast of storm wind, against anyone in her zone or the next. <b>Read the Sky.</b> +2 to Lore to create an advantage about the weather or the sea. <b>Calm Water.</b> +2 to Empathy to overcome someone's fear or anger.</p><p><b>Refresh:</b> 3</p></text>
+			</ilsafenwrightfatecore>
+			<coringalefatecore>
+				<name type="string">Corin Gale (Fate Core)</name>
+				<game type="string">core</game>
+				<aspects>
+					<highconcept type="string">Smuggler With a Conscience</highconcept>
+					<trouble type="string">Mercy Sloane Wants Me Back</trouble>
+					<a1 type="string">Every Cove on This Coast</a1>
+					<a2 type="string">Ilsa Still Owes Me a Fair Wind</a2>
+					<a3 type="string">Quick Hands, Quicker Excuses</a3>
+				</aspects>
+				<skilllist>
+					<id-00001>
+						<name type="string">Deceive</name>
+						<rating type="number">4</rating>
+					</id-00001>
+					<id-00002>
+						<name type="string">Stealth</name>
+						<rating type="number">3</rating>
+					</id-00002>
+					<id-00003>
+						<name type="string">Drive</name>
+						<rating type="number">3</rating>
+					</id-00003>
+					<id-00004>
+						<name type="string">Burglary</name>
+						<rating type="number">2</rating>
+					</id-00004>
+					<id-00005>
+						<name type="string">Shoot</name>
+						<rating type="number">2</rating>
+					</id-00005>
+					<id-00006>
+						<name type="string">Athletics</name>
+						<rating type="number">2</rating>
+					</id-00006>
+					<id-00007>
+						<name type="string">Contacts</name>
+						<rating type="number">1</rating>
+					</id-00007>
+					<id-00008>
+						<name type="string">Notice</name>
+						<rating type="number">1</rating>
+					</id-00008>
+					<id-00009>
+						<name type="string">Fight</name>
+						<rating type="number">1</rating>
+					</id-00009>
+					<id-00010>
+						<name type="string">Resources</name>
+						<rating type="number">1</rating>
+					</id-00010>
+				</skilllist>
+				<stuntlist>
+					<id-00001>
+						<name type="string">Old Friends in Every Port</name>
+						<text type="string">He can use Deceive instead of Contacts among sailors, smugglers and dockhands.</text>
+						<skill type="string">Deceive</skill>
+					</id-00001>
+					<id-00002>
+						<name type="string">Into the Dark</name>
+						<text type="string">+2 to Stealth to overcome when he moves between zones in darkness or fog.</text>
+						<skill type="string">Stealth</skill>
+					</id-00002>
+					<id-00003>
+						<name type="string">Born on a Deck</name>
+						<text type="string">+2 to Drive with any boat, in any weather.</text>
+						<skill type="string">Drive</skill>
+					</id-00003>
+				</stuntlist>
+				<refreshbase type="number">3</refreshbase>
+				<description type="string">A smiling sailor with a hidden pocket for everything, who sailed for Mercy Sloane until he could not stomach it.</description>
+				<text type="formattedtext"><p>A smiling sailor with a hidden pocket for everything, who sailed for Mercy Sloane until he could not stomach it.</p><p><b>High Concept:</b> _Smuggler With a Conscience_</p><p><b>Trouble:</b> _Mercy Sloane Wants Me Back_</p><p><b>Aspects:</b> _Every Cove on This Coast_, _Ilsa Still Owes Me a Fair Wind_, _Quick Hands, Quicker Excuses_</p><p><b>Skills:</b> Deceive +4, Stealth +3, Drive +3, Burglary +2, Shoot +2, Athletics +2, Contacts +1, Notice +1, Fight +1, Resources +1</p><p><b>Stunts:</b> <b>Old Friends in Every Port.</b> He can use Deceive instead of Contacts among sailors, smugglers and dockhands. <b>Into the Dark.</b> +2 to Stealth to overcome when he moves between zones in darkness or fog. <b>Born on a Deck.</b> +2 to Drive with any boat, in any weather.</p><p><b>Refresh:</b> 3</p></text>
+			</coringalefatecore>
+		</category>
+		<category name="Pregenerated (Fate Accelerated)">
+			<rooktallowfateaccelerated>
+				<name type="string">Rook Tallow (Fate Accelerated)</name>
+				<game type="string">fae</game>
+				<aspects>
+					<highconcept type="string">Disgraced Captain of the Harbour Watch</highconcept>
+					<trouble type="string">I Owe the Wrong People</trouble>
+					<a1 type="string">Saltreach Knows My Face</a1>
+					<a2 type="string">Corin Saved My Life Once</a2>
+					<a3 type="string">Never Leave Anyone in the Water</a3>
+				</aspects>
+				<approaches>
+					<careful type="number">2</careful>
+					<clever type="number">1</clever>
+					<flashy type="number">1</flashy>
+					<forceful type="number">3</forceful>
+					<quick type="number">2</quick>
+					<sneaky type="number">0</sneaky>
+				</approaches>
+				<stuntlist>
+					<id-00001>
+						<name type="string">Harbour Brawler</name>
+						<text type="string">Because I am a Harbour Brawler, I get a +2 when I Forcefully attack on a deck, a quay or anywhere wet and slippery.</text>
+						<skill type="string"></skill>
+					</id-00001>
+					<id-00002>
+						<name type="string">Shield the Weak</name>
+						<text type="string">Because I Never Leave Anyone Behind, I get a +2 when I Carefully defend someone in my zone.</text>
+						<skill type="string"></skill>
+					</id-00002>
+				</stuntlist>
+				<refreshbase type="number">3</refreshbase>
+				<description type="string">Broad, scarred and stubborn, Rook ran the Saltreach watch until a smuggler's bribe he never took got him thrown out.</description>
+				<text type="formattedtext"><p>Broad, scarred and stubborn, Rook ran the Saltreach watch until a smuggler's bribe he never took got him thrown out.</p><p><b>High Concept:</b> _Disgraced Captain of the Harbour Watch_</p><p><b>Trouble:</b> _I Owe the Wrong People_</p><p><b>Aspects:</b> _Saltreach Knows My Face_, _Corin Saved My Life Once_, _Never Leave Anyone in the Water_</p><p><b>Approaches:</b> Careful +2, Clever +1, Flashy +1, Forceful +3, Quick +2, Sneaky +0</p><p><b>Stunts:</b> <b>Harbour Brawler.</b> Because I am a Harbour Brawler, I get a +2 when I Forcefully attack on a deck, a quay or anywhere wet and slippery. <b>Shield the Weak.</b> Because I Never Leave Anyone Behind, I get a +2 when I Carefully defend someone in my zone.</p><p><b>Refresh:</b> 3</p></text>
+			</rooktallowfateaccelerated>
+			<ilsafenwrightfateaccelerated>
+				<name type="string">Ilsa Fenwright (Fate Accelerated)</name>
+				<game type="string">fae</game>
+				<aspects>
+					<highconcept type="string">Weather-Witch of the Western Isles</highconcept>
+					<trouble type="string">The Storm Answers Before I Ask</trouble>
+					<a1 type="string">My Grandmother's Sea-Glass Charm</a1>
+					<a2 type="string">Rook Is Too Stubborn to Die</a2>
+					<a3 type="string">Curious About Everything Drowned</a3>
+				</aspects>
+				<approaches>
+					<careful type="number">2</careful>
+					<clever type="number">3</clever>
+					<flashy type="number">2</flashy>
+					<forceful type="number">1</forceful>
+					<quick type="number">1</quick>
+					<sneaky type="number">0</sneaky>
+				</approaches>
+				<stuntlist>
+					<id-00001>
+						<name type="string">Read the Sky</name>
+						<text type="string">Because I can Read the Sky, I get a +2 when I Cleverly create advantages about the weather or the sea.</text>
+						<skill type="string"></skill>
+					</id-00001>
+					<id-00002>
+						<name type="string">Call the Wind</name>
+						<text type="string">Because the Storm Answers Me, once per game session I can call a gale that puts out every fire in a zone, or fills a ship's sails.</text>
+						<skill type="string"></skill>
+					</id-00002>
+				</stuntlist>
+				<refreshbase type="number">3</refreshbase>
+				<description type="string">A young witch from the islands, salt in her hair and questions on her lips, who hears the weather talk.</description>
+				<text type="formattedtext"><p>A young witch from the islands, salt in her hair and questions on her lips, who hears the weather talk.</p><p><b>High Concept:</b> _Weather-Witch of the Western Isles_</p><p><b>Trouble:</b> _The Storm Answers Before I Ask_</p><p><b>Aspects:</b> _My Grandmother's Sea-Glass Charm_, _Rook Is Too Stubborn to Die_, _Curious About Everything Drowned_</p><p><b>Approaches:</b> Careful +2, Clever +3, Flashy +2, Forceful +1, Quick +1, Sneaky +0</p><p><b>Stunts:</b> <b>Read the Sky.</b> Because I can Read the Sky, I get a +2 when I Cleverly create advantages about the weather or the sea. <b>Call the Wind.</b> Because the Storm Answers Me, once per game session I can call a gale that puts out every fire in a zone, or fills a ship's sails.</p><p><b>Refresh:</b> 3</p></text>
+			</ilsafenwrightfateaccelerated>
+			<coringalefateaccelerated>
+				<name type="string">Corin Gale (Fate Accelerated)</name>
+				<game type="string">fae</game>
+				<aspects>
+					<highconcept type="string">Smuggler With a Conscience</highconcept>
+					<trouble type="string">Mercy Sloane Wants Me Back</trouble>
+					<a1 type="string">Every Cove on This Coast</a1>
+					<a2 type="string">Ilsa Still Owes Me a Fair Wind</a2>
+					<a3 type="string">Quick Hands, Quicker Excuses</a3>
+				</aspects>
+				<approaches>
+					<careful type="number">1</careful>
+					<clever type="number">2</clever>
+					<flashy type="number">1</flashy>
+					<forceful type="number">0</forceful>
+					<quick type="number">2</quick>
+					<sneaky type="number">3</sneaky>
+				</approaches>
+				<stuntlist>
+					<id-00001>
+						<name type="string">Into the Dark</name>
+						<text type="string">Because I Know Every Cove, I get a +2 when I Sneakily overcome obstacles in darkness or fog.</text>
+						<skill type="string"></skill>
+					</id-00001>
+					<id-00002>
+						<name type="string">Old Friends in Every Port</name>
+						<text type="string">Because I have Old Friends in Every Port, once per game session I can find a sailor who owes me a favour.</text>
+						<skill type="string"></skill>
+					</id-00002>
+				</stuntlist>
+				<refreshbase type="number">3</refreshbase>
+				<description type="string">A smiling sailor with a hidden pocket for everything, who sailed for Mercy Sloane until he could not stomach it.</description>
+				<text type="formattedtext"><p>A smiling sailor with a hidden pocket for everything, who sailed for Mercy Sloane until he could not stomach it.</p><p><b>High Concept:</b> _Smuggler With a Conscience_</p><p><b>Trouble:</b> _Mercy Sloane Wants Me Back_</p><p><b>Aspects:</b> _Every Cove on This Coast_, _Ilsa Still Owes Me a Fair Wind_, _Quick Hands, Quicker Excuses_</p><p><b>Approaches:</b> Careful +1, Clever +2, Flashy +1, Forceful +0, Quick +2, Sneaky +3</p><p><b>Stunts:</b> <b>Into the Dark.</b> Because I Know Every Cove, I get a +2 when I Sneakily overcome obstacles in darkness or fog. <b>Old Friends in Every Port.</b> Because I have Old Friends in Every Port, once per game session I can find a sailor who owes me a favour.</p><p><b>Refresh:</b> 3</p></text>
+			</coringalefateaccelerated>
+		</category>
+	</pregencharsheet>
+</root>

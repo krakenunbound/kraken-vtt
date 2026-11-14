@@ -1,7 +1,8 @@
 import { createPortal } from "react-dom";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import type { ChatLine, RollResult, Session } from "../session/useSession";
-import { characterDice, diceStore, rolling, setThrow, tower as towerDrops, type DiceLook } from "../dice/diceStore";
+import { characterDice, diceStore, FATE_SIDES, fateFace, rolling, setThrow, tower as towerDrops, type DiceLook } from "../dice/diceStore";
+import { ladder } from "../../shared/fate/rules.mjs";
 import { commandsFor, runChat, type Command } from "./chatCommands";
 import { slotDrag } from "./QuickSlots";
 import { chatRunner } from "./chatRunner";
@@ -82,7 +83,7 @@ export function RollCard({ roll, pending = false }: { roll: RollResult; pending?
             term.kind === "dice"
               ? term.rolls.map((_, die) => (
                   <span key={`${index}-${die}`} className="die spinning">
-                    <DieShape sides={term.sides === 100 ? 10 : term.sides} size={28} label="" look={look} />
+                    <DieShape sides={(term as { fate?: boolean }).fate ? 6 : term.sides === 100 ? 10 : term.sides} size={28} label="" look={look} />
                   </span>
                 ))
               : [],
@@ -92,6 +93,7 @@ export function RollCard({ roll, pending = false }: { roll: RollResult; pending?
       </span>
     );
   }
+  const fate = roll.terms.some((term) => term.kind === "dice" && (term as { fate?: boolean }).fate);
   return (
     <span className="roll-card" data-total={roll.total}>
       {roll.label ? <span className="roll-label">{roll.label}</span> : null}
@@ -104,16 +106,23 @@ export function RollCard({ roll, pending = false }: { roll: RollResult; pending?
             </span>
           ) : (
             term.rolls.map((value, die) => (
-              <span key={`${index}-${die}`} className={term.kept[die] ? "die" : "die dropped"} title={`d${term.sides}`}>
-                <DieShape sides={term.sides === 100 ? 10 : term.sides} size={28} label={value} look={look} />
+              <span key={`${index}-${die}`} className={term.kept[die] ? "die" : "die dropped"} title={(term as { fate?: boolean }).fate ? "dF" : `d${term.sides}`} data-fate-die={(term as { fate?: boolean }).fate ? value : undefined}>
+                <DieShape sides={(term as { fate?: boolean }).fate ? 6 : term.sides === 100 ? 10 : term.sides} size={28} label={(term as { fate?: boolean }).fate ? fateFace(value) : value} look={look} />
               </span>
             ))
           ),
         )}
       </span>
       <span className="roll-formula">{roll.formula}</span>
-      {roll.result ? <span className={`roll-result ${roll.result === "HIT" || roll.result === "SAVED" ? "hit" : roll.result === "MISS" || roll.result === "FAILED" ? "miss" : "none"}`}>{roll.result}</span> : null}
-      <b className="roll-total">{roll.total}</b>
+      {roll.result ? <span className={`roll-result ${roll.result === "HIT" || roll.result === "SAVED" || roll.result === "SUCCEED" || roll.result === "STYLE" ? "hit" : roll.result === "MISS" || roll.result === "FAILED" || roll.result === "FAIL" ? "miss" : "none"}`}>{roll.result}</span> : null}
+      {fate ? (
+        // Fate: the total on the ladder (Good +3), as the rules read it.
+        <b className="roll-total" data-ladder={ladder(roll.total)} title={ladder(roll.total)}>
+          {roll.total > 0 ? `+${roll.total}` : roll.total}
+        </b>
+      ) : (
+        <b className="roll-total">{roll.total}</b>
+      )}
     </span>
   );
 }
@@ -229,7 +238,7 @@ function Line({ line, gmIcon, session }: { line: ChatLine; gmIcon: string; sessi
 function formulaOf(dice: number[]) {
   const counts = new Map<number, number>();
   for (const sides of dice) counts.set(sides, (counts.get(sides) ?? 0) + 1);
-  return [...counts].map(([sides, count]) => `${count}d${sides}`).join("+");
+  return [...counts].map(([sides, count]) => `${count}d${sides === FATE_SIDES ? "F" : sides}`).join("+");
 }
 
 function withModifier(formula: string, modifier: number) {
@@ -478,7 +487,7 @@ export function ChatDock({ session }: { session: Session }) {
     trayArt[sides] ? (
       <img className="tray-die-3d" src={trayArt[sides]} width={size} height={size} alt="" draggable={false} />
     ) : (
-      <DieShape sides={sides === 100 ? 10 : sides} size={size - 8} label={sides === 100 ? "%" : sides} look={mine} />
+      <DieShape sides={sides === 100 ? 10 : sides === FATE_SIDES ? 6 : sides} size={size - 8} label={sides === 100 ? "%" : sides === FATE_SIDES ? "+" : sides} look={mine} />
     );
   useEffect(() => {
     if (!menu) return;
@@ -593,7 +602,7 @@ export function ChatDock({ session }: { session: Session }) {
     });
     // Dice into the tower, or a blind roll: they drop in, as from the tray.
     const towerRoll = /^\/(?:(r|roll|die)|blindroll|br|tower)\s+(\S+)/i.exec(line.trim());
-    if (towerRoll && (!towerRoll[1] || tower)) dropInTower([...towerRoll[2].matchAll(/d(\d+|%)/gi)].map((match) => (match[1] === "%" ? 100 : Number(match[1]))));
+    if (towerRoll && (!towerRoll[1] || tower)) dropInTower([...towerRoll[2].matchAll(/d(\d+|%|f)/gi)].map((match) => (match[1] === "%" ? 100 : /f/i.test(match[1]) ? FATE_SIDES : Number(match[1]))));
   };
   const runner = useRef(runLine);
   runner.current = runLine;
@@ -958,13 +967,13 @@ export function ChatDock({ session }: { session: Session }) {
         </div>
       ) : null}
       <div className="dice-tray" aria-label="Dice tray" style={{ ["--tray-glow" as string]: mine.accent ?? mine.body }}>
-        {TRAY.map((sides) => (
+        {(/^Fate /.test(session.ruleset) ? [FATE_SIDES, ...TRAY] : TRAY).map((sides) => (
           <button
             key={sides}
             type="button"
-            className="tray-die"
-            title={`Pick up a d${sides} and throw it: drag out and let go, or drop it on the dice tower. Click adds it to the pool; right-click picks up several (then click the table to throw them, or a quick slot to keep them there).`}
-            aria-label={`d${sides}`}
+            className={sides === FATE_SIDES ? "tray-die tray-fate" : "tray-die"}
+            title={sides === FATE_SIDES ? "A Fate die (dF: plus, minus or blank). Click adds one to the pool (four make a Fate roll, 4dF); drag it out and let go, or right-click and pick up 4." : `Pick up a d${sides} and throw it: drag out and let go, or drop it on the dice tower. Click adds it to the pool; right-click picks up several (then click the table to throw them, or a quick slot to keep them there).`}
+            aria-label={sides === FATE_SIDES ? "dF" : `d${sides}`}
             onPointerDown={(event) => startDrag(event, sides)}
             onClick={() => {
               if (!dragged.current) setPool([...pool, sides]);
@@ -1048,7 +1057,7 @@ export function ChatDock({ session }: { session: Session }) {
               </button>
               {MANY.map((count) => (
                 <button key={count} type="button" role="menuitem" data-many={count} title="Pick them up: click the table to throw them, the tower to roll there, or a quick slot to keep them there; a right-click puts them back" onClick={(event) => pickUp([...pool, ...Array<number>(count).fill(menu.sides as number)], { x: event.clientX, y: event.clientY })}>
-                  <b>{count}×</b> Pick up {count} d{menu.sides === 100 ? "%" : menu.sides}
+                  <b>{count}×</b> Pick up {count} d{menu.sides === 100 ? "%" : menu.sides === FATE_SIDES ? "F" : menu.sides}
                 </button>
               ))}
             </>

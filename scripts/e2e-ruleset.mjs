@@ -214,7 +214,8 @@ async function runRuleset(ruleset, plan) {
       if (!check(listed.length >= 1, "the wizard made a character", JSON.stringify(mine).slice(0, 200))) return;
       ctx.character = await tool("kraken_record_get", { id: listed[listed.length - 1].id });
       const items = Object.values(ctx.character.data.inventorylist ?? {});
-      check(items.length > 0, "the character has gear", JSON.stringify(ctx.character.data.inventorylist ?? {}).slice(0, 200));
+      // (A game without gear lists, Fate, keeps what is found in the extras.)
+      if (!plan.noGear) check(items.length > 0, "the character has gear", JSON.stringify(ctx.character.data.inventorylist ?? {}).slice(0, 200));
       if (plan.bought) await plan.bought(ctx);
       await ctx.shot(seat, "07-sheet");
     });
@@ -345,8 +346,12 @@ async function runRuleset(ruleset, plan) {
         await page.waitForTimeout(800);
       }
       const after = await tool("kraken_record_get", { id: ctx.character.id });
-      check(coinTotal(after.data.coins) > coinsBefore, "the parcel's money reached the character", `${coinsBefore} -> ${coinTotal(after.data.coins)} ${JSON.stringify(after.data.coins)}`);
-      if (ctx.parcelItems?.length) check(itemCount(after.data.inventorylist) > itemsBefore, "the parcel's items reached the character", `${itemsBefore} -> ${itemCount(after.data.inventorylist)}`);
+      // A game's own way of receiving a parcel (Fate: no coin, the finds in the extras), else coin and items.
+      if (plan.received) await plan.received(ctx, before, after);
+      else {
+        check(coinTotal(after.data.coins) > coinsBefore, "the parcel's money reached the character", `${coinsBefore} -> ${coinTotal(after.data.coins)} ${JSON.stringify(after.data.coins)}`);
+        if (ctx.parcelItems?.length) check(itemCount(after.data.inventorylist) > itemsBefore, "the parcel's items reached the character", `${itemsBefore} -> ${itemCount(after.data.inventorylist)}`);
+      }
       if (plan.xp !== null) check(Number(after.data.exp ?? 0) >= expBefore + (plan.xp ?? 100), "the experience reached the character", `${expBefore} -> ${after.data.exp}`);
       // The player's sheet shows the experience.
       await seat.bringToFront();
@@ -450,7 +455,8 @@ async function fight(ctx) {
     const foe = view.entries.find((entry) => entry.id === ctx.foe.id);
     const pc = view.entries.find((entry) => entry.id === ctx.pcEntry.id);
     // (Cairn: the routed and the fleeing are out of the fight; a stabilized PC is out of action.)
-    return { foe: foe && !["Dead", "Destroyed", "Dying", "Down", "Unconscious", "Routed", "Fleeing"].includes(foe.health?.status), pc: pc && !["Dead", "Dying", "Down", "Unconscious", "Stable"].includes(pc.health?.status), view };
+    // (Fate: the taken out and the conceded are out of the conflict.)
+    return { foe: foe && !["Dead", "Destroyed", "Dying", "Down", "Unconscious", "Routed", "Fleeing", "Taken Out", "Conceded"].includes(foe.health?.status), pc: pc && !["Dead", "Dying", "Down", "Unconscious", "Stable", "Taken Out", "Conceded"].includes(pc.health?.status), view };
   };
   await seat.bringToFront();
   await openSide(seat, "characters").catch(() => undefined);
@@ -498,7 +504,8 @@ async function fight(ctx) {
   await tool("kraken_combat", { action: "end", removeNpcs: true });
   const lines = (await tool("kraken_chat_log", { count: 200 })) || [];
   check(lines.some((line) => /\[ATTACK\]|\[SHIP ATTACK\]/.test(line.roll?.label ?? "")), "attacks went to chat");
-  check(lines.some((line) => /\[DAMAGE\]/.test(`${line.roll?.label ?? ""} ${line.text ?? ""}`)), "damage went to chat");
+  // (Fate: harm is shifts, absorbed as stress and consequences, or a creature taken out.)
+  check(lines.some((line) => /\[DAMAGE\]|\[STRESS\]|\[TAKEN OUT\]/.test(`${line.roll?.label ?? ""} ${line.text ?? ""}`)), "damage went to chat");
 }
 // How many things a character carries (counts, so a second rope counts).
 function itemCount(list) {

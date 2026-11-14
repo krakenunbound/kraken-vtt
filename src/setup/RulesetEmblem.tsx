@@ -72,6 +72,22 @@ const GLYPHS: Record<string, ReactElement> = {
       <circle cx="27" cy="25.5" r="1.4" />
     </>
   ),
+  // Fate Core: two Fate dice, a plus and a minus (Kraken's own drawing, no Fate logo).
+  fatecore: (
+    <>
+      <rect x="8.5" y="12" width="11" height="11" rx="2" fill="none" />
+      <path d="M14 14.8v5.4M11.3 17.5h5.4" fill="none" />
+      <rect x="20.5" y="17" width="11" height="11" rx="2" fill="none" />
+      <path d="M23.3 22.5h5.4" fill="none" />
+    </>
+  ),
+  // Fate Accelerated: one Fate die, a plus, thrown fast.
+  fateaccelerated: (
+    <>
+      <rect x="16" y="13" width="13" height="13" rx="2.2" fill="none" />
+      <path d="M22.5 16v7M19 19.5h7M8 15.5h5M9.5 19.5h4M8 23.5h5" fill="none" />
+    </>
+  ),
   // Worldbuilding: a compass rose.
   worldbuilding: (
     <>

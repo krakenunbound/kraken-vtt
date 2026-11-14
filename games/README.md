@@ -1,6 +1,6 @@
 # Kraken's own games
 
-Two original games and one open game ship with Kraken, so testers can play
+Two original games and three open games ship with Kraken, so testers can play
 without any Fantasy Grounds modules:
 Two original games, and one free open game, ship with Kraken, so testers can
 play without any Fantasy Grounds modules:
@@ -10,6 +10,27 @@ play without any Fantasy Grounds modules:
 | **Descending Darkness** (dark fantasy) | the d20 family (`shared/dnd5e/rules.mjs`, profile `descending`) | Player's Handbook, Bestiary, *The Empty Watchtower* |
 | **Apeira Astra** (science fiction) | its own 2d6 engine (`shared/astra/rules.mjs`) | Crew Handbook, Threat Dossier, *Salvage Rights* |
 | **Cairn**, Second Edition (Yochai Gal, CC BY-SA 4.0) | its own engine (`shared/cairn/rules.mjs`) | Player's Guide, Warden's Guide, *Trouble in Twin Lakes* |
+| **Fate Core** and **Fate Accelerated** (Evil Hat, CC BY 3.0) | one engine (`shared/fate/rules.mjs`) | Fate Core System, Fate Accelerated Edition, Fate Toolkit and Adversaries, *The Lighthouse at Gull's End* |
+
+Fate's books are Evil Hat's System Reference Documents (Fate Core, Fate
+Accelerated, the Fate System Toolkit, the Fate Adversary Toolkit), read from
+the official HTML files (the "CC-BY SRDs" download at
+https://www.faterpg.com/licensing/) into Markdown, a file a chapter, once:
+
+    node games/fate/tools/convert.mjs "path/to/CC-BY SRDs"
+
+`games/fate/*.mjs` make the books from `games/fate/text` (with Cairn's
+Markdown helpers): every chapter as pages, the skills (and their example
+stunts) from the Default Skill List, FAE's approaches, stunts and example
+characters, and the SRDs' example opposition as NPCs. Each book's first page
+carries its SRD's attribution word for word (`games/fate/LICENSE.md`), with
+Fate's trademark line; no Fate logo or Evil Hat art. *The Lighthouse at
+Gull's End* (`gulls-end.mjs`) is Kraken's own: its two battle maps are drawn
+by `mapgen.py`, then `games/fate/tools/zones.py` washes the sea in and
+outlines each Fate zone in its colour (no lettering; the story names them):
+
+    python games/tools/mapgen.py games/fate/maps/strand.json games/fate/art/strand.webp games/fate/maps/strand.walls.json
+    python games/fate/tools/zones.py games/fate/maps/strand.json games/fate/art/strand.webp
 
 Cairn's books are made from its official Markdown, kept in `games/cairn/text`
 (copied from github.com/yochaigal/cairn: `second-edition/` and the adventure
@@ -109,7 +130,10 @@ that looks like another work's characters.
 ## Licensing
 
 Cairn (`games/cairn` and the three books built from it) is CC BY-SA 4.0, by
-Yochai Gal, adapted for Kraken: see `games/cairn/LICENSE.md`. The rest:
+Yochai Gal, adapted for Kraken: see `games/cairn/LICENSE.md`. Fate's SRD text
+(`games/fate/text` and the three books built from it) is Evil Hat's, CC BY
+3.0, credited word for word in `games/fate/LICENSE.md`; *The Lighthouse at
+Gull's End* and its maps are Kraken's own. The rest:
 
 Everything else here is original: text, names, setting and pictures. Descending
 Darkness's mechanics are in the 5E family; some are based on the System

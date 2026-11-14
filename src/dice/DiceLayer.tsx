@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import type { ChatLine } from "../session/useSession";
-import { diceStore, fullLook, rolling, SHAPED, tower, type DiceLook, type DiceThrow, type TowerDrop } from "./diceStore";
+import { diceStore, FATE_FACES, FATE_SIDES, fullLook, rolling, SHAPED, tower, type DiceLook, type DiceThrow, type TowerDrop } from "./diceStore";
 import { createEffects } from "./effects";
 import { bottomFace, buildDie, model, pulseDice, tensLook, topFace, type ShapeKind } from "./models";
 import { sparkColors, studioScene } from "./gilded";
@@ -279,10 +279,13 @@ function createEngine(host: HTMLDivElement) {
     towerDrop(drop: TowerDrop) {
       const look = diceStore.settings().look;
       const to = new THREE.Vector3(drop.to.x / unit, 0.4, drop.to.y / unit);
-      const kinds = drop.sides.flatMap((sides): ShapeKind[] => (sides === 100 ? ["d100tens", "d100"] : sides === 2 || sides === 3 ? ["d6"] : SHAPED.has(sides) ? [`d${sides}` as ShapeKind] : [])).slice(0, MAX_DICE);
-      if (kinds.length === 0) return;
-      const groups = kinds.map((kind) => {
-        const group = buildDie(kind, kind === "d100tens" ? tensLook(look) : look, model(kind).shape.values);
+      // A Fate die (FATE_SIDES) is a d6 with plus, minus and blank faces.
+      const dice = drop.sides
+        .flatMap((sides): { kind: ShapeKind; fate?: boolean }[] => (sides === 100 ? [{ kind: "d100tens" }, { kind: "d100" }] : sides === FATE_SIDES ? [{ kind: "d6", fate: true }] : sides === 2 || sides === 3 ? [{ kind: "d6" }] : SHAPED.has(sides) ? [{ kind: `d${sides}` as ShapeKind }] : []))
+        .slice(0, MAX_DICE);
+      if (dice.length === 0) return;
+      const groups = dice.map(({ kind, fate }) => {
+        const group = buildDie(kind, kind === "d100tens" ? tensLook(look) : look, fate ? FATE_FACES : model(kind).shape.values);
         scene.add(group);
         return group;
       });

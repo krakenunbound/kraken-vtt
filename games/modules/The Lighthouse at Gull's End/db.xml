@@ -1,0 +1,683 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root version="4.6" release="1">
+	<encounter>
+		<category name="The Lighthouse at Gull's End">
+			<e00aboutthisscenario>
+				<name type="string">00 About This Scenario</name>
+				<text type="formattedtext"><p><b>The Lighthouse at Gull's End</b> is a short scenario for three or four player characters, for <b>Fate Core</b> or <b>Fate Accelerated</b> (one session, two or three hours). It was written for Kraken VTT; its rules are Fate's.</p><frame>This work is based on Fate Core System and Fate Accelerated Edition (found at http://www.faterpg.com/), products of Evil Hat Productions, LLC, developed, authored, and edited by Leonard Balsera, Brian Engard, Jeremy Keller, Ryan Macklin, Mike Olson, Clark Valentine, Amanda Valentine, Fred Hicks, and Rob Donoghue, and licensed for our use under the Creative Commons Attribution 3.0 Unported license (http://creativecommons.org/licenses/by/3.0/).</frame><p>Fate™ is a trademark of Evil Hat Productions, LLC. Kraken VTT is not affiliated with Evil Hat Productions, LLC, and this book is not endorsed by it. No Fate logo or Evil Hat art is used.</p><p><b>What you need:</b> the Fate Core System or Fate Accelerated Edition book made active (the character wizard reads it), and this scenario. The Fate Toolkit and Adversaries book has more opposition if the table wants it.</p><p><b>Pregenerated characters:</b> Rook Tallow, Ilsa Fenwright and Corin Gale, each made twice: for Fate Core (skills) and for Fate Accelerated (approaches). In the Characters window a player takes one as it is (<i>Pregenerated</i>), or makes their own with the wizard.</p><p><b>In Kraken:</b> put the game aspects and each scene's situation aspects on the <b>Scene Aspects</b> strip (the GM's + on the strip, or <i>Start a scene</i>: the GM's fate points are set to one a player character). The two conflicts are encounters (drag them onto the combat tracker); the two maps have their zones outlined in colour.</p></text>
+			</e00aboutthisscenario>
+			<e01thesituation>
+				<name type="string">01 The Situation</name>
+				<text type="formattedtext"><p>For three nights the great lamp of <b>Gull's End</b> has stayed dark. On the third, the merchant ship <i>Kittiwake</i> broke on the rocks below it, and by morning there was nothing on the beach but planks: her cargo was gone before the tide was.</p><p>The harbour town of <b>Saltreach</b> wants to know why the light is out, and the keeper, <b>Isolde Varr</b>, has not come down the cliff in a week.</p><p><b>What is really going on:</b> Captain <b>Mercy Sloane</b>, a smuggler, paid the keeper to let the light go dark, and holds the keeper's son aboard her ship to keep her quiet. Sloane's wreckers, led by <b>Tam Coller</b> (<i>the Lamp-Snuffer</i>), light false fires on the strand to lure ships onto the rocks, and strip what washes in.</p><p><b>Game aspects</b> (on the strip for the whole session, kind <i>game</i>):</p><list><li><i>The Light Has Gone Out</i></li><li><i>A Coast That Eats Ships</i></li></list><p><b>Story questions:</b> Will the heroes put the light back before another ship breaks? Will they free Isolde's son? Will Mercy Sloane get away with the <i>Kittiwake</i>'s cargo?</p></text>
+			</e01thesituation>
+			<e02sceneonesaltreach>
+				<name type="string">02 Scene One: Saltreach</name>
+				<text type="formattedtext"><p>The harbour town at dusk. Fishing boats pulled high, a crowd at the harbourmaster's door, and the <i>Kittiwake</i>'s widowed owner, <b>Maren Hask</b>, shouting for someone to do something.</p><p><b>Situation aspects:</b> <i>Angry Crowd on the Quay</i>, <i>Fog Rolling In</i>.</p><p><b>What the heroes can learn</b> (overcome or create an advantage against Fair (+2), Contacts, Rapport, Investigate, Empathy; FAE Clever, Flashy, Careful):</p><list><li>Lights were seen on the strand the night the <i>Kittiwake</i> sank: not the lighthouse's, low and moving. A success makes the aspect <i>False Fires on the Strand</i> (one free invoke).</li><li>Tam Coller has been spending silver in the taverns: <i>Tam Coller Is Flush With Silver</i>.</li><li>A black-sailed ship has been anchored in the lee of the point: <i>The Ship Without a Flag</i>.</li></list><p><b>Compel to offer:</b> a character with a past in Saltreach (Rook's <i>Saltreach Knows My Face</i>) is recognised and held up by old grievances: a fate point if they let it happen.</p></text>
+			</e02sceneonesaltreach>
+			<e03scenetwothecliffpath>
+				<name type="string">03 Scene Two: The Cliff Path</name>
+				<text type="formattedtext"><p>The way down to the strand and up to the lighthouse is a goat-path along the cliff, at night, in a rising gale. Play it as a <b>challenge</b>: three overcome actions, each by a different hero or skill, against Fair (+2):</p><list><li><b>Keep your footing</b> on the wet stone (Athletics; FAE Careful or Quick).</li><li><b>Spot the wreckers' lookout</b> before he sees you (Notice; FAE Careful or Sneaky).</li><li><b>Find the way down in the dark</b> (Lore or Investigate; FAE Clever).</li></list><p><b>Situation aspects:</b> <i>Slick Rocks</i>, <i>Howling Gale</i>.</p><p>Failures do not stop them: each costs something (a stress box, a lookout who runs to warn Tam Coller, the wreckers ready for them: one free invoke on <i>Ambush in the Dunes</i> for the opposition in Scene Three).</p></text>
+			</e03scenetwothecliffpath>
+			<e04scenethreewreckersonthestrand>
+				<name type="string">04 Scene Three: Wreckers on the Strand</name>
+				<text type="formattedtext"><p><b>The Strand at Gull's End</b> (the map). The wreckers have built a fire on the beach to draw the next ship in. Tam Coller and three wreckers are stripping the <i>Kittiwake</i>'s last crates.</p><p><b>Zones</b> (their outlines on the map):</p><list><li><b>Blue: The Surf.</b> Waist-deep, freezing water. <i>Breaking Waves</i>: moving into or out of it is an overcome (Athletics, Fair).</li><li><b>Orange: The Wreck.</b> What is left of the <i>Kittiwake</i>'s hull. <i>Splintered Timbers</i>; good cover.</li><li><b>Teal: The Tidepools.</b> <i>Slippery Rock Pools</i>.</li><li><b>Red: The Strand.</b> Open sand, the wreckers' <i>False Beacon Fire</i> burning.</li><li><b>Purple: The Cliff Path.</b> Up to the lighthouse. <i>Narrow Ledge</i>.</li></list><p><b>The conflict</b> (the encounter <i>Wreckers on the Strand</i>): <b>Tam Coller</b> (supporting NPC) and <b>Wreckers</b> (nameless, Fair; three, or a mob). The wreckers fight to keep their haul; Tam concedes when the fight turns ("I'll tell you who paid us!") rather than be taken out.</p><p><b>If the heroes put out the false fire</b> (overcome against Good (+3), or as part of an attack's narration on a success with style) another ship is saved: tell the players, and remember it at the milestone.</p></text>
+			</e04scenethreewreckersonthestrand>
+			<e05scenefourthelamproom>
+				<name type="string">05 Scene Four: The Lamp Room</name>
+				<text type="formattedtext"><p><b>The Lighthouse at Gull's End</b> (the map). Isolde Varr's cottage and the tower. Captain <b>Mercy Sloane</b> is here with two <b>deckhands</b>, collecting her last payment of silver from the keeper and making sure the lamp stays dark.</p><p><b>Zones</b> (their outlines on the map):</p><list><li><b>Orange: The Keeper's Cottage.</b> Isolde is here, <i>Bound to a Chair</i>.</li><li><b>Teal: The Tower Floor.</b> The spiral stair up. <i>Barrels of Lamp Oil</i>.</li><li><b>Yellow: The Lamp Room</b> (upstairs, drawn beside the tower). The great lamp, cold. <i>The Great Lens</i>.</li><li><b>Green: The Yard.</b> The path from the cliff. <i>Wind-Bent Grass</i>.</li><li><b>Red: The Cliff's Edge.</b> <i>A Long Fall to the Rocks</i>.</li></list><p><b>The conflict</b> (the encounter <i>The Lamp Room</i>): <b>Mercy Sloane</b> (main NPC) and two <b>Sloane's Deckhands</b> (nameless, Average). Sloane prefers talk to a fight, and a fight to losing: if the heroes threaten her, she offers a bargain (the boy for her freedom). She concedes rather than be taken out, and gets away on her ship unless the heroes have cut her off.</p><p><b>Lighting the lamp</b> is an overcome against Great (+4) (Crafts, Lore; FAE Clever or Careful), easier with Isolde's help (+2, or a free invoke on <i>Isolde Knows This Lamp</i> if a hero frees her).</p></text>
+			</e05scenefourthelamproom>
+			<e06resolutionandmilestones>
+				<name type="string">06 Resolution and Milestones</name>
+				<text type="formattedtext"><p><b>If the light burns again</b> before dawn, the next ship comes safe into Saltreach, and the town owes the heroes: a new game aspect for the next session, <i>Heroes of Saltreach</i>.</p><p><b>If Mercy Sloane got away</b>, she is a main NPC for the next scenario: give her a new aspect, <i>The Heroes of Gull's End Cost Me Everything</i>.</p><p><b>Milestones:</b> at the end of the session, each player character reaches a <b>minor milestone</b> (switch two skills or approaches, rename an aspect, trade a stunt). If the story questions were answered (the light lit, the boy freed), it is a <b>significant milestone</b> instead: a skill point too. In Kraken: the sheet's <i>Milestones</i> tab, or the party sheet's <i>Milestones</i> tab for everyone at once.</p></text>
+			</e06resolutionandmilestones>
+			<e07thepregeneratedcharacters>
+				<name type="string">07 The Pregenerated Characters</name>
+				<text type="formattedtext"><p>Three heroes who know each other already (their aspects say so):</p><list><li><b>Rook Tallow</b>, <i>Disgraced Captain of the Harbour Watch</i>: a fighter, stubborn and loyal; trouble <i>I Owe the Wrong People</i>.</li><li><b>Ilsa Fenwright</b>, <i>Weather-Witch of the Western Isles</i>: wise in old lore and the moods of the sea; trouble <i>The Storm Answers Before I Ask</i>.</li><li><b>Corin Gale</b>, <i>Smuggler With a Conscience</i>: a liar and a sailor; trouble <i>Mercy Sloane Wants Me Back</i> (the GM's best compel tonight).</li></list><p>Each comes in a Fate Core version (the skill pyramid, three stunts) and a Fate Accelerated version (approaches, one or two stunts), with refresh 3.</p></text>
+			</e07thepregeneratedcharacters>
+		</category>
+	</encounter>
+	<npc>
+		<category name="Gull's End">
+			<wrecker>
+				<name type="string">Wrecker</name>
+				<fatekind type="string">nameless</fatekind>
+				<quality type="string">Fair</quality>
+				<aspectlist>
+					<id-00001>
+						<name type="string">Lanterns on the Rocks</name>
+					</id-00001>
+					<id-00002>
+						<name type="string">Paid by the Wreck</name>
+					</id-00002>
+				</aspectlist>
+				<skilllist>
+					<id-00001>
+						<name type="string">Fight</name>
+						<rating type="number">2</rating>
+					</id-00001>
+					<id-00002>
+						<name type="string">Athletics</name>
+						<rating type="number">1</rating>
+					</id-00002>
+					<id-00003>
+						<name type="string">Stealth</name>
+						<rating type="number">1</rating>
+					</id-00003>
+				</skilllist>
+				<stuntlist>
+				</stuntlist>
+				<stressphysical type="number">1</stressphysical>
+				<stressmental type="number">1</stressmental>
+				<consequencelist type="string"></consequencelist>
+				<mob type="number">1</mob>
+				<text type="formattedtext"><p>Fair nameless NPC.</p><p><b>Aspects:</b> _Lanterns on the Rocks_, _Paid by the Wreck_</p><p><b>Skills:</b> Fight +2, Athletics +1, Stealth +1</p><p><b>Stress:</b> 1 box; no consequences</p><p>Three of them on the strand, or a mob of three.</p></text>
+			</wrecker>
+			<tamcollerthelampsnuffer>
+				<name type="string">Tam Coller, the Lamp-Snuffer</name>
+				<fatekind type="string">supporting</fatekind>
+				<aspectlist>
+					<id-00001>
+						<name type="string">Wrecker Chief of Gull's End</name>
+					</id-00001>
+					<id-00002>
+						<name type="string">Afraid of the Captain More Than of You</name>
+					</id-00002>
+					<id-00003>
+						<name type="string">The Tide Is My Friend</name>
+					</id-00003>
+				</aspectlist>
+				<skilllist>
+					<id-00001>
+						<name type="string">Fight</name>
+						<rating type="number">3</rating>
+					</id-00001>
+					<id-00002>
+						<name type="string">Physique</name>
+						<rating type="number">2</rating>
+					</id-00002>
+					<id-00003>
+						<name type="string">Athletics</name>
+						<rating type="number">1</rating>
+					</id-00003>
+					<id-00004>
+						<name type="string">Deceive</name>
+						<rating type="number">1</rating>
+					</id-00004>
+				</skilllist>
+				<stuntlist>
+					<id-00001>
+						<name type="string">Hook and Line</name>
+						<text type="string">+2 to Fight to create an advantage by dragging someone into the surf with his boat-hook.</text>
+					</id-00001>
+				</stuntlist>
+				<stressphysical type="number">3</stressphysical>
+				<stressmental type="number">2</stressmental>
+				<consequencelist type="string">mild</consequencelist>
+				<mob type="number">1</mob>
+				<text type="formattedtext"><p>A supporting NPC.</p><p><b>Aspects:</b> _Wrecker Chief of Gull's End_, _Afraid of the Captain More Than of You_, _The Tide Is My Friend_</p><p><b>Skills:</b> Fight +3, Physique +2, Athletics +1, Deceive +1</p><p><b>Stress:</b> 3 physical, 2 mental; consequences mild</p><p><b>Hook and Line.</b> +2 to Fight to create an advantage by dragging someone into the surf with his boat-hook.</p><p>He concedes when the fight turns against him, and gives up who paid him.</p></text>
+			</tamcollerthelampsnuffer>
+			<captainmercysloane>
+				<name type="string">Captain Mercy Sloane</name>
+				<fatekind type="string">main</fatekind>
+				<aspectlist>
+					<id-00001>
+						<name type="string">Smuggler Captain Who Bought the Light</name>
+					</id-00001>
+					<id-00002>
+						<name type="string">Every Wreck Is My Cargo</name>
+					</id-00002>
+					<id-00003>
+						<name type="string">Corin Gale Owes Me</name>
+					</id-00003>
+					<id-00004>
+						<name type="string">Charming Until She Isn't</name>
+					</id-00004>
+					<id-00005>
+						<name type="string">The Sea Took My First Ship</name>
+					</id-00005>
+				</aspectlist>
+				<skilllist>
+					<id-00001>
+						<name type="string">Shoot</name>
+						<rating type="number">4</rating>
+					</id-00001>
+					<id-00002>
+						<name type="string">Deceive</name>
+						<rating type="number">3</rating>
+					</id-00002>
+					<id-00003>
+						<name type="string">Fight</name>
+						<rating type="number">3</rating>
+					</id-00003>
+					<id-00004>
+						<name type="string">Rapport</name>
+						<rating type="number">2</rating>
+					</id-00004>
+					<id-00005>
+						<name type="string">Will</name>
+						<rating type="number">2</rating>
+					</id-00005>
+					<id-00006>
+						<name type="string">Notice</name>
+						<rating type="number">2</rating>
+					</id-00006>
+					<id-00007>
+						<name type="string">Athletics</name>
+						<rating type="number">1</rating>
+					</id-00007>
+					<id-00008>
+						<name type="string">Physique</name>
+						<rating type="number">1</rating>
+					</id-00008>
+					<id-00009>
+						<name type="string">Contacts</name>
+						<rating type="number">1</rating>
+					</id-00009>
+					<id-00010>
+						<name type="string">Resources</name>
+						<rating type="number">1</rating>
+					</id-00010>
+				</skilllist>
+				<stuntlist>
+					<id-00001>
+						<name type="string">Brace of Pistols</name>
+						<text type="string">+2 to Shoot when she attacks first in a conflict.</text>
+					</id-00001>
+					<id-00002>
+						<name type="string">Silver Tongue</name>
+						<text type="string">She can use Deceive instead of Rapport to create advantages when she bargains.</text>
+					</id-00002>
+				</stuntlist>
+				<stressphysical type="number">3</stressphysical>
+				<stressmental type="number">3</stressmental>
+				<consequencelist type="string">mild, moderate, severe</consequencelist>
+				<mob type="number">1</mob>
+				<text type="formattedtext"><p>A main NPC.</p><p><b>Aspects:</b> _Smuggler Captain Who Bought the Light_, _Every Wreck Is My Cargo_, _Corin Gale Owes Me_, _Charming Until She Isn't_, _The Sea Took My First Ship_</p><p><b>Skills:</b> Shoot +4, Deceive +3, Fight +3, Rapport +2, Will +2, Notice +2, Athletics +1, Physique +1, Contacts +1, Resources +1</p><p><b>Stress:</b> 3 boxes; consequences mild, moderate, severe</p><p><b>Brace of Pistols.</b> +2 to Shoot when she attacks first in a conflict.</p><p><b>Silver Tongue.</b> She can use Deceive instead of Rapport to create advantages when she bargains.</p><p>She concedes rather than be taken out, and gets away on her ship unless the heroes have cut her off.</p></text>
+			</captainmercysloane>
+			<sloanesdeckhand>
+				<name type="string">Sloane's Deckhand</name>
+				<fatekind type="string">nameless</fatekind>
+				<quality type="string">Average</quality>
+				<aspectlist>
+					<id-00001>
+						<name type="string">Better Paid Than Brave</name>
+					</id-00001>
+				</aspectlist>
+				<skilllist>
+					<id-00001>
+						<name type="string">Fight</name>
+						<rating type="number">1</rating>
+					</id-00001>
+					<id-00002>
+						<name type="string">Shoot</name>
+						<rating type="number">1</rating>
+					</id-00002>
+				</skilllist>
+				<stuntlist>
+				</stuntlist>
+				<stressphysical type="number">0</stressphysical>
+				<stressmental type="number">0</stressmental>
+				<consequencelist type="string"></consequencelist>
+				<mob type="number">1</mob>
+				<text type="formattedtext"><p>Average nameless NPC.</p><p><b>Aspects:</b> _Better Paid Than Brave_</p><p><b>Skills:</b> Fight +1, Shoot +1</p><p><b>Stress:</b> no boxes; no consequences</p></text>
+			</sloanesdeckhand>
+			<isoldevarrthekeeper>
+				<name type="string">Isolde Varr, the Keeper</name>
+				<fatekind type="string">supporting</fatekind>
+				<aspectlist>
+					<id-00001>
+						<name type="string">Keeper of the Gull's End Light</name>
+					</id-00001>
+					<id-00002>
+						<name type="string">I Sold the Light to Save My Son</name>
+					</id-00002>
+					<id-00003>
+						<name type="string">Isolde Knows This Lamp</name>
+					</id-00003>
+				</aspectlist>
+				<skilllist>
+					<id-00001>
+						<name type="string">Lore</name>
+						<rating type="number">3</rating>
+					</id-00001>
+					<id-00002>
+						<name type="string">Crafts</name>
+						<rating type="number">2</rating>
+					</id-00002>
+					<id-00003>
+						<name type="string">Will</name>
+						<rating type="number">1</rating>
+					</id-00003>
+					<id-00004>
+						<name type="string">Notice</name>
+						<rating type="number">1</rating>
+					</id-00004>
+				</skilllist>
+				<stuntlist>
+				</stuntlist>
+				<stressphysical type="number">2</stressphysical>
+				<stressmental type="number">3</stressmental>
+				<consequencelist type="string">mild</consequencelist>
+				<mob type="number">1</mob>
+				<text type="formattedtext"><p>A supporting NPC.</p><p><b>Aspects:</b> _Keeper of the Gull's End Light_, _I Sold the Light to Save My Son_, _Isolde Knows This Lamp_</p><p><b>Skills:</b> Lore +3, Crafts +2, Will +1, Notice +1</p><p><b>Stress:</b> 2 physical, 3 mental; consequences mild</p><p>An ally, once freed: her help lighting the lamp is +2.</p></text>
+			</isoldevarrthekeeper>
+			<marenhask>
+				<name type="string">Maren Hask</name>
+				<fatekind type="string">nameless</fatekind>
+				<quality type="string">Average</quality>
+				<aspectlist>
+					<id-00001>
+						<name type="string">The Kittiwake Was All I Had</name>
+					</id-00001>
+				</aspectlist>
+				<skilllist>
+					<id-00001>
+						<name type="string">Contacts</name>
+						<rating type="number">1</rating>
+					</id-00001>
+					<id-00002>
+						<name type="string">Provoke</name>
+						<rating type="number">1</rating>
+					</id-00002>
+				</skilllist>
+				<stuntlist>
+				</stuntlist>
+				<stressphysical type="number">0</stressphysical>
+				<stressmental type="number">0</stressmental>
+				<consequencelist type="string"></consequencelist>
+				<mob type="number">1</mob>
+				<text type="formattedtext"><p>Average nameless NPC.</p><p><b>Aspects:</b> _The Kittiwake Was All I Had_</p><p><b>Skills:</b> Contacts +1, Provoke +1</p><p><b>Stress:</b> no boxes; no consequences</p><p>The Kittiwake's owner, on the quay in Saltreach.</p></text>
+			</marenhask>
+		</category>
+	</npc>
+	<battle>
+		<category name="Conflicts">
+			<wreckersonthestrand>
+				<name type="string">Wreckers on the Strand</name>
+				<npclist>
+					<id-00001>
+						<name type="string">Tam Coller, the Lamp-Snuffer</name>
+						<count type="number">1</count>
+						<faction type="string">foe</faction>
+						<isidentified type="number">1</isidentified>
+						<link type="windowreference"><class>npc</class><recordname>npc.tamcollerthelampsnuffer@The Lighthouse at Gull's End</recordname></link>
+					</id-00001>
+					<id-00002>
+						<name type="string">Wrecker</name>
+						<count type="number">3</count>
+						<faction type="string">foe</faction>
+						<isidentified type="number">1</isidentified>
+						<link type="windowreference"><class>npc</class><recordname>npc.wrecker@The Lighthouse at Gull's End</recordname></link>
+					</id-00002>
+				</npclist>
+			</wreckersonthestrand>
+			<thelamproom>
+				<name type="string">The Lamp Room</name>
+				<npclist>
+					<id-00001>
+						<name type="string">Captain Mercy Sloane</name>
+						<count type="number">1</count>
+						<faction type="string">foe</faction>
+						<isidentified type="number">1</isidentified>
+						<link type="windowreference"><class>npc</class><recordname>npc.captainmercysloane@The Lighthouse at Gull's End</recordname></link>
+					</id-00001>
+					<id-00002>
+						<name type="string">Sloane's Deckhand</name>
+						<count type="number">2</count>
+						<faction type="string">foe</faction>
+						<isidentified type="number">1</isidentified>
+						<link type="windowreference"><class>npc</class><recordname>npc.sloanesdeckhand@The Lighthouse at Gull's End</recordname></link>
+					</id-00002>
+				</npclist>
+			</thelamproom>
+		</category>
+	</battle>
+	<image>
+		<category name="Maps">
+			<thestrandatgullsend>
+				<name type="string">The Strand at Gull's End</name>
+				<image>
+					<grid type="string">on</grid>
+					<gridsize type="string">70,70</gridsize>
+					<gridoffset type="string">0,0</gridoffset>
+					<layers>
+						<layer>
+							<name type="string">The Strand at Gull's End</name>
+							<id type="string">0</id>
+							<parentid type="string">-1</parentid>
+							<type type="string">image</type>
+							<bitmap type="string">images/strand.webp</bitmap>
+							<matrix type="string">1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1</matrix>
+							<occluders>
+								<occluder>
+									<id type="string">0</id>
+									<points type="string">910,630,1120,630</points>
+								</occluder>
+								<occluder>
+									<id type="string">1</id>
+									<points type="string">840,280,910,280</points>
+								</occluder>
+								<occluder>
+									<id type="string">2</id>
+									<points type="string">980,280,1120,280</points>
+								</occluder>
+								<occluder>
+									<id type="string">3</id>
+									<points type="string">-840,210,-420,210</points>
+								</occluder>
+								<occluder>
+									<id type="string">4</id>
+									<points type="string">-840,140,-350,140</points>
+								</occluder>
+								<occluder>
+									<id type="string">5</id>
+									<points type="string">-140,140,0,140</points>
+								</occluder>
+								<occluder>
+									<id type="string">6</id>
+									<points type="string">-140,70,0,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">7</id>
+									<points type="string">-420,0,-350,0</points>
+								</occluder>
+								<occluder>
+									<id type="string">8</id>
+									<points type="string">210,0,280,0</points>
+								</occluder>
+								<occluder>
+									<id type="string">9</id>
+									<points type="string">700,0,840,0</points>
+								</occluder>
+								<occluder>
+									<id type="string">10</id>
+									<points type="string">-840,-70,-490,-70</points>
+								</occluder>
+								<occluder>
+									<id type="string">11</id>
+									<points type="string">840,-70,980,-70</points>
+								</occluder>
+								<occluder>
+									<id type="string">12</id>
+									<points type="string">-840,-140,-490,-140</points>
+								</occluder>
+								<occluder>
+									<id type="string">13</id>
+									<points type="string">210,-140,280,-140</points>
+								</occluder>
+								<occluder>
+									<id type="string">14</id>
+									<points type="string">560,-350,700,-350</points>
+								</occluder>
+								<occluder>
+									<id type="string">15</id>
+									<points type="string">560,-560,840,-560</points>
+								</occluder>
+								<occluder>
+									<id type="string">16</id>
+									<points type="string">-840,210,-840,140</points>
+								</occluder>
+								<occluder>
+									<id type="string">17</id>
+									<points type="string">-840,-70,-840,-140</points>
+								</occluder>
+								<occluder>
+									<id type="string">18</id>
+									<points type="string">-490,-70,-490,-140</points>
+								</occluder>
+								<occluder>
+									<id type="string">19</id>
+									<points type="string">-420,210,-420,0</points>
+								</occluder>
+								<occluder>
+									<id type="string">20</id>
+									<points type="string">-350,140,-350,0</points>
+								</occluder>
+								<occluder>
+									<id type="string">21</id>
+									<points type="string">-140,140,-140,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">22</id>
+									<points type="string">0,140,0,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">23</id>
+									<points type="string">210,0,210,-140</points>
+								</occluder>
+								<occluder>
+									<id type="string">24</id>
+									<points type="string">280,0,280,-140</points>
+								</occluder>
+								<occluder>
+									<id type="string">25</id>
+									<points type="string">560,700,560,-350</points>
+								</occluder>
+								<occluder>
+									<id type="string">26</id>
+									<points type="string">560,-560,560,-700</points>
+								</occluder>
+								<occluder>
+									<id type="string">27</id>
+									<points type="string">700,0,700,-350</points>
+								</occluder>
+								<occluder>
+									<id type="string">28</id>
+									<points type="string">840,280,840,0</points>
+								</occluder>
+								<occluder>
+									<id type="string">29</id>
+									<points type="string">840,-70,840,-560</points>
+								</occluder>
+								<occluder>
+									<id type="string">30</id>
+									<points type="string">910,630,910,280</points>
+								</occluder>
+								<occluder>
+									<id type="string">31</id>
+									<points type="string">980,280,980,-70</points>
+								</occluder>
+							</occluders>
+						</layer>
+					</layers>
+				</image>
+			</thestrandatgullsend>
+			<thelighthouseatgullsend>
+				<name type="string">The Lighthouse at Gull's End</name>
+				<image>
+					<grid type="string">on</grid>
+					<gridsize type="string">70,70</gridsize>
+					<gridoffset type="string">0,0</gridoffset>
+					<layers>
+						<layer>
+							<name type="string">The Lighthouse at Gull's End</name>
+							<id type="string">0</id>
+							<parentid type="string">-1</parentid>
+							<type type="string">image</type>
+							<bitmap type="string">images/lighthouse.webp</bitmap>
+							<matrix type="string">1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1</matrix>
+							<occluders>
+								<occluder>
+									<id type="string">0</id>
+									<points type="string">70,560,490,560</points>
+								</occluder>
+								<occluder>
+									<id type="string">1</id>
+									<points type="string">70,350,490,350</points>
+								</occluder>
+								<occluder>
+									<id type="string">2</id>
+									<points type="string">-70,280,0,280</points>
+								</occluder>
+								<occluder>
+									<id type="string">3</id>
+									<points type="string">560,280,630,280</points>
+								</occluder>
+								<occluder>
+									<id type="string">4</id>
+									<points type="string">0,210,560,210</points>
+								</occluder>
+								<occluder>
+									<id type="string">5</id>
+									<points type="string">-840,140,-140,140</points>
+								</occluder>
+								<occluder>
+									<id type="string">6</id>
+									<points type="string">-770,70,-210,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">7</id>
+									<points type="string">-70,0,0,0</points>
+								</occluder>
+								<occluder>
+									<id type="string">8</id>
+									<points type="string">-210,-70,-140,-70</points>
+								</occluder>
+								<occluder>
+									<id type="string">9</id>
+									<points type="string">-70,-70,0,-70</points>
+								</occluder>
+								<occluder>
+									<id type="string">10</id>
+									<points type="string">-210,-140,-140,-140</points>
+								</occluder>
+								<occluder>
+									<id type="string">11</id>
+									<points type="string">0,-280,210,-280</points>
+								</occluder>
+								<occluder>
+									<id type="string">12</id>
+									<points type="string">280,-280,560,-280</points>
+								</occluder>
+								<occluder>
+									<id type="string">13</id>
+									<points type="string">-770,-350,-560,-350</points>
+								</occluder>
+								<occluder>
+									<id type="string">14</id>
+									<points type="string">-490,-350,-210,-350</points>
+								</occluder>
+								<occluder>
+									<id type="string">15</id>
+									<points type="string">-70,-350,210,-350</points>
+								</occluder>
+								<occluder>
+									<id type="string">16</id>
+									<points type="string">280,-350,630,-350</points>
+								</occluder>
+								<occluder>
+									<id type="string">17</id>
+									<points type="string">-840,-420,-560,-420</points>
+								</occluder>
+								<occluder>
+									<id type="string">18</id>
+									<points type="string">-490,-420,-140,-420</points>
+								</occluder>
+								<occluder>
+									<id type="string">19</id>
+									<points type="string">-840,140,-840,-420</points>
+								</occluder>
+								<occluder>
+									<id type="string">20</id>
+									<points type="string">-770,70,-770,-350</points>
+								</occluder>
+								<occluder>
+									<id type="string">21</id>
+									<points type="string">-560,-350,-560,-420</points>
+								</occluder>
+								<occluder>
+									<id type="string">22</id>
+									<points type="string">-490,-350,-490,-420</points>
+								</occluder>
+								<occluder>
+									<id type="string">23</id>
+									<points type="string">-210,70,-210,-70</points>
+								</occluder>
+								<occluder>
+									<id type="string">24</id>
+									<points type="string">-210,-140,-210,-350</points>
+								</occluder>
+								<occluder>
+									<id type="string">25</id>
+									<points type="string">-140,140,-140,-70</points>
+								</occluder>
+								<occluder>
+									<id type="string">26</id>
+									<points type="string">-140,-140,-140,-420</points>
+								</occluder>
+								<occluder>
+									<id type="string">27</id>
+									<points type="string">-70,280,-70,0</points>
+								</occluder>
+								<occluder>
+									<id type="string">28</id>
+									<points type="string">-70,-70,-70,-350</points>
+								</occluder>
+								<occluder>
+									<id type="string">29</id>
+									<points type="string">0,630,0,280</points>
+								</occluder>
+								<occluder>
+									<id type="string">30</id>
+									<points type="string">0,210,0,0</points>
+								</occluder>
+								<occluder>
+									<id type="string">31</id>
+									<points type="string">0,-70,0,-280</points>
+								</occluder>
+								<occluder>
+									<id type="string">32</id>
+									<points type="string">70,560,70,350</points>
+								</occluder>
+								<occluder>
+									<id type="string">33</id>
+									<points type="string">210,-280,210,-350</points>
+								</occluder>
+								<occluder>
+									<id type="string">34</id>
+									<points type="string">280,-280,280,-350</points>
+								</occluder>
+								<occluder>
+									<id type="string">35</id>
+									<points type="string">490,560,490,350</points>
+								</occluder>
+								<occluder>
+									<id type="string">36</id>
+									<points type="string">560,630,560,280</points>
+								</occluder>
+								<occluder>
+									<id type="string">37</id>
+									<points type="string">560,210,560,-280</points>
+								</occluder>
+								<occluder>
+									<id type="string">38</id>
+									<points type="string">630,280,630,-350</points>
+								</occluder>
+								<occluder>
+									<id type="string">39</id>
+									<points type="string">-560,-350,-490,-350</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+								<occluder>
+									<id type="string">40</id>
+									<points type="string">-210,-70,-210,-140</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+								<occluder>
+									<id type="string">41</id>
+									<points type="string">210,-280,280,-280</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+								<occluder>
+									<id type="string">42</id>
+									<points type="string">0,0,0,-70</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+							</occluders>
+						</layer>
+					</layers>
+				</image>
+			</thelighthouseatgullsend>
+		</category>
+	</image>
+</root>

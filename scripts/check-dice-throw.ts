@@ -56,6 +56,22 @@ for (const side of sides) {
 const one = (side: number, value: number) =>
   diceOf({ id: "x", from: "", text: "", at: 0, roll: { formula: "", label: "", total: value, terms: [{ kind: "dice", sign: 1, count: 1, sides: side, rolls: [value], kept: [true], sum: value }] } } as ChatLine).map((die) => die.label).join(" ");
 assert(one(100, 100) === "00 0" && one(100, 7) === "00 7" && one(100, 42) === "40 2" && one(10, 10) === "0", "percentile and d10 labels");
+// Fate dice (4dF): d6s of two plus, two minus and two blank faces (a plus
+// opposite each minus), each resting on the face the host rolled.
+for (let round = 0; round < 6; round++) {
+  const rolls = Array.from({ length: 4 }, () => Math.floor(Math.random() * 3) - 1);
+  const line = { id: "x", from: "Ann", text: "", at: 0, roll: { formula: "4dF", label: "", total: rolls.reduce((a, b) => a + b, 0), terms: [{ kind: "dice", sign: 1, count: 4, sides: 3, rolls, kept: rolls.map(() => true), sum: 0, fate: true } as RollTerm] } } as ChatLine;
+  const dice = diceOf(line);
+  assert(dice.length === 4 && dice.every((die) => die.kind === "d6" && die.faces?.join("") === "+−+−  "), `4dF: four Fate d6s: ${JSON.stringify(dice)}`);
+  const result = simulate(dice, { x: 0.5, y: 0.5, vx: 0.6, vy: 0.2 }, width, depth);
+  dice.forEach((die, index) => {
+    const values = labelsFor(die, result.rest[index]);
+    const want = rolls[index] > 0 ? "+" : rolls[index] < 0 ? "−" : " ";
+    assert(die.label === want && values[topFace("d6", result.rest[index])] === want, `a Fate die shows ${values[topFace("d6", result.rest[index])]} on top, wanted ${want}`);
+    assert([...values].sort().join() === [...die.faces!].sort().join(), "a Fate die keeps two of each face");
+  });
+}
+console.log("ok Fate dice (4dF): plus, minus and blank d6s land on the host's faces");
 // Dice already on the table: a second throw at the same spot knocks against
 // them and never comes to rest inside or on top of them (they are where they lie).
 const restOf = (result: ReturnType<typeof simulate>, n: number) =>

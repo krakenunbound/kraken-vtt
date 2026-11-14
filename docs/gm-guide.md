@@ -45,6 +45,17 @@ ulesets` (on Linux,
     and class limits, the hit die, 3d6 x 10 gp and the shop); the tracker
     plays d6 initiative, attacks against ascending AC, the five saves, death at
     0, Turn undead for clerics and a **Morale** button for monsters.
+  - *Fate Core* and *Fate Accelerated* (Evil Hat, CC BY 3.0) come with Kraken:
+    each its own book, the Toolkit and Adversaries, and the starter scenario
+    *The Lighthouse at Gull's End* ([included-games.md](included-games.md)).
+    Rolls are four Fate dice on the ladder; the **Scene Aspects** strip over
+    the table keeps the scene's aspects and free invokes and your pool of
+    fate points (⚙ for your tools: add an aspect, **New scene**, **Refresh
+    all**); on the tracker choose a physical or mental conflict, **Turn
+    order** sets it without dice, attacks roll against defences in shifts, and
+    a hit on a player's character waits for them to take it (stress,
+    consequences) or **Concede**. The party sheet's **Milestones** tab takes
+    the place of experience, and parcels carry things, not coin.
   - *Castles & Crusades*, *D&D 5E*, *D&D 3.5E* and *AD&D 2E* use your own
     books (Fantasy Grounds modules, or Kraken packs made from them) for their
     content: a 3.5E campaign takes your 3.5E Player's Handbook's classes,

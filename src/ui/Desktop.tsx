@@ -10,6 +10,7 @@ import { savedSignIn, type Session } from "../session/useSession";
 import { diceStore } from "../dice/diceStore";
 import { agentCommands } from "./agentCommands";
 import { ChatDock } from "./ChatDock";
+import { FateStrip } from "./FateStrip";
 import { Mark } from "./Emblem";
 import { DecalPicker, SettingsWindow, TableDecal } from "./Settings";
 import { DiceWindow } from "../dice/DiceWindow";
@@ -554,6 +555,8 @@ export function Desktop({
           </button>
         </div>
       </header>
+      {/* Fate: the scene's aspects and the GM's pool, over the table for everyone. */}
+      {/^Fate /.test(session.ruleset) ? <FateStrip session={session} /> : null}
       {/* The GM's read-aloud with no map up: over the table. */}
       {!anyMapShown ? <ReadAloudBubble now={session.readAloudNow} onDone={session.dismissReadAloud} floating /> : null}
       {banner ? (

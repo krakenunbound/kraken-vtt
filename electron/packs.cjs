@@ -56,6 +56,8 @@ const KRAKEN_RULESET = {
   cairn: "Cairn",
   "basic fantasy": "Basic Fantasy",
   basicfantasy: "Basic Fantasy",
+  "fate core": "Fate Core",
+  "fate accelerated": "Fate Accelerated",
   any: "Any",
   corerpg: "Any",
   "": "Any",

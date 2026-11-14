@@ -40,6 +40,10 @@ const FG_RULESETS = {
   Cairn: ["Cairn"],
   // Basic Fantasy RPG 4th Edition (CC BY-SA 4.0), its books shipped in the app.
   "Basic Fantasy": ["Basic Fantasy"],
+  // Fate Core and Fate Accelerated (CC BY 3.0), their books shipped in the app
+  // (games/modules): each its own book, the toolkit and the scenario ("Fate") both.
+  "Fate Core": ["Fate Core", "Fate"],
+  "Fate Accelerated": ["Fate Accelerated", "Fate"],
   Worldbuilding: [],
 };
 const ANY = new Set(["", "any", "corerpg"]);
