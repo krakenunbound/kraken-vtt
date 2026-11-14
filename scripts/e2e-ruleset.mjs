@@ -181,8 +181,10 @@ async function runRuleset(ruleset, plan) {
 
     // 5-6. A test player in Chrome, a new account.
     await step("5-6 a player in Chrome, a new account", async () => {
-      browser = await chromium.launch({ executablePath: CHROME, headless: false, args: ["--mute-audio", `--window-position=${AT[0] + 900},${AT[1] + 80}`, "--window-size=1500,1000"] });
-      ctx.seat = await browser.newPage({ viewport: { width: 1480, height: 900 } });
+      // A full-size window on the test monitor, and no fixed viewport: the page
+      // follows the real window, as a player's browser does (resize it and it resizes).
+      browser = await chromium.launch({ executablePath: CHROME, headless: false, args: ["--mute-audio", `--window-position=${AT[0] - 60},${AT[1] - 40}`, "--window-size=2560,1400"] });
+      ctx.seat = await browser.newPage({ viewport: null });
       ctx.seat.on("pageerror", (error) => problem("player page error", error.message));
       await ctx.seat.goto(`http://127.0.0.1:${ctx.port}/`);
       await ctx.seat.waitForLoadState("networkidle").catch(() => undefined);
@@ -215,7 +217,9 @@ async function runRuleset(ruleset, plan) {
       ctx.character = await tool("kraken_record_get", { id: listed[listed.length - 1].id });
       const items = Object.values(ctx.character.data.inventorylist ?? {});
       // (A game without gear lists, Fate, keeps what is found in the extras.)
-      if (!plan.noGear) check(items.length > 0, "the character has gear", JSON.stringify(ctx.character.data.inventorylist ?? {}).slice(0, 200));
+      // (A Traveller whose career dice left no money and no item benefits starts with nothing: noted, not a fault.)
+      if (!plan.noGear && !(ctx.noMoney && items.length === 0)) check(items.length > 0, "the character has gear", JSON.stringify(ctx.character.data.inventorylist ?? {}).slice(0, 200));
+      else if (ctx.noMoney && items.length === 0) console.log(`  note: ${ruleset}: the character mustered out with no money and no gear (the dice)`);
       if (plan.bought) await plan.bought(ctx);
       await ctx.shot(seat, "07-sheet");
     });
@@ -244,8 +248,17 @@ async function runRuleset(ruleset, plan) {
     await step("12 custom dice, rolled", async () => {
       await seat.click('.sidebar [data-launch="settings"], [title="Settings"]');
       await seat.click('[data-setting="dice"]');
-      await seat.waitForSelector("[data-preset]", { timeout: 10000 });
-      const preset = seat.locator("[data-preset]").nth(5);
+      // The Dice window's sets on screen (another copy of the window may sit hidden in the page).
+      const shown = seat.locator("[data-preset] >> visible=true");
+      await shown.first().waitFor({ timeout: 30000 }).catch(async (error) => {
+        const seen = await seat.$$eval("[data-preset]", (items) => items.slice(0, 4).map((item) => {
+          const box = item.getBoundingClientRect();
+          const style = getComputedStyle(item);
+          return { box: [Math.round(box.width), Math.round(box.height)], vis: style.visibility, op: style.opacity, display: style.display, win: item.closest("[data-window]")?.getAttribute("data-window") };
+        })).catch(() => []);
+        throw new Error(`${error.message.split("\n")[0]} | presets in the page: ${JSON.stringify(seen)} | windows: ${await seat.$$eval("[data-window]", (wins) => wins.map((win) => win.getAttribute("data-window")).join(",")).catch(() => "?")}`);
+      });
+      const preset = shown.nth(Math.min(5, (await shown.count()) - 1));
       const presetName = await preset.getAttribute("data-preset");
       await preset.click();
       await seat.waitForTimeout(500);

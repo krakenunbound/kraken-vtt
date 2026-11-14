@@ -4,7 +4,12 @@ What changed in each release of Kraken VTT. Downloads are on the
 [Releases](https://github.com/krakenunbound/kraken-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
-## Unreleased
+## 0.1.0-alpha.90: Pictures for every game, and a pass for looks
+
+Every open game's book now has a cover and every creature its portrait and token; Kraken's windows had a pass for form, not only function; and AI agents can now build maps in Map Studio.
+
+- **Settings, redesigned.** Titled sections; each setting a short label, a line saying what it does, and its switch or choice on the right. The character wizards' ability methods read as a checklist in two columns.
+- **Sheet tabs** sit in a slim rail inside the sheet, along its right edge, in brass for the one you are on, in place of the brown tabs that hung out of the window.
 
 - **Art for the open games.** Every book of D&D 5E (SRD 5.2.1), Basic
   Fantasy, Cairn, Ironsworn, Starforged, Fate and Forged in the Dark now has

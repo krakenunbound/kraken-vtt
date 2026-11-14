@@ -129,6 +129,7 @@ async function buy(ctx, names) {
   if (!(Number(await seat.getAttribute("[data-coin-left]", "data-coin-left")) > 0)) {
     console.log(`  note: ${ctx.ruleset}: the character has no money to spend`);
     ctx.bought = [];
+    ctx.noMoney = true;
     return;
   }
   const bought = [];
