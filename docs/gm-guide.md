@@ -28,6 +28,11 @@ ulesets` (on Linux,
     only; Kraken never ships a game's official logo.
   - *Descending Darkness* and *Apeira Astra* come with Kraken, with their books
     and a first adventure ([included-games.md](included-games.md)).
+  - *D&D 5E* comes with the SRD 5.2.1 as three books (*SRD 5.2.1 Player's
+    Rules*, *Creatures*, *Magic Items*): classes and subclasses, species,
+    backgrounds, feats, gear, spells, every monster and magic item, ready to
+    play with nothing else installed ([included-games.md](included-games.md)).
+    Your own 5E modules or packs sit beside them.
   - *Castles & Crusades*, *D&D 5E*, *D&D 3.5E* and *AD&D 2E* use your own
     books (Fantasy Grounds modules, or Kraken packs made from them) for their
     content: a 3.5E campaign takes your 3.5E Player's Handbook's classes,
@@ -107,7 +112,8 @@ any other way).
 
 ## Books and modules
 
-- **Kraken's own games' books** are always on the shelf for their campaigns.
+- **Kraken's own games' books** are always on the shelf for their campaigns,
+  and the SRD 5.2.1 books for a D&D 5E campaign.
 - **Your Fantasy Grounds modules:** Kraken reads them in place from your
   Fantasy Grounds data folder's `modules` folder (set `KRAKEN_BOOKS` to read
   another folder). Nothing is copied. A campaign's game decides which modules

@@ -1,14 +1,15 @@
 // D&D 5E in the real app (the second ruleset): a campaign made as D&D 5E,
-// its books (the SRD 5.2.1's player book and bestiary, FG's 5E modules)
+// its books (the SRD 5.2.1's player book and creatures: Kraken's own SRD
+// 5.2.1 books, shipped; with KRAKEN_DND5E_FG=1, FG's 5E modules instead)
 // made active; a test player in Chrome makes a character with the 5E wizard,
 // opens the 5E sheet and rolls a skill and a save from it; the GM puts a
 // goblin on the tracker; the player targets it and attacks and rolls damage
-// from the sheet; the goblin's hit points go down on the tracker. Skipped
-// without the SRD modules.
+// from the sheet; the goblin's hit points go down on the tracker. Played with
+// only the books Kraken ships (KRAKEN_BOOKS and KRAKEN_PACKS empty) unless FG's are asked for.
 import "./loopback.mjs";
 import { spawn } from "node:child_process";
 import { createRequire } from "node:module";
-import { mkdtempSync } from "node:fs";
+import { mkdirSync, mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import readline from "node:readline";
@@ -20,13 +21,16 @@ function assert(condition, message) {
 }
 const require = createRequire(import.meta.url);
 const { listModules } = require("../electron/importers/fgModule.cjs");
-if (!listModules().some((item) => (item.name ?? item) === "DNDSRD521PLAYER")) {
-  console.log("skip dnd5e ui: no SRD 5.2.1 modules");
+const FG = process.env.KRAKEN_DND5E_FG === "1";
+if (FG && !listModules().some((item) => (item.name ?? item) === "DNDSRD521PLAYER")) {
+  console.log("skip dnd5e ui: no SRD 5.2.1 FG modules");
   process.exit(0);
 }
+const [PLAYER_BOOK, CREATURE_BOOK] = FG ? [/DNDSRD521PLAYER/i, /DNDSRD521BESTIARY/i] : [/SRD 5\.2\.1 Player's Rules/i, /SRD 5\.2\.1 Creatures/i];
 
 const profile = mkdtempSync(path.join(tmpdir(), "kraken-dnd5e-ui-"));
-const env = { ...process.env, KRAKEN_AGENT_FILE: path.join(profile, "agent.json"), KRAKEN_AGENT_PORT: "0" };
+const env = { ...process.env, KRAKEN_AGENT_FILE: path.join(profile, "agent.json"), KRAKEN_AGENT_PORT: "0", ...(FG ? {} : { KRAKEN_BOOKS: path.join(profile, "no-fg-modules"), KRAKEN_PACKS: path.join(profile, "packs") }) };
+if (!FG) for (const dir of [env.KRAKEN_BOOKS, env.KRAKEN_PACKS]) mkdirSync(dir, { recursive: true });
 const app = await electron.launch({ args: [".", "--mute-audio", `--user-data-dir=${profile}`], cwd: process.cwd(), env });
 const page = await app.firstWindow();
 await page.waitForSelector("text=My Campaigns");
@@ -69,8 +73,8 @@ try {
   const shelf = await tool("kraken_books", { action: "list" });
   const list = shelf.books ?? shelf;
   const label = (book) => `${book.id} ${book.name ?? ""} ${book.title ?? ""}`;
-  const player = list.find((book) => /DNDSRD521PLAYER/i.test(label(book)));
-  const bestiary = list.find((book) => /DNDSRD521BESTIARY/i.test(label(book)));
+  const player = list.find((book) => PLAYER_BOOK.test(label(book)));
+  const bestiary = list.find((book) => CREATURE_BOOK.test(label(book)));
   assert(player && bestiary, `the SRD books are on a 5E campaign's shelf: ${list.map(label).join(" | ").slice(0, 400)}`);
   assert(!list.some((book) => /Castles|SiegeCore|C&C/i.test(label(book))), "no C&C book on a 5E shelf");
   await tool("kraken_books", { action: "activate", book: player.id });

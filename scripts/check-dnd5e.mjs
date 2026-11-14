@@ -1,5 +1,6 @@
-// Kraken's second ruleset, D&D 5E from the SRD 5.2.1 (the FG modules
-// DNDSRD521PLAYER and DNDSRD521BESTIARY, when they are on this computer),
+// Kraken's second ruleset, D&D 5E from the SRD 5.2.1: Kraken's own SRD books
+// (games/srd-5e, built from the SRD's PDF), and the FG modules DNDSRD521PLAYER
+// and DNDSRD521BESTIARY too when they are on this computer,
 // played through the same agent tools as Castles & Crusades, with fixed dice:
 // characters built (HP, AC, saves, skills, attacks as the SRD gives them), the
 // tracker's initiative (d20 + DEX), attacks (a natural 20 a critical hit whose
@@ -19,11 +20,13 @@ function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 const have = (name) => listModules().some((item) => (item.name ?? item) === name);
-if (!have("DNDSRD521PLAYER") || !have("DNDSRD521BESTIARY")) {
-  console.log("skip dnd5e: the SRD 5.2.1 FG modules are not on this computer");
-  process.exit(0);
-}
+// The books to play from: Kraken's own, and FG's SRD modules where the GM has them.
+const SETS = [["SRD 5.2.1 Player's Rules", "SRD 5.2.1 Creatures"]];
+if (have("DNDSRD521PLAYER") && have("DNDSRD521BESTIARY")) SETS.push(["DNDSRD521PLAYER", "DNDSRD521BESTIARY"]);
+else console.log("note dnd5e: the SRD 5.2.1 FG modules are not on this computer; Kraken's own SRD books only");
+for (const [playerBook, bestiaryBook] of SETS) await run(playerBook, bestiaryBook);
 
+async function run(playerBook, bestiaryBook) {
 const server = createTableServer({ ruleset: "D&D 5E" });
 try {
   await server.listen({ port: 0, password: "" });
@@ -38,8 +41,8 @@ try {
   const chat = () => agent.chatLog(200);
   // The last roll card whose label fits.
   const last = (pattern) => [...chat()].reverse().find((line) => line.roll && pattern.test(line.roll.label ?? ""));
-  importModule(agent.records, agent.seat, "DNDSRD521PLAYER");
-  importModule(agent.records, agent.seat, "DNDSRD521BESTIARY");
+  importModule(agent.records, agent.seat, playerBook);
+  importModule(agent.records, agent.seat, bestiaryBook);
   assert(agent.ruleset() === "D&D 5E", "the table knows its ruleset");
 
   // Characters, as the SRD's numbers give them.
@@ -208,7 +211,8 @@ try {
   const party = await tool("kraken_party");
   const member = party.members.find((item) => item.name === "Bruenor");
   assert(member && member.hp === 23 && member.ac === 18 && member.classes === "Fighter 2", `the party sheet: ${JSON.stringify(member)}`);
-  console.log("ok dnd5e: SRD characters (HP, AC, saves, skills, attacks, spell DC and slots); the character wizard's rules (point buy, swaps, a 2024 species' and background's choices, a class's features and decisions, kits A/B/C with their coin, feats, languages, tools); initiative d20 + DEX; hits, automatic misses, a critical's doubled dice; a goblin's stat block attacks; creatures dead at 0; saves against a DC; Fire Bolt, a halved Fireball, Magic Missile's darts, Cure Wounds from 0, Bless's d4; Dying and death saves; advantage; a level up; the party sheet");
+  console.log(`ok dnd5e (${playerBook}, ${bestiaryBook}): SRD characters (HP, AC, saves, skills, attacks, spell DC and slots); the character wizard's rules (point buy, swaps, a 2024 species' and background's choices, a class's features and decisions, kits A/B/C with their coin, feats, languages, tools); initiative d20 + DEX; hits, automatic misses, a critical's doubled dice; a goblin's stat block attacks; creatures dead at 0; saves against a DC; Fire Bolt, a halved Fireball, Magic Missile's darts, Cure Wounds from 0, Bless's d4; Dying and death saves; advantage; a level up; the party sheet`);
 } finally {
   await server.stop();
+}
 }

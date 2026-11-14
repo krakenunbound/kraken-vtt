@@ -4,6 +4,24 @@ What changed in each release of Kraken VTT. Downloads are on the
 [Releases](https://github.com/krakenunbound/kraken-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
+## Unreleased
+
+- **D&D 5E plays with nothing else installed.** Kraken now ships the System
+  Reference Document 5.2.1 as three books for a D&D 5E campaign, made from
+  the SRD's own PDF:
+  - *SRD 5.2.1 Player's Rules*: every rules chapter to read, and the 12
+    classes (each with its subclass and its features to level 20), 9 species
+    with their lineages, 4 backgrounds, the feats, all the equipment and 339
+    spells for the character wizard and the sheet. Spells that roll play on
+    the Combat Tracker: Fire Bolt's attack, Fireball's save for half, Cure
+    Wounds, Magic Missile's darts, Bless's d4 and 189 more.
+  - *SRD 5.2.1 Creatures*: all 330 monsters and animals, their attacks rolling
+    on the tracker.
+  - *SRD 5.2.1 Magic Items*: the 258 magic items and their rules.
+
+  Make a D&D 5E campaign and the three are on its shelf; your own 5E books
+  sit beside them. Each book carries the SRD's licence notice (CC BY 4.0).
+
 ## 0.1.0-alpha.87: Two fixes from the screenshot shoot
 
 - **A read-aloud bubble leaves on time.** It could stay over the map for
