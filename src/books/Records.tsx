@@ -31,9 +31,12 @@ const LISTS: { id: string; label: string; group: string }[] = [
   { id: "siegepackage:race", label: "Races", group: "Character" },
   { id: "siegepackage", label: "Packages", group: "Character" },
   { id: "siegepower", label: "Spells", group: "Character" },
+  // Fate: the skills (FAE's approaches) and stunts.
+  { id: "fateskill", label: "Skills", group: "Character" },
+  { id: "fatestunt", label: "Stunts", group: "Character" },
 ];
 // Not lists: what has its own window (characters, the party, notes) or is the game's own setup.
-const NOT_LISTED = new Set(["character", "party", "note", "siegegame"]);
+const NOT_LISTED = new Set(["character", "party", "note", "siegegame", "fatetable"]);
 
 // A new record for a list: its type, and for C&C's Classes and Races the package's kind.
 function recordFor(list: string, name: string) {
@@ -120,7 +123,7 @@ const LIMIT = 400;
 // The lists the sidebar shows in a group (FG's Campaign and Character
 // categories): those this table has records for, in FG's order.
 // A game's own word for a list (Descending Darkness calls species "Kin").
-const GAME_WORDS: Record<string, Record<string, string>> = { "D&D 3.5E": { race: "Races" }, "Descending Darkness": { race: "Kin" }, "Apeira Astra": { race: "Origins", class: "Paths", item: "Gear", npc: "Threats" }, Traveller: { item: "Equipment", npc: "NPCs and Animals" }, Cairn: { background: "Backgrounds", item: "Gear and Relics", npc: "Bestiary", cairntable: "Tables" } };
+const GAME_WORDS: Record<string, Record<string, string>> = { "D&D 3.5E": { race: "Races" }, "Descending Darkness": { race: "Kin" }, "Apeira Astra": { race: "Origins", class: "Paths", item: "Gear", npc: "Threats" }, Traveller: { item: "Equipment", npc: "NPCs and Animals" }, Cairn: { background: "Backgrounds", item: "Gear and Relics", npc: "Bestiary", cairntable: "Tables" }, "Fate Core": { fateskill: "Skills", fatestunt: "Stunts", npc: "NPCs", pregencharsheet: "Pregenerated Characters" }, "Fate Accelerated": { fateskill: "Approaches", fatestunt: "Stunts", npc: "NPCs", pregencharsheet: "Pregenerated Characters" } };
 export function sidebarLists(records: Record<string, TableRecord>, group: string, ruleset = "") {
   const present = new Set<string>();
   for (const record of Object.values(records)) if (!NOT_LISTED.has(record.type)) present.add(listOf(record));

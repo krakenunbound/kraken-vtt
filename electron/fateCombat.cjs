@@ -305,7 +305,7 @@ function createFateCombat({ table, state, record, find, mustGM, targetsOf, chang
   function attacksFor(entry) {
     if (!rules) return [];
     const sheet = sheetOf(entry);
-    return (sheet.npc?.attacks ?? rules.attacksOf(sheet)).map((item) => ({ key: item.key, name: item.name, bonus: rules.ratingIn(sheet, item.key), damage: `${rules.signed(rules.ratingIn(sheet, item.key))} ${item.kind ?? ""}`.trim() }));
+    return (sheet.npc?.attacks ?? rules.attacksOf(sheet)).map((item) => ({ key: item.key, name: item.name, bonus: rules.ratingIn(sheet, item.key), damage: "", kind: item.kind ?? "physical" }));
   }
   // A new NPC entry's numbers: no hit points (stress is its own).
   function setup(source) {

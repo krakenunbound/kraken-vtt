@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { studioScene } from "./gilded";
-import type { DiceLook } from "./diceStore";
+import { FATE_FACES, FATE_SIDES, type DiceLook } from "./diceStore";
 import { buildDie, model, type ShapeKind } from "./models";
 import { dicePacks } from "./dicePacks";
 
@@ -17,6 +17,8 @@ const KINDS: Record<number, { kind: ShapeKind; face: string }> = {
   12: { kind: "d12", face: "12" },
   20: { kind: "d20", face: "20" },
   100: { kind: "d100tens", face: "00" },
+  // A Fate die: a d6 of plus, minus and blank, its plus up.
+  [FATE_SIDES]: { kind: "d6", face: "+" },
 };
 
 const cache = new Map<string, string>();
@@ -50,9 +52,10 @@ function render(jobs: { look: DiceLook; sides: number }[]): string[] {
       for (const job of missing) {
         const { kind, face } = KINDS[job.sides] ?? KINDS[20];
         const { shape, faces } = model(kind);
-        const die = buildDie(kind, job.look, shape.values);
+        const values = job.sides === FATE_SIDES ? FATE_FACES : shape.values;
+        const die = buildDie(kind, job.look, values);
         // Its highest number toward the viewer, then turned a little to show it is a solid.
-        const index = Math.max(0, shape.values.indexOf(face));
+        const index = Math.max(0, values.indexOf(face));
         const facing = new THREE.Quaternion().setFromUnitVectors(faces[index % faces.length].normal.clone().normalize(), toCamera);
         die.quaternion.copy(tilt).multiply(facing);
         // Sized as real dice are, by how far the shell reaches from its middle.

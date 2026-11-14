@@ -683,7 +683,8 @@ export function buildDie(kind: ShapeKind, look: DiceLook, values: string[]) {
     shell.renderOrder = profile.transmission > 0 ? 2 : 0;
     if (profile.inclusion) group.add(...crystal(kind, theme, look.body));
   }
-  const pips = Boolean(look.pips) && kind === "d6";
+  // Pips are for numbers: a Fate die keeps its plus and minus.
+  const pips = Boolean(look.pips) && kind === "d6" && !values.includes("+");
   const largePips = pips && look.theme === "gilded";
   const size = largePips ? 0.82 : kind === "d20" ? 0.39 : kind === "d12" ? 0.43 : kind === "d4" ? 0.43 : 0.5;
   const visual = kind === "d100" || kind === "d100tens" ? "d10" : kind;

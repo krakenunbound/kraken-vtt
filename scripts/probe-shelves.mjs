@@ -11,7 +11,7 @@ import path from "node:path";
 import readline from "node:readline";
 import { _electron as electron } from "playwright-core";
 
-const RULESETS = (process.argv[2] ?? "Castles & Crusades,D&D 5E,D&D 3.5E,AD&D 2E,Traveller,Descending Darkness,Apeira Astra,Cairn,Worldbuilding").split(",");
+const RULESETS = (process.argv[2] ?? "Castles & Crusades,D&D 5E,D&D 3.5E,AD&D 2E,Traveller,Descending Darkness,Apeira Astra,Cairn,Fate Core,Fate Accelerated,Worldbuilding").split(",");
 const profile = mkdtempSync(path.join(tmpdir(), "kraken-shelves-"));
 const env = { ...process.env, KRAKEN_WINDOW_AT: process.env.KRAKEN_WINDOW_AT ?? "-2500,40", KRAKEN_AGENT_FILE: path.join(profile, "agent.json"), KRAKEN_AGENT_PORT: "0" };
 const app = await electron.launch({ args: [".", "--mute-audio", `--user-data-dir=${profile}`], cwd: process.cwd(), env });

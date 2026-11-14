@@ -208,6 +208,18 @@ export type CombatEntry = {
   powers?: { key: string; name: string; uses: number; used: number; damage: string; save: string }[];
   /** Cairn: STR now and its maximum, a detachment, a lost first turn. */
   cairn?: { str: number; max: number; detachment: number; lostTurn: number };
+  /** Fate: stress boxes, consequences, a hit waiting to be absorbed (its options), taken out or conceded. */
+  fate?: FateEntry;
+};
+export type FateEntry = {
+  out: string;
+  tracks?: { key: string; label: string; boxes: { value: number; marked: boolean }[] }[];
+  consequences?: { key: string; label: string; value: number; text: string }[];
+  pending?: { shifts: number; track: string; by: string; options: { index: number; words: string; box: number; consequences: string[] }[] };
+  fatepoints?: number;
+  kind?: string;
+  aspects?: string[];
+  taken: number;
 };
 export type CombatView = { round: number; active: string | null; entries: CombatEntry[] };
 export type TableRecord = {
@@ -922,6 +934,14 @@ export function useSession() {
     socket.send(JSON.stringify({ type: "cairn", id, action, args, ...throwIntent() }));
     return Promise.resolve();
   }, []);
+  // Fate: a character's rolls, invokes, fate points, stress, consequences and
+  // milestones (id), or the table's own (no id: the scene's aspects, the GM's pool).
+  const fateAction = useCallback((id: string | null, action: string, args: Record<string, unknown> = {}) => {
+    const socket = socketRef.current;
+    if (!socket || socket.readyState !== WebSocket.OPEN) return Promise.reject(new Error("Not connected."));
+    socket.send(JSON.stringify({ type: "fate", ...(id ? { id } : {}), action, args, ...throwIntent() }));
+    return Promise.resolve();
+  }, []);
   // Apeira Astra: experience spent on a skill's next level or a characteristic +1 (the host checks the cost).
   const improveCharacter = useCallback((id: string, what: { skill?: string; attribute?: string }) => {
     const socket = socketRef.current;
@@ -1235,6 +1255,7 @@ export function useSession() {
     levelUp,
     improveCharacter,
     cairnAction,
+    fateAction,
     wall,
     mapUndo,
     prepClose,

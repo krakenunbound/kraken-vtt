@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import * as CANNON from "cannon-es";
 import type { ChatLine } from "../session/useSession";
-import { SHAPED, SIX_SIDED, type DiceThrow } from "./diceStore";
+import { FATE_FACES, SHAPED, SIX_SIDED, fateFace, type DiceThrow } from "./diceStore";
 import { bottomFace, collider, model, topFace, type ShapeKind } from "./models";
 
 // A throw worked out before it is shown: the dice of a roll, their flight in
@@ -20,9 +20,12 @@ export function diceOf(line: ChatLine): Die[] {
   const dice: Die[] = [];
   for (const term of line.roll?.terms ?? []) {
     if (term.kind !== "dice" || !SHAPED.has(term.sides)) continue;
+    const fate = Boolean((term as { fate?: boolean }).fate);
     for (const value of term.rolls) {
       if (dice.length >= MAX_DICE) break;
-      if (term.sides === 100) {
+      // A Fate die (4dF): a d6 of plus, minus and blank faces, its own face up.
+      if (fate) dice.push({ kind: "d6", label: fateFace(value), faces: FATE_FACES });
+      else if (term.sides === 100) {
         const tens = Math.floor((value % 100) / 10);
         dice.push({ kind: "d100tens", label: `${tens}0` }, { kind: "d100", label: `${value % 10}` });
       } else if (SIX_SIDED[term.sides]) dice.push({ kind: "d6", label: `${value}`, faces: SIX_SIDED[term.sides] });

@@ -1789,3 +1789,40 @@ span.flip { display: inline-flex; transform: scaleX(-1); }
 .motd-head { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border: 1px solid var(--line, #3a3a44); border-radius: 8px; font-family: Cinzel, Georgia, serif; }
 .motd-icon { display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: rgba(210, 161, 90, 0.16); color: var(--brass); }
 .motd-text { min-height: 160px; resize: none; padding: 10px; border: 1px solid var(--line, #3a3a44); border-radius: 8px; font-size: 0.98rem; line-height: 1.45; white-space: pre-wrap; overflow: auto; }
+
+/* Fate Core and Fate Accelerated: the sheet, the tracker's line, the Scene Aspects strip. */
+.sheet-fate .fate-aspects { display: grid; grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr)); gap: 6px; }
+.sheet-fate .fate-aspect { font-style: italic; }
+.sheet-fate .fate-rollbar { flex-wrap: wrap; gap: 6px; }
+.sheet-fate .fate-skill { display: grid; grid-template-columns: 2.6rem 1fr auto 3rem; align-items: center; gap: 6px; padding: 2px 0; }
+.sheet-fate .fate-rating { font-family: Cinzel, Georgia, serif; font-weight: 700; color: var(--brass); text-align: center; }
+.sheet-fate .fate-track, .ct-fate-track { display: inline-flex; align-items: center; gap: 4px; margin: 2px 8px 2px 0; }
+.fate-box { display: inline-grid; place-items: center; min-width: 1.6rem; height: 1.6rem; padding: 0; border: 2px solid var(--brass); border-radius: 4px; background: transparent; color: inherit; font-weight: 700; font-size: 0.8rem; }
+.fate-box.marked { background: var(--brass); color: #1a1208; }
+.sheet-fate .fate-consequence { display: grid; grid-template-columns: 8rem 1fr auto; align-items: center; gap: 6px; margin: 2px 0; }
+.sheet-fate .fate-invokes { list-style: none; margin: 0; padding: 0; display: grid; gap: 3px; }
+.sheet-fate .fate-invokes li { display: flex; align-items: center; gap: 6px; }
+.sheet-fate .fate-invokes li span { flex: 1; }
+.wizard-5e[data-wizard="fate"] .fate-wizard-aspects { display: grid; grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr)); gap: 6px; }
+.wizard-5e[data-wizard="fate"] .fate-phase { display: grid; grid-template-columns: 14rem 1fr 1fr 1fr; gap: 6px; align-items: center; margin: 4px 0; }
+.wizard-5e[data-wizard="fate"] .fate-wizard-pyramid, .wizard-5e[data-wizard="fate"] .fate-wizard-approaches { display: grid; grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr)); gap: 6px; }
+.wizard-5e[data-wizard="fate"] textarea { width: 100%; min-height: 3rem; }
+.ct-fate { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 2px 8px 4px 46px; font-size: 0.82rem; }
+.ct-fate .fate-box { min-width: 1.3rem; height: 1.3rem; font-size: 0.7rem; }
+.ct-fate-cons { display: inline-flex; gap: 4px; flex-wrap: wrap; }
+.ct-con { padding: 1px 5px; border: 1px dashed rgba(210, 161, 90, 0.6); border-radius: 4px; opacity: 0.7; }
+.ct-con.taken { border-style: solid; opacity: 1; color: #f0b060; }
+.ct-fate-hit { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; width: 100%; padding: 4px; border: 1px solid #e06000; border-radius: 6px; background: rgba(224, 96, 0, 0.12); }
+.ct-fate-hit input { width: 11rem; }
+.fate-strip { position: fixed; top: 46px; left: 50%; transform: translateX(-50%); z-index: 960; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px; max-width: min(92vw, 1100px); padding: 4px 10px; border: 1px solid rgba(210, 161, 90, 0.5); border-radius: 10px; background: rgba(18, 14, 10, 0.86); color: #f2e6cf; font-size: 0.85rem; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4); }
+.fate-strip-aspects { display: flex; flex-wrap: wrap; gap: 4px; margin: 0; padding: 0; list-style: none; }
+.fate-aspect-chip { display: inline-flex; align-items: center; gap: 3px; padding: 2px 8px; border-radius: 12px; border: 1px solid rgba(210, 161, 90, 0.6); background: rgba(210, 161, 90, 0.12); }
+.fate-aspect-chip.kind-boost { border-style: dashed; }
+.fate-aspect-chip.kind-game { border-color: #8fb3e0; background: rgba(120, 160, 220, 0.14); }
+.fate-aspect-chip button { padding: 0 3px; min-width: 0; }
+.fate-dots { color: var(--brass); letter-spacing: 1px; font-size: 0.7rem; }
+.fate-strip-gm { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.fate-strip-gm input { width: 13rem; }
+.fate-pool { display: inline-flex; align-items: center; gap: 3px; padding: 1px 8px; border-radius: 10px; background: rgba(255, 255, 255, 0.06); }
+.fate-pool b { font-family: Cinzel, Georgia, serif; color: var(--brass); }
+.tray-die.tray-fate { outline: 1px dashed rgba(210, 161, 90, 0.5); border-radius: 6px; }
