@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root version="4.6" release="1">
+	<name type="string">Fate Accelerated Edition</name>
+	<displayname type="string">Fate Accelerated Edition (Player's Reference)</displayname>
+	<category type="string">Fate</category>
+	<author type="string">Evil Hat Productions (SRD, CC BY 3.0; adapted for Kraken VTT)</author>
+	<ruleset type="string">Fate Accelerated</ruleset>
+</root>

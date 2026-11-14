@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root version="4.6" release="1">
+	<name type="string">The Lighthouse at Gull's End</name>
+	<displayname type="string">The Lighthouse at Gull's End (Fate scenario)</displayname>
+	<category type="string">Fate Adventures</category>
+	<author type="string">Kraken VTT (for Fate Core and Fate Accelerated)</author>
+	<ruleset type="string">Fate</ruleset>
+</root>

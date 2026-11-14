@@ -187,6 +187,8 @@ function cleanEntry(raw) {
     critical: ["dead", "routed"].includes(raw.critical) ? raw.critical : "",
     lostTurn: Math.max(0, Math.round(num(raw.lostTurn, 0))),
     deathsaves: raw.deathsaves && typeof raw.deathsaves === "object" ? { success: Math.min(3, Math.max(0, Math.round(num(raw.deathsaves.success, 0)))), failure: Math.min(3, Math.max(0, Math.round(num(raw.deathsaves.failure, 0)))) } : { success: 0, failure: 0 },
+    // Fate: an NPC's stress and consequences, a hit waiting to be absorbed, taken out or conceded (electron/fateCombat.cjs).
+    ...(raw.fate ? { fate: require("./fateCombat.cjs").cleanState(raw.fate) } : {}),
   };
 }
 
@@ -321,6 +323,9 @@ function createCombat({ saved, table, onChange = () => undefined }) {
   const astraOn = () => table().ruleset?.() === "Apeira Astra";
   const mgtOn = () => table().ruleset?.() === "Traveller";
   const cairnOn = () => table().ruleset?.() === "Cairn";
+  // Fate Core and Fate Accelerated: conflicts by shifts, stress and consequences (electron/fateCombat.cjs).
+  const fateOn = () => require("./fate.cjs").isFateRuleset(table().ruleset?.());
+  const fc = require("./fateCombat.cjs").createFateCombat({ table, state, record: (entry) => record(entry), find: (id) => find(id), mustGM: (seat) => mustGM(seat), targetsOf: (entry) => targetsOf(entry), changed: () => changed(), owner: (entry) => owner(entry) });
   // Cairn: morale checks made this fight, by faction ({ first, half }).
   const moraleDone = {};
   // The 2d6 games: Apeira Astra and Traveller share the tracker's rolls.
@@ -651,6 +656,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     return { status: "Wounded", percent, color: "#C0C000" };
   }
   function health(entry) {
+    if (fateOn()) return fc.health(entry);
     if (cairnOn()) return healthCairn(entry);
     const { hp, wounds } = vitals(entry);
     if (!geometry) return { status: "Healthy", percent: 0, color: "#00C000" };
@@ -789,6 +795,8 @@ function createCombat({ saved, table, onChange = () => undefined }) {
   // SiegeCore turn skipping: unconscious enemies (or everyone, by option).
   function skips(entry, opts) {
     const mode = String(opts?.SIEGE_SKIP_UNCONSCIOUS ?? "enemies").toLowerCase();
+    // Fate: the taken out and the conceded are out of the conflict.
+    if (fateOn()) return fc.skips(entry);
     // Apeira Astra: Down is out of the fight, whoever they are.
     if (astraOn() && health(entry).status === "Down") return true;
     // Cairn: the dead, those with Critical Damage, the routed and the fleeing do not act; a PC who failed the first round's DEX save loses that turn.
@@ -872,6 +880,8 @@ function createCombat({ saved, table, onChange = () => undefined }) {
   }
 
   async function applyWounds(entry, delta, why, opts) {
+    // Fate: damage is a hit of that many shifts; healing clears the stress.
+    if (fateOn()) return delta > 0 ? fc.hit(entry, delta, fc.kindNow(), "") : fc.clearStress(entry);
     if (cairnOn()) return applyCairn(entry, delta, why, opts);
     const linked = record(entry);
     let before = vitals(entry);
@@ -2157,8 +2167,12 @@ function createCombat({ saved, table, onChange = () => undefined }) {
             // 2E: the level a cleric (or a paladin from 3rd) turns undead at.
             ...(d2e() && r2e && record(entry)?.type === "character" && r2e.turnLevel(r2e.derive(record(entry).data)) > 0 ? { turns: r2e.turnLevel(r2e.derive(record(entry).data)) } : {}),
             ...(cairnOn() && (numbers || seat.role === "dm") ? { cairn: { ...cairnStr(entry), detachment: record(entry)?.type !== "character" && rc ? rc.npcStats(record(entry)?.data ?? {}).detachment : 0, lostTurn: entry.lostTurn } } : {}),
+            // Fate: stress boxes, consequences, a hit to absorb, taken out or conceded.
+            ...(fateOn() ? { fate: fc.view(entry, seat) } : {}),
             attacks:
-              cairnOn() && seat.role === "dm" && record(entry)?.type === "npc" && rc
+              fateOn() && seat.role === "dm" && record(entry)?.type === "npc"
+                ? fc.attacksFor(entry)
+                : cairnOn() && seat.role === "dm" && record(entry)?.type === "npc" && rc
                 ? rc.npcStats(record(entry).data).attacks.map((attack) => ({ key: attack.key, name: attack.name, bonus: 0, damage: `${attack.damage}${attack.blast ? " blast" : ""}${attack.ignoresarmor ? " ignores armor" : ""}` }))
                 : mgtOn() && seat.role === "dm" && record(entry)?.type === "npc" && rm
                 ? rm.npcStats(record(entry).data).attacks.map((attack, index) => ({ key: String(index), name: attack.name, bonus: attack.bonus, damage: `${attack.damage}${attack.ap ? ` AP ${attack.ap}` : ""}` }))
@@ -2201,7 +2215,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       const count = Math.min(20, Math.max(1, Math.round(num(input.count, 1))));
       for (let index = 0; index < count; index += 1) {
         let hp = Math.max(0, Math.round(num(input.hp, 0)));
-        const npc5 = d2e() && source && source.type !== "character" ? (await r2eReady, r2e.npcStats(source.data)) : d35() && source && source.type !== "character" ? (await r35Ready, r35.npcStats(source.data)) : astraOn() && source && source.type !== "character" ? (await raReady, ra.npcStats(source.data)) : mgtOn() && source && source.type !== "character" ? (await rmReady, rm.npcStats(source.data)) : cairnOn() && source && source.type !== "character" ? (await rcReady, rc.npcStats(source.data)) : five() && source && source.type !== "character" ? (await r5Ready, r5.npcStats(source.data)) : null;
+        const npc5 = fateOn() && source && source.type !== "character" ? fc.setup(source) : d2e() && source && source.type !== "character" ? (await r2eReady, r2e.npcStats(source.data)) : d35() && source && source.type !== "character" ? (await r35Ready, r35.npcStats(source.data)) : astraOn() && source && source.type !== "character" ? (await raReady, ra.npcStats(source.data)) : mgtOn() && source && source.type !== "character" ? (await rmReady, rm.npcStats(source.data)) : cairnOn() && source && source.type !== "character" ? (await rcReady, rc.npcStats(source.data)) : five() && source && source.type !== "character" ? (await r5Ready, r5.npcStats(source.data)) : null;
         if (npc5 && !hp) hp = npc5.hp;
         if (source?.type === "starship") hp = Math.max(1, num(source.data?.hull?.max, 1));
         if (source && source.type !== "character" && !hp) {
@@ -2284,6 +2298,8 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       if (seat.role !== "dm" && (pick.length !== 1 || owner(pick[0]) !== seat.name)) throw new Error("You can roll initiative for your own character.");
       // SiegeCore rollTrackerInit: the die, the initiative attribute's bonus
       // (SIEGE_INIT_STAT; none adds nothing) and the entry's own bonus.
+      // Fate: no dice, the turn order by a skill (Notice; FAE Quick), or Empathy (Careful) in a mental conflict.
+      if (fateOn()) return fc.initiative(pick, seat);
       if (cairnOn()) {
         // Cairn: the PCs act first, then their opponents (sides, not dice); in
         // the first round each PC saves DEX to act, and loses that turn on a failure.
@@ -2501,7 +2517,19 @@ function createCombat({ saved, table, onChange = () => undefined }) {
         entry.lostTurn = 0;
       }
       for (const key of Object.keys(moraleDone)) delete moraleDone[key];
+      // Fate: the conflict is over: everyone's stress clears (consequences stay), the out come back.
+      if (fateOn()) return fc.endConflict().then(() => changed());
       changed();
+    },
+    // Fate: a hit absorbed as its player chooses (choice: { plan, box, consequences, names } or { out: true }).
+    absorb(id, choice, seat) {
+      if (!fateOn()) throw new Error("Absorbing shifts is Fate's.");
+      return fc.absorb(String(id ?? ""), choice ?? {}, seat);
+    },
+    // Fate: conceding before being taken out (a fate point, and one a consequence taken).
+    concede(id, seat) {
+      if (!fateOn()) throw new Error("Conceding is Fate's.");
+      return fc.concede(String(id ?? ""), seat);
     },
     // Cairn: the side's morale now (id: that creature alone; faction: everyone of it still standing).
     async morale(idOrFaction, seat) {
@@ -2545,6 +2573,8 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       mustGM(seat);
       const { options: opts } = await options();
       const entry = find(id);
+      // Fate: healing on the tracker clears the stress (consequences recover on the sheet).
+      if (fateOn()) return fc.clearStress(entry);
       let value = Math.round(num(amount, 0));
       if (value <= 0) throw new Error("How much healing?");
       const { hp, wounds } = vitals(entry);
@@ -2622,6 +2652,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       const { engine, game, options: opts } = await options();
       const plan = this.weapon(who, weaponKey, engine, game, opts, seat);
       const source = plan.entry;
+      if (fateOn()) return fc.attack(plan, from, attackOptions);
       if (cairnOn()) return attackCairn(plan, from, attackOptions);
       if (twoSix()) return attackAstra(plan, from);
       if (five()) return attack5e(plan, from);
@@ -2667,6 +2698,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       const { engine, game, options: opts } = await options();
       cachedThresholds = thresholds(opts);
       const plan = this.weapon(who, weaponKey, engine, game, opts, seat);
+      if (fateOn()) throw new Error("In Fate an attack's shifts are its harm: Attack rolls both sides.");
       if (!plan.damage) throw new Error(`${plan.name} has no damage.`);
       if (cairnOn()) throw new Error("In Cairn attacks always hit: Attack rolls the damage and takes off the Armor.");
       if (twoSix()) return damageAstra(plan, from, opts);
@@ -2703,6 +2735,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     },
     // What a creature attacks with, and its numbers.
     weapon(who, weaponKey, engine, game, opts, seat) {
+      if (fateOn()) return fc.weapon(who, weaponKey, seat);
       if (cairnOn()) return weaponCairn(who, weaponKey, seat);
       if (mgtOn()) return weaponMgt(who, weaponKey, seat);
       if (astraOn()) return weaponAstra(who, weaponKey, seat);
@@ -2751,6 +2784,8 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     // level + SAVE effects against CB (12 prime, 18 not) + CL. An NPC's level
     // is its hit dice and its primes its primeset (physical, mental, both).
     async save(entryId, stat, cl, from, castName, advantage = "") {
+      // Fate: a creature's skill (or approach) rolled, against cl as the opposition when given.
+      if (fateOn()) return fc.rollEntry(find(entryId), String(stat ?? ""), cl, from);
       if (cairnOn()) return saveCairnEntry(find(entryId), stat, from);
       if (twoSix()) return saveAstra(find(entryId), stat, cl, from);
       if (d35()) return save35(find(entryId), stat, cl, from, castName);

@@ -18,10 +18,15 @@ import { MAGIC_ITEMS_SPEC } from "../games/srd-5e/magic-items.mjs";
 import { PLAYERS_GUIDE as CAIRN_PLAYERS_GUIDE } from "../games/cairn/players-guide.mjs";
 import { WARDENS_GUIDE as CAIRN_WARDENS_GUIDE } from "../games/cairn/wardens-guide.mjs";
 import { TROUBLE_IN_TWIN_LAKES } from "../games/cairn/trouble-in-twin-lakes.mjs";
+// Fate Core and Fate Accelerated (CC BY 3.0, Evil Hat's SRDs), and a starter scenario.
+import { FATE_CORE } from "../games/fate/fate-core.mjs";
+import { FATE_ACCELERATED } from "../games/fate/fate-accelerated.mjs";
+import { TOOLKIT as FATE_TOOLKIT } from "../games/fate/toolkit.mjs";
+import { GULLS_END } from "../games/fate/gulls-end.mjs";
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 const out = path.join(root, "games", "modules");
-const modules = [PLAYERS_HANDBOOK, BESTIARY, EMPTY_WATCHTOWER, CREW_HANDBOOK, DOSSIER, SALVAGE_RIGHTS, PLAYERS_RULES, CREATURES_SPEC, MAGIC_ITEMS_SPEC, CAIRN_PLAYERS_GUIDE, CAIRN_WARDENS_GUIDE, TROUBLE_IN_TWIN_LAKES];
+const modules = [PLAYERS_HANDBOOK, BESTIARY, EMPTY_WATCHTOWER, CREW_HANDBOOK, DOSSIER, SALVAGE_RIGHTS, PLAYERS_RULES, CREATURES_SPEC, MAGIC_ITEMS_SPEC, CAIRN_PLAYERS_GUIDE, CAIRN_WARDENS_GUIDE, TROUBLE_IN_TWIN_LAKES, FATE_CORE, FATE_ACCELERATED, FATE_TOOLKIT, GULLS_END];
 for (const spec of modules) {
   const folder = writeModule(out, spec);
   console.log(`built ${path.relative(root, folder)}`);

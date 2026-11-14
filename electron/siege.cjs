@@ -6,6 +6,7 @@ const adnd2e = require("./adnd2e.cjs");
 const astra = require("./astra.cjs");
 const mgt2 = require("./mgt2.cjs");
 const cairn = require("./cairn.cjs");
+const fate = require("./fate.cjs");
 
 // Host side of the SIEGE engine (shared/siege, ES modules shared with the
 // app window): the game library from the campaign's imported records, and
@@ -36,6 +37,11 @@ async function siegeCheck(table, record, { attribute, cl = 0, bonus = 0, addLeve
   if (adnd2e.is2e(record)) return adnd2e.check2e(table, record, { kind: kind ?? (/save/i.test(String(label ?? "")) ? "save" : "check"), attribute, skill, bonus, label: kind ? label : undefined }, from);
   if (dnd35.is35(record)) return dnd35.check35(table, record, { kind: kind ?? (/save/i.test(String(label ?? "")) ? "save" : "check"), attribute, skill, dc: dc ?? cl, bonus, label: kind ? label : undefined }, from);
   if (dnd5e.is5e(record)) return dnd5e.check5e(table, record, { kind: kind ?? (/save/i.test(String(label ?? "")) ? "save" : "check"), attribute, skill, dc: dc ?? cl, bonus, advantage, label: kind ? label : undefined }, from);
+  // Fate: 4dF + the skill (or approach: attribute or skill) to overcome, against cl (or dc) as the opposition.
+  if (fate.isFate(record)) {
+    const rolled = await fate.rollFate(table, record, { skill: skill ?? attribute, action: "overcome", opposition: dc ?? cl ?? 0, bonus }, from);
+    return { ...rolled, success: rolled.shifts >= 0 };
+  }
   // Cairn: a save, d20 at or under STR, DEX or WIL (a 1 succeeds, a 20 fails).
   if (cairn.isCairn(record)) return cairn.saveCairn(table, record, { attribute, label: kind ? label : undefined }, from);
   // Apeira Astra: a task (2d6 + skill + characteristic against 8); dc is the difficulty's shift, advantage boon/bane.
@@ -68,6 +74,7 @@ async function levelUp(table, record, packageKey, from) {
   if (dnd35.is35(record)) return dnd35.levelUp35(table, record, from);
   if (adnd2e.is2e(record)) return adnd2e.levelUp2e(table, record, from, packageKey);
   if (cairn.isCairn(record)) throw new Error("Cairn has no levels: a character grows from what happens to them (Scars, Growth, Downtime).");
+  if (fate.isFate(record)) throw new Error("Fate has no levels: a character grows at milestones (minor, significant, major: the sheet's Milestones).");
   if (astra.isAstra(record)) throw new Error("Apeira Astra has no levels: spend experience on a skill or a characteristic (Improve).");
   if (mgt2.isMgt2(record)) throw new Error("Traveller has no levels: change a skill or a characteristic on the sheet (training, a new term).");
   const { engine } = await siege();
@@ -166,6 +173,7 @@ async function editCharacter(table, record, changes, seat) {
   if (dnd35.is35(record)) return dnd35.edit35(table, record, changes, seat);
   if (adnd2e.is2e(record)) return adnd2e.edit2e(table, record, changes, seat);
   if (cairn.isCairn(record)) return cairn.editCairn(table, record, changes, seat);
+  if (fate.isFate(record)) return fate.editFate(table, record, changes, seat);
   if (astra.isAstra(record)) return astra.editAstra(table, record, changes, seat);
   if (mgt2.isMgt2(record)) return mgt2.editMgt2(table, record, changes, seat);
   if (seat.role !== "dm" && record.owner !== seat.name) throw new Error("You can only change your own character.");
@@ -241,6 +249,20 @@ async function exportCharacter(record, format = "kraken") {
 async function dropOnCharacter(table, record, source, from) {
   if (!source) throw new Error("Nothing to drop.");
   const who = from || record.name;
+  if (fate.isFate(record)) {
+    // A Fate sheet takes a stunt (from the books' lists); anything else is written into its extras.
+    if (source.type === "fatestunt") {
+      const result = await fate.actionFate(table, record, "stunt-add", { name: source.name, text: String(source.data?.summary ?? source.data?.text ?? "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim(), skill: String(source.data?.skill ?? "") }, table.seat, who);
+      return { record: result.record, added: "stunt", summary: `${record.name} learns ${source.name}.` };
+    }
+    const rules = await fate.rulesFate();
+    const data = structuredClone(record.data);
+    data.extras = `${String(data.extras ?? "").trim()}${String(data.extras ?? "").trim() ? "\n" : ""}${source.name}`.slice(0, 8000);
+    const updated = table.records.update(record.id, { data: rules.derive(data) }, table.seat, { replace: true });
+    const summary = `${record.name} gets ${source.name} (written into the extras).`;
+    table.say(summary, who, record.visibility === "gm");
+    return { record: updated, added: "extra", summary };
+  }
   if (cairn.isCairn(record)) {
     if (source.type !== "item") throw new Error("A Cairn sheet takes items; a background comes with the character wizard.");
     const data = structuredClone(record.data);
