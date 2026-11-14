@@ -74,6 +74,8 @@
 				<refreshbase type="number">3</refreshbase>
 				<description type="string">Broad, scarred and stubborn, Rook ran the Saltreach watch until a smuggler's bribe he never took got him thrown out.</description>
 				<text type="formattedtext"><p>Broad, scarred and stubborn, Rook ran the Saltreach watch until a smuggler's bribe he never took got him thrown out.</p><p><b>High Concept:</b> _Disgraced Captain of the Harbour Watch_</p><p><b>Trouble:</b> _I Owe the Wrong People_</p><p><b>Aspects:</b> _Saltreach Knows My Face_, _Corin Saved My Life Once_, _Never Leave Anyone in the Water_</p><p><b>Skills:</b> Fight +4, Physique +3, Notice +3, Athletics +2, Provoke +2, Will +2, Contacts +1, Investigate +1, Rapport +1, Shoot +1</p><p><b>Stunts:</b> <b>Watch Captain's Bark.</b> +2 to Provoke to create an advantage when he gives orders in a fight. <b>Shield the Weak.</b> When someone in his zone is attacked, he can defend for them with Fight. <b>Harbour Brawler.</b> +2 to Fight attacks on a deck, a quay or anywhere wet and slippery.</p><p><b>Refresh:</b> 3</p></text>
+				<picture type="string">images/npc/rook-tallow.webp@The Lighthouse at Gull's End</picture>
+				<token type="string">tokens/rook-tallow.webp@The Lighthouse at Gull's End</token>
 			</rooktallowfatecore>
 			<ilsafenwrightfatecore>
 				<name type="string">Ilsa Fenwright (Fate Core)</name>
@@ -147,6 +149,8 @@
 				<refreshbase type="number">3</refreshbase>
 				<description type="string">A young witch from the islands, salt in her hair and questions on her lips, who hears the weather talk.</description>
 				<text type="formattedtext"><p>A young witch from the islands, salt in her hair and questions on her lips, who hears the weather talk.</p><p><b>High Concept:</b> _Weather-Witch of the Western Isles_</p><p><b>Trouble:</b> _The Storm Answers Before I Ask_</p><p><b>Aspects:</b> _My Grandmother's Sea-Glass Charm_, _Rook Is Too Stubborn to Die_, _Curious About Everything Drowned_</p><p><b>Skills:</b> Lore +4, Will +3, Empathy +3, Notice +2, Rapport +2, Provoke +2, Athletics +1, Crafts +1, Investigate +1, Stealth +1</p><p><b>Stunts:</b> <b>Call the Wind.</b> Once per scene she can use Lore to attack with a blast of storm wind, against anyone in her zone or the next. <b>Read the Sky.</b> +2 to Lore to create an advantage about the weather or the sea. <b>Calm Water.</b> +2 to Empathy to overcome someone's fear or anger.</p><p><b>Refresh:</b> 3</p></text>
+				<picture type="string">images/npc/ilsa-fenwright.webp@The Lighthouse at Gull's End</picture>
+				<token type="string">tokens/ilsa-fenwright.webp@The Lighthouse at Gull's End</token>
 			</ilsafenwrightfatecore>
 			<coringalefatecore>
 				<name type="string">Corin Gale (Fate Core)</name>
@@ -220,6 +224,8 @@
 				<refreshbase type="number">3</refreshbase>
 				<description type="string">A smiling sailor with a hidden pocket for everything, who sailed for Mercy Sloane until he could not stomach it.</description>
 				<text type="formattedtext"><p>A smiling sailor with a hidden pocket for everything, who sailed for Mercy Sloane until he could not stomach it.</p><p><b>High Concept:</b> _Smuggler With a Conscience_</p><p><b>Trouble:</b> _Mercy Sloane Wants Me Back_</p><p><b>Aspects:</b> _Every Cove on This Coast_, _Ilsa Still Owes Me a Fair Wind_, _Quick Hands, Quicker Excuses_</p><p><b>Skills:</b> Deceive +4, Stealth +3, Drive +3, Burglary +2, Shoot +2, Athletics +2, Contacts +1, Notice +1, Fight +1, Resources +1</p><p><b>Stunts:</b> <b>Old Friends in Every Port.</b> He can use Deceive instead of Contacts among sailors, smugglers and dockhands. <b>Into the Dark.</b> +2 to Stealth to overcome when he moves between zones in darkness or fog. <b>Born on a Deck.</b> +2 to Drive with any boat, in any weather.</p><p><b>Refresh:</b> 3</p></text>
+				<picture type="string">images/npc/corin-gale.webp@The Lighthouse at Gull's End</picture>
+				<token type="string">tokens/corin-gale.webp@The Lighthouse at Gull's End</token>
 			</coringalefatecore>
 		</category>
 		<category name="Pregenerated (Fate Accelerated)">
@@ -256,6 +262,8 @@
 				<refreshbase type="number">3</refreshbase>
 				<description type="string">Broad, scarred and stubborn, Rook ran the Saltreach watch until a smuggler's bribe he never took got him thrown out.</description>
 				<text type="formattedtext"><p>Broad, scarred and stubborn, Rook ran the Saltreach watch until a smuggler's bribe he never took got him thrown out.</p><p><b>High Concept:</b> _Disgraced Captain of the Harbour Watch_</p><p><b>Trouble:</b> _I Owe the Wrong People_</p><p><b>Aspects:</b> _Saltreach Knows My Face_, _Corin Saved My Life Once_, _Never Leave Anyone in the Water_</p><p><b>Approaches:</b> Careful +2, Clever +1, Flashy +1, Forceful +3, Quick +2, Sneaky +0</p><p><b>Stunts:</b> <b>Harbour Brawler.</b> Because I am a Harbour Brawler, I get a +2 when I Forcefully attack on a deck, a quay or anywhere wet and slippery. <b>Shield the Weak.</b> Because I Never Leave Anyone Behind, I get a +2 when I Carefully defend someone in my zone.</p><p><b>Refresh:</b> 3</p></text>
+				<picture type="string">images/npc/rook-tallow.webp@The Lighthouse at Gull's End</picture>
+				<token type="string">tokens/rook-tallow.webp@The Lighthouse at Gull's End</token>
 			</rooktallowfateaccelerated>
 			<ilsafenwrightfateaccelerated>
 				<name type="string">Ilsa Fenwright (Fate Accelerated)</name>
@@ -290,6 +298,8 @@
 				<refreshbase type="number">3</refreshbase>
 				<description type="string">A young witch from the islands, salt in her hair and questions on her lips, who hears the weather talk.</description>
 				<text type="formattedtext"><p>A young witch from the islands, salt in her hair and questions on her lips, who hears the weather talk.</p><p><b>High Concept:</b> _Weather-Witch of the Western Isles_</p><p><b>Trouble:</b> _The Storm Answers Before I Ask_</p><p><b>Aspects:</b> _My Grandmother's Sea-Glass Charm_, _Rook Is Too Stubborn to Die_, _Curious About Everything Drowned_</p><p><b>Approaches:</b> Careful +2, Clever +3, Flashy +2, Forceful +1, Quick +1, Sneaky +0</p><p><b>Stunts:</b> <b>Read the Sky.</b> Because I can Read the Sky, I get a +2 when I Cleverly create advantages about the weather or the sea. <b>Call the Wind.</b> Because the Storm Answers Me, once per game session I can call a gale that puts out every fire in a zone, or fills a ship's sails.</p><p><b>Refresh:</b> 3</p></text>
+				<picture type="string">images/npc/ilsa-fenwright.webp@The Lighthouse at Gull's End</picture>
+				<token type="string">tokens/ilsa-fenwright.webp@The Lighthouse at Gull's End</token>
 			</ilsafenwrightfateaccelerated>
 			<coringalefateaccelerated>
 				<name type="string">Corin Gale (Fate Accelerated)</name>
@@ -324,6 +334,8 @@
 				<refreshbase type="number">3</refreshbase>
 				<description type="string">A smiling sailor with a hidden pocket for everything, who sailed for Mercy Sloane until he could not stomach it.</description>
 				<text type="formattedtext"><p>A smiling sailor with a hidden pocket for everything, who sailed for Mercy Sloane until he could not stomach it.</p><p><b>High Concept:</b> _Smuggler With a Conscience_</p><p><b>Trouble:</b> _Mercy Sloane Wants Me Back_</p><p><b>Aspects:</b> _Every Cove on This Coast_, _Ilsa Still Owes Me a Fair Wind_, _Quick Hands, Quicker Excuses_</p><p><b>Approaches:</b> Careful +1, Clever +2, Flashy +1, Forceful +0, Quick +2, Sneaky +3</p><p><b>Stunts:</b> <b>Into the Dark.</b> Because I Know Every Cove, I get a +2 when I Sneakily overcome obstacles in darkness or fog. <b>Old Friends in Every Port.</b> Because I have Old Friends in Every Port, once per game session I can find a sailor who owes me a favour.</p><p><b>Refresh:</b> 3</p></text>
+				<picture type="string">images/npc/corin-gale.webp@The Lighthouse at Gull's End</picture>
+				<token type="string">tokens/corin-gale.webp@The Lighthouse at Gull's End</token>
 			</coringalefateaccelerated>
 		</category>
 	</pregencharsheet>

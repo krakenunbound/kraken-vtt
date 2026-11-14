@@ -24,6 +24,8 @@
 				<consequencelist type="string"></consequencelist>
 				<mob type="number">1</mob>
 				<text type="formattedtext"><p>Average nameless NPC.</p><p><b>Aspects:</b> _I Don't Want No Trouble in My Place_</p><p><b>Skills:</b> Contacts +1</p><p><b>Stress:</b> no boxes; no consequences</p><p>_From Fate Core System, Running the Game._</p></text>
+				<picture type="string">images/npc/tavern-keeper.webp@Fate Toolkit and Adversaries</picture>
+				<token type="string">tokens/tavern-keeper.webp@Fate Toolkit and Adversaries</token>
 			</tavernkeeper>
 			<trainedthug>
 				<name type="string">Trained Thug</name>
@@ -58,6 +60,8 @@
 				<consequencelist type="string"></consequencelist>
 				<mob type="number">1</mob>
 				<text type="formattedtext"><p>Fair nameless NPC.</p><p><b>Aspects:</b> _The Ways of the Streets_, _Violent Criminal_</p><p><b>Skills:</b> Fight +2, Athletics +1, Physique +1</p><p><b>Stress:</b> 1 box; no consequences</p><p>_From Fate Core System, Running the Game._</p></text>
+				<picture type="string">images/npc/trained-thug.webp@Fate Toolkit and Adversaries</picture>
+				<token type="string">tokens/trained-thug.webp@Fate Toolkit and Adversaries</token>
 			</trainedthug>
 			<collegiaarcanacourtmage>
 				<name type="string">Collegia Arcana Court Mage</name>
@@ -96,6 +100,8 @@
 				<consequencelist type="string"></consequencelist>
 				<mob type="number">1</mob>
 				<text type="formattedtext"><p>Good nameless NPC.</p><p><b>Aspects:</b> _Haughty Demeanor_, _Devoted to the Arcane Arts_</p><p><b>Skills:</b> Lore +3, Deceive +2, Will +1, Empathy +1</p><p><b>Stress:</b> 2 boxes; no consequences</p><p>_From Fate Core System, Running the Game._</p></text>
+				<picture type="string">images/npc/collegia-arcana-court-mage.webp@Fate Toolkit and Adversaries</picture>
+				<token type="string">tokens/collegia-arcana-court-mage.webp@Fate Toolkit and Adversaries</token>
 			</collegiaarcanacourtmage>
 			<streetgangtough>
 				<name type="string">Street-Gang Tough</name>
@@ -123,6 +129,8 @@
 				<consequencelist type="string"></consequencelist>
 				<mob type="number">3</mob>
 				<text type="formattedtext"><p>Average nameless NPC.</p><p><b>Aspects:</b> _Ill-Informed Street-Gang Tough_</p><p><b>Skills:</b> Notice +1, Fight +1</p><p><b>Stress:</b> no boxes; no consequences (a mob of 3)</p><p>From the book's example of a mob: six of them set upon Landon and Cynere, split into two mobs of three. Add them three at a time.</p><p>_From Fate Core System, Running the Game._</p></text>
+				<picture type="string">images/npc/street-gang-tough.webp@Fate Toolkit and Adversaries</picture>
+				<token type="string">tokens/street-gang-tough.webp@Fate Toolkit and Adversaries</token>
 			</streetgangtough>
 		</category>
 		<category name="Fate Core: Supporting">
@@ -169,6 +177,8 @@
 				<consequencelist type="string">mild</consequencelist>
 				<mob type="number">1</mob>
 				<text type="formattedtext"><p>A supporting NPC.</p><p><b>Aspects:</b> _Retired Vinfeld Militia Captain_, _Too Old For This Shit_, _Landon's Mentor_</p><p><b>Skills:</b> Shoot +4, Fight +3, Will +2, Athletics +1</p><p><b>Stress:</b> 2 physical, 3 mental; consequences mild</p><p><b>Battlefield Expert.</b> Can use Fight to create advantages in large-scale tactical situations.</p><p>_From Fate Core System, Running the Game._</p></text>
+				<picture type="string">images/npc/old-finn-landon-s-mentor.webp@Fate Toolkit and Adversaries</picture>
+				<token type="string">tokens/old-finn-landon-s-mentor.webp@Fate Toolkit and Adversaries</token>
 			</oldfinnlandonsmentor>
 			<terantheswiftthiefextraordinaire>
 				<name type="string">Teran the Swift, Thief Extraordinaire</name>
@@ -214,6 +224,8 @@
 				<consequencelist type="string">mild</consequencelist>
 				<mob type="number">1</mob>
 				<text type="formattedtext"><p>A supporting NPC.</p><p><b>Aspects:</b> _Cutpurse and Scoundrel_, _I Just Can't Help Myself_</p><p><b>Skills:</b> Burglary +5, Stealth +4, Lore +3, Fight +2, Physique +1</p><p><b>Stress:</b> 3 physical, 2 mental; consequences mild</p><p><b>Inside Man.</b> +2 to Stealth in an indoor, urban environment.</p><p>_From Fate Core System, Running the Game._</p></text>
+				<picture type="string">images/npc/teran-the-swift-thief-extraordinaire.webp@Fate Toolkit and Adversaries</picture>
+				<token type="string">tokens/teran-the-swift-thief-extraordinaire.webp@Fate Toolkit and Adversaries</token>
 			</terantheswiftthiefextraordinaire>
 			<ogthestrong>
 				<name type="string">Og the Strong</name>
@@ -247,6 +259,8 @@
 				<consequencelist type="string">mild, mild2, moderate</consequencelist>
 				<mob type="number">1</mob>
 				<text type="formattedtext"><p>A supporting NPC.</p><p><b>Aspects:</b> _Og Smash!_, _Og Not Terribly Bright_</p><p><b>Skills:</b> Fight +6, Physique +5, Athletics +4</p><p><b>Stress:</b> 4 physical, 2 mental; consequences mild, mild2, moderate</p><p>Superb Physique: four physical stress boxes and an extra mild consequence for physical conflicts.</p><p>_From Fate Core System, Running the Game._</p></text>
+				<picture type="string">images/npc/og-the-strong.webp@Fate Toolkit and Adversaries</picture>
+				<token type="string">tokens/og-the-strong.webp@Fate Toolkit and Adversaries</token>
 			</ogthestrong>
 		</category>
 		<category name="Fate Core: Main">
@@ -345,6 +359,8 @@
 				<consequencelist type="string">mild, moderate, severe</consequencelist>
 				<mob type="number">1</mob>
 				<text type="formattedtext"><p>A main NPC.</p><p><b>Aspects:</b> _Smuggler Queen of the Sindral Reach_, _A Mostly Loyal Crew_, _Remorse is For the Weak_, _“Zird, Why Won't You Die?”_, _My Ship, The Death Dealer_, _A Harem of Thugs_, _I've Got the Law in My Pocket_</p><p><b>Skills:</b> Deceive +6, Fight +6, Shoot +5, Burglary +5, Resources +4, Will +4, Contacts +3, Notice +3, Crafts +2, Stealth +2, Lore +1, Physique +1</p><p><b>Stress:</b> 3 physical, 4 mental; consequences mild, moderate, severe</p><p><b>Takes One to Know One.</b> Use Deceive instead of Empathy to create an advantage in social situations.</p><p><b>Feint Master.</b> +2 to use Deceive to create an advantage in a physical conflict.</p><p><b>Riposte.</b> If you succeed with style on a Fight defense, you can choose to inflict a 2-shift hit rather than take a boost.</p><p>_From Fate Core System, Running the Game._</p></text>
+				<picture type="string">images/npc/barathar-smuggler-queen-of-the-sindral-reach.webp@Fate Toolkit and Adversaries</picture>
+				<token type="string">tokens/barathar-smuggler-queen-of-the-sindral-reach.webp@Fate Toolkit and Adversaries</token>
 			</baratharsmugglerqueenofthesindralreach>
 		</category>
 		<category name="Fate Accelerated: Mooks">
@@ -388,6 +404,8 @@
 				<consequencelist type="string"></consequencelist>
 				<mob type="number">1</mob>
 				<text type="formattedtext"><p>A nameless NPC.</p><p><b>Aspects:</b> _Cyclops House Bully_, _Cowardly Without Backup_</p><p><b>Skills:</b> Frightening other students +2, Weaseling out of trouble +2, Breaking things +2, Planning −2, Studying −2</p><p><b>Stress:</b> no boxes; no consequences</p><p>No stress: the first hit takes them out.</p><p>_From Fate Accelerated Edition, Being the GM._</p></text>
+				<picture type="string">images/npc/cyclops-house-bully.webp@Fate Toolkit and Adversaries</picture>
+				<token type="string">tokens/cyclops-house-bully.webp@Fate Toolkit and Adversaries</token>
 			</cyclopshousebully>
 			<steelassassin>
 				<name type="string">Steel Assassin</name>
@@ -421,6 +439,8 @@
 				<consequencelist type="string"></consequencelist>
 				<mob type="number">1</mob>
 				<text type="formattedtext"><p>A nameless NPC.</p><p><b>Aspects:</b> _Steel Assassin_, _The Night Is Ours_</p><p><b>Skills:</b> Sneaking +2, Ambushing +2, Standing up to determined opposition −2</p><p><b>Stress:</b> 1 box; no consequences</p><p>_From Fate Accelerated Edition, Being the GM._</p></text>
+				<picture type="string">images/npc/steel-assassin.webp@Fate Toolkit and Adversaries</picture>
+				<token type="string">tokens/steel-assassin.webp@Fate Toolkit and Adversaries</token>
 			</steelassassin>
 			<skyshark>
 				<name type="string">Sky Shark</name>
@@ -450,6 +470,8 @@
 				<consequencelist type="string"></consequencelist>
 				<mob type="number">1</mob>
 				<text type="formattedtext"><p>A nameless NPC.</p><p><b>Aspects:</b> _I'm a Shark_, _Vulnerable Belly_</p><p><b>Skills:</b> Flying +2, Biting +2</p><p><b>Stress:</b> 2 boxes; no consequences</p><p>Bad (−2) at anything that isn't flying or biting.</p><p>_From Fate Accelerated Edition, Being the GM._</p></text>
+				<picture type="string">images/npc/sky-shark.webp@Fate Toolkit and Adversaries</picture>
+				<token type="string">tokens/sky-shark.webp@Fate Toolkit and Adversaries</token>
 			</skyshark>
 			<gangofthugs>
 				<name type="string">Gang of Thugs</name>
@@ -484,6 +506,8 @@
 				<consequencelist type="string"></consequencelist>
 				<mob type="number">4</mob>
 				<text type="formattedtext"><p>A nameless NPC.</p><p><b>Aspects:</b> _Axe Handles &amp; Crowbars_</p><p><b>Skills:</b> Ganging up +2, Scaring innocent people +2, Thinking ahead −2, Fighting when outnumbered −2</p><p><b>Stress:</b> 2 boxes; no consequences (a mob of 4)</p><p>A group of four thugs played as one: a stress box for every two of them.</p><p>_From Fate Accelerated Edition, Being the GM._</p></text>
+				<picture type="string">images/npc/gang-of-thugs.webp@Fate Toolkit and Adversaries</picture>
+				<token type="string">tokens/gang-of-thugs.webp@Fate Toolkit and Adversaries</token>
 			</gangofthugs>
 		</category>
 		<category name="Adversary Toolkit">
@@ -523,6 +547,8 @@
 				<consequencelist type="string">mild</consequencelist>
 				<mob type="number">1</mob>
 				<text type="formattedtext"><p>A nameless NPC.</p><p><b>Aspects:</b> _Loyal Agent of the Empire_, _Better Part of Valor_</p><p><b>Skills:</b> Athletics +3, Shoot +2, Stealth +2</p><p><b>Stress:</b> 2 boxes; consequences mild</p><p><b>Scout Armor.</b> The scout has Armor:1 against small-arms fire and melee weapons.</p><p>Countdown 5. Trigger (first box): the scout is attacked. Trigger (remaining boxes): one minute elapses. Outcome: reinforcements arrive. (The book's Sneak is Fate Core's Stealth here.)</p><p>_From the Fate Adversary Toolkit._</p></text>
+				<picture type="string">images/npc/forward-scout.webp@Fate Toolkit and Adversaries</picture>
+				<token type="string">tokens/forward-scout.webp@Fate Toolkit and Adversaries</token>
 			</forwardscout>
 			<baronvondarkness>
 				<name type="string">Baron von Darkness</name>
@@ -613,6 +639,8 @@
 				<consequencelist type="string">mild, moderate, severe</consequencelist>
 				<mob type="number">1</mob>
 				<text type="formattedtext"><p>A main NPC.</p><p><b>Aspects:</b> _Dark Lord of Crime_, _“My intellect is unparalleled!”_, _Fearsome Death Ray_, _Wanted in Sixteen Countries_, _“I'll rule this city one day.”_</p><p><b>Skills:</b> Contacts +5, Deceive +4, Will +4, Provoke +3, Rapport +3, Shoot +3, Crafts +2, Fight +2, Lore +2, Physique +2, Athletics +1, Notice +1, Empathy +1, Stealth +1</p><p><b>Stress:</b> 3 physical, 4 mental; consequences mild, moderate, severe</p><p><b>Contingency Plan.</b> Whenever Baron von Darkness takes a consequence, you can pay a fate point to remove him from the scene (in a puff of smoke), replacing him with two threats.</p><p>Average (+1) at everything else. Countdown 3: the bank robbed, the mayor assassinated, the undersea base; outcome: the city controlled from beneath the waves. (The book's Deceit is Fate Core's Deceive here.)</p><p>_From the Fate Adversary Toolkit._</p></text>
+				<picture type="string">images/npc/baron-von-darkness.webp@Fate Toolkit and Adversaries</picture>
+				<token type="string">tokens/baron-von-darkness.webp@Fate Toolkit and Adversaries</token>
 			</baronvondarkness>
 		</category>
 	</npc>
