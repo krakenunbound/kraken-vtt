@@ -1,6 +1,6 @@
 import { ShipsWindow } from "../ships/ShipsWindow";
 import { DelveWindow, OraclesWindow } from "../ironsworn/IronswornWindows";
-import { lazy, Suspense, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { Fragment, lazy, Suspense, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { Picture } from "../characters/ArtPicker";
 import { CharacterPanel } from "../characters/CharacterPanel";
 import { CharacterSelect } from "../characters/CharacterSelect";
@@ -51,23 +51,34 @@ function PlayersWindow({ session }: { session: Session }) {
     <div className="players-window">
       {info ? (
         <div className="share-card">
-          <p>Players open one of these in a browser:</p>
-          <p>
-            This computer <span className="secret">http://127.0.0.1:{info.port}</span>
-          </p>
-          {info.lan
-            ? info.addresses.map((address) => (
-                <p key={address}>
-                  Your network <span className="secret">http://{address}:{info.port}</span>
-                </p>
-              ))
-            : null}
-          {info.cloud && info.externalV4 ? (
-            <p>
-              Internet <span className="secret">http://{info.externalV4}:{info.port}</span>
-            </p>
-          ) : null}
-          <p>{info.publicGame ? "Public game: players leave the table password blank." : <>Table password <span className="secret">{info.password}</span></>}</p>
+          <h3>Joining</h3>
+          <p className="hint">Players open one of these in a browser.</p>
+          <dl className="share-addresses">
+            <dt>This computer</dt>
+            <dd>
+              <span className="secret">http://127.0.0.1:{info.port}</span>
+            </dd>
+            {info.lan
+              ? info.addresses.map((address) => (
+                  <Fragment key={address}>
+                    <dt>Your network</dt>
+                    <dd>
+                      <span className="secret">http://{address}:{info.port}</span>
+                    </dd>
+                  </Fragment>
+                ))
+              : null}
+            {info.cloud && info.externalV4 ? (
+              <>
+                <dt>Internet</dt>
+                <dd>
+                  <span className="secret">http://{info.externalV4}:{info.port}</span>
+                </dd>
+              </>
+            ) : null}
+            <dt>Password</dt>
+            <dd>{info.publicGame ? <span className="hint">None: a public game, players leave it blank</span> : <span className="secret">{info.password}</span>}</dd>
+          </dl>
         </div>
       ) : null}
       <h3>At the table</h3>
@@ -158,7 +169,7 @@ function AccountsPanel({ session }: { session: Session }) {
             )}
           </li>
         ))}
-        {session.accounts.list.length === 0 ? <li className="hint">No accounts yet.</li> : null}
+        {session.accounts.list.length === 0 ? <li className="hint empty-state">No accounts yet. A player makes one the first time they sit down, or make one here.</li> : null}
       </ul>
       <form
         className="account-create"
@@ -277,7 +288,7 @@ export function Desktop({
       id: "library",
       label: "Library",
       entries: [
-        ...(gm ? [{ kind: "books" as const, payload: "activation", label: "Modules", icon: "package", title: "Modules: make a book active for this campaign (Activation)" }] : []),
+        ...(gm ? [{ kind: "books" as const, payload: "activation", label: "Modules", icon: "package", title: "Modules", hint: "Make a book active for this campaign" }] : []),
         { kind: "books", label: "Books", icon: "book", title: "Books" },
         { kind: "sound", label: "Sound Sets", icon: "music", title: "Sound" },
         ...(gm ? [{ kind: "assets" as const, label: "Assets", icon: "image", title: "Assets" }] : []),
@@ -301,7 +312,7 @@ export function Desktop({
         { kind: "calendar", label: "Calendar", icon: "calendar", title: "Calendar" },
         // Progress clocks: Forged in the Dark's (shown in any game that has some).
         ...(session.ruleset === "Forged in the Dark" || session.clocks.clocks.length ? [{ kind: "clocks" as const, label: "Clocks", icon: "hourglass", title: "Clocks" }] : []),
-        ...(gm || session.options.motd?.text || session.options.motd?.links?.length ? [{ kind: "motd" as const, label: "Message of the Day", icon: "flag", title: "Message of the Day" }] : []),
+        ...(gm || session.options.motd?.text || session.options.motd?.links?.length ? [{ kind: "motd" as const, label: "Message", icon: "flag", title: "Message of the Day" }] : []),
       ],
     },
     {
@@ -309,17 +320,17 @@ export function Desktop({
       label: "Campaign",
       entries: gm
         ? [
-            { kind: "adventure", payload: "battle", label: "Encounters", icon: "encounter", title: "Encounters: every active adventure's" },
+            { kind: "adventure", payload: "battle", label: "Encounters", icon: "encounter", title: "Encounters", hint: "Every active adventure's encounters" },
             { kind: "imagelist", label: "Images", icon: "image", title: "Images" },
             { kind: "library", label: "Adventures", icon: "map", title: "Library" },
             listEntry("item", "Items", "bag"),
             listEntry("npc", "NPCs", "skull"),
-            { kind: "adventure", payload: "parcel", label: "Parcels", icon: "coins", title: "Treasure parcels: every active adventure's" },
-            { kind: "adventure", payload: "table", label: "Tables", icon: "table", title: "Random tables: every active adventure's" },
+            { kind: "adventure", payload: "parcel", label: "Parcels", icon: "coins", title: "Parcels", hint: "Every active adventure's treasure parcels" },
+            { kind: "adventure", payload: "table", label: "Tables", icon: "table", title: "Tables", hint: "Every active adventure's random tables" },
           ]
         : [listEntry("item", "Items", "bag"), listEntry("npc", "NPCs", "skull")],
     },
-    ...(gm ? [{ id: "world", label: "World", entries: [{ kind: "adventure" as const, payload: "story", label: "Story", icon: "scroll", title: "Story: every active adventure's story entries" }] }] : []),
+    ...(gm ? [{ id: "world", label: "World", entries: [{ kind: "adventure" as const, payload: "story", label: "Story", icon: "scroll", title: "Story", hint: "Every active adventure's story entries" }] }] : []),
     { id: "character", label: "Character", entries: characterLists },
   ];
   const launchers = [...tools, ...groups.flatMap((group) => group.entries)];
