@@ -20,7 +20,7 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
   const [rounds, setRounds] = useState("");
   const [open, setOpen] = useState(false);
   const [saveStat, setSaveStat] = useState("wisdom");
-  const saveChoices = session.ruleset === "D&D 3.5E" ? ["fortitude", "reflex", "will"] : session.ruleset === "AD&D 2E" ? ["paralyzation", "rod", "petrification", "breath", "spell"] : session.ruleset === "Traveller" ? ["str", "dex", "end", "int", "edu", "soc"] : session.ruleset === "Apeira Astra" ? ["brawn", "reflex", "grit", "intellect", "training", "presence"] : ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"];
+  const saveChoices = session.ruleset === "D&D 3.5E" ? ["fortitude", "reflex", "will"] : session.ruleset === "AD&D 2E" ? ["paralyzation", "rod", "petrification", "breath", "spell"] : session.ruleset === "Traveller" ? ["str", "dex", "end", "int", "edu", "soc"] : session.ruleset === "Apeira Astra" ? ["brawn", "reflex", "grit", "intellect", "training", "presence"] : session.ruleset === "Cairn" ? ["str", "dex", "wil"] : ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"];
   const saveChoice = saveChoices.includes(saveStat) ? saveStat : saveChoices[saveChoices.length - 1];
   const [saveCl, setSaveCl] = useState("0");
   const record = entry.recordId ? session.records[entry.recordId] : null;
@@ -130,6 +130,13 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
             {entry.ac}
           </span>
         ) : null}
+        {entry.cairn ? (
+          // Cairn: STR now (damage past HP comes off it); a detachment is marked.
+          <span className="ct-stat" data-cairn-str={entry.cairn.str} title={`STR ${entry.cairn.str} of ${entry.cairn.max}${entry.cairn.detachment ? " · a detachment" : ""}${entry.cairn.lostTurn ? " · loses the first turn (failed DEX save)" : ""}`}>
+            STR {entry.cairn.str}
+            {entry.cairn.detachment ? " ⚑" : ""}
+          </span>
+        ) : null}
         {entry.hp !== undefined ? (
           <span className="ct-stat ct-hp" title={`${entry.health.status}: ${(entry.hp ?? 0) - (entry.wounds ?? 0)} of ${entry.hp}${entry.temp ? `, ${entry.temp} temporary` : ""}`} style={{ color: entry.health.color }}>
             <Icon name="heart" size={14} />
@@ -159,6 +166,17 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
             Steady
           </button>
         ) : null}
+        {session.ruleset === "Cairn" && entry.health.status === "Dying" && entry.recordId && (gm || myCharacterId) ? (
+          // Cairn: Critical Damage; aid (bandages) stabilizes, untreated death within the hour.
+          <button type="button" className="ct-death-save" data-action="stabilize" title="Give aid (bandages): stable, out of danger but out of action" onClick={() => void session.cairnAction(entry.recordId ?? "", "stabilize")}>
+            Stabilize
+          </button>
+        ) : null}
+        {session.ruleset === "Cairn" && gm && entry.faction !== "friend" && !["Dead", "Routed", "Fleeing"].includes(entry.health.status) ? (
+          <button type="button" className="ct-death-save" data-action="morale" title="Morale: a WIL save to stand, else the creature flees" onClick={() => session.ct("morale", { id: entry.id })}>
+            Morale
+          </button>
+        ) : null}
         {session.ruleset === "D&D 5E" && entry.health.status === "Dying" && (gm || entry.mine) ? (
           // 5E: a Dying character's death saving throw.
           <button type="button" className="ct-death-save" data-action="death-save" title={`Death saves: ${entry.deathsaves?.success ?? 0} successes, ${entry.deathsaves?.failure ?? 0} failures`} onClick={() => session.ct("death-save", { id: entry.id })}>
@@ -184,15 +202,30 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
           </span>
         ) : entry.mine ? (
           <span className="ct-tools">
-            <button type="button" title="Roll my initiative" onClick={() => session.ct("init", { which: entry.id })}>
-              d10
+            <button type="button" title={session.ruleset === "Cairn" ? "My DEX save to act in the first round" : "Roll my initiative"} onClick={() => session.ct("init", { which: entry.id })}>
+              {session.ruleset === "Cairn" ? "DEX" : "d10"}
             </button>
           </span>
         ) : null}
       </div>
       {entry.targets.length > 0 || (gm && (entry.attacks?.length || entry.powers?.length)) ? (
         <div className="ct-actions">
-          {entry.attacks?.map((attack) => (
+          {session.ruleset === "Cairn"
+            ? entry.attacks?.map((attack) => (
+                // Cairn: attacks always hit; the die less Armor (impaired d4, enhanced d12).
+                <span key={attack.key} className="ct-attack" data-cairn-attack={attack.key}>
+                  <button type="button" data-action="npc-attack" onClick={() => session.ct("attack", { id: entry.id, weapon: attack.key })} title={`${attack.name}: ${attack.damage}, always hits (less Armor)`}>
+                    {attack.name} {attack.damage}
+                  </button>
+                  <button type="button" data-mode="impaired" onClick={() => session.ct("attack", { id: entry.id, weapon: attack.key, mode: "impaired" })} title="Impaired (cover, bound hands): d4">
+                    d4
+                  </button>
+                  <button type="button" data-mode="enhanced" onClick={() => session.ct("attack", { id: entry.id, weapon: attack.key, mode: "enhanced" })} title="Enhanced (a helpless foe, a daring maneuver): d12">
+                    d12
+                  </button>
+                </span>
+              ))
+            : entry.attacks?.map((attack) => (
             <span key={attack.key} className="ct-attack">
               <button type="button" onClick={() => session.ct("attack", { id: entry.id, weapon: attack.key })} title={attack.thaco !== undefined ? `${attack.name}: attack (THAC0 ${attack.thaco}${attack.bonus ? `, ${attack.bonus > 0 ? "+" : ""}${attack.bonus} to hit` : ""})` : `${attack.name}: attack`}>
                 {attack.thaco !== undefined ? (
@@ -408,9 +441,14 @@ export function CombatTracker({ session }: { session: Session }) {
             <button type="button" onClick={() => session.ct("init", { which: "npcs" })} disabled={combat.entries.length === 0}>
               Roll NPC init
             </button>
-            <button type="button" onClick={() => session.ct("init", { which: "all" })} disabled={combat.entries.length === 0}>
-              Roll all
+            <button type="button" onClick={() => session.ct("init", { which: "all" })} disabled={combat.entries.length === 0} title={session.ruleset === "Cairn" ? "The PCs first (each saves DEX to act in the first round), then their opponents" : undefined}>
+              {session.ruleset === "Cairn" ? "Sides (DEX saves)" : "Roll all"}
             </button>
+            {session.ruleset === "Cairn" ? (
+              <button type="button" data-action="morale-foes" title="Morale: every foe still standing saves WIL, or flees" onClick={() => session.ct("morale", { faction: "foe" })} disabled={!combat.entries.some((item) => item.faction === "foe")}>
+                Morale
+              </button>
+            ) : null}
             {combat.round > 0 ? (
               <button type="button" data-action="prev-turn" title="Back: undo the last turn change (effects that ran out come back, ongoing damage is healed); what happened during the turn stays" onClick={() => session.ct("prev")}>
                 <span className="flip"><Icon name="next" size={14} /></span> Back

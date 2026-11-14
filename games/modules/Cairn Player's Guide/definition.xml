@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root version="4.6" release="1">
+	<name type="string">Cairn Player's Guide</name>
+	<displayname type="string">Cairn Player's Guide</displayname>
+	<category type="string">Cairn</category>
+	<author type="string">Yochai Gal (adapted for Kraken VTT)</author>
+	<ruleset type="string">Cairn</ruleset>
+</root>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root version="4.6" release="1">
+	<name type="string">Trouble in Twin Lakes</name>
+	<displayname type="string">Trouble in Twin Lakes (Cairn)</displayname>
+	<category type="string">Cairn Adventures</category>
+	<author type="string">Yochai Gal (adapted for Kraken VTT)</author>
+	<ruleset type="string">Cairn</ruleset>
+</root>

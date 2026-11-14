@@ -827,7 +827,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
   // read from the module itself (the Books window), as FG reads them, never
   // copied into the campaign (they made it tens of MB, sent to every player).
   const GM_SEAT = { role: "dm", name: "GM" };
-  const RULES_TYPES = new Set(["siegepackage", "siegepower", "siegegame", "item", "npc", "spell", "pregencharsheet", ...require("./dnd5e.cjs").TYPES_5E]);
+  const RULES_TYPES = new Set(["siegepackage", "siegepower", "siegegame", "item", "npc", "spell", "pregencharsheet", "cairntable", ...require("./dnd5e.cjs").TYPES_5E]);
   function loadRecords(info) {
     const file = books?.file?.(info.id);
     if (!file) return;
@@ -1749,6 +1749,18 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       // spec with the campaign's books. A player's character is theirs.
       if (msg.type === "build-character") {
         const answer = (body) => send(ws, { type: "op-result", req: msg.req ?? null, ...body });
+        if (require("./cairn.cjs").isCairnRuleset(ruleset)) {
+          // A Cairn character from its wizard's spec (the background's tables and the rolls made on the host's dice).
+          const owner = client.role === "dm" ? text(msg.owner, "").slice(0, 24) : client.name;
+          require("./cairn.cjs")
+            .buildCairn(agentHandle, msg.spec ?? {}, owner, client.role === "dm" ? seatOf(client) : { role: "dm", name: client.name })
+            .then(({ record, problems }) => {
+              addChat({ id: client.id, from: client.name, text: `Created ${record.name}: ${record.data.background ?? ""}, STR ${record.data.attributes.str.score} DEX ${record.data.attributes.dex.score} WIL ${record.data.attributes.wil.score}, HP ${record.data.hp.max}.${problems.length ? ` ${problems.join(" ")}` : ""}`, at: Date.now() });
+              answer({ ok: true, id: record.id, problems });
+            })
+            .catch((error) => answer({ ok: false, error: error instanceof Error ? error.message : "Could not build that character." }));
+          return;
+        }
         if (ruleset === require("./astra.cjs").RULESET_NAME) {
           // An Apeira Astra character from its wizard's spec.
           const owner = client.role === "dm" ? text(msg.owner, "").slice(0, 24) : client.name;
@@ -1850,6 +1862,19 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         levelUp(agentHandle, record, msg.package, client.role === "dm" ? record.name : client.name).catch((error) =>
           send(ws, { type: "error", reason: error instanceof Error ? error.message : "Could not level up." }),
         );
+        return;
+      }
+
+      // Cairn: what a character does outside the fight (rest, Fatigue, spells, Scars, Growth).
+      if (msg.type === "cairn") {
+        const record = records.get(msg.id, seatOf(client));
+        if (!record || !require("./cairn.cjs").isCairn(record) || (client.role !== "dm" && record.owner !== client.name)) {
+          send(ws, { type: "error", reason: "That is not your Cairn character." });
+          return;
+        }
+        require("./cairn.cjs")
+          .actionCairn(agentHandle, record, String(msg.action ?? ""), msg.args && typeof msg.args === "object" ? msg.args : {}, seatOf(client), client.role === "dm" ? record.name : client.name)
+          .catch((error) => send(ws, { type: "error", reason: error instanceof Error ? error.message : "Could not do that." }));
         return;
       }
 
@@ -2272,7 +2297,13 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
               return combat.targetArea(sourceId, { x: num(msg.x, 0), y: num(msg.y, 0), radius: num(msg.radius, 0) * per, faction: msg.faction ?? null }, seat, (entry) => map.tokens().find((token) => token.id === entry.tokenId) ?? map.tokens().find((token) => entry.recordId && token.recordId === entry.recordId) ?? null);
             }
             case "attack":
-              return combat.attack(msg.recordId ? { recordId: String(msg.recordId) } : { entryId: String(msg.id) }, String(msg.weapon), seat, client.role === "dm" ? "Combat" : client.name, { full: Boolean(msg.full) });
+              return combat.attack(msg.recordId ? { recordId: String(msg.recordId) } : { entryId: String(msg.id) }, String(msg.weapon), seat, client.role === "dm" ? "Combat" : client.name, { full: Boolean(msg.full), mode: ["impaired", "enhanced"].includes(msg.mode) ? msg.mode : "" });
+            case "morale":
+              // Cairn: a WIL save to stand, for one creature (id) or a side (faction).
+              return combat.morale(String(msg.id ?? msg.faction ?? "foe"), seat);
+            case "attack-together":
+              // Cairn: several attackers at one foe, the highest die kept.
+              return combat.attackTogether(Array.isArray(msg.ids) ? msg.ids : [], String(msg.targetId ?? ""), seat, client.role === "dm" ? "Combat" : client.name);
             case "damage-roll":
               return combat.damageRoll(msg.recordId ? { recordId: String(msg.recordId) } : { entryId: String(msg.id) }, String(msg.weapon), seat, client.role === "dm" ? "Combat" : client.name);
             case "heal":

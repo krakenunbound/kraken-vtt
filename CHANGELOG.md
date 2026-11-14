@@ -25,6 +25,31 @@ full log of the work is in [PLAN.md](PLAN.md).
   (10 + DEX + CON, or + WIS for a Monk without a shield). A Monk is proficient
   only with martial weapons that are Light, a Rogue with those that are Finesse
   or Light, as the SRD 5.2.1 says.
+- **Cairn, Second Edition comes with Kraken.** Make a campaign with the
+  *Cairn* ruleset and play it with nothing else installed: Yochai Gal's game
+  (CC BY-SA 4.0) with its *Player's Guide*, *Warden's Guide* and the adventure
+  *Trouble in Twin Lakes*, made from the official text.
+  - **The character wizard follows the book:** a background rolled on the d20
+    (or chosen), a name from its list, its starting gear and a roll on each of
+    its two tables; STR, DEX and WIL on 3d6 with one swap; Hit Protection 1d6;
+    the traits, a Bond, the age and (for the youngest) an Omen; 3d6 gold
+    pieces to spend at the Marketplace. Every die is rolled in front of the
+    table.
+  - **The sheet:** saves (a d20 at or under; a 1 always succeeds, a 20 always
+    fails), HP and Armor, the ten inventory slots (bulky two, petty none, four
+    on the body and six in the backpack; a full inventory takes HP to 0),
+    Fatigue, rest (a short rest, a night's rest, a week with a healer),
+    deprivation, spellbooks (a Fatigue each cast), scrolls and relics, the
+    traits, Bond and Omen, and a **Growth** tab instead of experience: Scars,
+    what has changed, Downtime milestones.
+  - **Cairn's combat on the tracker:** the PCs act first, each saving DEX to
+    act in the first round; attacks always hit (impaired d4, enhanced d12, two
+    weapons keep the best, blast, detachments); damage past Armor comes off HP
+    and then STR, with a STR save against Critical Damage; HP taken to exactly
+    0 rolls on the Scars table; morale (WIL) at the first casualty and at
+    half; several attackers on one foe keep the highest die.
+  - **The party sheet** hands out gold pieces, and its XP tab is the party's
+    Growth: Cairn has no experience points.
 
 ## 0.1.0-alpha.87: Two fixes from the screenshot shoot
 

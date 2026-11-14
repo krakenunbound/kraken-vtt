@@ -36,6 +36,8 @@ const FG_RULESETS = {
   // Kraken's own games, with their books shipped in the app (games/modules).
   "Descending Darkness": ["Descending Darkness"],
   "Apeira Astra": ["Apeira Astra"],
+  // Cairn Second Edition (CC BY-SA 4.0), its books shipped in the app (games/modules).
+  Cairn: ["Cairn"],
   Worldbuilding: [],
 };
 const ANY = new Set(["", "any", "corerpg"]);

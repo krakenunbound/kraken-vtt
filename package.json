@@ -49,6 +49,8 @@
     "adnd2e-ui": "node scripts/verify-adnd2e-ui.mjs",
     "dice-hold": "node scripts/verify-dice-hold.mjs",
     "mgt2": "node scripts/check-mgt2.mjs",
+    "cairn": "node scripts/check-cairn.mjs",
+    "cairn-ui": "node scripts/verify-cairn-ui.mjs",
     "mgt2-ui": "node scripts/verify-mgt2-ui.mjs",
     "tcwizard": "node scripts/check-tcwizard.mjs",
     "starships": "node scripts/check-starships.mjs",

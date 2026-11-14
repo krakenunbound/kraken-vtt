@@ -50,6 +50,16 @@ const GLYPHS: Record<string, ReactElement> = {
   ),
   // Apeira Astra: a four-pointed star.
   apeiraastra: <path d="M20 7.5 22.6 17.4 32.5 20 22.6 22.6 20 32.5 17.4 22.6 7.5 20 17.4 17.4z" />,
+  // Cairn: a cairn, stones stacked on a path.
+  cairn: (
+    <>
+      <ellipse cx="20" cy="29" rx="9" ry="2.6" />
+      <ellipse cx="20" cy="23.6" rx="7" ry="2.4" />
+      <ellipse cx="20" cy="18.6" rx="5.2" ry="2.2" />
+      <ellipse cx="20" cy="14" rx="3.6" ry="2" />
+      <ellipse cx="20" cy="10.2" rx="2.2" ry="1.5" />
+    </>
+  ),
   // Worldbuilding: a compass rose.
   worldbuilding: (
     <>

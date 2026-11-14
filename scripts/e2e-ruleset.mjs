@@ -249,9 +249,10 @@ async function runRuleset(ruleset, plan) {
       await preset.click();
       await seat.waitForTimeout(500);
       await closeWindows(seat);
-      await seat.click('.dice-tray button[aria-label="d20"]');
-      await seat.click('.dice-tray button[aria-label="d6"]');
-      await seat.click(".dice-pool .play-button");
+      // (The map the GM put on the table can lie over the chat dock: its buttons are pressed as clicks on them.)
+      await seat.locator('.dice-tray button[aria-label="d20"]').dispatchEvent("click");
+      await seat.locator('.dice-tray button[aria-label="d6"]').dispatchEvent("click");
+      await seat.locator(".dice-pool .play-button").dispatchEvent("click");
       const line = await waitFor(async () => {
         const lines = await tool("kraken_chat_log", { count: 30 });
         return (Array.isArray(lines) ? lines : []).reverse().find((item) => item.roll && [`A test player`, ctx.character?.name ?? "A test player"].some((who) => `${item.from} ${item.roll.by ?? ""}`.includes(who)) && item.roll.terms?.some((term) => term.sides === 20));
@@ -448,7 +449,8 @@ async function fight(ctx) {
     const view = await tool("kraken_combat", { action: "view" });
     const foe = view.entries.find((entry) => entry.id === ctx.foe.id);
     const pc = view.entries.find((entry) => entry.id === ctx.pcEntry.id);
-    return { foe: foe && !["Dead", "Destroyed", "Dying", "Down", "Unconscious"].includes(foe.health?.status), pc: pc && !["Dead", "Dying", "Down", "Unconscious"].includes(pc.health?.status), view };
+    // (Cairn: the routed and the fleeing are out of the fight; a stabilized PC is out of action.)
+    return { foe: foe && !["Dead", "Destroyed", "Dying", "Down", "Unconscious", "Routed", "Fleeing"].includes(foe.health?.status), pc: pc && !["Dead", "Dying", "Down", "Unconscious", "Stable"].includes(pc.health?.status), view };
   };
   await seat.bringToFront();
   await openSide(seat, "characters").catch(() => undefined);

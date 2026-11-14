@@ -86,6 +86,16 @@ let rm = null;
 const rmReady = import(pathToFileURL(path.join(__dirname, "..", "shared", "mgt2", "rules.mjs")).href).then((module) => {
   rm = module;
 });
+// Cairn (shared/cairn/rules.mjs), when the campaign's ruleset is "Cairn": the
+// PCs act first, each saving DEX to act in the first round, then their
+// opponents; attacks always hit: the weapon's die (d4 impaired, d12 enhanced,
+// the best of several attackers or of two weapons), less Armor, off HP and
+// then STR, with a STR save against Critical Damage; HP to exactly 0 is a
+// Scar; morale (WIL) at the first casualty and at half; detachments.
+let rc = null;
+const rcReady = import(pathToFileURL(path.join(__dirname, "..", "shared", "cairn", "rules.mjs")).href).then((module) => {
+  rc = module;
+});
 // Starships (shared/starships/rules.mjs) in the 2d6 games: a ship on the
 // tracker is its record's hull and armour; its initiative 2d6 + the pilot's
 // task DM + Thrust; its weapons fired by their gunners (ship-attack).
@@ -172,6 +182,10 @@ function cleanEntry(raw) {
     hitOn: raw.hitOn && typeof raw.hitOn === "object" ? Object.fromEntries(Object.entries(raw.hitOn).slice(0, 20).filter(([, value]) => ["hit", "crit", "miss"].includes(value)).map(([key, value]) => [String(key).slice(0, 40), value])) : null,
     // Apeira Astra: the targets its last attack hit and each one's Effect, until damage is rolled.
     effectOn: raw.effectOn && typeof raw.effectOn === "object" ? Object.fromEntries(Object.entries(raw.effectOn).slice(0, 20).filter(([, value]) => Number.isFinite(Number(value))).map(([key, value]) => [String(key).slice(0, 40), Math.round(Number(value))])) : null,
+    // Cairn: an NPC's STR lost, its Critical Damage ("dead", "routed"), and a PC's lost first turn (the round).
+    strLoss: Math.max(0, Math.round(num(raw.strLoss, 0))),
+    critical: ["dead", "routed"].includes(raw.critical) ? raw.critical : "",
+    lostTurn: Math.max(0, Math.round(num(raw.lostTurn, 0))),
     deathsaves: raw.deathsaves && typeof raw.deathsaves === "object" ? { success: Math.min(3, Math.max(0, Math.round(num(raw.deathsaves.success, 0)))), failure: Math.min(3, Math.max(0, Math.round(num(raw.deathsaves.failure, 0)))) } : { success: 0, failure: 0 },
   };
 }
@@ -306,6 +320,9 @@ function createCombat({ saved, table, onChange = () => undefined }) {
   const bleeds = () => table().ruleset?.() === "Descending Darkness";
   const astraOn = () => table().ruleset?.() === "Apeira Astra";
   const mgtOn = () => table().ruleset?.() === "Traveller";
+  const cairnOn = () => table().ruleset?.() === "Cairn";
+  // Cairn: morale checks made this fight, by faction ({ first, half }).
+  const moraleDone = {};
   // The 2d6 games: Apeira Astra and Traveller share the tracker's rolls.
   const twoSix = () => astraOn() || mgtOn();
   // Traveller: a creature's Endurance, Strength and Dexterity (null: an animal's Hits).
@@ -610,7 +627,31 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     const { hp } = vitals(entry);
     return { dead: -hp, dying: 0 };
   }
+  // Cairn: a creature's STR now (a character's from its sheet), and its state.
+  function cairnStr(entry) {
+    const linked = record(entry);
+    if (linked?.type === "character") return { str: num(linked.data?.attributes?.str?.score, 0), max: num(linked.data?.attributes?.str?.max, 0) };
+    const max = rc ? rc.npcStats(linked?.data ?? {}).str : num(linked?.data?.str, 10);
+    return { str: Math.max(0, max - entry.strLoss), max };
+  }
+  function healthCairn(entry) {
+    const { hp, wounds } = vitals(entry);
+    const linked = record(entry);
+    const percent = hp > 0 ? Math.min(100, Math.round((wounds / hp) * 100)) : 100;
+    const { str } = cairnStr(entry);
+    if (str <= 0) return { status: "Dead", percent: 100, color: "#404040" };
+    if (linked?.type === "character") {
+      if (linked.data?.critical === "dying") return { status: "Dying", percent: 100, color: "#C00000" };
+      if (linked.data?.critical === "stable") return { status: "Stable", percent: 100, color: "#6C2DC7" };
+    } else if (entry.critical === "dead") return { status: "Dead", percent: 100, color: "#404040" };
+    else if (entry.critical === "routed") return { status: "Routed", percent: 100, color: "#6C2DC7" };
+    if (hasCondition(entry, "Fleeing")) return { status: "Fleeing", percent, color: "#C08000" };
+    if (wounds <= 0) return { status: "Healthy", percent: 0, color: "#00C000" };
+    if (hp - wounds <= 0) return { status: "No HP", percent: 100, color: "#E06000" };
+    return { status: "Wounded", percent, color: "#C0C000" };
+  }
   function health(entry) {
+    if (cairnOn()) return healthCairn(entry);
     const { hp, wounds } = vitals(entry);
     if (!geometry) return { status: "Healthy", percent: 0, color: "#00C000" };
     const status = geometry.healthStatus(hp, wounds, thresholdsFor(entry));
@@ -750,6 +791,8 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     const mode = String(opts?.SIEGE_SKIP_UNCONSCIOUS ?? "enemies").toLowerCase();
     // Apeira Astra: Down is out of the fight, whoever they are.
     if (astraOn() && health(entry).status === "Down") return true;
+    // Cairn: the dead, those with Critical Damage, the routed and the fleeing do not act; a PC who failed the first round's DEX save loses that turn.
+    if (cairnOn()) return ["Dead", "Dying", "Stable", "Routed", "Fleeing"].includes(health(entry).status) || (entry.lostTurn > 0 && state.round <= entry.lostTurn);
     if (mgtOn() && ["Unconscious", "Dead"].includes(health(entry).status)) return true;
     if (mode !== "enemies" && mode !== "all") return false;
     const status = health(entry).status;
@@ -829,6 +872,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
   }
 
   async function applyWounds(entry, delta, why, opts) {
+    if (cairnOn()) return applyCairn(entry, delta, why, opts);
     const linked = record(entry);
     let before = vitals(entry);
     // 5E: temporary hit points take damage first (FG's d20 health); healing does not restore them.
@@ -1063,6 +1107,205 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     const attack = attacks[Number(key)] ?? attacks.find((item) => item.name.toLowerCase() === String(key).toLowerCase());
     if (!attack) throw new Error("No such attack.");
     return { actor: entry.name, name: attack.name, type: attack.type, bonus: attack.bonus, damage: attack.damage, damageBonus: 0, ap: attack.ap, entry };
+  }
+
+  // --- Cairn -------------------------------------------------------------------
+  // Damage that got past Armor (or healing, negative): HP first, then STR;
+  // a STR save with the new score against Critical Damage; HP to exactly 0
+  // from above a Scar (a PC's); STR 0 dead. opts.by: the attacker's entry
+  // (its Critical Damage effect is told when the target fails).
+  async function applyCairn(entry, delta, why, opts = {}) {
+    await rcReady;
+    const linked = record(entry);
+    const character = linked?.type === "character";
+    const before = vitals(entry);
+    const wasDown = ["Dead", "Dying", "Stable", "Routed"].includes(health(entry).status);
+    if (delta < 0) {
+      const wounds = Math.max(0, before.wounds + delta);
+      if (character) table().records.update(linked.id, { data: { hp: { wounds } } }, table().seat);
+      else entry.wounds = wounds;
+      table().say(`${why} -> ${entry.name}: ${-delta} (HP ${before.hp - wounds}/${before.hp})`, "Combat", entry.hidden);
+      changed();
+      return;
+    }
+    const { str } = cairnStr(entry);
+    const result = rc.applyDamage({ hp: Math.max(0, before.hp - before.wounds), str, armor: 0 }, delta);
+    const wounds = before.wounds + result.hpLost;
+    if (character) {
+      const attributes = structuredClone(linked.data.attributes ?? {});
+      attributes.str = { ...(attributes.str ?? {}), score: result.strAfter };
+      table().records.update(linked.id, { data: { hp: { wounds }, attributes } }, table().seat);
+    } else {
+      entry.wounds = wounds;
+      entry.strLoss += result.strLoss;
+    }
+    const parts = [`HP ${result.hpAfter}/${before.hp}`, ...(result.strLoss ? [`STR -${result.strLoss} (now ${result.strAfter})`] : [])];
+    table().say(`${why} -> ${entry.name}: ${result.dealt}${entry.faction === "friend" || character ? ` (${parts.join(", ")})` : ""}`, "Combat", entry.hidden);
+    // A PC's HP taken to exactly 0: a Scar, by the HP lost.
+    if (character && result.scar) await require("./cairn.cjs").scarCairn(table(), linked, result.scar, "Combat");
+    if (result.dead) table().say(`${entry.name} ${character ? "dies" : record(entry)?.data?.detachment ? "is destroyed" : "dies"} (STR 0).`, "Combat", entry.hidden);
+    else if (result.save) {
+      const rolled = table().dice.roll("1d20");
+      const die = rolled.terms?.[0]?.rolls?.[0] ?? rolled.total;
+      const passed = rc.saveResult(die, result.strAfter);
+      table().postRoll(rolled, `[SAVE] ${entry.name}: STR ${result.strAfter} against Critical Damage [${passed ? "SUCCESS" : "FAILURE"} ${die} vs ${result.strAfter}]`, "Combat", Boolean(entry.hidden), { result: passed ? "SUCCESS" : "FAILURE", by: entry.name, against: result.strAfter });
+      const doomed = character && num(table().records.get(linked.id)?.data?.doomed, 0);
+      if (doomed) {
+        // Doomed (Scar 12): a failed save is a horrible death; a pass, 3d6 for max HP.
+        const data = structuredClone(table().records.get(linked.id).data);
+        data.doomed = 0;
+        if (!passed) {
+          data.attributes.str.score = 0;
+          table().say(`${entry.name} was Doomed, and dies horribly.`, "Combat");
+        } else {
+          const roll = table().roll("3d6", `[SCAR] Doomed: ${entry.name} survives`, "Combat");
+          table().say(`${entry.name} cheats death: ${rc.applyGrowth(data, { to: "hp", how: "higher", value: roll.total })}.`, "Combat");
+        }
+        table().records.update(linked.id, { data: rc.derive(data) }, table().seat, { replace: true });
+      } else if (!passed) {
+        if (character) {
+          table().records.update(linked.id, { data: { critical: "dying" } }, table().seat);
+          table().say(`[CRITICAL DAMAGE] ${entry.name} can do nothing but crawl weakly, grasping for life: aid (bandages) stabilizes; untreated, death within the hour.`, "Combat", entry.hidden);
+        } else {
+          entry.critical = record(entry)?.data?.detachment ? "routed" : "dead";
+          table().say(`[CRITICAL DAMAGE] ${entry.name} ${entry.critical === "routed" ? "is routed: the detachment breaks up" : "is defeated"}.`, "Combat", entry.hidden);
+        }
+        // The attacker's own Critical Damage effect ("The Night Cat begins to eat the target").
+        const special = String(record(opts.by)?.data?.critical ?? "").trim();
+        if (special) table().say(`[CRITICAL DAMAGE] ${opts.by.name}: ${special}`, "Combat", Boolean(opts.by.hidden));
+      }
+    }
+    changed();
+    const now = health(entry).status;
+    // Morale: enemies (not PCs) at their first casualty and at half; a lone foe at 0 HP.
+    if (!character && entry.faction !== "friend") {
+      const side = state.entries.filter((item) => item.faction === entry.faction && record(item)?.type !== "character");
+      if (!wasDown && ["Dead", "Routed"].includes(now)) await moraleCheck(entry.faction, false);
+      else if (side.length === 1 && result.hpAfter === 0 && before.hp - before.wounds > 0 && now !== "Dead") await moraleRoll(entry, "a lone foe at 0 HP");
+    }
+  }
+  // A creature's WIL save to stand (a detachment's or a lone foe's own; a group with a leader may use the leader's WIL).
+  async function moraleRoll(entry, why, wil = null) {
+    const linked = record(entry);
+    const score = wil ?? (rc ? rc.npcStats(linked?.data ?? {}).wil : 10);
+    const rolled = table().dice.roll("1d20");
+    const die = rolled.terms?.[0]?.rolls?.[0] ?? rolled.total;
+    const stands = rc.saveResult(die, score);
+    table().postRoll(rolled, `[MORALE] ${entry.name}: WIL ${score} (${why}) [${stands ? "SUCCESS" : "FAILURE"} ${die} vs ${score}]`, "Combat", Boolean(entry.hidden), { result: stands ? "STANDS" : "FLEES", by: entry.name, against: score });
+    if (!stands && !hasCondition(entry, "Fleeing")) entry.effects.push(cleanEffect({ label: "Fleeing", duration: 0 }));
+    changed();
+    return { name: entry.name, stands, roll: die, wil: score };
+  }
+  // The side's morale when it is due (or now, forced): each one still standing saves WIL.
+  async function moraleCheck(faction, force) {
+    const side = state.entries.filter((item) => item.faction === faction && record(item)?.type !== "character");
+    const fallen = side.filter((item) => ["Dead", "Routed"].includes(health(item).status)).length;
+    const done = (moraleDone[faction] ??= {});
+    const due = force ? ["asked"] : rc.moraleDue({ size: side.length, fallen, done });
+    const out = [];
+    for (const which of due) {
+      if (which !== "asked") done[which] = true;
+      const why = which === "first" ? "the first casualty" : which === "half" ? "half their number fallen" : "the GM asks";
+      for (const item of side.filter((member) => !["Dead", "Routed", "Fleeing"].includes(health(member).status))) out.push(await moraleRoll(item, why));
+    }
+    return out;
+  }
+  function weaponCairn(who, key, seat) {
+    if (who.recordId) {
+      const linked = table().records.get(who.recordId);
+      if (!linked || linked.type !== "character") throw new Error("No such character.");
+      if (seat.role !== "dm" && linked.owner !== seat.name) throw new Error("That is not your character.");
+      const attack = linked.data.attacks?.[key] ?? (key === "unarmed" ? { name: "Unarmed", damage: "d4" } : null);
+      if (!attack) throw new Error("No such weapon: ready it (on the body or in hand) first.");
+      return { actor: linked.name, name: String(attack.name), damage: String(attack.damage), blast: num(attack.blast, 0), ignoresArmor: num(attack.ignoresarmor, 0), entry: state.entries.find((entry) => entry.recordId === linked.id) ?? null, record: linked };
+    }
+    mustGM(seat);
+    const entry = find(who.entryId);
+    const attacks = rc.npcStats(record(entry)?.data ?? {}).attacks;
+    const attack = attacks.find((item) => item.key === String(key)) ?? attacks[Number(key)] ?? attacks.find((item) => item.name.toLowerCase() === String(key).toLowerCase());
+    if (!attack) throw new Error("No such attack.");
+    return { actor: entry.name, name: attack.name, damage: attack.damage, blast: attack.blast, ignoresArmor: attack.ignoresarmor, entry };
+  }
+  // An attack: it always hits. Its die (impaired d4, enhanced d12; a
+  // detachment's attacks on individuals are enhanced and blast, an
+  // individual's on a detachment impaired unless blast), less the target's
+  // Armor. A blast rolls for each target; else the first target only.
+  async function attackCairn(plan, from, { mode = "" } = {}) {
+    await rcReady;
+    const source = plan.entry;
+    const status = source ? health(source).status : "";
+    if (["Dead", "Dying", "Stable", "Routed"].includes(status)) throw new Error(`${source.name} is ${status.toLowerCase()} and cannot attack.`);
+    const sourceDetachment = source && record(source)?.type !== "character" && num(record(source)?.data?.detachment, 0);
+    const blast = Boolean(plan.blast) || Boolean(sourceDetachment);
+    const all = targetsOf(source);
+    const targets = blast ? all : all.slice(0, 1);
+    const results = [];
+    const modeFor = (target) => {
+      if (mode === "impaired" || mode === "enhanced") return mode;
+      if (sourceDetachment && !num(record(target)?.data?.detachment, 0)) return "enhanced";
+      if (!blast && target && record(target)?.type !== "character" && num(record(target)?.data?.detachment, 0)) return "impaired";
+      return "";
+    };
+    if (targets.length === 0) {
+      const formula = rc.damageFormula(plan.damage, modeFor(null));
+      const roll = table().roll(formula, `[ATTACK] ${plan.name} (${formula}${blast ? ", blast" : ""})`, from, false, { result: "NO TARGET", by: plan.actor });
+      results.push({ total: roll.total, target: null });
+      return results;
+    }
+    let shared = null;
+    for (const target of targets) {
+      const how = modeFor(target);
+      const formula = rc.damageFormula(plan.damage, how);
+      // A blast rolls for each target; one target, one roll.
+      const rolled = !blast && shared ? shared : table().dice.roll(formula);
+      shared = rolled;
+      const armor = plan.ignoresArmor ? 0 : Math.min(rc.MAX_ARMOR, Math.max(0, vitals(target).ac));
+      const dealt = Math.max(0, rolled.total - armor);
+      table().postRoll(rolled, `[ATTACK] ${plan.name} (${formula}${how ? `, ${how}` : ""}${blast ? ", blast" : ""}) [DAMAGE ${rolled.total}${armor ? ` - ${armor} Armor = ${dealt}` : ""}] -> [at ${target.name}]`, from, Boolean(target.hidden), { result: dealt > 0 ? "HIT" : "ARMOR", by: plan.actor, target: target.name });
+      if (dealt > 0) await applyCairn(target, dealt, `[DAMAGE] ${plan.name}`, { by: source });
+      else table().say(`[DAMAGE] ${plan.name} -> ${target.name}: stopped by Armor`, "Combat", Boolean(target.hidden));
+      results.push({ target: target.name, total: rolled.total, armor, damage: dealt, mode: how || "normal" });
+    }
+    if (source && table().options?.().clearTargets === "action") source.targets = [];
+    changed();
+    return results;
+  }
+  // Several attackers on one foe: every damage die rolled, the single highest kept.
+  async function attackTogetherCairn(ids, targetId, seat, from) {
+    mustGM(seat);
+    await rcReady;
+    const target = find(targetId);
+    const rolls = [];
+    for (const id of ids) {
+      const entry = find(id);
+      const linked = record(entry);
+      const plan = linked?.type === "character" ? weaponCairn({ recordId: linked.id }, Object.keys(linked.data.attacks ?? {}).find((key) => key !== "unarmed") ?? "unarmed", seat) : weaponCairn({ entryId: entry.id }, "0", seat);
+      if (["Dead", "Dying", "Stable", "Routed"].includes(health(entry).status)) continue;
+      const formula = rc.damageFormula(plan.damage, num(record(target)?.data?.detachment, 0) && !plan.blast ? "impaired" : "");
+      const rolled = table().roll(formula, `[ATTACK] ${entry.name}: ${plan.name} (${formula}) -> [at ${target.name}]`, from, Boolean(target.hidden), { by: entry.name, target: target.name });
+      rolls.push({ name: entry.name, weapon: plan.name, total: rolled.total, ignoresArmor: plan.ignoresArmor });
+    }
+    if (rolls.length === 0) throw new Error("No one able to attack.");
+    const best = rolls.reduce((top, item) => (item.total > top.total ? item : top), rolls[0]);
+    const armor = best.ignoresArmor ? 0 : Math.min(rc.MAX_ARMOR, Math.max(0, vitals(target).ac));
+    const dealt = Math.max(0, best.total - armor);
+    table().say(`[DAMAGE] Together at ${target.name}: the highest is ${best.total} (${best.name}'s ${best.weapon})${armor ? `, - ${armor} Armor` : ""}.`, "Combat", Boolean(target.hidden));
+    if (dealt > 0) await applyCairn(target, dealt, `[DAMAGE] ${best.weapon}`, { by: find(ids.find((id) => find(id).name === best.name)) });
+    changed();
+    return { rolls, kept: best.total, damage: dealt };
+  }
+  // A save in a fight: d20 at or under STR (now), DEX or WIL.
+  async function saveCairnEntry(entry, stat, from) {
+    await rcReady;
+    const key = require("./cairn.cjs").statKey(stat);
+    if (!rc.STATS.includes(key)) throw new Error("Save which: str, dex or wil?");
+    const linked = record(entry);
+    const score = key === "str" ? cairnStr(entry).str : linked?.type === "character" ? num(linked.data?.attributes?.[key]?.score, 0) : rc.npcStats(linked?.data ?? {})[key];
+    const rolled = table().dice.roll("1d20");
+    const die = rolled.terms?.[0]?.rolls?.[0] ?? rolled.total;
+    const success = rc.saveResult(die, score);
+    table().postRoll(rolled, `[SAVE] ${rc.SHORT[key]} ${score} [${success ? "SUCCESS" : "FAILURE"} ${die} vs ${score}]`, from || entry.name, Boolean(entry.hidden), { result: success ? "SUCCESS" : "FAILURE", by: entry.name, against: score });
+    return { name: entry.name, total: die, score, success };
   }
 
   // --- Apeira Astra -------------------------------------------------------------
@@ -1913,8 +2156,11 @@ function createCombat({ saved, table, onChange = () => undefined }) {
             ...(record(entry)?.type === "starship" ? { ship: shipView(record(entry), seat) } : {}),
             // 2E: the level a cleric (or a paladin from 3rd) turns undead at.
             ...(d2e() && r2e && record(entry)?.type === "character" && r2e.turnLevel(r2e.derive(record(entry).data)) > 0 ? { turns: r2e.turnLevel(r2e.derive(record(entry).data)) } : {}),
+            ...(cairnOn() && (numbers || seat.role === "dm") ? { cairn: { ...cairnStr(entry), detachment: record(entry)?.type !== "character" && rc ? rc.npcStats(record(entry)?.data ?? {}).detachment : 0, lostTurn: entry.lostTurn } } : {}),
             attacks:
-              mgtOn() && seat.role === "dm" && record(entry)?.type === "npc" && rm
+              cairnOn() && seat.role === "dm" && record(entry)?.type === "npc" && rc
+                ? rc.npcStats(record(entry).data).attacks.map((attack) => ({ key: attack.key, name: attack.name, bonus: 0, damage: `${attack.damage}${attack.blast ? " blast" : ""}${attack.ignoresarmor ? " ignores armor" : ""}` }))
+                : mgtOn() && seat.role === "dm" && record(entry)?.type === "npc" && rm
                 ? rm.npcStats(record(entry).data).attacks.map((attack, index) => ({ key: String(index), name: attack.name, bonus: attack.bonus, damage: `${attack.damage}${attack.ap ? ` AP ${attack.ap}` : ""}` }))
                 : d2e() && seat.role === "dm" && record(entry)?.type === "npc" && r2e
                 ? (() => {
@@ -1955,7 +2201,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       const count = Math.min(20, Math.max(1, Math.round(num(input.count, 1))));
       for (let index = 0; index < count; index += 1) {
         let hp = Math.max(0, Math.round(num(input.hp, 0)));
-        const npc5 = d2e() && source && source.type !== "character" ? (await r2eReady, r2e.npcStats(source.data)) : d35() && source && source.type !== "character" ? (await r35Ready, r35.npcStats(source.data)) : astraOn() && source && source.type !== "character" ? (await raReady, ra.npcStats(source.data)) : mgtOn() && source && source.type !== "character" ? (await rmReady, rm.npcStats(source.data)) : five() && source && source.type !== "character" ? (await r5Ready, r5.npcStats(source.data)) : null;
+        const npc5 = d2e() && source && source.type !== "character" ? (await r2eReady, r2e.npcStats(source.data)) : d35() && source && source.type !== "character" ? (await r35Ready, r35.npcStats(source.data)) : astraOn() && source && source.type !== "character" ? (await raReady, ra.npcStats(source.data)) : mgtOn() && source && source.type !== "character" ? (await rmReady, rm.npcStats(source.data)) : cairnOn() && source && source.type !== "character" ? (await rcReady, rc.npcStats(source.data)) : five() && source && source.type !== "character" ? (await r5Ready, r5.npcStats(source.data)) : null;
         if (npc5 && !hp) hp = npc5.hp;
         if (source?.type === "starship") hp = Math.max(1, num(source.data?.hull?.max, 1));
         if (source && source.type !== "character" && !hp) {
@@ -2038,6 +2284,28 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       if (seat.role !== "dm" && (pick.length !== 1 || owner(pick[0]) !== seat.name)) throw new Error("You can roll initiative for your own character.");
       // SiegeCore rollTrackerInit: the die, the initiative attribute's bonus
       // (SIEGE_INIT_STAT; none adds nothing) and the entry's own bonus.
+      if (cairnOn()) {
+        // Cairn: the PCs act first, then their opponents (sides, not dice); in
+        // the first round each PC saves DEX to act, and loses that turn on a failure.
+        await rcReady;
+        for (const entry of pick) {
+          const linked = record(entry);
+          if (linked?.type === "character" || entry.faction === "friend") {
+            entry.initresult = 2;
+            const score = linked?.type === "character" ? num(linked.data?.attributes?.dex?.score, 10) : rc.npcStats(linked?.data ?? {}).dex;
+            const rolled = table().dice.roll("1d20");
+            const die = rolled.terms?.[0]?.rolls?.[0] ?? rolled.total;
+            const acts = rc.saveResult(die, score);
+            entry.lostTurn = acts ? 0 : Math.max(1, state.round);
+            table().postRoll(rolled, `[INIT] ${entry.name}: DEX ${score} to act in the first round [${acts ? "SUCCESS" : "FAILURE: loses this turn"} ${die} vs ${score}]`, seat.role === "dm" ? "Combat" : seat.name, entry.hidden, { result: acts ? "SUCCESS" : "FAILURE", by: entry.name, against: score });
+          } else {
+            entry.initresult = 1;
+            entry.lostTurn = 0;
+          }
+        }
+        changed();
+        return;
+      }
       if (twoSix()) {
         // Apeira Astra: 2d6 + Reflex modifier + Tactics; Traveller: 2d6 + the better of DEX and INT DM (a creature's from its record).
         await rmReady;
@@ -2230,8 +2498,24 @@ function createCombat({ saved, table, onChange = () => undefined }) {
         entry.bleedRound = -1;
         entry.hitOn = null;
         entry.effectOn = null;
+        entry.lostTurn = 0;
       }
+      for (const key of Object.keys(moraleDone)) delete moraleDone[key];
       changed();
+    },
+    // Cairn: the side's morale now (id: that creature alone; faction: everyone of it still standing).
+    async morale(idOrFaction, seat) {
+      mustGM(seat);
+      if (!cairnOn()) throw new Error("Morale saves are Cairn's.");
+      await rcReady;
+      const one = state.entries.find((entry) => entry.id === idOrFaction);
+      if (one) return [await moraleRoll(one, "the GM asks")];
+      return moraleCheck(FACTIONS.includes(idOrFaction) ? idOrFaction : "foe", true);
+    },
+    // Cairn: several attackers at one foe, the highest die kept.
+    attackTogether(ids, targetId, seat, from) {
+      if (!cairnOn()) throw new Error("Attacking together is Cairn's.");
+      return attackTogetherCairn((Array.isArray(ids) ? ids : []).map(String).slice(0, 20), String(targetId ?? ""), seat, from);
     },
     addEffect(id, input, seat) {
       mustGM(seat);
@@ -2338,6 +2622,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       const { engine, game, options: opts } = await options();
       const plan = this.weapon(who, weaponKey, engine, game, opts, seat);
       const source = plan.entry;
+      if (cairnOn()) return attackCairn(plan, from, attackOptions);
       if (twoSix()) return attackAstra(plan, from);
       if (five()) return attack5e(plan, from);
       if (d35()) return attack35(plan, from, attackOptions);
@@ -2383,6 +2668,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       cachedThresholds = thresholds(opts);
       const plan = this.weapon(who, weaponKey, engine, game, opts, seat);
       if (!plan.damage) throw new Error(`${plan.name} has no damage.`);
+      if (cairnOn()) throw new Error("In Cairn attacks always hit: Attack rolls the damage and takes off the Armor.");
       if (twoSix()) return damageAstra(plan, from, opts);
       if (five()) return damage5e(plan, from, opts);
       if (d35()) return damage35(plan, from, opts);
@@ -2417,6 +2703,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     },
     // What a creature attacks with, and its numbers.
     weapon(who, weaponKey, engine, game, opts, seat) {
+      if (cairnOn()) return weaponCairn(who, weaponKey, seat);
       if (mgtOn()) return weaponMgt(who, weaponKey, seat);
       if (astraOn()) return weaponAstra(who, weaponKey, seat);
       if (five()) return weapon5e(who, weaponKey, seat);
@@ -2464,6 +2751,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     // level + SAVE effects against CB (12 prime, 18 not) + CL. An NPC's level
     // is its hit dice and its primes its primeset (physical, mental, both).
     async save(entryId, stat, cl, from, castName, advantage = "") {
+      if (cairnOn()) return saveCairnEntry(find(entryId), stat, from);
       if (twoSix()) return saveAstra(find(entryId), stat, cl, from);
       if (d35()) return save35(find(entryId), stat, cl, from, castName);
       if (d2e()) return save2e(find(entryId), stat, cl, from, castName);

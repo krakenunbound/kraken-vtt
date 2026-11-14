@@ -1,0 +1,942 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root version="4.6" release="1">
+	<encounter>
+		<category name="Trouble in Twin Lakes">
+			<e00aboutthisadventure>
+				<name type="string">00 About This Adventure</name>
+				<text type="formattedtext"><p><b>Trouble in Twin Lakes</b> (CAS-1), an adventure for Cairn 2e by Yochai Gal.</p><frame>Cairn Second Edition by Yochai Gal, https://cairnrpg.com, licensed under CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/. This book is an adaptation made for Kraken VTT: the text of the official Markdown (github.com/yochaigal/cairn), its pages split into a reference book, its tables made into rollable tables and its items, backgrounds and creatures into records; pictures and the website's links left out. It is shared under the same licence (games/cairn/LICENSE.md).</frame><p>The two battle maps (the Temple of the Fungal Lizards and Deadmill) were drawn by Kraken VTT from the adventure's text; the encounters put its creatures on the combat tracker.</p></text>
+			</e00aboutthisadventure>
+			<e01troubleintwinlakes>
+				<name type="string">01 Trouble in Twin Lakes</name>
+				<text type="formattedtext"><p><i>Trouble in Twin Lakes</i> is the first in a series of standalone adventures for the Cairn 2e adventure game. The adventure revolves around two central mysteries for the party to solve. It includes various NPCs and antagonists, as well as multiple locations to explore. This adventure is suitable for both new and veteran players, and works particularly well for characters still trying to find their place in a wild and potentially dangerous world. Although the region and its denizens are part of the broader <b>Vald</b> setting, they can be easily incorporated into any low-fantasy setting of your choice.</p><p><b>Cairn Adventure Series 1</b> An Adventure Module for Cairn 2e by Yochai Gal</p><p><b>Credits:</b> Written by Yochai Gal, with editing by Derek B. and editing assistance by Yossi Krausz, layout and locale maps by Adam Hensley. Cover art and region map by Ari-Matti Toivonen.</p><p>Produced by Cairn Press.</p><p>The text of this work is licensed under CC-BY-SA 4.0.</p><h>Introduction</h><p>CAS-1: Trouble in Twin Lakes is the first in a series of standalone adventures for the Cairn 2e adventure game. The adventure revolves around two central mysteries for the party to solve. It includes various NPCs and antagonists, as well as multiple locations to explore. This adventure is suitable for both new and veteran players, and works particularly well for characters still trying to find their place in a wild and potentially dangerous world. Although the region and its denizens are part of the broader <b>Vald</b> setting, they can be easily incorporated into any low-fantasy setting of your choice.</p><h>On Rules and Procedures</h><p>The contents in this module rely heavily on the rules and procedures as presented in the <i>Cairn 2e Player’s Guide</i>, particularly the core Backgrounds (p.19) and the Dungeon Exploration procedures (pg. 71). However, due to the relative distances between various locales in this adventure, the Wilderness Procedures (pg. 75) are unlikely to be of much use. Instead, the Warden should take advantage of the various random encounter tables presented in this text.</p><h>Adventure Setup</h><p>Two weeks ago, <b>Aldra</b>, the beloved butcher of Isthmus Town, suddenly vanished without a trace. Some days later, a local teen reported seeing a man swallowed up by the earth near <b>Deadmill</b>. Others have also gone missing. Now the townsfolk are left wondering: Who might be next?</p><h>Hooks</h><list><li>The Tideborn have agreed to pay the party a sum of 750gp for determining Aldra’s whereabouts. A bonus of 250gp is to be paid in the event that the man’s body is recovered and returned to a Tideborn acolyte for proper burial. They are to meet with Flavia at the Butcher in Isthmus Town before they begin their search.</li><li>The Cities are offering 200gp apiece to anyone who can help locate Jandy, a tithingman who was meant to return days ago with the latest tithe. The party will only be rewarded if the tithe is returned intact and accounted for. They are to meet with Reeve Trellis at the Stuffed Inn before they begin their search.</li></list><h>What’s Really Going On Here?</h><p>What appears at first to be a set of interconnected events are instead <i>simple coincidences</i>. Aldra’s fate and that of the man at Deadmill are in fact completely unrelated. While both <i>The Return of Vuk</i> and <i>The Swallowed Man</i> share some of the characters and locations, the preceding events have nothing to do with each other.</p><h>The Return of Vuk</h><h>Six Months Ago</h><p>For most of his life, Fasha was a meek, selfish farmer making a meager living in <b>Dunston</b>. For some time, he’d been the right-hand man to Reeve Trellis, regularly helping him steal from the tithe owed to the Cities and hiding a portion of the goods at the <b>Abandoned Home</b> in <b>Dunston</b> in the dead of night.</p><p>One day while walking near <b>Bone Sump</b>, Fasha heard a woman’s voice calling to him from beneath the waters. Calling herself Vuk, the voice pleaded with him to free her. Fasha agreed, and was granted the <b>Eye of Vuk</b> in return.</p><h>Now</h><p>Two weeks ago, the late night activities of Fasha and the Reeve drew the attention of the local butcher, <b>Aldra</b>. He followed the men back to Dunston, hoping to catch them in the act. But Fasha was prepared, ambushing the butcher and dragging him to the <b>Temple of the Fungal Lizards</b>. There, his heart was ripped from his body and consumed by Vuk. And though Reeve Trellis knows that Fasha is responsible for what happened to Aldra, fear and selfishness keep him complicit.</p><p>Weeks have passed since Aldra’s disappearance. Meanwhile, each day Vuk demands more sacrifices to help quicken her rebirth. Every other evening, Fasha will kidnap a victim and take them to the <b>Temple of the Fungal Lizards</b> to have their still-beating hearts consumed by Vuk the following morning.</p><h>The Swallowed Man</h><h>One Week Ago</h><p><b>Jandy</b> the Scrivener regularly traveled to <b>Isthmus Town</b> to collect tithe on behalf of the Cities. For months, he had been writing a minor history of the region, interviewing locals and visiting various cultural sites. As part of that study he visited <b>Deadmill</b>, one week before the adventure begins. Unfortunately for Jandy, the place was rife with sinkholes and quicksand.</p><p>Unaware of the dangers, Jandy fell into quicksand and died. Due to his proximity to the <b>Echo Spark</b> however he was brought back but with no memory of his death. He then stepped into the quicksand again, continuing the endless death loop.</p><p>The following night, <b>Drum</b>, a local teen, saw the earth swallow a man whole at Deadmill. With the full moon only two days away, rumors that something nefarious is afoot are spreading like wildfire.</p><h>Now</h><p>A few days later, <b>Annafranax</b>, the Frog Witch of the Stone Forest, came to Deadmill to retrieve a time loop device called the Echo Spark beneath the millstone.</p><p>Realizing the potential to be found in a death loop, Annafranax hid a <b>Wisp Lamp</b> nearby, using Jandy’s endless suffering to enhance the trapped creature’s power. On the next full moon, she will return to Deadmill to toss the Wisp Lamp into the quicksand. The resulting energy will rip open a Gate to The Roots.</p><h>Victim Schedule</h><p>Each day, roll 1d8 to determine which victim is chosen.</p><p><b>Day 1:</b> No one. <b>Day 2:</b> Roll on Victims Table. <b>Day 3:</b> No one. <b>Day 4:</b> Roll on Victims Table. <b>Day 5:</b> Vuk awakens at sunset.</p><table><tr decoration="underline"><td><b>d8</b></td><td><b>Victims</b></td></tr><tr><td>1</td><td>Corsetta (a weaver)</td></tr><tr><td>2</td><td>Giva</td></tr><tr><td>3</td><td>Franz (a chandler)</td></tr><tr><td>4</td><td>Drum</td></tr><tr><td>5</td><td>Beju (a widower)</td></tr><tr><td>6</td><td>Reeve Trellis</td></tr><tr><td>7</td><td>Nicolas (a traveler)</td></tr><tr><td>8</td><td>Flavia</td></tr></table></text>
+			</e01troubleintwinlakes>
+			<e02importantnpcs>
+				<name type="string">02 Important NPCs</name>
+				<text type="formattedtext"><h>Reeve Trellis</h><p>A charismatic figure, well-liked and ruggedly handsome. Speaks with an affected drawl and continually forgets names. Owner of the Stuffed Inn and recently elected to handle town affairs.</p><list><li>Stays out of the PCs' way as much as possible, but will work against them if they show an interest in Aldra.</li><li>He knows that Jandy never came to retrieve the tithe, but any follow- up questions regarding the man's belongings will be directed to Drum, who works at the inn where Jandy was staying.</li><li>The official <b>tithing record</b> in the Reeve's office is a fake. The true account is kept in the <b>basement</b> at the <b>Stuffed Inn</b>. His crimes could also be uncovered by comparing this book with Jandy's own tithing record.</li><li>If his life is threatened, he will confess to pilfering from the tithe but not admit to Aldra's murder.</li></list><h>Fasha</h><p>A farmer from Dunston, formerly weak and ill-mannered, now revels in the newfound strength and insight gained since wearing The Eye of Vuk.</p><p>14 STR, 13 DEX, 5 WIL, fists (d8+d8), hook knife (d6)</p><list><li>If necessary he will flee to <b>White Tower Fens</b>, hoping that his pursuers trigger his traps there.</li><li>Given the opportunity, he will drag any defeated opponent to the Temple of the Fungal Lizards to be sacrificed.</li></list><h>Aldra</h><p>A burly and well-liked butcher, devout Tideborn, and husband to Flavia. Together they owned the Butcher Shop.</p><list><li>On the night he was murdered, Aldra was working at his desk when he saw the Reeve carrying large bags out from the cellar trapdoor. He quietly slipped out, careful not to wake his wife, and followed the Reeve. Later that night, Fasha dragged Aldra’s limp form to Bone Sump and murdered him to feed to Vuk.</li></list><h>Flavia</h><p>Wife to Aldra and co-owner of the Butcher Shop. Visibly distraught but puts on a brave face.</p><list><li>She will offer that her husband always took off his pendant (featuring three squiggles at an angle) before sleep, and that she hasn’t seen it anywhere.</li><li>Last saw her husband two weeks ago. He was counting coins at his desk as she went to bed, as he often did late into the night. She saved the half-finished ledger he was working on in the <b>desk drawer</b>. The key to the drawer is kept on a small silver chain hanging discreetely from her neck. </li><li>If asked about Fasha, she will say that she has heard rumors the man takes late-night walks on <b>East Lake Pass</b>. She dislikes the man immensely, calling him rude and arrogant.</li><li>If asked about Giva, she will mention that despite being a grumpy, superstitious old crone, Aldra found her charming.</li></list><h>Jandy</h><p>A middle-aged, frumpy Scrivener and tithingman for the Cities. Regularly visited Isthmus Town to collect the tithe from Reeve Trellis. He travels freely by horse and wagon, as no bandit would dream of attacking someone bearing the livery of the Cities.</p><list><li>Keeps a regular room at the Stuffed Inn but was scheduled to leave on the same day that he visited Deadmill. His horse and wagon are still at the village stables, however.</li><li>Friendly with Giva, whom he interviewed for a work on the region’s past.</li><li>If rescued, he will say that his last memories were of first entering the building from the West entrance. Noting the fine paddles of the mill through the East window, he exited via the South door to investigate. Failing to notice the quicksand he fell in, died, and then was reborn inside the mill.</li><li>Keeps a record of tithes in his side bag.</li></list><h>Giva</h><p>The oldest person in Isthmus Town. Generally grumpy on the best of days, she dislikes most people but especially hates Fasha. Great-aunt of Drum.</p><list><li>She likes Jandy, who occasionally interviews her about “the old days.” He missed their last scheduled visit a few days prior, and last she spoke to him, he’d told her that he’d planned on visiting some of the old lumber mills in the region. He wasn’t supposed to leave until that afternoon, but she assumed some urgent business must have called him back to the Cities.  </li></list><h>Drum</h><p>A sarcastic, lanky teenager. Giva is his great-aunt. Works afternoons and evenings at the Stuffed Inn.</p><list><li>Feels that his only way out of Isthmus Town is to save up as much gold as possible. Thinks Reeve Trellis is a phony. </li><li>If asked about Jandy, he will point out that the man’s horse and wagon are still at the stables.</li><li>Witnessed something strange at Deadmill and is willing to talk, for a price (15gp). </li><li>— He will tell the PCs that a few nights ago, he participated in a game where local teens compete to  see which of them can stand on Old Mill Road with their backs turned to the mill’s West entrance the longest. He was the last to remain, giving up only when he heard a “popping” sound from behind. He turned and saw a man walk out of the mill’s South entrance shortly before being swallowed up by the ground in front. The man looked vaguely familiar and definitely wasn’t a local.</li></list><h>Annafranax</h><p>An elder Half Witch, making her home deep in the Stone Forest. Relies on illusion and intelligence for survival and doesn’t give a whit for petty morality. She is interested in traversing The Roots, primarily for new curatives and lost magic. She eats mostly fungi, as well as the occasional rude traveler.</p><p>9 HP, 11 STR, 14 DEX, 17 WIL</p><list><li>Can change her form depending on the audience and their intentions. At times she is a young woman with long, auburn hair, and at others she is squat and almost amphibious in appearance.</li><li>Returns to Deadmill two days after the adventure begins, in the evening. Although she is an immensely powerful being, she is also very old and will try to avoid combat as much as possible. </li><li>She has near perfect knowledge of the forest and its history and can offer the party cures for nearly any ailment. She always keeps her word.</li><li>Carries four of the following Spellbooks: <i>Animate Object, Arcane Eye, Auditory Illusion, Beast Form, Befuddle, Haste, Pacify, Push/Pull, Read Mind, Thicket, True Sight, Visual Illusion.</i> </li><li>If she is killed, every bird in the Stone Forest will attack her murderer until they are dead or have fled The Wood.</li></list></text>
+			</e02importantnpcs>
+			<e03twinlakes>
+				<name type="string">03 Twin Lakes</name>
+				<text type="formattedtext"><p>This isolated region lies North of the Cities, just a few days' journey by horse through the <b>Humpbacks</b>. <b>Isthmus Town</b>, the region’s only major settlement, is situated on a narrow strip of land between two freshwater lakes. To the South of the town is mostly farmland, save for Dunston, a defunct fishing village.</p><p>To the North lies the <b>Stone Forest</b>, a vast wooded area dotted with old mills and lumber paths. <b>West Lake</b> remains the primary source of both fish and water to the surrounding towns, despite its lack of walking paths or natural cultivation. A winding lakeside pass is all that remains of the once vibrant <b>East Lake</b>, now deprived of both fish and healthy drinking water.</p><p>Despite the region’s reputation for relative safety, it is still dangerous to travel at night, as both bandits and night cats are known to pursue vulnerable parties. The adventure begins during the Harvest season, just after the final crops have been gathered.</p><table><tr decoration="underline"><td><b>d6</b></td><td><b>Rumors Heard on the Road Roll 1d6 whenever the party leaves Isthmus Town. Reroll repeated results.</b></td></tr><tr><td><b>1</b></td><td><i>A family from Dunston pulls a cart piled high with fish.</i> “West Lake, it’s alright for fishing. But it’s nothing compared to East Lake in my day. I tell you, when the lumber was good, the fish were good, too. Go ask that old goat, Giva. She remembers.”</td></tr><tr><td><b>2</b></td><td><i>A pair of youthful twins walk towards West Lake, fishing poles held high.</i> Only one speaks. “Folks used to go to the Downs and lick frogs, you know. Come up with all sorts of crazy stories, sayin’ it’s haunted and all that. It isn’t true, of course. Except for White Tower Fens. That place gives us the creeps.”</td></tr><tr><td><b>3</b></td><td><i>Two workers walk astride a work horse pulling a wagon piled high with tools and lumber.</i> “Yeah, me and my brother Berk here were hired to repair the ol’ Crawko place in Dunston, the one that fell down, what, ten years past? Seems a bit strange, seeing as how we weren’t told who is payin’ for it. But the Reeve said this fellow was a real philanthropist and wanted to ‘give back’.”</td></tr><tr><td><b>4</b></td><td><i>An older man sits at the exit to town, whittling a wood-knife.</i> “This business about that butcher, I think those Tideborn freaks are responsible. Did you know that they drown their own, embracing only the survivors into their ranks, all the while treating the dead as unworthy?”</td></tr><tr><td><b>5</b></td><td><i>A young woman walks West, dressed in fine clothes.</i> “I crossed the Humpbacks just to see the Frog Woman, out there in the woods. I’ve heard she makes curatives for all sorts of problems…  I’m waiting for the next full moon to try and find her.”</td></tr><tr><td><b>6</b></td><td><i>A hunter drags a large net stuffed with dead quarry. There is blood on his shirt.</i>  “Have you been through the Downs lately? A wind is blowin’ from the East, carrying with it something foul, like death rolled over.”</td></tr></table><table><tr decoration="underline"><td><b>d6</b></td><td><b>Encounters Roll 1d6 whenever the party travels between two points. Roll twice at night.</b></td></tr><tr><td><b>1</b></td><td>Bloodsuckers swarm, drawn to body heat. They are nearly impossible to fight off, but willingly fly into open flame. Unless avoided, everyone adds a Fatigue.</td></tr><tr><td><b>2</b></td><td>A Kettlewright rides alongside, burdened by gleaming tin. He sells mostly kitchenware, but if pressed, will agree to sell the Fletcher’s Ire in his pack for 100gp.</td></tr><tr><td><b>3</b></td><td>The party is drenched by a sudden torrent of wind and floating vegetation. Each character loses a resource (a torch goes out, a Ration is dropped, a shoe is lost, etc).</td></tr><tr><td><b>4</b></td><td>An unarmed woman pulling a cart full of fish crates asks for help getting its wheels unstuck from the mud. Her clothes appear relatively clean, despite her efforts. If the party stops to help, 3 <b>bandits</b>* leap from the foliage in ambush. Unprepared PCs fail their DEX save automatically. The cart (+4 slots) is in fine condition once unstuck. The crates are empty.</td></tr><tr><td><b>5</b></td><td>Mossy loam gives way to thick mud, popping noisily with each step. Nearby animals scatter at the party’s approach, and anyone traveling by foot adds a Fatigue.</td></tr><tr><td><b>6</b></td><td>A man and woman sit together over a roaring flame, cooking. They explain that they are frog trappers, and happy to sell their day’s catch: 2gp for spiced legs, or 25gp for a vial of toad excretions (2 uses). The latter acts as a psychedelic and a sort of truth-serum.</td></tr></table><list><li><b>Fletcher’s Ire.</b> A single missile attack is impaired when fired at a target within thirty feet of the bar. Bulky, three charges. Recharge: Bathe the bar in a molten lead furnace, then cool.</li><li><b>Bandit Leader:</b> 6 HP, 2 Armor, 13 STR, 14 DEX, 13 WIL, long sword (d10, bulky). </li><li><b>Bandits</b> (x2):  4 HP, 1 Armor, 12 STR, 12 DEX, 9 WIL, sword (d6). One has a short bow (d6).  </li><li>When testing Morale, save using the leader’s WIL. If their leader is killed, the bandits will retreat.</li></list></text>
+			</e03twinlakes>
+			<e04isthmustown>
+				<name type="string">04 Isthmus Town</name>
+				<text type="formattedtext"><p>A former logging town, currently squeaking by largely on profits made from fishing <b>West Lake</b>. Fewer than thirty families call the town their home. The town market runs from 8am to 2pm each day, boasting a decent array of goods and provisions, including any items under 10gp. (See Marketplace in 2e Player’s Guide.) Local culinary specialties include fried cod, roasted frog legs, and hot stewberry pie. Fishing equipment (15gp), bog shoes (10gp a pair), and rainproof clothing (15gp) are popular commodities.</p></text>
+			</e04isthmustown>
+			<e05isthmustownfactions>
+				<name type="string">05 Isthmus Town: Factions</name>
+				<text type="formattedtext"><h>Tideborn</h><p>A hierarchical religious sect that worships Rivulus, a petty god of rivers and lakes. Even the unaffiliated are familiar with the group’s initiation ceremony, a ritual drowning that occasionally kills participants. Survivors are dubbed Tideborn and adopt a new, water-related moniker (Carp, Reed, Oxbow, and so on). Only clergy need participate in the ritual; however, in recent years, their following among rural folk has increased, especially in villages near bodies of water.</p><h>The Order of Nine</h><p>A consortium of merchants, scholars, and the very powerful, the Order relies on their substantial wealth and a vast network of spies to accomplish their aims. Their primary focus is on the discovery, identification, and regulation of Relics. In recent years, they’ve turned their focus onto the Roots, as they believe this to be the origin of most Relics and they pay handsomely for any information regarding Gates.</p></text>
+			</e05isthmustownfactions>
+			<e06isthmustownthestuffedinn>
+				<name type="string">06 Isthmus Town: The Stuffed Inn</name>
+				<text type="formattedtext"><p>The only tavern in Isthmus Town, and the only place for travelers to safely rest. A night’s stay in a shared room is 10gp, which includes an onion soup and weak beer. The attached stables offer basic boarding for 5gp per night. The Inn is owned by Reeve Trellis, but most of the real work is performed by Drum and a local cook.</p><h>Outside</h><p>The building is H-shaped, with a main entrance on its northeast corner. On the east side of the building is a small <b>trapdoor</b>. On the west side is a small <b>stable</b>.</p><list><li><b>Trapdoor</b>: Directly in view of Butcher Shop’s second floor window. The trapdoor is chained to the ground and can only be opened from the inside unless the chain is broken. There are footsteps in the dirt nearby.</li><li><b>Stable</b>: Four exposed stalls, empty save one containing a single horse and wagon.</li><li>Drum manages the stables, but only checks in on the lodging once per day.</li><li>The horse and wagon belong to Jandy. Both bear the livery of the Cities.</li></list><h>Inside</h><p>The tavern area is small, with only three tables, arranged perpendicular to the bar. Guest rooms are all on the second floor, accessible by a single flight of stairs on the south side. A small office is tucked in the corner. Its door is nearly always locked (only Reeve Trellis has the key) but is easily picked. The tavern is functionally closed until 3pm, when Drum and the cook show up to clean up and prepare food.</p><h>The Reeve’s Office</h><p>A dank, uncomfortable room in the back of the <b>Stuffed Inn</b>. Empty save for a <b>single desk</b> and a locked <b>cellar door</b>. On the desk is a small <b>book</b>.</p><list><li><b>Desk</b>: A single drawer. Inside is a small black book. It is a fake tithing record, and comparing it to the true record in the basement or its twin in Jandy’s satchel can prove that the Reeve has been stealing from the tithe owed to the Cities.</li><li><b>Cellar Door</b>: Locked. Both Reeve Trellis and Drum have keys.</li></list><h>Cellar</h><p>A small, dank space filled with various <b>crates</b>. The air is heavy with the scent of damp earth. A <b>workbench</b> containing various tools leans against one wall. A <b>trapdoor</b> and ladder are installed in the ceiling of the Southeast corner.</p><list><li><b>Crate</b>: Clothing, household items, food. They are marked for the tithe of one of the great cities.</li><li>— These are meant for Jandy, who failed to retrieve them a week ago.</li><li><b>Workbench</b>: Household tools are scattered across the workbench. </li><li>— The workbench has a false drawer hidden underneath. Inside is the town’s true <b>tithing ledger</b>. Comparing this book to the fake ledger in the office upstairs or its twin in Jandy’s <b>satchel</b> can prove that Reeve has been stealing from the tithe owed to the Cities. </li><li><b>Trapdoor</b>: Leads upward into the alley between the inn and the Butcher. A thick chain is looped through it, then held together with a large brass lock. Only Reeve Trellis has the key.</li></list></text>
+			</e06isthmustownthestuffedinn>
+			<e07isthmustownbutchershop>
+				<name type="string">07 Isthmus Town: Butcher Shop</name>
+				<text type="formattedtext"><p>A rustic two-story building adjacent to the Stuffed Inn. A headless chicken is painted on the north entrance. The first floor has no windows, but the second has two on each of the four sides of the building. An alley separates the butcher shop from the east wing of the Stuffed Inn.</p><h>First Floor</h><p>The floor is gritty with wood chips and feathers. A large, bloody <b>butcher block</b> divides the space. In the southwest corner, a flight of stairs leads to the second floor. <b>Flavia</b> is here all day.</p><p><b>Butcher Block</b>: A hidden compartment (triggered by a latch underneath) contains the day’s current earnings (1d20 x the hour of the day). The money is taken out each evening and locked in the desk upstairs.</p><h>Second Floor</h><p>Eight windows (two in each cardinal direction) are covered by fine window dressing. A four-poster bed dominates the northeast corner of the room, and a beautiful wooden desk is installed beneath an ornate painting of Rivulus. Entry from the southwest corner stairs.</p><list><li><b>Window Views</b>: </li><li>— <b>North</b>: Giva’s home and a view of the <b>Stone Forest</b>.</li><li>— <b>West</b>: The Stuffed Inn, including the basement exit.</li><li>— <b>East</b>: A view of East Lake and White Tower Fens beyond.</li><li>— <b>South</b>: The town square and a view of the Farming Path.</li><li><b>Bed</b>: A regular bed. Underneath is a small dagger (d6) with a gold hilt worth 20gp.</li><li><b>Desk</b>: Some paperwork and writing implements. Contains a single drawer (locked). </li><li>— Sitting at the desk provides ample viewing of the alleyway between the Stuffed Inn and the Butcher, including the basement exit there. </li><li>— Flavia keeps the drawer key on a chain around her neck. Inside is a sales ledger and 870gp. The ledger is half-finished, just as it was found on the desk by Flavia the night Aldra went missing.</li><li><b>Painting</b>: A humanoid creature (<b>Rivulus</b>) rising from the waters. It is wearing a white robe with three squiggly lines cut into the front. Flavia will say it was purchased only a few months ago at great expense. Worth 400gp.</li></list></text>
+			</e07isthmustownbutchershop>
+			<e08isthmustowngivashome>
+				<name type="string">08 Isthmus Town: Giva’s Home</name>
+				<text type="formattedtext"><p>A single-room shack on the north side of town. Built from wood more weathered and older than the wood used in other buildings in town. The <b>door</b> is painted bright purple. Dried vegetation is stuffed into the top of the door.</p><list><li><b>Door</b>: Recently painted. Giva believes it protects against evil spirits. </li><li><b>Vegetation</b>: Dried wolfsbane and other herbs to ward off werewolves.</li></list><h>Interior</h><p>A heated wood stove dominates the west wall, and a small bed is tucked beneath a window on the north side. In the kitchen, a table is set with two glasses and a <b>wine</b> bottle.</p><list><li><b>Wine</b>: A very old vintage (worth 50gp). </li><li>— Giva will say that she sets out the wine “for company.” She also makes it very clear that the party is not who she is waiting for. </li><li>— She will admit that the person she is waiting on (Jandy) missed their last rendezvous; he was meant to stop by on his way out of town nearly a week ago.</li></list></text>
+			</e08isthmustowngivashome>
+			<e09farmingpath>
+				<name type="string">09 Farming Path</name>
+				<text type="formattedtext"><p>A dry, well-trod footpath stretching South from Isthmus Town and through the <b>Humpbacks</b> and into the <b>Cities</b> beyond. Small farms and independent homesteads are scattered alongside it. A small trail splits off to <b>Dunston</b> and <b>East Lake Pass</b>.</p></text>
+			</e09farmingpath>
+			<e10dunston>
+				<name type="string">10 Dunston</name>
+				<text type="formattedtext"><p>A thin circle of ramshackle homes built far apart from one another. Originally a fishing village, before the water in East Lake turned sour. Only impoverished fishers and unlucky farmers make their home here now. Connects to <b>East Lake Pass</b>.</p><h>Fasha’s Farm</h><p>On the West end of the circle is a frail, decrepit <b>farmhouse</b>. It sits adjacent to a broken corral on one side and a <b>withered field</b> on the other.</p><list><li><b>Corral</b>: Three <b>sheep</b> graze in a half-broken corral nearby, their water troughs nearly empty.</li><li><b>Fields</b>: Decaying crops and unirrigated dirt. Looks as if no one has tended them for months. </li></list><h>Farmhouse</h><p>A single-room hovel containing an ice-box, a moldering bed, and a small wood stove. The floor is muddy and covered in reeds and other small grasses.</p><list><li><b>Ice-box</b>: Empty and clearly unused for a long time.</li><li><b>Bed</b>: Long animal hairs line the sweat-stained sheets.</li><li><b>Stove</b>: A small box is buried beneath the ashes. Contains 130gp and a Tideborn pendant worth 25gp. The pendant once belonged to Aldra.</li><li><b>Reeds</b>: Fasha brought them in from the Downs after leaving Aldra’s body at <b>Bone Sump</b>. </li></list><h>Abandoned Home</h><p>A dilapidated home on the southeast end of the circle. Half the roof has caved in, and a wide woven tarp is draped across where the south wall should be.</p><list><li><b>Inside</b>: Completely bare and lacking any furniture. The <b>floorboards</b> look brand new. </li><li>— <b>Floorboards</b>: Fasha (with the help of the Reeve) hired workers to renovate the home. The flooring is nearly finished, but an imperfect section on the southwest corner is still accessible, where a single person could climb in halfway.</li><li>— Underneath the floorboards are two large sacks. Removing them would take time and draw considerable attention during the day. They are Fasha’s cut of the tithe (worth 200gp each).</li></list></text>
+			</e10dunston>
+			<e11oldmillroad>
+				<name type="string">11 Old Mill Road</name>
+				<text type="formattedtext"><p>A short dirt path connecting <b>Isthmus Town</b> to the <b>Stone Forest</b>, where it quickly disappears. <b>Deadmill</b> is visible through the trees, just at the edge of the wood. If <b>Annafranax</b> has returned, the grove and the mill will be gone, replaced by a massive sinkhole. See “<b>If the Gate has Opened...</b>”.</p></text>
+			</e11oldmillroad>
+			<e12thestoneforest>
+				<name type="string">12 The Stone Forest</name>
+				<text type="formattedtext"><p>An unending Wood stretching far to the north, its vast expanse halted only by the <b>Marble Sea</b>. For centuries, the forest’s lumber fed the needs of the Cities, until the allure of the gems and ore drew their insatiable hunger South. A small creek flows from the border of the wood, Northeast of East Lake before terminating at <b>Bone Sump</b>. Entering the Stone Forest after dark, creating a loud disturbance, or stepping off the path triggers a roll on the Wilderness Events table (see Player’s Guide pg. 78). This region will be explored in greater detail in future adventures in this series.</p><p>A common arboreal predator in the Stone Forest is the Night Cat, a nocturnal marsupial that hunts in packs. The only warning before they strike is a <b>tick-tick-tick</b> from the boughs above as they coordinate their attack, going after whoever is last in the marching order. The target must make a DEX save or take damage directly to STR. Despite their name, Night Cats will attack targets during the day as well.</p><h>Night Cat</h><p>6 HP, 9 STR, 14 DEX, 5 WIL, claws (d6+d6)</p><list><li>Intelligent, nocturnal marsupials that make their homes in forests and swamps. Hunt in packs.</li><li><b>Critical Damage</b>: The Night Cat begins to eat the target (d4 STR damage) while they are still alive.</li></list></text>
+			</e12thestoneforest>
+			<e13deadmill>
+				<name type="string">13 Deadmill</name>
+				<text type="formattedtext"><p>At the outskirts of the forest is an old gristmill shrouded by overgrown arboreal pillars. Due to the grove’s near-constant darkness, local teens believe it is haunted. (It’s not.) It is half-sunk into the <b>ground</b>, with large <b>paddles</b> that protrude out of the north side above a dried-up riverbed. Anyone coming from Old Mill Road will arrive at the building’s south entrance, and every 30 seconds a <b>man</b> opens the south door.</p><list><li><b>Ground</b>: The structure is slowly sinking into the earth, and some of the ground has the properties of quicksand. </li><li>— The south entrance is unsafe. DEX save to escape. A failed save causes the victim to sink even further (max 3 attempts).</li><li><b>Paddles</b>: Mostly obscured from the South side, save for the tip of one paddle painted a bright, unfaded white. See (2).</li><li><b>Man</b>: Part of a time loop.</li><li>— Every 30 seconds, the door to the mill opens, and a man (Jandy) steps out. He quickly looks back, as if hearing something. Finally, he shrugs, turns around again, and falls to his death into the quicksand. The sound he hears is actually the device being recharged after its last loop.</li><li>— The loop can be broken: either by saving <b>Jandy</b> or by freeing the Relic from the stone and taking it a short distance away.</li></list><h>1. Interior</h><p>A large <b>millstone</b> occupies most of the room, attached to some metallic <b>machinery</b>. A small leather <b>satchel</b> leans against the south wall. The building is slowly <b>sinking</b>.</p><list><li><b>Millstone</b>: A search will reveal something metallic and glowing beneath the stone. </li><li>— The Echo Spark is stuck in a loop, both by the weight of the millstone and Jandy’s continual death(s). Its charge is being restored, then depleted over and over again. </li><li><b>Machinery</b>: The wooden lever that turns the stone has rotted away, and as a result the grindstone cannot be turned with this device. </li><li><b>Satchel</b>: Belongs to Jandy. Contains a dagger (d6), a <b>notebook</b>, a  <b>tithing record</b>, Rations (2 uses left), a Torch (3 uses), and 23gp. </li><li>— <b>Notebook</b>: Contains a short history of the region, as well as snippets of interviews with <b>Giva</b>. There is a section called “The Lumber Trade, a History.”</li><li>— <b>Tithing Record</b>: A discrepancy exists between this copy and its twin in the basement of the Stuffed Inn. </li><li><b>Sinking</b>: The South side of the building has sunk halfway into the ground. If more than three people (including Jandy) are inside the mill at the same time it will fully sink into the earth (DEX save to escape or accomplish anything of note).</li></list><h>2. The Waterwheel</h><p>A pair of sturdy water wheel <b>paddles</b> sit motionless. The riverbed is completely dry and full of <b>dead</b> <b>leaves</b> and other detritus.</p><list><li><b>Paddles</b>: Show no signs of rot, their paint as white as the day they were painted. Investigation will reveal that an <b>unusual script</b> is carved into both paddles. </li><li>— Pushing the paddles manually turns the <b>millstone</b> inside, just enough to pull out the <b>Relic</b> from underneath. The process requires at least two able-bodied people.</li><li><b>Script</b>: An archaic phrase that only Giva, Jandy, or a person learned in ancient texts could decode. It says, “To prime, turn counter-clockwise.”</li><li><b>Leaves</b>: Partially hidden in the debris and dried humus is a well-preserved portable <b>iron cage</b>.</li><li>— The cage is actually a Wisp Lamp, where Annafranax has trapped a Wisp. It has been here for more than a week, absorbing the many deaths of Jandy. The Wisp has grown so large that the cage has become nearly too small for it. Contact with iron is quite painful for Wisps, and it is in near-constant agony as a result. It wishes only for freedom, and its revenge. If freed before Annafranax returns, it flies directly to the witch’s home, leaving a trail of fire in the wake of its vengeance.</li></list></text>
+			</e13deadmill>
+			<e14eastlakepass>
+				<name type="string">14 East Lake Pass</name>
+				<text type="formattedtext"><p>A lakeside path, overgrown with shrubs and wet grasses. Winds along <b>East Lake</b> and through the <b>Downs</b>, then West towards <b>Old Mill Road</b>.</p></text>
+			</e14eastlakepass>
+			<e15thedowns>
+				<name type="string">15 The Downs</name>
+				<text type="formattedtext"><p>A muddy, stinking bog shrouded in mist, and popular source for horror stories (all untrue). The only creatures that live here are frogs, fish, and birds.  The deposits of mud and stink are home to a multitude of corpses, both of animals and those that got left the trail. Parties traveling by foot <b>add a Fatigue</b>.</p></text>
+			</e15thedowns>
+			<e16whitetowerfens>
+				<name type="string">16 White Tower Fens</name>
+				<text type="formattedtext"><p>A small wood, East of the Downs. Named for its ruined white tower, shrouded in the mists of the nearby bog. Entry via <b>East Lake Pass</b> at the fork towards <b>Old Mill Road.</b></p><h>1. Whistlewood</h><p>An almost invisible wire crosses the path, tied between two trees. If broken, it emits a high-pitched sound only animals can hear.</p><h>2. Pit Trap</h><p>Hidden beneath a carpet of leaves and debris is a small pit, its bottom lined with sharp wooden stakes (d6 STR damage).</p><h>3. Log Trap</h><p>A small log is stretched across a small creek, offering an easy crossing. When weight is applied in the center, the log rotates, loudly dumping the victim into the creek below, which is teeming with <b>spinemoss</b>.</p><list><li><b>Spinemoss:</b> Contains a numbing toxin. Contact with skin leaves the victim deprived and their attacks impaired for 1d4-1 hours. </li></list><h>The White Tower</h><p>A broken tower 40ft high, colored white as snow. A thick ladder stands against the tower’s side. The <b>upper</b> portion of the tower is completely missing.</p><h>Up The Ladder</h><p>The tower’s <b>bottom</b> is bathed in darkness, its smooth white walls <b>glittering</b> in the light. No plant matter grows inside.</p><list><li><b>Bottom</b>: A viscous, amber-colored liquid creating a pool four feet deep, filling the tower’s base.</li><li>Something <b>shines</b> inside. </li><li>— <b>Liquid</b>: An acid that only harms flesh (4 STR damage on contact). Any other material placed in the substance is undamaged, and if fully immersed is perfectly preserved. The substance is highly flammable, burning away completely within a few moments, leaving its contents unharmed. </li><li>— <b>Shine</b>: An armored skeleton from a time long ago, still wearing perfectly preserved chainmail. On its belt is a bag of ancient gold pieces (82gp) and a torn silk rope (42ft).  </li><li><b>Glittering</b>: Residue from the acid at the bottom of the tower. Oily to the touch, it sting like nettles.</li></list><h>Bone Sump</h><p>The creek terminates in a small bog just a few minutes’ walk south of White Tower Fens. A <b>smell</b> of rot and decay permeates the area. On the west end of the bog is a large <b>mound</b> of grass and detritus. The area does not appear on any maps, and is known only to Fasha and Giva.</p><list><li><b>Smell</b>: Animals caught in the bog’s sticky solution quickly succumb to drowning or even starvation. There are many corpses here in varying states of decay.</li><li>— Aldra’s body is among the corpses, floating amongst the reeds. It is well-preserved by the bog’s unique chemistry. His chest is torn open and the heart has been removed.</li><li><b>Mound</b>: Appears freshly-made. Pushing the detritus aside reveals a set of stairs leading down into the earth beneath the bog. This is the entry to the <b>Temple of the Fungal Lizards</b>. The stairwell smells earthy and slightly floral.</li><li>— The temple is actually a building-sized ship shaped like a beetle. The entry is its “head.”</li><li>— Two sconces are installed at eye-level on the walls inside the stairwell. Diamond-shaped objects are inserted in each. The objects can be removed, and are valuable (150gp, bulky). They are lights, controlled from <b>T7. Light Room</b>. They are presently turned off.</li></list></text>
+			</e16whitetowerfens>
+			<e17templeofthefungallizardsgeneralinforma>
+				<name type="string">17 Temple of the Fungal Lizards: General Information</name>
+				<text type="formattedtext"><list><li><b>No light</b>. Sconces with diamond-shaped objects protrude from the corners of each room (see <b>T7. Light Room</b>). They are currently off. </li><li>The walls and floors are painted blue-black and are made from a foreign alloy. They cannot be chipped or broken by mundane weapons, although fire and explosive powders have some effect.</li><li>Two <b>Surarus</b> roam the temple. They appear on both <b>Encounters</b> and <b>Environmental</b> results from the Cairn 2e <b>Dungeon Events</b> table.</li></list></text>
+			</e17templeofthefungallizardsgeneralinforma>
+			<e18templeofthefungallizardst1antechamber>
+				<name type="string">18 Temple of the Fungal Lizards: T1. Antechamber</name>
+				<text type="formattedtext"><p>Small chambers have been carved into both the <b>east</b> and <b>west</b> walls, with a single waist-high pedestal installed in each. Small <b>statues</b> have been fused onto all but the southeast corner, which remains empty.</p><list><li><b>Statues</b>:  Each can be twisted off, but make a very loud noise. They are worth 50gp each. </li><li>— NW Statue: A bulbous cluster of eggs, held by a scaled hand.</li><li>— SW Statue: A cluster of fungal spores, growing from a salt-like pillar.</li><li>— NE Statue: A large, veiny spore. The outline of something reptilian is visible within.</li><li>— SE Statue: A copper-like ring is all that is left from whatever once sat here.</li></list></text>
+			</e18templeofthefungallizardst1antechamber>
+			<e19templeofthefungallizardst2columbarium>
+				<name type="string">19 Temple of the Fungal Lizards: T2. Columbarium</name>
+				<text type="formattedtext"><p>A thin hall divides the room, chambers built-in to each side. On the north side are stacks of <b>paper</b> products, and on the south side are rows of chipped <b>pottery</b>. On the southwest wall two large horizontal <b>seams</b> are arranged in parallel a few feet apart.</p><list><li><b>Paper</b>: Useless withered scrolls and fragments of eggshells are piled together. </li><li>— Buried beneath the detritus is a small tube made of scaled leather. Stuffed inside is a <b>Watersnatch</b>.</li><li><b>Pottery</b>: Ancient urns are arranged in stacks. It takes at least two turns to search them all. (Characters can split up the work.) </li><li>— A pot in the first row is filled with mummified remains of a fragile, bird-like creature. It is valuable only to specialty buyers (150gp).</li><li>— In the back is a nondescript urn, firmly attached to the chamber. Twisting its top opens the <b>hatch to T4</b> but creates a very loud noise. (Roll on the Dungeon Events table.)</li><li><b>Seams</b>: A hatch to <b>T4</b>. The seams are too narrow for a crowbar or blade, and there are no obvious handles, buttons, or levers in sight.</li></list><h>Watersnatch</h><list><li>A cylindrical object that can absorb up to a wagon’s load of water (or roughly 1000 gallons). 1 Charge. </li><li><b>Recharge</b>: Remove from moisture of any kind for a month and a day.</li></list></text>
+			</e19templeofthefungallizardst2columbarium>
+			<e20templeofthefungallizardst3breedingcham>
+				<name type="string">20 Temple of the Fungal Lizards: T3. Breeding Chamber</name>
+				<text type="formattedtext"><p>Enormous <b>fungal</b> growths sprout from three sacs scattered across the floor. All but one has burst, leaving behind large gaping <b>holes</b>. A fourth <b>nodule</b> sits intact.</p><list><li><b>Fungus</b>: Embryonic chambers for the Suraru. A learned person would note that they appear to have burst weeks ago.</li><li><b>Nodule</b>: Twice the size of the others. It pulsates and radiates a thin heat.</li><li>— Contains a fully-grown <b>Suraru</b>, ready to hatch. The sac will burst open if a loud noise is made nearby, or on an Encounter roll on the Dungeon Events table. If woken, it attacks any creature in sight, as hatchlings often eat their unhatched siblings.</li></list></text>
+			</e20templeofthefungallizardst3breedingcham>
+			<e21templeofthefungallizardst4maintenancet>
+				<name type="string">21 Temple of the Fungal Lizards: T4. Maintenance Tunnel</name>
+				<text type="formattedtext"><p>Grey, barren corridors connecting <b>T2</b> to <b>T6</b> and <b>T7</b>. U-shaped bars extend from the terminus of each hallway. Twisted, they can open a hatch to each. In the central corridor, a long <b>cloth</b> is covered by some rubble.</p><list><li><b>Cloth</b>: Among the debris is a very well-preserved skeleton of a tall, bird-like humanoid, wearing a small red crest on its head. Its throat is ripped open, and it is wrapped in <b>Moon Cloth</b>. It carries a small, <b>Curved Dagger (d6)</b> with a red jewel on it.</li></list></text>
+			</e21templeofthefungallizardst4maintenancet>
+			<e22templeofthefungallizardst5hallofglyphs>
+				<name type="string">22 Temple of the Fungal Lizards: T5. Hall of Glyphs</name>
+				<text type="formattedtext"><p>The East wall overflows with intricate <b>carvings</b>.</p><list><li><b>Carvings</b> (in order from topmost to bottom):</li><li>— Humanoid figures stand on a tower, pointing towards an object falling from the sky. It looks like an enormous beetle.</li><li>— Tall, winged figures wearing enormous headdresses stream out of a hole at the front of the “beetle.” They are followed by a pair of crouched, lizard-like creatures. </li><li>— The lizard-like creatures rip apart the humanoid onlookers, and overwhelm the tower.</li><li>— The winged figures stand above a crowd of kneeling humanoids, their lizard “pets” standing aside.</li></list></text>
+			</e22templeofthefungallizardst5hallofglyphs>
+			<e23templeofthefungallizardst6wastedisposa>
+				<name type="string">23 Temple of the Fungal Lizards: T6. Waste Disposal</name>
+				<text type="formattedtext"><p>In the center of this square-shaped room is a square <b>well</b>, waist-high. Three <b>nozzles</b> protrude from the south wall, with no visible controls anywhere in sight. A <b>drain</b> and grate are installed beneath each. On the west wall, two large horizontal <b>seams</b> are arranged in parallel a few feet apart.</p><list><li><b>Well</b>: Hundreds of feet deep. A light source reveals ancient refuse floating in the water at the bottom.</li><li><b>Nozzle</b>: Automatic showers that spray scalding hot water whenever weight is placed on its drain. A single chirp from a corner light sconce is the only warning.</li><li><b>Drains</b>: Pulling up the grate in the <b>Southwest</b> corner triggers a hatch in the <b>west</b> wall, opening a <b>secret door</b> to <b>T4</b>.</li><li><b>Seams</b>: A hatch to <b>T4</b>. Like its companions in <b>T2</b> and <b>T7</b>, the seams are too narrow for a crowbar or blade, and  there are no obvious handles, buttons, or levers in sight.</li></list></text>
+			</e23templeofthefungallizardst6wastedisposa>
+			<e24templeofthefungallizardst7lightroom>
+				<name type="string">24 Temple of the Fungal Lizards: T7. Light Room</name>
+				<text type="formattedtext"><p>This room <b>smells</b> like ozone. At the east exit, a small <b>pad</b> is installed in the wall at shoulder height. A diamond-shaped <b>board</b> is built into the <b>North</b> wall. On the west wall, two large horizontal <b>seams</b> are arranged in parallel a few feet apart. The layout of this room allows for a clear view of <b>T8</b> and the fungal growth in <b>T9</b>.</p><list><li><b>Smell</b>: There is an invisible forcefield between <b>T7</b> and <b>T8</b>. It causes only a minor shock on contact, but cannot be penetrated by any normal means.</li><li><b>Pad</b>: Controls the forcefield between <b>T7</b> and <b>T8</b>. There is no other way of shutting it off, save disconnecting the control board.</li><li><b>Board</b>: A dial on the board controls the light sconces in each room. </li><li>— If turned to extreme brightness, the diamond-shaped bulbs <b>in every room</b> will explode after <b>one dungeon cycle</b> (d4 STR damage to any nearby). Three immediate chirps from each sconce are the only warning. All nearby <b>Surarus</b> will come directly to T7 immediately after.</li><li>— Can be removed, but all wall sconces as well as the <b>forcefield</b> will be permanently disabled. The board would be very valuable to an Aurifex or like-minded professions (500gp).</li><li>— A small switch located underneath the board activates a <b>secret door to T4</b> in the <b>West</b> wall.</li><li><b>Seams</b>: A hatch to <b>T4</b>. Like its companions in <b>T2</b> and <b>T4</b>, the seams are too narrow for a crowbar or blade, and  there are no obvious handles, buttons, or levers in sight.</li></list></text>
+			</e24templeofthefungallizardst7lightroom>
+			<e25templeofthefungallizardst8preparationr>
+				<name type="string">25 Temple of the Fungal Lizards: T8. Preparation Room</name>
+				<text type="formattedtext"><p>This room <b>smells</b> faintly like ozone. It is completely bare, save for a grate in the floor and an enormous <b>nozzle</b> in the ceiling.  The layout of this room allows for a clear view of <b>T7</b> and the fungal growth in <b>T9</b>.</p><list><li><b>Smell</b>: There is an invisible forcefield in the hall between <b>T7</b> and <b>T8</b>. It causes only a minor shock on contact, but cannot be penetrated by any normal means. It can only be disabled in <b>T7</b>.</li><li><b>Nozzle</b>: Automatically activates when any weight is placed on the grate. Sprays a massive gush of superheated water (3 STR damage). A single chirp from a corner light sconce is the only warning.</li></list></text>
+			</e25templeofthefungallizardst8preparationr>
+			<e26templeofthefungallizardst9chamberofwor>
+				<name type="string">26 Temple of the Fungal Lizards: T9. Chamber of Worship</name>
+				<text type="formattedtext"><p>The room smells like a slaughterhouse, and streaks of <b>blood and viscera</b> are strewn across the floor. An enormous <b>fungal chamber</b> is growing in the <b>Southwest</b> corner. There are two <b>Surarus</b> here.</p><list><li><b>Gore</b>: The remains of any of Fasha’s previous victims (except Aldra) are all here. Each body is missing the heart, made clear by a deep wound in their chest. Depending on the day (see p.3), there may be one potential victim still living, tied up, and unconscious.</li><li><b>Surarus</b>: Sleeping, eating, and placing large chunks of flesh in a pile near the <b>fungal growth</b>. If one is killed, the others will attempt to wake the <b>Imperator</b> by slashing open the sac.</li><li><b>Growth</b>: A <b>Suraru Imperator</b>. The <b>West</b> exit to <b>T8</b> is completely blocked by the growth. </li></list><h>Suraru</h><p>6 HP, 1 Armor, 14 STR, 12 DEX, 5 WIL, claws (d6+d6) or teeth (d8)</p><list><li>Bipedal reptilians, birthed from large fungal growths that they spread and cultivate. They have perfect vision even in complete darkness and are fiercely loyal to their <b>Imperator</b>.</li><li>If their Imperator dies, they will always flee in order to prepare a new breeding sac.</li></list><h>Suraru Imperator</h><p>10 HP, 1 Armor, 16 STR, 12 DEX, 11 WIL, claws (d8+d8) or venomous bite (d6, blast)</p><list><li>Rules over a brood of subservient <b>Surarus</b>, who will fight to the death to protect the sac.</li><li><b>Critical damage</b>: A body part dissolves in venomous acid, and the target loses 1 point of Armor.</li></list></text>
+			</e26templeofthefungallizardst9chamberofwor>
+			<e27templeofthefungallizardst10ainterrogat>
+				<name type="string">27 Temple of the Fungal Lizards: T10a. Interrogation Room Door</name>
+				<text type="formattedtext"><p>A short hallway connects <b>T9</b> to a large metallic door. A single hooked gash is cut into the right-hand side, and a small <b>window</b> is built into the door six feet from the ground. Adjacent to the door is a metallic <b>handle</b> (left, facing the door).</p><list><li><b>Door</b>: Normally opened only by slotting the <b>Curved Dagger</b> from <b>T4</b> into the gash.</li><li><b>Window</b>: Reveals the room’s contents in their entirety. Thick but breakable glass.</li><li><b>Handle</b>: Opens a drawer, similar to a mail slot. It is slick with blood.</li></list></text>
+			</e27templeofthefungallizardst10ainterrogat>
+			<e28templeofthefungallizardst10binterrogat>
+				<name type="string">28 Temple of the Fungal Lizards: T10b. Interrogation Room (Interior)</name>
+				<text type="formattedtext"><p>Adjacent to the door (right, facing the hall) is a small slot above some blood and <b>viscera</b>. Two chains dangle from the ceiling in its center, just above a dark <b>stone</b> <b>block</b> jutting from the floor. If <b>Vuk</b> has not yet returned to full form, there will be a swirling <b>cloud of ash</b> that slowly circles the room.</p><list><li><b>Viscera</b>: Hearts from Vuk’s victims. Belong to Fasha’s victims. See Vuk to determine how many are here. (There should be at least one.) Dropped through the drawer in <b>T10a</b>. If the drawer outside the room is open, this one closes.</li><li><b>Block</b>: A small crack is visible on one side. It can be easily broken there after a few minutes of smashing. Inside is a large blue <b>memory prism</b> (<i>bulky</i>, worth 1000gp). </li><li><b>Cloud</b>: <b>Vuk</b>, now an <b>ash phantom</b>. Raised to unlife by the exposure of her decaying flesh to the <b>memory prism</b>. She cannot leave the room until she has consumed <b>three human hearts</b>.</li></list></text>
+			</e28templeofthefungallizardst10binterrogat>
+			<e29templeofthefungallizardsvuk>
+				<name type="string">29 Temple of the Fungal Lizards: Vuk</name>
+				<text type="formattedtext"><p>A former Queen, murdered by her own kind as their civilization came to an end a millennia before. Cursed to haunt the very chamber of her death, she now means to rule these lands again. In her full form, she is a 7ft-tall Lich Queen with bird-like facial features, wearing a magnificent yellow crest.</p><list><li>Cannot return to her full form until she has consumed <b>three hearts</b> and the door at <b>T10a</b> is opened. At the start of the adventure, she has already consumed Aldra’s heart, leaving only two remaining. Until then, she is trapped in <b>T10b</b>. If the party arrives within 24 hours of her transformation, she will have broken free of her prison and can be found at <b>T9</b>.</li><li>Immune to mundane attacks, she can only be destroyed by submerging her remains in water or destroying the memory prison that binds her to this realm. If she is <b>reborn</b>, only the latter will be sufficient.</li><li><b>Choking Hold</b>: As an Ash Phantom, she fully envelops her target, controlling their body like a puppet for one action, then dropping their paralyzed body to the ground (d4 STR damage). They die of asphyxiation if the ash is not somehow expelled (save STR).</li></list><h>Memory Prism</h><p>Absorbs the final moments of a person’s life on a minute by minute basis. The longer the exposure, the more memories are recovered. If another dies in its presence, their memories replace those that were stored. Direct contact with the prism replays the stored memories directly to the the mind of the person in contact with it, as if they were experiencing them first-hand.</p><h>Current Memories</h><p>At first there is only darkness; then a cowl is removed from the viewer’s face, and it is evident that they are in <b>T10</b>, their arms strung up by the same two chains hanging from the ceiling. They are being interviewed in a harsh, unintelligible tongue by two humanoids wearing grotesque masks with large, reddish crests.</p><p>Finally, one of the interrogators points to a lizard-like humanoid creature in the corner, which responds by attacking the stomach of the viewer with its talons. There is a bright light as their stomach is sliced open.</p><p>Suddenly, the door to the room opens and someone else enters the room. There is more gibberish, and then both the interrogators and the lizards rush from the room, slamming the door shut behind them. The viewer looks down at the wound in their stomach, and then everything goes dark.</p></text>
+			</e29templeofthefungallizardsvuk>
+			<e30concludingtheadventure>
+				<name type="string">30 Concluding the Adventure</name>
+				<text type="formattedtext"><h>If Vuk is Reborn…</h><p>If Vuk is reborn, she will quickly move to dominate the region. Within months, <b>Isthmus Town</b> will be deserted, and any who remain will either be dead or have joined her cause. With Fasha as her lieutenant, she will slowly conquer the Twin Lakes region, proclaiming herself the <b>Queen Reborn</b>. Slowly, her brood dominates the countryside, until finally the Cities declare the lands permanently unsafe. As the Marchguard gather at the boundary, hope that the Queen stays in her new realm becomes thinner by the day…</p><h>If the Gate has Opened...</h><p>Unless she is stopped, <b>Annafranax</b> will open a Gate to the <b>Roots</b> two days after the adventure begins. Deadmill and the surrounding grove will be replaced by a large sinkhole, accessible only via climbing tools. Within a few weeks, creatures not seen in these lands for millenia will rise from the depths, changing its landscape for good. Due to its proximity to a nearby settlement, the death toll will be high. As word of its influence spreads, the Cities will marshall their most powerful forces to create a perimeter around the forest. Isthmus Town will survive, but in name only - it will now serve as a military outpost and last refuge on a new frontier.</p><h>If Vuk is Reborn and the Gate has Opened…</h><p>Weeks after the Gate is opened, Vuk takes her armies into the Roots in search of lost artifacts from her era. Slowly, Gates all over the world begin closing, and there are whispers that an army greater than any in recorded history is marshaling its forces and preparing for war…</p><h>If Vuk is Stopped and the Gate is not Opened…</h><p>In the weeks that follow, a renewed calm overtakes Isthmus Town. As rumor spreads throughout the Cities of a region filled with ancient temples and strange artifacts, the hamlet sees a renewed economic growth rivaling its former days of glory. And though the locals (save Giva, perhaps) are happy with this result, soon the adventurers, scholars, and explorers begin eyeing the Stone Forest, wondering what secrets the Wood might hold…</p></text>
+			</e30concludingtheadventure>
+			<e31relicsitems>
+				<name type="string">31 Relics &amp; Items</name>
+				<text type="formattedtext"><h>The Eye of Vuk</h><p>A heavy iron medallion strung on a fine silver chain. No Suraru will ever attack someone wearing this amulet.</p><list><li>A WIL save is required every time the amulet is put on. On a fail, the wearer becomes more ruthless, more cruel, and more reptilian each time. </li><li>Wearing it increases STR and DEX by 1d4 points each. Additionally, the wearer’s sense of smell and vision is enhanced.</li><li>Once per month, the wearer can fully recover STR by shedding their skin. </li><li>The effects wear off if the amulet is taken off for longer than a few days.</li></list><h>Fletcher’s Ire</h><p>A heavy bar of tungsten, marked with symbols. When carried, a single missile attack is impaired when fired at a target within thirty feet of the bar. Bulky, three charges.</p><list><li><b>Recharge</b>: Bathe the bar in a molten lead furnace, then cool.</li></list><h>Echo Spark</h><p>A Relic that activates only when someone dies in its presence, pulling them back through time to approximately 30 seconds before their death. They do not retain any memories of their death but are otherwise unchanged. One charge.</p><list><li><b>Recharge</b>: Crush with the weight of an elephant.  </li></list><h>Moon Cloth</h><p>Very warm and highly weather resistant. When held in moonlight, it can be woven into any shape, growing by a foot per hour. Petty.</p><h>Curved Dagger (d6)</h><p>Used by overseers to control their unruly “pets.” When used against a <b>Suraru Imperator</b>, its damage is enhanced. Acts as a key to open the door at <b>T10a</b>.</p></text>
+			</e31relicsitems>
+			<e32valdlore>
+				<name type="string">32 Vald Lore</name>
+				<text type="formattedtext"><h>The Roots</h><p>Labyrinthine hollows stretching for immeasurable distances deep underground, connecting the sewers of the cities to far-flung ruins. Entrances to The Roots (called <b>Gates</b>) are scattered across the lands, and are usually protected or shrewdly hidden. Folktales tell of travelers disappearing into the depths, only to emerge decades later, claiming that only a few hours have passed. Others report having traveled vast distances in mere days.</p><h>Tideborn</h><p>A religious sect that worships Rivulus, god of Rivers and Lakes. Even the unaffiliated are familiar with the group’s initiation ceremony, a ritual drowning that occasionally kills participants. Survivors are dubbed “Tideborn” and adopt a new, water-related moniker (Carp, Reed, Oxbow, and so on). Only clergy need participate in the ritual, and in recent years their following among the rural folk has increased, especially among villages near bodies of water.</p></text>
+			</e32valdlore>
+			<e33creditsandlicense>
+				<name type="string">33 Credits and License</name>
+				<text type="formattedtext"><p><b>Trouble in Twin Lakes</b></p><p>Cairn Second Edition by Yochai Gal, https://cairnrpg.com, licensed under CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/. This book is an adaptation made for Kraken VTT: the text of the official Markdown (github.com/yochaigal/cairn), its pages split into a reference book, its tables made into rollable tables and its items, backgrounds and creatures into records; pictures and the website's links left out. It is shared under the same licence (games/cairn/LICENSE.md).</p><p>Kraken VTT's own code is not covered by this licence; only the Cairn text and its adaptations are.</p></text>
+			</e33creditsandlicense>
+		</category>
+	</encounter>
+	<npc>
+		<category name="Trouble in Twin Lakes">
+			<nightcat>
+				<name type="string">Night Cat</name>
+				<type type="string">Trouble in Twin Lakes</type>
+				<statline type="string">6 HP, 9 STR, 14 DEX, 5 WIL, claws (d6+d6)</statline>
+				<hp type="number">6</hp>
+				<armor type="number">0</armor>
+				<ac type="number">0</ac>
+				<str type="number">9</str>
+				<dex type="number">14</dex>
+				<wil type="number">5</wil>
+				<detachment type="number">0</detachment>
+				<attacks>
+					<id-00001>
+						<name type="string">Claws</name>
+						<damage type="string">d6+d6</damage>
+						<blast type="number">0</blast>
+						<ignoresarmor type="number">0</ignoresarmor>
+					</id-00001>
+				</attacks>
+				<critical type="string">The Night Cat begins to eat the target (d4 STR damage) while they are still alive.</critical>
+				<text type="formattedtext"><p>6 HP, 9 STR, 14 DEX, 5 WIL, claws (d6+d6)</p><list><li>Intelligent, nocturnal marsupials that make their homes in forests and swamps. Hunt in packs.</li><li><b>Critical Damage</b>: The Night Cat begins to eat the target (d4 STR damage) while they are still alive.</li></list></text>
+			</nightcat>
+			<suraru>
+				<name type="string">Suraru</name>
+				<type type="string">Trouble in Twin Lakes</type>
+				<statline type="string">6 HP, 1 Armor, 14 STR, 12 DEX, 5 WIL, claws (d6+d6) or teeth (d8)</statline>
+				<hp type="number">6</hp>
+				<armor type="number">1</armor>
+				<ac type="number">1</ac>
+				<str type="number">14</str>
+				<dex type="number">12</dex>
+				<wil type="number">5</wil>
+				<detachment type="number">0</detachment>
+				<attacks>
+					<id-00001>
+						<name type="string">Claws</name>
+						<damage type="string">d6+d6</damage>
+						<blast type="number">0</blast>
+						<ignoresarmor type="number">0</ignoresarmor>
+					</id-00001>
+					<id-00002>
+						<name type="string">Teeth</name>
+						<damage type="string">d8</damage>
+						<blast type="number">0</blast>
+						<ignoresarmor type="number">0</ignoresarmor>
+					</id-00002>
+				</attacks>
+				<critical type="string"></critical>
+				<text type="formattedtext"><p>6 HP, 1 Armor, 14 STR, 12 DEX, 5 WIL, claws (d6+d6) or teeth (d8)</p><list><li>Bipedal reptilians, birthed from large fungal growths that they spread and cultivate. They have perfect vision even in complete darkness and are fiercely loyal to their <b>Imperator</b>.</li><li>If their Imperator dies, they will always flee in order to prepare a new breeding sac.</li></list></text>
+			</suraru>
+			<suraruimperator>
+				<name type="string">Suraru Imperator</name>
+				<type type="string">Trouble in Twin Lakes</type>
+				<statline type="string">10 HP, 1 Armor, 16 STR, 12 DEX, 11 WIL, claws (d8+d8) or venomous bite (d6, blast)</statline>
+				<hp type="number">10</hp>
+				<armor type="number">1</armor>
+				<ac type="number">1</ac>
+				<str type="number">16</str>
+				<dex type="number">12</dex>
+				<wil type="number">11</wil>
+				<detachment type="number">0</detachment>
+				<attacks>
+					<id-00001>
+						<name type="string">Claws</name>
+						<damage type="string">d8+d8</damage>
+						<blast type="number">0</blast>
+						<ignoresarmor type="number">0</ignoresarmor>
+					</id-00001>
+					<id-00002>
+						<name type="string">Venomous bite</name>
+						<damage type="string">d6</damage>
+						<blast type="number">1</blast>
+						<ignoresarmor type="number">0</ignoresarmor>
+					</id-00002>
+				</attacks>
+				<critical type="string">A body part dissolves in venomous acid, and the target loses 1 point of Armor.</critical>
+				<text type="formattedtext"><p>10 HP, 1 Armor, 16 STR, 12 DEX, 11 WIL, claws (d8+d8) or venomous bite (d6, blast)</p><list><li>Rules over a brood of subservient <b>Surarus</b>, who will fight to the death to protect the sac.</li><li><b>Critical damage</b>: A body part dissolves in venomous acid, and the target loses 1 point of Armor.</li></list></text>
+			</suraruimperator>
+			<annafranax>
+				<name type="string">Annafranax</name>
+				<type type="string">Trouble in Twin Lakes</type>
+				<statline type="string">9 HP, 11 STR, 14 DEX, 17 WIL</statline>
+				<hp type="number">9</hp>
+				<armor type="number">0</armor>
+				<ac type="number">0</ac>
+				<str type="number">11</str>
+				<dex type="number">14</dex>
+				<wil type="number">17</wil>
+				<detachment type="number">0</detachment>
+				<attacks>
+				</attacks>
+				<critical type="string"></critical>
+				<text type="formattedtext"><p>9 HP, 11 STR, 14 DEX, 17 WIL</p><list><li>Can change her form depending on the audience and their intentions. At times she is a young woman with long, auburn hair, and at others she is squat and almost amphibious in appearance.</li><li>Returns to Deadmill two days after the adventure begins, in the evening. Although she is an immensely powerful being, she is also very old and will try to avoid combat as much as possible.</li><li>She has near perfect knowledge of the forest and its history and can offer the party cures for nearly any ailment. She always keeps her word.</li><li>Carries four of the following Spellbooks: <i>Animate Object, Arcane Eye, Auditory Illusion, Beast Form, Befuddle, Haste, Pacify, Push/Pull, Read Mind, Thicket, True Sight, Visual Illusion.</i></li><li>If she is killed, every bird in the Stone Forest will attack her murderer until they are dead or have fled The Wood.</li></list></text>
+			</annafranax>
+			<banditleader>
+				<name type="string">Bandit Leader</name>
+				<type type="string">Trouble in Twin Lakes</type>
+				<statline type="string">6 HP, 2 Armor, 13 STR, 14 DEX, 13 WIL, long sword (d10, bulky).</statline>
+				<hp type="number">6</hp>
+				<armor type="number">2</armor>
+				<ac type="number">2</ac>
+				<str type="number">13</str>
+				<dex type="number">14</dex>
+				<wil type="number">13</wil>
+				<detachment type="number">0</detachment>
+				<attacks>
+					<id-00001>
+						<name type="string">Long sword</name>
+						<damage type="string">d10</damage>
+						<blast type="number">0</blast>
+						<ignoresarmor type="number">0</ignoresarmor>
+					</id-00001>
+				</attacks>
+				<critical type="string"></critical>
+				<text type="formattedtext"><p>6 HP, 2 Armor, 13 STR, 14 DEX, 13 WIL, long sword (d10, bulky).</p></text>
+			</banditleader>
+			<bandit>
+				<name type="string">Bandit</name>
+				<type type="string">Trouble in Twin Lakes</type>
+				<statline type="string">4 HP, 1 Armor, 12 STR, 12 DEX, 9 WIL, sword (d6). One has a short bow (d6).</statline>
+				<hp type="number">4</hp>
+				<armor type="number">1</armor>
+				<ac type="number">1</ac>
+				<str type="number">12</str>
+				<dex type="number">12</dex>
+				<wil type="number">9</wil>
+				<detachment type="number">0</detachment>
+				<attacks>
+					<id-00001>
+						<name type="string">Sword</name>
+						<damage type="string">d6</damage>
+						<blast type="number">0</blast>
+						<ignoresarmor type="number">0</ignoresarmor>
+					</id-00001>
+					<id-00002>
+						<name type="string">One has a short bow</name>
+						<damage type="string">d6</damage>
+						<blast type="number">0</blast>
+						<ignoresarmor type="number">0</ignoresarmor>
+					</id-00002>
+				</attacks>
+				<critical type="string"></critical>
+				<text type="formattedtext"><p>4 HP, 1 Armor, 12 STR, 12 DEX, 9 WIL, sword (d6). One has a short bow (d6).</p></text>
+			</bandit>
+		</category>
+	</npc>
+	<battle>
+		<category name="Encounters">
+			<nightcatsinthestoneforest>
+				<name type="string">Night Cats in the Stone Forest</name>
+				<npclist>
+					<id-00001>
+						<name type="string">Night Cat</name>
+						<count type="number">3</count>
+						<faction type="string">foe</faction>
+						<isidentified type="number">1</isidentified>
+						<link type="windowreference"><class>npc</class><recordname>npc.nightcat@Trouble in Twin Lakes</recordname></link>
+					</id-00001>
+				</npclist>
+			</nightcatsinthestoneforest>
+			<banditsontheroad>
+				<name type="string">Bandits on the Road</name>
+				<npclist>
+					<id-00001>
+						<name type="string">Bandit Leader</name>
+						<count type="number">1</count>
+						<faction type="string">foe</faction>
+						<isidentified type="number">1</isidentified>
+						<link type="windowreference"><class>npc</class><recordname>npc.banditleader@Trouble in Twin Lakes</recordname></link>
+					</id-00001>
+					<id-00002>
+						<name type="string">Bandit</name>
+						<count type="number">2</count>
+						<faction type="string">foe</faction>
+						<isidentified type="number">1</isidentified>
+						<link type="windowreference"><class>npc</class><recordname>npc.bandit@Trouble in Twin Lakes</recordname></link>
+					</id-00002>
+				</npclist>
+			</banditsontheroad>
+			<thesurarust9>
+				<name type="string">The Surarus (T9)</name>
+				<npclist>
+					<id-00001>
+						<name type="string">Suraru</name>
+						<count type="number">2</count>
+						<faction type="string">foe</faction>
+						<isidentified type="number">1</isidentified>
+						<link type="windowreference"><class>npc</class><recordname>npc.suraru@Trouble in Twin Lakes</recordname></link>
+					</id-00001>
+				</npclist>
+			</thesurarust9>
+			<thesuraruimperator>
+				<name type="string">The Suraru Imperator</name>
+				<npclist>
+					<id-00001>
+						<name type="string">Suraru Imperator</name>
+						<count type="number">1</count>
+						<faction type="string">foe</faction>
+						<isidentified type="number">1</isidentified>
+						<link type="windowreference"><class>npc</class><recordname>npc.suraruimperator@Trouble in Twin Lakes</recordname></link>
+					</id-00001>
+					<id-00002>
+						<name type="string">Suraru</name>
+						<count type="number">2</count>
+						<faction type="string">foe</faction>
+						<isidentified type="number">1</isidentified>
+						<link type="windowreference"><class>npc</class><recordname>npc.suraru@Trouble in Twin Lakes</recordname></link>
+					</id-00002>
+				</npclist>
+			</thesuraruimperator>
+			<ahatchlingt3>
+				<name type="string">A Hatchling (T3)</name>
+				<npclist>
+					<id-00001>
+						<name type="string">Suraru</name>
+						<count type="number">1</count>
+						<faction type="string">foe</faction>
+						<isidentified type="number">1</isidentified>
+						<link type="windowreference"><class>npc</class><recordname>npc.suraru@Trouble in Twin Lakes</recordname></link>
+					</id-00001>
+				</npclist>
+			</ahatchlingt3>
+		</category>
+	</battle>
+	<item>
+		<category name="Relics">
+			<theeyeofvuk>
+				<name type="string">The Eye of Vuk</name>
+				<type type="string">Relic</type>
+				<description type="formattedtext"><p>A heavy iron medallion strung on a fine silver chain. No Suraru will ever attack someone wearing this amulet.</p><list><li>A WIL save is required every time the amulet is put on. On a fail, the wearer becomes more ruthless, more cruel, and more reptilian each time. </li><li>Wearing it increases STR and DEX by 1d4 points each. Additionally, the wearer’s sense of smell and vision is enhanced.</li><li>Once per month, the wearer can fully recover STR by shedding their skin. </li><li>The effects wear off if the amulet is taken off for longer than a few days.</li></list></description>
+				<kind type="string">relic</kind>
+			</theeyeofvuk>
+			<fletchersire>
+				<name type="string">Fletcher’s Ire</name>
+				<type type="string">Relic</type>
+				<description type="formattedtext"><p>A heavy bar of tungsten, marked with symbols. When carried, a single missile attack is impaired when fired at a target within thirty feet of the bar. Bulky, three charges.</p><list><li><b>Recharge</b>: Bathe the bar in a molten lead furnace, then cool.</li></list></description>
+				<bulky type="number">1</bulky>
+				<charges type="number">3</charges>
+				<kind type="string">relic</kind>
+			</fletchersire>
+			<echospark>
+				<name type="string">Echo Spark</name>
+				<type type="string">Relic</type>
+				<description type="formattedtext"><p>A Relic that activates only when someone dies in its presence, pulling them back through time to approximately 30 seconds before their death. They do not retain any memories of their death but are otherwise unchanged. One charge.</p><list><li><b>Recharge</b>: Crush with the weight of an elephant.</li></list></description>
+				<charges type="number">1</charges>
+				<kind type="string">relic</kind>
+			</echospark>
+			<mooncloth>
+				<name type="string">Moon Cloth</name>
+				<type type="string">Relic</type>
+				<description type="formattedtext"><p>Very warm and highly weather resistant. When held in moonlight, it can be woven into any shape, growing by a foot per hour. Petty.</p></description>
+				<petty type="number">1</petty>
+				<kind type="string">relic</kind>
+			</mooncloth>
+			<curveddagger>
+				<name type="string">Curved Dagger</name>
+				<damage type="string">d6</damage>
+				<type type="string">Weapon</type>
+				<description type="formattedtext"><p>Used by overseers to control their unruly “pets.” When used against a <b>Suraru Imperator</b>, its damage is enhanced. Acts as a key to open the door at <b>T10a</b>.</p></description>
+				<kind type="string">relic</kind>
+			</curveddagger>
+		</category>
+	</item>
+	<treasureparcels>
+		<category name="Treasure">
+			<jandyssatcheldeadmill>
+				<name type="string">Jandy's Satchel (Deadmill)</name>
+				<coinlist>
+					<id-00001>
+						<description type="string">GP</description>
+						<amount type="number">23</amount>
+					</id-00001>
+				</coinlist>
+				<itemlist>
+					<id-00001>
+						<name type="string">Dagger</name>
+						<count type="number">1</count>
+					</id-00001>
+					<id-00002>
+						<name type="string">Rations</name>
+						<count type="number">1</count>
+					</id-00002>
+					<id-00003>
+						<name type="string">Torch</name>
+						<count type="number">1</count>
+					</id-00003>
+				</itemlist>
+			</jandyssatcheldeadmill>
+			<boxinthestovefashasfarm>
+				<name type="string">Box in the Stove (Fasha's Farm)</name>
+				<coinlist>
+					<id-00001>
+						<description type="string">GP</description>
+						<amount type="number">130</amount>
+					</id-00001>
+				</coinlist>
+				<itemlist>
+					<id-00001>
+						<name type="string">Tideborn Pendant (25gp)</name>
+						<count type="number">1</count>
+					</id-00001>
+				</itemlist>
+			</boxinthestovefashasfarm>
+			<theshinesbeltwhitetower>
+				<name type="string">The Shine's Belt (White Tower)</name>
+				<coinlist>
+					<id-00001>
+						<description type="string">GP</description>
+						<amount type="number">82</amount>
+					</id-00001>
+				</coinlist>
+				<itemlist>
+					<id-00001>
+						<name type="string">Chainmail</name>
+						<count type="number">1</count>
+					</id-00001>
+					<id-00002>
+						<name type="string">Torn Silk Rope (42ft)</name>
+						<count type="number">1</count>
+					</id-00002>
+				</itemlist>
+			</theshinesbeltwhitetower>
+			<statuesoftheantechambert1>
+				<name type="string">Statues of the Antechamber (T1)</name>
+				<coinlist>
+					<id-00001>
+						<description type="string">GP</description>
+						<amount type="number">0</amount>
+					</id-00001>
+				</coinlist>
+				<itemlist>
+					<id-00001>
+						<name type="string">Temple Statue (50gp)</name>
+						<count type="number">3</count>
+					</id-00001>
+				</itemlist>
+			</statuesoftheantechambert1>
+		</category>
+	</treasureparcels>
+	<image>
+		<category name="Maps">
+			<templeofthefungallizards>
+				<name type="string">Temple of the Fungal Lizards</name>
+				<image>
+					<grid type="string">on</grid>
+					<gridsize type="string">70,70</gridsize>
+					<gridoffset type="string">0,0</gridoffset>
+					<layers>
+						<layer>
+							<name type="string">Temple of the Fungal Lizards</name>
+							<id type="string">0</id>
+							<parentid type="string">-1</parentid>
+							<type type="string">image</type>
+							<bitmap type="string">images/temple-of-the-fungal-lizards.webp</bitmap>
+							<matrix type="string">1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1</matrix>
+							<occluders>
+								<occluder>
+									<id type="string">0</id>
+									<points type="string">-1015,595,-455,595</points>
+								</occluder>
+								<occluder>
+									<id type="string">1</id>
+									<points type="string">385,595,735,595</points>
+								</occluder>
+								<occluder>
+									<id type="string">2</id>
+									<points type="string">-595,525,-525,525</points>
+								</occluder>
+								<occluder>
+									<id type="string">3</id>
+									<points type="string">-455,525,-105,525</points>
+								</occluder>
+								<occluder>
+									<id type="string">4</id>
+									<points type="string">35,525,315,525</points>
+								</occluder>
+								<occluder>
+									<id type="string">5</id>
+									<points type="string">875,525,1155,525</points>
+								</occluder>
+								<occluder>
+									<id type="string">6</id>
+									<points type="string">-105,455,35,455</points>
+								</occluder>
+								<occluder>
+									<id type="string">7</id>
+									<points type="string">735,455,875,455</points>
+								</occluder>
+								<occluder>
+									<id type="string">8</id>
+									<points type="string">-525,385,-455,385</points>
+								</occluder>
+								<occluder>
+									<id type="string">9</id>
+									<points type="string">-105,385,35,385</points>
+								</occluder>
+								<occluder>
+									<id type="string">10</id>
+									<points type="string">315,385,385,385</points>
+								</occluder>
+								<occluder>
+									<id type="string">11</id>
+									<points type="string">735,385,875,385</points>
+								</occluder>
+								<occluder>
+									<id type="string">12</id>
+									<points type="string">315,315,385,315</points>
+								</occluder>
+								<occluder>
+									<id type="string">13</id>
+									<points type="string">-455,245,-315,245</points>
+								</occluder>
+								<occluder>
+									<id type="string">14</id>
+									<points type="string">-245,245,-105,245</points>
+								</occluder>
+								<occluder>
+									<id type="string">15</id>
+									<points type="string">35,245,315,245</points>
+								</occluder>
+								<occluder>
+									<id type="string">16</id>
+									<points type="string">875,245,1155,245</points>
+								</occluder>
+								<occluder>
+									<id type="string">17</id>
+									<points type="string">-945,175,-595,175</points>
+								</occluder>
+								<occluder>
+									<id type="string">18</id>
+									<points type="string">-945,105,-595,105</points>
+								</occluder>
+								<occluder>
+									<id type="string">19</id>
+									<points type="string">385,105,455,105</points>
+								</occluder>
+								<occluder>
+									<id type="string">20</id>
+									<points type="string">525,105,735,105</points>
+								</occluder>
+								<occluder>
+									<id type="string">21</id>
+									<points type="string">-455,35,-315,35</points>
+								</occluder>
+								<occluder>
+									<id type="string">22</id>
+									<points type="string">-245,35,105,35</points>
+								</occluder>
+								<occluder>
+									<id type="string">23</id>
+									<points type="string">175,35,455,35</points>
+								</occluder>
+								<occluder>
+									<id type="string">24</id>
+									<points type="string">525,35,595,35</points>
+								</occluder>
+								<occluder>
+									<id type="string">25</id>
+									<points type="string">-595,-35,-455,-35</points>
+								</occluder>
+								<occluder>
+									<id type="string">26</id>
+									<points type="string">105,-35,175,-35</points>
+								</occluder>
+								<occluder>
+									<id type="string">27</id>
+									<points type="string">-595,-105,-455,-105</points>
+								</occluder>
+								<occluder>
+									<id type="string">28</id>
+									<points type="string">105,-105,175,-105</points>
+								</occluder>
+								<occluder>
+									<id type="string">29</id>
+									<points type="string">-455,-175,-245,-175</points>
+								</occluder>
+								<occluder>
+									<id type="string">30</id>
+									<points type="string">-105,-175,105,-175</points>
+								</occluder>
+								<occluder>
+									<id type="string">31</id>
+									<points type="string">-1015,-245,-595,-245</points>
+								</occluder>
+								<occluder>
+									<id type="string">32</id>
+									<points type="string">-385,-245,-245,-245</points>
+								</occluder>
+								<occluder>
+									<id type="string">33</id>
+									<points type="string">-105,-245,35,-245</points>
+								</occluder>
+								<occluder>
+									<id type="string">34</id>
+									<points type="string">-455,-315,-385,-315</points>
+								</occluder>
+								<occluder>
+									<id type="string">35</id>
+									<points type="string">35,-315,105,-315</points>
+								</occluder>
+								<occluder>
+									<id type="string">36</id>
+									<points type="string">175,-315,595,-315</points>
+								</occluder>
+								<occluder>
+									<id type="string">37</id>
+									<points type="string">-455,-385,-385,-385</points>
+								</occluder>
+								<occluder>
+									<id type="string">38</id>
+									<points type="string">35,-385,105,-385</points>
+								</occluder>
+								<occluder>
+									<id type="string">39</id>
+									<points type="string">-385,-455,-245,-455</points>
+								</occluder>
+								<occluder>
+									<id type="string">40</id>
+									<points type="string">-105,-455,35,-455</points>
+								</occluder>
+								<occluder>
+									<id type="string">41</id>
+									<points type="string">-245,-595,-105,-595</points>
+								</occluder>
+								<occluder>
+									<id type="string">42</id>
+									<points type="string">-1015,595,-1015,-245</points>
+								</occluder>
+								<occluder>
+									<id type="string">43</id>
+									<points type="string">-945,175,-945,105</points>
+								</occluder>
+								<occluder>
+									<id type="string">44</id>
+									<points type="string">-595,525,-595,175</points>
+								</occluder>
+								<occluder>
+									<id type="string">45</id>
+									<points type="string">-595,105,-595,-35</points>
+								</occluder>
+								<occluder>
+									<id type="string">46</id>
+									<points type="string">-595,-105,-595,-245</points>
+								</occluder>
+								<occluder>
+									<id type="string">47</id>
+									<points type="string">-525,525,-525,385</points>
+								</occluder>
+								<occluder>
+									<id type="string">48</id>
+									<points type="string">-455,595,-455,525</points>
+								</occluder>
+								<occluder>
+									<id type="string">49</id>
+									<points type="string">-455,385,-455,245</points>
+								</occluder>
+								<occluder>
+									<id type="string">50</id>
+									<points type="string">-455,35,-455,-35</points>
+								</occluder>
+								<occluder>
+									<id type="string">51</id>
+									<points type="string">-455,-105,-455,-175</points>
+								</occluder>
+								<occluder>
+									<id type="string">52</id>
+									<points type="string">-455,-315,-455,-385</points>
+								</occluder>
+								<occluder>
+									<id type="string">53</id>
+									<points type="string">-385,-245,-385,-315</points>
+								</occluder>
+								<occluder>
+									<id type="string">54</id>
+									<points type="string">-385,-385,-385,-455</points>
+								</occluder>
+								<occluder>
+									<id type="string">55</id>
+									<points type="string">-315,245,-315,35</points>
+								</occluder>
+								<occluder>
+									<id type="string">56</id>
+									<points type="string">-245,245,-245,35</points>
+								</occluder>
+								<occluder>
+									<id type="string">57</id>
+									<points type="string">-245,-175,-245,-245</points>
+								</occluder>
+								<occluder>
+									<id type="string">58</id>
+									<points type="string">-245,-455,-245,-595</points>
+								</occluder>
+								<occluder>
+									<id type="string">59</id>
+									<points type="string">-105,525,-105,455</points>
+								</occluder>
+								<occluder>
+									<id type="string">60</id>
+									<points type="string">-105,385,-105,245</points>
+								</occluder>
+								<occluder>
+									<id type="string">61</id>
+									<points type="string">-105,-175,-105,-245</points>
+								</occluder>
+								<occluder>
+									<id type="string">62</id>
+									<points type="string">-105,-455,-105,-595</points>
+								</occluder>
+								<occluder>
+									<id type="string">63</id>
+									<points type="string">35,525,35,455</points>
+								</occluder>
+								<occluder>
+									<id type="string">64</id>
+									<points type="string">35,385,35,245</points>
+								</occluder>
+								<occluder>
+									<id type="string">65</id>
+									<points type="string">35,-245,35,-315</points>
+								</occluder>
+								<occluder>
+									<id type="string">66</id>
+									<points type="string">35,-385,35,-455</points>
+								</occluder>
+								<occluder>
+									<id type="string">67</id>
+									<points type="string">105,35,105,-35</points>
+								</occluder>
+								<occluder>
+									<id type="string">68</id>
+									<points type="string">105,-105,105,-175</points>
+								</occluder>
+								<occluder>
+									<id type="string">69</id>
+									<points type="string">105,-315,105,-385</points>
+								</occluder>
+								<occluder>
+									<id type="string">70</id>
+									<points type="string">175,35,175,-35</points>
+								</occluder>
+								<occluder>
+									<id type="string">71</id>
+									<points type="string">175,-105,175,-315</points>
+								</occluder>
+								<occluder>
+									<id type="string">72</id>
+									<points type="string">315,525,315,385</points>
+								</occluder>
+								<occluder>
+									<id type="string">73</id>
+									<points type="string">315,315,315,245</points>
+								</occluder>
+								<occluder>
+									<id type="string">74</id>
+									<points type="string">385,595,385,385</points>
+								</occluder>
+								<occluder>
+									<id type="string">75</id>
+									<points type="string">385,315,385,105</points>
+								</occluder>
+								<occluder>
+									<id type="string">76</id>
+									<points type="string">455,105,455,35</points>
+								</occluder>
+								<occluder>
+									<id type="string">77</id>
+									<points type="string">525,105,525,35</points>
+								</occluder>
+								<occluder>
+									<id type="string">78</id>
+									<points type="string">595,35,595,-315</points>
+								</occluder>
+								<occluder>
+									<id type="string">79</id>
+									<points type="string">735,595,735,455</points>
+								</occluder>
+								<occluder>
+									<id type="string">80</id>
+									<points type="string">735,385,735,105</points>
+								</occluder>
+								<occluder>
+									<id type="string">81</id>
+									<points type="string">875,525,875,455</points>
+								</occluder>
+								<occluder>
+									<id type="string">82</id>
+									<points type="string">875,385,875,245</points>
+								</occluder>
+								<occluder>
+									<id type="string">83</id>
+									<points type="string">1155,525,1155,245</points>
+								</occluder>
+								<occluder>
+									<id type="string">84</id>
+									<points type="string">-945,-35,-945,-105</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+								<occluder>
+									<id type="string">85</id>
+									<points type="string">-945,385,-945,315</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+								<occluder>
+									<id type="string">86</id>
+									<points type="string">-455,455,-455,385</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+								<occluder>
+									<id type="string">87</id>
+									<points type="string">875,455,875,385</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+							</occluders>
+						</layer>
+					</layers>
+				</image>
+			</templeofthefungallizards>
+			<deadmill>
+				<name type="string">Deadmill</name>
+				<image>
+					<grid type="string">on</grid>
+					<gridsize type="string">70,70</gridsize>
+					<gridoffset type="string">0,0</gridoffset>
+					<layers>
+						<layer>
+							<name type="string">Deadmill</name>
+							<id type="string">0</id>
+							<parentid type="string">-1</parentid>
+							<type type="string">image</type>
+							<bitmap type="string">images/deadmill.webp</bitmap>
+							<matrix type="string">1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1</matrix>
+							<occluders>
+								<occluder>
+									<id type="string">0</id>
+									<points type="string">-350,280,350,280</points>
+								</occluder>
+								<occluder>
+									<id type="string">1</id>
+									<points type="string">-280,210,280,210</points>
+								</occluder>
+								<occluder>
+									<id type="string">2</id>
+									<points type="string">-280,-210,-70,-210</points>
+								</occluder>
+								<occluder>
+									<id type="string">3</id>
+									<points type="string">70,-210,280,-210</points>
+								</occluder>
+								<occluder>
+									<id type="string">4</id>
+									<points type="string">-350,-280,-70,-280</points>
+								</occluder>
+								<occluder>
+									<id type="string">5</id>
+									<points type="string">70,-280,350,-280</points>
+								</occluder>
+								<occluder>
+									<id type="string">6</id>
+									<points type="string">-350,280,-350,-280</points>
+								</occluder>
+								<occluder>
+									<id type="string">7</id>
+									<points type="string">-280,210,-280,-210</points>
+								</occluder>
+								<occluder>
+									<id type="string">8</id>
+									<points type="string">-70,-210,-70,-280</points>
+								</occluder>
+								<occluder>
+									<id type="string">9</id>
+									<points type="string">70,-210,70,-280</points>
+								</occluder>
+								<occluder>
+									<id type="string">10</id>
+									<points type="string">280,210,280,-210</points>
+								</occluder>
+								<occluder>
+									<id type="string">11</id>
+									<points type="string">350,280,350,-280</points>
+								</occluder>
+								<occluder>
+									<id type="string">12</id>
+									<points type="string">-70,-280,0,-280</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+								<occluder>
+									<id type="string">13</id>
+									<points type="string">0,-280,70,-280</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+							</occluders>
+						</layer>
+					</layers>
+				</image>
+			</deadmill>
+		</category>
+	</image>
+</root>

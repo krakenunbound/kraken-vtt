@@ -1,0 +1,28 @@
+{ "cell": 70, "cols": 35, "rows": 19, "ground": "rock", "seed": 81, "wallColor": [40, 46, 60],
+  "floors": [
+    { "x": 3, "y": 1, "w": 1, "h": 12, "tex": "metal" }, { "x": 4, "y": 1, "w": 6, "h": 1, "tex": "metal" }, { "x": 10, "y": 1, "w": 1, "h": 3, "tex": "metal" },
+    { "x": 4, "y": 2, "w": 5, "h": 5, "tex": "grate" },
+    { "x": 4, "y": 8, "w": 5, "h": 5, "tex": "flag" }, { "x": 9, "y": 10, "w": 2, "h": 1, "tex": "flag" },
+    { "x": 11, "y": 2, "w": 5, "h": 4, "tex": "metal" }, { "x": 13, "y": 6, "w": 1, "h": 3, "tex": "flag" },
+    { "x": 16, "y": 3, "w": 2, "h": 1, "tex": "metal" }, { "x": 18, "y": 2, "w": 4, "h": 4, "tex": "grate" }, { "x": 22, "y": 4, "w": 1, "h": 1, "tex": "metal" },
+    { "x": 23, "y": 1, "w": 5, "h": 7, "tex": "flag" }, { "x": 28, "y": 3, "w": 2, "h": 1, "tex": "metal" }, { "x": 30, "y": 2, "w": 4, "h": 4, "tex": "metal" },
+    { "x": 11, "y": 9, "w": 8, "h": 3, "tex": "flag" }, { "x": 19, "y": 10, "w": 1, "h": 1, "tex": "flag" },
+    { "x": 20, "y": 9, "w": 6, "h": 5, "tex": "dirt" }, { "x": 24, "y": 8, "w": 1, "h": 1, "tex": "flag" },
+    { "x": 14, "y": 12, "w": 2, "h": 1, "tex": "flag" }, { "x": 12, "y": 13, "w": 6, "h": 3, "tex": "flag" }, { "x": 11, "y": 14, "w": 1, "h": 1, "tex": "flag" }, { "x": 18, "y": 14, "w": 1, "h": 1, "tex": "flag" },
+    { "x": 14, "y": 16, "w": 2, "h": 2, "tex": "flag" }
+  ],
+  "doors": [ { "x": 4, "y": 10, "side": "w", "secret": true }, { "x": 4, "y": 4, "side": "w", "secret": true }, { "x": 11, "y": 3, "side": "w", "secret": true }, { "x": 30, "y": 3, "side": "w" } ],
+  "features": [
+    { "kind": "stairs", "x": 14, "y": 16, "w": 2, "h": 2, "dir": "s" },
+    { "kind": "altar", "x": 11, "y": 14, "w": 1, "h": 1 }, { "kind": "altar", "x": 18, "y": 14, "w": 1, "h": 1 },
+    { "kind": "pillar", "x": 12, "y": 13 }, { "kind": "pillar", "x": 17, "y": 13 }, { "kind": "pillar", "x": 12, "y": 15 },
+    { "kind": "barrel", "x": 4, "y": 12 }, { "kind": "barrel", "x": 5, "y": 12 }, { "kind": "barrel", "x": 6, "y": 12 }, { "kind": "barrel", "x": 7, "y": 12 },
+    { "kind": "crate", "x": 4, "y": 8 }, { "kind": "crate", "x": 5, "y": 8 }, { "kind": "rubble", "x": 6, "y": 8, "w": 2, "h": 1 },
+    { "kind": "pool", "x": 21, "y": 10, "w": 1, "h": 1 }, { "kind": "pool", "x": 24, "y": 10, "w": 1, "h": 1 }, { "kind": "pool", "x": 21, "y": 12, "w": 1, "h": 1 }, { "kind": "bush", "x": 23, "y": 12, "w": 2, "h": 2 },
+    { "kind": "rubble", "x": 3, "y": 6, "w": 1, "h": 2 }, { "kind": "bones", "x": 3, "y": 7 },
+    { "kind": "well", "x": 6, "y": 4, "w": 1, "h": 1 }, { "kind": "web", "x": 8, "y": 2 },
+    { "kind": "console", "x": 12, "y": 2, "w": 2, "h": 1 }, { "kind": "lamp", "x": 15, "y": 5 },
+    { "kind": "web", "x": 19, "y": 3 },
+    { "kind": "bush", "x": 23, "y": 4, "w": 2, "h": 3 }, { "kind": "blood", "x": 25, "y": 2 }, { "kind": "blood", "x": 26, "y": 5 }, { "kind": "bones", "x": 26, "y": 3 }, { "kind": "blood", "x": 24, "y": 1 },
+    { "kind": "altar", "x": 31, "y": 3, "w": 2, "h": 1 }, { "kind": "blood", "x": 32, "y": 4 }, { "kind": "blood", "x": 30, "y": 2 }
+  ] }
