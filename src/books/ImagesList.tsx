@@ -71,7 +71,7 @@ export function ImagesList({ session }: { session: Session }) {
               </div>
             </section>
           ) : null}
-          {books && books.length === 0 ? <p className="hint">No book is active: make one active in Modules.</p> : null}
+          {books && books.length === 0 ? <p className="hint empty-state"><b>No book is active</b>Make one active in Modules.</p> : null}
           {(books ?? []).map((book) => {
             const items = (session.library[`${book.name}|image`] ?? []).filter((item) => !mapsOnly || item.map);
             if (items.length === 0) return null;

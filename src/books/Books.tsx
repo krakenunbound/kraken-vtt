@@ -307,8 +307,8 @@ export function BooksWindow({ session, onOpenAdventure, start = "books" }: { ses
       ) : null}
       {gm && tab === "packs" && canPack ? <PacksPanel ruleset={ruleset} /> : null}
       {gm && tab === "packs" ? null : activation ? (
-        <p className="hint">
-          The modules for {ruleset || "this campaign's game"}. <b>Active</b>: in this campaign. <b>Players</b>: the players may read the book too (a Player's Handbook starts open to them). Adventures are the GM's alone: show the players their pictures and maps from the book instead.
+        <p className="hint books-intro" title="A Player's Handbook starts open to the players. Adventures are the GM's alone: show the players their pictures and maps from the book instead.">
+          The modules for {ruleset || "this campaign's game"}. <b>Active</b> puts a book in this campaign; <b>Players</b> lets the players read it too. Adventures stay the GM's.
         </p>
       ) : null}
       <div className="books-list" role="list" hidden={gm && tab === "packs"}>
