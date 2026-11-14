@@ -2592,6 +2592,8 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       const pick =
         which === "npcs" ? state.entries.filter((entry) => record(entry)?.type !== "character") : which === "all" ? state.entries : [find(which)];
       if (seat.role !== "dm" && (pick.length !== 1 || owner(pick[0]) !== seat.name)) throw new Error("You can roll initiative for your own character.");
+      // Forged in the Dark has no initiative: the action roll decides who acts (the Score panel instead of the tracker).
+      if (table().ruleset?.() === "Forged in the Dark") throw new Error("Forged in the Dark has no initiative: make action rolls (the GM's Score panel sets position and effect).");
       // SiegeCore rollTrackerInit: the die, the initiative attribute's bonus
       // (SIEGE_INIT_STAT; none adds nothing) and the entry's own bonus.
       // Fate: no dice, the turn order by a skill (Notice; FAE Quick), or Empathy (Careful) in a mental conflict.

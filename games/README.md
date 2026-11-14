@@ -76,6 +76,20 @@ tracker read. Every book's first page carries the SRD's notice word for word
 (`games/srd-5e/LICENSE.md`). `npm run srd5e` plays them alone; `npm run
 dnd5e` plays them and, where the GM has them, FG's own SRD modules.
 | **Basic Fantasy** (old-school fantasy; the Basic Fantasy RPG 4th Edition, CC BY-SA 4.0) | `shared/bfrpg/rules.mjs`, `electron/bfrpg.cjs` | Player's Handbook, Game Master's Guide, *The Mill at Hob's Ford* |
+| **Forged in the Dark** (based on Blades in the Dark: its SRD, CC BY 3.0) | `shared/forged/rules.mjs`, `electron/forged.cjs`, `electron/clocks.cjs` | Scoundrel's Handbook, Game Master's Guide, *The Brine Street Job* |
+
+Forged in the Dark's books are made from the Blades in the Dark SRD's
+Markdown, kept unchanged in `games/forged-dark/text/srd.md` (from
+github.com/amazingrando/blades-in-the-dark-srd-content, linked from
+bladesinthedark.com/licensing). `markdown.mjs` reads it into pages;
+`content.mjs` takes the SRD's example special abilities, crew abilities,
+upgrades and claims word for word and arranges them into Kraken's own seven
+playbooks and six crew types (the SRD has no finished ones, and no setting:
+Brackwater, the heritages, backgrounds, items, people and the starter score
+are Kraken's). The licence forbids "Blades in the Dark" in a product's title:
+the ruleset and books are "Forged in the Dark", and each book's front page
+carries the attribution word for word (`games/forged-dark/LICENSE.md`). The
+starter score's map was drawn with `mapgen.py` (`games/forged-dark/maps`).
 
 Basic Fantasy is not Kraken's own game: its books are the Basic Fantasy
 Role-Playing Game's text (Chris Gonnerman, CC BY-SA 4.0), read from the

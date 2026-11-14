@@ -298,7 +298,8 @@ async function runRuleset(ruleset, plan) {
       check(JSON.stringify(party).includes(ctx.character.id), "the character is in the party");
       await closeWindows(page);
       await openSide(page, "combat");
-      await page.waitForSelector(".combat-tracker", { timeout: 10000 });
+      // (A game without initiative shows its own panel there: Forged in the Dark's Score panel.)
+      await page.waitForSelector(plan.tracker ?? ".combat-tracker", { timeout: 10000 });
       await tool("kraken_combat", { action: "add-party" });
       const view = await tool("kraken_combat", { action: "view" });
       ctx.pcEntry = view.entries.find((entry) => entry.recordId === ctx.character.id);
@@ -316,7 +317,8 @@ async function runRuleset(ruleset, plan) {
     // 16. The fight.
     await step("16 the fight", async () => {
       if (!ctx.foe) return;
-      // A game whose fights are not attack rolls plays its own (plan.fight: Ironsworn's moves).
+      // A game whose fights are not attack rolls plays its own (plan.fight: Ironsworn's moves;
+      // Forged in the Dark, which does not fight on the tracker: action and resistance rolls).
       if (plan.fight) await plan.fight(ctx);
       else await fight(ctx);
       await ctx.shot(page, "16-fight");
@@ -420,7 +422,8 @@ async function fillSheet(ctx) {
   for (const tab of tabs) {
     await seat.click(`[data-sheet-tab="${tab}"]`);
     await seat.waitForTimeout(250);
-    const fields = await seat.$$eval('[data-character] input[aria-label]:not([type="checkbox"]):not([type="number"]):not([type="radio"]):not([disabled]), [data-character] textarea[aria-label]:not([disabled])', (list) =>
+    // (data-transient: a roll's own words, not kept on the sheet: a Devil's Bargain.)
+    const fields = await seat.$$eval('[data-character] input[aria-label]:not([type="checkbox"]):not([type="number"]):not([type="radio"]):not([disabled]):not([data-transient]), [data-character] textarea[aria-label]:not([disabled])', (list) =>
       list.map((element) => ({ label: element.getAttribute("aria-label"), value: element.value, tag: element.tagName })),
     );
     for (const field of fields) {

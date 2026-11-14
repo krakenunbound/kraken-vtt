@@ -52,6 +52,8 @@ function summary(record) {
     wounds: Number(data.hp?.wounds) || 0,
     ac: Number(data.ac?.total) || 0,
     exp: Number(data.exp) || 0,
+    // Forged in the Dark: the playbook, stress and trauma, harm, xp tracks, coin and stash.
+    ...(data.ruleset === "forged" ? { forged: { playbook: String(data.playbook ?? ""), alias: String(data.alias ?? ""), stress: Number(data.stress) || 0, stressmax: Number(data.stressmax) || 9, traumas: Array.isArray(data.traumas) ? data.traumas.map(String) : [], harm: [1, 2, 3].flatMap((level) => (Array.isArray(data.harm?.[level]) ? data.harm[level] : []).filter(Boolean).map((text) => `${text} (${level})`)), xp: data.xp ?? {}, stash: Number(data.stash) || 0, status: String(data.status ?? "") } } : {}),
     // Cairn: no experience; its attributes, Fatigue and what has grown instead.
     // Fate: no experience or coin; fate points, refresh, the high concept and milestones instead.
     ...(data.ruleset === "fate" ? { fate: { game: String(data.game ?? "core"), fatepoints: Number(data.fatepoints) || 0, refresh: Number(data.refresh) || 0, highconcept: String(data.aspects?.highconcept ?? ""), trouble: String(data.aspects?.trouble ?? ""), status: String(data.status ?? ""), consequences: rows(data.consequences).map(([, row]) => String(row.text ?? "")).filter(Boolean), milestones: rows(data.milestones).map(([, row]) => `${row.kind ?? "minor"}${row.text ? `: ${row.text}` : ""}`), skillpoints: Number(data.skillpoints) || 0 } } : {}),
@@ -76,12 +78,16 @@ async function partyView(table) {
     quests: party.data.quests ?? {},
     encounters: party.data.encounters ?? {},
     order: orderOf(party),
+    // Forged in the Dark: the crew (the crew sheet), shared by the whole table.
+    ...(party.data.crew ? { crew: party.data.crew } : {}),
   };
 }
 
 // Awards XP split across the party (PartyXPManager.awardXP), with FG's chat lines.
 async function awardXP(table, xp, from) {
   const { xpShares } = await partyRules();
+  // Forged in the Dark: every scoundrel marks the xp on their playbook track (it is not split).
+  if (table.ruleset?.() === "Forged in the Dark") return require("./forged.cjs").awardForged(table, xp, from);
   // Cairn has no experience: a character grows from what happens to them (the party sheet's Growth).
   if (table.ruleset?.() === "Cairn") throw new Error("Cairn has no experience points: record Growth on a character instead.");
   // Fate has milestones instead (minor, significant, major: kraken_fate milestone).
@@ -166,7 +172,7 @@ async function distribute(table, from) {
       const source = item.item && typeof item.item === "object" ? { ...item.item, name: item.name } : { name: item.name };
       // The rules load first, then the sheet is read: nothing changed meanwhile is written over.
       const current = table.records.get(member.id).data;
-      const astra = current?.ruleset === "astra" ? await require("./astra.cjs").rulesAstra() : current?.ruleset === "mgt2" ? await require("./mgt2.cjs").rulesMgt2() : current?.ruleset === "cairn" ? await require("./cairn.cjs").rulesCairn() : null;
+      const astra = current?.ruleset === "astra" ? await require("./astra.cjs").rulesAstra() : current?.ruleset === "mgt2" ? await require("./mgt2.cjs").rulesMgt2() : current?.ruleset === "cairn" ? await require("./cairn.cjs").rulesCairn() : current?.ruleset === "forged" ? await require("./forged.cjs").rulesForged() : null;
       const five = !astra && current?.ruleset === "bfrpg" ? await require("./bfrpg.cjs").rulesBf() : !astra && require("./dnd5e.cjs").is5e({ data: current }) ? await require("./dnd5e.cjs").rules5e() :!astra && require("./dnd35.cjs").is35({ data: current }) ? await require("./dnd35.cjs").rules35() : !astra && require("./adnd2e.cjs").is2e({ data: current }) ? await require("./adnd2e.cjs").rules2e() : null;
       const data = structuredClone(table.records.get(member.id).data);
       if (current?.ruleset === "fate") {

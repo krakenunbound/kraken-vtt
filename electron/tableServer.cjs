@@ -676,6 +676,15 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       for (const [ws, client] of clients) send(ws, { type: "calendar", calendar: calendar.view(seatOf(client)) });
     },
   });
+  // Progress clocks and the Score panel (clocks.cjs): every seat sees the clocks shown to it.
+  const clocks = require("./clocks.cjs").createClocks({
+    saved: saved.clocks,
+    onChange: () => {
+      onChange("table");
+      for (const [ws, client] of clients) send(ws, { type: "clocks", clocks: clocks.view(seatOf(client)) });
+    },
+    say: (line, from, secret) => agentHandle.say(line, from, secret),
+  });
   function sendCombat() {
     if (combatPending) return;
     combatPending = true;
@@ -827,7 +836,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
   // read from the module itself (the Books window), as FG reads them, never
   // copied into the campaign (they made it tens of MB, sent to every player).
   const GM_SEAT = { role: "dm", name: "GM" };
-  const RULES_TYPES = new Set(["siegepackage", "siegepower", "siegegame", "item", "npc", "spell", "pregencharsheet", "cairntable", "fateskill", "fatestunt", "ironmove", "ironasset", "ironoracle", "irondelve", ...require("./dnd5e.cjs").TYPES_5E]);
+  const RULES_TYPES = new Set(["siegepackage", "siegepower", "siegegame", "item", "npc", "spell", "pregencharsheet", "cairntable", "fateskill", "fatestunt", "ironmove", "ironasset", "ironoracle", "irondelve", "playbook", "crewtype", "forgedtable", ...require("./dnd5e.cjs").TYPES_5E]);
   function loadRecords(info) {
     const file = books?.file?.(info.id);
     if (!file) return;
@@ -1542,6 +1551,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
           map: client.role !== "dm" && sceneHiddenNow() ? emptyView() : map.viewFor(seatOf(client), client.assetToken),
           combat: combat.viewFor(seatOf(client)),
           calendar: calendar.view(seatOf(client)),
+          clocks: clocks.view(seatOf(client)),
           chat: chatFor(client),
           options,
           soundscape,
@@ -1649,6 +1659,41 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         } catch (error) {
           send(ws, { type: "error", reason: error instanceof Error ? error.message : "The calendar could not change." });
         }
+        return;
+      }
+
+      // Progress clocks: the GM adds, ticks, changes and removes them, and sets the Score panel (position, effect, plan).
+      if (msg.type === "clocks") {
+        try {
+          const seat = seatOf(client);
+          if (seat.role !== "dm") throw new Error("Only the GM changes the clocks.");
+          if (msg.action === "add") clocks.add(msg.clock ?? {}, seat);
+          else if (msg.action === "tick") clocks.tick(String(msg.id ?? ""), Number(msg.amount) || 1, seat, { by: "Clocks" });
+          else if (msg.action === "update") clocks.update(String(msg.id ?? ""), msg.patch ?? {}, seat);
+          else if (msg.action === "remove") clocks.remove(String(msg.id ?? ""), seat);
+          else if (msg.action === "clear") clocks.clear(seat);
+          else if (msg.action === "score") clocks.setScore(msg.patch ?? {}, seat);
+          else throw new Error("add, tick, update, remove, clear or score?");
+        } catch (error) {
+          send(ws, { type: "error", reason: error instanceof Error ? error.message : "The clocks could not change." });
+        }
+        return;
+      }
+
+      // Forged in the Dark: a scoundrel's rolls and sheet actions (id), or the crew's and the Score panel's (no id).
+      if (msg.type === "forged") {
+        const forged = require("./forged.cjs");
+        const seat = seatOf(client);
+        const args = msg.args && typeof msg.args === "object" ? msg.args : {};
+        const fail = (error) => send(ws, { type: "error", reason: error instanceof Error ? error.message : "Could not do that." });
+        if (msg.id) {
+          const record = records.get(String(msg.id), seat);
+          if (!record || !forged.isForged(record) || (client.role !== "dm" && record.owner !== client.name)) {
+            send(ws, { type: "error", reason: "That is not your scoundrel." });
+            return;
+          }
+          forged.actionForged(agentHandle, record, String(msg.action ?? ""), args, seat, client.role === "dm" ? record.name : client.name).catch(fail);
+        } else forged.crewAction(agentHandle, String(msg.action ?? ""), args, seat, client.role === "dm" ? "GM" : client.name).catch(fail);
         return;
       }
 
@@ -1772,6 +1817,18 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
               answer({ ok: true, id: record.id, problems });
             })
             .catch((error) => answer({ ok: false, error: error instanceof Error ? error.message : "Could not build that character." }));
+          return;
+        }
+        if (require("./forged.cjs").isForgedRuleset(ruleset)) {
+          // A Forged in the Dark scoundrel from its wizard's spec (a playbook from the active books).
+          const owner = client.role === "dm" ? text(msg.owner, "").slice(0, 24) : client.name;
+          require("./forged.cjs")
+            .buildForged(agentHandle, msg.spec ?? {}, owner, client.role === "dm" ? seatOf(client) : { role: "dm", name: client.name })
+            .then(({ record, problems }) => {
+              addChat({ id: client.id, from: client.name, text: `Created ${record.name}${record.data.alias ? ` "${record.data.alias}"` : ""}: ${record.data.playbook}, ${record.data.heritage} ${record.data.background}, ${record.data.abilities?.[0]?.name ?? ""}.`, at: Date.now() });
+              answer({ ok: true, id: record.id, problems });
+            })
+            .catch((error) => answer({ ok: false, error: error instanceof Error ? error.message : "Could not build that scoundrel." }));
           return;
         }
         if (require("./cairn.cjs").isCairnRuleset(ruleset)) {
@@ -2584,6 +2641,8 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     towers: () => towers,
     dicePacks: () => dicePacks,
     calendar: () => calendar,
+    // Progress clocks and the Score panel's state (clocks.cjs).
+    clocks: () => clocks,
     readAloud: (words, title) => readAloud(words, title),
     sounds: () => sounds,
     playSound,
@@ -2786,6 +2845,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         hiddenSceneId,
         combat: combat.persisted(),
         calendar: calendar.persisted(),
+        clocks: clocks.persisted(),
         records: records.toJSON(),
         dice: dice.toJSON(),
         sound: soundscape,

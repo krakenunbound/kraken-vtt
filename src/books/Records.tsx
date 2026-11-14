@@ -27,6 +27,9 @@ const LISTS: { id: string; label: string; group: string }[] = [
   { id: "race", label: "Species", group: "Character" },
   { id: "race_subrace", label: "Subspecies", group: "Character" },
   { id: "spell", label: "Spells", group: "Character" },
+  // Forged in the Dark: the playbooks and the crew types.
+  { id: "playbook", label: "Playbooks", group: "Character" },
+  { id: "crewtype", label: "Crew Types", group: "Character" },
   { id: "siegepackage:class", label: "Classes", group: "Character" },
   { id: "siegepackage:race", label: "Races", group: "Character" },
   { id: "siegepackage", label: "Packages", group: "Character" },
@@ -128,7 +131,7 @@ const LIMIT = 400;
 // The lists the sidebar shows in a group (FG's Campaign and Character
 // categories): those this table has records for, in FG's order.
 // A game's own word for a list (Descending Darkness calls species "Kin").
-const GAME_WORDS: Record<string, Record<string, string>> = { "D&D 3.5E": { race: "Races" }, "Basic Fantasy": { race: "Races", npc: "Monsters" }, "Descending Darkness": { race: "Kin" }, "Apeira Astra": { race: "Origins", class: "Paths", item: "Gear", npc: "Threats" }, Traveller: { item: "Equipment", npc: "NPCs and Animals" }, Cairn: { background: "Backgrounds", item: "Gear and Relics", npc: "Bestiary", cairntable: "Tables" }, "Fate Core": { fateskill: "Skills", fatestunt: "Stunts", npc: "NPCs", pregencharsheet: "Pregenerated Characters" }, "Fate Accelerated": { fateskill: "Approaches", fatestunt: "Stunts", npc: "NPCs", pregencharsheet: "Pregenerated Characters" }, Ironsworn: { npc: "Foes" }, Starforged: { npc: "Foes" } };
+const GAME_WORDS: Record<string, Record<string, string>> = { "D&D 3.5E": { race: "Races" }, "Basic Fantasy": { race: "Races", npc: "Monsters" }, "Descending Darkness": { race: "Kin" }, "Apeira Astra": { race: "Origins", class: "Paths", item: "Gear", npc: "Threats" }, Traveller: { item: "Equipment", npc: "NPCs and Animals" }, Cairn: { background: "Backgrounds", item: "Gear and Relics", npc: "Bestiary", cairntable: "Tables" }, "Fate Core": { fateskill: "Skills", fatestunt: "Stunts", npc: "NPCs", pregencharsheet: "Pregenerated Characters" }, "Fate Accelerated": { fateskill: "Approaches", fatestunt: "Stunts", npc: "NPCs", pregencharsheet: "Pregenerated Characters" }, Ironsworn: { npc: "Foes" }, Starforged: { npc: "Foes" }, "Forged in the Dark": { item: "Items", npc: "Cohorts and People", forgedtable: "Tables" } };
 export function sidebarLists(records: Record<string, TableRecord>, group: string, ruleset = "") {
   const present = new Set<string>();
   for (const record of Object.values(records)) if (!NOT_LISTED.has(record.type)) present.add(listOf(record));

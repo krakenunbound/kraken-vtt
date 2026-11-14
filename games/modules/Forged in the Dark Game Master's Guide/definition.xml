@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root version="4.6" release="1">
+	<name type="string">Forged in the Dark Game Master's Guide</name>
+	<displayname type="string">Forged in the Dark: Game Master's Guide</displayname>
+	<category type="string">Forged in the Dark</category>
+	<author type="string">Based on Blades in the Dark by John Harper (adapted for Kraken VTT)</author>
+	<ruleset type="string">Forged in the Dark</ruleset>
+</root>

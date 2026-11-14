@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ScorePanel } from "./ScorePanel";
 import { Picture } from "../characters/ArtPicker";
 import type { CombatEntry, Session } from "../session/useSession";
 import { Icon } from "../ui/icons";
@@ -457,6 +458,11 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
 // FG's combat tracker: the round, everyone in initiative order with the
 // active one marked, and the GM's controls along the bottom.
 export function CombatTracker({ session }: { session: Session }) {
+  // Forged in the Dark has no initiative: its Combat window is the Score panel.
+  if (session.ruleset === "Forged in the Dark") return <ScorePanel session={session} />;
+  return <InitiativeTracker session={session} />;
+}
+function InitiativeTracker({ session }: { session: Session }) {
   const gm = session.role === "dm";
   const { combat } = session;
   const fateGame = /^Fate /.test(session.ruleset);

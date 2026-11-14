@@ -48,6 +48,14 @@ ulesets` (on Linux,
     its rank and progress track: mark it (+), set its rank, or pick a
     character under **Harm…** to inflict its harm. The host can play a
     character too (GM-less play).
+  - *Forged in the Dark* (based on Blades in the Dark, through its SRD, CC BY
+    3.0) comes with Kraken: the *Scoundrel's Handbook*, the *Game Master's
+    Guide* and *The Brine Street Job*. There is no initiative: the **Score**
+    button opens the Score panel (phase, position and effect for every action
+    roll, the plan and the engagement roll, payoff, heat, entanglements,
+    downtime), the **Clocks** window puts progress clocks in the top bar for
+    every seat, and the party sheet's **Crew** tab is the crew sheet
+    ([included-games.md](included-games.md)).
   - *Basic Fantasy* (the Basic Fantasy RPG 4th Edition, CC BY-SA 4.0) comes
     with Kraken too: its Player's Handbook, Game Master's Guide and *The Mill
     at Hob's Ford*. Its character wizard follows the book (3d6 in order, race

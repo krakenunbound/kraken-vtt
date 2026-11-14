@@ -47,6 +47,8 @@ const FG_RULESETS = {
   // (games/modules): each its own book, the toolkit and the scenario ("Fate") both.
   "Fate Core": ["Fate Core", "Fate"],
   "Fate Accelerated": ["Fate Accelerated", "Fate"],
+  // Forged in the Dark (the Blades in the Dark SRD, CC BY 3.0), its books shipped in the app.
+  "Forged in the Dark": ["Forged in the Dark"],
   Worldbuilding: [],
 };
 const ANY = new Set(["", "any", "corerpg"]);

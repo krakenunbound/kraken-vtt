@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root version="4.6" release="1">
+	<name type="string">The Brine Street Job</name>
+	<displayname type="string">The Brine Street Job (Forged in the Dark)</displayname>
+	<category type="string">Forged in the Dark Adventures</category>
+	<author type="string">Kraken VTT</author>
+	<ruleset type="string">Forged in the Dark</ruleset>
+</root>

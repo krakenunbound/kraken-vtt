@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Picture } from "../characters/ArtPicker";
 import { Icon } from "../ui/icons";
 import type { Session } from "../session/useSession";
+import { CrewSheet } from "./CrewSheet";
 
 export type PartyMember = {
   id: string;
@@ -21,6 +22,8 @@ export type PartyMember = {
   /** Fate: fate points and refresh, the high concept and trouble, consequences, milestones (no experience or coin). */
   fate?: { game: string; fatepoints: number; refresh: number; highconcept: string; trouble: string; status: string; consequences: string[]; milestones: string[]; skillpoints: number };
   coins: { name: string; amount: number }[];
+  /** Forged in the Dark: the playbook, stress and trauma, harm, xp, stash. */
+  forged?: { playbook: string; alias: string; stress: number; stressmax: number; traumas: string[]; harm: string[]; xp: Record<string, number>; stash: number; status: string };
 };
 type Entry = { name: string; xp: number; awarded?: number };
 export type PartyView = {
@@ -37,7 +40,7 @@ const ATTRIBUTES = ["strength", "dexterity", "constitution", "intelligence", "wi
 // Cairn's books price everything in gold pieces.
 // Fate has no coin: a parcel is things found (each written into a character's extras).
 // Ironsworn and Starforged have no money: a parcel's Supply goes to the shared supply meter.
-const coinsFor = (ruleset: string) => (/^Fate /.test(ruleset) ? [] : ruleset === "Ironsworn" || ruleset === "Starforged" ? ["Supply"] : ruleset === "Traveller" ? ["MCr", "Cr"] : ruleset === "Apeira Astra" ? ["Cr"] : ruleset === "Descending Darkness" ? ["GC"] : ruleset === "Cairn" ? ["GP"] : ["PP", "GP", "EP", "SP", "CP"]);
+const coinsFor = (ruleset: string) => (/^Fate /.test(ruleset) ? [] : ruleset === "Ironsworn" || ruleset === "Starforged" ? ["Supply"] : ruleset === "Traveller" ? ["MCr", "Cr"] : ruleset === "Apeira Astra" ? ["Cr"] : ruleset === "Descending Darkness" ? ["GC"] : ruleset === "Cairn" ? ["GP"] : ruleset === "Forged in the Dark" ? ["Coin"] : ["PP", "GP", "EP", "SP", "CP"]);
 const TABS = [
   { id: "main", label: "Main" },
   { id: "inventory", label: "Inventory" },
@@ -53,7 +56,7 @@ function newKey() {
 export function PartySheet({ session, compact = false }: { session: Session; compact?: boolean }) {
   const party = session.party;
   const gm = session.role === "dm";
-  const [tab, setTab] = useState<(typeof TABS)[number]["id"]>("main");
+  const [tab, setTab] = useState<(typeof TABS)[number]["id"] | "crew">("main");
   const [checkStat, setCheckStat] = useState("strength");
   const [checkCl, setCheckCl] = useState(0);
   const [xp, setXp] = useState(0);
@@ -70,7 +73,9 @@ export function PartySheet({ session, compact = false }: { session: Session; com
   const cairn = session.ruleset === "Cairn";
   // Fate has milestones instead of experience: its tab gives the party one.
   const fate = /^Fate /.test(session.ruleset);
-  const visibleTabs = (gm ? TABS : TABS.filter((item) => item.id !== "xp")).map((item) => (cairn && item.id === "xp" ? { ...item, label: "Growth" } : fate && item.id === "xp" ? { ...item, label: "Milestones" } : item));
+  // Forged in the Dark: the crew sheet is the party's first tab.
+  const forgedGame = session.ruleset === "Forged in the Dark";
+  const visibleTabs: { id: (typeof TABS)[number]["id"] | "crew"; label: string }[] = [...(forgedGame ? [{ id: "crew" as const, label: "Crew" }] : []), ...(gm ? TABS : TABS.filter((item) => item.id !== "xp")).map((item) => (cairn && item.id === "xp" ? { ...item, label: "Growth" } : fate && item.id === "xp" ? { ...item, label: "Milestones" } : item))];
   const attributes = cairn ? ["str", "dex", "wil"] : fate ? (session.ruleset === "Fate Accelerated" ? ["careful", "clever", "flashy", "forceful", "quick", "sneaky"] : ["Athletics", "Notice", "Will", "Physique", "Stealth", "Investigate", "Lore", "Rapport"]) : ATTRIBUTES;
   const groupStat = attributes.includes(checkStat) ? checkStat : attributes[0];
 
@@ -83,6 +88,8 @@ export function PartySheet({ session, compact = false }: { session: Session; com
           </button>
         ))}
       </nav>
+
+      {tab === "crew" && forgedGame ? <CrewSheet session={session} /> : null}
 
       {tab === "main" ? (
         <div className="party-main">
@@ -124,7 +131,12 @@ export function PartySheet({ session, compact = false }: { session: Session; com
                       </span>
                     </>
                   )}
-                  {member.fate ? null : member.cairn ? (
+                  {member.fate ? null : member.forged ? (
+                    <span className="party-stat" title={`${member.forged.playbook}${member.forged.alias ? ` "${member.forged.alias}"` : ""}: stress ${member.forged.stress}/${member.forged.stressmax}, trauma ${member.forged.traumas.join(", ") || "none"}${member.forged.harm.length ? `; harm: ${member.forged.harm.join(", ")}` : ""}; stash ${member.forged.stash}${member.forged.status ? `; ${member.forged.status}` : ""}`} data-forged-member={member.id}>
+                      <small>Stress</small>
+                      {member.forged.stress}/{member.forged.stressmax}
+                    </span>
+                  ) : member.cairn ? (
                     <span className="party-stat" title={`STR ${member.cairn.str}, DEX ${member.cairn.dex}, WIL ${member.cairn.wil}; ${member.cairn.slots} of 10 slots, ${member.cairn.fatigue} Fatigue${member.cairn.status ? `; ${member.cairn.status}` : ""}`} data-cairn-member={member.id}>
                       <small>STR/DEX/WIL</small>
                       {member.cairn.str}/{member.cairn.dex}/{member.cairn.wil}
@@ -164,7 +176,8 @@ export function PartySheet({ session, compact = false }: { session: Session; com
                   ))}
                 </select>
               ) : null}
-              <div className="party-group" aria-label="Group check">
+              {/* Forged in the Dark has no group checks: a group action is on the Score panel. */}
+              <div className="party-group" aria-label="Group check" hidden={forgedGame}>
                 <select aria-label="Attribute" value={groupStat} onChange={(event) => setCheckStat(event.target.value)}>
                   {attributes.map((stat) => (
                     <option key={stat} value={stat}>

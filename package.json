@@ -57,6 +57,8 @@
     "fate-ui": "node scripts/verify-fate-ui.mjs",
     "ironsworn": "node scripts/check-ironsworn.mjs",
     "ironsworn-ui": "node scripts/verify-ironsworn-ui.mjs",
+    "forged": "node scripts/check-forged.mjs",
+    "forged-ui": "node scripts/verify-forged-ui.mjs",
     "mgt2-ui": "node scripts/verify-mgt2-ui.mjs",
     "tcwizard": "node scripts/check-tcwizard.mjs",
     "starships": "node scripts/check-starships.mjs",

@@ -29,10 +29,14 @@ import { FATE_CORE } from "../games/fate/fate-core.mjs";
 import { FATE_ACCELERATED } from "../games/fate/fate-accelerated.mjs";
 import { TOOLKIT as FATE_TOOLKIT } from "../games/fate/toolkit.mjs";
 import { GULLS_END } from "../games/fate/gulls-end.mjs";
+// Forged in the Dark: the Blades in the Dark SRD (CC BY 3.0: games/forged-dark/LICENSE.md).
+import { SCOUNDRELS_HANDBOOK as FORGED_PLAYERS } from "../games/forged-dark/scoundrels-handbook.mjs";
+import { GM_GUIDE as FORGED_GM } from "../games/forged-dark/gm-guide.mjs";
+import { BRINE_STREET } from "../games/forged-dark/brine-street.mjs";
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 const out = path.join(root, "games", "modules");
-const modules = [PLAYERS_HANDBOOK, BESTIARY, EMPTY_WATCHTOWER, CREW_HANDBOOK, DOSSIER, SALVAGE_RIGHTS, PLAYERS_RULES, CREATURES_SPEC, MAGIC_ITEMS_SPEC, CAIRN_PLAYERS_GUIDE, CAIRN_WARDENS_GUIDE, TROUBLE_IN_TWIN_LAKES, BF_PLAYERS, BF_GM, MILL_AT_HOBS_FORD, FATE_CORE, FATE_ACCELERATED, FATE_TOOLKIT, GULLS_END, ...IRONSWORN_BOOKS, ...STARFORGED_BOOKS];
+const modules = [PLAYERS_HANDBOOK, BESTIARY, EMPTY_WATCHTOWER, CREW_HANDBOOK, DOSSIER, SALVAGE_RIGHTS, PLAYERS_RULES, CREATURES_SPEC, MAGIC_ITEMS_SPEC, CAIRN_PLAYERS_GUIDE, CAIRN_WARDENS_GUIDE, TROUBLE_IN_TWIN_LAKES, BF_PLAYERS, BF_GM, MILL_AT_HOBS_FORD, FATE_CORE, FATE_ACCELERATED, FATE_TOOLKIT, GULLS_END, ...IRONSWORN_BOOKS, ...STARFORGED_BOOKS, FORGED_PLAYERS, FORGED_GM, BRINE_STREET];
 for (const spec of modules) {
   const folder = writeModule(out, spec);
   console.log(`built ${path.relative(root, folder)}`);

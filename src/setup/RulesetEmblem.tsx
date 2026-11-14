@@ -102,6 +102,15 @@ const GLYPHS: Record<string, ReactElement> = {
       <path d="M22.5 16v7M19 19.5h7M8 15.5h5M9.5 19.5h4M8 23.5h5" fill="none" />
     </>
   ),
+  // Forged in the Dark: a progress clock, four segments, two filled.
+  forgedinthedark: (
+    <>
+      <circle cx="20" cy="20" r="11" fill="none" stroke="currentColor" strokeWidth="2" />
+      <path d="M20 20V9a11 11 0 0 1 11 11z" />
+      <path d="M20 20h11a11 11 0 0 1-11 11z" />
+      <path d="M20 9v22M9 20h22" stroke="currentColor" strokeWidth="1.6" fill="none" />
+    </>
+  ),
   // Worldbuilding: a compass rose.
   worldbuilding: (
     <>

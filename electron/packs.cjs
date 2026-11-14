@@ -60,6 +60,7 @@ const KRAKEN_RULESET = {
   basicfantasy: "Basic Fantasy",
   "fate core": "Fate Core",
   "fate accelerated": "Fate Accelerated",
+  "forged in the dark": "Forged in the Dark",
   any: "Any",
   corerpg: "Any",
   "": "Any",

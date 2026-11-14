@@ -282,6 +282,69 @@ LICENSE.md); no art from the books or the website is included. The
 share-alike covers that folder and the books made from it, not Kraken's code.
 
 Kraken's two own games, their text, names, settings, maps and art are original to Kraken
+## Forged in the Dark (a crew of scoundrels, CC BY 3.0)
+
+Based on Blades in the Dark (John Harper, One Seven Design) through its
+System Reference Document. The SRD has the rules and the means to make
+playbooks and crews, but no setting and no finished playbooks: Kraken adds
+its own city of **Brackwater** (a canal port of salt fog and gaslight), seven
+playbooks and six crew types built from the SRD's example abilities, the
+standard items and a starter score.
+
+- **Actions and attributes.** Twelve actions (Hunt, Study, Survey, Tinker /
+  Finesse, Prowl, Skirmish, Wreck / Attune, Command, Consort, Sway); an
+  attribute's rating is how many of its actions have a dot.
+- **Action rolls.** Click an action on the sheet: its dots are d6s on the
+  table's dice, the highest one read (6 success, two 6s critical, 4-5 partial,
+  1-3 bad; with no dots, two dice and the lowest). The GM's **position**
+  (controlled, risky, desperate) and **effect** (zero to extreme) are on the
+  roll and on its card in chat. Add a teammate's **assist** (+1d, 1 stress for
+  them), **push** yourself (+1d or +1 effect, 2 stress each) or take a
+  **Devil's Bargain** (+1d). A desperate roll marks xp in the action's
+  attribute. A roll can tick a clock by its effect.
+- **Resistance** (click an attribute): 6 stress less the highest die; a
+  critical clears 1. **Armor** boxes (armor, heavy, special) reduce a
+  consequence instead. Stress past the last box is **trauma**; the fourth
+  retires the scoundrel.
+- **Harm**: two lesser, two moderate, one severe (a full row moves harm up;
+  past the top it is fatal), with their penalties (less effect, -1d, need
+  help). Recovery fills the **healing clock**; full, every harm is a level
+  less.
+- **Downtime** (the GM begins and ends it on the Score panel): payoff, heat
+  (at 9 a wanted level), the entanglement roll, then two activities each (more
+  for a coin or a rep): acquire an asset, a long-term project, recover, reduce
+  heat, train, indulge your vice (overindulging when you clear more stress
+  than you had).
+- **The crew** (the party sheet's Crew tab): Tier, hold, rep and turf, heat
+  and wanted level, coin and its vault, crew xp and advances, special
+  abilities, upgrades, contacts, cohorts (gangs and experts), the claim map
+  and faction status.
+- **Progress clocks** (the Clocks window, and the top bar for every seat):
+  danger, racing, linked, tug-of-war, mission, project and faction clocks.
+
+**Books:** *Forged in the Dark: Scoundrel's Handbook* (every player chapter of
+the SRD; the playbooks Enforcer, Tracker, Tinker, Burglar, Grifter, Schemer
+and Occultist; the crew types Assassins, Bravos, Cult, Hawkers, Shadows and
+Smugglers; heritages, backgrounds, vices, standard items),
+*Forged in the Dark: Game Master's Guide* (the faction game, entanglements,
+NPC and faction downtime, cohorts, magnitude, rituals, crafting, making your
+own playbooks and crews).
+
+**Starter score: *The Brine Street Job*.** A fence hires the crew to lift a
+guild's true ledger from a canal-side counting-house before dawn: story
+entries, four factions of Brackwater, its people, four clocks to put on the
+table from the Clocks window, its payoff, and the Brine Street
+Counting-house map with its walls and doors.
+
+## Licensing
+
+This work is based on Blades in the Dark (found at http://www.bladesinthedark.com/), product of One Seven Design, developed and authored by John Harper, and licensed for our use under the Creative Commons Attribution 3.0 Unported license (http://creativecommons.org/licenses/by/3.0/).
+
+Kraken VTT is not affiliated with or endorsed by One Seven Design. The SRD's
+text and Kraken's additions to it (Brackwater, the playbooks, crews, items,
+people and the score) are shared under CC BY 3.0 in `games/forged-dark` (see
+its LICENSE.md); no logo or art from the book is included.
+
 ## Basic Fantasy (old-school fantasy, CC BY-SA)
 
 The **Basic Fantasy Role-Playing Game, 4th Edition** by Chris Gonnerman

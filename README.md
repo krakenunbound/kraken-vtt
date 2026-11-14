@@ -141,6 +141,7 @@ Six start screens, fantasy, science fiction and horror, one at random each time.
     minutes and armour that soaks. Adventure: *Salvage Rights*.
   - **Cairn**, Second Edition (Yochai Gal, CC BY-SA 4.0): saves under a d20, attacks that always hit, Scars and ten slots. Adventure: *Trouble in Twin Lakes*.
   - **Ironsworn** (with Delve) and **Ironsworn: Starforged** (Shawn Tomkin, CC BY 4.0; an unofficial adaptation): vows, moves, momentum, progress tracks and oracles, with or without a GM. Starters: *The Cinder Barrow*, *The Silent Hulk*.
+  - **Forged in the Dark**, based on Blades in the Dark (John Harper, its SRD, CC BY 3.0): d6 pools, position and effect, stress, clocks for all to see, a crew and its scores. Starter score: *The Brine Street Job*.
   - **Basic Fantasy**: the free Basic Fantasy RPG 4th Edition (CC BY-SA), its Player's Handbook, Game Master's Guide and a first adventure, *The Mill at Hob's Ford*.
   - **Fate Core** and **Fate Accelerated** (Evil Hat, CC BY 3.0): four Fate dice on the ladder, aspects and fate points, stress and consequences, conflicts on the tracker. Starter scenario: *The Lighthouse at Gull's End*.
 
@@ -259,6 +260,10 @@ For permission beyond the licence, open an issue on GitHub.
 
 Map Studio's art pack (Kraken Map Art) is original to Kraken; Battle Map
 Forge's generator and pack are included with its author's permission.
+
+The included Forged in the Dark books are adapted from the Blades in the
+Dark SRD. This work is based on Blades in the Dark (found at http://www.bladesinthedark.com/), product of One Seven Design, developed and authored by John Harper, and licensed for our use under the Creative Commons Attribution 3.0 Unported license (http://creativecommons.org/licenses/by/3.0/). Kraken is not affiliated with or endorsed by One Seven Design
+([games/forged-dark/LICENSE.md](games/forged-dark/LICENSE.md)).
 
 The included Basic Fantasy books are adapted from the *Basic Fantasy
 Role-Playing Game, 4th Edition*, Copyright © 2006-2023 Chris Gonnerman
