@@ -2,7 +2,9 @@
 // book: every chapter as pages, and the records Kraken's rules and wizard
 // read: the 18 skills of the default skill list (what each does: overcome,
 // create an advantage, attack, defend) and their example stunts.
-import { ids, md } from "../lib/fg.mjs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { ids, illustrated, md } from "../lib/fg.mjs";
 import { CREDIT_CORE_FAE, chapters, creditsPage, plain, read, richText, sections } from "./markdown.mjs";
 
 export const NAME = "Fate Core System";
@@ -39,7 +41,7 @@ for (const part of sections(list, 3).filter((item) => ACTIONS[item.title])) {
 }
 if (SKILLS.length !== 18) throw new Error(`Fate Core: 18 skills expected, ${SKILLS.length} read.`);
 
-export const FATE_CORE = {
+export const FATE_CORE = illustrated({
   name: NAME,
   displayName: "Fate Core System (Player's Reference)",
   category: "Fate",
@@ -62,5 +64,5 @@ export const FATE_CORE = {
     },
     ...chapters("core", { skip: [/^Fate Core System$/i, /^FEEDBACK HEROES$/i] }),
   ],
-};
+}, path.join(path.dirname(fileURLToPath(import.meta.url)), "art"), "cover-fate-core.webp");
 export const CORE_COUNTS = () => ({ skills: SKILLS.length, stunts: STUNTS.length, chapters: FATE_CORE.reference.length });

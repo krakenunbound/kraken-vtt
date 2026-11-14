@@ -3,7 +3,9 @@
 // wizard read: the six approaches, the example stunts (the book's two
 // templates and its characters' stunts), and the four example characters as
 // pregenerated characters (taken as they are in the character wizard).
-import { ids, md } from "../lib/fg.mjs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { ids, illustrated, md } from "../lib/fg.mjs";
 import { CREDIT_CORE_FAE, chapters, creditsPage, plain, read, richText, sections } from "./markdown.mjs";
 import { APPROACHES, APPROACH_NAMES, ratingOf } from "../../shared/fate/rules.mjs";
 
@@ -53,7 +55,7 @@ if (PREGENS.length !== 4) throw new Error(`Fate Accelerated: four example charac
 // The example characters' stunts are examples too.
 for (const person of PREGENS) for (const stunt of Object.values(person.stuntlist)) STUNTS.push({ name: stunt.name, skill: APPROACHES.map((key) => APPROACH_NAMES[key]).find((word) => new RegExp(`\\b${word.replace(/y$/, "")}`, "i").test(stunt.text)) ?? "", summary: stunt.text, text: md(stunt.text), __category: `${person.name}'s Stunts` });
 
-export const FATE_ACCELERATED = {
+export const FATE_ACCELERATED = illustrated({
   name: NAME,
   displayName: "Fate Accelerated Edition (Player's Reference)",
   category: "Fate",
@@ -75,5 +77,5 @@ export const FATE_ACCELERATED = {
     },
     ...chapters("fae", { skip: [/^Fate Accelerated Edition$/i] }),
   ],
-};
+}, path.join(path.dirname(fileURLToPath(import.meta.url)), "art"), "cover-fate-accelerated.webp");
 export const FAE_COUNTS = () => ({ approaches: APPROACH_RECORDS.length, stunts: STUNTS.length, pregens: PREGENS.map((item) => item.name), chapters: FATE_ACCELERATED.reference.length });

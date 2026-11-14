@@ -8,7 +8,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { ids, imageRecord, link, md, slug } from "../lib/fg.mjs";
+import { ids, illustrated, imageRecord, link, md, slug } from "../lib/fg.mjs";
 import { CREDIT_CORE_FAE, TRADEMARK, NOT_ENDORSED, richText } from "./markdown.mjs";
 import { npc } from "./toolkit.mjs";
 
@@ -143,7 +143,7 @@ const map = (name, file) => {
   return imageRecord({ name, file: `images/${file}.webp`, width: data.width, height: data.height, grid: data.grid, walls: data.walls, category: "Maps" });
 };
 
-export const GULLS_END = {
+export const GULLS_END = illustrated({
   name: NAME,
   displayName: "The Lighthouse at Gull's End (Fate scenario)",
   category: "Fate Adventures",
@@ -158,5 +158,5 @@ export const GULLS_END = {
   // The pregenerated characters are the players' (client.xml): the wizard shows them.
   players: { pregencharsheet: PREGENS },
   pictures: Object.fromEntries(["strand", "lighthouse"].map((file) => [`images/${file}.webp`, path.join(here, "art", `${file}.webp`)])),
-};
+}, path.join(path.dirname(fileURLToPath(import.meta.url)), "art"), "cover-gulls-end.webp");
 export const GULLS_COUNTS = () => ({ story: STORY.length, npcs: NPCS.length, battles: BATTLES.length, pregens: PREGENS.length });

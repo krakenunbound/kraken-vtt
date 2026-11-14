@@ -4,7 +4,9 @@
 // rituals, crafting, cohorts, and how to make playbooks and crews), a page on
 // running a score in Kraken, and records: example cohorts (Kraken's own) and
 // the entanglement tables.
-import { md } from "../lib/fg.mjs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { illustrated, md } from "../lib/fg.mjs";
 import { between, chapterText, entries, richText } from "./markdown.mjs";
 import { CITY } from "./content.mjs";
 import { chapter, frontPage, noticePage, RULESET } from "./scoundrels-handbook.mjs";
@@ -35,7 +37,7 @@ export const COHORTS = [
 const COLUMNS = { low: "Heat 0-3", mid: "Heat 4-5", high: "Heat 6" };
 const entanglementTable = `| Result | ${Object.values(COLUMNS).join(" | ")} |\n| --- | --- | --- | --- |\n${["bad", "partial", "success"].map((result) => `| ${{ bad: "1-3", partial: "4-5", success: "6" }[result]} | ${Object.keys(COLUMNS).map((column) => ENTANGLEMENTS[column][result].join(" or ")).join(" | ")} |`).join("\n")}`;
 
-export const GM_GUIDE = {
+export const GM_GUIDE = illustrated({
   name: "Forged in the Dark Game Master's Guide",
   displayName: "Forged in the Dark: Game Master's Guide",
   category: "Forged in the Dark",
@@ -81,5 +83,5 @@ export const GM_GUIDE = {
     { name: "Making Playbooks and Crews", sections: [{ name: "Making Playbooks and Crews", pages: [{ name: "Making a Character Playbook", keywords: "playbook design", text: richText(chapterText("Character playbook").split("\n## Special abilities")[0]) }, { name: "Making a Crew Playbook", keywords: "crew design", text: richText(chapterText("Crew playbook").split("\n## Crew upgrades")[0]) }] }] },
     { name: "Credits", sections: [{ name: "Credits", pages: [noticePage("Forged in the Dark: Game Master's Guide")] }] },
   ],
-};
+}, path.join(path.dirname(fileURLToPath(import.meta.url)), "art"), "cover-gm-guide.webp");
 export const GM_COUNTS = () => ({ cohorts: COHORTS.length, entanglements: Object.keys(ENTANGLEMENT_WORDS).length });

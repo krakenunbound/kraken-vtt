@@ -7,7 +7,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { ids, imageRecord, link, slug } from "../lib/fg.mjs";
+import { ids, illustrated, imageRecord, link, slug } from "../lib/fg.mjs";
 import { plain, read, richText, sections } from "./markdown.mjs";
 import { itemRecord, noticePage, NOTICE, RULESET } from "./players-guide.mjs";
 import { creature } from "./wardens-guide.mjs";
@@ -80,7 +80,7 @@ const map = (name, file, walls) => {
   return imageRecord({ name, file: `images/${file}.webp`, width: data.width, height: data.height, grid: data.grid, walls: data.walls, category: "Maps" });
 };
 
-export const TROUBLE_IN_TWIN_LAKES = {
+export const TROUBLE_IN_TWIN_LAKES = illustrated({
   name: NAME,
   displayName: "Trouble in Twin Lakes (Cairn)",
   category: "Cairn Adventures",
@@ -95,5 +95,5 @@ export const TROUBLE_IN_TWIN_LAKES = {
     image: [map("Temple of the Fungal Lizards", "temple-of-the-fungal-lizards", "temple"), map("Deadmill", "deadmill", "deadmill")],
   },
   pictures: Object.fromEntries(["temple-of-the-fungal-lizards", "deadmill"].map((file) => [`images/${file}.webp`, path.join(here, "art", `${file}.webp`)])),
-};
+}, path.join(path.dirname(fileURLToPath(import.meta.url)), "art"), "cover-trouble-in-twin-lakes.webp");
 export const ADVENTURE_COUNTS = () => ({ story: STORY.length, npcs: CREATURES.map((item) => item.name), relics: RELICS.length });

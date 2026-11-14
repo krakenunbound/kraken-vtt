@@ -139,6 +139,38 @@ export const artKey = (name) => String(name).toLowerCase().replace(/[^a-z0-9]+/g
 export const creatureArt = (name, moduleName) => ({ token: `tokens/${artKey(name)}.webp@${moduleName}`, picture: `images/npc/${artKey(name)}.webp@${moduleName}` });
 export const creaturePictures = (records, artFolder) =>
   Object.fromEntries(records.flatMap((record) => [[`tokens/${artKey(record.name)}.webp`, `${artFolder}/tokens/${artKey(record.name)}.webp`], [`images/npc/${artKey(record.name)}.webp`, `${artFolder}/npc/${artKey(record.name)}.webp`]]));
+// A pregenerated character's art key leaves out the edition in brackets, so
+// "Rook Tallow (Fate Core)" and "(Fate Accelerated)" share one portrait.
+export const artKeyOf = (record, type = "npc") => artKey(type === "pregencharsheet" ? String(record.name).replace(/\s*\([^)]*\)\s*$/, "") : record.name);
+
+// The open games' art (games/tools/open-art.mjs makes it): the book's cover
+// (art/<cover>, its thumbnail and images/<cover>) and, for each creature, NPC
+// and pregenerated character, its portrait (art/npc/<key>.webp) and token
+// (art/tokens/<key>.webp), named inside this module like creatureArt. Only
+// pictures that exist are attached, so a missing one never breaks the build.
+// The records are copied, never changed, as another book may share them.
+export function illustrated(spec, artFolder, cover = "", types = ["npc", "pregencharsheet"]) {
+  const pictures = { ...(spec.pictures ?? {}) };
+  const dress = (side) => side && Object.fromEntries(Object.entries(side).map(([type, list]) => [type, !types.includes(type) ? list : list.map((record) => {
+    const key = artKeyOf(record, type);
+    const portrait = path.join(artFolder, "npc", `${key}.webp`);
+    const token = path.join(artFolder, "tokens", `${key}.webp`);
+    const art = {};
+    if (fs.existsSync(portrait)) {
+      art.picture = `images/npc/${key}.webp@${spec.name}`;
+      pictures[`images/npc/${key}.webp`] = portrait;
+    }
+    if (fs.existsSync(token)) {
+      art.token = `tokens/${key}.webp@${spec.name}`;
+      pictures[`tokens/${key}.webp`] = token;
+    }
+    return { ...record, ...art };
+  })]));
+  const coverFile = cover ? path.join(artFolder, cover) : "";
+  const hasCover = coverFile && fs.existsSync(coverFile);
+  if (hasCover) pictures[`images/${cover}`] = coverFile;
+  return { ...spec, gm: dress(spec.gm), players: dress(spec.players), pictures, ...(hasCover ? { thumbnail: coverFile } : {}) };
+}
 // A page with pictures above its text (FG's image blocks, then a text block):
 // files are paths inside the module ("images/npc/grave-hound.webp"), caption
 // under each. Several pictures sit side by side.

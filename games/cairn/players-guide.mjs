@@ -3,7 +3,9 @@
 // records Kraken's rules and wizard read: the twenty backgrounds (their
 // names, starting gear and tables), the Marketplace's gear, and the tables a
 // new character rolls on (traits, bonds, omens, the backgrounds, the Scars).
-import { ids, md, rich } from "../lib/fg.mjs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { ids, illustrated, md, rich } from "../lib/fg.mjs";
 import { dieTable, plain, read, richText, sections } from "./markdown.mjs";
 import { itemsIn, goldIn, parseItem } from "../../shared/cairn/rules.mjs";
 
@@ -159,7 +161,7 @@ export function chapter(name, file, { level = 2, intro = name } = {}) {
   return { name, sections: [{ name, pages: parts.filter((part) => part.body.trim()).map((part) => ({ name: part.title || intro, keywords: part.title.toLowerCase(), text: richText(part.body) })) }] };
 }
 
-export const PLAYERS_GUIDE = {
+export const PLAYERS_GUIDE = illustrated({
   name: "Cairn Player's Guide",
   displayName: "Cairn Player's Guide",
   category: "Cairn",
@@ -188,4 +190,4 @@ export const PLAYERS_GUIDE = {
     chapter("Vald", "players-guide/vald.md", { intro: "Vald" }),
     { name: "Credits", sections: [{ name: "Credits", pages: [noticePage("Cairn Player's Guide")] }] },
   ],
-};
+}, path.join(path.dirname(fileURLToPath(import.meta.url)), "art"), "cover-players-guide.webp");

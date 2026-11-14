@@ -23,6 +23,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>4 HP, 1 Armor, 8 STR, 11 DEX, 14 WIL, ceremonial dagger (d6)</p><list><li>Holy servants bound to a particular deity. Typically travel in groups of four or more.</li><li>Carry a holy symbol (<i>Ward</i> once per day).</li></list></text>
+				<picture type="string">images/npc/acolyte.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/acolyte.webp@Cairn Warden's Guide</token>
 			</acolyte>
 			<bandit>
 				<name type="string">Bandit</name>
@@ -51,6 +53,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>4 HP, 1 Armor, 12 STR, 12 DEX, 9 WIL, short sword (d6) or short bow (d6)</p><list><li>Outlaws who raid settlements, attack ships, or ambush travelers. Groups of four or more are a <i>detachment</i>.</li><li>A detachment always travels with one leader wearing chain mail or similar (2 Armor) and a long sword (d10) or crossbow (d8).</li><li><b>Loyal</b>: When testing Morale, save using the leader's WIL (13). If the leader dies, the others will flee.</li></list></text>
+				<picture type="string">images/npc/bandit.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/bandit.webp@Cairn Warden's Guide</token>
 			</bandit>
 			<gnoll>
 				<name type="string">Gnoll</name>
@@ -73,6 +77,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>6 HP, 1 Armor, 12 STR, 14 DEX, 8 WIL, spear (d8)</p><list><li>Ferocious humanoid hyenas spawned from arcane experiments long ago.</li><li>Deadly warriors, they attack as a pack (as <i>detachment</i>) or on their own.</li></list></text>
+				<picture type="string">images/npc/gnoll.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/gnoll.webp@Cairn Warden's Guide</token>
 			</gnoll>
 			<hoodedmen>
 				<name type="string">Hooded Men</name>
@@ -95,6 +101,8 @@
 				</attacks>
 				<critical type="string">Leech a part of the victim's soul (1d4 WIL damage).</critical>
 				<text type="formattedtext"><p>12 HP, 9 STR, 12 DEX, 14 WIL, leystaff (d8)</p><list><li>The Watchers of the Wood; a cult that derive their power from leylines, rune stones, and the like.</li><li><b>Critical Damage</b>: Leech a part of the victim's soul (1d4 WIL damage).</li><li>Carries two of the following spellbooks: <i>Charm, Hypnotize, Push/Pull, Shield</i>.</li></list></text>
+				<picture type="string">images/npc/hooded-men.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/hooded-men.webp@Cairn Warden's Guide</token>
 			</hoodedmen>
 			<triton>
 				<name type="string">Triton</name>
@@ -117,6 +125,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>6 HP, 12 STR, 15 DEX, 12 WIL, trident (d8)</p><list><li>Aquatic humanoids with silvery skin, blue-green hair, and scaled legs ending in fins. Dwell in warmer waters close to land.</li><li>Lair in beautiful castles sculpted from sea rock and coral. Command vast schools of fish for both protection and food.</li></list></text>
+				<picture type="string">images/npc/triton.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/triton.webp@Cairn Warden's Guide</token>
 			</triton>
 		</category>
 		<category name="Insectoid">
@@ -141,6 +151,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>6 HP, 13 STR, 12 DEX, 15 WIL, bite (d8)</p><list><li>Enormous spiders with greenish-black skin and large brains. Can shape shift into human form at will.</li><li>Conduct their magical research in dark, web-filled caverns. Carry the <i>Charm</i> and <i>Command</i> spellbooks at all times.</li><li>Fire damage against Aranea is <i>enhanced</i>.</li></list></text>
+				<picture type="string">images/npc/aranea.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/aranea.webp@Cairn Warden's Guide</token>
 			</aranea>
 			<burrowinghorror>
 				<name type="string">Burrowing Horror</name>
@@ -169,6 +181,8 @@
 				</attacks>
 				<critical type="string">Target loses a body part. Roll 1d6. 1: Head, 2-4: Leg, 5-6: Arm.</critical>
 				<text type="formattedtext"><p>6 HP, 1 Armor, 16 STR, 11 DEX, 4 WIL, bite (d10), acid squirt (d8, blast)</p><list><li>Huge insectoids with multiple legs and shiny black eyes. Subsist from dirt, roots, and flesh.</li><li>Burrow just beneath surfaces to ambush unsuspecting creatures.</li><li><b>Critical Damage</b>: Target loses a body part. Roll 1d6. 1: Head, 2-4: Leg, 5-6: Arm.</li></list></text>
+				<picture type="string">images/npc/burrowing-horror.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/burrowing-horror.webp@Cairn Warden's Guide</token>
 			</burrowinghorror>
 			<cavelocust>
 				<name type="string">Cave Locust</name>
@@ -191,6 +205,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>2 HP, 6 STR, 12 DEX, 3 WIL, bite (d6)</p><list><li>Giant plant-eating crickets that dwell in caves. Immune to most types of poison.</li><li>Their natural coloration allows them to blend in with the stone. They emit loud shrieks when threatened.</li></list></text>
+				<picture type="string">images/npc/cave-locust.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/cave-locust.webp@Cairn Warden's Guide</token>
 			</cavelocust>
 			<giantscorpion>
 				<name type="string">Giant Scorpion</name>
@@ -213,6 +229,8 @@
 				</attacks>
 				<critical type="string">The stinger's poison liquefies the target's insides for an additional d8 STR damage. The STR loss is permanent.</critical>
 				<text type="formattedtext"><p>8 HP, 1 Armor, 11 STR, 12 DEX, 4 WIL, claws (d10+d10)</p><list><li>Horse-sized arachnids commonly found in dry terrain or caverns.</li><li><b>Critical Damage</b>: The stinger's poison liquefies the target's insides for an additional d8 STR damage. The STR loss is permanent.</li></list></text>
+				<picture type="string">images/npc/giant-scorpion.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/giant-scorpion.webp@Cairn Warden's Guide</token>
 			</giantscorpion>
 		</category>
 		<category name="Mythical">
@@ -237,6 +255,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>8 HP, 6 STR, 12 DEX, 15 WIL, ghostly touch (d8)</p><list><li>Incorporeal spirits that linger long after death to haunt the living.</li><li>Unharmed by cold, heat, or the elements. Iron weapon damage is <i>enhanced</i>.</li><li><b>Wail</b>: Anyone in earshot must make a WIL save or fall unconscious.</li></list></text>
+				<picture type="string">images/npc/banshee.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/banshee.webp@Cairn Warden's Guide</token>
 			</banshee>
 			<griffon>
 				<name type="string">Griffon</name>
@@ -259,6 +279,8 @@
 				</attacks>
 				<critical type="string">Tears flesh and bone from its victim with its razor-sharp beak.</critical>
 				<text type="formattedtext"><p>7 HP, 14 STR, 15 DEX, 12 WIL, claws (d6+d6), detachment</p><list><li>Ravenous hybrids, with the head and wings of an eagle and the lower body of a lion.</li><li>Can be used as mounts if taken young and properly trained.</li><li>Fly and attack at astonishing speeds, diving in to scoop up their prey.</li><li><b>Critical Damage</b>: Tears flesh and bone from its victim with its razor-sharp beak.</li></list></text>
+				<picture type="string">images/npc/griffon.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/griffon.webp@Cairn Warden's Guide</token>
 			</griffon>
 			<harpy>
 				<name type="string">Harpy</name>
@@ -281,6 +303,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>8 HP, 7 STR, 12 DEX, 14 WIL, claws (d6+d6)</p><list><li>Hideous monstrosities with the body of a giant eagle and a humanoid head.</li><li>Their movements and flight are clumsy due to their disproportionate size. Rely on charmed victims to do anything of note.</li><li><b>Song</b>: Anyone nearby must save WIL or be charmed by its voice, following the harpy and defending it from any threat.</li></list></text>
+				<picture type="string">images/npc/harpy.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/harpy.webp@Cairn Warden's Guide</token>
 			</harpy>
 			<lamia>
 				<name type="string">Lamia</name>
@@ -303,6 +327,8 @@
 				</attacks>
 				<critical type="string">The target takes d6 WIL damage as their spirit is slowly sapped away. They then become enthralled to the Lamia, obeying its every command while in its presence.</critical>
 				<text type="formattedtext"><p>6 HP, 11 STR, 12 DEX, 16 WIL, toothy bite (d8)</p><list><li>Centaur-like creatures that prey on the life force of others, seducing their victims through heightened charm and intelligence. Their upper bodies are typically humanoid, the lower half any number of animal hybrids.</li><li>Inherently magical. Can create illusions, charm creatures, and disguise themselves at will.</li><li><b>Critical Damage</b>: The target takes d6 WIL damage as their spirit is slowly sapped away. They then become enthralled to the Lamia, obeying its every command while in its presence.</li></list></text>
+				<picture type="string">images/npc/lamia.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/lamia.webp@Cairn Warden's Guide</token>
 			</lamia>
 			<unicorn>
 				<name type="string">Unicorn</name>
@@ -325,6 +351,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>6 HP, 14 STR, 12 DEX, 14 WIL, horn (d10, ignores armor)</p><list><li>Magical horses with a single long horn on their foreheads. Timid, but proud and willful, are seen as divine beings.</li><li>Their hair is worth a small fortune due to its powerful healing properties.</li></list></text>
+				<picture type="string">images/npc/unicorn.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/unicorn.webp@Cairn Warden's Guide</token>
 			</unicorn>
 		</category>
 		<category name="Lizard">
@@ -349,6 +377,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>10 HP, 1 Armor, 12 STR, 13 DEX, 13 WIL, bite (d10)</p><list><li>Long, serpentine lizards that nest deep below the earth or in brambles just underfoot.</li><li>Fighting a <b>Basilisk</b> without meeting its gaze is difficult. (Attacks facing it are <i>impaired</i>.)</li><li><b>Gaze</b>: A target facing the Basilisk is slowly petrified from the bottom up and completely frozen after three rounds. An antidote can be brewed from the Basilisk's gizzards. The creature's reflection is harmless.</li></list></text>
+				<picture type="string">images/npc/basilisk.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/basilisk.webp@Cairn Warden's Guide</token>
 			</basilisk>
 			<hydra>
 				<name type="string">Hydra</name>
@@ -371,6 +401,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>12 HP, 2 Armor, 13 STR, 7 DEX, 12 WIL, bite (d12, blast), detachment</p><list><li>Large reptilians with nine serpentine heads. Very difficult to throw off once their quarry is detected.</li><li>On taking <b>Critical Damage</b>, the hydra loses one head. It then continues fighting until no heads remains.</li></list></text>
+				<picture type="string">images/npc/hydra.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/hydra.webp@Cairn Warden's Guide</token>
 			</hydra>
 			<kobold>
 				<name type="string">Kobold</name>
@@ -399,6 +431,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>3 HP, 8 STR, 13 DEX, 4 WIL, bite (d6), spear (d8)</p><list><li>Hairless humanoids with canine-like features and scaly skin. Can see perfectly in the dark, but are harmed by direct sunlight.</li><li>Use traps and ambush to defeat opponents. Often act in service of a more powerful creatures.</li></list></text>
+				<picture type="string">images/npc/kobold.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/kobold.webp@Cairn Warden's Guide</token>
 			</kobold>
 			<naga>
 				<name type="string">Naga</name>
@@ -427,6 +461,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>6 HP, 1 Armor, 14 STR, 12 DEX, 14 WIL, sword (d6), bite (d10)</p><list><li>Humanoids with the lower body, tail, and neck of snakes. Dwell in hot jungles and temples lost to time.</li><li>Use cunning and hypnosis to capture other creatures to be enslaved.</li><li><b>Gaze</b>: A target facing the Naga is hypnotized, falling under its will. Its victims cannot be compelled to violence.</li></list></text>
+				<picture type="string">images/npc/naga.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/naga.webp@Cairn Warden's Guide</token>
 			</naga>
 			<reptilian>
 				<name type="string">Reptilian</name>
@@ -449,6 +485,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>5 HP, 1 Armor, 14 STR, 12 DEX, 5 WIL, bone spear (d8)</p><list><li>Amphibian humanoids that live in large tribes near swamps and jungles.</li><li>Craft their armor and weapons from the bones of their prey. They will eat anything, including humanoids.</li></list></text>
+				<picture type="string">images/npc/reptilian.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/reptilian.webp@Cairn Warden's Guide</token>
 			</reptilian>
 		</category>
 		<category name="Magical">
@@ -473,6 +511,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>5 HP, 11 STR, 14 DEX, 5 WIL, bite (d6)</p><list><li>Teleporting canines in service of a powerful master.</li><li>Can phase out of reality at will. Melee attacks against them are <i>impaired</i>.</li></list></text>
+				<picture type="string">images/npc/blink-dog.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/blink-dog.webp@Cairn Warden's Guide</token>
 			</blinkdog>
 			<warppanther>
 				<name type="string">Warp Panther</name>
@@ -501,6 +541,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>8 HP, 13 STR, 16 DEX, 12 WIL, tentacles (d8+d8, blast), bite (d10)</p><list><li>Grotesque panther-like predators with long razored tentacles growing out of their backs.</li><li>Resistant to magical attacks. Caster must make a WIL save for the intended effect to succeed.</li><li>Can teleport a short distance away at will. Hate Blink Dogs.</li></list></text>
+				<picture type="string">images/npc/warp-panther.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/warp-panther.webp@Cairn Warden's Guide</token>
 			</warppanther>
 			<waterelemental>
 				<name type="string">Water Elemental</name>
@@ -523,6 +565,8 @@
 				</attacks>
 				<critical type="string">Target is enveloped by the water and drowns in three rounds.</critical>
 				<text type="formattedtext"><p>14 HP, 15 STR, 16 DEX, 4 WIL, spray (d8)</p><list><li>Rare spirits of lakes, rivers, and seas.</li><li>Mundane attacks against the Water Elemental are <i>impaired</i>.</li><li><b>Critical Damage</b>: Target is enveloped by the water and drowns in three rounds.</li></list></text>
+				<picture type="string">images/npc/water-elemental.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/water-elemental.webp@Cairn Warden's Guide</token>
 			</waterelemental>
 		</category>
 		<category name="Beast">
@@ -547,6 +591,8 @@
 				</attacks>
 				<critical type="string">Gores its victims by ripping out their entrails.</critical>
 				<text type="formattedtext"><p>4 HP, 12 STR, 13 DEX, 5 WIL, horns (d8)</p><list><li>Born from violence resulting from a greedy or selfish act.</li><li>Kill their victims for sustenance, but gains no succor. They are always hungry.</li><li><b>Critical Damage</b>: Gores its victims by ripping out their entrails.</li></list></text>
+				<picture type="string">images/npc/blood-elk.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/blood-elk.webp@Cairn Warden's Guide</token>
 			</bloodelk>
 			<grizzlybear>
 				<name type="string">Grizzly Bear</name>
@@ -569,6 +615,8 @@
 				</attacks>
 				<critical type="string">Bites the victim for an additional d6 STR damage. They bleed out very quickly.</critical>
 				<text type="formattedtext"><p>6 HP, 15 STR, 13 DEX, 5 WIL, claws (d8+d8)</p><list><li>Reddish-brown bears commonly found in mountains, woodlands, and prairies.</li><li>Prefer to eat fish and meat, and will attack the rare unfortunate who crosses their path.</li><li><b>Critical Damage</b>: Bites the victim for an additional d6 STR damage. They bleed out very quickly.</li></list></text>
+				<picture type="string">images/npc/grizzly-bear.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/grizzly-bear.webp@Cairn Warden's Guide</token>
 			</grizzlybear>
 			<killerbees>
 				<name type="string">Killer Bees</name>
@@ -591,6 +639,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>6 HP, 6 STR, 14 DEX, 8 WIL, sting (d6), detachment</p><list><li>Oversized bees that build underground hives. Hyper-aggressive, attack anything that comes near.</li><li>Produce special honey that heals 1d6 STR. 3 uses.</li><li>When the bees cause STR damage, the stingers are lodged into the target, dealing d4 damage each round until removed.</li></list></text>
+				<picture type="string">images/npc/killer-bees.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/killer-bees.webp@Cairn Warden's Guide</token>
 			</killerbees>
 			<nightcat>
 				<name type="string">Night Cat</name>
@@ -613,6 +663,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>6 HP, 9 STR, 14 DEX, 5 WIL, claws (d6+d6)</p><list><li>Intelligent, nocturnal marsupials that make their homes in forests and swamps. Hunt in</li><li>Critical Damage: The Night Cat begins to eat the target (d4 STR damage) while they are</li></list></text>
+				<picture type="string">images/npc/night-cat.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/night-cat.webp@Cairn Warden's Guide</token>
 			</nightcat>
 			<viper>
 				<name type="string">Viper</name>
@@ -635,6 +687,8 @@
 				</attacks>
 				<critical type="string">Target is poisoned, dying in 1d12 hours without a cure.</critical>
 				<text type="formattedtext"><p>3 HP, 5 STR, 12 DEX, 3 WIL, bite (d6)</p><list><li>Poisonous snakes often found in caves, pits, and other dark places. An antitoxin can be made from their poison sacs.</li><li>Use heat and smell to track their victims.</li><li><b>Critical Damage</b>: Target is poisoned, dying in 1d12 hours without a cure.</li></list></text>
+				<picture type="string">images/npc/viper.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/viper.webp@Cairn Warden's Guide</token>
 			</viper>
 			<wolf>
 				<name type="string">Wolf</name>
@@ -657,6 +711,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>6 HP, 12 STR, 14 DEX, 8 WIL, bite (d8)</p><list><li>Large canines that dwell primarily in forest or tundra.</li><li>Can be trained with effort if captured at a young age.</li></list></text>
+				<picture type="string">images/npc/wolf.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/wolf.webp@Cairn Warden's Guide</token>
 			</wolf>
 		</category>
 		<category name="Fey">
@@ -675,6 +731,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>3 HP, 4 STR, 17 DEX, 13 WIL</p><list><li>Wild, hairy tricksters that prize shiny trinkets above coin.</li><li>Boggarts have true names that describe their true nature. Knowing these names gives a person control over them.</li><li><b>Magic</b>: The Boggart can <i>bring objects to life</i>,  <i>sow confusion</i>, <i>create magical disguises</i>, use <i>telekinesis</i>, and <i>teleport</i>.</li></list></text>
+				<picture type="string">images/npc/boggart.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/boggart.webp@Cairn Warden's Guide</token>
 			</boggart>
 			<dryad>
 				<name type="string">Dryad</name>
@@ -697,6 +755,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>4 HP, 8 STR, 12 DEX, 14 WIL, knotted arms (d6)</p><list><li>Shy, protective tree spirits that manifest as beautiful, green-skinned humanoids.</li><li>Unable to travel far from the tree they are bound to. They perish if the tree is destroyed.</li><li><b>Befuddle</b>: Target becomes confused, gradually moving further and further away from the host tree. WIL save once per round to break free.</li></list></text>
+				<picture type="string">images/npc/dryad.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/dryad.webp@Cairn Warden's Guide</token>
 			</dryad>
 			<frostelf>
 				<name type="string">Frost Elf</name>
@@ -719,6 +779,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>14 HP, 1 Armor, 8 STR, 13 DEX, 14 WIL, icicle dagger (d6)</p><list><li>Beautiful, amoral, and long-lived.</li><li>Resistant to most forms of magic.</li><li>Can cast the following spells at will: <i>Sleep</i>, <i>Teleport</i>, <i>Detect Magic</i>.</li></list></text>
+				<picture type="string">images/npc/frost-elf.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/frost-elf.webp@Cairn Warden's Guide</token>
 			</frostelf>
 			<nighthag>
 				<name type="string">Night Hag</name>
@@ -741,6 +803,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>8 HP, 9 STR, 11 DEX, 16 WIL, talons (d8+d8)</p><list><li>Hideous old women that dwell in dead forests, swamps, and bogs.</li><li>Carry three of the following spellbooks: <i>Arcane Eye</i>, <i>Disguise</i>, <i>Fog Cloud</i>, <i>Identify Owner</i>, <i>Smoke Form</i>.</li></list></text>
+				<picture type="string">images/npc/night-hag.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/night-hag.webp@Cairn Warden's Guide</token>
 			</nighthag>
 			<pixie>
 				<name type="string">Pixie</name>
@@ -757,6 +821,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>3 HP, 3 STR, 15 DEX, 13 WIL</p><list><li>Tiny humanoids with insectoid wings. Naturally invisible.</li><li>Can cast <i>Sleep</i> and <i>Masquerade</i> at will.</li></list></text>
+				<picture type="string">images/npc/pixie.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/pixie.webp@Cairn Warden's Guide</token>
 			</pixie>
 			<redcap>
 				<name type="string">Red Cap</name>
@@ -779,6 +845,8 @@
 				</attacks>
 				<critical type="string">Target is eviscerated, the spray of their blood restoring STR loss suffered by the Red Cap.</critical>
 				<text type="formattedtext"><p>6 HP, 6 STR, 12 DEX, 8 WIL, dual sickles (d6+d6)</p><list><li>Born from blood left to rot in the land of Fairy. Their hats are a deep red from the blood they bathe in.</li><li>Ignore those with little to live for, as there is no pleasure in their murder.</li><li><b>Critical Damage</b>: Target is eviscerated, the spray of their blood restoring STR loss suffered by the Red Cap.</li></list></text>
+				<picture type="string">images/npc/red-cap.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/red-cap.webp@Cairn Warden's Guide</token>
 			</redcap>
 			<seahag>
 				<name type="string">Sea Hag</name>
@@ -801,6 +869,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>6 HP, 11 STR, 15 DEX, 14 WIL, long claws (d6+d6)</p><list><li>Ghostly, green-skinned hags that dwell in seaweed forests and warm shallow waters.</li><li>Immune to magic from spellbooks.</li><li><b>Hideous Gaze</b>: A target is overcome with fear (HP drops to 0). WIL save each round to break the spell.</li></list></text>
+				<picture type="string">images/npc/sea-hag.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/sea-hag.webp@Cairn Warden's Guide</token>
 			</seahag>
 			<willowisp>
 				<name type="string">Will-o-Wisp</name>
@@ -817,6 +887,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>3 HP, 6 STR, 17 DEX, 12 WIL</p><list><li>Nocturnal spirits of cool flame, commonly found in dense woodlands, marshes, and swamps.</li><li>Known to lead travelers astray, to a corpse, or back home again.</li></list></text>
+				<picture type="string">images/npc/will-o-wisp.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/will-o-wisp.webp@Cairn Warden's Guide</token>
 			</willowisp>
 		</category>
 		<category name="Construct">
@@ -841,6 +913,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>8 HP, 3 Armor, 15 STR, 5 DEX, 3 WIL, sharpened arms (d8+d8), detachment</p><list><li>Gigantic, four-armed constructs made of bone and sorcery.</li><li>Mindless guardians that stand ready to attack any creature other than their creator.</li></list></text>
+				<picture type="string">images/npc/bone-construct.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/bone-construct.webp@Cairn Warden's Guide</token>
 			</boneconstruct>
 			<cobblehounds>
 				<name type="string">Cobblehounds</name>
@@ -863,6 +937,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>12 HP, 2 Armor, 14 STR, 1 DEX, 8 WIL, bite (d10)</p><list><li>Immobile constructs typically used as guardians to great tombs or artifacts.</li><li>Unaffected by mundane persuasion techniques, but love a good bone.</li></list></text>
+				<picture type="string">images/npc/cobblehounds.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/cobblehounds.webp@Cairn Warden's Guide</token>
 			</cobblehounds>
 			<gargoyle>
 				<name type="string">Gargoyle</name>
@@ -885,6 +961,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>8 HP, 3 Armor, 14 STR, 4 DEX, 12 WIL, claws (d8+d8)</p><list><li>Magical, slow-moving statues of monstrous winged creatures, typically employed as guards or watchdogs.</li><li>Prowl at nights but fear the day, when the sun's light freezes them in place.</li><li>Immune to charms and magical sleep.</li></list></text>
+				<picture type="string">images/npc/gargoyle.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/gargoyle.webp@Cairn Warden's Guide</token>
 			</gargoyle>
 		</category>
 		<category name="Goblinoid">
@@ -909,6 +987,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>8 HP, 1 Armor, 14 STR, 12 DEX, 11 WIL, club (d8)</p><list><li>Large, goblin-like creatures covered in fur.</li><li>Prefer stealth and trickery to gain an advantage.</li><li>Often command parties of like creatures (typically goblins).</li></list></text>
+				<picture type="string">images/npc/bugbear.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/bugbear.webp@Cairn Warden's Guide</token>
 			</bugbear>
 			<goblin>
 				<name type="string">Goblin</name>
@@ -937,6 +1017,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>4 HP, 8 STR, 12 DEX, 8 WIL, dagger (d6) or sling (d6)</p><list><li>Small, grotesque humanoids with skin in earthly tones of green, brown, and grey.</li><li>Avoid combat, only attacking when advantageous, using hit-and-run tactics.</li><li>Sometimes are found using dire wolves as mounts.</li></list></text>
+				<picture type="string">images/npc/goblin.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/goblin.webp@Cairn Warden's Guide</token>
 			</goblin>
 			<hobgoblin>
 				<name type="string">Hobgoblin</name>
@@ -959,6 +1041,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>6 HP, 2 Armor, 14 STR, 8 DEX, 11 WIL, mace (d8)</p><list><li>Large and burly relatives of goblins. Dwell in underground fortresses until called for war.</li><li>Automatically succeed in Morale Saves if a commander is present.</li><li>Trained to fight together. Damage dealt is <i>enhanced</i> if an ally is also engaged with the same enemy.</li></list></text>
+				<picture type="string">images/npc/hobgoblin.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/hobgoblin.webp@Cairn Warden's Guide</token>
 			</hobgoblin>
 			<ogre>
 				<name type="string">Ogre</name>
@@ -981,6 +1065,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>6 HP, 1 Armor, 16 STR, 8 DEX, 6 WIL, club (d10)</p><list><li>Massive, gluttonous brutes of ill-spirit and low intelligence.</li><li>Easily impressed by shiny materials, keeping sacks of gold and treasure in their lairs.</li></list></text>
+				<picture type="string">images/npc/ogre.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/ogre.webp@Cairn Warden's Guide</token>
 			</ogre>
 			<rootgoblin>
 				<name type="string">Root Goblin</name>
@@ -1003,6 +1089,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>4 HP, 8 STR, 14 DEX, 8 WIL, spear (d6)</p><list><li>Avoid combat unless they have the advantage (such as greater numbers).</li><li>Guard their stolen goods to the death.</li><li>Root Goblins prize spellbooks and are always willing to trade.</li></list></text>
+				<picture type="string">images/npc/root-goblin.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/root-goblin.webp@Cairn Warden's Guide</token>
 			</rootgoblin>
 			<troll>
 				<name type="string">Troll</name>
@@ -1031,6 +1119,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>14 HP, 1 Armor, 14 STR, 12 DEX, 4 WIL, bite (d10), claws (d8+d8)</p><list><li>Giant, warty humanoids of flesh and bark. Dwell underground or in deep forests, as well as the ruined homes of their former victims. Carnivorous.</li><li>When taking <b>Critical Damage</b>, a Troll will continue fighting, despite loss of flesh and limb. Only when their STR is 0 are they truly killed. Unless their heads are bathed in acid, fire, or powerful magic, they will fully regenerate within 1d4 days.</li></list></text>
+				<picture type="string">images/npc/troll.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/troll.webp@Cairn Warden's Guide</token>
 			</troll>
 			<woodtroll>
 				<name type="string">Wood Troll</name>
@@ -1059,6 +1149,8 @@
 				</attacks>
 				<critical type="string">Moss and twigs begin growing out of target's wounds.</critical>
 				<text type="formattedtext"><p>10 HP, 15 STR, 12 DEX, 7 WIL, bite (d8), club (d10)</p><list><li>Large humanoids with elongated arms made of bark or root. They live in forests, sharing a deep connection with the vegetation around them.</li><li>If killed, they will slowly regenerate unless their corpse is taken out of the forest or burned with fire.</li><li><b>Critical Damage</b>: Moss and twigs begin growing out of target's wounds.</li></list></text>
+				<picture type="string">images/npc/wood-troll.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/wood-troll.webp@Cairn Warden's Guide</token>
 			</woodtroll>
 		</category>
 		<category name="Hybrid">
@@ -1089,6 +1181,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>6 HP, 1 Armor, 14 STR, 12 DEX, 14 WIL, spear (d8) or short bow (d6)</p><list><li>Creatures with the lower body and legs of a horse, but a humanoid upper body.</li><li>Rarely found alone, preferring the company of their own.</li></list></text>
+				<picture type="string">images/npc/centaur.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/centaur.webp@Cairn Warden's Guide</token>
 			</centaur>
 			<manticore>
 				<name type="string">Manticore</name>
@@ -1117,6 +1211,8 @@
 				</attacks>
 				<critical type="string">Target is deprived until they get a good night's sleep. Until then, they act boorish, selfish, and cruel (or more so, if that already is their nature).</critical>
 				<text type="formattedtext"><p>6 HP, 15 STR, 14 DEX, 12 WIL, claws (d6+d6), tail spike (d8)</p><list><li>Spiteful monstrosities that wear a humanoid face, a lion's body, wings of a bat, and a scorpion's tail. Dwell in mountainous regions, abandoned castles, and forgotten dungeons.</li><li>Tail spikes act like darts, regrowing after a few days. A single spike is worth 150gp to a collector.</li><li><b>Critical Damage</b>: Target is <i>deprived</i> until they get a good night's sleep. Until then, they act boorish, selfish, and cruel (or more so, if that already is their nature).</li></list></text>
+				<picture type="string">images/npc/manticore.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/manticore.webp@Cairn Warden's Guide</token>
 			</manticore>
 			<minotaur>
 				<name type="string">Minotaur</name>
@@ -1145,6 +1241,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>12 HP, 1 Armor, 16 STR, 12 DEX, 8 WIL, two-handed axe (d10), charge (d12)</p><list><li>Large humanoids (typically male) with the head of a bull. Dwell in mazes or dungeons.</li><li>Extraordinary trackers with an excellent sense of smell and navigation skills.</li></list></text>
+				<picture type="string">images/npc/minotaur.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/minotaur.webp@Cairn Warden's Guide</token>
 			</minotaur>
 			<owlbear>
 				<name type="string">Owlbear</name>
@@ -1173,6 +1271,8 @@
 				</attacks>
 				<critical type="string">A piece of armor is rent and destroyed.</critical>
 				<text type="formattedtext"><p>9 HP, 16 STR, 12 DEX, 5 WIL, beak (d10), claws (d8+d8)</p><list><li>Bear-like carnivores with the face of an owl. Found in dense forests. Rumored spawn of a magical mishap.</li><li><b>Critical Damage</b>: A piece of armor is rent and destroyed.</li></list></text>
+				<picture type="string">images/npc/owlbear.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/owlbear.webp@Cairn Warden's Guide</token>
 			</owlbear>
 		</category>
 		<category name="Plant">
@@ -1197,6 +1297,8 @@
 				</attacks>
 				<critical type="string">Target is pulled into the air where they asphyxiate within a few minutes.</critical>
 				<text type="formattedtext"><p>8 HP, 10 STR, 12 DEX, 2 WIL, vines (d4, blast)</p><list><li>Appear as an inert, typical vine. Attacks passing creatures to use their corpses as fertilizer.</li><li><b>Critical Damage</b>: Target is pulled into the air where they asphyxiate within a few minutes.</li></list></text>
+				<picture type="string">images/npc/creeping-vines.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/creeping-vines.webp@Cairn Warden's Guide</token>
 			</creepingvines>
 			<rootwitch>
 				<name type="string">Root Witch</name>
@@ -1219,6 +1321,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>8 HP, 9 STR, 16 DEX, 14 WIL, tuber-fingers (d6)</p><list><li>Excellent tunnelers that hide underground near water. Wiggle tiny fronds into the air as lures.</li><li>Above-ground, appear vaguely humanoid with the face of a rotted tree stump.</li><li>Will exchange rare minerals for a “fresh corpse” of any kind.</li></list></text>
+				<picture type="string">images/npc/root-witch.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/root-witch.webp@Cairn Warden's Guide</token>
 			</rootwitch>
 			<shamblingmound>
 				<name type="string">Shambling Mound</name>
@@ -1241,6 +1345,8 @@
 				</attacks>
 				<critical type="string">Target is swallowed whole and dragged away.</critical>
 				<text type="formattedtext"><p>9 HP, 15 STR, 6 DEX, 8 WIL, tendrils (d8+d8), detachment</p><list><li>Tall humanoids made of slimy vegetation. Dwell in dark swamps and damp undergrounds.</li><li><b>Critical Damage</b>: Target is swallowed whole and dragged away.</li></list></text>
+				<picture type="string">images/npc/shambling-mound.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/shambling-mound.webp@Cairn Warden's Guide</token>
 			</shamblingmound>
 			<treant>
 				<name type="string">Treant</name>
@@ -1263,6 +1369,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>10 HP, 3 Armor, 15 STR, 3 DEX, 12 WIL, roots (d8+d8, blast)</p><list><li>Sentient, bipedal trees with a vaguely humanoid face on their trunks. Found in the deepest part of the wood.</li><li>Speak slowly and ponderously, with a deep voice. Timeless, living for thousands of years.</li></list></text>
+				<picture type="string">images/npc/treant.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/treant.webp@Cairn Warden's Guide</token>
 			</treant>
 		</category>
 		<category name="Undead">
@@ -1287,6 +1395,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>12 HP, 12 STR, 11 DEX, 14 WIL, ethereal claws (d8+d8)</p><list><li>Animated skeletons clothed in billowing robes. Their eye sockets are hypnotically red. Defend crypts and tombs, but will not attack if left undisturbed.</li><li>Non-magical attacks against them are <i>impaired</i>.</li><li>Can teleport any target in eyesight to a random room nearby.</li></list></text>
+				<picture type="string">images/npc/crypt-guardian.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/crypt-guardian.webp@Cairn Warden's Guide</token>
 			</cryptguardian>
 			<ghost>
 				<name type="string">Ghost</name>
@@ -1309,6 +1419,8 @@
 				</attacks>
 				<critical type="string">Target must save WIL or is possessed, acting only on behalf of the ghost's whims.</critical>
 				<text type="formattedtext"><p>8 HP, 14 STR, 12 DEX, 15 WIL, life drain (d6)</p><list><li>Incorporeal spirits of the restless dead, vulnerable only to magic and specific anointed rites.</li><li><b>Critical Damage</b>: Target must save WIL or is possessed, acting only on behalf of the ghost's whims.</li></list></text>
+				<picture type="string">images/npc/ghost.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/ghost.webp@Cairn Warden's Guide</token>
 			</ghost>
 			<ghoul>
 				<name type="string">Ghoul</name>
@@ -1331,6 +1443,8 @@
 				</attacks>
 				<critical type="string">Target is deprived from their necrotic wound, dying in d4 days unless treated by a priest or skilled healer. If the body is not burned it later rises as a Ghoul as well.</critical>
 				<text type="formattedtext"><p>6 HP, 14 STR, 8 DEX, 3 WIL, elongated claws (d6+d6)</p><list><li>Grey-skinned man-things wearing shredded clothes that crave only the flesh of the living.</li><li><b>Critical Damage</b>: Target is <i>deprived</i> from their necrotic wound, dying in d4 days unless treated by a priest or skilled healer. If the body is not burned it later rises as a Ghoul as well.</li></list></text>
+				<picture type="string">images/npc/ghoul.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/ghoul.webp@Cairn Warden's Guide</token>
 			</ghoul>
 			<lich>
 				<name type="string">Lich</name>
@@ -1353,6 +1467,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>14 HP, 1 Armor, 8 STR, 8 DEX, 18 WIL, soul dagger (d8)</p><list><li>Powerful sorcerers that paid the ultimate price for immortality: their own life. Now their thirst for power knows no bounds.</li><li>Maintain unlife by binding themselves to an earthly artifact, which is typically protected by at least d6 other undead servants.</li><li>Carry up to six of the following spellbooks: <i>Animate Object</i>, <i>Arcane Eye</i>, <i>Deafen</i>, <i>Disassemble</i>, <i>Elemental Wall</i>, <i>Frenzy</i>, <i>Gate</i>, <i>Hover</i>, <i>Hatred</i>, <i>Identify Owner</i>, <i>Knock</i>, <i>Pacify</i>, <i>Raise Dead</i>, <i>Raise Spirit</i>, <i>Shield</i>, <i>Sleep</i>, <i>Smoke Form</i>, <i>Telekinesis</i>, <i>Telepathy</i>, <i>Teleport</i>, <i>Vision</i>, <i>Wizard Mark</i>.</li></list></text>
+				<picture type="string">images/npc/lich.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/lich.webp@Cairn Warden's Guide</token>
 			</lich>
 			<mummy>
 				<name type="string">Mummy</name>
@@ -1375,6 +1491,8 @@
 				</attacks>
 				<critical type="string">Target is infected with mummy rot, and is unable to recover STR until they are cured by a specialist healer. The target is also deprived.</critical>
 				<text type="formattedtext"><p>6 HP, 12 STR, 8 DEX, 6 WIL, necrotic touch (d10)</p><list><li>Undead humanoids wrapped in funerary cloth. Found in pyramids, ruins, temples, and tombs.</li><li><b>Critical Damage</b>: Target is infected with mummy rot, and is unable to recover STR until they are cured by a specialist healer. The target is also <i>deprived</i>.</li></list></text>
+				<picture type="string">images/npc/mummy.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/mummy.webp@Cairn Warden's Guide</token>
 			</mummy>
 			<skeleton>
 				<name type="string">Skeleton</name>
@@ -1403,6 +1521,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>5 HP, 1 Armor, 8 STR, 13 DEX, 0 WIL, rusty sword (d6) or bow (d6)</p><list><li>Frequently found serving a master or necromancer, often in groups of 3 or more.</li><li>Found wearing whatever was on them at the time of their death.</li><li>If a skeleton is killed and its bones are not scattered, it reforms.</li></list></text>
+				<picture type="string">images/npc/skeleton.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/skeleton.webp@Cairn Warden's Guide</token>
 			</skeleton>
 			<vampire>
 				<name type="string">Vampire</name>
@@ -1425,6 +1545,8 @@
 				</attacks>
 				<critical type="string">The vampire drains the target's essence, dealing d12 damage to WIL. If the target reaches 0 WIL this way, it dies and is raised as a thrall of the vampire.</critical>
 				<text type="formattedtext"><p>12 HP, 1 Armor, 14 STR, 12 DEX, 16 WIL, bite (d10)</p><list><li>Charming, undead creatures that drink the blood of mortals. Act at night and sleep in a coffin during the day. Can change into a bat at will.</li><li><b>Regeneration</b>: A damaged vampire regains 6 HP when it bites a target that has blood. If killed, it becomes a cloud of gas and retreats to its coffin, reforming at the next nightfall. Can only be killed if exposed to sunlight or if the coffin is destroyed.</li><li><b>Critical Damage</b>: The vampire drains the target's essence, dealing d12 damage to WIL. If the target reaches 0 WIL this way, it dies and is raised as a thrall of the vampire.</li></list></text>
+				<picture type="string">images/npc/vampire.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/vampire.webp@Cairn Warden's Guide</token>
 			</vampire>
 			<wight>
 				<name type="string">Wight</name>
@@ -1447,6 +1569,8 @@
 				</attacks>
 				<critical type="string">On a fail, any STR loss is permanent.</critical>
 				<text type="formattedtext"><p>12 HP, 3 Armor, 16 STR, 8 DEX, 12 WIL, long sword (d10)</p><list><li>Grotesque, fallen warriors, raised from death for ill purpose. Often astride equally nightmarish steeds, leading lesser undead creatures into battle.</li><li><b>Critical Damage</b>: On a fail, any STR loss is permanent.</li></list></text>
+				<picture type="string">images/npc/wight.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/wight.webp@Cairn Warden's Guide</token>
 			</wight>
 			<zombie>
 				<name type="string">Zombie</name>
@@ -1469,6 +1593,8 @@
 				</attacks>
 				<critical type="string">Target is infected and becomes deprived. Without the services of a specialist or healer, they will become a zombie in 1d4 days.</critical>
 				<text type="formattedtext"><p>2 HP, 12 STR, 6 DEX, 3 WIL, jagged nails (d6)</p><list><li>Re-animated corpse brought back through necromantic ritual or fell influence. Immune to all mind-influencing effects.</li><li>If not utterly destroyed (by fire, complete dismemberment, etc.), the Zombie will rise again within a few minutes.</li><li><b>Critical Damage</b>: Target is infected and becomes <i>deprived</i>. Without the services of a specialist or healer, they will become a zombie in 1d4 days.</li></list></text>
+				<picture type="string">images/npc/zombie.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/zombie.webp@Cairn Warden's Guide</token>
 			</zombie>
 		</category>
 		<category name="Giant">
@@ -1493,6 +1619,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>10 HP, 16 STR, 8 DEX, 6 WIL, club (d10)</p><list><li>The two-headed kin of giants. Prefer caves and underground hovels.</li><li>Cannot be surprised.</li></list></text>
+				<picture type="string">images/npc/ettin.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/ettin.webp@Cairn Warden's Guide</token>
 			</ettin>
 			<skygiant>
 				<name type="string">Sky Giant</name>
@@ -1515,6 +1643,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>12 HP, 1 Armor, 16 STR, 12 DEX, 14 WIL, mace (d10), detachment</p><list><li>Towering, white-skinned giants that live in castles high in the mountains.</li><li>Missile attacks against them are <i>impaired</i> due to the powerful winds surrounding them.</li></list></text>
+				<picture type="string">images/npc/sky-giant.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/sky-giant.webp@Cairn Warden's Guide</token>
 			</skygiant>
 			<stormgiant>
 				<name type="string">Storm Giant</name>
@@ -1537,6 +1667,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>18 HP, 2 Armor, 18 STR, 16 DEX, 18 WIL, great sword (d12), detachment</p><list><li>Building-sized humanoids with bronze-hued skin and light-colored hair. Live on the highest mountain peaks and rockiest coastlines.</li><li>Unharmed by lightning, can summon storm clouds at their will. Can fly with the wind as a their chariot.</li><li><b>Thunderclap</b>: Deals 4 STR damage against a single target. Targets wearing metal armor take double damage.</li></list></text>
+				<picture type="string">images/npc/storm-giant.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/storm-giant.webp@Cairn Warden's Guide</token>
 			</stormgiant>
 			<titan>
 				<name type="string">Titan</name>
@@ -1559,6 +1691,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>18 HP, 3 Armor, 16 STR, 15 DEX, 18 WIL, lightning sword (d12), detachment</p><list><li>Mythical, humanoid giants of radiant beauty and powerfully athletic bodies. Beneficent of character, but prone to megalomania.</li><li>Natives of other planes of existence, but sometimes have strongholds in the mortal world.</li><li>Can levitate, shape shift, and sculpt elements at will.</li></list></text>
+				<picture type="string">images/npc/titan.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/titan.webp@Cairn Warden's Guide</token>
 			</titan>
 		</category>
 		<category name="Extraplanar">
@@ -1583,6 +1717,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>15 HP, 9 STR, 8 DEX, 16 WIL, bite (d8)</p><list><li>Floating spheres with large mouths, enormous eyes, and several small eyes set atop long stalks.</li><li>They are highly intelligent, intensely greedy, and completely insane.</li><li>Can cast the following spells at will: <i>Charm, Phobia, Telekinesis, Sleep, Shuffle, Vision</i>. Magic used against them requires a WIL save or it fizzles out.</li></list></text>
+				<picture type="string">images/npc/eye-of-terror.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/eye-of-terror.webp@Cairn Warden's Guide</token>
 			</eyeofterror>
 			<mindlasher>
 				<name type="string">Mind Lasher</name>
@@ -1605,6 +1741,8 @@
 				</attacks>
 				<critical type="string">A tentacle rips the victim's brain out of their skull.</critical>
 				<text type="formattedtext"><p>12 HP, 8 STR, 12 DEX, 18 WIL, tentacles (d6, blast)</p><list><li>Humanoid creatures with purple skin and squid-like heads. Dwell deep underground or in spacefaring vessels. Feed on the brains of other humanoids, absorbing their memories and life essence. Highly intelligent, but evil beyond belief.</li><li><b>Mind Blast</b>: Nearby targets must save WIL or lose 1d4 WIL and become paralyzed.</li><li><b>Critical Damage</b>: A tentacle rips the victim's brain out of their skull.</li></list></text>
+				<picture type="string">images/npc/mind-lasher.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/mind-lasher.webp@Cairn Warden's Guide</token>
 			</mindlasher>
 		</category>
 		<category name="Unusual">
@@ -1629,6 +1767,8 @@
 				</attacks>
 				<critical type="string">The target is engulfed, losing d6 STR damage per round until they are consumed.</critical>
 				<text type="formattedtext"><p>8 HP, 1 Armor, 15 STR, 6 DEX, 3 WIL, devouring touch (d8)</p><list><li>Large shapeless masses of transparent jelly. Mindlessly hunt for food in dungeons and underground caverns.</li><li><b>Critical Damage</b>: The target is engulfed, losing d6 STR damage per round until they are consumed.</li></list></text>
+				<picture type="string">images/npc/gelatinous-ooze.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/gelatinous-ooze.webp@Cairn Warden's Guide</token>
 			</gelatinousooze>
 			<mimic>
 				<name type="string">Mimic</name>
@@ -1651,6 +1791,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>9 HP, 2 Armor, 13 STR, 6 DEX, 12 WIL, bite (d8)</p><list><li>Malicious shape shifters that take on the form of inanimate objects commonly found in dungeons.</li><li>Remain motionless while in disguise, surprising anyone that comes near.</li><li>The mimic's saliva is extremely sticky and difficult to remove. Alchemists will pay up to 150gp for even the smallest vial.</li></list></text>
+				<picture type="string">images/npc/mimic.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/mimic.webp@Cairn Warden's Guide</token>
 			</mimic>
 			<rustmonster>
 				<name type="string">Rust Monster</name>
@@ -1673,6 +1815,8 @@
 				</attacks>
 				<critical type="string">Metal armor rusts into useless weight.</critical>
 				<text type="formattedtext"><p>5 HP, 16 STR, 13 DEX, 5 WIL, bite (d6)</p><list><li>Armadillo-like creatures with club-like tails and long antennae. Feed on iron and rusted metal.</li><li>Any mundane metals their antennae touch instantly become rust. Can smell metal from a long distance away.</li><li><b>Critical Damage</b>: Metal armor rusts into useless weight.</li></list></text>
+				<picture type="string">images/npc/rust-monster.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/rust-monster.webp@Cairn Warden's Guide</token>
 			</rustmonster>
 			<warriorsnail>
 				<name type="string">Warrior Snail</name>
@@ -1695,6 +1839,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>4 HP, 2 Armor, 14 STR, 6 DEX, 3 WIL, tentacles (d8+d8)</p><list><li>Giant armored snails with heavy, club-like tentacles.</li><li>Some species have colorful shells that can reflect magical attacks.</li></list></text>
+				<picture type="string">images/npc/warrior-snail.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/warrior-snail.webp@Cairn Warden's Guide</token>
 			</warriorsnail>
 		</category>
 		<category name="Behemoth">
@@ -1719,6 +1865,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>12 HP, 2 Armor, 14 STR, 15 DEX, 18 WIL, bite (d12), detachment</p><list><li>Forest-dwelling snakes topped with tall green scales. Collect great hoards of treasure.</li><li>Use intelligence and cunning to manipulate the weak into their service.</li><li><b>Chlorine Gas</b>: Anyone nearby must make a DEX save to escape its reach or lose 1d4 STR and becomes <i>deprived</i>.</li></list></text>
+				<picture type="string">images/npc/green-dragon.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/green-dragon.webp@Cairn Warden's Guide</token>
 			</greendragon>
 			<purpleworm>
 				<name type="string">Purple Worm</name>
@@ -1741,6 +1889,8 @@
 				</attacks>
 				<critical type="string">The target is devoured, taking d8 STR damage from the acid in the worm's stomach.</critical>
 				<text type="formattedtext"><p>18 HP, 1 Armor, 18 STR, 8 DEX, 6 WIL, bite (d12), detachment</p><list><li>Gargantuan worms that lair in enormous burrows deep underground, only coming to the surface to eat. Found in high deserts and hot tundra.</li><li><b>Critical Damage</b>: The target is devoured, taking d8 STR damage from the acid in the worm's stomach.</li></list></text>
+				<picture type="string">images/npc/purple-worm.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/purple-worm.webp@Cairn Warden's Guide</token>
 			</purpleworm>
 		</category>
 		<category name="Demon">
@@ -1771,6 +1921,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>8 HP, 12 STR, 15 DEX, 9 WIL, bite (d8), fire breath (d6, blast)</p><list><li>Monstrous, intelligent dogs that dwell near volcanoes.</li><li>Immune to fire and heat damage. Hot enough to melt iron simply by biting it.</li></list></text>
+				<picture type="string">images/npc/hellhound.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/hellhound.webp@Cairn Warden's Guide</token>
 			</hellhound>
 			<nightmare>
 				<name type="string">Nightmare</name>
@@ -1793,6 +1945,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>8 HP, 15 STR, 12 DEX, 8 WIL, flaming hooves (d8+d8)</p><list><li>Intelligent, demonic horses with eyes like burning coals, smoldering nostrils, and flaming hooves.</li><li>Melee attacks against the Nightmare are <i>impaired</i> due to the thick clouds of smoke it produces.</li></list></text>
+				<picture type="string">images/npc/nightmare.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/nightmare.webp@Cairn Warden's Guide</token>
 			</nightmare>
 		</category>
 		<category name="Incorporeal">
@@ -1817,6 +1971,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>8 HP, 12 STR, 12 DEX, 15 WIL, fists (d4+d4)</p><list><li>Intelligent beings shaped into reality by a powerful wizard. Completely invisible and silent.</li><li>Attacks deal direct STR damage (subtracting Armor).</li></list></text>
+				<picture type="string">images/npc/invisible-stalker.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/invisible-stalker.webp@Cairn Warden's Guide</token>
 			</invisiblestalker>
 			<shadow>
 				<name type="string">Shadow</name>
@@ -1839,6 +1995,8 @@
 				</attacks>
 				<critical type="string">Target loses d4 STR. If reduced to 0 STR, they become a shadow as well.</critical>
 				<text type="formattedtext"><p>14 HP, 1 STR, 18 DEX, 14 WIL, draining touch (d6, ignores armor)</p><list><li>Incorporeal monsters that look like animated shadows. Unharmed by mundane attacks, sleep or mind control.</li><li><b>Critical Damage</b>: Target loses d4 STR. If reduced to 0 STR, they become a shadow as well.</li></list></text>
+				<picture type="string">images/npc/shadow.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/shadow.webp@Cairn Warden's Guide</token>
 			</shadow>
 		</category>
 		<category name="Avian">
@@ -1863,6 +2021,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>4 HP, 15 STR, 13 DEX, 12 WIL, talons (d10+d10)</p><list><li>Intelligent, hawk-like spirits of pure flame, found in isolated deserts and high mountains.</li><li>If killed, they explode in a burst of flames. They are reborn 1d3 days later from the ashes.</li><li>Their feathers are highly-sought after for their healing properties.</li></list></text>
+				<picture type="string">images/npc/phoenix.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/phoenix.webp@Cairn Warden's Guide</token>
 			</phoenix>
 			<wyvern>
 				<name type="string">Wyvern</name>
@@ -1885,6 +2045,8 @@
 				</attacks>
 				<critical type="string">The victim is impaled and held in place. The wyvern then bites their head off.</critical>
 				<text type="formattedtext"><p>11 HP, 15 STR, 14 DEX, 13 WIL, stinger (d10)</p><list><li>Large, intelligent, winged reptiles. Dwell in any terrain, but favor dry cliffs.</li><li>Shy away from other creatures, preferring to silently stalk their targets from afar.</li><li><b>Critical Damage</b>: The victim is impaled and held in place. The wyvern then bites their head off.</li></list></text>
+				<picture type="string">images/npc/wyvern.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/wyvern.webp@Cairn Warden's Guide</token>
 			</wyvern>
 		</category>
 		<category name="Creatures">
@@ -1915,6 +2077,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>18 HP, 12 STR, 13 DEX, 18 WIL, claws (d8+d8, blast), beak (d10)</p><list><li>Mythical beasts with the upper body and head of a human, the wings of an eagle, and the body of a lion. Immune to magic of any kind.</li><li>Poses riddles to anyone they meet. Failure to answer correctly is usually met with death. They know almost everything worth knowing.</li><li><b>Roar</b>: Anyone in earshot must save WIL or flee in fear.</li></list></text>
+				<picture type="string">images/npc/sphinx.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/sphinx.webp@Cairn Warden's Guide</token>
 			</sphinx>
 		</category>
 		<category name="Shape Shifter">
@@ -1939,6 +2103,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>9 HP, 16 STR, 8 DEX, 13 WIL, gore (d6+d6)</p><list><li>Obese humanoids that transform into massive porcine monstrosities to feast on human flesh.</li><li>Prefer to hunt in isolated settlements close to forests and wetlands. Can only shapeshift at night.</li><li><b>Charm</b>: Target obeys the swine's every command until it is killed. WIL save once per round to break free.</li></list></text>
+				<picture type="string">images/npc/swine-thing.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/swine-thing.webp@Cairn Warden's Guide</token>
 			</swinething>
 			<werewolf>
 				<name type="string">Werewolf</name>
@@ -1967,6 +2133,8 @@
 				</attacks>
 				<critical type="string">Target becomes infected with lycanthropy, transforming into a werewolf by the next full moon.</critical>
 				<text type="formattedtext"><p>8 HP, 15 STR, 14 DEX, 6 WIL, claws (d6+d6), bite (d8)</p><list><li>Ferocious lycanthropes that can transform into a wolf-shape at will.</li><li>Mundane attacks are <i>impaired</i> against werewolves, but attacks with weapons made of silver are <i>enhanced</i>.</li><li><b>Critical Damage</b>: Target becomes infected with lycanthropy, transforming into a werewolf by the next full moon.</li></list></text>
+				<picture type="string">images/npc/werewolf.webp@Cairn Warden's Guide</picture>
+				<token type="string">tokens/werewolf.webp@Cairn Warden's Guide</token>
 			</werewolf>
 		</category>
 	</npc>

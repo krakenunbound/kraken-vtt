@@ -5,7 +5,9 @@
 // keep the SRD's own words ("Melee Attack Roll: +4, reach 5 ft. Hit: 5 (1d6 +
 // 2) Slashing damage."), which shared/dnd5e/rules.mjs npcAttacks reads, so the
 // tracker rolls them. Grouped by creature type; the animals on their own.
-import { ids, md } from "../lib/fg.mjs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { ids, illustrated, md } from "../lib/fg.mjs";
 import { CATEGORY, CREATURES_BOOK, RULESET, data, frontMatter, plain } from "./common.mjs";
 
 const CREATURES_DATA = data("creatures");
@@ -71,7 +73,7 @@ for (const creature of [...CREATURES_DATA].sort((a, b) => a.name.localeCompare(b
 }
 const monsters = reference.find((chapter) => chapter.name === "Monsters");
 
-export const CREATURES_SPEC = {
+export const CREATURES_SPEC = illustrated({
   name: CREATURES_BOOK,
   displayName: CREATURES_BOOK,
   category: CATEGORY,
@@ -86,4 +88,4 @@ export const CREATURES_SPEC = {
       sections: [{ name: "Monsters and Animals", pages: [...letters.entries()].map(([letter, blocks]) => ({ name: `Creatures: ${letter}`, keywords: blocks.map((block) => /^### (.+)$/m.exec(block)?.[1] ?? "").join(" "), text: blocks.join("\n\n") })) }],
     },
   ],
-};
+}, path.join(path.dirname(fileURLToPath(import.meta.url)), "art"), "cover-creatures.webp");

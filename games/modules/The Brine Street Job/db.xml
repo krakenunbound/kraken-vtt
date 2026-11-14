@@ -41,6 +41,8 @@
 				<type type="string">NPC</type>
 				<text type="string">A round, polite old fence and broker of secrets, who never raises her voice and never forgets a debt. The crew's client.</text>
 				<description type="formattedtext"><p><b>The Widow's Hand.</b> A round, polite old fence and broker of secrets, who never raises her voice and never forgets a debt. The crew's client.</p><p><i>Quality 2.</i> Kraken's own character for The Brine Street Job.</p></description>
+				<picture type="string">images/npc/mother-corvane.webp@The Brine Street Job</picture>
+				<token type="string">tokens/mother-corvane.webp@The Brine Street Job</token>
 			</mothercorvane>
 			<captainmerrowhaske>
 				<name type="string">Captain Merrow Haske</name>
@@ -49,6 +51,8 @@
 				<type type="string">NPC</type>
 				<text type="string">The counting-house's night captain: tired, bitter, underpaid, and fond of the bottle. Can be bribed (2 coin) before the alarm; after it, he fights.</text>
 				<description type="formattedtext"><p><b>The Harbor Watch (hired by the Tallow Guild).</b> The counting-house's night captain: tired, bitter, underpaid, and fond of the bottle. Can be bribed (2 coin) before the alarm; after it, he fights.</p><p><i>Quality 2.</i> Kraken's own character for The Brine Street Job.</p></description>
+				<picture type="string">images/npc/captain-merrow-haske.webp@The Brine Street Job</picture>
+				<token type="string">tokens/captain-merrow-haske.webp@The Brine Street Job</token>
 			</captainmerrowhaske>
 			<masteraldousfenwick>
 				<name type="string">Master Aldous Fenwick</name>
@@ -57,6 +61,8 @@
 				<type type="string">NPC</type>
 				<text type="string">The Guild's ledger-master, who sleeps upstairs over the counting room. Vain, frightened, and the only one with the vault key (on a chain at his neck).</text>
 				<description type="formattedtext"><p><b>The Tallow Guild.</b> The Guild's ledger-master, who sleeps upstairs over the counting room. Vain, frightened, and the only one with the vault key (on a chain at his neck).</p><p><i>Quality 2.</i> Kraken's own character for The Brine Street Job.</p></description>
+				<picture type="string">images/npc/master-aldous-fenwick.webp@The Brine Street Job</picture>
+				<token type="string">tokens/master-aldous-fenwick.webp@The Brine Street Job</token>
 			</masteraldousfenwick>
 			<nightguards>
 				<name type="string">Night Guards</name>
@@ -67,6 +73,8 @@
 				<description type="formattedtext"><p><b>The Tallow Guild.</b> Four or five hired guards with cudgels, pistols and a bell. A small gang: quality 2, scale 1.</p><p><i>Quality 2.</i> Kraken's own character for The Brine Street Job.</p></description>
 				<kind type="string">gang</kind>
 				<scale type="number">1</scale>
+				<picture type="string">images/npc/night-guards.webp@The Brine Street Job</picture>
+				<token type="string">tokens/night-guards.webp@The Brine Street Job</token>
 			</nightguards>
 			<greylanternstoughs>
 				<name type="string">Grey Lanterns Toughs</name>
@@ -77,6 +85,8 @@
 				<description type="formattedtext"><p><b>The Grey Lanterns.</b> Three young toughs with knives and lanterns, led by a girl called Wick. A small gang: quality 1, scale 1.</p><p><i>Quality 1.</i> Kraken's own character for The Brine Street Job.</p></description>
 				<kind type="string">gang</kind>
 				<scale type="number">1</scale>
+				<picture type="string">images/npc/grey-lanterns-toughs.webp@The Brine Street Job</picture>
+				<token type="string">tokens/grey-lanterns-toughs.webp@The Brine Street Job</token>
 			</greylanternstoughs>
 		</category>
 	</npc>

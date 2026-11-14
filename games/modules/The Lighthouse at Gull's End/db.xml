@@ -71,6 +71,8 @@
 				<consequencelist type="string"></consequencelist>
 				<mob type="number">1</mob>
 				<text type="formattedtext"><p>Fair nameless NPC.</p><p><b>Aspects:</b> _Lanterns on the Rocks_, _Paid by the Wreck_</p><p><b>Skills:</b> Fight +2, Athletics +1, Stealth +1</p><p><b>Stress:</b> 1 box; no consequences</p><p>Three of them on the strand, or a mob of three.</p></text>
+				<picture type="string">images/npc/wrecker.webp@The Lighthouse at Gull's End</picture>
+				<token type="string">tokens/wrecker.webp@The Lighthouse at Gull's End</token>
 			</wrecker>
 			<tamcollerthelampsnuffer>
 				<name type="string">Tam Coller, the Lamp-Snuffer</name>
@@ -115,6 +117,8 @@
 				<consequencelist type="string">mild</consequencelist>
 				<mob type="number">1</mob>
 				<text type="formattedtext"><p>A supporting NPC.</p><p><b>Aspects:</b> _Wrecker Chief of Gull's End_, _Afraid of the Captain More Than of You_, _The Tide Is My Friend_</p><p><b>Skills:</b> Fight +3, Physique +2, Athletics +1, Deceive +1</p><p><b>Stress:</b> 3 physical, 2 mental; consequences mild</p><p><b>Hook and Line.</b> +2 to Fight to create an advantage by dragging someone into the surf with his boat-hook.</p><p>He concedes when the fight turns against him, and gives up who paid him.</p></text>
+				<picture type="string">images/npc/tam-coller-the-lamp-snuffer.webp@The Lighthouse at Gull's End</picture>
+				<token type="string">tokens/tam-coller-the-lamp-snuffer.webp@The Lighthouse at Gull's End</token>
 			</tamcollerthelampsnuffer>
 			<captainmercysloane>
 				<name type="string">Captain Mercy Sloane</name>
@@ -193,6 +197,8 @@
 				<consequencelist type="string">mild, moderate, severe</consequencelist>
 				<mob type="number">1</mob>
 				<text type="formattedtext"><p>A main NPC.</p><p><b>Aspects:</b> _Smuggler Captain Who Bought the Light_, _Every Wreck Is My Cargo_, _Corin Gale Owes Me_, _Charming Until She Isn't_, _The Sea Took My First Ship_</p><p><b>Skills:</b> Shoot +4, Deceive +3, Fight +3, Rapport +2, Will +2, Notice +2, Athletics +1, Physique +1, Contacts +1, Resources +1</p><p><b>Stress:</b> 3 boxes; consequences mild, moderate, severe</p><p><b>Brace of Pistols.</b> +2 to Shoot when she attacks first in a conflict.</p><p><b>Silver Tongue.</b> She can use Deceive instead of Rapport to create advantages when she bargains.</p><p>She concedes rather than be taken out, and gets away on her ship unless the heroes have cut her off.</p></text>
+				<picture type="string">images/npc/captain-mercy-sloane.webp@The Lighthouse at Gull's End</picture>
+				<token type="string">tokens/captain-mercy-sloane.webp@The Lighthouse at Gull's End</token>
 			</captainmercysloane>
 			<sloanesdeckhand>
 				<name type="string">Sloane's Deckhand</name>
@@ -220,6 +226,8 @@
 				<consequencelist type="string"></consequencelist>
 				<mob type="number">1</mob>
 				<text type="formattedtext"><p>Average nameless NPC.</p><p><b>Aspects:</b> _Better Paid Than Brave_</p><p><b>Skills:</b> Fight +1, Shoot +1</p><p><b>Stress:</b> no boxes; no consequences</p></text>
+				<picture type="string">images/npc/sloane-s-deckhand.webp@The Lighthouse at Gull's End</picture>
+				<token type="string">tokens/sloane-s-deckhand.webp@The Lighthouse at Gull's End</token>
 			</sloanesdeckhand>
 			<isoldevarrthekeeper>
 				<name type="string">Isolde Varr, the Keeper</name>
@@ -260,6 +268,8 @@
 				<consequencelist type="string">mild</consequencelist>
 				<mob type="number">1</mob>
 				<text type="formattedtext"><p>A supporting NPC.</p><p><b>Aspects:</b> _Keeper of the Gull's End Light_, _I Sold the Light to Save My Son_, _Isolde Knows This Lamp_</p><p><b>Skills:</b> Lore +3, Crafts +2, Will +1, Notice +1</p><p><b>Stress:</b> 2 physical, 3 mental; consequences mild</p><p>An ally, once freed: her help lighting the lamp is +2.</p></text>
+				<picture type="string">images/npc/isolde-varr-the-keeper.webp@The Lighthouse at Gull's End</picture>
+				<token type="string">tokens/isolde-varr-the-keeper.webp@The Lighthouse at Gull's End</token>
 			</isoldevarrthekeeper>
 			<marenhask>
 				<name type="string">Maren Hask</name>
@@ -287,6 +297,8 @@
 				<consequencelist type="string"></consequencelist>
 				<mob type="number">1</mob>
 				<text type="formattedtext"><p>Average nameless NPC.</p><p><b>Aspects:</b> _The Kittiwake Was All I Had_</p><p><b>Skills:</b> Contacts +1, Provoke +1</p><p><b>Stress:</b> no boxes; no consequences</p><p>The Kittiwake's owner, on the quay in Saltreach.</p></text>
+				<picture type="string">images/npc/maren-hask.webp@The Lighthouse at Gull's End</picture>
+				<token type="string">tokens/maren-hask.webp@The Lighthouse at Gull's End</token>
 			</marenhask>
 		</category>
 	</npc>

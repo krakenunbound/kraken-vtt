@@ -4,6 +4,17 @@ What changed in each release of Kraken VTT. Downloads are on the
 [Releases](https://github.com/krakenunbound/kraken-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
+## Unreleased
+
+- **Art for the open games.** Every book of D&D 5E (SRD 5.2.1), Basic
+  Fantasy, Cairn, Ironsworn, Starforged, Fate and Forged in the Dark now has
+  a cover in the Books window and the Library, and every creature, NPC and
+  pregenerated character has a portrait on its record and a map token on the
+  map and the Combat Tracker, each game in its own painted style (classic
+  high fantasy, old-school module art, dark fairy-tale woods, the iron-age
+  north, the space frontier, pulp adventure, the gaslit canal city). All of
+  it is Kraken's own, made for these books.
+
 ## 0.1.0-alpha.89: Code mode for agents
 
 - **Code mode for AI agents.** A new agent tool, `kraken_code`, takes one

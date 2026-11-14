@@ -110,6 +110,8 @@
 						<desc type="string">If the aboleth has at least one creature Charmed or Grappled, it uses Consume Memories and regains 5 (1d10) Hit Points.</desc>
 					</id-00003>
 				</legendaryactions>
+				<picture type="string">images/npc/aboleth.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/aboleth.webp@SRD 5.2.1 Creatures</token>
 			</aboleth>
 			<chuul>
 				<name type="string">Chuul</name>
@@ -188,6 +190,8 @@
 						<desc type="string">Constitution Saving Throw: DC 13, one creature Grappled by the chuul. Failure: The target has the Poisoned condition and repeats the save at the end of each of its turns, ending the effect on itself on a success. After 1 minute, it succeeds automatically. While Poisoned, the target has the Paralyzed condition.</desc>
 					</id-00003>
 				</actions>
+				<picture type="string">images/npc/chuul.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/chuul.webp@SRD 5.2.1 Creatures</token>
 			</chuul>
 			<cloaker>
 				<name type="string">Cloaker</name>
@@ -272,6 +276,8 @@
 						<desc type="string">The cloaker casts the Mirror Image spell, requiring no spell components and using Wisdom as the spellcasting ability. The spell ends early if the cloaker starts or ends its turn in Bright Light.</desc>
 					</id-00002>
 				</bonusactions>
+				<picture type="string">images/npc/cloaker.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/cloaker.webp@SRD 5.2.1 Creatures</token>
 			</cloaker>
 			<darkmantle>
 				<name type="string">Darkmantle</name>
@@ -336,6 +342,8 @@
 						<desc type="string">Magical Darkness fills a 15-foot Emanation originating from the darkmantle. This effect lasts while the darkmantle maintains Concentration on it, up to 10 minutes. Darkvision can't penetrate this area, and no light can illuminate it.</desc>
 					</id-00002>
 				</actions>
+				<picture type="string">images/npc/darkmantle.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/darkmantle.webp@SRD 5.2.1 Creatures</token>
 			</darkmantle>
 			<gibberingmouther>
 				<name type="string">Gibbering Mouther</name>
@@ -413,6 +421,8 @@
 						<desc type="string">Dexterity Saving Throw: DC 10, each creature in a 10-foot-radius Sphere centered on a point within 30 feet. Failure: 7 (2d6) Radiant damage, and the target has the Blinded condition until the end of the mouther's next turn.</desc>
 					</id-00002>
 				</actions>
+				<picture type="string">images/npc/gibbering-mouther.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/gibbering-mouther.webp@SRD 5.2.1 Creatures</token>
 			</gibberingmouther>
 			<grick>
 				<name type="string">Grick</name>
@@ -481,6 +491,8 @@
 						<desc type="string">Melee Attack Roll: +4, reach 5 ft. Hit: 7 (1d10 + 2) Slashing damage. If the target is a Medium or smaller creature, it has the Grappled condition (escape DC 12) from all four tentacles.</desc>
 					</id-00003>
 				</actions>
+				<picture type="string">images/npc/grick.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/grick.webp@SRD 5.2.1 Creatures</token>
 			</grick>
 			<grimlock>
 				<name type="string">Grimlock</name>
@@ -541,6 +553,8 @@
 						<desc type="string">Melee Attack Roll: +5, reach 5 ft. Hit: 6 (1d6 + 3) Bludgeoning damage plus 2 (1d4) Psychic damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/grimlock.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/grimlock.webp@SRD 5.2.1 Creatures</token>
 			</grimlock>
 			<otyugh>
 				<name type="string">Otyugh</name>
@@ -614,6 +628,8 @@
 						<desc type="string">Constitution Saving Throw: DC 14, each creature Grappled by the otyugh. Failure: 16 (3d8 + 3) Bludgeoning damage, and the target has the Stunned condition until the start of the otyugh's next turn. Suc- cess: Half damage only.</desc>
 					</id-00004>
 				</actions>
+				<picture type="string">images/npc/otyugh.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/otyugh.webp@SRD 5.2.1 Creatures</token>
 			</otyugh>
 			<roper>
 				<name type="string">Roper</name>
@@ -692,6 +708,8 @@
 						<desc type="string">The roper pulls each creature Grappled by it up to 30 feet straight toward it.</desc>
 					</id-00004>
 				</actions>
+				<picture type="string">images/npc/roper.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/roper.webp@SRD 5.2.1 Creatures</token>
 			</roper>
 		</category>
 		<category name="Elementals">
@@ -768,6 +786,8 @@
 						<desc type="string">Strength Saving Throw: DC 13, one Medium or smaller creature in the elemental's space. Failure: 24 (4d10 + 2) Thunder damage, and the target is pushed up to 20 feet straight away from the elemental and has the Prone condition. Success: Half damage only.</desc>
 					</id-00003>
 				</actions>
+				<picture type="string">images/npc/air-elemental.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/air-elemental.webp@SRD 5.2.1 Creatures</token>
 			</airelemental>
 			<azersentinel>
 				<name type="string">Azer Sentinel</name>
@@ -839,6 +859,8 @@
 						<desc type="string">Melee Attack Roll: +5, reach 5 ft. Hit: 8 (1d10 + 3) Bludgeoning damage plus 3 (1d6) Fire damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/azer-sentinel.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/azer-sentinel.webp@SRD 5.2.1 Creatures</token>
 			</azersentinel>
 			<djinni>
 				<name type="string">Djinni</name>
@@ -933,6 +955,8 @@ At Will: Detect Evil and Good, Detect Magic
 1/Day Each: Creation, Gaseous Form, Invisibility, Major Image, Plane Shift</desc>
 					</id-00005>
 				</actions>
+				<picture type="string">images/npc/djinni.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/djinni.webp@SRD 5.2.1 Creatures</token>
 			</djinni>
 			<earthelemental>
 				<name type="string">Earth Elemental</name>
@@ -1011,6 +1035,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">Ranged Attack Roll: +8, range 60 ft. Hit: 8 (1d6 + 5) Bludgeoning damage. If the target is a Large or smaller creature, it has the Prone condition.</desc>
 					</id-00003>
 				</actions>
+				<picture type="string">images/npc/earth-elemental.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/earth-elemental.webp@SRD 5.2.1 Creatures</token>
 			</earthelemental>
 			<efreeti>
 				<name type="string">Efreeti</name>
@@ -1100,6 +1126,8 @@ At Will: Detect Magic, Elementalism
 1/Day Each: Gaseous Form, Invisibility, Major Image, Plane Shift, Tongues, Wall of Fire (level 7 version)</desc>
 					</id-00004>
 				</actions>
+				<picture type="string">images/npc/efreeti.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/efreeti.webp@SRD 5.2.1 Creatures</token>
 			</efreeti>
 			<fireelemental>
 				<name type="string">Fire Elemental</name>
@@ -1182,6 +1210,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">Melee Attack Roll: +6, reach 5 ft. Hit: 10 (2d6 + 3) Fire damage. If the target is a creature or a flammable object, it starts burning.</desc>
 					</id-00002>
 				</actions>
+				<picture type="string">images/npc/fire-elemental.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/fire-elemental.webp@SRD 5.2.1 Creatures</token>
 			</fireelemental>
 			<gargoyle>
 				<name type="string">Gargoyle</name>
@@ -1252,6 +1282,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">Melee Attack Roll: +4, reach 5 ft. Hit: 7 (2d4 + 2) Slashing damage.</desc>
 					</id-00002>
 				</actions>
+				<picture type="string">images/npc/gargoyle.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/gargoyle.webp@SRD 5.2.1 Creatures</token>
 			</gargoyle>
 			<invisiblestalker>
 				<name type="string">Invisible Stalker</name>
@@ -1330,6 +1362,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">Constitution Saving Throw: DC 14, one Large or smaller creature in the stalker's space. Failure: 7 (1d8 + 3) Thunder damage, and the target has the Grappled condition (escape DC 13). Until the grapple ends, the target can't cast spells with a Verbal component and takes 7 (2d6) Thunder damage at the start of each of the stalker's turns.</desc>
 					</id-00003>
 				</actions>
+				<picture type="string">images/npc/invisible-stalker.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/invisible-stalker.webp@SRD 5.2.1 Creatures</token>
 			</invisiblestalker>
 			<magmin>
 				<name type="string">Magmin</name>
@@ -1402,6 +1436,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">The magmin sets itself ablaze or extinguishes its flames. While ablaze, the magmin sheds Bright Light in a 10-foot radius and Dim Light for an additional 10 feet.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/magmin.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/magmin.webp@SRD 5.2.1 Creatures</token>
 			</magmin>
 			<dustmephit>
 				<name type="string">Dust Mephit</name>
@@ -1476,6 +1512,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">The mephit casts the Sleep spell, requiring no spell components and using Charisma as the spellcasting ability (spell save DC 10).</desc>
 					</id-00003>
 				</actions>
+				<picture type="string">images/npc/dust-mephit.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/dust-mephit.webp@SRD 5.2.1 Creatures</token>
 			</dustmephit>
 			<icemephit>
 				<name type="string">Ice Mephit</name>
@@ -1550,6 +1588,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">Constitution Saving Throw: DC 10, each creature in a 15-foot Cone. Failure: 7 (3d4) Cold damage. Success: Half damage.</desc>
 					</id-00003>
 				</actions>
+				<picture type="string">images/npc/ice-mephit.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/ice-mephit.webp@SRD 5.2.1 Creatures</token>
 			</icemephit>
 			<magmamephit>
 				<name type="string">Magma Mephit</name>
@@ -1620,6 +1660,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">Dexterity Saving Throw: DC 11, each creature in a 15-foot Cone. Failure: 7 (2d6) Fire damage. Success: Half damage.</desc>
 					</id-00002>
 				</actions>
+				<picture type="string">images/npc/magma-mephit.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/magma-mephit.webp@SRD 5.2.1 Creatures</token>
 			</magmamephit>
 			<steammephit>
 				<name type="string">Steam Mephit</name>
@@ -1694,6 +1736,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">Constitution Saving Throw: DC 10, each creature in a 15-foot Cone. Failure: 5 (2d4) Fire damage, and the target's Speed decreases by 10 feet until the end of the mephit's next turn. Success: Half damage only. Failure or Success: Being underwater doesn't grant Resistance to this Fire damage.</desc>
 					</id-00002>
 				</actions>
+				<picture type="string">images/npc/steam-mephit.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/steam-mephit.webp@SRD 5.2.1 Creatures</token>
 			</steammephit>
 			<merfolkskirmisher>
 				<name type="string">Merfolk Skirmisher</name>
@@ -1760,6 +1804,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">Melee or Ranged Attack Roll: +2, reach 5 ft. or range 20/60 ft. Hit: 3 (1d6) Piercing damage plus 2 (1d4) Cold damage. If the target is a creature, its Speed decreases by 10 feet until the end of its next turn. Hit or Miss: The spear magically returns to the merfolk's hand immediately after a ranged attack.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/merfolk-skirmisher.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/merfolk-skirmisher.webp@SRD 5.2.1 Creatures</token>
 			</merfolkskirmisher>
 			<salamander>
 				<name type="string">Salamander</name>
@@ -1834,6 +1880,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">Strength Saving Throw: DC 15, one Large or smaller creature the salamander can see within 10 feet. Failure: 11 (2d6 + 4) Bludgeoning damage plus 7 (2d6) Fire damage. The target has the Grappled condition (escape DC 14), and it has the Restrained condition until the grapple ends.</desc>
 					</id-00003>
 				</actions>
+				<picture type="string">images/npc/salamander.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/salamander.webp@SRD 5.2.1 Creatures</token>
 			</salamander>
 			<waterelemental>
 				<name type="string">Water Elemental</name>
@@ -1912,6 +1960,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">Strength Saving Throw: DC 15, each creature in the elemental's space. Failure: 22 (4d8 + 4) Bludgeoning damage. If the target is a Large or smaller creature, it has the Grappled condition (escape DC 14). Until the grapple ends, the target has the Restrained condition, is suffocating unless it can breathe water, and takes 9 (2d8) Bludgeoning damage at the start of each of the elemental's turns. The elemental can grapple one Large creature or up to two Medium or smaller creatures at a time with Whelm. As an action, a creature within 5 feet of the elemental can pull a creature out of it by succeeding on a DC 14 Strength (Athletics) check. Success: Half damage only.</desc>
 					</id-00003>
 				</actions>
+				<picture type="string">images/npc/water-elemental.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/water-elemental.webp@SRD 5.2.1 Creatures</token>
 			</waterelemental>
 			<xorn>
 				<name type="string">Xorn</name>
@@ -1996,6 +2046,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">The xorn moves up to its Speed or Burrow Speed straight toward an enemy it can sense.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/xorn.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/xorn.webp@SRD 5.2.1 Creatures</token>
 			</xorn>
 		</category>
 		<category name="Constructs">
@@ -2062,6 +2114,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">Melee Attack Roll: +4, reach 5 ft. Hit: 5 (1d6 + 2) Bludgeoning damage.</desc>
 					</id-00002>
 				</actions>
+				<picture type="string">images/npc/animated-armor.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/animated-armor.webp@SRD 5.2.1 Creatures</token>
 			</animatedarmor>
 			<animatedflyingsword>
 				<name type="string">Animated Flying Sword</name>
@@ -2123,6 +2177,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">Melee Attack Roll: +4, reach 5 ft. Hit: 6 (1d8 + 2) Slashing damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/animated-flying-sword.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/animated-flying-sword.webp@SRD 5.2.1 Creatures</token>
 			</animatedflyingsword>
 			<animatedrugofsmothering>
 				<name type="string">Animated Rug of Smothering</name>
@@ -2183,6 +2239,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">Melee Attack Roll: +5, reach 5 ft. Hit: 10 (2d6 + 3) Bludgeoning damage. If the target is a Medium or smaller creature, the rug can give it the Grappled condition (escape DC 13) instead of dealing damage. Until the grapple ends, the target has the Blinded and Restrained conditions, is suffocating, and takes 10 (2d6 + 3) Bludgeoning damage at the start of each of its turns. The rug can smother only one creature at a time. While grappling the target, the rug can't take this action, the rug halves the damage it takes (round down), and the target takes the same amount of damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/animated-rug-of-smothering.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/animated-rug-of-smothering.webp@SRD 5.2.1 Creatures</token>
 			</animatedrugofsmothering>
 			<claygolem>
 				<name type="string">Clay Golem</name>
@@ -2271,6 +2329,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">The golem takes the Dash and Disengage actions.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/clay-golem.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/clay-golem.webp@SRD 5.2.1 Creatures</token>
 			</claygolem>
 			<fleshgolem>
 				<name type="string">Flesh Golem</name>
@@ -2357,6 +2417,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">Melee Attack Roll: +7, reach 5 ft. Hit: 13 (2d8 + 4) Bludgeoning damage plus 4 (1d8) Lightning damage.</desc>
 					</id-00002>
 				</actions>
+				<picture type="string">images/npc/flesh-golem.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/flesh-golem.webp@SRD 5.2.1 Creatures</token>
 			</fleshgolem>
 			<gorgon>
 				<name type="string">Gorgon</name>
@@ -2427,6 +2489,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">Dexterity Saving Throw: DC 16, one creature within 5 feet that has the Prone condition. Failure: 16 (2d10 + 5) Bludgeoning damage. Success: Half damage.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/gorgon.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/gorgon.webp@SRD 5.2.1 Creatures</token>
 			</gorgon>
 			<homunculus>
 				<name type="string">Homunculus</name>
@@ -2494,6 +2558,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">Melee Attack Roll: +4, reach 5 ft. Hit: 1 Piercing damage, and the target is subjected to the following effect. Constitution Saving Throw: DC 12. Failure: The target has the Poisoned condition until the end of the homunculus's next turn. Failure by 5 or More: The target has the Poisoned condition for 1 minute. While Poisoned, the target has the Unconscious condition, which ends early if the target takes any damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/homunculus.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/homunculus.webp@SRD 5.2.1 Creatures</token>
 			</homunculus>
 			<irongolem>
 				<name type="string">Iron Golem</name>
@@ -2580,6 +2646,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">Constitution Saving Throw: DC 18, each creature in a 60-foot Cone. Fail- ure: 55 (10d10) Poison damage. Success: Half damage.</desc>
 					</id-00004>
 				</actions>
+				<picture type="string">images/npc/iron-golem.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/iron-golem.webp@SRD 5.2.1 Creatures</token>
 			</irongolem>
 			<shieldguardian>
 				<name type="string">Shield Guardian</name>
@@ -2664,6 +2732,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">Trigger: An attack roll hits the wearer of the guardian's amulet while the wearer is within 5 feet of the guardian. Response: The wearer gains a +5 bonus to AC, including against the triggering attack and possibly causing it to miss, until the start of the guardian's next turn.</desc>
 					</id-00001>
 				</reactions>
+				<picture type="string">images/npc/shield-guardian.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/shield-guardian.webp@SRD 5.2.1 Creatures</token>
 			</shieldguardian>
 			<stonegolem>
 				<name type="string">Stone Golem</name>
@@ -2748,6 +2818,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">The golem casts the Slow spell, requiring no spell components and using Constitution as the spellcasting ability (spell save DC 17).</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/stone-golem.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/stone-golem.webp@SRD 5.2.1 Creatures</token>
 			</stonegolem>
 		</category>
 		<category name="Monstrosities">
@@ -2820,6 +2892,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">Dexterity Saving Throw: DC 12, each creature in a 30-foot-long, 5-foot-wide Line. Failure: 14 (4d6) Acid damage. Success: Half damage.</desc>
 					</id-00002>
 				</actions>
+				<picture type="string">images/npc/ankheg.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/ankheg.webp@SRD 5.2.1 Creatures</token>
 			</ankheg>
 			<axebeak>
 				<name type="string">Axe Beak</name>
@@ -2880,6 +2954,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">Melee Attack Roll: +4, reach 5 ft. Hit: 6 (1d8 + 2) Slashing damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/axe-beak.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/axe-beak.webp@SRD 5.2.1 Creatures</token>
 			</axebeak>
 			<basilisk>
 				<name type="string">Basilisk</name>
@@ -2946,6 +3022,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">Constitution Saving Throw: DC 12, each creature in a 30-foot Cone. If the basilisk sees its reflection in the Cone, the basilisk must make this save. First Failure: The target has the Restrained condition and repeats the save at the end of its next turn if it is still Restrained, ending the effect on itself on a success. Second Failure: The target has the Petrified condition instead of the Restrained condition.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/basilisk.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/basilisk.webp@SRD 5.2.1 Creatures</token>
 			</basilisk>
 			<behir>
 				<name type="string">Behir</name>
@@ -3024,6 +3102,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">Dexterity Saving Throw: DC 18, one Large or smaller creature Grappled by the behir (the behir can have only one creature swallowed at a time). Failure: The behir swallows the target, which is no longer Grappled. While swallowed, a creature has the Blinded and Restrained conditions, has Total Cover against attacks and other effects outside the behir, and takes 21 (6d6) Acid damage at the start of each of the behir's turns. If the behir takes 30 damage or more on a single turn from the swallowed creature, the behir must succeed on a DC 14 Constitution saving throw at the end of that turn or regurgitate the creature, which falls in a space within 10 feet of the behir and has the Prone condition. If the behir dies, a swallowed creature is no longer Restrained and can escape from the corpse by using 15 feet of movement, exiting Prone.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/behir.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/behir.webp@SRD 5.2.1 Creatures</token>
 			</behir>
 			<bulette>
 				<name type="string">Bulette</name>
@@ -3098,6 +3178,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">The bulette jumps up to 30 feet by spending 10 feet of movement.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/bulette.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/bulette.webp@SRD 5.2.1 Creatures</token>
 			</bulette>
 			<chimera>
 				<name type="string">Chimera</name>
@@ -3174,6 +3256,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">Dexterity Saving Throw: DC 15, each creature in a 15-foot Cone. Failure: 31 (7d8) Fire damage. Success: Half damage.</desc>
 					</id-00005>
 				</actions>
+				<picture type="string">images/npc/chimera.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/chimera.webp@SRD 5.2.1 Creatures</token>
 			</chimera>
 			<cockatrice>
 				<name type="string">Cockatrice</name>
@@ -3234,6 +3318,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">Melee Attack Roll: +3, reach 5 ft. Hit: 3 (1d4 + 1) Piercing damage. If the target is a creature, it is subjected to the following effect. Constitution Saving Throw: DC 11. First Failure: The target has the Restrained condition. The target repeats the save at the end of its next turn if it is still Restrained, ending the effect on itself on a success. Second Failure: The target has the Petrified condition, instead of the Restrained condition, for 24 hours.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/cockatrice.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/cockatrice.webp@SRD 5.2.1 Creatures</token>
 			</cockatrice>
 			<deathdog>
 				<name type="string">Death Dog</name>
@@ -3298,6 +3384,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">Melee Attack Roll: +4, reach 5 ft. Hit: 4 (1d4 + 2) Piercing damage. If the target is a creature, it is subjected to the following effect. Constitution Saving Throw: DC 12. First Failure: The target has the Poisoned condition. While Poisoned, the target's Hit Point maximum doesn't return to normal when finishing a Long Rest, and it repeats the save every 24 hours that elapse, ending the effect on itself on a success. Subsequent Failures: The Poisoned target's Hit Point maximum decreases by 5 (1d10).</desc>
 					</id-00002>
 				</actions>
+				<picture type="string">images/npc/death-dog.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/death-dog.webp@SRD 5.2.1 Creatures</token>
 			</deathdog>
 			<doppelganger>
 				<name type="string">Doppelganger</name>
@@ -3376,6 +3464,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">The doppelganger shape-shifts into a Medium or Small Humanoid, or it returns to its true form. Its game statistics, other than its size, are the same in each form. Any equipment it is wearing or carrying isn't transformed.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/doppelganger.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/doppelganger.webp@SRD 5.2.1 Creatures</token>
 			</doppelganger>
 			<drider>
 				<name type="string">Drider</name>
@@ -3464,6 +3554,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">The drider casts Darkness, Faerie Fire, or Web, requiring no Material components and using Wisdom as the spellcasting ability (spell save DC 14).</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/drider.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/drider.webp@SRD 5.2.1 Creatures</token>
 			</drider>
 			<ettercap>
 				<name type="string">Ettercap</name>
@@ -3552,6 +3644,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">The ettercap pulls one creature within 30 feet of itself that is Restrained by its Web Strand up to 25 feet straight toward itself.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/ettercap.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/ettercap.webp@SRD 5.2.1 Creatures</token>
 			</ettercap>
 			<griffon>
 				<name type="string">Griffon</name>
@@ -3616,6 +3710,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">Melee Attack Roll: +6, reach 5 ft. Hit: 8 (1d8 + 4) Piercing damage. If the target is a Medium or smaller creature, it has the Grappled condition (escape DC 14) from both of the griffon's front claws.</desc>
 					</id-00002>
 				</actions>
+				<picture type="string">images/npc/griffon.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/griffon.webp@SRD 5.2.1 Creatures</token>
 			</griffon>
 			<harpy>
 				<name type="string">Harpy</name>
@@ -3680,6 +3776,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">The harpy sings a magical melody, which lasts until the harpy's Concentration ends on it. Wisdom Saving Throw: DC 11, each Humanoid and Giant in a 300-foot Emanation originating from the harpy when the song starts. Failure: The target has the Charmed condition until the song ends and repeats the save at the end of each of its turns. While Charmed, the target has the Incapacitated condition and ignores the Luring Song of other harpies. If the target is more than 5 feet from the harpy, the target moves on its turn toward the harpy by the most direct route, trying to get within 5 feet of the harpy. It doesn't avoid Opportunity Attacks; however, before moving into damaging terrain (such as lava or a pit) and whenever it takes damage from a source other than the harpy, the target repeats the save. Success: The target is immune to this harpy's Luring Song for 24 hours.</desc>
 					</id-00002>
 				</actions>
+				<picture type="string">images/npc/harpy.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/harpy.webp@SRD 5.2.1 Creatures</token>
 			</harpy>
 			<hippogriff>
 				<name type="string">Hippogriff</name>
@@ -3750,6 +3848,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">Melee Attack Roll: +5, reach 5 ft. Hit: 7 (1d8 + 3) Slashing damage.</desc>
 					</id-00002>
 				</actions>
+				<picture type="string">images/npc/hippogriff.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/hippogriff.webp@SRD 5.2.1 Creatures</token>
 			</hippogriff>
 			<hydra>
 				<name type="string">Hydra</name>
@@ -3828,6 +3928,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">Melee Attack Roll: +8, reach 10 ft. Hit: 10 (1d10 + 5) Piercing damage.</desc>
 					</id-00002>
 				</actions>
+				<picture type="string">images/npc/hydra.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/hydra.webp@SRD 5.2.1 Creatures</token>
 			</hydra>
 			<kraken>
 				<name type="string">Kraken</name>
@@ -3933,6 +4035,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">Constitution Saving Throw: DC 23, each creature in a 15-foot Emanation originating from the kraken while it is underwater. Failure: The target has the Blinded and Poisoned conditions until the end of the kraken's next turn. The kraken then moves up to its Speed. Failure or Success: The kraken can't take this action again until the start of its next turn.</desc>
 					</id-00003>
 				</legendaryactions>
+				<picture type="string">images/npc/kraken.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/kraken.webp@SRD 5.2.1 Creatures</token>
 			</kraken>
 			<manticore>
 				<name type="string">Manticore</name>
@@ -4001,6 +4105,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">Ranged Attack Roll: +5, range 100/200 ft. Hit: 7 (1d8 + 3) Piercing damage.</desc>
 					</id-00003>
 				</actions>
+				<picture type="string">images/npc/manticore.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/manticore.webp@SRD 5.2.1 Creatures</token>
 			</manticore>
 			<medusa>
 				<name type="string">Medusa</name>
@@ -4080,6 +4186,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">Constitution Saving Throw: DC 13, each creature in a 30-foot Cone. If the medusa sees its reflection in the Cone, the medusa must make this save. First Failure: The target has the Restrained condition and repeats the save at the end of its next turn if it is still Restrained, ending the effect on itself on a success. Second Failure: The target has the Petrified condition instead of the Restrained condition.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/medusa.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/medusa.webp@SRD 5.2.1 Creatures</token>
 			</medusa>
 			<merrow>
 				<name type="string">Merrow</name>
@@ -4158,6 +4266,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">Melee or Ranged Attack Roll: +6, reach 5 ft. or range 20/60 ft. Hit: 11 (2d6 + 4) Piercing damage. If the target is a Large or smaller creature, the merrow pulls the target up to 15 feet straight toward itself.</desc>
 					</id-00004>
 				</actions>
+				<picture type="string">images/npc/merrow.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/merrow.webp@SRD 5.2.1 Creatures</token>
 			</merrow>
 			<mimic>
 				<name type="string">Mimic</name>
@@ -4234,6 +4344,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">The mimic shape-shifts to resemble a Medium or Small object while retaining its game statistics, or it returns to its true blob form. Any equipment it is wearing or carrying isn't transformed.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/mimic.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/mimic.webp@SRD 5.2.1 Creatures</token>
 			</mimic>
 			<minotaurofbaphomet>
 				<name type="string">Minotaur of Baphomet</name>
@@ -4298,6 +4410,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">Melee Attack Roll: +6, reach 5 ft. Hit: 18 (4d6 + 4) Piercing damage. If the target is a Large or smaller creature and the minotaur moved 10+ feet straight toward it immediately before the hit, the target takes an extra 10 (3d6) Piercing damage and has the Prone condition.</desc>
 					</id-00002>
 				</actions>
+				<picture type="string">images/npc/minotaur-of-baphomet.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/minotaur-of-baphomet.webp@SRD 5.2.1 Creatures</token>
 			</minotaurofbaphomet>
 			<owlbear>
 				<name type="string">Owlbear</name>
@@ -4362,6 +4476,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">Melee Attack Roll: +7, reach 5 ft. Hit: 14 (2d8 + 5) Slashing damage.</desc>
 					</id-00002>
 				</actions>
+				<picture type="string">images/npc/owlbear.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/owlbear.webp@SRD 5.2.1 Creatures</token>
 			</owlbear>
 			<phasespider>
 				<name type="string">Phase Spider</name>
@@ -4446,6 +4562,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">The spider teleports from the Material Plane to the Ethereal Plane or vice versa.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/phase-spider.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/phase-spider.webp@SRD 5.2.1 Creatures</token>
 			</phasespider>
 			<purpleworm>
 				<name type="string">Purple Worm</name>
@@ -4527,6 +4645,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">Strength Saving Throw: DC 19, one Large or smaller creature Grappled by the worm (it can have up to three creatures swallowed at a time). Failure: The target is swallowed by the worm, and the Grappled condition ends. A swallowed creature has the Blinded and Restrained conditions, has Total Cover against attacks and other effects outside the worm, and takes 17 (5d6) Acid damage at the start of each of the worm's turns. If the worm takes 30 damage or more on a single turn from a creature inside it, the worm must succeed on a DC 21 Constitution saving throw at the end of that turn or regurgitate all swallowed creatures, each of which falls in a space within 5 feet of the worm and has the Prone condition. If the worm dies, any swallowed creature no longer has the Restrained condition and can escape from the corpse using 20 feet of movement, exiting Prone.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/purple-worm.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/purple-worm.webp@SRD 5.2.1 Creatures</token>
 			</purpleworm>
 			<remorhaz>
 				<name type="string">Remorhaz</name>
@@ -4599,6 +4719,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">Strength Saving Throw: DC 19, one Large or smaller creature Grappled by the remorhaz (it can have up to two creatures swallowed at a time). Failure: The target is swallowed by the remorhaz, and the Grappled condition ends. A swallowed creature has the Blinded and Restrained conditions, it has Total Cover against attacks and other effects outside the remorhaz, and it takes 10 (3d6) Acid damage plus 10 (3d6) Fire damage at the start of each of the remorhaz's turns. If the remorhaz takes 30 damage or more on a single turn from a creature inside it, the remorhaz must succeed on a DC 15 Constitution saving throw at the end of that turn or regurgitate all swallowed creatures, each of which falls in a space within 5 feet of the remorhaz and has the Prone condition. If the remorhaz dies, any swallowed creature no longer has the Restrained condition and can escape from the corpse by using 15 feet of movement, exiting Prone.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/remorhaz.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/remorhaz.webp@SRD 5.2.1 Creatures</token>
 			</remorhaz>
 			<roc>
 				<name type="string">Roc</name>
@@ -4674,6 +4796,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">If the roc has a creature Grappled, the roc flies up to half its Fly Speed without provoking Opportunity Attacks and drops that creature.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/roc.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/roc.webp@SRD 5.2.1 Creatures</token>
 			</roc>
 			<rustmonster>
 				<name type="string">Rust Monster</name>
@@ -4758,6 +4882,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">Trigger: An attack roll hits the rust monster. Response: The rust monster uses Antennae.</desc>
 					</id-00001>
 				</reactions>
+				<picture type="string">images/npc/rust-monster.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/rust-monster.webp@SRD 5.2.1 Creatures</token>
 			</rustmonster>
 			<stirge>
 				<name type="string">Stirge</name>
@@ -4818,6 +4944,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">Melee Attack Roll: +5, reach 5 ft. Hit: 6 (1d6 + 3) Piercing damage, and the stirge attaches to the target. While attached, the stirge can't make Proboscis attacks, and the target takes 5 (2d4) Necrotic damage at the start of each of the stirge's turns. The stirge can detach itself by spending 5 feet of its movement. The target or a creature within 5 feet of it can detach the stirge as an action.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/stirge.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/stirge.webp@SRD 5.2.1 Creatures</token>
 			</stirge>
 			<tarrasque>
 				<name type="string">Tarrasque</name>
@@ -4933,6 +5061,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">The tarrasque moves up to its Speed. At the end of this movement, the tarrasque creates an instantaneous shock wave in a 60-foot Emanation originating from itself. Creatures in that area lose Concentration and, if Medium or smaller, have the Prone condition. The tarrasque can't take this action again until the start of its next turn.</desc>
 					</id-00003>
 				</legendaryactions>
+				<picture type="string">images/npc/tarrasque.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/tarrasque.webp@SRD 5.2.1 Creatures</token>
 			</tarrasque>
 			<werebear>
 				<name type="string">Werebear</name>
@@ -5012,6 +5142,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">The werebear shape-shifts into a Large bear-humanoid hybrid form or a Large bear, or it returns to its true humanoid form. Its game statistics, other than its size, are the same in each form. Any equipment it is wearing or carrying isn't transformed.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/werebear.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/werebear.webp@SRD 5.2.1 Creatures</token>
 			</werebear>
 			<wereboar>
 				<name type="string">Wereboar</name>
@@ -5091,6 +5223,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">The wereboar shape-shifts into a Medium boar-humanoid hybrid or a Small boar, or it returns to its true humanoid form. Its game statistics, other than its size, are the same in each form. Any equipment it is wearing or carrying isn't transformed.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/wereboar.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/wereboar.webp@SRD 5.2.1 Creatures</token>
 			</wereboar>
 			<wererat>
 				<name type="string">Wererat</name>
@@ -5170,6 +5304,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">The wererat shape-shifts into a Medium rat-humanoid hybrid or a Small rat, or it returns to its true humanoid form. Its game statistics, other than its size, are the same in each form. Any equipment it is wearing or carrying isn't transformed.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/wererat.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/wererat.webp@SRD 5.2.1 Creatures</token>
 			</wererat>
 			<weretiger>
 				<name type="string">Weretiger</name>
@@ -5253,6 +5389,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">The weretiger shape-shifts into a Large tiger-humanoid hybrid or a Large tiger, or it returns to its true humanoid form. Its game statistics, other than its size, are the same in each form. Any equipment it is wearing or carrying isn't transformed.</desc>
 					</id-00002>
 				</bonusactions>
+				<picture type="string">images/npc/weretiger.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/weretiger.webp@SRD 5.2.1 Creatures</token>
 			</weretiger>
 			<werewolf>
 				<name type="string">Werewolf</name>
@@ -5338,6 +5476,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">The werewolf shape-shifts into a Large wolf-humanoid hybrid or a Medium wolf, or it returns to its true humanoid form. Its game statistics, other than its size, are the same in each form. Any equipment it is wearing or carrying isn't transformed.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/werewolf.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/werewolf.webp@SRD 5.2.1 Creatures</token>
 			</werewolf>
 			<winterwolf>
 				<name type="string">Winter Wolf</name>
@@ -5408,6 +5548,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">Constitution Saving Throw: DC 12, each creature in a 15-foot Cone. Failure: 18 (4d8) Cold damage. Success: Half damage.</desc>
 					</id-00002>
 				</actions>
+				<picture type="string">images/npc/winter-wolf.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/winter-wolf.webp@SRD 5.2.1 Creatures</token>
 			</winterwolf>
 		</category>
 		<category name="Humanoids">
@@ -5492,6 +5634,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">The assassin takes the Dash, Disengage, or Hide action.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/assassin.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/assassin.webp@SRD 5.2.1 Creatures</token>
 			</assassin>
 			<bandit>
 				<name type="string">Bandit</name>
@@ -5557,6 +5701,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">Ranged Attack Roll: +3, range 80/320 ft. Hit: 5 (1d8 + 1) Piercing damage.</desc>
 					</id-00002>
 				</actions>
+				<picture type="string">images/npc/bandit.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/bandit.webp@SRD 5.2.1 Creatures</token>
 			</bandit>
 			<banditcaptain>
 				<name type="string">Bandit Captain</name>
@@ -5633,6 +5779,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">Trigger: The bandit is hit by a melee attack roll while holding a weapon. Response: The bandit adds 2 to its AC against that attack, possibly causing it to miss.</desc>
 					</id-00001>
 				</reactions>
+				<picture type="string">images/npc/bandit-captain.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/bandit-captain.webp@SRD 5.2.1 Creatures</token>
 			</banditcaptain>
 			<berserker>
 				<name type="string">Berserker</name>
@@ -5700,6 +5848,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">Melee Attack Roll: +5, reach 5 ft. Hit: 9 (1d12 + 3) Slashing damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/berserker.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/berserker.webp@SRD 5.2.1 Creatures</token>
 			</berserker>
 			<commoner>
 				<name type="string">Commoner</name>
@@ -5767,6 +5917,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">Melee Attack Roll: +2, reach 5 ft. Hit: 2 (1d4) Bludgeoning damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/commoner.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/commoner.webp@SRD 5.2.1 Creatures</token>
 			</commoner>
 			<cultist>
 				<name type="string">Cultist</name>
@@ -5829,6 +5981,8 @@ At Will: Detect Magic, Elementalism
 						<desc type="string">Melee Attack Roll: +3, reach 5 ft. Hit: 3 (1d4 + 1) Slashing damage plus 1 Necrotic damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/cultist.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/cultist.webp@SRD 5.2.1 Creatures</token>
 			</cultist>
 			<cultistfanatic>
 				<name type="string">Cultist Fanatic</name>
@@ -5904,6 +6058,8 @@ At Will: Light, Thaumaturgy
 						<desc type="string">The cultist casts the Spiritual Weapon spell, using the same spellcasting ability as Spellcasting.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/cultist-fanatic.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/cultist-fanatic.webp@SRD 5.2.1 Creatures</token>
 			</cultistfanatic>
 			<druid>
 				<name type="string">Druid</name>
@@ -5980,6 +6136,8 @@ At Will: Druidcraft, Speak with Animals
 1/Day Each: Animal Messenger, Long- strider, Moonbeam</desc>
 					</id-00004>
 				</actions>
+				<picture type="string">images/npc/druid.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/druid.webp@SRD 5.2.1 Creatures</token>
 			</druid>
 			<gladiator>
 				<name type="string">Gladiator</name>
@@ -6056,6 +6214,8 @@ At Will: Druidcraft, Speak with Animals
 						<desc type="string">Trigger: The gladiator is hit by a melee attack roll while holding a weapon. Response: The gladiator adds 3 to its AC against that attack, possibly causing it to miss.</desc>
 					</id-00001>
 				</reactions>
+				<picture type="string">images/npc/gladiator.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/gladiator.webp@SRD 5.2.1 Creatures</token>
 			</gladiator>
 			<guard>
 				<name type="string">Guard</name>
@@ -6117,6 +6277,8 @@ At Will: Druidcraft, Speak with Animals
 						<desc type="string">Melee or Ranged Attack Roll: +3, reach 5 ft. or range 20/60 ft. Hit: 4 (1d6 + 1) Piercing damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/guard.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/guard.webp@SRD 5.2.1 Creatures</token>
 			</guard>
 			<guardcaptain>
 				<name type="string">Guard Captain</name>
@@ -6186,6 +6348,8 @@ At Will: Druidcraft, Speak with Animals
 						<desc type="string">Melee Attack Roll: +6, reach 5 ft. Hit: 15 (2d10 + 4) Slashing damage.</desc>
 					</id-00003>
 				</actions>
+				<picture type="string">images/npc/guard-captain.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/guard-captain.webp@SRD 5.2.1 Creatures</token>
 			</guardcaptain>
 			<knight>
 				<name type="string">Knight</name>
@@ -6262,6 +6426,8 @@ At Will: Druidcraft, Speak with Animals
 						<desc type="string">Trigger: The knight is hit by a melee attack roll while holding a weapon. Response: The knight adds 2 to its AC against that attack, possibly causing it to miss.</desc>
 					</id-00001>
 				</reactions>
+				<picture type="string">images/npc/knight.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/knight.webp@SRD 5.2.1 Creatures</token>
 			</knight>
 			<mage>
 				<name type="string">Mage</name>
@@ -6347,6 +6513,8 @@ At Will: Detect Magic, Light, Mage Armor (included in AC), Mage Hand, Prestidigi
 						<desc type="string">The mage casts Counterspell or Shield in response to the spell's trigger, using the same spellcasting ability as Spellcasting.</desc>
 					</id-00001>
 				</reactions>
+				<picture type="string">images/npc/mage.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/mage.webp@SRD 5.2.1 Creatures</token>
 			</mage>
 			<archmage>
 				<name type="string">Archmage</name>
@@ -6438,6 +6606,8 @@ At Will: Detect Magic, Detect Thoughts, Disguise Self, Invisibility, Light, Mage
 						<desc type="string">The archmage casts Coun- terspell or Shield in response to the spell's trigger, using the same spellcasting ability as Spellcasting.</desc>
 					</id-00001>
 				</reactions>
+				<picture type="string">images/npc/archmage.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/archmage.webp@SRD 5.2.1 Creatures</token>
 			</archmage>
 			<noble>
 				<name type="string">Noble</name>
@@ -6505,6 +6675,8 @@ At Will: Detect Magic, Detect Thoughts, Disguise Self, Invisibility, Light, Mage
 						<desc type="string">Trigger: The noble is hit by a melee attack roll while holding a weapon. Response: The noble adds 2 to its AC against that attack, possibly causing it to miss.</desc>
 					</id-00001>
 				</reactions>
+				<picture type="string">images/npc/noble.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/noble.webp@SRD 5.2.1 Creatures</token>
 			</noble>
 			<pirate>
 				<name type="string">Pirate</name>
@@ -6575,6 +6747,8 @@ At Will: Detect Magic, Detect Thoughts, Disguise Self, Invisibility, Light, Mage
 						<desc type="string">Wisdom Saving Throw: DC 12, one creature the pirate can see within 30 feet. Failure: The target has the Charmed condition until the start of the pirate's next turn.</desc>
 					</id-00003>
 				</actions>
+				<picture type="string">images/npc/pirate.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/pirate.webp@SRD 5.2.1 Creatures</token>
 			</pirate>
 			<piratecaptain>
 				<name type="string">Pirate Captain</name>
@@ -6657,6 +6831,8 @@ At Will: Detect Magic, Detect Thoughts, Disguise Self, Invisibility, Light, Mage
 						<desc type="string">Trigger: The pirate is hit by a melee attack roll while holding a weapon. Response: The pirate adds 3 to its AC against that attack, possibly causing it to miss. On a miss, the pirate makes one Rapier attack against the triggering creature if within range.</desc>
 					</id-00001>
 				</reactions>
+				<picture type="string">images/npc/pirate-captain.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/pirate-captain.webp@SRD 5.2.1 Creatures</token>
 			</piratecaptain>
 			<priestacolyte>
 				<name type="string">Priest Acolyte</name>
@@ -6733,6 +6909,8 @@ At Will: Light, Thaumaturgy</desc>
 						<desc type="string">The priest casts Bless, Healing Word, or Sanctuary, using the same spellcasting ability as Spellcasting.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/priest-acolyte.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/priest-acolyte.webp@SRD 5.2.1 Creatures</token>
 			</priestacolyte>
 			<priest>
 				<name type="string">Priest</name>
@@ -6814,6 +6992,8 @@ At Will: Light, Thaumaturgy
 						<desc type="string">The priest casts Bless, Dispel Magic, Healing Word, or Lesser Restoration, using the same spellcasting ability as Spellcasting.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/priest.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/priest.webp@SRD 5.2.1 Creatures</token>
 			</priest>
 			<scout>
 				<name type="string">Scout</name>
@@ -6883,6 +7063,8 @@ At Will: Light, Thaumaturgy
 						<desc type="string">Ranged Attack Roll: +4, range 150/600 ft. Hit: 6 (1d8 + 2) Piercing damage.</desc>
 					</id-00003>
 				</actions>
+				<picture type="string">images/npc/scout.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/scout.webp@SRD 5.2.1 Creatures</token>
 			</scout>
 			<spy>
 				<name type="string">Spy</name>
@@ -6954,6 +7136,8 @@ At Will: Light, Thaumaturgy
 						<desc type="string">The spy takes the Dash, Disengage, or Hide action.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/spy.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/spy.webp@SRD 5.2.1 Creatures</token>
 			</spy>
 			<tough>
 				<name type="string">Tough</name>
@@ -7025,6 +7209,8 @@ At Will: Light, Thaumaturgy
 						<desc type="string">Ranged Attack Roll: +3, range 100/400 ft. Hit: 6 (1d10 + 1) Piercing damage.</desc>
 					</id-00002>
 				</actions>
+				<picture type="string">images/npc/tough.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/tough.webp@SRD 5.2.1 Creatures</token>
 			</tough>
 			<toughboss>
 				<name type="string">Tough Boss</name>
@@ -7101,6 +7287,8 @@ At Will: Light, Thaumaturgy
 						<desc type="string">Ranged Attack Roll: +4, range 100/400 ft. Hit: 13 (2d10 + 2) Piercing damage.</desc>
 					</id-00003>
 				</actions>
+				<picture type="string">images/npc/tough-boss.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/tough-boss.webp@SRD 5.2.1 Creatures</token>
 			</toughboss>
 			<vampirefamiliar>
 				<name type="string">Vampire Familiar</name>
@@ -7179,6 +7367,8 @@ At Will: Light, Thaumaturgy
 						<desc type="string">The familiar takes the Dash or Disengage action.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/vampire-familiar.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/vampire-familiar.webp@SRD 5.2.1 Creatures</token>
 			</vampirefamiliar>
 			<warriorinfantry>
 				<name type="string">Warrior Infantry</name>
@@ -7246,6 +7436,8 @@ At Will: Light, Thaumaturgy
 						<desc type="string">Melee or Ranged Attack Roll: +3, reach 5 ft. or range 20/60 ft. Hit: 4 (1d6 + 1) Piercing damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/warrior-infantry.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/warrior-infantry.webp@SRD 5.2.1 Creatures</token>
 			</warriorinfantry>
 			<warriorveteran>
 				<name type="string">Warrior Veteran</name>
@@ -7321,6 +7513,8 @@ At Will: Light, Thaumaturgy
 						<desc type="string">Trigger: The warrior is hit by a melee attack roll while holding a weapon. Response: The warrior adds 2 to its AC against that attack, possibly causing it to miss.</desc>
 					</id-00001>
 				</reactions>
+				<picture type="string">images/npc/warrior-veteran.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/warrior-veteran.webp@SRD 5.2.1 Creatures</token>
 			</warriorveteran>
 		</category>
 		<category name="Plants">
@@ -7383,6 +7577,8 @@ At Will: Light, Thaumaturgy
 						<desc type="string">Melee Attack Roll: +1, reach 5 ft. Hit: 1 Slashing damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/awakened-shrub.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/awakened-shrub.webp@SRD 5.2.1 Creatures</token>
 			</awakenedshrub>
 			<awakenedtree>
 				<name type="string">Awakened Tree</name>
@@ -7443,6 +7639,8 @@ At Will: Light, Thaumaturgy
 						<desc type="string">Melee Attack Roll: +6, reach 10 ft. Hit: 14 (3d6 + 4) Bludgeoning damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/awakened-tree.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/awakened-tree.webp@SRD 5.2.1 Creatures</token>
 			</awakenedtree>
 			<shriekerfungus>
 				<name type="string">Shrieker Fungus</name>
@@ -7503,6 +7701,8 @@ At Will: Light, Thaumaturgy
 						<desc type="string">Trigger: A creature or a source of Bright Light moves within 30 feet of the shrieker. Response: The shrieker emits a shriek audible within 300 feet of itself for 1 minute or until the shrieker dies.</desc>
 					</id-00001>
 				</reactions>
+				<picture type="string">images/npc/shrieker-fungus.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/shrieker-fungus.webp@SRD 5.2.1 Creatures</token>
 			</shriekerfungus>
 			<violetfungus>
 				<name type="string">Violet Fungus</name>
@@ -7567,6 +7767,8 @@ At Will: Light, Thaumaturgy
 						<desc type="string">Melee Attack Roll: +2, reach 10 ft. Hit: 4 (1d8) Necrotic damage.</desc>
 					</id-00002>
 				</actions>
+				<picture type="string">images/npc/violet-fungus.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/violet-fungus.webp@SRD 5.2.1 Creatures</token>
 			</violetfungus>
 			<shamblingmound>
 				<name type="string">Shambling Mound</name>
@@ -7641,6 +7843,8 @@ At Will: Light, Thaumaturgy
 						<desc type="string">Strength Saving Throw: DC 15, one Medium or smaller creature within 5 feet. Failure: The target is pulled into the shambling mound's space and has the Grappled condition (escape DC 14). Until the grapple ends, the target has the Blinded and Restrained conditions, and it takes 10 (3d6) Lightning damage at the start of each of its turns. When the shambling mound moves, the Grappled target moves with it, costing it no extra movement. The shambling mound can have only one creature Grappled by this action at a time.</desc>
 					</id-00003>
 				</actions>
+				<picture type="string">images/npc/shambling-mound.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/shambling-mound.webp@SRD 5.2.1 Creatures</token>
 			</shamblingmound>
 			<treant>
 				<name type="string">Treant</name>
@@ -7719,6 +7923,8 @@ At Will: Light, Thaumaturgy
 						<desc type="string">The treant magically animates up to two trees it can see within 60 feet of itself. Each tree uses the Treant stat block, except it has Intelligence and Charisma scores of 1, it can't speak, and it lacks this action. The tree takes its turn immediately after the treant on the same Initiative count, and it obeys the treant. A tree remains animate for 1 day or until it dies, the treant dies, or it is more than 120 feet from the treant. The tree then takes root if possible.</desc>
 					</id-00004>
 				</actions>
+				<picture type="string">images/npc/treant.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/treant.webp@SRD 5.2.1 Creatures</token>
 			</treant>
 		</category>
 		<category name="Fiends">
@@ -7814,6 +8020,8 @@ At Will: Light, Thaumaturgy
 						<desc type="string">The balor teleports itself or a willing demon within 10 feet of itself up to 60 feet to an unoccupied space the balor can see.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/balor.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/balor.webp@SRD 5.2.1 Creatures</token>
 			</balor>
 			<barbeddevil>
 				<name type="string">Barbed Devil</name>
@@ -7901,6 +8109,8 @@ At Will: Light, Thaumaturgy
 						<desc type="string">Ranged Attack Roll: +5, range 150 ft. Hit: 17 (5d6) Fire damage. If the target is a flammable object that isn't being worn or carried, it starts burning.</desc>
 					</id-00004>
 				</actions>
+				<picture type="string">images/npc/barbed-devil.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/barbed-devil.webp@SRD 5.2.1 Creatures</token>
 			</barbeddevil>
 			<beardeddevil>
 				<name type="string">Bearded Devil</name>
@@ -7976,6 +8186,8 @@ At Will: Light, Thaumaturgy
 						<desc type="string">Melee Attack Roll: +5, reach 10 ft. Hit: 8 (1d10 + 3) Slashing damage. If the target is a creature and doesn't already have an infernal wound, it is subjected to the following effect. Constitution Saving Throw: DC 12. Failure: The target receives an infernal wound. While wounded, the target loses 5 (1d10) Hit Points at the start of each of its turns. The wound closes after 1 minute, after a spell restores Hit Points to the target, or after the target or a creature within 5 feet of it takes an action to stanch the wound, doing so by succeeding on a DC 12 Wisdom (Medicine) check.</desc>
 					</id-00003>
 				</actions>
+				<picture type="string">images/npc/bearded-devil.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/bearded-devil.webp@SRD 5.2.1 Creatures</token>
 			</beardeddevil>
 			<bonedevil>
 				<name type="string">Bone Devil</name>
@@ -8055,6 +8267,8 @@ At Will: Light, Thaumaturgy
 						<desc type="string">Melee Attack Roll: +8, reach 10 ft. Hit: 15 (2d10 + 4) Piercing damage plus 18 (4d8) Poison damage, and the target has the Poisoned condition until the start of the devil's next turn. While Poisoned, the target can't regain Hit Points.</desc>
 					</id-00003>
 				</actions>
+				<picture type="string">images/npc/bone-devil.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/bone-devil.webp@SRD 5.2.1 Creatures</token>
 			</bonedevil>
 			<chaindevil>
 				<name type="string">Chain Devil</name>
@@ -8140,6 +8354,8 @@ At Will: Light, Thaumaturgy
 						<desc type="string">Trigger: A creature the devil can see starts its turn within 30 feet of the devil and can see the devil. Response—Wisdom Saving Throw: DC 15, the triggering creature. Failure: The target has the Frightened condition until the end of its turn. Success: The target is immune to this devil's Unnerving Gaze for 24 hours.</desc>
 					</id-00001>
 				</reactions>
+				<picture type="string">images/npc/chain-devil.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/chain-devil.webp@SRD 5.2.1 Creatures</token>
 			</chaindevil>
 			<dretch>
 				<name type="string">Dretch</name>
@@ -8204,6 +8420,8 @@ At Will: Light, Thaumaturgy
 						<desc type="string">Constitution Saving Throw: DC 11, each creature in a 10-foot Emanation originating from the dretch. Failure: The target has the Poisoned condition until the end of its next turn. While Poisoned, the creature can take either an action or a Bonus Action on its turn, not both, and it can't take Reactions.</desc>
 					</id-00002>
 				</actions>
+				<picture type="string">images/npc/dretch.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/dretch.webp@SRD 5.2.1 Creatures</token>
 			</dretch>
 			<erinyes>
 				<name type="string">Erinyes</name>
@@ -8293,6 +8511,8 @@ At Will: Light, Thaumaturgy
 						<desc type="string">Trigger: The erinyes is hit by a melee attack roll while holding a weapon. Response: The erinyes adds 4 to its AC against that attack, possibly causing it to miss.</desc>
 					</id-00001>
 				</reactions>
+				<picture type="string">images/npc/erinyes.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/erinyes.webp@SRD 5.2.1 Creatures</token>
 			</erinyes>
 			<glabrezu>
 				<name type="string">Glabrezu</name>
@@ -8378,6 +8598,8 @@ At Will: Darkness, Detect Magic, Dispel Magic
 1/Day Each: Confusion, Fly, Power Word Stun</desc>
 					</id-00004>
 				</actions>
+				<picture type="string">images/npc/glabrezu.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/glabrezu.webp@SRD 5.2.1 Creatures</token>
 			</glabrezu>
 			<gnollwarrior>
 				<name type="string">Gnoll Warrior</name>
@@ -8448,6 +8670,8 @@ At Will: Darkness, Detect Magic, Dispel Magic
 						<desc type="string">Immediately after dealing damage to a creature that is already Bloodied, the gnoll moves up to half its Speed, and it makes one Rend attack.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/gnoll-warrior.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/gnoll-warrior.webp@SRD 5.2.1 Creatures</token>
 			</gnollwarrior>
 			<hellhound>
 				<name type="string">Hell Hound</name>
@@ -8522,6 +8746,8 @@ At Will: Darkness, Detect Magic, Dispel Magic
 						<desc type="string">Dexterity Saving Throw: DC 12, each creature in a 15-foot Cone. Failure: 17 (5d6) Fire damage. Success: Half damage.</desc>
 					</id-00003>
 				</actions>
+				<picture type="string">images/npc/hell-hound.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/hell-hound.webp@SRD 5.2.1 Creatures</token>
 			</hellhound>
 			<hezrou>
 				<name type="string">Hezrou</name>
@@ -8607,6 +8833,8 @@ At Will: Darkness, Detect Magic, Dispel Magic
 						<desc type="string">The hezrou jumps up to 30 feet by spending 10 feet of movement.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/hezrou.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/hezrou.webp@SRD 5.2.1 Creatures</token>
 			</hezrou>
 			<horneddevil>
 				<name type="string">Horned Devil</name>
@@ -8690,6 +8918,8 @@ At Will: Darkness, Detect Magic, Dispel Magic
 						<desc type="string">Dexterity Saving Throw: DC 17, one creature the devil can see within 10 feet. Failure: 10 (1d8 + 6) Necrotic damage, and the target receives an infernal wound if it doesn't have one. While wounded, the target loses 10 (3d6) Hit Points at the start of each of its turns. The wound closes after 1 minute, after a spell restores Hit Points to the target, or after the target or a creature within 5 feet of it takes an action to stanch the wound, doing so by succeeding on a DC 17 Wisdom (Medicine) check.</desc>
 					</id-00004>
 				</actions>
+				<picture type="string">images/npc/horned-devil.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/horned-devil.webp@SRD 5.2.1 Creatures</token>
 			</horneddevil>
 			<icedevil>
 				<name type="string">Ice Devil</name>
@@ -8773,6 +9003,8 @@ At Will: Darkness, Detect Magic, Dispel Magic
 						<desc type="string">The devil casts Wall of Ice (level 8 version), requiring no spell components and using Intelligence as the spellcasting ability (spell save DC 17).</desc>
 					</id-00004>
 				</actions>
+				<picture type="string">images/npc/ice-devil.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/ice-devil.webp@SRD 5.2.1 Creatures</token>
 			</icedevil>
 			<imp>
 				<name type="string">Imp</name>
@@ -8847,6 +9079,8 @@ At Will: Darkness, Detect Magic, Dispel Magic
 						<desc type="string">The imp shape-shifts to resemble a rat (Speed 20 ft.), a raven (20 ft., Fly 60 ft.), or a spider (20 ft., Climb 20 ft.), or it returns to its true form. Its game statistics are the same in each form, except for its Speed. Any equipment it is wearing or carrying isn't transformed.</desc>
 					</id-00003>
 				</actions>
+				<picture type="string">images/npc/imp.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/imp.webp@SRD 5.2.1 Creatures</token>
 			</imp>
 			<incubus>
 				<name type="string">Incubus</name>
@@ -8929,6 +9163,8 @@ At Will: Disguise Self, Etherealness
 						<desc type="string">Wisdom Saving Throw: DC 15, one creature the incubus can see within 60 feet. Failure: If the target has 20 Hit Points or fewer, it has the Unconscious condition for 1 hour, until it takes damage, or until a creature within 5 feet of it takes an action to wake it. Otherwise, the target takes 18 (4d8) Psychic damage.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/incubus.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/incubus.webp@SRD 5.2.1 Creatures</token>
 			</incubus>
 			<lamia>
 				<name type="string">Lamia</name>
@@ -9009,6 +9245,8 @@ At Will: Disguise Self (can appear as a Large or Medium biped), Minor Illusion
 						<desc type="string">The lamia jumps up to 30 feet by spending 10 feet of movement.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/lamia.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/lamia.webp@SRD 5.2.1 Creatures</token>
 			</lamia>
 			<lemure>
 				<name type="string">Lemure</name>
@@ -9075,6 +9313,8 @@ At Will: Disguise Self (can appear as a Large or Medium biped), Minor Illusion
 						<desc type="string">Melee Attack Roll: +2, reach 5 ft. Hit: 2 (1d4) Poison damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/lemure.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/lemure.webp@SRD 5.2.1 Creatures</token>
 			</lemure>
 			<marilith>
 				<name type="string">Marilith</name>
@@ -9170,6 +9410,8 @@ At Will: Disguise Self (can appear as a Large or Medium biped), Minor Illusion
 						<desc type="string">Trigger: The marilith is hit by a melee attack roll while holding a weapon. Response: The marilith adds 5 to its AC against that attack, possibly causing it to miss.</desc>
 					</id-00001>
 				</reactions>
+				<picture type="string">images/npc/marilith.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/marilith.webp@SRD 5.2.1 Creatures</token>
 			</marilith>
 			<nalfeshnee>
 				<name type="string">Nalfeshnee</name>
@@ -9261,6 +9503,8 @@ At Will: Disguise Self (can appear as a Large or Medium biped), Minor Illusion
 						<desc type="string">Trigger: Another creature the nalfeshnee can see ends its move within 120 feet of the nalfeshnee. Response: The nalfeshnee uses Teleport, but its destination space must be within 10 feet of the triggering creature.</desc>
 					</id-00001>
 				</reactions>
+				<picture type="string">images/npc/nalfeshnee.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/nalfeshnee.webp@SRD 5.2.1 Creatures</token>
 			</nalfeshnee>
 			<nighthag>
 				<name type="string">Night Hag</name>
@@ -9355,6 +9599,8 @@ At Will: Detect Magic, Etherealness, Magic Missile (level 4 version)
 						<desc type="string">The hag shape-shifts into a Small or Medium Humanoid, or it returns to its true form. Other than its size, its game statistics are the same in each form. Any equipment it is wearing or carrying isn't transformed.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/night-hag.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/night-hag.webp@SRD 5.2.1 Creatures</token>
 			</nighthag>
 			<nightmare>
 				<name type="string">Nightmare</name>
@@ -9429,6 +9675,8 @@ At Will: Detect Magic, Etherealness, Magic Missile (level 4 version)
 						<desc type="string">The nightmare and up to three willing creatures within 5 feet of it teleport to the Ethereal Plane from the Material Plane or vice versa.</desc>
 					</id-00002>
 				</actions>
+				<picture type="string">images/npc/nightmare.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/nightmare.webp@SRD 5.2.1 Creatures</token>
 			</nightmare>
 			<oni>
 				<name type="string">Oni</name>
@@ -9519,6 +9767,8 @@ At Will: Detect Magic, Etherealness, Magic Missile (level 4 version)
 						<desc type="string">The oni casts Invisibility on itself, requiring no spell components and using the same spellcasting ability as Spellcasting.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/oni.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/oni.webp@SRD 5.2.1 Creatures</token>
 			</oni>
 			<pitfiend>
 				<name type="string">Pit Fiend</name>
@@ -9614,6 +9864,8 @@ At Will: Detect Magic, Etherealness, Magic Missile (level 4 version)
 						<desc type="string">The pit fiend casts Fireball (level 5 version) twice, requiring no Material components and using Charisma as the spellcasting ability (spell save DC 21). It can replace one Fireball with Hold Monster (level 7 version) or Wall of Fire.</desc>
 					</id-00005>
 				</actions>
+				<picture type="string">images/npc/pit-fiend.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/pit-fiend.webp@SRD 5.2.1 Creatures</token>
 			</pitfiend>
 			<quasit>
 				<name type="string">Quasit</name>
@@ -9692,6 +9944,8 @@ At Will: Detect Magic, Etherealness, Magic Missile (level 4 version)
 						<desc type="string">The quasit shape-shifts to resemble a bat (Speed 10 ft., Fly 40 ft.), a centipede (40 ft., Climb 40 ft.), or a toad (40 ft., Swim 40 ft.), or it returns to its true form. Its game statistics are the same in each form, except for its Speed. Any equipment it is wearing or carrying isn't transformed.</desc>
 					</id-00004>
 				</actions>
+				<picture type="string">images/npc/quasit.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/quasit.webp@SRD 5.2.1 Creatures</token>
 			</quasit>
 			<rakshasa>
 				<name type="string">Rakshasa</name>
@@ -9776,6 +10030,8 @@ At Will: Detect Magic, Detect Thoughts, Disguise Self, Mage Hand, Minor Illusion
 1/Day Each: Fly, Invisibility, Major Image, Plane Shift</desc>
 					</id-00004>
 				</actions>
+				<picture type="string">images/npc/rakshasa.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/rakshasa.webp@SRD 5.2.1 Creatures</token>
 			</rakshasa>
 			<sahuaginwarrior>
 				<name type="string">Sahuagin Warrior</name>
@@ -9860,6 +10116,8 @@ At Will: Detect Magic, Detect Thoughts, Disguise Self, Mage Hand, Minor Illusion
 						<desc type="string">The sahuagin swims up to its Swim Speed straight toward an enemy it can see.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/sahuagin-warrior.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/sahuagin-warrior.webp@SRD 5.2.1 Creatures</token>
 			</sahuaginwarrior>
 			<spiritnaga>
 				<name type="string">Spirit Naga</name>
@@ -9941,6 +10199,8 @@ At Will: Detect Magic, Mage Hand, Minor Illusion, Wa- ter Breathing
 2/Day Each: Detect Thoughts, Dimension Door, Hold Person (level 3 version), Lightning Bolt (level 4 version)</desc>
 					</id-00004>
 				</actions>
+				<picture type="string">images/npc/spirit-naga.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/spirit-naga.webp@SRD 5.2.1 Creatures</token>
 			</spiritnaga>
 			<succubus>
 				<name type="string">Succubus</name>
@@ -10025,6 +10285,8 @@ At Will: Detect Magic, Mage Hand, Minor Illusion, Wa- ter Breathing
 						<desc type="string">The succubus shape-shifts into a Medium or Small Humanoid, or it returns to its true form. Its game statistics are the same in each form, except its Fly Speed is available only in its true form. Any equipment it is wearing or carrying isn't transformed.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/succubus.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/succubus.webp@SRD 5.2.1 Creatures</token>
 			</succubus>
 			<vrock>
 				<name type="string">Vrock</name>
@@ -10108,6 +10370,8 @@ At Will: Detect Magic, Mage Hand, Minor Illusion, Wa- ter Breathing
 						<desc type="string">Constitution Saving Throw: DC 15, each creature in a 20-foot Emanation originating from the vrock (demons succeed automatically). Fail- ure: 10 (3d6) Thunder damage, and the target has the Stunned condition until the end of the vrock's next turn.</desc>
 					</id-00004>
 				</actions>
+				<picture type="string">images/npc/vrock.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/vrock.webp@SRD 5.2.1 Creatures</token>
 			</vrock>
 		</category>
 		<category name="Dragons">
@@ -10185,6 +10449,8 @@ At Will: Detect Magic, Mage Hand, Minor Illusion, Wa- ter Breathing
 						<desc type="string">Dexterity Saving Throw: DC 11, each creature in a 15-foot-long, 5-footwide Line. Failure: 22 (5d8) Acid damage. Success: Half damage.</desc>
 					</id-00003>
 				</actions>
+				<picture type="string">images/npc/black-dragon-wyrmling.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/black-dragon-wyrmling.webp@SRD 5.2.1 Creatures</token>
 			</blackdragonwyrmling>
 			<youngblackdragon>
 				<name type="string">Young Black Dragon</name>
@@ -10260,6 +10526,8 @@ At Will: Detect Magic, Mage Hand, Minor Illusion, Wa- ter Breathing
 						<desc type="string">Dexterity Saving Throw: DC 14, each creature in a 30-foot-long, 5-footwide Line. Failure: 49 (14d6) Acid damage. Success: Half damage.</desc>
 					</id-00003>
 				</actions>
+				<picture type="string">images/npc/young-black-dragon.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/young-black-dragon.webp@SRD 5.2.1 Creatures</token>
 			</youngblackdragon>
 			<adultblackdragon>
 				<name type="string">Adult Black Dragon</name>
@@ -10363,6 +10631,8 @@ At Will: Acid Arrow (level 3 version), Detect Magic, Fear
 						<desc type="string">The dragon moves up to half its Speed, and it makes one Rend attack.</desc>
 					</id-00004>
 				</legendaryactions>
+				<picture type="string">images/npc/adult-black-dragon.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/adult-black-dragon.webp@SRD 5.2.1 Creatures</token>
 			</adultblackdragon>
 			<ancientblackdragon>
 				<name type="string">Ancient Black Dragon</name>
@@ -10466,6 +10736,8 @@ At Will: Acid Arrow (level 4 version), Detect Magic, Fear
 						<desc type="string">The dragon moves up to half its Speed, and it makes one Rend attack.</desc>
 					</id-00004>
 				</legendaryactions>
+				<picture type="string">images/npc/ancient-black-dragon.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/ancient-black-dragon.webp@SRD 5.2.1 Creatures</token>
 			</ancientblackdragon>
 			<bluedragonwyrmling>
 				<name type="string">Blue Dragon Wyrmling</name>
@@ -10535,6 +10807,8 @@ At Will: Acid Arrow (level 4 version), Detect Magic, Fear
 						<desc type="string">Dexterity Saving Throw: DC 12, each creature in a 30-foot-long, 5-footwide Line. Failure: 21 (6d6) Lightning damage. Success: Half damage.</desc>
 					</id-00003>
 				</actions>
+				<picture type="string">images/npc/blue-dragon-wyrmling.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/blue-dragon-wyrmling.webp@SRD 5.2.1 Creatures</token>
 			</bluedragonwyrmling>
 			<youngbluedragon>
 				<name type="string">Young Blue Dragon</name>
@@ -10604,6 +10878,8 @@ At Will: Acid Arrow (level 4 version), Detect Magic, Fear
 						<desc type="string">Dexterity Saving Throw: DC 16, each creature in a 60-foot-long, 5-footwide Line. Failure: 55 (10d10) Lightning damage. Suc- cess: Half damage.</desc>
 					</id-00003>
 				</actions>
+				<picture type="string">images/npc/young-blue-dragon.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/young-blue-dragon.webp@SRD 5.2.1 Creatures</token>
 			</youngbluedragon>
 			<adultbluedragon>
 				<name type="string">Adult Blue Dragon</name>
@@ -10703,6 +10979,8 @@ At Will: Detect Magic, Invisibility, Mage Hand, Shatter
 						<desc type="string">The dragon makes one Rend attack.</desc>
 					</id-00004>
 				</legendaryactions>
+				<picture type="string">images/npc/adult-blue-dragon.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/adult-blue-dragon.webp@SRD 5.2.1 Creatures</token>
 			</adultbluedragon>
 			<ancientbluedragon>
 				<name type="string">Ancient Blue Dragon</name>
@@ -10802,6 +11080,8 @@ At Will: Detect Magic, Invisibility, Mage Hand, Shatter (level 3 version)
 						<desc type="string">The dragon makes one Rend attack.</desc>
 					</id-00004>
 				</legendaryactions>
+				<picture type="string">images/npc/ancient-blue-dragon.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/ancient-blue-dragon.webp@SRD 5.2.1 Creatures</token>
 			</ancientbluedragon>
 			<brassdragonwyrmling>
 				<name type="string">Brass Dragon Wyrmling</name>
@@ -10871,6 +11151,8 @@ At Will: Detect Magic, Invisibility, Mage Hand, Shatter (level 3 version)
 						<desc type="string">Constitution Saving Throw: DC 11, each creature in a 15-foot Cone. Failure: The target has the Incapacitated condition until the end of its next turn, at which point it repeats the save. Second Failure: The target has the Unconscious condition for 1 minute. This effect ends for the target if it takes damage or a creature within 5 feet of it takes an action to wake it.</desc>
 					</id-00003>
 				</actions>
+				<picture type="string">images/npc/brass-dragon-wyrmling.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/brass-dragon-wyrmling.webp@SRD 5.2.1 Creatures</token>
 			</brassdragonwyrmling>
 			<youngbrassdragon>
 				<name type="string">Young Brass Dragon</name>
@@ -10944,6 +11226,8 @@ At Will: Detect Magic, Invisibility, Mage Hand, Shatter (level 3 version)
 						<desc type="string">Constitution Saving Throw: DC 14, each creature in a 30-foot Cone. Failure: The target has the Incapacitated condition until the end of its next turn, at which point it repeats the save. Second Failure: The target has the Unconscious condition for 1 minute. This effect ends for the target if it takes damage or a creature within 5 feet of it takes an action to wake it.</desc>
 					</id-00004>
 				</actions>
+				<picture type="string">images/npc/young-brass-dragon.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/young-brass-dragon.webp@SRD 5.2.1 Creatures</token>
 			</youngbrassdragon>
 			<adultbrassdragon>
 				<name type="string">Adult Brass Dragon</name>
@@ -11047,6 +11331,8 @@ At Will: Detect Magic, Minor Illusion, Scorching Ray, Shapechange (Beast or Huma
 						<desc type="string">Dexterity Saving Throw: DC 16, one creature the dragon can see within 120 feet. Failure: 27 (6d8) Fire damage, and the target's Speed is halved until the end of its next turn. Failure or Success: The dragon can't take this action again until the start of its next turn.</desc>
 					</id-00004>
 				</legendaryactions>
+				<picture type="string">images/npc/adult-brass-dragon.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/adult-brass-dragon.webp@SRD 5.2.1 Creatures</token>
 			</adultbrassdragon>
 			<ancientbrassdragon>
 				<name type="string">Ancient Brass Dragon</name>
@@ -11150,6 +11436,8 @@ At Will: Detect Magic, Minor Illusion, Scorching Ray (level 3 version), Shapecha
 						<desc type="string">Dexterity Saving Throw: DC 20, one creature the dragon can see within 120 feet. Failure: 36 (8d8) Fire damage, and the target's Speed is halved until the end of its next turn. Failure or Success: The dragon can't take this action again until the start of its next turn.</desc>
 					</id-00004>
 				</legendaryactions>
+				<picture type="string">images/npc/ancient-brass-dragon.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/ancient-brass-dragon.webp@SRD 5.2.1 Creatures</token>
 			</ancientbrassdragon>
 			<bronzedragonwyrmling>
 				<name type="string">Bronze Dragon Wyrmling</name>
@@ -11229,6 +11517,8 @@ At Will: Detect Magic, Minor Illusion, Scorching Ray (level 3 version), Shapecha
 						<desc type="string">Strength Saving Throw: DC 12, each creature in a 30-foot Cone. Failure: The target is pushed up to 30 feet straight away from the dragon and has the Prone condition.</desc>
 					</id-00004>
 				</actions>
+				<picture type="string">images/npc/bronze-dragon-wyrmling.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/bronze-dragon-wyrmling.webp@SRD 5.2.1 Creatures</token>
 			</bronzedragonwyrmling>
 			<youngbronzedragon>
 				<name type="string">Young Bronze Dragon</name>
@@ -11308,6 +11598,8 @@ At Will: Detect Magic, Minor Illusion, Scorching Ray (level 3 version), Shapecha
 						<desc type="string">Strength Saving Throw: DC 15, each creature in a 30-foot Cone. Failure: The target is pushed up to 40 feet straight away from the dragon and has the Prone condition.</desc>
 					</id-00004>
 				</actions>
+				<picture type="string">images/npc/young-bronze-dragon.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/young-bronze-dragon.webp@SRD 5.2.1 Creatures</token>
 			</youngbronzedragon>
 			<adultbronzedragon>
 				<name type="string">Adult Bronze Dragon</name>
@@ -11415,6 +11707,8 @@ At Will: Detect Magic, Guiding Bolt (level 2 version), Shapechange (Beast or Hum
 						<desc type="string">Constitution Saving Throw: DC 17, each creature in a 20-foot-radius Sphere centered on a point the dragon can see within 90 feet. Failure: 10 (3d6) Thunder damage, and the target has the Deafened condition until the end of its next turn.</desc>
 					</id-00004>
 				</legendaryactions>
+				<picture type="string">images/npc/adult-bronze-dragon.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/adult-bronze-dragon.webp@SRD 5.2.1 Creatures</token>
 			</adultbronzedragon>
 			<ancientbronzedragon>
 				<name type="string">Ancient Bronze Dragon</name>
@@ -11522,6 +11816,8 @@ At Will: Detect Magic, Guiding Bolt (level 2 version), Shapechange (Beast or Hum
 						<desc type="string">Constitution Saving Throw: DC 22, each creature in a 20-foot-radius Sphere centered on a point the dragon can see within 120 feet. Failure: 13 (3d8) Thunder damage, and the target has the Deafened condition until the end of its next turn.</desc>
 					</id-00004>
 				</legendaryactions>
+				<picture type="string">images/npc/ancient-bronze-dragon.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/ancient-bronze-dragon.webp@SRD 5.2.1 Creatures</token>
 			</ancientbronzedragon>
 			<copperdragonwyrmling>
 				<name type="string">Copper Dragon Wyrmling</name>
@@ -11591,6 +11887,8 @@ At Will: Detect Magic, Guiding Bolt (level 2 version), Shapechange (Beast or Hum
 						<desc type="string">Constitution Saving Throw: DC 11, each creature in a 15-foot Cone. Failure: The target can't take Reactions; its Speed is halved; and it can take either an action or a Bonus Action on its turn, not both. This effect lasts until the end of its next turn.</desc>
 					</id-00003>
 				</actions>
+				<picture type="string">images/npc/copper-dragon-wyrmling.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/copper-dragon-wyrmling.webp@SRD 5.2.1 Creatures</token>
 			</copperdragonwyrmling>
 			<youngcopperdragon>
 				<name type="string">Young Copper Dragon</name>
@@ -11664,6 +11962,8 @@ At Will: Detect Magic, Guiding Bolt (level 2 version), Shapechange (Beast or Hum
 						<desc type="string">Constitution Saving Throw: DC 14, each creature in a 30-foot Cone. Failure: The target can't take Reactions; its Speed is halved; and it can take either an action or a Bonus Action on its turn, not both. This effect lasts until the end of its next turn.</desc>
 					</id-00004>
 				</actions>
+				<picture type="string">images/npc/young-copper-dragon.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/young-copper-dragon.webp@SRD 5.2.1 Creatures</token>
 			</youngcopperdragon>
 			<adultcopperdragon>
 				<name type="string">Adult Copper Dragon</name>
@@ -11767,6 +12067,8 @@ At Will: Detect Magic, Mind Spike (level 4 version), Minor Illusion, Shapechange
 						<desc type="string">The dragon moves up to half its Speed, and it makes one Rend attack.</desc>
 					</id-00004>
 				</legendaryactions>
+				<picture type="string">images/npc/adult-copper-dragon.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/adult-copper-dragon.webp@SRD 5.2.1 Creatures</token>
 			</adultcopperdragon>
 			<ancientcopperdragon>
 				<name type="string">Ancient Copper Dragon</name>
@@ -11870,6 +12172,8 @@ At Will: Detect Magic, Mind Spike (level 5 version), Minor Illusion, Shapechange
 						<desc type="string">The dragon moves up to half its Speed, and it makes one Rend attack.</desc>
 					</id-00004>
 				</legendaryactions>
+				<picture type="string">images/npc/ancient-copper-dragon.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/ancient-copper-dragon.webp@SRD 5.2.1 Creatures</token>
 			</ancientcopperdragon>
 			<dragonturtle>
 				<name type="string">Dragon Turtle</name>
@@ -11949,6 +12253,8 @@ At Will: Detect Magic, Mind Spike (level 5 version), Minor Illusion, Shapechange
 						<desc type="string">Constitution Saving Throw: DC 19, each creature in a 60-foot Cone. Failure: 56 (16d6) Fire damage. Success: Half damage. Failure or Success: Being underwater doesn't grant Resistance to this Fire damage.</desc>
 					</id-00004>
 				</actions>
+				<picture type="string">images/npc/dragon-turtle.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/dragon-turtle.webp@SRD 5.2.1 Creatures</token>
 			</dragonturtle>
 			<golddragonwyrmling>
 				<name type="string">Gold Dragon Wyrmling</name>
@@ -12028,6 +12334,8 @@ At Will: Detect Magic, Mind Spike (level 5 version), Minor Illusion, Shapechange
 						<desc type="string">Strength Saving Throw: DC 13, each creature that isn't currently affected by this breath in a 15-foot Cone. Failure: The target has Disadvantage on Strength-based D20 Tests and subtracts 2 (1d4) from its damage rolls. It repeats the save at the end of each of its turns, ending the effect on itself on a success. After 1 minute, it succeeds automatically.</desc>
 					</id-00004>
 				</actions>
+				<picture type="string">images/npc/gold-dragon-wyrmling.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/gold-dragon-wyrmling.webp@SRD 5.2.1 Creatures</token>
 			</golddragonwyrmling>
 			<younggolddragon>
 				<name type="string">Young Gold Dragon</name>
@@ -12107,6 +12415,8 @@ At Will: Detect Magic, Mind Spike (level 5 version), Minor Illusion, Shapechange
 						<desc type="string">Strength Saving Throw: DC 17, each creature that isn't currently affected by this breath in a 30-foot Cone. Failure: The target has Disadvantage on Strength-based D20 Tests and subtracts 3 (1d6) from its damage rolls. It repeats the save at the end of each of its turns, ending the effect on itself on a success. After 1 minute, it succeeds automatically.</desc>
 					</id-00004>
 				</actions>
+				<picture type="string">images/npc/young-gold-dragon.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/young-gold-dragon.webp@SRD 5.2.1 Creatures</token>
 			</younggolddragon>
 			<adultgolddragon>
 				<name type="string">Adult Gold Dragon</name>
@@ -12214,6 +12524,8 @@ At Will: Detect Magic, Guiding Bolt (level 2 version), Shapechange (Beast or Hum
 						<desc type="string">The dragon moves up to half its Speed, and it makes one Rend attack.</desc>
 					</id-00004>
 				</legendaryactions>
+				<picture type="string">images/npc/adult-gold-dragon.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/adult-gold-dragon.webp@SRD 5.2.1 Creatures</token>
 			</adultgolddragon>
 			<ancientgolddragon>
 				<name type="string">Ancient Gold Dragon</name>
@@ -12321,6 +12633,8 @@ At Will: Detect Magic, Guiding Bolt (level 4 version), Shapechange (Beast or Hum
 						<desc type="string">The dragon moves up to half its Speed, and it makes one Rend attack.</desc>
 					</id-00004>
 				</legendaryactions>
+				<picture type="string">images/npc/ancient-gold-dragon.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/ancient-gold-dragon.webp@SRD 5.2.1 Creatures</token>
 			</ancientgolddragon>
 			<greendragonwyrmling>
 				<name type="string">Green Dragon Wyrmling</name>
@@ -12396,6 +12710,8 @@ At Will: Detect Magic, Guiding Bolt (level 4 version), Shapechange (Beast or Hum
 						<desc type="string">Constitution Saving Throw: DC 11, each creature in a 15-foot Cone. Failure: 21 (6d6) Poison damage. Success: Half damage.</desc>
 					</id-00003>
 				</actions>
+				<picture type="string">images/npc/green-dragon-wyrmling.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/green-dragon-wyrmling.webp@SRD 5.2.1 Creatures</token>
 			</greendragonwyrmling>
 			<younggreendragon>
 				<name type="string">Young Green Dragon</name>
@@ -12471,6 +12787,8 @@ At Will: Detect Magic, Guiding Bolt (level 4 version), Shapechange (Beast or Hum
 						<desc type="string">Constitution Saving Throw: DC 14, each creature in a 30-foot Cone. Failure: 42 (12d6) Poison damage. Success: Half damage.</desc>
 					</id-00003>
 				</actions>
+				<picture type="string">images/npc/young-green-dragon.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/young-green-dragon.webp@SRD 5.2.1 Creatures</token>
 			</younggreendragon>
 			<adultgreendragon>
 				<name type="string">Adult Green Dragon</name>
@@ -12574,6 +12892,8 @@ At Will: Detect Magic, Mind Spike (level 3 version)
 						<desc type="string">The dragon moves up to half its Speed, and it makes one Rend attack.</desc>
 					</id-00004>
 				</legendaryactions>
+				<picture type="string">images/npc/adult-green-dragon.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/adult-green-dragon.webp@SRD 5.2.1 Creatures</token>
 			</adultgreendragon>
 			<ancientgreendragon>
 				<name type="string">Ancient Green Dragon</name>
@@ -12677,6 +12997,8 @@ At Will: Detect Magic, Mind Spike (level 5 version)
 						<desc type="string">The dragon moves up to half its Speed, and it makes one Rend attack.</desc>
 					</id-00004>
 				</legendaryactions>
+				<picture type="string">images/npc/ancient-green-dragon.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/ancient-green-dragon.webp@SRD 5.2.1 Creatures</token>
 			</ancientgreendragon>
 			<halfdragon>
 				<name type="string">Half-Dragon</name>
@@ -12758,6 +13080,8 @@ At Will: Detect Magic, Mind Spike (level 5 version)
 						<desc type="string">The half-dragon jumps up to 30 feet by spending 10 feet of movement.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/half-dragon.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/half-dragon.webp@SRD 5.2.1 Creatures</token>
 			</halfdragon>
 			<koboldwarrior>
 				<name type="string">Kobold Warrior</name>
@@ -12829,6 +13153,8 @@ At Will: Detect Magic, Mind Spike (level 5 version)
 						<desc type="string">Melee or Ranged Attack Roll: +4, reach 5 ft. or range 20/60 ft. Hit: 4 (1d4 + 2) Piercing damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/kobold-warrior.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/kobold-warrior.webp@SRD 5.2.1 Creatures</token>
 			</koboldwarrior>
 			<pseudodragon>
 				<name type="string">Pseudodragon</name>
@@ -12903,6 +13229,8 @@ At Will: Detect Magic, Mind Spike (level 5 version)
 						<desc type="string">Constitution Saving Throw: DC 12, one creature the pseudodragon can see within 5 feet. Failure: 5 (2d4) Poison damage, and the target has the Poisoned condition for 1 hour. Failure by 5 or More: While Poisoned, the target also has the Unconscious condition, which ends early if the target takes damage or a creature within 5 feet of it takes an action to wake it.</desc>
 					</id-00003>
 				</actions>
+				<picture type="string">images/npc/pseudodragon.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/pseudodragon.webp@SRD 5.2.1 Creatures</token>
 			</pseudodragon>
 			<reddragonwyrmling>
 				<name type="string">Red Dragon Wyrmling</name>
@@ -12972,6 +13300,8 @@ At Will: Detect Magic, Mind Spike (level 5 version)
 						<desc type="string">Dexterity Saving Throw: DC 13, each creature in a 15-foot Cone. Failure: 24 (7d6) Fire damage. Success: Half damage.</desc>
 					</id-00003>
 				</actions>
+				<picture type="string">images/npc/red-dragon-wyrmling.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/red-dragon-wyrmling.webp@SRD 5.2.1 Creatures</token>
 			</reddragonwyrmling>
 			<youngreddragon>
 				<name type="string">Young Red Dragon</name>
@@ -13041,6 +13371,8 @@ At Will: Detect Magic, Mind Spike (level 5 version)
 						<desc type="string">Dexterity Saving Throw: DC 17, each creature in a 30-foot Cone. Failure: 56 (16d6) Fire damage. Success: Half damage.</desc>
 					</id-00003>
 				</actions>
+				<picture type="string">images/npc/young-red-dragon.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/young-red-dragon.webp@SRD 5.2.1 Creatures</token>
 			</youngreddragon>
 			<adultreddragon>
 				<name type="string">Adult Red Dragon</name>
@@ -13140,6 +13472,8 @@ At Will: Command (level 2 version), Detect Magic, Scorching Ray
 						<desc type="string">The dragon moves up to half its Speed, and it makes one Rend attack.</desc>
 					</id-00004>
 				</legendaryactions>
+				<picture type="string">images/npc/adult-red-dragon.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/adult-red-dragon.webp@SRD 5.2.1 Creatures</token>
 			</adultreddragon>
 			<ancientreddragon>
 				<name type="string">Ancient Red Dragon</name>
@@ -13239,6 +13573,8 @@ At Will: Command (level 2 version), Detect Magic, Scorching Ray (level 3 version
 						<desc type="string">The dragon moves up to half its Speed, and it makes one Rend attack.</desc>
 					</id-00004>
 				</legendaryactions>
+				<picture type="string">images/npc/ancient-red-dragon.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/ancient-red-dragon.webp@SRD 5.2.1 Creatures</token>
 			</ancientreddragon>
 			<silverdragonwyrmling>
 				<name type="string">Silver Dragon Wyrmling</name>
@@ -13312,6 +13648,8 @@ At Will: Command (level 2 version), Detect Magic, Scorching Ray (level 3 version
 						<desc type="string">Constitution Saving Throw: DC 13, each creature in a 15-foot Cone. First Failure: The target has the Incapacitated condition until the end of its next turn, when it repeats the save. Second Failure: The target has the Paralyzed condition, and it repeats the save at the end of each of its turns, ending the effect on itself on a success. After 1 minute, it succeeds automatically.</desc>
 					</id-00004>
 				</actions>
+				<picture type="string">images/npc/silver-dragon-wyrmling.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/silver-dragon-wyrmling.webp@SRD 5.2.1 Creatures</token>
 			</silverdragonwyrmling>
 			<youngsilverdragon>
 				<name type="string">Young Silver Dragon</name>
@@ -13385,6 +13723,8 @@ At Will: Command (level 2 version), Detect Magic, Scorching Ray (level 3 version
 						<desc type="string">Constitution Saving Throw: DC 17, each creature in a 30-foot Cone. First Failure: The target has the Incapacitated condition until the end of its next turn, when it repeats the save. Second Failure: The target has the Paralyzed condition, and it repeats the save at the end of each of its turns, ending the effect on itself on a success. After 1 minute, it succeeds automatically.</desc>
 					</id-00004>
 				</actions>
+				<picture type="string">images/npc/young-silver-dragon.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/young-silver-dragon.webp@SRD 5.2.1 Creatures</token>
 			</youngsilverdragon>
 			<adultsilverdragon>
 				<name type="string">Adult Silver Dragon</name>
@@ -13488,6 +13828,8 @@ At Will: Detect Magic, Hold Monster, Ice Knife, Shapechange (Beast or Humanoid f
 						<desc type="string">The dragon moves up to half its Speed, and it makes one Rend attack.</desc>
 					</id-00004>
 				</legendaryactions>
+				<picture type="string">images/npc/adult-silver-dragon.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/adult-silver-dragon.webp@SRD 5.2.1 Creatures</token>
 			</adultsilverdragon>
 			<ancientsilverdragon>
 				<name type="string">Ancient Silver Dragon</name>
@@ -13591,6 +13933,8 @@ At Will: Detect Magic, Hold Monster, Ice Knife (level 2 version), Shapechange (B
 						<desc type="string">The dragon moves up to half its Speed, and it makes one Rend attack.</desc>
 					</id-00004>
 				</legendaryactions>
+				<picture type="string">images/npc/ancient-silver-dragon.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/ancient-silver-dragon.webp@SRD 5.2.1 Creatures</token>
 			</ancientsilverdragon>
 			<whitedragonwyrmling>
 				<name type="string">White Dragon Wyrmling</name>
@@ -13666,6 +14010,8 @@ At Will: Detect Magic, Hold Monster, Ice Knife (level 2 version), Shapechange (B
 						<desc type="string">Constitution Saving Throw: DC 12, each creature in a 15-foot Cone. Failure: 22 (5d8) Cold damage. Success: Half damage.</desc>
 					</id-00003>
 				</actions>
+				<picture type="string">images/npc/white-dragon-wyrmling.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/white-dragon-wyrmling.webp@SRD 5.2.1 Creatures</token>
 			</whitedragonwyrmling>
 			<youngwhitedragon>
 				<name type="string">Young White Dragon</name>
@@ -13741,6 +14087,8 @@ At Will: Detect Magic, Hold Monster, Ice Knife (level 2 version), Shapechange (B
 						<desc type="string">Constitution Saving Throw: DC 15, each creature in a 30-foot Cone. Failure: 40 (9d8) Cold damage. Success: Half damage.</desc>
 					</id-00003>
 				</actions>
+				<picture type="string">images/npc/young-white-dragon.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/young-white-dragon.webp@SRD 5.2.1 Creatures</token>
 			</youngwhitedragon>
 			<adultwhitedragon>
 				<name type="string">Adult White Dragon</name>
@@ -13833,6 +14181,8 @@ At Will: Detect Magic, Hold Monster, Ice Knife (level 2 version), Shapechange (B
 						<desc type="string">The dragon moves up to half its Speed, and it makes one Rend attack.</desc>
 					</id-00004>
 				</legendaryactions>
+				<picture type="string">images/npc/adult-white-dragon.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/adult-white-dragon.webp@SRD 5.2.1 Creatures</token>
 			</adultwhitedragon>
 			<ancientwhitedragon>
 				<name type="string">Ancient White Dragon</name>
@@ -13930,6 +14280,8 @@ At Will: Detect Magic, Hold Monster, Ice Knife (level 2 version), Shapechange (B
 						<desc type="string">The dragon moves up to half its Speed, and it makes one Rend attack.</desc>
 					</id-00004>
 				</legendaryactions>
+				<picture type="string">images/npc/ancient-white-dragon.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/ancient-white-dragon.webp@SRD 5.2.1 Creatures</token>
 			</ancientwhitedragon>
 			<wyvern>
 				<name type="string">Wyvern</name>
@@ -13998,6 +14350,8 @@ At Will: Detect Magic, Hold Monster, Ice Knife (level 2 version), Shapechange (B
 						<desc type="string">Melee Attack Roll: +7, reach 10 ft. Hit: 11 (2d6 + 4) Piercing damage plus 24 (7d6) Poison damage, and the target has the Poisoned condition until the start of the wyvern's next turn.</desc>
 					</id-00003>
 				</actions>
+				<picture type="string">images/npc/wyvern.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/wyvern.webp@SRD 5.2.1 Creatures</token>
 			</wyvern>
 		</category>
 		<category name="Oozes">
@@ -14080,6 +14434,8 @@ At Will: Detect Magic, Hold Monster, Ice Knife (level 2 version), Shapechange (B
 						<desc type="string">Trigger: While the pudding is Large or Medium and has 10+ Hit Points, it becomes Bloodied or is subjected to Lightning or Slashing damage. Response: The pudding splits into two new Black Puddings. Each new pudding is one size smaller than the original pudding and acts on its Initiative. The original pudding's Hit Points are divided evenly between the new puddings (round down).</desc>
 					</id-00001>
 				</reactions>
+				<picture type="string">images/npc/black-pudding.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/black-pudding.webp@SRD 5.2.1 Creatures</token>
 			</blackpudding>
 			<gelatinouscube>
 				<name type="string">Gelatinous Cube</name>
@@ -14154,6 +14510,8 @@ At Will: Detect Magic, Hold Monster, Ice Knife (level 2 version), Shapechange (B
 						<desc type="string">The cube moves up to its Speed without provoking Opportunity Attacks. The cube can move through the spaces of Large or smaller creatures if it has room inside itself to contain them (see the Ooze Cube trait). Dexterity Saving Throw: DC 12, each creature whose space the cube enters for the first time during this move. Failure: 10 (3d6) Acid damage, and the target is engulfed. An engulfed target is suffocating, can't cast spells with a Verbal component, has the Restrained condition, and takes 10 (3d6) Acid damage at the start of each of the cube's turns. When the cube moves, the engulfed target moves with it. An engulfed target can try to escape by taking an action to make a DC 12 Strength (Athletics) check. On a successful check, the target escapes and enters the nearest unoccupied space. Success: Half damage, and the target moves to an unoccupied space within 5 feet of the cube. If there is no unoccupied space, the target fails the save instead.</desc>
 					</id-00002>
 				</actions>
+				<picture type="string">images/npc/gelatinous-cube.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/gelatinous-cube.webp@SRD 5.2.1 Creatures</token>
 			</gelatinouscube>
 			<grayooze>
 				<name type="string">Gray Ooze</name>
@@ -14224,6 +14582,8 @@ At Will: Detect Magic, Hold Monster, Ice Knife (level 2 version), Shapechange (B
 						<desc type="string">Melee Attack Roll: +3, reach 5 ft. Hit: 10 (2d8 + 1) Acid damage. Nonmagical armor worn by the target takes a -1 penalty to the AC it offers. The armor is destroyed if the penalty reduces its AC to 10. The penalty can be removed by casting the Mending spell on the armor.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/gray-ooze.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/gray-ooze.webp@SRD 5.2.1 Creatures</token>
 			</grayooze>
 			<ochrejelly>
 				<name type="string">Ochre Jelly</name>
@@ -14300,6 +14660,8 @@ At Will: Detect Magic, Hold Monster, Ice Knife (level 2 version), Shapechange (B
 						<desc type="string">Trigger: While the jelly is Large or Medium and has 10+ Hit Points, it becomes Bloodied or is subjected to Lightning or Slashing damage. Response: The jelly splits into two new Ochre Jellies. Each new jelly is one size smaller than the original jelly and acts on its Initiative. The original jelly's Hit Points are divided evenly between the new jellies (round down).</desc>
 					</id-00001>
 				</reactions>
+				<picture type="string">images/npc/ochre-jelly.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/ochre-jelly.webp@SRD 5.2.1 Creatures</token>
 			</ochrejelly>
 		</category>
 		<category name="Fey">
@@ -14368,6 +14730,8 @@ At Will: Detect Magic, Hold Monster, Ice Knife (level 2 version), Shapechange (B
 						<desc type="string">The dog teleports up to 40 feet to an unoccupied space it can see.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/blink-dog.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/blink-dog.webp@SRD 5.2.1 Creatures</token>
 			</blinkdog>
 			<bugbearstalker>
 				<name type="string">Bugbear Stalker</name>
@@ -14450,6 +14814,8 @@ At Will: Detect Magic, Hold Monster, Ice Knife (level 2 version), Shapechange (B
 						<desc type="string">Dexterity Saving Throw: DC 13, one Medium or smaller creature the bugbear can see within 10 feet. Failure: The target has the Grappled condition (escape DC 13).</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/bugbear-stalker.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/bugbear-stalker.webp@SRD 5.2.1 Creatures</token>
 			</bugbearstalker>
 			<bugbearwarrior>
 				<name type="string">Bugbear Warrior</name>
@@ -14521,6 +14887,8 @@ At Will: Detect Magic, Hold Monster, Ice Knife (level 2 version), Shapechange (B
 						<desc type="string">Melee or Ranged Attack Roll: +4 (with Advantage if the target is Grappled by the bugbear), reach 10 ft. or range 20/60 ft. Hit: 9 (3d4 + 2) Bludgeoning damage.</desc>
 					</id-00002>
 				</actions>
+				<picture type="string">images/npc/bugbear-warrior.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/bugbear-warrior.webp@SRD 5.2.1 Creatures</token>
 			</bugbearwarrior>
 			<centaurtrooper>
 				<name type="string">Centaur Trooper</name>
@@ -14596,6 +14964,8 @@ At Will: Detect Magic, Hold Monster, Ice Knife (level 2 version), Shapechange (B
 						<desc type="string">The centaur moves up to its Speed without provoking Opportunity Attacks and can move through the spaces of Medium or smaller creatures. Each creature whose space the centaur enters is targeted once by the following effect. Strength Saving Throw: DC 14. Failure: 7 (1d6 + 4) Bludgeoning damage, and the target has the Prone condition.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/centaur-trooper.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/centaur-trooper.webp@SRD 5.2.1 Creatures</token>
 			</centaurtrooper>
 			<dryad>
 				<name type="string">Dryad</name>
@@ -14686,6 +15056,8 @@ At Will: Animal Friendship, Charm Monster (lasts 24 hours; ends early if the dry
 						<desc type="string">If within 5 feet of a Large or bigger tree, the dryad teleports to an unoccupied space within 5 feet of a second Large or bigger tree that is within 60 feet of the previous tree.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/dryad.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/dryad.webp@SRD 5.2.1 Creatures</token>
 			</dryad>
 			<goblinminion>
 				<name type="string">Goblin Minion</name>
@@ -14753,6 +15125,8 @@ At Will: Animal Friendship, Charm Monster (lasts 24 hours; ends early if the dry
 						<desc type="string">The goblin takes the Disengage or Hide action.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/goblin-minion.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/goblin-minion.webp@SRD 5.2.1 Creatures</token>
 			</goblinminion>
 			<goblinwarrior>
 				<name type="string">Goblin Warrior</name>
@@ -14824,6 +15198,8 @@ At Will: Animal Friendship, Charm Monster (lasts 24 hours; ends early if the dry
 						<desc type="string">The goblin takes the Disengage or Hide action.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/goblin-warrior.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/goblin-warrior.webp@SRD 5.2.1 Creatures</token>
 			</goblinwarrior>
 			<goblinboss>
 				<name type="string">Goblin Boss</name>
@@ -14905,6 +15281,8 @@ At Will: Animal Friendship, Charm Monster (lasts 24 hours; ends early if the dry
 						<desc type="string">Trigger: A creature the goblin can see makes an attack roll against it. Response: The goblin chooses a Small or Medium ally within 5 feet of itself. The goblin and that ally swap places, and the ally becomes the target of the attack instead.</desc>
 					</id-00001>
 				</reactions>
+				<picture type="string">images/npc/goblin-boss.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/goblin-boss.webp@SRD 5.2.1 Creatures</token>
 			</goblinboss>
 			<greenhag>
 				<name type="string">Green Hag</name>
@@ -14988,6 +15366,8 @@ At Will: Animal Friendship, Charm Monster (lasts 24 hours; ends early if the dry
 At Will: Dancing Lights, Disguise Self (24-hour duration), Invisibility (self only, and the hag leaves no tracks while Invisible), Minor Illusion, Ray of Sickness (level 3 version)</desc>
 					</id-00003>
 				</actions>
+				<picture type="string">images/npc/green-hag.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/green-hag.webp@SRD 5.2.1 Creatures</token>
 			</greenhag>
 			<hobgoblinwarrior>
 				<name type="string">Hobgoblin Warrior</name>
@@ -15059,6 +15439,8 @@ At Will: Dancing Lights, Disguise Self (24-hour duration), Invisibility (self on
 						<desc type="string">Ranged Attack Roll: +3, range 150/600 ft. Hit: 5 (1d8 + 1) Piercing damage plus 7 (3d4) Poison damage.</desc>
 					</id-00002>
 				</actions>
+				<picture type="string">images/npc/hobgoblin-warrior.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/hobgoblin-warrior.webp@SRD 5.2.1 Creatures</token>
 			</hobgoblinwarrior>
 			<hobgoblincaptain>
 				<name type="string">Hobgoblin Captain</name>
@@ -15134,6 +15516,8 @@ At Will: Dancing Lights, Disguise Self (24-hour duration), Invisibility (self on
 						<desc type="string">Ranged Attack Roll: +4, range 150/600 ft. Hit: 6 (1d8 + 2) Piercing damage plus 5 (2d4) Poison damage.</desc>
 					</id-00003>
 				</actions>
+				<picture type="string">images/npc/hobgoblin-captain.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/hobgoblin-captain.webp@SRD 5.2.1 Creatures</token>
 			</hobgoblincaptain>
 			<satyr>
 				<name type="string">Satyr</name>
@@ -15204,6 +15588,8 @@ At Will: Dancing Lights, Disguise Self (24-hour duration), Invisibility (self on
 						<desc type="string">Wisdom Saving Throw: DC 12, one creature the satyr can see within 90 feet. Failure: 5 (1d6 + 2) Psychic damage.</desc>
 					</id-00002>
 				</actions>
+				<picture type="string">images/npc/satyr.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/satyr.webp@SRD 5.2.1 Creatures</token>
 			</satyr>
 			<seahag>
 				<name type="string">Sea Hag</name>
@@ -15286,6 +15672,8 @@ At Will: Dancing Lights, Disguise Self (24-hour duration), Invisibility (self on
 						<desc type="string">The hag casts Disguise Self, using Constitution as the spellcasting ability (spell save DC 13). The spell's duration is 24 hours.</desc>
 					</id-00003>
 				</actions>
+				<picture type="string">images/npc/sea-hag.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/sea-hag.webp@SRD 5.2.1 Creatures</token>
 			</seahag>
 			<sprite>
 				<name type="string">Sprite</name>
@@ -15358,6 +15746,8 @@ At Will: Dancing Lights, Disguise Self (24-hour duration), Invisibility (self on
 						<desc type="string">The sprite casts Invisibility on itself, requiring no spell components and using Charisma as the spellcasting ability.</desc>
 					</id-00004>
 				</actions>
+				<picture type="string">images/npc/sprite.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/sprite.webp@SRD 5.2.1 Creatures</token>
 			</sprite>
 			<worg>
 				<name type="string">Worg</name>
@@ -15418,6 +15808,8 @@ At Will: Dancing Lights, Disguise Self (24-hour duration), Invisibility (self on
 						<desc type="string">Melee Attack Roll: +5, reach 5 ft. Hit: 7 (1d8 + 3) Piercing damage, and the next attack roll made against the target before the start of the worg's next turn has Advantage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/worg.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/worg.webp@SRD 5.2.1 Creatures</token>
 			</worg>
 		</category>
 		<category name="Giants">
@@ -15501,6 +15893,8 @@ At Will: Detect Magic, Fog Cloud, Light
 						<desc type="string">The giant casts the Misty Step spell, using the same spellcasting ability as Spellcasting.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/cloud-giant.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/cloud-giant.webp@SRD 5.2.1 Creatures</token>
 			</cloudgiant>
 			<ettin>
 				<name type="string">Ettin</name>
@@ -15570,6 +15964,8 @@ At Will: Detect Magic, Fog Cloud, Light
 						<desc type="string">Melee Attack Roll: +7, reach 5 ft. Hit: 14 (2d8 + 5) Piercing damage, and the target has Disadvantage on the next attack roll it makes before the end of its next turn.</desc>
 					</id-00003>
 				</actions>
+				<picture type="string">images/npc/ettin.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/ettin.webp@SRD 5.2.1 Creatures</token>
 			</ettin>
 			<firegiant>
 				<name type="string">Fire Giant</name>
@@ -15639,6 +16035,8 @@ At Will: Detect Magic, Fog Cloud, Light
 						<desc type="string">Ranged Attack Roll: +11, range 60/240 ft. Hit: 23 (3d10 + 7) Bludgeoning damage plus 4 (1d8) Fire damage, and the target is pushed up to 15 feet straight away from the giant and has Disadvantage on the next attack roll it makes before the end of its next turn.</desc>
 					</id-00003>
 				</actions>
+				<picture type="string">images/npc/fire-giant.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/fire-giant.webp@SRD 5.2.1 Creatures</token>
 			</firegiant>
 			<frostgiant>
 				<name type="string">Frost Giant</name>
@@ -15714,6 +16112,8 @@ At Will: Detect Magic, Fog Cloud, Light
 						<desc type="string">The giant or one creature of its choice that can see or hear it gains 16 (2d10 + 5) Temporary Hit Points and has Advantage on attack rolls until the start of the giant's next turn.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/frost-giant.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/frost-giant.webp@SRD 5.2.1 Creatures</token>
 			</frostgiant>
 			<hillgiant>
 				<name type="string">Hill Giant</name>
@@ -15782,6 +16182,8 @@ At Will: Detect Magic, Fog Cloud, Light
 						<desc type="string">Ranged Attack Roll: +8, range 60/240 ft. Hit: 16 (2d10 + 5) Bludgeoning damage, and the target has the Poisoned condition until the end of its next turn.</desc>
 					</id-00003>
 				</actions>
+				<picture type="string">images/npc/hill-giant.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/hill-giant.webp@SRD 5.2.1 Creatures</token>
 			</hillgiant>
 			<ogre>
 				<name type="string">Ogre</name>
@@ -15847,6 +16249,8 @@ At Will: Detect Magic, Fog Cloud, Light
 						<desc type="string">Melee or Ranged Attack Roll: +6, reach 5 ft. or range 30/120 ft. Hit: 11 (2d6 + 4) Piercing damage.</desc>
 					</id-00002>
 				</actions>
+				<picture type="string">images/npc/ogre.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/ogre.webp@SRD 5.2.1 Creatures</token>
 			</ogre>
 			<stonegiant>
 				<name type="string">Stone Giant</name>
@@ -15922,6 +16326,8 @@ At Will: Detect Magic, Fog Cloud, Light
 						<desc type="string">Trigger: The giant is hit by a ranged attack roll and takes Bludgeoning, Piercing, or Slashing damage from it. Response: The giant reduces the damage it takes from the attack by 11 (1d10 + 6), and if that damage is reduced to 0, the giant can redirect some of the attack's force. Dexterity Saving Throw: DC 17, one creature the giant can see within 60 feet. Failure: 11 (1d10 + 6) Force damage.</desc>
 					</id-00001>
 				</reactions>
+				<picture type="string">images/npc/stone-giant.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/stone-giant.webp@SRD 5.2.1 Creatures</token>
 			</stonegiant>
 			<stormgiant>
 				<name type="string">Storm Giant</name>
@@ -16007,6 +16413,8 @@ At Will: Detect Magic, Light
 1/Day: Control Weather</desc>
 					</id-00005>
 				</actions>
+				<picture type="string">images/npc/storm-giant.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/storm-giant.webp@SRD 5.2.1 Creatures</token>
 			</stormgiant>
 			<troll>
 				<name type="string">Troll</name>
@@ -16087,6 +16495,8 @@ At Will: Detect Magic, Light
 						<desc type="string">The troll moves up to half its Speed straight toward an enemy it can see.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/troll.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/troll.webp@SRD 5.2.1 Creatures</token>
 			</troll>
 			<trolllimb>
 				<name type="string">Troll Limb</name>
@@ -16157,6 +16567,8 @@ At Will: Detect Magic, Light
 						<desc type="string">Melee Attack Roll: +6, reach 5 ft. Hit: 9 (2d4 + 4) Slashing damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/troll-limb.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/troll-limb.webp@SRD 5.2.1 Creatures</token>
 			</trolllimb>
 		</category>
 		<category name="Celestials">
@@ -16242,6 +16654,8 @@ At Will: Detect Evil and Good, Detect Magic, Detect Thoughts, Shapechange (Beast
 						<desc type="string">The couatl casts Bless, Lesser Res- toration, or Sanctuary, requiring no spell components and using the same spellcasting ability as Spellcasting.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/couatl.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/couatl.webp@SRD 5.2.1 Creatures</token>
 			</couatl>
 			<deva>
 				<name type="string">Deva</name>
@@ -16329,6 +16743,8 @@ At Will: Detect Evil and Good, Shapechange (Beast or Humanoid form only, no Temp
 						<desc type="string">The deva casts Cure Wounds, Lesser Restoration, or Remove Curse, using the same spellcasting ability as Spellcasting.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/deva.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/deva.webp@SRD 5.2.1 Creatures</token>
 			</deva>
 			<guardiannaga>
 				<name type="string">Guardian Naga</name>
@@ -16410,6 +16826,8 @@ At Will: Thaumaturgy
 1/Day Each: Clairvoyance, Cure Wounds (level 6 version), Flame Strike (level 6 version), Geas, True Seeing</desc>
 					</id-00004>
 				</actions>
+				<picture type="string">images/npc/guardian-naga.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/guardian-naga.webp@SRD 5.2.1 Creatures</token>
 			</guardiannaga>
 			<pegasus>
 				<name type="string">Pegasus</name>
@@ -16471,6 +16889,8 @@ At Will: Thaumaturgy
 						<desc type="string">Melee Attack Roll: +6, reach 5 ft. Hit: 7 (1d6 + 4) Bludgeoning damage plus 5 (2d4) Radiant damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/pegasus.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/pegasus.webp@SRD 5.2.1 Creatures</token>
 			</pegasus>
 			<planetar>
 				<name type="string">Planetar</name>
@@ -16566,6 +16986,8 @@ At Will: Detect Evil and Good
 						<desc type="string">The planetar casts Cure Wounds, Invisibility, Lesser Restoration, or Remove Curse, using the same spellcasting ability as Spellcasting.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/planetar.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/planetar.webp@SRD 5.2.1 Creatures</token>
 			</planetar>
 			<solar>
 				<name type="string">Solar</name>
@@ -16678,6 +17100,8 @@ At Will: Detect Evil and Good
 						<desc type="string">The solar teleports up to 60 feet to an unoccupied space it can see. Dexterity Saving Throw: DC 25, each creature in a 10-foot Emanation originating from the solar at its destination space. Failure: 11 (2d10) Radiant damage. Success: Half damage.</desc>
 					</id-00003>
 				</legendaryactions>
+				<picture type="string">images/npc/solar.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/solar.webp@SRD 5.2.1 Creatures</token>
 			</solar>
 			<sphinxofwonder>
 				<name type="string">Sphinx of Wonder</name>
@@ -16750,6 +17174,8 @@ At Will: Detect Evil and Good
 						<desc type="string">Trigger: The sphinx or another creature within 30 feet makes an ability check or a saving throw. Response: The sphinx adds 2 to the roll.</desc>
 					</id-00001>
 				</reactions>
+				<picture type="string">images/npc/sphinx-of-wonder.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/sphinx-of-wonder.webp@SRD 5.2.1 Creatures</token>
 			</sphinxofwonder>
 			<sphinxoflore>
 				<name type="string">Sphinx of Lore</name>
@@ -16848,6 +17274,8 @@ At Will: Detect Magic, Identify, Mage Hand, Minor Illu- sion, Prestidigitation
 						<desc type="string">Constitution Saving Throw: DC 16, one creature the sphinx can see within 120 feet. Failure: The target gains 1 Exhaustion level. While the target has any Exhaustion levels, it appears 3d10 years older. Fail- ure or Success: The sphinx can't take this action again until the start of its next turn.</desc>
 					</id-00003>
 				</legendaryactions>
+				<picture type="string">images/npc/sphinx-of-lore.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/sphinx-of-lore.webp@SRD 5.2.1 Creatures</token>
 			</sphinxoflore>
 			<sphinxofvalor>
 				<name type="string">Sphinx of Valor</name>
@@ -16950,6 +17378,8 @@ At Will: Detect Evil and Good, Thaumaturgy
 						<desc type="string">Constitution Saving Throw: DC 16, one creature the sphinx can see within 120 feet. Failure: The target gains 1 Exhaustion level. While the target has any Exhaustion levels, it appears 3d10 years older. Fail- ure or Success: The sphinx can't take this action again until the start of its next turn.</desc>
 					</id-00003>
 				</legendaryactions>
+				<picture type="string">images/npc/sphinx-of-valor.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/sphinx-of-valor.webp@SRD 5.2.1 Creatures</token>
 			</sphinxofvalor>
 			<unicorn>
 				<name type="string">Unicorn</name>
@@ -17054,6 +17484,8 @@ At Will: Detect Evil and Good, Druidcraft
 						<desc type="string">The unicorn targets itself or one creature it can see within 60 feet of itself. The target gains 10 (3d6) Temporary Hit Points, and its AC increases by 2 until the end of the unicorn's next turn. The unicorn can't take this action again until the start of its next turn.</desc>
 					</id-00003>
 				</legendaryactions>
+				<picture type="string">images/npc/unicorn.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/unicorn.webp@SRD 5.2.1 Creatures</token>
 			</unicorn>
 		</category>
 		<category name="Undead">
@@ -17122,6 +17554,8 @@ At Will: Detect Evil and Good, Druidcraft
 						<desc type="string">Melee Attack Roll: +4, reach 5 ft. Hit: 20 (4d8 + 2) Necrotic damage, or 11 (2d8 + 2) Necrotic damage if the swarm is Bloodied. If the target is a Medium or smaller creature, it has the Prone condition.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/swarm-of-crawling-claws.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/swarm-of-crawling-claws.webp@SRD 5.2.1 Creatures</token>
 			</swarmofcrawlingclaws>
 			<ghast>
 				<name type="string">Ghast</name>
@@ -17193,6 +17627,8 @@ At Will: Detect Evil and Good, Druidcraft
 						<desc type="string">Melee Attack Roll: +5, reach 5 ft. Hit: 10 (2d6 + 3) Slashing damage. If the target is a non-Undead creature, it is subjected to the following effect. Consti- tution Saving Throw: DC 10. Failure: The target has the Paralyzed condition until the end of its next turn.</desc>
 					</id-00002>
 				</actions>
+				<picture type="string">images/npc/ghast.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/ghast.webp@SRD 5.2.1 Creatures</token>
 			</ghast>
 			<ghost>
 				<name type="string">Ghost</name>
@@ -17279,6 +17715,8 @@ At Will: Detect Evil and Good, Druidcraft
 						<desc type="string">Charisma Saving Throw: DC 13, one Humanoid the ghost can see within 5 feet. Fail- ure: The target is possessed by the ghost; the ghost disappears, and the target has the Incapacitated condition and loses control of its body. The ghost now controls the body, but the target retains awareness. The ghost can't be targeted by any attack, spell, or other effect, except ones that specifically target Undead. The ghost's game statistics are the same, except it uses the possessed target's Speed, as well as the target's Strength, Dexterity, and Constitution modifiers. The possession lasts until the body drops to 0 Hit Points or the ghost leaves as a Bonus Action. When the possession ends, the ghost appears in an unoccupied space within 5 feet of the target, and the target is immune to this ghost's Possession for 24 hours. Success: The target is immune to this ghost's Possession for 24 hours.</desc>
 					</id-00005>
 				</actions>
+				<picture type="string">images/npc/ghost.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/ghost.webp@SRD 5.2.1 Creatures</token>
 			</ghost>
 			<ghoul>
 				<name type="string">Ghoul</name>
@@ -17347,6 +17785,8 @@ At Will: Detect Evil and Good, Druidcraft
 						<desc type="string">Melee Attack Roll: +4, reach 5 ft. Hit: 4 (1d4 + 2) Slashing damage. If the target is a creature that isn't an Undead or elf, it is subjected to the following effect. Constitution Saving Throw: DC 10. Failure: The target has the Paralyzed condition until the end of its next turn.</desc>
 					</id-00003>
 				</actions>
+				<picture type="string">images/npc/ghoul.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/ghoul.webp@SRD 5.2.1 Creatures</token>
 			</ghoul>
 			<lich>
 				<name type="string">Lich</name>
@@ -17458,6 +17898,8 @@ At Will: Detect Magic, Detect Thoughts, Dispel Magic, Fireball (level 5 version)
 						<desc type="string">The lich casts Fear, using the same spellcasting ability as Spellcasting. The lich can't take this action again until the start of its next turn.</desc>
 					</id-00004>
 				</legendaryactions>
+				<picture type="string">images/npc/lich.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/lich.webp@SRD 5.2.1 Creatures</token>
 			</lich>
 			<mummy>
 				<name type="string">Mummy</name>
@@ -17527,6 +17969,8 @@ At Will: Detect Magic, Detect Thoughts, Dispel Magic, Fireball (level 5 version)
 						<desc type="string">Wisdom Saving Throw: DC 11, one creature the mummy can see within 60 feet. Failure: The target has the Frightened condition until the end of the mummy's next turn. Success: The target is immune to this mummy's Dreadful Glare for 24 hours.</desc>
 					</id-00003>
 				</actions>
+				<picture type="string">images/npc/mummy.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/mummy.webp@SRD 5.2.1 Creatures</token>
 			</mummy>
 			<mummylord>
 				<name type="string">Mummy Lord</name>
@@ -17644,6 +18088,8 @@ At Will: Dispel Magic, Thaumaturgy
 						<desc type="string">The mummy makes one Rotting Fist or Channel Negative Energy attack.</desc>
 					</id-00004>
 				</legendaryactions>
+				<picture type="string">images/npc/mummy-lord.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/mummy-lord.webp@SRD 5.2.1 Creatures</token>
 			</mummylord>
 			<shadow>
 				<name type="string">Shadow</name>
@@ -17721,6 +18167,8 @@ Shadow rises from the corpse 1d4 hours later.</desc>
 						<desc type="string">While in Dim Light or Darkness, the shadow takes the Hide action.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/shadow.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/shadow.webp@SRD 5.2.1 Creatures</token>
 			</shadow>
 			<skeleton>
 				<name type="string">Skeleton</name>
@@ -17786,6 +18234,8 @@ Shadow rises from the corpse 1d4 hours later.</desc>
 						<desc type="string">Ranged Attack Roll: +5, range 80/320 ft. Hit: 6 (1d6 + 3) Piercing damage.</desc>
 					</id-00002>
 				</actions>
+				<picture type="string">images/npc/skeleton.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/skeleton.webp@SRD 5.2.1 Creatures</token>
 			</skeleton>
 			<warhorseskeleton>
 				<name type="string">Warhorse Skeleton</name>
@@ -17846,6 +18296,8 @@ Shadow rises from the corpse 1d4 hours later.</desc>
 						<desc type="string">Melee Attack Roll: +6, reach 5 ft. Hit: 7 (1d6 + 4) Bludgeoning damage. If the target is a Large or smaller creature and the skeleton moved 20+ feet straight toward it immediately before the hit, the target has the Prone condition.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/warhorse-skeleton.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/warhorse-skeleton.webp@SRD 5.2.1 Creatures</token>
 			</warhorseskeleton>
 			<minotaurskeleton>
 				<name type="string">Minotaur Skeleton</name>
@@ -17910,6 +18362,8 @@ Shadow rises from the corpse 1d4 hours later.</desc>
 						<desc type="string">Melee Attack Roll: +6, reach 5 ft. Hit: 15 (2d10 + 4) Bludgeoning damage.</desc>
 					</id-00002>
 				</actions>
+				<picture type="string">images/npc/minotaur-skeleton.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/minotaur-skeleton.webp@SRD 5.2.1 Creatures</token>
 			</minotaurskeleton>
 			<specter>
 				<name type="string">Specter</name>
@@ -17980,6 +18434,8 @@ Shadow rises from the corpse 1d4 hours later.</desc>
 						<desc type="string">Melee Attack Roll: +4, reach 5 ft. Hit: 7 (2d6) Necrotic damage. If the target is a creature, its Hit Point maximum decreases by an amount equal to the damage taken.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/specter.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/specter.webp@SRD 5.2.1 Creatures</token>
 			</specter>
 			<vampirespawn>
 				<name type="string">Vampire Spawn</name>
@@ -18069,6 +18525,8 @@ Sunlight. The vampire takes 20 Radiant damage if it starts its turn in sunlight.
 						<desc type="string">The vampire takes the Dash or Disengage action.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/vampire-spawn.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/vampire-spawn.webp@SRD 5.2.1 Creatures</token>
 			</vampirespawn>
 			<vampire>
 				<name type="string">Vampire</name>
@@ -18185,6 +18643,8 @@ Vampire Spawn under the vampire's control.</desc>
 						<desc type="string">The vampire moves up to half its Speed, and it makes one Grave Strike attack.</desc>
 					</id-00003>
 				</legendaryactions>
+				<picture type="string">images/npc/vampire.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/vampire.webp@SRD 5.2.1 Creatures</token>
 			</vampire>
 			<wight>
 				<name type="string">Wight</name>
@@ -18264,6 +18724,8 @@ Vampire Spawn under the vampire's control.</desc>
 						<desc type="string">Constitution Saving Throw: DC 13, one creature within 5 feet. Failure: 6 (1d8 + 2) Necrotic damage, and the target's Hit Point maximum decreases by an amount equal to the damage taken. A Humanoid slain by this attack rises 24 hours later as a Zombie under the wight's control, unless the Humanoid is restored to life or its body is destroyed. The wight can have no more than twelve zombies under its control at a time.</desc>
 					</id-00004>
 				</actions>
+				<picture type="string">images/npc/wight.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/wight.webp@SRD 5.2.1 Creatures</token>
 			</wight>
 			<willowisp>
 				<name type="string">Will-o'-Wisp</name>
@@ -18348,6 +18810,8 @@ Vampire Spawn under the vampire's control.</desc>
 						<desc type="string">The wisp and its light have the Invisible condition until the wisp's Concentration ends on this effect, which ends early immediately after the wisp makes an attack roll or uses Consume Life.</desc>
 					</id-00002>
 				</bonusactions>
+				<picture type="string">images/npc/will-o-wisp.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/will-o-wisp.webp@SRD 5.2.1 Creatures</token>
 			</willowisp>
 			<wraith>
 				<name type="string">Wraith</name>
@@ -18422,6 +18886,8 @@ Vampire Spawn under the vampire's control.</desc>
 						<desc type="string">The wraith targets a Humanoid corpse within 10 feet of itself that has been dead for no longer than 1 minute. The target's spirit rises as a Specter in the space of its corpse or in the nearest unoccupied space. The specter is under the wraith's control. The wraith can have no more than seven specters under its control at a time.</desc>
 					</id-00002>
 				</actions>
+				<picture type="string">images/npc/wraith.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/wraith.webp@SRD 5.2.1 Creatures</token>
 			</wraith>
 			<zombie>
 				<name type="string">Zombie</name>
@@ -18489,6 +18955,8 @@ Vampire Spawn under the vampire's control.</desc>
 						<desc type="string">Melee Attack Roll: +3, reach 5 ft. Hit: 5 (1d8 + 1) Bludgeoning damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/zombie.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/zombie.webp@SRD 5.2.1 Creatures</token>
 			</zombie>
 			<ogrezombie>
 				<name type="string">Ogre Zombie</name>
@@ -18556,6 +19024,8 @@ Vampire Spawn under the vampire's control.</desc>
 						<desc type="string">Melee Attack Roll: +6, reach 5 ft. Hit: 13 (2d8 + 4) Bludgeoning damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/ogre-zombie.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/ogre-zombie.webp@SRD 5.2.1 Creatures</token>
 			</ogrezombie>
 		</category>
 		<category name="Animals">
@@ -18622,6 +19092,8 @@ Vampire Spawn under the vampire's control.</desc>
 						<desc type="string">Melee Attack Roll: +6, reach 5 ft. Hit: 8 (1d8 + 4) Slashing damage. If the target is a Large or smaller creature and the allosaurus moved 30+ feet straight toward it immediately before the hit, the target has the Prone condition, and the allosaurus can make one Bite attack against it.</desc>
 					</id-00002>
 				</actions>
+				<picture type="string">images/npc/allosaurus.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/allosaurus.webp@SRD 5.2.1 Creatures</token>
 			</allosaurus>
 			<ankylosaurus>
 				<name type="string">Ankylosaurus</name>
@@ -18687,6 +19159,8 @@ Vampire Spawn under the vampire's control.</desc>
 						<desc type="string">Melee Attack Roll: +6, reach 10 ft. Hit: 9 (1d10 + 4) Bludgeoning damage. If the target is a Huge or smaller creature, it has the Prone condition.</desc>
 					</id-00002>
 				</actions>
+				<picture type="string">images/npc/ankylosaurus.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/ankylosaurus.webp@SRD 5.2.1 Creatures</token>
 			</ankylosaurus>
 			<ape>
 				<name type="string">Ape</name>
@@ -18755,6 +19229,8 @@ Vampire Spawn under the vampire's control.</desc>
 						<desc type="string">Ranged Attack Roll: +5, range 25/50 ft. Hit: 10 (2d6 + 3) Bludgeoning damage.</desc>
 					</id-00003>
 				</actions>
+				<picture type="string">images/npc/ape.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/ape.webp@SRD 5.2.1 Creatures</token>
 			</ape>
 			<archelon>
 				<name type="string">Archelon</name>
@@ -18825,6 +19301,8 @@ Vampire Spawn under the vampire's control.</desc>
 						<desc type="string">Melee Attack Roll: +6, reach 5 ft. Hit: 14 (3d6 + 4) Piercing damage.</desc>
 					</id-00002>
 				</actions>
+				<picture type="string">images/npc/archelon.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/archelon.webp@SRD 5.2.1 Creatures</token>
 			</archelon>
 			<baboon>
 				<name type="string">Baboon</name>
@@ -18891,6 +19369,8 @@ Vampire Spawn under the vampire's control.</desc>
 						<desc type="string">Melee Attack Roll: +1, reach 5 ft. Hit: 1 (1d4 - 1) Piercing damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/baboon.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/baboon.webp@SRD 5.2.1 Creatures</token>
 			</baboon>
 			<badger>
 				<name type="string">Badger</name>
@@ -18951,6 +19431,8 @@ Vampire Spawn under the vampire's control.</desc>
 						<desc type="string">Melee Attack Roll: +2, reach 5 ft. Hit: 1 Piercing damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/badger.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/badger.webp@SRD 5.2.1 Creatures</token>
 			</badger>
 			<bat>
 				<name type="string">Bat</name>
@@ -19011,6 +19493,8 @@ Vampire Spawn under the vampire's control.</desc>
 						<desc type="string">Melee Attack Roll: +4, reach 5 ft. Hit: 1 Piercing damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/bat.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/bat.webp@SRD 5.2.1 Creatures</token>
 			</bat>
 			<blackbear>
 				<name type="string">Black Bear</name>
@@ -19075,6 +19559,8 @@ Vampire Spawn under the vampire's control.</desc>
 						<desc type="string">Melee Attack Roll: +4, reach 5 ft. Hit: 5 (1d6 + 2) Slashing damage.</desc>
 					</id-00002>
 				</actions>
+				<picture type="string">images/npc/black-bear.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/black-bear.webp@SRD 5.2.1 Creatures</token>
 			</blackbear>
 			<bloodhawk>
 				<name type="string">Blood Hawk</name>
@@ -19141,6 +19627,8 @@ Vampire Spawn under the vampire's control.</desc>
 						<desc type="string">Melee Attack Roll: +4, reach 5 ft. Hit: 4 (1d4 + 2) Piercing damage, or 6 (1d8 + 2) Piercing damage if the target is Bloodied.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/blood-hawk.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/blood-hawk.webp@SRD 5.2.1 Creatures</token>
 			</bloodhawk>
 			<boar>
 				<name type="string">Boar</name>
@@ -19207,6 +19695,8 @@ Vampire Spawn under the vampire's control.</desc>
 						<desc type="string">Melee Attack Roll: +3, reach 5 ft. Hit: 4 (1d6 + 1) Piercing damage. If the target is a Medium or smaller creature and the boar moved 20+ feet straight toward it immediately before the hit, the target takes an extra 3 (1d6) Piercing damage and has the Prone condition.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/boar.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/boar.webp@SRD 5.2.1 Creatures</token>
 			</boar>
 			<brownbear>
 				<name type="string">Brown Bear</name>
@@ -19275,6 +19765,8 @@ Vampire Spawn under the vampire's control.</desc>
 						<desc type="string">. Melee Attack Roll: +5, reach 5 ft. Hit: 5 (1d4 + 3) Slashing damage. If the target is a Large or smaller creature, it has the Prone condition.</desc>
 					</id-00003>
 				</actions>
+				<picture type="string">images/npc/brown-bear.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/brown-bear.webp@SRD 5.2.1 Creatures</token>
 			</brownbear>
 			<camel>
 				<name type="string">Camel</name>
@@ -19336,6 +19828,8 @@ Vampire Spawn under the vampire's control.</desc>
 						<desc type="string">Melee Attack Roll: +4, reach 5 ft. Hit: 4 (1d4 + 2) Bludgeoning damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/camel.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/camel.webp@SRD 5.2.1 Creatures</token>
 			</camel>
 			<cat>
 				<name type="string">Cat</name>
@@ -19403,6 +19897,8 @@ Vampire Spawn under the vampire's control.</desc>
 						<desc type="string">Melee Attack Roll: +4, reach 5 ft. Hit: 1 Slashing damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/cat.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/cat.webp@SRD 5.2.1 Creatures</token>
 			</cat>
 			<constrictorsnake>
 				<name type="string">Constrictor Snake</name>
@@ -19467,6 +19963,8 @@ Vampire Spawn under the vampire's control.</desc>
 						<desc type="string">Strength Saving Throw: DC 12, one Medium or smaller creature the snake can see within 5 feet. Failure: 7 (3d4) Bludgeoning damage, and the target has the Grappled condition (escape DC 12).</desc>
 					</id-00002>
 				</actions>
+				<picture type="string">images/npc/constrictor-snake.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/constrictor-snake.webp@SRD 5.2.1 Creatures</token>
 			</constrictorsnake>
 			<crab>
 				<name type="string">Crab</name>
@@ -19533,6 +20031,8 @@ Vampire Spawn under the vampire's control.</desc>
 						<desc type="string">Melee Attack Roll: +2, reach 5 ft. Hit: 1 Bludgeoning damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/crab.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/crab.webp@SRD 5.2.1 Creatures</token>
 			</crab>
 			<crocodile>
 				<name type="string">Crocodile</name>
@@ -19600,6 +20100,8 @@ Vampire Spawn under the vampire's control.</desc>
 						<desc type="string">Melee Attack Roll: +4, reach 5 ft. Hit: 6 (1d8 + 2) Piercing damage. If the target is a Medium or smaller creature, it has the Grappled condition (escape DC 12). While Grappled, the target has the Restrained condition.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/crocodile.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/crocodile.webp@SRD 5.2.1 Creatures</token>
 			</crocodile>
 			<deer>
 				<name type="string">Deer</name>
@@ -19666,6 +20168,8 @@ Vampire Spawn under the vampire's control.</desc>
 						<desc type="string">Melee Attack Roll: +2, reach 5 ft. Hit: 2 (1d4) Bludgeoning damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/deer.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/deer.webp@SRD 5.2.1 Creatures</token>
 			</deer>
 			<direwolf>
 				<name type="string">Dire Wolf</name>
@@ -19732,6 +20236,8 @@ Vampire Spawn under the vampire's control.</desc>
 						<desc type="string">Melee Attack Roll: +5, reach 5 ft. Hit: 8 (1d10 + 3) Piercing damage. If the target is a Large or smaller creature, it has the Prone condition.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/dire-wolf.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/dire-wolf.webp@SRD 5.2.1 Creatures</token>
 			</direwolf>
 			<drafthorse>
 				<name type="string">Draft Horse</name>
@@ -19792,6 +20298,8 @@ Vampire Spawn under the vampire's control.</desc>
 						<desc type="string">Melee Attack Roll: +6, reach 5 ft. Hit: 6 (1d4 + 4) Bludgeoning damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/draft-horse.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/draft-horse.webp@SRD 5.2.1 Creatures</token>
 			</drafthorse>
 			<eagle>
 				<name type="string">Eagle</name>
@@ -19852,6 +20360,8 @@ Vampire Spawn under the vampire's control.</desc>
 						<desc type="string">Melee Attack Roll: +4, reach 5 feet. Hit: 4 (1d4 + 2) Slashing damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/eagle.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/eagle.webp@SRD 5.2.1 Creatures</token>
 			</eagle>
 			<elephant>
 				<name type="string">Elephant</name>
@@ -19922,6 +20432,8 @@ Vampire Spawn under the vampire's control.</desc>
 						<desc type="string">Dexterity Saving Throw: DC 16, one creature within 5 feet that has the Prone condition. Failure: 17 (2d10 + 6) Bludgeoning damage. Success: Half damage.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/elephant.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/elephant.webp@SRD 5.2.1 Creatures</token>
 			</elephant>
 			<elk>
 				<name type="string">Elk</name>
@@ -19982,6 +20494,8 @@ Vampire Spawn under the vampire's control.</desc>
 						<desc type="string">Melee Attack Roll: +5, reach 5 ft. Hit: 6 (1d6 + 3) Bludgeoning damage. If the target is a Large or smaller creature and the elk moved 20+ feet straight toward it immediately before the hit, the target takes an extra 3 (1d6) Bludgeoning damage and has the Prone condition.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/elk.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/elk.webp@SRD 5.2.1 Creatures</token>
 			</elk>
 			<flyingsnake>
 				<name type="string">Flying Snake</name>
@@ -20048,6 +20562,8 @@ Vampire Spawn under the vampire's control.</desc>
 						<desc type="string">Melee Attack Roll: +4, reach 5 ft. Hit: 1 Piercing damage plus 5 (2d4) Poison damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/flying-snake.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/flying-snake.webp@SRD 5.2.1 Creatures</token>
 			</flyingsnake>
 			<frog>
 				<name type="string">Frog</name>
@@ -20118,6 +20634,8 @@ Vampire Spawn under the vampire's control.</desc>
 						<desc type="string">Melee Attack Roll: +3, reach 5 ft. Hit: 1 Piercing damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/frog.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/frog.webp@SRD 5.2.1 Creatures</token>
 			</frog>
 			<giantape>
 				<name type="string">Giant Ape</name>
@@ -20192,6 +20710,8 @@ Vampire Spawn under the vampire's control.</desc>
 						<desc type="string">The ape jumps up to 30 feet by spending 10 feet of movement.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/giant-ape.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/giant-ape.webp@SRD 5.2.1 Creatures</token>
 			</giantape>
 			<giantbadger>
 				<name type="string">Giant Badger</name>
@@ -20252,6 +20772,8 @@ Vampire Spawn under the vampire's control.</desc>
 						<desc type="string">Melee Attack Roll: +3, reach 5 ft. Hit: 6 (2d4 + 1) Piercing damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/giant-badger.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/giant-badger.webp@SRD 5.2.1 Creatures</token>
 			</giantbadger>
 			<giantbat>
 				<name type="string">Giant Bat</name>
@@ -20312,6 +20834,8 @@ Vampire Spawn under the vampire's control.</desc>
 						<desc type="string">Melee Attack Roll: +5, reach 5 ft. Hit: 6 (1d6 + 3) Piercing damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/giant-bat.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/giant-bat.webp@SRD 5.2.1 Creatures</token>
 			</giantbat>
 			<giantboar>
 				<name type="string">Giant Boar</name>
@@ -20379,6 +20903,8 @@ Vampire Spawn under the vampire's control.</desc>
 						<desc type="string">Melee Attack Roll: +5, reach 5 ft. Hit: 10 (2d6 + 3) Piercing damage. If the target is a Large or smaller creature and the boar moved 20+ feet straight toward it immediately before the hit, the target takes an extra 7 (2d6) Piercing damage and has the Prone condition.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/giant-boar.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/giant-boar.webp@SRD 5.2.1 Creatures</token>
 			</giantboar>
 			<giantcentipede>
 				<name type="string">Giant Centipede</name>
@@ -20439,6 +20965,8 @@ Vampire Spawn under the vampire's control.</desc>
 						<desc type="string">Melee Attack Roll: +4, reach 5 ft. Hit: 4 (1d4 + 2) Piercing damage, and the target has the Poisoned condition until the start of the centipede's next turn.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/giant-centipede.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/giant-centipede.webp@SRD 5.2.1 Creatures</token>
 			</giantcentipede>
 			<giantconstrictorsnake>
 				<name type="string">Giant Constrictor Snake</name>
@@ -20507,6 +21035,8 @@ Vampire Spawn under the vampire's control.</desc>
 						<desc type="string">Strength Saving Throw: DC 14, one Large or smaller creature the snake can see within 10 feet. Fail- ure: 13 (2d8 + 4) Bludgeoning damage, and the target has the Grappled condition (escape DC 14).</desc>
 					</id-00003>
 				</actions>
+				<picture type="string">images/npc/giant-constrictor-snake.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/giant-constrictor-snake.webp@SRD 5.2.1 Creatures</token>
 			</giantconstrictorsnake>
 			<giantcrab>
 				<name type="string">Giant Crab</name>
@@ -20573,6 +21103,8 @@ Vampire Spawn under the vampire's control.</desc>
 						<desc type="string">Melee Attack Roll: +3, reach 5 ft. Hit: 4 (1d6 + 1) Bludgeoning damage. If the target is a Medium or smaller creature, it has the Grappled condition (escape DC 11) from one of two claws.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/giant-crab.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/giant-crab.webp@SRD 5.2.1 Creatures</token>
 			</giantcrab>
 			<giantcrocodile>
 				<name type="string">Giant Crocodile</name>
@@ -20647,6 +21179,8 @@ Vampire Spawn under the vampire's control.</desc>
 						<desc type="string">Melee Attack Roll: +8, reach 10 ft. Hit: 18 (3d8 + 5) Bludgeoning damage. If the target is a Large or smaller creature, it has the Prone condition.</desc>
 					</id-00003>
 				</actions>
+				<picture type="string">images/npc/giant-crocodile.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/giant-crocodile.webp@SRD 5.2.1 Creatures</token>
 			</giantcrocodile>
 			<gianteagle>
 				<name type="string">Giant Eagle</name>
@@ -20711,6 +21245,8 @@ Vampire Spawn under the vampire's control.</desc>
 						<desc type="string">Melee Attack Roll: +5, reach 5 ft. Hit: 5 (1d4 + 3) Slashing damage plus 3 (1d6) Radiant damage.</desc>
 					</id-00002>
 				</actions>
+				<picture type="string">images/npc/giant-eagle.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/giant-eagle.webp@SRD 5.2.1 Creatures</token>
 			</gianteagle>
 			<giantelk>
 				<name type="string">Giant Elk</name>
@@ -20772,6 +21308,8 @@ Vampire Spawn under the vampire's control.</desc>
 						<desc type="string">Melee Attack Roll: +6, reach 10 ft. Hit: 11 (2d6 + 4) Bludgeoning damage plus 5 (2d4) Radiant damage. If the target is a Huge or smaller creature and the elk moved 20+ feet straight toward it immediately before the hit, the target takes an extra 5 (2d4) Bludgeoning damage and has the Prone condition.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/giant-elk.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/giant-elk.webp@SRD 5.2.1 Creatures</token>
 			</giantelk>
 			<giantfirebeetle>
 				<name type="string">Giant Fire Beetle</name>
@@ -20838,6 +21376,8 @@ Vampire Spawn under the vampire's control.</desc>
 						<desc type="string">Melee Attack Roll: +1, reach 5 ft. Hit: 1 Fire damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/giant-fire-beetle.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/giant-fire-beetle.webp@SRD 5.2.1 Creatures</token>
 			</giantfirebeetle>
 			<giantfrog>
 				<name type="string">Giant Frog</name>
@@ -20912,6 +21452,8 @@ Vampire Spawn under the vampire's control.</desc>
 						<desc type="string">The frog swallows a Small or smaller target it is grappling. While swallowed, the target isn't Grappled but has the Blinded and Restrained conditions, and it has Total Cover against attacks and other effects outside the frog. While swallowing the target, the frog can't use Bite, and if the frog dies, the swallowed target is no longer Restrained and can escape from the corpse using 5 feet of movement, exiting with the Prone condition. At the end of the frog's next turn, the swallowed target takes 5 (2d4) Acid damage. If that damage doesn't kill it, the frog disgorges it, causing it to exit Prone.</desc>
 					</id-00002>
 				</actions>
+				<picture type="string">images/npc/giant-frog.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/giant-frog.webp@SRD 5.2.1 Creatures</token>
 			</giantfrog>
 			<giantgoat>
 				<name type="string">Giant Goat</name>
@@ -20973,6 +21515,8 @@ Vampire Spawn under the vampire's control.</desc>
 						<desc type="string">Melee Attack Roll: +5, reach 5 ft. Hit: 6 (1d6 + 3) Bludgeoning damage. If the target is a Large or smaller creature and the goat moved 20+ feet straight toward it immediately before the hit, the target takes an extra 5 (2d4) Bludgeoning damage and has the Prone condition.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/giant-goat.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/giant-goat.webp@SRD 5.2.1 Creatures</token>
 			</giantgoat>
 			<gianthyena>
 				<name type="string">Giant Hyena</name>
@@ -21039,6 +21583,8 @@ Vampire Spawn under the vampire's control.</desc>
 						<desc type="string">Immediately after dealing damage to a creature that was already Bloodied, the hyena can move up to half its Speed, and it makes one Bite attack.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/giant-hyena.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/giant-hyena.webp@SRD 5.2.1 Creatures</token>
 			</gianthyena>
 			<giantlizard>
 				<name type="string">Giant Lizard</name>
@@ -21106,6 +21652,8 @@ Vampire Spawn under the vampire's control.</desc>
 						<desc type="string">Melee Attack Roll: +4, reach 5 ft. Hit: 6 (1d8 + 2) Piercing damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/giant-lizard.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/giant-lizard.webp@SRD 5.2.1 Creatures</token>
 			</giantlizard>
 			<giantoctopus>
 				<name type="string">Giant Octopus</name>
@@ -21178,6 +21726,8 @@ Vampire Spawn under the vampire's control.</desc>
 						<desc type="string">Trigger: The octopus takes damage while underwater. Response: The octopus releases ink that fills a 10-foot Cube centered on itself, and the octopus moves up to its Swim Speed. The Cube is Heavily Obscured for 1 minute or until a strong current or similar effect disperses the ink.</desc>
 					</id-00001>
 				</reactions>
+				<picture type="string">images/npc/giant-octopus.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/giant-octopus.webp@SRD 5.2.1 Creatures</token>
 			</giantoctopus>
 			<giantowl>
 				<name type="string">Giant Owl</name>
@@ -21251,6 +21801,8 @@ At Will: Detect Evil and Good, Detect Magic
 1/Day: Clairvoyance</desc>
 					</id-00002>
 				</actions>
+				<picture type="string">images/npc/giant-owl.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/giant-owl.webp@SRD 5.2.1 Creatures</token>
 			</giantowl>
 			<giantrat>
 				<name type="string">Giant Rat</name>
@@ -21318,6 +21870,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">Melee Attack Roll: +5, reach 5 feet. Hit: 5 (1d4 + 3) Piercing damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/giant-rat.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/giant-rat.webp@SRD 5.2.1 Creatures</token>
 			</giantrat>
 			<giantscorpion>
 				<name type="string">Giant Scorpion</name>
@@ -21386,6 +21940,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">Melee Attack Roll: +5, reach 5 ft. Hit: 7 (1d8 + 3) Piercing damage plus 11 (2d10) Poison damage.</desc>
 					</id-00003>
 				</actions>
+				<picture type="string">images/npc/giant-scorpion.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/giant-scorpion.webp@SRD 5.2.1 Creatures</token>
 			</giantscorpion>
 			<giantseahorse>
 				<name type="string">Giant Seahorse</name>
@@ -21458,6 +22014,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">While underwater, the seahorse moves up to half its Swim Speed without provoking Opportunity Attacks.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/giant-seahorse.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/giant-seahorse.webp@SRD 5.2.1 Creatures</token>
 			</giantseahorse>
 			<giantshark>
 				<name type="string">Giant Shark</name>
@@ -21528,6 +22086,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">Melee Attack Roll: +9 (with Advantage if the target doesn't have all its Hit Points), reach 5 ft. Hit: 22 (3d10 + 6) Piercing damage.</desc>
 					</id-00002>
 				</actions>
+				<picture type="string">images/npc/giant-shark.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/giant-shark.webp@SRD 5.2.1 Creatures</token>
 			</giantshark>
 			<giantspider>
 				<name type="string">Giant Spider</name>
@@ -21602,6 +22162,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">Dexterity Saving Throw: DC 13, one creature the spider can see within 60 feet. Failure: The target has the Restrained condition until the web is destroyed (AC 10; HP 5; Vulnerability to Fire damage; Immunity to Poison and Psychic damage).</desc>
 					</id-00002>
 				</actions>
+				<picture type="string">images/npc/giant-spider.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/giant-spider.webp@SRD 5.2.1 Creatures</token>
 			</giantspider>
 			<gianttoad>
 				<name type="string">Giant Toad</name>
@@ -21676,6 +22238,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">The toad swallows a Medium or smaller target it is grappling. While swallowed, the target isn't Grappled but has the Blinded and Restrained conditions, and it has Total Cover against attacks and other effects outside the toad. In addition, the target takes 10 (3d6) Acid damage at the end of each of the toad's turns. The toad can have only one target swallowed at a time, and it can't use Bite while it has a swallowed target. If the toad dies, a swallowed creature is no longer Restrained and can escape from the corpse using 5 feet of movement, exiting with the Prone condition.</desc>
 					</id-00002>
 				</actions>
+				<picture type="string">images/npc/giant-toad.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/giant-toad.webp@SRD 5.2.1 Creatures</token>
 			</gianttoad>
 			<giantvenomoussnake>
 				<name type="string">Giant Venomous Snake</name>
@@ -21736,6 +22300,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">Melee Attack Roll: +6, reach 10 ft. Hit: 6 (1d4 + 4) Piercing damage plus 4 (1d8) Poison damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/giant-venomous-snake.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/giant-venomous-snake.webp@SRD 5.2.1 Creatures</token>
 			</giantvenomoussnake>
 			<giantvulture>
 				<name type="string">Giant Vulture</name>
@@ -21802,6 +22368,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">Melee Attack Roll: +4, reach 5 ft. Hit: 9 (2d6 + 2) Piercing damage, and the target has the Poisoned condition until the end of its next turn.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/giant-vulture.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/giant-vulture.webp@SRD 5.2.1 Creatures</token>
 			</giantvulture>
 			<giantwasp>
 				<name type="string">Giant Wasp</name>
@@ -21868,6 +22436,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">Melee Attack Roll: +4, reach 5 ft. Hit: 5 (1d6 + 2) Piercing damage plus 5 (2d4) Poison damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/giant-wasp.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/giant-wasp.webp@SRD 5.2.1 Creatures</token>
 			</giantwasp>
 			<giantweasel>
 				<name type="string">Giant Weasel</name>
@@ -21928,6 +22498,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">Melee Attack Roll: +5, reach 5 ft. Hit: 5 (1d4 + 3) Piercing damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/giant-weasel.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/giant-weasel.webp@SRD 5.2.1 Creatures</token>
 			</giantweasel>
 			<giantwolfspider>
 				<name type="string">Giant Wolf Spider</name>
@@ -21994,6 +22566,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">Melee Attack Roll: +5, reach 5 ft. Hit: 5 (1d4 + 3) Piercing damage plus 5 (2d4) Poison damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/giant-wolf-spider.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/giant-wolf-spider.webp@SRD 5.2.1 Creatures</token>
 			</giantwolfspider>
 			<goat>
 				<name type="string">Goat</name>
@@ -22055,6 +22629,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">Melee Attack Roll: +2, reach 5 ft. Hit: 1 Bludgeoning damage, or 2 (1d4) Bludgeoning damage if the goat moved 20+ feet straight toward the target immediately before the hit.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/goat.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/goat.webp@SRD 5.2.1 Creatures</token>
 			</goat>
 			<hawk>
 				<name type="string">Hawk</name>
@@ -22115,6 +22691,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">Melee Attack Roll: +5, reach 5 ft. Hit: 1 Slashing damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/hawk.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/hawk.webp@SRD 5.2.1 Creatures</token>
 			</hawk>
 			<hippopotamus>
 				<name type="string">Hippopotamus</name>
@@ -22186,6 +22764,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">Melee Attack Roll: +7, reach 5 ft. Hit: 16 (2d10 + 5) Piercing damage.</desc>
 					</id-00002>
 				</actions>
+				<picture type="string">images/npc/hippopotamus.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/hippopotamus.webp@SRD 5.2.1 Creatures</token>
 			</hippopotamus>
 			<huntershark>
 				<name type="string">Hunter Shark</name>
@@ -22252,6 +22832,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">Melee Attack Roll: +6 (with Advantage if the target doesn't have all its Hit Points), reach 5 ft. Hit: 14 (3d6 + 4) Piercing damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/hunter-shark.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/hunter-shark.webp@SRD 5.2.1 Creatures</token>
 			</huntershark>
 			<hyena>
 				<name type="string">Hyena</name>
@@ -22318,6 +22900,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">Melee Attack Roll: +2, reach 5 ft. Hit: 3 (1d6) Piercing damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/hyena.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/hyena.webp@SRD 5.2.1 Creatures</token>
 			</hyena>
 			<jackal>
 				<name type="string">Jackal</name>
@@ -22378,6 +22962,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">Melee Attack Roll: +1, reach 5 ft. Hit: 1 (1d4 – 1) Piercing damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/jackal.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/jackal.webp@SRD 5.2.1 Creatures</token>
 			</jackal>
 			<killerwhale>
 				<name type="string">Killer Whale</name>
@@ -22444,6 +23030,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">Melee Attack Roll: +6, reach 5 ft. Hit: 21 (5d6 + 4) Piercing damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/killer-whale.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/killer-whale.webp@SRD 5.2.1 Creatures</token>
 			</killerwhale>
 			<lion>
 				<name type="string">Lion</name>
@@ -22522,6 +23110,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">Wisdom Saving Throw: DC 11, one creature within 15 feet. Failure: The target has the Frightened condition until the start of the lion's next turn.</desc>
 					</id-00003>
 				</actions>
+				<picture type="string">images/npc/lion.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/lion.webp@SRD 5.2.1 Creatures</token>
 			</lion>
 			<lizard>
 				<name type="string">Lizard</name>
@@ -22588,6 +23178,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">Melee Attack Roll: +2, reach 5 ft. Hit: 1 Piercing damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/lizard.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/lizard.webp@SRD 5.2.1 Creatures</token>
 			</lizard>
 			<mammoth>
 				<name type="string">Mammoth</name>
@@ -22659,6 +23251,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">Dexterity Saving Throw: DC 18, one creature within 5 feet that has the Prone condition. Failure: 29 (4d10 + 7) Bludgeoning damage. Success: Half damage.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/mammoth.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/mammoth.webp@SRD 5.2.1 Creatures</token>
 			</mammoth>
 			<mastiff>
 				<name type="string">Mastiff</name>
@@ -22720,6 +23314,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">Melee Attack Roll: +3, reach 5 ft. Hit: 4 (1d6 + 1) Piercing damage. If the target is a Medium or smaller creature, it has the Prone condition.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/mastiff.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/mastiff.webp@SRD 5.2.1 Creatures</token>
 			</mastiff>
 			<mule>
 				<name type="string">Mule</name>
@@ -22787,6 +23383,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">Melee Attack Roll: +4, reach 5 ft. Hit: 4 (1d4 + 2) Bludgeoning damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/mule.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/mule.webp@SRD 5.2.1 Creatures</token>
 			</mule>
 			<octopus>
 				<name type="string">Octopus</name>
@@ -22863,6 +23461,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">Trigger: A creature ends its turn within 5 feet of the octopus while underwater. Re- sponse: The octopus releases ink that fills a 5-foot Cube centered on itself, and the octopus moves up to its Swim Speed. The Cube is Heavily Obscured for 1 minute or until a strong current or similar effect disperses the ink.</desc>
 					</id-00001>
 				</reactions>
+				<picture type="string">images/npc/octopus.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/octopus.webp@SRD 5.2.1 Creatures</token>
 			</octopus>
 			<owl>
 				<name type="string">Owl</name>
@@ -22929,6 +23529,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">Melee Attack Roll: +3, reach 5 ft. Hit: 1 Slashing damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/owl.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/owl.webp@SRD 5.2.1 Creatures</token>
 			</owl>
 			<panther>
 				<name type="string">Panther</name>
@@ -22995,6 +23597,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">The panther takes the Disengage or Hide action.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/panther.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/panther.webp@SRD 5.2.1 Creatures</token>
 			</panther>
 			<piranha>
 				<name type="string">Piranha</name>
@@ -23061,6 +23665,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">Melee Attack Roll: +5 (with Advantage if the target doesn't have all its Hit Points), reach 5 ft. Hit: 1 Piercing damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/piranha.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/piranha.webp@SRD 5.2.1 Creatures</token>
 			</piranha>
 			<plesiosaurus>
 				<name type="string">Plesiosaurus</name>
@@ -23127,6 +23733,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">Melee Attack Roll: +6, reach 10 ft. Hit: 11 (2d6 + 4) Piercing damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/plesiosaurus.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/plesiosaurus.webp@SRD 5.2.1 Creatures</token>
 			</plesiosaurus>
 			<polarbear>
 				<name type="string">Polar Bear</name>
@@ -23191,6 +23799,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">Melee Attack Roll: +7, reach 5 ft. Hit: 9 (1d8 + 5) Slashing damage.</desc>
 					</id-00002>
 				</actions>
+				<picture type="string">images/npc/polar-bear.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/polar-bear.webp@SRD 5.2.1 Creatures</token>
 			</polarbear>
 			<pony>
 				<name type="string">Pony</name>
@@ -23252,6 +23862,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">Melee Attack Roll: +4, reach 5 ft. Hit: 4 (1d4 + 2) Bludgeoning damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/pony.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/pony.webp@SRD 5.2.1 Creatures</token>
 			</pony>
 			<pteranodon>
 				<name type="string">Pteranodon</name>
@@ -23318,6 +23930,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">Melee Attack Roll: +4, reach 5 ft. Hit: 6 (1d8 + 2) Piercing damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/pteranodon.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/pteranodon.webp@SRD 5.2.1 Creatures</token>
 			</pteranodon>
 			<rat>
 				<name type="string">Rat</name>
@@ -23384,6 +23998,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">Melee Attack Roll: +2, reach 5 ft. Hit: 1 Piercing damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/rat.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/rat.webp@SRD 5.2.1 Creatures</token>
 			</rat>
 			<raven>
 				<name type="string">Raven</name>
@@ -23450,6 +24066,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">Melee Attack Roll: +4, reach 5 ft. Hit: 1 Piercing damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/raven.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/raven.webp@SRD 5.2.1 Creatures</token>
 			</raven>
 			<reefshark>
 				<name type="string">Reef Shark</name>
@@ -23520,6 +24138,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">Melee Attack Roll: +4, reach 5 ft. Hit: 7 (2d4 + 2) Piercing damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/reef-shark.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/reef-shark.webp@SRD 5.2.1 Creatures</token>
 			</reefshark>
 			<rhinoceros>
 				<name type="string">Rhinoceros</name>
@@ -23580,6 +24200,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">Melee Attack Roll: +7, reach 5 ft. Hit: 14 (2d8 + 5) Piercing damage. If target is a Large or smaller creature and the rhinoceros moved 20+ feet straight toward it immediately before the hit, the target takes an extra 9 (2d8) Piercing damage and has the Prone condition.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/rhinoceros.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/rhinoceros.webp@SRD 5.2.1 Creatures</token>
 			</rhinoceros>
 			<ridinghorse>
 				<name type="string">Riding Horse</name>
@@ -23640,6 +24262,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">Melee Attack Roll: +5, reach 5 ft. Hit: 7 (1d8 + 3) Bludgeoning damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/riding-horse.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/riding-horse.webp@SRD 5.2.1 Creatures</token>
 			</ridinghorse>
 			<sabertoothedtiger>
 				<name type="string">Saber-Toothed Tiger</name>
@@ -23717,6 +24341,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">The tiger takes the Disengage or Hide action.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/saber-toothed-tiger.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/saber-toothed-tiger.webp@SRD 5.2.1 Creatures</token>
 			</sabertoothedtiger>
 			<scorpion>
 				<name type="string">Scorpion</name>
@@ -23777,6 +24403,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">Melee Attack Roll: +2, reach 5 ft. Hit: 1 Piercing damage plus 3 (1d6) Poison damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/scorpion.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/scorpion.webp@SRD 5.2.1 Creatures</token>
 			</scorpion>
 			<seahorse>
 				<name type="string">Seahorse</name>
@@ -23843,6 +24471,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">While underwater, the seahorse moves up to its Swim Speed without provoking Opportunity Attacks.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/seahorse.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/seahorse.webp@SRD 5.2.1 Creatures</token>
 			</seahorse>
 			<spider>
 				<name type="string">Spider</name>
@@ -23913,6 +24543,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">Melee Attack Roll: +4, reach 5 ft. Hit: 1 Piercing damage plus 2 (1d4) Poison damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/spider.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/spider.webp@SRD 5.2.1 Creatures</token>
 			</spider>
 			<swarmofbats>
 				<name type="string">Swarm of Bats</name>
@@ -23979,6 +24611,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">Melee Attack Roll: +4, reach 5 ft. Hit: 5 (2d4) Piercing damage, or 2 (1d4) Piercing damage if the swarm is Bloodied.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/swarm-of-bats.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/swarm-of-bats.webp@SRD 5.2.1 Creatures</token>
 			</swarmofbats>
 			<swarmofinsects>
 				<name type="string">Swarm of Insects</name>
@@ -24049,6 +24683,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">Melee Attack Roll: +3, reach 5 ft. Hit: 6 (2d4 + 1) Poison damage, or 3 (1d4 + 1) Poison damage if the swarm is Bloodied.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/swarm-of-insects.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/swarm-of-insects.webp@SRD 5.2.1 Creatures</token>
 			</swarmofinsects>
 			<swarmofpiranhas>
 				<name type="string">Swarm of Piranhas</name>
@@ -24119,6 +24755,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">Melee Attack Roll: +5 (with Advantage if the target doesn't have all its Hit Points), reach 5 ft. Hit: 8 (2d4 + 3) Piercing damage, or 5 (1d4 + 3) Piercing damage if the swarm is Bloodied.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/swarm-of-piranhas.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/swarm-of-piranhas.webp@SRD 5.2.1 Creatures</token>
 			</swarmofpiranhas>
 			<swarmofrats>
 				<name type="string">Swarm of Rats</name>
@@ -24186,6 +24824,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">Melee Attack Roll: +2, reach 5 ft. Hit: 5 (2d4) Piercing damage, or 2 (1d4) Piercing damage if the swarm is Bloodied.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/swarm-of-rats.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/swarm-of-rats.webp@SRD 5.2.1 Creatures</token>
 			</swarmofrats>
 			<swarmofravens>
 				<name type="string">Swarm of Ravens</name>
@@ -24256,6 +24896,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">Wisdom Saving Throw: DC 10, one creature in the swarm's space. Failure: The target has the Deafened condition until the start of the swarm's next turn. While Deafened, the target also has Disadvantage on ability checks and attack rolls.</desc>
 					</id-00002>
 				</actions>
+				<picture type="string">images/npc/swarm-of-ravens.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/swarm-of-ravens.webp@SRD 5.2.1 Creatures</token>
 			</swarmofravens>
 			<swarmofvenomoussnakes>
 				<name type="string">Swarm of Venomous Snakes</name>
@@ -24322,6 +24964,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">Melee Attack Roll: +6, reach 5 ft. Hit: 8 (1d8 + 4) Piercing damage—or 6 (1d4 + 4) Piercing damage if the swarm is Bloodied—plus 10 (3d6) Poison damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/swarm-of-venomous-snakes.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/swarm-of-venomous-snakes.webp@SRD 5.2.1 Creatures</token>
 			</swarmofvenomoussnakes>
 			<tiger>
 				<name type="string">Tiger</name>
@@ -24388,6 +25032,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">The tiger takes the Disengage or Hide action.</desc>
 					</id-00001>
 				</bonusactions>
+				<picture type="string">images/npc/tiger.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/tiger.webp@SRD 5.2.1 Creatures</token>
 			</tiger>
 			<triceratops>
 				<name type="string">Triceratops</name>
@@ -24452,6 +25098,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">Melee Attack Roll: +9, reach 5 ft. Hit: 19 (2d12 + 6) Piercing damage. If the target is Huge or smaller and the triceratops moved 20+ feet straight toward it immediately before the hit, the target takes an extra 9 (2d8) Piercing damage and has the Prone condition.</desc>
 					</id-00002>
 				</actions>
+				<picture type="string">images/npc/triceratops.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/triceratops.webp@SRD 5.2.1 Creatures</token>
 			</triceratops>
 			<tyrannosaurusrex>
 				<name type="string">Tyrannosaurus Rex</name>
@@ -24521,6 +25169,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">Melee Attack Roll: +10, reach 15 ft. Hit: 25 (4d8 + 7) Bludgeoning damage. If the target is a Huge or smaller creature, it has the Prone condition.</desc>
 					</id-00003>
 				</actions>
+				<picture type="string">images/npc/tyrannosaurus-rex.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/tyrannosaurus-rex.webp@SRD 5.2.1 Creatures</token>
 			</tyrannosaurusrex>
 			<venomoussnake>
 				<name type="string">Venomous Snake</name>
@@ -24581,6 +25231,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">Melee Attack Roll: +4, reach 5 ft. Hit: 4 (1d4 + 2) Piercing damage plus 3 (1d6) Poison damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/venomous-snake.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/venomous-snake.webp@SRD 5.2.1 Creatures</token>
 			</venomoussnake>
 			<vulture>
 				<name type="string">Vulture</name>
@@ -24647,6 +25299,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">Melee Attack Roll: +2, reach 5 ft. Hit: 2 (1d4) Piercing damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/vulture.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/vulture.webp@SRD 5.2.1 Creatures</token>
 			</vulture>
 			<warhorse>
 				<name type="string">Warhorse</name>
@@ -24708,6 +25362,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">Melee Attack Roll: +6, reach 5 ft. Hit: 9 (2d4 + 4) Bludgeoning damage. If the target is a Large or smaller creature and the horse moved 20+ feet straight toward it immediately before the hit, the target takes an extra 5 (2d4) Bludgeoning damage and has the Prone condition.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/warhorse.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/warhorse.webp@SRD 5.2.1 Creatures</token>
 			</warhorse>
 			<weasel>
 				<name type="string">Weasel</name>
@@ -24768,6 +25424,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">Melee Attack Roll: +5, reach 5 ft. Hit: 1 Piercing damage.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/weasel.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/weasel.webp@SRD 5.2.1 Creatures</token>
 			</weasel>
 			<wolf>
 				<name type="string">Wolf</name>
@@ -24834,6 +25492,8 @@ At Will: Detect Evil and Good, Detect Magic
 						<desc type="string">Melee Attack Roll: +4, reach 5 ft. Hit: 5 (1d6 + 2) Piercing damage. If the target is a Medium or smaller creature, it has the Prone condition.</desc>
 					</id-00001>
 				</actions>
+				<picture type="string">images/npc/wolf.webp@SRD 5.2.1 Creatures</picture>
+				<token type="string">tokens/wolf.webp@SRD 5.2.1 Creatures</token>
 			</wolf>
 		</category>
 	</npc>

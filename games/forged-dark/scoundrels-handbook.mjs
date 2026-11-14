@@ -4,7 +4,9 @@
 // the crew sheet read: Kraken's seven playbooks and six crew types (made of
 // the SRD's example abilities), the standard items, and the tables of
 // heritages, backgrounds, vices, traumas, upgrades, claims and abilities.
-import { ids, md, rich } from "../lib/fg.mjs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { ids, illustrated, md, rich } from "../lib/fg.mjs";
 import { chapterText, between, richText, sections, plain } from "./markdown.mjs";
 import { ATTRIBUTION, BACKGROUNDS, CITY, CLAIMS, CREW_ABILITIES, CREWS, HERITAGES, ITEMS, PLAYBOOKS, SPECIAL_ABILITIES, UPGRADES } from "./content.mjs";
 import { ACTIONS, OVERINDULGENCE, REPUTATIONS, TRAUMAS, VICES, titled } from "../../shared/forged/rules.mjs";
@@ -73,7 +75,7 @@ const playbookPages = PLAYBOOK_RECORDS.map((record, index) => ({ name: record.na
 const crewPages = CREW_RECORDS.map((record) => ({ name: record.name, keywords: "crew type", text: record.description }));
 const crewPlaybook = chapterText("Crew playbook");
 
-export const SCOUNDRELS_HANDBOOK = {
+export const SCOUNDRELS_HANDBOOK = illustrated({
   name: "Forged in the Dark Scoundrel's Handbook",
   displayName: "Forged in the Dark: Scoundrel's Handbook",
   category: "Forged in the Dark",
@@ -135,4 +137,4 @@ export const SCOUNDRELS_HANDBOOK = {
     chapter("Downtime activities", { name: "Downtime Activities" }),
     { name: "Credits", sections: [{ name: "Credits", pages: [noticePage("Forged in the Dark: Scoundrel's Handbook")] }] },
   ],
-};
+}, path.join(path.dirname(fileURLToPath(import.meta.url)), "art"), "cover-scoundrels-handbook.webp");
