@@ -1880,6 +1880,8 @@ const TOOLS = [
       return out(await ctx.studio.settings(change));
     },
   },
+  // Map Studio's editor for agents: every action of the map maker (electron/studio/agentTools.cjs).
+  require("../studio/agentTools.cjs").tool,
   {
     name: "kraken_updates",
     description:

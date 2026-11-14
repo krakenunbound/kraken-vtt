@@ -634,7 +634,24 @@ const agentContext = {
   assistant: () => assistant,
   packs: { view: (input) => packsView(input ?? {}), make: (ids) => makePacks(ids), job: () => packJob },
   // Map Studio's asset pack folders (Settings > Map Studio art).
-  studio: { settings: (input) => (input ? setStudioSettings(input) : calls["studio-settings"]()) },
+  // Map Studio's agent tools (kraken_map_studio, electron/studio/agentTools.cjs): an action of the editor
+  // (studio/web/agent.js, in the GM's Map Studio window), and the editor's Save to Kraken into the open image.
+  studio: {
+    settings: (input) => (input ? setStudioSettings(input) : calls["studio-settings"]()),
+    async page(action, args, timeout = 180000) {
+      const { url } = await studioUrl();
+      const answer = await ask("studio", { url, action, args }, timeout);
+      if (!answer?.ok) throw new Error(answer?.error || "Map Studio did not answer.");
+      return answer.value;
+    },
+    assets: () => studioAssets(),
+    async saveOpen(project, image) {
+      const view = openMaster();
+      const token = bridge().openSession({ sceneId: view.scene.id, name: view.scene.name, pictureId: null, size: { width: project.width, height: project.height }, campaignId: hosted.id });
+      return { scene: { id: view.scene.id, name: view.scene.name }, ...(await studioSave(token, studioAssets().validateProject(project), image)) };
+    },
+    folder: () => path.join(USER_DATA, "studio", "agent"),
+  },
 };
 
 // The DM assistant (GM only): the key from the environment or .env.local, or

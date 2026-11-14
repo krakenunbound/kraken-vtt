@@ -92,6 +92,7 @@ async function onBackend(child, message) {
     if (message.op === "ui") answer(true, await askWindow(message.payload, message.timeout));
     else if (message.op === "window") answer(true, await windowOp(message.payload));
     else if (message.op === "updater") answer(true, await updaterOp(message.payload));
+    else if (message.op === "studio") answer(true, await studioOp(message.payload));
     else answer(false, `No such request: ${message.op}`);
   } catch (error) {
     answer(false, error instanceof Error ? error.message : String(error));
@@ -136,6 +137,40 @@ async function windowOp({ op, code }) {
     return value === undefined ? "undefined" : value;
   }
   throw new Error(`No such window request: ${op}`);
+}
+
+// Map Studio's agent tools (kraken_map_studio): an action run by the editor itself
+// (studio/web/agent.js) in the GM's Map Studio window, which opens if it is closed,
+// so the GM watches the map being made in its own tab. url: Map Studio's address.
+async function studioFrame(url) {
+  const win = mainWindow && !mainWindow.isDestroyed() ? mainWindow : null;
+  if (!win) throw new Error("The app window is closed.");
+  const origin = new URL(url).origin;
+  const find = async () => {
+    for (const frame of win.webContents.mainFrame.framesInSubtree) {
+      if (frame.isDestroyed?.() || !String(frame.url).startsWith(origin + "/")) continue;
+      if (await frame.executeJavaScript("Boolean(window.KrakenStudioAgent && window.KrakenStudio && window.KrakenShell)").catch(() => false)) return frame;
+    }
+    return null;
+  };
+  let frame = await find();
+  if (frame) return frame;
+  await askWindow({ kind: "windows", action: "open", window: "studio" }, 30000);
+  for (let wait = 0; wait < 150 && !frame; wait++) {
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    frame = await find();
+  }
+  if (!frame) throw new Error("Map Studio did not open.");
+  // Its library loaded (the agent finds art by name).
+  for (let wait = 0; wait < 150; wait++) {
+    if (await frame.executeJavaScript("window.KrakenStudio.assets.length > 0").catch(() => false)) break;
+    await new Promise((resolve) => setTimeout(resolve, 200));
+  }
+  return frame;
+}
+async function studioOp({ url, action, args }) {
+  const frame = await studioFrame(url);
+  return frame.executeJavaScript(`window.KrakenStudioAgent.run(${JSON.stringify(String(action))}, ${JSON.stringify(args ?? {})})`, true);
 }
 
 // --- The window's calls, forwarded ---------------------------------------------------

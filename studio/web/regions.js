@@ -39,11 +39,14 @@ window.KrakenRegions = (() => {
   }
   const at = q => [...list()].reverse().find(r => inside(r.points, q));
 
-  function add(points) {
+  // A region drawn with the panel's kind; Map Studio's agent tools give their own ({kind, name, note, cost}).
+  function add(points, options = {}) {
+    const k = KINDS[options.kind] ? options.kind : kind;
+    const r = normalize({...options, kind: k, points, name: options.name || `${KINDS[k][3]} ${list().filter(x => x.kind === k).length + 1}`});
     S().snapshot();
-    const r = normalize({kind, points, name: `${KINDS[kind][3]} ${list().filter(x => x.kind === kind).length + 1}`});
     list().push(r); selected = r.id;
     S().save(); S().draw(); render();
+    return r;
   }
 
   function render() {
@@ -159,5 +162,5 @@ window.KrakenRegions = (() => {
     ctx.restore();
   }
   function modeChanged(mode) { drawing = null; drag = null; if (mode === 'regions') { render(); hint(); } }
-  return {KINDS, normalize, pointerDown, pointerMove, pointerUp, keyDown, draw, modeChanged, render};
+  return {KINDS, normalize, add, pointerDown, pointerMove, pointerUp, keyDown, draw, modeChanged, render};
 })();
