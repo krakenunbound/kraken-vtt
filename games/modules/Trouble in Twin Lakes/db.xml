@@ -163,6 +163,8 @@
 				</attacks>
 				<critical type="string">The Night Cat begins to eat the target (d4 STR damage) while they are still alive.</critical>
 				<text type="formattedtext"><p>6 HP, 9 STR, 14 DEX, 5 WIL, claws (d6+d6)</p><list><li>Intelligent, nocturnal marsupials that make their homes in forests and swamps. Hunt in packs.</li><li><b>Critical Damage</b>: The Night Cat begins to eat the target (d4 STR damage) while they are still alive.</li></list></text>
+				<picture type="string">images/npc/night-cat.webp@Trouble in Twin Lakes</picture>
+				<token type="string">tokens/night-cat.webp@Trouble in Twin Lakes</token>
 			</nightcat>
 			<suraru>
 				<name type="string">Suraru</name>
@@ -191,6 +193,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>6 HP, 1 Armor, 14 STR, 12 DEX, 5 WIL, claws (d6+d6) or teeth (d8)</p><list><li>Bipedal reptilians, birthed from large fungal growths that they spread and cultivate. They have perfect vision even in complete darkness and are fiercely loyal to their <b>Imperator</b>.</li><li>If their Imperator dies, they will always flee in order to prepare a new breeding sac.</li></list></text>
+				<picture type="string">images/npc/suraru.webp@Trouble in Twin Lakes</picture>
+				<token type="string">tokens/suraru.webp@Trouble in Twin Lakes</token>
 			</suraru>
 			<suraruimperator>
 				<name type="string">Suraru Imperator</name>
@@ -219,6 +223,8 @@
 				</attacks>
 				<critical type="string">A body part dissolves in venomous acid, and the target loses 1 point of Armor.</critical>
 				<text type="formattedtext"><p>10 HP, 1 Armor, 16 STR, 12 DEX, 11 WIL, claws (d8+d8) or venomous bite (d6, blast)</p><list><li>Rules over a brood of subservient <b>Surarus</b>, who will fight to the death to protect the sac.</li><li><b>Critical damage</b>: A body part dissolves in venomous acid, and the target loses 1 point of Armor.</li></list></text>
+				<picture type="string">images/npc/suraru-imperator.webp@Trouble in Twin Lakes</picture>
+				<token type="string">tokens/suraru-imperator.webp@Trouble in Twin Lakes</token>
 			</suraruimperator>
 			<annafranax>
 				<name type="string">Annafranax</name>
@@ -235,6 +241,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>9 HP, 11 STR, 14 DEX, 17 WIL</p><list><li>Can change her form depending on the audience and their intentions. At times she is a young woman with long, auburn hair, and at others she is squat and almost amphibious in appearance.</li><li>Returns to Deadmill two days after the adventure begins, in the evening. Although she is an immensely powerful being, she is also very old and will try to avoid combat as much as possible.</li><li>She has near perfect knowledge of the forest and its history and can offer the party cures for nearly any ailment. She always keeps her word.</li><li>Carries four of the following Spellbooks: <i>Animate Object, Arcane Eye, Auditory Illusion, Beast Form, Befuddle, Haste, Pacify, Push/Pull, Read Mind, Thicket, True Sight, Visual Illusion.</i></li><li>If she is killed, every bird in the Stone Forest will attack her murderer until they are dead or have fled The Wood.</li></list></text>
+				<picture type="string">images/npc/annafranax.webp@Trouble in Twin Lakes</picture>
+				<token type="string">tokens/annafranax.webp@Trouble in Twin Lakes</token>
 			</annafranax>
 			<banditleader>
 				<name type="string">Bandit Leader</name>
@@ -257,6 +265,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>6 HP, 2 Armor, 13 STR, 14 DEX, 13 WIL, long sword (d10, bulky).</p></text>
+				<picture type="string">images/npc/bandit-leader.webp@Trouble in Twin Lakes</picture>
+				<token type="string">tokens/bandit-leader.webp@Trouble in Twin Lakes</token>
 			</banditleader>
 			<bandit>
 				<name type="string">Bandit</name>
@@ -285,6 +295,8 @@
 				</attacks>
 				<critical type="string"></critical>
 				<text type="formattedtext"><p>4 HP, 1 Armor, 12 STR, 12 DEX, 9 WIL, sword (d6). One has a short bow (d6).</p></text>
+				<picture type="string">images/npc/bandit.webp@Trouble in Twin Lakes</picture>
+				<token type="string">tokens/bandit.webp@Trouble in Twin Lakes</token>
 			</bandit>
 		</category>
 	</npc>
