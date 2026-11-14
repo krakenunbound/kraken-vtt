@@ -11,6 +11,8 @@
 				<scale type="string">Crew Tier</scale>
 				<text type="string">Scholars, tinkerers, occultists, and chemists.</text>
 				<description type="formattedtext"><p><b>Adepts:</b> Scholars, tinkerers, occultists, and chemists.</p><p>A gang has scale and quality equal to the crew's Tier (1 or 2 people at Tier 0). Give it one or two edges and as many flaws.</p><p><b>Edges:</b> Fearsome, Independent, Loyal, Tenacious. <b>Flaws:</b> Principled, Savage, Unreliable, Wild.</p></description>
+				<picture type="string">images/npc/gang-of-adepts.webp@Forged in the Dark Game Master's Guide</picture>
+				<token type="string">tokens/gang-of-adepts.webp@Forged in the Dark Game Master's Guide</token>
 			</gangofadepts>
 			<gangofrooks>
 				<name type="string">Gang of Rooks</name>
@@ -21,6 +23,8 @@
 				<scale type="string">Crew Tier</scale>
 				<text type="string">Con artists, spies, and socialites.</text>
 				<description type="formattedtext"><p><b>Rooks:</b> Con artists, spies, and socialites.</p><p>A gang has scale and quality equal to the crew's Tier (1 or 2 people at Tier 0). Give it one or two edges and as many flaws.</p><p><b>Edges:</b> Fearsome, Independent, Loyal, Tenacious. <b>Flaws:</b> Principled, Savage, Unreliable, Wild.</p></description>
+				<picture type="string">images/npc/gang-of-rooks.webp@Forged in the Dark Game Master's Guide</picture>
+				<token type="string">tokens/gang-of-rooks.webp@Forged in the Dark Game Master's Guide</token>
 			</gangofrooks>
 			<gangofrovers>
 				<name type="string">Gang of Rovers</name>
@@ -31,6 +35,8 @@
 				<scale type="string">Crew Tier</scale>
 				<text type="string">Sailors, carriage drivers, and scavengers.</text>
 				<description type="formattedtext"><p><b>Rovers:</b> Sailors, carriage drivers, and scavengers.</p><p>A gang has scale and quality equal to the crew's Tier (1 or 2 people at Tier 0). Give it one or two edges and as many flaws.</p><p><b>Edges:</b> Fearsome, Independent, Loyal, Tenacious. <b>Flaws:</b> Principled, Savage, Unreliable, Wild.</p></description>
+				<picture type="string">images/npc/gang-of-rovers.webp@Forged in the Dark Game Master's Guide</picture>
+				<token type="string">tokens/gang-of-rovers.webp@Forged in the Dark Game Master's Guide</token>
 			</gangofrovers>
 			<gangofskulks>
 				<name type="string">Gang of Skulks</name>
@@ -41,6 +47,8 @@
 				<scale type="string">Crew Tier</scale>
 				<text type="string">Scouts, infiltrators, and thieves.</text>
 				<description type="formattedtext"><p><b>Skulks:</b> Scouts, infiltrators, and thieves.</p><p>A gang has scale and quality equal to the crew's Tier (1 or 2 people at Tier 0). Give it one or two edges and as many flaws.</p><p><b>Edges:</b> Fearsome, Independent, Loyal, Tenacious. <b>Flaws:</b> Principled, Savage, Unreliable, Wild.</p></description>
+				<picture type="string">images/npc/gang-of-skulks.webp@Forged in the Dark Game Master's Guide</picture>
+				<token type="string">tokens/gang-of-skulks.webp@Forged in the Dark Game Master's Guide</token>
 			</gangofskulks>
 			<gangofthugs>
 				<name type="string">Gang of Thugs</name>
@@ -51,6 +59,8 @@
 				<scale type="string">Crew Tier</scale>
 				<text type="string">Killers, brawlers, and roustabouts.</text>
 				<description type="formattedtext"><p><b>Thugs:</b> Killers, brawlers, and roustabouts.</p><p>A gang has scale and quality equal to the crew's Tier (1 or 2 people at Tier 0). Give it one or two edges and as many flaws.</p><p><b>Edges:</b> Fearsome, Independent, Loyal, Tenacious. <b>Flaws:</b> Principled, Savage, Unreliable, Wild.</p></description>
+				<picture type="string">images/npc/gang-of-thugs.webp@Forged in the Dark Game Master's Guide</picture>
+				<token type="string">tokens/gang-of-thugs.webp@Forged in the Dark Game Master's Guide</token>
 			</gangofthugs>
 			<doctorlieslvarn>
 				<name type="string">Doctor Liesl Varn</name>
@@ -61,6 +71,8 @@
 				<scale type="string">0 (1 person)</scale>
 				<text type="string">A canal-quarter physicker of Brackwater who stitches wounds by lamplight and keeps her prices low and her questions lower.</text>
 				<description type="formattedtext"><p><b>Expert (Physicker).</b> A canal-quarter physicker of Brackwater who stitches wounds by lamplight and keeps her prices low and her questions lower.</p><p><i>Kraken's own example.</i> An expert has quality equal to the crew's Tier +1; their scale is always zero.</p></description>
+				<picture type="string">images/npc/doctor-liesl-varn.webp@Forged in the Dark Game Master's Guide</picture>
+				<token type="string">tokens/doctor-liesl-varn.webp@Forged in the Dark Game Master's Guide</token>
 			</doctorlieslvarn>
 			<ebbestrand>
 				<name type="string">Ebbe Strand</name>
@@ -71,6 +83,8 @@
 				<scale type="string">0 (1 person)</scale>
 				<text type="string">A former Watch inspector, dismissed for honesty, who finds anyone in the city for a fee.</text>
 				<description type="formattedtext"><p><b>Expert (Investigator).</b> A former Watch inspector, dismissed for honesty, who finds anyone in the city for a fee.</p><p><i>Kraken's own example.</i> An expert has quality equal to the crew's Tier +1; their scale is always zero.</p></description>
+				<picture type="string">images/npc/ebbe-strand.webp@Forged in the Dark Game Master's Guide</picture>
+				<token type="string">tokens/ebbe-strand.webp@Forged in the Dark Game Master's Guide</token>
 			</ebbestrand>
 			<mirelleashgrove>
 				<name type="string">Mirelle Ashgrove</name>
@@ -81,6 +95,8 @@
 				<scale type="string">0 (1 person)</scale>
 				<text type="string">A medium of the old marsh tradition who can speak to, bind, or banish the restless dead.</text>
 				<description type="formattedtext"><p><b>Expert (Occultist).</b> A medium of the old marsh tradition who can speak to, bind, or banish the restless dead.</p><p><i>Kraken's own example.</i> An expert has quality equal to the crew's Tier +1; their scale is always zero.</p></description>
+				<picture type="string">images/npc/mirelle-ashgrove.webp@Forged in the Dark Game Master's Guide</picture>
+				<token type="string">tokens/mirelle-ashgrove.webp@Forged in the Dark Game Master's Guide</token>
 			</mirelleashgrove>
 			<quill>
 				<name type="string">Quill</name>
@@ -91,6 +107,8 @@
 				<scale type="string">0 (1 person)</scale>
 				<text type="string">An elderly scribe who can reproduce any seal, signature or ledger hand after an hour's study.</text>
 				<description type="formattedtext"><p><b>Expert (Forger).</b> An elderly scribe who can reproduce any seal, signature or ledger hand after an hour's study.</p><p><i>Kraken's own example.</i> An expert has quality equal to the crew's Tier +1; their scale is always zero.</p></description>
+				<picture type="string">images/npc/quill.webp@Forged in the Dark Game Master's Guide</picture>
+				<token type="string">tokens/quill.webp@Forged in the Dark Game Master's Guide</token>
 			</quill>
 			<gauntbastien>
 				<name type="string">Gaunt Bastien</name>
@@ -101,6 +119,8 @@
 				<scale type="string">0 (1 person)</scale>
 				<text type="string">A quiet killer with a gentle voice and no known address.</text>
 				<description type="formattedtext"><p><b>Expert (Assassin).</b> A quiet killer with a gentle voice and no known address.</p><p><i>Kraken's own example.</i> An expert has quality equal to the crew's Tier +1; their scale is always zero.</p></description>
+				<picture type="string">images/npc/gaunt-bastien.webp@Forged in the Dark Game Master's Guide</picture>
+				<token type="string">tokens/gaunt-bastien.webp@Forged in the Dark Game Master's Guide</token>
 			</gauntbastien>
 		</category>
 	</npc>
