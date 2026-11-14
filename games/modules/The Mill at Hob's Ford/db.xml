@@ -1,0 +1,416 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root version="4.6" release="1">
+	<encounter>
+		<category name="The Mill at Hob's Ford">
+			<e99creditsandlicence>
+				<name type="string">99 Credits and Licence</name>
+				<text type="formattedtext"><p><b>The Mill at Hob's Ford</b> is an original adventure written for Kraken VTT, for the <i>Basic Fantasy Role-Playing Game</i>.</p><p><b>Basic Fantasy Role-Playing Game, 4th Edition</b>, Copyright © 2006-2023 Chris Gonnerman, https://www.basicfantasy.org, licensed under <b>CC BY-SA 4.0</b> https://creativecommons.org/licenses/by-sa/4.0/</p><p>This book is adapted from that game's text for Kraken VTT, and is itself licensed under the <b>Creative Commons Attribution-ShareAlike 4.0 International License</b>. You may share and adapt it, even commercially, if you credit the source and share your changes under the same licence.</p><p><b>Changes made:</b> the text was arranged into Kraken books (rules chapters as pages; races, classes, spells, equipment, monsters and magic items as records) and its formatting converted. The book's artwork is not included (it belongs to its artists and is not covered by the licence). Kraken VTT's own program code is under its own licence; the share-alike covers this book's text.</p></text>
+			</e99creditsandlicence>
+			<e00aboutthisadventure>
+				<name type="string">00 About This Adventure</name>
+				<text type="formattedtext"><p><b>The Mill at Hob's Ford</b> is a first adventure for the <i>Basic Fantasy Role-Playing Game</i>: three to six characters of 1st level, one or two sessions. It was written for Kraken VTT.</p><p><b>What has happened.</b> The village of <b>Hob's Ford</b> grinds its grain at an old stone mill on the river bank, a mile upstream. Under the mill are cellars older than the mill itself: a forgotten shrine where three soldiers of a long-gone lord were laid to rest. A week ago a band of <b>goblins</b>, led by a <b>hobgoblin</b> called <b>Grisk</b>, came down the river, found the cellars and moved in. They drove off the miller, <b>Old Hennet</b>, and have been stealing flour, chickens and a cow from the village by night.</p><p>What the goblins do not know: when they broke into the shrine looking for treasure, they woke its dead. The goblins have walled the shrine door shut with crates and are frightened to go near it.</p><p><b>The job.</b> The village reeve offers <b>50 gp</b> to clear the mill, and Old Hennet promises the party what is in his strongbox, if they can find it: he hid it in the cellars' hidden room when the goblins came.</p><p><b>Using Kraken.</b> Make the <i>Basic Fantasy Player's Handbook</i> and <i>Game Master's Guide</i> active with this adventure. Share the mill map first; the cellars when the party goes down. The encounters put their monsters on the combat tracker; the treasure parcels go to the party sheet.</p></text>
+			</e00aboutthisadventure>
+			<e01hobsford>
+				<name type="string">01 Hob's Ford</name>
+				<text type="formattedtext"><p><i>Read or tell:</i> <b>Hob's Ford is twenty cottages, a tavern called the Wet Boot, and a shallow crossing where the river runs wide over stones. The reeve, a stout woman named Marla Tull, meets you outside the tavern. &quot;Goblins,&quot; she says, &quot;in Hennet's mill. They come down at night and take what they like. Clear them out, and the village will pay you fifty gold.&quot;</b></p><p>What the villagers know (one fact each, for asking around or buying a round): - The goblins come by night, five or six of them; a bigger one with them &quot;wears a red cloak and shouts&quot;. - Old Hennet fled to his daughter's house in the village. He is frightened and angry, and wants his strongbox back (see the handout). - The mill has cellars, &quot;older than the mill&quot;; the old folk say a lord's men were buried down there long ago. - Hennet's dog went missing the night the goblins came.</p><p>Old Hennet gives the party <b>the handout</b> (<i>The Miller's Note</i>) if they promise to bring back his strongbox.</p></text>
+			</e01hobsford>
+			<e02themill>
+				<name type="string">02 The Mill</name>
+				<text type="formattedtext"><p><i>Map: The Mill at Hob's Ford.</i></p><p><b>The mill stands on the river bank, its wheel still and dripping. The door hangs open. Flour is trodden into the mud of the path, and something has been dragged inside.</b></p><p><b>The millroom</b> (the large room): the millstone, a table, and blood on the floor (the miller's dog: its bones are by the inner door). <b>Three goblins</b> are here, eating stolen bread; one watches the path. Roll surprise as the book says (1d6 for each side; surprised on 1-2). If two goblins fall, the third tries to flee down the stairs to warn Grisk (check its morale when the first falls: 2d6 against 7).</p><p><b>The storeroom</b> (behind the inner door): sacks of flour, two barrels of beer, crates of the village's stolen goods (pots, a ham, a bolt of cloth). Nothing of great value.</p><p><b>The stairs</b> in the millroom's corner go down to the cellars (entry 03).</p></text>
+			</e02themill>
+			<e03thecellars>
+				<name type="string">03 The Cellars</name>
+				<text type="formattedtext"><p><i>Map: The Cellars under the Mill.</i></p><p><b>The stair ends in a low room cut from the rock, smelling of damp and smoke. Cobwebs fill one corner. A passage runs east toward a flicker of firelight; another, narrower, runs south into darkness.</b></p><p>The south passage ends after twenty feet at a blank wall: it is the <b>secret door</b> to the hidden room (entry 06). Searching finds it on 1 on 1d6 (1-2 for a Dwarf or an Elf; an Elf passing by notices it on 1). Old Hennet's note tells where it is.</p><p>The east passage leads to a door (unlocked) and the goblins' den (entry 04). The goblins can be heard from the passage, arguing.</p></text>
+			</e03thecellars>
+			<e04thegoblinden>
+				<name type="string">04 The Goblin Den</name>
+				<text type="formattedtext"><p><b>A long cave lit by a fire in an iron brazier. Straw bedding, gnawed bones, stolen crates. A big goblin in a red cloak sits on a crate, shouting at the others.</b></p><p><b>Grisk the hobgoblin</b> and <b>three goblins</b> (four if the one from the mill got away). Grisk fights while he is winning; check his morale (8) when he is reduced to half his hit points. The goblins check theirs (7) when Grisk falls, and those that fail try to surrender: they offer to show the party &quot;the dead men's door&quot; in return for their lives.</p><p>The crates against the south wall block a passage going south; moving them takes a turn. The goblins have scratched marks on them: a crude skull.</p><p><b>Treasure:</b> in a sack under Grisk's bedding (the parcel <i>Goblin Den Loot</i>): 140 sp, 300 cp, 12 gp and a dagger.</p></text>
+			</e04thegoblinden>
+			<e05theoldshrine>
+				<name type="string">05 The Old Shrine</name>
+				<text type="formattedtext"><p><b>Behind the crates a short passage leads down into a hall of dressed stone. Four pillars hold up the roof. Two stone coffins lie open on either side of a black pool, and before the altar three figures stand up from the floor in rusted mail, their eyes empty.</b></p><p><b>Three skeletons</b>, the dead lord's soldiers. They attack anyone who enters, and pursue no further than the passage. A Cleric may try to Turn them (1st level: 13 or more on 1d20 against skeletons; 2d6 hit dice are affected). Turned skeletons stand back in the corners while the party is in the hall.</p><p>The altar bears an old inscription: <i>&quot;They kept faith. Let them keep it still.&quot;</i> Under the altar's loose top lie a silver holy symbol (25 gp) and a vial of holy water.</p><p>If the party lays the skeletons' bones back in their coffins and closes them, they do not rise again; a Cleric who does so earns the party an extra <b>100 XP</b>.</p></text>
+			</e05theoldshrine>
+			<e06thehiddenroom>
+				<name type="string">06 The Hidden Room</name>
+				<text type="formattedtext"><p><b>A small rough room behind the secret door. A wooden chest sits against the wall; beside it, the bones of some long-dead thief who found this room before the miller did.</b></p><p>The chest is <b>Old Hennet's strongbox</b>. It is locked (a Thief may Open Locks; the key is in Hennet's pocket, if the party asks him). Inside (the parcel <i>The Miller's Strongbox</i>): 60 gp, 20 ep, 2 pp, a <b>potion of healing</b> and a vial of holy water.</p><p>The dead thief's bones hold a rotted bag with a rusty dagger and three iron spikes. Nothing else.</p></text>
+			</e06thehiddenroom>
+			<e07aftermath>
+				<name type="string">07 Aftermath</name>
+				<text type="formattedtext"><p><b>Rewards.</b> Defeated monsters are worth their XP as the book gives them: goblins 10 each, Grisk 25, skeletons 25 each. The Game Master may add XP for treasure brought back (the book's optional rule: 1 XP for each gold piece). Old Hennet's strongbox, returned to him, earns his thanks and a free sack of flour a month for life.</p><p>The reeve pays the <b>50 gp</b> when the mill is clear. If the party kept the goblins alive and brought them to the village, the reeve asks what is to be done with them: that is the party's choice.</p><p><b>Threads to follow.</b> The goblins came down the river from somewhere: Grisk's cloak is the red of a bigger tribe in the hills. And the inscription in the shrine names the lord the soldiers served, whose tower stands in ruins three days north.</p></text>
+			</e07aftermath>
+			<e08handoutthemillersnote>
+				<name type="string">08 Handout: The Miller's Note</name>
+				<text type="formattedtext"><p><i>A scrap of flour sack, written on in charcoal in a shaky hand.</i></p><p>To whoever goes into my mill:</p><p>The goblins came in the night. I ran. I am not ashamed of it.</p><p>My strongbox is in the cellar, in the little room behind the wall. Go down the stair, take the narrow passage south, and at the end of it push the stone with the chalk mark at knee height. It swings.</p><p>Do NOT go into the old shrine past the goblins' cave. My father said never. I never did.</p><p>Bring the box back and what is in it is yours, all but the silver ring. That was my wife's.</p><p>— Hennet</p></text>
+			</e08handoutthemillersnote>
+		</category>
+	</encounter>
+	<battle>
+		<category name="Encounters">
+			<goblinsinthemill>
+				<name type="string">Goblins in the Mill</name>
+				<npclist>
+					<id-00001>
+						<name type="string">Goblin</name>
+						<count type="number">3</count>
+						<faction type="string">foe</faction>
+						<isidentified type="number">1</isidentified>
+						<link type="windowreference"><class>npc</class><recordname>npc.goblin@Basic Fantasy Game Master's Guide</recordname></link>
+					</id-00001>
+				</npclist>
+			</goblinsinthemill>
+			<thegoblinden>
+				<name type="string">The Goblin Den</name>
+				<npclist>
+					<id-00001>
+						<name type="string">Hobgoblin</name>
+						<count type="number">1</count>
+						<faction type="string">foe</faction>
+						<isidentified type="number">1</isidentified>
+						<link type="windowreference"><class>npc</class><recordname>npc.hobgoblin@Basic Fantasy Game Master's Guide</recordname></link>
+					</id-00001>
+					<id-00002>
+						<name type="string">Goblin</name>
+						<count type="number">3</count>
+						<faction type="string">foe</faction>
+						<isidentified type="number">1</isidentified>
+						<link type="windowreference"><class>npc</class><recordname>npc.goblin@Basic Fantasy Game Master's Guide</recordname></link>
+					</id-00002>
+				</npclist>
+			</thegoblinden>
+			<theoldshrine>
+				<name type="string">The Old Shrine</name>
+				<npclist>
+					<id-00001>
+						<name type="string">Skeleton</name>
+						<count type="number">3</count>
+						<faction type="string">foe</faction>
+						<isidentified type="number">1</isidentified>
+						<link type="windowreference"><class>npc</class><recordname>npc.skeleton@Basic Fantasy Game Master's Guide</recordname></link>
+					</id-00001>
+				</npclist>
+			</theoldshrine>
+		</category>
+	</battle>
+	<treasureparcels>
+		<category name="Treasure">
+			<goblindenloot>
+				<name type="string">Goblin Den Loot</name>
+				<coinlist>
+					<id-00001>
+						<description type="string">SP</description>
+						<amount type="number">140</amount>
+					</id-00001>
+					<id-00002>
+						<description type="string">CP</description>
+						<amount type="number">300</amount>
+					</id-00002>
+					<id-00003>
+						<description type="string">GP</description>
+						<amount type="number">12</amount>
+					</id-00003>
+				</coinlist>
+				<itemlist>
+					<id-00001>
+						<name type="string">Dagger</name>
+						<count type="number">1</count>
+					</id-00001>
+				</itemlist>
+			</goblindenloot>
+			<themillersstrongbox>
+				<name type="string">The Miller's Strongbox</name>
+				<coinlist>
+					<id-00001>
+						<description type="string">GP</description>
+						<amount type="number">60</amount>
+					</id-00001>
+					<id-00002>
+						<description type="string">EP</description>
+						<amount type="number">20</amount>
+					</id-00002>
+					<id-00003>
+						<description type="string">PP</description>
+						<amount type="number">2</amount>
+					</id-00003>
+				</coinlist>
+				<itemlist>
+					<id-00001>
+						<name type="string">Potion of Healing</name>
+						<count type="number">1</count>
+					</id-00001>
+					<id-00002>
+						<name type="string">Holy Water, per vial</name>
+						<count type="number">1</count>
+					</id-00002>
+				</itemlist>
+			</themillersstrongbox>
+			<theshrinesaltar>
+				<name type="string">The Shrine's Altar</name>
+				<coinlist>
+				</coinlist>
+				<itemlist>
+					<id-00001>
+						<name type="string">Holy Symbol</name>
+						<count type="number">1</count>
+					</id-00001>
+					<id-00002>
+						<name type="string">Holy Water, per vial</name>
+						<count type="number">1</count>
+					</id-00002>
+				</itemlist>
+			</theshrinesaltar>
+		</category>
+	</treasureparcels>
+	<image>
+		<category name="Maps">
+			<themillathobsford>
+				<name type="string">The Mill at Hob's Ford</name>
+				<image>
+					<grid type="string">on</grid>
+					<gridsize type="string">70,70</gridsize>
+					<gridoffset type="string">0,0</gridoffset>
+					<layers>
+						<layer>
+							<name type="string">The Mill at Hob's Ford</name>
+							<id type="string">0</id>
+							<parentid type="string">-1</parentid>
+							<type type="string">image</type>
+							<bitmap type="string">images/hobs-ford-mill.webp</bitmap>
+							<matrix type="string">1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1</matrix>
+							<occluders>
+								<occluder>
+									<id type="string">0</id>
+									<points type="string">-280,420,490,420</points>
+								</occluder>
+								<occluder>
+									<id type="string">1</id>
+									<points type="string">-210,350,140,350</points>
+								</occluder>
+								<occluder>
+									<id type="string">2</id>
+									<points type="string">210,350,420,350</points>
+								</occluder>
+								<occluder>
+									<id type="string">3</id>
+									<points type="string">140,140,210,140</points>
+								</occluder>
+								<occluder>
+									<id type="string">4</id>
+									<points type="string">140,70,210,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">5</id>
+									<points type="string">-210,-140,70,-140</points>
+								</occluder>
+								<occluder>
+									<id type="string">6</id>
+									<points type="string">210,-140,420,-140</points>
+								</occluder>
+								<occluder>
+									<id type="string">7</id>
+									<points type="string">-280,-210,70,-210</points>
+								</occluder>
+								<occluder>
+									<id type="string">8</id>
+									<points type="string">140,-210,490,-210</points>
+								</occluder>
+								<occluder>
+									<id type="string">9</id>
+									<points type="string">-280,420,-280,-210</points>
+								</occluder>
+								<occluder>
+									<id type="string">10</id>
+									<points type="string">-210,350,-210,-140</points>
+								</occluder>
+								<occluder>
+									<id type="string">11</id>
+									<points type="string">70,-140,70,-210</points>
+								</occluder>
+								<occluder>
+									<id type="string">12</id>
+									<points type="string">140,350,140,140</points>
+								</occluder>
+								<occluder>
+									<id type="string">13</id>
+									<points type="string">140,70,140,-210</points>
+								</occluder>
+								<occluder>
+									<id type="string">14</id>
+									<points type="string">210,350,210,140</points>
+								</occluder>
+								<occluder>
+									<id type="string">15</id>
+									<points type="string">210,70,210,-140</points>
+								</occluder>
+								<occluder>
+									<id type="string">16</id>
+									<points type="string">420,350,420,-140</points>
+								</occluder>
+								<occluder>
+									<id type="string">17</id>
+									<points type="string">490,420,490,-210</points>
+								</occluder>
+								<occluder>
+									<id type="string">18</id>
+									<points type="string">70,-140,140,-140</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+								<occluder>
+									<id type="string">19</id>
+									<points type="string">210,140,210,70</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+							</occluders>
+						</layer>
+					</layers>
+				</image>
+			</themillathobsford>
+			<thecellarsunderthemill>
+				<name type="string">The Cellars under the Mill</name>
+				<image>
+					<grid type="string">on</grid>
+					<gridsize type="string">70,70</gridsize>
+					<gridoffset type="string">0,0</gridoffset>
+					<layers>
+						<layer>
+							<name type="string">The Cellars under the Mill</name>
+							<id type="string">0</id>
+							<parentid type="string">-1</parentid>
+							<type type="string">image</type>
+							<bitmap type="string">images/hobs-ford-cellars.webp</bitmap>
+							<matrix type="string">1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1</matrix>
+							<occluders>
+								<occluder>
+									<id type="string">0</id>
+									<points type="string">0,490,490,490</points>
+								</occluder>
+								<occluder>
+									<id type="string">1</id>
+									<points type="string">-630,420,-350,420</points>
+								</occluder>
+								<occluder>
+									<id type="string">2</id>
+									<points type="string">-350,350,0,350</points>
+								</occluder>
+								<occluder>
+									<id type="string">3</id>
+									<points type="string">-350,280,0,280</points>
+								</occluder>
+								<occluder>
+									<id type="string">4</id>
+									<points type="string">-630,140,-560,140</points>
+								</occluder>
+								<occluder>
+									<id type="string">5</id>
+									<points type="string">-490,140,-350,140</points>
+								</occluder>
+								<occluder>
+									<id type="string">6</id>
+									<points type="string">0,70,210,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">7</id>
+									<points type="string">280,70,490,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">8</id>
+									<points type="string">-70,-140,210,-140</points>
+								</occluder>
+								<occluder>
+									<id type="string">9</id>
+									<points type="string">280,-140,560,-140</points>
+								</occluder>
+								<occluder>
+									<id type="string">10</id>
+									<points type="string">-630,-210,-560,-210</points>
+								</occluder>
+								<occluder>
+									<id type="string">11</id>
+									<points type="string">-490,-210,-280,-210</points>
+								</occluder>
+								<occluder>
+									<id type="string">12</id>
+									<points type="string">-630,-420,-280,-420</points>
+								</occluder>
+								<occluder>
+									<id type="string">13</id>
+									<points type="string">-70,-490,560,-490</points>
+								</occluder>
+								<occluder>
+									<id type="string">14</id>
+									<points type="string">-630,420,-630,140</points>
+								</occluder>
+								<occluder>
+									<id type="string">15</id>
+									<points type="string">-630,-210,-630,-420</points>
+								</occluder>
+								<occluder>
+									<id type="string">16</id>
+									<points type="string">-560,140,-560,-210</points>
+								</occluder>
+								<occluder>
+									<id type="string">17</id>
+									<points type="string">-490,140,-490,-210</points>
+								</occluder>
+								<occluder>
+									<id type="string">18</id>
+									<points type="string">-350,420,-350,350</points>
+								</occluder>
+								<occluder>
+									<id type="string">19</id>
+									<points type="string">-350,280,-350,140</points>
+								</occluder>
+								<occluder>
+									<id type="string">20</id>
+									<points type="string">-280,-210,-280,-420</points>
+								</occluder>
+								<occluder>
+									<id type="string">21</id>
+									<points type="string">-70,-140,-70,-490</points>
+								</occluder>
+								<occluder>
+									<id type="string">22</id>
+									<points type="string">0,490,0,350</points>
+								</occluder>
+								<occluder>
+									<id type="string">23</id>
+									<points type="string">0,280,0,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">24</id>
+									<points type="string">210,70,210,-140</points>
+								</occluder>
+								<occluder>
+									<id type="string">25</id>
+									<points type="string">280,70,280,-140</points>
+								</occluder>
+								<occluder>
+									<id type="string">26</id>
+									<points type="string">490,490,490,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">27</id>
+									<points type="string">560,-140,560,-490</points>
+								</occluder>
+								<occluder>
+									<id type="string">28</id>
+									<points type="string">0,350,0,280</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+								<occluder>
+									<id type="string">29</id>
+									<points type="string">210,-140,280,-140</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+								<occluder>
+									<id type="string">30</id>
+									<points type="string">-560,-210,-490,-210</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+							</occluders>
+						</layer>
+					</layers>
+				</image>
+			</thecellarsunderthemill>
+		</category>
+	</image>
+</root>

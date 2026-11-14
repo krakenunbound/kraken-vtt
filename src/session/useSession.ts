@@ -201,8 +201,10 @@ export type CombatEntry = {
   effects: { id: string; label: string; duration: number }[];
   targets: string[];
   attacks?: { key: string; name: string; bonus: number; bonuses?: number[]; thaco?: number; damage: string }[];
-  /** AD&D 2E: the level this character turns undead at. */
+  /** AD&D 2E and Basic Fantasy: the level this character turns undead at. */
   turns?: number;
+  /** Basic Fantasy: a monster's morale score (the GM's view). */
+  morale?: number;
   /** A starship (the 2d6 games): its weapons and who mans them. */
   ship?: { record: string; thrust: number; criticals: Record<string, number>; weapons: { key: string; name: string; damage: string; range: string; gunner: string; gunnerName: string; mine: boolean; disabled: boolean }[] };
   powers?: { key: string; name: string; uses: number; used: number; damage: string; save: string }[];
@@ -903,7 +905,7 @@ export function useSession() {
   );
 
   // A SIEGE check for a character; the host rolls it and posts the result.
-  const siegeCheck = useCallback((id: string, attribute: string, cl = 0, save = false, extra?: { label?: string; bonus?: number; addLevel?: boolean; kind?: "check" | "save" | "skill"; skill?: string; dc?: number; advantage?: string }) => {
+  const siegeCheck = useCallback((id: string, attribute: string, cl = 0, save = false, extra?: { label?: string; bonus?: number; addLevel?: boolean; kind?: "check" | "save" | "skill" | "morale"; skill?: string; dc?: number; advantage?: string }) => {
     const socket = socketRef.current;
     if (!socket || socket.readyState !== WebSocket.OPEN) return;
     socket.send(JSON.stringify({ type: "siege-check", id, attribute, cl, ...(save ? { label: `${attribute[0].toUpperCase()}${attribute.slice(1)} save` } : {}), ...(extra ?? {}), ...throwIntent() }));

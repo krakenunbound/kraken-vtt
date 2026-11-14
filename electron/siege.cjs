@@ -6,6 +6,7 @@ const adnd2e = require("./adnd2e.cjs");
 const astra = require("./astra.cjs");
 const mgt2 = require("./mgt2.cjs");
 const cairn = require("./cairn.cjs");
+const bfrpg = require("./bfrpg.cjs");
 
 // Host side of the SIEGE engine (shared/siege, ES modules shared with the
 // app window): the game library from the campaign's imported records, and
@@ -33,6 +34,8 @@ async function siegeCheck(table, record, { attribute, cl = 0, bonus = 0, addLeve
   // A 5E character: its ruleset's check, save or skill (dc, advantage).
   // A 3.5E character: its check, save (fortitude, reflex, will) or skill against a DC.
   // An AD&D 2E character: a save (d20 at or above its number), an ability check (d20 at or under the score) or a thief skill (d100).
+  // A Basic Fantasy character: a save (d20 at or above), the ability roll (d20 + bonus at or above the level's target), a thief ability (d100) or loyalty (2d6).
+  if (bfrpg.isBf(record)) return bfrpg.checkBf(table, record, { kind: kind ?? (/save/i.test(String(label ?? "")) ? "save" : "check"), attribute, skill, bonus, label: kind ? label : undefined }, from);
   if (adnd2e.is2e(record)) return adnd2e.check2e(table, record, { kind: kind ?? (/save/i.test(String(label ?? "")) ? "save" : "check"), attribute, skill, bonus, label: kind ? label : undefined }, from);
   if (dnd35.is35(record)) return dnd35.check35(table, record, { kind: kind ?? (/save/i.test(String(label ?? "")) ? "save" : "check"), attribute, skill, dc: dc ?? cl, bonus, label: kind ? label : undefined }, from);
   if (dnd5e.is5e(record)) return dnd5e.check5e(table, record, { kind: kind ?? (/save/i.test(String(label ?? "")) ? "save" : "check"), attribute, skill, dc: dc ?? cl, bonus, advantage, label: kind ? label : undefined }, from);
@@ -68,6 +71,7 @@ async function levelUp(table, record, packageKey, from) {
   if (dnd35.is35(record)) return dnd35.levelUp35(table, record, from);
   if (adnd2e.is2e(record)) return adnd2e.levelUp2e(table, record, from, packageKey);
   if (cairn.isCairn(record)) throw new Error("Cairn has no levels: a character grows from what happens to them (Scars, Growth, Downtime).");
+  if (bfrpg.isBf(record)) return bfrpg.levelUpBf(table, record, from);
   if (astra.isAstra(record)) throw new Error("Apeira Astra has no levels: spend experience on a skill or a characteristic (Improve).");
   if (mgt2.isMgt2(record)) throw new Error("Traveller has no levels: change a skill or a characteristic on the sheet (training, a new term).");
   const { engine } = await siege();
@@ -166,6 +170,7 @@ async function editCharacter(table, record, changes, seat) {
   if (dnd35.is35(record)) return dnd35.edit35(table, record, changes, seat);
   if (adnd2e.is2e(record)) return adnd2e.edit2e(table, record, changes, seat);
   if (cairn.isCairn(record)) return cairn.editCairn(table, record, changes, seat);
+  if (bfrpg.isBf(record)) return bfrpg.editBf(table, record, changes, seat);
   if (astra.isAstra(record)) return astra.editAstra(table, record, changes, seat);
   if (mgt2.isMgt2(record)) return mgt2.editMgt2(table, record, changes, seat);
   if (seat.role !== "dm" && record.owner !== seat.name) throw new Error("You can only change your own character.");
@@ -267,6 +272,26 @@ async function dropOnCharacter(table, record, source, from) {
     const summary = `${record.name} gets ${source.name}.`;
     table.say(summary, who, record.visibility === "gm");
     return { record: updated, added: "item", summary };
+  }
+  if (bfrpg.isBf(record)) {
+    // A Basic Fantasy sheet takes items (a weapon, armor or shield ready) and spells (a Magic-User's into the spellbook, a Cleric's prepared).
+    const data = structuredClone(record.data);
+    const rules = await bfrpg.rulesBf();
+    let added;
+    if (source.type === "item") {
+      const list = (data.inventorylist = data.inventorylist ?? {});
+      const { engine } = await siege();
+      const { fgPath: _path, ...copy } = structuredClone(source.data ?? {});
+      list[engine.nextId(list)] = { ...copy, name: source.name, count: 1, carried: rules.isWeapon(copy) || rules.isArmor(copy) || rules.isShield(copy) ? 2 : 1 };
+      added = "item";
+    } else if (source.type === "spell") {
+      const key = rules.casterOf(data.class)?.kind === "arcane" ? "spellbook" : "prepared";
+      data[key] = [...new Set([...(Array.isArray(data[key]) ? data[key] : []), source.name])];
+      added = "spell";
+    } else throw new Error("A Basic Fantasy sheet takes items and spells; race and class come with the character wizard.");
+    const updated = table.records.update(record.id, { data: rules.derive(data) }, table.seat, { replace: true });
+    table.say(`${record.name} gets ${source.name}.`, who, record.visibility === "gm");
+    return { record: updated, added };
   }
   if (adnd2e.is2e(record)) {
     // A 2E sheet takes items (into the gear: a weapon, armor or shield worn) and spells (by name).

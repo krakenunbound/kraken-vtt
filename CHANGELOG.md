@@ -50,6 +50,30 @@ full log of the work is in [PLAN.md](PLAN.md).
     half; several attackers on one foe keep the highest die.
   - **The party sheet** hands out gold pieces, and its XP tab is the party's
     Growth: Cairn has no experience points.
+- **Basic Fantasy comes with Kraken.** The free *Basic Fantasy Role-Playing
+  Game, 4th Edition* (Chris Gonnerman, CC BY-SA 4.0) is a new ruleset on the
+  campaign screen, with its books and a first adventure, so a table can play it
+  with nothing else installed:
+  - **The character wizard follows the book:** 3d6 in order on the host's
+    dice, a race whose limits the scores meet, a class it may take (the Elf's
+    Fighter/Magic-User and Magic-User/Thief too), the hit die, 3d6 x 10 gp and
+    a shop that greys out what the class may not use, a Magic-User's first
+    spell, name and alignment.
+  - **The sheet** works out Armor Class, the attack bonus, the five saving
+    throws, movement, thief abilities and spells a day; saves, ability rolls,
+    thief abilities and loyalty roll from it; level up rolls the hit die to
+    9th level and adds the fixed hit points after. Humans get +10% experience.
+  - **The combat tracker** plays its rules: d6 initiative, highest first; d20
+    + attack bonus against ascending AC; monsters attack by hit dice; dead at
+    0; **Turn undead** for clerics (2d6 hit dice) and a **Morale** button for
+    monsters.
+  - **Books:** the *Basic Fantasy Player's Handbook* (rules chapters, 4 races,
+    6 classes, 105 spells, 85 items), the *Basic Fantasy Game Master's Guide*
+    (245 monsters, 135 magic items, treasure and the GM's chapters) and *The
+    Mill at Hob's Ford*, a first adventure written for Kraken (goblins under a
+    village mill, and what they woke; two maps with walls and doors, three
+    treasure parcels). The books stay under CC BY-SA 4.0, with the notice on
+    each one's first page; no art from the book is included.
 
 ## 0.1.0-alpha.87: Two fixes from the screenshot shoot
 

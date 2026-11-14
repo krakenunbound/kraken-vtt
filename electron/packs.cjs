@@ -54,6 +54,8 @@ const KRAKEN_RULESET = {
   "descending darkness": "Descending Darkness",
   "apeira astra": "Apeira Astra",
   cairn: "Cairn",
+  "basic fantasy": "Basic Fantasy",
+  basicfantasy: "Basic Fantasy",
   any: "Any",
   corerpg: "Any",
   "": "Any",

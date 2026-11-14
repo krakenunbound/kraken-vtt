@@ -38,6 +38,8 @@ const FG_RULESETS = {
   "Apeira Astra": ["Apeira Astra"],
   // Cairn Second Edition (CC BY-SA 4.0), its books shipped in the app (games/modules).
   Cairn: ["Cairn"],
+  // Basic Fantasy RPG 4th Edition (CC BY-SA 4.0), its books shipped in the app.
+  "Basic Fantasy": ["Basic Fantasy"],
   Worldbuilding: [],
 };
 const ANY = new Set(["", "any", "corerpg"]);

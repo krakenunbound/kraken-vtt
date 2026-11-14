@@ -39,6 +39,12 @@ installed: two of Kraken's own and *Cairn, Second Edition* (an open game,
 CC BY-SA 4.0). Each has a players' book, a GM's book of creatures, and a first
 adventure with story, encounters and maps (with walls and doors). Make a campaign with the game as its ruleset, then make its books active
 in **Modules**.
+Three games ship with Kraken, so a table can play with nothing else
+installed: two original games, and the free **Basic Fantasy Role-Playing
+Game** (CC BY-SA 4.0). Each has a players' book, a GM's book of creatures, and
+a first adventure with story, encounters, maps (with walls and doors) and
+handouts. Make a campaign with the game as its ruleset, then make its books
+active in **Modules**.
 
 ## Descending Darkness (dark fantasy)
 
@@ -152,6 +158,61 @@ LICENSE.md); no art from the books or the website is included. The
 share-alike covers that folder and the books made from it, not Kraken's code.
 
 Kraken's two own games, their text, names, settings, maps and art are original to Kraken
+## Basic Fantasy (old-school fantasy, CC BY-SA)
+
+The **Basic Fantasy Role-Playing Game, 4th Edition** by Chris Gonnerman
+(www.basicfantasy.org): classic old-school play, free and open. In Kraken:
+
+- **The character wizard follows the book.** Roll 3d6 for each ability in
+  order (the host's dice, in chat; the GM may allow exchanging scores);
+  choose a race whose limits the scores meet (Dwarf, Elf, Halfling, Human)
+  and a class it may take with its Prime Requisite of 9 (Cleric, Fighter,
+  Magic-User, Thief; an Elf may be a Fighter/Magic-User or a
+  Magic-User/Thief); roll the class's hit die + Constitution; roll 3d6 x 10
+  gp and buy equipment from the book's list (the shop greys out what the
+  class or race may not use: a Cleric's edged weapons, a Thief's metal armour,
+  a Halfling's large weapons); a Magic-User picks a first spell besides Read
+  Magic; name and alignment.
+- **The sheet** works everything out: ability bonuses, ascending Armor Class
+  (armour + shield + Dexterity), the attack bonus (melee with Strength,
+  missile with Dexterity), the five saving throws by class and level with the
+  race's bonus, movement by armour and load, thief abilities, spells a day,
+  turning the undead. Click a saving throw, an ability (the book's optional
+  ability roll), a thief ability or loyalty to roll it in front of the table.
+  The level up button rolls the hit die to 9th level and adds the class's
+  fixed hit points after. A Human gets +10% experience from the party sheet.
+- **The combat tracker** plays the Encounter rules: initiative d6 +
+  Dexterity, highest first; an attack is d20 + attack bonus at or above the
+  target's AC (a natural 20 hits, a 1 misses); a monster attacks with the
+  bonus for its hit dice, claw, claw, bite; saves at or above the number (a
+  natural 1 fails); anyone at 0 hit points is dead. A Cleric's **Turn undead**
+  rolls d20 against the table, 2d6 hit dice affected. The GM's **Morale**
+  button rolls 2d6 against a monster's morale.
+
+**Books:** *Basic Fantasy Player's Handbook* (the player's chapters: making
+a character, races, classes, equipment, spells, adventuring and encounters;
+4 races, 6 classes, 105 spells and 85 items as records) and *Basic Fantasy
+Game Master's Guide* (245 monsters as NPC records, 135 magic items, treasure
+and the Game Master's chapters).
+
+**Adventure: *The Mill at Hob's Ford*** (1st level, one or two sessions;
+written for Kraken). Goblins have moved into the cellars under the village's
+mill, and they have woken something older below. Ten story entries, three
+encounters (goblins, their hobgoblin chief, skeletons to turn), three treasure
+parcels, two maps (the mill, the cellars with a secret door) and the miller's
+note as a handout.
+
+## Licensing
+
+**Basic Fantasy** is not Kraken's: its books are adapted from the *Basic
+Fantasy Role-Playing Game, 4th Edition*, Copyright © 2006-2023 Chris Gonnerman,
+licensed under CC BY-SA 4.0 (creativecommons.org/licenses/by-sa/4.0), and stay
+under that licence, as does the adventure written for it. Each book's first
+page carries the notice; `games/basic-fantasy/LICENSE.md` says what changed
+and that the share-alike covers only that folder and the books built from it.
+No art from the book is included.
+
+Descending Darkness and Apeira Astra, their text, names, settings, maps and art are original to Kraken
 and licensed with it under the PolyForm Shield License 1.0.0 (see [LICENSE](../LICENSE)). Some of Descending Darkness's mechanics are based on
 the System Reference Document 5.1 (Wizards of the Coast LLC, CC-BY-4.0); no
 SRD text is reproduced. Apeira Astra's 2d6 task roll is a mechanic common to

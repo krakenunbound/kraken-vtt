@@ -140,6 +140,7 @@ Six start screens, fantasy, science fiction and horror, one at random each time.
   - **Apeira Astra**: science fiction on 2d6 and skills, with crews made in
     minutes and armour that soaks. Adventure: *Salvage Rights*.
   - **Cairn**, Second Edition (Yochai Gal, CC BY-SA 4.0): saves under a d20, attacks that always hit, Scars and ten slots. Adventure: *Trouble in Twin Lakes*.
+  - **Basic Fantasy**: the free Basic Fantasy RPG 4th Edition (CC BY-SA), its Player's Handbook, Game Master's Guide and a first adventure, *The Mill at Hob's Ford*.
 
   Kraken also plays **Castles & Crusades**, **D&D 5E**, **D&D 3.5E**
   (base attack and iterative attacks, criticals by threat and confirmation,
@@ -210,7 +211,7 @@ The full guides:
 |---|---|
 | [docs/gm-guide.md](docs/gm-guide.md) | Running a game: campaigns, hosting, books, maps, combat, sound |
 | [docs/players.md](docs/players.md) | Joining a table, making a character, rolling |
-| [docs/included-games.md](docs/included-games.md) | Descending Darkness and Apeira Astra, and running their adventures |
+| [docs/included-games.md](docs/included-games.md) | Descending Darkness, Apeira Astra and Basic Fantasy, and running their adventures |
 | [docs/development.md](docs/development.md) | Building from source, tests, how the code is laid out |
 | [AGENT.md](AGENT.md) | The AI agent and its tools |
 | [CHANGELOG.md](CHANGELOG.md) | What changed in each release |
@@ -256,6 +257,11 @@ For permission beyond the licence, open an issue on GitHub.
 
 Map Studio's art pack (Kraken Map Art) is original to Kraken; Battle Map
 Forge's generator and pack are included with its author's permission.
+
+The included Basic Fantasy books are adapted from the *Basic Fantasy
+Role-Playing Game, 4th Edition*, Copyright © 2006-2023 Chris Gonnerman
+(www.basicfantasy.org), and stay under CC BY-SA 4.0
+([games/basic-fantasy/LICENSE.md](games/basic-fantasy/LICENSE.md)).
 
 The included games (Descending Darkness and Apeira Astra), their books, maps
 and art are original to Kraken. Some of Descending Darkness's mechanics are

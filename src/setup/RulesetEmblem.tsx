@@ -60,6 +60,18 @@ const GLYPHS: Record<string, ReactElement> = {
       <ellipse cx="20" cy="10.2" rx="2.2" ry="1.5" />
     </>
   ),
+  // Basic Fantasy: a six-sided die (3d6 in order).
+  basicfantasy: (
+    <>
+      <path d="M20 8.5 30.5 14v12L20 31.5 9.5 26V14z" fill="none" />
+      <path d="M9.5 14 20 19.5 30.5 14M20 19.5v12" fill="none" />
+      <circle cx="20" cy="13.8" r="1.6" />
+      <circle cx="14" cy="21.5" r="1.4" />
+      <circle cx="16.5" cy="26" r="1.4" />
+      <circle cx="23.5" cy="22" r="1.4" />
+      <circle cx="27" cy="25.5" r="1.4" />
+    </>
+  ),
   // Worldbuilding: a compass rose.
   worldbuilding: (
     <>

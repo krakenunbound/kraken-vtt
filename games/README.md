@@ -2,6 +2,8 @@
 
 Two original games and one open game ship with Kraken, so testers can play
 without any Fantasy Grounds modules:
+Two original games, and one free open game, ship with Kraken, so testers can
+play without any Fantasy Grounds modules:
 
 | Game | Engine | Books (games/modules) |
 |---|---|---|
@@ -41,6 +43,17 @@ FG 5E (2024) records of them, the shapes the 5E wizard, sheet, level up and
 tracker read. Every book's first page carries the SRD's notice word for word
 (`games/srd-5e/LICENSE.md`). `npm run srd5e` plays them alone; `npm run
 dnd5e` plays them and, where the GM has them, FG's own SRD modules.
+| **Basic Fantasy** (old-school fantasy; the Basic Fantasy RPG 4th Edition, CC BY-SA 4.0) | `shared/bfrpg/rules.mjs`, `electron/bfrpg.cjs` | Player's Handbook, Game Master's Guide, *The Mill at Hob's Ford* |
+
+Basic Fantasy is not Kraken's own game: its books are the Basic Fantasy
+Role-Playing Game's text (Chris Gonnerman, CC BY-SA 4.0), read from the
+book's Quarto source by `games/tools/bfrpg-extract.mjs` into
+`games/basic-fantasy/data/*.json` (run it again with the path to a clone of
+github.com/Solomoriah/bfrpg to refresh them), then arranged into records and
+pages by `games/basic-fantasy/*.mjs`. Everything in `games/basic-fantasy/`
+stays CC BY-SA 4.0 (its `LICENSE.md`), and every book's first page carries the
+notice. No art from the book is used; the adventure's two maps are made with
+`mapgen.py`.
 
 ## How the books are made
 
