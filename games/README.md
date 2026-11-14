@@ -8,6 +8,31 @@ Fantasy Grounds modules:
 | **Descending Darkness** (dark fantasy) | the d20 family (`shared/dnd5e/rules.mjs`, profile `descending`) | Player's Handbook, Bestiary, *The Empty Watchtower* |
 | **Apeira Astra** (science fiction) | its own 2d6 engine (`shared/astra/rules.mjs`) | Crew Handbook, Threat Dossier, *Salvage Rights* |
 
+And D&D 5E's rules come with Kraken too, from the System Reference Document
+5.2.1 (CC BY 4.0), so a D&D 5E campaign plays with nothing else installed:
+
+| Books | Engine | What is in them |
+|---|---|---|
+| **SRD 5.2.1 Player's Rules**, **SRD 5.2.1 Creatures**, **SRD 5.2.1 Magic Items** (`games/srd-5e`, category SRD 5.2.1, FG ruleset 5E) | the d20 family (`shared/dnd5e/rules.mjs`, profile `dnd5e`) | every rules chapter as pages; 12 classes with their subclasses and features by level, 9 species with their lineages, 4 backgrounds, the feats, all the equipment, 339 spells (those that roll with the tracker's actions); 330 monsters and animals; 258 magic items |
+
+## The SRD 5.2.1 books
+
+Built from the SRD 5.2.1's own PDF (`SRD_CC_v5.2.1.pdf`,
+https://www.dndbeyond.com/srd), never from another product's packaging:
+
+    python games/srd-5e/tools/build.py path/to/SRD_CC_v5.2.1.pdf   (PyMuPDF)
+    npm run build-games && npm run build-packs
+
+`tools/extract.py` reads the PDF's lines in order, telling headings, body
+text, tables, field lines and stat blocks apart by the SRD's own fonts;
+`tools/parse.py` turns them into `games/srd-5e/data/*.json` (the reference
+chapters as pages, classes, origins, feats, equipment, spells with the
+actions read from their text, creatures, magic items). The `.mjs` files make
+FG 5E (2024) records of them, the shapes the 5E wizard, sheet, level up and
+tracker read. Every book's first page carries the SRD's notice word for word
+(`games/srd-5e/LICENSE.md`). `npm run srd5e` plays them alone; `npm run
+dnd5e` plays them and, where the GM has them, FG's own SRD modules.
+
 ## How the books are made
 
 Each book is written as plain data in `games/<game>/*.mjs` and built into a
@@ -67,3 +92,8 @@ Reference Document 5.1 (Wizards of the Coast LLC, CC-BY-4.0), credited in its
 Player's Handbook; no SRD text is reproduced. Apeira Astra's 2d6-and-skills
 task roll is a mechanic common to many games and owned by none; it uses no
 other game's terms, setting or text.
+
+The SRD 5.2.1 books (`games/srd-5e`) are the exception: they are the SRD
+5.2.1's own text, under its Creative Commons Attribution 4.0 licence, with the
+notice it asks for on each book's first page and in `games/srd-5e/LICENSE.md`.
+They have no art, and their names use no trademark.

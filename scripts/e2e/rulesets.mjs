@@ -29,6 +29,21 @@ async function bookMap(ctx, title) {
   }
   throw new Error(`${title}'s maps did not open.`);
 }
+// The GM: a picture of Kraken's own opened as a bare map (for a game whose books have no maps).
+async function pictureMap(ctx, file, name) {
+  const { page } = ctx;
+  const bytes = await import("node:fs").then((fs) => fs.readFileSync(file));
+  await page.evaluate(async ([data, title]) => {
+    const input = document.querySelector('input[type="file"]');
+    if (!input) throw new Error("No file input to open a map.");
+    const picture = new File([new Uint8Array(data)], title, { type: "image/webp" });
+    const transfer = new DataTransfer();
+    transfer.items.add(picture);
+    input.files = transfer.files;
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+  }, [[...bytes], name]);
+  for (let i = 0; i < 60 && !(await ctx.tool("kraken_map")).scene; i++) await wait(500);
+}
 // The GM: an NPC from an active adventure (Images > the module > NPCs > Add), else a bestiary's by name on the tracker.
 async function libraryNpc(ctx, title, search) {
   const { page, shelf, tool } = ctx;
@@ -308,6 +323,18 @@ export const RULESETS = {
   "D&D 5E": {
     books: ["5E SRD 5.2.1 Player Data", "5E SRD 5.2.1 Bestiary", "5E SRD 5.2.1 Magic Items", "The Secrets of Skyhorn Lighthouse"],
     map: (ctx) => bookMap(ctx, "The Secrets of Skyhorn Lighthouse"),
+    wizard: (ctx) => wizard5e(ctx, { root: '[data-wizard="dnd5e"]', cls: "Fighter", species: "Dwarf", background: "Soldier", name: "Mira Holt" }),
+    bought: checkKit,
+    enemy: (ctx) => trackerNpc(ctx, "Goblin Warrior"),
+    parcel: (ctx) => handParcel(ctx, { coin: "GP", amount: 75, item: "Potion of Healing" }),
+    xp: 200,
+  },
+  // D&D 5E with only the books Kraken ships: the SRD 5.2.1 (games/srd-5e), no FG modules or packs of the GM's.
+  "D&D 5E (SRD)": {
+    ruleset: "D&D 5E",
+    shipped: true,
+    books: ["SRD 5.2.1 Player's Rules", "SRD 5.2.1 Creatures", "SRD 5.2.1 Magic Items"],
+    map: (ctx) => pictureMap(ctx, "games/descending-darkness/art/watchtower-yard.webp", "Courtyard.webp"),
     wizard: (ctx) => wizard5e(ctx, { root: '[data-wizard="dnd5e"]', cls: "Fighter", species: "Dwarf", background: "Soldier", name: "Mira Holt" }),
     bought: checkKit,
     enemy: (ctx) => trackerNpc(ctx, "Goblin Warrior"),

@@ -76,6 +76,7 @@
     "walls": "node scripts/check-walls.mjs",
     "tiles": "tsx scripts/check-tiles.mjs",
     "dnd5e": "node scripts/check-dnd5e.mjs",
+    "srd5e": "node scripts/check-srd5e.mjs",
     "audit": "node scripts/check-audit.mjs",
     "dnd5e-fg": "node scripts/check-dnd5e-fg.mjs",
     "library": "node scripts/check-library.mjs",

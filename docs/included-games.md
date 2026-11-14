@@ -4,7 +4,36 @@ Two original games ship with Kraken, so a table can play with nothing else
 installed. Each has a players' book, a GM's book of creatures, and a first
 adventure with story, encounters, maps (with walls and doors), handouts and
 art. Make a campaign with the game as its ruleset, then make its books active
-in **Modules**.
+in **Modules**. D&D 5E comes with its rules too: the SRD 5.2.1 (below).
+
+## D&D 5E: the SRD 5.2.1
+
+The System Reference Document 5.2.1 as three books for a D&D 5E campaign,
+made from the SRD's own PDF:
+
+- **SRD 5.2.1 Player's Rules** (a players' book): every rules chapter as
+  pages (Playing the Game, Character Creation, Classes with their subclasses
+  and spell lists, Character Origins, Feats, Equipment, Spells, Rules
+  Glossary, Gameplay Toolbox), and what the character wizard, the sheet and
+  the tracker use: 12 classes with a subclass each and their features to
+  level 20, 9 species (the Elf's lineages, the Tiefling's legacies, the
+  Dragonborn's ancestors), 4 backgrounds, the feats, every weapon, armor,
+  tool and piece of gear, and 339 spells. Spells that roll (attacks, saves
+  with half damage, damage and healing that grow with the slot or the
+  caster's level, Magic Missile's darts, Bless's d4) play on the Combat
+  Tracker.
+- **SRD 5.2.1 Creatures** (the GM's): all 330 monster and animal stat blocks,
+  by creature type, as NPCs whose attacks roll on the tracker.
+- **SRD 5.2.1 Magic Items** (the GM's): the Magic Items chapter and its 258
+  items, for parcels and the party sheet.
+
+There is no adventure and no art (the SRD has none). Your own 5E modules and
+packs sit beside these books. The books carry the SRD's licence notice:
+This work includes material from the System Reference Document 5.2.1 ("SRD
+5.2.1") by Wizards of the Coast LLC, available at
+https://www.dndbeyond.com/srd. The SRD 5.2.1 is licensed under the Creative
+Commons Attribution 4.0 International License, available at
+https://creativecommons.org/licenses/by/4.0/legalcode.
 
 ## Descending Darkness (dark fantasy)
 

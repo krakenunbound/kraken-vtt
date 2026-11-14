@@ -1,5 +1,5 @@
-"""Rebuilds games/srd-5e/data/*.json from the SRD 5.2.1 PDF (Wizards of the
-Coast's SRD_CC_v5.2.1.pdf, from https://www.dndbeyond.com/srd):
+"""Rebuilds games/srd-5e/data/*.json from the SRD 5.2.1 PDF
+(SRD_CC_v5.2.1.pdf, from https://www.dndbeyond.com/srd):
 
     python games/srd-5e/tools/build.py path/to/SRD_CC_v5.2.1.pdf
 

@@ -78,7 +78,9 @@ async function runRuleset(ruleset, plan) {
   console.log(`\n=== ${ruleset} ===`);
 
   const profile = mkdtempSync(path.join(tmpdir(), "kraken-e2e-"));
-  const env = { ...process.env, KRAKEN_WINDOW_AT: AT.join(","), KRAKEN_AGENT_FILE: path.join(profile, "agent.json"), KRAKEN_AGENT_PORT: "0" };
+  // A plan may play with only the books Kraken ships (plan.shipped: no FG modules, no Kraken packs of the GM's).
+  const env = { ...process.env, KRAKEN_WINDOW_AT: AT.join(","), KRAKEN_AGENT_FILE: path.join(profile, "agent.json"), KRAKEN_AGENT_PORT: "0", ...(plan.shipped ? { KRAKEN_BOOKS: path.join(profile, "no-fg-modules"), KRAKEN_PACKS: path.join(profile, "Kraken VTT", "Packs") } : {}) };
+  if (plan.shipped) for (const dir of [env.KRAKEN_BOOKS, env.KRAKEN_PACKS]) mkdirSync(dir, { recursive: true });
   let app = null;
   let browser = null;
   let child = null;
@@ -136,7 +138,7 @@ async function runRuleset(ruleset, plan) {
       if (!(await page.$('[data-action="new-campaign"]'))) await page.click('[data-action="campaigns-mode"]').catch(() => undefined);
       await page.click('[data-action="new-campaign"]');
       await page.fill('[aria-label="New campaign name"]', `E2E ${ruleset}`);
-      await page.click(`[data-ruleset="${ruleset}"]`);
+      await page.click(`[data-ruleset="${plan.ruleset ?? ruleset}"]`);
       await page.click('[data-action="create"]');
       await page.waitForSelector('[data-action="play"]', { timeout: 15000 });
       await page.fill('input[name="port"]', String(ctx.port));
