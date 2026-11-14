@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root version="4.6" release="1">
+	<name type="string">SRD 5.2.1 Magic Items</name>
+	<displayname type="string">SRD 5.2.1 Magic Items</displayname>
+	<category type="string">SRD 5.2.1</category>
+	<author type="string">Kraken VTT</author>
+	<ruleset type="string">5E</ruleset>
+</root>
