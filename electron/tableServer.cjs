@@ -1755,7 +1755,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
           require("./cairn.cjs")
             .buildCairn(agentHandle, msg.spec ?? {}, owner, client.role === "dm" ? seatOf(client) : { role: "dm", name: client.name })
             .then(({ record, problems }) => {
-              addChat({ id: client.id, from: client.name, text: `Created ${record.name}: ${record.data.background ?? ""}, STR ${record.data.attributes.str.score} DEX ${record.data.attributes.dex.score} WIL ${record.data.attributes.wil.score}, HP ${record.data.hp.max}.`, at: Date.now() });
+              addChat({ id: client.id, from: client.name, text: `Created ${record.name}: ${record.data.background ?? ""}, STR ${record.data.attributes.str.score} DEX ${record.data.attributes.dex.score} WIL ${record.data.attributes.wil.score}, HP ${record.data.hp.max}.${problems.length ? ` ${problems.join(" ")}` : ""}`, at: Date.now() });
               answer({ ok: true, id: record.id, problems });
             })
             .catch((error) => answer({ ok: false, error: error instanceof Error ? error.message : "Could not build that character." }));

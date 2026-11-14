@@ -482,6 +482,42 @@ export const RULESETS = {
     parcel: (ctx) => handParcel(ctx, { coin: "Cr", amount: 800, item: "Toolkit" }),
     xp: 4,
   },
+  // Cairn: the book's creation in order (every die the host's), its gold at the Marketplace.
+  Cairn: {
+    books: ["Cairn Player's Guide", "Cairn Warden's Guide", "Trouble in Twin Lakes"],
+    map: (ctx) => bookMap(ctx, "Trouble in Twin Lakes"),
+    async wizard(ctx) {
+      const { seat } = ctx;
+      const w = '[data-wizard="cairn"]';
+      await seat.waitForSelector(w);
+      const ready = (action) => seat.waitForFunction((which) => { const button = document.querySelector(which); return button && !button.disabled; }, `${w} [data-action="${action}"]`, { timeout: 30000 });
+      const rolled = (action) => seat.waitForFunction((which) => document.querySelector(which)?.disabled, `${w} [data-action="${action}"]`, { timeout: 30000 });
+      await seat.click(`${w} [data-action="cairn-roll-background"]`);
+      await seat.waitForFunction((root) => document.querySelector(`${root} select[aria-label="Background"]`)?.value, w, { timeout: 30000 });
+      const names = await seat.locator(`${w} select[aria-label="Name from the background"] option`).allTextContents();
+      await seat.selectOption(`${w} select[aria-label="Name from the background"]`, names[1]);
+      for (const action of ["cairn-roll-table-0", "cairn-roll-table-1", "cairn-roll-attributes"]) {
+        await ready(action);
+        await seat.click(`${w} [data-action="${action}"]`);
+        await rolled(action);
+      }
+      await seat.click(`${w} [data-action="cairn-swap"]`).catch(() => undefined);
+      for (const action of ["cairn-roll-hp", "cairn-roll-traits", "cairn-roll-bond", "cairn-roll-age", "cairn-roll-gold"]) {
+        await ready(action);
+        await seat.click(`${w} [data-action="${action}"]`);
+        await rolled(action);
+      }
+      await buy(ctx, ["Chalk", "Torch", "Rope", "Dagger"]);
+      await ready("wizard-finish");
+      await finish(ctx);
+    },
+    bought: checkBought,
+    // A creature from the Warden's Guide's bestiary.
+    enemy: (ctx) => trackerNpc(ctx, "Wolf"),
+    parcel: (ctx) => handParcel(ctx, { coin: "GP", amount: 40, item: "Rope" }),
+    // Cairn has no experience: characters grow from what happens to them.
+    xp: null,
+  },
   Worldbuilding: {
     books: [],
     async map(ctx) {

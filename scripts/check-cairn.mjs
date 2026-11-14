@@ -54,6 +54,11 @@ assert(rules.damageFormula("d6+d6") === "2d6kh1" && rules.damageFormula("d8") ==
   const full = rules.derive({ ...data, fatigue: 4 });
   assert(full.slots.used === 10 && full.encumbered && full.hp.total === 0, "a full inventory: HP 0");
   assert(rules.derive({ ...data, attributes: { str: { score: 0, max: 10 }, dex: { score: 5 }, wil: { score: 5 } } }).status === "Dead" && rules.derive({ ...data, attributes: { str: { score: 5 }, dex: { score: 0, max: 9 }, wil: { score: 5 } } }).status === "Paralyzed" && rules.derive({ ...data, attributes: { str: { score: 5 }, dex: { score: 5 }, wil: { score: 0, max: 9 } } }).status === "Delirious", "STR 0 dead, DEX 0 paralyzed, WIL 0 delirious");
+  // A new character's gear: four on the body, ten in all; what does not fit is left behind, the last first.
+  const pile = { a: { name: "Plate", armor: 3, bulky: 1, carried: 2 }, b: { name: "Halberd", damage: "d10", bulky: 1, carried: 2 }, c: { name: "Shield", armor: 1, carried: 2 }, d: { name: "Tent", bulky: 1, carried: 1 }, e: { name: "Rope", carried: 1 }, f: { name: "Cart", bulky: 1, carried: 1 }, g: { name: "Chain", carried: 1 }, h: { name: "Lantern", carried: 1 } };
+  const leftBehind = rules.fitSlots(pile);
+  const packed = rules.derive({ ...data, fatigue: 0, inventorylist: pile });
+  assert(packed.slots.body === 3 && packed.slots.used === 10 && leftBehind.join() === "Lantern,Chain" && pile.b.carried === 1, `packing: body ${packed.slots.body}, ${packed.slots.used} slots, left ${leftBehind}`);
   const grown = structuredClone(data);
   assert(/max HP 5 -> 9/.test(rules.applyGrowth(grown, { to: "hp", how: "higher", value: 9 })) && /stays/.test(rules.applyGrowth(grown, { to: "wil", how: "higher", value: 3 })), "growth: higher than the maximum is kept, lower is not");
   assert(rules.moraleDue({ size: 4, fallen: 1, done: {} }).join() === "first" && rules.moraleDue({ size: 4, fallen: 2, done: { first: true } }).join() === "half" && rules.moraleDue({ size: 1, fallen: 1 }).length === 0, "morale: the first casualty, then half");

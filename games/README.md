@@ -1,12 +1,21 @@
 # Kraken's own games
 
-Two original games ship with Kraken, so testers can play without any
-Fantasy Grounds modules:
+Two original games and one open game ship with Kraken, so testers can play
+without any Fantasy Grounds modules:
 
 | Game | Engine | Books (games/modules) |
 |---|---|---|
 | **Descending Darkness** (dark fantasy) | the d20 family (`shared/dnd5e/rules.mjs`, profile `descending`) | Player's Handbook, Bestiary, *The Empty Watchtower* |
 | **Apeira Astra** (science fiction) | its own 2d6 engine (`shared/astra/rules.mjs`) | Crew Handbook, Threat Dossier, *Salvage Rights* |
+| **Cairn**, Second Edition (Yochai Gal, CC BY-SA 4.0) | its own engine (`shared/cairn/rules.mjs`) | Player's Guide, Warden's Guide, *Trouble in Twin Lakes* |
+
+Cairn's books are made from its official Markdown, kept in `games/cairn/text`
+(copied from github.com/yochaigal/cairn: `second-edition/` and the adventure
+CAS-1). `games/cairn/markdown.mjs` turns it into pages, tables and records;
+the backgrounds' items, the bestiary's stat lines and the spellbooks are read
+from the text. Its two battle maps were drawn with `mapgen.py` from the
+adventure's descriptions (`games/cairn/maps`). Everything in `games/cairn` is
+CC BY-SA 4.0 (its LICENSE.md); the rules engine is Kraken's code.
 
 ## How the books are made
 
@@ -61,7 +70,10 @@ that looks like another work's characters.
 
 ## Licensing
 
-Everything here is original: text, names, setting and pictures. Descending
+Cairn (`games/cairn` and the three books built from it) is CC BY-SA 4.0, by
+Yochai Gal, adapted for Kraken: see `games/cairn/LICENSE.md`. The rest:
+
+Everything else here is original: text, names, setting and pictures. Descending
 Darkness's mechanics are in the 5E family; some are based on the System
 Reference Document 5.1 (Wizards of the Coast LLC, CC-BY-4.0), credited in its
 Player's Handbook; no SRD text is reproduced. Apeira Astra's 2d6-and-skills

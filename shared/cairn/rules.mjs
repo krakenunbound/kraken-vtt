@@ -406,6 +406,7 @@ export function buildFromSpec(spec, lib) {
     for (let i = 0; i < count; i += 1) add({ ...item.data, name: item.name });
   }
   const traits = Object.fromEntries(TRAITS.map((trait) => [trait, String(spec.traits?.[trait] ?? "").slice(0, 60)]));
+  for (const name of fitSlots(inventorylist)) problems.push(`${name} did not fit in ten slots: left behind (Away).`);
   const data = derive({
     background: background.name,
     race: "Human",
@@ -428,6 +429,29 @@ export function buildFromSpec(spec, lib) {
     notes: String(spec.notes ?? ""),
   });
   return { name: String(spec.name ?? "").trim() || background.name, data, problems };
+}
+
+// A new character's gear packed: four slots on the body (armor first, then
+// weapons; the rest in the backpack), and no more than ten in all (what
+// does not fit, the last first, is left behind: carried 0). The names left.
+export function fitSlots(inventorylist) {
+  const list = rows(inventorylist).map(([, item]) => item);
+  let body = 0;
+  for (const item of [...list.filter((entry) => isArmor(entry)), ...list.filter((entry) => !isArmor(entry))]) {
+    if (num(item.carried, 1) !== 2) continue;
+    if (body + itemSlots(item) <= BODY_SLOTS) body += itemSlots(item);
+    else item.carried = 1;
+  }
+  const left = [];
+  let used = list.reduce((sum, item) => sum + (num(item.carried, 1) === 0 ? 0 : itemSlots(item)), 0);
+  for (const item of [...list].reverse()) {
+    if (used <= SLOTS) break;
+    if (num(item.carried, 1) === 0 || itemSlots(item) === 0) continue;
+    used -= itemSlots(item);
+    item.carried = 0;
+    left.push(String(item.name));
+  }
+  return left;
 }
 
 // The items a d6 result names: its bold words with their parentheses ("Take a

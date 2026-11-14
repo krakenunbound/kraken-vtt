@@ -139,6 +139,7 @@ Six start screens, fantasy, science fiction and horror, one at random each time.
     Watchtower*.
   - **Apeira Astra**: science fiction on 2d6 and skills, with crews made in
     minutes and armour that soaks. Adventure: *Salvage Rights*.
+  - **Cairn**, Second Edition (Yochai Gal, CC BY-SA 4.0): saves under a d20, attacks that always hit, Scars and ten slots. Adventure: *Trouble in Twin Lakes*.
 
   Kraken also plays **Castles & Crusades**, **D&D 5E**, **D&D 3.5E**
   (base attack and iterative attacks, criticals by threat and confirmation,

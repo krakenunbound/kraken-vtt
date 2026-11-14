@@ -446,7 +446,8 @@ async function fight(ctx) {
     const view = await tool("kraken_combat", { action: "view" });
     const foe = view.entries.find((entry) => entry.id === ctx.foe.id);
     const pc = view.entries.find((entry) => entry.id === ctx.pcEntry.id);
-    return { foe: foe && !["Dead", "Destroyed", "Dying", "Down", "Unconscious"].includes(foe.health?.status), pc: pc && !["Dead", "Dying", "Down", "Unconscious"].includes(pc.health?.status), view };
+    // (Cairn: the routed and the fleeing are out of the fight; a stabilized PC is out of action.)
+    return { foe: foe && !["Dead", "Destroyed", "Dying", "Down", "Unconscious", "Routed", "Fleeing"].includes(foe.health?.status), pc: pc && !["Dead", "Dying", "Down", "Unconscious", "Stable"].includes(pc.health?.status), view };
   };
   await seat.bringToFront();
   await openSide(seat, "characters").catch(() => undefined);

@@ -26,8 +26,12 @@ ulesets` (on Linux,
     `~/.config/kraken-vtt/assets/rulesets`), named as the ruleset:
     `D&D 3.5E.png`, `Castles & Crusades.webp`. It shows on your computer
     only; Kraken never ships a game's official logo.
-  - *Descending Darkness* and *Apeira Astra* come with Kraken, with their books
-    and a first adventure ([included-games.md](included-games.md)).
+  - *Descending Darkness*, *Apeira Astra* and *Cairn* (Second Edition, CC BY-SA
+    4.0) come with Kraken, with their books and a first adventure
+    ([included-games.md](included-games.md)). In *Cairn* the tracker's
+    **Sides (DEX saves)** starts a fight, attacks always hit, **Morale** asks
+    the foes' WIL saves, and the party sheet's **Growth** tab takes the place of
+    experience.
   - *Castles & Crusades*, *D&D 5E*, *D&D 3.5E* and *AD&D 2E* use your own
     books (Fantasy Grounds modules, or Kraken packs made from them) for their
     content: a 3.5E campaign takes your 3.5E Player's Handbook's classes,
