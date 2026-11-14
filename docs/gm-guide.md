@@ -39,6 +39,15 @@ ulesets` (on Linux,
     **Sides (DEX saves)** starts a fight, attacks always hit, **Morale** asks
     the foes' WIL saves, and the party sheet's **Growth** tab takes the place of
     experience.
+  - *Ironsworn* (with *Delve*) and *Starforged* (Shawn Tomkin's CC BY 4.0
+    moves, assets and oracles; an unofficial adaptation) come with Kraken,
+    each with a Reference, a book of foes and a starter scenario
+    ([included-games.md](included-games.md)). Players make every move from
+    the sheet's **Moves** tab; anyone opens **Oracles**; the GM's **Delve
+    Sites** builds a site from a theme and a domain. On the tracker a foe is
+    its rank and progress track: mark it (+), set its rank, or pick a
+    character under **Harm…** to inflict its harm. The host can play a
+    character too (GM-less play).
   - *Basic Fantasy* (the Basic Fantasy RPG 4th Edition, CC BY-SA 4.0) comes
     with Kraken too: its Player's Handbook, Game Master's Guide and *The Mill
     at Hob's Ford*. Its character wizard follows the book (3d6 in order, race

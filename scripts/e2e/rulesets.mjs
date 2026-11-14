@@ -562,6 +562,10 @@ export const RULESETS = {
     parcel: (ctx) => handParcel(ctx, { coin: "Cr", amount: 800, item: "Toolkit" }),
     xp: 4,
   },
+  // Ironsworn (with Delve) and Starforged: the wizard's steps; a fight of
+  // moves from the sheet against a foe's progress track; a parcel's Supply.
+  Ironsworn: ironswornPlan("Ironsworn"),
+  Starforged: ironswornPlan("Starforged"),
   // Cairn: the book's creation in order (every die the host's), its gold at the Marketplace.
   Cairn: {
     books: ["Cairn Player's Guide", "Cairn Warden's Guide", "Trouble in Twin Lakes"],
@@ -706,3 +710,109 @@ export const RULESETS = {
     xp: 50,
   },
 };
+
+// Ironsworn and Starforged: no money and no attack rolls. The wizard: the
+// spread placed, the assets, a background vow, bonds or a connection, what
+// they carry. The fight: Enter the Fray, then Strike against the foe on the
+// tracker until its progress is enough, then End the Fight (Take Decisive
+// Action) with a progress roll, every move made from the sheet. A parcel's
+// Supply goes to the shared supply meter.
+function ironswornPlan(game) {
+  const sf = game === "Starforged";
+  const move = async (ctx, key, target, option = null) => {
+    const { seat, tool } = ctx;
+    await seat.click('[data-character] [data-sheet-tab="moves"]');
+    await seat.locator(`[data-character] [data-move="${key}"]`).first().click();
+    if (option !== null) await seat.selectOption("[data-character] [data-move-option]", String(option)).catch(() => undefined);
+    if (target) {
+      await seat.waitForSelector(`[data-character] [data-move-track] option[value="target:${target}"]`, { state: "attached", timeout: 10000 });
+      await seat.selectOption("[data-character] [data-move-track]", `target:${target}`);
+    }
+    const before = (await tool("kraken_record_get", { id: ctx.character.id })).data.lastroll?.at ?? 0;
+    await seat.click('[data-character] [data-action="make-move"]');
+    for (let i = 0; i < 40; i++) {
+      const roll = (await tool("kraken_record_get", { id: ctx.character.id })).data.lastroll;
+      if ((roll?.at ?? 0) > before) {
+        // A roll momentum could better: kept, as a player might.
+        if (roll.pending) await seat.click('[data-character] [data-action="iron-keep"]');
+        return roll;
+      }
+      await wait(250);
+    }
+    return null;
+  };
+  return {
+    // Only the books Kraken ships (no FG modules or packs of the GM's).
+    shipped: true,
+    books: sf ? ["Starforged Reference", "Starforged Foes", "The Silent Hulk"] : ["Ironsworn Reference", "Ironsworn Foes and Sites", "The Cinder Barrow"],
+    map: (ctx) => bookMap(ctx, sf ? "The Silent Hulk" : "The Cinder Barrow"),
+    async wizard(ctx) {
+      const { seat } = ctx;
+      const w = '[data-wizard="ironsworn"]';
+      await seat.waitForSelector(w);
+      await seat.selectOption(`${w} [data-iron-stat="iron"]`, "3");
+      await seat.selectOption(`${w} [data-iron-stat="edge"]`, "2");
+      for (const name of sf ? ["Ace", "Gunner", "Combat Bot"] : ["Swordmaster", "Hound", "Ironclad"]) {
+        const box = seat.locator(`${w} [data-iron-asset="${name}"]`);
+        await box.evaluate((element) => element.closest("details")?.setAttribute("open", ""));
+        await box.check();
+      }
+      await seat.fill(`${w} [data-background-vow]`, sf ? "Find my lost crew" : "Free my people from the raider-king");
+      if (sf) {
+        await seat.fill(`${w} [data-ship-name]`, "Wayfarer");
+        await seat.fill(`${w} [data-connection-name]`, "Ashe Varo");
+        await seat.fill(`${w} [data-connection-role]`, "Broker");
+      } else await seat.fill(`${w} [data-bond="0"]`, "My home village");
+      await seat.fill(`${w} [data-inciting-vow]`, "Find out who stole the sacred iron");
+      await seat.fill(`${w} [data-gear]`, "A bedroll, a coil of rope, a lantern");
+      ctx.bought = ["bedroll", "rope", "lantern"];
+      await seat.fill(`${w} input[aria-label="Character name"]`, sf ? "Vesna Kade" : "Kira Ashdown");
+      await finish(ctx);
+    },
+    bought: checkBought,
+    enemy: (ctx) => trackerNpc(ctx, sf ? "Drift pirate" : "Raider"),
+    async fight(ctx) {
+      const { tool, seat, check } = ctx;
+      await seat.bringToFront();
+      await openSide(seat, "characters").catch(() => undefined);
+      const foeId = ctx.foe.id;
+      // The GM shows the foe (the tracker adds it hidden): the player makes moves against it.
+      await tool("kraken_combat", { action: "update", id: foeId, patch: { hidden: false } });
+      const status = async () => (await tool("kraken_combat", { action: "view" })).entries.find((entry) => entry.id === foeId);
+      const fray = await move(ctx, "enter_the_fray", foeId, sf ? 2 : 0);
+      check(fray?.outcome, "Enter the Fray from the sheet", JSON.stringify(fray ?? {}).slice(0, 200));
+      let rounds = 0;
+      while (rounds < 10 && Math.floor(((await status())?.iron?.ticks ?? 0) / 4) < 6) {
+        rounds += 1;
+        const control = (await tool("kraken_record_get", { id: ctx.character.id })).data.control;
+        // With the initiative (in control) Strike; without it Clash.
+        await move(ctx, control ? "strike" : "clash", foeId, 0);
+      }
+      const ticks = (await status())?.iron?.ticks ?? 0;
+      check(ticks > 0, "the player's moves marked the foe's progress", `${ticks} ticks after ${rounds} rounds`);
+      // The foe hits back: the GM inflicts its harm.
+      await tool("kraken_ironsworn", { action: "inflict", target: foeId, id: ctx.character.id });
+      await move(ctx, sf ? "take_decisive_action" : "end_the_fight", foeId);
+      let foe = await status();
+      if (foe?.health?.status !== "Defeated") {
+        // Not this time: the GM finishes it (harm enough to fill its track).
+        await tool("kraken_combat", { action: "damage", id: foeId, amount: 40 });
+        foe = await status();
+      }
+      check(foe?.health?.status === "Defeated", "the foe is out of the fight", foe?.health?.status);
+      const lines = (await tool("kraken_chat_log", { count: 200 })) || [];
+      check(lines.some((line) => /\[MOVE\]/.test(line.roll?.label ?? "")), "the moves went to chat");
+      check(lines.some((line) => /\[PROGRESS\]/.test(`${line.roll?.label ?? ""} ${line.text ?? ""}`)), "progress went to chat");
+      // Health back for what follows.
+      await tool("kraken_character_edit", { id: ctx.character.id, changes: [{ path: "meters.health", value: 5 }] });
+      await tool("kraken_combat", { action: "end", removeNpcs: true });
+    },
+    // First the supply is spent, then the parcel's Supply refills it (shared by the party).
+    async parcel(ctx) {
+      await ctx.tool("kraken_character_edit", { id: ctx.character.id, changes: [{ path: "meters.supply", value: 3 }] });
+      await handParcel(ctx, { coin: "Supply", amount: 1, item: sf ? "Data core" : "Silver torc" });
+    },
+    parcelReached: (before, after) => [Number(after.data.meters?.supply) > Number(before.data.meters?.supply), "the parcel's Supply reached the shared supply meter", `${before.data.meters?.supply} -> ${after.data.meters?.supply}`],
+    xp: 2,
+  };
+}

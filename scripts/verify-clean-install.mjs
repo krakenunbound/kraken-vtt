@@ -121,7 +121,7 @@ try {
   }
 
   // Kraken's own games: their books are the packs Kraken ships.
-  for (const game of ["Descending Darkness", "Apeira Astra", "Cairn", "Fate Core", "Fate Accelerated"]) {
+  for (const game of ["Descending Darkness", "Apeira Astra", "Cairn", "Fate Core", "Fate Accelerated", "Ironsworn", "Starforged"]) {
     const campaign = await tool("kraken_campaign_create", { name: `Clean ${game}`, ruleset: game });
     await tool("kraken_host", { campaignId: campaign.id, port: 47441 + report.length, password: "pw" });
     await page.waitForSelector("text=Hosting");

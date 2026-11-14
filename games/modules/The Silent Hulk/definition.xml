@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root version="4.6" release="1">
+	<name type="string">The Silent Hulk</name>
+	<displayname type="string">The Silent Hulk (Starforged starter)</displayname>
+	<category type="string">Starforged Adventures</category>
+	<author type="string">Kraken VTT</author>
+	<ruleset type="string">Starforged</ruleset>
+</root>

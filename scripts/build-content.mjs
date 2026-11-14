@@ -18,6 +18,8 @@ import { MAGIC_ITEMS_SPEC } from "../games/srd-5e/magic-items.mjs";
 import { PLAYERS_GUIDE as CAIRN_PLAYERS_GUIDE } from "../games/cairn/players-guide.mjs";
 import { WARDENS_GUIDE as CAIRN_WARDENS_GUIDE } from "../games/cairn/wardens-guide.mjs";
 import { TROUBLE_IN_TWIN_LAKES } from "../games/cairn/trouble-in-twin-lakes.mjs";
+// Ironsworn (with Delve) and Ironsworn: Starforged (Shawn Tomkin, CC BY 4.0 parts only).
+import { IRONSWORN_BOOKS, STARFORGED_BOOKS } from "../games/ironsworn/books.mjs";
 // Basic Fantasy (CC BY-SA 4.0: games/basic-fantasy/LICENSE.md).
 import { PLAYERS_HANDBOOK as BF_PLAYERS } from "../games/basic-fantasy/players-handbook.mjs";
 import { GM_GUIDE as BF_GM } from "../games/basic-fantasy/gm-guide.mjs";
@@ -30,7 +32,7 @@ import { GULLS_END } from "../games/fate/gulls-end.mjs";
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 const out = path.join(root, "games", "modules");
-const modules = [PLAYERS_HANDBOOK, BESTIARY, EMPTY_WATCHTOWER, CREW_HANDBOOK, DOSSIER, SALVAGE_RIGHTS, PLAYERS_RULES, CREATURES_SPEC, MAGIC_ITEMS_SPEC, CAIRN_PLAYERS_GUIDE, CAIRN_WARDENS_GUIDE, TROUBLE_IN_TWIN_LAKES, BF_PLAYERS, BF_GM, MILL_AT_HOBS_FORD, FATE_CORE, FATE_ACCELERATED, FATE_TOOLKIT, GULLS_END];
+const modules = [PLAYERS_HANDBOOK, BESTIARY, EMPTY_WATCHTOWER, CREW_HANDBOOK, DOSSIER, SALVAGE_RIGHTS, PLAYERS_RULES, CREATURES_SPEC, MAGIC_ITEMS_SPEC, CAIRN_PLAYERS_GUIDE, CAIRN_WARDENS_GUIDE, TROUBLE_IN_TWIN_LAKES, BF_PLAYERS, BF_GM, MILL_AT_HOBS_FORD, FATE_CORE, FATE_ACCELERATED, FATE_TOOLKIT, GULLS_END, ...IRONSWORN_BOOKS, ...STARFORGED_BOOKS];
 for (const spec of modules) {
   const folder = writeModule(out, spec);
   console.log(`built ${path.relative(root, folder)}`);

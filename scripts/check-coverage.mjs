@@ -29,6 +29,7 @@ const MESSAGES = {
   "character-improve": "kraken_character_improve",
   cairn: "kraken_cairn",
   fate: "kraken_fate",
+  ironsworn: "kraken_ironsworn",
   "siege-check": "kraken_siege_check",
   ct: "kraken_combat",
   "party-award-xp": "kraken_party_award",

@@ -1,8 +1,6 @@
 # Kraken's own games
 
-Two original games and three open games ship with Kraken, so testers can play
-without any Fantasy Grounds modules:
-Two original games, and one free open game, ship with Kraken, so testers can
+Two original games and several open games ship with Kraken, so testers can
 play without any Fantasy Grounds modules:
 
 | Game | Engine | Books (games/modules) |
@@ -31,6 +29,19 @@ outlines each Fate zone in its colour (no lettering; the story names them):
 
     python games/tools/mapgen.py games/fate/maps/strand.json games/fate/art/strand.webp games/fate/maps/strand.walls.json
     python games/fate/tools/zones.py games/fate/maps/strand.json games/fate/art/strand.webp
+| **Ironsworn** (with Delve) and **Starforged** (Shawn Tomkin, CC BY 4.0 parts only) | one engine (`shared/ironsworn/rules.mjs`) | Ironsworn Reference, Ironsworn Foes and Sites, *The Cinder Barrow*; Starforged Reference, Starforged Foes, *The Silent Hulk* |
+
+Ironsworn's and Starforged's books are made from Datasworn's data
+(datasworn-community/official-content, `generated-datasworn/`), kept in
+`games/ironsworn/data` only where each object's licence is CC BY 4.0:
+
+    node games/ironsworn/tools/filter-datasworn.mjs <generated-datasworn folder>
+
+prints what it kept and dropped (and writes `data/filter-report.json`).
+`games/ironsworn/datasworn.mjs` makes the records (moves, assets, oracles as
+FG tables, Delve's themes and domains, Starforged's foes);
+`rules-text.mjs` is Kraken's own rules chapters (the rulebooks' text is NC
+and not used); `books.mjs` the six books; maps by `mapgen.py`.
 
 Cairn's books are made from its official Markdown, kept in `games/cairn/text`
 (copied from github.com/yochaigal/cairn: `second-edition/` and the adventure
@@ -128,6 +139,10 @@ without a grid (`handout`). Check each picture by eye: no lettering, nothing
 that looks like another work's characters.
 
 ## Licensing
+
+Ironsworn and Starforged (`games/ironsworn`: the CC BY 4.0 data and the six
+books built from it): This work is based on Ironsworn, Ironsworn: Delve and Ironsworn: Starforged, created by Shawn Tomkin, and licensed for our use under the Creative Commons Attribution 4.0 International license (https://creativecommons.org/licenses/by/4.0/). An unofficial adaptation; see
+`games/ironsworn/LICENSE.md`.
 
 Cairn (`games/cairn` and the three books built from it) is CC BY-SA 4.0, by
 Yochai Gal, adapted for Kraken: see `games/cairn/LICENSE.md`. Fate's SRD text

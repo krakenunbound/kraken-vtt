@@ -60,6 +60,20 @@ const GLYPHS: Record<string, ReactElement> = {
       <ellipse cx="20" cy="10.2" rx="2.2" ry="1.5" />
     </>
   ),
+  // Ironsworn: a vow sworn on iron, a ring of iron with a notch.
+  ironsworn: (
+    <>
+      <circle cx="20" cy="20" r="10" fill="none" strokeWidth="3" />
+      <path d="M20 7.5v7M20 25.5v7" />
+    </>
+  ),
+  // Starforged: a star over an iron ring.
+  starforged: (
+    <>
+      <circle cx="20" cy="22" r="9.5" fill="none" strokeWidth="2.5" />
+      <path d="M20 6.5 21.6 12.4 27.5 14 21.6 15.6 20 21.5 18.4 15.6 12.5 14 18.4 12.4z" />
+    </>
+  ),
   // Basic Fantasy: a six-sided die (3d6 in order).
   basicfantasy: (
     <>

@@ -201,6 +201,8 @@ function cleanEntry(raw) {
     strLoss: Math.max(0, Math.round(num(raw.strLoss, 0))),
     critical: ["dead", "routed"].includes(raw.critical) ? raw.critical : "",
     lostTurn: Math.max(0, Math.round(num(raw.lostTurn, 0))),
+    // Ironsworn and Starforged: a foe's rank and progress (ticks, 0-40), out of the fight once defeated.
+    iron: raw.iron && typeof raw.iron === "object" ? { rank: ["troublesome", "dangerous", "formidable", "extreme", "epic"].includes(raw.iron.rank) ? raw.iron.rank : "dangerous", ticks: Math.min(40, Math.max(0, Math.round(num(raw.iron.ticks, 0)))), defeated: Boolean(raw.iron.defeated) } : null,
     deathsaves: raw.deathsaves && typeof raw.deathsaves === "object" ? { success: Math.min(3, Math.max(0, Math.round(num(raw.deathsaves.success, 0)))), failure: Math.min(3, Math.max(0, Math.round(num(raw.deathsaves.failure, 0)))) } : { success: 0, failure: 0 },
     // Fate: an NPC's stress and consequences, a hit waiting to be absorbed, taken out or conceded (electron/fateCombat.cjs).
     ...(raw.fate ? { fate: require("./fateCombat.cjs").cleanState(raw.fate) } : {}),
@@ -341,6 +343,8 @@ function createCombat({ saved, table, onChange = () => undefined }) {
   // Fate Core and Fate Accelerated: conflicts by shifts, stress and consequences (electron/fateCombat.cjs).
   const fateOn = () => require("./fate.cjs").isFateRuleset(table().ruleset?.());
   const fc = require("./fateCombat.cjs").createFateCombat({ table, state, record: (entry) => record(entry), find: (id) => find(id), mustGM: (seat) => mustGM(seat), targetsOf: (entry) => targetsOf(entry), changed: () => changed(), owner: (entry) => owner(entry) });
+  // Ironsworn and Starforged: foes are ranked progress tracks, characters have health 0-5 and initiative (in control).
+  const ironOn = () => ["Ironsworn", "Starforged"].includes(table().ruleset?.());
   // Cairn: morale checks made this fight, by faction ({ first, half }).
   const moraleDone = {};
   // The 2d6 games: Apeira Astra and Traveller share the tracker's rolls.
@@ -677,6 +681,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
   function health(entry) {
     if (fateOn()) return fc.health(entry);
     if (cairnOn()) return healthCairn(entry);
+    if (ironOn()) return healthIron(entry);
     const { hp, wounds } = vitals(entry);
     if (!geometry) return { status: "Healthy", percent: 0, color: "#00C000" };
     const status = geometry.healthStatus(hp, wounds, thresholdsFor(entry));
@@ -819,6 +824,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     // Apeira Astra: Down is out of the fight, whoever they are.
     if (astraOn() && health(entry).status === "Down") return true;
     // Cairn: the dead, those with Critical Damage, the routed and the fleeing do not act; a PC who failed the first round's DEX save loses that turn.
+    if (ironOn()) return health(entry).status === "Defeated";
     if (cairnOn()) return ["Dead", "Dying", "Stable", "Routed", "Fleeing"].includes(health(entry).status) || (entry.lostTurn > 0 && state.round <= entry.lostTurn);
     if (mgtOn() && ["Unconscious", "Dead"].includes(health(entry).status)) return true;
     if (mode !== "enemies" && mode !== "all") return false;
@@ -898,10 +904,42 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     }
   }
 
+  // Ironsworn: a foe's health is its progress track (each point of damage a mark of progress by its rank,
+  // enough to fill it defeats it); a character's is health 0-5 (past 0, momentum).
+  function healthIron(entry) {
+    const linked = record(entry);
+    if (linked?.type === "character") {
+      const health = Math.max(0, Math.min(5, num(linked.data?.meters?.health, 5)));
+      const percent = Math.round(((5 - health) / 5) * 100);
+      return health === 0 ? { status: "Down", percent: 100, color: "#6C2DC7" } : health === 5 ? { status: "Healthy", percent: 0, color: "#00C000" } : { status: "Wounded", percent, color: health <= 2 ? "#E06000" : "#C0C000" };
+    }
+    const iron = entry.iron ?? { ticks: 0 };
+    if (iron.defeated) return { status: "Defeated", percent: 100, color: "#404040" };
+    const boxes = Math.min(10, Math.floor(num(iron.ticks, 0) / 4));
+    return { status: boxes ? `Progress ${boxes}/10` : "Fresh", percent: boxes * 10, color: boxes >= 6 ? "#E06000" : boxes ? "#C0C000" : "#00C000" };
+  }
+  async function applyIron(entry, delta, why) {
+    const linked = record(entry);
+    if (linked?.type === "character") {
+      const rules = await import(pathToFileURL(path.join(__dirname, "..", "shared", "ironsworn", "rules.mjs")).href);
+      const next = delta > 0 ? rules.suffer(linked.data, "health", delta).data : rules.adjust(linked.data, "health", -delta);
+      table().records.update(linked.id, { data: rules.derive(next) }, table().seat, { replace: true });
+      table().say(`${why} -> ${entry.name}: ${delta > 0 ? `${delta} harm` : `+${-delta} health`} (health ${rules.derive(next).meters.health}/5)`, "Combat", entry.hidden);
+    } else {
+      const iron = entry.iron ?? { rank: "dangerous", ticks: 0 };
+      const per = { troublesome: 12, dangerous: 8, formidable: 4, extreme: 2, epic: 1 }[iron.rank] ?? 8;
+      const ticks = Math.max(0, Math.min(40, iron.ticks + delta * per));
+      entry.iron = { ...iron, ticks, defeated: delta > 0 && ticks >= 40 ? true : delta < 0 ? false : iron.defeated };
+      table().say(`${why} -> ${entry.name}: ${Math.abs(delta)} ${delta > 0 ? "harm (progress marked)" : "progress cleared"}, ${Math.floor(ticks / 4)}/10${entry.iron.defeated ? ": out of the fight" : ""}`, "Combat", entry.hidden);
+    }
+    changed();
+  }
+
   async function applyWounds(entry, delta, why, opts) {
     // Fate: damage is a hit of that many shifts; healing clears the stress.
     if (fateOn()) return delta > 0 ? fc.hit(entry, delta, fc.kindNow(), "") : fc.clearStress(entry);
     if (cairnOn()) return applyCairn(entry, delta, why, opts);
+    if (ironOn()) return applyIron(entry, delta, why);
     const linked = record(entry);
     let before = vitals(entry);
     // 5E: temporary hit points take damage first (FG's d20 health); healing does not restore them.
@@ -2367,6 +2405,13 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     turnUndead,
     shipAttack,
     ruleset5e: five,
+    // Ironsworn: a foe's rank and progress, set by electron/ironsworn.cjs (its moves and the GM's buttons).
+    ironState(id, patch) {
+      const entry = find(id);
+      entry.iron = cleanEntry({ iron: { ...(entry.iron ?? {}), ...(patch ?? {}) } }).iron;
+      changed();
+      return entry.iron;
+    },
     // What a seat sees of the tracker. The GM sees everything; players do not
     // see hidden entries or GM-only effects, and see foes' health as a status.
     viewFor(seat) {
@@ -2398,6 +2443,8 @@ function createCombat({ saved, table, onChange = () => undefined }) {
             ...(record(entry)?.type === "starship" ? { ship: shipView(record(entry), seat) } : {}),
             // 2E: the level a cleric (or a paladin from 3rd) turns undead at.
             ...(d2e() && r2e && record(entry)?.type === "character" && r2e.turnLevel(r2e.derive(record(entry).data)) > 0 ? { turns: r2e.turnLevel(r2e.derive(record(entry).data)) } : {}),
+            // Ironsworn: a foe's rank and progress; a character's initiative (in control) and momentum.
+            ...(ironOn() ? { iron: record(entry)?.type === "character" ? { control: Boolean(record(entry).data?.control), momentum: num(record(entry).data?.momentum, 0), health: num(record(entry).data?.meters?.health, 0), spirit: num(record(entry).data?.meters?.spirit, 0) } : { ...(entry.iron ?? { rank: "dangerous", ticks: 0 }), harm: ["troublesome", "dangerous", "formidable", "extreme", "epic"].indexOf(entry.iron?.rank ?? "dangerous") + 1 } } : {}),
             ...(cairnOn() && (numbers || seat.role === "dm") ? { cairn: { ...cairnStr(entry), detachment: record(entry)?.type !== "character" && rc ? rc.npcStats(record(entry)?.data ?? {}).detachment : 0, lostTurn: entry.lostTurn } } : {}),
             // Basic Fantasy: a Cleric turns undead at its level; a monster's morale (the GM's).
             ...(dbf() && rbf && record(entry)?.type === "character" && num(rbf.derive(record(entry).data).turn, 0) > 0 ? { turns: num(rbf.derive(record(entry).data).turn, 0) } : {}),
@@ -2497,6 +2544,8 @@ function createCombat({ saved, table, onChange = () => undefined }) {
             entry.name = `${base} ${++high}`;
           }
         }
+        // Ironsworn: a foe's rank from its record (its own, or the input's).
+        if (ironOn() && source?.type !== "character") entry.iron = cleanEntry({ iron: { rank: input.rank ?? source?.data?.rank ?? "dangerous", ticks: 0 } }).iron;
         state.entries.push(entry);
         added.push(entry);
       }
@@ -2547,6 +2596,12 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       // (SIEGE_INIT_STAT; none adds nothing) and the entry's own bonus.
       // Fate: no dice, the turn order by a skill (Notice; FAE Quick), or Empathy (Careful) in a mental conflict.
       if (fateOn()) return fc.initiative(pick, seat);
+      if (ironOn()) {
+        // Ironsworn: no initiative dice: those with the initiative (in control) first, then the rest.
+        for (const entry of pick) entry.initresult = record(entry)?.type === "character" ? (record(entry).data?.control ? 3 : 2) : 1;
+        changed();
+        return;
+      }
       if (cairnOn()) {
         // Cairn: the PCs act first, then their opponents (sides, not dice); in
         // the first round each PC saves DEX to act, and loses that turn on a failure.
@@ -3000,6 +3055,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     // What a creature attacks with, and its numbers.
     weapon(who, weaponKey, engine, game, opts, seat) {
       if (fateOn()) return fc.weapon(who, weaponKey, seat);
+      if (ironOn()) throw new Error("Ironsworn has no attack rolls: make a move (Strike, Clash) from the sheet against a foe, or mark its progress.");
       if (cairnOn()) return weaponCairn(who, weaponKey, seat);
       if (mgtOn()) return weaponMgt(who, weaponKey, seat);
       if (astraOn()) return weaponAstra(who, weaponKey, seat);

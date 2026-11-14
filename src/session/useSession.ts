@@ -210,6 +210,8 @@ export type CombatEntry = {
   powers?: { key: string; name: string; uses: number; used: number; damage: string; save: string }[];
   /** Cairn: STR now and its maximum, a detachment, a lost first turn. */
   cairn?: { str: number; max: number; detachment: number; lostTurn: number };
+  /** Ironsworn and Starforged: a foe's rank, progress (ticks) and harm; a character's initiative (in control), momentum, health and spirit. */
+  iron?: { rank?: string; ticks?: number; harm?: number; defeated?: boolean; control?: boolean; momentum?: number; health?: number; spirit?: number };
   /** Fate: stress boxes, consequences, a hit waiting to be absorbed (its options), taken out or conceded. */
   fate?: FateEntry;
 };
@@ -929,6 +931,17 @@ export function useSession() {
     if (socket && socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify({ type: "class-change", id, mode, className }));
   }, []);
 
+  // Ironsworn and Starforged: a character's moves, tracks and assets (id), or the oracles, Delve's sites and the
+  // tracker's foes (no id). The host does it (electron/ironsworn.cjs) and answers with what happened.
+  const ironsworn = useCallback((action: string, id = "", args: Record<string, unknown> = {}) => {
+    const socket = socketRef.current;
+    if (!socket || socket.readyState !== WebSocket.OPEN) return Promise.reject(new Error("Not connected."));
+    const req = ++opCounter.current;
+    return new Promise<Record<string, unknown>>((resolve, reject) => {
+      opWaits.current.set(req, { resolve: (_id, payload) => resolve(((payload as { result?: Record<string, unknown> } | undefined)?.result ?? {}) as Record<string, unknown>), reject });
+      socket.send(JSON.stringify({ type: "ironsworn", req, id, action, args, ...throwIntent() }));
+    });
+  }, []);
   // Cairn: rest, Fatigue, spells, Scars, Growth (the host does it: electron/cairn.cjs).
   const cairnAction = useCallback((id: string, action: string, args: Record<string, unknown> = {}) => {
     const socket = socketRef.current;
@@ -1258,6 +1271,7 @@ export function useSession() {
     improveCharacter,
     cairnAction,
     fateAction,
+    ironsworn,
     wall,
     mapUndo,
     prepClose,

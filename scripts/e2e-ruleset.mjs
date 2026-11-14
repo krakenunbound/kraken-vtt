@@ -316,7 +316,9 @@ async function runRuleset(ruleset, plan) {
     // 16. The fight.
     await step("16 the fight", async () => {
       if (!ctx.foe) return;
-      await fight(ctx);
+      // A game whose fights are not attack rolls plays its own (plan.fight: Ironsworn's moves).
+      if (plan.fight) await plan.fight(ctx);
+      else await fight(ctx);
       await ctx.shot(page, "16-fight");
     });
 
@@ -349,7 +351,9 @@ async function runRuleset(ruleset, plan) {
       // A game's own way of receiving a parcel (Fate: no coin, the finds in the extras), else coin and items.
       if (plan.received) await plan.received(ctx, before, after);
       else {
-        check(coinTotal(after.data.coins) > coinsBefore, "the parcel's money reached the character", `${coinsBefore} -> ${coinTotal(after.data.coins)} ${JSON.stringify(after.data.coins)}`);
+        // A game with no money says where a parcel's goes (plan.parcelReached: Ironsworn's supply).
+        if (plan.parcelReached) check(...plan.parcelReached(before, after));
+        else check(coinTotal(after.data.coins) > coinsBefore, "the parcel's money reached the character", `${coinsBefore} -> ${coinTotal(after.data.coins)} ${JSON.stringify(after.data.coins)}`);
         if (ctx.parcelItems?.length) check(itemCount(after.data.inventorylist) > itemsBefore, "the parcel's items reached the character", `${itemsBefore} -> ${itemCount(after.data.inventorylist)}`);
       }
       if (plan.xp !== null) check(Number(after.data.exp ?? 0) >= expBefore + (plan.xp ?? 100), "the experience reached the character", `${expBefore} -> ${after.data.exp}`);

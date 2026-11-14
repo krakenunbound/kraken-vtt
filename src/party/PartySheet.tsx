@@ -36,7 +36,8 @@ const ATTRIBUTES = ["strength", "dexterity", "constitution", "intelligence", "wi
 // A parcel's coins in the ruleset's money (FG's coin list): credits for Traveller (MCr and Cr, as FG's MGT2) and Apeira Astra, gold crowns for Descending Darkness.
 // Cairn's books price everything in gold pieces.
 // Fate has no coin: a parcel is things found (each written into a character's extras).
-const coinsFor = (ruleset: string) => (/^Fate /.test(ruleset) ? [] : ruleset === "Traveller" ? ["MCr", "Cr"] : ruleset === "Apeira Astra" ? ["Cr"] : ruleset === "Descending Darkness" ? ["GC"] : ruleset === "Cairn" ? ["GP"] : ["PP", "GP", "EP", "SP", "CP"]);
+// Ironsworn and Starforged have no money: a parcel's Supply goes to the shared supply meter.
+const coinsFor = (ruleset: string) => (/^Fate /.test(ruleset) ? [] : ruleset === "Ironsworn" || ruleset === "Starforged" ? ["Supply"] : ruleset === "Traveller" ? ["MCr", "Cr"] : ruleset === "Apeira Astra" ? ["Cr"] : ruleset === "Descending Darkness" ? ["GC"] : ruleset === "Cairn" ? ["GP"] : ["PP", "GP", "EP", "SP", "CP"]);
 const TABS = [
   { id: "main", label: "Main" },
   { id: "inventory", label: "Inventory" },

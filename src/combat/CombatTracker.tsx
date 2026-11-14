@@ -4,6 +4,8 @@ import type { CombatEntry, Session } from "../session/useSession";
 import { Icon } from "../ui/icons";
 import { FateLine } from "./FateLine";
 import { fateTableOf } from "../characters/SheetFate";
+import { ProgressBoxes } from "../characters/SheetIronsworn";
+import { RANK_NAMES, RANKS } from "../../shared/ironsworn/rules.mjs";
 
 const FACTION_LABEL = { friend: "Friend", neutral: "Neutral", foe: "Foe" } as const;
 // AD&D 2E's five saving throws.
@@ -126,7 +128,7 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
             {entry.hidden ? " · hidden" : ""}
           </small>
         </span>
-        {entry.ac !== undefined && !entry.fate ? (
+        {entry.ac !== undefined && !entry.fate && !entry.iron ? (
           <span className="ct-stat" title="Armour class">
             <Icon name="shield" size={14} />
             {entry.ac}
@@ -139,7 +141,58 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
             {entry.cairn.detachment ? " ⚑" : ""}
           </span>
         ) : null}
-        {entry.hp !== undefined && !entry.fate ? (
+        {entry.iron && entry.iron.rank ? (
+          // Ironsworn: a foe is its rank and its progress track (harm marks it), not hit points.
+          <span className="ct-iron" data-iron-rank={entry.iron.rank} data-iron-ticks={entry.iron.ticks ?? 0}>
+            {gm ? (
+              <select className="cc-field" value={entry.iron.rank} aria-label={`${entry.name} rank`} title={`Inflicts ${entry.iron.harm ?? 2} harm`} onChange={(event) => void session.ironsworn("foe-rank", "", { target: entry.id, rank: event.target.value })}>
+                {(RANKS as string[]).map((rank) => (
+                  <option key={rank} value={rank}>
+                    {RANK_NAMES[rank as keyof typeof RANK_NAMES]}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <small>{RANK_NAMES[entry.iron.rank as keyof typeof RANK_NAMES]}</small>
+            )}
+            <ProgressBoxes ticks={entry.iron.ticks ?? 0} label={`${entry.name}'s progress`} />
+            {gm && !entry.iron.defeated ? (
+              <>
+                <button type="button" data-action="foe-mark" title="Mark progress (one harm, by its rank)" onClick={() => void session.ironsworn("foe-mark", "", { target: entry.id, times: 1 })}>
+                  +
+                </button>
+                <select
+                  className="cc-field"
+                  value=""
+                  aria-label={`${entry.name} inflicts harm on`}
+                  title={`Inflict its harm (${entry.iron.harm ?? 2}) on a character: health down, then Endure Harm`}
+                  data-action="foe-inflict"
+                  onChange={(event) => event.target.value && void session.ironsworn("inflict", "", { target: entry.id, id: event.target.value })}
+                >
+                  <option value="">Harm…</option>
+                  {session.combat.entries
+                    .filter((item) => item.iron && !item.iron.rank && item.recordId)
+                    .map((item) => (
+                      <option key={item.id} value={item.recordId ?? ""}>
+                        {item.name}
+                      </option>
+                    ))}
+                </select>
+              </>
+            ) : null}
+          </span>
+        ) : entry.iron ? (
+          // Ironsworn: a character's initiative (in control) and momentum.
+          <span className="ct-iron" data-iron-control={entry.iron.control ? "1" : "0"} title={session.ruleset === "Starforged" ? "In control or in a bad spot" : "Initiative"}>
+            <b className={entry.iron.control ? "iron-on" : ""}>{session.ruleset === "Starforged" ? (entry.iron.control ? "In control" : "Bad spot") : entry.iron.control ? "Initiative" : "No initiative"}</b>
+            <small> · momentum {entry.iron.momentum ?? 0} · health {entry.iron.health ?? 0} · spirit {entry.iron.spirit ?? 0}</small>
+          </span>
+        ) : null}
+        {entry.iron ? (
+          <span className="ct-status" style={{ borderColor: entry.health.color, color: entry.health.color }}>
+            {entry.health.status}
+          </span>
+        ) : entry.hp !== undefined && !entry.fate ? (
           <span className="ct-stat ct-hp" title={`${entry.health.status}: ${(entry.hp ?? 0) - (entry.wounds ?? 0)} of ${entry.hp}${entry.temp ? `, ${entry.temp} temporary` : ""}`} style={{ color: entry.health.color }}>
             <Icon name="heart" size={14} />
             {(entry.hp ?? 0) - (entry.wounds ?? 0)}/{entry.hp}

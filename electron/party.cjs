@@ -90,6 +90,19 @@ async function awardXP(table, xp, from) {
   if (amount <= 0) throw new Error("How much XP?");
   const members = memberRecords(table);
   if (members.length === 0) throw new Error("The party has no members.");
+  // Ironsworn and Starforged: experience is each character's own (not split); Starforged keeps it beside its legacy tracks.
+  if (require("./ironsworn.cjs").isIronswornRuleset(table.ruleset?.())) {
+    const rules = await require("./ironsworn.cjs").rulesIron();
+    for (const member of members) {
+      const data = structuredClone(table.records.get(member.id).data);
+      if (data.game === "starforged") data.expbonus = (Number(data.expbonus) || 0) + amount;
+      else data.exp = (Number(data.exp) || 0) + amount;
+      table.records.update(member.id, { data: rules.derive(data) }, table.seat, { replace: true });
+      table.say(`[${amount} XP] -> ${member.name}`, from);
+    }
+    table.say(`Awarded experience to each of the Party. (${amount})`, from);
+    return amount;
+  }
   for (const { member, amount: shareIn } of xpShares(amount, members)) {
     if (shareIn <= 0) continue;
     // Basic Fantasy: a Human learns unusually quickly (+10% to all experience earned).
@@ -165,6 +178,15 @@ async function distribute(table, from) {
         given.push(`${item.name} (${each}) -> ${member.name}`);
         continue;
       }
+      if (current?.ruleset === "ironsworn") {
+        // Ironsworn: something carried (an asset is bought with experience, not handed out).
+        const rules = await require("./ironsworn.cjs").rulesIron();
+        const list = (data.inventorylist = data.inventorylist ?? {});
+        list[engine.nextId(list)] = { name: item.name, count: each, carried: 1 };
+        table.records.update(member.id, { data: rules.derive(data) }, table.seat, { replace: true });
+        given.push(`${item.name} (${each}) -> ${member.name}`);
+        continue;
+      }
       if (astra) {
         // An Apeira Astra character, a Traveller or a Cairn character: the item into the gear, the sheet worked out again.
         const list = (data.inventorylist = data.inventorylist ?? {});
@@ -201,6 +223,14 @@ async function distribute(table, from) {
       if (each <= 0) continue;
       handed.push(`${each * members.length} ${coin}`);
       for (const member of members) {
+        // Ironsworn has no money: a parcel's Supply is the shared supply meter (at most 5).
+        if (table.records.get(member.id).data?.ruleset === "ironsworn" && coin.toLowerCase() === "supply") {
+          const rules = await require("./ironsworn.cjs").rulesIron();
+          const data = rules.adjust(table.records.get(member.id).data, "supply", each);
+          table.records.update(member.id, { data: rules.derive(data) }, table.seat, { replace: true });
+          perMember.get(member.id).push(`${each} ${coin}`);
+          continue;
+        }
         const current = table.records.get(member.id).data.coins ?? {};
         // Megacredits land as credits (Traveller's sheet keeps Cr): 1 MCr = 1,000,000 Cr.
         const [name, factor] = coin.toLowerCase() === "mcr" ? ["Cr", 1e6] : [coin, 1];

@@ -38,6 +38,9 @@ const FG_RULESETS = {
   "Apeira Astra": ["Apeira Astra"],
   // Cairn Second Edition (CC BY-SA 4.0), its books shipped in the app (games/modules).
   Cairn: ["Cairn"],
+  // Ironsworn (with Delve) and Ironsworn: Starforged (their CC BY 4.0 parts), shipped in the app (games/modules).
+  Ironsworn: ["Ironsworn"],
+  Starforged: ["Starforged"],
   // Basic Fantasy RPG 4th Edition (CC BY-SA 4.0), its books shipped in the app.
   "Basic Fantasy": ["Basic Fantasy"],
   // Fate Core and Fate Accelerated (CC BY 3.0), their books shipped in the app

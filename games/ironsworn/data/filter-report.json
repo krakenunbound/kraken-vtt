@@ -1,0 +1,67 @@
+{
+ "source": "Datasworn (datasworn-community/official-content), generated-datasworn",
+ "datasworn": "0.3.0",
+ "packages": {
+  "classic": {
+   "manifestLicense": "CC-BY-NC-SA-4.0",
+   "kept": 193,
+   "dropped": 17,
+   "droppedNested": 38,
+   "droppedTextOutsideObjects": 44,
+   "keptByType": {
+    "asset_collection": 4,
+    "asset": 78,
+    "move": 58,
+    "move_category": 6,
+    "oracle_rollable": 37,
+    "oracle_collection": 9,
+    "world": 1
+   },
+   "droppedByType": {
+    "atlas_collection": 1,
+    "npc_collection": 5,
+    "truth": 11
+   }
+  },
+  "delve": {
+   "manifestLicense": "CC-BY-NC-SA-4.0",
+   "kept": 96,
+   "dropped": 91,
+   "droppedNested": 29,
+   "droppedTextOutsideObjects": 3,
+   "keptByType": {
+    "move_category": 4,
+    "move": 13,
+    "oracle_rollable": 49,
+    "oracle_collection": 10,
+    "delve_site_domain": 12,
+    "delve_site_theme": 8
+   },
+   "droppedByType": {
+    "delve_site": 20,
+    "npc_collection": 6,
+    "rarity": 65
+   }
+  },
+  "starforged": {
+   "manifestLicense": "CC-BY-4.0",
+   "kept": 547,
+   "dropped": 0,
+   "droppedNested": 0,
+   "droppedTextOutsideObjects": 0,
+   "keptByType": {
+    "asset_collection": 6,
+    "asset": 87,
+    "move": 68,
+    "move_category": 12,
+    "oracle_rollable": 267,
+    "npc_collection": 1,
+    "npc": 23,
+    "oracle_collection": 68,
+    "truth": 14,
+    "world": 1
+   },
+   "droppedByType": {}
+  }
+ }
+}

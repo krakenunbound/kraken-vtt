@@ -6,6 +6,7 @@ const adnd2e = require("./adnd2e.cjs");
 const astra = require("./astra.cjs");
 const mgt2 = require("./mgt2.cjs");
 const cairn = require("./cairn.cjs");
+const ironsworn = require("./ironsworn.cjs");
 const bfrpg = require("./bfrpg.cjs");
 const fate = require("./fate.cjs");
 
@@ -45,6 +46,8 @@ async function siegeCheck(table, record, { attribute, cl = 0, bonus = 0, addLeve
     const rolled = await fate.rollFate(table, record, { skill: skill ?? attribute, action: "overcome", opposition: dc ?? cl ?? 0, bonus }, from);
     return { ...rolled, success: rolled.shifts >= 0 };
   }
+  // Ironsworn and Starforged: a stat rolled on its own (an action roll: d6 + stat + bonus against two d10).
+  if (ironsworn.isIronsworn(record)) return ironsworn.statRoll(table, record, { attribute, bonus, label: kind ? label : undefined }, from);
   // Cairn: a save, d20 at or under STR, DEX or WIL (a 1 succeeds, a 20 fails).
   if (cairn.isCairn(record)) return cairn.saveCairn(table, record, { attribute, label: kind ? label : undefined }, from);
   // Apeira Astra: a task (2d6 + skill + characteristic against 8); dc is the difficulty's shift, advantage boon/bane.
@@ -76,6 +79,7 @@ async function levelUp(table, record, packageKey, from) {
   if (dnd5e.is5e(record)) return dnd5e.levelUp5e(table, record, from);
   if (dnd35.is35(record)) return dnd35.levelUp35(table, record, from);
   if (adnd2e.is2e(record)) return adnd2e.levelUp2e(table, record, from, packageKey);
+  if (ironsworn.isIronsworn(record)) throw new Error("Ironsworn has no levels: spend experience on assets (Advance).");
   if (cairn.isCairn(record)) throw new Error("Cairn has no levels: a character grows from what happens to them (Scars, Growth, Downtime).");
   if (bfrpg.isBf(record)) return bfrpg.levelUpBf(table, record, from);
   if (fate.isFate(record)) throw new Error("Fate has no levels: a character grows at milestones (minor, significant, major: the sheet's Milestones).");
@@ -176,6 +180,7 @@ async function editCharacter(table, record, changes, seat) {
   if (dnd5e.is5e(record)) return dnd5e.edit5e(table, record, changes, seat);
   if (dnd35.is35(record)) return dnd35.edit35(table, record, changes, seat);
   if (adnd2e.is2e(record)) return adnd2e.edit2e(table, record, changes, seat);
+  if (ironsworn.isIronsworn(record)) return ironsworn.editIronsworn(table, record, changes, seat);
   if (cairn.isCairn(record)) return cairn.editCairn(table, record, changes, seat);
   if (bfrpg.isBf(record)) return bfrpg.editBf(table, record, changes, seat);
   if (fate.isFate(record)) return fate.editFate(table, record, changes, seat);
@@ -267,6 +272,17 @@ async function dropOnCharacter(table, record, source, from) {
     const summary = `${record.name} gets ${source.name} (written into the extras).`;
     table.say(summary, who, record.visibility === "gm");
     return { record: updated, added: "extra", summary };
+  }
+  if (ironsworn.isIronsworn(record)) {
+    // An asset dropped on the sheet is bought with experience (Advance); anything else is something carried.
+    if (source.type === "ironasset") {
+      const result = await ironsworn.actionIronsworn(table, record, "advance", { asset: source.id }, { role: "dm", name: who }, who);
+      return { ...result, record: table.records.get(record.id), added: "asset", summary: `${record.name} gains ${source.name}.` };
+    }
+    if (source.type !== "item") throw new Error("An Ironsworn sheet takes assets (bought with experience) and things to carry.");
+    const updated = await ironsworn.editIronsworn(table, record, [{ path: "inventory.add", value: source.name }], { role: "dm", name: who });
+    table.say(`${record.name} gets ${source.name}.`, who, record.visibility === "gm");
+    return { record: updated, added: "item", summary: `${record.name} gets ${source.name}.` };
   }
   if (cairn.isCairn(record)) {
     if (source.type !== "item") throw new Error("A Cairn sheet takes items; a background comes with the character wizard.");
