@@ -75,9 +75,56 @@ def split_tabs(raw_spans):
     return out
 
 
+def reading_order(lines):
+    """A page's lines in reading order. The PDF's stream is mostly in order,
+    but a block set into a column later (a spell's stat block, the rest of a
+    column under it) can come after the other column. The stream is cut into
+    runs (a jump back up the page, or into the other column, starts a run; a
+    table's cells stay in their run), and the runs are read column by column
+    within each band of the page between full-width runs (a class's features
+    table across the page)."""
+    runs = []
+    boxed = ("tbl", "sidebar")
+    for line in lines:
+        col = 0 if line["x0"] < 300 else 1
+        prev = runs[-1]["lines"][-1] if runs else None
+        # A sidebar starts its own run, and the text after a box or a table starts another.
+        cut = prev is not None and (line["role"] == "sidebar" or (prev["role"] in boxed and line["role"] not in boxed))
+        # A table's cells, in either column, near the cell before (a table across the page).
+        cell = prev is not None and line["role"] == "tbl" and prev["role"] == "tbl" and abs(line["y0"] - prev["y0"]) <= 40
+        if runs and not cut and (cell or (col == runs[-1]["col"] and line["y0"] >= prev["y0"] - 20)):
+            runs[-1]["lines"].append(line)
+        else:
+            runs.append({"col": col, "lines": [line]})
+    for run in runs:
+        run["top"] = min(l["y0"] for l in run["lines"])
+        run["full"] = min(l["x0"] for l in run["lines"]) < 290 and max(l["x1"] for l in run["lines"]) > 340
+    # A full-width table (a class's features table) is read after the page's
+    # text, as the stream has it, so a paragraph running on from the page
+    # before is not cut by it.
+    # So is a sidebar, which the columns' text flows around.
+    tables = [r for r in runs if (r["full"] and all(l["role"] in ("tbl", "h5") for l in r["lines"])) or r["lines"][0]["role"] == "sidebar"]
+    for run in tables:
+        run["full"] = False
+        run["table"] = True
+    runs = [r for r in runs if not r.get("table")]
+    fulls = sorted((r for r in runs if r["full"]), key=lambda r: r["top"])
+    ordered = []
+    for band in range(len(fulls) + 1):
+        lo = fulls[band - 1]["top"] if band else -1
+        hi = fulls[band]["top"] if band < len(fulls) else 1e9
+        inside = [r for r in runs if not r["full"] and lo <= r["top"] < hi]
+        ordered += sorted(inside, key=lambda r: (r["col"], r["top"]))
+        if band < len(fulls):
+            ordered.append(fulls[band])
+    ordered += tables
+    return [line for run in ordered for line in run["lines"]]
+
+
 def lines_of(doc):
     out = []
     for pno, page in enumerate(doc, start=1):
+        start = len(out)
         for block in page.get_text("rawdict")["blocks"]:
             for line in block.get("lines", []):
                 spans = [s for s in split_tabs(line["spans"]) if s["text"] != ""]
@@ -99,6 +146,7 @@ def lines_of(doc):
                     "size": round(first["size"], 1),
                     "spans": [{"t": s["text"], "f": s["font"], "s": round(s["size"], 1), "x0": round(s["bbox"][0], 1), "x1": round(s["bbox"][2], 1)} for s in spans],
                 })
+        out[start:] = reading_order(out[start:])
     return out
 
 
@@ -316,6 +364,8 @@ def table_of(lines):
 
 def elements(lines):
     out = []
+    # Sidebars wait for the next heading, so the paragraph they sit beside is not cut.
+    pending = []
     i = 0
     n = len(lines)
     while i < n:
@@ -329,6 +379,8 @@ def elements(lines):
             while i + 1 < n and lines[i + 1]["role"] == role and lines[i + 1]["page"] == line["page"] and abs(lines[i + 1]["x0"] - line["x0"]) < 30 and 0 < lines[i + 1]["y0"] - line["y0"] < line["size"] * 1.6:
                 i += 1
                 plain = join(plain, clean("".join(s["t"] for s in lines[i]["spans"])).strip())
+            out.extend(pending)
+            pending.clear()
             out.append({"k": "h", "level": level, "text": plain.replace("…", "").strip(), "page": line["page"]})
             i += 1
             continue
@@ -343,7 +395,7 @@ def elements(lines):
                     paras.append(body)
                 else:
                     paras[-1] = join(paras[-1], body)
-            out.append({"k": "sidebar", "text": plain, "paras": paras, "page": line["page"]})
+            pending.append({"k": "sidebar", "text": plain, "paras": paras, "page": line["page"]})
             i += 1
             continue
         if role == "section":
@@ -396,6 +448,7 @@ def elements(lines):
         else:
             out[-1]["text"] = join(out[-1]["text"], raw.strip())
         i += 1
+    out.extend(pending)
     for el in out:
         if "text" in el and isinstance(el["text"], str):
             el["text"] = re.sub(r"\s+", " ", el["text"]).strip()

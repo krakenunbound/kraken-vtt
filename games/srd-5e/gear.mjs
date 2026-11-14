@@ -9,6 +9,8 @@ import { ids, md } from "../lib/fg.mjs";
 import { costOf, data, plain, pounds } from "./common.mjs";
 
 const EQUIPMENT = data("equipment");
+// A property's own rule, without a sidebar or table that follows it on the page.
+for (const [name, text] of Object.entries(EQUIPMENT.properties)) EQUIPMENT.properties[name] = text.split(/\n\n### /)[0];
 const titled = (text) => String(text).replace(/\b([a-z])/g, (letter) => letter.toUpperCase()).replace(/\b(Of|The|Or|And)\b/g, (word) => word.toLowerCase());
 
 export const WEAPONS = EQUIPMENT.weapons.map((weapon) => {

@@ -17,7 +17,7 @@ export const MAGIC_ITEMS = ITEMS_DATA.map((item) => ({
   properties: "Magic",
   cost: "",
   description: md(`*${item.line}*\n\n${item.text}`),
-  __category: item.type === "Wondrous Item" ? "Wondrous Items" : `${item.type}s`.replace(/ys$/, "ies").replace(/Staffs$/, "Staffs"),
+  __category: { "Wondrous Item": "Wondrous Items", Armor: "Armor", Staff: "Staves" }[item.type] ?? `${item.type}s`,
 }));
 
 const chapter = reference.find((entry) => entry.name === "Magic Items");

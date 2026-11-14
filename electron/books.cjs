@@ -24,7 +24,8 @@ const PICTURES = /\.(png|webp|jpe?g|gif)$/i;
 // maps), never the books of another of Kraken's games.
 const FG_RULESETS = {
   "Castles & Crusades": ["SiegeCore", "CnCRPG"],
-  // FG's 5E ruleset's modules (the SRD 5.2.1's player book, bestiary, magic items).
+  // FG's 5E ruleset's modules (the SRD 5.2.1's player book, bestiary, magic
+  // items), Kraken's own SRD 5.2.1 books among them (games/srd-5e: ruleset 5E).
   "D&D 5E": ["5E"],
   // The 3.5E ruleset's modules (FG's own and the GM's, Kraken35E's too).
   "D&D 3.5E": ["3.5E", "Kraken35E", "d20"],

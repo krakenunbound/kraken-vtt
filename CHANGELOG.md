@@ -14,7 +14,7 @@ full log of the work is in [PLAN.md](PLAN.md).
     with their lineages, 4 backgrounds, the feats, all the equipment and 339
     spells for the character wizard and the sheet. Spells that roll play on
     the Combat Tracker: Fire Bolt's attack, Fireball's save for half, Cure
-    Wounds, Magic Missile's darts, Bless's d4 and 190 more.
+    Wounds, Magic Missile's darts, Bless's d4 and 189 more.
   - *SRD 5.2.1 Creatures*: all 330 monsters and animals, their attacks rolling
     on the tracker.
   - *SRD 5.2.1 Magic Items*: the 258 magic items and their rules.

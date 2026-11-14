@@ -249,8 +249,25 @@
   "range": "120 feet",
   "components": "V, S",
   "duration": "Concentration, up to 1 minute",
-  "text": "Objects animate at your command. Choose a number of nonmagical objects within range that aren't being worn or carried, aren't fixed to a surface, and aren't Gargantuan. The maximum number of objects is equal to your spellcasting ability modifier; for this number, a Medium or smaller target counts as one object, a Large target counts as two, and a Huge target counts as three.\n\nEach target animates, sprouts legs, and becomes a Construct that uses the **Animated Object** stat block; this creature is under your control until the spell ends or until it is reduced to 0 Hit Points. Each creature you make with this spell is an ally to you and your allies. In combat, it shares your Initiative count and takes its turn immediately after yours.\n\nUntil the spell ends, you can take a Bonus Action to mentally command any creature you made with this spell if the creature is within 500 feet of you (if you control multiple creatures, you can command any of them at the same time, issuing the same command to each one). If you issue no commands, the creature takes the Dodge action and moves only to avoid harm. When the creature drops to 0 Hit Points, it reverts to its object form, and any remaining damage carries over to that form.\n\n***Using a Higher-Level Spell Slot.*** The creature's Slam damage increases by 1d4 (Medium or smaller), 1d6 (Large), or 1d12 (Huge) for each spell slot level above 5. or make attacks with Ranged or Reach weapons through the barrier.\n\nIf you move so that an affected creature is forced to pass through the barrier, the spell ends.",
-  "higher": "The creature's Slam damage increases by 1d4 (Medium or smaller), 1d6 (Large), or 1d12 (Huge) for each spell slot level above 5. or make attacks with Ranged or Reach weapons through the barrier.",
+  "text": "Objects animate at your command. Choose a number of nonmagical objects within range that aren't being worn or carried, aren't fixed to a surface, and aren't Gargantuan. The maximum number of objects is equal to your spellcasting ability modifier; for this number, a Medium or smaller target counts as one object, a Large target counts as two, and a Huge target counts as three.\n\nEach target animates, sprouts legs, and becomes a Construct that uses the **Animated Object** stat block; this creature is under your control until the spell ends or until it is reduced to 0 Hit Points. Each creature you make with this spell is an ally to you and your allies. In combat, it shares your Initiative count and takes its turn immediately after yours.\n\nUntil the spell ends, you can take a Bonus Action to mentally command any creature you made with this spell if the creature is within 500 feet of you (if you control multiple creatures, you can command any of them at the same time, issuing the same command to each one). If you issue no commands, the creature takes the Dodge action and moves only to avoid harm. When the creature drops to 0 Hit Points, it reverts to its object form, and any remaining damage carries over to that form.\n\n***Using a Higher-Level Spell Slot.*** The creature's Slam damage increases by 1d4 (Medium or smaller), 1d6 (Large), or 1d12 (Huge) for each spell slot level above 5.\n\n### Animated Object\n\n*Huge or Smaller Construct, Unaligned*\n\n**AC** 15 **HP** 10 (Medium or smaller), 20 (Large), 40 (Huge) **Speed** 30 ft.\n\n| | Score | Mod | Save |\n|---|---|---|---|\n| Str | 16 | +3 | +3 |\n| Dex | 10 | +0 | +0 |\n| Con | 10 | +0 | +0 |\n| Int | 3 | -4 | -4 |\n| Wis | 3 | -4 | -4 |\n| Cha | 1 | -5 | -5 |\n\n**Immunities** Poison, Psychic; Charmed, Exhaustion, Frightened, Paralyzed, Poisoned\n**Senses** Blindsight 30 ft.; Passive Perception 6\n**Languages** Understands the languages you know\n**CR** None (XP 0; PB equals your Proficiency Bonus)\n\n### Actions\n\n***Slam.*** *Melee Attack Roll:* Bonus equals your spell attack modifier, reach 5 ft. *Hit:* Force damage equal to 1d4 + 3 (Medium or smaller), 2d6 + 3 + your spellcasting ability modifier (Large), or 2d12 + 3 + your spellcasting ability modifier (Huge).",
+  "higher": "The creature's Slam damage increases by 1d4 (Medium or smaller), 1d6 (Large), or 1d12 (Huge) for each spell slot level above 5.",
+  "upgrade": "",
+  "actions": []
+ },
+ {
+  "name": "Antilife Shell",
+  "level": 5,
+  "school": "Abjuration",
+  "classes": [
+   "Druid"
+  ],
+  "castingtime": "Action",
+  "ritual": false,
+  "range": "Self",
+  "components": "V, S",
+  "duration": "Concentration, up to 1 hour",
+  "text": "An aura extends from you in a 10-foot Emanation for the duration. The aura prevents creatures other than Constructs and Undead from passing or reaching through it. An affected creature can cast spells or make attacks with Ranged or Reach weapons through the barrier.\n\nIf you move so that an affected creature is forced to pass through the barrier, the spell ends.",
+  "higher": "",
   "upgrade": "",
   "actions": []
  },
@@ -286,7 +303,7 @@
   "range": "60 feet",
   "components": "V, S, M (a mix of vinegar and honey)",
   "duration": "10 days",
-  "text": "As you cast the spell, choose whether it creates antipathy or sympathy, and target one creature or object that is Huge or smaller. Then specify a kind of creature, such as red dragons, goblins, or vampires. A creature of the chosen kind makes a Wisdom saving throw when it comes within 120 feet of the target. Your choice of antipathy or sympathy determines what happens to a creature when it fails that save:\n\n**Antipathy.** The creature has the Frightened condition. The Frightened creature must use its movement on its turns to get as far away as possible from the target, moving by the safest route.\n\n**Sympathy.** The creature has the Charmed condition. The Charmed creature must use its movement on its turns to get as close as possible to the target, moving by the safest route. If the creature is within 5 feet of the target, the creature can't willingly move away. If the target damages the Charmed creature, that creature can make a\n\n### Animated Object\n\n*Huge or Smaller Construct, Unaligned*\n\n**AC** 15 **HP** 10 (Medium or smaller), 20 (Large), 40 (Huge) **Speed** 30 ft.\n\n| | Score | Mod | Save |\n|---|---|---|---|\n| Str | 16 | +3 | +3 |\n| Dex | 10 | +0 | +0 |\n| Con | 10 | +0 | +0 |\n| Int | 3 | -4 | -4 |\n| Wis | 3 | -4 | -4 |\n| Cha | 1 | -5 | -5 |\n\n**Immunities** Poison, Psychic; Charmed, Exhaustion, Frightened, Paralyzed, Poisoned\n**Senses** Blindsight 30 ft.; Passive Perception 6\n**Languages** Understands the languages you know\n**CR** None (XP 0; PB equals your Proficiency Bonus)\n\n### Actions\n\n***Slam.*** *Melee Attack Roll:* Bonus equals your spell attack modifier, reach 5 ft. *Hit:* Force damage equal to 1d4 + 3 (Medium or smaller), 2d6 + 3 + your spellcasting ability modifier (Large), or 2d12 + 3 + your spellcasting ability modifier (Huge).",
+  "text": "As you cast the spell, choose whether it creates antipathy or sympathy, and target one creature or object that is Huge or smaller. Then specify a kind of creature, such as red dragons, goblins, or vampires. A creature of the chosen kind makes a Wisdom saving throw when it comes within 120 feet of the target. Your choice of antipathy or sympathy determines what happens to a creature when it fails that save:\n\n**Antipathy.** The creature has the Frightened condition. The Frightened creature must use its movement on its turns to get as far away as possible from the target, moving by the safest route.\n\n**Sympathy.** The creature has the Charmed condition. The Charmed creature must use its movement on its turns to get as close as possible to the target, moving by the safest route. If the creature is within 5 feet of the target, the creature can't willingly move away. If the target damages the Charmed creature, that creature can make a Wisdom saving throw to end the effect, as described below.\n\n***Ending the Effect.*** If the Frightened or Charmed creature ends its turn more than 120 feet away from the target, the creature makes a Wisdom saving throw. On a successful save, the creature is no longer affected by the target. A creature that successfully saves against this effect is immune to it for 1 minute, after which it can be affected again.",
   "higher": "",
   "upgrade": "",
   "actions": [
@@ -304,33 +321,6 @@
     "label": "Antipathy/Sympathy; Frightened",
     "durmod": 240,
     "durunit": "hour"
-   }
-  ]
- },
- {
-  "name": "Antilife Shell",
-  "level": 5,
-  "school": "Abjuration",
-  "classes": [
-   "Druid"
-  ],
-  "castingtime": "Action",
-  "ritual": false,
-  "range": "Self",
-  "components": "V, S",
-  "duration": "Concentration, up to 1 hour",
-  "text": "An aura extends from you in a 10-foot Emanation for the duration. The aura prevents creatures other than Constructs and Undead from passing or reaching through it. An affected creature can cast spells Wisdom saving throw to end the effect, as described below.\n\n***Ending the Effect.*** If the Frightened or Charmed creature ends its turn more than 120 feet away from the target, the creature makes a Wisdom saving throw. On a successful save, the creature is no longer affected by the target. A creature that successfully saves against this effect is immune to it for 1 minute, after which it can be affected again.",
-  "higher": "",
-  "upgrade": "",
-  "actions": [
-   {
-    "type": "cast",
-    "targeting": "targets",
-    "targetingval": 1
-   },
-   {
-    "type": "powersave",
-    "savetype": "wisdom"
    }
   ]
  },
@@ -3418,8 +3408,8 @@
   "range": "30 feet",
   "components": "",
   "duration": "Instantaneous",
-  "text": "You summon an otherworldly being that appears as a loyal steed in an unoccupied space of your choice within range. This creature uses the **Otherworldly Steed** stat block. If you already have a steed from this spell, the steed is replaced by the new one.\n\nThe steed resembles a Large, rideable animal of your choice, such as a horse, a camel, a dire wolf, or an elk. Whenever you cast the spell, choose the steed's creature type—Celestial, Fey, or Fiend— which determines certain traits in the stat block.\n\n***Combat.*** The steed is an ally to you and your allies. In combat, it shares your Initiative count, and it functions as a controlled mount while you ride it (as defined in the rules on mounted combat). If you have the Incapacitated condition, the steed takes its turn immediately after yours and acts independently, focusing on protecting you.\n\n***Disappearance of the Steed.*** The steed disappears if it drops to 0 Hit Points or if you die. When it disappears, it leaves behind anything it was wearing or carrying. If you cast this spell again, you decide whether you summon the steed that disappeared or a different one.\n\n***Using a Higher-Level Spell Slot.*** Use the spell slot's level for the spell's level in the stat block. face a choice of paths along the way there, you know which path is the most direct.",
-  "higher": "Use the spell slot's level for the spell's level in the stat block. face a choice of paths along the way there, you know which path is the most direct.",
+  "text": "You summon an otherworldly being that appears as a loyal steed in an unoccupied space of your choice within range. This creature uses the **Otherworldly Steed** stat block. If you already have a steed from this spell, the steed is replaced by the new one.\n\nThe steed resembles a Large, rideable animal of your choice, such as a horse, a camel, a dire wolf, or an elk. Whenever you cast the spell, choose the steed's creature type—Celestial, Fey, or Fiend— which determines certain traits in the stat block.\n\n***Combat.*** The steed is an ally to you and your allies. In combat, it shares your Initiative count, and it functions as a controlled mount while you ride it (as defined in the rules on mounted combat). If you have the Incapacitated condition, the steed takes its turn immediately after yours and acts independently, focusing on protecting you.\n\n***Disappearance of the Steed.*** The steed disappears if it drops to 0 Hit Points or if you die. When it disappears, it leaves behind anything it was wearing or carrying. If you cast this spell again, you decide whether you summon the steed that disappeared or a different one.\n\n***Using a Higher-Level Spell Slot.*** Use the spell slot's level for the spell's level in the stat block.\n\n### Otherworldly Steed\n\n*Large Celestial, Fey, or Fiend (Your Choice), Neutral*\n\n**AC** 10 + 1 per spell level **HP** 5 + 10 per spell level (the steed has a number of Hit Dice [d10s] equal to the spell's level) **Speed** 60 ft., Fly 60 ft. (requires level 4+ spell)\n\n| | Score | Mod | Save |\n|---|---|---|---|\n| Str | 18 | +4 | +4 |\n| Dex | 12 | +1 | +1 |\n| Con | 14 | +2 | +2 |\n| Int | 6 | -2 | -2 |\n| Wis | 12 | +1 | +1 |\n| Cha | 8 | -1 | -1 |\n\n**Senses** Passive Perception 11\n**Languages** Telepathy 1 mile (works only with you)\n**CR** None (XP 0; PB equals your Proficiency Bonus)\n\n### Traits\n\n***Life Bond.*** When you regain Hit Points from a level 1+ spell, the steed regains the same number of Hit Points if you're within 5 feet of it.\n\n### Actions\n\n***Otherworldly Slam.*** *Melee Attack Roll:* Bonus equals your spell attack modifier, reach 5 ft. *Hit:* 1d8 plus the spell's level of Radiant (Celestial), Psychic (Fey), or Necrotic (Fiend) damage.\n\n### Bonus Actions\n\n***Fell Glare (Fiend Only; Recharges after a Long Rest).*** *Wisdom Saving Throw:* DC equals your spell save DC, one creature within 60 feet the steed can see. *Failure:* The target has the Frightened condition until the end of your next turn.\n\n***Fey Step (Fey Only; Recharges after a Long Rest).*** The steed teleports, along with its rider, to an unoccupied space of your choice up to 60 feet away from itself.\n\n***Healing Touch (Celestial Only; Recharges after a Long.*** \n\n***Rest).*** One creature within 5 feet of the steed regains a number of Hit Points equal to 2d8 plus the spell's level.",
+  "higher": "Use the spell slot's level for the spell's level in the stat block.",
   "upgrade": "",
   "actions": [
    {
@@ -3435,6 +3425,25 @@
     "durunit": "round"
    }
   ]
+ },
+ {
+  "name": "Find the Path",
+  "level": 6,
+  "school": "Divination",
+  "classes": [
+   "Bard",
+   "Cleric",
+   "Druid"
+  ],
+  "castingtime": "1 minute",
+  "ritual": false,
+  "range": "Self",
+  "components": "V, S, M (a set of divination tools—such as cards or runes—worth 100+ GP)",
+  "duration": "Concentration, up to 1 day",
+  "text": "You magically sense the most direct physical route to a location you name. You must be familiar with the location, and the spell fails if you name a destination on another plane of existence, a moving destination (such as a mobile fortress), or an unspecific destination (such as \"a green dragon's lair\").\n\nFor the duration, as long as you are on the same plane of existence as the destination, you know how far it is and in what direction it lies. Whenever you face a choice of paths along the way there, you know which path is the most direct.",
+  "higher": "",
+  "upgrade": "",
+  "actions": []
  },
  {
   "name": "Find Traps",
@@ -3508,7 +3517,7 @@
   "range": "150 feet",
   "components": "V, S, M (a ball of bat guano and sulfur)",
   "duration": "Instantaneous",
-  "text": "A bright streak flashes from you to a point you choose within range and then blossoms with a low roar into a fiery explosion. Each creature in a 20-foot-radius Sphere centered on that point makes a Dexterity saving throw, taking 8d6 Fire damage on a failed save or half as much damage on a successful one.\n\nFlammable objects in the area that aren't being worn or carried start burning.\n\n***Using a Higher-Level Spell Slot.*** The damage increases by 1d6 for each spell slot level above 3.\n\n### Otherworldly Steed\n\n*Large Celestial, Fey, or Fiend (Your Choice), Neutral*\n\n**AC** 10 + 1 per spell level **HP** 5 + 10 per spell level (the steed has a number of Hit Dice [d10s] equal to the spell's level) **Speed** 60 ft., Fly 60 ft. (requires level 4+ spell)\n\n| | Score | Mod | Save |\n|---|---|---|---|\n| Str | 18 | +4 | +4 |\n| Dex | 12 | +1 | +1 |\n| Con | 14 | +2 | +2 |\n| Int | 6 | -2 | -2 |\n| Wis | 12 | +1 | +1 |\n| Cha | 8 | -1 | -1 |\n\n**Senses** Passive Perception 11\n**Languages** Telepathy 1 mile (works only with you)\n**CR** None (XP 0; PB equals your Proficiency Bonus)\n\n### Traits\n\n***Life Bond.*** When you regain Hit Points from a level 1+ spell, the steed regains the same number of Hit Points if you're within 5 feet of it.\n\n### Actions\n\n***Otherworldly Slam.*** *Melee Attack Roll:* Bonus equals your spell attack modifier, reach 5 ft. *Hit:* 1d8 plus the spell's level of Radiant (Celestial), Psychic (Fey), or Necrotic (Fiend) damage.\n\n### Bonus Actions\n\n***Fell Glare (Fiend Only; Recharges after a Long Rest).*** *Wisdom Saving Throw:* DC equals your spell save DC, one creature within 60 feet the steed can see. *Failure:* The target has the Frightened condition until the end of your next turn.\n\n***Fey Step (Fey Only; Recharges after a Long Rest).*** The steed teleports, along with its rider, to an unoccupied space of your choice up to 60 feet away from itself.\n\n***Healing Touch (Celestial Only; Recharges after a Long.*** \n\n***Rest).*** One creature within 5 feet of the steed regains a number of Hit Points equal to 2d8 plus the spell's level.",
+  "text": "A bright streak flashes from you to a point you choose within range and then blossoms with a low roar into a fiery explosion. Each creature in a 20-foot-radius Sphere centered on that point makes a Dexterity saving throw, taking 8d6 Fire damage on a failed save or half as much damage on a successful one.\n\nFlammable objects in the area that aren't being worn or carried start burning.\n\n***Using a Higher-Level Spell Slot.*** The damage increases by 1d6 for each spell slot level above 3.",
   "higher": "The damage increases by 1d6 for each spell slot level above 3.",
   "upgrade": "",
   "actions": [
@@ -3535,25 +3544,6 @@
     ]
    }
   ]
- },
- {
-  "name": "Find the Path",
-  "level": 6,
-  "school": "Divination",
-  "classes": [
-   "Bard",
-   "Cleric",
-   "Druid"
-  ],
-  "castingtime": "1 minute",
-  "ritual": false,
-  "range": "Self",
-  "components": "V, S, M (a set of divination tools—such as cards or runes—worth 100+ GP)",
-  "duration": "Concentration, up to 1 day",
-  "text": "You magically sense the most direct physical route to a location you name. You must be familiar with the location, and the spell fails if you name a destination on another plane of existence, a moving destination (such as a mobile fortress), or an unspecific destination (such as \"a green dragon's lair\").\n\nFor the duration, as long as you are on the same plane of existence as the destination, you know how far it is and in what direction it lies. Whenever you",
-  "higher": "",
-  "upgrade": "",
-  "actions": []
  },
  {
   "name": "Fire Bolt",

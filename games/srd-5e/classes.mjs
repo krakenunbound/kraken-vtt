@@ -21,11 +21,17 @@ const keyOf = (name) => plain(name).toLowerCase().replace(/\s*\(.*\)$/, "");
 // Ability Score Improvement at 4, 8, 12, 16 is a row each), its text from the
 // "Level N: Name" section that describes it.
 function featureRows(cls) {
-  const described = new Map(cls.features.map((feature) => [keyOf(feature.name), feature]));
+  // Two features may share a name (Improved Brutal Strike at 13 and 17): the one
+  // described at that level, else the last described before it.
+  const describedAt = (name, level) => {
+    const same = cls.features.filter((feature) => keyOf(feature.name) === keyOf(name));
+    return same.find((feature) => feature.level === level) ?? same.filter((feature) => feature.level <= level).at(-1) ?? same[0];
+  };
+  const described = { get: (name, level) => describedAt(name, level) };
   // The options a feature offers (Metamagic Options, Eldritch Invocation Options) go with it.
   for (const option of cls.options) {
     const stem = keyOf(option.name.replace(/ Options$/, ""));
-    const feature = [...described.entries()].find(([key]) => key.startsWith(stem) || stem.startsWith(key))?.[1];
+    const feature = cls.features.find((item) => keyOf(item.name).startsWith(stem) || stem.startsWith(keyOf(item.name)));
     if (feature) feature.text = `${feature.text}\n\n### ${option.name}\n\n${option.text}`;
   }
   const rows = [];
@@ -40,7 +46,7 @@ function featureRows(cls) {
     const level = Number(row[0]);
     for (const name of String(row[2] ?? "").split(/,\s*/)) {
       if (!name || /^(—|-|Subclass feature)$/i.test(name.trim())) continue;
-      add(level, name.trim(), described.get(keyOf(name))?.text ?? "");
+      add(level, name.trim(), described.get(name, level)?.text ?? "");
     }
   }
   // A feature described but not in the table (none in the SRD; kept so nothing is lost).
