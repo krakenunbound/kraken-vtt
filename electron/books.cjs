@@ -40,6 +40,8 @@ const FG_RULESETS = {
   Cairn: ["Cairn"],
   // Basic Fantasy RPG 4th Edition (CC BY-SA 4.0), its books shipped in the app.
   "Basic Fantasy": ["Basic Fantasy"],
+  // Forged in the Dark (the Blades in the Dark SRD, CC BY 3.0), its books shipped in the app.
+  "Forged in the Dark": ["Forged in the Dark"],
   Worldbuilding: [],
 };
 const ANY = new Set(["", "any", "corerpg"]);

@@ -20,6 +20,7 @@ import { DeathMarkersWindow } from "../combat/DeathMarkersWindow";
 import { AdventureList, LibraryWindow, StoryWindow, type Kind as AdventureKind } from "../books/Library";
 import { NotesWindow, NoteWindow } from "../notes/Notes";
 import { CalendarWindow } from "../notes/CalendarWindow";
+import { ClocksStrip, ClocksWindow } from "../notes/ClocksWindow";
 import { MotdWindow } from "../notes/MotdWindow";
 import { ReadAloudBubble, useAnyMapShown } from "../books/ReadAloudBubble";
 import { readAloud } from "../books/readAloud";
@@ -251,7 +252,7 @@ export function Desktop({
   const mapTool: SidebarEntry[] = scene ? [{ kind: "map", label: "Map", icon: "map", title: sceneName || "Map" }] : [];
   const tools: SidebarEntry[] = gm
     ? [
-        { kind: "combat", label: "Combat", icon: "combat", title: "Combat Tracker", badge: combatBadge },
+        session.ruleset === "Forged in the Dark" ? { kind: "combat", label: "Score", icon: "combat", title: "Score" } : { kind: "combat", label: "Combat", icon: "combat", title: "Combat Tracker", badge: combatBadge },
         { kind: "assistant", label: "Assistant", icon: "sparkle", title: "DM Assistant" },
         { kind: "studio", label: "Map Studio", icon: "pen", title: "Map Studio" },
         { kind: "players", label: "Players", icon: "players", title: "Players" },
@@ -259,7 +260,7 @@ export function Desktop({
       ]
     : [
         ...mapTool,
-        { kind: "combat", label: "Combat", icon: "combat", title: "Combat Tracker", badge: combatBadge },
+        session.ruleset === "Forged in the Dark" ? { kind: "combat", label: "Score", icon: "combat", title: "Score" } : { kind: "combat", label: "Combat", icon: "combat", title: "Combat Tracker", badge: combatBadge },
         { kind: "settings", label: "Settings", icon: "settings", title: "Settings" },
       ];
   const charactersEntry: SidebarEntry = gm
@@ -293,6 +294,8 @@ export function Desktop({
         ...(session.ruleset === "Traveller" || session.ruleset === "Apeira Astra" ? [{ kind: "ships" as const, label: "Starships", icon: "ship", title: "Starships" }] : []),
         { kind: "notes", label: gm ? "Notes" : "Player Notes", icon: "chat", title: gm ? "Notes" : "Player Notes" },
         { kind: "calendar", label: "Calendar", icon: "calendar", title: "Calendar" },
+        // Progress clocks: Forged in the Dark's (shown in any game that has some).
+        ...(session.ruleset === "Forged in the Dark" || session.clocks.clocks.length ? [{ kind: "clocks" as const, label: "Clocks", icon: "hourglass", title: "Clocks" }] : []),
         ...(gm || session.options.motd?.text || session.options.motd?.links?.length ? [{ kind: "motd" as const, label: "Message of the Day", icon: "flag", title: "Message of the Day" }] : []),
       ],
     },
@@ -575,6 +578,7 @@ export function Desktop({
         <Sidebar tools={tools} groups={groups} isOpen={entryOpen} onLaunch={launch} />
 
         <ChatDock session={session} />
+        <ClocksStrip session={session} />
 
         <div className="window-layer">
           {windows.windows.map((item) =>
@@ -617,6 +621,7 @@ export function Desktop({
               {item.kind === "picture" && item.payload ? <PictureWindow session={session} payload={item.payload} /> : null}
               {item.kind === "notes" ? <NotesWindow session={session} /> : null}
               {item.kind === "calendar" ? <CalendarWindow session={session} /> : null}
+              {item.kind === "clocks" ? <ClocksWindow session={session} /> : null}
               {item.kind === "motd" ? <MotdWindow session={session} /> : null}
               {item.kind === "note" && item.payload ? <NoteWindow session={session} id={item.payload} /> : null}
               {item.kind === "decals" ? <DecalPicker session={session} onClose={() => windows.close(item.key)} /> : null}

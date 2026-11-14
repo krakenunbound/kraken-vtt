@@ -53,6 +53,8 @@
     "mgt2": "node scripts/check-mgt2.mjs",
     "cairn": "node scripts/check-cairn.mjs",
     "cairn-ui": "node scripts/verify-cairn-ui.mjs",
+    "forged": "node scripts/check-forged.mjs",
+    "forged-ui": "node scripts/verify-forged-ui.mjs",
     "mgt2-ui": "node scripts/verify-mgt2-ui.mjs",
     "tcwizard": "node scripts/check-tcwizard.mjs",
     "starships": "node scripts/check-starships.mjs",

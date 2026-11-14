@@ -56,6 +56,7 @@ const KRAKEN_RULESET = {
   cairn: "Cairn",
   "basic fantasy": "Basic Fantasy",
   basicfantasy: "Basic Fantasy",
+  "forged in the dark": "Forged in the Dark",
   any: "Any",
   corerpg: "Any",
   "": "Any",

@@ -6,6 +6,43 @@ full log of the work is in [PLAN.md](PLAN.md).
 
 ## Unreleased
 
+- **Forged in the Dark comes with Kraken.** Make a campaign with the *Forged
+  in the Dark* ruleset and play a crew of scoundrels with nothing else
+  installed. It is based on Blades in the Dark (John Harper, One Seven Design)
+  through its System Reference Document (CC BY 3.0), with three books:
+  *Forged in the Dark: Scoundrel's Handbook* (every player chapter, seven
+  playbooks, six crew types, the items), *Forged in the Dark: Game Master's
+  Guide* (the faction game, entanglements, magnitude, rituals, crafting,
+  cohorts) and a starter score, *The Brine Street Job*, with a map of its
+  counting-house (walls and doors), its factions, people and clocks.
+  - **Rolls as the game has them:** a pool of d6s on the table's dice, the
+    highest die read (two 6s a critical; with no dice, two dice and the
+    lowest). Action rolls show the GM's **position** and **effect**; a
+    teammate can **assist** (+1d, 1 stress), you can **push** yourself
+    (+1d or +1 effect, 2 stress) or take a **Devil's Bargain**. Resistance
+    rolls cost 6 stress less the highest die. Stress past the last box is
+    trauma; the fourth trauma retires the scoundrel.
+  - **The sheet** has every field: actions and attributes with their xp
+    tracks, stress and trauma, harm and its penalties, the healing clock,
+    armor, load and items, coin and stash, special abilities and advances,
+    friends and rivals, long-term projects, and the downtime activities.
+  - **The character wizard** follows the book: playbook, heritage,
+    background, four action dots, a special ability, a friend and a rival,
+    a vice and its purveyor, a name, an alias and a look.
+  - **The crew** is the party sheet's new **Crew** tab: made with its own
+    wizard (type, reputation, lair, hunting grounds, ability, upgrades,
+    contact), then Tier, hold, rep and turf, heat and wanted level, coin and
+    vault, crew xp, upgrades, cohorts, the claim map and faction status.
+    Parcels pay out in coin; the party's XP award marks each scoundrel's
+    playbook xp.
+  - **The Score panel** takes the Combat button's place (the game has no
+    initiative): the phase, position and effect, the plan and its detail, the
+    engagement roll, fortune rolls, group actions, payoff, heat,
+    entanglements, and the start and end of downtime.
+- **Progress clocks for every table.** A **Clocks** window (and a strip in
+  the top bar that every seat sees): 4, 6 or 8 segments (2 to 12), danger,
+  racing, linked, tug-of-war, mission, project and faction clocks, kept for
+  the GM until shown. An action roll can tick one by its effect.
 - **D&D 5E plays with nothing else installed.** Kraken now ships the System
   Reference Document 5.2.1 as three books for a D&D 5E campaign, made from
   the SRD's own PDF:

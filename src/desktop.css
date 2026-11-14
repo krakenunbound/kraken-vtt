@@ -1455,6 +1455,93 @@ textarea.cc-field.tall { min-height: 220px; }
 .sheet-cairn .five-big .cc-field { width: 2.6rem; text-align: center; }
 .wizard-5e[data-wizard="cairn"] .cairn-table { margin: 4px 0; }
 .wizard-5e[data-wizard="cairn"] .cc-inline { flex-wrap: wrap; gap: 6px; }
+/* Forged in the Dark: boxes (stress, xp, heat, action dots), the roll bar, the attributes in three columns. */
+.forged-boxes { display: inline-flex; gap: 3px; flex-wrap: wrap; vertical-align: middle; }
+.forged-boxes button { width: 14px; height: 14px; min-width: 0; padding: 0; border-radius: 3px; border: 1px solid var(--brass-dim); background: rgba(255, 255, 255, 0.04); }
+.forged-boxes button.on { background: var(--brass); border-color: var(--brass); }
+.forged-boxes.dots button { border-radius: 50%; }
+.forged-boxes.stress button.on, .forged-boxes.heat button.on { background: #c0392b; border-color: #e0604f; }
+.forged-boxes button:disabled { cursor: default; opacity: 1; }
+.forged-rollbar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px; margin-bottom: 8px; }
+.forged-rollbar label { display: flex; flex-direction: column; gap: 2px; }
+.forged-rollbar label.inline-check, .score-row label.inline-check { flex-direction: row; align-items: center; }
+.forged-rollbar .grow, .score-pe .grow, .score-plan .grow { flex: 1; min-width: 10rem; }
+.forged-attributes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.forged-attribute header { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 6px; }
+.forged-resist { font-weight: 700; }
+.forged-action { display: flex; align-items: center; gap: 8px; margin: 3px 0; }
+.forged-roll { flex: 1; text-align: left; }
+.forged-advance button { margin: 2px; }
+.forged-condition { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 8px; }
+.forged-traumas span { display: inline-block; margin: 2px 4px 2px 0; padding: 1px 6px; border-radius: 8px; background: rgba(192, 57, 43, 0.25); }
+.forged-harm-row { display: grid; grid-template-columns: 1.2rem 1fr 1fr 5rem; gap: 4px; align-items: center; margin: 3px 0; }
+.forged-harm-row[data-harm-level="3"] { grid-template-columns: 1.2rem 2fr 5rem; }
+.forged-load { margin-top: 8px; }
+.forged-load h4 select { margin-left: 8px; }
+.forged-items { list-style: none; padding: 0; margin: 0; columns: 2; }
+.forged-items li { display: flex; justify-content: space-between; gap: 6px; break-inside: avoid; }
+.forged-abilities, .forged-friends { padding-left: 1rem; }
+.forged-abilities li, .forged-friends li { margin: 4px 0; }
+.forged-bond { color: var(--brass); }
+.forged-downtime p { margin: 6px 0; }
+.forged-steps { padding-left: 1.4rem; }
+.forged-steps > li { margin: 10px 0; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.forged-steps > li > b:first-child { width: 100%; }
+.forged-choice { display: block; width: 100%; margin: 2px 0; }
+.forged-wizard-dots { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; width: 100%; }
+.forged-wizard-dots > div { display: flex; flex-direction: column; gap: 3px; }
+.forged-wizard-dots button { min-width: 1.6rem; padding: 0 4px; }
+/* Progress clocks: the window, the strip on the table, the Score panel. */
+.clock-face { flex: none; }
+.clock-face.locked { opacity: 0.55; }
+.clocks-window { display: flex; flex-direction: column; gap: 10px; padding: 8px; }
+.clocks-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); gap: 8px; }
+.clock-card { display: flex; gap: 10px; align-items: center; padding: 8px; border-radius: 8px; border: 1px solid var(--panel-edge); background: rgba(255, 255, 255, 0.03); }
+.clock-card.gm-only { border-style: dashed; opacity: 0.85; }
+.clock-card-body { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.clock-card-tools { display: flex; gap: 4px; flex-wrap: wrap; }
+.clock-card-tools button { min-width: 2rem; padding: 2px 6px; }
+.clock-add, .clock-presets { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.clock-add input[aria-label="Clock name"] { flex: 1; min-width: 14rem; }
+/* The strip sits in the top bar's empty middle: seen by every seat, over no window. */
+.clocks-strip { position: fixed; top: 5px; left: 50%; transform: translateX(-50%); max-width: 44vw; z-index: 450; display: flex; gap: 6px; flex-wrap: nowrap; overflow-x: auto; pointer-events: none; }
+.clocks-strip-item { display: flex; flex: none; align-items: center; gap: 5px; padding: 1px 9px 1px 2px; border-radius: 20px; background: rgba(12, 16, 22, 0.85); border: 1px solid var(--brass-dim); color: #e8d9b5; font-size: 0.78rem; pointer-events: auto; }
+.clocks-strip-item.gm-only { border-style: dashed; opacity: 0.8; }
+.score-panel { display: flex; flex-direction: column; gap: 8px; padding: 8px; }
+.score-head { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
+.score-phase { display: flex; gap: 4px; }
+.score-phase button.active { border-color: var(--brass); color: var(--brass); background: var(--brass-soft); }
+.score-pe, .score-plan { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; }
+.score-pe label, .score-plan label { display: flex; flex-direction: column; gap: 2px; }
+.score-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--panel-edge); }
+.score-row > b { min-width: 6rem; }
+.score-clocks { display: flex; flex-wrap: wrap; gap: 10px; }
+.score-clock { display: flex; flex-direction: column; align-items: center; gap: 2px; max-width: 6rem; text-align: center; }
+/* The crew sheet (the party sheet's Crew tab). */
+.crew-sheet { display: flex; flex-direction: column; gap: 8px; }
+.crew-head { gap: 10px; flex-wrap: wrap; }
+.crew-name { font-family: var(--serif); font-size: 1.2rem; }
+.crew-stats { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.crew-track { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 2px 0; }
+.crew-track > b { min-width: 4.5rem; }
+.crew-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.crew-upgrades { padding-left: 1rem; }
+.crew-claims { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; }
+.crew-claim { padding: 6px 4px; font-size: 0.75rem; border-radius: 6px; border: 1px solid var(--panel-edge); background: rgba(255, 255, 255, 0.03); text-align: center; }
+.crew-claim.turf { border-style: dashed; }
+.crew-claim.held { border-color: var(--brass); background: var(--brass-soft); color: var(--brass); }
+.crew-claim.lair { display: grid; place-items: center; font-weight: 700; border-color: var(--brass-dim); }
+.crew-claim:disabled { opacity: 1; cursor: default; }
+.crew-factions { list-style: none; padding: 0; }
+.crew-factions li { display: flex; gap: 6px; align-items: center; margin: 3px 0; }
+.crew-factions .good { color: #5fbf7f; }
+.crew-factions .bad { color: #e0604f; }
+.crew-upgrade-picks { display: flex; flex-wrap: wrap; gap: 4px 10px; width: 100%; }
+@media (max-width: 760px) {
+  .forged-attributes, .forged-condition, .crew-columns, .forged-wizard-dots { grid-template-columns: 1fr; }
+  .crew-claims { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .clocks-strip { top: auto; bottom: 64px; max-width: calc(100vw - 24px); }
+}
 /* Kraken packs (the Books window's Packs tab). */
 .packs-panel { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 8px; }
 .packs-bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }

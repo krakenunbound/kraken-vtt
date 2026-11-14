@@ -6,6 +6,7 @@ const adnd2e = require("./adnd2e.cjs");
 const astra = require("./astra.cjs");
 const mgt2 = require("./mgt2.cjs");
 const cairn = require("./cairn.cjs");
+const forged = require("./forged.cjs");
 const bfrpg = require("./bfrpg.cjs");
 
 // Host side of the SIEGE engine (shared/siege, ES modules shared with the
@@ -70,6 +71,7 @@ async function levelUp(table, record, packageKey, from) {
   if (dnd5e.is5e(record)) return dnd5e.levelUp5e(table, record, from);
   if (dnd35.is35(record)) return dnd35.levelUp35(table, record, from);
   if (adnd2e.is2e(record)) return adnd2e.levelUp2e(table, record, from, packageKey);
+  if (forged.isForged(record)) throw new Error("Forged in the Dark has no levels: a full xp track gives an advance (a special ability or an action dot) on the sheet.");
   if (cairn.isCairn(record)) throw new Error("Cairn has no levels: a character grows from what happens to them (Scars, Growth, Downtime).");
   if (bfrpg.isBf(record)) return bfrpg.levelUpBf(table, record, from);
   if (astra.isAstra(record)) throw new Error("Apeira Astra has no levels: spend experience on a skill or a characteristic (Improve).");
@@ -169,6 +171,7 @@ async function editCharacter(table, record, changes, seat) {
   if (dnd5e.is5e(record)) return dnd5e.edit5e(table, record, changes, seat);
   if (dnd35.is35(record)) return dnd35.edit35(table, record, changes, seat);
   if (adnd2e.is2e(record)) return adnd2e.edit2e(table, record, changes, seat);
+  if (forged.isForged(record)) return forged.editForged(table, record, changes, seat);
   if (cairn.isCairn(record)) return cairn.editCairn(table, record, changes, seat);
   if (bfrpg.isBf(record)) return bfrpg.editBf(table, record, changes, seat);
   if (astra.isAstra(record)) return astra.editAstra(table, record, changes, seat);
@@ -246,6 +249,7 @@ async function exportCharacter(record, format = "kraken") {
 async function dropOnCharacter(table, record, source, from) {
   if (!source) throw new Error("Nothing to drop.");
   const who = from || record.name;
+  if (forged.isForged(record)) return forged.dropOnForged(table, record, source, from);
   if (cairn.isCairn(record)) {
     if (source.type !== "item") throw new Error("A Cairn sheet takes items; a background comes with the character wizard.");
     const data = structuredClone(record.data);

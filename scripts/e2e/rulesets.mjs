@@ -546,6 +546,81 @@ export const RULESETS = {
     xp: null,
   },
   // Basic Fantasy RPG 4th Edition: its three books ship with Kraken.
+  // Forged in the Dark (the Blades in the Dark SRD): its three books ship with Kraken; no initiative: the
+  // Combat window is the Score panel, and a conflict is action rolls and resistance from the sheet.
+  "Forged in the Dark": {
+    shipped: true,
+    books: ["Forged in the Dark: Scoundrel's Handbook", "Forged in the Dark: Game Master's Guide", "The Brine Street Job (Forged in the Dark)"],
+    map: (ctx) => bookMap(ctx, "The Brine Street Job (Forged in the Dark)"),
+    tracker: ".score-panel",
+    async wizard(ctx) {
+      const { seat } = ctx;
+      const w = '[data-wizard="forged"]';
+      await seat.waitForSelector(w);
+      await seat.selectOption(`${w} select[aria-label="Playbook"]`, "Enforcer");
+      await seat.selectOption(`${w} select[aria-label="Heritage"]`, "Canal-born");
+      await seat.fill(`${w} input[aria-label="Heritage detail"]`, "Barge folk on the Grey Canal");
+      await seat.selectOption(`${w} select[aria-label="Background"]`, "Military");
+      await seat.fill(`${w} input[aria-label="Background detail"]`, "A marine who deserted");
+      for (const action of ["prowl", "wreck", "hunt", "consort"]) await seat.click(`${w} [data-action="dot-${action}"]`);
+      await seat.check(`${w} input[data-ability="Battleborn"]`);
+      await seat.selectOption(`${w} select[aria-label="Close friend"]`, "Old Pell");
+      await seat.selectOption(`${w} select[aria-label="Rival"]`, "Sergeant Danna Vey");
+      await seat.selectOption(`${w} select[aria-label="Vice"]`, "Stupor");
+      await seat.fill(`${w} input[aria-label="Vice purveyor"]`, "The fighting pits under the tannery");
+      await seat.fill(`${w} input[aria-label="Character name"]`, "Bram Holloway");
+      await seat.fill(`${w} input[aria-label="Alias"]`, "Anchor");
+      await finish(ctx);
+    },
+    bought: null,
+    // The counting-house's night guards from the score, on the tracker (no initiative: a list of who is there).
+    async enemy(ctx) {
+      const { tool } = ctx;
+      const list = await tool("kraken_records_list", { type: "npc", name: "Night Guards" });
+      const guards = (list.records ?? list).find((item) => item.name === "Night Guards");
+      await tool("kraken_combat", guards ? { action: "add", recordId: guards.id } : { action: "add", entry: { name: "Night Guards", faction: "foe" } });
+    },
+    // The conflict: the player's Skirmish from the sheet (risky / standard), the GM's harm, the player resists it.
+    async fight(ctx) {
+      const { seat, tool, check, page } = ctx;
+      await tool("kraken_clocks", { action: "score", patch: { phase: "score", position: "risky", effect: "standard" } });
+      // Whatever harm the sheet's fields were filled with is cleared first (a clean roll: risky / standard).
+      for (const [level, index] of [[3, 0], [2, 0], [2, 1], [1, 0], [1, 1]]) await tool("kraken_forged", { id: ctx.character.id, action: "harm-clear", args: { level, index } }).catch(() => undefined);
+      await seat.bringToFront();
+      await openSide(seat, "characters").catch(() => undefined);
+      await seat.click('[data-sheet-tab="main"]').catch(() => undefined);
+      await seat.locator('[data-roll-action="skirmish"]').first().click();
+      await wait(1200);
+      await tool("kraken_forged", { id: ctx.character.id, action: "harm", args: { level: 2, text: "Cudgel to the ribs" } });
+      await seat.locator('[data-roll-resist="prowess"]').first().click();
+      await wait(1200);
+      const lines = (await tool("kraken_chat_log", { count: 200 })) || [];
+      check(lines.some((line) => /\[ACTION\] Skirmish \d?d · Risky \/ Standard/.test(line.roll?.label ?? "")), "the action roll went to chat with its position and effect");
+      check(lines.some((line) => /\[RESIST\] Prowess/.test(line.roll?.label ?? "")), "the resistance roll went to chat");
+      await tool("kraken_combat", { action: "end", removeNpcs: true });
+      await ctx.shot?.(page, "16-score");
+    },
+    parcel: (ctx) => handParcel(ctx, { coin: "Coin", amount: 4, item: "Lantern" }),
+    // Experience is marked on xp tracks, not a total: the party's award is checked in extra.
+    xp: null,
+    async extra(ctx) {
+      const { page, tool, check } = ctx;
+      const before = (await tool("kraken_record_get", { id: ctx.character.id })).data.xp?.playbook ?? 0;
+      await openSide(page, "party");
+      await page.click('[role="tab"]:has-text("XP")');
+      await page.locator('.party-xp input[type="number"]').first().fill("2");
+      await page.click('button:has-text("Award to the party")');
+      await wait(800);
+      const after = (await tool("kraken_record_get", { id: ctx.character.id })).data.xp?.playbook ?? 0;
+      check(after === before + 2 || after === 0, "the party's XP award marked the playbook track", `${before} -> ${after}`);
+      await closeWindows(page);
+      // A clock the whole table sees.
+      await tool("kraken_clocks", { action: "add", name: "First Light", segments: 8, kind: "mission" });
+      await tool("kraken_clocks", { action: "tick", id: "First Light", amount: 2 });
+      const seen = await ctx.seat.waitForSelector('.clocks-strip [data-clock="First Light"][data-filled="2"]', { timeout: 10000 }).catch(() => null);
+      check(seen, "the player sees the clock on the strip");
+    },
+  },
   "Basic Fantasy": {
     books: ["Basic Fantasy Player's Handbook", "Basic Fantasy Game Master's Guide", "The Mill at Hob's Ford (Basic Fantasy)"],
     map: (ctx) => bookMap(ctx, "The Mill at Hob's Ford (Basic Fantasy)"),

@@ -1,0 +1,35 @@
+{ "cell": 70, "cols": 26, "rows": 20, "ground": "rock", "seed": 47, "wallColor": [58, 52, 46],
+  "floors": [
+    { "x": 2, "y": 2, "w": 5, "h": 5, "tex": "flag" },
+    { "x": 8, "y": 2, "w": 7, "h": 5, "tex": "wood" },
+    { "x": 16, "y": 2, "w": 8, "h": 6, "tex": "wood" },
+    { "x": 2, "y": 9, "w": 11, "h": 6, "tex": "wood" },
+    { "x": 14, "y": 10, "w": 10, "h": 2, "tex": "flag" },
+    { "x": 17, "y": 13, "w": 7, "h": 2, "tex": "metal" },
+    { "x": 1, "y": 16, "w": 24, "h": 3, "tex": "cobble" },
+    { "x": 4, "y": 7, "w": 1, "h": 2, "tex": "flag" },
+    { "x": 10, "y": 7, "w": 1, "h": 2, "tex": "wood" },
+    { "x": 13, "y": 10, "w": 1, "h": 1, "tex": "flag" },
+    { "x": 19, "y": 8, "w": 1, "h": 2, "tex": "flag" },
+    { "x": 20, "y": 12, "w": 1, "h": 1, "tex": "metal" },
+    { "x": 6, "y": 15, "w": 1, "h": 1, "tex": "wood" },
+    { "x": 15, "y": 4, "w": 1, "h": 1, "tex": "wood" }
+  ],
+  "doors": [
+    { "x": 4, "y": 7, "side": "n" },
+    { "x": 10, "y": 8, "side": "s" },
+    { "x": 13, "y": 10, "side": "e" },
+    { "x": 19, "y": 8, "side": "n" },
+    { "x": 20, "y": 12, "side": "s" },
+    { "x": 6, "y": 15, "side": "n" },
+    { "x": 15, "y": 4, "side": "e", "secret": true }
+  ],
+  "features": [
+    { "kind": "bunk", "x": 2, "y": 2, "w": 1, "h": 2 }, { "kind": "bunk", "x": 2, "y": 5, "w": 1, "h": 2 }, { "kind": "lamp", "x": 5, "y": 3 }, { "kind": "barrel", "x": 6, "y": 6 },
+    { "kind": "console", "x": 9, "y": 3, "w": 2, "h": 1 }, { "kind": "console", "x": 12, "y": 3, "w": 2, "h": 1 }, { "kind": "console", "x": 9, "y": 5, "w": 2, "h": 1 }, { "kind": "lamp", "x": 14, "y": 6 },
+    { "kind": "console", "x": 18, "y": 3, "w": 3, "h": 1 }, { "kind": "lamp", "x": 23, "y": 2 }, { "kind": "stairs", "x": 22, "y": 5, "w": 2, "h": 2, "dir": "e" }, { "kind": "crate", "x": 16, "y": 7 },
+    { "kind": "crate", "x": 2, "y": 9 }, { "kind": "crate", "x": 3, "y": 9 }, { "kind": "crate", "x": 2, "y": 10 }, { "kind": "barrel", "x": 8, "y": 9 }, { "kind": "barrel", "x": 9, "y": 9 }, { "kind": "barrel", "x": 8, "y": 10 },
+    { "kind": "crate", "x": 11, "y": 13 }, { "kind": "crate", "x": 12, "y": 14 }, { "kind": "lamp", "x": 7, "y": 12 },
+    { "kind": "crate", "x": 22, "y": 13 }, { "kind": "crate", "x": 23, "y": 14 }, { "kind": "crate", "x": 17, "y": 14 },
+    { "kind": "barrel", "x": 2, "y": 16 }, { "kind": "barrel", "x": 3, "y": 16 }, { "kind": "crate", "x": 14, "y": 16 }, { "kind": "crate", "x": 15, "y": 16 }, { "kind": "lamp", "x": 10, "y": 16 }, { "kind": "lamp", "x": 20, "y": 16 }
+  ] }

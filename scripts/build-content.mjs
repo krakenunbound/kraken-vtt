@@ -22,10 +22,14 @@ import { TROUBLE_IN_TWIN_LAKES } from "../games/cairn/trouble-in-twin-lakes.mjs"
 import { PLAYERS_HANDBOOK as BF_PLAYERS } from "../games/basic-fantasy/players-handbook.mjs";
 import { GM_GUIDE as BF_GM } from "../games/basic-fantasy/gm-guide.mjs";
 import { MILL_AT_HOBS_FORD } from "../games/basic-fantasy/mill-at-hobs-ford.mjs";
+// Forged in the Dark: the Blades in the Dark SRD (CC BY 3.0: games/forged-dark/LICENSE.md).
+import { SCOUNDRELS_HANDBOOK as FORGED_PLAYERS } from "../games/forged-dark/scoundrels-handbook.mjs";
+import { GM_GUIDE as FORGED_GM } from "../games/forged-dark/gm-guide.mjs";
+import { BRINE_STREET } from "../games/forged-dark/brine-street.mjs";
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 const out = path.join(root, "games", "modules");
-const modules = [PLAYERS_HANDBOOK, BESTIARY, EMPTY_WATCHTOWER, CREW_HANDBOOK, DOSSIER, SALVAGE_RIGHTS, PLAYERS_RULES, CREATURES_SPEC, MAGIC_ITEMS_SPEC, CAIRN_PLAYERS_GUIDE, CAIRN_WARDENS_GUIDE, TROUBLE_IN_TWIN_LAKES, BF_PLAYERS, BF_GM, MILL_AT_HOBS_FORD];
+const modules = [PLAYERS_HANDBOOK, BESTIARY, EMPTY_WATCHTOWER, CREW_HANDBOOK, DOSSIER, SALVAGE_RIGHTS, PLAYERS_RULES, CREATURES_SPEC, MAGIC_ITEMS_SPEC, CAIRN_PLAYERS_GUIDE, CAIRN_WARDENS_GUIDE, TROUBLE_IN_TWIN_LAKES, BF_PLAYERS, BF_GM, MILL_AT_HOBS_FORD, FORGED_PLAYERS, FORGED_GM, BRINE_STREET];
 for (const spec of modules) {
   const folder = writeModule(out, spec);
   console.log(`built ${path.relative(root, folder)}`);

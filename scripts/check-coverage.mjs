@@ -28,6 +28,8 @@ const MESSAGES = {
   "level-up": "kraken_level_up",
   "character-improve": "kraken_character_improve",
   cairn: "kraken_cairn",
+  forged: "kraken_forged",
+  clocks: "kraken_clocks",
   "siege-check": "kraken_siege_check",
   ct: "kraken_combat",
   "party-award-xp": "kraken_party_award",

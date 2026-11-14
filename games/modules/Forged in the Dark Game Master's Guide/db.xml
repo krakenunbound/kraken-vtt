@@ -1,0 +1,530 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root version="4.6" release="1">
+	<npc>
+		<category name="Cohorts">
+			<gangofadepts>
+				<name type="string">Gang of Adepts</name>
+				<kind type="string">gang</kind>
+				<cohorttype type="string">Adepts</cohorttype>
+				<type type="string">Gang</type>
+				<quality type="string">Crew Tier</quality>
+				<scale type="string">Crew Tier</scale>
+				<text type="string">Scholars, tinkerers, occultists, and chemists.</text>
+				<description type="formattedtext"><p><b>Adepts:</b> Scholars, tinkerers, occultists, and chemists.</p><p>A gang has scale and quality equal to the crew's Tier (1 or 2 people at Tier 0). Give it one or two edges and as many flaws.</p><p><b>Edges:</b> Fearsome, Independent, Loyal, Tenacious. <b>Flaws:</b> Principled, Savage, Unreliable, Wild.</p></description>
+			</gangofadepts>
+			<gangofrooks>
+				<name type="string">Gang of Rooks</name>
+				<kind type="string">gang</kind>
+				<cohorttype type="string">Rooks</cohorttype>
+				<type type="string">Gang</type>
+				<quality type="string">Crew Tier</quality>
+				<scale type="string">Crew Tier</scale>
+				<text type="string">Con artists, spies, and socialites.</text>
+				<description type="formattedtext"><p><b>Rooks:</b> Con artists, spies, and socialites.</p><p>A gang has scale and quality equal to the crew's Tier (1 or 2 people at Tier 0). Give it one or two edges and as many flaws.</p><p><b>Edges:</b> Fearsome, Independent, Loyal, Tenacious. <b>Flaws:</b> Principled, Savage, Unreliable, Wild.</p></description>
+			</gangofrooks>
+			<gangofrovers>
+				<name type="string">Gang of Rovers</name>
+				<kind type="string">gang</kind>
+				<cohorttype type="string">Rovers</cohorttype>
+				<type type="string">Gang</type>
+				<quality type="string">Crew Tier</quality>
+				<scale type="string">Crew Tier</scale>
+				<text type="string">Sailors, carriage drivers, and scavengers.</text>
+				<description type="formattedtext"><p><b>Rovers:</b> Sailors, carriage drivers, and scavengers.</p><p>A gang has scale and quality equal to the crew's Tier (1 or 2 people at Tier 0). Give it one or two edges and as many flaws.</p><p><b>Edges:</b> Fearsome, Independent, Loyal, Tenacious. <b>Flaws:</b> Principled, Savage, Unreliable, Wild.</p></description>
+			</gangofrovers>
+			<gangofskulks>
+				<name type="string">Gang of Skulks</name>
+				<kind type="string">gang</kind>
+				<cohorttype type="string">Skulks</cohorttype>
+				<type type="string">Gang</type>
+				<quality type="string">Crew Tier</quality>
+				<scale type="string">Crew Tier</scale>
+				<text type="string">Scouts, infiltrators, and thieves.</text>
+				<description type="formattedtext"><p><b>Skulks:</b> Scouts, infiltrators, and thieves.</p><p>A gang has scale and quality equal to the crew's Tier (1 or 2 people at Tier 0). Give it one or two edges and as many flaws.</p><p><b>Edges:</b> Fearsome, Independent, Loyal, Tenacious. <b>Flaws:</b> Principled, Savage, Unreliable, Wild.</p></description>
+			</gangofskulks>
+			<gangofthugs>
+				<name type="string">Gang of Thugs</name>
+				<kind type="string">gang</kind>
+				<cohorttype type="string">Thugs</cohorttype>
+				<type type="string">Gang</type>
+				<quality type="string">Crew Tier</quality>
+				<scale type="string">Crew Tier</scale>
+				<text type="string">Killers, brawlers, and roustabouts.</text>
+				<description type="formattedtext"><p><b>Thugs:</b> Killers, brawlers, and roustabouts.</p><p>A gang has scale and quality equal to the crew's Tier (1 or 2 people at Tier 0). Give it one or two edges and as many flaws.</p><p><b>Edges:</b> Fearsome, Independent, Loyal, Tenacious. <b>Flaws:</b> Principled, Savage, Unreliable, Wild.</p></description>
+			</gangofthugs>
+			<doctorlieslvarn>
+				<name type="string">Doctor Liesl Varn</name>
+				<kind type="string">expert</kind>
+				<cohorttype type="string">Physicker</cohorttype>
+				<type type="string">Expert</type>
+				<quality type="string">Crew Tier +1</quality>
+				<scale type="string">0 (1 person)</scale>
+				<text type="string">A canal-quarter physicker of Brackwater who stitches wounds by lamplight and keeps her prices low and her questions lower.</text>
+				<description type="formattedtext"><p><b>Expert (Physicker).</b> A canal-quarter physicker of Brackwater who stitches wounds by lamplight and keeps her prices low and her questions lower.</p><p><i>Kraken's own example.</i> An expert has quality equal to the crew's Tier +1; their scale is always zero.</p></description>
+			</doctorlieslvarn>
+			<ebbestrand>
+				<name type="string">Ebbe Strand</name>
+				<kind type="string">expert</kind>
+				<cohorttype type="string">Investigator</cohorttype>
+				<type type="string">Expert</type>
+				<quality type="string">Crew Tier +1</quality>
+				<scale type="string">0 (1 person)</scale>
+				<text type="string">A former Watch inspector, dismissed for honesty, who finds anyone in the city for a fee.</text>
+				<description type="formattedtext"><p><b>Expert (Investigator).</b> A former Watch inspector, dismissed for honesty, who finds anyone in the city for a fee.</p><p><i>Kraken's own example.</i> An expert has quality equal to the crew's Tier +1; their scale is always zero.</p></description>
+			</ebbestrand>
+			<mirelleashgrove>
+				<name type="string">Mirelle Ashgrove</name>
+				<kind type="string">expert</kind>
+				<cohorttype type="string">Occultist</cohorttype>
+				<type type="string">Expert</type>
+				<quality type="string">Crew Tier +1</quality>
+				<scale type="string">0 (1 person)</scale>
+				<text type="string">A medium of the old marsh tradition who can speak to, bind, or banish the restless dead.</text>
+				<description type="formattedtext"><p><b>Expert (Occultist).</b> A medium of the old marsh tradition who can speak to, bind, or banish the restless dead.</p><p><i>Kraken's own example.</i> An expert has quality equal to the crew's Tier +1; their scale is always zero.</p></description>
+			</mirelleashgrove>
+			<quill>
+				<name type="string">Quill</name>
+				<kind type="string">expert</kind>
+				<cohorttype type="string">Forger</cohorttype>
+				<type type="string">Expert</type>
+				<quality type="string">Crew Tier +1</quality>
+				<scale type="string">0 (1 person)</scale>
+				<text type="string">An elderly scribe who can reproduce any seal, signature or ledger hand after an hour's study.</text>
+				<description type="formattedtext"><p><b>Expert (Forger).</b> An elderly scribe who can reproduce any seal, signature or ledger hand after an hour's study.</p><p><i>Kraken's own example.</i> An expert has quality equal to the crew's Tier +1; their scale is always zero.</p></description>
+			</quill>
+			<gauntbastien>
+				<name type="string">Gaunt Bastien</name>
+				<kind type="string">expert</kind>
+				<cohorttype type="string">Assassin</cohorttype>
+				<type type="string">Expert</type>
+				<quality type="string">Crew Tier +1</quality>
+				<scale type="string">0 (1 person)</scale>
+				<text type="string">A quiet killer with a gentle voice and no known address.</text>
+				<description type="formattedtext"><p><b>Expert (Assassin).</b> A quiet killer with a gentle voice and no known address.</p><p><i>Kraken's own example.</i> An expert has quality equal to the crew's Tier +1; their scale is always zero.</p></description>
+			</gauntbastien>
+		</category>
+	</npc>
+	<reference>
+		<refmanualindex>
+			<chapters>
+				<chapter_000>
+					<name type="string">About This Book</name>
+					<subchapters>
+						<sub_000>
+							<name type="string">About This Book</name>
+							<refpages>
+								<page_000>
+									<name type="string">Forged in the Dark: Game Master's Guide</name>
+									<keywords type="string">credits license attribution</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0001@Forged in the Dark Game Master's Guide</recordname></listlink>
+								</page_000>
+								<page_001>
+									<name type="string">Running a Score in Kraken</name>
+									<keywords type="string">kraken score panel clocks</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0002@Forged in the Dark Game Master's Guide</recordname></listlink>
+								</page_001>
+							</refpages>
+						</sub_000>
+					</subchapters>
+				</chapter_000>
+				<chapter_001>
+					<name type="string">The Faction Game</name>
+					<subchapters>
+						<sub_000>
+							<name type="string">The Faction Game</name>
+							<refpages>
+								<page_000>
+									<name type="string">Tier</name>
+									<keywords type="string">tier</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0003@Forged in the Dark Game Master's Guide</recordname></listlink>
+								</page_000>
+								<page_001>
+									<name type="string">Hold</name>
+									<keywords type="string">hold</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0004@Forged in the Dark Game Master's Guide</recordname></listlink>
+								</page_001>
+								<page_002>
+									<name type="string">Development</name>
+									<keywords type="string">development</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0005@Forged in the Dark Game Master's Guide</recordname></listlink>
+								</page_002>
+								<page_003>
+									<name type="string">Turf</name>
+									<keywords type="string">turf</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0006@Forged in the Dark Game Master's Guide</recordname></listlink>
+								</page_003>
+								<page_004>
+									<name type="string">Faction Status</name>
+									<keywords type="string">faction status</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0007@Forged in the Dark Game Master's Guide</recordname></listlink>
+								</page_004>
+								<page_005>
+									<name type="string">Claims</name>
+									<keywords type="string">claims</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0008@Forged in the Dark Game Master's Guide</recordname></listlink>
+								</page_005>
+							</refpages>
+						</sub_000>
+					</subchapters>
+				</chapter_001>
+				<chapter_002>
+					<name type="string">Entanglements</name>
+					<subchapters>
+						<sub_000>
+							<name type="string">Entanglements</name>
+							<refpages>
+								<page_000>
+									<name type="string">Entanglements</name>
+									<keywords type="string">entanglements</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0009@Forged in the Dark Game Master's Guide</recordname></listlink>
+								</page_000>
+								<page_001>
+									<name type="string">The Entanglements Table</name>
+									<keywords type="string">entanglements table</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0010@Forged in the Dark Game Master's Guide</recordname></listlink>
+								</page_001>
+								<page_002>
+									<name type="string">Arrest</name>
+									<keywords type="string">entanglement</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0011@Forged in the Dark Game Master's Guide</recordname></listlink>
+								</page_002>
+								<page_003>
+									<name type="string">Cooperation</name>
+									<keywords type="string">entanglement</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0012@Forged in the Dark Game Master's Guide</recordname></listlink>
+								</page_003>
+								<page_004>
+									<name type="string">Demonic notice</name>
+									<keywords type="string">entanglement</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0013@Forged in the Dark Game Master's Guide</recordname></listlink>
+								</page_004>
+								<page_005>
+									<name type="string">Flipped</name>
+									<keywords type="string">entanglement</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0014@Forged in the Dark Game Master's Guide</recordname></listlink>
+								</page_005>
+								<page_006>
+									<name type="string">Gang trouble</name>
+									<keywords type="string">entanglement</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0015@Forged in the Dark Game Master's Guide</recordname></listlink>
+								</page_006>
+								<page_007>
+									<name type="string">Interrogation</name>
+									<keywords type="string">entanglement</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0016@Forged in the Dark Game Master's Guide</recordname></listlink>
+								</page_007>
+								<page_008>
+									<name type="string">Questioning</name>
+									<keywords type="string">entanglement</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0017@Forged in the Dark Game Master's Guide</recordname></listlink>
+								</page_008>
+								<page_009>
+									<name type="string">Reprisals</name>
+									<keywords type="string">entanglement</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0018@Forged in the Dark Game Master's Guide</recordname></listlink>
+								</page_009>
+								<page_010>
+									<name type="string">Rivals</name>
+									<keywords type="string">entanglement</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0019@Forged in the Dark Game Master's Guide</recordname></listlink>
+								</page_010>
+								<page_011>
+									<name type="string">Show of force</name>
+									<keywords type="string">entanglement</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0020@Forged in the Dark Game Master's Guide</recordname></listlink>
+								</page_011>
+								<page_012>
+									<name type="string">Unquiet dead</name>
+									<keywords type="string">entanglement</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0021@Forged in the Dark Game Master's Guide</recordname></listlink>
+								</page_012>
+								<page_013>
+									<name type="string">The usual suspects</name>
+									<keywords type="string">entanglement</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0022@Forged in the Dark Game Master's Guide</recordname></listlink>
+								</page_013>
+							</refpages>
+						</sub_000>
+					</subchapters>
+				</chapter_002>
+				<chapter_003>
+					<name type="string">NPC &amp; Faction Downtime</name>
+					<subchapters>
+						<sub_000>
+							<name type="string">NPC &amp; Faction Downtime</name>
+							<refpages>
+								<page_000>
+									<name type="string">NPC &amp; Faction Downtime</name>
+									<keywords type="string">faction downtime clocks</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0023@Forged in the Dark Game Master's Guide</recordname></listlink>
+								</page_000>
+							</refpages>
+						</sub_000>
+					</subchapters>
+				</chapter_003>
+				<chapter_004>
+					<name type="string">Cohorts</name>
+					<subchapters>
+						<sub_000>
+							<name type="string">Cohorts</name>
+							<refpages>
+								<page_000>
+									<name type="string">Cohorts</name>
+									<keywords type="string">cohorts gangs experts</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0024@Forged in the Dark Game Master's Guide</recordname></listlink>
+								</page_000>
+							</refpages>
+						</sub_000>
+					</subchapters>
+				</chapter_004>
+				<chapter_005>
+					<name type="string">Magnitude</name>
+					<subchapters>
+						<sub_000>
+							<name type="string">Magnitude</name>
+							<refpages>
+								<page_000>
+									<name type="string">Magnitude</name>
+									<keywords type="string">magnitude</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0025@Forged in the Dark Game Master's Guide</recordname></listlink>
+								</page_000>
+							</refpages>
+						</sub_000>
+					</subchapters>
+				</chapter_005>
+				<chapter_006>
+					<name type="string">Rituals</name>
+					<subchapters>
+						<sub_000>
+							<name type="string">Rituals</name>
+							<refpages>
+								<page_000>
+									<name type="string">Rituals</name>
+									<keywords type="string">rituals</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0026@Forged in the Dark Game Master's Guide</recordname></listlink>
+								</page_000>
+								<page_001>
+									<name type="string">Finding a ritual source</name>
+									<keywords type="string">finding a ritual source</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0027@Forged in the Dark Game Master's Guide</recordname></listlink>
+								</page_001>
+								<page_002>
+									<name type="string">Learning a ritual</name>
+									<keywords type="string">learning a ritual</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0028@Forged in the Dark Game Master's Guide</recordname></listlink>
+								</page_002>
+								<page_003>
+									<name type="string">Performing a Ritual</name>
+									<keywords type="string">performing a ritual</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0029@Forged in the Dark Game Master's Guide</recordname></listlink>
+								</page_003>
+							</refpages>
+						</sub_000>
+					</subchapters>
+				</chapter_006>
+				<chapter_007>
+					<name type="string">Crafting</name>
+					<subchapters>
+						<sub_000>
+							<name type="string">Crafting</name>
+							<refpages>
+								<page_000>
+									<name type="string">Crafting</name>
+									<keywords type="string">crafting</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0030@Forged in the Dark Game Master's Guide</recordname></listlink>
+								</page_000>
+								<page_001>
+									<name type="string">Inventing</name>
+									<keywords type="string">inventing</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0031@Forged in the Dark Game Master's Guide</recordname></listlink>
+								</page_001>
+								<page_002>
+									<name type="string">Crafting</name>
+									<keywords type="string">crafting</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0032@Forged in the Dark Game Master's Guide</recordname></listlink>
+								</page_002>
+							</refpages>
+						</sub_000>
+					</subchapters>
+				</chapter_007>
+				<chapter_008>
+					<name type="string">Making Playbooks and Crews</name>
+					<subchapters>
+						<sub_000>
+							<name type="string">Making Playbooks and Crews</name>
+							<refpages>
+								<page_000>
+									<name type="string">Making a Character Playbook</name>
+									<keywords type="string">playbook design</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0033@Forged in the Dark Game Master's Guide</recordname></listlink>
+								</page_000>
+								<page_001>
+									<name type="string">Making a Crew Playbook</name>
+									<keywords type="string">crew design</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0034@Forged in the Dark Game Master's Guide</recordname></listlink>
+								</page_001>
+							</refpages>
+						</sub_000>
+					</subchapters>
+				</chapter_008>
+				<chapter_009>
+					<name type="string">Credits</name>
+					<subchapters>
+						<sub_000>
+							<name type="string">Credits</name>
+							<refpages>
+								<page_000>
+									<name type="string">Credits and License</name>
+									<keywords type="string">credits license attribution</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0035@Forged in the Dark Game Master's Guide</recordname></listlink>
+								</page_000>
+							</refpages>
+						</sub_000>
+					</subchapters>
+				</chapter_009>
+			</chapters>
+		</refmanualindex>
+		<refmanualdata>
+			<p0001>
+				<name type="string">Forged in the Dark: Game Master's Guide</name>
+				<text type="formattedtext"><p><b>Forged in the Dark: Game Master's Guide</b></p><p>The Game Master's rules of Kraken's Forged in the Dark ruleset: the faction game, heat and entanglements, the downtime of NPCs and factions, magnitude, rituals and crafting, cohorts, and how to make your own playbooks and crews.</p><p>This work is based on Blades in the Dark (found at http://www.bladesinthedark.com/), product of One Seven Design, developed and authored by John Harper, and licensed for our use under the Creative Commons Attribution 3.0 Unported license (http://creativecommons.org/licenses/by/3.0/).</p><p>Forged in the Dark is the open name of the system. Kraken VTT is not affiliated with or endorsed by One Seven Design. The rules text is the System Reference Document's; Kraken's own additions (the city of Brackwater, the playbooks, crew types, items, people and the starter score) are marked as Kraken's. Kraken VTT's code is not covered by this licence.</p></text>
+			</p0001>
+			<p0002>
+				<name type="string">Running a Score in Kraken</name>
+				<text type="formattedtext"><p><i>Kraken's own page.</i></p><p><b>The Score panel</b> (the Combat button) replaces the initiative tracker: there is no initiative in this game. Set the <b>phase</b> (free play, the score, downtime), the <b>position</b> and the <b>effect</b> every player's next action roll uses (risky / standard by default), the target and its Tier, the <b>plan</b> and its <b>detail</b>, and make the <b>engagement roll</b> (1d for sheer luck, +1d for each major advantage, -1d for each disadvantage): its result sets the starting position.</p><p><b>The Clocks window</b> (and the strip at the top of the table) shows the progress clocks to everyone: 4, 6 or 8 segments (any number from 2 to 12), danger clocks, racing clocks (two that race each other), linked clocks (one that opens when another fills), tug-of-war clocks (ticked up and down) and long-term projects. A clock can be kept for the GM until it is shown. An action roll can tick a clock by its effect: limited 1, standard 2, great 3 (a critical one level more).</p><p><b>Players</b> roll from their sheets: an action rating and its dice on the table's 3D dice, the highest die read (two 6s are a critical; zero dice rolls two and keeps the lowest), with assistance (+1d, the helper takes 1 stress), pushing (+1d or +1 effect for 2 stress each) or a Devil's Bargain; resistance rolls (6 stress less the highest die); armor boxes; the vice roll in downtime.</p><p><b>Downtime</b> is on the Score panel too: payoff (rep and coin), heat (and the wanted level at 9), the entanglement roll (the heat column, wanted-level dice), and each PC's two activities (more for 1 coin or 1 rep each).</p><p><b>The crew sheet</b> is the party sheet's Crew tab: its type, Tier, hold, rep and turf, heat and wanted level, coin and vault, crew xp, special abilities, upgrades, contacts, cohorts, claims and faction status.</p></text>
+			</p0002>
+			<p0003>
+				<name type="string">Tier</name>
+				<text type="formattedtext"><p>Each notable faction is ranked by <b>Tier</b>—a measure of wealth, influence, and scale. At the highest level are the Tier V and VI factions, the true powers of the city. Your crew begins at Tier 0.</p><p>You'll use your Tier rating to roll dice when you acquire an asset, as well as for any fortune roll for which your crew's overall power level and influence is the primary trait. Most importantly, your Tier determines the <b>quality level</b> of your items as well as the quality and <b>scale</b> of the gangs your crew employs—and thereby what size of enemy you can expect to handle.</p><h>Gang scale by tier</h><list><li><b>tier v</b>. Massive gangs. (80 people)</li><li><b>tier iv</b>. Huge gangs. (40 people)</li><li><b>tier iii</b>. Large gangs. (20 people)</li><li><b>tier ii</b>. Medium gangs. (12 people)</li><li><b>tier i</b>. Small gangs. (3-6 people)</li><li><b>tier 0</b>. 1 or 2 people</li></list></text>
+			</p0003>
+			<p0004>
+				<name type="string">Hold</name>
+				<text type="formattedtext"><p>On the faction ladder next to the Tier numbers is a letter indicating the strength of each faction's <b>hold</b>. Hold represents how well a faction can maintain their current position on the ladder. W indicates <b>weak</b> hold. S indicates <b>strong</b> hold. Your crew begins with <b>strong</b> hold at <b>Tier 0</b>.</p></text>
+			</p0004>
+			<p0005>
+				<name type="string">Development</name>
+				<text type="formattedtext"><p>To move up the ladder and develop your crew, you need <b>rep</b>. <b>Rep</b> is a measure of clout and renown. When you accrue enough <b>rep</b>, the other factions take you more seriously and you attract the support needed to develop and grow.</p><p>When you complete a score, your crew earns 2 rep. If the target of the score is higher Tier than your crew, you get +1 rep per Tier higher. If the target of the score is lower Tier, you get -1 rep per Tier lower (minimum zero).</p><p>You need <b>12 </b>rep<b> to fill the </b>rep tracker on your crew sheet. When you fill the tracker, do one of the following:</p><list><li>If your hold is weak, it becomes strong. <b>Reset your </b>rep<b> to zero</b>.</li><li>If your hold is strong, you can pay to increase your crew Tier by one. This costs <b>coin</b> equal to your <b>new Tier x 8</b>. As long as your <b>rep</b> tracker is full, you don't earn new <b>rep</b> (12 is the max). Once you pay and increase your Tier, <b>reset your </b>rep<b> to zero</b> and <b>reduce your hold to weak</b>.</li></list></text>
+			</p0005>
+			<p0006>
+				<name type="string">Turf</name>
+				<text type="formattedtext"><p>Another way to contribute to the crew's development is by acquiring <b>turf</b>. When you seize and hold territory, you establish a more stable basis for your <b>rep</b>. Each piece of turf that you claim represents abstracted support for the crew (often a result of the fear you instill in the citizens on that turf).</p><p>Turf is marked on your <b>rep</b> tracker (see the example below). Each piece of turf you hold reduces the <b>rep</b> cost to develop by one. So, if you have 2 turf, you need 10 <b>rep</b> to develop. If you have 4 turf, you need 8 <b>rep</b> to develop. <b>You can hold a maximum of 6 turf.</b> When you develop and reset your <b>rep</b>, <b>you keep the marks from all the turf you hold.</b></p><p><i>If you hold 3 pieces of turf, you need only 9 <b>Rep</b> to develop, instead of 12.</i></p><table><tr><td><b>Rep</b></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td><b>Turf</b></td></tr><tr><td></td><td>○</td><td>○</td><td>○</td><td>○</td><td>○</td><td>○</td><td></td><td>○</td><td>○</td><td>○</td><td>⊗</td><td>⊗</td><td>⊗</td><td></td></tr></table><p><i>When you develop, you'll clear the 9 <b>Rep</b> marks, but keep the 3 turf marks. Mark turf on the right side, to show the "cap" on how much <b>Rep</b> is needed.</i></p><p>Also, when you acquire turf, you expand the scope of your crew's <b>hunting grounds</b>.</p><h>Reducing hold</h><p>You may perform an operation specifically to reduce the hold of another faction, if you know how they're vulnerable. If the operation succeeds, the target faction loses 1 level of hold. If their hold is weak and it drops, the faction loses 1 Tier and stays weak.</p><p>When a faction is at war, it temporarily loses 1 hold.</p><p>Your crew can lose hold, too, following the same rules above. If your crew is Tier 0, with weak hold, and you lose hold for any reason, your lair comes under threat by your enemies or by a faction seeking to profit from your misfortune.</p></text>
+			</p0006>
+			<p0007>
+				<name type="string">Faction Status</name>
+				<text type="formattedtext"><p>Your crew's <b>status</b> with each faction indicates how well you are liked or hated. Status is rated from -3 to +3, with zero (neutral) being the default starting status. You track your status with each faction on the faction sheet.</p><p>When you create your crew, you assign some positive and negative status ratings to reflect recent history. The ratings will then change over time based on your actions in play.</p><h>Faction status changes</h><p>When you execute an operation, you gain -1 or -2 status with factions that are hurt by your actions. You may also gain +1 status with a faction that your operation helps. (If you keep your operation completely quiet then your status doesn't change.) Your status may also change if you do a favor for a faction or if you refuse one of their demands.</p><h>Faction status levels</h><list><li><b>+3: Allies.</b> This faction will help you even if it's not in their best interest to do so. They expect you to do the same for them.</li><li><b>+2: Friendly.</b> This faction will help you if it doesn't create serious problems for them. They expect you to do the same.</li><li><b>+1: Helpful.</b> This faction will help you if it causes no problems or significant cost for them. They expect the same from you.</li><li><b>0: Neutral</b></li><li><b>-1: Interfering.</b> This faction will look for opportunities to cause trouble for you (or profit from your misfortune) as long as it causes no problems or significant cost for them. They expect the same from you.</li><li><b>-2: Hostile.</b> This faction will look for opportunities to hurt you as long as it doesn't create serious problems for them. They expect you to do the same, and take precautions against you.</li><li><b>-3: War.</b> This faction will go out of its way to hurt you even if it's not in their best interest to do so. They expect you to do the same, and take precautions against you. When you're at war with any number of factions, your crew suffers +1 <b>heat</b> from scores, temporarily loses 1 hold, and PCs get only one downtime action rather than two. You can end a war by eliminating your enemy or by negotiating a mutual agreement to establish a new status rating.</li></list><frame>If your crew has weak hold when you go to war, the temporary loss of hold causes you to lose one Tier. When the war is over, restore your crew's Tier back to its pre-war level.</frame></text>
+			</p0007>
+			<p0008>
+				<name type="string">Claims</name>
+				<text type="formattedtext"><p>Each crew sheet has a map of claims available to be seized. The claim map displays a default roadmap for your crew type. Claims should usually be seized in an orderly sequence, by following the paths from the central square, the crew's lair.</p><p><i>However, you may attempt to seize any claim on your map</i>, ignoring the paths (or even seek out a special claim not on your map) but these operations will always be especially difficult and require exceptional efforts to discover and achieve.</p><h>Seizing a claim</h><p>Every claim is already controlled by a faction. To acquire one for yourself, you have to take it from someone else. To seize a claim, tell the GM which claim on your map your crew intends to capture. The GM will detail the claim with a location and a description and will tell you which faction currently controls that claim. Or the GM might offer you a choice of a few options if they're available.</p><p>If you choose to ignore the roadmap paths when seizing a claim, the GM might tell you that you'll need to investigate and gather information in order to discover a claim of that type before you can attempt to seize it.</p><p>Execute the operation like any other <b>score</b>, and if you succeed, you seize the claim and the targeted faction loses the claim.</p><p>Seizing a claim is a serious attack on a faction, usually resulting in -2 faction status with the target, and potentially +1 status with its enemies.</p><p>As soon as you seize a claim, you enjoy the listed benefit for as long as you hold the claim. Some claims count as <b>turf</b>. Others provide special benefits to the crew, such as bonus dice in certain circumstances, extra <b>coin</b> generated for the crew's treasury, or new opportunities for action.</p><h>Losing a claim</h><p>An enemy faction may try to seize a claim that your crew holds. You can fight to defend it, or negotiate a deal with the faction, depending on the situation. If you lose a claim, you lose all the benefits of that claim. If your lair is lost, you lose the benefits of all of your claims until you can restore your lair or establish a new one. To restore or establish a new lair, accomplish a score to do so.</p></text>
+			</p0008>
+			<p0009>
+				<name type="string">Entanglements</name>
+				<text type="formattedtext"><p>Your crew didn't just spring into existence tonight. You have a complex history of favors, commitments, debts, and promises that got you where you are today. To reflect this, after each score, you roll dice to find out which <b>entanglement</b> comes calling. An entanglement might be a rival crew looking to throw their weight around (and demand some <b>coin</b>), an Investigator of the City Watch making a case against your crew (but ready for a bribe), or even the attention of a vengeful ghost.</p><p>After payoff and <b>heat</b> are determined, the GM generates an entanglement for the crew using the lists below. Find the column that matches the crew's current <b>heat</b> level. Then roll a number of dice equal to their <b>wanted level</b>, and use the result of the roll to select which sort of entanglement manifests. <i>If <b>wanted level</b> is zero, roll two dice and keep the lowest result.</i></p><table><tr><td>RESULT</td><td><b>Heat</b> <b>0-3</b></td><td><b>Heat</b> <b>4-5</b></td><td><b>Heat</b> <b>6</b></td></tr><tr><td>1-3</td><td>Gang Trouble or The Usual Suspects</td><td>Gang Trouble or Questioning</td><td>Flipped or Interrogation</td></tr><tr><td>4-5</td><td>Rivals or Unquiet Dead</td><td>Reprisals or Unquiet Dead</td><td>Demonic Notice or Show of Force</td></tr><tr><td>6</td><td>Cooperation</td><td>Show of Force</td><td>Arrest</td></tr></table><p>Bring the entanglement into play immediately, or hold off until an appropriate moment. For example, if you get the <i>Interrogation</i> entanglement, you might wait until a PC indulges their vice, then say the costables picked them up when they were distracted by its pleasures.</p><p>Entanglements manifest fully before the PCs have a chance to avoid them. When an entanglement comes into play, describe the situation after the entanglement has manifested. The PCs deal with it from that point—they can't intercept it and defuse it before it happens. The purpose of the mechanic is to abstract a lot of the complex stuff happening in the backgrounds of the characters' lives in order to generate trouble for them. Entanglements are the cost of doing business in the underworld—a good crew learns to roll with the punches and pick their battles.</p><p>The entanglements are detailed in the following sections. Each has a list of potential ways for the PCs to be rid of it. If you want the entanglements to be a momentary problem for the crew, stick to the suggested methods to resolve them, and move on to the next part of downtime. If you want to dive in and explore the entanglement in detail, set the scene and play out the event in full, following the actions and consequences where they lead.</p></text>
+			</p0009>
+			<p0010>
+				<name type="string">The Entanglements Table</name>
+				<text type="formattedtext"><p>Find the column for the crew's heat; roll dice equal to its wanted level (zero: two dice, keep the lowest).</p><table><tr decoration="underline"><td><b>Result</b></td><td><b>Heat 0-3</b></td><td><b>Heat 4-5</b></td><td><b>Heat 6</b></td></tr><tr><td>1-3</td><td>Gang Trouble or The Usual Suspects</td><td>Gang Trouble or Questioning</td><td>Flipped or Interrogation</td></tr><tr><td>4-5</td><td>Rivals or Unquiet Dead</td><td>Reprisals or Unquiet Dead</td><td>Demonic Notice or Show of Force</td></tr><tr><td>6</td><td>Cooperation</td><td>Show of Force</td><td>Arrest</td></tr></table></text>
+			</p0010>
+			<p0011>
+				<name type="string">Arrest</name>
+				<text type="formattedtext"><p>An Inspector presents a case file of evidence to a magistrate, to begin prosecution of your crew. They send a detail to arrest you (a gang at least equal in <b>scale</b> to your <b>wanted level</b>). Pay them off with <b>coin</b> equal to your <b>wanted level</b> +3, hand someone over for arrest (this clears your <b>heat</b>), or try to evade capture.</p><frame>A truncheon bangs on the shutters of the window. "Alright then! Come on out and let's go quietly now!" It sounds like the bald Sergeant. When you peek out, you see a detail of about twenty constables, all geared up for a fight. The Sergeant mumbles under his breath, so only you inside can hear: "Or perhaps I have the wrong address?" He clears his throat and waits for some coin to appear.</frame></text>
+			</p0011>
+			<p0012>
+				<name type="string">Cooperation</name>
+				<text type="formattedtext"><p>A +3 status faction asks you for a favor. Agree to do it, or forfeit 1 <b>rep</b> per Tier of the friendly faction, or lose <b>1 status</b> with them. If you don't have a +3 faction status, you avoid entanglements right now.</p></text>
+			</p0012>
+			<p0013>
+				<name type="string">Demonic notice</name>
+				<text type="formattedtext"><p>A demon approaches the crew with a dark offer. Accept their bargain, hide until it loses interest (forfeit 3 <b>rep</b>), or deal with it another way.</p></text>
+			</p0013>
+			<p0014>
+				<name type="string">Flipped</name>
+				<text type="formattedtext"><p>One of the PCs' rivals arranges for one of your contacts, patrons, clients, or a group of your customers to switch allegiances due to the <b>heat</b> on you. They're loyal to another faction now.</p></text>
+			</p0014>
+			<p0015>
+				<name type="string">Gang trouble</name>
+				<text type="formattedtext"><p>One of your gangs (or other cohorts) causes trouble due to their flaw(s). You can lose face (forfeit<b> rep</b> equal to your Tier +1), make an example of one of the gang members, or face reprisals from the wronged party.</p></text>
+			</p0015>
+			<p0016>
+				<name type="string">Interrogation</name>
+				<text type="formattedtext"><p>The officers round up one of the PCs to question them about the crew's crimes. <i>How did they manage to capture you?</i> Either pay them off with 3 <b>coin</b>, or they beat you up (<b>level 2 harm</b>) and you tell them what they want to know (<b>+3</b> <b>heat</b>). You can <b>resist</b> each of those consequences separately.</p><frame>Some players really hate it when their character gets captured! Just tell them that this is completely normal for a scoundrel of the underworld. You spend time in and out of jail, getting questioned and harassed by the law. It's not the end of the world. But now that you're here in the interrogation room, what kind of person are you? Do you talk? Do you stand up to them? Do you make a deal?</frame></text>
+			</p0016>
+			<p0017>
+				<name type="string">Questioning</name>
+				<text type="formattedtext"><p>The cops grab an NPC member of your crew or one of the crew's contacts, to question them about your crimes. <i>Who do they think is most vulnerable?</i> Make a <b>fortune roll</b> to see how much they talk (<b>1-3</b>: <b>+2</b> <b>heat</b>, <b>4/5</b>: <b>+1</b> <b>heat</b>), or pay the constables off with 2 <b>coin</b>.</p><frame>Roll 2d for a normal person to see how well they keep quiet. If they're an experienced underworld type or some kind of tough, give them 3d or 4d instead. If they're soft or if they have some loyalty to the law, give them 1d or 0d.</frame></text>
+			</p0017>
+			<p0018>
+				<name type="string">Reprisals</name>
+				<text type="formattedtext"><p>An enemy faction makes a move against you (or a friend, contact, or vice purveyor). Pay them (1 <b>rep</b> and 1 <b>coin</b>) per Tier of the enemy as an apology, allow them to mess with you or yours, or fight back and show them who's boss.</p></text>
+			</p0018>
+			<p0019>
+				<name type="string">Rivals</name>
+				<text type="formattedtext"><p>A neutral faction throws their weight around. They threaten you, a friend, a contact, or one of your vice purveyors. Forfeit (1 <b>rep</b> or 1 <b>coin</b>) per Tier of the rival, or stand up to them and lose <b>1 status</b> with them.</p></text>
+			</p0019>
+			<p0020>
+				<name type="string">Show of force</name>
+				<text type="formattedtext"><p>A faction with whom you have a negative status makes a play against your holdings. Give them 1 <b>claim</b> or go to war (drop to -3 status). If you have no claims, <b>lose 1 hold</b> instead.</p></text>
+			</p0020>
+			<p0021>
+				<name type="string">Unquiet dead</name>
+				<text type="formattedtext"><p>A rogue spirit is drawn to you—perhaps it's a past victim? Acquire the services of an occultist to attempt to destroy or banish it, or deal with it yourself.</p><frame>They can hire an NPC by using the <b>acquire asset</b> downtime activity. Roll the NPC's quality level as a fortune roll to see how well they deal with the spirit.</frame></text>
+			</p0021>
+			<p0022>
+				<name type="string">The usual suspects</name>
+				<text type="formattedtext"><p>The cops grab someone in the periphery of your crew. One player volunteers a friend or vice purveyor as the person most likely to be taken. Make a fortune roll to find out if they resist questioning (1-3: +2 heat, 4/5: level 2 harm), or pay them off with 1 coin.</p></text>
+			</p0022>
+			<p0023>
+				<name type="string">NPC &amp; Faction Downtime</name>
+				<text type="formattedtext"><p>NPCs and factions also do things when the PCs have downtime. The GM <b>advances their project clocks</b> and chooses a downtime maneuver or two for each faction that they're interested in at the moment. Choose any maneuver that makes sense for that faction to pursue. For example:</p><list><li>Seize a claim or increase hold, make an enemy vulnerable, or reduce the hold of a vulnerable enemy.</li><li>Gather information on the PCs (may be opposed by a PC roll) or another subject.</li><li>Achieve a short-term goal they're in position to accomplish.</li><li>Acquire a new asset.</li><li>Call in a favor from another faction.</li><li>Employ political pressure or threats to force someone's hand.</li></list><p><b>GM:</b> Choose downtime maneuvers and advance clocks for the factions you're interested in right now. Don't worry about the rest. Later, when you turn your attention to a faction you've ignored for a while, go ahead and give them several downtime phases and project clock ticks to "catch up" to current events.</p><p>If you're not sure how far to progress a faction's clock, make a fortune roll using their Tier as the base trait, modified up or down depending on the opposition or circumstances. Tick 1 segment for a 1-3 result, 2 segments for a 4/5 result, 3 segments for a 6 result, or 5 segments for a <b>critical</b> result.</p><p>When factions do things that are known in the criminal underworld, <b>tell the players about it</b> through one of their <b>friends</b> or <b>contacts</b> or <b>vice purveyors</b>. These rumors and bits of gossip can lead to future scores and opportunities for the PCs.</p></text>
+			</p0023>
+			<p0024>
+				<name type="string">Cohorts</name>
+				<text type="formattedtext"><p>A <b>cohort</b> is a <b>gang</b> or an <b>expert</b> who works for your crew. To recruit a new cohort, spend <b>two upgrades</b> and create them using the process below.</p><h>Creating a gang</h><p>Choose a <b>gang type</b> from the list below:</p><list><li><b>Adepts</b>: Scholars, tinkerers, occultists, and chemists.</li><li><b>Rooks</b>: Con artists, spies, and socialites.</li><li><b>Rovers</b>: Sailors, carriage drivers, and deathlands scavengers.</li><li><b>Skulks</b>: Scouts, infiltrators, and thieves.</li><li><b>Thugs</b>: Killers, brawlers, and roustabouts.</li></list><p>A gang has <b>scale</b> and <b>quality</b> equal to your current crew Tier. It increases in scale and quality when your crew moves up in Tier.</p><frame>If your crew is Tier 0, your gang is quality 0 and scale 0 (1 or 2 people). When your crew is Tier II, your gang is quality 2 and scale 2 (12 people).</frame><p>Some crew upgrades will add the "Elite" feature to a gang, which gives them +1d when they roll for a given Type. <i>So, if you're Tier I and have a gang of Elite Thugs (+1d), they would roll 2d when they try to kill a target.</i></p><h>Creating an expert</h><p>Record the expert's <b>type</b> (their specific area of expertise). They might be a <i>Doctor</i>, an <i>Investigator</i>, an <i>Occultist</i>, an <i>Assassin</i>, a <i>Spy</i>, etc.</p><p>An expert has <b>quality</b> equal to your current crew Tier +1. Their scale is always zero (1 person). Your experts increase in quality when your crew moves up in Tier.</p><h>Edges &amp; flaws</h><p>When you create a cohort, give them one or two <b>edges</b> and an equal number of <b>flaws</b>.</p><p><b>Edges</b></p><list><li><b>Fearsome:</b> The cohort is terrifying in aspect and reputation.</li><li><b>Independent:</b> The cohort can be trusted to make good decisions and act on their own initiative in the absence of direct orders.</li><li><b>Loyal:</b> The cohort can't be bribed or turned against you.</li><li><b>Tenacious:</b> The cohort won't be deterred from a task.</li></list><p><b>Flaws</b></p><list><li><b>Principled:</b> The cohort has an ethic or values that it won't betray.</li><li><b>Savage:</b> The cohort is excessively violent and cruel.</li><li><b>Unreliable:</b> The cohort isn't always available, due to other obligations, stupefaction from their vices, etc.</li><li><b>Wild:</b> The cohort is drunken, debauched, and loud-mouthed.</li></list><h>Modifying a cohort</h><p>You can add an <b>additional type</b> to a gang or expert by spending two crew upgrades. When a cohort performs actions for which its types apply, it uses its full quality rating. Otherwise, its quality is zero. A given cohort can have up to two types.</p><h>Using a cohort</h><p>When you send a cohort to achieve a goal, roll their <b>quality</b> to see how it goes. Or, a PC can oversee the maneuver by leading a <b>group action</b>. If you direct the cohort with orders, roll <b>Command</b>. If you participate in the action alongside the cohort, roll the appropriate action. The quality of any opposition relative to the cohort's quality affects the position and effect of the action.</p><frame>The PCs crew of Hawkers want to run a rival gang out of the alley where they're selling drugs. They send their gang of Thugs to go kick the interlopers out. The GM rolls 2d for the Thugs' quality, and gets a <b>3</b>. An hour later, the Thugs come back, beaten and bloody. One of them looks sheepish, "Those guys are tough, boss." (The GM inflicts harm on the cohort, and they failed their goal.) The next day, the crew boss goes back and leads a group action, rolling her 3d in <b>Skirmish</b> alongside the Thugs' 2d. The boss gets a <b>6</b> this time—they beat the tar out of the other gang and send them packing (at least for now).</frame><h>Cohort harm &amp; Healing</h><p>Cohorts suffer harm similarly to PCs. A cohort can suffer four levels of harm:</p><list><li><b>Weakened.</b> The cohort has reduced effect.</li><li><b>Impaired.</b> The cohort operates with reduced quality (-1d).</li><li><b>Broken.</b> The cohort can't do anything until they recover.</li><li><b>Dead.</b> The cohort is destroyed.</li></list><p>All of your cohorts heal during downtime. If circumstances are amenable for recovery, each cohort removes one level of harm (or two levels of harm instead, if a PC spends a downtime activity helping them recuperate).</p><p>If a cohort is destroyed, it may be replaced. Spend <b>coin</b> equal to your Tier +2 to restore it, plus two downtime activities to recruit new gang members, or hire a new expert.</p></text>
+			</p0024>
+			<p0025>
+				<name type="string">Magnitude</name>
+				<text type="formattedtext"><p>Supernatural entities and energies have a wide variety of effects and power levels. To help the GM judge these forces consistently, the <b>magnitude</b> scale is provided. See the master table of magnitude at right. Magnitude measures the quality level of a ghost or demon or different aspects of an arcane force: its area, scale, duration, range, and force. Whenever you need to assess an entity or power, use the magnitude scale as a guideline to judge how it compares relative to the examples given on the table.</p><p>You can use the magnitude of an entity or power as a dice pool for a <b>fortune roll</b> to see how much effect it has, if it's not obvious or certain.</p><frame>A sea demon summons a crushing wave at the canal dock where the PCs are landing their boat. How badly does this damage the vessel and the crew? Obviously it's gonna be bad for them, but are they merely sinking or are they immediately wrecked and sunk? The GM makes a fortune roll using 6d (the magnitude of the demon). On a <b>1-3</b>, the wave has only little effect (for a huge wave), causing the craft to take on water and begin sinking. On a <b>4-5</b>, the wave has reduced effect, fully swamping the boat and throwing some of the characters and their cargo overboard. On a <b>6</b>, the wave has full effect, immediately sinking the boat and dragging the crew and cargo under. On a <b>critical</b>, the boat is sunk, and also the crew and cargo are badly harmed by flying debris and the crushing force of the wave.</frame><p>You can add levels of magnitude together to describe a combination of effects, or simply focus on one key feature for the magnitude assessment, ignoring other elements, even if they're on the magnitude scale. They're not <i>always</i> additive.</p><frame>In the example above, the demon generated magnitude 6 force and the GM included its area of effect "for free" as part of the power. A huge wave at a dock should affect the boats and the crews there, in their judgment. In a different session, a Whisper wants to accomplish a ritual that will unleash a hurricane across the district. The GM says that this is a very significant effect, so they add two levels of magnitude together: <i>force 6</i> and <i>range 5</i>. To create such a devastating power, the Whisper will suffer 11 stress! The GM offers a compromise: the ritual will take a few hours to complete, so the stress cost will be reduced to 8, but some people in the affected area may realize what's happening and flee before the full storm hits.</frame><p>The magnitude table is provided as a tool to help the GM make judgment calls. It's not meant to be a rigid restriction or mathematical formula to replace those judgment calls. Use the levels as a <i>guideline</i> for setting a magnitude number that seem appropriate to you.</p><p>This table can also be used as a guide to <b>quality level</b> when a PC <b>acquires an asset</b> or crafts an <b>alchemical</b> or <b>gadget</b>.</p><h>AREA/SCALE</h><table><tr><td>0</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td></tr><tr><td>A closet</td><td>A small room</td><td>A large room&amp; Several rooms</td><td>A small building</td><td>A large building</td><td>A city block</td><td></td></tr><tr><td>1 or 2 people</td><td>A small gang (3-6)</td><td>A medium gang (12)</td><td>A large gang (20)</td><td>A huge gang (40)</td><td>A massive gang (80)</td><td>A colossal gang (160)</td></tr></table><h>DURATION/RANGE</h><table><tr><td>0</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td></tr><tr><td>A few moments</td><td>A few minutes</td><td>An hour</td><td>A few hours</td><td>A day</td><td>Several days</td><td>A week</td></tr><tr><td>Within reach</td><td>A dozen paces</td><td>A stone's throw</td><td>Down the road</td><td>Several blocks away</td><td>Across the district</td><td>Across the city</td></tr></table><h>TIER &amp; QUALITY / FORCE</h><table><tr><td>0</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td></tr><tr><td>Poor</td><td>Adequate</td><td>Good</td><td>Excellent</td><td>Superior</td><td>Impeccable</td><td>Legendary</td></tr><tr><td>Weak</td><td>Moderate</td><td>Strong</td><td>Serious</td><td>Powerful</td><td>Overwhelming</td><td>Devastating</td></tr></table><h>QUALITY EXAMPLES</h><table><tr><td><b>6</b></td><td><i>A mansion, large ship, rare essences or arcane artifacts, powerful demon</i></td></tr><tr><td><b>5</b></td><td><i>A large townhouse, small ship, custom-tailored clothing, lightning barrier</i></td></tr><tr><td><b>4</b></td><td><i>A luxury vehicle, townhouse, typical demon or powerful ghost</i></td></tr><tr><td><b>3</b></td><td><i>A coach, boat, military rifle, fashionable clothing, small home</i></td></tr><tr><td><b>2</b></td><td><i>A pistol, respectable clothing, private rented room, typical ghost</i></td></tr><tr><td><b>1</b></td><td><i>A fighting blade, ordinary clothing, shared apartment, cheap food or drugs</i></td></tr><tr><td><b>0</b></td><td><i>A rusty knife, worn &amp; tattered clothing, rickety shack on the street</i></td></tr></table><h>FORCE EXAMPLES</h><table><tr><td><b>6</b></td><td><i>Hurricane wind, molten lava, tidal wave, electrical maelstrom</i></td></tr><tr><td><b>5</b></td><td><i>A ship's cannon, raging thunder-storm, massive fire, lightning strike</i></td></tr><tr><td><b>4</b></td><td><i>A charging horse, burning forge, bomb, whirlwind, electrocution</i></td></tr><tr><td><b>3</b></td><td><i>A crushing blow, staggering wind, grenade, searing fire, electrical surge</i></td></tr><tr><td><b>2</b></td><td><i>A powerful blow, howling wind, burning brand</i></td></tr><tr><td><b>1</b></td><td><i>A solid punch, steady wind, torch flame, electrical shock</i></td></tr><tr><td><b>0</b></td><td><i>A firm shove, a candle flame, breeze, tiny spark</i></td></tr></table></text>
+			</p0025>
+			<p0026>
+				<name type="string">Rituals</name>
+				<text type="formattedtext"><p>To enact a ritual is to come into contact with these abyssal forces and entreat them to do your will. It is a practice not without considerable risk.</p></text>
+			</p0026>
+			<p0027>
+				<name type="string">Finding a ritual source</name>
+				<text type="formattedtext"><p>A PC with the <b>Ritual</b> special ability begins with one known ritual, already learned (answer the questions below to create it). To learn a new ritual, a PC must first find a <b>source</b>. A source may be secured as payoff from a score—perhaps you steal a ritual book when your crew robs the Museum of Antiquities. You might also secure a source as the goal of a long-term project—by consorting with cultist friends, studying ancient texts, or some other method you devise.</p></text>
+			</p0027>
+			<p0028>
+				<name type="string">Learning a ritual</name>
+				<text type="formattedtext"><p>Once the source of a ritual is found, you may undertake a long-term project to learn the ritual. Most rituals will require an 8-segment progress clock to learn. The player and the GM answer questions about the ritual to define what it will do in play and what is required to perform it (see below). The player records these answers in their notes for future reference.</p><h>Ritual Questions</h><list><li>GM asks: <b>"What does the ritual do and how is it weird?"</b> Player answers.</li><li>Player asks: <b>"What must I do to perform the ritual, and what is its price?"</b> GM answers. A ritual takes at least one downtime activity to perform and inflicts <b>stress</b> on the caster according to its <b>magnitude</b>.  If performance of the ritual is dangerous or troublesome in some way, it requires an action roll (usually <b>Attune</b>). A ritual may also have additional costs, such as a sacrifice, rare item, the start of a dire progress clock, etc.</li><li>GM asks: <b>"What new belief or fear does knowledge of this ritual and its attendant occult forces instill in you?"</b> Player answers.</li></list><h>Example Ritual Answers</h><frame>Player: "The ritual wards a person so that the ghosts of their victims cannot find them. It's weird because... as long as the ward is in place, the person sometimes weeps tears of black blood." GM: "Spend a downtime action to prepare a mixture of tobacco, dream smoke, and crematory ash from a victim—which the target then smokes. You take at least 3 stress when you perform the ritual, which will be its quality for a fortune roll when it's challenged by a spirit—so you might want to take more stress to make it more potent." Player: "Gotcha. My new fear is what will happen if the spirits figure out where the ward came from and turn their vengeance on me, instead."</frame></text>
+			</p0028>
+			<p0029>
+				<name type="string">Performing a Ritual</name>
+				<text type="formattedtext"><p>To perform a ritual, you must have the <b>Ritual</b> special ability, then follow the method outlined by the answers to the ritual questions. Most rituals will take <b>one downtime activity</b> to complete, though the GM may call for two (or more) downtime activities for very powerful or far-reaching rituals. Some rituals may be partially performed during downtime and then fully manifested at-will later by completing the last incantation or ritual action. In this case, simply make a note that the ritual has been "primed" and may be unleashed at a later time.</p><p>When you perform a ritual, you take an amount of <b>stress</b> as established by the ritual questions, according to the <b>magnitude</b> of the forces brought to bear. The GM uses magnitude as a <i>guideline</i> for setting the stress cost—it may be higher or lower at their discretion to better describe the nature of the ritual. Some claims and special abilities also reduce the stress cost for ritual casting (like the Cult's <b>Ancient Obelisk</b> claim).</p><p><b>Rituals take time to cast.</b> Use the duration examples on the magnitude table to reduce the stress cost based on the time needed, generally no less than an hour.</p><p>The GM may also <b>tick a progress clock</b> when you perform a ritual—to advance the agenda of an arcane power or entity, or to show the steady approach of a dark outcome that is a consequence of the ritual's use.</p><p>If a ritual is dangerous or troublesome to perform, make an <b>action roll</b> (usually <b>Attune</b>) to see if unpleasant consequences manifest. If a ritual has an uncertain effect then a <b>fortune roll</b> should be made to see how well it manifests. Because a ritual is a downtime activity, you may spend <b>coin</b> 1-for-1 to increase the result level of your fortune roll (this represents the expenditure of expensive or rare ritual materials). If a ritual is both dangerous and uncertain, then both rolls may be called for.</p><p>Each performance of a ritual is a unique event, and may not always work the same way each time. The GM or players may call for a round of questions to establish a ritual anew. Rituals are a way to bring in a wide variety of arcane effects into the game. Use with caution! If you ever go overboard, address the questions again to establish new weirdness and costs if things have gotten out of hand. The abyssal forces are not playthings and cannot be considered a reliable or safe source of power.</p></text>
+			</p0029>
+			<p0030>
+				<name type="string">Crafting</name>
+				<text type="formattedtext"><p>During downtime, a PC can <b>Tinker</b> with special materials and tools to produce strange <b>alchemicals</b>, <b>build</b> (or <b>modify</b>) <b>items</b>, <b>create spark-craft</b> gadgets, or enchant <b>arcane</b> implements or weapons. The system for each method is similar, with different details depending on the nature of the project.</p></text>
+			</p0030>
+			<p0031>
+				<name type="string">Inventing</name>
+				<text type="formattedtext"><p>To invent a formula for a new alchemical concoction or the plan for a new item of your design, you need to <b>Study</b> it as a <b>long-term project</b>. Most new formulas or designs will require an 8-segment progress clock to invent and learn. The player and the GM answer questions about the invention to define what it will do in play and what is required to create it (see below). The player records these answers in their notes for future reference.</p><h>Creation Questions</h><list><li>GM asks: <b>"What type of creation is it and what does it do?"</b> Player answers. A creation might be mundane, alchemical, arcane, or spark-craft. If a PC has an appropriate special ability (<b>Alchemist</b>, <b>Artificer</b>, <b>Strange Methods</b>), they get bonuses when inventing and crafting certain creation types.</li><li>Player asks: <b>"What's the minimum quality level of this item?"</b> GM answers, with the <b>magnitude</b> of the effects the item produces as a guideline.</li><li>GM asks: <b>"What rare, strange, or adverse aspect of this formula or design has kept it in obscurity, out of common usage?</b>" Player answers.</li><li>Player asks: <b>"What drawbacks does this item have, if any?"</b> GM answers by choosing one or more from the drawbacks list, or by saying there are none.</li></list><p>A PC with the <b>Alchemist</b>, <b>Artificer</b>, or <b>Strange Methods</b> special abilities invents and learns one special formula when they take the ability (they don't have to take time to learn it).</p><p>Once you've invented a formula or design, you can <b>craft</b> it by using a downtime activity (see <b>Crafting</b>, below). No one else can craft this invention unless they learn your design as a long-term project. If you acquire a formula or design invented by another tinkerer, you may learn to craft it by completing a long-term project.</p><p>Common alchemicals (see <b>Sample Creations</b> for more information) and ordinary items don't require special formulas or designs to learn. Anyone may attempt to craft them by using commonly available instructions.</p></text>
+			</p0031>
+			<p0032>
+				<name type="string">Crafting</name>
+				<text type="formattedtext"><p>To craft something, spend one <b>downtime activity</b> to make a <b>Tinker</b> roll to determine the <b>quality level</b> of the item you produce. The base quality level is equal to your crew's Tier, modified by the result of the roll (see the results in the next section).</p><p>The results are based on your crew's Tier because it indicates the overall quality of the workspace and materials you have access to. <i>If you do the work with the <b>Workshop</b> upgrade for your crew, your effective Tier level is one higher for this roll.</i></p><h>CRAFTING ROLL</h><p>⏣   <b>1d</b> for each <b>Tinker</b> action dot.</p><p>⊕   <b>+1</b> quality per <b>Coin</b> spent.</p><p>⊕   <b>+1</b> quality for <b>Workshop</b> crew upgrade.</p><list><li><b>Critical</b>: Quality level is Tier +2.</li><li><b>6</b>: Quality level is Tier +1.</li><li><b>4/5</b>: Quality level is equal to Tier.</li><li><b>1-3</b>: Quality level is Tier -1.</li></list><p>The GM sets a <b>minimum quality</b> level that must be achieved to craft the item, based on the <b>magnitude</b> of the effect(s) it produces. The GM uses magnitude as a <i>guideline</i> for setting the quality level—it may be higher or lower at their discretion to better describe the nature of the project. An item may be crafted at <i>higher</i> quality if the player wishes to attempt it.</p><p>You may spend <b>coin</b> 1-for-1 to increase the final quality level result of your roll (this can raise quality level beyond Tier +2).</p><h>Modifying an item</h><p>Adding a feature or additional function to an item is simpler than creating something new. You don't need to invent a special formula or plan. Make a crafting roll to modify an item (the baseline quality of an item that you modify is equal to your crew's Tier, as usual).</p><list><li>A simple, useful modification requires Tier +1 quality. <i>A rifle that breaks down into two sections to be more easily concealed.</i></li><li>A significant modification requires Tier +2 quality. <i>Strengthening the barrel and powder load of a gun to fire further.</i></li><li>An arcane, spark-craft, or alchemical modification requires Tier +3 quality. <i>A dagger that can harm a demon. An electrified hull on a boat to repel boarders or ghosts. An outfit coated with chemicals to mask you from deathlands predators.</i></li></list><p>Modified items, like special creations, may have <b>drawbacks</b>.</p><h>Drawbacks</h><p>A creation or modification may have one or more drawbacks, chosen by the GM.</p><list><li><b>Complex</b>. You'll have to create it in multiple stages; the GM will tell you how many. One downtime activity and crafting roll is needed per stage.</li><li><b>Conspicuous</b>. This creation doesn't go unnoticed. Take <b>+1</b> <b>heat</b> if it's used any number of times on an operation.</li><li><b>Consumable</b>. This creation has a limited number of uses (all alchemicals must have this drawback, usually one use).</li><li><b>Rare</b>. This creation requires a rare item or material when it is crafted.</li><li><b>Unreliable</b>. When you use the item, make a fortune roll (using its <b>quality</b>) to see how well it performs.</li><li><b>Volatile</b>. The item produces a dangerous or troublesome side-effect for the user, specified by the GM. A side-effect is a consequence, and may be <b>resisted</b>.</li></list></text>
+			</p0032>
+			<p0033>
+				<name type="string">Making a Character Playbook</name>
+				<text type="formattedtext"><h>Short Descriptor of Character</h><p>Medium length description of the character here. Include what kind of activities they normally partake in.</p><p><b>Include the XP triggers for the characters here.</b> At the end of a session mark XP if you addressed a challenge with: insert a short list of methods or actions here. Examples could include: violence, coercion, knowledge, charm, audacity, calculation, deception, influence, stealth, evasion, technical skill, mayhem, tracking, or occult powers.</p><h>STARTING ACTIONS</h><table><tr><td>●</td><td></td><td>●</td><td>○</td><td>○</td><td>PRIMARY ACTION</td></tr><tr><td>●</td><td></td><td>○</td><td>○</td><td>○</td><td>SECONDARY ACTION</td></tr></table><h>Starting builds</h><p><i>If you want some guidance when you assign your four starting action dots and special ability, use one of these templates.</i></p><p><b>Example 1.</b> 4 Action Dots assigned plus a special ability</p><p><b>Example 2.</b> 4 Action Dots assigned plus a special ability</p><p><b>Example 3.</b> 4 Action Dots assigned plus a special ability</p><p><b>Example 4.</b> 4 Action Dots assigned plus a special ability</p><h>Friends, rivals</h><p>A list of five possible friends or rivals go here, along with descriptions of each. Some possibilities include: A spy, a bounty hunter, a pugilist, a cold killer, an extortionist, a physicker, an assassin, a sentinel, an apothecary, a priestess, a noble, a city clerk, an officer, an inspector, a beggar, a locksmith, a gang leader, a drug dealer, a tavern owner, a prostitute, a jail-bird, an information broker, a servant, an archivist, or a supernatural entity.</p><p>Questions can include how you know the friend, what they've done for you,  what you do for them, and what kind of relationship you have.</p></text>
+			</p0033>
+			<p0034>
+				<name type="string">Making a Crew Playbook</name>
+				<text type="formattedtext"><p><b>Short description of Crew</b></p><p>You're professional murderers—death is your business.</p><p><b>Add xp trigger. When you play this crew, you earn xp when you execute a successful operation of a few specific types.</b> Some examples include: murder, ransom, battle extortion, sabotage, product supply or sale, espionage, theft, acquiring new contraband or sources.</p><p><i>Add questions to personalize the crew. How is the crew distinguished from other similar crews?</i></p><h>Starting upgrades</h><list><li>First upgrade</li><li>Second upgrade</li></list><h>Favored Operations</h><p>A list of operation types that the crew may perform. Some possibilities include: murder, ranson, extortion, sabotage, acquisition, consecration, sacrifice, sale, supply, show of force, socialize, burglary, espionage, robbery, smuggling arms, smuggling contraband, or smuggling passengers.</p><h>Contacts</h><p>A list of five possible contacts for thew crew, along with descriptions of each. Some possibilities include: a gang boss, a deal broker, a noble, a bounty hunter, a merchant, a blacksmith, a physicker, a ward boss, a taver owner, an academic, an occultist, a magistrate, a dilettante, an explorer, a collector, an arms dealer, a drug dealer, an anarchist, or a dock worker.</p><p>Questions can include how you know the friend, what they've done for you,  what you do for them, and what kind of relationship you have.</p></text>
+			</p0034>
+			<p0035>
+				<name type="string">Credits and License</name>
+				<text type="formattedtext"><p><b>Forged in the Dark: Game Master's Guide</b></p><p>This work is based on Blades in the Dark (found at http://www.bladesinthedark.com/), product of One Seven Design, developed and authored by John Harper, and licensed for our use under the Creative Commons Attribution 3.0 Unported license (http://creativecommons.org/licenses/by/3.0/).</p><p>Kraken VTT's own text in this book (the playbooks, crew types, items, people and places of Brackwater) is shared under the same licence, CC BY 3.0. See games/forged-dark/LICENSE.md.</p></text>
+			</p0035>
+		</refmanualdata>
+	</reference>
+</root>
