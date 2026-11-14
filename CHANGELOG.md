@@ -4,6 +4,16 @@ What changed in each release of Kraken VTT. Downloads are on the
 [Releases](https://github.com/krakenunbound/kraken-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
+## 0.1.0-alpha.87: Two fixes from the screenshot shoot
+
+- **A read-aloud bubble leaves on time.** It could stay over the map for
+  minutes, because its timer started again whenever a map window opened or
+  closed. It now counts from when the words came, and leaves after the time it
+  takes to read them. Joining a table clears any old bubble.
+- **The Message of the Day opens only as a player joins.** It used to pop up on
+  every player's screen whenever the GM changed it during the game.
+- **The README** now has 24 full-screen screenshots, each explained.
+
 ## 0.1.0-alpha.86: Back really goes back
 
 - **Back and Round back now undo the turn change** on the combat tracker,
