@@ -83,7 +83,7 @@ export function LibraryWindow({ session, openMaps }: { session: Session; openMap
         <input value={search} placeholder="Search" onChange={(event) => setSearch(event.target.value)} aria-label="Library search" />
       </nav>
       {status ? <p className="hint">{status}</p> : null}
-      {modules.length === 0 ? <p className="hint">No adventure is active: make one active in Modules.</p> : null}
+      {modules.length === 0 ? <p className="hint empty-state"><b>No adventure is active</b>Make one active in Modules.</p> : null}
       {preview ? (
         <figure className="library-preview" data-library-preview={preview.item.name}>
           <img src={session.bookUrl("picture", preview.book.id, preview.item.file ?? "")} alt={preview.item.name} />
@@ -158,11 +158,11 @@ export function LibraryWindow({ session, openMaps }: { session: Session; openMap
                   )}
                 </div>
               ))}
-              {items.length === 0 && module !== ALL ? <p className="hint">Nothing here.</p> : null}
+              {items.length === 0 && module !== ALL ? <p className="hint empty-state">Nothing of this kind in this adventure.</p> : null}
             </section>
           );
         })}
-        {module === ALL && shown.every((book) => !(session.library[`${book.name}|${kind}`] ?? []).length) ? <p className="hint">Nothing here.</p> : null}
+        {module === ALL && shown.every((book) => !(session.library[`${book.name}|${kind}`] ?? []).length) ? <p className="hint empty-state">Nothing of this kind in the active adventures.</p> : null}
       </div>
     </div>
   );
@@ -195,7 +195,7 @@ export function AdventureList({ session, kind, onStory }: { session: Session; ki
           <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search" aria-label={`Search ${label}`} />
         </div>
         <div className="records-list">
-          {modules && modules.length === 0 ? <p className="hint">No adventure is active: tick one under Modules (Activation).</p> : null}
+          {modules && modules.length === 0 ? <p className="hint empty-state"><b>No adventure is active</b>Tick one under Modules.</p> : null}
           {(modules ?? []).map((book) => {
             const items = session.library[`${book.name}|${kind}`] ?? [];
             const groups = new Map<string, typeof items>();
@@ -203,7 +203,7 @@ export function AdventureList({ session, kind, onStory }: { session: Session; ki
             return (
               <section key={book.id} data-records-book={book.name}>
                 <h4>{book.title || book.name}</h4>
-                {items.length === 0 ? <p className="hint">No {label.toLowerCase()}{search ? " by that name" : ""}.</p> : null}
+                {items.length === 0 ? <p className="hint empty-state">No {label.toLowerCase()}{search ? " by that name" : " in this adventure"}.</p> : null}
                 {[...groups].map(([category, list]) => (
                   <div key={category}>
                     {category ? <h5 className="records-category">{category}</h5> : null}

@@ -29,7 +29,7 @@ export function OraclesWindow({ session }: { session: Session }) {
       setProblem(error instanceof Error ? error.message : String(error));
     }
   };
-  if (oracles.length === 0) return <p className="hint">No oracles yet: the GM makes the game's Reference book active (Modules).</p>;
+  if (oracles.length === 0) return <p className="hint empty-state"><b>No oracles yet</b>The GM makes the game's Reference book active (Modules).</p>;
   return (
     <div className="iron-oracles" data-oracles={oracles.length}>
       <div className="cc-inline iron-ask">
@@ -92,7 +92,7 @@ export function DelveWindow({ session }: { session: Session }) {
       setProblem(error instanceof Error ? error.message : String(error));
     }
   };
-  if (sites.length === 0) return <p className="hint">No Delve themes yet: make Ironsworn Foes and Sites active (Modules).</p>;
+  if (sites.length === 0) return <p className="hint empty-state"><b>No Delve themes yet</b>Make Ironsworn Foes and Sites active (Modules).</p>;
   return (
     <div className="iron-delve" data-delve>
       <p className="cc-inline">

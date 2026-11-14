@@ -651,7 +651,7 @@ export function WizardForged({ session, onDone }: { session: Session; onDone: (i
       {problem ? <p className="hint" style={{ color: "#c0392b" }}>{problem}</p> : null}
       <ol className="forged-steps">
         <li>
-          <b>Choose a playbook.</b>
+          <p className="forged-step"><b>Choose a playbook.</b></p>
           <select
             aria-label="Playbook"
             value={playbookName}
@@ -681,7 +681,7 @@ export function WizardForged({ session, onDone }: { session: Session; onDone: (i
           ) : null}
         </li>
         <li>
-          <b>Choose a heritage</b> and write a detail about your family life.
+          <p className="forged-step"><b>Choose a heritage</b> and write a detail about your family life.</p>
           <select aria-label="Heritage" value={heritage} onChange={(event) => setHeritage(event.target.value)}>
             <option value="">Choose...</option>
             {heritages.map((row) => (
@@ -693,7 +693,7 @@ export function WizardForged({ session, onDone }: { session: Session; onDone: (i
           <input aria-label="Heritage detail" placeholder="Ore miners, now war refugees" value={heritageDetail} onChange={(event) => setHeritageDetail(event.target.value)} />
         </li>
         <li>
-          <b>Choose a background</b> and write a detail of your own.
+          <p className="forged-step"><b>Choose a background</b> and write a detail of your own.</p>
           <select aria-label="Background" value={background} onChange={(event) => setBackground(event.target.value)}>
             <option value="">Choose...</option>
             {backgrounds.map((row) => (
@@ -705,7 +705,7 @@ export function WizardForged({ session, onDone }: { session: Session; onDone: (i
           <input aria-label="Background detail" placeholder="Labor: hunter, mutineer" value={backgroundDetail} onChange={(event) => setBackgroundDetail(event.target.value)} />
         </li>
         <li>
-          <b>Assign four action dots</b>: one for your heritage, one for your background, two anywhere. None above 2. <span data-dots-left={4 - added}>{4 - added} left.</span>
+          <p className="forged-step"><b>Assign four action dots</b>: one for your heritage, one for your background, two anywhere. None above 2. <span className="forged-left" data-dots-left={4 - added}>{4 - added} left</span></p>
           <div className="forged-wizard-dots">
             {ATTRIBUTES.map((attribute: string) => (
               <div key={attribute}>
@@ -727,7 +727,7 @@ export function WizardForged({ session, onDone }: { session: Session; onDone: (i
           </div>
         </li>
         <li>
-          <b>Choose a special ability</b> (the first is a good default).
+          <p className="forged-step"><b>Choose a special ability</b> (the first is a good default).</p>
           {abilities.map((item) => (
             <label key={String(item.name)} className="forged-choice">
               <input type="radio" name="forged-ability" data-ability={String(item.name)} checked={chosenAbility === item.name} onChange={() => setAbility(String(item.name))} /> <b>{String(item.name)}.</b> <small>{String(item.text ?? "")}</small>
@@ -735,7 +735,7 @@ export function WizardForged({ session, onDone }: { session: Session; onDone: (i
           ))}
         </li>
         <li>
-          <b>Choose one close friend and one rival.</b>
+          <p className="forged-step"><b>Choose one close friend and one rival.</b></p>
           <select aria-label="Close friend" value={friend} onChange={(event) => setFriend(event.target.value)}>
             <option value="">A close friend...</option>
             {friends.map((row) => (
@@ -754,7 +754,7 @@ export function WizardForged({ session, onDone }: { session: Session; onDone: (i
           </select>
         </li>
         <li>
-          <b>Choose your vice</b>, describe it, and name your purveyor and where to find them.
+          <p className="forged-step"><b>Choose your vice</b>, describe it, and name your purveyor and where to find them.</p>
           <select aria-label="Vice" value={vice} onChange={(event) => setVice(event.target.value)}>
             <option value="">Choose...</option>
             {Object.entries(VICES).map(([key, words]) => (
@@ -767,7 +767,7 @@ export function WizardForged({ session, onDone }: { session: Session; onDone: (i
           <input aria-label="Vice purveyor" placeholder="Old Tam at the Drowned Bell" value={purveyor} onChange={(event) => setPurveyor(event.target.value)} />
         </li>
         <li>
-          <b>Record your name, alias, and look.</b>
+          <p className="forged-step"><b>Record your name, alias, and look.</b></p>
           <input aria-label="Character name" placeholder="Name" value={name} onChange={(event) => setName(event.target.value)} />
           <input aria-label="Alias" placeholder="Alias" value={alias} onChange={(event) => setAlias(event.target.value)} />
           <input aria-label="Look" placeholder="Tall, scarred, a long grey coat" value={look} onChange={(event) => setLook(event.target.value)} />

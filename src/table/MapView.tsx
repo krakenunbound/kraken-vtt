@@ -2155,6 +2155,7 @@ function MapViewInner({
                 <button
                   type="button"
                   role="menuitem"
+                  className="danger"
                   onClick={() => {
                     actions.removeToken(token.id);
                     setMenu(null);

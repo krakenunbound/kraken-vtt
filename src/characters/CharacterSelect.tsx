@@ -96,7 +96,7 @@ export function CharacterSelect({ session, onSheet, onWizard, onClose }: { sessi
             </li>
           );
         })}
-        {shown.length === 0 ? <li className="hint">{session.roster.length ? "No character by that name." : "No characters yet. Make one with the Character Wizard."}</li> : null}
+        {shown.length === 0 ? <li className="hint empty-state">{session.roster.length ? "No character by that name." : "No characters yet. Make one with the Character Wizard."}</li> : null}
       </ul>
       <input className="charselect-filter" aria-label="Filter characters" placeholder="Filter by name" value={filter} onChange={(event) => setFilter(event.target.value)} />
     </section>

@@ -52,7 +52,7 @@ export function ShipsWindow({ session, openMaps }: { session: Session; openMaps?
             </li>
           ))}
         </ul>
-        {ships.length === 0 ? <p className="hint">{gm ? "No ships yet: make one below." : "No ships yet."}</p> : null}
+        {ships.length === 0 ? <p className="hint">{gm ? "Name a ship and pick its design:" : "No ships yet."}</p> : null}
         {gm ? (
           <div className="ships-new">
             <input value={name} placeholder="Ship's name" aria-label="Ship name" onChange={(event) => setName(event.target.value)} />
@@ -70,7 +70,14 @@ export function ShipsWindow({ session, openMaps }: { session: Session; openMaps?
           </div>
         ) : null}
       </aside>
-      {current ? <ShipSheet key={current.id} session={session} ship={current} openMaps={openMaps} /> : null}
+      {current ? (
+        <ShipSheet key={current.id} session={session} ship={current} openMaps={openMaps} />
+      ) : (
+        <p className="hint empty-state ships-empty">
+          <b>No ships yet</b>
+          {gm ? "Make one on the left: its sheet opens here, with its crew, hull and weapons." : "The GM makes the crew's ship; its sheet opens here."}
+        </p>
+      )}
     </section>
   );
 }

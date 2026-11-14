@@ -16,6 +16,8 @@ export type SidebarEntry = {
   label: string;
   icon: string;
   title: string;
+  // The button's tooltip, when there is more to say than the window's title.
+  hint?: string;
   payload?: string;
   // Opens with a click, never closes (Character Selection).
   openOnly?: boolean;
@@ -108,7 +110,7 @@ export function Sidebar({
       type="button"
       className={`${tool ? "sidebar-tool" : "sidebar-entry"} launcher${isOpen(entry) ? " open" : ""}`}
       data-launch={entryId(entry)}
-      title={entry.title}
+      title={entry.hint ?? entry.title}
       onClick={() => onLaunch(entry)}
     >
       <span className="sidebar-icon">

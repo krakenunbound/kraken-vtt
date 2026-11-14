@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import type { Session, SoundItem, SoundLibrary, SoundTrigger } from "../session/useSession";
 import { Icon } from "../ui/icons";
+import { SettingsSection, Toggle } from "../ui/SettingsParts";
 import { KINDS, sound, type SoundKind } from "./soundEngine";
 
 // The Sound window (Syrinscape's, inside Kraken): the GM's one-shots, sound
@@ -28,13 +29,11 @@ export function VolumePanel() {
   );
   return (
     <div className="sound-volumes">
-      {row("master", "Everything")}
-      {KINDS.map((kind) => row(kind.id, kind.name))}
-      <label className="check">
-        <input type="checkbox" checked={volumes.muted} onChange={(event) => sound.setVolumes({ muted: event.target.checked })} />
-        Mute this screen
-      </label>
-      <p className="hint">These are yours: every player sets their own.</p>
+      <SettingsSection title="Your volumes" note="These are yours: every player sets their own.">
+        {row("master", "Everything")}
+        {KINDS.map((kind) => row(kind.id, kind.name))}
+        <Toggle label="Mute this screen" hint="No sound here at all; the table still hears theirs." checked={volumes.muted} onChange={(muted) => sound.setVolumes({ muted })} />
+      </SettingsSection>
     </div>
   );
 }
