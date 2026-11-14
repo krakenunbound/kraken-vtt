@@ -576,6 +576,11 @@ export function WizardBf({ session, onDone }: { session: Session; onDone: (id: s
       <p className="cc-inline">
         Gold {gold} gp · spent {money(spent)} · <b data-coin-left={left}>{money(Math.max(0, left))} left</b>
       </p>
+      {Object.keys(cart).length ? (
+        <p className="hint" data-cart>
+          Bought: {Object.entries(cart).map(([item, count]) => `${count > 1 ? `${count} x ` : ""}${item}`).join(", ")}
+        </p>
+      ) : null}
       <input aria-label="Shop search" placeholder="Search the equipment" value={search} onChange={(event) => setSearch(event.target.value)} />
       <ul className="life-shop">
         {wares

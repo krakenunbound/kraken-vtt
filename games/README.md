@@ -1,12 +1,23 @@
 # Kraken's own games
 
-Two original games ship with Kraken, so testers can play without any
-Fantasy Grounds modules:
+Two original games, and one free open game, ship with Kraken, so testers can
+play without any Fantasy Grounds modules:
 
 | Game | Engine | Books (games/modules) |
 |---|---|---|
 | **Descending Darkness** (dark fantasy) | the d20 family (`shared/dnd5e/rules.mjs`, profile `descending`) | Player's Handbook, Bestiary, *The Empty Watchtower* |
 | **Apeira Astra** (science fiction) | its own 2d6 engine (`shared/astra/rules.mjs`) | Crew Handbook, Threat Dossier, *Salvage Rights* |
+| **Basic Fantasy** (old-school fantasy; the Basic Fantasy RPG 4th Edition, CC BY-SA 4.0) | `shared/bfrpg/rules.mjs`, `electron/bfrpg.cjs` | Player's Handbook, Game Master's Guide, *The Mill at Hob's Ford* |
+
+Basic Fantasy is not Kraken's own game: its books are the Basic Fantasy
+Role-Playing Game's text (Chris Gonnerman, CC BY-SA 4.0), read from the
+book's Quarto source by `games/tools/bfrpg-extract.mjs` into
+`games/basic-fantasy/data/*.json` (run it again with the path to a clone of
+github.com/Solomoriah/bfrpg to refresh them), then arranged into records and
+pages by `games/basic-fantasy/*.mjs`. Everything in `games/basic-fantasy/`
+stays CC BY-SA 4.0 (its `LICENSE.md`), and every book's first page carries the
+notice. No art from the book is used; the adventure's two maps are made with
+`mapgen.py`.
 
 ## How the books are made
 

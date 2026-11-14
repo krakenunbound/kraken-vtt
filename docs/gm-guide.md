@@ -28,6 +28,12 @@ ulesets` (on Linux,
     only; Kraken never ships a game's official logo.
   - *Descending Darkness* and *Apeira Astra* come with Kraken, with their books
     and a first adventure ([included-games.md](included-games.md)).
+  - *Basic Fantasy* (the Basic Fantasy RPG 4th Edition, CC BY-SA 4.0) comes
+    with Kraken too: its Player's Handbook, Game Master's Guide and *The Mill
+    at Hob's Ford*. Its character wizard follows the book (3d6 in order, race
+    and class limits, the hit die, 3d6 x 10 gp and the shop); the tracker
+    plays d6 initiative, attacks against ascending AC, the five saves, death at
+    0, Turn undead for clerics and a **Morale** button for monsters.
   - *Castles & Crusades*, *D&D 5E*, *D&D 3.5E* and *AD&D 2E* use your own
     books (Fantasy Grounds modules, or Kraken packs made from them) for their
     content: a 3.5E campaign takes your 3.5E Player's Handbook's classes,

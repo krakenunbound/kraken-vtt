@@ -482,6 +482,33 @@ export const RULESETS = {
     parcel: (ctx) => handParcel(ctx, { coin: "Cr", amount: 800, item: "Toolkit" }),
     xp: 4,
   },
+  // Basic Fantasy RPG 4th Edition: its three books ship with Kraken.
+  "Basic Fantasy": {
+    books: ["Basic Fantasy Player's Handbook", "Basic Fantasy Game Master's Guide", "The Mill at Hob's Ford (Basic Fantasy)"],
+    map: (ctx) => bookMap(ctx, "The Mill at Hob's Ford (Basic Fantasy)"),
+    async wizard(ctx) {
+      const { seat } = ctx;
+      const w = '[data-wizard="bfrpg"]';
+      await seat.waitForSelector(w);
+      // 3d6 in order on the host's dice; then (the GM allowing an exchange) scores a fighter may have.
+      await seat.click(`${w} [data-action="roll-abilities"]`);
+      await seat.waitForFunction((root) => Boolean(document.querySelector(`${root} input[data-score="charisma"]`)?.value), w, { timeout: 30000 });
+      for (const [stat, score] of [["strength", 15], ["intelligence", 10], ["wisdom", 11], ["dexterity", 13], ["constitution", 14], ["charisma", 9]]) await seat.fill(`${w} input[data-score="${stat}"]`, String(score));
+      await seat.selectOption(`${w} select[aria-label="Race"]`, "human");
+      await seat.selectOption(`${w} select[aria-label="Class"]`, "fighter");
+      await seat.click(`${w} [data-action="roll-hp"]`);
+      await seat.waitForSelector(`${w} [data-hp]`, { timeout: 30000 });
+      await buy(ctx, ["Longsword/Scimitar", "Leather Armor", "Shield", "Backpack", "Torches, 6"]);
+      await seat.fill(`${w} [aria-label="Character name"]`, "Darion Vell");
+      await seat.selectOption(`${w} select[aria-label="Alignment"]`, "Lawful");
+      await finish(ctx);
+    },
+    bought: checkBought,
+    // The Mill keeps its creatures in the Game Master's Guide.
+    enemy: (ctx) => trackerNpc(ctx, "Goblin"),
+    parcel: (ctx) => libraryParcel(ctx, "The Mill at Hob's Ford (Basic Fantasy)"),
+    xp: 25,
+  },
   Worldbuilding: {
     books: [],
     async map(ctx) {
