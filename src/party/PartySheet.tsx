@@ -93,7 +93,12 @@ export function PartySheet({ session, compact = false }: { session: Session; com
 
       {tab === "main" ? (
         <div className="party-main">
-          {party.members.length === 0 ? <p className="hint">No one is in the party yet.</p> : null}
+          {party.members.length === 0 ? (
+            <p className="hint empty-state">
+              <b>No one is in the party yet</b>
+              {gm ? "Add a character below: their hit points, armour and coins gather here." : "The GM adds characters to the party."}
+            </p>
+          ) : null}
           <ul className="party-members">
             {party.members.map((member) => {
               const current = member.hp - member.wounds;
@@ -260,7 +265,7 @@ export function PartySheet({ session, compact = false }: { session: Session; com
           ) : null}
           <h3>Party inventory</h3>
           <ul className="sheet-list">
-            {party.inventory.length === 0 ? <li className="hint">Nothing carried yet.</li> : null}
+            {party.inventory.length === 0 ? <li className="hint empty-state">Nothing carried yet. What the party's characters carry is listed here.</li> : null}
             {party.inventory.map((row) => (
               <li key={row.name}>
                 <span>
@@ -276,6 +281,7 @@ export function PartySheet({ session, compact = false }: { session: Session; com
           </ul>
           <h3>Coins</h3>
           <ul className="sheet-list">
+            {party.members.length === 0 ? <li className="hint empty-state">Each member's purse shows here.</li> : null}
             {party.members.map((member) => (
               <li key={member.id}>
                 <span>{member.name}</span>
@@ -374,6 +380,7 @@ export function PartySheet({ session, compact = false }: { session: Session; com
                 </button>
               </h3>
               <ul className="sheet-list">
+                {Object.keys(party[kind]).length === 0 ? <li className="hint empty-state">{kind === "encounters" ? "No encounters yet: add one below with its XP." : "No quests yet: add one below with its XP."}</li> : null}
                 {Object.entries(party[kind]).map(([id, entry]) => (
                   <li key={id} className={entry.awarded ? "awarded" : ""}>
                     <span>{entry.name}</span>
