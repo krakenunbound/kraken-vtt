@@ -7,6 +7,7 @@ import { cardsStore } from "../cards/cardsStore";
 import type { DecalItem, PictureKind, Session } from "../session/useSession";
 import { Emblem } from "./Emblem";
 import { useWindows } from "./Windows";
+import { Checklist, SettingRow, SettingsSection, Toggle } from "./SettingsParts";
 
 // Settings, as FG's settings cog: a button for each thing to set. Everyone
 // sets their own dice; the GM also sets what the whole table sees.
@@ -16,32 +17,27 @@ import { useWindows } from "./Windows";
 function YouAtTheTable() {
   const settings = useSyncExternalStore(diceStore.subscribe, diceStore.settings);
   return (
-    <fieldset className="settings-you" data-setting="you">
-      <legend>You at the table</legend>
-      <div className="you-colours" role="radiogroup" aria-label="Your colour">
-        <span className="you-label">Your colour</span>
-        <button type="button" role="radio" aria-checked={settings.color === null} className={settings.color === null ? "swatch mine on" : "swatch mine"} title="The table's colour for your name" data-you-color="default" onClick={() => diceStore.update({ color: null })}>
-          Auto
-        </button>
-        {PALETTE.map((color) => (
-          <button key={color} type="button" role="radio" aria-checked={settings.color === color} aria-label={`Colour ${color}`} className={settings.color === color ? "swatch on" : "swatch"} style={{ background: color }} data-you-color={color} onClick={() => diceStore.update({ color })} />
-        ))}
-        <label className="you-other">
-          <input type="color" aria-label="Pick your colour" value={settings.color ?? "#e8c46a"} onChange={(event) => diceStore.update({ color: event.target.value })} />
-          Other
-        </label>
+    <SettingsSection title="You at the table" setting="you">
+      <div className="set-row set-colours">
+        <span className="set-text">
+          <span className="set-label">Your colour</span>
+          <span className="set-hint">Rings your tokens and colours your pings and drawings, so everyone knows who is who.</span>
+        </span>
+        <div className="you-colours" role="radiogroup" aria-label="Your colour">
+          <button type="button" role="radio" aria-checked={settings.color === null} className={settings.color === null ? "swatch mine on" : "swatch mine"} title="The table's colour for your name" data-you-color="default" onClick={() => diceStore.update({ color: null })}>
+            Auto
+          </button>
+          {PALETTE.map((color) => (
+            <button key={color} type="button" role="radio" aria-checked={settings.color === color} aria-label={`Colour ${color}`} className={settings.color === color ? "swatch on" : "swatch"} style={{ background: color }} data-you-color={color} onClick={() => diceStore.update({ color })} />
+          ))}
+          <label className="you-other" title="Pick any colour">
+            <input type="color" aria-label="Pick your colour" value={settings.color ?? "#e8c46a"} onChange={(event) => diceStore.update({ color: event.target.value })} />
+          </label>
+        </div>
       </div>
-      <p className="hint">The ring around your tokens, your pings and your drawings on the map, so everyone knows who is who.</p>
-      <span className="you-label">When it is your turn in combat</span>
-      <label className="settings-check">
-        <input type="checkbox" data-setting="turn-sound" checked={settings.turnSound !== false} onChange={(event) => diceStore.update({ turnSound: event.target.checked })} />
-        Play a chime
-      </label>
-      <label className="settings-check">
-        <input type="checkbox" data-setting="turn-banner" checked={settings.turnBanner !== false} onChange={(event) => diceStore.update({ turnBanner: event.target.checked })} />
-        Show a banner across my screen
-      </label>
-    </fieldset>
+      <Toggle label="Chime on your turn" hint="A soft chime when your turn comes round in combat." setting="turn-sound" checked={settings.turnSound !== false} onChange={(on) => diceStore.update({ turnSound: on })} />
+      <Toggle label="Banner on your turn" hint="Your name across the screen when it is your turn." setting="turn-banner" checked={settings.turnBanner !== false} onChange={(on) => diceStore.update({ turnBanner: on })} />
+    </SettingsSection>
   );
 }
 
@@ -50,7 +46,7 @@ export function SettingsWindow({ session }: { session: Session }) {
   const gm = session.role === "dm";
   return (
     <div className="settings-window">
-      <div className="settings-grid">
+      <div className="settings-grid" role="group" aria-label="Look and feel">
         <button type="button" className="settings-button" data-setting="dice" onClick={() => windows.open("dice", "Dice")}>
           Dice
         </button>
@@ -81,35 +77,40 @@ export function SettingsWindow({ session }: { session: Session }) {
       </div>
       <YouAtTheTable />
       <CardsSetting />
-      {gm ? <label className="settings-check">
-        <input type="checkbox" checked={session.options.towerReveal} onChange={(event) => session.setTableOptions({ towerReveal: event.target.checked })} />
-        Let players see their own dice-tower rolls (unticked: only the GM sees them, as in FG)
-      </label> : null}
       {gm ? (
-        <label className="settings-check">
-          <input type="checkbox" data-setting="tower-external" checked={Boolean(session.options.towerExternal)} onChange={(event) => session.setTableOptions({ towerExternal: event.target.checked })} />
-          External dice tower: it stands on the table, apart from the chat (for everyone; each places it where they like, right-click it to lock it there). Unticked, it is docked in the chat.
-        </label>
+        <SettingsSection title="Dice and the dice tower" setting="dice-table">
+          <Toggle label="Players see their own tower rolls" hint="Off: only you see what goes into the dice tower, as in Fantasy Grounds." checked={Boolean(session.options.towerReveal)} onChange={(on) => session.setTableOptions({ towerReveal: on })} setting="tower-reveal" />
+          <Toggle
+            label="Dice tower on the table"
+            hint="It stands apart from the chat, for everyone; each person places it where they like (right-click to lock it). Off: it sits in the chat."
+            setting="tower-external"
+            checked={Boolean(session.options.towerExternal)}
+            onChange={(on) => session.setTableOptions({ towerExternal: on })}
+          />
+          {session.options.towerExternal ? (
+            <SettingRow label="The tower's look" hint="Six drawn looks, painted towers, or a picture of your own.">
+              <button type="button" className="settings-button" data-setting="tower-look" onClick={() => windows.open("towers", "Dice Tower")}>
+                Choose…
+              </button>
+            </SettingRow>
+          ) : null}
+          <DiceHoldSetting session={session} />
+        </SettingsSection>
       ) : null}
-      {gm && session.options.towerExternal ? (
-        <button type="button" className="settings-button" data-setting="tower-look" onClick={() => windows.open("towers", "Dice Tower")}>
-          Dice Tower Look
-        </button>
+      {gm ? (
+        <SettingsSection title="Combat" setting="combat">
+          <SettingRow label="Clear targets" hint="When a creature's targets are cleared on the combat tracker.">
+            <select value={(session.options as { clearTargets?: string }).clearTargets ?? "never"} onChange={(event) => session.setTableOptions({ clearTargets: event.target.value } as never)} aria-label="Clear targets" data-setting="clear-targets">
+              <option value="never">Never (as FG)</option>
+              <option value="action">After a spell or an attack's damage</option>
+              <option value="turn">At the end of the creature's turn</option>
+            </select>
+          </SettingRow>
+        </SettingsSection>
       ) : null}
-      {gm ? <DiceHoldSetting session={session} /> : null}
-      {gm ? <StudioFoldersSetting /> : null}
       {gm && session.ruleset === "D&D 3.5E" ? <Wizard35Setting session={session} /> : null}
       {gm && session.ruleset === "AD&D 2E" ? <Wizard2eSetting session={session} /> : null}
-      {gm ? (
-        <label className="settings-check">
-          Clear targets{" "}
-          <select value={(session.options as { clearTargets?: string }).clearTargets ?? "never"} onChange={(event) => session.setTableOptions({ clearTargets: event.target.value } as never)} aria-label="Clear targets" data-setting="clear-targets">
-            <option value="never">Never (as FG)</option>
-            <option value="action">After a spell or an attack's damage</option>
-            <option value="turn">At the end of the creature's turn</option>
-          </select>
-        </label>
-      ) : null}
+      {gm ? <StudioFoldersSetting /> : null}
     </div>
   );
 }
@@ -133,13 +134,16 @@ function StudioFoldersSetting() {
     ["packFolders", "pack", "Art packs", "Folders holding art packs (.mod); Fantasy Grounds' modules folder is read anyway"],
   ];
   return (
-    <fieldset className="settings-group studio-folders" data-setting="studio-folders">
-      <legend>Map Studio art</legend>
+    <SettingsSection title="Map Studio art" setting="studio-folders">
       {error ? <p className="error">{error}</p> : null}
       {lists.map(([key, kind, label, hint]) => (
         <div key={key} className="studio-folder-list" data-studio-folders={key}>
-          <b title={hint}>{label}</b>
-          {(settings?.[key] ?? []).length === 0 ? <span className="hint">None yet.</span> : null}
+          <span className="set-text">
+            <span className="set-label">{label}</span>
+            <span className="set-hint">{hint}.</span>
+          </span>
+          <div className="studio-folder-items">
+          {(settings?.[key] ?? []).length === 0 ? <span className="set-hint">None yet.</span> : null}
           {(settings?.[key] ?? []).map((folder) => (
             <span key={folder} className={settings?.found[folder] === false ? "studio-folder missing" : "studio-folder"} data-folder={folder} title={settings?.found[folder] === false ? "This folder is not there" : folder}>
               {folder}
@@ -160,9 +164,10 @@ function StudioFoldersSetting() {
           >
             Add a folder…
           </button>
+          </div>
         </div>
       ))}
-    </fieldset>
+    </SettingsSection>
   );
 }
 
@@ -178,89 +183,82 @@ function DiceHoldSetting({ session }: { session: Session }) {
     if (clean !== saved) session.setTableOptions({ diceHold: clean } as never);
   };
   return (
-    <label className="settings-check settings-dice-hold">
-      Dice stay on the table for{" "}
+    <SettingRow label="Dice stay on the table" hint="Seconds the landed dice stay before they fade, for everyone." className="settings-dice-hold">
       <input type="range" min={0.5} max={15} step={0.1} value={Math.min(15, seconds)} aria-label="Dice on the table (slider)" data-setting="dice-hold-slider" onChange={(event) => setSeconds(Number(event.target.value))} onPointerUp={() => send(seconds)} onKeyUp={() => send(seconds)} onBlur={() => send(seconds)} />
-      <input type="number" min={0.5} max={60} step={0.1} value={seconds} aria-label="Dice on the table (seconds)" data-setting="dice-hold" style={{ width: "4.5em" }} onChange={(event) => setSeconds(Number(event.target.value))} onBlur={(event) => send(Number(event.target.value))} onKeyDown={(event) => event.key === "Enter" && send(Number((event.target as HTMLInputElement).value))} />{" "}
-      seconds before they fade
-    </label>
+      <input type="number" className="set-number" min={0.5} max={60} step={0.1} value={seconds} aria-label="Dice on the table (seconds)" data-setting="dice-hold" onChange={(event) => setSeconds(Number(event.target.value))} onBlur={(event) => send(Number(event.target.value))} onKeyDown={(event) => event.key === "Enter" && send(Number((event.target as HTMLInputElement).value))} />
+      <span className="set-unit">s</span>
+    </SettingRow>
   );
 }
 
 // The D&D 3.5E character wizard's options, as the GM's FG extension has them
 // (CW35M1-4, CW35RL, CW35LOW, CW35VOTK): for every player who makes a character.
-const WIZARD35_METHODS: [number, string][] = [
-  [1, "PHB Default (4d6 drop lowest, arrange)"],
-  [2, "Classic (3d6 in order)"],
-  [3, "Standard Array (15, 14, 13, 12, 10, 8)"],
-  [4, "Manual Entry (type scores directly)"],
+const WIZARD35_METHODS: [number, string, string][] = [
+  [1, "PHB default", "4d6 drop lowest, arrange"],
+  [2, "Classic", "3d6 in order"],
+  [3, "Standard array", "15, 14, 13, 12, 10, 8"],
+  [4, "Manual entry", "Type the scores"],
 ];
 function Wizard35Setting({ session }: { session: Session }) {
   const options = session.options.wizard35 ?? { methods: [1, 2, 3, 4], rollLock: false, lowReroll: false, vault: false };
   const set = (patch: Partial<typeof options>) => session.setTableOptions({ wizard35: { ...options, ...patch } });
   return (
-    <fieldset className="settings-group" data-setting="wizard35">
-      <legend>D&amp;D 3.5E Character Wizard</legend>
-      {WIZARD35_METHODS.map(([id, label]) => (
-        <label key={id} className="settings-check">
-          <input
-            type="checkbox"
-            data-setting={`wizard35-method-${id}`}
-            checked={options.methods.includes(id)}
-            onChange={(event) => set({ methods: event.target.checked ? [...options.methods, id].sort() : options.methods.filter((item) => item !== id) })}
-          />
-          Ability method: {label}
-        </label>
-      ))}
-      <label className="settings-check">
-        <input type="checkbox" data-setting="wizard35-roll-lock" checked={options.rollLock} onChange={(event) => set({ rollLock: event.target.checked })} />
-        Lock ability scores after the first roll
-      </label>
-      <label className="settings-check">
-        <input type="checkbox" data-setting="wizard35-low-reroll" checked={options.lowReroll} onChange={(event) => set({ lowReroll: event.target.checked })} />
-        House rule: a 4d6 score under 8 may be rerolled once with 3d6 (the new result stands)
-      </label>
-      <label className="settings-check">
-        <input type="checkbox" data-setting="wizard35-vault" checked={options.vault} onChange={(event) => set({ vault: event.target.checked })} />
-        Vault of the Kraken hand-me-downs: its poor or secondhand gear is free in the wizard&apos;s shop
-      </label>
-    </fieldset>
+    <SettingsSection title="D&D 3.5E character wizard" setting="wizard35" note="For every player who makes a character.">
+      <Checklist
+        label="Ability methods players may use"
+        items={WIZARD35_METHODS.map(([id, label, detail]) => ({
+          key: id,
+          label,
+          detail,
+          setting: `wizard35-method-${id}`,
+          checked: options.methods.includes(id),
+          onChange: (on: boolean) => set({ methods: on ? [...options.methods, id].sort() : options.methods.filter((item) => item !== id) }),
+        }))}
+      />
+      <Toggle label="Lock ability scores" hint="After the first roll; no rolling again." setting="wizard35-roll-lock" checked={options.rollLock} onChange={(on) => set({ rollLock: on })} />
+      <Toggle label="Reroll a low score" hint="House rule: a 4d6 score under 8 may be rerolled once with 3d6, and the new result stands." setting="wizard35-low-reroll" checked={options.lowReroll} onChange={(on) => set({ lowReroll: on })} />
+      <Toggle label="Vault of the Kraken hand-me-downs" hint="Its poor or secondhand gear is free in the wizard's shop." setting="wizard35-vault" checked={options.vault} onChange={(on) => set({ vault: on })} />
+    </SettingsSection>
   );
 }
 
 // The AD&D 2E character wizard's options, as the FG extension's (Options >
 // Kraken Character Wizard): ability rolls once only, the PHB methods players
 // may pick from, starting gold above 1st level.
-const METHOD_NAMES = ["Method I (3d6, in order)", "Method II (3d6 twice each, keep higher)", "Method III (3d6 x6, arrange)", "Method IV (3d6 x12, keep best 6)", "Method V (4d6, drop lowest)", "Method VI (all 8s, then place 7d6)"];
+const METHOD_NAMES: [string, string][] = [
+  ["Method I", "3d6, in order"],
+  ["Method II", "3d6 twice each, keep the higher"],
+  ["Method III", "3d6 six times, arrange"],
+  ["Method IV", "3d6 twelve times, keep the best 6"],
+  ["Method V", "4d6, drop the lowest"],
+  ["Method VI", "All 8s, then place 7d6"],
+];
 function Wizard2eSetting({ session }: { session: Session }) {
   const options = session.options.wizard2e ?? { rollLock: false, methods: [1, 2, 3, 4, 5, 6], gold: "phb" as const };
   const set = (patch: Partial<typeof options>) => session.setTableOptions({ wizard2e: { ...options, ...patch } });
   return (
-    <fieldset className="settings-check" data-setting="wizard2e">
-      <legend>AD&amp;D 2E Character Wizard</legend>
-      <label>
-        <input type="checkbox" checked={options.rollLock} data-setting="wizard2e-lock" onChange={(event) => set({ rollLock: event.target.checked })} /> Lock ability rolls (one roll only)
-      </label>
-      {METHOD_NAMES.map((label, index) => (
-        <label key={label}>
-          <input
-            type="checkbox"
-            checked={options.methods.includes(index + 1)}
-            data-setting={`wizard2e-method${index + 1}`}
-            onChange={(event) => set({ methods: event.target.checked ? [...options.methods, index + 1].sort() : options.methods.filter((n) => n !== index + 1) })}
-          />{" "}
-          Allow ability {label}
-        </label>
-      ))}
-      <label>
-        Starting gold above 1st level{" "}
+    <SettingsSection title="AD&D 2E character wizard" setting="wizard2e" note="For every player who makes a character.">
+      <Checklist
+        label="Ability methods players may use"
+        hint="From the Player's Handbook."
+        items={METHOD_NAMES.map(([label, detail], index) => ({
+          key: label,
+          label,
+          detail,
+          setting: `wizard2e-method${index + 1}`,
+          checked: options.methods.includes(index + 1),
+          onChange: (on: boolean) => set({ methods: on ? [...options.methods, index + 1].sort() : options.methods.filter((n) => n !== index + 1) }),
+        }))}
+      />
+      <Toggle label="Lock ability rolls" hint="One roll only; no rolling again." setting="wizard2e-lock" checked={options.rollLock} onChange={(on) => set({ rollLock: on })} />
+      <SettingRow label="Starting gold above 1st level" hint="For a character who starts at a higher level.">
         <select value={options.gold} aria-label="Starting gold above 1st level" data-setting="wizard2e-gold" onChange={(event) => set({ gold: event.target.value as typeof options.gold })}>
           <option value="phb">PHB (one roll)</option>
           <option value="perlevel">One roll per level</option>
           <option value="xlevel">Roll x level</option>
         </select>
-      </label>
-    </fieldset>
+      </SettingRow>
+    </SettingsSection>
   );
 }
 
@@ -268,18 +266,10 @@ function Wizard2eSetting({ session }: { session: Session }) {
 function CardsSetting() {
   const cards = useSyncExternalStore(cardsStore.subscribe, cardsStore.settings);
   return (
-    <>
-      <label className="settings-check">
-        <input type="checkbox" data-setting="cards" checked={cards.on} onChange={(event) => cardsStore.set({ on: event.target.checked })} />
-        Ability cards: my spells and weapons as cards (a Cards button in the sidebar)
-      </label>
-      {cards.on ? (
-        <label className="settings-check">
-          <input type="checkbox" data-setting="card-effects" checked={cards.effects} onChange={(event) => cardsStore.set({ effects: event.target.checked })} />
-          Card effects (flips, foil, sparks)
-        </label>
-      ) : null}
-    </>
+    <SettingsSection title="Ability cards" setting="cards-section">
+      <Toggle label="Spells and weapons as cards" hint="A Cards button in the sidebar with your character's abilities as painted cards." setting="cards" checked={cards.on} onChange={(on) => cardsStore.set({ on })} />
+      {cards.on ? <Toggle label="Card effects" hint="Flips, foil and sparks." setting="card-effects" checked={cards.effects} onChange={(on) => cardsStore.set({ effects: on })} /> : null}
+    </SettingsSection>
   );
 }
 

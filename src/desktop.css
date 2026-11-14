@@ -549,14 +549,6 @@ span.ct-init { display: inline-block; }
 .emblem.decal { width: auto; height: auto; max-width: min(720px, 62vw); max-height: 62vh; border-radius: 0; filter: drop-shadow(0 10px 40px rgba(0, 0, 0, 0.6)); animation: decal-in 0.6s ease-out; }
 @keyframes decal-in { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: none; } }
 
-.settings-window { display: flex; flex-direction: column; gap: 14px; padding: 14px; }
-.settings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
-.settings-button { padding: 0.55rem 0.6rem; border-radius: 6px; border: 1px solid var(--brass-dim); background: linear-gradient(180deg, #1d3a44, #12262d); color: #eef3f2; font-weight: 600; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06); }
-.settings-button:hover { border-color: var(--brass); background: linear-gradient(180deg, #23495a, #163038); }
-.settings-check { display: flex; align-items: center; gap: 8px; color: var(--muted); }
-.settings-dice-hold { flex-wrap: wrap; }
-.settings-dice-hold input[type="range"] { flex: 1 1 160px; min-width: 120px; accent-color: var(--accent, #d8b46a); }
-.settings-dice-hold input[type="number"] { width: 4.5em; }
 
 .decal-picker { display: flex; flex-direction: column; gap: 10px; height: 100%; padding: 12px; min-height: 0; border-radius: 8px; transition: box-shadow 0.2s; }
 .decal-picker.dropping { box-shadow: inset 0 0 0 2px var(--brass), inset 0 0 40px rgba(210, 161, 90, 0.18); }
@@ -1126,8 +1118,6 @@ textarea.cc-field.tall { min-height: 220px; }
 .ccw .ccw35-warning { display: flex; width: 100%; text-align: left; background: transparent; border: none; padding: 2px 4px; }
 .ccw .ccw35-warning:hover { background: rgba(242, 213, 138, 0.4); }
 .ccw35-summary p { margin: 3px 0; }
-.settings-group { display: flex; flex-direction: column; gap: 4px; margin: 8px 0 0; padding: 6px 10px; border: 1px solid var(--brass-dim); border-radius: 6px; }
-.settings-group legend { color: var(--brass); padding: 0 4px; }
 
 /* Characters in and out: import and export beside the new character button. */
 .character-list-buttons { display: flex; align-items: center; gap: 6px; }
@@ -1737,8 +1727,6 @@ textarea.cc-field.tall { min-height: 220px; }
 .studio-frame { display: block; width: 100%; height: 100%; border: 0; background: #0d1014; }
 [data-window="studio"] .window-body { padding: 0; overflow: hidden; }
 /* Settings > Map Studio art: the GM's folders of asset packs. */
-.studio-folder-list { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 4px 0; }
-.studio-folder-list b { min-width: 9rem; }
 .studio-folder { display: inline-flex; align-items: center; gap: 4px; padding: 2px 4px 2px 8px; border: 1px solid var(--panel-edge); border-radius: 6px; font-size: 0.8rem; }
 .studio-folder.missing { border-color: #a0443a; color: #e08a7a; }
 .studio-folder button { padding: 0 6px; border: 0; background: transparent; }
@@ -1841,14 +1829,6 @@ textarea.cc-field.tall { min-height: 220px; }
 @media (prefers-reduced-motion: reduce) { .turn-banner, .turn-banner-glow { animation: none; } }
 
 /* Settings: you at the table (your colour, your turn). */
-.settings-you { display: grid; gap: 6px; margin: 4px 0; padding: 8px 10px 10px; border: 1px solid var(--line, #3a3a44); border-radius: 8px; }
-.settings-you legend { padding: 0 6px; color: var(--brass); font-family: Cinzel, Georgia, serif; }
-.settings-you .you-colours { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
-.settings-you .you-label { font-weight: 600; margin-right: 4px; }
-.settings-you .swatch { width: 24px; height: 24px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; padding: 0; }
-.settings-you .swatch.mine { width: auto; padding: 0 8px; border-radius: 12px; background: transparent; border-color: var(--line, #3a3a44); color: inherit; }
-.settings-you .swatch.on { border-color: #fff; box-shadow: 0 0 0 2px var(--brass); }
-.settings-you .you-other { display: inline-flex; align-items: center; gap: 4px; font-size: 0.85rem; }
 /* The pen's shapes, and their handles (one's own shapes, while the pen is out). */
 .draw-shapes { display: inline-flex; gap: 2px; margin: 0 4px; padding: 0 4px; border-left: 1px solid var(--line, #3a3a44); border-right: 1px solid var(--line, #3a3a44); }
 .draw-handle { pointer-events: all; cursor: grab; }
@@ -1971,3 +1951,58 @@ span.flip { display: inline-flex; transform: scaleX(-1); }
 .fate-pool { display: inline-flex; align-items: center; gap: 3px; padding: 1px 8px; border-radius: 10px; background: rgba(255, 255, 255, 0.06); }
 .fate-pool b { font-family: Cinzel, Georgia, serif; color: var(--brass); }
 .tray-die.tray-fate { outline: 1px dashed rgba(210, 161, 90, 0.5); border-radius: 6px; }
+
+
+/* Settings, and every ruleset's options (src/ui/SettingsParts.tsx): titled
+   sections; rows with a short label, a quieter line of what it does, and the
+   control on the right; switches for on and off; a checklist in columns. */
+.settings-window { display: flex; flex-direction: column; gap: 16px; padding: 16px; accent-color: var(--brass); container-type: inline-size; }
+.settings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr)); gap: 8px; }
+.settings-button { min-height: 2.6rem; padding: 0.45rem 0.7rem; border-radius: 6px; border: 1px solid var(--brass-dim); background: linear-gradient(180deg, #1d3a44, #12262d); color: #eef3f2; font-weight: 600; line-height: 1.2; text-wrap: balance; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06); }
+.settings-button:hover { border-color: var(--brass); background: linear-gradient(180deg, #23495a, #163038); }
+.settings-button:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
+.set-section { display: flex; flex-direction: column; gap: 2px; min-inline-size: 0; margin: 0; padding: 10px 14px 12px; border: 1px solid var(--line); border-radius: 8px; background: rgba(255, 255, 255, 0.015); }
+.set-section > legend { padding: 0 6px; color: var(--brass); font-family: Cinzel, Georgia, serif; font-size: 0.95rem; letter-spacing: 0.02em; }
+.set-note { margin: 0 0 4px; color: var(--muted); font-size: 0.82rem; }
+.set-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 4px 16px; padding: 8px 0; border-top: 1px solid rgba(255, 255, 255, 0.05); }
+.set-section > .set-row:first-of-type, .set-section > legend + .set-row, .set-section > .set-note + .set-row { border-top: 0; }
+label.set-row { cursor: pointer; }
+.set-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.set-label { color: var(--text); font-weight: 600; line-height: 1.25; }
+.set-hint { color: var(--muted); font-size: 0.82rem; line-height: 1.35; text-wrap: pretty; }
+.set-control { display: inline-flex; align-items: center; gap: 8px; justify-self: end; }
+.set-control select { max-width: 16rem; }
+.set-number { width: 4.2em; text-align: right; }
+.set-unit { color: var(--muted); }
+/* A switch: the native one where a browser has <input switch>, this drawing everywhere. */
+.set-switch { appearance: none; position: relative; flex: none; width: 2.5rem; height: 1.4rem; margin: 0; border-radius: 999px; border: 1px solid var(--brass-dim); background: #2a2f38; cursor: pointer; transition: background 0.15s, border-color 0.15s; }
+.set-switch::before { content: ""; position: absolute; top: 2px; left: 2px; width: calc(1.4rem - 6px); height: calc(1.4rem - 6px); border-radius: 50%; background: var(--muted); transition: transform 0.15s, background 0.15s; }
+.set-switch:checked { background: var(--brass-dim); border-color: var(--brass); }
+.set-switch:checked::before { transform: translateX(1.1rem); background: #fff4dc; }
+.set-switch:focus-visible { outline: 2px solid var(--brass); outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) { .set-switch, .set-switch::before { transition: none; } }
+.set-checklist { display: grid; gap: 6px; padding: 8px 0; }
+.set-checks { display: grid; grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr)); gap: 6px 14px; }
+.set-check { display: flex; align-items: flex-start; gap: 8px; padding: 6px 8px; border-radius: 6px; background: rgba(255, 255, 255, 0.03); cursor: pointer; }
+.set-check:hover { background: rgba(255, 255, 255, 0.06); }
+.set-check input { margin: 2px 0 0; flex: none; }
+.set-check span { display: flex; flex-direction: column; color: var(--text); line-height: 1.25; }
+.set-check small { color: var(--muted); font-size: 0.8rem; }
+.settings-dice-hold .set-control input[type="range"] { width: clamp(7rem, 30cqi, 14rem); }
+/* Your colour. */
+.set-colours { grid-template-columns: 1fr; }
+.set-colours .you-colours { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.set-colours .swatch { width: 24px; height: 24px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; padding: 0; }
+.set-colours .swatch.mine { width: auto; padding: 0 10px; border-radius: 12px; background: transparent; border-color: var(--line); color: inherit; }
+.set-colours .swatch.on { border-color: #fff; box-shadow: 0 0 0 2px var(--brass); }
+.set-colours .you-other { display: inline-flex; align-items: center; }
+.set-colours .you-other input { width: 30px; height: 26px; padding: 0; border: 1px solid var(--line); border-radius: 6px; background: transparent; cursor: pointer; }
+/* Map Studio's folders. */
+.studio-folder-list { display: grid; gap: 6px; padding: 8px 0; }
+.studio-folder-list + .studio-folder-list { border-top: 1px solid rgba(255, 255, 255, 0.05); }
+.studio-folder-items { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+@container (max-width: 26rem) {
+  .set-row { grid-template-columns: 1fr; }
+  .set-control { justify-self: start; }
+}
+.dice-window { accent-color: var(--brass); }

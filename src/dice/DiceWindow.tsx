@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useState, useSyncExternalStore } from "react
 import type { Session } from "../session/useSession";
 import { dicePacks } from "./dicePacks";
 import { characterDice, DESIGNS, diceStore, EFFECTS, FONTS, MATERIALS, PRESETS, SET_GROUPS, type DiceLook, type DiceSet } from "./diceStore";
+import { SettingRow, Toggle } from "../ui/SettingsParts";
 
 // The preview's three.js loads with the window.
 const DicePreview = lazy(() => import("./DicePreview"));
@@ -141,10 +142,7 @@ export function DiceWindow({ session }: { session: Session }) {
         ))}
       </div>
       {editing !== "look" || character ? (
-        <label className="check dice-follow">
-          <input type="checkbox" checked={following} data-dice-follow onChange={(event) => setFollowing(event.target.checked)} />
-          {followLabel} (untick to give them their own set)
-        </label>
+        <Toggle className="dice-follow" label={followLabel} hint="Off: they get a set of their own." attrs={{ "data-dice-follow": "" }} checked={following} onChange={setFollowing} />
       ) : null}
       <section className="dice-panel active-set" data-editing={editing}>
         <h3>{character ? `${character.name}'s ${charSet === "damage" ? "damage dice" : "dice"}` : editing === "npc" ? "NPC dice" : editing === "damage" ? "Damage dice" : "Active dice set"}</h3>
@@ -234,14 +232,8 @@ export function DiceWindow({ session }: { session: Session }) {
         <Chips label="Made of" items={MATERIALS} value={look.material} onPick={(material) => setLook({ material })} />
         <Chips label="Numbers" items={FONTS} value={look.font} onPick={(font) => setLook({ font })} styleOf={(font) => FONT_STYLE[font]} />
         <Chips label="Effect" items={EFFECTS} value={look.effect} onPick={(effect) => setLook({ effect })} />
-        <label className="check">
-          <input type="checkbox" checked={look.crit !== false} onChange={(event) => setLook({ crit: event.target.checked })} />
-          A natural 20 flares gold to a fanfare, a 1 red to a sad trombone (with dice sound on)
-        </label>
-        <label className="check">
-          <input type="checkbox" checked={Boolean(look.pips)} onChange={(event) => setLook({ pips: event.target.checked })} data-dice="pips" />
-          Pips on the d6
-        </label>
+        <Toggle label="Natural 20s and 1s" hint="A 20 flares gold to a fanfare, a 1 red to a sad trombone (with dice sounds on)." checked={look.crit !== false} onChange={(on) => setLook({ crit: on })} attrs={{ "data-dice": "crit" }} />
+        <Toggle label="Pips on the d6" hint="Dots instead of numbers." checked={Boolean(look.pips)} onChange={(on) => setLook({ pips: on })} attrs={{ "data-dice": "pips" }} />
       </section>
 
       <section className="dice-panel your-colour">
@@ -263,23 +255,14 @@ export function DiceWindow({ session }: { session: Session }) {
 
       <section className="dice-panel">
         <h3>On this screen</h3>
-        <label className="check">
-          <input type="checkbox" checked={settings.show} onChange={(event) => diceStore.update({ show: event.target.checked })} />
-          3D dice roll across the table
-        </label>
-        <div className="dice-sound">
-          <label className="check">
-            <input type="checkbox" checked={settings.sound} onChange={(event) => diceStore.update({ sound: event.target.checked })} />
-            Dice sounds
-          </label>
-          <input type="range" min={0} max={1} step={0.05} value={settings.volume} disabled={!settings.sound} aria-label="Dice volume" onChange={(event) => diceStore.update({ volume: Number(event.target.value) })} />
-        </div>
-        {session.role === "dm" ? (
-          <label className="check gm-option">
-            <input type="checkbox" checked={session.options.towerReveal} onChange={(event) => session.setTableOptions({ towerReveal: event.target.checked })} />
-            Let players see their own dice-tower rolls (unticked: only the GM sees them, as in FG)
-          </label>
+        <Toggle label="3D dice" hint="Dice roll across the table on this screen." checked={settings.show} onChange={(on) => diceStore.update({ show: on })} attrs={{ "data-dice": "show" }} />
+        <Toggle label="Dice sounds" hint="The rattle and the landing, here only." checked={settings.sound} onChange={(on) => diceStore.update({ sound: on })} attrs={{ "data-dice": "sound" }} />
+        {settings.sound ? (
+          <SettingRow label="Volume" className="dice-sound">
+            <input type="range" min={0} max={1} step={0.05} value={settings.volume} aria-label="Dice volume" onChange={(event) => diceStore.update({ volume: Number(event.target.value) })} />
+          </SettingRow>
         ) : null}
+        {session.role === "dm" ? <Toggle label="Players see their own tower rolls" hint="Off: only you see what goes into the dice tower, as in Fantasy Grounds." checked={Boolean(session.options.towerReveal)} onChange={(on) => session.setTableOptions({ towerReveal: on })} setting="tower-reveal" /> : null}
       </section>
     </div>
   );

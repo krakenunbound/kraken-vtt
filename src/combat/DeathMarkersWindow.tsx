@@ -1,5 +1,6 @@
 import type { Session } from "../session/useSession";
 import { DeathMarkerArt } from "../table/MapView";
+import { Toggle } from "../ui/SettingsParts";
 import { creatureTypes, DEFAULT_BY_TYPE, MARKER_SETS } from "../../shared/map/deathMarkers.mjs";
 
 // FG's Death Markers, the GM's: when a creature dies on the combat tracker it
@@ -18,10 +19,7 @@ export function DeathMarkersWindow({ session }: { session: Session }) {
   );
   return (
     <div className="death-markers-window">
-      <label className="settings-check">
-        <input type="checkbox" data-setting="death-markers-on" checked={settings.on !== false} onChange={(event) => set({ on: event.target.checked })} />
-        A creature that dies on the combat tracker leaves a marker on the map (characters and friends leave none)
-      </label>
+      <Toggle label="Leave death markers" hint="A creature that dies on the combat tracker leaves a marker where it fell. Characters and friends leave none." setting="death-markers-on" checked={settings.on !== false} onChange={(on) => set({ on })} />
       <table className="marker-types">
         <thead>
           <tr>
