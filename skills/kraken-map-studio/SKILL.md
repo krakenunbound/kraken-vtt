@@ -71,7 +71,10 @@ squares of margin round the outside.
   (the art is about 256 px per square; 100 keeps it crisp), background a dark
   colour such as `#16130f`).
 - Or a seeded dungeon to start from: `generate` (setting, seed, rooms...).
-  Same seed, same dungeon. Then dress it as below.
+  Same seed, same dungeon. **Always give `roomFloor`, `corridorFloor` and
+  `stairArt`** (or `stairs: false`): without them it falls back on a starter
+  kit's names, which on a GM's computer may be licensed art. Then dress it as
+  below.
 
 ### 3. Floors
 

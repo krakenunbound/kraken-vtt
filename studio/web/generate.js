@@ -62,7 +62,7 @@
   }
   // A generated layout opened as a new map. The dialog's way, and Map Studio's agent tools':
   // {setting, seed, composition, rooms, loops, deadEnds, roomFloor, corridorFloor (art id or name; empty for
-  // the setting's), doorsOpen, stairs, grid}. Throws on failure; returns what it made.
+  // the setting's), doorsOpen, stairs, stairArt (art id or name; empty for the starter kit's), grid}. Throws on failure; returns what it made.
   async function build(o){
     const p=S.project,grid=Math.round(Number(o.grid)||Number(p.grid))||50;
     const s=L.SETTINGS.find(v=>v.id===o.setting)||L.SETTINGS[0],map=L.generate({seed:o.seed||randomSeed(),setting:s.id,composition:o.composition,
@@ -74,14 +74,14 @@
     status('Laying '+out.regions.length+' floors…');
     const floors=await Promise.all(out.regions.map(region=>{const a=region.kind==='room'?rooms:corridors;return floorObject(region,a,art.get(a.id),grid)}));
     floors.forEach(f=>S.addAsset(f.asset));const objects=floors.map(f=>f.object);
-    const stairArt=named(STAIRS),stairs=o.stairs!==false&&stairArt?out.stairs.filter(t=>t.kind==='stairs'):[];
+    const stairArt=o.stairArt?S.assets.find(v=>v.id===o.stairArt)||named(o.stairArt):named(STAIRS),stairs=o.stairs!==false&&stairArt?out.stairs.filter(t=>t.kind==='stairs'):[];
     for(const t of stairs)objects.push({id:t.id,assetId:stairArt.id,name:'Stairs',x:t.x,y:t.y,width:t.width,height:t.height,rotation:t.rotation,visible:true});
     objects.forEach(o=>{o.layer=o.name==='Stairs'?'objects':'map'});
     S.openDocument({version:1,name:s.label+' ('+map.seed+')',width:out.width,height:out.height,grid,background:'#1d1b17',
       objects,walls:out.walls,lights:[],effects:[],exportLayers:p.exportLayers!==false,layout:out.layout});
     S.switchMode('view');
     const doors=out.walls.filter(w=>w.kind==='door').length;
-    return {seed:map.seed,setting:s.id,rooms:map.rooms.length,walls:out.walls.length-doors,doors,stairs:stairs.length,
+    return {roomFloor:rooms.id,corridorFloor:corridors.id,roomFloorName:rooms.name,corridorFloorName:corridors.name,seed:map.seed,setting:s.id,rooms:map.rooms.length,walls:out.walls.length-doors,doors,stairs:stairs.length,
       roomList:out.regions.filter(r=>r.kind==='room').map(r=>({id:r.id,name:r.name,squares:{x:r.bounds.x/grid,y:r.bounds.y/grid,width:r.bounds.width/grid,height:r.bounds.height/grid}}))};
   }
   async function generate(e){

@@ -278,5 +278,13 @@ window.KrakenShell = (() => {
   });
 
   setTimeout(restore, 0);
-  return {openDocument, newBlank, changed, markSaved, openPicture, get tabs() { return tabs; }, get active() { return active; }};
+  // Map Studio's agent tools: switch to a tab, close one (discard: drop its unsaved changes instead of asking).
+  function closeTab(i, discard = false) {
+    if (!tabs[i]) throw Error('There is no tab ' + i + '.');
+    if (discard) { sync(); tabs[i].doc.dirty = false; }
+    else { sync(); if (tabs[i].doc.dirty && !isEmpty(tabs[i].doc.project)) throw Error('That map has changes that are not saved: save it, or close it with discard.'); }
+    return close(i);
+  }
+  function selectTab(i) { if (!tabs[i]) throw Error('There is no tab ' + i + '.'); activate(i); }
+  return {openDocument, newBlank, changed, markSaved, openPicture, closeTab, selectTab, get tabs() { return tabs; }, get active() { return active; }};
 })();

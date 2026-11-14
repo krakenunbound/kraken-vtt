@@ -160,7 +160,8 @@ window.KrakenStudioAgent = (() => {
       if (!window.KrakenGenerate) throw Error('The generator did not load.');
       const made = await window.KrakenGenerate.build({...args, grid: args.grid});
       const p = S().project;
-      for (const o of p.objects) if (o.layer === 'map') { o.floor = true; if (/^Room /.test(o.name)) o.room = true; }
+      // Its floors remember the art they were made from (check reports art outside the shipped packs).
+      for (const o of p.objects) if (o.layer === 'map') { o.floor = true; o.sourceArt = /^Room /.test(o.name) ? made.roomFloor : made.corridorFloor; if (/^Room /.test(o.name)) o.room = true; }
       done();
       return {...made, settings: window.KrakenGenerate.SETTINGS.map(s => s.id), map: summary(false)};
     },
@@ -393,8 +394,50 @@ window.KrakenStudioAgent = (() => {
       return summary(false);
     },
     async projects() { const r = await fetch('/api/projects'); const d = await r.json(); return (d.projects || []).map(x => ({id: x.id, name: x.name, saved: x.savedAt || x.updated || null})); },
+    async openDemo() { const r = await fetch('/api/demo'); const d = await r.json(); if (!r.ok) throw Error(d.error || 'No example map.'); await S().refreshAssets(); S().openDocument(d.project); S().switchMode('view'); return summary(false); },
     async openSaved({id}) { const r = await fetch('/api/projects/' + encodeURIComponent(id)); const d = await r.json(); if (!r.ok) throw Error(d.error || 'No such project.'); S().openDocument(d.project || d); S().switchMode('view'); return summary(false); },
-    tabs() { const sh = window.KrakenShell; return {active: sh?.active ?? 0, tabs: (sh?.tabs || []).map((t, i) => ({index: i, name: t.doc.project.name, dirty: !!t.doc.dirty}))}; },
+    // The open maps (the tab bar): list them, switch to one (select: its index), close one (close: its index; discard drops unsaved changes).
+    async tabs({select, close, discard = false}) {
+      const sh = window.KrakenShell;
+      if (select !== undefined) sh.selectTab(Number(select));
+      if (close !== undefined) await sh.closeTab(Number(close), !!discard);
+      return {active: sh?.active ?? 0, tabs: (sh?.tabs || []).map((t, i) => ({index: i, name: t.doc.project.name, dirty: !!t.doc.dirty}))};
+    },
+    // Grid & map size (and the Map settings fields): width and height in squares, the grid's size in pixels,
+    // its offset, feet per square, the background, the name. Art, walls and lights stay where they are.
+    grid({width, height, size, offsetX, offsetY, distance, background, name}) {
+      const p = S().project, next = JSON.parse(JSON.stringify(p)), G = size ? Math.round(num(size, 'size')) : p.grid;
+      if (size) next.grid = G;
+      if (width) next.width = Math.round(num(width, 'width') * G);
+      if (height) next.height = Math.round(num(height, 'height') * G);
+      if (offsetX !== undefined || offsetY !== undefined) next.gridOffset = {x: Number(offsetX ?? p.gridOffset?.x ?? 0), y: Number(offsetY ?? p.gridOffset?.y ?? 0)};
+      if (distance) next.gridDistance = num(distance, 'distance');
+      if (background) next.background = String(background);
+      if (name) next.name = String(name).slice(0, 120);
+      S().replace(next);
+      return summary(false);
+    },
+    // The Layers panel: a layer (its id or name) shown or hidden, locked or not, renamed, moved up or down,
+    // or made the layer new art goes on; walls, lights, effects and regions groups shown or hidden.
+    layer({id, name, hidden, locked, rename, move, active}) {
+      const p = S().project, ref = id ?? name;
+      window.KrakenLayers.ensure(p);
+      S().snapshot();
+      if (['walls', 'lights', 'effects', 'regions'].includes(String(ref)) && !p.layers.some(l => l.id === ref)) {
+        if (hidden !== undefined) p.groups[ref].visible = !hidden;
+      } else {
+        const l = p.layers.find(v => v.id === ref || v.name.toLowerCase() === String(ref).toLowerCase()) || p.layers.find(v => v.id === ensureLayer(ref));
+        if (hidden !== undefined) l.visible = !hidden;
+        if (locked !== undefined) l.locked = !!locked;
+        if (rename) l.name = String(rename).slice(0, 60);
+        if (active) p.activeLayer = l.id;
+        const i = p.layers.indexOf(l);
+        if (move === 'up' && i < p.layers.length - 1) [p.layers[i], p.layers[i + 1]] = [p.layers[i + 1], p.layers[i]];
+        if (move === 'down' && i > 0) [p.layers[i], p.layers[i - 1]] = [p.layers[i - 1], p.layers[i]];
+      }
+      done();
+      return summary(false).layers;
+    },
   };
   const lightFields = f => {
     const out = {};

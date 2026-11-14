@@ -24,7 +24,7 @@ const W = 30, H = 20;
 // zone: which floor and which wall art. Rooms are boxes of whole squares.
 const ZONES = {
   out: { floor: "Snow", wall: null },
-  entry: { floor: "Dirt", wall: "Fieldstone wall, tumbled" },
+  entry: { floor: "Dirt", wall: "Fieldstone wall, tumbled", dim: 0.75 },
   passage: { floor: "Flagstone, cracked", wall: "Dungeon wall" },
   hall: { floor: "Dungeon stone", wall: "Dungeon wall" },
   tomb: { floor: "Flagstone, cracked", wall: "Dungeon wall, crumbling", dim: 0.75 },
@@ -137,16 +137,22 @@ try {
   await step("new map", "new", { name: "The Cinder Barrow", width: W, height: H, grid: 100, background: "#16130f" });
   // The rock the barrow is cut into, everywhere, then the floors, blended at their edges.
   const rock = await step("rock", "floor", { art: "Cave floor", rect: { x: 0, y: 0, width: W, height: H }, name: "Barrow rock" });
-  await step("rock dim", "update", { id: rock.id, opacity: 0.2 });
+  await step("rock dim", "update", { id: rock.id, opacity: 0.22 });
+  // A second ground with another tile size over it, so the rock's repeat does not show.
+  const grit = await step("grit", "floor", { art: "Gravel", rect: { x: 0, y: 0, width: W, height: H }, name: "Barrow grit" });
+  await step("grit dim", "update", { id: grit.id, opacity: 0.14 });
   for (const [zone, x, y, w, h, name] of AREAS) {
     const room = ["hall", "tomb", "burning", "vault"].includes(zone);
     const made = await step(name, "floor", { art: ZONES[zone].floor, rect: { x, y, width: w, height: h }, name, room, feather: zone === "out" ? 1 : zone === "tunnel" || zone === "entry" ? 0.35 : 0 });
     // Pale floors dimmed against the dark: a barrow, not a bathhouse.
-    if (ZONES[zone].dim || zone === "out") await step(`${name} dim`, "update", { id: made.id, opacity: ZONES[zone].dim ?? 0.45 });
+    if (ZONES[zone].dim || zone === "out") await step(`${name} dim`, "update", { id: made.id, opacity: ZONES[zone].dim ?? 0.8 });
   }
   // Where one floor meets another: worn soft blends, grime along the walls, the cave's own floor over the collapse.
-  const entryDirt = await step("entry to paving", "paint", { art: "Mud", path: [[4.5, 9.7], [5.5, 10.3]], size: 1.4, softness: 80 });
-  await step("entry dirt soft", "update", { id: entryDirt.id, opacity: 0.6 });
+  // The mouth: snow blown into the passage, earth trodden over the first paving stones.
+  const drift = await step("snow drift", "paint", { art: "Snow", path: [[1.6, 9.5], [2.8, 10.2], [2.2, 10.7]], size: 1.3, softness: 80 });
+  await step("snow drift soft", "update", { id: drift.id, opacity: 0.7 });
+  const entryDirt = await step("entry to paving", "paint", { art: "Dirt", path: [[4.6, 9.6], [5.8, 10.4]], size: 1.6, softness: 80 });
+  await step("entry dirt soft", "update", { id: entryDirt.id, opacity: 0.65 });
   await step("ash before the altar", "paint", { art: "Gravel", path: [[19.6, 10], [21, 10]], size: 1.4, softness: 80 });
   await step("tomb moss", "paint", { art: "Moss", path: [[14.6, 2.6], [14.2, 2.8]], size: 0.8, softness: 80 });
   await step("collapse spill", "paint", { art: "Gravel", path: [[27.4, 6], [28.4, 7.6], [27.6, 9]], size: 1.6, softness: 70 });

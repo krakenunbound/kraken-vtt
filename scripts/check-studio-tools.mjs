@@ -127,8 +127,10 @@ try {
   assert(saved.project, "save: a Map Studio project");
   const projects = await studio("projects", {});
   assert(projects.some((p) => p.id === saved.project), "projects: lists it");
-  await studio("generate", { setting: "crypt-catacomb", seed: "check-seed", rooms: 6, roomFloor: "Dungeon stone", corridorFloor: "Flagstone" });
+  await studio("generate", { setting: "crypt-catacomb", seed: "check-seed", rooms: 6, roomFloor: "Dungeon stone", corridorFloor: "Flagstone", stairArt: "Narrow stairs" });
   const generated = await studio("map", { detail: false });
+  const genCheck = await studio("check", {});
+  assert(genCheck.art.outside.length === 0 && genCheck.art.shipped >= 2, `generate: its floors are known shipped art (${JSON.stringify(genCheck.art)})`);
   assert(generated.counts.doors > 0 && generated.counts.walls > 0 && generated.layers.find((l) => l.id === "map").objects > 0, "generate: floors, walls and doors");
   const again = await studio("generate", { setting: "crypt-catacomb", seed: "check-seed", rooms: 6 });
   assert(again.rooms === generated.counts.objects || again.seed === "check-seed", "generate: seeded");
@@ -136,8 +138,27 @@ try {
   assert((await studio("map", { detail: false })).name === "Tool Test", "open: the saved project");
   await studio("open", { file: exported.project });
   const tabs = await studio("tabs", {});
-  assert(tabs.tabs.length >= 3 && tabs.tabs.some((t) => t.name === "Tool Test"), `tabs: ${tabs.tabs.map((t) => t.name).join(", ")}`);
-  report.push(`save, projects, generate (seeded crypt), open saved and portable zip; ${tabs.tabs.length} tabs`);
+  assert(tabs.tabs.length >= 2 && tabs.tabs.some((t) => t.name === "Tool Test"), `tabs: ${tabs.tabs.map((t) => t.name).join(", ")}`);
+  // grid, layer, tabs (switch and close), the example map.
+  const resized = await studio("grid", { width: 14, distance: 5, background: "#202020" });
+  assert(resized.squares[0] === 14 && resized.background === "#202020", "grid: the map 14 squares wide");
+  await studio("grid", { width: 12 });
+  const layers = await studio("layer", { id: "doors", hidden: true });
+  assert(layers.find((l) => l.id === "doors").hidden, "layer: doors hidden");
+  await studio("layer", { id: "doors", hidden: false, locked: true, move: "down" });
+  await studio("layer", { id: "doors", locked: false });
+  const demo = await studio("open", { demo: true });
+  assert(demo.counts.objects > 10, "open demo: the example map");
+  let list = await studio("tabs", {});
+  const crypt = list.tabs.find((t) => /check-seed/.test(t.name));
+  list = await studio("tabs", { select: crypt.index });
+  assert(list.active === crypt.index && (await studio("map", { detail: false })).name === crypt.name, "tabs: switched");
+  const count = list.tabs.length;
+  list = await studio("tabs", { close: crypt.index, discard: true });
+  assert(list.tabs.length === count - 1, "tabs: closed");
+  const back = (await studio("tabs", {})).tabs.findLast((t) => t.name === "Tool Test");
+  await studio("tabs", { select: back.index });
+  report.push(`save, projects, generate (seeded crypt, shipped floors), open saved, portable zip and the example; grid, layer, tabs switch and close`);
 
   // The editor shows what the tools made: its project, tab bar, layers panel and canvas.
   const frame = k.studioFrame();

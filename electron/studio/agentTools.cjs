@@ -12,7 +12,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const ACTIONS = ["library", "new", "generate", "floor", "paint", "scatter", "place", "wall", "door", "light", "ambient", "weather", "region", "update", "remove", "undo", "redo", "map", "check", "render", "save", "projects", "open", "tabs", "export", "kraken"];
+const ACTIONS = ["library", "new", "generate", "floor", "paint", "scatter", "place", "wall", "door", "light", "ambient", "weather", "region", "update", "remove", "undo", "redo", "map", "check", "render", "save", "projects", "open", "tabs", "grid", "layer", "export", "kraken"];
 
 const point = { type: "array", items: { type: "number" }, minItems: 2, maxItems: 2, description: "[x, y] in squares" };
 const points = (description) => ({ type: "array", items: point, description });
@@ -23,7 +23,7 @@ const DESCRIPTION = [
   "Actions:",
   "library (search, kind (Floors, Ground, Walls, Doors & windows, Furniture, Lights, Plants, Terrain...), pack, shippedOnly: art with id, name, kind, pack, shipped (Kraken Map Art and Battle Map Forge are the only art for maps that ship publicly), squares (its size on the grid), wallArt, tiles);",
   "new (name, width, height in squares, grid px per square (default 100), background #rrggbb: a blank map in a new tab);",
-  "generate (setting, seed, rooms 4-12, composition compact|sprawling, loops, deadEnds, roomFloor, corridorFloor (art), doorsOpen, stairs, grid: the dungeon generator, a new map with floors, walls and doors);",
+  "generate (setting, seed, rooms 4-12, composition compact|sprawling, loops, deadEnds, roomFloor, corridorFloor, stairArt (art: always give them, else it falls back on starter-kit names that may be licensed art), doorsOpen, stairs, grid: the dungeon generator, a new map with floors, walls and doors);",
   "floor (art: a floor or ground; rect, polygon or polygons (holes even-odd); feather in squares (soft edge that blends into what is under it); name; room true marks a room for check; layer, default map: tiled from the map's corner, so floors join without seams);",
   "paint (art, path, size in squares, softness 0-80: the Texture brush, soft-edged art along a stroke: worn paths, moss, scorch, blending);",
   "scatter (art, path, size, seed, spacing, scale [min, max], rotation [min, max]: the Scatter brush);",
@@ -38,7 +38,7 @@ const DESCRIPTION = [
   "remove (ids); undo; redo;",
   "map (detail: the map read back: size, layers, art, walls, doors, lights, effects, regions, in squares); check (the skill's quality rules: doors on wall lines, lights on light-source art, rooms with props...);",
   "render (view picture (what Kraken shows) | editor (walls, grid, lighting preview) | play (the play test: token [x, y], light, vision, darkness 0-1); region (a box in squares to look at closely); scale; file (a .png path; default in Kraken's data); inline: also return the picture). Render at full size and LOOK at it;",
-  "save (Map Studio's Save project); projects (saved projects); open (saved: a project id, or file: a .json or portable .kraken.zip); tabs;",
+  "save (Map Studio's Save project); projects (saved projects); open (saved: a project id, file: a .json or portable .kraken.zip, or demo: the example map); tabs (the open maps; select: an index to switch to, close: an index to close, discard: drop its unsaved changes); grid (Grid & map size: width, height in squares, size px per square, offsetX, offsetY, distance feet per square, background, name); layer (id or name of a layer, or walls, lights, effects, regions: hidden, locked, rename, move up|down, active: where new art goes);",
   "export (folder, name: the picture as name.webp, its walls, doors and lights as name.walls.json (the shape a Kraken book's map takes), the project as name.kraken.zip with its art);",
   "kraken (Save to Kraken: into open (default: the image open in Kraken's image window or on the table) or new (a new scene on the table from this map): its picture, walls, doors, windows, lights and weather).",
 ].join(" ");
@@ -70,6 +70,7 @@ const inputSchema = {
     corridorFloor: { type: "string" },
     doorsOpen: { type: "boolean" },
     stairs: { type: "boolean" },
+    stairArt: { type: "string", description: "generate: the stairs' art (its flight runs along +x)" },
     rect,
     polygon: points("Outline corners"),
     polygons: { type: "array", items: points("An outline"), description: "Outlines, filled even-odd" },
@@ -131,6 +132,16 @@ const inputSchema = {
     folder: { type: "string" },
     portable: { type: "boolean" },
     into: { type: "string", enum: ["open", "new"] },
+    select: { type: "number", description: "tabs: switch to this tab" },
+    close: { type: "number", description: "tabs: close this tab" },
+    discard: { type: "boolean" },
+    demo: { type: "boolean", description: "open: the example map" },
+    offsetX: { type: "number", description: "grid: pixels" },
+    offsetY: { type: "number", description: "grid: pixels" },
+    distance: { type: "number", description: "grid: feet per square" },
+    rename: { type: "string" },
+    move: { type: "string", enum: ["up", "down"] },
+    active: { type: "boolean" },
   },
 };
 
@@ -236,6 +247,7 @@ async function run(args, ctx) {
     return out(await ctx.studio.saveOpen(project, image));
   }
   if (action === "open") {
+    if (rest.demo) return out(await page("openDemo", {}));
     if (rest.saved) return out(await page("openSaved", { id: rest.saved }));
     if (!rest.file) throw new Error("Give saved (a project id from projects) or file (.json or .kraken.zip).");
     const file = path.resolve(String(rest.file));
