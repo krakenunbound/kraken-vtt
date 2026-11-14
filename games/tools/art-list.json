@@ -549,16 +549,46 @@
     ]
   ],
   "weapons": [
-    ["blade", "a gleaming steel sword and a dagger crossed, edges catching cold candlelight, sparks"],
-    ["axe", "a heavy battle axe with a notched steel head, embers drifting past the blade"],
-    ["bow", "a drawn longbow with an arrow nocked, its point glinting, a ranger's gloved hand on the string"],
-    ["crossbow", "close view of a medieval crossbow lying on a dark wooden table, its steel bolt loaded and string drawn, lantern light on the wooden stock"],
-    ["staff", "a gnarled wooden quarterstaff bound with iron rings, faint dust in a beam of light"],
-    ["hammer", "a dwarven war hammer with a square blunt iron head like a blacksmith's hammer, resting head down on a stone floor in a dark forge, orange firelight"],
-    ["spear", "a long spear with a leaf-shaped steel head and a fluttering ribbon, thrust forward"],
-    ["sling", "a leather sling whirling a stone, motion trail of the stone in dim light"],
-    ["fist", "a clenched fist wrapped in cloth, raised to strike, dust rising around it"],
-    ["firearm", "a sleek science fiction pistol with glowing blue energy coils on a dark metal table, cold neon light"]
+    [
+      "blade",
+      "a gleaming steel sword and a dagger crossed, edges catching cold candlelight, sparks"
+    ],
+    [
+      "axe",
+      "a heavy battle axe with a notched steel head, embers drifting past the blade"
+    ],
+    [
+      "bow",
+      "a drawn longbow with an arrow nocked, its point glinting, a ranger's gloved hand on the string"
+    ],
+    [
+      "crossbow",
+      "close view of a medieval crossbow lying on a dark wooden table, its steel bolt loaded and string drawn, lantern light on the wooden stock"
+    ],
+    [
+      "staff",
+      "a gnarled wooden quarterstaff bound with iron rings, faint dust in a beam of light"
+    ],
+    [
+      "hammer",
+      "a dwarven war hammer with a square blunt iron head like a blacksmith's hammer, resting head down on a stone floor in a dark forge, orange firelight"
+    ],
+    [
+      "spear",
+      "a long spear with a leaf-shaped steel head and a fluttering ribbon, thrust forward"
+    ],
+    [
+      "sling",
+      "a leather sling whirling a stone, motion trail of the stone in dim light"
+    ],
+    [
+      "fist",
+      "a clenched fist wrapped in cloth, raised to strike, dust rising around it"
+    ],
+    [
+      "firearm",
+      "a sleek science fiction pistol with glowing blue energy coils on a dark metal table, cold neon light"
+    ]
   ],
   "open": {
     "styles": {
@@ -917,13 +947,13 @@
         "sphinx-of-lore": 9137
       },
       "models": {
-        "harpy": "qwen",
+        "harpy": "h3",
         "centaur-trooper": "qwen",
         "ettin": "qwen",
         "guardian-naga": "qwen",
         "spirit-naga": "qwen",
         "sphinx-of-lore": "qwen",
-        "sphinx-of-wonder": "qwen"
+        "sphinx-of-wonder": "h3"
       }
     },
     "basic-fantasy": {
@@ -1176,13 +1206,94 @@
         "water-elemental": 7602
       },
       "models": {
-        "harpy": "qwen",
+        "harpy": "h3",
         "centaur": "qwen",
-        "naga": "qwen",
-        "sphinx": "qwen",
-        "lamia": "qwen",
-        "ettin": "qwen",
-        "griffon": "qwen"
+        "naga": "h3",
+        "sphinx": "h3",
+        "lamia": "h3",
+        "ettin": "h3",
+        "griffon": "h3",
+        "acolyte": "h3",
+        "annafranax": "h3",
+        "aranea": "h3",
+        "bandit-leader": "h3",
+        "bandit": "h3",
+        "banshee": "h3",
+        "basilisk": "h3",
+        "blink-dog": "h3",
+        "blood-elk": "h3",
+        "boggart": "h3",
+        "bone-construct": "h3",
+        "bugbear": "h3",
+        "burrowing-horror": "h3",
+        "cave-locust": "h3",
+        "cobblehounds": "h3",
+        "creeping-vines": "h3",
+        "crypt-guardian": "h3",
+        "dryad": "h3",
+        "eye-of-terror": "h3",
+        "frost-elf": "h3",
+        "gargoyle": "h3",
+        "gelatinous-ooze": "h3",
+        "ghost": "h3",
+        "ghoul": "h3",
+        "giant-scorpion": "h3",
+        "gnoll": "h3",
+        "goblin": "h3",
+        "green-dragon": "h3",
+        "grizzly-bear": "h3",
+        "hellhound": "h3",
+        "hobgoblin": "h3",
+        "hooded-men": "h3",
+        "hydra": "h3",
+        "invisible-stalker": "h3",
+        "killer-bees": "h3",
+        "kobold": "h3",
+        "lich": "h3",
+        "manticore": "h3",
+        "mimic": "h3",
+        "mind-lasher": "h3",
+        "minotaur": "h3",
+        "mummy": "h3",
+        "night-cat": "h3",
+        "night-hag": "h3",
+        "nightmare": "h3",
+        "ogre": "h3",
+        "owlbear": "h3",
+        "phoenix": "h3",
+        "pixie": "h3",
+        "purple-worm": "h3",
+        "red-cap": "h3",
+        "reptilian": "h3",
+        "root-goblin": "h3",
+        "root-witch": "h3",
+        "rust-monster": "h3",
+        "sea-hag": "h3",
+        "shadow": "h3",
+        "shambling-mound": "h3",
+        "skeleton": "h3",
+        "sky-giant": "h3",
+        "storm-giant": "h3",
+        "suraru-imperator": "h3",
+        "suraru": "h3",
+        "swine-thing": "h3",
+        "titan": "h3",
+        "treant": "h3",
+        "triton": "h3",
+        "troll": "h3",
+        "unicorn": "h3",
+        "vampire": "h3",
+        "viper": "h3",
+        "warp-panther": "h3",
+        "warrior-snail": "h3",
+        "water-elemental": "h3",
+        "werewolf": "h3",
+        "wight": "h3",
+        "will-o-wisp": "h3",
+        "wolf": "h3",
+        "wood-troll": "h3",
+        "wyvern": "h3",
+        "zombie": "h3"
       }
     },
     "ironsworn": {
@@ -1410,6 +1521,7 @@
         "night-guards": "hired night guards with cudgels, pistols and a hand bell, lanterns raised",
         "grey-lanterns-toughs": "three young street toughs with knives and lanterns, led by a fierce girl"
       }
-    }
+    },
+    "note_h3": "Pictures marked h3 were painted with MiniMax H3 Image in a local ComfyUI (games/tools/h3_image.py, 2048x2048, 6 steps, seed 7), not by Kraken Art; open-art.mjs leaves them as they are."
   }
 }
