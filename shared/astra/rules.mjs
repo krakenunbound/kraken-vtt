@@ -13,7 +13,10 @@
 //   skills {key: {name, level}}, hp {total (Stamina), wounds}, ac {total
 //   (Armour: what it takes off each hit), armor}, initiative {total},
 //   inventorylist (weapons: damage "3d6", skill; armour: protection), coins
-//   (credits), exp, attacks {key: {name, bonus, damage, skill, type}}.
+//   (credits), exp, attacks {key: {name, bonus, damage, skill, type}}, marks
+//   (0 to 6, the GM's awards), tricks {key: {name, path, text}} (one per Mark,
+//   from the major or minor Path's record's tricks). No skill above 4, no
+//   characteristic above 15.
 
 import { priceOf } from "../shop.mjs";
 
@@ -143,8 +146,77 @@ export function derive(input) {
   }
   data.exp = Math.max(0, Math.round(num(data.exp, 0)));
   data.expnext = 0;
+  // Marks (0 to 6) and the tricks learned with them (one each).
+  data.marks = Math.min(MAX_MARKS, Math.max(0, Math.round(num(input.marks, 0))));
+  data.tricks = Object.fromEntries(
+    rows(input.tricks)
+      .filter(([, row]) => row && String(row.name ?? "").trim())
+      .map(([key, row]) => [key, { name: String(row.name).trim(), path: String(row.path ?? ""), text: String(row.text ?? "") }]),
+  );
   return data;
 }
+
+// Marks and tricks. A Mark is awarded by the GM (at most six in a career); each
+// Mark teaches one trick from the character's major or minor Path, one not
+// already learned. A trick does what its text says: the player applies it (a
+// Boon on the strip, say); the sheet keeps the list and shows the text.
+export const MAX_MARKS = 6;
+// A Path record's tricks: [{ name, text }].
+export const pathTricks = (pathData) =>
+  rows(pathData?.tricks)
+    .map(([, row]) => ({ name: String(row?.name ?? "").trim(), text: String(row?.text ?? "") }))
+    .filter((row) => row.name);
+export const tricksOf = (data) => rows(data?.tricks).map(([key, row]) => ({ key, name: String(row?.name ?? ""), path: String(row?.path ?? ""), text: String(row?.text ?? "") }));
+export const unspentMarks = (data) => Math.max(0, Math.round(num(data?.marks, 0)) - tricksOf(data).length);
+// The tricks a character may still learn: its own Paths' (major, then minor),
+// not taken yet. paths: the Path records ({ name, data }) the books have.
+export function trickChoices(data, paths) {
+  const own = [...new Set((Array.isArray(data?.paths) ? data.paths : []).map((name) => String(name).toLowerCase()))];
+  const taken = new Set(tricksOf(data).map((trick) => trick.name.toLowerCase()));
+  const out = [];
+  for (const name of own) {
+    const record = (paths ?? []).find((item) => String(item?.name ?? "").toLowerCase() === name);
+    if (!record) continue;
+    for (const trick of pathTricks(record.data)) if (!taken.has(trick.name.toLowerCase())) out.push({ ...trick, path: record.name });
+  }
+  return out;
+}
+// A Mark awarded: the new data (throws at six).
+export function awardMark(data) {
+  const marks = Math.round(num(data?.marks, 0));
+  if (marks >= MAX_MARKS) throw new Error(`Six Marks is a whole career: no more Marks (only experience).`);
+  return { ...data, marks: marks + 1 };
+}
+// A trick learned with an unspent Mark: the new data (throws when there is no
+// unspent Mark, or the trick is not one of the character's Paths', or taken).
+export function learnTrick(data, paths, trickName) {
+  const wanted = String(trickName ?? "").trim().toLowerCase();
+  if (!wanted) throw new Error("Which trick?");
+  if (unspentMarks(data) <= 0) throw new Error("No unspent Mark: the GM awards a Mark first, then a trick is learned with it.");
+  if (tricksOf(data).some((trick) => trick.name.toLowerCase() === wanted)) throw new Error(`${trickName} is learned already.`);
+  const choice = trickChoices(data, paths).find((trick) => trick.name.toLowerCase() === wanted);
+  if (!choice) throw new Error(`${trickName} is not a trick of ${(data?.paths ?? []).join(" or ") || "this character's Paths"}.`);
+  const tricks = { ...(data.tricks ?? {}) };
+  let n = 1;
+  while (tricks[`id-${String(n).padStart(5, "0")}`]) n++;
+  tricks[`id-${String(n).padStart(5, "0")}`] = { name: choice.name, path: choice.path, text: choice.text };
+  return { data: { ...data, tricks }, trick: choice };
+}
+// A trick forgotten (the GM's correction): its Mark is unspent again.
+export function forgetTrick(data, trickName) {
+  const wanted = String(trickName ?? "").trim().toLowerCase();
+  const found = tricksOf(data).find((trick) => trick.name.toLowerCase() === wanted || trick.key === trickName);
+  if (!found) throw new Error(`No trick ${trickName} on this sheet.`);
+  const tricks = { ...(data.tricks ?? {}) };
+  delete tricks[found.key];
+  return { data: { ...data, tricks }, trick: found };
+}
+// The tricks that name a skill (a reminder beside it on the sheet).
+export const tricksForSkill = (data, key) => {
+  const name = skillName(key);
+  const pattern = new RegExp(`\\b${name.replace(/[-]/g, "\\-")}\\b`, "i");
+  return tricksOf(data).filter((trick) => pattern.test(trick.text));
+};
 
 // A task's modifier: a skill (with its usual characteristic, or another named),
 // or a characteristic alone.
@@ -248,6 +320,9 @@ export function buildFromSpec(spec, lib) {
     coins: credits > 0 ? { "id-00001": { name: "cr", amount: credits } } : {},
     notes: String(spec.notes ?? ""),
     exp: 0,
+    // A new crew member: no Marks, no tricks (they come from play).
+    marks: 0,
+    tricks: {},
   });
   return { name: String(spec.name ?? "").trim() || "Spacer", data, problems };
 }

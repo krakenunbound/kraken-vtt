@@ -3,7 +3,10 @@
 // with Kraken); a test player in Chrome makes a crew member in the crew wizard
 // (Origin, a major Path's four picks, a minor Path's two); the sheet shows
 // Stamina, Armour and the skills; a task rolls 2d6 + skill + characteristic
-// against 8 with its Effect; experience buys a skill; the GM opens Salvage
+// against 8 with its Effect; experience buys a skill; the GM awards a Mark
+// from the sheet and the player learns a trick of the minor Path with it (it
+// shows on the Main page with its text, and beside the skills it names); A
+// Lamp in the Rock is on the shelf too; the GM opens Salvage
 // Rights's decks (walls and hatches) and runs the boarding fight: initiative
 // 2d6, an attack against 8, damage + Effect - armour, Down at 0, dead at -Grit.
 import "./loopback.mjs";
@@ -19,7 +22,8 @@ function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 const profile = mkdtempSync(path.join(tmpdir(), "kraken-astra-ui-"));
-const env = { ...process.env, KRAKEN_AGENT_FILE: path.join(profile, "agent.json"), KRAKEN_AGENT_PORT: "0" };
+// Its own empty shelf and packs folder (never the GM's); the window on the left monitor.
+const env = { ...process.env, KRAKEN_WINDOW_AT: process.env.KRAKEN_WINDOW_AT ?? "-2500,40", KRAKEN_AGENT_FILE: path.join(profile, "agent.json"), KRAKEN_AGENT_PORT: "0", KRAKEN_BOOKS: path.join(profile, "no-fg-modules"), KRAKEN_PACKS: path.join(profile, "packs") };
 const app = await electron.launch({ args: [".", "--mute-audio", `--user-data-dir=${profile}`], cwd: process.cwd(), env });
 const page = await app.firstWindow();
 await page.waitForSelector("text=My Campaigns");
@@ -64,8 +68,8 @@ try {
   await page.waitForSelector("text=Hosting");
   const listed = await tool("kraken_books", { action: "list" });
   const shelf = Array.isArray(listed) ? listed : listed.books ?? [];
-  const ours = ["Apeira Astra Crew Handbook", "Apeira Astra Threat Dossier", "Salvage Rights (Apeira Astra)"].map((title) => shelf.find((item) => item.title === title));
-  assert(ours.every(Boolean), `its three books on the shelf: ${shelf.map((item) => item.title).join(", ")}`);
+  const ours = ["Apeira Astra Crew Handbook", "Apeira Astra Threat Dossier", "Salvage Rights (Apeira Astra)", "A Lamp in the Rock (Apeira Astra)"].map((title) => shelf.find((item) => item.title === title));
+  assert(ours.every(Boolean), `its four books on the shelf: ${shelf.map((item) => item.title).join(", ")}`);
   assert(!shelf.some((item) => /Descending Darkness|5E SRD/.test(item.title)), "no other game's books");
   assert(ours.every((book) => book.cover), `each book has its cover: ${JSON.stringify(ours.map((book) => book.cover))}`);
   for (const book of ours) await tool("kraken_books", { action: "activate", book: book.id });
@@ -127,6 +131,35 @@ try {
   await sheet.locator('[data-action="improve"]').click();
   await seat.waitForFunction(() => document.querySelector('[data-ruleset="astra"] [data-skill="pilot"] .cc-num')?.textContent === "1", null, { timeout: 8000 });
   assert((await dataOf(rook.id)).exp === 1, "Pilot 1 cost 2 experience");
+
+  // Marks: none yet; the GM awards one from the sheet; the player learns a trick of the minor Path (Engineer).
+  await sheet.locator('[data-sheet-tab="main"]').click();
+  await seat.waitForSelector('[data-ruleset="astra"] .astra-marks[data-marks="0"]', { timeout: 8000 });
+  assert((await sheet.locator('[data-action="award-mark"]').count()) === 0, "a player has no Award a Mark");
+  await tool("kraken_windows", { action: "open", kind: "sheet", record: rook.id });
+  const award = page.locator(`[data-character="${rook.id}"] [data-action="award-mark"]`).first();
+  await award.waitFor({ timeout: 15000 });
+  await award.click();
+  await seat.waitForSelector('[data-ruleset="astra"] .astra-marks[data-marks="1"][data-unspent="1"]', { timeout: 8000 });
+  await page.waitForFunction(() => [...document.querySelectorAll(".chat-line")].some((line) => line.textContent.includes("[MARK] Rook Tamsin gains a Mark (1 of 6)")), null, { timeout: 10000 });
+  const offered = await sheet.locator('select[aria-label="Trick to learn"] option').allTextContents();
+  assert(offered.length === 6 && offered.includes("First Through (Marine)") && offered.includes("She'll Hold (Engineer)") && !offered.some((option) => /Fleet|Medic|Scout|Merchant|Drifter/.test(option)), `the Marine's and Engineer's six tricks offered: ${offered.join(" | ")}`);
+  await sheet.locator('select[aria-label="Trick to learn"]').selectOption("She'll Hold");
+  assert((await sheet.locator("[data-trick-preview]").textContent()).includes("Effect 0"), "the chosen trick's text before learning it");
+  await sheet.locator('[data-action="learn-trick"]').click();
+  const learned = sheet.locator(".astra-tricks li").filter({ hasText: "She'll Hold" });
+  await learned.waitFor({ timeout: 8000 });
+  const learnedText = await learned.textContent();
+  assert(learnedText.includes("Engineer") && learnedText.includes("failed Engineering or Mechanics task into a success with Effect 0"), `She'll Hold on the sheet with its text: ${learnedText}`);
+  await seat.waitForSelector('[data-ruleset="astra"] .astra-marks[data-unspent="0"]', { timeout: 8000 });
+  assert((await sheet.locator('[data-action="learn-trick"]').count()) === 0, "the Mark is spent: nothing more to learn");
+  const marked = await tool("kraken_character_mark", { id: rook.id });
+  assert(marked.marks === 1 && marked.unspent === 0 && marked.tricks.map((trick) => trick.name).join() === "She'll Hold" && marked.choices.length === 5, `the tool sees it: ${JSON.stringify(marked)}`);
+  // A trick shows beside the skills it names (Engineering and Mechanics), not others.
+  await sheet.locator('[data-sheet-tab="skills"]').click();
+  await seat.waitForSelector('[data-ruleset="astra"] [data-skill="engineering"] [data-trick-for="engineering"]', { timeout: 8000 });
+  assert((await sheet.locator('[data-trick-for="mechanics"]').count()) === 1 && (await sheet.locator('[data-trick-for="firearms"]').count()) === 0, "She'll Hold beside Engineering and Mechanics, not Firearms");
+  await sheet.locator('[data-sheet-tab="main"]').click();
   await seat.screenshot({ path: path.join(tmpdir(), "kraken-astra-sheet.png") });
 
   // The derelict's decks: walls and hatches.
@@ -190,7 +223,7 @@ try {
   assert(view.find((entry) => entry.id === hers.id).health.status === "Dead", `dead at minus her Grit (8): ${view.find((entry) => entry.id === hers.id).health.status}`);
   await page.screenshot({ path: path.join(tmpdir(), "kraken-astra-combat.png") });
   assert(failures.length === 0, `page errors: ${failures.join(" | ")}`);
-  console.log(`ok astra ui: an Apeira Astra campaign's shelf has its three books (no other game's), made active; a test player makes Rook Tamsin in the crew wizard (Spacer; Marine's four picks, Engineer's two: Firearms 2, Zero-G 2; Stamina 27, Armour 5); a Hard Zero-G task from the sheet (2d6 + skill + Reflex against 8, its Effect); 2 experience buys Pilot 1; Salvage Rights's deck 1 with ${walls.total} walls and ${(map.doors ?? []).length} hatches; the boarding fight: initiative on 2d6, a carbine hit with Effect ${hit.effect}, damage ${roll.total} + ${hit.effect} - 4 armour = ${dealt}; Down at 0, dead at -8. ${path.join(tmpdir(), "kraken-astra-sheet.png")}`);
+  console.log(`ok astra ui: an Apeira Astra campaign's shelf has its four books (no other game's), made active; a test player makes Rook Tamsin in the crew wizard (Spacer; Marine's four picks, Engineer's two: Firearms 2, Zero-G 2; Stamina 27, Armour 5); a Hard Zero-G task from the sheet (2d6 + skill + Reflex against 8, its Effect); 2 experience buys Pilot 1; the GM awards a Mark from the sheet and the player learns She'll Hold (Engineer, the minor Path) with it, shown with its text and beside Engineering and Mechanics; Salvage Rights's deck 1 with ${walls.total} walls and ${(map.doors ?? []).length} hatches; the boarding fight: initiative on 2d6, a carbine hit with Effect ${hit.effect}, damage ${roll.total} + ${hit.effect} - 4 armour = ${dealt}; Down at 0, dead at -8. ${path.join(tmpdir(), "kraken-astra-sheet.png")}`);
 } finally {
   await browser?.close();
   child.kill();

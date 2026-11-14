@@ -27,6 +27,7 @@ const MESSAGES = {
   "sign-out": "kraken_accounts",
   "level-up": "kraken_level_up",
   "character-improve": "kraken_character_improve",
+  "character-mark": "kraken_character_mark",
   cairn: "kraken_cairn",
   fate: "kraken_fate",
   ironsworn: "kraken_ironsworn",

@@ -1,0 +1,382 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root version="4.6" release="1">
+	<encounter>
+		<category name="A Lamp in the Rock">
+			<e00aboutthisadventure>
+				<name type="string">00 About This Adventure</name>
+				<text type="formattedtext"><p><b>A Lamp in the Rock</b> is one session of <i>Apeira Astra</i> for three to five new crew. It is a job with a clock, a rival, and a find that changes what the job is.</p><p><b>What has happened.</b> The freighter <b>Merry Dividend</b> missed a skein exit and fused with the asteroid <b>Harrow-4</b>. Her beacon was dark for 112 days, long enough for a salvage filing. Yesterday the beacon lit again. The crew's filing is <b>claim 441</b>, stamped at Port Sable. <b>Sera Voss</b> of the cutter <i>Red Lease</i> stamped a second filing an hour later. If anyone aboard is alive, both filings are a rescue and the hull is not theirs to sell.</p><p>Someone is alive: <b>Brin Hale</b>, a passenger, awake in a cabin the rock missed. In the strong room is a metal case Brin calls a brother's ashes. It is a <b>thread spool</b>. Voss wants the case. She does not much care about the hull.</p><p><b>The quarantine phrase</b>, if anyone finds the plate by the drone, is: <i>Dividend, berth clear.</i></p><p><b>Experience:</b> 2 each for the job. +1 if Brin reaches a registry alive. +1 if the quarantine drone is shut down without anyone dying to it. Award a <b>Mark</b> to a crew member whose choice Port Sable will still be telling next month (the GM's <b>Award a Mark</b> on that crew member's sheet; they choose the trick).</p><p><b>Handouts.</b> One picture (<i>The Cut</i>, for when the crew first sees the rock's bite). The papers in this job are words, not pictures: read them out, or paste them in chat. Each is in the entry where it turns up.</p></text>
+			</e00aboutthisadventure>
+			<e01portsablenightdesk>
+				<name type="string">01 Port Sable, Night Desk</name>
+				<text type="formattedtext"><p><i>Paper: Claim 441, slid under the glass.</i> <b>Accord Registry, Port Sable night desk. Claim 441. Hull: Merry Dividend. Rock: Harrow-4. Beacon dark 112 days, then lit. First stamp: this desk, this hour. Second stamp: Red Lease, one hour later. Status: contested. A living person aboard makes this a rescue. Night clerk: I. Quill.</b></p><p><i>Read or tell:</i> <b>Port Sable never quite sleeps. The night desk is a cage of laminate and bad tea, and the clerk on the other side of the glass has ink on his fingers and two stamps for the same rock.</b></p><p><b>Ivo Quill</b> (<i>Threat Dossier</i>) pushed the crew's filing through an hour ago, then found Voss's copy under it. He will hold her registry copy until they dock again, if they come back with the truth about whether anyone is alive. He will not hold it against a cutter captain who is standing in his office.</p><p>The crew can learn, each a task at Standard:</p><list><li><b>Electronics</b> on the desk: the <i>Merry Dividend</i> was a small freighter, four crew and one passenger, last clearance &quot;personal effects and yard samples.&quot; The beacon's new signal is the ship's own, not a claim beacon.</li><li><b>Streetwise</b>: the <i>Red Lease</i> fuelled and left an hour ago. Voss pays her boarders well and her lawyers better.</li><li><b>Persuade</b> with Ivo: he admits he is afraid of her, and he gives them the rock's plot for nothing.</li></list><p>They need a ship of their own, or Port Sable's launch <i>Moth</i> at 400 credits (Persuade, Hard, talks the dockmaster down to fuel only).</p></text>
+			</e01portsablenightdesk>
+			<e02theclock>
+				<name type="string">02 The Clock</name>
+				<text type="formattedtext"><p>Harrow-4 is a short burn from Port Sable, not a week's jump. Run the approach as three tasks. Start the clock at <b>70 minutes</b> before the <i>Red Lease</i>'s lamps fill the cut. Each failure costs <b>15 minutes</b>. Each Effect of 4 or more gives <b>15 minutes</b> back. The clock does not drop below 25 unless the crew turn around and let her arrive first.</p><list><li>1. <b>Astrogation</b> (Standard): the rock is where Ivo said.</li><li>2. <b>Pilot</b> (Hard): into the cut without scraping the gantry. A failure is a scrape and a loud arrival. Effect 4 or more is a quiet dock.</li><li>3. <b>Electronics</b> (Standard): sort the beacons. Success: the ship's beacon is real, and a second, smaller claim beacon is shouting from the gantry. That one is Voss's, planted by someone who came and left. Failure: the crew is not sure which voice is older, and the argument later is harder.</li></list><p>Write the minutes remaining where the table can see them. Work aboard spends them: a fight spends ten, a careful search of a compartment spends ten, an argument with Brin spends as long as it is interesting.</p></text>
+			</e02theclock>
+			<e03thecut>
+				<name type="string">03 The Cut</name>
+				<text type="formattedtext"><p><i>Map: Harrow-4, the Cut. Handout: The Cut.</i></p><p><b>The asteroid is a black lump with a bite taken out of it. In the bite, a lamp. Under the lamp, a gantry, and the bow of a freighter grown into the stone like a splinter.</b></p><p>The cut has air if the crew come in suited and cycle the gantry lock (Mechanics, Standard; a Toolkit is a Boon). Gravity is a weak pull toward the rock. Mag boots are a comfort, not a requirement. There is no nest in the open. A cable run under the gantry holds <b>four Thread Lice</b> if anyone cuts power, salvages the cable, or fails a Recon task (Standard) and then puts a hand in.</p><p><b>Voss's claim beacon</b> is clamped to the gantry rail, newer than the frost. Her card is stuck under it: <b>&quot;The case. Eight thousand. The passenger is yours. Leave the hull to the lawyers. I am already in the cut. Sera Voss.&quot;</b> Silencing the beacon is Electronics (Hard). Leaving it running means her filing looks busy and official when Ivo compares the logs.</p><p>The east hatch is the <i>Dividend</i>'s own airlock, forced half open by the rock and then pulled shut again from inside. Mechanics (Standard) opens it. A boarding charge opens it louder and spends no roll, and everyone on the ship hears.</p></text>
+			</e03thecut>
+			<e04midships>
+				<name type="string">04 Midships</name>
+				<text type="formattedtext"><p><i>Map: Merry Dividend, Midships.</i></p><p><b>The corridor is a ship for ten metres and a cave after that. Stone has come through the deck. A drone the size of a crate hangs in the middle of the hall, amber ring lit, and says, in a flat voice, that this compartment is unclean.</b></p><p>The <b>Quarantine Drone</b> fires on anything that keeps coming after the warning. It does not get a surprise turn if the crew stop and answer. The phrase is on a plate beside the wall panel, under the frost, the words still cut clean: <b>&quot;Dividend, berth clear. Say it to the drone. Then it docks. Do not spin the ring. Capt. D. Moss.&quot;</b> Said clearly, the drone docks itself and powers down. Electronics (Hard) at the panel does the same. Shooting works, and the noise carries.</p><p>The panel also has the last captain's line, if anyone looks after the drone is quiet: <i>&quot;Passenger Hale awake. Case stays sealed. Do not spin the ring. — Capt. D. Moss.&quot;</i></p><p><b>North cabin:</b> Brin. <b>South strong room:</b> the case, locked. <b>East:</b> the drive compartment, crushed. The skein ring is dead and half buried. Powering it is a bad idea and a Desperate Engineering task that fails into a radiation flush (a Grit check each turn for anyone who stays, 1d6 on a failure) until the compartment is left alone.</p></text>
+			</e04midships>
+			<e05brinhale>
+				<name type="string">05 Brin Hale</name>
+				<text type="formattedtext"><p><b>A young passenger in a silver blanket is sitting on the bunk with a wrench across their knees. &quot;If you are here to take the case,&quot; Brin says, &quot;it is not cargo. It is my brother.&quot;</b></p><p><b>Brin Hale</b> is not the Hollow-Eyed kind of survivor. Brin has been awake two days, still has water, and is scared in an ordinary way. Persuade (Standard; Hard if a weapon is out) gets the story:</p><list><li>The <i>Dividend</i> came out of the jump inside the rock. The crew sealed the drive and died in the crush, or Brin thinks they did. Brin has not opened that compartment.</li><li>Brin's passenger chit says it plainly: <b>&quot;Passenger chit, Merry Dividend. Hale, Brin. Berth 2. Personal effects: one sealed case. Do not open the case. The yard samples are not yours. Clearance copy. Not a claim.&quot;</b></li><li>The case was listed as personal effects. Brin's brother, a yard tech, said it must not be opened and must not be left behind.</li><li>Brin will leave with the crew if the case comes too. Brin will not sign a paper that says the ship was empty.</li></list><p>A Deceive task (Hard) can talk Brin into leaving the case for &quot;ten minutes.&quot; Brin comes back for it. If the crew knocks Brin out, they have a rescue they are about to throw away, and Ivo will see a bruise.</p></text>
+			</e05brinhale>
+			<e06thecase>
+				<name type="string">06 The Case</name>
+				<text type="formattedtext"><p>The strong-room latch is Mechanics or Electronics (Standard). Inside is one brushed-metal case, warm, with a violet seam and no ashes.</p><p>An Engineering or Science task (Standard) knows it for a <b>thread spool</b>: a skein part the yards stamp and the Combine overpays for. The rules for using it or selling it are in the Threat Dossier, under Salvage. Say them when the crew understands what they are holding. Do not make them roll to be allowed to know their own options.</p><p>If the case is opened here, <b>one Thread Louse</b> is asleep in the packing. It wakes if the spool is powered or if the drive compartment is live. Shutting the case again is an action.</p><p>Brin, told the truth (or shown the louse), believes the crew about the case and still wants it off the rock. Brin will accept &quot;we carry it, we do not open it&quot; from someone who has not lied yet.</p></text>
+			</e06thecase>
+			<e07theredlease>
+				<name type="string">07 The Red Lease</name>
+				<text type="formattedtext"><p>When the clock ends, or when the crew undocks, the <i>Red Lease</i> is in the mouth of the cut. <b>Sera Voss</b> comes across with <b>three Red Lease Boarders</b> (two, if the crew is three). She does not vent the rock. A ruined spool is worth nothing.</p><p>She opens with the offer on the card, and she will go to <b>8,000 credits</b> for the case, Brin left to the crew, the hull left to whoever can be bothered to argue about a fused freighter. Persuade or Trade (Hard) moves her to 10,000. Leadership (Hard) with Brin standing there, alive and named, makes her step back from any plan that involves the passenger: she will not shoot a rescue in front of a witness she cannot buy. Easy, if the crew has already called Port Sable and Ivo is on the channel.</p><p>If it becomes a fight, she fights in the cut, behind the crates, and she orders a retreat when she is Down or two boarders are. She remembers the crew either way.</p><p>A crew that undocks before she arrives can still be caught at the mouth: Pilot (Hard) to slip out dark. Failure means she is alongside, and the offer happens in the launch instead of the cave.</p></text>
+			</e07theredlease>
+			<e08portsableagain>
+				<name type="string">08 Port Sable Again</name>
+				<text type="formattedtext"><p><b>If Brin reaches the registry:</b> Ivo stamps a rescue. The Accord pays <b>3,000 credits</b>. The fused hull is not worth a tow. Brin owes the crew a brother's gratitude and a true story, and will tell it. Toma Rees, if she hears, is a friend of the filing.</p><p><b>If the crew sells the spool to Voss:</b> 8,000 credits, or whatever was agreed. She pays. She also knows what they look like.</p><p><b>If they sell it to the Combine:</b> about <b>30,000 credits</b> at the yard. Hess Kade learns the name of the ship that brought it. He is polite. He is not finished.</p><p><b>If they keep it:</b> the next jump can be three days, once, if an engineer mounts it and the task succeeds. Voss and the Combine both keep looking. A yard stamp later makes the fine go away.</p><p><b>If they file the hull empty, and Brin is not there to say otherwise:</b> Ivo will not stamp it if he has been given a reason to doubt. A clean lie, with no witness, pays whatever a buyer will give for a claim on a wreck that cannot be moved. It is a small amount, and it is the sort of story that finds Toma Rees.</p><p><b>Threads:</b> Moss's last line named yard samples. The coolant in the crushed drive is the cheap sort. And Voss already knew the word &quot;spool&quot; before anyone told her.</p></text>
+			</e08portsableagain>
+		</category>
+	</encounter>
+	<battle>
+		<category name="Encounters">
+			<liceunderthegantry>
+				<name type="string">Lice under the Gantry</name>
+				<npclist>
+					<id-00001>
+						<name type="string">Thread Louse</name>
+						<count type="number">4</count>
+						<faction type="string">foe</faction>
+						<isidentified type="number">1</isidentified>
+						<link type="windowreference"><class>npc</class><recordname>npc.threadlouse@Apeira Astra Threat Dossier</recordname></link>
+					</id-00001>
+				</npclist>
+			</liceunderthegantry>
+			<thequarantinedrone>
+				<name type="string">The Quarantine Drone</name>
+				<npclist>
+					<id-00001>
+						<name type="string">Quarantine Drone</name>
+						<count type="number">1</count>
+						<faction type="string">foe</faction>
+						<isidentified type="number">1</isidentified>
+						<link type="windowreference"><class>npc</class><recordname>npc.quarantinedrone@Apeira Astra Threat Dossier</recordname></link>
+					</id-00001>
+				</npclist>
+			</thequarantinedrone>
+			<oneinthecase>
+				<name type="string">One in the Case</name>
+				<npclist>
+					<id-00001>
+						<name type="string">Thread Louse</name>
+						<count type="number">1</count>
+						<faction type="string">foe</faction>
+						<isidentified type="number">1</isidentified>
+						<link type="windowreference"><class>npc</class><recordname>npc.threadlouse@Apeira Astra Threat Dossier</recordname></link>
+					</id-00001>
+				</npclist>
+			</oneinthecase>
+			<brinhale>
+				<name type="string">Brin Hale</name>
+				<npclist>
+					<id-00001>
+						<name type="string">Brin Hale</name>
+						<count type="number">1</count>
+						<faction type="string">neutral</faction>
+						<isidentified type="number">1</isidentified>
+						<link type="windowreference"><class>npc</class><recordname>npc.brinhale@Apeira Astra Threat Dossier</recordname></link>
+					</id-00001>
+				</npclist>
+			</brinhale>
+			<vossinthecut>
+				<name type="string">Voss in the Cut</name>
+				<npclist>
+					<id-00001>
+						<name type="string">Sera Voss</name>
+						<count type="number">1</count>
+						<faction type="string">foe</faction>
+						<isidentified type="number">1</isidentified>
+						<link type="windowreference"><class>npc</class><recordname>npc.seravoss@Apeira Astra Threat Dossier</recordname></link>
+					</id-00001>
+					<id-00002>
+						<name type="string">Red Lease Boarder</name>
+						<count type="number">3</count>
+						<faction type="string">foe</faction>
+						<isidentified type="number">1</isidentified>
+						<link type="windowreference"><class>npc</class><recordname>npc.redleaseboarder@Apeira Astra Threat Dossier</recordname></link>
+					</id-00002>
+				</npclist>
+			</vossinthecut>
+		</category>
+	</battle>
+	<image>
+		<category name="Maps">
+			<harrow4thecut>
+				<name type="string">Harrow-4, the Cut</name>
+				<image>
+					<grid type="string">on</grid>
+					<gridsize type="string">70,70</gridsize>
+					<gridoffset type="string">0,0</gridoffset>
+					<layers>
+						<layer>
+							<name type="string">Harrow-4, the Cut</name>
+							<id type="string">0</id>
+							<parentid type="string">-1</parentid>
+							<type type="string">image</type>
+							<bitmap type="string">images/harrow-cut.webp</bitmap>
+							<matrix type="string">1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1</matrix>
+							<occluders>
+								<occluder>
+									<id type="string">0</id>
+									<points type="string">-840,350,280,350</points>
+								</occluder>
+								<occluder>
+									<id type="string">1</id>
+									<points type="string">490,210,840,210</points>
+								</occluder>
+								<occluder>
+									<id type="string">2</id>
+									<points type="string">280,140,490,140</points>
+								</occluder>
+								<occluder>
+									<id type="string">3</id>
+									<points type="string">280,-140,490,-140</points>
+								</occluder>
+								<occluder>
+									<id type="string">4</id>
+									<points type="string">490,-210,840,-210</points>
+								</occluder>
+								<occluder>
+									<id type="string">5</id>
+									<points type="string">-840,-350,280,-350</points>
+								</occluder>
+								<occluder>
+									<id type="string">6</id>
+									<points type="string">-840,350,-840,-350</points>
+								</occluder>
+								<occluder>
+									<id type="string">7</id>
+									<points type="string">280,350,280,140</points>
+								</occluder>
+								<occluder>
+									<id type="string">8</id>
+									<points type="string">280,-140,280,-350</points>
+								</occluder>
+								<occluder>
+									<id type="string">9</id>
+									<points type="string">490,210,490,140</points>
+								</occluder>
+								<occluder>
+									<id type="string">10</id>
+									<points type="string">490,-140,490,-210</points>
+								</occluder>
+								<occluder>
+									<id type="string">11</id>
+									<points type="string">840,210,840,-210</points>
+								</occluder>
+								<occluder>
+									<id type="string">12</id>
+									<points type="string">280,70,280,0</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+								<occluder>
+									<id type="string">13</id>
+									<points type="string">280,0,280,-70</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+								<occluder>
+									<id type="string">14</id>
+									<points type="string">490,70,490,0</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+								<occluder>
+									<id type="string">15</id>
+									<points type="string">490,0,490,-70</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+							</occluders>
+						</layer>
+					</layers>
+				</image>
+			</harrow4thecut>
+			<merrydividendmidships>
+				<name type="string">Merry Dividend, Midships</name>
+				<image>
+					<grid type="string">on</grid>
+					<gridsize type="string">70,70</gridsize>
+					<gridoffset type="string">0,0</gridoffset>
+					<layers>
+						<layer>
+							<name type="string">Merry Dividend, Midships</name>
+							<id type="string">0</id>
+							<parentid type="string">-1</parentid>
+							<type type="string">image</type>
+							<bitmap type="string">images/harrow-midships.webp</bitmap>
+							<matrix type="string">1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1</matrix>
+							<occluders>
+								<occluder>
+									<id type="string">0</id>
+									<points type="string">-490,350,-140,350</points>
+								</occluder>
+								<occluder>
+									<id type="string">1</id>
+									<points type="string">-70,350,280,350</points>
+								</occluder>
+								<occluder>
+									<id type="string">2</id>
+									<points type="string">-980,140,-700,140</points>
+								</occluder>
+								<occluder>
+									<id type="string">3</id>
+									<points type="string">420,140,910,140</points>
+								</occluder>
+								<occluder>
+									<id type="string">4</id>
+									<points type="string">-700,70,-490,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">5</id>
+									<points type="string">-140,70,-70,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">6</id>
+									<points type="string">280,70,420,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">7</id>
+									<points type="string">-700,-70,-420,-70</points>
+								</occluder>
+								<occluder>
+									<id type="string">8</id>
+									<points type="string">0,-70,420,-70</points>
+								</occluder>
+								<occluder>
+									<id type="string">9</id>
+									<points type="string">-980,-140,-700,-140</points>
+								</occluder>
+								<occluder>
+									<id type="string">10</id>
+									<points type="string">420,-140,910,-140</points>
+								</occluder>
+								<occluder>
+									<id type="string">11</id>
+									<points type="string">-420,-350,0,-350</points>
+								</occluder>
+								<occluder>
+									<id type="string">12</id>
+									<points type="string">-980,140,-980,-140</points>
+								</occluder>
+								<occluder>
+									<id type="string">13</id>
+									<points type="string">-700,140,-700,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">14</id>
+									<points type="string">-700,-70,-700,-140</points>
+								</occluder>
+								<occluder>
+									<id type="string">15</id>
+									<points type="string">-490,350,-490,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">16</id>
+									<points type="string">-420,-70,-420,-350</points>
+								</occluder>
+								<occluder>
+									<id type="string">17</id>
+									<points type="string">-140,350,-140,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">18</id>
+									<points type="string">-70,350,-70,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">19</id>
+									<points type="string">0,-70,0,-350</points>
+								</occluder>
+								<occluder>
+									<id type="string">20</id>
+									<points type="string">280,350,280,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">21</id>
+									<points type="string">420,140,420,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">22</id>
+									<points type="string">420,-70,420,-140</points>
+								</occluder>
+								<occluder>
+									<id type="string">23</id>
+									<points type="string">910,140,910,-140</points>
+								</occluder>
+								<occluder>
+									<id type="string">24</id>
+									<points type="string">-700,70,-700,0</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+								<occluder>
+									<id type="string">25</id>
+									<points type="string">-700,0,-700,-70</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+								<occluder>
+									<id type="string">26</id>
+									<points type="string">-350,70,-280,70</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+								<occluder>
+									<id type="string">27</id>
+									<points type="string">70,70,140,70</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+								<occluder>
+									<id type="string">28</id>
+									<points type="string">-280,-70,-210,-70</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+								<occluder>
+									<id type="string">29</id>
+									<points type="string">-210,-70,-140,-70</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+								<occluder>
+									<id type="string">30</id>
+									<points type="string">420,70,420,0</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+								<occluder>
+									<id type="string">31</id>
+									<points type="string">420,0,420,-70</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+							</occluders>
+						</layer>
+					</layers>
+				</image>
+			</merrydividendmidships>
+		</category>
+		<category name="Handouts">
+			<thecut>
+				<name type="string">The Cut</name>
+				<image>
+					<grid type="string">off</grid>
+					<gridsize type="string">70,70</gridsize>
+					<gridoffset type="string">0,0</gridoffset>
+					<layers>
+						<layer>
+							<name type="string">The Cut</name>
+							<id type="string">0</id>
+							<parentid type="string">-1</parentid>
+							<type type="string">image</type>
+							<bitmap type="string">images/handout-cut.webp</bitmap>
+							<matrix type="string">1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1</matrix>
+						</layer>
+					</layers>
+				</image>
+			</thecut>
+		</category>
+	</image>
+</root>

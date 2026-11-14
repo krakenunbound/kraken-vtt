@@ -971,6 +971,13 @@ export function useSession() {
     socket.send(JSON.stringify({ type: "character-improve", id, ...what }));
     return Promise.resolve();
   }, []);
+  // Apeira Astra: Marks and tricks (award / take: the GM's; learn: the player's, a trick with an unspent Mark; forget: the GM's correction).
+  const markCharacter = useCallback((id: string, action: "award" | "learn" | "forget" | "take", trick = "") => {
+    const socket = socketRef.current;
+    if (!socket || socket.readyState !== WebSocket.OPEN) return Promise.reject(new Error("Not connected."));
+    socket.send(JSON.stringify({ type: "character-mark", id, action, ...(trick ? { trick } : {}) }));
+    return Promise.resolve();
+  }, []);
   const levelUp = useCallback((id: string, packageKey?: string) => {
     const socket = socketRef.current;
     if (!socket || socket.readyState !== WebSocket.OPEN) return;
@@ -1283,6 +1290,7 @@ export function useSession() {
     lifeAction,
     levelUp,
     improveCharacter,
+    markCharacter,
     cairnAction,
     fateAction,
     ironsworn,

@@ -5,6 +5,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { artKey, creatureArt, creaturePictures, ids, md, pictured } from "../lib/fg.mjs";
 import { RULESET } from "./crew-handbook.mjs";
+import { REACH_SECTION, REACH_THREATS } from "./reach.mjs";
 
 const STATS = ["brawn", "reflex", "grit", "intellect", "training", "presence"];
 const attack = (name, bonus, dice, more = "") => ({ name, desc: `Attack ${bonus >= 0 ? "+" : ""}${bonus} (${dice})${more ? `, ${more}` : ""}.` });
@@ -37,6 +38,7 @@ export const THREATS = [
   threat({ name: "Rust Crawler", kind: "Creature", scores: [5, 9, 6, 1, 6, 1], stamina: 12, armour: 2, skills: "Stealth 2, Athletics 1", actions: [attack("Mandibles", 1, "1d6", "melee; a vac suit hit springs a slow leak")], traits: [["Swarm", "Usually 2d6 of them, in the ducts."]], text: "Spiny metal-eaters from the asteroid belts that get into hulls and chew through cabling. Annoying alone; dangerous in a swarm.", category: "Creatures" }),
   threat({ name: "Void Lamprey", kind: "Creature", scores: [11, 8, 10, 2, 8, 1], stamina: 26, armour: 3, skills: "Athletics 2, Stealth 1", actions: [attack("Rasping Maw", 2, "3d6", "melee; it holds on: 1d6 each turn until pulled off (Brawn, Hard)")], traits: [["Vacuum-born", "It lives in vacuum and lurks on hulls, drawn to warmth and light."]], text: "Three metres of muscle and teeth that drift between asteroids and latch on to anything warm.", category: "Creatures" }),
   threat({ name: "Hollow-Eyed Survivor", kind: "Human", scores: [6, 6, 5, 8, 8, 6], stamina: 17, skills: "Engineering 1, Electronics 1", actions: [attack("Wrench", -1, "1d6", "melee")], text: "Someone who has been alone on a dead ship too long. Scared, starving, and armed with whatever was to hand.", category: "Salvage Rights" }),
+  ...REACH_THREATS,
 ];
 
 export const DOSSIER = {
@@ -57,9 +59,10 @@ export const DOSSIER = {
           pages: THREATS.map((record) => ({
             name: record.name,
             // Each threat's page opens with its picture.
-            blocks: pictured(md(`*${record.type}.* ${String(record.text.__rich).replace(/<[^>]+>/g, "")}\n\n**Stamina** ${record.hp}. **Armour** ${record.armour}. **Skills** ${record.skills}.\n\n${Object.values(record.actions).map((action) => `**${action.name}.** ${action.desc}`).join("\n\n")}`), `images/npc/${artKey(record.name)}.webp`, record.name),
+            blocks: pictured(md(`*${record.type}.* ${String(record.text.__rich).replace(/<[^>]+>/g, "")}\n\n**Stamina** ${record.hp}. **Armour** ${record.armour}. **Skills** ${record.skills}.\n\n${[...Object.values(record.actions), ...Object.values(record.traits)].map((action) => `**${action.name}.** ${action.desc}`).join("\n\n")}`), `images/npc/${artKey(record.name)}.webp`, record.name),
           })),
         },
+        REACH_SECTION,
       ],
     },
   ],

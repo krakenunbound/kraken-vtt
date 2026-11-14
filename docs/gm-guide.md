@@ -92,6 +92,13 @@ ulesets` (on Linux,
     the tracker runs 2d6 initiative, attacks against 8 with the Effect on the
     damage, armour less AP, and damage off Endurance, then Strength, then
     Dexterity. Your Traveller books add their content.
+  - In *Apeira Astra*, the GM awards **Marks** from a crew member's sheet
+    (Main page, **Award a Mark**, at most six); the player then learns a
+    trick from their major or minor Path with it (the sheet offers the ones
+    not taken, with their text). A trick shows beside the skill it names; the
+    player sets its Boon on the strip when it applies. The GM can take a trick
+    or an unspent Mark back (a correction). Experience still buys skills (to 4)
+    and characteristics (to 15) with **Improve**.
   - In *Traveller* and *Apeira Astra*, **Starships** (sidebar) holds the
     campaign's ships: make one from a design, let the crew take stations with
     their characters, put the ships on the tracker, and the gunners fire from

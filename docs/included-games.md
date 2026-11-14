@@ -87,17 +87,31 @@ Its own 2d6 engine:
 - **A crew in minutes.** Choose an **Origin** (Coreborn, Spacer, Frontier,
   Undercity, Belter), a major **Path** (Fleet, Marine, Scout, Merchant,
   Engineer, Medic, Drifter: its signature skill and four picks) and a minor
-  Path (two picks). No levels: experience buys skills and characteristics.
+  Path (two picks). No levels: experience buys skills and characteristics
+  (no skill above 4, no characteristic above 15).
+- **Marks and tricks.** The GM awards a **Mark** when a crew member does
+  something the port will repeat (at most six in a career). Each Mark teaches
+  one **trick** from the character's major or minor Path (three each: Berth
+  Hands, First Through, Fair Price, Stay With Me...). The sheet keeps them: the
+  Main page shows the Marks and the tricks with their text, the GM's **Award a
+  Mark** gives one, and the player picks the trick; a skill a trick names shows
+  it beside the skill.
 
-**Books:** *Apeira Astra Crew Handbook* (rules, Origins, Paths, gear, salvage
-law), *Apeira Astra Threat Dossier* (10 threats, each with its portrait and
-token).
+**Books:** *Apeira Astra Crew Handbook* (rules, Origins, Paths with their
+tricks, Marks, every piece of gear and its price, salvage law), *Apeira Astra
+Threat Dossier* (22 threats and contacts, each with its portrait and token; a
+salvage roll, how to run a job, and six jobs ready to play).
 
 **Adventure: *Salvage Rights*** (a new crew, two sessions). The freighter
 *Kestrel's Due* is adrift in the Heron belt, and a rival salvager is racing
 the crew to it. But someone aboard may still be alive, and that changes
 everything. Ten story entries, four encounters, two deck maps with hatches,
 and four handouts.
+
+**Adventure: *A Lamp in the Rock*** (a new crew, one session). A freighter
+fused with an asteroid, two stamps on one salvage claim, a rival cutter on the
+clock, a passenger still alive, and a case that should not be spun. Nine story
+entries, five encounters, two maps with walls and hatches, and a handout.
 
 ## Ironsworn and Ironsworn: Starforged (vows, with or without a GM)
 

@@ -6,6 +6,21 @@ full log of the work is in [PLAN.md](PLAN.md).
 
 ## Unreleased
 
+- **Apeira Astra: Marks and tricks.** A crew member now grows in a second way:
+  the GM awards a **Mark** (at most six in a career) from the sheet, and the
+  player learns a **trick** with it from their major or minor Path (three
+  each). The sheet's Main page shows the Marks and the tricks with their text;
+  a trick shows beside the skill it names. Improve still stops at skill 4 and
+  characteristic 15. Agents: `kraken_character_mark`.
+- **Apeira Astra: a new job, *A Lamp in the Rock*** (one session): a freighter
+  fused with an asteroid, two stamps on one claim, a rival on the clock and a
+  passenger still alive. Two maps with walls and hatches.
+- **Apeira Astra's books grow.** Fifteen new pieces of gear (hull tape, patch
+  foam, a line gun, a shock net, a claim beacon, a doc box...) and a "What
+  Credits Buy" page listing everything with its price; the Threat Dossier adds
+  twelve people, machines and creatures with portraits and tokens (contacts
+  who offer something, rivals who want something), a salvage roll, how to run
+  a job and six jobs ready to play.
 - **A gentler "your turn".** The turn alert was a church bell, loud enough to
   hear from the next room. It is now a soft two-note chime (a starship
   console's tone in Apeira Astra, Traveller and Starforged), much quieter.

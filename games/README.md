@@ -6,7 +6,7 @@ play without any Fantasy Grounds modules:
 | Game | Engine | Books (games/modules) |
 |---|---|---|
 | **Descending Darkness** (dark fantasy) | the d20 family (`shared/dnd5e/rules.mjs`, profile `descending`) | Player's Handbook, Bestiary, *The Empty Watchtower* |
-| **Apeira Astra** (science fiction) | its own 2d6 engine (`shared/astra/rules.mjs`) | Crew Handbook, Threat Dossier, *Salvage Rights* |
+| **Apeira Astra** (science fiction) | its own 2d6 engine (`shared/astra/rules.mjs`) | Crew Handbook, Threat Dossier, *Salvage Rights*, *A Lamp in the Rock* |
 | **Cairn**, Second Edition (Yochai Gal, CC BY-SA 4.0) | its own engine (`shared/cairn/rules.mjs`) | Player's Guide, Warden's Guide, *Trouble in Twin Lakes* |
 | **Fate Core** and **Fate Accelerated** (Evil Hat, CC BY 3.0) | one engine (`shared/fate/rules.mjs`) | Fate Core System, Fate Accelerated Edition, Fate Toolkit and Adversaries, *The Lighthouse at Gull's End* |
 
@@ -125,6 +125,19 @@ its books (`FG_RULESETS` in books.cjs).
 make FG's XML swallow later records quietly), `imageRecord()` for a map with
 its walls (in picture pixels; FG's centred, y-up points are worked out),
 `writeModule()` for the folder.
+
+## Apeira Astra's records
+
+A Path (a "class" record, `games/apeira-astra/crew.mjs`) carries its three
+**tricks** as data (`tricks`: name and text) as well as in its page's text; the
+sheet's Marks read them from the active Crew Handbook, and the character keeps
+`marks` (0 to 6) and the `tricks` it learned (`shared/astra/rules.mjs`:
+awardMark, learnTrick, trickChoices). A threat or contact
+(`dossier.mjs`, `reach.mjs`) is rolled by the tracker when an action's text says
+"Attack +2 (3d6)": a person's bonus is their skill + characteristic modifier
+(-3 untrained), as a crew member's would be (`npm run astra` checks it).
+Handouts are pictures without lettering; a paper the crew reads (a claim, a
+note) is written in the story entry instead.
 
 ## Maps
 

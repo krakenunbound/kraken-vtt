@@ -1,0 +1,41 @@
+{
+  "cell": 70,
+  "cols": 30,
+  "rows": 16,
+  "ground": "rock",
+  "seed": 19,
+  "autoSolid": true,
+  "solidTex": "hull",
+  "wallColor": [70, 78, 86],
+  "light": "dark",
+  "floors": [
+    { "x": 1, "y": 6, "w": 4, "h": 4, "tex": "metal" },
+    { "x": 5, "y": 7, "w": 16, "h": 2, "tex": "deck" },
+    { "x": 8, "y": 3, "w": 5, "h": 4, "tex": "metal" },
+    { "x": 14, "y": 3, "w": 5, "h": 4, "tex": "metal" },
+    { "x": 9, "y": 9, "w": 6, "h": 4, "tex": "metal" },
+    { "x": 21, "y": 6, "w": 7, "h": 4, "tex": "grate" }
+  ],
+  "doors": [
+    { "x": 5, "y": 7, "side": "w" },
+    { "x": 5, "y": 8, "side": "w" },
+    { "x": 10, "y": 6, "side": "s" },
+    { "x": 16, "y": 6, "side": "s" },
+    { "x": 11, "y": 8, "side": "s" },
+    { "x": 12, "y": 8, "side": "s" },
+    { "x": 21, "y": 7, "side": "w" },
+    { "x": 21, "y": 8, "side": "w" }
+  ],
+  "features": [
+    { "kind": "bunk", "x": 8, "y": 3, "w": 2, "h": 1 },
+    { "kind": "locker", "x": 11, "y": 3, "w": 1, "h": 2 },
+    { "kind": "console", "x": 14, "y": 3, "w": 2, "h": 1 },
+    { "kind": "crate", "x": 17, "y": 4, "w": 1, "h": 1 },
+    { "kind": "chest", "x": 11, "y": 10, "w": 2, "h": 1 },
+    { "kind": "locker", "x": 9, "y": 11, "w": 1, "h": 1 },
+    { "kind": "rubble", "x": 23, "y": 6, "w": 4, "h": 2 },
+    { "kind": "console", "x": 22, "y": 8, "w": 2, "h": 1 },
+    { "kind": "lamp", "x": 12, "y": 7 },
+    { "kind": "blood", "x": 24, "y": 8 }
+  ]
+}
