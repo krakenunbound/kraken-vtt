@@ -38,6 +38,9 @@ const FG_RULESETS = {
   "Apeira Astra": ["Apeira Astra"],
   // Cairn Second Edition (CC BY-SA 4.0), its books shipped in the app (games/modules).
   Cairn: ["Cairn"],
+  // Ironsworn (with Delve) and Ironsworn: Starforged (their CC BY 4.0 parts), shipped in the app (games/modules).
+  Ironsworn: ["Ironsworn"],
+  Starforged: ["Starforged"],
   Worldbuilding: [],
 };
 const ANY = new Set(["", "any", "corerpg"]);

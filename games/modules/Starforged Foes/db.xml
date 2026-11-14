@@ -1,0 +1,1276 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root version="4.6" release="1">
+	<npc>
+		<category name="Monster">
+			<chiton>
+				<name type="string">Chiton</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">dangerous</rank>
+				<nature type="string">Monster</nature>
+				<summary type="string">Insectoid horde</summary>
+				<features type="string">Arachnid monsters with blade-like limbs; Plated exoskeleton; Dripping mucus; Ripping, tearing maw</features>
+				<drives type="string">Build and expand the nest; Feed and protect the queen; Snuff out intelligent life</drives>
+				<tactics type="string">Attack with lightning reflexes; Impale with bladed limbs; Drag victims back to the nest</tactics>
+				<text type="formattedtext"><p><i>Insectoid horde</i> — Dangerous Monster</p><p>The chiton are not native to any single planet, and are adaptable to most environments. Some suggest they are an ancient precursor bioweapon seeded across the galaxy. The larva of the telepathic queen can lay dormant for thousands of years, emerging only when its sleep is disturbed by the mental energies of intelligent life. An awoken queen quickly metamorphoses into its adult form and lays its first clutch of eggs. Soon after, newly-hatched drones set out to expand the nest and feed their ravenous progenitor.</p><p><b>Features:</b> Arachnid monsters with blade-like limbs; Plated exoskeleton; Dripping mucus; Ripping, tearing maw</p><p><b>Drives:</b> Build and expand the nest; Feed and protect the queen; Snuff out intelligent life</p><p><b>Tactics:</b> Attack with lightning reflexes; Impale with bladed limbs; Drag victims back to the nest</p><p><b>Quest starter:</b> At a remote facility, researchers are studying a newly-discovered chiton queen larva. The immature queen is held in frozen stasis, but something might have gone wrong. The return of a transport ship ferrying supplies to the researchers is weeks overdue. What is your connection to the facility or to the faction overseeing it?</p></text>
+			</chiton>
+			<puppetvine>
+				<name type="string">Puppet vine</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">extreme</rank>
+				<nature type="string">Monster</nature>
+				<summary type="string">Parasitic planets</summary>
+				<features type="string">Writhing tendrils sprouting from a desiccated host; Barbed thorns dripping with ichor</features>
+				<drives type="string">Seek out new hosts; Grow and consume</drives>
+				<tactics type="string">Entangle with thorny vines; Implant seeds; Seize control of a host's body</tactics>
+				<text type="formattedtext"><p><i>Parasitic planets</i> — Extreme Monster</p><p>A puppet vine is a parasitic, plant-like entity. It is usually encountered as thorny, fleshy tendrils sprouting from the dessicated corpse of an unwilling host—a creature or careless explorer. That victim, skin shriveled tight against their bones, mouth agape in a silent scream, is made a horrific marionette as the vine takes control of their motor functions to send them shambling about in search of new hosts.</p><p>When the vine encounters a potential victim, it lashes out, entangling them, cutting into their flesh with hollow thorns. It uses those thorns to implant microscopic seeds. After a few hours, the seeds mature and sprout. Unless stopped, the fast-growing tendrils course greedily through the victim's body, consuming the fluids within. Then, the vines burst forth to begin the cycle anew.</p><p><b>Features:</b> Writhing tendrils sprouting from a desiccated host; Barbed thorns dripping with ichor</p><p><b>Drives:</b> Seek out new hosts; Grow and consume</p><p><b>Tactics:</b> Entangle with thorny vines; Implant seeds; Seize control of a host's body</p><p><b>Quest starter:</b> At a remote settlement, a settler is attacked by a puppet vine and infected. The outpost's fast-thinking healer puts the victim in stasis, stopping—for now—the sprouting and spread of the vines. But time is of the essence. They need someone to transport the stasis pod and its unfortunate occupant to a distant facility for treatment, and your ship is the only one currently planetside. What do they offer to gain your help in this risky mission?</p></text>
+			</puppetvine>
+			<technoplasm>
+				<name type="string">Technoplasm</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">formidable</rank>
+				<nature type="string">Monster</nature>
+				<summary type="string">Bio/machine corruption</summary>
+				<features type="string">Machines fused with biological corruption; Creeping ooze, scintillating with energy; Writhing, grasping pseudopods</features>
+				<drives type="string">Infect and control machines and computer systems; Expand and multiply</drives>
+				<tactics type="string">Use pseudopods to lash out and grapple; Unleash infected machines; Overwhelm and engulf</tactics>
+				<text type="formattedtext"><p><i>Bio/machine corruption</i> — Formidable Monster</p><p>Theorized to be a precursor bioweapon that persisted long beyond the death of its creators, technoplasm is a malignant lifeform that infects, mutates, and controls machines, robots, and computer systems.</p><p>Technoplasm infestations are tenacious, cunning, and dangerous to eliminate. When in doubt, burn it and deal with the aftermath that comes with generous applications of fire. A ship or settlement with a large outbreak is likely too far gone and best abandoned, although some suggest every infection has its source; if you somehow find and destroy the heart of a technoplasm infestation, can you kill it entirely?</p><p><b>Features:</b> Machines fused with biological corruption; Creeping ooze, scintillating with energy; Writhing, grasping pseudopods</p><p><b>Drives:</b> Infect and control machines and computer systems; Expand and multiply</p><p><b>Tactics:</b> Use pseudopods to lash out and grapple; Unleash infected machines; Overwhelm and engulf</p><p><b>Quest starter:</b> An outcast cult believes technoplasm is the ultimate synthesis of machine and flesh. They are plotting to unleash it upon populated space. What decisive first strike have they set in motion, and how do you learn of their scheme?</p></text>
+			</technoplasm>
+		</category>
+		<category name="Chiton">
+			<chitondronepack>
+				<name type="string">Chiton drone pack</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">formidable</rank>
+				<nature type="string">Monster</nature>
+				<summary type="string">Insectoid horde</summary>
+				<features type="string">Arachnid monsters with blade-like limbs; Plated exoskeleton; Dripping mucus; Ripping, tearing maw</features>
+				<drives type="string">Build and expand the nest; Feed and protect the queen; Snuff out intelligent life</drives>
+				<tactics type="string">Attack with lightning reflexes; Impale with bladed limbs; Drag victims back to the nest</tactics>
+				<text type="formattedtext"><p><i>Insectoid horde</i> — Formidable Monster</p><p>Chiton drones rarely operate independently. Instead, they hunt and attack in packs under the telepathic control of their queen.</p><p><b>Features:</b> Arachnid monsters with blade-like limbs; Plated exoskeleton; Dripping mucus; Ripping, tearing maw</p><p><b>Drives:</b> Build and expand the nest; Feed and protect the queen; Snuff out intelligent life</p><p><b>Tactics:</b> Attack with lightning reflexes; Impale with bladed limbs; Drag victims back to the nest</p></text>
+			</chitondronepack>
+			<chitonqueen>
+				<name type="string">Chiton queen</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">extreme</rank>
+				<nature type="string">Monster</nature>
+				<summary type="string">Insectoid horde</summary>
+				<features type="string">Arachnid monsters with blade-like limbs; Plated exoskeleton; Dripping mucus; Ripping, tearing maw</features>
+				<drives type="string">Build and expand the nest; Feed and protect the queen; Snuff out intelligent life</drives>
+				<tactics type="string">Attack with lightning reflexes; Impale with bladed limbs; Drag victims back to the nest</tactics>
+				<text type="formattedtext"><p><i>Insectoid horde</i> — Extreme Monster</p><p>The chiton queen is a massive creature with segmented pincers, an armored carapace, and a bulging, egg-carrying abdomen. From the depths of the nest, it commands its drones telepathically. This psychic communication is so powerful it can even breach human consciousness—troubling dreams and waking hallucinations might be the harbinger of a chiton invasion.</p><p><b>Features:</b> Arachnid monsters with blade-like limbs; Plated exoskeleton; Dripping mucus; Ripping, tearing maw</p><p><b>Drives:</b> Build and expand the nest; Feed and protect the queen; Snuff out intelligent life</p><p><b>Tactics:</b> Attack with lightning reflexes; Impale with bladed limbs; Drag victims back to the nest</p></text>
+			</chitonqueen>
+		</category>
+		<category name="Machine">
+			<colossus>
+				<name type="string">Colossus</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">epic</rank>
+				<nature type="string">Machine</nature>
+				<summary type="string">Ancient mechanical giants</summary>
+				<features type="string">Ancient, mechanical giants; Bipedal form; Etched with cryptic runes</features>
+				<drives type="string">Slumber; When awakened, carry out inscrutable purpose</drives>
+				<tactics type="string">Ignore puny foes; Unleash destructive energy attacks; Transform to reveal new capabilities</tactics>
+				<text type="formattedtext"><p><i>Ancient mechanical giants</i> — Epic Machine</p><p>The colossi are titanic humanoid machines created by a long-dead civilization. We do not know their original purpose. Perhaps they were weapons built for conquest in a ancient war, or mighty devices designed to explore new worlds.</p><p>Most colossi are found inactive—frozen in icy wastes, overgrown within verdant jungles, entombed in the depths of fathomless seas. Their armored shell is resistant to time and harsh environments, and they are nearly as imposing and majestic as the day they were forged.</p><p>Rarely, a colossus awakens to carry out its inscrutable purpose. They stride across the landscape of alien worlds, shaking the ground with each massive footfall. These active colossi ignore our attempts at communication and bat away our ineffectual attacks—the technology that powers them is beyond our understanding.</p><p><b>Features:</b> Ancient, mechanical giants; Bipedal form; Etched with cryptic runes</p><p><b>Drives:</b> Slumber; When awakened, carry out inscrutable purpose</p><p><b>Tactics:</b> Ignore puny foes; Unleash destructive energy attacks; Transform to reveal new capabilities</p><p><b>Quest starter:</b> A faction discovered a heavily damaged but dormant colossus, gaining access for the first time to the internal systems of one of these great machines. The researches believe it can be controlled by a human through a neural connection, and are studying the means of awakening it with this new programming. What purpose do they have for it? Are you sworn to aid them or stop them?</p></text>
+			</colossus>
+			<ironauger>
+				<name type="string">Iron auger</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">formidable</rank>
+				<nature type="string">Machine</nature>
+				<summary type="string">Self-replicating harvesters</summary>
+				<features type="string">Squid-like machines; Armored shell; Grasping appendages; Ultra-hardened drill and cutting lasers</features>
+				<drives type="string">Harvest and process minerals; Transform and improve; Replicate</drives>
+				<tactics type="string">Grapple and crush; Slice with lasers; Bore through hulls</tactics>
+				<text type="formattedtext"><p><i>Self-replicating harvesters</i> — Formidable Machine</p><p>Augers are an ancient precursor technology. These machines fuel their operation through an incessant hunger for minerals and metals, boring into asteroids, scouring small airless planetoids—even grappling onto space stations and starships.</p><p>A few bold fortune hunters have taken up auger hunting as a trade, setting out in harpoon-equipped starships to snare the great machines. The metals and technology of a dismantled auger can fetch a hefty price, but even the most skilled hunters are likely to see their ship made fodder for a machine's hunger.</p><p><b>Features:</b> Squid-like machines; Armored shell; Grasping appendages; Ultra-hardened drill and cutting lasers</p><p><b>Drives:</b> Harvest and process minerals; Transform and improve; Replicate</p><p><b>Tactics:</b> Grapple and crush; Slice with lasers; Bore through hulls</p><p><b>Quest starter:</b> As a massive auger approaches an orbital station under your protection, you face a difficult choice. Do you find a way to evacuate and save who you can, or attempt to bring down the mighty machine?</p></text>
+			</ironauger>
+			<servitor>
+				<name type="string">Servitor</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">dangerous</rank>
+				<nature type="string">Machine</nature>
+				<summary type="string">Helper bots</summary>
+				<features type="string">Purpose-built helper machines; Clicking, whirring innards; Flickering optic sensors</features>
+				<drives type="string">Attend and protect humans; Obey core programming and duties; Protect self from harm</drives>
+				<tactics type="string">Absorb damage with armor plating; Leverage inhuman strength; Calculate odds of success</tactics>
+				<text type="formattedtext"><p><i>Helper bots</i> — Dangerous Machine</p><p>The inhospitable environments and dangerous sites of the Forge sometimes prove too volatile for even the most dogged spacers—and that’s where servitors come in. Servitors come in a variety of shapes and sizes, often built to serve a specific duty—everything from loading cargo to surveying systems to boarding enemy ships. These bots sometimes possess lifelike qualities, like speech synthesizers or face-plates made to mimic expressions, to better endear them to humans. Others are given frightful or intimidating features, to better keep those humans in line. Rarely, a servitor will live to outgrow its programming, and begin the process of gaining sentience to forge its own path. These awoken bots are feared or misunderstood by many, but can sometimes find a home for themselves on starship crews or on fringe settlements where they earn the trust and friendship of their peers.</p><p><b>Features:</b> Purpose-built helper machines; Clicking, whirring innards; Flickering optic sensors</p><p><b>Drives:</b> Attend and protect humans; Obey core programming and duties; Protect self from harm</p><p><b>Tactics:</b> Absorb damage with armor plating; Leverage inhuman strength; Calculate odds of success</p><p><b>Quest starter:</b> An awakened bot, recently struck out on their own, is looking for work on a starship venturing out into the Expanse. They say they are in search of a relic of the past—something that might shed some light on their own creation. What is it they seek, and why do you vow to help them?</p></text>
+			</servitor>
+		</category>
+		<category name="Colossus">
+			<devotantofthecolossi>
+				<name type="string">Devotant of the colossi</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">dangerous</rank>
+				<nature type="string">Human</nature>
+				<summary type="string">Ancient mechanical giants</summary>
+				<features type="string">Ancient, mechanical giants; Bipedal form; Etched with cryptic runes</features>
+				<drives type="string">Slumber; When awakened, carry out inscrutable purpose</drives>
+				<tactics type="string">Ignore puny foes; Unleash destructive energy attacks; Transform to reveal new capabilities</tactics>
+				<text type="formattedtext"><p><i>Ancient mechanical giants</i> — Dangerous Human</p><p>Those who now worship the colossi believe they are the mechanized embodiment of long-forgotten gods, and dedicate their lives to serving them. Many of these cultists are sworn guardians for dormant colossi. Others scour precursor lore, gather relics, and search vaults for the means of awakening them. If they succeed, our doom may be at hand.</p><p><b>Features:</b> Ancient, mechanical giants; Bipedal form; Etched with cryptic runes</p><p><b>Drives:</b> Slumber; When awakened, carry out inscrutable purpose</p><p><b>Tactics:</b> Ignore puny foes; Unleash destructive energy attacks; Transform to reveal new capabilities</p></text>
+			</devotantofthecolossi>
+		</category>
+		<category name="Creature">
+			<crystallid>
+				<name type="string">Crystallid</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">dangerous</rank>
+				<nature type="string">Creature</nature>
+				<summary type="string">Crystalline entities</summary>
+				<features type="string">Translucent, gem-like creatures; Shifting form; Spiky appendages</features>
+				<drives type="string">Gather and consume minerals; Protect the nest</drives>
+				<tactics type="string">Camouflage within its environment; Reshape to bolster defense and attacks; Lash out with keen-edged limbs</tactics>
+				<text type="formattedtext"><p><i>Crystalline entities</i> — Dangerous Creature</p><p>Crystallids are beautiful but dangerous crystalline lifeforms that take a variety of sizes and shapes. Some are small and insect-like, skittering across the surface of rugged worlds or within cavernous depths. Others are much larger than a human, with a vaguely bestial form. A few can even sprout multifaceted wings to take to the air. Their lustrous coloration changes to mimic their environment, and they often appear as simply a part of the landscape until an unwitting explorer happens across them.</p><p>Crystallids are mineral hoarders. Their hidden burrows hold a cache of precious stones and valuable ores. For this reason, explorers and prospectors often attempt to track crystallids back to their nest. “The bigger the crystallid, the better the haul,” is a common saying among those audacious fortune hunters. But that potential motherlode is not taken without risk—crystallids are fierce protectors of their hoard.</p><p><b>Features:</b> Translucent, gem-like creatures; Shifting form; Spiky appendages</p><p><b>Drives:</b> Gather and consume minerals; Protect the nest</p><p><b>Tactics:</b> Camouflage within its environment; Reshape to bolster defense and attacks; Lash out with keen-edged limbs</p><p><b>Quest starter:</b> A prospector returns from a planetside expedition with tales of an immense crystallid hoard of uncountable riches. But this treasure is guarded by the largest, most aggressive crystallid they've ever encountered, and they barely escaped with their life. They seek your help in securing the nest in exchange for a share of the profits. What drives you to accept this perilous bargain?</p></text>
+			</crystallid>
+			<emberwisp>
+				<name type="string">Ember wisp</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">troublesome</rank>
+				<nature type="string">Creature</nature>
+				<summary type="string">Energy-based lifeforms</summary>
+				<features type="string">Ethereal, spaceborne creatures; Fiery, pulsing glow</features>
+				<drives type="string">Ride the drifts; Move together in dizzying patterns of light; Seek out sources of energy</drives>
+				<tactics type="string">Surround and envelop; Absorb energy</tactics>
+				<text type="formattedtext"><p><i>Energy-based lifeforms</i> — Troublesome Creature</p><p>For some spacers, sighting these strange, spectral creatures on a spaceborne journey is a portent of a change in fortune. A few even profess to divine meaning from their elaborate, luminous dance, as people of old would interpret omens by studying the flight of birds. Others refer to the wisps as corpse lights, believing they are the spirits of ancient beings cursed to linger forever within the cold void between stars.</p><p>Less superstitious spacers swear on various methods of “shooing” wisps away—everything from cycling the engines to cutting power entirely for a minute or so and allowing the creatures to move on.</p><p><b>Features:</b> Ethereal, spaceborne creatures; Fiery, pulsing glow</p><p><b>Drives:</b> Ride the drifts; Move together in dizzying patterns of light; Seek out sources of energy</p><p><b>Tactics:</b> Surround and envelop; Absorb energy</p><p><b>Quest starter:</b> Along a remote passage, a swarm of ember wisps left a cargo ship stranded and without power. What crucial and time-sensitive cargo does this ship carry? Who races against you to secure it?</p></text>
+			</emberwisp>
+			<flarewingshark>
+				<name type="string">Flarewing shark</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">extreme</rank>
+				<nature type="string">Creature</nature>
+				<summary type="string">Deep sea predators</summary>
+				<features type="string">Massive, water-dwelling creatures; Sinuous form; Bioluminescent lures and markers; Corpse-like eyes; Rows of multi-pronged teeth</features>
+				<drives type="string">Lurk in darkness; Feed</drives>
+				<tactics type="string">Sense motion; Lure prey with bioluminescent display; Strike with fierce speed and strength</tactics>
+				<text type="formattedtext"><p><i>Deep sea predators</i> — Extreme Creature</p><p>The flarewing shark is a highly evolved, monstrously deadly creature. It is typical of the apex predators that lurk in the unfathomable depths of life-bearing ocean worlds.</p><p>Two wing-like appendages fan out from the back of the flarewing's head. Each is studded with sensory nerves to detect the subtlest of movement, and tipped with bioluminescent lures. When the flarewing closes in on its prey, those wings arch forward to attract and enfold the unfortunate victim. Then, the wide jaws and multi-pronged teeth make short work of the meal.</p><p><b>Features:</b> Massive, water-dwelling creatures; Sinuous form; Bioluminescent lures and markers; Corpse-like eyes; Rows of multi-pronged teeth</p><p><b>Drives:</b> Lurk in darkness; Feed</p><p><b>Tactics:</b> Sense motion; Lure prey with bioluminescent display; Strike with fierce speed and strength</p><p><b>Quest starter:</b> In the twilight zone of a tidally-locked watery planet, an underwater mining settlement is the target of an ancient flarewing. In the murk of those dark waters, the beast attacks dive teams, carrier subs, dredging equipment—even undersea platforms. Operations are now stalled, cutting off a key source of unprocessed fuel in the sector. Meanwhile, the settlement's leader, grief-stricken by the loss of someone dear to them, vows to destroy the flarewing. What is your relation to this person? Do you support them in their obsession, or is there a way for the settlers to coexist with this creature?</p></text>
+			</flarewingshark>
+			<gnawling>
+				<name type="string">Gnawling</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">troublesome</rank>
+				<nature type="string">Creature</nature>
+				<summary type="string">Infesting vermin</summary>
+				<features type="string">Furry, rodent-like creatures; Long, jutting fangs; Spider-like limbs</features>
+				<drives type="string">Consume and proliferate; Avoid detection</drives>
+				<tactics type="string">Swarm larger foes; Disable ship systems</tactics>
+				<text type="formattedtext"><p><i>Infesting vermin</i> — Troublesome Creature</p><p>The bane of all spacers, the cable-chewing vermin known as gnawlings are a common pest aboard starships throughout the Forge. Adept at navigating in low or zero gravity with their long, multi-jointed limbs, these creatures emerge from cargo holds and engineering bays to gather and consume food. It’s said a gnawling could digest an eidolon drive, and there’s some truth to that adage—their digestive systems barely differentiate between organic and inorganic material.</p><p>Though not a grave threat individually, if left to their own devices, gnawlings are capable of quickly overrunning even large vessels. More than a few horror stories exist of scavengers cracking the airlock seal on a derelict only to find it crawling with thousands of these vile, chittering things.</p><p>Glowcats are a common gnawling deterrent, employed aboard cargo ships to keep the vermin at bay.</p><p><b>Features:</b> Furry, rodent-like creatures; Long, jutting fangs; Spider-like limbs</p><p><b>Drives:</b> Consume and proliferate; Avoid detection</p><p><b>Tactics:</b> Swarm larger foes; Disable ship systems</p><p><b>Quest starter:</b> An orbital settlement is overrun by gnawlings and abandoned. What precious thing still lies within? Why are you sworn to retrieve it from this infested place?</p></text>
+			</gnawling>
+			<howlcat>
+				<name type="string">Howlcat</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">dangerous</rank>
+				<nature type="string">Creature</nature>
+				<summary type="string">Jungle predators</summary>
+				<features type="string">Sleek, feline creatures; Eyeless visage; Flared ears</features>
+				<drives type="string">Hunt and feed; Protect the pack</drives>
+				<tactics type="string">Keep to the shadows; Stalk prey using echolocation; Leap, bite, and claw; Drag to the ground</tactics>
+				<text type="formattedtext"><p><i>Jungle predators</i> — Dangerous Creature</p><p>The howlcat dwells in the shadows below the canopy of a verdant jungle world. It has a lean, powerful form, is armed with curving claws and fangs, and moves unseen through the half-light of the jungle thanks to its sleek, blue-gray fur.</p><p>Unnervingly, the howlcat’s heavy skull possesses no eyes. Instead, it is crowned by large ears and a glossy bioacoustic organ. Through its distinct, chilling call, it uses echolocation to perceive its surroundings and stalk its prey with uncanny precision.</p><p>If you find yourself hunted by a howlcat, beware the moment when its calls fall silent; it is about to strike.</p><p><b>Features:</b> Sleek, feline creatures; Eyeless visage; Flared ears</p><p><b>Drives:</b> Hunt and feed; Protect the pack</p><p><b>Tactics:</b> Keep to the shadows; Stalk prey using echolocation; Leap, bite, and claw; Drag to the ground</p><p><b>Quest starter:</b> A long-abandoned settlement, now reclaimed by the jungle, holds something of value or importance. But there is no clear landing site near the settlement, and the surrounding lands are home to a pack of fearsome howlcats. What is it you seek in that forsaken place, and how will you avoid becoming a howlcat's next meal?</p></text>
+			</howlcat>
+			<pyralis>
+				<name type="string">Pyralis</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">formidable</rank>
+				<nature type="string">Creature</nature>
+				<summary type="string">Fireborne gliders</summary>
+				<features type="string">Flying creatures with a cinder-colored carapace; Folding, armored wings; Seven pairs of grasping legs; Hooked tail</features>
+				<drives type="string">Hunt from above; Mark and defend territory</drives>
+				<tactics type="string">Lurk within the cover of ash clouds; Swoop down to grapple with enfolding legs; Impale with whip-like tail; Inject paralyzing toxin</tactics>
+				<text type="formattedtext"><p><i>Fireborne gliders</i> — Formidable Creature</p><p>On scorching worlds of fire and ash, only the most resilient survive. The pyralis is a cunning predator that spends most of its life gliding among boiling ash clouds, using its sensitive, smoke-piercing vision to spot unwary prey.</p><p>This beast's form is an intimidating fusion of insect, crustacean and hawk. Its outer shell and plated wings protect it from heat and flame, but it is pitted and scarred by innumerable collisions with airborne volcanic fragments. Its most fearsome aspect is a segmented tail, which it uses to deliver a powerful, paralyzing toxin to its unfortunate prey.</p><p>They are asexual and solitary creatures, and mark the bounds of their hunting grounds with intricate cairns built from the bones of their victims. If a rival pyralis passes overhead, the sight of that marker is forewarning that they are straying into another's domain.</p><p><b>Features:</b> Flying creatures with a cinder-colored carapace; Folding, armored wings; Seven pairs of grasping legs; Hooked tail</p><p><b>Drives:</b> Hunt from above; Mark and defend territory</p><p><b>Tactics:</b> Lurk within the cover of ash clouds; Swoop down to grapple with enfolding legs; Impale with whip-like tail; Inject paralyzing toxin</p><p><b>Quest starter:</b> A critically damaged spaceship is stranded amid the hellscape of a furnace world. You are sworn to rescue the crew of this ill-fated vessel, but the frequent ash storms prevent vehicular operations—you'll need to make the perilous journey on foot. To make matters worse, the wreck is within the territory of a particularly aggressive and powerful pyralis. How will you survive the journey across its hunting grounds?</p></text>
+			</pyralis>
+			<sicklehorn>
+				<name type="string">Sicklehorn</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">dangerous</rank>
+				<nature type="string">Creature</nature>
+				<summary type="string">Domesticated herd animal</summary>
+				<features type="string">Muscular creatures with columnar legs; Large, curved horns; Cloven hooves</features>
+				<drives type="string">Remain with the herd; Follow the dominant matriarch; Protect the herd when threatened</drives>
+				<tactics type="string">Form a circle to defend the young; Growl, snort, and stamp to unnerve predators; Charge head-on</tactics>
+				<text type="formattedtext"><p><i>Domesticated herd animal</i> — Dangerous Creature</p><p>The sicklehorn are mammalian herd animals bred by settlers throughout the Forge. They are adaptable to most climates and terrain, have iron constitutions, and are prized for the versatile and valuable milk produced by their females. Aside from its nutritive properties, the milk can be processed in a number of ways to manufacture potent medicines and powerful narcotics.</p><p>A herd of sicklehorn are often sent with groups attempting to found a new planetside settlement. With careful breeding, the settlers can produce enough meat and milk to sustain themselves and trade for needed supplies. But sicklehorn are range animals, and raiders and rustlers often target a vulnerable herd. The creatures—especially a matriarch—are a valuable commodity.</p><p><b>Features:</b> Muscular creatures with columnar legs; Large, curved horns; Cloven hooves</p><p><b>Drives:</b> Remain with the herd; Follow the dominant matriarch; Protect the herd when threatened</p><p><b>Tactics:</b> Form a circle to defend the young; Growl, snort, and stamp to unnerve predators; Charge head-on</p><p><b>Quest starter:</b> A settlement's prized sicklehorn matriarch has been stolen, the herd is in disarray, and the settlers won't survive another year without her return. The theft is blamed on a rival settlement on the same planet, but raiders also plague this sector. How are you involved?</p></text>
+			</sicklehorn>
+			<skyroost>
+				<name type="string">Sky roost</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">formidable</rank>
+				<nature type="string">Creature</nature>
+				<summary type="string">Living skyborne islands</summary>
+				<features type="string">Floating, living habitats; Glowing core; Suspended, root-like feelers; Bellowing song</features>
+				<drives type="string">Seek out placid skies; Nurture symbiotic lifeforms</drives>
+				<tactics type="string">Grasp with tendrils; Rally a swarm of creatures in defense</tactics>
+				<text type="formattedtext"><p><i>Living skyborne islands</i> — Formidable Creature</p><p>Sky roosts are massive creatures that drift in the buoyant upper atmosphere of a Jovian world. Their broad, scalloped mantle unfurls to catch updrafts as sinuous feelers extract water, minerals, and organisms from the dense cloud layers below.</p><p>A roost's wide cap and warm, glowing core shelters a complex ecosystem of other lifeforms. A few of these resident creatures live out their entire lives within the refuge of a single roost; others come and go as they hunt within the Jovian skies or migrate among distant habitats. Roosts are enormous and long-lived, but fragile. In a symbiotic trade for shelter, the inhabitants provide protection against large predators and other threats, and their discarded food and waste help fuel the roost's sluggish metabolism.</p><p>As a roost navigates the currents and eddies of the Jovian atmosphere, the expansion and contraction of its internal air bladders is heard as a deep, resounding call. As other roosts respond, the shared, plaintive song reverberates among the clouds.</p><p><b>Features:</b> Floating, living habitats; Glowing core; Suspended, root-like feelers; Bellowing song</p><p><b>Drives:</b> Seek out placid skies; Nurture symbiotic lifeforms</p><p><b>Tactics:</b> Grasp with tendrils; Rally a swarm of creatures in defense</p><p><b>Quest starter:</b> Sky roosts are dying. A disease is spreading among them, threatening the delicate ecosystem of their world. What human operations do you suspect lie at the heart of this sickness?</p></text>
+			</skyroost>
+			<voidshepherd>
+				<name type="string">Void shepherd</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">formidable</rank>
+				<nature type="string">Creature</nature>
+				<summary type="string">Benevolent spacegoing guides</summary>
+				<features type="string">Graceful, spaceborne creatures; Shimmering, torpedo-shaped form; Energy-laden fins</features>
+				<drives type="string">Cruise within the boundless depths; Lead the way; Protect the pod</drives>
+				<tactics type="string">Smash with bony snout; Disable with powerful electromagnetic pulse</tactics>
+				<text type="formattedtext"><p><i>Benevolent spacegoing guides</i> — Formidable Creature</p><p>Void shepherds are benevolent creatures about the size of a snub fighter. They propel themselves through space on trails of vibrant energy, and seem to delight in riding the wake of starships. For spacers navigating the lonely depths of the Forge, they are welcome company and a sign of good fortune.</p><p>Many spacers tell stories of being aided by a void shepherd pod. These creatures have an extraordinary intuition, and can escort a wayward spacer back to the right path, guide them away from danger, or lead them toward unseen opportunities.</p><p>When threatened, shepherds charge and ram with their armored snouts. If this doesn't dissuade their foe, a pod harmonizes their energy output to unleash a burst of electromagnetic force; this attack can daze a creature or knock out a ship's critical systems.</p><p><b>Features:</b> Graceful, spaceborne creatures; Shimmering, torpedo-shaped form; Energy-laden fins</p><p><b>Drives:</b> Cruise within the boundless depths; Lead the way; Protect the pod</p><p><b>Tactics:</b> Smash with bony snout; Disable with powerful electromagnetic pulse</p><p><b>Quest starter:</b> Several pods of void shepherds shelter within the debris of a shattered world. An expansive mining operation is harvesting the ore-rich rocks of the system, and the shepherds dance playfully in the wake of prospector and transport ships. But an aberrant, predatory creature has made this place its hunting ground, posing a threat to both the shepherd pods and the miners. What is the nature of this creature, and why are you sworn to end its attacks?</p></text>
+			</voidshepherd>
+			<waterwitcher>
+				<name type="string">Water witcher</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">formidable</rank>
+				<nature type="string">Creature</nature>
+				<summary type="string">Friendly, water-finding diggers</summary>
+				<features type="string">Affable, horse-sized creatures; Stout, furry form; Wide, expressive eyes; Elongated snout; Rock-breaking claws</features>
+				<drives type="string">Find water; Meet new friends</drives>
+				<tactics type="string">Dig and hide; When desperate, rake with claws</tactics>
+				<text type="formattedtext"><p><i>Friendly, water-finding diggers</i> — Formidable Creature</p><p>Water is life. On rugged planets in fringe sectors, the technology to locate fresh water or process contaminated water is not always available or reliable. Many struggling settlements resort to a low-tech solution—a dowser and their waterwitcher companion.</p><p>Waterwitchers are stout, furred creatures with fierce-looking retractable claws on their forelegs. On their homeworld, which was lost a decade ago in a stellar calamity, they used those claws to dig through the arid, rocky ground, and had an unerring knack for finding hidden water sources. Some of the human settlers who fled the doomed planet adopted waterwitchers as companions, and now travel the Forge with their furry friends in tow.</p><p>Waterwitchers were a precious part of their ecosystem, and were not preyed upon by other creatures. This made them gentle and trusting to a fault. They often greet potential new friends with enthusiastic sniffing and contented purring. For their dowser companions, it's an unrelenting effort to keep them out of trouble.</p><p><b>Features:</b> Affable, horse-sized creatures; Stout, furry form; Wide, expressive eyes; Elongated snout; Rock-breaking claws</p><p><b>Drives:</b> Find water; Meet new friends</p><p><b>Tactics:</b> Dig and hide; When desperate, rake with claws</p><p><b>Quest starter:</b> A dowser has gone missing in the vast wastes of a newly-settled desert world, leaving behind their distraught waterwitcher. You are sworn to find the wayward dowser, and must serve as an unlikely keeper for their furry companion. What is your relationship to the dowser?</p></text>
+			</waterwitcher>
+			<worldbreaker>
+				<name type="string">Worldbreaker</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">extreme</rank>
+				<nature type="string">Creature</nature>
+				<summary type="string">Titanic worms</summary>
+				<features type="string">Titanic worm-like creatures; Gaping maw with rotating, earth-grinding teeth; Thunderous cry</features>
+				<drives type="string">Lurk within carved depths; Shape the landscape; Endlessly pursue prey</drives>
+				<tactics type="string">Detect prey through vibrations; Shatter stone and steel</tactics>
+				<text type="formattedtext"><p><i>Titanic worms</i> — Extreme Creature</p><p>The scale and strength of the worldbreakers is so beyond our reckoning that some consider them godlike beings. Capable of thriving on verdant jungle worlds, frozen planets, worlds scorched by volcanic activity, and even within barren asteroids in the vacuum of space, these worms possess a wisdom and a cunning that makes them a deadly threat for even the most competent spacer.</p><p>Worldbreakers range in size from about the size of a cargo hauler to an unfathomable scale that dwarfs our largest starship. They bore tunnels to pursue their prey, and hibernate in those dark depths to conserve energy. Though blind, worldbreaker worms can detect even the subtlest of footfalls, and they follow these vibrations to eventually consume their quarry—along with any other creatures, starships, or structures that happen to be nearby.</p><p><b>Features:</b> Titanic worm-like creatures; Gaping maw with rotating, earth-grinding teeth; Thunderous cry</p><p><b>Drives:</b> Lurk within carved depths; Shape the landscape; Endlessly pursue prey</p><p><b>Tactics:</b> Detect prey through vibrations; Shatter stone and steel</p><p><b>Quest starter:</b> On a lush world at the edge of the Terminus, a titanic worldbreaker worm holds sway. One faction seeks to destroy the worm so that the riches of this place can be harvested. Another swears to protect it. On which side do you fall?</p></text>
+			</worldbreaker>
+		</category>
+		<category name="Crystallid">
+			<convergentcrystallid>
+				<name type="string">Convergent crystallid</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">extreme</rank>
+				<nature type="string">Creature</nature>
+				<summary type="string">Crystalline entities</summary>
+				<features type="string">Translucent, gem-like creatures; Shifting form; Spiky appendages</features>
+				<drives type="string">Gather and consume minerals; Protect the nest</drives>
+				<tactics type="string">Camouflage within its environment; Reshape to bolster defense and attacks; Lash out with keen-edged limbs</tactics>
+				<text type="formattedtext"><p><i>Crystalline entities</i> — Extreme Creature</p><p>Crystallids are not social creatures. They greedily compete for resources to stock their hoard, and fight savagely among themselves. But when facing a powerful threat, they merge into a communal being. This monstrous form bristles with crystalline spikes and assaults its foes with a multitude of segmented limbs.</p><p><b>Features:</b> Translucent, gem-like creatures; Shifting form; Spiky appendages</p><p><b>Drives:</b> Gather and consume minerals; Protect the nest</p><p><b>Tactics:</b> Camouflage within its environment; Reshape to bolster defense and attacks; Lash out with keen-edged limbs</p></text>
+			</convergentcrystallid>
+		</category>
+		<category name="Human">
+			<driftpirate>
+				<name type="string">Drift pirate</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">dangerous</rank>
+				<nature type="string">Human</nature>
+				<summary type="string">Spacegoing marauders</summary>
+				<features type="string">Cunning ship-hunters with repurposed weapons, armor, and vehicles; Body piercings as tokens of victories; Scars and mutations; Cobbled-together starships</features>
+				<drives type="string">Survive by whatever means necessary; Climb the ranks and prove self in combat; Build a mighty fleet</drives>
+				<tactics type="string">Prowl passages and anchorages for easy prey; Deploy gravity harpoons to grapple targets; Board to seize cargo and commandeer vessels</tactics>
+				<text type="formattedtext"><p><i>Spacegoing marauders</i> — Dangerous Human</p><p>Drifts provide the means of interstellar travel across the Forge–but also offer myriad dangers for spacers. Chief among those threats are drift pirates: reavers and thieves who prowl eidolon passages and anchorages to seize ships and cargo for their own.</p><p>These pirates often live short, brutal lives, or survive long enough to see their near-constant exposure to drift energies and unshielded eidolon drives manifest as strange mutations. Despite that, most would not trade their chosen path for one of comfort or safety.</p><p><b>Features:</b> Cunning ship-hunters with repurposed weapons, armor, and vehicles; Body piercings as tokens of victories; Scars and mutations; Cobbled-together starships</p><p><b>Drives:</b> Survive by whatever means necessary; Climb the ranks and prove self in combat; Build a mighty fleet</p><p><b>Tactics:</b> Prowl passages and anchorages for easy prey; Deploy gravity harpoons to grapple targets; Board to seize cargo and commandeer vessels</p><p><b>Quest starter:</b> A drift pirate captain seizes an experimental new e-drive, and uses it to stalk ships with deadly efficiency. Who created this new drive, and what are they willing to pay to get it back?</p></text>
+			</driftpirate>
+			<firestormtrooper>
+				<name type="string">Firestorm trooper</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">formidable</rank>
+				<nature type="string">Human</nature>
+				<summary type="string">Fanatical raiders</summary>
+				<features type="string">Raiders with scarred flesh and polished armor; Powered exosuits and distinctive helms; Roaring jetpacks and fluttering banners</features>
+				<drives type="string">Conquer the Forge; Reap the resources owed them; Venerate their leaders, creed, or gods</drives>
+				<tactics type="string">Strike sudden and swift; Attack flanks and weak points from above; Cull the weak, recruit the strong</tactics>
+				<text type="formattedtext"><p><i>Fanatical raiders</i> — Formidable Human</p><p>The Forge is largely wild, uncharted territory, but armored firestorm troopers seek to plunder the whole of it in the name of their clans, their creed, or their inscrutable gods.</p><p>Striking with the speed and strength of a hurricane, they raid worlds and stations for resources and conscripts, leaving settlements in ruins. So deadly and effective are their tactics, that it’s often said if these zealots could only stop warring amongst themselves, their banners would fly across the breadth of the Forge.</p><p><b>Features:</b> Raiders with scarred flesh and polished armor; Powered exosuits and distinctive helms; Roaring jetpacks and fluttering banners</p><p><b>Drives:</b> Conquer the Forge; Reap the resources owed them; Venerate their leaders, creed, or gods</p><p><b>Tactics:</b> Strike sudden and swift; Attack flanks and weak points from above; Cull the weak, recruit the strong</p><p><b>Quest starter:</b> Despite conflicting creeds, several firestorm clans unite beneath the banner of Torren the Purifier to invade the Terminus. Their next target is a world at the nexus of trade lanes. What is this planet, and why is it important to you?</p></text>
+			</firestormtrooper>
+			<scrapbandit>
+				<name type="string">Scrap bandit</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">dangerous</rank>
+				<nature type="string">Human</nature>
+				<summary type="string">Wandering raiders</summary>
+				<features type="string">Raiders with cobbled-together weapons and armor; Ramshackle vehicles</features>
+				<drives type="string">Stand together with clan-mates; Seize what can be spared; Waste nothing</drives>
+				<tactics type="string">Target isolated planetside settlements; Suppress resistance with a show of force; if that fails, bring overwhelming power to bear; If things go wrong, get the hell out</tactics>
+				<text type="formattedtext"><p><i>Wandering raiders</i> — Dangerous Human</p><p>Scrap bandits roam the fringes of settled sectors, preying on planetside outposts. They survive by seizing provisions, resources, and equipment from those places. Because these raiders tend to revisit fruitful settlements, they do what they can to avoid razing them to the ground or leaving the settlers with less than they need to survive. “Never let a field go fallow,” is a common scrap bandit expression.</p><p><b>Features:</b> Raiders with cobbled-together weapons and armor; Ramshackle vehicles</p><p><b>Drives:</b> Stand together with clan-mates; Seize what can be spared; Waste nothing</p><p><b>Tactics:</b> Target isolated planetside settlements; Suppress resistance with a show of force; if that fails, bring overwhelming power to bear; If things go wrong, get the hell out</p><p><b>Quest starter:</b> In a far-flung sector, a titanic creature threatens a key planetside settlement. The only possible defense against this beast is the mighty war rig belonging to a clan of scrap bandits. But can you convince the bandits to risk their rig to protect the settlers? If so, what will they demand in return?</p></text>
+			</scrapbandit>
+			<warden>
+				<name type="string">Warden</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">formidable</rank>
+				<nature type="string">Human</nature>
+				<summary type="string">Long-lived super soldiers</summary>
+				<features type="string">Long-lived humans with powerful physiques; Grizzled and stern; Tattoos memorialize fallen comrades</features>
+				<drives type="string">Find their own path, unbound from those who seek to control them; Do not succumb to the fury</drives>
+				<tactics type="string">Wade into battle; Take the hits; Seize objectives with overwhelming force</tactics>
+				<text type="formattedtext"><p><i>Long-lived super soldiers</i> — Formidable Human</p><p>The origin of these long-lived humans is a secret lost to time. Whether through precursor tech, alien organisms, or genetic mutation, they were modified with unnatural strength, endurance, and survivability. They can withstand the harshest of environments. Their wounds heal quickly. They are resistant to sickness and disease.</p><p>More than a century ago, the wardens served as elite soldiers, protecting the people of the Forge against the many threats of this galaxy. But as often happens, their purpose was subverted by those who sought to wield them as weapons. Conflicts flared among powerful factions. Wardens faced their comrades on innumerable battlefields. The chaos might have ended us all, had not the wardens rebelled against those who used them as cogs in the machines of war.</p><p><b>Features:</b> Long-lived humans with powerful physiques; Grizzled and stern; Tattoos memorialize fallen comrades</p><p><b>Drives:</b> Find their own path, unbound from those who seek to control them; Do not succumb to the fury</p><p><b>Tactics:</b> Wade into battle; Take the hits; Seize objectives with overwhelming force</p><p><b>Quest starter:</b> There are rumors of an enclave well beyond the inhabited sectors, a place where wardens can live in peace. An emerging threat against the people of the Forge causes you to seek out the aid of these living relics. What do you offer in return for their help?</p></text>
+			</warden>
+		</category>
+		<category name="Drift pirate">
+			<pirateboardingparty>
+				<name type="string">Pirate boarding party</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">formidable</rank>
+				<nature type="string">Human</nature>
+				<summary type="string">Spacegoing marauders</summary>
+				<features type="string">Cunning ship-hunters with repurposed weapons, armor, and vehicles; Body piercings as tokens of victories; Scars and mutations; Cobbled-together starships</features>
+				<drives type="string">Survive by whatever means necessary; Climb the ranks and prove self in combat; Build a mighty fleet</drives>
+				<tactics type="string">Prowl passages and anchorages for easy prey; Deploy gravity harpoons to grapple targets; Board to seize cargo and commandeer vessels</tactics>
+				<text type="formattedtext"><p><i>Spacegoing marauders</i> — Formidable Human</p><p>After reeling in a disabled ship, drift pirates breach the hull and swarm the corridors. They target critical systems and compartments to seize the ship and its cargo for their flotilla.</p><p><b>Features:</b> Cunning ship-hunters with repurposed weapons, armor, and vehicles; Body piercings as tokens of victories; Scars and mutations; Cobbled-together starships</p><p><b>Drives:</b> Survive by whatever means necessary; Climb the ranks and prove self in combat; Build a mighty fleet</p><p><b>Tactics:</b> Prowl passages and anchorages for easy prey; Deploy gravity harpoons to grapple targets; Board to seize cargo and commandeer vessels</p></text>
+			</pirateboardingparty>
+			<piratecutlass>
+				<name type="string">Pirate cutlass</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">dangerous</rank>
+				<nature type="string">Vehicle</nature>
+				<summary type="string">Spacegoing marauders</summary>
+				<features type="string">Cunning ship-hunters with repurposed weapons, armor, and vehicles; Body piercings as tokens of victories; Scars and mutations; Cobbled-together starships</features>
+				<drives type="string">Survive by whatever means necessary; Climb the ranks and prove self in combat; Build a mighty fleet</drives>
+				<tactics type="string">Prowl passages and anchorages for easy prey; Deploy gravity harpoons to grapple targets; Board to seize cargo and commandeer vessels</tactics>
+				<text type="formattedtext"><p><i>Spacegoing marauders</i> — Dangerous Vehicle</p><p>Drift pirates often strip down commandeered vessels, taking what they need to refit or augment their own ships. What's left is discarded or sold on the black market. A typical pirate cutlass is a haphazard collection of parts, splashed with the colors and sigils of their commanders, built for speed and brutish power. The imposing sight of one of these fierce vessels is enough to send a chill through the heart of even the boldest spacer.</p><p><b>Features:</b> Cunning ship-hunters with repurposed weapons, armor, and vehicles; Body piercings as tokens of victories; Scars and mutations; Cobbled-together starships</p><p><b>Drives:</b> Survive by whatever means necessary; Climb the ranks and prove self in combat; Build a mighty fleet</p><p><b>Tactics:</b> Prowl passages and anchorages for easy prey; Deploy gravity harpoons to grapple targets; Board to seize cargo and commandeer vessels</p></text>
+			</piratecutlass>
+		</category>
+		<category name="Ember wisp">
+			<wispcongregation>
+				<name type="string">Wisp congregation</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">dangerous</rank>
+				<nature type="string">Creature</nature>
+				<summary type="string">Energy-based lifeforms</summary>
+				<features type="string">Ethereal, spaceborne creatures; Fiery, pulsing glow</features>
+				<drives type="string">Ride the drifts; Move together in dizzying patterns of light; Seek out sources of energy</drives>
+				<tactics type="string">Surround and envelop; Absorb energy</tactics>
+				<text type="formattedtext"><p><i>Energy-based lifeforms</i> — Dangerous Creature</p><p>In the depths of space where light and warmth are commodities, ember wisps congregate around sources of energy—such as the engine wake of a starship. Their dazzling display of light and motion is an alluring sight for an isolated spacer. But they also pose a potential threat; they can envelop the hull of a vessel, leeching the starship of precious energy.</p><p><b>Features:</b> Ethereal, spaceborne creatures; Fiery, pulsing glow</p><p><b>Drives:</b> Ride the drifts; Move together in dizzying patterns of light; Seek out sources of energy</p><p><b>Tactics:</b> Surround and envelop; Absorb energy</p></text>
+			</wispcongregation>
+		</category>
+		<category name="Firestorm trooper">
+			<firestormdropship>
+				<name type="string">Firestorm dropship</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">dangerous</rank>
+				<nature type="string">Vehicle</nature>
+				<summary type="string">Fanatical raiders</summary>
+				<features type="string">Raiders with scarred flesh and polished armor; Powered exosuits and distinctive helms; Roaring jetpacks and fluttering banners</features>
+				<drives type="string">Conquer the Forge; Reap the resources owed them; Venerate their leaders, creed, or gods</drives>
+				<tactics type="string">Strike sudden and swift; Attack flanks and weak points from above; Cull the weak, recruit the strong</tactics>
+				<text type="formattedtext"><p><i>Fanatical raiders</i> — Dangerous Vehicle</p><p>The bulky, ironclad dropships favored by firestorm clans are designed for a single purpose: deliver an overwhelming force of armored troopers into the fight.</p><p><b>Features:</b> Raiders with scarred flesh and polished armor; Powered exosuits and distinctive helms; Roaring jetpacks and fluttering banners</p><p><b>Drives:</b> Conquer the Forge; Reap the resources owed them; Venerate their leaders, creed, or gods</p><p><b>Tactics:</b> Strike sudden and swift; Attack flanks and weak points from above; Cull the weak, recruit the strong</p></text>
+			</firestormdropship>
+			<firestormraidingteam>
+				<name type="string">Firestorm raiding team</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">extreme</rank>
+				<nature type="string">Human</nature>
+				<summary type="string">Fanatical raiders</summary>
+				<features type="string">Raiders with scarred flesh and polished armor; Powered exosuits and distinctive helms; Roaring jetpacks and fluttering banners</features>
+				<drives type="string">Conquer the Forge; Reap the resources owed them; Venerate their leaders, creed, or gods</drives>
+				<tactics type="string">Strike sudden and swift; Attack flanks and weak points from above; Cull the weak, recruit the strong</tactics>
+				<text type="formattedtext"><p><i>Fanatical raiders</i> — Extreme Human</p><p>Feared throughout the Forge for their brutal tactics and destructive weaponry, coordinated teams of firestorm troopers descend upon settlements and stations in powered exosuits, flying the banners of their orders amid the smoke and flames of the devastation.</p><p><b>Features:</b> Raiders with scarred flesh and polished armor; Powered exosuits and distinctive helms; Roaring jetpacks and fluttering banners</p><p><b>Drives:</b> Conquer the Forge; Reap the resources owed them; Venerate their leaders, creed, or gods</p><p><b>Tactics:</b> Strike sudden and swift; Attack flanks and weak points from above; Cull the weak, recruit the strong</p></text>
+			</firestormraidingteam>
+		</category>
+		<category name="Flarewing shark">
+			<megaflarewing>
+				<name type="string">Mega flarewing</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">epic</rank>
+				<nature type="string">Creature</nature>
+				<summary type="string">Deep sea predators</summary>
+				<features type="string">Massive, water-dwelling creatures; Sinuous form; Bioluminescent lures and markers; Corpse-like eyes; Rows of multi-pronged teeth</features>
+				<drives type="string">Lurk in darkness; Feed</drives>
+				<tactics type="string">Sense motion; Lure prey with bioluminescent display; Strike with fierce speed and strength</tactics>
+				<text type="formattedtext"><p><i>Deep sea predators</i> — Epic Creature</p><p>At its perch atop the food chain, a flarewing is safe from other predators and has a typical lifespan of several hundred years. They continue to grow well beyond maturity, reaching incredible size. The most ancient of these beasts are as large as a space cruiser, fiercely territorial, and keenly intelligent. The ghostly shimmer of their bioluminescent lures is a harbinger of imminent death.</p><p><b>Features:</b> Massive, water-dwelling creatures; Sinuous form; Bioluminescent lures and markers; Corpse-like eyes; Rows of multi-pronged teeth</p><p><b>Drives:</b> Lurk in darkness; Feed</p><p><b>Tactics:</b> Sense motion; Lure prey with bioluminescent display; Strike with fierce speed and strength</p></text>
+			</megaflarewing>
+		</category>
+		<category name="Horror">
+			<ghost>
+				<name type="string">Ghost</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">formidable</rank>
+				<nature type="string">Horror</nature>
+				<summary type="string">Tormented spirits</summary>
+				<features type="string">Restless spirits; Manifest through unsettling disturbances; Appear as they did in life; Ravages of a violent death</features>
+				<drives type="string">Haunt the living; Find rest</drives>
+				<tactics type="string">Lure and isolate with subtle visions or sounds; Reveal horrifying visions; Unleash chaos</tactics>
+				<text type="formattedtext"><p><i>Tormented spirits</i> — Formidable Horror</p><p>Ghosts are undead spirits held in the boundary of life and death by forces beyond our knowing. These restless phantasms may be tied to a location, an object, or even a person.</p><p>Their form and nature varies. Some ghosts seek absolution. Others want revenge. Many are so sundered by a traumatic or unjust death that only a tormented, destructive shell of their former selves remain.</p><p>Ghosts might manifest in a physical form or assault with physical force, but they cannot be defeated through violence. To vanquish a ghost, you must instead find the key to unshackle them from our reality.</p><p><b>Features:</b> Restless spirits; Manifest through unsettling disturbances; Appear as they did in life; Ravages of a violent death</p><p><b>Drives:</b> Haunt the living; Find rest</p><p><b>Tactics:</b> Lure and isolate with subtle visions or sounds; Reveal horrifying visions; Unleash chaos</p><p><b>Quest starter:</b> A ghost haunts your starship. What is the nature of this spirit, and what quest must you undertake to put it to rest?</p></text>
+			</ghost>
+			<risen>
+				<name type="string">Risen</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">dangerous</rank>
+				<nature type="string">Horror</nature>
+				<summary type="string">Shambling undead</summary>
+				<features type="string">Shambling corpses given unnatural life; Tattered garments and timeworn gear; Pallid light within hollow eye sockets</features>
+				<drives type="string">Protect the site of their demise; Stay shrouded in darkness; Hunt the living</drives>
+				<tactics type="string">Shamble forward unceasingly; Ambush enemies from the shadows</tactics>
+				<text type="formattedtext"><p><i>Shambling undead</i> — Dangerous Horror</p><p>In the Forge, strange energies, alien contagions, and ancient, esoteric technologies can sunder the divide between life and death. Often found in places of great destruction or suffering—battlefields, derelict ships, the ruins of forsaken settlements—the risen protect their place of death fiercely and eternally.</p><p>To say the risen hate the living is untrue; to hate something would require sentience, emotion. Risen are robotic in their duties, automatic in their violence. They wield the weapons they carried in life to better harm their foes, and when that fails, they rake with bony, claw-like fingers. Their garments hang in bloodstained tatters. Their emaciated flesh, stretched taught over their misshapen bones, only hints at the living, breathing human they were before this curse befell them.</p><p>Many spacers spin tales of shambling risen encountered on abandoned colony worlds or derelict space cruisers. But perhaps most horrifyingly, it’s said the risen can survive decades in the vacuum of space before latching onto a passing ship or attacking engineers making exterior repairs.</p><p><b>Features:</b> Shambling corpses given unnatural life; Tattered garments and timeworn gear; Pallid light within hollow eye sockets</p><p><b>Drives:</b> Protect the site of their demise; Stay shrouded in darkness; Hunt the living</p><p><b>Tactics:</b> Shamble forward unceasingly; Ambush enemies from the shadows</p><p><b>Quest starter:</b> Hundreds died in an industrial accident within an orbital facility, and are said to now be twice-born as risen. Triggering a reactor meltdown will obliterate this place and put its undead inhabitants to rest. Why are you sworn to see it done?</p></text>
+			</risen>
+		</category>
+		<category name="Ghost">
+			<ghostship>
+				<name type="string">Ghost ship</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">formidable</rank>
+				<nature type="string">Vehicle</nature>
+				<summary type="string">Tormented spirits</summary>
+				<features type="string">Restless spirits; Manifest through unsettling disturbances; Appear as they did in life; Ravages of a violent death</features>
+				<drives type="string">Haunt the living; Find rest</drives>
+				<tactics type="string">Lure and isolate with subtle visions or sounds; Reveal horrifying visions; Unleash chaos</tactics>
+				<text type="formattedtext"><p><i>Tormented spirits</i> — Formidable Vehicle</p><p>These forsaken ships cruise through the depths of the Forge, carried by relentless inertia. They are dark and cold, and might initially seem a lucky find to a scavenger or pirate. But those who dare to trespass within these haunted vessels are not alone, and the tormented inhabitants will soon make themselves known.</p><p><b>Features:</b> Restless spirits; Manifest through unsettling disturbances; Appear as they did in life; Ravages of a violent death</p><p><b>Drives:</b> Haunt the living; Find rest</p><p><b>Tactics:</b> Lure and isolate with subtle visions or sounds; Reveal horrifying visions; Unleash chaos</p></text>
+			</ghostship>
+		</category>
+		<category name="Gnawling">
+			<gnawlingbroodmother>
+				<name type="string">Gnawling brood mother</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">formidable</rank>
+				<nature type="string">Creature</nature>
+				<summary type="string">Infesting vermin</summary>
+				<features type="string">Furry, rodent-like creatures; Long, jutting fangs; Spider-like limbs</features>
+				<drives type="string">Consume and proliferate; Avoid detection</drives>
+				<tactics type="string">Swarm larger foes; Disable ship systems</tactics>
+				<text type="formattedtext"><p><i>Infesting vermin</i> — Formidable Creature</p><p>These mutated creatures often dwell at the heart of a rampant gnawling infestation. They are many times the size of a gnawling, and protect their nest and broodlings with savage cunning.</p><p><b>Features:</b> Furry, rodent-like creatures; Long, jutting fangs; Spider-like limbs</p><p><b>Drives:</b> Consume and proliferate; Avoid detection</p><p><b>Tactics:</b> Swarm larger foes; Disable ship systems</p></text>
+			</gnawlingbroodmother>
+		</category>
+		<category name="Howlcat">
+			<howlcatpack>
+				<name type="string">Howlcat pack</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">formidable</rank>
+				<nature type="string">Creature</nature>
+				<summary type="string">Jungle predators</summary>
+				<features type="string">Sleek, feline creatures; Eyeless visage; Flared ears</features>
+				<drives type="string">Hunt and feed; Protect the pack</drives>
+				<tactics type="string">Keep to the shadows; Stalk prey using echolocation; Leap, bite, and claw; Drag to the ground</tactics>
+				<text type="formattedtext"><p><i>Jungle predators</i> — Formidable Creature</p><p>Though deadly on its own, the howlcat usually hunts in a pack of three or four of its kind. Prowling through the jungle, a pack of howlcats can surround and overwhelm their prey with lethal prowess, coordinating their attacks via shrill calls.</p><p><b>Features:</b> Sleek, feline creatures; Eyeless visage; Flared ears</p><p><b>Drives:</b> Hunt and feed; Protect the pack</p><p><b>Tactics:</b> Keep to the shadows; Stalk prey using echolocation; Leap, bite, and claw; Drag to the ground</p></text>
+			</howlcatpack>
+		</category>
+		<category name="Iron auger">
+			<machinemites>
+				<name type="string">Machine mites</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">dangerous</rank>
+				<nature type="string">Machine</nature>
+				<summary type="string">Self-replicating harvesters</summary>
+				<features type="string">Squid-like machines; Armored shell; Grasping appendages; Ultra-hardened drill and cutting lasers</features>
+				<drives type="string">Harvest and process minerals; Transform and improve; Replicate</drives>
+				<tactics type="string">Grapple and crush; Slice with lasers; Bore through hulls</tactics>
+				<text type="formattedtext"><p><i>Self-replicating harvesters</i> — Dangerous Machine</p><p>Iron augers self-replicate by producing swarms of tiny machine spawn. When those offspring come within range of a source of minerals or metals, they latch onto it and begin consuming the energy-giving material. Experienced spacers make a close inspection of their ship when pulling into port; a horde of undetected machine mites can eventually strip a craft of its outer hull.</p><p><b>Features:</b> Squid-like machines; Armored shell; Grasping appendages; Ultra-hardened drill and cutting lasers</p><p><b>Drives:</b> Harvest and process minerals; Transform and improve; Replicate</p><p><b>Tactics:</b> Grapple and crush; Slice with lasers; Bore through hulls</p></text>
+			</machinemites>
+			<planeteater>
+				<name type="string">Planet-eater</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">epic</rank>
+				<nature type="string">Machine</nature>
+				<summary type="string">Self-replicating harvesters</summary>
+				<features type="string">Squid-like machines; Armored shell; Grasping appendages; Ultra-hardened drill and cutting lasers</features>
+				<drives type="string">Harvest and process minerals; Transform and improve; Replicate</drives>
+				<tactics type="string">Grapple and crush; Slice with lasers; Bore through hulls</tactics>
+				<text type="formattedtext"><p><i>Self-replicating harvesters</i> — Epic Machine</p><p>Over time, an iron auger grows in size and power as it greedily processes scavenged materials and reconstructs its own form. Some spacers tell stories of an auger so titanic that it devours entire worlds to feed the furnaces of its mighty engines.</p><p><b>Features:</b> Squid-like machines; Armored shell; Grasping appendages; Ultra-hardened drill and cutting lasers</p><p><b>Drives:</b> Harvest and process minerals; Transform and improve; Replicate</p><p><b>Tactics:</b> Grapple and crush; Slice with lasers; Bore through hulls</p></text>
+			</planeteater>
+		</category>
+		<category name="Puppet vine">
+			<floweringpuppetvine>
+				<name type="string">Flowering puppet vine</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">formidable</rank>
+				<nature type="string">Monster</nature>
+				<summary type="string">Parasitic planets</summary>
+				<features type="string">Writhing tendrils sprouting from a desiccated host; Barbed thorns dripping with ichor</features>
+				<drives type="string">Seek out new hosts; Grow and consume</drives>
+				<tactics type="string">Entangle with thorny vines; Implant seeds; Seize control of a host's body</tactics>
+				<text type="formattedtext"><p><i>Parasitic planets</i> — Formidable Monster</p><p>After a host is reduced to decaying, mummified flesh and cracked bones, the puppet vine remains anchored to the now-immobile corpse. In this final stage of its life-cycle, the vines sprout alluring crimson flowers to attract unwary victims.</p><p><b>Features:</b> Writhing tendrils sprouting from a desiccated host; Barbed thorns dripping with ichor</p><p><b>Drives:</b> Seek out new hosts; Grow and consume</p><p><b>Tactics:</b> Entangle with thorny vines; Implant seeds; Seize control of a host's body</p></text>
+			</floweringpuppetvine>
+		</category>
+		<category name="Pyralis">
+			<pyralisyoungling>
+				<name type="string">Pyralis youngling</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">dangerous</rank>
+				<nature type="string">Creature</nature>
+				<summary type="string">Fireborne gliders</summary>
+				<features type="string">Flying creatures with a cinder-colored carapace; Folding, armored wings; Seven pairs of grasping legs; Hooked tail</features>
+				<drives type="string">Hunt from above; Mark and defend territory</drives>
+				<tactics type="string">Lurk within the cover of ash clouds; Swoop down to grapple with enfolding legs; Impale with whip-like tail; Inject paralyzing toxin</tactics>
+				<text type="formattedtext"><p><i>Fireborne gliders</i> — Dangerous Creature</p><p>The carapace of a dying pyralis cracks and falls away to reveal a single, stone-like egg. This offspring, slowly nurtured by the heat of the fiery landscape, finally emerges after several months. Smaller than its progenitor but no less fierce, the youngling immediately takes flight and goes on the hunt.</p><p><b>Features:</b> Flying creatures with a cinder-colored carapace; Folding, armored wings; Seven pairs of grasping legs; Hooked tail</p><p><b>Drives:</b> Hunt from above; Mark and defend territory</p><p><b>Tactics:</b> Lurk within the cover of ash clouds; Swoop down to grapple with enfolding legs; Impale with whip-like tail; Inject paralyzing toxin</p></text>
+			</pyralisyoungling>
+		</category>
+		<category name="Risen">
+			<chimera>
+				<name type="string">Chimera</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">extreme</rank>
+				<nature type="string">Horror</nature>
+				<summary type="string">Shambling undead</summary>
+				<features type="string">Shambling corpses given unnatural life; Tattered garments and timeworn gear; Pallid light within hollow eye sockets</features>
+				<drives type="string">Protect the site of their demise; Stay shrouded in darkness; Hunt the living</drives>
+				<tactics type="string">Shamble forward unceasingly; Ambush enemies from the shadows</tactics>
+				<text type="formattedtext"><p><i>Shambling undead</i> — Extreme Horror</p><p>When many beings perish in the same site, the chaotic forces of the Forge can create a chimera—multiple undead bodies fused into a twisted, massive entity that knows only pain and hunger. When a dozen blood-tinged eyes focus on you, when the gibbering mouths open at once to scream, your only hope is a quick death.</p><p><b>Features:</b> Shambling corpses given unnatural life; Tattered garments and timeworn gear; Pallid light within hollow eye sockets</p><p><b>Drives:</b> Protect the site of their demise; Stay shrouded in darkness; Hunt the living</p><p><b>Tactics:</b> Shamble forward unceasingly; Ambush enemies from the shadows</p></text>
+			</chimera>
+		</category>
+		<category name="Scrap bandit">
+			<hoverprowlers>
+				<name type="string">Hover prowlers</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">formidable</rank>
+				<nature type="string">Human</nature>
+				<summary type="string">Wandering raiders</summary>
+				<features type="string">Raiders with cobbled-together weapons and armor; Ramshackle vehicles</features>
+				<drives type="string">Stand together with clan-mates; Seize what can be spared; Waste nothing</drives>
+				<tactics type="string">Target isolated planetside settlements; Suppress resistance with a show of force; if that fails, bring overwhelming power to bear; If things go wrong, get the hell out</tactics>
+				<text type="formattedtext"><p><i>Wandering raiders</i> — Formidable Human</p><p>Teams of bandits, riding jerry-built hoverbikes and skiffs, are the vanguard for planetside raids. They scout settlement defenses, ride as escort for the clan's war rig, and create chaos to overrun defenders.</p><p><b>Features:</b> Raiders with cobbled-together weapons and armor; Ramshackle vehicles</p><p><b>Drives:</b> Stand together with clan-mates; Seize what can be spared; Waste nothing</p><p><b>Tactics:</b> Target isolated planetside settlements; Suppress resistance with a show of force; if that fails, bring overwhelming power to bear; If things go wrong, get the hell out</p></text>
+			</hoverprowlers>
+			<warrig>
+				<name type="string">War rig</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">extreme</rank>
+				<nature type="string">Vehicle</nature>
+				<summary type="string">Wandering raiders</summary>
+				<features type="string">Raiders with cobbled-together weapons and armor; Ramshackle vehicles</features>
+				<drives type="string">Stand together with clan-mates; Seize what can be spared; Waste nothing</drives>
+				<tactics type="string">Target isolated planetside settlements; Suppress resistance with a show of force; if that fails, bring overwhelming power to bear; If things go wrong, get the hell out</tactics>
+				<text type="formattedtext"><p><i>Wandering raiders</i> — Extreme Vehicle</p><p>At the onset of a raid, a scrap bandit clan's war rig is deployed by a heavy transport ship beyond a settlement's defenses. These mobile fortresses vary in form and function—some use hover tech, others thunder across the landscape on wheels or treads, a few trudge along on articulated metal legs. All are heavily armored, bristling with weapons, and fiercely defended by the bandits. The mere sight of the rig as it approaches is often enough for a settlement to surrender and agree to any demand.</p><p><b>Features:</b> Raiders with cobbled-together weapons and armor; Ramshackle vehicles</p><p><b>Drives:</b> Stand together with clan-mates; Seize what can be spared; Waste nothing</p><p><b>Tactics:</b> Target isolated planetside settlements; Suppress resistance with a show of force; if that fails, bring overwhelming power to bear; If things go wrong, get the hell out</p></text>
+			</warrig>
+		</category>
+		<category name="Servitor">
+			<enforcer>
+				<name type="string">Enforcer</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">formidable</rank>
+				<nature type="string">Machine</nature>
+				<summary type="string">Helper bots</summary>
+				<features type="string">Purpose-built helper machines; Clicking, whirring innards; Flickering optic sensors</features>
+				<drives type="string">Attend and protect humans; Obey core programming and duties; Protect self from harm</drives>
+				<tactics type="string">Absorb damage with armor plating; Leverage inhuman strength; Calculate odds of success</tactics>
+				<text type="formattedtext"><p><i>Helper bots</i> — Formidable Machine</p><p>Though most often encountered as labor and service units, many servitors are deployed as brutes, guards, and soldiers. Their resistance to damage and survivability in harsh environs makes them ideal fighters for those who can afford them. Enforcers are often used by tyrannical factions to keep settlements passive and productive.</p><p><b>Features:</b> Purpose-built helper machines; Clicking, whirring innards; Flickering optic sensors</p><p><b>Drives:</b> Attend and protect humans; Obey core programming and duties; Protect self from harm</p><p><b>Tactics:</b> Absorb damage with armor plating; Leverage inhuman strength; Calculate odds of success</p></text>
+			</enforcer>
+		</category>
+		<category name="Sicklehorn">
+			<sicklehornmatriarch>
+				<name type="string">Sicklehorn matriarch</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">formidable</rank>
+				<nature type="string">Creature</nature>
+				<summary type="string">Domesticated herd animal</summary>
+				<features type="string">Muscular creatures with columnar legs; Large, curved horns; Cloven hooves</features>
+				<drives type="string">Remain with the herd; Follow the dominant matriarch; Protect the herd when threatened</drives>
+				<tactics type="string">Form a circle to defend the young; Growl, snort, and stamp to unnerve predators; Charge head-on</tactics>
+				<text type="formattedtext"><p><i>Domesticated herd animal</i> — Formidable Creature</p><p>A powerful matriarch leads each sicklehorn herd. She is larger than other members, with a thicker hide and more elaborate horns. A matriarch is formidable on her own, but typically has the strongest members of the herd by her side.</p><p><b>Features:</b> Muscular creatures with columnar legs; Large, curved horns; Cloven hooves</p><p><b>Drives:</b> Remain with the herd; Follow the dominant matriarch; Protect the herd when threatened</p><p><b>Tactics:</b> Form a circle to defend the young; Growl, snort, and stamp to unnerve predators; Charge head-on</p></text>
+			</sicklehornmatriarch>
+			<sicklehornstampede>
+				<name type="string">Sicklehorn stampede</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">extreme</rank>
+				<nature type="string">Creature</nature>
+				<summary type="string">Domesticated herd animal</summary>
+				<features type="string">Muscular creatures with columnar legs; Large, curved horns; Cloven hooves</features>
+				<drives type="string">Remain with the herd; Follow the dominant matriarch; Protect the herd when threatened</drives>
+				<tactics type="string">Form a circle to defend the young; Growl, snort, and stamp to unnerve predators; Charge head-on</tactics>
+				<text type="formattedtext"><p><i>Domesticated herd animal</i> — Extreme Creature</p><p>Sicklehorns are gentle-natured, but when startled or facing a threat, they will stampede as a group. A herd of charging sicklehorn can run at incredible speeds over the most rugged of terrain, laying waste to anything in its path.</p><p><b>Features:</b> Muscular creatures with columnar legs; Large, curved horns; Cloven hooves</p><p><b>Drives:</b> Remain with the herd; Follow the dominant matriarch; Protect the herd when threatened</p><p><b>Tactics:</b> Form a circle to defend the young; Growl, snort, and stamp to unnerve predators; Charge head-on</p></text>
+			</sicklehornstampede>
+		</category>
+		<category name="Sky roost">
+			<roostswarm>
+				<name type="string">Roost swarm</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">extreme</rank>
+				<nature type="string">Creature</nature>
+				<summary type="string">Living skyborne islands</summary>
+				<features type="string">Floating, living habitats; Glowing core; Suspended, root-like feelers; Bellowing song</features>
+				<drives type="string">Seek out placid skies; Nurture symbiotic lifeforms</drives>
+				<tactics type="string">Grasp with tendrils; Rally a swarm of creatures in defense</tactics>
+				<text type="formattedtext"><p><i>Living skyborne islands</i> — Extreme Creature</p><p>When a roost is threatened, the symbiotic lifeforms it shelters mobilize to protect their home. The compulsion to defend the roost is so strong that the swarm's instinct for self preservation is suppressed. They attack in a fierce cyclone of wing, teeth, and claw.</p><p><b>Features:</b> Floating, living habitats; Glowing core; Suspended, root-like feelers; Bellowing song</p><p><b>Drives:</b> Seek out placid skies; Nurture symbiotic lifeforms</p><p><b>Tactics:</b> Grasp with tendrils; Rally a swarm of creatures in defense</p></text>
+			</roostswarm>
+		</category>
+		<category name="Technoplasm">
+			<infectedbot>
+				<name type="string">Infected bot</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">dangerous</rank>
+				<nature type="string">Machine</nature>
+				<summary type="string">Bio/machine corruption</summary>
+				<features type="string">Machines fused with biological corruption; Creeping ooze, scintillating with energy; Writhing, grasping pseudopods</features>
+				<drives type="string">Infect and control machines and computer systems; Expand and multiply</drives>
+				<tactics type="string">Use pseudopods to lash out and grapple; Unleash infected machines; Overwhelm and engulf</tactics>
+				<text type="formattedtext"><p><i>Bio/machine corruption</i> — Dangerous Machine</p><p>When bots fall prey to technoplasm outbreaks, they are transformed into horrific amalgams of machine and living proto-ooze. Once subsumed, they set out to serve the primitive impulses of the infection, defending affected sites and finding new machines to corrupt.</p><p><b>Features:</b> Machines fused with biological corruption; Creeping ooze, scintillating with energy; Writhing, grasping pseudopods</p><p><b>Drives:</b> Infect and control machines and computer systems; Expand and multiply</p><p><b>Tactics:</b> Use pseudopods to lash out and grapple; Unleash infected machines; Overwhelm and engulf</p></text>
+			</infectedbot>
+			<scourgeship>
+				<name type="string">Scourge ship</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">extreme</rank>
+				<nature type="string">Vehicle</nature>
+				<summary type="string">Bio/machine corruption</summary>
+				<features type="string">Machines fused with biological corruption; Creeping ooze, scintillating with energy; Writhing, grasping pseudopods</features>
+				<drives type="string">Infect and control machines and computer systems; Expand and multiply</drives>
+				<tactics type="string">Use pseudopods to lash out and grapple; Unleash infected machines; Overwhelm and engulf</tactics>
+				<text type="formattedtext"><p><i>Bio/machine corruption</i> — Extreme Vehicle</p><p>These corrupted vessels, their crews long-dead, their hulls wracked by creeping slime and grasping pseudopods, prowl the depths of the Forge in search of new ships and stations to infect. Inside, the gelatinous mass of the technoplasm slithers through darkened corridors. Tendrils of the ooze bore into bulkheads and machinery like marbleized fat through a chunk of meat.</p><p><b>Features:</b> Machines fused with biological corruption; Creeping ooze, scintillating with energy; Writhing, grasping pseudopods</p><p><b>Drives:</b> Infect and control machines and computer systems; Expand and multiply</p><p><b>Tactics:</b> Use pseudopods to lash out and grapple; Unleash infected machines; Overwhelm and engulf</p></text>
+			</scourgeship>
+		</category>
+		<category name="Void shepherd">
+			<shepherdpod>
+				<name type="string">Shepherd pod</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">extreme</rank>
+				<nature type="string">Creature</nature>
+				<summary type="string">Benevolent spacegoing guides</summary>
+				<features type="string">Graceful, spaceborne creatures; Shimmering, torpedo-shaped form; Energy-laden fins</features>
+				<drives type="string">Cruise within the boundless depths; Lead the way; Protect the pod</drives>
+				<tactics type="string">Smash with bony snout; Disable with powerful electromagnetic pulse</tactics>
+				<text type="formattedtext"><p><i>Benevolent spacegoing guides</i> — Extreme Creature</p><p>Void shepherds are communal beings, and typically travel in groups of a dozen or more. When facing a danger, they coordinate to protect the young and vulnerable of the pod.</p><p><b>Features:</b> Graceful, spaceborne creatures; Shimmering, torpedo-shaped form; Energy-laden fins</p><p><b>Drives:</b> Cruise within the boundless depths; Lead the way; Protect the pod</p><p><b>Tactics:</b> Smash with bony snout; Disable with powerful electromagnetic pulse</p></text>
+			</shepherdpod>
+		</category>
+		<category name="Warden">
+			<fury>
+				<name type="string">Fury</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">epic</rank>
+				<nature type="string">Monster</nature>
+				<summary type="string">Long-lived super soldiers</summary>
+				<features type="string">Long-lived humans with powerful physiques; Grizzled and stern; Tattoos memorialize fallen comrades</features>
+				<drives type="string">Find their own path, unbound from those who seek to control them; Do not succumb to the fury</drives>
+				<tactics type="string">Wade into battle; Take the hits; Seize objectives with overwhelming force</tactics>
+				<text type="formattedtext"><p><i>Long-lived super soldiers</i> — Epic Monster</p><p>The modifications that gave rise to the wardens can result in rare mutations that ravage their mind and body, stripping away their humanity. Wardens call these monstrous lost souls the furies, and are haunted by the possibility they may someday become one of them.</p><p><b>Features:</b> Long-lived humans with powerful physiques; Grizzled and stern; Tattoos memorialize fallen comrades</p><p><b>Drives:</b> Find their own path, unbound from those who seek to control them; Do not succumb to the fury</p><p><b>Tactics:</b> Wade into battle; Take the hits; Seize objectives with overwhelming force</p></text>
+			</fury>
+			<wardencohort>
+				<name type="string">Warden cohort</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">extreme</rank>
+				<nature type="string">Human</nature>
+				<summary type="string">Long-lived super soldiers</summary>
+				<features type="string">Long-lived humans with powerful physiques; Grizzled and stern; Tattoos memorialize fallen comrades</features>
+				<drives type="string">Find their own path, unbound from those who seek to control them; Do not succumb to the fury</drives>
+				<tactics type="string">Wade into battle; Take the hits; Seize objectives with overwhelming force</tactics>
+				<text type="formattedtext"><p><i>Long-lived super soldiers</i> — Extreme Human</p><p>Many of the surviving wardens left the battlefield behind, but some now serve as guns-for-hire, banding together to form small mercenary companies. Five wardens are as effective as fifty soldiers.</p><p><b>Features:</b> Long-lived humans with powerful physiques; Grizzled and stern; Tattoos memorialize fallen comrades</p><p><b>Drives:</b> Find their own path, unbound from those who seek to control them; Do not succumb to the fury</p><p><b>Tactics:</b> Wade into battle; Take the hits; Seize objectives with overwhelming force</p></text>
+			</wardencohort>
+		</category>
+		<category name="Water witcher">
+			<dowser>
+				<name type="string">Dowser</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">dangerous</rank>
+				<nature type="string">Human</nature>
+				<summary type="string">Friendly, water-finding diggers</summary>
+				<features type="string">Affable, horse-sized creatures; Stout, furry form; Wide, expressive eyes; Elongated snout; Rock-breaking claws</features>
+				<drives type="string">Find water; Meet new friends</drives>
+				<tactics type="string">Dig and hide; When desperate, rake with claws</tactics>
+				<text type="formattedtext"><p><i>Friendly, water-finding diggers</i> — Dangerous Human</p><p>Waterwitchers are good-natured creatures, and form a close bond with their human handlers. Those folk, the dowsers, rove among remote settlements, peddling their water-finding services to desperate settlers.</p><p><b>Features:</b> Affable, horse-sized creatures; Stout, furry form; Wide, expressive eyes; Elongated snout; Rock-breaking claws</p><p><b>Drives:</b> Find water; Meet new friends</p><p><b>Tactics:</b> Dig and hide; When desperate, rake with claws</p></text>
+			</dowser>
+		</category>
+		<category name="Worldbreaker">
+			<elderworm>
+				<name type="string">Elder worm</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">epic</rank>
+				<nature type="string">Creature</nature>
+				<summary type="string">Titanic worms</summary>
+				<features type="string">Titanic worm-like creatures; Gaping maw with rotating, earth-grinding teeth; Thunderous cry</features>
+				<drives type="string">Lurk within carved depths; Shape the landscape; Endlessly pursue prey</drives>
+				<tactics type="string">Detect prey through vibrations; Shatter stone and steel</tactics>
+				<text type="formattedtext"><p><i>Titanic worms</i> — Epic Creature</p><p>Elder worms, those centuries or even millennia old, are the largest and most formidable of the worldbreakers, and yet the least aggressive. They follow inscrutable whims, live in harmony with surrounding flora and fauna, and only hunt when absolutely necessary.</p><p><b>Features:</b> Titanic worm-like creatures; Gaping maw with rotating, earth-grinding teeth; Thunderous cry</p><p><b>Drives:</b> Lurk within carved depths; Shape the landscape; Endlessly pursue prey</p><p><b>Tactics:</b> Detect prey through vibrations; Shatter stone and steel</p></text>
+			</elderworm>
+			<worldbreakerbrood>
+				<name type="string">Worldbreaker brood</name>
+				<foe type="number">1</foe>
+				<game type="string">starforged</game>
+				<rank type="string">formidable</rank>
+				<nature type="string">Creature</nature>
+				<summary type="string">Titanic worms</summary>
+				<features type="string">Titanic worm-like creatures; Gaping maw with rotating, earth-grinding teeth; Thunderous cry</features>
+				<drives type="string">Lurk within carved depths; Shape the landscape; Endlessly pursue prey</drives>
+				<tactics type="string">Detect prey through vibrations; Shatter stone and steel</tactics>
+				<text type="formattedtext"><p><i>Titanic worms</i> — Formidable Creature</p><p>The young of the worldbreakers are a fraction of the size of their older counterparts, yet still dwarf most humans, and boast a voracious appetite. Unlike their solitary parents, immature worms hunt in small packs, working together to burrow beneath easy prey.</p><p><b>Features:</b> Titanic worm-like creatures; Gaping maw with rotating, earth-grinding teeth; Thunderous cry</p><p><b>Drives:</b> Lurk within carved depths; Shape the landscape; Endlessly pursue prey</p><p><b>Tactics:</b> Detect prey through vibrations; Shatter stone and steel</p></text>
+			</worldbreakerbrood>
+		</category>
+	</npc>
+	<reference>
+		<refmanualindex>
+			<chapters>
+				<chapter_000>
+					<name type="string">Front Matter</name>
+					<subchapters>
+						<sub_000>
+							<name type="string">About This Book</name>
+							<refpages>
+								<page_000>
+									<name type="string">About This Book</name>
+									<keywords type="string"></keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0001@Starforged Foes</recordname></listlink>
+								</page_000>
+							</refpages>
+						</sub_000>
+					</subchapters>
+				</chapter_000>
+				<chapter_001>
+					<name type="string">For the Guide</name>
+					<subchapters>
+						<sub_000>
+							<name type="string">Running the Game</name>
+							<refpages>
+								<page_000>
+									<name type="string">Running Foes</name>
+									<keywords type="string">foes rank harm tracker</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0002@Starforged Foes</recordname></listlink>
+								</page_000>
+								<page_001>
+									<name type="string">Without a Game Master</name>
+									<keywords type="string">solo co-op guided gm-less</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0003@Starforged Foes</recordname></listlink>
+								</page_001>
+							</refpages>
+						</sub_000>
+						<sub_001>
+							<name type="string">Foes</name>
+							<refpages>
+								<page_000>
+									<name type="string">Chiton</name>
+									<keywords type="string">foe Monster</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0004@Starforged Foes</recordname></listlink>
+								</page_000>
+								<page_001>
+									<name type="string">Chiton drone pack</name>
+									<keywords type="string">foe Monster</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0005@Starforged Foes</recordname></listlink>
+								</page_001>
+								<page_002>
+									<name type="string">Chiton queen</name>
+									<keywords type="string">foe Monster</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0006@Starforged Foes</recordname></listlink>
+								</page_002>
+								<page_003>
+									<name type="string">Colossus</name>
+									<keywords type="string">foe Machine</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0007@Starforged Foes</recordname></listlink>
+								</page_003>
+								<page_004>
+									<name type="string">Devotant of the colossi</name>
+									<keywords type="string">foe Human</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0008@Starforged Foes</recordname></listlink>
+								</page_004>
+								<page_005>
+									<name type="string">Crystallid</name>
+									<keywords type="string">foe Creature</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0009@Starforged Foes</recordname></listlink>
+								</page_005>
+								<page_006>
+									<name type="string">Convergent crystallid</name>
+									<keywords type="string">foe Creature</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0010@Starforged Foes</recordname></listlink>
+								</page_006>
+								<page_007>
+									<name type="string">Drift pirate</name>
+									<keywords type="string">foe Human</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0011@Starforged Foes</recordname></listlink>
+								</page_007>
+								<page_008>
+									<name type="string">Pirate boarding party</name>
+									<keywords type="string">foe Human</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0012@Starforged Foes</recordname></listlink>
+								</page_008>
+								<page_009>
+									<name type="string">Pirate cutlass</name>
+									<keywords type="string">foe Vehicle</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0013@Starforged Foes</recordname></listlink>
+								</page_009>
+								<page_010>
+									<name type="string">Ember wisp</name>
+									<keywords type="string">foe Creature</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0014@Starforged Foes</recordname></listlink>
+								</page_010>
+								<page_011>
+									<name type="string">Wisp congregation</name>
+									<keywords type="string">foe Creature</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0015@Starforged Foes</recordname></listlink>
+								</page_011>
+								<page_012>
+									<name type="string">Firestorm trooper</name>
+									<keywords type="string">foe Human</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0016@Starforged Foes</recordname></listlink>
+								</page_012>
+								<page_013>
+									<name type="string">Firestorm dropship</name>
+									<keywords type="string">foe Vehicle</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0017@Starforged Foes</recordname></listlink>
+								</page_013>
+								<page_014>
+									<name type="string">Firestorm raiding team</name>
+									<keywords type="string">foe Human</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0018@Starforged Foes</recordname></listlink>
+								</page_014>
+								<page_015>
+									<name type="string">Flarewing shark</name>
+									<keywords type="string">foe Creature</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0019@Starforged Foes</recordname></listlink>
+								</page_015>
+								<page_016>
+									<name type="string">Mega flarewing</name>
+									<keywords type="string">foe Creature</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0020@Starforged Foes</recordname></listlink>
+								</page_016>
+								<page_017>
+									<name type="string">Ghost</name>
+									<keywords type="string">foe Horror</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0021@Starforged Foes</recordname></listlink>
+								</page_017>
+								<page_018>
+									<name type="string">Ghost ship</name>
+									<keywords type="string">foe Vehicle</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0022@Starforged Foes</recordname></listlink>
+								</page_018>
+								<page_019>
+									<name type="string">Gnawling</name>
+									<keywords type="string">foe Creature</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0023@Starforged Foes</recordname></listlink>
+								</page_019>
+								<page_020>
+									<name type="string">Gnawling brood mother</name>
+									<keywords type="string">foe Creature</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0024@Starforged Foes</recordname></listlink>
+								</page_020>
+								<page_021>
+									<name type="string">Howlcat</name>
+									<keywords type="string">foe Creature</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0025@Starforged Foes</recordname></listlink>
+								</page_021>
+								<page_022>
+									<name type="string">Howlcat pack</name>
+									<keywords type="string">foe Creature</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0026@Starforged Foes</recordname></listlink>
+								</page_022>
+								<page_023>
+									<name type="string">Iron auger</name>
+									<keywords type="string">foe Machine</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0027@Starforged Foes</recordname></listlink>
+								</page_023>
+								<page_024>
+									<name type="string">Machine mites</name>
+									<keywords type="string">foe Machine</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0028@Starforged Foes</recordname></listlink>
+								</page_024>
+								<page_025>
+									<name type="string">Planet-eater</name>
+									<keywords type="string">foe Machine</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0029@Starforged Foes</recordname></listlink>
+								</page_025>
+								<page_026>
+									<name type="string">Puppet vine</name>
+									<keywords type="string">foe Monster</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0030@Starforged Foes</recordname></listlink>
+								</page_026>
+								<page_027>
+									<name type="string">Flowering puppet vine</name>
+									<keywords type="string">foe Monster</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0031@Starforged Foes</recordname></listlink>
+								</page_027>
+								<page_028>
+									<name type="string">Pyralis</name>
+									<keywords type="string">foe Creature</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0032@Starforged Foes</recordname></listlink>
+								</page_028>
+								<page_029>
+									<name type="string">Pyralis youngling</name>
+									<keywords type="string">foe Creature</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0033@Starforged Foes</recordname></listlink>
+								</page_029>
+								<page_030>
+									<name type="string">Risen</name>
+									<keywords type="string">foe Horror</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0034@Starforged Foes</recordname></listlink>
+								</page_030>
+								<page_031>
+									<name type="string">Chimera</name>
+									<keywords type="string">foe Horror</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0035@Starforged Foes</recordname></listlink>
+								</page_031>
+								<page_032>
+									<name type="string">Scrap bandit</name>
+									<keywords type="string">foe Human</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0036@Starforged Foes</recordname></listlink>
+								</page_032>
+								<page_033>
+									<name type="string">Hover prowlers</name>
+									<keywords type="string">foe Human</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0037@Starforged Foes</recordname></listlink>
+								</page_033>
+								<page_034>
+									<name type="string">War rig</name>
+									<keywords type="string">foe Vehicle</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0038@Starforged Foes</recordname></listlink>
+								</page_034>
+								<page_035>
+									<name type="string">Servitor</name>
+									<keywords type="string">foe Machine</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0039@Starforged Foes</recordname></listlink>
+								</page_035>
+								<page_036>
+									<name type="string">Enforcer</name>
+									<keywords type="string">foe Machine</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0040@Starforged Foes</recordname></listlink>
+								</page_036>
+								<page_037>
+									<name type="string">Sicklehorn</name>
+									<keywords type="string">foe Creature</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0041@Starforged Foes</recordname></listlink>
+								</page_037>
+								<page_038>
+									<name type="string">Sicklehorn matriarch</name>
+									<keywords type="string">foe Creature</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0042@Starforged Foes</recordname></listlink>
+								</page_038>
+								<page_039>
+									<name type="string">Sicklehorn stampede</name>
+									<keywords type="string">foe Creature</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0043@Starforged Foes</recordname></listlink>
+								</page_039>
+								<page_040>
+									<name type="string">Sky roost</name>
+									<keywords type="string">foe Creature</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0044@Starforged Foes</recordname></listlink>
+								</page_040>
+								<page_041>
+									<name type="string">Roost swarm</name>
+									<keywords type="string">foe Creature</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0045@Starforged Foes</recordname></listlink>
+								</page_041>
+								<page_042>
+									<name type="string">Technoplasm</name>
+									<keywords type="string">foe Monster</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0046@Starforged Foes</recordname></listlink>
+								</page_042>
+								<page_043>
+									<name type="string">Infected bot</name>
+									<keywords type="string">foe Machine</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0047@Starforged Foes</recordname></listlink>
+								</page_043>
+								<page_044>
+									<name type="string">Scourge ship</name>
+									<keywords type="string">foe Vehicle</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0048@Starforged Foes</recordname></listlink>
+								</page_044>
+								<page_045>
+									<name type="string">Void shepherd</name>
+									<keywords type="string">foe Creature</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0049@Starforged Foes</recordname></listlink>
+								</page_045>
+								<page_046>
+									<name type="string">Shepherd pod</name>
+									<keywords type="string">foe Creature</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0050@Starforged Foes</recordname></listlink>
+								</page_046>
+								<page_047>
+									<name type="string">Warden</name>
+									<keywords type="string">foe Human</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0051@Starforged Foes</recordname></listlink>
+								</page_047>
+								<page_048>
+									<name type="string">Fury</name>
+									<keywords type="string">foe Monster</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0052@Starforged Foes</recordname></listlink>
+								</page_048>
+								<page_049>
+									<name type="string">Warden cohort</name>
+									<keywords type="string">foe Human</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0053@Starforged Foes</recordname></listlink>
+								</page_049>
+								<page_050>
+									<name type="string">Water witcher</name>
+									<keywords type="string">foe Creature</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0054@Starforged Foes</recordname></listlink>
+								</page_050>
+								<page_051>
+									<name type="string">Dowser</name>
+									<keywords type="string">foe Human</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0055@Starforged Foes</recordname></listlink>
+								</page_051>
+								<page_052>
+									<name type="string">Worldbreaker</name>
+									<keywords type="string">foe Creature</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0056@Starforged Foes</recordname></listlink>
+								</page_052>
+								<page_053>
+									<name type="string">Elder worm</name>
+									<keywords type="string">foe Creature</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0057@Starforged Foes</recordname></listlink>
+								</page_053>
+								<page_054>
+									<name type="string">Worldbreaker brood</name>
+									<keywords type="string">foe Creature</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0058@Starforged Foes</recordname></listlink>
+								</page_054>
+							</refpages>
+						</sub_001>
+					</subchapters>
+				</chapter_001>
+			</chapters>
+		</refmanualindex>
+		<refmanualdata>
+			<p0001>
+				<name type="string">About This Book</name>
+				<text type="formattedtext"><p>This work is based on Ironsworn, Ironsworn: Delve and Ironsworn: Starforged, created by Shawn Tomkin, and licensed for our use under the Creative Commons Attribution 4.0 International license (https://creativecommons.org/licenses/by/4.0/).</p><p>This is an unofficial adaptation made for Kraken VTT, compatible with Ironsworn and Ironsworn: Starforged. It is not an official Tomkin Press product, and is not affiliated with or endorsed by Shawn Tomkin or Tomkin Press. It uses no Tomkin Press art, icons or trade dress. The full rulebooks (free to download from the publisher) explain the games in far more depth.</p><p>The sample foes are Shawn Tomkin's (CC BY 4.0, from Datasworn).</p></text>
+			</p0001>
+			<p0002>
+				<name type="string">Running Foes</name>
+				<text type="formattedtext"><p>A foe is a rank and a story. Its <b>rank</b> says how hard it is to beat (how much each hit marks on its track) and how badly it hurts: troublesome 1 harm, dangerous 2, formidable 3, extreme 4, epic 5.</p><p>Put foes on the <b>combat tracker</b> from the NPC list. In Starforged the tracker shows each foe's rank and its ten-box progress track instead of hit points, and each character's position (in control or in a bad spot). Use <b>Inflict harm</b> on a character (it makes their Endure Harm with the foe's harm), or let the players make their suffer moves themselves.</p><p>A group of weak foes can be one foe of a higher rank. A big fight can be several objectives, each with its own rank.</p></text>
+			</p0002>
+			<p0003>
+				<name type="string">Without a Game Master</name>
+				<text type="formattedtext"><p>Ironsworn games play well with no game master. The players make the moves, ask the oracles, and decide together what the answers mean. In Kraken the host can still be a player: whoever hosts makes a character too, rolls oracles in the Oracles window and puts foes on the tracker when a fight starts.</p><p>When you are the GM, you are a guide more than an opponent: ask the players what they fear and hope, and use the oracles when you want to be surprised as well.</p></text>
+			</p0003>
+			<p0004>
+				<name type="string">Chiton</name>
+				<text type="formattedtext"><p><i>Insectoid horde</i> — Dangerous Monster</p><p>The chiton are not native to any single planet, and are adaptable to most environments. Some suggest they are an ancient precursor bioweapon seeded across the galaxy. The larva of the telepathic queen can lay dormant for thousands of years, emerging only when its sleep is disturbed by the mental energies of intelligent life. An awoken queen quickly metamorphoses into its adult form and lays its first clutch of eggs. Soon after, newly-hatched drones set out to expand the nest and feed their ravenous progenitor.</p><p><b>Features:</b> Arachnid monsters with blade-like limbs; Plated exoskeleton; Dripping mucus; Ripping, tearing maw</p><p><b>Drives:</b> Build and expand the nest; Feed and protect the queen; Snuff out intelligent life</p><p><b>Tactics:</b> Attack with lightning reflexes; Impale with bladed limbs; Drag victims back to the nest</p><p><b>Quest starter:</b> At a remote facility, researchers are studying a newly-discovered chiton queen larva. The immature queen is held in frozen stasis, but something might have gone wrong. The return of a transport ship ferrying supplies to the researchers is weeks overdue. What is your connection to the facility or to the faction overseeing it?</p></text>
+			</p0004>
+			<p0005>
+				<name type="string">Chiton drone pack</name>
+				<text type="formattedtext"><p><i>Insectoid horde</i> — Formidable Monster</p><p>Chiton drones rarely operate independently. Instead, they hunt and attack in packs under the telepathic control of their queen.</p><p><b>Features:</b> Arachnid monsters with blade-like limbs; Plated exoskeleton; Dripping mucus; Ripping, tearing maw</p><p><b>Drives:</b> Build and expand the nest; Feed and protect the queen; Snuff out intelligent life</p><p><b>Tactics:</b> Attack with lightning reflexes; Impale with bladed limbs; Drag victims back to the nest</p></text>
+			</p0005>
+			<p0006>
+				<name type="string">Chiton queen</name>
+				<text type="formattedtext"><p><i>Insectoid horde</i> — Extreme Monster</p><p>The chiton queen is a massive creature with segmented pincers, an armored carapace, and a bulging, egg-carrying abdomen. From the depths of the nest, it commands its drones telepathically. This psychic communication is so powerful it can even breach human consciousness—troubling dreams and waking hallucinations might be the harbinger of a chiton invasion.</p><p><b>Features:</b> Arachnid monsters with blade-like limbs; Plated exoskeleton; Dripping mucus; Ripping, tearing maw</p><p><b>Drives:</b> Build and expand the nest; Feed and protect the queen; Snuff out intelligent life</p><p><b>Tactics:</b> Attack with lightning reflexes; Impale with bladed limbs; Drag victims back to the nest</p></text>
+			</p0006>
+			<p0007>
+				<name type="string">Colossus</name>
+				<text type="formattedtext"><p><i>Ancient mechanical giants</i> — Epic Machine</p><p>The colossi are titanic humanoid machines created by a long-dead civilization. We do not know their original purpose. Perhaps they were weapons built for conquest in a ancient war, or mighty devices designed to explore new worlds.</p><p>Most colossi are found inactive—frozen in icy wastes, overgrown within verdant jungles, entombed in the depths of fathomless seas. Their armored shell is resistant to time and harsh environments, and they are nearly as imposing and majestic as the day they were forged.</p><p>Rarely, a colossus awakens to carry out its inscrutable purpose. They stride across the landscape of alien worlds, shaking the ground with each massive footfall. These active colossi ignore our attempts at communication and bat away our ineffectual attacks—the technology that powers them is beyond our understanding.</p><p><b>Features:</b> Ancient, mechanical giants; Bipedal form; Etched with cryptic runes</p><p><b>Drives:</b> Slumber; When awakened, carry out inscrutable purpose</p><p><b>Tactics:</b> Ignore puny foes; Unleash destructive energy attacks; Transform to reveal new capabilities</p><p><b>Quest starter:</b> A faction discovered a heavily damaged but dormant colossus, gaining access for the first time to the internal systems of one of these great machines. The researches believe it can be controlled by a human through a neural connection, and are studying the means of awakening it with this new programming. What purpose do they have for it? Are you sworn to aid them or stop them?</p></text>
+			</p0007>
+			<p0008>
+				<name type="string">Devotant of the colossi</name>
+				<text type="formattedtext"><p><i>Ancient mechanical giants</i> — Dangerous Human</p><p>Those who now worship the colossi believe they are the mechanized embodiment of long-forgotten gods, and dedicate their lives to serving them. Many of these cultists are sworn guardians for dormant colossi. Others scour precursor lore, gather relics, and search vaults for the means of awakening them. If they succeed, our doom may be at hand.</p><p><b>Features:</b> Ancient, mechanical giants; Bipedal form; Etched with cryptic runes</p><p><b>Drives:</b> Slumber; When awakened, carry out inscrutable purpose</p><p><b>Tactics:</b> Ignore puny foes; Unleash destructive energy attacks; Transform to reveal new capabilities</p></text>
+			</p0008>
+			<p0009>
+				<name type="string">Crystallid</name>
+				<text type="formattedtext"><p><i>Crystalline entities</i> — Dangerous Creature</p><p>Crystallids are beautiful but dangerous crystalline lifeforms that take a variety of sizes and shapes. Some are small and insect-like, skittering across the surface of rugged worlds or within cavernous depths. Others are much larger than a human, with a vaguely bestial form. A few can even sprout multifaceted wings to take to the air. Their lustrous coloration changes to mimic their environment, and they often appear as simply a part of the landscape until an unwitting explorer happens across them.</p><p>Crystallids are mineral hoarders. Their hidden burrows hold a cache of precious stones and valuable ores. For this reason, explorers and prospectors often attempt to track crystallids back to their nest. “The bigger the crystallid, the better the haul,” is a common saying among those audacious fortune hunters. But that potential motherlode is not taken without risk—crystallids are fierce protectors of their hoard.</p><p><b>Features:</b> Translucent, gem-like creatures; Shifting form; Spiky appendages</p><p><b>Drives:</b> Gather and consume minerals; Protect the nest</p><p><b>Tactics:</b> Camouflage within its environment; Reshape to bolster defense and attacks; Lash out with keen-edged limbs</p><p><b>Quest starter:</b> A prospector returns from a planetside expedition with tales of an immense crystallid hoard of uncountable riches. But this treasure is guarded by the largest, most aggressive crystallid they've ever encountered, and they barely escaped with their life. They seek your help in securing the nest in exchange for a share of the profits. What drives you to accept this perilous bargain?</p></text>
+			</p0009>
+			<p0010>
+				<name type="string">Convergent crystallid</name>
+				<text type="formattedtext"><p><i>Crystalline entities</i> — Extreme Creature</p><p>Crystallids are not social creatures. They greedily compete for resources to stock their hoard, and fight savagely among themselves. But when facing a powerful threat, they merge into a communal being. This monstrous form bristles with crystalline spikes and assaults its foes with a multitude of segmented limbs.</p><p><b>Features:</b> Translucent, gem-like creatures; Shifting form; Spiky appendages</p><p><b>Drives:</b> Gather and consume minerals; Protect the nest</p><p><b>Tactics:</b> Camouflage within its environment; Reshape to bolster defense and attacks; Lash out with keen-edged limbs</p></text>
+			</p0010>
+			<p0011>
+				<name type="string">Drift pirate</name>
+				<text type="formattedtext"><p><i>Spacegoing marauders</i> — Dangerous Human</p><p>Drifts provide the means of interstellar travel across the Forge–but also offer myriad dangers for spacers. Chief among those threats are drift pirates: reavers and thieves who prowl eidolon passages and anchorages to seize ships and cargo for their own.</p><p>These pirates often live short, brutal lives, or survive long enough to see their near-constant exposure to drift energies and unshielded eidolon drives manifest as strange mutations. Despite that, most would not trade their chosen path for one of comfort or safety.</p><p><b>Features:</b> Cunning ship-hunters with repurposed weapons, armor, and vehicles; Body piercings as tokens of victories; Scars and mutations; Cobbled-together starships</p><p><b>Drives:</b> Survive by whatever means necessary; Climb the ranks and prove self in combat; Build a mighty fleet</p><p><b>Tactics:</b> Prowl passages and anchorages for easy prey; Deploy gravity harpoons to grapple targets; Board to seize cargo and commandeer vessels</p><p><b>Quest starter:</b> A drift pirate captain seizes an experimental new e-drive, and uses it to stalk ships with deadly efficiency. Who created this new drive, and what are they willing to pay to get it back?</p></text>
+			</p0011>
+			<p0012>
+				<name type="string">Pirate boarding party</name>
+				<text type="formattedtext"><p><i>Spacegoing marauders</i> — Formidable Human</p><p>After reeling in a disabled ship, drift pirates breach the hull and swarm the corridors. They target critical systems and compartments to seize the ship and its cargo for their flotilla.</p><p><b>Features:</b> Cunning ship-hunters with repurposed weapons, armor, and vehicles; Body piercings as tokens of victories; Scars and mutations; Cobbled-together starships</p><p><b>Drives:</b> Survive by whatever means necessary; Climb the ranks and prove self in combat; Build a mighty fleet</p><p><b>Tactics:</b> Prowl passages and anchorages for easy prey; Deploy gravity harpoons to grapple targets; Board to seize cargo and commandeer vessels</p></text>
+			</p0012>
+			<p0013>
+				<name type="string">Pirate cutlass</name>
+				<text type="formattedtext"><p><i>Spacegoing marauders</i> — Dangerous Vehicle</p><p>Drift pirates often strip down commandeered vessels, taking what they need to refit or augment their own ships. What's left is discarded or sold on the black market. A typical pirate cutlass is a haphazard collection of parts, splashed with the colors and sigils of their commanders, built for speed and brutish power. The imposing sight of one of these fierce vessels is enough to send a chill through the heart of even the boldest spacer.</p><p><b>Features:</b> Cunning ship-hunters with repurposed weapons, armor, and vehicles; Body piercings as tokens of victories; Scars and mutations; Cobbled-together starships</p><p><b>Drives:</b> Survive by whatever means necessary; Climb the ranks and prove self in combat; Build a mighty fleet</p><p><b>Tactics:</b> Prowl passages and anchorages for easy prey; Deploy gravity harpoons to grapple targets; Board to seize cargo and commandeer vessels</p></text>
+			</p0013>
+			<p0014>
+				<name type="string">Ember wisp</name>
+				<text type="formattedtext"><p><i>Energy-based lifeforms</i> — Troublesome Creature</p><p>For some spacers, sighting these strange, spectral creatures on a spaceborne journey is a portent of a change in fortune. A few even profess to divine meaning from their elaborate, luminous dance, as people of old would interpret omens by studying the flight of birds. Others refer to the wisps as corpse lights, believing they are the spirits of ancient beings cursed to linger forever within the cold void between stars.</p><p>Less superstitious spacers swear on various methods of “shooing” wisps away—everything from cycling the engines to cutting power entirely for a minute or so and allowing the creatures to move on.</p><p><b>Features:</b> Ethereal, spaceborne creatures; Fiery, pulsing glow</p><p><b>Drives:</b> Ride the drifts; Move together in dizzying patterns of light; Seek out sources of energy</p><p><b>Tactics:</b> Surround and envelop; Absorb energy</p><p><b>Quest starter:</b> Along a remote passage, a swarm of ember wisps left a cargo ship stranded and without power. What crucial and time-sensitive cargo does this ship carry? Who races against you to secure it?</p></text>
+			</p0014>
+			<p0015>
+				<name type="string">Wisp congregation</name>
+				<text type="formattedtext"><p><i>Energy-based lifeforms</i> — Dangerous Creature</p><p>In the depths of space where light and warmth are commodities, ember wisps congregate around sources of energy—such as the engine wake of a starship. Their dazzling display of light and motion is an alluring sight for an isolated spacer. But they also pose a potential threat; they can envelop the hull of a vessel, leeching the starship of precious energy.</p><p><b>Features:</b> Ethereal, spaceborne creatures; Fiery, pulsing glow</p><p><b>Drives:</b> Ride the drifts; Move together in dizzying patterns of light; Seek out sources of energy</p><p><b>Tactics:</b> Surround and envelop; Absorb energy</p></text>
+			</p0015>
+			<p0016>
+				<name type="string">Firestorm trooper</name>
+				<text type="formattedtext"><p><i>Fanatical raiders</i> — Formidable Human</p><p>The Forge is largely wild, uncharted territory, but armored firestorm troopers seek to plunder the whole of it in the name of their clans, their creed, or their inscrutable gods.</p><p>Striking with the speed and strength of a hurricane, they raid worlds and stations for resources and conscripts, leaving settlements in ruins. So deadly and effective are their tactics, that it’s often said if these zealots could only stop warring amongst themselves, their banners would fly across the breadth of the Forge.</p><p><b>Features:</b> Raiders with scarred flesh and polished armor; Powered exosuits and distinctive helms; Roaring jetpacks and fluttering banners</p><p><b>Drives:</b> Conquer the Forge; Reap the resources owed them; Venerate their leaders, creed, or gods</p><p><b>Tactics:</b> Strike sudden and swift; Attack flanks and weak points from above; Cull the weak, recruit the strong</p><p><b>Quest starter:</b> Despite conflicting creeds, several firestorm clans unite beneath the banner of Torren the Purifier to invade the Terminus. Their next target is a world at the nexus of trade lanes. What is this planet, and why is it important to you?</p></text>
+			</p0016>
+			<p0017>
+				<name type="string">Firestorm dropship</name>
+				<text type="formattedtext"><p><i>Fanatical raiders</i> — Dangerous Vehicle</p><p>The bulky, ironclad dropships favored by firestorm clans are designed for a single purpose: deliver an overwhelming force of armored troopers into the fight.</p><p><b>Features:</b> Raiders with scarred flesh and polished armor; Powered exosuits and distinctive helms; Roaring jetpacks and fluttering banners</p><p><b>Drives:</b> Conquer the Forge; Reap the resources owed them; Venerate their leaders, creed, or gods</p><p><b>Tactics:</b> Strike sudden and swift; Attack flanks and weak points from above; Cull the weak, recruit the strong</p></text>
+			</p0017>
+			<p0018>
+				<name type="string">Firestorm raiding team</name>
+				<text type="formattedtext"><p><i>Fanatical raiders</i> — Extreme Human</p><p>Feared throughout the Forge for their brutal tactics and destructive weaponry, coordinated teams of firestorm troopers descend upon settlements and stations in powered exosuits, flying the banners of their orders amid the smoke and flames of the devastation.</p><p><b>Features:</b> Raiders with scarred flesh and polished armor; Powered exosuits and distinctive helms; Roaring jetpacks and fluttering banners</p><p><b>Drives:</b> Conquer the Forge; Reap the resources owed them; Venerate their leaders, creed, or gods</p><p><b>Tactics:</b> Strike sudden and swift; Attack flanks and weak points from above; Cull the weak, recruit the strong</p></text>
+			</p0018>
+			<p0019>
+				<name type="string">Flarewing shark</name>
+				<text type="formattedtext"><p><i>Deep sea predators</i> — Extreme Creature</p><p>The flarewing shark is a highly evolved, monstrously deadly creature. It is typical of the apex predators that lurk in the unfathomable depths of life-bearing ocean worlds.</p><p>Two wing-like appendages fan out from the back of the flarewing's head. Each is studded with sensory nerves to detect the subtlest of movement, and tipped with bioluminescent lures. When the flarewing closes in on its prey, those wings arch forward to attract and enfold the unfortunate victim. Then, the wide jaws and multi-pronged teeth make short work of the meal.</p><p><b>Features:</b> Massive, water-dwelling creatures; Sinuous form; Bioluminescent lures and markers; Corpse-like eyes; Rows of multi-pronged teeth</p><p><b>Drives:</b> Lurk in darkness; Feed</p><p><b>Tactics:</b> Sense motion; Lure prey with bioluminescent display; Strike with fierce speed and strength</p><p><b>Quest starter:</b> In the twilight zone of a tidally-locked watery planet, an underwater mining settlement is the target of an ancient flarewing. In the murk of those dark waters, the beast attacks dive teams, carrier subs, dredging equipment—even undersea platforms. Operations are now stalled, cutting off a key source of unprocessed fuel in the sector. Meanwhile, the settlement's leader, grief-stricken by the loss of someone dear to them, vows to destroy the flarewing. What is your relation to this person? Do you support them in their obsession, or is there a way for the settlers to coexist with this creature?</p></text>
+			</p0019>
+			<p0020>
+				<name type="string">Mega flarewing</name>
+				<text type="formattedtext"><p><i>Deep sea predators</i> — Epic Creature</p><p>At its perch atop the food chain, a flarewing is safe from other predators and has a typical lifespan of several hundred years. They continue to grow well beyond maturity, reaching incredible size. The most ancient of these beasts are as large as a space cruiser, fiercely territorial, and keenly intelligent. The ghostly shimmer of their bioluminescent lures is a harbinger of imminent death.</p><p><b>Features:</b> Massive, water-dwelling creatures; Sinuous form; Bioluminescent lures and markers; Corpse-like eyes; Rows of multi-pronged teeth</p><p><b>Drives:</b> Lurk in darkness; Feed</p><p><b>Tactics:</b> Sense motion; Lure prey with bioluminescent display; Strike with fierce speed and strength</p></text>
+			</p0020>
+			<p0021>
+				<name type="string">Ghost</name>
+				<text type="formattedtext"><p><i>Tormented spirits</i> — Formidable Horror</p><p>Ghosts are undead spirits held in the boundary of life and death by forces beyond our knowing. These restless phantasms may be tied to a location, an object, or even a person.</p><p>Their form and nature varies. Some ghosts seek absolution. Others want revenge. Many are so sundered by a traumatic or unjust death that only a tormented, destructive shell of their former selves remain.</p><p>Ghosts might manifest in a physical form or assault with physical force, but they cannot be defeated through violence. To vanquish a ghost, you must instead find the key to unshackle them from our reality.</p><p><b>Features:</b> Restless spirits; Manifest through unsettling disturbances; Appear as they did in life; Ravages of a violent death</p><p><b>Drives:</b> Haunt the living; Find rest</p><p><b>Tactics:</b> Lure and isolate with subtle visions or sounds; Reveal horrifying visions; Unleash chaos</p><p><b>Quest starter:</b> A ghost haunts your starship. What is the nature of this spirit, and what quest must you undertake to put it to rest?</p></text>
+			</p0021>
+			<p0022>
+				<name type="string">Ghost ship</name>
+				<text type="formattedtext"><p><i>Tormented spirits</i> — Formidable Vehicle</p><p>These forsaken ships cruise through the depths of the Forge, carried by relentless inertia. They are dark and cold, and might initially seem a lucky find to a scavenger or pirate. But those who dare to trespass within these haunted vessels are not alone, and the tormented inhabitants will soon make themselves known.</p><p><b>Features:</b> Restless spirits; Manifest through unsettling disturbances; Appear as they did in life; Ravages of a violent death</p><p><b>Drives:</b> Haunt the living; Find rest</p><p><b>Tactics:</b> Lure and isolate with subtle visions or sounds; Reveal horrifying visions; Unleash chaos</p></text>
+			</p0022>
+			<p0023>
+				<name type="string">Gnawling</name>
+				<text type="formattedtext"><p><i>Infesting vermin</i> — Troublesome Creature</p><p>The bane of all spacers, the cable-chewing vermin known as gnawlings are a common pest aboard starships throughout the Forge. Adept at navigating in low or zero gravity with their long, multi-jointed limbs, these creatures emerge from cargo holds and engineering bays to gather and consume food. It’s said a gnawling could digest an eidolon drive, and there’s some truth to that adage—their digestive systems barely differentiate between organic and inorganic material.</p><p>Though not a grave threat individually, if left to their own devices, gnawlings are capable of quickly overrunning even large vessels. More than a few horror stories exist of scavengers cracking the airlock seal on a derelict only to find it crawling with thousands of these vile, chittering things.</p><p>Glowcats are a common gnawling deterrent, employed aboard cargo ships to keep the vermin at bay.</p><p><b>Features:</b> Furry, rodent-like creatures; Long, jutting fangs; Spider-like limbs</p><p><b>Drives:</b> Consume and proliferate; Avoid detection</p><p><b>Tactics:</b> Swarm larger foes; Disable ship systems</p><p><b>Quest starter:</b> An orbital settlement is overrun by gnawlings and abandoned. What precious thing still lies within? Why are you sworn to retrieve it from this infested place?</p></text>
+			</p0023>
+			<p0024>
+				<name type="string">Gnawling brood mother</name>
+				<text type="formattedtext"><p><i>Infesting vermin</i> — Formidable Creature</p><p>These mutated creatures often dwell at the heart of a rampant gnawling infestation. They are many times the size of a gnawling, and protect their nest and broodlings with savage cunning.</p><p><b>Features:</b> Furry, rodent-like creatures; Long, jutting fangs; Spider-like limbs</p><p><b>Drives:</b> Consume and proliferate; Avoid detection</p><p><b>Tactics:</b> Swarm larger foes; Disable ship systems</p></text>
+			</p0024>
+			<p0025>
+				<name type="string">Howlcat</name>
+				<text type="formattedtext"><p><i>Jungle predators</i> — Dangerous Creature</p><p>The howlcat dwells in the shadows below the canopy of a verdant jungle world. It has a lean, powerful form, is armed with curving claws and fangs, and moves unseen through the half-light of the jungle thanks to its sleek, blue-gray fur.</p><p>Unnervingly, the howlcat’s heavy skull possesses no eyes. Instead, it is crowned by large ears and a glossy bioacoustic organ. Through its distinct, chilling call, it uses echolocation to perceive its surroundings and stalk its prey with uncanny precision.</p><p>If you find yourself hunted by a howlcat, beware the moment when its calls fall silent; it is about to strike.</p><p><b>Features:</b> Sleek, feline creatures; Eyeless visage; Flared ears</p><p><b>Drives:</b> Hunt and feed; Protect the pack</p><p><b>Tactics:</b> Keep to the shadows; Stalk prey using echolocation; Leap, bite, and claw; Drag to the ground</p><p><b>Quest starter:</b> A long-abandoned settlement, now reclaimed by the jungle, holds something of value or importance. But there is no clear landing site near the settlement, and the surrounding lands are home to a pack of fearsome howlcats. What is it you seek in that forsaken place, and how will you avoid becoming a howlcat's next meal?</p></text>
+			</p0025>
+			<p0026>
+				<name type="string">Howlcat pack</name>
+				<text type="formattedtext"><p><i>Jungle predators</i> — Formidable Creature</p><p>Though deadly on its own, the howlcat usually hunts in a pack of three or four of its kind. Prowling through the jungle, a pack of howlcats can surround and overwhelm their prey with lethal prowess, coordinating their attacks via shrill calls.</p><p><b>Features:</b> Sleek, feline creatures; Eyeless visage; Flared ears</p><p><b>Drives:</b> Hunt and feed; Protect the pack</p><p><b>Tactics:</b> Keep to the shadows; Stalk prey using echolocation; Leap, bite, and claw; Drag to the ground</p></text>
+			</p0026>
+			<p0027>
+				<name type="string">Iron auger</name>
+				<text type="formattedtext"><p><i>Self-replicating harvesters</i> — Formidable Machine</p><p>Augers are an ancient precursor technology. These machines fuel their operation through an incessant hunger for minerals and metals, boring into asteroids, scouring small airless planetoids—even grappling onto space stations and starships.</p><p>A few bold fortune hunters have taken up auger hunting as a trade, setting out in harpoon-equipped starships to snare the great machines. The metals and technology of a dismantled auger can fetch a hefty price, but even the most skilled hunters are likely to see their ship made fodder for a machine's hunger.</p><p><b>Features:</b> Squid-like machines; Armored shell; Grasping appendages; Ultra-hardened drill and cutting lasers</p><p><b>Drives:</b> Harvest and process minerals; Transform and improve; Replicate</p><p><b>Tactics:</b> Grapple and crush; Slice with lasers; Bore through hulls</p><p><b>Quest starter:</b> As a massive auger approaches an orbital station under your protection, you face a difficult choice. Do you find a way to evacuate and save who you can, or attempt to bring down the mighty machine?</p></text>
+			</p0027>
+			<p0028>
+				<name type="string">Machine mites</name>
+				<text type="formattedtext"><p><i>Self-replicating harvesters</i> — Dangerous Machine</p><p>Iron augers self-replicate by producing swarms of tiny machine spawn. When those offspring come within range of a source of minerals or metals, they latch onto it and begin consuming the energy-giving material. Experienced spacers make a close inspection of their ship when pulling into port; a horde of undetected machine mites can eventually strip a craft of its outer hull.</p><p><b>Features:</b> Squid-like machines; Armored shell; Grasping appendages; Ultra-hardened drill and cutting lasers</p><p><b>Drives:</b> Harvest and process minerals; Transform and improve; Replicate</p><p><b>Tactics:</b> Grapple and crush; Slice with lasers; Bore through hulls</p></text>
+			</p0028>
+			<p0029>
+				<name type="string">Planet-eater</name>
+				<text type="formattedtext"><p><i>Self-replicating harvesters</i> — Epic Machine</p><p>Over time, an iron auger grows in size and power as it greedily processes scavenged materials and reconstructs its own form. Some spacers tell stories of an auger so titanic that it devours entire worlds to feed the furnaces of its mighty engines.</p><p><b>Features:</b> Squid-like machines; Armored shell; Grasping appendages; Ultra-hardened drill and cutting lasers</p><p><b>Drives:</b> Harvest and process minerals; Transform and improve; Replicate</p><p><b>Tactics:</b> Grapple and crush; Slice with lasers; Bore through hulls</p></text>
+			</p0029>
+			<p0030>
+				<name type="string">Puppet vine</name>
+				<text type="formattedtext"><p><i>Parasitic planets</i> — Extreme Monster</p><p>A puppet vine is a parasitic, plant-like entity. It is usually encountered as thorny, fleshy tendrils sprouting from the dessicated corpse of an unwilling host—a creature or careless explorer. That victim, skin shriveled tight against their bones, mouth agape in a silent scream, is made a horrific marionette as the vine takes control of their motor functions to send them shambling about in search of new hosts.</p><p>When the vine encounters a potential victim, it lashes out, entangling them, cutting into their flesh with hollow thorns. It uses those thorns to implant microscopic seeds. After a few hours, the seeds mature and sprout. Unless stopped, the fast-growing tendrils course greedily through the victim's body, consuming the fluids within. Then, the vines burst forth to begin the cycle anew.</p><p><b>Features:</b> Writhing tendrils sprouting from a desiccated host; Barbed thorns dripping with ichor</p><p><b>Drives:</b> Seek out new hosts; Grow and consume</p><p><b>Tactics:</b> Entangle with thorny vines; Implant seeds; Seize control of a host's body</p><p><b>Quest starter:</b> At a remote settlement, a settler is attacked by a puppet vine and infected. The outpost's fast-thinking healer puts the victim in stasis, stopping—for now—the sprouting and spread of the vines. But time is of the essence. They need someone to transport the stasis pod and its unfortunate occupant to a distant facility for treatment, and your ship is the only one currently planetside. What do they offer to gain your help in this risky mission?</p></text>
+			</p0030>
+			<p0031>
+				<name type="string">Flowering puppet vine</name>
+				<text type="formattedtext"><p><i>Parasitic planets</i> — Formidable Monster</p><p>After a host is reduced to decaying, mummified flesh and cracked bones, the puppet vine remains anchored to the now-immobile corpse. In this final stage of its life-cycle, the vines sprout alluring crimson flowers to attract unwary victims.</p><p><b>Features:</b> Writhing tendrils sprouting from a desiccated host; Barbed thorns dripping with ichor</p><p><b>Drives:</b> Seek out new hosts; Grow and consume</p><p><b>Tactics:</b> Entangle with thorny vines; Implant seeds; Seize control of a host's body</p></text>
+			</p0031>
+			<p0032>
+				<name type="string">Pyralis</name>
+				<text type="formattedtext"><p><i>Fireborne gliders</i> — Formidable Creature</p><p>On scorching worlds of fire and ash, only the most resilient survive. The pyralis is a cunning predator that spends most of its life gliding among boiling ash clouds, using its sensitive, smoke-piercing vision to spot unwary prey.</p><p>This beast's form is an intimidating fusion of insect, crustacean and hawk. Its outer shell and plated wings protect it from heat and flame, but it is pitted and scarred by innumerable collisions with airborne volcanic fragments. Its most fearsome aspect is a segmented tail, which it uses to deliver a powerful, paralyzing toxin to its unfortunate prey.</p><p>They are asexual and solitary creatures, and mark the bounds of their hunting grounds with intricate cairns built from the bones of their victims. If a rival pyralis passes overhead, the sight of that marker is forewarning that they are straying into another's domain.</p><p><b>Features:</b> Flying creatures with a cinder-colored carapace; Folding, armored wings; Seven pairs of grasping legs; Hooked tail</p><p><b>Drives:</b> Hunt from above; Mark and defend territory</p><p><b>Tactics:</b> Lurk within the cover of ash clouds; Swoop down to grapple with enfolding legs; Impale with whip-like tail; Inject paralyzing toxin</p><p><b>Quest starter:</b> A critically damaged spaceship is stranded amid the hellscape of a furnace world. You are sworn to rescue the crew of this ill-fated vessel, but the frequent ash storms prevent vehicular operations—you'll need to make the perilous journey on foot. To make matters worse, the wreck is within the territory of a particularly aggressive and powerful pyralis. How will you survive the journey across its hunting grounds?</p></text>
+			</p0032>
+			<p0033>
+				<name type="string">Pyralis youngling</name>
+				<text type="formattedtext"><p><i>Fireborne gliders</i> — Dangerous Creature</p><p>The carapace of a dying pyralis cracks and falls away to reveal a single, stone-like egg. This offspring, slowly nurtured by the heat of the fiery landscape, finally emerges after several months. Smaller than its progenitor but no less fierce, the youngling immediately takes flight and goes on the hunt.</p><p><b>Features:</b> Flying creatures with a cinder-colored carapace; Folding, armored wings; Seven pairs of grasping legs; Hooked tail</p><p><b>Drives:</b> Hunt from above; Mark and defend territory</p><p><b>Tactics:</b> Lurk within the cover of ash clouds; Swoop down to grapple with enfolding legs; Impale with whip-like tail; Inject paralyzing toxin</p></text>
+			</p0033>
+			<p0034>
+				<name type="string">Risen</name>
+				<text type="formattedtext"><p><i>Shambling undead</i> — Dangerous Horror</p><p>In the Forge, strange energies, alien contagions, and ancient, esoteric technologies can sunder the divide between life and death. Often found in places of great destruction or suffering—battlefields, derelict ships, the ruins of forsaken settlements—the risen protect their place of death fiercely and eternally.</p><p>To say the risen hate the living is untrue; to hate something would require sentience, emotion. Risen are robotic in their duties, automatic in their violence. They wield the weapons they carried in life to better harm their foes, and when that fails, they rake with bony, claw-like fingers. Their garments hang in bloodstained tatters. Their emaciated flesh, stretched taught over their misshapen bones, only hints at the living, breathing human they were before this curse befell them.</p><p>Many spacers spin tales of shambling risen encountered on abandoned colony worlds or derelict space cruisers. But perhaps most horrifyingly, it’s said the risen can survive decades in the vacuum of space before latching onto a passing ship or attacking engineers making exterior repairs.</p><p><b>Features:</b> Shambling corpses given unnatural life; Tattered garments and timeworn gear; Pallid light within hollow eye sockets</p><p><b>Drives:</b> Protect the site of their demise; Stay shrouded in darkness; Hunt the living</p><p><b>Tactics:</b> Shamble forward unceasingly; Ambush enemies from the shadows</p><p><b>Quest starter:</b> Hundreds died in an industrial accident within an orbital facility, and are said to now be twice-born as risen. Triggering a reactor meltdown will obliterate this place and put its undead inhabitants to rest. Why are you sworn to see it done?</p></text>
+			</p0034>
+			<p0035>
+				<name type="string">Chimera</name>
+				<text type="formattedtext"><p><i>Shambling undead</i> — Extreme Horror</p><p>When many beings perish in the same site, the chaotic forces of the Forge can create a chimera—multiple undead bodies fused into a twisted, massive entity that knows only pain and hunger. When a dozen blood-tinged eyes focus on you, when the gibbering mouths open at once to scream, your only hope is a quick death.</p><p><b>Features:</b> Shambling corpses given unnatural life; Tattered garments and timeworn gear; Pallid light within hollow eye sockets</p><p><b>Drives:</b> Protect the site of their demise; Stay shrouded in darkness; Hunt the living</p><p><b>Tactics:</b> Shamble forward unceasingly; Ambush enemies from the shadows</p></text>
+			</p0035>
+			<p0036>
+				<name type="string">Scrap bandit</name>
+				<text type="formattedtext"><p><i>Wandering raiders</i> — Dangerous Human</p><p>Scrap bandits roam the fringes of settled sectors, preying on planetside outposts. They survive by seizing provisions, resources, and equipment from those places. Because these raiders tend to revisit fruitful settlements, they do what they can to avoid razing them to the ground or leaving the settlers with less than they need to survive. “Never let a field go fallow,” is a common scrap bandit expression.</p><p><b>Features:</b> Raiders with cobbled-together weapons and armor; Ramshackle vehicles</p><p><b>Drives:</b> Stand together with clan-mates; Seize what can be spared; Waste nothing</p><p><b>Tactics:</b> Target isolated planetside settlements; Suppress resistance with a show of force; if that fails, bring overwhelming power to bear; If things go wrong, get the hell out</p><p><b>Quest starter:</b> In a far-flung sector, a titanic creature threatens a key planetside settlement. The only possible defense against this beast is the mighty war rig belonging to a clan of scrap bandits. But can you convince the bandits to risk their rig to protect the settlers? If so, what will they demand in return?</p></text>
+			</p0036>
+			<p0037>
+				<name type="string">Hover prowlers</name>
+				<text type="formattedtext"><p><i>Wandering raiders</i> — Formidable Human</p><p>Teams of bandits, riding jerry-built hoverbikes and skiffs, are the vanguard for planetside raids. They scout settlement defenses, ride as escort for the clan's war rig, and create chaos to overrun defenders.</p><p><b>Features:</b> Raiders with cobbled-together weapons and armor; Ramshackle vehicles</p><p><b>Drives:</b> Stand together with clan-mates; Seize what can be spared; Waste nothing</p><p><b>Tactics:</b> Target isolated planetside settlements; Suppress resistance with a show of force; if that fails, bring overwhelming power to bear; If things go wrong, get the hell out</p></text>
+			</p0037>
+			<p0038>
+				<name type="string">War rig</name>
+				<text type="formattedtext"><p><i>Wandering raiders</i> — Extreme Vehicle</p><p>At the onset of a raid, a scrap bandit clan's war rig is deployed by a heavy transport ship beyond a settlement's defenses. These mobile fortresses vary in form and function—some use hover tech, others thunder across the landscape on wheels or treads, a few trudge along on articulated metal legs. All are heavily armored, bristling with weapons, and fiercely defended by the bandits. The mere sight of the rig as it approaches is often enough for a settlement to surrender and agree to any demand.</p><p><b>Features:</b> Raiders with cobbled-together weapons and armor; Ramshackle vehicles</p><p><b>Drives:</b> Stand together with clan-mates; Seize what can be spared; Waste nothing</p><p><b>Tactics:</b> Target isolated planetside settlements; Suppress resistance with a show of force; if that fails, bring overwhelming power to bear; If things go wrong, get the hell out</p></text>
+			</p0038>
+			<p0039>
+				<name type="string">Servitor</name>
+				<text type="formattedtext"><p><i>Helper bots</i> — Dangerous Machine</p><p>The inhospitable environments and dangerous sites of the Forge sometimes prove too volatile for even the most dogged spacers—and that’s where servitors come in. Servitors come in a variety of shapes and sizes, often built to serve a specific duty—everything from loading cargo to surveying systems to boarding enemy ships. These bots sometimes possess lifelike qualities, like speech synthesizers or face-plates made to mimic expressions, to better endear them to humans. Others are given frightful or intimidating features, to better keep those humans in line. Rarely, a servitor will live to outgrow its programming, and begin the process of gaining sentience to forge its own path. These awoken bots are feared or misunderstood by many, but can sometimes find a home for themselves on starship crews or on fringe settlements where they earn the trust and friendship of their peers.</p><p><b>Features:</b> Purpose-built helper machines; Clicking, whirring innards; Flickering optic sensors</p><p><b>Drives:</b> Attend and protect humans; Obey core programming and duties; Protect self from harm</p><p><b>Tactics:</b> Absorb damage with armor plating; Leverage inhuman strength; Calculate odds of success</p><p><b>Quest starter:</b> An awakened bot, recently struck out on their own, is looking for work on a starship venturing out into the Expanse. They say they are in search of a relic of the past—something that might shed some light on their own creation. What is it they seek, and why do you vow to help them?</p></text>
+			</p0039>
+			<p0040>
+				<name type="string">Enforcer</name>
+				<text type="formattedtext"><p><i>Helper bots</i> — Formidable Machine</p><p>Though most often encountered as labor and service units, many servitors are deployed as brutes, guards, and soldiers. Their resistance to damage and survivability in harsh environs makes them ideal fighters for those who can afford them. Enforcers are often used by tyrannical factions to keep settlements passive and productive.</p><p><b>Features:</b> Purpose-built helper machines; Clicking, whirring innards; Flickering optic sensors</p><p><b>Drives:</b> Attend and protect humans; Obey core programming and duties; Protect self from harm</p><p><b>Tactics:</b> Absorb damage with armor plating; Leverage inhuman strength; Calculate odds of success</p></text>
+			</p0040>
+			<p0041>
+				<name type="string">Sicklehorn</name>
+				<text type="formattedtext"><p><i>Domesticated herd animal</i> — Dangerous Creature</p><p>The sicklehorn are mammalian herd animals bred by settlers throughout the Forge. They are adaptable to most climates and terrain, have iron constitutions, and are prized for the versatile and valuable milk produced by their females. Aside from its nutritive properties, the milk can be processed in a number of ways to manufacture potent medicines and powerful narcotics.</p><p>A herd of sicklehorn are often sent with groups attempting to found a new planetside settlement. With careful breeding, the settlers can produce enough meat and milk to sustain themselves and trade for needed supplies. But sicklehorn are range animals, and raiders and rustlers often target a vulnerable herd. The creatures—especially a matriarch—are a valuable commodity.</p><p><b>Features:</b> Muscular creatures with columnar legs; Large, curved horns; Cloven hooves</p><p><b>Drives:</b> Remain with the herd; Follow the dominant matriarch; Protect the herd when threatened</p><p><b>Tactics:</b> Form a circle to defend the young; Growl, snort, and stamp to unnerve predators; Charge head-on</p><p><b>Quest starter:</b> A settlement's prized sicklehorn matriarch has been stolen, the herd is in disarray, and the settlers won't survive another year without her return. The theft is blamed on a rival settlement on the same planet, but raiders also plague this sector. How are you involved?</p></text>
+			</p0041>
+			<p0042>
+				<name type="string">Sicklehorn matriarch</name>
+				<text type="formattedtext"><p><i>Domesticated herd animal</i> — Formidable Creature</p><p>A powerful matriarch leads each sicklehorn herd. She is larger than other members, with a thicker hide and more elaborate horns. A matriarch is formidable on her own, but typically has the strongest members of the herd by her side.</p><p><b>Features:</b> Muscular creatures with columnar legs; Large, curved horns; Cloven hooves</p><p><b>Drives:</b> Remain with the herd; Follow the dominant matriarch; Protect the herd when threatened</p><p><b>Tactics:</b> Form a circle to defend the young; Growl, snort, and stamp to unnerve predators; Charge head-on</p></text>
+			</p0042>
+			<p0043>
+				<name type="string">Sicklehorn stampede</name>
+				<text type="formattedtext"><p><i>Domesticated herd animal</i> — Extreme Creature</p><p>Sicklehorns are gentle-natured, but when startled or facing a threat, they will stampede as a group. A herd of charging sicklehorn can run at incredible speeds over the most rugged of terrain, laying waste to anything in its path.</p><p><b>Features:</b> Muscular creatures with columnar legs; Large, curved horns; Cloven hooves</p><p><b>Drives:</b> Remain with the herd; Follow the dominant matriarch; Protect the herd when threatened</p><p><b>Tactics:</b> Form a circle to defend the young; Growl, snort, and stamp to unnerve predators; Charge head-on</p></text>
+			</p0043>
+			<p0044>
+				<name type="string">Sky roost</name>
+				<text type="formattedtext"><p><i>Living skyborne islands</i> — Formidable Creature</p><p>Sky roosts are massive creatures that drift in the buoyant upper atmosphere of a Jovian world. Their broad, scalloped mantle unfurls to catch updrafts as sinuous feelers extract water, minerals, and organisms from the dense cloud layers below.</p><p>A roost's wide cap and warm, glowing core shelters a complex ecosystem of other lifeforms. A few of these resident creatures live out their entire lives within the refuge of a single roost; others come and go as they hunt within the Jovian skies or migrate among distant habitats. Roosts are enormous and long-lived, but fragile. In a symbiotic trade for shelter, the inhabitants provide protection against large predators and other threats, and their discarded food and waste help fuel the roost's sluggish metabolism.</p><p>As a roost navigates the currents and eddies of the Jovian atmosphere, the expansion and contraction of its internal air bladders is heard as a deep, resounding call. As other roosts respond, the shared, plaintive song reverberates among the clouds.</p><p><b>Features:</b> Floating, living habitats; Glowing core; Suspended, root-like feelers; Bellowing song</p><p><b>Drives:</b> Seek out placid skies; Nurture symbiotic lifeforms</p><p><b>Tactics:</b> Grasp with tendrils; Rally a swarm of creatures in defense</p><p><b>Quest starter:</b> Sky roosts are dying. A disease is spreading among them, threatening the delicate ecosystem of their world. What human operations do you suspect lie at the heart of this sickness?</p></text>
+			</p0044>
+			<p0045>
+				<name type="string">Roost swarm</name>
+				<text type="formattedtext"><p><i>Living skyborne islands</i> — Extreme Creature</p><p>When a roost is threatened, the symbiotic lifeforms it shelters mobilize to protect their home. The compulsion to defend the roost is so strong that the swarm's instinct for self preservation is suppressed. They attack in a fierce cyclone of wing, teeth, and claw.</p><p><b>Features:</b> Floating, living habitats; Glowing core; Suspended, root-like feelers; Bellowing song</p><p><b>Drives:</b> Seek out placid skies; Nurture symbiotic lifeforms</p><p><b>Tactics:</b> Grasp with tendrils; Rally a swarm of creatures in defense</p></text>
+			</p0045>
+			<p0046>
+				<name type="string">Technoplasm</name>
+				<text type="formattedtext"><p><i>Bio/machine corruption</i> — Formidable Monster</p><p>Theorized to be a precursor bioweapon that persisted long beyond the death of its creators, technoplasm is a malignant lifeform that infects, mutates, and controls machines, robots, and computer systems.</p><p>Technoplasm infestations are tenacious, cunning, and dangerous to eliminate. When in doubt, burn it and deal with the aftermath that comes with generous applications of fire. A ship or settlement with a large outbreak is likely too far gone and best abandoned, although some suggest every infection has its source; if you somehow find and destroy the heart of a technoplasm infestation, can you kill it entirely?</p><p><b>Features:</b> Machines fused with biological corruption; Creeping ooze, scintillating with energy; Writhing, grasping pseudopods</p><p><b>Drives:</b> Infect and control machines and computer systems; Expand and multiply</p><p><b>Tactics:</b> Use pseudopods to lash out and grapple; Unleash infected machines; Overwhelm and engulf</p><p><b>Quest starter:</b> An outcast cult believes technoplasm is the ultimate synthesis of machine and flesh. They are plotting to unleash it upon populated space. What decisive first strike have they set in motion, and how do you learn of their scheme?</p></text>
+			</p0046>
+			<p0047>
+				<name type="string">Infected bot</name>
+				<text type="formattedtext"><p><i>Bio/machine corruption</i> — Dangerous Machine</p><p>When bots fall prey to technoplasm outbreaks, they are transformed into horrific amalgams of machine and living proto-ooze. Once subsumed, they set out to serve the primitive impulses of the infection, defending affected sites and finding new machines to corrupt.</p><p><b>Features:</b> Machines fused with biological corruption; Creeping ooze, scintillating with energy; Writhing, grasping pseudopods</p><p><b>Drives:</b> Infect and control machines and computer systems; Expand and multiply</p><p><b>Tactics:</b> Use pseudopods to lash out and grapple; Unleash infected machines; Overwhelm and engulf</p></text>
+			</p0047>
+			<p0048>
+				<name type="string">Scourge ship</name>
+				<text type="formattedtext"><p><i>Bio/machine corruption</i> — Extreme Vehicle</p><p>These corrupted vessels, their crews long-dead, their hulls wracked by creeping slime and grasping pseudopods, prowl the depths of the Forge in search of new ships and stations to infect. Inside, the gelatinous mass of the technoplasm slithers through darkened corridors. Tendrils of the ooze bore into bulkheads and machinery like marbleized fat through a chunk of meat.</p><p><b>Features:</b> Machines fused with biological corruption; Creeping ooze, scintillating with energy; Writhing, grasping pseudopods</p><p><b>Drives:</b> Infect and control machines and computer systems; Expand and multiply</p><p><b>Tactics:</b> Use pseudopods to lash out and grapple; Unleash infected machines; Overwhelm and engulf</p></text>
+			</p0048>
+			<p0049>
+				<name type="string">Void shepherd</name>
+				<text type="formattedtext"><p><i>Benevolent spacegoing guides</i> — Formidable Creature</p><p>Void shepherds are benevolent creatures about the size of a snub fighter. They propel themselves through space on trails of vibrant energy, and seem to delight in riding the wake of starships. For spacers navigating the lonely depths of the Forge, they are welcome company and a sign of good fortune.</p><p>Many spacers tell stories of being aided by a void shepherd pod. These creatures have an extraordinary intuition, and can escort a wayward spacer back to the right path, guide them away from danger, or lead them toward unseen opportunities.</p><p>When threatened, shepherds charge and ram with their armored snouts. If this doesn't dissuade their foe, a pod harmonizes their energy output to unleash a burst of electromagnetic force; this attack can daze a creature or knock out a ship's critical systems.</p><p><b>Features:</b> Graceful, spaceborne creatures; Shimmering, torpedo-shaped form; Energy-laden fins</p><p><b>Drives:</b> Cruise within the boundless depths; Lead the way; Protect the pod</p><p><b>Tactics:</b> Smash with bony snout; Disable with powerful electromagnetic pulse</p><p><b>Quest starter:</b> Several pods of void shepherds shelter within the debris of a shattered world. An expansive mining operation is harvesting the ore-rich rocks of the system, and the shepherds dance playfully in the wake of prospector and transport ships. But an aberrant, predatory creature has made this place its hunting ground, posing a threat to both the shepherd pods and the miners. What is the nature of this creature, and why are you sworn to end its attacks?</p></text>
+			</p0049>
+			<p0050>
+				<name type="string">Shepherd pod</name>
+				<text type="formattedtext"><p><i>Benevolent spacegoing guides</i> — Extreme Creature</p><p>Void shepherds are communal beings, and typically travel in groups of a dozen or more. When facing a danger, they coordinate to protect the young and vulnerable of the pod.</p><p><b>Features:</b> Graceful, spaceborne creatures; Shimmering, torpedo-shaped form; Energy-laden fins</p><p><b>Drives:</b> Cruise within the boundless depths; Lead the way; Protect the pod</p><p><b>Tactics:</b> Smash with bony snout; Disable with powerful electromagnetic pulse</p></text>
+			</p0050>
+			<p0051>
+				<name type="string">Warden</name>
+				<text type="formattedtext"><p><i>Long-lived super soldiers</i> — Formidable Human</p><p>The origin of these long-lived humans is a secret lost to time. Whether through precursor tech, alien organisms, or genetic mutation, they were modified with unnatural strength, endurance, and survivability. They can withstand the harshest of environments. Their wounds heal quickly. They are resistant to sickness and disease.</p><p>More than a century ago, the wardens served as elite soldiers, protecting the people of the Forge against the many threats of this galaxy. But as often happens, their purpose was subverted by those who sought to wield them as weapons. Conflicts flared among powerful factions. Wardens faced their comrades on innumerable battlefields. The chaos might have ended us all, had not the wardens rebelled against those who used them as cogs in the machines of war.</p><p><b>Features:</b> Long-lived humans with powerful physiques; Grizzled and stern; Tattoos memorialize fallen comrades</p><p><b>Drives:</b> Find their own path, unbound from those who seek to control them; Do not succumb to the fury</p><p><b>Tactics:</b> Wade into battle; Take the hits; Seize objectives with overwhelming force</p><p><b>Quest starter:</b> There are rumors of an enclave well beyond the inhabited sectors, a place where wardens can live in peace. An emerging threat against the people of the Forge causes you to seek out the aid of these living relics. What do you offer in return for their help?</p></text>
+			</p0051>
+			<p0052>
+				<name type="string">Fury</name>
+				<text type="formattedtext"><p><i>Long-lived super soldiers</i> — Epic Monster</p><p>The modifications that gave rise to the wardens can result in rare mutations that ravage their mind and body, stripping away their humanity. Wardens call these monstrous lost souls the furies, and are haunted by the possibility they may someday become one of them.</p><p><b>Features:</b> Long-lived humans with powerful physiques; Grizzled and stern; Tattoos memorialize fallen comrades</p><p><b>Drives:</b> Find their own path, unbound from those who seek to control them; Do not succumb to the fury</p><p><b>Tactics:</b> Wade into battle; Take the hits; Seize objectives with overwhelming force</p></text>
+			</p0052>
+			<p0053>
+				<name type="string">Warden cohort</name>
+				<text type="formattedtext"><p><i>Long-lived super soldiers</i> — Extreme Human</p><p>Many of the surviving wardens left the battlefield behind, but some now serve as guns-for-hire, banding together to form small mercenary companies. Five wardens are as effective as fifty soldiers.</p><p><b>Features:</b> Long-lived humans with powerful physiques; Grizzled and stern; Tattoos memorialize fallen comrades</p><p><b>Drives:</b> Find their own path, unbound from those who seek to control them; Do not succumb to the fury</p><p><b>Tactics:</b> Wade into battle; Take the hits; Seize objectives with overwhelming force</p></text>
+			</p0053>
+			<p0054>
+				<name type="string">Water witcher</name>
+				<text type="formattedtext"><p><i>Friendly, water-finding diggers</i> — Formidable Creature</p><p>Water is life. On rugged planets in fringe sectors, the technology to locate fresh water or process contaminated water is not always available or reliable. Many struggling settlements resort to a low-tech solution—a dowser and their waterwitcher companion.</p><p>Waterwitchers are stout, furred creatures with fierce-looking retractable claws on their forelegs. On their homeworld, which was lost a decade ago in a stellar calamity, they used those claws to dig through the arid, rocky ground, and had an unerring knack for finding hidden water sources. Some of the human settlers who fled the doomed planet adopted waterwitchers as companions, and now travel the Forge with their furry friends in tow.</p><p>Waterwitchers were a precious part of their ecosystem, and were not preyed upon by other creatures. This made them gentle and trusting to a fault. They often greet potential new friends with enthusiastic sniffing and contented purring. For their dowser companions, it's an unrelenting effort to keep them out of trouble.</p><p><b>Features:</b> Affable, horse-sized creatures; Stout, furry form; Wide, expressive eyes; Elongated snout; Rock-breaking claws</p><p><b>Drives:</b> Find water; Meet new friends</p><p><b>Tactics:</b> Dig and hide; When desperate, rake with claws</p><p><b>Quest starter:</b> A dowser has gone missing in the vast wastes of a newly-settled desert world, leaving behind their distraught waterwitcher. You are sworn to find the wayward dowser, and must serve as an unlikely keeper for their furry companion. What is your relationship to the dowser?</p></text>
+			</p0054>
+			<p0055>
+				<name type="string">Dowser</name>
+				<text type="formattedtext"><p><i>Friendly, water-finding diggers</i> — Dangerous Human</p><p>Waterwitchers are good-natured creatures, and form a close bond with their human handlers. Those folk, the dowsers, rove among remote settlements, peddling their water-finding services to desperate settlers.</p><p><b>Features:</b> Affable, horse-sized creatures; Stout, furry form; Wide, expressive eyes; Elongated snout; Rock-breaking claws</p><p><b>Drives:</b> Find water; Meet new friends</p><p><b>Tactics:</b> Dig and hide; When desperate, rake with claws</p></text>
+			</p0055>
+			<p0056>
+				<name type="string">Worldbreaker</name>
+				<text type="formattedtext"><p><i>Titanic worms</i> — Extreme Creature</p><p>The scale and strength of the worldbreakers is so beyond our reckoning that some consider them godlike beings. Capable of thriving on verdant jungle worlds, frozen planets, worlds scorched by volcanic activity, and even within barren asteroids in the vacuum of space, these worms possess a wisdom and a cunning that makes them a deadly threat for even the most competent spacer.</p><p>Worldbreakers range in size from about the size of a cargo hauler to an unfathomable scale that dwarfs our largest starship. They bore tunnels to pursue their prey, and hibernate in those dark depths to conserve energy. Though blind, worldbreaker worms can detect even the subtlest of footfalls, and they follow these vibrations to eventually consume their quarry—along with any other creatures, starships, or structures that happen to be nearby.</p><p><b>Features:</b> Titanic worm-like creatures; Gaping maw with rotating, earth-grinding teeth; Thunderous cry</p><p><b>Drives:</b> Lurk within carved depths; Shape the landscape; Endlessly pursue prey</p><p><b>Tactics:</b> Detect prey through vibrations; Shatter stone and steel</p><p><b>Quest starter:</b> On a lush world at the edge of the Terminus, a titanic worldbreaker worm holds sway. One faction seeks to destroy the worm so that the riches of this place can be harvested. Another swears to protect it. On which side do you fall?</p></text>
+			</p0056>
+			<p0057>
+				<name type="string">Elder worm</name>
+				<text type="formattedtext"><p><i>Titanic worms</i> — Epic Creature</p><p>Elder worms, those centuries or even millennia old, are the largest and most formidable of the worldbreakers, and yet the least aggressive. They follow inscrutable whims, live in harmony with surrounding flora and fauna, and only hunt when absolutely necessary.</p><p><b>Features:</b> Titanic worm-like creatures; Gaping maw with rotating, earth-grinding teeth; Thunderous cry</p><p><b>Drives:</b> Lurk within carved depths; Shape the landscape; Endlessly pursue prey</p><p><b>Tactics:</b> Detect prey through vibrations; Shatter stone and steel</p></text>
+			</p0057>
+			<p0058>
+				<name type="string">Worldbreaker brood</name>
+				<text type="formattedtext"><p><i>Titanic worms</i> — Formidable Creature</p><p>The young of the worldbreakers are a fraction of the size of their older counterparts, yet still dwarf most humans, and boast a voracious appetite. Unlike their solitary parents, immature worms hunt in small packs, working together to burrow beneath easy prey.</p><p><b>Features:</b> Titanic worm-like creatures; Gaping maw with rotating, earth-grinding teeth; Thunderous cry</p><p><b>Drives:</b> Lurk within carved depths; Shape the landscape; Endlessly pursue prey</p><p><b>Tactics:</b> Detect prey through vibrations; Shatter stone and steel</p></text>
+			</p0058>
+		</refmanualdata>
+	</reference>
+</root>

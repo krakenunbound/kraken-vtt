@@ -1,0 +1,384 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root version="4.6" release="1">
+	<encounter>
+		<category name="The Cinder Barrow">
+			<e00aboutthisscenario>
+				<name type="string">00 About This Scenario</name>
+				<text type="formattedtext"><p><b>The Cinder Barrow</b> is a short starter for <i>Ironsworn</i> (with <i>Delve</i>): one to four characters, one or two sessions, with or without a GM. It is Kraken's own, an unofficial adaptation (see the Ironsworn Reference's front page).</p><p>This work is based on Ironsworn, Ironsworn: Delve and Ironsworn: Starforged, created by Shawn Tomkin, and licensed for our use under the Creative Commons Attribution 4.0 International license (https://creativecommons.org/licenses/by/4.0/).</p><p>This is an unofficial adaptation made for Kraken VTT, compatible with Ironsworn and Ironsworn: Starforged. It is not an official Tomkin Press product, and is not affiliated with or endorsed by Shawn Tomkin or Tomkin Press. It uses no Tomkin Press art, icons or trade dress. The full rulebooks (free to download from the publisher) explain the games in far more depth.</p><p><b>The truth.</b> Long ago the chieftain Hallar Ash-Crown swore to guard the valley of Brannoch from a famine-winter, then fled with the clan's stores. His people buried him in a barrow with his hounds and cursed him to keep his vow in death. Now the barrow's braziers have lit themselves, smoke rolls down into the valley at night, and the cattle are found burned in their fields.</p></text>
+			</e00aboutthisscenario>
+			<e01brannochsplea>
+				<name type="string">01 Brannoch's Plea</name>
+				<text type="formattedtext"><p><i>Read or tell:</i> <b>Brannoch is a dozen longhouses on a frozen river. The elder, Wenna Tull, meets you at the gate with soot on her hands. &quot;Three nights now the hounds have come down from the barrow,&quot; she says. &quot;They burn what they touch. Tomorrow it will be our homes.&quot;</b></p><p><b>The inciting vow (dangerous):</b> <i>I will end the burning that comes from the Cinder Barrow.</i> Each character makes <b>Swear an Iron Vow</b> (+heart; +1 if they share a bond with Brannoch).</p><p>What the villagers know (Gather Information, +wits): the barrow is half a day north, past the split rock; its old name was the Hall of Hallar; &quot;the chieftain broke his vow, and the dead do not forgive&quot;. Wenna offers a bond to whoever returns: <b>Forge a Bond</b> with Brannoch afterwards.</p></text>
+			</e01brannochsplea>
+			<e02thewaynorth>
+				<name type="string">02 The Way North</name>
+				<text type="formattedtext"><p>A <b>troublesome journey</b> (Undertake a Journey, then Reach Your Destination). At each waypoint, ask the oracle or use these: the split rock, scorched black on one side; a burned-out shieling where a <b>Swarm of Crows</b> feeds; prints in the snow that steam.</p><p>On a miss on the journey: a <b>Cinder Hound</b> hunts the party in the dusk (a fight: Enter the Fray).</p></text>
+			</e02thewaynorth>
+			<e03intothebarrow>
+				<name type="string">03 Into the Barrow</name>
+				<text type="formattedtext"><p><b>Discover a Site:</b> <i>The Cinder Barrow</i>, a <b>haunted barrow</b> (theme Haunted, domain Barrow; use the GM's Delve Sites tool), <b>dangerous</b>.</p><p>The map shows the barrow: the <b>entry passage</b> (bones, a fallen stone), the <b>hall of four pillars</b> with two braziers that never go out, the <b>north and south tombs</b> (Hallar's oath-sworn: two <b>Barrow Dead</b> rise if their coffins are opened), the <b>burning hall</b> (the altar where the oath-stone lies, four braziers), a <b>collapsed tunnel</b> to the east with a black pool, and a <b>hidden vault</b> behind a secret door south of the altar (the clan's stores, rotted to dust, and Hallar's oath-ring).</p><p>Use <b>Delve the Depths</b> to cross each area; its features and dangers come from the theme and domain.</p></text>
+			</e03intothebarrow>
+			<e04theashcrownedwarden>
+				<name type="string">04 The Ash-Crowned Warden</name>
+				<text type="formattedtext"><p>When the party reaches the burning hall, <b>Hallar, the Ash-Crowned Warden</b> (formidable) rises from the altar's smoke with two <b>Cinder Hounds</b>.</p><p>He can be fought (End the Fight), or bargained with (Compel, +heart): he wants his vow kept at last. A character who swears to bring the clan's oath-ring back to Brannoch and lay it at the elders' hearth ends the curse when that vow is fulfilled. That is a new vow (formidable) and a story of its own.</p><p><b>Fulfill Your Vow</b> when the burning ends. A strong hit: mark experience for a dangerous vow (2). Brannoch remembers.</p></text>
+			</e04theashcrownedwarden>
+		</category>
+	</encounter>
+	<battle>
+		<category name="Encounters">
+			<houndsinthedusk>
+				<name type="string">Hounds in the Dusk</name>
+				<npclist>
+					<id-00001>
+						<name type="string">Cinder Hound</name>
+						<count type="number">1</count>
+						<faction type="string">foe</faction>
+						<isidentified type="number">1</isidentified>
+						<link type="windowreference"><class>npc</class><recordname>npc.cinderhound@Ironsworn Foes and Sites</recordname></link>
+					</id-00001>
+				</npclist>
+			</houndsinthedusk>
+			<theoathsworn>
+				<name type="string">The Oath-Sworn</name>
+				<npclist>
+					<id-00001>
+						<name type="string">Barrow Dead</name>
+						<count type="number">2</count>
+						<faction type="string">foe</faction>
+						<isidentified type="number">1</isidentified>
+						<link type="windowreference"><class>npc</class><recordname>npc.barrowdead@Ironsworn Foes and Sites</recordname></link>
+					</id-00001>
+				</npclist>
+			</theoathsworn>
+			<theashcrownedwarden>
+				<name type="string">The Ash-Crowned Warden</name>
+				<npclist>
+					<id-00001>
+						<name type="string">The Ash-Crowned Warden</name>
+						<count type="number">1</count>
+						<faction type="string">foe</faction>
+						<isidentified type="number">1</isidentified>
+						<link type="windowreference"><class>npc</class><recordname>npc.theashcrownedwarden@Ironsworn Foes and Sites</recordname></link>
+					</id-00001>
+					<id-00002>
+						<name type="string">Cinder Hound</name>
+						<count type="number">2</count>
+						<faction type="string">foe</faction>
+						<isidentified type="number">1</isidentified>
+						<link type="windowreference"><class>npc</class><recordname>npc.cinderhound@Ironsworn Foes and Sites</recordname></link>
+					</id-00002>
+				</npclist>
+			</theashcrownedwarden>
+		</category>
+	</battle>
+	<image>
+		<category name="Maps">
+			<thecinderbarrow>
+				<name type="string">The Cinder Barrow</name>
+				<image>
+					<grid type="string">on</grid>
+					<gridsize type="string">70,70</gridsize>
+					<gridoffset type="string">0,0</gridoffset>
+					<layers>
+						<layer>
+							<name type="string">The Cinder Barrow</name>
+							<id type="string">0</id>
+							<parentid type="string">-1</parentid>
+							<type type="string">image</type>
+							<bitmap type="string">images/cinder-barrow.webp</bitmap>
+							<matrix type="string">1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1</matrix>
+							<occluders>
+								<occluder>
+									<id type="string">0</id>
+									<points type="string">-350,630,0,630</points>
+								</occluder>
+								<occluder>
+									<id type="string">1</id>
+									<points type="string">-350,490,-210,490</points>
+								</occluder>
+								<occluder>
+									<id type="string">2</id>
+									<points type="string">-140,490,0,490</points>
+								</occluder>
+								<occluder>
+									<id type="string">3</id>
+									<points type="string">-420,280,-210,280</points>
+								</occluder>
+								<occluder>
+									<id type="string">4</id>
+									<points type="string">-140,280,70,280</points>
+								</occluder>
+								<occluder>
+									<id type="string">5</id>
+									<points type="string">840,280,980,280</points>
+								</occluder>
+								<occluder>
+									<id type="string">6</id>
+									<points type="string">280,210,700,210</points>
+								</occluder>
+								<occluder>
+									<id type="string">7</id>
+									<points type="string">-280,140,-210,140</points>
+								</occluder>
+								<occluder>
+									<id type="string">8</id>
+									<points type="string">-140,140,-70,140</points>
+								</occluder>
+								<occluder>
+									<id type="string">9</id>
+									<points type="string">-980,70,-420,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">10</id>
+									<points type="string">-280,70,-210,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">11</id>
+									<points type="string">-140,70,-70,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">12</id>
+									<points type="string">70,70,280,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">13</id>
+									<points type="string">700,70,840,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">14</id>
+									<points type="string">700,0,840,0</points>
+								</occluder>
+								<occluder>
+									<id type="string">15</id>
+									<points type="string">-980,-70,-420,-70</points>
+								</occluder>
+								<occluder>
+									<id type="string">16</id>
+									<points type="string">-280,-70,-210,-70</points>
+								</occluder>
+								<occluder>
+									<id type="string">17</id>
+									<points type="string">-140,-70,-70,-70</points>
+								</occluder>
+								<occluder>
+									<id type="string">18</id>
+									<points type="string">70,-70,280,-70</points>
+								</occluder>
+								<occluder>
+									<id type="string">19</id>
+									<points type="string">-280,-140,-210,-140</points>
+								</occluder>
+								<occluder>
+									<id type="string">20</id>
+									<points type="string">-140,-140,-70,-140</points>
+								</occluder>
+								<occluder>
+									<id type="string">21</id>
+									<points type="string">280,-210,420,-210</points>
+								</occluder>
+								<occluder>
+									<id type="string">22</id>
+									<points type="string">560,-210,700,-210</points>
+								</occluder>
+								<occluder>
+									<id type="string">23</id>
+									<points type="string">840,-210,980,-210</points>
+								</occluder>
+								<occluder>
+									<id type="string">24</id>
+									<points type="string">-420,-280,-210,-280</points>
+								</occluder>
+								<occluder>
+									<id type="string">25</id>
+									<points type="string">-140,-280,70,-280</points>
+								</occluder>
+								<occluder>
+									<id type="string">26</id>
+									<points type="string">280,-350,420,-350</points>
+								</occluder>
+								<occluder>
+									<id type="string">27</id>
+									<points type="string">560,-350,700,-350</points>
+								</occluder>
+								<occluder>
+									<id type="string">28</id>
+									<points type="string">-350,-420,-210,-420</points>
+								</occluder>
+								<occluder>
+									<id type="string">29</id>
+									<points type="string">-140,-420,0,-420</points>
+								</occluder>
+								<occluder>
+									<id type="string">30</id>
+									<points type="string">-350,-630,0,-630</points>
+								</occluder>
+								<occluder>
+									<id type="string">31</id>
+									<points type="string">280,-630,700,-630</points>
+								</occluder>
+								<occluder>
+									<id type="string">32</id>
+									<points type="string">-980,70,-980,-70</points>
+								</occluder>
+								<occluder>
+									<id type="string">33</id>
+									<points type="string">-420,280,-420,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">34</id>
+									<points type="string">-420,-70,-420,-280</points>
+								</occluder>
+								<occluder>
+									<id type="string">35</id>
+									<points type="string">-350,630,-350,490</points>
+								</occluder>
+								<occluder>
+									<id type="string">36</id>
+									<points type="string">-350,-420,-350,-630</points>
+								</occluder>
+								<occluder>
+									<id type="string">37</id>
+									<points type="string">-280,140,-280,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">38</id>
+									<points type="string">-280,-70,-280,-140</points>
+								</occluder>
+								<occluder>
+									<id type="string">39</id>
+									<points type="string">-210,490,-210,280</points>
+								</occluder>
+								<occluder>
+									<id type="string">40</id>
+									<points type="string">-210,140,-210,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">41</id>
+									<points type="string">-210,-70,-210,-140</points>
+								</occluder>
+								<occluder>
+									<id type="string">42</id>
+									<points type="string">-210,-280,-210,-420</points>
+								</occluder>
+								<occluder>
+									<id type="string">43</id>
+									<points type="string">-140,490,-140,280</points>
+								</occluder>
+								<occluder>
+									<id type="string">44</id>
+									<points type="string">-140,140,-140,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">45</id>
+									<points type="string">-140,-70,-140,-140</points>
+								</occluder>
+								<occluder>
+									<id type="string">46</id>
+									<points type="string">-140,-280,-140,-420</points>
+								</occluder>
+								<occluder>
+									<id type="string">47</id>
+									<points type="string">-70,140,-70,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">48</id>
+									<points type="string">-70,-70,-70,-140</points>
+								</occluder>
+								<occluder>
+									<id type="string">49</id>
+									<points type="string">0,630,0,490</points>
+								</occluder>
+								<occluder>
+									<id type="string">50</id>
+									<points type="string">0,-420,0,-630</points>
+								</occluder>
+								<occluder>
+									<id type="string">51</id>
+									<points type="string">70,280,70,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">52</id>
+									<points type="string">70,-70,70,-280</points>
+								</occluder>
+								<occluder>
+									<id type="string">53</id>
+									<points type="string">280,210,280,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">54</id>
+									<points type="string">280,-70,280,-210</points>
+								</occluder>
+								<occluder>
+									<id type="string">55</id>
+									<points type="string">280,-350,280,-630</points>
+								</occluder>
+								<occluder>
+									<id type="string">56</id>
+									<points type="string">420,-210,420,-350</points>
+								</occluder>
+								<occluder>
+									<id type="string">57</id>
+									<points type="string">560,-210,560,-350</points>
+								</occluder>
+								<occluder>
+									<id type="string">58</id>
+									<points type="string">700,210,700,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">59</id>
+									<points type="string">700,0,700,-210</points>
+								</occluder>
+								<occluder>
+									<id type="string">60</id>
+									<points type="string">700,-350,700,-630</points>
+								</occluder>
+								<occluder>
+									<id type="string">61</id>
+									<points type="string">840,280,840,70</points>
+								</occluder>
+								<occluder>
+									<id type="string">62</id>
+									<points type="string">840,0,840,-210</points>
+								</occluder>
+								<occluder>
+									<id type="string">63</id>
+									<points type="string">980,280,980,-210</points>
+								</occluder>
+								<occluder>
+									<id type="string">64</id>
+									<points type="string">-420,70,-420,0</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+								<occluder>
+									<id type="string">65</id>
+									<points type="string">-420,0,-420,-70</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+								<occluder>
+									<id type="string">66</id>
+									<points type="string">-210,490,-140,490</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+								<occluder>
+									<id type="string">67</id>
+									<points type="string">-210,-420,-140,-420</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+								<occluder>
+									<id type="string">68</id>
+									<points type="string">280,70,280,0</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+								<occluder>
+									<id type="string">69</id>
+									<points type="string">490,-350,560,-350</points>
+									<toggleable type="number">1</toggleable>
+								</occluder>
+							</occluders>
+						</layer>
+					</layers>
+				</image>
+			</thecinderbarrow>
+		</category>
+	</image>
+</root>

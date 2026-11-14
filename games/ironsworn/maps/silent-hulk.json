@@ -1,0 +1,21 @@
+{ "cell": 70, "cols": 32, "rows": 18, "ground": "space", "seed": 271, "autoSolid": true, "solidTex": "hull", "wallColor": [64, 70, 80],
+  "floors": [
+    { "x": 1, "y": 8, "w": 3, "h": 2, "tex": "metal" },
+    { "x": 4, "y": 6, "w": 5, "h": 6, "tex": "deck" },
+    { "x": 9, "y": 8, "w": 13, "h": 2, "tex": "grate" },
+    { "x": 10, "y": 2, "w": 5, "h": 5, "tex": "metal" }, { "x": 12, "y": 7, "w": 1, "h": 1, "tex": "metal" },
+    { "x": 16, "y": 2, "w": 5, "h": 5, "tex": "deck" }, { "x": 18, "y": 7, "w": 1, "h": 1, "tex": "deck" },
+    { "x": 10, "y": 11, "w": 5, "h": 5, "tex": "metal" }, { "x": 12, "y": 10, "w": 1, "h": 1, "tex": "metal" },
+    { "x": 16, "y": 11, "w": 5, "h": 5, "tex": "grate" }, { "x": 18, "y": 10, "w": 1, "h": 1, "tex": "grate" },
+    { "x": 22, "y": 5, "w": 8, "h": 8, "tex": "deck" }
+  ],
+  "doors": [ { "x": 4, "y": 8, "side": "w" }, { "x": 4, "y": 9, "side": "w" }, { "x": 9, "y": 8, "side": "w" }, { "x": 12, "y": 7, "side": "n" }, { "x": 18, "y": 7, "side": "n" }, { "x": 12, "y": 10, "side": "s" }, { "x": 18, "y": 10, "side": "s" }, { "x": 22, "y": 8, "side": "w" }, { "x": 22, "y": 9, "side": "w" } ],
+  "features": [
+    { "kind": "console", "x": 1, "y": 8, "w": 1, "h": 1 },
+    { "kind": "crate", "x": 5, "y": 6, "w": 2, "h": 1 }, { "kind": "locker", "x": 8, "y": 6, "w": 1, "h": 2 }, { "kind": "blood", "x": 6, "y": 10 },
+    { "kind": "cryopod", "x": 10, "y": 2 }, { "kind": "cryopod", "x": 12, "y": 2 }, { "kind": "cryopod", "x": 14, "y": 2 }, { "kind": "cryopod", "x": 10, "y": 5 }, { "kind": "cryopod", "x": 14, "y": 5 },
+    { "kind": "bunk", "x": 16, "y": 2, "w": 1, "h": 2 }, { "kind": "bunk", "x": 20, "y": 2, "w": 1, "h": 2 }, { "kind": "table", "x": 17, "y": 4, "w": 2, "h": 1 },
+    { "kind": "crate", "x": 10, "y": 11, "w": 2, "h": 2 }, { "kind": "crate", "x": 13, "y": 13, "w": 2, "h": 2 }, { "kind": "barrel", "x": 10, "y": 15 },
+    { "kind": "reactor", "x": 17, "y": 12, "w": 3, "h": 3 }, { "kind": "lamp", "x": 16, "y": 15 },
+    { "kind": "console", "x": 27, "y": 5, "w": 3, "h": 1 }, { "kind": "console", "x": 29, "y": 6, "w": 1, "h": 6 }, { "kind": "table", "x": 24, "y": 8, "w": 2, "h": 2 }, { "kind": "rubble", "x": 23, "y": 11, "w": 2, "h": 1 }, { "kind": "bones", "x": 27, "y": 10 }
+  ] }

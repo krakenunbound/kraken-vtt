@@ -827,7 +827,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
   // read from the module itself (the Books window), as FG reads them, never
   // copied into the campaign (they made it tens of MB, sent to every player).
   const GM_SEAT = { role: "dm", name: "GM" };
-  const RULES_TYPES = new Set(["siegepackage", "siegepower", "siegegame", "item", "npc", "spell", "pregencharsheet", "cairntable", ...require("./dnd5e.cjs").TYPES_5E]);
+  const RULES_TYPES = new Set(["siegepackage", "siegepower", "siegegame", "item", "npc", "spell", "pregencharsheet", "cairntable", "ironmove", "ironasset", "ironoracle", "irondelve", ...require("./dnd5e.cjs").TYPES_5E]);
   function loadRecords(info) {
     const file = books?.file?.(info.id);
     if (!file) return;
@@ -1749,6 +1749,19 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       // spec with the campaign's books. A player's character is theirs.
       if (msg.type === "build-character") {
         const answer = (body) => send(ws, { type: "op-result", req: msg.req ?? null, ...body });
+        if (require("./ironsworn.cjs").isIronswornRuleset(ruleset)) {
+          // An Ironsworn or Starforged character from its wizard's spec (stats, assets, background vow, bonds or a connection).
+          const owner = client.role === "dm" ? text(msg.owner, "").slice(0, 24) : client.name;
+          require("./ironsworn.cjs")
+            .buildIronsworn(agentHandle, msg.spec ?? {}, owner, client.role === "dm" ? seatOf(client) : { role: "dm", name: client.name })
+            .then(({ record, problems }) => {
+              const stats = record.data.stats;
+              addChat({ id: client.id, from: client.name, text: `Created ${record.name}: Edge ${stats.edge}, Heart ${stats.heart}, Iron ${stats.iron}, Shadow ${stats.shadow}, Wits ${stats.wits}; ${Object.values(record.data.assets ?? {}).map((asset) => asset.name).join(", ")}.`, at: Date.now() });
+              answer({ ok: true, id: record.id, problems });
+            })
+            .catch((error) => answer({ ok: false, error: error instanceof Error ? error.message : "Could not build that character." }));
+          return;
+        }
         if (require("./cairn.cjs").isCairnRuleset(ruleset)) {
           // A Cairn character from its wizard's spec (the background's tables and the rolls made on the host's dice).
           const owner = client.role === "dm" ? text(msg.owner, "").slice(0, 24) : client.name;
@@ -1862,6 +1875,32 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         levelUp(agentHandle, record, msg.package, client.role === "dm" ? record.name : client.name).catch((error) =>
           send(ws, { type: "error", reason: error instanceof Error ? error.message : "Could not level up." }),
         );
+        return;
+      }
+
+      // Ironsworn and Starforged: moves, burning momentum, choices, progress tracks,
+      // assets, the oracles, Delve's sites and the tracker's foes (electron/ironsworn.cjs).
+      if (msg.type === "ironsworn") {
+        const iron = require("./ironsworn.cjs");
+        const answer = (body) => send(ws, { type: "op-result", req: msg.req ?? null, ...body });
+        const action = String(msg.action ?? "");
+        const args = msg.args && typeof msg.args === "object" ? msg.args : {};
+        let run;
+        if (iron.TABLE_ACTIONS.has(action)) run = iron.tableIronsworn(agentHandle, action, args, seatOf(client), client.role === "dm" && !["oracle", "site"].includes(action) ? "Combat" : client.name);
+        else {
+          const record = records.get(String(msg.id ?? ""), seatOf(client));
+          if (!record || !iron.isIronsworn(record) || (client.role !== "dm" && record.owner !== client.name)) {
+            answer({ ok: false, error: "That is not your Ironsworn character." });
+            return;
+          }
+          run = iron.actionIronsworn(agentHandle, record, action, args, seatOf(client), client.role === "dm" ? record.name : client.name);
+        }
+        run
+          .then((result) => answer({ ok: true, id: String(msg.id ?? ""), result: result && typeof result === "object" && "record" in result ? { ...result, record: undefined } : result }))
+          .catch((error) => {
+            answer({ ok: false, error: error instanceof Error ? error.message : "Could not do that." });
+            send(ws, { type: "error", reason: error instanceof Error ? error.message : "Could not do that." });
+          });
         return;
       }
 
