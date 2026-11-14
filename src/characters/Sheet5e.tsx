@@ -310,7 +310,10 @@ export function Sheet5e({ record, session }: { record: TableRecord; session: Ses
               <Field value={String(data.alignment ?? "")} editable={editable} label="Alignment" onSave={(value) => change("alignment", value)} />
               <small>Alignment</small>
             </label>
-            <Field value={String(data.notes ?? "")} area editable={editable} label="Notes" onSave={(value) => change("notes", value)} />
+            <label className="cc-labelled">
+              <Field value={String(data.notes ?? "")} area editable={editable} label="Notes" onSave={(value) => change("notes", value)} />
+              <small>Notes</small>
+            </label>
             {/* What the character wizard gave: feats, languages, proficiencies, traits and features. */}
             {(
               [
@@ -350,7 +353,7 @@ function Spells5e({ record, session, editable }: { record: TableRecord; session:
   const slots = rows(data.slots).sort((a, b) => a[0].localeCompare(b[0]));
   const known = (Array.isArray(data.spells) ? data.spells : []).map(String);
   const book = Object.values(session.records).filter((item) => item.type === "spell");
-  if (!casting) return <section className="cc-panel cc-page" data-tab-page="spells"><p className="hint">No spellcasting in this class.</p></section>;
+  if (!casting) return <section className="cc-panel cc-page" data-tab-page="spells"><p className="hint empty-state">No spellcasting in this class.</p></section>;
   return (
     <section className="cc-panel cc-page" data-tab-page="spells">
       <p className="cc-inline">

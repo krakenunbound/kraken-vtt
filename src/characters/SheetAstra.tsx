@@ -383,7 +383,10 @@ export function SheetAstra({ record, session }: { record: TableRecord; session: 
               <Field value={String(data.contacts ?? "")} editable={editable} label="Contacts and rivals" onSave={(value) => change("contacts", value)} />
               <small>Contacts and rivals</small>
             </label>
-            <Field value={String(data.notes ?? "")} area editable={editable} label="Notes" onSave={(value) => change("notes", value)} />
+            <label className="cc-labelled">
+              <Field value={String(data.notes ?? "")} area editable={editable} label="Notes" onSave={(value) => change("notes", value)} />
+              <small>Notes</small>
+            </label>
           </section>
         ) : null}
       </div>
