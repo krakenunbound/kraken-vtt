@@ -4,6 +4,27 @@ What changed in each release of Kraken VTT. Downloads are on the
 [Releases](https://github.com/krakenunbound/kraken-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
+## Unreleased
+
+- **A pass for looks, not only for function.** Every window was
+  photographed in eight games, full screen, as the GM and as a player,
+  and tidied:
+  scrollbars, checkboxes, sliders and switches in the table's brass instead
+  of the system's grey and blue; explanations in a quieter colour under what
+  they explain; empty lists that say what to do in a framed box (the party,
+  notes, clocks, starships, accounts, adventures); window titles cut to a
+  word (Modules, Encounters, Parcels, Tables, Story), the rest in the
+  tooltip; the Players window's addresses in a column; the party sheet's
+  sections under headings with the GM's controls in a bar; the character
+  wizards' parts under headings, the scores in boxes and the choices as
+  chips that light when ticked (Forged in the Dark's steps numbered on
+  cards); the right-click menu of a token like the dice tower's; gear rows
+  with the drop button at the end; Critical Hits & Fumbles and the volumes
+  on the Settings window's parts; Settings, Players and Critical Hits open
+  wide enough that each switch stays beside its label. In Forged in the Dark the party sheet no
+  longer shows a group check it does not have.
+  `node scripts/shot-all-windows.mjs` takes the photographs again.
+
 ## 0.1.0-alpha.89: Code mode for agents
 
 - **Code mode for AI agents.** A new agent tool, `kraken_code`, takes one
