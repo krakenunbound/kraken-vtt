@@ -4,7 +4,16 @@ What changed in each release of Kraken VTT. Downloads are on the
 [Releases](https://github.com/krakenunbound/kraken-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
-## Unreleased
+## 0.1.0-alpha.88: Ten games in the box
+
+Kraken now comes with ten games you can play with nothing else installed:
+its own Descending Darkness and Apeira Astra, and eight from open licences:
+D&D 5E (the SRD 5.2.1), Basic Fantasy, Cairn, Ironsworn, Starforged, Fate
+Core, Fate Accelerated and Forged in the Dark. Each has its rules, its
+character wizard and sheet, its books and a first adventure with maps, and
+each passed the full end-to-end run (a player in Chrome makes a character,
+buys gear, fights, and is given a parcel and experience). Each open game's
+text keeps its own licence, in its folder under `games/`.
 
 - **Apeira Astra: Marks and tricks.** A crew member now grows in a second way:
   the GM awards a **Mark** (at most six in a career) from the sheet, and the
