@@ -1798,6 +1798,18 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
             .catch((error) => answer({ ok: false, error: error instanceof Error ? error.message : "Could not build that character." }));
           return;
         }
+        if (require("./bfrpg.cjs").isBfRuleset(ruleset)) {
+          // A Basic Fantasy character from its wizard's spec (the book's procedure, the shop's purchases).
+          const owner = client.role === "dm" ? text(msg.owner, "").slice(0, 24) : client.name;
+          require("./bfrpg.cjs")
+            .buildBf(agentHandle, msg.spec ?? {}, owner, client.role === "dm" ? seatOf(client) : { role: "dm", name: client.name })
+            .then(({ record, problems }) => {
+              addChat({ id: client.id, from: client.name, text: `Created ${record.name}: ${record.data.race} ${record.data.className} ${record.data.level}.`, at: Date.now() });
+              answer({ ok: true, id: record.id, problems });
+            })
+            .catch((error) => answer({ ok: false, error: error instanceof Error ? error.message : "Could not build that character." }));
+          return;
+        }
         if (require("./adnd2e.cjs").is2eRuleset(ruleset)) {
           // A 2E character from its wizard's spec, or a book's pregen.
           const owner = client.role === "dm" ? text(msg.owner, "").slice(0, 24) : client.name;
@@ -2028,7 +2040,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
           send(ws, { type: "error", reason: "You cannot roll for that character." });
           return;
         }
-        siegeCheck(agentHandle, record, { attribute: msg.attribute, cl: msg.cl, bonus: msg.bonus, label: msg.label, addLevel: typeof msg.addLevel === "boolean" ? msg.addLevel : undefined, ...(["check", "save", "skill"].includes(msg.kind) ? { kind: msg.kind, skill: text(msg.skill, ""), dc: num(msg.dc, 0), advantage: ["advantage", "disadvantage", "boon", "bane"].includes(msg.advantage) ? msg.advantage : "" } : {}) }, client.role === "dm" ? record.name : client.name).catch((error) =>
+        siegeCheck(agentHandle, record, { attribute: msg.attribute, cl: msg.cl, bonus: msg.bonus, label: msg.label, addLevel: typeof msg.addLevel === "boolean" ? msg.addLevel : undefined, ...(["check", "save", "skill", "morale"].includes(msg.kind) ? { kind: msg.kind, skill: text(msg.skill, ""), dc: num(msg.dc, 0), advantage: ["advantage", "disadvantage", "boon", "bane"].includes(msg.advantage) ? msg.advantage : "" } : {}) }, client.role === "dm" ? record.name : client.name).catch((error) =>
           send(ws, { type: "error", reason: error instanceof Error ? error.message : "Could not roll that." }),
         );
         return;
@@ -2320,6 +2332,10 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
             case "turn-undead":
               // 2E: a cleric (or paladin) turns the undead it targets.
               return combat.turnUndead(msg.id ? String(msg.id) : "", msg.recordId ? String(msg.recordId) : "", Array.isArray(msg.undead) ? msg.undead.map(String).slice(0, 50) : null, seat);
+            case "morale":
+              // Basic Fantasy: a monster's (or retainer's) 2d6 at or under its score (bonus: the GM's adjustment).
+              // Cairn: a WIL save to stand, for one creature (id) or a side (faction).
+              return combat.morale(String(msg.id ?? msg.faction ?? "foe"), Number(msg.bonus) || 0, seat);
             case "clear-targets":
               return combat.clearTargets(String(msg.id), seat);
             case "target-area": {
@@ -2337,9 +2353,6 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
             }
             case "attack":
               return combat.attack(msg.recordId ? { recordId: String(msg.recordId) } : { entryId: String(msg.id) }, String(msg.weapon), seat, client.role === "dm" ? "Combat" : client.name, { full: Boolean(msg.full), mode: ["impaired", "enhanced"].includes(msg.mode) ? msg.mode : "" });
-            case "morale":
-              // Cairn: a WIL save to stand, for one creature (id) or a side (faction).
-              return combat.morale(String(msg.id ?? msg.faction ?? "foe"), seat);
             case "attack-together":
               // Cairn: several attackers at one foe, the highest die kept.
               return combat.attackTogether(Array.isArray(msg.ids) ? msg.ids : [], String(msg.targetId ?? ""), seat, client.role === "dm" ? "Combat" : client.name);

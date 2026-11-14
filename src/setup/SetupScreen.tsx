@@ -50,6 +50,7 @@ const RULESETS = [
   { name: "Ironsworn", blurb: "Ironsworn and Ironsworn: Delve (Shawn Tomkin, CC BY 4.0; an unofficial adaptation): vows sworn upon iron, the action die against two challenge dice, momentum, progress tracks, assets, the oracles for play with or without a GM, Delve's sites. Its Reference, Foes and Sites and The Cinder Barrow come with Kraken." },
   { name: "Starforged", blurb: "Ironsworn: Starforged (Shawn Tomkin, CC BY 4.0; an unofficial adaptation): a spacefarer's vows in the Forge, in control or in a bad spot, legacy tracks for experience, connections, your starship, the Forge's oracles. Its Reference, Foes and The Silent Hulk come with Kraken." },
   { name: "Cairn", blurb: "Cairn, Second Edition (Yochai Gal, CC BY-SA 4.0): three attributes and Hit Protection, saves under a d20, attacks that always hit, Scars, Fatigue and ten inventory slots, backgrounds instead of classes. Its Player's Guide, Warden's Guide and Trouble in Twin Lakes come with Kraken." },
+  { name: "Basic Fantasy", blurb: "The Basic Fantasy Role-Playing Game, 4th Edition (free, CC BY-SA): old-school play with ascending Armor Class and an attack bonus, 3d6 in order, four races and four classes, the five saving throws, d6 initiative, thief abilities, turning the undead. Its Player's Handbook, Game Master's Guide and a first adventure come with Kraken." },
   { name: "Worldbuilding", blurb: "No game rules: maps, tokens, chat and dice for any system." },
 ];
 

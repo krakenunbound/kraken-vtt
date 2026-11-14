@@ -99,10 +99,13 @@ async function awardXP(table, xp, from) {
     table.say(`Awarded experience to each of the Party. (${amount})`, from);
     return amount;
   }
-  for (const { member, amount: share } of xpShares(amount, members)) {
-    if (share <= 0) continue;
+  for (const { member, amount: shareIn } of xpShares(amount, members)) {
+    if (shareIn <= 0) continue;
+    // Basic Fantasy: a Human learns unusually quickly (+10% to all experience earned).
+    const bonus = member.data?.ruleset === "bfrpg" ? Number(member.data.xpbonus) || 0 : 0;
+    const share = bonus ? Math.round(shareIn * (1 + bonus / 100)) : shareIn;
     table.records.update(member.id, { data: { exp: (Number(member.data.exp) || 0) + share } }, table.seat);
-    table.say(`[${share} XP] -> ${member.name}`, from);
+    table.say(`[${share} XP${bonus ? ` (+${bonus}%)` : ""}] -> ${member.name}`, from);
   }
   table.say(`Awarded XP to the Party. (${amount})`, from);
   return amount;
@@ -160,7 +163,7 @@ async function distribute(table, from) {
       // The rules load first, then the sheet is read: nothing changed meanwhile is written over.
       const current = table.records.get(member.id).data;
       const astra = current?.ruleset === "astra" ? await require("./astra.cjs").rulesAstra() : current?.ruleset === "mgt2" ? await require("./mgt2.cjs").rulesMgt2() : current?.ruleset === "cairn" ? await require("./cairn.cjs").rulesCairn() : null;
-      const five = !astra && require("./dnd5e.cjs").is5e({ data: current }) ? await require("./dnd5e.cjs").rules5e() : !astra && require("./dnd35.cjs").is35({ data: current }) ? await require("./dnd35.cjs").rules35() : !astra && require("./adnd2e.cjs").is2e({ data: current }) ? await require("./adnd2e.cjs").rules2e() : null;
+      const five = !astra && current?.ruleset === "bfrpg" ? await require("./bfrpg.cjs").rulesBf() : !astra && require("./dnd5e.cjs").is5e({ data: current }) ? await require("./dnd5e.cjs").rules5e() :!astra && require("./dnd35.cjs").is35({ data: current }) ? await require("./dnd35.cjs").rules35() : !astra && require("./adnd2e.cjs").is2e({ data: current }) ? await require("./adnd2e.cjs").rules2e() : null;
       const data = structuredClone(table.records.get(member.id).data);
       if (current?.ruleset === "ironsworn") {
         // Ironsworn: something carried (an asset is bought with experience, not handed out).

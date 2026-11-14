@@ -20,10 +20,14 @@ import { WARDENS_GUIDE as CAIRN_WARDENS_GUIDE } from "../games/cairn/wardens-gui
 import { TROUBLE_IN_TWIN_LAKES } from "../games/cairn/trouble-in-twin-lakes.mjs";
 // Ironsworn (with Delve) and Ironsworn: Starforged (Shawn Tomkin, CC BY 4.0 parts only).
 import { IRONSWORN_BOOKS, STARFORGED_BOOKS } from "../games/ironsworn/books.mjs";
+// Basic Fantasy (CC BY-SA 4.0: games/basic-fantasy/LICENSE.md).
+import { PLAYERS_HANDBOOK as BF_PLAYERS } from "../games/basic-fantasy/players-handbook.mjs";
+import { GM_GUIDE as BF_GM } from "../games/basic-fantasy/gm-guide.mjs";
+import { MILL_AT_HOBS_FORD } from "../games/basic-fantasy/mill-at-hobs-ford.mjs";
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 const out = path.join(root, "games", "modules");
-const modules = [PLAYERS_HANDBOOK, BESTIARY, EMPTY_WATCHTOWER, CREW_HANDBOOK, DOSSIER, SALVAGE_RIGHTS, PLAYERS_RULES, CREATURES_SPEC, MAGIC_ITEMS_SPEC, CAIRN_PLAYERS_GUIDE, CAIRN_WARDENS_GUIDE, TROUBLE_IN_TWIN_LAKES, ...IRONSWORN_BOOKS, ...STARFORGED_BOOKS];
+const modules = [PLAYERS_HANDBOOK, BESTIARY, EMPTY_WATCHTOWER, CREW_HANDBOOK, DOSSIER, SALVAGE_RIGHTS, PLAYERS_RULES, CREATURES_SPEC, MAGIC_ITEMS_SPEC, CAIRN_PLAYERS_GUIDE, CAIRN_WARDENS_GUIDE, TROUBLE_IN_TWIN_LAKES, BF_PLAYERS, BF_GM, MILL_AT_HOBS_FORD, ...IRONSWORN_BOOKS, ...STARFORGED_BOOKS];
 for (const spec of modules) {
   const folder = writeModule(out, spec);
   console.log(`built ${path.relative(root, folder)}`);

@@ -41,6 +41,8 @@ const FG_RULESETS = {
   // Ironsworn (with Delve) and Ironsworn: Starforged (their CC BY 4.0 parts), shipped in the app (games/modules).
   Ironsworn: ["Ironsworn"],
   Starforged: ["Starforged"],
+  // Basic Fantasy RPG 4th Edition (CC BY-SA 4.0), its books shipped in the app.
+  "Basic Fantasy": ["Basic Fantasy"],
   Worldbuilding: [],
 };
 const ANY = new Set(["", "any", "corerpg"]);

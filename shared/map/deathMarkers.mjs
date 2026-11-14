@@ -30,7 +30,7 @@ const SCIFI_TYPES = ["Animal", "Alien", "Human", "Robot", "Vehicle"];
 export function creatureTypes(ruleset = "") {
   if (ruleset === "D&D 5E" || ruleset === "Descending Darkness") return FIVE_TYPES;
   if (ruleset === "D&D 3.5E" || ruleset === "Castles & Crusades") return D20_TYPES;
-  if (ruleset === "AD&D 2E") return OLD_TYPES;
+  if (ruleset === "AD&D 2E" || ruleset === "Basic Fantasy") return OLD_TYPES;
   if (ruleset === "Traveller" || ruleset === "Apeira Astra" || ruleset === "Starforged") return SCIFI_TYPES;
   return [...new Set([...D20_TYPES, ...FIVE_TYPES])].sort();
 }
