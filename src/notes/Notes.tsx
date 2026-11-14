@@ -52,7 +52,7 @@ export function NotesWindow({ session }: { session: Session }) {
       }}
     >
       <div className="notes-list" role="list">
-        {notes.length === 0 ? <p className="hint">{search ? "No note says that." : "No notes yet. The + makes one."}</p> : null}
+        {notes.length === 0 ? <p className="hint empty-state">{search ? "No note says that." : <><b>No notes yet</b>The + below makes one.</>}</p> : null}
         {notes.map((record) => (
           <button key={record.id} type="button" role="listitem" className="notes-row" data-note={record.id} onClick={() => windows.open("note", record.name, record.id)} {...slotDrag({ kind: "note", record: record.id, label: record.name })}>
             <Icon name="chat" size={15} />

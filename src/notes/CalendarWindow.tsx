@@ -177,11 +177,11 @@ export function CalendarWindow({ session }: { session: Session }) {
           ) : null}
           <h4>Player notes</h4>
           <ul className="cal-notes" data-cal-notes="players">
-            {playerNotes.length ? playerNotes.map(noteRow) : <li className="hint">None.</li>}
+            {playerNotes.length ? playerNotes.map(noteRow) : <li className="hint cal-none">None on this day.</li>}
           </ul>
           <h4>GM notes</h4>
           <ul className="cal-notes" data-cal-notes="gm">
-            {gmNotes.length ? gmNotes.map(noteRow) : <li className="hint">None.</li>}
+            {gmNotes.length ? gmNotes.map(noteRow) : <li className="hint cal-none">None on this day.</li>}
           </ul>
           <textarea
             className="cal-draft"

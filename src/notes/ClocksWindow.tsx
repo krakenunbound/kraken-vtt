@@ -84,7 +84,12 @@ export function ClocksWindow({ session }: { session: Session }) {
   };
   return (
     <section className="clocks-window" data-clocks={list.length}>
-      {list.length === 0 ? <p className="hint">{gm ? "No clocks yet. Make one below: 4 segments for a complex obstacle, 6 for a more complicated one, 8 for a daunting one." : "No clocks on the table."}</p> : null}
+      {list.length === 0 ? (
+        <p className="hint empty-state">
+          <b>No clocks yet</b>
+          {gm ? "Make one below: 4 segments for a complex obstacle, 6 for a more complicated one, 8 for a daunting one." : "The GM's clocks show here when they share them."}
+        </p>
+      ) : null}
       <div className="clocks-grid">
         {list.map((clock) => (
           <div key={clock.id} className={`clock-card${clock.shown ? "" : " gm-only"}`} data-clock={clock.name} data-filled={clock.filled}>
