@@ -27,6 +27,7 @@ const MESSAGES = {
   "sign-out": "kraken_accounts",
   "level-up": "kraken_level_up",
   "character-improve": "kraken_character_improve",
+  "character-mark": "kraken_character_mark",
   "siege-check": "kraken_siege_check",
   ct: "kraken_combat",
   "party-award-xp": "kraken_party_award",

@@ -127,6 +127,88 @@
 				<token type="string">tokens/pirate-raider.webp@Apeira Astra Threat Dossier</token>
 				<picture type="string">images/npc/pirate-raider.webp@Apeira Astra Threat Dossier</picture>
 			</pirateraider>
+			<hesskade>
+				<name type="string">Hess Kade</name>
+				<type type="string">Human</type>
+				<characteristics>
+					<brawn>
+						<score type="number">8</score>
+					</brawn>
+					<reflex>
+						<score type="number">7</score>
+					</reflex>
+					<grit>
+						<score type="number">8</score>
+					</grit>
+					<intellect>
+						<score type="number">8</score>
+					</intellect>
+					<training>
+						<score type="number">7</score>
+					</training>
+					<presence>
+						<score type="number">9</score>
+					</presence>
+				</characteristics>
+				<hp type="number">23</hp>
+				<armour type="number">2</armour>
+				<ac type="number">2</ac>
+				<skills type="string">Melee 1, Deceive 2, Persuade 1, Streetwise 1</skills>
+				<actions>
+					<id-00001>
+						<name type="string">Shock Baton</name>
+						<desc type="string">Attack +1 (2d6), melee; a target hit makes a Grit check or loses its next turn.</desc>
+					</id-00001>
+				</actions>
+				<traits>
+				</traits>
+				<text type="formattedtext"><p>A Halvard Combine collector. <b>Wants</b> the debt, or an asset worth more than the debt. <b>Offers</b> nothing at first. He pays well for a thread spool and then he knows the seller's name, ship, and habits. He would rather a signature than a body: bodies do not owe interest.</p></text>
+				<token type="string">tokens/hess-kade.webp@Apeira Astra Threat Dossier</token>
+				<picture type="string">images/npc/hess-kade.webp@Apeira Astra Threat Dossier</picture>
+			</hesskade>
+			<rooktal>
+				<name type="string">Rook Tal</name>
+				<type type="string">Human</type>
+				<characteristics>
+					<brawn>
+						<score type="number">7</score>
+					</brawn>
+					<reflex>
+						<score type="number">9</score>
+					</reflex>
+					<grit>
+						<score type="number">7</score>
+					</grit>
+					<intellect>
+						<score type="number">7</score>
+					</intellect>
+					<training>
+						<score type="number">6</score>
+					</training>
+					<presence>
+						<score type="number">8</score>
+					</presence>
+				</characteristics>
+				<hp type="number">23</hp>
+				<armour type="number">3</armour>
+				<ac type="number">3</ac>
+				<skills type="string">Firearms 1, Stealth 1, Deceive 1, Zero-G 1, Melee 0</skills>
+				<actions>
+					<id-00001>
+						<name type="string">Snub Pistol</name>
+						<desc type="string">Attack +2 (2d6), 10 m.</desc>
+					</id-00001>
+					<id-00002>
+						<name type="string">Knife</name>
+						<desc type="string">Attack +0 (1d6), melee.</desc>
+					</id-00002>
+				</actions>
+				<traits>
+				</traits>
+				<text type="formattedtext"><p>A claim jumper. Rook boards a dark hull, plants a claim beacon timed to look older than yours, and is gone before the argument. Rook runs when the fight turns, and sells the recording of your airlock code to the next buyer.</p></text>
+				<token type="string">tokens/rook-tal.webp@Apeira Astra Threat Dossier</token>
+				<picture type="string">images/npc/rook-tal.webp@Apeira Astra Threat Dossier</picture>
+			</rooktal>
 		</category>
 		<category name="Salvage Rights">
 			<magsorrin>
@@ -342,6 +424,53 @@
 				<token type="string">tokens/sentry-turret.webp@Apeira Astra Threat Dossier</token>
 				<picture type="string">images/npc/sentry-turret.webp@Apeira Astra Threat Dossier</picture>
 			</sentryturret>
+			<quarantinedrone>
+				<name type="string">Quarantine Drone</name>
+				<type type="string">Robot</type>
+				<characteristics>
+					<brawn>
+						<score type="number">6</score>
+					</brawn>
+					<reflex>
+						<score type="number">8</score>
+					</reflex>
+					<grit>
+						<score type="number">10</score>
+					</grit>
+					<intellect>
+						<score type="number">4</score>
+					</intellect>
+					<training>
+						<score type="number">6</score>
+					</training>
+					<presence>
+						<score type="number">1</score>
+					</presence>
+				</characteristics>
+				<hp type="number">16</hp>
+				<armour type="number">6</armour>
+				<ac type="number">6</ac>
+				<skills type="string">Firearms 1, Recon 1</skills>
+				<actions>
+					<id-00001>
+						<name type="string">Spray Gun</name>
+						<desc type="string">Attack +1 (2d6), 15 m; a living target hit makes a Grit check (Standard) or takes a Bane on physical tasks until a Medicine task (Standard).</desc>
+					</id-00001>
+				</actions>
+				<traits>
+					<id-00001>
+						<name type="string">Machine</name>
+						<desc type="string">Does not breathe. Immune to vacuum and fear.</desc>
+					</id-00001>
+					<id-00002>
+						<name type="string">Phrase</name>
+						<desc type="string">It stands down if someone says the ship's quarantine phrase, clearly, before shooting.</desc>
+					</id-00002>
+				</traits>
+				<text type="formattedtext"><p>A boxy medical drone with an amber ring on its face. It was told the compartment was unclean, and the order was never lifted. Electronics (Hard) at its wall panel shuts it down.</p></text>
+				<token type="string">tokens/quarantine-drone.webp@Apeira Astra Threat Dossier</token>
+				<picture type="string">images/npc/quarantine-drone.webp@Apeira Astra Threat Dossier</picture>
+			</quarantinedrone>
 		</category>
 		<category name="Creatures">
 			<rustcrawler>
@@ -430,6 +559,389 @@
 				<token type="string">tokens/void-lamprey.webp@Apeira Astra Threat Dossier</token>
 				<picture type="string">images/npc/void-lamprey.webp@Apeira Astra Threat Dossier</picture>
 			</voidlamprey>
+			<threadlouse>
+				<name type="string">Thread Louse</name>
+				<type type="string">Creature</type>
+				<characteristics>
+					<brawn>
+						<score type="number">3</score>
+					</brawn>
+					<reflex>
+						<score type="number">8</score>
+					</reflex>
+					<grit>
+						<score type="number">4</score>
+					</grit>
+					<intellect>
+						<score type="number">1</score>
+					</intellect>
+					<training>
+						<score type="number">4</score>
+					</training>
+					<presence>
+						<score type="number">1</score>
+					</presence>
+				</characteristics>
+				<hp type="number">6</hp>
+				<armour type="number">1</armour>
+				<ac type="number">1</ac>
+				<skills type="string">Stealth 2, Athletics 1</skills>
+				<actions>
+					<id-00001>
+						<name type="string">Mandibles</name>
+						<desc type="string">Attack +1 (1d6), melee; chews a cable, a seal, or a suit.</desc>
+					</id-00001>
+				</actions>
+				<traits>
+					<id-00001>
+						<name type="string">Nest</name>
+						<desc type="string">In a cable run, use four of them. One may be asleep in a sealed case of skein metal.</desc>
+					</id-00001>
+					<id-00002>
+						<name type="string">Skein-hungry</name>
+						<desc type="string">They ignore people until the people touch a drive, a spool, or a live power line.</desc>
+					</id-00002>
+				</traits>
+				<text type="formattedtext"><p>Pale, soft, and the size of a hand. Thread lice eat the metal of skein rings and the insulation around it. A nest is a ruined jump. A single louse in a case is a surprise.</p></text>
+				<token type="string">tokens/thread-louse.webp@Apeira Astra Threat Dossier</token>
+				<picture type="string">images/npc/thread-louse.webp@Apeira Astra Threat Dossier</picture>
+			</threadlouse>
+		</category>
+		<category name="A Lamp in the Rock">
+			<seravoss>
+				<name type="string">Sera Voss</name>
+				<type type="string">Human</type>
+				<characteristics>
+					<brawn>
+						<score type="number">7</score>
+					</brawn>
+					<reflex>
+						<score type="number">9</score>
+					</reflex>
+					<grit>
+						<score type="number">8</score>
+					</grit>
+					<intellect>
+						<score type="number">9</score>
+					</intellect>
+					<training>
+						<score type="number">8</score>
+					</training>
+					<presence>
+						<score type="number">11</score>
+					</presence>
+				</characteristics>
+				<hp type="number">24</hp>
+				<armour type="number">4</armour>
+				<ac type="number">4</ac>
+				<skills type="string">Firearms 2, Persuade 2, Deceive 2, Pilot 1, Trade 1, Melee 0</skills>
+				<actions>
+					<id-00001>
+						<name type="string">Laser Pistol</name>
+						<desc type="string">Attack +3 (3d6), 30 m.</desc>
+					</id-00001>
+					<id-00002>
+						<name type="string">Knife</name>
+						<desc type="string">Attack +0 (1d6), melee.</desc>
+					</id-00002>
+				</actions>
+				<traits>
+				</traits>
+				<text type="formattedtext"><p>Captain of the cutter <i>Red Lease</i>. She buys claims out from under the crews who filed them, and she is polite until the price is refused. She wants the thread spool aboard the <i>Merry Dividend</i>, not the hull, and she will pay 8,000 credits to walk away with the case. She leaves a fight when she is Down, or when two of her boarders are.</p></text>
+				<token type="string">tokens/sera-voss.webp@Apeira Astra Threat Dossier</token>
+				<picture type="string">images/npc/sera-voss.webp@Apeira Astra Threat Dossier</picture>
+			</seravoss>
+			<redleaseboarder>
+				<name type="string">Red Lease Boarder</name>
+				<type type="string">Human</type>
+				<characteristics>
+					<brawn>
+						<score type="number">8</score>
+					</brawn>
+					<reflex>
+						<score type="number">8</score>
+					</reflex>
+					<grit>
+						<score type="number">8</score>
+					</grit>
+					<intellect>
+						<score type="number">6</score>
+					</intellect>
+					<training>
+						<score type="number">6</score>
+					</training>
+					<presence>
+						<score type="number">5</score>
+					</presence>
+				</characteristics>
+				<hp type="number">24</hp>
+				<armour type="number">5</armour>
+				<ac type="number">5</ac>
+				<skills type="string">Firearms 1, Melee 1, Zero-G 1</skills>
+				<actions>
+					<id-00001>
+						<name type="string">Carbine</name>
+						<desc type="string">Attack +1 (3d6), 100 m.</desc>
+					</id-00001>
+					<id-00002>
+						<name type="string">Shock Baton</name>
+						<desc type="string">Attack +1 (2d6), melee; a target hit makes a Grit check or loses its next turn.</desc>
+					</id-00002>
+				</actions>
+				<traits>
+				</traits>
+				<text type="formattedtext"><p>Sera Voss's boarding party, in grey plate with the visors up unless someone starts shooting. They follow her deal. If she says walk, they walk.</p></text>
+				<token type="string">tokens/red-lease-boarder.webp@Apeira Astra Threat Dossier</token>
+				<picture type="string">images/npc/red-lease-boarder.webp@Apeira Astra Threat Dossier</picture>
+			</redleaseboarder>
+			<brinhale>
+				<name type="string">Brin Hale</name>
+				<type type="string">Human</type>
+				<characteristics>
+					<brawn>
+						<score type="number">6</score>
+					</brawn>
+					<reflex>
+						<score type="number">7</score>
+					</reflex>
+					<grit>
+						<score type="number">6</score>
+					</grit>
+					<intellect>
+						<score type="number">9</score>
+					</intellect>
+					<training>
+						<score type="number">8</score>
+					</training>
+					<presence>
+						<score type="number">7</score>
+					</presence>
+				</characteristics>
+				<hp type="number">14</hp>
+				<armour type="number">0</armour>
+				<ac type="number">0</ac>
+				<skills type="string">Persuade 1, Electronics 1</skills>
+				<actions>
+					<id-00001>
+						<name type="string">Wrench</name>
+						<desc type="string">Attack -3 (1d6), melee.</desc>
+					</id-00001>
+				</actions>
+				<traits>
+					<id-00001>
+						<name type="string">Passenger</name>
+						<desc type="string">If Brin reaches an Accord registry alive, every filing on this hull is a rescue, not salvage.</desc>
+					</id-00001>
+				</traits>
+				<text type="formattedtext"><p>A passenger off the <i>Merry Dividend</i>, awake in a cabin the rock did not take. Brin thinks the metal case in the strong room is a brother's ashes, and will not leave it. Hungry, frightened, and telling the truth as far as it goes.</p></text>
+				<token type="string">tokens/brin-hale.webp@Apeira Astra Threat Dossier</token>
+				<picture type="string">images/npc/brin-hale.webp@Apeira Astra Threat Dossier</picture>
+			</brinhale>
+		</category>
+		<category name="Contacts">
+			<ivoquill>
+				<name type="string">Ivo Quill</name>
+				<type type="string">Human</type>
+				<characteristics>
+					<brawn>
+						<score type="number">5</score>
+					</brawn>
+					<reflex>
+						<score type="number">6</score>
+					</reflex>
+					<grit>
+						<score type="number">6</score>
+					</grit>
+					<intellect>
+						<score type="number">10</score>
+					</intellect>
+					<training>
+						<score type="number">9</score>
+					</training>
+					<presence>
+						<score type="number">7</score>
+					</presence>
+				</characteristics>
+				<hp type="number">17</hp>
+				<armour type="number">0</armour>
+				<ac type="number">0</ac>
+				<skills type="string">Electronics 2, Persuade 1, Deceive 0</skills>
+				<actions>
+					<id-00001>
+						<name type="string">The Stamp</name>
+						<desc type="string">Ivo can hold a rival filing for one day, or stamp a rescue the hour the crew docks, if they tell him whether anyone was alive.</desc>
+					</id-00001>
+				</actions>
+				<traits>
+				</traits>
+				<text type="formattedtext"><p><b>Wants</b> the registry to be true. <b>Offers</b> a delay on Sera Voss's copy of claim 441, and a clean stamp if the crew brings him the facts. He folds if he is threatened, and he will not stamp a lie he has seen through. Night clerk at Port Sable.</p></text>
+				<token type="string">tokens/ivo-quill.webp@Apeira Astra Threat Dossier</token>
+				<picture type="string">images/npc/ivo-quill.webp@Apeira Astra Threat Dossier</picture>
+			</ivoquill>
+			<harunvey>
+				<name type="string">Harun Vey</name>
+				<type type="string">Human</type>
+				<characteristics>
+					<brawn>
+						<score type="number">9</score>
+					</brawn>
+					<reflex>
+						<score type="number">6</score>
+					</reflex>
+					<grit>
+						<score type="number">8</score>
+					</grit>
+					<intellect>
+						<score type="number">7</score>
+					</intellect>
+					<training>
+						<score type="number">6</score>
+					</training>
+					<presence>
+						<score type="number">9</score>
+					</presence>
+				</characteristics>
+				<hp type="number">23</hp>
+				<armour type="number">1</armour>
+				<ac type="number">1</ac>
+				<skills type="string">Persuade 1, Streetwise 2, Leadership 1, Melee 0</skills>
+				<actions>
+					<id-00001>
+						<name type="string">Pipe</name>
+						<desc type="string">Attack +1 (1d6), melee.</desc>
+					</id-00001>
+					<id-00002>
+						<name type="string">A Berth</name>
+						<desc type="string">A night's dock, a name, or a look at who fuelled this morning. He remembers favours.</desc>
+					</id-00002>
+				</actions>
+				<traits>
+				</traits>
+				<text type="formattedtext"><p><b>Wants</b> his docks quiet and his friends paid. <b>Offers</b> a berth, a rumour, or an introduction on any station where the longshore trust him, which is most of them. Berthmaster. If the crew starts a firefight on his deck, the offer ends.</p></text>
+				<token type="string">tokens/harun-vey.webp@Apeira Astra Threat Dossier</token>
+				<picture type="string">images/npc/harun-vey.webp@Apeira Astra Threat Dossier</picture>
+			</harunvey>
+			<laleyee>
+				<name type="string">Lale Yee</name>
+				<type type="string">Human</type>
+				<characteristics>
+					<brawn>
+						<score type="number">6</score>
+					</brawn>
+					<reflex>
+						<score type="number">7</score>
+					</reflex>
+					<grit>
+						<score type="number">7</score>
+					</grit>
+					<intellect>
+						<score type="number">10</score>
+					</intellect>
+					<training>
+						<score type="number">11</score>
+					</training>
+					<presence>
+						<score type="number">8</score>
+					</presence>
+				</characteristics>
+				<hp type="number">20</hp>
+				<armour type="number">0</armour>
+				<ac type="number">0</ac>
+				<skills type="string">Medicine 3, Science 1, Persuade 1</skills>
+				<actions>
+					<id-00001>
+						<name type="string">Clinic</name>
+						<desc type="string">She treats the crew for the cost of the supplies, and one favour later. A Down character in her care wakes with 1d6 Stamina. She does not do this twice in a row for nothing.</desc>
+					</id-00001>
+				</actions>
+				<traits>
+				</traits>
+				<text type="formattedtext"><p><b>Wants</b> her clinic left out of Combine business. <b>Offers</b> real medicine: wounds, radiation, the crash after too many stims. She will not sign a false death, and she will not forget a crew that brought her someone still breathing.</p></text>
+				<token type="string">tokens/lale-yee.webp@Apeira Astra Threat Dossier</token>
+				<picture type="string">images/npc/lale-yee.webp@Apeira Astra Threat Dossier</picture>
+			</laleyee>
+			<oldcade>
+				<name type="string">Old Cade</name>
+				<type type="string">Human</type>
+				<characteristics>
+					<brawn>
+						<score type="number">7</score>
+					</brawn>
+					<reflex>
+						<score type="number">7</score>
+					</reflex>
+					<grit>
+						<score type="number">8</score>
+					</grit>
+					<intellect>
+						<score type="number">8</score>
+					</intellect>
+					<training>
+						<score type="number">9</score>
+					</training>
+					<presence>
+						<score type="number">8</score>
+					</presence>
+				</characteristics>
+				<hp type="number">22</hp>
+				<armour type="number">2</armour>
+				<ac type="number">2</ac>
+				<skills type="string">Mechanics 2, Streetwise 2, Trade 1, Zero-G 1, Firearms 0</skills>
+				<actions>
+					<id-00001>
+						<name type="string">Snub Pistol</name>
+						<desc type="string">Attack +0 (2d6), 10 m.</desc>
+					</id-00001>
+					<id-00002>
+						<name type="string">A Name</name>
+						<desc type="string">For a fee or a favour he names who is buying a given kind of salvage this month, and what they will not ask.</desc>
+					</id-00002>
+				</actions>
+				<traits>
+				</traits>
+				<text type="formattedtext"><p><b>Wants</b> to die on a rock he chose, not in a yard he owes. <b>Offers</b> parts, a quiet buyer, and the truth about a wreck if he has been there. A belter fixer. His price is credits, or a tool he does not have.</p></text>
+				<token type="string">tokens/old-cade.webp@Apeira Astra Threat Dossier</token>
+				<picture type="string">images/npc/old-cade.webp@Apeira Astra Threat Dossier</picture>
+			</oldcade>
+			<tomarees>
+				<name type="string">Toma Rees</name>
+				<type type="string">Human</type>
+				<characteristics>
+					<brawn>
+						<score type="number">7</score>
+					</brawn>
+					<reflex>
+						<score type="number">8</score>
+					</reflex>
+					<grit>
+						<score type="number">8</score>
+					</grit>
+					<intellect>
+						<score type="number">9</score>
+					</intellect>
+					<training>
+						<score type="number">8</score>
+					</training>
+					<presence>
+						<score type="number">9</score>
+					</presence>
+				</characteristics>
+				<hp type="number">23</hp>
+				<armour type="number">3</armour>
+				<ac type="number">3</ac>
+				<skills type="string">Firearms 1, Persuade 2, Leadership 1, Electronics 0</skills>
+				<actions>
+					<id-00001>
+						<name type="string">Service Pistol</name>
+						<desc type="string">Attack +1 (3d6), 20 m.</desc>
+					</id-00001>
+				</actions>
+				<traits>
+				</traits>
+				<text type="formattedtext"><p><b>Wants</b> the Accord's salvage law applied in the open. <b>Offers</b> a lawful rescue reward paid in full, and her testimony if a rival tries to bury a living passenger. She is an enemy only to a crew that files a derelict with someone still breathing on it. Inspector out of Port Sable.</p></text>
+				<token type="string">tokens/toma-rees.webp@Apeira Astra Threat Dossier</token>
+				<picture type="string">images/npc/toma-rees.webp@Apeira Astra Threat Dossier</picture>
+			</tomarees>
 		</category>
 	</npc>
 	<reference>
@@ -491,8 +1003,88 @@
 									<keywords type="string"></keywords>
 									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0010@Apeira Astra Threat Dossier</recordname></listlink>
 								</page_009>
+								<page_010>
+									<name type="string">Sera Voss</name>
+									<keywords type="string"></keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0011@Apeira Astra Threat Dossier</recordname></listlink>
+								</page_010>
+								<page_011>
+									<name type="string">Red Lease Boarder</name>
+									<keywords type="string"></keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0012@Apeira Astra Threat Dossier</recordname></listlink>
+								</page_011>
+								<page_012>
+									<name type="string">Brin Hale</name>
+									<keywords type="string"></keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0013@Apeira Astra Threat Dossier</recordname></listlink>
+								</page_012>
+								<page_013>
+									<name type="string">Ivo Quill</name>
+									<keywords type="string"></keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0014@Apeira Astra Threat Dossier</recordname></listlink>
+								</page_013>
+								<page_014>
+									<name type="string">Harun Vey</name>
+									<keywords type="string"></keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0015@Apeira Astra Threat Dossier</recordname></listlink>
+								</page_014>
+								<page_015>
+									<name type="string">Lale Yee</name>
+									<keywords type="string"></keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0016@Apeira Astra Threat Dossier</recordname></listlink>
+								</page_015>
+								<page_016>
+									<name type="string">Old Cade</name>
+									<keywords type="string"></keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0017@Apeira Astra Threat Dossier</recordname></listlink>
+								</page_016>
+								<page_017>
+									<name type="string">Toma Rees</name>
+									<keywords type="string"></keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0018@Apeira Astra Threat Dossier</recordname></listlink>
+								</page_017>
+								<page_018>
+									<name type="string">Hess Kade</name>
+									<keywords type="string"></keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0019@Apeira Astra Threat Dossier</recordname></listlink>
+								</page_018>
+								<page_019>
+									<name type="string">Rook Tal</name>
+									<keywords type="string"></keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0020@Apeira Astra Threat Dossier</recordname></listlink>
+								</page_019>
+								<page_020>
+									<name type="string">Thread Louse</name>
+									<keywords type="string"></keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0021@Apeira Astra Threat Dossier</recordname></listlink>
+								</page_020>
+								<page_021>
+									<name type="string">Quarantine Drone</name>
+									<keywords type="string"></keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0022@Apeira Astra Threat Dossier</recordname></listlink>
+								</page_021>
 							</refpages>
 						</sub_000>
+						<sub_001>
+							<name type="string">Work</name>
+							<refpages>
+								<page_000>
+									<name type="string">Running a Job</name>
+									<keywords type="string">job patron rival find payoff</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0023@Apeira Astra Threat Dossier</recordname></listlink>
+								</page_000>
+								<page_001>
+									<name type="string">Salvage</name>
+									<keywords type="string">salvage treasure find spool wreck table</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0024@Apeira Astra Threat Dossier</recordname></listlink>
+								</page_001>
+								<page_002>
+									<name type="string">Six Jobs</name>
+									<keywords type="string">job seed scenario patron</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0025@Apeira Astra Threat Dossier</recordname></listlink>
+								</page_002>
+							</refpages>
+						</sub_001>
 					</subchapters>
 				</chapter_000>
 			</chapters>
@@ -656,7 +1248,7 @@
 					<id-00002>
 						<blocktype type="string">singletext</blocktype>
 						<order type="number">2</order>
-						<text type="formattedtext"><p><i>Robot.</i> A boxy drone with magnetic treads and a cutting arm, built to strip wrecks. A damaged control core makes it treat everything as scrap.</p><p><b>Stamina</b> 18. <b>Armour</b> 6. <b>Skills</b> Melee 1, Recon 1.</p><p><b>Cutting Arm.</b> Attack +1 (2d6), melee.</p></text>
+						<text type="formattedtext"><p><i>Robot.</i> A boxy drone with magnetic treads and a cutting arm, built to strip wrecks. A damaged control core makes it treat everything as scrap.</p><p><b>Stamina</b> 18. <b>Armour</b> 6. <b>Skills</b> Melee 1, Recon 1.</p><p><b>Cutting Arm.</b> Attack +1 (2d6), melee.</p><p><b>Machine.</b> Does not breathe; immune to vacuum, poison and fear.</p></text>
 					</id-00002>
 				</blocks>
 			</p0006>
@@ -683,7 +1275,7 @@
 					<id-00002>
 						<blocktype type="string">singletext</blocktype>
 						<order type="number">2</order>
-						<text type="formattedtext"><p><i>Robot.</i> A ceiling-mounted defence gun, guarding a ship's bridge or vault.</p><p><b>Stamina</b> 16. <b>Armour</b> 8. <b>Skills</b> Firearms 2.</p><p><b>Twin Guns.</b> Attack +2 (3d6), 50 m.</p></text>
+						<text type="formattedtext"><p><i>Robot.</i> A ceiling-mounted defence gun, guarding a ship's bridge or vault.</p><p><b>Stamina</b> 16. <b>Armour</b> 8. <b>Skills</b> Firearms 2.</p><p><b>Twin Guns.</b> Attack +2 (3d6), 50 m.</p><p><b>Fixed.</b> It cannot move. Electronics (Hard) at its panel shuts it down.</p></text>
 					</id-00002>
 				</blocks>
 			</p0007>
@@ -710,7 +1302,7 @@
 					<id-00002>
 						<blocktype type="string">singletext</blocktype>
 						<order type="number">2</order>
-						<text type="formattedtext"><p><i>Creature.</i> Spiny metal-eaters from the asteroid belts that get into hulls and chew through cabling. Annoying alone; dangerous in a swarm.</p><p><b>Stamina</b> 12. <b>Armour</b> 2. <b>Skills</b> Stealth 2, Athletics 1.</p><p><b>Mandibles.</b> Attack +1 (1d6), melee; a vac suit hit springs a slow leak.</p></text>
+						<text type="formattedtext"><p><i>Creature.</i> Spiny metal-eaters from the asteroid belts that get into hulls and chew through cabling. Annoying alone; dangerous in a swarm.</p><p><b>Stamina</b> 12. <b>Armour</b> 2. <b>Skills</b> Stealth 2, Athletics 1.</p><p><b>Mandibles.</b> Attack +1 (1d6), melee; a vac suit hit springs a slow leak.</p><p><b>Swarm.</b> Usually 2d6 of them, in the ducts.</p></text>
 					</id-00002>
 				</blocks>
 			</p0008>
@@ -737,7 +1329,7 @@
 					<id-00002>
 						<blocktype type="string">singletext</blocktype>
 						<order type="number">2</order>
-						<text type="formattedtext"><p><i>Creature.</i> Three metres of muscle and teeth that drift between asteroids and latch on to anything warm.</p><p><b>Stamina</b> 26. <b>Armour</b> 3. <b>Skills</b> Athletics 2, Stealth 1.</p><p><b>Rasping Maw.</b> Attack +2 (3d6), melee; it holds on: 1d6 each turn until pulled off (Brawn, Hard).</p></text>
+						<text type="formattedtext"><p><i>Creature.</i> Three metres of muscle and teeth that drift between asteroids and latch on to anything warm.</p><p><b>Stamina</b> 26. <b>Armour</b> 3. <b>Skills</b> Athletics 2, Stealth 1.</p><p><b>Rasping Maw.</b> Attack +2 (3d6), melee; it holds on: 1d6 each turn until pulled off (Brawn, Hard).</p><p><b>Vacuum-born.</b> It lives in vacuum and lurks on hulls, drawn to warmth and light.</p></text>
 					</id-00002>
 				</blocks>
 			</p0009>
@@ -768,6 +1360,342 @@
 					</id-00002>
 				</blocks>
 			</p0010>
+			<p0011>
+				<name type="string">Sera Voss</name>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Sera Voss</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Sera Voss</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/npc/sera-voss.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><p><i>Human.</i> Captain of the cutter Red Lease. She buys claims out from under the crews who filed them, and she is polite until the price is refused. She wants the thread spool aboard the Merry Dividend, not the hull, and she will pay 8,000 credits to walk away with the case. She leaves a fight when she is Down, or when two of her boarders are.</p><p><b>Stamina</b> 24. <b>Armour</b> 4. <b>Skills</b> Firearms 2, Persuade 2, Deceive 2, Pilot 1, Trade 1, Melee 0.</p><p><b>Laser Pistol.</b> Attack +3 (3d6), 30 m.</p><p><b>Knife.</b> Attack +0 (1d6), melee.</p></text>
+					</id-00002>
+				</blocks>
+			</p0011>
+			<p0012>
+				<name type="string">Red Lease Boarder</name>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Red Lease Boarder</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Red Lease Boarder</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/npc/red-lease-boarder.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><p><i>Human.</i> Sera Voss's boarding party, in grey plate with the visors up unless someone starts shooting. They follow her deal. If she says walk, they walk.</p><p><b>Stamina</b> 24. <b>Armour</b> 5. <b>Skills</b> Firearms 1, Melee 1, Zero-G 1.</p><p><b>Carbine.</b> Attack +1 (3d6), 100 m.</p><p><b>Shock Baton.</b> Attack +1 (2d6), melee; a target hit makes a Grit check or loses its next turn.</p></text>
+					</id-00002>
+				</blocks>
+			</p0012>
+			<p0013>
+				<name type="string">Brin Hale</name>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Brin Hale</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Brin Hale</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/npc/brin-hale.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><p><i>Human.</i> A passenger off the Merry Dividend, awake in a cabin the rock did not take. Brin thinks the metal case in the strong room is a brother's ashes, and will not leave it. Hungry, frightened, and telling the truth as far as it goes.</p><p><b>Stamina</b> 14. <b>Armour</b> 0. <b>Skills</b> Persuade 1, Electronics 1.</p><p><b>Wrench.</b> Attack -3 (1d6), melee.</p><p><b>Passenger.</b> If Brin reaches an Accord registry alive, every filing on this hull is a rescue, not salvage.</p></text>
+					</id-00002>
+				</blocks>
+			</p0013>
+			<p0014>
+				<name type="string">Ivo Quill</name>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Ivo Quill</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Ivo Quill</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/npc/ivo-quill.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><p><i>Human.</i> Wants the registry to be true. Offers a delay on Sera Voss's copy of claim 441, and a clean stamp if the crew brings him the facts. He folds if he is threatened, and he will not stamp a lie he has seen through. Night clerk at Port Sable.</p><p><b>Stamina</b> 17. <b>Armour</b> 0. <b>Skills</b> Electronics 2, Persuade 1, Deceive 0.</p><p><b>The Stamp.</b> Ivo can hold a rival filing for one day, or stamp a rescue the hour the crew docks, if they tell him whether anyone was alive.</p></text>
+					</id-00002>
+				</blocks>
+			</p0014>
+			<p0015>
+				<name type="string">Harun Vey</name>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Harun Vey</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Harun Vey</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/npc/harun-vey.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><p><i>Human.</i> Wants his docks quiet and his friends paid. Offers a berth, a rumour, or an introduction on any station where the longshore trust him, which is most of them. Berthmaster. If the crew starts a firefight on his deck, the offer ends.</p><p><b>Stamina</b> 23. <b>Armour</b> 1. <b>Skills</b> Persuade 1, Streetwise 2, Leadership 1, Melee 0.</p><p><b>Pipe.</b> Attack +1 (1d6), melee.</p><p><b>A Berth.</b> A night's dock, a name, or a look at who fuelled this morning. He remembers favours.</p></text>
+					</id-00002>
+				</blocks>
+			</p0015>
+			<p0016>
+				<name type="string">Lale Yee</name>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Lale Yee</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Lale Yee</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/npc/lale-yee.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><p><i>Human.</i> Wants her clinic left out of Combine business. Offers real medicine: wounds, radiation, the crash after too many stims. She will not sign a false death, and she will not forget a crew that brought her someone still breathing.</p><p><b>Stamina</b> 20. <b>Armour</b> 0. <b>Skills</b> Medicine 3, Science 1, Persuade 1.</p><p><b>Clinic.</b> She treats the crew for the cost of the supplies, and one favour later. A Down character in her care wakes with 1d6 Stamina. She does not do this twice in a row for nothing.</p></text>
+					</id-00002>
+				</blocks>
+			</p0016>
+			<p0017>
+				<name type="string">Old Cade</name>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Old Cade</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Old Cade</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/npc/old-cade.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><p><i>Human.</i> Wants to die on a rock he chose, not in a yard he owes. Offers parts, a quiet buyer, and the truth about a wreck if he has been there. A belter fixer. His price is credits, or a tool he does not have.</p><p><b>Stamina</b> 22. <b>Armour</b> 2. <b>Skills</b> Mechanics 2, Streetwise 2, Trade 1, Zero-G 1, Firearms 0.</p><p><b>Snub Pistol.</b> Attack +0 (2d6), 10 m.</p><p><b>A Name.</b> For a fee or a favour he names who is buying a given kind of salvage this month, and what they will not ask.</p></text>
+					</id-00002>
+				</blocks>
+			</p0017>
+			<p0018>
+				<name type="string">Toma Rees</name>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Toma Rees</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Toma Rees</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/npc/toma-rees.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><p><i>Human.</i> Wants the Accord's salvage law applied in the open. Offers a lawful rescue reward paid in full, and her testimony if a rival tries to bury a living passenger. She is an enemy only to a crew that files a derelict with someone still breathing on it. Inspector out of Port Sable.</p><p><b>Stamina</b> 23. <b>Armour</b> 3. <b>Skills</b> Firearms 1, Persuade 2, Leadership 1, Electronics 0.</p><p><b>Service Pistol.</b> Attack +1 (3d6), 20 m.</p></text>
+					</id-00002>
+				</blocks>
+			</p0018>
+			<p0019>
+				<name type="string">Hess Kade</name>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Hess Kade</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Hess Kade</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/npc/hess-kade.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><p><i>Human.</i> A Halvard Combine collector. Wants the debt, or an asset worth more than the debt. Offers nothing at first. He pays well for a thread spool and then he knows the seller's name, ship, and habits. He would rather a signature than a body: bodies do not owe interest.</p><p><b>Stamina</b> 23. <b>Armour</b> 2. <b>Skills</b> Melee 1, Deceive 2, Persuade 1, Streetwise 1.</p><p><b>Shock Baton.</b> Attack +1 (2d6), melee; a target hit makes a Grit check or loses its next turn.</p></text>
+					</id-00002>
+				</blocks>
+			</p0019>
+			<p0020>
+				<name type="string">Rook Tal</name>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Rook Tal</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Rook Tal</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/npc/rook-tal.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><p><i>Human.</i> A claim jumper. Rook boards a dark hull, plants a claim beacon timed to look older than yours, and is gone before the argument. Rook runs when the fight turns, and sells the recording of your airlock code to the next buyer.</p><p><b>Stamina</b> 23. <b>Armour</b> 3. <b>Skills</b> Firearms 1, Stealth 1, Deceive 1, Zero-G 1, Melee 0.</p><p><b>Snub Pistol.</b> Attack +2 (2d6), 10 m.</p><p><b>Knife.</b> Attack +0 (1d6), melee.</p></text>
+					</id-00002>
+				</blocks>
+			</p0020>
+			<p0021>
+				<name type="string">Thread Louse</name>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Thread Louse</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Thread Louse</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/npc/thread-louse.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><p><i>Creature.</i> Pale, soft, and the size of a hand. Thread lice eat the metal of skein rings and the insulation around it. A nest is a ruined jump. A single louse in a case is a surprise.</p><p><b>Stamina</b> 6. <b>Armour</b> 1. <b>Skills</b> Stealth 2, Athletics 1.</p><p><b>Mandibles.</b> Attack +1 (1d6), melee; chews a cable, a seal, or a suit.</p><p><b>Nest.</b> In a cable run, use four of them. One may be asleep in a sealed case of skein metal.</p><p><b>Skein-hungry.</b> They ignore people until the people touch a drive, a spool, or a live power line.</p></text>
+					</id-00002>
+				</blocks>
+			</p0021>
+			<p0022>
+				<name type="string">Quarantine Drone</name>
+				<blocks>
+					<id-00001>
+						<blocktype type="string">image</blocktype>
+						<order type="number">1</order>
+						<align type="string">center</align>
+						<caption type="string">Quarantine Drone</caption>
+						<image>
+							<layers>
+								<layer>
+									<name type="string">Quarantine Drone</name>
+									<id type="string">0</id>
+									<parentid type="string">-1</parentid>
+									<type type="string">image</type>
+									<bitmap type="string">images/npc/quarantine-drone.webp</bitmap>
+								</layer>
+							</layers>
+						</image>
+					</id-00001>
+					<id-00002>
+						<blocktype type="string">singletext</blocktype>
+						<order type="number">2</order>
+						<text type="formattedtext"><p><i>Robot.</i> A boxy medical drone with an amber ring on its face. It was told the compartment was unclean, and the order was never lifted. Electronics (Hard) at its wall panel shuts it down.</p><p><b>Stamina</b> 16. <b>Armour</b> 6. <b>Skills</b> Firearms 1, Recon 1.</p><p><b>Spray Gun.</b> Attack +1 (2d6), 15 m; a living target hit makes a Grit check (Standard) or takes a Bane on physical tasks until a Medicine task (Standard).</p><p><b>Machine.</b> Does not breathe. Immune to vacuum and fear.</p><p><b>Phrase.</b> It stands down if someone says the ship's quarantine phrase, clearly, before shooting.</p></text>
+					</id-00002>
+				</blocks>
+			</p0022>
+			<p0023>
+				<name type="string">Running a Job</name>
+				<text type="formattedtext"><p>A job the crew can finish in a session has five parts. Write them down before you play. The players do not need to see the page.</p><list><li>1. <b>The patron.</b> Someone with a name, a want, and a reason to hire this crew. A contact in this book will do.</li><li>2. <b>The rival.</b> Someone who wants the same thing, already moving. They arrive when the clock says, not when the fight would be fair.</li><li>3. <b>The clock.</b> Three tasks to get there (Astrogation, Pilot, and one more). Each failure costs time. Say the time out loud.</li><li>4. <b>The find.</b> What is actually there. It should change the job: a living person turns salvage into a rescue; a thread spool turns a tow into a decision.</li><li>5. <b>The payoff.</b> Credits, a favour, a Mark, and a thread for next time. Experience is 2 each for the job, plus 1 for a hard thing done right.</li></list><p>Offer the deal before the shooting. Most rivals in the Reach would rather be paid.</p></text>
+			</p0023>
+			<p0024>
+				<name type="string">Salvage</name>
+				<text type="formattedtext"><p>When the crew cracks a hold and you have not already decided what is in it, roll <b>2d6</b> once for the hold, then invent the crate that matches.</p><table><tr decoration="underline"><td><b>2d6</b></td><td><b>In the hold</b></td></tr><tr><td>2</td><td>Thread-eaten scrap. 200 credits if anyone will buy it. A nest of thread lice if anyone powers the ring.</td></tr><tr><td>3</td><td>Personal effects. A story, a name, and maybe 100 credits.</td></tr><tr><td>4</td><td>A ship's locker: tape, foam, a breather, a lamp. Useful, not rich.</td></tr><tr><td>5</td><td>Rations and a medkit. Someone meant to come back.</td></tr><tr><td>6</td><td>Ordinary trade goods, 1d6 x 1,000 credits at a fair port.</td></tr><tr><td>7</td><td>Yard parts, 2d6 x 1,000 credits to a yard, half that to anyone else.</td></tr><tr><td>8</td><td>A data slate with a route. Sell it for 3,000, or keep a Boon on one Astrogation in that sector.</td></tr><tr><td>9</td><td>A locked strongbox. Electronics or Mechanics (Hard). Then roll again, and use the higher idea.</td></tr><tr><td>10</td><td>Someone alive. The job is a rescue. The Accord pays about a tenth of what the cargo would have.</td></tr><tr><td>11</td><td>A sealed case the Combine will bid on: 2d6 x 5,000 credits. Someone follows the seller.</td></tr><tr><td>12</td><td>A beacon that should be dark. Another crew is already counting the days.</td></tr></table><p><b>A thread spool</b> is the expensive case. It is a black-market skein part, legal to own, not legal to spin without a yard stamp (a fine, not a hanging). Mounted by an Engineering task (Hard, one hour), the ship's next jump takes three days instead of seven. On a failure the drive is ruined until a yard rebuilds it. The Combine pays about 30,000 credits and remembers the name. A bare spool carried next to a powered skein ring makes every task in that compartment Desperate until one of them is moved or powered down.</p><p><b>A claim beacon</b> left on a hull shouts a filing. If it was planted earlier than the crew's stamp, the argument at the registry gets worse. Electronics (Hard) silences one.</p><p>Prices are a guide. A hungry port pays less. A yard that needs the part pays more.</p></text>
+			</p0024>
+			<p0025>
+				<name type="string">Six Jobs</name>
+				<text type="formattedtext"><p>Each of these is a session if you play the clock and the choice. Use the salvage roll if a hold is still a mystery.</p><p><b>The ice run.</b> Lale Yee pays 1,500 credits to get a cold-crate of blood and antibiotics to a belt clinic before a fever does. A pirate skiff wants the crate because the clinic's buyer is late on protection. The find: the patient is a Combine clerk's child, and Hess Kade is already on the way to collect the family, not the medicine.</p><p><b>The buoy.</b> The Accord pays 2,000 to restart a navigation buoy that has gone quiet. Rook Tal is stripping it. The find: a vac-suit clipped to the buoy's far side, still broadcasting a claim chip. The person inside has been dead nine days. The chip is a filing on a hull nobody has found.</p><p><b>Yard night.</b> Harun Vey wants photographs of a coolant swap at the Combine yard, not a theft. The yard boss is the rival, and the watch is awake. The find: the cheap cores are real, and the <i>Kestrel's Due</i> was not the only ship sold them.</p><p><b>Two stamps.</b> Ivo Quill shows the crew two filings on one hull, an hour apart. He will delay the second if they go and see whether anyone is alive. This is <i>A Lamp in the Rock</i>, if you want it played out.</p><p><b>Missed the boat.</b> A passenger pays 1,000 to be put aboard a liner that has already spun up its ring. The rival is the liner's purser, who was paid to leave them. The find: the passenger's papers are good, and the purser's second payment came from Hess Kade.</p><p><b>The marker.</b> Old Cade asks the crew to carry a debt marker to a rock and pay it off with parts he has boxed. Hess Kade meets them there and says the marker is forged, which is half true. The find: the box is real yard parts, and the forgery is Cade's only lie. Paying the true debt costs the parts. Keeping them makes an enemy of both.</p></text>
+			</p0025>
 		</refmanualdata>
 	</reference>
 </root>

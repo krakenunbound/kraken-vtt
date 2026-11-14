@@ -92,6 +92,7 @@
     "prefs-ui": "node scripts/verify-prefs-ui.mjs",
     "walls-ui": "node scripts/verify-walls-ui.mjs",
     "descending-ui": "node scripts/verify-descending-ui.mjs",
+    "astra": "node scripts/check-astra.mjs",
     "astra-ui": "node scripts/verify-astra-ui.mjs",
     "backdrops": "node scripts/verify-backdrops.mjs",
     "build-games": "node scripts/build-content.mjs",

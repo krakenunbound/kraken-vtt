@@ -1866,6 +1866,19 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         return;
       }
 
+      // Apeira Astra: a Mark awarded (the GM), a trick learned with it (the player), or a correction (the GM).
+      if (msg.type === "character-mark") {
+        const record = records.get(msg.id, seatOf(client));
+        if (!record || (client.role !== "dm" && record.owner !== client.name)) {
+          send(ws, { type: "error", reason: "You cannot change that character's Marks." });
+          return;
+        }
+        require("./astra.cjs")
+          .markAstra(agentHandle, record, { action: String(msg.action ?? ""), trick: String(msg.trick ?? "") }, seatOf(client), client.role === "dm" ? "GM" : client.name)
+          .catch((error) => send(ws, { type: "error", reason: error instanceof Error ? error.message : "Could not change the Marks." }));
+        return;
+      }
+
       // FG's Library of an adventure module (the GM's): NPCs, encounters, parcels, tables.
       if (msg.type === "library") {
         if (client.role !== "dm") {

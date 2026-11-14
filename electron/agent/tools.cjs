@@ -323,6 +323,25 @@ const TOOLS = [
     },
   },
   {
+    name: "kraken_character_mark",
+    description:
+      "Apeira Astra: Marks and tricks (the sheet's Marks, on its Main page). action view (default): the character's Marks (0 to 6), how many are unspent, its tricks (name, Path, text) and the tricks it may still learn (its major and minor Paths' tricks not taken yet, from the active Crew Handbook). award: the GM gives a Mark (at most 6; chat says so). learn (trick: its name): an unspent Mark teaches one trick from the character's own major or minor Path, one not already learned. forget (trick): the GM's correction, the trick goes and its Mark is unspent again. take: the GM takes back an unspent Mark. A trick does what its text says; the player applies it (a Boon on the sheet's strip, say).",
+    inputSchema: object({ id: string("Character record id"), action: { type: "string", enum: ["view", "award", "learn", "forget", "take"] }, trick: string("A trick's name, as Berth Hands (learn, forget)") }, ["id"]),
+    async run(args, ctx) {
+      const agent = needTable(ctx);
+      const record = agent.records.get(args.id);
+      if (!record) throw new Error(`No record ${args.id}.`);
+      const astra = require("../astra.cjs");
+      if (!astra.isAstra(record)) throw new Error("Marks are Apeira Astra's.");
+      if (!args.action || args.action === "view") {
+        const rules = await astra.rulesAstra();
+        return out({ id: record.id, name: record.name, paths: record.data.paths ?? [], marks: Number(record.data.marks ?? 0), unspent: rules.unspentMarks(record.data), tricks: rules.tricksOf(record.data).map(({ name, path, text }) => ({ name, path, text })), choices: rules.trickChoices(record.data, astra.libraryAstra(agent.records).paths) });
+      }
+      const result = await astra.markAstra(agent, record, { action: args.action, trick: args.trick ?? "" }, agent.seat, "Agent");
+      return out({ id: record.id, name: record.name, marks: result.marks, unspent: result.unspent, tricks: result.tricks, learned: result.learned, choices: result.choices });
+    },
+  },
+  {
     name: "kraken_siege_check",
     description: "Make a check or save for a character in front of the table, by the campaign's ruleset. Traveller: a task, 2d6 + the characteristic's DM + the skill's level (untrained -3, less Jack-of-all-Trades) + bonus, against dc (the difficulty's number: Simple 2, Easy 4, Routine 6, Average 8 (default), Difficult 10, Very Difficult 12, Formidable 14); skill its name ('Gun Combat (Slug)', 'Pilot (Small Craft)'), attribute a characteristic (str, dex, end, int, edu, soc) to roll alone or to use instead of the skill's usual one; advantage boon or bane (3d6, the best or worst two); returns the Effect. Apeira Astra: a task, 2d6 + skill + characteristic against 8. Castles & Crusades: a SIEGE attribute check or save, d20 + attribute modifier + level (when added) + bonus, against the challenge base (prime 12 / secondary 18 by default) + challenge level. D&D 5E: kind check (an ability), save, or skill (skill: its name), d20 + modifier (+ proficiency) + bonus, against dc; advantage or disadvantage rolls 2d20. AD&D 2E: kind save (attribute paralyzation, rod, petrification, breath or spell: d20 + bonus at or above the number), check (attribute an ability: d20 at or under the score, a bonus comes off the die) or skill (skill a thief skill's key: openlocks, pickpockets...: d100 at or under). Goes to chat.",
     inputSchema: object(

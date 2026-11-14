@@ -6,13 +6,15 @@ import { Icon } from "../ui/icons";
 import { slotDrag } from "../ui/QuickSlots";
 import { ArtPicker, Picture } from "./ArtPicker";
 import { Field } from "./CCSheet";
-import { DIFFICULTIES, SKILLS, SPREAD, STAT_NAMES, STATS, dm, signed, skillCost, skillList } from "../../shared/astra/rules.mjs";
+import { DIFFICULTIES, MAX_MARKS, SKILLS, SPREAD, STAT_NAMES, STATS, dm, pathTricks, signed, skillCost, skillList, trickChoices, tricksForSkill, tricksOf, unspentMarks } from "../../shared/astra/rules.mjs";
 
 // The Apeira Astra crew sheet, in Kraken's sheet style: who they are on top,
 // tabs down the right (Main, Skills, Combat, Gear, Notes). Click a number to
 // roll a task in front of the table (2d6 + skill + characteristic against 8;
 // the difficulty and a Boon or Bane on the strip). Experience buys skills and
-// characteristics (Improve). The host works every number out again
+// characteristics (Improve). Marks (the GM's awards, at most six) teach tricks
+// from the major and minor Paths (the Main page); a skill a trick names shows
+// it beside the skill. The host works every number out again
 // (shared/astra/rules.mjs).
 
 type Row = Record<string, unknown>;
@@ -30,6 +32,7 @@ export function SheetAstra({ record, session }: { record: TableRecord; session: 
   const [picking, setPicking] = useState<"portrait" | "token" | null>(null);
   const [untrained, setUntrained] = useState("");
   const [improving, setImproving] = useState("");
+  const [learning, setLearning] = useState("");
   const data = record.data as Row;
   const me = session.players.find((seat) => seat.id === session.selfId)?.name;
   const editable = session.role === "dm" || (record.owner !== "" && record.owner === me);
@@ -50,6 +53,15 @@ export function SheetAstra({ record, session }: { record: TableRecord; session: 
   };
   const known = Object.entries(skills).sort((a, b) => String(a[1].name).localeCompare(String(b[1].name)));
   const exp = num(data.exp);
+  // Marks and tricks: the Paths' tricks come from the active Crew Handbook's Path records.
+  const marks = num(data.marks);
+  const tricks = tricksOf(data) as { key: string; name: string; path: string; text: string }[];
+  const unspent = unspentMarks(data) as number;
+  const pathRecords = Object.values(session.records)
+    .filter((item) => item.type === "class")
+    .map((item) => ({ name: item.name, data: item.data }));
+  const choices = (unspent > 0 ? trickChoices(data, pathRecords) : []) as { name: string; path: string; text: string }[];
+  const chosen = choices.find((item) => item.name === learning) ?? choices[0];
 
   return (
     <article className="cc-sheet sheet-5e sheet-astra" data-character={record.id} data-ruleset="astra">
@@ -161,6 +173,83 @@ export function SheetAstra({ record, session }: { record: TableRecord; session: 
                 </div>
               </section>
             </div>
+            <section className="cc-panel astra-marks" aria-label="Marks" data-marks={marks} data-unspent={unspent}>
+              <h4>
+                Marks
+                <span className="astra-mark-pips" title={`${marks} of ${MAX_MARKS} Marks${unspent ? `, ${unspent} unspent` : ""}`}>
+                  {Array.from({ length: MAX_MARKS }, (_, index) => (
+                    <i key={index} className={index < tricks.length ? "on" : index < marks ? "unspent" : ""} />
+                  ))}
+                </span>
+                <small className="hint" data-marks-count>
+                  {marks} of {MAX_MARKS}
+                  {unspent ? ` · ${unspent} to spend on a trick` : ""}
+                </small>
+                {session.role === "dm" ? (
+                  <button type="button" data-action="award-mark" disabled={marks >= MAX_MARKS} title={marks >= MAX_MARKS ? "Six Marks is a whole career" : "Award a Mark: they did something the port will repeat (at most one a session)"} onClick={() => void session.markCharacter(record.id, "award").catch(() => undefined)}>
+                    Award a Mark
+                  </button>
+                ) : null}
+                {session.role === "dm" && unspent > 0 ? (
+                  <button type="button" className="ghost" data-action="take-mark" title="Take back an unspent Mark" aria-label="Take back an unspent Mark" onClick={() => void session.markCharacter(record.id, "take").catch(() => undefined)}>
+                    <Icon name="minus" size={14} />
+                  </button>
+                ) : null}
+              </h4>
+              {tricks.length ? (
+                <ul className="astra-tricks">
+                  {tricks.map((trick) => (
+                    <li key={trick.key} data-trick={trick.name}>
+                      <span>
+                        <b>{trick.name}</b> <small className="hint">{trick.path}</small>
+                      </span>
+                      {session.role === "dm" ? (
+                        <button type="button" className="ghost" aria-label={`Forget ${trick.name}`} title="Forget this trick (its Mark is unspent again)" onClick={() => void session.markCharacter(record.id, "forget", trick.name).catch(() => undefined)}>
+                          ×
+                        </button>
+                      ) : (
+                        <span />
+                      )}
+                      <p>{trick.text}</p>
+                    </li>
+                  ))}
+                </ul>
+              ) : marks === 0 ? (
+                <p className="hint">No Marks yet. The GM awards one when a job is done and the port will repeat the story; each Mark teaches a trick from your Paths.</p>
+              ) : null}
+              {unspent > 0 && editable ? (
+                choices.length ? (
+                  <div className="astra-learn">
+                    <select className="cc-field" aria-label="Trick to learn" value={chosen?.name ?? ""} onChange={(event) => setLearning(event.target.value)}>
+                      {choices.map((item) => (
+                        <option key={`${item.path}:${item.name}`} value={item.name}>
+                          {item.name} ({item.path})
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      data-action="learn-trick"
+                      disabled={!chosen}
+                      title="Learn this trick with an unspent Mark"
+                      onClick={() => {
+                        if (chosen) void session.markCharacter(record.id, "learn", chosen.name).catch(() => undefined);
+                        setLearning("");
+                      }}
+                    >
+                      Learn
+                    </button>
+                    {chosen ? (
+                      <p className="hint" data-trick-preview>
+                        {chosen.text}
+                      </p>
+                    ) : null}
+                  </div>
+                ) : (
+                  <p className="hint">No trick left to learn from {Array.isArray(data.paths) ? data.paths.join(" and ") : "your Paths"} (or the Crew Handbook is not active).</p>
+                )
+              ) : null}
+            </section>
           </div>
         ) : null}
 
@@ -171,6 +260,11 @@ export function SheetAstra({ record, session }: { record: TableRecord; session: 
                 <span className="cc-num">{num(row.level)}</span>
                 <span>
                   {String(row.name)} <small className="hint">{String(row.stat).slice(0, 3).toUpperCase()}</small>
+                  {(tricksForSkill(data, key) as { name: string; text: string }[]).map((trick) => (
+                    <small key={trick.name} className="astra-trick-note" data-trick-for={key} title={`${trick.name}: ${trick.text}`}>
+                      ★ {trick.name}
+                    </small>
+                  ))}
                 </span>
                 <button type="button" className="cc-bonus" disabled={!editable} aria-label={`${String(row.name)} task`} data-roll-skill={key} onClick={() => task(key)}>
                   {signed(num(row.level) + num(stats[String(row.stat)]?.dm))}
@@ -453,6 +547,13 @@ export function WizardAstra({ session, onDone }: { session: Session; onDone: (id
           {picker(minorRecord, minorSkills, setMinorSkills, 2, "minor")}
         </>
       ) : null}
+      <p className="hint" data-wizard-tricks title="A new crew member has no Marks: the GM awards them in play, and each teaches one of these">
+        Tricks to learn with Marks later:{" "}
+        {[majorRecord, minor !== major ? minorRecord : undefined]
+          .filter((item): item is TableRecord => Boolean(item))
+          .map((item) => `${item.name}: ${(pathTricks(item.data) as { name: string }[]).map((trick) => trick.name).join(", ") || "none"}`)
+          .join(" · ")}
+      </p>
       <h4>
         Starting gear <small className="hint">the {major} kit, and what you buy with its credits</small>
       </h4>

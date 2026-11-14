@@ -106,7 +106,21 @@
 				</id-00001>
 			</startingequipmentlist>
 			<startingequipment type="string">Flight Jacket, Snub Pistol, Comm Bead, Data Slate</startingequipment>
-			<text type="formattedtext"><p>You served aboard a warship or a patrol cutter: watch rotations, drills, and the long silence of a skein transit.</p><p><b>Signature skill:</b> Pilot 1. <b>Choose from:</b> Pilot, Astrogation, Gunnery, Electronics, Leadership, Tactics, Zero-G. <b>Starting credits:</b> 1500.</p><p><i>Former ranks:</i> rating, ensign, lieutenant.</p></text>
+			<text type="formattedtext"><p>You served aboard a warship or a patrol cutter: watch rotations, drills, and the long silence of a skein transit.</p><p><b>Signature skill:</b> Pilot 1. <b>Choose from:</b> Pilot, Astrogation, Gunnery, Electronics, Leadership, Tactics, Zero-G. <b>Starting credits:</b> 1500.</p><p><i>Former ranks:</i> rating, ensign, lieutenant.</p><p><b>Tricks</b> (one each time you gain a Mark; see Marks):</p><list><li><b>Berth Hands.</b> A Boon on Pilot when you are docking, undocking, or holding a ship still against another hull.</li><li><b>Watch Captain.</b> Once per fight, one ally who can hear you takes their turn immediately after yours.</li><li><b>Skein Stomach.</b> A skein transit does not wear on you: a Boon on Grit checks made during a jump, and on tasks to keep a ship running through one.</li></list></text>
+			<tricks>
+				<id-00001>
+					<name type="string">Berth Hands</name>
+					<text type="string">A Boon on Pilot when you are docking, undocking, or holding a ship still against another hull.</text>
+				</id-00001>
+				<id-00002>
+					<name type="string">Watch Captain</name>
+					<text type="string">Once per fight, one ally who can hear you takes their turn immediately after yours.</text>
+				</id-00002>
+				<id-00003>
+					<name type="string">Skein Stomach</name>
+					<text type="string">A skein transit does not wear on you: a Boon on Grit checks made during a jump, and on tasks to keep a ship running through one.</text>
+				</id-00003>
+			</tricks>
 			<hp>
 				<hitdice>
 					<text type="string"></text>
@@ -166,7 +180,21 @@
 				</id-00001>
 			</startingequipmentlist>
 			<startingequipment type="string">Flak Vest, Carbine, Knife, Medkit</startingequipment>
-			<text type="formattedtext"><p>You were the one sent through the airlock first. Boarding actions, station security, and things you do not talk about.</p><p><b>Signature skill:</b> Firearms 1. <b>Choose from:</b> Firearms, Melee, Athletics, Heavy Weapons, Tactics, Recon, Zero-G, Leadership. <b>Starting credits:</b> 1000.</p><p><i>Former ranks:</i> trooper, corporal, sergeant.</p></text>
+			<text type="formattedtext"><p>You were the one sent through the airlock first. Boarding actions, station security, and things you do not talk about.</p><p><b>Signature skill:</b> Firearms 1. <b>Choose from:</b> Firearms, Melee, Athletics, Heavy Weapons, Tactics, Recon, Zero-G, Leadership. <b>Starting credits:</b> 1000.</p><p><i>Former ranks:</i> trooper, corporal, sergeant.</p><p><b>Tricks</b> (one each time you gain a Mark; see Marks):</p><list><li><b>First Through.</b> A Boon on the first attack you make in a fight after you come through a hatch, a breach, or an airlock.</li><li><b>Button Up.</b> While you wear armour, allies within two metres get +1 Armour until the start of your next turn. Say so when you take your turn. It does not stack with itself.</li><li><b>Count the Room.</b> A Boon on the first Recon or Tactics task you make when you enter a compartment you have not been in.</li></list></text>
+			<tricks>
+				<id-00001>
+					<name type="string">First Through</name>
+					<text type="string">A Boon on the first attack you make in a fight after you come through a hatch, a breach, or an airlock.</text>
+				</id-00001>
+				<id-00002>
+					<name type="string">Button Up</name>
+					<text type="string">While you wear armour, allies within two metres get +1 Armour until the start of your next turn. Say so when you take your turn. It does not stack with itself.</text>
+				</id-00002>
+				<id-00003>
+					<name type="string">Count the Room</name>
+					<text type="string">A Boon on the first Recon or Tactics task you make when you enter a compartment you have not been in.</text>
+				</id-00003>
+			</tricks>
 			<hp>
 				<hitdice>
 					<text type="string"></text>
@@ -223,7 +251,21 @@
 				</id-00001>
 			</startingequipmentlist>
 			<startingequipment type="string">Flight Jacket, Service Pistol, Hand Scanner, Breather Mask</startingequipment>
-			<text type="formattedtext"><p>You charted the empty places: survey runs, first landings, months alone with the ship's voice.</p><p><b>Signature skill:</b> Recon 1. <b>Choose from:</b> Recon, Pilot, Survival, Astrogation, Stealth, Drive, Science, Mechanics. <b>Starting credits:</b> 1200.</p><p><i>Former ranks:</i> surveyor, pathfinder.</p></text>
+			<text type="formattedtext"><p>You charted the empty places: survey runs, first landings, months alone with the ship's voice.</p><p><b>Signature skill:</b> Recon 1. <b>Choose from:</b> Recon, Pilot, Survival, Astrogation, Stealth, Drive, Science, Mechanics. <b>Starting credits:</b> 1200.</p><p><i>Former ranks:</i> surveyor, pathfinder.</p><p><b>Tricks</b> (one each time you gain a Mark; see Marks):</p><list><li><b>Cold Read.</b> A Boon on Recon to notice a leak, a nest, a trap, or something still alive.</li><li><b>Long Way Round.</b> Once per job, if you have an hour and you have seen the trouble coming, you get the crew past one patrol, rock field, or closed dock without a roll.</li><li><b>First Boot.</b> A Boon on Survival or Science the first time you step onto a world, station, or wreck none of the crew has visited.</li></list></text>
+			<tricks>
+				<id-00001>
+					<name type="string">Cold Read</name>
+					<text type="string">A Boon on Recon to notice a leak, a nest, a trap, or something still alive.</text>
+				</id-00001>
+				<id-00002>
+					<name type="string">Long Way Round</name>
+					<text type="string">Once per job, if you have an hour and you have seen the trouble coming, you get the crew past one patrol, rock field, or closed dock without a roll.</text>
+				</id-00002>
+				<id-00003>
+					<name type="string">First Boot</name>
+					<text type="string">A Boon on Survival or Science the first time you step onto a world, station, or wreck none of the crew has visited.</text>
+				</id-00003>
+			</tricks>
 			<hp>
 				<hitdice>
 					<text type="string"></text>
@@ -280,7 +322,21 @@
 				</id-00001>
 			</startingequipmentlist>
 			<startingequipment type="string">Mesh Undersuit, Snub Pistol, Comm Bead, Data Slate</startingequipment>
-			<text type="formattedtext"><p>You bought low and sold far away: cargo manifests, port fees and handshakes in bad bars.</p><p><b>Signature skill:</b> Trade 1. <b>Choose from:</b> Trade, Persuade, Deceive, Streetwise, Pilot, Electronics, Leadership. <b>Starting credits:</b> 3000.</p><p><i>Former ranks:</i> purser, factor, master.</p></text>
+			<text type="formattedtext"><p>You bought low and sold far away: cargo manifests, port fees and handshakes in bad bars.</p><p><b>Signature skill:</b> Trade 1. <b>Choose from:</b> Trade, Persuade, Deceive, Streetwise, Pilot, Electronics, Leadership. <b>Starting credits:</b> 3000.</p><p><i>Former ranks:</i> purser, factor, master.</p><p><b>Tricks</b> (one each time you gain a Mark; see Marks):</p><list><li><b>Fair Price.</b> When you sell cargo or salvage, make a Trade task. Add 10% to the price for each point of Effect, to at most double. A failure is the offered price, not a worse one.</li><li><b>Open Account.</b> On a station you have visited before, a Persuade task (Standard) gets a night's berth, a meal, or one useful name, on credit.</li><li><b>Clean Manifest.</b> Once per inspection, one item you are carrying is not on the list, unless they search your person. Say which item when the list is asked for.</li></list></text>
+			<tricks>
+				<id-00001>
+					<name type="string">Fair Price</name>
+					<text type="string">When you sell cargo or salvage, make a Trade task. Add 10% to the price for each point of Effect, to at most double. A failure is the offered price, not a worse one.</text>
+				</id-00001>
+				<id-00002>
+					<name type="string">Open Account</name>
+					<text type="string">On a station you have visited before, a Persuade task (Standard) gets a night's berth, a meal, or one useful name, on credit.</text>
+				</id-00002>
+				<id-00003>
+					<name type="string">Clean Manifest</name>
+					<text type="string">Once per inspection, one item you are carrying is not on the list, unless they search your person. Say which item when the list is asked for.</text>
+				</id-00003>
+			</tricks>
 			<hp>
 				<hitdice>
 					<text type="string"></text>
@@ -337,7 +393,21 @@
 				</id-00001>
 			</startingequipmentlist>
 			<startingequipment type="string">Vac Suit, Toolkit, Cutting Laser, Mag Boots</startingequipment>
-			<text type="formattedtext"><p>You kept the drive lit and the air flowing. You know what every noise a ship makes means.</p><p><b>Signature skill:</b> Engineering 1. <b>Choose from:</b> Engineering, Mechanics, Electronics, Zero-G, Science, Pilot, Gunnery. <b>Starting credits:</b> 1200.</p><p><i>Former ranks:</i> mate, chief.</p></text>
+			<text type="formattedtext"><p>You kept the drive lit and the air flowing. You know what every noise a ship makes means.</p><p><b>Signature skill:</b> Engineering 1. <b>Choose from:</b> Engineering, Mechanics, Electronics, Zero-G, Science, Pilot, Gunnery. <b>Starting credits:</b> 1200.</p><p><i>Former ranks:</i> mate, chief.</p><p><b>Tricks</b> (one each time you gain a Mark; see Marks):</p><list><li><b>She'll Hold.</b> Once per session, turn one failed Engineering or Mechanics task into a success with Effect 0. Something small breaks later. The GM says what, before the job is over.</li><li><b>Listen to Her.</b> A Boon on tasks to diagnose a ship you have lived aboard for at least a day.</li><li><b>Patch and Pray.</b> With a toolkit and ten minutes, restore 1d6 hull points to a ship, or stop one leak, without a roll. Once per job.</li></list></text>
+			<tricks>
+				<id-00001>
+					<name type="string">She'll Hold</name>
+					<text type="string">Once per session, turn one failed Engineering or Mechanics task into a success with Effect 0. Something small breaks later. The GM says what, before the job is over.</text>
+				</id-00001>
+				<id-00002>
+					<name type="string">Listen to Her</name>
+					<text type="string">A Boon on tasks to diagnose a ship you have lived aboard for at least a day.</text>
+				</id-00002>
+				<id-00003>
+					<name type="string">Patch and Pray</name>
+					<text type="string">With a toolkit and ten minutes, restore 1d6 hull points to a ship, or stop one leak, without a roll. Once per job.</text>
+				</id-00003>
+			</tricks>
 			<hp>
 				<hitdice>
 					<text type="string"></text>
@@ -394,7 +464,21 @@
 				</id-00001>
 			</startingequipmentlist>
 			<startingequipment type="string">Flight Jacket, Snub Pistol, Medkit, Stim Patch (3)</startingequipment>
-			<text type="formattedtext"><p>Ship's doctor, field medic or clinic worker: you have kept people alive with less than you needed.</p><p><b>Signature skill:</b> Medicine 1. <b>Choose from:</b> Medicine, Science, Electronics, Persuade, Survival, Recon. <b>Starting credits:</b> 1500.</p><p><i>Former ranks:</i> orderly, doctor.</p></text>
+			<text type="formattedtext"><p>Ship's doctor, field medic or clinic worker: you have kept people alive with less than you needed.</p><p><b>Signature skill:</b> Medicine 1. <b>Choose from:</b> Medicine, Science, Electronics, Persuade, Survival, Recon. <b>Starting credits:</b> 1500.</p><p><i>Former ranks:</i> orderly, doctor.</p><p><b>Tricks</b> (one each time you gain a Mark; see Marks):</p><list><li><b>Stay With Me.</b> A Medicine task to bring someone back from Down is Easy. They wake with 1d6 Stamina plus your Effect, still hurt.</li><li><b>Two at Once.</b> With a medkit, your Medicine action in a fight can treat two willing people instead of one. Roll once and use it for both.</li><li><b>Right Dose.</b> A stim patch you administer does not deal its crash damage.</li></list></text>
+			<tricks>
+				<id-00001>
+					<name type="string">Stay With Me</name>
+					<text type="string">A Medicine task to bring someone back from Down is Easy. They wake with 1d6 Stamina plus your Effect, still hurt.</text>
+				</id-00001>
+				<id-00002>
+					<name type="string">Two at Once</name>
+					<text type="string">With a medkit, your Medicine action in a fight can treat two willing people instead of one. Roll once and use it for both.</text>
+				</id-00002>
+				<id-00003>
+					<name type="string">Right Dose</name>
+					<text type="string">A stim patch you administer does not deal its crash damage.</text>
+				</id-00003>
+			</tricks>
 			<hp>
 				<hitdice>
 					<text type="string"></text>
@@ -454,7 +538,21 @@
 				</id-00001>
 			</startingequipmentlist>
 			<startingequipment type="string">Flight Jacket, Service Pistol, Knife, Grapple Line</startingequipment>
-			<text type="formattedtext"><p>You moved on whenever it got complicated: odd jobs, borrowed names and quick exits.</p><p><b>Signature skill:</b> Streetwise 1. <b>Choose from:</b> Streetwise, Stealth, Deceive, Melee, Firearms, Drive, Athletics, Persuade. <b>Starting credits:</b> 600.</p><p><i>Former ranks:</i> none worth mentioning.</p></text>
+			<text type="formattedtext"><p>You moved on whenever it got complicated: odd jobs, borrowed names and quick exits.</p><p><b>Signature skill:</b> Streetwise 1. <b>Choose from:</b> Streetwise, Stealth, Deceive, Melee, Firearms, Drive, Athletics, Persuade. <b>Starting credits:</b> 600.</p><p><i>Former ranks:</i> none worth mentioning.</p><p><b>Tricks</b> (one each time you gain a Mark; see Marks):</p><list><li><b>Already Gone.</b> A Boon on Stealth to leave a room, a berth, or a station while attention is elsewhere.</li><li><b>Borrowed.</b> Once per session you have one common tool, a magazine of quiet rounds, or a snub pistol you did not pay for. It wants to go back. If it does not, someone comes asking next session.</li><li><b>Smile and Step.</b> When you succeed at Deceive in a crowd, you are out of that scene before anyone thinks to check your story.</li></list></text>
+			<tricks>
+				<id-00001>
+					<name type="string">Already Gone</name>
+					<text type="string">A Boon on Stealth to leave a room, a berth, or a station while attention is elsewhere.</text>
+				</id-00001>
+				<id-00002>
+					<name type="string">Borrowed</name>
+					<text type="string">Once per session you have one common tool, a magazine of quiet rounds, or a snub pistol you did not pay for. It wants to go back. If it does not, someone comes asking next session.</text>
+				</id-00002>
+				<id-00003>
+					<name type="string">Smile and Step</name>
+					<text type="string">When you succeed at Deceive in a crowd, you are out of that scene before anyone thinks to check your story.</text>
+				</id-00003>
+			</tricks>
 			<hp>
 				<hitdice>
 					<text type="string"></text>
@@ -714,6 +812,111 @@
 				<cost type="string">60 cr</cost>
 				<description type="formattedtext"><p>Shrugs off pain: ignore being Down for 3 turns, then take 1d6 damage. One use.</p></description>
 			</stimpatch>
+			<hulltape>
+				<name type="string">Hull Tape</name>
+				<type type="string">Gear</type>
+				<subtype type="string">Equipment</subtype>
+				<cost type="string">40 cr</cost>
+				<description type="formattedtext"><p>A palm-sized reel of sealing tape. It holds a suit puncture or a hairline hull crack for one hour, or until someone leans on it.</p></description>
+			</hulltape>
+			<patchfoam>
+				<name type="string">Patch Foam</name>
+				<type type="string">Gear</type>
+				<subtype type="string">Equipment</subtype>
+				<cost type="string">150 cr</cost>
+				<description type="formattedtext"><p>One use. Sprayed into a vac-suit leak, it sets in one turn and the suit holds. It will not seal a hatch.</p></description>
+			</patchfoam>
+			<shoulderlamp>
+				<name type="string">Shoulder Lamp</name>
+				<type type="string">Gear</type>
+				<subtype type="string">Equipment</subtype>
+				<cost type="string">50 cr</cost>
+				<description type="formattedtext"><p>A lamp on a strap, both hands free. Thirty metres of hard light, and everyone can see who is wearing it.</p></description>
+			</shoulderlamp>
+			<linegun>
+				<name type="string">Line Gun</name>
+				<type type="string">Gear</type>
+				<subtype type="string">Equipment</subtype>
+				<cost type="string">350 cr</cost>
+				<description type="formattedtext"><p>Fires a magnetic grapple and 30 m of line. A Zero-G or Athletics task (Standard) to hit a hull, a hatch, or a person.</p></description>
+			</linegun>
+			<shocknet>
+				<name type="string">Shock Net</name>
+				<type type="string">Gear</type>
+				<subtype type="string">Equipment</subtype>
+				<cost type="string">450 cr</cost>
+				<description type="formattedtext"><p>A folded net. Thrown with Athletics (Standard) out to 10 m: the target makes a Brawn check (Hard) or loses its next turn. Folding it to throw again takes one action.</p></description>
+			</shocknet>
+			<quietrounds>
+				<name type="string">Quiet Rounds</name>
+				<type type="string">Gear</type>
+				<subtype type="string">Equipment</subtype>
+				<cost type="string">100 cr</cost>
+				<description type="formattedtext"><p>Ten low-velocity rounds for a snub pistol or a service pistol. They will not hole a hull. Damage dice of that gun are one step smaller (a 3d6 gun does 2d6) while they are loaded.</p></description>
+			</quietrounds>
+			<boardingcharge>
+				<name type="string">Boarding Charge</name>
+				<type type="string">Gear</type>
+				<subtype type="string">Equipment</subtype>
+				<cost type="string">1200 cr</cost>
+				<description type="formattedtext"><p>A shaped charge for a hatch, not a person. It opens an ordinary interior hatch in one action and is loud in every compartment next door. Anyone in the square beyond the hatch when it goes takes 4d6, armour applies. One use.</p></description>
+			</boardingcharge>
+			<claimbeacon>
+				<name type="string">Claim Beacon</name>
+				<type type="string">Gear</type>
+				<subtype type="string">Equipment</subtype>
+				<cost type="string">500 cr</cost>
+				<description type="formattedtext"><p>A fist-sized Accord beacon. Set it on a hull and it shouts your filing on the salvage band. Spoofing or silencing one is an Electronics task (Hard).</p></description>
+			</claimbeacon>
+			<registrystylus>
+				<name type="string">Registry Stylus</name>
+				<type type="string">Gear</type>
+				<subtype type="string">Equipment</subtype>
+				<cost type="string">300 cr</cost>
+				<description type="formattedtext"><p>Files a claim or a rescue to the nearest Accord desk, if any band can hear you. The desk still has to stamp it.</p></description>
+			</registrystylus>
+			<surveybuoy>
+				<name type="string">Survey Buoy</name>
+				<type type="string">Gear</type>
+				<subtype type="string">Equipment</subtype>
+				<cost type="string">700 cr</cost>
+				<description type="formattedtext"><p>Drop it in a belt, a wreck, or a dark corridor. For one day, while the buoy lives, Recon tasks in that place and a ship's sensor sweeps of it (Electronics) have a Boon.</p></description>
+			</surveybuoy>
+			<skeinchart>
+				<name type="string">Skein Chart</name>
+				<type type="string">Gear</type>
+				<subtype type="string">Equipment</subtype>
+				<cost type="string">600 cr</cost>
+				<description type="formattedtext"><p>A local chart, bought not stolen. One Boon on a single Astrogation task in the sector named on the slip. Then it is ordinary paper.</p></description>
+			</skeinchart>
+			<tradeseal>
+				<name type="string">Trade Seal</name>
+				<type type="string">Gear</type>
+				<subtype type="string">Equipment</subtype>
+				<cost type="string">80 cr</cost>
+				<description type="formattedtext"><p>A tamper-evident seal for a crate. Breaking it is obvious. Forging one is an Electronics or Deceive task (Hard), and the yard keeps a list.</p></description>
+			</tradeseal>
+			<coldpack>
+				<name type="string">Cold Pack</name>
+				<type type="string">Gear</type>
+				<subtype type="string">Equipment</subtype>
+				<cost type="string">40 cr</cost>
+				<description type="formattedtext"><p>One use. Takes the edge off a burn, a radiation flush, or the crash after a stim. The next damage of that kind in the scene is 2 less, to a minimum of 0.</p></description>
+			</coldpack>
+			<docbox>
+				<name type="string">Doc Box</name>
+				<type type="string">Gear</type>
+				<subtype type="string">Equipment</subtype>
+				<cost type="string">2200 cr</cost>
+				<description type="formattedtext"><p>A crate-sized automedic. Once a day, a person with no Medicine may attempt one Medicine task with no untrained penalty. A medic using it has a Boon. Refill: 200 credits, at any clinic.</p></description>
+			</docbox>
+			<magclamp>
+				<name type="string">Mag Clamp</name>
+				<type type="string">Gear</type>
+				<subtype type="string">Equipment</subtype>
+				<cost type="string">200 cr</cost>
+				<description type="formattedtext"><p>A plate and a strap. It holds a crate, a door-wheel, or a willing person to a hull in zero-g. An unwilling person gets a Brawn check (Hard) to twist free.</p></description>
+			</magclamp>
 		</category>
 	</item>
 	<reference>
@@ -810,38 +1013,53 @@
 									<keywords type="string">experience improve advance</keywords>
 									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0014@Apeira Astra Crew Handbook</recordname></listlink>
 								</page_009>
+								<page_010>
+									<name type="string">Marks</name>
+									<keywords type="string">mark trick rank path</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0015@Apeira Astra Crew Handbook</recordname></listlink>
+								</page_010>
 							</refpages>
 						</sub_001>
 						<sub_002>
+							<name type="string">Kit</name>
+							<refpages>
+								<page_000>
+									<name type="string">What Credits Buy</name>
+									<keywords type="string">gear weapon armour price credits shop</keywords>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0016@Apeira Astra Crew Handbook</recordname></listlink>
+								</page_000>
+							</refpages>
+						</sub_002>
+						<sub_003>
 							<name type="string">Danger</name>
 							<refpages>
 								<page_000>
 									<name type="string">Combat</name>
 									<keywords type="string">combat initiative attack damage armour</keywords>
-									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0015@Apeira Astra Crew Handbook</recordname></listlink>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0017@Apeira Astra Crew Handbook</recordname></listlink>
 								</page_000>
 								<page_001>
 									<name type="string">Vacuum and Hazards</name>
 									<keywords type="string">vacuum radiation zero-g hazard</keywords>
-									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0016@Apeira Astra Crew Handbook</recordname></listlink>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0018@Apeira Astra Crew Handbook</recordname></listlink>
 								</page_001>
 							</refpages>
-						</sub_002>
-						<sub_003>
+						</sub_003>
+						<sub_004>
 							<name type="string">Ships</name>
 							<refpages>
 								<page_000>
 									<name type="string">Your Ship</name>
 									<keywords type="string">ship starship hull armour thrust jump crew station</keywords>
-									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0017@Apeira Astra Crew Handbook</recordname></listlink>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0019@Apeira Astra Crew Handbook</recordname></listlink>
 								</page_000>
 								<page_001>
 									<name type="string">Ship Combat</name>
 									<keywords type="string">ship combat gunnery range critical</keywords>
-									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0018@Apeira Astra Crew Handbook</recordname></listlink>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0020@Apeira Astra Crew Handbook</recordname></listlink>
 								</page_001>
 							</refpages>
-						</sub_003>
+						</sub_004>
 					</subchapters>
 				</chapter_001>
 				<chapter_002>
@@ -853,7 +1071,7 @@
 								<page_000>
 									<name type="string">Credits and License</name>
 									<keywords type="string"></keywords>
-									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0019@Apeira Astra Crew Handbook</recordname></listlink>
+									<listlink type="windowreference"><class>reference_manualtextwide</class><recordname>reference.refmanualdata.p0021@Apeira Astra Crew Handbook</recordname></listlink>
 								</page_000>
 							</refpages>
 						</sub_000>
@@ -947,7 +1165,7 @@
 					<id-00002>
 						<blocktype type="string">singletext</blocktype>
 						<order type="number">2</order>
-						<text type="formattedtext"><list><li>1. <b>Characteristics</b>: place <b>10, 9, 8, 7, 6 and 5</b> as you like, or roll 2d6 for each.</li><li>2. <b>Origin</b>: where you grew up. It gives a few skills and a trait.</li><li>3. <b>Major Path</b>: what you did for most of your life. Its <b>signature skill</b> at 1, and <b>four picks</b> from its list (each +1).</li><li>4. <b>Minor Path</b>: what you did before or after. <b>Two picks</b> from its list.</li><li>5. <b>Kit and credits</b>: your major Path's kit and credits, half your minor Path's credits.</li></list><p>No skill starts above 3. <b>Stamina</b> is Brawn + Reflex + Grit.</p><p>In Kraken, the Characters window's <b>Character Wizard</b> does all of this.</p></text>
+						<text type="formattedtext"><list><li>1. <b>Characteristics</b>: place <b>10, 9, 8, 7, 6 and 5</b> as you like, or roll 2d6 for each.</li><li>2. <b>Origin</b>: where you grew up. It gives a few skills and a trait.</li><li>3. <b>Major Path</b>: what you did for most of your life. Its <b>signature skill</b> at 1, and <b>four picks</b> from its list (each +1).</li><li>4. <b>Minor Path</b>: what you did before or after. <b>Two picks</b> from its list.</li><li>5. <b>Kit and credits</b>: your major Path's kit and credits, half your minor Path's credits.</li></list><p>No skill starts above 3. <b>Stamina</b> is Brawn + Reflex + Grit. You start with no Marks and no tricks: they come from play (see Marks).</p><p>In Kraken, the Characters window's <b>Character Wizard</b> does all of this.</p></text>
 					</id-00002>
 				</blocks>
 			</p0005>
@@ -1069,7 +1287,7 @@
 					<id-00002>
 						<blocktype type="string">singletext</blocktype>
 						<order type="number">2</order>
-						<text type="formattedtext"><p>You served aboard a warship or a patrol cutter: watch rotations, drills, and the long silence of a skein transit.</p><p><b>Signature skill:</b> Pilot 1. <b>Choose from:</b> Pilot, Astrogation, Gunnery, Electronics, Leadership, Tactics, Zero-G. <b>Starting credits:</b> 1500.</p><p><i>Former ranks:</i> rating, ensign, lieutenant.</p></text>
+						<text type="formattedtext"><p>You served aboard a warship or a patrol cutter: watch rotations, drills, and the long silence of a skein transit.</p><p><b>Signature skill:</b> Pilot 1. <b>Choose from:</b> Pilot, Astrogation, Gunnery, Electronics, Leadership, Tactics, Zero-G. <b>Starting credits:</b> 1500.</p><p><i>Former ranks:</i> rating, ensign, lieutenant.</p><p><b>Tricks</b> (one each time you gain a Mark; see Marks):</p><list><li><b>Berth Hands.</b> A Boon on Pilot when you are docking, undocking, or holding a ship still against another hull.</li><li><b>Watch Captain.</b> Once per fight, one ally who can hear you takes their turn immediately after yours.</li><li><b>Skein Stomach.</b> A skein transit does not wear on you: a Boon on Grit checks made during a jump, and on tasks to keep a ship running through one.</li></list></text>
 					</id-00002>
 				</blocks>
 			</p0007>
@@ -1096,7 +1314,7 @@
 					<id-00002>
 						<blocktype type="string">singletext</blocktype>
 						<order type="number">2</order>
-						<text type="formattedtext"><p>You were the one sent through the airlock first. Boarding actions, station security, and things you do not talk about.</p><p><b>Signature skill:</b> Firearms 1. <b>Choose from:</b> Firearms, Melee, Athletics, Heavy Weapons, Tactics, Recon, Zero-G, Leadership. <b>Starting credits:</b> 1000.</p><p><i>Former ranks:</i> trooper, corporal, sergeant.</p></text>
+						<text type="formattedtext"><p>You were the one sent through the airlock first. Boarding actions, station security, and things you do not talk about.</p><p><b>Signature skill:</b> Firearms 1. <b>Choose from:</b> Firearms, Melee, Athletics, Heavy Weapons, Tactics, Recon, Zero-G, Leadership. <b>Starting credits:</b> 1000.</p><p><i>Former ranks:</i> trooper, corporal, sergeant.</p><p><b>Tricks</b> (one each time you gain a Mark; see Marks):</p><list><li><b>First Through.</b> A Boon on the first attack you make in a fight after you come through a hatch, a breach, or an airlock.</li><li><b>Button Up.</b> While you wear armour, allies within two metres get +1 Armour until the start of your next turn. Say so when you take your turn. It does not stack with itself.</li><li><b>Count the Room.</b> A Boon on the first Recon or Tactics task you make when you enter a compartment you have not been in.</li></list></text>
 					</id-00002>
 				</blocks>
 			</p0008>
@@ -1123,7 +1341,7 @@
 					<id-00002>
 						<blocktype type="string">singletext</blocktype>
 						<order type="number">2</order>
-						<text type="formattedtext"><p>You charted the empty places: survey runs, first landings, months alone with the ship's voice.</p><p><b>Signature skill:</b> Recon 1. <b>Choose from:</b> Recon, Pilot, Survival, Astrogation, Stealth, Drive, Science, Mechanics. <b>Starting credits:</b> 1200.</p><p><i>Former ranks:</i> surveyor, pathfinder.</p></text>
+						<text type="formattedtext"><p>You charted the empty places: survey runs, first landings, months alone with the ship's voice.</p><p><b>Signature skill:</b> Recon 1. <b>Choose from:</b> Recon, Pilot, Survival, Astrogation, Stealth, Drive, Science, Mechanics. <b>Starting credits:</b> 1200.</p><p><i>Former ranks:</i> surveyor, pathfinder.</p><p><b>Tricks</b> (one each time you gain a Mark; see Marks):</p><list><li><b>Cold Read.</b> A Boon on Recon to notice a leak, a nest, a trap, or something still alive.</li><li><b>Long Way Round.</b> Once per job, if you have an hour and you have seen the trouble coming, you get the crew past one patrol, rock field, or closed dock without a roll.</li><li><b>First Boot.</b> A Boon on Survival or Science the first time you step onto a world, station, or wreck none of the crew has visited.</li></list></text>
 					</id-00002>
 				</blocks>
 			</p0009>
@@ -1150,7 +1368,7 @@
 					<id-00002>
 						<blocktype type="string">singletext</blocktype>
 						<order type="number">2</order>
-						<text type="formattedtext"><p>You bought low and sold far away: cargo manifests, port fees and handshakes in bad bars.</p><p><b>Signature skill:</b> Trade 1. <b>Choose from:</b> Trade, Persuade, Deceive, Streetwise, Pilot, Electronics, Leadership. <b>Starting credits:</b> 3000.</p><p><i>Former ranks:</i> purser, factor, master.</p></text>
+						<text type="formattedtext"><p>You bought low and sold far away: cargo manifests, port fees and handshakes in bad bars.</p><p><b>Signature skill:</b> Trade 1. <b>Choose from:</b> Trade, Persuade, Deceive, Streetwise, Pilot, Electronics, Leadership. <b>Starting credits:</b> 3000.</p><p><i>Former ranks:</i> purser, factor, master.</p><p><b>Tricks</b> (one each time you gain a Mark; see Marks):</p><list><li><b>Fair Price.</b> When you sell cargo or salvage, make a Trade task. Add 10% to the price for each point of Effect, to at most double. A failure is the offered price, not a worse one.</li><li><b>Open Account.</b> On a station you have visited before, a Persuade task (Standard) gets a night's berth, a meal, or one useful name, on credit.</li><li><b>Clean Manifest.</b> Once per inspection, one item you are carrying is not on the list, unless they search your person. Say which item when the list is asked for.</li></list></text>
 					</id-00002>
 				</blocks>
 			</p0010>
@@ -1177,7 +1395,7 @@
 					<id-00002>
 						<blocktype type="string">singletext</blocktype>
 						<order type="number">2</order>
-						<text type="formattedtext"><p>You kept the drive lit and the air flowing. You know what every noise a ship makes means.</p><p><b>Signature skill:</b> Engineering 1. <b>Choose from:</b> Engineering, Mechanics, Electronics, Zero-G, Science, Pilot, Gunnery. <b>Starting credits:</b> 1200.</p><p><i>Former ranks:</i> mate, chief.</p></text>
+						<text type="formattedtext"><p>You kept the drive lit and the air flowing. You know what every noise a ship makes means.</p><p><b>Signature skill:</b> Engineering 1. <b>Choose from:</b> Engineering, Mechanics, Electronics, Zero-G, Science, Pilot, Gunnery. <b>Starting credits:</b> 1200.</p><p><i>Former ranks:</i> mate, chief.</p><p><b>Tricks</b> (one each time you gain a Mark; see Marks):</p><list><li><b>She'll Hold.</b> Once per session, turn one failed Engineering or Mechanics task into a success with Effect 0. Something small breaks later. The GM says what, before the job is over.</li><li><b>Listen to Her.</b> A Boon on tasks to diagnose a ship you have lived aboard for at least a day.</li><li><b>Patch and Pray.</b> With a toolkit and ten minutes, restore 1d6 hull points to a ship, or stop one leak, without a roll. Once per job.</li></list></text>
 					</id-00002>
 				</blocks>
 			</p0011>
@@ -1204,7 +1422,7 @@
 					<id-00002>
 						<blocktype type="string">singletext</blocktype>
 						<order type="number">2</order>
-						<text type="formattedtext"><p>Ship's doctor, field medic or clinic worker: you have kept people alive with less than you needed.</p><p><b>Signature skill:</b> Medicine 1. <b>Choose from:</b> Medicine, Science, Electronics, Persuade, Survival, Recon. <b>Starting credits:</b> 1500.</p><p><i>Former ranks:</i> orderly, doctor.</p></text>
+						<text type="formattedtext"><p>Ship's doctor, field medic or clinic worker: you have kept people alive with less than you needed.</p><p><b>Signature skill:</b> Medicine 1. <b>Choose from:</b> Medicine, Science, Electronics, Persuade, Survival, Recon. <b>Starting credits:</b> 1500.</p><p><i>Former ranks:</i> orderly, doctor.</p><p><b>Tricks</b> (one each time you gain a Mark; see Marks):</p><list><li><b>Stay With Me.</b> A Medicine task to bring someone back from Down is Easy. They wake with 1d6 Stamina plus your Effect, still hurt.</li><li><b>Two at Once.</b> With a medkit, your Medicine action in a fight can treat two willing people instead of one. Roll once and use it for both.</li><li><b>Right Dose.</b> A stim patch you administer does not deal its crash damage.</li></list></text>
 					</id-00002>
 				</blocks>
 			</p0012>
@@ -1231,15 +1449,23 @@
 					<id-00002>
 						<blocktype type="string">singletext</blocktype>
 						<order type="number">2</order>
-						<text type="formattedtext"><p>You moved on whenever it got complicated: odd jobs, borrowed names and quick exits.</p><p><b>Signature skill:</b> Streetwise 1. <b>Choose from:</b> Streetwise, Stealth, Deceive, Melee, Firearms, Drive, Athletics, Persuade. <b>Starting credits:</b> 600.</p><p><i>Former ranks:</i> none worth mentioning.</p></text>
+						<text type="formattedtext"><p>You moved on whenever it got complicated: odd jobs, borrowed names and quick exits.</p><p><b>Signature skill:</b> Streetwise 1. <b>Choose from:</b> Streetwise, Stealth, Deceive, Melee, Firearms, Drive, Athletics, Persuade. <b>Starting credits:</b> 600.</p><p><i>Former ranks:</i> none worth mentioning.</p><p><b>Tricks</b> (one each time you gain a Mark; see Marks):</p><list><li><b>Already Gone.</b> A Boon on Stealth to leave a room, a berth, or a station while attention is elsewhere.</li><li><b>Borrowed.</b> Once per session you have one common tool, a magazine of quiet rounds, or a snub pistol you did not pay for. It wants to go back. If it does not, someone comes asking next session.</li><li><b>Smile and Step.</b> When you succeed at Deceive in a crowd, you are out of that scene before anyone thinks to check your story.</li></list></text>
 					</id-00002>
 				</blocks>
 			</p0013>
 			<p0014>
 				<name type="string">Improving</name>
-				<text type="formattedtext"><p>Apeira Astra has no levels. The Game Master awards <b>experience</b> at the end of a session (1 to 3 each, more for a big job), and you spend it:</p><table><tr decoration="underline"><td><b>Purchase</b></td><td><b>Cost</b></td></tr><tr><td>A new skill at 0</td><td>1</td></tr><tr><td>A skill's next level</td><td>that level x 2 (level 1: 2, level 2: 4, level 3: 6, level 4: 8)</td></tr><tr><td>A characteristic +1</td><td>6</td></tr></table><p>In Kraken, the Skills page's <b>Improve</b> spends it.</p></text>
+				<text type="formattedtext"><p>Apeira Astra has no levels. A crew member gets better in two ways: <b>experience</b>, which buys skills and characteristics, and <b>Marks</b>, which teach tricks.</p><p>The Game Master awards experience at the end of a session (1 to 3 each, more for a big job). You spend it:</p><table><tr decoration="underline"><td><b>Purchase</b></td><td><b>Cost</b></td></tr><tr><td>A new skill at 0</td><td>1</td></tr><tr><td>A skill's next level</td><td>that level x 2 (level 1: 2, level 2: 4, level 3: 6, level 4: 8)</td></tr><tr><td>A characteristic +1</td><td>6</td></tr></table><p>No skill goes above 4. No characteristic goes above 15.</p><p>In Kraken, the Skills page's <b>Improve</b> spends experience, and it will not take a skill past 4 or a characteristic past 15. The sheet keeps your Marks and tricks too (see Marks).</p></text>
 			</p0014>
 			<p0015>
+				<name type="string">Marks</name>
+				<text type="formattedtext"><p>A <b>Mark</b> is a story the Reach tells about you. The Game Master awards one when a job is finished and you did something the port will repeat. At most one Mark a session. Six Marks is a long career. After the sixth, only experience remains.</p><p>When you gain a Mark, choose one <b>trick</b> from your major Path or your minor Path that you do not already have. A new crew member has none. A trick is not a skill level. It does what it says, and only then.</p><p>A trick's Boon does not stack with another Boon. You still roll three dice and keep two.</p><p>Each Path lists three tricks on its page. Across a major and a minor, that is six: a full career of Marks, if you live that long. (A crew member whose major and minor are the same Path has only its three to learn; the Marks after the third still count, but teach nothing new.)</p><p><b>In Kraken,</b> the sheet tracks it all. The Main page's <b>Marks</b> shows how many you have (of six) and the tricks you have learned, each with its text. The Game Master's <b>Award a Mark</b> gives one; with a Mark unspent, the sheet offers your major and minor Paths' tricks you do not have yet, and <b>Learn</b> takes one. A skill that one of your tricks names shows the trick beside it on the Skills page, as a reminder: you still set the Boon on the strip yourself when the trick applies.</p></text>
+			</p0015>
+			<p0016>
+				<name type="string">What Credits Buy</name>
+				<text type="formattedtext"><p>Credits buy what a port will sell. A yard, a clinic, or a lockup may refuse the expensive pieces. In Kraken, the crew wizard's shop sells all of this at the price below.</p><p><b>Knife</b> (20 cr; damage 1d6, Melee, Melee). A utility blade. Everyone carries one; few admit they have used it.</p><p><b>Shock Baton</b> (150 cr; damage 2d6, Melee, Melee). A security officer's stun stick. A target hit makes a Grit check (Standard) or loses its next turn.</p><p><b>Cutlass</b> (200 cr; damage 2d6, Melee, Melee). The boarding blade of the old navies: no ricochets inside a hull.</p><p><b>Snub Pistol</b> (150 cr; damage 2d6, 10 m, Firearms). Low-velocity rounds that will not hole a hull. The spacer's sidearm.</p><p><b>Service Pistol</b> (250 cr; damage 3d6, 20 m, Firearms). A reliable slug-thrower. Do not fire it at the windows.</p><p><b>Laser Pistol</b> (1200 cr; damage 3d6, 30 m, Firearms). A focused beam from a palm-sized power pack (20 shots).</p><p><b>Scattergun</b> (300 cr; damage 4d6, 10 m, Firearms). A short shotgun for close corridors. Past 10 m, halve the damage.</p><p><b>Carbine</b> (400 cr; damage 3d6, 100 m, Firearms). A short rifle that fits through a hatch.</p><p><b>Rifle</b> (500 cr; damage 4d6, 300 m, Firearms). A frontier rifle: long range, heavy recoil, too much gun for a ship.</p><p><b>Laser Rifle</b> (3500 cr; damage 4d6, 500 m, Firearms). Silent, recoilless, and expensive to power.</p><p><b>Rotary Cannon</b> (6000 cr; damage 5d6, 400 m, Heavy Weapons). A spinning-barrel heavy gun. Needs a Brawn of 9, or a mount.</p><p><b>Cutting Laser</b> (600 cr; damage 2d6, Melee, Melee). A hull-cutting tool. As a weapon it is clumsy; through a bulkhead it is a door.</p><p><b>Flight Jacket</b> (100 cr; armour 1). Padded and lined: a little protection, a lot of pockets.</p><p><b>Mesh Undersuit</b> (500 cr; armour 3). Woven ballistic fibre, worn under clothing.</p><p><b>Flak Vest</b> (400 cr; armour 5). Heavy plates front and back. Obvious.</p><p><b>Vac Suit</b> (1500 cr; armour 4). A sealed suit with 6 hours of air. In vacuum without one: 1d6 damage a turn.</p><p><b>Combat Armour</b> (15000 cr; armour 10). Military plate with a sealed helmet and 6 hours of air. Not sold to just anyone.</p><p><b>Medkit</b> (300 cr). Dressings, stims and a diagnostic cuff: +2 to Medicine tasks. A Medicine task (Standard) with it restores 1d6 Stamina plus the Effect, once per wound.</p><p><b>Toolkit</b> (400 cr). Spanners, drivers, a multimeter and a cutting torch: needed for most Mechanics and Engineering tasks.</p><p><b>Hand Scanner</b> (900 cr). Reads radiation, atmosphere, life signs and power within 50 m: +2 to Recon in the dark or behind bulkheads.</p><p><b>Comm Bead</b> (150 cr). An earpiece radio with a 10 km range, or ship-to-crew anywhere within a ship.</p><p><b>Data Slate</b> (200 cr). A tablet for maps, records and hacking tools: needed for Electronics tasks on a system.</p><p><b>Breather Mask</b> (100 cr). Filters a thin or tainted atmosphere for 12 hours.</p><p><b>Mag Boots</b> (250 cr). Keep your feet on the deck in zero gravity: no Zero-G task to stand, fight or walk.</p><p><b>Flashlight</b> (20 cr). A bright beam 30 m long. Dark ships are very dark.</p><p><b>Emergency Beacon</b> (300 cr). Broadcasts a distress call on every band for 30 days.</p><p><b>Ration Packs (5)</b> (25 cr). Five days of food that tastes of the packet.</p><p><b>Grapple Line</b> (80 cr). 50 m of line and a magnetic grapple, rated for zero-g work.</p><p><b>Stim Patch</b> (60 cr). Shrugs off pain: ignore being Down for 3 turns, then take 1d6 damage. One use.</p><p><b>Hull Tape</b> (40 cr). A palm-sized reel of sealing tape. It holds a suit puncture or a hairline hull crack for one hour, or until someone leans on it.</p><p><b>Patch Foam</b> (150 cr). One use. Sprayed into a vac-suit leak, it sets in one turn and the suit holds. It will not seal a hatch.</p><p><b>Shoulder Lamp</b> (50 cr). A lamp on a strap, both hands free. Thirty metres of hard light, and everyone can see who is wearing it.</p><p><b>Line Gun</b> (350 cr). Fires a magnetic grapple and 30 m of line. A Zero-G or Athletics task (Standard) to hit a hull, a hatch, or a person.</p><p><b>Shock Net</b> (450 cr). A folded net. Thrown with Athletics (Standard) out to 10 m: the target makes a Brawn check (Hard) or loses its next turn. Folding it to throw again takes one action.</p><p><b>Quiet Rounds</b> (100 cr). Ten low-velocity rounds for a snub pistol or a service pistol. They will not hole a hull. Damage dice of that gun are one step smaller (a 3d6 gun does 2d6) while they are loaded.</p><p><b>Boarding Charge</b> (1200 cr). A shaped charge for a hatch, not a person. It opens an ordinary interior hatch in one action and is loud in every compartment next door. Anyone in the square beyond the hatch when it goes takes 4d6, armour applies. One use.</p><p><b>Claim Beacon</b> (500 cr). A fist-sized Accord beacon. Set it on a hull and it shouts your filing on the salvage band. Spoofing or silencing one is an Electronics task (Hard).</p><p><b>Registry Stylus</b> (300 cr). Files a claim or a rescue to the nearest Accord desk, if any band can hear you. The desk still has to stamp it.</p><p><b>Survey Buoy</b> (700 cr). Drop it in a belt, a wreck, or a dark corridor. For one day, while the buoy lives, Recon tasks in that place and a ship's sensor sweeps of it (Electronics) have a Boon.</p><p><b>Skein Chart</b> (600 cr). A local chart, bought not stolen. One Boon on a single Astrogation task in the sector named on the slip. Then it is ordinary paper.</p><p><b>Trade Seal</b> (80 cr). A tamper-evident seal for a crate. Breaking it is obvious. Forging one is an Electronics or Deceive task (Hard), and the yard keeps a list.</p><p><b>Cold Pack</b> (40 cr). One use. Takes the edge off a burn, a radiation flush, or the crash after a stim. The next damage of that kind in the scene is 2 less, to a minimum of 0.</p><p><b>Doc Box</b> (2200 cr). A crate-sized automedic. Once a day, a person with no Medicine may attempt one Medicine task with no untrained penalty. A medic using it has a Boon. Refill: 200 credits, at any clinic.</p><p><b>Mag Clamp</b> (200 cr). A plate and a strap. It holds a crate, a door-wheel, or a willing person to a hull in zero-g. An unwilling person gets a Brawn check (Hard) to twist free.</p></text>
+			</p0016>
+			<p0017>
 				<name type="string">Combat</name>
 				<blocks>
 					<id-00001>
@@ -1265,8 +1491,8 @@
 						<text type="formattedtext"><p><b>Initiative:</b> 2d6 + Reflex modifier + Tactics (-3 without Tactics, as any skill you do not have; Tactics 0 adds 0). Highest first.</p><p><b>On your turn:</b> move (about 6 m) and take one action: attack, a task, reload, aid someone.</p><p><b>Attacking:</b> 2d6 + the weapon's skill (Firearms, Melee, Heavy Weapons) + Reflex (ranged) or Brawn (melee) against <b>8</b>.</p><p><b>Damage:</b> the weapon's dice <b>+ the attack's Effect</b>, minus the target's <b>Armour</b>. A hit that does not beat the armour is stopped.</p><p><b>Stamina:</b> at 0 you are <b>Down</b>: out of the fight, unconscious or close to it. At <b>minus your Grit</b> you are dead. A Medicine task brings you back from Down.</p><p>In Kraken, target a creature (Ctrl+click its token) and use the weapon's attack and damage on your sheet's Combat page.</p></text>
 					</id-00002>
 				</blocks>
-			</p0015>
-			<p0016>
+			</p0017>
+			<p0018>
 				<name type="string">Vacuum and Hazards</name>
 				<blocks>
 					<id-00001>
@@ -1292,8 +1518,8 @@
 						<text type="formattedtext"><p><b>Vacuum:</b> without a sealed suit, 1d6 damage each turn (armour does not help), and you are Down within a minute.</p><p><b>Zero-G:</b> without mag boots, every physical task takes a Bane unless you make a Zero-G task (Standard) at the start of the scene.</p><p><b>Radiation:</b> a hot reactor or a flare: a Grit check each hour (or each turn, close in), 1d6 damage on a failure.</p><p><b>Fire in a hull</b> eats the air: put it out in three turns or vent the compartment.</p></text>
 					</id-00002>
 				</blocks>
-			</p0016>
-			<p0017>
+			</p0018>
+			<p0019>
 				<name type="string">Your Ship</name>
 				<blocks>
 					<id-00001>
@@ -1319,8 +1545,8 @@
 						<text type="formattedtext"><p>A ship is a <b>hull</b> (its tonnage), <b>hull points</b> (tons / 2.5: a ship is destroyed at 0), <b>armour</b> (it comes off every hit), <b>Thrust</b> (how hard it can push), <b>Jump</b> (how many threads of the skein it can cross at once), <b>sensors</b> and a <b>computer</b> (together its <b>fire control</b>, added to every shot).</p><p>Its crew take <b>stations</b>: the <b>pilot</b> at the helm, a <b>gunner</b> at each weapon, someone on <b>sensors</b>, an <b>engineer</b>, the <b>captain</b>. In Kraken, open <b>Starships</b> in the sidebar and take a station with your character.</p><p>The GM has six ready designs: the <b>Courier</b>, the <b>Free Trader</b>, the <b>Salvage Tug</b>, the <b>Patrol Cutter</b>, the <b>Fighter</b> and the <b>Corsair</b>.</p><p>On the map, a ship has its own token, and its <b>deck plans</b> open as maps: bridge, staterooms, galley, turrets, airlock, holds and engineering, with their walls and doors.</p></text>
 					</id-00002>
 				</blocks>
-			</p0017>
-			<p0018>
+			</p0019>
+			<p0020>
 				<name type="string">Ship Combat</name>
 				<blocks>
 					<id-00001>
@@ -1346,11 +1572,11 @@
 						<text type="formattedtext"><p><b>Initiative:</b> 2d6 + the pilot's Pilot task modifier (Pilot + Reflex) + the ship's Thrust.</p><p><b>Range:</b> Adjacent, Close, Short (+1), Medium, Long (-2), Very Long (-4), Distant (-6). A weapon reaches only so far (a pulse laser to Long, a missile rack to Distant).</p><p><b>Firing:</b> 2d6 + the gunner's Gunnery + Intellect (-3 with no one at the gun) + the weapon's modifier + fire control + the range, against <b>8</b>.</p><p><b>Damage:</b> the weapon's dice + the Effect, minus the target's armour, off its hull.</p><p><b>Critical hits:</b> a shot with an Effect of 6 or more that does damage strikes a system (2d6): 2 sensors, 3 power plant, 4 fuel, 5 a weapon, 6 armour, 7 the hull itself, 8 the drive, 9 cargo, 10 the skein drive, 11 the crew, 12 the computer. Each hit on a system makes it worse.</p><p>In Kraken, the GM puts the ships on the combat tracker; a gunner picks the target and the range on the ship's sheet and presses <b>Fire</b>.</p></text>
 					</id-00002>
 				</blocks>
-			</p0018>
-			<p0019>
+			</p0020>
+			<p0021>
 				<name type="string">Credits and License</name>
 				<text type="formattedtext"><p><b>Apeira Astra</b> is an original game made for Kraken VTT: its rules text, setting, names and art are original, and it may be shared freely with Kraken.</p><p>It belongs to the family of &quot;2d6 and skills&quot; science fiction roleplaying games, whose shared idea — two dice, a skill, a target of 8 — is a game mechanic common to many games and owned by none. Apeira Astra is not affiliated with or endorsed by any other game's publisher.</p></text>
-			</p0019>
+			</p0021>
 		</refmanualdata>
 	</reference>
 </root>

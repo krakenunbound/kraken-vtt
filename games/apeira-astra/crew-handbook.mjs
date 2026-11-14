@@ -110,7 +110,7 @@ In Kraken, set the difficulty and any Boon on your sheet's strip, then click a s
 4. **Minor Path**: what you did before or after. **Two picks** from its list.
 5. **Kit and credits**: your major Path's kit and credits, half your minor Path's credits.
 
-No skill starts above 3. **Stamina** is Brawn + Reflex + Grit.
+No skill starts above 3. **Stamina** is Brawn + Reflex + Grit. You start with no Marks and no tricks: they come from play (see Marks).
 
 In Kraken, the Characters window's **Character Wizard** does all of this.`, "images/rules-crew.webp", "A crew"),
             },
@@ -128,7 +128,9 @@ In Kraken, the Characters window's **Character Wizard** does all of this.`, "ima
             {
               name: "Improving",
               keywords: "experience improve advance",
-              text: `Apeira Astra has no levels. The Game Master awards **experience** at the end of a session (1 to 3 each, more for a big job), and you spend it:
+              text: `Apeira Astra has no levels. A crew member gets better in two ways: **experience**, which buys skills and characteristics, and **Marks**, which teach tricks.
+
+The Game Master awards experience at the end of a session (1 to 3 each, more for a big job). You spend it:
 
 | Purchase | Cost |
 |---|---|
@@ -136,7 +138,37 @@ In Kraken, the Characters window's **Character Wizard** does all of this.`, "ima
 | A skill's next level | that level x 2 (level 1: 2, level 2: 4, level 3: 6, level 4: 8) |
 | A characteristic +1 | 6 |
 
-In Kraken, the Skills page's **Improve** spends it.`,
+No skill goes above 4. No characteristic goes above 15.
+
+In Kraken, the Skills page's **Improve** spends experience, and it will not take a skill past 4 or a characteristic past 15. The sheet keeps your Marks and tricks too (see Marks).`,
+            },
+            {
+              name: "Marks",
+              keywords: "mark trick rank path",
+              text: `A **Mark** is a story the Reach tells about you. The Game Master awards one when a job is finished and you did something the port will repeat. At most one Mark a session. Six Marks is a long career. After the sixth, only experience remains.
+
+When you gain a Mark, choose one **trick** from your major Path or your minor Path that you do not already have. A new crew member has none. A trick is not a skill level. It does what it says, and only then.
+
+A trick's Boon does not stack with another Boon. You still roll three dice and keep two.
+
+Each Path lists three tricks on its page. Across a major and a minor, that is six: a full career of Marks, if you live that long. (A crew member whose major and minor are the same Path has only its three to learn; the Marks after the third still count, but teach nothing new.)
+
+**In Kraken,** the sheet tracks it all. The Main page's **Marks** shows how many you have (of six) and the tricks you have learned, each with its text. The Game Master's **Award a Mark** gives one; with a Mark unspent, the sheet offers your major and minor Paths' tricks you do not have yet, and **Learn** takes one. A skill that one of your tricks names shows the trick beside it on the Skills page, as a reminder: you still set the Boon on the strip yourself when the trick applies.`,
+            },
+          ],
+        },
+        {
+          name: "Kit",
+          pages: [
+            {
+              name: "What Credits Buy",
+              keywords: "gear weapon armour price credits shop",
+              text: `Credits buy what a port will sell. A yard, a clinic, or a lockup may refuse the expensive pieces. In Kraken, the crew wizard's shop sells all of this at the price below.
+
+${[...WEAPONS, ...ARMOUR, ...GEAR].map((entry) => {
+  const extra = [entry.damage && `damage ${entry.damage}`, entry.range, entry.protection !== undefined && `armour ${entry.protection}`, entry.skill && entry.damage && entry.skill].filter(Boolean).join(", ");
+  return `**${entry.name}** (${entry.cost}${extra ? `; ${extra}` : ""}). ${plain(entry.description)}`;
+}).join("\n\n")}`,
             },
           ],
         },

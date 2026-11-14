@@ -107,4 +107,42 @@ async function improveAstra(table, record, { skill = "", attribute = "" } = {}, 
   return { record: updated, cost, now: words };
 }
 
-module.exports = { rulesAstra, libraryAstra, buildAstra, taskAstra, editAstra, improveAstra, isAstra, RULESET_NAME };
+// Marks and tricks: the GM awards a Mark (at most six); the player (or the GM)
+// learns a trick with an unspent Mark, from the character's major or minor
+// Path (the Path records of the active Crew Handbook); the GM can forget a
+// trick (a correction: its Mark is unspent again) or take back an unspent
+// Mark. Chat says what happened.
+async function markAstra(table, record, { action = "", trick = "" } = {}, seat, from) {
+  if (!isAstra(record)) throw new Error("Marks are Apeira Astra's.");
+  const gm = seat?.role === "dm";
+  if (!gm && record.owner !== seat?.name) throw new Error("You can only change your own character.");
+  const rules = await rulesAstra();
+  let data = structuredClone(record.data);
+  let words;
+  let learned = null;
+  if (action === "award") {
+    if (!gm) throw new Error("The GM awards Marks.");
+    data = rules.awardMark(data);
+    words = `${record.name} gains a Mark (${data.marks} of ${rules.MAX_MARKS}): a trick to learn from ${(data.paths ?? []).join(" or ")}.`;
+  } else if (action === "learn") {
+    const result = rules.learnTrick(data, libraryAstra(table.records).paths, trick);
+    data = result.data;
+    learned = result.trick;
+    words = `${record.name} learns ${learned.name} (${learned.path}): ${learned.text}`;
+  } else if (action === "forget") {
+    if (!gm) throw new Error("Only the GM takes a trick back.");
+    const result = rules.forgetTrick(data, trick);
+    data = result.data;
+    words = `${record.name} forgets ${result.trick.name}: the Mark is unspent again.`;
+  } else if (action === "take") {
+    if (!gm) throw new Error("Only the GM takes a Mark back.");
+    if (rules.unspentMarks(data) <= 0) throw new Error("Every Mark has its trick: forget a trick first.");
+    data.marks = Math.max(0, Number(data.marks ?? 0) - 1);
+    words = `${record.name} loses an unspent Mark (${data.marks} of ${rules.MAX_MARKS}).`;
+  } else throw new Error("action: award, learn, forget or take.");
+  const updated = table.records.update(record.id, { data: rules.derive(data) }, table.seat, { replace: true });
+  table.say(`[MARK] ${words}`, from || record.name);
+  return { record: updated, marks: updated.data.marks, unspent: rules.unspentMarks(updated.data), tricks: rules.tricksOf(updated.data).map(({ name, path: from, text }) => ({ name, path: from, text })), learned, choices: rules.trickChoices(updated.data, libraryAstra(table.records).paths) };
+}
+
+module.exports = { rulesAstra, libraryAstra, buildAstra, taskAstra, editAstra, improveAstra, markAstra, isAstra, RULESET_NAME };

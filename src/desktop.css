@@ -1448,6 +1448,20 @@ textarea.cc-field.tall { min-height: 220px; }
 .mgt2-upp { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; letter-spacing: 0.12em; font-weight: 700; }
 .sheet-astra .astra-stats .five-ability { grid-template-columns: 1fr 3.5rem 3rem; }
 .sheet-astra .astra-stats .five-ability-head { grid-template-columns: 1fr 3.5rem 3rem; }
+/* Apeira Astra's Marks: the count, the tricks learned (with their text), a trick to learn. */
+.sheet-astra .astra-marks { margin-top: 8px; display: flex; flex-direction: column; gap: 6px; }
+.sheet-astra .astra-marks h4 { display: flex; align-items: center; gap: 8px; margin: 0; }
+.sheet-astra .astra-marks h4 [data-action="award-mark"] { margin-left: auto; }
+.sheet-astra .astra-mark-pips { display: inline-flex; gap: 3px; }
+.sheet-astra .astra-mark-pips i { width: 10px; height: 10px; border-radius: 50%; border: 1px solid var(--accent, #e8c66a); }
+.sheet-astra .astra-mark-pips i.on { background: var(--accent, #e8c66a); }
+.sheet-astra .astra-mark-pips i.unspent { background: transparent; box-shadow: 0 0 5px var(--accent, #e8c66a); border-style: dashed; }
+.sheet-astra .astra-tricks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.sheet-astra .astra-tricks li { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; }
+.sheet-astra .astra-tricks li p { grid-column: 1 / -1; margin: 0; font-size: 0.85rem; opacity: 0.85; }
+.sheet-astra .astra-learn { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.sheet-astra .astra-learn select { flex: 1; min-width: 12rem; }
+.sheet-astra .astra-trick-note { margin-left: 6px; font-size: 0.75rem; color: var(--accent, #e8c66a); cursor: help; }
 /* Kraken packs (the Books window's Packs tab). */
 .packs-panel { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 8px; }
 .packs-bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }

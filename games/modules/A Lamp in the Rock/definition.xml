@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root version="4.6" release="1">
+	<name type="string">A Lamp in the Rock</name>
+	<displayname type="string">A Lamp in the Rock (Apeira Astra)</displayname>
+	<category type="string">Apeira Astra Adventures</category>
+	<author type="string">Kraken VTT</author>
+	<ruleset type="string">Apeira Astra</ruleset>
+</root>
