@@ -59,9 +59,30 @@ const TOOLS = [
   },
   {
     name: "kraken_campaigns",
-    description: "List the GM's campaigns (id, name, ruleset, last played).",
-    inputSchema: object({}),
-    run: (_args, ctx) => out(ctx.campaigns.list()),
+    description:
+      "List the GM's campaigns (id, name, ruleset, last played); with action, the start screen's campaign menu: rename (name), duplicate (a copy with its table, records, adventure and Map Studio pictures; name optional), export (one .zip; path, default Documents/Kraken VTT/Exports/<name>.zip), delete (to the recycle bin, never gone for good; not the campaign being played), backups (the rolling backups: one each Play and every hour while hosting, the newest ten kept), backup (one now), restore (backup: a backup's id; what is there now is backed up first; not while it is played), folder (its folder, opened on the GM's screen).",
+    inputSchema: object({
+      action: { type: "string", enum: ["list", "rename", "duplicate", "export", "delete", "backups", "backup", "restore", "folder"] },
+      id: string("Campaign id"),
+      name: string("rename: the new name; duplicate: the copy's name"),
+      path: string("export: where the .zip goes"),
+      backup: string("restore: the backup's id (from action backups)"),
+    }),
+    async run(args, ctx) {
+      const action = args.action ?? "list";
+      if (action === "list") return out(ctx.campaigns.list());
+      if (!args.id) throw new Error("Which campaign? Give id (kraken_campaigns).");
+      return out(await ctx.campaigns.manage({ action, id: args.id, name: args.name, path: args.path, backup: args.backup }));
+    },
+  },
+  {
+    name: "kraken_logs",
+    description: "Kraken's logs (Settings > Open logs): the last lines of the backend's log (the table server, campaigns, books, this bridge) and the window's (the GM's page), and the folder they are in. open: true opens the folder on the GM's screen.",
+    inputSchema: object({ lines: number("How many lines of each, default 80"), open: { type: "boolean" } }),
+    async run(args, ctx) {
+      if (args.open) await ctx.openLogs();
+      return out(ctx.logs(Math.max(1, Math.min(2000, Number(args.lines) || 80))));
+    },
   },
   {
     name: "kraken_campaign_create",

@@ -80,6 +80,8 @@
     "session-ui": "node scripts/verify-session-ui.mjs",
     "port-mapping": "node scripts/check-port-mapping.mjs",
     "invite-ui": "node scripts/verify-invite-ui.mjs",
+    "campaign-files": "node scripts/check-campaign-files.mjs",
+    "campaigns-ui": "node scripts/verify-campaigns-ui.mjs",
     "agent": "node scripts/check-agent.mjs",
     "assistant": "node scripts/check-assistant.mjs",
     "agent-ui": "node scripts/check-agent-ui.mjs",

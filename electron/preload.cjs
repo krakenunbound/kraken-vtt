@@ -33,6 +33,9 @@ contextBridge.exposeInMainWorld("kraken", {
   startHost: (options) => ipcRenderer.invoke("start-host", options),
   stopHost: () => ipcRenderer.invoke("stop-host"),
   invite: () => ipcRenderer.invoke("invite"),
+  // The start screen's campaign menu (rename, duplicate, export, delete, backups, restore, folder); Settings > Open logs.
+  manageCampaign: (input) => ipcRenderer.invoke("campaign-manage", input),
+  openLogs: () => ipcRenderer.invoke("open-logs"),
   setSceneImage: (bytes, mime) => ipcRenderer.invoke("set-scene-image", bytes, mime),
   setTokenArt: (list) => ipcRenderer.invoke("set-token-art", list),
   pickDecal: (kind) => ipcRenderer.invoke("decal-pick", kind),

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { emblemKey, RulesetEmblem } from "./RulesetEmblem";
 import { UpdateNotice } from "./UpdateNotice";
+import { CampaignMenu } from "./CampaignMenu";
 import { LivingEmblem, Mark } from "../ui/Emblem";
 import type { KrakenCampaign, KrakenNetwork } from "../kraken";
 import "@fontsource/cinzel/latin-500.css";
@@ -237,6 +238,15 @@ export function SetupScreen({
     };
   }, []);
 
+  // The campaign menu open, and where; the list read again after a change (a copy selected).
+  const [menuFor, setMenuFor] = useState<{ id: string; x: number; y: number } | null>(null);
+  async function reloadCampaigns(select?: string) {
+    const list = await window.kraken?.campaigns().catch(() => null);
+    if (!list) return;
+    setRows(list);
+    if (select) setSelectedId(select);
+    else setSelectedId((current) => (current && list.some((item) => item.id === current) ? current : null));
+  }
   const shown = rows
     .filter((campaign) => campaign.name.toLowerCase().includes(query.trim().toLowerCase()))
     .sort((a, b) => (b.playedAt ?? b.createdAt) - (a.playedAt ?? a.createdAt));
@@ -509,10 +519,12 @@ export function SetupScreen({
                 <p className="campaign-empty">{rows.length === 0 ? "No campaigns yet. Begin your first one." : "No campaign by that name."}</p>
               ) : null}
               {shown.map((campaign, index) => (
+                <div key={campaign.id} role="listitem" className="campaign-card-row" onContextMenu={(event) => {
+                  event.preventDefault();
+                  setMenuFor({ id: campaign.id, x: event.clientX, y: event.clientY });
+                }}>
                 <button
-                  key={campaign.id}
                   type="button"
-                  role="listitem"
                   className={campaign.id === selectedId ? "campaign-card selected" : "campaign-card"}
                   style={{ animationDelay: `${index * 60}ms` }}
                   data-campaign={campaign.name}
@@ -530,6 +542,34 @@ export function SetupScreen({
                     ›
                   </span>
                 </button>
+                {window.kraken?.manageCampaign ? (
+                  <>
+                    <button
+                      type="button"
+                      className="campaign-more"
+                      data-action="campaign-menu"
+                      aria-haspopup="menu"
+                      aria-expanded={menuFor?.id === campaign.id}
+                      aria-label={`More for ${campaign.name}`}
+                      title="Rename, duplicate, export, backups, open folder, delete"
+                      onClick={(event) => {
+                        const box = event.currentTarget.getBoundingClientRect();
+                        setMenuFor(menuFor?.id === campaign.id ? null : { id: campaign.id, x: box.left, y: box.bottom + 4 });
+                      }}
+                    >
+                      ⋯
+                    </button>
+                    <CampaignMenu
+                      campaign={campaign}
+                      open={menuFor?.id === campaign.id}
+                      anchor={menuFor?.id === campaign.id ? menuFor : null}
+                      onOpenChange={(open) => !open && setMenuFor((current) => (current?.id === campaign.id ? null : current))}
+                      onError={setLocalError}
+                      onChanged={(select) => void reloadCampaigns(select)}
+                    />
+                  </>
+                ) : null}
+                </div>
               ))}
             </div>
             <button type="button" className="new-campaign" data-action="new-campaign" onClick={newCampaign}>

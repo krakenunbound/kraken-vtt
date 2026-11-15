@@ -31,6 +31,9 @@ const USER_DATA = process.env.KRAKEN_USER_DATA;
 const APP_DIR = path.join(__dirname, "..");
 const VERSION = process.env.KRAKEN_VERSION || "0.0.0";
 if (!USER_DATA) throw new Error("The backend needs KRAKEN_USER_DATA.");
+// What goes wrong in this process is kept in <userData>/logs/backend.log (Settings > Open logs).
+const backendLog = require("./logFile.cjs").createLog(path.join(USER_DATA, "logs"), "backend");
+backendLog.capture();
 
 // --- Asking the window's process -------------------------------------------
 let asked = 0;
@@ -334,8 +337,24 @@ function closeCampaign() {
   if (!hosted) return;
   flushCampaign();
   clearInterval(hosted.timer);
+  clearInterval(hosted.backups);
   clearTimeout(hosted.soon);
   hosted = null;
+}
+// Rolling backups of the hosted campaign: one as it is played, then one an hour (the newest ten kept).
+const BACKUP_EVERY_MS = Math.max(1000, Number(process.env.KRAKEN_BACKUP_EVERY_MS) || 3600_000);
+function backupCampaign(id, reason) {
+  try {
+    if (hosted && hosted.id === id) {
+      hosted.dirty = true;
+      hosted.recordsDirty = true;
+      flushCampaign();
+    }
+    return campaigns.backup(campaignFile(), { id, reason });
+  } catch (error) {
+    console.error("could not back up the campaign", error);
+    return null;
+  }
 }
 function openCampaign(id) {
   closeCampaign();
@@ -343,6 +362,9 @@ function openCampaign(id) {
   if (!campaigns.exists(campaignFile(), id)) throw new Error("That campaign is missing.");
   hosted = { id, state: campaigns.readState(campaignFile(), id), dirty: false, recordsDirty: false, soon: null, timer: null };
   hosted.timer = setInterval(flushCampaign, SAVE_EVERY_MS);
+  // A copy as it was before this sitting, then every hour while it is hosted.
+  backupCampaign(id, "play");
+  hosted.backups = setInterval(() => backupCampaign(id, "hourly"), BACKUP_EVERY_MS);
   return hosted.state;
 }
 // A campaign's ruleset is chosen before it is hosted (it decides its books).
@@ -520,6 +542,45 @@ function rulesetLogos() {
   return { folder, logos };
 }
 
+// The campaign menu's actions, for the start screen and the agent alike.
+// Never the campaign being played for delete or restore; it is saved first for the rest.
+async function manageCampaign(input) {
+  const file = campaignFile();
+  const action = String(input.action ?? "");
+  const id = String(input.id ?? "");
+  const playing = hosted && hosted.id === id;
+  if (playing && (action === "delete" || action === "restore")) throw new Error("Leave the table first: that campaign is being played.");
+  if (playing && (action === "duplicate" || action === "export")) {
+    hosted.dirty = true;
+    hosted.recordsDirty = true;
+    flushCampaign();
+  }
+  if (action === "rename") return campaigns.rename(file, { id, name: input.name });
+  if (action === "duplicate") return campaigns.duplicate(file, { id, name: input.name });
+  if (action === "export") {
+    const found = campaigns.read(file).find((item) => item.id === id);
+    if (!found) throw new Error("That campaign is missing.");
+    const target = input.path ? String(input.path) : path.join(kraken.root(), "Exports", `${found.name.replace(/[^\w .()-]/g, "_").trim() || "campaign"}.zip`);
+    return campaigns.exportZip(file, { id, path: target });
+  }
+  if (action === "delete") {
+    const { removed, folders } = campaigns.remove(file, { id });
+    // To the recycle bin (the window's process does it), never gone for good.
+    await ask("shell", { action: "trash", paths: folders });
+    return { deleted: removed.name, trashed: folders.length };
+  }
+  if (action === "backups") return { backups: campaigns.backups(file, { id }) };
+  if (action === "backup") return { backup: backupCampaign(id, "manual") };
+  if (action === "restore") return campaigns.restore(file, { id, backup: input.backup });
+  if (action === "folder") {
+    const dir = campaigns.folder(file, id);
+    fs.mkdirSync(dir, { recursive: true });
+    if (input.open !== false) await ask("shell", { action: "open", path: dir });
+    return { folder: dir };
+  }
+  throw new Error("action is rename, duplicate, export, delete, backups, backup, restore or folder.");
+}
+
 // --- What the window's process may call -------------------------------------------
 const calls = {
   addresses: () => eachAddress().v4,
@@ -631,6 +692,13 @@ const calls = {
     return assistantStatus();
   },
   hosting: () => Boolean(table || hosted),
+  // The start screen's campaign menu (and kraken_campaigns): rename, duplicate, export, delete, backups, open its folder.
+  "campaign-manage": (input) => manageCampaign(input ?? {}),
+  // The logs folder (Settings > Open logs): the window's process opens it.
+  "logs-folder": () => {
+    fs.mkdirSync(backendLog.folder, { recursive: true });
+    return backendLog.folder;
+  },
   packs: (input) => packsView(input ?? {}),
   "packs-make": (ids) => makePacks(ids),
   // The packs folder (made if new): the window's process opens it.
@@ -650,7 +718,14 @@ const agentContext = {
     list: () => campaigns.read(campaignFile()),
     create: (input) => campaigns.create(campaignFile(), input),
     setRuleset: (input) => setCampaignRuleset(input),
+    manage: (input) => manageCampaign(input ?? {}),
   },
+  // Kraken's logs: the last lines of the backend's and the window's, and where they are.
+  logs: (lines = 80) => {
+    const windowLog = require("./logFile.cjs").createLog(backendLog.folder, "window");
+    return { folder: backendLog.folder, backend: backendLog.tail(lines), window: windowLog.tail(lines) };
+  },
+  openLogs: () => ask("shell", { action: "open", path: (fs.mkdirSync(backendLog.folder, { recursive: true }), backendLog.folder) }),
   ui: (command, timeout) => ask("ui", command, timeout ?? 60000),
   // The window itself (a screenshot, its text, a script in it): done by the window's process.
   windowOp: (op, payload) => ask("window", { op, ...payload }),
