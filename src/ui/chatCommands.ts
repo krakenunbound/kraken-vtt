@@ -155,6 +155,25 @@ export const COMMANDS: Command[] = [
     group: "Talk",
     run: (rest, context) => (rest.trim() ? context.session.tableCommand({ type: "vote", question: rest.trim() }) : context.session.note("As /vote Do we rest here tonight?")),
   },
+  {
+    // FG's /rollon: a random table by its name, on the host's dice; -c a column, -d other dice, -hide the GM's eyes only.
+    names: ["rollon"],
+    args: "[table] <-c column> <-d dice> <-hide>",
+    help: "Roll on a random table: /rollon Rumours -d 2d6 -hide",
+    group: "Dice",
+    run: (rest, context) => {
+      let words = ` ${rest.trim()}`;
+      const hide = / -hide\b/.test(words);
+      words = words.replace(/ -hide\b/g, "");
+      const dice = / -d(.+)$/.exec(words)?.[1]?.trim();
+      words = words.replace(/ -d.+$/, "");
+      const column = / -c(.+)$/.exec(words)?.[1]?.trim();
+      words = words.replace(/ -c.+$/, "");
+      const name = words.trim();
+      if (!name) return context.session.note("As /rollon tablename -c [column name] [-d dice] [-hide]");
+      void context.session.content("table-roll", { action: "roll", name, ...(column ? { column } : {}), ...(dice ? { dice } : {}), ...(hide ? { hide: true } : {}) }).catch((error: unknown) => context.session.note(error instanceof Error ? error.message : "Could not roll that."));
+    },
+  },
   // --- GM ------------------------------------------------------------------
   { names: ["story"], args: "[text]", help: "Story text for the table, without a name", group: "GM", gm: true, run: (rest, context) => context.session.sendChat(rest, { kind: "story" }) },
   {

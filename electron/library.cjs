@@ -26,7 +26,6 @@ function moduleRecords(moduleName) {
   return records;
 }
 const rows = (value) => Object.values(value && typeof value === "object" ? value : {}).filter((row) => row && typeof row === "object");
-const plain = (html) => String(html ?? "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
 
 function list(moduleName, kind, search = "") {
   const type = KINDS[kind];
@@ -73,30 +72,37 @@ function ensureNpc(table, fgPath) {
 }
 
 // An encounter onto the combat tracker; tokens where FG put them when that map is open.
+// battle: a module's encounter by its FG path, or a campaign encounter record
+// (kraken_encounter: its NPCs the campaign's own, a count that may be dice,
+// rolled now, and spots kept per scene).
 async function addBattle(table, fgPath, { place = true } = {}) {
-  const battle = find(moduleOf(fgPath), fgPath);
+  const battle = typeof fgPath === "object" && fgPath ? fgPath : find(moduleOf(fgPath), fgPath);
   const frame = table.map.frame();
+  const sceneId = (table.map.scene?.() ?? table.scene?.())?.id ?? null;
   const added = [];
   for (const row of rows(battle.data.npclist)) {
     const npcPath = row.link?.recordname;
     if (!npcPath) continue;
-    const record = ensureNpc(table, npcPath);
-    const count = Math.max(1, Math.min(20, Number(row.count) || 1));
-    const spots = rows(row.maplink).filter((spot) => frame && String(spot.imageref?.recordname ?? "").replace(/\.image@.*$|@.*$/g, "") === frame.image);
-    const entries = await table.combat.add({ recordId: record.id, count, hidden: false }, table.seat);
+    const record = table.records.get(npcPath)?.type === "npc" ? table.records.get(npcPath) : ensureNpc(table, npcPath);
+    const counted = /d/i.test(String(row.count ?? "")) ? table.dice.roll(String(row.count).replace(/\s+/g, "")).total : Number(row.count);
+    const count = Math.max(1, Math.min(20, counted || 1));
+    // Kraken's own spots (a campaign encounter's, by scene), or FG's (by its image).
+    const own = rows(row.maplink).filter((spot) => spot.scene && spot.scene === sceneId);
+    const spots = own.length ? own : rows(row.maplink).filter((spot) => frame && String(spot.imageref?.recordname ?? "").replace(/\.image@.*$|@.*$/g, "") === frame.image);
+    const entries = await table.combat.add({ recordId: record.id, count, hidden: false, ...(row.faction ? { faction: row.faction } : {}) }, table.seat);
     const list = Array.isArray(entries) ? entries : [entries];
     list.forEach((entry, index) => {
       const spot = spots[index];
-      if (!place || !spot || !frame) return;
-      // FG's map position: from the picture's centre, y up.
-      const x = frame.width / 2 + Number(spot.imagex);
-      const y = frame.height / 2 - Number(spot.imagey);
+      if (!place || !spot || (!frame && !own.length)) return;
+      // FG's map position: from the picture's centre, y up; Kraken's: the map's own.
+      const x = own.length ? Number(spot.x) : frame.width / 2 + Number(spot.imagex);
+      const y = own.length ? Number(spot.y) : frame.height / 2 - Number(spot.imagey);
       const token = table.map.place({ recordId: record.id, name: entry.name, x, y, hidden: true, faction: row.faction === "friend" ? "friend" : row.faction === "neutral" ? "neutral" : "foe", allowSecond: true }, table.seat);
       table.combat.update(entry.id, { tokenId: token.id }, table.seat);
     });
     added.push(...list.map((entry) => entry.name));
   }
-  table.say(`[ENCOUNTER] ${battle.name}: ${added.join(", ")}${frame ? "" : " (no FG map open: tokens not placed)"}.`, "Combat", true);
+  table.say(`[ENCOUNTER] ${battle.name}: ${added.join(", ")}${frame || !battle.source ? "" :" (no FG map open: tokens not placed)"}.`, "Combat", true);
   return { encounter: battle.name, added };
 }
 
@@ -112,16 +118,11 @@ function giveParcel(table, fgPath, party) {
   return party.addToParcel(table, { coins, items, from: parcel.name });
 }
 
-// A table rolled on the host: FG's dice and modifier, the row whose range it falls in.
+// A table rolled on the host (the table engine, shared/tables/roll.mjs: FG's
+// dice and modifier, the row its total falls in, linked tables rolled too),
+// for the GM's eyes, as the Library is the GM's.
 function rollTable(table, fgPath, from = "GM") {
-  const record = find(moduleOf(fgPath), fgPath);
-  const dice = String(record.data.dice ?? "d20").replace(/^d/i, "1d");
-  const mod = Number(record.data.mod) || 0;
-  const roll = table.dice.roll(`${dice}${mod ? (mod > 0 ? `+${mod}` : mod) : ""}`);
-  const row = rows(record.data.tablerows).find((item) => roll.total >= Number(item.fromrange) && roll.total <= Number(item.torange));
-  const result = row ? rows(row.results).map((cell) => plain(cell.result)).filter(Boolean).join(" · ") : "(no row)";
-  table.postRoll(roll, `[TABLE] ${record.name} = ${roll.total}: ${result}`, from, true, { result: result.slice(0, 120) });
-  return { table: record.name, roll: roll.total, result };
+  return require("./content.cjs").rollOn(table, { path: fgPath, hide: true }, table.seat, from);
 }
 
 // A story entry's text, as safe HTML (FG's formatted text; its links are not followed).
@@ -137,4 +138,4 @@ function tables(moduleName) {
   return moduleRecords(moduleName).filter((record) => record.type === KINDS.table);
 }
 
-module.exports = { useShelf, resolved: (name) => resolveBook(name), tables, list, ensureNpc, addBattle, giveParcel, rollTable, storyEntry, KINDS };
+module.exports = { useShelf, resolved: (name) => resolveBook(name), tables, list, find, moduleOf, ensureNpc, addBattle, giveParcel, rollTable, storyEntry, KINDS };

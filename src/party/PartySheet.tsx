@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Picture } from "../characters/ArtPicker";
 import { Icon } from "../ui/icons";
+import { hasLink, linkFrom } from "../ui/QuickSlots";
 import type { Session } from "../session/useSession";
 import { CrewSheet } from "./CrewSheet";
 import { has, rulesetFor } from "../../shared/rulesets/registry.mjs";
@@ -212,7 +213,21 @@ export function PartySheet({ session, compact = false }: { session: Session; com
       {tab === "inventory" ? (
         <div className="party-inventory">
           {gm ? (
-            <div className="party-parcel">
+            <div
+              className="party-parcel"
+              data-parcel-drop
+              title="Drop a treasure parcel here (FG's): its coins and items join the parcel"
+              onDragOver={(event) => {
+                if (hasLink(event)) event.preventDefault();
+              }}
+              onDrop={(event) => {
+                const link = linkFrom(event);
+                const record = link && link.kind === "record" ? session.records[link.record] : null;
+                if (record?.type !== "treasureparcel") return;
+                event.preventDefault();
+                void session.content("parcel", { action: "party", id: record.id });
+              }}
+            >
               <h3>Parcel to hand out</h3>
               <div className="parcel-coins">
                 {[...new Set([...game.party.currency, ...Object.keys(party.parcel.coins ?? {}).filter((coin) => Number(party.parcel.coins?.[coin]) > 0)])].map((coin) => (
@@ -398,26 +413,42 @@ export function PartySheet({ session, compact = false }: { session: Session; com
               </ul>
             </div>
           ))}
-          <form
-            className="parcel-add"
-            onSubmit={(event) => {
+          {/* FG's XP tab: quests and encounters dropped on it from their lists (an encounter's XP from its creatures). */}
+          <div
+            className="xp-drop record-drop"
+            data-xp-drop
+            onDragOver={(event) => {
+              if (hasLink(event)) event.preventDefault();
+            }}
+            onDrop={(event) => {
+              const link = linkFrom(event);
+              const record = link && link.kind === "record" ? session.records[link.record] : null;
+              if (record?.type !== "quest" && record?.type !== "battle") return;
               event.preventDefault();
-              if (!entryName.trim()) return;
-              const kind = (event.nativeEvent as SubmitEvent).submitter?.getAttribute("data-kind") === "quests" ? "quests" : "encounters";
-              patch({ [kind]: { [newKey()]: { name: entryName.trim(), xp: Math.max(0, entryXp), awarded: 0 } } });
-              setEntryName("");
-              setEntryXp(0);
+              void (record.type === "quest" ? session.content("quest", { action: "party", id: record.id }) : session.content("encounter", { action: "end", id: record.id }));
             }}
           >
-            <input placeholder="Encounter or quest" value={entryName} onChange={(event) => setEntryName(event.target.value)} />
-            <input type="number" min={0} value={entryXp} onChange={(event) => setEntryXp(Number(event.target.value) || 0)} style={{ width: "5rem" }} aria-label="XP" />
-            <button type="submit" data-kind="encounters">
-              Add encounter
-            </button>
-            <button type="submit" data-kind="quests">
-              Add quest
-            </button>
-          </form>
+            <span className="hint">Drop a quest (Quests) or an encounter (Encounters) here.</span>
+            <form
+              className="parcel-add"
+              onSubmit={(event) => {
+                event.preventDefault();
+                if (!entryName.trim()) return;
+                // A new quest record, onto the XP tab at once (it is in the Quests list, to write up and share).
+                void session
+                  .content<{ id: string }>("quest", { action: "create", name: entryName.trim(), xp: Math.max(0, entryXp) })
+                  .then((quest) => session.content("quest", { action: "party", id: quest.id }));
+                setEntryName("");
+                setEntryXp(0);
+              }}
+            >
+              <input placeholder="A new quest" aria-label="New quest name" value={entryName} onChange={(event) => setEntryName(event.target.value)} />
+              <input type="number" min={0} value={entryXp} onChange={(event) => setEntryXp(Number(event.target.value) || 0)} style={{ width: "5rem" }} aria-label="XP" />
+              <button type="submit" data-kind="quests">
+                New quest
+              </button>
+            </form>
+          </div>
         </div>
       ) : null}
     </section>

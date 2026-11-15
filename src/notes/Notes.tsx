@@ -3,6 +3,9 @@ import type { QuickSlot, Session, TableRecord } from "../session/useSession";
 import { Icon } from "../ui/icons";
 import { hasLink, LINK_ICON, linkFrom, slotDrag, useOpenLink } from "../ui/QuickSlots";
 import { useWindows } from "../ui/Windows";
+import { RichText } from "../core/fields/RichText";
+import { FormattedText } from "../books/Records";
+import { ShareMenu } from "../books/RecordEditor";
 
 // Notes, as FG's Player Notes: everyone keeps their own; a note is its
 // writer's (and the GM's) until its writer shares it with the table. A note
@@ -120,7 +123,10 @@ export function NoteWindow({ session, id }: { session: Session; id: string }) {
             if (name !== record.name) save({ name });
           }}
         />
-        {editable ? (
+        {gm ? (
+          // The GM's eye: everyone, some players, or the GM alone.
+          <ShareMenu session={session} record={record} />
+        ) : editable ? (
           <button type="button" className={shared ? "share-button on" : "share-button"} aria-pressed={shared} data-share-note title={shared ? "Shared with the table (click to make it yours alone)" : "Share with the table"} onClick={() => save({ visibility: shared ? (gm && record.owner === "" ? "gm" : "owner") : "all" })}>
             <Icon name="share" size={15} />
           </button>
@@ -144,37 +150,19 @@ export function NoteWindow({ session, id }: { session: Session; id: string }) {
         <b>Owner:</b> {record.owner || "GM"}
         {shared ? " · shared with the table" : ""}
       </p>
-      <textarea
+      {/* The core's editor: FG's formatted text; words dragged in (a chat line) and links go where they fall. */}
+      <RichText
         className="note-text"
-        aria-label="Note text"
-        placeholder={editable ? "Click to enter text" : ""}
-        readOnly={!editable}
         value={text}
-        onChange={(event) => {
-          typing.current = true;
-          setText(event.target.value);
-        }}
-        onBlur={() => {
-          typing.current = false;
-          if (text !== (noteOf(record).text ?? "")) save({ data: { text } });
-        }}
-        // Words dragged in (a chat line, text from a book) go where they fall, and are kept at once.
-        onDragOver={(event) => {
-          if (editable && [...event.dataTransfer.types].includes("text/plain") && !hasLink(event)) event.preventDefault();
-        }}
-        onDrop={(event) => {
-          if (!editable || hasLink(event)) return;
-          const words = event.dataTransfer.getData("text/plain");
-          if (!words) return;
-          event.preventDefault();
-          const area = event.currentTarget;
-          const at = document.activeElement === area ? area.selectionStart : text.length;
-          const before = text.slice(0, at);
-          const next = `${before}${before && !before.endsWith("\n") ? "\n" : ""}${words}${text.slice(at)}`;
+        editable={editable}
+        label="Note text"
+        placeholder="Click to enter text"
+        onSave={(next) => {
           setText(next);
-          typing.current = false;
           save({ data: { text: next } });
         }}
+        onOpen={openLink}
+        read={<FormattedText text={text} onOpen={openLink} />}
       />
       <div
         className={dropping ? "note-links dropping" : "note-links"}

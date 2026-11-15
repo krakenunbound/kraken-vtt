@@ -83,7 +83,7 @@ try {
   await seat.click('[data-action="new-note"]');
   await seat.waitForSelector(".note-window");
   await seat.fill(".note-title", "Clues");
-  await seat.fill(".note-text", "The innkeeper is lying about the cellar.");
+  await seat.fill(".note-text .rt-body", "The innkeeper is lying about the cellar.");
   await seat.click(".note-owner");
   let note = null;
   for (let wait = 0; wait < 30 && !(note?.name === "Clues" && note.data?.text?.includes("innkeeper")); wait++) {
@@ -117,7 +117,7 @@ try {
   await second.waitForSelector(`[data-note="${note.id}"]`, { timeout: 8000 });
   await second.click(`[data-note="${note.id}"]`);
   await second.waitForSelector(".note-text");
-  assert((await second.inputValue(".note-text")).includes("innkeeper") && (await second.getAttribute(".note-text", "readonly")) !== null, "shared, they read it but cannot change it");
+  assert((await second.textContent(".note-text")).includes("innkeeper") && !(await second.$(".note-text [contenteditable]")), "shared, they read it but cannot change it");
 
   // The GM sees every note (as FG's), opens it and follows its link to the sheet.
   await page.click('.sidebar [data-launch="notes"]');

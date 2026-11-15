@@ -180,9 +180,41 @@ any other way).
   encounters, maps, story) into the campaign. A book that is not active is
   off limits: its pages, pictures, maps and records open only once it is. A players' book can be shared
   with the players.
-- **Share** a record with the players from its window (*Share with the
-  players*), or a picture from its menu. Players never see what you have not
-  shared.
+- **Share** a record with the players from its window or its list row: the
+  eye opens a menu of *Everyone*, each player, and *GM only*. Drag a record,
+  note, story or picture onto a player's portrait along the top to share it
+  with that player alone; a picture's right-click menu has *Show to* each
+  player. Players never see what you have not shared.
+- **Edit a record** with the pencil in its window (Fantasy Grounds' lock):
+  its fields (the game's own list, else the fields that kind of record
+  carries; *+ Field* adds one of your own) and its description in the text
+  editor. Click the lock to read it again. Right-click a row for
+  *Duplicate* (a copy named "(copy)") and *Delete* (*Undo* shows for a few
+  seconds). A book's record has *Copy to campaign*, to change it without
+  touching the book.
+- **The text editor** (notes, story pages, quests, descriptions): the bar
+  gives bold, italic, underline, a heading, a list, boxed read-aloud text,
+  a table and plain text. Drag anything into it (a page, a picture, a
+  character, a sound, a note, a record) and it becomes a chip in the words.
+- **Story** (World > Story): *New* makes one of the campaign's own, above the
+  adventures' entries; it has a chapter, an order, and pages: text, a picture
+  or a book page (drag one onto it). An adventure's entry has *Copy to
+  campaign*. Share it and the players find it under Story.
+- **Tables** (Campaign > Tables): *New*, or *Import a table* (paste the rows,
+  "1-3  words", or comma/pipe/colon/semicolon separated). Every table's window
+  has *Roll* (a column, *GM only*); unlocked, it edits the die, the columns
+  and every row. In a result, `[2d6]` is rolled, `[3x]` rolls the tables it
+  links three times and `[Other Table]` rolls that table. In chat:
+  `/rollon Rumours -c Column -d 2d6 -hide`.
+- **Identify items:** an item's window has *Identified* and the name and notes
+  the players see until it is ticked again. The real item never reaches them,
+  on a sheet, the party sheet or in chat.
+- **Encounters** (Campaign > Encounters): *New*, drop NPCs in (a count can be
+  dice, rolled when they go on), *Add to tracker*, *Place on this map* (put
+  the tokens where they go first; it keeps where they stand), *End encounter*
+  (its XP to the party sheet). **Parcels**: drop items in, add coins, then *To
+  the party sheet* or *Give* to a character. **Quests** (Campaign > Quests):
+  XP, text and status; drop one on the party sheet's XP tab.
 - **Links in a book** work as in Fantasy Grounds: a page, a picture, or a
   record the book holds (a creature, spell, item, class, race, feat, table,
   encounter) opens in its own window. A table shows as a table, an

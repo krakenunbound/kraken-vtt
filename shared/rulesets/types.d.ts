@@ -364,7 +364,10 @@ export interface RulesetManifest {
   engine: string | null; // "shared/cairn/rules.mjs"; null for no rules (Worldbuilding)
   host: { module: string | null; message?: string; tool?: string };
   labels?: Record<string, string>;
-  records?: Record<string, { label?: string; sheet?: Ref | "core"; statblock?: Ref; filters?: string[] }>;
+  // fields: what the record window's editor offers for that kind (unlocked), in order; none, the fields its records carry.
+  records?: Record<string, { label?: string; sheet?: Ref | "core"; statblock?: Ref; filters?: string[]; fields?: FieldSpec[] }>;
+  // An encounter's experience (kraken_encounter xp, End encounter): the NPC field its creatures' XP is read from (default "xp").
+  encounter?: { xp?: Path };
   sheet: SheetSpec | Ref;
   wizard?: WizardSpec | Ref;
   blank?: boolean; // a blank character can be made (FG's Create)

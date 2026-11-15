@@ -1,6 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { useReadAloudFrames } from "./readAloud";
-import type { BookInfo, LibraryItem, Session } from "../session/useSession";
+import type { BookInfo, LibraryItem, Session, TableRecord } from "../session/useSession";
+import { Icon } from "../ui/icons";
+import { slotDrag } from "../ui/QuickSlots";
+import { useWindows } from "../ui/Windows";
+import { ShareMenu, TableImport, useRecordMenu } from "./RecordEditor";
 import { imageWindow } from "../table/imageWindow";
 
 // FG's Library for the GM's adventures: each kind in its own tab (Maps,
@@ -173,6 +177,75 @@ export function LibraryWindow({ session, openMaps }: { session: Session; openMap
 // module's records under the module. The same actions as the Library's.
 const LABELS: Record<Kind, string> = { map: "Maps", battle: "Encounters", npc: "NPCs", parcel: "Parcels", table: "Tables", story: "Story" };
 
+// The campaign's own records of the kind, above the adventures' (FG lists the
+// campaign's first): New makes one (opened to fill in), a row opens it, is
+// dragged as a link, and has FG's right-click Duplicate and Delete.
+const CAMPAIGN_TYPES: Partial<Record<Kind, string>> = { battle: "battle", parcel: "treasureparcel", table: "table", story: "story" };
+const NEW_INPUT: Record<string, (session: Session, name: string) => Promise<TableRecord>> = {
+  battle: (session, name) => session.content<TableRecord>("encounter", { action: "create", name }),
+  treasureparcel: (session, name) => session.content<TableRecord>("parcel", { action: "create", name }),
+  table: (session, name) => session.content<TableRecord>("table-roll", { action: "create", name, dice: "d6", data: { tablerows: { "id-00001": { fromrange: 1, torange: 6, results: { "id-00001": { result: "" } } } } } }),
+  story: (session, name) => session.content<TableRecord>("story", { action: "create", name }),
+};
+function CampaignRecords({ session, type, label, search }: { session: Session; type: string; label: string; search: string }) {
+  const windows = useWindows();
+  const menu = useRecordMenu(session);
+  const [name, setName] = useState("");
+  const [status, setStatus] = useState("");
+  const wanted = search.trim().toLowerCase();
+  const rows = Object.values(session.records)
+    .filter((record) => record.type === type && !record.source && (!wanted || record.name.toLowerCase().includes(wanted)))
+    .sort((a, b) => String(a.data.chapter ?? "").localeCompare(String(b.data.chapter ?? "")) || (Number(a.data.order) || 0) - (Number(b.data.order) || 0) || a.name.localeCompare(b.name));
+  const chapters = new Map<string, TableRecord[]>();
+  for (const record of rows) chapters.set(String(record.data.chapter ?? ""), [...(chapters.get(String(record.data.chapter ?? "")) ?? []), record]);
+  const made = (record: TableRecord) => menu.actions.open(record.id, record.name);
+  return (
+    <section data-records-book="Campaign" data-campaign-list={type}>
+      <h4>Campaign</h4>
+      <form
+        className="records-new cc-inline"
+        onSubmit={(event) => {
+          event.preventDefault();
+          if (!name.trim()) return;
+          void NEW_INPUT[type](session, name.trim())
+            .then((record) => {
+              setName("");
+              made(record);
+            })
+            .catch((error) => setStatus(error instanceof Error ? error.message : "Could not make that."));
+        }}
+      >
+        <input value={name} onChange={(event) => setName(event.target.value)} placeholder={`New ${label.replace(/s$/, "").toLowerCase()}`} aria-label={`New ${label.replace(/s$/, "").toLowerCase()} name`} />
+        <button type="submit" data-action="campaign-new" disabled={!name.trim()} title={`Make a new ${label.replace(/s$/, "").toLowerCase()} of the campaign's own (FG's +)`}>
+          <Icon name="plus" size={15} /> New
+        </button>
+      </form>
+      {type === "table" ? <TableImport session={session} onMade={made} /> : null}
+      {status ? <p className="hint" role="status">{status}</p> : null}
+      {rows.length === 0 ? <p className="hint">None of the campaign's own yet.</p> : null}
+      {[...chapters].map(([chapter, list]) => (
+        <div key={chapter}>
+          {chapter ? <h5 className="records-category">{chapter}</h5> : null}
+          {list.map((record) => (
+            <div key={record.id} className="records-row" data-record-row={record.id} onContextMenu={(event) => menu.show(event, record)}>
+              <ShareMenu session={session} record={record} />
+              <button type="button" className="records-name" title={`Open ${record.name} (right-click: Duplicate, Delete)`} onClick={() => windows.open("record", record.name, record.id)} {...slotDrag({ kind: "record", record: record.id, label: record.name })}>
+                {record.name}
+              </button>
+              {type === "table" ? (
+                <button type="button" data-action="campaign-table-roll" title="Roll it (the result goes to chat)" onClick={() => void session.content("table-roll", { action: "roll", id: record.id })}>
+                  🎲 Roll
+                </button>
+              ) : null}
+            </div>
+          ))}
+        </div>
+      ))}
+      {menu.element}
+    </section>
+  );
+}
+
 export function AdventureList({ session, kind, onStory }: { session: Session; kind: Kind; onStory?: (path: string, name: string) => void }) {
   const [modules, setModules] = useState<BookInfo[] | null>(null);
   const [search, setSearch] = useState("");
@@ -195,6 +268,7 @@ export function AdventureList({ session, kind, onStory }: { session: Session; ki
           <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search" aria-label={`Search ${label}`} />
         </div>
         <div className="records-list">
+          {CAMPAIGN_TYPES[kind] ? <CampaignRecords session={session} type={CAMPAIGN_TYPES[kind]!} label={label} search={search} /> : null}
           {modules && modules.length === 0 ? <p className="hint empty-state"><b>No adventure is active</b>Tick one under Modules.</p> : null}
           {(modules ?? []).map((book) => {
             const items = session.library[`${book.name}|${kind}`] ?? [];
@@ -260,10 +334,22 @@ export function StoryWindow({ session, path }: { session: Session; path: string 
   // Its boxed text, read aloud by the GM.
   const storyText = useRef<HTMLDivElement>(null);
   useReadAloudFrames(storyText, [entry?.html], entry?.name);
+  const windows = useWindows();
+  const [status, setStatus] = useState("");
+  // The entry as the campaign's own story record, to change and share (the adventure's stays as it is).
+  const copy = () =>
+    session
+      .content<TableRecord>("story", { action: "copy", path })
+      .then((record) => windows.open("record", record.name, record.id))
+      .catch((error) => setStatus(error instanceof Error ? error.message : "Could not copy that."));
   return (
     <div className="record-window story-window" data-story={path}>
       {entry ? (
         <>
+          <button type="button" className="story-copy" data-action="story-copy" title="Copy it into the campaign's story, to change it and share it with the players" onClick={() => void copy()}>
+            <Icon name="import" size={15} /> Copy to campaign
+          </button>
+          {status ? <p className="hint" role="status">{status}</p> : null}
           <h3>{entry.name}</h3>
           {entry.category ? <p className="hint">{entry.category}</p> : null}
           <div className="book-text" ref={storyText} dangerouslySetInnerHTML={{ __html: entry.html ?? "" }} />
