@@ -20,7 +20,9 @@ export type Text = string | { by: string; map: Record<string, string>; else: str
 export type ActionCall =
   | { message: string; action: string; key?: string; value?: string; args?: Record<string, unknown>; modifiers?: string[] }
   | { ct: string; key?: string; value?: string; args?: Record<string, unknown>; modifiers?: string[] }
-  | { roll: "save" | "check" | "skill"; key?: string };
+  // A roll (session.siegeCheck): bonus names the sheet modifier added to it; keyAs "skill": the key goes as the skill;
+  // fight: a save while in a fight goes through the tracker (its effects count).
+  | { roll: "save" | "check" | "skill" | "morale"; key?: string; bonus?: string; keyAs?: "skill"; fight?: boolean };
 
 export interface FieldSpec {
   path: Path; // relative to the row in a list
@@ -38,6 +40,8 @@ export interface FieldSpec {
   bare?: boolean; // no label box around it
   action?: ActionCall; // sent as an action, not an edit
   when?: Cond;
+  show?: string; // shown: this template instead of the path's value ("{className} {level}")
+  lines?: boolean; // a textarea of a list: one item a line
 }
 
 export interface RollSpec {
@@ -47,6 +51,7 @@ export interface RollSpec {
   aria?: Text;
   hook: string; // the data-* attribute the button carries the row's key in: "roll-save" -> data-roll-save="str"
   column?: string; // its column's heading in a stat block ("Save")
+  className?: string; // default "cc-bonus"
 }
 export interface StepSpec {
   hook: Hook; // data-action
@@ -64,8 +69,11 @@ export interface BoxSpec {
   hook?: Hook;
   danger?: boolean; // red at 0 or less
   fields?: (FieldSpec & { before?: string })[]; // small fields beside it (Lost, Max)
-  warn?: { when: Cond; text: string };
+  warn?: { when?: Cond; atZero?: boolean; text: string; attr?: { name: string; value: string } }; // atZero: when what is shown is 0 or less; attr: a data-* it carries
   steps?: StepSpec[]; // + and - (Fatigue), the owner's
+  format?: "signed"; // +2
+  suffix?: string; // after the number (movement's ')
+  note?: Text; // a small hint under the number
 }
 export interface ListAction {
   hook: Hook;
@@ -85,15 +93,23 @@ export interface Modifier {
 }
 
 export type Part = (
-  | { part: "statBlock"; label: string; hook: string; className?: string; rows: { key: string; label: string; short?: string }[]; columns: { label: string; path: Path; field: Omit<FieldSpec, "path"> }[]; roll?: RollSpec }
+  // base: the section's classes (default "cc-panel five-abilities"); heading: an h4 in place of the column heads;
+  // rowClass / rowTitle: each row's classes and title; plain: the row's name without a title; notes: lines under it.
+  | { part: "statBlock"; label: string; hook: string; className?: string; rows: { key: string; label: string; short?: string }[]; columns: { label: string; path: Path; field: Omit<FieldSpec, "path"> }[]; roll?: RollSpec; base?: string; heading?: { text: string; hint?: string }; head?: false; rowClass?: string; rowTitle?: Text; plain?: boolean; notes?: Path }
   | { part: "derived"; className?: string; boxes: BoxSpec[] }
-  | { part: "list"; label?: string; path: Path; hook: string; count?: string; className?: string; select?: FieldSpec; check?: FieldSpec; name: { path: Path; else?: string; bold?: boolean; title?: Path[]; flat?: boolean /* the name and details straight in the row, not in a span */ }; details?: { text?: string; format?: Ref; when?: Cond }[]; sep?: string; rowActions?: ListAction[]; remove?: { aria: Text; title?: string; action?: ActionCall }; add?: { label: string; note: string; action: ActionCall }; modifier?: Modifier; empty?: string }
-  | { part: "coins"; path: Path; className?: string; none?: { text: string; unless: string } }
+  | { part: "list"; label?: string; path: Path; hook: string; count?: string; className?: string; select?: FieldSpec; check?: FieldSpec; name: { path: Path; else?: string; bold?: boolean; title?: Path[]; flat?: boolean /* the name and details straight in the row, not in a span */ }; details?: { text?: string; format?: Ref; when?: Cond }[]; sep?: string; hideEmpty?: boolean /* no details line when none */; fields?: FieldSpec[] /* typed into, after the select */; rowActions?: ListAction[]; remove?: { aria: Text; title?: string; action?: ActionCall }; add?: { label: string; note: string; action: ActionCall }; modifier?: Modifier; empty?: string }
+  | { part: "coins"; path: Path; className?: string; none?: { text: string; unless: string }; aria?: Text /* default "{name} coins" */; upper?: boolean /* the coin's name in capitals */ }
   | { part: "load"; mode: "slots"; hook: string; used: Path; total: number; text: string }
   | { part: "notes"; fields: FieldSpec[]; className?: string }
   | { part: "advancement"; mode: "growth"; title?: string; rolls: StepSpec[] }
-  | { part: "hint"; text: string }
-  | { part: "heading"; text: string; targets?: boolean }
+  | { part: "hint"; text: Text }
+  | { part: "heading"; text: string; targets?: boolean; hint?: string }
+  // A row of records' rows (thief abilities, skills): each a field, its name and a roll.
+  | { part: "skills"; path: Path; hook: string; className: string; rowTitle?: Text; field: FieldSpec; name: Path; roll: RollSpec }
+  // Boxes to tick off (spells a day): max is a number or a list (a row of boxes for each, as a level's slots);
+  // used the count ticked (a list alike); a click ticks up to that box, or back.
+  | { part: "track"; style: "boxes"; className: string; attr?: { name: string; value: Text }; intro?: Text; max: Path; used: Path; rowClass: string; rowHook: string; labels: string[]; aria: Text; empty?: string }
+  | ({ part: "button" } & StepSpec)
   | { part: "row"; parts: Part[]; className?: string }
   | { part: "custom"; component: Ref; props?: Record<string, unknown> }
 ) & { when?: Cond; gm?: boolean };
@@ -110,6 +126,8 @@ export interface TabSpec {
 export interface SheetSpec {
   level: "inherit" | "arrange"; // "replace" is per part (custom) or per window
   header: { identity: FieldSpec[] };
+  top?: Part[]; // above every tab (a strip of level, experience and the roll modifier)
+  art?: Path; // what picks the portrait art (the race)
   tabs: TabSpec[];
   className?: string; // keeps a game's own look (decision 1)
 }
@@ -176,6 +194,7 @@ export type Cond =
   | { is: { path: Path; values: string[] } }
   | { positive: Path }
   | { defined: Path }
+  | { rows: Path } // a list with at least one row
   | { editable: true }
   | { all: Cond[] }
   | { any: Cond[] }
@@ -254,5 +273,5 @@ export interface RulesetManifest {
   strips?: Ref[];
   combatLabel?: string; // "Score"
   calendar?: string; // shared/calendars.mjs id
-  edit?: { text: Path[]; number: Path[]; string?: Path[]; remove?: Path[] }; // remove: lists whose rows may be dropped
+  edit?: { text: Path[]; number: Path[]; string?: Path[]; list?: Path[]; remove?: Path[] }; // list: a list typed one item a line; remove: lists whose rows may be dropped
 }

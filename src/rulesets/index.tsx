@@ -8,7 +8,7 @@ import { Sheet5e, Wizard5e } from "../characters/Sheet5e";
 import { Sheet35 } from "../characters/Sheet35";
 import { Wizard35 } from "../characters/Wizard35";
 import { Sheet2e, Wizard2e } from "../characters/Sheet2e";
-import { SheetBf, WizardBf } from "../characters/SheetBf";
+import { WizardBf } from "../characters/WizardBf";
 import { SheetMgt2 } from "../characters/SheetMgt2";
 import { WizardMgt2 } from "../characters/WizardMgt2";
 import { SheetAstra, WizardAstra } from "../characters/SheetAstra";
@@ -36,7 +36,6 @@ export const SHEETS: Record<string, ComponentType<SheetProps>> = {
   "dnd5e.sheet": Sheet5e,
   "dnd35.sheet": Sheet35,
   "adnd2e.sheet": Sheet2e,
-  "bfrpg.sheet": SheetBf,
   "mgt2.sheet": SheetMgt2,
   "astra.sheet": SheetAstra,
   "fate.sheet": SheetFate,

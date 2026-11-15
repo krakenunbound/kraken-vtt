@@ -13,7 +13,8 @@ export function FieldView({ spec, scope, base = "" }: { spec: FieldSpec; scope: 
   const value = raw === undefined || raw === null || raw === "" ? spec.default : raw;
   const label = textOf(spec.label, scope, modifiers);
   const title = spec.title ? textOf(spec.title, scope, modifiers) : undefined;
-  const typing = editable && spec.edit !== "never";
+  // Who types: the owner and the GM, the GM only (edit: "gm"), or no one.
+  const typing = spec.edit === "gm" ? sheet.gm : editable && spec.edit !== "never";
   const save = (next: unknown) => (spec.action ? act(spec.action, { key: scope.extra?.key === undefined ? undefined : String(scope.extra.key), value: next }) : change(path, next));
   switch (spec.kind) {
     case "number":
@@ -21,7 +22,7 @@ export function FieldView({ spec, scope, base = "" }: { spec: FieldSpec; scope: 
     case "text":
       return <Field value={String(value ?? "")} editable={typing} label={label} onSave={(text) => save(text)} />;
     case "textarea":
-      return <Field value={String(value ?? "")} area editable={typing} label={label} onSave={(text) => save(text)} />;
+      return <Field value={spec.lines ? (Array.isArray(value) ? value.map(String).join("\n") : "") : String(value ?? "")} area editable={typing} label={label} onSave={(text) => save(text)} />;
     case "select":
       return (
         <select className="cc-field" value={spec.number ? num(value) : String(value ?? "")} disabled={!typing} aria-label={label} title={title} onChange={(event) => save(spec.number ? Number(event.target.value) : event.target.value)}>
@@ -41,7 +42,7 @@ export function FieldView({ spec, scope, base = "" }: { spec: FieldSpec; scope: 
       if (spec.attr) attrs[spec.attr] = String(value ?? "");
       return (
         <span className="cc-value" title={title} style={spec.color ? { color: spec.color } : undefined} {...attrs}>
-          {fill(`{${spec.path}}`, scope) || String(value ?? "")}
+          {spec.show ? fill(spec.show, scope) : fill(`{${spec.path}}`, scope) || String(value ?? "")}
         </span>
       );
     }

@@ -12,6 +12,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { CALENDARS } from "../shared/calendars.mjs";
+import { globRegex, samplePath } from "../shared/rulesets/edit.mjs";
 import { CAMPAIGN_RULESETS, FEATURES, MANIFESTS, rulesetNamed } from "../shared/rulesets/registry.mjs";
 
 const require = createRequire(import.meta.url);
@@ -114,7 +115,10 @@ function checkSheet(where, manifest) {
         : part.part === "notes" ? part.fields
         : part.part === "list" ? [part.select, part.check].filter(Boolean).map((field) => ({ ...field, path: `${part.path}.*.${field.path}` }))
         : part.part === "statBlock" ? part.rows.flatMap((row) => part.columns.map((column) => ({ ...column.field, path: column.path.replace("{key}", row.key) })))
+        : part.part === "skills" ? [{ ...part.field, path: `${part.path}.%.${part.field.path}` }]
         : [];
+      if (part.part === "list") fields.push(...(part.fields ?? []).map((field) => ({ ...field, path: `${part.path}.*.${field.path}` })));
+      if (part.part === "track") editable.push(`${part.used}.#`);
       // A field is typed into when it has an input kind (no kind: shown only) and is not edit: "never" or sent as an action.
       for (const field of fields) if (field.kind && field.kind !== "readonly" && field.edit !== "never" && !field.action) editable.push(field.path);
       if (part.part === "coins") editable.push(`${part.path}.*.amount`);
@@ -128,22 +132,23 @@ function checkSheet(where, manifest) {
     }
   };
   for (const field of manifest.sheet.header.identity) if (field.kind && field.kind !== "readonly" && field.edit !== "never") editable.push(field.path);
+  walk(manifest.sheet.top ?? [], { rows: new Set(), actions: new Set() }, "top");
   for (const tab of manifest.sheet.tabs) walk(tab.parts, { rows: new Set(), actions: new Set() }, tab.id);
   // The whitelist: every editable path is allowed by the manifest's edit globs.
   // Rows a list may drop: "inventorylist" -> inventorylist.<id>.
   const removable = (manifest.edit?.remove ?? []).length ? [`(${manifest.edit.remove.join("|")}).*`] : [];
-  const globs = [...(manifest.edit?.text ?? []), ...(manifest.edit?.number ?? []), ...(manifest.edit?.string ?? []), ...removable];
+  const globs = [...(manifest.edit?.text ?? []), ...(manifest.edit?.number ?? []), ...(manifest.edit?.string ?? []), ...(manifest.edit?.list ?? []), ...removable];
   const compiled = globs.map((glob) => globRegex(glob));
   for (const path of editable) {
-    const sample = path.replace(/\*/g, "id-00001");
+    const sample = samplePath(path);
     if (!compiled.some((regex) => regex.test(sample))) problem(where, `the sheet edits ${path}, which the manifest's edit whitelist does not allow`);
   }
   // The host builds its whitelist from the manifest: the same regexes.
   if (manifest.host?.module && manifest.edit) {
     const host = require(`../${manifest.host.module}`);
     if (host.EDIT_PATHS) {
-      const mine = ["text", "number", "string"].map((kind) => (manifest.edit[kind] ?? []).map((glob) => globRegex(glob).source).join("|")).concat(removable.map((glob) => globRegex(glob).source));
-      const theirs = ["text", "number", "string"].map((kind) => (host.EDIT_PATHS[kind] ?? []).map((regex) => regex.source).join("|")).concat((host.EDIT_PATHS.remove ?? []).map((regex) => regex.source));
+      const mine = ["text", "number", "string", "list"].map((kind) => (manifest.edit[kind] ?? []).map((glob) => globRegex(glob).source).join("|")).concat(removable.map((glob) => globRegex(glob).source));
+      const theirs = ["text", "number", "string", "list"].map((kind) => (host.EDIT_PATHS[kind] ?? []).map((regex) => regex.source).join("|")).concat((host.EDIT_PATHS.remove ?? []).map((regex) => regex.source));
       if (mine.join("\n") !== theirs.join("\n")) problem(where, `${manifest.host.module}'s EDIT_PATHS are not the manifest's edit globs`);
     }
   }
@@ -178,11 +183,6 @@ function checkWizard(where, wizard) {
   for (const step of wizard.steps ?? []) walk(step.parts ?? []);
   if (actions.has("wizard-finish")) problem(where, "a wizard part uses the frame's wizard-finish");
   return refs;
-}
-
-// The manifest's edit glob as the host's regex: "*" = one id-n key.
-function globRegex(glob) {
-  return new RegExp(`^${glob.replace(/\./g, "\\.").replace(/\*/g, "id-\\d+")}$`);
 }
 
 const strictLater = FEATURES.filter((feature) => !existsSync(new URL(`../src/core/features/${feature}`, import.meta.url)));

@@ -1,5 +1,6 @@
 import type { CustomPart, Format } from "../core/parts/Parts";
 import type { WizardFunctions } from "../core/wizard/Steps";
+import { BfStrip, BfTurnUndead } from "./bfrpg";
 import { CairnRest, cairnBackgroundGold, cairnBackgroundOfRoll, cairnBuild, cairnItemSlots } from "./cairn";
 
 // The level-3 parts a manifest places inside the core frame ({ part: "custom",
@@ -8,6 +9,8 @@ import { CairnRest, cairnBackgroundGold, cairnBackgroundOfRoll, cairnBuild, cair
 // Ref a manifest names is one of these (or a component in index.tsx).
 export const CUSTOM_PARTS: Record<string, CustomPart> = {
   "cairn.restStrip": CairnRest,
+  "bfrpg.strip": BfStrip,
+  "bfrpg.turnUndead": BfTurnUndead,
 };
 export const FORMATS: Record<string, Format> = {
   "cairn.itemSlots": cairnItemSlots,

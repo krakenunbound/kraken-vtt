@@ -1,7 +1,7 @@
 import type { ComponentType } from "react";
 import type { BoxSpec, Part, RollSpec, StepSpec } from "../../../shared/rulesets/types";
 import { Field } from "../fields/Field";
-import { at, fill, holds, num, rows, textOf, useSheet, type Row, type Scope } from "../sheet/context";
+import { at, fill, holds, num, rows, signed, textOf, useSheet, type Row, type Scope } from "../sheet/context";
 import { FieldView, LabelledField } from "./FieldView";
 
 // The core parts a manifest arranges on a sheet's tabs (docs/core-ui-design.md
@@ -62,11 +62,28 @@ export function PartView({ spec, custom, formats }: { spec: Part; custom: Record
     case "heading":
       return (
         <h4>
-          {spec.text} {spec.targets ? sheet.targets.length ? <small className="hint">at {sheet.targets.join(", ")}</small> : <small className="hint">Ctrl+click a token to target it</small> : null}
+          {spec.text}
+          {spec.targets ? (
+            <>
+              {" "}
+              {sheet.targets.length ? <small className="hint">at {sheet.targets.join(", ")}</small> : <small className="hint">Ctrl+click a token to target it</small>}
+            </>
+          ) : spec.hint ? (
+            <>
+              {" "}
+              <small className="hint">{spec.hint}</small>
+            </>
+          ) : null}
         </h4>
       );
     case "hint":
-      return <p className="hint">{fill(spec.text, scope)}</p>;
+      return <p className="hint">{textOf(spec.text, scope, sheet.modifiers)}</p>;
+    case "skills":
+      return <Skills spec={spec} />;
+    case "track":
+      return <Track spec={spec} />;
+    case "button":
+      return <StepButton spec={spec} />;
     case "custom": {
       const Custom = custom[spec.component];
       return Custom ? <Custom props={spec.props} /> : null;
@@ -85,7 +102,8 @@ function StepButton({ spec, scope }: { spec: StepSpec; scope?: Scope }) {
   );
 }
 
-function RollButton({ roll, scope, className }: { roll: RollSpec; scope: Scope; className?: string }) {
+function RollButton({ roll, scope, className: base }: { roll: RollSpec; scope: Scope; className?: string }) {
+  const className = roll.className ?? base;
   const sheet = useSheet();
   const key = String(scope.extra?.key ?? "");
   return (
@@ -107,19 +125,31 @@ function RollButton({ roll, scope, className }: { roll: RollSpec; scope: Scope; 
 function StatBlock({ spec }: { spec: Extract<Part, { part: "statBlock" }> }) {
   const sheet = useSheet();
   return (
-    <section className={`cc-panel five-abilities${spec.className ? ` ${spec.className}` : ""}`} aria-label={spec.label}>
-      <div className="five-ability-head">
-        <span />
-        {spec.columns.map((column) => (
-          <small key={column.label}>{column.label}</small>
-        ))}
-        {spec.roll ? <small>{spec.roll.column}</small> : null}
-      </div>
+    <section className={`${spec.base ?? "cc-panel five-abilities"}${spec.className ? ` ${spec.className}` : ""}`} aria-label={spec.label}>
+      {spec.heading ? (
+        <h4>
+          {spec.heading.text}
+          {spec.heading.hint ? (
+            <>
+              {" "}
+              <small className="hint">{spec.heading.hint}</small>
+            </>
+          ) : null}
+        </h4>
+      ) : spec.head === false ? null : (
+        <div className="five-ability-head">
+          <span />
+          {spec.columns.map((column) => (
+            <small key={column.label}>{column.label}</small>
+          ))}
+          {spec.roll ? <small>{spec.roll.column}</small> : null}
+        </div>
+      )}
       {spec.rows.map((row) => {
         const scope: Scope = { data: sheet.data, extra: { key: row.key, label: row.label, short: row.short ?? row.label } };
         return (
-          <div key={row.key} className="five-ability" {...{ [`data-${spec.hook}`]: row.key }}>
-            <b title={row.label}>{row.short ?? row.label}</b>
+          <div key={row.key} className={spec.rowClass ?? "five-ability"} {...{ [`data-${spec.hook}`]: row.key }} title={spec.rowTitle ? textOf(spec.rowTitle, scope, sheet.modifiers) : undefined}>
+            {spec.plain ? <b>{row.short ?? row.label}</b> : <b title={row.label}>{row.short ?? row.label}</b>}
             {spec.columns.map((column) => (
               <FieldView key={column.label} spec={{ ...column.field, path: column.path.replace("{key}", row.key) }} scope={scope} />
             ))}
@@ -127,7 +157,64 @@ function StatBlock({ spec }: { spec: Extract<Part, { part: "statBlock" }> }) {
           </div>
         );
       })}
+      {spec.notes
+        ? ((at(sheet.data, spec.notes) ?? []) as string[]).map((note) => (
+            <p key={note} className="hint">
+              {note}
+            </p>
+          ))
+        : null}
     </section>
+  );
+}
+
+// A record's rows each with a field, a name and a roll (thief abilities): "{name}" and the others from the row.
+function Skills({ spec }: { spec: Extract<Part, { part: "skills" }> }) {
+  const sheet = useSheet();
+  return (
+    <div className={spec.className}>
+      {rows(at(sheet.data, spec.path)).map(([key, row]) => {
+        const scope: Scope = { row, extra: { key }, data: sheet.data };
+        return (
+          <div key={key} className="five-skill" {...{ [`data-${spec.hook}`]: key }} title={spec.rowTitle ? textOf(spec.rowTitle, scope, sheet.modifiers) : undefined}>
+            <FieldView spec={spec.field} scope={scope} base={`${spec.path}.${key}`} />
+            <span>{String(at(row, spec.name) ?? "")}</span>
+            <RollButton roll={spec.roll} scope={scope} className="cc-bonus" />
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// Boxes to tick off: a row for each count in max (a spell level's slots); a click ticks up to that box, or back to it.
+function Track({ spec }: { spec: Extract<Part, { part: "track" }> }) {
+  const sheet = useSheet();
+  const scope: Scope = { data: sheet.data };
+  const maxes = ((): number[] => {
+    const max = at(sheet.data, spec.max);
+    return Array.isArray(max) ? max.map(num) : [num(max)];
+  })();
+  const usedOf = (index: number) => {
+    const used = at(sheet.data, spec.used);
+    return num(Array.isArray(used) ? used[index] : used);
+  };
+  return (
+    <div className={spec.className} {...(spec.attr ? { [`data-${spec.attr.name}`]: textOf(spec.attr.value, scope, sheet.modifiers) } : {})}>
+      {spec.intro ? <p className="hint">{textOf(spec.intro, scope, sheet.modifiers)}</p> : null}
+      {maxes.map((max, index) =>
+        max > 0 ? (
+          <div key={index} className={spec.rowClass} {...{ [`data-${spec.rowHook}`]: index + 1 }}>
+            <b>{spec.labels[index]}</b>
+            {Array.from({ length: max }, (_, slot) => {
+              const used = usedOf(index);
+              return <button key={slot} type="button" className={slot < used ? "used" : ""} disabled={!sheet.editable} aria-label={textOf(spec.aria, { data: sheet.data, extra: { label: spec.labels[index], n: slot + 1 } }, sheet.modifiers)} onClick={() => sheet.change(`${spec.used}.${index}`, slot < used ? slot : slot + 1)} />;
+            })}
+          </div>
+        ) : null,
+      )}
+      {spec.empty && maxes.every((max) => !max) ? <p className="hint">{spec.empty}</p> : null}
+    </div>
   );
 }
 
@@ -146,6 +233,7 @@ function DerivedBox({ box }: { box: BoxSpec }) {
   const scope: Scope = { data: sheet.data };
   const value = num(at(sheet.data, box.path));
   const shown = box.show === "remaining" ? value - num(at(sheet.data, box.minus ?? "")) : value;
+  const warn = box.warn && (box.warn.atZero ? shown <= 0 : holds(box.warn.when, scope, sheet));
   const hook = box.hook ? { "data-stat": box.hook } : {};
   return (
     <div className="five-big" title={box.title ? textOf(box.title, scope, sheet.modifiers) : undefined}>
@@ -160,11 +248,19 @@ function DerivedBox({ box }: { box: BoxSpec }) {
             <>
               {shown} / {value}
             </>
+          ) : box.format === "signed" ? (
+            signed(shown)
+          ) : box.suffix ? (
+            <>
+              {shown}
+              {box.suffix}
+            </>
           ) : (
             shown
           )}
         </span>
       )}
+      {box.note ? <small className="hint">{textOf(box.note, scope, sheet.modifiers)}</small> : null}
       {box.fields?.length ? (
         <span className="cc-inline">
           {box.fields.map((field) => (
@@ -172,7 +268,11 @@ function DerivedBox({ box }: { box: BoxSpec }) {
           ))}
         </span>
       ) : null}
-      {box.warn && holds(box.warn.when, scope, sheet) ? <span className="hint">{box.warn.text}</span> : null}
+      {box.warn && warn ? (
+        <span className="hint" {...(box.warn.attr ? { [`data-${box.warn.attr.name}`]: box.warn.attr.value } : {})}>
+          {box.warn.text}
+        </span>
+      ) : null}
       {box.steps?.length && sheet.editable ? (
         <span className="cc-inline">
           {box.steps.map((step) => (
@@ -207,13 +307,17 @@ function List({ spec, formats }: { spec: Extract<Part, { part: "list" }>; format
         {items.map(([key, item]) => {
           const scope: Scope = { row: item, extra: { key }, data: sheet.data };
           const name = String(at(item, spec.name.path) ?? spec.name.else ?? "");
-          const details = (spec.details ?? []).filter((detail) => holds(detail.when, scope, sheet)).map((detail) => (detail.format ? (formats[detail.format]?.(item) ?? "") : fill(detail.text ?? "", scope))).filter(Boolean);
+          // A row's details read the row alone (as an FG list item's fields): an item with no "ac" never shows the character's.
+          const own: Scope = { row: item, extra: { key }, data: {} };
+          const details = (spec.details ?? []).filter((detail) => holds(detail.when, own, sheet)).map((detail) => (detail.format ? (formats[detail.format]?.(item) ?? "") : fill(detail.text ?? "", own))).filter(Boolean);
           const title = spec.name.title?.map((path) => String(at(item, path) ?? "")).find(Boolean) ?? (spec.name.title ? "" : undefined);
           const words = (
             <>
               {spec.name.bold ? <b>{name}</b> : name}
-              {/* A list with details always has their line (empty or not), as every list on the hand-made sheets did. */}
-              {spec.details ? (
+              {/* A list with details always has their line (empty or not), as every list on the hand-made sheets did, unless hideEmpty. */}
+              {spec.details && spec.hideEmpty && !details.length ? (
+                <> </>
+              ) : spec.details ? (
                 <>
                   {" "}
                   <small className="hint">{details.join(spec.sep ?? " · ")}</small>
@@ -224,6 +328,9 @@ function List({ spec, formats }: { spec: Extract<Part, { part: "list" }>; format
           return (
             <li key={key} {...{ [`data-${spec.hook}`]: key }}>
               {spec.select ? <FieldView spec={spec.select} scope={scope} base={`${spec.path}.${key}`} /> : null}
+              {(spec.fields ?? []).map((field) => (
+                <FieldView key={field.path} spec={field} scope={scope} base={`${spec.path}.${key}`} />
+              ))}
               {spec.check ? (
                 <label className="cc-inline">
                   <FieldView spec={spec.check} scope={scope} base={`${spec.path}.${key}`} /> {words}
@@ -302,7 +409,7 @@ function Coins({ spec }: { spec: Extract<Part, { part: "coins" }> }) {
     <div className={spec.className ?? "five-coins"}>
       {coins.map(([key, coin]) => (
         <label key={key} className="cc-inline">
-          <Field value={num(coin.amount)} number editable={sheet.editable} label={`${String(coin.name ?? "GP")} coins`} onSave={(value) => sheet.change(`${spec.path}.${key}.amount`, Number(value) || 0)} /> {String(coin.name ?? "gp").toLowerCase()}
+          <Field value={num(coin.amount)} number editable={sheet.editable} label={spec.aria ? textOf(spec.aria, { row: coin, data: sheet.data }, sheet.modifiers) : `${String(coin.name ?? "GP")} coins`} onSave={(value) => sheet.change(`${spec.path}.${key}.amount`, Number(value) || 0)} /> {spec.upper ? String(coin.name).toUpperCase() : String(coin.name ?? "gp").toLowerCase()}
         </label>
       ))}
       {none ? <span className="hint">{spec.none?.text}</span> : null}
