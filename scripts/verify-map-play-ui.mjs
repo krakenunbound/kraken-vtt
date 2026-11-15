@@ -255,9 +255,9 @@ try {
   await page.keyboard.press("Escape");
   await page.keyboard.press("+");
   await until(async () => (await page.locator(`[data-token="${orcToken.id}"]`).boundingBox()).width > box.width * 1.1, "+ zooms in");
-  const before = await page.locator(`[data-token="${orcToken.id}"]`).boundingBox();
+  const zoomed = await page.locator(`[data-token="${orcToken.id}"]`).boundingBox();
   await page.keyboard.press("ArrowLeft");
-  await until(async () => (await page.locator(`[data-token="${orcToken.id}"]`).boundingBox()).x > before.x + 50, "an arrow with nothing selected pans the map");
+  await until(async () => (await page.locator(`[data-token="${orcToken.id}"]`).boundingBox()).x > zoomed.x + 50, "an arrow with nothing selected pans the map");
   await page.keyboard.press("-");
   await tool("kraken_token_remove", { id: pasted.id });
   report.push("GM keys: Ctrl+C / Ctrl+V copies the orc to the pointer; + zooms; an arrow pans");

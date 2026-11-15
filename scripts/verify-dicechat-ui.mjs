@@ -152,7 +152,7 @@ try {
   await tool("kraken_dice_force", { values: [6, 15] });
   await say(seat, "/r 1d20 + 3 #Climb");
   const climb = await until(lastRoll, "the climb");
-  assert(climb.label === "Climb" && climb.formula === "2d20kh1+3+3" && climb.total === 21 && climb.mods.length === 3, `the roll reads the box and ADV: ${JSON.stringify(climb)}`);
+  assert(climb.label === "Climb [ADVANTAGE]" && climb.formula === "2d20kh1+3+3" && climb.total === 21 && climb.mods.length === 3, `the roll reads the box and ADV: ${JSON.stringify(climb)}`);
   await until(async () => (await seat.$$(".modifier-slots li")).length === 0 && (await seat.getAttribute('[data-modifier-key="adv"]', "aria-pressed")) === "false", "the box and the key clear");
   await seat.waitForSelector(".chat-line .roll-mods");
   await seat.screenshot({ path: path.join(shots, "1-player-roll-card.png") });

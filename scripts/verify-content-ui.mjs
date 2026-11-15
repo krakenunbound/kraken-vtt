@@ -278,8 +278,8 @@ try {
   await seat.press("form.chat-entry input", "Enter");
   await until(async () => (await tool("kraken_chat_log", { count: 20 })).some((line) => line.roll?.label === "[TABLE] Lake Rumours = 1: The mill grinds bones" && line.from === "A test player"), "the player's /rollon");
   // A result dragged from the table's window into the chat's entry goes into the line being typed.
-  await seat.click('.sidebar [data-launch="adventure:table"]');
-  await seat.click('[data-campaign-list="table"] >> text=Lake Rumours');
+  await seat.click('.sidebar [data-launch="records:table"]');
+  await seat.click('.window[data-window="records"] >> text=Lake Rumours');
   await seat.waitForSelector(`.record-window[data-record="${rumours.id}"] tr[data-table-row="1"]`);
   await seat.fill("form.chat-entry input", "Rumour:");
   await seat.dragAndDrop(`.record-window[data-record="${rumours.id}"] tr[data-table-row="1"]`, "form.chat-entry input");
