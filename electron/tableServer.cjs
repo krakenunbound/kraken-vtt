@@ -878,6 +878,7 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
     combatPending = true;
     setImmediate(() => {
       combatPending = false;
+      floatScan();
       for (const [ws, client] of clients) send(ws, { type: "combat", combat: forPlayer(client, combat.viewFor(seatOf(client))) });
     });
   }
@@ -915,11 +916,40 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
     working.place({ name: "Test player", owner: TEST_SEAT.name, faction: "friend", ...(Number.isFinite(x) && Number.isFinite(y) ? { x, y } : {}) }, seat);
   }
 
+  // Scrolling combat text (Foundry's, FG's token combat actions): damage and healing float off a token.
+  // Hit points as they stand (wounds less temporary hit points, from its tracker entry or its record),
+  // compared with the last look; a change floats to the GM, and to players where the tracker would show
+  // them the numbers (their own, a friend's, or every creature's when the GM shows numbers). Never a
+  // hidden token's.
+  const lastHurt = new Map();
+  function floatScan() {
+    for (const token of map.tokens()) {
+      const entry = combat.entries().find((item) => item.tokenId === token.id);
+      const record = token.recordId ? records.get(token.recordId) : null;
+      const vitals = entry ? combat.vitals(entry) : record?.data?.hp && Number(record.data.hp.total) > 0 ? { wounds: Number(record.data.hp.wounds) || 0, temp: Math.max(0, Number(record.data.hp.temp) || 0) } : null;
+      if (!vitals) continue;
+      const hurt = (Number(vitals.wounds) || 0) - (Number(vitals.temp) || 0);
+      const before = lastHurt.get(token.id);
+      lastHurt.set(token.id, hurt);
+      if (before === undefined || before === hurt) continue;
+      const amount = hurt - before;
+      const pc = Boolean(token.owner) || record?.type === "character";
+      for (const [ws, client] of clients) {
+        if (client.role !== "dm") {
+          if (token.hidden) continue;
+          const shows = pc || token.faction === "friend" || (token.owner !== "" && token.owner === client.name) ? "numbers" : (options.healthNpc ?? "dot");
+          if (shows !== "numbers") continue;
+        }
+        send(ws, { type: "float", tokenId: token.id, amount: -amount });
+      }
+    }
+  }
   function sendMaps() {
     if (mapsPending) return;
     mapsPending = true;
     setImmediate(() => {
       mapsPending = false;
+      floatScan();
       let explored = false;
       for (const [ws, client] of clients) {
         if (client.role !== "dm") {

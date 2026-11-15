@@ -654,6 +654,22 @@ select {
   pointer-events: none;
 }
 
+/* Scrolling combat text: damage (red) or healing (green) rises off the token and fades. */
+.token-float { position: absolute; z-index: 40; transform: translate(-50%, -100%); font-weight: 900; line-height: 1; pointer-events: none; white-space: nowrap; paint-order: stroke; -webkit-text-stroke: 3px rgba(0, 0, 0, 0.8); text-shadow: 0 2px 6px rgba(0, 0, 0, 0.7); animation: token-float 1.8s ease-out forwards; }
+.token-float.hurt { color: #ff5a4a; }
+.token-float.healed { color: #6ee07a; }
+@keyframes token-float {
+  0% { opacity: 0; translate: 0 10%; scale: 0.7; }
+  12% { opacity: 1; translate: 0 0; scale: 1.15; }
+  25% { scale: 1; }
+  75% { opacity: 1; }
+  100% { opacity: 0; translate: 0 -120%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .token-float { animation: token-float-still 1.8s linear forwards; }
+  @keyframes token-float-still { 0%, 80% { opacity: 1; } 100% { opacity: 0; } }
+}
+
 .ping {
   position: absolute;
   z-index: 6;

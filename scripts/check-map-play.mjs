@@ -164,6 +164,21 @@ try {
   await tool("kraken_table_options", { healthPc: "dot", names: "hover" });
   console.log("ok names and health");
 
+  // 2b. Scrolling combat text: damage floats off the token. Ann sees her own character's; the goblin's
+  // only reaches the GM while enemies' numbers are hidden (healthNpc dot).
+  const floatsSince = { ann: ann.inbox.length, dm: dm.inbox.length };
+  server.agent.records.update(annRecord.id, { data: { hp: { total: 10, wounds: 5 } } }, server.agent.seat);
+  await latest(ann, "float", (m) => m.tokenId === annToken.id && m.amount === -2, "Ann sees her own 2 damage float");
+  const gobEntry = (await tool("kraken_combat", { action: "add", entry: { name: "Goblin", tokenId: gob.id, faction: "foe", hp: 7 } })).entries?.find?.((item) => item.tokenId === gob.id) ?? server.agent.combat.entries().find((item) => item.tokenId === gob.id);
+  await new Promise((resolve) => setTimeout(resolve, 150));
+  await tool("kraken_combat", { action: "damage", id: gobEntry.id, amount: 3 });
+  await latest(dm, "float", (m) => m.tokenId === gob.id && m.amount === -3, "the GM sees the goblin's 3 damage float");
+  await new Promise((resolve) => setTimeout(resolve, 150));
+  assert(!ann.inbox.slice(floatsSince.ann).some((m) => m.type === "float" && m.tokenId === gob.id), "Ann is not told the goblin's damage (enemy numbers hidden)");
+  await tool("kraken_combat", { action: "end" });
+  server.agent.records.update(annRecord.id, { data: { hp: { total: 10, wounds: 3 } } }, server.agent.seat);
+  console.log("ok scrolling combat text");
+
   // 3. Fog of war on the host: Ann's view becomes her explored area; she is sent hers alone; the GM resets it.
   const annExplored = await latest(ann, "explored", (m) => m.sceneId === "crypt" && m.polygons.length > 0, "Ann's explored areas");
   assert(annExplored.polygons.length >= 1, "her view is kept");

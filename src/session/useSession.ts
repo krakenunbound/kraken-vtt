@@ -139,6 +139,8 @@ export type MapGroup = { name: string; shown?: boolean; players?: boolean; locke
 export type LibraryItem = { path: string; name: string; category: string; npcs?: string; summary?: string; html?: string; file?: string; map?: boolean };
 export type MapMask = { on: boolean; shapes: { id: string; mode: "reveal" | "hide"; points: number[] }[] };
 export type Ping = { id: number; x: number; y: number; from: string; color: string };
+// Damage (negative) or healing floating off a token for a moment (the host's scrolling combat text).
+export type Float = { id: number; tokenId: string; amount: number };
 // A line drawn on the map, for everyone (by "" is the GM's).
 export type CalendarNote = { id: string; year: number; day: number; by: string; color: string | null; text: string; shown: boolean; at: number };
 // Progress clocks on the table (clocks.cjs) and the GM's Score panel (Forged in the Dark).
@@ -477,6 +479,7 @@ export function useSession() {
   const [soundTriggers, setSoundTriggers] = useState<SoundTrigger[]>([]);
   const [options, setOptions] = useState<TableOptions>({ towerReveal: false, decal: "kraken", wallpaper: "", gmIcon: "", soundHidden: "combat", soundRepeat: 1 });
   const [pings, setPings] = useState<Ping[]>([]);
+  const [floats, setFloats] = useState<Float[]>([]);
   // How many times the GM has shared the map (each one opens the map window).
   const [mapShared, setMapShared] = useState(0);
   const [notice, setNotice] = useState<string | null>(null);
@@ -678,6 +681,11 @@ export function useSession() {
           }
           if (msg.type === "ruler") rulerStore.put(msg);
           if (msg.type === "explored") exploredStore.put(msg);
+          if (msg.type === "float" && typeof msg.tokenId === "string" && Number(msg.amount)) {
+            const float = { id: ++pingCounter.current, tokenId: msg.tokenId, amount: Number(msg.amount) };
+            setFloats((current) => [...current, float].slice(-24));
+            window.setTimeout(() => setFloats((current) => current.filter((item) => item.id !== float.id)), 1800);
+          }
           if (msg.type === "ping") {
             const ping = { id: ++pingCounter.current, x: Number(msg.x), y: Number(msg.y), from: String(msg.from ?? ""), color: String(msg.color ?? "#fff") };
             setPings((current) => [...current, ping].slice(-12));
@@ -1492,6 +1500,7 @@ export function useSession() {
     sendReadAloud,
     dismissReadAloud,
     pings,
+    floats,
     ruler,
     resetExplored,
     undoMove,

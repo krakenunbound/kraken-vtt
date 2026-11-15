@@ -7,7 +7,7 @@ import { MARKER_SETS, markerShapes } from "../../shared/map/deathMarkers.mjs";
 import { backgroundRect, colorWithAlpha, gridStops, sceneFrame, type BackgroundFit, type SceneFrame } from "../foundry/geometry";
 import { type SceneLight, type SceneMarker, type SceneRegion, type SceneWall } from "../foundry/sceneObjects";
 import { diagonalRule, gridDistance, gridKind, pathDistance, gridOrigin, hexCorners, hexOf, LIGHT_PRESETS, snapCenter, withGrid } from "../../shared/map/geometry.mjs";
-import type { DecalItem, EditWall, MapDoor, MapTemplate, MapTile, MapToken, Ping, PictureKind, SceneLightRecord, TableMap, TableRecord, TemplateAsk, WallKind } from "../session/useSession";
+import type { DecalItem, EditWall, MapDoor, MapTemplate, MapTile, MapToken, Ping, Float, PictureKind, SceneLightRecord, TableMap, TableRecord, TemplateAsk, WallKind } from "../session/useSession";
 import { useBookWindows } from "../books/Books";
 import { MapEditor, kindColor, placePicture, type EditTab, type EditTool, type LabelStyle, type PaintStyle } from "./MapEditor";
 import { Lighting } from "./Lighting";
@@ -310,6 +310,7 @@ function MapViewInner({
   map,
   records = [],
   pings = [],
+  floats = [],
   notice = null,
   actions,
   targeted = [],
@@ -338,6 +339,8 @@ function MapViewInner({
   map: TableMap;
   records?: TableRecord[];
   pings?: Ping[];
+  // Damage and healing floating off tokens (scrolling combat text).
+  floats?: Float[];
   notice?: string | null;
   actions: MapActions;
   // Tokens this seat's creatures have targeted (a reticle shows on them).
@@ -2223,6 +2226,16 @@ function MapViewInner({
           : null}
         {/* A ping: a bright dot in the person's colour, three rings going out from it and a
             beam of light, never smaller on screen than about 180 px however far out the map is. */}
+        {floats.map((item) => {
+          const token = tokens.find((candidate) => candidate.id === item.tokenId);
+          if (!token) return null;
+          const span = token.squares * size;
+          return (
+            <div key={item.id} className={item.amount < 0 ? "token-float hurt" : "token-float healed"} data-float={item.tokenId} style={{ left: token.x, top: token.y - span / 2, fontSize: Math.max(18, (size * 0.42)) }} aria-hidden="true">
+              {item.amount > 0 ? `+${item.amount}` : `−${-item.amount}`}
+            </div>
+          );
+        })}
         {pings.map((item) => {
           const reach = Math.max(size * 3, 180 / camera.scale);
           return (
