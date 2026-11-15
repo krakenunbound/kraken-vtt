@@ -6,6 +6,18 @@ full log of the work is in [PLAN.md](PLAN.md).
 
 ## Unreleased
 
+**From a hands-on audit of Fantasy Grounds and Foundry: what a game night trips over.**
+
+- **Action links in text.** "DC 15 Dexterity saving throw" in a book, story, note or chat line is a button: the GM's click asks every player to roll it, a player's rolls their own character's save. Checks, skills, damage, healing, XP awards and conditions too, from Foundry's markup or a book's own words. Chat: `/check dex 15`, `/save wis 13`, `/skill perception 12`, `/award 50`.
+- **Range lines.** A creature's targets get an arrow in its colour with the distance; long range and out of range are named from its weapons and spells.
+- **Whose turn it is** lights up on the portraits along the top (a spinning ring, a glow, a Turn ribbon); the GM may sort them into initiative order.
+- **Damage and healing float off tokens**; **speech bubbles** over a token when someone speaks as it.
+- **The map behind every window**, filling the table (each screen chooses).
+- **Cards for every game**: potions, scrolls, wands, kits and class features; Cairn's spellbooks and relics; Ironsworn's and Starforged's assets; Fate's aspects and stunts; Forged's special abilities; new pictures for all of them, the spell schools and sci-fi weapons.
+- **Combat options**: initiative rolled every round, stop at the start of each round, creatures' hit points as listed, rolled or maximum. 5E: an Inspiration box.
+- **Map keys**: the GM's Ctrl+A, Ctrl+C / Ctrl+V of tokens; + and - zoom; arrows pan; the number pad moves diagonally.
+- **Help on the start screen**: the quickstart, the new wiki (krakenunbound.github.io/kraken-vtt), game guides, release notes, bug reports and the community.
+
 **Rough edges smoothed.**
 
 - A creature whose token has a "players call it" name is called that on the players' combat tracker and in chat too.
