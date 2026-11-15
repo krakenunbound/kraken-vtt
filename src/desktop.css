@@ -763,6 +763,12 @@ span.ct-init { display: inline-block; }
 .inline-roll { display: inline; padding: 0 5px; margin: 0 1px; font: inherit; font-weight: 700; line-height: inherit; color: var(--brass); background: rgba(210, 161, 90, 0.12); border: 1px solid var(--brass-dim); border-radius: 4px; cursor: pointer; white-space: nowrap; }
 .inline-roll::before { content: "\2684"; margin-right: 3px; font-weight: 400; opacity: 0.8; }
 .inline-roll:focus-visible { outline: 2px solid var(--brass); outline-offset: 1px; }
+/* Action links: a check or save (a shield), damage (a burst), healing (a cross), an award (a star), a condition (a ring). */
+.inline-roll.action-link { color: #9fd3ff; background: rgba(90, 160, 210, 0.14); border-color: rgba(120, 180, 230, 0.55); white-space: normal; }
+.inline-roll.action-link::before { content: "\26E8"; }
+.inline-roll.action-link[data-action-link="damage"]::before { content: "\2739"; }
+.inline-roll.action-link[data-action-link="award"]::before { content: "\2605"; }
+.inline-roll.action-link[data-action-link="condition"]::before { content: "\25CE"; }
 @media (hover: hover) {
   .inline-roll:hover { background: var(--brass-soft); border-color: var(--brass); }
 }

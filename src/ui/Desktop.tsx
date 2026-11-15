@@ -15,6 +15,7 @@ import { diceStore } from "../dice/diceStore";
 import { agentCommands } from "./agentCommands";
 import { ChatDock } from "./ChatDock";
 import { manifestOf, PANELS } from "../rulesets";
+import { setActionRolls } from "./InlineRolls";
 import { has } from "../../shared/rulesets/registry.mjs";
 import { Mark } from "./Emblem";
 import { DecalPicker, SettingsWindow, TableDecal } from "./Settings";
@@ -393,6 +394,8 @@ export function Desktop({
     for (const item of windows.windows) if (item.kind === "characters" && String(item.payload ?? "").startsWith("new")) windows.close(item.key);
     windows.open("characters", "Character Wizard", `new-${Date.now()}`);
   };
+  // Action links in text know this game's checks, saves and skills.
+  setActionRolls((manifestOf(session.ruleset).party?.groupCheck || undefined)?.rolls);
   const dice =useSyncExternalStore(diceStore.subscribe, diceStore.settings);
   // A sheet whose character this seat may no longer see (the GM took it back) closes.
   useEffect(() => {

@@ -34,7 +34,7 @@ run build-packs npm run build-packs
 run tsc npx tsc --noEmit -p .
 run coverage npm run coverage
 run build npm run build
-for s in check-astra check-ironsworn check-forged check-fate check-bfrpg check-cairn check-srd5e check-dnd5e check-dnd35 check-adnd2e check-mgt2 check-combat check-combat-fixes check-audit check-party check-books check-packs check-dice check-setup check-starships check-code-mode check-assistant check-open-art check-studio-server check-studio-bridge check-studio-fg check-studio-tools check-map-play check-map check-walls check-content check-session-tools check-port-mapping check-campaign-files check-targeting check-templates check-cards check-effects check-cast-text check-spell-parse check-modifiers check-chat-flow check-bookkeeping; do
+for s in check-astra check-ironsworn check-forged check-fate check-bfrpg check-cairn check-srd5e check-dnd5e check-dnd35 check-adnd2e check-mgt2 check-combat check-combat-fixes check-audit check-party check-books check-packs check-dice check-setup check-starships check-code-mode check-assistant check-open-art check-studio-server check-studio-bridge check-studio-fg check-studio-tools check-map-play check-map check-walls check-content check-session-tools check-port-mapping check-campaign-files check-targeting check-templates check-cards check-effects check-cast-text check-spell-parse check-action-links check-modifiers check-chat-flow check-bookkeeping; do
   [ -f "scripts/$s.mjs" ] && run "$s" node "scripts/$s.mjs"
 done
 run check-tiles npx tsx scripts/check-tiles.mjs

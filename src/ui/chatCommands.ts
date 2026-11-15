@@ -2,6 +2,8 @@ import { diceStore } from "../dice/diceStore";
 import { sound } from "../sound/soundEngine";
 import type { RollMode, Session } from "../session/useSession";
 import type { WindowKind } from "./Windows";
+import { manifestOf } from "../rulesets";
+import { resolveTest } from "../../shared/text/actionLinks.mjs";
 
 // The chat's slash commands, as Fantasy Grounds' (so its players know them),
 // with Foundry's names too where it has its own (/gmroll, /me...) and a few of
@@ -93,6 +95,24 @@ const onOff = (value: string) => (/^(on|yes|true|1)$/i.test(value.trim()) ? true
 function percent(rest: string, low: number, high: number) {
   const value = Number(rest.trim().replace(/%$/, ""));
   return Number.isFinite(value) && value >= low && value <= high ? value / 100 : null;
+}
+
+// A check, save or skill against a DC (/check dex 15): the player's own character rolls it through its
+// sheet; the GM's asks every player for theirs (the party sheet's Ask the players card).
+function testRoll(kind: "check" | "save" | "skill", rest: string, context: CommandContext) {
+  const words = rest.trim().split(/\s+/).filter(Boolean);
+  const dc = Number(words.find((word) => /^(dc)?\d+$/i.test(word))?.replace(/\D/g, "") ?? 0) || 0;
+  const word = words.filter((item) => !/^(dc)?\d+$/i.test(item)).join(" ");
+  const session = context.session;
+  const found = resolveTest((manifestOf(session.ruleset).party?.groupCheck || undefined)?.rolls ?? [], kind, word);
+  if (!found) return session.note(word ? `This game has no ${kind} called '${word}'.` : `As /${kind} dex 15`);
+  const which = found.kind === "skill" ? { skill: found.value } : { attribute: found.value };
+  if (session.role === "dm") return session.partyRoll({ kind: found.kind, ...which, dc, mode: "ask" });
+  const me = session.players.find((seat) => seat.id === session.selfId)?.name ?? "";
+  const mine = Object.values(session.records).filter((record) => record.type === "character" && me !== "" && record.owner === me);
+  if (!mine.length) return session.note("You have no character to roll for.");
+  const label = `${found.name} ${found.kind === "save" ? "save" : "check"}`;
+  session.siegeCheck(mine[0].id, found.kind === "skill" ? "" : found.value, dc, false, { kind: found.kind, ...(found.kind === "skill" ? { skill: found.value } : {}), dc, label });
 }
 
 export const COMMANDS: Command[] = [
@@ -229,7 +249,32 @@ export const COMMANDS: Command[] = [
     gm: true,
     run: (rest, context) => (rest.trim() ? context.session.tableCommand({ type: "kick", name: rest.trim() }) : context.session.note("As /kick Bob")),
   },
-  { names: ["save"], args: "", help: "Save the campaign now", group: "GM", gm: true, run: (_rest, context) => context.session.tableCommand({ type: "save" }) },
+  // Action links' rolls (shared/text/actionLinks.mjs): a player rolls their character's, the GM asks the players.
+  { names: ["check"], args: "[ability or skill] <DC>", help: "A check: /check dex 15 (the GM asks every player for theirs)", group: "Dice", run: (rest, context) => testRoll("check", rest, context) },
+  { names: ["skill"], args: "[skill] <DC>", help: "A skill check: /skill perception 12", group: "Dice", run: (rest, context) => testRoll("skill", rest, context) },
+  {
+    names: ["save"],
+    args: "<ability> <DC>",
+    help: "A saving throw: /save wis 13 (the GM asks the players); alone, the GM saves the campaign",
+    group: "Dice",
+    run: (rest, context) => {
+      if (rest.trim()) return testRoll("save", rest, context);
+      if (context.session.role === "dm") return context.session.tableCommand({ type: "save" });
+      context.session.note("As /save wis 13");
+    },
+  },
+  {
+    names: ["award"],
+    args: "[xp]",
+    help: "Award XP to the party: /award 50",
+    group: "GM",
+    gm: true,
+    run: (rest, context) => {
+      const xp = Math.round(Number(rest.replace(/xp/i, "").trim()));
+      if (!Number.isFinite(xp) || xp <= 0) return context.session.note("As /award 50");
+      context.session.partyAwardXP(xp);
+    },
+  },
   {
     names: ["pause"],
     args: "[on|off]",

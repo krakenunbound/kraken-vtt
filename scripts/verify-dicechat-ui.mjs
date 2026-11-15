@@ -236,6 +236,22 @@ try {
   assert((await seat.getAttribute('.chat-prompt [data-prompt-row="Hagar"]', "data-rolled")) === "15", "the player's row: 11 + 4");
   await seat.screenshot({ path: path.join(shots, "5-player-party-prompt.png") });
 
+  // 5b. Action links: a book's "DC 13 Dexterity saving throw" in a chat line is a chip. The GM's click
+  // asks the players (a new prompt card); the player's rolls Hagar's own save against the DC.
+  await tool("kraken_chat_send", { text: "The floor gives way: make a DC 13 Dexterity saving throw." });
+  const link = '.chat-line .action-link[data-action-link="test"]';
+  await page.waitForSelector(link);
+  await seat.waitForSelector(link);
+  assert((await seat.textContent(link)).trim() === "DC 13 Dexterity saving throw", `the chip keeps the book's words: ${await seat.textContent(link)}`);
+  const promptsBefore = await seat.locator(".chat-prompt").count();
+  await page.locator(link).last().click();
+  await seat.waitForFunction((before) => document.querySelectorAll(".chat-prompt").length > before, promptsBefore, { timeout: 10000 });
+  assert(/Dexterity/.test(await seat.locator(".chat-prompt").last().textContent()) && /DC 13/.test(await seat.locator(".chat-prompt").last().textContent()), "the GM's click asks the players for a DC 13 Dexterity save");
+  await tool("kraken_dice_force", { values: [9] });
+  await seat.locator(link).last().click();
+  await until(async () => (await tool("kraken_chat_log", { count: 10 })).some((line) => /Dexterity save/i.test(line.roll?.label ?? "") && line.from === "A test player"), "the player's click rolls Hagar's Dexterity save");
+  await seat.screenshot({ path: path.join(shots, "5b-action-link.png") });
+
   // 6. The tracker: initiative by kind, Delay and Act now; the player's bars.
   await tool("kraken_table_options", { initGroup: "kind", healthNpc: "bar" });
   for (let i = 0; i < 3; i += 1) await tool("kraken_combat", { action: "add", recordId: goblin.id });
