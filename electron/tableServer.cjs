@@ -439,7 +439,7 @@ function serveWeb(url, res, root) {
 // decals, wallpapers: the background decals and desktop tiles the GM can
 // choose from (decals.cjs).
 // sounds: the GM's sounds (sounds.cjs): one-shots, effects, ambience and music.
-function createTableServer({ saved = {}, onChange = () => undefined, webRoot = WEB_ROOT, art = null, decals = null, wallpapers = null, gmIcons = null, towers = null, dicePacks = null, tiles = null, sounds = null, books = null, ruleset = "", accounts = null, prefs: prefsStore = null, studioPicture = null } = {}) {
+function createTableServer({ saved = {}, archive = null, onChange = () => undefined, webRoot = WEB_ROOT, art = null, decals = null, wallpapers = null, gmIcons = null, towers = null, dicePacks = null, tiles = null, sounds = null, books = null, ruleset = "", accounts = null, prefs: prefsStore = null, studioPicture = null } = {}) {
   // Each person's own settings (prefs.cjs): their colour and dice. Kept by the app for every campaign; in memory without a file.
   const prefs = prefsStore ?? createPrefsStore(null, diceLook);
   const prefsKey = (client) => (client.role === "dm" ? "@gm" : client.name);
@@ -636,6 +636,13 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
   }
   // The seat whose request is being handled now (and when).
   let asking = null;
+  // Each sitting of the campaign (the Session Log): when it began; its chat is archived when the table closes
+  // (archive: the campaign folder's chat logs, from the backend; kept here when there is none).
+  const sessions = (Array.isArray(saved.sessions) ? saved.sessions : []).filter((item) => item && typeof item.id === "string" && Number.isFinite(Number(item.started))).slice(-199).map((item) => ({ id: item.id.slice(0, 24), started: Number(item.started), ...(Number(item.ended) ? { ended: Number(item.ended) } : {}), ...(item.archived ? { archived: true } : {}) }));
+  const thisSession = { id: `s${Date.now().toString(36)}`, started: Date.now() };
+  sessions.push(thisSession);
+  const archived = new Map();
+  const sessionStore = archive ?? { save: (id, lines) => archived.set(id, lines), read: (id) => archived.get(id) ?? null };
   const records = createRecordStore({ saved: saved.records, onChange: () => onChange("records") });
   const dice = createDice(saved.dice);
   // Each seat's modifier stack (FG's modifier box and keys), read by every roll the seat starts.
@@ -2675,6 +2682,18 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         return;
       }
 
+      // The GM's Session Log: the sittings, one's chat, an export (answered as an op).
+      if (msg.type === "chat-log") {
+        const reply = (ok, result, error) => send(ws, { type: "op-result", req: msg.req ?? null, ok, ...(ok ? { result } : { error }) });
+        try {
+          if (client.role !== "dm") throw new Error("The Session Log is the GM's (your own chat exports from the chat itself).");
+          reply(true, sessionLog({ action: msg.action, id: msg.id, format: msg.format, title: msg.title }));
+        } catch (error) {
+          reply(false, null, error instanceof Error ? error.message : "Could not read the log.");
+        }
+        return;
+      }
+
       // FG's /vote: a question everyone answers yes or no; the counts show to all.
       if (msg.type === "vote") {
         const question = text(msg.question, "").slice(0, 200);
@@ -3346,6 +3365,8 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       return { cleared: true };
     },
     chatLog: (count = 20) => chat.slice(-Math.max(1, Math.min(MAX_CHAT, Number(count) || 20))),
+    // The Session Log: sessions, session (id), export (id, format md|html), archive (the sitting so far).
+    sessionLog: (args = {}) => sessionLog(args),
     players: () => playerList(),
     scene: () => scene,
     // The map the GM works on: the image window's while one is open (the same master), else the table's.
@@ -3591,6 +3612,43 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     onChange("table");
     return prompt;
   }
+  // The Session Log: the campaign's sittings, each one's chat (the GM's whole view), and an export of it.
+  function linesOf(session) {
+    const index = sessions.indexOf(session);
+    const end = session.ended ?? sessions[index + 1]?.started ?? Infinity;
+    const live = chat.filter((line) => (line.at ?? 0) >= session.started && (line.at ?? 0) <= end);
+    if (session === thisSession) return live;
+    const kept = sessionStore.read(session.id);
+    return Array.isArray(kept) && kept.length >= live.length ? kept : live;
+  }
+  function archiveSession() {
+    thisSession.ended = Date.now();
+    const lines = linesOf(thisSession);
+    if (!lines.length) return;
+    sessionStore.save(thisSession.id, lines);
+    thisSession.archived = true;
+  }
+  function sessionLog(args = {}) {
+    const action = String(args.action ?? "sessions");
+    const find = (id) => (id && id !== "current" ? sessions.find((item) => item.id === String(id)) : thisSession);
+    if (action === "sessions") return sessions.map((item) => ({ ...item, current: item === thisSession, lines: linesOf(item).length })).reverse();
+    const session = find(args.id);
+    if (!session) throw new Error("No such session in the log.");
+    const lines = linesOf(session);
+    if (action === "session") return { ...session, current: session === thisSession, lines };
+    if (action === "export") {
+      const { chatToHtml, chatToMarkdown } = require("../shared/text/chatExport.mjs");
+      const title = `${args.title ? `${text(args.title, "").slice(0, 80)}: ` : ""}session of ${new Date(session.started).toISOString().slice(0, 10)}`;
+      const format = args.format === "html" ? "html" : "md";
+      return { format, title, file: `${title.replace(/[^\w -]+/g, "").replace(/\s+/g, "-")}.${format === "html" ? "html" : "md"}`, text: format === "html" ? chatToHtml(lines, title) : chatToMarkdown(lines, title) };
+    }
+    if (action === "archive") {
+      archiveSession();
+      delete thisSession.ended;
+      return { ...thisSession };
+    }
+    throw new Error("sessions, session, export or archive?");
+  }
   function startVote(question, client) {
     const id = crypto.randomBytes(6).toString("hex");
     addChat({ id: client?.id ?? "agent", from: client?.name ?? "Agent", text: question, at: Date.now(), vote: { id, question, yes: [], no: [] } });
@@ -3700,6 +3758,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         chatCleared: Object.fromEntries(chatCleared),
         quickSlots: Object.fromEntries(quickSlots),
         modifiers: modifiers.toJSON(),
+        sessions,
         bookSounds: Object.fromEntries(bookSounds),
         sceneSounds: Object.fromEntries(sceneSounds),
         bans,
@@ -3718,6 +3777,12 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     },
     stop() {
       clearInterval(heartbeat);
+      // The sitting's chat into the Session Log's archive.
+      try {
+        archiveSession();
+      } catch {
+        /* the log stays in the campaign's chat as far as it goes */
+      }
       for (const held of lingering.values()) clearTimeout(held.timer);
       lingering.clear();
       // 4003: the table closed (the GM left): players go back to the join screen, not into a reconnect.

@@ -43,7 +43,11 @@ function connect(port, join) {
 const settle = (ms = 150) => new Promise((resolve) => setTimeout(resolve, ms));
 const lastLine = (seat, test = () => true) => [...seat.lines].reverse().find(test);
 
-const server = createTableServer({ ruleset: "D&D 5E" });
+// The Session Log's archive (the backend's is the campaign folder's chat-logs).
+const store = new Map();
+const archive = { save: (id, lines) => store.set(id, lines), read: (id) => store.get(id) ?? null };
+const server = createTableServer({ ruleset: "D&D 5E", archive });
+let stopped = false;
 try {
   const { port, hostToken } = await server.listen({ port: 0, password: "" });
   const agent = server.agent;
@@ -198,9 +202,46 @@ try {
   await tool("kraken_table_options", { skipDead: "enemies" });
   done.push("D10 random numbering, the tracker's health off/dot/bar/numbers for players, Delay and Act now, skip turns");
 
+  // D8: a table rolled by a player (/rollon) follows their roll mode; its result's link rides on the card.
+  agent.records.create({ type: "table", name: "Rumours", visibility: "all", data: { dice: "d2", mod: 0, resultscols: 1, tablerows: { "id-1": { fromrange: 1, torange: 1, results: { "id-1": { result: "The mill is haunted" } } }, "id-2": { fromrange: 2, torange: 2, results: { "id-1": { result: "Sir Aldric owes money" } } } } } }, agent.seat);
+  await settle();
+  ann.send({ type: "modifiers", action: "mode", mode: "gm" });
+  await settle();
+  const bobBefore = bob.lines.length;
+  agent.dice.force([1]);
+  ann.send({ type: "table-roll", action: "roll", name: "Rumours", req: 9 });
+  await settle(250);
+  const rumour = lastLine(gm, (line) => /^\[TABLE\] Rumours/.test(line.roll?.label ?? ""));
+  assert(rumour?.secret && rumour.shownTo === "a test player" && bob.lines.length === bobBefore && /haunted/.test(rumour.roll.label), `a player's /rollon in GM-and-me mode: ${JSON.stringify(rumour)}`);
+  ann.send({ type: "modifiers", action: "mode", mode: "public" });
+  await settle();
+  done.push("D8 a player's table roll follows their roll mode");
+
+  // The Session Log: this sitting's lines, exported as Markdown and HTML; archived when the table closes, read back after.
+  const sessions = await tool("kraken_chat_log", { action: "sessions" });
+  assert(sessions.length === 1 && sessions[0].current && sessions[0].lines > 10, `one session so far: ${JSON.stringify(sessions)}`);
+  const md = await tool("kraken_chat_log", { action: "export", format: "md" });
+  assert(md.file.endsWith(".md") && /^# session of/.test(md.text) && /Look at this/.test(md.text) && /\(1d20\+?[^)]*\) = \d+/.test(md.text), `the Markdown: ${md.text.slice(0, 200)}`);
+  const html = await tool("kraken_chat_log", { action: "export", format: "html" });
+  assert(/^<!doctype html>/.test(html.text) && /<li class="roll">/.test(html.text) && !/<script/i.test(html.text), "the HTML page");
+  ann.send({ type: "chat-log", action: "sessions", req: 5 });
+  await settle();
+  for (const seat of [gm, ann, bob]) seat.ws.close();
+  const saved = server.persisted();
+  await server.stop();
+  stopped = true;
+  assert(store.size === 1, "the sitting's chat archived when the table closed");
+  const reopened = createTableServer({ ruleset: "D&D 5E", archive, saved });
+  const logged = reopened.agent.sessionLog({ action: "sessions" });
+  const old = logged.find((item) => !item.current);
+  assert(logged.length === 2 && old.lines >= sessions[0].lines, `the old session read back: ${JSON.stringify(logged)}`);
+  const oldMd = reopened.agent.sessionLog({ action: "export", id: old.id, format: "md" });
+  assert(/Look at this/.test(oldMd.text), "its export after a restart");
+  await reopened.stop();
+  done.push("the Session Log: sessions, Markdown and HTML exports, archived on close and read back after a restart");
+
   console.log(`check-chat-flow: ${done.length} groups passed`);
   for (const line of done) console.log(`  ok ${line}`);
-  for (const seat of [gm, ann, bob]) seat.ws.close();
 } finally {
-  await server.stop();
+  if (!stopped) await server.stop();
 }

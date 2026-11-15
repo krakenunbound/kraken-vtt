@@ -593,6 +593,16 @@ span.ct-init { display: inline-block; }
 .popout-bar span { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .chat-popout { position: absolute; top: 6px; right: 8px; z-index: 2; padding: 2px 4px; background: rgba(20, 23, 28, 0.8); border-color: transparent; color: var(--muted); opacity: 0.55; }
 .chat-dock:hover .chat-popout { opacity: 1; }
+.chat-export { position: absolute; top: 6px; right: 36px; z-index: 2; padding: 2px 4px; background: rgba(20, 23, 28, 0.8); border-color: transparent; color: var(--muted); opacity: 0.55; }
+.chat-dock:hover .chat-export { opacity: 1; }
+/* The GM's Session Log: a sitting's chat, read back and exported. */
+.session-log { display: flex; flex-direction: column; gap: 6px; height: 100%; }
+.session-log-bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.session-log-lines { flex: 1; margin: 0; padding: 0; overflow: auto; list-style: none; font-size: 0.84rem; }
+.session-log-lines li { padding: 2px 0; border-bottom: 1px solid var(--panel-edge); }
+.session-log-lines time { color: var(--muted); font-size: 0.72rem; margin-right: 4px; }
+.session-log-lines li.roll span { color: var(--brass); }
+.session-log-lines li.story span { font-style: italic; }
 .chat-popout:hover { color: var(--text); border-color: var(--panel-edge); }
 .chat-dock.popped { position: static; width: auto; height: 100%; resize: none; border: 0; border-radius: 0; box-shadow: none; }
 

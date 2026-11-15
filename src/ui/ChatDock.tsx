@@ -7,6 +7,7 @@ import { commandsFor, runChat, type Command } from "./chatCommands";
 import { slotDrag } from "./QuickSlots";
 import { ModifierBox, ModifierKeys, NUMBER_DRAG } from "./ModifierBox";
 import { InlineRollText } from "./InlineRolls";
+import { exportChat } from "../notes/SessionLog";
 import { ChatLinkChip, PromptCard, SharedRecord, SpeakerPortrait } from "./ChatParts";
 import { hasLink, linkFrom } from "./QuickSlots";
 import type { QuickSlot } from "../session/useSession";
@@ -960,6 +961,16 @@ export function ChatDock({ session }: { session: Session }) {
   const body = (
     <section className={out ? "chat-dock popped" : "chat-dock"} aria-label="Chat" ref={dock} style={!out && size ? { width: size.w, height: size.h } : undefined}>
       {out ? null : <span className="chat-grip" role="separator" aria-label="Stretch the chat" title="Drag to stretch the chat; double-click for its usual size" onPointerDown={stretch} onDoubleClick={resetSize} />}
+      <button
+        type="button"
+        className="chat-export"
+        data-action="chat-export"
+        title="Export the chat you have seen: a Markdown file (Shift+click: a web page)"
+        aria-label="Export the chat"
+        onClick={(event) => exportChat(session.chat, event.shiftKey ? "html" : "md", "Chat")}
+      >
+        <Icon name="scroll" size={15} />
+      </button>
       <button
         type="button"
         className="chat-popout"

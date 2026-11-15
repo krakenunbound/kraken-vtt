@@ -307,7 +307,7 @@ export type FateEntry = {
 export type CombatView = { round: number; active: string | null; entries: CombatEntry[] };
 export type Visibility = "gm" | "owner" | "all" | string[];
 // The host's content requests (electron/content.cjs), each with its agent tool.
-export type ContentRequest = "record-copy" | "story" | "table-roll" | "identify" | "encounter" | "parcel" | "quest";
+export type ContentRequest = "record-copy" | "story" | "table-roll" | "identify" | "encounter" | "parcel" | "quest" | "chat-log";
 export type TableRecord = {
   id: string;
   type: string;

@@ -13,6 +13,7 @@ const { listTools } = require("../electron/agent/tools.cjs");
 const MESSAGES = {
   chat: "kraken_chat_send",
   "chat-clear": "kraken_chat_log",
+  "chat-log": "kraken_chat_log",
   quickslots: "kraken_quickslots",
   modifiers: "kraken_modifiers",
   "book-activate": "kraken_books",

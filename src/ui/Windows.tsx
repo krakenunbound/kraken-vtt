@@ -8,7 +8,7 @@ import { openPopOut, PopOutWindow, screenOffset, type ScreenPlace } from "./PopO
 // the edge of the main window, or sent out with its pop-out button, becomes a
 // window of its own that can go on another monitor.
 
-export type WindowKind = "assets" | "studio" | "imagelist" | "assistant" | "characters" | "party" | "combat" | "players" | "sheet" | "settings" | "decals" | "wallpapers" | "gmicons" | "towers" | "deathmarkers" | "calendar" | "effects" | "clocks" | "motd" | "krits" | "library" | "dice" | "sound" | "books" | "book" | "images" | "picture" | "notes" | "note" | "charselect" | "records" | "record" | "adventure" | "story" | "map" | "cards" | "ships" | "bookrecord" | "oracles" | "delve";
+export type WindowKind = "assets" | "studio" | "imagelist" | "assistant" | "characters" | "party" | "combat" | "players" | "sheet" | "settings" | "decals" | "wallpapers" | "gmicons" | "towers" | "deathmarkers" | "calendar" | "effects" | "clocks" | "motd" | "krits" | "library" | "dice" | "sound" | "books" | "book" | "images" | "picture" | "notes" | "note" | "charselect" | "records" | "record" | "adventure" | "story" | "map" | "cards" | "ships" | "bookrecord" | "oracles" | "delve" | "sessionlog";
 type Placement = { x: number; y: number; w: number; h: number; out?: ScreenPlace | null };
 export type OpenWindow = { key: string; kind: WindowKind; title: string; payload?: string; z: number; popped: boolean } & Placement;
 
@@ -31,6 +31,7 @@ const DEFAULTS: Record<WindowKind, Placement> = {
   effects: { x: 260, y: 80, w: 640, h: 640 },
   clocks: { x: 300, y: 70, w: 720, h: 520 },
   motd: { x: 380, y: 120, w: 520, h: 480 },
+  sessionlog: { x: 300, y: 90, w: 640, h: 640 },
   krits: { x: 300, y: 110, w: 600, h: 440 },
   ships: { x: 220, y: 60, w: 720, h: 720 },
   oracles: { x: 260, y: 70, w: 560, h: 680 },

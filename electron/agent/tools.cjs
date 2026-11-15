@@ -1003,9 +1003,10 @@ const TOOLS = [
   },
   {
     name: "kraken_chat_log",
-    description: "Recent chat, including roll results (the table's record, also lines the GM has cleared). clear: true clears the GM's chat window, as /clear; it stays cleared when the GM comes back.",
-    inputSchema: object({ count: number("How many lines, default 20"), clear: { type: "boolean", description: "Clear the GM's chat window (/clear)" } }),
-    run: (args, ctx) => out(args.clear ? needTable(ctx).clearChat() : needTable(ctx).chatLog(args.count)),
+    description:
+      "Recent chat, including roll results (the table's record, also lines the GM has cleared). clear: true clears the GM's chat window, as /clear; it stays cleared when the GM comes back. The Session Log window: action sessions (every sitting of the campaign: id, started, ended, lines; the current one first), session (id, or current: its lines), export (id, format md or html: the session's chat as a Markdown or HTML document, its text and a file name, as the window's Export), archive (the sitting so far into the log; it is archived by itself when the table closes).",
+    inputSchema: object({ count: number("How many lines, default 20"), clear: { type: "boolean", description: "Clear the GM's chat window (/clear)" }, action: { type: "string", enum: ["recent", "sessions", "session", "export", "archive"] }, id: string("A session's id (current: this sitting)"), format: { type: "string", enum: ["md", "html"] } }),
+    run: (args, ctx) => out(args.clear ? needTable(ctx).clearChat() : args.action && args.action !== "recent" ? needTable(ctx).sessionLog(args) : needTable(ctx).chatLog(args.count)),
   },
   {
     name: "kraken_players",
@@ -2269,7 +2270,7 @@ const TOOLS = [
       "The GM's windows: list them, or open, close, pop out (to a window of its own, for another monitor) or dock back a window. Kinds: oracles (Ironsworn and Starforged: every oracle table, rolled for the table; Ask the Oracle), delve (Ironsworn: Delve's site themes and domains, features and dangers), map (the open map in its own window, as FG's image window, with its tools and settings; it opens by itself when a map opens and never pops out), assistant (the GM's DM assistant chat), characters (the sidebar's Characters: Character Selection, every character as a card, as FG's), party, combat, players, settings, decals (the background decal picker), wallpapers (the desktop wallpaper picker), gmicons (the GM icon picker), krits (critical hits and fumbles), dice (this seat's dice: sets, colours, design, material, effects), sound (one-shots, effects, ambience, music, chat triggers, volumes), sheet (a character's sheet: give record, its id or name), charselect (Character Selection), records (FG's campaign lists: NPCs, items, spells, classes...; the GM shares one with kraken_record_update visibility all, hides it with gm), record (one record: give record, its id or name). cards (the ability cards, when this seat turned them on in Settings).",
     inputSchema: object({
       action: { type: "string", enum: ["list", "open", "close", "popout", "dock"] },
-      kind: { type: "string", enum: ["assistant", "characters", "party", "combat", "players", "settings", "decals", "wallpapers", "gmicons", "krits", "library", "dice", "sound", "sheet", "books", "book", "images", "picture", "notes", "note", "charselect", "records", "record", "adventure", "story", "map", "cards", "imagelist", "studio", "assets", "towers", "deathmarkers", "calendar", "effects", "clocks", "motd", "oracles", "delve"] },
+      kind: { type: "string", enum: ["assistant", "characters", "party", "combat", "players", "settings", "decals", "wallpapers", "gmicons", "krits", "library", "dice", "sound", "sheet", "books", "book", "images", "picture", "notes", "note", "charselect", "records", "record", "adventure", "story", "map", "cards", "imagelist", "studio", "assets", "towers", "deathmarkers", "calendar", "effects", "clocks", "motd", "oracles", "delve", "sessionlog"] },
       record: string("For a sheet: the character's record id or name; for a record: its id or name"),
     }),
     run: async (args, ctx) => out(await ctx.ui({ kind: "windows", action: args.action ?? "list", window: args.kind, record: args.record })),
