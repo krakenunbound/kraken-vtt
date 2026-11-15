@@ -4,7 +4,7 @@ What changed in each release of Kraken VTT. Downloads are on the
 [Releases](https://github.com/krakenunbound/kraken-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
-## Unreleased
+## 0.1.0-alpha.91: Game night ready: the audit of Fantasy Grounds and Foundry
 
 **From a hands-on audit of Fantasy Grounds and Foundry: what a game night trips over.**
 
