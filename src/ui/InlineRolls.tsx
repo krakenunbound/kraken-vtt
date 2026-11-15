@@ -53,9 +53,16 @@ export function chipElement(doc: Document, piece: { formula: string; label: stri
   chip.title = `Roll ${piece.formula}${piece.label ? ` (${piece.label})` : ""}; drag it onto a quick slot`;
   chip.draggable = true;
   chip.textContent = piece.source.startsWith("[[") ? `${piece.formula}${piece.label ? ` ${piece.label}` : ""}` : piece.source;
+  // In an editor already being typed in, a click only places the cursor: it never rolls for the whole table.
+  let typing = false;
+  if (editable) chip.addEventListener("pointerdown", () => {
+    const editor = chip.closest<HTMLElement>("[contenteditable='true']");
+    typing = Boolean(editor && editor === doc.activeElement);
+  });
   chip.addEventListener("click", (event) => {
     event.preventDefault();
     event.stopPropagation();
+    if (typing) return;
     rollInline(piece.formula, piece.label);
   });
   chip.addEventListener("dragstart", (event) => dragOf(piece.formula, piece.label)(event as DragEvent));
