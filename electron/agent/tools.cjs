@@ -1118,6 +1118,7 @@ const TOOLS = [
       attackKind: { type: "string", enum: ["slashing", "piercing", "bludgeoning", "missile", "natural"], description: "krit-test, 2E: which kind's table" },
       undead: { type: "array", items: { type: "string" }, description: "turn-undead: the undead entries' ids (default: the turner's targets, else every undead foe)" },
       range: { type: "string", enum: ["map", "Adjacent", "Close", "Short", "Medium", "Long", "Very Long", "Distant"], description: "ship-attack: the range band, or map: from the squares between the two ships' tokens (0 Adjacent, 1 Close, up to 3 Short, 8 Medium, 20 Long, 50 Very Long, more Distant)" },
+      template: { type: "object", description: "cast: a spell with an area (Fireball, Burning Hands, Sleep) placed where its caster points: {x, y} world pixels (a sphere's centre; for a cone, line or cube from the caster, a point in its direction), or {angle} (degrees clockwise from east, from the caster); everyone inside becomes the caster's target, then the spell is cast (a buff only on allies, a harmful spell on creatures of the caster's choice only on the others)" },
       x: number("target-area: scene pixels across"),
       y: number("target-area: scene pixels down"),
       radius: number("target-area: feet (Sleep: 15 ft radius, a fireball 20)"),
@@ -1191,6 +1192,7 @@ const TOOLS = [
       else if (action === "attack") return out({ results: await combat.attack(args.recordId ? { recordId: args.recordId } : { entryId: args.id }, args.weapon, seat, "Agent", { full: Boolean(args.full), mode: args.mode ?? "", invokes: Array.isArray(args.invokes) ? args.invokes : [] }), combat: combat.viewFor(seat) });
       else if (action === "attack-together") return out({ together: await combat.attackTogether(args.ids ?? [], args.targetId, seat, "Agent"), combat: combat.viewFor(seat) });
       else if (action === "save") return out({ save: await combat.save(args.id, args.attribute, args.cl ?? (require("../fate.cjs").isFateRuleset(agent.ruleset?.()) ? undefined : 0), "Agent", undefined, args.advantage ?? ""), combat: combat.viewFor(seat) });
+      else if (action === "cast" && args.template) return out({ ...(await agent.castWithTemplate(args.recordId ? { recordId: args.recordId } : { entryId: args.id }, args.power, args.template, seat, "Agent")), combat: combat.viewFor(seat) });
       else if (action === "cast") return out({ cast: await combat.cast(args.recordId ? { recordId: args.recordId } : { entryId: args.id }, args.power, args.castAction ?? "", seat, "Agent"), combat: combat.viewFor(seat) });
       else if (action === "krits") return out(await combat.krits(args.settings, seat));
       else if (action === "krit-test") return out({ krit: await combat.kritTest(args.kind, args.id, args.targetId, seat, args.table || args.roll || args.entryRoll || args.attackKind ? { table: args.table, roll: args.roll, entryRoll: args.entryRoll, kind: args.attackKind } : undefined), combat: combat.viewFor(seat) });
@@ -1855,6 +1857,39 @@ const TOOLS = [
         lockMovement: agent.map.lockedNow(),
         ...(view ? { player: args.player, sees: view.tokens.map((token) => token.name), doors: view.doors.map((door) => door.id), limited: Boolean(view.vision) } : {}),
       });
+    },
+  },
+  {
+    name: "kraken_template",
+    description:
+      "Area templates on the map (the map toolbar's Area template tool; a spell's own come from kraken_combat cast with template): list; place {template: {shape: circle|cone|line|square, x, y (world pixels: a circle's centre, a cone's or line's point, a square's centre), size (feet: radius, length or side), width (feet, a line's), angle (degrees clockwise from east: where a cone or line points)}, target: true makes every creature inside the targets of id (default: whose turn it is)}; move {id, patch}; remove {id}; clear (every template on the map). Everyone sees them, in the placer's colour; returns the templates and, with target, who is inside.",
+    inputSchema: object({
+      action: { type: "string", enum: ["list", "place", "move", "remove", "clear"] },
+      template: { type: "object", description: "place: {shape, x, y, size, width?, angle?, label?}" },
+      target: { type: "boolean", description: "place: the creatures inside become the targets of id (or whose turn it is)" },
+      id: string("move/remove: the template's id; place with target: the tracker entry that targets"),
+      patch: { type: "object", description: "move: {x, y, angle, size}" },
+    }),
+    run(args, ctx) {
+      const agent = needTable(ctx);
+      const { map, combat, seat } = agent;
+      const action = args.action ?? "list";
+      if (action === "place") {
+        const template = map.placeTemplate({ ...(args.template ?? {}), turn: false }, seat);
+        let inside = [];
+        if (args.target) {
+          const entries = combat.entries();
+          const source = entries.find((entry) => entry.id === (args.id ?? combat.active()));
+          if (!source) throw new Error("Whose targets? Give id (a tracker entry) or start combat.");
+          inside = map.tokensInTemplate(template).map((token) => entries.find((entry) => entry.tokenId === token.id) ?? entries.find((entry) => token.recordId && entry.recordId === token.recordId)).filter((entry) => entry && entry.id !== source.id && combat.health(entry).status !== "Dead");
+          combat.targetIds(source.id, inside.map((entry) => entry.id), seat);
+        }
+        return out({ template, inside: inside.map((entry) => entry.name), templates: map.templates() });
+      }
+      if (action === "move") map.moveTemplate(String(args.id ?? ""), args.patch ?? {}, seat);
+      else if (action === "remove") map.removeTemplate(String(args.id ?? ""), seat);
+      else if (action === "clear") map.clearTemplates(seat);
+      return out({ templates: map.templates() });
     },
   },
   {

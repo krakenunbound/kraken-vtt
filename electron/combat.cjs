@@ -57,6 +57,17 @@ const r35Ready = import(pathToFileURL(path.join(__dirname, "..", "shared", "dnd3
 // 2/1; saves d20 at or above the number (Paralyzation, Rod, Petrification,
 // Breath, Spell); a creature dies at 0, a character at 0 to -9 is dying (a
 // point lost each round until the wounds are bound), dead at -10.
+// Spells and powers read from their words (shared/actions/parse.mjs) and the
+// effects' catalogue (shared/actions/effects.mjs): areas, who a spell lands on,
+// how many, and actions for a spell its book gave none.
+let spellParse = null;
+let effectsLib = null;
+let registry = null;
+const actionsReady = Promise.all([
+  import(pathToFileURL(path.join(__dirname, "..", "shared", "rulesets", "registry.mjs")).href).then((module) => (registry = module)),
+  import(pathToFileURL(path.join(__dirname, "..", "shared", "actions", "parse.mjs")).href).then((module) => (spellParse = module)),
+  import(pathToFileURL(path.join(__dirname, "..", "shared", "actions", "effects.mjs")).href).then((module) => (effectsLib = module)),
+]);
 let r2e = null;
 const r2eReady = import(pathToFileURL(path.join(__dirname, "..", "shared", "adnd2e", "rules.mjs")).href).then((module) => {
   r2e = module;
@@ -159,6 +170,17 @@ function cleanEffect(raw) {
     // A concentration spell's effect: who holds it (the caster's record) and the spell,
     // so a new concentration spell, a failed save or falling ends it everywhere.
     ...(raw.by && raw.conc ? { by: text(raw.by, "").slice(0, 160), conc: text(raw.conc, "").slice(0, 120) } : {}),
+    // Its picture in the Effects list and on the buff bar, and who put it on.
+    ...(raw.icon ? { icon: text(raw.icon, "").slice(0, 24) } : {}),
+    ...(raw.source ? { source: text(raw.source, "").slice(0, 60) } : {}),
+    // Ends when its creature takes damage (Sleep).
+    ...(raw.ends === "damage" ? { ends: "damage" } : {}),
+    // The rounds it started with (a light's warning comes at a tenth), whether
+    // it is put out for now (a snuffed torch keeps its time), and whether it
+    // has warned that it is nearly out.
+    ...(num(raw.total, 0) > 0 ? { total: Math.round(num(raw.total, 0)) } : {}),
+    ...(raw.paused ? { paused: true } : {}),
+    ...(raw.warned ? { warned: true } : {}),
   };
 }
 
@@ -167,10 +189,20 @@ function effectAppliesTo(effect, against) {
   return !effect.targets?.length || Boolean(against && effect.targets.includes(against.id));
 }
 
+// The parts of an effect that are on its creature now: none while it is put
+// out (a snuffed torch), and not those after "FAIL:" (what a failed repeated
+// save will bring: FG's "Sleep; Incapacitated; SAVEOE: ...; FAIL: inherit; Unconscious").
+function livePartsOf(effect) {
+  if (effect.paused) return [];
+  const parts = effect.label.split(";");
+  const stop = parts.findIndex((part) => /^\s*fail\s*:/i.test(part));
+  return stop < 0 ? parts : parts.slice(0, stop);
+}
+
 // A creature's conditions from its effects' parts: "Asleep; Unconscious" has Unconscious.
 function hasCondition(entry, name) {
   const want = name.toLowerCase();
-  return (entry?.effects ?? []).some((effect) => effect.label.split(";").some((part) => part.trim().toLowerCase() === want));
+  return (entry?.effects ?? []).some((effect) => livePartsOf(effect).some((part) => part.trim().toLowerCase() === want));
 }
 
 function cleanEntry(raw) {
@@ -217,7 +249,7 @@ function effectDice(entry, tag, against) {
   const out = [];
   for (const effect of entry?.effects ?? []) {
     if (!effectAppliesTo(effect, against)) continue;
-    for (const part of effect.label.split(";")) {
+    for (const part of livePartsOf(effect)) {
       const match = /^\s*([A-Z]+)\s*:\s*([+-]?\d*d\d+)(?:\s+[a-z][a-z ,]*)?\s*$/i.exec(part);
       if (match && match[1].toUpperCase() === tag) out.push(match[2].startsWith("-") ? match[2] : `+${match[2].replace(/^\+/, "")}`);
     }
@@ -231,7 +263,7 @@ function effectBonus(entry, tag, against) {
   let total = 0;
   for (const effect of entry?.effects ?? []) {
     if (!effectAppliesTo(effect, against)) continue;
-    for (const part of effect.label.split(";")) {
+    for (const part of livePartsOf(effect)) {
       const match = /^\s*([A-Z]+)\s*:\s*([+-]?\d+)(?:\s+[a-z][a-z ,]*)?\s*$/i.exec(part);
       if (match && match[1].toUpperCase() === tag) total += Number(match[2]);
     }
@@ -250,7 +282,7 @@ const PHYSICAL = new Set(["strength", "dexterity", "constitution"]);
 function siegeEffect(entry, stat, save) {
   let total = 0;
   for (const effect of entry?.effects ?? []) {
-    for (const part of effect.label.split(";")) {
+    for (const part of livePartsOf(effect)) {
       const match = /^\s*([A-Z]+)\s*:\s*([+-]?\d+)\s*(.*)$/i.exec(part);
       if (!match) continue;
       const tag = match[1].toUpperCase();
@@ -317,6 +349,30 @@ function durationRounds(text, casterLevel, roundSeconds = 10) {
   return Math.max(1, Math.round((count * seconds) / roundSeconds));
 }
 
+// Game time passing over a creature's effects: `rounds` off each one with a
+// duration (a snuffed light keeps its time), those that run out gone with a
+// line in chat, and a light warning once when it is nearly out (a tenth of its
+// time, at most 10 minutes). Returns the effects still on. say(line, secret).
+function tickEffects(list, rounds, { name, hidden = false, roundSeconds = 6, say = () => undefined, warnAt = (total) => Math.max(1, Math.round(total / 10)) } = {}) {
+  if (!(rounds > 0)) return list;
+  return list.filter((effect) => {
+    if (effect.duration <= 0 || effect.paused) return true;
+    effect.duration = Math.max(0, effect.duration - rounds);
+    const what = effect.label.split(";")[0].trim();
+    const light = /(^|;)\s*LIGHT\s*:/i.test(effect.label);
+    if (effect.duration <= 0) {
+      say(light ? `${what} burns out: ${name}'s light goes dark.` : `Effect ['${effect.label}'] -> [EXPIRED] on ${name}`, effect.gmOnly || hidden);
+      return false;
+    }
+    if (light && !effect.warned && effect.total && effect.duration <= warnAt(effect.total, roundSeconds)) {
+      effect.warned = true;
+      const minutes = Math.round((effect.duration * roundSeconds) / 60);
+      say(`${what} is nearly out: ${name}'s light has ${minutes >= 1 ? `about ${minutes} minute${minutes === 1 ? "" : "s"}` : `${effect.duration} round${effect.duration === 1 ? "" : "s"}`} left.`, effect.gmOnly || hidden);
+    }
+    return true;
+  });
+}
+
 function savedCombat(value) {
   const raw = value && typeof value === "object" ? value : {};
   return {
@@ -379,9 +435,9 @@ function createCombat({ saved, table, onChange = () => undefined }) {
   }
 
   // An effect the tracker puts on by itself (no GM seat needed).
-  function putEffect(entry, label, duration = 0, gmOnly = false, targets = [], held = null) {
+  function putEffect(entry, label, duration = 0, gmOnly = false, targets = [], held = null, extra = {}) {
     const active = state.entries.find((item) => item.id === state.active);
-    const effect = cleanEffect({ label, duration, gmOnly, init: active ? active.initresult : entry.initresult, targets, ...(held ?? {}) });
+    const effect = cleanEffect({ label, duration, gmOnly, init: active ? active.initresult : entry.initresult, targets, ...(held ?? {}), ...extra, total: duration });
     if (effect) entry.effects.push(effect);
     return effect;
   }
@@ -847,25 +903,52 @@ function createCombat({ saved, table, onChange = () => undefined }) {
   // going from `from` to `to` (descending): from > effect.init >= to.
   function passInitiative(from, to) {
     for (const entry of state.entries) {
-      entry.effects = entry.effects.filter((effect) => {
-        if (effect.duration <= 0) return true;
-        if (!(rank(effect.init) < from && rank(effect.init) >= to)) return true;
-        effect.duration -= 1;
-        if (effect.duration <= 0) {
-          table().say(`Effect ['${effect.label}'] -> [EXPIRED] on ${entry.name}`, "Combat", effect.gmOnly || entry.hidden);
-          return false;
-        }
-        return true;
-      });
+      const due = entry.effects.filter((effect) => effect.duration > 0 && !effect.paused && rank(effect.init) < from && rank(effect.init) >= to);
+      if (!due.length) continue;
+      const kept = tickEffects(due, 1, tickOptions(entry));
+      entry.effects = entry.effects.filter((effect) => !due.includes(effect) || kept.includes(effect));
+    }
+  }
+  // How effects count down for this game: its round's length, the warning's time, chat.
+  function tickOptions(who) {
+    const roundSeconds = rulesetActions()?.roundSeconds ?? 6;
+    return { name: who.name, hidden: Boolean(who.hidden), roundSeconds, say: (line, secret) => table().say(line, "Combat", secret), warnAt: (total) => (effectsLib ? effectsLib.warnAt(total, roundSeconds) : Math.max(1, Math.round(total / 10))) };
+  }
+  // At the end of a creature's turn, a repeated save (FG's SAVEOE: "SAVEOE: DC 13
+  // wisdom"): saved, the effect ends; failed, what its FAIL: parts say comes on
+  // (2024 Sleep: Incapacitated, then Unconscious for the rest of the spell).
+  async function endOfTurnSaves(entry) {
+    for (const effect of [...entry.effects]) {
+      const parts = effect.label.split(";").map((part) => part.trim());
+      const stop = parts.findIndex((part) => /^fail\s*:/i.test(part));
+      const live = stop < 0 ? parts : parts.slice(0, stop);
+      const saveoe = live.find((part) => /^saveoe\s*:/i.test(part));
+      if (!saveoe || effect.paused) continue;
+      const dc = Number(/dc\s*(\d+)/i.exec(saveoe)?.[1] ?? 0);
+      const stat = (/(strength|dexterity|constitution|intelligence|wisdom|charisma|fortitude|reflex|will)/i.exec(saveoe)?.[1] ?? "").toLowerCase();
+      if (!dc || !stat) continue;
+      const result = await api.save(entry.id, stat, dc, entry.name, live[0]);
+      const name = live[0];
+      if (result?.success) {
+        entry.effects = entry.effects.filter((item) => item !== effect);
+        table().say(`${entry.name} shakes off ${name}.`, "Combat", Boolean(entry.hidden));
+      } else if (stop >= 0) {
+        const after = parts.slice(stop + 1).filter((part) => part && !/^inherit$/i.test(part) && !/^fail\s*:/i.test(part));
+        const keep = live.filter((part, index) => index === 0 || /^\(c\)$|^note\s*:/i.test(part));
+        effect.label = [...keep, ...after].join("; ");
+        table().say(`${entry.name} fails to shake off ${name}: ${after.join(", ") || "it holds"}.`, "Combat", Boolean(entry.hidden));
+      }
     }
   }
 
   async function startTurn(entry, opts) {
     const secret = entry.hidden;
+    // A turn passes: templates of instant spells come off the map.
+    table().onTurn?.();
     table().say(`[TURN] ${entry.name}`, "Combat", secret);
     // Ongoing damage (CoreRPG's DMGO: "Severed artery; DMGO: 1d12") at the start of the turn.
     for (const effect of entry.effects) {
-      for (const part of effect.label.split(";")) {
+      for (const part of livePartsOf(effect)) {
         const match = /^\s*DMGO\s*:\s*([0-9d+\- ]+)\s*$/i.exec(part);
         if (!match) continue;
         const rolled = table().roll(match[1].replace(/\s+/g, ""), `[DAMAGE] Ongoing damage (${effect.label.split(";")[0].trim()})`, "Combat", secret);
@@ -937,7 +1020,15 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     changed();
   }
 
+  // Damage ends the effects that end on damage (Sleep: the sleeper wakes).
+  function wakeOnDamage(entry) {
+    const gone = entry.effects.filter((effect) => effect.ends === "damage" || /(^|;)\s*note\s*:\s*ends on damage/i.test(effect.label));
+    if (!gone.length) return;
+    entry.effects = entry.effects.filter((effect) => !gone.includes(effect));
+    table().say(`${entry.name} takes damage: ${gone.map((effect) => effect.label.split(";")[0].trim()).join(", ")} ends.`, "Combat", Boolean(entry.hidden));
+  }
   async function applyWounds(entry, delta, why, opts) {
+    if (delta > 0) wakeOnDamage(entry);
     // Fate: damage is a hit of that many shifts; healing clears the stress.
     if (fateOn()) return delta > 0 ? fc.hit(entry, delta, fc.kindNow(), "") : fc.clearStress(entry);
     if (cairnOn()) return applyCairn(entry, delta, why, opts);
@@ -1975,6 +2066,47 @@ function createCombat({ saved, table, onChange = () => undefined }) {
   function targetsOf(entry) {
     return (entry?.targets ?? []).map((id) => state.entries.find((item) => item.id === id)).filter(Boolean);
   }
+  // Allies stand on the caster's side; everyone else is not (a neutral is no ally).
+  const allied = (caster, target) => Boolean(caster && target && (caster === target || caster.faction === target.faction));
+  // Who a spell lands on, from its words (shared/actions/parse.mjs): a buff or
+  // healing only on the caster's side (a foe never gets Bless), a harmful spell
+  // "on creatures of your choice" only on the others, an area's damage on
+  // everyone inside (friendly fire); then at most `cap` of them (Bless 3, +1 a
+  // slot level above), the first picked first. Says who was left out and why.
+  function pickTargets(caster, targets, parsed, { cap = 0, name = "", say = "Combat", area = false } = {}) {
+    if (!parsed || !caster) return targets;
+    const who = parsed.targets?.who ?? "any";
+    const dropped = [];
+    let kept = targets.filter((target) => {
+      const ally = allied(caster, target);
+      const ok = who === "ally" ? ally : who === "enemy" && area ? !ally : true;
+      if (!ok) dropped.push(`${target.name} (${who === "ally" ? "not an ally" : "an ally"})`);
+      return ok;
+    });
+    if (cap > 0 && kept.length > cap) {
+      for (const target of kept.slice(cap)) dropped.push(`${target.name} (only ${cap})`);
+      kept = kept.slice(0, cap);
+    }
+    if (dropped.length) table().say(`${name}: not on ${dropped.join(", ")}`, say, Boolean(caster.hidden));
+    return kept;
+  }
+  // A spell's record and its words read (area, saves, who it lands on): a 5E
+  // spell by its name in the campaign's books, else a character's or NPC's power.
+  function spellOf(who, spellName) {
+    const npcEntry = typeof who === "object" && who?.entryId ? state.entries.find((entry) => entry.id === who.entryId) : null;
+    const caster = npcEntry ? record(npcEntry) : table().records.get(typeof who === "object" ? who.recordId : who);
+    const power = caster?.data?.powers?.[spellName];
+    const spell = power ? { name: power.name, data: power } : table().records.list({ type: "spell" }).find((item) => String(item.name).toLowerCase() === String(spellName ?? "").toLowerCase()) ?? table().records.list({ type: "spelldesc" }).find((item) => String(item.name).toLowerCase() === String(spellName ?? "").toLowerCase());
+    if (!spell) return null;
+    const game = rulesetGame();
+    const parsed = spellParse ? spellParse.parseSpell({ name: spell.name, ...(spell.data ?? {}) }, game ? { game } : {}) : null;
+    const casterEntry = npcEntry ?? (caster ? state.entries.find((entry) => entry.recordId === caster.id) : null) ?? null;
+    return { spell, parsed, caster, casterEntry };
+  }
+  // The campaign's game declaration (shared/<id>/actions.mjs, on its manifest).
+  const rulesetActions = () => registry?.rulesetFor(table().ruleset?.() ?? "").actions ?? null;
+  // The campaign's game words for the parser.
+  const rulesetGame = () => rulesetActions()?.game ?? "";
   // 5E conditions (FG's 5E): a creature that drops to 0 gets Unconscious, so the
   // Dying, the stable and the dead count as unconscious; these cannot act, and
   // attacks against them (and the Paralyzed, Petrified, Stunned) have advantage.
@@ -2072,7 +2204,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     const data = record(target)?.data ?? {};
     const lists = { immune: typeList(data.damageimmunities), resist: typeList(data.damageresistances), vuln: typeList(data.damagevulnerabilities) };
     for (const effect of target.effects ?? []) {
-      for (const part of effect.label.split(";")) {
+      for (const part of livePartsOf(effect)) {
         const match = /^\s*(IMMUNE|RESIST|VULN)\s*:\s*(.+)$/i.exec(part);
         if (match) lists[match[1].toLowerCase()].push(...typeList(match[2]));
       }
@@ -2170,7 +2302,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
   // (a cantrip none), then for each target its attack roll or save, damage
   // (cantrips scale at 5th, 11th and 17th; half on a save where the spell says
   // so), healing (+ the casting modifier where FG's heal says base) and its effect.
-  async function cast5e(who, spellName, seat, from) {
+  async function cast5e(who, spellName, seat, from, castOpts = {}) {
     await r5Ready;
     const npcEntry = typeof who === "object" && who?.entryId ? find(who.entryId) : null;
     if (npcEntry) mustGM(seat);
@@ -2207,7 +2339,11 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     const attackBonus = isCharacter ? num(data.spellcasting?.attack, 0) : Number(/([+-]\d+) to hit with spell attacks/i.exec(JSON.stringify(data))?.[1] ?? 4);
     const charLevel = isCharacter ? num(data.level, 1) : Math.max(1, Number(/^(\d+)/.exec(String(data.hd ?? "").replace(/[()]/g, ""))?.[1] ?? 1));
     const tiers = 1 + (charLevel >= 5) + (charLevel >= 11) + (charLevel >= 17);
-    const actions = Object.values(spell.data?.actions ?? {}).filter((item) => item && typeof item === "object");
+    await actionsReady;
+    const parsed = spellParse.parseSpell({ name: spell.name, ...(spell.data ?? {}) }, { game: "5e" });
+    // A spell its book gave no actions: read from its words, as FG's 5E parser does.
+    let actions = Object.values(spell.data?.actions ?? {}).filter((item) => item && typeof item === "object");
+    if (!actions.some((item) => item.type !== "cast")) actions = spellParse.toFg5eActions(parsed);
     const castRow = actions.find((item) => item.type === "cast") ?? {};
     const saveRow = actions.find((item) => item.type === "powersave");
     const attackRow = actions.find((item) => item.type === "attack");
@@ -2252,7 +2388,11 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     }
     table().say(`[CAST] ${spell.name}${level > 0 ? ` (level ${slotLevel} slot)` : " (cantrip)"}${saveRow ? ` [${String(saveRow.savetype).toUpperCase()} DC ${dc}]` : ""}`, say, Boolean(casterEntry?.hidden));
     const damageType = Object.values(damageRow?.damagelist ?? {})[0]?.type ?? "";
-    const targets = targetsOf(casterEntry);
+    // How many it may take: its cast's count (no cap for an area or darts), one more a slot level above where it says so.
+    const extra = slotLevel > level && (castRow.targetscalestat === "upcast" || parsed.targets?.upcast) ? slotLevel - level : 0;
+    const cap = !parsed.area && castRow.targeting !== "multihit" && num(castRow.targetingval, 0) > 0 && (castRow.targeting ?? "targets") === "targets" ? num(castRow.targetingval, 0) + extra : 0;
+    const picked = targetsOf(casterEntry);
+    const targets = pickTargets(casterEntry, picked, parsed, { cap, name: spell.name, say, area: Boolean(castOpts.fromTemplate) });
     const out = [];
     const minutes = (row) => Math.round(num(row?.durmod, 0) * (row?.durunit === "hour" ? 600 : row?.durunit === "minute" ? 10 : 1));
     if (healRow) {
@@ -2309,9 +2449,10 @@ function createCombat({ saved, table, onChange = () => undefined }) {
           if (amount > 0) await applyWounds(target, amount, `[DAMAGE] ${spell.name}${half ? " (half)" : ""}${dealt.note}`, { critical: crit });
           out.push({ target: target.name, damage: amount, half });
         }
-        if (effectRow && effectRow.targeting !== "self" && (saveRow ? !landed || half ? false : true : landed)) {
+        const helps = effectRow && effectsLib.toneOf(String(effectRow.label ?? "")) === "good";
+        if (effectRow && effectRow.targeting !== "self" && (saveRow ? !landed || half ? false : true : landed) && (!helps || allied(casterEntry, target) || !casterEntry)) {
           const label = String(effectRow.label ?? spell.name).replace(/\[SDC\]/g, `DC ${dc}`);
-          putEffect(target, label, minutes(effectRow), false, [], held);
+          putEffect(target, label, minutes(effectRow), false, [], held, { source: caster.name, ...(parsed.endsOnDamage ? { ends: "damage" } : {}) });
           out.push({ target: target.name, effect: label, rounds: minutes(effectRow) });
         }
       }
@@ -2322,7 +2463,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
         const aimed = effectRow.targeted ? targets.map((target) => target.id) : [];
         putEffect(casterEntry, String(effectRow.label ?? spell.name), minutes(effectRow), false, aimed, held);
         out.push({ target: casterEntry.name, effect: effectRow.label, ...(aimed.length ? { against: targets.map((target) => target.name) } : {}) });
-      } else if (effectRow && !saveRow && targets.length === 0 && casterEntry) {
+      } else if (effectRow && !saveRow && picked.length === 0 && casterEntry) {
         putEffect(casterEntry, String(effectRow.label ?? spell.name), minutes(effectRow), false, [], held);
         out.push({ target: casterEntry.name, effect: effectRow.label });
       }
@@ -2399,8 +2540,8 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     return { total: rolled.total, success: ok, status: health(entry).status };
   }
 
-  return {
-    ready: geometryReady,
+  const api = {
+    ready: Promise.all([geometryReady, actionsReady]),
     sorted,
     deathSave,
     stabilize,
@@ -2552,6 +2693,9 @@ function createCombat({ saved, table, onChange = () => undefined }) {
         added.push(entry);
         // A side given for a creature with a token: the token takes it too.
         if (input.faction && entry.tokenId) table().syncTokenFaction?.(entry);
+        // What its token carried out of the fight (a lit torch) comes with it.
+        const carried = entry.tokenId ? table().takeTokenEffects?.(entry.tokenId) : null;
+        if (carried?.length) entry.effects.push(...carried.map(cleanEffect).filter(Boolean));
       }
       void engine;
       changed();
@@ -2590,6 +2734,8 @@ function createCombat({ saved, table, onChange = () => undefined }) {
         state.resume = { initresult: gone.initresult, name: gone.name, id: gone.id };
       }
       for (const entry of state.entries) entry.targets = entry.targets.filter((id) => id !== gone.id);
+      // Its effects stay on its token (a torch still burns), its targets go.
+      if (gone.tokenId && gone.effects.length) table().giveTokenEffects?.(gone.tokenId, gone.effects);
       changed();
     },
     // Rolls initiative: one entry ("a player may roll their own"), every NPC, or everyone.
@@ -2705,6 +2851,8 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       if (seat.role !== "dm" && (!active || owner(active) !== seat.name)) throw new Error("It is not your turn.");
       // The table's option: a creature's targets clear when its turn ends.
       if (active && table().options?.().clearTargets === "turn") active.targets = [];
+      // Repeated saves at the end of its turn (2024 Sleep, Hold Person).
+      if (active && state.round > 0) await endOfTurnSaves(active);
       // The active entry was removed mid-turn: carry on after its place.
       const resume = !active && state.resume && state.round > 0 ? state.resume : null;
       const index = active ? list.indexOf(active) : resume ? list.filter((entry) => order(resume, entry) > 0).length - 1 : -1;
@@ -2829,7 +2977,11 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       state.round = 0;
       state.active = null;
       state.resume = null;
-      if (removeNpcs) state.entries = state.entries.filter((entry) => record(entry)?.type === "character");
+      if (removeNpcs) {
+        // The NPCs leave the tracker; what is on them stays on their tokens.
+        for (const entry of state.entries) if (record(entry)?.type !== "character" && entry.tokenId && entry.effects.length) table().giveTokenEffects?.(entry.tokenId, entry.effects);
+        state.entries = state.entries.filter((entry) => record(entry)?.type === "character");
+      }
       // The fight's round markers and pending attack results go with it (bleeding
       // counts from round 1 again in the next fight).
       for (const entry of state.entries) {
@@ -3183,8 +3335,8 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     // damage is one roll for everyone (each missile its own), halved or
     // cancelled for those who saved; an effect lands on those who failed;
     // healing goes to the targets, or the caster with none.
-    async cast(who, powerKey, actionKey, seat, from) {
-      if (five()) return cast5e(who, powerKey, seat, from);
+    async cast(who, powerKey, actionKey, seat, from, castOpts = {}) {
+      if (five()) return cast5e(who, powerKey, seat, from, castOpts);
       const { engine, game, options: opts } = await options();
       cachedThresholds = thresholds(opts);
       // An NPC casts from its tracker entry: its caster level is its hit dice,
@@ -3364,7 +3516,32 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     round: () => state.round,
     active: () => state.active,
     persisted: () => JSON.parse(JSON.stringify(state)),
+    // Game time passes outside the turn order (the calendar moved on): every
+    // creature's effects count it down in rounds of this game's length.
+    passTime(minutes) {
+      const roundSeconds = rulesetActions()?.roundSeconds ?? 6;
+      const rounds = Math.floor((Math.max(0, num(minutes, 0)) * 60) / roundSeconds);
+      if (rounds <= 0) return 0;
+      for (const entry of state.entries) entry.effects = tickEffects(entry.effects, rounds, tickOptions(entry));
+      changed();
+      return rounds;
+    },
+    // A spell's area and who casts it (a template's size and its caster), read
+    // from the spell's data and words; instant: its template goes at the next turn.
+    spellInfo(who, power) {
+      const found = spellOf(who, power);
+      if (!found) return null;
+      const { spell, parsed, casterEntry } = found;
+      const duration = String(spell.data?.duration ?? "");
+      const instant = /instant/i.test(duration) || (!duration && !parsed?.effect && !parsed?.concentration);
+      return { name: spell.name, area: parsed?.area ?? null, instant, casterEntry, who: parsed?.targets?.who ?? "any" };
+    },
+    // The same count for effects kept on a token out of the fight.
+    tickList(list, rounds, who) {
+      return tickEffects(list, rounds, tickOptions(who));
+    },
   };
+  return api;
 }
 
-module.exports = { createCombat };
+module.exports = { createCombat, cleanEffect };

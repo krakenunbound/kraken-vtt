@@ -67,6 +67,7 @@ const MESSAGES = {
   fx: "kraken_fx",
   tile: "kraken_tile",
   ping: "kraken_ping",
+  template: "kraken_template",
   "map-share": "kraken_map",
   "scene-share": "kraken_map",
   "prep-close": "kraken_image",

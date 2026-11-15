@@ -530,6 +530,12 @@ span.ct-init { display: inline-block; }
 .target-reticle { position: absolute; inset: -8%; width: 116%; height: 116%; pointer-events: none; fill: none; stroke: #ff5a4d; stroke-width: 5; filter: drop-shadow(0 0 4px rgba(255, 90, 77, 0.8)); animation: reticle 2.4s linear infinite; }
 @keyframes reticle { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .target-reticle { animation: none; } }
+/* Area templates (a spell's sphere, cone, line, cube): the squares they cover shaded, the outline in the placer's colour. */
+.world .overlay.templates { pointer-events: none; }
+.area-template .area-square { fill: currentColor; fill-opacity: 0.16; stroke: currentColor; stroke-opacity: 0.25; stroke-width: 1; }
+.area-template .area-outline { fill: currentColor; fill-opacity: 0.1; stroke: currentColor; stroke-opacity: 0.95; stroke-linejoin: round; cursor: context-menu; }
+.area-template.aiming .area-outline { stroke-dasharray: 10 6; }
+.area-template .area-label { fill: #fff; text-anchor: middle; font-weight: 700; paint-order: stroke; stroke: rgba(0, 0, 0, 0.75); stroke-width: 3px; }
 /* Target mode's box (red, not the picking box's gold). */
 .world .pick-box.target-box { border-color: #ff5a4d; background: rgba(255, 90, 77, 0.12); }
 /* A tracker row aimed at: its reticle chips in the targeters' colours. */

@@ -588,7 +588,9 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     // An NPC token's health and the active turn come from the tracker.
     combatFor: (tokenId) => {
       const entry = combat.entries().find((item) => item.tokenId === tokenId);
-      return entry ? { health: combat.health(entry), active: combat.active() === entry.id } : null;
+      if (!entry) return null;
+      const concentrating = entry.recordId ? String(records.get(entry.recordId)?.data?.concentration ?? "").trim() : "";
+      return { health: combat.health(entry), active: combat.active() === entry.id, effects: entry.effects, ...(concentrating ? { concentrating } : {}) };
     },
     activeRecord: () => combat.entries().find((item) => item.id === combat.active())?.recordId ?? null,
     colorOf: (name) => tokenColorOf(name),
@@ -679,7 +681,18 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       onChange("table");
       for (const [ws, client] of clients) send(ws, { type: "calendar", calendar: calendar.view(seatOf(client)) });
     },
+    // Game time moved on: effects with a duration count it down, on the tracker
+    // and on tokens out of the fight (a torch burns its hour of game time).
+    onTime: (minutes) => passGameTime(minutes),
   });
+  function passGameTime(minutes) {
+    const rounds = combat.passTime(minutes);
+    if (rounds <= 0) return;
+    for (const token of map.tokensWithEffects()) {
+      const kept = combat.tickList(map.tokenEffects(token.id), rounds, token);
+      map.setTokenEffects(token.id, kept);
+    }
+  }
   // Progress clocks and the Score panel (clocks.cjs): every seat sees the clocks shown to it.
   const clocks = require("./clocks.cjs").createClocks({
     saved: saved.clocks,
@@ -744,6 +757,38 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         send(ws, { type: "map", ...view, prep: working === prep ? working.scene()?.id ?? null : null, testing, previewing, sceneHidden: sceneHiddenNow() });
       }
     });
+  }
+
+  // A creature's token on the table map: its own, else its record's.
+  function tokenOfEntry(entry) {
+    return map.tokens().find((token) => token.id === entry.tokenId) ?? map.tokens().find((token) => entry.recordId && token.recordId === entry.recordId) ?? null;
+  }
+  async function castWithTemplate(who, power, at, seat, from) {
+    await Promise.all([map.ready, combat.ready]);
+    const info = combat.spellInfo(who, power);
+    if (!info) throw new Error(`No spell ${power}.`);
+    if (!info.area) throw new Error(`${info.name} has no area to place: target its creatures instead.`);
+    const caster = info.casterEntry;
+    if (!caster) throw new Error("The caster is not on the combat tracker.");
+    if (seat.role !== "dm" && !combat.viewFor(seat).entries.find((item) => item.id === caster.id)?.mine) throw new Error("That is not your character.");
+    if (!map.scene()) throw new Error("Open a map first.");
+    const casterToken = tokenOfEntry(caster);
+    const point = { x: Number(at?.x), y: Number(at?.y) };
+    // A direction alone (a cone from the caster): a point that way.
+    if (casterToken && Number.isFinite(Number(at?.angle)) && !Number.isFinite(point.x)) {
+      const angle = (Number(at.angle) * Math.PI) / 180;
+      point.x = casterToken.x + Math.cos(angle) * 100;
+      point.y = casterToken.y + Math.sin(angle) * 100;
+    }
+    if (!Number.isFinite(point.x) || !Number.isFinite(point.y)) throw new Error("Where? Give the template's x and y.");
+    const shape = map.areaAt(info.area, casterToken, point.x, point.y);
+    const color = seat.role === "dm" ? (prefs.get("@gm").color ?? "#ff9e3d") : tokenColorOf(seat.name);
+    const template = map.placeTemplate({ ...shape, label: `${info.name} (${caster.name})`, attach: info.area.attach && casterToken ? casterToken.id : undefined, turn: info.instant, entryId: caster.id, color }, { role: "dm", name: "GM", color });
+    const inside = map.tokensInTemplate(template).map((token) => combat.entries().find((entry) => entry.tokenId === token.id) ?? combat.entries().find((entry) => token.recordId && entry.recordId === token.recordId)).filter(Boolean);
+    const ids = [...new Set(inside.filter((entry) => combat.health(entry).status !== "Dead").map((entry) => entry.id))];
+    const targeted = combat.targetIds(caster.id, ids, { role: "dm", name: "GM" });
+    const cast = await combat.cast(who, power, "", seat, from, { fromTemplate: true });
+    return { template, targets: targeted, cast };
   }
 
   function seatOf(client) {
@@ -2349,6 +2394,35 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         return;
       }
 
+      // Area templates (circle, cone, line, square): anyone places one in their
+      // colour; target: true makes the creatures inside the targets of the one
+      // who places it (the selected creature's, a player's own, the GM's whose turn it is).
+      if (msg.type === "template") {
+        const seat = seatOf(client);
+        try {
+          if (msg.action === "place") {
+            const color = client.role === "dm" ? (prefs.get("@gm").color ?? "#ff9e3d") : tokenColorOf(client.name);
+            const template = map.placeTemplate({ ...(msg.template ?? {}), turn: false }, { ...seat, color });
+            if (msg.target && combat.entries().length) {
+              const mine = (entry) => combat.viewFor(seat).entries.find((item) => item.id === entry.id)?.mine;
+              const entries = combat.entries();
+              const named = msg.id ? entries.find((entry) => entry.id === String(msg.id) && (client.role === "dm" || mine(entry))) : null;
+              const source = named ?? (client.role === "dm" ? entries.find((entry) => entry.id === combat.active()) : (entries.find((entry) => entry.id === combat.active() && mine(entry)) ?? entries.find(mine)));
+              if (source) {
+                const inside = map.tokensInTemplate(template).map((token) => entries.find((entry) => entry.tokenId === token.id) ?? entries.find((entry) => token.recordId && entry.recordId === token.recordId)).filter((entry) => entry && entry.id !== source.id && combat.health(entry).status !== "Dead");
+                combat.targetIds(source.id, inside.map((entry) => entry.id), seat);
+              }
+            }
+          } else if (msg.action === "move") map.moveTemplate(String(msg.id ?? ""), msg.patch ?? {}, seat);
+          else if (msg.action === "remove") map.removeTemplate(String(msg.id ?? ""), seat);
+          else if (msg.action === "clear") map.clearTemplates(seat);
+          else throw new Error("What should the template do?");
+        } catch (error) {
+          send(ws, { type: "error", reason: error instanceof Error ? error.message : "Not allowed." });
+        }
+        return;
+      }
+
       // The combat tracker. Players may roll their own initiative and end their own turn.
       if (msg.type === "ct") {
         // Who targets (FG's getSelectionHelper): the entry named (the selected token's,
@@ -2450,8 +2524,24 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
               if (client.role !== "dm" && !combat.viewFor(seat).entries.find((item) => item.id === entry.id)?.mine) throw new Error("You can roll saves for your own character.");
               return combat.save(entry.id, String(msg.attribute), msg.cl, client.role === "dm" ? entry.name : client.name, undefined, String(msg.advantage ?? ""));
             }
-            case "cast":
-              return combat.cast(msg.recordId ? { recordId: String(msg.recordId) } : { entryId: String(msg.id) }, String(msg.power), msg.action ? String(msg.action) : "", seat, client.role === "dm" ? "Combat" : client.name);
+            case "cast": {
+              const who = msg.recordId ? { recordId: String(msg.recordId) } : { entryId: String(msg.id) };
+              const from = client.role === "dm" ? "Combat" : client.name;
+              // Its area placed where the caster points, then cast at everyone inside.
+              if (msg.template && typeof msg.template === "object") return castWithTemplate(who, String(msg.power), msg.template, seat, from);
+              // From a screen that can place templates (place: true), a spell with an area
+              // cast by a creature on the map with no targets picked asks for its template
+              // first (FG: target first; Foundry: place the template). Picked targets cast at once.
+              if (msg.place && !msg.castAction) {
+                const info = combat.spellInfo(who, String(msg.power));
+                const casterToken = info?.casterEntry && map.scene() ? tokenOfEntry(info.casterEntry) : null;
+                if (info?.area && casterToken && !info.casterEntry.targets.length) {
+                  send(ws, { type: "template-request", power: String(msg.power), recordId: msg.recordId ? String(msg.recordId) : null, id: msg.id ? String(msg.id) : null, name: info.name, area: info.area, casterTokenId: casterToken.id, color: client.role === "dm" ? (prefs.get("@gm").color ?? "#ff9e3d") : tokenColorOf(client.name) });
+                  return;
+                }
+              }
+              return combat.cast(who, String(msg.power), msg.castAction ? String(msg.castAction) : "", seat, from);
+            }
             case "death-save":
               // 5E: a Dying character's death saving throw (the player rolls their own).
               return combat.deathSave(String(msg.id), seat);
@@ -2619,6 +2709,36 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     activeBookId,
     requireActiveBook,
     seat: { role: "dm", name: "Agent" },
+    // A turn starts: the templates of instant spells come off the map.
+    onTurn() {
+      try {
+        map.clearTemplates({ role: "dm", name: "GM" }, { turn: true });
+      } catch {
+        /* no scene */
+      }
+    },
+    // A token joins the fight: what it carried (a lit torch) moves onto its entry.
+    takeTokenEffects(tokenId) {
+      try {
+        const list = map.tokenEffects(tokenId);
+        if (list.length) map.setTokenEffects(tokenId, []);
+        return list;
+      } catch {
+        return [];
+      }
+    },
+    // A creature leaves the fight: its effects stay on its token.
+    giveTokenEffects(tokenId, list) {
+      try {
+        map.setTokenEffects(tokenId, [...map.tokenEffects(tokenId), ...list]);
+      } catch {
+        /* its token is on another scene, or gone */
+      }
+    },
+    // A spell with an area: its template placed where its caster points (at:
+    // {x, y} world pixels, or a whole template {shape, x, y, size, angle}), the
+    // creatures inside become the caster's targets, then the spell is cast.
+    castWithTemplate: (who, power, at, seat, from) => castWithTemplate(who, power, at, seat, from),
     // An entry's side changed on the tracker: its token follows (map.update tells the tracker back, which already agrees).
     syncTokenFaction(entry) {
       const token = entry.tokenId ? map.tokens().find((item) => item.id === entry.tokenId) : null;

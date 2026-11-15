@@ -13,6 +13,18 @@ const geometryReady = import(pathToFileURL(path.join(__dirname, "..", "shared", 
   return module;
 });
 
+// Area templates and effects (shared/actions): which tokens a template covers,
+// what effects show on a token and the light they shed.
+let areas = null;
+let effectsLib = null;
+const actionsReady = Promise.all([
+  import(pathToFileURL(path.join(__dirname, "..", "shared", "actions", "areas.mjs")).href).then((module) => (areas = module)),
+  import(pathToFileURL(path.join(__dirname, "..", "shared", "actions", "effects.mjs")).href).then((module) => (effectsLib = module)),
+]);
+// An effect, as the tracker keeps it (combat.cjs): a token not in the fight carries its own (a torch lit while exploring).
+const { cleanEffect } = require("./combat.cjs");
+const MAX_TEMPLATES = 60;
+
 // FG's faction colours (ColorManager token faction defaults).
 const FACTION_COLOR = { friend: "#56B33F", neutral: "#A6A6A6", foe: "#C23741", none: "#18A9D1" };
 const FACTIONS = Object.keys(FACTION_COLOR);
@@ -59,6 +71,37 @@ function cleanToken(raw) {
     vision: raw.vision == null ? null : Math.min(1000, Math.max(0, num(raw.vision, 0))),
     // Which way it faces, degrees clockwise from up (FG's token orientation); null: not turned.
     facing: cleanFacing(raw.facing),
+    // Effects on a creature that is not on the combat tracker (they move onto its entry when it joins).
+    ...(Array.isArray(raw.effects) && raw.effects.length ? { effects: raw.effects.map(cleanEffect).filter(Boolean).slice(0, 30) } : {}),
+  };
+}
+
+// An area template on a scene (a Fireball's sphere): shape, its origin in
+// world pixels, size and width in feet, the way it points (degrees clockwise
+// from east), the placer's colour, its label, a token it moves with (an
+// emanation), and whether it goes when the next turn starts (an instant spell's).
+const TEMPLATE_SHAPES = ["circle", "cone", "line", "square"];
+function cleanTemplate(raw) {
+  if (!raw || typeof raw !== "object" || !TEMPLATE_SHAPES.includes(raw.shape)) return null;
+  const x = num(raw.x, NaN);
+  const y = num(raw.y, NaN);
+  const size = Math.min(1000, Math.max(0, num(raw.size, 0)));
+  if (!Number.isFinite(x) || !Number.isFinite(y) || size <= 0) return null;
+  return {
+    id: text(raw.id, "").slice(0, 40) || `tp-${crypto.randomBytes(5).toString("hex")}`,
+    shape: raw.shape,
+    x,
+    y,
+    size,
+    width: Math.min(200, Math.max(1, num(raw.width, 5))),
+    angle: ((num(raw.angle, 0) % 360) + 360) % 360,
+    ...(num(raw.spread, 0) > 0 ? { spread: Math.min(360, num(raw.spread, 0)) } : {}),
+    color: /^#[0-9a-fA-F]{6}$/.test(String(raw.color ?? "")) ? raw.color : "#ff9e3d",
+    label: text(raw.label, "").slice(0, 80),
+    by: text(raw.by, "").slice(0, 24),
+    ...(raw.attach ? { attach: text(raw.attach, "").slice(0, 40) } : {}),
+    ...(raw.turn ? { turn: true } : {}),
+    ...(raw.entryId ? { entryId: text(raw.entryId, "").slice(0, 40) } : {}),
   };
 }
 function cleanFacing(value) {
@@ -354,6 +397,7 @@ function savedMap(value) {
   const groups = {};
   const fx = {};
   const tiles = {};
+  const templates = {};
   const frames = value && typeof value === "object" && value.frames && typeof value.frames === "object" ? Object.fromEntries(Object.entries(value.frames).slice(0, 500)) : {};
   // The characters that have had a token on each scene (a player cannot take
   // theirs off and put it back somewhere else: the GM places it again).
@@ -362,7 +406,8 @@ function savedMap(value) {
   // next open is exact) and the picture it painted (a file kept beside the
   // campaign: its name and version), by scene id.
   const studio = value && typeof value === "object" && value.studio && typeof value.studio === "object" ? Object.fromEntries(Object.entries(value.studio).slice(0, 500).filter(([, item]) => item && typeof item === "object")) : {};
-  if (!value || typeof value !== "object") return { tokens, doors, sight, locked, settings, lights, drawings, deathMarkers, walls, masks, labels, groups, fx, tiles, frames, entered, studio };
+  if (!value || typeof value !== "object") return { tokens, doors, sight, locked, settings, lights, drawings, deathMarkers, walls, masks, labels, groups, fx, tiles, frames, entered, studio, templates };
+  for (const [sceneId, list] of Object.entries(value.templates ?? {}).slice(0, 500)) if (Array.isArray(list)) templates[sceneId.slice(0, 80)] = list.map(cleanTemplate).filter(Boolean).slice(-MAX_TEMPLATES);
   for (const [sceneId, list] of Object.entries(value.deathMarkers ?? {}).slice(0, 500)) {
     if (Array.isArray(list)) deathMarkers[sceneId.slice(0, 80)] = list.map(cleanDeathMarker).filter(Boolean).slice(-MAX_DEATH_MARKERS);
   }
@@ -396,7 +441,7 @@ function savedMap(value) {
   for (const [sceneId, list] of Object.entries(value.drawings ?? {}).slice(0, 500)) {
     if (Array.isArray(list)) drawings[sceneId.slice(0, 80)] = list.map(cleanDrawing).filter(Boolean).slice(-MAX_DRAWINGS);
   }
-  return { tokens, doors, sight, locked, settings, lights, drawings, deathMarkers, walls, masks, labels, groups, fx, tiles, frames, entered, studio };
+  return { tokens, doors, sight, locked, settings, lights, drawings, deathMarkers, walls, masks, labels, groups, fx, tiles, frames, entered, studio, templates };
 }
 const MAX_DRAWINGS = 400;
 const MAX_PLAYER_DRAWINGS = 60;
@@ -613,6 +658,16 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
     for (const light of lightsHere()) if (light.on && !light.hidden) add(light.id, light.x, light.y, light.bright, light.dim, light.color, light.hidden, light);
     // A hidden token's light is marked hidden: it reaches the GM only.
     for (const token of tokensHere()) if (token.light) add(`token:${token.id}`, token.x, token.y, token.light.bright, token.light.dim, token.light.color, token.hidden);
+    // Lights its effects shed (a torch, the Light spell): centred on the token, moving with it.
+    if (effectsLib) {
+      for (const token of tokensHere()) {
+        for (const effect of effectsOn(token)) {
+          if (effect.paused) continue;
+          const light = effectsLib.lightOf(effect.label);
+          if (light && light.dim > 0) add(`fx:${token.id}:${effect.id}`, token.x, token.y, light.bright, light.dim, light.color, token.hidden, { animation: light.animation === "flicker" ? "torch" : light.animation === "pulse" ? "pulse" : "none", speed: 0.5 });
+        }
+      }
+    }
     return out;
   }
 
@@ -676,6 +731,30 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
     return seat.role === "dm" || (token.owner !== "" && token.owner === seat.name);
   }
 
+  // The effects on a token's creature: its tracker entry's while it is in the
+  // fight, else the token's own.
+  function effectsOn(token) {
+    const tracked = combatFor(token.id);
+    return tracked?.effects ?? token.effects ?? [];
+  }
+  // Can this seat see the token at all? An invisible creature is shown to its
+  // owner and the GM only (as a shimmer); other players are not sent it.
+  function invisibleTo(token, seat) {
+    if (seat.role === "dm" || token.owner === seat.name || !effectsLib) return false;
+    return effectsOn(token).some((effect) => !effect.paused && effectsLib.conditionsOf(effect.label).includes("invisible"));
+  }
+  // What its effects show (shared/actions/effects.mjs visualOf): the GM sees
+  // every effect; a player sees all but the GM's secret ones on their own
+  // creatures, and only the visible conditions on others (no numbers).
+  function visualFor(token, seat) {
+    if (!effectsLib) return null;
+    const own = seat.role === "dm" || token.owner === seat.name;
+    const list = effectsOn(token).filter((effect) => seat.role === "dm" || !effect.gmOnly).filter((effect) => own || effectsLib.conditionsOf(effect.label).length > 0 || effectsLib.lightOf(effect.label));
+    const tracked = combatFor(token.id);
+    const out = effectsLib.visualOf(list.map((effect) => (own ? effect : { label: effect.label, paused: effect.paused, icon: effect.icon })), { concentrating: own ? tracked?.concentrating : undefined });
+    return out.fx.length || out.badges.length ? out : null;
+  }
+
   // Health for the token's dot, from its record (FG's token health dot).
   function health(token) {
     const tracked = combatFor(token.id);
@@ -709,6 +788,8 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       facing: token.facing ?? null,
       seesFt: visionRange(token),
     };
+    const visual = visualFor(token, seat);
+    if (visual) out.effects = visual;
     // A character's token picture, else its portrait (FG's token from the sheet).
     const data = token.recordId ? records.get(token.recordId)?.data : null;
     // A character with none of its own: its race and class's (Kraken's pair).
@@ -754,7 +835,7 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       .map((wall) => ({ id: wall.id, group: doorGroup(wall), x1: wall.x1, y1: wall.y1, x2: wall.x2, y2: wall.y2, secret: wall.door === 2 || wall.toggle === "gm", kind: wall.door > 0 ? "door" : wall.kind, state: wall.id in doors ? doors[wall.id] : wall.ds }));
     const mask = maskHere();
     const groups = groupsHere();
-    const shared = { sceneId: scene.id, sight: sightOn(), locked, darkness: dark, settings: { grid: settings.grid, weather: settings.weather, darkness: settings.darkness }, drawings: drawingsHere(), deathMarkers: deathMarkersHere(), mask: mask.on || mask.shapes.length ? mask : null, groups, fx: fxHere() };
+    const shared = { sceneId: scene.id, sight: sightOn(), locked, darkness: dark, settings: { grid: settings.grid, weather: settings.weather, darkness: settings.darkness }, drawings: drawingsHere(), deathMarkers: deathMarkersHere(), mask: mask.on || mask.shapes.length ? mask : null, groups, fx: fxHere(), templates: templatesFor(seat) };
     const lightOut = (list) => list.map(({ id, x, y, brightPx, dimPx, color, polygon, animation, speed }) => ({ id, x, y, brightPx, dimPx, color, polygon, ...(animation ? { animation, speed } : {}) }));
     if (seat.role === "dm") {
       return {
@@ -770,7 +851,7 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
         tiles: tilesHere().map((tile) => tileOut(tile, assetToken)),
       };
     }
-    const shown = all.filter((token) => !token.hidden);
+    const shown = all.filter((token) => !token.hidden && !invisibleTo(token, seat));
     // Player vision preview (the GM's): every player's tokens at once, as the table sees them.
     const mine = shown.filter((token) => token.owner === seat.name || (seat.everyone && token.owner && !token.owner.startsWith("@")));
     const vision = sightOn() && mine.length > 0 ? mine.map(polygonFor) : null;
@@ -833,10 +914,103 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
     return token;
   }
 
+  function templatesHere() {
+    if (!scene) return [];
+    state.templates = state.templates ?? {};
+    state.templates[scene.id] = state.templates[scene.id] ?? [];
+    return state.templates[scene.id];
+  }
+  // A template where it is now: an emanation sits on its token.
+  function placed(template) {
+    if (!template.attach) return template;
+    const token = tokensHere().find((item) => item.id === template.attach);
+    return token ? { ...template, x: token.x, y: token.y } : template;
+  }
+  // Everyone sees the templates, but one on a token they are not shown.
+  function templatesFor(seat) {
+    const tokens = tokensHere();
+    return templatesHere()
+      .filter((template) => !template.attach || seat.role === "dm" || (() => {
+        const token = tokens.find((item) => item.id === template.attach);
+        return token && !token.hidden && !invisibleTo(token, seat);
+      })())
+      .map(placed);
+  }
+  // The tokens a template covers (shared/actions/areas.mjs: any square they fill
+  // whose centre is inside; walls that stop movement stop it).
+  function tokensInTemplate(template) {
+    if (!scene || !areas) return [];
+    const shape = areas.toPixels(placed(template), geometry.gridSize(scene), units());
+    return areas.tokensIn(shape, tokensHere(), { gridPx: geometry.gridSize(scene), gridless: geometry.gridKind(scene) === "none", walls: wallsHere(), doors: doorsHere(), firstBlock: geometry.firstBlock });
+  }
+
   return {
-    ready: geometryReady,
+    ready: Promise.all([geometryReady, actionsReady]),
     scene: () => scene,
     units,
+    // Area templates: placed by anyone (a player's in their colour), moved or
+    // removed by their placer or the GM; the GM clears them all.
+    templates: () => templatesHere().map(placed),
+    placeTemplate(input, seat) {
+      if (!scene) throw new Error("No scene is open.");
+      const template = cleanTemplate({ ...input, id: undefined, by: seat.role === "dm" ? "" : seat.name, color: input?.color ?? seat.color ?? colorOf(seat.name) });
+      if (!template) throw new Error("A template needs a shape (circle, cone, line, square), a place and a size.");
+      if (template.attach && !tokensHere().some((token) => token.id === template.attach)) delete template.attach;
+      const list = templatesHere();
+      list.push(template);
+      if (list.length > MAX_TEMPLATES) list.splice(0, list.length - MAX_TEMPLATES);
+      changed({ keepVision: true });
+      return placed(template);
+    },
+    moveTemplate(id, patch, seat) {
+      const template = templatesHere().find((item) => item.id === id);
+      if (!template) throw new Error("That template is gone.");
+      if (seat.role !== "dm" && template.by !== seat.name) throw new Error("You can move only your own templates.");
+      Object.assign(template, cleanTemplate({ ...template, ...patch, id: template.id, by: template.by }) ?? {});
+      changed({ keepVision: true });
+      return placed(template);
+    },
+    removeTemplate(id, seat) {
+      const list = templatesHere();
+      const template = list.find((item) => item.id === id);
+      if (!template) throw new Error("That template is gone.");
+      if (seat.role !== "dm" && template.by !== seat.name) throw new Error("You can remove only your own templates.");
+      list.splice(list.indexOf(template), 1);
+      changed({ keepVision: true });
+      return template;
+    },
+    clearTemplates(seat, { turn = false } = {}) {
+      if (!turn && seat.role !== "dm") throw new Error("Only the GM clears every template.");
+      const list = templatesHere();
+      const kept = list.filter((template) => turn && !template.turn);
+      const gone = list.length - kept.length;
+      if (gone) {
+        state.templates[scene.id] = kept;
+        changed({ keepVision: true });
+      }
+      return gone;
+    },
+    tokensInTemplate,
+    // Where a spell's area goes when its caster (a token, or null) points at x, y (shared/actions/areas.mjs place).
+    areaAt(area, token, x, y) {
+      if (!scene || !areas) throw new Error("No scene is open.");
+      const origin = geometry.gridOrigin(scene);
+      return areas.place(area, token, num(x, 0), num(y, 0), { gridPx: geometry.gridSize(scene), originX: origin.x, originY: origin.y, feetPerSquare: units(), gridless: geometry.gridKind(scene) === "none" });
+    },
+    // A token's own effects (one not on the tracker): put on, changed, taken off, all taken (it joins the tracker).
+    tokenEffects(id) {
+      return findToken(id).effects ?? [];
+    },
+    setTokenEffects(id, list) {
+      const token = findToken(id);
+      const clean = (Array.isArray(list) ? list : []).map(cleanEffect).filter(Boolean).slice(0, 30);
+      if (clean.length) token.effects = clean;
+      else delete token.effects;
+      changed({ keepVision: true });
+      return token.effects ?? [];
+    },
+    // Game time passes for the effects on tokens out of the fight (the calendar): see tableServer.
+    tokensWithEffects: () => tokensHere().filter((token) => token.effects?.length),
     squareCenter,
     squareOf,
     squareSize: () => (scene ? geometry.gridSize(scene) : 0),

@@ -28,7 +28,14 @@ export type MapToken = {
   seesFt: number;
   // Degrees clockwise from up; null: not turned.
   facing?: number | null;
+  // What its effects show (shared/actions/effects.mjs visualOf): condition visuals and badges.
+  effects?: { fx: string[]; badges: { icon: string; title: string; tone: string; rounds?: number }[] };
 };
+// An area template on the map (a spell's sphere, cone, line or cube): world pixels for
+// its origin, feet for its size; angle: degrees clockwise from east.
+export type MapTemplate = { id: string; shape: "circle" | "cone" | "line" | "square"; x: number; y: number; size: number; width: number; angle: number; spread?: number; color: string; label: string; by: string; attach?: string; turn?: boolean; entryId?: string };
+// The host asks this screen to place a spell's template (an area spell cast with no targets).
+export type TemplateAsk = { power: string; recordId: string | null; id: string | null; name: string; area: { shape: MapTemplate["shape"]; size: number; width?: number; origin: "point" | "self"; attach?: boolean; spread?: number }; casterTokenId: string; color: string };
 // A light shining now, with its own line of sight (pixels).
 export type MapLight = { id: string; x: number; y: number; brightPx: number; dimPx: number; color: string; polygon: number[] | null; animation?: string; speed?: number };
 // A player's token seeing in the dark (darkvision), pixels.
@@ -66,6 +73,7 @@ export type TableMap = {
   spoiled?: string[];
   sceneLights: SceneLightRecord[];
   settings: MapSettings;
+  templates?: MapTemplate[];
   drawings?: MapDrawing[];
   // Where creatures died (FG's death markers): drawn under the tokens, for everyone.
   deathMarkers?: DeathMarker[];
@@ -171,7 +179,7 @@ export type QuickSlot =
 export type KrakenLink = QuickSlot;
 export type SoundItem = { id: string; kind: string; group: string; name: string };
 export type SoundLibrary = { sounds: SoundItem[]; groups: { id: string; count: number }[]; folder: string; triggers?: SoundTrigger[] };
-export type TableOptions = { towerReveal: boolean; towerExternal?: boolean; towerStyle?: string; deathMarkers?: { on: boolean; default: string; byType: Record<string, string> }; motd?: { text: string; links: QuickSlot[] }; decal: string; wallpaper: string; gmIcon: string; soundHidden: "off" | "combat" | "all"; soundRepeat: number; diceHold?: number; wizard35?: Wizard35Options; wizard2e?: Wizard2eOptions };
+export type TableOptions = { towerReveal: boolean; towerExternal?: boolean; towerStyle?: string; deathMarkers?: { on: boolean; default: string; byType: Record<string, string> }; motd?: { text: string; links: QuickSlot[] }; decal: string; wallpaper: string; gmIcon: string; soundHidden: "off" | "combat" | "all"; soundRepeat: number; diceHold?: number; tokenEffects?: "full" | "icons" | "off"; playerEffects?: "none" | "lights" | "conditions" | "all"; autoApply?: boolean; wizard35?: Wizard35Options; wizard2e?: Wizard2eOptions };
 // The D&D 3.5E character wizard's options (the GM's, as FG's KrakenCharWizard35E).
 export type Wizard35Options = { methods: number[]; rollLock: boolean; lowReroll: boolean; vault: boolean };
 // The AD&D 2E character wizard's options (the GM's): ability rolls once only, the PHB methods allowed, gold above 1st level.
@@ -393,6 +401,7 @@ export function useSession() {
   // How many times the GM has shared the map (each one opens the map window).
   const [mapShared, setMapShared] = useState(0);
   const [notice, setNotice] = useState<string | null>(null);
+  const [templateAsk, setTemplateAsk] = useState<TemplateAsk | null>(null);
   const [chat, setChat] = useState<ChatLine[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [playerScene, setPlayerScene] = useState<MapScene | null>(null);
@@ -549,6 +558,10 @@ export function useSession() {
             const ping = { id: ++pingCounter.current, x: Number(msg.x), y: Number(msg.y), from: String(msg.from ?? ""), color: String(msg.color ?? "#fff") };
             setPings((current) => [...current, ping].slice(-12));
             window.setTimeout(() => setPings((current) => current.filter((item) => item.id !== ping.id)), 4200);
+          }
+          if (msg.type === "template-request" && msg.area && typeof msg.power === "string") {
+            setTemplateAsk(msg as unknown as TemplateAsk);
+            return;
           }
           if (msg.type === "notice" && typeof msg.text === "string") {
             const text = msg.text;
@@ -1137,7 +1150,19 @@ export function useSession() {
   // The party sheet's GM actions; the host splits and posts them as FG does.
   // The combat tracker: every action goes to the host, which applies FG's rules.
   // The tracker's rolls are thrown from where they were asked for.
-  const ct = useCallback((action: string, payload: Record<string, unknown> = {}) => send({ type: "ct", action, ...payload, ...throwIntent() }), [send]);
+  // A cast from this screen may be asked to place its area's template first (place: the
+  // map can); a power's own action key travels as castAction (a sheet's per-action Cast
+  // buttons name it `action`, which would replace the tracker action itself).
+  const ct = useCallback(
+    (action: string, payload: Record<string, unknown> = {}) => {
+      if (action === "cast") {
+        const { action: castAction, ...rest } = payload;
+        return send({ type: "ct", place: true, ...rest, action, ...(castAction ? { castAction } : {}), ...throwIntent() });
+      }
+      return send({ type: "ct", action, ...payload, ...throwIntent() });
+    },
+    [send],
+  );
   const setTableOptions = useCallback((patch: Partial<TableOptions>) => send({ type: "table-options", options: patch }), [send]);
   const partyAwardXP = useCallback((xp: number) => send({ type: "party-award-xp", xp }), [send]);
   const partyAward = useCallback((kind: "quests" | "encounters", id?: string) => send({ type: "party-award", kind, id }), [send]);
@@ -1206,6 +1231,9 @@ export function useSession() {
     pings,
     mapShared,
     notice,
+    // An area spell waiting for its template (the map places it, or Escape cancels).
+    templateAsk,
+    clearTemplateAsk: () => setTemplateAsk(null),
     chat,
     records,
     error,
@@ -1237,6 +1265,8 @@ export function useSession() {
     updateLight,
     removeLight,
     ct,
+    // Area templates by hand (the map toolbar's Area template tool): place, move, remove, clear.
+    template: (action: string, payload: Record<string, unknown> = {}) => send({ type: "template", action, ...payload }),
     partyAwardXP,
     partyAward,
     partyDistribute,
