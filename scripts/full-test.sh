@@ -24,6 +24,7 @@ if [ "$1" = "--window-less" ]; then
     case " $gui check-tiles " in *" $n "*) continue;; esac
     run "$n" node "$f"
   done
+  run check-tiles npx tsx scripts/check-tiles.mjs
   echo "TOTAL: $pass passed, $fail failed:$failed (skipped, they open windows: $gui)"
   exit 0
 fi
@@ -36,6 +37,7 @@ run build npm run build
 for s in check-astra check-ironsworn check-forged check-fate check-bfrpg check-cairn check-srd5e check-dnd5e check-dnd35 check-adnd2e check-mgt2 check-combat check-combat-fixes check-audit check-party check-books check-packs check-dice check-setup check-starships check-code-mode check-assistant check-open-art check-studio-server check-studio-bridge check-studio-fg check-studio-tools check-map-play check-map check-walls check-content check-session-tools check-port-mapping check-campaign-files check-targeting check-templates check-cards check-effects check-cast-text check-spell-parse check-modifiers check-chat-flow check-bookkeeping; do
   [ -f "scripts/$s.mjs" ] && run "$s" node "scripts/$s.mjs"
 done
+run check-tiles npx tsx scripts/check-tiles.mjs
 for t in verify-settings-ui verify-prefs-ui check-agent-ui verify-tower-ui verify-table-play-ui verify-calendar-notes-ui verify-dicepacks-ui verify-natural-sound-ui verify-studio-ui verify-open-art-ui verify-dnd5e-ui verify-bfrpg-ui verify-cairn-ui verify-fate-ui verify-forged-ui verify-ironsworn-ui verify-astra-ui verify-mgt2-ui verify-charselect-ui verify-core-parts-ui verify-core-wizard-ui verify-bfrpg-sheet-ui verify-dnd35-ui verify-adnd2e-ui verify-descending-ui verify-map-play-ui verify-content-ui verify-session-ui verify-invite-ui verify-campaigns-ui verify-targeting-ui verify-dicechat-ui verify-bookkeeping-ui; do
   [ -f "scripts/$t.mjs" ] && run "$t" node "scripts/$t.mjs"
 done
