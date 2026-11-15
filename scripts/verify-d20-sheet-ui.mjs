@@ -104,6 +104,29 @@ const GAMES = {
   },
 };
 
+// The 2d6 games (stage 4, docs/core-ui-design.md 7.15): no books (Traveller's kit is Kraken's own; Astra's from its shipped books).
+const TRAVELLER_STATS = (str, dex, end, int, edu, soc) => ({ str, dex, end, int, edu, soc });
+Object.assign(GAMES, {
+  mgt2: {
+    ruleset: "Traveller",
+    shipped: true,
+    books: [],
+    tabs: "main,skills,combat,gear,notes",
+    specs: [
+      { name: "Ilsa Varn", characteristics: TRAVELLER_STATS(7, 9, 8, 10, 8, 6), careers: [{ name: "Scout", terms: 3, rank: 2 }], skills: { "Pilot (Small Craft)": 1, "Gun Combat (Slug)": 1, Recon: 1, "Vacc Suit": 0, Mechanic: 0 }, gear: ["Autopistol", "Mesh", "Medikit", ["Rations (1 week)", 3]], credits: 2500, homeworld: "Regina", age: 30, gender: "F", contacts: "Ally: Mara (a broker)" },
+      { name: "Dorn Kessler", characteristics: TRAVELLER_STATS(9, 7, 9, 6, 7, 11), careers: [{ name: "Marine", terms: 2, rank: 2, title: "Lieutenant" }, { name: "Drifter", terms: 1 }], skills: { "Melee (Blade)": 2, "Gun Combat (Energy)": 1, Athletics: 0, Leadership: 1 }, gear: ["Cutlass", "Laser Pistol", "Cloth", "Comm"], species: "Vargr", homeworld: "Lair" },
+    ],
+    fight: ["Ilsa Varn"],
+    // The states, shot on the tabs they change (a wounded characteristic's DM moves the skills' and the attacks' totals).
+    states: [
+      { who: "Ilsa Varn", label: "wounded", tabs: ["main", "skills", "combat"], changes: () => [{ path: "hp.wounds", value: 10 }] },
+      { who: "Ilsa Varn", label: "unconscious", tabs: ["main"], changes: () => [{ path: "hp.wounds", value: 15 }] },
+      { who: "Ilsa Varn", label: "dead", tabs: ["main", "skills"], changes: () => [{ path: "hp.wounds", value: 24 }] },
+      { who: "Ilsa Varn", label: "healed", tabs: ["main"], changes: () => [{ path: "hp.wounds", value: 0 }] },
+    ],
+  },
+});
+
 const [gameId, outArg] = process.argv.slice(2);
 const game = GAMES[gameId];
 if (!game) {
@@ -293,14 +316,37 @@ try {
     const data = await dataOf(ids[state.who]);
     await tool("kraken_character_edit", { id: ids[state.who], changes: state.changes(data) });
     await settle(600);
+    // A state shot on its tabs (main, unless it names more); the main tab's file keeps its old name.
+    const tabsOf = state.tabs ?? ["main"];
+    const named = (who, tab) => `${gameId}-${who}-${slug(state.who)}-state-${state.label}${tab === "main" ? "" : `-${tab}`}`;
     const gm = await gmOpen(state.who);
-    await gm.locator('[data-sheet-tab="main"]').click();
-    await shoot(gm, `${gameId}-gm-${slug(state.who)}-state-${state.label}`);
+    for (const tab of tabsOf) {
+      await gm.locator(`[data-sheet-tab="${tab}"]`).click();
+      await shoot(gm, named("gm", tab));
+    }
     await gmClose(state.who);
     const mine = await openCard(state.who);
-    await mine.locator('[data-sheet-tab="main"]').click();
-    await shoot(mine, `${gameId}-player-${slug(state.who)}-state-${state.label}`);
+    for (const tab of tabsOf) {
+      await mine.locator(`[data-sheet-tab="${tab}"]`).click();
+      await shoot(mine, named("player", tab));
+    }
   }
+
+  // The sheet as someone who may not type sees it (a character shared with the table, not theirs): the player's
+  // open sheet, its owner changed under it, every tab; then given back.
+  if (game.watch !== false)
+    for (const spec of game.specs) {
+      const sheet = await openCard(spec.name);
+      await tool("kraken_record_update", { id: ids[spec.name], owner: "Someone else", visibility: "all" });
+      await seat.waitForFunction(() => !document.querySelector(".cc-sheet .cc-field:not([readonly])") || document.querySelectorAll(".cc-sheet").length !== 1, null, { timeout: 5000 }).catch(() => undefined);
+      await settle(600);
+      for (const tab of game.tabs.split(",")) {
+        await sheet.locator(`[data-sheet-tab="${tab}"]`).click();
+        await shoot(sheet, `${gameId}-watcher-${slug(spec.name)}-sheet-${tab}`);
+      }
+      await tool("kraken_record_update", { id: ids[spec.name], owner: "A test player", visibility: "owner" });
+      await settle(600);
+    }
 
   // Every control on every tab, pressed once by the player, in order, the dice fixed first.
   const presses = [];
@@ -325,6 +371,12 @@ try {
       const count = await sheet.locator(".cc-page").locator(CONTROLS).count();
       const strip = await sheet.locator(".five-strip").locator(CONTROLS).count();
       const header = await sheet.locator(".cc-boxes").locator(CONTROLS).count();
+      // Every control of the sheet is in one of the three places pressed, or it is said here.
+      const outside = (await sheet.locator(CONTROLS).count()) - count - strip - header;
+      if (outside) {
+        presses.push({ what: `${spec.name} ${tab}: controls outside the header, the strip and the page`, unpressed: outside });
+        console.log(`  ${spec.name} ${tab}: ${outside} controls not pressed (outside the header, the strip and the page)`);
+      }
       // The header's boxes and the strip over every tab once (on the first tab), then the tab's own controls. The
       // strip's DC or Mod stays at what was typed (1), so every later roll and save carries it.
       const first = tab === game.tabs.split(",")[0];

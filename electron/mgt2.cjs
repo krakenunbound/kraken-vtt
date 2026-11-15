@@ -55,9 +55,13 @@ async function taskMgt2(table, record, { skill = "", attribute = "", difficulty 
   return { total: rolled.total, modifier: total, target, effect, success };
 }
 
-// What the sheet may change, then every number worked out again.
-const TEXT = new Set(["playername", "notes", "appearance", "gender", "species", "homeworld", "contacts", "allies", "enemies", "ship", "background"]);
-const NUMBERS = [/^characteristics\.(str|dex|end|int|edu|soc)\.score$/, /^skills\.[a-z0-9-]+\.level$/, /^hp\.wounds$/, /^age$/, /^ac\.misc$/, /^initiative\.misc$/, /^careers\.\d+\.(terms|rank)$/, /^coins\.id-\d+\.amount$/, /^inventorylist\.id-\d+\.(count|carried)$/];
+// What the sheet may change (the manifest's edit globs: shared/rulesets/edit.mjs), then every number worked out
+// again. A skill by its name, careers as a whole, a skill dropped and the floor at 0 damage are this host's own.
+const { default: MANIFEST } = require("../shared/mgt2/manifest.mjs");
+const { editPaths } = require("../shared/rulesets/edit.mjs");
+const EDIT_PATHS = editPaths(MANIFEST.edit);
+const TEXT = EDIT_PATHS.text;
+const NUMBERS = EDIT_PATHS.number;
 function setPath(data, key, value) {
   const keys = key.split(".");
   let node = data;
@@ -77,7 +81,7 @@ async function editMgt2(table, record, changes, seat) {
     const named = /^skills\.(.+)\.level$/.exec(key);
     if (named && !/^[a-z0-9-]+$/.test(named[1])) key = `skills.${rules.skillKey(named[1]).key}.level`;
     if (key === "name") name = String(value ?? "").trim().slice(0, 120) || record.name;
-    else if (TEXT.has(key)) data[key] = String(value ?? "").slice(0, 8000);
+    else if (TEXT.some((pattern) => pattern.test(key))) data[key] = String(value ?? "").slice(0, 8000);
     else if (key === "careers") data.careers = (Array.isArray(value) ? value : []).slice(0, 12).map((item) => ({ name: String(item?.name ?? "").slice(0, 60), terms: Math.max(0, Math.round(Number(item?.terms) || 0)), rank: Math.max(0, Math.round(Number(item?.rank) || 0)) }));
     else if (/^skills\.[a-z0-9-]+$/.test(key) && value === null) delete data.skills?.[key.split(".")[1]];
     else if (NUMBERS.some((pattern) => pattern.test(key))) {
@@ -85,7 +89,7 @@ async function editMgt2(table, record, changes, seat) {
       if (!Number.isFinite(n) || Math.abs(n) > 1e7) throw new Error(`${key} needs a number.`);
       if (key.startsWith("skills.") && !rules.SKILLS[key.split(".")[1].split("-")[0]]) throw new Error(`No skill ${key.split(".")[1]}.`);
       setPath(data, key, key === "hp.wounds" ? Math.max(0, n) : n);
-    } else if (/^inventorylist\.id-\d+$/.test(key) && value === null) delete data.inventorylist?.[key.split(".")[1]];
+    } else if (EDIT_PATHS.remove.some((pattern) => pattern.test(key)) && value === null) delete data.inventorylist?.[key.split(".")[1]];
     else throw new Error(`The sheet cannot change ${key}.`);
   }
   return table.records.update(record.id, { name, data: rules.derive(data) }, table.seat, { replace: true });
@@ -325,4 +329,4 @@ async function lifeAction(table, owner, { action = "view", name, fn, args, build
   throw new Error("Which action? start, view, call, details, build or cancel.");
 }
 
-module.exports = { rulesMgt2, buildMgt2, taskMgt2, editMgt2, isMgt2, isMgt2Ruleset, lifeAction, RULESET_NAME };
+module.exports = { rulesMgt2, buildMgt2, taskMgt2, editMgt2, isMgt2, isMgt2Ruleset, lifeAction, RULESET_NAME, EDIT_PATHS };

@@ -1,13 +1,14 @@
 // @ts-check
 // A manifest's edit glob as the host's whitelist regex (docs/core-ui-design.md
-// 4.7): "*" is one id-n key (a list's row), "#" a digit, "%" a word (a-z),
+// 4.7): "*" is one id-n key (a list's row), "#" a digit ("#+" a number), "%" a word (a-z), "&" a key of
+// letters, digits and dashes (a Traveller skill with its speciality: pilot-smallcraft),
 // "(a|b)" either. Used by the hosts (electron/<id>.cjs) and by
 // scripts/check-manifests.mjs, so both read a manifest the same way.
 /** @param {string} glob */
-export const globRegex = (glob) => new RegExp(`^${glob.replace(/\./g, "\\.").replace(/\*/g, "id-\\d+").replace(/#/g, "\\d").replace(/%/g, "[a-z]+")}$`);
+export const globRegex = (glob) => new RegExp(`^${glob.replace(/\./g, "\\.").replace(/\*/g, "id-\\d+").replace(/#/g, "\\d").replace(/%/g, "[a-z]+").replace(/&/g, "[a-z0-9-]+")}$`);
 // A path that fits a glob, for testing that a sheet's field is allowed ("inventorylist.id-1.count").
 /** @param {string} path */
-export const samplePath = (path) => path.replace(/\*/g, "id-00001").replace(/#/g, "1").replace(/%/g, "word");
+export const samplePath = (path) => path.replace(/\*/g, "id-00001").replace(/#/g, "1").replace(/%/g, "word").replace(/&/g, "word");
 // The host's whitelist from a manifest's edit: text, number, string and list paths, and the rows it may drop.
 /** @param {NonNullable<import("./types").RulesetManifest["edit"]>} edit */
 export const editPaths = (edit) => ({

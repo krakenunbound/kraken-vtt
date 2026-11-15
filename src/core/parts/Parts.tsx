@@ -2,8 +2,9 @@ import { Fragment, type ComponentType } from "react";
 import type { BoxSpec, Part, Path, RollSpec, StatBlockSpec, StepSpec } from "../../../shared/rulesets/types";
 import { Icon } from "../../ui/icons";
 import { Field } from "../fields/Field";
-import { at, fill, holds, nodesOf, num, rows, signed, textOf, useSheet, type Row, type Scope } from "../sheet/context";
+import { at, fill, holds, nodesOf, num, rows, signed, textOf, useSheet, type Format, type Row, type Scope } from "../sheet/context";
 import { FieldView, LabelledField } from "./FieldView";
+export type { Format };
 
 // The core parts a manifest arranges on a sheet's tabs (docs/core-ui-design.md
 // 4.2): a stat block, derived boxes, a list, coins, load, notes, advancement,
@@ -11,8 +12,8 @@ import { FieldView, LabelledField } from "./FieldView";
 // (custom) where nothing here fits. Each writes the shared look (the five-*
 // and cc-* styles every sheet uses) and the data-* hooks the manifest names.
 
-export type CustomPart = ComponentType<{ props?: Record<string, unknown> }>;
-export type Format = (row: Row, key?: string) => string;
+// A game's own part: given its props, and (inside a list or skills row) the row and its key.
+export type CustomPart = ComponentType<{ props?: Record<string, unknown>; row?: Row; rowKey?: string }>;
 
 export function PartView({ spec, custom, formats }: { spec: Part; custom: Record<string, CustomPart>; formats: Record<string, Format> }) {
   const sheet = useSheet();
@@ -96,7 +97,7 @@ export function PartView({ spec, custom, formats }: { spec: Part; custom: Record
     case "hint":
       return <p className={spec.plain ? undefined : "hint"}>{nodesOf(spec.text, scope, sheet.modifiers)}</p>;
     case "skills":
-      return <Skills spec={spec} />;
+      return <Skills spec={spec} custom={custom} />;
     case "track":
       return <Track spec={spec} />;
     case "button":
@@ -176,7 +177,21 @@ function StatRows({ spec }: { spec: StatBlockSpec }) {
         const scope: Scope = { data: sheet.data, extra: { key: row.key, label: row.label, short: row.short ?? row.label } };
         return (
           <div key={row.key} className={spec.rowClass ?? "five-ability"} {...{ [`data-${spec.hook}`]: row.key }} title={spec.rowTitle ? textOf(spec.rowTitle, scope, sheet.modifiers) : undefined}>
-            {spec.plain ? <b>{row.short ?? row.label}</b> : <b title={row.label}>{row.short ?? row.label}</b>}
+            {spec.nameSmall ? (
+              // The name with a small after it while its condition holds, written as JSX wrote "STR {hurt ? <small> : null}".
+              <b title={row.label}>
+                {row.short ?? row.label}{" "}
+                {holds(spec.nameSmall.when, scope, sheet) ? (
+                  <small className={spec.nameSmall.className} {...(spec.nameSmall.attr ? { [`data-${spec.nameSmall.attr}`]: row.key } : {})}>
+                    {nodesOf(spec.nameSmall.text, scope, sheet.modifiers)}
+                  </small>
+                ) : null}
+              </b>
+            ) : spec.plain ? (
+              <b>{row.short ?? row.label}</b>
+            ) : (
+              <b title={row.label}>{row.short ?? row.label}</b>
+            )}
             {spec.columns.map((column) => {
               if ("roll" in column) return <RollButton key={column.label} roll={column.roll} scope={scope} className="cc-bonus" />;
               const field = <FieldView spec={{ ...column.field, path: column.path.replace("{key}", row.key) }} scope={scope} />;
@@ -217,10 +232,13 @@ function StatRows({ spec }: { spec: StatBlockSpec }) {
 
 // A record's rows each with a field, a name and a roll (thief abilities): "{name}" and the others from the row.
 // Fixed rows (every skill of the game): each row's data at path.{key}, named by its label and note.
-function Skills({ spec }: { spec: Extract<Part, { part: "skills" }> }) {
+function Skills({ spec, custom }: { spec: Extract<Part, { part: "skills" }>; custom: Record<string, CustomPart> }) {
   const sheet = useSheet();
   const fixed = spec.rows;
   const list: [string, Row, { label: string; note?: string } | null][] = fixed ? fixed.map((item) => [item.key, (at(sheet.data, `${spec.path}.${item.key}`) ?? {}) as Row, item]) : rows(at(sheet.data, spec.path)).map(([key, row]) => [key, row, null]);
+  // Rows in order of a field (a skill's name), as a hand-made sheet sorted them.
+  if (spec.sort) list.sort((a, b) => String(at(a[1], spec.sort ?? "")).localeCompare(String(at(b[1], spec.sort ?? ""))));
+  const More = spec.more ? custom[spec.more] : null;
   const body = (
     <>
       {spec.head ? (
@@ -240,13 +258,25 @@ function Skills({ spec }: { spec: Extract<Part, { part: "skills" }> }) {
                 {spec.mark ? (holds(spec.mark.when, scope, sheet) ? spec.mark.text : "") : null}
                 {named.label} <small className="hint">{named.note}</small>
               </span>
+            ) : spec.note !== undefined || More ? (
+              // The name, a small hint after it (its characteristic) and a game's own words (Astra's tricks).
+              <span>
+                {String(at(row, spec.name ?? "name") ?? "")} <small className="hint">{textOf(spec.note, scope, sheet.modifiers)}</small>
+                {More ? <More row={row} rowKey={key} /> : null}
+              </span>
             ) : (
               <span>{String(at(row, spec.name ?? "name") ?? "")}</span>
             )}
             <RollButton roll={spec.roll} scope={scope} className="cc-bonus" />
+            {sheet.editable && spec.remove ? (
+              <button type="button" className="ghost" title={spec.remove.title} aria-label={textOf(spec.remove.aria, scope, sheet.modifiers)} onClick={() => sheet.change(`${spec.path}.${key}`, null)}>
+                ×
+              </button>
+            ) : null}
           </div>
         );
       })}
+      {spec.empty && list.length === 0 ? <p className="hint">{spec.empty}</p> : null}
     </>
   );
   return spec.className ? <div className={spec.className}>{body}</div> : body;
@@ -334,7 +364,9 @@ function DerivedBox({ box }: { box: BoxSpec }) {
           {shown}
         </span>
       ) : box.show === "text" ? (
-        <span {...hook}>{fill(box.text ?? "", scope)}</span>
+        <span {...hook} style={{ color: box.dangerWhen && holds(box.dangerWhen, scope, sheet) ? "#c0392b" : undefined }}>
+          {typeof box.text === "string" || box.text === undefined ? fill(box.text ?? "", scope) : nodesOf(box.text, scope, sheet.modifiers)}
+        </span>
       ) : box.show === "field" && box.field ? (
         <span {...hook}>
           <FieldView spec={box.field} scope={scope} />
@@ -387,7 +419,7 @@ function DerivedBox({ box }: { box: BoxSpec }) {
       ) : null}
       {box.warn && warn ? (
         <span className="hint" {...(box.warn.attr ? { [`data-${box.warn.attr.name}`]: box.warn.attr.value } : {})}>
-          {box.warn.text}
+          {typeof box.warn.text === "string" ? box.warn.text : textOf(box.warn.text, scope, sheet.modifiers)}
         </span>
       ) : null}
       {box.steps?.length && sheet.editable ? (
@@ -575,10 +607,26 @@ function Strip({ spec }: { spec: Extract<Part, { part: "strip" }> }) {
                 })}
               </Fragment>
             );
-          case "xp":
+          case "xp": {
+            const field = <Field value={num(at(data, item.path))} number editable={item.edit === "gm" ? gm : editable} label={item.label} onSave={(value) => sheet.change(item.path, Number(value) || 0)} />;
             return (
               <span key={index} className="cc-inline">
-                <b>XP</b> <Field value={num(at(data, item.path))} number editable={editable} label={item.label} onSave={(value) => sheet.change(item.path, Number(value) || 0)} /> / <span className="cc-num">{num(at(data, item.next)) || "—"}</span>
+                {item.next ? (
+                  <>
+                    <b>{item.word ?? "XP"}</b> {field} / <span className="cc-num">{num(at(data, item.next)) || "—"}</span>
+                  </>
+                ) : (
+                  <>
+                    <b>{item.word ?? "XP"}</b> {field}
+                  </>
+                )}
+              </span>
+            );
+          }
+          case "hint":
+            return (
+              <span key={index} className="hint">
+                {item.text}
               </span>
             );
           case "value":
@@ -587,15 +635,27 @@ function Strip({ spec }: { spec: Extract<Part, { part: "strip" }> }) {
                 <b>{item.label}</b> <span className="cc-num" data-stat={item.hook}>{item.format === "signed" ? signed(num(at(data, item.path))) : num(at(data, item.path))}</span>
               </span>
             );
-          case "modifier":
+          case "modifier": {
+            const input = <input type="number" className={item.input ?? "cc-field number"} value={num(modifiers[item.key])} min={item.min} max={item.max} aria-label={item.aria} style={item.width ? { width: `${item.width}em` } : undefined} onChange={(event) => sheet.setModifier(item.key, Number(event.target.value) || 0)} />;
             return (
               <label key={index} className="cc-inline" title={item.title}>
-                <b>{item.label}</b> <input type="number" className="cc-field number" value={num(modifiers[item.key])} min={item.min} max={item.max} aria-label={item.aria} onChange={(event) => sheet.setModifier(item.key, Number(event.target.value) || 0)} />
+                {item.plain ? (
+                  <>
+                    {`${item.label} `}
+                    {input}
+                  </>
+                ) : (
+                  <>
+                    <b>{item.label}</b> {input}
+                  </>
+                )}
               </label>
             );
-          case "choice":
-            return (
-              <select key={index} className="cc-field" aria-label={item.aria} value={String(modifiers[item.key] ?? "")} onChange={(event) => sheet.setModifier(item.key, event.target.value)}>
+          }
+          case "choice": {
+            // In a labelled box the box carries the title, as "<label title><b>Task</b><select>" did.
+            const select = (
+              <select key={index} className="cc-field" aria-label={item.aria} title={item.label ? undefined : item.title} value={String(modifiers[item.key] ?? "")} onChange={(event) => sheet.setModifier(item.key, item.number ? Number(event.target.value) : event.target.value)}>
                 {item.options.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
@@ -603,6 +663,15 @@ function Strip({ spec }: { spec: Extract<Part, { part: "strip" }> }) {
                 ))}
               </select>
             );
+            return item.label ? (
+              <label key={index} className="cc-inline" title={item.title}>
+                <b>{item.label}</b>
+                {select}
+              </label>
+            ) : (
+              select
+            );
+          }
         }
       })}
     </section>
@@ -617,12 +686,33 @@ function Coins({ spec }: { spec: Extract<Part, { part: "coins" }> }) {
   return (
     <div className={spec.className ?? "five-coins"}>
       {coins.map(([key, coin]) => (
-        <label key={key} className="cc-inline">
-          <Field value={num(coin.amount)} number editable={sheet.editable} label={spec.aria ? textOf(spec.aria, { row: coin, data: sheet.data }, sheet.modifiers) : `${String(coin.name ?? "GP")} coins`} onSave={(value) => sheet.change(`${spec.path}.${key}.amount`, Number(value) || 0)} /> {spec.upper ? String(coin.name).toUpperCase() : String(coin.name ?? "gp").toLowerCase()}
-        </label>
+        <CoinLine key={key} spec={spec} coin={coin} at={`${spec.path}.${key}.amount`} />
       ))}
       {none ? <span className="hint">{spec.none?.text}</span> : null}
     </div>
+  );
+}
+
+// One coin: its amount and its word (the coin's name, or the game's fixed word), the word after the field or before it.
+function CoinLine({ spec, coin, at: path }: { spec: Extract<Part, { part: "coins" }>; coin: Row; at: string }) {
+  const sheet = useSheet();
+  const field = <Field value={num(coin.amount)} number editable={sheet.editable} label={spec.aria ? textOf(spec.aria, { row: coin, data: sheet.data }, sheet.modifiers) : `${String(coin.name ?? "GP")} coins`} onSave={(value) => sheet.change(path, Number(value) || 0)} />;
+  const word = spec.word ?? (spec.upper ? String(coin.name).toUpperCase() : String(coin.name ?? "gp").toLowerCase());
+  return spec.before ? (
+    <label className="cc-inline">
+      {`${word} `}
+      {field}
+    </label>
+  ) : spec.word ? (
+    // A fixed word is one text node with its space (as "<Field /> credits" wrote it).
+    <label className="cc-inline">
+      {field}
+      {` ${word}`}
+    </label>
+  ) : (
+    <label className="cc-inline">
+      {field} {word}
+    </label>
   );
 }
 

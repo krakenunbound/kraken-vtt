@@ -5,7 +5,7 @@ import { canEdit, SheetFrame } from "../frame/SheetFrame";
 import { messageSender } from "../sender";
 import { FieldView } from "../parts/FieldView";
 import { PartView, type CustomPart, type Format } from "../parts/Parts";
-import { at, holds, num, SheetCtx, textOf, type Row, type SheetContext } from "./context";
+import { at, holds, num, setFormatters, SheetCtx, textOf, type Row, type SheetContext } from "./context";
 
 // A sheet laid out by its manifest (FG's arrange level: the ruleset lists its
 // tabs and fills each with core parts bound to record paths). The frame, the
@@ -19,8 +19,8 @@ function startingModifiers(parts: Part[], into: Record<string, unknown> = {}) {
     if (part.part === "list" && part.modifier) into[part.modifier.key] = part.modifier.kind === "check" ? false : (part.modifier.options?.[0]?.value ?? "");
     if (part.part === "strip")
       for (const item of part.items) {
-        if (item.kind === "modifier") into[item.key] = 0;
-        if (item.kind === "choice") into[item.key] = item.options[0]?.value ?? "";
+        if (item.kind === "modifier") into[item.key] = item.start ?? 0;
+        if (item.kind === "choice") into[item.key] = item.start ?? item.options[0]?.value ?? "";
       }
   }
   return into;
@@ -41,6 +41,8 @@ const NO_FEATURES: string[] = [];
 
 export function SheetRenderer({ spec: given, record, session, ruleset, custom, formats, words = NO_WORDS, features = NO_FEATURES }: { spec: SheetSpec; record: TableRecord; session: Session; ruleset: string; custom: Record<string, CustomPart>; formats: Record<string, Format>; words?: Record<string, string>; features?: string[] }) {
   const spec = useMemo(() => withWords(given, words), [given, words]);
+  // The game's formatters, for a text that names one ({ format }).
+  setFormatters(formats);
   const [tab, setTab] = useState(spec.tabs[0]?.id ?? "main");
   const [modifiers, setModifiers] = useState<Record<string, unknown>>(() => startingModifiers([...(spec.top ?? []), ...spec.tabs.flatMap((item) => item.parts)]));
   const data = record.data as Row;

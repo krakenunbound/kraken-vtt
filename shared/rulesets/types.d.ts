@@ -14,7 +14,8 @@ export type FieldKind = "text" | "number" | "textarea" | "select" | "check" | "r
 // A text that may depend on the row or a sheet modifier ("{path}" filled in; "[...]" kept only when its values are there):
 // { by: "kind", map: { relic: "Use" }, else: "Cast" }; by "modifier:mode" reads a sheet modifier.
 // { if: Cond, then, else }: a text by a condition on the row or the record.
-export type Text = string | { by: string; map: Record<string, string>; else: string } | { if: Cond; then: string; else: string };
+// { format: Ref }: a game's formatter's words for the row (or the record), given the row's key and the record's data.
+export type Text = string | { by: string; map: Record<string, string>; else: string } | { if: Cond; then: string; else: string } | { format: Ref };
 // Texts shown as one text node each, as JSX writes "Level {level}" ("Level ", "3"): a sheet that must not move a pixel.
 export type Nodes = Text | Text[];
 // What a button or a field sends instead of an edit: a ruleset message (session.<message>Action(record, action, args)),
@@ -49,6 +50,8 @@ export interface FieldSpec {
   zeroIsEmpty?: boolean; // 0 shows the default too (a count of 0 shows 1, as the hand-made sheets did)
   format?: Ref; // shown: a formatter's text from the record (a class worked out from its packages)
   join?: { item: string; sep: string }; // shown: the path's rows, each as item, joined ("Fighter 3 / Thief 2")
+  className?: string; // shown: more classes on its span ("mgt2-upp")
+  locked?: "num"; // a number field that, for a viewer who may not type, is a number box (cc-num), not a field
 }
 
 export interface RollSpec {
@@ -82,7 +85,7 @@ export interface BoxSpec {
   path: Path;
   minus?: Path;
   plus?: Path;
-  text?: string;
+  text?: Nodes; // a list: one text node each ("END ", "8", " · STR ", ...)
   field?: FieldSpec;
   lines?: BoxLine[]; // small lines under the number, each its own span
   // What the shown number means, the first that holds (Dead at -10, Dying under 0...): a hint with data-status.
@@ -90,8 +93,9 @@ export interface BoxSpec {
   when?: Cond;
   hook?: Hook;
   danger?: boolean; // red at 0 or less
+  dangerWhen?: Cond; // red while this holds (Traveller's Unconscious or Dead)
   fields?: (FieldSpec & { before?: string })[]; // small fields beside it (Lost, Max)
-  warn?: { when?: Cond; atZero?: boolean; text: string; attr?: { name: string; value: string } }; // atZero: when what is shown is 0 or less; attr: a data-* it carries
+  warn?: { when?: Cond; atZero?: boolean; text: Text; attr?: { name: string; value: string } }; // atZero: when what is shown is 0 or less; attr: a data-* it carries
   steps?: StepSpec[]; // + and - (Fatigue), the owner's
   format?: "signed"; // +2
   suffix?: string; // after the number (movement's ')
@@ -121,7 +125,8 @@ export type Part = (
   // A box may be a game's own (custom: a Ref); hint: a line under the boxes.
   | { part: "derived"; className?: string; boxes: (BoxSpec | { custom: Ref; when?: Cond })[]; hint?: Text }
   | { part: "list"; label?: string; path: Path; hook?: string /* no data-* on a row without */; count?: string; className?: string; select?: FieldSpec; check?: FieldSpec; name: { path: Path; else?: string; bold?: boolean; title?: Path[]; flat?: boolean /* the name and details straight in the row, not in a span */ }; details?: { text?: string; format?: Ref; when?: Cond }[]; sep?: string; hideEmpty?: boolean /* no details line when none */; fields?: FieldSpec[] /* typed into, after the select */; small?: Text[] /* the details as text nodes, in place of details */; smalls?: ListSmall[]; rowActions?: ListAction[]; remove?: { aria: Text; title?: string; action?: ActionCall }; add?: { label: string; note: string; action: ActionCall }; modifier?: Modifier; empty?: string }
-  | { part: "coins"; path: Path; className?: string; none?: { text: string; unless: string }; aria?: Text /* default "{name} coins" */; upper?: boolean /* the coin's name in capitals */ }
+  // word: a fixed word in place of the coin's name ("credits"); before: the word goes before the field ("Cr 2500").
+  | { part: "coins"; path: Path; className?: string; none?: { text: string; unless: string }; aria?: Text /* default "{name} coins" */; upper?: boolean /* the coin's name in capitals */; word?: string; before?: boolean }
   | { part: "load"; mode: "slots"; hook: string; used: Path; total: number; text: string }
   | { part: "notes"; fields: FieldSpec[]; className?: string }
   | { part: "advancement"; mode: "growth"; title?: string; rolls: StepSpec[] }
@@ -131,7 +136,9 @@ export type Part = (
   // A row of records' rows (thief abilities, skills): each a field, its name and a roll.
   // rows: fixed rows (every skill of the game, in the data or not), each row's data at path.{key}, named by its
   // label with its note in a small hint; else name is a path in each row. head: column heads; mark: words before the name.
-  | { part: "skills"; path: Path; hook: string; className?: string; rows?: { key: string; label: string; note?: string }[]; head?: { className: string; labels: string[] }; rowClass?: Text; rowTitle?: Text; mark?: { when: Cond; text: string }; field: FieldSpec; name?: Path; roll: RollSpec }
+  // sort: the rows by this field of each (a skill's name); note: a small hint after the name (a text on the row);
+  // more: a game's own words after it (a custom part, given the row); remove: the row dropped (×); empty: shown with no rows.
+  | { part: "skills"; path: Path; hook: string; className?: string; rows?: { key: string; label: string; note?: string }[]; head?: { className: string; labels: string[] }; rowClass?: Text; rowTitle?: Text; mark?: { when: Cond; text: string }; field: FieldSpec; name?: Path; roll: RollSpec; sort?: Path; note?: Text; more?: Ref; remove?: { aria: Text; title?: string }; empty?: string }
   // Boxes to tick off (spells a day): max is a number or a list (a row of boxes for each, as a level's slots);
   // used the count ticked (a list alike); a click ticks up to that box, or back.
   // each: one track per row of a list (2E's casting classes), max and used then in the row; first: the first row's
@@ -163,6 +170,8 @@ export interface StatBlockSpec {
   rowClass?: string;
   rowTitle?: Text;
   rowNote?: { format: Ref; className: string; row: Path /* the row's data: "abilities.{key}" */ };
+  // A small inside the row's name, after it, while when holds (Traveller's "now 5" on a wounded characteristic).
+  nameSmall?: { text: Nodes; className: string; attr?: string /* data-<attr>="{key}" */; when: Cond };
   plain?: boolean;
   notes?: Path;
   inner?: StatBlockSpec;
@@ -180,11 +189,17 @@ export type StripItem =
   // A level per class (a multi-class character's), each with its own level-up (session.levelUp(record, class));
   // hook: the formatter that names a class's data-stat ("level-{key}").
   | { kind: "levels"; path: Path; exp: Path; next: Path; max: number; title: Text; buttonTitle: Text; hook: Ref }
-  | { kind: "xp"; path: Path; next: Path; label: string }
+  // word: its bold word (default XP); no next: no "/ next"; edit "gm": only the GM types it.
+  | { kind: "xp"; path: Path; next?: Path; label: string; word?: string; edit?: "gm" }
   | { kind: "value"; label: string; path: Path; hook: Hook; title?: string; format?: "signed" }
   // A sheet modifier the rolls read (DC, Mod): a number kept while the sheet is open.
-  | { kind: "modifier"; key: string; label: string; aria: string; title: string; min: number; max: number }
-  | { kind: "choice"; key: string; aria: string; options: { value: string; label: string }[] };
+  // plain: the label as plain words, not bold; input: the field's classes (default "cc-field number"); width: in em;
+  // start: its value when the sheet opens (default 0); no min or max: none.
+  | { kind: "modifier"; key: string; label: string; aria: string; title: string; min?: number; max?: number; plain?: boolean; input?: string; width?: number; start?: number }
+  // A choice the rolls read; label: in a labelled box (<b>label</b>, then the select); number: its values are numbers;
+  // start: its value when the sheet opens (default the first option's).
+  | { kind: "choice"; key: string; aria: string; options: { value: string; label: string }[]; title?: string; label?: string; number?: boolean; start?: string | number }
+  | { kind: "hint"; text: string };
 
 export interface TabSpec {
   id: string;
@@ -274,6 +289,7 @@ export type Cond =
   | { below: { path: Path; value: number } }
   | { zero: { path: Path; minus: Path; plus?: Path } } // path + plus - minus at or under 0 (hit points left)
   | { feature: FeatureId } // the game (or its variant) has the feature
+  | { less: { path: Path; than: Path } } // one number under another (a characteristic now under its score)
   | { editable: true }
   | { all: Cond[] }
   | { any: Cond[] }
