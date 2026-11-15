@@ -181,7 +181,7 @@ export function CampaignMenu({ campaign, onChanged, onError, open, onOpenChange,
                         <b>{new Date(backup.at).toLocaleString()}</b>
                         <small className="hint">
                           {" "}
-                          {REASONS[backup.reason] ?? backup.reason} · {(backup.bytes / 1024 / 1024).toFixed(1)} MB
+                          {REASONS[backup.reason] ?? backup.reason} · {backup.bytes < 1024 * 1024 ? `${Math.max(1, Math.round(backup.bytes / 1024))} KB` : `${(backup.bytes / 1024 / 1024).toFixed(1)} MB`}
                         </small>
                       </span>
                       <button type="button" className="ghost" data-action="restore" onClick={() => void restore(backup)}>

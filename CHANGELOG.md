@@ -6,6 +6,16 @@ full log of the work is in [PLAN.md](PLAN.md).
 
 ## Unreleased
 
+**The session, as good as any VTT's.**
+
+- **A dropped connection comes back by itself.** A player whose Wi-Fi drops sees "Reconnecting…" over the table and sits back down in the same seat with the same character; the GM sees them as reconnecting meanwhile and their portrait stays. The GM's own window does the same.
+- **Internet play without touching the router.** Under Internet, Kraken asks the router to open the port while you host (UPnP or NAT-PMP) and closes it when you stop.
+- **Invite links.** The Players window has a link with the table password already in it, a Copy button and a QR code. A player opens it and types only their name.
+- **Pause the game.** The pause button (or `/pause`) puts a veil over the players' screens and holds their moves and rolls; chat goes on.
+- **The Players window's controls.** Each row has Ring bell and a menu (also a right-click on a row or a portrait): View as, Mark away, Kick and Ban, with a Banned list to Unban. Players can raise a hand; `/afk` or five idle minutes dims their portrait.
+- **Pull players to my view.** A button in the map's tools (or Shift+click with the ping tool) glides every player's map to what you see. Sharing a map shows its name across the players' screens.
+- **Campaigns: a menu, backups and logs.** Each campaign card's menu renames, duplicates, exports a .zip, opens the folder, restores a backup and deletes (to the recycle bin). Kraken backs a campaign up each time you press Play and every hour while you host, keeping ten. Settings > Open logs opens Kraken's logs for a bug report.
+
 The first two stages of Kraken's core UI (docs/core-ui-design.md): one core that every game slides into, as Fantasy Grounds' CoreRPG and Foundry's core do. On screen almost nothing changes. Underneath, the games stop hand-copying each other.
 
 - **One sheet frame for every game.** The portrait and token, the name, the boxes under it and the tab rail are now one shared frame. Every game's sheet gives only its own boxes and pages, and all 16 games' sheets look exactly as before (checked pixel by pixel, for the GM and for a player).
