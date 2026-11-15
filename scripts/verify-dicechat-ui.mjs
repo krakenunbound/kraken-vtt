@@ -208,13 +208,17 @@ try {
   await seat.click('.sidebar [data-launch="notes"]');
   await seat.click(`text=Torches`).catch(() => undefined);
   const noteChip = await seat.waitForSelector('.note-window .inline-roll[data-inline-roll="1d6"]', { timeout: 10000 }).catch(() => null);
-  if (noteChip) {
-    await seat.click(".note-window .rt-body");
-    await seat.click(".note-window .note-title");
-    await settle(600);
-    const kept = (await tool("kraken_record_get", { id: note.id })).data.text;
-    assert(kept === "<p>Each torch burns [[1d6]] hours.</p>", `the note keeps its words: ${kept}`);
-  }
+  assert(noteChip, "the note's [[1d6]] shows as a roll chip");
+  await seat.click(".note-window .rt-body");
+  // While typing in the note, a click on its chip places the cursor and rolls nothing.
+  const linesBefore = await seat.locator(".chat-line").count();
+  await noteChip.click();
+  await settle(800);
+  assert((await seat.locator(".chat-line").count()) === linesBefore, "a chip clicked while typing in the note rolls nothing");
+  await seat.click(".note-window .note-title");
+  await settle(600);
+  const kept = (await tool("kraken_record_get", { id: note.id })).data.text;
+  assert(kept === "<p>Each torch burns [[1d6]] hours.</p>", `the note keeps its words: ${kept}`);
 
   // 5. The party's group roll asked of the players.
   await page.click('.sidebar [data-launch="party"]');
