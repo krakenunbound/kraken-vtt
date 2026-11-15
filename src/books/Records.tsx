@@ -393,7 +393,7 @@ export function RecordWindow({ session, id, record: given, book }: { session: Se
           {typeof data.fgCategory === "string" ? ` · ${data.fgCategory}` : ""}
         </small>
         <span className="record-tools">
-          {canEdit ? (
+          {canEdit && !Block ? (
             <button type="button" className={editing ? "records-lock on" : "records-lock"} data-action="record-lock" aria-pressed={editing} title={editing ? "Lock it (done editing)" : "Unlock it to edit (FG's lock)"} aria-label={editing ? "Lock" : "Edit"} onClick={() => setUnlocked(!editing)}>
               <Icon name={editing ? "unlock" : "pen"} size={15} />
             </button>
@@ -426,7 +426,7 @@ export function RecordWindow({ session, id, record: given, book }: { session: Se
       {table ? <TableRollBar session={session} record={record} book={book} /> : null}
       {CoreView ? (
         <CoreView session={session} record={record} editable={editing} />
-      ) : editing ? (
+      ) : editing && !Block ? (
         table ? <TableEditor session={session} record={record} /> : <RecordFields session={session} record={record} />
       ) : (
       <>
