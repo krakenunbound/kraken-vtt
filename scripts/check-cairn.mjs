@@ -65,6 +65,19 @@ assert(rules.damageFormula("d6+d6") === "2d6kh1" && rules.damageFormula("d8") ==
 }
 console.log("rules ok");
 
+// --- The sheet's edit whitelist: built from the manifest, the same as the hand-written lists it replaced ---
+{
+  const { EDIT_PATHS } = require("../electron/cairn.cjs");
+  const before = {
+    text: ["playername", "notes", "appearance", "background", "bond", "omen", "history", "contacts"].map((key) => `^${key}$`),
+    number: [/^attributes\.(str|dex|wil)\.(score|max)$/, /^hp\.(wounds|max)$/, /^age$/, /^fatigue$/, /^deprived$/, /^ac\.misc$/, /^coins\.id-\d+\.amount$/, /^inventorylist\.id-\d+\.(count|carried|uses|charges|slots)$/, /^milestones\.id-\d+\.done$/].map((regex) => regex.source),
+    string: [/^traits\.(physique|skin|hair|face|speech|clothing|virtue|vice)$/, /^inventorylist\.id-\d+\.(name|note|text)$/, /^growth\.id-\d+\.text$/, /^milestones\.id-\d+\.name$/, /^scars\.id-\d+\.text$/].map((regex) => regex.source),
+  };
+  assert(EDIT_PATHS.remove.map((regex) => regex.source).join() === /^(inventorylist|growth|milestones|scars)\.id-\d+$/.source, `the rows the sheet may drop: ${EDIT_PATHS.remove.map((regex) => regex.source).join()}`);
+  for (const kind of ["text", "number", "string"]) assert(EDIT_PATHS[kind].map((regex) => regex.source).join(" ") === before[kind].join(" "), `the ${kind} whitelist from the manifest is the old one: ${EDIT_PATHS[kind].map((regex) => regex.source).join(" ")}`);
+  console.log("whitelist ok");
+}
+
 // --- At the table ---------------------------------------------------------------
 const server = createTableServer({ ruleset: "Cairn" });
 await server.listen({ port: 0, password: "" });

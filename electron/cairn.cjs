@@ -57,10 +57,20 @@ async function saveCairn(table, record, { attribute = "", label } = {}, from) {
 // "strength", "STR", "str" -> "str".
 const statKey = (word) => ({ strength: "str", dexterity: "dex", willpower: "wil", wisdom: "wil" })[String(word ?? "").toLowerCase()] ?? String(word ?? "").toLowerCase().slice(0, 3);
 
-// What the sheet may change, then every number worked out again.
-const TEXT = new Set(["playername", "notes", "appearance", "background", "bond", "omen", "history", "contacts"]);
-const NUMBERS = [/^attributes\.(str|dex|wil)\.(score|max)$/, /^hp\.(wounds|max)$/, /^age$/, /^fatigue$/, /^deprived$/, /^ac\.misc$/, /^coins\.id-\d+\.amount$/, /^inventorylist\.id-\d+\.(count|carried|uses|charges|slots)$/, /^milestones\.id-\d+\.done$/];
-const STRINGS = [/^traits\.(physique|skin|hair|face|speech|clothing|virtue|vice)$/, /^inventorylist\.id-\d+\.(name|note|text)$/, /^growth\.id-\d+\.text$/, /^milestones\.id-\d+\.name$/, /^scars\.id-\d+\.text$/];
+// What the sheet may change (the manifest's edit globs, "*" one id-n key),
+// then every number worked out again.
+const { default: MANIFEST } = require("../shared/cairn/manifest.mjs");
+const globRegex = (glob) => new RegExp(`^${glob.replace(/\./g, "\\.").replace(/\*/g, "id-\\d+")}$`);
+const EDIT_PATHS = {
+  text: MANIFEST.edit.text.map(globRegex),
+  number: MANIFEST.edit.number.map(globRegex),
+  string: MANIFEST.edit.string.map(globRegex),
+  // A row the sheet may drop (an edit to null).
+  remove: [globRegex(`(${MANIFEST.edit.remove.join("|")}).*`)],
+};
+const TEXT = EDIT_PATHS.text;
+const NUMBERS = EDIT_PATHS.number;
+const STRINGS = EDIT_PATHS.string;
 function setPath(data, key, value) {
   const keys = key.split(".");
   let node = data;
@@ -80,14 +90,14 @@ async function editCairn(table, record, changes, seat) {
     const key = String(change?.path ?? "");
     const value = change?.value;
     if (key === "name") name = String(value ?? "").trim().slice(0, 120) || record.name;
-    else if (TEXT.has(key)) data[key] = String(value ?? "").slice(0, 8000);
+    else if (TEXT.some((pattern) => pattern.test(key))) data[key] = String(value ?? "").slice(0, 8000);
     else if (key === "critical") data.critical = ["dying", "stable"].includes(value) ? value : "";
     else if (STRINGS.some((pattern) => pattern.test(key))) setPath(data, key, String(value ?? "").slice(0, 2000));
     else if (NUMBERS.some((pattern) => pattern.test(key))) {
       const n = Math.round(Number(value));
       if (!Number.isFinite(n) || Math.abs(n) > 1e7) throw new Error(`${key} needs a number.`);
       setPath(data, key, n);
-    } else if (/^(inventorylist|growth|milestones|scars)\.id-\d+$/.test(key) && value === null) delete data[key.split(".")[0]]?.[key.split(".")[1]];
+    } else if (EDIT_PATHS.remove.some((pattern) => pattern.test(key)) && value === null) delete data[key.split(".")[0]]?.[key.split(".")[1]];
     else throw new Error(`The sheet cannot change ${key}.`);
   }
   return table.records.update(record.id, { name, data: rules.derive(data) }, table.seat, { replace: true });
@@ -310,4 +320,4 @@ async function actionCairn(table, record, action, args = {}, seat, from) {
   }
 }
 
-module.exports = { rulesCairn, libraryCairn, buildCairn, saveCairn, editCairn, actionCairn, scarCairn, isCairn, isCairnRuleset, statKey, tableRow, RULESET_NAME };
+module.exports = { rulesCairn, libraryCairn, buildCairn, saveCairn, editCairn, actionCairn, scarCairn, isCairn, isCairnRuleset, statKey, tableRow, RULESET_NAME, EDIT_PATHS };

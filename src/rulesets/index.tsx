@@ -12,13 +12,15 @@ import { SheetBf, WizardBf } from "../characters/SheetBf";
 import { SheetMgt2 } from "../characters/SheetMgt2";
 import { WizardMgt2 } from "../characters/WizardMgt2";
 import { SheetAstra, WizardAstra } from "../characters/SheetAstra";
-import { SheetCairn, WizardCairn } from "../characters/SheetCairn";
+import { WizardCairn } from "../characters/WizardCairn";
 import { SheetFate, WizardFate } from "../characters/SheetFate";
 import { SheetIronsworn, WizardIronsworn } from "../characters/SheetIronsworn";
 import { SheetForged, WizardForged } from "../characters/SheetForged";
 import { ScorePanel } from "../combat/ScorePanel";
 import { FateStrip } from "../ui/FateStrip";
 import { Wizard2eSetting, Wizard35Setting } from "./WizardSettings";
+import { SheetRenderer } from "../core/sheet/SheetRenderer";
+import { CUSTOM_PARTS, FORMATS } from "./parts";
 
 // The React side of the manifests: every Ref a manifest names ("cairn.sheet")
 // and the component that is it (FG's windowclass by name; Foundry's
@@ -36,7 +38,6 @@ export const SHEETS: Record<string, ComponentType<SheetProps>> = {
   "bfrpg.sheet": SheetBf,
   "mgt2.sheet": SheetMgt2,
   "astra.sheet": SheetAstra,
-  "cairn.sheet": SheetCairn,
   "fate.sheet": SheetFate,
   "ironsworn.sheet": SheetIronsworn,
   "forged.sheet": SheetForged,
@@ -64,9 +65,18 @@ export const PANELS: Record<string, ComponentType<SessionProps>> = {
 
 const refOf = (spec: RulesetManifest["sheet"] | RulesetManifest["wizard"]) => (typeof spec === "string" ? spec : "");
 
+// A sheet the manifest lays out (its sheet is a SheetSpec, not a Ref): the core's parts in the core's frame.
+function ManifestSheet({ record, session }: SheetProps) {
+  const manifest = rulesetOfRecord(record.data.ruleset);
+  if (typeof manifest.sheet === "string") return null;
+  return <SheetRenderer spec={manifest.sheet} record={record} session={session} ruleset={manifest.id} custom={CUSTOM_PARTS} formats={FORMATS} />;
+}
+
 // The sheet for a character: its own game's (data.ruleset), C&C's when it has none.
 export function sheetFor(record: TableRecord): ComponentType<SheetProps> {
-  return SHEETS[refOf(rulesetOfRecord(record.data.ruleset).sheet)] ?? CCSheet;
+  const spec = rulesetOfRecord(record.data.ruleset).sheet;
+  if (typeof spec !== "string") return ManifestSheet;
+  return SHEETS[spec] ?? CCSheet;
 }
 // The character wizard of the campaign's game.
 export function wizardFor(ruleset: string): ComponentType<WizardProps> {

@@ -54,6 +54,8 @@
     "mgt2": "node scripts/check-mgt2.mjs",
     "cairn": "node scripts/check-cairn.mjs",
     "cairn-ui": "node scripts/verify-cairn-ui.mjs",
+    "core-parts-ui": "node scripts/verify-core-parts-ui.mjs",
+    "sheet-shots": "node scripts/shot-sheets.mjs",
     "fate": "node scripts/check-fate.mjs",
     "fate-ui": "node scripts/verify-fate-ui.mjs",
     "ironsworn": "node scripts/check-ironsworn.mjs",
