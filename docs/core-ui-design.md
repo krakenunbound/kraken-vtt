@@ -1022,7 +1022,76 @@ The user's words were: "why is there a new character icon built into character s
 - **Not built:** FG's right-click "clear owner" and "take ownership" on a card. `kraken_characters` give and release do the same for an agent.
 - **Tests:** they now open a sheet the way a person does, through the sidebar's Characters and then a card. `openSheet` in `scripts/e2e/rulesets.mjs` does this, and `check-wizard`, `check-character`, `verify-sidebar-ui`, `verify-adnd2e-ui`, `verify-mgt2-ui`, `verify-forged-ui` and `verify-order-ui` were updated to match. `scripts/shot-sheets.mjs flow` shoots the way to a sheet, full screen, for the GM and the player.
 
-### 7.7 Next stage
-- **Step 3:** the wizard frame and Cairn's wizard on it, with the step kinds `roll-table`, `roll-stats`, `shop` and `text`.
-- **Step 4:** the combat tracker and party sheet from the manifests. CombatTracker's remaining 19 checks become manifest `columns`, `rowActions`, `initiative` and `headerActions`, for every game at once.
-- **Then step 5 (Basic Fantasy):** it brings `rollBar`, the saves stat block, spellbooks, thief skills, turn undead and `load(weight)`. It is also the first game with a `track`.
+### 7.7 The second stage (steps 3, 4 and 5)
+On the branch `worktree-agent-aa6465359d848e4f6`, one commit per step, then the docs. Nothing was released or pushed. Each step ships the same screens: the proof for each is below, and the test record is in 7.11.
+
+### 7.8 Step 3: the wizard frame, and Cairn's wizard on it
+- **`src/core/wizard/`:**
+  - `WizardFrame.tsx`: the frame every wizard shares (FG's charwizard window): the title, Cancel, Finish (`data-action="wizard-finish"`, greyed until every step is done), the steps and the last problem. `data-wizard` is the game's hook.
+  - `WizardRenderer.tsx`: a `WizardSpec` in the frame. It holds one spec that every part writes into, rolls on the host's dice (`useHostRolls`, labelled with the manifest's `chat` word), finds roll tables among the records (`tables: { type, key }`) and, on Finish, sends the spec through the game's `build` Ref to `build-character`. So `kraken_build_character` takes the same spec as before.
+  - `Steps.tsx`: a numbered step (`<h4>1. Background</h4>`, with words a condition adds, as Cairn's ", Omen") and its parts:
+    - `choose-record`: a select of a record type, or a roll on a table that names one (the game's `pick` Ref); choosing clears the paths in `resets`
+    - `text`: a choice from a list on the chosen record, or typed
+    - `record-tables`: each of the chosen record's tables on a button of its own
+    - `roll`: one roll, a number or a roll table's row
+    - `roll-table`: one roll per row, each on its own table, on one button (Cairn's eight traits)
+    - `roll-stats`: scores in order, with one swap
+    - `check`, `hint` (a template, a chosen record's fields, or one line from a row each), `row`
+    - `shop`: money rolled (plus what a choice brings, the game's `bonus` Ref), the records of a type with a price, search, Buy and Return
+  - A roll button is greyed while a roll is out and once its result is in. Finish needs every part that rolls or chooses (an `optional` roll, or a part its condition hides, aside) and no overspent shop.
+- **Cairn.** Its wizard is now `shared/cairn/manifest.mjs`'s `wizard`: four steps of these parts. Three small rules stay Cairn's own in `src/rulesets/cairn.tsx`: which background a d20 roll names (`cairn.backgroundOfRoll`), the gold a background's table results bring (`cairn.backgroundGold`) and the spec `build-character` takes (`cairn.build`). `WizardCairn.tsx` is gone.
+- **`check-manifests`** also checks a manifest wizard: its hook and build Ref, every Ref it names, each data-action once, each spec path written by one part.
+- **Proof:**
+  - `scripts/verify-core-wizard-ui.mjs` presses every control of the wizard once, with every die fixed first (`kraken_dice_force`): Cancel, a background by hand (its names and gear, a table rolled), another background (which clears the tables and the name), the d20 background, a name from the list and one typed, the attributes and a swap (and no swap of a score with itself), HP, the traits, a Bond, the age, the youngest's Omen (the heading grows), the gold, the Marketplace's search, Buy twice, Return, and Finish greyed until the end. It passes the same 33 checks on the hand-written wizard (the stage-1 build) and on the manifest wizard, and the two characters it makes are the same record.
+  - `scripts/shot-sheets.mjs wizard` runs the e2e plan's own wizard for the GM (Kraken full screen) and the player (Chrome, 2560x1440), from a copy of the same made profile (so the dice fall the same), and after every action shoots the wizard, the whole screen and the wizard's controls (tag, attributes, text, disabled, value). With the 3D dice off (`/dice3d off`), all 78 shots of the wizard alone and all 40 control signatures are identical to the hand-written wizard's. The player's whole screens differ by 161 pixels each, the chat and the clock.
+- **Where it differs from the design (4.2, 4.3):** the step kinds are the ones Cairn needed, with the fields it uses (`WizardPart` in `types.d.ts`). The page rail with FG's per-page instructions, `assign-points` and `pick-list` come with the first wizard that has them (the d20 wizards, decision 6).
+
+### 7.9 Step 4: the combat tracker from the manifests
+- **`tracker` in each manifest** now holds everything the tracker used to ask the game's name for:
+  - `rowActions`: a row's buttons, each with a declarative condition (`status`, `faction`, `activeTurn`, `gmOrMine`, `viewerHasCharacter`, `has`, `atLeast`...) and a call: a tracker message with the row's entry (and the row's record, or the viewer's own character), or the game's message on the row's record. 5E's death save, Descending Darkness' Steady, 2E's Bind wounds and Turn undead, Basic Fantasy's Turn undead and Morale, Cairn's Stabilize and Morale.
+  - `headerActions` (Cairn's Morale for every foe) and `headerParts` (Fate's conflict select, `fate.conflict`, a component in `src/rulesets/fate.tsx`)
+  - `initiative`: the roll-all button's words and title, and a player's own initiative button (Cairn's DEX, Fate's Order)
+  - `attacks`: Cairn's always-hit attacks (the damage die, impaired d4, enhanced d12)
+  - `control`: an Ironsworn character's initiative words (Starforged's "In control", "Bad spot")
+  - The "All attacks" button is `has(multiAttack)`.
+- **Words** are templates on the row's entry, a choice by a condition, or a list (one text node each, as JSX writes them: "Morale ", "8").
+- **`src/core/tracker/actions.tsx`** evaluates the conditions and renders the buttons; **`src/core/sender.ts`** is the one way a sheet or the tracker sends a game's message (`session.<message>Action`), replacing the sheet renderer's switch.
+- **`CombatTracker.tsx` has no ruleset checks left** (18 by the 3.1 grep before). It still imports Ironsworn's `ProgressBoxes` and rank names for a foe's progress track, which shows by the entry's data (`entry.iron`); that moves with Ironsworn (step 10).
+- **The party sheet** needed nothing: step 1 had already taken its 12 checks to 0, and it imports no game's sheet.
+- **`check-manifests`** also checks the tracker's header Refs, each button's hook once per place, and that a button's message is the game's own.
+- **Proof:** `scripts/shot-sheets.mjs tracker` puts, for every game, the made character and an enemy in a started fight (a Cleric too, for 2E and Basic Fantasy), shoots the tracker for the GM and the player, makes the character dying (Cairn: Critical Damage) and gives the cleric the turn, shoots again, then presses every game button the GM's tracker shows once and writes down what each posted in chat (dice numbers left out), and the player's own initiative button's words.
+  - Run for all 16 games on the stage-1 build and on a build of the step-4 commit alone (from an export of it): every game's control signatures (GM and player, each state) and every press record are identical: the same buttons with the same words, titles and hooks, posting the same chat lines.
+  - 146 of the 154 tracker shots are pixel-identical. Six player shots differ by 3 pixels (the turn arrow's edge), and the D&D 5E (SRD) GM's two by about 2,000 pixels, all in the character's portrait (its image decoding; the crop shows the same tracker).
+  - The Cairn and Basic Fantasy sheets were shot again on the step-5 build: every Cairn sheet-only shot is still pixel-identical.
+
+### 7.10 Step 5: Basic Fantasy on the core parts
+- **Its sheet** is `shared/bfrpg/manifest.mjs`'s `sheet`: six tabs of core parts. Two parts stay its own (`src/rulesets/bfrpg.tsx`): the strip over every tab (level and level-up, experience, attack bonus, the next roll's modifier) and Turn undead on the combat tab. `SheetBf.tsx` is gone; its wizard moved unchanged to `WizardBf.tsx`.
+- **What the core parts gained** (each reusable by the d20 family, whose sheets share these styles):
+  - `track` (the first): rows of boxes to tick, one per count in a list (spells a day by level); a click ticks up to that box, or back to it
+  - `skills`: a record's rows each with a field, its name and a roll (thief abilities)
+  - `button`: one action (Roll loyalty)
+  - `statBlock`: its section's classes, an `h4` heading in place of the column heads (or none), a row's classes and title, names without a title, notes under it (the saving throws block, `d2e-saves`)
+  - `derived` boxes: a signed number (+1), a suffix (60'), a note under it, a warning at 0 with a data-* (`data-status="Dead"`)
+  - `list`: fields after the select (a count), no details line when there are none; a row's details now read the row alone (as an FG list item's fields), so an item without `ac` never shows the character's
+  - `coins`: the field's label and the coin's name in capitals
+  - `heading`: a hint after it; `hint`: a text by a value
+  - fields: `show` (a template shown in place of the value: "Fighter 3"), `lines` (a list typed one item a line), `edit: "gm"`
+  - templates: `{path|signed}`, `{path|0}` (a value or a default), `{?path}` (a presence test inside `[...]`)
+  - a roll's `bonus` (a sheet modifier added to it), `keyAs: "skill"` and `fight` (a save in a fight goes through the tracker, as before)
+  - a sheet's `top` parts (over every tab) and `art` (the race picks the portrait art)
+- **The host's whitelist** (`electron/bfrpg.cjs`) is built from the manifest's `edit` through `shared/rulesets/edit.mjs`, which both hosts' readers and `check-manifests` now share. A glob may say `#` (a digit), `%` (a word) and `(a|b)`, and `edit.list` names the lists typed one item a line. `check-bfrpg` asserts the regexes are exactly the hand-written ones.
+- **Proof:** `scripts/verify-bfrpg-sheet-ui.mjs` builds a 3rd-level Cleric (in a fight, on its turn), a 2nd-level Elf Magic-User and a 4th-level Halfling Thief, shoots every tab of each sheet for the GM (full screen) and the player (Chrome, 2560x1440) with each sheet's control signature, then presses every control once (25: the score, ability and save rolls, the modifier, AC misc, damage, save misc, alignment, Turn undead, a spell slot and back, prepared spells and the spellbook, carried, count, a coin, drop, the player and appearance fields, Roll loyalty, a thief ability's misc and roll, and the GM's experience, level-up and loyalty) and records what each did.
+  - On both builds every control does the same to the record (and posts the same chat line, dice aside), and all 36 control signatures are identical.
+  - 10 of the 36 sheet shots are pixel-identical. The other 26 differ by 26 to 311 pixels, all sub-pixel glyph placement where a line that was several text nodes is now one ("Magic-User 2", the load line, the attack hint). The crops look identical.
+
+### 7.11 Tests run for this stage
+- **Types, build and coverage:** `npx tsc --noEmit -p .`, `npm run build` and `npm run coverage` (with `check-manifests`) pass after each step; the step-4 commit was also built and checked alone, from an export of it.
+- **Host checks** (all pass on the final build): `check-cairn` (56), `check-bfrpg` (with the whitelist test), `check-adnd2e`, `check-dnd5e`, `check-dnd35`, `check-fate`, `check-ironsworn`, `check-forged`, `check-mgt2`, `check-astra`, `check-combat`, `check-party`, `check-character`, `check-wizard`, `check-setup`, `check-agent`.
+- **UI tests** on the final build: `verify-core-wizard-ui` (33, also on the stage-1 build), `verify-bfrpg-sheet-ui` (25 controls, also on the stage-1 build), `verify-bfrpg-ui`, `verify-core-parts-ui` (34), `verify-cairn-ui`: all pass.
+- **Ruleset checks** (the 3.1 grep): src 24 -> 5 (CombatTracker 18 -> 0; what is left: SheetFate, SheetForged, ScorePanel, IronswornWindows, useSession, one each, for their own steps). electron 124, unchanged (step 12).
+- **End to end:** see below.
+- **Shots** (scratchpad of the run, not in the repo): the wizard's before/after, the tracker's for 16 games, and the Basic Fantasy sheet's three characters.
+
+### 7.12 Next stage
+- **Step 6, the d20 family:** 5E (with Descending Darkness as a variant), 3.5E and 2E onto the core parts; their sheets share the `d2e-saves`, `d35-perday` and `five-*` styles that Basic Fantasy's parts now produce. Their wizards move onto the wizard frame page by page, bringing the page rail, `assign-points` and `pick-list`.
+- Then 2d6 (Traveller, Apeira Astra), C&C, Fate, Ironsworn (with the tracker's foe column), Forged, as in section 5.

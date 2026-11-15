@@ -6,7 +6,7 @@ full log of the work is in [PLAN.md](PLAN.md).
 
 ## Unreleased
 
-The first stage of Kraken's core UI (docs/core-ui-design.md): one core that every game slides into, as Fantasy Grounds' CoreRPG and Foundry's core do. On screen almost nothing changes. Underneath, the games stop hand-copying each other.
+The first two stages of Kraken's core UI (docs/core-ui-design.md): one core that every game slides into, as Fantasy Grounds' CoreRPG and Foundry's core do. On screen almost nothing changes. Underneath, the games stop hand-copying each other.
 
 - **One sheet frame for every game.** The portrait and token, the name, the boxes under it and the tab rail are now one shared frame. Every game's sheet gives only its own boxes and pages, and all 16 games' sheets look exactly as before (checked pixel by pixel, for the GM and for a player).
 - **Every game has a manifest:** a file that says what the game is.
@@ -17,6 +17,9 @@ The first stage of Kraken's core UI (docs/core-ui-design.md): one core that ever
   - New character (the wizard), Create (a blank one), Import, and in edit mode (the pencil) each card's Export and the GM's Delete all live there now.
   - A character's window shows only the character: no more new-character, import and export buttons above the sheet.
 - **Cairn's character sheet is built from the core's parts,** laid out by its manifest: stat block, Hit Protection and Armor boxes, item lists, slots, coins and notes. It looks and works as before, every button included.
+- **One wizard frame.** Cairn's character wizard is now its manifest's four steps on the core's wizard frame (Cancel, Finish, numbered steps, host-rolled dice, a Marketplace). Same screens, same dice, same character.
+- **The combat tracker asks the manifest, not the game's name.** Every game's tracker buttons (5E's death save, Descending Darkness' Steady, 2E's Bind wounds, Turn undead, morale, Cairn's Stabilize and always-hit attacks, Fate's conflict, Starforged's "In control") come from its manifest.
+- **Basic Fantasy's character sheet is built from the core's parts** too, including a new track of boxes for spells a day. It looks and works as before.
 
 ## 0.1.0-alpha.90: Pictures for every game, and a pass for looks
 
