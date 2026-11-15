@@ -6,7 +6,8 @@ import { ReadAloudBubble, useMapShown } from "../books/ReadAloudBubble";
 import { MARKER_SETS, markerShapes } from "../../shared/map/deathMarkers.mjs";
 import { backgroundRect, colorWithAlpha, gridStops, sceneFrame, type BackgroundFit, type SceneFrame } from "../foundry/geometry";
 import { type SceneLight, type SceneMarker, type SceneRegion, type SceneWall } from "../foundry/sceneObjects";
-import { diagonalRule, gridDistance, gridKind, pathDistance, gridOrigin, hexCorners, hexOf, LIGHT_PRESETS, snapCenter, withGrid } from "../../shared/map/geometry.mjs";
+import { rangeBand } from "../../shared/map/ranges.mjs";
+import { diagonalRule, gridDistance, gridDistance3, gridKind, pathDistance, gridOrigin, hexCorners, hexOf, LIGHT_PRESETS, snapCenter, withGrid } from "../../shared/map/geometry.mjs";
 import type { DecalItem, EditWall, MapDoor, MapTemplate, MapTile, MapToken, Ping, Float, Bubble, PictureKind, SceneLightRecord, TableMap, TableRecord, TemplateAsk, WallKind } from "../session/useSession";
 import { useBookWindows } from "../books/Books";
 import { MapEditor, kindColor, placePicture, type EditTab, type EditTool, type LabelStyle, type PaintStyle } from "./MapEditor";
@@ -318,6 +319,7 @@ function MapViewInner({
   actions,
   targeted = [],
   targeters = {},
+  targetLinks = [],
   templateAsk = null,
   onTemplateDone = () => undefined,
   fxMode = "full",
@@ -352,6 +354,8 @@ function MapViewInner({
   targeted?: string[];
   // For each targeted token, the colours of those aiming at it (the GM sees everyone's).
   targeters?: Record<string, string[]>;
+  // Each creature's line to each of its targets, in its token's colour: the range between them.
+  targetLinks?: { from: string; to: string; color: string; ranges?: { normal: number; long: number } | null }[];
   // An area spell waiting for its template on this screen (the host asked), and its end.
   templateAsk?: TemplateAsk | null;
   onTemplateDone?: () => void;
@@ -2294,6 +2298,50 @@ function MapViewInner({
           : null}
         {/* A ping: a bright dot in the person's colour, three rings going out from it and a
             beam of light, never smaller on screen than about 180 px however far out the map is. */}
+        {/* Range lines: from each creature to each of its targets, an arrow in the attacker's colour and
+            the distance between them by the table's measuring rule (height counts, big creatures from their edges). */}
+        {targetLinks.length ? (
+          <svg className="overlay target-lines" width={frame.worldWidth} height={frame.worldHeight} viewBox={`0 0 ${frame.worldWidth} ${frame.worldHeight}`} aria-label="Range to targets">
+            {targetLinks.map((link) => {
+              const from = tokens.find((item) => item.id === link.from);
+              const to = tokens.find((item) => item.id === link.to);
+              if (!from || !to) return null;
+              const length = Math.hypot(to.x - from.x, to.y - from.y);
+              if (length < 1) return null;
+              const ux = (to.x - from.x) / length;
+              const uy = (to.y - from.y) / length;
+              const startGap = (from.squares * size) / 2;
+              const endGap = (to.squares * size) / 2 + Math.max(2, 3 / camera.scale);
+              if (length <= startGap + endGap) return null;
+              const x1 = from.x + ux * startGap;
+              const y1 = from.y + uy * startGap;
+              const x2 = to.x - ux * endGap;
+              const y2 = to.y - uy * endGap;
+              const line = Math.max(2.5, 3.5 / camera.scale);
+              const head = Math.max(12, 16 / camera.scale);
+              const per = Number(scene.grid.distance) > 0 ? Number(scene.grid.distance) : 5;
+              // Edge to edge for creatures bigger than a square (5E's reach and range).
+              const centres = gridDistance3(scene, from, to, diagonalRule(diagonal), (to.elevation ?? 0) - (from.elevation ?? 0));
+              const feet = Math.max(per, Math.round((centres - ((from.squares - 1) / 2 + (to.squares - 1) / 2) * per) * 10) / 10);
+              const midX = (x1 + x2) / 2;
+              const midY = (y1 + y2) / 2;
+              const font = Math.max(13, 15 / camera.scale);
+              // Within its weapons' normal range, at long range, or beyond them all (when its record says).
+              const band = rangeBand(link.ranges ?? null, feet);
+              return (
+                <g key={`${link.from}-${link.to}`} className={`target-line${band === "out" ? " out-of-range" : band === "long" ? " long-range" : ""}`} data-range={band} data-target-line={`${link.from}>${link.to}`} data-distance={feet} style={{ color: link.color }}>
+                  <line x1={x1} y1={y1} x2={x2 - ux * head * 0.8} y2={y2 - uy * head * 0.8} stroke="rgba(0,0,0,0.55)" strokeWidth={line + 3 / camera.scale} strokeLinecap="round" />
+                  <line x1={x1} y1={y1} x2={x2 - ux * head * 0.8} y2={y2 - uy * head * 0.8} stroke="currentColor" strokeWidth={line} strokeLinecap="round" strokeDasharray={`${line * 4} ${line * 2.5}`} />
+                  <polygon points={`${x2},${y2} ${x2 - ux * head - uy * head * 0.55},${y2 - uy * head + ux * head * 0.55} ${x2 - ux * head + uy * head * 0.55},${y2 - uy * head - ux * head * 0.55}`} fill="currentColor" stroke="rgba(0,0,0,0.6)" strokeWidth={Math.max(1, 1.5 / camera.scale)} />
+                  <text x={midX} y={midY} dy={-font * 0.6} textAnchor="middle" className="target-line-label" style={{ fontSize: font }}>
+                    {feet} {units}
+                    {band === "out" ? ` · out of range (${link.ranges?.long})` : band === "long" ? ` · long range` : ""}
+                  </text>
+                </g>
+              );
+            })}
+          </svg>
+        ) : null}
         {bubbles.map((item) => {
           const token = tokens.find((candidate) => candidate.recordId === item.recordId);
           if (!token) return null;

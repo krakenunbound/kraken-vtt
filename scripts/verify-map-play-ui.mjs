@@ -162,6 +162,24 @@ try {
   assert((await seat.locator(`.token-float[data-float="${orcToken.id}"]`).count()) === 0, "the player, shown a bar, gets no number");
   report.push("chat bubble over the speaking orc; its damage floats on the GM's screen, not the player's");
 
+  // 2c. Range line: the hero targets the orc four squares away. An arrow in the player's colour with
+  // "20 ft"; a short bow (range 10/15) puts the orc out of range, a longer one (30/60) within it.
+  await tool("kraken_combat", { action: "add", recordId: hero.id });
+  const heroEntry = (await tool("kraken_combat")).entries.find((entry) => entry.recordId === hero.id);
+  await tool("kraken_record_update", { id: hero.id, data: { inventorylist: { "id-bow": { name: "Short test bow", properties: "Ammunition (Range 10/15; Arrow)", carried: 2 } } } });
+  await tool("kraken_combat", { action: "target", id: heroEntry.id, targetId: orcEntry.id, on: true });
+  const rangeLine = `${seatMap} .target-line[data-target-line="${heroToken.id}>${orcToken.id}"]`;
+  await seat.waitForSelector(rangeLine, { timeout: 8000 });
+  assert((await seat.getAttribute(rangeLine, "data-distance")) === "20", `the line says 20 ft: ${await seat.getAttribute(rangeLine, "data-distance")}`);
+  await until(async () => (await seat.getAttribute(rangeLine, "data-range")) === "out", "a 10/15 bow: the orc is out of range");
+  assert(/out of range/.test(await seat.textContent(rangeLine)), "the label says out of range");
+  await seat.screenshot({ path: path.join(SHOTS, "kraken-range-line-player.png") });
+  await tool("kraken_record_update", { id: hero.id, data: { inventorylist: { "id-bow": { properties: "Ammunition (Range 30/60; Arrow)" } } } });
+  await until(async () => (await seat.getAttribute(rangeLine, "data-range")) === "near", "a 30/60 bow: within range");
+  await tool("kraken_combat", { action: "target", id: heroEntry.id, targetId: orcEntry.id, on: false });
+  await tool("kraken_combat", { action: "remove", id: heroEntry.id });
+  report.push("range line: the hero's arrow to the orc says 20 ft, out of range for a 10/15 bow, within for 30/60");
+
   // 3. Fog of war on the host: walls, line of sight; the player's explored areas come from the host.
   await tool("kraken_wall", { action: "add", points: [700, 200, 700, 1200], kind: "wall" }).catch(() => undefined);
   await tool("kraken_line_of_sight", { on: true });

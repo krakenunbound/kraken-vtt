@@ -654,6 +654,12 @@ select {
   pointer-events: none;
 }
 
+/* Range lines from a creature to its targets: the distance in white on a dark edge; never in the way of a click. */
+.target-lines { pointer-events: none; }
+.target-line-label { fill: #fff; font-weight: 800; paint-order: stroke; stroke: rgba(0, 0, 0, 0.85); stroke-width: 0.25em; stroke-linejoin: round; }
+.target-line.out-of-range .target-line-label { fill: #ff8a7a; }
+.target-line.long-range .target-line-label { fill: #ffd27a; }
+
 /* Speech over a token: a parchment bubble with a tail, above the token, fading in and out. */
 .token-bubble { position: absolute; z-index: 39; transform: translate(-50%, calc(-100% - 12px)); max-width: 22em; width: max-content; padding: 0.4em 0.7em; border: 1px solid rgba(90, 60, 25, 0.6); border-radius: 0.8em; background: #f4ead2; color: #2a1d0e; line-height: 1.3; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.45); pointer-events: none; animation: token-bubble-in 0.25s ease-out; }
 .token-bubble::after { content: ""; position: absolute; left: 50%; bottom: -8px; translate: -50% 0; border: 8px solid transparent; border-bottom: 0; border-top-color: #f4ead2; }

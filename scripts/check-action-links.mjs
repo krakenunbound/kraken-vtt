@@ -58,6 +58,15 @@ const inCreatures = links(allText(creatures), five).length;
 eq("SRD spells name saves with DCs", inSpells > 0 || true, true);
 eq("SRD creatures name saves and checks with DCs (over 200)", inCreatures > 200, true);
 
+// Weapon and spell ranges for the range line (shared/map/ranges.mjs), however the record writes them.
+const { rangesOf, rangeBand } = await import("../shared/map/ranges.mjs");
+eq("2024 longbow", rangesOf({ inventorylist: { a: { properties: "Ammunition (Range 150/600; Arrow)" } } }), { normal: 150, long: 600 });
+eq("FG range", rangesOf({ inventorylist: { a: { properties: "ammunition (range 80/320)" } } }), { normal: 80, long: 320 });
+eq("a creature's action", rangesOf({ actions: { a: { desc: "Ranged Weapon Attack: +4 to hit, range 80/320 ft., one target." } } }), { normal: 80, long: 320 });
+eq("a spell's range", rangesOf({ spells: [{ name: "Fire Bolt", range: "120 feet" }] }), { normal: 120, long: 120 });
+eq("melee only", rangesOf({ inventorylist: { a: { name: "Longsword", properties: "Versatile (1d10)" } } }), null);
+eq("bands", [rangeBand({ normal: 150, long: 600 }, 150), rangeBand({ normal: 150, long: 600 }, 155), rangeBand({ normal: 150, long: 600 }, 605), rangeBand(null, 900)], ["near", "long", "out", "near"]);
+
 console.log(`SRD 5.2.1: ${inSpells} action links in the spells, ${inCreatures} in the creatures.`);
 if (failures.length) {
   for (const failure of failures) console.error(`FAIL ${failure}`);
