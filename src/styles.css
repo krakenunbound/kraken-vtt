@@ -521,6 +521,40 @@ select {
 .token-lifted { opacity: 0.45; }
 .token-hidden .token-disc { opacity: 0.5; outline: 2px dashed #a612d4; outline-offset: 2px; }
 
+/* FG's token options (TokenBadges.tsx): a health bar along the bottom, a badge on hover only, names always, elevation. */
+.health-bar {
+  position: absolute;
+  left: 14%;
+  right: 14%;
+  bottom: 2%;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.75);
+  border: 1px solid #000;
+  overflow: clip;
+  pointer-events: auto;
+}
+.health-bar > b { display: block; block-size: 100%; transition: inline-size 0.3s; }
+.token .hover-only { opacity: 0; transition: opacity 0.12s; }
+.token:hover .hover-only, .token-selected .hover-only { opacity: 1; }
+.token-name.always { opacity: 1; }
+/* Felt by tremorsense, not seen: a shape over the dark, no picture. */
+.token-sensed { z-index: 6; }
+.token-sensed .token-disc { filter: grayscale(1) brightness(0.35); outline: 2px dashed #9fb8d8; outline-offset: 2px; opacity: 0.75; }
+.overlay.darkness-areas { z-index: 2; pointer-events: none; }
+.token-menu-note { margin: 0.2em 0; font-size: 0.85em; color: #bcd; }
+.token-elevation {
+  position: absolute;
+  top: 2%;
+  right: 2%;
+  padding: 0 0.3em;
+  border-radius: 3px;
+  background: rgba(10, 30, 60, 0.85);
+  color: #bfe3ff;
+  font-weight: 700;
+  line-height: 1.3;
+  pointer-events: none;
+}
+
 .token-selected .token-disc {
   box-shadow: 0 0 0 3px #ffd36b, 0 0 14px rgba(255, 211, 107, 0.8);
 }
@@ -564,6 +598,11 @@ select {
 }
 
 .overlay.measure { z-index: 4; }
+/* The ruler (Ruler.tsx): over the fog, so a ruler into the dark still shows; each leg's length small, the whole larger. */
+.overlay.measure.ruler { z-index: 6; }
+.measure-label.ruler-leg { color: #fff; border: 1px solid; opacity: 0.9; }
+.measure-label.ruler-total { border: 2px solid; }
+.measure-label.ruler-total small { display: block; font-size: 0.7em; font-weight: 600; color: #ddd; text-align: center; }
 .overlay.doors { z-index: 2; }
 .overlay.sight { z-index: 5; }
 .overlay.sight rect { pointer-events: none; }

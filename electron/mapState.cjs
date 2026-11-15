@@ -59,6 +59,12 @@ function cleanToken(raw) {
     vision: raw.vision == null ? null : Math.min(1000, Math.max(0, num(raw.vision, 0))),
     // Which way it faces, degrees clockwise from up (FG's token orientation); null: not turned.
     facing: cleanFacing(raw.facing),
+    // What players call it until it is known (FG's unidentified name); "": its name.
+    unidentified: text(raw.unidentified, "").slice(0, 48),
+    // How high it is, in the scene's units (FG's and Foundry's elevation): flying, on a ledge, under water.
+    elevation: Math.round(Math.min(100000, Math.max(-100000, num(raw.elevation, 0))) * 10) / 10,
+    // Its own senses line, over its character's ("Darkvision 60 ft, Blindsight 10 ft"); "": the record's.
+    senses: text(raw.senses, "").slice(0, 200),
   };
 }
 function cleanFacing(value) {
@@ -96,6 +102,9 @@ function cleanLight(raw) {
     rotation: ((Math.round(num(raw.rotation, 0)) % 360) + 360) % 360,
     animation: ["none", "flicker", "pulse", "flash", "torch"].includes(raw.animation) ? raw.animation : "none",
     speed: Math.min(1, Math.max(0, num(raw.speed, 0.5))),
+    // Magical darkness (the Darkness spell, Foundry's negative light): its dim
+    // radius is dark whatever else lights it; darkvision does not see in it.
+    darkness: Boolean(raw.darkness),
   };
 }
 
@@ -230,6 +239,8 @@ function cleanSettings(raw) {
       intensity: Math.min(1, Math.max(0, num(weather.intensity, 0.5))),
       direction: ((num(weather.direction, 250) % 360) + 360) % 360,
     },
+    // This scene's diagonal rule ("1", "1.5", "raw"); null: the campaign's.
+    diagonal: ["1", "1.5", "raw"].includes(String(value.diagonal)) ? String(value.diagonal) : null,
   };
 }
 
@@ -362,7 +373,19 @@ function savedMap(value) {
   // next open is exact) and the picture it painted (a file kept beside the
   // campaign: its name and version), by scene id.
   const studio = value && typeof value === "object" && value.studio && typeof value.studio === "object" ? Object.fromEntries(Object.entries(value.studio).slice(0, 500).filter(([, item]) => item && typeof item === "object")) : {};
-  if (!value || typeof value !== "object") return { tokens, doors, sight, locked, settings, lights, drawings, deathMarkers, walls, masks, labels, groups, fx, tiles, frames, entered, studio };
+  // What each player has seen of each scene (fog of war, FG's and Foundry's
+  // explored areas): kept by the host, saved with the campaign, sent to that player alone.
+  const explored = {};
+  if (!value || typeof value !== "object") return { tokens, doors, sight, locked, settings, lights, drawings, deathMarkers, walls, masks, labels, groups, fx, tiles, frames, entered, studio, explored };
+  for (const [sceneId, row] of Object.entries(value.explored ?? {}).slice(0, 500)) {
+    if (!row || typeof row !== "object") continue;
+    explored[sceneId.slice(0, 80)] = Object.fromEntries(
+      Object.entries(row)
+        .slice(0, 40)
+        .filter(([, list]) => Array.isArray(list))
+        .map(([name, list]) => [name.slice(0, 24), list.filter((polygon) => Array.isArray(polygon) && polygon.length >= 6 && polygon.length <= 8000).map((polygon) => polygon.map((value) => Math.round(Number(value) || 0))).slice(-EXPLORED_KEPT)]),
+    );
+  }
   for (const [sceneId, list] of Object.entries(value.deathMarkers ?? {}).slice(0, 500)) {
     if (Array.isArray(list)) deathMarkers[sceneId.slice(0, 80)] = list.map(cleanDeathMarker).filter(Boolean).slice(-MAX_DEATH_MARKERS);
   }
@@ -396,8 +419,10 @@ function savedMap(value) {
   for (const [sceneId, list] of Object.entries(value.drawings ?? {}).slice(0, 500)) {
     if (Array.isArray(list)) drawings[sceneId.slice(0, 80)] = list.map(cleanDrawing).filter(Boolean).slice(-MAX_DRAWINGS);
   }
-  return { tokens, doors, sight, locked, settings, lights, drawings, deathMarkers, walls, masks, labels, groups, fx, tiles, frames, entered, studio };
+  return { tokens, doors, sight, locked, settings, lights, drawings, deathMarkers, walls, masks, labels, groups, fx, tiles, frames, entered, studio, explored };
 }
+// Explored areas kept per player and scene (geometry.mjs EXPLORED_CAP).
+const EXPLORED_KEPT = 400;
 const MAX_DRAWINGS = 400;
 const MAX_PLAYER_DRAWINGS = 60;
 
@@ -415,10 +440,15 @@ function presetLight(name, profiles = []) {
 // Walls an image may hold from Map Studio (FG maps run to many thousands of segments).
 const MAX_WALLS_STUDIO = 20000;
 
-function createMapState({ saved, records, onChange = () => undefined, hasArt = () => false, hasPicture = () => false, artFor = () => null, hasTile = () => true, combatFor = () => null, activeRecord = () => null, sharedWith = null, colorOf = playerColor }) {
+function createMapState({ saved, records, onChange = () => undefined, hasArt = () => false, hasPicture = () => false, artFor = () => null, hasTile = () => true, combatFor = () => null, activeRecord = () => null, sharedWith = null, colorOf = playerColor, tableOptions = () => ({}) }) {
   // One master per map: a second state (the GM's private image window) works on
   // the very same walls, lights, tokens, paint and effects as the table's.
   const state = sharedWith ? sharedWith.rawState() : savedMap(saved);
+  state.explored = state.explored ?? {};
+  // A count that moves on whenever anyone's explored areas change (not saved).
+  if (!("exploredVersion" in state)) Object.defineProperty(state, "exploredVersion", { value: 0, writable: true, enumerable: false });
+  // The last views merged for each player, so the same view is not merged again.
+  const lastMerged = new Map();
   let scene = null;
   const visionCache = new Map();
   // The last edits on each scene's walls, to undo (FG has none; Foundry Ctrl+Z).
@@ -610,10 +640,36 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       }
       out.push({ id, x, y, brightPx: bright * per, dimPx: dim * per, color, hidden, polygon, ...(shape.animation && shape.animation !== "none" ? { animation: shape.animation, speed: shape.speed } : {}) });
     };
-    for (const light of lightsHere()) if (light.on && !light.hidden) add(light.id, light.x, light.y, light.bright, light.dim, light.color, light.hidden, light);
+    for (const light of lightsHere()) if (light.on && !light.hidden && !light.darkness) add(light.id, light.x, light.y, light.bright, light.dim, light.color, light.hidden, light);
     // A hidden token's light is marked hidden: it reaches the GM only.
     for (const token of tokensHere()) if (token.light) add(`token:${token.id}`, token.x, token.y, token.light.bright, token.light.dim, token.light.color, token.hidden);
     return out;
+  }
+
+  // Magical darkness on the scene now: each with its reach (pixels) and its own outline.
+  function darknessSources() {
+    const per = pixelsPerUnit();
+    const out = [];
+    for (const light of lightsHere()) {
+      if (!light.on || !light.darkness) continue;
+      const reachPx = Math.max(light.bright, light.dim) * per;
+      const key = `D|${scene.id}|${Math.round(light.x)}|${Math.round(light.y)}|${Math.round(reachPx)}`;
+      let polygon = visionCache.get(key);
+      if (!polygon) {
+        polygon = geometry.sceneSight(scene, { x: light.x, y: light.y }, doorsHere(), 0, "light", reachPx * 1.05 + 1, null);
+        visionCache.set(key, polygon);
+      }
+      out.push({ id: light.id, x: light.x, y: light.y, radiusPx: reachPx, polygon, hidden: light.hidden });
+    }
+    return out;
+  }
+
+  // A token's senses (its own line, else its character's), in feet; its sight
+  // in the dark set on the token wins over darkvision.
+  function sensesOf(token) {
+    const record = token.recordId ? records.get(token.recordId) : null;
+    const parsed = geometry.parseSenses(token.senses || record?.data?.senses);
+    return { ...parsed, darkvision: token.vision != null ? token.vision : parsed.darkvision };
   }
 
   function sightOn() {
@@ -629,6 +685,17 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
   function changed({ keepVision = false } = {}) {
     if (!keepVision || visionCache.size > 4000) visionCache.clear();
     onChange();
+  }
+
+  // How a diagonal counts here: the scene's rule, else the campaign's (FG's HRDD).
+  function diagonalNow() {
+    return settingsHere().diagonal ?? tableOptions().diagonal ?? "1";
+  }
+
+  // What entering a point costs (Map Studio's difficult terrain, cost 2 by
+  // default), or null when the scene has none.
+  function terrainCost() {
+    return null;
   }
 
   function units() {
@@ -687,11 +754,34 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
     return geometry.healthStatus(hp.total, hp.wounds);
   }
 
+  // Whether a token is a character's (a player's) for FG's token options, else the GM's creature.
+  function isPc(token) {
+    if (token.owner) return true;
+    return Boolean(token.recordId && records.get(token.recordId)?.type === "character");
+  }
+  // FG's token options: what this seat is shown of a token's health (bar,
+  // barhover, dot, dothover; off sends none to players) and its name (off:
+  // only a player's own; an unidentified name replaces the real one).
+  function tokenShows(token, seat) {
+    const options = tableOptions();
+    const set = (isPc(token) ? options.healthPc : options.healthNpc) ?? "dot";
+    const names = options.names ?? "hover";
+    if (seat.role === "dm") return { health: set === "off" ? "dothover" : set, names: names === "off" ? "hover" : names, name: token.name };
+    const own = token.owner !== "" && token.owner === seat.name;
+    return { health: set, names, name: own ? token.name : names === "off" ? "" : token.unidentified || token.name };
+  }
+
   function publicToken(token, seat, assetToken) {
+    const shows = tokenShows(token, seat);
     const out = {
       id: token.id,
       recordId: token.recordId,
-      name: token.name,
+      name: shows.name,
+      // How health and the name are drawn on this seat (FG's token options).
+      healthShow: shows.health,
+      namesShow: shows.names,
+      elevation: token.elevation ?? 0,
+      ...(seat.role === "dm" ? { unidentified: token.unidentified ?? "", senses: token.senses ?? "" } : {}),
       x: token.x,
       y: token.y,
       squares: token.squares,
@@ -701,7 +791,7 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       color: token.owner ? colorOf(token.owner) : FACTION_COLOR[token.faction],
       hidden: token.hidden,
       mine: seat.role === "player" && token.owner === seat.name,
-      health: health(token),
+      health: shows.health === "off" ? null : health(token),
       // Whose turn it is on the combat tracker.
       active: Boolean(combatFor(token.id)?.active) || (token.recordId != null && token.recordId === activeRecord()),
       light: token.light,
@@ -754,7 +844,7 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       .map((wall) => ({ id: wall.id, group: doorGroup(wall), x1: wall.x1, y1: wall.y1, x2: wall.x2, y2: wall.y2, secret: wall.door === 2 || wall.toggle === "gm", kind: wall.door > 0 ? "door" : wall.kind, state: wall.id in doors ? doors[wall.id] : wall.ds }));
     const mask = maskHere();
     const groups = groupsHere();
-    const shared = { sceneId: scene.id, sight: sightOn(), locked, darkness: dark, settings: { grid: settings.grid, weather: settings.weather, darkness: settings.darkness }, drawings: drawingsHere(), deathMarkers: deathMarkersHere(), mask: mask.on || mask.shapes.length ? mask : null, groups, fx: fxHere() };
+    const shared = { sceneId: scene.id, sight: sightOn(), locked, darkness: dark, settings: { grid: settings.grid, weather: settings.weather, darkness: settings.darkness, diagonal: settings.diagonal, diagonalRule: diagonalNow() }, drawings: drawingsHere(), deathMarkers: deathMarkersHere(), mask: mask.on || mask.shapes.length ? mask : null, groups, fx: fxHere() };
     const lightOut = (list) => list.map(({ id, x, y, brightPx, dimPx, color, polygon, animation, speed }) => ({ id, x, y, brightPx, dimPx, color, polygon, ...(animation ? { animation, speed } : {}) }));
     if (seat.role === "dm") {
       return {
@@ -763,6 +853,8 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
         doors: doorList,
         vision: null,
         lights: lightOut(sources),
+        darkAreas: darknessSources(),
+        trueSeeing: [],
         seeing: [],
         sceneLights: lightsHere(),
         walls: wallsHere(),
@@ -783,23 +875,50 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
     // and darkvision: a token standing in a light's bright light sees only by light.
     const spoils = records.list({ type: "siegegame" }).length > 0;
     const spoiled = spoils && dark > 0 ? mine.filter((token) => visionRange(token) > 0 && geometry.brightlyLit(token.x, token.y, shining)).map((token) => token.id) : [];
+    // Each token's senses: blindsight perceives what is near as darkvision does (and in
+    // magical darkness); truesight and Devil's Sight see in magical darkness.
+    const senses = new Map(mine.map((token) => [token.id, sensesOf(token)]));
     const seeing = mine
-      .map((token, index) => ({ x: token.x, y: token.y, radiusPx: spoiled.includes(token.id) ? 0 : visionRange(token) * per, polygon: vision ? vision[index] : null }))
+      .map((token, index) => ({ x: token.x, y: token.y, radiusPx: Math.max(spoiled.includes(token.id) ? 0 : visionRange(token), senses.get(token.id).blindsight) * per, polygon: vision ? vision[index] : null }))
       .filter((item) => item.radiusPx > 0);
+    const trueSeeing = mine
+      .map((token, index) => {
+        const sense = senses.get(token.id);
+        return { x: token.x, y: token.y, radiusPx: Math.max(sense.truesight, sense.devilsight, sense.blindsight) * per, polygon: vision ? vision[index] : null };
+      })
+      .filter((item) => item.radiusPx > 0);
+    const within = (list, x, y) => list.some((item) => Math.hypot(x - item.x, y - item.y) <= item.radiusPx && (!item.polygon || geometry.pointInPolygon(x, y, item.polygon)));
+    const darkAreas = darknessSources();
+    // Tremorsense: what touches the ground within its reach, through walls, by a token on the ground.
+    const tremor = mine.filter((token) => senses.get(token.id).tremorsense > 0 && !(token.elevation > 0));
+    const felt = (token) => !(token.elevation > 0) && tremor.some((by) => by !== token && Math.hypot(by.x - token.x, by.y - token.y) <= senses.get(by.id).tremorsense * per);
     // Twilight vision: a moonlit night is like dusk, and dim light is enough.
     const twilight = mine.some((token) => token.recordId && geometry.hasTwilightVision(records.get(token.recordId)?.data?.senses));
     const needsLight = mine.length > 0 && (twilight ? dark >= 1 : dark >= geometry.NEEDS_LIGHT);
     const visibleInDark = (x, y) =>
-      !needsLight || geometry.lit(x, y, shining) || seeing.some((item) => Math.hypot(x - item.x, y - item.y) <= item.radiusPx && (!item.polygon || geometry.pointInPolygon(x, y, item.polygon)));
+      mine.length > 0 && within(darkAreas, x, y) ? within(trueSeeing, x, y) : !needsLight || geometry.lit(x, y, shining) || within(seeing, x, y);
     // Nothing under the GM's mask reaches a player (FG: tokens under the mask are hidden), but their own tokens.
-    const tokens = shown.filter((token) => token.owner === seat.name || mine.includes(token) || ((!vision || geometry.seen(token.x, token.y, vision, slack)) && visibleInDark(token.x, token.y) && !masked(token.x, token.y)));
+    const sighted = (token) => (!vision || geometry.seen(token.x, token.y, vision, slack)) && visibleInDark(token.x, token.y);
+    const sensedOnly = new Set();
+    const tokens = shown.filter((token) => {
+      if (token.owner === seat.name || mine.includes(token)) return true;
+      if (masked(token.x, token.y)) return false;
+      if (sighted(token)) return true;
+      if (!felt(token)) return false;
+      sensedOnly.add(token.id);
+      return true;
+    });
     // A door a player sees any side of is shown whole (all its sides).
     const seenSide = (door) => !door.secret && !masked((door.x1 + door.x2) / 2, (door.y1 + door.y2) / 2) && (!vision || geometry.seen((door.x1 + door.x2) / 2, (door.y1 + door.y2) / 2, vision, slack));
     const seenGroups = new Set(doorList.filter(seenSide).map((door) => door.group));
     const playerDoors = doorList.filter((door) => !door.secret && seenGroups.has(door.group));
     return {
-      tokens: tokens.map((token) => publicToken(token, seat, assetToken)),
+      // A token felt by tremorsense alone is marked so (a shape, not a sight of it).
+      tokens: tokens.map((token) => (sensedOnly.has(token.id) ? { ...publicToken(token, seat, assetToken), sensed: true } : publicToken(token, seat, assetToken))),
       ...shared,
+      // Magical darkness reaching what the player sees, and where their truesight sees through it.
+      darkAreas: darkAreas.filter((area) => !area.hidden && (!vision || mine.some((token) => Math.hypot(token.x - area.x, token.y - area.y) <= area.radiusPx) || vision.some((polygon) => geometry.polygonsOverlap(area.polygon, polygon)))).map(({ hidden: _hidden, ...area }) => area),
+      trueSeeing,
       doors: playerDoors.map(({ secret, ...door }) => door),
       vision,
       // Only the lights that reach what the player sees now: a light's polygon
@@ -986,9 +1105,12 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       // A player may light or put out a light on their own token, and turn it; nothing else.
       if (seat.role !== "dm") {
         const keys = Object.keys(patch);
-        if (!canMove(token, seat) || keys.some((key) => key !== "light" && key !== "facing")) throw new Error("Only the GM can change tokens.");
+        if (!canMove(token, seat) || keys.some((key) => key !== "light" && key !== "facing" && key !== "elevation")) throw new Error("Only the GM can change tokens.");
       }
       if (patch.facing !== undefined) token.facing = cleanFacing(patch.facing);
+      if (patch.elevation !== undefined) token.elevation = cleanToken({ x: 0, y: 0, elevation: patch.elevation }).elevation;
+      if (patch.unidentified !== undefined) token.unidentified = text(patch.unidentified, "").slice(0, 48);
+      if (patch.senses !== undefined) token.senses = text(patch.senses, "").slice(0, 200);
       if (patch.light !== undefined) token.light = typeof patch.light === "string" ? presetLight(patch.light, lightProfiles()) : cleanCarried(patch.light);
       if (patch.vision !== undefined) token.vision = patch.vision == null ? null : Math.min(1000, Math.max(0, num(patch.vision, 0)));
       if (patch.name !== undefined) token.name = text(patch.name, token.name).slice(0, 48);
@@ -1034,6 +1156,48 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       return next;
     },
     darkness,
+    diagonalNow,
+    // Fog of war on the host: a player's view now added to what they have seen
+    // of this scene (true when that grew). Test and preview seats keep nothing.
+    explore(player, vision) {
+      if (!scene || !Array.isArray(vision) || !player || String(player).startsWith("@")) return false;
+      const key = `${scene.id}|${player}`;
+      const last = lastMerged.get(key);
+      if (last && last.length === vision.length && last.every((polygon, index) => polygon === vision[index])) return false;
+      lastMerged.set(key, vision);
+      const row = (state.explored[scene.id] = state.explored[scene.id] ?? {});
+      const known = row[player] ?? [];
+      const merged = geometry.mergeExplored(known, vision);
+      if (merged === known) return false;
+      row[player] = merged;
+      state.exploredVersion += 1;
+      return true;
+    },
+    // What a player has seen of this scene; "*" every player's together (the GM's vision preview).
+    exploredFor(player) {
+      const row = scene ? state.explored[scene.id] ?? {} : {};
+      if (player === "*") return Object.values(row).flat();
+      return row[player] ?? [];
+    },
+    exploredVersion: () => state.exploredVersion,
+    exploredPlayers: () => Object.keys((scene && state.explored[scene.id]) ?? {}),
+    // The GM's Reset explored: one player's memory of this scene, or everyone's.
+    resetExplored(player, seat) {
+      if (seat.role !== "dm") throw new Error("Only the GM can reset what players have explored.");
+      if (!scene) throw new Error("No scene is open.");
+      const row = state.explored[scene.id] ?? {};
+      if (player) delete row[player];
+      else state.explored[scene.id] = {};
+      for (const key of [...lastMerged.keys()]) if (key.startsWith(`${scene.id}|`) && (!player || key === `${scene.id}|${player}`)) lastMerged.delete(key);
+      state.exploredVersion += 1;
+      changed({ keepVision: true });
+      return { reset: player || "everyone" };
+    },
+    // A path measured as the ruler does: each leg and the whole, by this scene's rule.
+    measure(points) {
+      if (!scene) throw new Error("No scene is open.");
+      return geometry.pathDistance(scene, points, diagonalNow(), terrainCost());
+    },
     lightProfiles,
     settings: settingsHere,
     lights: lightsHere,
@@ -1046,6 +1210,7 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
         darkness: patch.darkness !== undefined ? patch.darkness : current.darkness,
         grid: { ...current.grid, ...(patch.grid ?? {}) },
         weather: { ...current.weather, ...(patch.weather ?? {}) },
+        diagonal: patch.diagonal !== undefined ? patch.diagonal : current.diagonal,
       });
       liveScene();
       // The grid changes wall thresholds (sight polygons); darkness and weather do not.

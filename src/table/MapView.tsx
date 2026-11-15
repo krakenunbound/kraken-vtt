@@ -6,7 +6,7 @@ import { ReadAloudBubble, useMapShown } from "../books/ReadAloudBubble";
 import { MARKER_SETS, markerShapes } from "../../shared/map/deathMarkers.mjs";
 import { backgroundRect, colorWithAlpha, gridStops, sceneFrame, type BackgroundFit, type SceneFrame } from "../foundry/geometry";
 import { type SceneLight, type SceneMarker, type SceneRegion, type SceneWall } from "../foundry/sceneObjects";
-import { gridDistance, gridKind, gridOrigin, hexCorners, hexOf, LIGHT_PRESETS, pointInPolygon, snapCenter, withGrid } from "../../shared/map/geometry.mjs";
+import { diagonalRule, gridDistance, gridKind, gridOrigin, hexCorners, hexOf, LIGHT_PRESETS, snapCenter, withGrid } from "../../shared/map/geometry.mjs";
 import type { DecalItem, EditWall, MapDoor, MapTile, MapToken, Ping, PictureKind, SceneLightRecord, TableMap, TableRecord, WallKind } from "../session/useSession";
 import { useBookWindows } from "../books/Books";
 import { MapEditor, kindColor, placePicture, type EditTab, type EditTool, type LabelStyle, type PaintStyle } from "./MapEditor";
@@ -14,6 +14,11 @@ import { Lighting } from "./Lighting";
 import { fxMaskImage, fxMaskStyle } from "./fxMask";
 import { SceneGraphics, SceneLegend, type OverlayToken } from "./SceneOverlay";
 import { SceneSettings, type SceneSettingsPatch } from "./SceneSettings";
+import { RulerPath, SharedRulers, rulerPoints, useRulerBroadcast, useRulerKeys } from "./Ruler";
+import { TokenBadges } from "./TokenBadges";
+import { useExplored } from "./explored";
+import { TokenMenuExtras } from "./TokenMenuExtras";
+import { DarknessAreas } from "./DarknessAreas";
 // three.js only loads when a scene has weather.
 const Weather = lazy(() => import("./Weather").then((module) => ({ default: module.Weather })));
 
@@ -94,71 +99,6 @@ function capture(element: Element, pointerId: number) {
   }
 }
 
-function loadExplored(key: string): number[][] {
-  try {
-    const saved = JSON.parse(window.localStorage.getItem(key) ?? "[]");
-    return Array.isArray(saved) ? saved.filter((item) => Array.isArray(item)) : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveExplored(key: string, polygons: number[][]) {
-  try {
-    window.localStorage.setItem(key, JSON.stringify(polygons));
-  } catch {
-    /* a full or blocked store only loses the dimmed memory */
-  }
-}
-
-function polygonKey(points: number[]): string {
-  let hash = 0;
-  for (const value of points) hash = (hash * 31 + value) | 0;
-  return `${points.length}:${hash}`;
-}
-
-// The explored areas with a new view added: one already known (the same, or
-// inside one known) adds nothing, and known ones inside a new one give way to
-// it, so a long crawl keeps every room; only past the cap do the oldest go.
-// Returns the same array when nothing was added.
-const EXPLORED_CAP = 500;
-function polygonBox(points: number[]): [number, number, number, number] {
-  let x0 = Infinity;
-  let y0 = Infinity;
-  let x1 = -Infinity;
-  let y1 = -Infinity;
-  for (let index = 0; index + 1 < points.length; index += 2) {
-    x0 = Math.min(x0, points[index]);
-    x1 = Math.max(x1, points[index]);
-    y0 = Math.min(y0, points[index + 1]);
-    y1 = Math.max(y1, points[index + 1]);
-  }
-  return [x0, y0, x1, y1];
-}
-function polygonInside(inner: number[], innerBox: number[], outer: number[], outerBox: number[]): boolean {
-  if (innerBox[0] < outerBox[0] || innerBox[1] < outerBox[1] || innerBox[2] > outerBox[2] || innerBox[3] > outerBox[3]) return false;
-  for (let index = 0; index + 1 < inner.length; index += 2) if (!pointInPolygon(inner[index], inner[index + 1], outer)) return false;
-  return true;
-}
-function mergeExplored(known: number[][], views: number[][]): number[][] {
-  let out = known;
-  const keys = new Set(known.map(polygonKey));
-  for (const view of views) {
-    if (view.length < 6) continue;
-    // Compare whole polygons: a door opened from the same spot gives a view
-    // that starts like the old one but reaches further.
-    const key = polygonKey(view);
-    if (keys.has(key)) continue;
-    const box = polygonBox(view);
-    const boxes = out.map(polygonBox);
-    if (out.some((item, index) => polygonInside(view, box, item, boxes[index]))) continue;
-    out = [...out.filter((item, index) => !polygonInside(item, boxes[index], view, box)), view];
-    keys.add(key);
-  }
-  if (out.length > EXPLORED_CAP) out = out.slice(out.length - EXPLORED_CAP);
-  return out;
-}
-
 function polygonPoints(points: number[]): string {
   const pairs: string[] = [];
   for (let index = 0; index + 1 < points.length; index += 2) pairs.push(`${points[index]},${points[index + 1]}`);
@@ -177,12 +117,16 @@ export type MapActions = {
   setDoor: (id: string, state?: number) => void;
   setSight: (on: boolean) => void;
   setLocked: (on: boolean) => void;
-  updateToken: (id: string, patch: Partial<Pick<MapToken, "name" | "hidden" | "squares" | "faction" | "owner" | "vision" | "facing">> & { light?: string | MapToken["light"] }) => void;
+  updateToken: (id: string, patch: Partial<Pick<MapToken, "name" | "hidden" | "squares" | "faction" | "owner" | "vision" | "facing" | "unidentified" | "senses" | "elevation">> & { light?: string | MapToken["light"] }) => void;
   updateSettings: (patch: SceneSettingsPatch) => void;
   placeLight: (light: Partial<SceneLightRecord> & { preset?: string }) => void;
   updateLight: (id: string, patch: Partial<SceneLightRecord>) => void;
   removeLight: (id: string) => void;
   ping: (x: number, y: number) => void;
+  // This seat's ruler, shown to the table as it is drawn (none: let go).
+  ruler?: (points: number[]) => void;
+  // The GM's Reset explored (a player's name, "" everyone).
+  resetExplored?: (player: string) => void;
   shareMap?: () => void;
   // The GM's player vision preview (the players' view of this map).
   visionPreview?: (on: boolean) => void;
@@ -270,7 +214,8 @@ const DRAW_COLORS = ["#ffcc33", "#ff5a5a", "#5ad1ff", "#7dff7a", "#d38cff", "#ff
 // start: the token's centre; grab: where the pointer pressed; at: the pointer now.
 // The token goes where its centre would be moved by the pointer's own travel.
 type Drag = { pointerId: number; id: string; start: Point; grab: Point; at: Point; moved: boolean; snap: boolean; squares: number; group?: { id: string; x: number; y: number; squares: number }[] };
-type Measure = { pointerId: number; start: Point; at: Point };
+// A ruler: where it starts, its waypoints (a left click or Space while measuring), the pointer.
+type Measure = { pointerId: number; start: Point; at: Point; waypoints: Point[]; left?: boolean };
 type Menu = { id: string; left: number; top: number };
 
 // FG's doors: a door is one shape (its sides arrive as wall lines named
@@ -486,7 +431,6 @@ function MapViewInner({
   const [pinsShown, setPinsShown] = useState(() => readFlag("kraken-map-pins", true));
   const [lightMenu, setLightMenu] = useState<{ id: string; left: number; top: number } | null>(null);
   const lightDrag = useRef<{ pointerId: number; id: string } | null>(null);
-  const explored = useRef<{ sceneId: string; polygons: number[][] }>({ sceneId: "", polygons: [] });
   const frame = sceneFrame(scene);
   // Each FX layer's mask picture, made again only when its painted areas change.
   const fxMasks = useMemo(() => {
@@ -546,23 +490,9 @@ function MapViewInner({
   const vision = !gm && map.sceneId === scene.id ? map.vision : null;
   const mine = tokens.filter((token) => token.mine);
 
-  // Areas a player has seen stay dimly shown after their tokens move on,
-  // and after a reload (kept in this browser).
-  const exploredKey = `kraken-explored:${scene.id}:${mine[0]?.owner ?? ""}`;
-  // Merged only when the view changes (not every render), and saved after the render.
-  const exploredNow = useMemo(() => {
-    if (explored.current.sceneId !== exploredKey) explored.current = { sceneId: exploredKey, polygons: vision ? loadExplored(exploredKey) : [] };
-    let added = false;
-    if (vision) {
-      const merged = mergeExplored(explored.current.polygons, vision);
-      added = merged !== explored.current.polygons;
-      explored.current = { sceneId: exploredKey, polygons: merged };
-    }
-    return { key: exploredKey, polygons: explored.current.polygons, added };
-  }, [exploredKey, vision]);
-  useEffect(() => {
-    if (exploredNow.added) saveExplored(exploredNow.key, exploredNow.polygons);
-  }, [exploredNow]);
+  // Areas a player has seen stay dimly shown after their tokens move on: the
+  // host keeps them (saved with the campaign) and sends this seat its own.
+  const exploredPolygons = useExplored(scene.id);
 
   useEffect(() => {
     setNatural(null);
@@ -842,8 +772,10 @@ function MapViewInner({
     return worldAt(rect.left + rect.width / 2, rect.top + rect.height / 2);
   }
 
+  // The table's diagonal rule (the scene's, else the campaign's): 1, 1.5 or raw.
+  const diagonal = map.settings.diagonalRule ?? "1";
   function distanceLabel(from: Point, to: Point): string {
-    return `${gridDistance(scene, from, to, 1)} ${units}`;
+    return `${gridDistance(scene, from, to, diagonalRule(diagonal))} ${units}`;
   }
 
   // Wall points snap to the grid's corners (hex corners on a hex grid) and to
@@ -1044,6 +976,10 @@ function MapViewInner({
     setBox(null);
   }, [scene.id]);
 
+  // The ruler measured now (square centres), shown to everyone on the map as it moves.
+  const measurePoints = measure ? rulerPoints(scene, measure.start, measure.waypoints, measure.at) : null;
+  useRulerBroadcast(map.sceneId === scene.id && !map.prep ? measurePoints : null, actions.ruler);
+  useRulerKeys(viewport, measure ? { add: () => setMeasure((current) => (current ? { ...current, waypoints: [...current.waypoints, current.at].slice(0, 30) } : current)), undo: () => setMeasure((current) => (current ? { ...current, waypoints: current.waypoints.slice(0, -1) } : current)) } : null);
   const placeable = records.filter((record) => record.type === "character" && (gm || record.owner !== ""));
   const dragging = drag ? tokens.find((token) => token.id === drag.id) : null;
   const dragTo = drag ? { x: drag.start.x + drag.at.x - drag.grab.x, y: drag.start.y + drag.at.y - drag.grab.y } : null;
@@ -1081,6 +1017,11 @@ function MapViewInner({
       onContextMenu={(event) => event.preventDefault()}
       onPointerDown={(event) => {
         if ((event.target as HTMLElement).closest(".map-controls, .map-corner, .map-nav, .legend, .token-tray, .token-menu, .scene-settings, .map-editor")) return;
+        // A left click while measuring drops a waypoint there.
+        if (measure && event.button === 0) {
+          setMeasure({ ...measure, waypoints: [...measure.waypoints, measure.at].slice(0, 30) });
+          return;
+        }
         setMenu(null);
         setLightMenu(null);
         if (event.button === 2) {
@@ -1094,7 +1035,7 @@ function MapViewInner({
           const point = worldAt(event.clientX, event.clientY);
           if (!point) return;
           capture(event.currentTarget, event.pointerId);
-          setMeasure({ pointerId: event.pointerId, start: point, at: point });
+          setMeasure({ pointerId: event.pointerId, start: point, at: point, waypoints: [] });
           return;
         }
         if (event.button !== 0) return;
@@ -1314,7 +1255,9 @@ function MapViewInner({
         }
         if (measure && measure.pointerId === event.pointerId) {
           const point = worldAt(event.clientX, event.clientY);
-          if (point) setMeasure({ ...measure, at: point });
+          // The left button pressed while the right is held comes as a move (one pointer): a waypoint.
+          const left = (event.buttons & 1) === 1;
+          if (point) setMeasure({ ...measure, at: point, left, waypoints: left && !measure.left ? [...measure.waypoints, point].slice(0, 30) : measure.waypoints });
           return;
         }
         if (resizing && resizing.pointerId === event.pointerId) {
@@ -1424,6 +1367,11 @@ function MapViewInner({
           return;
         }
         if (measure && measure.pointerId === event.pointerId) {
+          // Letting go of the left button alone keeps measuring; the right ends it.
+          if ((event.buttons & 2) === 2) {
+            setMeasure({ ...measure, left: false });
+            return;
+          }
           setMeasure(null);
           return;
         }
@@ -1651,6 +1599,7 @@ function MapViewInner({
             image={scene.imageUrl && !imageFailed ? { url: scene.imageUrl, ...backdrop } : null}
           />
         ) : null}
+        {map.sceneId === scene.id ? <DarknessAreas areas={map.darkAreas} through={map.trueSeeing} gm={gm} width={frame.worldWidth} height={frame.worldHeight} /> : null}
         {(map.labels ?? []).length ? (
           // Text on the map (FG's text layers): outlined, with a shadow; size in squares.
           <svg className="overlay labels" width={frame.worldWidth} height={frame.worldHeight} viewBox={`0 0 ${frame.worldWidth} ${frame.worldHeight}`}>
@@ -1854,7 +1803,7 @@ function MapViewInner({
           return (
             <div
               key={token.id}
-              className={["token", canDrag ? "token-draggable" : "", token.mine ? "token-mine" : "", token.active ? "token-active" : "", targeted.includes(token.id) ? "token-targeted" : "", selected === token.id ? "token-selected" : "", picked.includes(token.id) ? "token-picked" : "", token.hidden ? "token-hidden" : "", isDragged ? "token-lifted" : ""]
+              className={["token", token.sensed ? "token-sensed" : "", canDrag ? "token-draggable" : "", token.mine ? "token-mine" : "", token.active ? "token-active" : "", targeted.includes(token.id) ? "token-targeted" : "", selected === token.id ? "token-selected" : "", picked.includes(token.id) ? "token-picked" : "", token.hidden ? "token-hidden" : "", isDragged ? "token-lifted" : ""]
                 .filter(Boolean)
                 .join(" ")}
               data-token={token.id}
@@ -1924,17 +1873,7 @@ function MapViewInner({
                   <path d="M50 0v18M50 82v18M0 50h18M82 50h18" />
                 </svg>
               ) : null}
-              {token.health ? (
-                <i
-                  className="health-dot"
-                  data-status={token.health.status}
-                  title={token.health.status}
-                  style={{ background: token.health.color, width: span * 0.18, height: span * 0.18 }}
-                />
-              ) : null}
-              <span className="token-name" style={{ fontSize: Math.max(size * 0.2, 12 / camera.scale) }}>
-                {token.name}
-              </span>
+              <TokenBadges token={token} span={span} labelSize={Math.max(size * 0.2, 12 / camera.scale)} units={units} />
             </div>
           );
         })}
@@ -1961,17 +1900,8 @@ function MapViewInner({
             </span>
           </>
         ) : null}
-        {measure ? (
-          <>
-            <svg className="overlay measure" width={frame.worldWidth} height={frame.worldHeight} viewBox={`0 0 ${frame.worldWidth} ${frame.worldHeight}`}>
-              <line x1={measure.start.x} y1={measure.start.y} x2={measure.at.x} y2={measure.at.y} stroke="#7fd4ff" strokeWidth={3 / camera.scale} strokeDasharray={`${8 / camera.scale} ${5 / camera.scale}`} />
-              <circle cx={measure.start.x} cy={measure.start.y} r={5 / camera.scale} fill="#7fd4ff" />
-            </svg>
-            <span className="measure-label" style={{ left: measure.at.x, top: measure.at.y, fontSize: 15 / camera.scale }}>
-              {distanceLabel(snapCenter(scene, measure.start.x, measure.start.y, 1), snapCenter(scene, measure.at.x, measure.at.y, 1))}
-            </span>
-          </>
-        ) : null}
+        {measure && measurePoints ? <RulerPath scene={scene} points={measurePoints} color={myColor} diagonal={diagonal} scale={camera.scale} units={units} width={frame.worldWidth} height={frame.worldHeight} terrain={map.terrain} /> : null}
+        <SharedRulers sceneId={scene.id} scene={scene} diagonal={diagonal} scale={camera.scale} units={units} width={frame.worldWidth} height={frame.worldHeight} terrain={map.terrain} />
         {(map.drawings?.length ?? 0) > 0 || stroke || resizing ? (
           <svg className="overlay drawings" width={frame.worldWidth} height={frame.worldHeight} viewBox={`0 0 ${frame.worldWidth} ${frame.worldHeight}`}>
             {(map.drawings ?? [])
@@ -2030,7 +1960,7 @@ function MapViewInner({
               <mask id="sight-explored">
                 <rect width={frame.worldWidth} height={frame.worldHeight} fill="#fff" />
                 <g filter="url(#sight-soft)">
-                  {[...exploredNow.polygons, ...vision].map((polygon, index) => (
+                  {[...exploredPolygons, ...vision].map((polygon, index) => (
                     <polygon key={index} points={polygonPoints(polygon)} fill="#000" />
                   ))}
                 </g>
@@ -2106,6 +2036,7 @@ function MapViewInner({
                     ft
                   </label>
                 ) : null}
+                <TokenMenuExtras token={token} gm={gm} recordSenses={String((records.find((record) => record.id === token.recordId)?.data as { senses?: unknown } | undefined)?.senses ?? "")} units={units} update={(patch) => actions.updateToken(token.id, patch)} />
                 {gm ? (
                   <button
                     type="button"
@@ -2195,6 +2126,9 @@ function MapViewInner({
                 <button type="button" onClick={() => actions.updateLight(light.id, { hidden: !light.hidden })}>
                   {light.hidden ? "Let players see it" : "Hide from players"}
                 </button>
+                <button type="button" data-action="light-darkness" aria-pressed={Boolean(light.darkness)} onClick={() => actions.updateLight(light.id, { darkness: !light.darkness })} title="Magical darkness (the Darkness spell): nothing in it is lit or seen by darkvision; truesight, Devil's Sight and blindsight see in it">
+                  {light.darkness ? "Make it light again" : "Make it magical darkness"}
+                </button>
                 <button
                   type="button"
                   onClick={() => {
@@ -2219,6 +2153,7 @@ function MapViewInner({
           onSettings={actions.updateSettings}
           onSight={actions.setSight}
           onLocked={actions.setLocked}
+          onResetExplored={actions.resetExplored}
           onClose={() => setSettingsOpen(false)}
         />
       ) : null}
@@ -2501,7 +2436,7 @@ function MapViewInner({
           {notice}
         </p>
       ) : null}
-      <p className="map-hint">Drag to pan · wheel to zoom · right-drag to measure · double-click (or the ping tool) to ping · Ctrl+click a token to target it{gm || mine.length > 0 ? " · arrows move the selected token" : ""}</p>
+      <p className="map-hint">Drag to pan · wheel to zoom · right-drag to measure (left click or Space: a waypoint) · double-click (or the ping tool) to ping · Ctrl+click a token to target it{gm || mine.length > 0 ? " · arrows move the selected token" : ""}</p>
       {imageFailed || !scene.imageUrl ? <p className="map-note">This scene has no background image.</p> : null}
     </div>
   );

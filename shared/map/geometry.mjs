@@ -122,6 +122,7 @@ export function tokenSquares(space, unitsPerSquare = 5) {
 // Distance from a to b in the scene's units. diagonal is FG's distance
 // multiplier for a diagonal step (HRDD): 1 counts every square as one,
 // 1.5 is the 5-10-5 variant, "raw" is a straight-line measure.
+/** @param {any} scene @param {any} a @param {any} b @param {number | string} [diagonal] @param {any} [rest] */
 export function gridDistance(scene, a, b, diagonal = 1) {
   const size = gridSize(scene);
   const per = Number(scene?.grid?.distance) > 0 ? Number(scene.grid.distance) : 5;
@@ -138,6 +139,80 @@ export function gridDistance(scene, a, b, diagonal = 1) {
   if (diagonal === "raw") squares = Math.hypot((b.x - a.x) / size, (b.y - a.y) / size);
   else if (diagonal === 1.5) squares = Math.max(dx, dy) + Math.floor(Math.min(dx, dy) / 2);
   else squares = Math.max(dx, dy);
+  return Math.round(squares * per * 10) / 10;
+}
+
+// The diagonal rule as the table keeps it ("1", "1.5", "raw"): the value gridDistance takes.
+export function diagonalRule(value) {
+  if (value === "raw") return "raw";
+  return Number(value) === 1.5 ? 1.5 : 1;
+}
+
+// A path's length, leg by leg, in the scene's units: points are [x, y, x, y,
+// ...] (square centres), diagonal the rule. Under 1.5 the 5-10-5 count runs
+// on across the legs (the second diagonal of the whole path costs double,
+// whichever leg it is on), as FG and the d20 games count a turn's movement.
+// costAt(x, y), if given, is what entering that square costs (difficult
+// terrain 2, else 1); the walk then goes square by square.
+/** @param {any} scene @param {number[]} points @param {number | string | unknown} [diagonal] @param {((x: number, y: number) => number) | null} [costAt] */
+export function pathDistance(scene, points, diagonal = 1, costAt = null) {
+  const rule = diagonalRule(diagonal);
+  const size = gridSize(scene);
+  const per = Number(scene?.grid?.distance) > 0 ? Number(scene.grid.distance) : 5;
+  const kind = gridKind(scene);
+  const hex = kind === "hexrow" || kind === "hexcol";
+  const legs = [];
+  let parity = 0;
+  for (let index = 0; index + 3 < points.length; index += 2) {
+    const a = { x: points[index], y: points[index + 1] };
+    const b = { x: points[index + 2], y: points[index + 3] };
+    let squares;
+    if (hex || rule === "raw" || kind === "none") {
+      // Hexes and a straight-line measure: the leg's own length; terrain sampled along it.
+      const flat = gridDistance(scene, a, b, rule) / per;
+      if (costAt && flat > 0) {
+        const steps = Math.max(1, Math.round(flat));
+        let cost = 0;
+        for (let step = 1; step <= steps; step += 1) cost += Number(costAt(a.x + ((b.x - a.x) * step) / steps, a.y + ((b.y - a.y) * step) / steps)) || 1;
+        squares = (flat * cost) / steps;
+      } else squares = flat;
+    } else {
+      const dx = Math.round((b.x - a.x) / size);
+      const dy = Math.round((b.y - a.y) / size);
+      const n = Math.max(Math.abs(dx), Math.abs(dy));
+      squares = 0;
+      let last = { col: 0, row: 0 };
+      for (let step = 1; step <= n; step += 1) {
+        const at = { col: Math.round((dx * step) / n), row: Math.round((dy * step) / n) };
+        const diagonalStep = at.col !== last.col && at.row !== last.row;
+        let cost = 1;
+        if (diagonalStep && rule === 1.5) {
+          cost = parity === 1 ? 2 : 1;
+          parity = 1 - parity;
+        }
+        squares += cost * (costAt ? Number(costAt(a.x + at.col * size, a.y + at.row * size)) || 1 : 1);
+        last = at;
+      }
+    }
+    legs.push(Math.round(squares * per * 10) / 10);
+  }
+  return { legs, total: Math.round(legs.reduce((sum, leg) => sum + leg, 0) * 10) / 10 };
+}
+
+// A distance with height in it (elevation in the scene's units, as FG's and
+// Foundry's token elevation): the climb counts as a third axis, by the same rule.
+/** @param {any} scene @param {any} a @param {any} b @param {number | string} [diagonal] @param {any} [rest] */
+export function gridDistance3(scene, a, b, diagonal = 1, rise = 0) {
+  const flat = gridDistance(scene, a, b, diagonal);
+  const up = Math.abs(Number(rise) || 0);
+  if (!up) return flat;
+  const rule = diagonalRule(diagonal);
+  const per = Number(scene?.grid?.distance) > 0 ? Number(scene.grid.distance) : 5;
+  if (rule === "raw") return Math.round(Math.hypot(flat, up) * 10) / 10;
+  const climb = Math.round(up / per);
+  const across = Math.round(flat / per);
+  // Rule 1: the longer of the two; 1.5: the shorter counts half again (5-10-5).
+  const squares = rule === 1.5 ? Math.max(across, climb) + Math.floor(Math.min(across, climb) / 2) : Math.max(across, climb);
   return Math.round(squares * per * 10) / 10;
 }
 
@@ -536,6 +611,77 @@ export function sensesRange(senses) {
   let best = 0;
   for (const match of text.matchAll(/(darkvision|deepvision)\s*(\d+)/g)) best = Math.max(best, Number(match[2]));
   return best;
+}
+
+// Every sense in a senses line, in feet (0: none), as the d20 games write
+// them ("Darkvision 60 ft., Blindsight 10 ft., passive Perception 12"):
+// darkvision (C&C's deepvision too) sees in the dark; blindsight perceives
+// what is near without sight; tremorsense feels what touches the ground;
+// truesight and the warlock's Devil's Sight (120 ft) see in magical darkness.
+export function parseSenses(senses) {
+  const text = String(senses ?? "").toLowerCase();
+  const range = (pattern) => {
+    let best = 0;
+    for (const match of text.matchAll(pattern)) best = Math.max(best, Number(match[1]) || 0);
+    return best;
+  };
+  return {
+    darkvision: sensesRange(text),
+    blindsight: range(/(?:blindsight|blindsense)\s*(?:\(|:)?\s*(\d+)/g),
+    tremorsense: range(/tremorsense\s*(?:\(|:)?\s*(\d+)/g),
+    truesight: range(/truesight\s*(?:\(|:)?\s*(\d+)/g),
+    devilsight: /devil'?s sight/.test(text) ? Math.max(120, range(/devil'?s sight\s*(\d+)/g)) : 0,
+  };
+}
+
+// --- Explored areas (fog of war) ----------------------------------------------
+// The areas a player has seen, with new views added: one already known (the
+// same, or inside one known) adds nothing, and known ones inside a new one give
+// way to it, so a long crawl keeps every room; only past the cap do the oldest
+// go. Returns the same array when nothing was added. The host keeps these.
+export const EXPLORED_CAP = 400;
+function polygonKey(points) {
+  let hash = 0;
+  for (const value of points) hash = (hash * 31 + Math.round(value)) | 0;
+  return `${points.length}:${hash}`;
+}
+function polygonBox(points) {
+  let x0 = Infinity;
+  let y0 = Infinity;
+  let x1 = -Infinity;
+  let y1 = -Infinity;
+  for (let index = 0; index + 1 < points.length; index += 2) {
+    x0 = Math.min(x0, points[index]);
+    x1 = Math.max(x1, points[index]);
+    y0 = Math.min(y0, points[index + 1]);
+    y1 = Math.max(y1, points[index + 1]);
+  }
+  return [x0, y0, x1, y1];
+}
+function polygonInside(inner, innerBox, outer, outerBox) {
+  if (innerBox[0] < outerBox[0] || innerBox[1] < outerBox[1] || innerBox[2] > outerBox[2] || innerBox[3] > outerBox[3]) return false;
+  for (let index = 0; index + 1 < inner.length; index += 2) if (!pointInPolygon(inner[index], inner[index + 1], outer)) return false;
+  return true;
+}
+export function mergeExplored(known, views) {
+  let out = known;
+  const keys = new Set(known.map(polygonKey));
+  for (const raw of views) {
+    if (!Array.isArray(raw) || raw.length < 6) continue;
+    // Kept to whole pixels: a campaign holds many of them.
+    const view = raw.map((value) => Math.round(value));
+    // Compare whole polygons: a door opened from the same spot gives a view
+    // that starts like the old one but reaches further.
+    const key = polygonKey(view);
+    if (keys.has(key)) continue;
+    const box = polygonBox(view);
+    const boxes = out.map(polygonBox);
+    if (out.some((item, index) => polygonInside(view, box, item, boxes[index]))) continue;
+    out = [...out.filter((item, index) => !polygonInside(item, boxes[index], view, box)), view];
+    keys.add(key);
+  }
+  if (out.length > EXPLORED_CAP) out = out.slice(out.length - EXPLORED_CAP);
+  return out;
 }
 
 // Twilight Vision (elves, PHB): colour and detail under starlight, moonlight
