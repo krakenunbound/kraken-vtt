@@ -3,6 +3,8 @@ import { dicePacks } from "../dice/dicePacks";
 import type { MapScene } from "../table/MapView";
 import { sound, type Soundscape } from "../sound/soundEngine";
 import { diceStore, rolling, throwIntent } from "../dice/diceStore";
+import { rulerStore } from "../table/Ruler";
+import { exploredStore } from "../table/explored";
 
 export type Seat = { id: string; name: string; role: "dm" | "player" };
 // The map as the host shows it to this seat (electron/mapState.cjs viewFor).
@@ -28,17 +30,39 @@ export type MapToken = {
   seesFt: number;
   // Degrees clockwise from up; null: not turned.
   facing?: number | null;
+  // FG's token options, as the host chose for this seat: how health and the name are drawn.
+  healthShow?: "bar" | "barhover" | "dot" | "dothover" | "off";
+  namesShow?: "off" | "hover" | "always";
+  // Height in the scene's units (0: on the ground).
+  elevation?: number;
+  // The GM's: the name players see instead, and the token's own senses line.
+  unidentified?: string;
+  senses?: string;
+  // Felt by tremorsense alone (a player's view): its shape, not a sight of it.
+  sensed?: boolean;
+  // The GM's and its owner's: moves that can be undone, and this turn's path ([x, y, ...]) on the tracker.
+  undo?: number;
+  path?: number[];
 };
+// A sound placed on the map (radius in feet).
+export type MapSound = { id: string; name: string; sound: string; x: number; y: number; radius: number; volume: number; on: boolean };
+// A player's move waiting for the GM while movement is locked (FG's TokenMoveManager).
+export type MoveRequest = { id: string; name: string; by: string; from: { x: number; y: number }; to: { x: number; y: number }; at: number };
+// A region of the map, the GM's (Map Studio's Traps & regions, a bundle's Foundry regions).
+export type MapRegion = { id: string; kind: "trap" | "pit" | "difficult" | "teleport"; name: string; note: string; points: number[]; on: boolean; cost?: number; to?: string | { x: number; y: number; sceneId?: string } };
 // A light shining now, with its own line of sight (pixels).
 export type MapLight = { id: string; x: number; y: number; brightPx: number; dimPx: number; color: string; polygon: number[] | null; animation?: string; speed?: number };
 // A player's token seeing in the dark (darkvision), pixels.
 export type MapSeeing = { x: number; y: number; radiusPx: number; polygon: number[] | null };
 // A light placed on the scene, as the GM edits it (radii in feet).
-export type SceneLightRecord = { id: string; x: number; y: number; bright: number; dim: number; color: string; on: boolean; hidden: boolean; angle?: number; rotation?: number; animation?: string; speed?: number };
+export type SceneLightRecord = { id: string; x: number; y: number; bright: number; dim: number; color: string; on: boolean; hidden: boolean; angle?: number; rotation?: number; animation?: string; speed?: number; darkness?: boolean };
 export type MapSettings = {
   darkness: number | null;
   grid: { show: boolean; alpha: number | null; color: string | null; type?: "square" | "hexrow" | "hexcol" | "none" | null; size?: number | null; offsetX?: number | null; offsetY?: number | null; distance?: number | null; units?: string | null; style?: string; thickness?: number };
   weather: { type: import("../table/Weather").WeatherType; intensity: number; direction: number };
+  // This scene's diagonal rule (null: the campaign's), and the rule in force ("1", "1.5", "raw").
+  diagonal?: string | null;
+  diagonalRule?: string;
 };
 export type MapDoor = { id: string; group?: string; x1: number; y1: number; x2: number; y2: number; state: number; secret?: boolean; kind?: string };
 // A wall in the GM's map editor (FG's kinds with Foundry's senses).
@@ -60,6 +84,9 @@ export type TableMap = {
   darkness: number;
   lights: MapLight[];
   seeing: MapSeeing[];
+  // Magical darkness reaching this seat's view, and where its truesight sees through it.
+  darkAreas?: MapSeeing[];
+  trueSeeing?: MapSeeing[];
   // This player's tokens have twilight vision (C&C elves).
   twilight?: boolean;
   // This player's tokens whose darkvision a bright light spoils now (C&C).
@@ -77,6 +104,13 @@ export type TableMap = {
   groups?: MapGroup[];
   fx?: MapFx[];
   tiles?: MapTile[];
+  // Difficult terrain (Map Studio's regions): what measuring through it costs.
+  terrain?: import("../table/Ruler").TerrainArea[];
+  // Moves waiting for the GM (a player: their own), and the GM's regions.
+  moveRequests?: MoveRequest[];
+  regions?: MapRegion[];
+  // The GM's sounds placed on the map.
+  mapSounds?: MapSound[];
 };
 // An image layer (FG's image layers, Foundry's tiles): url is where this seat loads it.
 export type MapTile = { id: string; name: string; src: string; url: string; x: number; y: number; width: number; height: number; rotation: number; alpha: number; flipX: boolean; flipY: boolean; level: "below" | "above"; hidden: boolean; locked?: boolean; group: string };
@@ -273,6 +307,7 @@ type NetScene = {
   fit?: MapScene["fit"];
   lights: MapScene["lights"];
   image: string | null;
+  video?: boolean;
 };
 
 // account: the player's account at that table (its password, or the token this browser kept).
@@ -329,6 +364,7 @@ function toPlayerScene(payload: NetScene, origin: string): MapScene {
     backgroundColor: payload.backgroundColor,
     grid: payload.grid,
     imageUrl: payload.image ? `${origin}${payload.image}` : null,
+    video: Boolean(payload.video),
     offsetX: payload.offsetX,
     offsetY: payload.offsetY,
     scaleX: payload.scaleX,
@@ -536,6 +572,8 @@ export function useSession() {
           if (msg.type === "roster" && Array.isArray(msg.roster)) setRoster(msg.roster as RosterEntry[]);
           if (msg.type === "accounts") setAccounts({ list: Array.isArray(msg.accounts) ? (msg.accounts as PlayerAccount[]) : [], note: typeof msg.done === "string" ? msg.done : "", error: typeof msg.error === "string" ? msg.error : "" });
           if (msg.type === "map") applyMap(msg as unknown as TableMap);
+          // The sounds placed on the map this seat hears now (the host decides how loud).
+          if (msg.type === "map") sound.setPlaced(Array.isArray(msg.sounds) ? (msg.sounds as { id: string; sound: string; gain: number; muffled?: boolean }[]) : []);
           if (msg.type === "library" && Array.isArray(msg.items)) setLibrary((current) => ({ ...current, [`${msg.module}|${msg.kind}`]: msg.items as LibraryItem[] }));
           if (msg.type === "krits" && msg.settings) setKrits(msg.settings as Record<string, string>);
           if (msg.type === "party" && msg.party) setParty(msg.party as import("../party/PartySheet").PartyView);
@@ -545,6 +583,8 @@ export function useSession() {
           if (msg.type === "read-aloud" && typeof msg.text === "string") setReadAloudNow({ text: msg.text, title: String(msg.title ?? ""), at: Date.now() });
           if (msg.type === "options" && msg.options) setOptions(msg.options as TableOptions);
           if (msg.type === "map-share") setMapShared((count) => count + 1);
+          if (msg.type === "ruler") rulerStore.put(msg);
+          if (msg.type === "explored") exploredStore.put(msg);
           if (msg.type === "ping") {
             const ping = { id: ++pingCounter.current, x: Number(msg.x), y: Number(msg.y), from: String(msg.from ?? ""), color: String(msg.color ?? "#fff") };
             setPings((current) => [...current, ping].slice(-12));
@@ -826,6 +866,8 @@ export function useSession() {
           darkness: scene.darkness,
           tokens,
           walls: scene.walls,
+          // A bundle's regions (traps, difficult terrain, teleports): the host keeps them, never a player.
+          regions: scene.regions,
         },
       }),
     );
@@ -1088,7 +1130,7 @@ export function useSession() {
   }, [send]);
   const removeToken = useCallback((id: string) => send({ type: "token-remove", id }), [send]);
   const updateToken = useCallback(
-    (id: string, patch: Partial<Pick<MapToken, "name" | "hidden" | "squares" | "faction" | "owner" | "vision" | "facing">> & { light?: string | MapToken["light"] }) => send({ type: "token-update", id, patch }),
+    (id: string, patch: Partial<Pick<MapToken, "name" | "hidden" | "squares" | "faction" | "owner" | "vision" | "facing" | "unidentified" | "senses" | "elevation">> & { light?: string | MapToken["light"] }) => send({ type: "token-update", id, patch }),
     [send],
   );
   const updateSettings = useCallback((patch: import("../table/SceneSettings").SceneSettingsPatch) => send({ type: "scene-settings", patch }), [send]);
@@ -1147,6 +1189,15 @@ export function useSession() {
   const setSight = useCallback((on: boolean) => send({ type: "sight", on }), [send]);
   const setLocked = useCallback((on: boolean) => send({ type: "lock", on }), [send]);
   const ping = useCallback((x: number, y: number) => send({ type: "ping", x, y }), [send]);
+  // This seat's ruler as it is drawn (none: let go), for the other seats on the map.
+  const ruler = useCallback((points: number[]) => send({ type: "ruler", points }), [send]);
+  // The GM: forget what a player (or everyone: "") has explored of this scene.
+  const resetExplored = useCallback((player: string) => send({ type: "explored-reset", player }), [send]);
+  // Undo a token's last move (Ctrl+Z); the GM's yes or no to moves asked for while movement is locked.
+  const undoMove = useCallback((id: string) => send({ type: "token-undo", id }), [send]);
+  // The GM's sounds placed on the map (add, update, remove).
+  const mapSound = useCallback((action: string, payload: Record<string, unknown> = {}) => send({ type: "map-sound", action, ...payload }), [send]);
+  const approveMoves = useCallback((ids: string[] | "all", accept: boolean) => send({ type: "move-approve", ...(ids === "all" ? { all: true } : { ids }), accept }), [send]);
   // The GM: the map opens on every player's screen.
   const shareMap = useCallback(() => send({ type: "map-share" }), [send]);
 
@@ -1204,6 +1255,11 @@ export function useSession() {
     sendReadAloud,
     dismissReadAloud,
     pings,
+    ruler,
+    resetExplored,
+    undoMove,
+    approveMoves,
+    mapSound,
     mapShared,
     notice,
     chat,

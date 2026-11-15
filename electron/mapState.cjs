@@ -59,6 +59,12 @@ function cleanToken(raw) {
     vision: raw.vision == null ? null : Math.min(1000, Math.max(0, num(raw.vision, 0))),
     // Which way it faces, degrees clockwise from up (FG's token orientation); null: not turned.
     facing: cleanFacing(raw.facing),
+    // What players call it until it is known (FG's unidentified name); "": its name.
+    unidentified: text(raw.unidentified, "").slice(0, 48),
+    // How high it is, in the scene's units (FG's and Foundry's elevation): flying, on a ledge, under water.
+    elevation: Math.round(Math.min(100000, Math.max(-100000, num(raw.elevation, 0))) * 10) / 10,
+    // Its own senses line, over its character's ("Darkvision 60 ft, Blindsight 10 ft"); "": the record's.
+    senses: text(raw.senses, "").slice(0, 200),
   };
 }
 function cleanFacing(value) {
@@ -96,6 +102,9 @@ function cleanLight(raw) {
     rotation: ((Math.round(num(raw.rotation, 0)) % 360) + 360) % 360,
     animation: ["none", "flicker", "pulse", "flash", "torch"].includes(raw.animation) ? raw.animation : "none",
     speed: Math.min(1, Math.max(0, num(raw.speed, 0.5))),
+    // Magical darkness (the Darkness spell, Foundry's negative light): its dim
+    // radius is dark whatever else lights it; darkvision does not see in it.
+    darkness: Boolean(raw.darkness),
   };
 }
 
@@ -230,6 +239,8 @@ function cleanSettings(raw) {
       intensity: Math.min(1, Math.max(0, num(weather.intensity, 0.5))),
       direction: ((num(weather.direction, 250) % 360) + 360) % 360,
     },
+    // This scene's diagonal rule ("1", "1.5", "raw"); null: the campaign's.
+    diagonal: ["1", "1.5", "raw"].includes(String(value.diagonal)) ? String(value.diagonal) : null,
   };
 }
 
@@ -362,7 +373,23 @@ function savedMap(value) {
   // next open is exact) and the picture it painted (a file kept beside the
   // campaign: its name and version), by scene id.
   const studio = value && typeof value === "object" && value.studio && typeof value.studio === "object" ? Object.fromEntries(Object.entries(value.studio).slice(0, 500).filter(([, item]) => item && typeof item === "object")) : {};
-  if (!value || typeof value !== "object") return { tokens, doors, sight, locked, settings, lights, drawings, deathMarkers, walls, masks, labels, groups, fx, tiles, frames, entered, studio };
+  // What each player has seen of each scene (fog of war, FG's and Foundry's
+  // explored areas): kept by the host, saved with the campaign, sent to that player alone.
+  const explored = {};
+  const regions = {};
+  const sounds = {};
+  if (!value || typeof value !== "object") return { tokens, doors, sight, locked, settings, lights, drawings, deathMarkers, walls, masks, labels, groups, fx, tiles, frames, entered, studio, explored, regions, sounds };
+  for (const [sceneId, list] of Object.entries(value.sounds ?? {}).slice(0, 500)) if (Array.isArray(list)) sounds[sceneId.slice(0, 80)] = list.map(cleanMapSound).filter(Boolean).slice(0, MAX_MAP_SOUNDS);
+  for (const [sceneId, list] of Object.entries(value.regions ?? {}).slice(0, 500)) if (Array.isArray(list)) regions[sceneId.slice(0, 80)] = list.map(cleanRegion).filter(Boolean).slice(0, MAX_REGIONS);
+  for (const [sceneId, row] of Object.entries(value.explored ?? {}).slice(0, 500)) {
+    if (!row || typeof row !== "object") continue;
+    explored[sceneId.slice(0, 80)] = Object.fromEntries(
+      Object.entries(row)
+        .slice(0, 40)
+        .filter(([, list]) => Array.isArray(list))
+        .map(([name, list]) => [name.slice(0, 24), list.filter((polygon) => Array.isArray(polygon) && polygon.length >= 6 && polygon.length <= 8000).map((polygon) => polygon.map((value) => Math.round(Number(value) || 0))).slice(-EXPLORED_KEPT)]),
+    );
+  }
   for (const [sceneId, list] of Object.entries(value.deathMarkers ?? {}).slice(0, 500)) {
     if (Array.isArray(list)) deathMarkers[sceneId.slice(0, 80)] = list.map(cleanDeathMarker).filter(Boolean).slice(-MAX_DEATH_MARKERS);
   }
@@ -396,8 +423,66 @@ function savedMap(value) {
   for (const [sceneId, list] of Object.entries(value.drawings ?? {}).slice(0, 500)) {
     if (Array.isArray(list)) drawings[sceneId.slice(0, 80)] = list.map(cleanDrawing).filter(Boolean).slice(-MAX_DRAWINGS);
   }
-  return { tokens, doors, sight, locked, settings, lights, drawings, deathMarkers, walls, masks, labels, groups, fx, tiles, frames, entered, studio };
+  return { tokens, doors, sight, locked, settings, lights, drawings, deathMarkers, walls, masks, labels, groups, fx, tiles, frames, entered, studio, explored, regions, sounds };
 }
+// Explored areas kept per player and scene (geometry.mjs EXPLORED_CAP).
+const EXPLORED_KEPT = 400;
+
+// A region of the map (Map Studio's Traps & regions, a Foundry region): trap
+// and pit spring when a player's token steps in (the token stops there, the
+// GM is told, movement locks); difficult terrain costs more to cross;
+// teleport moves whoever steps in to its destination (a point here, another
+// region by name, or a point on another scene). Players are never sent the
+// traps, pits and teleports, nor any note.
+const REGION_KINDS = ["trap", "pit", "difficult", "teleport"];
+function cleanRegion(raw) {
+  if (!raw || typeof raw !== "object" || !REGION_KINDS.includes(raw.kind)) return null;
+  const points = Array.isArray(raw.points) ? raw.points.map(Number).filter(Number.isFinite).slice(0, 2000) : [];
+  if (points.length < 6 || points.length % 2) return null;
+  const to = raw.to;
+  return {
+    id: text(raw.id, "").slice(0, 64) || `r-${crypto.randomBytes(5).toString("hex")}`,
+    kind: raw.kind,
+    name: text(raw.name, raw.kind === "difficult" ? "Difficult terrain" : raw.kind[0].toUpperCase() + raw.kind.slice(1)).slice(0, 120),
+    note: typeof raw.note === "string" ? raw.note.slice(0, 4000) : "",
+    points: points.map((value) => Math.round(value * 10) / 10),
+    on: raw.on !== false,
+    ...(raw.kind === "difficult" ? { cost: Math.min(5, Math.max(1, num(raw.cost, 2))) } : {}),
+    ...(raw.kind === "teleport"
+      ? {
+          to:
+            typeof to === "string"
+              ? text(to, "").slice(0, 120)
+              : to && typeof to === "object" && Number.isFinite(Number(to.x)) && Number.isFinite(Number(to.y))
+                ? { x: Number(to.x), y: Number(to.y), ...(typeof to.sceneId === "string" && to.sceneId ? { sceneId: to.sceneId.slice(0, 80) } : {}) }
+                : "",
+        }
+      : {}),
+  };
+}
+const MAX_REGIONS = 300;
+
+// A sound placed on the map (Foundry's ambient sound): a library sound that
+// loops at a point, heard by players whose tokens are within its radius
+// (feet), louder nearer, muffled by walls that stop sound.
+function cleanMapSound(raw) {
+  if (!raw || typeof raw !== "object") return null;
+  const x = num(raw.x, NaN);
+  const y = num(raw.y, NaN);
+  const sound = text(raw.sound, "").slice(0, 300);
+  if (!Number.isFinite(x) || !Number.isFinite(y) || !sound) return null;
+  return {
+    id: text(raw.id, "").slice(0, 64) || `s-${crypto.randomBytes(5).toString("hex")}`,
+    name: text(raw.name, sound.split("/").pop() ?? "Sound").slice(0, 80),
+    sound,
+    x: Math.round(x),
+    y: Math.round(y),
+    radius: Math.min(1000, Math.max(5, num(raw.radius, 30))),
+    volume: Math.min(1, Math.max(0, num(raw.volume, 0.8))),
+    on: raw.on !== false,
+  };
+}
+const MAX_MAP_SOUNDS = 60;
 const MAX_DRAWINGS = 400;
 const MAX_PLAYER_DRAWINGS = 60;
 
@@ -415,10 +500,52 @@ function presetLight(name, profiles = []) {
 // Walls an image may hold from Map Studio (FG maps run to many thousands of segments).
 const MAX_WALLS_STUDIO = 20000;
 
-function createMapState({ saved, records, onChange = () => undefined, hasArt = () => false, hasPicture = () => false, artFor = () => null, hasTile = () => true, combatFor = () => null, activeRecord = () => null, sharedWith = null, colorOf = playerColor }) {
+function createMapState({ saved, records, onChange = () => undefined, hasArt = () => false, hasPicture = () => false, artFor = () => null, hasTile = () => true, combatFor = () => null, activeRecord = () => null, sharedWith = null, colorOf = playerColor, tableOptions = () => ({}), onRegion = () => undefined, onTracker = () => false }) {
   // One master per map: a second state (the GM's private image window) works on
   // the very same walls, lights, tokens, paint and effects as the table's.
   const state = sharedWith ? sharedWith.rawState() : savedMap(saved);
+  state.explored = state.explored ?? {};
+  // Counts that move on when a player's explored areas change ("*": anyone's), so each is sent only its own news (not saved).
+  if (!("exploredVersions" in state)) Object.defineProperty(state, "exploredVersions", { value: new Map(), enumerable: false });
+  const bumpExplored = (key) => {
+    state.exploredVersions.set(key, (state.exploredVersions.get(key) ?? 0) + 1);
+    state.exploredVersions.set("*", (state.exploredVersions.get("*") ?? 0) + 1);
+  };
+  // The last views merged for each player, so the same view is not merged again.
+  const lastMerged = new Map();
+  state.regions = state.regions ?? {};
+  state.sounds = state.sounds ?? {};
+  function soundsHere() {
+    if (!scene) return [];
+    state.sounds[scene.id] = state.sounds[scene.id] ?? [];
+    return state.sounds[scene.id];
+  }
+  // What a player hears of the placed sounds: by their nearest token in reach,
+  // fading to nothing at the edge; through walls that stop sound, quieter and muffled.
+  function soundsHeard(listeners) {
+    const per = pixelsPerUnit();
+    const out = [];
+    for (const placed of soundsHere()) {
+      if (!placed.on) continue;
+      let best = null;
+      for (const token of listeners) {
+        const reach = placed.radius * per;
+        const distance = Math.hypot(token.x - placed.x, token.y - placed.y);
+        if (distance > reach) continue;
+        const walls = geometry.soundWalls(wallsHere(), doorsHere(), token, placed);
+        const gain = placed.volume * (1 - distance / reach) * (walls ? 0.45 / walls : 1);
+        if (!best || gain > best.gain) best = { gain, muffled: walls > 0 };
+      }
+      if (best && best.gain > 0.01) out.push({ id: placed.id, sound: placed.sound, gain: Math.round(best.gain * 100) / 100, ...(best.muffled ? { muffled: true } : {}) });
+    }
+    return out;
+  }
+  // Each token's moves, to undo and to draw this turn's path (not saved), and
+  // the moves players asked for while movement is locked (FG's TokenMoveManager).
+  if (!("moveLog" in state)) Object.defineProperty(state, "moveLog", { value: new Map(), enumerable: false });
+  if (!("moveRequests" in state)) Object.defineProperty(state, "moveRequests", { value: new Map(), enumerable: false });
+  const logKey = (token) => `${scene.id}|${token.id}`;
+  const logOf = (token) => state.moveLog.get(logKey(token)) ?? [];
   let scene = null;
   const visionCache = new Map();
   // The last edits on each scene's walls, to undo (FG has none; Foundry Ctrl+Z).
@@ -587,9 +714,7 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
   // How far a token sees in the dark, in feet: its own setting, else its
   // character's senses (C&C deepvision, darkvision, twilight vision).
   function visionRange(token) {
-    if (token.vision != null) return token.vision;
-    const record = token.recordId ? records.get(token.recordId) : null;
-    return geometry.sensesRange(record?.data?.senses);
+    return sensesOf(token).darkvision;
   }
 
   // Every light shining now: the scene's lights that are on, and the lights
@@ -610,10 +735,36 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       }
       out.push({ id, x, y, brightPx: bright * per, dimPx: dim * per, color, hidden, polygon, ...(shape.animation && shape.animation !== "none" ? { animation: shape.animation, speed: shape.speed } : {}) });
     };
-    for (const light of lightsHere()) if (light.on && !light.hidden) add(light.id, light.x, light.y, light.bright, light.dim, light.color, light.hidden, light);
+    for (const light of lightsHere()) if (light.on && !light.hidden && !light.darkness) add(light.id, light.x, light.y, light.bright, light.dim, light.color, light.hidden, light);
     // A hidden token's light is marked hidden: it reaches the GM only.
     for (const token of tokensHere()) if (token.light) add(`token:${token.id}`, token.x, token.y, token.light.bright, token.light.dim, token.light.color, token.hidden);
     return out;
+  }
+
+  // Magical darkness on the scene now: each with its reach (pixels) and its own outline.
+  function darknessSources() {
+    const per = pixelsPerUnit();
+    const out = [];
+    for (const light of lightsHere()) {
+      if (!light.on || !light.darkness) continue;
+      const reachPx = Math.max(light.bright, light.dim) * per;
+      const key = `D|${scene.id}|${Math.round(light.x)}|${Math.round(light.y)}|${Math.round(reachPx)}`;
+      let polygon = visionCache.get(key);
+      if (!polygon) {
+        polygon = geometry.sceneSight(scene, { x: light.x, y: light.y }, doorsHere(), 0, "light", reachPx * 1.05 + 1, null);
+        visionCache.set(key, polygon);
+      }
+      out.push({ id: light.id, x: light.x, y: light.y, radiusPx: reachPx, polygon, hidden: light.hidden });
+    }
+    return out;
+  }
+
+  // A token's senses (its own line, else its character's), in feet; its sight
+  // in the dark set on the token wins over darkvision.
+  function sensesOf(token) {
+    const record = token.recordId ? records.get(token.recordId) : null;
+    const parsed = geometry.parseSenses(token.senses || record?.data?.senses);
+    return { ...parsed, darkvision: token.vision != null ? token.vision : parsed.darkvision };
   }
 
   function sightOn() {
@@ -629,6 +780,103 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
   function changed({ keepVision = false } = {}) {
     if (!keepVision || visionCache.size > 4000) visionCache.clear();
     onChange();
+  }
+
+  // How a diagonal counts here: the scene's rule, else the campaign's (FG's HRDD).
+  function diagonalNow() {
+    return settingsHere().diagonal ?? tableOptions().diagonal ?? "1";
+  }
+
+  function regionsHere() {
+    if (!scene) return [];
+    state.regions[scene.id] = state.regions[scene.id] ?? [];
+    return state.regions[scene.id];
+  }
+  // What entering a point costs (Map Studio's difficult terrain, cost 2 by
+  // default), or null when the scene has none.
+  function terrainCost() {
+    const list = regionsHere().filter((region) => region.kind === "difficult" && region.on);
+    if (!list.length) return null;
+    return (x, y) => {
+      let cost = 1;
+      for (const region of list) if (region.cost > cost && geometry.pointInPolygon(x, y, region.points)) cost = region.cost;
+      return cost;
+    };
+  }
+  const terrainOut = () => regionsHere().filter((region) => region.kind === "difficult" && region.on).map((region) => ({ points: region.points, cost: region.cost }));
+  const regionCentre = (region) => {
+    const xs = region.points.filter((_, index) => index % 2 === 0);
+    const ys = region.points.filter((_, index) => index % 2 === 1);
+    return { x: (Math.min(...xs) + Math.max(...xs)) / 2, y: (Math.min(...ys) + Math.max(...ys)) / 2 };
+  };
+  // Where a move from a to b first steps into a trap, pit or teleport it did not start in.
+  function enteredRegion(a, b) {
+    const list = regionsHere().filter((region) => region.on && region.kind !== "difficult" && !geometry.pointInPolygon(a.x, a.y, region.points));
+    if (!list.length) return null;
+    const steps = Math.max(1, Math.ceil(Math.hypot(b.x - a.x, b.y - a.y) / (geometry.gridSize(scene) / 4)));
+    for (let step = 1; step <= steps; step += 1) {
+      const at = { x: a.x + ((b.x - a.x) * step) / steps, y: a.y + ((b.y - a.y) * step) / steps };
+      const region = list.find((item) => geometry.pointInPolygon(at.x, at.y, item.points));
+      if (region) return { region, at };
+    }
+    return null;
+  }
+  // A token moved, as its mover may: stopped by walls (collide), at the edge of
+  // a trap a player's token steps into, or sent on by a teleport. The move is
+  // kept to undo and for this turn's path.
+  function stepToken(token, to, seat, { snap, collide }) {
+    const from = { x: token.x, y: token.y };
+    const result = geometry.settleMove(scene, wallsHere(), doorsHere(), from, to, token.squares, { snap, collide });
+    let at = { x: result.x, y: result.y };
+    let sprang = null;
+    // A play test's token (an "@" seat) springs traps too, but never locks the table.
+    const tester = String(seat.name ?? "").startsWith("@");
+    if (seat.role !== "dm") {
+      const hit = enteredRegion(from, at);
+      if (hit) {
+        sprang = hit.region;
+        if (hit.region.kind === "teleport") {
+          const dest = hit.region.to;
+          const named = typeof dest === "string" && dest ? regionsHere().find((item) => item.name.toLowerCase() === dest.toLowerCase() && item !== hit.region) : null;
+          if (dest && typeof dest === "object" && dest.sceneId && dest.sceneId !== scene.id) {
+            // To another scene (one the table has opened before): the token goes there.
+            const there = state.tokens[dest.sceneId];
+            if (Array.isArray(there) && there.length < MAX_TOKENS) {
+              tokensHere().splice(tokensHere().indexOf(token), 1);
+              there.push({ ...token, x: dest.x, y: dest.y });
+              state.moveLog.delete(logKey(token));
+              return { blocked: result.blocked, sprang, gone: dest.sceneId };
+            }
+          } else if (named || (dest && typeof dest === "object")) {
+            const point = named ? regionCentre(named) : dest;
+            at = geometry.snapCenter(scene, point.x, point.y, token.squares);
+          }
+        } else {
+          // A trap or pit: the token stops on the first square of it.
+          const stop = geometry.snapCenter(scene, hit.at.x, hit.at.y, token.squares);
+          at = geometry.pointInPolygon(stop.x, stop.y, hit.region.points) ? stop : { x: Math.round(hit.at.x), y: Math.round(hit.at.y) };
+          if (!tester) state.locked[scene.id] = true;
+        }
+      }
+    }
+    token.x = at.x;
+    token.y = at.y;
+    if (at.x !== from.x || at.y !== from.y) {
+      const log = [...logOf(token), { from, to: { ...at }, by: seat.name }].slice(-40);
+      state.moveLog.set(logKey(token), log);
+    }
+    if (sprang) onRegion({ region: sprang, token, seat, sceneId: scene.id });
+    return { blocked: result.blocked, sprang };
+  }
+  // A player's move while the GM has locked movement: asked for, until the GM says.
+  function requestMove(token, to, seat) {
+    const point = geometry.snapCenter(scene, to.x, to.y, token.squares);
+    state.moveRequests.set(logKey(token), { id: token.id, name: token.name, by: seat.name, from: { x: token.x, y: token.y }, to: point, at: Date.now() });
+  }
+  function requestsHere() {
+    if (!scene) return [];
+    const prefix = `${scene.id}|`;
+    return [...state.moveRequests].filter(([key]) => key.startsWith(prefix)).map(([, request]) => request);
   }
 
   function units() {
@@ -687,11 +935,40 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
     return geometry.healthStatus(hp.total, hp.wounds);
   }
 
+  // Whether a token is a character's (a player's) for FG's token options, else the GM's creature.
+  function isPc(token) {
+    if (token.owner) return true;
+    return Boolean(token.recordId && records.get(token.recordId)?.type === "character");
+  }
+  // FG's token options: what this seat is shown of a token's health (bar,
+  // barhover, dot, dothover; off sends none to players) and its name (off:
+  // only a player's own; an unidentified name replaces the real one).
+  function tokenShows(token, seat) {
+    const options = tableOptions();
+    const set = (isPc(token) ? options.healthPc : options.healthNpc) ?? "dot";
+    const names = options.names ?? "hover";
+    if (seat.role === "dm") return { health: set === "off" ? "dothover" : set, names: names === "off" ? "hover" : names, name: token.name };
+    const own = token.owner !== "" && token.owner === seat.name;
+    return { health: set, names, name: own ? token.name : names === "off" ? "" : token.unidentified || token.name };
+  }
+
+  function movesOut(token) {
+    const log = logOf(token);
+    if (!log.length) return {};
+    return { undo: log.length, ...(onTracker(token) ? { path: [log[0].from.x, log[0].from.y, ...log.flatMap((move) => [move.to.x, move.to.y])] } : {}) };
+  }
+
   function publicToken(token, seat, assetToken) {
+    const shows = tokenShows(token, seat);
     const out = {
       id: token.id,
       recordId: token.recordId,
-      name: token.name,
+      name: shows.name,
+      // How health and the name are drawn on this seat (FG's token options).
+      healthShow: shows.health,
+      namesShow: shows.names,
+      elevation: token.elevation ?? 0,
+      ...(seat.role === "dm" ? { unidentified: token.unidentified ?? "", senses: token.senses ?? "" } : {}),
       x: token.x,
       y: token.y,
       squares: token.squares,
@@ -701,7 +978,10 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       color: token.owner ? colorOf(token.owner) : FACTION_COLOR[token.faction],
       hidden: token.hidden,
       mine: seat.role === "player" && token.owner === seat.name,
-      health: health(token),
+      health: shows.health === "off" ? null : health(token),
+      // The GM's and its owner's: how many moves can be undone, and (on the
+      // combat tracker) this turn's path, where it went since its turn began.
+      ...(seat.role === "dm" || (token.owner !== "" && token.owner === seat.name) ? movesOut(token) : {}),
       // Whose turn it is on the combat tracker.
       active: Boolean(combatFor(token.id)?.active) || (token.recordId != null && token.recordId === activeRecord()),
       light: token.light,
@@ -754,7 +1034,7 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       .map((wall) => ({ id: wall.id, group: doorGroup(wall), x1: wall.x1, y1: wall.y1, x2: wall.x2, y2: wall.y2, secret: wall.door === 2 || wall.toggle === "gm", kind: wall.door > 0 ? "door" : wall.kind, state: wall.id in doors ? doors[wall.id] : wall.ds }));
     const mask = maskHere();
     const groups = groupsHere();
-    const shared = { sceneId: scene.id, sight: sightOn(), locked, darkness: dark, settings: { grid: settings.grid, weather: settings.weather, darkness: settings.darkness }, drawings: drawingsHere(), deathMarkers: deathMarkersHere(), mask: mask.on || mask.shapes.length ? mask : null, groups, fx: fxHere() };
+    const shared = { sceneId: scene.id, sight: sightOn(), locked, darkness: dark, settings: { grid: settings.grid, weather: settings.weather, darkness: settings.darkness, diagonal: settings.diagonal, diagonalRule: diagonalNow() }, drawings: drawingsHere(), deathMarkers: deathMarkersHere(), mask: mask.on || mask.shapes.length ? mask : null, groups, fx: fxHere() };
     const lightOut = (list) => list.map(({ id, x, y, brightPx, dimPx, color, polygon, animation, speed }) => ({ id, x, y, brightPx, dimPx, color, polygon, ...(animation ? { animation, speed } : {}) }));
     if (seat.role === "dm") {
       return {
@@ -763,6 +1043,16 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
         doors: doorList,
         vision: null,
         lights: lightOut(sources),
+        // The sounds placed on the map (the GM hears them through the player vision preview).
+        mapSounds: soundsHere(),
+        sounds: [],
+        // Moves players asked for while movement is locked, for the GM's approval strip.
+        moveRequests: requestsHere(),
+        // Every region (traps and their notes too), and the difficult terrain the ruler counts.
+        regions: regionsHere(),
+        terrain: terrainOut(),
+        darkAreas: darknessSources(),
+        trueSeeing: [],
         seeing: [],
         sceneLights: lightsHere(),
         walls: wallsHere(),
@@ -783,23 +1073,59 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
     // and darkvision: a token standing in a light's bright light sees only by light.
     const spoils = records.list({ type: "siegegame" }).length > 0;
     const spoiled = spoils && dark > 0 ? mine.filter((token) => visionRange(token) > 0 && geometry.brightlyLit(token.x, token.y, shining)).map((token) => token.id) : [];
+    // Each token's senses: blindsight perceives what is near as darkvision does (and in
+    // magical darkness); truesight and Devil's Sight see in magical darkness.
+    const senses = new Map(mine.map((token) => [token.id, sensesOf(token)]));
     const seeing = mine
-      .map((token, index) => ({ x: token.x, y: token.y, radiusPx: spoiled.includes(token.id) ? 0 : visionRange(token) * per, polygon: vision ? vision[index] : null }))
+      .map((token, index) => {
+        // Darkvision (a bright light spoils it in C&C); blindsight, truesight and Devil's Sight see in the dark too.
+        const sense = senses.get(token.id);
+        return { x: token.x, y: token.y, radiusPx: Math.max(spoiled.includes(token.id) ? 0 : sense.darkvision, sense.blindsight, sense.truesight, sense.devilsight) * per, polygon: vision ? vision[index] : null };
+      })
       .filter((item) => item.radiusPx > 0);
+    const trueSeeing = mine
+      .map((token, index) => {
+        const sense = senses.get(token.id);
+        return { x: token.x, y: token.y, radiusPx: Math.max(sense.truesight, sense.devilsight, sense.blindsight) * per, polygon: vision ? vision[index] : null };
+      })
+      .filter((item) => item.radiusPx > 0);
+    const within = (list, x, y) => list.some((item) => Math.hypot(x - item.x, y - item.y) <= item.radiusPx && (!item.polygon || geometry.pointInPolygon(x, y, item.polygon)));
+    const darkAreas = darknessSources();
+    // Tremorsense: what touches the ground within its reach, through walls, by a token on the ground.
+    const tremor = mine.filter((token) => senses.get(token.id).tremorsense > 0 && !(token.elevation > 0));
+    const felt = (token) => !(token.elevation > 0) && tremor.some((by) => by !== token && Math.hypot(by.x - token.x, by.y - token.y) <= senses.get(by.id).tremorsense * per);
     // Twilight vision: a moonlit night is like dusk, and dim light is enough.
     const twilight = mine.some((token) => token.recordId && geometry.hasTwilightVision(records.get(token.recordId)?.data?.senses));
     const needsLight = mine.length > 0 && (twilight ? dark >= 1 : dark >= geometry.NEEDS_LIGHT);
     const visibleInDark = (x, y) =>
-      !needsLight || geometry.lit(x, y, shining) || seeing.some((item) => Math.hypot(x - item.x, y - item.y) <= item.radiusPx && (!item.polygon || geometry.pointInPolygon(x, y, item.polygon)));
+      mine.length > 0 && within(darkAreas, x, y) ? within(trueSeeing, x, y) : !needsLight || geometry.lit(x, y, shining) || within(seeing, x, y);
     // Nothing under the GM's mask reaches a player (FG: tokens under the mask are hidden), but their own tokens.
-    const tokens = shown.filter((token) => token.owner === seat.name || mine.includes(token) || ((!vision || geometry.seen(token.x, token.y, vision, slack)) && visibleInDark(token.x, token.y) && !masked(token.x, token.y)));
+    const sighted = (token) => (!vision || geometry.seen(token.x, token.y, vision, slack)) && visibleInDark(token.x, token.y);
+    const sensedOnly = new Set();
+    const tokens = shown.filter((token) => {
+      if (token.owner === seat.name || mine.includes(token)) return true;
+      if (masked(token.x, token.y)) return false;
+      if (sighted(token)) return true;
+      if (!felt(token)) return false;
+      sensedOnly.add(token.id);
+      return true;
+    });
     // A door a player sees any side of is shown whole (all its sides).
     const seenSide = (door) => !door.secret && !masked((door.x1 + door.x2) / 2, (door.y1 + door.y2) / 2) && (!vision || geometry.seen((door.x1 + door.x2) / 2, (door.y1 + door.y2) / 2, vision, slack));
     const seenGroups = new Set(doorList.filter(seenSide).map((door) => door.group));
     const playerDoors = doorList.filter((door) => !door.secret && seenGroups.has(door.group));
     return {
-      tokens: tokens.map((token) => publicToken(token, seat, assetToken)),
+      // A token felt by tremorsense alone is marked so (a shape, not a sight of it).
+      tokens: tokens.map((token) => (sensedOnly.has(token.id) ? { ...publicToken(token, seat, assetToken), name: "", health: null, art: undefined, video: undefined, light: null, sensed: true } : publicToken(token, seat, assetToken))),
       ...shared,
+      // The placed sounds they hear now, and how loud (never where they are).
+      sounds: soundsHeard(mine),
+      // Their own moves waiting for the GM, and the difficult terrain (no traps, no notes) the ruler counts.
+      moveRequests: requestsHere().filter((request) => request.by === seat.name),
+      terrain: terrainOut(),
+      // Magical darkness reaching what the player sees, and where their truesight sees through it.
+      darkAreas: darkAreas.filter((area) => !area.hidden && (!vision || mine.some((token) => Math.hypot(token.x - area.x, token.y - area.y) <= area.radiusPx) || vision.some((polygon) => geometry.polygonsOverlap(area.polygon, polygon)))).map(({ hidden: _hidden, ...area }) => area),
+      trueSeeing,
       doors: playerDoors.map(({ secret, ...door }) => door),
       vision,
       // Only the lights that reach what the player sees now: a light's polygon
@@ -852,6 +1178,14 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
           .filter(Boolean);
       }
       liveScene();
+      // A bundle's regions the first time (Foundry's: a Pause Game behaviour is a trap,
+      // Modify Movement Cost difficult terrain, Teleport Token a teleport).
+      if (!state.regions[next.id]) {
+        state.regions[next.id] = (Array.isArray(next.regions) ? next.regions : [])
+          .flatMap((region) => (Array.isArray(region.polygons) ? region.polygons : []).map((points, index) => cleanRegion({ id: `${region.id}-${index}`.slice(0, 64), kind: region.kind ?? (region.trap ? "trap" : null), name: region.name, note: region.note ?? "", points, cost: region.cost, to: region.to })))
+          .filter(Boolean)
+          .slice(0, MAX_REGIONS);
+      }
       if (!state.lights[next.id]) {
         state.lights[next.id] = (next.lights ?? [])
           .map((light) => cleanLight({ id: light.id, x: light.x, y: light.y, bright: light.bright, dim: light.dim, color: light.color, on: !light.hidden }))
@@ -952,13 +1286,16 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       if (!scene) throw new Error("No scene is open.");
       const token = findToken(id);
       if (!canMove(token, seat)) throw new Error("That is not your token.");
-      if (seat.role !== "dm" && state.locked[scene.id]) throw new Error("The GM has locked token movement.");
+      if (seat.role !== "dm" && state.locked[scene.id] && !String(seat.name ?? "").startsWith("@")) {
+        // Locked: the move becomes a request with its path on the GM's map (not a play test's token).
+        requestMove(token, to, seat);
+        changed({ keepVision: true });
+        return { token, blocked: false, requested: true };
+      }
       const blockByWalls = collide ?? (seat.role !== "dm" && sightOn());
-      const result = geometry.settleMove(scene, wallsHere(), doorsHere(), { x: token.x, y: token.y }, to, token.squares, { snap, collide: blockByWalls });
-      token.x = result.x;
-      token.y = result.y;
+      const result = stepToken(token, to, seat, { snap, collide: blockByWalls });
       changed({ keepVision: true });
-      return { token, blocked: result.blocked };
+      return { token, ...result };
     },
     // Several tokens at once (a group dragged together, a marching order):
     // every one must be the seat's to move; each is stopped by walls on its own.
@@ -969,26 +1306,136 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       const list = moves.map((item) => ({ token: findToken(String(item.id)), to: { x: num(item.x, NaN), y: num(item.y, NaN) } }));
       if (list.some(({ to }) => !Number.isFinite(to.x) || !Number.isFinite(to.y))) throw new Error("Where to?");
       for (const { token } of list) if (!canMove(token, seat)) throw new Error(`${token.name} is not your token.`);
-      if (seat.role !== "dm" && state.locked[scene.id]) throw new Error("The GM has locked token movement.");
+      if (seat.role !== "dm" && state.locked[scene.id] && !String(seat.name ?? "").startsWith("@")) {
+        for (const { token, to } of list) requestMove(token, to, seat);
+        changed({ keepVision: true });
+        return list.map(({ token }) => ({ token, blocked: false, requested: true }));
+      }
       const blockByWalls = collide ?? (seat.role !== "dm" && sightOn());
       const out = [];
-      for (const { token, to } of list) {
-        const result = geometry.settleMove(scene, wallsHere(), doorsHere(), { x: token.x, y: token.y }, to, token.squares, { snap, collide: blockByWalls });
-        token.x = result.x;
-        token.y = result.y;
-        out.push({ token, blocked: result.blocked });
+      for (const { token, to } of list) out.push({ token, ...stepToken(token, to, seat, { snap, collide: blockByWalls }) });
+      changed({ keepVision: true });
+      return out;
+    },
+    // Undo a move (Ctrl+Z, the token menu): a player their own token's last
+    // move, if it was theirs; the GM any token's. Back where it came from.
+    undoMove(id, seat) {
+      if (!scene) throw new Error("No scene is open.");
+      const token = findToken(id);
+      const log = logOf(token);
+      if (!log.length) throw new Error(`${token.name} has no move to undo.`);
+      const last = log[log.length - 1];
+      if (seat.role !== "dm") {
+        if (!canMove(token, seat)) throw new Error("That is not your token.");
+        if (last.by !== seat.name) throw new Error("Its last move was not yours.");
+        if (state.locked[scene.id]) throw new Error("The GM has locked token movement.");
+      }
+      token.x = last.from.x;
+      token.y = last.from.y;
+      state.moveLog.set(logKey(token), log.slice(0, -1));
+      changed({ keepVision: true });
+      return { token, undone: log.length };
+    },
+    // A token's turn begins on the combat tracker: its path starts again.
+    clearPath(tokenId) {
+      if (!scene) return;
+      if (state.moveLog.delete(`${scene.id}|${tokenId}`)) changed({ keepVision: true });
+    },
+    path: (tokenId) => (scene ? (state.moveLog.get(`${scene.id}|${tokenId}`) ?? []).map((move) => ({ ...move })) : []),
+    // The GM's approval of moves asked for while movement is locked: some (ids) or all, accepted or cancelled.
+    approveMoves(ids, accept, seat) {
+      if (seat.role !== "dm") throw new Error("Only the GM approves moves.");
+      if (!scene) throw new Error("No scene is open.");
+      const wanted = requestsHere().filter((request) => ids === "all" || (Array.isArray(ids) && ids.includes(request.id)));
+      const out = [];
+      for (const request of wanted) {
+        state.moveRequests.delete(`${scene.id}|${request.id}`);
+        const token = tokensHere().find((item) => item.id === request.id);
+        if (!token) continue;
+        if (accept) {
+          // The move as its player would make it: walls stop it, traps spring.
+          const result = stepToken(token, request.to, { role: "player", name: request.by }, { snap: true, collide: sightOn() });
+          out.push({ id: token.id, name: token.name, accepted: true, ...(result.blocked ? { blocked: true } : {}), ...(result.sprang ? { sprang: result.sprang.name } : {}) });
+        } else out.push({ id: token.id, name: token.name, accepted: false });
       }
       changed({ keepVision: true });
       return out;
+    },
+    moveRequests: () => requestsHere(),
+    // Sounds placed on the map (Foundry's ambient sounds): the GM's list, place, change, remove.
+    mapSounds: () => soundsHere(),
+    addMapSound(input, seat) {
+      if (seat.role !== "dm") throw new Error("Only the GM places sounds.");
+      if (!scene) throw new Error("No scene is open.");
+      const placed = cleanMapSound({ ...input, id: undefined });
+      if (!placed) throw new Error("Give a sound and where (x, y).");
+      if (soundsHere().length >= MAX_MAP_SOUNDS) throw new Error("This scene has too many sounds.");
+      soundsHere().push(placed);
+      changed({ keepVision: true });
+      return placed;
+    },
+    updateMapSound(id, patch, seat) {
+      if (seat.role !== "dm") throw new Error("Only the GM changes sounds.");
+      const list = soundsHere();
+      const index = list.findIndex((item) => item.id === id);
+      if (index < 0) throw new Error(`No sound ${id} on this map.`);
+      const next = cleanMapSound({ ...list[index], ...patch, id });
+      if (!next) throw new Error("That is not a sound.");
+      list[index] = next;
+      changed({ keepVision: true });
+      return next;
+    },
+    removeMapSound(id, seat) {
+      if (seat.role !== "dm") throw new Error("Only the GM removes sounds.");
+      const list = soundsHere();
+      const index = list.findIndex((item) => item.id === id);
+      if (index < 0) throw new Error(`No sound ${id} on this map.`);
+      list.splice(index, 1);
+      changed({ keepVision: true });
+    },
+    soundsFor: (player) => soundsHeard(tokensHere().filter((token) => !token.hidden && token.owner === player)),
+    // Regions (Map Studio's Traps & regions, Foundry's): the GM's list, add, change, remove.
+    regions: () => regionsHere(),
+    addRegion(input, seat) {
+      if (seat.role !== "dm") throw new Error("Only the GM makes regions.");
+      if (!scene) throw new Error("No scene is open.");
+      const region = cleanRegion({ ...input, id: undefined });
+      if (!region) throw new Error("A region needs a kind (trap, pit, difficult, teleport) and three corners or more.");
+      if (regionsHere().length >= MAX_REGIONS) throw new Error("This scene has too many regions.");
+      regionsHere().push(region);
+      changed({ keepVision: true });
+      return region;
+    },
+    updateRegion(id, patch, seat) {
+      if (seat.role !== "dm") throw new Error("Only the GM changes regions.");
+      const list = regionsHere();
+      const index = list.findIndex((item) => item.id === id);
+      if (index < 0) throw new Error(`No region ${id}.`);
+      const next = cleanRegion({ ...list[index], ...patch, id });
+      if (!next) throw new Error("That is not a region.");
+      list[index] = next;
+      changed({ keepVision: true });
+      return next;
+    },
+    removeRegion(id, seat) {
+      if (seat.role !== "dm") throw new Error("Only the GM removes regions.");
+      const list = regionsHere();
+      const index = list.findIndex((item) => item.id === id);
+      if (index < 0) throw new Error(`No region ${id}.`);
+      list.splice(index, 1);
+      changed({ keepVision: true });
     },
     update(id, patch, seat) {
       const token = findToken(id);
       // A player may light or put out a light on their own token, and turn it; nothing else.
       if (seat.role !== "dm") {
         const keys = Object.keys(patch);
-        if (!canMove(token, seat) || keys.some((key) => key !== "light" && key !== "facing")) throw new Error("Only the GM can change tokens.");
+        if (!canMove(token, seat) || keys.some((key) => key !== "light" && key !== "facing" && key !== "elevation")) throw new Error("Only the GM can change tokens.");
       }
       if (patch.facing !== undefined) token.facing = cleanFacing(patch.facing);
+      if (patch.elevation !== undefined) token.elevation = cleanToken({ x: 0, y: 0, elevation: patch.elevation }).elevation;
+      if (patch.unidentified !== undefined) token.unidentified = text(patch.unidentified, "").slice(0, 48);
+      if (patch.senses !== undefined) token.senses = text(patch.senses, "").slice(0, 200);
       if (patch.light !== undefined) token.light = typeof patch.light === "string" ? presetLight(patch.light, lightProfiles()) : cleanCarried(patch.light);
       if (patch.vision !== undefined) token.vision = patch.vision == null ? null : Math.min(1000, Math.max(0, num(patch.vision, 0)));
       if (patch.name !== undefined) token.name = text(patch.name, token.name).slice(0, 48);
@@ -1005,6 +1452,8 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       if (!canMove(token, seat)) throw new Error("That is not your token.");
       if (seat.role !== "dm" && state.locked[scene.id]) throw new Error("The GM has locked token movement.");
       list.splice(list.indexOf(token), 1);
+      state.moveLog.delete(logKey(token));
+      state.moveRequests.delete(logKey(token));
       if (token.recordId && records.get(token.recordId)?.type === "character") markEntered(token.recordId);
       changed({ keepVision: true });
       return token;
@@ -1034,6 +1483,49 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       return next;
     },
     darkness,
+    diagonalNow,
+    // Fog of war on the host: a player's view now added to what they have seen
+    // of this scene (true when that grew). Test and preview seats keep nothing.
+    explore(player, vision) {
+      if (!scene || !Array.isArray(vision) || !player || String(player).startsWith("@")) return false;
+      const key = `${scene.id}|${player}`;
+      const last = lastMerged.get(key);
+      if (last && last.length === vision.length && last.every((polygon, index) => polygon === vision[index])) return false;
+      lastMerged.set(key, vision);
+      const row = (state.explored[scene.id] = state.explored[scene.id] ?? {});
+      const known = row[player] ?? [];
+      const merged = geometry.mergeExplored(known, vision);
+      if (merged === known) return false;
+      row[player] = merged;
+      bumpExplored(key);
+      return true;
+    },
+    // What a player has seen of this scene; "*" every player's together (the GM's vision preview).
+    exploredFor(player) {
+      const row = scene ? state.explored[scene.id] ?? {} : {};
+      if (player === "*") return Object.values(row).flat();
+      return row[player] ?? [];
+    },
+    exploredVersion: (player) => state.exploredVersions.get(player === "*" ? "*" : `${scene?.id}|${player}`) ?? 0,
+    exploredPlayers: () => Object.keys((scene && state.explored[scene.id]) ?? {}),
+    // The GM's Reset explored: one player's memory of this scene, or everyone's.
+    resetExplored(player, seat) {
+      if (seat.role !== "dm") throw new Error("Only the GM can reset what players have explored.");
+      if (!scene) throw new Error("No scene is open.");
+      const row = state.explored[scene.id] ?? {};
+      if (player) delete row[player];
+      else state.explored[scene.id] = {};
+      for (const key of [...lastMerged.keys()]) if (key.startsWith(`${scene.id}|`) && (!player || key === `${scene.id}|${player}`)) lastMerged.delete(key);
+      for (const name of player ? [player] : Object.keys(row)) bumpExplored(`${scene.id}|${name}`);
+      bumpExplored(`${scene.id}|*reset`);
+      changed({ keepVision: true });
+      return { reset: player || "everyone" };
+    },
+    // A path measured as the ruler does: each leg and the whole, by this scene's rule.
+    measure(points) {
+      if (!scene) throw new Error("No scene is open.");
+      return geometry.pathDistance(scene, points, diagonalNow(), terrainCost());
+    },
     lightProfiles,
     settings: settingsHere,
     lights: lightsHere,
@@ -1046,6 +1538,7 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
         darkness: patch.darkness !== undefined ? patch.darkness : current.darkness,
         grid: { ...current.grid, ...(patch.grid ?? {}) },
         weather: { ...current.weather, ...(patch.weather ?? {}) },
+        diagonal: patch.diagonal !== undefined ? patch.diagonal : current.diagonal,
       });
       liveScene();
       // The grid changes wall thresholds (sight polygons); darkness and weather do not.
@@ -1170,18 +1663,20 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
     // and image layers made in Kraken stay.
     studioView() {
       if (!scene) return null;
-      return { scene, walls: wallsHere(), lights: lightsHere(), fx: fxHere(), studio: state.studio[scene.id] ?? null };
+      return { scene, walls: wallsHere(), lights: lightsHere(), fx: fxHere(), regions: regionsHere(), studio: state.studio[scene.id] ?? null };
     },
-    fromStudio({ walls = [], lights = [], fx = [], project = null, picture = null }) {
+    fromStudio({ walls = [], lights = [], fx = [], regions = null, project = null, picture = null }) {
       if (!scene) throw new Error("No scene is open.");
       state.walls[scene.id] = walls.map(cleanWall).filter(Boolean).slice(0, MAX_WALLS_STUDIO);
+      // Map Studio's traps and regions play at the table.
+      if (Array.isArray(regions)) state.regions[scene.id] = regions.map(cleanRegion).filter(Boolean).slice(0, MAX_REGIONS);
       state.lights[scene.id] = lights.map(cleanLight).filter(Boolean).slice(0, 500);
       state.fx[scene.id] = fx.map(cleanFx).filter(Boolean).slice(0, 20);
       const before = state.studio[scene.id] ?? {};
       state.studio[scene.id] = { project, picture: picture ?? before.picture ?? null, saved: Date.now() };
       liveScene();
       changed();
-      return { walls: state.walls[scene.id].length, lights: state.lights[scene.id].length, fx: state.fx[scene.id].length };
+      return { walls: state.walls[scene.id].length, lights: state.lights[scene.id].length, fx: state.fx[scene.id].length, regions: regionsHere().length };
     },
     // The picture Map Studio painted for a scene (its file name and version), if any.
     studioPicture: (sceneId) => state.studio[sceneId]?.picture ?? null,
