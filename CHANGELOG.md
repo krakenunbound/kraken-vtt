@@ -6,6 +6,20 @@ full log of the work is in [PLAN.md](PLAN.md).
 
 ## Unreleased
 
+**Rough edges smoothed.**
+
+- A creature whose token has a "players call it" name is called that on the players' combat tracker and in chat too.
+- An identified item keeps its real name in tracker and chat lines, even when an unidentified copy of the same name is about.
+- Drag a result from a random table's window into the chat's entry.
+- ADV and DIS from the modifier box tag a 5E roll **[ADVANTAGE]** or **[DISADVANTAGE]**, like advantage from the rules.
+- Pause now also holds a player finishing the character wizard or improving a character.
+- A region the GM switched off at the table stays off after Map Studio's Save to Kraken.
+- Clicking a roll chip while typing in a note places the cursor; it no longer rolls for the whole table.
+- The Character Wizard's window takes the new character's name when the wizard ends.
+- Fate dice: the minus is a fat bar, so a die on its side no longer reads as "|". The Scene Aspects strip sits under windows, not over their title bars.
+- Forged: the Harm panel no longer covers the trauma Mark button. Character Selection: the Export menu no longer covers the card's name.
+- A circle's or square's template name sits under it, clear of Sleep's Zzz.
+
 **Bookkeeping, as the GM asked: arrows, potions, rations, torches and the load counted for you, each with a switch to hand-wave it.**
 
 - **Ammunition:** a bow, crossbow, sling or gun spends from its stack as it attacks; with none left the attack is refused, and chat warns when you run low. After a fight, **Recover** on the sheet picks up what can be found (half, in 5E). Traveller's guns count their magazines.

@@ -10,9 +10,9 @@ the core UI plan in [docs/core-ui-design.md](docs/core-ui-design.md).
 - [ ] Run the full GUI suite (all UI tests and the 16-game end-to-end run) on main
       as merged. Core UI stage 5 and bookkeeping each passed on their own branch,
       but not together after the merge; only the window-less checks ran on main.
-- [ ] Rerun `verify-bookkeeping-ui` on the merged build (it was stopped).
+- [x] Rerun `verify-bookkeeping-ui` on the merged build (it was stopped).
 - [ ] Release 0.1.0-alpha.91 once the suite passes.
-- [ ] Add `check-tiles` to the suite with `tsx` (it reads TypeScript).
+- [x] Add `check-tiles` to the suite with `tsx` (it reads TypeScript).
 
 ## Core UI (one interface every game slides into)
 
@@ -41,7 +41,7 @@ the core UI plan in [docs/core-ui-design.md](docs/core-ui-design.md).
       and spells cast from text, get one now).
 - [ ] Effects on tokens in scenes that aren't open catch up on game time only
       when the scene is shown.
-- [ ] Sleep's drifting Zzz overlaps the template's "Sleep (caster)" label.
+- [x] Sleep's drifting Zzz overlaps the template's "Sleep (caster)" label.
 
 ## Maps and tokens
 
@@ -56,9 +56,9 @@ the core UI plan in [docs/core-ui-design.md](docs/core-ui-design.md).
 - [ ] The GM hears placed sounds only through the vision preview.
 - [ ] The stand-alone Map Studio may refuse a project with the new teleport
       region kind.
-- [ ] A region switched off at the table comes back on after Map Studio's
+- [x] A region switched off at the table comes back on after Map Studio's
       Save to Kraken.
-- [ ] Check the combat tracker and chat never show players a creature's real
+- [x] Check the combat tracker and chat never show players a creature's real
       name when its token shows the "players call it" name.
 
 ## Records and content
@@ -70,17 +70,17 @@ the core UI plan in [docs/core-ui-design.md](docs/core-ui-design.md).
       hidden options, 5E, 2E).
 - [ ] Encounter "Place on this map" saves where tokens stand now; clicking
       spots on the map for each NPC is not built.
-- [ ] Two items with the same name, one identified and one not, can show the
+- [x] Two items with the same name, one identified and one not, can show the
       unidentified name in tracker and chat lines.
 - [ ] Lower: story templates, Foundry JSON import, PDF pages, a shop, editing
       a record's category.
 
 ## Dice and chat
 
-- [ ] Drag a table result from the table window into chat.
-- [ ] An `[ADVANTAGE]` tag in 5E roll labels when advantage comes from the chip.
-- [ ] Clicking an inline-roll chip inside the note editor rolls it publicly.
-- [ ] Confirm a note keeps its `[[1d6]]` text after editing (the UI test can
+- [x] Drag a table result from the table window into chat.
+- [x] An `[ADVANTAGE]` tag in 5E roll labels when advantage comes from the chip.
+- [x] Clicking an inline-roll chip inside the note editor rolls it publicly.
+- [x] Confirm a note keeps its `[[1d6]]` text after editing (the UI test can
       skip that step silently).
 - [ ] Lower: chat languages, quick-slot pages, a turn timer.
 
@@ -112,7 +112,7 @@ the core UI plan in [docs/core-ui-design.md](docs/core-ui-design.md).
 - [ ] Mobile and tablet players (touch pan, pinch zoom, narrow layout).
 - [ ] Import a campaign .zip (export exists).
 - [ ] Map Studio pictures in the rolling backups.
-- [ ] Pause doesn't hold the character wizards or character improvement.
+- [x] Pause doesn't hold the character wizards or character improvement.
 - [ ] Lower: first-run GM checklist and tour, an Assistant GM role, a session
       timer, light/high-contrast themes, i18n, an add-on API on the manifests,
       voice/video.
@@ -133,14 +133,14 @@ the core UI plan in [docs/core-ui-design.md](docs/core-ui-design.md).
 
 ## Known bugs and rough edges
 
-- [ ] Forged sheet: the Harm panel covers the trauma "Mark" button while a
+- [x] Forged sheet: the Harm panel covers the trauma "Mark" button while a
       trauma is pending.
 - [ ] C&C e2e once lost the inventory "Where" field on save (passed on
       rerun): look for a save race.
-- [ ] A player's sheet keeps the title "Character Wizard" after the wizard ends.
-- [ ] Fate's Scene Aspects strip overlaps window title bars.
-- [ ] Fate's minus die face can read as "|".
-- [ ] Character Selection: the Export menu covers the card's name in edit mode.
+- [x] A player's sheet keeps the title "Character Wizard" after the wizard ends.
+- [x] Fate's Scene Aspects strip overlaps window title bars.
+- [x] Fate's minus die face can read as "|".
+- [x] Character Selection: the Export menu covers the card's name in edit mode.
 - [ ] UI tests failing for setup reasons: `verify-cards-ui` and
       `verify-map-share-ui` (one window covers another's button),
       `verify-starships-ui` (the deck plan covers a button), `verify-doors-ui`
