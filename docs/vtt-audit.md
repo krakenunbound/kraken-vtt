@@ -102,6 +102,24 @@ and leaves measuring to the ruler. Built (src/table/MapView.tsx, shared/map/rang
 
 Not planned: built-in audio/video chat (#104): Discord covers it.
 
+## Seen in Fantasy Grounds, through the bridge (5E campaign "5th Edition One-Shots")
+
+- **The desktop.** The chat, modifier stack, dice tower and dice tray are panels on the desktop, and the
+  character list runs along the top. Kraken has all of them; its portraits along the top now light up
+  for whoever's turn it is and can sort into initiative order (the GM's option), which FG's don't.
+- **Map panels.** An image can be sent to the desktop's back panel (behind every window), maximised, or
+  shown full screen. Foundry's map is always the background. Kraken had map windows only: **built**, the
+  map button puts it behind every window, filling the table area (per screen).
+- **Modifiers library** (sidebar). Saved, named modifiers ("Bless +1d4") dragged onto the modifier stack.
+  Kraken: each game's fixed chips and typed numbers, no saved custom ones. **Build** (tier 2).
+- **Manual Dice Rolls** (sidebar). With the option on, rolls wait in this window for the player to type
+  what the real dice showed. This is the model for Kraken's manual dice: a queue the roll waits in, not a
+  host that stops. **Build** (tier 1, item 2).
+- **Sound: Context** (sidebar). FG's sound triggers; Kraken has chat-triggered sounds and sound sets.
+- **Options.** Every option was checked against Kraken (the table above, numbers 89 to 118): roll
+  initiative every round, stop at round start and NPC hit points are built today; FG's whisper and GM-roll
+  display options are covered by Kraken's GM seeing every whisper and its per-seat roll modes.
+
 ## Kraken against all 118 (code check, 2026-11-15)
 
 Has 37, Partial 40, Missing 41.
