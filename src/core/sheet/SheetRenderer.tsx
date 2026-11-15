@@ -5,7 +5,7 @@ import { canEdit, SheetFrame } from "../frame/SheetFrame";
 import { messageSender } from "../sender";
 import { FieldView } from "../parts/FieldView";
 import { PartView, type CustomPart, type Format } from "../parts/Parts";
-import { at, holds, num, SheetCtx, textOf, type Row, type SheetContext } from "./context";
+import { at, holds, num, setFormatters, SheetCtx, textOf, type Row, type SheetContext } from "./context";
 
 // A sheet laid out by its manifest (FG's arrange level: the ruleset lists its
 // tabs and fills each with core parts bound to record paths). The frame, the
@@ -19,8 +19,8 @@ function startingModifiers(parts: Part[], into: Record<string, unknown> = {}) {
     if (part.part === "list" && part.modifier) into[part.modifier.key] = part.modifier.kind === "check" ? false : (part.modifier.options?.[0]?.value ?? "");
     if (part.part === "strip")
       for (const item of part.items) {
-        if (item.kind === "modifier") into[item.key] = 0;
-        if (item.kind === "choice") into[item.key] = item.options[0]?.value ?? "";
+        if (item.kind === "modifier") into[item.key] = item.start ?? 0;
+        if (item.kind === "choice") into[item.key] = item.start ?? item.options[0]?.value ?? "";
       }
   }
   return into;
@@ -41,6 +41,8 @@ const NO_FEATURES: string[] = [];
 
 export function SheetRenderer({ spec: given, record, session, ruleset, custom, formats, words = NO_WORDS, features = NO_FEATURES }: { spec: SheetSpec; record: TableRecord; session: Session; ruleset: string; custom: Record<string, CustomPart>; formats: Record<string, Format>; words?: Record<string, string>; features?: string[] }) {
   const spec = useMemo(() => withWords(given, words), [given, words]);
+  // The game's formatters, for a text that names one ({ format }).
+  setFormatters(formats);
   const [tab, setTab] = useState(spec.tabs[0]?.id ?? "main");
   const [modifiers, setModifiers] = useState<Record<string, unknown>>(() => startingModifiers([...(spec.top ?? []), ...spec.tabs.flatMap((item) => item.parts)]));
   const data = record.data as Row;
@@ -74,7 +76,13 @@ export function SheetRenderer({ spec: given, record, session, ruleset, custom, f
         return;
       }
       const send = messageSender(session, call.message);
-      if (send) void Promise.resolve(send(record.id, call.action, args)).catch(() => undefined);
+      // The host's refusal shown on the sheet (problem: the modifier its error line reads), cleared when sent.
+      const problem = call.problem;
+      if (problem) setModifiers((now) => ({ ...now, [problem]: "" }));
+      if (send)
+        void Promise.resolve(send(record.id, call.action, args)).catch((error: unknown) => {
+          if (problem) setModifiers((now) => ({ ...now, [problem]: error instanceof Error ? error.message : String(error) }));
+        });
     };
     return { record, session, data, editable, gm, change, act, modifiers, setModifier: (key, value) => setModifiers((now) => ({ ...now, [key]: value })), targets, features, formats };
   }, [record, session, data, editable, gm, modifiers, targets.join("\u0000"), inFight?.id, features, formats]);
@@ -90,19 +98,26 @@ export function SheetRenderer({ spec: given, record, session, ruleset, custom, f
         session={session}
         editable={editable}
         className={spec.className ? `cc-sheet ${spec.className}` : "cc-sheet"}
-        attrs={{ "data-ruleset": ruleset }}
+        attrs={{ "data-ruleset": ruleset, ...Object.fromEntries((spec.attrs ?? []).map((attr) => [`data-${attr.name}`, textOf(attr.value, scope, modifiers)])) }}
         artRace={spec.art === undefined ? undefined : String(art ?? "")}
         tabs={shownTabs.map((item) => (item.label ? { id: item.id, label: item.label } : item.id))}
         tab={page?.id ?? ""}
         onTab={setTab}
-        boxes={spec.header.identity
-          .filter((field) => holds(field.when, scope, context))
-          .map((field) => (
-            <label key={field.path} className="cc-labelled cc-box">
-              <FieldView spec={field} scope={scope} />
-              <small>{field.note ?? textOf(field.label, scope, modifiers)}</small>
-            </label>
-          ))}
+        boxes={[
+          ...spec.header.identity
+            .filter((field) => holds(field.when, scope, context))
+            .map((field) => (
+              <label key={field.path} className="cc-labelled cc-box">
+                <FieldView spec={field} scope={scope} />
+                <small>{field.note ?? textOf(field.label, scope, modifiers)}</small>
+              </label>
+            )),
+          // A game's own boxes after them (a button in the header).
+          ...(spec.header.custom ?? []).map((ref) => {
+            const Custom = custom[ref];
+            return Custom ? <Custom key={ref} /> : null;
+          }),
+        ]}
       >
         {(spec.top ?? []).map((part, index) => (
           <PartView key={`top-${index}`} spec={part} custom={custom} formats={formats} />

@@ -44,9 +44,13 @@ async function taskAstra(table, record, { skill = "", attribute = "", difficulty
   return { total: rolled.total, modifier: total, effect, success };
 }
 
-// What the sheet may change, then every number worked out again.
-const TEXT = new Set(["playername", "notes", "appearance", "origin", "homeworld", "contacts", "ship"]);
-const NUMBERS = [/^characteristics\.(brawn|reflex|grit|intellect|training|presence)\.score$/, /^skills\.[a-z]+\.level$/, /^hp\.wounds$/, /^exp$/, /^ac\.misc$/, /^initiative\.misc$/, /^coins\.id-\d+\.amount$/, /^inventorylist\.id-\d+\.(count|carried)$/];
+// What the sheet may change (the manifest's edit globs: shared/rulesets/edit.mjs), then every number worked out
+// again. A skill dropped is this host's own.
+const { default: MANIFEST } = require("../shared/astra/manifest.mjs");
+const { editPaths } = require("../shared/rulesets/edit.mjs");
+const EDIT_PATHS = editPaths(MANIFEST.edit);
+const TEXT = EDIT_PATHS.text;
+const NUMBERS = EDIT_PATHS.number;
 function setPath(data, key, value) {
   const keys = key.split(".");
   let node = data;
@@ -63,13 +67,13 @@ async function editAstra(table, record, changes, seat) {
     const key = String(change?.path ?? "");
     const value = change?.value;
     if (key === "name") name = String(value ?? "").trim().slice(0, 120) || record.name;
-    else if (TEXT.has(key)) data[key] = String(value ?? "").slice(0, 8000);
+    else if (TEXT.some((pattern) => pattern.test(key))) data[key] = String(value ?? "").slice(0, 8000);
     else if (/^skills\.[a-z]+$/.test(key) && value === null) delete data.skills?.[key.split(".")[1]];
     else if (NUMBERS.some((pattern) => pattern.test(key))) {
       const n = Math.round(Number(value));
       if (!Number.isFinite(n) || Math.abs(n) > 1e7) throw new Error(`${key} needs a number.`);
       setPath(data, key, n);
-    } else if (/^inventorylist\.id-\d+$/.test(key) && value === null) delete data.inventorylist?.[key.split(".")[1]];
+    } else if (EDIT_PATHS.remove.some((pattern) => pattern.test(key)) && value === null) delete data.inventorylist?.[key.split(".")[1]];
     else throw new Error(`The sheet cannot change ${key}.`);
   }
   return table.records.update(record.id, { name, data: rules.derive(data) }, table.seat, { replace: true });
@@ -145,4 +149,4 @@ async function markAstra(table, record, { action = "", trick = "" } = {}, seat, 
   return { record: updated, marks: updated.data.marks, unspent: rules.unspentMarks(updated.data), tricks: rules.tricksOf(updated.data).map(({ name, path: from, text }) => ({ name, path: from, text })), learned, choices: rules.trickChoices(updated.data, libraryAstra(table.records).paths) };
 }
 
-module.exports = { rulesAstra, libraryAstra, buildAstra, taskAstra, editAstra, improveAstra, markAstra, isAstra, RULESET_NAME };
+module.exports = { rulesAstra, libraryAstra, buildAstra, taskAstra, editAstra, improveAstra, markAstra, isAstra, RULESET_NAME, EDIT_PATHS };

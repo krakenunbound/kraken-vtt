@@ -104,6 +104,102 @@ const GAMES = {
   },
 };
 
+// The 2d6 games (stage 4, docs/core-ui-design.md 7.15): no books (Traveller's kit is Kraken's own; Astra's from its shipped books).
+const TRAVELLER_STATS = (str, dex, end, int, edu, soc) => ({ str, dex, end, int, edu, soc });
+Object.assign(GAMES, {
+  mgt2: {
+    ruleset: "Traveller",
+    shipped: true,
+    books: [],
+    tabs: "main,skills,combat,gear,notes",
+    specs: [
+      { name: "Ilsa Varn", characteristics: TRAVELLER_STATS(7, 9, 8, 10, 8, 6), careers: [{ name: "Scout", terms: 3, rank: 2 }], skills: { "Pilot (Small Craft)": 1, "Gun Combat (Slug)": 1, Recon: 1, "Vacc Suit": 0, Mechanic: 0 }, gear: ["Autopistol", "Mesh", "Medikit", ["Rations (1 week)", 3]], credits: 2500, homeworld: "Regina", age: 30, gender: "F", contacts: "Ally: Mara (a broker)" },
+      { name: "Dorn Kessler", characteristics: TRAVELLER_STATS(9, 7, 9, 6, 7, 11), careers: [{ name: "Marine", terms: 2, rank: 2, title: "Lieutenant" }, { name: "Drifter", terms: 1 }], skills: { "Melee (Blade)": 2, "Gun Combat (Energy)": 1, Athletics: 0, Leadership: 1 }, gear: ["Cutlass", "Laser Pistol", "Cloth", "Comm"], species: "Vargr", homeworld: "Lair" },
+    ],
+    fight: ["Ilsa Varn"],
+    // The states, shot on the tabs they change (a wounded characteristic's DM moves the skills' and the attacks' totals).
+    states: [
+      { who: "Ilsa Varn", label: "wounded", tabs: ["main", "skills", "combat"], changes: () => [{ path: "hp.wounds", value: 10 }] },
+      { who: "Ilsa Varn", label: "unconscious", tabs: ["main"], changes: () => [{ path: "hp.wounds", value: 15 }] },
+      { who: "Ilsa Varn", label: "dead", tabs: ["main", "skills"], changes: () => [{ path: "hp.wounds", value: 24 }] },
+      { who: "Ilsa Varn", label: "healed", tabs: ["main"], changes: () => [{ path: "hp.wounds", value: 0 }] },
+    ],
+  },
+  astra: {
+    ruleset: "Apeira Astra",
+    shipped: true,
+    books: ["Apeira Astra Crew Handbook"],
+    tabs: "main,skills,combat,gear,notes",
+    specs: [
+      { name: "Rook Tamsin", origin: "Spacer", major: "Scout", minor: "Engineer", characteristics: { brawn: 7, reflex: 10, grit: 8, intellect: 9, training: 6, presence: 5 }, gear: [["Carbine", 1], ["Mesh Undersuit", 1], ["Medkit", 1], ["Comm Bead", 2]], credits: 300 },
+      { name: "Vela Okonkwo", origin: "Coreborn", major: "Medic", characteristics: { brawn: 6, reflex: 7, grit: 9, intellect: 10, training: 8, presence: 5 }, gear: [["Service Pistol", 1], ["Flight Jacket", 1]], credits: 120 },
+    ],
+    // Experience to spend, and three Marks for Rook (one spent on a trick): the Marks panel's pips, a trick and its note on a skill.
+    async setup({ tool, ids }) {
+      await tool("kraken_character_edit", { id: ids["Rook Tamsin"], changes: [{ path: "exp", value: 14 }] });
+      let marked = null;
+      for (let i = 0; i < 3; i++) marked = await tool("kraken_character_mark", { id: ids["Rook Tamsin"], action: "award" });
+      const trick = marked?.choices?.[0]?.name;
+      if (trick) await tool("kraken_character_mark", { id: ids["Rook Tamsin"], action: "learn", trick });
+    },
+    fight: ["Rook Tamsin"],
+    states: [
+      { who: "Rook Tamsin", label: "down", tabs: ["main"], changes: (data) => [{ path: "hp.wounds", value: data.hp.total + 2 }] },
+      { who: "Rook Tamsin", label: "dead", tabs: ["main"], changes: (data) => [{ path: "hp.wounds", value: data.hp.total + data.characteristics.grit.score }] },
+      { who: "Rook Tamsin", label: "healed", tabs: ["main"], changes: () => [{ path: "hp.wounds", value: 0 }] },
+    ],
+    // The GM's own controls, pressed by the GM on each sheet after the player's: the experience, a Mark awarded and taken back, a trick forgotten.
+    gmControls: ['.five-strip input[aria-label="Experience"]', '[data-action="award-mark"]', '[data-action="take-mark"]', 'button[aria-label^="Forget "]'],
+  },
+});
+
+// Ironsworn and Starforged (stage 4): their own pages' steps, the last move over every tab.
+const IRON_MOVES = [
+  '[data-move="face_danger"]', ["[data-move-option]", 1], ["[data-move-adds]", 1], '[data-action="make-move"]', '.iron-last [data-action="iron-burn"]', '.iron-last [data-action="iron-keep"]', '.iron-last [data-action="iron-choose"]',
+  '[data-move="swear_an_iron_vow"]', ["[data-vow-name]", "Find the ford"], ["[data-vow-rank]", "formidable"], '[data-action="make-move"]',
+  '[data-move="endure_harm"]', ["[data-move-amount]", 2], '[data-action="make-move"]',
+  '[data-move="fulfill_your_vow"]', ["[data-move-track]", "track:t01"], '[data-action="make-move"]',
+];
+const ironGame = (ruleset, books, specs, setup) => ({ ruleset, shipped: true, books, tabs: "main,moves,progress,assets,notes", specs, setup, fight: [], areas: [".iron-last"], more: { moves: IRON_MOVES } });
+Object.assign(GAMES, {
+  ironsworn: {
+    ...ironGame(
+      "Ironsworn",
+      ["Ironsworn Reference", "Ironsworn Foes and Sites"],
+      [
+        { name: "Kira Ashdown", stats: { edge: 3, heart: 2, iron: 2, shadow: 1, wits: 1 }, assets: [{ name: "Hound", field: "Ember" }, "Archer", "Alchemist"], backgroundVow: { name: "Avenge my clan", rank: "extreme" }, bonds: ["Brannoch", "Wenna Tull"], look: "Scarred hands", gear: ["Bow", "Bedroll"] },
+        { name: "Bo Fenn", stats: { edge: 1, heart: 1, iron: 3, shadow: 2, wits: 2 }, assets: ["Horse", "Brawler", "Bonded"], backgroundVow: { name: "Find my sister", rank: "epic" } },
+      ],
+      // Experience to spend, a journey marked twice, a failure tick.
+      async ({ tool, ids }) => {
+        await tool("kraken_character_edit", { id: ids["Kira Ashdown"], changes: [{ path: "exp", value: 6 }] });
+        await tool("kraken_ironsworn", { id: ids["Kira Ashdown"], action: "track-add", name: "Reach the Cinder Barrow", kind: "journey", rank: "troublesome" });
+        await tool("kraken_ironsworn", { id: ids["Kira Ashdown"], action: "track-mark", track: "t02", times: 2 });
+        await tool("kraken_ironsworn", { id: ids["Kira Ashdown"], action: "failure", ticks: 1 });
+      },
+    ),
+    states: [
+      { who: "Kira Ashdown", label: "wounded", tabs: ["main"], changes: () => [{ path: "debilities.wounded", value: true }, { path: "meters.health", value: 2 }] },
+      { who: "Kira Ashdown", label: "move", tabs: ["main", "progress"], tools: (id) => [["kraken_ironsworn", { id, action: "move", move: "Face Danger", option: 0 }]] },
+    ],
+  },
+  starforged: {
+    ...ironGame(
+      "Starforged",
+      ["Starforged Reference"],
+      [{ name: "Vesna Kade", callsign: "Needle", stats: { edge: 2, heart: 1, iron: 3, shadow: 1, wits: 2 }, assets: ["Ace", "Blademaster", { name: "Starship", field: "Lantern" }, "Glowcat"], backgroundVow: { name: "Find the lost fleet", rank: "epic" }, incitingVow: { name: "Bring the colonists home", rank: "dangerous" }, connection: { name: "Ashe Varo", role: "Broker", rank: "dangerous" } }],
+      async ({ tool, ids }) => {
+        await tool("kraken_character_edit", { id: ids["Vesna Kade"], changes: [{ path: "exp", value: 6 }] });
+        await tool("kraken_ironsworn", { id: ids["Vesna Kade"], action: "legacy-mark", track: "quests", ticks: 3 });
+      },
+    ),
+    states: [
+      { who: "Vesna Kade", label: "impacted", tabs: ["main"], changes: () => [{ path: "impacts.wounded", value: true }, { path: "meters.spirit", value: 1 }] },
+      { who: "Vesna Kade", label: "move", tabs: ["main"], tools: (id) => [["kraken_ironsworn", { id, action: "move", move: "Face Danger", option: 0 }]] },
+    ],
+  },
+});
+
 const [gameId, outArg] = process.argv.slice(2);
 const game = GAMES[gameId];
 if (!game) {
@@ -225,6 +321,7 @@ try {
     assert(ids[spec.name], `${spec.name} built`);
     if (built.problems?.length) console.log(`  ${spec.name}: ${built.problems.join(" | ")}`);
   }
+  if (game.setup) await game.setup({ tool, ids });
   for (const name of game.fight) await tool("kraken_combat", { action: "add", recordId: ids[name] });
   if (game.fight.length) {
     await tool("kraken_combat", { action: "next" });
@@ -291,16 +388,44 @@ try {
   // The states a sheet shows by itself, each shot on the main tab, GM and player.
   for (const state of game.states) {
     const data = await dataOf(ids[state.who]);
-    await tool("kraken_character_edit", { id: ids[state.who], changes: state.changes(data) });
+    // A state set by the game's own tools (a move made, the dice fixed first), or by edits.
+    for (const [name, args] of state.tools?.(ids[state.who]) ?? []) {
+      await tool("kraken_dice_force", { values: [5, 2, 4, 1, 3, 2] });
+      await tool(name, args);
+    }
+    if (state.changes) await tool("kraken_character_edit", { id: ids[state.who], changes: state.changes(data) });
     await settle(600);
+    // A state shot on its tabs (main, unless it names more); the main tab's file keeps its old name.
+    const tabsOf = state.tabs ?? ["main"];
+    const named = (who, tab) => `${gameId}-${who}-${slug(state.who)}-state-${state.label}${tab === "main" ? "" : `-${tab}`}`;
     const gm = await gmOpen(state.who);
-    await gm.locator('[data-sheet-tab="main"]').click();
-    await shoot(gm, `${gameId}-gm-${slug(state.who)}-state-${state.label}`);
+    for (const tab of tabsOf) {
+      await gm.locator(`[data-sheet-tab="${tab}"]`).click();
+      await shoot(gm, named("gm", tab));
+    }
     await gmClose(state.who);
     const mine = await openCard(state.who);
-    await mine.locator('[data-sheet-tab="main"]').click();
-    await shoot(mine, `${gameId}-player-${slug(state.who)}-state-${state.label}`);
+    for (const tab of tabsOf) {
+      await mine.locator(`[data-sheet-tab="${tab}"]`).click();
+      await shoot(mine, named("player", tab));
+    }
   }
+
+  // The sheet as someone who may not type sees it (a character shared with the table, not theirs): the player's
+  // open sheet, its owner changed under it, every tab; then given back.
+  if (game.watch !== false)
+    for (const spec of game.specs) {
+      const sheet = await openCard(spec.name);
+      await tool("kraken_record_update", { id: ids[spec.name], owner: "Someone else", visibility: "all" });
+      await seat.waitForFunction(() => !document.querySelector(".cc-sheet .cc-field:not([readonly])") || document.querySelectorAll(".cc-sheet").length !== 1, null, { timeout: 5000 }).catch(() => undefined);
+      await settle(600);
+      for (const tab of game.tabs.split(",")) {
+        await sheet.locator(`[data-sheet-tab="${tab}"]`).click();
+        await shoot(sheet, `${gameId}-watcher-${slug(spec.name)}-sheet-${tab}`);
+      }
+      await tool("kraken_record_update", { id: ids[spec.name], owner: "A test player", visibility: "owner" });
+      await settle(600);
+    }
 
   // Every control on every tab, pressed once by the player, in order, the dice fixed first.
   const presses = [];
@@ -324,13 +449,23 @@ try {
       await settle(300);
       const count = await sheet.locator(".cc-page").locator(CONTROLS).count();
       const strip = await sheet.locator(".five-strip").locator(CONTROLS).count();
-      const header = await sheet.locator(".cc-boxes").locator(CONTROLS).count();
+      const header = await sheet.locator(".cc-boxes").first().locator(CONTROLS).count();
+      // A game's other places over every tab (Ironsworn's last move), pressed on every tab before its page.
+      const areas = [];
+      for (const area of game.areas ?? []) areas.push(...Array.from({ length: await sheet.locator(area).locator(CONTROLS).count() }, (_, index) => ({ in: area, index })));
+      // Every control of the sheet is in one of the places pressed, or it is said here.
+      const outside = (await sheet.locator(CONTROLS).count()) - count - strip - header - areas.length;
+      if (outside) {
+        presses.push({ what: `${spec.name} ${tab}: controls outside the header, the strip and the page`, unpressed: outside });
+        console.log(`  ${spec.name} ${tab}: ${outside} controls not pressed (outside the header, the strip and the page)`);
+      }
       // The header's boxes and the strip over every tab once (on the first tab), then the tab's own controls. The
       // strip's DC or Mod stays at what was typed (1), so every later roll and save carries it.
       const first = tab === game.tabs.split(",")[0];
       const targets = [
         ...(first ? Array.from({ length: header }, (_, index) => ({ in: ".cc-boxes", index })) : []),
         ...(first ? Array.from({ length: strip }, (_, index) => ({ in: ".five-strip", index })) : []),
+        ...areas,
         ...Array.from({ length: count }, (_, index) => ({ in: ".cc-page", index })),
       ];
       let dropped = false;
@@ -359,6 +494,18 @@ try {
           });
         } else await press(sheet, id, what, () => control.click());
       }
+      // A tab whose controls appear only once one is used (a move chosen, then rolled): the game's own steps, each a
+      // selector clicked (or [selector, value] filled or picked), pressed in order where the sheet shows it.
+      for (const step of game.more?.[tab] ?? []) {
+        const [selector, value] = Array.isArray(step) ? step : [step];
+        const control = sheet.locator(selector).first();
+        if (!(await control.count()) || (await control.isDisabled())) {
+          presses.push({ what: `${spec.name} ${tab}: ${selector}`, skipped: (await control.count()) ? "disabled" : "absent" });
+          continue;
+        }
+        const tag = await control.evaluate((item) => item.tagName);
+        await press(sheet, id, `${spec.name} ${tab}: ${selector}${value === undefined ? "" : ` = ${value}`}`, () => (value === undefined ? control.click() : tag === "SELECT" ? control.selectOption(String(value)) : control.fill(String(value))));
+      }
     }
   }
   // Controls that show only in a state (a death save's Roll): the state set, the control pressed, the state put back.
@@ -375,6 +522,22 @@ try {
     const sheet = await gmOpen(spec.name);
     const ups = await sheet.locator('[data-action="level-up"]').count();
     for (let index = 0; index < ups; index++) await press(sheet, ids[spec.name], `${spec.name}: level up (GM) ${index + 1}`, () => sheet.locator('[data-action="level-up"]').nth(index).click());
+    // The GM's own controls (a field typed one up, a button pressed), each where the sheet shows it.
+    for (const selector of game.gmControls ?? []) {
+      const control = sheet.locator(selector).first();
+      if (!(await control.count()) || (await control.isDisabled())) {
+        presses.push({ what: `${spec.name}: ${selector} (GM)`, skipped: (await control.count()) ? "disabled" : "absent" });
+        continue;
+      }
+      const tag = await control.evaluate((item) => item.tagName);
+      if (tag === "INPUT") {
+        const next = String((Number(await control.inputValue()) || 0) + 1);
+        await press(sheet, ids[spec.name], `${spec.name}: ${selector} = ${next} (GM)`, async () => {
+          await control.fill(next);
+          await control.press("Tab");
+        });
+      } else await press(sheet, ids[spec.name], `${spec.name}: ${selector} (GM)`, () => control.click());
+    }
     await gmClose(spec.name);
   }
 

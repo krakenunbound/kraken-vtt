@@ -6,7 +6,7 @@
 // track, coins and notes on them; only the strip over every tab and Turn
 // undead are its own (src/rulesets/bfrpg.tsx). The host's edit whitelist
 // (electron/bfrpg.cjs) is built from `edit` below.
-import { SAVE_NAMES, SAVES, STATS } from "./rules.mjs";
+import { MAX_LEVEL, SAVE_NAMES, SAVES, STATS } from "./rules.mjs";
 
 /** @type {Record<string, string>} */
 const SAVE_WORDS = SAVE_NAMES;
@@ -54,7 +54,20 @@ export default {
         { path: "alignment", label: "Alignment", kind: "text" },
       ],
     },
-    top: [{ part: "custom", component: "bfrpg.strip" }],
+    // The strip over every tab: the level (its level-up once the experience is there, or the GM's), the experience
+    // (the GM types it), the attack bonus and the next roll's modifier (added to a save or an ability roll, taken off a
+    // thief ability's d100).
+    top: [
+      {
+        part: "strip",
+        items: [
+          { kind: "level", path: "level", exp: "exp", next: "expnext", max: MAX_LEVEL, atLeast: 1, hint: "{exp|0} of {expnext|nz:—} experience points for the next level", title: { if: { below: { path: "level", value: 9 } }, then: "Level up: the host rolls the hit die", else: "Level up: the class's fixed hit points" } },
+          { kind: "xp", path: "exp", next: "expnext", label: "Experience", shown: { hook: "exp" }, note: { when: { positive: "xpbonus" }, text: ["+", "{xpbonus|0}", "% XP"] } },
+          { kind: "value", label: "AB", path: "ab", hook: "ab", format: "signed", title: "Attack bonus: add Strength in melee, Dexterity with missiles" },
+          { kind: "modifier", key: "mod", label: "Mod", aria: "Roll modifier", title: "A modifier for the next roll: added to a save or an ability roll, taken off a thief ability's d100", min: -20, max: 20 },
+        ],
+      },
+    ],
     tabs: [
       {
         id: "main",

@@ -8,11 +8,10 @@ import { Wizard5e } from "../characters/Wizard5e";
 import { Wizard35 } from "../characters/Wizard35";
 import { Wizard2e } from "../characters/Wizard2e";
 import { WizardBf } from "../characters/WizardBf";
-import { SheetMgt2 } from "../characters/SheetMgt2";
 import { WizardMgt2 } from "../characters/WizardMgt2";
-import { SheetAstra, WizardAstra } from "../characters/SheetAstra";
+import { WizardAstra } from "../characters/WizardAstra";
 import { SheetFate, WizardFate } from "../characters/SheetFate";
-import { SheetIronsworn, WizardIronsworn } from "../characters/SheetIronsworn";
+import { WizardIronsworn } from "../characters/WizardIronsworn";
 import { SheetForged, WizardForged } from "../characters/SheetForged";
 import { ScorePanel } from "../combat/ScorePanel";
 import { FateStrip } from "../ui/FateStrip";
@@ -32,10 +31,7 @@ type SessionProps = { session: Session };
 
 export const SHEETS: Record<string, ComponentType<SheetProps>> = {
   "cnc.sheet": CCSheet,
-  "mgt2.sheet": SheetMgt2,
-  "astra.sheet": SheetAstra,
   "fate.sheet": SheetFate,
-  "ironsworn.sheet": SheetIronsworn,
   "forged.sheet": SheetForged,
 };
 export const WIZARDS: Record<string, ComponentType<WizardProps>> = {

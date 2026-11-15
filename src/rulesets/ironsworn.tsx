@@ -1,23 +1,23 @@
 import { useMemo, useState } from "react";
 import type { Session, TableRecord } from "../session/useSession";
 import { Field } from "../core/fields/Field";
-import { IdentityBox, SheetFrame } from "../core/frame/SheetFrame";
+import { ProgressBoxes } from "../core/parts/ProgressBoxes";
+import { useSheet } from "../core/sheet/context";
 import { FormattedText } from "../books/Records";
-import { DEBILITIES, LEGACY, RANK_NAMES, RANKS, SPREAD, STAT_NAMES, STATS, TRACK_KINDS, boxes, gameOf, signed } from "../../shared/ironsworn/rules.mjs";
+import { DEBILITIES, LEGACY, RANK_NAMES, RANKS, TRACK_KINDS, boxes, signed } from "../../shared/ironsworn/rules.mjs";
 
-// The Ironsworn and Starforged character sheet, in Kraken's sheet style:
-// who they are on top, tabs down the right (Main, Moves, Progress, Assets,
-// Notes). Moves come from the campaign's active Reference book (the CC BY
-// moves): pick one, its option (the stat it rolls), adds, a track or a foe
-// on the tracker, and Roll: the host rolls the action and challenge dice in
-// front of the table, applies what the outcome plainly does and leaves its
-// choices as buttons here; when momentum would do better, Burn or Keep.
-// Progress tracks, bonds or legacies, assets bought with experience. The
-// host works every number out again (shared/ironsworn/rules.mjs).
+// Ironsworn's and Starforged's own parts, where no core part fits
+// (docs/core-ui-design.md 4.4, level 3): the initiative (or position) button
+// in the header, the last move over every tab (its dice, Burn or Keep, its
+// choices) and the host's refusal under it, the debilities (impacts), and the
+// Moves, Progress and Assets pages. Moves come from the campaign's active
+// Reference book: pick one, its option, adds, a track or a foe on the
+// tracker, and Roll; the host rolls in front of the table, applies what the
+// outcome plainly does and leaves its choices here. The progress tracks draw
+// the core's ProgressBoxes. Everything else on the sheet is the core's, laid
+// out by shared/ironsworn/manifest.mjs.
 
 type Row = Record<string, unknown>;
-const TABS = ["main", "moves", "progress", "assets", "notes"] as const;
-type Tab = (typeof TABS)[number];
 const rows = (node: unknown): [string, Row][] =>
   node && typeof node === "object" ? Object.entries(node as Record<string, unknown>).filter((entry): entry is [string, Row] => Boolean(entry[1]) && typeof entry[1] === "object") : [];
 const num = (value: unknown) => (Number.isFinite(Number(value)) ? Number(value) : 0);
@@ -26,189 +26,82 @@ const OUTCOME: Record<string, string> = { strong: "Strong hit", weak: "Weak hit"
 // The move a track's progress roll makes.
 const PROGRESS_MOVE: Record<string, string> = { vow: "fulfill_your_vow", journey: "reach_your_destination", fight: "end_the_fight", site: "locate_your_objective", expedition: "finish_an_expedition", scene: "finish_the_scene", connection: "forge_a_bond" };
 
-// Ten boxes of four ticks.
-export function ProgressBoxes({ ticks, label }: { ticks: number; label?: string }) {
-  return (
-    <span className="iron-boxes" aria-label={label ?? `${boxes(ticks)} of 10 boxes`} data-ticks={ticks} title={`${ticks} ticks: ${boxes(ticks)} boxes`}>
-      {Array.from({ length: 10 }, (_, index) => {
-        const fill = Math.max(0, Math.min(4, ticks - index * 4));
-        return <span key={index} className={`iron-box fill-${fill}`} />;
-      })}
-    </span>
-  );
-}
-
-export function SheetIronsworn({ record, session }: { record: TableRecord; session: Session }) {
-  const [tab, setTab] = useState<Tab>("main");
-  const [problem, setProblem] = useState("");
-  const data = record.data as Row;
-  const game = data.game === "starforged" ? "starforged" : "classic";
-  const sf = game === "starforged";
-  const me = session.players.find((seat) => seat.id === session.selfId)?.name;
-  const editable = session.role === "dm" || (record.owner !== "" && record.owner === me);
-  const change = (path: string, value: unknown) => session.editCharacter(record.id, [{ path, value }]);
-  const act = (action: string, args: Record<string, unknown> = {}) => {
-    setProblem("");
+// The sheet's character, who may type, and its game's message to the host: a refusal goes to the sheet's error line
+// (the "problem" modifier, which the manifest's own buttons use too).
+function useIron() {
+  const { record, session, editable, change, setModifier } = useSheet();
+  const act: Act = (action, args = {}) => {
+    setModifier("problem", "");
     return session.ironsworn(action, record.id, args).catch((error: unknown) => {
-      setProblem(error instanceof Error ? error.message : String(error));
+      setModifier("problem", error instanceof Error ? error.message : String(error));
       return null;
     });
   };
-  const stats = (data.stats ?? {}) as Record<string, number>;
-  const meters = (data.meters ?? {}) as Record<string, number>;
-  const experience = (data.experience ?? {}) as Row;
-  const momentum = num(data.momentum);
-  const marks = (sf ? data.impacts : data.debilities) as Record<string, boolean> | undefined;
-  const control = Boolean(data.control);
+  return { record, session, editable, act, change };
+}
+
+// The header's initiative (Ironsworn) or position (Starforged) button.
+export function IronControl() {
+  const { record, editable, act } = useIron();
+  const sf = record.data.game === "starforged";
+  const control = Boolean(record.data.control);
   const controlWord = sf ? (control ? "In control" : "In a bad spot") : control ? "Initiative" : "No initiative";
-
   return (
-    <SheetFrame
-      record={record}
-      session={session}
-      editable={editable}
-      className="cc-sheet sheet-5e sheet-ironsworn"
-      attrs={{ "data-ruleset": "ironsworn", "data-game": game }}
-      tabs={TABS}
-      tab={tab}
-      onTab={(id) => setTab(id as Tab)}
-      boxes={
-        <>
-          <IdentityBox label={`Momentum (max ${num(data.momentummax)}, reset ${num(data.momentumreset)})`}>
-            <span className="cc-value" data-stat="momentum" data-momentum={momentum}>
-              {signed(momentum)}
-            </span>
-          </IdentityBox>
-          <IdentityBox label="Experience to spend / earned">
-            <span className="cc-value" data-stat="experience">
-              {num(experience.available)} / {num(experience.earned)}
-            </span>
-          </IdentityBox>
-          <button type="button" className={`cc-labelled cc-box iron-control${control ? " on" : ""}`} data-action="iron-control" data-control={control ? "1" : "0"} disabled={!editable} title={sf ? "In control or in a bad spot (a fight's position)" : "Who has the initiative in a fight"} onClick={() => void act("control", { on: !control })}>
-            <span className="cc-value">{controlWord}</span>
-            <small>{sf ? "Position" : "Initiative"}</small>
-          </button>
-        </>
-      }
-    >
-      <LastRoll record={record} session={session} editable={editable} act={act} />
-      {problem ? <p className="error" data-iron-problem>{problem}</p> : null}
-
-      {tab === "main" ? (
-        <div className="cc-page" data-tab-page="main">
-          <div className="cc-main-grid five-main">
-            <section className="cc-panel five-abilities iron-stats" aria-label="Stats">
-              {STATS.map((stat: string) => (
-                <div key={stat} className="five-ability" data-stat-row={stat}>
-                  <b>{STAT_NAMES[stat as keyof typeof STAT_NAMES]}</b>
-                  <button type="button" className="cc-bonus" disabled={!editable} title={`Roll +${stat}: d6 + ${num(stats[stat])} against two d10`} aria-label={`${stat} roll`} data-roll-stat={stat} onClick={() => session.siegeCheck(record.id, stat, 0, false, { kind: "check" })}>
-                    {num(stats[stat])}
-                  </button>
-                </div>
-              ))}
-            </section>
-            <section className="cc-panel five-defence iron-meters">
-              {["health", "spirit", "supply"].map((meter) => (
-                <div key={meter} className="five-big" data-meter={meter}>
-                  <small>
-                    {titled(meter)}
-                    {meter === "supply" ? " (shared)" : ""}
-                  </small>
-                  <span data-stat={meter}>{num(meters[meter])} / 5</span>
-                  {editable ? (
-                    <span className="cc-inline">
-                      <button type="button" aria-label={`${meter} down`} data-action={`${meter}-down`} onClick={() => void act("adjust", { what: meter, delta: -1 })}>
-                        −
-                      </button>
-                      <button type="button" aria-label={`${meter} up`} data-action={`${meter}-up`} onClick={() => void act("adjust", { what: meter, delta: 1 })}>
-                        +
-                      </button>
-                    </span>
-                  ) : null}
-                </div>
-              ))}
-              <div className="five-big" data-meter="momentum">
-                <small>Momentum</small>
-                <span>{signed(momentum)}</span>
-                {editable ? (
-                  <span className="cc-inline">
-                    <button type="button" aria-label="momentum down" data-action="momentum-down" onClick={() => void act("adjust", { what: "momentum", delta: -1 })}>
-                      −
-                    </button>
-                    <button type="button" aria-label="momentum up" data-action="momentum-up" onClick={() => void act("adjust", { what: "momentum", delta: 1 })}>
-                      +
-                    </button>
-                    <button type="button" className="ghost" title={`Reset momentum to ${num(data.momentumreset)} (after burning it)`} onClick={() => void act("burn-reset")}>
-                      Reset
-                    </button>
-                  </span>
-                ) : null}
-              </div>
-            </section>
-          </div>
-          <section className="cc-panel iron-debilities" aria-label={sf ? "Impacts" : "Debilities"}>
-            <h4>{sf ? "Impacts" : "Debilities"}</h4>
-            {(DEBILITIES[game] as { key: string; name: string; group: string }[]).map((item) => (
-              <label key={item.key} className="cc-inline" title={item.group}>
-                <input type="checkbox" checked={Boolean(marks?.[item.key])} disabled={!editable} data-debility={item.key} onChange={(event) => void act("debility", { key: item.key, on: event.target.checked })} />
-                {item.name}
-              </label>
-            ))}
-          </section>
-        </div>
-      ) : null}
-
-      {tab === "moves" ? <MovesPanel record={record} session={session} editable={editable} act={act} /> : null}
-      {tab === "progress" ? <ProgressPanel record={record} session={session} editable={editable} act={act} change={change} /> : null}
-      {tab === "assets" ? <AssetsPanel record={record} session={session} editable={editable} act={act} change={change} /> : null}
-
-      {tab === "notes" ? (
-        <section className="cc-panel cc-page" data-tab-page="notes">
-          {sf ? (
-            <div className="cc-boxes">
-              <label className="cc-labelled">
-                <Field value={String(data.pronouns ?? "")} editable={editable} label="Pronouns" onSave={(value) => change("pronouns", value)} />
-                <small>Pronouns</small>
-              </label>
-              <label className="cc-labelled">
-                <Field value={String(data.callsign ?? "")} editable={editable} label="Callsign" onSave={(value) => change("callsign", value)} />
-                <small>Callsign</small>
-              </label>
-            </div>
-          ) : null}
-          <label className="cc-labelled">
-            <Field value={String(data.look ?? "")} editable={editable} label="Look" onSave={(value) => change("look", value)} />
-            <small>Look</small>
-          </label>
-          <label className="cc-labelled">
-            <Field value={String(data.background ?? "")} area editable={editable} label={sf ? "Backstory" : "Background"} onSave={(value) => change("background", value)} />
-            <small>{sf ? "Backstory" : "Background"}</small>
-          </label>
-          <h4>What they carry <small className="hint">Ironsworn has no money: wealth is supply; anything special is an asset</small></h4>
-          <ul className="five-items">
-            {rows(data.inventorylist).map(([key, item]) => (
-              <li key={key} data-item={key}>
-                <span>
-                  {String(item.name)}
-                  {num(item.count) > 1 ? ` ×${num(item.count)}` : ""}
-                </span>
-                {editable ? (
-                  <button type="button" className="ghost" aria-label={`Drop ${String(item.name)}`} onClick={() => change(`inventorylist.${key}`, null)}>
-                    ×
-                  </button>
-                ) : null}
-              </li>
-            ))}
-          </ul>
-          {editable ? <AddLine placeholder="Something else they carry" onAdd={(text) => change("inventory.add", text)} /> : null}
-          <label className="cc-labelled">
-            <Field value={String(data.notes ?? "")} area editable={editable} label="Notes" onSave={(value) => change("notes", value)} />
-            <small>Notes</small>
-          </label>
-        </section>
-      ) : null}
-    </SheetFrame>
+    <button type="button" className={`cc-labelled cc-box iron-control${control ? " on" : ""}`} data-action="iron-control" data-control={control ? "1" : "0"} disabled={!editable} title={sf ? "In control or in a bad spot (a fight's position)" : "Who has the initiative in a fight"} onClick={() => void act("control", { on: !control })}>
+      <span className="cc-value">{controlWord}</span>
+      <small>{sf ? "Position" : "Initiative"}</small>
+    </button>
   );
+}
+
+// The last move over every tab, and the host's refusal of the last thing asked.
+export function IronLastRoll() {
+  const iron = useIron();
+  return <LastRoll record={iron.record} session={iron.session} editable={iron.editable} act={iron.act} />;
+}
+export function IronProblem() {
+  const { modifiers } = useSheet();
+  const problem = String(modifiers.problem ?? "");
+  return problem ? <p className="error" data-iron-problem>{problem}</p> : null;
+}
+
+// Debilities (Ironsworn) or impacts (Starforged): each a box the host marks.
+export function IronDebilities() {
+  const { record, editable, act } = useIron();
+  const data = record.data as Row;
+  const game = data.game === "starforged" ? "starforged" : "classic";
+  const sf = game === "starforged";
+  const marks = (sf ? data.impacts : data.debilities) as Record<string, boolean> | undefined;
+  return (
+    <section className="cc-panel iron-debilities" aria-label={sf ? "Impacts" : "Debilities"}>
+      <h4>{sf ? "Impacts" : "Debilities"}</h4>
+      {(DEBILITIES[game] as { key: string; name: string; group: string }[]).map((item) => (
+        <label key={item.key} className="cc-inline" title={item.group}>
+          <input type="checkbox" checked={Boolean(marks?.[item.key])} disabled={!editable} data-debility={item.key} onChange={(event) => void act("debility", { key: item.key, on: event.target.checked })} />
+          {item.name}
+        </label>
+      ))}
+    </section>
+  );
+}
+
+// The Moves, Progress and Assets pages.
+export function IronMoves() {
+  const iron = useIron();
+  return <MovesPanel record={iron.record} session={iron.session} editable={iron.editable} act={iron.act} />;
+}
+export function IronProgress() {
+  const iron = useIron();
+  return <ProgressPanel record={iron.record} session={iron.session} editable={iron.editable} act={iron.act} change={iron.change} />;
+}
+export function IronAssets() {
+  const iron = useIron();
+  return <AssetsPanel record={iron.record} session={iron.session} editable={iron.editable} act={iron.act} change={iron.change} />;
+}
+// What they carry: one more thing, typed and added.
+export function IronCarryLine() {
+  const { editable, change } = useIron();
+  return editable ? <AddLine placeholder="Something else they carry" onAdd={(text) => change("inventory.add", text)} /> : null;
 }
 
 // A line typed and added (Enter or the button): its input has no aria-label of its own (it is not a sheet field).
@@ -686,193 +579,3 @@ function AssetsPanel({ record, session, editable, act, change }: { record: Table
 // The character wizard, the game's steps: stats (3, 2, 2, 1, 1), assets
 // (Ironsworn three; Starforged two paths, the starship and one more), the
 // background vow, bonds or a first connection, the inciting vow, what they
-// carry, name and look.
-export function WizardIronsworn({ session, onDone }: { session: Session; onDone: (id: string | null) => void }) {
-  const game = gameOf(session.ruleset);
-  const sf = game === "starforged";
-  const assets = Object.values(session.records)
-    .filter((item) => item.type === "ironasset" && String(item.data.game ?? game) === game)
-    .sort((a, b) => String(a.data.category).localeCompare(String(b.data.category)) || a.name.localeCompare(b.name));
-  const [name, setName] = useState("");
-  const [look, setLook] = useState("");
-  const [pronouns, setPronouns] = useState("");
-  const [callsign, setCallsign] = useState("");
-  const [values, setValues] = useState<Record<string, number>>(() => Object.fromEntries(STATS.map((stat: string, index: number) => [stat, SPREAD[index]])));
-  const [chosen, setChosen] = useState<string[]>([]);
-  const [shipName, setShipName] = useState("");
-  const [vow, setVow] = useState("");
-  const [vowRank, setVowRank] = useState(sf ? "epic" : "extreme");
-  const [inciting, setInciting] = useState("");
-  const [incitingRank, setIncitingRank] = useState("dangerous");
-  const [bonds, setBonds] = useState(["", "", ""]);
-  const [connection, setConnection] = useState({ name: "", role: "", rank: "dangerous" });
-  const [background, setBackground] = useState("");
-  const [gear, setGear] = useState(sf ? "" : "Bedroll, flint and steel, a waterskin");
-  const [problem, setProblem] = useState("");
-  const [busy, setBusy] = useState(false);
-  const starship = assets.find((item) => /command vehicle/i.test(String(item.data.category)));
-  const sorted = Object.values(values).sort((a, b) => b - a).join(",");
-  const statsOk = sorted === SPREAD.join(",");
-  const chosenRecords = chosen.map((id) => assets.find((item) => item.id === id)).filter(Boolean) as TableRecord[];
-  const paths = chosenRecords.filter((item) => /path/i.test(String(item.data.category))).length;
-  // Three chosen in either game (Starforged's starship comes on top).
-  const need = 3;
-  const assetsOk = sf ? chosenRecords.length === 3 && paths >= 2 : chosenRecords.length === 3;
-  const canFinish = statsOk && assetsOk && Boolean(vow.trim());
-  const toggle = (id: string) => setChosen(chosen.includes(id) ? chosen.filter((item) => item !== id) : chosen.length < need ? [...chosen, id] : chosen);
-  const finish = async () => {
-    setBusy(true);
-    setProblem("");
-    try {
-      const spec = {
-        name: name || (sf ? "Spacer" : "Ironsworn"),
-        look,
-        background,
-        ...(sf ? { pronouns, callsign } : {}),
-        stats: values,
-        assets: [...chosenRecords.map((item) => item.name), ...(sf && starship ? [{ name: starship.name, field: shipName }] : [])],
-        backgroundVow: { name: vow, rank: vowRank },
-        ...(inciting.trim() ? { incitingVow: { name: inciting, rank: incitingRank } } : {}),
-        ...(sf ? (connection.name.trim() ? { connection } : {}) : { bonds }),
-        gear: gear.split(/\n|,/).map((item) => item.trim()).filter(Boolean),
-      };
-      const id = await session.buildCharacter(spec);
-      onDone(id);
-    } catch (error) {
-      setProblem(error instanceof Error ? error.message : String(error));
-    } finally {
-      setBusy(false);
-    }
-  };
-  if (assets.length === 0) return <p className="hint">No assets yet: the GM makes the {sf ? "Starforged" : "Ironsworn"} Reference active (Modules).</p>;
-  const groups = [...new Set(assets.filter((item) => !(sf && /command vehicle|deed/i.test(String(item.data.category)))).map((item) => String(item.data.category)))];
-  return (
-    <section className="wizard-5e cc-panel wizard-ironsworn" aria-label={`${sf ? "Starforged" : "Ironsworn"} character wizard`} data-wizard="ironsworn" data-game={game}>
-      <header className="cc-row">
-        <b>New {sf ? "Starforged" : "Ironsworn"} character</b>
-        <span className="me-spacer" />
-        <button type="button" className="ghost" onClick={() => onDone(null)}>
-          Cancel
-        </button>
-        <button type="button" data-action="wizard-finish" disabled={busy || !canFinish} title="Stats 3, 2, 2, 1, 1; the assets; a background vow" onClick={() => void finish()}>
-          Finish
-        </button>
-      </header>
-      <h4>1. Stats <small className="hint">3, 2, 2, 1 and 1, one to each {statsOk ? "✓" : "(not yet)"}</small></h4>
-      <div className="wizard-5e-scores">
-        {STATS.map((stat: string) => (
-          <label key={stat}>
-            {STAT_NAMES[stat as keyof typeof STAT_NAMES]}
-            <select value={values[stat]} aria-label={`${stat} value`} data-iron-stat={stat} onChange={(event) => setValues({ ...values, [stat]: Number(event.target.value) })}>
-              {[3, 2, 1].map((value) => (
-                <option key={value} value={value}>
-                  {value}
-                </option>
-              ))}
-            </select>
-          </label>
-        ))}
-      </div>
-      <h4>
-        2. Assets{" "}
-        <small className="hint">
-          {sf ? `two paths and one more of any kind (${chosenRecords.length}/3, ${paths} paths); the Starship is yours` : `three of any kind (${chosenRecords.length}/3)`}
-        </small>
-      </h4>
-      {sf && starship ? (
-        <p className="cc-inline">
-          <b>Starship</b> (command vehicle, everyone's){" "}
-          <label>
-            its name <input value={shipName} data-ship-name onChange={(event) => setShipName(event.target.value)} />
-          </label>
-        </p>
-      ) : null}
-      <div className="iron-wizard-assets">
-        {groups.map((group) => (
-          <details key={group} open={/path/i.test(group)}>
-            <summary>{group}</summary>
-            <div className="wizard-5e-skills">
-              {assets
-                .filter((item) => String(item.data.category) === group)
-                .map((item) => (
-                  <label key={item.id} title={rows(item.data.abilities).map(([, ability]) => String(ability.text ?? "")).join("\n\n")}>
-                    <input type="checkbox" checked={chosen.includes(item.id)} data-iron-asset={item.name} disabled={!chosen.includes(item.id) && chosen.length >= need} onChange={() => toggle(item.id)} />
-                    {item.name}
-                  </label>
-                ))}
-            </div>
-          </details>
-        ))}
-      </div>
-      <h4>3. {sf ? "Backstory and background vow (epic)" : "Background vow (extreme or epic)"}</h4>
-      <p className="cc-inline">
-        <input placeholder="I swear to..." value={vow} data-background-vow onChange={(event) => setVow(event.target.value)} style={{ flex: 1 }} />
-        {sf ? null : (
-          <select value={vowRank} data-background-rank onChange={(event) => setVowRank(event.target.value)}>
-            <option value="extreme">Extreme</option>
-            <option value="epic">Epic</option>
-          </select>
-        )}
-      </p>
-      <textarea placeholder={sf ? "Your backstory" : "Your background"} value={background} onChange={(event) => setBackground(event.target.value)} rows={2} />
-      {sf ? (
-        <>
-          <h4>4. Your first connection</h4>
-          <p className="cc-inline">
-            <input placeholder="Name" value={connection.name} data-connection-name onChange={(event) => setConnection({ ...connection, name: event.target.value })} />
-            <input placeholder="Role (Broker, Navigator...)" value={connection.role} data-connection-role onChange={(event) => setConnection({ ...connection, role: event.target.value })} />
-            <select value={connection.rank} onChange={(event) => setConnection({ ...connection, rank: event.target.value })}>
-              {(RANKS as string[]).map((rank) => (
-                <option key={rank} value={rank}>
-                  {RANK_NAMES[rank as keyof typeof RANK_NAMES]}
-                </option>
-              ))}
-            </select>
-          </p>
-        </>
-      ) : (
-        <>
-          <h4>4. Bonds <small className="hint">up to three people or places; each a tick on the bonds track</small></h4>
-          <p className="cc-inline">
-            {bonds.map((bond, index) => (
-              <input key={index} placeholder={`Bond ${index + 1}`} value={bond} data-bond={index} onChange={(event) => setBonds(bonds.map((item, at) => (at === index ? event.target.value : item)))} />
-            ))}
-          </p>
-        </>
-      )}
-      <h4>5. The inciting incident <small className="hint">a first vow to start the story (optional)</small></h4>
-      <p className="cc-inline">
-        <input placeholder="I swear to..." value={inciting} data-inciting-vow onChange={(event) => setInciting(event.target.value)} style={{ flex: 1 }} />
-        <select value={incitingRank} onChange={(event) => setIncitingRank(event.target.value)}>
-          {(RANKS as string[]).map((rank) => (
-            <option key={rank} value={rank}>
-              {RANK_NAMES[rank as keyof typeof RANK_NAMES]}
-            </option>
-          ))}
-        </select>
-      </p>
-      <h4>6. What you carry <small className="hint">in words: Ironsworn has no money</small></h4>
-      <textarea value={gear} data-gear onChange={(event) => setGear(event.target.value)} rows={2} placeholder="A bow, a bedroll..." />
-      <h4>7. Name and look</h4>
-      <div className="wizard-5e-grid">
-        <label>
-          Name <input value={name} onChange={(event) => setName(event.target.value)} aria-label="Character name" />
-        </label>
-        <label>
-          Look <input value={look} onChange={(event) => setLook(event.target.value)} data-look />
-        </label>
-        {sf ? (
-          <>
-            <label>
-              Pronouns <input value={pronouns} onChange={(event) => setPronouns(event.target.value)} />
-            </label>
-            <label>
-              Callsign <input value={callsign} onChange={(event) => setCallsign(event.target.value)} />
-            </label>
-          </>
-        ) : null}
-      </div>
-      {problem ? <p className="error">{problem}</p> : null}
-    </section>
-  );
-}

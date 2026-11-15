@@ -38,6 +38,7 @@ The first two stages of Kraken's core UI (docs/core-ui-design.md): one core that
 - **Basic Fantasy's character sheet is built from the core's parts** too, including a new track of boxes for spells a day. It looks and works as before.
 - **The D&D family's sheets are built from the core's parts:** D&D 5E, Descending Darkness, D&D 3.5E and AD&D 2E. 5E and Descending Darkness are one layout with the game's own words (Kin, Defense, Health) and its own rules (Dread, bleeding out, death saves); 2E arranges the same parts its own way, as Fantasy Grounds' 2E sheet does. They look and work as before, every button included.
 - **One frame for the D&D wizards.** The 5E, Descending Darkness, 3.5E and 2E character wizards share the core's page-rail frame (title, Next, Cancel, the page tabs with their ticks and alerts). Same screens, same characters.
+- **Traveller, Apeira Astra, Ironsworn and Starforged sheets are built from the core's parts,** laid out by their manifests, with their own pieces (Traveller's skill pickers, Astra's Marks, Ironsworn's moves, progress and assets) inside the core frame. The ten-box progress track is now the core's, and the combat tracker draws a foe's progress with it. Basic Fantasy's level and experience strip is the core strip too. They look and work as before, every button included.
 
 ## 0.1.0-alpha.90: Pictures for every game, and a pass for looks
 

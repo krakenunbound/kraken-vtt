@@ -533,7 +533,9 @@ export function useSession() {
             sound.setSource((id) => `${originRef.current}/sound/file?token=${assetRef.current}&id=${encodeURIComponent(id)}`);
             // The GM's dice packs (Documents/Kraken VTT/Dice): more sets for this seat to choose from.
             void dicePacks.connect(originRef.current, assetRef.current);
-            setRuleset(typeof msg.ruleset === "string" ? msg.ruleset : "");
+            // The campaign's game, by its name (a string, or none).
+            const campaignGame = msg.ruleset;
+            setRuleset(typeof campaignGame === "string" ? campaignGame : "");
             if (msg.sceneSound && typeof msg.sceneSound === "object") setSceneSound(msg.sceneSound as { sceneId: string | null; kept: Soundscape | null });
             if (msg.soundscape) {
               setSoundscape(msg.soundscape as Soundscape);
