@@ -65,6 +65,14 @@ already beats both).
 
 Ranked by how soon a game night trips over it. Each ships with its agent tool and a test.
 
+**Built 2026-11-15 (branch bugfix-rough-edges, unreleased):** action links in text (1); scrolling
+combat text (3); chat bubbles over tokens (4); roll initiative every round, stop at round start (5;
+the GM already sees every whisper); 5E Inspiration and NPC hit points as listed, rolled or maximum
+for every game (6); the GM's Ctrl+A, Ctrl+C / Ctrl+V of tokens, keyboard pan and zoom, number-pad
+diagonals (7). Not yet: manual dice entry (2: the host rolls synchronously, so it must learn to wait
+for a player's typed dice), 5E attunement slots, massive damage, pan to the speaker (off by default
+in Foundry too), pasting a token's size and hidden state.
+
 **Tier 1: felt at the table every session**
 1. **Action links in text** (Foundry's enrichers): `[[/check dex 15]]`, saves, skills, damage, heal, award XP, condition references, with the GM's Request roll card. For every game, read from its manifest's checks and saves.
 2. **Manual dice entry** (#89, FG and Foundry): players with real dice type what they rolled.
