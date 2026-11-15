@@ -33,7 +33,11 @@ maps (`scripts/studio-map-*.mjs`), each stood in for as noted:
 - **Fantasy:** water wheel and millstone (a ritual platform for the
   millstone, logs for the wheel), hand cart, beacon basket (a cold campfire),
   a cold (unlit) brazier, a fresh corpse (a blood stain), an alarm bell,
-  a heavy stone slab door (an iron door).
+  a heavy stone slab door (an iron door), a lighthouse lamp and lens (the gas
+  lamp), rock tidepools (shallow water blobs), quicksand (mud), alien
+  statues on pedestals and wall sconces (statue pedestals, spirit lanterns),
+  a fungal sac or nodule (fungal caps, web cocoons), a cliff face from above
+  (cave wall over limestone).
 - **Stand-ins that mislead:** `Reactor core` is the only reactor or ring
   art, and it always reads as live and glowing (a crated spare in a hold, a
   dead skein ring); the open cryo pod is a different shape from the closed
