@@ -7,13 +7,18 @@ import { MARKER_SETS, markerShapes } from "../../shared/map/deathMarkers.mjs";
 import { backgroundRect, colorWithAlpha, gridStops, sceneFrame, type BackgroundFit, type SceneFrame } from "../foundry/geometry";
 import { type SceneLight, type SceneMarker, type SceneRegion, type SceneWall } from "../foundry/sceneObjects";
 import { diagonalRule, gridDistance, gridKind, pathDistance, gridOrigin, hexCorners, hexOf, LIGHT_PRESETS, snapCenter, withGrid } from "../../shared/map/geometry.mjs";
-import type { DecalItem, EditWall, MapDoor, MapTile, MapToken, Ping, PictureKind, SceneLightRecord, TableMap, TableRecord, WallKind } from "../session/useSession";
+import type { DecalItem, EditWall, MapDoor, MapTemplate, MapTile, MapToken, Ping, PictureKind, SceneLightRecord, TableMap, TableRecord, TemplateAsk, WallKind } from "../session/useSession";
 import { useBookWindows } from "../books/Books";
 import { MapEditor, kindColor, placePicture, type EditTab, type EditTool, type LabelStyle, type PaintStyle } from "./MapEditor";
 import { Lighting } from "./Lighting";
 import { fxMaskImage, fxMaskStyle } from "./fxMask";
 import { SceneGraphics, SceneLegend, type OverlayToken } from "./SceneOverlay";
 import { SceneSettings, type SceneSettingsPatch } from "./SceneSettings";
+import { coveredSquares, outline, place as placeArea, toPixels } from "../../shared/actions/areas.mjs";
+import { TokenBadges as EffectBadges, TokenFx, tokenFxClasses, type FxKey } from "./TokenFx";
+import { BuffBar } from "../effects/BuffBar";
+import { carriesCreatureDrop, dropOnCreature } from "../effects/drops";
+import type { Session } from "../session/useSession";
 import { RulerPath, SharedRulers, rulerPoints, speedBand, terrainCostAt, useRulerBroadcast, useRulerKeys } from "./Ruler";
 import { TokenBadges } from "./TokenBadges";
 import { useExplored } from "./explored";
@@ -150,6 +155,10 @@ export type MapActions = {
   removeDeathMarker?: (id: string) => void;
   clearDeathMarkers?: () => void;
   ct: (action: string, payload?: Record<string, unknown>) => void;
+  // The Effects list's actions (useSession.effects): apply, remove, update, snuff, relight.
+  effects?: (action: string, payload?: Record<string, unknown>) => void;
+  // Area templates by hand: place, move, remove, clear (useSession.template).
+  template?: (action: string, payload?: Record<string, unknown>) => void;
   // The GM's map editor.
   wall?: (action: string, payload?: Record<string, unknown>) => void;
   mask?: (action: string, payload?: Record<string, unknown>) => void;
@@ -164,7 +173,7 @@ export type MapActions = {
   libraryAction?: (action: string, payload?: Record<string, unknown>) => void;
 };
 // What a left-drag does on the map: pan it, ping, draw, or rub a line out.
-type Tool = "pan" | "ping" | "draw" | "erase" | "area";
+type Tool = "pan" | "ping" | "draw" | "erase" | "target" | "template";
 // What a drag with the pen draws: a free line, or a shape from where it starts to where it ends
 // (a circle from its centre, a cone from its point), measured as it is drawn.
 export type DrawShape = "free" | "line" | "arrow" | "rect" | "circle" | "cone";
@@ -304,6 +313,10 @@ function MapViewInner({
   notice = null,
   actions,
   targeted = [],
+  targeters = {},
+  templateAsk = null,
+  onTemplateDone = () => undefined,
+  fxMode = "full",
   me = "",
   startEditing = false,
   gmSeat = gm,
@@ -329,6 +342,13 @@ function MapViewInner({
   actions: MapActions;
   // Tokens this seat's creatures have targeted (a reticle shows on them).
   targeted?: string[];
+  // For each targeted token, the colours of those aiming at it (the GM sees everyone's).
+  targeters?: Record<string, string[]>;
+  // An area spell waiting for its template on this screen (the host asked), and its end.
+  templateAsk?: TemplateAsk | null;
+  onTemplateDone?: () => void;
+  // Token effects: animated, icons only, or none (the GM's setting).
+  fxMode?: "full" | "icons" | "off";
   // This seat's name (a player rubs out only their own lines).
   me?: string;
 }) {
@@ -420,7 +440,15 @@ function MapViewInner({
   const [selected, setSelected] = useState<string | null>(null);
   // Several tokens picked at once (Shift+click, or Shift+drag a box): dragged together.
   const [picked, setPicked] = useState<string[]>([]);
-  const [box, setBox] = useState<{ pointerId: number; start: Point; at: Point } | null>(null);
+  const [box, setBox] = useState<{ pointerId: number; start: Point; at: Point; target?: boolean } | null>(null);
+  // The Area template tool: its shape, and the one being dragged out; where a spell's template is aimed.
+  const [tplShape, setTplShape] = useState<MapTemplate["shape"]>("circle");
+  const [tplDrag, setTplDrag] = useState<{ pointerId: number; start: Point; at: Point } | null>(null);
+  const [aim, setAim] = useState<Point | null>(null);
+  const templateAskRef = useRef(templateAsk);
+  templateAskRef.current = templateAsk;
+  const onTemplateDoneRef = useRef(onTemplateDone);
+  onTemplateDoneRef.current = onTemplateDone;
   // Shift+wheel over a token turns it (FG's token orientation): set each render, read by the wheel handler.
   const turnRef = useRef<(tokenId: string, direction: number, fine: boolean) => boolean>(() => false);
   const elevateRef = useRef<(tokenId: string, direction: number) => boolean>(() => false);
@@ -609,6 +637,10 @@ function MapViewInner({
         setSelected(null);
         setPicked([]);
         setMenu(null);
+        if (templateAskRef.current) {
+          onTemplateDoneRef.current();
+          setAim(null);
+        }
         return;
       }
       // Ctrl+Z (map editor closed): the selected token's last move back; a player's own token if none is selected.
@@ -1094,6 +1126,45 @@ function MapViewInner({
     return entries.find((item) => item.tokenId === hit.id) ?? (hit.recordId ? entries.find((item) => item.recordId === hit.recordId) : undefined) ?? null;
   };
   const ghost = drag && dragTo && drag.moved ? (drag.snap ? snapCenter(scene, dragTo.x, dragTo.y, drag.squares) : dragTo) : null;
+  // Who targets with the toolbar (FG's selection): the selected token's creature, when
+  // this seat may act for it (the GM: any; a player: their own); else the host picks
+  // (a player's own creature, the GM's whose turn it is).
+  const targeterId = () => {
+    const token = selected ? tokens.find((item) => item.id === selected) : null;
+    if (!token || !(gm || token.mine)) return undefined;
+    return entryFor(token)?.id;
+  };
+  // The grid in the terms the area module uses (feet a square, pixels a square, its corner).
+  const gridInfo = { gridPx: size, originX: gridOrigin(scene).x, originY: gridOrigin(scene).y, feetPerSquare: Number(scene.grid.distance) > 0 ? Number(scene.grid.distance) : 5, gridless: gridKind(scene) === "none" };
+  // A spell's template asked for: shown at once beside its caster (then it follows the mouse), and
+  // put away after a minute and a half if it is never placed, so a later click does not cast it.
+  useEffect(() => {
+    if (!templateAsk) return;
+    const caster = tokens.find((token) => token.id === templateAsk.casterTokenId);
+    if (caster) setAim({ x: caster.x + size * 3, y: caster.y });
+    const timer = window.setTimeout(() => {
+      onTemplateDoneRef.current();
+      setAim(null);
+    }, 90000);
+    return () => window.clearTimeout(timer);
+    // Once per request: the caster's place when it came.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [templateAsk]);
+  // A spell's template where it is aimed now (the caster's token for cones, lines and emanations).
+  const askedShape = (() => {
+    if (!templateAsk || !aim) return null;
+    const caster = tokens.find((token) => token.id === templateAsk.casterTokenId) ?? null;
+    return { ...placeArea(templateAsk.area, caster, aim.x, aim.y, gridInfo), color: templateAsk.color, label: templateAsk.name } as Omit<MapTemplate, "id" | "by" | "width"> & { width?: number };
+  })();
+  // A template dragged out by hand: a circle's radius, a cone's or line's length, a square's side, to 5-foot steps.
+  const draggedShape = (() => {
+    if (!tplDrag) return null;
+    const feet = (px: number) => Math.max(gridInfo.feetPerSquare, Math.round(px / size) * gridInfo.feetPerSquare);
+    const dx = tplDrag.at.x - tplDrag.start.x;
+    const dy = tplDrag.at.y - tplDrag.start.y;
+    const reach = tplShape === "square" ? Math.max(Math.abs(dx), Math.abs(dy)) * 2 : Math.hypot(dx, dy);
+    return { shape: tplShape, x: Math.round(tplDrag.start.x), y: Math.round(tplDrag.start.y), size: feet(reach), width: 5, angle: Math.round((Math.atan2(dy, dx) * 180) / Math.PI), color: myColor, label: "" };
+  })();
   // A ruler from one token to another: how much higher the second stands.
   const riseOf = (points: number[]) => {
     const from = tokenAt({ x: points[0], y: points[1] });
@@ -1125,10 +1196,22 @@ function MapViewInner({
         setMenu(null);
         setLightMenu(null);
         if (event.button === 2) {
+          // A spell's template being placed: a right-click puts it away (as Escape does).
+          if (templateAsk) {
+            onTemplateDone();
+            setAim(null);
+            return;
+          }
           // The GM's right-click on a death marker takes it away.
           const marker = gm ? (event.target as Element).closest?.("[data-death-marker]") : null;
           if (marker) {
             actions.removeDeathMarker?.(marker.getAttribute("data-death-marker") ?? "");
+            return;
+          }
+          // A right-click on a template takes it away (its placer's, or any for the GM).
+          const held = (event.target as Element).closest?.("[data-template]");
+          if (held) {
+            actions.template?.("remove", { id: held.getAttribute("data-template") ?? "" });
             return;
           }
           // Right-drag measures, as FG's pointer does.
@@ -1139,6 +1222,30 @@ function MapViewInner({
           return;
         }
         if (event.button !== 0) return;
+        if (templateAsk) {
+          // The spell's template goes where it is aimed: the host targets everyone inside and casts.
+          const point = worldAt(event.clientX, event.clientY);
+          if (point) actions.ct("cast", { ...(templateAsk.recordId ? { recordId: templateAsk.recordId } : { id: templateAsk.id }), power: templateAsk.power, template: { x: Math.round(point.x), y: Math.round(point.y) } });
+          onTemplateDone();
+          setAim(null);
+          return;
+        }
+        if (tool === "template") {
+          const point = worldAt(event.clientX, event.clientY);
+          if (!point) return;
+          capture(event.currentTarget, event.pointerId);
+          setTplDrag({ pointerId: event.pointerId, start: point, at: point });
+          return;
+        }
+        if (tool === "target") {
+          // Target mode (FG's): a drag draws a box; every creature inside becomes a target
+          // of the selected creature (else your own, the GM's: whose turn it is). Shift adds.
+          const point = worldAt(event.clientX, event.clientY);
+          if (!point) return;
+          capture(event.currentTarget, event.pointerId);
+          setBox({ pointerId: event.pointerId, start: point, at: point, target: true });
+          return;
+        }
         setSelected(null);
         if (event.shiftKey && tool === "pan" && !(gm && editorOpen && editTool)) {
           // Shift+drag on the map: a box that picks the tokens in it (yours; the GM's: any).
@@ -1270,11 +1377,6 @@ function MapViewInner({
             actions.ping(point.x, point.y);
             // Shift+ping: the players' maps are pulled there too.
             if (event.shiftKey) pullHere(point);
-          } else if (tool === "area") {
-            // An area spell: everyone within the radius becomes the target of your creature (the GM's: the active one).
-            const answer = window.prompt("Target everyone within how many feet of this point? (Sleep 15, a fireball 20)", "15");
-            const radius = Number(answer);
-            if (answer !== null && radius > 0) actions.ct("target-area", { x: Math.round(point.x), y: Math.round(point.y), radius });
           }
           else if (tool === "erase") {
             const id = lineAt(point);
@@ -1293,6 +1395,15 @@ function MapViewInner({
         setPanning(true);
       }}
       onPointerMove={(event) => {
+        if (templateAsk) {
+          const point = worldAt(event.clientX, event.clientY);
+          if (point) setAim(point);
+        }
+        if (tplDrag && tplDrag.pointerId === event.pointerId) {
+          const point = worldAt(event.clientX, event.clientY);
+          if (point) setTplDrag({ ...tplDrag, at: point });
+          return;
+        }
         if (box && box.pointerId === event.pointerId) {
           const point = worldAt(event.clientX, event.clientY);
           if (point) setBox({ ...box, at: point });
@@ -1393,6 +1504,13 @@ function MapViewInner({
         setCamera((camera) => ({ ...camera, x: camera.x + dx, y: camera.y + dy }));
       }}
       onPointerUp={(event) => {
+        if (tplDrag && tplDrag.pointerId === event.pointerId) {
+          const shape = draggedShape;
+          setTplDrag(null);
+          // Placed, the creatures inside become the targets of the selected creature (else yours, the GM's: whose turn it is).
+          if (shape && Math.hypot(tplDrag.at.x - tplDrag.start.x, tplDrag.at.y - tplDrag.start.y) * camera.scale > 6) actions.template?.("place", { template: shape, target: true, id: targeterId() });
+          return;
+        }
         if (boxDrag.current && boxDrag.current.pointerId === event.pointerId) {
           const start = boxDrag.current;
           boxDrag.current = null;
@@ -1416,6 +1534,12 @@ function MapViewInner({
           const moved = movedWalls(drag);
           if (drag.mode === "corner") actions.wall("move-point", { from: drag.start, to: moved.to });
           else actions.wall("move", { ids: drag.ids, dx: moved.dx, dy: moved.dy });
+          return;
+        }
+        if (box && box.pointerId === event.pointerId && box.target) {
+          setBox(null);
+          if (Math.hypot(box.at.x - box.start.x, box.at.y - box.start.y) * camera.scale < 6) return;
+          actions.ct("target-box", { id: targeterId(), x1: Math.round(box.start.x), y1: Math.round(box.start.y), x2: Math.round(box.at.x), y2: Math.round(box.at.y), add: event.shiftKey });
           return;
         }
         if (box && box.pointerId === event.pointerId) {
@@ -1515,7 +1639,7 @@ function MapViewInner({
           event.stopPropagation();
           return;
         }
-        if (["application/x-kraken-record", "application/x-kraken-ct", "application/x-kraken-damage", "application/x-kraken-card"].some((type) => [...event.dataTransfer.types].includes(type))) {
+        if (["application/x-kraken-record", "application/x-kraken-ct", "application/x-kraken-damage", "application/x-kraken-card"].some((type) => [...event.dataTransfer.types].includes(type)) || carriesCreatureDrop([...event.dataTransfer.types])) {
           event.preventDefault();
           event.stopPropagation();
         }
@@ -1536,6 +1660,18 @@ function MapViewInner({
           return;
         }
         // A damage or healing roll from chat dropped on a creature's token (the GM's, as in FG).
+        // An effect from the Effects list, a chat roll or a sheet's action, dropped on a creature's token.
+        if (carriesCreatureDrop([...event.dataTransfer.types])) {
+          event.preventDefault();
+          event.stopPropagation();
+          const hit = tokenAt(worldAt(event.clientX, event.clientY));
+          if (!hit) {
+            setHint("Drop it on a creature's token.");
+            return;
+          }
+          dropOnCreature(event.dataTransfer, { tokenId: hit.id }, { ct: actions.ct, effects: actions.effects, entryOfRecord: (recordId) => actions.combat?.entries.find((item) => item.recordId === recordId)?.id }, gm);
+          return;
+        }
         const damage = event.dataTransfer.getData("application/x-kraken-damage");
         if (damage && gm) {
           event.preventDefault();
@@ -1573,7 +1709,12 @@ function MapViewInner({
               window.setTimeout(() => setHint((now) => (now === why ? "" : now)), 4000);
             };
             if (!used.entryId) refuse("Your character is not in the fight: add them to the combat tracker first.");
-            else if (!target) refuse(hit ? `${hit.name} is not on the combat tracker.` : "Drop the card on a creature's token.");
+            else if (!hit && used.kind === "spell" && at) {
+              // A spell dropped on open ground: its area's template there (a Fireball's centre), then cast at everyone inside.
+              setHint("");
+              actions.ct("cast", { recordId: used.recordId, power: used.name, template: { x: Math.round(at.x), y: Math.round(at.y) } });
+              window.dispatchEvent(new CustomEvent("kraken-card-used", { detail: used.id ?? "" }));
+            } else if (!target) refuse(hit ? `${hit.name} is not on the combat tracker.` : "Drop the card on a creature's token.");
             else {
               setHint("");
               actions.ct("clear-targets", { id: used.entryId });
@@ -1882,6 +2023,29 @@ function MapViewInner({
             })}
           </svg>
         ) : null}
+        {(map.templates?.length ?? 0) > 0 || askedShape || draggedShape ? (
+          <svg className="overlay templates" width={frame.worldWidth} height={frame.worldHeight} viewBox={`0 0 ${frame.worldWidth} ${frame.worldHeight}`} aria-label="Area templates">
+            {[...(map.templates ?? []).map((template) => ({ ...template, key: template.id, live: true })), ...(askedShape ? [{ ...askedShape, width: askedShape.width ?? 5, key: "aim", live: false }] : []), ...(draggedShape ? [{ ...draggedShape, key: "drag", live: false }] : [])].map((template) => {
+              const shape = toPixels(template, size, gridInfo.feetPerSquare);
+              const mine = gm || template.key === "aim" || template.key === "drag" || ("by" in template && template.by === me);
+              return (
+                <g key={template.key} className={template.live ? "area-template" : "area-template aiming"} data-template={template.live ? template.key : undefined} data-shape={template.shape} style={{ color: template.color }}>
+                  {gridInfo.gridless
+                    ? null
+                    : coveredSquares(shape, gridInfo, 900).map((cell, index) => <rect key={index} className="area-square" x={cell.x - size / 2} y={cell.y - size / 2} width={size} height={size} />)}
+                  <path className="area-outline" d={outline(shape)} style={{ pointerEvents: template.live && mine ? "visiblePainted" : "none", strokeWidth: Math.max(2, 2.5 / camera.scale) }}>
+                    {template.live ? <title>{`${template.label || "Template"}${mine ? " (right-click to remove)" : ""}`}</title> : null}
+                  </path>
+                  {template.label ? (
+                    <text className="area-label" x={shape.x} y={shape.y - (template.shape === "circle" || template.shape === "square" ? shape.size * (template.shape === "square" ? 0.5 : 1) + 6 / camera.scale : 8 / camera.scale)} style={{ fontSize: Math.max(12, 13 / camera.scale) }}>
+                      {template.label}
+                    </text>
+                  ) : null}
+                </g>
+              );
+            })}
+          </svg>
+        ) : null}
         {(map.deathMarkers?.length ?? 0) > 0 ? (
           <svg className="overlay death-markers" width={frame.worldWidth} height={frame.worldHeight} viewBox={`0 0 ${frame.worldWidth} ${frame.worldHeight}`}>
             {(map.deathMarkers ?? []).map((marker) => {
@@ -1912,7 +2076,7 @@ function MapViewInner({
           return (
             <div
               key={token.id}
-              className={["token", token.sensed ? "token-sensed" : "", canDrag ? "token-draggable" : "", token.mine ? "token-mine" : "", token.active ? "token-active" : "", targeted.includes(token.id) ? "token-targeted" : "", selected === token.id ? "token-selected" : "", picked.includes(token.id) ? "token-picked" : "", token.hidden ? "token-hidden" : "", isDragged ? "token-lifted" : ""]
+              className={["token", ...tokenFxClasses((token.effects?.fx ?? []) as FxKey[], fxMode), token.sensed ? "token-sensed" : "", canDrag ? "token-draggable" : "", token.mine ? "token-mine" : "", token.active ? "token-active" : "", targeted.includes(token.id) ? "token-targeted" : "", selected === token.id ? "token-selected" : "", picked.includes(token.id) ? "token-picked" : "", token.hidden ? "token-hidden" : "", isDragged ? "token-lifted" : ""]
                 .filter(Boolean)
                 .join(" ")}
               data-token={token.id}
@@ -1922,11 +2086,13 @@ function MapViewInner({
               style={{ left: token.x - span / 2, top: token.y - span / 2, width: span, height: span }}
               onPointerDown={(event) => {
                 if (event.button === 2) return;
+                // Laying a template (by hand, or a spell's): the press is the map's, even on a token.
+                if (event.button === 0 && (tool === "template" || templateAsk)) return;
                 event.stopPropagation();
                 setMenu(null);
                 // Ctrl+click targets (FG): with your character, or for the GM the creature whose turn it is.
-                if (event.button === 0 && (event.ctrlKey || event.metaKey)) {
-                  actions.ct("target", { tokenId: token.id });
+                if (event.button === 0 && (event.ctrlKey || event.metaKey || tool === "target")) {
+                  actions.ct("target", { tokenId: token.id, sourceId: targeterId() });
                   return;
                 }
                 setSelected(token.id);
@@ -1971,15 +2137,19 @@ function MapViewInner({
                   <span>{initials(token.name)}</span>
                 )}
               </div>
+              {token.effects ? <TokenFx fx={token.effects.fx as FxKey[]} span={span} mode={fxMode} /> : null}
+              {token.effects && fxMode !== "off" ? <EffectBadges badges={token.effects.badges.map((badge) => ({ ...badge, tone: badge.tone as "good" | "bad" | "neutral" }))} span={span} /> : null}
               {token.facing != null ? (
                 <i className="token-facing" data-facing={token.facing} style={{ transform: `rotate(${token.facing}deg)` }} aria-hidden>
                   <b style={{ borderBottomColor: token.color, borderWidth: `0 ${span * 0.09}px ${span * 0.13}px` }} />
                 </i>
               ) : null}
-              {targeted.includes(token.id) ? (
-                <svg className="target-reticle" viewBox="0 0 100 100" aria-label="Targeted">
-                  <circle cx="50" cy="50" r="44" />
-                  <path d="M50 0v18M50 82v18M0 50h18M82 50h18" />
+              {targeted.includes(token.id) || targeters[token.id]?.length ? (
+                <svg className="target-reticle" viewBox="0 0 100 100" aria-label={`Targeted${(targeters[token.id]?.length ?? 0) > 1 ? ` by ${targeters[token.id].length}` : ""}`} data-targeters={(targeters[token.id] ?? []).length}>
+                  {(targeters[token.id]?.length ? targeters[token.id] : ["#ff5a4d"]).slice(0, 4).map((color, index) => (
+                    <circle key={index} cx="50" cy="50" r={44 - index * 6} style={{ stroke: color }} />
+                  ))}
+                  <path d="M50 0v18M50 82v18M0 50h18M82 50h18" style={{ stroke: targeters[token.id]?.[0] }} />
                 </svg>
               ) : null}
               <TokenBadges token={token} span={span} labelSize={Math.max(size * 0.2, 12 / camera.scale)} units={units} />
@@ -1993,7 +2163,7 @@ function MapViewInner({
             ))
           : null}
         {box ? (
-          <div className="pick-box" style={{ left: Math.min(box.start.x, box.at.x), top: Math.min(box.start.y, box.at.y), width: Math.abs(box.at.x - box.start.x), height: Math.abs(box.at.y - box.start.y), borderWidth: 2 / camera.scale }} />
+          <div className={box.target ? "pick-box target-box" : "pick-box"} style={{ left: Math.min(box.start.x, box.at.x), top: Math.min(box.start.y, box.at.y), width: Math.abs(box.at.x - box.start.x), height: Math.abs(box.at.y - box.start.y), borderWidth: 2 / camera.scale }} />
         ) : null}
         {drag && ghost && dragging ? (
           <>
@@ -2168,6 +2338,12 @@ function MapViewInner({
                 >
                   {targeted.includes(token.id) ? "Drop target" : "Target (Ctrl+click)"}
                 </button>
+                {gm || token.mine ? (
+                  // Its effects (the buff bar): put out a torch, take one off, + puts one on.
+                  <div className="token-menu-effects" role="group" aria-label={`${token.name}'s effects`}>
+                    <BuffBar session={actions as unknown as Session} at={{ tokenId: token.id }} />
+                  </div>
+                ) : null}
                 {gm ? (
                   <button type="button" role="menuitem" onClick={() => actions.updateToken(token.id, { hidden: !token.hidden })}>
                     {token.hidden ? "Show to players" : "Hide from players"}
@@ -2401,7 +2577,8 @@ function MapViewInner({
               ["ping", "ping", "Ping: click to show everyone a spot, in your colour"],
               ["draw", "pen", "Draw on the map, for everyone"],
               ["erase", "eraser", gm ? "Rub out a line (any)" : "Rub out one of your lines"],
-              ["area", "target", "Area target: click a spot, give a radius; your creature (the GM's: whose turn it is) targets everyone in it"],
+              ["target", "target", "Target mode: click a creature to target it (or not), drag a box to target every creature in it (Shift adds); with the selected creature, else yours (the GM's: whose turn it is)"],
+              ["template", "template", "Area template: pick a shape and drag it out on the map; creatures inside become your targets"],
             ] as const
           ).map(([id, icon, title]) => (
             <button key={id} type="button" className={tool === id ? "tool on" : "tool"} role="radio" aria-checked={tool === id} aria-label={title} title={title} data-tool={id} onClick={() => {
@@ -2414,6 +2591,30 @@ function MapViewInner({
               <Icon name={icon} />
             </button>
           ))}
+
+          {tool === "template" ? (
+            <span className="draw-shapes" role="radiogroup" aria-label="Template shape">
+              {(
+                [
+                  ["circle", "Circle (a sphere, a radius): drag from its centre", "M10 3a7 7 0 1 0 .01 0Z"],
+                  ["cone", "Cone: drag from its point the way it goes", "M3 10 17 4v12Z"],
+                  ["line", "Line (5 feet wide): drag from where it starts", "M3 9h14v2H3Z"],
+                  ["square", "Square (a cube): drag from its centre", "M4 4h12v12H4z"],
+                ] as const
+              ).map(([id, name, glyph]) => (
+                <button key={id} type="button" role="radio" aria-checked={tplShape === id} className={tplShape === id ? "tool on" : "tool"} title={name} aria-label={name.split(":")[0]} data-template-shape={id} onClick={() => setTplShape(id)}>
+                  <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true">
+                    <path d={glyph} fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+                  </svg>
+                </button>
+              ))}
+              {gm && (map.templates?.length ?? 0) > 0 ? (
+                <button type="button" className="tool" data-action="clear-templates" aria-label="Clear every template" title="Clear every template on this map" onClick={() => actions.template?.("clear")}>
+                  <Icon name="trash" />
+                </button>
+              ) : null}
+            </span>
+          ) : null}
           {tool === "draw" ? (
             <span className="draw-shapes" role="radiogroup" aria-label="What to draw">
               {DRAW_SHAPES.map((item) => (
@@ -2453,6 +2654,21 @@ function MapViewInner({
             </button>
           ) : null}
         </div>
+        <div className="tool-group" role="group" aria-label="Targeting">
+          {(
+            [
+              ["target-friend", "target-faction", { faction: "friend" }, "Target all friendlies: every creature on your side on this map (yourself too)"],
+              ["target-foe", "target-faction", { faction: "foe" }, "Target all foes: every creature on the other side on this map"],
+              ["target-clear-friend", "clear-targets", { faction: "friend" }, "Clear friendly targets"],
+              ["target-clear-foe", "clear-targets", { faction: "foe" }, "Clear enemy targets"],
+              ["target-clear", "clear-targets", {}, "Clear all targets"],
+            ] as const
+          ).map(([icon, action, extra, title]) => (
+            <button key={icon} type="button" className="tool" data-action={icon} aria-label={title.split(":")[0]} title={title} onClick={() => actions.ct(action, { id: targeterId(), ...extra })}>
+              <Icon name={icon} />
+            </button>
+          ))}
+        </div>
         {gm ? (
           <div className="tool-group">
             <button type="button" className="tool" data-action="map-share" aria-label="Share with players" title="Share with players: the map opens on every player's screen, even where it was closed (FG's Share)" onClick={() => actions.shareMap?.()}>
@@ -2490,6 +2706,11 @@ function MapViewInner({
           </span>
         ) : null}
       </div>
+      ) : null}
+      {templateAsk ? (
+        <p className="map-toast template-ask" role="status" data-template-ask={templateAsk.name}>
+          {`${templateAsk.name}: click where its ${templateAsk.area.label ? templateAsk.area.label.toLowerCase() : "area"} goes (it points from your token where it starts from you). Everyone inside is its target. Escape or right-click: put it away.`}
+        </p>
       ) : null}
       {hint ? (
         <p className="map-toast" role="status">

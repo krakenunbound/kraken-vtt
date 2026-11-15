@@ -75,7 +75,13 @@
      }
     ]
    }
-  ]
+  ],
+  "area": {
+   "shape": "circle",
+   "size": 5,
+   "origin": "point",
+   "label": "5-foot-radius Sphere"
+  }
  },
  {
   "name": "Aid",
@@ -269,7 +275,14 @@
   "text": "An aura extends from you in a 10-foot Emanation for the duration. The aura prevents creatures other than Constructs and Undead from passing or reaching through it. An affected creature can cast spells or make attacks with Ranged or Reach weapons through the barrier.\n\nIf you move so that an affected creature is forced to pass through the barrier, the spell ends.",
   "higher": "",
   "upgrade": "",
-  "actions": []
+  "actions": [],
+  "area": {
+   "shape": "circle",
+   "size": 10,
+   "origin": "self",
+   "label": "10-foot Emanation",
+   "attach": true
+  }
  },
  {
   "name": "Antimagic Field",
@@ -287,7 +300,14 @@
   "text": "An aura of antimagic surrounds you in 10-foot Emanation. No one can cast spells, take Magic actions, or create other magical effects inside the aura, and those things can't target or otherwise affect anything inside it. Magical properties of magic items don't work inside the aura or on anything inside it.\n\nAreas of effect created by spells or other magic can't extend into the aura, and no one can teleport into or out of it or use planar travel there. Portals close temporarily while in the aura.\n\nOngoing spells, except those cast by an Artifact or a deity, are suppressed in the area. While an effect is suppressed, it doesn't function, but the time it spends suppressed counts against its duration.\n\n*Dispel Magic* has no effect on the aura, and the auras created by different *Antimagic Field* spells don't nullify each other.",
   "higher": "",
   "upgrade": "",
-  "actions": []
+  "actions": [],
+  "area": {
+   "shape": "circle",
+   "size": 10,
+   "origin": "self",
+   "label": "10-foot Emanation",
+   "attach": true
+  }
  },
  {
   "name": "Antipathy/Sympathy",
@@ -526,7 +546,14 @@
     "durunit": "minute",
     "targeting": "self"
    }
-  ]
+  ],
+  "area": {
+   "shape": "circle",
+   "size": 30,
+   "origin": "self",
+   "label": "30-foot Emanation",
+   "attach": true
+  }
  },
  {
   "name": "Awaken",
@@ -796,7 +823,13 @@
     "durmod": 1,
     "durunit": "minute"
    }
-  ]
+  ],
+  "area": {
+   "shape": "square",
+   "size": 20,
+   "origin": "point",
+   "label": "20-foot Square"
+  }
  },
  {
   "name": "Blade Barrier",
@@ -1015,7 +1048,13 @@
      }
     ]
    }
-  ]
+  ],
+  "area": {
+   "shape": "cone",
+   "size": 15,
+   "origin": "self",
+   "label": "15-foot Cone"
+  }
  },
  {
   "name": "Call Lightning",
@@ -1055,7 +1094,13 @@
      }
     ]
    }
-  ]
+  ],
+  "area": {
+   "shape": "circle",
+   "size": 60,
+   "origin": "point",
+   "label": "60-foot-radius Sphere"
+  }
  },
  {
   "name": "Calm Emotions",
@@ -1083,7 +1128,13 @@
     "type": "powersave",
     "savetype": "charisma"
    }
-  ]
+  ],
+  "area": {
+   "shape": "circle",
+   "size": 20,
+   "origin": "point",
+   "label": "20-foot-radius Sphere"
+  }
  },
  {
   "name": "Chain Lightning",
@@ -1320,7 +1371,13 @@
      }
     ]
    }
-  ]
+  ],
+  "area": {
+   "shape": "circle",
+   "size": 60,
+   "origin": "point",
+   "label": "60-foot-radius Sphere"
+  }
  },
  {
   "name": "Clairvoyance",
@@ -1398,7 +1455,13 @@
      }
     ]
    }
-  ]
+  ],
+  "area": {
+   "shape": "circle",
+   "size": 20,
+   "origin": "point",
+   "label": "20-foot-radius Sphere"
+  }
  },
  {
   "name": "Color Spray",
@@ -1433,7 +1496,13 @@
     "durmod": 1,
     "durunit": "round"
    }
-  ]
+  ],
+  "area": {
+   "shape": "cone",
+   "size": 15,
+   "origin": "self",
+   "label": "15-foot Cone"
+  }
  },
  {
   "name": "Command",
@@ -1599,7 +1668,13 @@
      }
     ]
    }
-  ]
+  ],
+  "area": {
+   "shape": "cone",
+   "size": 60,
+   "origin": "self",
+   "label": "60-foot Cone"
+  }
  },
  {
   "name": "Confusion",
@@ -1630,7 +1705,13 @@
     "type": "powersave",
     "savetype": "wisdom"
    }
-  ]
+  ],
+  "area": {
+   "shape": "circle",
+   "size": 10,
+   "origin": "point",
+   "label": "10-foot-radius Sphere"
+  }
  },
  {
   "name": "Conjure Animals",
@@ -1806,7 +1887,14 @@
   "text": "You conjure spirits from the Elemental Planes that flit around you in a 15-foot Emanation for the duration. Until the spell ends, any attack you make deals an extra 2d8 damage when you hit a creature in the Emanation. This damage is Acid, Cold, Fire, or Lightning (your choice when you make the attack).\n\nIn addition, the ground in the Emanation is Difficult Terrain for your enemies.\n\n***Using a Higher-Level Spell Slot.*** The damage increases by 1d8 for each spell slot level above 4.",
   "higher": "The damage increases by 1d8 for each spell slot level above 4.",
   "upgrade": "",
-  "actions": []
+  "actions": [],
+  "area": {
+   "shape": "circle",
+   "size": 15,
+   "origin": "self",
+   "label": "15-foot Emanation",
+   "attach": true
+  }
  },
  {
   "name": "Conjure Woodland Beings",
@@ -1847,7 +1935,14 @@
      }
     ]
    }
-  ]
+  ],
+  "area": {
+   "shape": "circle",
+   "size": 10,
+   "origin": "self",
+   "label": "10-foot Emanation",
+   "attach": true
+  }
  },
  {
   "name": "Contact Other Plane",
@@ -2008,7 +2103,13 @@
      }
     ]
    }
-  ]
+  ],
+  "area": {
+   "shape": "square",
+   "size": 50,
+   "origin": "point",
+   "label": "50-foot Square"
+  }
  },
  {
   "name": "Control Weather",
@@ -2092,7 +2193,13 @@
   "text": "You do one of the following:\n\n**Create Water.** You create up to 10 gallons of clean water within range in an open container. Alternatively, the water falls as rain in a 30-foot Cube within range, extinguishing exposed flames there.\n\n**Destroy Water.** You destroy up to 10 gallons of water in an open container within range. Alternatively, you destroy fog in a 30-foot Cube within range.\n\n***Using a Higher-Level Spell Slot.*** You create or destroy 10 additional gallons of water, or the size of the Cube increases by 5 feet, for each spell slot level above 1.",
   "higher": "You create or destroy 10 additional gallons of water, or the size of the Cube increases by 5 feet, for each spell slot level above 1.",
   "upgrade": "",
-  "actions": []
+  "actions": [],
+  "area": {
+   "shape": "square",
+   "size": 30,
+   "origin": "point",
+   "label": "30-foot Cube"
+  }
  },
  {
   "name": "Create Undead",
@@ -2206,7 +2313,13 @@
   "text": "For the duration, magical Darkness spreads from a point within range and fills a 15-foot-radius Sphere. Darkvision can't see through it, and nonmagical light can't illuminate it.\n\nAlternatively, you cast the spell on an object that isn't being worn or carried, causing the Darkness to fill a 15-foot Emanation originating from that object. Covering that object with something opaque, such as a bowl or helm, blocks the Darkness.\n\nIf any of this spell's area overlaps with an area of Bright Light or Dim Light created by a spell of level 2 or lower, that other spell is dispelled.",
   "higher": "",
   "upgrade": "",
-  "actions": []
+  "actions": [],
+  "area": {
+   "shape": "circle",
+   "size": 15,
+   "origin": "point",
+   "label": "15-foot-radius Sphere"
+  }
  },
  {
   "name": "Darkvision",
@@ -2247,7 +2360,13 @@
   "text": "For the duration, sunlight spreads from a point within range and fills a 60-foot-radius Sphere. The sunlight's area is Bright Light and sheds Dim Light for an additional 60 feet.\n\nAlternatively, you cast the spell on an object that isn't being worn or carried, causing the sunlight to fill a 60-foot Emanation originating from that object. Covering that object with something opaque, such as a bowl or helm, blocks the sunlight.\n\nIf any of this spell's area overlaps with an area of Darkness created by a spell of level 3 or lower, that other spell is dispelled.",
   "higher": "",
   "upgrade": "",
-  "actions": []
+  "actions": [],
+  "area": {
+   "shape": "circle",
+   "size": 60,
+   "origin": "point",
+   "label": "60-foot-radius Sphere"
+  }
  },
  {
   "name": "Death Ward",
@@ -2295,7 +2414,13 @@
     "savetype": "dexterity",
     "onmissdamage": "half"
    }
-  ]
+  ],
+  "area": {
+   "shape": "circle",
+   "size": 20,
+   "origin": "point",
+   "label": "20-foot-radius Sphere"
+  }
  },
  {
   "name": "Demiplane",
@@ -2500,7 +2625,13 @@
      }
     ]
    }
-  ]
+  ],
+  "area": {
+   "shape": "square",
+   "size": 10,
+   "origin": "point",
+   "label": "10-foot Cube"
+  }
  },
  {
   "name": "Dispel Evil and Good",
@@ -2842,7 +2973,13 @@
     "savetype": "dexterity",
     "onmissdamage": "half"
    }
-  ]
+  ],
+  "area": {
+   "shape": "cone",
+   "size": 15,
+   "origin": "self",
+   "label": "15-foot Cone"
+  }
  },
  {
   "name": "Dream",
@@ -2942,7 +3079,13 @@
     "durmod": 1,
     "durunit": "minute"
    }
-  ]
+  ],
+  "area": {
+   "shape": "circle",
+   "size": 100,
+   "origin": "point",
+   "label": "100-foot-radius Sphere"
+  }
  },
  {
   "name": "Eldritch Blast",
@@ -2999,7 +3142,13 @@
   "text": "You exert control over the elements, creating one of the following effects within range.\n\n***Beckon Air.*** You create a breeze strong enough to ripple cloth, stir dust, rustle leaves, and close open doors and shutters, all in a 5-foot Cube. Doors and shutters being held open by someone or something aren't affected.\n\n***Beckon Earth.*** You create a thin shroud of dust or sand that covers surfaces in a 5-foot-square area, or you cause a single word to appear in your handwriting in a patch of dirt or sand.\n\n***Beckon Fire.*** You create a thin cloud of harmless embers and colored, scented smoke in a 5-foot Cube. You choose the color and scent, and the embers can light candles, torches, or lamps in that area. The smoke's scent lingers for 1 minute.\n\n***Beckon Water.*** You create a spray of cool mist that lightly dampens creatures and objects in a 5-foot Cube. Alternatively, you create 1 cup of clean water either in an open container or on a surface, and the water evaporates in 1 minute.\n\n***Sculpt Element.*** You cause dirt, sand, fire, smoke, mist, or water that can fit in a 1-foot Cube to assume a crude shape (such as that of a creature) for 1 hour.",
   "higher": "",
   "upgrade": "",
-  "actions": []
+  "actions": [],
+  "area": {
+   "shape": "square",
+   "size": 5,
+   "origin": "point",
+   "label": "5-foot Cube"
+  }
  },
  {
   "name": "Enhance Ability",
@@ -3119,7 +3268,13 @@
     "durmod": 1,
     "durunit": "minute"
    }
-  ]
+  ],
+  "area": {
+   "shape": "square",
+   "size": 20,
+   "origin": "point",
+   "label": "20-foot Square"
+  }
  },
  {
   "name": "Enthrall",
@@ -3268,7 +3423,13 @@
     "type": "powersave",
     "savetype": "dexterity"
    }
-  ]
+  ],
+  "area": {
+   "shape": "square",
+   "size": 20,
+   "origin": "point",
+   "label": "20-foot Cube"
+  }
  },
  {
   "name": "Faithful Hound",
@@ -3358,7 +3519,13 @@
     "durmod": 1,
     "durunit": "minute"
    }
-  ]
+  ],
+  "area": {
+   "shape": "cone",
+   "size": 30,
+   "origin": "self",
+   "label": "30-foot Cone"
+  }
  },
  {
   "name": "Feather Fall",
@@ -3543,7 +3710,13 @@
      }
     ]
    }
-  ]
+  ],
+  "area": {
+   "shape": "circle",
+   "size": 20,
+   "origin": "point",
+   "label": "20-foot-radius Sphere"
+  }
  },
  {
   "name": "Fire Bolt",
@@ -3730,7 +3903,13 @@
      }
     ]
    }
-  ]
+  ],
+  "area": {
+   "shape": "circle",
+   "size": 10,
+   "origin": "point",
+   "label": "10-foot-radius Cylinder"
+  }
  },
  {
   "name": "Flaming Sphere",
@@ -3772,7 +3951,13 @@
      }
     ]
    }
-  ]
+  ],
+  "area": {
+   "shape": "circle",
+   "size": 2.5,
+   "origin": "point",
+   "label": "2.5-foot-radius Sphere"
+  }
  },
  {
   "name": "Flesh to Stone",
@@ -3863,7 +4048,13 @@
   "text": "You create a 20-foot-radius Sphere of fog centered on a point within range. The Sphere is Heavily Obscured. It lasts for the duration or until a strong wind (such as one created by *Gust of Wind*) disperses it.\n\n***Using a Higher-Level Spell Slot.*** The fog's radius increases by 20 feet for each spell slot level above 1.",
   "higher": "The fog's radius increases by 20 feet for each spell slot level above 1.",
   "upgrade": "",
-  "actions": []
+  "actions": [],
+  "area": {
+   "shape": "circle",
+   "size": 20,
+   "origin": "point",
+   "label": "20-foot-radius Sphere"
+  }
  },
  {
   "name": "Forbiddance",
@@ -3996,7 +4187,13 @@
     "durmod": 1,
     "durunit": "round"
    }
-  ]
+  ],
+  "area": {
+   "shape": "circle",
+   "size": 60,
+   "origin": "point",
+   "label": "60-foot-radius Sphere"
+  }
  },
  {
   "name": "Gaseous Form",
@@ -4171,7 +4368,14 @@
   "text": "An immobile, shimmering barrier appears in a 10-foot Emanation around you and remains for the duration.\n\nAny spell of level 5 or lower cast from outside the barrier can't affect anything within it. Such a spell can target creatures and objects within the barrier, but the spell has no effect on them. Similarly, the area within the barrier is excluded from areas of effect created by such spells.\n\n***Using a Higher-Level Spell Slot.*** The barrier blocks spells of 1 level higher for each spell slot level above 6.",
   "higher": "The barrier blocks spells of 1 level higher for each spell slot level above 6.",
   "upgrade": "",
-  "actions": []
+  "actions": [],
+  "area": {
+   "shape": "circle",
+   "size": 10,
+   "origin": "self",
+   "label": "10-foot Emanation",
+   "attach": true
+  }
  },
  {
   "name": "Glyph of Warding",
@@ -4202,7 +4406,13 @@
     "savetype": "dexterity",
     "onmissdamage": "half"
    }
-  ]
+  ],
+  "area": {
+   "shape": "circle",
+   "size": 20,
+   "origin": "point",
+   "label": "20-foot-radius Sphere"
+  }
  },
  {
   "name": "Goodberry",
@@ -4254,7 +4464,13 @@
     "durmod": 1,
     "durunit": "minute"
    }
-  ]
+  ],
+  "area": {
+   "shape": "square",
+   "size": 10,
+   "origin": "point",
+   "label": "10-foot Square"
+  }
  },
  {
   "name": "Greater Invisibility",
@@ -4352,7 +4568,13 @@
   "text": "You create a ward that protects up to 2,500 square feet of floor space. The warded area can be up to 20 feet tall, and you shape it as one 50-foot square, one hundred 5-foot squares that are contiguous, or twenty-five 10-foot squares that are contiguous.\n\nWhen you cast this spell, you can specify individuals that are unaffected by the spell's effects. You can also specify a password that, when spoken aloud within 5 feet of the warded area, makes the speaker immune to its effects.\n\nThe spell creates the effects below within the warded area. *Dispel Magic* has no effect on *Guards and Wards* itself, but each of the following effects can be dispelled. If all four are dispelled, *Guards and Wards* ends. If you cast the spell every day for 365 days on the same area, the spell thereafter lasts until all its effects are dispelled.\n\n***Corridors.*** Fog fills all the warded corridors, making them Heavily Obscured. In addition, at each intersection or branching passage offering a choice of direction, there is a 50 percent chance that a creature other than you believes it is going in the opposite direction from the one it chooses.\n\n***Doors.*** All doors in the warded area are magically locked, as if sealed by the *Arcane Lock* spell. In addition, you can cover up to ten doors with an illusion to make them appear as plain sections of wall.\n\n***Stairs.*** Webs fill all stairs in the warded area from top to bottom, as in the *Web* spell. These strands regrow in 10 minutes if they are destroyed while *Guards and Wards* lasts.\n\n***Other Spell Effect.*** Place one of the following magical effects within the warded area:\n\n- *Dancing Lights* in four corridors, with a simple program that the lights repeat as long as *Guards and Wards* lasts\n- *Magic Mouth* in two locations\n- *Stinking Cloud* in two locations (the vapors return within 10 minutes if dispersed while *Guards and Wards* lasts)\n- *Gust of Wind* in one corridor or room (the wind blows continuously while the spell lasts)\n- *Suggestion* in one 5-foot square; any creature that enters that square receives the suggestion mentally",
   "higher": "",
   "upgrade": "",
-  "actions": []
+  "actions": [],
+  "area": {
+   "shape": "square",
+   "size": 50,
+   "origin": "point",
+   "label": "50-foot Square"
+  }
  },
  {
   "name": "Guidance",
@@ -4451,7 +4673,14 @@
     "type": "powersave",
     "savetype": "strength"
    }
-  ]
+  ],
+  "area": {
+   "shape": "line",
+   "size": 60,
+   "origin": "self",
+   "label": "60-foot-long, 10-foot-wide Line",
+   "width": 10
+  }
  },
  {
   "name": "Hallow",
@@ -4500,7 +4729,13 @@
   "text": "You make natural terrain in a 150-foot Cube in range look, sound, and smell like another sort of natural terrain. Thus, open fields or a road can be made to resemble a swamp, hill, crevasse, or some other difficult or impassable terrain. A pond can be made to seem like a grassy meadow, a precipice like a gentle slope, or a rock-strewn gully like a wide and smooth road. Manufactured structures, equipment, and creatures within the area aren't changed.\n\nThe tactile characteristics of the terrain are unchanged, so creatures entering the area are likely to notice the illusion. If the difference isn't obvious by touch, a creature examining the illusion can take the Study action to make an Intelligence (Investigation) check against your spell save DC to disbelieve it. If a creature discerns that the terrain is illusory, the creature sees a vague image superimposed on the real terrain.",
   "higher": "",
   "upgrade": "",
-  "actions": []
+  "actions": [],
+  "area": {
+   "shape": "square",
+   "size": 150,
+   "origin": "point",
+   "label": "150-foot Cube"
+  }
  },
  {
   "name": "Harm",
@@ -4754,7 +4989,13 @@
     "durunit": "round",
     "targeting": "self"
    }
-  ]
+  ],
+  "area": {
+   "shape": "square",
+   "size": 10,
+   "origin": "self",
+   "label": "10-foot Cube"
+  }
  },
  {
   "name": "Heroism",
@@ -4943,7 +5184,14 @@
     "durmod": 1,
     "durunit": "minute"
    }
-  ]
+  ],
+  "area": {
+   "shape": "circle",
+   "size": 30,
+   "origin": "self",
+   "label": "30-foot Emanation",
+   "attach": true
+  }
  },
  {
   "name": "Hunter's Mark",
@@ -5011,7 +5259,13 @@
     "durmod": 1,
     "durunit": "minute"
    }
-  ]
+  ],
+  "area": {
+   "shape": "square",
+   "size": 30,
+   "origin": "point",
+   "label": "30-foot Cube"
+  }
  },
  {
   "name": "Ice Knife",
@@ -5050,7 +5304,13 @@
      }
     ]
    }
-  ]
+  ],
+  "area": {
+   "shape": "circle",
+   "size": 5,
+   "origin": "point",
+   "label": "5-foot-radius Sphere"
+  }
  },
  {
   "name": "Ice Storm",
@@ -5096,7 +5356,13 @@
      }
     ]
    }
-  ]
+  ],
+  "area": {
+   "shape": "circle",
+   "size": 20,
+   "origin": "point",
+   "label": "20-foot-radius Cylinder"
+  }
  },
  {
   "name": "Identify",
@@ -5206,7 +5472,13 @@
      }
     ]
    }
-  ]
+  ],
+  "area": {
+   "shape": "circle",
+   "size": 20,
+   "origin": "point",
+   "label": "20-foot-radius Sphere"
+  }
  },
  {
   "name": "Inflict Wounds",
@@ -5288,7 +5560,13 @@
      }
     ]
    }
-  ]
+  ],
+  "area": {
+   "shape": "circle",
+   "size": 20,
+   "origin": "point",
+   "label": "20-foot-radius Sphere"
+  }
  },
  {
   "name": "Instant Summons",
@@ -5540,7 +5818,14 @@
      }
     ]
    }
-  ]
+  ],
+  "area": {
+   "shape": "line",
+   "size": 100,
+   "origin": "self",
+   "label": "100-foot-long, 5-foot-wide Line",
+   "width": 5
+  }
  },
  {
   "name": "Locate Animals or Plants",
@@ -5692,7 +5977,13 @@
     "type": "powersave",
     "savetype": "charisma"
    }
-  ]
+  ],
+  "area": {
+   "shape": "circle",
+   "size": 10,
+   "origin": "point",
+   "label": "10-foot-radius Cylinder"
+  }
  },
  {
   "name": "Magic Jar",
@@ -5867,7 +6158,13 @@
      }
     ]
    }
-  ]
+  ],
+  "area": {
+   "shape": "circle",
+   "size": 30,
+   "origin": "point",
+   "label": "30-foot-radius Sphere"
+  }
  },
  {
   "name": "Mass Heal",
@@ -6096,7 +6393,13 @@
      }
     ]
    }
-  ]
+  ],
+  "area": {
+   "shape": "circle",
+   "size": 40,
+   "origin": "point",
+   "label": "40-foot-radius Sphere"
+  }
  },
  {
   "name": "Mind Blank",
@@ -6347,7 +6650,13 @@
      }
     ]
    }
-  ]
+  ],
+  "area": {
+   "shape": "circle",
+   "size": 5,
+   "origin": "point",
+   "label": "5-foot-radius Cylinder"
+  }
  },
  {
   "name": "Move Earth",
@@ -6366,7 +6675,13 @@
   "text": "Choose an area of terrain no larger than 40 feet on a side within range. You can reshape dirt, sand, or clay in the area in any manner you choose for the duration. You can raise or lower the area's elevation, create or fill in a trench, erect or flatten a wall, or form a pillar. The extent of any such changes can't exceed half the area's largest dimension. For example, if you affect a 40-foot square, you can create a pillar up to 20 feet high, raise or lower the square's elevation by up to 20 feet, dig a trench up to 20 feet deep, and so on. It takes 10 minutes for these changes to complete. Because the terrain's transformation occurs slowly, creatures in the area can't usually be trapped or injured by the ground's movement.\n\nAt the end of every 10 minutes you spend concentrating on the spell, you can choose a new area of terrain to affect within range.\n\nThis spell can't manipulate natural stone or stone construction. Rocks and structures shift to accommodate the new terrain. If the way you shape the terrain would make a structure unstable, it might collapse.\n\nSimilarly, this spell doesn't directly affect plant growth. The moved earth carries any plants along with it.",
   "higher": "",
   "upgrade": "",
-  "actions": []
+  "actions": [],
+  "area": {
+   "shape": "square",
+   "size": 40,
+   "origin": "point",
+   "label": "40-foot Square"
+  }
  },
  {
   "name": "Nondetection",
@@ -6420,7 +6735,14 @@
   "text": "You radiate a concealing aura in a 30-foot Emanation for the duration. While in the aura, you and each creature you choose have a +10 bonus to Dexterity (Stealth) checks and leave no tracks.",
   "higher": "",
   "upgrade": "",
-  "actions": []
+  "actions": [],
+  "area": {
+   "shape": "circle",
+   "size": 30,
+   "origin": "self",
+   "label": "30-foot Emanation",
+   "attach": true
+  }
  },
  {
   "name": "Phantasmal Force",
@@ -6605,7 +6927,13 @@
   "text": "This spell channels vitality into plants. The casting time you use determines whether the spell has the Overgrowth or the Enrichment effect below.\n\n***Overgrowth.*** Choose a point within range. All normal plants in a 100-foot-radius Sphere centered on that point become thick and overgrown. A creature moving through that area must spend 4 feet of movement for every 1 foot it moves. You can exclude one or more areas of any size within the spell's area from being affected.\n\n***Enrichment.*** All plants in a half-mile radius centered on a point within range become enriched for 365 days. The plants yield twice the normal amount of food when harvested. They can benefit from only one *Plant Growth* per year.",
   "higher": "",
   "upgrade": "",
-  "actions": []
+  "actions": [],
+  "area": {
+   "shape": "circle",
+   "size": 100,
+   "origin": "point",
+   "label": "100-foot-radius Sphere"
+  }
  },
  {
   "name": "Poison Spray",
@@ -6861,7 +7189,13 @@
     "type": "powersave",
     "savetype": "dexterity"
    }
-  ]
+  ],
+  "area": {
+   "shape": "cone",
+   "size": 60,
+   "origin": "self",
+   "label": "60-foot Cone"
+  }
  },
  {
   "name": "Prismatic Wall",
@@ -7079,7 +7413,13 @@
   "text": "You remove poison and rot from nonmagical food and drink in a 5-foot-radius Sphere centered on a point within range.",
   "higher": "",
   "upgrade": "",
-  "actions": []
+  "actions": [],
+  "area": {
+   "shape": "circle",
+   "size": 5,
+   "origin": "point",
+   "label": "5-foot-radius Sphere"
+  }
  },
  {
   "name": "Raise Dead",
@@ -7374,7 +7714,13 @@
     "type": "powersave",
     "savetype": "dexterity"
    }
-  ]
+  ],
+  "area": {
+   "shape": "circle",
+   "size": 50,
+   "origin": "point",
+   "label": "50-foot-radius Cylinder"
+  }
  },
  {
   "name": "Revivify",
@@ -7770,7 +8116,13 @@
      }
     ]
    }
-  ]
+  ],
+  "area": {
+   "shape": "circle",
+   "size": 10,
+   "origin": "point",
+   "label": "10-foot-radius Sphere"
+  }
  },
  {
   "name": "Shield",
@@ -7953,7 +8305,13 @@
     "durmod": 10,
     "durunit": "minute"
    }
-  ]
+  ],
+  "area": {
+   "shape": "circle",
+   "size": 20,
+   "origin": "point",
+   "label": "20-foot-radius Sphere"
+  }
  },
  {
   "name": "Silent Image",
@@ -8024,7 +8382,13 @@
     "durmod": 1,
     "durunit": "minute"
    }
-  ]
+  ],
+  "area": {
+   "shape": "circle",
+   "size": 5,
+   "origin": "point",
+   "label": "5-foot-radius Sphere"
+  }
  },
  {
   "name": "Sleet Storm",
@@ -8059,7 +8423,13 @@
     "durmod": 1,
     "durunit": "minute"
    }
-  ]
+  ],
+  "area": {
+   "shape": "circle",
+   "size": 20,
+   "origin": "point",
+   "label": "20-foot-radius Cylinder"
+  }
  },
  {
   "name": "Slow",
@@ -8088,7 +8458,13 @@
     "type": "powersave",
     "savetype": "wisdom"
    }
-  ]
+  ],
+  "area": {
+   "shape": "square",
+   "size": 40,
+   "origin": "point",
+   "label": "40-foot Cube"
+  }
  },
  {
   "name": "Sorcerous Burst",
@@ -8202,7 +8578,14 @@
   "text": "You imbue plants in an immobile 30-foot Emanation with limited sentience and animation, giving them the ability to communicate with you and follow your simple commands. You can question plants about events in the spell's area within the past day, gaining information about creatures that have passed, weather, and other circumstances.\n\nYou can also turn Difficult Terrain caused by plant growth (such as thickets and undergrowth) into ordinary terrain that lasts for the duration. Or you can turn ordinary terrain where plants are present into Difficult Terrain that lasts for the duration.\n\nThe spell doesn't enable plants to uproot themselves and move about, but they can move their branches, tendrils, and stalks for you.\n\nIf a Plant creature is in the area, you can communicate with it as if you shared a common language.",
   "higher": "",
   "upgrade": "",
-  "actions": []
+  "actions": [],
+  "area": {
+   "shape": "circle",
+   "size": 30,
+   "origin": "self",
+   "label": "30-foot Emanation",
+   "attach": true
+  }
  },
  {
   "name": "Spider Climb",
@@ -8254,7 +8637,13 @@
      }
     ]
    }
-  ]
+  ],
+  "area": {
+   "shape": "circle",
+   "size": 20,
+   "origin": "point",
+   "label": "20-foot-radius Sphere"
+  }
  },
  {
   "name": "Spirit Guardians",
@@ -8294,7 +8683,14 @@
      }
     ]
    }
-  ]
+  ],
+  "area": {
+   "shape": "circle",
+   "size": 15,
+   "origin": "self",
+   "label": "15-foot Emanation",
+   "attach": true
+  }
  },
  {
   "name": "Spiritual Weapon",
@@ -8396,7 +8792,13 @@
     "durmod": 1,
     "durunit": "minute"
    }
-  ]
+  ],
+  "area": {
+   "shape": "circle",
+   "size": 20,
+   "origin": "point",
+   "label": "20-foot-radius Sphere"
+  }
  },
  {
   "name": "Stone Shape",
@@ -8589,7 +8991,14 @@
     "durmod": 1,
     "durunit": "minute"
    }
-  ]
+  ],
+  "area": {
+   "shape": "line",
+   "size": 60,
+   "origin": "self",
+   "label": "60-foot-long, 5-foot-wide Line",
+   "width": 5
+  }
  },
  {
   "name": "Sunburst",
@@ -8635,7 +9044,13 @@
     "durmod": 1,
     "durunit": "round"
    }
-  ]
+  ],
+  "area": {
+   "shape": "circle",
+   "size": 60,
+   "origin": "point",
+   "label": "60-foot-radius Sphere"
+  }
  },
  {
   "name": "Symbol",
@@ -8681,7 +9096,13 @@
     "durmod": 1,
     "durunit": "round"
    }
-  ]
+  ],
+  "area": {
+   "shape": "circle",
+   "size": 60,
+   "origin": "point",
+   "label": "60-foot-radius Sphere"
+  }
  },
  {
   "name": "Telekinesis",
@@ -8787,7 +9208,13 @@
   "text": "As you cast the spell, you draw a 5-foot-radius circle on the ground inscribed with sigils that link your location to a permanent teleportation circle of your choice whose sigil sequence you know and that is on the same plane of existence as you. A shimmering portal opens within the circle you drew and remains open until the end of your next turn. Any creature that enters the portal instantly appears within 5 feet of the destination circle or in the nearest unoccupied space if that space is occupied.\n\nMany major temples, guildhalls, and other important places have permanent teleportation circles. Each circle includes a unique sigil sequence—a string of runes arranged in a particular pattern.\n\nWhen you first gain the ability to cast this spell, you learn the sigil sequences for two destinations on the Material Plane, determined by the GM. You might learn additional sigil sequences during your adventures. You can commit a new sigil sequence to memory after studying it for 1 minute.\n\nYou can create a permanent teleportation circle by casting this spell in the same location every day for 365 days.",
   "higher": "",
   "upgrade": "",
-  "actions": []
+  "actions": [],
+  "area": {
+   "shape": "circle",
+   "size": 5,
+   "origin": "point",
+   "label": "5-foot-radius Sphere"
+  }
  },
  {
   "name": "Thaumaturgy",
@@ -8847,7 +9274,13 @@
      }
     ]
    }
-  ]
+  ],
+  "area": {
+   "shape": "square",
+   "size": 15,
+   "origin": "self",
+   "label": "15-foot Cube"
+  }
  },
  {
   "name": "Time Stop",
@@ -8883,7 +9316,14 @@
   "text": "A 10-foot Emanation springs into existence around you and remains stationary for the duration. The spell fails when you cast it if the Emanation isn't big enough to fully encapsulate all creatures in its area.\n\nCreatures and objects within the Emanation when you cast the spell can move through it freely. All other creatures and objects are barred from passing through it. Spells of level 3 or lower can't be cast through it, and the effects of such spells can't extend into it.\n\nThe atmosphere inside the Emanation is comfortable and dry, regardless of the weather outside. Until the spell ends, you can command the interior to have Dim Light or Darkness (no action required). The Emanation is opaque from the outside and of any color you choose, but it's transparent from the inside.\n\nThe spell ends early if you leave the Emanation or if you cast it again.",
   "higher": "",
   "upgrade": "",
-  "actions": []
+  "actions": [],
+  "area": {
+   "shape": "circle",
+   "size": 10,
+   "origin": "self",
+   "label": "10-foot Emanation",
+   "attach": true
+  }
  },
  {
   "name": "Tongues",
@@ -9202,7 +9642,13 @@
      }
     ]
    }
-  ]
+  ],
+  "area": {
+   "shape": "circle",
+   "size": 20,
+   "origin": "point",
+   "label": "20-foot-radius Sphere"
+  }
  },
  {
   "name": "Wall of Fire",
@@ -9299,7 +9745,13 @@
      }
     ]
    }
-  ]
+  ],
+  "area": {
+   "shape": "square",
+   "size": 10,
+   "origin": "point",
+   "label": "10-foot Square"
+  }
  },
  {
   "name": "Wall of Stone",
@@ -9481,7 +9933,13 @@
     "durmod": 1,
     "durunit": "hour"
    }
-  ]
+  ],
+  "area": {
+   "shape": "square",
+   "size": 20,
+   "origin": "point",
+   "label": "20-foot Cube"
+  }
  },
  {
   "name": "Weird",
@@ -9525,7 +9983,13 @@
     "durmod": 1,
     "durunit": "minute"
    }
-  ]
+  ],
+  "area": {
+   "shape": "circle",
+   "size": 30,
+   "origin": "point",
+   "label": "30-foot-radius Sphere"
+  }
  },
  {
   "name": "Wind Walk",
@@ -9671,6 +10135,12 @@
     "type": "powersave",
     "savetype": "charisma"
    }
-  ]
+  ],
+  "area": {
+   "shape": "circle",
+   "size": 15,
+   "origin": "point",
+   "label": "15-foot-radius Sphere"
+  }
  }
 ]

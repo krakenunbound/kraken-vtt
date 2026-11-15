@@ -130,6 +130,7 @@ export function App() {
   const mapActions = useMemo(() => new Proxy({} as typeof session, { get: (_target, key) => (sessionRef.current as unknown as Record<string | symbol, unknown>)[key] }), []);
   const recordList = useMemo(() => Object.values(session.records), [session.records]);
   const targeted = useMemo(() => targetedTokens(session), [session.combat, session.map.tokens, session.role]);
+  const targeters = useMemo(() => targetersOf(session), [session.combat, session.map.tokens]);
   const myName = session.players.find((seat) => seat.id === session.selfId)?.name ?? "";
   const urls = useRef<string[]>([]);
   const fileInput = useRef<HTMLInputElement>(null);
@@ -627,7 +628,7 @@ export function App() {
           session={session}
           scene={
             scene ? (
-              <MapView scene={scene} gm={dm && !testing && !previewing} map={session.map} records={recordList} pings={session.pings} notice={session.notice} actions={mapActions} targeted={targeted} me={testing ? "@test" : myName} startEditing={dm && Boolean(prep) && !testing} gmSeat={dm} readAloud={session.readAloudNow} onReadAloudDone={session.dismissReadAloud} viewPull={session.viewPull} />
+              <MapView scene={scene} gm={dm && !testing && !previewing} map={session.map} records={recordList} pings={session.pings} notice={session.notice} actions={mapActions} targeted={targeted} targeters={targeters} templateAsk={session.templateAsk} onTemplateDone={session.clearTemplateAsk} fxMode={session.options.tokenEffects ?? "full"} me={testing ? "@test" : myName} startEditing={dm && Boolean(prep) && !testing} gmSeat={dm} readAloud={session.readAloudNow} onReadAloudDone={session.dismissReadAloud} viewPull={session.viewPull} />
             ) : null
           }
           sceneId={scene?.id ?? ""}
@@ -665,6 +666,26 @@ export function App() {
       </WindowProvider>
     </div>
   );
+}
+
+// Who aims at each token, as their colours (each targeter's token ring: a player's
+// chosen colour, an NPC's side): the GM is sent every creature's targets, a player
+// their own creatures' (combat.cjs viewFor), so the GM sees all the aiming at once.
+function targetersOf(session: ReturnType<typeof useSession>): Record<string, string[]> {
+  const { entries } = session.combat;
+  const tokenOf = (entry: (typeof entries)[number]) => session.map.tokens.find((token) => token.id === entry.tokenId) ?? session.map.tokens.find((token) => entry.recordId && token.recordId === entry.recordId);
+  const out: Record<string, string[]> = {};
+  for (const source of entries) {
+    if (!source.targets?.length) continue;
+    const color = tokenOf(source)?.color || "#ff5a4d";
+    for (const id of source.targets) {
+      const target = entries.find((entry) => entry.id === id);
+      const token = target ? tokenOf(target) : null;
+      if (!token) continue;
+      out[token.id] = [...(out[token.id] ?? []), color];
+    }
+  }
+  return out;
 }
 
 // The tokens this seat's creatures have targeted: a player's own characters,

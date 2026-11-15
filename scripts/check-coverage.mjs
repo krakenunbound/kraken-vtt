@@ -79,6 +79,8 @@ const MESSAGES = {
   "token-undo": "kraken_token_move",
   "move-approve": "kraken_token_move",
   "map-sound": "kraken_map_sound",
+  template: "kraken_template",
+  effects: "kraken_effects",
   "map-share": "kraken_map",
   "scene-share": "kraken_map",
   "prep-close": "kraken_image",

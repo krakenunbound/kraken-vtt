@@ -1,6 +1,6 @@
 import { createPortal } from "react-dom";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import type { ChatLine, RollResult, Session } from "../session/useSession";
+import type { ChatLine, DamageCard, RollResult, Session } from "../session/useSession";
 import { characterDice, diceStore, FATE_SIDES, fateFace, rolling, setThrow, tower as towerDrops, type DiceLook } from "../dice/diceStore";
 import { ladder } from "../../shared/fate/rules.mjs";
 import { commandsFor, runChat, type Command } from "./chatCommands";
@@ -12,6 +12,7 @@ import { DieShape, Icon } from "./icons";
 import { useWindows } from "./Windows";
 import { rulesetFor } from "../../shared/rulesets/registry.mjs";
 import { openPopOut, PopOutWindow, screenOffset, type ScreenPlace } from "./PopOut";
+import "../effects/effects.css";
 
 // Where chat last was in a window of its own (in this browser).
 function chatPlace(): ScreenPlace | null {
@@ -175,6 +176,9 @@ function Line({ line, gmIcon, session }: { line: ChatLine; gmIcon: string; sessi
   const mark = iconOf(line);
   const me = session.players.find((seat) => seat.id === session.selfId)?.name ?? "";
   const applied = line.roll && session.role === "dm" && /^\[(DAMAGE|HEAL)/i.test(line.roll.label ?? "") ? { amount: Number(line.roll.total) || 0, heal: /^\[HEAL/i.test(line.roll.label ?? "") } : null;
+  // What the line is when dropped on a creature (FG's drop of a chat result): damage with its
+  // type, healing, an attack's total and d20, or an effect's words.
+  const dropped = session.role === "dm" ? rollDrop(line) : null;
   const myVote = line.vote ? (line.vote.yes.includes(me) ? "yes" : line.vote.no.includes(me) ? "no" : "") : "";
   return (
     <div
@@ -191,9 +195,10 @@ function Line({ line, gmIcon, session }: { line: ChatLine; gmIcon: string; sessi
         event.dataTransfer.setData("text/plain", chatWords(line));
         event.dataTransfer.setData("application/x-kraken-chat", chatWords(line));
         if (applied) event.dataTransfer.setData("application/x-kraken-damage", JSON.stringify(applied));
+        if (dropped) event.dataTransfer.setData("application/x-kraken-roll", JSON.stringify(dropped));
         event.dataTransfer.effectAllowed = "copy";
       }}
-      title={applied ? `Drag onto a creature to ${applied.heal ? "heal" : "deal"} ${applied.amount}, or into a note` : "Drag into a note to keep it"}
+      title={dropped ? `Drag onto a creature to ${dropped.kind === "attack" ? "attack it" : dropped.kind === "effect" ? "put it on" : dropped.kind === "heal" ? `heal ${dropped.total}` : `deal ${dropped.total}${dropped.type ? ` ${dropped.type}` : ""}`}, or into a note` : applied ? `Drag onto a creature to ${applied.heal ? "heal" : "deal"} ${applied.amount}, or into a note` : "Drag into a note to keep it"}
     >
       {mark ? (
         <span className={`chat-kind tone-${mark.tone}`} aria-hidden="true">
@@ -208,7 +213,10 @@ function Line({ line, gmIcon, session }: { line: ChatLine; gmIcon: string; sessi
       {line.self ? <span className="chat-tag">Only you</span> : null}
       {line.tower ? <span className="chat-tag">To the GM</span> : null}
       {line.roll ? (
-        <RollCard roll={line.roll} pending={rolling.has(line)} />
+        <>
+          <RollCard roll={line.roll} pending={rolling.has(line)} />
+          {line.roll.apply && line.roll.card ? <DamageCardRows card={line.roll.apply} cardId={line.roll.card} session={session} /> : null}
+        </>
       ) : line.kind === "readaloud" ? (
         <span className="chat-text chat-readaloud">
           <span className="read-aloud-title">{line.title ? `Read aloud · ${line.title}` : "Read aloud"}</span>
@@ -233,6 +241,62 @@ function Line({ line, gmIcon, session }: { line: ChatLine; gmIcon: string; sessi
         </span>
       ) : null}
     </div>
+  );
+}
+
+// A chat line as a drop on a creature: a damage or healing roll (its type from
+// "[TYPE: fire]", its card when it has one), an attack (its total and d20), or an
+// effect line ("Effect ['Bless; ATK: 1d4'] -> [to Mira]": its words).
+export type RollDrop = { kind: "damage" | "heal" | "attack" | "effect"; total?: number; type?: string; natural?: number; name: string; by?: string; card?: string; label?: string };
+function rollDrop(line: ChatLine): RollDrop | null {
+  const roll = line.roll;
+  if (roll) {
+    const label = roll.label ?? "";
+    const name = label.replace(/^\[[A-Z]+\]\s*(\([A-Z]\)\s*)?/, "").replace(/\s*\[.*$/, "").replace(/\s*->.*$/, "").trim() || "Roll";
+    if (/^\[DAMAGE\]/i.test(label)) return { kind: "damage", total: Number(roll.total) || 0, type: /\[TYPE:\s*([a-z ,]+)\]/i.exec(label)?.[1]?.trim() ?? "", name, by: roll.by, ...(roll.card ? { card: roll.card } : {}) };
+    if (/^\[HEAL\]/i.test(label)) return { kind: "heal", total: Number(roll.total) || 0, name, by: roll.by, ...(roll.card ? { card: roll.card } : {}) };
+    if (/^\[ATTACK\]/i.test(label)) return { kind: "attack", total: Number(roll.total) || 0, natural: (() => { const die = roll.terms?.find((term) => term.kind === "dice"); return die && die.kind === "dice" ? die.rolls.find((_, index) => die.kept[index] !== false) : undefined; })(), name, by: roll.by };
+    return null;
+  }
+  const effect = /^Effect \['(.+)'\] -> \[to /.exec(line.text ?? "");
+  return effect ? { kind: "effect", label: effect[1], name: effect[1].split(";")[0] } : null;
+}
+
+// Foundry's damage card under a damage or healing roll: each creature it landed on,
+// what it took (its save, resistance), and for the GM the buttons that set what it
+// takes now (x0, x1/2, x1, x2, heal): only the difference lands.
+const MULTS: [number | "heal", string, string][] = [
+  [0, "×0", "Takes nothing (undo)"],
+  [0.5, "½", "Half: the save succeeded after all, or resistance"],
+  [1, "×1", "The roll as it is"],
+  [2, "×2", "Double: vulnerability, or a critical"],
+  ["heal", "♥", "Heals by the roll instead"],
+];
+function DamageCardRows({ card, cardId, session }: { card: DamageCard; cardId: string; session: Session }) {
+  const gm = session.role === "dm";
+  if (!card.targets.length) return null;
+  return (
+    <ul className={card.auto ? "damage-card" : "damage-card waiting"} data-card={cardId} aria-label={`${card.name}: ${card.kind === "heal" ? "healing" : "damage"} by creature`}>
+      {card.targets.map((row) => (
+        <li key={row.id} data-card-target={row.name}>
+          <span className="damage-card-name">{row.name}</span>
+          {row.save ? <span className={`damage-card-save ${row.save}`}>{row.save === "half" ? "saved: half" : row.save === "failed" ? "failed save" : row.save}</span> : null}
+          {row.note ? <span className="damage-card-note">{row.note.replace(/[[\]]/g, "").toLowerCase()}</span> : null}
+          <b className={row.taken < 0 ? "damage-card-taken heal" : "damage-card-taken"} title={row.mult === null ? "Waiting: press a button to apply it" : row.taken < 0 ? `Healed ${-row.taken}` : `Took ${row.taken}`}>
+            {row.mult === null ? "—" : row.taken < 0 ? `+${-row.taken}` : `−${row.taken}`}
+          </b>
+          {gm ? (
+            <span className="damage-card-buttons" role="group" aria-label={`What ${row.name} takes`}>
+              {MULTS.map(([mult, text, title]) => (
+                <button key={String(mult)} type="button" className={row.mult === mult ? "on" : ""} aria-pressed={row.mult === mult} title={title} data-mult={String(mult)} onClick={() => session.ct("apply-card", { card: cardId, targetId: row.id, mult })}>
+                  {text}
+                </button>
+              ))}
+            </span>
+          ) : null}
+        </li>
+      ))}
+    </ul>
   );
 }
 

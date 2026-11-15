@@ -4,6 +4,7 @@ import { Icon } from "../ui/icons";
 import { hasLink, linkFrom } from "../ui/QuickSlots";
 import type { Session } from "../session/useSession";
 import { CrewSheet } from "./CrewSheet";
+import { carriesCreatureDrop, dropOnCreature } from "../effects/drops";
 import { has, rulesetFor } from "../../shared/rulesets/registry.mjs";
 
 export type PartyMember = {
@@ -108,7 +109,19 @@ export function PartySheet({ session, compact = false }: { session: Session; com
             {party.members.map((member) => {
               const current = member.hp - member.wounds;
               return (
-                <li key={member.id} data-member={member.id}>
+                <li
+                  key={member.id}
+                  data-member={member.id}
+                  // An effect or a roll dropped on a member lands on that character (its token or tracker entry).
+                  onDragOver={(event) => {
+                    if (carriesCreatureDrop([...event.dataTransfer.types])) event.preventDefault();
+                  }}
+                  onDrop={(event) => {
+                    if (!carriesCreatureDrop([...event.dataTransfer.types])) return;
+                    event.preventDefault();
+                    dropOnCreature(event.dataTransfer, { recordId: member.id }, { ct: session.ct, effects: session.effects }, session.role === "dm");
+                  }}
+                >
                   <span className="party-face">{member.portrait ? <Picture session={session} id={member.portrait} alt="" still /> : member.name.slice(0, 1)}</span>
                   <span className="party-who">
                     <b>{member.name}</b>

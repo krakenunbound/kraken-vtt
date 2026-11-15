@@ -48,6 +48,8 @@ export type MapToken = {
   // The GM's and its owner's: moves that can be undone, and this turn's path ([x, y, ...]) on the tracker.
   undo?: number;
   path?: number[];
+  // What its effects show (shared/actions/effects.mjs visualOf): condition visuals and badges.
+  effects?: { fx: string[]; badges: { icon: string; title: string; tone: string; rounds?: number }[]; list?: TrackedEffect[] };
 };
 // A sound placed on the map (radius in feet).
 export type MapSound = { id: string; name: string; sound: string; x: number; y: number; radius: number; volume: number; on: boolean };
@@ -55,6 +57,14 @@ export type MapSound = { id: string; name: string; sound: string; x: number; y: 
 export type MoveRequest = { id: string; name: string; by: string; from: { x: number; y: number }; to: { x: number; y: number }; at: number };
 // A region of the map, the GM's (Map Studio's Traps & regions, a bundle's Foundry regions).
 export type MapRegion = { id: string; kind: "trap" | "pit" | "difficult" | "teleport"; name: string; note: string; points: number[]; on: boolean; cost?: number; to?: string | { x: number; y: number; sceneId?: string } };
+// An effect on a creature as its owner and the GM see it (the tracker's, or a token's out of the fight):
+// its words, rounds left of `total`, put out for now (a light), its picture, who put it on.
+export type TrackedEffect = { id: string; label: string; duration: number; total?: number; paused?: boolean; icon?: string; source?: string; gmOnly?: boolean };
+// An area template on the map (a spell's sphere, cone, line or cube): world pixels for
+// its origin, feet for its size; angle: degrees clockwise from east.
+export type MapTemplate = { id: string; shape: "circle" | "cone" | "line" | "square"; x: number; y: number; size: number; width: number; angle: number; spread?: number; color: string; label: string; by: string; attach?: string; turn?: boolean; entryId?: string };
+// The host asks this screen to place a spell's template (an area spell cast with no targets).
+export type TemplateAsk = { power: string; recordId: string | null; id: string | null; name: string; area: { shape: MapTemplate["shape"]; size: number; width?: number; origin: "point" | "self"; attach?: boolean; spread?: number; label?: string }; casterTokenId: string; color: string };
 // A light shining now, with its own line of sight (pixels).
 export type MapLight = { id: string; x: number; y: number; brightPx: number; dimPx: number; color: string; polygon: number[] | null; animation?: string; speed?: number };
 // A player's token seeing in the dark (darkvision), pixels.
@@ -100,6 +110,7 @@ export type TableMap = {
   spoiled?: string[];
   sceneLights: SceneLightRecord[];
   settings: MapSettings;
+  templates?: MapTemplate[];
   drawings?: MapDrawing[];
   // Where creatures died (FG's death markers): drawn under the tokens, for everyone.
   deathMarkers?: DeathMarker[];
@@ -150,7 +161,10 @@ const EMPTY_MAP: TableMap = { sceneId: null, tokens: [], doors: [], vision: null
 export type RollTerm =
   | { kind: "number"; sign: number; value: number }
   | { kind: "dice"; sign: number; count: number; sides: number; rolls: number[]; kept: boolean[]; sum: number };
-export type RollResult = { formula: string; label: string; total: number; terms: RollTerm[]; tag?: string; result?: string; target?: string; against?: number; by?: string };
+export type RollResult = { formula: string; label: string; total: number; terms: RollTerm[]; tag?: string; result?: string; target?: string; against?: number; by?: string; card?: string; apply?: DamageCard };
+// A damage or healing roll's card (combat.cjs landOn): each creature it landed on, what it took
+// after its save and resistances, the multiplier the GM chose (null: waiting, autoApply off).
+export type DamageCard = { kind: "damage" | "heal"; type: string; name: string; total: number; auto: boolean; targets: { id: string; name: string; base?: number; taken: number; mult: number | "heal" | null; note?: string; save?: string; hidden?: boolean }[] };
 // kind: what the line is (FG's chat commands): said, an emote, an action, out of character, the GM's story, a mood.
 export type ChatKind = "say" | "emote" | "action" | "ooc" | "story" | "mood" | "readaloud";
 export type ChatVote = { id: string; question: string; yes: string[]; no: string[] };
@@ -212,7 +226,7 @@ export type QuickSlot =
 export type KrakenLink = QuickSlot;
 export type SoundItem = { id: string; kind: string; group: string; name: string };
 export type SoundLibrary = { sounds: SoundItem[]; groups: { id: string; count: number }[]; folder: string; triggers?: SoundTrigger[] };
-export type TableOptions = { paused?: boolean; towerReveal: boolean; towerExternal?: boolean; towerStyle?: string; deathMarkers?: { on: boolean; default: string; byType: Record<string, string> }; motd?: { text: string; links: QuickSlot[] }; decal: string; wallpaper: string; gmIcon: string; soundHidden: "off" | "combat" | "all"; soundRepeat: number; diceHold?: number; wizard35?: Wizard35Options; wizard2e?: Wizard2eOptions };
+export type TableOptions = { paused?: boolean; towerReveal: boolean; towerExternal?: boolean; towerStyle?: string; deathMarkers?: { on: boolean; default: string; byType: Record<string, string> }; motd?: { text: string; links: QuickSlot[] }; decal: string; wallpaper: string; gmIcon: string; soundHidden: "off" | "combat" | "all"; soundRepeat: number; diceHold?: number; tokenEffects?: "full" | "icons" | "off"; playerEffects?: "none" | "lights" | "conditions" | "all"; autoApply?: boolean; wizard35?: Wizard35Options; wizard2e?: Wizard2eOptions };
 // The D&D 3.5E character wizard's options (the GM's, as FG's KrakenCharWizard35E).
 export type Wizard35Options = { methods: number[]; rollLock: boolean; lowReroll: boolean; vault: boolean };
 // The AD&D 2E character wizard's options (the GM's): ability rolls once only, the PHB methods allowed, gold above 1st level.
@@ -243,7 +257,7 @@ export type CombatEntry = {
   wounds?: number;
   temp?: number;
   ac?: number;
-  effects: { id: string; label: string; duration: number }[];
+  effects: TrackedEffect[];
   targets: string[];
   attacks?: { key: string; name: string; bonus: number; bonuses?: number[]; thaco?: number; damage: string }[];
   /** AD&D 2E and Basic Fantasy: the level this character turns undead at. */
@@ -442,6 +456,7 @@ export function useSession() {
   // How many times the GM has shared the map (each one opens the map window).
   const [mapShared, setMapShared] = useState(0);
   const [notice, setNotice] = useState<string | null>(null);
+  const [templateAsk, setTemplateAsk] = useState<TemplateAsk | null>(null);
   // The connection dropped: trying again (attempt, and when the next try is), the table kept on screen meanwhile.
   const [reconnecting, setReconnecting] = useState<{ attempt: number; at: number } | null>(null);
   // The GM's Ban list; the bells rung for this player (each one a chime and a flash); raised hands the GM is told of.
@@ -643,10 +658,18 @@ export function useSession() {
             setPings((current) => [...current, ping].slice(-12));
             window.setTimeout(() => setPings((current) => current.filter((item) => item.id !== ping.id)), 4200);
           }
+          if (msg.type === "template-request" && msg.area && typeof msg.power === "string") {
+            setTemplateAsk(msg as unknown as TemplateAsk);
+            return;
+          }
           if (msg.type === "notice" && typeof msg.text === "string") {
             const text = msg.text;
             setNotice(text);
             window.setTimeout(() => setNotice((current) => (current === text ? null : current)), 2500);
+          }
+          if (msg.type === "card" && typeof msg.card === "string") {
+            const card = msg.card;
+            setChat((current) => current.map((line) => (line.roll?.card === card ? { ...line, roll: { ...line.roll, apply: msg.apply as DamageCard } } : line)));
           }
           if (msg.type === "vote" && typeof msg.id === "string") {
             const id = msg.id;
@@ -1314,7 +1337,19 @@ export function useSession() {
   // The party sheet's GM actions; the host splits and posts them as FG does.
   // The combat tracker: every action goes to the host, which applies FG's rules.
   // The tracker's rolls are thrown from where they were asked for.
-  const ct = useCallback((action: string, payload: Record<string, unknown> = {}) => send({ type: "ct", action, ...payload, ...throwIntent() }), [send]);
+  // A cast from this screen may be asked to place its area's template first (place: the
+  // map can); a power's own action key travels as castAction (a sheet's per-action Cast
+  // buttons name it `action`, which would replace the tracker action itself).
+  const ct = useCallback(
+    (action: string, payload: Record<string, unknown> = {}) => {
+      if (action === "cast") {
+        const { action: castAction, ...rest } = payload;
+        return send({ type: "ct", place: true, ...rest, action, ...(castAction ? { castAction } : {}), ...throwIntent() });
+      }
+      return send({ type: "ct", action, ...payload, ...throwIntent() });
+    },
+    [send],
+  );
   const setTableOptions = useCallback((patch: Partial<TableOptions>) => send({ type: "table-options", options: patch }), [send]);
   const partyAwardXP = useCallback((xp: number) => send({ type: "party-award-xp", xp }), [send]);
   const partyAward = useCallback((kind: "quests" | "encounters", id?: string) => send({ type: "party-award", kind, id }), [send]);
@@ -1410,6 +1445,9 @@ export function useSession() {
     mapSound,
     mapShared,
     notice,
+    // An area spell waiting for its template (the map places it, or Escape cancels).
+    templateAsk,
+    clearTemplateAsk: () => setTemplateAsk(null),
     chat,
     records,
     error,
@@ -1441,6 +1479,10 @@ export function useSession() {
     updateLight,
     removeLight,
     ct,
+    // Area templates by hand (the map toolbar's Area template tool): place, move, remove, clear.
+    template: (action: string, payload: Record<string, unknown> = {}) => send({ type: "template", action, ...payload }),
+    // The Effects list: apply, remove, update, snuff, relight; the GM's own: save, delete (electron/effects.cjs).
+    effects: (action: string, payload: Record<string, unknown> = {}) => send({ type: "effects", action, ...payload }),
     partyAwardXP,
     partyAward,
     partyDistribute,

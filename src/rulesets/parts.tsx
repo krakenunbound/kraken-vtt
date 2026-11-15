@@ -6,6 +6,7 @@ import { Dnd5eDeathSaves, Dnd5eDread, Dnd5eDying, Dnd5eSpells, dnd5eClassName } 
 import { adnd2eAbilityNote, adnd2eClassKey } from "./adnd2e";
 import { Mgt2SkillPickers, mgt2Careers, mgt2SkillTotal } from "./mgt2";
 import { AstraMarks, AstraSkillPickers, AstraTrickNotes, astraSkillTotal } from "./astra";
+import { SpellCasts } from "../core/parts/SpellCasts";
 import { FateCompels, FateHarm, FateLastRoll, FateMilestones, FateProblem, FateRollBar, FateSkills, FateStunts } from "./fate";
 import { ForgedAttributes, ForgedCondition, ForgedDowntime, ForgedLoad, ForgedPlaybook, ForgedRollBar } from "./forged";
 import { IronAssets, IronCarryLine, IronControl, IronDebilities, IronLastRoll, IronMoves, IronProblem, IronProgress } from "./ironsworn";
@@ -18,6 +19,8 @@ export const CUSTOM_PARTS: Record<string, CustomPart> = {
   "cairn.restStrip": CairnRest,
   "bfrpg.turnUndead": BfTurnUndead,
   "dnd5e.spells": Dnd5eSpells,
+  // The core's: each known spell with Cast (the games whose spells the host reads from their words).
+  "core.spellCasts": SpellCasts,
   "dnd5e.dread": Dnd5eDread,
   "dnd5e.dying": Dnd5eDying,
   "dnd5e.deathSaves": Dnd5eDeathSaves,

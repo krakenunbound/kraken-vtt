@@ -29,7 +29,7 @@ function cleanNote(raw) {
   };
 }
 
-function createCalendar({ saved, ruleset = "", onChange = () => undefined }) {
+function createCalendar({ saved, ruleset = "", onChange = () => undefined, onTime = () => undefined }) {
   const raw = saved && typeof saved === "object" ? saved : {};
   const first = calendarOf(raw.id ?? calendarFor(ruleset));
   const state = {
@@ -94,6 +94,9 @@ function createCalendar({ saved, ruleset = "", onChange = () => undefined }) {
       state.year = moved.year;
       state.day = moved.day;
       changed();
+      // Game time passed: torches burn down, spells run out (tableServer).
+      const passed = int(days, 0) * 1440 + int(hours, 0) * 60 + int(minutes, 0);
+      if (passed > 0) onTime(passed);
       return view(seat);
     },
     // A note on a day (today unless a year and day are given), signed by its writer.

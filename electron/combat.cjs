@@ -57,6 +57,17 @@ const r35Ready = import(pathToFileURL(path.join(__dirname, "..", "shared", "dnd3
 // 2/1; saves d20 at or above the number (Paralyzation, Rod, Petrification,
 // Breath, Spell); a creature dies at 0, a character at 0 to -9 is dying (a
 // point lost each round until the wounds are bound), dead at -10.
+// Spells and powers read from their words (shared/actions/parse.mjs) and the
+// effects' catalogue (shared/actions/effects.mjs): areas, who a spell lands on,
+// how many, and actions for a spell its book gave none.
+let spellParse = null;
+let effectsLib = null;
+let registry = null;
+const actionsReady = Promise.all([
+  import(pathToFileURL(path.join(__dirname, "..", "shared", "rulesets", "registry.mjs")).href).then((module) => (registry = module)),
+  import(pathToFileURL(path.join(__dirname, "..", "shared", "actions", "parse.mjs")).href).then((module) => (spellParse = module)),
+  import(pathToFileURL(path.join(__dirname, "..", "shared", "actions", "effects.mjs")).href).then((module) => (effectsLib = module)),
+]);
 let r2e = null;
 const r2eReady = import(pathToFileURL(path.join(__dirname, "..", "shared", "adnd2e", "rules.mjs")).href).then((module) => {
   r2e = module;
@@ -122,6 +133,8 @@ const geometryReady = import(pathToFileURL(path.join(__dirname, "..", "shared", 
 });
 
 const FACTIONS = ["friend", "neutral", "foe"];
+// The side a creature faces: friends face foes and foes friends; a neutral's foes are the foes.
+const otherSide = (faction) => (faction === "foe" ? "friend" : "foe");
 
 function text(value, fallback) {
   const raw = typeof value === "string" ? value : value == null ? "" : String(value);
@@ -157,6 +170,17 @@ function cleanEffect(raw) {
     // A concentration spell's effect: who holds it (the caster's record) and the spell,
     // so a new concentration spell, a failed save or falling ends it everywhere.
     ...(raw.by && raw.conc ? { by: text(raw.by, "").slice(0, 160), conc: text(raw.conc, "").slice(0, 120) } : {}),
+    // Its picture in the Effects list and on the buff bar, and who put it on.
+    ...(raw.icon ? { icon: text(raw.icon, "").slice(0, 24) } : {}),
+    ...(raw.source ? { source: text(raw.source, "").slice(0, 60) } : {}),
+    // Ends when its creature takes damage (Sleep).
+    ...(raw.ends === "damage" ? { ends: "damage" } : {}),
+    // The rounds it started with (a light's warning comes at a tenth), whether
+    // it is put out for now (a snuffed torch keeps its time), and whether it
+    // has warned that it is nearly out.
+    ...(num(raw.total, 0) > 0 ? { total: Math.round(num(raw.total, 0)) } : {}),
+    ...(raw.paused ? { paused: true } : {}),
+    ...(raw.warned ? { warned: true } : {}),
   };
 }
 
@@ -165,10 +189,20 @@ function effectAppliesTo(effect, against) {
   return !effect.targets?.length || Boolean(against && effect.targets.includes(against.id));
 }
 
+// The parts of an effect that are on its creature now: none while it is put
+// out (a snuffed torch), and not those after "FAIL:" (what a failed repeated
+// save will bring: FG's "Sleep; Incapacitated; SAVEOE: ...; FAIL: inherit; Unconscious").
+function livePartsOf(effect) {
+  if (effect.paused) return [];
+  const parts = effect.label.split(";");
+  const stop = parts.findIndex((part) => /^\s*fail\s*:/i.test(part));
+  return stop < 0 ? parts : parts.slice(0, stop);
+}
+
 // A creature's conditions from its effects' parts: "Asleep; Unconscious" has Unconscious.
 function hasCondition(entry, name) {
   const want = name.toLowerCase();
-  return (entry?.effects ?? []).some((effect) => effect.label.split(";").some((part) => part.trim().toLowerCase() === want));
+  return (entry?.effects ?? []).some((effect) => livePartsOf(effect).some((part) => part.trim().toLowerCase() === want));
 }
 
 function cleanEntry(raw) {
@@ -191,7 +225,7 @@ function cleanEntry(raw) {
     // An NPC's powers used today (FG's per-day uses on the tracker's copy).
     used: raw.used && typeof raw.used === "object" ? Object.fromEntries(Object.entries(raw.used).slice(0, 60).map(([key, value]) => [String(key).slice(0, 60), Math.max(0, Math.round(num(value, 0)))])) : {},
     // Who this creature has targeted (FG's targets on the tracker).
-    targets: (Array.isArray(raw.targets) ? raw.targets : []).map((id) => text(id, "")).filter(Boolean).slice(0, 20),
+    targets: (Array.isArray(raw.targets) ? raw.targets : []).map((id) => text(id, "")).filter(Boolean).slice(0, 100),
     // 5E: how its last attack went against each target ("hit", "crit" or "miss"),
     // until damage is rolled (FG's crit state per target, cleared at each attack); death saves for an NPC entry.
     hitOn: raw.hitOn && typeof raw.hitOn === "object" ? Object.fromEntries(Object.entries(raw.hitOn).slice(0, 20).filter(([, value]) => ["hit", "crit", "miss"].includes(value)).map(([key, value]) => [String(key).slice(0, 40), value])) : null,
@@ -215,7 +249,7 @@ function effectDice(entry, tag, against) {
   const out = [];
   for (const effect of entry?.effects ?? []) {
     if (!effectAppliesTo(effect, against)) continue;
-    for (const part of effect.label.split(";")) {
+    for (const part of livePartsOf(effect)) {
       const match = /^\s*([A-Z]+)\s*:\s*([+-]?\d*d\d+)(?:\s+[a-z][a-z ,]*)?\s*$/i.exec(part);
       if (match && match[1].toUpperCase() === tag) out.push(match[2].startsWith("-") ? match[2] : `+${match[2].replace(/^\+/, "")}`);
     }
@@ -229,7 +263,7 @@ function effectBonus(entry, tag, against) {
   let total = 0;
   for (const effect of entry?.effects ?? []) {
     if (!effectAppliesTo(effect, against)) continue;
-    for (const part of effect.label.split(";")) {
+    for (const part of livePartsOf(effect)) {
       const match = /^\s*([A-Z]+)\s*:\s*([+-]?\d+)(?:\s+[a-z][a-z ,]*)?\s*$/i.exec(part);
       if (match && match[1].toUpperCase() === tag) total += Number(match[2]);
     }
@@ -248,7 +282,7 @@ const PHYSICAL = new Set(["strength", "dexterity", "constitution"]);
 function siegeEffect(entry, stat, save) {
   let total = 0;
   for (const effect of entry?.effects ?? []) {
-    for (const part of effect.label.split(";")) {
+    for (const part of livePartsOf(effect)) {
       const match = /^\s*([A-Z]+)\s*:\s*([+-]?\d+)\s*(.*)$/i.exec(part);
       if (!match) continue;
       const tag = match[1].toUpperCase();
@@ -315,6 +349,30 @@ function durationRounds(text, casterLevel, roundSeconds = 10) {
   return Math.max(1, Math.round((count * seconds) / roundSeconds));
 }
 
+// Game time passing over a creature's effects: `rounds` off each one with a
+// duration (a snuffed light keeps its time), those that run out gone with a
+// line in chat, and a light warning once when it is nearly out (a tenth of its
+// time, at most 10 minutes). Returns the effects still on. say(line, secret).
+function tickEffects(list, rounds, { name, hidden = false, roundSeconds = 6, say = () => undefined, warnAt = (total) => Math.max(1, Math.round(total / 10)) } = {}) {
+  if (!(rounds > 0)) return list;
+  return list.filter((effect) => {
+    if (effect.duration <= 0 || effect.paused) return true;
+    effect.duration = Math.max(0, effect.duration - rounds);
+    const what = effect.label.split(";")[0].trim();
+    const light = /(^|;)\s*LIGHT\s*:/i.test(effect.label);
+    if (effect.duration <= 0) {
+      say(light ? `${what} burns out: ${name}'s light goes dark.` : `Effect ['${effect.label}'] -> [EXPIRED] on ${name}`, effect.gmOnly || hidden);
+      return false;
+    }
+    if (light && !effect.warned && effect.total && effect.duration <= warnAt(effect.total, roundSeconds)) {
+      effect.warned = true;
+      const minutes = Math.round((effect.duration * roundSeconds) / 60);
+      say(`${what} is nearly out: ${name}'s light has ${minutes >= 1 ? `about ${minutes} minute${minutes === 1 ? "" : "s"}` : `${effect.duration} round${effect.duration === 1 ? "" : "s"}`} left.`, effect.gmOnly || hidden);
+    }
+    return true;
+  });
+}
+
 function savedCombat(value) {
   const raw = value && typeof value === "object" ? value : {};
   return {
@@ -377,9 +435,9 @@ function createCombat({ saved, table, onChange = () => undefined }) {
   }
 
   // An effect the tracker puts on by itself (no GM seat needed).
-  function putEffect(entry, label, duration = 0, gmOnly = false, targets = [], held = null) {
+  function putEffect(entry, label, duration = 0, gmOnly = false, targets = [], held = null, extra = {}) {
     const active = state.entries.find((item) => item.id === state.active);
-    const effect = cleanEffect({ label, duration, gmOnly, init: active ? active.initresult : entry.initresult, targets, ...(held ?? {}) });
+    const effect = cleanEffect({ label, duration, gmOnly, init: active ? active.initresult : entry.initresult, targets, ...(held ?? {}), ...extra, total: duration });
     if (effect) entry.effects.push(effect);
     return effect;
   }
@@ -845,25 +903,52 @@ function createCombat({ saved, table, onChange = () => undefined }) {
   // going from `from` to `to` (descending): from > effect.init >= to.
   function passInitiative(from, to) {
     for (const entry of state.entries) {
-      entry.effects = entry.effects.filter((effect) => {
-        if (effect.duration <= 0) return true;
-        if (!(rank(effect.init) < from && rank(effect.init) >= to)) return true;
-        effect.duration -= 1;
-        if (effect.duration <= 0) {
-          table().say(`Effect ['${effect.label}'] -> [EXPIRED] on ${entry.name}`, "Combat", effect.gmOnly || entry.hidden);
-          return false;
-        }
-        return true;
-      });
+      const due = entry.effects.filter((effect) => effect.duration > 0 && !effect.paused && rank(effect.init) < from && rank(effect.init) >= to);
+      if (!due.length) continue;
+      const kept = tickEffects(due, 1, tickOptions(entry));
+      entry.effects = entry.effects.filter((effect) => !due.includes(effect) || kept.includes(effect));
+    }
+  }
+  // How effects count down for this game: its round's length, the warning's time, chat.
+  function tickOptions(who) {
+    const roundSeconds = rulesetActions()?.roundSeconds ?? 6;
+    return { name: who.name, hidden: Boolean(who.hidden), roundSeconds, say: (line, secret) => table().say(line, "Combat", secret), warnAt: (total) => (effectsLib ? effectsLib.warnAt(total, roundSeconds) : Math.max(1, Math.round(total / 10))) };
+  }
+  // At the end of a creature's turn, a repeated save (FG's SAVEOE: "SAVEOE: DC 13
+  // wisdom"): saved, the effect ends; failed, what its FAIL: parts say comes on
+  // (2024 Sleep: Incapacitated, then Unconscious for the rest of the spell).
+  async function endOfTurnSaves(entry) {
+    for (const effect of [...entry.effects]) {
+      const parts = effect.label.split(";").map((part) => part.trim());
+      const stop = parts.findIndex((part) => /^fail\s*:/i.test(part));
+      const live = stop < 0 ? parts : parts.slice(0, stop);
+      const saveoe = live.find((part) => /^saveoe\s*:/i.test(part));
+      if (!saveoe || effect.paused) continue;
+      const dc = Number(/dc\s*(\d+)/i.exec(saveoe)?.[1] ?? 0);
+      const stat = (/(strength|dexterity|constitution|intelligence|wisdom|charisma|fortitude|reflex|will)/i.exec(saveoe)?.[1] ?? "").toLowerCase();
+      if (!dc || !stat) continue;
+      const result = await api.save(entry.id, stat, dc, entry.name, live[0]);
+      const name = live[0];
+      if (result?.success) {
+        entry.effects = entry.effects.filter((item) => item !== effect);
+        table().say(`${entry.name} shakes off ${name}.`, "Combat", Boolean(entry.hidden));
+      } else if (stop >= 0) {
+        const after = parts.slice(stop + 1).filter((part) => part && !/^inherit$/i.test(part) && !/^fail\s*:/i.test(part));
+        const keep = live.filter((part, index) => index === 0 || /^\(c\)$|^note\s*:/i.test(part));
+        effect.label = [...keep, ...after].join("; ");
+        table().say(`${entry.name} fails to shake off ${name}: ${after.join(", ") || "it holds"}.`, "Combat", Boolean(entry.hidden));
+      }
     }
   }
 
   async function startTurn(entry, opts) {
     const secret = entry.hidden;
+    // A turn passes: templates of instant spells come off the map.
+    table().onTurn?.();
     table().say(`[TURN] ${entry.name}`, "Combat", secret);
     // Ongoing damage (CoreRPG's DMGO: "Severed artery; DMGO: 1d12") at the start of the turn.
     for (const effect of entry.effects) {
-      for (const part of effect.label.split(";")) {
+      for (const part of livePartsOf(effect)) {
         const match = /^\s*DMGO\s*:\s*([0-9d+\- ]+)\s*$/i.exec(part);
         if (!match) continue;
         const rolled = table().roll(match[1].replace(/\s+/g, ""), `[DAMAGE] Ongoing damage (${effect.label.split(";")[0].trim()})`, "Combat", secret);
@@ -935,7 +1020,15 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     changed();
   }
 
+  // Damage ends the effects that end on damage (Sleep: the sleeper wakes).
+  function wakeOnDamage(entry) {
+    const gone = entry.effects.filter((effect) => effect.ends === "damage" || /(^|;)\s*note\s*:\s*ends on damage/i.test(effect.label));
+    if (!gone.length) return;
+    entry.effects = entry.effects.filter((effect) => !gone.includes(effect));
+    table().say(`${entry.name} takes damage: ${gone.map((effect) => effect.label.split(";")[0].trim()).join(", ")} ends.`, "Combat", Boolean(entry.hidden));
+  }
   async function applyWounds(entry, delta, why, opts) {
+    if (delta > 0) wakeOnDamage(entry);
     // Fate: damage is a hit of that many shifts; healing clears the stress.
     if (fateOn()) return delta > 0 ? fc.hit(entry, delta, fc.kindNow(), "") : fc.clearStress(entry);
     if (cairnOn()) return applyCairn(entry, delta, why, opts);
@@ -1973,6 +2066,49 @@ function createCombat({ saved, table, onChange = () => undefined }) {
   function targetsOf(entry) {
     return (entry?.targets ?? []).map((id) => state.entries.find((item) => item.id === id)).filter(Boolean);
   }
+  // Allies stand on the caster's side; everyone else is not (a neutral is no ally).
+  const allied = (caster, target) => Boolean(caster && target && (caster === target || caster.faction === target.faction));
+  // Foes face each other: friends and foes (a neutral is neither, so a buff may still go to it).
+  const hostile = (caster, target) => Boolean(caster && target && caster !== target && ((caster.faction === "friend" && target.faction === "foe") || (caster.faction === "foe" && target.faction === "friend")));
+  // Who a spell lands on, from its words (shared/actions/parse.mjs): a buff or
+  // healing only on the caster's side (a foe never gets Bless), a harmful spell
+  // "on creatures of your choice" only on the others, an area's damage on
+  // everyone inside (friendly fire); then at most `cap` of them (Bless 3, +1 a
+  // slot level above), the first picked first. Says who was left out and why.
+  function pickTargets(caster, targets, parsed, { cap = 0, name = "", say = "Combat", area = false } = {}) {
+    if (!parsed || !caster) return targets;
+    const who = parsed.targets?.who ?? "any";
+    const dropped = [];
+    let kept = targets.filter((target) => {
+      const ally = allied(caster, target);
+      const ok = who === "ally" ? !hostile(caster, target) : who === "enemy" && area ? !ally : true;
+      if (!ok) dropped.push(`${target.name} (${who === "ally" ? "a foe" : "an ally"})`);
+      return ok;
+    });
+    if (cap > 0 && kept.length > cap) {
+      for (const target of kept.slice(cap)) dropped.push(`${target.name} (only ${cap})`);
+      kept = kept.slice(0, cap);
+    }
+    if (dropped.length) table().say(`${name}: not on ${dropped.join(", ")}`, say, Boolean(caster.hidden));
+    return kept;
+  }
+  // A spell's record and its words read (area, saves, who it lands on): a 5E
+  // spell by its name in the campaign's books, else a character's or NPC's power.
+  function spellOf(who, spellName) {
+    const npcEntry = typeof who === "object" && who?.entryId ? state.entries.find((entry) => entry.id === who.entryId) : null;
+    const caster = npcEntry ? record(npcEntry) : table().records.get(typeof who === "object" ? who.recordId : who);
+    const power = caster?.data?.powers?.[spellName];
+    const spell = power ? { name: power.name, data: power } : table().records.list({ type: "spell" }).find((item) => String(item.name).toLowerCase() === String(spellName ?? "").toLowerCase()) ?? table().records.list({ type: "spelldesc" }).find((item) => String(item.name).toLowerCase() === String(spellName ?? "").toLowerCase());
+    if (!spell) return null;
+    const game = rulesetGame();
+    const parsed = spellParse ? spellParse.parseSpell({ name: spell.name, ...(spell.data ?? {}) }, game ? { game } : {}) : null;
+    const casterEntry = npcEntry ?? (caster ? state.entries.find((entry) => entry.recordId === caster.id) : null) ?? null;
+    return { spell, parsed, caster, casterEntry };
+  }
+  // The campaign's game declaration (shared/<id>/actions.mjs, on its manifest).
+  const rulesetActions = () => registry?.rulesetFor(table().ruleset?.() ?? "").actions ?? null;
+  // The campaign's game words for the parser.
+  const rulesetGame = () => rulesetActions()?.game ?? "";
   // 5E conditions (FG's 5E): a creature that drops to 0 gets Unconscious, so the
   // Dying, the stable and the dead count as unconscious; these cannot act, and
   // attacks against them (and the Paralyzed, Petrified, Stunned) have advantage.
@@ -2070,7 +2206,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     const data = record(target)?.data ?? {};
     const lists = { immune: typeList(data.damageimmunities), resist: typeList(data.damageresistances), vuln: typeList(data.damagevulnerabilities) };
     for (const effect of target.effects ?? []) {
-      for (const part of effect.label.split(";")) {
+      for (const part of livePartsOf(effect)) {
         const match = /^\s*(IMMUNE|RESIST|VULN)\s*:\s*(.+)$/i.exec(part);
         if (match) lists[match[1].toLowerCase()].push(...typeList(match[2]));
       }
@@ -2088,6 +2224,83 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       notes.push(`VULNERABLE ${kind}`);
     }
     return { amount: out, note: notes.map((note) => ` [${note}]`).join("") };
+  }
+  // --- Damage cards (Foundry's chat damage card on FG's automatic results) ---
+  // A damage or healing roll keeps a card: each creature it landed on, what it
+  // took after its save, resistance, immunity or vulnerability, and the
+  // multiplier used. The GM's buttons on the card (x0, x1/2, x1, x2, heal) set
+  // what a creature takes now: only the difference is applied. With the table's
+  // autoApply off (Foundry's way), nothing lands until a button is pressed.
+  const cards = new Map();
+  function newCard(kind, type, name) {
+    const card = { id: newId("card"), kind, type: String(type ?? "").toLowerCase(), name, total: 0, auto: table().options?.().autoApply !== false, targets: [] };
+    cards.set(card.id, card);
+    if (cards.size > 60) cards.delete(cards.keys().next().value);
+    return card;
+  }
+  function cardView(card) {
+    return { kind: card.kind, type: card.type, name: card.name, total: card.total, auto: card.auto, targets: card.targets.map((row) => ({ ...row })) };
+  }
+  function publish(card) {
+    table().cardUpdate?.(card.id, cardView(card));
+  }
+  // Healing that the tracker's rules allow (the dead are not healed; at most the wounds).
+  async function healBy(entry, amount, why) {
+    if (health(entry).status === "Dead") return 0;
+    const { wounds } = vitals(entry);
+    const value = Math.min(Math.max(0, Math.round(amount)), wounds);
+    if (value > 0) await applyWounds(entry, -value, why, {});
+    return value;
+  }
+  // One creature's share of a card's roll: amount after its save (half, or the
+  // whole), then its resistances by type; applied now unless the card waits.
+  async function landOn(card, target, amount, why, opts = {}, { save } = {}) {
+    const dealt = card.kind === "heal" ? { amount: Math.max(0, amount), note: "" } : damageTaken(target, Math.max(0, amount), card.type);
+    const row = { id: target.id, name: target.name, base: Math.max(0, amount), taken: 0, mult: null, note: dealt.note.trim(), ...(save ? { save } : {}), ...(target.hidden ? { hidden: true } : {}) };
+    card.targets = [...card.targets.filter((item) => item.id !== target.id), row];
+    if (card.auto) {
+      if (card.kind === "heal") row.taken = -(await healBy(target, dealt.amount, why));
+      else if (dealt.amount > 0) {
+        await applyWounds(target, dealt.amount, `${why}${dealt.note}`, opts);
+        row.taken = dealt.amount;
+      } else table().say(`${why} -> ${target.name}: no damage${dealt.note}`, "Combat", Boolean(target.hidden));
+      row.mult = 1;
+    }
+    publish(card);
+    return card.kind === "heal" ? -row.taken : row.taken;
+  }
+  // A card's button: what this creature takes now (mult 0, 0.5, 1, 2; "heal": the
+  // roll heals it instead). A creature not on the card yet (the GM's chosen) joins it.
+  async function applyCard(cardId, targetId, mult) {
+    const card = cards.get(String(cardId));
+    if (!card) throw new Error("That roll is too old to apply from its card: drag it onto the creature instead.");
+    const target = find(targetId);
+    let row = card.targets.find((item) => item.id === target.id);
+    if (!row) {
+      row = { id: target.id, name: target.name, base: card.total, taken: 0, mult: null, note: "", ...(target.hidden ? { hidden: true } : {}) };
+      card.targets.push(row);
+    }
+    const heal = mult === "heal" || card.kind === "heal";
+    const times = mult === "heal" ? 1 : Math.max(0, Number(mult) || 0);
+    let want;
+    if (heal) want = -Math.round(row.base * (mult === "heal" ? 1 : times));
+    else {
+      const dealt = damageTaken(target, Math.floor(row.base * times), card.type);
+      want = dealt.amount;
+      row.note = dealt.note.trim();
+    }
+    const delta = want - row.taken;
+    if (delta > 0) await applyWounds(target, delta, `[DAMAGE] ${card.name} (from its card)`, {});
+    else if (delta < 0) {
+      // More healing (capped at its wounds), or damage taken back.
+      if (want < 0 && row.taken <= 0) want = row.taken - (await healBy(target, -delta, `[HEAL] ${card.name} (from its card)`));
+      else await applyWounds(target, delta, `[HEAL] ${card.name} (from its card)`, {});
+    }
+    row.taken = want;
+    row.mult = mult === "heal" ? "heal" : times;
+    publish(card);
+    changed();
+    return cardView(card);
   }
   // Doubles every die in a formula (a critical hit): 1d8+3 -> 2d8+3.
   const doubled = (formula) => formula.replace(/(\d*)d(\d+)/g, (_, count, sides) => `${(Number(count) || 1) * 2}d${sides}`);
@@ -2125,15 +2338,14 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     let anyCrit = false;
     for (const group of groups) {
       const formula = group.formula;
-      const roll = table().roll(formula, `[DAMAGE]${kind} ${plan.name}${group.crit ? " [CRITICAL]" : ""}${plan.dmgtype ? ` [TYPE: ${plan.dmgtype}]` : ""}`, from, false, { by: plan.actor });
+      const card = newCard("damage", plan.dmgtype, plan.name);
+      const roll = table().roll(formula, `[DAMAGE]${kind} ${plan.name}${group.crit ? " [CRITICAL]" : ""}${plan.dmgtype ? ` [TYPE: ${plan.dmgtype}]` : ""}`, from, false, { by: plan.actor, card: card.id });
       const amount = Math.max(0, roll.total);
+      card.total = amount;
       total = Math.max(total, amount);
       anyCrit ||= group.crit;
-      for (const target of group.targets) {
-        const dealt = damageTaken(target, amount, plan.dmgtype);
-        if (dealt.amount > 0) await applyWounds(target, dealt.amount, `[DAMAGE] ${plan.name}${dealt.note}`, { ...opts, critical: group.crit });
-        else table().say(`[DAMAGE] ${plan.name} -> ${target.name}: no damage${dealt.note}`, "Combat", Boolean(target.hidden));
-      }
+      for (const target of group.targets) await landOn(card, target, amount, `[DAMAGE] ${plan.name}`, { ...opts, critical: group.crit });
+      if (!group.targets.length) publish(card);
     }
     if (plan.entry && table().options?.().clearTargets === "action") plan.entry.targets = [];
     changed();
@@ -2168,7 +2380,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
   // (a cantrip none), then for each target its attack roll or save, damage
   // (cantrips scale at 5th, 11th and 17th; half on a save where the spell says
   // so), healing (+ the casting modifier where FG's heal says base) and its effect.
-  async function cast5e(who, spellName, seat, from) {
+  async function cast5e(who, spellName, seat, from, castOpts = {}) {
     await r5Ready;
     const npcEntry = typeof who === "object" && who?.entryId ? find(who.entryId) : null;
     if (npcEntry) mustGM(seat);
@@ -2205,7 +2417,11 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     const attackBonus = isCharacter ? num(data.spellcasting?.attack, 0) : Number(/([+-]\d+) to hit with spell attacks/i.exec(JSON.stringify(data))?.[1] ?? 4);
     const charLevel = isCharacter ? num(data.level, 1) : Math.max(1, Number(/^(\d+)/.exec(String(data.hd ?? "").replace(/[()]/g, ""))?.[1] ?? 1));
     const tiers = 1 + (charLevel >= 5) + (charLevel >= 11) + (charLevel >= 17);
-    const actions = Object.values(spell.data?.actions ?? {}).filter((item) => item && typeof item === "object");
+    await actionsReady;
+    const parsed = spellParse.parseSpell({ name: spell.name, ...(spell.data ?? {}) }, { game: "5e" });
+    // A spell its book gave no actions: read from its words, as FG's 5E parser does.
+    let actions = Object.values(spell.data?.actions ?? {}).filter((item) => item && typeof item === "object");
+    if (!actions.some((item) => item.type !== "cast")) actions = spellParse.toFg5eActions(parsed);
     const castRow = actions.find((item) => item.type === "cast") ?? {};
     const saveRow = actions.find((item) => item.type === "powersave");
     const attackRow = actions.find((item) => item.type === "attack");
@@ -2250,14 +2466,20 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     }
     table().say(`[CAST] ${spell.name}${level > 0 ? ` (level ${slotLevel} slot)` : " (cantrip)"}${saveRow ? ` [${String(saveRow.savetype).toUpperCase()} DC ${dc}]` : ""}`, say, Boolean(casterEntry?.hidden));
     const damageType = Object.values(damageRow?.damagelist ?? {})[0]?.type ?? "";
-    const targets = targetsOf(casterEntry);
+    // How many it may take: its cast's count (no cap for an area or darts), one more a slot level above where it says so.
+    const extra = slotLevel > level && (castRow.targetscalestat === "upcast" || parsed.targets?.upcast) ? slotLevel - level : 0;
+    const cap = !parsed.area && castRow.targeting !== "multihit" && num(castRow.targetingval, 0) > 1 && (castRow.targeting ?? "targets") === "targets" ? num(castRow.targetingval, 0) + extra : 0;
+    const picked = targetsOf(casterEntry);
+    const targets = pickTargets(casterEntry, picked, parsed, { cap, name: spell.name, say, area: Boolean(castOpts.fromTemplate) });
     const out = [];
     const minutes = (row) => Math.round(num(row?.durmod, 0) * (row?.durunit === "hour" ? 600 : row?.durunit === "minute" ? 10 : 1));
     if (healRow) {
       const formula = diceOf(healRow.heallist, true);
-      const roll = table().roll(formula, `[HEAL] ${spell.name}`, say, false, { by: caster.name });
+      const card = newCard("heal", "", spell.name);
+      const roll = table().roll(formula, `[HEAL] ${spell.name}`, say, false, { by: caster.name, card: card.id });
+      card.total = Math.max(0, roll.total);
       for (const target of targets.length ? targets : casterEntry ? [casterEntry] : []) {
-        await this_heal(target, roll.total);
+        await landOn(card, target, roll.total, "[HEAL]");
         out.push({ target: target.name, heal: roll.total });
       }
     }
@@ -2266,13 +2488,15 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       const darts = num(castRow.targetingval, 3) + (castRow.targetscalestat === "upcast" || castRow.allowupcast ? Math.max(0, slotLevel - level) : 0);
       for (let dart = 0; dart < darts && targets.length; dart++) {
         const target = targets[dart % targets.length];
-        const roll = table().roll(diceOf(damageRow.damagelist), `[DAMAGE] ${spell.name} (dart ${dart + 1})`, say, Boolean(target.hidden), { by: caster.name });
-        const dealt = damageTaken(target, Math.max(0, roll.total), damageType);
-        if (dealt.amount > 0) await applyWounds(target, dealt.amount, `[DAMAGE] ${spell.name}${dealt.note}`, {});
-        out.push({ target: target.name, damage: dealt.amount });
+        const card = newCard("damage", damageType, `${spell.name} (dart ${dart + 1})`);
+        const roll = table().roll(diceOf(damageRow.damagelist), `[DAMAGE] ${spell.name} (dart ${dart + 1})`, say, Boolean(target.hidden), { by: caster.name, card: card.id });
+        card.total = Math.max(0, roll.total);
+        const taken = await landOn(card, target, roll.total, `[DAMAGE] ${spell.name}`);
+        out.push({ target: target.name, damage: taken });
       }
     } else {
       let shared = null;
+      let sharedCard = null;
       for (const target of targets) {
         let landed = true;
         let half = false;
@@ -2300,16 +2524,21 @@ function createCombat({ saved, table, onChange = () => undefined }) {
           // One damage roll for an area (as FG), each target its own when it was an attack.
           let formula = diceOf(damageRow.damagelist);
           if (crit) formula = doubled(formula);
-          const roll = attackRow || !shared ? table().roll(formula, `[DAMAGE] ${spell.name}${crit ? " [CRITICAL]" : ""} [TYPE: ${damageType}]`, say, false, { by: caster.name }) : shared;
-          if (!attackRow) shared = roll;
-          const dealt = damageTaken(target, half ? Math.floor(roll.total / 2) : Math.max(0, roll.total), damageType);
-          const amount = dealt.amount;
-          if (amount > 0) await applyWounds(target, amount, `[DAMAGE] ${spell.name}${half ? " (half)" : ""}${dealt.note}`, { critical: crit });
+          const fresh = attackRow || !shared;
+          const card = fresh ? newCard("damage", damageType, spell.name) : sharedCard;
+          const roll = fresh ? table().roll(formula, `[DAMAGE] ${spell.name}${crit ? " [CRITICAL]" : ""} [TYPE: ${damageType}]`, say, false, { by: caster.name, card: card.id }) : shared;
+          card.total = Math.max(0, roll.total);
+          if (!attackRow) {
+            shared = roll;
+            sharedCard = card;
+          }
+          const amount = await landOn(card, target, half ? Math.floor(roll.total / 2) : Math.max(0, roll.total), `[DAMAGE] ${spell.name}${half ? " (half)" : ""}`, { critical: crit }, { save: saveRow ? (half ? "half" : "failed") : undefined });
           out.push({ target: target.name, damage: amount, half });
         }
-        if (effectRow && effectRow.targeting !== "self" && (saveRow ? !landed || half ? false : true : landed)) {
+        const helps = effectRow && effectsLib.toneOf(String(effectRow.label ?? "")) === "good";
+        if (effectRow && effectRow.targeting !== "self" && (saveRow ? !landed || half ? false : true : landed) && (!helps || !hostile(casterEntry, target))) {
           const label = String(effectRow.label ?? spell.name).replace(/\[SDC\]/g, `DC ${dc}`);
-          putEffect(target, label, minutes(effectRow), false, [], held);
+          putEffect(target, label, minutes(effectRow), false, [], held, { source: caster.name, ...(parsed.endsOnDamage ? { ends: "damage" } : {}) });
           out.push({ target: target.name, effect: label, rounds: minutes(effectRow) });
         }
       }
@@ -2320,7 +2549,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
         const aimed = effectRow.targeted ? targets.map((target) => target.id) : [];
         putEffect(casterEntry, String(effectRow.label ?? spell.name), minutes(effectRow), false, aimed, held);
         out.push({ target: casterEntry.name, effect: effectRow.label, ...(aimed.length ? { against: targets.map((target) => target.name) } : {}) });
-      } else if (effectRow && !saveRow && targets.length === 0 && casterEntry) {
+      } else if (effectRow && !saveRow && picked.length === 0 && casterEntry) {
         putEffect(casterEntry, String(effectRow.label ?? spell.name), minutes(effectRow), false, [], held);
         out.push({ target: casterEntry.name, effect: effectRow.label });
       }
@@ -2328,6 +2557,119 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     if (casterEntry && table().options?.().clearTargets === "action") casterEntry.targets = [];
     changed();
     return out;
+  }
+  // --- Spells read from their words (D&D 3.5E, AD&D 2E and OSRIC, Basic Fantasy) ---
+  // A book's spell record (3.5E's Effect, Area, Save and words; 2E's AOE, Save
+  // and FG 2E actions; Basic Fantasy's words) cast at the caster's targets: a
+  // slot of its level spent where the sheet keeps them, each target's save (3.5E
+  // against 10 + spell level + the casting modifier; 2E and Basic Fantasy save
+  // vs. spell / Spells), damage per caster level to its maximum (one roll for an
+  // area, half or nothing on a save as the spell says), healing, and its effect
+  // on those who failed (or everyone, with no save), for its duration in this
+  // game's rounds; an effect that ends on damage (Sleep) is marked so.
+  const CLASS_SHORT = { wizard: "wiz", sorcerer: "sor", cleric: "clr", druid: "drd", bard: "brd", paladin: "pal", ranger: "rgr", "magic-user": "magic-user", "magic user": "magic-user", illusionist: "ill" };
+  function textSpellLevel(spellData, data) {
+    if (Number.isFinite(Number(spellData.level))) return Math.max(0, Math.round(Number(spellData.level)));
+    const levels = [...String(spellData.level ?? "").matchAll(/([A-Za-z/ -]+?)\s+(\d)/g)].map(([, names, level]) => ({ names: names.toLowerCase(), level: Number(level) }));
+    const classes = (data.classes ?? []).map((item) => String(item.name ?? "").toLowerCase());
+    const mine = levels.find((row) => classes.some((name) => row.names.includes(CLASS_SHORT[name] ?? name.slice(0, 3))));
+    return mine?.level ?? (levels.length ? Math.min(...levels.map((row) => row.level)) : 1);
+  }
+  async function castText(who, spellName, seat, from, castOpts = {}) {
+    await actionsReady;
+    const npcEntry = typeof who === "object" && who?.entryId ? find(who.entryId) : null;
+    if (npcEntry) mustGM(seat);
+    const found = spellOf(who, spellName);
+    if (!found) throw new Error(`No spell ${spellName} in this campaign's books.`);
+    const { spell, parsed, caster, casterEntry } = found;
+    if (!caster) throw new Error("No such caster.");
+    if (!npcEntry && seat.role !== "dm" && caster.owner !== seat.name) throw new Error("That is not your character.");
+    mustAct(casterEntry);
+    const data = caster.data ?? {};
+    const isCharacter = caster.type === "character";
+    const level = textSpellLevel(spell.data ?? {}, data);
+    const casterLevel = isCharacter ? Math.max(1, Math.max(num(data.level, 0), ...(data.classes ?? []).map((item) => num(item.level, 0)))) : Math.max(1, Number(/^(\d+)/.exec(String(data.hd ?? data.hitdice ?? "").replace(/[()]/g, ""))?.[1] ?? 1));
+    // A slot of its level (3.5E: spellcasting.used by level; 2E: each class's row, from 1st level).
+    if (isCharacter && level > 0 && data.spellcasting) {
+      const rows = Array.isArray(data.spellcasting) ? data.spellcasting : [data.spellcasting];
+      const index = Array.isArray(data.spellcasting) ? level - 1 : level;
+      const row = rows.find((item) => num(item?.perday?.[index], 0) > num(item?.used?.[index], 0));
+      if (!row) throw new Error(`${caster.name} has no level ${level} spell left today.`);
+      const used = [...(row.used ?? [])];
+      used[index] = num(used[index], 0) + 1;
+      const next = Array.isArray(data.spellcasting) ? data.spellcasting.map((item) => (item === row ? { ...item, used } : item)) : { ...row, used };
+      table().records.update(caster.id, { data: { spellcasting: next } }, table().seat);
+    }
+    const say = from ?? caster.name;
+    const decl = rulesetActions();
+    const dc = decl?.saves?.dc === "spell" ? 10 + level + num(data.spellcasting?.dc, 10) - 10 : 0;
+    table().say(`[CAST] ${spell.name} (level ${level}) at caster level ${casterLevel}${parsed.save ? ` [${parsed.save.kind.toUpperCase()}${dc ? ` DC ${dc}` : ""}${parsed.save.effect !== "negates" ? ` ${parsed.save.effect}` : " negates"}]` : ""}`, say, Boolean(casterEntry?.hidden));
+    const cap = !parsed.area && num(parsed.targets?.count, 0) > 1 ? num(parsed.targets.count, 0) : 0;
+    const picked = targetsOf(casterEntry);
+    let targets = pickTargets(casterEntry, picked, parsed, { cap, name: spell.name, say, area: Boolean(castOpts.fromTemplate) });
+    // No targets: a heal or a buff with no one picked lands on the caster.
+    if (!targets.length && casterEntry && (parsed.heal || (parsed.effect && parsed.beneficial)) ) targets = [casterEntry];
+    // Dice per caster level, to the spell's maximum: "1d6 per level (maximum 10d6)".
+    const diceFor = (part) => {
+      if (!part) return "";
+      const base = /^(\d*)d(\d+)$/.exec(String(part.dice ?? ""));
+      if (!base) return String(part.dice ?? "");
+      let count = Number(base[1] || 1);
+      if (part.perLevel) {
+        const max = Number(/^(\d+)d/.exec(String(part.max ?? ""))?.[1] ?? 0);
+        count = count * casterLevel;
+        if (max) count = Math.min(count, max);
+      }
+      return `${count}d${base[2]}${part.bonus ? (part.bonus > 0 ? `+${part.bonus}` : part.bonus) : ""}`;
+    };
+    const out = [];
+    const saved = new Map();
+    if (parsed.save && parsed.save.effect !== "none" && !parsed.save.harmless) {
+      for (const target of targets) {
+        if (target === casterEntry) continue;
+        const result = await api.save(target.id, parsed.save.kind, decl?.saves?.dc === "spell" ? dc : 0, target.name, spell.name);
+        saved.set(target.id, Boolean(result?.success));
+      }
+    }
+    const damage = parsed.damage?.[0];
+    if (damage) {
+      const card = newCard("damage", damage.type, spell.name);
+      const roll = table().roll(diceFor(damage), `[DAMAGE] ${spell.name}${damage.type ? ` [TYPE: ${damage.type}]` : ""}`, say, false, { by: caster.name, card: card.id });
+      card.total = Math.max(0, roll.total);
+      for (const target of targets) {
+        if (target === casterEntry && !parsed.area) continue;
+        const save = saved.get(target.id);
+        if (save && parsed.save.effect !== "half") {
+          table().say(`${target.name} saves: no damage from ${spell.name}.`, "Combat", Boolean(target.hidden));
+          continue;
+        }
+        const taken = await landOn(card, target, save ? Math.floor(roll.total / 2) : roll.total, `[DAMAGE] ${spell.name}${save ? " (half)" : ""}`, {}, { save: save === undefined ? undefined : save ? "half" : "failed" });
+        out.push({ target: target.name, damage: taken, half: Boolean(save) });
+      }
+    }
+    if (parsed.heal) {
+      const bonus = parsed.heal.perLevel ? Math.min(casterLevel, parsed.heal.maxBonus || casterLevel) : num(parsed.heal.bonus, 0);
+      const card = newCard("heal", "", spell.name);
+      const roll = table().roll(`${parsed.heal.dice}${bonus ? `+${bonus}` : ""}`, `[HEAL] ${spell.name}`, say, false, { by: caster.name, card: card.id });
+      card.total = Math.max(0, roll.total);
+      for (const target of targets) out.push({ target: target.name, heal: await landOn(card, target, roll.total, "[HEAL]") });
+    }
+    if (parsed.effect) {
+      const roundSeconds = decl?.roundSeconds ?? 6;
+      const span = parsed.effect.duration;
+      const unitSeconds = { round: roundSeconds, minute: 60, turn: decl?.roundSeconds >= 60 ? 600 : 60, hour: 3600, day: 86400 }[span?.unit] ?? 0;
+      const rounds = span && unitSeconds ? Math.max(1, Math.round((num(span.value, 1) * (span.perLevel ? casterLevel : 1) * unitSeconds) / roundSeconds)) : 0;
+      for (const target of targets) {
+        if (saved.get(target.id)) continue;
+        if (parsed.beneficial && hostile(casterEntry, target)) continue;
+        putEffect(target, parsed.effect.label, rounds, false, [], null, { source: caster.name, ...(parsed.endsOnDamage ? { ends: "damage" } : {}) });
+        table().say(`Effect ['${parsed.effect.label}'] -> [to ${target.name}]${rounds ? ` for ${rounds} round${rounds === 1 ? "" : "s"}` : ""}`, "Combat", Boolean(target.hidden));
+        out.push({ target: target.name, effect: parsed.effect.label, rounds });
+      }
+    }
+    if (casterEntry && table().options?.().clearTargets === "action") casterEntry.targets = [];
+    changed();
+    return { spell: spell.name, level, casterLevel, saves: [...saved].map(([id, success]) => ({ target: find(id).name, success })), results: out };
   }
   // Healing from a spell: the tracker's own heal (a Dying character starts from 0).
   async function this_heal(entry, amount) {
@@ -2397,8 +2739,8 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     return { total: rolled.total, success: ok, status: health(entry).status };
   }
 
-  return {
-    ready: geometryReady,
+  const api = {
+    ready: Promise.all([geometryReady, actionsReady]),
     sorted,
     deathSave,
     stabilize,
@@ -2436,7 +2778,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
             mine: seat.role === "player" && owner(entry) === seat.name,
             health: status,
             ...(numbers ? { hp, wounds, ac, ...(temp ? { temp } : {}) } : {}),
-            effects: entry.effects.filter((effect) => seat.role === "dm" || !effect.gmOnly).map(({ id, label, duration, targets }) => ({ id, label: targets?.length ? `${label} [-> ${targets.map((tid) => state.entries.find((item) => item.id === tid)?.name ?? "?").join(", ")}]` : label, duration })),
+            effects: entry.effects.filter((effect) => seat.role === "dm" || !effect.gmOnly).map(({ id, label, duration, targets, icon, source, total, paused, gmOnly }) => ({ id, label: targets?.length ? `${label} [-> ${targets.map((tid) => state.entries.find((item) => item.id === tid)?.name ?? "?").join(", ")}]` : label, duration, ...(icon ? { icon } : {}), ...(source ? { source } : {}), ...(total ? { total } : {}), ...(paused ? { paused } : {}), ...(gmOnly ? { gmOnly } : {}) })),
             targets: seat.role === "dm" || owner(entry) === seat.name ? entry.targets.filter((id) => shown.some((item) => item.id === id)) : [],
             ...(five() ? { deathsaves: record(entry)?.type === "character" || numbers ? deathSaves(entry) : undefined } : {}),
             // A ship: its weapons (and who mans them), Thrust, criticals.
@@ -2548,6 +2890,11 @@ function createCombat({ saved, table, onChange = () => undefined }) {
         if (ironOn() && source?.type !== "character") entry.iron = cleanEntry({ iron: { rank: input.rank ?? source?.data?.rank ?? "dangerous", ticks: 0 } }).iron;
         state.entries.push(entry);
         added.push(entry);
+        // A side given for a creature with a token: the token takes it too.
+        if (input.faction && entry.tokenId) table().syncTokenFaction?.(entry);
+        // What its token carried out of the fight (a lit torch) comes with it.
+        const carried = entry.tokenId ? table().takeTokenEffects?.(entry.tokenId) : null;
+        if (carried?.length) entry.effects.push(...carried.map(cleanEffect).filter(Boolean));
       }
       void engine;
       changed();
@@ -2556,11 +2903,14 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     update(id, patch, seat) {
       mustGM(seat);
       const entry = find(id);
+      const wasFaction = entry.faction;
       for (const key of ["name", "faction", "init", "initresult", "hp", "wounds", "ac", "hidden", "tokenId"]) {
         if (patch[key] === undefined) continue;
         const next = cleanEntry({ ...entry, [key]: patch[key] });
         entry[key] = next[key];
       }
+      // The tracker's faction and its token's are one (FG's friend/foe on both).
+      if (entry.faction !== wasFaction) table().syncTokenFaction?.(entry);
       changed();
       return entry;
     },
@@ -2583,6 +2933,8 @@ function createCombat({ saved, table, onChange = () => undefined }) {
         state.resume = { initresult: gone.initresult, name: gone.name, id: gone.id };
       }
       for (const entry of state.entries) entry.targets = entry.targets.filter((id) => id !== gone.id);
+      // Its effects stay on its token (a torch still burns), its targets go.
+      if (gone.tokenId && gone.effects.length) table().giveTokenEffects?.(gone.tokenId, gone.effects);
       changed();
     },
     // Rolls initiative: one entry ("a player may roll their own"), every NPC, or everyone.
@@ -2698,6 +3050,8 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       if (seat.role !== "dm" && (!active || owner(active) !== seat.name)) throw new Error("It is not your turn.");
       // The table's option: a creature's targets clear when its turn ends.
       if (active && table().options?.().clearTargets === "turn") active.targets = [];
+      // Repeated saves at the end of its turn (2024 Sleep, Hold Person).
+      if (active && state.round > 0) await endOfTurnSaves(active);
       // The active entry was removed mid-turn: carry on after its place.
       const resume = !active && state.resume && state.round > 0 ? state.resume : null;
       const index = active ? list.indexOf(active) : resume ? list.filter((entry) => order(resume, entry) > 0).length - 1 : -1;
@@ -2822,7 +3176,11 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       state.round = 0;
       state.active = null;
       state.resume = null;
-      if (removeNpcs) state.entries = state.entries.filter((entry) => record(entry)?.type === "character");
+      if (removeNpcs) {
+        // The NPCs leave the tracker; what is on them stays on their tokens.
+        for (const entry of state.entries) if (record(entry)?.type !== "character" && entry.tokenId && entry.effects.length) table().giveTokenEffects?.(entry.tokenId, entry.effects);
+        state.entries = state.entries.filter((entry) => record(entry)?.type === "character");
+      }
       // The fight's round markers and pending attack results go with it (bleeding
       // counts from round 1 again in the next fight).
       for (const entry of state.entries) {
@@ -2881,6 +3239,76 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       entry.effects = entry.effects.filter((effect) => effect.id !== effectId);
       changed();
     },
+    // A damage card's button (the GM's): what that creature takes now.
+    async applyCard(cardId, targetId, mult, seat) {
+      mustGM(seat);
+      return applyCard(cardId, targetId, mult);
+    },
+    // A chat roll dropped on a creature (FG's drop of a chat result, the GM's):
+    // damage with its type (resistances count), healing, or an attack total
+    // against its AC (the effects' AC too); the roll's own result, no new roll.
+    async dropRoll(targetId, roll, seat) {
+      mustGM(seat);
+      const target = find(targetId);
+      const { options: opts } = await options();
+      const name = text(roll?.name, "Roll").slice(0, 80);
+      if (roll?.kind === "attack") {
+        if (d2e() || twoSix() || cairnOn() || fateOn() || ironOn()) throw new Error("A dropped attack is compared with AC in the games that roll d20 + bonus against it: here, attack from the tracker or the sheet.");
+        const total = Math.round(num(roll.total, 0));
+        const die = Math.round(num(roll.natural, 0));
+        const ac = vitals(target).ac + effectBonus(target, "AC");
+        const crit = die === 20;
+        const hit = crit || (die !== 1 && total >= ac);
+        table().say(`[ATTACK] ${name} -> ${target.name}: ${crit ? "CRITICAL HIT" : hit ? "HIT" : "MISS"} (${total} vs AC ${ac})`, "Combat", Boolean(target.hidden));
+        // The attacker's next damage lands on this creature only if it hit (FG's attack-then-damage).
+        const source = roll.by ? state.entries.find((entry) => entry.name === roll.by) : null;
+        if (source) source.hitOn = { ...(source.hitOn ?? {}), [target.id]: crit ? "crit" : hit ? "hit" : "miss" };
+        changed();
+        return { hit, crit, ac, total };
+      }
+      const amount = Math.max(0, Math.round(num(roll?.total, 0)));
+      if (roll?.kind === "heal") {
+        const healed = await healBy(target, amount, `[HEAL] ${name}`);
+        changed();
+        return { healed };
+      }
+      const dealt = damageTaken(target, amount, roll?.type);
+      if (dealt.amount > 0) await applyWounds(target, dealt.amount, `[DAMAGE] ${name}${dealt.note}`, opts);
+      else table().say(`[DAMAGE] ${name} -> ${target.name}: no damage${dealt.note}`, "Combat", Boolean(target.hidden));
+      changed();
+      return { damage: dealt.amount, note: dealt.note.trim() };
+    },
+    // The Effects list's own hands (electron/effects.cjs checks who may): an effect
+    // put on, taken off or changed (put out, relit, its time or words), no GM check here.
+    putOn(id, input) {
+      const entry = find(id);
+      const active = state.entries.find((item) => item.id === state.active);
+      const effect = cleanEffect({ ...input, id: undefined, init: active ? active.initresult : entry.initresult });
+      if (!effect) throw new Error("What effect?");
+      entry.effects.push(effect);
+      changed();
+      return effect;
+    },
+    takeOff(id, effectId) {
+      const entry = find(id);
+      const gone = entry.effects.find((effect) => effect.id === effectId);
+      if (!gone) throw new Error("That effect is gone.");
+      entry.effects = entry.effects.filter((effect) => effect !== gone);
+      changed();
+      return gone;
+    },
+    changeEffect(id, effectId, patch) {
+      const entry = find(id);
+      const effect = entry.effects.find((item) => item.id === effectId);
+      if (!effect) throw new Error("That effect is gone.");
+      const next = cleanEffect({ ...effect, ...patch, id: effect.id });
+      if (!next) throw new Error("An effect needs words.");
+      Object.keys(effect).forEach((key) => delete effect[key]);
+      Object.assign(effect, next);
+      changed();
+      return effect;
+    },
+    owner: (entry) => owner(entry),
     async damage(id, amount, seat) {
       mustGM(seat);
       const { options: opts } = await options();
@@ -2957,11 +3385,40 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       changed();
       return inside.map((entry) => entry.name);
     },
-    clearTargets(sourceId, seat) {
+    // Clears the source's targets: all, or only its side's ("friend") or the other side's ("foe").
+    clearTargets(sourceId, seat, faction = null) {
       const source = find(sourceId);
       if (seat.role !== "dm" && owner(source) !== seat.name) throw new Error("You can clear only your own targets.");
-      source.targets = [];
+      if (faction === "friend" || faction === "foe") {
+        const want = faction === "friend" ? source.faction : otherSide(source.faction);
+        source.targets = source.targets.filter((id) => state.entries.find((entry) => entry.id === id)?.faction !== want);
+      } else source.targets = [];
       changed();
+      return source.targets;
+    },
+    // FG's target friendlies / target foes (the map toolbar): every creature of
+    // the source's side (itself too, so a blessing can take the caster), or of
+    // the other side (friends and foes face each other; neutrals are targeted
+    // by hand). The dead are left out, and for a player the hidden. onMap: only
+    // creatures with a token on the map the toolbar belongs to.
+    targetFaction(sourceId, faction, seat, onMap = () => true) {
+      const source = find(sourceId);
+      if (seat.role !== "dm" && owner(source) !== seat.name) throw new Error("You can target only with your own character.");
+      const want = faction === "friend" ? source.faction : otherSide(source.faction);
+      const picked = state.entries.filter((entry) => entry.faction === want && (faction === "friend" || entry.id !== source.id) && health(entry).status !== "Dead" && (seat.role === "dm" || !entry.hidden) && onMap(entry));
+      source.targets = [...source.targets.filter((id) => state.entries.find((entry) => entry.id === id)?.faction !== want), ...picked.map((entry) => entry.id)].slice(0, 100);
+      changed();
+      return picked.map((entry) => entry.name);
+    },
+    // Several creatures targeted at once (a box dragged in target mode, a
+    // template's area): they become the targets, or join them (add).
+    targetIds(sourceId, ids, seat, add = false) {
+      const source = find(sourceId);
+      if (seat.role !== "dm" && owner(source) !== seat.name) throw new Error("You can target only with your own character.");
+      const picked = ids.map((id) => state.entries.find((entry) => entry.id === id)).filter((entry) => entry && (seat.role === "dm" || !entry.hidden));
+      source.targets = [...new Set([...(add ? source.targets : []), ...picked.map((entry) => entry.id)])].slice(0, 100);
+      changed();
+      return picked.map((entry) => entry.name);
     },
     // An attack (SiegeCore ActionAttack): d20 + the attack's bonus + ATK effects,
     // one roll per target against its AC + AC effects; equal hits.
@@ -3147,8 +3604,15 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     // damage is one roll for everyone (each missile its own), halved or
     // cancelled for those who saved; an effect lands on those who failed;
     // healing goes to the targets, or the caster with none.
-    async cast(who, powerKey, actionKey, seat, from) {
-      if (five()) return cast5e(who, powerKey, seat, from);
+    async cast(who, powerKey, actionKey, seat, from, castOpts = {}) {
+      if (five()) return cast5e(who, powerKey, seat, from, castOpts);
+      // A book's spell by name in a game that reads its spells' words (3.5E, 2E, Basic Fantasy), not a sheet's power.
+      {
+        await actionsReady;
+        const casterRecord = typeof who === "object" && who?.entryId ? record(find(who.entryId)) : table().records.get(typeof who === "object" ? who.recordId : who);
+        const reads = ["text", "fg2e"].includes(rulesetActions()?.spells ?? "");
+        if (reads && !casterRecord?.data?.powers?.[powerKey]) return castText(who, powerKey, seat, from, castOpts);
+      }
       const { engine, game, options: opts } = await options();
       cachedThresholds = thresholds(opts);
       // An NPC casts from its tracker entry: its caster level is its hit dice,
@@ -3198,6 +3662,8 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       const entry = npcEntry ?? state.entries.find((item) => item.recordId === caster.id) ?? null;
       const self = action.effecttarget === "self";
       let targets = self || !entry ? [] : entry.targets.map((id) => state.entries.find((item) => item.id === id)).filter(Boolean);
+      // Who it lands on, from its words (a blessing only on allies; an area's "creatures of your choice" spare them).
+      if (spellParse && targets.length) targets = pickTargets(entry, targets, spellParse.parseSpell({ name: power.name, ...power, ...action }, { game: "cnc" }), { name: power.name, say: from, area: Boolean(castOpts.fromTemplate) });
       if ((action.heal && targets.length === 0) || self) targets = entry ? [entry] : [];
       const actionName = action.name && action.name !== power.name ? `${power.name}: ${action.name}` : power.name;
       table().say(`[CAST] ${actionName}${power.powertype ? ` (${power.powertype})` : ""} at caster level ${casterLevel}${targets.length ? ` -> [at ${targets.map((t) => t.name).join(", ")}]` : ""}`, from);
@@ -3328,7 +3794,32 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     round: () => state.round,
     active: () => state.active,
     persisted: () => JSON.parse(JSON.stringify(state)),
+    // Game time passes outside the turn order (the calendar moved on): every
+    // creature's effects count it down in rounds of this game's length.
+    passTime(minutes) {
+      const roundSeconds = rulesetActions()?.roundSeconds ?? 6;
+      const rounds = Math.floor((Math.max(0, num(minutes, 0)) * 60) / roundSeconds);
+      if (rounds <= 0) return 0;
+      for (const entry of state.entries) entry.effects = tickEffects(entry.effects, rounds, tickOptions(entry));
+      changed();
+      return rounds;
+    },
+    // A spell's area and who casts it (a template's size and its caster), read
+    // from the spell's data and words; instant: its template goes at the next turn.
+    spellInfo(who, power) {
+      const found = spellOf(who, power);
+      if (!found) return null;
+      const { spell, parsed, casterEntry } = found;
+      const duration = String(spell.data?.duration ?? "");
+      const instant = /instant/i.test(duration) || (!duration && !parsed?.effect && !parsed?.concentration);
+      return { name: spell.name, area: parsed?.area ?? null, instant, casterEntry, who: parsed?.targets?.who ?? "any" };
+    },
+    // The same count for effects kept on a token out of the fight.
+    tickList(list, rounds, who) {
+      return tickEffects(list, rounds, tickOptions(who));
+    },
   };
+  return api;
 }
 
-module.exports = { createCombat };
+module.exports = { createCombat, cleanEffect };

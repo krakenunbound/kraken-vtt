@@ -1142,12 +1142,20 @@ const TOOLS = [
     description:
       "The combat tracker (SiegeCore rules: d10 initiative, high to low; unconscious enemies lose their turns; effect durations count down each round; the dying bleed). action view (default); place-token (id, x, y: the entry's token onto the open map at that point, tied to it; moved there if it has one); add (recordId of a character or NPC, count, hidden, place: also put tokens on the map; or entry {name, faction, hp, ac, init}); add-party; init (which: an entry id, npcs or all); next (next turn); round (next round); prev (Back: undoes the last turn change, Next turn, Next round or set-turn: whose turn and the round go back, effects it ended come back with their durations, durations it counted down go back up, ongoing damage and the dying's bleeding it did are healed, death saves and targets it changed restored; what happened since stays; with no change kept, the arrow moves back); round-back (undoes the turn changes back to the last turn of the round before; with none kept, the counter alone); set-turn (id: make it that entry's turn, as FG's turn arrow dragged to it); end (removeNpcs); update (id, patch {name, faction, init, initresult, hp, wounds, ac, hidden}); remove (id); damage / heal (id, amount); effect (id, effect {label, duration in rounds, gmOnly}); effect-remove (id, effectId); target (id: the attacker entry, targetId, on true/false); clear-targets (id); attack / damage-roll (a character: recordId + weapon = its inventory key; an NPC: id + weapon = its attack key from view's attacks): SiegeCore's attack, one d20 per target against its AC (equal hits), damage rolled once and put on every target; save (id, attribute, cl): a SIEGE save; cast (recordId, power: its powers key, castAction: the power's actions key): spends a slot, targets save against the caster level, damage halves or cancels on a save, effects land on those who failed, healing goes to the targets. target-area: the source (id) targets everyone whose token is within radius feet of x, y (faction to narrow), for an area spell. krits: critical hits and fumbles (the Castle Keeper's Guide options as Kraken Krits & Fumbles: a natural 20 rolls the critical table, a natural 1 the fumble table, and the result is applied: effects, damage, the next damage roll at maximum or doubled; ranged attacks use up ammunition; spells with spell resistance on are checked first). settings: { mode opt5|opt6|opt1|opt4, crit/fumble always|half|third|off, auto yes|no, npc yes|no, show all|gm, death gm|apply } (omit to read them). krit-test: roll a critical (kind crit) or fumble (kind fumble) for id against targetId (table, roll to fix the result). In a D&D 5E campaign the tracker plays FG's 5E rules instead: init d20 + DEX; attack d20 + bonus against AC, a natural 20 a CRITICAL HIT (the next damage roll doubles its dice), a natural 1 an AUTOMATIC MISS, no krits; save (id, attribute, cl = the DC); cast (recordId or id, power = the spell's name): a slot of its level (or the lowest free above), attack roll or save against the caster's DC, damage (cantrips scale, half on a save where the spell says), healing, effects; a creature at 0 hit points is dead, a character Dying: death-save (id) rolls its death saving throw. In a Descending Darkness campaign the same d20 rules, but a Dying character has no death saves: it loses 1 Health each of its turns, and stabilize (id, recordId: the ally steadying them) rolls that ally's Wisdom against 12 to stop it; dead at minus its maximum Health. In a D&D 3.5E campaign the tracker plays FG's 3.5E rules: init d20 + its bonus; attack (weapon: a character's attacks key, an NPC's attack by its place, 0 the first) d20 + bonus against AC, a natural 20 hits and a 1 misses, a roll in the weapon's threat range (19-20, 18-20) that hits is CONFIRMED by a second roll to be a CRITICAL HIT, full true rolls every iterative bonus at the first target; damage-roll rolls each hit, a critical rolled x2/x3/x4 (dice and bonuses), at least 1; save (id, attribute fortitude, reflex or will, cl = the DC), a natural 20 saves and a 1 fails; at 0 hit points Disabled, -1 to -9 Dying (each turn 10% to become Stable, else 1 more lost), dead at -10; no krits. In an AD&D 2E campaign the tracker plays 2E: init d10 + modifiers, the LOWEST first; attack d20 + to-hit against THAC0 - the target's AC (AC effects lower it), a natural 20 hits and a 1 misses; full true: an NPC's every attack (claw, claw, bite) or a warrior's 3/2 or 2/1 at the first target; damage-roll rolls each hit's damage by the target's size (Small or Medium, or Large for an NPC whose size is L, H or G), at least 1; save (id, attribute paralyzation, rod, petrification, breath or spell, cl = a modifier added to the roll), d20 at or above the save's number; a creature dies at 0, a character at 0 to -9 is Dying (a hit point lost each round), stabilize (id, recordId) binds the wounds (no roll); dead at -10; turn-undead (recordId of a cleric, or a paladin from 3rd level, or id; undead: entry ids, else its targets, else every undead foe): one d20 against the turning table for each undead's type (by name, else its hit dice), 2d6 undead affected weakest first, T turned for 3d4 rounds (an effect), D destroyed (D*: 2d4 more); krits come from the GM's Krits & Fumbles 2E book when it is active (its Critical Hit and Fumble tables, then the attack kind's table: slashing, piercing, bludgeoning, missile, natural), the row applied (extra damage, maximum or an extra die on the next damage roll, AC and to-hit penalties, GRANTATK: the next attack against it gains, prone or a save against it), the rest left to the GM; krit-test takes entryRoll, attackKind and roll. In a Cairn campaign the tracker plays Cairn: init puts the PCs first (each saves DEX to act in the first round; a failure loses that turn) and their opponents after; attack (a character's weapon: its attacks key, unarmed for fists; an NPC's attack key) always hits: the weapon's die (d6+d6: both, the best kept; mode impaired d4, enhanced d12; a blast rolls for each target, else the first target only; a detachment's attacks are enhanced and blast, an individual's on a detachment impaired) less the target's Armor (at most 3) comes off HP, then STR; STR damage asks a STR save (the new score) against Critical Damage: a PC is Dying (stabilize with kraken_cairn), an NPC dead (a detachment routed); a PC's HP taken to exactly 0 rolls the Scars table; STR 0 is death; damage-roll is not used; damage (id, amount) is damage past Armor; save (id, attribute str, dex or wil): d20 at or under, 1 succeeds, 20 fails; morale (faction or id): a WIL save to stand, else Fleeing (also made by itself at a side's first casualty and at half, and for a lone foe at 0 HP); attack-together (ids, targetId): several attackers at one foe, every die rolled, the highest kept. In a Basic Fantasy campaign the tracker plays the Basic Fantasy RPG 4th Edition: init d6 + Dexterity bonus (+1 a Halfling), the highest first; attack d20 + attack bonus (+ Strength in melee, Dexterity with missiles; a monster's by its hit dice) at or above the target's AC (ascending; AC effects raise it), a natural 20 hits and a 1 misses, no krits; damage-roll rolls each hit, at least 1; save (id, attribute death, wands, paralysis, breath or spells, cl = a modifier added to the roll), d20 at or above the number (a monster saves as its listed class and level), a natural 1 fails and a 20 saves; anyone at 0 hit points is dead; turn-undead (recordId of a Cleric, or id; undead: entry ids, else its targets, else every undead foe): one d20 against the Clerics vs. Undead table (by type, else hit dice), 2d6 hit dice of undead affected weakest first (at least one), T turned (flees for 2d4 turns: an effect in rounds), D damaged 1d8 a cleric level (destroyed at 0, else turned); morale (id, bonus): an NPC's 2d6 at or under its morale score (12 never fails). In a Fate Core or Fate Accelerated campaign the tracker plays a Fate conflict (physical or mental: kraken_fate conflict): init sets the turn order without dice (Core Notice, then Athletics, then Physique; mental Empathy, Rapport, Will; FAE Quick, mental Careful); attack (a character: recordId + weapon = a skill, Fight, Shoot or Provoke (FAE an approach: forceful, flashy...); an NPC: id + weapon = an attack key from view) rolls 4dF + the rating (+2 for each of invokes) against the first target's 4dF + its best defence (Athletics or Fight, Will; FAE Careful or Quick); the shifts: a tie gives the attacker a boost (a scene aspect with a free invoke), a defence by 3 or more the defender; a hit on an NPC is absorbed by itself the lightest way (one stress box and its free consequences), or it is taken out; a hit on a player's character waits (fate.pending with its options) for absorb (id, choice: plan index, or box + consequences, names) or concede; concede (id): out of the conflict on their own terms, a fate point and one for each consequence taken in it; damage (id, amount) is a hit of that many shifts; heal clears the stress; save (id, attribute = a skill or approach, cl = an opposition when given) rolls it; the taken out and conceded lose their turns; end clears everyone's stress (consequences stay). damage-roll is not used.",
     inputSchema: object({
-      action: { type: "string", enum: ["view", "add", "add-party", "init", "next", "round", "prev", "round-back", "set-turn", "end", "update", "remove", "damage", "heal", "effect", "effect-remove", "target", "clear-targets", "attack", "damage-roll", "save", "cast", "krits", "krit-test", "target-area", "death-save", "stabilize", "turn-undead", "ship-attack", "place-token", "morale", "attack-together", "absorb", "concede"] },
+      action: { type: "string", enum: ["view", "add", "add-party", "init", "next", "round", "prev", "round-back", "set-turn", "end", "update", "remove", "damage", "heal", "effect", "effect-remove", "target", "target-faction", "target-box", "clear-targets", "apply-card", "apply-roll", "attack", "damage-roll", "save", "cast", "krits", "krit-test", "target-area", "death-save", "stabilize", "turn-undead", "ship-attack", "place-token", "morale", "attack-together", "absorb", "concede"] },
       invokes: { type: "array", items: { type: "object", properties: { aspect: { type: "string" }, free: { type: "boolean" } } }, description: "attack (Fate): aspects invoked before the roll, +2 each (a fate point each, the GM's pool for an NPC, or free: a scene aspect's free invoke)" },
       choice: { type: "object", properties: { plan: { type: "number" }, box: { type: "number" }, consequences: { type: "array", items: { type: "string" } }, names: { type: "object" }, out: { type: "boolean" } }, description: "absorb (Fate): plan (an index in the entry's fate.pending.options, 0 the lightest) or box + consequences [mild, moderate, severe, extreme, mild2, mild3]; names {mild: 'Bruised Ribs'}: the consequences' aspects; out: taken out instead" },
       mode: { type: "string", enum: ["", "impaired", "enhanced"], description: "attack (Cairn): impaired rolls d4 (cover, bound hands), enhanced d12 (a helpless foe, a daring maneuver)" },
       ids: { type: "array", items: { type: "string" }, description: "attack-together (Cairn): the attackers' entry ids, at targetId" },
-      faction: { type: "string", enum: ["foe", "friend", "neutral"], description: "morale (Cairn): the side that saves WIL (or id: one creature); target-area: only these" },
+      faction: { type: "string", enum: ["foe", "friend", "neutral"], description: "morale (Cairn): the side that saves WIL (or id: one creature); target-area: only these; target-faction: friend (the source's side, itself too) or foe (the other side), as the map toolbar's Target all friendlies / foes; clear-targets: only those of that side" },
+      x1: number("target-box: one corner, scene pixels"),
+      y1: number("target-box: one corner, scene pixels"),
+      x2: number("target-box: the other corner"),
+      y2: number("target-box: the other corner"),
+      add: { type: "boolean", description: "target-box: add to the targets instead of replacing them" },
+      card: string("apply-card: the damage or healing roll's card (its chat line's roll.card)"),
+      mult: { type: ["number", "string"], description: "apply-card: what the creature (targetId) takes now: 0, 0.5, 1, 2, or heal (the roll heals it); only the difference from what it took is applied" },
+      rollDrop: { type: "object", description: "apply-roll: a chat roll dropped on targetId: {kind: damage|heal|attack, total, type (damage), natural (attack's d20), name, by (the attacker's name)}" },
       targetId: string("target: the entry to target"),
       on: { type: "boolean", description: "target: add (true) or drop (false)" },
       weapon: string("attack / damage-roll: inventory key (character) or attack key (NPC)"),
@@ -1177,6 +1185,7 @@ const TOOLS = [
       attackKind: { type: "string", enum: ["slashing", "piercing", "bludgeoning", "missile", "natural"], description: "krit-test, 2E: which kind's table" },
       undead: { type: "array", items: { type: "string" }, description: "turn-undead: the undead entries' ids (default: the turner's targets, else every undead foe)" },
       range: { type: "string", enum: ["map", "Adjacent", "Close", "Short", "Medium", "Long", "Very Long", "Distant"], description: "ship-attack: the range band, or map: from the squares between the two ships' tokens (0 Adjacent, 1 Close, up to 3 Short, 8 Medium, 20 Long, 50 Very Long, more Distant)" },
+      template: { type: "object", description: "cast: a spell with an area (Fireball, Burning Hands, Sleep) placed where its caster points: {x, y} world pixels (a sphere's centre; for a cone, line or cube from the caster, a point in its direction), or {angle} (degrees clockwise from east, from the caster); everyone inside becomes the caster's target, then the spell is cast (a buff only on allies, a harmful spell on creatures of the caster's choice only on the others)" },
       x: number("target-area: scene pixels across"),
       y: number("target-area: scene pixels down"),
       radius: number("target-area: feet (Sleep: 15 ft radius, a fireball 20)"),
@@ -1223,7 +1232,23 @@ const TOOLS = [
       else if (action === "effect") combat.addEffect(args.id, args.effect ?? {}, seat);
       else if (action === "effect-remove") combat.removeEffect(args.id, args.effectId, seat);
       else if (action === "target") combat.target(args.id, args.targetId, args.on ?? true, seat);
-      else if (action === "clear-targets") combat.clearTargets(args.id, seat);
+      else if (action === "apply-card") return out({ card: await combat.applyCard(String(args.card ?? ""), args.targetId, args.mult === "heal" ? "heal" : Number(args.mult ?? 1), seat), combat: combat.viewFor(seat) });
+      else if (action === "apply-roll") return out({ applied: await combat.dropRoll(args.targetId, args.rollDrop ?? {}, seat), combat: combat.viewFor(seat) });
+      else if (action === "clear-targets") return out({ targets: combat.clearTargets(args.id, seat, ["friend", "foe"].includes(args.faction) ? args.faction : null), combat: combat.viewFor(seat) });
+      else if (action === "target-faction" || action === "target-box") {
+        // The map toolbar's targeting: id is the creature that targets (default: whose turn it is).
+        const source = args.id ?? combat.active();
+        if (!source) throw new Error("Whose targets? Give id (the creature that targets) or start combat.");
+        const tokenOf = (entry) => map.tokens().find((token) => token.id === entry.tokenId) ?? map.tokens().find((token) => entry.recordId && token.recordId === entry.recordId) ?? null;
+        if (action === "target-faction") return out({ targeted: combat.targetFaction(source, args.faction === "friend" ? "friend" : "foe", seat, (entry) => !map.scene() || Boolean(tokenOf(entry))), combat: combat.viewFor(seat) });
+        const [x1, x2] = [Number(args.x1) || 0, Number(args.x2) || 0].sort((a, b) => a - b);
+        const [y1, y2] = [Number(args.y1) || 0, Number(args.y2) || 0].sort((a, b) => a - b);
+        const ids = combat.entries().filter((entry) => {
+          const token = tokenOf(entry);
+          return token && token.x >= x1 && token.x <= x2 && token.y >= y1 && token.y <= y2;
+        }).map((entry) => entry.id);
+        return out({ targeted: combat.targetIds(source, ids, seat, Boolean(args.add)), combat: combat.viewFor(seat) });
+      }
       else if (action === "death-save") return out({ deathSave: await combat.deathSave(args.id, seat), combat: combat.viewFor(seat) });
       else if (action === "stabilize") return out({ stabilize: await combat.stabilize(args.id, args.recordId ?? "", seat), combat: combat.viewFor(seat) });
       else if (action === "ship-attack") return out({ shot: await combat.shipAttack(args.id, String(args.weapon ?? ""), args.targetId ?? "", args.range ?? "Short", seat, "Agent"), combat: combat.viewFor(seat) });
@@ -1236,6 +1261,7 @@ const TOOLS = [
       else if (action === "attack") return out({ results: await combat.attack(args.recordId ? { recordId: args.recordId } : { entryId: args.id }, args.weapon, seat, "Agent", { full: Boolean(args.full), mode: args.mode ?? "", invokes: Array.isArray(args.invokes) ? args.invokes : [] }), combat: combat.viewFor(seat) });
       else if (action === "attack-together") return out({ together: await combat.attackTogether(args.ids ?? [], args.targetId, seat, "Agent"), combat: combat.viewFor(seat) });
       else if (action === "save") return out({ save: await combat.save(args.id, args.attribute, args.cl ?? (require("../fate.cjs").isFateRuleset(agent.ruleset?.()) ? undefined : 0), "Agent", undefined, args.advantage ?? ""), combat: combat.viewFor(seat) });
+      else if (action === "cast" && args.template) return out({ ...(await agent.castWithTemplate(args.recordId ? { recordId: args.recordId } : { entryId: args.id }, args.power, args.template, seat, "Agent")), combat: combat.viewFor(seat) });
       else if (action === "cast") return out({ cast: await combat.cast(args.recordId ? { recordId: args.recordId } : { entryId: args.id }, args.power, args.castAction ?? "", seat, "Agent"), combat: combat.viewFor(seat) });
       else if (action === "krits") return out(await combat.krits(args.settings, seat));
       else if (action === "krit-test") return out({ krit: await combat.kritTest(args.kind, args.id, args.targetId, seat, args.table || args.roll || args.entryRoll || args.attackKind ? { table: args.table, roll: args.roll, entryRoll: args.entryRoll, kind: args.attackKind } : undefined), combat: combat.viewFor(seat) });
@@ -1365,6 +1391,9 @@ const TOOLS = [
       towerStyle: { type: "string" },
       motd: { type: "object", properties: { text: { type: "string" }, links: { type: "array" } } },
       clearTargets: { type: "string", enum: ["never", "action", "turn"] },
+      tokenEffects: { type: "string", enum: ["full", "icons", "off"], description: "Conditions and effects on tokens: animated visuals (Zzz, flames, frost...), icons only, or not drawn" },
+      playerEffects: { type: "string", enum: ["none", "lights", "conditions", "all"], description: "What players may put on their own characters from the Effects list" },
+      autoApply: { type: "boolean", description: "Damage and healing land as the roll does (FG, true), or wait on the chat card's buttons (Foundry, false)" },
       diceHold: { type: "number" },
       wizard35: { type: "object", properties: { methods: { type: "array", items: { type: "number" } }, rollLock: { type: "boolean" }, lowReroll: { type: "boolean" }, vault: { type: "boolean" } } },
       wizard2e: { type: "object", properties: { rollLock: { type: "boolean" }, methods: { type: "array", items: { type: "number" } }, gold: { type: "string", enum: ["phb", "perlevel", "xlevel"] } } },
@@ -1912,6 +1941,71 @@ const TOOLS = [
     },
   },
   {
+    name: "kraken_effects",
+    description:
+      "The Effects list (the sidebar's Effects window, FG's Effects window): list (the game's conditions, buffs, lights with their burn time, and the GM's own effects); on {to} (the effects on a creature); apply {to, preset (a list id: prone, asleep, poisoned, bless, torch, lantern, light-spell, flashlight..., or custom:<record id>) or effect {label: 'Name; ATK: 1; AC: -2; LIGHT: 20/40 #ff9e3d flicker', duration (rounds), icon, gmOnly}, duration, gmOnly}: as dropping it on a token, a tracker row, a sheet or a party row; remove {to, effectId}; update {to, effectId, patch {label, duration, gmOnly, paused}}; snuff / relight {to, effectId} (a light put out keeps its time); save {effect {id?, label, kind condition|buff|debuff|light, icon, text, duration, burn (minutes), gmOnly}} the GM's own; delete {id}. to: {tokenId} | {entryId} | {recordId}. A creature on the tracker keeps the effect on its entry (rounds count down by initiative); a token out of the fight keeps it on the token; game time passing (kraken_calendar advance) burns lights and spells down.",
+    inputSchema: object({
+      action: { type: "string", enum: ["list", "on", "apply", "remove", "update", "snuff", "relight", "save", "delete"] },
+      to: { type: "object", properties: { tokenId: { type: "string" }, entryId: { type: "string" }, recordId: { type: "string" } }, description: "Whom: a token, a tracker entry or a character record" },
+      preset: string("apply: an Effects list id"),
+      effect: { type: "object", description: "apply: {label, duration, icon, gmOnly}; save: {id?, label, kind, icon, text, duration, burn, gmOnly}" },
+      duration: number("apply: rounds (instead of the preset's)"),
+      gmOnly: { type: "boolean", description: "apply: only the GM sees it" },
+      effectId: string("remove / update / snuff / relight: the effect's id"),
+      patch: { type: "object", description: "update: {label, duration, gmOnly, paused}" },
+      id: string("delete: the GM's effect record id"),
+    }),
+    async run(args, ctx) {
+      const agent = needTable(ctx);
+      const api = agent.effects;
+      await api.ready;
+      const action = args.action ?? "list";
+      if (action === "list") return out({ effects: api.list(agent.seat) });
+      if (action === "on") return out({ effects: api.on(args.to, agent.seat) });
+      if (action === "apply") return out(api.apply({ to: args.to, preset: args.preset, effect: args.effect, duration: args.duration, gmOnly: args.gmOnly }, agent.seat));
+      if (action === "remove") return out(api.remove({ to: args.to, effectId: args.effectId }, agent.seat));
+      if (action === "update") return out(api.update({ to: args.to, effectId: args.effectId, patch: args.patch ?? {} }, agent.seat));
+      if (action === "snuff" || action === "relight") return out(api.update({ to: args.to, effectId: args.effectId, patch: { paused: action === "snuff" } }, agent.seat));
+      if (action === "save") return out({ saved: api.save(args.effect ?? {}, agent.seat) });
+      if (action === "delete") return out({ deleted: api.delete(String(args.id ?? ""), agent.seat) });
+      throw new Error("Which action?");
+    },
+  },
+  {
+    name: "kraken_template",
+    description:
+      "Area templates on the map (the map toolbar's Area template tool; a spell's own come from kraken_combat cast with template): list; place {template: {shape: circle|cone|line|square, x, y (world pixels: a circle's centre, a cone's or line's point, a square's centre), size (feet: radius, length or side), width (feet, a line's), angle (degrees clockwise from east: where a cone or line points)}, target: true makes every creature inside the targets of id (default: whose turn it is)}; move {id, patch}; remove {id}; clear (every template on the map). Everyone sees them, in the placer's colour; returns the templates and, with target, who is inside.",
+    inputSchema: object({
+      action: { type: "string", enum: ["list", "place", "move", "remove", "clear"] },
+      template: { type: "object", description: "place: {shape, x, y, size, width?, angle?, label?}" },
+      target: { type: "boolean", description: "place: the creatures inside become the targets of id (or whose turn it is)" },
+      id: string("move/remove: the template's id; place with target: the tracker entry that targets"),
+      patch: { type: "object", description: "move: {x, y, angle, size}" },
+    }),
+    run(args, ctx) {
+      const agent = needTable(ctx);
+      const { combat, seat } = agent;
+      const map = agent.tableMap ?? agent.map;
+      const action = args.action ?? "list";
+      if (action === "place") {
+        const template = map.placeTemplate({ ...(args.template ?? {}), turn: false }, seat);
+        let inside = [];
+        if (args.target) {
+          const entries = combat.entries();
+          const source = entries.find((entry) => entry.id === (args.id ?? combat.active()));
+          if (!source) throw new Error("Whose targets? Give id (a tracker entry) or start combat.");
+          inside = map.tokensInTemplate(template).map((token) => entries.find((entry) => entry.tokenId === token.id) ?? entries.find((entry) => token.recordId && entry.recordId === token.recordId)).filter((entry) => entry && entry.id !== source.id && combat.health(entry).status !== "Dead");
+          combat.targetIds(source.id, inside.map((entry) => entry.id), seat);
+        }
+        return out({ template, inside: inside.map((entry) => entry.name), templates: map.templates() });
+      }
+      if (action === "move") map.moveTemplate(String(args.id ?? ""), args.patch ?? {}, seat);
+      else if (action === "remove") map.removeTemplate(String(args.id ?? ""), seat);
+      else if (action === "clear") map.clearTemplates(seat);
+      return out({ templates: map.templates() });
+    },
+  },
+  {
     name: "kraken_ping",
     description: "Ping a square on the map, as the GM clicking to point something out: everyone at the table sees it flash there.",
     inputSchema: object(
@@ -2143,7 +2237,7 @@ const TOOLS = [
       "The GM's windows: list them, or open, close, pop out (to a window of its own, for another monitor) or dock back a window. Kinds: oracles (Ironsworn and Starforged: every oracle table, rolled for the table; Ask the Oracle), delve (Ironsworn: Delve's site themes and domains, features and dangers), map (the open map in its own window, as FG's image window, with its tools and settings; it opens by itself when a map opens and never pops out), assistant (the GM's DM assistant chat), characters (the sidebar's Characters: Character Selection, every character as a card, as FG's), party, combat, players, settings, decals (the background decal picker), wallpapers (the desktop wallpaper picker), gmicons (the GM icon picker), krits (critical hits and fumbles), dice (this seat's dice: sets, colours, design, material, effects), sound (one-shots, effects, ambience, music, chat triggers, volumes), sheet (a character's sheet: give record, its id or name), charselect (Character Selection), records (FG's campaign lists: NPCs, items, spells, classes...; the GM shares one with kraken_record_update visibility all, hides it with gm), record (one record: give record, its id or name). cards (the ability cards, when this seat turned them on in Settings).",
     inputSchema: object({
       action: { type: "string", enum: ["list", "open", "close", "popout", "dock"] },
-      kind: { type: "string", enum: ["assistant", "characters", "party", "combat", "players", "settings", "decals", "wallpapers", "gmicons", "krits", "library", "dice", "sound", "sheet", "books", "book", "images", "picture", "notes", "note", "charselect", "records", "record", "adventure", "story", "map", "cards", "imagelist", "studio", "assets", "towers", "deathmarkers", "calendar", "clocks", "motd", "oracles", "delve"] },
+      kind: { type: "string", enum: ["assistant", "characters", "party", "combat", "players", "settings", "decals", "wallpapers", "gmicons", "krits", "library", "dice", "sound", "sheet", "books", "book", "images", "picture", "notes", "note", "charselect", "records", "record", "adventure", "story", "map", "cards", "imagelist", "studio", "assets", "towers", "deathmarkers", "calendar", "effects", "clocks", "motd", "oracles", "delve"] },
       record: string("For a sheet: the character's record id or name; for a record: its id or name"),
     }),
     run: async (args, ctx) => out(await ctx.ui({ kind: "windows", action: args.action ?? "list", window: args.kind, record: args.record })),

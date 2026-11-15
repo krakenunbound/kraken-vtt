@@ -215,6 +215,8 @@ const done = [];
     // 7. Concentration: Tomas blesses the sentinel, then wards it (one spell held at a time).
     const conc = () => String(agent.records.get(tomas.id).data.concentration ?? "");
     const effectsBy = async () => (await view()).entries.flatMap((item) => item.effects.map((effect) => `${item.name}:${effect.label.split(";")[0]}`));
+    // A blessing lands only on the caster's side (docs/targeting-actions-design.md 4.3): the sentinel is turned to the party's first.
+    await ct({ action: "update", id: S, patch: { faction: "friend" } });
     await ct({ action: "target", id: T, targetId: S, on: true });
     await ct({ action: "cast", recordId: tomas.id, power: "Blessing" });
     assert(conc() === "Blessing" && (await effectsBy()).includes("Bone Sentinel:Blessing"), `Blessing held: ${conc()} ${await effectsBy()}`);
