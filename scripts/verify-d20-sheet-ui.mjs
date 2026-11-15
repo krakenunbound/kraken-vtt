@@ -200,6 +200,77 @@ Object.assign(GAMES, {
   },
 });
 
+// Fate Core and Fate Accelerated (core UI stage 5): aspects, the roll bar and its skills (or approaches), stress and
+// consequences, the last roll's invokes, compels, stunts, milestones and the phases. A scene aspect with free invokes
+// and a roll made first, so the Last roll panel and its +2 free show from the start; a foe in the conflict, targeted.
+const FATE_MAIN = [
+  // An advantage with its new aspect, rolled; no opposition; an attack at the target (through the tracker); defend.
+  ['[data-field="fate-action"]', "advantage"], ['[data-field="fate-new-aspect"]', "Slick Floor"], '[data-roll-skill]',
+  ['[data-field="fate-opposition"]', ""], '[data-roll-skill]',
+  ['[data-field="fate-action"]', "attack"], '[data-roll-skill]',
+  ['[data-field="fate-action"]', "defend"], '[data-roll-skill]',
+  ['[data-field="fate-action"]', "overcome"],
+  // The last roll's invokes (each a fate point), a scene aspect's free invoke, a reroll.
+  '[data-invoke-aspect] [data-action="fate-invoke"]', '[data-invoke-aspect] [data-action="fate-reroll"]', '[data-action="fate-free-invoke"]', '[data-invoke-scene] [data-action="fate-invoke"]',
+  // A consequence written, recovering, then cleared; a stress box back off.
+  ['[data-consequence="mild"] input', "Bruised Ribs", "commit"], '[data-action="recover"]', '[data-action="recover"]',
+  '[data-stress-box]', '.fate-box.marked', '[data-action="compel-refuse"]', '[data-action="compel-accept"]',
+];
+const fateGame = (ruleset, books, specs, extra) => ({
+  ruleset,
+  shipped: true,
+  books,
+  tabs: "main,stunts,milestones,notes",
+  specs,
+  fight: [specs[0].name],
+  foe: { name: "Thug", faction: "foe", hp: 3, init: 1 },
+  ignore: ["lastroll.at"],
+  async setup({ tool, ids }) {
+    await tool("kraken_fate", { action: "aspect-add", name: "Thick Fog", invokes: 2, kind: "situation" });
+    await tool("kraken_dice_force", { values: [3, 2, 1, 3] });
+    await tool("kraken_fate", { id: ids[specs[0].name], action: "roll", skill: extra.rollSkill, kind: "overcome", opposition: 2 });
+  },
+  states: [
+    { who: specs[0].name, label: "harmed", tabs: ["main"], changes: () => [{ path: "consequences.moderate.text", value: "Broken Arm" }] },
+    { who: specs[0].name, label: "no-points", tabs: ["main"], changes: () => [{ path: "fatepoints", value: 0 }] },
+    { who: specs[0].name, label: "taken-out", tabs: ["main"], changes: () => [{ path: "out", value: "taken out" }] },
+    { who: specs[0].name, label: "healed", tabs: ["main"], changes: () => [{ path: "out", value: "" }, { path: "consequences.moderate.text", value: "" }, { path: "fatepoints", value: 40 }] },
+  ],
+  // A skill point from a significant milestone, spent; a stunt dropped (each × is a ghost: only the first is pressed).
+  more: { main: FATE_MAIN, milestones: ['[data-action="milestone-significant"]', "[data-skill-up]"], stunts: ['[data-stunt] button.ghost'] },
+  gmControls: ['[data-action="gm-fatepoint"]', '[data-action="gm-fatepoint-take"]'],
+  // The roll bar's choice is the sheet's, not the tab's: set, another tab, back.
+  persist: { tab: "main", away: "stunts", selector: '[data-field="fate-action"]', value: "defend" },
+});
+const FATE_CORE_BOOKS = ["Fate Core System", "Fate Toolkit and Adversaries"];
+Object.assign(GAMES, {
+  fate: fateGame(
+    "Fate Core",
+    FATE_CORE_BOOKS,
+    [
+      {
+        game: "core",
+        name: "Mara Quickfingers",
+        aspects: { highconcept: "Reformed Cat Burglar", trouble: "The Guild Wants Me Back", a1: "Never Leave a Friend", a2: "Owes the Duke", a3: "Roofs Are Roads" },
+        skills: { Burglary: 4, Athletics: 3, Stealth: 3, Notice: 2, Deceive: 2, Fight: 2, Physique: 1, Will: 1, Contacts: 1, Rapport: 1 },
+        phases: { p1: { title: "The Emerald Job", story: "Stole the Duke's emerald, gave it back.", guest: "" }, p2: { title: "Fire at the Docks", story: "Pulled Tam from the flames.", guest: "Tam" }, p3: { title: "", story: "", guest: "" } },
+        stunts: [{ name: "Cat's Feet", text: "+2 to Athletics on rooftops", skill: "Athletics" }, { name: "Lockbreaker", text: "+2 to Burglary against locks", skill: "Burglary" }, { name: "Quick Hands", text: "", skill: "" }, { name: "Face in the Crowd", text: "Vanish into any crowd", skill: "Stealth" }],
+        description: "Small, quick, always smiling.",
+      },
+      { game: "core", name: "Brother Tam", aspects: { highconcept: "Fire-Scarred Monk", trouble: "Sworn to Peace", a1: "", a2: "", a3: "" }, skills: { Will: 4, Physique: 3, Lore: 3, Empathy: 2, Rapport: 2, Notice: 2, Athletics: 1, Crafts: 1, Investigate: 1, Fight: 1 }, stunts: [] },
+    ],
+    { rollSkill: "Burglary" },
+  ),
+  fae: fateGame(
+    "Fate Accelerated",
+    ["Fate Accelerated Edition", "Fate Toolkit and Adversaries"],
+    [
+      { game: "fae", name: "Zip Lightfoot", aspects: { highconcept: "Goblin Courier of the Undercity", trouble: "Can't Resist a Shiny", a1: "My Map Is Always Right", a2: "", a3: "" }, approaches: { careful: 1, clever: 2, flashy: 1, forceful: 0, quick: 3, sneaky: 2 }, stunts: [{ name: "Shortcut", text: "+2 to Quickly overcome when I know the way", skill: "" }], description: "Green, grinning, gone." },
+    ],
+    { rollSkill: "quick" },
+  ),
+});
+
 const [gameId, outArg] = process.argv.slice(2);
 const game = GAMES[gameId];
 if (!game) {
@@ -326,7 +397,14 @@ try {
   if (game.fight.length) {
     await tool("kraken_combat", { action: "next" });
     const fight = await tool("kraken_combat", { action: "view" });
-    await tool("kraken_combat", { action: "set-turn", id: fight.entries.find((entry) => entry.recordId === ids[game.fight[0]]).id });
+    const mine = fight.entries.find((entry) => entry.recordId === ids[game.fight[0]]).id;
+    await tool("kraken_combat", { action: "set-turn", id: mine });
+    // A foe in the fight, targeted by the first fighter (an attack then goes through the tracker).
+    if (game.foe) {
+      await tool("kraken_combat", { action: "add", entry: game.foe });
+      const foe = (await tool("kraken_combat", { action: "view" })).entries.find((entry) => entry.name === game.foe.name);
+      await tool("kraken_combat", { action: "target", id: mine, targetId: foe.id, on: true });
+    }
   }
 
   // A character's sheet among the open ones (marked by its name field, which is a property, not an attribute).
@@ -438,6 +516,12 @@ try {
     await act();
     await settle(900);
     const after = await dataOf(id);
+    // What changes by itself on every press (a roll's time) left out.
+    for (const ignored of game.ignore ?? []) for (const record of [before, after]) {
+      const keys = ignored.split(".");
+      const node = keys.slice(0, -1).reduce((value, key) => value?.[key], record);
+      if (node && typeof node === "object") delete node[keys.at(-1)];
+    }
     const posted = (await chatLines()).slice(lines).map((line) => `${line.text ?? ""} ${line.roll?.label ?? ""} ${line.roll?.total ?? ""}`.trim());
     presses.push({ what, changed: changed(before, after), posted });
   };
@@ -448,7 +532,8 @@ try {
       await sheet.locator(`[data-sheet-tab="${tab}"]`).click();
       await settle(300);
       const count = await sheet.locator(".cc-page").locator(CONTROLS).count();
-      const strip = await sheet.locator(".five-strip").locator(CONTROLS).count();
+      // A strip inside the page (Fate's compels) is the page's, not counted twice.
+      const strip = await sheet.locator(".five-strip:not(.cc-page .five-strip)").locator(CONTROLS).count();
       const header = await sheet.locator(".cc-boxes").first().locator(CONTROLS).count();
       // A game's other places over every tab (Ironsworn's last move), pressed on every tab before its page.
       const areas = [];
@@ -464,7 +549,7 @@ try {
       const first = tab === game.tabs.split(",")[0];
       const targets = [
         ...(first ? Array.from({ length: header }, (_, index) => ({ in: ".cc-boxes", index })) : []),
-        ...(first ? Array.from({ length: strip }, (_, index) => ({ in: ".five-strip", index })) : []),
+        ...(first ? Array.from({ length: strip }, (_, index) => ({ in: ".five-strip:not(.cc-page .five-strip)", index })) : []),
         ...areas,
         ...Array.from({ length: count }, (_, index) => ({ in: ".cc-page", index })),
       ];
@@ -497,16 +582,37 @@ try {
       // A tab whose controls appear only once one is used (a move chosen, then rolled): the game's own steps, each a
       // selector clicked (or [selector, value] filled or picked), pressed in order where the sheet shows it.
       for (const step of game.more?.[tab] ?? []) {
-        const [selector, value] = Array.isArray(step) ? step : [step];
+        // A third "commit": the field is left after it is filled (Tab), as a sheet field saves.
+        const [selector, value, commit] = Array.isArray(step) ? step : [step];
         const control = sheet.locator(selector).first();
         if (!(await control.count()) || (await control.isDisabled())) {
           presses.push({ what: `${spec.name} ${tab}: ${selector}`, skipped: (await control.count()) ? "disabled" : "absent" });
           continue;
         }
         const tag = await control.evaluate((item) => item.tagName);
-        await press(sheet, id, `${spec.name} ${tab}: ${selector}${value === undefined ? "" : ` = ${value}`}`, () => (value === undefined ? control.click() : tag === "SELECT" ? control.selectOption(String(value)) : control.fill(String(value))));
+        await press(sheet, id, `${spec.name} ${tab}: ${selector}${value === undefined ? "" : ` = ${value}`}`, async () => {
+          if (value === undefined) await control.click();
+          // "@first": the first option with a value (a clock or an ability whose id the run makes).
+          else if (tag === "SELECT") await control.selectOption(value === "@first" ? await control.evaluate((item) => [...item.options].find((option) => option.value)?.value ?? "") : String(value));
+          else {
+            await control.fill(String(value));
+            if (commit) await control.press("Tab");
+          }
+        });
       }
     }
+  }
+  // A choice the sheet keeps across its tabs (the roll bar's action): set, another tab, back, read.
+  if (game.persist) {
+    const sheet = await openCard(game.specs[0].name);
+    await sheet.locator(`[data-sheet-tab="${game.persist.tab}"]`).click();
+    await sheet.locator(game.persist.selector).selectOption(game.persist.value);
+    await sheet.locator(`[data-sheet-tab="${game.persist.away}"]`).click();
+    await settle(300);
+    await sheet.locator(`[data-sheet-tab="${game.persist.tab}"]`).click();
+    const kept = await sheet.locator(game.persist.selector).inputValue();
+    presses.push({ what: `${game.specs[0].name}: ${game.persist.selector} kept across tabs`, kept });
+    await shoot(sheet, `${gameId}-player-${slug(game.specs[0].name)}-persist`);
   }
   // Controls that show only in a state (a death save's Roll): the state set, the control pressed, the state put back.
   for (const extra of game.extra ?? []) {

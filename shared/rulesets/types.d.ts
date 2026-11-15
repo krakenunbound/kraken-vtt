@@ -41,8 +41,11 @@ export interface FieldSpec {
   title?: Text;
   hook?: Hook; // data-stat value
   attr?: string; // a data-* attribute that carries the value (data-cairn-status)
-  color?: string; // a value shown in this colour (a status)
-  note?: string; // the small text under a labelled field (its label by default)
+  color?: Text; // a value shown in this colour (a status; a text: by a condition)
+  note?: string | Text[]; // the small text under a labelled field (its label by default); a list: one text node each
+  // The labelled box around it (in the header or a notes part): more classes, its title, a data-* on it.
+  box?: { className?: string; title?: Text; attr?: { name: string; value: Text } };
+  fieldClass?: string; // a typed text field's own classes (Fate's "fate-aspect")
   bare?: boolean; // no label box around it
   action?: ActionCall; // sent as an action, not an edit
   when?: Cond;
@@ -132,7 +135,8 @@ export type Part = (
   // word: a fixed word in place of the coin's name ("credits"); before: the word goes before the field ("Cr 2500").
   | { part: "coins"; path: Path; className?: string; none?: { text: string; unless: string }; aria?: Text /* default "{name} coins" */; upper?: boolean /* the coin's name in capitals */; word?: string; before?: boolean }
   | { part: "load"; mode: "slots"; hook: string; used: Path; total: number; text: string }
-  | { part: "notes"; fields: FieldSpec[]; className?: string }
+  // section: the fields in a panel of their own (a <section> with its classes and aria-label), in place of className's div.
+  | { part: "notes"; fields: FieldSpec[]; className?: string; section?: { className: string; aria: string } }
   | { part: "advancement"; mode: "growth"; title?: string; rolls: StepSpec[] }
   | { part: "hint"; text: Nodes; plain?: boolean /* a <p> without the hint style */ }
   // text as a list: its nodes exactly, with no space added before the hint
@@ -220,7 +224,8 @@ export interface TabSpec {
 
 export interface SheetSpec {
   level: "inherit" | "arrange"; // "replace" is per part (custom) or per window
-  header: { identity: FieldSpec[]; custom?: Ref[] /* a game's own boxes after them (Ironsworn's initiative button) */ };
+  // note: the words under the name (default "Name"), as text nodes ("Name · ", "Fate Core").
+  header: { identity: FieldSpec[]; custom?: Ref[] /* a game's own boxes after them (Ironsworn's initiative button) */; note?: Nodes };
   attrs?: { name: string; value: Text }[]; // more data-* on the sheet (data-game="starforged")
   top?: Part[]; // above every tab (a strip of level, experience and the roll modifier)
   art?: Path | Path[]; // what picks the portrait art (the race): the first path with a value

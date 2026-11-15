@@ -22,7 +22,7 @@ export function FieldView({ spec, scope, base = "" }: { spec: FieldSpec; scope: 
       if (spec.locked === "num" && !typing) return <span className="cc-num">{num(value)}</span>;
       return <Field value={num(value)} number editable={typing} label={label} onSave={(text) => save(Number(text) || 0)} />;
     case "text":
-      return <Field value={String(value ?? "")} editable={typing} label={label} onSave={(text) => save(text)} />;
+      return <Field value={String(value ?? "")} editable={typing} label={label} className={spec.fieldClass} onSave={(text) => save(text)} />;
     case "textarea":
       return <Field value={spec.lines ? (Array.isArray(value) ? value.map(String).join("\n") : "") : String(value ?? "")} area editable={typing} label={label} onSave={(text) => save(text)} />;
     case "select":
@@ -52,7 +52,7 @@ export function FieldView({ spec, scope, base = "" }: { spec: FieldSpec; scope: 
             ? textOf(spec.show, scope, modifiers)
             : fill(`{${spec.path}}`, scope) || String(value ?? "");
       return (
-        <span className={spec.className ? `cc-value ${spec.className}` : "cc-value"} title={title} style={spec.color ? { color: spec.color } : undefined} {...attrs}>
+        <span className={spec.className ? `cc-value ${spec.className}` : "cc-value"} title={title} style={spec.color ? { color: textOf(spec.color, scope, modifiers) } : undefined} {...attrs}>
           {shown}
         </span>
       );
@@ -65,9 +65,21 @@ export function LabelledField({ spec, scope, base, className = "cc-labelled" }: 
   const { modifiers } = useSheet();
   if (spec.bare) return <FieldView spec={spec} scope={scope} base={base} />;
   return (
-    <label className={className}>
+    <label className={spec.box?.className ? `${className} ${spec.box.className}` : className} {...boxAttrs(spec, scope, modifiers)}>
       <FieldView spec={spec} scope={scope} base={base} />
-      <small>{spec.note ?? textOf(spec.label, scope, modifiers)}</small>
+      <small>{noteOf(spec, scope, modifiers)}</small>
     </label>
   );
+}
+// The words under a labelled field: its note (a list: one text node each), else its label.
+export function noteOf(spec: FieldSpec, scope: Scope, modifiers: Record<string, unknown>) {
+  if (Array.isArray(spec.note)) return nodesOf(spec.note, scope, modifiers);
+  return spec.note ?? textOf(spec.label, scope, modifiers);
+}
+// The labelled box's title and data-* (box.title, box.attr), none when the field gives none.
+export function boxAttrs(spec: FieldSpec, scope: Scope, modifiers: Record<string, unknown>): Record<string, string> {
+  const attrs: Record<string, string> = {};
+  if (spec.box?.title !== undefined) attrs.title = textOf(spec.box.title, scope, modifiers);
+  if (spec.box?.attr) attrs[`data-${spec.box.attr.name}`] = textOf(spec.box.attr.value, scope, modifiers);
+  return attrs;
 }

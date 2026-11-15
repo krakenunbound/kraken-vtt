@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { Session } from "../session/useSession";
-import { fateTableOf } from "../characters/SheetFate";
+import { fateTableOf } from "../rulesets/fate";
 import { Icon } from "./icons";
 
 // Fate's Scene Aspects strip, over the table for everyone: the scene's

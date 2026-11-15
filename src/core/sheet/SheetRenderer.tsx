@@ -1,11 +1,11 @@
 import { useMemo, useState } from "react";
 import type { ActionCall, Part, SheetSpec } from "../../../shared/rulesets/types";
 import type { Session, TableRecord } from "../../session/useSession";
-import { canEdit, SheetFrame } from "../frame/SheetFrame";
+import { canEdit, NameField, SheetFrame } from "../frame/SheetFrame";
 import { messageSender } from "../sender";
-import { FieldView } from "../parts/FieldView";
+import { boxAttrs, FieldView, noteOf } from "../parts/FieldView";
 import { PartView, type CustomPart, type Format } from "../parts/Parts";
-import { at, holds, num, setFormatters, SheetCtx, textOf, type Row, type SheetContext } from "./context";
+import { at, holds, nodesOf, num, setFormatters, SheetCtx, textOf, type Row, type SheetContext } from "./context";
 
 // A sheet laid out by its manifest (FG's arrange level: the ruleset lists its
 // tabs and fills each with core parts bound to record paths). The frame, the
@@ -103,13 +103,14 @@ export function SheetRenderer({ spec: given, record, session, ruleset, custom, f
         tabs={shownTabs.map((item) => (item.label ? { id: item.id, label: item.label } : item.id))}
         tab={page?.id ?? ""}
         onTab={setTab}
+        name={spec.header.note === undefined ? undefined : <NameField record={record} session={session} editable={editable} note={nodesOf(spec.header.note, scope, modifiers)} />}
         boxes={[
           ...spec.header.identity
             .filter((field) => holds(field.when, scope, context))
             .map((field) => (
-              <label key={field.path} className="cc-labelled cc-box">
+              <label key={field.path} className={field.box?.className ? `cc-labelled cc-box ${field.box.className}` : "cc-labelled cc-box"} {...boxAttrs(field, scope, modifiers)}>
                 <FieldView spec={field} scope={scope} />
-                <small>{field.note ?? textOf(field.label, scope, modifiers)}</small>
+                <small>{noteOf(field, scope, modifiers)}</small>
               </label>
             )),
           // A game's own boxes after them (a button in the header).
