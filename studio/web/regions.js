@@ -13,6 +13,7 @@ window.KrakenRegions = (() => {
     trap: ['Trap', '#e53935', 'Springs when a token enters: the game pauses and the GM sees its name and note.', 'Trap'],
     pit: ['Pit', '#8e24aa', 'A trap that drops whoever steps in. Draw invisible walls round its edge too if it should block movement.', 'Pit'],
     difficult: ['Difficult terrain', '#f9a825', 'Moving through it costs more: 2 means each square counts double.', 'Difficult terrain'],
+    teleport: ['Teleport', '#00acc1', 'Whoever steps in is moved to the region named in Destination (draw that one too: a teleport, a trap or terrain).', 'Teleport'],
   };
   let kind = 'trap', tool = 'rect', drawing = null, drag = null, selected = null, lastPress = null;
   const active = () => S().mode === 'regions';
@@ -25,6 +26,7 @@ window.KrakenRegions = (() => {
       note: String(r.note || '').slice(0, 4000), points: (r.points || []).map(Number).filter(Number.isFinite)};
     if (out.points.length < 6 || out.points.length % 2) throw Error('A region needs at least three corners.');
     if (out.kind === 'difficult') out.cost = Math.min(5, Math.max(1, Number(r.cost) || 2));
+    if (out.kind === 'teleport') out.to = r.to && typeof r.to === 'object' ? {x: Number(r.to.x) || 0, y: Number(r.to.y) || 0, ...(r.to.sceneId ? {sceneId: String(r.to.sceneId)} : {})} : String(r.to || '').slice(0, 120);
     if (!out.name) out.name = KINDS[out.kind][3];
     return out;
   }
@@ -66,6 +68,7 @@ window.KrakenRegions = (() => {
         <label>Name <input id="regionName" value="${esc(r.name)}"></label>
         <label>What happens (GM note) <textarea id="regionNote" rows="4">${esc(r.note)}</textarea></label>
         ${r.kind === 'difficult' ? `<label>Movement cost <input id="regionCost" type="number" min="1" max="5" step="0.25" value="${r.cost}"></label>` : ''}
+        ${r.kind === 'teleport' ? `<label>Destination <select id="regionTo"><option value="">Choose a region…</option>${list().filter(x => x.id !== r.id).map(x => `<option ${x.name === r.to ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select></label>` : ''}
         <button class="los-action" id="regionDelete">Delete this ${esc(KINDS[r.kind][0].toLowerCase())}</button>
       </div>` : ''}
       <div class="region-list">${list().map(x => `<button class="region-row ${x.id === selected ? 'on' : ''}" data-region-id="${esc(x.id)}"><i style="background:${KINDS[x.kind][1]}"></i>${esc(x.name)}</button>`).join('') || '<p class="los-help">No traps or regions yet.</p>'}</div>`;
@@ -77,6 +80,7 @@ window.KrakenRegions = (() => {
       $('#regionName').onchange = e => { edit('name', e.target.value); render(); };
       $('#regionNote').onchange = e => edit('note', e.target.value);
       if ($('#regionCost')) $('#regionCost').onchange = e => edit('cost', Number(e.target.value));
+      if ($('#regionTo')) $('#regionTo').onchange = e => edit('to', e.target.value);
       $('#regionDelete').onclick = () => remove(r.id);
     }
   }
@@ -148,7 +152,7 @@ window.KrakenRegions = (() => {
       ctx.setLineDash([]);
       const xs = r.points.filter((_, i) => i % 2 === 0), ys = r.points.filter((_, i) => i % 2);
       ctx.font = `${Math.max(11, 13 / zoom)}px sans-serif`; ctx.fillStyle = '#fff'; ctx.strokeStyle = '#000'; ctx.lineWidth = 3 / zoom;
-      const label = (r.kind === 'difficult' ? '' : '⚠ ') + r.name;
+      const label = (r.kind === 'difficult' ? '' : r.kind === 'teleport' ? '⇢ ' : '⚠ ') + r.name + (r.kind === 'teleport' && typeof r.to === 'string' && r.to ? ` → ${r.to}` : '');
       ctx.strokeText(label, Math.min(...xs) + 6 / zoom, Math.min(...ys) + 16 / zoom); ctx.fillText(label, Math.min(...xs) + 6 / zoom, Math.min(...ys) + 16 / zoom);
     }
     const color = KINDS[kind][1];

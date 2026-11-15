@@ -391,7 +391,7 @@ const FX_SETTINGS = {
 };
 const FX_BLUR = "maskblur";
 const FX_BLUR_MAX = 100;
-const REGION_KINDS = { trap: "Trap", pit: "Pit", difficult: "Difficult terrain" };
+const REGION_KINDS = { trap: "Trap", pit: "Pit", difficult: "Difficult terrain", teleport: "Teleport" };
 
 // Where a grid line crosses, in map pixels from the top-left.
 function gridOffset(p) {
@@ -439,6 +439,8 @@ function cleanRegion(r) {
     if (cost === undefined) fail(`could not convert string to float: '${r.cost}'`);
     out.cost = Math.min(5.0, Math.max(1.0, cost));
   }
+  // A teleport's destination: another region by name, or a point (map pixels; a scene id to go to another scene).
+  if (r.kind === "teleport") out.to = isDict(r.to) ? { x: Number(r.to.x) || 0, y: Number(r.to.y) || 0, ...(typeof r.to.sceneId === "string" ? { sceneId: clip(r.to.sceneId, 80) } : {}) } : clip(String(r.to || ""), 120);
   return out;
 }
 

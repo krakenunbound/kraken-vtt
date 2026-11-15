@@ -77,6 +77,13 @@ doesn't get it (it could reach the tools withheld from the assistant).
 | The dice tower: its look for everyone (Kraken's six drawn, the tower pictures, a picture imported); on the GM's screen, lock it, fix it at x,y, move it, turn it on or off (its right-click menu) | `kraken_tower` |
 | Dice packs (Documents/Kraken VTT/Dice): list them with their sets and problems, check a pack being made, the folder; a pack's set by name | `kraken_dice_packs`; `kraken_dice_settings` preset |
 | Ping the map | `kraken_ping` |
+| The ruler (right-drag, waypoints; seen by every seat on the map, in the measurer's colour), by the diagonal rule (campaign: `kraken_table_options` diagonal; a scene's own: `kraken_scene_settings` diagonal) | `kraken_ruler` (squares, show) |
+| Settings > Tokens and measuring: what players see of health (bar, dot, on hover, off) and names; a token's unidentified name, its senses line, its elevation (Alt+wheel) | `kraken_table_options` healthNpc, healthPc, names, diagonal; `kraken_token_update` unidentified, senses, elevation |
+| Fog of war (explored areas kept by the host per player and scene); Scene > Reset explored | `kraken_line_of_sight` (explored counts; resetExplored) |
+| Magical darkness (a light's menu) | `kraken_light` darkness |
+| Undo a move (Ctrl+Z, the token menu), this turn's path; the GM's Moves waiting strip (Accept, Cancel, all) while movement is locked | `kraken_token_move` undo, path, requests, approve |
+| Traps, pits, difficult terrain and teleports at the table (from Map Studio or a bundle's Foundry regions) | `kraken_region` |
+| Scene > Sounds on this map (a sound looping at a point, heard near players' tokens, muffled by walls) | `kraken_map_sound` |
 | Read the map: grid, tokens, doors; share it with the players (opens on every screen, as FG's Share) | `kraken_map` (`share: true`) |
 | The map editor: walls, doors, windows (drawn where the hand puts them, grid snap off unless on; dragged to move, a corner dragged; a door box is one door); mask; text, numbers and pins; paint; FX layers; layer groups; undo | `kraken_wall`, `kraken_mask`, `kraken_label`, `kraken_draw`, `kraken_fx`, `kraken_map_group`, `kraken_map_undo` |
 | FX masks: paint an effect's areas on the map (rectangle, shape, brush; several, added together; a soft edge), remove one from the list | `kraken_fx` paint / erase-area |

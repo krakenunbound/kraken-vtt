@@ -152,6 +152,9 @@ function mimeFor(name: string): string {
   if (ext === "webp") return "image/webp";
   if (ext === "png") return "image/png";
   if (ext === "gif") return "image/gif";
+  // Animated maps (Foundry's video backgrounds).
+  if (ext === "webm") return "video/webm";
+  if (ext === "mp4" || ext === "m4v") return "video/mp4";
   return "application/octet-stream";
 }
 
