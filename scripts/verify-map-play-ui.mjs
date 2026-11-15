@@ -197,10 +197,78 @@ try {
   await page.waitForSelector('.overlay.regions [data-region-kind="trap"]', { timeout: 8000 });
   await seat.waitForSelector(`${seatMap} .overlay.darkness-areas`, { timeout: 8000 });
   assert((await seat.locator(".overlay.regions").count()) === 0, "the player has no regions");
-  await settle(600);
+  // Past any notice (they fade after a few seconds).
+  await settle(3200);
   await page.screenshot({ path: path.join(SHOTS, "kraken-map-play-gm.png") });
   await seat.screenshot({ path: path.join(SHOTS, "kraken-map-play-player.png") });
   report.push("magical darkness is black on the player's map; the rune trap is the GM's alone");
+
+  // 8. Tremorsense through a wall: the orc behind it is a shape over the fog for the player.
+  await tool("kraken_light", { action: "list" }).then((lights) => Promise.all(lights.map((light) => tool("kraken_light", { action: "remove", id: light.id }))));
+  await tool("kraken_wall", { action: "add", points: [700, 200, 700, 1200], kind: "wall" }).catch(() => undefined);
+  await tool("kraken_line_of_sight", { on: true });
+  await tool("kraken_token_update", { id: orcToken.id, elevation: 0 });
+  await tool("kraken_token_move", { id: heroToken.id, col: 6, row: 5 });
+  await tool("kraken_token_move", { id: orcToken.id, col: 7, row: 5 });
+  await tool("kraken_token_update", { id: heroToken.id, senses: "Tremorsense 30 ft" });
+  await seat.waitForSelector(`${seatMap} [data-token="${orcToken.id}"].token-sensed`, { timeout: 8000 });
+  const onTop = await seat.evaluate((id) => {
+    const token = document.querySelector(`[data-token="${id}"]`);
+    const box = token.getBoundingClientRect();
+    const hit = document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2);
+    return Boolean(hit?.closest(`[data-token="${id}"]`));
+  }, orcToken.id);
+  assert(onTop, "the felt orc is drawn above the fog");
+  await settle(500);
+  await seat.screenshot({ path: path.join(SHOTS, "kraken-tremorsense-player.png") });
+  await tool("kraken_token_update", { id: heroToken.id, senses: "" });
+  await tool("kraken_line_of_sight", { on: false });
+  report.push("tremorsense: the orc behind the wall is felt, drawn above the fog on the player's screen");
+
+  // 9. A sound placed on the map: the player's browser fetches it to play near their token.
+  const library = await tool("kraken_sound", { action: "list" });
+  const loop = (library.sounds ?? []).find((item) => item.kind === "ambience") ?? (library.sounds ?? [])[0];
+  if (loop) {
+    const fetched = [];
+    seat.on("request", (request) => request.url().includes("/sound/file") && fetched.push(request.url()));
+    await tool("kraken_map_sound", { action: "add", sound: loop.id, col: 6, row: 5, radius: 30 });
+    await until(() => fetched.some((url) => url.includes(encodeURIComponent(loop.id))), "the player's browser fetches the placed sound");
+    report.push(`a sound placed on the map (${loop.name}): the player's browser fetches it to play near their token`);
+  } else report.push("no sound in the library here: the placed sound was not tried in the browser");
+
+  // 10. Settings > Tokens and measuring, on the GM's screen.
+  await page.click('[data-launch="settings"]');
+  await page.waitForSelector('[data-setting="tokens"]', { timeout: 8000 });
+  await page.locator('[data-setting="tokens"]').scrollIntoViewIfNeeded();
+  await page.screenshot({ path: path.join(SHOTS, "kraken-token-options-gm.png") });
+  await page.keyboard.press("Escape");
+  report.push("Settings > Tokens and measuring opens on the GM's screen");
+
+  // 11. An animated map: a real .webm put on the table plays and loops on the player's screen.
+  const webm = readFileSync(path.join(process.cwd(), "scripts", "fixtures", "animated-map.webm")).toString("base64");
+  await page.evaluate(async (data) => {
+    const bytes = Uint8Array.from(atob(data), (c) => c.charCodeAt(0));
+    const url = URL.createObjectURL(new Blob([bytes], { type: "video/webm" }));
+    await window.__kraken.publish({ id: "animated-test", name: "Animated", width: 640, height: 400, padding: 0, backgroundColor: "#000", grid: { size: 50, type: 1, color: "#000", alpha: 0.2, distance: 5, units: "ft" }, imageUrl: url, video: true, offsetX: 0, offsetY: 0, scaleX: 1, scaleY: 1, anchorX: 0, anchorY: 0, fit: "fill", walls: [], darkness: 0, lights: [], tokens: [], markers: [], regions: [] });
+  }, webm);
+  await seat.waitForSelector(`${seatMap} video.map-video`, { timeout: 15000 });
+  const playing = await until(async () => {
+    const first = await seat.evaluate(() => document.querySelector("video.map-video")?.currentTime ?? 0);
+    await settle(700);
+    const later = await seat.evaluate(() => document.querySelector("video.map-video")?.currentTime ?? 0);
+    return later !== first ? { first, later } : null;
+  }, "the animated map plays", 20);
+  let wrapped = false;
+  let last = await seat.evaluate(() => document.querySelector("video.map-video").currentTime);
+  for (let i = 0; i < 20 && !wrapped; i += 1) {
+    await settle(250);
+    const now = await seat.evaluate(() => document.querySelector("video.map-video").currentTime);
+    if (now < last) wrapped = true;
+    last = now;
+  }
+  assert(wrapped, "the animated map loops");
+  await seat.screenshot({ path: path.join(SHOTS, "kraken-animated-map-player.png") });
+  report.push(`an animated map (.webm): plays on the player's screen (${playing.first.toFixed(2)}s to ${playing.later.toFixed(2)}s) and loops`);
 
   assert(failures.length === 0, `page errors: ${failures.join(" | ")}`);
   console.log(`ok map play ui${process.env.KRAKEN_APP ? " (the built app)" : ""}:\n  ${report.join("\n  ")}\n  screenshots in ${SHOTS}`);

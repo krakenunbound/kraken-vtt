@@ -807,7 +807,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
   // A seat's explored areas of the scene, sent when they change (not with every map).
   function sendExplored(ws, client, working, who) {
     const sceneId = working.scene()?.id ?? null;
-    const key = who === null ? `${sceneId}|none` : `${sceneId}|${who}|${working.exploredVersion()}`;
+    const key = who === null ? `${sceneId}|none` : `${sceneId}|${who}|${working.exploredVersion(who)}`;
     if (client.exploredKey === key) return;
     client.exploredKey = key;
     send(ws, { type: "explored", sceneId, polygons: who === null ? [] : working.exploredFor(who) });
@@ -1079,9 +1079,25 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         res.end();
         return;
       }
+      // An animated map is a video: the browser asks for it in ranges to play and loop it.
+      const range = /^bytes=(\d*)-(\d*)$/.exec(String(req.headers.range ?? ""));
+      if (range && (range[1] || range[2])) {
+        const size = image.bytes.length;
+        const start = range[1] ? Number(range[1]) : Math.max(0, size - Number(range[2]));
+        const end = range[1] && range[2] ? Math.min(size - 1, Number(range[2])) : size - 1;
+        if (start >= size || start > end) {
+          res.writeHead(416, { "Content-Range": `bytes */${size}`, "Access-Control-Allow-Origin": "*" });
+          res.end();
+          return;
+        }
+        res.writeHead(206, { "Content-Type": image.mime, "Content-Range": `bytes ${start}-${end}/${size}`, "Content-Length": end - start + 1, "Accept-Ranges": "bytes", "Cache-Control": "no-store", "Access-Control-Allow-Origin": "*" });
+        res.end(image.bytes.subarray(start, end + 1));
+        return;
+      }
       res.writeHead(200, {
         "Content-Type": image.mime,
         "Content-Length": image.bytes.length,
+        "Accept-Ranges": "bytes",
         "Cache-Control": "no-store",
         "Access-Control-Allow-Origin": "*",
       });

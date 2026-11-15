@@ -107,6 +107,9 @@ export function useRulerBroadcast(points: number[] | null, send: ((points: numbe
     if (pending.current !== null) window.clearTimeout(pending.current);
     if (wait <= 0) go();
     else pending.current = window.setTimeout(go, wait);
+    // Held still, it is sent again now and then, so the other seats keep it (they let a silent one fade).
+    const keep = window.setInterval(() => send(points), 2000);
+    return () => window.clearInterval(keep);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key, send]);
 }

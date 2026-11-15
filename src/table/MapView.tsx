@@ -1015,7 +1015,9 @@ function MapViewInner({
   }, [scene.id]);
 
   // The ruler measured now (square centres), shown to everyone on the map as it moves.
-  const measurePoints = measure ? rulerPoints(scene, measure.start, measure.waypoints, measure.at) : null;
+  // A right-click that has not left its square (a menu opened) is no ruler, here or for the table.
+  const measureRaw = measure ? rulerPoints(scene, measure.start, measure.waypoints, measure.at) : null;
+  const measurePoints = measureRaw && (measureRaw.length > 4 || measureRaw[0] !== measureRaw[2] || measureRaw[1] !== measureRaw[3]) ? measureRaw : null;
   useRulerBroadcast(map.sceneId === scene.id && !map.prep ? measurePoints : null, actions.ruler);
   useRulerKeys(viewport, measure ? { add: () => setMeasure((current) => (current ? { ...current, waypoints: [...current.waypoints, current.at].slice(0, 30) } : current)), undo: () => setMeasure((current) => (current ? { ...current, waypoints: current.waypoints.slice(0, -1) } : current)) } : null);
   const placeable = records.filter((record) => record.type === "character" && (gm || record.owner !== ""));

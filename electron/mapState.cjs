@@ -505,8 +505,12 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
   // the very same walls, lights, tokens, paint and effects as the table's.
   const state = sharedWith ? sharedWith.rawState() : savedMap(saved);
   state.explored = state.explored ?? {};
-  // A count that moves on whenever anyone's explored areas change (not saved).
-  if (!("exploredVersion" in state)) Object.defineProperty(state, "exploredVersion", { value: 0, writable: true, enumerable: false });
+  // Counts that move on when a player's explored areas change ("*": anyone's), so each is sent only its own news (not saved).
+  if (!("exploredVersions" in state)) Object.defineProperty(state, "exploredVersions", { value: new Map(), enumerable: false });
+  const bumpExplored = (key) => {
+    state.exploredVersions.set(key, (state.exploredVersions.get(key) ?? 0) + 1);
+    state.exploredVersions.set("*", (state.exploredVersions.get("*") ?? 0) + 1);
+  };
   // The last views merged for each player, so the same view is not merged again.
   const lastMerged = new Map();
   state.regions = state.regions ?? {};
@@ -710,9 +714,7 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
   // How far a token sees in the dark, in feet: its own setting, else its
   // character's senses (C&C deepvision, darkvision, twilight vision).
   function visionRange(token) {
-    if (token.vision != null) return token.vision;
-    const record = token.recordId ? records.get(token.recordId) : null;
-    return geometry.sensesRange(record?.data?.senses);
+    return sensesOf(token).darkvision;
   }
 
   // Every light shining now: the scene's lights that are on, and the lights
@@ -827,6 +829,8 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
     const result = geometry.settleMove(scene, wallsHere(), doorsHere(), from, to, token.squares, { snap, collide });
     let at = { x: result.x, y: result.y };
     let sprang = null;
+    // A play test's token (an "@" seat) springs traps too, but never locks the table.
+    const tester = String(seat.name ?? "").startsWith("@");
     if (seat.role !== "dm") {
       const hit = enteredRegion(from, at);
       if (hit) {
@@ -851,7 +855,7 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
           // A trap or pit: the token stops on the first square of it.
           const stop = geometry.snapCenter(scene, hit.at.x, hit.at.y, token.squares);
           at = geometry.pointInPolygon(stop.x, stop.y, hit.region.points) ? stop : { x: Math.round(hit.at.x), y: Math.round(hit.at.y) };
-          state.locked[scene.id] = true;
+          if (!tester) state.locked[scene.id] = true;
         }
       }
     }
@@ -1073,7 +1077,11 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
     // magical darkness); truesight and Devil's Sight see in magical darkness.
     const senses = new Map(mine.map((token) => [token.id, sensesOf(token)]));
     const seeing = mine
-      .map((token, index) => ({ x: token.x, y: token.y, radiusPx: Math.max(spoiled.includes(token.id) ? 0 : visionRange(token), senses.get(token.id).blindsight) * per, polygon: vision ? vision[index] : null }))
+      .map((token, index) => {
+        // Darkvision (a bright light spoils it in C&C); blindsight, truesight and Devil's Sight see in the dark too.
+        const sense = senses.get(token.id);
+        return { x: token.x, y: token.y, radiusPx: Math.max(spoiled.includes(token.id) ? 0 : sense.darkvision, sense.blindsight, sense.truesight, sense.devilsight) * per, polygon: vision ? vision[index] : null };
+      })
       .filter((item) => item.radiusPx > 0);
     const trueSeeing = mine
       .map((token, index) => {
@@ -1108,7 +1116,7 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
     const playerDoors = doorList.filter((door) => !door.secret && seenGroups.has(door.group));
     return {
       // A token felt by tremorsense alone is marked so (a shape, not a sight of it).
-      tokens: tokens.map((token) => (sensedOnly.has(token.id) ? { ...publicToken(token, seat, assetToken), sensed: true } : publicToken(token, seat, assetToken))),
+      tokens: tokens.map((token) => (sensedOnly.has(token.id) ? { ...publicToken(token, seat, assetToken), name: "", health: null, art: undefined, video: undefined, light: null, sensed: true } : publicToken(token, seat, assetToken))),
       ...shared,
       // The placed sounds they hear now, and how loud (never where they are).
       sounds: soundsHeard(mine),
@@ -1278,8 +1286,8 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       if (!scene) throw new Error("No scene is open.");
       const token = findToken(id);
       if (!canMove(token, seat)) throw new Error("That is not your token.");
-      if (seat.role !== "dm" && state.locked[scene.id]) {
-        // Locked: the move becomes a request with its path on the GM's map.
+      if (seat.role !== "dm" && state.locked[scene.id] && !String(seat.name ?? "").startsWith("@")) {
+        // Locked: the move becomes a request with its path on the GM's map (not a play test's token).
         requestMove(token, to, seat);
         changed({ keepVision: true });
         return { token, blocked: false, requested: true };
@@ -1298,7 +1306,7 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       const list = moves.map((item) => ({ token: findToken(String(item.id)), to: { x: num(item.x, NaN), y: num(item.y, NaN) } }));
       if (list.some(({ to }) => !Number.isFinite(to.x) || !Number.isFinite(to.y))) throw new Error("Where to?");
       for (const { token } of list) if (!canMove(token, seat)) throw new Error(`${token.name} is not your token.`);
-      if (seat.role !== "dm" && state.locked[scene.id]) {
+      if (seat.role !== "dm" && state.locked[scene.id] && !String(seat.name ?? "").startsWith("@")) {
         for (const { token, to } of list) requestMove(token, to, seat);
         changed({ keepVision: true });
         return list.map(({ token }) => ({ token, blocked: false, requested: true }));
@@ -1489,7 +1497,7 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       const merged = geometry.mergeExplored(known, vision);
       if (merged === known) return false;
       row[player] = merged;
-      state.exploredVersion += 1;
+      bumpExplored(key);
       return true;
     },
     // What a player has seen of this scene; "*" every player's together (the GM's vision preview).
@@ -1498,7 +1506,7 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       if (player === "*") return Object.values(row).flat();
       return row[player] ?? [];
     },
-    exploredVersion: () => state.exploredVersion,
+    exploredVersion: (player) => state.exploredVersions.get(player === "*" ? "*" : `${scene?.id}|${player}`) ?? 0,
     exploredPlayers: () => Object.keys((scene && state.explored[scene.id]) ?? {}),
     // The GM's Reset explored: one player's memory of this scene, or everyone's.
     resetExplored(player, seat) {
@@ -1508,7 +1516,8 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       if (player) delete row[player];
       else state.explored[scene.id] = {};
       for (const key of [...lastMerged.keys()]) if (key.startsWith(`${scene.id}|`) && (!player || key === `${scene.id}|${player}`)) lastMerged.delete(key);
-      state.exploredVersion += 1;
+      for (const name of player ? [player] : Object.keys(row)) bumpExplored(`${scene.id}|${name}`);
+      bumpExplored(`${scene.id}|*reset`);
       changed({ keepVision: true });
       return { reset: player || "everyone" };
     },

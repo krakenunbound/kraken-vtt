@@ -295,6 +295,7 @@ weather with masks, mark traps and regions, generate a dungeon, and play test.
   token: the move waits on your screen (a dashed line to where they want to
   go) and in the **Moves waiting** strip, with Accept and Cancel for each and
   for all.
+- **Dragging a token** shows how far, green within its speed (the sheet's Speed), amber within a dash, red past both. It warns; it never stops the move.
 - **Elevation:** Alt+wheel over a token raises or lowers it a square's
   distance (or the token menu's Elevation); a badge shows its height to everyone.
 - **Traps and regions** from Map Studio (and a Foundry bundle's regions) play

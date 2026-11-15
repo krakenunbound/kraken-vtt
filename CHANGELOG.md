@@ -15,6 +15,7 @@ The map at play, past what Fantasy Grounds and Foundry give:
 - **Undo a move** (Ctrl+Z, the token menu) and **this turn's path** on the tracker, with its distance.
 - **Locked movement asks the GM:** a player's drag waits on the GM's Moves waiting strip, Accept or Cancel.
 - **Elevation:** Alt+wheel, a badge, height in measuring.
+- **A dragged token's distance in the colour of its speed:** green within it, amber within a dash, red past both (a warning, never a stop).
 - **Map Studio's traps, pits, difficult terrain and teleports play at the table**, and a Foundry bundle's regions by their behaviours.
 - **Animated maps** (.webm, .mp4) and **sounds placed on a map**, heard near your tokens and muffled by walls.
 - New agent tools: `kraken_ruler`, `kraken_region`, `kraken_map_sound`; `kraken_token_move` undo, path and approvals; checks `npm run map-play` and `npm run map-play-ui`.

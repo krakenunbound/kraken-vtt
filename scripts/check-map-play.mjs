@@ -188,7 +188,8 @@ try {
   await tool("kraken_token_move", { id: orc.id, col: 5, row: 2 });
   await tool("kraken_token_update", { id: annToken.id, senses: "Tremorsense 30 ft" });
   view = server.agent.viewFor("Ann");
-  assert(view.tokens.find((t) => t.id === orc.id)?.sensed === true, "tremorsense feels the orc through the wall");
+  const felt = view.tokens.find((t) => t.id === orc.id);
+  assert(felt?.sensed === true && felt.name === "" && felt.health === null && !felt.art, "tremorsense feels the orc through the wall: a shape, no name, no health");
   await tool("kraken_token_update", { id: orc.id, elevation: 10 });
   assert(!names().includes(orc.id), "not while it is in the air");
   await tool("kraken_token_update", { id: orc.id, elevation: 0 });
@@ -204,7 +205,15 @@ try {
   view = server.agent.viewFor("Ann");
   assert(view.tokens.some((t) => t.id === gob.id) && view.trueSeeing.length === 1, "Devil's Sight sees in it");
   await tool("kraken_light", { action: "remove", id: dark.id });
+  // In plain darkness: a Darkvision line typed on the token, truesight and Devil's Sight all see.
+  await tool("kraken_scene_settings", { darkness: 1 });
+  for (const line of ["Darkvision 60 ft", "Truesight 30 ft", "Devil's Sight"]) {
+    await tool("kraken_token_update", { id: annToken.id, senses: line });
+    assert(names().includes(gob.id), `${line} sees the goblin in the dark`);
+  }
   await tool("kraken_token_update", { id: annToken.id, senses: "" });
+  assert(!names().includes(gob.id), "without them, not");
+  await tool("kraken_scene_settings", { darkness: 0 });
   console.log("ok senses");
 
   // 5. Undo a move, and this turn's path. Ann walks two squares, then takes one back; Bob cannot.
@@ -293,6 +302,22 @@ try {
   const counts = server.agent.map.fromStudio({ ...master, walls: server.agent.map.walls().map((wall) => ({ ...wall })), project: null });
   assert(counts.regions === 1 && server.agent.map.regions()[0].kind === "pit", `Map Studio's regions: ${JSON.stringify(counts)}`);
   assert(server.persisted().map.regions.crypt.length === 1, "regions are saved");
+  // A play test's token springs a trap, but never locks the table.
+  await tool("kraken_region", { action: "add", kind: "trap", name: "Test trap", rect: { col: 0, row: 0, cols: 1, rows: 1 } });
+  const tester = server.agent.map.place({ name: "Test player", owner: "@test", x: 75, y: 25 }, server.agent.seat);
+  server.agent.map.move(tester.id, { x: 25, y: 25 }, { role: "player", name: "@test" });
+  assert(!server.agent.map.lockedNow() && server.agent.map.tokens().find((t) => t.id === tester.id).x === 25, "the play test's token springs it without locking the table");
+  server.agent.map.remove(tester.id, server.agent.seat);
+  // A bundle's Foundry regions come with its scene, by their behaviours; players' scene has none.
+  const bundle = { ...scene, id: "vault", name: "Vault", tokens: [], regions: [{ id: "fr1", name: "Collapsing floor", trap: false, kind: "pit", polygons: [[0, 0, 100, 0, 100, 100, 0, 100]] }, { id: "fr2", name: "Rubble", trap: false, kind: "difficult", cost: 2, polygons: [[200, 0, 300, 0, 300, 100, 200, 100]] }] };
+  dm.send({ type: "scene", scene: bundle });
+  const vaultScene = await latest(ann, "scene", (m) => m.scene?.id === "vault", "Ann gets the vault");
+  assert(!("regions" in vaultScene.scene), "the players' scene carries no regions");
+  await latest(ann, "map", (m) => m.sceneId === "vault", "the vault on the table");
+  const listed = await tool("kraken_region", {});
+  assert(listed.map((r) => r.kind).sort().join() === "difficult,pit", `the bundle's regions: ${JSON.stringify(listed)}`);
+  dm.send({ type: "scene", scene });
+  await latest(ann, "map", (m) => m.sceneId === "crypt", "back to the crypt");
   console.log("ok regions");
 
   // 9. Sounds placed on the map: heard near her token, louder nearer, muffled through the wall; never where they are.
@@ -314,6 +339,45 @@ try {
   const served = await fetch(`http://127.0.0.1:${info.port}${videoScene.scene.image}`);
   assert(served.headers.get("content-type") === "video/webm", "served as a video");
   console.log("ok sounds and animated maps");
+
+  // 10. Speed: a walled scene with 200 tokens and four players; what one burst of
+  // map sends costs the host (every player's view, their explored areas merged).
+  {
+    const big = createTableServer({});
+    await big.listen({ port: 0, password: "" });
+    const walls = [];
+    for (let i = 0; i < 30; i += 1) walls.push({ id: `bw${i}`, x1: 100 + i * 120, y1: 0, x2: 100 + i * 120, y2: 1500 + (i % 3) * 300, sight: 20, move: 20, door: 0, ds: 0 });
+    for (let i = 0; i < 30; i += 1) walls.push({ id: `bh${i}`, x1: 0, y1: 100 + i * 120, x2: 1500 + (i % 4) * 400, y2: 100 + i * 120, sight: 20, move: 20, door: i % 2, ds: i % 4 === 0 ? 1 : 0 });
+    const tokens = Array.from({ length: 200 }, (_, i) => ({ id: `n${i}`, name: `Goblin ${i}`, x: 50 + (i % 20) * 150, y: 50 + Math.floor(i / 20) * 150, width: 50, height: 50, disposition: -1, hidden: false }));
+    big.agent.map.setScene({ ...scene, id: "big", width: 3600, height: 3600, walls, tokens });
+    big.agent.map.setSight(true);
+    const players = ["P1", "P2", "P3", "P4"];
+    for (const [index, name] of players.entries()) big.agent.map.place({ name, owner: name, x: 175 + index * 600, y: 175 + index * 300 }, big.agent.seat);
+    const burst = () => {
+      let bytes = 0;
+      for (const name of players) {
+        const view = big.agent.map.viewFor({ role: "player", name }, "x");
+        if (view.vision) big.agent.map.explore(name, view.vision);
+        bytes += JSON.stringify(view).length;
+      }
+      return bytes;
+    };
+    burst();
+    const times = [];
+    let bytes = 0;
+    for (let step = 0; step < 20; step += 1) {
+      const mover = big.agent.map.tokens().find((t) => t.owner === players[step % 4]);
+      big.agent.map.move(mover.id, { x: mover.x + (step % 2 ? -150 : 150), y: mover.y }, big.agent.seat);
+      const startAt = performance.now();
+      bytes = burst();
+      times.push(performance.now() - startAt);
+    }
+    times.sort((a, b) => a - b);
+    const explored = JSON.stringify(players.map((name) => big.agent.map.exploredFor(name))).length;
+    console.log(`speed: 200 tokens, 60 walls, 4 players: a burst of map views ${times[10].toFixed(1)} ms median, ${times[19].toFixed(1)} ms worst; views ${(bytes / 1024).toFixed(0)} KB for the four; explored areas ${(explored / 1024).toFixed(0)} KB in all`);
+    assert(times[10] < 150, "a burst stays quick");
+    await big.stop();
+  }
 
   console.log("MAP_PLAY_OK");
 } finally {

@@ -866,6 +866,8 @@ export function useSession() {
           darkness: scene.darkness,
           tokens,
           walls: scene.walls,
+          // A bundle's regions (traps, difficult terrain, teleports): the host keeps them, never a player.
+          regions: scene.regions,
         },
       }),
     );
