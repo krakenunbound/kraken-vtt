@@ -2037,7 +2037,14 @@ function MapViewInner({
                     {template.live ? <title>{`${template.label || "Template"}${mine ? " (right-click to remove)" : ""}`}</title> : null}
                   </path>
                   {template.label ? (
-                    <text className="area-label" x={shape.x} y={shape.y - (template.shape === "circle" || template.shape === "square" ? shape.size * (template.shape === "square" ? 0.5 : 1) + 6 / camera.scale : 8 / camera.scale)} style={{ fontSize: Math.max(12, 13 / camera.scale) }}>
+                    // A circle's or square's name goes under it: effects on tokens inside (Sleep's Zzz) drift upwards.
+                    <text
+                      className="area-label"
+                      x={shape.x}
+                      y={template.shape === "circle" || template.shape === "square" ? shape.y + shape.size * (template.shape === "square" ? 0.5 : 1) + 6 / camera.scale : shape.y - 8 / camera.scale}
+                      dominantBaseline={template.shape === "circle" || template.shape === "square" ? "hanging" : undefined}
+                      style={{ fontSize: Math.max(12, 13 / camera.scale) }}
+                    >
                       {template.label}
                     </text>
                   ) : null}
