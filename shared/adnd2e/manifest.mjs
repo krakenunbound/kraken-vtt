@@ -196,6 +196,7 @@ export default {
           { part: "hint", text: "This character casts no spells (yet: paladins from 9th level, rangers from 8th, bards from 2nd).", when: { not: { rows: "spellcasting" } } },
           { part: "heading", text: "Spells known or memorized" },
           { part: "notes", fields: [{ path: "spells", label: "Spells", kind: "textarea", lines: true, bare: true }] },
+          { part: "custom", component: "core.spellCasts" },
           { part: "hint", text: "One spell a line, or drop a spell on the sheet." },
         ],
       },

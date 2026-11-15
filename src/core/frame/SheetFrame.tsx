@@ -4,6 +4,8 @@ import { Icon } from "../../ui/icons";
 import { hasLink, linkFrom, slotDrag } from "../../ui/QuickSlots";
 import { ArtPicker, Picture } from "../../characters/ArtPicker";
 import { Field } from "../fields/Field";
+import { BuffBar } from "../../effects/BuffBar";
+import { creatureDrop } from "../../effects/drops";
 
 // The core's character sheet frame (FG CoreRPG's charsheet_base and its
 // overview header): the article with data-character / data-ruleset, the
@@ -104,7 +106,7 @@ export function SheetFrame({
         <header className="cc-head">
           {/* The token as a small round badge on the portrait's corner. */}
           <div className="cc-portrait-frame">
-            <button type="button" className="cc-portrait" data-action="pick-portrait" disabled={!editable} title={editable ? "Click to choose a portrait" : record.name} onClick={() => setPicking("portrait")} {...slotDrag({ kind: "sheet", record: record.id, label: record.name })}>
+            <button type="button" className="cc-portrait" data-action="pick-portrait" disabled={!editable} title={editable ? "Click to choose a portrait" : record.name} onClick={() => setPicking("portrait")} {...slotDrag({ kind: "sheet", record: record.id, label: record.name })} {...creatureDrop(session, { recordId: record.id })}>
               {portrait ? <Picture session={session} id={portrait} alt={record.name} /> : <span>{record.name.slice(0, 1)}</span>}
             </button>
             <button type="button" className="cc-token" data-action="pick-token" disabled={!editable} title={tokenTitle} onClick={() => setPicking("token")}>
@@ -114,6 +116,7 @@ export function SheetFrame({
           <div className="cc-identity">
             {name ?? <NameField record={record} session={session} editable={editable} />}
             <div className="cc-boxes">{boxes}</div>
+            <BuffBar session={session} at={{ recordId: record.id }} />
           </div>
           {picking ? (
             <ArtPicker

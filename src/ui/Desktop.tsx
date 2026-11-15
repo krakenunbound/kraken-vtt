@@ -25,6 +25,7 @@ import { DeathMarkersWindow } from "../combat/DeathMarkersWindow";
 import { AdventureList, LibraryWindow, StoryWindow, type Kind as AdventureKind } from "../books/Library";
 import { NotesWindow, NoteWindow } from "../notes/Notes";
 import { CalendarWindow } from "../notes/CalendarWindow";
+import { EffectsWindow } from "../effects/EffectsWindow";
 import { ClocksStrip, ClocksWindow } from "../notes/ClocksWindow";
 import { MotdWindow } from "../notes/MotdWindow";
 import { ReadAloudBubble, useAnyMapShown } from "../books/ReadAloudBubble";
@@ -354,6 +355,8 @@ export function Desktop({
         ...gameWindows,
         { kind: "notes", label: gm ? "Notes" : "Player Notes", icon: "chat", title: gm ? "Notes" : "Player Notes" },
         { kind: "calendar", label: "Calendar", icon: "calendar", title: "Calendar" },
+        // FG's Effects window: conditions, buffs, lights and the GM's own, each dragged onto a creature.
+        { kind: "effects", label: "Effects", icon: "flask", title: "Effects" },
         // Progress clocks: a game with the clocks feature (Forged in the Dark), or any game that has some.
         ...(has(game, "clocks") || session.clocks.clocks.length ? [{ kind: "clocks" as const, label: "Clocks", icon: "hourglass", title: "Clocks" }] : []),
         ...(gm || session.options.motd?.text || session.options.motd?.links?.length ? [{ kind: "motd" as const, label: "Message", icon: "flag", title: "Message of the Day" }] : []),
@@ -709,6 +712,7 @@ export function Desktop({
               {item.kind === "picture" && item.payload ? <PictureWindow session={session} payload={item.payload} /> : null}
               {item.kind === "notes" ? <NotesWindow session={session} /> : null}
               {item.kind === "calendar" ? <CalendarWindow session={session} /> : null}
+              {item.kind === "effects" ? <EffectsWindow session={session} /> : null}
               {item.kind === "clocks" ? <ClocksWindow session={session} /> : null}
               {item.kind === "motd" ? <MotdWindow session={session} /> : null}
               {item.kind === "note" && item.payload ? <NoteWindow session={session} id={item.payload} /> : null}

@@ -4,6 +4,22 @@ import { Icon } from "../../ui/icons";
 import { Field } from "../fields/Field";
 import { at, fill, holds, nodesOf, num, rows, signed, textOf, useSheet, type Format, type Row, type Scope } from "../sheet/context";
 import { FieldView, LabelledField } from "./FieldView";
+import { ACTION_DRAG } from "../../effects/drops";
+
+// An attack or damage button drags onto a creature (FG's drag of a sheet's action onto a
+// token or tracker row): there it is rolled against that creature alone (src/effects/drops.ts).
+function actionDrag(call: unknown, recordId: string, key: string, editable: boolean) {
+  const ct = call && typeof call === "object" && "ct" in call ? String((call as { ct: unknown }).ct) : "";
+  const kind = ct === "attack" ? "attack" : ct === "damage-roll" ? "damage" : "";
+  if (!kind || !editable) return {};
+  return {
+    draggable: true,
+    onDragStart: (event: React.DragEvent) => {
+      event.dataTransfer.setData(ACTION_DRAG, JSON.stringify({ kind, recordId, weapon: key }));
+      event.dataTransfer.effectAllowed = "copy";
+    },
+  };
+}
 export type { Format };
 
 // The core parts a manifest arranges on a sheet's tabs (docs/core-ui-design.md
@@ -508,7 +524,7 @@ function List({ spec, formats }: { spec: Extract<Part, { part: "list" }>; format
               {(spec.rowActions ?? [])
                 .filter((action) => holds(action.when, scope, sheet))
                 .map((action) => (
-                  <button key={action.hook} type="button" className={action.className} data-action={action.hook} disabled={!editable} title={action.title ? textOf(action.title, scope, modifiers) : undefined} onClick={() => sheet.act(action.action, { key })}>
+                  <button key={action.hook} type="button" className={action.className} data-action={action.hook} disabled={!editable} title={action.title ? textOf(action.title, scope, modifiers) : undefined} onClick={() => sheet.act(action.action, { key })} {...actionDrag(action.action, sheet.record.id, key, editable)}>
                     {nodesOf(action.label, scope, modifiers)}
                   </button>
                 ))}

@@ -9,7 +9,11 @@ import { num, rows, useSheet, type Row } from "../core/sheet/context";
 // shared/dnd5e/manifest.mjs; the words (Species or Kin, AC or Defense) are its labels.
 
 const titled = (word: string) => word[0].toUpperCase() + word.slice(1);
-const plain = (html: unknown) => String(html ?? "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+// A book's words as plain text: its HTML, or Kraken's rich text ({ __rich: "<p>...</p>" }, the packs' form).
+const plain = (html: unknown) => {
+  const source = html && typeof html === "object" ? ((html as { __rich?: unknown }).__rich ?? "") : html;
+  return String(source ?? "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+};
 
 // The class's name and level, from the character's packages (FG 5E's class package).
 export const dnd5eClassName = (data: Row) => {

@@ -18,6 +18,8 @@
     "map-play-ui": "node scripts/verify-map-play-ui.mjs",
     "party": "node scripts/check-party.mjs",
     "combat": "node scripts/check-combat.mjs",
+    "targeting": "node scripts/check-targeting.mjs && node scripts/check-templates.mjs && node scripts/check-cards.mjs && node scripts/check-effects.mjs && node scripts/check-cast-text.mjs && node scripts/check-spell-parse.mjs",
+    "targeting-ui": "node scripts/verify-targeting-ui.mjs",
     "attack": "node scripts/check-attack.mjs",
     "spells": "node scripts/check-spells.mjs",
     "popout": "node scripts/check-popout.mjs",

@@ -78,6 +78,11 @@ doesn't get it (it could reach the tools withheld from the assistant).
 | A person's turn alerts (bell, banner) and colour | `kraken_dice_settings` turnSound, turnBanner, color (who: a player) |
 | The tracker's corrections: back a turn, a round back, a turn given to anyone | `kraken_combat` prev, round-back, set-turn |
 | Shapes on the map (line, arrow, square, circle, cone), resized | `kraken_draw` shape, resize |
+| The map toolbar's Targeting (target mode's click and box, target all friendlies / foes, clear friendly / enemy / all targets), Ctrl+click on a token or a tracker row | `kraken_combat` target, target-box, target-faction, clear-targets (faction) |
+| Area templates: the Area template tool (circle, cone, line, square, dragged out; creatures inside targeted), a spell's template placed where its caster points, right-click to remove, the GM's clear | `kraken_template` (list, place, move, remove, clear); `kraken_combat` cast with `template` |
+| The Effects window and the buff bar: conditions, buffs, lights (with burn times), the GM's own effects; dropped on a token, a tracker row, a sheet or a party row; taken off, changed, put out and relit | `kraken_effects` (list, on, apply, remove, update, snuff, relight, save, delete); `kraken_windows` kind effects |
+| Chat damage cards (x0, x1/2, x1, x2, heal per creature) and chat rolls dropped on a creature (damage by type, healing, an attack against its AC, an effect line) | `kraken_combat` apply-card, apply-roll |
+| Settings: token effects (animated, icons, off), what players may add from the Effects list, damage applied at once or from the card | `kraken_table_options` tokenEffects, playerEffects, autoApply |
 | The dice tower: its look for everyone (Kraken's six drawn, the tower pictures, a picture imported); on the GM's screen, lock it, fix it at x,y, move it, turn it on or off (its right-click menu) | `kraken_tower` |
 | Dice packs (Documents/Kraken VTT/Dice): list them with their sets and problems, check a pack being made, the folder; a pack's set by name | `kraken_dice_packs`; `kraken_dice_settings` preset |
 | Ping the map; Pull players to my view (the map's players button, Shift+ping) | `kraken_ping` (pull, squares) |
