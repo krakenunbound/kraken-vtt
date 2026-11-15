@@ -13,7 +13,7 @@ Targeting, area spells, effects and damage cards, Fantasy Grounds' and Foundry's
 - **Effects you can see:** conditions and buffs on tokens (Zzz over sleepers, flames, frost, stone, trembling fear, a blessing's glow...), a buff bar on sheets and tracker rows, the Effects window (conditions, buffs, lights, your own) whose entries drag onto any creature. Durations count down in rounds and in game time.
 - **Lights as effects:** a torch dropped on a token lights the map around it, moves with it, shows as glow to players, burns an hour of game time, warns, and goes out; it can be put out and lit again.
 - **Damage cards:** each creature hit, what it took after saves and resistances, and buttons to halve, double, undo or heal it. Damage can wait on the card instead of landing at once (a setting). Chat rolls dragged onto a creature apply there.
-- D&D 3.5E, AD&D 2E and Basic Fantasy cast spells from their book's words.
+- D&D 3.5E and AD&D 2E (OSRIC too) cast spells from their books' words: slots, saves, damage by caster level, effects. (Basic Fantasy's engine is ready; its books keep spells as pages, not records, so it has nothing to cast yet.)
 
 The first two stages of Kraken's core UI (docs/core-ui-design.md): one core that every game slides into, as Fantasy Grounds' CoreRPG and Foundry's core do. On screen almost nothing changes. Underneath, the games stop hand-copying each other.
 

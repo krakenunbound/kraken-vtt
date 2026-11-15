@@ -768,6 +768,18 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     });
   }
 
+  // A token's tracker entry: the one tied to that very token, else (a token placed
+  // before the fight) an entry of its record with no token of its own on this map.
+  // Never another goblin's entry because they share the Goblin record.
+  function entryOfToken(tokenId) {
+    if (!tokenId) return null;
+    const entries = combat.entries();
+    const exact = entries.find((entry) => entry.tokenId === tokenId);
+    if (exact) return exact;
+    const token = map.tokens().find((item) => item.id === tokenId);
+    if (!token?.recordId) return null;
+    return entries.find((entry) => entry.recordId === token.recordId && !map.tokens().some((item) => item.id === entry.tokenId)) ?? null;
+  }
   // A creature's token on the table map: its own, else its record's.
   function tokenOfEntry(entry) {
     return map.tokens().find((token) => token.id === entry.tokenId) ?? map.tokens().find((token) => entry.recordId && token.recordId === entry.recordId) ?? null;
@@ -792,11 +804,19 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     if (!Number.isFinite(point.x) || !Number.isFinite(point.y)) throw new Error("Where? Give the template's x and y.");
     const shape = map.areaAt(info.area, casterToken, point.x, point.y);
     const color = seat.role === "dm" ? (prefs.get("@gm").color ?? "#ff9e3d") : tokenColorOf(seat.name);
-    const template = map.placeTemplate({ ...shape, label: `${info.name} (${caster.name})`, attach: info.area.attach && casterToken ? casterToken.id : undefined, turn: info.instant, entryId: caster.id, color }, { role: "dm", name: "GM", color });
+    const template = map.placeTemplate({ ...shape, label: caster.hidden ? info.name : `${info.name} (${caster.name})`, attach: info.area.attach && casterToken ? casterToken.id : undefined, turn: info.instant, entryId: caster.id, color }, { role: "dm", name: "GM", color });
     const inside = map.tokensInTemplate(template).map((token) => combat.entries().find((entry) => entry.tokenId === token.id) ?? combat.entries().find((entry) => token.recordId && entry.recordId === token.recordId)).filter(Boolean);
     const ids = [...new Set(inside.filter((entry) => combat.health(entry).status !== "Dead").map((entry) => entry.id))];
+    const before = [...caster.targets];
     const targeted = combat.targetIds(caster.id, ids, { role: "dm", name: "GM" });
-    const cast = await combat.cast(who, power, "", seat, from, { fromTemplate: true });
+    let cast;
+    try {
+      cast = await combat.cast(who, power, "", seat, from, { fromTemplate: true });
+    } finally {
+      // The template's creatures were the spell's alone: the caster's own targets come back
+      // (so the next area spell asks for its template again).
+      combat.targetIds(caster.id, before, { role: "dm", name: "GM" });
+    }
     return { template, targets: targeted, cast };
   }
 
@@ -2526,7 +2546,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
               // A target by token or entry: the source is the player's own entry (the
               // active one if several), or the GM's chosen or active entry.
               const entries = combat.entries();
-              const target = msg.targetId ? entries.find((entry) => entry.id === msg.targetId) : entries.find((entry) => entry.tokenId === msg.tokenId || (msg.tokenId && entry.recordId && map.tokens().find((token) => token.id === msg.tokenId)?.recordId === entry.recordId));
+              const target = msg.targetId ? entries.find((entry) => entry.id === msg.targetId) : entryOfToken(msg.tokenId);
               if (!target) throw new Error("Add that token to the combat tracker first.");
               const source = entries.find((entry) => entry.id === targeterOf(msg.sourceId, client, seat));
               const already = source.targets.includes(target.id);
@@ -2588,13 +2608,13 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
               return combat.morale(String(msg.id ?? msg.faction ?? "foe"), Number(msg.bonus) || 0, seat);
             case "apply-card": {
               // A damage card's button (Foundry's): x0, x1/2, x1, x2 or heal, for a creature on it or the GM's chosen one.
-              const target = msg.targetId ? String(msg.targetId) : combat.entries().find((entry) => entry.tokenId === msg.tokenId || (msg.tokenId && entry.recordId && map.tokens().find((token) => token.id === msg.tokenId)?.recordId === entry.recordId))?.id;
+              const target = msg.targetId ? String(msg.targetId) : entryOfToken(msg.tokenId)?.id;
               if (!target) throw new Error("That creature is not on the combat tracker.");
               return combat.applyCard(String(msg.card ?? ""), target, msg.mult === "heal" ? "heal" : Number(msg.mult), seat);
             }
             case "apply-roll": {
               // A chat roll dropped on a creature (FG): its damage (by type), healing or attack against its AC.
-              const target = msg.targetId ? String(msg.targetId) : combat.entries().find((entry) => entry.tokenId === msg.tokenId || (msg.tokenId && entry.recordId && map.tokens().find((token) => token.id === msg.tokenId)?.recordId === entry.recordId))?.id;
+              const target = msg.targetId ? String(msg.targetId) : entryOfToken(msg.tokenId)?.id;
               if (!target) throw new Error("That creature is not on the combat tracker.");
               return combat.dropRoll(target, msg.roll ?? {}, seat);
             }

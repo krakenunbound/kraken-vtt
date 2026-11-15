@@ -1106,6 +1106,20 @@ function MapViewInner({
   };
   // The grid in the terms the area module uses (feet a square, pixels a square, its corner).
   const gridInfo = { gridPx: size, originX: gridOrigin(scene).x, originY: gridOrigin(scene).y, feetPerSquare: Number(scene.grid.distance) > 0 ? Number(scene.grid.distance) : 5, gridless: gridKind(scene) === "none" };
+  // A spell's template asked for: shown at once beside its caster (then it follows the mouse), and
+  // put away after a minute and a half if it is never placed, so a later click does not cast it.
+  useEffect(() => {
+    if (!templateAsk) return;
+    const caster = tokens.find((token) => token.id === templateAsk.casterTokenId);
+    if (caster) setAim({ x: caster.x + size * 3, y: caster.y });
+    const timer = window.setTimeout(() => {
+      onTemplateDoneRef.current();
+      setAim(null);
+    }, 90000);
+    return () => window.clearTimeout(timer);
+    // Once per request: the caster's place when it came.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [templateAsk]);
   // A spell's template where it is aimed now (the caster's token for cones, lines and emanations).
   const askedShape = (() => {
     if (!templateAsk || !aim) return null;
@@ -1141,6 +1155,12 @@ function MapViewInner({
         setMenu(null);
         setLightMenu(null);
         if (event.button === 2) {
+          // A spell's template being placed: a right-click puts it away (as Escape does).
+          if (templateAsk) {
+            onTemplateDone();
+            setAim(null);
+            return;
+          }
           // The GM's right-click on a death marker takes it away.
           const marker = gm ? (event.target as Element).closest?.("[data-death-marker]") : null;
           if (marker) {
@@ -2634,6 +2654,11 @@ function MapViewInner({
           </span>
         ) : null}
       </div>
+      ) : null}
+      {templateAsk ? (
+        <p className="map-toast template-ask" role="status" data-template-ask={templateAsk.name}>
+          {`${templateAsk.name}: click where its ${templateAsk.area.label ? templateAsk.area.label.toLowerCase() : "area"} goes (it points from your token where it starts from you). Everyone inside is its target. Escape or right-click: put it away.`}
+        </p>
       ) : null}
       {hint ? (
         <p className="map-toast" role="status">

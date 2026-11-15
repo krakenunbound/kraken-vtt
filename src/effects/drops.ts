@@ -59,3 +59,19 @@ export function dropOnCreature(data: DataTransfer, to: DropTarget, send: Senders
   }
   return false;
 }
+
+// The drop handlers for an element that stands for a creature (a sheet's portrait).
+type DropSession = { role: string | null; ct: Senders["ct"]; effects: NonNullable<Senders["effects"]>; combat: { entries: { id: string; recordId?: string | null }[] } };
+export function creatureDrop(session: DropSession, to: DropTarget) {
+  return {
+    onDragOver: (event: { dataTransfer: DataTransfer; preventDefault: () => void }) => {
+      if (carriesCreatureDrop([...event.dataTransfer.types])) event.preventDefault();
+    },
+    onDrop: (event: { dataTransfer: DataTransfer; preventDefault: () => void; stopPropagation: () => void }) => {
+      if (!carriesCreatureDrop([...event.dataTransfer.types])) return;
+      event.preventDefault();
+      event.stopPropagation();
+      dropOnCreature(event.dataTransfer, to, { ct: session.ct, effects: session.effects, entryOfRecord: (recordId) => session.combat.entries.find((item) => item.recordId === recordId)?.id }, session.role === "dm");
+    },
+  };
+}

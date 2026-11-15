@@ -1911,7 +1911,8 @@ const TOOLS = [
     }),
     run(args, ctx) {
       const agent = needTable(ctx);
-      const { map, combat, seat } = agent;
+      const { combat, seat } = agent;
+      const map = agent.tableMap ?? agent.map;
       const action = args.action ?? "list";
       if (action === "place") {
         const template = map.placeTemplate({ ...(args.template ?? {}), turn: false }, seat);

@@ -95,7 +95,7 @@ try {
   const abilities = Object.fromEntries(["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"].map((stat) => [stat, { score: 14, bonus: 2, save: 2 }]));
   const pc = (name, owner, extra = {}) => tool("kraken_record_create", { type: "character", name, owner, visibility: owner ? "owner" : "all", data: { level: 5, hp: { total: 40, wounds: 0 }, ac: { total: 14 }, abilities, ...extra } });
   const slots = { l1: { max: 4, used: 0 }, l2: { max: 3, used: 0 }, l3: { max: 2, used: 0 } };
-  const hagar = await pc("Hagar", "a test player", { spellcasting: { stat: "intelligence", dc: 14, attack: 6 }, slots });
+  const hagar = await pc("Hagar", "a test player", { spellcasting: { stat: "intelligence", dc: 14, attack: 6 }, slots, spells: ["Fireball", "Sleep", "Burning Hands"], ruleset: "dnd5e" });
   const mira = await pc("Mira", "", { spellcasting: { stat: "wisdom", dc: 14, attack: 6 }, slots });
   const cora = await pc("Cora", "");
   const goblin = await tool("kraken_record_create", { type: "npc", name: "Goblin", data: { hp: 40, ac: 13, abilities: { dexterity: { score: 14, bonus: 2 }, wisdom: { score: 8, bonus: -1 } } } });
@@ -235,6 +235,108 @@ try {
   await shoot(page, "5-gm-bless-icons");
   await shoot(seat, "5-player-bless-icons");
 
+  // 5b. Casting from the sheet: the GM presses Hagar's Fireball; the map asks for its template
+  // (a hint, the sphere beside Hagar); a click on the goblins places it and casts. A second
+  // Fireball is put away with Escape: nothing is cast, no slot spent.
+  for (const entry of (await tool("kraken_combat", { action: "view" })).entries) await tool("kraken_combat", { action: "clear-targets", id: entry.id });
+  const slotUsed = async (level) => {
+    const got = await tool("kraken_record_get", { id: id(hagar) });
+    return Number((got.data ?? got.record?.data)?.slots?.[level]?.used ?? 0);
+  };
+  const usedBefore = () => slotUsed("l3");
+  const slotsAt = await usedBefore();
+  await tool("kraken_windows", { action: "open", kind: "sheet", record: id(hagar) });
+  await page.waitForSelector('[data-sheet-tab="spells"]');
+  await page.click('[data-sheet-tab="spells"]');
+  await page.click('[data-spell="Fireball"] [data-action="cast"]');
+  await page.waitForSelector("[data-template-ask]");
+  check((await page.locator(".area-template.aiming").count()) === 1, "the sphere shows at once beside Hagar, waiting");
+  await shoot(page, "5b-gm-template-request");
+  await tool("kraken_windows", { action: "close", kind: "sheet", record: id(hagar) }).catch(() => undefined);
+  await settle(300);
+  const target = await page.locator(`[data-token="${tokenOf(goblin, 1).id}"]`).boundingBox();
+  await page.mouse.move(target.x + target.width / 2 + 3, target.y + target.height / 2);
+  await page.mouse.move(target.x + target.width / 2, target.y + target.height / 2, { steps: 3 });
+  await page.mouse.down();
+  await page.mouse.up();
+  await settle(1500);
+  check((await usedBefore()) === slotsAt + 1 && !(await page.locator("[data-template-ask]").count()), "a click places it and Fireball is cast (a 3rd-level slot spent)");
+  check((await page.locator(".area-template").count()) === 1, "its template lies on the map");
+  await tool("kraken_template", { action: "clear" });
+  await tool("kraken_windows", { action: "open", kind: "sheet", record: id(hagar) });
+  await page.waitForSelector('[data-sheet-tab="spells"]');
+  await page.click('[data-sheet-tab="spells"]');
+  await page.click('[data-spell="Fireball"] [data-action="cast"]');
+  await page.waitForSelector("[data-template-ask]");
+  await page.keyboard.press("Escape");
+  await settle(400);
+  check(!(await page.locator("[data-template-ask]").count()) && (await usedBefore()) === slotsAt + 1, "Escape puts it away: nothing cast");
+  // The sheet's buff bar shows Hagar's Bless; an effect dropped on his portrait lands on him.
+  check((await page.locator(".cc-identity .buff-bar .buff").count()) >= 2, "the sheet's buff bar shows his effects");
+  await tool("kraken_windows", { action: "open", kind: "effects" });
+  await page.waitForSelector('[data-effect-preset="prone"]');
+  await page.locator('[data-effect-preset="prone"]').dragTo(page.locator(".cc-portrait").first());
+  await settle(800);
+  let effectsOn = (await tool("kraken_effects", { action: "on", to: { recordId: id(hagar) } })).effects;
+  check(effectsOn.some((effect) => effect.label === "Prone"), "Prone dropped on the sheet's portrait is on Hagar");
+  await shoot(page, "5b-gm-sheet-buff-bar");
+  await tool("kraken_windows", { action: "close", kind: "sheet", record: id(hagar) }).catch(() => undefined);
+  // An effect dropped on a tracker row.
+  await tool("kraken_windows", { action: "open", kind: "combat" });
+  const gob4 = (await tool("kraken_combat", { action: "view" })).entries.find((entry) => entry.name === "Goblin 4");
+  await page.waitForSelector(`.ct-row[data-ct="${gob4.id}"]`);
+  // The Effects window to the front, beside the tracker (moved by its title bar).
+  await tool("kraken_windows", { action: "open", kind: "effects" });
+  const tracker = await page.locator('.window[data-window="combat"]').boundingBox();
+  const effectsBar = await page.locator('.window[data-window="effects"] > .window-title').boundingBox();
+  await page.mouse.move(effectsBar.x + 60, effectsBar.y + effectsBar.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(tracker.x > 1300 ? 200 : tracker.x + tracker.width + 80, 120, { steps: 8 });
+  await page.mouse.up();
+  await settle(300);
+  await page.locator('[data-effect-preset="poisoned"]').dragTo(page.locator(`.ct-row[data-ct="${gob4.id}"] .ct-name`));
+  await settle(800);
+  check((await tool("kraken_combat", { action: "view" })).entries.find((entry) => entry.id === gob4.id).effects.some((effect) => effect.label === "Poisoned"), "Poisoned dropped on a tracker row");
+  await shoot(page, "5b-gm-tracker-buff-bars");
+  await tool("kraken_windows", { action: "close", kind: "combat" }).catch(() => undefined);
+  await tool("kraken_windows", { action: "close", kind: "effects" }).catch(() => undefined);
+  // A chat damage roll dropped on a token (the drag's own payload, as the chat line makes it).
+  const woundsOf = async (name) => (await tool("kraken_combat", { action: "view" })).entries.find((entry) => entry.name === name).wounds;
+  const coraBefore = await woundsOf("Cora");
+  const moved = await page.evaluate((tokenId) => {
+    const line = [...document.querySelectorAll(".chat-line")].reverse().find((item) => item.querySelector(".damage-card"));
+    if (!line) return "no damage line";
+    const data = new DataTransfer();
+    line.dispatchEvent(new DragEvent("dragstart", { bubbles: true, dataTransfer: data }));
+    if (!data.getData("application/x-kraken-roll")) return "no roll in the drag";
+    const token = document.querySelector(`[data-token="${tokenId}"]`);
+    const box = token.getBoundingClientRect();
+    const at = { bubbles: true, cancelable: true, dataTransfer: data, clientX: box.x + box.width / 2, clientY: box.y + box.height / 2 };
+    token.dispatchEvent(new DragEvent("dragover", at));
+    token.dispatchEvent(new DragEvent("drop", at));
+    return "dropped";
+  }, tokenOf(cora).id);
+  await settle(800);
+  check(moved === "dropped" && (await woundsOf("Cora")) > coraBefore, `a chat damage roll dropped on Cora's token hurts her (${moved})`);
+  // A sheet's action (the payload the sheets will emit) dropped on a goblin: Hagar's Burning Hands at it.
+  const handsBefore = await slotUsed("l1");
+  const acted = await page.evaluate(({ tokenId, recordId }) => {
+    const data = new DataTransfer();
+    data.setData("application/x-kraken-action", JSON.stringify({ kind: "cast", recordId, power: "Burning Hands" }));
+    const token = document.querySelector(`[data-token="${tokenId}"]`);
+    const box = token.getBoundingClientRect();
+    const at = { bubbles: true, cancelable: true, dataTransfer: data, clientX: box.x + box.width / 2, clientY: box.y + box.height / 2 };
+    token.dispatchEvent(new DragEvent("dragover", at));
+    token.dispatchEvent(new DragEvent("drop", at));
+    return "dropped";
+  }, { tokenId: tokenOf(goblin, 3).id, recordId: id(hagar) });
+  await settle(1000);
+  combat = await tool("kraken_combat", { action: "view" });
+  const handsAfter = await slotUsed("l1");
+  const aimed = combat.entries.find((entry) => entry.name === "Hagar").targets.map((target) => combat.entries.find((entry) => entry.id === target)?.name);
+  const dropTarget = combat.entries.find((entry) => entry.tokenId === tokenOf(goblin, 3).id)?.name;
+  check(acted === "dropped" && handsAfter === handsBefore + 1 && aimed.join() === dropTarget, `a sheet action dropped on a goblin casts at it alone (slots ${handsBefore} -> ${handsAfter}, targets ${aimed})`);
+
   // 6. "I light a torch!": the GM drags Torch from the Effects window onto Hagar's token, in the dark.
   await tool("kraken_scene_settings", { darkness: 0.9 });
   await tool("kraken_windows", { action: "open", kind: "effects" });
@@ -259,6 +361,18 @@ try {
   await tool("kraken_token_move", { id: tokenOf(hagar).id, col: 8, row: 9 });
   await settle(1200);
   await shoot(seat, "6-player-torch-moved");
+  // The player puts it out from the token's menu (its buff bar), and lights it again.
+  await seat.click(`[data-token="${tokenOf(hagar).id}"]`, { button: "right" });
+  await seat.waitForSelector(".token-menu-effects .buff");
+  const torchButton = seat.locator('.token-menu-effects .buff[aria-label^="Torch"]').first();
+  await torchButton.click();
+  await seat.locator('.effect-pop:popover-open [data-action="snuff"]').click();
+  await settle(800);
+  on = (await tool("kraken_effects", { action: "on", to: { tokenId: tokenOf(hagar).id } })).effects;
+  check(on.some((effect) => /^Torch/.test(effect.label) && effect.paused), "the player put the torch out from the token's menu");
+  await shoot(seat, "6-player-torch-snuffed");
+  await tool("kraken_effects", { action: "relight", to: { tokenId: tokenOf(hagar).id }, effectId: on.find((effect) => /^Torch/.test(effect.label)).id });
+  await seat.keyboard.press("Escape");
   // An hour of game time: a warning, then dark.
   await tool("kraken_calendar", { action: "advance", minutes: 55 });
   await settle(400);

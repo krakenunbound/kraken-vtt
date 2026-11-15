@@ -38,7 +38,7 @@ export type TrackedEffect = { id: string; label: string; duration: number; total
 // its origin, feet for its size; angle: degrees clockwise from east.
 export type MapTemplate = { id: string; shape: "circle" | "cone" | "line" | "square"; x: number; y: number; size: number; width: number; angle: number; spread?: number; color: string; label: string; by: string; attach?: string; turn?: boolean; entryId?: string };
 // The host asks this screen to place a spell's template (an area spell cast with no targets).
-export type TemplateAsk = { power: string; recordId: string | null; id: string | null; name: string; area: { shape: MapTemplate["shape"]; size: number; width?: number; origin: "point" | "self"; attach?: boolean; spread?: number }; casterTokenId: string; color: string };
+export type TemplateAsk = { power: string; recordId: string | null; id: string | null; name: string; area: { shape: MapTemplate["shape"]; size: number; width?: number; origin: "point" | "self"; attach?: boolean; spread?: number; label?: string }; casterTokenId: string; color: string };
 // A light shining now, with its own line of sight (pixels).
 export type MapLight = { id: string; x: number; y: number; brightPx: number; dimPx: number; color: string; polygon: number[] | null; animation?: string; speed?: number };
 // A player's token seeing in the dark (darkvision), pixels.

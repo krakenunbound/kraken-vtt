@@ -79,7 +79,7 @@ try {
   await agent.combat.ready;
 
   // The SRD's own spell records (the book Kraken ships).
-  for (const name of ["Fireball", "Sleep", "Bless", "Burning Hands"]) {
+  for (const name of ["Fireball", "Sleep", "Bless", "Burning Hands", "Scorching Ray", "Cure Wounds"]) {
     const spell = SPELLS.find((item) => item.name === name);
     const { __category, ...data } = spell;
     agent.records.create({ type: "spell", name, data }, agent.seat);
@@ -160,6 +160,24 @@ try {
   assert(blessed.length === 3 && !blessed.some((name) => name.startsWith("Goblin")), `Bless on the three allies only: ${blessed}`);
   const blessToken = agent.map.viewFor({ role: "dm", name: "GM" }, "").tokens.find((token) => token.recordId === hagar.id);
   assert(blessToken.effects?.fx.includes("glow-good") && blessToken.effects.badges.some((badge) => badge.icon === "buff"), `Hagar's token glows with a buff badge: ${JSON.stringify(blessToken.effects)}`);
+
+  // A spell naming one target never cuts a hand-picked list (Scorching Ray's rays at three goblins).
+  await ct({ action: "clear-targets", id: entry("Hagar").id });
+  for (const g of goblins().slice(0, 3)) await ct({ action: "target", id: entry("Hagar").id, targetId: g.id });
+  const before = agent.chatLog(200).filter((line) => /^\[ATTACK\].*Scorching Ray/.test(line.roll?.label ?? "")).length;
+  await ct({ action: "cast", recordId: hagar.id, power: "Scorching Ray" });
+  const rays = agent.chatLog(200).filter((line) => /^\[ATTACK\].*Scorching Ray/.test(line.roll?.label ?? "")).length - before;
+  assert(rays === 3, `three goblins, three attacks: ${rays}`);
+  // A healing spell may go to a neutral (only a foe is refused).
+  await ct({ action: "add", entry: { name: "Villager", hp: 8, ac: 10, faction: "neutral" } });
+  view = await ct({ action: "view" });
+  await ct({ action: "damage", id: entry("Villager").id, amount: 5 });
+  await ct({ action: "clear-targets", id: entry("Mira").id });
+  await ct({ action: "target", id: entry("Mira").id, targetId: entry("Villager").id });
+  agent.dice.force([4, 4]);
+  await ct({ action: "cast", recordId: mira.id, power: "Cure Wounds" });
+  view = await ct({ action: "view" });
+  assert(agent.combat.vitals(agent.combat.entries().find((item) => item.name === "Villager")).wounds === 0, "Cure Wounds heals a neutral villager");
 
   // Burning Hands, a 15-foot cone pointing east from Hagar: Mira beside him is caught.
   await ct({ action: "clear-targets", id: entry("Hagar").id });

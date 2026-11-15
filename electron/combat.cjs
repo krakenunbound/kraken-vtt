@@ -2068,6 +2068,8 @@ function createCombat({ saved, table, onChange = () => undefined }) {
   }
   // Allies stand on the caster's side; everyone else is not (a neutral is no ally).
   const allied = (caster, target) => Boolean(caster && target && (caster === target || caster.faction === target.faction));
+  // Foes face each other: friends and foes (a neutral is neither, so a buff may still go to it).
+  const hostile = (caster, target) => Boolean(caster && target && caster !== target && ((caster.faction === "friend" && target.faction === "foe") || (caster.faction === "foe" && target.faction === "friend")));
   // Who a spell lands on, from its words (shared/actions/parse.mjs): a buff or
   // healing only on the caster's side (a foe never gets Bless), a harmful spell
   // "on creatures of your choice" only on the others, an area's damage on
@@ -2079,8 +2081,8 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     const dropped = [];
     let kept = targets.filter((target) => {
       const ally = allied(caster, target);
-      const ok = who === "ally" ? ally : who === "enemy" && area ? !ally : true;
-      if (!ok) dropped.push(`${target.name} (${who === "ally" ? "not an ally" : "an ally"})`);
+      const ok = who === "ally" ? !hostile(caster, target) : who === "enemy" && area ? !ally : true;
+      if (!ok) dropped.push(`${target.name} (${who === "ally" ? "a foe" : "an ally"})`);
       return ok;
     });
     if (cap > 0 && kept.length > cap) {
@@ -2466,7 +2468,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     const damageType = Object.values(damageRow?.damagelist ?? {})[0]?.type ?? "";
     // How many it may take: its cast's count (no cap for an area or darts), one more a slot level above where it says so.
     const extra = slotLevel > level && (castRow.targetscalestat === "upcast" || parsed.targets?.upcast) ? slotLevel - level : 0;
-    const cap = !parsed.area && castRow.targeting !== "multihit" && num(castRow.targetingval, 0) > 0 && (castRow.targeting ?? "targets") === "targets" ? num(castRow.targetingval, 0) + extra : 0;
+    const cap = !parsed.area && castRow.targeting !== "multihit" && num(castRow.targetingval, 0) > 1 && (castRow.targeting ?? "targets") === "targets" ? num(castRow.targetingval, 0) + extra : 0;
     const picked = targetsOf(casterEntry);
     const targets = pickTargets(casterEntry, picked, parsed, { cap, name: spell.name, say, area: Boolean(castOpts.fromTemplate) });
     const out = [];
@@ -2534,7 +2536,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
           out.push({ target: target.name, damage: amount, half });
         }
         const helps = effectRow && effectsLib.toneOf(String(effectRow.label ?? "")) === "good";
-        if (effectRow && effectRow.targeting !== "self" && (saveRow ? !landed || half ? false : true : landed) && (!helps || allied(casterEntry, target) || !casterEntry)) {
+        if (effectRow && effectRow.targeting !== "self" && (saveRow ? !landed || half ? false : true : landed) && (!helps || !hostile(casterEntry, target))) {
           const label = String(effectRow.label ?? spell.name).replace(/\[SDC\]/g, `DC ${dc}`);
           putEffect(target, label, minutes(effectRow), false, [], held, { source: caster.name, ...(parsed.endsOnDamage ? { ends: "damage" } : {}) });
           out.push({ target: target.name, effect: label, rounds: minutes(effectRow) });
@@ -2602,7 +2604,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     const decl = rulesetActions();
     const dc = decl?.saves?.dc === "spell" ? 10 + level + num(data.spellcasting?.dc, 10) - 10 : 0;
     table().say(`[CAST] ${spell.name} (level ${level}) at caster level ${casterLevel}${parsed.save ? ` [${parsed.save.kind.toUpperCase()}${dc ? ` DC ${dc}` : ""}${parsed.save.effect !== "negates" ? ` ${parsed.save.effect}` : " negates"}]` : ""}`, say, Boolean(casterEntry?.hidden));
-    const cap = !parsed.area && num(parsed.targets?.count, 0) > 0 ? num(parsed.targets.count, 0) : 0;
+    const cap = !parsed.area && num(parsed.targets?.count, 0) > 1 ? num(parsed.targets.count, 0) : 0;
     const picked = targetsOf(casterEntry);
     let targets = pickTargets(casterEntry, picked, parsed, { cap, name: spell.name, say, area: Boolean(castOpts.fromTemplate) });
     // No targets: a heal or a buff with no one picked lands on the caster.
@@ -2659,7 +2661,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       const rounds = span && unitSeconds ? Math.max(1, Math.round((num(span.value, 1) * (span.perLevel ? casterLevel : 1) * unitSeconds) / roundSeconds)) : 0;
       for (const target of targets) {
         if (saved.get(target.id)) continue;
-        if (parsed.beneficial && !allied(casterEntry, target) && casterEntry) continue;
+        if (parsed.beneficial && hostile(casterEntry, target)) continue;
         putEffect(target, parsed.effect.label, rounds, false, [], null, { source: caster.name, ...(parsed.endsOnDamage ? { ends: "damage" } : {}) });
         table().say(`Effect ['${parsed.effect.label}'] -> [to ${target.name}]${rounds ? ` for ${rounds} round${rounds === 1 ? "" : "s"}` : ""}`, "Combat", Boolean(target.hidden));
         out.push({ target: target.name, effect: parsed.effect.label, rounds });
@@ -3251,6 +3253,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       const { options: opts } = await options();
       const name = text(roll?.name, "Roll").slice(0, 80);
       if (roll?.kind === "attack") {
+        if (d2e() || twoSix() || cairnOn() || fateOn() || ironOn()) throw new Error("A dropped attack is compared with AC in the games that roll d20 + bonus against it: here, attack from the tracker or the sheet.");
         const total = Math.round(num(roll.total, 0));
         const die = Math.round(num(roll.natural, 0));
         const ac = vitals(target).ac + effectBonus(target, "AC");
