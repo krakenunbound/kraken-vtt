@@ -1,4 +1,5 @@
 import { ShipsWindow } from "../ships/ShipsWindow";
+import { SessionLogWindow } from "../notes/SessionLog";
 import { DelveWindow, OraclesWindow } from "../ironsworn/IronswornWindows";
 import { Fragment, lazy, Suspense, useEffect, useRef, useState, useSyncExternalStore, type MouseEvent as ReactMouseEvent, type ReactNode } from "react";
 import { BellAndHands, HandButton, InviteCard, PauseButton, PauseVeil, PlayerMenu, ReconnectBanner, SceneTitleCard, seatState, useIdle, usePlayerMenu } from "./SessionTools";
@@ -360,6 +361,8 @@ export function Desktop({
         // Progress clocks: a game with the clocks feature (Forged in the Dark), or any game that has some.
         ...(has(game, "clocks") || session.clocks.clocks.length ? [{ kind: "clocks" as const, label: "Clocks", icon: "hourglass", title: "Clocks" }] : []),
         ...(gm || session.options.motd?.text || session.options.motd?.links?.length ? [{ kind: "motd" as const, label: "Message", icon: "flag", title: "Message of the Day" }] : []),
+        // The GM's Session Log: each sitting's chat, read back and exported.
+        ...(gm ? [{ kind: "sessionlog" as const, label: "Session Log", icon: "scroll", title: "Session Log" }] : []),
       ],
     },
     {
@@ -715,6 +718,7 @@ export function Desktop({
               {item.kind === "effects" ? <EffectsWindow session={session} /> : null}
               {item.kind === "clocks" ? <ClocksWindow session={session} /> : null}
               {item.kind === "motd" ? <MotdWindow session={session} /> : null}
+              {item.kind === "sessionlog" ? <SessionLogWindow session={session} /> : null}
               {item.kind === "note" && item.payload ? <NoteWindow session={session} id={item.payload} /> : null}
               {item.kind === "decals" ? <DecalPicker session={session} onClose={() => windows.close(item.key)} /> : null}
               {item.kind === "wallpapers" ? <DecalPicker session={session} kind="wallpaper" onClose={() => windows.close(item.key)} /> : null}

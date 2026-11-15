@@ -7,6 +7,9 @@
 // undead are its own (src/rulesets/bfrpg.tsx). The host's edit whitelist
 // (electron/bfrpg.cjs) is built from `edit` below.
 import { MAX_LEVEL, SAVE_NAMES, SAVES, STATS } from "./rules.mjs";
+import { SAVES as PARTY_SAVES, STATS as PARTY_STATS, THIEF_SKILLS as PARTY_SKILLS } from "./rules.mjs";
+// The party sheet's group rolls: what the game checks, saves and its skills (D6).
+const titleOf = (/** @type {string} */ word) => word[0].toUpperCase() + word.slice(1);
 
 /** @type {Record<string, string>} */
 const SAVE_WORDS = SAVE_NAMES;
@@ -24,11 +27,13 @@ export default {
   blurb: "The Basic Fantasy Role-Playing Game, 4th Edition (free, CC BY-SA): old-school play with ascending Armor Class and an attack bonus, 3d6 in order, four races and four classes, the five saving throws, d6 initiative, thief abilities, turning the undead. Its Player's Handbook, Game Master's Guide and a first adventure come with Kraken.",
   engine: "shared/bfrpg/rules.mjs",
   host: { module: "electron/bfrpg.cjs" },
+  // The modifier box's keys beside the chat (shared/rulesets/modifiers.mjs).
+  dice: { modifiers: { presets: ["plus2", "minus2", "max", "half"] } },
   records: { race: { label: "Races" }, npc: { label: "Monsters" } },
   wizard: "bfrpg.wizard",
   blank: false,
   features: ["turnUndead", "morale", "multiAttack", "thiefSkills", "spellbooks", "encumbrance"],
-  party: { currency: ["PP", "GP", "EP", "SP", "CP"], xp: "xp" },
+  party: { currency: ["PP", "GP", "EP", "SP", "CP"], xp: "xp", groupCheck: { stats: [], rolls: [{ kind: "save", label: "Save", options: PARTY_SAVES.map((value) => ({ value, label: titleOf(value) })) }, { kind: "check", label: "Check", options: PARTY_STATS.map((value) => ({ value, label: titleOf(value) })) }, { kind: "skill", label: "Thief ability", options: Object.entries(PARTY_SKILLS).map(([value, row]) => ({ value, label: String(row[0]) })) }] } },
   tracker: {
     saves: { keys: ["death", "wands", "paralysis", "breath", "spells"], modLabel: "Mod", modAria: "Save modifier", button: "Roll save" },
     rowActions: [

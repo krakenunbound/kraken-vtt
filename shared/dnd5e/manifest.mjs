@@ -9,12 +9,17 @@
 // {@ac}: Defense, {@hp}: Health), its features and its maximum level. The
 // host's edit whitelist (electron/dnd5e.cjs) is built from `edit` below.
 import { SKILLS, STATS } from "./rules.mjs";
+import { SKILLS as PARTY_SKILLS, STATS as PARTY_STATS } from "./rules.mjs";
+// The party sheet's group rolls: what the game checks, saves and its skills (D6).
+const titleOf = (/** @type {string} */ word) => word[0].toUpperCase() + word.slice(1);
+/** @type {{ stats: string[]; rolls: { kind: "check" | "save" | "skill"; label: string; options: { value: string; label: string }[] }[] }} */
+const PARTY_GROUP = { stats: [], rolls: [{ kind: "check", label: "Check", options: PARTY_STATS.map((value) => ({ value, label: titleOf(value) })) }, { kind: "save", label: "Save", options: PARTY_STATS.map((value) => ({ value, label: titleOf(value) })) }, { kind: "skill", label: "Skill", options: Object.entries(PARTY_SKILLS).map(([value, row]) => ({ value, label: String(row[0]) })) }] };
 
 const SIX = ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"];
 const titled = (/** @type {string} */ word) => word[0].toUpperCase() + word.slice(1);
-// A roll with the strip's DC and advantage.
+// A roll with the strip's DC (advantage is the chat bar's ADV and DIS keys, the modifier stack).
 /** @param {"save" | "check" | "skill"} roll @param {Record<string, unknown>} [more] */
-const roll = (roll, more = {}) => ({ roll, dc: "dc", advantage: "advantage", ...more });
+const roll = (roll, more = {}) => ({ roll, dc: "dc", ...more });
 /** @type {Record<string, string[]>} */
 const SKILL_LIST = SKILLS;
 
@@ -25,6 +30,8 @@ export default {
   blurb: "Played from your 5E books (the rulebooks you own, or the free SRD): 5E sheets and character building, d20 combat with criticals, saves, spells and death saves.",
   engine: "shared/dnd5e/rules.mjs",
   host: { module: "electron/dnd5e.cjs" },
+  // The modifier box's keys beside the chat (shared/rulesets/modifiers.mjs).
+  dice: { modifiers: { presets: ["adv", "dis", "plus2", "minus2", "opp", "cover", "scover", "crit", "max", "half"] } },
   // The sheet's words ({@word}) and its highest level.
   labels: { species: "Species", speciesLower: "species", ac: "AC", acLong: "Armor Class", hp: "Hit Points", hpLower: "hit points", maxLevel: "20" },
   sheet: {
@@ -46,7 +53,6 @@ export default {
           { kind: "xp", path: "exp", next: "expnext", label: "Experience" },
           { kind: "value", label: "Prof", path: "prof", hook: "prof", title: "Proficiency bonus", format: "signed" },
           { kind: "modifier", key: "dc", label: "DC", aria: "Difficulty class", title: "The DC a check or save is rolled against (0: none)", min: 0, max: 40 },
-          { kind: "choice", key: "advantage", aria: "Advantage", options: [{ value: "", label: "Normal" }, { value: "advantage", label: "Advantage" }, { value: "disadvantage", label: "Disadvantage" }] },
         ],
       },
     ],
@@ -189,7 +195,7 @@ export default {
   wizard: "dnd5e.wizard",
   blank: false,
   features: ["deathSaves", "spellbooks"],
-  party: { currency: ["PP", "GP", "EP", "SP", "CP"], xp: "xp" },
+  party: { currency: ["PP", "GP", "EP", "SP", "CP"], xp: "xp", groupCheck: PARTY_GROUP },
   tracker: {
     saves: { keys: SIX, modLabel: "DC", modAria: "Save DC", button: "Roll save" },
     // A Dying character's death saving throw.
@@ -205,7 +211,7 @@ export default {
       records: { race: { label: "Kin" } },
       labels: { species: "Kin", speciesLower: "kin", ac: "Defense", acLong: "Defense", hp: "Health", hpLower: "health", maxLevel: "10" },
       features: ["dread", "dying.bleed", "spellbooks"],
-      party: { currency: ["GC"], xp: "xp" },
+      party: { currency: ["GC"], xp: "xp", groupCheck: PARTY_GROUP },
       // Its save box says DC, as 5E's, but kept its old aria-label (the tracker's, before the manifest).
       tracker: {
         saves: { keys: SIX, modLabel: "DC", modAria: "Save CL", button: "Roll save" },

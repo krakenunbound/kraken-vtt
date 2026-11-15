@@ -9,6 +9,12 @@ const crypto = require("crypto");
 //   exploding   4d6! or 4d6x (a die on its highest rolls another), 4d6!>5 or x>=5
 //   reroll      4d6r1 (dice of 1 or less are rolled again, once), r<3 also reads
 //   successes   6d10cs>=7 (the total is how many dice reach 7), cs>5
+//   Foundry's too:
+//   rr          4d6rr1 rerolls a 1 until it is not one (a hundred times at most)
+//   xo          3d6xo explodes once (the extra dice do not explode again)
+//   min, max    4d6min2 (a die below 2 counts as 2), 4d6max5 (above 5 counts as 5)
+//   cf          6d10cf<3 counts the dice that fail (with cs: successes less failures)
+//   ms          1d20ms>=15 (the margin: the total less 15)
 // d% is d100; dF (Fate) is -1, 0 or +1.
 
 const MAX_DICE = 200;
@@ -43,8 +49,10 @@ function parse(formula) {
   if (!text) throw new Error("Give a dice formula, like 1d20+3.");
   if (text.length > 200) throw new Error("That formula is too long.");
   const terms = [];
-  const pattern = /([+-]?)(?:(\d*)d(\d+|%|f)((?:kh|kl|k|dh|dl|d)\d+|[!x](?:[<>]=?\d+)?|ro?[<>]?=?\d+|cs[<>]=?\d+)*|(\d+))/y;
-  const modifier = /(kh|kl|k|dh|dl|d)(\d+)|[!x](?:([<>]=?)(\d+))?|ro?([<>]?=?)(\d+)|cs([<>]=?)(\d+)/y;
+  // The modifiers after a die; xo before x, rr before r, min and max before m...
+  const MODS = "(?:(?:kh|kl|k|dh|dl|d)\\d+|xo(?:[<>]=?\\d+)?|[!x](?:[<>]=?\\d+)?|rr[<>]?=?\\d+|ro?[<>]?=?\\d+|cs[<>]=?\\d+|cf[<>]=?\\d+|ms(?:[<>]=?)?\\d+|min\\d+|max\\d+)";
+  const pattern = new RegExp(`([+-]?)(?:(\\d*)d(\\d+|%|f)(${MODS}*)|(\\d+))`, "y");
+  const modifier = /(kh|kl|k|dh|dl|d)(\d+)|xo(?:([<>]=?)(\d+))?|[!x](?:([<>]=?)(\d+))?|rr([<>]?=?)(\d+)|ro?([<>]?=?)(\d+)|cs([<>]=?)(\d+)|cf([<>]=?)(\d+)|ms([<>]=?)?(\d+)|min(\d+)|max(\d+)/y;
   let index = 0;
   let dice = 0;
   while (index < text.length) {
@@ -64,32 +72,51 @@ function parse(formula) {
     dice += count;
     if (dice > MAX_DICE) throw new Error("That is too many dice.");
     // The modifiers after the dice, in any order.
-    const tail = text.slice(match.index + match[0].length - (match[0].length - match[0].indexOf("d") - 1 - match[3].length), index);
+    const tail = match[4] ?? "";
     let keep = null;
     let explode = null;
     let reroll = null;
     let success = null;
+    let failure = null;
+    let margin = null;
+    let floor = null;
+    let ceiling = null;
     for (let at = 0; at < tail.length; ) {
       modifier.lastIndex = at;
       const part = modifier.exec(tail);
       if (!part) throw new Error(`Could not read "${formula}".`);
       at = modifier.lastIndex;
+      const word = part[0];
       if (part[1]) {
         const n = Number(part[2]);
         if (n < 1 || n > count) throw new Error(`Could not read "${formula}".`);
         keep = { mode: part[1] === "k" ? "kh" : part[1] === "d" ? "dl" : part[1], n };
-      } else if (part[0][0] === "!" || part[0][0] === "x") {
-        explode = { op: part[3] || ">=", n: part[4] ? Number(part[4]) : sides };
+      } else if (word.startsWith("xo")) {
+        explode = { op: part[3] || ">=", n: part[4] ? Number(part[4]) : sides, once: true };
+      } else if (word[0] === "!" || word[0] === "x") {
+        explode = { op: part[5] || ">=", n: part[6] ? Number(part[6]) : sides };
         if (!fate && (explode.op === ">=" ? explode.n : explode.n + 1) <= 1) throw new Error("Those dice would explode for ever.");
-      } else if (part[0].startsWith("cs")) {
-        success = { op: part[7], n: Number(part[8]) };
+      } else if (word.startsWith("rr")) {
+        const op = part[7] || "<=";
+        reroll = { op: op === "=" ? "<=" : op, n: Number(part[8]), again: true };
+        if (!fate && ((reroll.op === "<=" && reroll.n >= sides) || (reroll.op === "<" && reroll.n > sides))) throw new Error("Those dice would be rerolled for ever.");
+      } else if (word.startsWith("cs")) {
+        success = { op: part[11], n: Number(part[12]) };
+      } else if (word.startsWith("cf")) {
+        failure = { op: part[13], n: Number(part[14]) };
+      } else if (word.startsWith("ms")) {
+        margin = { op: part[15] || ">=", n: Number(part[16]) };
+      } else if (word.startsWith("min")) {
+        floor = Number(part[17]);
+      } else if (word.startsWith("max")) {
+        ceiling = Number(part[18]);
       } else {
         // r1 rerolls dice of 1 or less; r<3, r<=2, r>5 say which.
-        const op = part[5] || "<=";
-        reroll = { op: op === "=" ? "<=" : op, n: Number(part[6]) };
+        const op = part[9] || "<=";
+        reroll = { op: op === "=" ? "<=" : op, n: Number(part[10]) };
       }
     }
-    terms.push({ kind: "dice", sign, count, sides, keep, ...(fate ? { fate: true } : {}), ...(explode ? { explode } : {}), ...(reroll ? { reroll } : {}), ...(success ? { success } : {}) });
+    terms.push({ kind: "dice", sign, count, sides, keep, ...(fate ? { fate: true } : {}), ...(explode ? { explode } : {}), ...(reroll ? { reroll } : {}), ...(success ? { success } : {}), ...(failure ? { failure } : {}), ...(margin ? { margin } : {}), ...(floor !== null ? { floor } : {}), ...(ceiling !== null ? { ceiling } : {}) });
   }
   return terms;
 }
@@ -128,24 +155,36 @@ function createDice(state = {}) {
         const meets = (value, test) => (test.op === ">" ? value > test.n : test.op === ">=" ? value >= test.n : test.op === "<" ? value < test.n : value <= test.n);
         const one = () => (term.fate ? face(3) - 2 : face(term.sides));
         let rolls = Array.from({ length: term.count }, one);
-        // Rerolled once, the new result stands.
-        if (term.reroll) rolls = rolls.map((value) => (meets(value, term.reroll) ? one() : value));
-        // An exploding die rolls another, and that one may explode too (a hundred at most).
+        // Rerolled once, the new result stands (rr: until it no longer matches, a hundred times at most).
+        if (term.reroll && term.reroll.again) {
+          rolls = rolls.map((value) => {
+            let next = value;
+            for (let tries = 0; tries < 100 && meets(next, term.reroll); tries += 1) next = one();
+            return next;
+          });
+        } else if (term.reroll) rolls = rolls.map((value) => (meets(value, term.reroll) ? one() : value));
+        // An exploding die rolls another, and that one may explode too (a hundred at most; xo: the first dice only).
         if (term.explode) {
           let extra = 0;
-          for (let i = 0; i < rolls.length && extra < 100; i++) {
+          const first = rolls.length;
+          for (let i = 0; i < (term.explode.once ? first : rolls.length) && extra < 100; i++) {
             if (meets(rolls[i], term.explode)) {
               rolls.push(one());
               extra += 1;
             }
           }
         }
+        // min and max: what a die counts as.
+        if (term.floor !== undefined) rolls = rolls.map((value) => Math.max(term.floor, value));
+        if (term.ceiling !== undefined) rolls = rolls.map((value) => Math.min(term.ceiling, value));
         const kept = keptFlags(rolls, term.keep);
-        const sum = term.success
-          ? rolls.filter((value, i) => kept[i] && meets(value, term.success)).length
-          : rolls.reduce((acc, value, i) => acc + (kept[i] ? value : 0), 0);
+        const successes = term.success ? rolls.filter((value, i) => kept[i] && meets(value, term.success)).length : 0;
+        const failures = term.failure ? rolls.filter((value, i) => kept[i] && meets(value, term.failure)).length : 0;
+        let sum = term.success || term.failure ? successes - (term.success ? failures : -failures) : rolls.reduce((acc, value, i) => acc + (kept[i] ? value : 0), 0);
+        // The margin of success: the total less the target.
+        if (term.margin) sum -= term.margin.n;
         total += term.sign * sum;
-        return { kind: "dice", sign: term.sign, count: term.count, sides: term.sides, keep: term.keep, rolls, kept, sum, ...(term.fate ? { fate: true } : {}), ...(term.success ? { success: term.success } : {}) };
+        return { kind: "dice", sign: term.sign, count: term.count, sides: term.sides, keep: term.keep, rolls, kept, sum, ...(term.fate ? { fate: true } : {}), ...(term.success ? { success: term.success } : {}), ...(term.failure ? { failure: term.failure } : {}), ...(term.margin ? { margin: term.margin } : {}) };
       });
       return { formula: String(formula).replace(/\s+/g, ""), terms: out, total };
     },

@@ -40,7 +40,8 @@ async function check2e(table, record, { kind = "check", attribute, skill, bonus 
   const mod = Math.round(Number(bonus) || 0);
   // A save adds its modifier; a roll-under check takes a bonus off the die.
   const formula = `${test.die}${mod ? `${test.high ? (mod > 0 ? "+" : "") + mod : (mod > 0 ? "-" : "+") + Math.abs(mod)}` : ""}`;
-  const rolled = table.dice.roll(formula);
+  // The modifier stack too: added to a save, taken off a roll-under die.
+  const rolled = table.act(formula, kind === "save" ? "save" : "check", "", { under: !test.high });
   const success = test.high ? rolled.total >= test.target : rolled.total <= test.target;
   const words = `${label ? `${label} ` : ""}${test.label} [${test.high ? "NEEDS" : "UNDER"} ${test.target}] [${success ? "SUCCESS" : "FAILURE"} ${rolled.total} ${test.high ? "vs" : "under"} ${test.target}]`;
   table.postRoll(rolled, words, from || record.name, false, { by: record.name, result: success ? "SUCCESS" : "FAILURE", against: test.target });

@@ -20,7 +20,7 @@ export default {
   features: ["fatePoints", "stressConsequences", "sceneAspects"],
   party: { currency: [], xp: "milestone", groupCheck: { stats: ["Athletics", "Notice", "Will", "Physique", "Stealth", "Investigate", "Lore", "Rapport"] } },
   tracker: { saves: { keys: ["Athletics", "Fight", "Notice", "Physique", "Provoke", "Shoot", "Stealth", "Will"], modLabel: "CL", modAria: "Save CL", button: "Roll save" }, initiative: ORDER, headerParts: HEADER },
-  dice: { extraTray: ["dF"] },
+  dice: { extraTray: ["dF"], modifiers: { presets: ["plus2", "minus2"] } },
   strips: ["fate.sceneAspects"],
   variants: {
     "Fate Accelerated": {

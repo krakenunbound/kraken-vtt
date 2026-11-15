@@ -373,7 +373,15 @@ weather with masks, mark traps and regions, generate a dungeon, and play test.
 - Add creatures and characters to the **combat tracker** by dragging them in,
   from an encounter, or from its search box.
 - **Roll initiative**, then step through turns with **Next round** and the
-  turn controls. Effects tick at each turn.
+  turn controls. Effects tick at each turn. Settings > Combat: initiative by
+  kind (one roll for all the goblins), whose turns are skipped, NPC numbering.
+- **Delay** on the active row lets a creature wait; **Act now** brings it in
+  at once, after the one acting.
+- What players see of your creatures' health (Settings > Tokens) counts for
+  the tracker too: nothing, the status, a bar, or the numbers.
+- **The party sheet's group roll:** pick a check, save or skill and Roll for
+  them, or Ask the players: each rolls from a card in chat; you can roll for
+  anyone who is away.
 - **Attacks and damage** roll from the sheet or the tracker against the
   targeted token and apply to it. Saves, healing and conditions work the same
   way, by each game's rules.
@@ -405,9 +413,25 @@ and `music`.
 ## Chat and dice
 
 Type in chat to talk; `/` lists the commands (Fantasy Grounds' and Foundry's),
-and `/help` shows all of them. `/r 1d20+2` rolls. The modifier box below the
-chat adds to the next roll. Click the dice to roll them; the 3D dice tower is
-the GM's by default.
+and `/help` shows all of them. `/r 1d20+2` rolls (`/r 1d20 + 2 #Climb` with a
+label; Foundry's rr, xo, min, max, cf and ms work too). Click the dice to roll
+them; the 3D dice tower is the GM's by default.
+**The modifier box** beside the dice holds up to six numbers for your next
+roll, each with a label (FG's modifier stack): `/mod 2 Flanking`, or drop a
+number, a chat roll or an effect on it; right-click one to take it off. The
+chips under the tray are the game's keys: ADV, DIS, +2, -2, and in D&D 5E
+cover, superior cover, opportunity, Crit, Max and Half for damage. Whatever you
+roll next, from the tray, a sheet or the combat tracker, reads them and lists
+them on its card; then they clear. Every player has their own.
+**Roll mode** (the list under the chat): public, GM and me, blind or self, for
+every roll until you change it.
+**Links:** drop a record, a book page or a picture into the chat's entry. The
+line carries it; each player opens it only if they may see it. The share
+button beside it posts the record's text, as the players know it.
+**Inline rolls:** `[[1d20+5 #Attack]]` in chat, and the dice a book, story or
+note names, are chips you click to roll.
+**Session Log** (sidebar): each sitting's chat, kept with the campaign, with
+Export to Markdown or a web page. The chat's corner exports the chat you saw.
 **External dice tower** (Settings, the GM's): the tower stands on the table
 apart from the chat, for everyone, each placing it where they like (drag it).
 It is dark when off; on, or while you hold dice over it, its door glows and

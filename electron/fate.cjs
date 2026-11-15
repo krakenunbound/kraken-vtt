@@ -131,8 +131,9 @@ async function editFate(table, record, changes, seat) {
 
 // --- Rolls ---------------------------------------------------------------------------
 // Four Fate dice and a modifier, rolled on the host's dice: { rolled, dice, total }.
-function fourDF(table, modifier) {
-  const rolled = table.dice.roll(`4dF${modifier ? (modifier > 0 ? `+${modifier}` : modifier) : ""}`);
+// kind: the roller's own roll reads their modifier stack (a defence rolled for the target does not).
+function fourDF(table, modifier, kind = "none") {
+  const rolled = table.act(`4dF${modifier ? (modifier > 0 ? `+${modifier}` : modifier) : ""}`, kind);
   const dice = rolled.terms.find((term) => term.kind === "dice")?.rolls ?? [];
   return { rolled, dice, total: rolled.total };
 }
@@ -189,7 +190,7 @@ async function rollFate(table, record, args = {}, from) {
   const paid = await payInvokes(table, record, args.invokes);
   const bonus = Math.round(num(args.bonus));
   const modifier = rating + 2 * paid.count + bonus;
-  const { rolled, dice, total } = fourDF(table, modifier);
+  const { rolled, dice, total } = fourDF(table, modifier, "check");
   const result = opposition === null ? null : rules.outcome(total, opposition);
   const label = `[FATE] ${shown} ${rules.signed(rating)}${paid.count ? ` +${paid.count * 2} invoked` : ""}${bonus ? ` ${rules.signed(bonus)}` : ""} · ${rules.ACTIONS[action]}${opposition !== null ? ` vs ${rules.ladder(opposition)}` : ""}${result ? ` [${RESULT[result.outcome]} ${rules.signed(result.shifts)}]` : ""}`;
   table.postRoll(rolled, label, from || record.name, Boolean(args.secret), { by: record.name, ...(result ? { result: RESULT[result.outcome], against: opposition } : {}), ladder: rules.ladder(total) });

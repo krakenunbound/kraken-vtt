@@ -436,6 +436,11 @@ span.ct-init { display: inline-block; }
 .ct-name small { color: var(--muted); font-size: 0.72rem; }
 .ct-stat { min-width: 3.4rem; display: inline-flex; align-items: center; justify-content: flex-end; gap: 3px; font-variant-numeric: tabular-nums; font-weight: 650; }
 .ct-status { padding: 1px 8px; border: 1px solid; border-radius: 999px; font-size: 0.75rem; }
+/* A creature's share of hit points left (the Settings show players a bar); delaying; the row's Delay and Act now. */
+.ct-bar { display: inline-block; vertical-align: middle; width: 3.2rem; height: 5px; margin-left: 6px; border-radius: 3px; background: rgba(255, 255, 255, 0.12); overflow: hidden; }
+.ct-bar > span { display: block; height: 100%; }
+.ct-delayed { padding: 1px 7px; font-size: 0.72rem; color: var(--brass); border: 1px dashed var(--brass); border-radius: 999px; }
+.ct-delay, .ct-act-now { padding: 2px 6px; }
 .ct-tools { display: flex; gap: 2px; }
 .ct-tools button { padding: 3px 6px; background: transparent; }
 .ct-effects { display: flex; flex-wrap: wrap; gap: 4px; padding: 0 8px 6px 70px; }
@@ -588,6 +593,16 @@ span.ct-init { display: inline-block; }
 .popout-bar span { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .chat-popout { position: absolute; top: 6px; right: 8px; z-index: 2; padding: 2px 4px; background: rgba(20, 23, 28, 0.8); border-color: transparent; color: var(--muted); opacity: 0.55; }
 .chat-dock:hover .chat-popout { opacity: 1; }
+.chat-export { position: absolute; top: 6px; right: 36px; z-index: 2; padding: 2px 4px; background: rgba(20, 23, 28, 0.8); border-color: transparent; color: var(--muted); opacity: 0.55; }
+.chat-dock:hover .chat-export { opacity: 1; }
+/* The GM's Session Log: a sitting's chat, read back and exported. */
+.session-log { display: flex; flex-direction: column; gap: 6px; height: 100%; }
+.session-log-bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.session-log-lines { flex: 1; margin: 0; padding: 0; overflow: auto; list-style: none; font-size: 0.84rem; }
+.session-log-lines li { padding: 2px 0; border-bottom: 1px solid var(--panel-edge); }
+.session-log-lines time { color: var(--muted); font-size: 0.72rem; margin-right: 4px; }
+.session-log-lines li.roll span { color: var(--brass); }
+.session-log-lines li.story span { font-style: italic; }
 .chat-popout:hover { color: var(--text); border-color: var(--panel-edge); }
 .chat-dock.popped { position: static; width: auto; height: 100%; resize: none; border: 0; border-radius: 0; box-shadow: none; }
 
@@ -695,6 +710,62 @@ span.ct-init { display: inline-block; }
 .modifier-box .modifier-value small { font-size: 0.56rem; color: var(--muted); letter-spacing: 0.06em; margin-top: -2px; }
 .modifier-box.set { border-color: var(--brass); box-shadow: 0 0 8px rgba(210, 161, 90, 0.35); }
 .modifier-box.set input { color: var(--brass); }
+/* The stack's labelled slots, above the box (FG's modifier stack); a right-click takes one off. */
+.modifier-box { position: relative; overflow: visible; }
+.modifier-box > button:first-of-type { border-radius: 5px 0 0 5px; }
+.modifier-box > button:last-of-type { border-radius: 0 5px 5px 0; }
+.modifier-box.drop { border-color: var(--brass); outline: 2px dashed var(--brass); outline-offset: 2px; }
+.modifier-slots { position: absolute; right: 0; bottom: calc(100% + 4px); z-index: 4; display: flex; flex-direction: column; gap: 2px; min-width: 9rem; max-width: 14rem; margin: 0; padding: 4px; list-style: none; border: 1px solid var(--brass-dim); border-radius: 6px; background: rgba(15, 17, 21, 0.94); box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5); }
+.modifier-slots li { display: flex; gap: 6px; padding: 1px 4px; font-size: 0.78rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-radius: 4px; cursor: context-menu; }
+.modifier-slots li b { min-width: 2rem; color: var(--brass); text-align: right; }
+@media (hover: hover) {
+  .modifier-slots li:hover { background: var(--brass-soft); }
+  .modifier-keys button:hover { border-color: var(--brass); }
+}
+/* The game's keys (ADV, DIS, +2, Cover...), each on until the next roll reads it. */
+.modifier-keys { display: flex; flex-wrap: wrap; gap: 3px; padding: 0 6px 6px; }
+.modifier-keys button { min-inline-size: 24px; min-block-size: 24px; padding: 1px 7px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em; border: 1px solid var(--line); border-radius: 999px; background: #1a1d23; color: var(--muted); }
+.modifier-keys button[aria-pressed="true"] { border-color: var(--brass); background: var(--brass); color: #1a1408; box-shadow: 0 0 8px rgba(210, 161, 90, 0.45); }
+.modifier-keys button:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
+@media (forced-colors: active) {
+  .modifier-keys button[aria-pressed="true"] { background: Highlight; color: HighlightText; }
+}
+/* What the stack added to a roll, on its card. */
+.roll-card .roll-mods { display: flex; flex-wrap: wrap; gap: 3px; flex-basis: 100%; }
+.roll-card .roll-mods span { padding: 0 6px; font-size: 0.7rem; border: 1px solid var(--brass-dim); border-radius: 999px; color: var(--brass); }
+/* A link on a chat line (FG's links in chat): a click opens it, a drag carries it on. */
+.chat-link { display: inline-flex; align-items: center; gap: 4px; margin: 2px 4px 0 0; padding: 1px 8px; font-size: 0.8rem; color: var(--text); background: #1a1d23; border: 1px solid var(--brass-dim); border-radius: 999px; cursor: pointer; }
+.chat-link.closed { opacity: 0.55; cursor: not-allowed; border-style: dashed; }
+.chat-links { display: flex; flex-wrap: wrap; }
+@media (hover: hover) {
+  .chat-link:not(.closed):hover { border-color: var(--brass); background: var(--brass-soft); }
+}
+/* The GM's Share: a record's words under the line. */
+.chat-share { flex-basis: 100%; margin-top: 4px; padding: 6px 8px; border: 1px solid var(--panel-edge); border-left: 3px solid var(--brass); border-radius: 6px; background: rgba(15, 17, 21, 0.7); font-size: 0.82rem; max-height: 16rem; overflow: auto; }
+.chat-share > b { display: block; margin-bottom: 2px; color: var(--brass); }
+/* The speaker's portrait (FG's chat portrait). */
+.chat-portrait { flex: none; width: 34px; height: 34px; margin-right: 6px; border-radius: 50%; object-fit: cover; border: 1px solid var(--brass-dim); background: #0f1115; cursor: pointer; }
+/* A link dropped into the chat's entry, waiting for the line. */
+.chat-attached { display: inline-flex; align-items: center; gap: 2px; max-width: 45%; overflow: hidden; }
+.chat-attached .chat-link { margin: 0; }
+.chat-attached button.chat-share-toggle, .chat-attached button.chat-attached-clear { padding: 2px 4px; border: 1px solid var(--line); border-radius: 4px; background: #1a1d23; }
+.chat-attached button.chat-share-toggle[aria-pressed="true"] { border-color: var(--brass); background: var(--brass); color: #1a1408; }
+.chat-entry[data-link-over] { outline: 2px dashed var(--brass); outline-offset: -2px; }
+/* Ask the players: a card each owner rolls from; the summary fills in. */
+.chat-prompt { flex-basis: 100%; margin-top: 4px; padding: 6px 8px; border: 1px solid var(--brass-dim); border-radius: 6px; background: rgba(15, 17, 21, 0.7); }
+.chat-prompt ul { margin: 4px 0; padding: 0; list-style: none; display: grid; gap: 2px; }
+.chat-prompt li { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.chat-prompt li b.hit { color: #7bd88f; }
+.chat-prompt li b.miss { color: #ff7a6b; }
+.chat-prompt .play-button { padding: 1px 8px; font-size: 0.78rem; }
+.chat-prompt-summary { color: var(--muted); }
+/* An inline roll in text ([[1d20+3]], a book's 2d6 + 3): a click rolls it, a drag takes it to a quick slot. */
+.inline-roll { display: inline; padding: 0 5px; margin: 0 1px; font: inherit; font-weight: 700; line-height: inherit; color: var(--brass); background: rgba(210, 161, 90, 0.12); border: 1px solid var(--brass-dim); border-radius: 4px; cursor: pointer; white-space: nowrap; }
+.inline-roll::before { content: "\2684"; margin-right: 3px; font-weight: 400; opacity: 0.8; }
+.inline-roll:focus-visible { outline: 2px solid var(--brass); outline-offset: 1px; }
+@media (hover: hover) {
+  .inline-roll:hover { background: var(--brass-soft); border-color: var(--brass); }
+}
 /* A die in its owner's set (tray, pool, roll cards). */
 .die-shape.set polygon { stroke: rgba(255, 255, 255, 0.42); stroke-width: 1.1; stroke-linejoin: round; filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.55)); }
 .die-shape.set text { paint-order: stroke; stroke: rgba(0, 0, 0, 0.5); stroke-width: 1.5px; stroke-linejoin: round; }
@@ -1439,6 +1510,8 @@ textarea.cc-field.tall { min-height: 220px; }
 
 /* FG's identity list under the chat: who a player speaks and rolls as. */
 .chat-identity { margin: 0 8px 6px; font-size: 0.8rem; max-width: calc(100% - 16px); }
+.chat-roll-mode { margin: 0 8px 6px; font-size: 0.78rem; max-width: calc(100% - 16px); }
+.chat-roll-mode:not([data-roll-mode="public"]) { border-color: var(--brass); color: var(--brass); }
 
 /* FG's campaign lists: the lists down the side, a list grouped by category, the sharing icon. */
 .records-window { display: grid; grid-template-columns: 150px 1fr; height: 100%; min-height: 0; }
@@ -2129,6 +2202,12 @@ label.set-row { cursor: pointer; }
 .party-group { margin-left: auto; }
 .party-group label, .xp-award label { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 0.84rem; }
 .party-group label input, .xp-award label input { color: var(--text); font-size: 1rem; }
+.party-group { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.party-roll-mode { display: inline-flex; }
+.party-roll-mode button { padding: 3px 7px; border-radius: 0; }
+.party-roll-mode button:first-child { border-radius: 5px 0 0 5px; }
+.party-roll-mode button:last-child { border-radius: 0 5px 5px 0; }
+.party-roll-mode button[aria-pressed="true"] { background: var(--brass); color: #1a1408; border-color: var(--brass); }
 .party-parcel { background: var(--raise); }
 .parcel-coins label { text-transform: uppercase; letter-spacing: 0.06em; font-size: 0.72rem; }
 .party-xp { display: flex; flex-direction: column; gap: 8px; }

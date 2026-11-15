@@ -13,7 +13,9 @@ const { listTools } = require("../electron/agent/tools.cjs");
 const MESSAGES = {
   chat: "kraken_chat_send",
   "chat-clear": "kraken_chat_log",
+  "chat-log": "kraken_chat_log",
   quickslots: "kraken_quickslots",
+  modifiers: "kraken_modifiers",
   "book-activate": "kraken_books",
   "book-sound": "kraken_books",
   "book-share": "kraken_books",
@@ -46,6 +48,7 @@ const MESSAGES = {
   "party-award": "kraken_party_award",
   "party-distribute": "kraken_party_distribute",
   "party-group": "kraken_party_group_check",
+  "party-prompt-roll": "kraken_party_group_check",
   "party-order": "kraken_party_order",
   "character-edit": "kraken_character_edit",
   starship: "kraken_starship",

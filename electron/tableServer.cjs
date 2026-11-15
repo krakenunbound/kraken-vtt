@@ -11,6 +11,7 @@ const { withArt } = require("./characterArt.cjs");
 const { soundFor, cleanTriggers } = require("./soundTriggers.cjs");
 const { defaultTriggers, TRIGGERS_VERSION } = require("./soundCatalog.cjs");
 const { createDice } = require("./dice.cjs");
+const { createModifiers, kindOf: modifierKind, run: modifierScope } = require("./modifiers.cjs");
 const { siege, siegeLibrary, siegeCheck, levelUp, changeClass, dropOnCharacter, editCharacter, importCharacter } = require("./siege.cjs");
 const { createMapState, playerColor } = require("./mapState.cjs");
 const { createPrefsStore } = require("./prefs.cjs");
@@ -21,7 +22,7 @@ const { fitsRuleset } = require("./books.cjs");
 
 const MAX_CLIENTS = 16;
 // What a player may not do while the GM has paused the game: move or change tokens, open doors, roll.
-const PAUSE_HOLDS = new Set(["token-place", "token-move", "token-update", "token-remove", "token-undo", "door", "roll", "siege-check", "ct", "template", "effects", "cairn", "fate", "ironsworn", "forged", "party-group", "starship"]);
+const PAUSE_HOLDS = new Set(["token-place", "token-move", "token-update", "token-remove", "token-undo", "door", "roll", "siege-check", "ct", "template", "effects", "cairn", "fate", "ironsworn", "forged", "party-group", "party-prompt-roll", "starship"]);
 
 
 // What a player may do with raw record changes (the GM and the agent may do
@@ -317,9 +318,17 @@ function savedOptions(value) {
     healthNpc: HEALTH_SHOWS.includes(options.healthNpc) ? options.healthNpc : "dot",
     healthPc: HEALTH_SHOWS.includes(options.healthPc) ? options.healthPc : "dot",
     names: ["off", "hover", "always"].includes(options.names) ? options.names : "hover",
+    // The combat tracker's options (FG's combat options): initiative each (every creature its own
+    // roll) or by kind (one roll per kind of creature, its copies sharing it); who is skipped
+    // (enemies: dead and unconscious creatures, FG's default; all: characters too; off: no one);
+    // NPC numbering (append: the same name numbered, random: a random number, off).
+    initGroup: options.initGroup === "kind" ? "kind" : "each",
+    ...(["enemies", "all", "off"].includes(options.skipDead) ? { skipDead: options.skipDead } : {}),
+    npcNumbering: ["append", "random", "off"].includes(options.npcNumbering) ? options.npcNumbering : "append",
   };
 }
-const HEALTH_SHOWS = ["bar", "barhover", "dot", "dothover", "off"];
+// numbers: the bar on tokens, and the hit points themselves in the tracker.
+const HEALTH_SHOWS = ["bar", "barhover", "dot", "dothover", "numbers", "off"];
 function wizard2eOptions(value) {
   const raw = value && typeof value === "object" ? value : {};
   const methods = Array.isArray(raw.methods) ? [...new Set(raw.methods.map((n) => Math.round(Number(n))).filter((n) => n >= 1 && n <= 6))].sort() : [1, 2, 3, 4, 5, 6];
@@ -365,6 +374,11 @@ function savedChat(value) {
       ...(typeof line.mood === "string" ? { mood: line.mood.slice(0, 24) } : {}),
       ...(line.vote && typeof line.vote === "object" ? { vote: line.vote } : {}),
       ...(line.secret ? { secret: true } : {}),
+      // A link on the line (a record, a picture, a page), a shared record's text, the speaker's record, a prompt to roll.
+      ...(line.link && typeof line.link === "object" ? { link: line.link } : {}),
+      ...(line.share && typeof line.share === "object" ? { share: line.share } : {}),
+      ...(typeof line.recordId === "string" ? { recordId: line.recordId.slice(0, 160) } : {}),
+      ...(line.prompt && typeof line.prompt === "object" ? { prompt: line.prompt } : {}),
     }))
     .filter((line) => line.text || line.roll);
 }
@@ -425,7 +439,7 @@ function serveWeb(url, res, root) {
 // decals, wallpapers: the background decals and desktop tiles the GM can
 // choose from (decals.cjs).
 // sounds: the GM's sounds (sounds.cjs): one-shots, effects, ambience and music.
-function createTableServer({ saved = {}, onChange = () => undefined, webRoot = WEB_ROOT, art = null, decals = null, wallpapers = null, gmIcons = null, towers = null, dicePacks = null, tiles = null, sounds = null, books = null, ruleset = "", accounts = null, prefs: prefsStore = null, studioPicture = null } = {}) {
+function createTableServer({ saved = {}, archive = null, onChange = () => undefined, webRoot = WEB_ROOT, art = null, decals = null, wallpapers = null, gmIcons = null, towers = null, dicePacks = null, tiles = null, sounds = null, books = null, ruleset = "", accounts = null, prefs: prefsStore = null, studioPicture = null } = {}) {
   // Each person's own settings (prefs.cjs): their colour and dice. Kept by the app for every campaign; in memory without a file.
   const prefs = prefsStore ?? createPrefsStore(null, diceLook);
   const prefsKey = (client) => (client.role === "dm" ? "@gm" : client.name);
@@ -616,12 +630,41 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     onChange("table");
     // What tokens show (names, health) and how distance counts are in each seat's map.
     if (["diagonal", "healthNpc", "healthPc", "names"].some((key) => key in next)) sendMaps();
+    // What the tracker shows players of the creatures' health follows the same option.
+    if (["healthNpc", "healthPc", "skipDead"].some((key) => key in next)) sendCombat();
     return options;
   }
   // The seat whose request is being handled now (and when).
   let asking = null;
+  // Each sitting of the campaign (the Session Log): when it began; its chat is archived when the table closes
+  // (archive: the campaign folder's chat logs, from the backend; kept here when there is none).
+  const sessions = (Array.isArray(saved.sessions) ? saved.sessions : []).filter((item) => item && typeof item.id === "string" && Number.isFinite(Number(item.started))).slice(-199).map((item) => ({ id: item.id.slice(0, 24), started: Number(item.started), ...(Number(item.ended) ? { ended: Number(item.ended) } : {}), ...(item.archived ? { archived: true } : {}) }));
+  const thisSession = { id: `s${Date.now().toString(36)}`, started: Date.now() };
+  sessions.push(thisSession);
+  const archived = new Map();
+  const sessionStore = archive ?? { save: (id, lines) => archived.set(id, lines), read: (id) => archived.get(id) ?? null };
   const records = createRecordStore({ saved: saved.records, onChange: () => onChange("records") });
   const dice = createDice(saved.dice);
+  // Each seat's modifier stack (FG's modifier box and keys), read by every roll the seat starts.
+  const rulesetManifest = () => {
+    try {
+      return require("../shared/rulesets/registry.mjs").rulesetFor(ruleset);
+    } catch {
+      return null;
+    }
+  };
+  const { keysFor: modifierKeysFor, stackFor: modifierStackFor } = require("../shared/rulesets/modifiers.mjs");
+  const modifiers = createModifiers({
+    saved: saved.modifiers,
+    keysFor: () => modifierKeysFor(rulesetManifest()),
+    kindsFor: () => modifierStackFor(rulesetManifest()).kinds,
+    onChange: (key, stack) => {
+      for (const [ws, client] of clients) if (client.joined && clearKey(client) === key) send(ws, { type: "modifiers", modifiers: stack });
+      onChange("table");
+    },
+  });
+  // A roll the seat makes with its stack read (an attack, a check, a save: the rules' own d20 rolls).
+  const actRoll = (formula, kind = "roll", label = "", options = {}) => modifiers.roll(dice, formula, modifierStackFor(rulesetManifest()).on ? kind : "none", label, options);
   // A character's race and class token (Kraken's pair), when it has no picture of its own.
   const artForCharacter = (data) => {
     if (!art || !data) return null;
@@ -965,7 +1008,41 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     return hand.look ?? null;
   }
 
+  // The record a chat line speaks for: its roll's actor or who it is from; a
+  // character by name, or (from the GM's side) a creature in the fight or an NPC.
+  const spokenArt = new Set();
+  function speakerRecord(entry, gmSide) {
+    const name = String(entry.roll?.by || entry.from || "").trim();
+    if (!name || /^(gm|dm|agent|combat|table|map|calendar|clocks)$/i.test(name)) return null;
+    const character = records.list({ type: "character" }).find((record) => sameName(record.name, name));
+    if (character) return character;
+    if (!gmSide) return null;
+    let fighting = null;
+    try {
+      fighting = combat.entries().find((item) => sameName(item.name, name) && item.recordId);
+    } catch {
+      /* the tracker is not made yet (a line while the table opens) */
+    }
+    const linked = fighting ? records.get(fighting.recordId) : null;
+    if (linked) return linked;
+    return records.list({ type: "npc" }).find((record) => sameName(record.name, name)) ?? null;
+  }
   function addChat(entry) {
+    // The roller's roll mode (the chat bar's): the GM and them, the GM alone, or them alone.
+    const asked = entry.roll && !entry.secret && !entry.self && !entry.to && !entry.tower ? modifiers.modeNow() : null;
+    if (asked) {
+      const { mode, seat } = asked;
+      if (mode === "self") Object.assign(entry, { self: true, id: seat.id });
+      else if (mode === "gm") Object.assign(entry, { secret: true, ...(seat.gm ? {} : { shownTo: seat.name }) });
+      else if (mode === "blind") {
+        entry.secret = true;
+        // The roller sees only that it was rolled (Foundry's blind roll).
+        if (!seat.gm) {
+          const ws = [...clients.entries()].find(([, client]) => client.id === seat.id)?.[0];
+          if (ws) send(ws, { type: "chat", id: seat.id, from: entry.from, text: `[BLIND] ${String(entry.roll.label ?? "").slice(0, 120)} [${entry.roll.formula}]`.replace(/\s+/g, " "), at: Date.now(), tower: true });
+        }
+      }
+    }
     // A roll goes out with the throw its roller just made, for the 3D dice.
     // (A tracker's roll is the agent's: it is thrown by the seat that just asked for it.)
     if (entry.roll) {
@@ -991,6 +1068,14 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     // What the GM's seat (or the GM's agent) says carries the GM's chat picture.
     const speaker = [...clients.values()].find((client) => client.id === entry.id);
     if (speaker?.role === "dm" || (entry.id === "agent" && ["Agent", "GM", "DM"].includes(entry.from))) entry.gm = true;
+    // Who speaks (FG's chat portrait): a character, or a creature the GM speaks or rolls as (/id, the tracker).
+    if (!entry.recordId && entry.kind !== "story") {
+      const found = speakerRecord(entry, speaker?.role === "dm" || entry.id === "agent" || entry.id === "table");
+      if (found) {
+        entry.recordId = found.id;
+        spokenArt.add(found.id);
+      }
+    }
     chat.push(entry);
     if (chat.length > MAX_CHAT) chat.shift();
     for (const [ws, client] of clients) if (seesLine(client, entry)) send(ws, forPlayer(client, { type: "chat", ...entry }));
@@ -1096,6 +1181,18 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     return shelfView();
   }
 
+  // A record's words as the players know it (an unidentified item as they see it), for the GM's Share.
+  function sharedText(link) {
+    if (!["record", "sheet", "note"].includes(link.kind)) return null;
+    const record = records.get(link.record);
+    if (!record) return null;
+    const seen = require("./records.cjs").viewFor(record, { role: "player", name: "" });
+    const data = seen.data ?? {};
+    const words = [data.description, data.text, data.notes, data.nonid_notes, data.summary].find((value) => typeof value === "string" && value.trim()) ?? "";
+    const { sanitizeFormatted } = require("../shared/text/formatted.mjs");
+    return { name: String(seen.name ?? "").slice(0, 120), type: record.type, text: sanitizeFormatted(String(words), 6000) };
+  }
+
   function chatFor(client) {
     const since = chatCleared.get(clearKey(client)) ?? 0;
     return chat.filter((line) => (line.at ?? 0) > since && seesLine(client, line)).slice(-JOIN_CHAT);
@@ -1106,7 +1203,14 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
   // extra: what an action adds to its roll card (an attack's HIT or MISS, its target).
   // secret: the GM's only, or shown to that one seat too (a name).
   function rollDice(formula, label, from, id, tag, secret = false, extra = null) {
-    const result = dice.roll(formula);
+    // The seat's modifier stack, by what the label says the roll is (none for hit points, ongoing damage...).
+    // modKind: a plain roll (the tray, /roll) says so, whatever its label's words.
+    const result = actRoll(formula, extra?.mods === false ? "none" : extra?.modKind ?? modifierKind(label), String(label ?? ""));
+    if (extra && ("mods" in extra || "modKind" in extra)) {
+      extra = { ...extra };
+      delete extra.mods;
+      delete extra.modKind;
+    }
     const roll = { ...result, label: text(label, "").slice(0, 160), ...(tag ? { tag: text(tag, "").slice(0, 80) } : {}), ...(extra ?? {}) };
     addChat({ id, from, text: "", roll, at: Date.now(), ...(secret ? { secret: true } : {}), ...(typeof secret === "string" ? { shownTo: secret } : {}) });
     return roll;
@@ -1429,7 +1533,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       const record = client ? records.get(url.searchParams.get("record") || "") : null;
       const allowed =
         record &&
-        (canSee(record, seatOf(client)) || map.tokens().some((item) => item.recordId === record.id && !item.hidden) || client.role === "dm");
+        (canSee(record, seatOf(client)) || map.tokens().some((item) => item.recordId === record.id && !item.hidden) || client.role === "dm" || (spokenArt.has(record.id) && url.searchParams.get("kind") === "portrait"));
       const kind = url.searchParams.get("kind") === "portrait" ? "picture" : url.searchParams.get("kind") === "card" ? "card" : "token";
       // A character's: its token (or portrait, or its race and class's), from the art library, as a still.
       if (allowed && record.type === "character" && art) {
@@ -1720,7 +1824,8 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       if (!client.joined) ws.close();
     }, 10000);
 
-    ws.on("message", (raw) => {
+    // Each request runs as its seat's (the modifier stack it reads, electron/modifiers.cjs).
+    const onMessage = (raw) => {
       let msg;
       try {
         msg = JSON.parse(raw.toString());
@@ -1858,6 +1963,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
           soundscape,
           books: shelfView(client),
           quickSlots: slotsFor(client),
+          modifiers: modifiers.view(clearKey(client)),
           prefs: prefs.get(prefsKey(client)),
           ...(client.role === "dm" ? { bookSounds: Object.fromEntries(bookSounds), sceneSound: sceneSoundView() } : {}),
           records: records.list({ seat: seatOf(client) }).map((record) => viewFor(record, seatOf(client))),
@@ -2032,6 +2138,16 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         return;
       }
 
+      // The seat's modifier stack (FG's modifier box and keys): add, remove, set, clear, key.
+      if (msg.type === "modifiers") {
+        try {
+          modifiers.act(clearKey(client), { action: msg.action, value: msg.value, label: msg.label, index: msg.index, key: msg.key, on: msg.on, keys: msg.keys, mode: msg.mode });
+        } catch (error) {
+          send(ws, { type: "error", reason: error instanceof Error ? error.message : "The modifier box could not change." });
+        }
+        return;
+      }
+
       if (msg.type === "chat-clear") {
         chatCleared.set(clearKey(client), Date.now());
         onChange("table");
@@ -2039,7 +2155,10 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       }
 
       if (msg.type === "chat") {
-        const line = text(msg.text, "").slice(0, 500);
+        // A link on the line (anything dropped into the chat's entry), and the GM's Share: the record's own text (FG's share).
+        const link = cleanSlot(msg.link);
+        const share = link && msg.share && client.role === "dm" ? sharedText(link) : null;
+        const line = text(msg.text, "").slice(0, 500) || (link ? link.label : "");
         if (!line) return;
         const kind = CHAT_KINDS.has(msg.kind) ? msg.kind : "say";
         // The GM's alone: story text, and speaking as someone else (/id, /gmid).
@@ -2057,6 +2176,8 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
           ...(kind !== "say" ? { kind } : {}),
           ...(kind === "mood" ? { mood: text(msg.mood, "").slice(0, 24) } : {}),
           ...(to && to.length ? { to } : {}),
+          ...(link ? { link } : {}),
+          ...(share ? { share } : {}),
         });
         return;
       }
@@ -2072,6 +2193,8 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       }
 
       if (msg.type === "roll") {
+        // The tray's and /roll's: a plain roll for the modifier box, whatever its label says.
+        const PLAIN = { modKind: "roll" };
         try {
           // The dice tower, as FG's: the GM's roll, marked [TOWER]. Its roller sees
           // what went in (FG's line with the dice, no result) unless the GM
@@ -2079,22 +2202,22 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
           if (msg.tower) {
             const label = `[TOWER] ${text(msg.label, "")}`.trim();
             const reveal = client.role !== "dm" && options.towerReveal;
-            const roll = rollDice(msg.formula, label, client.name, client.id, msg.tag, reveal ? client.name : true);
+            const roll = rollDice(msg.formula, label, client.name, client.id, msg.tag, reveal ? client.name : true, PLAIN);
             if (client.role !== "dm" && !reveal) {
               send(ws, { type: "chat", id: client.id, from: client.name, text: `${label} [${roll.formula}]`, at: Date.now(), tower: true });
             }
           } else if (msg.mode === "blind") {
             // Foundry's /blindroll: the GM sees it, the roller sees only that it was rolled.
-            const roll = rollDice(msg.formula, `[BLIND] ${text(msg.label, "")}`.trim(), client.name, client.id, msg.tag, true);
+            const roll = rollDice(msg.formula, `[BLIND] ${text(msg.label, "")}`.trim(), client.name, client.id, msg.tag, true, PLAIN);
             if (client.role !== "dm") send(ws, { type: "chat", id: client.id, from: client.name, text: `[BLIND] ${text(msg.label, "")} [${roll.formula}]`.replace(/\s+/g, " "), at: Date.now(), tower: true });
           } else if (msg.mode === "gm") {
             // Foundry's /gmroll: the GM and the roller.
-            rollDice(msg.formula, msg.label, client.name, client.id, msg.tag, client.role === "dm" ? true : client.name);
+            rollDice(msg.formula, msg.label, client.name, client.id, msg.tag, client.role === "dm" ? true : client.name, PLAIN);
           } else if (msg.mode === "self") {
             // Foundry's /selfroll: the roller alone.
-            const result = dice.roll(msg.formula);
+            const result = actRoll(msg.formula, "roll", text(msg.label, ""));
             addChat({ id: client.id, from: client.name, text: "", roll: { ...result, label: text(msg.label, "").slice(0, 160) }, at: Date.now(), self: true });
-          } else rollDice(msg.formula, msg.label, client.role === "dm" ? (msg.as ? text(msg.as, "").slice(0, 24) : client.name) : speaksAs(client, msg.as) || client.name, client.id, msg.tag);
+          } else rollDice(msg.formula, msg.label, client.role === "dm" ? (msg.as ? text(msg.as, "").slice(0, 24) : client.name) : speaksAs(client, msg.as) || client.name, client.id, msg.tag, false, PLAIN);
         } catch (error) {
           send(ws, { type: "error", reason: error instanceof Error ? error.message : "Could not roll that." });
         }
@@ -2557,6 +2680,24 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         }
         return;
       }
+      // Ask the players: an owner rolls their character's part of the party's roll from its card (the GM anyone's).
+      if (msg.type === "party-prompt-roll") {
+        promptRoll(String(msg.prompt ?? ""), String(msg.member ?? ""), seatOf(client)).catch((error) => send(ws, { type: "error", reason: error instanceof Error ? error.message : "Could not roll that." }));
+        return;
+      }
+
+      // The GM's Session Log: the sittings, one's chat, an export (answered as an op).
+      if (msg.type === "chat-log") {
+        const reply = (ok, result, error) => send(ws, { type: "op-result", req: msg.req ?? null, ok, ...(ok ? { result } : { error }) });
+        try {
+          if (client.role !== "dm") throw new Error("The Session Log is the GM's (your own chat exports from the chat itself).");
+          reply(true, sessionLog({ action: msg.action, id: msg.id, format: msg.format, title: msg.title }));
+        } catch (error) {
+          reply(false, null, error instanceof Error ? error.message : "Could not read the log.");
+        }
+        return;
+      }
+
       // FG's /vote: a question everyone answers yes or no; the counts show to all.
       if (msg.type === "vote") {
         const question = text(msg.question, "").slice(0, 200);
@@ -2833,6 +2974,11 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
               return combat.roundBack(seat);
             case "set-turn":
               return combat.setTurn(String(msg.id ?? ""), seat);
+            // A tracker row's Delay and Act now (its owner, or the GM).
+            case "delay":
+              return combat.delay(String(msg.id ?? ""), seat);
+            case "act-now":
+              return combat.actNow(String(msg.id ?? ""), seat);
             case "end":
               return combat.end(seat, { removeNpcs: Boolean(msg.removeNpcs) });
             case "effect":
@@ -2988,7 +3134,10 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
               ? party.awardEntries(agentHandle, msg.kind, msg.id, client.name)
               : msg.type === "party-distribute"
                 ? party.distribute(agentHandle, client.name)
-                : party.groupCheck(agentHandle, msg.kind === "save" ? "save" : "check", msg.attribute, msg.cl, client.name);
+                : msg.mode || msg.kind === "skill" || msg.skill
+                  ? // The party sheet's group roll for every game: a check, save or skill; rolled now, or asked of the players.
+                    party.partyRoll(agentHandle, { kind: ["check", "save", "skill"].includes(msg.kind) ? msg.kind : "check", attribute: text(msg.attribute, "").slice(0, 60), skill: text(msg.skill, "").slice(0, 60), dc: num(msg.dc ?? msg.cl, 0), mode: msg.mode === "ask" ? "ask" : "roll", members: Array.isArray(msg.members) ? msg.members.slice(0, 40) : undefined }, client.name)
+                  : party.groupCheck(agentHandle, msg.kind === "save" ? "save" : "check", msg.attribute, msg.cl, client.name);
         run.catch((error) => send(ws, { type: "error", reason: error instanceof Error ? error.message : "Could not do that." }));
         return;
       }
@@ -3049,7 +3198,8 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         broadcastScene();
         sendMaps();
       }
-    });
+    };
+    ws.on("message", (raw) => modifierScope(client.joined ? clearKey(client) : "", () => onMessage(raw), client.joined ? { id: client.id, name: client.name, gm: client.role === "dm" } : null));
 
     ws.on("close", (code) => {
       clearTimeout(joinTimer);
@@ -3166,9 +3316,21 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     },
     setOptions,
     roll: (formula, label, from = "Agent", secret = false, extra = null) => rollDice(formula, label, from, "agent", undefined, secret, extra),
+    // A roll read through the modifier stack of the seat whose request this is (kind: attack, save, check, damage...).
+    act: (formula, kind = "roll", label = "", options = {}) => actRoll(formula, kind, label, options),
+    // A seat's modifier stack (FG's modifier box): view, add, remove, set, clear, key (who: a player's name; the GM's by default).
+    modifiers: (args = {}, who = "@gm") => modifiers.act(!who || who === "GM" ? "@gm" : who, args),
     // Posts a roll already made (an attack decides HIT or MISS before its card goes out).
     postRoll: (result, label, from = "Agent", secret = false, extra = null) =>
       addChat({ id: "agent", from: text(from, "Agent").slice(0, 24), text: "", roll: { ...result, label: text(label, "").slice(0, 160), ...(extra ?? {}) }, at: Date.now(), ...(secret ? { secret: true } : {}) }),
+    // A chat line with a link (a record, a page, a picture), or the GM's Share of a record's text.
+    sayLink: (line, link, { from = "Agent", share = false, secret = false } = {}) => {
+      const clean = cleanSlot(link);
+      if (!clean) throw new Error("Give a link: { kind: record|sheet|note|book|picture|sound|dice|macro, ... }.");
+      const shared = share ? sharedText(clean) : null;
+      if (share && !shared) throw new Error("Only a record (an item, an NPC, a note...) can be shared.");
+      return addChat({ id: "agent", from: text(from, "Agent").slice(0, 24), text: text(line, "").slice(0, 500) || clean.label, at: Date.now(), link: clean, ...(shared ? { share: shared } : {}), ...(secret ? { secret: true } : {}) });
+    },
     say: (line, from = "Agent", secret = false, extra = {}) =>
       addChat({ id: "agent", from: text(from, "Agent").slice(0, 24), text: text(line, "").slice(0, 500), at: Date.now(), ...(secret ? { secret: true } : {}), ...extra }),
     kick: (name, how = {}) => kick(name, how),
@@ -3193,6 +3355,10 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     },
     pullView: (view, from = "Agent") => pullView(view, from),
     vote: (question, by = "Agent") => startVote(text(question, "").slice(0, 200), { id: "agent", name: by }),
+    // Ask the players: a party roll's card (party.cjs partyRoll), and a row of it rolled (as its owner's click, or the GM's).
+    prompt: (spec, from = "GM") => postPrompt(spec, from),
+    promptRoll: (promptId, memberId, seat = { role: "dm", name: "GM" }) => promptRoll(String(promptId ?? ""), String(memberId ?? ""), seat),
+    prompts: () => chat.filter((line) => line.prompt).map((line) => line.prompt),
     votes: () => chat.filter((line) => line.vote).map((line) => line.vote),
     save: () => onChange("save"),
     // The GM's /clear: the GM's chat windows clear, now and when they come back.
@@ -3203,6 +3369,8 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       return { cleared: true };
     },
     chatLog: (count = 20) => chat.slice(-Math.max(1, Math.min(MAX_CHAT, Number(count) || 20))),
+    // The Session Log: sessions, session (id), export (id, format md|html), archive (the sitting so far).
+    sessionLog: (args = {}) => sessionLog(args),
     players: () => playerList(),
     scene: () => scene,
     // The map the GM works on: the image window's while one is open (the same master), else the table's.
@@ -3410,6 +3578,83 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     for (const [ws, client] of clients) if (client.role !== "dm") send(ws, message);
     return { pulled: [...clients.values()].filter((client) => client.role !== "dm").length, x, y, width, height };
   }
+  // Ask the players (the party sheet's group roll): a card in chat; each row rolled by its owner
+  // (their own sheet roll and modifier box), or by the GM; the summary when all have rolled.
+  function postPrompt(spec, from = "GM") {
+    const id = crypto.randomBytes(6).toString("hex");
+    const prompt = { id, kind: text(spec.kind, "check").slice(0, 12), attribute: text(spec.attribute, "").slice(0, 60), skill: text(spec.skill, "").slice(0, 60), dc: num(spec.dc, 0), label: text(spec.label, "Group roll").slice(0, 120), rows: (spec.rows ?? []).slice(0, 40).map((row) => ({ id: text(row.id, "").slice(0, 160), name: text(row.name, "").slice(0, 80), owner: text(row.owner, "").slice(0, 24) })) };
+    addChat({ id: "table", from: text(from, "GM").slice(0, 24), text: prompt.label, at: Date.now(), prompt, gm: true });
+    return prompt;
+  }
+  async function promptRoll(promptId, memberId, seat) {
+    const line = chat.find((item) => item.prompt?.id === promptId);
+    if (!line) throw new Error("That roll is no longer asked for.");
+    const prompt = line.prompt;
+    const row = prompt.rows.find((item) => item.id === memberId);
+    if (!row) throw new Error("They are not asked for this roll.");
+    if (row.total !== undefined) throw new Error(`${row.name} has rolled already.`);
+    if (seat.role !== "dm" && !sameName(row.owner, seat.name)) throw new Error(`${row.name} is not yours to roll for.`);
+    const record = records.get(row.id);
+    if (!record) throw new Error(`${row.name} is gone.`);
+    row.total = null;
+    try {
+      // Rolled as the character (its portrait on the line), from whoever clicked.
+      const result = await party.rollForMember(agentHandle, record, prompt, record.name);
+      row.total = result.total;
+      row.success = result.success;
+    } catch (error) {
+      delete row.total;
+      throw error;
+    }
+    if (prompt.rows.every((item) => item.total !== undefined && item.total !== null)) {
+      prompt.done = true;
+      const judged = prompt.rows.some((item) => typeof item.success === "boolean");
+      const passed = prompt.rows.filter((item) => item.success).length;
+      const failed = prompt.rows.filter((item) => item.success === false).map((item) => item.name);
+      addChat({ id: "table", from: "GM", text: judged ? `${prompt.label}: ${passed} of ${prompt.rows.length} succeed.${failed.length ? ` Failed: ${failed.join(", ")}.` : ""}` : `${prompt.label}: ${prompt.rows.map((item) => `${item.name} ${item.total}`).join(", ")}.`, at: Date.now(), gm: true });
+    }
+    broadcast({ type: "prompt", prompt });
+    onChange("table");
+    return prompt;
+  }
+  // The Session Log: the campaign's sittings, each one's chat (the GM's whole view), and an export of it.
+  function linesOf(session) {
+    const index = sessions.indexOf(session);
+    const end = session.ended ?? sessions[index + 1]?.started ?? Infinity;
+    // What the GM saw: a player's self roll is theirs alone, never in the GM's log.
+    const live = chat.filter((line) => (line.at ?? 0) >= session.started && (line.at ?? 0) <= end && (!line.self || line.gm));
+    if (session === thisSession) return live;
+    const kept = sessionStore.read(session.id);
+    return Array.isArray(kept) && kept.length >= live.length ? kept : live;
+  }
+  function archiveSession() {
+    thisSession.ended = Date.now();
+    const lines = linesOf(thisSession);
+    if (!lines.length) return;
+    sessionStore.save(thisSession.id, lines);
+    thisSession.archived = true;
+  }
+  function sessionLog(args = {}) {
+    const action = String(args.action ?? "sessions");
+    const find = (id) => (id && id !== "current" ? sessions.find((item) => item.id === String(id)) : thisSession);
+    if (action === "sessions") return sessions.map((item) => ({ ...item, current: item === thisSession, lines: linesOf(item).length })).reverse();
+    const session = find(args.id);
+    if (!session) throw new Error("No such session in the log.");
+    const lines = linesOf(session);
+    if (action === "session") return { ...session, current: session === thisSession, lines };
+    if (action === "export") {
+      const { chatToHtml, chatToMarkdown } = require("../shared/text/chatExport.mjs");
+      const title = `${args.title ? `${text(args.title, "").slice(0, 80)}: ` : ""}session of ${new Date(session.started).toISOString().slice(0, 10)}`;
+      const format = args.format === "html" ? "html" : "md";
+      return { format, title, file: `${title.replace(/[^\w -]+/g, "").replace(/\s+/g, "-")}.${format === "html" ? "html" : "md"}`, text: format === "html" ? chatToHtml(lines, title) : chatToMarkdown(lines, title) };
+    }
+    if (action === "archive") {
+      archiveSession();
+      delete thisSession.ended;
+      return { ...thisSession };
+    }
+    throw new Error("sessions, session, export or archive?");
+  }
   function startVote(question, client) {
     const id = crypto.randomBytes(6).toString("hex");
     addChat({ id: client?.id ?? "agent", from: client?.name ?? "Agent", text: question, at: Date.now(), vote: { id, question, yes: [], no: [] } });
@@ -3518,6 +3763,8 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         soundTriggersVersion: TRIGGERS_VERSION,
         chatCleared: Object.fromEntries(chatCleared),
         quickSlots: Object.fromEntries(quickSlots),
+        modifiers: modifiers.toJSON(),
+        sessions,
         bookSounds: Object.fromEntries(bookSounds),
         sceneSounds: Object.fromEntries(sceneSounds),
         bans,
@@ -3536,6 +3783,12 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     },
     stop() {
       clearInterval(heartbeat);
+      // The sitting's chat into the Session Log's archive.
+      try {
+        archiveSession();
+      } catch {
+        /* the log stays in the campaign's chat as far as it goes */
+      }
       for (const held of lingering.values()) clearTimeout(held.timer);
       lingering.clear();
       // 4003: the table closed (the GM left): players go back to the join screen, not into a reconnect.

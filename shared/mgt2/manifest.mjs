@@ -5,6 +5,8 @@
 // roll a task (2d6 + DM + skill against the difficulty). The host works every number out again (shared/mgt2/rules.mjs).
 
 import { DIFFICULTIES, SHORT, STAT_NAMES, STATS as KEYS } from "./rules.mjs";
+import { SKILLS as PARTY_SKILLS, STATS as PARTY_STATS, STAT_NAMES as PARTY_STAT_NAMES } from "./rules.mjs";
+// The party sheet's group rolls: what the game checks, saves and its skills (D6).
 
 /** @type {{ key: string; label: string; short: string }[]} */
 const STATS = KEYS.map((key) => ({ key, label: STAT_NAMES[/** @type {keyof typeof STAT_NAMES} */ (key)], short: SHORT[/** @type {keyof typeof SHORT} */ (key)] }));
@@ -160,12 +162,14 @@ export default {
   blurb: "Mongoose Traveller 2nd Edition: the UPP's six characteristics, skills and specialities, 2d6 tasks with Effect, Boon and Bane, careers and terms, damage to Endurance, Strength and Dexterity, armour and AP. Its rules are Kraken's own code; your Traveller books add their content.",
   engine: "shared/mgt2/rules.mjs",
   host: { module: "electron/mgt2.cjs", message: "mgt2-life", tool: "kraken_traveller_lifepath" },
+  // The modifier box's keys beside the chat (shared/rulesets/modifiers.mjs).
+  dice: { modifiers: { presets: ["boon", "bane", "plus1", "minus2"] } },
   records: { item: { label: "Equipment" }, npc: { label: "NPCs and Animals", statblock: "mgt2.npcBlock" } },
   sheet,
   wizard: "mgt2.wizard",
   blank: false,
   features: ["starships", "careers"],
-  party: { currency: ["MCr", "Cr"], xp: "xp" },
+  party: { currency: ["MCr", "Cr"], xp: "xp", groupCheck: { stats: [], rolls: [{ kind: "skill", label: "Skill", options: Object.entries(PARTY_SKILLS).map(([value, row]) => ({ value, label: String(row[0]) })) }, { kind: "check", label: "Characteristic", options: PARTY_STATS.map((value) => ({ value, label: String(/** @type {Record<string, string>} */ (PARTY_STAT_NAMES)[value] ?? value) })) }] } },
   tracker: { saves: { keys: ["str", "dex", "end", "int", "edu", "soc"], modLabel: "DM", modAria: "Check DM", button: "Roll check" } },
   windows: [{ kind: "ships", label: "Starships", icon: "ship", title: "Starships", feature: "starships" }],
   calendar: "imperial",

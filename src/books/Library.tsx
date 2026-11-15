@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { markInlineRolls } from "../ui/InlineRolls";
 import { useReadAloudFrames } from "./readAloud";
 import type { BookInfo, LibraryItem, Session, TableRecord } from "../session/useSession";
 import { Icon } from "../ui/icons";
@@ -334,6 +335,8 @@ export function StoryWindow({ session, path }: { session: Session; path: string 
   // Its boxed text, read aloud by the GM.
   const storyText = useRef<HTMLDivElement>(null);
   useReadAloudFrames(storyText, [entry?.html], entry?.name);
+  // Its dice as roll chips.
+  useEffect(() => markInlineRolls(storyText.current), [entry?.html]);
   const windows = useWindows();
   const [status, setStatus] = useState("");
   // The entry as the campaign's own story record, to change and share (the adventure's stays as it is).

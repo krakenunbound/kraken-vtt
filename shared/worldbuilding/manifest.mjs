@@ -8,6 +8,8 @@ export default {
   blurb: "No game rules: maps, tokens, chat and dice for any system.",
   engine: null,
   host: { module: null },
+  // The modifier box's keys beside the chat (shared/rulesets/modifiers.mjs).
+  dice: { modifiers: { presets: ["plus2", "minus2"] } },
   sheet: "cnc.sheet",
   wizard: "cnc.wizard",
   blank: true,
