@@ -2,7 +2,7 @@
 // gateways on this computer, never a real router: a UPnP Internet Gateway
 // Device (its description and SOAP control) takes AddPortMapping, says the
 // external address, and takes DeletePortMapping when hosting stops; one that
-// refuses permanent leases gets a day's lease; with no UPnP answer, NAT-PMP at
+// takes only permanent mappings gets one (others an hour's lease, renewed); with no UPnP answer, NAT-PMP at
 // the gateway maps the port and unmaps it; with neither, the GM is told what
 // to do by hand. And the QR encoder (src/ui/qr.ts): its codes decode to the
 // invite links (OpenCV's decoder, when Python has it).
@@ -20,7 +20,7 @@ function assert(condition, message) {
 const results = [];
 
 // --- A fake UPnP gateway.
-function fakeGateway({ permanent = true } = {}) {
+function fakeGateway({ onlyPermanent = false } = {}) {
   const calls = [];
   const server = http.createServer((req, res) => {
     let body = "";
@@ -34,7 +34,7 @@ function fakeGateway({ permanent = true } = {}) {
       const action = /#(\w+)"/.exec(String(req.headers.soapaction ?? ""))?.[1] ?? "";
       const value = (name) => new RegExp(`<${name}>([^<]*)</${name}>`).exec(body)?.[1] ?? "";
       calls.push({ action, port: value("NewExternalPort"), client: value("NewInternalClient"), lease: value("NewLeaseDuration"), description: value("NewPortMappingDescription") });
-      if (action === "AddPortMapping" && !permanent && value("NewLeaseDuration") === "0") {
+      if (action === "AddPortMapping" && onlyPermanent && value("NewLeaseDuration") !== "0") {
         res.writeHead(500);
         res.end("<s:Envelope><s:Body><s:Fault><detail><UPnPError><errorCode>725</errorCode><errorDescription>OnlyPermanentLeasesSupported</errorDescription></UPnPError></detail></s:Fault></s:Body></s:Envelope>");
         return;
@@ -61,22 +61,22 @@ process.env.KRAKEN_E2E = "1";
   const opened = await openPort(47377);
   assert(opened.ok && opened.method === "UPnP" && opened.external === "203.0.113.7", `UPnP maps the port: ${JSON.stringify(opened)}`);
   const add = gateway.calls.find((call) => call.action === "AddPortMapping");
-  assert(add && add.port === "47377" && add.client === "127.0.0.1" && add.lease === "0" && add.description === "Kraken VTT", `the mapping asked for: ${JSON.stringify(add)}`);
+  assert(add && add.port === "47377" && add.client === "127.0.0.1" && add.lease === "3600" && add.description === "Kraken VTT", `the mapping asked for: ${JSON.stringify(add)}`);
   await opened.remove();
   assert(gateway.calls.some((call) => call.action === "DeletePortMapping" && call.port === "47377"), "the mapping is removed when hosting stops");
   gateway.server.close();
   results.push("UPnP add, external address, delete");
 }
 {
-  const gateway = await fakeGateway({ permanent: false });
+  const gateway = await fakeGateway({ onlyPermanent: true });
   process.env.KRAKEN_UPNP_LOCATION = gateway.location;
   const { openPort } = await load();
   const opened = await openPort(47378);
   assert(opened.ok, `a router that wants a lease still maps it: ${JSON.stringify(opened)}`);
-  assert(gateway.calls.filter((call) => call.action === "AddPortMapping").map((call) => call.lease).join(",") === "0,86400", `a day's lease after the refusal: ${JSON.stringify(gateway.calls)}`);
+  assert(gateway.calls.filter((call) => call.action === "AddPortMapping").map((call) => call.lease).join(",") === "3600,0", `a permanent mapping after the refusal: ${JSON.stringify(gateway.calls)}`);
   await opened.remove();
   gateway.server.close();
-  results.push("UPnP lease when permanent is refused");
+  results.push("UPnP permanent when a lease is refused");
 }
 {
   // No UPnP answer (nothing listens there): NAT-PMP at the gateway.

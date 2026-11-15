@@ -30,7 +30,7 @@ const env = { ...process.env, KRAKEN_AGENT_FILE: path.join(profile, "agent.json"
 const app = await electron.launch({ args: [".", "--mute-audio", `--user-data-dir=${profile}`], cwd: process.cwd(), env });
 const page = await app.firstWindow();
 // A 1440p screen's worth, as the GM's.
-await app.evaluate(({ BrowserWindow }, at) => BrowserWindow.getAllWindows()[0]?.setBounds({ x: at[0], y: at[1], width: 2560, height: 1440 }), AT);
+await app.evaluate(({ BrowserWindow }, at) => { const win = BrowserWindow.getAllWindows()[0]; win?.setBounds({ x: at[0], y: at[1], width: 2560, height: 1440 }); win?.setFullScreen(true); }, AT);
 await page.waitForSelector("text=My Campaigns");
 const child = spawn(process.execPath, ["electron/agent/mcp-stdio.cjs"], { env, stdio: ["pipe", "pipe", "inherit"] });
 const answers = new Map();
@@ -109,7 +109,10 @@ try {
   const player = await context.newPage();
   player.on("pageerror", (error) => failures.push(`player: ${error.message}`));
   let playerCut = null;
+  // Unreachable: the player's new connections reach nothing (a sleeping host, Wi-Fi gone), so each attempt times out.
+  let unreachable = false;
   await player.routeWebSocket(/:47433\/?$/, (ws) => {
+    if (unreachable) return;
     const server = ws.connectToServer();
     playerCut = () => {
       ws.close({ code: 4002, reason: "cut" });
@@ -138,8 +141,17 @@ try {
   await player.waitForSelector('[data-portrait]:has-text("Tamsin"):not(.theirs)');
   results.push("player reconnects to the same seat and character");
 
+  // Unreachable for a while: each attempt times out and the next waits longer (the count climbs, never starts again).
+  unreachable = true;
+  playerCut();
+  await player.waitForSelector(".reconnect-veil");
+  const attemptOf = () => player.$eval(".reconnect-veil", (element) => Number(element.dataset.reconnecting)).catch(() => 0);
+  await until(async () => (await attemptOf()) >= 3, "the third attempt after two timeouts", 140);
+  unreachable = false;
+  await player.waitForSelector(".reconnect-veil", { state: "detached", timeout: 30000 });
+  results.push("attempts that time out back off");
+
   // --- The GM's own window: its connection drops and comes back as the GM.
-  if (!process.env.SKIP_GM_CUT) {
   gmCut();
   await page.waitForSelector(".reconnect-veil");
   await shoot(page, "gm-reconnecting");
@@ -148,7 +160,6 @@ try {
   const gmBack = await tool("kraken_players");
   assert(gmBack.players.filter((seat) => seat.role === "dm").length === 1, `one GM seat after the GM's reconnect: ${JSON.stringify(gmBack.players)}`);
   results.push("GM window reconnects as the GM");
-  }
 
   // --- 3. Pause: the GM's menubar button; the player's veil; a roll refused; chat goes on.
   await page.click('[data-action="pause"]');
@@ -277,6 +288,12 @@ try {
   await player.mouse.move(420, 420);
   await page.waitForSelector('[data-portrait][data-quiet]', { state: "detached" });
   results.push("idle");
+
+  // The GM closes the table: the player goes back to the join screen, told so (no reconnecting).
+  await tool("kraken_leave");
+  await player.waitForSelector("text=The GM closed the table.");
+  assert(!(await player.$(".reconnect-veil")), "no reconnecting to a closed table");
+  results.push("the GM closing the table sends players to the join screen");
 
   if (failures.length) throw new Error(failures.join("\n"));
   console.log(`SESSION_UI_OK ${results.join("; ")}${shots.length ? `\nshots: ${shots.join(", ")}` : ""}`);

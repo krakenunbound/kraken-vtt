@@ -319,6 +319,8 @@ function TrayFace({ url, name }: { url: string; name: string }) {
 // pings, targets), not on every chat line or roll: the table's busiest parts
 // (walls, lighting, animated tokens) live here.
 export const MapView = memo(MapViewInner);
+// The GM's view pulls already followed (one per pull, whichever map window shows it).
+const pullsSeen = { last: 0 };
 
 // The image window's own choices, kept on this screen (not the table's).
 function readFlag(key: string, fallback: boolean) {
@@ -740,7 +742,9 @@ function MapViewInner({
     requestAnimationFrame(step);
   }
   useEffect(() => {
-    if (!viewPull || gmSeat) return;
+    // Each pull once, and only while it is news (a map window opened later does not replay an old one).
+    if (!viewPull || gmSeat || viewPull.id <= pullsSeen.last || Date.now() - viewPull.at > 8000) return;
+    pullsSeen.last = viewPull.id;
     if (busyRef.current) setPullWaiting(viewPull);
     else {
       setPullWaiting(null);

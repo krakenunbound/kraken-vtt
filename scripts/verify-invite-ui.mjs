@@ -47,7 +47,7 @@ const profile = mkdtempSync(path.join(tmpdir(), "kraken-invite-ui-"));
 const env = { ...process.env, KRAKEN_AGENT_FILE: path.join(profile, "agent.json"), KRAKEN_AGENT_PORT: "0", KRAKEN_WINDOW_AT: AT.join(","), KRAKEN_BIND: "127.0.0.1", KRAKEN_UPNP_LOCATION: `http://127.0.0.1:${gateway.address().port}/desc.xml`, KRAKEN_NATPMP_GATEWAY: "127.0.0.1:9" };
 const app = await electron.launch({ args: [".", "--mute-audio", `--user-data-dir=${profile}`], cwd: process.cwd(), env });
 const page = await app.firstWindow();
-await app.evaluate(({ BrowserWindow }, at) => BrowserWindow.getAllWindows()[0]?.setBounds({ x: at[0], y: at[1], width: 2560, height: 1440 }), AT);
+await app.evaluate(({ BrowserWindow }, at) => { const win = BrowserWindow.getAllWindows()[0]; win?.setBounds({ x: at[0], y: at[1], width: 2560, height: 1440 }); win?.setFullScreen(true); }, AT);
 await page.waitForSelector("text=My Campaigns");
 const child = spawn(process.execPath, ["electron/agent/mcp-stdio.cjs"], { env, stdio: ["pipe", "pipe", "inherit"] });
 const answers = new Map();
@@ -114,7 +114,8 @@ try {
   await page.waitForSelector('.upnp-line[data-upnp="mapped"]');
   const shown = await page.$eval("[data-invite]", (element) => element.dataset.invite);
   assert(shown === hosted.invite, `the Players window's link is the tool's: ${shown}`);
-  const qr = await page.$(".invite-qr");
+  await page.click('[data-action="invite-qr"] summary');
+  const qr = await page.waitForSelector(".invite-qr");
   const qrFile = path.join(profile, "qr.png");
   await qr.screenshot({ path: qrFile });
   if (SHOTS) {

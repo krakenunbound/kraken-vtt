@@ -564,9 +564,11 @@ async function manageCampaign(input) {
     return campaigns.exportZip(file, { id, path: target });
   }
   if (action === "delete") {
-    const { removed, folders } = campaigns.remove(file, { id });
-    // To the recycle bin (the window's process does it), never gone for good.
+    if (!campaigns.exists(file, id)) throw new Error("That campaign is missing.");
+    // To the recycle bin first (the window's process does it), never gone for good; off the list only once it is there.
+    const folders = [campaigns.folder(file, id), campaigns.picturesFolder(file, id)].filter((dir) => fs.existsSync(dir));
     await ask("shell", { action: "trash", paths: folders });
+    const { removed } = campaigns.remove(file, { id });
     return { deleted: removed.name, trashed: folders.length };
   }
   if (action === "backups") return { backups: campaigns.backups(file, { id }) };

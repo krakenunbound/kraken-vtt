@@ -53,7 +53,11 @@
 .players-window .seat-state { color: var(--muted); font-style: italic; }
 .players-window .seat-hand { color: var(--brass); display: inline-grid; }
 .players-window .seat-role { margin-left: auto; }
-.players-window .seat-actions { display: inline-flex; gap: 2px; }
+.players-window .seat-actions { display: inline-flex; gap: 4px; }
+.players-window .seat-actions .icon-button { border: 1px solid var(--line); color: var(--text); }
+.players-window .seat-actions .icon-button:hover:not(:disabled) { border-color: var(--brass); color: var(--brass); }
+.invite-qr-box summary { cursor: pointer; color: var(--muted); }
+.invite-qr-box[open] summary { margin-bottom: 8px; }
 .players-window .roster-list li[data-role="player"] { cursor: context-menu; }
 .bans-panel li { display: flex; align-items: center; gap: 8px; }
 .bans-panel li > button { margin-left: auto; }

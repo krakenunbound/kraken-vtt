@@ -256,11 +256,14 @@ export function InviteCard({ session }: { session: Session }) {
       </div>
       <p className="hint">{info.publicGame ? "Anyone with the link sits down." : "The link carries the table's password: a player opens it and only types their name."}</p>
       {qr ? (
-        <div className="invite-qr" aria-label="QR code of the invite link" role="img">
-          <svg viewBox={`0 0 ${qr.size} ${qr.size}`} shapeRendering="crispEdges">
-            <path d={qr.path} fill="#000" />
-          </svg>
-        </div>
+        <details className="invite-qr-box" data-action="invite-qr">
+          <summary>QR code, for a phone or tablet</summary>
+          <div className="invite-qr" aria-label="QR code of the invite link" role="img">
+            <svg viewBox={`0 0 ${qr.size} ${qr.size}`} shapeRendering="crispEdges">
+              <path d={qr.path} fill="#000" />
+            </svg>
+          </div>
+        </details>
       ) : (
         <p className="hint">The link is too long for a QR code; copy it instead.</p>
       )}

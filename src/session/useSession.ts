@@ -9,7 +9,7 @@ export type Seat = { id: string; name: string; role: "dm" | "player"; afk?: bool
 // The GM's Ban list (kept with the campaign).
 export type Ban = { name: string; address: string; at: number };
 // The GM pulled the players' maps here: a centre and how much of the map shows (map pixels).
-export type ViewPull = { id: number; x: number; y: number; width: number; height: number; from: string };
+export type ViewPull = { id: number; x: number; y: number; width: number; height: number; from: string; at: number };
 // The map as the host shows it to this seat (electron/mapState.cjs viewFor).
 export type TokenHealth = { status: string; percent: number; color: string };
 export type MapToken = {
@@ -484,6 +484,8 @@ export function useSession() {
         socketRef.current = socket;
         let settled = false;
         let opened = false;
+        // Seated at the table (its "ok" came): only then does a close mean a drop to come back from.
+        let seated = false;
         // Why the host sent this seat away (kicked, signed in elsewhere): kept past the close.
         let sentAway = "";
         const timer = window.setTimeout(() => {
@@ -519,6 +521,7 @@ export function useSession() {
           }
           if (msg.type === "ok" && !settled) {
             settled = true;
+            seated = true;
             window.clearTimeout(timer);
             const you = msg.you as Seat & { assetToken?: string; accountToken?: string };
             // Signed in: this browser keeps the token, not the password.
@@ -586,7 +589,7 @@ export function useSession() {
           if (msg.type === "bell") setBell({ id: ++bellCounter.current, from: String(msg.from ?? "GM") });
           if (msg.type === "hand" && typeof msg.name === "string") setHandRaised({ id: ++bellCounter.current, name: msg.name });
           if (msg.type === "view-pull") {
-            const pull = { id: ++bellCounter.current, x: Number(msg.x), y: Number(msg.y), width: Number(msg.width), height: Number(msg.height), from: String(msg.from ?? "GM") };
+            const pull = { id: ++bellCounter.current, x: Number(msg.x), y: Number(msg.y), width: Number(msg.width), height: Number(msg.height), from: String(msg.from ?? "GM"), at: Date.now() };
             if ([pull.x, pull.y, pull.width, pull.height].every(Number.isFinite)) setViewPull(pull);
           }
           if (msg.type === "ping") {
@@ -660,7 +663,7 @@ export function useSession() {
           }
         };
 
-        socket.onclose = () => {
+        socket.onclose = (event) => {
           if (!settled) {
             // Never opened: nothing answered there. Opened, then closed: the table turned us away.
             fail(
@@ -670,10 +673,11 @@ export function useSession() {
             );
             return;
           }
-          if (generation.current !== gen || intentional.current) return;
-          // Sent away (kicked, banned, signed in elsewhere): back to the join screen, saying why.
-          if (sentAway || !lastJoin.current || !reconnectRef.current) {
-            setError(sentAway || "The table closed.");
+          // An attempt that timed out (never seated): its own promise has already said so.
+          if (generation.current !== gen || intentional.current || !seated) return;
+          // Sent away (kicked, banned, signed in elsewhere), or the GM closed the table (4003): back to the join screen, saying why.
+          if (sentAway || event.code === 4003 || !lastJoin.current || !reconnectRef.current) {
+            setError(sentAway || (event.code === 4003 ? "The GM closed the table." : "The table closed."));
             reset();
             return;
           }
@@ -701,6 +705,13 @@ export function useSession() {
     if (!last) return;
     window.clearTimeout(retryTimer.current);
     const attempt = (count: number) => {
+      // The GM's own table on this computer not answering for a minute and a half has stopped: say so, not try forever.
+      if (last.role === "dm" && count >= 8) {
+        setError("Your table stopped answering. Press Play to host it again.");
+        reset();
+        void window.kraken?.stopHost().catch(() => undefined);
+        return;
+      }
       const delay = Math.min(15000, 1000 * 2 ** count);
       setReconnecting({ attempt: count + 1, at: Date.now() + delay });
       retryTimer.current = window.setTimeout(() => {

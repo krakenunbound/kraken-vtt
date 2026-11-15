@@ -12,6 +12,7 @@ const SSDP = { address: "239.255.255.250", port: 1900 };
 const SEARCH_TARGETS = ["urn:schemas-upnp-org:device:InternetGatewayDevice:1", "urn:schemas-upnp-org:device:InternetGatewayDevice:2", "urn:schemas-upnp-org:service:WANIPConnection:1"];
 const SERVICES = ["urn:schemas-upnp-org:service:WANIPConnection:2", "urn:schemas-upnp-org:service:WANIPConnection:1", "urn:schemas-upnp-org:service:WANPPPConnection:1"];
 const DESCRIPTION = "Kraken VTT";
+const LEASE_SECONDS = 3600;
 
 // The LOCATION headers of the gateways that answer an SSDP search (a few seconds at most).
 function discover(timeout = 2500) {
@@ -103,14 +104,15 @@ async function upnpMap(port) {
       const control = await controlOf(location);
       const client = localAddressFor(new URL(location).hostname);
       const mapping = { NewRemoteHost: "", NewExternalPort: port, NewProtocol: "TCP", NewInternalPort: port, NewInternalClient: client, NewEnabled: 1, NewPortMappingDescription: DESCRIPTION };
+      // An hour's lease, renewed every half hour while hosting: if Kraken stops without closing it (a crash, a
+      // power cut), the router closes it by itself. A router that takes only permanent mappings gets one.
       let renew = null;
       try {
-        await soap(control, "AddPortMapping", { ...mapping, NewLeaseDuration: 0 });
-      } catch {
-        // Some routers take only leases with an end: a day, renewed every twelve hours while hosting.
-        await soap(control, "AddPortMapping", { ...mapping, NewLeaseDuration: 86400 });
-        renew = setInterval(() => soap(control, "AddPortMapping", { ...mapping, NewLeaseDuration: 86400 }).catch(() => undefined), 12 * 3600_000);
+        await soap(control, "AddPortMapping", { ...mapping, NewLeaseDuration: LEASE_SECONDS });
+        renew = setInterval(() => soap(control, "AddPortMapping", { ...mapping, NewLeaseDuration: LEASE_SECONDS }).catch(() => undefined), (LEASE_SECONDS / 2) * 1000);
         renew.unref?.();
+      } catch {
+        await soap(control, "AddPortMapping", { ...mapping, NewLeaseDuration: 0 });
       }
       let external = "";
       try {

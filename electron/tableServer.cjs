@@ -3127,7 +3127,8 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       clearInterval(heartbeat);
       for (const held of lingering.values()) clearTimeout(held.timer);
       lingering.clear();
-      for (const ws of clients.keys()) ws.close();
+      // 4003: the table closed (the GM left): players go back to the join screen, not into a reconnect.
+      for (const ws of clients.keys()) ws.close(4003, "closed");
       clients.clear();
       wss.close();
       return new Promise((resolve) => {
