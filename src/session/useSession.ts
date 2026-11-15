@@ -267,7 +267,12 @@ export type CombatEntry = {
   hidden: boolean;
   owner: string;
   mine: boolean;
+  // Its status words (empty when the GM's Settings show players none of a creature's health).
   health: TokenHealth;
+  // What is left of its hit points, 0..1 (a bar, when the Settings show players a bar).
+  bar?: number;
+  // Delaying (the row's Delay), out of the order until its Act now.
+  delayed?: boolean;
   hp?: number;
   wounds?: number;
   temp?: number;

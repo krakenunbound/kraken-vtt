@@ -235,6 +235,9 @@ function cleanEntry(raw) {
     strLoss: Math.max(0, Math.round(num(raw.strLoss, 0))),
     critical: ["dead", "routed"].includes(raw.critical) ? raw.critical : "",
     lostTurn: Math.max(0, Math.round(num(raw.lostTurn, 0))),
+    // Delay (the tracker row's Delay): out of the order until its Act now; actingNow: the entry it cut in after.
+    ...(raw.delayed ? { delayed: true } : {}),
+    ...(typeof raw.actingNow === "string" ? { actingNow: raw.actingNow.slice(0, 40) } : {}),
     // Ironsworn and Starforged: a foe's rank and progress (ticks, 0-40), out of the fight once defeated.
     iron: raw.iron && typeof raw.iron === "object" ? { rank: ["troublesome", "dangerous", "formidable", "extreme", "epic"].includes(raw.iron.rank) ? raw.iron.rank : "dangerous", ticks: Math.min(40, Math.max(0, Math.round(num(raw.iron.ticks, 0)))), defeated: Boolean(raw.iron.defeated) } : null,
     deathsaves: raw.deathsaves && typeof raw.deathsaves === "object" ? { success: Math.min(3, Math.max(0, Math.round(num(raw.deathsaves.success, 0)))), failure: Math.min(3, Math.max(0, Math.round(num(raw.deathsaves.failure, 0)))) } : { success: 0, failure: 0 },
@@ -876,7 +879,10 @@ function createCombat({ saved, table, onChange = () => undefined }) {
 
   // SiegeCore turn skipping: unconscious enemies (or everyone, by option).
   function skips(entry, opts) {
-    const mode = String(opts?.SIEGE_SKIP_UNCONSCIOUS ?? "enemies").toLowerCase();
+    // Delayed: out of the order until its Act now.
+    if (entry.delayed) return true;
+    // The table's option (Settings > Combat: skip the dead and the unconscious) wins over the game's own.
+    const mode = String(table().options?.().skipDead ?? opts?.SIEGE_SKIP_UNCONSCIOUS ?? "enemies").toLowerCase();
     // Fate: the taken out and the conceded are out of the conflict.
     if (fateOn()) return fc.skips(entry);
     // Apeira Astra: Down is out of the fight, whoever they are.
@@ -2763,8 +2769,12 @@ function createCombat({ saved, table, onChange = () => undefined }) {
         active: shown.some((entry) => entry.id === state.active) ? state.active : null,
         entries: shown.map((entry) => {
           const { hp, wounds, temp, ac } = vitals(entry);
-          const status = health(entry);
-          const numbers = seat.role === "dm" || entry.faction === "friend";
+          // What players see of a creature's health follows the token option (Settings > Tokens): off
+          // none, a dot its status words, a bar the share left too, numbers the hit points.
+          const shows = seat.role === "dm" || entry.faction === "friend" ? "numbers" : String((record(entry)?.type === "character" ? table().options?.().healthPc : table().options?.().healthNpc) ?? "dot");
+          const status = shows === "off" ? { status: "", percent: 0, color: "" } : health(entry);
+          const numbers = shows === "numbers";
+          const bar = !numbers && /^bar/.test(shows) && hp > 0 ? Math.max(0, Math.min(1, (hp - wounds) / hp)) : undefined;
           return {
             id: entry.id,
             recordId: entry.recordId,
@@ -2777,7 +2787,9 @@ function createCombat({ saved, table, onChange = () => undefined }) {
             owner: owner(entry),
             mine: seat.role === "player" && owner(entry) === seat.name,
             health: status,
-            ...(numbers ? { hp, wounds, ac, ...(temp ? { temp } : {}) } : {}),
+            ...(bar !== undefined ? { bar } : {}),
+            ...(entry.delayed ? { delayed: true } : {}),
+            ...(numbers ? { hp, wounds, ...(seat.role === "dm" || entry.faction === "friend" ? { ac } : {}), ...(temp ? { temp } : {}) } : {}),
             effects: entry.effects.filter((effect) => seat.role === "dm" || !effect.gmOnly).map(({ id, label, duration, targets, icon, source, total, paused, gmOnly }) => ({ id, label: targets?.length ? `${label} [-> ${targets.map((tid) => state.entries.find((item) => item.id === tid)?.name ?? "?").join(", ")}]` : label, duration, ...(icon ? { icon } : {}), ...(source ? { source } : {}), ...(total ? { total } : {}), ...(paused ? { paused } : {}), ...(gmOnly ? { gmOnly } : {}) })),
             targets: seat.role === "dm" || owner(entry) === seat.name ? entry.targets.filter((id) => shown.some((item) => item.id === id)) : [],
             ...(five() ? { deathsaves: record(entry)?.type === "character" || numbers ? deathSaves(entry) : undefined } : {}),
@@ -2877,8 +2889,17 @@ function createCombat({ saved, table, onChange = () => undefined }) {
           ac: num(input.ac, source?.type === "starship" ? num(source.data?.armour, 0) : npc5 ? npc5.ac : num(source?.data?.ac?.total, twoSix() ? 0 : 10)),
           hidden: Boolean(input.hidden),
         });
-        // NNPC "append": the same name twice numbers them all.
-        if (source?.type !== "character") {
+        // FG's NPC numbering (the table's option): append (the same name twice numbers them all),
+        // random (an unused number from 1 to 20 or more), off (the names as they are).
+        const numbering = table().options?.().npcNumbering ?? "append";
+        if (source?.type !== "character" && numbering === "random") {
+          const used = new Set(state.entries.filter((item) => item.name.replace(/ \d+$/, "") === base).map((item) => Number(/ (\d+)$/.exec(item.name)?.[1] ?? 0)));
+          const top = Math.max(20, used.size * 3);
+          let pickN = 0;
+          for (let tries = 0; tries < 60 && (!pickN || used.has(pickN)); tries += 1) pickN = table().dice.roll(`1d${top}`).total;
+          if (used.has(pickN)) for (pickN = 1; used.has(pickN); pickN += 1);
+          entry.name = `${base} ${pickN}`;
+        } else if (source?.type !== "character" && numbering !== "off") {
           const same = state.entries.filter((item) => item.name === base || item.name.replace(/ \d+$/, "") === base);
           if (same.length > 0) {
             let high = Math.max(0, ...same.map((item) => Number(/ (\d+)$/.exec(item.name)?.[1] ?? 0)));
@@ -2939,11 +2960,35 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     },
     // Rolls initiative: one entry ("a player may roll their own"), every NPC, or everyone.
     async rollInit(which, seat) {
-      const { engine, game, options: opts } = await options();
-      const die = Math.max(2, Math.round(num(opts?.SIEGE_INIT_DIE, 10)));
       const pick =
         which === "npcs" ? state.entries.filter((entry) => record(entry)?.type !== "character") : which === "all" ? state.entries : [find(which)];
       if (seat.role !== "dm" && (pick.length !== 1 || owner(pick[0]) !== seat.name)) throw new Error("You can roll initiative for your own character.");
+      // Group initiative (the table's option, FG's): one roll for each kind of creature, its copies sharing it.
+      const copies = [];
+      let leaders = pick;
+      if (pick.length > 1 && table().options?.().initGroup === "kind") {
+        const seen = new Map();
+        leaders = [];
+        for (const entry of pick) {
+          const key = record(entry)?.type === "character" ? "" : entry.recordId ? `r:${entry.recordId}` : `n:${entry.name.replace(/ \d+$/, "").toLowerCase()}`;
+          if (key && seen.has(key)) copies.push([entry, seen.get(key)]);
+          else {
+            if (key) seen.set(key, entry);
+            leaders.push(entry);
+          }
+        }
+      }
+      const rolled = await this.rollInitFor(leaders, seat);
+      if (copies.length) {
+        for (const [copy, leader] of copies) copy.initresult = leader.initresult;
+        changed();
+      }
+      return rolled;
+    },
+    // The initiative of these entries, by the game's rule (rollInit's dice).
+    async rollInitFor(pick, seat) {
+      const { engine, game, options: opts } = await options();
+      const die = Math.max(2, Math.round(num(opts?.SIEGE_INIT_DIE, 10)));
       // Forged in the Dark has no initiative: the action roll decides who acts (the Score panel instead of the tracker).
       if (table().ruleset?.() === "Forged in the Dark") throw new Error("Forged in the Dark has no initiative: make action rolls (the GM's Score panel sets position and effect).");
       // SiegeCore rollTrackerInit: the die, the initiative attribute's bonus
@@ -3054,10 +3099,15 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       if (active && state.round > 0) await endOfTurnSaves(active);
       // The active entry was removed mid-turn: carry on after its place.
       const resume = !active && state.resume && state.round > 0 ? state.resume : null;
-      const index = active ? list.indexOf(active) : resume ? list.filter((entry) => order(resume, entry) > 0).length - 1 : -1;
-      const from = active ? rank(active.initresult) : resume ? rank(resume.initresult) : Infinity;
+      // Act now: the order goes on after the one it cut in after.
+      const cut = active?.actingNow ? list.find((entry) => entry.id === active.actingNow) ?? null : null;
+      if (active) delete active.actingNow;
+      const at = cut ?? active;
+      const index = at ? list.indexOf(at) : resume ? list.filter((entry) => order(resume, entry) > 0).length - 1 : -1;
+      const from = at ? rank(at.initresult) : resume ? rank(resume.initresult) : Infinity;
       let nextIndex = -1;
       for (let i = index + 1; i < list.length; i += 1) {
+        if (list[i] === active) continue;
         if (!skips(list[i], opts)) {
           nextIndex = i;
           break;
@@ -3147,6 +3197,36 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       table().say(`[ROUND ${state.round}] (back)`, "Combat");
       changed();
       return { round: state.round, active: state.active };
+    },
+    // Delay (the active creature's row): it leaves the order and the turn passes on; its owner or the GM.
+    async delay(id, seat) {
+      const entry = find(id);
+      if (seat.role !== "dm" && owner(entry) !== seat.name) throw new Error("That is not yours to delay.");
+      if (state.active !== entry.id) throw new Error(`${entry.name} can delay only on its own turn.`);
+      entry.delayed = true;
+      table().say(`[DELAY] ${entry.name} waits.`, "Combat", Boolean(entry.hidden));
+      await this.next({ role: "dm", name: "Combat" });
+      return entry;
+    },
+    // Act now: a delayed creature takes its turn at once, after the one acting now; its initiative becomes theirs.
+    async actNow(id, seat) {
+      const entry = find(id);
+      if (seat.role !== "dm" && owner(entry) !== seat.name) throw new Error("That is not yours.");
+      if (!entry.delayed) throw new Error(`${entry.name} is not delaying.`);
+      const now = state.entries.find((item) => item.id === state.active) ?? null;
+      entry.delayed = false;
+      if (now) {
+        entry.initresult = now.initresult;
+        entry.actingNow = now.id;
+      }
+      state.active = entry.id;
+      state.resume = null;
+      if (state.round === 0) state.round = 1;
+      table().say(`[ACT NOW] ${entry.name}`, "Combat", Boolean(entry.hidden));
+      const { options: opts } = await options();
+      await startTurn(entry, opts);
+      changed();
+      return entry;
     },
     setTurn(id, seat) {
       mustGM(seat);

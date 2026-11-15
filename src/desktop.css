@@ -436,6 +436,11 @@ span.ct-init { display: inline-block; }
 .ct-name small { color: var(--muted); font-size: 0.72rem; }
 .ct-stat { min-width: 3.4rem; display: inline-flex; align-items: center; justify-content: flex-end; gap: 3px; font-variant-numeric: tabular-nums; font-weight: 650; }
 .ct-status { padding: 1px 8px; border: 1px solid; border-radius: 999px; font-size: 0.75rem; }
+/* A creature's share of hit points left (the Settings show players a bar); delaying; the row's Delay and Act now. */
+.ct-bar { display: inline-block; vertical-align: middle; width: 3.2rem; height: 5px; margin-left: 6px; border-radius: 3px; background: rgba(255, 255, 255, 0.12); overflow: hidden; }
+.ct-bar > span { display: block; height: 100%; }
+.ct-delayed { padding: 1px 7px; font-size: 0.72rem; color: var(--brass); border: 1px dashed var(--brass); border-radius: 999px; }
+.ct-delay, .ct-act-now { padding: 2px 6px; }
 .ct-tools { display: flex; gap: 2px; }
 .ct-tools button { padding: 3px 6px; background: transparent; }
 .ct-effects { display: flex; flex-wrap: wrap; gap: 4px; padding: 0 8px 6px 70px; }

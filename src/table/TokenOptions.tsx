@@ -9,6 +9,7 @@ const HEALTH = [
   ["barhover", "Bar on hover"],
   ["dot", "Dot"],
   ["dothover", "Dot on hover"],
+  ["numbers", "Numbers (the tracker's hit points; a bar on tokens)"],
   ["off", "Off"],
 ] as const;
 
@@ -17,7 +18,7 @@ export function TokenOptionsSection({ session }: { session: Session }) {
   const set = (patch: Record<string, string>) => session.setTableOptions(patch as never);
   return (
     <SettingsSection title="Tokens and measuring" setting="tokens">
-      <SettingRow label="Creatures' health" hint="What players see of the health of your creatures (NPCs) on their tokens. You always see it.">
+      <SettingRow label="Creatures' health" hint="What players see of the health of your creatures (NPCs), on their tokens and in the combat tracker: a dot is its status words, a bar the share left, numbers its hit points. You always see it.">
         <select value={options.healthNpc ?? "dot"} onChange={(event) => set({ healthNpc: event.target.value })} aria-label="Creatures' health" data-setting="health-npc">
           {HEALTH.map(([value, label]) => (
             <option key={value} value={value}>

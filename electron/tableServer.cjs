@@ -318,9 +318,17 @@ function savedOptions(value) {
     healthNpc: HEALTH_SHOWS.includes(options.healthNpc) ? options.healthNpc : "dot",
     healthPc: HEALTH_SHOWS.includes(options.healthPc) ? options.healthPc : "dot",
     names: ["off", "hover", "always"].includes(options.names) ? options.names : "hover",
+    // The combat tracker's options (FG's combat options): initiative each (every creature its own
+    // roll) or by kind (one roll per kind of creature, its copies sharing it); who is skipped
+    // (enemies: dead and unconscious creatures, FG's default; all: characters too; off: no one);
+    // NPC numbering (append: the same name numbered, random: a random number, off).
+    initGroup: options.initGroup === "kind" ? "kind" : "each",
+    ...(["enemies", "all", "off"].includes(options.skipDead) ? { skipDead: options.skipDead } : {}),
+    npcNumbering: ["append", "random", "off"].includes(options.npcNumbering) ? options.npcNumbering : "append",
   };
 }
-const HEALTH_SHOWS = ["bar", "barhover", "dot", "dothover", "off"];
+// numbers: the bar on tokens, and the hit points themselves in the tracker.
+const HEALTH_SHOWS = ["bar", "barhover", "dot", "dothover", "numbers", "off"];
 function wizard2eOptions(value) {
   const raw = value && typeof value === "object" ? value : {};
   const methods = Array.isArray(raw.methods) ? [...new Set(raw.methods.map((n) => Math.round(Number(n))).filter((n) => n >= 1 && n <= 6))].sort() : [1, 2, 3, 4, 5, 6];
@@ -622,6 +630,8 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     onChange("table");
     // What tokens show (names, health) and how distance counts are in each seat's map.
     if (["diagonal", "healthNpc", "healthPc", "names"].some((key) => key in next)) sendMaps();
+    // What the tracker shows players of the creatures' health follows the same option.
+    if (["healthNpc", "healthPc", "skipDead"].some((key) => key in next)) sendCombat();
     return options;
   }
   // The seat whose request is being handled now (and when).
@@ -1171,7 +1181,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     if (!record) return null;
     const seen = require("./records.cjs").viewFor(record, { role: "player", name: "" });
     const data = seen.data ?? {};
-    const words = [data.description, data.text, data.notes, data.summary].find((value) => typeof value === "string" && value.trim()) ?? "";
+    const words = [data.description, data.text, data.notes, data.nonid_notes, data.summary].find((value) => typeof value === "string" && value.trim()) ?? "";
     const { sanitizeFormatted } = require("../shared/text/formatted.mjs");
     return { name: String(seen.name ?? "").slice(0, 120), type: record.type, text: sanitizeFormatted(String(words), 6000) };
   }
@@ -2941,6 +2951,11 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
               return combat.roundBack(seat);
             case "set-turn":
               return combat.setTurn(String(msg.id ?? ""), seat);
+            // A tracker row's Delay and Act now (its owner, or the GM).
+            case "delay":
+              return combat.delay(String(msg.id ?? ""), seat);
+            case "act-now":
+              return combat.actNow(String(msg.id ?? ""), seat);
             case "end":
               return combat.end(seat, { removeNpcs: Boolean(msg.removeNpcs) });
             case "effect":
