@@ -5,6 +5,7 @@ import { characterDice, diceStore, FATE_SIDES, fateFace, rolling, setThrow, towe
 import { ladder } from "../../shared/fate/rules.mjs";
 import { commandsFor, runChat, type Command } from "./chatCommands";
 import { slotDrag } from "./QuickSlots";
+import { ModifierBox, ModifierKeys, NUMBER_DRAG } from "./ModifierBox";
 import { chatRunner } from "./chatRunner";
 import { TowerArt, towerLook } from "./TowerArt";
 import { agentCommands } from "./agentCommands";
@@ -116,6 +117,17 @@ export function RollCard({ roll, pending = false }: { roll: RollResult; pending?
         )}
       </span>
       <span className="roll-formula">{roll.formula}</span>
+      {roll.mods?.length ? (
+        // What the modifier box and its keys added (FG lists them in the roll's words).
+        <span className="roll-mods" aria-label="Modifiers">
+          {roll.mods.map((mod, index) => (
+            <span key={index} data-mod-key={mod.key ?? undefined}>
+              {mod.value !== undefined ? `${mod.value > 0 ? "+" : ""}${mod.value} ` : ""}
+              {mod.label || "Modifier"}
+            </span>
+          ))}
+        </span>
+      ) : null}
       {roll.result ? <span className={`roll-result ${roll.result === "HIT" || roll.result === "SAVED" || roll.result === "SUCCEED" || roll.result === "STYLE" ? "hit" : roll.result === "MISS" || roll.result === "FAILED" || roll.result === "FAIL" ? "miss" : "none"}`}>{roll.result}</span> : null}
       {fate ? (
         // Fate: the total on the ladder (Good +3), as the rules read it.
@@ -196,6 +208,8 @@ function Line({ line, gmIcon, session }: { line: ChatLine; gmIcon: string; sessi
         event.dataTransfer.setData("application/x-kraken-chat", chatWords(line));
         if (applied) event.dataTransfer.setData("application/x-kraken-damage", JSON.stringify(applied));
         if (dropped) event.dataTransfer.setData("application/x-kraken-roll", JSON.stringify(dropped));
+        // A roll's total onto the modifier box (FG's drag of a number).
+        if (line.roll && Number.isFinite(Number(line.roll.total))) event.dataTransfer.setData(NUMBER_DRAG, JSON.stringify({ value: Number(line.roll.total), label: (line.roll.label ?? "").replace(/^\[[A-Z ]+\]\s*/, "").replace(/\s*\[.*$/, "").slice(0, 40) }));
         event.dataTransfer.effectAllowed = "copy";
       }}
       title={dropped ? `Drag onto a creature to ${dropped.kind === "attack" ? "attack it" : dropped.kind === "effect" ? "put it on" : dropped.kind === "heal" ? `heal ${dropped.total}` : `deal ${dropped.total}${dropped.type ? ` ${dropped.type}` : ""}`}, or into a note` : applied ? `Drag onto a creature to ${applied.heal ? "heal" : "deal"} ${applied.amount}, or into a note` : "Drag into a note to keep it"}
@@ -306,10 +320,6 @@ function formulaOf(dice: number[]) {
   return [...counts].map(([sides, count]) => `${count}d${sides === FATE_SIDES ? "F" : sides}`).join("+");
 }
 
-function withModifier(formula: string, modifier: number) {
-  if (!modifier) return formula;
-  return `${formula}${modifier > 0 ? "+" : ""}${modifier}`;
-}
 
 // The chat window (FG's, bottom left): the log, a line to type in, the dice
 // tray (click dice to gather a pool, then roll), the modifier box, and the
@@ -496,7 +506,8 @@ function ExternalTower({ session, on, drop, title, towerRef, onToggle }: { sessi
 export function ChatDock({ session }: { session: Session }) {
   const [draft, setDraft] = useState("");
   const [pool, setPool] = useState<number[]>([]);
-  const [modifier, setModifier] = useState(0);
+  // The modifier box is the host's (each seat's own): every roll this seat starts reads it.
+  const modifier = session.modifiers.total;
   const [tower, setTower] = useState(false);
   const [size, setSize] = useState<ChatSize>(chatSize);
   const windows = useWindows();
@@ -656,8 +667,7 @@ export function ChatDock({ session }: { session: Session }) {
       session,
       openWindow: (kind, title) => windows.open(kind, title),
       closeWindow: (kind) => windows.windows.filter((item) => item.kind === kind).forEach((item) => windows.close(item.key)),
-      modifier,
-      setModifier,
+      addModifier: (value, label) => session.modify({ action: "add", value, label }),
       tower,
       speakAs: speakAs || (session.role === "dm" ? gmName : ""),
       setSpeakAs,
@@ -690,10 +700,9 @@ export function ChatDock({ session }: { session: Session }) {
   };
   const rollDice = (dice: number[], inTower: boolean, from?: { x: number; y: number }) => {
     if (dice.length === 0) return;
-    session.roll(withModifier(formulaOf(dice), modifier), "", "", inTower, "public", speakAs || (session.role === "dm" ? gmName : ""));
+    session.roll(formulaOf(dice), "", "", inTower, "public", speakAs || (session.role === "dm" ? gmName : ""));
     if (inTower) dropInTower(dice, from);
     setPool([]);
-    setModifier(0);
   };
   const rollPool = () => rollDice(pool, tower);
   // The tower apart from the chat (the GM's Settings, for every seat), or in the tray.
@@ -712,10 +721,10 @@ export function ChatDock({ session }: { session: Session }) {
   };
   // Dice kept on a quick slot: a click on it rolls them again.
   const keepOnSlot = (index: number, dice: number[]) => {
-    const formula = withModifier(formulaOf(dice), modifier);
+    // The modifier box stays: a slot's dice read it when they are rolled.
+    const formula = formulaOf(dice);
     session.setQuickSlots(session.quickSlots.map((slot, at) => (at === index ? { kind: "dice", formula, label: formula } : slot)));
     setPool([]);
-    setModifier(0);
   };
   // Thrown on the table from a point: toward the middle when let go without a throw.
   const throwFrom = (view: Window, screenX: number, screenY: number, clientX: number, clientY: number, vx = 0, vy = 0) => {
@@ -1051,32 +1060,14 @@ export function ChatDock({ session }: { session: Session }) {
             {trayDie(sides, traySize)}
           </button>
         ))}
-        <div
-          className={modifier ? "modifier-box set" : "modifier-box"}
-          title="Modifier for the next roll (FG's modifier box): the wheel or the buttons change it, a right-click picks one"
-          onWheel={(event) => setModifier(modifier + (event.deltaY < 0 ? 1 : -1))}
-          onContextMenu={(event) => {
-            event.preventDefault();
-            setMenu({ x: event.clientX, y: event.clientY, sides: null });
-          }}
-        >
-          <button type="button" aria-label="Modifier down" onClick={() => setModifier(modifier - 1)}>
-            −
-          </button>
-          <span className="modifier-value">
-            <input aria-label="Modifier" type="number" value={modifier} onChange={(event) => setModifier(Number(event.target.value) || 0)} />
-            <small>Modifier</small>
-          </span>
-          <button type="button" aria-label="Modifier up" onClick={() => setModifier(modifier + 1)}>
-            +
-          </button>
-        </div>
+        <ModifierBox session={session} onMenu={(x, y) => setMenu({ x, y, sides: null })} />
         {external ? null : (
           <button type="button" ref={towerButton} className={["tower", tower ? "on" : "", ghost?.overTower ? "drop" : ""].filter(Boolean).join(" ")} aria-pressed={tower} title={towerTitle} onClick={() => setTower(!tower)}>
             <Icon name="tower" size={20} />
           </button>
         )}
       </div>
+      <ModifierKeys session={session} />
       {external
         ? createPortal(
             <ExternalTower session={session} on={tower} drop={Boolean(ghost?.overTower)} title={towerTitle} towerRef={towerButton} onToggle={() => setTower(!tower)} />,
@@ -1096,11 +1087,11 @@ export function ChatDock({ session }: { session: Session }) {
           {menu.sides === null ? (
             <>
               {QUICK.map((value) => (
-                <button key={value} type="button" role="menuitem" onClick={() => (setModifier(modifier + value), setMenu(null))}>
+                <button key={value} type="button" role="menuitem" onClick={() => (session.modify({ action: "add", value }), setMenu(null))}>
                   {value > 0 ? `+${value}` : `−${-value}`}
                 </button>
               ))}
-              <button type="button" role="menuitem" onClick={() => (setModifier(0), setMenu(null))}>
+              <button type="button" role="menuitem" onClick={() => (session.modify({ action: "clear" }), setMenu(null))}>
                 Clear
               </button>
             </>

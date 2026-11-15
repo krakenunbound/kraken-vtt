@@ -12,9 +12,9 @@ import { SKILLS, STATS } from "./rules.mjs";
 
 const SIX = ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"];
 const titled = (/** @type {string} */ word) => word[0].toUpperCase() + word.slice(1);
-// A roll with the strip's DC and advantage.
+// A roll with the strip's DC (advantage is the chat bar's ADV and DIS keys, the modifier stack).
 /** @param {"save" | "check" | "skill"} roll @param {Record<string, unknown>} [more] */
-const roll = (roll, more = {}) => ({ roll, dc: "dc", advantage: "advantage", ...more });
+const roll = (roll, more = {}) => ({ roll, dc: "dc", ...more });
 /** @type {Record<string, string[]>} */
 const SKILL_LIST = SKILLS;
 
@@ -48,7 +48,6 @@ export default {
           { kind: "xp", path: "exp", next: "expnext", label: "Experience" },
           { kind: "value", label: "Prof", path: "prof", hook: "prof", title: "Proficiency bonus", format: "signed" },
           { kind: "modifier", key: "dc", label: "DC", aria: "Difficulty class", title: "The DC a check or save is rolled against (0: none)", min: 0, max: 40 },
-          { kind: "choice", key: "advantage", aria: "Advantage", options: [{ value: "", label: "Normal" }, { value: "advantage", label: "Advantage" }, { value: "disadvantage", label: "Disadvantage" }] },
         ],
       },
     ],

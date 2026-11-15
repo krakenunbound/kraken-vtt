@@ -12,8 +12,8 @@ export type CommandContext = {
   session: Session;
   openWindow: (kind: WindowKind, title: string) => void;
   closeWindow: (kind: WindowKind) => void;
-  modifier: number;
-  setModifier: (value: number) => void;
+  // The modifier box (the host's): a slot added, as FG's /mod.
+  addModifier: (value: number, label: string) => void;
   tower: boolean;
   // Who the GM speaks as (/id, /gmid).
   speakAs: string;
@@ -43,15 +43,13 @@ const WINDOWS: Record<string, { kind: WindowKind; title: string }> = {
   gmicon: { kind: "gmicons", title: "GM Icon" },
 };
 
-const withModifier = (formula: string, modifier: number) => (modifier ? `${formula}${modifier > 0 ? "+" : ""}${modifier}` : formula);
-
 // "/roll 4d6d1 Strength": the dice (one word) and what the roll is for.
 function rollWith(mode: RollMode) {
   return (rest: string, context: CommandContext) => {
     const [formula = "", ...label] = rest.trim().split(/\s+/);
     if (!formula) return context.session.note("Give the dice, like /roll 1d20+3 Strength. 4d6d1 drops the lowest, 4d6k3 keeps the highest three, 3d6! explodes.");
-    context.session.roll(withModifier(formula, context.modifier), label.join(" "), "", mode === "public" && context.tower, mode, context.speakAs);
-    context.setModifier(0);
+    // The host adds the modifier box (and its keys) to the roll.
+    context.session.roll(formula, label.join(" "), "", mode === "public" && context.tower, mode, context.speakAs);
   };
 }
 
@@ -103,12 +101,13 @@ export const COMMANDS: Command[] = [
   {
     names: ["mod"],
     args: "[number] <for>",
-    help: "Add to the modifier box for the next roll (FG's /mod)",
+    help: "Add a number to the modifier box for the next roll (FG's /mod): /mod 2 Flanking",
     group: "Dice",
     run: (rest, context) => {
-      const n = Math.round(Number(rest.trim().split(/\s+/)[0]));
-      if (!Number.isFinite(n)) return context.session.note("Give a number, like /mod 2 or /mod -1.");
-      context.setModifier(context.modifier + n);
+      const [first = "", ...words] = rest.trim().split(/\s+/);
+      const n = Math.round(Number(first));
+      if (!first || !Number.isFinite(n)) return context.session.note("Give a number, like /mod 2 Flanking or /mod -1.");
+      context.addModifier(n, words.join(" "));
     },
   },
   // --- Talk ----------------------------------------------------------------

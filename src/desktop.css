@@ -695,6 +695,29 @@ span.ct-init { display: inline-block; }
 .modifier-box .modifier-value small { font-size: 0.56rem; color: var(--muted); letter-spacing: 0.06em; margin-top: -2px; }
 .modifier-box.set { border-color: var(--brass); box-shadow: 0 0 8px rgba(210, 161, 90, 0.35); }
 .modifier-box.set input { color: var(--brass); }
+/* The stack's labelled slots, above the box (FG's modifier stack); a right-click takes one off. */
+.modifier-box { position: relative; overflow: visible; }
+.modifier-box > button:first-of-type { border-radius: 5px 0 0 5px; }
+.modifier-box > button:last-of-type { border-radius: 0 5px 5px 0; }
+.modifier-box.drop { border-color: var(--brass); outline: 2px dashed var(--brass); outline-offset: 2px; }
+.modifier-slots { position: absolute; right: 0; bottom: calc(100% + 4px); z-index: 4; display: flex; flex-direction: column; gap: 2px; min-width: 9rem; max-width: 14rem; margin: 0; padding: 4px; list-style: none; border: 1px solid var(--brass-dim); border-radius: 6px; background: rgba(15, 17, 21, 0.94); box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5); }
+.modifier-slots li { display: flex; gap: 6px; padding: 1px 4px; font-size: 0.78rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-radius: 4px; cursor: context-menu; }
+.modifier-slots li b { min-width: 2rem; color: var(--brass); text-align: right; }
+@media (hover: hover) {
+  .modifier-slots li:hover { background: var(--brass-soft); }
+  .modifier-keys button:hover { border-color: var(--brass); }
+}
+/* The game's keys (ADV, DIS, +2, Cover...), each on until the next roll reads it. */
+.modifier-keys { display: flex; flex-wrap: wrap; gap: 3px; padding: 0 6px 6px; }
+.modifier-keys button { min-inline-size: 24px; min-block-size: 24px; padding: 1px 7px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em; border: 1px solid var(--line); border-radius: 999px; background: #1a1d23; color: var(--muted); }
+.modifier-keys button[aria-pressed="true"] { border-color: var(--brass); background: var(--brass); color: #1a1408; box-shadow: 0 0 8px rgba(210, 161, 90, 0.45); }
+.modifier-keys button:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
+@media (forced-colors: active) {
+  .modifier-keys button[aria-pressed="true"] { background: Highlight; color: HighlightText; }
+}
+/* What the stack added to a roll, on its card. */
+.roll-card .roll-mods { display: flex; flex-wrap: wrap; gap: 3px; flex-basis: 100%; }
+.roll-card .roll-mods span { padding: 0 6px; font-size: 0.7rem; border: 1px solid var(--brass-dim); border-radius: 999px; color: var(--brass); }
 /* A die in its owner's set (tray, pool, roll cards). */
 .die-shape.set polygon { stroke: rgba(255, 255, 255, 0.42); stroke-width: 1.1; stroke-linejoin: round; filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.55)); }
 .die-shape.set text { paint-order: stroke; stroke: rgba(0, 0, 0, 0.5); stroke-width: 1.5px; stroke-linejoin: round; }
