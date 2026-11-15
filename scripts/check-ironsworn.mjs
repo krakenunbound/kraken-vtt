@@ -75,6 +75,15 @@ function assert(condition, message) {
 }
 console.log("rules ok");
 
+// --- The sheet's words: the whitelist from the manifest, the same as the hand-written set it replaced ---------
+{
+  const { EDIT_PATHS } = require("../electron/ironsworn.cjs");
+  const text = ["look", "background", "notes", "pronouns", "callsign", "epilogue"].map((key) => `^${key}$`);
+  assert(EDIT_PATHS.text.map((regex) => regex.source).join(" ") === text.join(" "), `the text whitelist from the manifest is the old set: ${EDIT_PATHS.text.map((regex) => regex.source).join(" ")}`);
+  assert(EDIT_PATHS.remove.map((regex) => regex.source).join() === /^(inventorylist)\.id-\d+$/.source, `the rows the sheet may drop: ${EDIT_PATHS.remove.map((regex) => regex.source).join()}`);
+  assert(EDIT_PATHS.number.length === 0 && EDIT_PATHS.string.length === 0 && EDIT_PATHS.list.length === 0, "no other whitelisted paths (the host's own rules)");
+}
+
 // --- At the table: Ironsworn --------------------------------------------------------
 async function table(ruleset, books) {
   const server = createTableServer({ ruleset });

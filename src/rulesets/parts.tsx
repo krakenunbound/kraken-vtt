@@ -1,11 +1,12 @@
 import type { CustomPart, Format } from "../core/parts/Parts";
 import type { WizardFunctions } from "../core/wizard/Steps";
-import { BfStrip, BfTurnUndead } from "./bfrpg";
+import { BfTurnUndead } from "./bfrpg";
 import { CairnRest, cairnBackgroundGold, cairnBackgroundOfRoll, cairnBuild, cairnItemSlots } from "./cairn";
 import { Dnd5eDeathSaves, Dnd5eDread, Dnd5eDying, Dnd5eSpells, dnd5eClassName } from "./dnd5e";
 import { adnd2eAbilityNote, adnd2eClassKey } from "./adnd2e";
 import { Mgt2SkillPickers, mgt2Careers, mgt2SkillTotal } from "./mgt2";
 import { AstraMarks, AstraSkillPickers, AstraTrickNotes, astraSkillTotal } from "./astra";
+import { IronAssets, IronCarryLine, IronControl, IronDebilities, IronLastRoll, IronMoves, IronProblem, IronProgress } from "./ironsworn";
 
 // The level-3 parts a manifest places inside the core frame ({ part: "custom",
 // component: "<ruleset>.<name>" }) and the formatters a list's details name
@@ -13,7 +14,6 @@ import { AstraMarks, AstraSkillPickers, AstraTrickNotes, astraSkillTotal } from 
 // Ref a manifest names is one of these (or a component in index.tsx).
 export const CUSTOM_PARTS: Record<string, CustomPart> = {
   "cairn.restStrip": CairnRest,
-  "bfrpg.strip": BfStrip,
   "bfrpg.turnUndead": BfTurnUndead,
   "dnd5e.spells": Dnd5eSpells,
   "dnd5e.dread": Dnd5eDread,
@@ -23,6 +23,14 @@ export const CUSTOM_PARTS: Record<string, CustomPart> = {
   "astra.marks": AstraMarks,
   "astra.trickNotes": AstraTrickNotes,
   "astra.skillPickers": AstraSkillPickers,
+  "ironsworn.control": IronControl,
+  "ironsworn.lastRoll": IronLastRoll,
+  "ironsworn.problem": IronProblem,
+  "ironsworn.debilities": IronDebilities,
+  "ironsworn.moves": IronMoves,
+  "ironsworn.progress": IronProgress,
+  "ironsworn.assets": IronAssets,
+  "ironsworn.carryLine": IronCarryLine,
 };
 export const FORMATS: Record<string, Format> = {
   "cairn.itemSlots": cairnItemSlots,

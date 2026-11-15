@@ -6,7 +6,7 @@ import type { CombatEntry, Session } from "../session/useSession";
 import { Icon } from "../ui/icons";
 import { FateLine } from "./FateLine";
 import { TrackerButtons, wordsOf, textOfWords } from "../core/tracker/actions";
-import { ProgressBoxes } from "../characters/SheetIronsworn";
+import { ProgressBoxes } from "../core/parts/ProgressBoxes";
 import { RANK_NAMES, RANKS } from "../../shared/ironsworn/rules.mjs";
 
 // The save box of a game whose manifest names none (C&C's six attributes against a CL).

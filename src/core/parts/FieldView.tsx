@@ -1,6 +1,6 @@
 import type { FieldSpec } from "../../../shared/rulesets/types";
 import { Field } from "../fields/Field";
-import { at, fill, num, rows, textOf, useSheet, type Scope } from "../sheet/context";
+import { at, fill, nodesOf, num, rows, textOf, useSheet, type Scope } from "../sheet/context";
 
 // One field of a manifest (FG's stringfield / numberfield / combobox, bound to
 // a path): shown, typed into, picked or ticked. An edit goes to the host's
@@ -46,8 +46,10 @@ export function FieldView({ spec, scope, base = "" }: { spec: FieldSpec; scope: 
         ? (sheet.formats[spec.format]?.(scope.data, undefined, scope.data) ?? "")
         : spec.join
           ? rows(raw).map(([, row]) => fill(spec.join?.item ?? "", { row, data: {} })).join(spec.join.sep)
-          : spec.show
-            ? fill(spec.show, scope)
+          : Array.isArray(spec.show)
+            ? nodesOf(spec.show, scope, modifiers)
+            : spec.show
+            ? textOf(spec.show, scope, modifiers)
             : fill(`{${spec.path}}`, scope) || String(value ?? "");
       return (
         <span className={spec.className ? `cc-value ${spec.className}` : "cc-value"} title={title} style={spec.color ? { color: spec.color } : undefined} {...attrs}>

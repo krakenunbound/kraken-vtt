@@ -422,8 +422,12 @@ async function siteRoll(table, { theme, domain, what = "feature" }, from = "GM")
   return { what, roll: value, result, from: source };
 }
 
-// What the sheet may change, then every number worked out again.
-const TEXT = new Set(["look", "background", "notes", "pronouns", "callsign", "epilogue"]);
+// What the sheet may change, then every number worked out again: its words from the manifest's edit globs
+// (shared/rulesets/edit.mjs); the numbers, marks, tracks, assets and carried things are this host's own rules.
+const { default: MANIFEST } = require("../shared/ironsworn/manifest.mjs");
+const { editPaths } = require("../shared/rulesets/edit.mjs");
+const EDIT_PATHS = editPaths(MANIFEST.edit);
+const TEXT = EDIT_PATHS.text;
 async function editIronsworn(table, record, changes, seat) {
   mine(record, seat);
   if (!Array.isArray(changes) || changes.length === 0) throw new Error("What changes?");
@@ -445,7 +449,7 @@ async function editIronsworn(table, record, changes, seat) {
     const value = change?.value;
     const parts = key.split(".");
     if (key === "name") name = String(value ?? "").trim().slice(0, 120) || record.name;
-    else if (TEXT.has(key)) data[key] = String(value ?? "").slice(0, 8000);
+    else if (TEXT.some((pattern) => pattern.test(key))) data[key] = String(value ?? "").slice(0, 8000);
     else if (key === "bonds.list") data.bonds = { ...(data.bonds ?? {}), list: String(value ?? "").slice(0, 4000) };
     else if (/^stats\.(edge|heart|iron|shadow|wits)$/.test(key) || /^meters\.(health|spirit|supply)$/.test(key) || key === "momentum" || key === "expspent" || key === "bonds.ticks" || key === "failure.ticks" || /^legacy\.(quests|bonds|discoveries)\.(ticks|cleared)$/.test(key)) set(parts, number(key, value));
     else if (key === "exp") {
@@ -462,7 +466,7 @@ async function editIronsworn(table, record, changes, seat) {
     else if (/^assets\.a\d+\.meter$/.test(key)) set(parts, number(key, value));
     else if (/^assets\.a\d+\.fields\.name$/.test(key)) set(parts, String(value ?? "").slice(0, 80));
     else if (/^assets\.a\d+\.marks\.[a-z_]+$/.test(key)) set(parts, Boolean(value));
-    else if (/^inventorylist\.id-\d+$/.test(key) && value === null) delete data.inventorylist?.[parts[1]];
+    else if (EDIT_PATHS.remove.some((pattern) => pattern.test(key)) && value === null) delete data.inventorylist?.[parts[1]];
     else if (/^inventorylist\.id-\d+\.name$/.test(key)) set(parts, String(value ?? "").slice(0, 120));
     else if (/^inventorylist\.id-\d+\.(count|carried)$/.test(key)) set(parts, number(key, value));
     else if (key === "inventory.add") {
@@ -661,4 +665,4 @@ async function tableIronsworn(table, action, args = {}, seat, from) {
 }
 const TABLE_ACTIONS = new Set(["oracle", "site", "foe-mark", "foe-rank", "foe-clear", "inflict"]);
 
-module.exports = { rulesIron, isIronsworn, isIronswornRuleset, gameOfRuleset, buildIronsworn, editIronsworn, statRoll, actionIronsworn, tableIronsworn, TABLE_ACTIONS, rollOracle, siteRoll, RULESETS };
+module.exports = { rulesIron, isIronsworn, isIronswornRuleset, gameOfRuleset, buildIronsworn, editIronsworn, statRoll, actionIronsworn, tableIronsworn, TABLE_ACTIONS, rollOracle, siteRoll, RULESETS, EDIT_PATHS };

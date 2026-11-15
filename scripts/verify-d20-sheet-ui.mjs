@@ -153,6 +153,53 @@ Object.assign(GAMES, {
   },
 });
 
+// Ironsworn and Starforged (stage 4): their own pages' steps, the last move over every tab.
+const IRON_MOVES = [
+  '[data-move="face_danger"]', ["[data-move-option]", 1], ["[data-move-adds]", 1], '[data-action="make-move"]', '.iron-last [data-action="iron-burn"]', '.iron-last [data-action="iron-keep"]', '.iron-last [data-action="iron-choose"]',
+  '[data-move="swear_an_iron_vow"]', ["[data-vow-name]", "Find the ford"], ["[data-vow-rank]", "formidable"], '[data-action="make-move"]',
+  '[data-move="endure_harm"]', ["[data-move-amount]", 2], '[data-action="make-move"]',
+  '[data-move="fulfill_your_vow"]', ["[data-move-track]", "track:t01"], '[data-action="make-move"]',
+];
+const ironGame = (ruleset, books, specs, setup) => ({ ruleset, shipped: true, books, tabs: "main,moves,progress,assets,notes", specs, setup, fight: [], areas: [".iron-last"], more: { moves: IRON_MOVES } });
+Object.assign(GAMES, {
+  ironsworn: {
+    ...ironGame(
+      "Ironsworn",
+      ["Ironsworn Reference", "Ironsworn Foes and Sites"],
+      [
+        { name: "Kira Ashdown", stats: { edge: 3, heart: 2, iron: 2, shadow: 1, wits: 1 }, assets: [{ name: "Hound", field: "Ember" }, "Archer", "Alchemist"], backgroundVow: { name: "Avenge my clan", rank: "extreme" }, bonds: ["Brannoch", "Wenna Tull"], look: "Scarred hands", gear: ["Bow", "Bedroll"] },
+        { name: "Bo Fenn", stats: { edge: 1, heart: 1, iron: 3, shadow: 2, wits: 2 }, assets: ["Horse", "Brawler", "Bonded"], backgroundVow: { name: "Find my sister", rank: "epic" } },
+      ],
+      // Experience to spend, a journey marked twice, a failure tick.
+      async ({ tool, ids }) => {
+        await tool("kraken_character_edit", { id: ids["Kira Ashdown"], changes: [{ path: "exp", value: 6 }] });
+        await tool("kraken_ironsworn", { id: ids["Kira Ashdown"], action: "track-add", name: "Reach the Cinder Barrow", kind: "journey", rank: "troublesome" });
+        await tool("kraken_ironsworn", { id: ids["Kira Ashdown"], action: "track-mark", track: "t02", times: 2 });
+        await tool("kraken_ironsworn", { id: ids["Kira Ashdown"], action: "failure", ticks: 1 });
+      },
+    ),
+    states: [
+      { who: "Kira Ashdown", label: "wounded", tabs: ["main"], changes: () => [{ path: "debilities.wounded", value: true }, { path: "meters.health", value: 2 }] },
+      { who: "Kira Ashdown", label: "move", tabs: ["main", "progress"], tools: (id) => [["kraken_ironsworn", { id, action: "move", move: "Face Danger", option: 0 }]] },
+    ],
+  },
+  starforged: {
+    ...ironGame(
+      "Starforged",
+      ["Starforged Reference"],
+      [{ name: "Vesna Kade", callsign: "Needle", stats: { edge: 2, heart: 1, iron: 3, shadow: 1, wits: 2 }, assets: ["Ace", "Blademaster", { name: "Starship", field: "Lantern" }, "Glowcat"], backgroundVow: { name: "Find the lost fleet", rank: "epic" }, incitingVow: { name: "Bring the colonists home", rank: "dangerous" }, connection: { name: "Ashe Varo", role: "Broker", rank: "dangerous" } }],
+      async ({ tool, ids }) => {
+        await tool("kraken_character_edit", { id: ids["Vesna Kade"], changes: [{ path: "exp", value: 6 }] });
+        await tool("kraken_ironsworn", { id: ids["Vesna Kade"], action: "legacy-mark", track: "quests", ticks: 3 });
+      },
+    ),
+    states: [
+      { who: "Vesna Kade", label: "impacted", tabs: ["main"], changes: () => [{ path: "impacts.wounded", value: true }, { path: "meters.spirit", value: 1 }] },
+      { who: "Vesna Kade", label: "move", tabs: ["main"], tools: (id) => [["kraken_ironsworn", { id, action: "move", move: "Face Danger", option: 0 }]] },
+    ],
+  },
+});
+
 const [gameId, outArg] = process.argv.slice(2);
 const game = GAMES[gameId];
 if (!game) {
@@ -341,7 +388,12 @@ try {
   // The states a sheet shows by itself, each shot on the main tab, GM and player.
   for (const state of game.states) {
     const data = await dataOf(ids[state.who]);
-    await tool("kraken_character_edit", { id: ids[state.who], changes: state.changes(data) });
+    // A state set by the game's own tools (a move made, the dice fixed first), or by edits.
+    for (const [name, args] of state.tools?.(ids[state.who]) ?? []) {
+      await tool("kraken_dice_force", { values: [5, 2, 4, 1, 3, 2] });
+      await tool(name, args);
+    }
+    if (state.changes) await tool("kraken_character_edit", { id: ids[state.who], changes: state.changes(data) });
     await settle(600);
     // A state shot on its tabs (main, unless it names more); the main tab's file keeps its old name.
     const tabsOf = state.tabs ?? ["main"];
@@ -397,9 +449,12 @@ try {
       await settle(300);
       const count = await sheet.locator(".cc-page").locator(CONTROLS).count();
       const strip = await sheet.locator(".five-strip").locator(CONTROLS).count();
-      const header = await sheet.locator(".cc-boxes").locator(CONTROLS).count();
-      // Every control of the sheet is in one of the three places pressed, or it is said here.
-      const outside = (await sheet.locator(CONTROLS).count()) - count - strip - header;
+      const header = await sheet.locator(".cc-boxes").first().locator(CONTROLS).count();
+      // A game's other places over every tab (Ironsworn's last move), pressed on every tab before its page.
+      const areas = [];
+      for (const area of game.areas ?? []) areas.push(...Array.from({ length: await sheet.locator(area).locator(CONTROLS).count() }, (_, index) => ({ in: area, index })));
+      // Every control of the sheet is in one of the places pressed, or it is said here.
+      const outside = (await sheet.locator(CONTROLS).count()) - count - strip - header - areas.length;
       if (outside) {
         presses.push({ what: `${spec.name} ${tab}: controls outside the header, the strip and the page`, unpressed: outside });
         console.log(`  ${spec.name} ${tab}: ${outside} controls not pressed (outside the header, the strip and the page)`);
@@ -410,6 +465,7 @@ try {
       const targets = [
         ...(first ? Array.from({ length: header }, (_, index) => ({ in: ".cc-boxes", index })) : []),
         ...(first ? Array.from({ length: strip }, (_, index) => ({ in: ".five-strip", index })) : []),
+        ...areas,
         ...Array.from({ length: count }, (_, index) => ({ in: ".cc-page", index })),
       ];
       let dropped = false;
@@ -437,6 +493,18 @@ try {
             await control.press("Tab");
           });
         } else await press(sheet, id, what, () => control.click());
+      }
+      // A tab whose controls appear only once one is used (a move chosen, then rolled): the game's own steps, each a
+      // selector clicked (or [selector, value] filled or picked), pressed in order where the sheet shows it.
+      for (const step of game.more?.[tab] ?? []) {
+        const [selector, value] = Array.isArray(step) ? step : [step];
+        const control = sheet.locator(selector).first();
+        if (!(await control.count()) || (await control.isDisabled())) {
+          presses.push({ what: `${spec.name} ${tab}: ${selector}`, skipped: (await control.count()) ? "disabled" : "absent" });
+          continue;
+        }
+        const tag = await control.evaluate((item) => item.tagName);
+        await press(sheet, id, `${spec.name} ${tab}: ${selector}${value === undefined ? "" : ` = ${value}`}`, () => (value === undefined ? control.click() : tag === "SELECT" ? control.selectOption(String(value)) : control.fill(String(value))));
       }
     }
   }

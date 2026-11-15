@@ -76,7 +76,13 @@ export function SheetRenderer({ spec: given, record, session, ruleset, custom, f
         return;
       }
       const send = messageSender(session, call.message);
-      if (send) void Promise.resolve(send(record.id, call.action, args)).catch(() => undefined);
+      // The host's refusal shown on the sheet (problem: the modifier its error line reads), cleared when sent.
+      const problem = call.problem;
+      if (problem) setModifiers((now) => ({ ...now, [problem]: "" }));
+      if (send)
+        void Promise.resolve(send(record.id, call.action, args)).catch((error: unknown) => {
+          if (problem) setModifiers((now) => ({ ...now, [problem]: error instanceof Error ? error.message : String(error) }));
+        });
     };
     return { record, session, data, editable, gm, change, act, modifiers, setModifier: (key, value) => setModifiers((now) => ({ ...now, [key]: value })), targets, features, formats };
   }, [record, session, data, editable, gm, modifiers, targets.join("\u0000"), inFight?.id, features, formats]);
@@ -92,19 +98,26 @@ export function SheetRenderer({ spec: given, record, session, ruleset, custom, f
         session={session}
         editable={editable}
         className={spec.className ? `cc-sheet ${spec.className}` : "cc-sheet"}
-        attrs={{ "data-ruleset": ruleset }}
+        attrs={{ "data-ruleset": ruleset, ...Object.fromEntries((spec.attrs ?? []).map((attr) => [`data-${attr.name}`, textOf(attr.value, scope, modifiers)])) }}
         artRace={spec.art === undefined ? undefined : String(art ?? "")}
         tabs={shownTabs.map((item) => (item.label ? { id: item.id, label: item.label } : item.id))}
         tab={page?.id ?? ""}
         onTab={setTab}
-        boxes={spec.header.identity
-          .filter((field) => holds(field.when, scope, context))
-          .map((field) => (
-            <label key={field.path} className="cc-labelled cc-box">
-              <FieldView spec={field} scope={scope} />
-              <small>{field.note ?? textOf(field.label, scope, modifiers)}</small>
-            </label>
-          ))}
+        boxes={[
+          ...spec.header.identity
+            .filter((field) => holds(field.when, scope, context))
+            .map((field) => (
+              <label key={field.path} className="cc-labelled cc-box">
+                <FieldView spec={field} scope={scope} />
+                <small>{field.note ?? textOf(field.label, scope, modifiers)}</small>
+              </label>
+            )),
+          // A game's own boxes after them (a button in the header).
+          ...(spec.header.custom ?? []).map((ref) => {
+            const Custom = custom[ref];
+            return Custom ? <Custom key={ref} /> : null;
+          }),
+        ]}
       >
         {(spec.top ?? []).map((part, index) => (
           <PartView key={`top-${index}`} spec={part} custom={custom} formats={formats} />

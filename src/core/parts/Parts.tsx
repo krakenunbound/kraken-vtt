@@ -114,7 +114,7 @@ function StepButton({ spec, scope }: { spec: StepSpec; scope?: Scope }) {
   const sheet = useSheet();
   const here = scope ?? { data: sheet.data };
   return (
-    <button type="button" data-action={spec.hook} title={spec.title} disabled={spec.disabled ? holds(spec.disabled, here, sheet) : false} onClick={() => sheet.act(spec.action)}>
+    <button type="button" className={spec.className} aria-label={spec.aria} data-action={spec.hook} title={spec.title?.includes("{") ? fill(spec.title, here) : spec.title} disabled={spec.disabled ? holds(spec.disabled, here, sheet) : false} onClick={() => sheet.act(spec.action)}>
       {spec.label}
     </button>
   );
@@ -357,8 +357,8 @@ function DerivedBox({ box }: { box: BoxSpec }) {
   // The first state the shown number is in (Dead, Dying, Stable, Disabled).
   const state = box.states?.find((item) => (item.atMost === undefined || shown <= item.atMost) && (item.under === undefined || shown < item.under) && (item.equals === undefined || shown === item.equals) && holds(item.when, scope, sheet));
   return (
-    <div className="five-big" title={box.title ? textOf(box.title, scope, sheet.modifiers) : undefined}>
-      <small>{box.label}</small>
+    <div className="five-big" title={box.title ? textOf(box.title, scope, sheet.modifiers) : undefined} {...(box.attr ? { [`data-${box.attr.name}`]: box.attr.value } : {})}>
+      <small>{Array.isArray(box.label) ? box.label.map((word, index) => <Fragment key={index}>{word}</Fragment>) : box.label}</small>
       {box.show === "shield" ? (
         <span className="cc-shield" {...hook}>
           {shown}
@@ -463,6 +463,7 @@ function List({ spec, formats }: { spec: Extract<Part, { part: "list" }>; format
           const words = (
             <>
               {spec.name.bold ? <b>{name}</b> : name}
+              {spec.name.after !== undefined ? textOf(spec.name.after, own, modifiers) : null}
               {/* A list with details always has their line (empty or not), as every list on the hand-made sheets did, unless hideEmpty. */}
               {spec.small ? (
                 <>
@@ -576,12 +577,13 @@ function Strip({ spec }: { spec: Extract<Part, { part: "strip" }> }) {
         const ready = (exp: Path, next: Path) => num(at(data, next)) > 0 && num(at(data, exp)) >= num(at(data, next));
         switch (item.kind) {
           case "level": {
-            const level = num(at(data, item.path));
+            const level = num(at(data, item.path)) || (item.atLeast ?? 0);
+            const scope: Scope = { data };
             return (
-              <span key={index} className="cc-inline">
+              <span key={index} className="cc-inline" title={item.hint ? fill(item.hint, scope) : undefined}>
                 <b>Level</b> <span className="cc-num" data-stat="level">{level}</span>
                 {editable && (ready(item.exp, item.next) || gm) && level < Number(item.max) ? (
-                  <button type="button" className="cc-levelup" data-action="level-up" title={item.title} onClick={() => session.levelUp(record.id)}>
+                  <button type="button" className="cc-levelup" data-action="level-up" title={textOf(item.title, scope, modifiers)} onClick={() => session.levelUp(record.id)}>
                     <Icon name="add" size={14} />
                   </button>
                 ) : null}
@@ -609,9 +611,23 @@ function Strip({ spec }: { spec: Extract<Part, { part: "strip" }> }) {
             );
           case "xp": {
             const field = <Field value={num(at(data, item.path))} number editable={item.edit === "gm" ? gm : editable} label={item.label} onSave={(value) => sheet.change(item.path, Number(value) || 0)} />;
+            const scope: Scope = { data };
             return (
               <span key={index} className="cc-inline">
-                {item.next ? (
+                {item.shown ? (
+                  // The experience as a number and its next, the GM's field after them, and a note (Basic Fantasy's).
+                  <>
+                    <b>{item.word ?? "XP"}</b>
+                    {" "}
+                    <span className="cc-num" data-stat={item.shown.hook}>
+                      {num(at(data, item.path))}
+                    </span>
+                    {" / "}
+                    <span className="cc-num">{num(at(data, item.next ?? "")) || "—"}</span>
+                    {gm ? field : null}
+                    {item.note && holds(item.note.when, scope, sheet) ? <small className="hint">{nodesOf(item.note.text, scope, modifiers)}</small> : null}
+                  </>
+                ) : item.next ? (
                   <>
                     <b>{item.word ?? "XP"}</b> {field} / <span className="cc-num">{num(at(data, item.next)) || "—"}</span>
                   </>

@@ -21,8 +21,9 @@ export type Nodes = Text | Text[];
 // What a button or a field sends instead of an edit: a ruleset message (session.<message>Action(record, action, args)),
 // a tracker message (session.ct(ct, { recordId, ...args })), or a roll (session.siegeCheck). key / value: the argument
 // names that carry the row's key and the field's value.
+// problem: the sheet modifier that shows the host's refusal (cleared when it is sent), as a sheet's error line reads it.
 export type ActionCall =
-  | { message: string; action: string; key?: string; value?: string; args?: Record<string, unknown>; modifiers?: string[] }
+  | { message: string; action: string; key?: string; value?: string; args?: Record<string, unknown>; modifiers?: string[]; problem?: string }
   | { ct: string; key?: string; value?: string; args?: Record<string, unknown>; modifiers?: string[] }
   // A roll (session.siegeCheck): bonus names the sheet modifier added to it; keyAs "skill": the key goes as the skill;
   // fight: a save while in a fight goes through the tracker (its effects count).
@@ -45,7 +46,7 @@ export interface FieldSpec {
   bare?: boolean; // no label box around it
   action?: ActionCall; // sent as an action, not an edit
   when?: Cond;
-  show?: string; // shown: this template instead of the path's value ("{className} {level}")
+  show?: Nodes; // shown: this template instead of the path's value ("{className} {level}"); a list: one text node each
   lines?: boolean; // a textarea of a list: one item a line
   zeroIsEmpty?: boolean; // 0 shows the default too (a count of 0 shows 1, as the hand-made sheets did)
   format?: Ref; // shown: a formatter's text from the record (a class worked out from its packages)
@@ -66,9 +67,11 @@ export interface RollSpec {
   className?: string; // default "cc-bonus"
 }
 export interface StepSpec {
-  hook: Hook; // data-action
+  hook?: Hook; // data-action (none: no data-action)
   label: string;
   title?: string;
+  aria?: string;
+  className?: string;
   action: ActionCall;
   disabled?: Cond;
 }
@@ -78,8 +81,9 @@ export interface BoxLine {
   items: ({ before: string } & ({ field: FieldSpec } | { value: Path; hook?: Hook }))[];
 }
 export interface BoxSpec {
-  label: string;
+  label: string | string[]; // a list: one text node each ("Supply", " (shared)")
   title?: Text;
+  attr?: { name: string; value: string }; // a data-* on the box (data-meter="health")
   // remaining: path (+ plus) less minus, "/ path" (HP); text: a template (text); field: a field in the box (field)
   show: "value" | "remaining" | "shield" | "text" | "field";
   path: Path;
@@ -124,7 +128,7 @@ export type Part = (
   | ({ part: "statBlock" } & StatBlockSpec)
   // A box may be a game's own (custom: a Ref); hint: a line under the boxes.
   | { part: "derived"; className?: string; boxes: (BoxSpec | { custom: Ref; when?: Cond })[]; hint?: Text }
-  | { part: "list"; label?: string; path: Path; hook?: string /* no data-* on a row without */; count?: string; className?: string; select?: FieldSpec; check?: FieldSpec; name: { path: Path; else?: string; bold?: boolean; title?: Path[]; flat?: boolean /* the name and details straight in the row, not in a span */ }; details?: { text?: string; format?: Ref; when?: Cond }[]; sep?: string; hideEmpty?: boolean /* no details line when none */; fields?: FieldSpec[] /* typed into, after the select */; small?: Text[] /* the details as text nodes, in place of details */; smalls?: ListSmall[]; rowActions?: ListAction[]; remove?: { aria: Text; title?: string; action?: ActionCall }; add?: { label: string; note: string; action: ActionCall }; modifier?: Modifier; empty?: string }
+  | { part: "list"; label?: string; path: Path; hook?: string /* no data-* on a row without */; count?: string; className?: string; select?: FieldSpec; check?: FieldSpec; name: { path: Path; else?: string; bold?: boolean; title?: Path[]; flat?: boolean /* the name and details straight in the row, not in a span */; after?: Text /* words right after the name (" ×3") */ }; details?: { text?: string; format?: Ref; when?: Cond }[]; sep?: string; hideEmpty?: boolean /* no details line when none */; fields?: FieldSpec[] /* typed into, after the select */; small?: Text[] /* the details as text nodes, in place of details */; smalls?: ListSmall[]; rowActions?: ListAction[]; remove?: { aria: Text; title?: string; action?: ActionCall }; add?: { label: string; note: string; action: ActionCall }; modifier?: Modifier; empty?: string }
   // word: a fixed word in place of the coin's name ("credits"); before: the word goes before the field ("Cr 2500").
   | { part: "coins"; path: Path; className?: string; none?: { text: string; unless: string }; aria?: Text /* default "{name} coins" */; upper?: boolean /* the coin's name in capitals */; word?: string; before?: boolean }
   | { part: "load"; mode: "slots"; hook: string; used: Path; total: number; text: string }
@@ -185,12 +189,15 @@ export interface ListSmall {
 }
 export type StripItem =
   // The level (data-stat="level") and its level-up: the owner once the experience is there, or the GM, under max.
-  | { kind: "level"; path: Path; exp: Path; next: Path; max: number | string; title: string }
+  // title: the level-up's (a text: by the level); hint: the line's own title; atLeast: the level shown when there is none.
+  | { kind: "level"; path: Path; exp: Path; next: Path; max: number | string; title: Text; hint?: string; atLeast?: number }
   // A level per class (a multi-class character's), each with its own level-up (session.levelUp(record, class));
   // hook: the formatter that names a class's data-stat ("level-{key}").
   | { kind: "levels"; path: Path; exp: Path; next: Path; max: number; title: Text; buttonTitle: Text; hook: Ref }
   // word: its bold word (default XP); no next: no "/ next"; edit "gm": only the GM types it.
-  | { kind: "xp"; path: Path; next?: Path; label: string; word?: string; edit?: "gm" }
+  // shown: the experience as a number box (data-stat=hook) and its next, with the GM's field after them (Basic
+  // Fantasy's); note: a small after it while when holds (+10% XP).
+  | { kind: "xp"; path: Path; next?: Path; label: string; word?: string; edit?: "gm"; shown?: { hook: Hook }; note?: { when: Cond; text: Nodes } }
   | { kind: "value"; label: string; path: Path; hook: Hook; title?: string; format?: "signed" }
   // A sheet modifier the rolls read (DC, Mod): a number kept while the sheet is open.
   // plain: the label as plain words, not bold; input: the field's classes (default "cc-field number"); width: in em;
@@ -213,7 +220,8 @@ export interface TabSpec {
 
 export interface SheetSpec {
   level: "inherit" | "arrange"; // "replace" is per part (custom) or per window
-  header: { identity: FieldSpec[] };
+  header: { identity: FieldSpec[]; custom?: Ref[] /* a game's own boxes after them (Ironsworn's initiative button) */ };
+  attrs?: { name: string; value: Text }[]; // more data-* on the sheet (data-game="starforged")
   top?: Part[]; // above every tab (a strip of level, experience and the roll modifier)
   art?: Path | Path[]; // what picks the portrait art (the race): the first path with a value
   tabs: TabSpec[];
