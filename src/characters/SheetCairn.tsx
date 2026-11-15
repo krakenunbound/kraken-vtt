@@ -2,10 +2,8 @@ import { useMemo, useState } from "react";
 import { useHostRolls } from "./hostRolls";
 import { priceOf } from "../../shared/shop.mjs";
 import type { Session, TableRecord } from "../session/useSession";
-import { Icon } from "../ui/icons";
-import { slotDrag } from "../ui/QuickSlots";
-import { ArtPicker, Picture } from "./ArtPicker";
-import { Field } from "./CCSheet";
+import { Field } from "../core/fields/Field";
+import { IdentityBox, SheetFrame } from "../core/frame/SheetFrame";
 import { BODY_SLOTS, PACK_SLOTS, SHORT, SLOTS, STAT_NAMES, STATS, TRAITS, TRAIT_NAMES, itemSlots } from "../../shared/cairn/rules.mjs";
 
 // The Cairn character sheet, in Kraken's sheet style: who they are on top,
@@ -23,13 +21,11 @@ type Tab = (typeof TABS)[number];
 const rows = (node: unknown): [string, Row][] =>
   node && typeof node === "object" ? Object.entries(node as Record<string, unknown>).filter((entry): entry is [string, Row] => Boolean(entry[1]) && typeof entry[1] === "object") : [];
 const num = (value: unknown) => (Number.isFinite(Number(value)) ? Number(value) : 0);
-const titled = (word: string) => word[0].toUpperCase() + word.slice(1);
 const stat = (key: string) => STAT_NAMES[key as keyof typeof STAT_NAMES];
 const short = (key: string) => SHORT[key as keyof typeof SHORT];
 
 export function SheetCairn({ record, session }: { record: TableRecord; session: Session }) {
   const [tab, setTab] = useState<Tab>("main");
-  const [picking, setPicking] = useState<"portrait" | "token" | null>(null);
   const [danger, setDanger] = useState(false);
   const [mode, setMode] = useState("");
   const data = record.data as Row;
@@ -43,7 +39,6 @@ export function SheetCairn({ record, session }: { record: TableRecord; session: 
   const ac = (data.ac ?? {}) as Row;
   const slots = (data.slots ?? {}) as Row;
   const traits = (data.traits ?? {}) as Row;
-  const portrait = typeof data.portrait === "string" ? data.portrait : "";
   const current = num(hp.total) - num(hp.wounds);
   const status = String(data.status ?? "");
   const inFight = session.combat.entries.find((entry) => entry.recordId === record.id);
@@ -53,341 +48,310 @@ export function SheetCairn({ record, session }: { record: TableRecord; session: 
   const gp = rows(data.coins).find(([, coin]) => /gp/i.test(String(coin.name ?? "gp")));
 
   return (
-    <article className="cc-sheet sheet-5e sheet-cairn" data-character={record.id} data-ruleset="cairn">
-      <div className="cc-body">
-        <header className="cc-head">
-          <div className="cc-portrait-frame">
-            <button type="button" className="cc-portrait" data-action="pick-portrait" disabled={!editable} title={editable ? "Click to choose a portrait" : record.name} onClick={() => setPicking("portrait")} {...slotDrag({ kind: "sheet", record: record.id, label: record.name })}>
-              {portrait ? <Picture session={session} id={portrait} alt={record.name} /> : <span>{record.name.slice(0, 1)}</span>}
-            </button>
-            <button type="button" className="cc-token" data-action="pick-token" disabled={!editable} title="Token" onClick={() => setPicking("token")}>
-              {typeof data.token === "string" && data.token ? <Picture session={session} id={data.token} alt="Token" /> : portrait ? <Picture session={session} id={portrait} alt="Token" /> : <Icon name="character" size={18} />}
-            </button>
-          </div>
-          <div className="cc-identity">
-            <label className="cc-labelled grow">
-              <Field value={record.name} editable={editable} label="Name" className="cc-name" onSave={(value) => change("name", value)} />
-              <small>Name</small>
-            </label>
-            <div className="cc-boxes">
-              <label className="cc-labelled cc-box">
-                <span className="cc-value" data-stat="background">{String(data.background ?? "")}</span>
-                <small>Background</small>
-              </label>
-              <label className="cc-labelled cc-box">
-                <Field value={num(data.age)} number editable={editable} label="Age" onSave={numberAt("age")} />
-                <small>Age</small>
-              </label>
-              {status ? (
-                <label className="cc-labelled cc-box">
-                  <span className="cc-value" data-cairn-status={status} style={{ color: "#c0392b" }}>
-                    {status}
-                  </span>
-                  <small>State</small>
-                </label>
-              ) : null}
-            </div>
-          </div>
-          {picking ? (
-            <ArtPicker
-              session={session}
-              kind={picking}
-              current={typeof data[picking] === "string" ? String(data[picking]) : undefined}
-              race=""
-              onClose={() => setPicking(null)}
-              onPick={(id) => {
-                void session.op({ op: "update", id: record.id, patch: { data: { [picking]: id } } });
-                setPicking(null);
-              }}
-            />
+    <SheetFrame
+      record={record}
+      session={session}
+      editable={editable}
+      className="cc-sheet sheet-5e sheet-cairn"
+      attrs={{ "data-ruleset": "cairn" }}
+      tabs={TABS}
+      tab={tab}
+      onTab={(id) => setTab(id as Tab)}
+      boxes={
+        <>
+          <IdentityBox label="Background">
+            <span className="cc-value" data-stat="background">{String(data.background ?? "")}</span>
+          </IdentityBox>
+          <IdentityBox label="Age">
+            <Field value={num(data.age)} number editable={editable} label="Age" onSave={numberAt("age")} />
+          </IdentityBox>
+          {status ? (
+            <IdentityBox label="State">
+              <span className="cc-value" data-cairn-status={status} style={{ color: "#c0392b" }}>
+                {status}
+              </span>
+            </IdentityBox>
           ) : null}
-        </header>
-
-        {tab === "main" ? (
-          <div className="cc-page" data-tab-page="main">
-            <div className="cc-main-grid five-main">
-              <section className="cc-panel five-abilities cairn-stats" aria-label="Attributes">
-                <div className="five-ability-head">
-                  <span />
-                  <small>Now</small>
-                  <small>Max</small>
-                  <small>Save</small>
-                </div>
-                {STATS.map((key: string) => {
-                  const row = attributes[key] ?? {};
-                  return (
-                    <div key={key} className="five-ability" data-attribute={key}>
-                      <b title={stat(key)}>{short(key)}</b>
-                      <Field value={num(row.score)} number editable={editable} label={`${key} now`} onSave={numberAt(`attributes.${key}.score`)} />
-                      <Field value={num(row.max)} number editable={editable} label={`${key} max`} onSave={numberAt(`attributes.${key}.max`)} />
-                      <button type="button" className="cc-bonus" disabled={!editable} title={`Save ${stat(key)}: a d20 at or under ${num(row.score)} (a 1 always succeeds, a 20 always fails)`} aria-label={`${key} save`} data-roll-save={key} onClick={() => save(key)}>
-                        d20
-                      </button>
-                    </div>
-                  );
-                })}
-              </section>
-              <section className="cc-panel five-defence">
-                <div className="five-big" title="Hit Protection: how well you avoid harm. Damage past it comes off STR. A full inventory takes it to 0.">
-                  <small>HP</small>
-                  <span data-stat="hp" style={{ color: current <= 0 ? "#c0392b" : undefined }}>
-                    {current} / {num(hp.total)}
-                  </span>
+        </>
+      }
+    >
+      {tab === "main" ? (
+        <div className="cc-page" data-tab-page="main">
+          <div className="cc-main-grid five-main">
+            <section className="cc-panel five-abilities cairn-stats" aria-label="Attributes">
+              <div className="five-ability-head">
+                <span />
+                <small>Now</small>
+                <small>Max</small>
+                <small>Save</small>
+              </div>
+              {STATS.map((key: string) => {
+                const row = attributes[key] ?? {};
+                return (
+                  <div key={key} className="five-ability" data-attribute={key}>
+                    <b title={stat(key)}>{short(key)}</b>
+                    <Field value={num(row.score)} number editable={editable} label={`${key} now`} onSave={numberAt(`attributes.${key}.score`)} />
+                    <Field value={num(row.max)} number editable={editable} label={`${key} max`} onSave={numberAt(`attributes.${key}.max`)} />
+                    <button type="button" className="cc-bonus" disabled={!editable} title={`Save ${stat(key)}: a d20 at or under ${num(row.score)} (a 1 always succeeds, a 20 always fails)`} aria-label={`${key} save`} data-roll-save={key} onClick={() => save(key)}>
+                      d20
+                    </button>
+                  </div>
+                );
+              })}
+            </section>
+            <section className="cc-panel five-defence">
+              <div className="five-big" title="Hit Protection: how well you avoid harm. Damage past it comes off STR. A full inventory takes it to 0.">
+                <small>HP</small>
+                <span data-stat="hp" style={{ color: current <= 0 ? "#c0392b" : undefined }}>
+                  {current} / {num(hp.total)}
+                </span>
+                <span className="cc-inline">
+                  Lost <Field value={num(hp.wounds)} number editable={editable} label="HP lost" onSave={numberAt("hp.wounds")} /> Max <Field value={num(hp.max)} number editable={editable} label="HP max" onSave={numberAt("hp.max")} />
+                </span>
+                {data.encumbered ? <span className="hint">A full inventory: HP 0</span> : null}
+              </div>
+              <div className="five-big" title={`Armor comes off every hit (3 at most)${ac.armor ? `: ${String(ac.armor)}` : ""}`}>
+                <small>Armor</small>
+                <span className="cc-shield" data-stat="ac">
+                  {num(ac.total)}
+                </span>
+              </div>
+              <div className="five-big" title="Fatigue: one slot each, until a safe night's rest">
+                <small>Fatigue</small>
+                <span data-stat="fatigue">{num(data.fatigue)}</span>
+                {editable ? (
                   <span className="cc-inline">
-                    Lost <Field value={num(hp.wounds)} number editable={editable} label="HP lost" onSave={numberAt("hp.wounds")} /> Max <Field value={num(hp.max)} number editable={editable} label="HP max" onSave={numberAt("hp.max")} />
+                    <button type="button" data-action="fatigue-add" title="Add a Fatigue (it takes a free slot)" onClick={() => act("fatigue", { amount: 1 })}>
+                      +
+                    </button>
+                    <button type="button" data-action="fatigue-remove" title="Remove a Fatigue" disabled={num(data.fatigue) <= 0} onClick={() => act("fatigue", { amount: -1 })}>
+                      −
+                    </button>
                   </span>
-                  {data.encumbered ? <span className="hint">A full inventory: HP 0</span> : null}
-                </div>
-                <div className="five-big" title={`Armor comes off every hit (3 at most)${ac.armor ? `: ${String(ac.armor)}` : ""}`}>
-                  <small>Armor</small>
-                  <span className="cc-shield" data-stat="ac">
-                    {num(ac.total)}
-                  </span>
-                </div>
-                <div className="five-big" title="Fatigue: one slot each, until a safe night's rest">
-                  <small>Fatigue</small>
-                  <span data-stat="fatigue">{num(data.fatigue)}</span>
-                  {editable ? (
-                    <span className="cc-inline">
-                      <button type="button" data-action="fatigue-add" title="Add a Fatigue (it takes a free slot)" onClick={() => act("fatigue", { amount: 1 })}>
-                        +
-                      </button>
-                      <button type="button" data-action="fatigue-remove" title="Remove a Fatigue" disabled={num(data.fatigue) <= 0} onClick={() => act("fatigue", { amount: -1 })}>
-                        −
-                      </button>
-                    </span>
-                  ) : null}
-                </div>
-              </section>
-            </div>
-            {editable ? (
-              <section className="cc-panel cc-row five-strip" aria-label="Rest">
-                <button type="button" data-action="cairn-rest" title="A few moments' rest and a drink of water: HP back (not while deprived)" onClick={() => act("rest")}>
-                  Short rest
+                ) : null}
+              </div>
+            </section>
+          </div>
+          {editable ? (
+            <section className="cc-panel cc-row five-strip" aria-label="Rest">
+              <button type="button" data-action="cairn-rest" title="A few moments' rest and a drink of water: HP back (not while deprived)" onClick={() => act("rest")}>
+                Short rest
+              </button>
+              <button type="button" data-action="cairn-sleep" title="A full night's rest in a safe spot: HP back and every Fatigue gone" onClick={() => act("sleep")}>
+                Night's rest
+              </button>
+              <button type="button" data-action="cairn-recover" title="A week's rest with a healer: STR, DEX and WIL back to their maximum" onClick={() => act("recover")}>
+                A week's rest
+              </button>
+              <label className="cc-inline" title="Deprived: lacking food, water or rest. No recovery of HP, attributes or Fatigue.">
+                <input type="checkbox" checked={Boolean(num(data.deprived))} data-action="cairn-deprived" onChange={(event) => act("deprived", { on: event.target.checked })} /> Deprived
+              </label>
+              {data.critical === "dying" ? (
+                <button type="button" data-action="cairn-stabilize" title="Aid (bandages): stable, out of danger" onClick={() => act("stabilize")}>
+                  Stabilize
                 </button>
-                <button type="button" data-action="cairn-sleep" title="A full night's rest in a safe spot: HP back and every Fatigue gone" onClick={() => act("sleep")}>
-                  Night's rest
-                </button>
-                <button type="button" data-action="cairn-recover" title="A week's rest with a healer: STR, DEX and WIL back to their maximum" onClick={() => act("recover")}>
-                  A week's rest
-                </button>
-                <label className="cc-inline" title="Deprived: lacking food, water or rest. No recovery of HP, attributes or Fatigue.">
-                  <input type="checkbox" checked={Boolean(num(data.deprived))} data-action="cairn-deprived" onChange={(event) => act("deprived", { on: event.target.checked })} /> Deprived
-                </label>
-                {data.critical === "dying" ? (
-                  <button type="button" data-action="cairn-stabilize" title="Aid (bandages): stable, out of danger" onClick={() => act("stabilize")}>
-                    Stabilize
+              ) : null}
+            </section>
+          ) : null}
+        </div>
+      ) : null}
+
+      {tab === "inventory" ? (
+        <section className="cc-panel cc-page" data-tab-page="inventory">
+          <p className="cc-inline" data-slots={num(slots.used)}>
+            <b>
+              Slots {num(slots.used)} / {SLOTS}
+            </b>
+            <small className="hint">
+              body {num(slots.body)}/{BODY_SLOTS} · backpack {num(slots.pack)}/{PACK_SLOTS} · Fatigue {num(slots.fatigue)}
+              {num(slots.coins) ? ` · coin ${num(slots.coins)}` : ""} · bulky 2, petty 0
+            </small>
+          </p>
+          <ul className="five-items">
+            {items.map(([key, item]) => (
+              <li key={key} data-item={key}>
+                <select className="cc-field" value={item.carried === undefined ? 1 : num(item.carried)} disabled={!editable} aria-label={`${String(item.name)} carried`} title="On the body or in hand, in the backpack, or left elsewhere (a mule, a cart, camp)" onChange={(event) => change(`inventorylist.${key}.carried`, Number(event.target.value))}>
+                  <option value={2}>Body</option>
+                  <option value={1}>Pack</option>
+                  <option value={0}>Away</option>
+                </select>
+                <span title={String(item.text ?? item.note ?? "")}>
+                  {String(item.name)}{" "}
+                  <small className="hint">
+                    {[item.damage ? String(item.damage) : "", item.armor ? `${num(item.armor)} Armor` : "", item.uses !== undefined ? `${num(item.uses)} uses` : "", item.charges !== undefined ? `${num(item.charges)} charges` : "", `${itemSlots(item)} slot${itemSlots(item) === 1 ? "" : "s"}`, item.kind ? String(item.kind) : ""].filter(Boolean).join(" · ")}
+                  </small>
+                </span>
+                {editable && ["spellbook", "scroll", "relic"].includes(String(item.kind ?? "")) ? (
+                  <button type="button" data-action="cast" title={item.kind === "spellbook" ? "Read it aloud with both hands: +1 Fatigue (in danger, a WIL save first)" : item.kind === "scroll" ? "Read it: no Fatigue, the scroll is gone" : "Use the relic: a charge"} onClick={() => act("cast", { item: key, danger })}>
+                    {item.kind === "relic" ? "Use" : "Cast"}
+                  </button>
+                ) : editable && (num(item.uses) > 0 || num(item.charges) > 0) ? (
+                  <button type="button" data-action="use" title="Spend a use" onClick={() => act("use", { item: key })}>
+                    Use
                   </button>
                 ) : null}
-              </section>
-            ) : null}
-          </div>
-        ) : null}
-
-        {tab === "inventory" ? (
-          <section className="cc-panel cc-page" data-tab-page="inventory">
-            <p className="cc-inline" data-slots={num(slots.used)}>
-              <b>
-                Slots {num(slots.used)} / {SLOTS}
-              </b>
-              <small className="hint">
-                body {num(slots.body)}/{BODY_SLOTS} · backpack {num(slots.pack)}/{PACK_SLOTS} · Fatigue {num(slots.fatigue)}
-                {num(slots.coins) ? ` · coin ${num(slots.coins)}` : ""} · bulky 2, petty 0
-              </small>
+                {editable ? (
+                  <button type="button" className="ghost" title="Drop it" aria-label={`Drop ${String(item.name)}`} onClick={() => change(`inventorylist.${key}`, null)}>
+                    ×
+                  </button>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+          {editable ? (
+            <p className="cc-inline">
+              <label className="cc-inline" title="Casting in danger (in a fight) or deprived: a WIL save first">
+                <input type="checkbox" checked={danger} onChange={(event) => setDanger(event.target.checked)} /> In danger
+              </label>
+              <label className="cc-labelled grow">
+                <Field value="" editable={editable} label="Add an item" onSave={(value) => value.trim() && act("item-add", { text: value })} />
+                <small>Add an item, as the books write it: Rope (25ft), Bow (d6, bulky)</small>
+              </label>
             </p>
-            <ul className="five-items">
-              {items.map(([key, item]) => (
-                <li key={key} data-item={key}>
-                  <select className="cc-field" value={item.carried === undefined ? 1 : num(item.carried)} disabled={!editable} aria-label={`${String(item.name)} carried`} title="On the body or in hand, in the backpack, or left elsewhere (a mule, a cart, camp)" onChange={(event) => change(`inventorylist.${key}.carried`, Number(event.target.value))}>
-                    <option value={2}>Body</option>
-                    <option value={1}>Pack</option>
-                    <option value={0}>Away</option>
-                  </select>
-                  <span title={String(item.text ?? item.note ?? "")}>
-                    {String(item.name)}{" "}
-                    <small className="hint">
-                      {[item.damage ? String(item.damage) : "", item.armor ? `${num(item.armor)} Armor` : "", item.uses !== undefined ? `${num(item.uses)} uses` : "", item.charges !== undefined ? `${num(item.charges)} charges` : "", `${itemSlots(item)} slot${itemSlots(item) === 1 ? "" : "s"}`, item.kind ? String(item.kind) : ""].filter(Boolean).join(" · ")}
-                    </small>
-                  </span>
-                  {editable && ["spellbook", "scroll", "relic"].includes(String(item.kind ?? "")) ? (
-                    <button type="button" data-action="cast" title={item.kind === "spellbook" ? "Read it aloud with both hands: +1 Fatigue (in danger, a WIL save first)" : item.kind === "scroll" ? "Read it: no Fatigue, the scroll is gone" : "Use the relic: a charge"} onClick={() => act("cast", { item: key, danger })}>
-                      {item.kind === "relic" ? "Use" : "Cast"}
-                    </button>
-                  ) : editable && (num(item.uses) > 0 || num(item.charges) > 0) ? (
-                    <button type="button" data-action="use" title="Spend a use" onClick={() => act("use", { item: key })}>
-                      Use
-                    </button>
-                  ) : null}
-                  {editable ? (
-                    <button type="button" className="ghost" title="Drop it" aria-label={`Drop ${String(item.name)}`} onClick={() => change(`inventorylist.${key}`, null)}>
-                      ×
-                    </button>
-                  ) : null}
-                </li>
-              ))}
-            </ul>
-            {editable ? (
-              <p className="cc-inline">
-                <label className="cc-inline" title="Casting in danger (in a fight) or deprived: a WIL save first">
-                  <input type="checkbox" checked={danger} onChange={(event) => setDanger(event.target.checked)} /> In danger
-                </label>
-                <label className="cc-labelled grow">
-                  <Field value="" editable={editable} label="Add an item" onSave={(value) => value.trim() && act("item-add", { text: value })} />
-                  <small>Add an item, as the books write it: Rope (25ft), Bow (d6, bulky)</small>
-                </label>
-              </p>
-            ) : null}
-            <div className="five-coins">
-              {rows(data.coins).map(([key, coin]) => (
-                <label key={key} className="cc-inline">
-                  <Field value={num(coin.amount)} number editable={editable} label={`${String(coin.name ?? "GP")} coins`} onSave={numberAt(`coins.${key}.amount`)} /> {String(coin.name ?? "gp").toLowerCase()}
-                </label>
-              ))}
-              {!gp ? <span className="hint">No gold.</span> : null}
-            </div>
-          </section>
-        ) : null}
-
-        {tab === "combat" ? (
-          <section className="cc-panel cc-page" data-tab-page="combat">
-            <h4>
-              Attacks {targetNames.length ? <small className="hint">at {targetNames.join(", ")}</small> : <small className="hint">Ctrl+click a token to target it</small>}
-            </h4>
-            <p className="hint">Attacks always hit: the die, less the target's Armor, off HP and then STR.</p>
-            <label className="cc-inline">
-              <select className="cc-field" aria-label="Attack modifier" value={mode} onChange={(event) => setMode(event.target.value)}>
-                <option value="">Normal</option>
-                <option value="impaired">Impaired: d4 (cover, bound hands)</option>
-                <option value="enhanced">Enhanced: d12 (a helpless foe, a daring move)</option>
-              </select>
-            </label>
-            <ul className="five-attacks">
-              {rows(data.attacks).map(([key, attack]) => (
-                <li key={key} data-attack={key}>
-                  <b>{String(attack.name)}</b> <small className="hint">{[attack.blast ? "blast" : "", attack.bulky ? "bulky" : "", attack.ignoresarmor ? "ignores armor" : ""].filter(Boolean).join(", ")}</small>
-                  <button type="button" data-action="attack" disabled={!editable} title="Attack: it hits; the die less Armor" onClick={() => session.ct("attack", { recordId: record.id, weapon: key, ...(mode ? { mode } : {}) })}>
-                    {mode === "impaired" ? "d4" : mode === "enhanced" ? "d12" : String(attack.damage)}
-                  </button>
-                </li>
-              ))}
-            </ul>
-            <p className="hint">Two weapons (d6+d6) roll both and keep the best. In the first round, save DEX to act (the tracker asks).</p>
-          </section>
-        ) : null}
-
-        {tab === "character" ? (
-          <section className="cc-panel cc-page" data-tab-page="character">
-            <div className="cairn-traits">
-              {TRAITS.map((key: string) => (
-                <label key={key} className="cc-labelled">
-                  <Field value={String(traits[key] ?? "")} editable={editable} label={TRAIT_NAMES[key as keyof typeof TRAIT_NAMES]} onSave={(value) => change(`traits.${key}`, value)} />
-                  <small>{TRAIT_NAMES[key as keyof typeof TRAIT_NAMES]}</small>
-                </label>
-              ))}
-            </div>
-            <label className="cc-labelled">
-              <Field value={String(data.bond ?? "")} area editable={editable} label="Bond" onSave={(value) => change("bond", value)} />
-              <small>Bond</small>
-            </label>
-            <label className="cc-labelled">
-              <Field value={String(data.omen ?? "")} area editable={editable} label="Omen" onSave={(value) => change("omen", value)} />
-              <small>Omen</small>
-            </label>
-            <label className="cc-labelled">
-              <Field value={String(data.history ?? "")} area editable={editable} label="Background history" onSave={(value) => change("history", value)} />
-              <small>From the background's tables</small>
-            </label>
-          </section>
-        ) : null}
-
-        {tab === "growth" ? (
-          <section className="cc-panel cc-page" data-tab-page="growth">
-            <p className="hint">Cairn has no experience: a character grows from what happens to them. Scars, changes and Downtime milestones are kept here.</p>
-            <h4>Scars</h4>
-            <ul className="five-items" data-scars={rows(data.scars).length}>
-              {rows(data.scars).map(([key, scar]) => (
-                <li key={key} data-scar={key}>
-                  <span>
-                    <b>{String(scar.name ?? "Scar")}</b> <small className="hint">{String(scar.text ?? "")}</small>
-                  </span>
-                  {editable && num(scar.pending) ? (
-                    <button type="button" data-action="scar-recover" title="Recovered (mended, over it): roll what the scar gives" onClick={() => act("scar-recover", { scar: key })}>
-                      Recover
-                    </button>
-                  ) : null}
-                </li>
-              ))}
-            </ul>
-            <h4>Growth</h4>
-            <ul className="five-items">
-              {rows(data.growth).map(([key, entry]) => (
-                <li key={key} data-growth={key}>
-                  <span>{String(entry.text ?? "")}</span>
-                  {editable ? (
-                    <button type="button" className="ghost" aria-label="Remove" onClick={() => change(`growth.${key}`, null)}>
-                      ×
-                    </button>
-                  ) : null}
-                </li>
-              ))}
-            </ul>
-            {editable ? (
-              <label className="cc-labelled">
-                <Field value="" editable={editable} label="New growth" onSave={(value) => value.trim() && act("growth", { text: value })} />
-                <small>What changed, and why (Enter to add)</small>
+          ) : null}
+          <div className="five-coins">
+            {rows(data.coins).map(([key, coin]) => (
+              <label key={key} className="cc-inline">
+                <Field value={num(coin.amount)} number editable={editable} label={`${String(coin.name ?? "GP")} coins`} onSave={numberAt(`coins.${key}.amount`)} /> {String(coin.name ?? "gp").toLowerCase()}
               </label>
-            ) : null}
-            {session.role === "dm" ? (
-              <p className="cc-inline" title="Growth by a roll: keep it if it beats the maximum (the Warden's call)">
-                {(["hp", "str", "dex", "wil"] as const).map((key) => (
-                  <button key={key} type="button" data-action={`grow-${key}`} onClick={() => act("growth-roll", { to: key, roll: key === "hp" ? "1d6" : "3d6", how: "higher", reason: "Growth" })}>
-                    Reroll {key.toUpperCase()}
-                  </button>
-                ))}
-              </p>
-            ) : null}
-            <h4>Milestones</h4>
-            <ul className="five-items">
-              {rows(data.milestones).map(([key, entry]) => (
-                <li key={key} data-milestone={key}>
-                  <label className="cc-inline">
-                    <input type="checkbox" checked={Boolean(num(entry.done))} disabled={!editable} onChange={(event) => act("milestone", { key, done: event.target.checked })} /> {String(entry.name ?? "")}
-                  </label>
-                  {editable ? (
-                    <button type="button" className="ghost" aria-label="Remove milestone" onClick={() => act("milestone", { key, remove: true })}>
-                      ×
-                    </button>
-                  ) : null}
-                </li>
-              ))}
-            </ul>
-            {editable ? (
-              <label className="cc-labelled">
-                <Field value="" editable={editable} label="New milestone" onSave={(value) => value.trim() && act("milestone", { name: value })} />
-                <small>A Downtime milestone (Enter to add)</small>
-              </label>
-            ) : null}
-          </section>
-        ) : null}
+            ))}
+            {!gp ? <span className="hint">No gold.</span> : null}
+          </div>
+        </section>
+      ) : null}
 
-        {tab === "notes" ? (
-          <section className="cc-panel cc-page" data-tab-page="notes">
+      {tab === "combat" ? (
+        <section className="cc-panel cc-page" data-tab-page="combat">
+          <h4>
+            Attacks {targetNames.length ? <small className="hint">at {targetNames.join(", ")}</small> : <small className="hint">Ctrl+click a token to target it</small>}
+          </h4>
+          <p className="hint">Attacks always hit: the die, less the target's Armor, off HP and then STR.</p>
+          <label className="cc-inline">
+            <select className="cc-field" aria-label="Attack modifier" value={mode} onChange={(event) => setMode(event.target.value)}>
+              <option value="">Normal</option>
+              <option value="impaired">Impaired: d4 (cover, bound hands)</option>
+              <option value="enhanced">Enhanced: d12 (a helpless foe, a daring move)</option>
+            </select>
+          </label>
+          <ul className="five-attacks">
+            {rows(data.attacks).map(([key, attack]) => (
+              <li key={key} data-attack={key}>
+                <b>{String(attack.name)}</b> <small className="hint">{[attack.blast ? "blast" : "", attack.bulky ? "bulky" : "", attack.ignoresarmor ? "ignores armor" : ""].filter(Boolean).join(", ")}</small>
+                <button type="button" data-action="attack" disabled={!editable} title="Attack: it hits; the die less Armor" onClick={() => session.ct("attack", { recordId: record.id, weapon: key, ...(mode ? { mode } : {}) })}>
+                  {mode === "impaired" ? "d4" : mode === "enhanced" ? "d12" : String(attack.damage)}
+                </button>
+              </li>
+            ))}
+          </ul>
+          <p className="hint">Two weapons (d6+d6) roll both and keep the best. In the first round, save DEX to act (the tracker asks).</p>
+        </section>
+      ) : null}
+
+      {tab === "character" ? (
+        <section className="cc-panel cc-page" data-tab-page="character">
+          <div className="cairn-traits">
+            {TRAITS.map((key: string) => (
+              <label key={key} className="cc-labelled">
+                <Field value={String(traits[key] ?? "")} editable={editable} label={TRAIT_NAMES[key as keyof typeof TRAIT_NAMES]} onSave={(value) => change(`traits.${key}`, value)} />
+                <small>{TRAIT_NAMES[key as keyof typeof TRAIT_NAMES]}</small>
+              </label>
+            ))}
+          </div>
+          <label className="cc-labelled">
+            <Field value={String(data.bond ?? "")} area editable={editable} label="Bond" onSave={(value) => change("bond", value)} />
+            <small>Bond</small>
+          </label>
+          <label className="cc-labelled">
+            <Field value={String(data.omen ?? "")} area editable={editable} label="Omen" onSave={(value) => change("omen", value)} />
+            <small>Omen</small>
+          </label>
+          <label className="cc-labelled">
+            <Field value={String(data.history ?? "")} area editable={editable} label="Background history" onSave={(value) => change("history", value)} />
+            <small>From the background's tables</small>
+          </label>
+        </section>
+      ) : null}
+
+      {tab === "growth" ? (
+        <section className="cc-panel cc-page" data-tab-page="growth">
+          <p className="hint">Cairn has no experience: a character grows from what happens to them. Scars, changes and Downtime milestones are kept here.</p>
+          <h4>Scars</h4>
+          <ul className="five-items" data-scars={rows(data.scars).length}>
+            {rows(data.scars).map(([key, scar]) => (
+              <li key={key} data-scar={key}>
+                <span>
+                  <b>{String(scar.name ?? "Scar")}</b> <small className="hint">{String(scar.text ?? "")}</small>
+                </span>
+                {editable && num(scar.pending) ? (
+                  <button type="button" data-action="scar-recover" title="Recovered (mended, over it): roll what the scar gives" onClick={() => act("scar-recover", { scar: key })}>
+                    Recover
+                  </button>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+          <h4>Growth</h4>
+          <ul className="five-items">
+            {rows(data.growth).map(([key, entry]) => (
+              <li key={key} data-growth={key}>
+                <span>{String(entry.text ?? "")}</span>
+                {editable ? (
+                  <button type="button" className="ghost" aria-label="Remove" onClick={() => change(`growth.${key}`, null)}>
+                    ×
+                  </button>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+          {editable ? (
             <label className="cc-labelled">
-              <Field value={String(data.appearance ?? "")} editable={editable} label="Appearance" onSave={(value) => change("appearance", value)} />
-              <small>Appearance</small>
+              <Field value="" editable={editable} label="New growth" onSave={(value) => value.trim() && act("growth", { text: value })} />
+              <small>What changed, and why (Enter to add)</small>
             </label>
-            <Field value={String(data.notes ?? "")} area editable={editable} label="Notes" onSave={(value) => change("notes", value)} />
-          </section>
-        ) : null}
-      </div>
-      <nav className="cc-tabs" role="tablist" aria-label="Sheet">
-        {TABS.map((id) => (
-          <button key={id} type="button" role="tab" aria-selected={tab === id} data-sheet-tab={id} onClick={() => setTab(id)}>
-            {titled(id)}
-          </button>
-        ))}
-      </nav>
-    </article>
+          ) : null}
+          {session.role === "dm" ? (
+            <p className="cc-inline" title="Growth by a roll: keep it if it beats the maximum (the Warden's call)">
+              {(["hp", "str", "dex", "wil"] as const).map((key) => (
+                <button key={key} type="button" data-action={`grow-${key}`} onClick={() => act("growth-roll", { to: key, roll: key === "hp" ? "1d6" : "3d6", how: "higher", reason: "Growth" })}>
+                  Reroll {key.toUpperCase()}
+                </button>
+              ))}
+            </p>
+          ) : null}
+          <h4>Milestones</h4>
+          <ul className="five-items">
+            {rows(data.milestones).map(([key, entry]) => (
+              <li key={key} data-milestone={key}>
+                <label className="cc-inline">
+                  <input type="checkbox" checked={Boolean(num(entry.done))} disabled={!editable} onChange={(event) => act("milestone", { key, done: event.target.checked })} /> {String(entry.name ?? "")}
+                </label>
+                {editable ? (
+                  <button type="button" className="ghost" aria-label="Remove milestone" onClick={() => act("milestone", { key, remove: true })}>
+                    ×
+                  </button>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+          {editable ? (
+            <label className="cc-labelled">
+              <Field value="" editable={editable} label="New milestone" onSave={(value) => value.trim() && act("milestone", { name: value })} />
+              <small>A Downtime milestone (Enter to add)</small>
+            </label>
+          ) : null}
+        </section>
+      ) : null}
+
+      {tab === "notes" ? (
+        <section className="cc-panel cc-page" data-tab-page="notes">
+          <label className="cc-labelled">
+            <Field value={String(data.appearance ?? "")} editable={editable} label="Appearance" onSave={(value) => change("appearance", value)} />
+            <small>Appearance</small>
+          </label>
+          <Field value={String(data.notes ?? "")} area editable={editable} label="Notes" onSave={(value) => change("notes", value)} />
+        </section>
+      ) : null}
+    </SheetFrame>
   );
 }
 

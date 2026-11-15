@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { Session, TableRecord } from "../session/useSession";
-import { Field } from "../characters/CCSheet";
+import { Field } from "../core/fields/Field";
 import { CRITICALS, CRITICAL_WORDS, DESIGNS, RANGES, WEAPONS, signed } from "../../shared/starships/rules.mjs";
 
 // Starships, in the 2d6 games (Traveller, Apeira Astra): the campaign's ships

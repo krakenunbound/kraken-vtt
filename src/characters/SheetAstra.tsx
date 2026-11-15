@@ -3,9 +3,8 @@ import { useHostRolls } from "./Wizard2e";
 import { priceOf } from "../../shared/shop.mjs";
 import type { Session, TableRecord } from "../session/useSession";
 import { Icon } from "../ui/icons";
-import { slotDrag } from "../ui/QuickSlots";
-import { ArtPicker, Picture } from "./ArtPicker";
-import { Field } from "./CCSheet";
+import { Field } from "../core/fields/Field";
+import { IdentityBox, SheetFrame } from "../core/frame/SheetFrame";
 import { DIFFICULTIES, MAX_MARKS, SKILLS, SPREAD, STAT_NAMES, STATS, dm, pathTricks, signed, skillCost, skillList, trickChoices, tricksForSkill, tricksOf, unspentMarks } from "../../shared/astra/rules.mjs";
 
 // The Apeira Astra crew sheet, in Kraken's sheet style: who they are on top,
@@ -23,13 +22,11 @@ type Tab = (typeof TABS)[number];
 const rows = (node: unknown): [string, Row][] =>
   node && typeof node === "object" ? Object.entries(node as Record<string, unknown>).filter((entry): entry is [string, Row] => Boolean(entry[1]) && typeof entry[1] === "object") : [];
 const num = (value: unknown) => (Number.isFinite(Number(value)) ? Number(value) : 0);
-const titled = (word: string) => word[0].toUpperCase() + word.slice(1);
 
 export function SheetAstra({ record, session }: { record: TableRecord; session: Session }) {
   const [tab, setTab] = useState<Tab>("main");
   const [difficulty, setDifficulty] = useState(0);
   const [boon, setBoon] = useState("");
-  const [picking, setPicking] = useState<"portrait" | "token" | null>(null);
   const [untrained, setUntrained] = useState("");
   const [improving, setImproving] = useState("");
   const [learning, setLearning] = useState("");
@@ -42,7 +39,6 @@ export function SheetAstra({ record, session }: { record: TableRecord; session: 
   const skills = (data.skills ?? {}) as Record<string, Row>;
   const hp = (data.hp ?? {}) as Row;
   const ac = (data.ac ?? {}) as Row;
-  const portrait = typeof data.portrait === "string" ? data.portrait : "";
   const current = num(hp.total) - num(hp.wounds);
   const grit = num(stats.grit?.score);
   const inFight = session.combat.entries.find((entry) => entry.recordId === record.id);
@@ -64,340 +60,310 @@ export function SheetAstra({ record, session }: { record: TableRecord; session: 
   const chosen = choices.find((item) => item.name === learning) ?? choices[0];
 
   return (
-    <article className="cc-sheet sheet-5e sheet-astra" data-character={record.id} data-ruleset="astra">
-      <div className="cc-body">
-        <header className="cc-head">
-          <div className="cc-portrait-frame">
-            <button type="button" className="cc-portrait" data-action="pick-portrait" disabled={!editable} title={editable ? "Click to choose a portrait" : record.name} onClick={() => setPicking("portrait")} {...slotDrag({ kind: "sheet", record: record.id, label: record.name })}>
-              {portrait ? <Picture session={session} id={portrait} alt={record.name} /> : <span>{record.name.slice(0, 1)}</span>}
-            </button>
-            <button type="button" className="cc-token" data-action="pick-token" disabled={!editable} title="Token" onClick={() => setPicking("token")}>
-              {typeof data.token === "string" && data.token ? <Picture session={session} id={data.token} alt="Token" /> : portrait ? <Picture session={session} id={portrait} alt="Token" /> : <Icon name="character" size={18} />}
-            </button>
-          </div>
-          <div className="cc-identity">
-            <label className="cc-labelled grow">
-              <Field value={record.name} editable={editable} label="Name" className="cc-name" onSave={(value) => change("name", value)} />
-              <small>Name</small>
-            </label>
-            <div className="cc-boxes">
-              <label className="cc-labelled cc-box">
-                <span className="cc-value">{String(data.origin ?? "")}</span>
-                <small>Origin</small>
-              </label>
-              <label className="cc-labelled cc-box">
-                <span className="cc-value" data-stat="paths">{Array.isArray(data.paths) ? data.paths.join(" / ") : ""}</span>
-                <small>Paths</small>
-              </label>
-            </div>
-          </div>
-          {picking ? (
-            <ArtPicker
-              session={session}
-              kind={picking}
-              current={typeof data[picking] === "string" ? String(data[picking]) : undefined}
-              race=""
-              onClose={() => setPicking(null)}
-              onPick={(id) => {
-                void session.op({ op: "update", id: record.id, patch: { data: { [picking]: id } } });
-                setPicking(null);
-              }}
-            />
-          ) : null}
-        </header>
-
-        <section className="cc-panel cc-row five-strip">
-          <span className="cc-inline">
-            <b>Experience</b> <Field value={exp} number editable={session.role === "dm"} label="Experience" onSave={numberAt("exp")} />
-          </span>
-          <label className="cc-inline" title="How hard the task is: it shifts the roll">
-            <b>Task</b>
-            <select className="cc-field" value={difficulty} aria-label="Difficulty" onChange={(event) => setDifficulty(Number(event.target.value))}>
-              {(DIFFICULTIES as [string, number][]).map(([name, shift]) => (
-                <option key={name} value={shift}>
-                  {name} {shift ? signed(shift) : ""}
-                </option>
-              ))}
-            </select>
-          </label>
-          <select className="cc-field" aria-label="Boon or bane" value={boon} onChange={(event) => setBoon(event.target.value)} title="A Boon rolls 3d6 and keeps the best two; a Bane the worst two">
-            <option value="">No boon</option>
-            <option value="boon">Boon</option>
-            <option value="bane">Bane</option>
+    <SheetFrame
+      record={record}
+      session={session}
+      editable={editable}
+      className="cc-sheet sheet-5e sheet-astra"
+      attrs={{ "data-ruleset": "astra" }}
+      tabs={TABS}
+      tab={tab}
+      onTab={(id) => setTab(id as Tab)}
+      boxes={
+        <>
+          <IdentityBox label="Origin">
+            <span className="cc-value">{String(data.origin ?? "")}</span>
+          </IdentityBox>
+          <IdentityBox label="Paths">
+            <span className="cc-value" data-stat="paths">{Array.isArray(data.paths) ? data.paths.join(" / ") : ""}</span>
+          </IdentityBox>
+        </>
+      }
+    >
+      <section className="cc-panel cc-row five-strip">
+        <span className="cc-inline">
+          <b>Experience</b> <Field value={exp} number editable={session.role === "dm"} label="Experience" onSave={numberAt("exp")} />
+        </span>
+        <label className="cc-inline" title="How hard the task is: it shifts the roll">
+          <b>Task</b>
+          <select className="cc-field" value={difficulty} aria-label="Difficulty" onChange={(event) => setDifficulty(Number(event.target.value))}>
+            {(DIFFICULTIES as [string, number][]).map(([name, shift]) => (
+              <option key={name} value={shift}>
+                {name} {shift ? signed(shift) : ""}
+              </option>
+            ))}
           </select>
-          <span className="hint">2d6 + skill + characteristic, 8 or more</span>
-        </section>
+        </label>
+        <select className="cc-field" aria-label="Boon or bane" value={boon} onChange={(event) => setBoon(event.target.value)} title="A Boon rolls 3d6 and keeps the best two; a Bane the worst two">
+          <option value="">No boon</option>
+          <option value="boon">Boon</option>
+          <option value="bane">Bane</option>
+        </select>
+        <span className="hint">2d6 + skill + characteristic, 8 or more</span>
+      </section>
 
-        {tab === "main" ? (
-          <div className="cc-page" data-tab-page="main">
-            <div className="cc-main-grid five-main">
-              <section className="cc-panel five-abilities astra-stats" aria-label="Characteristics">
-                <div className="five-ability-head">
-                  <span />
-                  <small>Score</small>
-                  <small>Mod</small>
-                </div>
-                {STATS.map((stat: string) => {
-                  const row = stats[stat] ?? {};
-                  return (
-                    <div key={stat} className="five-ability" data-characteristic={stat}>
-                      <b>{STAT_NAMES[stat as keyof typeof STAT_NAMES]}</b>
-                      <Field value={num(row.score)} number editable={editable} label={`${stat} score`} onSave={numberAt(`characteristics.${stat}.score`)} />
-                      <button type="button" className="cc-bonus" disabled={!editable} title={`Roll ${stat} alone (2d6 + its modifier)`} aria-label={`${stat} check`} data-roll-check={stat} onClick={() => task("", stat)}>
-                        {signed(num(row.dm))}
-                      </button>
-                    </div>
-                  );
-                })}
-              </section>
-              <section className="cc-panel five-defence">
-                <div className="five-big">
-                  <small>Stamina</small>
-                  <span data-stat="hp" style={{ color: current <= 0 ? "#c0392b" : undefined }}>
-                    {current} / {num(hp.total)}
-                  </span>
-                  <span className="cc-inline">
-                    Damage <Field value={num(hp.wounds)} number editable={editable} label="Damage taken" onSave={numberAt("hp.wounds")} />
-                  </span>
-                  {current <= 0 ? <span className="hint" data-down>{current <= -grit ? "Dead" : `Down: out of the fight; dead at -${grit}`}</span> : null}
-                </div>
-                <div className="five-big" title={`Armour takes this off every hit${ac.armor ? `: ${String(ac.armor)}` : ""}`}>
-                  <small>Armour</small>
-                  <span className="cc-shield" data-stat="ac">
-                    {num(ac.total)}
-                  </span>
-                </div>
-                <div className="five-big">
-                  <small>Initiative</small>
-                  <span data-stat="init">{signed(num((data.initiative as Row)?.total))}</span>
-                </div>
-              </section>
-            </div>
-            <section className="cc-panel astra-marks" aria-label="Marks" data-marks={marks} data-unspent={unspent}>
-              <h4>
-                Marks
-                <span className="astra-mark-pips" title={`${marks} of ${MAX_MARKS} Marks${unspent ? `, ${unspent} unspent` : ""}`}>
-                  {Array.from({ length: MAX_MARKS }, (_, index) => (
-                    <i key={index} className={index < tricks.length ? "on" : index < marks ? "unspent" : ""} />
-                  ))}
-                </span>
-                <small className="hint" data-marks-count>
-                  {marks} of {MAX_MARKS}
-                  {unspent ? ` · ${unspent} to spend on a trick` : ""}
-                </small>
-                {session.role === "dm" ? (
-                  <button type="button" data-action="award-mark" disabled={marks >= MAX_MARKS} title={marks >= MAX_MARKS ? "Six Marks is a whole career" : "Award a Mark: they did something the port will repeat (at most one a session)"} onClick={() => void session.markCharacter(record.id, "award").catch(() => undefined)}>
-                    Award a Mark
-                  </button>
-                ) : null}
-                {session.role === "dm" && unspent > 0 ? (
-                  <button type="button" className="ghost" data-action="take-mark" title="Take back an unspent Mark" aria-label="Take back an unspent Mark" onClick={() => void session.markCharacter(record.id, "take").catch(() => undefined)}>
-                    <Icon name="minus" size={14} />
-                  </button>
-                ) : null}
-              </h4>
-              {tricks.length ? (
-                <ul className="astra-tricks">
-                  {tricks.map((trick) => (
-                    <li key={trick.key} data-trick={trick.name}>
-                      <span>
-                        <b>{trick.name}</b> <small className="hint">{trick.path}</small>
-                      </span>
-                      {session.role === "dm" ? (
-                        <button type="button" className="ghost" aria-label={`Forget ${trick.name}`} title="Forget this trick (its Mark is unspent again)" onClick={() => void session.markCharacter(record.id, "forget", trick.name).catch(() => undefined)}>
-                          ×
-                        </button>
-                      ) : (
-                        <span />
-                      )}
-                      <p>{trick.text}</p>
-                    </li>
-                  ))}
-                </ul>
-              ) : marks === 0 ? (
-                <p className="hint">No Marks yet. The GM awards one when a job is done and the port will repeat the story; each Mark teaches a trick from your Paths.</p>
-              ) : null}
-              {unspent > 0 && editable ? (
-                choices.length ? (
-                  <div className="astra-learn">
-                    <select className="cc-field" aria-label="Trick to learn" value={chosen?.name ?? ""} onChange={(event) => setLearning(event.target.value)}>
-                      {choices.map((item) => (
-                        <option key={`${item.path}:${item.name}`} value={item.name}>
-                          {item.name} ({item.path})
-                        </option>
-                      ))}
-                    </select>
-                    <button
-                      type="button"
-                      data-action="learn-trick"
-                      disabled={!chosen}
-                      title="Learn this trick with an unspent Mark"
-                      onClick={() => {
-                        if (chosen) void session.markCharacter(record.id, "learn", chosen.name).catch(() => undefined);
-                        setLearning("");
-                      }}
-                    >
-                      Learn
+      {tab === "main" ? (
+        <div className="cc-page" data-tab-page="main">
+          <div className="cc-main-grid five-main">
+            <section className="cc-panel five-abilities astra-stats" aria-label="Characteristics">
+              <div className="five-ability-head">
+                <span />
+                <small>Score</small>
+                <small>Mod</small>
+              </div>
+              {STATS.map((stat: string) => {
+                const row = stats[stat] ?? {};
+                return (
+                  <div key={stat} className="five-ability" data-characteristic={stat}>
+                    <b>{STAT_NAMES[stat as keyof typeof STAT_NAMES]}</b>
+                    <Field value={num(row.score)} number editable={editable} label={`${stat} score`} onSave={numberAt(`characteristics.${stat}.score`)} />
+                    <button type="button" className="cc-bonus" disabled={!editable} title={`Roll ${stat} alone (2d6 + its modifier)`} aria-label={`${stat} check`} data-roll-check={stat} onClick={() => task("", stat)}>
+                      {signed(num(row.dm))}
                     </button>
-                    {chosen ? (
-                      <p className="hint" data-trick-preview>
-                        {chosen.text}
-                      </p>
-                    ) : null}
                   </div>
-                ) : (
-                  <p className="hint">No trick left to learn from {Array.isArray(data.paths) ? data.paths.join(" and ") : "your Paths"} (or the Crew Handbook is not active).</p>
-                )
-              ) : null}
+                );
+              })}
+            </section>
+            <section className="cc-panel five-defence">
+              <div className="five-big">
+                <small>Stamina</small>
+                <span data-stat="hp" style={{ color: current <= 0 ? "#c0392b" : undefined }}>
+                  {current} / {num(hp.total)}
+                </span>
+                <span className="cc-inline">
+                  Damage <Field value={num(hp.wounds)} number editable={editable} label="Damage taken" onSave={numberAt("hp.wounds")} />
+                </span>
+                {current <= 0 ? <span className="hint" data-down>{current <= -grit ? "Dead" : `Down: out of the fight; dead at -${grit}`}</span> : null}
+              </div>
+              <div className="five-big" title={`Armour takes this off every hit${ac.armor ? `: ${String(ac.armor)}` : ""}`}>
+                <small>Armour</small>
+                <span className="cc-shield" data-stat="ac">
+                  {num(ac.total)}
+                </span>
+              </div>
+              <div className="five-big">
+                <small>Initiative</small>
+                <span data-stat="init">{signed(num((data.initiative as Row)?.total))}</span>
+              </div>
             </section>
           </div>
-        ) : null}
-
-        {tab === "skills" ? (
-          <section className="cc-panel five-skills cc-page" data-tab-page="skills">
-            {known.map(([key, row]) => (
-              <div key={key} className="five-skill" data-skill={key}>
-                <span className="cc-num">{num(row.level)}</span>
-                <span>
-                  {String(row.name)} <small className="hint">{String(row.stat).slice(0, 3).toUpperCase()}</small>
-                  {(tricksForSkill(data, key) as { name: string; text: string }[]).map((trick) => (
-                    <small key={trick.name} className="astra-trick-note" data-trick-for={key} title={`${trick.name}: ${trick.text}`}>
-                      ★ {trick.name}
-                    </small>
-                  ))}
-                </span>
-                <button type="button" className="cc-bonus" disabled={!editable} aria-label={`${String(row.name)} task`} data-roll-skill={key} onClick={() => task(key)}>
-                  {signed(num(row.level) + num(stats[String(row.stat)]?.dm))}
+          <section className="cc-panel astra-marks" aria-label="Marks" data-marks={marks} data-unspent={unspent}>
+            <h4>
+              Marks
+              <span className="astra-mark-pips" title={`${marks} of ${MAX_MARKS} Marks${unspent ? `, ${unspent} unspent` : ""}`}>
+                {Array.from({ length: MAX_MARKS }, (_, index) => (
+                  <i key={index} className={index < tricks.length ? "on" : index < marks ? "unspent" : ""} />
+                ))}
+              </span>
+              <small className="hint" data-marks-count>
+                {marks} of {MAX_MARKS}
+                {unspent ? ` · ${unspent} to spend on a trick` : ""}
+              </small>
+              {session.role === "dm" ? (
+                <button type="button" data-action="award-mark" disabled={marks >= MAX_MARKS} title={marks >= MAX_MARKS ? "Six Marks is a whole career" : "Award a Mark: they did something the port will repeat (at most one a session)"} onClick={() => void session.markCharacter(record.id, "award").catch(() => undefined)}>
+                  Award a Mark
                 </button>
-              </div>
-            ))}
-            {known.length === 0 ? <p className="hint">No skills yet.</p> : null}
-            {editable ? (
-              <>
-                <p className="cc-inline">
-                  <select className="cc-field" value={untrained} aria-label="An untrained skill" onChange={(event) => setUntrained(event.target.value)}>
-                    <option value="">An untrained task (-3)…</option>
-                    {Object.entries(SKILLS)
-                      .filter(([key]) => !skills[key])
-                      .map(([key, [name]]) => (
-                        <option key={key} value={key}>
-                          {name}
-                        </option>
-                      ))}
-                  </select>
-                  <button type="button" disabled={!untrained} onClick={() => task(untrained)}>
-                    Roll
-                  </button>
-                </p>
-                <p className="cc-inline" title="Spend experience: a skill's next level costs that level x 2 (a new skill at 0 costs 1); a characteristic +1 costs 6">
-                  <select className="cc-field" value={improving} aria-label="Improve" onChange={(event) => setImproving(event.target.value)}>
-                    <option value="">Improve (spend experience)…</option>
-                    {Object.entries(SKILLS).map(([key, [name]]) => {
-                      const next = skills[key] ? num(skills[key].level) + 1 : 0;
-                      return next <= 4 ? (
-                        <option key={key} value={`skill:${key}`}>
-                          {name} {next} ({skillCost(next)})
-                        </option>
-                      ) : null;
-                    })}
-                    {STATS.map((stat: string) => (
-                      <option key={stat} value={`stat:${stat}`}>
-                        {STAT_NAMES[stat as keyof typeof STAT_NAMES]} {num(stats[stat]?.score) + 1} (6)
+              ) : null}
+              {session.role === "dm" && unspent > 0 ? (
+                <button type="button" className="ghost" data-action="take-mark" title="Take back an unspent Mark" aria-label="Take back an unspent Mark" onClick={() => void session.markCharacter(record.id, "take").catch(() => undefined)}>
+                  <Icon name="minus" size={14} />
+                </button>
+              ) : null}
+            </h4>
+            {tricks.length ? (
+              <ul className="astra-tricks">
+                {tricks.map((trick) => (
+                  <li key={trick.key} data-trick={trick.name}>
+                    <span>
+                      <b>{trick.name}</b> <small className="hint">{trick.path}</small>
+                    </span>
+                    {session.role === "dm" ? (
+                      <button type="button" className="ghost" aria-label={`Forget ${trick.name}`} title="Forget this trick (its Mark is unspent again)" onClick={() => void session.markCharacter(record.id, "forget", trick.name).catch(() => undefined)}>
+                        ×
+                      </button>
+                    ) : (
+                      <span />
+                    )}
+                    <p>{trick.text}</p>
+                  </li>
+                ))}
+              </ul>
+            ) : marks === 0 ? (
+              <p className="hint">No Marks yet. The GM awards one when a job is done and the port will repeat the story; each Mark teaches a trick from your Paths.</p>
+            ) : null}
+            {unspent > 0 && editable ? (
+              choices.length ? (
+                <div className="astra-learn">
+                  <select className="cc-field" aria-label="Trick to learn" value={chosen?.name ?? ""} onChange={(event) => setLearning(event.target.value)}>
+                    {choices.map((item) => (
+                      <option key={`${item.path}:${item.name}`} value={item.name}>
+                        {item.name} ({item.path})
                       </option>
                     ))}
                   </select>
                   <button
                     type="button"
-                    data-action="improve"
-                    disabled={!improving}
+                    data-action="learn-trick"
+                    disabled={!chosen}
+                    title="Learn this trick with an unspent Mark"
                     onClick={() => {
-                      const [kind, key] = improving.split(":");
-                      void session.improveCharacter(record.id, kind === "skill" ? { skill: key } : { attribute: key }).catch(() => undefined);
-                      setImproving("");
+                      if (chosen) void session.markCharacter(record.id, "learn", chosen.name).catch(() => undefined);
+                      setLearning("");
                     }}
                   >
-                    Improve
+                    Learn
                   </button>
-                  <small className="hint">{exp} to spend</small>
-                </p>
-              </>
+                  {chosen ? (
+                    <p className="hint" data-trick-preview>
+                      {chosen.text}
+                    </p>
+                  ) : null}
+                </div>
+              ) : (
+                <p className="hint">No trick left to learn from {Array.isArray(data.paths) ? data.paths.join(" and ") : "your Paths"} (or the Crew Handbook is not active).</p>
+              )
             ) : null}
           </section>
-        ) : null}
+        </div>
+      ) : null}
 
-        {tab === "combat" ? (
-          <section className="cc-panel cc-page" data-tab-page="combat">
-            <h4>Weapons {targetNames.length ? <small className="hint">at {targetNames.join(", ")}</small> : <small className="hint">Ctrl+click a token to target it</small>}</h4>
-            <ul className="five-attacks">
-              {rows(data.attacks).map(([key, attack]) => (
-                <li key={key} data-attack={key}>
-                  <b>{String(attack.name)}</b> <small className="hint">{String(attack.range ?? "")}</small>
-                  <button type="button" data-action="attack" disabled={!editable} title="Attack: 2d6 + this, 8 or more; the Effect adds to the damage" onClick={() => session.ct("attack", { recordId: record.id, weapon: key })}>
-                    {signed(num(attack.bonus))}
-                  </button>
-                  <button type="button" data-action="damage" disabled={!editable} title="Damage: the dice + the attack's Effect, less the target's armour" onClick={() => session.ct("damage-roll", { recordId: record.id, weapon: key })}>
-                    {String(attack.damage)}
-                  </button>
-                </li>
-              ))}
-            </ul>
-            {rows(data.attacks).length === 0 ? <p className="hint">No weapon ready: equip one on the Gear tab.</p> : null}
-          </section>
-        ) : null}
-
-        {tab === "gear" ? (
-          <section className="cc-panel cc-page" data-tab-page="gear">
-            <ul className="five-items">
-              {rows(data.inventorylist).map(([key, item]) => (
-                <li key={key} data-item={key}>
-                  <select className="cc-field" value={num(item.carried) || 1} disabled={!editable} aria-label={`${String(item.name)} carried`} title="Ready (worn or in hand), carried or stowed" onChange={(event) => change(`inventorylist.${key}.carried`, Number(event.target.value))}>
-                    <option value={2}>Ready</option>
-                    <option value={1}>Carried</option>
-                    <option value={0}>Stowed</option>
-                  </select>
-                  <Field value={num(item.count) || 1} number editable={editable} label={`${String(item.name)} count`} onSave={numberAt(`inventorylist.${key}.count`)} />
-                  <span>
-                    {String(item.name)} <small className="hint">{String(item.subtype ?? item.type ?? "")}{item.protection ? ` · protection ${num(item.protection)}` : ""}{item.damage ? ` · ${String(item.damage)}` : ""}</small>
-                  </span>
-                  {editable ? (
-                    <button type="button" className="ghost" title="Drop it" aria-label={`Drop ${String(item.name)}`} onClick={() => change(`inventorylist.${key}`, null)}>
-                      ×
-                    </button>
-                  ) : null}
-                </li>
-              ))}
-            </ul>
-            <div className="five-coins">
-              {rows(data.coins).map(([key, coin]) => (
-                <label key={key} className="cc-inline">
-                  <Field value={num(coin.amount)} number editable={editable} label="Credits" onSave={numberAt(`coins.${key}.amount`)} /> credits
-                </label>
-              ))}
+      {tab === "skills" ? (
+        <section className="cc-panel five-skills cc-page" data-tab-page="skills">
+          {known.map(([key, row]) => (
+            <div key={key} className="five-skill" data-skill={key}>
+              <span className="cc-num">{num(row.level)}</span>
+              <span>
+                {String(row.name)} <small className="hint">{String(row.stat).slice(0, 3).toUpperCase()}</small>
+                {(tricksForSkill(data, key) as { name: string; text: string }[]).map((trick) => (
+                  <small key={trick.name} className="astra-trick-note" data-trick-for={key} title={`${trick.name}: ${trick.text}`}>
+                    ★ {trick.name}
+                  </small>
+                ))}
+              </span>
+              <button type="button" className="cc-bonus" disabled={!editable} aria-label={`${String(row.name)} task`} data-roll-skill={key} onClick={() => task(key)}>
+                {signed(num(row.level) + num(stats[String(row.stat)]?.dm))}
+              </button>
             </div>
-          </section>
-        ) : null}
+          ))}
+          {known.length === 0 ? <p className="hint">No skills yet.</p> : null}
+          {editable ? (
+            <>
+              <p className="cc-inline">
+                <select className="cc-field" value={untrained} aria-label="An untrained skill" onChange={(event) => setUntrained(event.target.value)}>
+                  <option value="">An untrained task (-3)…</option>
+                  {Object.entries(SKILLS)
+                    .filter(([key]) => !skills[key])
+                    .map(([key, [name]]) => (
+                      <option key={key} value={key}>
+                        {name}
+                      </option>
+                    ))}
+                </select>
+                <button type="button" disabled={!untrained} onClick={() => task(untrained)}>
+                  Roll
+                </button>
+              </p>
+              <p className="cc-inline" title="Spend experience: a skill's next level costs that level x 2 (a new skill at 0 costs 1); a characteristic +1 costs 6">
+                <select className="cc-field" value={improving} aria-label="Improve" onChange={(event) => setImproving(event.target.value)}>
+                  <option value="">Improve (spend experience)…</option>
+                  {Object.entries(SKILLS).map(([key, [name]]) => {
+                    const next = skills[key] ? num(skills[key].level) + 1 : 0;
+                    return next <= 4 ? (
+                      <option key={key} value={`skill:${key}`}>
+                        {name} {next} ({skillCost(next)})
+                      </option>
+                    ) : null;
+                  })}
+                  {STATS.map((stat: string) => (
+                    <option key={stat} value={`stat:${stat}`}>
+                      {STAT_NAMES[stat as keyof typeof STAT_NAMES]} {num(stats[stat]?.score) + 1} (6)
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  data-action="improve"
+                  disabled={!improving}
+                  onClick={() => {
+                    const [kind, key] = improving.split(":");
+                    void session.improveCharacter(record.id, kind === "skill" ? { skill: key } : { attribute: key }).catch(() => undefined);
+                    setImproving("");
+                  }}
+                >
+                  Improve
+                </button>
+                <small className="hint">{exp} to spend</small>
+              </p>
+            </>
+          ) : null}
+        </section>
+      ) : null}
 
-        {tab === "notes" ? (
-          <section className="cc-panel cc-page" data-tab-page="notes">
-            <label className="cc-labelled">
-              <Field value={String(data.contacts ?? "")} editable={editable} label="Contacts and rivals" onSave={(value) => change("contacts", value)} />
-              <small>Contacts and rivals</small>
-            </label>
-            <label className="cc-labelled">
-              <Field value={String(data.notes ?? "")} area editable={editable} label="Notes" onSave={(value) => change("notes", value)} />
-              <small>Notes</small>
-            </label>
-          </section>
-        ) : null}
-      </div>
-      <nav className="cc-tabs" role="tablist" aria-label="Sheet">
-        {TABS.map((id) => (
-          <button key={id} type="button" role="tab" aria-selected={tab === id} data-sheet-tab={id} onClick={() => setTab(id)}>
-            {titled(id)}
-          </button>
-        ))}
-      </nav>
-    </article>
+      {tab === "combat" ? (
+        <section className="cc-panel cc-page" data-tab-page="combat">
+          <h4>Weapons {targetNames.length ? <small className="hint">at {targetNames.join(", ")}</small> : <small className="hint">Ctrl+click a token to target it</small>}</h4>
+          <ul className="five-attacks">
+            {rows(data.attacks).map(([key, attack]) => (
+              <li key={key} data-attack={key}>
+                <b>{String(attack.name)}</b> <small className="hint">{String(attack.range ?? "")}</small>
+                <button type="button" data-action="attack" disabled={!editable} title="Attack: 2d6 + this, 8 or more; the Effect adds to the damage" onClick={() => session.ct("attack", { recordId: record.id, weapon: key })}>
+                  {signed(num(attack.bonus))}
+                </button>
+                <button type="button" data-action="damage" disabled={!editable} title="Damage: the dice + the attack's Effect, less the target's armour" onClick={() => session.ct("damage-roll", { recordId: record.id, weapon: key })}>
+                  {String(attack.damage)}
+                </button>
+              </li>
+            ))}
+          </ul>
+          {rows(data.attacks).length === 0 ? <p className="hint">No weapon ready: equip one on the Gear tab.</p> : null}
+        </section>
+      ) : null}
+
+      {tab === "gear" ? (
+        <section className="cc-panel cc-page" data-tab-page="gear">
+          <ul className="five-items">
+            {rows(data.inventorylist).map(([key, item]) => (
+              <li key={key} data-item={key}>
+                <select className="cc-field" value={num(item.carried) || 1} disabled={!editable} aria-label={`${String(item.name)} carried`} title="Ready (worn or in hand), carried or stowed" onChange={(event) => change(`inventorylist.${key}.carried`, Number(event.target.value))}>
+                  <option value={2}>Ready</option>
+                  <option value={1}>Carried</option>
+                  <option value={0}>Stowed</option>
+                </select>
+                <Field value={num(item.count) || 1} number editable={editable} label={`${String(item.name)} count`} onSave={numberAt(`inventorylist.${key}.count`)} />
+                <span>
+                  {String(item.name)} <small className="hint">{String(item.subtype ?? item.type ?? "")}{item.protection ? ` · protection ${num(item.protection)}` : ""}{item.damage ? ` · ${String(item.damage)}` : ""}</small>
+                </span>
+                {editable ? (
+                  <button type="button" className="ghost" title="Drop it" aria-label={`Drop ${String(item.name)}`} onClick={() => change(`inventorylist.${key}`, null)}>
+                    ×
+                  </button>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+          <div className="five-coins">
+            {rows(data.coins).map(([key, coin]) => (
+              <label key={key} className="cc-inline">
+                <Field value={num(coin.amount)} number editable={editable} label="Credits" onSave={numberAt(`coins.${key}.amount`)} /> credits
+              </label>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {tab === "notes" ? (
+        <section className="cc-panel cc-page" data-tab-page="notes">
+          <label className="cc-labelled">
+            <Field value={String(data.contacts ?? "")} editable={editable} label="Contacts and rivals" onSave={(value) => change("contacts", value)} />
+            <small>Contacts and rivals</small>
+          </label>
+          <label className="cc-labelled">
+            <Field value={String(data.notes ?? "")} area editable={editable} label="Notes" onSave={(value) => change("notes", value)} />
+            <small>Notes</small>
+          </label>
+        </section>
+      ) : null}
+    </SheetFrame>
   );
 }
 
