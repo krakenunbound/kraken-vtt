@@ -6,6 +6,7 @@ full log of the work is in [PLAN.md](PLAN.md).
 
 ## Unreleased
 
+<<<<<<< HEAD
 Targeting, area spells, effects and damage cards, Fantasy Grounds' and Foundry's best together (docs/targeting-actions-design.md).
 
 - **Targeting from the map toolbar, on every map:** target mode (click a creature, or drag a box), target all friendlies or all foes, clear friendly, enemy or all targets, for the selected creature (or your own). Ctrl+click works on tracker rows too. The GM sees everyone's aim, a ring per targeter in that player's colour.
@@ -14,6 +15,21 @@ Targeting, area spells, effects and damage cards, Fantasy Grounds' and Foundry's
 - **Lights as effects:** a torch dropped on a token lights the map around it, moves with it, shows as glow to players, burns an hour of game time, warns, and goes out; it can be put out and lit again.
 - **Damage cards:** each creature hit, what it took after saves and resistances, and buttons to halve, double, undo or heal it. Damage can wait on the card instead of landing at once (a setting). Chat rolls dragged onto a creature apply there.
 - D&D 3.5E and AD&D 2E (OSRIC too) cast spells from their books' words: slots, saves, damage by caster level, effects. (Basic Fantasy's engine is ready; its books keep spells as pages, not records, so it has nothing to cast yet.)
+=======
+The map at play, past what Fantasy Grounds and Foundry give:
+
+- **A ruler everyone sees.** Right-drag to measure; a left click or Space drops a waypoint, each leg is measured and the whole. Every seat on the map sees it as you draw, in your colour. Diagonals count one, 5-10-5 (carried across the legs) or as a straight line, for the campaign or a scene; height counts from token to token.
+- **Who sees health and names** (FG's options): health of creatures and characters as a bar, a dot, either on hover, or off; names on hover, always or off; an unidentified name players see instead of the real one. What is off is never sent to a player.
+- **Fog of war kept by the GM's app**, per player and map, saved with the campaign (it was each browser's own); Reset explored for one player or all.
+- **Senses:** blindsight, tremorsense (through walls, on the ground), truesight and Devil's Sight; magical darkness, black for players.
+- **Undo a move** (Ctrl+Z, the token menu) and **this turn's path** on the tracker, with its distance.
+- **Locked movement asks the GM:** a player's drag waits on the GM's Moves waiting strip, Accept or Cancel.
+- **Elevation:** Alt+wheel, a badge, height in measuring.
+- **A dragged token's distance in the colour of its speed:** green within it, amber within a dash, red past both (a warning, never a stop).
+- **Map Studio's traps, pits, difficult terrain and teleports play at the table**, and a Foundry bundle's regions by their behaviours.
+- **Animated maps** (.webm, .mp4) and **sounds placed on a map**, heard near your tokens and muffled by walls.
+- New agent tools: `kraken_ruler`, `kraken_region`, `kraken_map_sound`; `kraken_token_move` undo, path and approvals; checks `npm run map-play` and `npm run map-play-ui`.
+>>>>>>> main
 
 The first two stages of Kraken's core UI (docs/core-ui-design.md): one core that every game slides into, as Fantasy Grounds' CoreRPG and Foundry's core do. On screen almost nothing changes. Underneath, the games stop hand-copying each other.
 

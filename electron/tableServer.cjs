@@ -162,9 +162,23 @@ function sanitizeScene(input) {
       threshold: num(wall.threshold, 0) > 0 ? num(wall.threshold, 0) : null,
     });
   }
+  // A bundle's regions (traps, difficult terrain, teleports): the host keeps them (mapState.cjs), never a player.
+  const regions = (Array.isArray(input.regions) ? input.regions : [])
+    .filter((region) => region && typeof region === "object")
+    .slice(0, 300)
+    .map((region, index) => ({
+      id: text(region.id, `region-${index}`).slice(0, 60),
+      name: text(region.name, "Region").slice(0, 120),
+      trap: Boolean(region.trap),
+      kind: ["trap", "pit", "difficult", "teleport"].includes(region.kind) ? region.kind : null,
+      note: typeof region.note === "string" ? region.note.slice(0, 4000) : "",
+      cost: num(region.cost, 2),
+      polygons: (Array.isArray(region.polygons) ? region.polygons : []).filter((points) => Array.isArray(points) && points.length >= 6 && points.length <= 2000).slice(0, 20).map((points) => points.map((value) => num(value, 0))),
+    }));
   return {
     id: text(input.id, "scene").slice(0, 80),
     name: text(input.name, "Scene").slice(0, 80),
+    regions,
     width,
     height,
     padding: Math.min(2, Math.max(0, num(input.padding, 0))),
@@ -286,8 +300,18 @@ function savedOptions(value) {
     // The AD&D 2E character wizard's options (the FG extension's Options): ability
     // rolls once only, the PHB methods (I to VI) players may use, gold above 1st level.
     wizard2e: wizard2eOptions(options.wizard2e),
+    // How a diagonal square counts when measuring (FG's HRDD): "1" every square
+    // one, "1.5" the 5-10-5 count, "raw" a straight line. A scene may set its own.
+    diagonal: ["1", "1.5", "raw"].includes(String(options.diagonal)) ? String(options.diagonal) : "1",
+    // FG's token options, what players see on tokens: the health of the GM's
+    // creatures and of the characters (bar, bar on hover, dot, dot on hover,
+    // off) and names (off, on hover, always). Players are never sent what is off.
+    healthNpc: HEALTH_SHOWS.includes(options.healthNpc) ? options.healthNpc : "dot",
+    healthPc: HEALTH_SHOWS.includes(options.healthPc) ? options.healthPc : "dot",
+    names: ["off", "hover", "always"].includes(options.names) ? options.names : "hover",
   };
 }
+const HEALTH_SHOWS = ["bar", "barhover", "dot", "dothover", "off"];
 function wizard2eOptions(value) {
   const raw = value && typeof value === "object" ? value : {};
   const methods = Array.isArray(raw.methods) ? [...new Set(raw.methods.map((n) => Math.round(Number(n))).filter((n) => n >= 1 && n <= 6))].sort() : [1, 2, 3, 4, 5, 6];
@@ -568,6 +592,8 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     options = savedOptions({ ...options, ...next, ...(next.wizard35 && typeof next.wizard35 === "object" ? { wizard35: { ...options.wizard35, ...next.wizard35 } } : {}), ...(next.wizard2e && typeof next.wizard2e === "object" ? { wizard2e: { ...options.wizard2e, ...next.wizard2e } } : {}) });
     broadcast({ type: "options", options });
     onChange("table");
+    // What tokens show (names, health) and how distance counts are in each seat's map.
+    if (["diagonal", "healthNpc", "healthPc", "names"].some((key) => key in next)) sendMaps();
     return options;
   }
   // The seat whose request is being handled now (and when).
@@ -600,6 +626,10 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     },
     activeRecord: () => combat.entries().find((item) => item.id === combat.active())?.recordId ?? null,
     colorOf: (name) => tokenColorOf(name),
+    tableOptions: () => options,
+    onRegion: (event) => regionSprang(event, false),
+    // On the combat tracker (by its token, or a character's record): its path this turn is drawn.
+    onTracker: (token) => combat.entries().some((entry) => entry.tokenId === token.id || (token.recordId && !entry.tokenId && entry.recordId === token.recordId)),
     // A token's side changed (its menu, a tool): its tracker entry follows.
     onFaction: (token) => {
       for (const entry of combat.entries()) if (entry.tokenId === token.id && entry.faction !== token.faction) combat.update(entry.id, { faction: token.faction }, { role: "dm", name: "GM" });
@@ -625,6 +655,8 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     combatFor: () => null,
     activeRecord: () => null,
     colorOf: (name) => tokenColorOf(name),
+    tableOptions: () => options,
+    onRegion: (event) => regionSprang(event, true),
   });
   // FG's play test: the GM sees the image as a player would, through a test
   // token's eyes ("@test" owns it), and moves it as a player moves.
@@ -711,7 +743,29 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     },
     say: (line, from, secret) => agentHandle.say(line, from, secret),
   });
+  // A token stepped into a trap, a pit or a teleport (mapState.cjs): the GM is
+  // told, by name and note, in a line only the GM sees, and on the map; a trap
+  // locks movement until the GM lets the table go on.
+  function regionSprang({ region, token, seat }, prepOnly) {
+    const what = region.kind === "teleport" ? "stepped into the teleport" : `sprang the ${region.kind}`;
+    const line = `${token.name} ${what} "${region.name}"${region.note ? `: ${region.note}` : ""}${region.kind === "trap" || region.kind === "pit" ? " (movement is locked: unlock it to go on)" : ""}`;
+    if (!prepOnly) agentHandle.say(line, "Map", true);
+    for (const [ws, client] of clients) if (client.role === "dm") send(ws, { type: "notice", text: line.slice(0, 300) });
+    if (seat.role !== "dm" && region.kind !== "teleport") for (const [ws, client] of clients) if (client.name === seat.name && client.role !== "dm") send(ws, { type: "notice", text: "Something happens. The GM has stopped the table." });
+  }
+  // A creature's turn begins on the tracker: its token's path (this turn's moves) starts again.
+  let turnOf = null;
+  function turnStarted() {
+    const now = combat.active?.() ?? null;
+    if (now === turnOf) return;
+    turnOf = now;
+    const entry = combat.entries().find((item) => item.id === now);
+    if (!entry) return;
+    const token = map.tokens().find((item) => item.id === entry.tokenId) ?? (entry.recordId ? map.tokens().find((item) => item.recordId === entry.recordId) : null);
+    if (token) map.clearPath(token.id);
+  }
   function sendCombat() {
+    turnStarted();
     if (combatPending) return;
     combatPending = true;
     setImmediate(() => {
@@ -756,16 +810,33 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     mapsPending = true;
     setImmediate(() => {
       mapsPending = false;
+      let explored = false;
       for (const [ws, client] of clients) {
         if (client.role !== "dm") {
-          send(ws, { type: "map", ...(sceneHiddenNow() ? emptyView() : map.viewFor(seatOf(client), client.assetToken)) });
+          const hidden = sceneHiddenNow();
+          const view = hidden ? emptyView() : map.viewFor(seatOf(client), client.assetToken);
+          send(ws, { type: "map", ...view });
+          // Fog of war: what this player sees now joins what they have seen (kept here, sent to them alone).
+          if (!hidden && view.vision && map.explore(client.name, view.vision)) explored = true;
+          if (!hidden) sendExplored(ws, client, map, client.name);
           continue;
         }
         const working = gmMap();
         const view = working.viewFor(testing ? TEST_SEAT : previewing ? PREVIEW_SEAT : seatOf(client), client.assetToken);
         send(ws, { type: "map", ...view, prep: working === prep ? working.scene()?.id ?? null : null, testing, previewing, sceneHidden: sceneHiddenNow() });
+        // The GM's player vision preview shows every player's explored areas together.
+        sendExplored(ws, client, working, previewing ? "*" : null);
       }
+      if (explored) onChange("table");
     });
+  }
+  // A seat's explored areas of the scene, sent when they change (not with every map).
+  function sendExplored(ws, client, working, who) {
+    const sceneId = working.scene()?.id ?? null;
+    const key = who === null ? `${sceneId}|none` : `${sceneId}|${who}|${working.exploredVersion(who)}`;
+    if (client.exploredKey === key) return;
+    client.exploredKey = key;
+    send(ws, { type: "explored", sceneId, polygons: who === null ? [] : working.exploredFor(who) });
   }
 
   // A token's tracker entry: the one tied to that very token, else (a token placed
@@ -1086,9 +1157,25 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         res.end();
         return;
       }
+      // An animated map is a video: the browser asks for it in ranges to play and loop it.
+      const range = /^bytes=(\d*)-(\d*)$/.exec(String(req.headers.range ?? ""));
+      if (range && (range[1] || range[2])) {
+        const size = image.bytes.length;
+        const start = range[1] ? Number(range[1]) : Math.max(0, size - Number(range[2]));
+        const end = range[1] && range[2] ? Math.min(size - 1, Number(range[2])) : size - 1;
+        if (start >= size || start > end) {
+          res.writeHead(416, { "Content-Range": `bytes */${size}`, "Access-Control-Allow-Origin": "*" });
+          res.end();
+          return;
+        }
+        res.writeHead(206, { "Content-Type": image.mime, "Content-Range": `bytes ${start}-${end}/${size}`, "Content-Length": end - start + 1, "Accept-Ranges": "bytes", "Cache-Control": "no-store", "Access-Control-Allow-Origin": "*" });
+        res.end(image.bytes.subarray(start, end + 1));
+        return;
+      }
       res.writeHead(200, {
         "Content-Type": image.mime,
         "Content-Length": image.bytes.length,
+        "Accept-Ranges": "bytes",
         "Cache-Control": "no-store",
         "Access-Control-Allow-Origin": "*",
       });
@@ -1463,10 +1550,11 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     if (!scene) return null;
     // Not shared: a player is sent no map.
     if (client.role !== "dm" && sceneHiddenNow()) return null;
-    const { walls, tokens, lights, ...shown } = scene;
+    const { walls, tokens, lights, regions: _regions, ...shown } = scene;
     return {
       ...shown,
       image: image ? `/table/image?token=${client.assetToken}&v=${imageVersion}` : null,
+      video: Boolean(image && image.mime.startsWith("video/")),
     };
   }
 
@@ -1621,6 +1709,8 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         client.joined = true;
         clearTimeout(joinTimer);
         clients.set(ws, client);
+        // Their explored areas (and the rest of the map) follow the welcome.
+        sendMaps();
         send(ws, {
           type: "ok",
           ruleset,
@@ -2331,7 +2421,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
 
       // The map: tokens, doors, line of sight and pings (mapState.cjs decides
       // who may do what).
-      if (["token-place", "token-move", "token-remove", "token-update", "door", "sight", "lock", "scene-settings", "light-place", "light-update", "light-remove", "draw", "draw-update", "draw-erase", "draw-clear", "death-marker", "wall", "map-undo", "mask", "label", "map-group", "fx", "tile"].includes(msg.type)) {
+      if (["token-place", "token-move", "token-remove", "token-update", "door", "sight", "lock", "scene-settings", "light-place", "light-update", "light-remove", "draw", "draw-update", "draw-erase", "draw-clear", "death-marker", "wall", "map-undo", "mask", "label", "map-group", "fx", "tile", "explored-reset", "token-undo", "move-approve", "map-sound"].includes(msg.type)) {
         const working = mapOf(client);
         // Testing: the GM's moves of the test token are a player's (walls, locks).
         const testToken = (id) => testing && client.role === "dm" && working.tokens().some((token) => token.id === id && token.owner === TEST_SEAT.name);
@@ -2342,12 +2432,28 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
           } else if (msg.type === "token-move" && Array.isArray(msg.moves)) {
             // A group dragged together.
             const moved = working.moveMany(msg.moves.slice(0, 400), seat, { snap: msg.snap !== false });
-            if (moved.some((item) => item.blocked)) send(ws, { type: "notice", text: "A wall is in the way." });
+            if (moved.some((item) => item.requested)) send(ws, { type: "notice", text: "The GM has locked token movement: your move waits for the GM." });
+            else if (moved.some((item) => item.blocked)) send(ws, { type: "notice", text: "A wall is in the way." });
           } else if (msg.type === "token-move") {
             const to = { x: num(msg.x, NaN), y: num(msg.y, NaN) };
             if (!Number.isFinite(to.x) || !Number.isFinite(to.y) || Math.abs(to.x) > 1e7 || Math.abs(to.y) > 1e7) throw new Error("Where to?");
-            const { blocked } = working.move(String(msg.id ?? ""), to, testToken(String(msg.id ?? "")) ? TEST_SEAT : seat, { snap: msg.snap !== false });
-            if (blocked) send(ws, { type: "notice", text: "A wall is in the way." });
+            const { blocked, requested } = working.move(String(msg.id ?? ""), to, testToken(String(msg.id ?? "")) ? TEST_SEAT : seat, { snap: msg.snap !== false });
+            // Locked: FG's TokenMoveManager, the move waits for the GM's yes.
+            if (requested) send(ws, { type: "notice", text: "The GM has locked token movement: your move waits for the GM." });
+            else if (blocked) send(ws, { type: "notice", text: "A wall is in the way." });
+          } else if (msg.type === "token-undo") {
+            // Undo a move: a player their own last move, the GM any.
+            working.undoMove(String(msg.id ?? ""), testToken(String(msg.id ?? "")) ? TEST_SEAT : seat);
+          } else if (msg.type === "map-sound") {
+            // The GM's sounds placed on the map (Scene settings): placed, changed, removed.
+            if (msg.action === "add") working.addMapSound(msg.sound ?? {}, seat);
+            else if (msg.action === "update") working.updateMapSound(String(msg.id ?? ""), msg.patch ?? {}, seat);
+            else if (msg.action === "remove") working.removeMapSound(String(msg.id ?? ""), seat);
+            else throw new Error("What should the sound do?");
+          } else if (msg.type === "move-approve") {
+            // The GM's approval strip: a player's locked move (or all of them) accepted or cancelled.
+            if (client.role !== "dm") throw new Error("Only the GM approves moves.");
+            working.approveMoves(msg.all ? "all" : Array.isArray(msg.ids) ? msg.ids.map(String).slice(0, 400) : [String(msg.id ?? "")], msg.accept !== false, seat);
           } else if (msg.type === "token-remove") {
             working.remove(String(msg.id ?? ""), seat);
           } else if (msg.type === "token-update") {
@@ -2415,6 +2521,9 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
           } else if (msg.type === "lock") {
             if (client.role !== "dm") throw new Error("Only the GM can lock token movement.");
             working.setLocked(Boolean(msg.on));
+          } else if (msg.type === "explored-reset") {
+            // The GM's Reset explored: one player's memory of this scene, or everyone's.
+            working.resetExplored(typeof msg.player === "string" ? msg.player.slice(0, 24) : "", seat);
           }
         } catch (error) {
           send(ws, { type: "error", reason: error instanceof Error ? error.message : "Not allowed." });
@@ -2714,6 +2823,14 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         return;
       }
 
+      // A ruler being measured (right-drag, with waypoints): shown to every
+      // seat that sees this map as it moves, gone when it is let go. Not kept.
+      if (msg.type === "ruler") {
+        if (!scene) return;
+        relayRuler(client, msg.points);
+        return;
+      }
+
       if (msg.type === "scene") {
         if (client.role !== "dm") return;
         const next = sanitizeScene(msg.scene);
@@ -2951,6 +3068,11 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       if (on) broadcast({ type: "map-share", name: scene.name });
       return on ? { shared: scene.name } : { notShared: scene.name };
     },
+    // A ruler shown to the table (the agent measuring), and cleared.
+    ruler(points) {
+      if (!scene) throw new Error("No scene is on the table.");
+      relayRuler({ id: "agent", name: "Agent", role: "dm", color: "#f4f1ea" }, points);
+    },
     // A ping on the map at a square, as a GM's click would make.
     ping(col, row, from = "Agent") {
       if (!scene) throw new Error("No scene is on the table.");
@@ -3037,6 +3159,26 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     broadcast({ type: "read-aloud", text: said, title: String(title ?? "").slice(0, 120), at: Date.now() });
     return { read: said.length };
   }
+  // A ruler to the other seats on this map (points [x, y, ...]: start, waypoints, end; none clears it).
+  // The GM measuring on a private image, or a map held back, reaches no player.
+  const rulerAt = new Map();
+  function relayRuler(client, raw) {
+    const points = Array.isArray(raw) ? raw.slice(0, 66).map(Number) : [];
+    if (points.length % 2 || points.some((value) => !Number.isFinite(value) || Math.abs(value) > 1e7)) return;
+    const clearing = points.length < 4;
+    // At most about 25 a second from one seat (a clear always goes).
+    const now = Date.now();
+    if (!clearing && now - (rulerAt.get(client.id) ?? 0) < 40) return;
+    rulerAt.set(client.id, now);
+    const privateToGm = client.role === "dm" && gmMap() === prep;
+    const out = { type: "ruler", from: text(client.name, "GM").slice(0, 24), id: String(client.id ?? client.name), sceneId: scene?.id ?? null, color: client.color ?? playerColorOf(client), points: clearing ? [] : points };
+    for (const [ws, other] of clients) {
+      if (other === client) continue;
+      if (other.role !== "dm" && (privateToGm || sceneHiddenNow())) continue;
+      send(ws, out);
+    }
+  }
+
   function playerColorOf(client) {
     return prefs.get(prefsKey(client)).color ?? (client.role === "dm" ? "#f4f1ea" : playerColor(client.name));
   }
@@ -3064,7 +3206,8 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     setImage(bytes, mime) {
       if (!bytes || bytes.length === 0) image = null;
       else {
-        const type = typeof mime === "string" && mime.startsWith("image/") ? mime : "application/octet-stream";
+        // A picture, or an animated map (a .webm or .mp4 video).
+        const type = typeof mime === "string" && (mime.startsWith("image/") || mime === "video/webm" || mime === "video/mp4") ? mime : "application/octet-stream";
         image = { bytes: Buffer.from(bytes), mime: type };
       }
       imageVersion += 1;

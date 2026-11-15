@@ -189,8 +189,10 @@ try {
   // The GM's token lock stops players moving, until it is lifted.
   assert((await tool("kraken_line_of_sight", { lockMovement: true })).lockMovement === true, "movement locked");
   ann.ws.send(JSON.stringify({ type: "token-move", id: placed.id, x: 325, y: 75 }));
-  await latest(ann, "error", (m) => m.reason.includes("locked token movement"), "locked movement refused");
+  // Locked, a player's move waits for the GM (FG's TokenMoveManager; check-map-play approves them).
+  await latest(ann, "notice", (m) => m.text.includes("locked token movement"), "locked movement waits for the GM");
   assert(server.snapshot().tokens.find((t) => t.id === placed.id).y === 125, "the locked token stayed");
+  await tool("kraken_token_move", { approve: "all", accept: false });
   await tool("kraken_line_of_sight", { lockMovement: false });
 
   // Hidden tokens stay off the player's map; line of sight off shows everything.
