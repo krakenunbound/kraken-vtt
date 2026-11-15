@@ -109,6 +109,11 @@ function checkSheet(where, manifest) {
   const walk = (parts, seen, tab) => {
     for (const part of parts) {
       if (part.part === "custom") refs.push(part.component);
+      // Refs inside parts: a game's own box, a formatter for a shown field or a row's note, a class's level hook.
+      if (part.part === "derived") for (const box of part.boxes) if (box.custom) refs.push(box.custom);
+      if (part.part === "statBlock") for (let block = part; block; block = block.inner) if (block.rowNote) refs.push(block.rowNote.format);
+      if (part.part === "strip") for (const item of part.items) if (item.kind === "levels") refs.push(item.hook);
+      for (const field of part.part === "notes" ? part.fields : []) if (field.format) refs.push(field.format);
       if (part.part === "row") walk(part.parts, seen, tab);
       // A stat block's fields: each row's columns (not its rolls), a second field, and an inner block's.
       const statFields = (block) => [
@@ -138,6 +143,7 @@ function checkSheet(where, manifest) {
     }
   };
   for (const field of manifest.sheet.header.identity) if (field.kind && field.kind !== "readonly" && field.edit !== "never") editable.push(field.path);
+  for (const field of manifest.sheet.header.identity) if (field.format) refs.push(field.format);
   walk(manifest.sheet.top ?? [], { rows: new Set(), actions: new Set() }, "top");
   for (const tab of manifest.sheet.tabs) walk(tab.parts, { rows: new Set(), actions: new Set() }, tab.id);
   // The whitelist: every editable path is allowed by the manifest's edit globs.

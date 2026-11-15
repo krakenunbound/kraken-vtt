@@ -35,7 +35,11 @@ function withWords<T>(value: T, words: Record<string, string>): T {
   return value;
 }
 
-export function SheetRenderer({ spec: given, record, session, ruleset, custom, formats, words = {}, features = [] }: { spec: SheetSpec; record: TableRecord; session: Session; ruleset: string; custom: Record<string, CustomPart>; formats: Record<string, Format>; words?: Record<string, string>; features?: string[] }) {
+// The same objects every render when a game has no words or features, so the spec and the context stay memoised.
+const NO_WORDS: Record<string, string> = {};
+const NO_FEATURES: string[] = [];
+
+export function SheetRenderer({ spec: given, record, session, ruleset, custom, formats, words = NO_WORDS, features = NO_FEATURES }: { spec: SheetSpec; record: TableRecord; session: Session; ruleset: string; custom: Record<string, CustomPart>; formats: Record<string, Format>; words?: Record<string, string>; features?: string[] }) {
   const spec = useMemo(() => withWords(given, words), [given, words]);
   const [tab, setTab] = useState(spec.tabs[0]?.id ?? "main");
   const [modifiers, setModifiers] = useState<Record<string, unknown>>(() => startingModifiers([...(spec.top ?? []), ...spec.tabs.flatMap((item) => item.parts)]));

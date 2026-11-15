@@ -324,8 +324,15 @@ try {
       await settle(300);
       const count = await sheet.locator(".cc-page").locator(CONTROLS).count();
       const strip = await sheet.locator(".five-strip").locator(CONTROLS).count();
-      // The strip over every tab once (on the first tab), then the tab's own controls; a row's drop (×) last.
-      const targets = [...(tab === game.tabs.split(",")[0] ? Array.from({ length: strip }, (_, index) => ({ in: ".five-strip", index })) : []), ...Array.from({ length: count }, (_, index) => ({ in: ".cc-page", index }))];
+      const header = await sheet.locator(".cc-boxes").locator(CONTROLS).count();
+      // The header's boxes and the strip over every tab once (on the first tab), then the tab's own controls. The
+      // strip's DC or Mod stays at what was typed (1), so every later roll and save carries it.
+      const first = tab === game.tabs.split(",")[0];
+      const targets = [
+        ...(first ? Array.from({ length: header }, (_, index) => ({ in: ".cc-boxes", index })) : []),
+        ...(first ? Array.from({ length: strip }, (_, index) => ({ in: ".five-strip", index })) : []),
+        ...Array.from({ length: count }, (_, index) => ({ in: ".cc-page", index })),
+      ];
       let dropped = false;
       for (const target of targets) {
         const control = sheet.locator(target.in).locator(CONTROLS).nth(target.index);
@@ -350,8 +357,6 @@ try {
             await control.fill(next);
             await control.press("Tab");
           });
-          // The strip's DC / Mod back to 0 so a later roll reads the same way.
-          if (target.in === ".five-strip" && info.type === "number" && info.aria !== "Experience") await control.fill("0");
         } else await press(sheet, id, what, () => control.click());
       }
     }
