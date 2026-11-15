@@ -648,7 +648,7 @@ const TOOLS = [
   {
     name: "kraken_chat_send",
     description:
-      "Post a chat message to the table, as FG's chat commands do: kind say (default), emote (/emote: \"Agent nods\"), action (/action), ooc (/ooc), story (/story: the GM's narration, no name) or mood (/mood, with mood); to: whisper it to these players only (the GM sees every whisper, as FG's); as: the name shown (/id: an NPC speaking).",
+      "Post a chat message to the table, as FG's chat commands do: kind say (default), emote (/emote: \"Agent nods\"), action (/action), ooc (/ooc), story (/story: the GM's narration, no name) or mood (/mood, with mood); to: whisper it to these players only (the GM sees every whisper, as FG's); as: the name shown (/id: an NPC speaking; a character's or NPC's name puts its portrait on the line). link: a link on the line, as anything dropped into the chat's entry (a record, a sheet, a note, a book page, a picture; each player may open it only if they may see it); share with a record link: FG's Share, the record's text posted as the players know it (an unidentified item as unidentified).",
     inputSchema: object(
       {
         text: string("Message"),
@@ -656,11 +656,15 @@ const TOOLS = [
         kind: { type: "string", enum: ["say", "emote", "action", "ooc", "story", "mood"] },
         mood: string("For kind mood: angry, laughing..."),
         to: { type: "array", items: { type: "string" }, description: "Player names to whisper to" },
+        link: { type: "object", description: "A link on the line: { kind: record|sheet|note, record: id, label } | { kind: book, book, page, label } | { kind: picture, book, file, label }" },
+        share: { type: "boolean", description: "With a record link: post the record's text (FG's Share)" },
       },
       ["text"],
     ),
     run: (args, ctx) =>
-      out(
+      args.link
+        ? out(needTable(ctx).sayLink(args.text, args.link, { from: args.as || "Agent", share: args.share === true }))
+        : out(
         needTable(ctx).say(args.text, args.as || "Agent", false, {
           ...(args.kind && args.kind !== "say" ? { kind: args.kind } : {}),
           ...(args.kind === "mood" && args.mood ? { mood: String(args.mood).slice(0, 24) } : {}),
@@ -1342,10 +1346,30 @@ const TOOLS = [
   },
   {
     name: "kraken_party_group_check",
-    description: "SiegeCore's group check or save: every party member rolls the attribute against the CL in front of the table, and chat sums up who succeeded.",
-    inputSchema: object({ kind: { type: "string", enum: ["check", "save"] }, attribute: { type: "string", enum: ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"] }, cl: number("Challenge level") }, ["attribute"]),
+    description:
+      "The party sheet's group roll (FG's party sheet rolls, SiegeCore's group check), for every game: kind check (an ability), save (5E: an ability; 3.5E: fortitude, reflex, will; 2E: paralyzation, rod, petrification, breath, spell; Basic Fantasy: death, wands, paralysis, breath, spells; Cairn: str, dex, wil) or skill (5E's, 3.5E's, a thief skill, Traveller's...), against dc (C&C: the CL; Fate: the opposition), each member through their own sheet roll. mode roll (default: the host rolls for them all now, chat sums it up) or ask (ask the players: a card in chat each owner clicks to roll it from their sheet, with their own modifier box; the GM may roll for anyone offline; the summary when all have rolled). members: some of them (ids or names). action prompt-roll (prompt, member): roll one row of an asked card for its character, as the GM.",
+    inputSchema: object(
+      {
+        action: { type: "string", enum: ["roll", "prompt-roll", "prompts"] },
+        kind: { type: "string", enum: ["check", "save", "skill"] },
+        attribute: string("The ability, save or stat (C&C: strength...; 5E: an ability for a check or save; 3.5E: fortitude/reflex/will for a save)"),
+        skill: string("The skill (kind skill)"),
+        dc: number("The DC (C&C: the CL; Fate: the opposition)"),
+        cl: number("Challenge level (C&C; the same as dc)"),
+        mode: { type: "string", enum: ["roll", "ask"] },
+        members: { type: "array", items: { type: "string" }, description: "Only these members (ids or names)" },
+        prompt: string("An asked card's id (prompt-roll)"),
+        member: string("The member's id on that card (prompt-roll)"),
+      },
+      [],
+    ),
     async run(args, ctx) {
-      return out(await party.groupCheck(needTable(ctx), args.kind ?? "check", args.attribute, args.cl ?? 0));
+      const table = needTable(ctx);
+      if (args.action === "prompt-roll") return out(await table.promptRoll(args.prompt, args.member));
+      if (args.action === "prompts") return out(table.prompts());
+      // The old form (an attribute check or save, C&C's): as before.
+      if (!args.mode && !args.skill && args.kind !== "skill" && args.dc === undefined && ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"].includes(args.attribute)) return out(await party.groupCheck(table, args.kind ?? "check", args.attribute, args.cl ?? 0));
+      return out(await party.partyRoll(table, { kind: args.kind ?? "check", attribute: args.attribute ?? "", skill: args.skill ?? "", dc: args.dc ?? args.cl ?? 0, mode: args.mode === "ask" ? "ask" : "roll", members: args.members }, "GM"));
     },
   },
   {

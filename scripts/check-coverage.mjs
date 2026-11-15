@@ -47,6 +47,7 @@ const MESSAGES = {
   "party-award": "kraken_party_award",
   "party-distribute": "kraken_party_distribute",
   "party-group": "kraken_party_group_check",
+  "party-prompt-roll": "kraken_party_group_check",
   "party-order": "kraken_party_order",
   "character-edit": "kraken_character_edit",
   starship: "kraken_starship",

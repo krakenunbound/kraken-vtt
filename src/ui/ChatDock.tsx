@@ -7,6 +7,9 @@ import { commandsFor, runChat, type Command } from "./chatCommands";
 import { slotDrag } from "./QuickSlots";
 import { ModifierBox, ModifierKeys, NUMBER_DRAG } from "./ModifierBox";
 import { InlineRollText } from "./InlineRolls";
+import { ChatLinkChip, PromptCard, SharedRecord, SpeakerPortrait } from "./ChatParts";
+import { hasLink, linkFrom } from "./QuickSlots";
+import type { QuickSlot } from "../session/useSession";
 import { chatRunner } from "./chatRunner";
 import { TowerArt, towerLook } from "./TowerArt";
 import { agentCommands } from "./agentCommands";
@@ -220,7 +223,7 @@ function Line({ line, gmIcon, session }: { line: ChatLine; gmIcon: string; sessi
           <Icon name={mark.icon} size={13} />
         </span>
       ) : null}
-      {line.gm && gmIcon && !story ? <img className="chat-icon" src={gmIcon} alt="" draggable={false} /> : null}
+      {line.recordId && !story ? <SpeakerPortrait line={line} session={session} /> : line.gm && gmIcon && !story ? <img className="chat-icon" src={gmIcon} alt="" draggable={false} /> : null}
       {!system && !story && line.kind !== "emote" ? <b className="chat-from">{line.from}{line.kind === "mood" && line.mood ? <i className="chat-mood"> ({line.mood})</i> : null}</b> : null}
       {line.to ? <span className="chat-tag whisper-tag">to {line.to.join(", ")}</span> : null}
       {line.kind === "ooc" ? <span className="chat-tag">OOC</span> : null}
@@ -231,6 +234,15 @@ function Line({ line, gmIcon, session }: { line: ChatLine; gmIcon: string; sessi
         <>
           <RollCard roll={line.roll} pending={rolling.has(line)} />
           {line.roll.apply && line.roll.card ? <DamageCardRows card={line.roll.apply} cardId={line.roll.card} session={session} /> : null}
+          {line.roll.links?.length ? (
+            // A table result's links: the records they name, opened where this seat may see them.
+            <span className="chat-links">
+              {line.roll.links.map((item, index) => {
+                const found = Object.values(session.records).find((record) => record.name.toLowerCase() === item.name.toLowerCase());
+                return <ChatLinkChip key={index} session={session} link={found ? { kind: found.type === "character" ? "sheet" : "record", record: found.id, label: found.name } : { kind: "record", record: item.recordname, label: item.name }} />;
+              })}
+            </span>
+          ) : null}
         </>
       ) : line.kind === "readaloud" ? (
         <span className="chat-text chat-readaloud">
@@ -246,6 +258,9 @@ function Line({ line, gmIcon, session }: { line: ChatLine; gmIcon: string; sessi
           <InlineRollText text={line.text} />
         </span>
       )}
+      {line.link ? <ChatLinkChip link={line.link} session={session} /> : null}
+      {line.share ? <SharedRecord share={line.share} session={session} /> : null}
+      {line.prompt ? <PromptCard line={line} session={session} /> : null}
       {line.vote ? (
         <span className="chat-vote">
           <button type="button" className={myVote === "yes" ? "on" : ""} onClick={() => session.tableCommand({ type: "vote-cast", id: line.vote!.id, choice: "yes" })}>
@@ -545,6 +560,11 @@ export function ChatDock({ session }: { session: Session }) {
     }
   };
   const [helpOpen, setHelpOpen] = useState(false);
+  // A link dropped into the entry (a record, a picture, a page, a table's result), sent with the next line;
+  // the GM's Share posts a record's words with it.
+  const [attached, setAttached] = useState<QuickSlot | null>(null);
+  const [share, setShare] = useState(false);
+  const [linkOver, setLinkOver] = useState(false);
   // A right-click menu over the tray: how many of a die to roll, or the modifier's quick values.
   const [menu, setMenu] = useState<{ x: number; y: number; sides: number | null; custom?: boolean } | null>(null);
   // This seat's own set, on the tray's dice (the GM's too).
@@ -959,17 +979,58 @@ export function ChatDock({ session }: { session: Session }) {
         className="chat-entry"
         onSubmit={(event) => {
           event.preventDefault();
-          if (!draft.trim()) return;
+          if (!draft.trim() && !attached) return;
           // A first word that names a command finishes it, as Tab does.
           const typed = /^\/(\S*)$/.exec(draft.trim());
           if (typed && suggestions.length > 0 && !suggestions.some((command) => command.names.includes(typed[1].toLowerCase()))) {
             setDraft(`/${finish(suggestions[0])} `);
             return;
           }
+          if (attached && !draft.trim().startsWith("/")) {
+            session.sendChat(draft.trim(), { link: attached, ...(share ? { share: true } : {}), ...(speakAs || (session.role === "dm" && gmName) ? { as: speakAs || gmName } : {}) });
+            setAttached(null);
+            setShare(false);
+            setDraft("");
+            return;
+          }
           runLine(draft);
           setDraft("");
         }}
+        onDragOver={(event) => {
+          const types = [...event.dataTransfer.types];
+          if (!hasLink(event) && !types.includes("application/x-kraken-record")) return;
+          event.preventDefault();
+          event.dataTransfer.dropEffect = "copy";
+          setLinkOver(true);
+        }}
+        onDragLeave={() => setLinkOver(false)}
+        onDrop={(event) => {
+          setLinkOver(false);
+          const link = linkFrom(event) ?? (() => {
+            const id = event.dataTransfer.getData("application/x-kraken-record");
+            const record = id ? session.records[id] : undefined;
+            return record ? ({ kind: record.type === "character" ? "sheet" : record.type === "note" ? "note" : "record", record: id, label: record.name } as QuickSlot) : null;
+          })();
+          if (!link) return;
+          event.preventDefault();
+          setAttached(link);
+          setShare(false);
+        }}
+        data-link-over={linkOver ? "true" : undefined}
       >
+        {attached ? (
+          <span className="chat-attached" data-chat-attached={attached.kind}>
+            <ChatLinkChip link={attached} session={session} />
+            {session.role === "dm" && ["record", "sheet", "note"].includes(attached.kind) ? (
+              <button type="button" className={share ? "chat-share-toggle on" : "chat-share-toggle"} aria-pressed={share} aria-label="Share its text" title="Share: post the record's text, as the players know it (FG's Share)" onClick={() => setShare(!share)}>
+                <Icon name="share" size={13} />
+              </button>
+            ) : null}
+            <button type="button" className="chat-attached-clear" aria-label="Take the link off" title="Take the link off" onClick={() => (setAttached(null), setShare(false))}>
+              <Icon name="close" size={11} />
+            </button>
+          </span>
+        ) : null}
         {draft.trim() ? (
           <span
             className="chat-macro-grip"

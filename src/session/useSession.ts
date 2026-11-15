@@ -163,7 +163,7 @@ export type RollTerm =
   | { kind: "dice"; sign: number; count: number; sides: number; rolls: number[]; kept: boolean[]; sum: number };
 // What the modifier stack added to a roll (its slots and keys), listed on the card.
 export type RollMod = { label: string; value?: number; key?: string };
-export type RollResult = { formula: string; label: string; total: number; terms: RollTerm[]; tag?: string; result?: string; target?: string; against?: number; by?: string; card?: string; apply?: DamageCard; mods?: RollMod[] };
+export type RollResult = { formula: string; label: string; total: number; terms: RollTerm[]; tag?: string; result?: string; target?: string; against?: number; by?: string; card?: string; apply?: DamageCard; mods?: RollMod[]; links?: { class: string; recordname: string; name: string }[] };
 // The seat's modifier stack (FG's modifier box): up to six labelled numbers, their total, and the keys on (ADV, Cover...).
 // mode: who sees this seat's rolls (the chat bar's roll mode, kept by the host).
 export type ModifierStack = { slots: { label: string; value: number }[]; keys: string[]; total: number; mode?: RollMode };
@@ -192,12 +192,22 @@ export type ChatLine = {
   local?: boolean;
   // Read aloud: where the words are from (a page, a story).
   title?: string;
+  // A link on the line (anything dropped into the chat's entry): opened with a click, dragged on.
+  link?: QuickSlot;
+  // The GM's Share (FG's): a record's words, as the players know it.
+  share?: { name: string; type: string; text: string };
+  // The record that speaks (a character, or a creature the GM speaks or rolls as): its portrait.
+  recordId?: string;
+  // Ask the players (a party roll): who rolls, and what each rolled.
+  prompt?: ChatPrompt;
 };
+// A party roll the GM asked the players for (FG's party sheet roll, as a card each owner clicks).
+export type ChatPrompt = { id: string; kind: string; attribute?: string; skill?: string; dc?: number; label: string; rows: { id: string; name: string; owner: string; total?: number; success?: boolean | null }[]; done?: boolean };
 // The GM's read-aloud, shown over the map as a speech bubble for everyone.
 export type ReadAloud = { text: string; title: string; at: number };
 // Who sees a roll (Foundry's roll modes): everyone, the GM and you, the GM alone, you alone.
 export type RollMode = "public" | "gm" | "blind" | "self";
-export type ChatSend = { kind?: ChatKind; mood?: string; to?: string[]; as?: string };
+export type ChatSend = { kind?: ChatKind; mood?: string; to?: string[]; as?: string; link?: QuickSlot; share?: boolean };
 // The table's own options, set by the GM (electron/tableServer.cjs savedOptions).
 export type SoundTrigger = { id: string; name: string; on: string; match: string; result: string; sound: string; enabled: boolean };
 // Books (FG's Library): what the GM has shared, and the pictures shown to the players.
@@ -677,6 +687,10 @@ export function useSession() {
           if (msg.type === "card" && typeof msg.card === "string") {
             const card = msg.card;
             setChat((current) => current.map((line) => (line.roll?.card === card ? { ...line, roll: { ...line.roll, apply: msg.apply as DamageCard } } : line)));
+          }
+          if (msg.type === "prompt" && msg.prompt && typeof msg.prompt === "object") {
+            const prompt = msg.prompt as ChatPrompt;
+            setChat((current) => current.map((line) => (line.prompt?.id === prompt.id ? { ...line, prompt } : line)));
           }
           if (msg.type === "vote" && typeof msg.id === "string") {
             const id = msg.id;
@@ -1186,7 +1200,7 @@ export function useSession() {
   const sendChat = useCallback((text: string, how: ChatSend = {}) => {
     const socket = socketRef.current;
     const line = text.trim();
-    if (!line || !socket || socket.readyState !== WebSocket.OPEN) return;
+    if ((!line && !how.link) || !socket || socket.readyState !== WebSocket.OPEN) return;
     socket.send(JSON.stringify({ type: "chat", text: line.slice(0, 500), ...how }));
   }, []);
   // The table's own commands (FG's): the GM's /kick and /save, anyone's /vote.
@@ -1363,6 +1377,8 @@ export function useSession() {
   const partyAward = useCallback((kind: "quests" | "encounters", id?: string) => send({ type: "party-award", kind, id }), [send]);
   const partyDistribute = useCallback(() => send({ type: "party-distribute" }), [send]);
   const partyGroup = useCallback((kind: "check" | "save", attribute: string, cl: number) => send({ type: "party-group", kind, attribute, cl }), [send]);
+  // The party sheet's group roll for every game: a check, save or skill; rolled now, or asked of the players.
+  const partyRoll = useCallback((spec: { kind: "check" | "save" | "skill"; attribute?: string; skill?: string; dc?: number; mode: "roll" | "ask" }) => send({ type: "party-group", ...spec }), [send]);
   const setDoor = useCallback((id: string, state?: number) => send({ type: "door", id, state }), [send]);
   const setSight = useCallback((on: boolean) => send({ type: "sight", on }), [send]);
   const setLocked = useCallback((on: boolean) => send({ type: "lock", on }), [send]);
@@ -1495,6 +1511,7 @@ export function useSession() {
     partyAward,
     partyDistribute,
     partyGroup,
+    partyRoll,
     artUrl,
     artList,
     tableCommand,

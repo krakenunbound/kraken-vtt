@@ -61,6 +61,8 @@ export function PartySheet({ session, compact = false }: { session: Session; com
   const [tab, setTab] = useState<(typeof TABS)[number]["id"] | "crew">("main");
   const [checkStat, setCheckStat] = useState("strength");
   const [checkCl, setCheckCl] = useState(0);
+  const [groupKind, setGroupKind] = useState<"check" | "save" | "skill">("check");
+  const [groupMode, setGroupMode] = useState<"roll" | "ask">("roll");
   const [xp, setXp] = useState(0);
   const [itemName, setItemName] = useState("");
   const [itemCount, setItemCount] = useState(1);
@@ -83,7 +85,14 @@ export function PartySheet({ session, compact = false }: { session: Session; com
   const attributes = game.party.groupCheck ? game.party.groupCheck.stats : ATTRIBUTES;
   // The opposition on Fate's ladder instead of a challenge level.
   const ladder = has(game, "fatePoints");
-  const groupStat = attributes.includes(checkStat) ? checkStat : attributes[0];
+  // The game's group rolls (its manifest), or its attributes as a check and a save (C&C; Fate: its skills).
+  const declared = game.party.groupCheck ? game.party.groupCheck.rolls : undefined;
+  const asOptions = attributes.map((value) => ({ value, label: value[0].toUpperCase() + value.slice(1) }));
+  const groupRolls = declared?.length ? declared : ladder ? [{ kind: "check" as const, label: "Check", options: asOptions }] : [{ kind: "check" as const, label: "Check", options: asOptions }, { kind: "save" as const, label: "Save", options: asOptions }];
+  const groupRoll = groupRolls.find((item) => item.kind === groupKind) ?? groupRolls[0];
+  const groupChoice = groupRoll?.options.some((option) => option.value === checkStat) ? checkStat : groupRoll?.options[0]?.value ?? "";
+  // C&C's challenge level; every other game's DC.
+  const cl = !declared && !ladder;
 
   return (
     <section className={compact ? "party-sheet compact" : "party-sheet"} data-party-members={party.members.length}>
@@ -200,24 +209,39 @@ export function PartySheet({ session, compact = false }: { session: Session; com
                 </select>
               ) : null}
               {/* Forged in the Dark has no group checks: a group action is on the Score panel. */}
-              <div className="party-group" aria-label="Group check" hidden={game.party.groupCheck === false}>
-                <select aria-label="Attribute" value={groupStat} onChange={(event) => setCheckStat(event.target.value)}>
-                  {attributes.map((stat) => (
-                    <option key={stat} value={stat}>
-                      {stat[0].toUpperCase() + stat.slice(1)}
-                    </option>
-                  ))}
-                </select>
-                <label title={ladder ? "The opposition on the ladder (2: Fair)" : undefined}>
-                  {ladder ? "vs" : "CL"} <input type="number" min={0} value={checkCl} onChange={(event) => setCheckCl(Number(event.target.value) || 0)} style={{ width: "3.5rem" }} />
-                </label>
-                <button type="button" onClick={() => session.partyGroup("check", groupStat, checkCl)} disabled={party.members.length === 0}>
-                  Group check
-                </button>
-                <button type="button" onClick={() => session.partyGroup("save", groupStat, checkCl)} disabled={party.members.length === 0}>
-                  Group save
-                </button>
-              </div>
+              {game.party.groupCheck === false ? null : (
+                // The group roll (FG's party sheet roll): a check, save or skill, rolled for them now or asked of the players.
+                <div className="party-group" aria-label="Group roll" data-party-roll={groupKind}>
+                  <select aria-label="Roll kind" value={groupKind} onChange={(event) => setGroupKind(event.target.value as "check" | "save" | "skill")}>
+                    {groupRolls.map((item) => (
+                      <option key={item.kind} value={item.kind}>
+                        {item.label}
+                      </option>
+                    ))}
+                  </select>
+                  <select aria-label="What they roll" value={groupChoice} onChange={(event) => setCheckStat(event.target.value)}>
+                    {(groupRoll?.options ?? []).map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                  <label title={ladder ? "The opposition on the ladder (2: Fair)" : "The DC (0: none)"}>
+                    {ladder ? "vs" : cl ? "CL" : "DC"} <input type="number" min={0} value={checkCl} onChange={(event) => setCheckCl(Number(event.target.value) || 0)} style={{ width: "3.5rem" }} />
+                  </label>
+                  <span className="party-roll-mode" role="group" aria-label="Who rolls">
+                    <button type="button" aria-pressed={groupMode === "roll"} data-party-mode="roll" title="Roll for them: the host rolls every member's sheet roll now" onClick={() => setGroupMode("roll")}>
+                      <Icon name="d20" size={14} />
+                    </button>
+                    <button type="button" aria-pressed={groupMode === "ask"} data-party-mode="ask" title="Ask the players: a card in chat each owner rolls from (their own modifier box); you can roll for anyone offline" onClick={() => setGroupMode("ask")}>
+                      <Icon name="chat" size={14} />
+                    </button>
+                  </span>
+                  <button type="button" className="play-button" data-action="party-roll" onClick={() => session.partyRoll({ kind: groupKind, ...(groupKind === "skill" ? { skill: groupChoice } : { attribute: groupChoice }), dc: checkCl, mode: groupMode })} disabled={party.members.length === 0 || !groupChoice}>
+                    {groupMode === "ask" ? "Ask" : "Roll"}
+                  </button>
+                </div>
+              )}
             </div>
           ) : null}
         </div>

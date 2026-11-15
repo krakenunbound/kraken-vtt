@@ -8,6 +8,9 @@
 // class. Its own are two formatters (src/rulesets/adnd2e.tsx). The host's
 // edit whitelist (electron/adnd2e.cjs) is built from `edit` below.
 import { MAX_LEVEL, SAVE_NAMES, SAVES, STATS } from "./rules.mjs";
+import { SAVES as PARTY_SAVES, STATS as PARTY_STATS, THIEF_SKILLS as PARTY_SKILLS } from "./rules.mjs";
+// The party sheet's group rolls: what the game checks, saves and its skills (D6).
+const titleOf = (/** @type {string} */ word) => word[0].toUpperCase() + word.slice(1);
 
 const titled = (/** @type {string} */ word) => word[0].toUpperCase() + word.slice(1);
 // A roll with the strip's modifier ("mod": added to a save, taken off an ability check or a thief skill's d100).
@@ -256,7 +259,7 @@ export default {
   wizard: "adnd2e.wizard",
   blank: false,
   features: ["turnUndead", "multiAttack", "dying.save", "thiefSkills", "spellbooks"],
-  party: { currency: ["PP", "GP", "EP", "SP", "CP"], xp: "xp" },
+  party: { currency: ["PP", "GP", "EP", "SP", "CP"], xp: "xp", groupCheck: { stats: [], rolls: [{ kind: "save", label: "Save", options: PARTY_SAVES.map((value) => ({ value, label: titleOf(value) })) }, { kind: "check", label: "Check", options: PARTY_STATS.map((value) => ({ value, label: titleOf(value) })) }, { kind: "skill", label: "Thief skill", options: Object.entries(PARTY_SKILLS).map(([value, row]) => ({ value, label: String(row[0]) })) }] } },
   tracker: {
     saves: { keys: ["paralyzation", "rod", "petrification", "breath", "spell"], modLabel: "Mod", modAria: "Save modifier", button: "Roll save" },
     rowActions: [

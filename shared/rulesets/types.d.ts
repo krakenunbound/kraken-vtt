@@ -335,7 +335,8 @@ export interface TrackerSpec {
 
 export interface PartySpec {
   currency: string[]; // [] = no coin (Fate), ["Supply"], ["MCr", "Cr"]
-  groupCheck?: { stats: string[] } | false; // false: no group check (Forged: a group action is on the Score panel)
+  // rolls: the party sheet's group rolls (a check, a save, a skill and their choices), each member through their own sheet roll; mode roll or ask the players.
+  groupCheck?: { stats: string[]; rolls?: { kind: "check" | "save" | "skill"; label: string; options: { value: string; label: string }[] }[] } | false; // false: no group check (Forged: a group action is on the Score panel)
   xp: "xp" | "growth" | "milestone" | "none";
   tabs?: { id: string; label: string; component?: Ref; first?: boolean; gm?: boolean; feature?: FeatureId }[];
 }

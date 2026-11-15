@@ -9,6 +9,11 @@
 // {@ac}: Defense, {@hp}: Health), its features and its maximum level. The
 // host's edit whitelist (electron/dnd5e.cjs) is built from `edit` below.
 import { SKILLS, STATS } from "./rules.mjs";
+import { SKILLS as PARTY_SKILLS, STATS as PARTY_STATS } from "./rules.mjs";
+// The party sheet's group rolls: what the game checks, saves and its skills (D6).
+const titleOf = (/** @type {string} */ word) => word[0].toUpperCase() + word.slice(1);
+/** @type {{ stats: string[]; rolls: { kind: "check" | "save" | "skill"; label: string; options: { value: string; label: string }[] }[] }} */
+const PARTY_GROUP = { stats: [], rolls: [{ kind: "check", label: "Check", options: PARTY_STATS.map((value) => ({ value, label: titleOf(value) })) }, { kind: "save", label: "Save", options: PARTY_STATS.map((value) => ({ value, label: titleOf(value) })) }, { kind: "skill", label: "Skill", options: Object.entries(PARTY_SKILLS).map(([value, row]) => ({ value, label: String(row[0]) })) }] };
 
 const SIX = ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"];
 const titled = (/** @type {string} */ word) => word[0].toUpperCase() + word.slice(1);
@@ -190,7 +195,7 @@ export default {
   wizard: "dnd5e.wizard",
   blank: false,
   features: ["deathSaves", "spellbooks"],
-  party: { currency: ["PP", "GP", "EP", "SP", "CP"], xp: "xp" },
+  party: { currency: ["PP", "GP", "EP", "SP", "CP"], xp: "xp", groupCheck: PARTY_GROUP },
   tracker: {
     saves: { keys: SIX, modLabel: "DC", modAria: "Save DC", button: "Roll save" },
     // A Dying character's death saving throw.
@@ -206,7 +211,7 @@ export default {
       records: { race: { label: "Kin" } },
       labels: { species: "Kin", speciesLower: "kin", ac: "Defense", acLong: "Defense", hp: "Health", hpLower: "health", maxLevel: "10" },
       features: ["dread", "dying.bleed", "spellbooks"],
-      party: { currency: ["GC"], xp: "xp" },
+      party: { currency: ["GC"], xp: "xp", groupCheck: PARTY_GROUP },
       // Its save box says DC, as 5E's, but kept its old aria-label (the tracker's, before the manifest).
       tracker: {
         saves: { keys: SIX, modLabel: "DC", modAria: "Save CL", button: "Roll save" },

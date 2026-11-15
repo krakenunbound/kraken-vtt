@@ -115,7 +115,7 @@ export default {
   blank: false,
   features: ["slots", "fatigue", "scars", "spellbooks", "morale", "dying.save"],
   // Cairn has no experience: the party's tab is its Growth (Scars and what has changed).
-  party: { currency: ["GP"], xp: "growth", groupCheck: { stats: ["str", "dex", "wil"] } },
+  party: { currency: ["GP"], xp: "growth", groupCheck: { stats: ["str", "dex", "wil"], rolls: [{ kind: "save", label: "Save", options: [{ value: "str", label: "STR" }, { value: "dex", label: "DEX" }, { value: "wil", label: "WIL" }] }] } },
   tracker: {
     saves: { keys: ["str", "dex", "wil"], modLabel: "CL", modAria: "Save CL", button: "Roll save" },
     // No initiative: the PCs act first, each saving DEX to act in the first round.
