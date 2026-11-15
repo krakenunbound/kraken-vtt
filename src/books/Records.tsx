@@ -2,7 +2,7 @@ import { Fragment, useEffect, useMemo, useState, type ReactNode } from "react";
 import type { Session, TableRecord } from "../session/useSession";
 import { Icon } from "../ui/icons";
 import { slotDrag } from "../ui/QuickSlots";
-import { NpcMgt2 } from "../characters/NpcMgt2";
+import { recordLabel, statblockFor } from "../rulesets/statblocks";
 import { useBookWindows } from "./Books";
 import { ReadAloudButton } from "./readAloud";
 
@@ -130,12 +130,11 @@ const LIMIT = 400;
 
 // The lists the sidebar shows in a group (FG's Campaign and Character
 // categories): those this table has records for, in FG's order.
-// A game's own word for a list (Descending Darkness calls species "Kin").
-const GAME_WORDS: Record<string, Record<string, string>> = { "D&D 3.5E": { race: "Races" }, "Basic Fantasy": { race: "Races", npc: "Monsters" }, "Descending Darkness": { race: "Kin" }, "Apeira Astra": { race: "Origins", class: "Paths", item: "Gear", npc: "Threats" }, Traveller: { item: "Equipment", npc: "NPCs and Animals" }, Cairn: { background: "Backgrounds", item: "Gear and Relics", npc: "Bestiary", cairntable: "Tables" }, "Fate Core": { fateskill: "Skills", fatestunt: "Stunts", npc: "NPCs", pregencharsheet: "Pregenerated Characters" }, "Fate Accelerated": { fateskill: "Approaches", fatestunt: "Stunts", npc: "NPCs", pregencharsheet: "Pregenerated Characters" }, Ironsworn: { npc: "Foes" }, Starforged: { npc: "Foes" }, "Forged in the Dark": { item: "Items", npc: "Cohorts and People", forgedtable: "Tables" } };
+// A game's own word for a list (its manifest's records: Descending Darkness calls species "Kin").
 export function sidebarLists(records: Record<string, TableRecord>, group: string, ruleset = "") {
   const present = new Set<string>();
   for (const record of Object.values(records)) if (!NOT_LISTED.has(record.type)) present.add(listOf(record));
-  return LISTS.filter((item) => item.group === group && present.has(item.id)).map((item) => ({ id: item.id, label: GAME_WORDS[ruleset]?.[item.id] ?? item.label }));
+  return LISTS.filter((item) => item.group === group && present.has(item.id)).map((item) => ({ id: item.id, label: recordLabel(ruleset, item.id) ?? item.label }));
 }
 export { listLabel };
 
@@ -364,6 +363,8 @@ export function RecordWindow({ session, id, record: given, book }: { session: Se
   }
   // An NPC's description (FG's text), first; and its portrait from its book.
   const npc = record.type === "npc";
+  // The game's own block for an NPC, the GM's (Traveller's), instead of the core's fields.
+  const Block = gm && npc ? statblockFor(session.ruleset, "npc") : null;
   if (npc && typeof data.text === "string" && data.text.trim()) texts.unshift(["description", data.text]);
   const portrait = npc && (data.picture || data.token) ? session.recordArtUrl(record.id, "portrait") : "";
   const table = tableOf(data);
@@ -391,7 +392,7 @@ export function RecordWindow({ session, id, record: given, book }: { session: Se
           </button>
         ) : null}
       </header>
-      {gm && npc && session.ruleset === "Traveller" ? <NpcMgt2 session={session} record={record} /> : null}
+      {Block ? <Block session={session} record={record} /> : null}
       {grouped
         ? grouped.map((group, index) => (
             <section key={index} className="record-grouped" data-record-group={group.title}>
@@ -449,7 +450,7 @@ export function RecordWindow({ session, id, record: given, book }: { session: Se
           </tbody>
         </table>
       ) : null}
-      {gm && npc && session.ruleset === "Traveller" ? null : abilities && STATS.some((stat) => abilities[stat]) ? (
+      {Block ? null : abilities && STATS.some((stat) => abilities[stat]) ? (
         <div className="record-abilities">
           {STATS.map((stat) => (
             <span key={stat}>
@@ -459,7 +460,7 @@ export function RecordWindow({ session, id, record: given, book }: { session: Se
           ))}
         </div>
       ) : null}
-      {fields.length && !(gm && npc && session.ruleset === "Traveller") ? (
+      {fields.length && !Block ? (
         <dl className="record-fields">
           {fields.map(([key, value]) => (
             <Fragment key={key}>
@@ -479,7 +480,7 @@ export function RecordWindow({ session, id, record: given, book }: { session: Se
           ))}
         </section>
       ))}
-      {(gm && npc && session.ruleset === "Traveller" ? [] : texts).map(([key, value]) => (
+      {(Block ? [] : texts).map(([key, value]) => (
         <section key={key} className="record-text">
           {texts.length > 1 || key !== "description" ? <h4>{labelOf(key)}</h4> : null}
           <FormattedText text={value} onLink={onLink} />

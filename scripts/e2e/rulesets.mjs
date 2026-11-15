@@ -15,6 +15,15 @@ async function openSide(where, launch) {
   }
   await where.click(`.sidebar [data-launch="${launch}"]`);
 }
+// A character's sheet in front: an open sheet brought forward, else as a person does it (FG's way):
+// the sidebar's Characters (Character Selection), then their card (the GM: the first card).
+export async function openSheet(where) {
+  const open = await where.$('.window:has(.cc-sheet)');
+  if (open) return open.dispatchEvent("pointerdown");
+  await where.click('.sidebar [data-launch="characters"]');
+  await where.click(".charselect-card.mine");
+  await where.waitForSelector(".cc-sheet", { timeout: 15000 });
+}
 // Close every window but the map (the Close buttons, never Pop out).
 async function closeWindows(where) {
   for (const button of await where.$$('[data-window]:not([data-window="map"]) button[aria-label^="Close"]')) await button.click().catch(() => undefined);
@@ -652,7 +661,7 @@ export const RULESETS = {
       // Whatever harm the sheet's fields were filled with is cleared first (a clean roll: risky / standard).
       for (const [level, index] of [[3, 0], [2, 0], [2, 1], [1, 0], [1, 1]]) await tool("kraken_forged", { id: ctx.character.id, action: "harm-clear", args: { level, index } }).catch(() => undefined);
       await seat.bringToFront();
-      await openSide(seat, "characters").catch(() => undefined);
+      await openSheet(seat).catch(() => undefined);
       await seat.click('[data-sheet-tab="main"]').catch(() => undefined);
       await seat.locator('[data-roll-action="skirmish"]').first().click();
       await wait(1200);
@@ -750,10 +759,11 @@ export const RULESETS = {
     },
     async wizard(ctx) {
       const { seat } = ctx;
-      await seat.click('[data-action="blank-character"]').catch(async () => {
-        await seat.waitForSelector('[data-action="blank-character"]', { timeout: 10000 });
-        await seat.click('[data-action="blank-character"]');
-      });
+      // A blank sheet (FG's Create) is made in Character Selection: the wizard the run opened goes, the list comes back.
+      await seat.locator('.window:has([data-wizard]) button[aria-label^="Close"]').first().click().catch(() => undefined);
+      if (!(await seat.$('[data-action="blank-character"]'))) await seat.click('.sidebar [data-launch="characters"]');
+      await seat.waitForSelector('[data-action="blank-character"]', { timeout: 10000 });
+      await seat.click('[data-action="blank-character"]');
       await seat.waitForSelector("[data-character]", { timeout: 20000 });
       // No wizard in a game of the GM's own (FG's CoreRPG has none): the player writes the gear in.
       await seat.click('[data-sheet-tab="inventory"]');
@@ -857,7 +867,7 @@ function ironswornPlan(game) {
     async fight(ctx) {
       const { tool, seat, check } = ctx;
       await seat.bringToFront();
-      await openSide(seat, "characters").catch(() => undefined);
+      await openSheet(seat).catch(() => undefined);
       const foeId = ctx.foe.id;
       // The GM shows the foe (the tracker adds it hidden): the player makes moves against it.
       await tool("kraken_combat", { action: "update", id: foeId, patch: { hidden: false } });

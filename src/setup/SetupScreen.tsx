@@ -8,6 +8,7 @@ import "@fontsource/cinzel/latin-600.css";
 import "@fontsource/cinzel/latin-700.css";
 import { Backdrop, BackdropDots, randomTheme } from "./Backdrop";
 import { forgetSignIn, savedSignIn } from "../session/useSession";
+import { campaignRulesets } from "../../shared/rulesets/registry.mjs";
 import "./setup.css";
 
 type HostInput = { name: string; port: number; password: string; lan: boolean; cloud: boolean; campaignId: string };
@@ -38,24 +39,8 @@ function rememberGame(game: RecentGame) {
   saveRecentGames([game, ...recentGames().filter((other) => !(other.address === game.address && other.port === game.port))]);
 }
 
-// The rulesets a campaign can be made with.
-const RULESETS = [
-  { name: "Castles & Crusades", blurb: "SiegeCore rules: character sheets, the SIEGE engine, combat and spells." },
-  { name: "D&D 5E", blurb: "Played from your 5E books (the rulebooks you own, or the free SRD): 5E sheets and character building, d20 combat with criticals, saves, spells and death saves." },
-  { name: "D&D 3.5E", blurb: "Played from your 3.5E books (the Player's Handbook, Dungeon Master's Guide and Monster Manual): 3.5E sheets and character building, base attack and iterative attacks, criticals by threat and confirmation, Fortitude, Reflex and Will, skills by ranks." },
-  { name: "AD&D 2E", blurb: "Second Edition with your 2E books: THAC0 and descending Armor Class, the five saving throws, d10 initiative lowest first, thief skills, multi-classing, your books' pregenerated characters." },
-  { name: "Traveller", blurb: "Mongoose Traveller 2nd Edition: the UPP's six characteristics, skills and specialities, 2d6 tasks with Effect, Boon and Bane, careers and terms, damage to Endurance, Strength and Dexterity, armour and AP. Its rules are Kraken's own code; your Traveller books add their content." },
-  { name: "Descending Darkness", blurb: "Kraken's dark fantasy: d20, fragile heroes, light that runs out, dread that builds. Its books and a first adventure come with Kraken." },
-  { name: "Apeira Astra", blurb: "Kraken's science fiction: 2d6 and skills, Paths to make a crew in minutes, armour that soaks. Its books and a first adventure come with Kraken." },
-  { name: "Ironsworn", blurb: "Ironsworn and Ironsworn: Delve (Shawn Tomkin, CC BY 4.0; an unofficial adaptation): vows sworn upon iron, the action die against two challenge dice, momentum, progress tracks, assets, the oracles for play with or without a GM, Delve's sites. Its Reference, Foes and Sites and The Cinder Barrow come with Kraken." },
-  { name: "Starforged", blurb: "Ironsworn: Starforged (Shawn Tomkin, CC BY 4.0; an unofficial adaptation): a spacefarer's vows in the Forge, in control or in a bad spot, legacy tracks for experience, connections, your starship, the Forge's oracles. Its Reference, Foes and The Silent Hulk come with Kraken." },
-  { name: "Cairn", blurb: "Cairn, Second Edition (Yochai Gal, CC BY-SA 4.0): three attributes and Hit Protection, saves under a d20, attacks that always hit, Scars, Fatigue and ten inventory slots, backgrounds instead of classes. Its Player's Guide, Warden's Guide and Trouble in Twin Lakes come with Kraken." },
-  { name: "Basic Fantasy", blurb: "The Basic Fantasy Role-Playing Game, 4th Edition (free, CC BY-SA): old-school play with ascending Armor Class and an attack bonus, 3d6 in order, four races and four classes, the five saving throws, d6 initiative, thief abilities, turning the undead. Its Player's Handbook, Game Master's Guide and a first adventure come with Kraken." },
-  { name: "Fate Core", blurb: "Fate Core System (Evil Hat, CC BY 3.0): four Fate dice and the ladder, aspects invoked and compelled with fate points, a pyramid of skills, stunts, stress and consequences, conflicts in shifts. Its book, the Toolkit and Adversaries and a starter scenario come with Kraken." },
-  { name: "Fate Accelerated", blurb: "Fate Accelerated Edition (Evil Hat, CC BY 3.0): Fate with six approaches (Careful, Clever, Flashy, Forceful, Quick, Sneaky) instead of skills, three stress boxes, a character in minutes. Its book, the Toolkit and Adversaries and a starter scenario come with Kraken." },
-  { name: "Forged in the Dark", blurb: "Forged in the Dark, based on Blades in the Dark (John Harper, One Seven Design; its SRD, CC BY 3.0): a crew of scoundrels in the haunted canal city of Brackwater. Twelve actions as d6 pools read by the highest die, position and effect, stress and trauma, harm, progress clocks for all to see, the score and downtime, a crew with its Tier, heat and claims. Its Scoundrel's Handbook, Game Master's Guide and The Brine Street Job come with Kraken." },
-  { name: "Worldbuilding", blurb: "No game rules: maps, tokens, chat and dice for any system." },
-];
+// The rulesets a campaign can be made with: every manifest's names, each with its blurb (shared/rulesets).
+const RULESETS = campaignRulesets();
 
 const RELATIVE = typeof Intl !== "undefined" && "RelativeTimeFormat" in Intl ? new Intl.RelativeTimeFormat(undefined, { numeric: "auto" }) : null;
 

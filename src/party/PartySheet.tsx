@@ -3,6 +3,7 @@ import { Picture } from "../characters/ArtPicker";
 import { Icon } from "../ui/icons";
 import type { Session } from "../session/useSession";
 import { CrewSheet } from "./CrewSheet";
+import { has, rulesetFor } from "../../shared/rulesets/registry.mjs";
 
 export type PartyMember = {
   id: string;
@@ -36,11 +37,10 @@ export type PartyView = {
 };
 
 const ATTRIBUTES = ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"];
-// A parcel's coins in the ruleset's money (FG's coin list): credits for Traveller (MCr and Cr, as FG's MGT2) and Apeira Astra, gold crowns for Descending Darkness.
-// Cairn's books price everything in gold pieces.
-// Fate has no coin: a parcel is things found (each written into a character's extras).
-// Ironsworn and Starforged have no money: a parcel's Supply goes to the shared supply meter.
-const coinsFor = (ruleset: string) => (/^Fate /.test(ruleset) ? [] : ruleset === "Ironsworn" || ruleset === "Starforged" ? ["Supply"] : ruleset === "Traveller" ? ["MCr", "Cr"] : ruleset === "Apeira Astra" ? ["Cr"] : ruleset === "Descending Darkness" ? ["GC"] : ruleset === "Cairn" ? ["GP"] : ruleset === "Forged in the Dark" ? ["Coin"] : ["PP", "GP", "EP", "SP", "CP"]);
+// A parcel's coins are the game's money (its manifest's party.currency, FG's coin list): credits for
+// Traveller (MCr and Cr, as FG's MGT2) and Apeira Astra, gold crowns for Descending Darkness, gold
+// pieces for Cairn; none for Fate (a parcel is things found, each written into a character's extras);
+// Supply for Ironsworn and Starforged (it goes to the shared supply meter).
 const TABS = [
   { id: "main", label: "Main" },
   { id: "inventory", label: "Inventory" },
@@ -69,14 +69,18 @@ export function PartySheet({ session, compact = false }: { session: Session; com
 
   const characters = Object.values(session.records).filter((record) => record.type === "character");
   const nonMembers = characters.filter((record) => !party.members.some((member) => member.id === record.id));
-  // Cairn has no experience: its tab is the party's Growth (Scars and what has changed).
-  const cairn = session.ruleset === "Cairn";
-  // Fate has milestones instead of experience: its tab gives the party one.
-  const fate = /^Fate /.test(session.ruleset);
-  // Forged in the Dark: the crew sheet is the party's first tab.
-  const forgedGame = session.ruleset === "Forged in the Dark";
-  const visibleTabs: { id: (typeof TABS)[number]["id"] | "crew"; label: string }[] = [...(forgedGame ? [{ id: "crew" as const, label: "Crew" }] : []), ...(gm ? TABS : TABS.filter((item) => item.id !== "xp")).map((item) => (cairn && item.id === "xp" ? { ...item, label: "Growth" } : fate && item.id === "xp" ? { ...item, label: "Milestones" } : item))];
-  const attributes = cairn ? ["str", "dex", "wil"] : fate ? (session.ruleset === "Fate Accelerated" ? ["careful", "clever", "flashy", "forceful", "quick", "sneaky"] : ["Athletics", "Notice", "Will", "Physique", "Stealth", "Investigate", "Lore", "Rapport"]) : ATTRIBUTES;
+  // The campaign's game: its money, its kind of experience, its own tabs (docs/core-ui-design.md, 4.2).
+  const game = rulesetFor(session.ruleset);
+  // Growth instead of experience (Cairn: Scars and what has changed), or milestones (Fate): the tab says so.
+  const growth = game.party.xp === "growth";
+  const milestones = game.party.xp === "milestone";
+  // A game's own tabs first (Forged in the Dark: the crew sheet).
+  const ownTabs = (game.party.tabs ?? []).filter((item) => item.first && (!item.feature || has(game, item.feature)) && (!item.gm || gm));
+  const crew = ownTabs.some((item) => item.id === "crew");
+  const visibleTabs: { id: (typeof TABS)[number]["id"] | "crew"; label: string }[] = [...ownTabs.map((item) => ({ id: item.id as "crew", label: item.label })), ...(gm ? TABS : TABS.filter((item) => item.id !== "xp")).map((item) => (growth && item.id === "xp" ? { ...item, label: "Growth" } : milestones && item.id === "xp" ? { ...item, label: "Milestones" } : item))];
+  const attributes = game.party.groupCheck ? game.party.groupCheck.stats : ATTRIBUTES;
+  // The opposition on Fate's ladder instead of a challenge level.
+  const ladder = has(game, "fatePoints");
   const groupStat = attributes.includes(checkStat) ? checkStat : attributes[0];
 
   return (
@@ -89,7 +93,7 @@ export function PartySheet({ session, compact = false }: { session: Session; com
         ))}
       </nav>
 
-      {tab === "crew" && forgedGame ? <CrewSheet session={session} /> : null}
+      {tab === "crew" && crew ? <CrewSheet session={session} /> : null}
 
       {tab === "main" ? (
         <div className="party-main">
@@ -182,7 +186,7 @@ export function PartySheet({ session, compact = false }: { session: Session; com
                 </select>
               ) : null}
               {/* Forged in the Dark has no group checks: a group action is on the Score panel. */}
-              <div className="party-group" aria-label="Group check" hidden={forgedGame}>
+              <div className="party-group" aria-label="Group check" hidden={game.party.groupCheck === false}>
                 <select aria-label="Attribute" value={groupStat} onChange={(event) => setCheckStat(event.target.value)}>
                   {attributes.map((stat) => (
                     <option key={stat} value={stat}>
@@ -190,8 +194,8 @@ export function PartySheet({ session, compact = false }: { session: Session; com
                     </option>
                   ))}
                 </select>
-                <label title={fate ? "The opposition on the ladder (2: Fair)" : undefined}>
-                  {fate ? "vs" : "CL"} <input type="number" min={0} value={checkCl} onChange={(event) => setCheckCl(Number(event.target.value) || 0)} style={{ width: "3.5rem" }} />
+                <label title={ladder ? "The opposition on the ladder (2: Fair)" : undefined}>
+                  {ladder ? "vs" : "CL"} <input type="number" min={0} value={checkCl} onChange={(event) => setCheckCl(Number(event.target.value) || 0)} style={{ width: "3.5rem" }} />
                 </label>
                 <button type="button" onClick={() => session.partyGroup("check", groupStat, checkCl)} disabled={party.members.length === 0}>
                   Group check
@@ -211,7 +215,7 @@ export function PartySheet({ session, compact = false }: { session: Session; com
             <div className="party-parcel">
               <h3>Parcel to hand out</h3>
               <div className="parcel-coins">
-                {[...new Set([...coinsFor(session.ruleset), ...Object.keys(party.parcel.coins ?? {}).filter((coin) => Number(party.parcel.coins?.[coin]) > 0)])].map((coin) => (
+                {[...new Set([...game.party.currency, ...Object.keys(party.parcel.coins ?? {}).filter((coin) => Number(party.parcel.coins?.[coin]) > 0)])].map((coin) => (
                   <label key={coin}>
                     {coin}
                     <input type="number" min={0} data-parcel-coin={coin} aria-label={`Parcel ${coin}`} value={party.parcel.coins?.[coin] ?? 0} onChange={(event) => patch({ parcel: { coins: { [coin]: Math.max(0, Number(event.target.value) || 0) } } })} />
@@ -294,7 +298,7 @@ export function PartySheet({ session, compact = false }: { session: Session; com
 
       {tab === "order" ? <OrderTab session={session} party={party} /> : null}
 
-      {tab === "xp" && gm && cairn ? (
+      {tab === "xp" && gm && growth ? (
         <div className="party-xp" data-cairn-growth>
           <p className="hint">Cairn has no experience points: characters grow from what happens to them. Write a change on a character (its sheet's Growth tab), or here.</p>
           <ul className="sheet-list">
@@ -334,7 +338,7 @@ export function PartySheet({ session, compact = false }: { session: Session; com
         </div>
       ) : null}
 
-      {tab === "xp" && gm && fate ? (
+      {tab === "xp" && gm && milestones ? (
         <div className="party-xp" data-fate-milestones>
           <p className="hint">Fate has no experience points: characters change at milestones. A minor one at a session's end; a significant one at a scenario's (a skill point); a major one at an arc's (a refresh more).</p>
           <ul className="sheet-list">
@@ -354,7 +358,7 @@ export function PartySheet({ session, compact = false }: { session: Session; com
         </div>
       ) : null}
 
-      {tab === "xp" && gm && !cairn && !fate ? (
+      {tab === "xp" && gm && !growth && !milestones ? (
         <div className="party-xp">
           <form
             className="xp-award"

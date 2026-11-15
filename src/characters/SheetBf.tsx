@@ -1,9 +1,8 @@
 import { useMemo, useState } from "react";
 import type { Session, TableRecord } from "../session/useSession";
 import { Icon } from "../ui/icons";
-import { slotDrag } from "../ui/QuickSlots";
-import { ArtPicker, Picture } from "./ArtPicker";
-import { Field } from "./CCSheet";
+import { Field } from "../core/fields/Field";
+import { IdentityBox, SheetFrame } from "../core/frame/SheetFrame";
 import { useHostRolls } from "./hostRolls";
 import { priceOf } from "../../shared/shop.mjs";
 import * as R from "../../shared/bfrpg/rules.mjs";
@@ -39,7 +38,6 @@ const listText = (value: unknown) => (Array.isArray(value) ? value.map(String).j
 export function SheetBf({ record, session }: { record: TableRecord; session: Session }) {
   const [tab, setTab] = useState<Tab>("main");
   const [mod, setMod] = useState(0);
-  const [picking, setPicking] = useState<"portrait" | "token" | null>(null);
   const data = record.data as Row;
   const me = session.players.find((seat) => seat.id === session.selfId)?.name;
   const editable = session.role === "dm" || (record.owner !== "" && record.owner === me);
@@ -62,319 +60,287 @@ export function SheetBf({ record, session }: { record: TableRecord; session: Ses
   const exp = num(data.exp);
   const expnext = num(data.expnext);
   const ready = expnext > 0 && exp >= expnext;
-  const portrait = typeof data.portrait === "string" ? data.portrait : "";
   const current = num(hp.total) - num(hp.wounds);
   const casting = (data.spellcasting ?? null) as Row | null;
   const skills = rows(data.thiefskills);
   const arcane = casting?.kind === "arcane";
 
   return (
-    <article className="cc-sheet sheet-5e sheet-35 sheet-2e sheet-bf" data-character={record.id} data-ruleset="bfrpg">
-      <div className="cc-body">
-        <header className="cc-head">
-          <div className="cc-portrait-frame">
-            <button type="button" className="cc-portrait" data-action="pick-portrait" disabled={!editable} title={editable ? "Click to choose a portrait" : record.name} onClick={() => setPicking("portrait")} {...slotDrag({ kind: "sheet", record: record.id, label: record.name })}>
-              {portrait ? <Picture session={session} id={portrait} alt={record.name} /> : <span>{record.name.slice(0, 1)}</span>}
+    <SheetFrame
+      record={record}
+      session={session}
+      editable={editable}
+      className="cc-sheet sheet-5e sheet-35 sheet-2e sheet-bf"
+      attrs={{ "data-ruleset": "bfrpg" }}
+      artRace={String(data.race ?? "")}
+      tabs={TABS}
+      tab={tab}
+      onTab={(id) => setTab(id as Tab)}
+      boxes={
+        <>
+          <IdentityBox label="Race">
+            <span className="cc-value" data-stat="race">{String(data.race ?? "")}</span>
+          </IdentityBox>
+          <IdentityBox label="Class and level">
+            <span className="cc-value" data-stat="class">
+              {String(data.className ?? "")} {level}
+            </span>
+          </IdentityBox>
+          <IdentityBox label="Alignment">
+            <Field value={String(data.alignment ?? "")} editable={editable} label="Alignment" onSave={(value) => change("alignment", value)} />
+          </IdentityBox>
+        </>
+      }
+    >
+      <section className="cc-panel cc-row five-strip">
+        <span className="cc-inline" title={`${exp} of ${expnext || "—"} experience points for the next level`}>
+          <b>Level</b> <span className="cc-num" data-stat="level">{level}</span>
+          {editable && (ready || session.role === "dm") && level < R.MAX_LEVEL ? (
+            <button type="button" className="cc-levelup" data-action="level-up" title={`Level up: ${level + 1 <= 9 ? "the host rolls the hit die" : "the class's fixed hit points"}`} onClick={() => session.levelUp(record.id)}>
+              <Icon name="add" size={14} />
             </button>
-            <button type="button" className="cc-token" data-action="pick-token" disabled={!editable} title="Token" onClick={() => setPicking("token")}>
-              {typeof data.token === "string" && data.token ? <Picture session={session} id={data.token} alt="Token" /> : portrait ? <Picture session={session} id={portrait} alt="Token" /> : <Icon name="character" size={18} />}
-            </button>
-          </div>
-          <div className="cc-identity">
-            <label className="cc-labelled grow">
-              <Field value={record.name} editable={editable} label="Name" className="cc-name" onSave={(value) => change("name", value)} />
-              <small>Name</small>
-            </label>
-            <div className="cc-boxes">
-              <label className="cc-labelled cc-box">
-                <span className="cc-value" data-stat="race">{String(data.race ?? "")}</span>
-                <small>Race</small>
-              </label>
-              <label className="cc-labelled cc-box">
-                <span className="cc-value" data-stat="class">
-                  {String(data.className ?? "")} {level}
-                </span>
-                <small>Class and level</small>
-              </label>
-              <label className="cc-labelled cc-box">
-                <Field value={String(data.alignment ?? "")} editable={editable} label="Alignment" onSave={(value) => change("alignment", value)} />
-                <small>Alignment</small>
-              </label>
-            </div>
-          </div>
-          {picking ? (
-            <ArtPicker
-              session={session}
-              kind={picking}
-              current={typeof data[picking] === "string" ? String(data[picking]) : undefined}
-              race={String(data.race ?? "")}
-              onClose={() => setPicking(null)}
-              onPick={(id) => {
-                void session.op({ op: "update", id: record.id, patch: { data: { [picking]: id } } });
-                setPicking(null);
-              }}
-            />
           ) : null}
-        </header>
+        </span>
+        <span className="cc-inline">
+          <b>XP</b> <span className="cc-num" data-stat="exp">{exp}</span> / <span className="cc-num">{expnext || "—"}</span>
+          {session.role === "dm" ? <Field value={exp} number editable label="Experience" onSave={numberAt("exp")} /> : null}
+          {num(data.xpbonus) ? <small className="hint">+{num(data.xpbonus)}% XP</small> : null}
+        </span>
+        <span className="cc-inline" title="Attack bonus: add Strength in melee, Dexterity with missiles">
+          <b>AB</b> <span className="cc-num" data-stat="ab">{signed(num(data.ab))}</span>
+        </span>
+        <label className="cc-inline" title="A modifier for the next roll: added to a save or an ability roll, taken off a thief ability's d100">
+          <b>Mod</b> <input type="number" className="cc-field number" value={mod} min={-20} max={20} aria-label="Roll modifier" onChange={(event) => setMod(Number(event.target.value) || 0)} />
+        </label>
+      </section>
 
-        <section className="cc-panel cc-row five-strip">
-          <span className="cc-inline" title={`${exp} of ${expnext || "—"} experience points for the next level`}>
-            <b>Level</b> <span className="cc-num" data-stat="level">{level}</span>
-            {editable && (ready || session.role === "dm") && level < R.MAX_LEVEL ? (
-              <button type="button" className="cc-levelup" data-action="level-up" title={`Level up: ${level + 1 <= 9 ? "the host rolls the hit die" : "the class's fixed hit points"}`} onClick={() => session.levelUp(record.id)}>
-                <Icon name="add" size={14} />
-              </button>
-            ) : null}
-          </span>
-          <span className="cc-inline">
-            <b>XP</b> <span className="cc-num" data-stat="exp">{exp}</span> / <span className="cc-num">{expnext || "—"}</span>
-            {session.role === "dm" ? <Field value={exp} number editable label="Experience" onSave={numberAt("exp")} /> : null}
-            {num(data.xpbonus) ? <small className="hint">+{num(data.xpbonus)}% XP</small> : null}
-          </span>
-          <span className="cc-inline" title="Attack bonus: add Strength in melee, Dexterity with missiles">
-            <b>AB</b> <span className="cc-num" data-stat="ab">{signed(num(data.ab))}</span>
-          </span>
-          <label className="cc-inline" title="A modifier for the next roll: added to a save or an ability roll, taken off a thief ability's d100">
-            <b>Mod</b> <input type="number" className="cc-field number" value={mod} min={-20} max={20} aria-label="Roll modifier" onChange={(event) => setMod(Number(event.target.value) || 0)} />
-          </label>
-        </section>
-
-        {tab === "main" ? (
-          <div className="cc-page" data-tab-page="main">
-            <div className="cc-main-grid five-main">
-              <section className="cc-panel five-abilities" aria-label="Abilities">
-                {STATS.map((stat) => {
-                  const row = abilities[stat] ?? {};
-                  return (
-                    <div key={stat} className="five-ability" data-ability={stat}>
-                      <b>{titled(stat)}</b>
-                      <Field value={num(row.score)} number editable={editable} label={`${stat} score`} onSave={numberAt(`abilities.${stat}.score`)} />
-                      <button type="button" className="cc-bonus" disabled={!editable} title={`Ability roll: d20 ${signed(num(row.bonus))} at or above ${num(data.abilityTarget)} (the book's optional rule)`} aria-label={`${stat} roll`} data-roll-check={stat} onClick={() => roll("check", stat)}>
-                        {signed(num(row.bonus))}
-                      </button>
-                    </div>
-                  );
-                })}
-              </section>
-              <section className="cc-panel five-defence">
-                <div className="five-big" title={`Armor ${num(ac.armor)}${ac.worn ? ` (${String(ac.worn)})` : ""}, shield +${num(ac.shield)}, Dexterity ${signed(num(ac.dex))}, misc ${signed(num(ac.misc))}`}>
-                  <small>Armor Class</small>
-                  <span className="cc-shield" data-stat="ac">{num(ac.total)}</span>
-                  <span className="cc-inline">
-                    Misc <Field value={num(ac.misc)} number editable={editable} label="AC misc" onSave={numberAt("ac.misc")} />
-                  </span>
-                </div>
-                <div className="five-big">
-                  <small>Hit Points</small>
-                  <span data-stat="hp" style={{ color: current <= 0 ? "#c0392b" : undefined }}>
-                    {current} / {num(hp.total)}
-                  </span>
-                  <span className="cc-inline">
-                    Damage <Field value={num(hp.wounds)} number editable={editable} label="Damage taken" onSave={numberAt("hp.wounds")} />
-                  </span>
-                  {current <= 0 ? <span className="hint" data-status="Dead">At 0 hit points a character is dead (the book's rule; the GM may use an optional one).</span> : null}
-                </div>
-                <div className="five-big" title="d6 + this, the highest acts first">
-                  <small>Initiative</small>
-                  <span data-stat="init">{signed(num((data.initiative as Row)?.total))}</span>
-                </div>
-                <div className="five-big" title={`${String(data.encumbrance ?? "")}: ${num(data.load)} lb. carried (light to ${num((data.loads as Row)?.light)}, heavy to ${num((data.loads as Row)?.heavy)})`}>
-                  <small>Movement</small>
-                  <span data-stat="movement">{num(data.movement)}'</span>
-                  <small className="hint">{String(data.encumbrance ?? "")}</small>
-                </div>
-              </section>
-            </div>
-            <section className="cc-panel d2e-saves" aria-label="Saving throws">
-              <h4>
-                Saving throws <small className="hint">d20 at or above the number; a natural 1 fails, a 20 succeeds</small>
-              </h4>
-              {SAVES.map((save) => {
-                const row = saves[save] ?? {};
+      {tab === "main" ? (
+        <div className="cc-page" data-tab-page="main">
+          <div className="cc-main-grid five-main">
+            <section className="cc-panel five-abilities" aria-label="Abilities">
+              {STATS.map((stat) => {
+                const row = abilities[stat] ?? {};
                 return (
-                  <div key={save} className="five-ability d35-save" data-save={save} title={`Class ${num(row.base)}${num(row.racial) ? `, race -${num(row.racial)}` : ""}${num(row.misc) ? `, misc -${num(row.misc)}` : ""}`}>
-                    <b>{SAVE_NAMES[save]}</b>
-                    <Field value={num(row.misc)} number editable={editable} label={`${save} misc`} onSave={numberAt(`saves.${save}.misc`)} />
-                    <button type="button" className="cc-save" disabled={!editable} title={`Roll a save: d20 at or above ${num(row.total)}`} aria-label={`${save} save`} data-roll-save={save} onClick={() => roll("save", save)}>
-                      {num(row.total)}
+                  <div key={stat} className="five-ability" data-ability={stat}>
+                    <b>{titled(stat)}</b>
+                    <Field value={num(row.score)} number editable={editable} label={`${stat} score`} onSave={numberAt(`abilities.${stat}.score`)} />
+                    <button type="button" className="cc-bonus" disabled={!editable} title={`Ability roll: d20 ${signed(num(row.bonus))} at or above ${num(data.abilityTarget)} (the book's optional rule)`} aria-label={`${stat} roll`} data-roll-check={stat} onClick={() => roll("check", stat)}>
+                      {signed(num(row.bonus))}
                     </button>
                   </div>
                 );
               })}
-              {((data.savenotes ?? []) as string[]).map((note) => (
-                <p key={note} className="hint">
-                  {note}
-                </p>
-              ))}
+            </section>
+            <section className="cc-panel five-defence">
+              <div className="five-big" title={`Armor ${num(ac.armor)}${ac.worn ? ` (${String(ac.worn)})` : ""}, shield +${num(ac.shield)}, Dexterity ${signed(num(ac.dex))}, misc ${signed(num(ac.misc))}`}>
+                <small>Armor Class</small>
+                <span className="cc-shield" data-stat="ac">{num(ac.total)}</span>
+                <span className="cc-inline">
+                  Misc <Field value={num(ac.misc)} number editable={editable} label="AC misc" onSave={numberAt("ac.misc")} />
+                </span>
+              </div>
+              <div className="five-big">
+                <small>Hit Points</small>
+                <span data-stat="hp" style={{ color: current <= 0 ? "#c0392b" : undefined }}>
+                  {current} / {num(hp.total)}
+                </span>
+                <span className="cc-inline">
+                  Damage <Field value={num(hp.wounds)} number editable={editable} label="Damage taken" onSave={numberAt("hp.wounds")} />
+                </span>
+                {current <= 0 ? <span className="hint" data-status="Dead">At 0 hit points a character is dead (the book's rule; the GM may use an optional one).</span> : null}
+              </div>
+              <div className="five-big" title="d6 + this, the highest acts first">
+                <small>Initiative</small>
+                <span data-stat="init">{signed(num((data.initiative as Row)?.total))}</span>
+              </div>
+              <div className="five-big" title={`${String(data.encumbrance ?? "")}: ${num(data.load)} lb. carried (light to ${num((data.loads as Row)?.light)}, heavy to ${num((data.loads as Row)?.heavy)})`}>
+                <small>Movement</small>
+                <span data-stat="movement">{num(data.movement)}'</span>
+                <small className="hint">{String(data.encumbrance ?? "")}</small>
+              </div>
             </section>
           </div>
-        ) : null}
-
-        {tab === "combat" ? (
-          <section className="cc-panel cc-page" data-tab-page="combat">
-            <h4>Attacks {targetNames.length ? <small className="hint">at {targetNames.join(", ")}</small> : <small className="hint">Ctrl+click a token to target it</small>}</h4>
-            <p className="hint">
-              d20 + attack bonus at or above the target's Armor Class: melee {signed(num(attack.melee))}, missile {signed(num(attack.missile))}. A natural 20 hits, a 1 misses.
-              {data.sneakattack ? " Sneak attack (from behind, unseen): +4 to hit and double damage (add +4 in the tracker's ATK effect)." : ""}
-            </p>
-            <ul className="five-attacks">
-              {rows(data.attacks).map(([key, item]) => (
-                <li key={key} data-attack={key}>
-                  <b>{String(item.name)}</b> {item.range ? <small className="hint">{String(item.range)}'</small> : null}
-                  <button type="button" data-action="attack" disabled={!editable} title="One attack roll at each target" onClick={() => session.ct("attack", { recordId: record.id, weapon: key })}>
-                    {signed(num(item.bonus))}
+          <section className="cc-panel d2e-saves" aria-label="Saving throws">
+            <h4>
+              Saving throws <small className="hint">d20 at or above the number; a natural 1 fails, a 20 succeeds</small>
+            </h4>
+            {SAVES.map((save) => {
+              const row = saves[save] ?? {};
+              return (
+                <div key={save} className="five-ability d35-save" data-save={save} title={`Class ${num(row.base)}${num(row.racial) ? `, race -${num(row.racial)}` : ""}${num(row.misc) ? `, misc -${num(row.misc)}` : ""}`}>
+                  <b>{SAVE_NAMES[save]}</b>
+                  <Field value={num(row.misc)} number editable={editable} label={`${save} misc`} onSave={numberAt(`saves.${save}.misc`)} />
+                  <button type="button" className="cc-save" disabled={!editable} title={`Roll a save: d20 at or above ${num(row.total)}`} aria-label={`${save} save`} data-roll-save={save} onClick={() => roll("save", save)}>
+                    {num(row.total)}
                   </button>
-                  <button type="button" data-action="damage" disabled={!editable} title="Damage roll (at least 1)" onClick={() => session.ct("damage-roll", { recordId: record.id, weapon: key })}>
-                    {String(item.damage)}
-                  </button>
-                </li>
-              ))}
-            </ul>
-            {rows(data.attacks).length === 0 ? <p className="hint">No weapon ready: ready one on the Inventory tab.</p> : null}
-            {num(data.turn) > 0 ? (
-              <p className="cc-inline">
-                <b>Turn undead</b> as a level {num(data.turn)} Cleric: d20 against the Clerics vs. Undead table, 2d6 hit dice of undead affected.
-                {inFight ? (
-                  <button type="button" data-action="turn-undead" disabled={!editable} onClick={() => session.ct("turn-undead", { id: inFight.id, recordId: record.id })}>
-                    Turn undead
-                  </button>
-                ) : (
-                  <small className="hint">On the combat tracker, on your turn.</small>
-                )}
+                </div>
+              );
+            })}
+            {((data.savenotes ?? []) as string[]).map((note) => (
+              <p key={note} className="hint">
+                {note}
               </p>
-            ) : null}
+            ))}
           </section>
-        ) : null}
+        </div>
+      ) : null}
 
-        {tab === "skills" ? (
-          <section className="cc-panel cc-page" data-tab-page="skills">
-            {skills.length ? (
-              <>
-                <h4>
-                  Thief abilities <small className="hint">d100 at or under; the GM rolls some in secret</small>
-                </h4>
-                <div className="five-skills d2e-skills">
-                  {skills.map(([key, row]) => (
-                    <div key={key} className="five-skill" data-skill={key} title={`Level ${level}: ${num(row.base)}%, misc ${signed(num(row.misc))}`}>
-                      <Field value={num(row.misc)} number editable={editable} label={`${String(row.name)} misc`} onSave={numberAt(`thiefskills.${key}.misc`)} />
-                      <span>{String(row.name)}</span>
-                      <button type="button" className="cc-bonus" disabled={!editable} aria-label={`Roll ${String(row.name)}`} data-roll-skill={key} onClick={() => roll("skill", key)}>
-                        {num(row.total)}%
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </>
-            ) : (
-              <p className="hint">No thief abilities (a Thief's, or a Magic-User/Thief's).</p>
-            )}
-            {String(data.race) === "Halfling" ? <p className="hint">Halfling: hides with only a 10% chance of being seen outdoors (30% indoors); +1 with missiles and to initiative.</p> : null}
-            {num(data.darkvision) ? <p className="hint">Darkvision {num(data.darkvision)}'.</p> : null}
-            <p className="hint">Ability rolls (the book's optional rule): d20 + the ability's bonus at or above {num(data.abilityTarget)} at level {level}. Click an ability's bonus on the Main tab.</p>
-          </section>
-        ) : null}
-
-        {tab === "spells" ? (
-          <section className="cc-panel cc-page" data-tab-page="spells">
-            {casting ? (
-              <>
-                <div className="d35-perday" data-perday={String(casting.kind)}>
-                  <p className="hint">{arcane ? "Magic-User" : "Cleric"} spells a day. Click a box to use a spell of that level, again to get it back.</p>
-                  {((casting.perday ?? []) as number[]).map((max, index) =>
-                    max > 0 ? (
-                      <div key={index} className="d35-slots" data-spell-level={index + 1}>
-                        <b>{ORDINAL[index]}</b>
-                        {Array.from({ length: max }, (_, slot) => {
-                          const used = num(((casting.used ?? []) as number[])[index]);
-                          return <button key={slot} type="button" className={slot < used ? "used" : ""} disabled={!editable} aria-label={`${ORDINAL[index]} level spell ${slot + 1}`} onClick={() => change(`spellcasting.used.${index}`, slot < used ? slot : slot + 1)} />;
-                        })}
-                      </div>
-                    ) : null,
-                  )}
-                  {((casting.perday ?? []) as number[]).every((max) => !max) ? <p className="hint">No spells a day yet (a Cleric casts from 2nd level).</p> : null}
-                </div>
-                {arcane ? (
-                  <>
-                    <h4>Spellbook</h4>
-                    <Field value={listText(data.spellbook)} area editable={editable} label="Spellbook" onSave={(value) => change("spellbook", value)} />
-                  </>
-                ) : null}
-                <h4>Prepared today</h4>
-                <Field value={listText(data.prepared)} area editable={editable} label="Prepared spells" onSave={(value) => change("prepared", value)} />
-                <p className="hint">One spell a line, or drop a spell on the sheet.</p>
-              </>
-            ) : (
-              <p className="hint">This character casts no spells (Clerics and Magic-Users do).</p>
-            )}
-          </section>
-        ) : null}
-
-        {tab === "inventory" ? (
-          <section className="cc-panel cc-page" data-tab-page="inventory">
-            <ul className="five-items">
-              {rows(data.inventorylist).map(([key, item]) => (
-                <li key={key} data-item={key}>
-                  <select className="cc-field" value={num(item.carried) || 0} disabled={!editable} aria-label={`${String(item.name)} carried`} title="Ready (worn or in hand), carried or left behind" onChange={(event) => change(`inventorylist.${key}.carried`, Number(event.target.value))}>
-                    <option value={2}>Ready</option>
-                    <option value={1}>Carried</option>
-                    <option value={0}>Left behind</option>
-                  </select>
-                  <Field value={num(item.count) || 1} number editable={editable} label={`${String(item.name)} count`} onSave={numberAt(`inventorylist.${key}.count`)} />
-                  <span>
-                    {String(item.name)} <small className="hint">{[item.type, item.damage, item.ac ? `AC ${num(item.ac)}` : "", item.acbonus ? `AC +${num(item.acbonus)}` : "", item.weight ? `${String(item.weight)} lb.` : ""].filter(Boolean).join(" · ")}</small>
-                  </span>
-                  {editable ? (
-                    <button type="button" className="ghost" title="Drop it" aria-label={`Drop ${String(item.name)}`} onClick={() => change(`inventorylist.${key}`, null)}>
-                      ×
-                    </button>
-                  ) : null}
-                </li>
-              ))}
-            </ul>
-            <div className="five-coins">
-              {rows(data.coins).map(([key, coin]) => (
-                <label key={key} className="cc-inline">
-                  <Field value={num(coin.amount)} number editable={editable} label={String(coin.name)} onSave={numberAt(`coins.${key}.amount`)} /> {String(coin.name).toUpperCase()}
-                </label>
-              ))}
-            </div>
-            <p className="hint">
-              Load {num(data.load)} lb. ({String(data.encumbrance ?? "")}); 1 pp = 5 gp, 1 gp = 10 sp, 1 ep = 5 sp, 1 sp = 10 cp.
+      {tab === "combat" ? (
+        <section className="cc-panel cc-page" data-tab-page="combat">
+          <h4>Attacks {targetNames.length ? <small className="hint">at {targetNames.join(", ")}</small> : <small className="hint">Ctrl+click a token to target it</small>}</h4>
+          <p className="hint">
+            d20 + attack bonus at or above the target's Armor Class: melee {signed(num(attack.melee))}, missile {signed(num(attack.missile))}. A natural 20 hits, a 1 misses.
+            {data.sneakattack ? " Sneak attack (from behind, unseen): +4 to hit and double damage (add +4 in the tracker's ATK effect)." : ""}
+          </p>
+          <ul className="five-attacks">
+            {rows(data.attacks).map(([key, item]) => (
+              <li key={key} data-attack={key}>
+                <b>{String(item.name)}</b> {item.range ? <small className="hint">{String(item.range)}'</small> : null}
+                <button type="button" data-action="attack" disabled={!editable} title="One attack roll at each target" onClick={() => session.ct("attack", { recordId: record.id, weapon: key })}>
+                  {signed(num(item.bonus))}
+                </button>
+                <button type="button" data-action="damage" disabled={!editable} title="Damage roll (at least 1)" onClick={() => session.ct("damage-roll", { recordId: record.id, weapon: key })}>
+                  {String(item.damage)}
+                </button>
+              </li>
+            ))}
+          </ul>
+          {rows(data.attacks).length === 0 ? <p className="hint">No weapon ready: ready one on the Inventory tab.</p> : null}
+          {num(data.turn) > 0 ? (
+            <p className="cc-inline">
+              <b>Turn undead</b> as a level {num(data.turn)} Cleric: d20 against the Clerics vs. Undead table, 2d6 hit dice of undead affected.
+              {inFight ? (
+                <button type="button" data-action="turn-undead" disabled={!editable} onClick={() => session.ct("turn-undead", { id: inFight.id, recordId: record.id })}>
+                  Turn undead
+                </button>
+              ) : (
+                <small className="hint">On the combat tracker, on your turn.</small>
+              )}
             </p>
-          </section>
-        ) : null}
+          ) : null}
+        </section>
+      ) : null}
 
-        {tab === "notes" ? (
-          <section className="cc-panel cc-page" data-tab-page="notes">
-            {(["playername", "deity", "languages", "gender", "age", "height", "weight"] as const).map((key) => (
-              <label key={key} className="cc-labelled">
-                <Field value={String(data[key] ?? "")} editable={editable} label={key === "playername" ? "Player" : titled(key)} onSave={(value) => change(key, value)} />
-                <small>{key === "playername" ? "Player" : titled(key)}</small>
+      {tab === "skills" ? (
+        <section className="cc-panel cc-page" data-tab-page="skills">
+          {skills.length ? (
+            <>
+              <h4>
+                Thief abilities <small className="hint">d100 at or under; the GM rolls some in secret</small>
+              </h4>
+              <div className="five-skills d2e-skills">
+                {skills.map(([key, row]) => (
+                  <div key={key} className="five-skill" data-skill={key} title={`Level ${level}: ${num(row.base)}%, misc ${signed(num(row.misc))}`}>
+                    <Field value={num(row.misc)} number editable={editable} label={`${String(row.name)} misc`} onSave={numberAt(`thiefskills.${key}.misc`)} />
+                    <span>{String(row.name)}</span>
+                    <button type="button" className="cc-bonus" disabled={!editable} aria-label={`Roll ${String(row.name)}`} data-roll-skill={key} onClick={() => roll("skill", key)}>
+                      {num(row.total)}%
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            <p className="hint">No thief abilities (a Thief's, or a Magic-User/Thief's).</p>
+          )}
+          {String(data.race) === "Halfling" ? <p className="hint">Halfling: hides with only a 10% chance of being seen outdoors (30% indoors); +1 with missiles and to initiative.</p> : null}
+          {num(data.darkvision) ? <p className="hint">Darkvision {num(data.darkvision)}'.</p> : null}
+          <p className="hint">Ability rolls (the book's optional rule): d20 + the ability's bonus at or above {num(data.abilityTarget)} at level {level}. Click an ability's bonus on the Main tab.</p>
+        </section>
+      ) : null}
+
+      {tab === "spells" ? (
+        <section className="cc-panel cc-page" data-tab-page="spells">
+          {casting ? (
+            <>
+              <div className="d35-perday" data-perday={String(casting.kind)}>
+                <p className="hint">{arcane ? "Magic-User" : "Cleric"} spells a day. Click a box to use a spell of that level, again to get it back.</p>
+                {((casting.perday ?? []) as number[]).map((max, index) =>
+                  max > 0 ? (
+                    <div key={index} className="d35-slots" data-spell-level={index + 1}>
+                      <b>{ORDINAL[index]}</b>
+                      {Array.from({ length: max }, (_, slot) => {
+                        const used = num(((casting.used ?? []) as number[])[index]);
+                        return <button key={slot} type="button" className={slot < used ? "used" : ""} disabled={!editable} aria-label={`${ORDINAL[index]} level spell ${slot + 1}`} onClick={() => change(`spellcasting.used.${index}`, slot < used ? slot : slot + 1)} />;
+                      })}
+                    </div>
+                  ) : null,
+                )}
+                {((casting.perday ?? []) as number[]).every((max) => !max) ? <p className="hint">No spells a day yet (a Cleric casts from 2nd level).</p> : null}
+              </div>
+              {arcane ? (
+                <>
+                  <h4>Spellbook</h4>
+                  <Field value={listText(data.spellbook)} area editable={editable} label="Spellbook" onSave={(value) => change("spellbook", value)} />
+                </>
+              ) : null}
+              <h4>Prepared today</h4>
+              <Field value={listText(data.prepared)} area editable={editable} label="Prepared spells" onSave={(value) => change("prepared", value)} />
+              <p className="hint">One spell a line, or drop a spell on the sheet.</p>
+            </>
+          ) : (
+            <p className="hint">This character casts no spells (Clerics and Magic-Users do).</p>
+          )}
+        </section>
+      ) : null}
+
+      {tab === "inventory" ? (
+        <section className="cc-panel cc-page" data-tab-page="inventory">
+          <ul className="five-items">
+            {rows(data.inventorylist).map(([key, item]) => (
+              <li key={key} data-item={key}>
+                <select className="cc-field" value={num(item.carried) || 0} disabled={!editable} aria-label={`${String(item.name)} carried`} title="Ready (worn or in hand), carried or left behind" onChange={(event) => change(`inventorylist.${key}.carried`, Number(event.target.value))}>
+                  <option value={2}>Ready</option>
+                  <option value={1}>Carried</option>
+                  <option value={0}>Left behind</option>
+                </select>
+                <Field value={num(item.count) || 1} number editable={editable} label={`${String(item.name)} count`} onSave={numberAt(`inventorylist.${key}.count`)} />
+                <span>
+                  {String(item.name)} <small className="hint">{[item.type, item.damage, item.ac ? `AC ${num(item.ac)}` : "", item.acbonus ? `AC +${num(item.acbonus)}` : "", item.weight ? `${String(item.weight)} lb.` : ""].filter(Boolean).join(" · ")}</small>
+                </span>
+                {editable ? (
+                  <button type="button" className="ghost" title="Drop it" aria-label={`Drop ${String(item.name)}`} onClick={() => change(`inventorylist.${key}`, null)}>
+                    ×
+                  </button>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+          <div className="five-coins">
+            {rows(data.coins).map(([key, coin]) => (
+              <label key={key} className="cc-inline">
+                <Field value={num(coin.amount)} number editable={editable} label={String(coin.name)} onSave={numberAt(`coins.${key}.amount`)} /> {String(coin.name).toUpperCase()}
               </label>
             ))}
-            <label className="cc-labelled">
-              <Field value={num(data.loyalty)} number editable={session.role === "dm"} label="Loyalty" onSave={numberAt("loyalty")} />
-              <small>Loyalty (a retainer's: 7 + the employer's Charisma bonus)</small>
-            </label>
-            <button type="button" disabled={!editable} data-action="loyalty-roll" title="Loyalty check: 2d6 at or under" onClick={() => roll("morale", "")}>
-              Roll loyalty
-            </button>
-            <p className="hint">Retainers: at most {num(data.maxretainers)}.</p>
-            <Field value={String(data.appearance ?? "")} area editable={editable} label="Appearance" onSave={(value) => change("appearance", value)} />
-            <Field value={String(data.background ?? "")} area editable={editable} label="Background" onSave={(value) => change("background", value)} />
-            <Field value={String(data.notes ?? "")} area editable={editable} label="Notes" onSave={(value) => change("notes", value)} />
-          </section>
-        ) : null}
-      </div>
+          </div>
+          <p className="hint">
+            Load {num(data.load)} lb. ({String(data.encumbrance ?? "")}); 1 pp = 5 gp, 1 gp = 10 sp, 1 ep = 5 sp, 1 sp = 10 cp.
+          </p>
+        </section>
+      ) : null}
 
-      <nav className="cc-tabs" role="tablist" aria-label="Sheet">
-        {TABS.map((id) => (
-          <button key={id} type="button" role="tab" aria-selected={tab === id} data-sheet-tab={id} onClick={() => setTab(id)}>
-            {titled(id)}
+      {tab === "notes" ? (
+        <section className="cc-panel cc-page" data-tab-page="notes">
+          {(["playername", "deity", "languages", "gender", "age", "height", "weight"] as const).map((key) => (
+            <label key={key} className="cc-labelled">
+              <Field value={String(data[key] ?? "")} editable={editable} label={key === "playername" ? "Player" : titled(key)} onSave={(value) => change(key, value)} />
+              <small>{key === "playername" ? "Player" : titled(key)}</small>
+            </label>
+          ))}
+          <label className="cc-labelled">
+            <Field value={num(data.loyalty)} number editable={session.role === "dm"} label="Loyalty" onSave={numberAt("loyalty")} />
+            <small>Loyalty (a retainer's: 7 + the employer's Charisma bonus)</small>
+          </label>
+          <button type="button" disabled={!editable} data-action="loyalty-roll" title="Loyalty check: 2d6 at or under" onClick={() => roll("morale", "")}>
+            Roll loyalty
           </button>
-        ))}
-      </nav>
-    </article>
+          <p className="hint">Retainers: at most {num(data.maxretainers)}.</p>
+          <Field value={String(data.appearance ?? "")} area editable={editable} label="Appearance" onSave={(value) => change("appearance", value)} />
+          <Field value={String(data.background ?? "")} area editable={editable} label="Background" onSave={(value) => change("background", value)} />
+          <Field value={String(data.notes ?? "")} area editable={editable} label="Notes" onSave={(value) => change("notes", value)} />
+        </section>
+      ) : null}
+    </SheetFrame>
   );
 }
 

@@ -355,13 +355,23 @@ async function audit(game) {
       if (!win) continue;
       await shoot(win, launch, `${slug}-player-${slugOf(launch)}`);
       if (launch === "characters") {
-        const tabs = await win.$$("[data-sheet-tab]");
+        // Characters is Character Selection: the player's card opens their sheet (FG's way).
+        const card = await seat.$(".charselect-card.mine");
+        if (card) {
+          await card.click();
+          await seat.waitForSelector(".cc-sheet", { timeout: 15000 }).catch(() => undefined);
+          await settle(800);
+          const sheetWin = await topWindow(seat);
+          if (sheetWin) await shoot(sheetWin, launch, `${slug}-player-sheet-main`);
+        }
+        const sheetOf = (await topWindow(seat)) ?? win;
+        const tabs = await sheetOf.$$("[data-sheet-tab]");
         for (const [i, tab] of tabs.entries()) {
           if (i === 0 || i > 8) continue;
           const label = slugOf((await tab.getAttribute("data-sheet-tab")) ?? String(i));
           await tab.click({ timeout: 2000 }).catch(() => undefined);
           await settle(500);
-          await shoot(win, launch, `${slug}-player-sheet-${label}`);
+          await shoot(sheetOf, launch, `${slug}-player-sheet-${label}`);
         }
       }
       if (launch === "settings") {

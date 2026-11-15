@@ -6,10 +6,15 @@
 // click takes one, which becomes theirs (the record's owner) and opens its
 // sheet. The portrait bar along the top shows every character with whose it
 // is, on the player's screen and the GM's. kraken_characters lists the roster,
-// gives one and releases one; a released one is offered again.
+// gives one and releases one; a released one is offered again. The sidebar's
+// Characters is Character Selection for the GM too (empty: New character;
+// kraken_windows characters opens and closes it); in edit mode (the pencil) a
+// player exports their own card (not one no one holds; no Delete) and the GM
+// sees Export and Delete on every card and deletes one. Full-screen shots go
+// to the temp folder's kraken-charselect.
 import "./loopback.mjs";
 import { spawn } from "node:child_process";
-import { mkdtempSync } from "node:fs";
+import { mkdirSync, mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import readline from "node:readline";
@@ -20,10 +25,17 @@ function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 const profile = mkdtempSync(path.join(tmpdir(), "kraken-charselect-ui-"));
-const env = { ...process.env, KRAKEN_AGENT_FILE: path.join(profile, "agent.json"), KRAKEN_AGENT_PORT: "0" };
+const env = { ...process.env, KRAKEN_WINDOW_AT: process.env.KRAKEN_WINDOW_AT ?? "-2500,40", KRAKEN_AGENT_FILE: path.join(profile, "agent.json"), KRAKEN_AGENT_PORT: "0" };
 const app = await electron.launch({ args: [".", "--mute-audio", `--user-data-dir=${profile}`], cwd: process.cwd(), env });
 const page = await app.firstWindow();
 await page.waitForSelector("text=My Campaigns");
+// Full screen on its monitor, as a GM plays (the shots below are of the whole screen).
+await app.evaluate(async ({ BrowserWindow }) => {
+  BrowserWindow.getAllWindows()[0].setFullScreen(true);
+  await new Promise((resolve) => setTimeout(resolve, 1500));
+});
+const shots = path.join(tmpdir(), "kraken-charselect");
+mkdirSync(shots, { recursive: true });
 const child = spawn(process.execPath, ["electron/agent/mcp-stdio.cjs"], { env, stdio: ["pipe", "pipe", "inherit"] });
 const answers = new Map();
 readline.createInterface({ input: child.stdout }).on("line", (line) => {
@@ -67,7 +79,19 @@ try {
     process.exit(0);
   }
   await tool("kraken_books", { action: "activate", book: srd.id });
-  const maelis = await tool("kraken_build_character", { spec: spec("Maelis Voidtide", "Elf", "Wizard") });
+  // The GM's Characters: Character Selection (FG's charselect_host), empty before any character is made.
+  await page.click('.sidebar [data-launch="characters"]');
+  await page.waitForSelector('[data-window="charselect"] .empty-state', { timeout: 10000 });
+  assert(await page.$('[data-window="charselect"] [data-action="new-character"]'), "the empty list offers New character");
+  await page.mouse.move(2, 2);
+  await page.screenshot({ path: path.join(shots, "gm-empty.png") });
+  // kraken_windows: characters is that window; closed by the same name.
+  await tool("kraken_windows", { action: "close", kind: "characters" });
+  await page.waitForSelector('[data-window="charselect"]', { state: "detached", timeout: 10000 });
+  await tool("kraken_windows", { action: "open", kind: "characters" });
+  await page.waitForSelector('[data-window="charselect"]', { timeout: 10000 });
+  await tool("kraken_windows", { action: "close", kind: "characters" });
+  const maelis =await tool("kraken_build_character", { spec: spec("Maelis Voidtide", "Elf", "Wizard") });
   const zhree = await tool("kraken_build_character", { spec: spec("Zhree Limelight", "Human", "Bard") });
   const bimz = await tool("kraken_build_character", { owner: "Someone else", spec: spec("Bimz", "Halfling", "Rogue") });
   const idOf = (built) => built.id ?? built.record?.id;
@@ -75,7 +99,7 @@ try {
   assert(roster.length === 3 && roster.filter((entry) => !entry.owner).length === 2, `the roster: three, two held by no one: ${JSON.stringify(roster)}`);
 
   browser = await chromium.launch({ args: ["--mute-audio"], executablePath: CHROME, headless: true });
-  const seat = await browser.newPage({ viewport: { width: 1400, height: 950 } });
+  const seat = await browser.newPage({ viewport: { width: 2560, height: 1440 } });
   seat.on("pageerror", (error) => failures.push(`player: ${error.message}`));
   await seat.goto(`http://127.0.0.1:${port}/`);
   await seat.fill('input[name="name"]', "A test player");
@@ -166,8 +190,41 @@ try {
   assert((await seat.textContent(`[data-charselect="${idOf(maelis)}"]`)).includes("Server"), "Maelis is offered again");
   assert((await seat.textContent(`[data-charselect="${idOf(zhree)}"]`)).includes("Yours"), "Zhree is the player's");
 
-  await seat.screenshot({ path: path.join(tmpdir(), "kraken-charselect-player.png") });
-  await page.screenshot({ path: path.join(tmpdir(), "kraken-charselect-gm.png") });
+  // The player's edit mode (FG's pencil): Export on their own card only, its two formats.
+  await seat.click('[data-window="charselect"] [data-action="charselect-edit"]');
+  const zhreeItem = seat.locator(".charselect-item", { has: seat.locator(`[data-charselect="${idOf(zhree)}"]`) });
+  const maelisItem = seat.locator(".charselect-item", { has: seat.locator(`[data-charselect="${idOf(maelis)}"]`) });
+  assert((await zhreeItem.locator('[data-action="export-character"]').count()) === 1 && (await maelisItem.locator('[data-action="export-character"]').count()) === 0, "Export on the player's own card, not on one no one holds");
+  assert((await seat.locator('[data-action="delete-character"]').count()) === 0, "a player deletes nothing");
+  await zhreeItem.locator('[data-action="export-character"]').click();
+  await seat.waitForSelector('[data-export="kraken"]');
+  await seat.waitForSelector('[data-export="fg"]');
+  const download = seat.waitForEvent("download", { timeout: 10000 });
+  await seat.click('[data-export="kraken"]');
+  assert((await download).suggestedFilename() === "Zhree Limelight.kraken.json", "the player's export downloads the character as Kraken's file");
+  await zhreeItem.locator('[data-action="export-character"]').click();
+  await seat.mouse.move(2, 2);
+  await seat.screenshot({ path: path.join(shots, "player-edit-export.png") });
+
+  // The GM's list, every character: edit mode, Export and Delete on each card; Bimz deleted (after the GM confirms).
+  await page.click('.sidebar [data-launch="characters"]');
+  await page.waitForSelector('[data-window="charselect"] .charselect-card', { timeout: 10000 });
+  assert((await page.$$('[data-window="charselect"] .charselect-card')).length === 3, "the GM's list has every character");
+  await page.click('[data-window="charselect"] [data-action="charselect-edit"]');
+  assert((await page.locator('[data-window="charselect"] [data-action="delete-character"]').count()) === 3, "Delete on every card for the GM");
+  await page.locator(".charselect-item", { has: page.locator(`[data-charselect="${idOf(bimz)}"]`) }).locator('[data-action="export-character"]').click();
+  await page.waitForSelector('[data-export="fg"]');
+  await page.mouse.move(2, 2);
+  await page.screenshot({ path: path.join(shots, "gm-list-edit-export.png") });
+  await page.keyboard.press("Escape");
+  page.once("dialog", (dialog) => void dialog.accept());
+  await page.click(`[aria-label="Delete Bimz"]`);
+  for (let i = 0; i < 40 && (await tool("kraken_records_list", { type: "character" })).records.some((item) => item.name === "Bimz"); i++) await new Promise((resolve) => setTimeout(resolve, 150));
+  assert(!(await tool("kraken_records_list", { type: "character" })).records.some((item) => item.name === "Bimz"), "Bimz deleted");
+  await page.waitForFunction((id) => !document.querySelector(`[data-charselect="${id}"]`), idOf(bimz), { timeout: 10000 });
+
+  await seat.screenshot({ path: path.join(shots, "player.png") });
+  await page.screenshot({ path: path.join(shots, "gm.png") });
   assert(failures.length === 0, `page errors: ${failures.join(" | ")}`);
   console.log(`ok charselect ui: a test player is shown Character Selection on joining (two "Server", one another player's and not pickable), takes Maelis (theirs, the sheet opens) and speaks and rolls as her (out of character as themselves; a whisper to Maelis reaches them; speaking as a character not theirs goes out under their own name); the portrait bar shows all three with whose each is on both screens; another's character is refused; kraken_characters gives and releases, and a released one is offered again. ${path.join(tmpdir(), "kraken-charselect-player.png")}`);
 } finally {

@@ -177,7 +177,11 @@ try {
   await until("the score's position", async () => (await tool("kraken_clocks")).score.position === "desperate" && (await tool("kraken_clocks")).score.effect === "great");
   await page.screenshot({ path: path.join(shots, "score.png") });
   // The player's sheet takes them; an action roll: Prowl 2d, desperate (1 Prowess xp).
-  await seat.click('.sidebar [data-launch="characters"]').catch(() => undefined);
+  // (Their sheet: still open, or from Character Selection, their card.)
+  if (!(await seat.$('[data-ruleset="forged"]'))) {
+    await seat.click('.sidebar [data-launch="characters"]');
+    await seat.click(".charselect-card.mine");
+  }
   await seat.waitForSelector('[data-ruleset="forged"]', { timeout: 10000 });
   await seat.waitForFunction(() => document.querySelector('[data-ruleset="forged"] select[aria-label="Roll position"]')?.value === "desperate", null, { timeout: 10000 });
   await sheet.locator('[data-roll-action="prowl"]').click();

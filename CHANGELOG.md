@@ -4,6 +4,20 @@ What changed in each release of Kraken VTT. Downloads are on the
 [Releases](https://github.com/krakenunbound/kraken-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
+## Unreleased
+
+The first stage of Kraken's core UI (docs/core-ui-design.md): one core that every game slides into, as Fantasy Grounds' CoreRPG and Foundry's core do. On screen almost nothing changes. Underneath, the games stop hand-copying each other.
+
+- **One sheet frame for every game.** The portrait and token, the name, the boxes under it and the tab rail are now one shared frame. Every game's sheet gives only its own boxes and pages, and all 16 games' sheets look exactly as before (checked pixel by pixel, for the GM and for a player).
+- **Every game has a manifest:** a file that says what the game is.
+  - It holds the game's name and blurb, the words for its lists (Kin, Bestiary, Threats...), its coins, its save box, its kind of experience (XP, Growth, Milestones), its extra windows (Starships, Oracles, Delve Sites, Clocks) and its calendar.
+  - The campaign screen, the sidebar, the party sheet, the combat tracker's save box, the dice tray, Settings and the record lists all read it, instead of asking which game it is.
+- **Characters opens Character Selection, for everyone (as Fantasy Grounds does).**
+  - The sidebar's Characters shows every character as a card, for the GM all of them. A card opens its sheet.
+  - New character (the wizard), Create (a blank one), Import, and in edit mode (the pencil) each card's Export and the GM's Delete all live there now.
+  - A character's window shows only the character: no more new-character, import and export buttons above the sheet.
+- **Cairn's character sheet is built from the core's parts,** laid out by its manifest: stat block, Hit Protection and Armor boxes, item lists, slots, coins and notes. It looks and works as before, every button included.
+
 ## 0.1.0-alpha.90: Pictures for every game, and a pass for looks
 
 Every open game's book now has a cover and every creature its portrait and token; Kraken's windows had a pass for form, not only function; and AI agents can now build maps in Map Studio.

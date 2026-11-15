@@ -1,9 +1,7 @@
 import { useMemo, useState } from "react";
 import type { Session, TableRecord } from "../session/useSession";
-import { Icon } from "../ui/icons";
-import { slotDrag } from "../ui/QuickSlots";
-import { ArtPicker, Picture } from "./ArtPicker";
-import { Field } from "./CCSheet";
+import { Field } from "../core/fields/Field";
+import { IdentityBox, SheetFrame } from "../core/frame/SheetFrame";
 import { FormattedText } from "../books/Records";
 import { DEBILITIES, LEGACY, RANK_NAMES, RANKS, SPREAD, STAT_NAMES, STATS, TRACK_KINDS, boxes, gameOf, signed } from "../../shared/ironsworn/rules.mjs";
 
@@ -42,7 +40,6 @@ export function ProgressBoxes({ ticks, label }: { ticks: number; label?: string 
 
 export function SheetIronsworn({ record, session }: { record: TableRecord; session: Session }) {
   const [tab, setTab] = useState<Tab>("main");
-  const [picking, setPicking] = useState<"portrait" | "token" | null>(null);
   const [problem, setProblem] = useState("");
   const data = record.data as Row;
   const game = data.game === "starforged" ? "starforged" : "classic";
@@ -59,7 +56,6 @@ export function SheetIronsworn({ record, session }: { record: TableRecord; sessi
   };
   const stats = (data.stats ?? {}) as Record<string, number>;
   const meters = (data.meters ?? {}) as Record<string, number>;
-  const portrait = typeof data.portrait === "string" ? data.portrait : "";
   const experience = (data.experience ?? {}) as Row;
   const momentum = num(data.momentum);
   const marks = (sf ? data.impacts : data.debilities) as Record<string, boolean> | undefined;
@@ -67,183 +63,151 @@ export function SheetIronsworn({ record, session }: { record: TableRecord; sessi
   const controlWord = sf ? (control ? "In control" : "In a bad spot") : control ? "Initiative" : "No initiative";
 
   return (
-    <article className="cc-sheet sheet-5e sheet-ironsworn" data-character={record.id} data-ruleset="ironsworn" data-game={game}>
-      <div className="cc-body">
-        <header className="cc-head">
-          <div className="cc-portrait-frame">
-            <button type="button" className="cc-portrait" data-action="pick-portrait" disabled={!editable} title={editable ? "Click to choose a portrait" : record.name} onClick={() => setPicking("portrait")} {...slotDrag({ kind: "sheet", record: record.id, label: record.name })}>
-              {portrait ? <Picture session={session} id={portrait} alt={record.name} /> : <span>{record.name.slice(0, 1)}</span>}
-            </button>
-            <button type="button" className="cc-token" data-action="pick-token" disabled={!editable} title="Token" onClick={() => setPicking("token")}>
-              {typeof data.token === "string" && data.token ? <Picture session={session} id={data.token} alt="Token" /> : portrait ? <Picture session={session} id={portrait} alt="Token" /> : <Icon name="character" size={18} />}
-            </button>
-          </div>
-          <div className="cc-identity">
-            <label className="cc-labelled grow">
-              <Field value={record.name} editable={editable} label="Name" className="cc-name" onSave={(value) => change("name", value)} />
-              <small>Name</small>
-            </label>
-            <div className="cc-boxes">
-              <label className="cc-labelled cc-box">
-                <span className="cc-value" data-stat="momentum" data-momentum={momentum}>
-                  {signed(momentum)}
-                </span>
-                <small>
-                  Momentum (max {num(data.momentummax)}, reset {num(data.momentumreset)})
-                </small>
-              </label>
-              <label className="cc-labelled cc-box">
-                <span className="cc-value" data-stat="experience">
-                  {num(experience.available)} / {num(experience.earned)}
-                </span>
-                <small>Experience to spend / earned</small>
-              </label>
-              <button type="button" className={`cc-labelled cc-box iron-control${control ? " on" : ""}`} data-action="iron-control" data-control={control ? "1" : "0"} disabled={!editable} title={sf ? "In control or in a bad spot (a fight's position)" : "Who has the initiative in a fight"} onClick={() => void act("control", { on: !control })}>
-                <span className="cc-value">{controlWord}</span>
-                <small>{sf ? "Position" : "Initiative"}</small>
-              </button>
-            </div>
-          </div>
-          {picking ? (
-            <ArtPicker
-              session={session}
-              kind={picking}
-              current={typeof data[picking] === "string" ? String(data[picking]) : undefined}
-              race=""
-              onClose={() => setPicking(null)}
-              onPick={(id) => {
-                void session.op({ op: "update", id: record.id, patch: { data: { [picking]: id } } });
-                setPicking(null);
-              }}
-            />
-          ) : null}
-        </header>
+    <SheetFrame
+      record={record}
+      session={session}
+      editable={editable}
+      className="cc-sheet sheet-5e sheet-ironsworn"
+      attrs={{ "data-ruleset": "ironsworn", "data-game": game }}
+      tabs={TABS}
+      tab={tab}
+      onTab={(id) => setTab(id as Tab)}
+      boxes={
+        <>
+          <IdentityBox label={`Momentum (max ${num(data.momentummax)}, reset ${num(data.momentumreset)})`}>
+            <span className="cc-value" data-stat="momentum" data-momentum={momentum}>
+              {signed(momentum)}
+            </span>
+          </IdentityBox>
+          <IdentityBox label="Experience to spend / earned">
+            <span className="cc-value" data-stat="experience">
+              {num(experience.available)} / {num(experience.earned)}
+            </span>
+          </IdentityBox>
+          <button type="button" className={`cc-labelled cc-box iron-control${control ? " on" : ""}`} data-action="iron-control" data-control={control ? "1" : "0"} disabled={!editable} title={sf ? "In control or in a bad spot (a fight's position)" : "Who has the initiative in a fight"} onClick={() => void act("control", { on: !control })}>
+            <span className="cc-value">{controlWord}</span>
+            <small>{sf ? "Position" : "Initiative"}</small>
+          </button>
+        </>
+      }
+    >
+      <LastRoll record={record} session={session} editable={editable} act={act} />
+      {problem ? <p className="error" data-iron-problem>{problem}</p> : null}
 
-        <LastRoll record={record} session={session} editable={editable} act={act} />
-        {problem ? <p className="error" data-iron-problem>{problem}</p> : null}
-
-        {tab === "main" ? (
-          <div className="cc-page" data-tab-page="main">
-            <div className="cc-main-grid five-main">
-              <section className="cc-panel five-abilities iron-stats" aria-label="Stats">
-                {STATS.map((stat: string) => (
-                  <div key={stat} className="five-ability" data-stat-row={stat}>
-                    <b>{STAT_NAMES[stat as keyof typeof STAT_NAMES]}</b>
-                    <button type="button" className="cc-bonus" disabled={!editable} title={`Roll +${stat}: d6 + ${num(stats[stat])} against two d10`} aria-label={`${stat} roll`} data-roll-stat={stat} onClick={() => session.siegeCheck(record.id, stat, 0, false, { kind: "check" })}>
-                      {num(stats[stat])}
-                    </button>
-                  </div>
-                ))}
-              </section>
-              <section className="cc-panel five-defence iron-meters">
-                {["health", "spirit", "supply"].map((meter) => (
-                  <div key={meter} className="five-big" data-meter={meter}>
-                    <small>
-                      {titled(meter)}
-                      {meter === "supply" ? " (shared)" : ""}
-                    </small>
-                    <span data-stat={meter}>{num(meters[meter])} / 5</span>
-                    {editable ? (
-                      <span className="cc-inline">
-                        <button type="button" aria-label={`${meter} down`} data-action={`${meter}-down`} onClick={() => void act("adjust", { what: meter, delta: -1 })}>
-                          −
-                        </button>
-                        <button type="button" aria-label={`${meter} up`} data-action={`${meter}-up`} onClick={() => void act("adjust", { what: meter, delta: 1 })}>
-                          +
-                        </button>
-                      </span>
-                    ) : null}
-                  </div>
-                ))}
-                <div className="five-big" data-meter="momentum">
-                  <small>Momentum</small>
-                  <span>{signed(momentum)}</span>
+      {tab === "main" ? (
+        <div className="cc-page" data-tab-page="main">
+          <div className="cc-main-grid five-main">
+            <section className="cc-panel five-abilities iron-stats" aria-label="Stats">
+              {STATS.map((stat: string) => (
+                <div key={stat} className="five-ability" data-stat-row={stat}>
+                  <b>{STAT_NAMES[stat as keyof typeof STAT_NAMES]}</b>
+                  <button type="button" className="cc-bonus" disabled={!editable} title={`Roll +${stat}: d6 + ${num(stats[stat])} against two d10`} aria-label={`${stat} roll`} data-roll-stat={stat} onClick={() => session.siegeCheck(record.id, stat, 0, false, { kind: "check" })}>
+                    {num(stats[stat])}
+                  </button>
+                </div>
+              ))}
+            </section>
+            <section className="cc-panel five-defence iron-meters">
+              {["health", "spirit", "supply"].map((meter) => (
+                <div key={meter} className="five-big" data-meter={meter}>
+                  <small>
+                    {titled(meter)}
+                    {meter === "supply" ? " (shared)" : ""}
+                  </small>
+                  <span data-stat={meter}>{num(meters[meter])} / 5</span>
                   {editable ? (
                     <span className="cc-inline">
-                      <button type="button" aria-label="momentum down" data-action="momentum-down" onClick={() => void act("adjust", { what: "momentum", delta: -1 })}>
+                      <button type="button" aria-label={`${meter} down`} data-action={`${meter}-down`} onClick={() => void act("adjust", { what: meter, delta: -1 })}>
                         −
                       </button>
-                      <button type="button" aria-label="momentum up" data-action="momentum-up" onClick={() => void act("adjust", { what: "momentum", delta: 1 })}>
+                      <button type="button" aria-label={`${meter} up`} data-action={`${meter}-up`} onClick={() => void act("adjust", { what: meter, delta: 1 })}>
                         +
-                      </button>
-                      <button type="button" className="ghost" title={`Reset momentum to ${num(data.momentumreset)} (after burning it)`} onClick={() => void act("burn-reset")}>
-                        Reset
                       </button>
                     </span>
                   ) : null}
                 </div>
-              </section>
-            </div>
-            <section className="cc-panel iron-debilities" aria-label={sf ? "Impacts" : "Debilities"}>
-              <h4>{sf ? "Impacts" : "Debilities"}</h4>
-              {(DEBILITIES[game] as { key: string; name: string; group: string }[]).map((item) => (
-                <label key={item.key} className="cc-inline" title={item.group}>
-                  <input type="checkbox" checked={Boolean(marks?.[item.key])} disabled={!editable} data-debility={item.key} onChange={(event) => void act("debility", { key: item.key, on: event.target.checked })} />
-                  {item.name}
-                </label>
               ))}
+              <div className="five-big" data-meter="momentum">
+                <small>Momentum</small>
+                <span>{signed(momentum)}</span>
+                {editable ? (
+                  <span className="cc-inline">
+                    <button type="button" aria-label="momentum down" data-action="momentum-down" onClick={() => void act("adjust", { what: "momentum", delta: -1 })}>
+                      −
+                    </button>
+                    <button type="button" aria-label="momentum up" data-action="momentum-up" onClick={() => void act("adjust", { what: "momentum", delta: 1 })}>
+                      +
+                    </button>
+                    <button type="button" className="ghost" title={`Reset momentum to ${num(data.momentumreset)} (after burning it)`} onClick={() => void act("burn-reset")}>
+                      Reset
+                    </button>
+                  </span>
+                ) : null}
+              </div>
             </section>
           </div>
-        ) : null}
-
-        {tab === "moves" ? <MovesPanel record={record} session={session} editable={editable} act={act} /> : null}
-        {tab === "progress" ? <ProgressPanel record={record} session={session} editable={editable} act={act} change={change} /> : null}
-        {tab === "assets" ? <AssetsPanel record={record} session={session} editable={editable} act={act} change={change} /> : null}
-
-        {tab === "notes" ? (
-          <section className="cc-panel cc-page" data-tab-page="notes">
-            {sf ? (
-              <div className="cc-boxes">
-                <label className="cc-labelled">
-                  <Field value={String(data.pronouns ?? "")} editable={editable} label="Pronouns" onSave={(value) => change("pronouns", value)} />
-                  <small>Pronouns</small>
-                </label>
-                <label className="cc-labelled">
-                  <Field value={String(data.callsign ?? "")} editable={editable} label="Callsign" onSave={(value) => change("callsign", value)} />
-                  <small>Callsign</small>
-                </label>
-              </div>
-            ) : null}
-            <label className="cc-labelled">
-              <Field value={String(data.look ?? "")} editable={editable} label="Look" onSave={(value) => change("look", value)} />
-              <small>Look</small>
-            </label>
-            <label className="cc-labelled">
-              <Field value={String(data.background ?? "")} area editable={editable} label={sf ? "Backstory" : "Background"} onSave={(value) => change("background", value)} />
-              <small>{sf ? "Backstory" : "Background"}</small>
-            </label>
-            <h4>What they carry <small className="hint">Ironsworn has no money: wealth is supply; anything special is an asset</small></h4>
-            <ul className="five-items">
-              {rows(data.inventorylist).map(([key, item]) => (
-                <li key={key} data-item={key}>
-                  <span>
-                    {String(item.name)}
-                    {num(item.count) > 1 ? ` ×${num(item.count)}` : ""}
-                  </span>
-                  {editable ? (
-                    <button type="button" className="ghost" aria-label={`Drop ${String(item.name)}`} onClick={() => change(`inventorylist.${key}`, null)}>
-                      ×
-                    </button>
-                  ) : null}
-                </li>
-              ))}
-            </ul>
-            {editable ? <AddLine placeholder="Something else they carry" onAdd={(text) => change("inventory.add", text)} /> : null}
-            <label className="cc-labelled">
-              <Field value={String(data.notes ?? "")} area editable={editable} label="Notes" onSave={(value) => change("notes", value)} />
-              <small>Notes</small>
-            </label>
+          <section className="cc-panel iron-debilities" aria-label={sf ? "Impacts" : "Debilities"}>
+            <h4>{sf ? "Impacts" : "Debilities"}</h4>
+            {(DEBILITIES[game] as { key: string; name: string; group: string }[]).map((item) => (
+              <label key={item.key} className="cc-inline" title={item.group}>
+                <input type="checkbox" checked={Boolean(marks?.[item.key])} disabled={!editable} data-debility={item.key} onChange={(event) => void act("debility", { key: item.key, on: event.target.checked })} />
+                {item.name}
+              </label>
+            ))}
           </section>
-        ) : null}
-      </div>
-      <nav className="cc-tabs" role="tablist" aria-label="Sheet">
-        {TABS.map((id) => (
-          <button key={id} type="button" role="tab" aria-selected={tab === id} data-sheet-tab={id} onClick={() => setTab(id)}>
-            {titled(id)}
-          </button>
-        ))}
-      </nav>
-    </article>
+        </div>
+      ) : null}
+
+      {tab === "moves" ? <MovesPanel record={record} session={session} editable={editable} act={act} /> : null}
+      {tab === "progress" ? <ProgressPanel record={record} session={session} editable={editable} act={act} change={change} /> : null}
+      {tab === "assets" ? <AssetsPanel record={record} session={session} editable={editable} act={act} change={change} /> : null}
+
+      {tab === "notes" ? (
+        <section className="cc-panel cc-page" data-tab-page="notes">
+          {sf ? (
+            <div className="cc-boxes">
+              <label className="cc-labelled">
+                <Field value={String(data.pronouns ?? "")} editable={editable} label="Pronouns" onSave={(value) => change("pronouns", value)} />
+                <small>Pronouns</small>
+              </label>
+              <label className="cc-labelled">
+                <Field value={String(data.callsign ?? "")} editable={editable} label="Callsign" onSave={(value) => change("callsign", value)} />
+                <small>Callsign</small>
+              </label>
+            </div>
+          ) : null}
+          <label className="cc-labelled">
+            <Field value={String(data.look ?? "")} editable={editable} label="Look" onSave={(value) => change("look", value)} />
+            <small>Look</small>
+          </label>
+          <label className="cc-labelled">
+            <Field value={String(data.background ?? "")} area editable={editable} label={sf ? "Backstory" : "Background"} onSave={(value) => change("background", value)} />
+            <small>{sf ? "Backstory" : "Background"}</small>
+          </label>
+          <h4>What they carry <small className="hint">Ironsworn has no money: wealth is supply; anything special is an asset</small></h4>
+          <ul className="five-items">
+            {rows(data.inventorylist).map(([key, item]) => (
+              <li key={key} data-item={key}>
+                <span>
+                  {String(item.name)}
+                  {num(item.count) > 1 ? ` ×${num(item.count)}` : ""}
+                </span>
+                {editable ? (
+                  <button type="button" className="ghost" aria-label={`Drop ${String(item.name)}`} onClick={() => change(`inventorylist.${key}`, null)}>
+                    ×
+                  </button>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+          {editable ? <AddLine placeholder="Something else they carry" onAdd={(text) => change("inventory.add", text)} /> : null}
+          <label className="cc-labelled">
+            <Field value={String(data.notes ?? "")} area editable={editable} label="Notes" onSave={(value) => change("notes", value)} />
+            <small>Notes</small>
+          </label>
+        </section>
+      ) : null}
+    </SheetFrame>
   );
 }
 

@@ -241,7 +241,8 @@ try {
   await page.click('[data-full-attack="all"]');
   await chat(page, "Bite #3");
   assert(await page.evaluate(() => document.body.textContent.includes("AUTOMATIC HIT")), "the bite's natural 20 hits");
-  // The book's pregen, taken as a second character.
+  // The book's pregen, taken as a second character (New character in Character Selection).
+  await seat.click('.sidebar [data-launch="characters"]');
   await seat.click('[data-action="new-character"]');
   await seat.waitForSelector('[data-wizard="adnd2e"]');
   await seat.selectOption('[aria-label="Pregenerated character"]', { label: "Sister Mara (Human Cleric 2)" });
