@@ -1192,3 +1192,53 @@ On the branch `worktree-agent-acf53ab2ff27687d8`, one commit per game. Nothing w
 - Fate (Core and Accelerated; its NameField note, the roll bar, stress and consequences), Forged in the Dark (most level-3 parts), Worldbuilding (onto the generic sheet), then C&C last.
 - The wizards' pages onto the core's step kinds (`assign-points`, `pick-list`), the d20 wizards first, each page with its own before/after run.
 - Step 12: the host's 124 ruleset checks through the manifests and the registry.
+
+### 7.17 The fifth stage (steps 8 and 9: Fate Core, Fate Accelerated and Forged in the Dark)
+On the branch `worktree-agent-aa4d997dd16bdb497`, one commit per game, then the docs. Nothing was released or pushed.
+
+**The sheets.** Fate (Core and Accelerated: one sheet, `data.game` says which) and Forged in the Dark are their manifests' `sheet`. `SheetFate.tsx` and `SheetForged.tsx` are gone; their wizards moved unchanged to `WizardFate.tsx` and `WizardForged.tsx`.
+- **Fate** (`shared/fate/manifest.mjs`). Core parts: the header (fate points, refresh with its title, the state in its colour, the name's note "Name · " and "Fate Core" as two text nodes, as 7.1 needs), the aspects (a notes part in a section of its own, each box with its `data-aspect-key`), the Stunts page's hint and extras, the Milestones hint, and the Notes page (Core's phase trio, each note as text nodes, then the description and notes). Its own parts (`src/rulesets/fate.tsx`): the roll bar, the skills (or approaches) it rolls, stress and consequences, the last roll and its invokes, compels, the refusal line, the stunts list with its "Name: what it does" line, and the milestones and skill points. `fateTableOf` and the tracker's conflict select live there too.
+- **Forged** (`shared/forged/manifest.mjs`). Core parts: the header (the name with the Alias beside it, playbook, heritage, background, the vice with its words as the title, the state) and the Notes page. Its own parts (`src/rulesets/forged.tsx`): the roll bar, the attributes and their actions, stress and trauma, harm and the healing clock, armor and coin, load and items, the Playbook page (xp, special abilities, friends and rivals) and the Downtime page. Forged is mostly level 3, as 4.4 expected.
+- **Choices kept while the sheet is open** are sheet modifiers: the roll bars' action, opposition and new aspect, and Forged's position, effect, pushes, bargain and the xp track its Playbook and Downtime pages share. So they stay from tab to tab, exactly as the hand-written sheets' own state did.
+- **The crew and the Score panel** are not character sheets. The crew stays the party sheet's first tab, and the Score panel stays the tracker's replacement (`tracker.replace`). Both are whole windows of the game's own (4.4's replace level), so nothing moved there.
+
+**What the core gained** (for any game), each defaulting to what was there before:
+- a header note as text nodes (`header.note`)
+- labelled fields beside the name (`header.nameFields`)
+- a field's labelled box with more classes, a title and a data-* (`box`)
+- a colour by a condition (`color` as a text)
+- a text field's own class (`fieldClass`)
+- a notes part in a section of its own (`section`)
+- a note as text nodes
+
+**The hosts' whitelists** (`electron/fate.cjs`, `forged.cjs`) come from the manifests' `edit` (text, string, number, and the rows that may be dropped), checked in the order of the hand-written lists. A glob's character class passes through unchanged (`phases.p[123]`, `skills.[A-Za-z][\w' -]{0,39}`, `harm.[123].[01]`). `check-fate` and `check-forged` assert the regexes are exactly the hand-written ones. The name, Fate's "out", and Forged's fatal harm and action cap stay the hosts' own.
+
+**Proof.** `verify-d20-sheet-ui.mjs` takes `fate`, `fae` and `forged`, and gained, for every game:
+- a foe in the fight, targeted by the first fighter (Fate's attack goes through the tracker)
+- what changes by itself left out of a press's record (`lastroll.at`)
+- a strip inside the page counted once (Fate's compels)
+- steps whose field is left after it is filled
+- a select's first real option (a clock or an ability whose id the run makes)
+- the fields beside the name, pressed with the header's
+- a choice set, another tab opened, then back (the roll bar's action is kept)
+- a control another part covers, clicked through and listed. Forged's Mark sits under the Harm panel while a trauma is pending, on the old build too: a layout bug to fix on its own.
+
+Run on the stage-4 build (`a2a79f4`) and this one:
+- **Fate Core** (Mara Quickfingers with four stunts, phases and a guest, a scene aspect with two free invokes, a roll made, a Thug targeted; Brother Tam): 148 presses, with the same record changes and chat lines on both builds (the roll's time aside), and 33 signatures identical. In the first round all 33 sheet shots were identical. In the final round, with 40 fate points so that every invoke is pressed, the GM's Mara shots differ only inside the portrait's box (13,990 pixels, at most 4 of 255): the portrait that moves by itself (7.13). One more shot differs by 12 scattered pixels, at most 3 of 255.
+- **Fate Accelerated** (Zip Lightfoot): 63 presses and 21 signatures identical. In the final round all 21 shots are identical; in the first, the GM's four differed only inside the portrait's box.
+- **Forged** (Silas Venn with severe harm, an attribute advance, a playbook advance, a project and a clock; Wren): 370 presses, the same records and chat lines (record and clock ids aside); 28 signatures identical; 27 of 28 shots identical, and one GM shot differs by 10 pixels at the panel's right edge (at most 2 of 255).
+- What the runs do not reach: the action dots are the GM's (one is pressed as a GM control), armor needs carried armor and the stash needs coin (greyed in both runs), and Silas's later rolls are refused once his stress runs out (the same on both builds).
+- **The games already on the core** (the header boxes, labelled fields and notes changed for all of them): `verify-d20-sheet-ui` for Ironsworn (247 presses) and D&D 5E (201) on the same two builds. Every press and every signature is identical. Ironsworn's shots are identical except the two Moves shots, which differ by the same 38 pixels at the long lists' scrollbar ends as in 7.15, and one portrait's box. D&D 5E's shots differ only inside the portrait's box (at most 9 of 255) and by 2 to 4 pixels at a panel's edge (at most 3 of 255).
+
+**Worldbuilding was not moved.** Decision 7 sends it to the generic core sheet, but today a Worldbuilding character is a C&C record. Create (`createBlank`) stamps no `data.ruleset`, so `sheetFor` gives it `CCSheet` and the C&C host takes its edits; the Worldbuilding manifest's `sheet` Ref is never consulted. The inherit sheet (4.4: attribute categories the user makes, inventory, abilities, notes) is a new sheet with new data, so three things need the user's answer first: what Create stamps in a Worldbuilding campaign, which host takes its edits, and what happens to the characters already made (left on `CCSheet`, or moved).
+
+**Not started in this stage:**
+- Castles & Crusades: main has since changed `CCSheet`'s weapons (they drag onto a creature), so it needs a fresh before from merged main.
+- The wizards' pages onto `assign-points` and `pick-list`.
+- Step 12: 61 of the host's 125 checks are in `combat.cjs`, which another agent is changing.
+
+### 7.18 Next stage
+- Worldbuilding, once the user answers the three questions above.
+- Castles & Crusades (the sheet, then its wizard), from merged main.
+- The wizards' pages onto the core's step kinds, the d20 wizards first, each page with its own before/after run.
+- Step 12, once `combat.cjs`'s roll paths have settled.
