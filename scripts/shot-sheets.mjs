@@ -496,7 +496,7 @@ async function trackerShots(game) {
         const button = await page.$(`.combat-tracker ${selector}:not([disabled])`);
         if (!button) continue;
         const before = (await tool("kraken_chat_log", { count: 400 })).length ?? 0;
-        await button.click();
+        await button.evaluate((item) => item.click());
         await settle(1500);
         const lines = await tool("kraken_chat_log", { count: 400 });
         const posted = (Array.isArray(lines) ? lines.slice(before) : []).map((line) => `${line.text ?? ""} ${line.roll?.label ?? ""}`.replace(/\d+/g, "#").trim());

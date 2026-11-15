@@ -96,6 +96,28 @@ export default {
   features: ["slots", "fatigue", "scars", "spellbooks", "morale", "dying.save"],
   // Cairn has no experience: the party's tab is its Growth (Scars and what has changed).
   party: { currency: ["GP"], xp: "growth", groupCheck: { stats: ["str", "dex", "wil"] } },
+  tracker: {
+    saves: { keys: ["str", "dex", "wil"], modLabel: "CL", modAria: "Save CL", button: "Roll save" },
+    // No initiative: the PCs act first, each saving DEX to act in the first round.
+    initiative: { rollAll: "Sides (DEX saves)", rollAllTitle: "The PCs first (each saves DEX to act in the first round), then their opponents", own: "DEX", ownTitle: "My DEX save to act in the first round" },
+    // Attacks always hit: the die less Armor (impaired d4, enhanced d12).
+    attacks: {
+      hook: "npc-attack",
+      attr: "cairn-attack",
+      label: ["{name}", " ", "{damage}"],
+      title: "{name}: {damage}, always hits (less Armor)",
+      modes: [
+        { mode: "impaired", label: "d4", title: "Impaired (cover, bound hands): d4" },
+        { mode: "enhanced", label: "d12", title: "Enhanced (a helpless foe, a daring maneuver): d12" },
+      ],
+    },
+    rowActions: [
+      // Critical Damage: aid (bandages) stabilizes; untreated, death within the hour.
+      { hook: "stabilize", label: "Stabilize", title: "Give aid (bandages): stable, out of danger but out of action", when: { all: [{ status: "Dying" }, { has: "recordId" }, { any: [{ gm: true }, { viewerHasCharacter: true }] }] }, call: { message: "cairn", action: "stabilize" } },
+      { hook: "morale", label: "Morale", title: "Morale: a WIL save to stand, else the creature flees", when: { all: [{ gm: true }, { faction: "not-friend" }, { not: { status: ["Dead", "Routed", "Fleeing"] } }] }, call: { ct: "morale" } },
+    ],
+    headerActions: [{ hook: "morale-foes", label: "Morale", title: "Morale: every foe still standing saves WIL, or flees", disabled: { not: { anyEntry: { faction: "foe" } } }, call: { ct: "morale", args: { faction: "foe" } } }],
+  },
 
   // Who they are on top, tabs down the right (Main, Inventory, Combat, Character, Growth, Notes).
   sheet: {

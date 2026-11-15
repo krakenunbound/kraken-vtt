@@ -13,6 +13,8 @@ export default {
   blank: false,
   features: ["oracles", "delve", "progressTracks", "momentum", "assetsCards"],
   party: { currency: ["Supply"], xp: "xp" },
+  // A character's initiative on the tracker, in the game's words.
+  tracker: { control: { on: "Initiative", off: "No initiative", title: "Initiative" } },
   windows: [
     // The oracles, for everyone (often played without a GM); Delve's sites, the GM's.
     { kind: "oracles", label: "Oracles", icon: "sparkle", title: "Oracles", feature: "oracles" },
@@ -22,6 +24,7 @@ export default {
     Starforged: {
       blurb: "Ironsworn: Starforged (Shawn Tomkin, CC BY 4.0; an unofficial adaptation): a spacefarer's vows in the Forge, in control or in a bad spot, legacy tracks for experience, connections, your starship, the Forge's oracles. Its Reference, Foes and The Silent Hulk come with Kraken.",
       features: ["oracles", "progressTracks", "momentum", "assetsCards"],
+      tracker: { control: { on: "In control", off: "Bad spot", title: "In control or in a bad spot" } },
     },
   },
 };

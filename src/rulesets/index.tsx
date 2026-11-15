@@ -17,6 +17,7 @@ import { SheetIronsworn, WizardIronsworn } from "../characters/SheetIronsworn";
 import { SheetForged, WizardForged } from "../characters/SheetForged";
 import { ScorePanel } from "../combat/ScorePanel";
 import { FateStrip } from "../ui/FateStrip";
+import { FateConflict } from "./fate";
 import { Wizard2eSetting, Wizard35Setting } from "./WizardSettings";
 import { SheetRenderer } from "../core/sheet/SheetRenderer";
 import { WizardRenderer } from "../core/wizard/WizardRenderer";
@@ -54,10 +55,11 @@ export const WIZARDS: Record<string, ComponentType<WizardProps>> = {
   "ironsworn.wizard": WizardIronsworn,
   "forged.wizard": WizardForged,
 };
-// Whole windows a game replaces (the tracker), desktop strips and Settings rows.
+// Whole windows a game replaces (the tracker), desktop strips, the tracker's header controls and Settings rows.
 export const PANELS: Record<string, ComponentType<SessionProps>> = {
   "forged.scorePanel": ScorePanel,
   "fate.sceneAspects": FateStrip,
+  "fate.conflict": FateConflict,
   "dnd35.wizardSetting": Wizard35Setting,
   "adnd2e.wizardSetting": Wizard2eSetting,
 };

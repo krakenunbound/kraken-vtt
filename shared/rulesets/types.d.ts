@@ -169,6 +169,8 @@ export type Cond =
   | { gm: true }
   | { gmOrMine: true }
   | { viewerHasCharacter: true }
+  | { atLeast: { path: Path; value: number } }
+  | { anyEntry: Cond } // in the tracker's header: some entry in the fight
   | { has: Path }
   // On a sheet: a row's or the record's values, and whether the viewer may type.
   | { is: { path: Path; values: string[] } }
@@ -179,13 +181,32 @@ export type Cond =
   | { any: Cond[] }
   | { not: Cond };
 
-export type TrackerCall = { ct: string; args?: Record<string, unknown> } | { message: string; action: string };
+// The tracker's words (docs/core-ui-design.md 7.9): "{path}" from the row's entry ("{path|0}": 0 when it has none);
+// a choice by a condition; a list is one text node each, as JSX writes "Morale {morale}" ("Morale ", "8").
+export type Words = string | { if: Cond; then: string; else: string } | Words[];
+// A tracker button's call: a tracker message (session.ct(ct, { id: the row's entry, ...args }); with: the row's record
+// as recordId, or the viewer's own character's), or a ruleset message on the row's record (session.<message>Action).
+export type TrackerCall = { ct: string; args?: Record<string, unknown>; with?: "record" | "viewer" } | { message: string; action: string };
+export interface TrackerAction {
+  hook: Hook; // data-action
+  label: Words;
+  title?: Words;
+  className?: string; // a row's default: "ct-death-save"; the header's: none
+  when?: Cond;
+  disabled?: Cond;
+  call: TrackerCall;
+}
 export interface TrackerSpec {
   replace?: Ref; // Forged: the Score panel instead of the tracker
-  initiative?: { label: string; rollAll: string; hint?: string; none?: string };
-  columns?: { id: string; label: string; from: Path; kind: "number" | "boxes" | "badge" | "select"; gm?: boolean; when?: Cond }[];
-  rowActions?: ({ id: Hook; label: string; when: Cond; title?: string; className?: string } & TrackerCall)[];
-  headerActions?: ({ id: Hook; label: string; title?: string; gm?: boolean } & TrackerCall)[];
+  // The GM's "roll all" button and a player's own initiative button (default: Roll all, d10).
+  initiative?: { rollAll: string; rollAllTitle?: string; own: string; ownTitle: string };
+  // An Ironsworn character's initiative, in the game's words.
+  control?: { on: string; off: string; title: string };
+  // An NPC's attacks that always hit (Cairn): the button's words and title, its data-* name, and the die modes beside it.
+  attacks?: { hook: Hook; attr: string; label: Words; title: Words; modes: { mode: string; label: string; title: string }[] };
+  rowActions?: TrackerAction[]; // on a row, after its health, in this order
+  headerParts?: Ref[]; // whole controls a game adds to the GM's header (Fate's conflict)
+  headerActions?: TrackerAction[]; // buttons in the GM's header (Cairn's morale for every foe)
   // The GM's "Roll save" box on a row: the stats offered, the modifier's word and aria-label, the button.
   saves?: { keys: string[]; modLabel: string; modAria: string; button: string };
 }

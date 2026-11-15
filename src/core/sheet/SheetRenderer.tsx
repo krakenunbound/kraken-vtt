@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import type { ActionCall, Part, SheetSpec } from "../../../shared/rulesets/types";
 import type { Session, TableRecord } from "../../session/useSession";
 import { canEdit, SheetFrame } from "../frame/SheetFrame";
+import { messageSender } from "../sender";
 import { FieldView } from "../parts/FieldView";
 import { PartView, type CustomPart, type Format } from "../parts/Parts";
 import { holds, SheetCtx, textOf, type Row, type SheetContext } from "./context";
@@ -10,20 +11,6 @@ import { holds, SheetCtx, textOf, type Row, type SheetContext } from "./context"
 // tabs and fills each with core parts bound to record paths). The frame, the
 // header's identity boxes and the tab rail are the core's (SheetFrame); every
 // part sends an edit through the host's whitelist or a ruleset message.
-
-// A ruleset message's sender (session.<message>Action).
-function sender(session: Session, message: string): ((id: string, action: string, args: Record<string, unknown>) => unknown) | null {
-  switch (message) {
-    case "cairn":
-      return session.cairnAction;
-    case "fate":
-      return session.fateAction;
-    case "forged":
-      return session.forgedAction;
-    default:
-      return null;
-  }
-}
 
 // The modifiers a sheet's lists offer, at their starting values (a check off, a select on its first option).
 function startingModifiers(parts: Part[], into: Record<string, unknown> = {}) {
@@ -57,7 +44,7 @@ export function SheetRenderer({ spec, record, session, ruleset, custom, formats 
         session.ct(call.ct, { recordId: record.id, ...args });
         return;
       }
-      const send = sender(session, call.message);
+      const send = messageSender(session, call.message);
       if (send) void Promise.resolve(send(record.id, call.action, args)).catch(() => undefined);
     };
     return { record, session, data, editable, gm, change, act, modifiers, setModifier: (key, value) => setModifiers((now) => ({ ...now, [key]: value })), targets };

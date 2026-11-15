@@ -1,6 +1,10 @@
 // @ts-check
 // Fate Core and, as its variant, Fate Accelerated (approaches for skills).
 const APPROACHES = ["careful", "clever", "flashy", "forceful", "quick", "sneaky"];
+// The turn order without dice (Notice, FAE Quick), and the conflict (physical or mental) on the GM's header.
+const ORDER = { rollAll: "Turn order", rollAllTitle: "The turn order, without dice: Notice (FAE Quick) in a physical conflict, Empathy (Careful) in a mental one", own: "Order", ownTitle: "My place in the turn order (Notice; FAE Quick)" };
+/** @type {import("../rulesets/types").Ref[]} */
+const HEADER = ["fate.conflict"];
 
 /** @type {import("../rulesets/types").RulesetManifest} */
 export default {
@@ -15,7 +19,7 @@ export default {
   blank: false,
   features: ["fatePoints", "stressConsequences", "sceneAspects"],
   party: { currency: [], xp: "milestone", groupCheck: { stats: ["Athletics", "Notice", "Will", "Physique", "Stealth", "Investigate", "Lore", "Rapport"] } },
-  tracker: { saves: { keys: ["Athletics", "Fight", "Notice", "Physique", "Provoke", "Shoot", "Stealth", "Will"], modLabel: "CL", modAria: "Save CL", button: "Roll save" } },
+  tracker: { saves: { keys: ["Athletics", "Fight", "Notice", "Physique", "Provoke", "Shoot", "Stealth", "Will"], modLabel: "CL", modAria: "Save CL", button: "Roll save" }, initiative: ORDER, headerParts: HEADER },
   dice: { extraTray: ["dF"] },
   strips: ["fate.sceneAspects"],
   variants: {
@@ -23,7 +27,7 @@ export default {
       blurb: "Fate Accelerated Edition (Evil Hat, CC BY 3.0): Fate with six approaches (Careful, Clever, Flashy, Forceful, Quick, Sneaky) instead of skills, three stress boxes, a character in minutes. Its book, the Toolkit and Adversaries and a starter scenario come with Kraken.",
       records: { fateskill: { label: "Approaches" } },
       party: { currency: [], xp: "milestone", groupCheck: { stats: APPROACHES } },
-      tracker: { saves: { keys: APPROACHES, modLabel: "CL", modAria: "Save CL", button: "Roll save" } },
+      tracker: { saves: { keys: APPROACHES, modLabel: "CL", modAria: "Save CL", button: "Roll save" }, initiative: ORDER, headerParts: HEADER },
     },
   },
 };

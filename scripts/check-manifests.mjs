@@ -76,6 +76,16 @@ for (const name of CAMPAIGN_RULESETS) {
   else if (manifest.wizard) refs.push(...checkWizard(where, manifest.wizard));
   refs.push(...(manifest.strips ?? []));
   if (manifest.tracker?.replace) refs.push(manifest.tracker.replace);
+  // The tracker's header controls are components; its buttons' hooks are once each per place; a ruleset message is the game's own.
+  refs.push(...(manifest.tracker?.headerParts ?? []));
+  for (const place of ["rowActions", "headerActions"]) {
+    const seen = new Set();
+    for (const action of manifest.tracker?.[place] ?? []) {
+      if (seen.has(action.hook)) problem(where, `the tracker's ${place} use ${action.hook} twice`);
+      seen.add(action.hook);
+      if ("message" in action.call && action.call.message !== manifest.host?.message) problem(where, `the tracker's ${action.hook} sends ${action.call.message}, not the game's message ${manifest.host?.message}`);
+    }
+  }
   for (const record of Object.values(manifest.records ?? {})) {
     if (record.statblock) refs.push(record.statblock);
     if (record.sheet && record.sheet !== "core") refs.push(record.sheet);

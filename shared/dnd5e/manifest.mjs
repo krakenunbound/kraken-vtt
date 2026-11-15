@@ -15,7 +15,13 @@ export default {
   blank: false,
   features: ["deathSaves", "spellbooks"],
   party: { currency: ["PP", "GP", "EP", "SP", "CP"], xp: "xp" },
-  tracker: { saves: { keys: SIX, modLabel: "DC", modAria: "Save DC", button: "Roll save" } },
+  tracker: {
+    saves: { keys: SIX, modLabel: "DC", modAria: "Save DC", button: "Roll save" },
+    // A Dying character's death saving throw.
+    rowActions: [
+      { hook: "death-save", label: ["Death save ", { if: { defined: "deathsaves" }, then: "({deathsaves.success}✓ {deathsaves.failure}✗)", else: "" }], title: "Death saves: {deathsaves.success|0} successes, {deathsaves.failure|0} failures", when: { all: [{ status: "Dying" }, { gmOrMine: true }] }, call: { ct: "death-save" } },
+    ],
+  },
   calendar: "harptos",
   variants: {
     "Descending Darkness": {
@@ -25,7 +31,13 @@ export default {
       features: ["dread", "dying.bleed", "spellbooks"],
       party: { currency: ["GC"], xp: "xp" },
       // Its save box says DC, as 5E's, but kept its old aria-label (the tracker's, before the manifest).
-      tracker: { saves: { keys: SIX, modLabel: "DC", modAria: "Save CL", button: "Roll save" } },
+      tracker: {
+        saves: { keys: SIX, modLabel: "DC", modAria: "Save CL", button: "Roll save" },
+        // An ally steadies the dying (Wisdom 12); the GM's call without one.
+        rowActions: [
+          { hook: "stabilize", label: "Steady", title: "Steady them: an ally's Wisdom check against 12 stops the bleeding", when: { all: [{ status: "Dying" }, { any: [{ gm: true }, { viewerHasCharacter: true }] }] }, call: { ct: "stabilize", with: "viewer" } },
+        ],
+      },
       calendar: "waning",
     },
   },
