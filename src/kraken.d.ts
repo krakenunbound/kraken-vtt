@@ -143,7 +143,7 @@ export type KrakenHandle = {
     map: import("./session/useSession").TableMap;
     chat: { id: string; from: string; text: string; at: number }[];
     sceneName: string | null;
-    records: { id: string; type: string; name: string; owner: string; visibility: string; data: unknown }[];
+    records: { id: string; type: string; name: string; owner: string; visibility: string | string[]; data: unknown }[];
   };
 };
 

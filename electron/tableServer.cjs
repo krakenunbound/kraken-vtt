@@ -481,6 +481,8 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
   const canSeePicture = (client, book, file) => {
     // A picture named from another module ("<file>@<module>") needs that module shared too.
     if (shelf.images.some((item) => item.book === book && item.file === file && seesImage(client, item))) return true;
+    // A picture that is a page of a story shared with this seat (the campaign's story records).
+    if (client.role !== "dm" && records.list({ type: "story", seat: seatOf(client) }).some((story) => Array.isArray(story.data?.blocks) && story.data.blocks.some((block) => block?.link?.kind === "picture" && block.link.book === book && block.link.file === file))) return true;
     const other = String(file).split("@")[1]?.trim();
     if (other && other !== book && client.role !== "dm" && !canRead(client, other)) return false;
     return canRead(client, book);

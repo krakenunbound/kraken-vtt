@@ -67,8 +67,8 @@ const pictures = (() => {
 })();
 
 // A right-click menu, in whichever window was clicked (a popped-out one too).
-type MenuItem = { label: string; run: () => void; icon?: string };
-function useContextMenu() {
+export type MenuItem = { label: string; run: () => void; icon?: string };
+export function useContextMenu() {
   const [menu, setMenu] = useState<{ x: number; y: number; items: MenuItem[]; doc: Document } | null>(null);
   useEffect(() => {
     if (!menu) return;
@@ -148,6 +148,11 @@ function usePictureActions(session: Session) {
     if (where !== "own") list.push({ label: "Out on its own", icon: "popout", run: () => outOnItsOwn(tab) });
     else list.push({ label: "Back in", icon: "dock", run: () => backIn(tab) });
     if (gm) list.push(shown ? { label: "Stop sharing", icon: "eye-off", run: () => session.hideImage(shown.id) } : { label: "Share with the players", icon: "share", run: () => session.showImage(tab.book, tab.file, tab.name) });
+    // FG's share with one: shown to that player alone (more can be added; Share with the players shows everyone).
+    if (gm && (!shown || shown.to))
+      for (const seat of session.players.filter((item) => item.role === "player" && !shown?.to?.some((name) => name.toLowerCase() === item.name.toLowerCase())))
+        list.push({ label: `Show to ${seat.name}`, icon: "character", run: () => session.showImage(tab.book, tab.file, tab.name, [seat.name]) });
+    if (gm && shown?.to && shown.to.length) list.push({ label: "Share with everyone", icon: "share", run: () => session.showImage(tab.book, tab.file, tab.name) });
     if (where !== "book") list.push({ label: "Close", icon: "close", run: () => close(tab) });
     return list;
   };

@@ -5,6 +5,7 @@ import { Picture } from "../characters/ArtPicker";
 import { CharacterPanel } from "../characters/CharacterPanel";
 import { CharacterSelect } from "../characters/CharacterSelect";
 import { BookRecordWindow, listOf, RecordsWindow, RecordWindow, sidebarLists } from "../books/Records";
+import { shareDrop, UndoToast } from "../books/RecordEditor";
 import { CombatTracker } from "../combat/CombatTracker";
 import { PartySheet } from "../party/PartySheet";
 import { savedSignIn, type Session } from "../session/useSession";
@@ -259,6 +260,10 @@ export function Desktop({
     .filter((item) => item.id !== "siegepackage")
     .map((item) => listEntry(item.id, item.label, characterIcon[item.id] ?? "shield"));
   const hasPackages = Object.values(session.records).some((record) => record.type === "siegepackage" && listOf(record) === "siegepackage");
+  // The campaign's own story, tables and quests a player has been shown (the GM's are under World and Campaign).
+  const sharedLists = sidebarLists(session.records, "Campaign", session.ruleset)
+    .filter((item) => ["story", "table", "quest"].includes(item.id))
+    .map((item) => listEntry(item.id, item.label, item.id === "story" ? "scroll" : item.id === "table" ? "table" : "flag"));
   const combatBadge = session.combat.round > 0 ? session.combat.round : undefined;
   // A player's way back to the table's map after closing its window (the GM
   // opens maps from Images, the Library or a book, and the map window comes to
@@ -327,9 +332,10 @@ export function Desktop({
             listEntry("item", "Items", "bag"),
             listEntry("npc", "NPCs", "skull"),
             { kind: "adventure", payload: "parcel", label: "Parcels", icon: "coins", title: "Parcels", hint: "Every active adventure's treasure parcels" },
-            { kind: "adventure", payload: "table", label: "Tables", icon: "table", title: "Tables", hint: "Every active adventure's random tables" },
+            { kind: "adventure", payload: "table", label: "Tables", icon: "table", title: "Tables", hint: "The campaign's random tables and every active adventure's" },
+            listEntry("quest", "Quests", "flag"),
           ]
-        : [listEntry("item", "Items", "bag"), listEntry("npc", "NPCs", "skull")],
+        : [listEntry("item", "Items", "bag"), listEntry("npc", "NPCs", "skull"), ...sharedLists],
     },
     ...(gm ? [{ id: "world", label: "World", entries: [{ kind: "adventure" as const, payload: "story", label: "Story", icon: "scroll", title: "Story", hint: "Every active adventure's story entries" }] }] : []),
     { id: "character", label: "Character", entries: characterLists },
@@ -561,6 +567,8 @@ export function Desktop({
                 title={opens ? `${entry.name}: open the sheet` : entry.owner ? `${entry.name} (${entry.owner})` : `${entry.name}: no one holds it yet; take it in Character Selection`}
                 onClick={() => (opens ? windows.open("sheet", entry.name, entry.id) : !entry.owner ? windows.open("charselect", "Character Selection") : undefined)}
                 {...(opens ? slotDrag({ kind: "sheet", record: entry.id, label: entry.name }) : {})}
+                // FG's share with one: a record, a note, a story or a picture dropped on a player's portrait (the GM's).
+                {...(gm && entry.owner ? shareDrop(session, entry.owner) : {})}
               >
                 <span className="chip-face">{entry.portrait ? <Picture session={session} id={entry.portrait} alt="" still /> : entry.name.slice(0, 1)}</span>
                 <span className="chip-name">{entry.name}</span>
@@ -609,6 +617,7 @@ export function Desktop({
 
         <ChatDock session={session} />
         <ClocksStrip session={session} />
+        {gm ? <UndoToast session={session} /> : null}
 
         <div className="window-layer">
           {windows.windows.map((item) =>

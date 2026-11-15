@@ -94,6 +94,8 @@ function findTable(table, link) {
 }
 // The table asked for: a record (id), a book's (path), or by name; a player only one they can see.
 function tableTarget(table, args, seat) {
+  // A table read from a book's page (a rulebook's, which the campaign does not copy in): rolled as the reader has it.
+  if (args.data && isTable(args.data)) return { name: text(args.name) || "Table", data: args.data, id: "" };
   if (args.id) {
     const record = table.records.get(String(args.id), seat);
     if (!record || !isTable(record.data)) throw new Error(`No table ${args.id}.`);

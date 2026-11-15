@@ -2184,3 +2184,59 @@ label.set-row { cursor: pointer; }
 .token-menu-row > select { flex: 1; min-width: 0; color: var(--text); }
 .token-menu-row > input[type="number"] { width: 4.5em; color: var(--text); }
 .token-menu-row button { min-width: 2rem; color: var(--text); text-transform: capitalize; }
+
+/* The campaign's records, edited (RecordEditor.tsx) and the core's rich text editor (core/fields/RichText.tsx) */
+.record-window .record-tools { margin-left: auto; display: inline-flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.record-window header .record-tools .records-share { margin-left: 0; }
+.records-lock { background: transparent; border: 1px solid var(--panel-edge); padding: 2px 6px; color: var(--muted); display: inline-flex; align-items: center; }
+.records-lock.on { color: var(--brass); border-color: var(--brass-dim); background: var(--brass-soft); }
+.share-menu { position: fixed; inset: auto; margin: 4px 0; position-area: block-end span-inline-end; position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline; color: var(--text); }
+.share-menu:not(:popover-open) { display: none; }
+.share-menu hr { width: 100%; border: none; border-top: 1px solid var(--line); margin: 3px 0; }
+.share-menu button[aria-checked="true"] { color: var(--brass); }
+.share-menu button[aria-checked="true"]::after { content: "\2713"; margin-left: auto; }
+.portrait-chip.share-drop { outline: 2px dashed var(--brass); outline-offset: 2px; }
+.undo-toast { position: fixed; left: 50%; bottom: 84px; translate: -50% 0; z-index: 9000; display: flex; gap: 12px; align-items: center; padding: 8px 14px; border-radius: 10px; border: 1px solid var(--brass-dim); background: #161b22; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55); }
+.record-editor .record-fields.editing { grid-template-columns: minmax(7rem, max-content) 1fr; align-items: center; }
+.record-editor .record-fields.editing .cc-field { width: 100%; }
+.identify-bar { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; margin: 4px 0 8px; padding: 6px 8px; border-radius: 8px; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--line); }
+.identify-bar[data-identify="off"] { border-color: #6b5a8e; }
+.table-roll-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 2px 0 8px; }
+.table-roll-bar small { flex-basis: 100%; }
+.table-editor .record-table.editing td, .table-editor .record-table.editing th { padding: 2px; }
+.table-editor .record-table.editing { width: 100%; }
+.table-editor .record-table.editing .cc-field { width: 100%; min-width: 3rem; }
+.table-editor .record-table.editing :is(td, th):nth-child(-n + 2) { width: 3.6rem; }
+.table-editor .record-table.editing :is(td, th):last-child { width: 2rem; }
+.table-editor > .cc-inline { display: flex; flex-wrap: wrap; gap: 6px 12px; margin-bottom: 6px; }
+.table-editor .cc-inline .cc-field { width: 5rem; }
+.table-import { margin: 6px 0; }
+.table-import textarea, .table-import > input { width: 100%; margin: 4px 0; font: inherit; }
+.record-drop { margin: 8px 0; padding: 8px 10px; border: 1px dashed var(--panel-edge); border-radius: 8px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.record-drop.dropping { border-color: var(--brass); background: var(--brass-soft); }
+.story-view .story-block { position: relative; margin: 8px 0; padding: 4px 0; border-bottom: 1px solid var(--line); }
+.story-view .story-block figure { margin: 0; cursor: grab; }
+.story-view .story-block img { max-width: 100%; border-radius: 6px; display: block; cursor: zoom-in; }
+.story-view .story-block-tools { position: absolute; top: 2px; right: 0; display: flex; gap: 2px; }
+.story-view .note-chip-open { border: 1px solid var(--brass-dim); border-radius: 999px; background: rgba(255, 255, 255, 0.04); padding: 3px 9px; display: inline-flex; gap: 5px; align-items: center; }
+.story-copy { float: right; }
+.encounter-view .cc-inline, .parcel-view .cc-inline, .quest-view .cc-inline, .story-view .cc-inline { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; margin: 6px 0; }
+.encounter-view .record-table .cc-field { width: 4.5rem; }
+.parcel-view ul { list-style: none; padding: 0; margin: 0 0 6px; }
+.parcel-view li { display: flex; gap: 8px; align-items: center; padding: 2px 0; }
+.rich-text { display: flex; flex-direction: column; gap: 4px; min-height: 0; }
+.rich-text .rt-tools { display: flex; gap: 2px; flex-wrap: wrap; }
+.rich-text .rt-tools button { min-width: 28px; padding: 2px 6px; border-radius: 5px; font-weight: 600; }
+.rich-text .rt-tools [data-rt="italic"] { font-style: italic; }
+.rich-text .rt-tools [data-rt="underline"] { text-decoration: underline; }
+.rich-text .rt-body { flex: 1; min-height: 120px; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--line); background: rgba(255, 252, 235, 0.05); line-height: 1.5; overflow: auto; outline: none; }
+.rich-text .rt-body:focus-visible, .rich-text .rt-body:focus { border-color: var(--brass-dim); }
+.rich-text.dropping .rt-body { border-color: var(--brass); background: var(--brass-soft); }
+.rich-text .rt-body:has(> p:only-child:empty)::before { content: attr(data-placeholder); color: var(--muted); pointer-events: none; position: absolute; }
+.rich-text .rt-body blockquote { margin: 6px 0; padding: 6px 10px; border: 1px solid var(--brass-dim); border-radius: 6px; background: rgba(210, 161, 90, 0.08); }
+.rich-text .rt-body table { border-collapse: collapse; }
+.rich-text .rt-body td { border: 1px solid var(--line); padding: 2px 6px; min-width: 3rem; }
+.note-window .rich-text.note-text { flex: 1; padding: 0; border: none; background: transparent; min-height: 160px; }
+.note-window .rich-text.note-text.read { padding: 10px; border: 1px solid var(--line); border-radius: 8px; }
+.rt-chip { display: inline-flex; align-items: center; border-radius: 999px; border: 1px solid var(--brass-dim); background: rgba(255, 255, 255, 0.05); padding: 0 8px; margin: 0 1px; font-size: 0.88em; cursor: pointer; user-select: none; }
+.rt-chip button { border: none; background: transparent; padding: 1px 0; display: inline-flex; align-items: center; gap: 4px; font: inherit; color: inherit; }

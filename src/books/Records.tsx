@@ -1,10 +1,13 @@
 import { Fragment, useEffect, useMemo, useState, type ReactNode } from "react";
-import type { Session, TableRecord } from "../session/useSession";
+import type { QuickSlot, Session, TableRecord } from "../session/useSession";
 import { Icon } from "../ui/icons";
-import { slotDrag } from "../ui/QuickSlots";
+import { slotDrag, useOpenLink } from "../ui/QuickSlots";
 import { recordLabel, statblockFor } from "../rulesets/statblocks";
 import { useBookWindows } from "./Books";
 import { ReadAloudButton } from "./readAloud";
+import { isFormatted, linkOfRecordname } from "../../shared/text/formatted.mjs";
+import { LinkChip } from "../core/fields/RichText";
+import { CORE_VIEWS, IdentifyBar, openUnlocked, RecordFields, ShareMenu, TableEditor, TableRollBar, useRecordActions, useRecordMenu } from "./RecordEditor";
 
 // FG's campaign lists (the sidebar's Campaign and Character groups, each a
 // master index): the records of this campaign and its active books, a list per
@@ -42,6 +45,12 @@ const LISTS: { id: string; label: string; group: string }[] = [
   { id: "ironasset", label: "Assets", group: "Character" },
   { id: "ironoracle", label: "Oracles", group: "Campaign" },
   { id: "irondelve", label: "Delve Themes and Domains", group: "Campaign" },
+  // The core's own kinds (the campaign's story, tables, quests, encounters and parcels).
+  { id: "story", label: "Story", group: "Campaign" },
+  { id: "table", label: "Tables", group: "Campaign" },
+  { id: "quest", label: "Quests", group: "Campaign" },
+  { id: "battle", label: "Encounters", group: "Campaign" },
+  { id: "treasureparcel", label: "Parcels", group: "Campaign" },
 ];
 // Not lists: what has its own window (characters, the party, notes) or is the game's own setup.
 const NOT_LISTED = new Set(["character", "party", "note", "siegegame", "fatetable"]);
@@ -125,7 +134,8 @@ function listLabel(id: string) {
   return LISTS.find((item) => item.id === id)?.label ?? id.replace(/^siegepackage:/, "").replace(/[_-]+/g, " ").replace(/^./, (letter) => letter.toUpperCase());
 }
 
-const shared = (record: TableRecord) => record.visibility === "all";
+// Shared: with everyone, or with some of the players.
+const shared = (record: TableRecord) => record.visibility === "all" || (Array.isArray(record.visibility) && record.visibility.length > 0);
 const LIMIT = 400;
 
 // The lists the sidebar shows in a group (FG's Campaign and Character
@@ -170,14 +180,7 @@ export function RecordsWindow({ session, onOpen, only }: { session: Session; onO
     groups.set(book, inBook);
   }
   const books = [...groups.keys()].sort((a, b) => (a === "Campaign" ? -1 : b === "Campaign" ? 1 : a.localeCompare(b)));
-  const share = async (record: TableRecord, on: boolean) => {
-    try {
-      await session.op({ op: "update", id: record.id, patch: { visibility: on ? "all" : "gm" } });
-      setStatus(on ? `${record.name} is shared with the players.` : `${record.name} is hidden from the players.`);
-    } catch (error) {
-      setStatus(error instanceof Error ? error.message : "Could not change that.");
-    }
-  };
+  const recordMenu = useRecordMenu(session);
 
   return (
     <div className={only ? "records-window single" : "records-window"} data-window="records" data-records-only={only}>
@@ -210,6 +213,8 @@ export function RecordsWindow({ session, onOpen, only }: { session: Session; onO
                 .op({ op: "create", input: recordFor(only, name) })
                 .then((id) => {
                   setNewName("");
+                  // A new record opens with its lock open, to fill in.
+                  if (id) openUnlocked.add(String(id));
                   if (id) onOpen({ id: String(id), name, type: only } as TableRecord);
                 })
                 .catch((error) => setStatus(error instanceof Error ? error.message : "Could not make that."));
@@ -234,20 +239,9 @@ export function RecordsWindow({ session, onOpen, only }: { session: Session; onO
               <Fragment key={category}>
               {category ? <h5 className="records-category">{category}</h5> : null}
               {items.map((record) => (
-                <div key={record.id} className="records-row" data-record-row={record.id}>
-                  {gm ? (
-                    <button
-                      type="button"
-                      className={shared(record) ? "records-share on" : record.visibility === "owner" && record.owner ? "records-share some" : "records-share"}
-                      data-action="record-share"
-                      aria-pressed={shared(record)}
-                      title={shared(record) ? "Shared with the players: click to hide it (FG's Unshare)" : record.visibility === "owner" && record.owner ? `Shared with ${record.owner}: click to share with everyone` : "Hidden from the players: click to share it (FG's Share)"}
-                      onClick={() => void share(record, !shared(record))}
-                    >
-                      <Icon name={shared(record) ? "eye" : "eye-off"} size={15} />
-                    </button>
-                  ) : null}
-                  <button type="button" className="records-name" title={`Open ${record.name}`} onClick={() => onOpen(record)} {...slotDrag({ kind: "record", record: record.id, label: record.name })}>
+                <div key={record.id} className="records-row" data-record-row={record.id} onContextMenu={gm ? (event) => recordMenu.show(event, record) : undefined}>
+                  {gm ? <ShareMenu session={session} record={record} /> : null}
+                  <button type="button" className="records-name" title={gm ? `Open ${record.name} (right-click: Duplicate, Delete)` : `Open ${record.name}`} onClick={() => onOpen(record)} {...slotDrag({ kind: "record", record: record.id, label: record.name })}>
                     {record.name}
                   </button>
                 </div>
@@ -258,6 +252,7 @@ export function RecordsWindow({ session, onOpen, only }: { session: Session; onO
           ))}
           {rows.length > LIMIT ? <p className="hint">{rows.length - LIMIT} more: search to narrow the list.</p> : null}
           {list && rows.length === 0 ? <p className="hint">{sharedOnly ? "Nothing in this list is shared." : wanted ? "Nothing by that name." : gm ? "Nothing here yet: make a book active (Modules)." : "The GM has shared nothing here yet."}</p> : null}
+          {recordMenu.element}
         </div>
       </section>
     </div>
@@ -267,9 +262,11 @@ export function RecordsWindow({ session, onOpen, only }: { session: Session; onO
 // FG's formatted text, as elements: only the tags FG's text uses, never raw
 // HTML (a record's text comes from a module or another seat).
 const TAGS: Record<string, string> = { p: "p", b: "b", strong: "b", i: "i", em: "i", u: "u", h: "h4", list: "ul", ul: "ul", ol: "ol", li: "li", table: "table", tr: "tr", td: "td", th: "th", frame: "blockquote", linklist: "ul", sup: "sup", sub: "sub" };
-// A link in a record's text: followed when the record is a book's (onLink), else shown as its words.
+// A link in a record's text: followed when the record is a book's (onLink), else shown as its words;
+// a Kraken link (a chip the editor made: a page, a picture, a sound...) opens with onOpen.
 type OnLink = (linkClass: string, recordname: string, words: string) => void;
-function nodes(parent: Node, key = "n", onLink?: OnLink): ReactNode[] {
+type OnOpen = (link: QuickSlot) => void;
+function nodes(parent: Node, key = "n", onLink?: OnLink, onOpen?: OnOpen): ReactNode[] {
   const out: ReactNode[] = [];
   parent.childNodes.forEach((child, index) => {
     const id = `${key}.${index}`;
@@ -277,10 +274,12 @@ function nodes(parent: Node, key = "n", onLink?: OnLink): ReactNode[] {
     if (child.nodeType !== 1) return;
     const tag = (child as Element).tagName.toLowerCase();
     if (tag === "br") return void out.push(<br key={id} />);
-    const inner = nodes(child, id, onLink);
+    const inner = nodes(child, id, onLink, onOpen);
     if (tag === "link") {
       const element = child as Element;
       const words = element.textContent?.trim() || "Link";
+      const kraken = linkOfRecordname(element.getAttribute("recordname"));
+      if (kraken) return void out.push(onOpen ? <LinkChip key={id} link={kraken as QuickSlot} words={words} onOpen={onOpen} /> : <span key={id} className="rt-chip">{words}</span>);
       return void out.push(
         onLink ? (
           <a key={id} href="#" className="record-link" onClick={(event) => (event.preventDefault(), onLink(element.getAttribute("class") ?? "", element.getAttribute("recordname") ?? "", words))}>
@@ -310,11 +309,13 @@ function nodes(parent: Node, key = "n", onLink?: OnLink): ReactNode[] {
   });
   return out;
 }
-export function FormattedText({ text, onLink }: { text: string; onLink?: OnLink }) {
+export function FormattedText({ text, onLink, onOpen }: { text: string; onLink?: OnLink; onOpen?: OnOpen }) {
   const content = useMemo(() => {
+    // An old note's plain words: a paragraph a line.
+    if (!isFormatted(text)) return text.split("\n").map((line, index) => <p key={index}>{line}</p>);
     const xml = new DOMParser().parseFromString(`<root>${text}</root>`, "application/xml");
     const root = xml.getElementsByTagName("parsererror").length ? new DOMParser().parseFromString(text, "text/html").body : xml.documentElement;
-    return nodes(root, "n", onLink);
+    return nodes(root, "n", onLink, onOpen);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [text]);
   return <div className="formatted-text">{content}</div>;
@@ -343,9 +344,19 @@ export function RecordWindow({ session, id, record: given, book }: { session: Se
         else if (!/^image\./.test(inner) && linkClass !== "imagewindow") openRecord(book, `${inner}@${String(given?.id ?? "").split("@").slice(1).join("@")}`, words);
       }
     : undefined;
+  // FG's lock: shut, the record is read; open (the pencil), it is edited. A new record opens with it open.
+  const [unlocked, setUnlocked] = useState(() => openUnlocked.delete(id));
+  const actions = useRecordActions(session);
+  const openLink = useOpenLink(session);
+  const [status, setStatus] = useState("");
   if (!record) return <p className="hint record-window">This is not shown to you any more.</p>;
   // A record read from a book (a page's link) is the book's: shown, not shared or edited.
   const gm = session.role === "dm" && !given;
+  const me = session.players.find((seat) => seat.id === session.selfId)?.name ?? "";
+  // The GM, or the record's owner (records.cjs canEdit), edits the campaign's own records.
+  const canEdit = !given && (session.role === "dm" || (record.owner !== "" && record.owner === me));
+  const editing = canEdit && unlocked;
+  const CoreView = CORE_VIEWS[record.type];
   const data = record.data ?? {};
   const fields: [string, string][] = [];
   const texts: [string, string][] = [];
@@ -365,7 +376,8 @@ export function RecordWindow({ session, id, record: given, book }: { session: Se
   const npc = record.type === "npc";
   // The game's own block for an NPC, the GM's (Traveller's), instead of the core's fields.
   const Block = gm && npc ? statblockFor(session.ruleset, "npc") : null;
-  if (npc && typeof data.text === "string" && data.text.trim()) texts.unshift(["description", data.text]);
+  // The campaign's own record's text (its editor's Description) too.
+  if ((npc || (!record.source && !given)) && typeof data.text === "string" && data.text.trim()) texts.unshift(["description", data.text]);
   const portrait = npc && (data.picture || data.token) ? session.recordArtUrl(record.id, "portrait") : "";
   const table = tableOf(data);
   const grouped = groupsOf(data);
@@ -380,18 +392,44 @@ export function RecordWindow({ session, id, record: given, book }: { session: Se
           {record.source ? ` · ${record.source}` : ""}
           {typeof data.fgCategory === "string" ? ` · ${data.fgCategory}` : ""}
         </small>
-        {gm ? (
-          <button
-            type="button"
-            className={shared(record) ? "records-share on" : "records-share"}
-            data-action="record-share"
-            aria-pressed={shared(record)}
-            onClick={() => void session.op({ op: "update", id: record.id, patch: { visibility: shared(record) ? "gm" : "all" } })}
-          >
-            <Icon name={shared(record) ? "eye" : "eye-off"} size={15} /> {shared(record) ? "Shared" : "Share with the players"}
-          </button>
-        ) : null}
+        <span className="record-tools">
+          {canEdit ? (
+            <button type="button" className={editing ? "records-lock on" : "records-lock"} data-action="record-lock" aria-pressed={editing} title={editing ? "Lock it (done editing)" : "Unlock it to edit (FG's lock)"} aria-label={editing ? "Lock" : "Edit"} onClick={() => setUnlocked(!editing)}>
+              <Icon name={editing ? "unlock" : "pen"} size={15} />
+            </button>
+          ) : null}
+          {gm ? <ShareMenu session={session} record={record} words /> : null}
+          {session.role === "dm" && (given || record.source) ? (
+            <button
+              type="button"
+              data-action="record-copy-campaign"
+              title="Copy it into the campaign, to change it there (the book's stays as it is)"
+              onClick={() => void actions.copyToCampaign(record, book).catch((error) => setStatus(error instanceof Error ? error.message : "Could not copy that."))}
+            >
+              <Icon name="import" size={15} /> Copy to campaign
+            </button>
+          ) : null}
+          {gm && !record.source ? (
+            <>
+              <button type="button" className="ghost" data-action="record-duplicate" title="Duplicate (FG's): a copy, named (copy)" aria-label="Duplicate" onClick={() => void actions.duplicate(record)}>
+                <Icon name="plus" size={15} />
+              </button>
+              <button type="button" className="ghost" data-action="record-delete" title="Delete (Undo comes up for a moment)" aria-label="Delete" onClick={() => void actions.remove(record)}>
+                <Icon name="trash" size={15} />
+              </button>
+            </>
+          ) : null}
+        </span>
       </header>
+      {status ? <p className="hint" role="status">{status}</p> : null}
+      {gm && record.type === "item" && !record.source ? <IdentifyBar session={session} record={record} /> : null}
+      {table ? <TableRollBar session={session} record={record} book={book} /> : null}
+      {CoreView ? (
+        <CoreView session={session} record={record} editable={editing} />
+      ) : editing ? (
+        table ? <TableEditor session={session} record={record} /> : <RecordFields session={session} record={record} />
+      ) : (
+      <>
       {Block ? <Block session={session} record={record} /> : null}
       {grouped
         ? grouped.map((group, index) => (
@@ -483,9 +521,11 @@ export function RecordWindow({ session, id, record: given, book }: { session: Se
       {(Block ? [] : texts).map(([key, value]) => (
         <section key={key} className="record-text">
           {texts.length > 1 || key !== "description" ? <h4>{labelOf(key)}</h4> : null}
-          <FormattedText text={value} onLink={onLink} />
+          <FormattedText text={value} onLink={onLink} onOpen={openLink} />
         </section>
       ))}
+      </>
+      )}
     </article>
   );
 }

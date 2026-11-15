@@ -141,7 +141,7 @@ export type ChatSend = { kind?: ChatKind; mood?: string; to?: string[]; as?: str
 // The table's own options, set by the GM (electron/tableServer.cjs savedOptions).
 export type SoundTrigger = { id: string; name: string; on: string; match: string; result: string; sound: string; enabled: boolean };
 // Books (FG's Library): what the GM has shared, and the pictures shown to the players.
-export type ShownImage = { id: string; book: string; file: string; name: string; at: number };
+export type ShownImage = { id: string; book: string; file: string; name: string; at: number; to?: string[] };
 export type BookShelf = { active: string[]; shared: string[]; images: ShownImage[] };
 export type BookInfo = { id: string; name: string; title: string; category: string; ruleset: string; author: string; hasBook: boolean; cover: string; adventure: boolean; forPlayers: boolean; active: boolean; shared: boolean; pack?: boolean };
 export type BookPageRef = { id: string; name: string; keywords: string };
@@ -230,12 +230,16 @@ export type FateEntry = {
   taken: number;
 };
 export type CombatView = { round: number; active: string | null; entries: CombatEntry[] };
+export type Visibility = "gm" | "owner" | "all" | string[];
+// The host's content requests (electron/content.cjs), each with its agent tool.
+export type ContentRequest = "record-copy" | "story" | "table-roll" | "identify" | "encounter" | "parcel" | "quest";
 export type TableRecord = {
   id: string;
   type: string;
   name: string;
   owner: string;
-  visibility: "gm" | "owner" | "all";
+  // gm, owner, all, or the players it is shared with by name.
+  visibility: Visibility;
   // The book (module) it came from, if any.
   source?: string;
   data: Record<string, unknown>;
@@ -924,6 +928,17 @@ export function useSession() {
     },
     [],
   );
+  // The campaign's content (electron/content.cjs): copies, story, tables, identifying, encounters,
+  // parcels, quests; the host answers with what it made or did, or why not.
+  const content = useCallback(<T = unknown,>(type: ContentRequest, body: Record<string, unknown>) => {
+    const socket = socketRef.current;
+    if (!socket || socket.readyState !== WebSocket.OPEN) return Promise.reject(new Error("Not connected."));
+    const req = ++opCounter.current;
+    return new Promise<T>((resolve, reject) => {
+      opWaits.current.set(req, { resolve: (_id, payload) => resolve((payload as { result?: T } | undefined)?.result as T), reject });
+      socket.send(JSON.stringify({ ...body, type, req }));
+    });
+  }, []);
 
   // A SIEGE check for a character; the host rolls it and posts the result.
   const siegeCheck = useCallback((id: string, attribute: string, cl = 0, save = false, extra?: { label?: string; bonus?: number; addLevel?: boolean; kind?: "check" | "save" | "skill" | "morale"; skill?: string; dc?: number; advantage?: string }) => {
@@ -1271,7 +1286,7 @@ export function useSession() {
     // The party's watch order and formation (a player moves their own characters).
     partyOrder: (change: { action: "place" | "remove" | "watch" | "fill" | "rotate" | "clear"; id?: string; x?: number; y?: number; watch?: number; columns?: number; direction?: "left" | "right" }) => send({ type: "party-order", ...change }),
     shareBook: (book: string, shared: boolean) => send({ type: "book-share", book, shared }),
-    showImage: (book: string, file: string, name: string) => send({ type: "image-share", book, file, name }),
+    showImage: (book: string, file: string, name: string, to?: string[]) => send({ type: "image-share", book, file, name, ...(to?.length ? { to } : {}) }),
     hideImage: (id: string) => send({ type: "image-unshare", id }),
     soundList,
     soundCommand,
@@ -1284,6 +1299,7 @@ export function useSession() {
     wizardText,
     roll,
     op,
+    content,
     siegeCheck,
     buildCharacter,
     shipAction,
