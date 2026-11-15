@@ -2,6 +2,7 @@ import { useMemo, useState, useSyncExternalStore } from "react";
 import { useHostRolls as useSharedHostRolls } from "./hostRolls";
 import type { Session } from "../session/useSession";
 import { ArtChoice } from "./ArtPicker";
+import { RailFrame, WizardPlate as Plate } from "../core/wizard/RailFrame";
 import * as W from "../../shared/dnd35/wizard.mjs";
 import { ABILITY_PROSE, ALIGNMENT_DETAILS, ALIGNMENT_PROSE, CLASS_DETAILS, CLASS_PROSE, INSTRUCTIONS, RACE_DETAILS, RACE_MANUAL_NOTES, RACE_PROSE, WARNINGS } from "../../shared/dnd35/wizardText.mjs";
 
@@ -117,14 +118,6 @@ function Instructions({ page }: { page: Page }) {
         </div>
       ) : null}
     </section>
-  );
-}
-function Plate({ children, action }: { children: React.ReactNode; action?: React.ReactNode }) {
-  return (
-    <div className="ccw-plate">
-      {action}
-      <span>{children}</span>
-    </div>
   );
 }
 function Card({ title, body }: { title: string; body: string }) {
@@ -349,40 +342,27 @@ export function Wizard35({ session, onDone }: { session: Session; onDone: (id: s
   })();
 
   return (
-    <section className="ccw ccw-35" data-page={page} data-wizard="dnd35" aria-label="D&D 3.5E character wizard">
-      <header className="ccw-head">
-        <h2>D&amp;D 3.5E Character Wizard</h2>
-        <span className="ccw-head-buttons">
-          <button type="button" className="wizard-next" data-wizard-next disabled={page === "commit"} onClick={() => setPage(next)} title={`Next: ${PAGE_LABEL[next]}`}>
-            Next: {PAGE_LABEL[next]} ›
-          </button>
-          <button type="button" onClick={() => onDone(null)}>
-            Cancel
-          </button>
-        </span>
-      </header>
-      <nav className="ccw-tabs" role="tablist">
-        {PAGES.map((name) => {
-          const ok = name === "commit" ? blocking === 0 : done(name as Page);
-          return (
-            <button key={name} type="button" role="tab" aria-selected={page === name} data-wizard-tab={name} onClick={() => setPage(name as Page)}>
-              {PAGE_LABEL[name as Page]}
-              <span className={ok ? "ccw-tab-badge done" : "ccw-tab-badge todo"} data-tab-done={ok ? "yes" : "no"}>
-                {ok ? "✓" : <img src={`${ART}/alert.webp`} alt="!" />}
-              </span>
-            </button>
-          );
-        })}
-      </nav>
-      {note ? (
-        <p className="ccw-note" role="status">
-          {note}
-          <button type="button" aria-label="Dismiss" onClick={() => setNote("")}>
-            ×
-          </button>
-        </p>
-      ) : null}
-
+    <RailFrame
+      className="ccw ccw-35"
+      attrs={{ "data-page": page, "data-wizard": "dnd35" }}
+      aria="D&D 3.5E character wizard"
+      heading={<h2>D&amp;D 3.5E Character Wizard</h2>}
+      next={{
+        label: <>Next: {PAGE_LABEL[next]} ›</>,
+        title: `Next: ${PAGE_LABEL[next]}`,
+        disabled: page === "commit",
+        onClick: () => setPage(next),
+      }}
+      onCancel={() => onDone(null)}
+      tabs={PAGES.map((name) => {
+        const ok = name === "commit" ? blocking === 0 : done(name as Page);
+        return { id: name, label: PAGE_LABEL[name as Page], badge: { done: ok, todo: <img src={`${ART}/alert.webp`} alt="!" />, attrs: { "data-tab-done": ok ? "yes" : "no" } } };
+      })}
+      page={page}
+      onPage={(id) => setPage(id as Page)}
+      note={note}
+      onNote={() => setNote("")}
+    >
       <div className="ccw-page" style={{ ["--ccw-art" as string]: `url(${ART}/${PAGE_ART[page]}.webp)` }}>
         <Instructions page={page} />
         <Plate>{W.PAGE_HEADER[page]}</Plate>
@@ -998,6 +978,6 @@ export function Wizard35({ session, onDone }: { session: Session; onDone: (id: s
           </>
         ) : null}
       </div>
-    </section>
+    </RailFrame>
   );
 }
