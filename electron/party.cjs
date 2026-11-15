@@ -332,7 +332,7 @@ async function rollForMember(table, member, spec, from) {
 }
 async function partyRoll(table, spec = {}, from = "GM") {
   const fateGame = require("./fate.cjs").isFateRuleset(table.ruleset?.());
-  if (!String(spec.attribute ?? spec.skill ?? "").trim()) throw new Error(fateGame ? "Pick a skill or an approach." : "Pick what they roll: an ability, a save or a skill.");
+  if (!String(spec.attribute || spec.skill || "").trim()) throw new Error(fateGame ? "Pick a skill or an approach." : "Pick what they roll: an ability, a save or a skill.");
   if (spec.kind === "skill" && !String(spec.skill ?? "").trim()) throw new Error("Pick the skill.");
   const wanted = Array.isArray(spec.members) && spec.members.length ? new Set(spec.members.map(String)) : null;
   const members = memberRecords(table).filter((member) => !wanted || wanted.has(member.id) || wanted.has(member.name));
