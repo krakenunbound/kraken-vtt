@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import type { Session, TableRecord } from "../session/useSession";
 import { ArtChoice } from "./ArtPicker";
+import { RailFrame, WizardPlate as Plate } from "../core/wizard/RailFrame";
 import { useHostRolls } from "./Wizard";
 import { abilityAdjustments, CASTERS, mod, profileFor, signed, SKILLS, skillKey, slotsFor, STATS } from "../../shared/dnd5e/rules.mjs";
 import {
@@ -72,14 +73,6 @@ const STEPS: Record<Tab, string[]> = {
   commit: ["Review warnings (if any) and return to previous sections to resolve.", "Enter your character name.", "Review character to make sure everything looks right.", "Click the Save button to finalize and create the Character record."],
 };
 
-function Plate({ children, action }: { children: React.ReactNode; action?: React.ReactNode }) {
-  return (
-    <div className="ccw-plate">
-      {action}
-      <span>{children}</span>
-    </div>
-  );
-}
 
 // A list of records to choose from: Source and Name filters, + to choose, the name to read it.
 function Choose({ records, kind, onPick, blocked }: { records: TableRecord[]; kind: string; onPick: (record: TableRecord) => void; blocked?: (record: TableRecord) => string | null }) {
@@ -427,29 +420,25 @@ export function Wizard5e({ session, onDone }: { session: Session; onDone: (id: s
   };
 
   return (
-    <section className="ccw w5-wizard" aria-label={`${words.game} character wizard`} data-wizard={profile.id} data-page={tab}>
-      <header className="ccw-head">
+    <RailFrame
+      className="ccw w5-wizard"
+      attrs={{ "data-wizard": profile.id, "data-page": tab }}
+      aria={`${words.game} character wizard`}
+      heading={
         <h2>
           Character Wizard <small className="hint">New {words.game} character</small>
         </h2>
-        <span className="ccw-head-buttons">
-          <button type="button" className="wizard-next" data-wizard-next disabled={tab === "commit"} onClick={() => setTab(next)} title={`Next: ${(TAB_LABEL as Record<string, string>)[next]}`}>
-            Next ›
-          </button>
-          <button type="button" onClick={() => onDone(null)}>
-            Cancel
-          </button>
-        </span>
-      </header>
-      <nav className="ccw-tabs" role="tablist">
-        {TABS.map((page: Tab) => (
-          <button key={page} type="button" role="tab" aria-selected={tab === page} data-wizard-tab={page} onClick={() => setTab(page)}>
-            {page === "species" ? words.species : (TAB_LABEL as Record<string, string>)[page]}
-            {page !== "commit" ? <span className={badge(page) ? "ccw-tab-badge todo" : "ccw-tab-badge done"} data-alert={badge(page) ? "todo" : "done"} title={alerts[page].join("; ") || (badge(page) ? "Choose" : "Done")}>{badge(page) ? <img src="rulesets/cnc/wizard/alert.webp" alt="!" /> : "✓"}</span> : null}
-          </button>
-        ))}
-      </nav>
-
+      }
+      next={{ label: "Next ›", title: `Next: ${(TAB_LABEL as Record<string, string>)[next]}`, disabled: tab === "commit", onClick: () => setTab(next) }}
+      onCancel={() => onDone(null)}
+      tabs={TABS.map((page: Tab) => ({
+        id: page,
+        label: page === "species" ? words.species : (TAB_LABEL as Record<string, string>)[page],
+        ...(page !== "commit" ? { badge: { done: !badge(page), todo: <img src="rulesets/cnc/wizard/alert.webp" alt="!" />, title: alerts[page].join("; ") || (badge(page) ? "Choose" : "Done"), attrs: { "data-alert": badge(page) ? "todo" : "done" } } } : {}),
+      }))}
+      page={tab}
+      onPage={(id) => setTab(id as Tab)}
+    >
       <div className="ccw-page">
         <section className="ccw-instructions">
           <button type="button" className="ccw-plate" aria-expanded={instructions} onClick={() => setInstructions(!instructions)}>
@@ -927,6 +916,6 @@ export function Wizard5e({ session, onDone }: { session: Session; onDone: (id: s
           </>
         ) : null}
       </div>
-    </section>
+    </RailFrame>
   );
 }
