@@ -32,6 +32,16 @@ const PAUSE_HOLDS = new Set(["token-place", "token-move", "token-update", "token
 // words (notes, appearance...), never a number the rules read, and a new
 // character starts blank. Notes are the player's own.
 const PLAYER_CHARACTER_PATHS = [/^portrait$/, /^token$/, /^dice(\..+)?$/, /^slots\.[^.]+\.used$/, /^(notes|appearance|playername|gender|age|height|weight|alignment|personality|ideals|bonds|flaws|backstory)$/];
+// Advantage or disadvantage from the modifier box's ADV or DIS chip tags the roll's label as the rules'
+// own do (after its name, before [AC ...], [DC ...] or -> [at ...]); both at once cancel.
+function edgeTagged(result, label) {
+  const said = String(label ?? "");
+  const chip = (id) => Array.isArray(result?.mods) && result.mods.some((mod) => mod.key === id);
+  const edge = chip("adv") === chip("dis") ? "" : chip("adv") ? "[ADVANTAGE]" : "[DISADVANTAGE]";
+  if (!edge || said.includes(edge)) return label;
+  const at = said.search(/ \[(AC|DC) | -> /);
+  return at < 0 ? `${said.trim()} ${edge}`.trim() : `${said.slice(0, at)} ${edge}${said.slice(at)}`;
+}
 function leafPaths(value, prefix = "") {
   if (!value || typeof value !== "object" || Array.isArray(value)) return [prefix];
   const keys = Object.keys(value);
@@ -1227,6 +1237,7 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
       delete extra.mods;
       delete extra.modKind;
     }
+    label = edgeTagged(result, label);
     const roll = { ...result, label: text(label, "").slice(0, 160), ...(tag ? { tag: text(tag, "").slice(0, 80) } : {}), ...(extra ?? {}) };
     addChat({ id, from, text: "", roll, at: Date.now(), ...(secret ? { secret: true } : {}), ...(typeof secret === "string" ? { shownTo: secret } : {}) });
     return roll;
@@ -3366,7 +3377,7 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
     modifiers: (args = {}, who = "@gm") => modifiers.act(!who || who === "GM" ? "@gm" : who, args),
     // Posts a roll already made (an attack decides HIT or MISS before its card goes out).
     postRoll: (result, label, from = "Agent", secret = false, extra = null) =>
-      addChat({ id: "agent", from: text(from, "Agent").slice(0, 24), text: "", roll: { ...result, label: text(label, "").slice(0, 160), ...(extra ?? {}) }, at: Date.now(), ...(secret ? { secret: true } : {}) }),
+      addChat({ id: "agent", from: text(from, "Agent").slice(0, 24), text: "", roll: { ...result, label: text(edgeTagged(result, label), "").slice(0, 160), ...(extra ?? {}) }, at: Date.now(), ...(secret ? { secret: true } : {}) }),
     // A chat line with a link (a record, a page, a picture), or the GM's Share of a record's text.
     sayLink: (line, link, { from = "Agent", share = false, secret = false } = {}) => {
       const clean = cleanSlot(link);
