@@ -6022,8 +6022,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">sphere</targeting>
+						<targetingval type="number">20</targetingval>
 					</id-00001>
 					<id-00002>
 						<type type="string">powersave</type>
@@ -6104,8 +6104,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">cone</targeting>
+						<targetingval type="number">15</targetingval>
 						<allowupcast type="number">1</allowupcast>
 					</id-00001>
 					<id-00002>
@@ -6249,8 +6249,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">sphere</targeting>
+						<targetingval type="number">2.5</targetingval>
 						<allowupcast type="number">1</allowupcast>
 					</id-00001>
 					<id-00002>
@@ -6297,8 +6297,9 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">line</targeting>
+						<targetingval type="number">60</targetingval>
+						<targetingval2 type="number">10</targetingval2>
 					</id-00001>
 					<id-00002>
 						<type type="string">powersave</type>
@@ -6586,8 +6587,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">sphere</targeting>
+						<targetingval type="number">5</targetingval>
 						<allowupcast type="number">1</allowupcast>
 					</id-00001>
 					<id-00002>
@@ -6815,8 +6816,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">sphere</targeting>
+						<targetingval type="number">10</targetingval>
 						<allowupcast type="number">1</allowupcast>
 					</id-00001>
 					<id-00002>
@@ -6882,8 +6883,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">sphere</targeting>
+						<targetingval type="number">20</targetingval>
 					</id-00001>
 					<id-00002>
 						<type type="string">effect</type>
@@ -6919,8 +6920,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">sphere</targeting>
+						<targetingval type="number">20</targetingval>
 					</id-00001>
 					<id-00002>
 						<type type="string">damage</type>
@@ -7025,8 +7026,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">cube</targeting>
+						<targetingval type="number">20</targetingval>
 					</id-00001>
 					<id-00002>
 						<type type="string">powersave</type>
@@ -7063,8 +7064,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">sphere</targeting>
+						<targetingval type="number">15</targetingval>
 					</id-00001>
 					<id-00002>
 						<type type="string">powersave</type>
@@ -7088,8 +7089,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">sphere</targeting>
+						<targetingval type="number">5</targetingval>
 					</id-00001>
 					<id-00002>
 						<type type="string">powersave</type>
@@ -7789,8 +7790,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">cone</targeting>
+						<targetingval type="number">15</targetingval>
 						<allowupcast type="number">1</allowupcast>
 					</id-00001>
 					<id-00002>
@@ -7890,8 +7891,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">cone</targeting>
+						<targetingval type="number">15</targetingval>
 					</id-00001>
 					<id-00002>
 						<type type="string">powersave</type>
@@ -8175,8 +8176,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">cube</targeting>
+						<targetingval type="number">20</targetingval>
 					</id-00001>
 					<id-00002>
 						<type type="string">powersave</type>
@@ -8216,8 +8217,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">cube</targeting>
+						<targetingval type="number">20</targetingval>
 					</id-00001>
 					<id-00002>
 						<type type="string">powersave</type>
@@ -8311,8 +8312,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">cube</targeting>
+						<targetingval type="number">10</targetingval>
 					</id-00001>
 					<id-00002>
 						<type type="string">powersave</type>
@@ -8534,8 +8535,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">sphere</targeting>
+						<targetingval type="number">5</targetingval>
 						<allowupcast type="number">1</allowupcast>
 					</id-00001>
 					<id-00002>
@@ -8879,8 +8880,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">sphere</targeting>
+						<targetingval type="number">5</targetingval>
 					</id-00001>
 					<id-00002>
 						<type type="string">powersave</type>
@@ -8920,8 +8921,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">cube</targeting>
+						<targetingval type="number">15</targetingval>
 						<allowupcast type="number">1</allowupcast>
 					</id-00001>
 					<id-00002>
@@ -9122,8 +9123,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">sphere</targeting>
+						<targetingval type="number">100</targetingval>
 					</id-00001>
 					<id-00002>
 						<type type="string">powersave</type>
@@ -9173,8 +9174,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">emanation</targeting>
+						<targetingval type="number">30</targetingval>
 					</id-00001>
 					<id-00002>
 						<type type="string">powersave</type>
@@ -9202,8 +9203,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">sphere</targeting>
+						<targetingval type="number">20</targetingval>
 					</id-00001>
 					<id-00002>
 						<type type="string">powersave</type>
@@ -9288,8 +9289,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">sphere</targeting>
+						<targetingval type="number">60</targetingval>
 					</id-00001>
 					<id-00002>
 						<type type="string">powersave</type>
@@ -9442,8 +9443,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">sphere</targeting>
+						<targetingval type="number">60</targetingval>
 						<allowupcast type="number">1</allowupcast>
 					</id-00001>
 					<id-00002>
@@ -9584,8 +9585,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">cone</targeting>
+						<targetingval type="number">30</targetingval>
 					</id-00001>
 					<id-00002>
 						<type type="string">powersave</type>
@@ -9613,8 +9614,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">sphere</targeting>
+						<targetingval type="number">20</targetingval>
 						<allowupcast type="number">1</allowupcast>
 					</id-00001>
 					<id-00002>
@@ -9691,8 +9692,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">sphere</targeting>
+						<targetingval type="number">20</targetingval>
 						<allowupcast type="number">1</allowupcast>
 					</id-00001>
 					<id-00002>
@@ -9745,8 +9746,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">cube</targeting>
+						<targetingval type="number">30</targetingval>
 					</id-00001>
 					<id-00002>
 						<type type="string">powersave</type>
@@ -9774,9 +9775,10 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">line</targeting>
+						<targetingval type="number">100</targetingval>
 						<allowupcast type="number">1</allowupcast>
+						<targetingval2 type="number">5</targetingval2>
 					</id-00001>
 					<id-00002>
 						<type type="string">powersave</type>
@@ -9810,8 +9812,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">sphere</targeting>
+						<targetingval type="number">10</targetingval>
 						<allowupcast type="number">1</allowupcast>
 					</id-00001>
 					<id-00002>
@@ -9995,8 +9997,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">sphere</targeting>
+						<targetingval type="number">20</targetingval>
 					</id-00001>
 					<id-00002>
 						<type type="string">powersave</type>
@@ -10024,8 +10026,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">6</targetingval>
+						<targeting type="string">cube</targeting>
+						<targetingval type="number">40</targetingval>
 					</id-00001>
 					<id-00002>
 						<type type="string">powersave</type>
@@ -10071,8 +10073,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">emanation</targeting>
+						<targetingval type="number">15</targetingval>
 						<allowupcast type="number">1</allowupcast>
 					</id-00001>
 					<id-00002>
@@ -10107,8 +10109,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">sphere</targeting>
+						<targetingval type="number">20</targetingval>
 					</id-00001>
 					<id-00002>
 						<type type="string">powersave</type>
@@ -10342,8 +10344,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">sphere</targeting>
+						<targetingval type="number">20</targetingval>
 						<allowupcast type="number">1</allowupcast>
 					</id-00001>
 					<id-00002>
@@ -10402,8 +10404,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">cone</targeting>
+						<targetingval type="number">60</targetingval>
 						<allowupcast type="number">1</allowupcast>
 					</id-00001>
 					<id-00002>
@@ -10641,8 +10643,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">sphere</targeting>
+						<targetingval type="number">10</targetingval>
 						<allowupcast type="number">1</allowupcast>
 					</id-00001>
 					<id-00002>
@@ -10789,8 +10791,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">sphere</targeting>
+						<targetingval type="number">20</targetingval>
 						<allowupcast type="number">1</allowupcast>
 					</id-00001>
 					<id-00002>
@@ -10837,8 +10839,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">6</targetingval>
+						<targeting type="string">sphere</targeting>
+						<targetingval type="number">30</targetingval>
 						<allowupcast type="number">1</allowupcast>
 					</id-00001>
 					<id-00002>
@@ -11142,8 +11144,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">emanation</targeting>
+						<targetingval type="number">30</targetingval>
 					</id-00001>
 					<id-00002>
 						<type type="string">effect</type>
@@ -11198,8 +11200,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">cube</targeting>
+						<targetingval type="number">20</targetingval>
 					</id-00001>
 					<id-00002>
 						<type type="string">powersave</type>
@@ -11331,8 +11333,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">sphere</targeting>
+						<targetingval type="number">10</targetingval>
 						<allowupcast type="number">1</allowupcast>
 					</id-00001>
 					<id-00002>
@@ -11367,8 +11369,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">emanation</targeting>
+						<targetingval type="number">10</targetingval>
 						<allowupcast type="number">1</allowupcast>
 					</id-00001>
 					<id-00002>
@@ -11403,8 +11405,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">cube</targeting>
+						<targetingval type="number">50</targetingval>
 					</id-00001>
 					<id-00002>
 						<type type="string">powersave</type>
@@ -11675,8 +11677,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">sphere</targeting>
+						<targetingval type="number">20</targetingval>
 						<allowupcast type="number">1</allowupcast>
 					</id-00001>
 					<id-00002>
@@ -11870,8 +11872,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">sphere</targeting>
+						<targetingval type="number">20</targetingval>
 						<allowupcast type="number">1</allowupcast>
 					</id-00001>
 					<id-00002>
@@ -12011,8 +12013,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">sphere</targeting>
+						<targetingval type="number">20</targetingval>
 						<allowupcast type="number">1</allowupcast>
 					</id-00001>
 					<id-00002>
@@ -12197,8 +12199,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">cone</targeting>
+						<targetingval type="number">60</targetingval>
 					</id-00001>
 					<id-00002>
 						<type type="string">powersave</type>
@@ -12272,8 +12274,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">sphere</targeting>
+						<targetingval type="number">50</targetingval>
 					</id-00001>
 					<id-00002>
 						<type type="string">powersave</type>
@@ -12332,8 +12334,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">sphere</targeting>
+						<targetingval type="number">60</targetingval>
 					</id-00001>
 					<id-00002>
 						<type type="string">powersave</type>
@@ -12491,8 +12493,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">sphere</targeting>
+						<targetingval type="number">40</targetingval>
 					</id-00001>
 					<id-00002>
 						<type type="string">powersave</type>
@@ -12708,8 +12710,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">sphere</targeting>
+						<targetingval type="number">30</targetingval>
 					</id-00001>
 					<id-00002>
 						<type type="string">powersave</type>
@@ -12844,8 +12846,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">sphere</targeting>
+						<targetingval type="number">60</targetingval>
 						<allowupcast type="number">1</allowupcast>
 					</id-00001>
 					<id-00002>
@@ -12934,8 +12936,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">cube</targeting>
+						<targetingval type="number">10</targetingval>
 						<allowupcast type="number">1</allowupcast>
 					</id-00001>
 					<id-00002>
@@ -13052,8 +13054,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">sphere</targeting>
+						<targetingval type="number">60</targetingval>
 						<allowupcast type="number">1</allowupcast>
 					</id-00001>
 					<id-00002>
@@ -13180,8 +13182,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">cube</targeting>
+						<targetingval type="number">10</targetingval>
 					</id-00001>
 					<id-00002>
 						<type type="string">effect</type>
@@ -13336,8 +13338,9 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">line</targeting>
+						<targetingval type="number">60</targetingval>
+						<targetingval2 type="number">5</targetingval2>
 					</id-00001>
 					<id-00002>
 						<type type="string">powersave</type>
@@ -13399,8 +13402,8 @@
 				<actions>
 					<id-00001>
 						<type type="string">cast</type>
-						<targeting type="string">targets</targeting>
-						<targetingval type="number">1</targetingval>
+						<targeting type="string">cube</targeting>
+						<targetingval type="number">10</targetingval>
 						<allowupcast type="number">1</allowupcast>
 					</id-00001>
 					<id-00002>
