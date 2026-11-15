@@ -194,7 +194,7 @@ try {
   await seat.waitForSelector(`[data-note-window="${made.id}"] .note-text`);
   await tool("kraken_chat_send", { text: "Elmo's brother is called Otis." });
   await seat.waitForSelector('.chat-line:has-text("Otis")');
-  await seat.locator('.chat-line:has-text("Otis")').last().dragTo(seat.locator(`[data-note-window="${made.id}"] .note-text`));
+  await seat.locator('.chat-line:has-text("Otis")').last().dragTo(seat.locator(`[data-note-window="${made.id}"] .note-text .rt-body`));
   await until(async () => /Otis/.test((await tool("kraken_record_get", { id: made.id })).data?.text ?? ""), "the second line added to the note");
   await seat.locator(`[data-note-window="${made.id}"]`).screenshot({ path: path.join(SHOTS, "kraken-note-from-chat.png") });
   report.push(`a chat line dragged onto Player Notes: a new note ("${made.name}"); another dragged into it: added and kept`);

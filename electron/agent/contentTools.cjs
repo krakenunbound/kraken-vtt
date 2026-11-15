@@ -64,7 +64,7 @@ const TOOLS = [
         labels: { type: "array", items: { type: "string" }, description: "edit: the columns' labels" },
         rows: { type: "array", items: { type: "object" }, description: "edit: every row, { from, to, results }" },
         hiderollresults: number("edit: 1 to keep its rolls the GM's"),
-        data: { type: "object", description: "create: FG's table fields" },
+        data: { type: "object", description: "create: FG's table fields; roll: a table's fields as read from a book's page (a rulebook's table, which the campaign does not copy in), with name" },
         text: string("import: the pasted table"),
         delimiter: { type: "string", enum: ["", ",", "|", ":", ";"] },
         header: { type: "boolean" },

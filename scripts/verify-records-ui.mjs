@@ -102,6 +102,7 @@ try {
 
   // The GM shares the goblin (FG's Share): the player's NPCs list holds it, and only it.
   await page.click(`${row} [data-action="record-share"]`);
+  await page.click(`[data-share-menu="${goblin.id}"] [data-share="all"]`);
   await page.waitForFunction((selector) => document.querySelector(selector)?.getAttribute("aria-pressed") === "true", `${row} [data-action="record-share"]`);
   assert((await tool("kraken_record_get", { id: goblin.id })).visibility === "all", "the goblin's record is shared");
   await seat.waitForSelector('[data-records-only="npc"] .records-row', { timeout: 10000 });
