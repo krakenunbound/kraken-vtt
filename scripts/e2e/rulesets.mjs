@@ -226,15 +226,28 @@ async function wizard35(ctx, { race, cls, name, gear }) {
   await seat.waitForSelector("[data-class-plan]");
   await tab("alignment");
   await seat.click('[data-alignment="Lawful Good"]');
-  // Skills: raise the class's first skills until every point is spent.
+  // Skills: raise class skills first, then cross-class ones, each only while under its maximum ranks, until every
+  // point is spent. (The wizard's Raise buttons are never greyed: a skill at its maximum just takes no more, so
+  // raising the same first three skills ran out of room whenever a high Intelligence gave more points than they hold.)
   await tab("skills");
-  for (let guard = 0; guard < 60; guard++) {
+  const tried = new Set();
+  for (let guard = 0; guard < 120; guard++) {
     const text = (await seat.textContent("[data-skill-points]").catch(() => "")) ?? "";
-    const spent = /Spent (\d+) \/ (\d+)/.exec(text);
+    const spent = /Spent ([\d.]+) \/ ([\d.]+)/.exec(text);
     if (!spent || Number(spent[1]) >= Number(spent[2])) break;
-    const raise = seat.locator('button[aria-label^="Raise "]:not([disabled])');
-    if (!(await raise.count())) break;
-    await raise.nth(guard % Math.min(3, await raise.count())).click();
+    const open = await seat.$$eval('[data-wizard="dnd35"] .ccw35-skill', (list) =>
+      list
+        .filter((row) => Number(row.querySelector("[data-ranks]")?.getAttribute("data-ranks")) < Number(/max ([\d.]+)/.exec(row.querySelector("small")?.textContent ?? "")?.[1] ?? 0))
+        .sort((a, b) => Number(b.classList.contains("class-skill")) - Number(a.classList.contains("class-skill")))
+        .map((row) => row.getAttribute("data-skill")),
+    );
+    // Not Speak Language (it changes the languages page's count).
+    const skill = open.find((name) => name !== "Speak Language" && !tried.has(name));
+    if (!skill) break;
+    await seat.click(`[data-wizard="dnd35"] [data-skill="${skill}"] button[aria-label^="Raise "]`);
+    // The count moves (the page has re-rendered), or this skill takes no more.
+    const moved = await seat.waitForFunction((before) => document.querySelector("[data-skill-points]")?.textContent !== before, text, { timeout: 2000 }).then(() => true, () => false);
+    if (!moved) tried.add(skill);
   }
   // Feats: those the character qualifies for, until the count is met (a target where one is asked).
   await tab("feats");

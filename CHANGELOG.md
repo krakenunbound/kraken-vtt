@@ -22,6 +22,8 @@ The first two stages of Kraken's core UI (docs/core-ui-design.md): one core that
 - **One wizard frame.** Cairn's character wizard is now its manifest's four steps on the core's wizard frame (Cancel, Finish, numbered steps, host-rolled dice, a Marketplace). Same screens, same dice, same character.
 - **The combat tracker asks the manifest, not the game's name.** Every game's tracker buttons (5E's death save, Descending Darkness' Steady, 2E's Bind wounds, Turn undead, morale, Cairn's Stabilize and always-hit attacks, Fate's conflict, Starforged's "In control") come from its manifest.
 - **Basic Fantasy's character sheet is built from the core's parts** too, including a new track of boxes for spells a day. It looks and works as before.
+- **The D&D family's sheets are built from the core's parts:** D&D 5E, Descending Darkness, D&D 3.5E and AD&D 2E. 5E and Descending Darkness are one layout with the game's own words (Kin, Defense, Health) and its own rules (Dread, bleeding out, death saves); 2E arranges the same parts its own way, as Fantasy Grounds' 2E sheet does. They look and work as before, every button included.
+- **One frame for the D&D wizards.** The 5E, Descending Darkness, 3.5E and 2E character wizards share the core's page-rail frame (title, Next, Cancel, the page tabs with their ticks and alerts). Same screens, same characters.
 
 ## 0.1.0-alpha.90: Pictures for every game, and a pass for looks
 
