@@ -17,7 +17,7 @@ window.KrakenStudioAgent = (() => {
   const g = () => S().project.grid;
   const px = v => Number(v) * g();
   const sq = v => r2(v / g());
-  const LIGHT_PROPS = /torch|brazier|lantern|candle|candelabra|campfire|fireplace|hearth|lava|lamp|fire/i;
+  const LIGHT_PROPS = /torch|brazier|lantern|candle|candelabra|campfire|fireplace|hearth|lava|lamp|fire|reactor|console|sparking/i;
   let queue = Promise.resolve();
 
   // --- arguments -------------------------------------------------------------------

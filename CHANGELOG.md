@@ -12,6 +12,7 @@ The first stage of Kraken's core UI (docs/core-ui-design.md): one core that ever
 - **Every game has a manifest:** a file that says what the game is.
   - It holds the game's name and blurb, the words for its lists (Kin, Bestiary, Threats...), its coins, its save box, its kind of experience (XP, Growth, Milestones), its extra windows (Starships, Oracles, Delve Sites, Clocks) and its calendar.
   - The campaign screen, the sidebar, the party sheet, the combat tracker's save box, the dice tray, Settings and the record lists all read it, instead of asking which game it is.
+- **54 new pieces of map art in Map Studio** (Kraken Map Art): starship decks, hull, bulkheads, hatches and airlocks, consoles, cryo pods, a reactor, containers, lockers and med beds for the sci-fi games; wet cobbles, dock planks, quay and soot-brick walls, a gondola and an iron bridge for Forged in the Dark; barrow stones, a longhouse wall and hearth, standing stones and a stone circle for Ironsworn; undergrowth, a hollow tree, a fairy ring, coffins, a sarcophagus, a trapdoor, an open pit and scorch marks for everyone. A reactor or a console now counts as a light source in Map Studio's check.
 - **Characters opens Character Selection, for everyone (as Fantasy Grounds does).**
   - The sidebar's Characters shows every character as a card, for the GM all of them. A card opens its sheet.
   - New character (the wizard), Create (a blank one), Import, and in edit mode (the pencil) each card's Export and the GM's Delete all live there now.

@@ -5,6 +5,26 @@ covers fantasy dungeons, caves, wilderness, shores and taverns well. These are
 the gaps, by the game that needs them, with a prompt for each so they can be
 made later (not yet: the GPU is busy).
 
+## Made (2026-11-14, MiniMax H3 Image)
+
+54 of these are now in `studio/packs/Kraken Map Art.mod`, in its kind folders:
+floors and ground (deck plating, worn deck, grating, hull plating, asteroid
+rock, wet cobbles, dock planks, warehouse floor, turf and snow, dense
+undergrowth, ash and soot), walls with end caps (bulkhead, damaged bulkhead,
+hull wall, quay wall, soot brick, barrow stones, longhouse, root-choked), doors
+(hatch, airlock, blast door, trapdoor) and props (consoles, bridge row,
+captain's chair, three cryo pods, reactor core, containers, lockers, bunk, mess
+table, med bed, pipes, wreckage, iron bridge, gondola, oil drum, standing
+stone, stone circle, capstone, longhouse hearth, hide rug, burial urn, grave
+goods, hollow tree, fairy ring, scorch mark, open pit, coffins, sarcophagus).
+Painted at 2048 by H3 with "seen from straight overhead in a flat bird's-eye
+plan view" in the prompt (without it H3 paints product shots from the side),
+props cut out with rembg (u2net), tiles made seamless by a half-offset blend.
+
+Still missing (tried, rejected: side views, painted lettering, or not
+tileable): gas lamp, spirit lantern, sparking cable, sci-fi crate, gibbet,
+canal water, clean station floor, ironwork fence.
+
 ## How to make them so they fit the packs
 
 - **Look:** top-down (straight down, no perspective), hand-painted digital
