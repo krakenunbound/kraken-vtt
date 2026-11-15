@@ -125,11 +125,16 @@ doesn't get it (it could reach the tools withheld from the assistant).
 | Members, coin, items | `kraken_party`, `kraken_party_edit` |
 | Award XP, quests, encounters | `kraken_party_award` |
 | Hand out coin and items | `kraken_party_distribute` |
-| Group check or save | `kraken_party_group_check` |
+| The group roll (every game's checks, saves and skills; Roll for them or Ask the players: a card each owner rolls from, the GM for anyone) | `kraken_party_group_check` (kind, attribute, skill, dc, mode roll/ask; action prompt-roll, prompts) |
 | **Combat tracker** | |
 | Every tracker action: add, initiative, turns, rounds, damage, healing, effects, targets, attacks, saves, spells; 5E death saves; 3.5E full attacks (`full`), Fortitude / Reflex / Will saves; Traveller's 2d6 attacks with Effect and AP, damage off END, STR, DEX, characteristic checks; 2E THAC0 attacks, a creature's whole round (`full`), the five saves, binding wounds (`stabilize`), turning undead (`turn-undead`), the GM's Krits & Fumbles 2E book on a natural 20 or 1 | `kraken_combat` |
 | **Chat and dice** | |
-| Chat, `/r` rolls, the chat log | `kraken_chat_send`, `kraken_roll`, `kraken_chat_log` |
+| Chat, `/r` rolls (spaces and `#label`: `/r 1d20 + 3 #Climb`; rr, xo, min, max, cf, ms), the chat log | `kraken_chat_send`, `kraken_roll`, `kraken_chat_log` |
+| The modifier box and its keys under the tray (FG's modifier stack: six labelled slots, a number, roll or effect dropped on it, right-click off, `/mod 2 Flanking`; ADV, DIS, +2, -2 and the game's own keys from its manifest), read by every roll the seat starts, then cleared; the chat bar's roll mode (public, GM and me, blind, self) | `kraken_modifiers` (view, add, remove, set, clear, key, mode; who) |
+| A link dropped into the chat's entry (a record, a page, a picture), the GM's Share of a record's words; speakers' portraits (set by the host) | `kraken_chat_send` link, share |
+| Inline rolls (`[[1d20+3 #Attack]]` and a page's bare dice) in chat, books, stories, records and notes: a click rolls as `/roll` | `kraken_roll` (the same roll) |
+| The Session Log window (each sitting's chat, archived when the table closes), its Export (Markdown, HTML); the chat's own export | `kraken_chat_log` action sessions, session, export, archive; `kraken_windows` kind sessionlog |
+| The tracker's options (Settings > Combat: initiative by kind, skip turns, NPC numbering; Tokens: creatures' health also in the tracker, numbers), a row's Delay and Act now | `kraken_table_options` initGroup, skipDead, npcNumbering, healthNpc; `kraken_combat` delay, act-now |
 | Chat commands: `/w` whispers, `/me` `/action` `/ooc` `/mood`, the GM's `/story` and `/id` | `kraken_chat_send` (`kind`, `to`, `as`, `mood`) |
 | `/gmroll`, `/blindroll` | `kraken_roll` with `secret` |
 | `/kick` (and the Players window's Kick, Ban), `/vote`, `/save` | `kraken_kick` (ban), `kraken_vote`, `kraken_save` |

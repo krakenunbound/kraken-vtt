@@ -16,7 +16,7 @@ Status of the work (2026-11-15):
 | Session and platform | S1 reconnect, S2 hosting/invites, S4 pause, S5 player controls, S6 pull view, S8 campaign management | S3 (with R4), S7, S9, S10 |
 | Maps and tokens | M1-M10 | M11-M13 |
 | Records and content | R1-R7, R9 (R4 = S3) | R8 (= S8), R10 |
-| Dice, chat and combat | | D1-D10, after targeting merges (they share the roll paths and chat) |
+| Dice, chat and combat | Done (D5 rest with the resources work) | D1-D4, D6-D10 and the smaller items |
 | Resource tracking (GM's ask) | | ammunition, consumables, rations and water, light burn-down, encumbrance and bag space, each with a GM off switch; with D5 rest; after targeting and core UI stage 3 merge |
 
 ## Asked by the GM (2026-11-15), queued
@@ -77,18 +77,18 @@ Kraken already at or ahead: seeded host dice engine, 3D dice, tray with right-cl
 
 | # | Gap | Kraken today | Best solution | Priority |
 |---|---|---|---|---|
-| D1 | Modifier stack every roll reads | one number in ChatDock local state; sheet and tracker rolls ignore it | per-seat host stack (6 labelled slots + total), applied to every roll the seat starts, listed in the card | High |
-| D2 | ADV / DIS / +2 / -2 and ruleset presets | 5E sheet select only | toggle chips beside the modifier box, each used once; presets per manifest (5E cover, crit, max, half) | High |
-| D3 | Links in chat | none | link {kind,id,name} on chat lines; drop any record or picture into chat; click opens, drag carries | High |
-| D4 | Speaker portraits in chat | GM icon only | stamp recordId when speaking as a character/NPC, draw its portrait, drag opens the sheet | High |
+| D1 | Modifier stack every roll reads | one number in ChatDock local state; sheet and tracker rolls ignore it | per-seat host stack (6 labelled slots + total), applied to every roll the seat starts, listed in the card | High. Done: electron/modifiers.cjs, each seat's stack kept by the host (6 labelled slots and the total; a number, a chat roll or an effect dropped on the box, right-click takes one off, /mod), read by every roll the seat starts in one request (FG's lock: a full attack's rolls all read it), then cleared; the card lists it; kraken_modifiers; check-modifiers |
+| D2 | ADV / DIS / +2 / -2 and ruleset presets | 5E sheet select only | toggle chips beside the modifier box, each used once; presets per manifest (5E cover, crit, max, half) | High. Done: the game's keys as chips under the tray (shared/rulesets/modifiers.mjs; a manifest's dice.modifiers lists them: 5E ADV, DIS, +2, -2, Opp, Cover, S. cover, Crit, Max, Half; Traveller and Apeira Astra Boon, Bane...), each used once by the next roll that reads it; ADV and DIS cancel; the 5E sheet's advantage select removed |
+| D3 | Links in chat | none | link {kind,id,name} on chat lines; drop any record or picture into chat; click opens, drag carries | High. Done: link on chat lines (the quick slot link shape), dropped into the chat's entry; a chip that opens only what the seat may see, drags on; unidentified items by their unidentified name; the GM's Share posts the record's words as the players know it; kraken_chat_send link, share |
+| D4 | Speaker portraits in chat | GM icon only | stamp recordId when speaking as a character/NPC, draw its portrait, drag opens the sheet | High. Done: the host stamps recordId on lines spoken or rolled as a character, or by the GM as a creature (/id, the tracker); its portrait drawn, a click opens it, a drag carries it |
 | D5 | Rest per ruleset | Cairn only; 5E card rest resets slots only | short/long rest hooks per ruleset (hit dice, HP, slots, effects ending), on sheet, party sheet and tracker | High |
-| D6 | Party rolls with skills, ask the players | attributes only, host rolls | checks/saves/skills; "roll for them" or "ask the players" prompt cards; summary line | High |
-| D7 | Group initiative | each entry rolls | option each / by kind: one roll per NPC kind | High |
-| D8 | Roll tables to chat, /rollon | adventure tables, always GM-only | /rollon with visibility, nested tables, campaign and pack tables, roll button | Medium |
-| D9 | Inline rolls in text | none | [[1d20+3]] and NdS+M chips in books, story, notes, chat | Medium |
-| D10 | Combat options | hard-coded | NPC health to players (off/status/bar/numbers), skip the dead, NPC numbering, Delay/Act now | Medium |
+| D6 | Party rolls with skills, ask the players | attributes only, host rolls | checks/saves/skills; "roll for them" or "ask the players" prompt cards; summary line | High. Done: the party sheet's group roll for every game (its manifest's checks, saves and skills), each member through their own sheet roll; Roll for them, or Ask the players: a card each owner rolls from (their own modifier box), the GM for anyone, the summary when all have rolled; kraken_party_group_check mode, prompt-roll |
+| D7 | Group initiative | each entry rolls | option each / by kind: one roll per NPC kind | High. Done: the table option initGroup each / kind (one roll per kind, its copies sharing it), for every game's initiative branch |
+| D8 | Roll tables to chat, /rollon | adventure tables, always GM-only | /rollon with visibility, nested tables, campaign and pack tables, roll button | Medium. Done: /rollon, nested tables, campaign and pack tables and the window's Roll were the records work; a player's table roll now follows their roll mode, and a result's links are chips on the card |
+| D9 | Inline rolls in text | none | [[1d20+3]] and NdS+M chips in books, story, notes, chat | Medium. Done: shared/text/inlineRolls.mjs, src/ui/InlineRolls.tsx: [[1d20+3 #label]] and bare dice as chips in chat, books, adventures' stories, records, story pages and notes (kept as typed when saved); a click rolls as /roll would (the speaker, the modifier box) |
+| D10 | Combat options | hard-coded | NPC health to players (off/status/bar/numbers), skip the dead, NPC numbering, Delay/Act now | Medium. Done: the token health option (off, dot, bar, numbers) also sets what the tracker shows players; skipDead (enemies, all, off); npcNumbering (append, random, off); Delay and Act now on tracker rows; Settings > Combat |
 
-Smaller: formulas with spaces and #label; dice modifiers rr, xo, min, max, cf, ms; roll-mode selector in the chat bar; chat export and archive; /gm alias, /help note that /r rolls; chat languages; quick-slot pages; turn timer.
+Smaller: formulas with spaces and #label (done); dice modifiers rr, xo, min, max, cf, ms (done); roll-mode selector in the chat bar (done: kept by the host per seat, every roll the seat makes); chat export and archive (done: the chat's export for every seat, the GM's Session Log with each sitting archived in the campaign folder); /gm alias, /help note that /r rolls (done); chat languages; quick-slot pages; turn timer (open).
 
 ## Session, players and platform
 

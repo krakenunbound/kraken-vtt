@@ -6,6 +6,18 @@ full log of the work is in [PLAN.md](PLAN.md).
 
 ## Unreleased
 
+Dice, chat and combat, as Fantasy Grounds and Foundry do them, in one place.
+
+- **The modifier box is the table's now.** Each seat's box holds up to six labelled numbers and their total: type `/mod 2 Flanking`, drop a number, a chat roll or an effect on it, right-click one to take it off. Every roll you start next reads it, from the tray, `/roll`, your sheet or the combat tracker (all the rolls of one attack or spell), lists it on its card, and clears it.
+- **ADV, DIS, +2, -2 and each game's own keys** sit under the dice tray as chips: D&D 5E adds cover, superior cover, opportunity, and Crit, Max and Half for damage; Traveller and Apeira Astra Boon and Bane. Each is used once, by the next roll it fits. The 5E sheet's advantage list is gone.
+- **Roll modes in the chat bar:** public, GM and me, blind (the GM alone), self. Every roll you make follows it until you change it.
+- **Links in chat.** Drop a record, a book page or a picture into the chat's entry: the line carries it, everyone may click it if they may see it, and drag it on. The GM's **Share** posts the record's text (an unidentified item as the players know it). Lines spoken as a character or an NPC show its portrait.
+- **Inline rolls.** `[[1d20+5 #Attack]]` in chat, and the dice a book, story, record or note names ("2d6 + 3 fire"), are chips you click to roll.
+- **The party sheet's group roll** covers each game's checks, saves and skills, rolled for everyone at once or **asked of the players**: a card in chat each player rolls from their own sheet (their modifier box counts); the GM can roll for anyone, and the card sums it up.
+- **Combat options** (Settings > Combat): initiative by kind (one roll for all the goblins), whose turns are skipped, NPC numbering (in order or random). The creatures' health setting now also decides what players see in the tracker: nothing, the status, a bar, or the numbers. Tracker rows have **Delay** and **Act now**.
+- **Dice:** `/r 1d20 + 3 #Climb` (spaces and a label), and Foundry's rr, xo, min, max, cf and ms. `/gm` whispers to the GM.
+- **Session Log** (the GM's sidebar): each sitting's chat, kept with the campaign, read back and exported as Markdown or a web page. Everyone can export the chat they saw from the chat's corner.
+
 Targeting, area spells, effects and damage cards, Fantasy Grounds' and Foundry's best together (docs/targeting-actions-design.md).
 
 - **Targeting from the map toolbar, on every map:** target mode (click a creature, or drag a box), target all friendlies or all foes, clear friendly, enemy or all targets, for the selected creature (or your own). Ctrl+click works on tracker rows too. The GM sees everyone's aim, a ring per targeter in that player's colour.
