@@ -106,6 +106,18 @@ const twice = derive({ ...data, paths: ["Scout", "Scout"], tricks: {}, marks: 6 
 assert(trickChoices(twice, paths).length === 3, "a major and minor of one Path: its three tricks");
 done.push("Marks: award to six (no seventh); one trick per Mark from the major or minor Path, never twice; forget frees a Mark; a trick shows beside its skill");
 
+// --- The sheet's edit whitelist: built from the manifest, the same as the hand-written lists it replaced ---------
+{
+  const { EDIT_PATHS } = require("../electron/astra.cjs");
+  const text = ["playername", "notes", "appearance", "origin", "homeworld", "contacts", "ship"].map((key) => `^${key}$`);
+  const number = [/^characteristics\.(brawn|reflex|grit|intellect|training|presence)\.score$/, /^skills\.[a-z]+\.level$/, /^hp\.wounds$/, /^exp$/, /^ac\.misc$/, /^initiative\.misc$/, /^coins\.id-\d+\.amount$/, /^inventorylist\.id-\d+\.(count|carried)$/].map((regex) => regex.source);
+  assert(EDIT_PATHS.text.map((regex) => regex.source).join(" ") === text.join(" "), `the text whitelist from the manifest is the old set: ${EDIT_PATHS.text.map((regex) => regex.source).join(" ")}`);
+  assert(EDIT_PATHS.number.map((regex) => regex.source).join(" ") === number.join(" "), `the number whitelist from the manifest is the old one: ${EDIT_PATHS.number.map((regex) => regex.source).join(" ")}`);
+  assert(EDIT_PATHS.remove.map((regex) => regex.source).join() === /^(inventorylist)\.id-\d+$/.source, `the rows the sheet may drop: ${EDIT_PATHS.remove.map((regex) => regex.source).join()}`);
+  assert(EDIT_PATHS.string.length === 0 && EDIT_PATHS.list.length === 0, "no string or list paths");
+  console.log("whitelist ok");
+}
+
 // --- Caps ---------------------------------------------------------------------
 const capped = derive({ characteristics: { brawn: { score: 19 } }, skills: { pilot: { level: 7 } } });
 assert(capped.characteristics.brawn.score === 15 && capped.characteristics.brawn.dm === dm(15) && capped.skills.pilot.level === 4, `derive caps skills at 4 and characteristics at 15: ${capped.characteristics.brawn.score}, ${capped.skills.pilot.level}`);

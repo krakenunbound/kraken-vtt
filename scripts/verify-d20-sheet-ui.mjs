@@ -125,6 +125,32 @@ Object.assign(GAMES, {
       { who: "Ilsa Varn", label: "healed", tabs: ["main"], changes: () => [{ path: "hp.wounds", value: 0 }] },
     ],
   },
+  astra: {
+    ruleset: "Apeira Astra",
+    shipped: true,
+    books: ["Apeira Astra Crew Handbook"],
+    tabs: "main,skills,combat,gear,notes",
+    specs: [
+      { name: "Rook Tamsin", origin: "Spacer", major: "Scout", minor: "Engineer", characteristics: { brawn: 7, reflex: 10, grit: 8, intellect: 9, training: 6, presence: 5 }, gear: [["Carbine", 1], ["Mesh Undersuit", 1], ["Medkit", 1], ["Comm Bead", 2]], credits: 300 },
+      { name: "Vela Okonkwo", origin: "Coreborn", major: "Medic", characteristics: { brawn: 6, reflex: 7, grit: 9, intellect: 10, training: 8, presence: 5 }, gear: [["Service Pistol", 1], ["Flight Jacket", 1]], credits: 120 },
+    ],
+    // Experience to spend, and three Marks for Rook (one spent on a trick): the Marks panel's pips, a trick and its note on a skill.
+    async setup({ tool, ids }) {
+      await tool("kraken_character_edit", { id: ids["Rook Tamsin"], changes: [{ path: "exp", value: 14 }] });
+      let marked = null;
+      for (let i = 0; i < 3; i++) marked = await tool("kraken_character_mark", { id: ids["Rook Tamsin"], action: "award" });
+      const trick = marked?.choices?.[0]?.name;
+      if (trick) await tool("kraken_character_mark", { id: ids["Rook Tamsin"], action: "learn", trick });
+    },
+    fight: ["Rook Tamsin"],
+    states: [
+      { who: "Rook Tamsin", label: "down", tabs: ["main"], changes: (data) => [{ path: "hp.wounds", value: data.hp.total + 2 }] },
+      { who: "Rook Tamsin", label: "dead", tabs: ["main"], changes: (data) => [{ path: "hp.wounds", value: data.hp.total + data.characteristics.grit.score }] },
+      { who: "Rook Tamsin", label: "healed", tabs: ["main"], changes: () => [{ path: "hp.wounds", value: 0 }] },
+    ],
+    // The GM's own controls, pressed by the GM on each sheet after the player's: the experience, a Mark awarded and taken back, a trick forgotten.
+    gmControls: ['.five-strip input[aria-label="Experience"]', '[data-action="award-mark"]', '[data-action="take-mark"]', 'button[aria-label^="Forget "]'],
+  },
 });
 
 const [gameId, outArg] = process.argv.slice(2);
@@ -248,6 +274,7 @@ try {
     assert(ids[spec.name], `${spec.name} built`);
     if (built.problems?.length) console.log(`  ${spec.name}: ${built.problems.join(" | ")}`);
   }
+  if (game.setup) await game.setup({ tool, ids });
   for (const name of game.fight) await tool("kraken_combat", { action: "add", recordId: ids[name] });
   if (game.fight.length) {
     await tool("kraken_combat", { action: "next" });
@@ -427,6 +454,22 @@ try {
     const sheet = await gmOpen(spec.name);
     const ups = await sheet.locator('[data-action="level-up"]').count();
     for (let index = 0; index < ups; index++) await press(sheet, ids[spec.name], `${spec.name}: level up (GM) ${index + 1}`, () => sheet.locator('[data-action="level-up"]').nth(index).click());
+    // The GM's own controls (a field typed one up, a button pressed), each where the sheet shows it.
+    for (const selector of game.gmControls ?? []) {
+      const control = sheet.locator(selector).first();
+      if (!(await control.count()) || (await control.isDisabled())) {
+        presses.push({ what: `${spec.name}: ${selector} (GM)`, skipped: (await control.count()) ? "disabled" : "absent" });
+        continue;
+      }
+      const tag = await control.evaluate((item) => item.tagName);
+      if (tag === "INPUT") {
+        const next = String((Number(await control.inputValue()) || 0) + 1);
+        await press(sheet, ids[spec.name], `${spec.name}: ${selector} = ${next} (GM)`, async () => {
+          await control.fill(next);
+          await control.press("Tab");
+        });
+      } else await press(sheet, ids[spec.name], `${spec.name}: ${selector} (GM)`, () => control.click());
+    }
     await gmClose(spec.name);
   }
 

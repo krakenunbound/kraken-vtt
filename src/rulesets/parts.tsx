@@ -5,6 +5,7 @@ import { CairnRest, cairnBackgroundGold, cairnBackgroundOfRoll, cairnBuild, cair
 import { Dnd5eDeathSaves, Dnd5eDread, Dnd5eDying, Dnd5eSpells, dnd5eClassName } from "./dnd5e";
 import { adnd2eAbilityNote, adnd2eClassKey } from "./adnd2e";
 import { Mgt2SkillPickers, mgt2Careers, mgt2SkillTotal } from "./mgt2";
+import { AstraMarks, AstraSkillPickers, AstraTrickNotes, astraSkillTotal } from "./astra";
 
 // The level-3 parts a manifest places inside the core frame ({ part: "custom",
 // component: "<ruleset>.<name>" }) and the formatters a list's details name
@@ -19,6 +20,9 @@ export const CUSTOM_PARTS: Record<string, CustomPart> = {
   "dnd5e.dying": Dnd5eDying,
   "dnd5e.deathSaves": Dnd5eDeathSaves,
   "mgt2.skillPickers": Mgt2SkillPickers,
+  "astra.marks": AstraMarks,
+  "astra.trickNotes": AstraTrickNotes,
+  "astra.skillPickers": AstraSkillPickers,
 };
 export const FORMATS: Record<string, Format> = {
   "cairn.itemSlots": cairnItemSlots,
@@ -27,6 +31,7 @@ export const FORMATS: Record<string, Format> = {
   "adnd2e.classKey": adnd2eClassKey,
   "mgt2.careers": mgt2Careers,
   "mgt2.skillTotal": mgt2SkillTotal,
+  "astra.skillTotal": astraSkillTotal,
 };
 // A manifest wizard's own rules, by Ref: how a table's roll picks a record, the money a choice brings, the spec build-character takes.
 export const WIZARD_FUNCTIONS: WizardFunctions = {
