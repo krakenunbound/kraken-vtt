@@ -5,6 +5,7 @@ import { sound, type Soundscape } from "../sound/soundEngine";
 import { diceStore, rolling, throwIntent } from "../dice/diceStore";
 import { rulerStore } from "../table/Ruler";
 import { exploredStore } from "../table/explored";
+import { setItemUser } from "../effects/drops";
 
 // afk: away (/afk); idle: no input for a while; hand: a raised hand; lost: the connection dropped, a reconnect awaited.
 export type Seat = { id: string; name: string; role: "dm" | "player"; afk?: boolean; idle?: boolean; hand?: boolean; lost?: boolean };
@@ -241,7 +242,9 @@ export type QuickSlot =
 export type KrakenLink = QuickSlot;
 export type SoundItem = { id: string; kind: string; group: string; name: string };
 export type SoundLibrary = { sounds: SoundItem[]; groups: { id: string; count: number }[]; folder: string; triggers?: SoundTrigger[] };
-export type TableOptions = { paused?: boolean; towerReveal: boolean; towerExternal?: boolean; towerStyle?: string; deathMarkers?: { on: boolean; default: string; byType: Record<string, string> }; motd?: { text: string; links: QuickSlot[] }; decal: string; wallpaper: string; gmIcon: string; soundHidden: "off" | "combat" | "all"; soundRepeat: number; diceHold?: number; tokenEffects?: "full" | "icons" | "off"; playerEffects?: "none" | "lights" | "conditions" | "all"; autoApply?: boolean; wizard35?: Wizard35Options; wizard2e?: Wizard2eOptions };
+// Bookkeeping, each part the GM may switch off (electron/bookkeeping.cjs); variant: 5E variant encumbrance.
+export type BookkeepingOptions = { ammo: boolean; consumables: boolean; rations: boolean; light: boolean; encumbrance: boolean; variant: boolean };
+export type TableOptions = { paused?: boolean; towerReveal: boolean; towerExternal?: boolean; towerStyle?: string; deathMarkers?: { on: boolean; default: string; byType: Record<string, string> }; motd?: { text: string; links: QuickSlot[] }; decal: string; wallpaper: string; gmIcon: string; soundHidden: "off" | "combat" | "all"; soundRepeat: number; diceHold?: number; tokenEffects?: "full" | "icons" | "off"; playerEffects?: "none" | "lights" | "conditions" | "all"; autoApply?: boolean; bookkeeping?: BookkeepingOptions; wizard35?: Wizard35Options; wizard2e?: Wizard2eOptions };
 // The D&D 3.5E character wizard's options (the GM's, as FG's KrakenCharWizard35E).
 export type Wizard35Options = { methods: number[]; rollLock: boolean; lowReroll: boolean; vault: boolean };
 // The AD&D 2E character wizard's options (the GM's): ability rolls once only, the PHB methods allowed, gold above 1st level.
@@ -1167,6 +1170,28 @@ export function useSession() {
       socket.send(JSON.stringify({ type: "ironsworn", req, id, action, args, ...throwIntent() }));
     });
   }, []);
+  // Bookkeeping (electron/bookkeeping.cjs): a character's ammunition picked up, an item used (on whom),
+  // a ration eaten, skins filled, a pack opened, an item put in a container; answered with what happened.
+  const bookkeeping = useCallback((id: string, action: string, args: Record<string, unknown> = {}) => {
+    const socket = socketRef.current;
+    if (!socket || socket.readyState !== WebSocket.OPEN) return Promise.reject(new Error("Not connected."));
+    const req = ++opCounter.current;
+    return new Promise<Record<string, unknown>>((resolve, reject) => {
+      opWaits.current.set(req, { resolve: (_id, payload) => resolve(((payload as { result?: Record<string, unknown> } | undefined)?.result ?? {}) as Record<string, unknown>), reject });
+      socket.send(JSON.stringify({ type: "bookkeeping", req, id, action, args, ...throwIntent() }));
+    });
+  }, []);
+  // A rest by the game's rules: a character's (id), or the GM's whole party (id null).
+  const rest = useCallback((id: string | null, kind: "short" | "long", args: { hitDice?: number } = {}) => {
+    const socket = socketRef.current;
+    if (!socket || socket.readyState !== WebSocket.OPEN) return Promise.reject(new Error("Not connected."));
+    const req = ++opCounter.current;
+    return new Promise<Record<string, unknown>>((resolve, reject) => {
+      opWaits.current.set(req, { resolve: (_id, payload) => resolve(((payload as { result?: Record<string, unknown> } | undefined)?.result ?? {}) as Record<string, unknown>), reject });
+      socket.send(JSON.stringify({ type: "rest", req, ...(id ? { id } : {}), args: { kind, ...(id ? {} : { party: true }), ...args }, ...throwIntent() }));
+    });
+  }, []);
+  useEffect(() => setItemUser((recordId, item, to) => void bookkeeping(recordId, "use", { item, to }).catch(() => undefined)), [bookkeeping]);
   // Cairn: rest, Fatigue, spells, Scars, Growth (the host does it: electron/cairn.cjs).
   const cairnAction = useCallback((id: string, action: string, args: Record<string, unknown> = {}) => {
     const socket = socketRef.current;
@@ -1572,6 +1597,8 @@ export function useSession() {
     improveCharacter,
     markCharacter,
     cairnAction,
+    bookkeeping,
+    rest,
     fateAction,
     ironsworn,
     wall,

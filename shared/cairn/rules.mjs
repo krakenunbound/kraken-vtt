@@ -247,7 +247,8 @@ export function derive(input) {
   const coins = coinSlots(gp);
   const used = body + pack + data.fatigue + coins;
   data.slots = { body, pack, fatigue: data.fatigue, coins, used, free: Math.max(0, SLOTS - used), max: SLOTS, over: used > SLOTS, bodyOver: body > BODY_SLOTS, packOver: pack + data.fatigue + coins > PACK_SLOTS + Math.max(0, BODY_SLOTS - body) };
-  data.encumbered = used >= SLOTS ? 1 : 0;
+  // The GM's Settings may switch encumbrance off (bookkeeping, data.encumbranceoff): a full inventory costs no HP.
+  data.encumbered = used >= SLOTS && !num(input.encumbranceoff, 0) ? 1 : 0;
   data.ac = { total: clamp(armor + num(input.ac?.misc, 0), 0, MAX_ARMOR), misc: num(input.ac?.misc, 0), armor: wearing.join(", ") };
   const max = Math.max(1, Math.round(num(input.hp?.max, num(input.hp?.total, 1))));
   // A full inventory: HP 0.

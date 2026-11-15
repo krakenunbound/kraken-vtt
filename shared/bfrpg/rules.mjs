@@ -457,11 +457,13 @@ export function derive(input) {
   data.load = Math.round(load * 10) / 10;
   const loads = loadsFor(abilities.strength.score, data.race);
   data.loads = loads;
-  const heavy = data.load > loads.light;
+  // The GM's Settings may switch encumbrance off (bookkeeping): the load is still shown, it slows no one.
+  const counted = !num(data.encumbranceoff, 0);
+  const heavy = counted && data.load > loads.light;
   const metal = armor && !/leather/i.test(`${armor.subtype ?? ""} ${armor.name ?? ""}`);
   const magicArmor = armor && magicOf(armor) > 0;
   const base = !armor || (magicArmor && !metal) ? 40 : metal && !magicArmor ? 20 : 30;
-  data.movement = Math.max(5, base - (heavy ? 10 : 0) - (data.load > loads.heavy ? 10 : 0) + Math.round(num(data.movemisc, 0)));
+  data.movement = Math.max(5, base - (heavy ? 10 : 0) - (counted && data.load > loads.heavy ? 10 : 0) + Math.round(num(data.movemisc, 0)));
   data.encumbrance = data.load > loads.heavy ? "Overloaded" : heavy ? "Heavily loaded" : "Lightly loaded";
   // Attack bonus, melee and missile.
   data.ab = attackBonus(key, level);

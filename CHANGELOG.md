@@ -6,6 +6,16 @@ full log of the work is in [PLAN.md](PLAN.md).
 
 ## Unreleased
 
+**Bookkeeping, as the GM asked: arrows, potions, rations, torches and the load counted for you, each with a switch to hand-wave it.**
+
+- **Ammunition:** a bow, crossbow, sling or gun spends from its stack as it attacks; with none left the attack is refused, and chat warns when you run low. After a fight, **Recover** on the sheet picks up what can be found (half, in 5E). Traveller's guns count their magazines.
+- **Consumables:** potions, scrolls, wand charges and kit uses are used from the sheet's new **Supplies**, or by dragging the item onto a creature (a healing potion heals whoever it lands on).
+- **Rations and water:** eaten as days pass on the calendar and on a long rest, never twice for a day; going without brings the game's penalty (5E Exhaustion, 3.5E nonlethal damage, Basic Fantasy hit points, Cairn Deprived and Fatigue).
+- **Light from the pack:** a torch lit takes a torch, a lantern a flask of oil; a player with none cannot light it.
+- **Encumbrance and bag space:** a load meter on every sheet by its game's rules (5E with its variant, 3.5E's loads, 2E, Basic Fantasy, C&C, Cairn's slots), containers with their capacity (a bag of holding weighs nothing inside), the penalty put on the creature. Packs unpack into their contents.
+- **Rest:** Short and Long rest on the sheet, **Rest the party** on the party sheet and under the tracker after a fight (the clock moves on): 5E Hit Point Dice, hit points, slots, death saves, Exhaustion; natural healing in the old-school games; Cairn's own.
+- **Settings > Bookkeeping:** ammunition, consumables, rations and water, light, encumbrance and the 5E variant, each on or off for the table.
+
 Dice, chat and combat, as Fantasy Grounds and Foundry do them, in one place.
 
 - **The modifier box is the table's now.** Each seat's box holds up to six labelled numbers and their total: type `/mod 2 Flanking`, drop a number, a chat roll or an effect on it, right-click one to take it off. Every roll you start next reads it, from the tray, `/roll`, your sheet or the combat tracker (all the rolls of one attack or spell), lists it on its card, and clears it.

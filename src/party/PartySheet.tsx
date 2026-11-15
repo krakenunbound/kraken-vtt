@@ -6,6 +6,7 @@ import type { Session } from "../session/useSession";
 import { CrewSheet } from "./CrewSheet";
 import { carriesCreatureDrop, dropOnCreature } from "../effects/drops";
 import { has, rulesetFor } from "../../shared/rulesets/registry.mjs";
+import { RestParty } from "../bookkeeping/RestParty";
 
 export type PartyMember = {
   id: string;
@@ -244,6 +245,7 @@ export function PartySheet({ session, compact = false }: { session: Session; com
               )}
             </div>
           ) : null}
+          {gm && party.members.length ? <RestParty session={session} /> : null}
         </div>
       ) : null}
 

@@ -38,6 +38,8 @@ const MESSAGES = {
   "character-improve": "kraken_character_improve",
   "character-mark": "kraken_character_mark",
   cairn: "kraken_cairn",
+  bookkeeping: "kraken_bookkeeping",
+  rest: "kraken_rest",
   fate: "kraken_fate",
   ironsworn: "kraken_ironsworn",
   forged: "kraken_forged",

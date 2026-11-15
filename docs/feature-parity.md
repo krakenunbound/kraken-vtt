@@ -16,17 +16,17 @@ Status of the work (2026-11-15):
 | Session and platform | S1 reconnect, S2 hosting/invites, S4 pause, S5 player controls, S6 pull view, S8 campaign management | S3 (with R4), S7, S9, S10 |
 | Maps and tokens | M1-M10 | M11-M13 |
 | Records and content | R1-R7, R9 (R4 = S3) | R8 (= S8), R10 |
+| Resource tracking (GM's ask) | Done (unreleased): bookkeeping (ammunition, consumables, rations and water, light from the pack, encumbrance and bag space, each with a GM switch) and D5 rest | |
 | Dice, chat and combat | Done (D5 rest with the resources work) | D1-D4, D6-D10 and the smaller items |
-| Resource tracking (GM's ask) | | ammunition, consumables, rations and water, light burn-down, encumbrance and bag space, each with a GM off switch; with D5 rest; after targeting and core UI stage 3 merge |
 
-## Asked by the GM (2026-11-15), queued
-- Resource tracking, each with a GM option to turn it off ("fun mode"):
-  - ammunition spent per attack (arrows, bolts, bullets, sling stones), recovery after a fight per ruleset, low warning
-  - consumables used: potions, scrolls, charges
-  - rations and water per long rest / day of travel, the ruleset's penalty for going without
-  - light sources burning down (torch, lantern oil) - tie to the light effects
-  - encumbrance and bag space per ruleset (weight, slots, coin weight), container capacity, the ruleset's penalties
-  - Start after: targeting/actions agent and core UI stage 3 merge (attacks and sheets).
+## Asked by the GM (2026-11-15): Done (unreleased)
+- Resource tracking, each with a GM option to turn it off ("fun mode", Settings > Bookkeeping, `kraken_table_options bookkeeping`):
+  - ammunition spent per attack (arrows, bolts, bullets, sling stones, a firearm's magazine), refused when out, low warning, recovery after a fight per ruleset (5E half; Traveller none) offered on the sheet
+  - consumables used: potions, scrolls, charges, kits; from the sheet or dragged onto a creature (healing lands on it)
+  - rations and water per day on the calendar and per long rest (never twice for a day), the ruleset's penalty for going without (5E Exhaustion, 3.5E Con check or nonlethal, BF hit points, Cairn Deprived then Fatigue; 2E, C&C and Worldbuilding: a note to the GM)
+  - light sources from the pack (a torch, a lantern's flask of oil, Cairn's uses) when lit; the existing light effects burn them down
+  - encumbrance and bag space per ruleset (weight with coin weight, slots, the rules' own numbers), containers with capacity (bag of holding weightless), the penalty as an effect on the creature; BF's movement and Cairn's full inventory switch off with it
+  - Applied on rolls: ATK and SAVE components (5E Exhaustion's -2 a level on the tracker's attacks and saves, proven in check-bookkeeping; 2E's and Traveller's -1 to hit). Not yet: the 5E variant's disadvantage (DISATK, DISCHK, DISSAV) is shown, not rolled: D2's ADV/DIS comes from the chat bar's chips, not from effects; SPEED, CHECK and SKILL components (speeds, 3.5E's check penalty, Exhaustion on checks and sheet rolls out of a fight) are shown, not read by any roll or move; C&C's load keeps SiegeCore's own on/off setting; Traveller's load (its gear has no masses) and Forged's load (chosen on its own sheet) are not counted; a lantern burnt out is lit again by hand (another flask). The C&C, Fate, Forged and Worldbuilding sheets (custom, core UI stage 5's) show no Supplies yet: the tools, rests, the party's and tracker's rest buttons work there now.
 
 ## Maps, scenes and tokens
 
@@ -77,11 +77,20 @@ Kraken already at or ahead: seeded host dice engine, 3D dice, tray with right-cl
 
 | # | Gap | Kraken today | Best solution | Priority |
 |---|---|---|---|---|
+| D1 | Modifier stack every roll reads | one number in ChatDock local state; sheet and tracker rolls ignore it | per-seat host stack (6 labelled slots + total), applied to every roll the seat starts, listed in the card | High |
+| D2 | ADV / DIS / +2 / -2 and ruleset presets | 5E sheet select only | toggle chips beside the modifier box, each used once; presets per manifest (5E cover, crit, max, half) | High |
+| D3 | Links in chat | none | link {kind,id,name} on chat lines; drop any record or picture into chat; click opens, drag carries | High |
+| D4 | Speaker portraits in chat | GM icon only | stamp recordId when speaking as a character/NPC, draw its portrait, drag opens the sheet | High |
+| D5 | Rest per ruleset | Done (unreleased): `kraken_rest`, each game's `bookkeeping.mjs` rest (5E Hit Point Dice, HP, half the dice back, slots, death saves, Exhaustion, concentration, effects that end on a rest, a ration; 3.5E/2E/BF/C&C natural healing and spells; Traveller 1D + END; Cairn's rest and sleep), on the sheet, the party sheet, the tracker after End and the Cards window | short/long rest hooks per ruleset (hit dice, HP, slots, effects ending), on sheet, party sheet and tracker | High |
+| D6 | Party rolls with skills, ask the players | attributes only, host rolls | checks/saves/skills; "roll for them" or "ask the players" prompt cards; summary line | High |
+| D7 | Group initiative | each entry rolls | option each / by kind: one roll per NPC kind | High |
+| D8 | Roll tables to chat, /rollon | adventure tables, always GM-only | /rollon with visibility, nested tables, campaign and pack tables, roll button | Medium |
+| D9 | Inline rolls in text | none | [[1d20+3]] and NdS+M chips in books, story, notes, chat | Medium |
+| D10 | Combat options | hard-coded | NPC health to players (off/status/bar/numbers), skip the dead, NPC numbering, Delay/Act now | Medium |
 | D1 | Modifier stack every roll reads | one number in ChatDock local state; sheet and tracker rolls ignore it | per-seat host stack (6 labelled slots + total), applied to every roll the seat starts, listed in the card | High. Done: electron/modifiers.cjs, each seat's stack kept by the host (6 labelled slots and the total; a number, a chat roll or an effect dropped on the box, right-click takes one off, /mod), read by every roll the seat starts in one request (FG's lock: a full attack's rolls all read it), then cleared; the card lists it; kraken_modifiers; check-modifiers |
 | D2 | ADV / DIS / +2 / -2 and ruleset presets | 5E sheet select only | toggle chips beside the modifier box, each used once; presets per manifest (5E cover, crit, max, half) | High. Done: the game's keys as chips under the tray (shared/rulesets/modifiers.mjs; a manifest's dice.modifiers lists them: 5E ADV, DIS, +2, -2, Opp, Cover, S. cover, Crit, Max, Half; Traveller and Apeira Astra Boon, Bane...), each used once by the next roll that reads it; ADV and DIS cancel; the 5E sheet's advantage select removed |
 | D3 | Links in chat | none | link {kind,id,name} on chat lines; drop any record or picture into chat; click opens, drag carries | High. Done: link on chat lines (the quick slot link shape), dropped into the chat's entry; a chip that opens only what the seat may see, drags on; unidentified items by their unidentified name; the GM's Share posts the record's words as the players know it; kraken_chat_send link, share |
 | D4 | Speaker portraits in chat | GM icon only | stamp recordId when speaking as a character/NPC, draw its portrait, drag opens the sheet | High. Done: the host stamps recordId on lines spoken or rolled as a character, or by the GM as a creature (/id, the tracker); its portrait drawn, a click opens it, a drag carries it |
-| D5 | Rest per ruleset | Cairn only; 5E card rest resets slots only | short/long rest hooks per ruleset (hit dice, HP, slots, effects ending), on sheet, party sheet and tracker | High |
 | D6 | Party rolls with skills, ask the players | attributes only, host rolls | checks/saves/skills; "roll for them" or "ask the players" prompt cards; summary line | High. Done: the party sheet's group roll for every game (its manifest's checks, saves and skills), each member through their own sheet roll; Roll for them, or Ask the players: a card each owner rolls from (their own modifier box), the GM for anyone, the summary when all have rolled; kraken_party_group_check mode, prompt-roll |
 | D7 | Group initiative | each entry rolls | option each / by kind: one roll per NPC kind | High. Done: the table option initGroup each / kind (one roll per kind, its copies sharing it), for every game's initiative branch |
 | D8 | Roll tables to chat, /rollon | adventure tables, always GM-only | /rollon with visibility, nested tables, campaign and pack tables, roll button | Medium. Done: /rollon, nested tables, campaign and pack tables and the window's Roll were the records work; a player's table roll now follows their roll mode, and a result's links are chips on the card |

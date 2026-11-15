@@ -211,6 +211,7 @@ export const GEAR = [
   ["Filter Mask", 3, 100, "Breathes a tainted atmosphere."],
   ["Respirator", 5, 100, "Breathes a very thin atmosphere."],
   ["Rations (1 week)", 1, 50, "Travel food for a week."],
+  ["Magazine (spare)", 5, 15, "A full spare magazine for a slug-thrower; loaded when the gun runs dry."],
   ["Survival Kit", 5, 100, "Shelter, fire and water for a week in the wilds."],
 ];
 // Everything for sale: Kraken's weapons, armour and gear as FG's MGT2 item

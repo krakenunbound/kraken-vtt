@@ -108,6 +108,9 @@ function createEffects(table) {
         item = { id: "", kind: effectsLib.lightOf(label) ? "light" : effectsLib.conditionsOf(label).length ? "condition" : effectsLib.toneOf(label) === "bad" ? "debuff" : "buff", label, icon: text(effect?.icon), duration: Number(effect?.duration) || 0, burn: Number(effect?.burn) || null, gmOnly: Boolean(effect?.gmOnly) };
       }
       mayTouch(where, seat, item.kind);
+      // A light lit from the pack (bookkeeping): a torch, or a flask of oil for a lantern; a player with none is refused.
+      const lit = item.kind === "light" && item.id ? (table.bookkeeping?.light(where, item.id, seat) ?? null) : null;
+      if (lit?.note) say(lit.note, where, false);
       const made = fromPreset(item, { duration, gmOnly: seat.role === "dm" ? gmOnly : false, source: seat.role === "dm" ? "" : seat.name });
       let placed;
       if (where.kind === "entry") placed = table.combat.putOn(where.entry.id, made);
@@ -116,8 +119,8 @@ function createEffects(table) {
         placed = list[list.length - 1];
       }
       const name = item.label.split(";")[0].trim();
-      say(`Effect ['${item.label}'] -> [to ${where.name}]${placed.duration ? ` for ${placed.duration} round${placed.duration === 1 ? "" : "s"}` : ""}`, where, placed.gmOnly);
-      return { effect: placed, to: where.name, name };
+      say(`Effect ['${item.label}'] -> [to ${where.name}]${placed.duration ? ` for ${placed.duration} round${placed.duration === 1 ? "" : "s"}` : ""}${lit?.spent ? ` (from the pack: ${lit.spent}, ${lit.left} left)` : ""}`, where, placed.gmOnly);
+      return { effect: placed, to: where.name, name, ...(lit?.spent ? { spent: lit.spent, left: lit.left } : {}) };
     },
     remove({ to, effectId } = {}, seat) {
       const where = resolve(to);

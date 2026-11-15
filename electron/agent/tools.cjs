@@ -545,6 +545,49 @@ const TOOLS = [
     },
   },
   {
+    name: "kraken_bookkeeping",
+    description:
+      "Bookkeeping (the sheet's Supplies on the Inventory tab; each part behind the GM's switch in Settings > Bookkeeping, kraken_table_options bookkeeping): a character's ammunition, consumables, rations and water, light from the pack, the load and its containers, exhaustion, packs. Ammunition is spent by kraken_combat attack itself (one a shot, a full attack one a swing; a launcher with nothing to fire is refused; a firearm's magazine counts down and a spare is loaded when it runs dry); NPCs are never counted. action view (default): every part as the sheet shows it (ammo per launcher with its stacks, what can be recovered, consumables with what each spends and heals, rations and water in days, the load: mode, used, max, level and its penalty, containers with used/capacity, exhaustion, the effects bookkeeping keeps on the creature, the rests its game has, packs that can be opened); recover (after a fight: the game's share of the shots fired comes back, 5E half, the rest lost); use (item: an inventory key: a potion drunk, a scroll read, a wand's charge or a kit's use spent; to {entryId | tokenId | recordId}: who a potion's healing lands on, the user by default, as dragging the item onto a creature); eat (today's ration and water, if not had already); refill (every waterskin filled); unpack (item: an equipment pack's key: its contents, read from its text, become rows); pack (item, into: a container's key, '' to take it out: FG's location; a bag of holding's contents weigh nothing); exhaustion (amount: +1 / -1, the GM); light (preset: torch, lantern, candle, lamp...: lit on the character's token or tracker entry as the Effects window does; a torch or a flask of oil comes out of the pack, a player with none is refused). Rations are also eaten as days end on the calendar (kraken_calendar advance past midnight) and on a long rest, never twice for one day; going without brings the game's penalty (5E Exhaustion from the fifth day without food or the first without water; 3.5E a Constitution check or 1d6 nonlethal; Basic Fantasy hit points; Cairn Deprived, then Fatigue).",
+    inputSchema: object(
+      {
+        id: string("Character record id"),
+        action: { type: "string", enum: ["view", "recover", "use", "eat", "refill", "unpack", "pack", "exhaustion", "light"] },
+        item: string("use / unpack / pack: the inventory key"),
+        into: string("pack: the container's inventory key ('' takes it out)"),
+        to: { type: "object", description: "use: {entryId} | {tokenId} | {recordId}: who the potion lands on" },
+        amount: number("exhaustion: +1 or -1"),
+        preset: string("light: the Effects list's light (torch, lantern, candle, lamp)"),
+      },
+      ["id"],
+    ),
+    async run(args, ctx) {
+      const agent = needTable(ctx);
+      const record = agent.records.get(args.id);
+      if (!record || record.type !== "character") throw new Error(`No character ${args.id}.`);
+      const { id: _id, action = "view", ...rest } = args;
+      const api = agent.bookkeeping;
+      const result = await api.act(record, action, rest, agent.seat);
+      return out(action === "view" ? result : { ...result, now: api.view(agent.records.get(record.id)) });
+    },
+  },
+  {
+    name: "kraken_rest",
+    description:
+      "A rest by the game's own rules (the sheet's Short rest / Long rest, the party sheet's Rest the party, the combat tracker's rest after End combat). kind short or long. A character (id): 5E short rest spends Hit Point Dice (hitDice: how many; none given: as many as it takes, of those left; each die + CON, at least 1); 5E long rest: every hit point back, temporary HP gone, half the Hit Point Dice back, every spell slot and the death saves reset, Exhaustion -1 (not while hungry or thirsty), concentration ends, effects that end on a rest come off, and a ration is eaten for the day; 3.5E: a night's rest heals 1 HP a level, nonlethal damage and spells back; AD&D 2E, Basic Fantasy, Castles & Crusades: 1 HP and spells back; Traveller (a day): 1D + END DM; Cairn: short is Cairn's rest, long its night's sleep (kraken_cairn). party: true (the GM): every party member rests and the calendar moves on by the rest (8 hours, a short rest 1); refused while a fight is on. A game with no such rest says so (Fate, Forged, Ironsworn keep their own recovery).",
+    inputSchema: object({
+      id: string("Character record id (or party: true)"),
+      party: { type: "boolean", description: "Rest the whole party (the GM)" },
+      kind: { type: "string", enum: ["short", "long"] },
+      hitDice: number("short (5E): Hit Point Dice to spend"),
+    }),
+    async run(args, ctx) {
+      const agent = needTable(ctx);
+      const api = agent.bookkeeping;
+      await api.ready;
+      return out(await api.rest({ id: args.id, party: Boolean(args.party), kind: args.kind ?? "long", hitDice: args.hitDice }, agent.seat));
+    },
+  },
+  {
     name: "kraken_fate",
     description:
       "Fate Core and Fate Accelerated: a character's rolls and fate points, and the table's scene aspects and the GM's pool (the sheet's buttons and the Scene Aspects strip). With id (a character, as its owner or the GM): action roll (skill: a Core skill, or a FAE approach; kind: overcome, advantage, attack or defend; opposition: the ladder number or word, Fair +2 by default for overcome and advantage, none for attack/defend; invokes [{aspect, free}]: paid before the roll, +2 each, a fate point or (free: true) a scene aspect's free invoke; bonus; aspect: create an advantage's new aspect, made with one free invoke on a success, two with style, a boost on a tie) — four Fate dice (4dF, each -1, 0 or +1) plus the rating, the total on the ladder (Terrible -2 to Legendary +8), the outcome fail, tie, succeed or succeed with style and the shifts; invoke (aspect, mode bonus (+2) or reroll, free: a scene aspect's free invoke instead of a fate point; on the character's last roll: the new total and outcome); compel (aspect, accept: true gains a fate point, false pays one to refuse; text); fatepoints (amount: the GM gives (+) or takes (-)); refresh (fate points back up to the refresh); stress (track physical, mental or stress (FAE), box: its value, on true/false); clear-stress (the scene is over); consequence (key mild, moderate, severe, extreme, mild2, mild3; text: the consequence's aspect, empty clears it); recover (key: recovering, then done); milestone (kind minor, significant or major, text: a significant or major gives a skill point, a major +1 refresh); skill-up (skill: a skill point spent: a skill or approach one step up, Superb at most); stunt-add (name, text, skill: a stunt past three costs a refresh); stunt-remove (key). Without id (the table): aspect-add (name, invokes, kind situation, boost or game, by: whose free invokes; the GM), aspect-remove (aspectId), aspect-invokes (aspectId, invokes), gm-pool (amount + or -, or set), scene-start (name; count: the GM's pool, by default one a player character; clear false keeps the scene's aspects), conflict (kind physical or mental: the turn order's skill and the defence), refresh-all (a new session: everyone's fate points up to their refresh), compel-offer (characterId, aspect, text: the GM offers a compel in chat), view (the scene's aspects, the pool, the conflict).",
@@ -853,8 +896,14 @@ const TOOLS = [
       const action = args.action;
       if (action === "list") return out({ character: record.name, cards: list().map(({ text, ...card }) => card) });
       if (action === "rest") {
-        const changes = cards.restChanges(record.data);
-        if (changes.length) await siegeEdit(agent, record, changes, seat);
+        // The game's long rest where it has one (bookkeeping: HP, Hit Dice, slots, rations); else the slots alone.
+        const books = agent.bookkeeping;
+        await books?.ready;
+        if (books?.declOf(record)?.rest?.long) await books.rest({ id: record.id, kind: "long" }, seat);
+        else {
+          const changes = cards.restChanges(record.data);
+          if (changes.length) await siegeEdit(agent, record, changes, seat);
+        }
         return out({ rested: record.name, cards: list().map(({ id, spent }) => ({ id, spent })) });
       }
       if (action === "end-concentration") {
@@ -1429,6 +1478,11 @@ const TOOLS = [
       healthNpc: { type: "string", enum: ["bar", "barhover", "dot", "dothover", "numbers", "off"], description: "What players see of the GM's creatures' health, on tokens and in the combat tracker alike: a bar (the tracker: the status and the share left), a dot (the tracker: the status words), numbers (the tracker: the hit points; tokens: a bar), off (nothing)" },
       healthPc: { type: "string", enum: ["bar", "barhover", "dot", "dothover", "numbers", "off"] },
       names: { type: "string", enum: ["off", "hover", "always"] },
+      bookkeeping: {
+        type: "object",
+        description: "Settings > Bookkeeping, each on unless switched off (a relaxed table's 'fun mode' hand-waves it): ammo (an attack spends its arrows, bolts, bullets, rounds; none left refuses it), consumables (potions, scrolls, charges used up), rations (food and water eaten each day and on a long rest, the game's penalty for going without), light (a torch or a lantern's oil out of the pack when lit), encumbrance (the load's level and its penalties on the creature; off, Basic Fantasy's movement and Cairn's full inventory count nothing), variant (5E's variant encumbrance, off by default). A partial object changes only what it names.",
+        properties: { ammo: { type: "boolean" }, consumables: { type: "boolean" }, rations: { type: "boolean" }, light: { type: "boolean" }, encumbrance: { type: "boolean" }, variant: { type: "boolean" } },
+      },
       initGroup: { type: "string", enum: ["each", "kind"], description: "The tracker's initiative: each creature its own roll, or by kind (one roll per kind of creature, its copies sharing it), for every game" },
       skipDead: { type: "string", enum: ["enemies", "all", "off"], description: "Whose turns the tracker skips: dead and unconscious creatures (enemies, FG's), characters too (all), or no one (off)" },
       npcNumbering: { type: "string", enum: ["append", "random", "off"], description: "NPC numbering when the same creature is added again: append (Goblin 1, Goblin 2), random (Goblin 14), off" },
