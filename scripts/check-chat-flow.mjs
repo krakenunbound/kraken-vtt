@@ -225,6 +225,23 @@ try {
   assert(view.round === roundBefore + 1 && view.active === view.entries.find((entry) => !entry.delayed && entry.initresult === Math.max(...view.entries.filter((item) => !item.delayed).map((item) => item.initresult)))?.id || Boolean(view.active), "the GM's next click starts the round's first creature, in the same round");
   await tool("kraken_table_options", { roundStop: false, initEachRound: false });
   agent.dice.clearForced();
+  // FG's NPC hit points: as listed, the most the hit dice give, or rolled.
+  const imp = agent.records.create({ type: "npc", name: "Hp Imp", visibility: "gm", data: { hp: 7, hd: "(2d6)" } }, agent.seat);
+  const hpOf = async () => {
+    const added = await ct({ action: "add", recordId: imp.id });
+    const entry = (await ct({ action: "view" })).entries.filter((item) => item.recordId === imp.id).at(-1);
+    await ct({ action: "remove", id: entry.id });
+    return entry.hp ?? added?.hp;
+  };
+  await tool("kraken_table_options", { npcHp: "listed" });
+  const listed = await hpOf();
+  await tool("kraken_table_options", { npcHp: "max" });
+  const most = await hpOf();
+  await tool("kraken_table_options", { npcHp: "roll" });
+  agent.dice.force([1, 2]);
+  const rolledHp = await hpOf();
+  await tool("kraken_table_options", { npcHp: "listed" });
+  assert(most === 12 && rolledHp === 3, `NPC hit points: listed ${listed}, max ${most} (want 12), rolled ${rolledHp} (want 3)`);
   done.push("D10 random numbering, the tracker's health off/dot/bar/numbers for players, Delay and Act now, skip turns, stop at round start, initiative every round");
 
   // D8: a table rolled by a player (/rollon) follows their roll mode; its result's link rides on the card.

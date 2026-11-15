@@ -341,6 +341,8 @@ function savedOptions(value) {
     // round waits for the GM's next click).
     ...(options.initEachRound ? { initEachRound: true } : {}),
     ...(options.roundStop ? { roundStop: true } : {}),
+    // FG's NPC hit points (HRNH): listed (each game's own), roll, max.
+    ...(["roll", "max"].includes(options.npcHp) ? { npcHp: options.npcHp } : {}),
     ...(["enemies", "all", "off"].includes(options.skipDead) ? { skipDead: options.skipDead } : {}),
     npcNumbering: ["append", "random", "off"].includes(options.npcNumbering) ? options.npcNumbering : "append",
   };
