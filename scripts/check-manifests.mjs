@@ -110,15 +110,21 @@ function checkSheet(where, manifest) {
     for (const part of parts) {
       if (part.part === "custom") refs.push(part.component);
       if (part.part === "row") walk(part.parts, seen, tab);
+      // A stat block's fields: each row's columns (not its rolls), a second field, and an inner block's.
+      const statFields = (block) => [
+        ...block.rows.flatMap((row) => block.columns.filter((column) => column.field).flatMap((column) => [{ ...column.field, path: column.path.replace("{key}", row.key) }, ...(column.extra ? [column.extra.field] : [])])),
+        ...(block.inner ? statFields(block.inner) : []),
+      ];
       const fields =
-        part.part === "derived" ? part.boxes.flatMap((box) => box.fields ?? [])
+        part.part === "derived" ? part.boxes.filter((box) => !box.custom).flatMap((box) => [...(box.fields ?? []), ...(box.field ? [box.field] : []), ...(box.lines ?? []).flatMap((line) => line.items.filter((item) => item.field).map((item) => item.field))])
         : part.part === "notes" ? part.fields
         : part.part === "list" ? [part.select, part.check].filter(Boolean).map((field) => ({ ...field, path: `${part.path}.*.${field.path}` }))
-        : part.part === "statBlock" ? part.rows.flatMap((row) => part.columns.map((column) => ({ ...column.field, path: column.path.replace("{key}", row.key) })))
+        : part.part === "statBlock" ? statFields(part)
         : part.part === "skills" ? [{ ...part.field, path: `${part.path}.%.${part.field.path}` }]
         : [];
       if (part.part === "list") fields.push(...(part.fields ?? []).map((field) => ({ ...field, path: `${part.path}.*.${field.path}` })));
-      if (part.part === "track") editable.push(`${part.used}.#`);
+      if (part.part === "track") editable.push(part.each ? `${part.each}.#.${part.used}.#` : `${part.used}.#`);
+      if (part.part === "strip") for (const item of part.items) if (item.kind === "xp") editable.push(item.path);
       // A field is typed into when it has an input kind (no kind: shown only) and is not edit: "never" or sent as an action.
       for (const field of fields) if (field.kind && field.kind !== "readonly" && field.edit !== "never" && !field.action) editable.push(field.path);
       if (part.part === "coins") editable.push(`${part.path}.*.amount`);

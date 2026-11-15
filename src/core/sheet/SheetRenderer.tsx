@@ -12,18 +12,33 @@ import { at, holds, num, SheetCtx, textOf, type Row, type SheetContext } from ".
 // header's identity boxes and the tab rail are the core's (SheetFrame); every
 // part sends an edit through the host's whitelist or a ruleset message.
 
-// The modifiers a sheet's lists offer, at their starting values (a check off, a select on its first option).
+// The modifiers a sheet's lists and strip offer, at their starting values (a check off, a select on its first option, a number 0).
 function startingModifiers(parts: Part[], into: Record<string, unknown> = {}) {
   for (const part of parts) {
     if (part.part === "row") startingModifiers(part.parts, into);
     if (part.part === "list" && part.modifier) into[part.modifier.key] = part.modifier.kind === "check" ? false : (part.modifier.options?.[0]?.value ?? "");
+    if (part.part === "strip")
+      for (const item of part.items) {
+        if (item.kind === "modifier") into[item.key] = 0;
+        if (item.kind === "choice") into[item.key] = item.options[0]?.value ?? "";
+      }
   }
   return into;
 }
 
-export function SheetRenderer({ spec, record, session, ruleset, custom, formats }: { spec: SheetSpec; record: TableRecord; session: Session; ruleset: string; custom: Record<string, CustomPart>; formats: Record<string, Format> }) {
+// The game's words in every text of the sheet: "{@species}" is the manifest's labels.species (a variant's own:
+// Descending Darkness's "Kin" where 5E says "Species"), as FG's string resources.
+function withWords<T>(value: T, words: Record<string, string>): T {
+  if (typeof value === "string") return value.replace(/\{@(\w+)\}/g, (whole, word: string) => words[word] ?? whole) as T;
+  if (Array.isArray(value)) return value.map((item) => withWords(item, words)) as T;
+  if (value && typeof value === "object") return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, withWords(item, words)])) as T;
+  return value;
+}
+
+export function SheetRenderer({ spec: given, record, session, ruleset, custom, formats, words = {}, features = [] }: { spec: SheetSpec; record: TableRecord; session: Session; ruleset: string; custom: Record<string, CustomPart>; formats: Record<string, Format>; words?: Record<string, string>; features?: string[] }) {
+  const spec = useMemo(() => withWords(given, words), [given, words]);
   const [tab, setTab] = useState(spec.tabs[0]?.id ?? "main");
-  const [modifiers, setModifiers] = useState<Record<string, unknown>>(() => startingModifiers(spec.tabs.flatMap((item) => item.parts)));
+  const [modifiers, setModifiers] = useState<Record<string, unknown>>(() => startingModifiers([...(spec.top ?? []), ...spec.tabs.flatMap((item) => item.parts)]));
   const data = record.data as Row;
   const editable = canEdit(record, session);
   const gm = session.role === "dm";
@@ -35,9 +50,15 @@ export function SheetRenderer({ spec, record, session, ruleset, custom, formats 
       if ("roll" in call) {
         const key = String(given.key ?? call.key ?? "");
         const bonus = call.bonus ? num(modifiers[call.bonus]) : 0;
+        // The sheet's DC and advantage, when the roll takes them (5E, 3.5E).
+        const more: Record<string, unknown> = {};
+        if (call.dc) more.dc = num(modifiers[call.dc]);
+        if (call.advantage) more.advantage = String(modifiers[call.advantage] ?? "");
         // A save in a fight goes through the tracker (its effects count); else straight to chat.
-        if (call.fight && call.roll === "save" && inFight) session.ct("save", { id: inFight.id, attribute: key, cl: bonus });
-        else session.siegeCheck(record.id, call.keyAs === "skill" ? "" : key, 0, false, { kind: call.roll, ...(call.keyAs === "skill" ? { skill: key } : {}), ...(call.bonus ? { bonus } : {}) });
+        if (call.fight && call.roll === "save" && inFight) {
+          const { dc, ...rest } = more;
+          session.ct("save", { id: inFight.id, attribute: key, cl: call.dc ? dc : bonus, ...rest });
+        } else session.siegeCheck(record.id, call.keyAs === "skill" ? "" : key, 0, false, { kind: call.roll, ...(call.keyAs === "skill" ? { skill: key } : {}), ...(call.bonus ? { bonus } : {}), ...more });
         return;
       }
       const args: Record<string, unknown> = { ...(call.args ?? {}) };
@@ -51,12 +72,13 @@ export function SheetRenderer({ spec, record, session, ruleset, custom, formats 
       const send = messageSender(session, call.message);
       if (send) void Promise.resolve(send(record.id, call.action, args)).catch(() => undefined);
     };
-    return { record, session, data, editable, gm, change, act, modifiers, setModifier: (key, value) => setModifiers((now) => ({ ...now, [key]: value })), targets };
-  }, [record, session, data, editable, gm, modifiers, targets.join("\u0000"), inFight?.id]);
+    return { record, session, data, editable, gm, change, act, modifiers, setModifier: (key, value) => setModifiers((now) => ({ ...now, [key]: value })), targets, features, formats };
+  }, [record, session, data, editable, gm, modifiers, targets.join("\u0000"), inFight?.id, features, formats]);
   const shownTabs = spec.tabs.filter((item) => !item.gm || gm);
   const page = shownTabs.find((item) => item.id === tab) ?? shownTabs[0];
   const scope = { data };
   const parts = page?.parts.map((part, index) => <PartView key={`${page.id}-${index}`} spec={part} custom={custom} formats={formats} />);
+  const art = spec.art === undefined ? undefined : (Array.isArray(spec.art) ? spec.art : [spec.art]).map((path) => at(data, path)).find((value) => value !== undefined && value !== null);
   return (
     <SheetCtx.Provider value={context}>
       <SheetFrame
@@ -65,7 +87,7 @@ export function SheetRenderer({ spec, record, session, ruleset, custom, formats 
         editable={editable}
         className={spec.className ? `cc-sheet ${spec.className}` : "cc-sheet"}
         attrs={{ "data-ruleset": ruleset }}
-        artRace={spec.art ? String(at(data, spec.art) ?? "") : undefined}
+        artRace={spec.art === undefined ? undefined : String(art ?? "")}
         tabs={shownTabs.map((item) => (item.label ? { id: item.id, label: item.label } : item.id))}
         tab={page?.id ?? ""}
         onTab={setTab}
@@ -82,8 +104,10 @@ export function SheetRenderer({ spec, record, session, ruleset, custom, formats 
           <PartView key={`top-${index}`} spec={part} custom={custom} formats={formats} />
         ))}
         {page ? (
-          page.page === "panel" ? (
-            <section className="cc-panel cc-page" data-tab-page={page.id}>
+          page.page === "none" ? (
+            parts
+          ) : page.page === "panel" ? (
+            <section className={page.pageClass ?? "cc-panel cc-page"} data-tab-page={page.id}>
               {parts}
             </section>
           ) : (
