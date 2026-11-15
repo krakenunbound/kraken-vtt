@@ -267,10 +267,10 @@ end caps the Wall tool uses by itself).
   display, hearth, supply and weapon racks; flagstone scatter, iron chain,
   ceramic vessel, rune fragment; mine cart, ore pile, rails, timber brace.
 
-**What is missing:** anything sci-fi (deck plating, bulkheads, consoles,
-hatches, pods), a canal city's quays and bridges, iron-age barrow stones and
-standing stones, snow-covered ground features, ships' decks. See
-`missing-assets.md`.
+**Added since (Kraken Map Art):** a sci-fi set, a canal city's wet cobbles,
+dock planks, quay and soot-brick walls, iron bridge and gondola, barrow
+stones, standing stones and a longhouse, coffins, a sarcophagus, an open pit.
+**Still missing:** see `missing-assets.md`.
 
 ## Style recipes
 
@@ -296,16 +296,21 @@ top); `Bush`, `Fern`, `Flowers`, `Log`, `Boulder`; `Campfire` with light;
 **Town, tavern, canal city.** `Cobblestone` streets, `Wood planks` and
 `Parquet` interiors, `Timber and plaster wall` and `Brick wall`, furniture
 (`Table, tavern`, `Table, round`, `Chair`, `Bench`, `Stool`), `Fireplace`, `Barrels`,
-`Crates`, `Sacks`. Water: `Deep water` channels, `Boardwalk` as a path. The
-packs have no quays, canal walls or bridges for a Doskvol-style canal city:
-see `missing-assets.md`.
+`Crates`, `Sacks`. Water: `Deep water` channels, `Boardwalk` as a path. A
+canal city: `Wet cobbles`, `Soot brick wall`, `Quay wall` along the water
+(update its line-of-sight wall to `type: "invisible"`, so it stops feet but
+not eyes), `Dock planks` jetties, `Gondola`, `Iron bridge`
+(`scripts/studio-map-counting-house.mjs`).
 
-**Starship, derelict, space station.** The shipped packs have **no sci-fi
-art** (deck plating, bulkheads, consoles, hatches, cryo pods). Say so, list
-it from `missing-assets.md`, and if the user still wants a map now, build
-the layout and line of sight with plain `wall`s and `door`s on a dark
-background and mark it as waiting for art. Do not paint a sci-fi ship from
-dungeon flagstones.
+**Starship, derelict, space station.** Kraken Map Art has a sci-fi set (see
+`missing-assets.md`, "Made"): `Hull plating` round the rooms on a near-black
+background, `Deck plating` (dimmed to about 0.7), `Deck plating, worn` and
+`Grating` floors, `Bulkhead` / `Bulkhead, damaged` / `Hull wall` walls,
+`Hatch` and `Airlock door` doors, `Console` (a light source: screens glow),
+`Bridge console row`, `Captain's chair`, cryo pods, `Reactor core`, cargo
+containers, lockers, bunks, med beds, `Pipes, straight` along walls,
+`Wreckage scatter`, `Scorch mark`. `scripts/studio-map-silent-hulk.mjs` is a
+worked example. Do not paint a ship from dungeon flagstones.
 
 ## Quality rules
 

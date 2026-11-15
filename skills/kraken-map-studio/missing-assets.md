@@ -35,6 +35,10 @@ maps (`scripts/studio-map-*.mjs`), each stood in for as noted:
   millstone, logs for the wheel), hand cart, beacon basket (a cold campfire),
   a cold (unlit) brazier, a fresh corpse (a blood stain), an alarm bell,
   a heavy stone slab door (an iron door).
+- **Stand-ins that mislead:** `Reactor core` is the only reactor or ring
+  art, and it always reads as live and glowing (a crated spare in a hold, a
+  dead skein ring); the open cryo pod is a different shape from the closed
+  ones.
 - **Art that does not read right:** `Blast door` and `Iron bridge` look
   side-on, `Trapdoor` is painted at an angle, `Puddle` reads as a gold plate,
   `Ash and soot` reads as flagstones, `Chest` and `Chest, iron` are side
