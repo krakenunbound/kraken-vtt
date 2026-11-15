@@ -3594,7 +3594,8 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
     if (!record) throw new Error(`${row.name} is gone.`);
     row.total = null;
     try {
-      const result = await party.rollForMember(agentHandle, record, prompt, seat.role === "dm" ? record.name : seat.name);
+      // Rolled as the character (its portrait on the line), from whoever clicked.
+      const result = await party.rollForMember(agentHandle, record, prompt, record.name);
       row.total = result.total;
       row.success = result.success;
     } catch (error) {
