@@ -195,10 +195,14 @@ function cleanCohort(raw, index = 0) {
 const cohortQuality = (crew, cohort) => num(crew?.tier) + (cohort.kind === "expert" ? 1 : 0);
 
 // --- A character's actions -------------------------------------------------------------------
-// What the sheet may change by hand, then every number worked out again.
-const TEXT = new Set(["alias", "look", "heritage", "heritagedetail", "background", "backgrounddetail", "vice", "vicedetail", "purveyor", "notes", "playername"]);
-const NUMBERS = [/^actions\.(hunt|study|survey|tinker|finesse|prowl|skirmish|wreck|attune|command|consort|sway)$/, /^stress$/, /^healing$/, /^stash$/, /^xp\.(playbook|insight|prowess|resolve)$/, /^armor\.(armor|heavy|special)$/, /^coins\.id-\d+\.amount$/, /^inventorylist\.id-\d+\.(carried|load)$/, /^projects\.id-\d+\.(filled|segments)$/];
-const STRINGS = [/^harm\.[123]\.[01]$/, /^inventorylist\.id-\d+\.(name|text)$/, /^projects\.id-\d+\.name$/, /^friends\.\d+\.bond$/];
+// What the sheet may change by hand, then every number worked out again: the manifest's edit globs
+// (shared/rulesets/edit.mjs), in the order the hand-written lists had.
+const { default: MANIFEST } = require("../shared/forged/manifest.mjs");
+const { editPaths } = require("../shared/rulesets/edit.mjs");
+const EDIT_PATHS = editPaths(MANIFEST.edit);
+const TEXT = EDIT_PATHS.text;
+const NUMBERS = EDIT_PATHS.number;
+const STRINGS = EDIT_PATHS.string;
 function setPath(data, key, value) {
   const keys = key.split(".");
   let node = data;
@@ -215,14 +219,14 @@ async function editForged(table, record, changes, seat) {
     const key = String(change?.path ?? "");
     const value = change?.value;
     if (key === "name") name = text(value, 120) || record.name;
-    else if (TEXT.has(key)) data[key] = String(value ?? "").slice(0, 8000);
+    else if (TEXT.some((pattern) => pattern.test(key))) data[key] = String(value ?? "").slice(0, 8000);
     else if (STRINGS.some((pattern) => pattern.test(key))) setPath(data, key, String(value ?? "").slice(0, 400));
     else if (NUMBERS.some((pattern) => pattern.test(key))) {
       const n = Math.round(Number(value));
       if (!Number.isFinite(n) || Math.abs(n) > 1e6) throw new Error(`${key} needs a number.`);
       if (/^actions\./.test(key) && (n < 0 || n > rules.actionCap(Boolean(data.crewBonus?.mastery)))) throw new Error(`An action rating is 0 to ${rules.actionCap(Boolean(data.crewBonus?.mastery))}.`);
       setPath(data, key, n);
-    } else if (/^(inventorylist|projects)\.id-\d+$/.test(key) && value === null) delete data[key.split(".")[0]]?.[key.split(".")[1]];
+    } else if (EDIT_PATHS.remove.some((pattern) => pattern.test(key)) && value === null) delete data[key.split(".")[0]]?.[key.split(".")[1]];
     else if (key === "fatal" && !value) delete data.fatal;
     else throw new Error(`The sheet cannot change ${key}.`);
   }
@@ -967,4 +971,4 @@ async function dropOnForged(table, record, source, from) {
   return { record: updated, added: "item", summary };
 }
 
-module.exports = { rulesForged, libraryForged, buildForged, buildCrew, editForged, actionForged, crewAction, awardForged, dropOnForged, crewOf, isForged, isForgedRuleset, RULESET_NAME };
+module.exports = { rulesForged, libraryForged, buildForged, buildCrew, editForged, actionForged, crewAction, awardForged, dropOnForged, crewOf, isForged, isForgedRuleset, RULESET_NAME, EDIT_PATHS };

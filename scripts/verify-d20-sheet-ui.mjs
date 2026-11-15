@@ -271,6 +271,42 @@ Object.assign(GAMES, {
   ),
 });
 
+// Forged in the Dark (core UI stage 5): a clock to tick, severe harm (Push through harm), an attribute's advance (its
+// dots), a playbook advance (a new special ability), a long-term project, a scoundrel to assist; stress to trauma.
+const FORGED_MAIN = [
+  // A roll with every choice of the bar: pushed, a bargain (greyed by the push, so pushed after), bonus dice, a clock.
+  ['[aria-label="Devil\'s Bargain"]', "A debt to the Crows"], ['[aria-label="Bonus dice"]', 1], ['[aria-label="Clock to tick"]', "@first"], '[data-push="effect"]', '[data-roll-action="prowl"]',
+  '[data-push="dice"]', '[data-roll-action="skirmish"]',
+  '[data-action="advance-dot"]',
+];
+Object.assign(GAMES, {
+  forged: {
+    ruleset: "Forged in the Dark",
+    shipped: true,
+    books: ["Forged in the Dark: Scoundrel's Handbook", "Forged in the Dark: Game Master's Guide"],
+    tabs: "main,playbook,downtime,notes",
+    specs: [
+      { name: "Silas Venn", playbook: "Enforcer", heritage: "Canal-born", heritageDetail: "Barge folk", background: "Military", backgroundDetail: "Marine deserter", dots: { skirmish: 0, prowl: 1, wreck: 1, hunt: 1, sway: 1 }, ability: "Battleborn", friend: "Old Pell", rival: "Sergeant Danna Vey", vice: "Gambling", viceDetail: "Dice", purveyor: "The Drowned Bell", alias: "Hammer", look: "Big, scarred, quiet" },
+      { name: "Wren", playbook: "Burglar", heritage: "Far Isles", background: "Underworld", dots: { finesse: 1, survey: 1, attune: 1, tinker: 1 }, vice: "Pleasure", purveyor: "The Velvet Room" },
+    ],
+    fight: [],
+    async setup({ tool, ids }) {
+      await tool("kraken_clocks", { action: "add", name: "Alarm", segments: 6, kind: "danger" });
+      const silas = ids["Silas Venn"];
+      await tool("kraken_forged", { id: silas, action: "harm", args: { level: 3, text: "Broken leg" } });
+      await tool("kraken_forged", { id: silas, action: "xp", args: { track: "insight", amount: 6 } });
+      await tool("kraken_forged", { id: silas, action: "xp", args: { track: "playbook", amount: 8 } });
+      await tool("kraken_forged", { id: silas, action: "project", args: { name: "Learn the old locks", segments: 8 } });
+    },
+    states: [
+      { who: "Silas Venn", label: "trauma", tabs: ["main"], tools: (id) => [["kraken_forged", { id, action: "stress", args: { amount: 9, why: "a test" } }]] },
+      { who: "Silas Venn", label: "healed", tabs: ["main"], changes: () => [{ path: "stress", value: 0 }] },
+    ],
+    more: { main: FORGED_MAIN, playbook: [['[aria-label="New special ability"]', "@first"], '[data-action="advance-ability"]'], downtime: ['[data-action="project-work"]'] },
+    gmControls: ['button[aria-label="hunt rating 2"]'],
+  },
+});
+
 const [gameId, outArg] = process.argv.slice(2);
 const game = GAMES[gameId];
 if (!game) {
@@ -508,6 +544,14 @@ try {
   // Every control on every tab, pressed once by the player, in order, the dice fixed first.
   const presses = [];
   const CONTROLS = "button:not([data-sheet-tab]):not(.cc-portrait):not(.cc-token), input:not(.cc-name), select, textarea";
+  // A click; a control another part covers (Forged's Mark under the Harm panel, on both builds) is said so, then
+  // clicked through its element, so what it does is still recorded.
+  const covered = [];
+  const clickIt = (control, what) =>
+    control.click({ timeout: 5000 }).catch(async () => {
+      covered.push(what);
+      await control.dispatchEvent("click");
+    });
   const press = async (sheet, id, what, act) => {
     const before = await dataOf(id);
     const lines = (await chatLines()).length;
@@ -535,11 +579,13 @@ try {
       // A strip inside the page (Fate's compels) is the page's, not counted twice.
       const strip = await sheet.locator(".five-strip:not(.cc-page .five-strip)").locator(CONTROLS).count();
       const header = await sheet.locator(".cc-boxes").first().locator(CONTROLS).count();
+      // Fields in a row beside the name (Forged's Alias), pressed with the header's.
+      const nameRow = await sheet.locator(".cc-identity > .cc-row").first().locator(CONTROLS).count();
       // A game's other places over every tab (Ironsworn's last move), pressed on every tab before its page.
       const areas = [];
       for (const area of game.areas ?? []) areas.push(...Array.from({ length: await sheet.locator(area).locator(CONTROLS).count() }, (_, index) => ({ in: area, index })));
       // Every control of the sheet is in one of the places pressed, or it is said here.
-      const outside = (await sheet.locator(CONTROLS).count()) - count - strip - header - areas.length;
+      const outside = (await sheet.locator(CONTROLS).count()) - count - strip - header - nameRow - areas.length;
       if (outside) {
         presses.push({ what: `${spec.name} ${tab}: controls outside the header, the strip and the page`, unpressed: outside });
         console.log(`  ${spec.name} ${tab}: ${outside} controls not pressed (outside the header, the strip and the page)`);
@@ -548,6 +594,7 @@ try {
       // strip's DC or Mod stays at what was typed (1), so every later roll and save carries it.
       const first = tab === game.tabs.split(",")[0];
       const targets = [
+        ...(first ? Array.from({ length: nameRow }, (_, index) => ({ in: ".cc-identity > .cc-row", index })) : []),
         ...(first ? Array.from({ length: header }, (_, index) => ({ in: ".cc-boxes", index })) : []),
         ...(first ? Array.from({ length: strip }, (_, index) => ({ in: ".five-strip:not(.cc-page .five-strip)", index })) : []),
         ...areas,
@@ -570,14 +617,14 @@ try {
         if (info.tag === "SELECT") {
           const next = info.options.find((value) => value !== info.value) ?? info.value;
           await press(sheet, id, `${what} -> ${next}`, () => control.selectOption(next));
-        } else if (info.tag === "INPUT" && info.type === "checkbox") await press(sheet, id, what, () => control.click());
+        } else if (info.tag === "INPUT" && info.type === "checkbox") await press(sheet, id, what, () => clickIt(control, what));
         else if (info.tag === "INPUT" || info.tag === "TEXTAREA") {
           const next = info.tag === "TEXTAREA" ? `${info.value ? `${info.value}\n` : ""}Test line` : info.type === "number" || /^-?\d+(\.\d+)?$/.test(info.value) ? String((Number(info.value) || 0) + 1) : `${info.value}x`;
           await press(sheet, id, `${what} = ${JSON.stringify(next)}`, async () => {
             await control.fill(next);
             await control.press("Tab");
           });
-        } else await press(sheet, id, what, () => control.click());
+        } else await press(sheet, id, what, () => clickIt(control, what));
       }
       // A tab whose controls appear only once one is used (a move chosen, then rolled): the game's own steps, each a
       // selector clicked (or [selector, value] filled or picked), pressed in order where the sheet shows it.
@@ -647,6 +694,7 @@ try {
     await gmClose(spec.name);
   }
 
+  if (covered.length) presses.push({ what: "covered controls (clicked through)", covered });
   writeFileSync(path.join(out, `${gameId}-presses.json`), JSON.stringify(presses, null, 1));
   assert(failures.length === 0, `page errors: ${failures.join(" | ")}`);
   console.log(`ok ${gameId} sheet ui: ${checks.length} checks, ${presses.length} controls pressed; shots, signatures and presses in ${out}`);

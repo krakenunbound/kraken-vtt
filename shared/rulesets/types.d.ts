@@ -225,7 +225,7 @@ export interface TabSpec {
 export interface SheetSpec {
   level: "inherit" | "arrange"; // "replace" is per part (custom) or per window
   // note: the words under the name (default "Name"), as text nodes ("Name · ", "Fate Core").
-  header: { identity: FieldSpec[]; custom?: Ref[] /* a game's own boxes after them (Ironsworn's initiative button) */; note?: Nodes };
+  header: { identity: FieldSpec[]; custom?: Ref[] /* a game's own boxes after them (Ironsworn's initiative button) */; note?: Nodes; nameFields?: FieldSpec[] /* labelled fields in a row beside the name (Forged's Alias) */ };
   attrs?: { name: string; value: Text }[]; // more data-* on the sheet (data-game="starforged")
   top?: Part[]; // above every tab (a strip of level, experience and the roll modifier)
   art?: Path | Path[]; // what picks the portrait art (the race): the first path with a value
