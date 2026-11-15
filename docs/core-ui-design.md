@@ -864,7 +864,7 @@ The core "inherit" sheet (CoreRPG's category lists) is **not** in this plan, bec
 
 ## 7. Built: the first stage (steps 0, 1 and 2)
 
-On the `core-ui` worktree branch, as three commits, one per step. Nothing was released.
+On the branch `worktree-agent-a3fe3505925455bd4`: a commit per step, then Character Selection and its test, then the docs. Nothing was released or pushed.
 
 ### 7.1 Step 0: one sheet frame
 - `src/core/fields/Field.tsx`: `Field`, moved out of `CCSheet.tsx`. Every sheet and `ShipsWindow` import it from here.
@@ -956,7 +956,7 @@ On the `core-ui` worktree branch, as three commits, one per step. Nothing was re
   - `SheetCairn.tsx` is gone. Its wizard moved, unchanged, to `src/characters/WizardCairn.tsx`.
   - `electron/cairn.cjs` builds its edit whitelist (`EDIT_PATHS`, plus `edit.remove` for droppable rows) from the manifest. `check-cairn.mjs` asserts these are the exact regexes the hand-written lists had.
 - **Proof:**
-  - **Fresh character.** `shot-sheets.mjs` on Cairn: 10 of the 12 sheet shots are pixel-identical. The two others, the inventory's slot line and the GM's growth rolls, differ by 153-323 pixels of sub-pixel glyph placement: one text node where the old sheet had several. The crops look identical.
+  - **Fresh character.** `shot-sheets.mjs` on Cairn: 9 of the 12 sheet shots are pixel-identical. The three others, the inventory's slot line (GM and player, 323 pixels) and the GM's growth rolls (153 pixels), differ only in sub-pixel glyph placement: one text node where the old sheet had several. The crops look identical.
   - **Every branch.** `scripts/verify-core-parts-ui.mjs` gives a character a spellbook, a scroll, a relic, a waterskin, a pending scar, growth and a milestone, and later puts them at dying. It then presses every control once and checks the record: the header's Age, the stat block fields, + and - Fatigue, Deprived, the item select, Cast in danger (with the WIL save), a relic's Use, a scroll used up, Use, drop, add, the attack mode, Bond, Recover, growth add and drop, the GM's growth roll, a milestone ticked, added and removed, Notes, the State box and Stabilize.
     - It passes the same 34 checks on the hand-written sheet (a step-0 build) and on the manifest sheet.
     - Its sheet-only shots match, except where a dice animation crossed the sheet.
@@ -977,7 +977,7 @@ On the `core-ui` worktree branch, as three commits, one per step. Nothing was re
   - It gained `attr` (a `data-*` carrying the value, such as `data-cairn-status`), `color`, `note`, `bare`, `default`, `number` and `action`.
   - Its `label` is the aria-label and may be a template (`"{key} now"`).
 - **`edit`** gained `remove`: the lists whose rows the sheet may drop.
-- **Variants** may carry their own `id`. `ids` is not used.
+- **Variants** may carry their own `id`; the draft's `ids` was dropped.
 - **Refs.** Besides the components in `src/rulesets/index.tsx`, `src/rulesets/parts.tsx` holds the custom parts (`CUSTOM_PARTS`) and the list formatters (`FORMATS`).
 - **The manifest sheet.** `sheet` is either a Ref (every game but Cairn, for now) or a SheetSpec, which `sheetFor` renders with `SheetRenderer`.
 
@@ -985,7 +985,11 @@ On the `core-ui` worktree branch, as three commits, one per step. Nothing was re
 - **Types, build and coverage.** `npx tsc --noEmit -p .`, `npm run build` and `npm run coverage` all pass, including `check-manifests`.
   - Step 1's commit was also checked on its own in a separate export of the tree: tsc, build, coverage, `check-cairn` and `check-setup`.
 - **Host checks** (all pass): `check-cairn`, `check-bfrpg`, `check-adnd2e`, `check-dnd35`, `check-dnd5e`, `check-mgt2`, `check-astra`, `check-fate`, `check-ironsworn`, `check-forged`, `check-combat`, `check-party`, `check-character`, `check-wizard`, `check-setup`, `check-agent`, `check-agent-ui`, `check-starships`.
-- **UI tests** (all pass, before and after the Character Selection change): `verify-core-parts-ui`, `-cairn-ui`, `-settings-ui`, `-table-play-ui`, `-rulesets-ui`, `-sidebar-ui`, `-charselect-ui`, `-records-ui`, `-order-ui`, `-calendar-notes-ui`, `-mgt2-ui`, `-astra-ui`, `-fate-ui`, `-forged-ui`, `-ironsworn-ui`, `-descending-ui`, `-dnd5e-ui`, `-dnd35-ui`, `-adnd2e-ui`, `-bfrpg-ui`, `-combat-hand-ui`, `-accounts-ui`.
+- **Sheet shots of the step-2 commit** (built alone from an export of it): `shot-sheets.mjs` for all 16 games against the shots from before step 0.
+  - Every sheet-only shot of the 15 games other than Cairn is pixel-identical.
+  - C&C's GM portrait differed on the first shoot, as it did at step 0. A reshoot was identical: the portrait image decoding.
+  - The whole-screen shots differ only as much as two shoots of the same build do (`diff-base.log`): about 50-170 pixels on a player's screen, from the chat and the clock.
+- **UI tests** (all pass on the final build): `verify-core-parts-ui`, `-cairn-ui`, `-settings-ui`, `-table-play-ui`, `-rulesets-ui`, `-sidebar-ui`, `-charselect-ui`, `-records-ui`, `-order-ui`, `-calendar-notes-ui`, `-mgt2-ui`, `-astra-ui`, `-fate-ui`, `-forged-ui`, `-ironsworn-ui`, `-descending-ui`, `-dnd5e-ui`, `-dnd35-ui`, `-adnd2e-ui`, `-bfrpg-ui`, `-combat-hand-ui`, `-accounts-ui`. All but `-accounts-ui` also passed on the steps 0-2 build. `verify-charselect-ui` now also covers edit mode: a player's Export, the GM's Export and Delete, the GM's empty list, and `kraken_windows` characters.
   - `verify-starships-ui` fails, but it fails the same way on the step-0 build: the deck plan's map window covers a button. It is not from this stage.
 - **End to end:** `e2e-ruleset.mjs` with all 16 games, on the steps 0-2 build.
   - 14 passed first time.
@@ -998,7 +1002,7 @@ On the `core-ui` worktree branch, as three commits, one per step. Nothing was re
   | Hand-written (step 0) | 14-16 ms | 27-29 ms |
   | Manifest-laid | 14-17 ms | 28-29 ms |
 
-  No slower within the measurement.
+  No slower within the measurement. The timings were taken while an e2e run was going on the same machine.
 
 ### 7.6 Character Selection, as FG's (the user's request during this stage)
 The user's words were: "why is there a new character icon built into character sheets?" The New character, blank, import and export buttons sat on the character window, above the sheet.
