@@ -19,7 +19,7 @@ function ChosenWizard({ session, onDone }: { session: Session; onDone: (id: stri
 
 // selected: the character to show (else the first this seat can see).
 // create: open on the creation wizard; when it finishes, the new character's sheet.
-export function CharacterPanel({ session, selected: chosen, create = false }: { session: Session; selected?: string | null; create?: boolean }) {
+export function CharacterPanel({ session, selected: chosen, create = false, onTitle }: { session: Session; selected?: string | null; create?: boolean; onTitle?: (title: string) => void }) {
   const characters = Object.values(session.records)
     .filter((record) => record.type === "character")
     .sort((a, b) => a.name.localeCompare(b.name));
@@ -29,6 +29,11 @@ export function CharacterPanel({ session, selected: chosen, create = false }: { 
     if (chosen) setSelected(chosen);
   }, [chosen]);
   const current = characters.find((record) => record.id === selected) ?? (creating ? null : characters[0]) ?? null;
+  // Once the wizard is done the window shows a sheet, so it takes the character's name.
+  const shownName = !creating && create && current ? current.name : "";
+  useEffect(() => {
+    if (shownName) onTitle?.(shownName);
+  }, [shownName]);
   return (
     <section className="characters dock-characters" role="tabpanel">
       {creating ? (
