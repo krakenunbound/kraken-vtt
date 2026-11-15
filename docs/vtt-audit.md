@@ -73,6 +73,11 @@ diagonals (7). Not yet: manual dice entry (2: the host rolls synchronously, so i
 for a player's typed dice), 5E attunement slots, massive damage, pan to the speaker (off by default
 in Foundry too), pasting a token's size and hidden state.
 
+**Asked by the GM (2026-11-15): range lines.** A creature targeting another gets an arrow in its
+token's colour (a player's own) with the distance; long range and out of range are named when its
+record gives its weapons' and spells' ranges. FG draws no range at all; Foundry shows a target pip
+and leaves measuring to the ruler. Built (src/table/MapView.tsx, shared/map/ranges.mjs).
+
 **Tier 1: felt at the table every session**
 1. **Action links in text** (Foundry's enrichers): `[[/check dex 15]]`, saves, skills, damage, heal, award XP, condition references, with the GM's Request roll card. For every game, read from its manifest's checks and saves.
 2. **Manual dice entry** (#89, FG and Foundry): players with real dice type what they rolled.
