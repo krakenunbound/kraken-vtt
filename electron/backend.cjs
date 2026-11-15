@@ -22,6 +22,7 @@ const { createBookShelf } = require("./books.cjs");
 const { fgDataFolder } = require("./importers/fgModule.cjs");
 const packs = require("./packs.cjs");
 const campaigns = require("./campaigns.cjs");
+const { openPort } = require("./portMapping.cjs");
 const { startAgentServer } = require("./agent/mcpServer.cjs");
 const assistantModule = require("./assistant.cjs");
 
@@ -364,6 +365,19 @@ async function stopTable() {
   table = null;
   if (current) await current.stop();
   closeCampaign();
+  invite = null;
+  // The port opened on the router is closed again.
+  const mapping = portMapping;
+  portMapping = null;
+  if (mapping) await Promise.race([mapping.remove().catch(() => undefined), new Promise((resolve) => setTimeout(resolve, 3000))]);
+}
+// The port the router opened for this table (portMapping.cjs), and the invite links (the password in the #fragment,
+// which a browser never sends to the server; the join page reads it).
+let portMapping = null;
+let invite = null;
+function inviteFor({ port, password, lan, internet }) {
+  const link = (host) => `http://${host}:${port}/${password ? `#pw=${encodeURIComponent(password)}` : ""}`;
+  return { internet: internet ? link(internet) : "", lan: lan.map(link), local: link("127.0.0.1") };
 }
 function plain(error) {
   if (error && error.code === "EADDRINUSE") return "That port is already in use.";
@@ -537,7 +551,16 @@ const calls = {
       table = next;
       if (hosted) hosted.port = info.port;
       const net = await networkSnapshot();
-      return { ...info, v6: net.v6, externalV4: net.externalV4, externalV6: net.externalV6 };
+      // Internet play: the port opened on the router by itself (UPnP or NAT-PMP), when the GM asked.
+      let upnp = null;
+      if (options?.upnp && options?.cloud) {
+        const mapped = await Promise.race([openPort(info.port), new Promise((resolve) => setTimeout(() => resolve({ ok: false, error: "The router took too long to answer." }), 9000))]);
+        if (mapped.ok) portMapping = mapped;
+        upnp = { ok: mapped.ok, method: mapped.method ?? "", external: mapped.external ?? "", error: mapped.error ?? "" };
+      }
+      const externalV4 = net.externalV4 || upnp?.external || "";
+      invite = inviteFor({ port: info.port, password, lan: options?.lan ? info.addresses : [], internet: options?.cloud ? externalV4 : "" });
+      return { ...info, v6: net.v6, externalV4, externalV6: net.externalV6, upnp, invite };
     } catch (error) {
       await next.stop().catch(() => undefined);
       closeCampaign();
@@ -545,6 +568,8 @@ const calls = {
     }
   },
   "stop-host": () => stopTable(),
+  // The invite links of the table being hosted (and whether the router opened its port).
+  invite: () => (table && invite ? { ...invite, upnp: portMapping ? { ok: true, method: portMapping.method } : null } : null),
   "campaign-view": (id) => {
     const current = requireHosted(id);
     return { view: current.state.view ?? null, hasBundle: Boolean(campaigns.readBundle(campaignFile(), id)) };

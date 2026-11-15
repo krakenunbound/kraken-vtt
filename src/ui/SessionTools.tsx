@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
+import { qrModules, qrSvgPath } from "./qr";
 import type { Seat, Session } from "../session/useSession";
 import { sound } from "../sound/soundEngine";
 import { Icon } from "./icons";
@@ -200,6 +201,71 @@ export function seatState(seat: Seat | undefined) {
   if (seat.afk) return "away";
   if (seat.idle) return "idle";
   return "";
+}
+
+// The invite (the GM's Players window): a link that seats a player with the table's password
+// already filled in (it rides in the link's #fragment, which a browser never sends to a server),
+// a Copy button and a QR code for a phone or tablet; and whether the router opened the port.
+export function InviteCard({ session }: { session: Session }) {
+  const info = session.hostInfo;
+  const invite = info?.invite;
+  const links = invite ? [...(invite.internet ? [{ label: "Internet", url: invite.internet }] : []), ...invite.lan.map((url) => ({ label: `Network ${new URL(url).hostname}`, url }))] : [];
+  const [chosen, setChosen] = useState(0);
+  const [copied, setCopied] = useState<"" | "copied" | "failed">("");
+  const link = links[Math.min(chosen, links.length - 1)];
+  const modules = useMemo(() => (link ? qrModules(link.url) : null), [link?.url]);
+  if (!info || !link) return null;
+  const copy = async () => {
+    let ok = false;
+    try {
+      await navigator.clipboard.writeText(link.url);
+      ok = true;
+    } catch {
+      ok = (await window.kraken?.copy(link.url).catch(() => false)) !== false && Boolean(window.kraken);
+    }
+    setCopied(ok ? "copied" : "failed");
+    window.setTimeout(() => setCopied(""), 1800);
+  };
+  const qr = modules ? qrSvgPath(modules) : null;
+  return (
+    <div className="invite-card" data-invite={link.url}>
+      <h3>Invite</h3>
+      {info.upnp ? (
+        <p className="upnp-line hint" data-upnp={info.upnp.ok ? "mapped" : "failed"}>
+          <Icon name={info.upnp.ok ? "check" : "warning"} size={14} />
+          {info.upnp.ok ? `Your router opened port ${info.port} for the table (${info.upnp.method}); it closes again when you stop.` : info.upnp.error}
+        </p>
+      ) : null}
+      {links.length > 1 ? (
+        <div className="invite-row" role="radiogroup" aria-label="Which link">
+          {links.map((item, index) => (
+            <label key={item.url} className="hint">
+              <input type="radio" name="invite-link" checked={index === chosen} onChange={() => setChosen(index)} /> {item.label}
+            </label>
+          ))}
+        </div>
+      ) : null}
+      <div className="invite-row">
+        <Icon name="link" size={15} />
+        <span className="secret" title={link.url}>
+          {link.url}
+        </span>
+        <button type="button" className="ghost" data-action="copy-invite" aria-live="polite" onClick={() => void copy()}>
+          {copied === "copied" ? "Copied" : copied === "failed" ? "Couldn't copy" : "Copy"}
+        </button>
+      </div>
+      <p className="hint">{info.publicGame ? "Anyone with the link sits down." : "The link carries the table's password: a player opens it and only types their name."}</p>
+      {qr ? (
+        <div className="invite-qr" aria-label="QR code of the invite link" role="img">
+          <svg viewBox={`0 0 ${qr.size} ${qr.size}`} shapeRendering="crispEdges">
+            <path d={qr.path} fill="#000" />
+          </svg>
+        </div>
+      ) : (
+        <p className="hint">The link is too long for a QR code; copy it instead.</p>
+      )}
+    </div>
+  );
 }
 
 // The GM's menu for a player (a right-click on their row in Players, or on their portrait):

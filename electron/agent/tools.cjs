@@ -77,16 +77,19 @@ const TOOLS = [
   },
   {
     name: "kraken_host",
-    description: "Host a campaign in the app window, as the GM pressing Play. The window joins as the DM.",
+    description:
+      "Host a campaign in the app window, as the GM pressing Play. The window joins as the DM. internet: players anywhere (the start screen's Internet); upnp: also open the port on the router by itself (UPnP or NAT-PMP; closed again when hosting stops). Returns invite: the link a player opens to sit down, the table's password in its #fragment (internet's when on, else the network's), and invites (every link).",
     inputSchema: object(
       {
         campaignId: string("Campaign id from kraken_campaigns"),
         port: number("Port, default 47300"),
         password: string("Table password; empty for a public game"),
+        internet: { type: "boolean", description: "Players anywhere (the start screen's Internet toggle)" },
+        upnp: { type: "boolean", description: "Open the port on the router by itself (implies internet)" },
       },
       ["campaignId"],
     ),
-    run: async (args, ctx) => out(await ctx.ui({ kind: "host", campaignId: args.campaignId, port: args.port ?? 47300, password: args.password ?? "" })),
+    run: async (args, ctx) => out(await ctx.ui({ kind: "host", campaignId: args.campaignId, port: args.port ?? 47300, password: args.password ?? "", internet: Boolean(args.internet), upnp: Boolean(args.upnp) }, 90000)),
   },
   {
     name: "kraken_leave",

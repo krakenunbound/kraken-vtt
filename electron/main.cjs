@@ -187,6 +187,7 @@ for (const name of [
   "studio-settings",
   "start-host",
   "stop-host",
+  "invite",
   "campaign-view",
   "campaign-bundle",
   "save-bundle",

@@ -170,9 +170,12 @@ export function App() {
         if (current.connected) current.leave(true);
         // The GM plays under the name kept with the campaign.
         const touched = await kraken.touchCampaign({ id: command.campaignId, port: command.port }).catch(() => null);
-        const failed = await current.host({ name: touched?.gmName || "DM", port: command.port, password: command.password, lan: true, cloud: false, campaignId: command.campaignId });
+        // internet: players anywhere (and upnp: the router's port opened by itself).
+        const internet = Boolean(command.internet || command.upnp);
+        const failed = await current.host({ name: touched?.gmName || "DM", port: command.port, password: command.password, lan: true, cloud: internet, upnp: Boolean(command.upnp), campaignId: command.campaignId });
         if (failed) throw new Error(failed);
-        return { hosting: true, campaignId: command.campaignId, port: command.port };
+        const invite = await kraken.invite?.().catch(() => null);
+        return { hosting: true, campaignId: command.campaignId, port: command.port, ...(invite ? { invite: invite.internet || invite.lan[0] || invite.local, invites: invite } : {}) };
       }
       if (command.kind === "dice-settings") return diceSettings(command.patch ?? {});
       if (command.kind === "open-adventure") {

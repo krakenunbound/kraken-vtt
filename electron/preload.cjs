@@ -32,6 +32,7 @@ contextBridge.exposeInMainWorld("kraken", {
   copy: (text) => ipcRenderer.invoke("copy", text),
   startHost: (options) => ipcRenderer.invoke("start-host", options),
   stopHost: () => ipcRenderer.invoke("stop-host"),
+  invite: () => ipcRenderer.invoke("invite"),
   setSceneImage: (bytes, mime) => ipcRenderer.invoke("set-scene-image", bytes, mime),
   setTokenArt: (list) => ipcRenderer.invoke("set-token-art", list),
   pickDecal: (kind) => ipcRenderer.invoke("decal-pick", kind),

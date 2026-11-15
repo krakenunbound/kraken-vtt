@@ -1,7 +1,7 @@
 import { ShipsWindow } from "../ships/ShipsWindow";
 import { DelveWindow, OraclesWindow } from "../ironsworn/IronswornWindows";
 import { Fragment, lazy, Suspense, useEffect, useRef, useState, useSyncExternalStore, type MouseEvent as ReactMouseEvent, type ReactNode } from "react";
-import { BellAndHands, HandButton, PauseButton, PauseVeil, PlayerMenu, ReconnectBanner, SceneTitleCard, seatState, useIdle, usePlayerMenu } from "./SessionTools";
+import { BellAndHands, HandButton, InviteCard, PauseButton, PauseVeil, PlayerMenu, ReconnectBanner, SceneTitleCard, seatState, useIdle, usePlayerMenu } from "./SessionTools";
 import { Picture } from "../characters/ArtPicker";
 import { CharacterPanel } from "../characters/CharacterPanel";
 import { CharacterSelect } from "../characters/CharacterSelect";
@@ -81,6 +81,7 @@ function PlayersWindow({ session, onMenu }: { session: Session; onMenu?: (name: 
             <dt>Password</dt>
             <dd>{info.publicGame ? <span className="hint">None: a public game, players leave it blank</span> : <span className="secret">{info.password}</span>}</dd>
           </dl>
+          <InviteCard session={session} />
         </div>
       ) : null}
       <h3>At the table</h3>

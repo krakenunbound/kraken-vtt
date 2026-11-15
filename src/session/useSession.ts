@@ -261,6 +261,8 @@ export type HostInfo = {
   lan: boolean;
   cloud: boolean;
   campaignId: string;
+  upnp?: import("../kraken").KrakenUpnp | null;
+  invite?: import("../kraken").KrakenInvite | null;
 };
 
 type NetScene = {
@@ -761,7 +763,7 @@ export function useSession() {
   }, [remoteLabel, leave]);
 
   const host = useCallback(
-    async (input: { name: string; port: number; password: string; lan: boolean; cloud: boolean; campaignId: string }) => {
+    async (input: { name: string; port: number; password: string; lan: boolean; cloud: boolean; upnp?: boolean; campaignId: string }) => {
       setConnecting(true);
       setError(null);
       let started = false;
@@ -775,6 +777,7 @@ export function useSession() {
           password,
           lan: input.lan,
           cloud: input.cloud,
+          upnp: Boolean(input.upnp),
           campaignId: input.campaignId,
         });
         started = true;
@@ -789,6 +792,8 @@ export function useSession() {
           lan: input.lan,
           cloud: input.cloud,
           campaignId: input.campaignId,
+          upnp: info.upnp ?? null,
+          invite: info.invite ?? null,
         });
         await connect(
           endpoint("127.0.0.1", info.port, "ws"),
