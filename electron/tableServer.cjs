@@ -932,7 +932,9 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
   const lastHurt = new Map();
   function floatScan() {
     for (const token of map.tokens()) {
-      const entry = combat.entries().find((item) => item.tokenId === token.id);
+      // Its tracker entry: tied to this token, else (added from its record) the record's.
+      const entries = combat.entries();
+      const entry = entries.find((item) => item.tokenId === token.id) ?? (token.recordId ? entries.find((item) => !item.tokenId && item.recordId === token.recordId) : undefined);
       const record = token.recordId ? records.get(token.recordId) : null;
       const vitals = entry ? combat.vitals(entry) : record?.data?.hp && Number(record.data.hp.total) > 0 ? { wounds: Number(record.data.hp.wounds) || 0, temp: Math.max(0, Number(record.data.hp.temp) || 0) } : null;
       if (!vitals) continue;
