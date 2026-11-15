@@ -11,8 +11,17 @@ import { data } from "./common.mjs";
 
 const SPELLS_DATA = data("spells");
 
-const action = (row) => {
+// A spell with an area (tools/areas.mjs): its cast action names the shape and
+// size as FG's 2024 data does (targeting sphere, emanation, cone, line, cube),
+// so the tracker places its template at that size.
+const SHAPE = { circle: "sphere", cone: "cone", line: "line", square: "cube" };
+const action = (row, spell) => {
   const out = { ...row };
+  if (row.type === "cast" && spell?.area && (row.targeting ?? "targets") === "targets") {
+    out.targeting = spell.area.attach ? "emanation" : SHAPE[spell.area.shape];
+    out.targetingval = spell.area.size;
+    if (spell.area.shape === "line") out.targetingval2 = spell.area.width ?? 5;
+  }
   if (row.damagelist) out.damagelist = ids(row.damagelist);
   if (row.heallist) out.heallist = ids(row.heallist);
   return out;
@@ -29,7 +38,7 @@ export const SPELLS = SPELLS_DATA.map((spell) => ({
   ritual: spell.ritual ? 1 : 0,
   source: spell.classes.join(", "),
   description: md(`*${spell.level ? `Level ${spell.level} ${spell.school}` : `${spell.school} Cantrip`} (${spell.classes.join(", ")})*\n\n**Casting Time:** ${spell.castingtime}${spell.ritual ? " or Ritual" : ""}\n\n**Range:** ${spell.range}\n\n**Components:** ${spell.components}\n\n**Duration:** ${spell.duration}\n\n${spell.text}`),
-  ...(spell.actions.length ? { actions: ids(spell.actions.map(action)) } : {}),
+  ...(spell.actions.length ? { actions: ids(spell.actions.map((row) => action(row, spell))) } : {}),
   __category: spell.level === 0 ? "Cantrips" : `Level ${spell.level}`,
 }));
 

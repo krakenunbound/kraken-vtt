@@ -3,7 +3,8 @@
 
     python games/srd-5e/tools/build.py path/to/SRD_CC_v5.2.1.pdf
 
-then `npm run build-games` and `npm run build-packs` make the books. Needs
+(tools/areas.mjs then adds each spell's area), then `npm run build-games` and
+`npm run build-packs` make the books. Needs
 PyMuPDF (pip install pymupdf).
 """
 import os
@@ -22,6 +23,9 @@ def main():
         elements = os.path.join(work, "elements.json")
         subprocess.run([sys.executable, os.path.join(HERE, "extract.py"), pdf, elements], check=True)
         subprocess.run([sys.executable, os.path.join(HERE, "parse.py"), elements, os.path.join(HERE, "..", "data")], check=True)
+    # Each spell's area (a Fireball's 20-foot sphere) from its words, by Kraken's
+    # own parser (shared/actions/parse.mjs), so the build and the tracker read them alike.
+    subprocess.run(["node", os.path.join(HERE, "areas.mjs")], check=True)
 
 
 if __name__ == "__main__":
