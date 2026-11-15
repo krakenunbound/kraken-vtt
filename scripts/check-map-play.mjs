@@ -312,6 +312,10 @@ try {
   const counts = server.agent.map.fromStudio({ ...master, walls: server.agent.map.walls().map((wall) => ({ ...wall })), project: null });
   assert(counts.regions === 1 && server.agent.map.regions()[0].kind === "pit", `Map Studio's regions: ${JSON.stringify(counts)}`);
   assert(server.persisted().map.regions.crypt.length === 1, "regions are saved");
+  // Switched off at the table, the well stays off when Map Studio saves to Kraken again.
+  await tool("kraken_region", { action: "update", id: server.agent.map.regions()[0].id, on: false });
+  server.agent.map.fromStudio({ ...master, walls: server.agent.map.walls().map((wall) => ({ ...wall })), project: null });
+  assert(server.agent.map.regions()[0].on === false, `a region switched off at the table stays off after Save to Kraken: ${JSON.stringify(server.agent.map.regions()[0])}`);
   // A play test's token springs a trap, but never locks the table.
   await tool("kraken_region", { action: "add", kind: "trap", name: "Test trap", rect: { col: 0, row: 0, cols: 1, rows: 1 } });
   const tester = server.agent.map.place({ name: "Test player", owner: "@test", x: 75, y: 25 }, server.agent.seat);
