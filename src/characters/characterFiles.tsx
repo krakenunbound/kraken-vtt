@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Session, TableRecord } from "../session/useSession";
 import { toFgXml, toKrakenFile } from "../../shared/siege/interchange.mjs";
 import { manifestOf } from "../rulesets";
@@ -61,11 +61,26 @@ function save(name: string, text: string, type: string) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-// Export a character as Kraken's file or FG's XML (FG's button_exportchar).
+// Export a character as Kraken's file or FG's XML (FG's button_exportchar). The menu closes on a
+// click elsewhere or Escape.
 export function ExportButton({ record }: { record: TableRecord }) {
   const [menu, setMenu] = useState(false);
+  const box = useRef<HTMLSpanElement>(null);
+  useEffect(() => {
+    if (!menu) return;
+    const away = (event: PointerEvent) => {
+      if (!box.current?.contains(event.target as Node)) setMenu(false);
+    };
+    const key = (event: KeyboardEvent) => event.key === "Escape" && setMenu(false);
+    document.addEventListener("pointerdown", away);
+    document.addEventListener("keydown", key);
+    return () => {
+      document.removeEventListener("pointerdown", away);
+      document.removeEventListener("keydown", key);
+    };
+  }, [menu]);
   return (
-    <span className="character-files">
+    <span className="character-files" ref={box}>
       <button type="button" className="character-file-button" title={`Export ${record.name}`} aria-label={`Export ${record.name}`} data-action="export-character" onClick={() => setMenu(!menu)}>
         <Icon name="export" size={16} />
       </button>
