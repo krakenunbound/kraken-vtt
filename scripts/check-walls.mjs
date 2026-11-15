@@ -223,7 +223,10 @@ try {
   const playerDrawings = () => map.viewFor(playerSeat, "").drawings.map((line) => line.id);
   assert(!playerDrawings().includes(box.id) && playerDrawings().includes(river.id), "paint in a GM-only group stays with the GM");
   const scribble = map.draw({ points: [0, 0, 10, 10], shape: "rect", fill: "#ffffff", group: "GM notes" }, playerSeat);
-  assert(!scribble.shape && !scribble.fill && !scribble.group, "a player draws plain lines");
+  // A player's shapes (line, arrow, square, circle, cone) get a faint fill in their own colour; the GM's fill colours and groups are not theirs to set.
+  assert(scribble.shape === "rect" && scribble.fill !== "#ffffff" && !scribble.group, "a player's shape keeps its kind but not the GM's fill or group");
+  const polygon = map.draw({ points: [0, 0, 10, 10, 0, 10], shape: "polygon" }, playerSeat);
+  assert(!polygon.shape, "a player's polygon is drawn as a plain line");
 
   // FX layers (the FX tab): several at once, each with a mask; a GM-only one stays with the GM.
   const rain = await tool("kraken_fx", { action: "add", type: "rain", amount: 0.8, intensity: 0.13, speed: 1, direction: 144, maskRect: { x: 0, y: 0, width: 300, height: 300 }, maskMode: "outside" });
