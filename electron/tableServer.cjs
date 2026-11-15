@@ -11,6 +11,7 @@ const { withArt } = require("./characterArt.cjs");
 const { soundFor, cleanTriggers } = require("./soundTriggers.cjs");
 const { defaultTriggers, TRIGGERS_VERSION } = require("./soundCatalog.cjs");
 const { createDice } = require("./dice.cjs");
+const { createModifiers, kindOf: modifierKind, run: modifierScope } = require("./modifiers.cjs");
 const { siege, siegeLibrary, siegeCheck, levelUp, changeClass, dropOnCharacter, editCharacter, importCharacter } = require("./siege.cjs");
 const { createMapState, playerColor } = require("./mapState.cjs");
 const { createPrefsStore } = require("./prefs.cjs");
@@ -622,6 +623,26 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
   let asking = null;
   const records = createRecordStore({ saved: saved.records, onChange: () => onChange("records") });
   const dice = createDice(saved.dice);
+  // Each seat's modifier stack (FG's modifier box and keys), read by every roll the seat starts.
+  const rulesetManifest = () => {
+    try {
+      return require("../shared/rulesets/registry.mjs").rulesetFor(ruleset);
+    } catch {
+      return null;
+    }
+  };
+  const { keysFor: modifierKeysFor, stackFor: modifierStackFor } = require("../shared/rulesets/modifiers.mjs");
+  const modifiers = createModifiers({
+    saved: saved.modifiers,
+    keysFor: () => modifierKeysFor(rulesetManifest()),
+    kindsFor: () => modifierStackFor(rulesetManifest()).kinds,
+    onChange: (key, stack) => {
+      for (const [ws, client] of clients) if (client.joined && clearKey(client) === key) send(ws, { type: "modifiers", modifiers: stack });
+      onChange("table");
+    },
+  });
+  // A roll the seat makes with its stack read (an attack, a check, a save: the rules' own d20 rolls).
+  const actRoll = (formula, kind = "roll", label = "", options = {}) => modifiers.roll(dice, formula, modifierStackFor(rulesetManifest()).on ? kind : "none", label, options);
   // A character's race and class token (Kraken's pair), when it has no picture of its own.
   const artForCharacter = (data) => {
     if (!art || !data) return null;
@@ -1106,7 +1127,12 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
   // extra: what an action adds to its roll card (an attack's HIT or MISS, its target).
   // secret: the GM's only, or shown to that one seat too (a name).
   function rollDice(formula, label, from, id, tag, secret = false, extra = null) {
-    const result = dice.roll(formula);
+    // The seat's modifier stack, by what the label says the roll is (none for hit points, ongoing damage...).
+    const result = actRoll(formula, extra?.mods === false ? "none" : modifierKind(label), String(label ?? ""));
+    if (extra?.mods === false) {
+      extra = { ...extra };
+      delete extra.mods;
+    }
     const roll = { ...result, label: text(label, "").slice(0, 160), ...(tag ? { tag: text(tag, "").slice(0, 80) } : {}), ...(extra ?? {}) };
     addChat({ id, from, text: "", roll, at: Date.now(), ...(secret ? { secret: true } : {}), ...(typeof secret === "string" ? { shownTo: secret } : {}) });
     return roll;
@@ -1720,7 +1746,8 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       if (!client.joined) ws.close();
     }, 10000);
 
-    ws.on("message", (raw) => {
+    // Each request runs as its seat's (the modifier stack it reads, electron/modifiers.cjs).
+    const onMessage = (raw) => {
       let msg;
       try {
         msg = JSON.parse(raw.toString());
@@ -1858,6 +1885,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
           soundscape,
           books: shelfView(client),
           quickSlots: slotsFor(client),
+          modifiers: modifiers.view(clearKey(client)),
           prefs: prefs.get(prefsKey(client)),
           ...(client.role === "dm" ? { bookSounds: Object.fromEntries(bookSounds), sceneSound: sceneSoundView() } : {}),
           records: records.list({ seat: seatOf(client) }).map((record) => viewFor(record, seatOf(client))),
@@ -2032,6 +2060,16 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         return;
       }
 
+      // The seat's modifier stack (FG's modifier box and keys): add, remove, set, clear, key.
+      if (msg.type === "modifiers") {
+        try {
+          modifiers.act(clearKey(client), { action: msg.action, value: msg.value, label: msg.label, index: msg.index, key: msg.key, on: msg.on, keys: msg.keys });
+        } catch (error) {
+          send(ws, { type: "error", reason: error instanceof Error ? error.message : "The modifier box could not change." });
+        }
+        return;
+      }
+
       if (msg.type === "chat-clear") {
         chatCleared.set(clearKey(client), Date.now());
         onChange("table");
@@ -2092,7 +2130,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
             rollDice(msg.formula, msg.label, client.name, client.id, msg.tag, client.role === "dm" ? true : client.name);
           } else if (msg.mode === "self") {
             // Foundry's /selfroll: the roller alone.
-            const result = dice.roll(msg.formula);
+            const result = actRoll(msg.formula, "roll", text(msg.label, ""));
             addChat({ id: client.id, from: client.name, text: "", roll: { ...result, label: text(msg.label, "").slice(0, 160) }, at: Date.now(), self: true });
           } else rollDice(msg.formula, msg.label, client.role === "dm" ? (msg.as ? text(msg.as, "").slice(0, 24) : client.name) : speaksAs(client, msg.as) || client.name, client.id, msg.tag);
         } catch (error) {
@@ -3049,7 +3087,8 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         broadcastScene();
         sendMaps();
       }
-    });
+    };
+    ws.on("message", (raw) => modifierScope(client.joined ? clearKey(client) : "", () => onMessage(raw)));
 
     ws.on("close", (code) => {
       clearTimeout(joinTimer);
@@ -3166,6 +3205,10 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     },
     setOptions,
     roll: (formula, label, from = "Agent", secret = false, extra = null) => rollDice(formula, label, from, "agent", undefined, secret, extra),
+    // A roll read through the modifier stack of the seat whose request this is (kind: attack, save, check, damage...).
+    act: (formula, kind = "roll", label = "", options = {}) => actRoll(formula, kind, label, options),
+    // A seat's modifier stack (FG's modifier box): view, add, remove, set, clear, key (who: a player's name; the GM's by default).
+    modifiers: (args = {}, who = "@gm") => modifiers.act(!who || who === "GM" ? "@gm" : who, args),
     // Posts a roll already made (an attack decides HIT or MISS before its card goes out).
     postRoll: (result, label, from = "Agent", secret = false, extra = null) =>
       addChat({ id: "agent", from: text(from, "Agent").slice(0, 24), text: "", roll: { ...result, label: text(label, "").slice(0, 160), ...(extra ?? {}) }, at: Date.now(), ...(secret ? { secret: true } : {}) }),
@@ -3518,6 +3561,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         soundTriggersVersion: TRIGGERS_VERSION,
         chatCleared: Object.fromEntries(chatCleared),
         quickSlots: Object.fromEntries(quickSlots),
+        modifiers: modifiers.toJSON(),
         bookSounds: Object.fromEntries(bookSounds),
         sceneSounds: Object.fromEntries(sceneSounds),
         bans,

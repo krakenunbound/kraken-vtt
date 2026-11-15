@@ -26,6 +26,7 @@
     "setup": "node scripts/check-setup.mjs",
     "dice": "node scripts/check-dice.mjs && tsx scripts/check-dice-throw.ts",
     "chat": "node scripts/check-chat.mjs",
+    "modifiers": "node scripts/check-modifiers.mjs",
     "sound": "node scripts/check-sound.mjs",
     "sound-ui": "node scripts/verify-sound-ui.mjs",
     "books": "node scripts/check-books.mjs",

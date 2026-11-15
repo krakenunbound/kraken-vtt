@@ -14,6 +14,7 @@ const MESSAGES = {
   chat: "kraken_chat_send",
   "chat-clear": "kraken_chat_log",
   quickslots: "kraken_quickslots",
+  modifiers: "kraken_modifiers",
   "book-activate": "kraken_books",
   "book-sound": "kraken_books",
   "book-share": "kraken_books",

@@ -24,6 +24,8 @@ export default {
   blurb: "Second Edition with your 2E books: THAC0 and descending Armor Class, the five saving throws, d10 initiative lowest first, thief skills, multi-classing, your books' pregenerated characters.",
   engine: "shared/adnd2e/rules.mjs",
   host: { module: "electron/adnd2e.cjs" },
+  // The modifier box's keys beside the chat (shared/rulesets/modifiers.mjs).
+  dice: { modifiers: { presets: ["plus2", "minus2", "max", "half"] } },
   sheet: {
     level: "arrange",
     className: "sheet-5e sheet-35 sheet-2e",

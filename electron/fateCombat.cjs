@@ -107,7 +107,7 @@ function createFateCombat({ table, state, record, find, mustGM, targetsOf, chang
     if (source && skips(source)) throw new Error(`${source.name} is ${health(source).status.toLowerCase()} and out of the conflict.`);
     const target = targetsOf(source)[0];
     const paid = await fate.payInvokes(table(), plan.record ?? null, opts.invokes, { gm: plan.gm });
-    const attackRoll = fate.fourDF(table(), plan.rating + 2 * paid.count);
+    const attackRoll = fate.fourDF(table(), plan.rating + 2 * paid.count, "attack");
     const words = `${plan.name} ${rules.signed(plan.rating)}${paid.count ? ` +${paid.count * 2} invoked` : ""}`;
     if (!target) {
       table().postRoll(attackRoll.rolled, `[ATTACK] ${plan.actor}: ${words}`, from, false, { by: plan.actor, result: "NO TARGET", ladder: rules.ladder(attackRoll.total) });
@@ -249,7 +249,7 @@ function createFateCombat({ table, state, record, find, mustGM, targetsOf, chang
     if (linked?.type === "character") return fate.rollFate(table(), linked, { skill, action: "overcome", opposition }, from);
     const sheet = sheetOf(entry);
     const rating = rules.ratingIn(sheet, skill);
-    const { rolled, total } = fate.fourDF(table(), rating);
+    const { rolled, total } = fate.fourDF(table(), rating, "check");
     const result = opposition === undefined || opposition === null || opposition === "" ? null : rules.outcome(total, rules.ratingOf(opposition));
     table().postRoll(rolled, `[FATE] ${entry.name}: ${skill} ${rules.signed(rating)}${result ? ` [${fate.RESULT[result.outcome]} ${rules.signed(result.shifts)}]` : ""}`, from || entry.name, Boolean(entry.hidden), { by: entry.name, ladder: rules.ladder(total), ...(result ? { result: fate.RESULT[result.outcome] } : {}) });
     return { name: entry.name, total, ladder: rules.ladder(total), ...(result ? { outcome: result.outcome, shifts: result.shifts, success: result.shifts >= 0 } : {}) };

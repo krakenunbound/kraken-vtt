@@ -2158,6 +2158,8 @@ const TOOLS = [
   require("../studio/agentTools.cjs").tool,
   // The campaign's own content: copies, story, tables, identification, encounters, parcels, quests (contentTools.cjs).
   ...require("./contentTools.cjs").TOOLS,
+  // The dice, chat and combat flow: the modifier stack, chat links, the session log (diceTools.cjs).
+  ...require("./diceTools.cjs").TOOLS,
   {
     name: "kraken_updates",
     description:
@@ -2386,7 +2388,8 @@ function listTools() {
 async function callTool(name, args, ctx) {
   const tool = TOOLS.find((item) => item.name === name);
   if (!tool) throw new Error(`Unknown tool ${name}.`);
-  return tool.run(args && typeof args === "object" ? args : {}, ctx);
+  // The agent is the GM: its rolls read the GM's modifier stack (electron/modifiers.cjs).
+  return require("../modifiers.cjs").run("@gm", () => tool.run(args && typeof args === "object" ? args : {}, ctx));
 }
 
 module.exports = { listTools, callTool };

@@ -1185,7 +1185,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     const crew = await ships.stationDm(table(), "gunner", weapon.gunner);
     const band = rs.RANGES[rs.rangeIndex(range)][0];
     const dm = crew.dm + weapon.dm + data.fireControl + rs.rangeDm(band) + effectBonus(source, "ATK");
-    const rolled = table().dice.roll(`2d6${dm ? `${dm > 0 ? "+" : ""}${dm}` : ""}`);
+    const rolled = table().act(`2d6${dm ? `${dm > 0 ? "+" : ""}${dm}` : ""}`, "attack");
     const effect = rolled.total - 8;
     const hit = effect >= 0;
     const name = from || crew.who?.name || ship.name;
@@ -1420,7 +1420,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       const how = modeFor(target);
       const formula = rc.damageFormula(plan.damage, how);
       // A blast rolls for each target; one target, one roll.
-      const rolled = !blast && shared ? shared : table().dice.roll(formula);
+      const rolled = !blast && shared ? shared : table().act(formula, "damage");
       shared = rolled;
       const armor = plan.ignoresArmor ? 0 : Math.min(rc.MAX_ARMOR, Math.max(0, vitals(target).ac));
       const dealt = Math.max(0, rolled.total - armor);
@@ -1504,7 +1504,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       results.push({ total: roll.total, hit: null, effect: roll.total - 8 });
     }
     for (const target of targets) {
-      const rolled = table().dice.roll(formula);
+      const rolled = table().act(formula, "attack");
       const effect = rolled.total - 8;
       const hit = effect >= 0;
       const armour = Math.max(0, vitals(target).ac - num(plan.ap, 0));
@@ -1554,7 +1554,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     // Traveller: a character's DM from its current characteristic (a wounded Strength is weaker).
     const modifier = linked?.type === "character" ? num((mgtOn() ? rm.derive(linked.data) : linked.data)?.characteristics?.[key]?.dm, 0) : mgtOn() ? mgtNpcDm(entry, linked, key) : num(ra.dm(linked?.data?.characteristics?.[key]?.score ?? 7), 0);
     const total = modifier + num(shift, 0) + effectBonus(entry, "SAVE");
-    const rolled = table().dice.roll(`2d6${total ? `${total > 0 ? "+" : ""}${total}` : ""}`);
+    const rolled = table().act(`2d6${total ? `${total > 0 ? "+" : ""}${total}` : ""}`, "check");
     const success = rolled.total >= 8;
     table().postRoll(rolled, `[CHECK] ${rules.STAT_NAMES[key] ?? key} [${success ? "SUCCESS" : "FAILURE"} ${rolled.total} vs 8]`, from || entry.name, Boolean(entry.hidden), { result: success ? "SUCCESS" : "FAILURE", by: entry.name, against: 8 });
     return { total: rolled.total, success };
@@ -1615,13 +1615,13 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     const swings = full ? bonuses.map((bonus) => ({ bonus, target: targets[0] })) : targets.map((target) => ({ bonus: plan.bonus, target }));
     for (const [index, { bonus, target }] of swings.entries()) {
       const ac = vitals(target).ac + effectBonus(target, "AC");
-      const rolled = table().dice.roll(formulaFor(bonus, target));
+      const rolled = table().act(formulaFor(bonus, target), "attack");
       const die = natural(rolled);
       const hit = die === 20 || (die !== 1 && rolled.total >= ac);
       let crit = false;
       let confirm = null;
       if (hit && die >= range) {
-        confirm = table().dice.roll(formulaFor(bonus, target));
+        confirm = table().act(formulaFor(bonus, target), "attack");
         const confirmDie = natural(confirm);
         crit = confirmDie === 20 || (confirmDie !== 1 && confirm.total >= ac);
       }
@@ -1690,7 +1690,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     const linked = record(entry);
     const base = linked?.type === "character" ? num(r35.derive(linked.data).saves[save].total, 0) : linked ? num(r35.npcStats(linked.data).saves[save], 0) : 0;
     const modifier = base + effectBonus(entry, "SAVE");
-    const rolled = table().dice.roll(`1d20${modifier ? `${modifier > 0 ? "+" : ""}${modifier}` : ""}${effectDice(entry, "SAVE")}`);
+    const rolled = table().act(`1d20${modifier ? `${modifier > 0 ? "+" : ""}${modifier}` : ""}${effectDice(entry, "SAVE")}`, castName ? "none" : "save");
     const die = natural(rolled);
     const success = dc > 0 ? die === 20 || (die !== 1 && rolled.total >= dc) : null;
     const name = r35.SAVE_NAMES[save];
@@ -1761,7 +1761,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     for (const [index, { swing, target }] of rounds.entries()) {
       const ac = vitals(target).ac - effectBonus(target, "AC");
       const need = plan.thaco - ac;
-      const rolled = table().dice.roll(formulaFor(swing, target));
+      const rolled = table().act(formulaFor(swing, target), "attack");
       const die = natural(rolled);
       const hit = die === 20 || (die !== 1 && rolled.total >= need);
       const verdict = die === 20 ? "AUTOMATIC HIT" : die === 1 ? "AUTOMATIC MISS" : hit ? "HIT" : "MISS";
@@ -1833,7 +1833,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     const linked = record(entry);
     const target = linked?.type === "character" ? num(r2e.derive(linked.data).saves[save].total, 20) : linked ? num(r2e.npcStats(linked.data).saves[save], 20) : r2e.savesFor("warrior", 1)[save];
     const modifier = Math.round(num(modIn, 0)) + effectBonus(entry, "SAVE");
-    const rolled = table().dice.roll(`1d20${modifier ? `${modifier > 0 ? "+" : ""}${modifier}` : ""}${effectDice(entry, "SAVE")}`);
+    const rolled = table().act(`1d20${modifier ? `${modifier > 0 ? "+" : ""}${modifier}` : ""}${effectDice(entry, "SAVE")}`, castName ? "none" : "save");
     const success = rolled.total >= target;
     const name = r2e.SAVE_NAMES[save];
     const label = `[SAVE] ${castName ? `${castName} (${name})` : name} [NEEDS ${target}] [${success ? "SUCCESS" : "FAILURE"} ${rolled.total} vs ${target}]`;
@@ -1893,7 +1893,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     const rounds = full ? swingsFor.map((swing) => ({ swing, target: targets[0] })) : targets.map((target) => ({ swing: plan.swing, target }));
     for (const [index, { swing, target }] of rounds.entries()) {
       const ac = vitals(target).ac + effectBonus(target, "AC");
-      const rolled = table().dice.roll(formulaFor(swing, target));
+      const rolled = table().act(formulaFor(swing, target), "attack");
       const die = natural(rolled);
       const hit = die === 20 || (die !== 1 && rolled.total >= ac);
       const verdict = die === 20 ? "AUTOMATIC HIT" : die === 1 ? "AUTOMATIC MISS" : hit ? "HIT" : "MISS";
@@ -1951,7 +1951,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     const linked = record(entry);
     const target = linked?.type === "character" ? num(rbf.derive(linked.data).saves[save].total, 20) : linked ? num(rbf.npcStats(linked.data).saves[save], 20) : rbf.savesFor("fighter", 1)[save];
     const modifier = Math.round(num(modIn, 0)) + effectBonus(entry, "SAVE");
-    const rolled = table().dice.roll(`1d20${modifier ? signedNum(modifier) : ""}${effectDice(entry, "SAVE")}`);
+    const rolled = table().act(`1d20${modifier ? signedNum(modifier) : ""}${effectDice(entry, "SAVE")}`, castName ? "none" : "save");
     const die = natural(rolled);
     const success = die === 20 || (die !== 1 && rolled.total >= target);
     const name = rbf.SAVE_NAMES[save];
@@ -2171,7 +2171,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       const ac = vitals(target).ac + effectBonus(target, "AC");
       // FG's getDefenseAdvantage: attacks on a frozen creature have advantage.
       const advantage = frozen(target);
-      const rolled = table().dice.roll(formulaFor(target, advantage));
+      const rolled = table().act(formulaFor(target, advantage), "attack");
       const die = natural(rolled);
       let crit = die === 20;
       const hit = crit || (die !== 1 && rolled.total >= ac);
@@ -2366,7 +2366,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     const shaken = linked?.type === "character" ? r5.dreadAdvantage(linked.data, "save", stat, chosen) : { advantage: chosen, dread: false };
     const advantage = shaken.advantage;
     const d20 = advantage === "advantage" ? "2d20kh1" : advantage === "disadvantage" ? "2d20kl1" : "1d20";
-    const rolled = table().dice.roll(`${d20}${modifier ? `${modifier > 0 ? "+" : ""}${modifier}` : ""}${effectDice(entry, "SAVE")}`);
+    const rolled = table().act(`${d20}${modifier ? `${modifier > 0 ? "+" : ""}${modifier}` : ""}${effectDice(entry, "SAVE")}`, castName ? "none" : "save");
     // Paralyzed, Petrified, Stunned and Unconscious (the Dying and the stable too)
     // creatures fail Strength and Dexterity saves automatically.
     const autoFail = (stat === "strength" || stat === "dexterity") && frozen(entry);
@@ -2504,7 +2504,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
         if (attackRow) {
           // Attacks on a frozen creature have advantage; a melee hit on one Paralyzed or Unconscious is a critical (FG).
           const advantage = frozen(target);
-          const rolled = table().dice.roll(`${advantage ? "2d20kh1" : "1d20"}${attackBonus >= 0 ? "+" : ""}${attackBonus}`);
+          const rolled = table().act(`${advantage ? "2d20kh1" : "1d20"}${attackBonus >= 0 ? "+" : ""}${attackBonus}`, "attack");
           const die = natural(rolled);
           const ac = vitals(target).ac + effectBonus(target, "AC");
           landed = die === 20 || (die !== 1 && rolled.total >= ac);
@@ -3459,7 +3459,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       }
       for (const target of targets) {
         const ac = vitals(target).ac + effectBonus(target, "AC");
-        const rolled = table().dice.roll(formula);
+        const rolled = table().act(formula, "attack");
         const hit = rolled.total >= ac;
         const label = `[ATTACK]${kind} ${plan.name} [AC ${ac}] [${hit ? "HIT" : "MISS"} ${rolled.total} vs ${ac}] -> [at ${target.name}]`;
         table().postRoll(rolled, label, from, Boolean(target.hidden), { result: hit ? "HIT" : "MISS", by: plan.actor, against: ac, target: target.name });
@@ -3592,7 +3592,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       const bonus = siegeEffect(entry, stat, true);
       const addLevel = String(opts.SIEGE_ADD_LEVEL ?? "on").toLowerCase() === "on";
       const modifier = engine.abilityBonus(score, game) + (addLevel ? level : 0) + bonus;
-      const rolled = table().dice.roll(`1d20${modifier >= 0 ? "+" : ""}${modifier}`);
+      const rolled = table().act(`1d20${modifier >= 0 ? "+" : ""}${modifier}`, castName ? "none" : "save");
       const result = engine.check({ d20: rolled.terms[0].rolls[0], score, prime, level, addLevel, cl: Math.round(num(cl, 0)), bonus }, game);
       const label = `[SAVE] ${castName ? `${castName} (${stat[0].toUpperCase()}${stat.slice(1)})` : `${stat[0].toUpperCase()}${stat.slice(1)}`} (${prime ? "Prime" : "Secondary"}) [CB ${result.cb} CL ${Math.round(num(cl, 0))} CC ${result.cc}]${bonus ? ` [EFFECT ${bonus > 0 ? "+" : ""}${bonus}]` : ""} [${result.success ? "SUCCESS" : "FAILURE"} ${result.total} vs ${result.cc}]`;
       table().postRoll(rolled, label, from ?? entry.name, Boolean(entry.hidden), { result: result.success ? "SAVED" : "FAILED", by: entry.name });

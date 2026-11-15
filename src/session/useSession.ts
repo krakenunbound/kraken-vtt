@@ -161,7 +161,11 @@ const EMPTY_MAP: TableMap = { sceneId: null, tokens: [], doors: [], vision: null
 export type RollTerm =
   | { kind: "number"; sign: number; value: number }
   | { kind: "dice"; sign: number; count: number; sides: number; rolls: number[]; kept: boolean[]; sum: number };
-export type RollResult = { formula: string; label: string; total: number; terms: RollTerm[]; tag?: string; result?: string; target?: string; against?: number; by?: string; card?: string; apply?: DamageCard };
+// What the modifier stack added to a roll (its slots and keys), listed on the card.
+export type RollMod = { label: string; value?: number; key?: string };
+export type RollResult = { formula: string; label: string; total: number; terms: RollTerm[]; tag?: string; result?: string; target?: string; against?: number; by?: string; card?: string; apply?: DamageCard; mods?: RollMod[] };
+// The seat's modifier stack (FG's modifier box): up to six labelled numbers, their total, and the keys on (ADV, Cover...).
+export type ModifierStack = { slots: { label: string; value: number }[]; keys: string[]; total: number };
 // A damage or healing roll's card (combat.cjs landOn): each creature it landed on, what it took
 // after its save and resistances, the multiplier the GM chose (null: waiting, autoApply off).
 export type DamageCard = { kind: "damage" | "heal"; type: string; name: string; total: number; auto: boolean; targets: { id: string; name: string; base?: number; taken: number; mult: number | "heal" | null; note?: string; save?: string; hidden?: boolean }[] };
@@ -447,6 +451,7 @@ export function useSession() {
   const [sceneSound, setSceneSound] = useState<{ sceneId: string | null; kept: Soundscape | null }>({ sceneId: null, kept: null });
   const [bookSounds, setBookSounds] = useState<Record<string, PageSounds>>({});
   const [quickSlots, setQuickSlotsState] = useState<(QuickSlot | null)[]>(Array(10).fill(null));
+  const [modifiers, setModifiers] = useState<ModifierStack>({ slots: [], keys: [], total: 0 });
   const [bookShelf, setBookShelf] = useState<BookShelf>({ active: [], shared: [], images: [] });
   // The last picture the GM showed the players (a player's screen opens it).
   const [imageShown, setImageShown] = useState<{ id: string; at: number } | null>(null);
@@ -612,6 +617,7 @@ export function useSession() {
             setChat((msg.chat as ChatLine[]) ?? []);
             if (msg.books) setBookShelf(msg.books as BookShelf);
             if (Array.isArray(msg.quickSlots)) setQuickSlotsState(msg.quickSlots as (QuickSlot | null)[]);
+            if (msg.modifiers && typeof msg.modifiers === "object") setModifiers(msg.modifiers as ModifierStack);
             // This person's own settings (their colour and dice), kept by the GM's app.
             diceStore.connect((patch) => {
               const open = socketRef.current;
@@ -695,6 +701,7 @@ export function useSession() {
           if (msg.type === "book-sounds" && msg.sounds && typeof msg.sounds === "object") setBookSounds(msg.sounds as Record<string, PageSounds>);
           if (msg.type === "prefs") diceStore.adopt(msg.prefs);
           if (msg.type === "quickslots" && Array.isArray(msg.slots)) setQuickSlotsState(msg.slots as (QuickSlot | null)[]);
+          if (msg.type === "modifiers" && msg.modifiers && typeof msg.modifiers === "object") setModifiers(msg.modifiers as ModifierStack);
           if (msg.type === "chat-cleared") {
             setChat([]);
             return;
@@ -1499,6 +1506,9 @@ export function useSession() {
     bookSounds,
     // The GM's: a sound on one of a page's sound links, or in its story.
     setBookSound: (change: { book: string; page: string; action: "bind" | "unbind" | "add" | "remove"; key?: string; block?: number; id?: string; sound?: string; kind?: string; label?: string }) => send({ type: "book-sound", ...change }),
+    // The modifier box beside the tray (the host keeps it, every roll this seat starts reads it).
+    modifiers,
+    modify: (change: { action: "add" | "remove" | "set" | "clear" | "key"; value?: number; label?: string; index?: number; key?: string; on?: boolean }) => send({ type: "modifiers", ...change }),
     quickSlots,
     setQuickSlots: (slots: (QuickSlot | null)[]) => {
       setQuickSlotsState(slots);

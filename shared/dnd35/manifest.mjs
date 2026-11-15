@@ -27,6 +27,8 @@ export default {
   blurb: "Played from your 3.5E books (the Player's Handbook, Dungeon Master's Guide and Monster Manual): 3.5E sheets and character building, base attack and iterative attacks, criticals by threat and confirmation, Fortitude, Reflex and Will, skills by ranks.",
   engine: "shared/dnd35/rules.mjs",
   host: { module: "electron/dnd35.cjs" },
+  // The modifier box's keys beside the chat (shared/rulesets/modifiers.mjs).
+  dice: { modifiers: { presets: ["plus2", "minus2", "crit", "max", "half"] } },
   records: { race: { label: "Races" } },
   sheet: {
     level: "arrange",

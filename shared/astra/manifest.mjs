@@ -153,6 +153,8 @@ export default {
   blurb: "Kraken's science fiction: 2d6 and skills, Paths to make a crew in minutes, armour that soaks. Its books and a first adventure come with Kraken.",
   engine: "shared/astra/rules.mjs",
   host: { module: "electron/astra.cjs", message: "character-improve", tool: "kraken_character_improve" },
+  // The modifier box's keys beside the chat (shared/rulesets/modifiers.mjs).
+  dice: { modifiers: { presets: ["boon", "bane", "plus1", "minus2"] } },
   records: { race: { label: "Origins" }, class: { label: "Paths" }, item: { label: "Gear" }, npc: { label: "Threats" } },
   sheet,
   wizard: "astra.wizard",

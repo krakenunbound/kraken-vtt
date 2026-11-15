@@ -24,6 +24,8 @@ export default {
   blurb: "The Basic Fantasy Role-Playing Game, 4th Edition (free, CC BY-SA): old-school play with ascending Armor Class and an attack bonus, 3d6 in order, four races and four classes, the five saving throws, d6 initiative, thief abilities, turning the undead. Its Player's Handbook, Game Master's Guide and a first adventure come with Kraken.",
   engine: "shared/bfrpg/rules.mjs",
   host: { module: "electron/bfrpg.cjs" },
+  // The modifier box's keys beside the chat (shared/rulesets/modifiers.mjs).
+  dice: { modifiers: { presets: ["plus2", "minus2", "max", "half"] } },
   records: { race: { label: "Races" }, npc: { label: "Monsters" } },
   wizard: "bfrpg.wizard",
   blank: false,

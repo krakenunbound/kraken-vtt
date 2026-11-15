@@ -160,6 +160,8 @@ export default {
   blurb: "Mongoose Traveller 2nd Edition: the UPP's six characteristics, skills and specialities, 2d6 tasks with Effect, Boon and Bane, careers and terms, damage to Endurance, Strength and Dexterity, armour and AP. Its rules are Kraken's own code; your Traveller books add their content.",
   engine: "shared/mgt2/rules.mjs",
   host: { module: "electron/mgt2.cjs", message: "mgt2-life", tool: "kraken_traveller_lifepath" },
+  // The modifier box's keys beside the chat (shared/rulesets/modifiers.mjs).
+  dice: { modifiers: { presets: ["boon", "bane", "plus1", "minus2"] } },
   records: { item: { label: "Equipment" }, npc: { label: "NPCs and Animals", statblock: "mgt2.npcBlock" } },
   sheet,
   wizard: "mgt2.wizard",

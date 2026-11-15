@@ -95,6 +95,8 @@ export default {
   blurb: "Ironsworn and Ironsworn: Delve (Shawn Tomkin, CC BY 4.0; an unofficial adaptation): vows sworn upon iron, the action die against two challenge dice, momentum, progress tracks, assets, the oracles for play with or without a GM, Delve's sites. Its Reference, Foes and Sites and The Cinder Barrow come with Kraken.",
   engine: "shared/ironsworn/rules.mjs",
   host: { module: "electron/ironsworn.cjs", message: "ironsworn", tool: "kraken_ironsworn" },
+  // No modifier stack: an action roll's adds are chosen on the move itself (the action die is never past 10).
+  dice: { modifiers: false },
   records: { npc: { label: "Foes" } },
   sheet,
   wizard: "ironsworn.wizard",

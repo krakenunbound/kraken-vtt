@@ -23,6 +23,8 @@ export default {
   blurb: "Cairn, Second Edition (Yochai Gal, CC BY-SA 4.0): three attributes and Hit Protection, saves under a d20, attacks that always hit, Scars, Fatigue and ten inventory slots, backgrounds instead of classes. Its Player's Guide, Warden's Guide and Trouble in Twin Lakes come with Kraken.",
   engine: "shared/cairn/rules.mjs",
   host: { module: "electron/cairn.cjs", message: "cairn", tool: "kraken_cairn" },
+  // Cairn's saves are roll-under with no bonuses: the stack reads damage rolls alone.
+  dice: { modifiers: { presets: ["max"], kinds: ["damage"] } },
   labels: { hp: "HP", ac: "Armor", xp: "Growth" },
   records: {
     background: { label: "Backgrounds" },

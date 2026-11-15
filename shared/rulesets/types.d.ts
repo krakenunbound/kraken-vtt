@@ -375,7 +375,8 @@ export interface RulesetManifest {
   party: PartySpec;
   features: FeatureId[];
   settings?: ({ key: string; label: string; hint?: string; kind: "toggle" | "select" | "checklist"; default: unknown; options?: string[] } | { component: Ref; gm?: boolean })[];
-  dice?: { extraTray?: string[]; resultWords?: Record<string, "good" | "mixed" | "bad"> };
+  // modifiers: the modifier box and its keys (shared/rulesets/modifiers.mjs); false: none. kinds: the rolls it reads (all when left out).
+  dice?: { extraTray?: string[]; resultWords?: Record<string, "good" | "mixed" | "bad">; modifiers?: false | { presets?: (string | import("./modifiers.mjs").ModifierKey)[]; kinds?: string[] } };
   windows?: WindowSpec[];
   strips?: Ref[];
   combatLabel?: string; // "Score"
