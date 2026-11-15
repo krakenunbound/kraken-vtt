@@ -88,6 +88,15 @@ export function linkOfRecordname(recordname) {
   }
 }
 
+/** Plain words as written, from the entities the host's cleaning put in (an old note's &amp; and &lt;). @param {unknown} text */
+export const decodeEntities = (text) =>
+  String(text ?? "")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#(\d{1,7});/g, (_, code) => String.fromCodePoint(Number(code)))
+    .replace(/&amp;/g, "&");
+
 /** The words of a formatted text, without its tags (a chat line, a search). @param {unknown} text */
 export const plainOf = (text) =>
   String(text ?? "")

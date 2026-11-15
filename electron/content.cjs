@@ -84,12 +84,14 @@ function storyAction(table, args) {
 
 const TABLE_TYPES = new Set(["table", "tables"]);
 // A table by a link: a campaign record's id, a book path (FG's recordname), or a name.
-function findTable(table, link) {
+// seat: a player's (only the campaign's tables shared with them); none, the GM's (the active books' too).
+function findTable(table, link, seat = null) {
   const want = String(link?.recordname ?? link?.id ?? "").trim();
   const name = String(link?.name ?? "").trim().toLowerCase();
-  const campaign = table.records.list().filter((record) => isTable(record.data));
+  const player = seat && seat.role !== "dm";
+  const campaign = table.records.list(player ? { seat } : {}).filter((record) => isTable(record.data));
   const matchOf = (record) => (want && (record.id === want || record.data?.fgPath === want || String(record.data?.fgPath ?? "").replace(/@.*$/, "") === want.replace(/@.*$/, ""))) || (name && record.name.toLowerCase() === name);
-  const found = campaign.find(matchOf) ?? (table.bookTables?.() ?? []).find(matchOf);
+  const found = campaign.find(matchOf) ?? (player ? null : (table.bookTables?.() ?? []).find(matchOf));
   return found ? { name: found.name, data: found.data, id: found.id } : null;
 }
 // The table asked for: a record (id), a book's (path), or by name; a player only one they can see.
@@ -102,12 +104,14 @@ function tableTarget(table, args, seat) {
     return { name: record.name, data: record.data, id: record.id };
   }
   if (args.path) {
+    // An adventure's table (the Library's) is the GM's.
+    if (seat && seat.role !== "dm") throw new Error("That table is the GM's.");
     const library = require("./library.cjs");
     const record = library.find(library.moduleOf(String(args.path)), String(args.path));
     return { name: record.name, data: record.data, id: record.id };
   }
-  const found = findTable(table, { name: args.name });
-  if (!found || (seat && seat.role !== "dm" && !table.records.get(found.id, seat))) throw new Error(`No table called ${args.name ?? ""}.`);
+  const found = findTable(table, { name: args.name }, seat);
+  if (!found) throw new Error(`No table called ${args.name ?? ""}.`);
   return found;
 }
 // Rolls a table on the host's dice (FG's table roll and /rollon): its card in
@@ -117,7 +121,9 @@ function tableTarget(table, args, seat) {
 // treasure parcel (FG's table output to a parcel).
 function rollOn(table, args, seat = table.seat, from = "GM") {
   const target = tableTarget(table, args, seat);
-  const roll = rollTable(target.data, { name: target.name, roll: (formula) => table.dice.roll(formula), find: (link) => findTable(table, link), column: args.column, dice: args.dice, secret: args.hide === true });
+  const player = seat.role !== "dm";
+  if (player && args.output) throw new Error("Only the GM rolls a table into a parcel.");
+  const roll = rollTable(target.data, { name: target.name, roll: (formula) => table.dice.roll(formula), find: (link) => findTable(table, link, seat), column: args.column, dice: args.dice, secret: args.hide === true });
   const post = (one) => {
     const links = one.results.filter((result) => result.link).map((result) => ({ class: result.link.class, recordname: result.link.recordname, name: plainOf(result.text) }));
     const words = plainOf(resultWords(one));
@@ -125,7 +131,7 @@ function rollOn(table, args, seat = table.seat, from = "GM") {
     one.nested.forEach(post);
   };
   post(roll);
-  const output = String(args.output ?? target.data.output ?? "");
+  const output = player ? "" : String(args.output ?? target.data.output ?? "");
   const parcel = output === "parcel" ? parcelFromRoll(table, roll) : null;
   return { table: target.name, roll: roll.total, result: plainOf(resultWords(roll)), results: flatResults(roll).map((result) => ({ table: result.table, label: result.label, text: plainOf(result.text), link: result.link })), secret: roll.secret, ...(parcel ? { parcel: parcel.id } : {}) };
 }
@@ -293,7 +299,8 @@ async function encounterAction(table, args, from = "GM") {
   // there (put them on with Add to tracker or from the list, move them, then Place), kept with the
   // encounter for that map: the next Add to tracker puts them there.
   if (action === "place") {
-    const scene = table.scene?.();
+    // The map the GM works on (the image window's while one is open): its scene and its tokens together.
+    const scene = table.map.scene?.() ?? table.scene?.();
     if (!scene) throw new Error("No map is open.");
     const tokens = table.map.tokens();
     const npclist = {};

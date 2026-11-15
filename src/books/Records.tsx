@@ -5,7 +5,7 @@ import { slotDrag, useOpenLink } from "../ui/QuickSlots";
 import { recordLabel, statblockFor } from "../rulesets/statblocks";
 import { useBookWindows } from "./Books";
 import { ReadAloudButton } from "./readAloud";
-import { isFormatted, linkOfRecordname } from "../../shared/text/formatted.mjs";
+import { decodeEntities, isFormatted, linkOfRecordname } from "../../shared/text/formatted.mjs";
 import { LinkChip } from "../core/fields/RichText";
 import { CORE_VIEWS, IdentifyBar, openUnlocked, RecordFields, ShareMenu, TableEditor, TableRollBar, useRecordActions, useRecordMenu } from "./RecordEditor";
 
@@ -312,7 +312,7 @@ function nodes(parent: Node, key = "n", onLink?: OnLink, onOpen?: OnOpen): React
 export function FormattedText({ text, onLink, onOpen }: { text: string; onLink?: OnLink; onOpen?: OnOpen }) {
   const content = useMemo(() => {
     // An old note's plain words: a paragraph a line.
-    if (!isFormatted(text)) return text.split("\n").map((line, index) => <p key={index}>{line}</p>);
+    if (!isFormatted(text)) return decodeEntities(text).split("\n").map((line, index) => <p key={index}>{line}</p>);
     const xml = new DOMParser().parseFromString(`<root>${text}</root>`, "application/xml");
     const root = xml.getElementsByTagName("parsererror").length ? new DOMParser().parseFromString(text, "text/html").body : xml.documentElement;
     return nodes(root, "n", onLink, onOpen);

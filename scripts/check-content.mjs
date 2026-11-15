@@ -158,24 +158,41 @@ try {
 
   // --- Tables on the host's dice: a campaign table made, imported, rolled; a player's /rollon.
   const made = await tool("kraken_table", { action: "import", name: "Rumours", text: "1  The well is cursed\n2  The miller lies\n3  [1d4+10] goblins in the hills" });
-  agent.dice.force([3, 2]);
+  agent.dice.clearForced(); agent.dice.force([3, 2]);
   const rolled = await tool("kraken_table", { action: "roll", id: made.id });
   assert(rolled.roll === 3 && rolled.result === "12 goblins in the hills", `rolled: ${JSON.stringify(rolled)}`);
   const card = agent.chatLog(5).reverse().find((line) => line.roll?.label?.startsWith("[TABLE] Rumours"));
   assert(card && !card.secret && card.roll.label === "[TABLE] Rumours = 3: 12 goblins in the hills", `the chat card: ${JSON.stringify(card?.roll?.label)}`);
   await tool("kraken_table", { action: "edit", id: made.id, hiderollresults: 1 });
-  agent.dice.force([1]);
+  agent.dice.clearForced(); agent.dice.force([1]);
   assert((await tool("kraken_table", { action: "roll", id: made.id })).secret === true, "hide roll results keeps it the GM's");
   await tool("kraken_table", { action: "edit", id: made.id, hiderollresults: 0, rows: [{ from: 1, to: 3, results: ["Anything"] }], labels: ["Rumour"] });
   assert(Object.keys(agent.records.get(made.id).data.tablerows).length === 1 && agent.records.get(made.id).data.labelcol1 === "Rumour", "the editor's rows saved");
   // A player rolls a table shared with them by name (/rollon Rumours), and not a hidden one.
   await tool("kraken_record_update", { id: made.id, visibility: "all" });
-  agent.dice.force([2]);
+  agent.dice.clearForced(); agent.dice.force([2]);
   const theirs = await ask(ann, { type: "table-roll", action: "roll", name: "Rumours" });
   assert(theirs.ok && theirs.result.result === "Anything", `a player's /rollon: ${JSON.stringify(theirs)}`);
   await tool("kraken_record_update", { id: made.id, visibility: "gm" });
   assert((await ask(ann, { type: "table-roll", action: "roll", name: "Rumours" })).ok === false, "a hidden table is not the player's to roll");
   assert((await ask(ann, { type: "table-roll", action: "import", name: "X", text: "1 a" })).ok === false, "a player cannot make tables");
+  // A player's roll reaches only what is theirs: no adventure table by path, no parcel, no GM table named inside one.
+  await tool("kraken_table", { action: "import", name: "Secret Lair", text: "1  The vault under the chapel" });
+  await tool("kraken_record_update", { id: made.id, visibility: "all" });
+  assert((await ask(ann, { type: "table-roll", action: "roll", path: "tables.id-00001@Some Adventure" })).ok === false, "a player cannot roll an adventure's table by its path");
+  assert((await ask(ann, { type: "table-roll", action: "roll", id: made.id, output: "parcel" })).ok === false, "a player cannot roll into a parcel");
+  agent.dice.clearForced();
+  const sneaky = await ask(ann, { type: "table-roll", action: "roll", name: "Mine", data: { dice: "d1", tablerows: { a: { fromrange: 1, torange: 1, results: { a: { result: "Look: [Secret Lair]" } } } } } });
+  assert(sneaky.ok && !JSON.stringify(sneaky).includes("vault") && !agent.chatLog(5).some((line) => /vault/.test(line.roll?.label ?? "")), `a GM table named in a player's roll is not rolled: ${JSON.stringify(sneaky)}`);
+  agent.dice.clearForced(); agent.dice.force([3, 2]);
+  const real = await tool("kraken_table", { action: "roll", name: "Rumours" });
+  assert(real.result === "Anything", "the GM's roll by name");
+  // [2x] and [3] on the host's own dice.
+  const twice = await tool("kraken_table", { action: "import", name: "Twice", text: "1  [2x] Rumours and [3] more" });
+  agent.dice.clearForced(); agent.dice.force([1]);
+  const rolledTwice = await tool("kraken_table", { action: "roll", id: twice.id });
+  assert(rolledTwice.result === "[2x] Rumours and 3 more" && rolledTwice.results.filter((row) => row.table === "Rumours").length === 0, `[3] is a number, [2x] repeats links (none here): ${JSON.stringify(rolledTwice)}`);
+  await tool("kraken_record_update", { id: made.id, visibility: "gm" });
 
   // --- Identification: nothing of the real item reaches a player's screen.
   const ring = await tool("kraken_record_create", { type: "item", name: "Ring of Sunfire", visibility: "all", data: { isidentified: 1, nonid_name: "Plain gold ring", nonid_notes: "Warm to the touch.", description: "Sunfire burns for 3d6.", cost: "5000 gp" } });
@@ -210,6 +227,33 @@ try {
   await latest(ann, (m) => m.type === "record" && m.record.id === hero.id && Object.values(m.record.data.inventorylist ?? {}).some((item) => item.name === "Ring of Sunfire"), "the ring identified on the sheet");
   // A player may not identify it themselves.
   assert((await ask(ann, { type: "op", op: "update", id: hero.id, patch: { data: { inventorylist: { [heroRow]: { isidentified: 0 } } } } })).ok === false, "a player cannot change an item's identification");
+  // What a sheet works out from an unidentified weapon and armour (5E's attacks, the armour worn), the
+  // tracker's view of the character and a chat line about it: none names the real items to the player.
+  ann.raw.length = 0;
+  const fighter = agent.records.create(
+    {
+      type: "character",
+      name: "Brenna",
+      owner: "a test player",
+      visibility: "owner",
+      data: {
+        ruleset: "dnd5e",
+        level: 3,
+        hp: { total: 20, wounds: 0 },
+        inventorylist: { "id-00001": { name: "Flame Tongue Longsword", nonid_name: "Ornate longsword", isidentified: 0, type: "Weapon", damage: "1d8 slashing", carried: 2 }, "id-00002": { name: "Mithral Breastplate", nonid_name: "Silvery breastplate", isidentified: 0, type: "Armor", subtype: "Medium Armor", ac: 14, carried: 2 } },
+        attacks: { "id-00001": { name: "Flame Tongue Longsword", bonus: 5, damage: "1d8+3" } },
+        ac: { total: 16, wearing: "Mithral Breastplate" },
+      },
+    },
+    agent.seat,
+  );
+  await tool("kraken_combat", { action: "add", recordId: fighter.id }).catch(() => undefined);
+  agent.say("Brenna draws the Flame Tongue Longsword.", "GM");
+  await latest(ann, (m) => m.type === "chat" && /draws the/.test(m.text ?? ""), "the chat line");
+  await settle();
+  const seen = ann.raw.join("\n");
+  assert(!/Flame Tongue|Mithral/.test(seen) && /Ornate longsword/.test(seen) && /Silvery breastplate/.test(seen), `the player's frames name only the unidentified weapon and armour: ${seen.match(/.{60}(Flame Tongue|Mithral).{60}/)?.[0]}`);
+  assert(agent.chatLog(3).some((line) => /Flame Tongue/.test(line.text ?? "")), "the GM's log keeps the real name");
   console.log("ok identification");
 
   // --- A parcel onto one character.
@@ -221,7 +265,7 @@ try {
   assert(given.given.length === 2 && Object.values(heroNow.inventorylist).some((item) => item.name === "Silver locket") && Object.values(heroNow.coins).some((coin) => coin.name === "SP" && coin.amount === 12), `a parcel dropped on a sheet: ${JSON.stringify(given)}`);
   // A table's results into a parcel.
   const loot = await tool("kraken_table", { action: "import", name: "Loot", text: "1  25 GP\n2  A silver comb" });
-  agent.dice.force([1]);
+  agent.dice.clearForced(); agent.dice.force([1]);
   const filled = await tool("kraken_table", { action: "roll", id: loot.id, output: "parcel" });
   assert(filled.parcel && Object.values(agent.records.get(filled.parcel).data.coinlist).some((coin) => coin.description === "GP" && coin.amount === 25), `a table output to a parcel: ${JSON.stringify(agent.records.get(filled.parcel)?.data)}`);
 
@@ -230,9 +274,23 @@ try {
   await tool("kraken_encounter", { action: "add-npc", id: battle.id, npc: goblin.id, count: "2" });
   await tool("kraken_encounter", { action: "add-npc", id: battle.id, npc: copy.id, count: "1d4+1", faction: "neutral" });
   assert((await tool("kraken_encounter", { action: "xp", id: battle.id })).xp === 150, "XP: two goblins at 50 and one copy (dice count as one)");
-  agent.dice.force([2]);
+  agent.dice.clearForced();
+  agent.dice.clearForced(); agent.dice.force([2]);
   const run = await tool("kraken_encounter", { action: "run", id: battle.id, place: false });
   assert(run.added.length === 5, `2 goblins and 1d4+1 = 3 copies on the tracker: ${run.added.join(", ")}`);
+  // Place on this map: where the tokens stand is kept; the next Add to tracker puts hidden tokens there.
+  const scene = { id: "scene-test", name: "Bridge", width: 1000, height: 800, padding: 0, backgroundColor: "#000", grid: { size: 50, type: 1, color: "#000", alpha: 0.2, distance: 5, units: "ft" }, walls: [], lights: [], tokens: [] };
+  agent.map.setScene(scene);
+  const solo = await tool("kraken_encounter", { action: "create", name: "Bridge troll" });
+  await tool("kraken_encounter", { action: "add-npc", id: solo.id, npc: goblin.id, count: "1" });
+  await tool("kraken_token_place", { recordId: goblin.id, x: 425, y: 275 });
+  const placed = await tool("kraken_encounter", { action: "place", id: solo.id });
+  assert(placed.placed >= 1, `spots kept: ${JSON.stringify(placed)}`);
+  for (const token of agent.map.tokens()) agent.map.remove?.(token.id, agent.seat);
+  for (const token of agent.map.tokens()) await tool("kraken_token_remove", { id: token.id }).catch(() => undefined);
+  await tool("kraken_encounter", { action: "run", id: solo.id });
+  const put = agent.map.tokens().filter((token) => token.recordId === goblin.id);
+  assert(put.length >= 1 && put.every((token) => token.hidden) && put.some((token) => Math.abs(token.x - 425) < 30 && Math.abs(token.y - 275) < 30), `a hidden token at the kept spot: ${JSON.stringify(put.map((token) => [token.x, token.y, token.hidden]))}`);
   const ended = await tool("kraken_encounter", { action: "end", id: battle.id });
   assert(ended.xp === 150 && agent.records.get("party").data.encounters[battle.id].xp === 150, "the encounter's XP on the party sheet");
   // --- A quest onto the party sheet's XP tab.

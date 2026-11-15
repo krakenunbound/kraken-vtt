@@ -261,9 +261,13 @@ try {
   await page.waitForSelector(".record-window [data-table-editor]");
   const rumours = (await records("table")).find((item) => item.name === "Lake Rumours");
   assert(Object.keys((await get(rumours.id)).data.tablerows).length === 3, "three rows imported");
+  // The Bog Hag dropped on the first row's result: its link (FG's resultlink), kept through another row's edit.
+  await dropLink(page, `[data-table-editor="${rumours.id}"] [data-table-cell="0-0"]`, { kind: "record", record: hag.id, label: "Bog Hag" });
+  await page.waitForSelector(`[data-table-editor="${rumours.id}"] [data-result-link="${hag.id}"]`);
   await page.locator(`[data-table-editor="${rumours.id}"] [aria-label="Row 3 result 1"]`).fill("[1d4+1] lights on the far shore, moving");
   await page.locator(`[data-table-editor="${rumours.id}"] [aria-label="Row 3 result 1"]`).press("Enter");
   await until(async () => JSON.stringify((await get(rumours.id)).data.tablerows).includes("moving"), "a row edited");
+  assert(JSON.stringify((await get(rumours.id)).data.tablerows).includes(`"recordname":"${hag.id}"`), "the first row's link kept through the edit");
   await tool("kraken_dice_force", { values: [6, 2] });
   await page.click(`.record-window[data-record="${rumours.id}"] [data-action="table-roll"]`);
   await until(async () => (await tool("kraken_chat_log", { count: 20 })).some((line) => line.roll?.label === "[TABLE] Lake Rumours = 6: 3 lights on the far shore, moving"), "the table's roll in chat");
@@ -273,6 +277,27 @@ try {
   await seat.fill("form.chat-entry input", "/rollon Lake Rumours");
   await seat.press("form.chat-entry input", "Enter");
   await until(async () => (await tool("kraken_chat_log", { count: 20 })).some((line) => line.roll?.label === "[TABLE] Lake Rumours = 1: The mill grinds bones" && line.from === "A test player"), "the player's /rollon");
+
+  // A note's plain words as written (an old note, or a chat line dropped on Notes): "->" and "&" read as
+  // themselves, and stay so through the editor.
+  await closeAll();
+  const plainNote = await tool("kraken_record_create", { type: "note", name: "XP line", data: { text: "[3 XP] -> Aldric & co" } });
+  await page.click('.sidebar [data-launch="notes"]');
+  await page.click(`[data-note="${plainNote.id}"]`);
+  await page.waitForSelector(`[data-note-window="${plainNote.id}"] .rt-body`);
+  assert((await page.textContent(`[data-note-window="${plainNote.id}"] .rt-body`)).includes("[3 XP] -> Aldric & co"), "the plain note reads as written");
+  await page.click(`[data-note-window="${plainNote.id}"] .rt-body`);
+  await page.keyboard.press("End");
+  await page.keyboard.type(".");
+  await page.click(`[data-note-window="${plainNote.id}"] .note-owner`);
+  await until(async () => (await get(plainNote.id)).data.text === "<p>[3 XP] -&gt; Aldric &amp; co.</p>", `the note saved once escaped: ${(await get(plainNote.id)).data.text}`);
+  await closeAll();
+
+  // FG's share with one by a drop: the Bog Hag's copy dragged onto the test player's portrait.
+  const hero = await tool("kraken_record_create", { type: "character", name: "Wren", owner: "A test player", visibility: "owner", data: {} });
+  await page.waitForSelector(`[data-portrait="${hero.id}"]`, { timeout: 10000 });
+  await dropLink(page, `[data-portrait="${hero.id}"]`, { kind: "record", record: copy.id, label: "Bog Hag (copy)" });
+  await until(async () => JSON.stringify((await get(copy.id)).visibility) === '["A test player"]', "the copy shared with the player by the portrait drop");
 
   // 6. An item, unidentified from its window: the player sees the plain name.
   await closeAll();

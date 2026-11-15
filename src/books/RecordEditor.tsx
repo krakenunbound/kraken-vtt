@@ -172,7 +172,7 @@ export function useRecordActions(session: Session) {
   const items = (record: TableRecord): MenuItem[] => [
     { label: "Open", icon: "open", run: () => windows.open("record", record.name, record.id) },
     ...(record.source ? [{ label: "Copy to campaign", icon: "import", run: () => void copyToCampaign(record) }] : [{ label: "Duplicate", icon: "plus", run: () => void duplicate(record) }]),
-    { label: "Delete", icon: "trash", run: () => void remove(record) },
+    ...(record.source ? [] : [{ label: "Delete", icon: "trash", run: () => void remove(record) }]),
   ];
   return { open, duplicate, copyToCampaign, remove, items };
 }
@@ -316,14 +316,22 @@ export function IdentifyBar({ session, record }: { session: Session; record: Tab
 
 // --- Random tables -----------------------------------------------------------------
 
-type Row = { from: number; to: number; results: string[] };
+// A result's link (FG's resultlink: a record, or another table) is kept with its words through every edit.
+type ResultLink = { class: string; recordname: string };
+type Row = { from: number; to: number; results: string[]; links: (ResultLink | null)[] };
 function rowsOf(data: Record<string, unknown>): Row[] {
   const columns = Math.max(1, Number(data.resultscols) || 1);
-  return Object.entries((data.tablerows ?? {}) as Record<string, { fromrange?: number; torange?: number; results?: Record<string, { result?: string }> }>)
+  return Object.entries((data.tablerows ?? {}) as Record<string, { fromrange?: number; torange?: number; results?: Record<string, { result?: string; resultlink?: ResultLink }> }>)
     .sort(([a], [b]) => a.localeCompare(b, undefined, { numeric: true }))
     .map(([, row]) => {
-      const cells = Object.keys(row.results ?? {}).sort().map((key) => String(row.results?.[key]?.result ?? ""));
-      return { from: Number(row.fromrange) || 0, to: Number(row.torange) || Number(row.fromrange) || 0, results: Array.from({ length: columns }, (_, index) => cells[index] ?? "") };
+      const keys = Object.keys(row.results ?? {}).sort();
+      const at = (index: number) => row.results?.[keys[index]];
+      return {
+        from: Number(row.fromrange) || 0,
+        to: Number(row.torange) || Number(row.fromrange) || 0,
+        results: Array.from({ length: columns }, (_, index) => String(at(index)?.result ?? "")),
+        links: Array.from({ length: columns }, (_, index) => (at(index)?.resultlink?.recordname ? at(index)!.resultlink! : null)),
+      };
     });
 }
 const labelsOf = (data: Record<string, unknown>) => Array.from({ length: Math.max(1, Number(data.resultscols) || 1) }, (_, index) => String(data[`labelcol${index + 1}`] ?? (index === 0 ? "Result" : "")));
@@ -371,7 +379,15 @@ export function TableEditor({ session, record }: { session: Session; record: Tab
   const rows = rowsOf(record.data);
   const labels = labelsOf(record.data);
   const edit = (change: Record<string, unknown>) => void session.content("table-roll", { action: "edit", id: record.id, ...change });
-  const setRows = (next: Row[]) => edit({ rows: next.map((row) => ({ from: row.from, to: row.to, results: row.results })) });
+  const wire = (next: Row[]) => next.map((row) => ({ from: row.from, to: row.to, results: row.results.map((result, column) => ({ result, ...(row.links[column] ? { resultlink: row.links[column] } : {}) })) }));
+  const setRows = (next: Row[]) => edit({ rows: wire(next) });
+  const resize = (count: number) => rows.map((row) => ({ ...row, results: Array.from({ length: count }, (_, index) => row.results[index] ?? ""), links: Array.from({ length: count }, (_, index) => row.links[index] ?? null) }));
+  // A record or a table dropped on a result: its link (FG's resultlink), rolled or carried by the chat card.
+  const linkCell = (index: number, column: number, link: QuickSlot) => {
+    const target = link.kind === "record" ? session.records[link.record] : null;
+    if (!target) return;
+    setRows(rows.map((item, at) => (at === index ? { ...item, links: item.links.map((cell, c) => (c === column ? { class: target.type, recordname: target.id } : cell)), results: item.results.map((cell, c) => (c === column && !cell ? target.name : cell)) } : item)));
+  };
   return (
     <div className="table-editor" data-table-editor={record.id}>
       <div className="cc-inline">
@@ -382,7 +398,7 @@ export function TableEditor({ session, record }: { session: Session; record: Tab
           Modifier <Field value={record.data.mod ?? 0} editable number label="Modifier" onSave={(value) => edit({ mod: Number(value) || 0 })} />
         </label>
         <label>
-          Columns <Field value={labels.length} editable number label="Columns" onSave={(value) => edit({ resultscols: Math.max(1, Math.min(30, Number(value) || 1)), rows: rows.map((row) => ({ ...row, results: Array.from({ length: Math.max(1, Math.min(30, Number(value) || 1)) }, (_, index) => row.results[index] ?? "") })) })} />
+          Columns <Field value={labels.length} editable number label="Columns" onSave={(value) => edit({ resultscols: Math.max(1, Math.min(30, Number(value) || 1)), rows: wire(resize(Math.max(1, Math.min(30, Number(value) || 1)))) })} />
         </label>
         <label title="Its rolls for the GM alone (FG's Hide roll results)">
           <input type="checkbox" checked={Number(record.data.hiderollresults) === 1} onChange={(event) => edit({ hiderollresults: event.target.checked ? 1 : 0 })} /> Hide rolls
@@ -411,8 +427,29 @@ export function TableEditor({ session, record }: { session: Session; record: Tab
                 <Field value={row.to} editable number label={`Row ${index + 1} to`} onSave={(value) => setRows(rows.map((item, at) => (at === index ? { ...item, to: Number(value) || 0 } : item)))} />
               </td>
               {row.results.map((result, column) => (
-                <td key={column}>
+                <td
+                  key={column}
+                  data-table-cell={`${index}-${column}`}
+                  title="Drop a record or a table here to link it"
+                  onDragOver={(event) => {
+                    if (hasLink(event)) event.preventDefault();
+                  }}
+                  onDrop={(event) => {
+                    const link = linkFrom(event);
+                    if (!link) return;
+                    event.preventDefault();
+                    linkCell(index, column, link);
+                  }}
+                >
                   <Field value={result} editable label={`Row ${index + 1} result ${column + 1}`} onSave={(value) => setRows(rows.map((item, at) => (at === index ? { ...item, results: item.results.map((cell, c) => (c === column ? value : cell)) } : item)))} />
+                  {row.links[column] ? (
+                    <span className="table-cell-link" data-result-link={row.links[column]!.recordname}>
+                      <Icon name="shield" size={12} /> {session.records[row.links[column]!.recordname]?.name ?? row.links[column]!.class}
+                      <button type="button" className="ghost" aria-label={`Unlink row ${index + 1} result ${column + 1}`} title="Unlink" onClick={() => setRows(rows.map((item, at) => (at === index ? { ...item, links: item.links.map((cell, c) => (c === column ? null : cell)) } : item)))}>
+                        ×
+                      </button>
+                    </span>
+                  ) : null}
                 </td>
               ))}
               <td>
@@ -429,7 +466,7 @@ export function TableEditor({ session, record }: { session: Session; record: Tab
         data-action="table-add-row"
         onClick={() => {
           const next = (rows.at(-1)?.to ?? 0) + 1;
-          setRows([...rows, { from: next, to: next, results: labels.map(() => "") }]);
+          setRows([...rows, { from: next, to: next, results: labels.map(() => ""), links: labels.map(() => null) }]);
         }}
       >
         <Icon name="plus" size={14} /> Row

@@ -78,7 +78,7 @@ function ensureNpc(table, fgPath) {
 async function addBattle(table, fgPath, { place = true } = {}) {
   const battle = typeof fgPath === "object" && fgPath ? fgPath : find(moduleOf(fgPath), fgPath);
   const frame = table.map.frame();
-  const sceneId = table.scene?.()?.id ?? null;
+  const sceneId = (table.map.scene?.() ?? table.scene?.())?.id ?? null;
   const added = [];
   for (const row of rows(battle.data.npclist)) {
     const npcPath = row.link?.recordname;

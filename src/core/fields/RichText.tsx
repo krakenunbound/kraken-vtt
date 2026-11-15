@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { isFormatted, krakenRecordname, linkOfRecordname } from "../../../shared/text/formatted.mjs";
+import { decodeEntities, isFormatted, krakenRecordname, linkOfRecordname } from "../../../shared/text/formatted.mjs";
 import type { QuickSlot } from "../../session/useSession";
 import { Icon } from "../../ui/icons";
 import { hasLink, LINK_ICON, linkFrom, SLOT_DRAG } from "../../ui/QuickSlots";
@@ -24,7 +24,7 @@ function parse(text: string): Node {
     const root = document.createElement("div");
     for (const line of text.split("\n")) {
       const p = document.createElement("p");
-      p.textContent = line;
+      p.textContent = decodeEntities(line);
       root.append(p);
     }
     if (!text) root.append(document.createElement("p"));
@@ -210,6 +210,12 @@ export function RichText({
         onBlur={() => {
           save();
           setFocused(false);
+        }}
+        // Pasted text comes in as words (another page's markup, and its pictures from elsewhere, never do).
+        onPaste={(event) => {
+          event.preventDefault();
+          const words = event.clipboardData.getData("text/plain");
+          if (words) event.currentTarget.ownerDocument.execCommand("insertText", false, words);
         }}
         onClick={(event) => {
           const chip = (event.target as HTMLElement).closest?.(".rt-chip") as HTMLElement | null;

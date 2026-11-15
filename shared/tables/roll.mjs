@@ -135,7 +135,9 @@ export function rollTable(data, options) {
 function rollOne(data, name, options, budget, depth, dice, column) {
   budget.rolls += 1;
   const formula = String(dice ?? "").trim() || tableFormula(data);
-  const rolled = options.roll(formula);
+  // A table of one row (a die of one side): its one result, with no dice thrown.
+  const single = /^1?d1([+-]\d+)?$/i.exec(formula.replace(/\s+/g, ""));
+  const rolled = single ? { total: 1 + (Number(single[1]) || 0), formula, dice: [] } : options.roll(formula);
   const total = rolled.total;
   const secret = Boolean(options.secret) || Number(data.hiderollresults) === 1;
   const found = resultsAt(data, total, column) ?? [];

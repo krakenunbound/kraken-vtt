@@ -129,11 +129,54 @@ function stripUnidentified(value, depth = 0) {
 const MAY_HOLD_ITEMS = new Set(["item", "character", "party", "treasureparcel", "npc"]);
 // What one seat is shown of a record: the GM all of it; a player, an
 // unidentified item as its unidentified self. Never used to act on a record.
+// What a sheet works out from an unidentified item (5E's attacks, the armour worn) carries the item's
+// name, so that goes too: the names of the record's own unidentified items (another copy, identified
+// elsewhere, keeps its name).
 function viewFor(record, seat) {
   if (!record || !seat || seat.role === "dm" || record.source || !MAY_HOLD_ITEMS.has(record.type)) return record;
   if (record.type === "item" && unidentified(record.data)) return { ...record, name: clean(record.data.nonid_name, 120) || "Unidentified item", data: hiddenItem(record.data) };
-  const data = stripUnidentified(record.data);
+  const stripped = stripUnidentified(record.data);
+  const names = record.type === "item" ? null : collectHiddenNames([record]);
+  const data = names?.size ? hideNames(stripped, names) : stripped;
   return data === record.data ? record : { ...record, data };
+}
+// Every string in a value with the real names of unidentified items put as the players know them.
+function hideNames(value, names, depth = 0) {
+  if (!names?.size || depth > 12) return value;
+  if (typeof value === "string") {
+    let out = value;
+    for (const [real, shown] of names) if (out.includes(real)) out = out.split(real).join(shown);
+    return out;
+  }
+  if (!value || typeof value !== "object") return value;
+  if (Array.isArray(value)) {
+    const list = value.map((item) => hideNames(item, names, depth + 1));
+    return list.some((item, index) => item !== value[index]) ? list : value;
+  }
+  let out = value;
+  for (const [key, child] of Object.entries(value)) {
+    const next = hideNames(child, names, depth + 1);
+    if (next !== child) {
+      if (out === value) out = { ...value };
+      out[key] = next;
+    }
+  }
+  return out;
+}
+// The real name of every unidentified item in these records (items, gear, parcels), with its unidentified name.
+function collectHiddenNames(list) {
+  const names = new Map();
+  const walk = (value, depth = 0) => {
+    if (!value || typeof value !== "object" || depth > 8) return;
+    if (unidentified(value) && typeof value.name === "string" && value.name.trim().length >= 3) names.set(value.name.trim(), clean(value.nonid_name, 120) || "Unidentified item");
+    for (const child of Object.values(value)) if (child && typeof child === "object") walk(child, depth + 1);
+  };
+  for (const record of list) {
+    if (record.source || !MAY_HOLD_ITEMS.has(record.type)) continue;
+    if (record.type === "item" && unidentified(record.data) && record.name.length >= 3) names.set(record.name, clean(record.data.nonid_name, 120) || "Unidentified item");
+    walk(record.data);
+  }
+  return names;
 }
 // An item's name as the players are told it (a chat line about it).
 const itemName = (item) => (unidentified(item) ? clean(item.nonid_name, 120) || "Unidentified item" : clean(item?.name, 120));
@@ -173,7 +216,10 @@ function createRecordStore({ saved = [], onChange = () => undefined } = {}) {
   }
 
   // change: { kind: "upsert" | "delete", record, before }
+  // The real names of unidentified items, worked out again after any change (records.cjs viewFor).
+  let namesCache = null;
   function emit(change) {
+    namesCache = null;
     onChange(change);
     for (const listener of listeners) listener(change);
   }
@@ -185,6 +231,11 @@ function createRecordStore({ saved = [], onChange = () => undefined } = {}) {
   }
 
   return {
+    hiddenNames() {
+      namesCache = namesCache ?? collectHiddenNames(records.values());
+      return namesCache;
+    },
+
     subscribe(listener) {
       listeners.add(listener);
       return () => listeners.delete(listener);
@@ -295,4 +346,4 @@ function createRecordStore({ saved = [], onChange = () => undefined } = {}) {
   };
 }
 
-module.exports = { createRecordStore, canSee, canEdit, merge, viewFor, itemName, cleanVisibility, unidentified };
+module.exports = { createRecordStore, canSee, canEdit, merge, viewFor, hideNames, itemName, cleanVisibility, unidentified };

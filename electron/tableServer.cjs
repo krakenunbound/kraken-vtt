@@ -4,7 +4,7 @@ const path = require("path");
 const crypto = require("crypto");
 const os = require("os");
 const { WebSocketServer } = require("ws");
-const { createRecordStore, canSee, viewFor } = require("./records.cjs");
+const { createRecordStore, canSee, viewFor, hideNames } = require("./records.cjs");
 // The players' view of the party sheet and the records (records.cjs viewFor).
 const PLAYER_VIEW = { role: "player", name: "" };
 const { withArt } = require("./characterArt.cjs");
@@ -416,7 +416,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     active: new Set(ids(saved.books?.active)),
     shared: new Set(ids(saved.books?.shared)),
     images: Array.isArray(saved.books?.images)
-      ? saved.books.images.filter((item) => item && typeof item.book === "string" && typeof item.file === "string").slice(-40).map((item) => ({ id: text(item.id, "").slice(0, 40), book: item.book, file: item.file, name: text(item.name, "Picture").slice(0, 120), at: num(item.at, 0) }))
+      ? saved.books.images.filter((item) => item && typeof item.book === "string" && typeof item.file === "string").slice(-40).map((item) => ({ id: text(item.id, "").slice(0, 40), book: item.book, file: item.file, name: text(item.name, "Picture").slice(0, 120), at: num(item.at, 0), ...(Array.isArray(item.to) && item.to.length ? { to: item.to.map((name) => text(name, "").slice(0, 24)).filter(Boolean).slice(0, 32) } : {}) }))
       : [],
   };
   // Sounds the GM keeps in the books, as FG's sound links in the story: a
@@ -693,12 +693,17 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     },
     say: (line, from, secret) => agentHandle.say(line, from, secret),
   });
+  // What a player is sent with every unidentified item called by its unidentified name (a weapon's
+  // attack on the tracker, a line in chat): the GM's seat gets it as it is (records.cjs hideNames).
+  function forPlayer(client, value) {
+    return client.role === "dm" ? value : hideNames(value, records.hiddenNames());
+  }
   function sendCombat() {
     if (combatPending) return;
     combatPending = true;
     setImmediate(() => {
       combatPending = false;
-      for (const [ws, client] of clients) send(ws, { type: "combat", combat: combat.viewFor(seatOf(client)) });
+      for (const [ws, client] of clients) send(ws, { type: "combat", combat: forPlayer(client, combat.viewFor(seatOf(client))) });
     });
   }
 
@@ -822,7 +827,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     if (speaker?.role === "dm" || (entry.id === "agent" && ["Agent", "GM", "DM"].includes(entry.from))) entry.gm = true;
     chat.push(entry);
     if (chat.length > MAX_CHAT) chat.shift();
-    for (const [ws, client] of clients) if (seesLine(client, entry)) send(ws, { type: "chat", ...entry });
+    for (const [ws, client] of clients) if (seesLine(client, entry)) send(ws, forPlayer(client, { type: "chat", ...entry }));
     onChange("table");
     return entry;
   }
@@ -1564,10 +1569,10 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
           you: { id: client.id, name: client.name, role: client.role, assetToken: client.assetToken, ...(client.accountToken ? { accountToken: client.accountToken } : {}), account: Boolean(accounts?.has(client.name)) },
           players: playerList(),
           map: client.role !== "dm" && sceneHiddenNow() ? emptyView() : map.viewFor(seatOf(client), client.assetToken),
-          combat: combat.viewFor(seatOf(client)),
+          combat: forPlayer(client, combat.viewFor(seatOf(client))),
           calendar: calendar.view(seatOf(client)),
           clocks: clocks.view(seatOf(client)),
-          chat: chatFor(client),
+          chat: forPlayer(client, chatFor(client)),
           options,
           soundscape,
           books: shelfView(client),
