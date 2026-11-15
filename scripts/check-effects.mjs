@@ -156,6 +156,15 @@ try {
   player.ws.send(JSON.stringify({ type: "effects", action: "apply", to: { tokenId: tokenOf(goblin).id }, preset: "prone" }));
   await latest(player, "error", (m) => /only on your own character/.test(m.reason), "another's creature refused");
   assert(true, "players are held to their own and the GM's option");
+  // A paused game holds a player's effects (and templates) as it holds their moves and rolls.
+  server.agent.setOptions({ paused: true });
+  player.ws.send(JSON.stringify({ type: "effects", action: "apply", to: { tokenId: tokenOf(hagar).id }, preset: "blinded" }));
+  player.ws.send(JSON.stringify({ type: "template", action: "place", template: { shape: "circle", x: 100, y: 100, size: 10 } }));
+  await latest(player, "notice", (m) => /paused/.test(m.text), "the pause notice");
+  await new Promise((resolve) => setTimeout(resolve, 150));
+  effects = (await fx({ action: "on", to: { tokenId: tokenOf(hagar).id } })).effects;
+  assert(!effects.some((effect) => effect.label === "Blinded") && agent.map.templates().length === 0, "paused: no effect, no template from a player");
+  server.agent.setOptions({ paused: false });
   await tool("kraken_table_options", { playerEffects: "all" }).catch(async () => server.agent.setOptions?.({ playerEffects: "all" }));
 
   // Invisible: Hagar's owner and the GM see him (a shimmer); the other player is not sent his token.
