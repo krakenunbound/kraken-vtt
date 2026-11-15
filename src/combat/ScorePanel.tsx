@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { Session } from "../session/useSession";
 import { ACTIONS, EFFECTS, HEAT_EXPOSURE, PLANS, POSITIONS, titled } from "../../shared/forged/rules.mjs";
 import { ClockFace } from "../notes/ClocksWindow";
+import { ofGame } from "../../shared/rulesets/registry.mjs";
 
 // Forged in the Dark has no initiative: the Combat window is the Score panel.
 // The GM sets the phase (free play, the score, downtime), the position and
@@ -17,7 +18,7 @@ export function ScorePanel({ session }: { session: Session }) {
   const gm = session.role === "dm";
   const score = session.clocks.score;
   const me = session.players.find((seat) => seat.id === session.selfId)?.name ?? "";
-  const scoundrels = Object.values(session.records).filter((record) => record.type === "character" && record.data.ruleset === "forged");
+  const scoundrels = Object.values(session.records).filter((record) => record.type === "character" && ofGame(record, session.ruleset));
   const mine = scoundrels.filter((record) => gm || record.owner === me);
   const [who, setWho] = useState("");
   const [action, setAction] = useState("prowl");

@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import type { Session } from "../session/useSession";
 import { RANK_NAMES, RANKS } from "../../shared/ironsworn/rules.mjs";
+import { ofGame } from "../../shared/rulesets/registry.mjs";
 
 // Ironsworn's and Starforged's Oracles window: every table of the campaign's
 // active Reference (the CC BY oracles), by category, searchable; a click
@@ -73,7 +74,7 @@ export function DelveWindow({ session }: { session: Session }) {
   const sites = Object.values(session.records).filter((record) => record.type === "irondelve");
   const themes = sites.filter((record) => record.data.kind === "theme").sort((a, b) => a.name.localeCompare(b.name));
   const domains = sites.filter((record) => record.data.kind === "domain").sort((a, b) => a.name.localeCompare(b.name));
-  const characters = Object.values(session.records).filter((record) => record.type === "character" && record.data.ruleset === "ironsworn");
+  const characters = Object.values(session.records).filter((record) => record.type === "character" && ofGame(record, session.ruleset));
   const [theme, setTheme] = useState(themes[0]?.name ?? "");
   const [domain, setDomain] = useState(domains[0]?.name ?? "");
   const [rank, setRank] = useState("dangerous");

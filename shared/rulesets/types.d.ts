@@ -336,7 +336,8 @@ export type FeatureId =
   | "deathSaves" | "dying.save" | "dying.bleed" | "morale" | "turnUndead" | "multiAttack" | "dread"
   | "clocks" | "crew" | "scorePanel" | "downtime" | "fatePoints" | "sceneAspects" | "stressConsequences"
   | "oracles" | "delve" | "progressTracks" | "momentum" | "assetsCards" | "starships" | "careers"
-  | "slots" | "fatigue" | "scars" | "spellbooks" | "thiefSkills" | "encumbrance" | "abilityCards";
+  | "slots" | "fatigue" | "scars" | "spellbooks" | "thiefSkills" | "encumbrance" | "abilityCards"
+  | "approaches"; // Fate Accelerated: six approaches in place of skills
 
 export interface WindowSpec {
   kind: string;

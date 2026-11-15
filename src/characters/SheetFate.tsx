@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import type { Session, TableRecord } from "../session/useSession";
 import { Field } from "../core/fields/Field";
 import { IdentityBox, NameField, SheetFrame } from "../core/frame/SheetFrame";
+import { has, rulesetFor } from "../../shared/rulesets/registry.mjs";
 import { ACTIONS, APPROACHES, APPROACH_NAMES, CONSEQUENCE_NAMES, CONSEQUENCES, FREE_STUNTS, LADDER, MILESTONES, PYRAMID, SKILLS, aspectsOf, ladder, pyramidProblems, approachProblems, refreshOf, signed } from "../../shared/fate/rules.mjs";
 
 // The Fate character sheet (Fate Core and Fate Accelerated, one sheet): who
@@ -361,7 +362,7 @@ export function SheetFate({ record, session }: { record: TableRecord; session: S
 // pregenerated character, taken as it is.
 const SLOTS: number[] = Object.entries(PYRAMID).sort((a, b) => Number(b[0]) - Number(a[0])).flatMap(([rating, count]) => Array<number>(count as number).fill(Number(rating)));
 export function WizardFate({ session, onDone }: { session: Session; onDone: (id: string | null) => void }) {
-  const fae = session.ruleset === "Fate Accelerated";
+  const fae = has(rulesetFor(session.ruleset), "approaches");
   const game = fae ? "fae" : "core";
   const records = Object.values(session.records);
   const pregens = records.filter((item) => item.type === "pregencharsheet" && (item.data.game ?? game) === game).sort((a, b) => a.name.localeCompare(b.name));
