@@ -166,7 +166,7 @@ try {
   await step("bridge props", "place", {
     items: [
       { art: "Bridge console row", at: [28.85, 9], width: 2.6, rotation: 90, light: screen("#5fe0ff", 5, 15) },
-      { art: "Captain's chair", at: [26.4, 9], width: 0.95, rotation: 90 },
+      { art: "Captain's chair", at: [26.4, 9], width: 0.95, rotation: 270 },
       { art: "Skeleton", at: [26.95, 10.15], width: 0.6, rotation: 120, name: "The captain" },
       { art: "Console", at: [24.6, 9], width: 1.2, light: screen("#5fe0ff", 0, 10), name: "Tactical console" },
       { art: "Console", at: [29.35, 5.7], width: 0.85, light: { preset: "custom", color: "#ff3b30", bright: 5, dim: 15, animation: "pulse", speed: 30, strength: 80 }, name: "Beacon console" },
