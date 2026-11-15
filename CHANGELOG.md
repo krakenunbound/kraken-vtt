@@ -6,6 +6,15 @@ full log of the work is in [PLAN.md](PLAN.md).
 
 ## Unreleased
 
+Targeting, area spells, effects and damage cards, Fantasy Grounds' and Foundry's best together (docs/targeting-actions-design.md).
+
+- **Targeting from the map toolbar, on every map:** target mode (click a creature, or drag a box), target all friendlies or all foes, clear friendly, enemy or all targets, for the selected creature (or your own). Ctrl+click works on tracker rows too. The GM sees everyone's aim, a ring per targeter in that player's colour.
+- **Area spells place their templates:** Fireball's 20-foot sphere, Burning Hands' cone, Lightning Bolt's line, Thunderwave's cube, Spirit Guardians around its caster, sized for the grid from the spell and shown to everyone in the caster's colour. Everyone inside is targeted (walls stop it), and the spell lands by its words: damage on all inside, half on a save; Sleep only on foes; Bless only on allies, three at most. An Area template tool lays one out by hand.
+- **Effects you can see:** conditions and buffs on tokens (Zzz over sleepers, flames, frost, stone, trembling fear, a blessing's glow...), a buff bar on sheets and tracker rows, the Effects window (conditions, buffs, lights, your own) whose entries drag onto any creature. Durations count down in rounds and in game time.
+- **Lights as effects:** a torch dropped on a token lights the map around it, moves with it, shows as glow to players, burns an hour of game time, warns, and goes out; it can be put out and lit again.
+- **Damage cards:** each creature hit, what it took after saves and resistances, and buttons to halve, double, undo or heal it. Damage can wait on the card instead of landing at once (a setting). Chat rolls dragged onto a creature apply there.
+- D&D 3.5E, AD&D 2E and Basic Fantasy cast spells from their book's words.
+
 The first two stages of Kraken's core UI (docs/core-ui-design.md): one core that every game slides into, as Fantasy Grounds' CoreRPG and Foundry's core do. On screen almost nothing changes. Underneath, the games stop hand-copying each other.
 
 - **One sheet frame for every game.** The portrait and token, the name, the boxes under it and the tab rail are now one shared frame. Every game's sheet gives only its own boxes and pages, and all 16 games' sheets look exactly as before (checked pixel by pixel, for the GM and for a player).

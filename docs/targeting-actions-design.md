@@ -122,8 +122,9 @@ message context options.
   caster's token and move with it. v14 templates are Regions with a
   "coverage" highlight (the grid squares it covers are shaded) and walls
   restricting it (`restriction: move`).
-- **Targets from templates**: tokens inside are targeted; in dnd5e the
-  outcome is shown per target.
+- **Targets from templates** (from knowledge, not in 6.1's source: it
+  places a Region and leaves targeting to the user or modules): tokens inside
+  are targeted; in dnd5e the outcome is shown per target.
 - **Chat damage cards**: a damage roll lists the targeted (or selected)
   tokens as pills, each with the damage it would take after its
   resistances, immunities and vulnerabilities (each source can be toggled
@@ -135,8 +136,8 @@ message context options.
   off), icons on the token, the condition's rules in a tooltip; effects have
   durations in rounds and turns that the combat tracker counts down; light
   is a token property that an effect may change (torch, lantern...).
-- **Targets are per user**: each user's targets show on the token in that
-  user's colour (pips for other users' targets).
+- **Targets are per user** (from knowledge): each user's targets show on the
+  token in that user's colour (pips for other users' targets).
 
 ## 3. What Kraken has today (verified)
 
@@ -411,3 +412,15 @@ damage and spell rows) should, after stage 3 merges:
   `session.ct("cast", {recordId, power})` (the host casts them now);
 - place `<BuffBar>` (already in `SheetFrame`) where the game's layout wants
   it, if not under the name.
+
+## 9. Built (branch worktree-agent-a310ba63a88d4440b)
+
+Everything in sections 4.2 to 4.6 is built, with these differences and gaps:
+
+- **Where it lives.** `shared/actions/parse.mjs`, `areas.mjs` and `effects.mjs`; each game's `shared/<id>/actions.mjs`; `electron/effects.cjs` (the Effects list), `combat.cjs` (targets, casting, cards, effect time), `mapState.cjs` (templates, token effects, effect lights, token visuals in the view), `tableServer.cjs` (messages `template`, `effects`, `ct` target-faction / target-box / apply-card / apply-roll, `template-request`, `card`); `src/effects` (drops, the buff bar, the Effects window), `src/table/TokenFx.tsx`.
+- **Foundry from its source.** Templates from the spell's data, in the user's colour, covering squares, attached emanations, the damage card's per-creature multipliers and its "apply to selected" were read in dnd5e 6.1's source. Targets on placement and other users' target pips are from knowledge (the 6.1 source places Regions; tokens inside are not targeted by the system); Kraken targets them, which is the point of placing one.
+- **Who a spell lands on.** "Creatures of your choice" spare allies only for a template's area; targets picked by hand are the caster's choice. A buff never lands on a creature not of the caster's side.
+- **Cards.** The card sits on the damage roll's chat line, updated in place (`card` messages); players see it without the GM's buttons and without hidden creatures.
+- **Game time.** The calendar's Advance burns effects down (`calendar.cjs` onTime). Setting a date by hand does not. Effects on tokens of other scenes wait until their scene is shown.
+- **Not built.** Magical darkness as a light that darkens; lights carried by items (an effect on the bearer stands in); the sheets' drag of attack and damage rows (section 8: the drop side reads `application/x-kraken-action`); 3.5E spell resistance on text spells; the 3.5E and 2E sheets' Cast buttons (the host casts `ct cast {recordId, power: <spell name>}`).
+- **Checks.** `check-targeting`, `check-templates`, `check-cards`, `check-effects`, `check-cast-text`, `check-spell-parse`; `verify-targeting-ui` drives the GM's app full screen and a test player's Chrome at 2560x1440.
