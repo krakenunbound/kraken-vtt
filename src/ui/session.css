@@ -14,7 +14,9 @@
 
 /* The GM has paused the game: the players' veil; the GM's badge. */
 .pause-veil { position: absolute; inset: 0; z-index: 960; display: grid; place-items: center; pointer-events: none; background: radial-gradient(ellipse at center, rgba(8, 10, 14, 0.55), rgba(8, 10, 14, 0.82)); }
-.pause-card { display: grid; justify-items: center; gap: 8px; padding: 26px 40px; border-block: 2px solid var(--brass); background: rgba(18, 12, 6, 0.85); color: #fff3d6; text-align: center; }
+/* Chat goes on while paused: it stays above the veil. */
+.desktop:has(> .pause-veil) > .chat-dock { z-index: 961; }
+.pause-card {display: grid; justify-items: center; gap: 8px; padding: 26px 40px; border-block: 2px solid var(--brass); background: rgba(18, 12, 6, 0.85); color: #fff3d6; text-align: center; }
 .pause-card strong { font-family: Cinzel, Georgia, serif; font-size: clamp(1.6rem, 3.4vw, 2.6rem); letter-spacing: 0.08em; text-shadow: 0 0 16px rgba(255, 196, 92, 0.6); }
 .pause-card .icon { color: var(--brass); }
 .pause-badge { position: absolute; top: 10px; left: 50%; translate: -50% 0; z-index: 960; display: flex; align-items: center; gap: 8px; padding: 6px 8px 6px 12px; border: 1px solid var(--brass); border-radius: 999px; background: rgba(18, 12, 6, 0.9); color: #fff3d6; box-shadow: var(--shadow); }

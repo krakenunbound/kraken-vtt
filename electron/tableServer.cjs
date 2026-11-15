@@ -1327,7 +1327,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
 
   function playerList() {
     // away: gone quiet (/afk, or idle); hand: a raised hand for the GM; lost: the connection dropped, a reconnect is awaited.
-    const seat = (client, lost) => ({ id: client.id, name: client.name, role: client.role, ...(client.afk ? { afk: true } : {}), ...(client.idle ? { idle: true } : {}), ...(client.hand ? { hand: true } : {}), ...(lost ? { lost: true } : {}) });
+    const seat = (client, lost) => ({ id: client.id, name: client.name, role: client.role, ...(client.afk ? { afk: true } : {}), ...(client.idle ? { idle: true } : {}), ...(client.handUp ? { hand: true } : {}), ...(lost ? { lost: true } : {}) });
     return [...[...clients.values()].map((client) => seat(client, false)), ...[...lingering.values()].map((held) => seat(held.client, true))];
   }
 
@@ -1650,7 +1650,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         const kept = client.role === "player" ? unlinger(client.name) : null;
         if (kept) {
           client.afk = kept.afk;
-          client.hand = kept.hand;
+          client.handUp = kept.handUp;
         }
         client.assetToken = crypto.randomBytes(18).toString("hex");
         client.joined = true;
@@ -2995,11 +2995,11 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
   }
   // Away (/afk, or idle at the keyboard) and a raised hand: a player's own, or set by the GM for a player.
   function setPresence(client, change) {
-    const before = `${Boolean(client.afk)}${Boolean(client.idle)}${Boolean(client.hand)}`;
+    const before = `${Boolean(client.afk)}${Boolean(client.idle)}${Boolean(client.handUp)}`;
     if (change.afk !== undefined) client.afk = Boolean(change.afk);
     if (change.idle !== undefined) client.idle = Boolean(change.idle);
-    if (change.hand !== undefined) client.hand = Boolean(change.hand);
-    if (before === `${Boolean(client.afk)}${Boolean(client.idle)}${Boolean(client.hand)}`) return false;
+    if (change.hand !== undefined) client.handUp = Boolean(change.hand);
+    if (before === `${Boolean(client.afk)}${Boolean(client.idle)}${Boolean(client.handUp)}`) return false;
     broadcast({ type: "players", players: playerList() });
     if (change.hand === true) for (const [ws, seat] of clients) if (seat.role === "dm") send(ws, { type: "hand", name: client.name });
     return true;
