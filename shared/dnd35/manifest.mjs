@@ -207,6 +207,7 @@ export default {
           { part: "heading", text: "Spells known or prepared" },
           { part: "notes", fields: [{ path: "spells", label: "Spells", kind: "textarea", lines: true, bare: true }] },
           { part: "hint", text: "One spell a line, or drop a spell from the Spells list on the sheet." },
+          { part: "custom", component: "core.spellCasts" },
         ],
       },
       {

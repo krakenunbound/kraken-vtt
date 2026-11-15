@@ -1,3 +1,5 @@
+// A weapon's attack or damage dragged onto a creature rolls at it alone (src/effects/drops.ts).
+import { ACTION_DRAG } from "../effects/drops";
 import { useState } from "react";
 import { ClassLevel } from "./ClassLevel";
 import type { Session, TableRecord } from "../session/useSession";
@@ -337,10 +339,10 @@ export function CCSheet({ record, session }: { record: TableRecord; session: Ses
                 <div key={key} className="cc-weapon" data-weapon={key}>
                   <span>{String(item.name)}</span>
                   <span>{ranged ? "R" : "M"}</span>
-                  <button type="button" data-action="attack" disabled={!editable} onClick={() => session.ct("attack", { recordId: record.id, weapon: key })} title={targetNames.length ? `Attack ${targetNames.join(", ")}` : "No target: Ctrl+click a token to target it"}>
+                  <button type="button" data-action="attack" disabled={!editable} onClick={() => session.ct("attack", { recordId: record.id, weapon: key })} draggable={editable} onDragStart={(event) => event.dataTransfer.setData(ACTION_DRAG, JSON.stringify({ kind: "attack", recordId: record.id, weapon: key }))} title={targetNames.length ? `Attack ${targetNames.join(", ")}` : "No target: Ctrl+click a token to target it"}>
                     Attack {signed(bonus)}
                   </button>
-                  <button type="button" data-action="damage" disabled={!editable} onClick={() => session.ct("damage-roll", { recordId: record.id, weapon: key })} title={targetNames.length ? `Damage ${targetNames.join(", ")}` : "Roll damage"}>
+                  <button type="button" data-action="damage" disabled={!editable} onClick={() => session.ct("damage-roll", { recordId: record.id, weapon: key })} draggable={editable} onDragStart={(event) => event.dataTransfer.setData(ACTION_DRAG, JSON.stringify({ kind: "damage", recordId: record.id, weapon: key }))} title={targetNames.length ? `Damage ${targetNames.join(", ")}` : "Roll damage"}>
                     Damage {String(item.damage)}
                   </button>
                 </div>
