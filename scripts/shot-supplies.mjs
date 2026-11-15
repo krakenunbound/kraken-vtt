@@ -49,7 +49,7 @@ const games = [
 ];
 try {
   await rpc("initialize", { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "shots", version: "1" } });
-  for (const [game, id, tab, data] of games) {
+  for (const [game, id, tab, data] of games.filter(([name]) => !process.env.ONLY || process.env.ONLY === name)) {
     const campaign = await tool("kraken_campaign_create", { name: `Supplies ${game}`, ruleset: game });
     await tool("kraken_host", { campaignId: campaign.id, port: 47464, password: "" });
     await page.waitForSelector("text=Hosting");
