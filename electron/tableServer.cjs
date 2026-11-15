@@ -21,7 +21,7 @@ const { fitsRuleset } = require("./books.cjs");
 
 const MAX_CLIENTS = 16;
 // What a player may not do while the GM has paused the game: move or change tokens, open doors, roll.
-const PAUSE_HOLDS = new Set(["token-place", "token-move", "token-update", "token-remove", "token-undo", "door", "roll", "siege-check", "ct", "template", "effects", "cairn", "fate", "ironsworn", "forged", "party-group", "starship"]);
+const PAUSE_HOLDS = new Set(["token-place", "token-move", "token-update", "token-remove", "token-undo", "door", "roll", "siege-check", "ct", "template", "effects", "cairn", "fate", "ironsworn", "forged", "party-group", "starship", "bookkeeping", "rest"]);
 
 
 // What a player may do with raw record changes (the GM and the agent may do
@@ -317,7 +317,15 @@ function savedOptions(value) {
     healthNpc: HEALTH_SHOWS.includes(options.healthNpc) ? options.healthNpc : "dot",
     healthPc: HEALTH_SHOWS.includes(options.healthPc) ? options.healthPc : "dot",
     names: ["off", "hover", "always"].includes(options.names) ? options.names : "hover",
+    // Bookkeeping (electron/bookkeeping.cjs), each part the GM may switch off for a relaxed table:
+    // ammunition, consumables, rations and water, light from the pack, encumbrance; and the 5E
+    // variant encumbrance (off unless chosen).
+    bookkeeping: bookkeepingOptions(options.bookkeeping),
   };
+}
+function bookkeepingOptions(value) {
+  const raw = value && typeof value === "object" ? value : {};
+  return { ammo: raw.ammo !== false, consumables: raw.consumables !== false, rations: raw.rations !== false, light: raw.light !== false, encumbrance: raw.encumbrance !== false, variant: raw.variant === true };
 }
 const HEALTH_SHOWS = ["bar", "barhover", "dot", "dothover", "off"];
 function wizard2eOptions(value) {
@@ -610,12 +618,15 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     if (next.towerStyle !== undefined && !(TOWER_STYLES.includes(String(next.towerStyle)) || (towers && towers.has(String(next.towerStyle))))) throw new Error(`No dice tower look "${next.towerStyle}" (${TOWER_STYLES.join(", ")}, or a picture in the towers folder).`);
     if (next.motd !== undefined) next.motd = { text: String(next.motd?.text ?? "").slice(0, 8000), links: (Array.isArray(next.motd?.links) ? next.motd.links : []).map(cleanSlot).filter(Boolean).slice(0, 40) };
     const wasPaused = options.paused;
-    options = savedOptions({ ...options, ...next, ...(next.wizard35 && typeof next.wizard35 === "object" ? { wizard35: { ...options.wizard35, ...next.wizard35 } } : {}), ...(next.wizard2e && typeof next.wizard2e === "object" ? { wizard2e: { ...options.wizard2e, ...next.wizard2e } } : {}) });
+    const wasBooks = options.bookkeeping;
+    options = savedOptions({ ...options, ...next, ...(next.bookkeeping && typeof next.bookkeeping === "object" ? { bookkeeping: { ...options.bookkeeping, ...next.bookkeeping } } : {}), ...(next.wizard35 && typeof next.wizard35 === "object" ? { wizard35: { ...options.wizard35, ...next.wizard35 } } : {}), ...(next.wizard2e && typeof next.wizard2e === "object" ? { wizard2e: { ...options.wizard2e, ...next.wizard2e } } : {}) });
     broadcast({ type: "options", options });
     if (options.paused !== wasPaused) addChat({ id: "table", from: "Table", text: options.paused ? "The GM has paused the game." : "The game goes on.", at: Date.now(), kind: "story" });
     onChange("table");
     // What tokens show (names, health) and how distance counts are in each seat's map.
     if (["diagonal", "healthNpc", "healthPc", "names"].some((key) => key in next)) sendMaps();
+    // A bookkeeping switch changed: the load's effects (and the games whose rules count the load) follow.
+    if ("bookkeeping" in next && bookkeepingApi) void bookkeepingApi.switched(wasBooks, options.bookkeeping).catch(() => undefined);
     return options;
   }
   // The seat whose request is being handled now (and when).
@@ -707,6 +718,9 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
   // The Effects list's actions (electron/effects.cjs): made once the agent handle exists.
   let effectsApi = null;
   const effects = () => (effectsApi ??= require("./effects.cjs").createEffects(agentHandle));
+  // Bookkeeping (electron/bookkeeping.cjs): ammunition, consumables, rations, light, the load, rest.
+  let bookkeepingApi = null;
+  const bookkeeping = () => (bookkeepingApi ??= require("./bookkeeping.cjs").createBookkeeping(agentHandle));
   // A creature that dies on the tracker leaves a death marker where its token
   // stands (FG's Death Markers): its type's set, the default's else; a
   // character does not. Those dead already when the table opens are known.
@@ -752,6 +766,8 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     onTime: (minutes) => passGameTime(minutes),
   });
   function passGameTime(minutes) {
+    // A day that ends is eaten and drunk for (bookkeeping: rations and water).
+    if (bookkeepingApi) void bookkeepingApi.timePassed().catch(() => undefined);
     const rounds = combat.passTime(minutes);
     if (rounds <= 0) return;
     for (const token of map.tokensWithEffects()) {
@@ -2320,6 +2336,30 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         return;
       }
 
+      // Bookkeeping (electron/bookkeeping.cjs): a character's ammunition picked up, an item used
+      // (on whom: to), a ration eaten, skins filled, a pack opened, an item put in a container, the
+      // GM's exhaustion; and the rests (rest: a character's, or the GM's whole party). Answered as an op.
+      if (msg.type === "bookkeeping" || msg.type === "rest") {
+        const seat = seatOf(client);
+        const reply = (ok, result, error) => send(ws, { type: "op-result", req: msg.req ?? null, ok, id: String(msg.id ?? ""), ...(ok ? { result } : { error }) });
+        const args = msg.args && typeof msg.args === "object" ? msg.args : {};
+        const run = async () => {
+          const api = bookkeeping();
+          await api.ready;
+          if (msg.type === "rest") return api.rest({ id: msg.id ? String(msg.id) : undefined, party: Boolean(args.party), kind: String(args.kind ?? msg.action ?? "long"), hitDice: args.hitDice === undefined ? undefined : Number(args.hitDice) }, seat);
+          const record = records.get(String(msg.id ?? ""), seat);
+          if (!record || record.type !== "character") throw new Error("No such character.");
+          return api.act(record, String(msg.action ?? ""), args, seat);
+        };
+        run()
+          .then((result) => reply(true, result))
+          .catch((error) => {
+            reply(false, null, error instanceof Error ? error.message : "Could not do that.");
+            send(ws, { type: "error", reason: error instanceof Error ? error.message : "Could not do that." });
+          });
+        return;
+      }
+
       // Cairn: what a character does outside the fight (rest, Fatigue, spells, Scars, Growth).
       if (msg.type === "cairn") {
         const record = records.get(msg.id, seatOf(client));
@@ -3095,6 +3135,10 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     get effects() {
       return effects();
     },
+    // Bookkeeping: ammunition, consumables, rations, light from the pack, the load, rest.
+    get bookkeeping() {
+      return bookkeeping();
+    },
     // A turn starts: the templates of instant spells come off the map.
     onTurn() {
       try {
@@ -3461,6 +3505,9 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
   function playerColorOf(client) {
     return prefs.get(prefsKey(client)).color ?? (client.role === "dm" ? "#f4f1ea" : playerColor(client.name));
   }
+
+  // Bookkeeping starts with the table: the day counting from today, the load's effects kept as records change.
+  void bookkeeping().start();
 
   return {
     listen({ port, password: nextPassword }) {

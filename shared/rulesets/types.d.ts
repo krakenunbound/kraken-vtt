@@ -382,6 +382,68 @@ export interface RulesetManifest {
   calendar?: string; // shared/calendars.mjs id
   edit?: { text: Path[]; number: Path[]; string?: Path[]; list?: Path[]; remove?: Path[] }; // list: a list typed one item a line; remove: lists whose rows may be dropped
   actions?: ActionsSpec; // attached by the registry from shared/<id>/actions.mjs
+  bookkeeping?: BookkeepingSpec; // attached by the registry from shared/<id>/bookkeeping.mjs
+}
+
+// What a game's bookkeeping tracks (shared/<id>/bookkeeping.mjs, read by shared/bookkeeping):
+// each part false when the game does not count it. Patterns are regular expressions' sources.
+export type LimitSpec = number | Path | { stat?: Path; path?: Path; times?: number; plus?: number } | { table: number[]; stat: Path; part?: number } | { sum: LimitSpec[]; times?: number };
+export interface LoadLevelSpec {
+  id: string;
+  label: string;
+  upTo?: LimitSpec; // the most this level holds; the last has none
+  speed?: number | { table: number[][] } | { times: number }; // minus feet (negative), set to, a table from the base, or a share of it
+  tone?: "warn" | "bad";
+  effect?: string; // its components on the creature ("SPEED: -10; DISATK")
+  text?: string;
+}
+export interface PenaltySpec {
+  after?: number | string; // days gone without before it starts: a number or "3+constitution"
+  kind: "exhaustion" | "damage" | "check-damage" | "deprived" | "note";
+  damage?: string;
+  path?: Path;
+  check?: { mod: Path; dc: number; step?: number };
+  text: string;
+}
+export interface RestSpec {
+  hours?: number;
+  hp?: "full" | number | { perLevel: number; level: Path } | { dice: string; mod?: Path };
+  temp?: boolean;
+  hitDice?: { die?: Path; total?: Path; used: Path; mod?: Path; back?: "half" | "all" };
+  reset?: string[]; // paths zeroed (globs: "slots.*.used")
+  exhaustion?: number;
+  rations?: boolean;
+  concentration?: boolean;
+  via?: { module: string; action: string }; // the game's own (Cairn's rest and sleep)
+}
+export interface BookkeepingSpec {
+  ammo: false | { recover: number; low?: number; engine?: "siege"; kinds?: { id: string; label: string; launcher: string; ammo: string }[] };
+  consumables: false | { kinds?: { kind: string; match: string; spend: "count" | "uses" | "charges" }[] };
+  rations: false | { food: { match: string }; water: false | { match: string; days?: number }; penalty: { food?: PenaltySpec; water?: PenaltySpec } };
+  light: false | Record<string, false | { item?: string; fuel?: string; keep?: boolean }>;
+  exhaustion?: { path: Path; max: number; effect: string; text: string };
+  encumbrance:
+    | false
+    | {
+        mode: "weight" | "derived";
+        unit?: string;
+        label?: string;
+        coins?: number;
+        speed?: Path;
+        used?: Path;
+        max?: LimitSpec;
+        levelPath?: Path;
+        offFlag?: boolean; // the rules' derive reads data.encumbranceoff (the GM's switch)
+        sizes?: Record<string, number>;
+        sizePath?: Path;
+        wornArmor?: number;
+        levels: LoadLevelSpec[];
+        variant?: LoadLevelSpec[];
+        variantLabel?: string;
+        containers?: { match: string; capacity: number; weightless?: boolean }[];
+        note?: string;
+      };
+  rest: false | { short?: RestSpec; long?: RestSpec };
 }
 
 // What a game declares for targeting, actions and effects (shared/<id>/actions.mjs,

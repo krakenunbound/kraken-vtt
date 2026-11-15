@@ -644,7 +644,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     const left = (row) => Math.max(0, num(row.count, 1)) * Math.max(1, num(row.ammoperunit, 1)) - num(row.ammoused, 0);
     const choices = Object.entries(inventory).filter(([, row]) => String(row?.subtype ?? "").toLowerCase() === "ammunition" && String(row.ammotype ?? "").trim().toLowerCase() === type && left(row) > 0);
     const pick = choices.find(([, row]) => num(row.carried, 1) === 2) ?? choices.find(([, row]) => num(row.carried, 1) === 1);
-    if (String(opts.SIEGE_AMMO_TRACK ?? "on").toLowerCase() === "off") return { ok: true, ammo: pick?.[1]?.name };
+    if (String(opts.SIEGE_AMMO_TRACK ?? "on").toLowerCase() === "off" || table().options?.().bookkeeping?.ammo === false) return { ok: true, ammo: pick?.[1]?.name };
     if (!pick) {
       table().say(`${item.name}: no ${type} left to fire.`, "Combat");
       return { ok: false };
@@ -660,6 +660,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     table().records.update(recordRow.id, { data: { inventorylist: { [key]: { count, ammoused: used } } } }, table().seat);
     const remaining = count * per - used;
     table().say(`${item.name}: fired ${row.name}, ${remaining} left.`, "Combat");
+    table().bookkeeping?.tally(recordRow.id, key, String(row.name), 1);
     return { ok: true, ammo: row.name, left: remaining };
   }
 
@@ -3191,6 +3192,8 @@ function createCombat({ saved, table, onChange = () => undefined }) {
         entry.lostTurn = 0;
       }
       for (const key of Object.keys(moraleDone)) delete moraleDone[key];
+      // Bookkeeping: whoever shot is told what ammunition can be picked up.
+      table().bookkeeping?.fightOver();
       // Fate: the conflict is over: everyone's stress clears (consequences stay), the out come back.
       if (fateOn()) return fc.endConflict().then(() => changed());
       changed();
@@ -3428,6 +3431,9 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       const { engine, game, options: opts } = await options();
       const plan = this.weapon(who, weaponKey, engine, game, opts, seat);
       const source = plan.entry;
+      // Bookkeeping: a launcher's ammunition spent (a shot a swing), the attack refused with none left.
+      const shot = await table().bookkeeping?.fire(plan, weaponKey, attackOptions);
+      if (shot && !shot.ok) return [{ refused: shot.reason }];
       if (fateOn()) return fc.attack(plan, from, attackOptions);
       if (cairnOn()) return attackCairn(plan, from, attackOptions);
       if (twoSix()) return attackAstra(plan, from);

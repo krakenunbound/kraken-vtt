@@ -30,6 +30,20 @@ import ironswornActions from "../ironsworn/actions.mjs";
 import mgt2Actions from "../mgt2/actions.mjs";
 import worldbuildingActions from "../worldbuilding/actions.mjs";
 
+// What each game counts and spends (ammunition, rations, light, load, rest), beside its manifest (shared/<id>/bookkeeping.mjs).
+import adnd2eBooks from "../adnd2e/bookkeeping.mjs";
+import astraBooks from "../astra/bookkeeping.mjs";
+import bfrpgBooks from "../bfrpg/bookkeeping.mjs";
+import cairnBooks from "../cairn/bookkeeping.mjs";
+import cncBooks from "../cnc/bookkeeping.mjs";
+import dnd35Books from "../dnd35/bookkeeping.mjs";
+import dnd5eBooks from "../dnd5e/bookkeeping.mjs";
+import fateBooks from "../fate/bookkeeping.mjs";
+import forgedBooks from "../forged/bookkeeping.mjs";
+import ironswornBooks from "../ironsworn/bookkeeping.mjs";
+import mgt2Books from "../mgt2/bookkeeping.mjs";
+import worldbuildingBooks from "../worldbuilding/bookkeeping.mjs";
+
 /** @typedef {import("./types").RulesetManifest} RulesetManifest */
 /** @typedef {import("./types").FeatureId} FeatureId */
 
@@ -38,6 +52,9 @@ export const MANIFESTS = [cnc, dnd5e, dnd35, adnd2e, mgt2, astra, ironsworn, cai
 /** @type {Record<string, import("./types").ActionsSpec>} */
 const ACTIONS = { adnd2e: adnd2eActions, astra: astraActions, bfrpg: bfrpgActions, cairn: cairnActions, cnc: cncActions, dnd35: dnd35Actions, dnd5e: dnd5eActions, fate: fateActions, forged: forgedActions, ironsworn: ironswornActions, mgt2: mgt2Actions, worldbuilding: worldbuildingActions };
 for (const manifest of MANIFESTS) manifest.actions = ACTIONS[manifest.id] ?? manifest.actions;
+/** @type {Record<string, import("./types").BookkeepingSpec>} */
+const BOOKS = { adnd2e: adnd2eBooks, astra: astraBooks, bfrpg: bfrpgBooks, cairn: cairnBooks, cnc: cncBooks, dnd35: dnd35Books, dnd5e: dnd5eBooks, fate: fateBooks, forged: forgedBooks, ironsworn: ironswornBooks, mgt2: mgt2Books, worldbuilding: worldbuildingBooks };
+for (const manifest of MANIFESTS) manifest.bookkeeping = BOOKS[manifest.id] ?? manifest.bookkeeping;
 
 // The games a campaign can be made with, in the campaign screen's order.
 export const CAMPAIGN_RULESETS = ["Castles & Crusades", "D&D 5E", "D&D 3.5E", "AD&D 2E", "Traveller", "Descending Darkness", "Apeira Astra", "Ironsworn", "Starforged", "Cairn", "Basic Fantasy", "Fate Core", "Fate Accelerated", "Forged in the Dark", "Worldbuilding"];
