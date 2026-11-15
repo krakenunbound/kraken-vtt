@@ -55,6 +55,8 @@
     "cairn": "node scripts/check-cairn.mjs",
     "cairn-ui": "node scripts/verify-cairn-ui.mjs",
     "core-parts-ui": "node scripts/verify-core-parts-ui.mjs",
+    "core-wizard-ui": "node scripts/verify-core-wizard-ui.mjs",
+    "bfrpg-sheet-ui": "node scripts/verify-bfrpg-sheet-ui.mjs",
     "sheet-shots": "node scripts/shot-sheets.mjs",
     "fate": "node scripts/check-fate.mjs",
     "fate-ui": "node scripts/verify-fate-ui.mjs",

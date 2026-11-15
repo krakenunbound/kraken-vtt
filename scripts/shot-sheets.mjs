@@ -11,6 +11,13 @@
 //                                                       the shots compared pixel by pixel (the sheet-only shots must
 //                                                       match exactly; full-screen ones report the pixels that differ)
 //
+//   node scripts/shot-sheets.mjs wizard  <root> <out> [games]
+//                                                       the character wizard, GM and player, the e2e plan's steps,
+//                                                       a shot and the controls' signature after every action
+//   node scripts/shot-sheets.mjs tracker <root> <out> [games]
+//                                                       the combat tracker, GM and player: a fight, a PC dying, a
+//                                                       cleric's turn; every ruleset button pressed and its chat line
+//
 //   node scripts/shot-sheets.mjs flow  <root> <out> [games]
 //                                                       the way to a sheet, full screen, GM and player: the table,
 //                                                       the sidebar's Characters, then a card in Character Selection
@@ -63,20 +70,30 @@ if (mode === "diff") {
       const other = compare(await pixels(again, file), b);
       if (other === 0 || (other > 0 && (differ < 0 || other < differ))) differ = other;
     }
-    const strict = file.includes("-sheet-");
+    const strict = file.includes("-sheet-") || (/-(wizard|tracker)-/.test(file) && !file.includes("-screen"));
     const line = `${differ === 0 ? "same" : strict ? "DIFF" : "diff"} ${file}${differ === -1 ? " (another size)" : differ ? ` (${differ} pixels)` : ""}`;
     if (differ && strict) bad += 1;
     report.push(line);
   }
   for (const file of readdirSync(before).filter((item) => item.endsWith(".png") && !files.includes(item))) report.push(`only before: ${file}`);
+  // The controls' signatures and what the tracker's buttons posted: the same text, or a DIFF.
+  for (const file of readdirSync(after).filter((item) => item.endsWith(".json"))) {
+    if (!existsSync(path.join(before, file))) {
+      report.push(`only after: ${file}`);
+      continue;
+    }
+    const same = readFileSync(path.join(before, file), "utf8") === readFileSync(path.join(after, file), "utf8");
+    if (!same) bad += 1;
+    report.push(`${same ? "same" : "DIFF"} ${file}`);
+  }
   writeFileSync(path.join(after, "diff.txt"), report.join("\n"));
   console.log(report.join("\n"));
-  console.log(`\n${files.length} shots, ${bad} sheet shot(s) differ`);
+  console.log(`\n${files.length} shots, ${bad} strict shot(s) or signature(s) differ`);
   process.exit(bad ? 1 : 0);
 }
 
-if (mode !== "make" && mode !== "shoot" && mode !== "flow") {
-  console.log("node scripts/shot-sheets.mjs make <root> [games] | shoot <root> <out> [games] | flow <root> <out> [games] | diff <before> <after> [<before again>]");
+if (!["make", "shoot", "flow", "wizard", "tracker"].includes(mode)) {
+  console.log("node scripts/shot-sheets.mjs make <root> [games] | shoot|flow|wizard|tracker <root> <out> [games] | diff <before> <after> [<before again>]");
   process.exit(2);
 }
 const root = rest[0];
@@ -297,13 +314,227 @@ async function flow(game) {
   }
 }
 
+// Every control and text in a window, for a diff that sees what a picture does not (titles, aria-labels, disabled).
+const signatureOf = (where, root) =>
+  where
+    .$$eval(`${root} *`, (items) =>
+      items
+        .filter((item) => /^(BUTTON|SELECT|INPUT|LABEL|H\d|P|B|SPAN|LI|OPTION)$/.test(item.tagName) || [...item.attributes].some((attr) => attr.name.startsWith("data-")))
+        .map((item) => {
+          const attrs = Object.fromEntries([...item.attributes].filter((attr) => attr.name !== "style" && attr.name !== "id" && attr.name !== "for").map((attr) => [attr.name, attr.value]));
+          const own = [...item.childNodes].filter((node) => node.nodeType === 3).map((node) => node.textContent).join("|");
+          return { tag: item.tagName, attrs, text: own, ...(item.disabled !== undefined ? { disabled: item.disabled } : {}), ...(item.value !== undefined && item.tagName !== "LI" ? { value: item.value } : {}), ...(item.checked !== undefined ? { checked: item.checked } : {}) };
+        }),
+    )
+    .catch(() => []);
+
+// The character wizard, step by step, for the GM (Kraken full screen) and the player (Chrome at 2560x1440):
+// the e2e plan's own wizard is run, with a shot of the wizard, the whole screen and the wizard's controls
+// after every click, choice and typing. Each seat starts from its own copy of the made profile, so the dice
+// (saved with the campaign) fall the same for a build before and after a change.
+async function wizardShots(game) {
+  const plan = RULESETS[game];
+  if (!existsSync(path.join(root, slugOf(game), "made.json"))) return note(`${game}: not made`);
+  const slug = slugOf(game.replace(/\s*\(SRD\)/, "-srd"));
+  for (const who of ["gm", "player"]) {
+    const profile = mkdtempSync(path.join(tmpdir(), "kraken-sheets-"));
+    cpSync(path.join(root, slugOf(game)), profile, { recursive: true });
+    const port = 47800 + Math.floor(Math.random() * 150);
+    const { app, page, child, tool } = await launch(profile, plan);
+    let browser = null;
+    let step = 0;
+    try {
+      const campaigns = await tool("kraken_campaigns");
+      await tool("kraken_host", { campaignId: (Array.isArray(campaigns) ? campaigns : campaigns.campaigns ?? [])[0].id, port, password: PASSWORD });
+      await page.waitForSelector("text=Hosting", { timeout: 30000 });
+      await settle(2500);
+      let where = page;
+      if (who === "player") {
+        browser = await chromium.launch({ executablePath: CHROME, headless: true, args: ["--mute-audio"] });
+        where = await join(browser, port);
+      }
+      await diceOff(where);
+      const snap = async () => {
+        step += 1;
+        const name = `${slug}-${who}-wizard-${String(step).padStart(2, "0")}`;
+        await where.mouse.move(2, 2);
+        await settle(900);
+        const box = await where.$("[data-wizard]");
+        if (box) await box.screenshot({ path: path.join(out, `${name}.png`), animations: "disabled", caret: "hide", timeout: 10000 }).catch((error) => note(`${name}: ${error.message.split("\n")[0]}`));
+        await where.screenshot({ path: path.join(out, `${name}-screen.png`), animations: "disabled", caret: "hide", timeout: 10000 }).catch((error) => note(`${name}: ${error.message.split("\n")[0]}`));
+        writeFileSync(path.join(out, `${name}.json`), JSON.stringify(await signatureOf(where, "[data-wizard]"), null, 1));
+      };
+      const ACTS = new Set(["click", "selectOption", "fill", "check", "uncheck"]);
+      const wrapLocator = (locator) =>
+        new Proxy(locator, {
+          get(target, key) {
+            const value = target[key];
+            if (typeof value !== "function") return value;
+            if (ACTS.has(key)) return async (...args) => {
+              const result = await value.apply(target, args);
+              await snap();
+              return result;
+            };
+            if (["first", "last", "nth", "locator", "getByLabel", "getByRole", "getByText", "filter"].includes(key)) return (...args) => wrapLocator(value.apply(target, args));
+            return value.bind(target);
+          },
+        });
+      const seat = new Proxy(where, {
+        get(target, key) {
+          const value = target[key];
+          if (typeof value !== "function") return value;
+          if (ACTS.has(key)) return async (...args) => {
+            const result = await value.apply(target, args);
+            await snap();
+            return result;
+          };
+          if (["locator", "getByLabel", "getByRole", "getByText"].includes(key)) return (...args) => wrapLocator(value.apply(target, args));
+          return value.bind(target);
+        },
+      });
+      const ctx = { ruleset: game, plan, page, seat, tool, port, problem: (what, detail) => note(`${game}: ${what} ${detail ?? ""}`), check: (ok, what, detail) => (ok || note(`${game}: not so: ${what} ${String(detail ?? "").slice(0, 200)}`), Boolean(ok)) };
+      await where.click('.sidebar [data-launch="characters"]');
+      await where.waitForSelector('[data-action="new-character"]', { timeout: 15000 });
+      await where.click('[data-action="new-character"]');
+      await where.waitForSelector("[data-wizard]", { timeout: 20000 });
+      await snap();
+      await plan.wizard(ctx);
+      console.log(`${game}: wizard shot (${who}, ${step} steps)`);
+    } catch (error) {
+      note(`${game} (${who}): wizard stopped at step ${step}: ${error.message.split("\n")[0]}`);
+    } finally {
+      await browser?.close().catch(() => undefined);
+      child.kill();
+      await app.close().catch(() => undefined);
+    }
+  }
+}
+
+// A Cleric for the games whose tracker offers Turn undead on the cleric's own turn.
+const CLERICS = {
+  "Basic Fantasy": { name: "Brother Test", race: "Human", class: "Cleric", abilities: { strength: 12, intelligence: 10, wisdom: 15, dexterity: 11, constitution: 13, charisma: 10 }, hpRoll: 5, gold: 60, alignment: "Lawful" },
+  "AD&D 2E": { name: "Brother Test", race: "Human", class: "Cleric", level: 3, scores: { strength: 12, dexterity: 11, constitution: 13, intelligence: 10, wisdom: 16, charisma: 10 }, alignment: "Lawful Good" },
+};
+// The combat tracker, GM and player, in the states its ruleset's buttons need: the party and an enemy in a
+// started fight; then the player's character dying and (where there is one) a cleric's turn. Then the GM
+// presses every ruleset button the tracker shows, and what each did (the chat line it posted) is written down.
+async function trackerShots(game) {
+  const plan = RULESETS[game];
+  const made = path.join(root, slugOf(game), "made.json");
+  if (!existsSync(made)) return note(`${game}: not made`);
+  const { character } = JSON.parse(readFileSync(made, "utf8"));
+  const slug = slugOf(game.replace(/\s*\(SRD\)/, "-srd"));
+  const profile = mkdtempSync(path.join(tmpdir(), "kraken-sheets-"));
+  cpSync(path.join(root, slugOf(game)), profile, { recursive: true });
+  const port = 47800 + Math.floor(Math.random() * 150);
+  const { app, page, child, tool } = await launch(profile, plan);
+  let browser = null;
+  const record = [];
+  const shoot = async (where, who, stage) => {
+    const name = `${slug}-${who}-tracker-${stage}`;
+    await where.mouse.move(2, 2);
+    await settle(1200);
+    const box = await where.$(".combat-tracker, .score-panel");
+    if (box) await box.screenshot({ path: path.join(out, `${name}.png`), animations: "disabled", caret: "hide", timeout: 10000 }).catch((error) => note(`${name}: ${error.message.split("\n")[0]}`));
+    await where.screenshot({ path: path.join(out, `${name}-screen.png`), animations: "disabled", caret: "hide", timeout: 10000 }).catch((error) => note(`${name}: ${error.message.split("\n")[0]}`));
+    writeFileSync(path.join(out, `${name}.json`), JSON.stringify(await signatureOf(where, ".combat-tracker, .score-panel"), null, 1));
+  };
+  const view = async () => {
+    const got = await tool("kraken_combat", { action: "view" });
+    return got.entries ?? got.combat?.entries ?? [];
+  };
+  try {
+    const campaigns = await tool("kraken_campaigns");
+    await tool("kraken_host", { campaignId: (Array.isArray(campaigns) ? campaigns : campaigns.campaigns ?? [])[0].id, port, password: PASSWORD });
+    await page.waitForSelector("text=Hosting", { timeout: 30000 });
+    await settle(2500);
+    const listed = await tool("kraken_books", { action: "list" });
+    const shelf = Array.isArray(listed) ? listed : listed.books ?? [];
+    const ctx = { ruleset: game, plan, page, tool, port, shelf, problem: (what, detail) => note(`${game}: ${what} ${detail ?? ""}`), check: (ok) => Boolean(ok) };
+    await diceOff(page);
+    let cleric = null;
+    if (CLERICS[game]) {
+      const built = await tool("kraken_build_character", { spec: CLERICS[game], owner: PLAYER.name }).catch((error) => note(`${game}: cleric: ${error.message}`));
+      cleric = built?.id ?? built?.record?.id ?? null;
+    }
+    await page.click('.sidebar [data-launch="combat"]');
+    await page.waitForSelector(".combat-tracker, .score-panel", { timeout: 15000 });
+    if (await page.$(".combat-tracker")) {
+      await tool("kraken_combat", { action: "add", recordId: character });
+      if (cleric) await tool("kraken_combat", { action: "add", recordId: cleric });
+      if (plan.enemy) await plan.enemy(ctx).catch((error) => note(`${game}: enemy: ${error.message.split("\n")[0]}`));
+      await tool("kraken_combat", { action: "init", which: "all" }).catch((error) => note(`${game}: init: ${error.message}`));
+      await tool("kraken_combat", { action: "next" }).catch((error) => note(`${game}: start: ${error.message}`));
+    }
+    browser = await chromium.launch({ executablePath: CHROME, headless: true, args: ["--mute-audio"] });
+    const seat = await join(browser, port);
+    await diceOff(seat);
+    await openSide(seat, "combat");
+    await seat.waitForSelector(".combat-tracker, .score-panel", { timeout: 15000 });
+    await shoot(page, "gm", "1-fight");
+    await shoot(seat, "player", "1-fight");
+    if (await page.$(".combat-tracker")) {
+      // The player's character dying (Cairn: Critical Damage, as its STR save would leave it).
+      const pc = (await view()).find((entry) => entry.recordId === character);
+      if (pc && game === "Cairn") await tool("kraken_record_update", { id: character, data: { critical: "dying" } }).catch((error) => note(`${game}: dying: ${error.message}`));
+      else if (pc) {
+        for (let hit = 0; hit < 40; hit++) {
+          const now = (await view()).find((entry) => entry.id === pc.id);
+          const status = now?.health?.status ?? now?.status;
+          if (["Dying", "Down", "Dead", "Unconscious", "Taken Out"].includes(status) || !now) break;
+          await tool("kraken_combat", { action: "damage", id: pc.id, amount: 1 }).catch(() => undefined);
+        }
+        const status = (await view()).find((entry) => entry.id === pc.id);
+        record.push({ dying: status?.health?.status ?? status?.status ?? "?" });
+      }
+      const priest = cleric ? (await view()).find((entry) => entry.recordId === cleric) : null;
+      if (priest) await tool("kraken_combat", { action: "set-turn", id: priest.id }).catch((error) => note(`${game}: cleric's turn: ${error.message}`));
+      await shoot(page, "gm", "2-dying");
+      await shoot(seat, "player", "2-dying");
+      // Every ruleset button on the GM's tracker, pressed once: what it posted.
+      for (const selector of ['[data-action="stabilize"]', '[data-action="death-save"]', '[data-action="turn-undead"]', '[data-action="morale"]', '[data-action="morale-foes"]', '[data-action="npc-attack"]', '[data-mode="impaired"]', '[data-mode="enhanced"]', '[data-full-attack="all"]', '[data-action="init-all"]']) {
+        const button = await page.$(`.combat-tracker ${selector}:not([disabled])`);
+        if (!button) continue;
+        const before = (await tool("kraken_chat_log", { count: 400 })).length ?? 0;
+        await button.evaluate((item) => item.click());
+        await settle(1500);
+        const lines = await tool("kraken_chat_log", { count: 400 });
+        const posted = (Array.isArray(lines) ? lines.slice(before) : []).map((line) => `${line.text ?? ""} ${line.roll?.label ?? ""}`.replace(/\d+/g, "#").trim());
+        record.push({ pressed: selector, posted });
+      }
+      // The player's own initiative button.
+      const own = await seat.$(".combat-tracker .ct-tools button");
+      if (own) record.push({ player: await own.textContent(), title: await own.getAttribute("title") });
+      await shoot(page, "gm", "3-pressed");
+    }
+    writeFileSync(path.join(out, `${slug}-tracker-presses.json`), JSON.stringify(record, null, 1));
+    console.log(`${game}: tracker shot`);
+  } finally {
+    await browser?.close().catch(() => undefined);
+    child.kill();
+    await app.close().catch(() => undefined);
+  }
+}
+// The 3D dice off on this screen (/dice3d off), so a die rolling across the window is not in the shots.
+async function diceOff(where) {
+  const box = await where.$('input[aria-label="Message"]');
+  if (!box) return note("no chat box for /dice3d off");
+  await box.fill("/dice3d off");
+  await box.press("Enter");
+  await settle(500);
+}
+async function openSide(where, launch) {
+  if (await where.$(`.sidebar [data-launch="${launch}"].open`)) return;
+  await where.click(`.sidebar [data-launch="${launch}"]`);
+}
+
 for (const game of games) {
   if (!RULESETS[game]) {
     note(`${game}: no plan in scripts/e2e/rulesets.mjs`);
     continue;
   }
   try {
-    await (mode === "make" ? make(game) : mode === "flow" ? flow(game) : shoot(game));
+    await (mode === "make" ? make(game) : mode === "flow" ? flow(game) : mode === "wizard" ? wizardShots(game) : mode === "tracker" ? trackerShots(game) : shoot(game));
   } catch (error) {
     note(`${game}: stopped: ${error.message.split("\n")[0]}`);
   }

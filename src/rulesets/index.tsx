@@ -8,19 +8,20 @@ import { Sheet5e, Wizard5e } from "../characters/Sheet5e";
 import { Sheet35 } from "../characters/Sheet35";
 import { Wizard35 } from "../characters/Wizard35";
 import { Sheet2e, Wizard2e } from "../characters/Sheet2e";
-import { SheetBf, WizardBf } from "../characters/SheetBf";
+import { WizardBf } from "../characters/WizardBf";
 import { SheetMgt2 } from "../characters/SheetMgt2";
 import { WizardMgt2 } from "../characters/WizardMgt2";
 import { SheetAstra, WizardAstra } from "../characters/SheetAstra";
-import { WizardCairn } from "../characters/WizardCairn";
 import { SheetFate, WizardFate } from "../characters/SheetFate";
 import { SheetIronsworn, WizardIronsworn } from "../characters/SheetIronsworn";
 import { SheetForged, WizardForged } from "../characters/SheetForged";
 import { ScorePanel } from "../combat/ScorePanel";
 import { FateStrip } from "../ui/FateStrip";
+import { FateConflict } from "./fate";
 import { Wizard2eSetting, Wizard35Setting } from "./WizardSettings";
 import { SheetRenderer } from "../core/sheet/SheetRenderer";
-import { CUSTOM_PARTS, FORMATS } from "./parts";
+import { WizardRenderer } from "../core/wizard/WizardRenderer";
+import { CUSTOM_PARTS, FORMATS, WIZARD_FUNCTIONS } from "./parts";
 
 // The React side of the manifests: every Ref a manifest names ("cairn.sheet")
 // and the component that is it (FG's windowclass by name; Foundry's
@@ -35,7 +36,6 @@ export const SHEETS: Record<string, ComponentType<SheetProps>> = {
   "dnd5e.sheet": Sheet5e,
   "dnd35.sheet": Sheet35,
   "adnd2e.sheet": Sheet2e,
-  "bfrpg.sheet": SheetBf,
   "mgt2.sheet": SheetMgt2,
   "astra.sheet": SheetAstra,
   "fate.sheet": SheetFate,
@@ -50,15 +50,15 @@ export const WIZARDS: Record<string, ComponentType<WizardProps>> = {
   "bfrpg.wizard": WizardBf,
   "mgt2.wizard": WizardMgt2,
   "astra.wizard": WizardAstra,
-  "cairn.wizard": WizardCairn,
   "fate.wizard": WizardFate,
   "ironsworn.wizard": WizardIronsworn,
   "forged.wizard": WizardForged,
 };
-// Whole windows a game replaces (the tracker), desktop strips and Settings rows.
+// Whole windows a game replaces (the tracker), desktop strips, the tracker's header controls and Settings rows.
 export const PANELS: Record<string, ComponentType<SessionProps>> = {
   "forged.scorePanel": ScorePanel,
   "fate.sceneAspects": FateStrip,
+  "fate.conflict": FateConflict,
   "dnd35.wizardSetting": Wizard35Setting,
   "adnd2e.wizardSetting": Wizard2eSetting,
 };
@@ -80,7 +80,15 @@ export function sheetFor(record: TableRecord): ComponentType<SheetProps> {
 }
 // The character wizard of the campaign's game.
 export function wizardFor(ruleset: string): ComponentType<WizardProps> {
-  return WIZARDS[refOf(rulesetFor(ruleset).wizard)] ?? Wizard;
+  const spec = rulesetFor(ruleset).wizard;
+  if (spec && typeof spec !== "string") return ManifestWizard;
+  return WIZARDS[refOf(spec)] ?? Wizard;
+}
+// A wizard the manifest lays out (its wizard is a WizardSpec): the core's frame and parts.
+function ManifestWizard({ session, onDone }: WizardProps) {
+  const spec = rulesetFor(session.ruleset).wizard;
+  if (!spec || typeof spec === "string") return null;
+  return <WizardRenderer spec={spec} session={session} onDone={onDone} functions={WIZARD_FUNCTIONS} />;
 }
 // The campaign's game (C&C's manifest for a name with none).
 export const manifestOf = (ruleset: string) => rulesetFor(ruleset);

@@ -25,12 +25,99 @@ export default {
   host: { module: "electron/cairn.cjs", message: "cairn", tool: "kraken_cairn" },
   labels: { hp: "HP", ac: "Armor", xp: "Growth" },
   records: { background: { label: "Backgrounds" }, item: { label: "Gear and Relics" }, npc: { label: "Bestiary" }, cairntable: { label: "Tables" } },
-  wizard: "cairn.wizard",
+  // The book's Character Creation in its order, on the core's wizard: a background (rolled d20 or chosen), a
+  // name from its list, its starting gear, a roll on each of its tables; STR, DEX and WIL 3d6 in order (two
+  // may be swapped once); Hit Protection 1d6; the traits (d10 each), a Bond (d20), the age (2d20+10) and, for
+  // the youngest, an Omen (d20); 3d6 gold pieces and the Marketplace. Every die is the host's, in chat.
+  wizard: {
+    hook: "cairn",
+    title: "New Cairn character",
+    aria: "Cairn character wizard",
+    chat: "[CHARGEN] ",
+    tables: { type: "cairntable", key: "group" },
+    empty: { type: "background", text: "No backgrounds yet: the GM makes the Cairn Player's Guide active (Modules)." },
+    finish: { title: "Every step rolled first", build: "cairn.build" },
+    steps: [
+      {
+        id: "background",
+        title: "Background",
+        parts: [
+          { kind: "choose-record", fromType: "background", into: "background", aria: "Background", placeholder: "Choose a background…", resets: ["results", "name"], roll: { hook: "cairn-roll-background", formula: "1d20", label: "Background (d20)", button: "Roll d20", table: "backgrounds", pick: "cairn.backgroundOfRoll" } },
+          { kind: "hint", record: "background", text: "{quote}" },
+          { kind: "text", into: "name", label: "Name", aria: "Name from the background", placeholder: "Choose a name…", options: { record: "background", list: "names" }, free: { aria: "Character name", placeholder: "or your own" }, when: { has: "background" } },
+          { kind: "hint", record: "background", text: "Starting gear: a backpack, {gear}." },
+          { kind: "record-tables", record: "background", path: "tables", into: "results", formula: "1d6", hook: "cairn-roll-table-", label: "{record}: {table}", button: "Roll d6", done: "Rolled {value}", className: "cairn-table", attr: "cairn-table" },
+        ],
+      },
+      {
+        id: "attributes",
+        title: "Attributes and Hit Protection",
+        parts: [
+          {
+            kind: "row",
+            parts: [
+              { kind: "roll-stats", into: "attributes", hook: "cairn-roll-attributes", formula: "3d6", label: "{label} (3d6)", button: "Roll 3d6 in order", stats: STATS.map((key) => ({ key, label: NAMES[key], short: SHORTS[key] })), swap: { hook: "cairn-swap", title: "You may swap any two of the results", aria: ["Swap", "With"], start: ["str", "dex"], button: "Swap" } },
+              { kind: "roll", into: "hp", hook: "cairn-roll-hp", formula: "1d6", label: "Hit Protection (1d6)", button: "Roll HP (1d6)", done: "HP {value}" },
+            ],
+          },
+        ],
+      },
+      {
+        id: "traits",
+        title: "Traits, Bond, Age",
+        more: { when: { has: "youngest" }, text: ", Omen" },
+        parts: [
+          {
+            kind: "row",
+            parts: [
+              { kind: "roll-table", into: "traits", hook: "cairn-roll-traits", formula: "1d10", label: "{label} (d10)", button: "Roll the traits (d10 each)", table: "{key}", rows: TRAITS.map((key) => ({ key, label: TRAIT_WORDS[key] })) },
+              { kind: "roll", into: "bond", table: "bonds", hook: "cairn-roll-bond", formula: "1d20", label: "Bond (d20)", button: "Roll a Bond (d20)" },
+              { kind: "roll", into: "age", hook: "cairn-roll-age", formula: "2d20+10", label: "Age (2d20+10)", button: "Roll the age (2d20+10)", done: "Age {value}" },
+              { kind: "check", into: "youngest", label: "The youngest", title: "The youngest character rolls an Omen and reads it aloud" },
+              { kind: "roll", into: "omen", table: "omens", optional: true, hook: "cairn-roll-omen", formula: "1d20", label: "Omen (d20)", button: "Roll an Omen (d20)", when: { has: "youngest" } },
+            ],
+          },
+          { kind: "hint", attr: "wizard-traits", join: { path: "traits", rows: TRAITS.map((key) => ({ key, label: TRAIT_WORDS[key] })), text: "{label}: {value}", sep: " · " }, when: { any: TRAITS.map((key) => ({ has: `traits.${key}` })) } },
+          { kind: "hint", text: "Bond: {bond}", when: { has: "bond" } },
+          { kind: "hint", text: "Omen (read it aloud): {omen}", when: { has: "omen" } },
+        ],
+      },
+      {
+        id: "gold",
+        title: "Gold and the Marketplace",
+        parts: [
+          // The Marketplace: gear, weapons, armor and transport (not services or hirelings), in gold pieces.
+          { kind: "shop", into: "buy", fromType: "item", exclude: { path: "type", values: ["Service", "Hireling", "Spellbook", "Relic"] }, price: { path: "cost", per: 100, unit: "gp" }, type: "type", gold: { into: "gold", hook: "cairn-roll-gold", formula: "3d6", label: "Gold pieces (3d6)", button: "Roll 3d6 gold pieces", done: "{value} gp rolled", bonus: "cairn.backgroundGold", bonusText: " ({value} from the background)" }, search: { aria: "Shop search", placeholder: "Search the Marketplace" }, limit: 80 },
+        ],
+      },
+    ],
+  },
   blank: false,
   features: ["slots", "fatigue", "scars", "spellbooks", "morale", "dying.save"],
   // Cairn has no experience: the party's tab is its Growth (Scars and what has changed).
   party: { currency: ["GP"], xp: "growth", groupCheck: { stats: ["str", "dex", "wil"] } },
-  tracker: { saves: { keys: ["str", "dex", "wil"], modLabel: "CL", modAria: "Save CL", button: "Roll save" } },
+  tracker: {
+    saves: { keys: ["str", "dex", "wil"], modLabel: "CL", modAria: "Save CL", button: "Roll save" },
+    // No initiative: the PCs act first, each saving DEX to act in the first round.
+    initiative: { rollAll: "Sides (DEX saves)", rollAllTitle: "The PCs first (each saves DEX to act in the first round), then their opponents", own: "DEX", ownTitle: "My DEX save to act in the first round" },
+    // Attacks always hit: the die less Armor (impaired d4, enhanced d12).
+    attacks: {
+      hook: "npc-attack",
+      attr: "cairn-attack",
+      label: ["{name}", " ", "{damage}"],
+      title: "{name}: {damage}, always hits (less Armor)",
+      modes: [
+        { mode: "impaired", label: "d4", title: "Impaired (cover, bound hands): d4" },
+        { mode: "enhanced", label: "d12", title: "Enhanced (a helpless foe, a daring maneuver): d12" },
+      ],
+    },
+    rowActions: [
+      // Critical Damage: aid (bandages) stabilizes; untreated, death within the hour.
+      { hook: "stabilize", label: "Stabilize", title: "Give aid (bandages): stable, out of danger but out of action", when: { all: [{ status: "Dying" }, { has: "recordId" }, { any: [{ gm: true }, { viewerHasCharacter: true }] }] }, call: { message: "cairn", action: "stabilize" } },
+      { hook: "morale", label: "Morale", title: "Morale: a WIL save to stand, else the creature flees", when: { all: [{ gm: true }, { faction: "not-friend" }, { not: { status: ["Dead", "Routed", "Fleeing"] } }] }, call: { ct: "morale" } },
+    ],
+    headerActions: [{ hook: "morale-foes", label: "Morale", title: "Morale: every foe still standing saves WIL, or flees", disabled: { not: { anyEntry: { faction: "foe" } } }, call: { ct: "morale", args: { faction: "foe" } } }],
+  },
 
   // Who they are on top, tabs down the right (Main, Inventory, Combat, Character, Growth, Notes).
   sheet: {

@@ -60,14 +60,9 @@ const statKey = (word) => ({ strength: "str", dexterity: "dex", willpower: "wil"
 // What the sheet may change (the manifest's edit globs, "*" one id-n key),
 // then every number worked out again.
 const { default: MANIFEST } = require("../shared/cairn/manifest.mjs");
-const globRegex = (glob) => new RegExp(`^${glob.replace(/\./g, "\\.").replace(/\*/g, "id-\\d+")}$`);
-const EDIT_PATHS = {
-  text: MANIFEST.edit.text.map(globRegex),
-  number: MANIFEST.edit.number.map(globRegex),
-  string: MANIFEST.edit.string.map(globRegex),
-  // A row the sheet may drop (an edit to null).
-  remove: [globRegex(`(${MANIFEST.edit.remove.join("|")}).*`)],
-};
+const { editPaths } = require("../shared/rulesets/edit.mjs");
+// The rows the sheet may drop (an edit to null) are EDIT_PATHS.remove.
+const EDIT_PATHS = editPaths(MANIFEST.edit);
 const TEXT = EDIT_PATHS.text;
 const NUMBERS = EDIT_PATHS.number;
 const STRINGS = EDIT_PATHS.string;

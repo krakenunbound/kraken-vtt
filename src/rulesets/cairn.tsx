@@ -1,5 +1,6 @@
 import { itemSlots } from "../../shared/cairn/rules.mjs";
-import { num, useSheet } from "../core/sheet/context";
+import { num, useSheet, type Row } from "../core/sheet/context";
+import { listOf, rowFor, tablesOf, type WizardContext } from "../core/wizard/context";
 
 // Cairn's own parts, where no core part fits (docs/core-ui-design.md 4.4,
 // level 3): the rest strip. Everything else on the Cairn sheet is the core's,
@@ -38,4 +39,39 @@ export function CairnRest() {
 export const cairnItemSlots = (item: Record<string, unknown>) => {
   const slots = itemSlots(item);
   return `${slots} slot${slots === 1 ? "" : "s"}`;
+};
+
+// The wizard's own rules (shared/cairn/manifest.mjs wizard):
+// A background rolled on the d20 table: its row names one (spelled loosely: "Barber-surgeon"), or the roll counts down the list.
+export const cairnBackgroundOfRoll = (total: number, names: string[], text: string) => {
+  const picked = text || names[(total - 1) % names.length];
+  const loose = (name: string) => name.replace(/[-\s]/g, "").toLowerCase();
+  return names.find((name) => name.toLowerCase() === picked.toLowerCase().replace(/-/g, " ").replace(/\s+/g, " ")) ?? names.find((name) => loose(name) === loose(picked));
+};
+// The gold a background's table results bring ("+20 gp", "take 10 gp", "an extra 5 gp").
+export const cairnBackgroundGold = (spec: Row, wizard: WizardContext) => {
+  const results = (spec.results ?? {}) as Row;
+  return tablesOf(wizard.chosen("background"), "tables").reduce((sum, table, index) => {
+    const match = /(?:\+\s*|take\s+|extra\s+)(\d+)\s*gp\b/i.exec(rowFor(table, results[index])?.text ?? "");
+    return sum + (match ? Number(match[1]) : 0);
+  }, 0);
+};
+// What build-character takes (kraken_build_character's Cairn spec): the name (else the background's first), each table's roll, the cart.
+export const cairnBuild = (spec: Row, wizard: WizardContext) => {
+  const chosen = wizard.chosen("background");
+  if (!chosen || !spec.attributes) return null;
+  const results = (spec.results ?? {}) as Row;
+  return {
+    name: String(spec.name ?? "") || listOf(chosen.data.names)[0] || chosen.name,
+    background: chosen.name,
+    attributes: spec.attributes,
+    hp: spec.hp ?? 0,
+    age: spec.age ?? 0,
+    gold: spec.gold ?? 0,
+    traits: spec.traits ?? {},
+    bond: spec.bond ?? "",
+    omen: spec.omen ?? "",
+    results: tablesOf(chosen, "tables").map((_, index) => ({ table: index, roll: results[index] })),
+    buy: Object.entries((spec.buy ?? {}) as Record<string, number>),
+  };
 };

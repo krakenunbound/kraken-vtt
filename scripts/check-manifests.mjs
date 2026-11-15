@@ -12,6 +12,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { CALENDARS } from "../shared/calendars.mjs";
+import { globRegex, samplePath } from "../shared/rulesets/edit.mjs";
 import { CAMPAIGN_RULESETS, FEATURES, MANIFESTS, rulesetNamed } from "../shared/rulesets/registry.mjs";
 
 const require = createRequire(import.meta.url);
@@ -73,9 +74,19 @@ for (const name of CAMPAIGN_RULESETS) {
   const refs = [];
   if (typeof manifest.sheet === "string") refs.push(manifest.sheet);
   if (typeof manifest.wizard === "string") refs.push(manifest.wizard);
-  else if (manifest.wizard && typeof manifest.wizard.steps === "string") refs.push(manifest.wizard.steps);
+  else if (manifest.wizard) refs.push(...checkWizard(where, manifest.wizard));
   refs.push(...(manifest.strips ?? []));
   if (manifest.tracker?.replace) refs.push(manifest.tracker.replace);
+  // The tracker's header controls are components; its buttons' hooks are once each per place; a ruleset message is the game's own.
+  refs.push(...(manifest.tracker?.headerParts ?? []));
+  for (const place of ["rowActions", "headerActions"]) {
+    const seen = new Set();
+    for (const action of manifest.tracker?.[place] ?? []) {
+      if (seen.has(action.hook)) problem(where, `the tracker's ${place} use ${action.hook} twice`);
+      seen.add(action.hook);
+      if ("message" in action.call && action.call.message !== manifest.host?.message) problem(where, `the tracker's ${action.hook} sends ${action.call.message}, not the game's message ${manifest.host?.message}`);
+    }
+  }
   for (const record of Object.values(manifest.records ?? {})) {
     if (record.statblock) refs.push(record.statblock);
     if (record.sheet && record.sheet !== "core") refs.push(record.sheet);
@@ -104,7 +115,10 @@ function checkSheet(where, manifest) {
         : part.part === "notes" ? part.fields
         : part.part === "list" ? [part.select, part.check].filter(Boolean).map((field) => ({ ...field, path: `${part.path}.*.${field.path}` }))
         : part.part === "statBlock" ? part.rows.flatMap((row) => part.columns.map((column) => ({ ...column.field, path: column.path.replace("{key}", row.key) })))
+        : part.part === "skills" ? [{ ...part.field, path: `${part.path}.%.${part.field.path}` }]
         : [];
+      if (part.part === "list") fields.push(...(part.fields ?? []).map((field) => ({ ...field, path: `${part.path}.*.${field.path}` })));
+      if (part.part === "track") editable.push(`${part.used}.#`);
       // A field is typed into when it has an input kind (no kind: shown only) and is not edit: "never" or sent as an action.
       for (const field of fields) if (field.kind && field.kind !== "readonly" && field.edit !== "never" && !field.action) editable.push(field.path);
       if (part.part === "coins") editable.push(`${part.path}.*.amount`);
@@ -118,30 +132,57 @@ function checkSheet(where, manifest) {
     }
   };
   for (const field of manifest.sheet.header.identity) if (field.kind && field.kind !== "readonly" && field.edit !== "never") editable.push(field.path);
+  walk(manifest.sheet.top ?? [], { rows: new Set(), actions: new Set() }, "top");
   for (const tab of manifest.sheet.tabs) walk(tab.parts, { rows: new Set(), actions: new Set() }, tab.id);
   // The whitelist: every editable path is allowed by the manifest's edit globs.
   // Rows a list may drop: "inventorylist" -> inventorylist.<id>.
   const removable = (manifest.edit?.remove ?? []).length ? [`(${manifest.edit.remove.join("|")}).*`] : [];
-  const globs = [...(manifest.edit?.text ?? []), ...(manifest.edit?.number ?? []), ...(manifest.edit?.string ?? []), ...removable];
+  const globs = [...(manifest.edit?.text ?? []), ...(manifest.edit?.number ?? []), ...(manifest.edit?.string ?? []), ...(manifest.edit?.list ?? []), ...removable];
   const compiled = globs.map((glob) => globRegex(glob));
   for (const path of editable) {
-    const sample = path.replace(/\*/g, "id-00001");
+    const sample = samplePath(path);
     if (!compiled.some((regex) => regex.test(sample))) problem(where, `the sheet edits ${path}, which the manifest's edit whitelist does not allow`);
   }
   // The host builds its whitelist from the manifest: the same regexes.
   if (manifest.host?.module && manifest.edit) {
     const host = require(`../${manifest.host.module}`);
     if (host.EDIT_PATHS) {
-      const mine = ["text", "number", "string"].map((kind) => (manifest.edit[kind] ?? []).map((glob) => globRegex(glob).source).join("|")).concat(removable.map((glob) => globRegex(glob).source));
-      const theirs = ["text", "number", "string"].map((kind) => (host.EDIT_PATHS[kind] ?? []).map((regex) => regex.source).join("|")).concat((host.EDIT_PATHS.remove ?? []).map((regex) => regex.source));
+      const mine = ["text", "number", "string", "list"].map((kind) => (manifest.edit[kind] ?? []).map((glob) => globRegex(glob).source).join("|")).concat(removable.map((glob) => globRegex(glob).source));
+      const theirs = ["text", "number", "string", "list"].map((kind) => (host.EDIT_PATHS[kind] ?? []).map((regex) => regex.source).join("|")).concat((host.EDIT_PATHS.remove ?? []).map((regex) => regex.source));
       if (mine.join("\n") !== theirs.join("\n")) problem(where, `${manifest.host.module}'s EDIT_PATHS are not the manifest's edit globs`);
     }
   }
   return refs;
 }
-// The manifest's edit glob as the host's regex: "*" = one id-n key.
-function globRegex(glob) {
-  return new RegExp(`^${glob.replace(/\./g, "\\.").replace(/\*/g, "id-\\d+")}$`);
+// A manifest-laid-out wizard: its Refs (a roll's pick, a shop's bonus, the build), every button's data-action
+// once in the wizard, and every part's spec path written by one part only.
+function checkWizard(where, wizard) {
+  const refs = [wizard.finish?.build].filter(Boolean);
+  if (!wizard.hook) problem(where, "the wizard has no hook (data-wizard)");
+  if (!wizard.finish?.build) problem(where, "the wizard has no build Ref");
+  const actions = new Set();
+  const intos = new Set();
+  const once = (seen, value, what) => {
+    if (seen.has(value)) problem(where, `the wizard's ${what} ${value} is used twice`);
+    seen.add(value);
+  };
+  const walk = (parts) => {
+    for (const part of parts) {
+      if (part.kind === "row") {
+        walk(part.parts);
+        continue;
+      }
+      if (part.into) once(intos, part.into, "spec path");
+      for (const roll of [part.kind === "choose-record" ? part.roll : null, part.kind === "shop" ? part.gold : null, ["roll", "roll-table", "roll-stats", "record-tables"].includes(part.kind) ? part : null]) if (roll?.hook) once(actions, roll.hook, "data-action");
+      if (part.kind === "roll-stats" && part.swap) once(actions, part.swap.hook, "data-action");
+      if (part.kind === "shop" && part.gold.into) once(intos, part.gold.into, "spec path");
+      if (part.kind === "choose-record" && part.roll) refs.push(part.roll.pick);
+      if (part.kind === "shop" && part.gold.bonus) refs.push(part.gold.bonus);
+    }
+  };
+  for (const step of wizard.steps ?? []) walk(step.parts ?? []);
+  if (actions.has("wizard-finish")) problem(where, "a wizard part uses the frame's wizard-finish");
+  return refs;
 }
 
 const strictLater = FEATURES.filter((feature) => !existsSync(new URL(`../src/core/features/${feature}`, import.meta.url)));

@@ -44,14 +44,25 @@ const look = (scope: Scope, path: string): unknown => {
   return at(scope.data, path);
 };
 const present = (value: unknown) => value !== undefined && value !== null && value !== "" && value !== false && value !== 0;
-// "{a.b}" filled in; "[ · coin {slots.coins}]" kept only when every value inside is there (not empty, not 0).
+export const signed = (n: number) => (n >= 0 ? `+${n}` : `${n}`);
+// A placeholder's text: "{path}", "{path|signed}" (+2, -1), "{path|0}" (the value, or 0 when it has none).
+function valueText(scope: Scope, expression: string): string {
+  const [path, filter] = expression.split("|");
+  if (path.startsWith("?")) return "";
+  const value = look(scope, path);
+  if (filter === "signed") return signed(num(value));
+  if (filter !== undefined && (value === undefined || value === null || value === "")) return filter;
+  return String(value ?? "");
+}
+// "{a.b}" filled in; "[ · coin {slots.coins}]" kept only when every value inside is there (not empty, not 0);
+// "{?path}" inside one is only that test ("[ Sneak attack...{?sneakattack}]").
 // A placeholder may hold another: "{attributes.{key}.score}" (the innermost first).
 export function fill(template: string, scope: Scope): string {
   let text = template;
   // The row's key and the extras go in first, so a path can be built from them.
   if (scope.extra) for (let pass = 0; pass < 2 && /\{[^{}]+\}[^{}]*\}/.test(text); pass++) text = text.replace(/\{([^{}]+)\}(?=[^{}]*\})/g, (whole, path: string) => (scope.extra && path in scope.extra ? String(scope.extra[path]) : whole));
-  const kept = text.replace(/\[([^\]]*)\]/g, (_, inner: string) => ([...inner.matchAll(/\{([^{}]+)\}/g)].every((match) => present(look(scope, match[1]))) ? inner : ""));
-  return kept.replace(/\{([^{}]+)\}/g, (_, path: string) => String(look(scope, path) ?? ""));
+  const kept = text.replace(/\[([^\]]*)\]/g, (_, inner: string) => ([...inner.matchAll(/\{\??([^{}|]+)(?:\|[^{}]*)?\}/g)].every((match) => present(look(scope, match[1]))) ? inner : ""));
+  return kept.replace(/\{([^{}]+)\}/g, (_, expression: string) => valueText(scope, expression));
 }
 // A text that may depend on the row or a sheet modifier: { by: "kind", map: { relic: "Use" }, else: "Cast" }.
 export function textOf(text: Text | undefined, scope: Scope, modifiers: Record<string, unknown>): string {
@@ -72,5 +83,6 @@ export function holds(cond: Cond | undefined, scope: Scope, context: Pick<SheetC
   if ("positive" in cond) return num(look(scope, cond.positive)) > 0;
   if ("has" in cond) return present(look(scope, cond.has));
   if ("defined" in cond) return look(scope, cond.defined) !== undefined;
+  if ("rows" in cond) return rows(look(scope, cond.rows)).length > 0;
   return false;
 }

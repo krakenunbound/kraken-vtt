@@ -68,22 +68,14 @@ async function levelUpBf(table, record, from) {
   return { record: updated, gain, level: next.level };
 }
 
-// What the sheet may change, then every number worked out again.
-const TEXT = new Set(["playername", "alignment", "deity", "appearance", "notes", "background", "gender", "age", "height", "weight", "languages", "retainers", "specialabilities"]);
-const NUMBERS = [
-  /^abilities\.(strength|intelligence|wisdom|dexterity|constitution|charisma)\.score$/,
-  /^saves\.(death|wands|paralysis|breath|spells)\.misc$/,
-  /^thiefskills\.[a-z]+\.misc$/,
-  /^hp\.(wounds|misc)$/,
-  /^exp$/,
-  /^ac\.misc$/,
-  /^initiative\.misc$/,
-  /^movemisc$/,
-  /^loyalty$/,
-  /^spellcasting\.used\.\d$/,
-  /^coins\.id-\d+\.amount$/,
-  /^inventorylist\.id-\d+\.(count|carried)$/,
-];
+// What the sheet may change (the manifest's edit globs: shared/rulesets/edit.mjs),
+// then every number worked out again.
+const { default: MANIFEST } = require("../shared/bfrpg/manifest.mjs");
+const { editPaths } = require("../shared/rulesets/edit.mjs");
+const EDIT_PATHS = editPaths(MANIFEST.edit);
+const TEXT = EDIT_PATHS.text;
+const NUMBERS = EDIT_PATHS.number;
+const LISTS = EDIT_PATHS.list;
 function setPath(data, key, value) {
   const keys = key.split(".");
   let node = data;
@@ -104,16 +96,16 @@ async function editBf(table, record, changes, seat) {
     const key = String(change?.path ?? "");
     const value = change?.value;
     if (key === "name") name = String(value ?? "").trim().slice(0, 120) || record.name;
-    else if (TEXT.has(key)) data[key] = String(value ?? "").slice(0, 8000);
-    else if (key === "spellbook" || key === "prepared") data[key] = listOf(value);
+    else if (TEXT.some((pattern) => pattern.test(key))) data[key] = String(value ?? "").slice(0, 8000);
+    else if (LISTS.some((pattern) => pattern.test(key))) data[key] = listOf(value);
     else if (NUMBERS.some((pattern) => pattern.test(key))) {
       const n = Number(value);
       if (!Number.isFinite(n) || Math.abs(n) > 1e7) throw new Error(`${key} needs a number.`);
       setPath(data, key, /(^spellcasting|^hp\.wounds|amount$|count$)/.test(key) ? Math.max(0, Math.round(n)) : Math.round(n));
-    } else if (/^inventorylist\.id-\d+$/.test(key) && value === null) delete data.inventorylist?.[key.split(".")[1]];
+    } else if (EDIT_PATHS.remove.some((pattern) => pattern.test(key)) && value === null) delete data[key.split(".")[0]]?.[key.split(".")[1]];
     else throw new Error(`The sheet cannot change ${key}.`);
   }
   return table.records.update(record.id, { name, data: rules.derive(data) }, table.seat, { replace: true });
 }
 
-module.exports = { rulesBf, buildBf, checkBf, levelUpBf, editBf, isBf, isBfRuleset, RULESET_NAME };
+module.exports = { rulesBf, buildBf, checkBf, levelUpBf, editBf, isBf, isBfRuleset, RULESET_NAME, EDIT_PATHS };
