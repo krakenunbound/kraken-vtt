@@ -112,6 +112,30 @@ async function copyText(text: string) {
   }
 }
 
+// Help on the start screen (as FG's launcher has): the wiki's quickstart and pages, the release
+// notes, a bug report and the community, in the system's browser (a player's: a new tab).
+const WIKI = "https://krakenunbound.github.io/kraken-vtt/";
+const REPO = "https://github.com/krakenunbound/kraken-vtt";
+const HELP_LINKS = [
+  { label: "Quickstart guide", href: `${WIKI}quickstart.html`, title: "From a new campaign to the first fight, in ten steps" },
+  { label: "Wiki", href: WIKI, title: "Every part of Kraken, for GMs and players" },
+  { label: "Game guides", href: `${WIKI}games.html`, title: "The games Kraken plays, and their sheets and rules" },
+  { label: "Release notes", href: `${REPO}/releases`, title: "What each version brought" },
+  { label: "Report a bug", href: `${REPO}/issues/new`, title: "Tell us what went wrong (a GitHub account is needed)" },
+  { label: "Community", href: `${REPO}/discussions`, title: "Questions, ideas and tables looking for players" },
+];
+function HelpLinks() {
+  return (
+    <nav className="help-links rise" aria-label="Help">
+      {HELP_LINKS.map((link) => (
+        <a key={link.label} className="help-link" href={link.href} target="_blank" rel="noopener noreferrer" title={link.title} data-help-link={link.label}>
+          {link.label}
+        </a>
+      ))}
+    </nav>
+  );
+}
+
 function CopyAddress({ label, value }: { label: string; value: string }) {
   const [state, setState] = useState<"" | "copied" | "failed">("");
   const timer = useRef<number | undefined>(undefined);
@@ -427,6 +451,7 @@ export function SetupScreen({
               <span className="home-card-go">Connect ›</span>
             </div>
           </div>
+          <HelpLinks />
           {alertLine}
         </main>
       ) : mode === "join" ? (
