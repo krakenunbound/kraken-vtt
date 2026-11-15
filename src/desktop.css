@@ -392,6 +392,11 @@ li.empty-state { list-style: none; }
 .window-close { padding: 2px 4px; background: transparent; border-color: transparent; color: var(--muted); }
 .window-close:hover { color: var(--text); border-color: var(--panel-edge); }
 .window-body { flex: 1; min-height: 0; overflow: auto; display: flex; flex-direction: column; }
+/* The map behind every window (FG's background panel): edge to edge in the table area, no frame;
+   its two buttons faint in the corner until the pointer comes near. */
+.window.window-backdrop { border: 0; border-radius: 0; box-shadow: none; pointer-events: auto; }
+.window-backdrop-controls { position: absolute; top: 8px; right: 8px; z-index: 5; display: flex; gap: 4px; padding: 3px; border-radius: 8px; background: rgba(12, 14, 18, 0.55); opacity: 0.45; transition: opacity 0.15s ease; }
+.window-backdrop-controls:hover, .window-backdrop-controls:focus-within { opacity: 1; }
 .window-body > * { flex: 1; min-height: 0; }
 .window-body > .characters { padding: 12px; }
 /* The map's window: the scene's name and pickers along the top, the map under them. */

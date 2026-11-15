@@ -185,6 +185,20 @@ try {
   await tool("kraken_combat", { action: "remove", id: heroEntry.id });
   report.push("range line: the hero's arrow to the orc says 20 ft, out of range for a 10/15 bow, within for 30/60");
 
+  // 2d. The map behind every window (FG's background panel), on the player's screen, and back.
+  await seat.click('.window[data-window="map"] [data-action="map-backdrop"]');
+  await seat.waitForSelector('.window[data-window="map"][data-backdrop="on"]', { timeout: 5000 });
+  const filled = await seat.evaluate(() => {
+    const map = document.querySelector('.window[data-window="map"]').getBoundingClientRect();
+    const table = document.querySelector(".desktop-surface").getBoundingClientRect();
+    return Math.abs(map.width - table.width) < 2 && Math.abs(map.height - table.height) < 2;
+  });
+  assert(filled, "the map fills the table area behind the windows");
+  await seat.screenshot({ path: path.join(SHOTS, "kraken-map-backdrop-player.png") });
+  await seat.click('.window[data-window="map"] [data-action="map-window"]');
+  await seat.waitForSelector('.window[data-window="map"] .window-title', { timeout: 5000 });
+  report.push("map behind every window: fills the table area on the player's screen, and back into its window");
+
   // 3. Fog of war on the host: walls, line of sight; the player's explored areas come from the host.
   await tool("kraken_wall", { action: "add", points: [700, 200, 700, 1200], kind: "wall" }).catch(() => undefined);
   await tool("kraken_line_of_sight", { on: true });
