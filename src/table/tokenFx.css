@@ -35,7 +35,7 @@
 .fx-zzz > i {
   left: 64%;
   top: 2%;
-  font: 900 max(10px, 0.19em)/1 system-ui, "Segoe UI", sans-serif;
+  font: 900 max(14px, 0.3em)/1 system-ui, "Segoe UI", sans-serif;
   color: #fff;
   text-shadow: 1px 1px 0 #1a1230, -1px -1px 0 #1a1230, 1px -1px 0 #1a1230, -1px 1px 0 #1a1230, 0 0 3px #000;
   transform-origin: 0 100%;

@@ -2007,6 +2007,8 @@ function MapViewInner({
               style={{ left: token.x - span / 2, top: token.y - span / 2, width: span, height: span }}
               onPointerDown={(event) => {
                 if (event.button === 2) return;
+                // Laying a template (by hand, or a spell's): the press is the map's, even on a token.
+                if (event.button === 0 && (tool === "template" || templateAsk)) return;
                 event.stopPropagation();
                 setMenu(null);
                 // Ctrl+click targets (FG): with your character, or for the GM the creature whose turn it is.

@@ -161,7 +161,7 @@ export function visualOf(effects, extra = {}) {
     const icon = effect.icon || (light ? "light" : first?.icon ?? (tone === "good" ? "buff" : tone === "bad" ? "debuff" : "generic"));
     const time = effect.duration && effect.duration > 0 ? ` (${effect.duration} round${effect.duration === 1 ? "" : "s"} left)` : "";
     const what = first?.text ?? componentsOf(effect.label).filter((part) => part.tag !== "LIGHT").map((part) => `${part.tag} ${part.value}${part.rest ? ` ${part.rest}` : ""}`).join(", ");
-    badges.push({ icon, tone, title: `${nameOf(effect.label)}${effect.paused ? " (put out)" : ""}${time}${what ? `: ${what}` : ""}${effect.source ? ` · from ${effect.source}` : ""}`, ...(effect.duration && effect.duration > 0 ? { rounds: effect.duration } : {}) });
+    badges.push({ icon, tone, title: `${nameOf(effect.label)}${effect.paused ? " (put out)" : ""}${time}${what ? `: ${what}` : ""}${effect.source ? ` · from ${effect.source}` : ""}`, ...(effect.duration && effect.duration > 0 && effect.duration < 100 ? { rounds: effect.duration } : {}) });
   }
   if (extra.concentrating) {
     fx.add("ring");
