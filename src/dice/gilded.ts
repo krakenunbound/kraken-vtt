@@ -1036,9 +1036,12 @@ function drawPips(ctx: CanvasRenderingContext2D, value: string, ink: string, lar
   });
 }
 
-function drawNumeral(ctx: CanvasRenderingContext2D, value: string, ink: string, style: NumberStyle) {
-  const size = value.length > 2 ? 92 : value.length > 1 ? 118 : 148;
-  ctx.font = `700 ${size}px Cinzel, Georgia`;
+function drawNumeral(ctx: CanvasRenderingContext2D, text: string, ink: string, style: NumberStyle) {
+  // Fate's minus and plus as fat bars ("▬", "✚"), so a minus on its side never reads as "|".
+  const fate = text === "−" || text === "+";
+  const value = text === "−" ? "▬" : text === "+" ? "✚" : text;
+  const size = fate ? 150 : value.length > 2 ? 92 : value.length > 1 ? 118 : 148;
+  ctx.font = fate ? `900 ${size}px "Segoe UI Symbol", "DejaVu Sans", sans-serif` : `700 ${size}px Cinzel, Georgia`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.lineJoin = "round";

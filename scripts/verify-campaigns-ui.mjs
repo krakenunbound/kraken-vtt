@@ -115,6 +115,14 @@ try {
   await tool("kraken_leave");
   await page.waitForSelector("text=My Campaigns");
 
+  // The start screen's help row: the wiki's quickstart and pages, release notes, a bug report, the community.
+  await page.waitForSelector(".help-links .help-link");
+  const help = await page.$$eval(".help-links .help-link", (links) => links.map((link) => [link.textContent.trim(), link.getAttribute("href"), link.getAttribute("target")]));
+  assert(help.length === 6 && help.every(([, href, target]) => /^https:\/\//.test(href) && target === "_blank"), `six help links to the web: ${JSON.stringify(help)}`);
+  assert(help.some(([label, href]) => /quickstart/i.test(label) && /quickstart\.html$/.test(href)) && help.some(([label, href]) => /release/i.test(label) && /\/releases$/.test(href)), "Quickstart and Release notes go where they say");
+  await shoot("start-help-links");
+  results.push("start screen: six help links (quickstart, wiki, game guides, release notes, report a bug, community)");
+
   // The start screen's menu: Rename.
   await page.reload();
   await page.click('[data-action="campaigns-mode"]');

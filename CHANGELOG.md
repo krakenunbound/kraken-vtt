@@ -6,6 +6,32 @@ full log of the work is in [PLAN.md](PLAN.md).
 
 ## Unreleased
 
+**From a hands-on audit of Fantasy Grounds and Foundry: what a game night trips over.**
+
+- **Action links in text.** "DC 15 Dexterity saving throw" in a book, story, note or chat line is a button: the GM's click asks every player to roll it, a player's rolls their own character's save. Checks, skills, damage, healing, XP awards and conditions too, from Foundry's markup or a book's own words. Chat: `/check dex 15`, `/save wis 13`, `/skill perception 12`, `/award 50`.
+- **Range lines.** A creature's targets get an arrow in its colour with the distance; long range and out of range are named from its weapons and spells.
+- **Whose turn it is** lights up on the portraits along the top (a spinning ring, a glow, a Turn ribbon); the GM may sort them into initiative order.
+- **Damage and healing float off tokens**; **speech bubbles** over a token when someone speaks as it.
+- **The map behind every window**, filling the table (each screen chooses).
+- **Cards for every game**: potions, scrolls, wands, kits and class features; Cairn's spellbooks and relics; Ironsworn's and Starforged's assets; Fate's aspects and stunts; Forged's special abilities; new pictures for all of them, the spell schools and sci-fi weapons.
+- **Combat options**: initiative rolled every round, stop at the start of each round, creatures' hit points as listed, rolled or maximum. 5E: an Inspiration box.
+- **Map keys**: the GM's Ctrl+A, Ctrl+C / Ctrl+V of tokens; + and - zoom; arrows pan; the number pad moves diagonally.
+- **Help on the start screen**: the quickstart, the new wiki (krakenunbound.github.io/kraken-vtt), game guides, release notes, bug reports and the community.
+
+**Rough edges smoothed.**
+
+- A creature whose token has a "players call it" name is called that on the players' combat tracker and in chat too.
+- An identified item keeps its real name in tracker and chat lines, even when an unidentified copy of the same name is about.
+- Drag a result from a random table's window into the chat's entry.
+- ADV and DIS from the modifier box tag a 5E roll **[ADVANTAGE]** or **[DISADVANTAGE]**, like advantage from the rules.
+- Pause now also holds a player finishing the character wizard or improving a character.
+- A region the GM switched off at the table stays off after Map Studio's Save to Kraken.
+- Clicking a roll chip while typing in a note places the cursor; it no longer rolls for the whole table.
+- The Character Wizard's window takes the new character's name when the wizard ends.
+- Fate dice: the minus is a fat bar, so a die on its side no longer reads as "|". The Scene Aspects strip sits under windows, not over their title bars.
+- Forged: the Harm panel no longer covers the trauma Mark button. Character Selection: the Export menu no longer covers the card's name.
+- A circle's or square's template name sits under it, clear of Sleep's Zzz.
+
 **Bookkeeping, as the GM asked: arrows, potions, rations, torches and the load counted for you, each with a switch to hand-wave it.**
 
 - **Ammunition:** a bow, crossbow, sling or gun spends from its stack as it attacks; with none left the attack is refused, and chat warns when you run low. After a fight, **Recover** on the sheet picks up what can be found (half, in 5E). Traveller's guns count their magazines.

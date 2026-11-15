@@ -152,7 +152,7 @@ try {
   await tool("kraken_dice_force", { values: [6, 15] });
   await say(seat, "/r 1d20 + 3 #Climb");
   const climb = await until(lastRoll, "the climb");
-  assert(climb.label === "Climb" && climb.formula === "2d20kh1+3+3" && climb.total === 21 && climb.mods.length === 3, `the roll reads the box and ADV: ${JSON.stringify(climb)}`);
+  assert(climb.label === "Climb [ADVANTAGE]" && climb.formula === "2d20kh1+3+3" && climb.total === 21 && climb.mods.length === 3, `the roll reads the box and ADV: ${JSON.stringify(climb)}`);
   await until(async () => (await seat.$$(".modifier-slots li")).length === 0 && (await seat.getAttribute('[data-modifier-key="adv"]', "aria-pressed")) === "false", "the box and the key clear");
   await seat.waitForSelector(".chat-line .roll-mods");
   await seat.screenshot({ path: path.join(shots, "1-player-roll-card.png") });
@@ -208,13 +208,17 @@ try {
   await seat.click('.sidebar [data-launch="notes"]');
   await seat.click(`text=Torches`).catch(() => undefined);
   const noteChip = await seat.waitForSelector('.note-window .inline-roll[data-inline-roll="1d6"]', { timeout: 10000 }).catch(() => null);
-  if (noteChip) {
-    await seat.click(".note-window .rt-body");
-    await seat.click(".note-window .note-title");
-    await settle(600);
-    const kept = (await tool("kraken_record_get", { id: note.id })).data.text;
-    assert(kept === "<p>Each torch burns [[1d6]] hours.</p>", `the note keeps its words: ${kept}`);
-  }
+  assert(noteChip, "the note's [[1d6]] shows as a roll chip");
+  await seat.click(".note-window .rt-body");
+  // While typing in the note, a click on its chip places the cursor and rolls nothing.
+  const linesBefore = await seat.locator(".chat-line").count();
+  await noteChip.click();
+  await settle(800);
+  assert((await seat.locator(".chat-line").count()) === linesBefore, "a chip clicked while typing in the note rolls nothing");
+  await seat.click(".note-window .note-title");
+  await settle(600);
+  const kept = (await tool("kraken_record_get", { id: note.id })).data.text;
+  assert(kept === "<p>Each torch burns [[1d6]] hours.</p>", `the note keeps its words: ${kept}`);
 
   // 5. The party's group roll asked of the players.
   await page.click('.sidebar [data-launch="party"]');
@@ -231,6 +235,22 @@ try {
   await seat.waitForSelector('.chat-prompt [data-prompt-row="Hagar"][data-rolled]');
   assert((await seat.getAttribute('.chat-prompt [data-prompt-row="Hagar"]', "data-rolled")) === "15", "the player's row: 11 + 4");
   await seat.screenshot({ path: path.join(shots, "5-player-party-prompt.png") });
+
+  // 5b. Action links: a book's "DC 13 Dexterity saving throw" in a chat line is a chip. The GM's click
+  // asks the players (a new prompt card); the player's rolls Hagar's own save against the DC.
+  await tool("kraken_chat_send", { text: "The floor gives way: make a DC 13 Dexterity saving throw." });
+  const link = '.chat-line .action-link[data-action-link="test"]';
+  await page.waitForSelector(link);
+  await seat.waitForSelector(link);
+  assert((await seat.textContent(link)).trim() === "DC 13 Dexterity saving throw", `the chip keeps the book's words: ${await seat.textContent(link)}`);
+  const promptsBefore = await seat.locator(".chat-prompt").count();
+  await page.locator(link).last().click();
+  await seat.waitForFunction((before) => document.querySelectorAll(".chat-prompt").length > before, promptsBefore, { timeout: 10000 });
+  assert(/Dexterity/.test(await seat.locator(".chat-prompt").last().textContent()) && /DC 13/.test(await seat.locator(".chat-prompt").last().textContent()), "the GM's click asks the players for a DC 13 Dexterity save");
+  await tool("kraken_dice_force", { values: [9] });
+  await seat.locator(link).last().click();
+  await until(async () => (await tool("kraken_chat_log", { count: 10 })).some((line) => /Dexterity save/i.test(line.roll?.label ?? "") && line.from === "A test player"), "the player's click rolls Hagar's Dexterity save");
+  await seat.screenshot({ path: path.join(shots, "5b-action-link.png") });
 
   // 6. The tracker: initiative by kind, Delay and Act now; the player's bars.
   await tool("kraken_table_options", { initGroup: "kind", healthNpc: "bar" });

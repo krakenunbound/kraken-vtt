@@ -74,6 +74,15 @@ function firstPlace(kind: WindowKind): Placement {
   return DEFAULTS[kind];
 }
 
+// Whether the map fills the table behind the windows (kept per screen).
+function readBackdrop() {
+  try {
+    return window.localStorage.getItem("kraken-map-backdrop") === "1";
+  } catch {
+    return false;
+  }
+}
+
 // The height of a window's own title bar, which a window of its own does not need.
 const TITLE = 34;
 
@@ -346,7 +355,44 @@ export function FloatingWindow({ item, children }: { item: OpenWindow; children:
     window.addEventListener("pointercancel", finish);
   };
 
+  // FG's image back panel and Foundry's canvas: a map may fill the table behind every window (this screen's choice).
+  const [backdrop, setBackdrop] = useState(() => item.kind === "map" && readBackdrop());
+  const [surface, setSurface] = useState<{ x: number; y: number; w: number; h: number } | null>(null);
+  useLayoutEffect(() => {
+    if (!backdrop) return;
+    const measure = () => {
+      const box = document.querySelector(".desktop-surface")?.getBoundingClientRect();
+      if (box && box.width > 100) setSurface({ x: box.left, y: box.top, w: box.width, h: box.height });
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, [backdrop]);
+  const setBack = (on: boolean) => {
+    setBackdrop(on);
+    try {
+      window.localStorage.setItem("kraken-map-backdrop", on ? "1" : "0");
+    } catch {
+      /* remembered for this sitting only */
+    }
+  };
+
   const child = item.popped ? popup(item.key) : undefined;
+  if (backdrop && !item.popped && surface) {
+    return (
+      <section className="window window-backdrop" data-window={item.kind} data-backdrop="on" aria-label={`${item.title} (behind every window)`} style={{ left: surface.x, top: surface.y, width: surface.w, height: surface.h, zIndex: 1 }}>
+        <div className="window-backdrop-controls">
+          <button type="button" className="window-close" data-action="map-window" title="Back into a window of its own" aria-label={`${item.title}: back into a window`} onClick={() => setBack(false)}>
+            <Icon name="dock" size={15} />
+          </button>
+          <button type="button" className="window-close" aria-label={`Close ${item.title}`} onClick={() => close(item.key)}>
+            <Icon name="close" size={15} />
+          </button>
+        </div>
+        <div className="window-body">{children}</div>
+      </section>
+    );
+  }
   if (item.popped && child) {
     return (
       <PopOutWindow child={child} title={`${item.title} · Kraken`} onClosed={() => close(item.key)} onPlaced={(out) => move(item.key, { out })}>
@@ -374,6 +420,11 @@ export function FloatingWindow({ item, children }: { item: OpenWindow; children:
     >
       <header className="window-title" onPointerDown={begin("move")} onDoubleClick={() => move(item.key, fitToScreen(firstPlace(item.kind)))}>
         <span>{item.title}</span>
+        {item.kind === "map" ? (
+          <button type="button" className="window-close" data-action="map-backdrop" title="Behind every window: the map fills the table (FG's background panel)" aria-label={`${item.title}: behind every window`} onClick={() => setBack(true)}>
+            <Icon name="map" size={16} />
+          </button>
+        ) : null}
         {STAYS_IN.includes(item.kind) ? null : (
           <button type="button" className="window-close" title="Out to a window of its own (for another monitor)" aria-label={`Pop out ${item.title}`} onClick={() => popOut(item.key)}>
             <Icon name="popout" size={16} />

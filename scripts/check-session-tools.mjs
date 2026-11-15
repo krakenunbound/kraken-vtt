@@ -142,6 +142,12 @@ try {
   await nextOf(deeAgain.ws, "notice", (msg) => /paused/.test(msg.text));
   send(deeAgain.ws, { type: "token-move", id: "x", x: 10, y: 10 });
   await nextOf(deeAgain.ws, "notice", (msg) => /paused/.test(msg.text));
+  // A character wizard's finish and a character's improvement wait too.
+  for (const [type, req] of [["build-character", 8], ["level-up", 9]]) {
+    send(deeAgain.ws, { type, req });
+    const wait = await nextOf(deeAgain.ws, "op-result", (msg) => msg.req === req);
+    assert(wait.ok === false && /paused/.test(wait.error), `a player's ${type} waits: ${JSON.stringify(wait)}`);
+  }
   send(deeAgain.ws, { type: "chat", text: "still talking" });
   await nextOf(deeAgain.ws, "chat", (msg) => msg.text === "still talking");
   drain(host);

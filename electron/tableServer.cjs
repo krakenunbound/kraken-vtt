@@ -21,8 +21,8 @@ const { modulePicture, importModule, prepareModule } = require("./importers/fgMo
 const { fitsRuleset } = require("./books.cjs");
 
 const MAX_CLIENTS = 16;
-// What a player may not do while the GM has paused the game: move or change tokens, open doors, roll.
-const PAUSE_HOLDS = new Set(["token-place", "token-move", "token-update", "token-remove", "token-undo", "door", "roll", "siege-check", "ct", "template", "effects", "cairn", "fate", "ironsworn", "forged", "party-group", "party-prompt-roll", "starship", "bookkeeping", "rest"]);
+// What a player may not do while the GM has paused the game: move or change tokens, open doors, roll, finish a character wizard or improve a character.
+const PAUSE_HOLDS = new Set(["token-place", "token-move", "token-update", "token-remove", "token-undo", "door", "roll", "siege-check", "ct", "template", "effects", "cairn", "fate", "ironsworn", "forged", "party-group", "party-prompt-roll", "starship", "bookkeeping", "rest", "build-character", "level-up"]);
 
 
 // What a player may do with raw record changes (the GM and the agent may do
@@ -32,6 +32,16 @@ const PAUSE_HOLDS = new Set(["token-place", "token-move", "token-update", "token
 // words (notes, appearance...), never a number the rules read, and a new
 // character starts blank. Notes are the player's own.
 const PLAYER_CHARACTER_PATHS = [/^portrait$/, /^token$/, /^dice(\..+)?$/, /^slots\.[^.]+\.used$/, /^(notes|appearance|playername|gender|age|height|weight|alignment|personality|ideals|bonds|flaws|backstory)$/];
+// Advantage or disadvantage from the modifier box's ADV or DIS chip tags the roll's label as the rules'
+// own do (after its name, before [AC ...], [DC ...] or -> [at ...]); both at once cancel.
+function edgeTagged(result, label) {
+  const said = String(label ?? "");
+  const chip = (id) => Array.isArray(result?.mods) && result.mods.some((mod) => mod.key === id);
+  const edge = chip("adv") === chip("dis") ? "" : chip("adv") ? "[ADVANTAGE]" : "[DISADVANTAGE]";
+  if (!edge || said.includes(edge)) return label;
+  const at = said.search(/ \[(AC|DC) | -> /);
+  return at < 0 ? `${said.trim()} ${edge}`.trim() : `${said.slice(0, at)} ${edge}${said.slice(at)}`;
+}
 function leafPaths(value, prefix = "") {
   if (!value || typeof value !== "object" || Array.isArray(value)) return [prefix];
   const keys = Object.keys(value);
@@ -327,6 +337,14 @@ function savedOptions(value) {
     // (enemies: dead and unconscious creatures, FG's default; all: characters too; off: no one);
     // NPC numbering (append: the same name numbered, random: a random number, off).
     initGroup: options.initGroup === "kind" ? "kind" : "each",
+    // FG's house rule (everyone rolls initiative again each round) and "stop at round start" (a new
+    // round waits for the GM's next click).
+    ...(options.initEachRound ? { initEachRound: true } : {}),
+    ...(options.roundStop ? { roundStop: true } : {}),
+    // The party's portraits along the top in initiative order during a fight (the GM's choice).
+    ...(options.partyByInitiative ? { partyByInitiative: true } : {}),
+    // FG's NPC hit points (HRNH): listed (each game's own), roll, max.
+    ...(["roll", "max"].includes(options.npcHp) ? { npcHp: options.npcHp } : {}),
     ...(["enemies", "all", "off"].includes(options.skipDead) ? { skipDead: options.skipDead } : {}),
     npcNumbering: ["append", "random", "off"].includes(options.npcNumbering) ? options.npcNumbering : "append",
   };
@@ -829,8 +847,17 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
   });
   // What a player is sent with every unidentified item called by its unidentified name (a weapon's
   // attack on the tracker, a line in chat): the GM's seat gets it as it is (records.cjs hideNames).
+  // A creature whose token has a "players call it" name (FG's unidentified name) is called that too, in
+  // the tracker and chat, unless another token of the same name is known by it.
   function forPlayer(client, value) {
-    return client.role === "dm" ? value : hideNames(value, records.hiddenNames());
+    if (client.role === "dm") return value;
+    const tokens = map.tokens();
+    const creatures = tokens.filter((token) => token.unidentified && token.name && token.name.trim().length >= 3 && token.unidentified !== token.name);
+    if (!creatures.length) return hideNames(value, records.hiddenNames());
+    const names = new Map(records.hiddenNames());
+    const known = new Set(tokens.filter((token) => !token.unidentified).map((token) => token.name));
+    for (const token of creatures) if (!known.has(token.name)) names.set(token.name.trim(), token.unidentified);
+    return hideNames(value, names);
   }
   // A token stepped into a trap, a pit or a teleport (mapState.cjs): the GM is
   // told, by name and note, in a line only the GM sees, and on the map; a trap
@@ -859,6 +886,7 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
     combatPending = true;
     setImmediate(() => {
       combatPending = false;
+      floatScan();
       for (const [ws, client] of clients) send(ws, { type: "combat", combat: forPlayer(client, combat.viewFor(seatOf(client))) });
     });
   }
@@ -896,11 +924,42 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
     working.place({ name: "Test player", owner: TEST_SEAT.name, faction: "friend", ...(Number.isFinite(x) && Number.isFinite(y) ? { x, y } : {}) }, seat);
   }
 
+  // Scrolling combat text (Foundry's, FG's token combat actions): damage and healing float off a token.
+  // Hit points as they stand (wounds less temporary hit points, from its tracker entry or its record),
+  // compared with the last look; a change floats to the GM, and to players where the tracker would show
+  // them the numbers (their own, a friend's, or every creature's when the GM shows numbers). Never a
+  // hidden token's.
+  const lastHurt = new Map();
+  function floatScan() {
+    for (const token of map.tokens()) {
+      // Its tracker entry: tied to this token, else (added from its record) the record's.
+      const entries = combat.entries();
+      const entry = entries.find((item) => item.tokenId === token.id) ?? (token.recordId ? entries.find((item) => !item.tokenId && item.recordId === token.recordId) : undefined);
+      const record = token.recordId ? records.get(token.recordId) : null;
+      const vitals = entry ? combat.vitals(entry) : record?.data?.hp && Number(record.data.hp.total) > 0 ? { wounds: Number(record.data.hp.wounds) || 0, temp: Math.max(0, Number(record.data.hp.temp) || 0) } : null;
+      if (!vitals) continue;
+      const hurt = (Number(vitals.wounds) || 0) - (Number(vitals.temp) || 0);
+      const before = lastHurt.get(token.id);
+      lastHurt.set(token.id, hurt);
+      if (before === undefined || before === hurt) continue;
+      const amount = hurt - before;
+      const pc = Boolean(token.owner) || record?.type === "character";
+      for (const [ws, client] of clients) {
+        if (client.role !== "dm") {
+          if (token.hidden) continue;
+          const shows = pc || token.faction === "friend" || (token.owner !== "" && token.owner === client.name) ? "numbers" : (options.healthNpc ?? "dot");
+          if (shows !== "numbers") continue;
+        }
+        send(ws, { type: "float", tokenId: token.id, amount: -amount });
+      }
+    }
+  }
   function sendMaps() {
     if (mapsPending) return;
     mapsPending = true;
     setImmediate(() => {
       mapsPending = false;
+      floatScan();
       let explored = false;
       for (const [ws, client] of clients) {
         if (client.role !== "dm") {
@@ -1227,6 +1286,7 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
       delete extra.mods;
       delete extra.modKind;
     }
+    label = edgeTagged(result, label);
     const roll = { ...result, label: text(label, "").slice(0, 160), ...(tag ? { tag: text(tag, "").slice(0, 80) } : {}), ...(extra ?? {}) };
     addChat({ id, from, text: "", roll, at: Date.now(), ...(secret ? { secret: true } : {}), ...(typeof secret === "string" ? { shownTo: secret } : {}) });
     return roll;
@@ -3366,7 +3426,7 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
     modifiers: (args = {}, who = "@gm") => modifiers.act(!who || who === "GM" ? "@gm" : who, args),
     // Posts a roll already made (an attack decides HIT or MISS before its card goes out).
     postRoll: (result, label, from = "Agent", secret = false, extra = null) =>
-      addChat({ id: "agent", from: text(from, "Agent").slice(0, 24), text: "", roll: { ...result, label: text(label, "").slice(0, 160), ...(extra ?? {}) }, at: Date.now(), ...(secret ? { secret: true } : {}) }),
+      addChat({ id: "agent", from: text(from, "Agent").slice(0, 24), text: "", roll: { ...result, label: text(edgeTagged(result, label), "").slice(0, 160), ...(extra ?? {}) }, at: Date.now(), ...(secret ? { secret: true } : {}) }),
     // A chat line with a link (a record, a page, a picture), or the GM's Share of a record's text.
     sayLink: (line, link, { from = "Agent", share = false, secret = false } = {}) => {
       const clean = cleanSlot(link);

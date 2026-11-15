@@ -9,7 +9,7 @@ import { ModifierBox, ModifierKeys, NUMBER_DRAG } from "./ModifierBox";
 import { InlineRollText } from "./InlineRolls";
 import { exportChat } from "../notes/SessionLog";
 import { ChatLinkChip, PromptCard, SharedRecord, SpeakerPortrait } from "./ChatParts";
-import { hasLink, linkFrom } from "./QuickSlots";
+import { hasLink, linkFrom, TABLE_RESULT_DRAG } from "./QuickSlots";
 import type { QuickSlot } from "../session/useSession";
 import { chatRunner } from "./chatRunner";
 import { TowerArt, towerLook } from "./TowerArt";
@@ -1009,7 +1009,7 @@ export function ChatDock({ session }: { session: Session }) {
         }}
         onDragOver={(event) => {
           const types = [...event.dataTransfer.types];
-          if (!hasLink(event) && !types.includes("application/x-kraken-record")) return;
+          if (!hasLink(event) && !types.includes("application/x-kraken-record") && !types.includes(TABLE_RESULT_DRAG)) return;
           event.preventDefault();
           event.dataTransfer.dropEffect = "copy";
           setLinkOver(true);
@@ -1017,6 +1017,13 @@ export function ChatDock({ session }: { session: Session }) {
         onDragLeave={() => setLinkOver(false)}
         onDrop={(event) => {
           setLinkOver(false);
+          // A random table's result: its words into the line being typed.
+          const result = event.dataTransfer.getData(TABLE_RESULT_DRAG);
+          if (result) {
+            event.preventDefault();
+            setDraft((now) => `${now.trim() ? `${now.trimEnd()} ` : ""}${result}`);
+            return;
+          }
           const link = linkFrom(event) ?? (() => {
             const id = event.dataTransfer.getData("application/x-kraken-record");
             const record = id ? session.records[id] : undefined;

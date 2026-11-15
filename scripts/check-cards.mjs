@@ -106,6 +106,25 @@ try {
   assert(attack.hit && attack.ac === 11, "a dropped attack is compared with the AC");
   assert(agent.combat.entries().find((entry) => entry.name === "Hagar").hitOn?.[id("Ogre")] === "hit", "the attacker's next damage knows it hit");
 
+  // The other cards each game prints: items, features, assets, aspects and stunts, special abilities;
+  // pictures by kind (sci-fi weapons too).
+  const { cardsFor: other, weaponKind: kindOf } = await import("../shared/cards/cards.mjs");
+  const d20 = other({ inventorylist: { a: { name: "Potion of Healing", count: 2 }, b: { name: "Spell Scroll (Shield)", count: 1 }, c: { name: "Rope, hempen", count: 1 }, d: { name: "Potion of Climbing", count: 0 } }, features: ["Second Wind", "Channel Divinity", "Sneak Attack"] });
+  const art = (list, kind) => list.filter((card) => card.kind === kind).map((card) => [card.name, card.artKey, card.group]);
+  assert(JSON.stringify(art(d20, "item")) === JSON.stringify([["Potion of Healing", "potion", "Items"], ["Spell Scroll (Shield)", "scroll", "Items"]]), `d20 items: potions and scrolls, none at 0, no rope: ${JSON.stringify(art(d20, "item"))}`);
+  assert(d20.find((card) => card.kind === "item").use === true, "an item card has Use");
+  assert(JSON.stringify(art(d20, "feature").map((row) => row[1])) === JSON.stringify(["feature-martial", "feature-divine", "feature-skill"]), `feature pictures by name: ${JSON.stringify(art(d20, "feature"))}`);
+  const cairn = other({ inventorylist: { a: { name: "Unseen Servant", kind: "spellbook", text: "An invisible servant." }, b: { name: "Bone talisman", kind: "relic" } } });
+  assert(JSON.stringify(art(cairn, "item").map((row) => row[1])) === JSON.stringify(["cairn-spellbook", "cairn-relic"]), "Cairn's spellbook and relic");
+  const iron = other({ assets: { a: { name: "Raven", category: "Companion" }, b: { name: "Sword", category: "Combat Talent" }, c: { name: "Starship", category: "Command Vehicle" } } });
+  assert(JSON.stringify(art(iron, "asset").map((row) => row[1])) === JSON.stringify(["asset-companion", "asset-combat", "asset-starship"]), "Ironsworn and Starforged assets by category");
+  const fate = other({ aspects: { high: "Wizard Private Eye", trouble: "Rivals in the Collegia" }, stunts: { a: { name: "Lore Master", text: "+2 to Lore when..." } } });
+  assert(art(fate, "aspect").length === 2 && art(fate, "stunt").length === 1, "Fate's aspects and stunts");
+  const forged = other({ playbook: "Cutter", abilities: [{ name: "Battleborn", text: "You may expend your special armor..." }] });
+  assert(art(forged, "ability")[0]?.[1] === "forged-ability", "Forged's special abilities");
+  assert(other({ abilities: { strength: { score: 10 } } }).length === 0, "a 5E sheet's abilities are not special abilities");
+  assert(["Laser Pistol", "Plasma Rifle", "Frag Grenade", "Autopistol", "Longbow"].map((name) => kindOf(name.toLowerCase(), name === "Longbow" ? "ranged" : "")).join() === "energy,heavy,grenade,firearm,bow", "sci-fi weapon pictures");
+
   console.log(`check-cards: ${passed} checks passed`);
 } catch (error) {
   console.error(error);

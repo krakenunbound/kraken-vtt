@@ -2872,6 +2872,19 @@ function createCombat({ saved, table, onChange = () => undefined }) {
         }
         const npc5 = fateOn() && source && source.type !== "character" ? fc.setup(source) : dbf() && source && source.type !== "character" ? (await rbfReady, rbf.npcStats(source.data)) : d2e() && source && source.type !== "character" ? (await r2eReady, r2e.npcStats(source.data)) : d35() && source && source.type !== "character" ? (await r35Ready, r35.npcStats(source.data)) : astraOn() && source && source.type !== "character" ? (await raReady, ra.npcStats(source.data)) : mgtOn() && source && source.type !== "character" ? (await rmReady, rm.npcStats(source.data)) : cairnOn() && source && source.type !== "character" ? (await rcReady, rc.npcStats(source.data)) : five() && source && source.type !== "character" ? (await r5Ready, r5.npcStats(source.data)) : null;
         if (npc5 && !hp) hp = npc5.hp;
+        // FG's "NPC hit points" option (HRNH): listed (each game's own rule, the default), roll (the
+        // hit dice rolled every time), max (the most they can be). Only where the record names its dice.
+        const npcHp = table().options?.().npcHp;
+        if (source && source.type === "npc" && !num(input.hp, 0) && (npcHp === "roll" || npcHp === "max")) {
+          const words = [source.data?.hd, source.data?.hitdice, source.data?.hp, source.data?.hitpoints].map((value) => (typeof value === "object" && value ? JSON.stringify(value) : String(value ?? ""))).join(" ");
+          const dice = /(\d*)d(\d+)\s*(?:([+-])\s*(\d+))?/i.exec(words);
+          if (dice) {
+            const count = Number(dice[1] || 1);
+            const sides = Number(dice[2]);
+            const bonus = dice[4] ? (dice[3] === "-" ? -1 : 1) * Number(dice[4]) : 0;
+            hp = Math.max(1, npcHp === "max" ? count * sides + bonus : table().dice.roll(`${count}d${sides}${bonus ? `${bonus > 0 ? "+" : ""}${bonus}` : ""}`).total);
+          }
+        }
         if (source?.type === "starship") hp = Math.max(1, num(source.data?.hull?.max, 1));
         if (source && source.type !== "character" && !hp) {
           // SiegeCore getNPCHitPoints: the listed total, else the hit dice rolled (at least 1).
@@ -3153,7 +3166,14 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       state.resume = null;
       state.round += 1;
       table().say(`[ROUND ${state.round}]`, "Combat");
-      const first = list.find((entry) => !skips(entry, opts));
+      // FG's house rule: everyone rolls initiative again each round (the GM rolls for all).
+      if (table().options?.().initEachRound && state.round > 1) await this.rollInit("all", { role: "dm", name: "Combat" });
+      // FG's "stop at round start": the new round waits for the GM's next click before anyone acts.
+      if (table().options?.().roundStop && state.round > 1) {
+        changed();
+        return;
+      }
+      const first = sorted().find((entry) => !skips(entry, opts));
       if (first) {
         passInitiative(Infinity, rank(first.initresult));
         state.active = first.id;

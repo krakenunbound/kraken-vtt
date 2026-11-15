@@ -30,6 +30,13 @@ export const SCHOOLS = {
   necromancy: { color: "#7fcf6b", glyph: "skull" },
   transmutation: { color: "#d9c255", glyph: "flask" },
   weapon: { color: "#b8b2a6", glyph: "combat" },
+  // The other cards' frames (otherCards below).
+  item: { color: "#d9a441", glyph: "flask" },
+  feature: { color: "#c9b28a", glyph: "shield" },
+  asset: { color: "#8fb3c9", glyph: "sparkle" },
+  aspect: { color: "#e8c65a", glyph: "sparkle" },
+  stunt: { color: "#e88a5a", glyph: "damage" },
+  ability: { color: "#c98a4a", glyph: "mood" },
 };
 // What the sparks of a cast look like, by its damage type (or healing).
 export const SPARKS = { fire: "embers", radiant: "motes", cold: "frost", lightning: "arcs", thunder: "rings", necrotic: "smoke", poison: "smoke", acid: "drops", psychic: "rings", force: "motes", healing: "motes" };
@@ -114,6 +121,104 @@ export function cardsFor(data, spells = []) {
       weaponKind: weaponKind(String(attack.name), String(attack.type ?? "")),
     });
   }
+  out.push(...otherCards(data));
+  return out;
+}
+
+// What else tables print as cards, from each game's sheet: a d20 character's potions, scrolls,
+// wands and kits (used through the Supplies) and class features; Cairn's spellbooks, scrolls and
+// relics; Ironsworn's and Starforged's assets; Fate's aspects and stunts; Forged in the Dark's
+// special abilities. artKey names its picture (src/assets/cards/<artKey>.webp); group, its row.
+const rowsOf = (value) => (Array.isArray(value) ? value.map((row, index) => [String(index), row]) : Object.entries(value && typeof value === "object" ? value : {}));
+const ITEM_ART = [
+  ["potion", /potion|elixir|philter|philtre|draught|tonic|oil of/i],
+  ["scroll", /scroll/i],
+  ["wand", /\bwand\b|\brod of\b/i],
+  ["kit", /\bkit\b|healer|herbalism|antitoxin/i],
+];
+const FEATURE_ART = [
+  ["feature-divine", /divin|smite|lay on hands|turn undead|channel|blessing|aura|holy|sacred|prayer/i],
+  ["feature-primal", /wild shape|rage|beast|nature|primal|druid|ranger|favored|companion|totem/i],
+  ["feature-skill", /sneak|cunning|expertise|thie|evasion|reliable|uncanny|skill|lucky|trick/i],
+];
+const ASSET_ART = [
+  ["asset-companion", /companion/i],
+  ["asset-ritual", /ritual/i],
+  ["asset-combat", /combat/i],
+  ["asset-starship", /vehicle|ship/i],
+  ["asset-module", /module/i],
+];
+const pick = (table, text, fallback) => table.find(([, pattern]) => pattern.test(text))?.[0] ?? fallback;
+const card = (id, kind, name, artKey, group, text, more = {}) => ({
+  id,
+  kind,
+  name,
+  level: 0,
+  school: kind,
+  castingtime: "",
+  range: "",
+  duration: "",
+  concentration: false,
+  concentrating: false,
+  text: plain(text),
+  sparks: "motes",
+  art: false,
+  spent: false,
+  slot: 0,
+  pool: null,
+  known: true,
+  recordId: "",
+  weapon: "",
+  weaponKind: "",
+  artKey,
+  group,
+  ...more,
+});
+function otherCards(data) {
+  const out = [];
+  // Inventory: Cairn's spellbooks, scrolls and relics; any game's potions, scrolls, wands and kits.
+  for (const [key, item] of rowsOf(data?.inventorylist)) {
+    if (!item || typeof item !== "object" || !item.name) continue;
+    const name = String(item.name);
+    const words = String(item.text ?? item.note ?? item.description ?? "");
+    const count = item.count === undefined ? 1 : num(item.count);
+    if (["spellbook", "scroll", "relic"].includes(String(item.kind))) {
+      out.push(card(`item:${key}`, "item", name, item.kind === "relic" ? "cairn-relic" : item.kind === "scroll" ? "scroll" : "cairn-spellbook", item.kind === "relic" ? "Relics" : "Spellbooks", words));
+      continue;
+    }
+    const art = pick(ITEM_ART, name, "");
+    if (!art || count <= 0 || /\bweapon\b/i.test(String(item.type ?? ""))) continue;
+    out.push(card(`item:${key}`, "item", name, art, "Items", words || `${count > 1 ? `${count} of them. ` : ""}Use it from here or drag it onto a creature.`, { item: key, use: true, castingtime: "Use" }));
+  }
+  // A d20 character's class features (5E's list of names, or rows with their words).
+  for (const [key, feature] of rowsOf(data?.features)) {
+    const name = String(feature?.name ?? feature ?? "").trim();
+    if (!name) continue;
+    out.push(card(`feature:${key}`, "feature", name, pick(FEATURE_ART, name, "feature-martial"), "Features", String(feature?.text ?? feature?.description ?? "")));
+  }
+  // Ironsworn's and Starforged's assets, by their category.
+  for (const [key, asset] of rowsOf(data?.assets)) {
+    if (!asset?.name) continue;
+    const category = String(asset.category ?? "");
+    out.push(card(`asset:${key}`, "asset", String(asset.name), pick(ASSET_ART, category, "asset-path"), "Assets", String(asset.text ?? asset.description ?? category), { castingtime: category }));
+  }
+  // Fate's aspects (the high concept, the trouble, the rest) and stunts.
+  const aspects = data?.aspects && typeof data.aspects === "object" && !Array.isArray(data.aspects) ? data.aspects : {};
+  for (const [key, value] of Object.entries(aspects)) {
+    const name = String(value && typeof value === "object" ? value.name ?? "" : value ?? "").trim();
+    if (!name || !data?.stunts) continue;
+    const role = key === "high" || key === "highconcept" ? "High concept" : key === "trouble" ? "Trouble" : "Aspect";
+    out.push(card(`aspect:${key}`, "aspect", name, "fate-aspect", "Aspects", `${role}: invoke it for +2 or a reroll (a fate point), or be compelled by it for one.`, { castingtime: role }));
+  }
+  for (const [key, stunt] of rowsOf(data?.stunts)) {
+    const name = String(stunt?.name ?? stunt ?? "").trim();
+    if (name) out.push(card(`stunt:${key}`, "stunt", name, "fate-stunt", "Stunts", String(stunt?.text ?? "")));
+  }
+  // Forged in the Dark's special abilities.
+  for (const [key, ability] of rowsOf(data?.abilities)) {
+    const name = String(ability?.name ?? "").trim();
+    if (name && data?.playbook !== undefined) out.push(card(`ability:${key}`, "ability", name, "forged-ability", "Special abilities", String(ability?.text ?? "")));
+  }
   return out;
 }
 
@@ -122,7 +227,11 @@ export function cardsFor(data, spells = []) {
 /** @type {[string, RegExp][]} */
 const WEAPON_KINDS = [
   // Whole words: a blowgun is not a gun, an elbow not a bow, a moonstone dagger not a sling stone.
-  ["firearm", /pistol|rifle|blaster|carbine|\b(?:hand|shot|machine|ray|stun|rail|needle)?guns?\b|laser|revolver|musket|needler|stunner/],
+  // Science fiction first: a grenade, a heavy weapon (plasma, a launcher, a cannon), an energy weapon (a laser, a blaster).
+  ["grenade", /grenade|\bbombs?\b|explosive|satchel charge/],
+  ["heavy", /plasma|launcher|cannon|gauss|fusion|heavy (?:rifle|gun|weapon)|flamer|flamethrower/],
+  ["energy", /laser|blaster|\bray ?guns?\b|beam|stunner|needler|\bion\b|disruptor|phaser/],
+  ["firearm", /pistol|rifle|carbine|\b(?:hand|shot|machine|stun|rail|needle)?guns?\b|revolver|musket/],
   ["crossbow", /crossbow/],
   ["bow", /\b(?:long|short|great|war|hand)?bows?\b/],
   // A blowgun is a simple ranged weapon: a sling's picture, not a firearm's.

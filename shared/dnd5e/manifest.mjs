@@ -93,6 +93,8 @@ export default {
                   { label: "Initiative", show: "value", path: "initiative.total", hook: "init", format: "signed" },
                   { label: "Speed", show: "text", path: "speed", text: "{speed}" },
                   { label: "Passive Perception", show: "value", path: "passive", hook: "passive" },
+                  // Inspiration (2014) or Heroic Inspiration (2024): the GM gives it, the player spends it for advantage.
+                  { label: "Inspiration", show: "text", path: "inspiration", text: "", hook: "inspiration", title: "Inspiration: the GM gives it; spend it for advantage on a roll", lines: [{ items: [{ before: "Has it", field: { path: "inspiration", kind: "check", label: "Inspiration", title: "Has Inspiration" } }] }] },
                   // Descending Darkness's Dread, its bleeding out at 0 Health; 5E's death saves.
                   { custom: "dnd5e.dread", when: { feature: "dread" } },
                   { custom: "dnd5e.dying", when: { all: [{ feature: "dying.bleed" }, { zero: { path: "hp.total", minus: "hp.wounds" } }] } },
@@ -185,6 +187,7 @@ export default {
       "initiative.misc",
       "slots.l#.used",
       "deathsaves.(success|failure)",
+      "inspiration",
       "hitdice.used",
       "dread",
       "coins.*.amount",

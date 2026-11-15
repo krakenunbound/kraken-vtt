@@ -149,10 +149,35 @@ try {
   await tool("kraken_token_update", { id: gob.id, unidentified: "Small shape" });
   view = server.agent.viewFor("Ann");
   assert(goblinOf(view).name === "Small shape" && !JSON.stringify(view).includes("Goblin") && !("unidentified" in goblinOf(view)), "the unidentified name, never the real one");
+  // The tracker and chat call it what the players call it too.
+  const since = ann.inbox.length;
+  await tool("kraken_combat", { action: "add", entry: { name: "Goblin", tokenId: gob.id, faction: "foe" } });
+  await tool("kraken_chat_send", { text: "The Goblin snarls at Ann." });
+  const snarl = await latest(ann, "chat", (m) => /snarls/.test(m.text), "the line about the goblin");
+  const tracked = await latest(ann, "combat", (m) => m.combat.entries.some((entry) => entry.tokenId === gob.id), "the goblin on Ann's tracker");
+  assert(snarl.text === "The Small shape snarls at Ann." && tracked.combat.entries.find((entry) => entry.tokenId === gob.id).name === "Small shape", `tracker and chat use the unidentified name: ${snarl.text}`);
+  assert(!ann.inbox.slice(since).some((m) => (m.type === "chat" || m.type === "combat") && JSON.stringify(m).includes("Goblin")), "no tracker or chat frame names the goblin to Ann");
+  assert(server.agent.combat.entries().some((entry) => entry.name === "Goblin"), "the GM's tracker keeps its real name");
+  await tool("kraken_combat", { action: "end" });
   assert(view.tokens.find((t) => t.id === annToken.id).healthShow === "bar", "a health bar");
   assert(server.agent.map.viewFor({ role: "dm", name: "GM" }, "").tokens.find((t) => t.id === gob.id).unidentified === "Small shape", "the GM sees what players call it");
   await tool("kraken_table_options", { healthPc: "dot", names: "hover" });
   console.log("ok names and health");
+
+  // 2b. Scrolling combat text: damage floats off the token. Ann sees her own character's; the goblin's
+  // only reaches the GM while enemies' numbers are hidden (healthNpc dot).
+  const floatsSince = { ann: ann.inbox.length, dm: dm.inbox.length };
+  server.agent.records.update(annRecord.id, { data: { hp: { total: 10, wounds: 5 } } }, server.agent.seat);
+  await latest(ann, "float", (m) => m.tokenId === annToken.id && m.amount === -2, "Ann sees her own 2 damage float");
+  const gobEntry = (await tool("kraken_combat", { action: "add", entry: { name: "Goblin", tokenId: gob.id, faction: "foe", hp: 7 } })).entries?.find?.((item) => item.tokenId === gob.id) ?? server.agent.combat.entries().find((item) => item.tokenId === gob.id);
+  await new Promise((resolve) => setTimeout(resolve, 150));
+  await tool("kraken_combat", { action: "damage", id: gobEntry.id, amount: 3 });
+  await latest(dm, "float", (m) => m.tokenId === gob.id && m.amount === -3, "the GM sees the goblin's 3 damage float");
+  await new Promise((resolve) => setTimeout(resolve, 150));
+  assert(!ann.inbox.slice(floatsSince.ann).some((m) => m.type === "float" && m.tokenId === gob.id), "Ann is not told the goblin's damage (enemy numbers hidden)");
+  await tool("kraken_combat", { action: "end" });
+  server.agent.records.update(annRecord.id, { data: { hp: { total: 10, wounds: 3 } } }, server.agent.seat);
+  console.log("ok scrolling combat text");
 
   // 3. Fog of war on the host: Ann's view becomes her explored area; she is sent hers alone; the GM resets it.
   const annExplored = await latest(ann, "explored", (m) => m.sceneId === "crypt" && m.polygons.length > 0, "Ann's explored areas");
@@ -302,6 +327,10 @@ try {
   const counts = server.agent.map.fromStudio({ ...master, walls: server.agent.map.walls().map((wall) => ({ ...wall })), project: null });
   assert(counts.regions === 1 && server.agent.map.regions()[0].kind === "pit", `Map Studio's regions: ${JSON.stringify(counts)}`);
   assert(server.persisted().map.regions.crypt.length === 1, "regions are saved");
+  // Switched off at the table, the well stays off when Map Studio saves to Kraken again.
+  await tool("kraken_region", { action: "update", id: server.agent.map.regions()[0].id, on: false });
+  server.agent.map.fromStudio({ ...master, walls: server.agent.map.walls().map((wall) => ({ ...wall })), project: null });
+  assert(server.agent.map.regions()[0].on === false, `a region switched off at the table stays off after Save to Kraken: ${JSON.stringify(server.agent.map.regions()[0])}`);
   // A play test's token springs a trap, but never locks the table.
   await tool("kraken_region", { action: "add", kind: "trap", name: "Test trap", rect: { col: 0, row: 0, cols: 1, rows: 1 } });
   const tester = server.agent.map.place({ name: "Test player", owner: "@test", x: 75, y: 25 }, server.agent.seat);

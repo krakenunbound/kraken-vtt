@@ -21,8 +21,7 @@ On the start screen choose **My Campaigns**.
   holds; the chosen one's full description is below them.
   - **Your own ruleset pictures:** each ruleset shows Kraken's own emblem.
     To show a picture of your own instead (a logo from your books, say), put
-    it in `%APPDATA%\kraken-vttssets
-ulesets` (on Linux,
+    it in `%APPDATA%\kraken-vtt\assets\rulesets` (on Linux,
     `~/.config/kraken-vtt/assets/rulesets`), named as the ruleset:
     `D&D 3.5E.png`, `Castles & Crusades.webp`. It shows on your computer
     only; Kraken never ships a game's official logo.
@@ -244,7 +243,7 @@ any other way).
   record the book holds (a creature, spell, item, class, race, feat, table,
   encounter) opens in its own window. A table shows as a table, an
   equipment list as its sections, and a web link opens in your browser.
-- Your own background decals go in `%APPDATA%kraken-vttassetsdecals`;
+- Your own background decals go in `Documents/Kraken VTT/Background Decals`;
   in a folder named for a game (`D&D 3.5e`), they show under its filter.
 - **New** (on the NPCs, Items and other lists, as Fantasy Grounds' +) makes
   a record and opens it. A Traveller NPC opens on its own sheet: its six

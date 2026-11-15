@@ -6,8 +6,9 @@ import { ReadAloudBubble, useMapShown } from "../books/ReadAloudBubble";
 import { MARKER_SETS, markerShapes } from "../../shared/map/deathMarkers.mjs";
 import { backgroundRect, colorWithAlpha, gridStops, sceneFrame, type BackgroundFit, type SceneFrame } from "../foundry/geometry";
 import { type SceneLight, type SceneMarker, type SceneRegion, type SceneWall } from "../foundry/sceneObjects";
-import { diagonalRule, gridDistance, gridKind, pathDistance, gridOrigin, hexCorners, hexOf, LIGHT_PRESETS, snapCenter, withGrid } from "../../shared/map/geometry.mjs";
-import type { DecalItem, EditWall, MapDoor, MapTemplate, MapTile, MapToken, Ping, PictureKind, SceneLightRecord, TableMap, TableRecord, TemplateAsk, WallKind } from "../session/useSession";
+import { rangeBand } from "../../shared/map/ranges.mjs";
+import { diagonalRule, gridDistance, gridDistance3, gridKind, pathDistance, gridOrigin, hexCorners, hexOf, LIGHT_PRESETS, snapCenter, withGrid } from "../../shared/map/geometry.mjs";
+import type { DecalItem, EditWall, MapDoor, MapTemplate, MapTile, MapToken, Ping, Float, Bubble, PictureKind, SceneLightRecord, TableMap, TableRecord, TemplateAsk, WallKind } from "../session/useSession";
 import { useBookWindows } from "../books/Books";
 import { MapEditor, kindColor, placePicture, type EditTab, type EditTool, type LabelStyle, type PaintStyle } from "./MapEditor";
 import { Lighting } from "./Lighting";
@@ -73,6 +74,8 @@ type Camera = { x: number; y: number; scale: number };
 // Where each scene was being looked at (this screen): the map put into a window of
 // its own, or back, or drawn again, shows just what it showed, never framed anew.
 const views = new Map<string, { camera: Camera; framed: string }>();
+// The GM's copied tokens (Ctrl+C), kept across scenes for a paste on another map.
+const tokenClipboard: { items: { recordId: string | null; name: string; dx: number; dy: number }[] } = { items: [] };
 type Point = { x: number; y: number };
 
 const MIN_SCALE = 0.02;
@@ -310,10 +313,13 @@ function MapViewInner({
   map,
   records = [],
   pings = [],
+  floats = [],
+  bubbles = [],
   notice = null,
   actions,
   targeted = [],
   targeters = {},
+  targetLinks = [],
   templateAsk = null,
   onTemplateDone = () => undefined,
   fxMode = "full",
@@ -338,12 +344,18 @@ function MapViewInner({
   map: TableMap;
   records?: TableRecord[];
   pings?: Ping[];
+  // Damage and healing floating off tokens (scrolling combat text).
+  floats?: Float[];
+  // Words spoken as a character or creature, over its token.
+  bubbles?: Bubble[];
   notice?: string | null;
   actions: MapActions;
   // Tokens this seat's creatures have targeted (a reticle shows on them).
   targeted?: string[];
   // For each targeted token, the colours of those aiming at it (the GM sees everyone's).
   targeters?: Record<string, string[]>;
+  // Each creature's line to each of its targets, in its token's colour: the range between them.
+  targetLinks?: { from: string; to: string; color: string; ranges?: { normal: number; long: number } | null }[];
   // An area spell waiting for its template on this screen (the host asked), and its end.
   templateAsk?: TemplateAsk | null;
   onTemplateDone?: () => void;
@@ -456,6 +468,26 @@ function MapViewInner({
   const [camera, setCamera] = useState<Camera>(() => views.get(sceneIn.id)?.camera ?? { x: 0, y: 0, scale: 0.1 });
   const cameraRef = useRef(camera);
   cameraRef.current = camera;
+  // Where the pointer is on the map (a paste lands there), and whether it is over the map at all.
+  const pointerWorld = useRef({ x: 0, y: 0 });
+  const pointerOver = useRef(false);
+  useEffect(() => {
+    const element = viewport.current;
+    if (!element) return;
+    const onMove = (event: PointerEvent) => {
+      const box = element.getBoundingClientRect();
+      const current = cameraRef.current;
+      pointerWorld.current = { x: (event.clientX - box.left - current.x) / current.scale, y: (event.clientY - box.top - current.y) / current.scale };
+      pointerOver.current = true;
+    };
+    const onLeave = () => (pointerOver.current = false);
+    element.addEventListener("pointermove", onMove);
+    element.addEventListener("pointerleave", onLeave);
+    return () => {
+      element.removeEventListener("pointermove", onMove);
+      element.removeEventListener("pointerleave", onLeave);
+    };
+  }, []);
   const [panning, setPanning] = useState(false);
   const [natural, setNatural] = useState<{ width: number; height: number } | null>(null);
   const [imageFailed, setImageFailed] = useState(false);
@@ -652,8 +684,51 @@ function MapViewInner({
         }
         return;
       }
+      const mod = event.ctrlKey || event.metaKey;
+      const key = event.key.toLowerCase();
+      // The GM's select all, copy and paste of tokens (Foundry's), while the pointer is over the map
+      // (so Ctrl+A in the chat still selects its words). Paste puts the copies at the pointer, as laid out.
+      if (gm && mod && !editorOpen && pointerOver.current && ["a", "c", "v"].includes(key)) {
+        if (key === "a") {
+          event.preventDefault();
+          setPicked(tokens.map((item) => item.id));
+          setSelected(tokens[0]?.id ?? null);
+        } else if (key === "c") {
+          const list = picked.length ? tokens.filter((item) => picked.includes(item.id)) : token ? [token] : [];
+          if (list.length) tokenClipboard.items = list.map((item) => ({ recordId: item.recordId ?? null, name: item.name, dx: item.x - list[0].x, dy: item.y - list[0].y }));
+        } else if (tokenClipboard.items.length) {
+          event.preventDefault();
+          const at = pointerWorld.current;
+          for (const item of tokenClipboard.items) actions.placeToken(item.recordId, at.x + item.dx, at.y + item.dy, item.name);
+        }
+        return;
+      }
+      // + and - zoom about the middle of the view (Foundry's Zoom In / Zoom Out).
+      if (!mod && (event.key === "+" || event.key === "=" || event.key === "-")) {
+        const box = viewport.current?.getBoundingClientRect();
+        if (!box) return;
+        event.preventDefault();
+        const factor = event.key === "-" ? 1 / 1.25 : 1.25;
+        setCamera((current) => {
+          const scale = clampScale(current.scale * factor);
+          const midX = box.width / 2;
+          const midY = box.height / 2;
+          return { scale, x: midX - ((midX - current.x) / current.scale) * scale, y: midY - ((midY - current.y) / current.scale) * scale };
+        });
+        return;
+      }
+      // Arrows, or the number pad with its diagonals (7 9 1 3), whatever Num Lock says.
+      const step =
+        { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[event.key] ??
+        { Numpad7: [-1, -1], Numpad8: [0, -1], Numpad9: [1, -1], Numpad4: [-1, 0], Numpad6: [1, 0], Numpad1: [-1, 1], Numpad2: [0, 1], Numpad3: [1, 1] }[event.code];
+      // Nothing of this seat's selected: the keys pan the map (Foundry's Pan).
+      if (step && (!token || !(gm || token.mine))) {
+        if (mod) return;
+        event.preventDefault();
+        setCamera((current) => ({ ...current, x: current.x - step[0] * 120, y: current.y - step[1] * 120 }));
+        return;
+      }
       if (!token || !(gm || token.mine)) return;
-      const step = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[event.key];
       if (step) {
         event.preventDefault();
         const group = picked.includes(token.id) ? tokens.filter((item) => picked.includes(item.id) && (gm || item.mine)) : [];
@@ -2037,7 +2112,14 @@ function MapViewInner({
                     {template.live ? <title>{`${template.label || "Template"}${mine ? " (right-click to remove)" : ""}`}</title> : null}
                   </path>
                   {template.label ? (
-                    <text className="area-label" x={shape.x} y={shape.y - (template.shape === "circle" || template.shape === "square" ? shape.size * (template.shape === "square" ? 0.5 : 1) + 6 / camera.scale : 8 / camera.scale)} style={{ fontSize: Math.max(12, 13 / camera.scale) }}>
+                    // A circle's or square's name goes under it: effects on tokens inside (Sleep's Zzz) drift upwards.
+                    <text
+                      className="area-label"
+                      x={shape.x}
+                      y={template.shape === "circle" || template.shape === "square" ? shape.y + shape.size * (template.shape === "square" ? 0.5 : 1) + 6 / camera.scale : shape.y - 8 / camera.scale}
+                      dominantBaseline={template.shape === "circle" || template.shape === "square" ? "hanging" : undefined}
+                      style={{ fontSize: Math.max(12, 13 / camera.scale) }}
+                    >
                       {template.label}
                     </text>
                   ) : null}
@@ -2216,6 +2298,70 @@ function MapViewInner({
           : null}
         {/* A ping: a bright dot in the person's colour, three rings going out from it and a
             beam of light, never smaller on screen than about 180 px however far out the map is. */}
+        {/* Range lines: from each creature to each of its targets, an arrow in the attacker's colour and
+            the distance between them by the table's measuring rule (height counts, big creatures from their edges). */}
+        {targetLinks.length ? (
+          <svg className="overlay target-lines" width={frame.worldWidth} height={frame.worldHeight} viewBox={`0 0 ${frame.worldWidth} ${frame.worldHeight}`} aria-label="Range to targets">
+            {targetLinks.map((link) => {
+              const from = tokens.find((item) => item.id === link.from);
+              const to = tokens.find((item) => item.id === link.to);
+              if (!from || !to) return null;
+              const length = Math.hypot(to.x - from.x, to.y - from.y);
+              if (length < 1) return null;
+              const ux = (to.x - from.x) / length;
+              const uy = (to.y - from.y) / length;
+              const startGap = (from.squares * size) / 2;
+              const endGap = (to.squares * size) / 2 + Math.max(2, 3 / camera.scale);
+              if (length <= startGap + endGap) return null;
+              const x1 = from.x + ux * startGap;
+              const y1 = from.y + uy * startGap;
+              const x2 = to.x - ux * endGap;
+              const y2 = to.y - uy * endGap;
+              const line = Math.max(2.5, 3.5 / camera.scale);
+              const head = Math.max(12, 16 / camera.scale);
+              const per = Number(scene.grid.distance) > 0 ? Number(scene.grid.distance) : 5;
+              // Edge to edge for creatures bigger than a square (5E's reach and range).
+              const centres = gridDistance3(scene, from, to, diagonalRule(diagonal), (to.elevation ?? 0) - (from.elevation ?? 0));
+              const feet = Math.max(per, Math.round((centres - ((from.squares - 1) / 2 + (to.squares - 1) / 2) * per) * 10) / 10);
+              const midX = (x1 + x2) / 2;
+              const midY = (y1 + y2) / 2;
+              const font = Math.max(13, 15 / camera.scale);
+              // Within its weapons' normal range, at long range, or beyond them all (when its record says).
+              const band = rangeBand(link.ranges ?? null, feet);
+              return (
+                <g key={`${link.from}-${link.to}`} className={`target-line${band === "out" ? " out-of-range" : band === "long" ? " long-range" : ""}`} data-range={band} data-target-line={`${link.from}>${link.to}`} data-distance={feet} style={{ color: link.color }}>
+                  <line x1={x1} y1={y1} x2={x2 - ux * head * 0.8} y2={y2 - uy * head * 0.8} stroke="rgba(0,0,0,0.55)" strokeWidth={line + 3 / camera.scale} strokeLinecap="round" />
+                  <line x1={x1} y1={y1} x2={x2 - ux * head * 0.8} y2={y2 - uy * head * 0.8} stroke="currentColor" strokeWidth={line} strokeLinecap="round" strokeDasharray={`${line * 4} ${line * 2.5}`} />
+                  <polygon points={`${x2},${y2} ${x2 - ux * head - uy * head * 0.55},${y2 - uy * head + ux * head * 0.55} ${x2 - ux * head + uy * head * 0.55},${y2 - uy * head - ux * head * 0.55}`} fill="currentColor" stroke="rgba(0,0,0,0.6)" strokeWidth={Math.max(1, 1.5 / camera.scale)} />
+                  <text x={midX} y={midY} dy={-font * 0.6} textAnchor="middle" className="target-line-label" style={{ fontSize: font }}>
+                    {feet} {units}
+                    {band === "out" ? ` · out of range (${link.ranges?.long})` : band === "long" ? ` · long range` : ""}
+                  </text>
+                </g>
+              );
+            })}
+          </svg>
+        ) : null}
+        {bubbles.map((item) => {
+          const token = tokens.find((candidate) => candidate.recordId === item.recordId);
+          if (!token) return null;
+          const span = token.squares * size;
+          return (
+            <div key={item.id} className={`token-bubble ${item.kind}`} data-bubble={token.id} style={{ left: token.x, top: token.y - span / 2, fontSize: Math.max(13, 14 / camera.scale) }}>
+              {item.kind === "emote" ? <em>{item.text}</em> : item.text}
+            </div>
+          );
+        })}
+        {floats.map((item) => {
+          const token = tokens.find((candidate) => candidate.id === item.tokenId);
+          if (!token) return null;
+          const span = token.squares * size;
+          return (
+            <div key={item.id} className={item.amount < 0 ? "token-float hurt" : "token-float healed"} data-float={item.tokenId} style={{ left: token.x, top: token.y - span / 2, fontSize: Math.max(18, (size * 0.42)) }} aria-hidden="true">
+              {item.amount > 0 ? `+${item.amount}` : `−${-item.amount}`}
+            </div>
+          );
+        })}
         {pings.map((item) => {
           const reach = Math.max(size * 3, 180 / camera.scale);
           return (

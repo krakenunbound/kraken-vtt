@@ -1850,7 +1850,12 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       if (!scene) throw new Error("No scene is open.");
       state.walls[scene.id] = walls.map(cleanWall).filter(Boolean).slice(0, MAX_WALLS_STUDIO);
       // Map Studio's traps and regions play at the table.
-      if (Array.isArray(regions)) state.regions[scene.id] = regions.map(cleanRegion).filter(Boolean).slice(0, MAX_REGIONS);
+      // One the GM switched off at the table stays off (the same id, else the same kind and name).
+      if (Array.isArray(regions)) {
+        const was = state.regions[scene.id] ?? [];
+        const off = (region) => was.some((old) => old.on === false && (old.id === region.id || (old.kind === region.kind && old.name === region.name)));
+        state.regions[scene.id] = regions.map(cleanRegion).filter(Boolean).slice(0, MAX_REGIONS).map((region) => (off(region) ? { ...region, on: false } : region));
+      }
       state.lights[scene.id] = lights.map(cleanLight).filter(Boolean).slice(0, 500);
       state.fx[scene.id] = fx.map(cleanFx).filter(Boolean).slice(0, 20);
       const before = state.studio[scene.id] ?? {};

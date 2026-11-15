@@ -135,6 +135,7 @@ try {
   await settle();
   roll = lastRoll(ann);
   assert(/^\[ATTACK\]/.test(roll.label) && roll.formula.startsWith("2d20kh1+5") && roll.formula.endsWith("-5") && roll.total === 15 && roll.mods.some((mod) => mod.label === "ADV") && roll.mods.some((mod) => mod.key === "scover"), `the attack reads ADV and superior cover: ${JSON.stringify(roll)}`);
+  assert(roll.label.includes("[ADVANTAGE]"), `the ADV chip tags the attack's label: ${roll.label}`);
   stack = ann.stacks.at(-1);
   assert(!stack.keys.includes("adv") && !stack.keys.includes("scover") && stack.keys.includes("crit"), `ADV and cover are used; Crit waits for damage: ${JSON.stringify(stack)}`);
   agent.dice.force([5, 6]);

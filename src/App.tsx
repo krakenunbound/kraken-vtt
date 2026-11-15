@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { rangesOf } from "../shared/map/ranges.mjs";
 import { dicePacks } from "./dice/dicePacks";
 import { restoreAllowed } from "../shared/table/restore.mjs";
 import { Icon } from "./ui/icons";
@@ -131,6 +132,7 @@ export function App() {
   const recordList = useMemo(() => Object.values(session.records), [session.records]);
   const targeted = useMemo(() => targetedTokens(session), [session.combat, session.map.tokens, session.role]);
   const targeters = useMemo(() => targetersOf(session), [session.combat, session.map.tokens]);
+  const targetLinks = useMemo(() => targetLinksOf(session), [session.combat, session.map.tokens]);
   const myName = session.players.find((seat) => seat.id === session.selfId)?.name ?? "";
   const urls = useRef<string[]>([]);
   const fileInput = useRef<HTMLInputElement>(null);
@@ -628,7 +630,7 @@ export function App() {
           session={session}
           scene={
             scene ? (
-              <MapView scene={scene} gm={dm && !testing && !previewing} map={session.map} records={recordList} pings={session.pings} notice={session.notice} actions={mapActions} targeted={targeted} targeters={targeters} templateAsk={session.templateAsk} onTemplateDone={session.clearTemplateAsk} fxMode={session.options.tokenEffects ?? "full"} me={testing ? "@test" : myName} startEditing={dm && Boolean(prep) && !testing} gmSeat={dm} readAloud={session.readAloudNow} onReadAloudDone={session.dismissReadAloud} viewPull={session.viewPull} />
+              <MapView scene={scene} gm={dm && !testing && !previewing} map={session.map} records={recordList} pings={session.pings} floats={session.floats} bubbles={session.bubbles} notice={session.notice} actions={mapActions} targeted={targeted} targeters={targeters} targetLinks={targetLinks} templateAsk={session.templateAsk} onTemplateDone={session.clearTemplateAsk} fxMode={session.options.tokenEffects ?? "full"} me={testing ? "@test" : myName} startEditing={dm && Boolean(prep) && !testing} gmSeat={dm} readAloud={session.readAloudNow} onReadAloudDone={session.dismissReadAloud} viewPull={session.viewPull} />
             ) : null
           }
           sceneId={scene?.id ?? ""}
@@ -683,6 +685,26 @@ function targetersOf(session: ReturnType<typeof useSession>): Record<string, str
       const token = target ? tokenOf(target) : null;
       if (!token) continue;
       out[token.id] = [...(out[token.id] ?? []), color];
+    }
+  }
+  return out;
+}
+
+// Each creature's line to each of its targets (a range line), in its token's colour (the player's own).
+function targetLinksOf(session: ReturnType<typeof useSession>): { from: string; to: string; color: string; ranges: { normal: number; long: number } | null }[] {
+  const { entries } = session.combat;
+  const tokenOf = (entry: (typeof entries)[number]) => session.map.tokens.find((token) => token.id === entry.tokenId) ?? session.map.tokens.find((token) => entry.recordId && token.recordId === entry.recordId);
+  const out: { from: string; to: string; color: string; ranges: { normal: number; long: number } | null }[] = [];
+  for (const source of entries) {
+    const from = source.targets?.length ? tokenOf(source) : null;
+    if (!from) continue;
+    // Its weapons' and spells' reach, from its record when this seat may see it (a player's own, the GM's all).
+    const record = source.recordId ? session.records[source.recordId] : undefined;
+    const ranges = record ? rangesOf(record.data) : null;
+    for (const id of source.targets) {
+      const target = entries.find((entry) => entry.id === id);
+      const token = target ? tokenOf(target) : null;
+      if (token && token.id !== from.id) out.push({ from: from.id, to: token.id, color: from.color || "#ff5a4d", ranges });
     }
   }
   return out;

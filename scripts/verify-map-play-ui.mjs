@@ -149,6 +149,56 @@ try {
   await until(() => seat.locator(`${seatMap} [data-token="${orcToken.id}"]`).getAttribute("data-name").then((name) => name === "Hulking brute"), "the unidentified name");
   report.push("token options: a health bar on the orc for the player; names off sends none; the unidentified name instead of the real one");
 
+  // 2b. The GM speaks as the orc: a bubble over its token on the player's screen. Damage floats off it on the
+  // GM's screen; the player, shown a health bar and not numbers, gets no number.
+  await tool("kraken_chat_send", { text: "None shall pass!", as: "Orc Captain" });
+  await seat.waitForSelector(`${seatMap} .token-bubble[data-bubble="${orcToken.id}"]`, { timeout: 8000 });
+  assert((await seat.textContent(`${seatMap} .token-bubble[data-bubble="${orcToken.id}"]`)).includes("None shall pass!"), "the orc's words over its token");
+  await seat.screenshot({ path: path.join(SHOTS, "kraken-chat-bubble-player.png") });
+  await tool("kraken_combat", { action: "damage", id: orcEntry.id, amount: 2 });
+  await page.waitForSelector(`.token-float.hurt[data-float="${orcToken.id}"]`, { timeout: 8000 });
+  assert((await page.textContent(`.token-float.hurt[data-float="${orcToken.id}"]`)).trim() === "−2", "the GM sees -2 float off the orc");
+  await page.waitForTimeout(400);
+  assert((await seat.locator(`.token-float[data-float="${orcToken.id}"]`).count()) === 0, "the player, shown a bar, gets no number");
+  report.push("chat bubble over the speaking orc; its damage floats on the GM's screen, not the player's");
+
+  // 2c. Range line: the hero targets the orc four squares away. An arrow in the player's colour with
+  // "20 ft"; a short bow (range 10/15) puts the orc out of range, a longer one (30/60) within it.
+  await tool("kraken_combat", { action: "add", recordId: hero.id });
+  const heroEntry = (await tool("kraken_combat")).entries.find((entry) => entry.recordId === hero.id);
+  await tool("kraken_record_update", { id: hero.id, data: { inventorylist: { "id-bow": { name: "Short test bow", properties: "Ammunition (Range 10/15; Arrow)", carried: 2 } } } });
+  await tool("kraken_combat", { action: "target", id: heroEntry.id, targetId: orcEntry.id, on: true });
+  const rangeLine = `${seatMap} .target-line[data-target-line="${heroToken.id}>${orcToken.id}"]`;
+  await seat.waitForSelector(rangeLine, { timeout: 8000 });
+  assert((await seat.getAttribute(rangeLine, "data-distance")) === "20", `the line says 20 ft: ${await seat.getAttribute(rangeLine, "data-distance")}`);
+  await until(async () => (await seat.getAttribute(rangeLine, "data-range")) === "out", "a 10/15 bow: the orc is out of range");
+  assert(/out of range/.test(await seat.textContent(rangeLine)), "the label says out of range");
+  await seat.screenshot({ path: path.join(SHOTS, "kraken-range-line-player.png") });
+  await tool("kraken_record_update", { id: hero.id, data: { inventorylist: { "id-bow": { properties: "Ammunition (Range 30/60; Arrow)" } } } });
+  await until(async () => (await seat.getAttribute(rangeLine, "data-range")) === "near", "a 30/60 bow: within range");
+  // The hero's turn: its portrait along the top gets the spinning ring and the Turn ribbon.
+  await tool("kraken_combat", { action: "set-turn", id: heroEntry.id });
+  await seat.waitForSelector(`.portrait-chip.active[data-portrait="${hero.id}"] .chip-turn-ring`, { timeout: 8000 });
+  assert(await seat.isVisible(`.portrait-chip.active[data-portrait="${hero.id}"] [data-turn-badge]`), "the Turn ribbon on the hero's portrait");
+  await seat.screenshot({ path: path.join(SHOTS, "kraken-turn-portrait-player.png"), clip: { x: 0, y: 0, width: 900, height: 70 } });
+  await tool("kraken_combat", { action: "target", id: heroEntry.id, targetId: orcEntry.id, on: false });
+  await tool("kraken_combat", { action: "remove", id: heroEntry.id });
+  report.push("range line: the hero's arrow to the orc says 20 ft, out of range for a 10/15 bow, within for 30/60");
+
+  // 2d. The map behind every window (FG's background panel), on the player's screen, and back.
+  await seat.click('.window[data-window="map"] [data-action="map-backdrop"]');
+  await seat.waitForSelector('.window[data-window="map"][data-backdrop="on"]', { timeout: 5000 });
+  const filled = await seat.evaluate(() => {
+    const map = document.querySelector('.window[data-window="map"]').getBoundingClientRect();
+    const table = document.querySelector(".desktop-surface").getBoundingClientRect();
+    return Math.abs(map.width - table.width) < 2 && Math.abs(map.height - table.height) < 2;
+  });
+  assert(filled, "the map fills the table area behind the windows");
+  await seat.screenshot({ path: path.join(SHOTS, "kraken-map-backdrop-player.png") });
+  await seat.click('.window[data-window="map"] [data-action="map-window"]');
+  await seat.waitForSelector('.window[data-window="map"] .window-title', { timeout: 5000 });
+  report.push("map behind every window: fills the table area on the player's screen, and back into its window");
+
   // 3. Fog of war on the host: walls, line of sight; the player's explored areas come from the host.
   await tool("kraken_wall", { action: "add", points: [700, 200, 700, 1200], kind: "wall" }).catch(() => undefined);
   await tool("kraken_line_of_sight", { on: true });
@@ -190,6 +240,27 @@ try {
   await page.keyboard.up("Alt");
   await seat.waitForSelector(`${seatMap} [data-token="${orcToken.id}"] .token-elevation[data-elevation="10"]`, { timeout: 8000 });
   report.push("elevation: Alt+wheel raises the orc 10 ft, a badge on the player's screen");
+
+  // 6b. The GM's keys: the orc selected, Ctrl+C, the pointer two squares right, Ctrl+V makes a second
+  // Orc Captain there; + zooms in (the orc's token grows on screen); an arrow with nothing selected pans.
+  const tokensBefore = (await tool("kraken_map")).tokens.length;
+  await page.click(`[data-token="${orcToken.id}"]`);
+  await page.keyboard.press("Control+c");
+  const box = await page.locator(`[data-token="${orcToken.id}"]`).boundingBox();
+  await page.mouse.move(box.x + box.width * 2.5, box.y + box.height / 2);
+  await page.keyboard.press("Control+v");
+  await until(async () => (await tool("kraken_map")).tokens.length === tokensBefore + 1, "Ctrl+V pastes a copy of the orc");
+  const pasted = (await tool("kraken_map")).tokens.find((token) => token.id !== orcToken.id && token.recordId === orc.id);
+  assert(pasted, "the pasted token is the Orc Captain's");
+  await page.keyboard.press("Escape");
+  await page.keyboard.press("+");
+  await until(async () => (await page.locator(`[data-token="${orcToken.id}"]`).boundingBox()).width > box.width * 1.1, "+ zooms in");
+  const zoomed = await page.locator(`[data-token="${orcToken.id}"]`).boundingBox();
+  await page.keyboard.press("ArrowLeft");
+  await until(async () => (await page.locator(`[data-token="${orcToken.id}"]`).boundingBox()).x > zoomed.x + 50, "an arrow with nothing selected pans the map");
+  await page.keyboard.press("-");
+  await tool("kraken_token_remove", { id: pasted.id });
+  report.push("GM keys: Ctrl+C / Ctrl+V copies the orc to the pointer; + zooms; an arrow pans");
 
   // 7. Magical darkness over the orc, a trap the GM sees and the player does not.
   await tool("kraken_light", { action: "place", col: 10, row: 5, bright: 0, dim: 15, darkness: true });
