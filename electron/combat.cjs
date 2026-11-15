@@ -2556,6 +2556,119 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     changed();
     return out;
   }
+  // --- Spells read from their words (D&D 3.5E, AD&D 2E and OSRIC, Basic Fantasy) ---
+  // A book's spell record (3.5E's Effect, Area, Save and words; 2E's AOE, Save
+  // and FG 2E actions; Basic Fantasy's words) cast at the caster's targets: a
+  // slot of its level spent where the sheet keeps them, each target's save (3.5E
+  // against 10 + spell level + the casting modifier; 2E and Basic Fantasy save
+  // vs. spell / Spells), damage per caster level to its maximum (one roll for an
+  // area, half or nothing on a save as the spell says), healing, and its effect
+  // on those who failed (or everyone, with no save), for its duration in this
+  // game's rounds; an effect that ends on damage (Sleep) is marked so.
+  const CLASS_SHORT = { wizard: "wiz", sorcerer: "sor", cleric: "clr", druid: "drd", bard: "brd", paladin: "pal", ranger: "rgr", "magic-user": "magic-user", "magic user": "magic-user", illusionist: "ill" };
+  function textSpellLevel(spellData, data) {
+    if (Number.isFinite(Number(spellData.level))) return Math.max(0, Math.round(Number(spellData.level)));
+    const levels = [...String(spellData.level ?? "").matchAll(/([A-Za-z/ -]+?)\s+(\d)/g)].map(([, names, level]) => ({ names: names.toLowerCase(), level: Number(level) }));
+    const classes = (data.classes ?? []).map((item) => String(item.name ?? "").toLowerCase());
+    const mine = levels.find((row) => classes.some((name) => row.names.includes(CLASS_SHORT[name] ?? name.slice(0, 3))));
+    return mine?.level ?? (levels.length ? Math.min(...levels.map((row) => row.level)) : 1);
+  }
+  async function castText(who, spellName, seat, from, castOpts = {}) {
+    await actionsReady;
+    const npcEntry = typeof who === "object" && who?.entryId ? find(who.entryId) : null;
+    if (npcEntry) mustGM(seat);
+    const found = spellOf(who, spellName);
+    if (!found) throw new Error(`No spell ${spellName} in this campaign's books.`);
+    const { spell, parsed, caster, casterEntry } = found;
+    if (!caster) throw new Error("No such caster.");
+    if (!npcEntry && seat.role !== "dm" && caster.owner !== seat.name) throw new Error("That is not your character.");
+    mustAct(casterEntry);
+    const data = caster.data ?? {};
+    const isCharacter = caster.type === "character";
+    const level = textSpellLevel(spell.data ?? {}, data);
+    const casterLevel = isCharacter ? Math.max(1, Math.max(num(data.level, 0), ...(data.classes ?? []).map((item) => num(item.level, 0)))) : Math.max(1, Number(/^(\d+)/.exec(String(data.hd ?? data.hitdice ?? "").replace(/[()]/g, ""))?.[1] ?? 1));
+    // A slot of its level (3.5E: spellcasting.used by level; 2E: each class's row, from 1st level).
+    if (isCharacter && level > 0 && data.spellcasting) {
+      const rows = Array.isArray(data.spellcasting) ? data.spellcasting : [data.spellcasting];
+      const index = Array.isArray(data.spellcasting) ? level - 1 : level;
+      const row = rows.find((item) => num(item?.perday?.[index], 0) > num(item?.used?.[index], 0));
+      if (!row) throw new Error(`${caster.name} has no level ${level} spell left today.`);
+      const used = [...(row.used ?? [])];
+      used[index] = num(used[index], 0) + 1;
+      const next = Array.isArray(data.spellcasting) ? data.spellcasting.map((item) => (item === row ? { ...item, used } : item)) : { ...row, used };
+      table().records.update(caster.id, { data: { spellcasting: next } }, table().seat);
+    }
+    const say = from ?? caster.name;
+    const decl = rulesetActions();
+    const dc = decl?.saves?.dc === "spell" ? 10 + level + num(data.spellcasting?.dc, 10) - 10 : 0;
+    table().say(`[CAST] ${spell.name} (level ${level}) at caster level ${casterLevel}${parsed.save ? ` [${parsed.save.kind.toUpperCase()}${dc ? ` DC ${dc}` : ""}${parsed.save.effect !== "negates" ? ` ${parsed.save.effect}` : " negates"}]` : ""}`, say, Boolean(casterEntry?.hidden));
+    const cap = !parsed.area && num(parsed.targets?.count, 0) > 0 ? num(parsed.targets.count, 0) : 0;
+    const picked = targetsOf(casterEntry);
+    let targets = pickTargets(casterEntry, picked, parsed, { cap, name: spell.name, say, area: Boolean(castOpts.fromTemplate) });
+    // No targets: a heal or a buff with no one picked lands on the caster.
+    if (!targets.length && casterEntry && (parsed.heal || (parsed.effect && parsed.beneficial)) ) targets = [casterEntry];
+    // Dice per caster level, to the spell's maximum: "1d6 per level (maximum 10d6)".
+    const diceFor = (part) => {
+      if (!part) return "";
+      const base = /^(\d*)d(\d+)$/.exec(String(part.dice ?? ""));
+      if (!base) return String(part.dice ?? "");
+      let count = Number(base[1] || 1);
+      if (part.perLevel) {
+        const max = Number(/^(\d+)d/.exec(String(part.max ?? ""))?.[1] ?? 0);
+        count = count * casterLevel;
+        if (max) count = Math.min(count, max);
+      }
+      return `${count}d${base[2]}${part.bonus ? (part.bonus > 0 ? `+${part.bonus}` : part.bonus) : ""}`;
+    };
+    const out = [];
+    const saved = new Map();
+    if (parsed.save && parsed.save.effect !== "none" && !parsed.save.harmless) {
+      for (const target of targets) {
+        if (target === casterEntry) continue;
+        const result = await api.save(target.id, parsed.save.kind, decl?.saves?.dc === "spell" ? dc : 0, target.name, spell.name);
+        saved.set(target.id, Boolean(result?.success));
+      }
+    }
+    const damage = parsed.damage?.[0];
+    if (damage) {
+      const card = newCard("damage", damage.type, spell.name);
+      const roll = table().roll(diceFor(damage), `[DAMAGE] ${spell.name}${damage.type ? ` [TYPE: ${damage.type}]` : ""}`, say, false, { by: caster.name, card: card.id });
+      card.total = Math.max(0, roll.total);
+      for (const target of targets) {
+        if (target === casterEntry && !parsed.area) continue;
+        const save = saved.get(target.id);
+        if (save && parsed.save.effect !== "half") {
+          table().say(`${target.name} saves: no damage from ${spell.name}.`, "Combat", Boolean(target.hidden));
+          continue;
+        }
+        const taken = await landOn(card, target, save ? Math.floor(roll.total / 2) : roll.total, `[DAMAGE] ${spell.name}${save ? " (half)" : ""}`, {}, { save: save === undefined ? undefined : save ? "half" : "failed" });
+        out.push({ target: target.name, damage: taken, half: Boolean(save) });
+      }
+    }
+    if (parsed.heal) {
+      const bonus = parsed.heal.perLevel ? Math.min(casterLevel, parsed.heal.maxBonus || casterLevel) : num(parsed.heal.bonus, 0);
+      const card = newCard("heal", "", spell.name);
+      const roll = table().roll(`${parsed.heal.dice}${bonus ? `+${bonus}` : ""}`, `[HEAL] ${spell.name}`, say, false, { by: caster.name, card: card.id });
+      card.total = Math.max(0, roll.total);
+      for (const target of targets) out.push({ target: target.name, heal: await landOn(card, target, roll.total, "[HEAL]") });
+    }
+    if (parsed.effect) {
+      const roundSeconds = decl?.roundSeconds ?? 6;
+      const span = parsed.effect.duration;
+      const unitSeconds = { round: roundSeconds, minute: 60, turn: decl?.roundSeconds >= 60 ? 600 : 60, hour: 3600, day: 86400 }[span?.unit] ?? 0;
+      const rounds = span && unitSeconds ? Math.max(1, Math.round((num(span.value, 1) * (span.perLevel ? casterLevel : 1) * unitSeconds) / roundSeconds)) : 0;
+      for (const target of targets) {
+        if (saved.get(target.id)) continue;
+        if (parsed.beneficial && !allied(casterEntry, target) && casterEntry) continue;
+        putEffect(target, parsed.effect.label, rounds, false, [], null, { source: caster.name, ...(parsed.endsOnDamage ? { ends: "damage" } : {}) });
+        table().say(`Effect ['${parsed.effect.label}'] -> [to ${target.name}]${rounds ? ` for ${rounds} round${rounds === 1 ? "" : "s"}` : ""}`, "Combat", Boolean(target.hidden));
+        out.push({ target: target.name, effect: parsed.effect.label, rounds });
+      }
+    }
+    if (casterEntry && table().options?.().clearTargets === "action") casterEntry.targets = [];
+    changed();
+    return { spell: spell.name, level, casterLevel, saves: [...saved].map(([id, success]) => ({ target: find(id).name, success })), results: out };
+  }
   // Healing from a spell: the tracker's own heal (a Dying character starts from 0).
   async function this_heal(entry, amount) {
     if (health(entry).status === "Dead") return;
@@ -3490,6 +3603,13 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     // healing goes to the targets, or the caster with none.
     async cast(who, powerKey, actionKey, seat, from, castOpts = {}) {
       if (five()) return cast5e(who, powerKey, seat, from, castOpts);
+      // A book's spell by name in a game that reads its spells' words (3.5E, 2E, Basic Fantasy), not a sheet's power.
+      {
+        await actionsReady;
+        const casterRecord = typeof who === "object" && who?.entryId ? record(find(who.entryId)) : table().records.get(typeof who === "object" ? who.recordId : who);
+        const reads = ["text", "fg2e"].includes(rulesetActions()?.spells ?? "");
+        if (reads && !casterRecord?.data?.powers?.[powerKey]) return castText(who, powerKey, seat, from, castOpts);
+      }
       const { engine, game, options: opts } = await options();
       cachedThresholds = thresholds(opts);
       // An NPC casts from its tracker entry: its caster level is its hit dice,
@@ -3539,6 +3659,8 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       const entry = npcEntry ?? state.entries.find((item) => item.recordId === caster.id) ?? null;
       const self = action.effecttarget === "self";
       let targets = self || !entry ? [] : entry.targets.map((id) => state.entries.find((item) => item.id === id)).filter(Boolean);
+      // Who it lands on, from its words (a blessing only on allies; an area's "creatures of your choice" spare them).
+      if (spellParse && targets.length) targets = pickTargets(entry, targets, spellParse.parseSpell({ name: power.name, ...power, ...action }, { game: "cnc" }), { name: power.name, say: from, area: Boolean(castOpts.fromTemplate) });
       if ((action.heal && targets.length === 0) || self) targets = entry ? [entry] : [];
       const actionName = action.name && action.name !== power.name ? `${power.name}: ${action.name}` : power.name;
       table().say(`[CAST] ${actionName}${power.powertype ? ` (${power.powertype})` : ""} at caster level ${casterLevel}${targets.length ? ` -> [at ${targets.map((t) => t.name).join(", ")}]` : ""}`, from);
