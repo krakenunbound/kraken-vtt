@@ -142,7 +142,7 @@ async function yard(step) {
   await step("wolves", "region", { kind: "trap", name: "Ash Wolves", note: "Three Ash Wolves attack where the road narrows by the ruined wall. Two lost and they flee; rations and Animal Handling DC 12 send them off.", rect: { x: 9, y: 19.5, width: 10, height: 2.5 } });
   await step("rats", "region", { kind: "trap", name: "Barrow Rats", note: "A swarm boils out of the broken crate when anyone comes near (two if the party is five).", rect: { x: 12, y: 11.8, width: 2, height: 1.6 } });
   await step("stair", "region", { kind: "trap", name: "Unsafe stair; the Gloomcrawler", note: "Cracked steps near the top: Perception DC 12 notices, Dexterity DC 12 each to cross or fall 15 ft (2d6). The Gloomcrawler drops from the webs on the last climber.", rect: { x: 15.6, y: 10.2, width: 2.8, height: 2.4 } });
-  return finish(step, { name: "watchtower-yard-studio", out: OUT, renders, plays: [{ name: "gate", token: [14.5, 18], light: "none", vision: "normal" }, { name: "hall", token: [15, 8], light: "torch" }] });
+  return finish(step, { name: "watchtower-yard-studio", out: OUT, renders, plays: [{ name: "gate", token: [14.5, 18], light: "torch" }, { name: "hall", token: [15, 8], light: "torch" }] });
 }
 
 // --- The upper floor (18 x 14) --------------------------------------------------------------
@@ -272,7 +272,7 @@ async function crypt(step) {
   await step("cold", "weather", { type: "myst", name: "Grave cold", settings: { MystFade: 0.3, MystSpeed: 0.15 }, areas: [{ rect: { x: 3, y: 6, width: 14, height: 7 } }] });
   await step("sentinels", "region", { kind: "trap", name: "Bone Sentinels", note: "Four Bone Sentinels stand in the hall: they attack anyone who enters without the badge of the watch; with it shown, they stand aside.", rect: { x: 5, y: 8, width: 9, height: 3 } });
   await step("saranth", "region", { kind: "trap", name: "Warden Saranth", note: "'Who comes? Give the word, or give your name to the dark.' He paces before his coffin. When the beacon burns, he lays down his sword and is still.", rect: { x: 17.5, y: 8, width: 4, height: 3 } });
-  return finish(step, { name: "watchtower-crypt-studio", out: OUT, renders, plays: [{ name: "landing", token: [4, 4], light: "torch" }, { name: "hall", token: [10, 9.5], light: "torch" }] });
+  return finish(step, { name: "watchtower-crypt-studio", out: OUT, renders, plays: [{ name: "landing", token: [4, 4], light: "torch" }, { name: "hall", token: [10, 9.5], light: "torch" }, { name: "secret-door", token: [19.5, 13.5], light: "torch" }] });
 }
 
 const k = await startKraken({ name: "The Empty Watchtower", port: 47467 });

@@ -205,7 +205,7 @@ const DECK2 = {
     { kind: "pit", name: "Lift shaft", note: "The lift is dead; the shaft leads down to deck 1 (Athletics or Zero-G, Standard).", rect: { x: 16.3, y: 2.3, width: 2.4, height: 2.4 } },
   ],
   myst: [{ rect: { x: 21, y: 4, width: 5, height: 8 } }],
-  plays: [{ name: "corridor", token: [12.5, 8], light: "torch" }, { name: "engineering", token: [22, 9.5], light: "none" }],
+  plays: [{ name: "corridor", token: [12.5, 8], light: "torch" }, { name: "engineering", token: [22, 9.5], light: "torch" }],
 };
 
 async function build(step, deck) {

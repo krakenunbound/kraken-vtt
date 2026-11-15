@@ -55,7 +55,7 @@ const DOORS = [
   { from: [9, 8], to: [9, 9], art: "Hatch" },
   { from: [12, 7], to: [13, 7], art: "Hatch" },
   { from: [18, 7], to: [19, 7], art: "Hatch" },
-  { from: [12, 11], to: [13, 11], art: "Hatch", locked: true, name: "Cargo hold (sealed)" },
+  { from: [12, 11], to: [13, 11], art: "Hatch", name: "Cargo hold" },
   { from: [18, 11], to: [19, 11], art: "Hatch" },
   { from: [22, 8], to: [22, 10], art: "Airlock door", name: "Bridge" },
 ];
@@ -191,7 +191,7 @@ try {
     renders: RENDERS,
     plays: [
       { name: "airlock", token: [2.5, 9], light: "torch" },
-      { name: "spine", token: [15.5, 9], light: "none" },
+      { name: "spine", token: [15.5, 9], light: "torch" },
     ],
   });
   if (check.notes?.length) console.log("NOTES REMAIN");

@@ -20,13 +20,13 @@ export function wallRuns(areas, doors, { zones, open = () => false } = {}) {
   const cells = new Map();
   for (const a of areas) for (let cx = a.x * S; cx < (a.x + a.w) * S; cx++) for (let cy = a.y * S; cy < (a.y + a.h) * S; cy++) cells.set(`${cx},${cy}`, { zone: a.zone, group: a.group ?? a.zone });
   const doorEdges = new Set();
-  const secretEdges = new Set();
   for (const d of doors) {
+    if (d.kind === "secret") continue; // its wall line carries on across the gap
     const [x1, y1] = d.from.map((v) => v * S), [x2, y2] = d.to.map((v) => v * S);
     const steps = Math.max(Math.abs(x2 - x1), Math.abs(y2 - y1));
     for (let i = 0; i < steps; i++) {
       const a = [x1 + Math.sign(x2 - x1) * i, y1 + Math.sign(y2 - y1) * i], b = [a[0] + Math.sign(x2 - x1), a[1] + Math.sign(y2 - y1)];
-      (d.kind === "secret" ? secretEdges : doorEdges).add(`${a}|${b}`).add(`${b}|${a}`);
+      doorEdges.add(`${a}|${b}`).add(`${b}|${a}`);
     }
   }
   const drawn = new Set();

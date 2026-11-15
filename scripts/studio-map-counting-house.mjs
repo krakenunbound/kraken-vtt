@@ -55,7 +55,7 @@ const DOORS = [
   { from: [19, 8], to: [20, 8], art: "Door, old" },
   { from: [14, 10], to: [14, 11], art: "Door, wooden" },
   { from: [20, 13], to: [21, 13], art: "Door, iron", locked: true, name: "The vault door (Tier II lock)" },
-  { from: [6, 15], to: [7, 15], art: "Door, wooden", locked: true, name: "Dock door" },
+  { from: [6, 15], to: [7, 15], art: "Door, wooden", name: "Dock door" },
 ];
 
 const k = await startKraken({ name: "The Brine Street Job", port: 47466 });
@@ -163,7 +163,7 @@ try {
   await step("bell", "region", { kind: "trap", name: "The alarm bell's rope", note: "Pulled: the bell rings, the guards gather, the Harbor Watch sends a patrol (Counting-house Alert fills).", rect: { x: 5.5, y: 5.5, width: 1.5, height: 1.5 } });
   await step("vault door", "region", { kind: "trap", name: "The vault door", note: "Iron, a Tier II lock: The Vault Door clock (4). Fenwick has the key on a chain at his neck.", rect: { x: 19.5, y: 12, width: 2, height: 1 } });
 
-  await finish(step, { name: "counting-house-studio", out: OUT, renders: RENDERS, plays: [{ name: "dock", token: [6.5, 17.5], light: "none" }, { name: "hall", token: [7.5, 10.5], light: "none" }] });
+  await finish(step, { name: "counting-house-studio", out: OUT, renders: RENDERS, plays: [{ name: "dock", token: [6.5, 17.5], light: "torch" }, { name: "hall", token: [7.5, 10.5], light: "torch" }, { name: "secret-door", token: [13.5, 4.5], light: "torch" }] });
   await step("save project", "save", {});
 } finally {
   if (!process.env.KEEP_OPEN) await k.close();

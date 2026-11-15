@@ -117,7 +117,7 @@ async function mill(step) {
   await step("ambient", "ambient", { preset: "dusk" });
   await step("goblins", "region", { kind: "trap", name: "Three goblins", note: "Eating stolen bread; one watches the path. Surprise 1d6 each side (1-2). If two fall, the third flees down the stairs to warn Grisk (morale 7).", rect: { x: 10.5, y: 7.5, width: 3, height: 3 } });
   await step("ford", "region", { kind: "difficult", name: "The river", note: "Wide and shallow over stones.", rect: { x: 0.4, y: 0, width: 3.8, height: 18 } });
-  return finish(step, { name: "hobs-ford-mill-studio", out: OUT, renders, plays: [{ name: "path", token: [13.5, 14], light: "none" }] });
+  return finish(step, { name: "hobs-ford-mill-studio", out: OUT, renders, plays: [{ name: "path", token: [13.5, 14], light: "torch" }] });
 }
 
 // --- The cellars (22 x 16) -------------------------------------------------------------------
@@ -190,7 +190,7 @@ async function cellars(step) {
   await step("ambient", "ambient", { preset: "night" });
   await step("skeletons", "region", { kind: "trap", name: "Three skeletons", note: "Stand up from the floor before the altar and attack anyone who enters; they pursue no further than the passage. Bones laid back in the coffins: they do not rise (+100 XP for a Cleric).", rect: { x: 12, y: 12.6, width: 5, height: 2 } });
   await step("grisk", "region", { kind: "trap", name: "Grisk and the goblins", note: "Grisk the hobgoblin (morale 8 at half hp) and three goblins (four if the mill's runner got away).", rect: { x: 12, y: 2.5, width: 5, height: 3 } });
-  return finish(step, { name: "hobs-ford-cellars-studio", out: OUT, renders, plays: [{ name: "landing", token: [4, 4], light: "torch" }, { name: "den", token: [13, 4], light: "none" }] });
+  return finish(step, { name: "hobs-ford-cellars-studio", out: OUT, renders, plays: [{ name: "landing", token: [4, 4], light: "torch" }, { name: "den", token: [13, 4], light: "torch" }, { name: "secret-door", token: [3.5, 9.5], light: "torch" }] });
 }
 
 const k = await startKraken({ name: "The Mill at Hob's Ford", port: 47468 });
