@@ -204,6 +204,27 @@ try {
   await seat.waitForSelector(`${seatMap} [data-token="${orcToken.id}"] .token-elevation[data-elevation="10"]`, { timeout: 8000 });
   report.push("elevation: Alt+wheel raises the orc 10 ft, a badge on the player's screen");
 
+  // 6b. The GM's keys: the orc selected, Ctrl+C, the pointer two squares right, Ctrl+V makes a second
+  // Orc Captain there; + zooms in (the orc's token grows on screen); an arrow with nothing selected pans.
+  const tokensBefore = (await tool("kraken_map")).tokens.length;
+  await page.click(`[data-token="${orcToken.id}"]`);
+  await page.keyboard.press("Control+c");
+  const box = await page.locator(`[data-token="${orcToken.id}"]`).boundingBox();
+  await page.mouse.move(box.x + box.width * 2.5, box.y + box.height / 2);
+  await page.keyboard.press("Control+v");
+  await until(async () => (await tool("kraken_map")).tokens.length === tokensBefore + 1, "Ctrl+V pastes a copy of the orc");
+  const pasted = (await tool("kraken_map")).tokens.find((token) => token.id !== orcToken.id && token.recordId === orc.id);
+  assert(pasted, "the pasted token is the Orc Captain's");
+  await page.keyboard.press("Escape");
+  await page.keyboard.press("+");
+  await until(async () => (await page.locator(`[data-token="${orcToken.id}"]`).boundingBox()).width > box.width * 1.1, "+ zooms in");
+  const before = await page.locator(`[data-token="${orcToken.id}"]`).boundingBox();
+  await page.keyboard.press("ArrowLeft");
+  await until(async () => (await page.locator(`[data-token="${orcToken.id}"]`).boundingBox()).x > before.x + 50, "an arrow with nothing selected pans the map");
+  await page.keyboard.press("-");
+  await tool("kraken_token_remove", { id: pasted.id });
+  report.push("GM keys: Ctrl+C / Ctrl+V copies the orc to the pointer; + zooms; an arrow pans");
+
   // 7. Magical darkness over the orc, a trap the GM sees and the player does not.
   await tool("kraken_light", { action: "place", col: 10, row: 5, bright: 0, dim: 15, darkness: true });
   await tool("kraken_region", { action: "add", kind: "trap", name: "Rune trap", note: "Fire 3d6", rect: { col: 7, row: 3, cols: 2, rows: 2 } });

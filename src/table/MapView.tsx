@@ -73,6 +73,8 @@ type Camera = { x: number; y: number; scale: number };
 // Where each scene was being looked at (this screen): the map put into a window of
 // its own, or back, or drawn again, shows just what it showed, never framed anew.
 const views = new Map<string, { camera: Camera; framed: string }>();
+// The GM's copied tokens (Ctrl+C), kept across scenes for a paste on another map.
+const tokenClipboard: { items: { recordId: string | null; name: string; dx: number; dy: number }[] } = { items: [] };
 type Point = { x: number; y: number };
 
 const MIN_SCALE = 0.02;
@@ -462,6 +464,26 @@ function MapViewInner({
   const [camera, setCamera] = useState<Camera>(() => views.get(sceneIn.id)?.camera ?? { x: 0, y: 0, scale: 0.1 });
   const cameraRef = useRef(camera);
   cameraRef.current = camera;
+  // Where the pointer is on the map (a paste lands there), and whether it is over the map at all.
+  const pointerWorld = useRef({ x: 0, y: 0 });
+  const pointerOver = useRef(false);
+  useEffect(() => {
+    const element = viewport.current;
+    if (!element) return;
+    const onMove = (event: PointerEvent) => {
+      const box = element.getBoundingClientRect();
+      const current = cameraRef.current;
+      pointerWorld.current = { x: (event.clientX - box.left - current.x) / current.scale, y: (event.clientY - box.top - current.y) / current.scale };
+      pointerOver.current = true;
+    };
+    const onLeave = () => (pointerOver.current = false);
+    element.addEventListener("pointermove", onMove);
+    element.addEventListener("pointerleave", onLeave);
+    return () => {
+      element.removeEventListener("pointermove", onMove);
+      element.removeEventListener("pointerleave", onLeave);
+    };
+  }, []);
   const [panning, setPanning] = useState(false);
   const [natural, setNatural] = useState<{ width: number; height: number } | null>(null);
   const [imageFailed, setImageFailed] = useState(false);
@@ -658,8 +680,51 @@ function MapViewInner({
         }
         return;
       }
+      const mod = event.ctrlKey || event.metaKey;
+      const key = event.key.toLowerCase();
+      // The GM's select all, copy and paste of tokens (Foundry's), while the pointer is over the map
+      // (so Ctrl+A in the chat still selects its words). Paste puts the copies at the pointer, as laid out.
+      if (gm && mod && !editorOpen && pointerOver.current && ["a", "c", "v"].includes(key)) {
+        if (key === "a") {
+          event.preventDefault();
+          setPicked(tokens.map((item) => item.id));
+          setSelected(tokens[0]?.id ?? null);
+        } else if (key === "c") {
+          const list = picked.length ? tokens.filter((item) => picked.includes(item.id)) : token ? [token] : [];
+          if (list.length) tokenClipboard.items = list.map((item) => ({ recordId: item.recordId ?? null, name: item.name, dx: item.x - list[0].x, dy: item.y - list[0].y }));
+        } else if (tokenClipboard.items.length) {
+          event.preventDefault();
+          const at = pointerWorld.current;
+          for (const item of tokenClipboard.items) actions.placeToken(item.recordId, at.x + item.dx, at.y + item.dy, item.name);
+        }
+        return;
+      }
+      // + and - zoom about the middle of the view (Foundry's Zoom In / Zoom Out).
+      if (!mod && (event.key === "+" || event.key === "=" || event.key === "-")) {
+        const box = viewport.current?.getBoundingClientRect();
+        if (!box) return;
+        event.preventDefault();
+        const factor = event.key === "-" ? 1 / 1.25 : 1.25;
+        setCamera((current) => {
+          const scale = clampScale(current.scale * factor);
+          const midX = box.width / 2;
+          const midY = box.height / 2;
+          return { scale, x: midX - ((midX - current.x) / current.scale) * scale, y: midY - ((midY - current.y) / current.scale) * scale };
+        });
+        return;
+      }
+      // Arrows, or the number pad with its diagonals (7 9 1 3), whatever Num Lock says.
+      const step =
+        { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[event.key] ??
+        { Numpad7: [-1, -1], Numpad8: [0, -1], Numpad9: [1, -1], Numpad4: [-1, 0], Numpad6: [1, 0], Numpad1: [-1, 1], Numpad2: [0, 1], Numpad3: [1, 1] }[event.code];
+      // Nothing of this seat's selected: the keys pan the map (Foundry's Pan).
+      if (step && (!token || !(gm || token.mine))) {
+        if (mod) return;
+        event.preventDefault();
+        setCamera((current) => ({ ...current, x: current.x - step[0] * 120, y: current.y - step[1] * 120 }));
+        return;
+      }
       if (!token || !(gm || token.mine)) return;
-      const step = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[event.key];
       if (step) {
         event.preventDefault();
         const group = picked.includes(token.id) ? tokens.filter((item) => picked.includes(item.id) && (gm || item.mine)) : [];
