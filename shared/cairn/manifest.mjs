@@ -23,6 +23,8 @@ export default {
   blurb: "Cairn, Second Edition (Yochai Gal, CC BY-SA 4.0): three attributes and Hit Protection, saves under a d20, attacks that always hit, Scars, Fatigue and ten inventory slots, backgrounds instead of classes. Its Player's Guide, Warden's Guide and Trouble in Twin Lakes come with Kraken.",
   engine: "shared/cairn/rules.mjs",
   host: { module: "electron/cairn.cjs", message: "cairn", tool: "kraken_cairn" },
+  // Cairn's saves are roll-under with no bonuses: the stack reads damage and plain rolls (the tray, /roll).
+  dice: { modifiers: { presets: ["max"], kinds: ["damage", "roll"] } },
   labels: { hp: "HP", ac: "Armor", xp: "Growth" },
   records: {
     background: { label: "Backgrounds" },
@@ -113,7 +115,7 @@ export default {
   blank: false,
   features: ["slots", "fatigue", "scars", "spellbooks", "morale", "dying.save"],
   // Cairn has no experience: the party's tab is its Growth (Scars and what has changed).
-  party: { currency: ["GP"], xp: "growth", groupCheck: { stats: ["str", "dex", "wil"] } },
+  party: { currency: ["GP"], xp: "growth", groupCheck: { stats: ["str", "dex", "wil"], rolls: [{ kind: "save", label: "Save", options: [{ value: "str", label: "STR" }, { value: "dex", label: "DEX" }, { value: "wil", label: "WIL" }] }] } },
   tracker: {
     saves: { keys: ["str", "dex", "wil"], modLabel: "CL", modAria: "Save CL", button: "Roll save" },
     // No initiative: the PCs act first, each saving DEX to act in the first round.

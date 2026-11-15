@@ -122,6 +122,15 @@ try {
   agent.dice.force([10, 3, 18]);
   const group = await tool("kraken_party_group_check", { attribute: "wisdom", cl: 2 });
   assert(group.line === "Group check (Wisdom, CL 2): 1 of 3 succeed. Failed: Aldric, Borin.", group.line);
+  // The party sheet's group roll (every game's path): the same dice, each roll named, and the
+  // GM's modifier box (+8) counted in the verdict as on the card: Aldric 10+1+1+8 = 20 now succeeds.
+  await tool("kraken_modifiers", { action: "add", value: 8, label: "Inspired" });
+  agent.dice.force([10, 3, 18]);
+  const sheetRoll = await tool("kraken_party_group_check", { kind: "check", attribute: "wisdom", dc: 2, mode: "roll" });
+  const named = agent.chatLog(12).filter((line) => /\[GROUP CHECK\] Wisdom check/.test(line.roll?.label ?? "")).slice(-3);
+  assert(named.length === 3 && named.every((line) => line.roll.mods?.some((mod) => mod.label === "Inspired")), `each member's roll named and read through the box: ${named.map((line) => line.roll.label)}`);
+  assert(sheetRoll.passed === 2 && sheetRoll.failed.join() === "Borin", `the box counts in the verdict: ${sheetRoll.line}`);
+  assert((await tool("kraken_modifiers", {})).slots.length === 0, "and clears");
 
   // Players see the party, but cannot run it.
   const seen = await latest(player, (m) => m.type === "party" && m.party.members.length === 3, "the party reaches the player");

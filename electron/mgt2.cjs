@@ -46,7 +46,7 @@ async function taskMgt2(table, record, { skill = "", attribute = "", difficulty 
   const target = Math.min(20, Math.max(2, Math.round(Number(difficulty) || 8)));
   const total = dm + (Math.round(Number(modifier)) || 0);
   const dice = boon === "boon" ? "3d6kh2" : boon === "bane" ? "3d6kl2" : "2d6";
-  const rolled = table.dice.roll(`${dice}${total ? rules.signed(total) : ""}`);
+  const rolled = table.act(`${dice}${total ? rules.signed(total) : ""}`, "check");
   const effect = rolled.total - target;
   const success = effect >= 0;
   const name = rules.DIFFICULTIES.find(([, value]) => value === target)?.[0] ?? `${target}+`;

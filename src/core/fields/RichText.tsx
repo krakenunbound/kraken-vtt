@@ -3,6 +3,7 @@ import { decodeEntities, isFormatted, krakenRecordname, linkOfRecordname } from 
 import type { QuickSlot } from "../../session/useSession";
 import { Icon } from "../../ui/icons";
 import { hasLink, LINK_ICON, linkFrom, SLOT_DRAG } from "../../ui/QuickSlots";
+import { markInlineRolls } from "../../ui/InlineRolls";
 
 // The core's one rich text editor (FG's formattedtextfield): a story's page,
 // a note, a quest's text. It edits FG's formatted text and saves FG's tags
@@ -80,6 +81,8 @@ function serialize(node: Node): string {
     if (child.nodeType === 3) return void (out += escapeText(child.nodeValue ?? ""));
     if (child.nodeType !== 1) return;
     const element = child as HTMLElement;
+    // A roll chip is kept as the words it was typed as ([[1d20+3]], 2d6 + 3).
+    if (element.classList.contains("inline-roll")) return void (out += escapeText(element.dataset.source ?? element.textContent ?? ""));
     if (element.classList.contains("rt-chip")) return void (out += `<link class="${escapeAttr(element.dataset.class ?? "")}" recordname="${escapeAttr(element.dataset.recordname ?? "")}">${escapeText(element.textContent ?? "")}</link>`);
     if (element.classList.contains("read-aloud-button")) return;
     if (element.tagName === "BR") return void (out += "<br />");
@@ -167,6 +170,8 @@ export function RichText({
     if (!root || focused || (shown.current === value && root.childNodes.length)) return;
     root.replaceChildren();
     build(parse(value), root);
+    // Its dice as roll chips (a click rolls; saved as the words they were).
+    markInlineRolls(root, true);
     shown.current = value;
   }, [value, focused, editable]);
   const save = () => {

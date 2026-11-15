@@ -4,6 +4,9 @@
 // button on top, the last move over every tab, then Main (stats to roll, health, spirit, supply and momentum,
 // debilities or impacts), Moves, Progress and Assets (the game's own pages) and Notes.
 import { STAT_NAMES, STATS } from "./rules.mjs";
+import { STATS as PARTY_STATS } from "./rules.mjs";
+// The party sheet's group rolls: what the game checks, saves and its skills (D6).
+const titleOf = (/** @type {string} */ word) => word[0].toUpperCase() + word.slice(1);
 
 const SF = { is: { path: "game", values: ["starforged"] } };
 // A meter's or momentum's step: the host adjusts it; a refusal shows on the sheet's error line.
@@ -95,12 +98,14 @@ export default {
   blurb: "Ironsworn and Ironsworn: Delve (Shawn Tomkin, CC BY 4.0; an unofficial adaptation): vows sworn upon iron, the action die against two challenge dice, momentum, progress tracks, assets, the oracles for play with or without a GM, Delve's sites. Its Reference, Foes and Sites and The Cinder Barrow come with Kraken.",
   engine: "shared/ironsworn/rules.mjs",
   host: { module: "electron/ironsworn.cjs", message: "ironsworn", tool: "kraken_ironsworn" },
+  // The modifier box reads only plain rolls (the tray, /roll): an action roll's adds are chosen on the move itself (the action die is never past 10).
+  dice: { modifiers: { presets: [], kinds: ["roll"] } },
   records: { npc: { label: "Foes" } },
   sheet,
   wizard: "ironsworn.wizard",
   blank: false,
   features: ["oracles", "delve", "progressTracks", "momentum", "assetsCards"],
-  party: { currency: ["Supply"], xp: "xp" },
+  party: { currency: ["Supply"], xp: "xp", groupCheck: { stats: [], rolls: [{ kind: "check", label: "Stat", options: PARTY_STATS.map((value) => ({ value, label: titleOf(value) })) }] } },
   // A character's initiative on the tracker, in the game's words.
   tracker: { control: { on: "Initiative", off: "No initiative", title: "Initiative" } },
   // The words the sheet (and kraken_character_edit) may change: the host's whitelist (electron/ironsworn.cjs). Its

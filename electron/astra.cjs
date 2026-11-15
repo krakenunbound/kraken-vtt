@@ -36,7 +36,7 @@ async function taskAstra(table, record, { skill = "", attribute = "", difficulty
   const { modifier, label: tag } = rules.taskModifier(record.data, skill, String(attribute ?? "").toLowerCase() || "");
   const total = modifier + (Number(difficulty) || 0);
   const dice = boon === "boon" ? "3d6kh2" : boon === "bane" ? "3d6kl2" : "2d6";
-  const rolled = table.dice.roll(`${dice}${total ? rules.signed(total) : ""}`);
+  const rolled = table.act(`${dice}${total ? rules.signed(total) : ""}`, "check");
   const effect = rolled.total - rules.TARGET;
   const success = effect >= 0;
   const words = `${label ? `${label} ` : ""}${tag}${Number(difficulty) ? ` [${rules.signed(Number(difficulty))}]` : ""}${boon ? ` [${boon.toUpperCase()}]` : ""} [${success ? "SUCCESS" : "FAILURE"} ${rolled.total} vs 8, Effect ${rules.signed(effect)}]`;

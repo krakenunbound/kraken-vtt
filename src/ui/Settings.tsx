@@ -114,6 +114,26 @@ export function SettingsWindow({ session }: { session: Session }) {
               <option value="turn">At the end of the creature's turn</option>
             </select>
           </SettingRow>
+          <SettingRow label="Initiative" hint="Each creature rolls its own, or one roll for each kind of creature (all the goblins together), as FG's group initiative.">
+            <select value={(session.options as { initGroup?: string }).initGroup ?? "each"} onChange={(event) => session.setTableOptions({ initGroup: event.target.value } as never)} aria-label="Initiative" data-setting="init-group">
+              <option value="each">Each creature</option>
+              <option value="kind">By kind of creature</option>
+            </select>
+          </SettingRow>
+          <SettingRow label="Skip turns" hint="Whose turns the tracker passes over: dead and unconscious creatures (FG's), characters too, or no one.">
+            <select value={(session.options as { skipDead?: string }).skipDead ?? "enemies"} onChange={(event) => session.setTableOptions({ skipDead: event.target.value } as never)} aria-label="Skip turns" data-setting="skip-dead">
+              <option value="enemies">The dead and unconscious creatures</option>
+              <option value="all">Characters too</option>
+              <option value="off">No one</option>
+            </select>
+          </SettingRow>
+          <SettingRow label="NPC numbering" hint="The same creature added again: numbered in order (Goblin 1, Goblin 2), with a random number (Goblin 14), or left as it is.">
+            <select value={(session.options as { npcNumbering?: string }).npcNumbering ?? "append"} onChange={(event) => session.setTableOptions({ npcNumbering: event.target.value } as never)} aria-label="NPC numbering" data-setting="npc-numbering">
+              <option value="append">In order</option>
+              <option value="random">Random</option>
+              <option value="off">Off</option>
+            </select>
+          </SettingRow>
           <SettingRow label="Token effects" hint="Conditions and effects on tokens (Zzz, flames, frost, a buff's glow): animated, icons only, or not drawn. Everyone's screen; motion stops anyway where the computer asks for reduced motion.">
             <select value={session.options.tokenEffects ?? "full"} onChange={(event) => session.setTableOptions({ tokenEffects: event.target.value as "full" })} aria-label="Token effects" data-setting="token-effects">
               <option value="full">Animated</option>

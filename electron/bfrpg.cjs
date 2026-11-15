@@ -47,7 +47,7 @@ async function checkBf(table, record, { kind = "check", attribute, skill, bonus 
   const test = rules.testOf(data, kind, which);
   const mod = Math.round(Number(bonus) || 0);
   const formula = `${test.die}${mod ? (test.high ? rules.signed(mod) : mod > 0 ? `-${mod}` : `+${-mod}`) : ""}`;
-  const rolled = table.dice.roll(formula);
+  const rolled = table.act(formula, kind === "save" ? "save" : "check", "", { under: !test.high });
   const die = rolled.terms?.[0]?.rolls?.[0];
   let success = test.high ? rolled.total >= test.target : rolled.total <= test.target;
   if (kind === "save" && die === 1) success = false;

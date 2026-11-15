@@ -1026,7 +1026,9 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
   // only a player's own; an unidentified name replaces the real one).
   function tokenShows(token, seat) {
     const options = tableOptions();
-    const set = (isPc(token) ? options.healthPc : options.healthNpc) ?? "dot";
+    // numbers: a bar on the token (the tracker shows the numbers).
+    const chosen = (isPc(token) ? options.healthPc : options.healthNpc) ?? "dot";
+    const set = chosen === "numbers" ? "bar" : chosen;
     const names = options.names ?? "hover";
     if (seat.role === "dm") return { health: set === "off" ? "dothover" : set, names: names === "off" ? "hover" : names, name: token.name };
     const own = token.owner !== "" && token.owner === seat.name;

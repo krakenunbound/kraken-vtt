@@ -4,6 +4,8 @@
 // top (Origin, Paths), the strip (experience, the task's difficulty, a Boon or Bane), then Main (with the Marks),
 // Skills, Combat, Gear and Notes. The host works every number out again (shared/astra/rules.mjs).
 import { DIFFICULTIES, STAT_NAMES, STATS } from "./rules.mjs";
+import { SKILLS as PARTY_SKILLS, STATS as PARTY_STATS, STAT_NAMES as PARTY_STAT_NAMES } from "./rules.mjs";
+// The party sheet's group rolls: what the game checks, saves and its skills (D6).
 
 // A task: the strip's difficulty shifts the roll, with its Boon or Bane.
 /** @type {import("../rulesets/types").ActionCall} */
@@ -153,12 +155,14 @@ export default {
   blurb: "Kraken's science fiction: 2d6 and skills, Paths to make a crew in minutes, armour that soaks. Its books and a first adventure come with Kraken.",
   engine: "shared/astra/rules.mjs",
   host: { module: "electron/astra.cjs", message: "character-improve", tool: "kraken_character_improve" },
+  // The modifier box's keys beside the chat (shared/rulesets/modifiers.mjs).
+  dice: { modifiers: { presets: ["boon", "bane", "plus1", "minus2"] } },
   records: { race: { label: "Origins" }, class: { label: "Paths" }, item: { label: "Gear" }, npc: { label: "Threats" } },
   sheet,
   wizard: "astra.wizard",
   blank: false,
   features: ["starships"],
-  party: { currency: ["Cr"], xp: "xp" },
+  party: { currency: ["Cr"], xp: "xp", groupCheck: { stats: [], rolls: [{ kind: "skill", label: "Skill", options: Object.entries(PARTY_SKILLS).map(([value, row]) => ({ value, label: String(row[0]) })) }, { kind: "check", label: "Characteristic", options: PARTY_STATS.map((value) => ({ value, label: String(/** @type {Record<string, string>} */ (PARTY_STAT_NAMES)[value] ?? value) })) }] } },
   tracker: { saves: { keys: ["brawn", "reflex", "grit", "intellect", "training", "presence"], modLabel: "DM", modAria: "Check DM", button: "Roll check" } },
   windows: [{ kind: "ships", label: "Starships", icon: "ship", title: "Starships", feature: "starships" }],
   calendar: "astra",

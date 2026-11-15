@@ -1,4 +1,5 @@
 import { Fragment, useEffect, useMemo, useState, type ReactNode } from "react";
+import { inlineRollNodes } from "../ui/InlineRolls";
 import type { QuickSlot, Session, TableRecord } from "../session/useSession";
 import { Icon } from "../ui/icons";
 import { slotDrag, useOpenLink } from "../ui/QuickSlots";
@@ -270,7 +271,8 @@ function nodes(parent: Node, key = "n", onLink?: OnLink, onOpen?: OnOpen): React
   const out: ReactNode[] = [];
   parent.childNodes.forEach((child, index) => {
     const id = `${key}.${index}`;
-    if (child.nodeType === 3 || child.nodeType === 4) out.push(child.nodeValue ?? "");
+    // Words, with their dice as roll chips ([[1d20+3]], 2d6 + 3).
+    if (child.nodeType === 3 || child.nodeType === 4) out.push(...inlineRollNodes(child.nodeValue ?? "", id));
     if (child.nodeType !== 1) return;
     const tag = (child as Element).tagName.toLowerCase();
     if (tag === "br") return void out.push(<br key={id} />);
@@ -283,10 +285,10 @@ function nodes(parent: Node, key = "n", onLink?: OnLink, onOpen?: OnOpen): React
       return void out.push(
         onLink ? (
           <a key={id} href="#" className="record-link" onClick={(event) => (event.preventDefault(), onLink(element.getAttribute("class") ?? "", element.getAttribute("recordname") ?? "", words))}>
-            {inner.length ? inner : "Link"}
+            {words}
           </a>
         ) : (
-          <span key={id} className="record-link">{inner.length ? inner : "Link"}</span>
+          <span key={id} className="record-link">{words}</span>
         ),
       );
     }

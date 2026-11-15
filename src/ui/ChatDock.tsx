@@ -5,6 +5,12 @@ import { characterDice, diceStore, FATE_SIDES, fateFace, rolling, setThrow, towe
 import { ladder } from "../../shared/fate/rules.mjs";
 import { commandsFor, runChat, type Command } from "./chatCommands";
 import { slotDrag } from "./QuickSlots";
+import { ModifierBox, ModifierKeys, NUMBER_DRAG } from "./ModifierBox";
+import { InlineRollText } from "./InlineRolls";
+import { exportChat } from "../notes/SessionLog";
+import { ChatLinkChip, PromptCard, SharedRecord, SpeakerPortrait } from "./ChatParts";
+import { hasLink, linkFrom } from "./QuickSlots";
+import type { QuickSlot } from "../session/useSession";
 import { chatRunner } from "./chatRunner";
 import { TowerArt, towerLook } from "./TowerArt";
 import { agentCommands } from "./agentCommands";
@@ -116,6 +122,17 @@ export function RollCard({ roll, pending = false }: { roll: RollResult; pending?
         )}
       </span>
       <span className="roll-formula">{roll.formula}</span>
+      {roll.mods?.length ? (
+        // What the modifier box and its keys added (FG lists them in the roll's words).
+        <span className="roll-mods" aria-label="Modifiers">
+          {roll.mods.map((mod, index) => (
+            <span key={index} data-mod-key={mod.key ?? undefined}>
+              {mod.value !== undefined ? `${mod.value > 0 ? "+" : ""}${mod.value} ` : ""}
+              {mod.label || "Modifier"}
+            </span>
+          ))}
+        </span>
+      ) : null}
       {roll.result ? <span className={`roll-result ${roll.result === "HIT" || roll.result === "SAVED" || roll.result === "SUCCEED" || roll.result === "STYLE" ? "hit" : roll.result === "MISS" || roll.result === "FAILED" || roll.result === "FAIL" ? "miss" : "none"}`}>{roll.result}</span> : null}
       {fate ? (
         // Fate: the total on the ladder (Good +3), as the rules read it.
@@ -196,6 +213,8 @@ function Line({ line, gmIcon, session }: { line: ChatLine; gmIcon: string; sessi
         event.dataTransfer.setData("application/x-kraken-chat", chatWords(line));
         if (applied) event.dataTransfer.setData("application/x-kraken-damage", JSON.stringify(applied));
         if (dropped) event.dataTransfer.setData("application/x-kraken-roll", JSON.stringify(dropped));
+        // A roll's total onto the modifier box (FG's drag of a number).
+        if (line.roll && Number.isFinite(Number(line.roll.total))) event.dataTransfer.setData(NUMBER_DRAG, JSON.stringify({ value: Number(line.roll.total), label: (line.roll.label ?? "").replace(/^\[[A-Z ]+\]\s*/, "").replace(/\s*\[.*$/, "").slice(0, 40) }));
         event.dataTransfer.effectAllowed = "copy";
       }}
       title={dropped ? `Drag onto a creature to ${dropped.kind === "attack" ? "attack it" : dropped.kind === "effect" ? "put it on" : dropped.kind === "heal" ? `heal ${dropped.total}` : `deal ${dropped.total}${dropped.type ? ` ${dropped.type}` : ""}`}, or into a note` : applied ? `Drag onto a creature to ${applied.heal ? "heal" : "deal"} ${applied.amount}, or into a note` : "Drag into a note to keep it"}
@@ -205,7 +224,7 @@ function Line({ line, gmIcon, session }: { line: ChatLine; gmIcon: string; sessi
           <Icon name={mark.icon} size={13} />
         </span>
       ) : null}
-      {line.gm && gmIcon && !story ? <img className="chat-icon" src={gmIcon} alt="" draggable={false} /> : null}
+      {line.recordId && !story ? <SpeakerPortrait line={line} session={session} /> : line.gm && gmIcon && !story ? <img className="chat-icon" src={gmIcon} alt="" draggable={false} /> : null}
       {!system && !story && line.kind !== "emote" ? <b className="chat-from">{line.from}{line.kind === "mood" && line.mood ? <i className="chat-mood"> ({line.mood})</i> : null}</b> : null}
       {line.to ? <span className="chat-tag whisper-tag">to {line.to.join(", ")}</span> : null}
       {line.kind === "ooc" ? <span className="chat-tag">OOC</span> : null}
@@ -216,6 +235,15 @@ function Line({ line, gmIcon, session }: { line: ChatLine; gmIcon: string; sessi
         <>
           <RollCard roll={line.roll} pending={rolling.has(line)} />
           {line.roll.apply && line.roll.card ? <DamageCardRows card={line.roll.apply} cardId={line.roll.card} session={session} /> : null}
+          {line.roll.links?.length ? (
+            // A table result's links: the records they name, opened where this seat may see them.
+            <span className="chat-links">
+              {line.roll.links.map((item, index) => {
+                const found = Object.values(session.records).find((record) => record.name.toLowerCase() === item.name.toLowerCase());
+                return <ChatLinkChip key={index} session={session} link={found ? { kind: found.type === "character" ? "sheet" : "record", record: found.id, label: found.name } : { kind: "record", record: item.recordname, label: item.name }} />;
+              })}
+            </span>
+          ) : null}
         </>
       ) : line.kind === "readaloud" ? (
         <span className="chat-text chat-readaloud">
@@ -224,11 +252,16 @@ function Line({ line, gmIcon, session }: { line: ChatLine; gmIcon: string; sessi
         </span>
       ) : line.kind === "emote" ? (
         <span className="chat-text">
-          <b className="chat-from">{line.from}</b> {line.text}
+          <b className="chat-from">{line.from}</b> <InlineRollText text={line.text} />
         </span>
       ) : (
-        <span className="chat-text">{line.text}</span>
+        <span className="chat-text">
+          <InlineRollText text={line.text} />
+        </span>
       )}
+      {line.link ? <ChatLinkChip link={line.link} session={session} /> : null}
+      {line.share ? <SharedRecord share={line.share} session={session} /> : null}
+      {line.prompt ? <PromptCard line={line} session={session} /> : null}
       {line.vote ? (
         <span className="chat-vote">
           <button type="button" className={myVote === "yes" ? "on" : ""} onClick={() => session.tableCommand({ type: "vote-cast", id: line.vote!.id, choice: "yes" })}>
@@ -306,10 +339,6 @@ function formulaOf(dice: number[]) {
   return [...counts].map(([sides, count]) => `${count}d${sides === FATE_SIDES ? "F" : sides}`).join("+");
 }
 
-function withModifier(formula: string, modifier: number) {
-  if (!modifier) return formula;
-  return `${formula}${modifier > 0 ? "+" : ""}${modifier}`;
-}
 
 // The chat window (FG's, bottom left): the log, a line to type in, the dice
 // tray (click dice to gather a pool, then roll), the modifier box, and the
@@ -496,7 +525,8 @@ function ExternalTower({ session, on, drop, title, towerRef, onToggle }: { sessi
 export function ChatDock({ session }: { session: Session }) {
   const [draft, setDraft] = useState("");
   const [pool, setPool] = useState<number[]>([]);
-  const [modifier, setModifier] = useState(0);
+  // The modifier box is the host's (each seat's own): every roll this seat starts reads it.
+  const modifier = session.modifiers.total;
   const [tower, setTower] = useState(false);
   const [size, setSize] = useState<ChatSize>(chatSize);
   const windows = useWindows();
@@ -531,6 +561,11 @@ export function ChatDock({ session }: { session: Session }) {
     }
   };
   const [helpOpen, setHelpOpen] = useState(false);
+  // A link dropped into the entry (a record, a picture, a page, a table's result), sent with the next line;
+  // the GM's Share posts a record's words with it.
+  const [attached, setAttached] = useState<QuickSlot | null>(null);
+  const [share, setShare] = useState(false);
+  const [linkOver, setLinkOver] = useState(false);
   // A right-click menu over the tray: how many of a die to roll, or the modifier's quick values.
   const [menu, setMenu] = useState<{ x: number; y: number; sides: number | null; custom?: boolean } | null>(null);
   // This seat's own set, on the tray's dice (the GM's too).
@@ -656,8 +691,7 @@ export function ChatDock({ session }: { session: Session }) {
       session,
       openWindow: (kind, title) => windows.open(kind, title),
       closeWindow: (kind) => windows.windows.filter((item) => item.kind === kind).forEach((item) => windows.close(item.key)),
-      modifier,
-      setModifier,
+      addModifier: (value, label) => session.modify({ action: "add", value, label }),
       tower,
       speakAs: speakAs || (session.role === "dm" ? gmName : ""),
       setSpeakAs,
@@ -690,10 +724,9 @@ export function ChatDock({ session }: { session: Session }) {
   };
   const rollDice = (dice: number[], inTower: boolean, from?: { x: number; y: number }) => {
     if (dice.length === 0) return;
-    session.roll(withModifier(formulaOf(dice), modifier), "", "", inTower, "public", speakAs || (session.role === "dm" ? gmName : ""));
+    session.roll(formulaOf(dice), "", "", inTower, "public", speakAs || (session.role === "dm" ? gmName : ""));
     if (inTower) dropInTower(dice, from);
     setPool([]);
-    setModifier(0);
   };
   const rollPool = () => rollDice(pool, tower);
   // The tower apart from the chat (the GM's Settings, for every seat), or in the tray.
@@ -712,10 +745,10 @@ export function ChatDock({ session }: { session: Session }) {
   };
   // Dice kept on a quick slot: a click on it rolls them again.
   const keepOnSlot = (index: number, dice: number[]) => {
-    const formula = withModifier(formulaOf(dice), modifier);
+    // The modifier box stays: a slot's dice read it when they are rolled.
+    const formula = formulaOf(dice);
     session.setQuickSlots(session.quickSlots.map((slot, at) => (at === index ? { kind: "dice", formula, label: formula } : slot)));
     setPool([]);
-    setModifier(0);
   };
   // Thrown on the table from a point: toward the middle when let go without a throw.
   const throwFrom = (view: Window, screenX: number, screenY: number, clientX: number, clientY: number, vx = 0, vy = 0) => {
@@ -930,6 +963,16 @@ export function ChatDock({ session }: { session: Session }) {
       {out ? null : <span className="chat-grip" role="separator" aria-label="Stretch the chat" title="Drag to stretch the chat; double-click for its usual size" onPointerDown={stretch} onDoubleClick={resetSize} />}
       <button
         type="button"
+        className="chat-export"
+        data-action="chat-export"
+        title="Export the chat you have seen: a Markdown file (Shift+click: a web page)"
+        aria-label="Export the chat"
+        onClick={(event) => exportChat(session.chat, event.shiftKey ? "html" : "md", "Chat")}
+      >
+        <Icon name="scroll" size={15} />
+      </button>
+      <button
+        type="button"
         className="chat-popout"
         title={out ? "Back into the main window" : "Out to a window of its own (for another monitor)"}
         aria-label={out ? "Put chat back in the main window" : "Pop out chat"}
@@ -947,17 +990,58 @@ export function ChatDock({ session }: { session: Session }) {
         className="chat-entry"
         onSubmit={(event) => {
           event.preventDefault();
-          if (!draft.trim()) return;
+          if (!draft.trim() && !attached) return;
           // A first word that names a command finishes it, as Tab does.
           const typed = /^\/(\S*)$/.exec(draft.trim());
           if (typed && suggestions.length > 0 && !suggestions.some((command) => command.names.includes(typed[1].toLowerCase()))) {
             setDraft(`/${finish(suggestions[0])} `);
             return;
           }
+          if (attached && !draft.trim().startsWith("/")) {
+            session.sendChat(draft.trim(), { link: attached, ...(share ? { share: true } : {}), ...(speakAs || (session.role === "dm" && gmName) ? { as: speakAs || gmName } : {}) });
+            setAttached(null);
+            setShare(false);
+            setDraft("");
+            return;
+          }
           runLine(draft);
           setDraft("");
         }}
+        onDragOver={(event) => {
+          const types = [...event.dataTransfer.types];
+          if (!hasLink(event) && !types.includes("application/x-kraken-record")) return;
+          event.preventDefault();
+          event.dataTransfer.dropEffect = "copy";
+          setLinkOver(true);
+        }}
+        onDragLeave={() => setLinkOver(false)}
+        onDrop={(event) => {
+          setLinkOver(false);
+          const link = linkFrom(event) ?? (() => {
+            const id = event.dataTransfer.getData("application/x-kraken-record");
+            const record = id ? session.records[id] : undefined;
+            return record ? ({ kind: record.type === "character" ? "sheet" : record.type === "note" ? "note" : "record", record: id, label: record.name } as QuickSlot) : null;
+          })();
+          if (!link) return;
+          event.preventDefault();
+          setAttached(link);
+          setShare(false);
+        }}
+        data-link-over={linkOver ? "true" : undefined}
       >
+        {attached ? (
+          <span className="chat-attached" data-chat-attached={attached.kind}>
+            <ChatLinkChip link={attached} session={session} />
+            {session.role === "dm" && ["record", "sheet", "note"].includes(attached.kind) ? (
+              <button type="button" className={share ? "chat-share-toggle on" : "chat-share-toggle"} aria-pressed={share} aria-label="Share its text" title="Share: post the record's text, as the players know it (FG's Share)" onClick={() => setShare(!share)}>
+                <Icon name="share" size={13} />
+              </button>
+            ) : null}
+            <button type="button" className="chat-attached-clear" aria-label="Take the link off" title="Take the link off" onClick={() => (setAttached(null), setShare(false))}>
+              <Icon name="close" size={11} />
+            </button>
+          </span>
+        ) : null}
         {draft.trim() ? (
           <span
             className="chat-macro-grip"
@@ -1000,6 +1084,19 @@ export function ChatDock({ session }: { session: Session }) {
           <option value="">{me || "Yourself"} (out of character)</option>
         </select>
       ) : null}
+      <select
+        className="chat-roll-mode"
+        aria-label="Roll mode"
+        data-roll-mode={session.modifiers.mode ?? "public"}
+        value={session.modifiers.mode ?? "public"}
+        title="Who sees your rolls (Foundry's roll mode): every roll you make, from the tray, a sheet or the tracker, until you change it"
+        onChange={(event) => session.modify({ action: "mode", mode: event.target.value as "public" | "gm" | "blind" | "self" })}
+      >
+        <option value="public">Public roll</option>
+        <option value="gm">{session.role === "dm" ? "Private GM roll" : "GM and me"}</option>
+        {session.role === "dm" ? null : <option value="blind">Blind (GM only)</option>}
+        <option value="self">Self roll (only me)</option>
+      </select>
       {helpOpen || suggestions.length > 0 ? (
         <div className="chat-commands" role="listbox" aria-label="Chat commands">
           {helpOpen ? (
@@ -1051,32 +1148,14 @@ export function ChatDock({ session }: { session: Session }) {
             {trayDie(sides, traySize)}
           </button>
         ))}
-        <div
-          className={modifier ? "modifier-box set" : "modifier-box"}
-          title="Modifier for the next roll (FG's modifier box): the wheel or the buttons change it, a right-click picks one"
-          onWheel={(event) => setModifier(modifier + (event.deltaY < 0 ? 1 : -1))}
-          onContextMenu={(event) => {
-            event.preventDefault();
-            setMenu({ x: event.clientX, y: event.clientY, sides: null });
-          }}
-        >
-          <button type="button" aria-label="Modifier down" onClick={() => setModifier(modifier - 1)}>
-            −
-          </button>
-          <span className="modifier-value">
-            <input aria-label="Modifier" type="number" value={modifier} onChange={(event) => setModifier(Number(event.target.value) || 0)} />
-            <small>Modifier</small>
-          </span>
-          <button type="button" aria-label="Modifier up" onClick={() => setModifier(modifier + 1)}>
-            +
-          </button>
-        </div>
+        <ModifierBox session={session} onMenu={(x, y) => setMenu({ x, y, sides: null })} />
         {external ? null : (
           <button type="button" ref={towerButton} className={["tower", tower ? "on" : "", ghost?.overTower ? "drop" : ""].filter(Boolean).join(" ")} aria-pressed={tower} title={towerTitle} onClick={() => setTower(!tower)}>
             <Icon name="tower" size={20} />
           </button>
         )}
       </div>
+      <ModifierKeys session={session} />
       {external
         ? createPortal(
             <ExternalTower session={session} on={tower} drop={Boolean(ghost?.overTower)} title={towerTitle} towerRef={towerButton} onToggle={() => setTower(!tower)} />,
@@ -1096,11 +1175,11 @@ export function ChatDock({ session }: { session: Session }) {
           {menu.sides === null ? (
             <>
               {QUICK.map((value) => (
-                <button key={value} type="button" role="menuitem" onClick={() => (setModifier(modifier + value), setMenu(null))}>
+                <button key={value} type="button" role="menuitem" onClick={() => (session.modify({ action: "add", value }), setMenu(null))}>
                   {value > 0 ? `+${value}` : `−${-value}`}
                 </button>
               ))}
-              <button type="button" role="menuitem" onClick={() => (setModifier(0), setMenu(null))}>
+              <button type="button" role="menuitem" onClick={() => (session.modify({ action: "clear" }), setMenu(null))}>
                 Clear
               </button>
             </>

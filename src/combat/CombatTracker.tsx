@@ -242,11 +242,33 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
             {(entry.hp ?? 0) - (entry.wounds ?? 0)}/{entry.hp}
             {entry.temp ? <span className="ct-temp"> (+{entry.temp})</span> : null}
           </span>
-        ) : (
+        ) : entry.health.status ? (
           <span className="ct-status" style={{ borderColor: entry.health.color, color: entry.health.color }}>
             {entry.health.status}
+            {entry.bar !== undefined ? (
+              // The share of its hit points left (the GM's Settings show players a bar).
+              <span className="ct-bar" role="meter" aria-label={`${entry.name}'s health`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(entry.bar * 100)}>
+                <span style={{ width: `${Math.round(entry.bar * 100)}%`, background: entry.health.color }} />
+              </span>
+            ) : null}
           </span>
-        )}
+        ) : null}
+        {entry.delayed ? (
+          <span className="ct-delayed" title="Delaying: out of the order until Act now">
+            Delaying
+          </span>
+        ) : null}
+        {(gm || entry.mine) && session.combat.active === entry.id && !entry.delayed ? (
+          // FG's and Foundry's Delay: this creature waits; the turn passes on.
+          <button type="button" className="ct-delay" data-action="delay" title="Delay: wait, out of the order, and act later with Act now" aria-label={`${entry.name}: delay`} onClick={() => session.ct("delay", { id: entry.id })}>
+            <Icon name="hourglass" size={15} />
+          </button>
+        ) : null}
+        {(gm || entry.mine) && entry.delayed ? (
+          <button type="button" className="ct-act-now play-button" data-action="act-now" title="Act now: take the turn at once, after the one acting; this becomes its initiative" aria-label={`${entry.name}: act now`} onClick={() => session.ct("act-now", { id: entry.id })}>
+            <Icon name="next" size={15} />
+          </button>
+        ) : null}
         {/* The game's row buttons (a dying character's save, Turn undead on the cleric's turn, an NPC's morale), as its manifest lists them. */}
         <TrackerButtons actions={tracker?.rowActions} scope={scope} className="ct-death-save" />
         {gm ? (

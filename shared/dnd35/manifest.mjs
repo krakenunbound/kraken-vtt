@@ -7,6 +7,9 @@
 // critical ranges, spells a day, lists, coins and notes. It has no part of its
 // own. The host's edit whitelist (electron/dnd35.cjs) is built from `edit` below.
 import { MAX_LEVEL, SAVE_NAMES, SAVES, SKILLS, STATS } from "./rules.mjs";
+import { SAVES as PARTY_SAVES, SKILLS as PARTY_SKILLS, STATS as PARTY_STATS } from "./rules.mjs";
+// The party sheet's group rolls: what the game checks, saves and its skills (D6).
+const titleOf = (/** @type {string} */ word) => word[0].toUpperCase() + word.slice(1);
 
 const titled = (/** @type {string} */ word) => word[0].toUpperCase() + word.slice(1);
 // A roll with the strip's DC.
@@ -27,6 +30,8 @@ export default {
   blurb: "Played from your 3.5E books (the Player's Handbook, Dungeon Master's Guide and Monster Manual): 3.5E sheets and character building, base attack and iterative attacks, criticals by threat and confirmation, Fortitude, Reflex and Will, skills by ranks.",
   engine: "shared/dnd35/rules.mjs",
   host: { module: "electron/dnd35.cjs" },
+  // The modifier box's keys beside the chat (shared/rulesets/modifiers.mjs).
+  dice: { modifiers: { presets: ["plus2", "minus2", "crit", "max", "half"] } },
   records: { race: { label: "Races" } },
   sheet: {
     level: "arrange",
@@ -275,7 +280,7 @@ export default {
   wizard: "dnd35.wizard",
   blank: false,
   features: ["spellbooks"],
-  party: { currency: ["PP", "GP", "EP", "SP", "CP"], xp: "xp" },
+  party: { currency: ["PP", "GP", "EP", "SP", "CP"], xp: "xp", groupCheck: { stats: [], rolls: [{ kind: "check", label: "Check", options: PARTY_STATS.map((value) => ({ value, label: titleOf(value) })) }, { kind: "save", label: "Save", options: Object.keys(PARTY_SAVES).map((value) => ({ value, label: titleOf(value) })) }, { kind: "skill", label: "Skill", options: Object.entries(PARTY_SKILLS).map(([value, row]) => ({ value, label: String(row[0]) })) }] } },
   tracker: { saves: { keys: ["fortitude", "reflex", "will"], modLabel: "DC", modAria: "Save DC", button: "Roll save" } },
   settings: [{ component: "dnd35.wizardSetting", gm: true }],
   calendar: "greyhawk",

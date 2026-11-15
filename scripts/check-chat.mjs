@@ -52,7 +52,23 @@ const last = (seat) => seat.lines.at(-1);
   assert(dice.roll("4d10cs>=7").total === 3, "4d10cs>=7 counts successes");
   dice.force([1, 2, 3, 3]);
   assert(dice.roll("4dF").total === 1, "4dF is Fate: -1, 0, +1, +1");
-  for (const bad of ["1d1!", "3d6q", "2d6+"]) {
+  // Foundry's: rr (again and again), xo (once), min, max, cf (failures), ms (margin).
+  const fixed = (formula, values) => {
+    dice.force(values);
+    const total = dice.roll(formula).total;
+    dice.clearForced();
+    return total;
+  };
+  assert(fixed("1d6rr1", [1, 1, 4]) === 4, "1d6rr1 rerolls until it is not a 1");
+  assert(fixed("1d6r1", [1, 1, 4]) === 1, "1d6r1 rerolls once");
+  assert(fixed("2d6xo", [6, 6, 6, 2]) === 20, "2d6xo: each first die explodes once, the extra 6 does not");
+  assert(fixed("4d6min3", [1, 2, 5, 6]) === 17, "4d6min3: 3 + 3 + 5 + 6");
+  assert(fixed("2d6max4", [6, 1]) === 5, "2d6max4: 4 + 1");
+  assert(fixed("4d10cf<3", [1, 2, 7, 9]) === 2, "4d10cf<3 counts two failures");
+  assert(fixed("4d10cs>=7cf<3", [1, 2, 7, 9]) === 0, "successes less failures");
+  assert(fixed("1d20ms>=15", [18]) === 3, "1d20ms>=15: a margin of 3");
+  assert(fixed("4d6dl1", [2, 5, 6, 3]) === 14 && fixed("1d20+5", [10]) === 15, "the old forms still read");
+  for (const bad of ["1d1!", "3d6q", "2d6+", "1d6rr6"]) {
     let threw = false;
     try {
       dice.roll(bad);

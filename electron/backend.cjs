@@ -608,7 +608,22 @@ const calls = {
     if (typeof remembered === "string" && !(saved.options && "gmIcon" in saved.options)) saved.options = { ...(saved.options ?? {}), gmIcon: remembered };
     const dataFolder = fgDataFolder();
     const ruleset = campaigns.read(campaignFile()).find((item) => item.id === campaignId)?.ruleset ?? "";
-    const next = createTableServer({ saved, ruleset, onChange: markDirty, art: createArtLibrary({ base: dataFolder, roots: [...defaultRoots(dataFolder), ...krakenArtRoots()] }), decals: decals(), wallpapers: wallpapers(), gmIcons: gmIcons(), towers: towers(), dicePacks: dicePacks(), tiles: tiles(), sounds: sounds(), books: books(), accounts: accounts(), prefs: prefs(), studioPicture: (sceneId) => studioPicture(sceneId) });
+    // The Session Log's archive: each sitting's chat in the campaign's folder (chat-logs/<session>.json).
+    const logs = campaignId ? path.join(campaigns.folder(campaignFile(), campaignId), "chat-logs") : path.join(USER_DATA, "chat-logs");
+    const archive = {
+      save: (id, lines) => {
+        fs.mkdirSync(logs, { recursive: true });
+        fs.writeFileSync(path.join(logs, `${String(id).replace(/[^\w-]/g, "")}.json`), JSON.stringify(lines));
+      },
+      read: (id) => {
+        try {
+          return JSON.parse(fs.readFileSync(path.join(logs, `${String(id).replace(/[^\w-]/g, "")}.json`), "utf8"));
+        } catch {
+          return null;
+        }
+      },
+    };
+    const next = createTableServer({ saved, archive, ruleset, onChange: markDirty, art: createArtLibrary({ base: dataFolder, roots: [...defaultRoots(dataFolder), ...krakenArtRoots()] }), decals: decals(), wallpapers: wallpapers(), gmIcons: gmIcons(), towers: towers(), dicePacks: dicePacks(), tiles: tiles(), sounds: sounds(), books: books(), accounts: accounts(), prefs: prefs(), studioPicture: (sceneId) => studioPicture(sceneId) });
     try {
       const info = await next.listen({ port: wanted, password });
       table = next;

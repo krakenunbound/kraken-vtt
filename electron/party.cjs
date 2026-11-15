@@ -309,6 +309,56 @@ async function groupCheck(table, kind, attribute, cl, from) {
   return { passed, of: members.length, failed, line };
 }
 
+// The party sheet's group roll, for every game (FG's party sheet rolls): a
+// check, a save or a skill, through each member's own sheet roll (siegeCheck:
+// the game's own rules). mode "roll": the host rolls for them all now; "ask":
+// a card in chat each owner rolls from (their own modifier box counts), the GM
+// may roll for anyone; the card's summary fills in. members: some of them.
+function partyRollLabel(spec) {
+  const what = String(spec.skill || spec.attribute || "").trim();
+  const name = what ? `${what[0].toUpperCase()}${what.slice(1)}` : "";
+  const kind = spec.kind === "save" ? "save" : spec.kind === "skill" ? "skill" : "check";
+  const dc = Number(spec.dc) || 0;
+  return `Group ${kind}: ${name}${dc ? ` (${spec.ladder ? "vs" : "DC"} ${dc})` : ""}`;
+}
+// One member's roll of the party's spec, as their sheet rolls it: { total, success }.
+async function rollForMember(table, member, spec, from) {
+  const kind = ["check", "save", "skill"].includes(spec.kind) ? spec.kind : "check";
+  const dc = Math.round(Number(spec.dc) || 0);
+  // C&C's SiegeCore roll takes the label as its whole name ("[GROUP SAVE] Strength save"); the others put it before their own.
+  const what = String(spec.attribute ?? "");
+  const tag = member.data?.ruleset ? `[GROUP ${kind.toUpperCase()}]` : `[GROUP ${kind.toUpperCase()}] ${what ? `${what[0].toUpperCase()}${what.slice(1)} ` : ""}${kind === "save" ? "save" : "check"}`;
+  const result = await siegeCheck(table, member, { kind, attribute: spec.attribute, skill: kind === "skill" ? spec.skill : undefined, dc, cl: dc, label: tag }, from || member.name);
+  const total = Number(result?.total ?? result?.score ?? result?.d20 ?? 0);
+  return { total: Number.isFinite(total) ? total : 0, success: typeof result?.success === "boolean" ? result.success : null };
+}
+async function partyRoll(table, spec = {}, from = "GM") {
+  const fateGame = require("./fate.cjs").isFateRuleset(table.ruleset?.());
+  if (!String(spec.attribute || spec.skill || "").trim()) throw new Error(fateGame ? "Pick a skill or an approach." : "Pick what they roll: an ability, a save or a skill.");
+  if (spec.kind === "skill" && !String(spec.skill ?? "").trim()) throw new Error("Pick the skill.");
+  const wanted = Array.isArray(spec.members) && spec.members.length ? new Set(spec.members.map(String)) : null;
+  const members = memberRecords(table).filter((member) => !wanted || wanted.has(member.id) || wanted.has(member.name));
+  if (members.length === 0) throw new Error("The party has no members.");
+  const label = partyRollLabel({ ...spec, ladder: fateGame });
+  if (spec.mode === "ask") {
+    const prompt = table.prompt({ kind: spec.kind ?? "check", attribute: spec.attribute ?? "", skill: spec.skill ?? "", dc: Math.round(Number(spec.dc) || 0), label, rows: members.map((member) => ({ id: member.id, name: member.name, owner: member.owner ?? "" })) }, from);
+    return { asked: members.map((member) => member.name), prompt: prompt.id, label };
+  }
+  const failed = [];
+  const rolls = [];
+  let passed = 0;
+  for (const member of members) {
+    const result = await rollForMember(table, member, spec, member.name);
+    rolls.push({ name: member.name, ...result });
+    if (result.success) passed += 1;
+    else if (result.success === false) failed.push(member.name);
+  }
+  const judged = rolls.some((item) => item.success !== null);
+  const line = judged ? `${label}: ${passed} of ${members.length} succeed.${failed.length > 0 ? ` Failed: ${failed.join(", ")}.` : ""}` : `${label}: ${rolls.map((item) => `${item.name} ${item.total}`).join(", ")}.`;
+  table.say(line, from);
+  return { passed, of: members.length, failed, rolls, line };
+}
+
 // FG's party formation (PartyFormationManager, CombatFormationManager): a 7 by
 // 7 grid of slots, x and y from -3 to 3 (y up is the front when the party
 // faces up), and a facing (0 up, 1 right, 2 down, 3 left). The watches are
@@ -475,4 +525,4 @@ function addToParcel(table, { coins = {}, items = [], from = "" } = {}) {
   return { coins: nextCoins, items: items.length };
 }
 
-module.exports = { addToParcel, giveTo, PARTY_ID, partyRecord, partyView, awardXP, awardEntries, distribute, groupCheck, changeOrder, fillFormation, rotate, RANGE };
+module.exports = { addToParcel, giveTo, PARTY_ID, partyRecord, partyView, awardXP, awardEntries, distribute, groupCheck, partyRoll, rollForMember, partyRollLabel, changeOrder, fillFormation, rotate, RANGE };
