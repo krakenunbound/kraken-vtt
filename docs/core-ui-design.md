@@ -1230,6 +1230,14 @@ Run on the stage-4 build (`a2a79f4`) and this one:
 - What the runs do not reach: the action dots are the GM's (one is pressed as a GM control), armor needs carried armor and the stash needs coin (greyed in both runs), and Silas's later rolls are refused once his stress runs out (the same on both builds).
 - **The games already on the core** (the header boxes, labelled fields and notes changed for all of them): `verify-d20-sheet-ui` for Ironsworn (247 presses) and D&D 5E (201) on the same two builds. Every press and every signature is identical. Ironsworn's shots are identical except the two Moves shots, which differ by the same 38 pixels at the long lists' scrollbar ends as in 7.15, and one portrait's box. D&D 5E's shots differ only inside the portrait's box (at most 9 of 255) and by 2 to 4 pixels at a panel's edge (at most 3 of 255).
 
+**Tests on the final build, with main merged in** (main had the targeting, actions and effects work):
+- `npx tsc --noEmit -p .`, `npm run build`, `npm run coverage` (with `check-manifests`)
+- host checks `check-fate`, `-forged`, `-cairn`, `-bfrpg`, `-dnd5e`, `-dnd35`, `-adnd2e`, `-mgt2`, `-astra`, `-ironsworn`, `-combat`, `-party`, `-character`, `-wizard`, `-setup`
+- UI tests `verify-fate-ui`, `-forged-ui`, `-ironsworn-ui`, `-core-parts-ui` (34), `-charselect-ui`, `-bfrpg-sheet-ui`, and `verify-d20-sheet-ui` for fate (152 presses: main's sheet additions bring four more), fae (67) and forged (370)
+- end to end: all 16 games passed first time (17 steps each, Forged 18)
+
+All pass. **Ruleset checks** (the 3.1 grep): src 0; electron 128 after the merge (main brought three more).
+
 **Worldbuilding was not moved.** Decision 7 sends it to the generic core sheet, but today a Worldbuilding character is a C&C record. Create (`createBlank`) stamps no `data.ruleset`, so `sheetFor` gives it `CCSheet` and the C&C host takes its edits; the Worldbuilding manifest's `sheet` Ref is never consulted. The inherit sheet (4.4: attribute categories the user makes, inventory, abilities, notes) is a new sheet with new data, so three things need the user's answer first: what Create stamps in a Worldbuilding campaign, which host takes its edits, and what happens to the characters already made (left on `CCSheet`, or moved).
 
 **Not started in this stage:**
