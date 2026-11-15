@@ -129,7 +129,7 @@ const TOOLS = [
         type: string("Record type, e.g. character, npc, item, note"),
         name: string("Name"),
         owner: string("Owning player's name; empty for the GM"),
-        visibility: { type: "string", enum: ["gm", "owner", "all"] },
+        visibility: { description: "gm (the GM alone), owner, all (every player), or a list of players' names (shared with them alone)", anyOf: [{ type: "string", enum: ["gm", "owner", "all"] }, { type: "array", items: { type: "string" } }] },
         data: { type: "object", description: "The record's fields (any JSON)" },
         id: string("Optional id; generated if empty"),
       },
@@ -184,7 +184,7 @@ const TOOLS = [
         id: string("Record id"),
         name: string("New name"),
         owner: string("New owner"),
-        visibility: { type: "string", enum: ["gm", "owner", "all"] },
+        visibility: { description: "gm (the GM alone), owner, all (every player), or a list of players' names (shared with them alone, as the eye's menu or a row dropped on a player's portrait)", anyOf: [{ type: "string", enum: ["gm", "owner", "all"] }, { type: "array", items: { type: "string" } }] },
         data: { type: "object", description: "Fields to change" },
         replace: { type: "boolean", description: "Replace data entirely" },
       },
@@ -647,7 +647,7 @@ const TOOLS = [
   {
     name: "kraken_books",
     description:
-      "The GM's books, as FG's Library: the Fantasy Grounds modules on this computer that fit the campaign's ruleset (rulebooks, adventures), read inside Kraken. action list (every module that fits: id, title, category, hasBook, adventure, active, shared, forPlayers); activate / deactivate (book: active for this campaign, as FG's Activation; a player's book starts shared, the GM's books (monsters, the GM's guide, adventures) do not); contents (book: its chapters, sections and pages, and its pictures and maps); page (book, page: a page's text as HTML and its pictures); share / unshare (book: the players may read it, or not; never an adventure, whose pictures and maps the GM shows one at a time with show); show (book, file, name: show the players a picture or map from it; it opens as a tab on their screens); hide (id, or \"all\"); shared (what the players have now); sound (book, page, soundAction bind: a sound for one of the page's sound links, key = the link's data-sound-key; unbind (key); add: a sound in the story after a paragraph, block = its index (-1 at the top); remove (id); sound = a sound or folder id, as kraken_sound list); sounds (every sound kept in the books).",
+      "The GM's books, as FG's Library: the Fantasy Grounds modules on this computer that fit the campaign's ruleset (rulebooks, adventures), read inside Kraken. action list (every module that fits: id, title, category, hasBook, adventure, active, shared, forPlayers); activate / deactivate (book: active for this campaign, as FG's Activation; a player's book starts shared, the GM's books (monsters, the GM's guide, adventures) do not); contents (book: its chapters, sections and pages, and its pictures and maps); page (book, page: a page's text as HTML and its pictures); share / unshare (book: the players may read it, or not; never an adventure, whose pictures and maps the GM shows one at a time with show); show (book, file, name, to: show the players (or only those named in to) a picture or map from it; it opens as a tab on their screens); hide (id, or \"all\"); shared (what the players have now); sound (book, page, soundAction bind: a sound for one of the page's sound links, key = the link's data-sound-key; unbind (key); add: a sound in the story after a paragraph, block = its index (-1 at the top); remove (id); sound = a sound or folder id, as kraken_sound list); sounds (every sound kept in the books).",
     inputSchema: object(
       {
         action: { type: "string", enum: ["list", "activate", "deactivate", "contents", "page", "share", "unshare", "show", "hide", "shared", "sound", "sounds"] },
@@ -660,6 +660,7 @@ const TOOLS = [
         page: string("A page's id (from contents)"),
         file: string("A picture's file in the book (from contents or a page)"),
         name: string("What the players see the picture called"),
+        to: { type: "array", items: { type: "string" }, description: "show: only these players (their names), as the picture's Show to menu or the picture dropped on a player's portrait; none, everyone" },
         id: string("A shown picture's id (hide), or all"),
         search: string("Part of a title or category (list)"),
       },
@@ -676,7 +677,7 @@ const TOOLS = [
       if (action === "contents") return out(await table.bookContents(args.book));
       if (action === "page") return out(await table.bookPage(args.book, args.page));
       if (action === "share" || action === "unshare") return out(table.shareBook(args.book, action === "share"));
-      if (action === "show") return out(table.showImage(args.book, args.file, args.name));
+      if (action === "show") return out(table.showImage(args.book, args.file, args.name, args.to));
       if (action === "sound") return out(table.setBookSound({ ...args, action: args.soundAction, id: args.id }));
       if (action === "sounds") return out(table.bookSounds());
       if (action === "hide") return out(table.hideImage(args.id ?? "all"));
@@ -1882,6 +1883,8 @@ const TOOLS = [
   },
   // Map Studio's editor for agents: every action of the map maker (electron/studio/agentTools.cjs).
   require("../studio/agentTools.cjs").tool,
+  // The campaign's own content: copies, story, tables, identification, encounters, parcels, quests (contentTools.cjs).
+  ...require("./contentTools.cjs").TOOLS,
   {
     name: "kraken_updates",
     description:

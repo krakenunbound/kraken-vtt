@@ -4,7 +4,9 @@ const path = require("path");
 const crypto = require("crypto");
 const os = require("os");
 const { WebSocketServer } = require("ws");
-const { createRecordStore, canSee } = require("./records.cjs");
+const { createRecordStore, canSee, viewFor } = require("./records.cjs");
+// The players' view of the party sheet and the records (records.cjs viewFor).
+const PLAYER_VIEW = { role: "player", name: "" };
 const { withArt } = require("./characterArt.cjs");
 const { soundFor, cleanTriggers } = require("./soundTriggers.cjs");
 const { defaultTriggers, TRIGGERS_VERSION } = require("./soundCatalog.cjs");
@@ -46,6 +48,8 @@ function playerOp(msg, records) {
   const before = records.get(String(msg.id ?? ""));
   if (!before || before.type === "note") return;
   if (msg.replace === true) throw new Error("Change your character on its sheet.");
+  // Identifying an item is the GM's (FG's Identified toggle), wherever the item is.
+  if (msg.patch?.data !== undefined && leafPaths(msg.patch.data).some((path) => /(^|\.)(isidentified|nonid_name|nonid_notes)$/.test(path))) throw new Error("Only the GM identifies an item.");
   if (before.type !== "character") return;
   const data = msg.patch?.data;
   const paths = data === undefined ? [] : leafPaths(data);
@@ -462,7 +466,9 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
   }
   // A record path's book (npc.goblin@C&C Monsters & Treasure).
   const bookOfPath = (fgPath) => String(fgPath ?? "").split("@").slice(1).join("@");
-  const shelfView = () => ({ active: [...shelf.active], shared: [...shelf.shared].filter((id) => shelf.active.has(id)), images: shelf.images });
+  // A picture shown to some of the players (to: their names) reaches only them.
+  const seesImage = (client, item) => !client || client.role === "dm" || !Array.isArray(item.to) || item.to.some((name) => sameName(name, client.name));
+  const shelfView = (client) => ({ active: [...shelf.active], shared: [...shelf.shared].filter((id) => shelf.active.has(id)), images: shelf.images.filter((item) => seesImage(client, item)) });
   const fits = (info) => Boolean(info) && fitsRuleset(info, ruleset);
   // The GM reads the campaign's active books; a player, those the GM opened to them.
   const canRead = (client, book) => (client.role === "dm" ? fits(books?.info(book)) && shelf.active.has(books?.info(book)?.id ?? book) : shelf.active.has(book) && shelf.shared.has(book));
@@ -474,7 +480,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       .map((item) => ({ ...item, active: shelf.active.has(item.id), shared: shelf.active.has(item.id) && shelf.shared.has(item.id) }));
   const canSeePicture = (client, book, file) => {
     // A picture named from another module ("<file>@<module>") needs that module shared too.
-    if (shelf.images.some((item) => item.book === book && item.file === file)) return true;
+    if (shelf.images.some((item) => item.book === book && item.file === file && seesImage(client, item))) return true;
     const other = String(file).split("@")[1]?.trim();
     if (other && other !== book && client.role !== "dm" && !canRead(client, other)) return false;
     return canRead(client, book);
@@ -701,9 +707,11 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     partyPending = true;
     setTimeout(() => {
       partyPending = false;
-      party
-        .partyView(agentHandle)
-        .then((view) => broadcast({ type: "party", party: view }))
+      // The GM's view, and the players' (an unidentified item by its unidentified name).
+      Promise.all([party.partyView(agentHandle), party.partyView(agentHandle, PLAYER_VIEW)])
+        .then(([gmView, playerView]) => {
+          for (const [ws, client] of clients) send(ws, { type: "party", party: client.role === "dm" ? gmView : playerView });
+        })
         .catch((error) => console.error("party view", error));
     }, 30);
   }
@@ -818,7 +826,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
   }
 
   function shelfChanged() {
-    broadcast({ type: "books", ...shelfView() });
+    for (const [ws, client] of clients) send(ws, { type: "books", ...shelfView(client) });
     onChange("table");
   }
   function bookFor(book) {
@@ -895,13 +903,18 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     shelfChanged();
     return shelfView();
   }
-  function showImage(book, file, name) {
+  // to: the players it is shown to (FG's share with one); none, everyone. Shown
+  // again to more players, it is theirs too; shown to everyone, it is everyone's.
+  function showImage(book, file, name, to) {
     if (!books?.picture(book, file)) throw new Error("There is no such picture in that book.");
+    const names = Array.isArray(to) ? [...new Set(to.map((item) => text(item, "").slice(0, 24)).filter(Boolean))].slice(0, 32) : null;
     const existing = shelf.images.find((item) => item.book === book && item.file === file);
     const shown = existing ?? { id: crypto.randomBytes(6).toString("hex"), book, file: String(file), name: text(name, "Picture").slice(0, 120), at: Date.now() };
+    if (!names || !names.length) delete shown.to;
+    else if (!existing || Array.isArray(existing.to)) shown.to = [...new Set([...(existing?.to ?? []), ...names])];
     if (!existing) shelf.images = [...shelf.images, shown].slice(-40);
     shelfChanged();
-    broadcast({ type: "image-shown", id: shown.id });
+    for (const [ws, client] of clients) if (seesImage(client, shown)) send(ws, { type: "image-shown", id: shown.id });
     return shown;
   }
   function hideImage(id) {
@@ -932,7 +945,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     for (const [ws, client] of clients) {
       const seat = seatOf(client);
       const sees = kind === "upsert" && canSee(record, seat);
-      if (sees) send(ws, { type: "record", record });
+      if (sees) send(ws, { type: "record", record: viewFor(record, seat) });
       else if ((before && canSee(before, seat)) || kind === "delete") send(ws, { type: "record-gone", id: record.id });
     }
     // A token's health dot follows its record.
@@ -1106,7 +1119,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         res.end(found.bytes);
       };
       try {
-        if (url.pathname === "/book/list") return json({ books: shelfFor(client), ruleset, ...shelfView() });
+        if (url.pathname === "/book/list") return json({ books: shelfFor(client), ruleset, ...shelfView(client) });
         // A book's cover, for Modules (the GM chooses what to make active); its content needs it active.
         if (url.pathname === "/book/cover") return canRead(client, book) || (client.role === "dm" && fits(books?.info(book))) ? picture(books.cover(book)) : nothing();
         if (url.pathname === "/book/picture") return canSeePicture(client, book, url.searchParams.get("file") || "") ? picture(books.picture(book, url.searchParams.get("file") || "")) : nothing();
@@ -1555,18 +1568,18 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
           chat: chatFor(client),
           options,
           soundscape,
-          books: shelfView(),
+          books: shelfView(client),
           quickSlots: slotsFor(client),
           prefs: prefs.get(prefsKey(client)),
           ...(client.role === "dm" ? { bookSounds: Object.fromEntries(bookSounds), sceneSound: sceneSoundView() } : {}),
-          records: records.list({ seat: seatOf(client) }),
+          records: records.list({ seat: seatOf(client) }).map((record) => viewFor(record, seatOf(client))),
           scene: client.role === "player" ? sceneFor(client) : null,
           roster: rosterView(),
         });
         broadcast({ type: "players", players: playerList() }, ws);
         if (client.role === "player") broadcast({ type: "roster", roster: rosterView() }, ws);
         party
-          .partyView(agentHandle)
+          .partyView(agentHandle, client.role === "dm" ? null : PLAYER_VIEW)
           .then((view) => send(ws, { type: "party", party: view }))
           .catch(() => undefined);
         return;
@@ -1595,7 +1608,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         try {
           if (msg.type === "book-activate") activateBook(msg.book, msg.active !== false).catch((error) => send(ws, { type: "error", reason: error instanceof Error ? error.message : "Could not do that." }));
           else if (msg.type === "book-share") shareBook(msg.book, msg.shared !== false);
-          else if (msg.type === "image-share") showImage(msg.book, msg.file, msg.name);
+          else if (msg.type === "image-share") showImage(msg.book, msg.file, msg.name, msg.to);
           else hideImage(msg.id);
         } catch (error) {
           send(ws, { type: "error", reason: error.message });
@@ -2152,6 +2165,18 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         return;
       }
 
+      // The campaign's content (electron/content.cjs): copies, story, random tables, identifying
+      // items, encounters, parcels, quests. The GM's, but for a table roll; answered as an op.
+      if (["record-copy", "story", "table-roll", "identify", "encounter", "parcel", "quest"].includes(msg.type)) {
+        const seat = seatOf(client);
+        const reply = (ok, result, error) => send(ws, { type: "op-result", req: msg.req ?? null, ok, id: result?.id ?? "", ...(ok ? { result } : { error }) });
+        require("./content.cjs")
+          .message(agentHandle, msg, { seat, from: client.role === "dm" ? "GM" : client.name, readBook: agentHandle.readBookRecord })
+          .then((result) => reply(true, result))
+          .catch((error) => reply(false, null, error instanceof Error ? error.message : "Could not do that."));
+        return;
+      }
+
       // Record changes from a client: { op: create | update | delete, ... }.
       // The answer carries req back so the client can match it.
       if (msg.type === "op") {
@@ -2618,6 +2643,13 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         };
       }
       return bookTablesCache.tables;
+    },
+    // A record an active book's page links to (Copy to campaign), read from the book.
+    async readBookRecord(book, bookPath) {
+      requireActiveBook(String(book));
+      const file = books?.file?.(String(book));
+      if (file) await prepareModule(file);
+      return books?.record(String(book), String(bookPath)) ?? null;
     },
     setOptions,
     roll: (formula, label, from = "Agent", secret = false, extra = null) => rollDice(formula, label, from, "agent", undefined, secret, extra),
