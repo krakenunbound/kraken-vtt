@@ -630,6 +630,10 @@ select {
 /* The ruler (Ruler.tsx): over the fog, so a ruler into the dark still shows; each leg's length small, the whole larger. */
 .overlay.measure.ruler { z-index: 6; }
 .measure-label.ruler-leg { color: #fff; border: 1px solid; opacity: 0.9; }
+/* A token dragged against its speed: within it, a dash, past both (a warning, never a stop). */
+.measure-label[data-speed="walk"] { color: #7dff7a; }
+.measure-label[data-speed="dash"] { color: #ffd36b; }
+.measure-label[data-speed="far"] { color: #ff6b6b; }
 .measure-label.ruler-total { border: 2px solid; }
 .measure-label.ruler-total small { display: block; font-size: 0.7em; font-weight: 600; color: #ddd; text-align: center; }
 .overlay.doors { z-index: 2; }

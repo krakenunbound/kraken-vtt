@@ -64,6 +64,15 @@ export function terrainCostAt(areas: TerrainArea[] | undefined) {
   };
 }
 
+// A drag against the creature's speed (its sheet's speed, "30 ft"): within
+// it, within a dash (double), or past both. A warning colour, never a stop.
+export function speedBand(feet: number, speed: unknown): "walk" | "dash" | "far" | undefined {
+  const match = /(\d+)/.exec(String(speed ?? ""));
+  const walk = match ? Number(match[1]) : 0;
+  if (!(walk > 0)) return undefined;
+  return feet <= walk ? "walk" : feet <= walk * 2 ? "dash" : "far";
+}
+
 // The ruler's points as measured: every one on the centre of its square.
 export function rulerPoints(scene: GridScene, start: Point, waypoints: Point[], at: Point): number[] {
   return [start, ...waypoints, at].flatMap((point) => {

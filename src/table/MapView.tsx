@@ -6,7 +6,7 @@ import { ReadAloudBubble, useMapShown } from "../books/ReadAloudBubble";
 import { MARKER_SETS, markerShapes } from "../../shared/map/deathMarkers.mjs";
 import { backgroundRect, colorWithAlpha, gridStops, sceneFrame, type BackgroundFit, type SceneFrame } from "../foundry/geometry";
 import { type SceneLight, type SceneMarker, type SceneRegion, type SceneWall } from "../foundry/sceneObjects";
-import { diagonalRule, gridDistance, gridKind, gridOrigin, hexCorners, hexOf, LIGHT_PRESETS, snapCenter, withGrid } from "../../shared/map/geometry.mjs";
+import { diagonalRule, gridDistance, gridKind, pathDistance, gridOrigin, hexCorners, hexOf, LIGHT_PRESETS, snapCenter, withGrid } from "../../shared/map/geometry.mjs";
 import type { DecalItem, EditWall, MapDoor, MapTile, MapToken, Ping, PictureKind, SceneLightRecord, TableMap, TableRecord, WallKind } from "../session/useSession";
 import { useBookWindows } from "../books/Books";
 import { MapEditor, kindColor, placePicture, type EditTab, type EditTool, type LabelStyle, type PaintStyle } from "./MapEditor";
@@ -14,7 +14,7 @@ import { Lighting } from "./Lighting";
 import { fxMaskImage, fxMaskStyle } from "./fxMask";
 import { SceneGraphics, SceneLegend, type OverlayToken } from "./SceneOverlay";
 import { SceneSettings, type SceneSettingsPatch } from "./SceneSettings";
-import { RulerPath, SharedRulers, rulerPoints, useRulerBroadcast, useRulerKeys } from "./Ruler";
+import { RulerPath, SharedRulers, rulerPoints, speedBand, terrainCostAt, useRulerBroadcast, useRulerKeys } from "./Ruler";
 import { TokenBadges } from "./TokenBadges";
 import { useExplored } from "./explored";
 import { TokenMenuExtras } from "./TokenMenuExtras";
@@ -1945,8 +1945,8 @@ function MapViewInner({
             <svg className="overlay measure" width={frame.worldWidth} height={frame.worldHeight} viewBox={`0 0 ${frame.worldWidth} ${frame.worldHeight}`}>
               <line x1={drag.start.x} y1={drag.start.y} x2={ghost.x} y2={ghost.y} stroke="#ffd36b" strokeWidth={Math.max(3 / camera.scale, size * 0.05)} strokeLinecap="round" />
             </svg>
-            <span className="measure-label" style={{ left: ghost.x, top: ghost.y - (drag.squares * size) / 2, fontSize: 15 / camera.scale }}>
-              {distanceLabel(drag.start, ghost)}
+            <span className="measure-label" data-speed={speedBand(pathDistance(scene, [drag.start.x, drag.start.y, ghost.x, ghost.y], diagonalRule(diagonal), terrainCostAt(map.terrain)).total, (records.find((record) => record.id === dragging.recordId)?.data as { speed?: unknown } | undefined)?.speed)} style={{ left: ghost.x, top: ghost.y - (drag.squares * size) / 2, fontSize: 15 / camera.scale }}>
+              {pathDistance(scene, [drag.start.x, drag.start.y, ghost.x, ghost.y], diagonalRule(diagonal), terrainCostAt(map.terrain)).total} {units}
             </span>
           </>
         ) : null}
