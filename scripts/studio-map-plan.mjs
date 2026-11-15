@@ -5,7 +5,8 @@
 // wallRuns(areas, doors, { zones, open }):
 //   areas: [{ zone, x, y, w, h, group }] in squares (halves allowed). Cells of the
 //     same group are one space (no wall between them); group defaults to the zone.
-//   zones: { name: { wall: "wall art" | null } }, the wall art drawn on that zone's edges.
+//   zones: { name: { wall: "wall art" | null, outer } }, the wall art drawn on that zone's
+//     edges (outer, if given, on its edges to the outside: a building's outer walls).
 //   doors: [{ from, to, kind }]: wall lines stop at a door's gap (a secret door's
 //     line carries on, so its wall art crosses it).
 //   open(edge): true for an edge to the outside (no floor, or a zone with no wall
@@ -41,7 +42,8 @@ export function wallRuns(areas, doors, { zones, open = () => false } = {}) {
       if (other && other.group === cell.group) continue;
       if ((!other || !zones[other.zone]?.wall) && open({ a: a.map((v) => v / S), b: b.map((v) => v / S), zone: cell.zone })) continue;
       drawn.add(k).add(`${b}|${a}`);
-      edges.push({ a, b, art });
+      const outside = !other || !zones[other.zone]?.wall;
+      edges.push({ a, b, art: (outside && zones[cell.zone].outer) || art });
     }
   }
   return chains(edges);
