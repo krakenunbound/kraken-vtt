@@ -1,6 +1,7 @@
 const path = require("path");
 const { pathToFileURL } = require("url");
 const { siege, siegeLibrary, siegeCheck, ATTRIBUTES } = require("./siege.cjs");
+const { itemName, unidentified, viewFor } = require("./records.cjs");
 
 // The party sheet (FG's partysheet), kept by the host as one record anyone at
 // the table may read and only the GM may change:
@@ -67,10 +68,11 @@ function summary(record) {
 }
 
 // What everyone at the table is shown of the party.
-async function partyView(table) {
+// seat: a player's (unidentified items by their unidentified names), or the GM's.
+async function partyView(table, seat = null) {
   const { partyInventory } = await partyRules();
-  const party = partyRecord(table);
-  const members = memberRecords(table).map(summary);
+  const party = viewFor(partyRecord(table), seat);
+  const members = memberRecords(table).map((record) => summary(viewFor(record, seat)));
   return {
     members: members.map(({ items, ...member }) => member),
     inventory: partyInventory(members),
@@ -142,6 +144,88 @@ async function awardEntries(table, kind, entryId, from) {
   return xp;
 }
 
+// One item into one character's gear, as the game keeps gear (the sheet worked
+// out again): the party's distribution, and a parcel dropped on a sheet.
+async function giveItem(table, member, item, each, engine, game) {
+  const source = item.item && typeof item.item === "object" ? { ...item.item, name: item.name } : { name: item.name };
+  // The rules load first, then the sheet is read: nothing changed meanwhile is written over.
+  const current = table.records.get(member.id).data;
+  const astra = current?.ruleset === "astra" ? await require("./astra.cjs").rulesAstra() : current?.ruleset === "mgt2" ? await require("./mgt2.cjs").rulesMgt2() : current?.ruleset === "cairn" ? await require("./cairn.cjs").rulesCairn() : current?.ruleset === "forged" ? await require("./forged.cjs").rulesForged() : null;
+  const five = !astra && current?.ruleset === "bfrpg" ? await require("./bfrpg.cjs").rulesBf() : !astra && require("./dnd5e.cjs").is5e({ data: current }) ? await require("./dnd5e.cjs").rules5e() :!astra && require("./dnd35.cjs").is35({ data: current }) ? await require("./dnd35.cjs").rules35() : !astra && require("./adnd2e.cjs").is2e({ data: current }) ? await require("./adnd2e.cjs").rules2e() : null;
+  const data = structuredClone(table.records.get(member.id).data);
+  if (current?.ruleset === "fate") {
+    // Fate has no gear lists: what the party finds is written into the character's extras (an aspect or a stunt to be, as the GM and player agree).
+    const note = `${itemName(source)}${each > 1 ? ` (${each})` : ""}`;
+    data.extras = `${String(data.extras ?? "").trim()}${String(data.extras ?? "").trim() ? "\n" : ""}${note}`.slice(0, 8000);
+    const fateRules = await require("./fate.cjs").rulesFate();
+    table.records.update(member.id, { data: fateRules.derive(data) }, table.seat, { replace: true });
+    return true;
+  }
+  if (current?.ruleset === "ironsworn") {
+    // Ironsworn: something carried (an asset is bought with experience, not handed out).
+    const rules = await require("./ironsworn.cjs").rulesIron();
+    const list = (data.inventorylist = data.inventorylist ?? {});
+    list[engine.nextId(list)] = { name: item.name, count: each, carried: 1, ...(unidentified(source) ? { isidentified: 0, nonid_name: source.nonid_name ?? "", nonid_notes: source.nonid_notes ?? "" } : {}) };
+    table.records.update(member.id, { data: rules.derive(data) }, table.seat, { replace: true });
+    return true;
+  }
+  if (astra) {
+    // An Apeira Astra character, a Traveller or a Cairn character: the item into the gear, the sheet worked out again.
+    const list = (data.inventorylist = data.inventorylist ?? {});
+    list[engine.nextId(list)] = { ...source, count: each, carried: 1 };
+    table.records.update(member.id, { data: astra.derive(data) }, table.seat, { replace: true });
+    return true;
+  }
+  if (five) {
+    // A 5E character: the item into the pack (carried), the sheet worked out again.
+    const list = (data.inventorylist = data.inventorylist ?? {});
+    list[engine.nextId(list)] = { ...source, count: each, carried: 1 };
+    table.records.update(member.id, { data: five.derive(data) }, table.seat, { replace: true });
+    return true;
+  }
+  const row = engine.addItem(data, source, game);
+  row.count = (Number(row.count) || 1) + (each - 1);
+  table.records.update(member.id, { data: engine.derive(data, game) }, table.seat, { replace: true });
+  return true;
+}
+
+// Coins into one character's purse (Ironsworn's Supply onto its meter).
+async function giveCoin(table, member, coin, each, engine) {
+  // Ironsworn has no money: a parcel's Supply is the shared supply meter (at most 5).
+  if (table.records.get(member.id).data?.ruleset === "ironsworn" && coin.toLowerCase() === "supply") {
+    const rules = await require("./ironsworn.cjs").rulesIron();
+    const data = rules.adjust(table.records.get(member.id).data, "supply", each);
+    table.records.update(member.id, { data: rules.derive(data) }, table.seat, { replace: true });
+    return;
+  }
+  const current = table.records.get(member.id).data.coins ?? {};
+  // Megacredits land as credits (Traveller's sheet keeps Cr): 1 MCr = 1,000,000 Cr.
+  const [name, factor] = coin.toLowerCase() === "mcr" ? ["Cr", 1e6] : [coin, 1];
+  const found = rows(current).find(([, row]) => String(row.name).toLowerCase() === name.toLowerCase());
+  const key = found ? found[0] : engine.nextId(current);
+  table.records.update(member.id, { data: { coins: { [key]: { name: found ? found[1].name : name, amount: (Number(found?.[1].amount) || 0) + each * factor } } } }, table.seat);
+}
+
+// A treasure parcel dropped on one character's sheet (FG's): its items into
+// that character's gear, its coins into the purse; chat says what went.
+async function giveTo(table, member, { coins = {}, items = [], from: parcelName = "" } = {}, from = "GM") {
+  const { engine } = await siege();
+  const game = siegeLibrary(table.records).game;
+  const given = [];
+  for (const item of items.slice(0, 100)) {
+    const each = Math.max(1, Number(item.count) || 1);
+    await giveItem(table, member, { name: item.name, item: item.item ?? null }, each, engine, game);
+    given.push(`${itemName(item.item && typeof item.item === "object" ? { ...item.item, name: item.name } : item)}${each > 1 ? ` (${each})` : ""}`);
+  }
+  for (const [coin, amount] of Object.entries(coins)) {
+    if (!(Number(amount) > 0)) continue;
+    await giveCoin(table, member, coin, Number(amount), engine);
+    given.push(`${amount} ${coin}`);
+  }
+  table.say(`[PARCEL] ${parcelName || "Treasure"} -> ${member.name}: ${given.join(", ") || "nothing"}.`, from);
+  return { character: member.name, given };
+}
+
 // Hands out the parcel (PartyLootManager.distribute): assigned items to the
 // people named, then each coin split evenly with the remainder left behind.
 async function distribute(table, from) {
@@ -159,7 +243,7 @@ async function distribute(table, from) {
     const { names, each, error } = assignedShares(item.count, item.assign);
     if (names.length === 0) continue;
     if (error) {
-      table.say(`[WARNING] Too many people for ${item.name} (${item.assign}).`, from);
+      table.say(`[WARNING] Too many people for ${itemName(item.item ?? item)} (${item.assign}).`, from);
       continue;
     }
     const failed = [];
@@ -169,53 +253,11 @@ async function distribute(table, from) {
         failed.push(name);
         continue;
       }
-      const source = item.item && typeof item.item === "object" ? { ...item.item, name: item.name } : { name: item.name };
-      // The rules load first, then the sheet is read: nothing changed meanwhile is written over.
-      const current = table.records.get(member.id).data;
-      const astra = current?.ruleset === "astra" ? await require("./astra.cjs").rulesAstra() : current?.ruleset === "mgt2" ? await require("./mgt2.cjs").rulesMgt2() : current?.ruleset === "cairn" ? await require("./cairn.cjs").rulesCairn() : current?.ruleset === "forged" ? await require("./forged.cjs").rulesForged() : null;
-      const five = !astra && current?.ruleset === "bfrpg" ? await require("./bfrpg.cjs").rulesBf() : !astra && require("./dnd5e.cjs").is5e({ data: current }) ? await require("./dnd5e.cjs").rules5e() :!astra && require("./dnd35.cjs").is35({ data: current }) ? await require("./dnd35.cjs").rules35() : !astra && require("./adnd2e.cjs").is2e({ data: current }) ? await require("./adnd2e.cjs").rules2e() : null;
-      const data = structuredClone(table.records.get(member.id).data);
-      if (current?.ruleset === "fate") {
-        // Fate has no gear lists: what the party finds is written into the character's extras (an aspect or a stunt to be, as the GM and player agree).
-        const note = `${item.name}${each > 1 ? ` (${each})` : ""}`;
-        data.extras = `${String(data.extras ?? "").trim()}${String(data.extras ?? "").trim() ? "\n" : ""}${note}`.slice(0, 8000);
-        const fateRules = await require("./fate.cjs").rulesFate();
-        table.records.update(member.id, { data: fateRules.derive(data) }, table.seat, { replace: true });
-        given.push(`${item.name} (${each}) -> ${member.name}`);
-        continue;
-      }
-      if (current?.ruleset === "ironsworn") {
-        // Ironsworn: something carried (an asset is bought with experience, not handed out).
-        const rules = await require("./ironsworn.cjs").rulesIron();
-        const list = (data.inventorylist = data.inventorylist ?? {});
-        list[engine.nextId(list)] = { name: item.name, count: each, carried: 1 };
-        table.records.update(member.id, { data: rules.derive(data) }, table.seat, { replace: true });
-        given.push(`${item.name} (${each}) -> ${member.name}`);
-        continue;
-      }
-      if (astra) {
-        // An Apeira Astra character, a Traveller or a Cairn character: the item into the gear, the sheet worked out again.
-        const list = (data.inventorylist = data.inventorylist ?? {});
-        list[engine.nextId(list)] = { ...source, count: each, carried: 1 };
-        table.records.update(member.id, { data: astra.derive(data) }, table.seat, { replace: true });
-        given.push(`${item.name} (${each}) -> ${member.name}`);
-        continue;
-      }
-      if (five) {
-        // A 5E character: the item into the pack (carried), the sheet worked out again.
-        const list = (data.inventorylist = data.inventorylist ?? {});
-        list[engine.nextId(list)] = { ...source, count: each, carried: 1 };
-        table.records.update(member.id, { data: five.derive(data) }, table.seat, { replace: true });
-        given.push(`${item.name} (${each}) -> ${member.name}`);
-        continue;
-      }
-      const row = engine.addItem(data, source, game);
-      row.count = (Number(row.count) || 1) + (each - 1);
-      table.records.update(member.id, { data: engine.derive(data, game) }, table.seat, { replace: true });
-      given.push(`${item.name} (${each}) -> ${member.name}`);
+      await giveItem(table, member, item, each, engine, game);
+      given.push(`${itemName(item.item && typeof item.item === "object" ? { ...item.item, name: item.name } : item)} (${each}) -> ${member.name}`);
     }
     parcelUpdate.items[id] = failed.length > 0 ? { assign: failed.join(", ") } : null;
-    if (failed.length > 0) table.say(`[WARNING] Could not give ${item.name} to ${failed.join(", ")}.`, from);
+    if (failed.length > 0) table.say(`[WARNING] Could not give ${itemName(item.item ?? item)} to ${failed.join(", ")}.`, from);
   }
   if (given.length > 0) table.say(`Items distributed: ${given.join("; ")}.`, from);
 
@@ -229,20 +271,7 @@ async function distribute(table, from) {
       if (each <= 0) continue;
       handed.push(`${each * members.length} ${coin}`);
       for (const member of members) {
-        // Ironsworn has no money: a parcel's Supply is the shared supply meter (at most 5).
-        if (table.records.get(member.id).data?.ruleset === "ironsworn" && coin.toLowerCase() === "supply") {
-          const rules = await require("./ironsworn.cjs").rulesIron();
-          const data = rules.adjust(table.records.get(member.id).data, "supply", each);
-          table.records.update(member.id, { data: rules.derive(data) }, table.seat, { replace: true });
-          perMember.get(member.id).push(`${each} ${coin}`);
-          continue;
-        }
-        const current = table.records.get(member.id).data.coins ?? {};
-        // Megacredits land as credits (Traveller's sheet keeps Cr): 1 MCr = 1,000,000 Cr.
-        const [name, factor] = coin.toLowerCase() === "mcr" ? ["Cr", 1e6] : [coin, 1];
-        const found = rows(current).find(([, row]) => String(row.name).toLowerCase() === name.toLowerCase());
-        const key = found ? found[0] : engine.nextId(current);
-        table.records.update(member.id, { data: { coins: { [key]: { name: found ? found[1].name : name, amount: (Number(found?.[1].amount) || 0) + each * factor } } } }, table.seat);
+        await giveCoin(table, member, coin, each, engine);
         perMember.get(member.id).push(`${each} ${coin}`);
       }
     }
@@ -446,4 +475,4 @@ function addToParcel(table, { coins = {}, items = [], from = "" } = {}) {
   return { coins: nextCoins, items: items.length };
 }
 
-module.exports = { addToParcel, PARTY_ID, partyRecord, partyView, awardXP, awardEntries, distribute, groupCheck, changeOrder, fillFormation, rotate, RANGE };
+module.exports = { addToParcel, giveTo, PARTY_ID, partyRecord, partyView, awardXP, awardEntries, distribute, groupCheck, changeOrder, fillFormation, rotate, RANGE };

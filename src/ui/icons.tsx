@@ -88,6 +88,16 @@ const PATHS: Record<string, string> = {
   "target-clear-foe": "M6 6l12 12M18 6 6 18M4.5 15.5l4 4M19.5 15.5l-4 4M12 21.5a9.5 9.5 0 1 0 0-19 9.5 9.5 0 0 0 0 19ZM5.3 5.3l13.4 13.4",
   // An area template: a cone and a sphere.
   template: "M3 20 11 5l8 15ZM18 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z",
+  // The session's controls: pause and go on, a bell, a ban, a raised hand, more, a folder, a link.
+  pause: "M8 5v14M16 5v14",
+  play: "M7 4.5v15l12-7.5Z",
+  bell: "M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15ZM10 20.5a2 2 0 0 0 4 0",
+  ban: "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM5.6 5.6l12.8 12.8",
+  raise: "M8 13V6.5a1.5 1.5 0 0 1 3 0V12M11 11V4.5a1.5 1.5 0 0 1 3 0V12M14 11.5V6a1.5 1.5 0 0 1 3 0v8a7 7 0 0 1-7 7 6 6 0 0 1-5-3l-2.5-4.2a1.5 1.5 0 0 1 2.5-1.6L8 15",
+  more: "M5 12h.01M12 12h.01M19 12h.01",
+  folder: "M3.5 7.5V18a1 1 0 0 0 1 1h15a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1h-8l-2-2.5h-5a1 1 0 0 0-1 1Z",
+  link: "M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1",
+  away: "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 7v5l3 2",
 };
 
 export function Icon({ name, size = 18, title }: { name: keyof typeof PATHS | string; size?: number; title?: string }) {

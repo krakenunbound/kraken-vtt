@@ -218,6 +218,16 @@ try {
   const agentShown = await tool("kraken_books", { action: "show", book: "Test Keep", file: "images/keep.png", name: "The Keep" });
   assert(agentShown.id === shown.id, "showing the same picture again keeps one tab");
   assert((await tool("kraken_books", { action: "hide", id: "all" })).images.length === 0, "hides every picture");
+  // Shown to one player (FG's share with one): the late player gets neither the tab nor the picture; kept through a reload.
+  await settle();
+  late.events.length = 0;
+  const toOne = await tool("kraken_books", { action: "show", book: "Test Keep", file: "images/keep.png", name: "The Keep", to: ["A test player"] });
+  await settle();
+  assert(JSON.stringify(toOne.to) === '["A test player"]', `shown to one: ${JSON.stringify(toOne)}`);
+  assert(player.events.filter((event) => event.type === "books").at(-1).images.some((item) => item.id === toOne.id) && player.events.some((event) => event.type === "image-shown" && event.id === toOne.id), "the named player has it");
+  assert(!late.events.some((event) => event.type === "image-shown") && !late.events.filter((event) => event.type === "books").at(-1).images.length, `another player is not told of it: ${JSON.stringify(late.events.slice(-4))}`);
+  assert((await get(late, `/book/picture?book=${book}&file=images/keep.png`)).status === 404 && (await get(player, `/book/picture?book=${book}&file=images/keep.png`)).ok, "nor can fetch it; the named player can");
+  assert(JSON.stringify(createTableServer({ books, saved: server.persisted() }).agent.shelf().images[0].to) === '["A test player"]', "who it is shown to is saved with the campaign");
   for (const seat of [gm, player, late]) seat.ws.close();
   console.log(`BOOKS_OK the ruleset's books, activation (players' books open, the GM's not), chapters, pages, pictures and links; sharing a book and a picture; saved; the agent`);
 } finally {

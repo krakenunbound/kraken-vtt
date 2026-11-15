@@ -59,9 +59,30 @@ const TOOLS = [
   },
   {
     name: "kraken_campaigns",
-    description: "List the GM's campaigns (id, name, ruleset, last played).",
-    inputSchema: object({}),
-    run: (_args, ctx) => out(ctx.campaigns.list()),
+    description:
+      "List the GM's campaigns (id, name, ruleset, last played); with action, the start screen's campaign menu: rename (name), duplicate (a copy with its table, records, adventure and Map Studio pictures; name optional), export (one .zip; path, default Documents/Kraken VTT/Exports/<name>.zip), delete (to the recycle bin, never gone for good; not the campaign being played), backups (the rolling backups: one each Play and every hour while hosting, the newest ten kept), backup (one now), restore (backup: a backup's id; what is there now is backed up first; not while it is played), folder (its folder, opened on the GM's screen).",
+    inputSchema: object({
+      action: { type: "string", enum: ["list", "rename", "duplicate", "export", "delete", "backups", "backup", "restore", "folder"] },
+      id: string("Campaign id"),
+      name: string("rename: the new name; duplicate: the copy's name"),
+      path: string("export: where the .zip goes"),
+      backup: string("restore: the backup's id (from action backups)"),
+    }),
+    async run(args, ctx) {
+      const action = args.action ?? "list";
+      if (action === "list") return out(ctx.campaigns.list());
+      if (!args.id) throw new Error("Which campaign? Give id (kraken_campaigns).");
+      return out(await ctx.campaigns.manage({ action, id: args.id, name: args.name, path: args.path, backup: args.backup }));
+    },
+  },
+  {
+    name: "kraken_logs",
+    description: "Kraken's logs (Settings > Open logs): the last lines of the backend's log (the table server, campaigns, books, this bridge) and the window's (the GM's page), and the folder they are in. open: true opens the folder on the GM's screen.",
+    inputSchema: object({ lines: number("How many lines of each, default 80"), open: { type: "boolean" } }),
+    async run(args, ctx) {
+      if (args.open) await ctx.openLogs();
+      return out(ctx.logs(Math.max(1, Math.min(2000, Number(args.lines) || 80))));
+    },
   },
   {
     name: "kraken_campaign_create",
@@ -77,16 +98,19 @@ const TOOLS = [
   },
   {
     name: "kraken_host",
-    description: "Host a campaign in the app window, as the GM pressing Play. The window joins as the DM.",
+    description:
+      "Host a campaign in the app window, as the GM pressing Play. The window joins as the DM. internet: players anywhere (the start screen's Internet); upnp: also open the port on the router by itself (UPnP or NAT-PMP; closed again when hosting stops). Returns invite: the link a player opens to sit down, the table's password in its #fragment (internet's when on, else the network's), and invites (every link).",
     inputSchema: object(
       {
         campaignId: string("Campaign id from kraken_campaigns"),
         port: number("Port, default 47300"),
         password: string("Table password; empty for a public game"),
+        internet: { type: "boolean", description: "Players anywhere (the start screen's Internet toggle)" },
+        upnp: { type: "boolean", description: "Open the port on the router by itself (implies internet)" },
       },
       ["campaignId"],
     ),
-    run: async (args, ctx) => out(await ctx.ui({ kind: "host", campaignId: args.campaignId, port: args.port ?? 47300, password: args.password ?? "" })),
+    run: async (args, ctx) => out(await ctx.ui({ kind: "host", campaignId: args.campaignId, port: args.port ?? 47300, password: args.password ?? "", internet: Boolean(args.internet), upnp: Boolean(args.upnp) }, 90000)),
   },
   {
     name: "kraken_leave",
@@ -129,7 +153,7 @@ const TOOLS = [
         type: string("Record type, e.g. character, npc, item, note"),
         name: string("Name"),
         owner: string("Owning player's name; empty for the GM"),
-        visibility: { type: "string", enum: ["gm", "owner", "all"] },
+        visibility: { description: "gm (the GM alone), owner, all (every player), or a list of players' names (shared with them alone)", anyOf: [{ type: "string", enum: ["gm", "owner", "all"] }, { type: "array", items: { type: "string" } }] },
         data: { type: "object", description: "The record's fields (any JSON)" },
         id: string("Optional id; generated if empty"),
       },
@@ -184,7 +208,7 @@ const TOOLS = [
         id: string("Record id"),
         name: string("New name"),
         owner: string("New owner"),
-        visibility: { type: "string", enum: ["gm", "owner", "all"] },
+        visibility: { description: "gm (the GM alone), owner, all (every player), or a list of players' names (shared with them alone, as the eye's menu or a row dropped on a player's portrait)", anyOf: [{ type: "string", enum: ["gm", "owner", "all"] }, { type: "array", items: { type: "string" } }] },
         data: { type: "object", description: "Fields to change" },
         replace: { type: "boolean", description: "Replace data entirely" },
       },
@@ -647,7 +671,7 @@ const TOOLS = [
   {
     name: "kraken_books",
     description:
-      "The GM's books, as FG's Library: the Fantasy Grounds modules on this computer that fit the campaign's ruleset (rulebooks, adventures), read inside Kraken. action list (every module that fits: id, title, category, hasBook, adventure, active, shared, forPlayers); activate / deactivate (book: active for this campaign, as FG's Activation; a player's book starts shared, the GM's books (monsters, the GM's guide, adventures) do not); contents (book: its chapters, sections and pages, and its pictures and maps); page (book, page: a page's text as HTML and its pictures); share / unshare (book: the players may read it, or not; never an adventure, whose pictures and maps the GM shows one at a time with show); show (book, file, name: show the players a picture or map from it; it opens as a tab on their screens); hide (id, or \"all\"); shared (what the players have now); sound (book, page, soundAction bind: a sound for one of the page's sound links, key = the link's data-sound-key; unbind (key); add: a sound in the story after a paragraph, block = its index (-1 at the top); remove (id); sound = a sound or folder id, as kraken_sound list); sounds (every sound kept in the books).",
+      "The GM's books, as FG's Library: the Fantasy Grounds modules on this computer that fit the campaign's ruleset (rulebooks, adventures), read inside Kraken. action list (every module that fits: id, title, category, hasBook, adventure, active, shared, forPlayers); activate / deactivate (book: active for this campaign, as FG's Activation; a player's book starts shared, the GM's books (monsters, the GM's guide, adventures) do not); contents (book: its chapters, sections and pages, and its pictures and maps); page (book, page: a page's text as HTML and its pictures); share / unshare (book: the players may read it, or not; never an adventure, whose pictures and maps the GM shows one at a time with show); show (book, file, name, to: show the players (or only those named in to) a picture or map from it; it opens as a tab on their screens); hide (id, or \"all\"); shared (what the players have now); sound (book, page, soundAction bind: a sound for one of the page's sound links, key = the link's data-sound-key; unbind (key); add: a sound in the story after a paragraph, block = its index (-1 at the top); remove (id); sound = a sound or folder id, as kraken_sound list); sounds (every sound kept in the books).",
     inputSchema: object(
       {
         action: { type: "string", enum: ["list", "activate", "deactivate", "contents", "page", "share", "unshare", "show", "hide", "shared", "sound", "sounds"] },
@@ -660,6 +684,7 @@ const TOOLS = [
         page: string("A page's id (from contents)"),
         file: string("A picture's file in the book (from contents or a page)"),
         name: string("What the players see the picture called"),
+        to: { type: "array", items: { type: "string" }, description: "show: only these players (their names), as the picture's Show to menu or the picture dropped on a player's portrait; none, everyone" },
         id: string("A shown picture's id (hide), or all"),
         search: string("Part of a title or category (list)"),
       },
@@ -676,7 +701,7 @@ const TOOLS = [
       if (action === "contents") return out(await table.bookContents(args.book));
       if (action === "page") return out(await table.bookPage(args.book, args.page));
       if (action === "share" || action === "unshare") return out(table.shareBook(args.book, action === "share"));
-      if (action === "show") return out(table.showImage(args.book, args.file, args.name));
+      if (action === "show") return out(table.showImage(args.book, args.file, args.name, args.to));
       if (action === "sound") return out(table.setBookSound({ ...args, action: args.soundAction, id: args.id }));
       if (action === "sounds") return out(table.bookSounds());
       if (action === "hide") return out(table.hideImage(args.id ?? "all"));
@@ -945,12 +970,12 @@ const TOOLS = [
   },
   {
     name: "kraken_kick",
-    description: "FG's /kick: send a player away from the table (they can join again).",
-    inputSchema: object({ name: string("The player's name") }, ["name"]),
+    description: "FG's /kick, the Players window's Kick: send a player away from the table (they can join again). ban: true is the Players window's Ban: they may not sit at this table again (their name, and the address they came from, kept with the campaign) until kraken_players unban.",
+    inputSchema: object({ name: string("The player's name"), ban: { type: "boolean", description: "Ban them too" } }, ["name"]),
     run(args, ctx) {
-      const gone = needTable(ctx).kick(args.name);
+      const gone = needTable(ctx).kick(args.name, { ban: Boolean(args.ban) });
       if (!gone) throw new Error(`Nobody called ${args.name} is at the table.`);
-      return out({ kicked: gone });
+      return out(args.ban ? { kicked: gone, banned: true } : { kicked: gone });
     },
   },
   {
@@ -980,10 +1005,38 @@ const TOOLS = [
   },
   {
     name: "kraken_players",
-    description: "Who is connected: id, name, role (dm or player).",
-    inputSchema: object({}),
-    run(_args, ctx) {
-      return out({ players: needTable(ctx).players() });
+    description:
+      "Who is connected: id, name, role (dm or player), and afk (away: /afk), idle (no input for a while), hand (a raised hand), lost (the connection dropped; the seat waits for a reconnect). The Players window's controls: action ring (Ring bell: a chime and a flash on that player's screen), afk (mark them away or back: afk true/false), lower (lower their raised hand), bans (the Ban list), unban, view-as (the GM's map as that player sees it; name \"\" ends it).",
+    inputSchema: object({
+      action: { type: "string", enum: ["list", "ring", "afk", "lower", "bans", "unban", "view-as"] },
+      name: string("The player's name"),
+      afk: { type: "boolean", description: "With action afk: away (true) or back (false)" },
+    }),
+    run(args, ctx) {
+      const table = needTable(ctx);
+      const action = args.action ?? "list";
+      const named = () => {
+        if (!args.name) throw new Error("Which player? Give name.");
+        return args.name;
+      };
+      if (action === "ring") {
+        const rung = table.ring(named(), "GM");
+        if (!rung) throw new Error(`Nobody called ${args.name} is at the table.`);
+        return out({ rang: rung });
+      }
+      if (action === "afk" || action === "lower") {
+        const seat = table.presence(named(), action === "afk" ? { afk: args.afk !== false } : { hand: false });
+        if (!seat) throw new Error(`Nobody called ${args.name} is at the table.`);
+        return out({ player: seat });
+      }
+      if (action === "bans") return out({ bans: table.bans() });
+      if (action === "unban") {
+        const freed = table.unban(named());
+        if (!freed) throw new Error(`${args.name} is not banned.`);
+        return out({ unbanned: freed, bans: table.bans() });
+      }
+      if (action === "view-as") return out(table.viewAs(args.name ?? ""));
+      return out({ players: table.players() });
     },
   },
   {
@@ -1332,6 +1385,7 @@ const TOOLS = [
     description:
       "The table's own options. towerReveal: a roll a player drops in the dice tower is shown to that player too (as FG, it is otherwise the GM's alone; the player sees only what went in). towerExternal: the dice tower stands on the table apart from the chat (every seat; each places it where they like), else it is docked in the chat's dice tray. towerStyle: how the tower looks for every seat (kraken_tower lists the looks). motd: the message of the day (FG's), shown to each player as they join: { text, links: quick-slot links (a map: {kind: picture, book, file, label}, a record: {kind: record, record, label}, a book page, a note) }; text \"\" for none. decal: the background decal (kraken_decal chooses one). clearTargets: when a creature's targets clear: never (FG), action (after its spell, or its attack's damage), turn (at the end of its turn). diceHold: how long landed 3D dice lie on the table before they fade, in seconds (0.5 to 60, default 2.6), for every seat. wizard35: the D&D 3.5E character wizard's options (FG's KrakenCharWizard35E options): methods, the ability score methods players may pick (1 4d6 drop lowest arranged, 2 3d6 in order, 3 the standard array 15,14,13,12,10,8, 4 typed by hand; default all four); rollLock: the scores cannot be rolled again; lowReroll: a 4d6 score under 8 may be rerolled once with 3d6, the result stands; vault: the Vault of the Kraken's poor or secondhand gear is free in the wizard's shop. wizard2e: the AD&D 2E character wizard's options, as the FG extension's: rollLock (abilities rolled once only, no re-rolls), methods (the PHB ability methods players may pick: 1 = 3d6 in order, 2 = 3d6 twice keep higher, 3 = 3d6 x6 arrange, 4 = 3d6 x12 keep best 6, 5 = 4d6 drop lowest, 6 = all 8s then place 7d6; none: Method V), gold (starting gold above 1st level: phb one roll, perlevel one roll a level, xlevel one roll times the level). A partial wizard35 or wizard2e changes only what it names. diagonal: how a diagonal square counts when measuring (FG's diagonal option: 1 every square one, default; 1.5 the 5-10-5 count carried across a path's legs; raw a straight line); a scene may set its own (kraken_scene_settings diagonal). healthNpc and healthPc: what players see of the health of the GM's creatures and of the characters on their tokens (FG's token health options: bar, barhover = the bar while the pointer is over the token, dot (default), dothover, off: players are not sent it at all); the GM always sees it. names: token names for players and the GM's screen (off: players are not sent them, but their own; hover, default, as FG; always); a token's unidentified name (kraken_token_update unidentified) is what players get instead of its real one. Call with nothing to read them.",
     inputSchema: object({
+      paused: { type: "boolean", description: "Pause the game (the GM's Pause button, /pause): players see a veil and their token moves and rolls are refused until it goes on; chat goes on, and the GM is unaffected. Every table opens unpaused." },
       towerReveal: { type: "boolean" },
       towerExternal: { type: "boolean" },
       towerStyle: { type: "string" },
@@ -1954,10 +2008,22 @@ const TOOLS = [
   {
     name: "kraken_ping",
     description: "Ping a square on the map, as the GM clicking to point something out: everyone at the table sees it flash there.",
-    inputSchema: object({ col: number("Square across, from the left"), row: number("Square down, from the top") }, ["col", "row"]),
+    inputSchema: object(
+      {
+        col: number("Square across, from the left"),
+        row: number("Square down, from the top"),
+        pull: { type: "boolean", description: "Also pull every player's map there (the GM's Shift+ping, or Pull players to my view): their maps glide to that square (a player mid-drag is told instead)" },
+        squares: number("With pull: how many squares across the players see (default 12)"),
+      },
+      ["col", "row"],
+    ),
     run(args, ctx) {
-      const at = needTable(ctx).ping(Number(args.col), Number(args.row));
-      return out({ pinged: { col: args.col, row: args.row }, x: at.x, y: at.y });
+      const table = needTable(ctx);
+      const at = table.ping(Number(args.col), Number(args.row));
+      if (!args.pull) return out({ pinged: { col: args.col, row: args.row }, x: at.x, y: at.y });
+      const square = table.square(Number(args.col), Number(args.row));
+      const across = Math.max(1, Number(args.squares) || 12) * (square?.size || 100);
+      return out({ pinged: { col: args.col, row: args.row }, x: at.x, y: at.y, ...table.pullView({ x: at.x, y: at.y, width: across, height: across * 0.6 }) });
     },
   },
   {
@@ -2090,6 +2156,8 @@ const TOOLS = [
   },
   // Map Studio's editor for agents: every action of the map maker (electron/studio/agentTools.cjs).
   require("../studio/agentTools.cjs").tool,
+  // The campaign's own content: copies, story, tables, identification, encounters, parcels, quests (contentTools.cjs).
+  ...require("./contentTools.cjs").TOOLS,
   {
     name: "kraken_updates",
     description:

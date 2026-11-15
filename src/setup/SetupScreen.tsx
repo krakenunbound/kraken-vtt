@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { emblemKey, RulesetEmblem } from "./RulesetEmblem";
 import { UpdateNotice } from "./UpdateNotice";
+import { CampaignMenu } from "./CampaignMenu";
 import { LivingEmblem, Mark } from "../ui/Emblem";
 import type { KrakenCampaign, KrakenNetwork } from "../kraken";
 import "@fontsource/cinzel/latin-500.css";
@@ -11,7 +12,7 @@ import { forgetSignIn, savedSignIn } from "../session/useSession";
 import { campaignRulesets } from "../../shared/rulesets/registry.mjs";
 import "./setup.css";
 
-type HostInput = { name: string; port: number; password: string; lan: boolean; cloud: boolean; campaignId: string };
+type HostInput = { name: string; port: number; password: string; lan: boolean; cloud: boolean; upnp?: boolean; campaignId: string };
 // accountPassword: the player's own password (their account at that table).
 type JoinInput = { name: string; address: string; port: number; password: string; accountPassword?: string };
 
@@ -183,6 +184,39 @@ export function SetupScreen({
   const newName = useRef<HTMLInputElement>(null);
   const [lanOn, setLanOn] = useState(true);
   const [cloudOn, setCloudOn] = useState(false);
+  // Internet play: the router asked to open the port by itself (UPnP / NAT-PMP).
+  const [upnpOn, setUpnpOn] = useState(true);
+  // An invite link's table password (its #pw= fragment: never sent to the server), taken out of the address bar.
+  const [invitePassword] = useState(() => {
+    if (!inBrowser) return "";
+    // Kept for this tab (a reload, or the join screen again after a drop, still has it).
+    const key = `kraken-invite:${window.location.host}`;
+    const found = /(?:^#|&)pw=([^&]*)/.exec(window.location.hash);
+    if (!found) {
+      try {
+        return window.sessionStorage.getItem(key) ?? "";
+      } catch {
+        return "";
+      }
+    }
+    try {
+      window.history.replaceState(null, "", window.location.pathname + window.location.search);
+    } catch {
+      /* the address bar keeps it */
+    }
+    let password = found[1];
+    try {
+      password = decodeURIComponent(found[1]);
+    } catch {
+      /* as it is */
+    }
+    try {
+      window.sessionStorage.setItem(key, password);
+    } catch {
+      /* this tab only */
+    }
+    return password;
+  });
   const [localError, setLocalError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -204,6 +238,15 @@ export function SetupScreen({
     };
   }, []);
 
+  // The campaign menu open, and where; the list read again after a change (a copy selected).
+  const [menuFor, setMenuFor] = useState<{ id: string; x: number; y: number } | null>(null);
+  async function reloadCampaigns(select?: string) {
+    const list = await window.kraken?.campaigns().catch(() => null);
+    if (!list) return;
+    setRows(list);
+    if (select) setSelectedId(select);
+    else setSelectedId((current) => (current && list.some((item) => item.id === current) ? current : null));
+  }
   const shown = rows
     .filter((campaign) => campaign.name.toLowerCase().includes(query.trim().toLowerCase()))
     .sort((a, b) => (b.playedAt ?? b.createdAt) - (a.playedAt ?? a.createdAt));
@@ -258,7 +301,7 @@ export function SetupScreen({
     } catch {
       /* The table can still start if the date stamp fails. */
     }
-    await onHost({ name, port, password, lan: lanOn, cloud: cloudOn, campaignId: campaign.id });
+    await onHost({ name, port, password, lan: lanOn, cloud: cloudOn, upnp: cloudOn && upnpOn, campaignId: campaign.id });
   }
 
   // Joining; a game joined is kept for a quick way back.
@@ -447,7 +490,7 @@ export function SetupScreen({
             )}
             <label className="field">
               <span>Table password</span>
-              <input name="password" type="text" placeholder="The GM's, blank if the game is public" autoComplete="off" defaultValue={joinFill?.password ?? ""} />
+              <input name="password" type="text" placeholder="The GM's, blank if the game is public" autoComplete="off" defaultValue={joinFill?.password ?? invitePassword} />
             </label>
             <button type="submit" className="play-button grand" disabled={busy}>
               {busy ? "Joining…" : "Take your seat"}
@@ -476,10 +519,12 @@ export function SetupScreen({
                 <p className="campaign-empty">{rows.length === 0 ? "No campaigns yet. Begin your first one." : "No campaign by that name."}</p>
               ) : null}
               {shown.map((campaign, index) => (
+                <div key={campaign.id} role="listitem" className="campaign-card-row" onContextMenu={(event) => {
+                  event.preventDefault();
+                  setMenuFor({ id: campaign.id, x: event.clientX, y: event.clientY });
+                }}>
                 <button
-                  key={campaign.id}
                   type="button"
-                  role="listitem"
                   className={campaign.id === selectedId ? "campaign-card selected" : "campaign-card"}
                   style={{ animationDelay: `${index * 60}ms` }}
                   data-campaign={campaign.name}
@@ -497,6 +542,34 @@ export function SetupScreen({
                     ›
                   </span>
                 </button>
+                {window.kraken?.manageCampaign ? (
+                  <>
+                    <button
+                      type="button"
+                      className="campaign-more"
+                      data-action="campaign-menu"
+                      aria-haspopup="menu"
+                      aria-expanded={menuFor?.id === campaign.id}
+                      aria-label={`More for ${campaign.name}`}
+                      title="Rename, duplicate, export, backups, open folder, delete"
+                      onClick={(event) => {
+                        const box = event.currentTarget.getBoundingClientRect();
+                        setMenuFor(menuFor?.id === campaign.id ? null : { id: campaign.id, x: box.left, y: box.bottom + 4 });
+                      }}
+                    >
+                      ⋯
+                    </button>
+                    <CampaignMenu
+                      campaign={campaign}
+                      open={menuFor?.id === campaign.id}
+                      anchor={menuFor?.id === campaign.id ? menuFor : null}
+                      onOpenChange={(open) => !open && setMenuFor((current) => (current?.id === campaign.id ? null : current))}
+                      onError={setLocalError}
+                      onChanged={(select) => void reloadCampaigns(select)}
+                    />
+                  </>
+                ) : null}
+                </div>
               ))}
             </div>
             <button type="button" className="new-campaign" data-action="new-campaign" onClick={newCampaign}>
@@ -562,9 +635,14 @@ export function SetupScreen({
                     <label className={cloudOn ? "toggle on" : "toggle"}>
                       <input type="checkbox" name="cloud" checked={cloudOn} onChange={(event) => setCloudOn(event.target.checked)} />
                       <strong>Internet</strong>
-                      <small>Players anywhere, once the port is open on your router</small>
+                      <small>Players anywhere: your router's port opened for you, or by hand</small>
                     </label>
                   </div>
+                  {cloudOn ? (
+                    <label className="upnp-toggle hint">
+                      <input type="checkbox" name="upnp" data-action="upnp" checked={upnpOn} onChange={(event) => setUpnpOn(event.target.checked)} /> Open the port on my router by itself (UPnP), and close it when I stop
+                    </label>
+                  ) : null}
                 </div>
                 <details className="addr-block">
                   <summary>Addresses to give your players</summary>

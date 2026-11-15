@@ -3,6 +3,7 @@ import type { Session, TableRecord } from "../session/useSession";
 import { Field } from "../core/fields/Field";
 import { IdentityBox, NameField, SheetFrame } from "../core/frame/SheetFrame";
 import { ClockFace } from "../notes/ClocksWindow";
+import { ofGame } from "../../shared/rulesets/registry.mjs";
 import { ACTION_WORDS, ACTIONS, ACTIONS_BY_ATTRIBUTE, ATTRIBUTES, EFFECTS, FLASHBACK, HARM_PENALTY, OVERINDULGENCE, POSITIONS, RESIST_WORDS, TRAUMAS, VICES, XP_TRACKS, titled } from "../../shared/forged/rules.mjs";
 
 // The Forged in the Dark character sheet (the Blades in the Dark SRD), in
@@ -73,7 +74,7 @@ export function SheetForged({ record, session }: { record: TableRecord; session:
   const downtime = (data.downtime ?? {}) as Row;
   const status = String(data.status ?? "");
   const coin = num(rows(data.coins).find(([, row]) => /coin/i.test(String(row.name ?? "")))?.[1].amount);
-  const others = Object.values(session.records).filter((item) => item.type === "character" && item.data.ruleset === "forged" && item.id !== record.id);
+  const others = Object.values(session.records).filter((item) => item.type === "character" && ofGame(item, String(record.data.ruleset)) && item.id !== record.id);
   const playbook = Object.values(session.records).find((item) => item.type === "playbook" && item.name === data.playbook);
   const usesSpecial = abilities.some((ability) => /special armor/i.test(String(ability.text ?? "")));
   const carried = items.filter(([, item]) => num(item.carried) > 0);

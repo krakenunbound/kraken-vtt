@@ -43,7 +43,7 @@ for (const manifest of MANIFESTS) manifest.actions = ACTIONS[manifest.id] ?? man
 export const CAMPAIGN_RULESETS = ["Castles & Crusades", "D&D 5E", "D&D 3.5E", "AD&D 2E", "Traveller", "Descending Darkness", "Apeira Astra", "Ironsworn", "Starforged", "Cairn", "Basic Fantasy", "Fate Core", "Fate Accelerated", "Forged in the Dark", "Worldbuilding"];
 
 // Every optional feature a manifest may switch on (types.d.ts FeatureId).
-export const FEATURES = ["deathSaves", "dying.save", "dying.bleed", "morale", "turnUndead", "multiAttack", "dread", "clocks", "crew", "scorePanel", "downtime", "fatePoints", "sceneAspects", "stressConsequences", "oracles", "delve", "progressTracks", "momentum", "assetsCards", "starships", "careers", "slots", "fatigue", "scars", "spellbooks", "thiefSkills", "encumbrance", "abilityCards"];
+export const FEATURES = ["deathSaves", "dying.save", "dying.bleed", "morale", "turnUndead", "multiAttack", "dread", "clocks", "crew", "scorePanel", "downtime", "fatePoints", "sceneAspects", "stressConsequences", "oracles", "delve", "progressTracks", "momentum", "assetsCards", "starships", "careers", "slots", "fatigue", "scars", "spellbooks", "thiefSkills", "encumbrance", "abilityCards", "approaches"];
 
 // Objects that a variant joins (one level deep, as FG's merge="join") rather than replaces.
 const JOINED = new Set(["records", "labels", "dice", "host"]);
@@ -91,5 +91,12 @@ export const rulesetFor = (nameOrId) => BY_NAME.get(String(nameOrId ?? "")) ?? B
 // Is an optional feature on in this game?
 /** @param {RulesetManifest | null | undefined} manifest @param {FeatureId} feature */
 export const has = (manifest, feature) => Boolean(manifest?.features.includes(feature));
+// Whether a record (a character) is of a game, given by its campaign name or id: the campaign's own scoundrels,
+// the characters who may take a site's track. A variant is its base's game (a Starforged character is Ironsworn's).
+/**
+ * @param {{ data?: { ruleset?: unknown } } | null | undefined} record
+ * @param {string} nameOrId
+ */
+export const ofGame = (record, nameOrId) => rulesetOfRecord(record?.data?.ruleset).id === rulesetFor(nameOrId).id;
 // The campaign screen's list: each name with its own blurb.
 export const campaignRulesets = () => CAMPAIGN_RULESETS.map((name) => ({ name, blurb: rulesetNamed(name)?.blurb ?? "" }));

@@ -6,7 +6,6 @@ full log of the work is in [PLAN.md](PLAN.md).
 
 ## Unreleased
 
-<<<<<<< HEAD
 Targeting, area spells, effects and damage cards, Fantasy Grounds' and Foundry's best together (docs/targeting-actions-design.md).
 
 - **Targeting from the map toolbar, on every map:** target mode (click a creature, or drag a box), target all friendlies or all foes, clear friendly, enemy or all targets, for the selected creature (or your own). Ctrl+click works on tracker rows too. The GM sees everyone's aim, a ring per targeter in that player's colour.
@@ -15,7 +14,17 @@ Targeting, area spells, effects and damage cards, Fantasy Grounds' and Foundry's
 - **Lights as effects:** a torch dropped on a token lights the map around it, moves with it, shows as glow to players, burns an hour of game time, warns, and goes out; it can be put out and lit again.
 - **Damage cards:** each creature hit, what it took after saves and resistances, and buttons to halve, double, undo or heal it. Damage can wait on the card instead of landing at once (a setting). Chat rolls dragged onto a creature apply there.
 - D&D 3.5E and AD&D 2E (OSRIC too) cast spells from their books' words: slots, saves, damage by caster level, effects. (Basic Fantasy's engine is ready; its books keep spells as pages, not records, so it has nothing to cast yet.)
-=======
+
+**The session, as good as any VTT's.**
+
+- **A dropped connection comes back by itself.** A player whose Wi-Fi drops sees "Reconnecting…" over the table and sits back down in the same seat with the same character; the GM sees them as reconnecting meanwhile and their portrait stays. The GM's own window does the same.
+- **Internet play without touching the router.** Under Internet, Kraken asks the router to open the port while you host (UPnP or NAT-PMP) and closes it when you stop.
+- **Invite links.** The Players window has a link with the table password already in it, a Copy button and a QR code. A player opens it and types only their name.
+- **Pause the game.** The pause button (or `/pause`) puts a veil over the players' screens and holds their moves and rolls; chat goes on.
+- **The Players window's controls.** Each row has Ring bell and a menu (also a right-click on a row or a portrait): View as, Mark away, Kick and Ban, with a Banned list to Unban. Players can raise a hand; `/afk` or five idle minutes dims their portrait.
+- **Pull players to my view.** A button in the map's tools (or Shift+click with the ping tool) glides every player's map to what you see. Sharing a map shows its name across the players' screens.
+- **Campaigns: a menu, backups and logs.** Each campaign card's menu renames, duplicates, exports a .zip, opens the folder, restores a backup and deletes (to the recycle bin). Kraken backs a campaign up each time you press Play and every hour while you host, keeping ten. Settings > Open logs opens Kraken's logs for a bug report.
+
 The map at play, past what Fantasy Grounds and Foundry give:
 
 - **A ruler everyone sees.** Right-drag to measure; a left click or Space drops a waypoint, each leg is measured and the whole. Every seat on the map sees it as you draw, in your colour. Diagonals count one, 5-10-5 (carried across the legs) or as a straight line, for the campaign or a scene; height counts from token to token.
@@ -29,7 +38,6 @@ The map at play, past what Fantasy Grounds and Foundry give:
 - **Map Studio's traps, pits, difficult terrain and teleports play at the table**, and a Foundry bundle's regions by their behaviours.
 - **Animated maps** (.webm, .mp4) and **sounds placed on a map**, heard near your tokens and muffled by walls.
 - New agent tools: `kraken_ruler`, `kraken_region`, `kraken_map_sound`; `kraken_token_move` undo, path and approvals; checks `npm run map-play` and `npm run map-play-ui`.
->>>>>>> main
 
 The first two stages of Kraken's core UI (docs/core-ui-design.md): one core that every game slides into, as Fantasy Grounds' CoreRPG and Foundry's core do. On screen almost nothing changes. Underneath, the games stop hand-copying each other.
 
@@ -47,8 +55,18 @@ The first two stages of Kraken's core UI (docs/core-ui-design.md): one core that
 - **One wizard frame.** Cairn's character wizard is now its manifest's four steps on the core's wizard frame (Cancel, Finish, numbered steps, host-rolled dice, a Marketplace). Same screens, same dice, same character.
 - **The combat tracker asks the manifest, not the game's name.** Every game's tracker buttons (5E's death save, Descending Darkness' Steady, 2E's Bind wounds, Turn undead, morale, Cairn's Stabilize and always-hit attacks, Fate's conflict, Starforged's "In control") come from its manifest.
 - **Basic Fantasy's character sheet is built from the core's parts** too, including a new track of boxes for spells a day. It looks and works as before.
+- **Every record can be edited, copied and deleted (as Fantasy Grounds' record windows).**
+  - A record's window has FG's lock: the pencil opens it for the GM (or its owner). Unlocked, it shows the record's fields (the game's own list where its manifest gives one, Cairn's creatures so far; else the fields that kind of record carries), a field of your own, and its description in the new text editor. New on a list now opens a record ready to fill in.
+  - Right-click a row: Duplicate (named "(copy)") and Delete, with Undo for a few seconds. A book's record has Copy to campaign, to change it without touching the book.
+- **One text editor for the whole table:** headings, bold, italic, underline, lists, tables and FG's boxed read-aloud text, from a small bar. Drag anything into it (a book page, a picture, a character, a sound, a note, a record) and it becomes a chip in the words that opens with a click. It saves FG's own text tags, and the host cleans everything written, so no one can slip their own markup to another screen. Notes use it now.
+- **The campaign's own story.** World > Story lists the campaign's story entries above the adventures', by chapter. An entry has pages: text, a picture, a book page; drag a picture or page onto it. An adventure's story entry has Copy to campaign. Shared, the players read it under their sidebar's Story, its pictures included.
+- **Random tables, as FG's.** Every table window has Roll (a column, or every one; GM only if you like), the campaign's tables and the rulebooks' alike. `[2d6]` in a result is rolled into it, `[3x]` repeats the tables it links, `[Another Table]` rolls that one too (ten deep at most), a result that links a record carries the link. Tables' Campaign section: New, and FG's Import Table (paste the rows: simple, or comma, pipe, colon or semicolon delimited). Unlocked, a table's window edits its die, columns, labels and every row. `/rollon Name -c column -d dice -hide` in chat, for players too (a table shared with them).
+- **Share with one player.** The eye on a record now opens a menu: Everyone, each player (tick as many as you like), or GM only. Drag a record, note, story or picture onto a player's portrait to share it with that player alone. A picture's right-click menu has Show to (a player).
+- **Item identification.** An item's window has FG's Identified box, with the unidentified name and notes. Unidentified, the players see only those: in the lists, on character sheets (a weapon's attack and the armour worn too), on the combat tracker, in the party sheet's parcel, in what is handed out and in chat. The real name never reaches their browsers.
+- **Encounters, parcels and quests of the campaign's own.** Encounters: New, drop NPCs in (a count may be dice, rolled when added), Add to tracker, Place on this map (keeps where their tokens stand), End encounter (its XP to the party sheet). Parcels: drop items in (unidentified or not), add coins in the game's money, then To the party sheet or Give to a character; a table can roll straight into a parcel. Quests (Campaign > Quests): XP, text and status; drop one on the party sheet's XP tab (which now takes quests and encounters by drop).
 - **The D&D family's sheets are built from the core's parts:** D&D 5E, Descending Darkness, D&D 3.5E and AD&D 2E. 5E and Descending Darkness are one layout with the game's own words (Kin, Defense, Health) and its own rules (Dread, bleeding out, death saves); 2E arranges the same parts its own way, as Fantasy Grounds' 2E sheet does. They look and work as before, every button included.
 - **One frame for the D&D wizards.** The 5E, Descending Darkness, 3.5E and 2E character wizards share the core's page-rail frame (title, Next, Cancel, the page tabs with their ticks and alerts). Same screens, same characters.
+- **Traveller, Apeira Astra, Ironsworn and Starforged sheets are built from the core's parts,** laid out by their manifests, with their own pieces (Traveller's skill pickers, Astra's Marks, Ironsworn's moves, progress and assets) inside the core frame. The ten-box progress track is now the core's, and the combat tracker draws a foe's progress with it. Basic Fantasy's level and experience strip is the core strip too. They look and work as before, every button included.
 
 ## 0.1.0-alpha.90: Pictures for every game, and a pass for looks
 

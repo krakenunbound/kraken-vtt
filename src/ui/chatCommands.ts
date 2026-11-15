@@ -155,6 +155,25 @@ export const COMMANDS: Command[] = [
     group: "Talk",
     run: (rest, context) => (rest.trim() ? context.session.tableCommand({ type: "vote", question: rest.trim() }) : context.session.note("As /vote Do we rest here tonight?")),
   },
+  {
+    // FG's /rollon: a random table by its name, on the host's dice; -c a column, -d other dice, -hide the GM's eyes only.
+    names: ["rollon"],
+    args: "[table] <-c column> <-d dice> <-hide>",
+    help: "Roll on a random table: /rollon Rumours -d 2d6 -hide",
+    group: "Dice",
+    run: (rest, context) => {
+      let words = ` ${rest.trim()}`;
+      const hide = / -hide\b/.test(words);
+      words = words.replace(/ -hide\b/g, "");
+      const dice = / -d(.+)$/.exec(words)?.[1]?.trim();
+      words = words.replace(/ -d.+$/, "");
+      const column = / -c(.+)$/.exec(words)?.[1]?.trim();
+      words = words.replace(/ -c.+$/, "");
+      const name = words.trim();
+      if (!name) return context.session.note("As /rollon tablename -c [column name] [-d dice] [-hide]");
+      void context.session.content("table-roll", { action: "roll", name, ...(column ? { column } : {}), ...(dice ? { dice } : {}), ...(hide ? { hide: true } : {}) }).catch((error: unknown) => context.session.note(error instanceof Error ? error.message : "Could not roll that."));
+    },
+  },
   // --- GM ------------------------------------------------------------------
   { names: ["story"], args: "[text]", help: "Story text for the table, without a name", group: "GM", gm: true, run: (rest, context) => context.session.sendChat(rest, { kind: "story" }) },
   {
@@ -188,6 +207,26 @@ export const COMMANDS: Command[] = [
     run: (rest, context) => (rest.trim() ? context.session.tableCommand({ type: "kick", name: rest.trim() }) : context.session.note("As /kick Bob")),
   },
   { names: ["save"], args: "", help: "Save the campaign now", group: "GM", gm: true, run: (_rest, context) => context.session.tableCommand({ type: "save" }) },
+  {
+    names: ["pause"],
+    args: "[on|off]",
+    help: "Pause the game (the players see a veil; their moves and rolls wait), or go on",
+    group: "GM",
+    gm: true,
+    run: (rest, context) => context.session.setPaused(onOff(rest.trim()) ?? !context.session.options.paused),
+  },
+  {
+    names: ["afk"],
+    args: "",
+    help: "Away from the keyboard: your portrait dims for everyone (again to come back)",
+    group: "Talk",
+    run: (_rest, context) => {
+      const me = context.session.players.find((seat) => seat.id === context.session.selfId);
+      if (context.session.role === "dm") return context.session.note("The GM is never away: /pause the game instead.");
+      context.session.setPresence({ afk: !me?.afk });
+      context.session.note(me?.afk ? "You are back." : "You are away (/afk again to come back).");
+    },
+  },
   {
     names: ["option"],
     args: "[name] [value]",

@@ -28,6 +28,19 @@ ulesets` (on Linux,
     only; Kraken never ships a game's official logo.
   - *Descending Darkness* and *Apeira Astra* come with Kraken, with their books
     and a first adventure ([included-games.md](included-games.md)).
+- **A campaign's menu:** the **⋯** on its card (or a right-click on it):
+  **Rename**, **Duplicate** (a copy with its records, adventure and Map Studio
+  pictures), **Export .zip** (one file of the whole campaign, to keep or move),
+  **Backups and restore**, **Open folder**, and **Delete** (after you confirm,
+  to the recycle bin, where you can get it back). Not the campaign you are
+  playing: leave the table first.
+- **Backups:** Kraken keeps a copy of a campaign each time you press Play and
+  every hour while you host; the newest ten stay. **Backups and restore**
+  lists them by date; **Restore** puts one back (what was there is kept as a
+  backup too, so a restore can be undone). **Back up now** makes one.
+- **Logs:** when something goes wrong, Settings > **Open logs** opens the
+  folder of Kraken's logs (the table server's and the window's), for a bug
+  report.
   - *D&D 5E* comes with the SRD 5.2.1 as three books (*SRD 5.2.1 Player's
     Rules*, *Creatures*, *Magic Items*): classes and subclasses, species,
     backgrounds, feats, gear, spells, every monster and magic item, ready to
@@ -123,8 +136,20 @@ Select a campaign, then:
 - Press **Play**. *Addresses to give your players* lists the addresses to
   share, written as `http://address:port`.
 
-**Players on the internet** need your router to forward the port (47300 by
-default, TCP) to this PC. The Windows installer adds the firewall rule for
+**Players on the internet:** with **Internet** on, leave *Open the port on my
+router by itself (UPnP)* ticked and Kraken asks your router to open the port
+while you host (UPnP, or NAT-PMP), and closes it again when you stop. The
+Players window says whether it worked. If your router has UPnP turned off,
+forward the port (47300 by default, TCP) to this PC in its settings instead.
+
+**Inviting players:** the Players window's **Invite** is a link with the
+table password already in it (after the `#`, the part of a link a browser
+never sends to a server). Press **Copy** and paste it in your group's chat,
+or let a player at the table scan the QR code with a phone. They open it,
+type their name and their own password, and sit down. Choose the internet
+link or your network's when you have both.
+
+**The firewall:** the Windows installer adds the firewall rule for
 you; running from source, Windows asks once, the first time you host. On
 Linux, if a firewall is on (such as `ufw`), allow the port yourself:
 `sudo ufw allow 47300/tcp`.
@@ -180,9 +205,41 @@ any other way).
   encounters, maps, story) into the campaign. A book that is not active is
   off limits: its pages, pictures, maps and records open only once it is. A players' book can be shared
   with the players.
-- **Share** a record with the players from its window (*Share with the
-  players*), or a picture from its menu. Players never see what you have not
-  shared.
+- **Share** a record with the players from its window or its list row: the
+  eye opens a menu of *Everyone*, each player, and *GM only*. Drag a record,
+  note, story or picture onto a player's portrait along the top to share it
+  with that player alone; a picture's right-click menu has *Show to* each
+  player. Players never see what you have not shared.
+- **Edit a record** with the pencil in its window (Fantasy Grounds' lock):
+  its fields (the game's own list, else the fields that kind of record
+  carries; *+ Field* adds one of your own) and its description in the text
+  editor. Click the lock to read it again. Right-click a row for
+  *Duplicate* (a copy named "(copy)") and *Delete* (*Undo* shows for a few
+  seconds). A book's record has *Copy to campaign*, to change it without
+  touching the book.
+- **The text editor** (notes, story pages, quests, descriptions): the bar
+  gives bold, italic, underline, a heading, a list, boxed read-aloud text,
+  a table and plain text. Drag anything into it (a page, a picture, a
+  character, a sound, a note, a record) and it becomes a chip in the words.
+- **Story** (World > Story): *New* makes one of the campaign's own, above the
+  adventures' entries; it has a chapter, an order, and pages: text, a picture
+  or a book page (drag one onto it). An adventure's entry has *Copy to
+  campaign*. Share it and the players find it under Story.
+- **Tables** (Campaign > Tables): *New*, or *Import a table* (paste the rows,
+  "1-3  words", or comma/pipe/colon/semicolon separated). Every table's window
+  has *Roll* (a column, *GM only*); unlocked, it edits the die, the columns
+  and every row. In a result, `[2d6]` is rolled, `[3x]` rolls the tables it
+  links three times and `[Other Table]` rolls that table. In chat:
+  `/rollon Rumours -c Column -d 2d6 -hide`.
+- **Identify items:** an item's window has *Identified* and the name and notes
+  the players see until it is ticked again. The real item never reaches them,
+  on a sheet, the party sheet or in chat.
+- **Encounters** (Campaign > Encounters): *New*, drop NPCs in (a count can be
+  dice, rolled when they go on), *Add to tracker*, *Place on this map* (put
+  the tokens where they go first; it keeps where they stand), *End encounter*
+  (its XP to the party sheet). **Parcels**: drop items in, add coins, then *To
+  the party sheet* or *Give* to a character. **Quests** (Campaign > Quests):
+  XP, text and status; drop one on the party sheet's XP tab.
 - **Links in a book** work as in Fantasy Grounds: a page, a picture, or a
   record the book holds (a creature, spell, item, class, race, feat, table,
   encounter) opens in its own window. A table shows as a table, an
@@ -405,6 +462,28 @@ folder. Back up the whole folder to keep what you made.
 
 ## At the table
 
+- **Pause:** the pause button beside *Hosting* (or `/pause`) puts a veil over
+  the players' screens: their tokens stay put and their rolls wait until you
+  press **Go on**. Chat goes on, and you can do everything as usual.
+- **The players:** in the Players window each player's row has a bell (**Ring
+  bell**: a chime and a flash on their screen alone) and **⋯**; right-click a
+  row, or a character's portrait at the top, for the same menu: **Ring bell**,
+  **View as** (your map through that player's eyes), **Mark away**, **Kick**,
+  **Ban** (they cannot sit at this table again, by name and from the address
+  they came from, until you press **Unban** in the Players window's *Banned*
+  list).
+- **Away and hands:** a player who types `/afk`, or does nothing for five
+  minutes, has their portrait dimmed. A player's hand button (top right)
+  raises a hand: you hear a chime and see the hand on their portrait and row.
+- **A dropped connection:** a player whose Wi-Fi drops sees *Reconnecting…*
+  over the table and sits back down in the same seat by themselves; you see
+  them as *reconnecting* meanwhile, and their portrait stays. Your own window
+  does the same if its connection drops.
+- **Pull players to my view:** the players button in the map's tools glides
+  every player's map to what you see now; with the ping tool, Shift+click
+  pulls them to that spot as it pings. A player in the middle of a drag is
+  asked instead. Sharing a map also shows its name across the players'
+  screens for a moment.
 - **You at the table** (Settings, every seat): your colour (your tokens' ring,
   your pings and drawings) and, when your turn comes round in combat, a soft chime
   (a console tone in the sci-fi games) and a banner across your screen (each can be turned off).

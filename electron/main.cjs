@@ -27,6 +27,33 @@ if (process.env.KRAKEN_E2E === "1" || process.env.KRAKEN_SMOKE === "1") {
 
 Menu.setApplicationMenu(null);
 
+// What goes wrong in this process and in the window's page is kept in <userData>/logs/window.log (Settings > Open logs).
+const windowLog = require("./logFile.cjs").createLog(path.join(app.getPath("userData"), "logs"), "window");
+windowLog.capture();
+
+// The backend's requests for the desktop's shell: a deleted campaign's folders to the recycle bin
+// (never gone for good, and only inside Kraken's own data folder), a folder opened.
+async function shellOp({ action, paths, path: target }) {
+  const inside = (file) => {
+    const resolved = path.resolve(String(file ?? ""));
+    const base = path.resolve(app.getPath("userData"));
+    return resolved.startsWith(base + path.sep);
+  };
+  if (action === "trash") {
+    const list = (Array.isArray(paths) ? paths : []).map(String);
+    if (!list.every(inside)) throw new Error("Only Kraken's own folders go to the recycle bin.");
+    for (const file of list) if (fs.existsSync(file)) await shell.trashItem(file);
+    return { trashed: list.length };
+  }
+  if (action === "open") {
+    if (process.env.KRAKEN_NO_OPEN === "1") return { opened: String(target), shown: false };
+    const failed = await shell.openPath(String(target ?? ""));
+    if (failed) throw new Error(failed);
+    return { opened: String(target) };
+  }
+  throw new Error(`No such shell request: ${action}`);
+}
+
 // --- The backend ------------------------------------------------------------------
 let backend = null;
 let backendReady = null;
@@ -93,6 +120,7 @@ async function onBackend(child, message) {
     else if (message.op === "window") answer(true, await windowOp(message.payload));
     else if (message.op === "updater") answer(true, await updaterOp(message.payload));
     else if (message.op === "studio") answer(true, await studioOp(message.payload));
+    else if (message.op === "shell") answer(true, await shellOp(message.payload ?? {}));
     else answer(false, `No such request: ${message.op}`);
   } catch (error) {
     answer(false, error instanceof Error ? error.message : String(error));
@@ -187,6 +215,7 @@ for (const name of [
   "studio-settings",
   "start-host",
   "stop-host",
+  "invite",
   "campaign-view",
   "campaign-bundle",
   "save-bundle",
@@ -242,6 +271,22 @@ ipcMain.handle("sound-folder", async () => shell.openPath(await call("sound-fold
 ipcMain.handle("packs-folder", async () => shell.openPath(await call("packs-folder")));
 ipcMain.handle("decal-folder", async (_event, kind) => shell.openPath(await call("decal-folder", kind)));
 ipcMain.handle("kraken-folder", async (_event, kind) => shell.openPath(await call("kraken-folder", kind ?? "")));
+// Settings > Open logs.
+ipcMain.handle("open-logs", async () => shellOp({ action: "open", path: await call("logs-folder") }));
+// The start screen's campaign menu; Export asks where the .zip goes first.
+ipcMain.handle("campaign-manage", async (_event, input) => {
+  if (input?.action === "export" && !input.path) {
+    const found = (await call("campaigns")).find((item) => item.id === input.id);
+    const picked = await dialog.showSaveDialog(mainWindow, {
+      title: "Export the campaign",
+      defaultPath: path.join(app.getPath("documents"), `${String(found?.name ?? "campaign").replace(/[^\w .()-]/g, "_")}.zip`),
+      filters: [{ name: "Kraken campaign", extensions: ["zip"] }],
+    });
+    if (picked.canceled || !picked.filePath) return null;
+    return call("campaign-manage", { ...input, path: picked.filePath });
+  }
+  return call("campaign-manage", input);
+});
 
 // The DM assistant's key the GM typed: kept encrypted on this computer, known to the backend for the run.
 const assistantKeys = assistantModule.keyStore(path.join(app.getPath("userData"), "assistant-key.bin"), safeStorage);
@@ -317,6 +362,12 @@ function createWindow() {
     if (!headless) win.show();
   });
 
+  // The page's errors and a crashed page, into the window's log.
+  win.webContents.on("console-message", (event, level, message, line, source) => {
+    const details = event && typeof event === "object" && "level" in event ? event : { level, message, lineNumber: line, sourceId: source };
+    if (details.level === "error" || details.level === 3) windowLog.write("error", `page: ${details.message} (${details.sourceId ?? ""}:${details.lineNumber ?? ""})`);
+  });
+  win.webContents.on("render-process-gone", (_event, details) => windowLog.write("fatal", `the page stopped: ${details.reason} (${details.exitCode})`));
   win.webContents.on("will-navigate", (event) => {
     event.preventDefault();
   });

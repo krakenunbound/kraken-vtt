@@ -1,6 +1,6 @@
 import type { FieldSpec } from "../../../shared/rulesets/types";
 import { Field } from "../fields/Field";
-import { at, fill, num, rows, textOf, useSheet, type Scope } from "../sheet/context";
+import { at, fill, nodesOf, num, rows, textOf, useSheet, type Scope } from "../sheet/context";
 
 // One field of a manifest (FG's stringfield / numberfield / combobox, bound to
 // a path): shown, typed into, picked or ticked. An edit goes to the host's
@@ -18,6 +18,8 @@ export function FieldView({ spec, scope, base = "" }: { spec: FieldSpec; scope: 
   const save = (next: unknown) => (spec.action ? act(spec.action, { key: scope.extra?.key === undefined ? undefined : String(scope.extra.key), value: next }) : change(path, next));
   switch (spec.kind) {
     case "number":
+      // A viewer who may not type sees a number box (a skill's level), where the sheet says so.
+      if (spec.locked === "num" && !typing) return <span className="cc-num">{num(value)}</span>;
       return <Field value={num(value)} number editable={typing} label={label} onSave={(text) => save(Number(text) || 0)} />;
     case "text":
       return <Field value={String(value ?? "")} editable={typing} label={label} onSave={(text) => save(text)} />;
@@ -41,14 +43,16 @@ export function FieldView({ spec, scope, base = "" }: { spec: FieldSpec; scope: 
       if (spec.hook) attrs["data-stat"] = spec.hook;
       if (spec.attr) attrs[spec.attr] = String(value ?? "");
       const shown = spec.format
-        ? (sheet.formats[spec.format]?.(scope.data) ?? "")
+        ? (sheet.formats[spec.format]?.(scope.data, undefined, scope.data) ?? "")
         : spec.join
           ? rows(raw).map(([, row]) => fill(spec.join?.item ?? "", { row, data: {} })).join(spec.join.sep)
-          : spec.show
-            ? fill(spec.show, scope)
+          : Array.isArray(spec.show)
+            ? nodesOf(spec.show, scope, modifiers)
+            : spec.show
+            ? textOf(spec.show, scope, modifiers)
             : fill(`{${spec.path}}`, scope) || String(value ?? "");
       return (
-        <span className="cc-value" title={title} style={spec.color ? { color: spec.color } : undefined} {...attrs}>
+        <span className={spec.className ? `cc-value ${spec.className}` : "cc-value"} title={title} style={spec.color ? { color: spec.color } : undefined} {...attrs}>
           {shown}
         </span>
       );

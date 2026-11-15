@@ -6,7 +6,12 @@ import { diceStore, rolling, throwIntent } from "../dice/diceStore";
 import { rulerStore } from "../table/Ruler";
 import { exploredStore } from "../table/explored";
 
-export type Seat = { id: string; name: string; role: "dm" | "player" };
+// afk: away (/afk); idle: no input for a while; hand: a raised hand; lost: the connection dropped, a reconnect awaited.
+export type Seat = { id: string; name: string; role: "dm" | "player"; afk?: boolean; idle?: boolean; hand?: boolean; lost?: boolean };
+// The GM's Ban list (kept with the campaign).
+export type Ban = { name: string; address: string; at: number };
+// The GM pulled the players' maps here: a centre and how much of the map shows (map pixels).
+export type ViewPull = { id: number; x: number; y: number; width: number; height: number; from: string; at: number };
 // The map as the host shows it to this seat (electron/mapState.cjs viewFor).
 export type TokenHealth = { status: string; percent: number; color: string };
 export type MapToken = {
@@ -85,6 +90,8 @@ export type TableMap = {
   prep?: string | null;
   testing?: boolean;
   previewing?: boolean;
+  // View as: the player whose eyes the preview is ("": every player's).
+  previewAs?: string;
   sceneHidden?: boolean;
   tokens: MapToken[];
   doors: MapDoor[];
@@ -189,7 +196,7 @@ export type ChatSend = { kind?: ChatKind; mood?: string; to?: string[]; as?: str
 // The table's own options, set by the GM (electron/tableServer.cjs savedOptions).
 export type SoundTrigger = { id: string; name: string; on: string; match: string; result: string; sound: string; enabled: boolean };
 // Books (FG's Library): what the GM has shared, and the pictures shown to the players.
-export type ShownImage = { id: string; book: string; file: string; name: string; at: number };
+export type ShownImage = { id: string; book: string; file: string; name: string; at: number; to?: string[] };
 export type BookShelf = { active: string[]; shared: string[]; images: ShownImage[] };
 export type BookInfo = { id: string; name: string; title: string; category: string; ruleset: string; author: string; hasBook: boolean; cover: string; adventure: boolean; forPlayers: boolean; active: boolean; shared: boolean; pack?: boolean };
 export type BookPageRef = { id: string; name: string; keywords: string };
@@ -219,7 +226,7 @@ export type QuickSlot =
 export type KrakenLink = QuickSlot;
 export type SoundItem = { id: string; kind: string; group: string; name: string };
 export type SoundLibrary = { sounds: SoundItem[]; groups: { id: string; count: number }[]; folder: string; triggers?: SoundTrigger[] };
-export type TableOptions = { towerReveal: boolean; towerExternal?: boolean; towerStyle?: string; deathMarkers?: { on: boolean; default: string; byType: Record<string, string> }; motd?: { text: string; links: QuickSlot[] }; decal: string; wallpaper: string; gmIcon: string; soundHidden: "off" | "combat" | "all"; soundRepeat: number; diceHold?: number; tokenEffects?: "full" | "icons" | "off"; playerEffects?: "none" | "lights" | "conditions" | "all"; autoApply?: boolean; wizard35?: Wizard35Options; wizard2e?: Wizard2eOptions };
+export type TableOptions = { paused?: boolean; towerReveal: boolean; towerExternal?: boolean; towerStyle?: string; deathMarkers?: { on: boolean; default: string; byType: Record<string, string> }; motd?: { text: string; links: QuickSlot[] }; decal: string; wallpaper: string; gmIcon: string; soundHidden: "off" | "combat" | "all"; soundRepeat: number; diceHold?: number; tokenEffects?: "full" | "icons" | "off"; playerEffects?: "none" | "lights" | "conditions" | "all"; autoApply?: boolean; wizard35?: Wizard35Options; wizard2e?: Wizard2eOptions };
 // The D&D 3.5E character wizard's options (the GM's, as FG's KrakenCharWizard35E).
 export type Wizard35Options = { methods: number[]; rollLock: boolean; lowReroll: boolean; vault: boolean };
 // The AD&D 2E character wizard's options (the GM's): ability rolls once only, the PHB methods allowed, gold above 1st level.
@@ -278,12 +285,16 @@ export type FateEntry = {
   taken: number;
 };
 export type CombatView = { round: number; active: string | null; entries: CombatEntry[] };
+export type Visibility = "gm" | "owner" | "all" | string[];
+// The host's content requests (electron/content.cjs), each with its agent tool.
+export type ContentRequest = "record-copy" | "story" | "table-roll" | "identify" | "encounter" | "parcel" | "quest";
 export type TableRecord = {
   id: string;
   type: string;
   name: string;
   owner: string;
-  visibility: "gm" | "owner" | "all";
+  // gm, owner, all, or the players it is shared with by name.
+  visibility: Visibility;
   // The book (module) it came from, if any.
   source?: string;
   data: Record<string, unknown>;
@@ -302,6 +313,8 @@ export type HostInfo = {
   lan: boolean;
   cloud: boolean;
   campaignId: string;
+  upnp?: import("../kraken").KrakenUpnp | null;
+  invite?: import("../kraken").KrakenInvite | null;
 };
 
 type NetScene = {
@@ -325,7 +338,7 @@ type NetScene = {
 };
 
 // account: the player's account at that table (its password, or the token this browser kept).
-type JoinMessage = { name: string; password: string; hostToken?: string; account?: { password?: string; token?: string } };
+type JoinMessage = { name: string; password: string; hostToken?: string; account?: { password?: string; token?: string }; rejoin?: boolean };
 
 // A browser stays signed in to a table's account: the name and the token the
 // host gave, kept per table (address:port). Never the password.
@@ -444,6 +457,15 @@ export function useSession() {
   const [mapShared, setMapShared] = useState(0);
   const [notice, setNotice] = useState<string | null>(null);
   const [templateAsk, setTemplateAsk] = useState<TemplateAsk | null>(null);
+  // The connection dropped: trying again (attempt, and when the next try is), the table kept on screen meanwhile.
+  const [reconnecting, setReconnecting] = useState<{ attempt: number; at: number } | null>(null);
+  // The GM's Ban list; the bells rung for this player (each one a chime and a flash); raised hands the GM is told of.
+  const [bans, setBans] = useState<Ban[]>([]);
+  const [bell, setBell] = useState<{ id: number; from: string } | null>(null);
+  const [handRaised, setHandRaised] = useState<{ id: number; name: string } | null>(null);
+  // The GM pulled the players' maps to a place; the GM shared a map (its name, for the title card).
+  const [viewPull, setViewPull] = useState<ViewPull | null>(null);
+  const [mapShareName, setMapShareName] = useState("");
   const [chat, setChat] = useState<ChatLine[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [playerScene, setPlayerScene] = useState<MapScene | null>(null);
@@ -458,6 +480,13 @@ export function useSession() {
   const assetRef = useRef("");
   const originRef = useRef("");
   const intentional = useRef(false);
+  // The last join that seated us (its host token, the table's password), to sit down again after a drop.
+  const lastJoin = useRef<{ url: string; join: JoinMessage; label: string; origin: string; role: "dm" | "player" } | null>(null);
+  // The account token the host gave this seat (kept here too: a browser that keeps nothing still reconnects).
+  const accountToken = useRef("");
+  const retryTimer = useRef<number | undefined>(undefined);
+  const reconnectRef = useRef<(() => void) | null>(null);
+  const bellCounter = useRef(0);
   const stateRef = useRef({ role, selfId, players, map, chat, playerScene, records });
   roleRef.current = role;
   playersRef.current = players;
@@ -493,6 +522,11 @@ export function useSession() {
     setHostInfo(null);
     setRemoteLabel("");
     roleRef.current = null;
+    window.clearTimeout(retryTimer.current);
+    setReconnecting(null);
+    setBans([]);
+    setViewPull(null);
+    lastJoin.current = null;
   }, []);
 
   const connect = useCallback(
@@ -505,6 +539,8 @@ export function useSession() {
         socketRef.current = socket;
         let settled = false;
         let opened = false;
+        // Seated at the table (its "ok" came): only then does a close mean a drop to come back from.
+        let seated = false;
         // Why the host sent this seat away (kicked, signed in elsewhere): kept past the close.
         let sentAway = "";
         const timer = window.setTimeout(() => {
@@ -514,13 +550,14 @@ export function useSession() {
           reject(new Error(`No table answered at ${label} in time. Check that the GM has pressed Play and that the address and port match. From another computer, the GM's firewall must allow Kraken VTT.`));
         }, 8000);
 
-        const fail = (message: string) => {
+        // refused: the table said no (a wrong password, a ban): trying again would not help.
+        const fail = (message: string, refused = false) => {
           if (settled) return;
           settled = true;
           intentional.current = true;
           window.clearTimeout(timer);
           socket.close();
-          reject(new Error(message));
+          reject(Object.assign(new Error(message), { refused }));
         };
 
         socket.onmessage = (event) => {
@@ -534,21 +571,27 @@ export function useSession() {
           if (msg.type === "no") {
             // The account would not take this browser's token (a new password, signed out elsewhere): forget it.
             if (msg.account === "password") forgetSignIn(label);
-            fail(typeof msg.reason === "string" ? msg.reason : "Wrong password.");
+            fail(typeof msg.reason === "string" ? msg.reason : "Wrong password.", !msg.retry);
             return;
           }
           if (msg.type === "ok" && !settled) {
             settled = true;
+            seated = true;
             window.clearTimeout(timer);
             const you = msg.you as Seat & { assetToken?: string; accountToken?: string };
             // Signed in: this browser keeps the token, not the password.
             if (you.accountToken) keepSignIn(label, { name: you.name, token: you.accountToken });
+            accountToken.current = you.accountToken ?? "";
+            lastJoin.current = { url, join, label, origin, role: you.role };
+            if (Array.isArray(msg.bans)) setBans(msg.bans as Ban[]);
             assetRef.current = you.assetToken ?? "";
             // Sounds come from the host, for this seat.
             sound.setSource((id) => `${originRef.current}/sound/file?token=${assetRef.current}&id=${encodeURIComponent(id)}`);
             // The GM's dice packs (Documents/Kraken VTT/Dice): more sets for this seat to choose from.
             void dicePacks.connect(originRef.current, assetRef.current);
-            setRuleset(typeof msg.ruleset === "string" ? msg.ruleset : "");
+            // The campaign's game, by its name (a string, or none).
+            const campaignGame = msg.ruleset;
+            setRuleset(typeof campaignGame === "string" ? campaignGame : "");
             if (msg.sceneSound && typeof msg.sceneSound === "object") setSceneSound(msg.sceneSound as { sceneId: string | null; kept: Soundscape | null });
             if (msg.soundscape) {
               setSoundscape(msg.soundscape as Soundscape);
@@ -597,7 +640,17 @@ export function useSession() {
           if (msg.type === "clocks" && msg.clocks) setClocks(msg.clocks as ClocksView);
           if (msg.type === "read-aloud" && typeof msg.text === "string") setReadAloudNow({ text: msg.text, title: String(msg.title ?? ""), at: Date.now() });
           if (msg.type === "options" && msg.options) setOptions(msg.options as TableOptions);
-          if (msg.type === "map-share") setMapShared((count) => count + 1);
+          if (msg.type === "map-share") {
+            setMapShared((count) => count + 1);
+            setMapShareName(typeof msg.name === "string" ? msg.name : "");
+          }
+          if (msg.type === "bans" && Array.isArray(msg.bans)) setBans(msg.bans as Ban[]);
+          if (msg.type === "bell") setBell({ id: ++bellCounter.current, from: String(msg.from ?? "GM") });
+          if (msg.type === "hand" && typeof msg.name === "string") setHandRaised({ id: ++bellCounter.current, name: msg.name });
+          if (msg.type === "view-pull") {
+            const pull = { id: ++bellCounter.current, x: Number(msg.x), y: Number(msg.y), width: Number(msg.width), height: Number(msg.height), from: String(msg.from ?? "GM"), at: Date.now() };
+            if ([pull.x, pull.y, pull.width, pull.height].every(Number.isFinite)) setViewPull(pull);
+          }
           if (msg.type === "ruler") rulerStore.put(msg);
           if (msg.type === "explored") exploredStore.put(msg);
           if (msg.type === "ping") {
@@ -679,7 +732,7 @@ export function useSession() {
           }
         };
 
-        socket.onclose = () => {
+        socket.onclose = (event) => {
           if (!settled) {
             // Never opened: nothing answered there. Opened, then closed: the table turned us away.
             fail(
@@ -689,19 +742,76 @@ export function useSession() {
             );
             return;
           }
-          if (generation.current !== gen || intentional.current) return;
-          setError(sentAway || "The table closed.");
-          reset();
+          // An attempt that timed out (never seated): its own promise has already said so.
+          if (generation.current !== gen || intentional.current || !seated) return;
+          // Sent away (kicked, banned, signed in elsewhere), or the GM closed the table (4003): back to the join screen, saying why.
+          if (sentAway || event.code === 4003 || !lastJoin.current || !reconnectRef.current) {
+            setError(sentAway || (event.code === 4003 ? "The GM closed the table." : "The table closed."));
+            reset();
+            return;
+          }
+          // Dropped: the table stays on screen while we sit down again.
+          for (const wait of opWaits.current.values()) wait.reject(new Error("The connection dropped."));
+          opWaits.current.clear();
+          reconnectRef.current();
         };
 
         socket.onopen = () => {
           opened = true;
-          socket.send(JSON.stringify({ type: "join", name: join.name, password: join.password, hostToken: join.hostToken, ...(join.account ? { account: join.account } : {}) }));
+          socket.send(JSON.stringify({ type: "join", name: join.name, password: join.password, hostToken: join.hostToken, ...(join.account ? { account: join.account } : {}), ...(join.rejoin ? { rejoin: true } : {}) }));
         };
       });
     },
     [applyMap, reset],
   );
+
+  // The connection dropped (not closed on purpose, not sent away): sit down again
+  // with the same seat, after 1, 2, 4... seconds (at most 15), until it works, the
+  // table says no, or the person leaves. A player signs in with their account's
+  // token; the GM's window with its host token.
+  reconnectRef.current = () => {
+    const last = lastJoin.current;
+    if (!last) return;
+    window.clearTimeout(retryTimer.current);
+    const attempt = (count: number) => {
+      // The GM's own table on this computer not answering for a minute and a half has stopped: say so, not try forever.
+      if (last.role === "dm" && count >= 8) {
+        setError("Your table stopped answering. Press Play to host it again.");
+        reset();
+        void window.kraken?.stopHost().catch(() => undefined);
+        return;
+      }
+      const delay = Math.min(15000, 1000 * 2 ** count);
+      setReconnecting({ attempt: count + 1, at: Date.now() + delay });
+      retryTimer.current = window.setTimeout(() => {
+        const now = lastJoin.current;
+        if (!now) return;
+        const token = accountToken.current || savedSignIn(now.label)?.token || "";
+        const join: JoinMessage = now.role === "player" && token ? { name: now.join.name, password: now.join.password, account: { token } } : { ...now.join, rejoin: true };
+        connect(now.url, join, now.label, now.origin)
+          .then(() => {
+            setReconnecting(null);
+            // The GM's window came back as someone else (another GM seat took the table): not ours any more.
+            if (now.role === "dm" && roleRef.current !== "dm") {
+              setError("Your table was taken over by another window.");
+              intentional.current = true;
+              socketRef.current?.close(4000);
+              reset();
+            }
+          })
+          .catch((caught: Error & { refused?: boolean }) => {
+            if (!lastJoin.current) return;
+            if (caught.refused) {
+              setError(caught.message);
+              reset();
+              return;
+            }
+            attempt(count + 1);
+          });
+      }, delay);
+    };
+    attempt(0);
+  };
 
   const leave = useCallback((force = false) => {
     if (!force && roleRef.current === "dm" && playersRef.current.some((seat) => seat.role === "player")) {
@@ -710,10 +820,12 @@ export function useSession() {
     }
     intentional.current = true;
     generation.current += 1;
+    window.clearTimeout(retryTimer.current);
     const wasDm = roleRef.current === "dm";
     const socket = socketRef.current;
     socketRef.current = null;
-    socket?.close();
+    // 4000: left on purpose (the host frees the seat at once, keeping none for a reconnect).
+    socket?.close(4000, "leave");
     setError(null);
     reset();
     if (wasDm) void window.kraken?.stopHost();
@@ -731,7 +843,7 @@ export function useSession() {
   }, [remoteLabel, leave]);
 
   const host = useCallback(
-    async (input: { name: string; port: number; password: string; lan: boolean; cloud: boolean; campaignId: string }) => {
+    async (input: { name: string; port: number; password: string; lan: boolean; cloud: boolean; upnp?: boolean; campaignId: string }) => {
       setConnecting(true);
       setError(null);
       let started = false;
@@ -745,6 +857,7 @@ export function useSession() {
           password,
           lan: input.lan,
           cloud: input.cloud,
+          upnp: Boolean(input.upnp),
           campaignId: input.campaignId,
         });
         started = true;
@@ -759,6 +872,8 @@ export function useSession() {
           lan: input.lan,
           cloud: input.cloud,
           campaignId: input.campaignId,
+          upnp: info.upnp ?? null,
+          invite: info.invite ?? null,
         });
         await connect(
           endpoint("127.0.0.1", info.port, "ws"),
@@ -989,6 +1104,17 @@ export function useSession() {
     },
     [],
   );
+  // The campaign's content (electron/content.cjs): copies, story, tables, identifying, encounters,
+  // parcels, quests; the host answers with what it made or did, or why not.
+  const content = useCallback(<T = unknown,>(type: ContentRequest, body: Record<string, unknown>) => {
+    const socket = socketRef.current;
+    if (!socket || socket.readyState !== WebSocket.OPEN) return Promise.reject(new Error("Not connected."));
+    const req = ++opCounter.current;
+    return new Promise<T>((resolve, reject) => {
+      opWaits.current.set(req, { resolve: (_id, payload) => resolve((payload as { result?: T } | undefined)?.result as T), reject });
+      socket.send(JSON.stringify({ ...body, type, req }));
+    });
+  }, []);
 
   // A SIEGE check for a character; the host rolls it and posts the result.
   const siegeCheck = useCallback((id: string, attribute: string, cl = 0, save = false, extra?: { label?: string; bonus?: number; addLevel?: boolean; kind?: "check" | "save" | "skill" | "morale"; skill?: string; dc?: number; advantage?: string }) => {
@@ -1172,6 +1298,15 @@ export function useSession() {
   const forgedAction = useCallback((id: string, action: string, args: Record<string, unknown> = {}) => send({ type: "forged", ...(id ? { id } : {}), action, args, ...throwIntent() }), [send]);
   const clearDrawings = useCallback(() => send({ type: "draw-clear" }), [send]);
   // Death markers: the GM removes one (right-click) or clears them all.
+  // The Players window's controls (the GM's), a player's own presence, the GM's pause and view pull.
+  const kickPlayer = useCallback((name: string, ban = false) => send({ type: "kick", name, ...(ban ? { ban: true } : {}) }), [send]);
+  const unbanPlayer = useCallback((name: string) => send({ type: "bans", action: "unban", name }), [send]);
+  const ringPlayer = useCallback((name: string) => send({ type: "ring", name }), [send]);
+  // A player's own (afk, idle, hand), or with name the GM's for that player.
+  const setPresence = useCallback((change: { afk?: boolean; idle?: boolean; hand?: boolean }, name?: string) => send({ type: "presence", ...change, ...(name ? { name } : {}) }), [send]);
+  const pullView = useCallback((view: { x: number; y: number; width: number; height: number }) => send({ type: "view-pull", ...view }), [send]);
+  const viewAs = useCallback((name: string) => send({ type: "playtest", preview: Boolean(name), as: name }), [send]);
+  const setPaused = useCallback((paused: boolean) => send({ type: "table-options", options: { paused } }), [send]);
   const removeDeathMarker = useCallback((id: string) => send({ type: "death-marker", action: "remove", id }), [send]);
   const clearDeathMarkers = useCallback(() => send({ type: "death-marker", action: "clear" }), [send]);
   // The GM's map editor: walls and undo.
@@ -1265,6 +1400,19 @@ export function useSession() {
     setTableOptions,
     connected,
     connecting,
+    reconnecting,
+    bans,
+    bell,
+    handRaised,
+    viewPull,
+    mapShareName,
+    kickPlayer,
+    unbanPlayer,
+    ringPlayer,
+    setPresence,
+    pullView,
+    viewAs,
+    setPaused,
     canHost: typeof window !== "undefined" && Boolean(window.kraken),
     role,
     selfId,
@@ -1369,7 +1517,7 @@ export function useSession() {
     // The party's watch order and formation (a player moves their own characters).
     partyOrder: (change: { action: "place" | "remove" | "watch" | "fill" | "rotate" | "clear"; id?: string; x?: number; y?: number; watch?: number; columns?: number; direction?: "left" | "right" }) => send({ type: "party-order", ...change }),
     shareBook: (book: string, shared: boolean) => send({ type: "book-share", book, shared }),
-    showImage: (book: string, file: string, name: string) => send({ type: "image-share", book, file, name }),
+    showImage: (book: string, file: string, name: string, to?: string[]) => send({ type: "image-share", book, file, name, ...(to?.length ? { to } : {}) }),
     hideImage: (id: string) => send({ type: "image-unshare", id }),
     soundList,
     soundCommand,
@@ -1382,6 +1530,7 @@ export function useSession() {
     wizardText,
     roll,
     op,
+    content,
     siegeCheck,
     buildCharacter,
     shipAction,

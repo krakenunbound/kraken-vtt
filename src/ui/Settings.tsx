@@ -74,6 +74,11 @@ export function SettingsWindow({ session }: { session: Session }) {
                 Kraken VTT Folder
               </button>
             ) : null}
+            {window.kraken?.openLogs ? (
+              <button type="button" className="settings-button" data-setting="open-logs" title="Kraken's logs: what went wrong in the table server and in this window (the newest three files of each), for a bug report" onClick={() => void window.kraken?.openLogs?.()}>
+                Open logs
+              </button>
+            ) : null}
           </>
         ) : null}
       </div>

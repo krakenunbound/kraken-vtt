@@ -24,7 +24,25 @@ export default {
   engine: "shared/cairn/rules.mjs",
   host: { module: "electron/cairn.cjs", message: "cairn", tool: "kraken_cairn" },
   labels: { hp: "HP", ac: "Armor", xp: "Growth" },
-  records: { background: { label: "Backgrounds" }, item: { label: "Gear and Relics" }, npc: { label: "Bestiary" }, cairntable: { label: "Tables" } },
+  records: {
+    background: { label: "Backgrounds" },
+    item: { label: "Gear and Relics" },
+    // A creature's block as the Warden's Guide writes one (the record window's editor, unlocked).
+    npc: {
+      label: "Bestiary",
+      fields: [
+        { path: "hp", label: "HP", kind: "number" },
+        { path: "armor", label: "Armor", kind: "number" },
+        { path: "str", label: "STR", kind: "number" },
+        { path: "dex", label: "DEX", kind: "number" },
+        { path: "wil", label: "WIL", kind: "number" },
+        { path: "type", label: "Type", kind: "text" },
+        { path: "detachment", label: "Detachment", kind: "text" },
+        { path: "critical", label: "Critical damage", kind: "text" },
+      ],
+    },
+    cairntable: { label: "Tables" },
+  },
   // The book's Character Creation in its order, on the core's wizard: a background (rolled d20 or chosen), a
   // name from its list, its starting gear, a roll on each of its tables; STR, DEX and WIL 3d6 in order (two
   // may be swapped once); Hit Protection 1d6; the traits (d10 each), a Bond (d20), the age (2d20+10) and, for

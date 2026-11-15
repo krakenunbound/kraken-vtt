@@ -57,8 +57,12 @@ doesn't get it (it could reach the tools withheld from the assistant).
 | Sidebar Assistant: ask, stop, new chat (its key is set in its window or ANTHROPIC_API_KEY, never by a tool) | `kraken_assistant`, `kraken_windows` kind assistant |
 | **Campaigns** | |
 | List campaigns, make one | `kraken_campaigns`, `kraken_campaign_create` |
-| Play (host) a campaign, leave | `kraken_host`, `kraken_leave` |
+| The start screen's campaign menu: Rename, Duplicate, Export .zip, Backups and restore (a backup at each Play and hourly while hosting, ten kept), Open folder, Delete (to the recycle bin) | `kraken_campaigns` action rename, duplicate, export, backups, backup, restore, folder, delete |
+| Settings > Open logs (the backend's and the window's rotating logs) | `kraken_logs` (open) |
+| Play (host) a campaign, leave; Internet with the router's port opened by itself (UPnP / NAT-PMP, closed on leave); the invite link (password in its #fragment), Copy, QR | `kraken_host` (internet, upnp; returns invite), `kraken_leave` |
 | See who is connected, what's going on | `kraken_status`, `kraken_players` |
+| The Players window's controls and the portraits' right-click: Ring bell, View as, Mark away, a raised hand lowered, the Ban list and Unban; a player's /afk, idle and raised hand (shown on their row and portrait); a dropped seat kept while it reconnects (lost) | `kraken_players` action ring, view-as, afk, lower, bans, unban |
+| Pause the game (the menubar's button, /pause): the players' veil, their moves and rolls refused | `kraken_table_options` paused |
 | **Maps** | |
 | Open map (a prepared map bundle, or a bare picture to build on) | `kraken_open_adventure` |
 | Adventure and scene menus | `kraken_scenes` |
@@ -81,7 +85,7 @@ doesn't get it (it could reach the tools withheld from the assistant).
 | Settings: token effects (animated, icons, off), what players may add from the Effects list, damage applied at once or from the card | `kraken_table_options` tokenEffects, playerEffects, autoApply |
 | The dice tower: its look for everyone (Kraken's six drawn, the tower pictures, a picture imported); on the GM's screen, lock it, fix it at x,y, move it, turn it on or off (its right-click menu) | `kraken_tower` |
 | Dice packs (Documents/Kraken VTT/Dice): list them with their sets and problems, check a pack being made, the folder; a pack's set by name | `kraken_dice_packs`; `kraken_dice_settings` preset |
-| Ping the map | `kraken_ping` |
+| Ping the map; Pull players to my view (the map's players button, Shift+ping) | `kraken_ping` (pull, squares) |
 | The ruler (right-drag, waypoints; seen by every seat on the map, in the measurer's colour), by the diagonal rule (campaign: `kraken_table_options` diagonal; a scene's own: `kraken_scene_settings` diagonal) | `kraken_ruler` (squares, show) |
 | Settings > Tokens and measuring: what players see of health (bar, dot, on hover, off) and names; a token's unidentified name, its senses line, its elevation (Alt+wheel) | `kraken_table_options` healthNpc, healthPc, names, diagonal; `kraken_token_update` unidentified, senses, elevation |
 | Fog of war (explored areas kept by the host per player and scene); Scene > Reset explored | `kraken_line_of_sight` (explored counts; resetExplored) |
@@ -98,7 +102,16 @@ doesn't get it (it could reach the tools withheld from the assistant).
 | Creation wizard (C&C's, or the 5E wizard in a D&D 5E campaign: species, class, background, scores, skills, gear, spells; the 3.5E wizard in a D&D 3.5E campaign: race, class, level, scores; the Traveller wizard in a Traveller campaign: characteristics, career and terms, skills and specialities, kit; the 2E wizard in an AD&D 2E campaign: race, class or multi-class, level, scores and 18/xx, or a book's pregen) | `kraken_build_character` |
 | Character Selection, what the sidebar's Characters opens for the GM and every player (FG's charselect): a card opens its sheet (a player takes a character no one holds), New character (the wizard), Create (a blank one), Import, and in edit mode (the pencil) each card's Export and the GM's Delete; the portrait bar along the top | `kraken_windows` characters (or charselect), sheet; `kraken_characters` (roster, give, release); `kraken_character_import`, `kraken_character_export`, `kraken_record_delete` |
 | Players' accounts (the Players window): list, make one ahead, a new password, remove | `kraken_accounts` |
-| Lists (FG's campaign lists): share a record with the players or hide it (the sharing icon, FG's Share / Unshare); open the lists or a record | `kraken_record_update` visibility all / gm; `kraken_windows` records, record |
+| Lists (FG's campaign lists): share a record with the players or hide it (the eye's menu: Everyone, each player, GM only; a row dropped on a player's portrait); open the lists or a record | `kraken_record_update` visibility all / gm / [players' names]; `kraken_windows` records, record |
+| A record's window, unlocked (the pencil, FG's lock): its fields (the manifest's `records.<type>.fields`, else its kind's), + Field, the description in the text editor | `kraken_record_update` (data; the text is FG's formatted text, cleaned by the host) |
+| Right-click a row: Duplicate, Delete (Undo), Copy to campaign (a book's record, also from its window) | `kraken_record_duplicate` (id, or book + path); `kraken_record_delete`; Undo is `kraken_record_create` with the record |
+| The campaign's story (World > Story's Campaign section): New, pages (text, picture, book page), chapter and order; an adventure's entry's Copy to campaign | `kraken_story` (create, copy, set, add-block, remove-block) |
+| Random tables: Roll from any table window (column, GM only), the Tables list's New and Import a table (FG's paste), the table editor's die, columns and rows; `/rollon` in chat | `kraken_table` (roll, create, edit, import) |
+| An item's Identified box and unidentified name and notes (an item record, a row of a sheet's gear, the party parcel or a treasure parcel) | `kraken_item_identify` |
+| Encounters (Campaign > Encounters' Campaign section): New, NPCs dropped in with a count or dice, faction, Add to tracker, Place on this map, End encounter | `kraken_encounter` (create, add-npc, set-npc, remove-npc, xp, place, run, end) |
+| Treasure parcels: New, items dropped in, coins, To the party sheet (or dropped on its parcel), Give to a character; a table rolled into one | `kraken_parcel` (create, add, remove, party, character); `kraken_table` roll output parcel |
+| Quests (Campaign > Quests): XP, text, status; dropped on the party sheet's XP tab, or its New quest | `kraken_quest` (create, set, party) |
+| A picture's Show to (a player), or a picture dropped on a player's portrait | `kraken_books` show with `to` |
 | The sidebar (FG's dock): tools along the top; Library, Player, Campaign, Character categories that fold away; the arrow at the bottom collapses it to icons and opens it again; a button opens its list (Items, NPCs, Classes, Races, Spells...: every active book's records under the book's name; Encounters, Parcels, Tables: every active adventure's) | `kraken_sidebar` list / state / fold / press |
 | A blank character sheet (Character Selection's Create), filled by hand | `kraken_record_create` type character |
 | A race, class, spell or item dragged from a list onto a character sheet (FG's sheet drop): the package at 1st level with its primes and hit points, a race replacing the old, the spell bound to its class, the item into the gear; a second class is refused (dual class or reclass) | `kraken_character_drop` |
@@ -119,7 +132,7 @@ doesn't get it (it could reach the tools withheld from the assistant).
 | Chat, `/r` rolls, the chat log | `kraken_chat_send`, `kraken_roll`, `kraken_chat_log` |
 | Chat commands: `/w` whispers, `/me` `/action` `/ooc` `/mood`, the GM's `/story` and `/id` | `kraken_chat_send` (`kind`, `to`, `as`, `mood`) |
 | `/gmroll`, `/blindroll` | `kraken_roll` with `secret` |
-| `/kick`, `/vote`, `/save` | `kraken_kick`, `kraken_vote`, `kraken_save` |
+| `/kick` (and the Players window's Kick, Ban), `/vote`, `/save` | `kraken_kick` (ban), `kraken_vote`, `kraken_save` |
 | **Sound** | |
 | The Sound window: one-shots and effects for the table, ambience loops, music, the chat's sound triggers, a scene's own sound | `kraken_sound` (list, play, stop, ambience, music, scene, triggers, scape) |
 | GM-only roll (the GM's dice tower) | `kraken_roll` with `secret` |

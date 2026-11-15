@@ -22,6 +22,7 @@ const { createBookShelf } = require("./books.cjs");
 const { fgDataFolder } = require("./importers/fgModule.cjs");
 const packs = require("./packs.cjs");
 const campaigns = require("./campaigns.cjs");
+const { openPort } = require("./portMapping.cjs");
 const { startAgentServer } = require("./agent/mcpServer.cjs");
 const assistantModule = require("./assistant.cjs");
 
@@ -30,6 +31,9 @@ const USER_DATA = process.env.KRAKEN_USER_DATA;
 const APP_DIR = path.join(__dirname, "..");
 const VERSION = process.env.KRAKEN_VERSION || "0.0.0";
 if (!USER_DATA) throw new Error("The backend needs KRAKEN_USER_DATA.");
+// What goes wrong in this process is kept in <userData>/logs/backend.log (Settings > Open logs).
+const backendLog = require("./logFile.cjs").createLog(path.join(USER_DATA, "logs"), "backend");
+backendLog.capture();
 
 // --- Asking the window's process -------------------------------------------
 let asked = 0;
@@ -333,8 +337,24 @@ function closeCampaign() {
   if (!hosted) return;
   flushCampaign();
   clearInterval(hosted.timer);
+  clearInterval(hosted.backups);
   clearTimeout(hosted.soon);
   hosted = null;
+}
+// Rolling backups of the hosted campaign: one as it is played, then one an hour (the newest ten kept).
+const BACKUP_EVERY_MS = Math.max(1000, Number(process.env.KRAKEN_BACKUP_EVERY_MS) || 3600_000);
+function backupCampaign(id, reason) {
+  try {
+    if (hosted && hosted.id === id) {
+      hosted.dirty = true;
+      hosted.recordsDirty = true;
+      flushCampaign();
+    }
+    return campaigns.backup(campaignFile(), { id, reason });
+  } catch (error) {
+    console.error("could not back up the campaign", error);
+    return null;
+  }
 }
 function openCampaign(id) {
   closeCampaign();
@@ -342,6 +362,9 @@ function openCampaign(id) {
   if (!campaigns.exists(campaignFile(), id)) throw new Error("That campaign is missing.");
   hosted = { id, state: campaigns.readState(campaignFile(), id), dirty: false, recordsDirty: false, soon: null, timer: null };
   hosted.timer = setInterval(flushCampaign, SAVE_EVERY_MS);
+  // A copy as it was before this sitting, then every hour while it is hosted.
+  backupCampaign(id, "play");
+  hosted.backups = setInterval(() => backupCampaign(id, "hourly"), BACKUP_EVERY_MS);
   return hosted.state;
 }
 // A campaign's ruleset is chosen before it is hosted (it decides its books).
@@ -364,6 +387,19 @@ async function stopTable() {
   table = null;
   if (current) await current.stop();
   closeCampaign();
+  invite = null;
+  // The port opened on the router is closed again.
+  const mapping = portMapping;
+  portMapping = null;
+  if (mapping) await Promise.race([mapping.remove().catch(() => undefined), new Promise((resolve) => setTimeout(resolve, 3000))]);
+}
+// The port the router opened for this table (portMapping.cjs), and the invite links (the password in the #fragment,
+// which a browser never sends to the server; the join page reads it).
+let portMapping = null;
+let invite = null;
+function inviteFor({ port, password, lan, internet }) {
+  const link = (host) => `http://${host}:${port}/${password ? `#pw=${encodeURIComponent(password)}` : ""}`;
+  return { internet: internet ? link(internet) : "", lan: lan.map(link), local: link("127.0.0.1") };
 }
 function plain(error) {
   if (error && error.code === "EADDRINUSE") return "That port is already in use.";
@@ -506,6 +542,47 @@ function rulesetLogos() {
   return { folder, logos };
 }
 
+// The campaign menu's actions, for the start screen and the agent alike.
+// Never the campaign being played for delete or restore; it is saved first for the rest.
+async function manageCampaign(input) {
+  const file = campaignFile();
+  const action = String(input.action ?? "");
+  const id = String(input.id ?? "");
+  const playing = hosted && hosted.id === id;
+  if (playing && (action === "delete" || action === "restore")) throw new Error("Leave the table first: that campaign is being played.");
+  if (playing && (action === "duplicate" || action === "export")) {
+    hosted.dirty = true;
+    hosted.recordsDirty = true;
+    flushCampaign();
+  }
+  if (action === "rename") return campaigns.rename(file, { id, name: input.name });
+  if (action === "duplicate") return campaigns.duplicate(file, { id, name: input.name });
+  if (action === "export") {
+    const found = campaigns.read(file).find((item) => item.id === id);
+    if (!found) throw new Error("That campaign is missing.");
+    const target = input.path ? String(input.path) : path.join(kraken.root(), "Exports", `${found.name.replace(/[^\w .()-]/g, "_").trim() || "campaign"}.zip`);
+    return campaigns.exportZip(file, { id, path: target });
+  }
+  if (action === "delete") {
+    if (!campaigns.exists(file, id)) throw new Error("That campaign is missing.");
+    // To the recycle bin first (the window's process does it), never gone for good; off the list only once it is there.
+    const folders = [campaigns.folder(file, id), campaigns.picturesFolder(file, id)].filter((dir) => fs.existsSync(dir));
+    await ask("shell", { action: "trash", paths: folders });
+    const { removed } = campaigns.remove(file, { id });
+    return { deleted: removed.name, trashed: folders.length };
+  }
+  if (action === "backups") return { backups: campaigns.backups(file, { id }) };
+  if (action === "backup") return { backup: backupCampaign(id, "manual") };
+  if (action === "restore") return campaigns.restore(file, { id, backup: input.backup });
+  if (action === "folder") {
+    const dir = campaigns.folder(file, id);
+    fs.mkdirSync(dir, { recursive: true });
+    if (input.open !== false) await ask("shell", { action: "open", path: dir });
+    return { folder: dir };
+  }
+  throw new Error("action is rename, duplicate, export, delete, backups, backup, restore or folder.");
+}
+
 // --- What the window's process may call -------------------------------------------
 const calls = {
   addresses: () => eachAddress().v4,
@@ -537,7 +614,16 @@ const calls = {
       table = next;
       if (hosted) hosted.port = info.port;
       const net = await networkSnapshot();
-      return { ...info, v6: net.v6, externalV4: net.externalV4, externalV6: net.externalV6 };
+      // Internet play: the port opened on the router by itself (UPnP or NAT-PMP), when the GM asked.
+      let upnp = null;
+      if (options?.upnp && options?.cloud) {
+        const mapped = await Promise.race([openPort(info.port), new Promise((resolve) => setTimeout(() => resolve({ ok: false, error: "The router took too long to answer." }), 9000))]);
+        if (mapped.ok) portMapping = mapped;
+        upnp = { ok: mapped.ok, method: mapped.method ?? "", external: mapped.external ?? "", error: mapped.error ?? "" };
+      }
+      const externalV4 = net.externalV4 || upnp?.external || "";
+      invite = inviteFor({ port: info.port, password, lan: options?.lan ? info.addresses : [], internet: options?.cloud ? externalV4 : "" });
+      return { ...info, v6: net.v6, externalV4, externalV6: net.externalV6, upnp, invite };
     } catch (error) {
       await next.stop().catch(() => undefined);
       closeCampaign();
@@ -545,6 +631,8 @@ const calls = {
     }
   },
   "stop-host": () => stopTable(),
+  // The invite links of the table being hosted (and whether the router opened its port).
+  invite: () => (table && invite ? { ...invite, upnp: portMapping ? { ok: true, method: portMapping.method } : null } : null),
   "campaign-view": (id) => {
     const current = requireHosted(id);
     return { view: current.state.view ?? null, hasBundle: Boolean(campaigns.readBundle(campaignFile(), id)) };
@@ -606,6 +694,13 @@ const calls = {
     return assistantStatus();
   },
   hosting: () => Boolean(table || hosted),
+  // The start screen's campaign menu (and kraken_campaigns): rename, duplicate, export, delete, backups, open its folder.
+  "campaign-manage": (input) => manageCampaign(input ?? {}),
+  // The logs folder (Settings > Open logs): the window's process opens it.
+  "logs-folder": () => {
+    fs.mkdirSync(backendLog.folder, { recursive: true });
+    return backendLog.folder;
+  },
   packs: (input) => packsView(input ?? {}),
   "packs-make": (ids) => makePacks(ids),
   // The packs folder (made if new): the window's process opens it.
@@ -625,7 +720,14 @@ const agentContext = {
     list: () => campaigns.read(campaignFile()),
     create: (input) => campaigns.create(campaignFile(), input),
     setRuleset: (input) => setCampaignRuleset(input),
+    manage: (input) => manageCampaign(input ?? {}),
   },
+  // Kraken's logs: the last lines of the backend's and the window's, and where they are.
+  logs: (lines = 80) => {
+    const windowLog = require("./logFile.cjs").createLog(backendLog.folder, "window");
+    return { folder: backendLog.folder, backend: backendLog.tail(lines), window: windowLog.tail(lines) };
+  },
+  openLogs: () => ask("shell", { action: "open", path: (fs.mkdirSync(backendLog.folder, { recursive: true }), backendLog.folder) }),
   ui: (command, timeout) => ask("ui", command, timeout ?? 60000),
   // The window itself (a screenshot, its text, a script in it): done by the window's process.
   windowOp: (op, payload) => ask("window", { op, ...payload }),

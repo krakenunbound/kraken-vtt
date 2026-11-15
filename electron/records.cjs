@@ -1,4 +1,5 @@
 const crypto = require("crypto");
+const { sanitizeFormatted } = require("../shared/text/formatted.mjs");
 
 // The campaign's records: characters, NPCs, items, notes, combat entries and so
 // on. The host owns them; clients and agents send changes, the host checks
@@ -7,7 +8,8 @@ const crypto = require("crypto");
 // A record is { id, type, name, owner, visibility, source, data, updatedAt }.
 // - type: a short word chosen by the core or a ruleset ("character", "npc").
 // - owner: a player name, or "" for the GM.
-// - visibility: "gm" (GM only), "owner" (GM and the owner), or "all".
+// - visibility: "gm" (GM only), "owner" (GM and the owner), "all", or a list
+//   of player names (shared with those players alone, as FG's share with one).
 // - source: the module it was imported from, or "" for the campaign's own.
 // - data: any JSON. Rulesets decide its shape.
 
@@ -39,6 +41,31 @@ function cleanData(value) {
   return JSON.parse(text);
 }
 
+// A list of player names (shared with them alone): trimmed, once each; none is the GM's alone.
+function cleanVisibility(value) {
+  if (Array.isArray(value)) {
+    const names = [];
+    for (const item of value.slice(0, 32)) {
+      const name = clean(item, 24);
+      if (name && !names.some((have) => have.toLowerCase() === name.toLowerCase())) names.push(name);
+    }
+    return names.length ? names : "gm";
+  }
+  return VISIBILITY.includes(value) ? value : null;
+}
+const sameName = (a, b) => String(a ?? "").toLowerCase() === String(b ?? "").toLowerCase();
+
+// The formatted texts a record keeps (a story's, a note's, a quest's): only
+// FG's tags, whoever writes them (shared/text/formatted.mjs).
+const FORMATTED_TYPES = new Set(["note", "story", "quest"]);
+function cleanFormatted(type, data) {
+  if (!FORMATTED_TYPES.has(type) || !data || typeof data !== "object") return data;
+  if (typeof data.text === "string") data.text = sanitizeFormatted(data.text);
+  if (data.blocks && typeof data.blocks === "object")
+    for (const block of Object.values(data.blocks)) if (block && typeof block === "object" && typeof block.text === "string") block.text = sanitizeFormatted(block.text);
+  return data;
+}
+
 function isPlainObject(value) {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
@@ -61,8 +88,98 @@ function canSee(record, seat) {
   if (!seat) return false;
   if (seat.role === "dm") return true;
   if (record.visibility === "all") return true;
-  return record.visibility === "owner" && record.owner !== "" && record.owner === seat.name;
+  const owns = record.owner !== "" && record.owner === seat.name;
+  if (Array.isArray(record.visibility)) return owns || record.visibility.some((name) => sameName(name, seat.name));
+  return record.visibility === "owner" && owns;
 }
+
+// FG's identification (CoreRPG's isidentified, nonid_name, nonid_notes; a
+// missing isidentified is identified): an item the players have not yet
+// identified reaches a player's screen as its unidentified name and notes
+// only, wherever it is: an item record of the campaign's own, a row of a
+// character's gear, the party's parcel, a treasure parcel. A book's records
+// are left as the book has them (its shop and its wizard read them).
+const unidentified = (value) => isPlainObject(value) && (value.isidentified === 0 || value.isidentified === "0");
+const KEPT_UNIDENTIFIED = ["isidentified", "nonid_name", "nonid_notes", "count", "carried", "location", "weight", "assign", "slot", "slots", "bulky", "petty"];
+function hiddenItem(value) {
+  const out = { name: clean(value.nonid_name, 120) || "Unidentified item" };
+  for (const key of KEPT_UNIDENTIFIED) if (value[key] !== undefined) out[key] = value[key];
+  return out;
+}
+function stripUnidentified(value, depth = 0) {
+  if (depth > 8 || !value || typeof value !== "object") return value;
+  if (Array.isArray(value)) {
+    const list = value.map((item) => stripUnidentified(item, depth + 1));
+    return list.some((item, index) => item !== value[index]) ? list : value;
+  }
+  if (unidentified(value)) return hiddenItem(value);
+  let out = value;
+  for (const [key, child] of Object.entries(value)) {
+    if (!child || typeof child !== "object") continue;
+    const next = stripUnidentified(child, depth + 1);
+    if (next !== child) {
+      if (out === value) out = { ...value };
+      out[key] = next;
+      // A parcel's row is named after the item it carries.
+      if (key === "item" && unidentified(child)) out.name = next.name;
+    }
+  }
+  return out;
+}
+const MAY_HOLD_ITEMS = new Set(["item", "character", "party", "treasureparcel", "npc"]);
+// What one seat is shown of a record: the GM all of it; a player, an
+// unidentified item as its unidentified self. Never used to act on a record.
+// What a sheet works out from an unidentified item (5E's attacks, the armour worn) carries the item's
+// name, so that goes too: the names of the record's own unidentified items (another copy, identified
+// elsewhere, keeps its name).
+function viewFor(record, seat) {
+  if (!record || !seat || seat.role === "dm" || record.source || !MAY_HOLD_ITEMS.has(record.type)) return record;
+  if (record.type === "item" && unidentified(record.data)) return { ...record, name: clean(record.data.nonid_name, 120) || "Unidentified item", data: hiddenItem(record.data) };
+  const stripped = stripUnidentified(record.data);
+  const names = record.type === "item" ? null : collectHiddenNames([record]);
+  const data = names?.size ? hideNames(stripped, names) : stripped;
+  return data === record.data ? record : { ...record, data };
+}
+// Every string in a value with the real names of unidentified items put as the players know them.
+function hideNames(value, names, depth = 0) {
+  if (!names?.size || depth > 12) return value;
+  if (typeof value === "string") {
+    let out = value;
+    for (const [real, shown] of names) if (out.includes(real)) out = out.split(real).join(shown);
+    return out;
+  }
+  if (!value || typeof value !== "object") return value;
+  if (Array.isArray(value)) {
+    const list = value.map((item) => hideNames(item, names, depth + 1));
+    return list.some((item, index) => item !== value[index]) ? list : value;
+  }
+  let out = value;
+  for (const [key, child] of Object.entries(value)) {
+    const next = hideNames(child, names, depth + 1);
+    if (next !== child) {
+      if (out === value) out = { ...value };
+      out[key] = next;
+    }
+  }
+  return out;
+}
+// The real name of every unidentified item in these records (items, gear, parcels), with its unidentified name.
+function collectHiddenNames(list) {
+  const names = new Map();
+  const walk = (value, depth = 0) => {
+    if (!value || typeof value !== "object" || depth > 8) return;
+    if (unidentified(value) && typeof value.name === "string" && value.name.trim().length >= 3) names.set(value.name.trim(), clean(value.nonid_name, 120) || "Unidentified item");
+    for (const child of Object.values(value)) if (child && typeof child === "object") walk(child, depth + 1);
+  };
+  for (const record of list) {
+    if (record.source || !MAY_HOLD_ITEMS.has(record.type)) continue;
+    if (record.type === "item" && unidentified(record.data) && record.name.length >= 3) names.set(record.name, clean(record.data.nonid_name, 120) || "Unidentified item");
+    walk(record.data);
+  }
+  return names;
+}
+// An item's name as the players are told it (a chat line about it).
+const itemName = (item) => (unidentified(item) ? clean(item.nonid_name, 120) || "Unidentified item" : clean(item?.name, 120));
 
 function canEdit(record, seat) {
   if (!seat) return false;
@@ -80,7 +197,7 @@ function asRecord(value) {
       type: cleanType(value.type),
       name: clean(value.name, 120),
       owner: clean(value.owner, 24),
-      visibility: VISIBILITY.includes(value.visibility) ? value.visibility : "gm",
+      visibility: cleanVisibility(value.visibility) ?? "gm",
       source: clean(value.source, 120),
       data: cleanData(value.data),
       updatedAt: Number(value.updatedAt) || Date.now(),
@@ -99,7 +216,10 @@ function createRecordStore({ saved = [], onChange = () => undefined } = {}) {
   }
 
   // change: { kind: "upsert" | "delete", record, before }
+  // The real names of unidentified items, worked out again after any change (records.cjs viewFor).
+  let namesCache = null;
   function emit(change) {
+    namesCache = null;
     onChange(change);
     for (const listener of listeners) listener(change);
   }
@@ -111,6 +231,11 @@ function createRecordStore({ saved = [], onChange = () => undefined } = {}) {
   }
 
   return {
+    hiddenNames() {
+      namesCache = namesCache ?? collectHiddenNames(records.values());
+      return namesCache;
+    },
+
     subscribe(listener) {
       listeners.add(listener);
       return () => listeners.delete(listener);
@@ -154,9 +279,9 @@ function createRecordStore({ saved = [], onChange = () => undefined } = {}) {
         type: cleanType(input?.type),
         name: clean(input?.name, 120),
         owner,
-        visibility: VISIBILITY.includes(input?.visibility) ? input.visibility : seat.role === "dm" ? "gm" : "owner",
+        visibility: cleanVisibility(input?.visibility) ?? (seat.role === "dm" ? "gm" : "owner"),
         source: seat.role === "dm" ? clean(input?.source, 120) : "",
-        data: cleanData(input?.data),
+        data: cleanFormatted(cleanType(input?.type), cleanData(input?.data)),
         updatedAt: Date.now(),
       };
       records.set(id, record);
@@ -179,18 +304,32 @@ function createRecordStore({ saved = [], onChange = () => undefined } = {}) {
       if (seat.role === "dm") {
         if (patch?.owner !== undefined) next.owner = clean(patch.owner, 24);
         if (patch?.visibility !== undefined) {
-          if (!VISIBILITY.includes(patch.visibility)) throw new Error("Visibility is gm, owner or all.");
-          next.visibility = patch.visibility;
+          const visibility = cleanVisibility(patch.visibility);
+          if (!visibility) throw new Error("Visibility is gm, owner, all or a list of players' names.");
+          next.visibility = visibility;
         }
-      } else if (before.type === "note" && (patch?.visibility === "owner" || patch?.visibility === "all")) {
-        // A player shares their own note with the table, or stops (FG's notes).
-        next.visibility = patch.visibility;
+      } else if (before.type === "note" && (patch?.visibility === "owner" || patch?.visibility === "all" || Array.isArray(patch?.visibility))) {
+        // A player shares their own note with the table, or with some of it, or stops (FG's notes).
+        const visibility = cleanVisibility(patch.visibility);
+        next.visibility = visibility === "gm" ? "owner" : visibility;
       }
-      if (patch?.data !== undefined) next.data = cleanData(replace ? patch.data : merge(before.data, patch.data));
+      if (patch?.data !== undefined) next.data = cleanFormatted(next.type, cleanData(replace ? patch.data : merge(before.data, patch.data)));
       next.updatedAt = Date.now();
       records.set(next.id, next);
       emit({ kind: "upsert", record: next, before });
       return next;
+    },
+
+    // A copy of a record as the campaign's own (FG's Duplicate, and Copy to
+    // campaign for a book's): a new id, no book and no book path, hidden from
+    // the players; name: by default the old one with " (copy)". record: a
+    // book's record that is not in the campaign (read from the book).
+    duplicate(id, seat, { name, record: given } = {}) {
+      if (seat?.role !== "dm") throw new Error("Only the GM copies records.");
+      const source = given ?? must(id);
+      const data = cleanData(source.data);
+      delete data.fgPath;
+      return this.create({ type: source.type, name: name ?? `${source.name} (copy)`, visibility: "gm", data }, seat);
     },
 
     remove(id, seat) {
@@ -207,4 +346,4 @@ function createRecordStore({ saved = [], onChange = () => undefined } = {}) {
   };
 }
 
-module.exports = { createRecordStore, canSee, canEdit, merge };
+module.exports = { createRecordStore, canSee, canEdit, merge, viewFor, hideNames, itemName, cleanVisibility, unidentified };

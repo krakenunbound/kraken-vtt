@@ -173,9 +173,12 @@ export function App() {
         if (current.connected) current.leave(true);
         // The GM plays under the name kept with the campaign.
         const touched = await kraken.touchCampaign({ id: command.campaignId, port: command.port }).catch(() => null);
-        const failed = await current.host({ name: touched?.gmName || "DM", port: command.port, password: command.password, lan: true, cloud: false, campaignId: command.campaignId });
+        // internet: players anywhere (and upnp: the router's port opened by itself).
+        const internet = Boolean(command.internet || command.upnp);
+        const failed = await current.host({ name: touched?.gmName || "DM", port: command.port, password: command.password, lan: true, cloud: internet, upnp: Boolean(command.upnp), campaignId: command.campaignId });
         if (failed) throw new Error(failed);
-        return { hosting: true, campaignId: command.campaignId, port: command.port };
+        const invite = await kraken.invite?.().catch(() => null);
+        return { hosting: true, campaignId: command.campaignId, port: command.port, ...(invite ? { invite: invite.internet || invite.lan[0] || invite.local, invites: invite } : {}) };
       }
       if (command.kind === "dice-settings") return diceSettings(command.patch ?? {});
       if (command.kind === "open-adventure") {
@@ -625,7 +628,7 @@ export function App() {
           session={session}
           scene={
             scene ? (
-              <MapView scene={scene} gm={dm && !testing && !previewing} map={session.map} records={recordList} pings={session.pings} notice={session.notice} actions={mapActions} targeted={targeted} targeters={targeters} templateAsk={session.templateAsk} onTemplateDone={session.clearTemplateAsk} fxMode={session.options.tokenEffects ?? "full"} me={testing ? "@test" : myName} startEditing={dm && Boolean(prep) && !testing} gmSeat={dm} readAloud={session.readAloudNow} onReadAloudDone={session.dismissReadAloud} />
+              <MapView scene={scene} gm={dm && !testing && !previewing} map={session.map} records={recordList} pings={session.pings} notice={session.notice} actions={mapActions} targeted={targeted} targeters={targeters} templateAsk={session.templateAsk} onTemplateDone={session.clearTemplateAsk} fxMode={session.options.tokenEffects ?? "full"} me={testing ? "@test" : myName} startEditing={dm && Boolean(prep) && !testing} gmSeat={dm} readAloud={session.readAloudNow} onReadAloudDone={session.dismissReadAloud} viewPull={session.viewPull} />
             ) : null
           }
           sceneId={scene?.id ?? ""}

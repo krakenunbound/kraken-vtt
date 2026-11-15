@@ -8,7 +8,7 @@ import { FateLine } from "./FateLine";
 import { BuffBar } from "../effects/BuffBar";
 import { carriesCreatureDrop, dropOnCreature } from "../effects/drops";
 import { TrackerButtons, wordsOf, textOfWords } from "../core/tracker/actions";
-import { ProgressBoxes } from "../characters/SheetIronsworn";
+import { ProgressBoxes } from "../core/parts/ProgressBoxes";
 import { RANK_NAMES, RANKS } from "../../shared/ironsworn/rules.mjs";
 
 // The save box of a game whose manifest names none (C&C's six attributes against a CL).

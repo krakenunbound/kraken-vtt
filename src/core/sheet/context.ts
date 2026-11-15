@@ -23,8 +23,15 @@ export interface SheetContext {
   // The game's (or its variant's) features, for a part's { feature } condition.
   features: string[];
   // The game's formatters (src/rulesets/parts.tsx FORMATS), for a field shown through one.
-  formats: Record<string, (row: Row, key?: string) => string>;
+  formats: Record<string, Format>;
 }
+// A game's formatter: words for a row (or the record), given the row's key and the record's data.
+export type Format = (row: Row, key?: string, data?: Row) => string;
+// The formatters a text's { format } names: the rendered sheet's game's (SheetRenderer sets them).
+let formatters: Record<string, Format> = {};
+export const setFormatters = (given: Record<string, Format>) => {
+  formatters = given;
+};
 export const SheetCtx = createContext<SheetContext | null>(null);
 export function useSheet(): SheetContext {
   const context = useContext(SheetCtx);
@@ -39,7 +46,9 @@ export const at = (node: unknown, path: string): unknown => path.split(".").redu
 
 // A scope a template reads from: the row first (in a list), then the extras ({key}, {label}), then the record's data.
 export type Scope = { row?: Row; extra?: Record<string, unknown>; data: Row };
-const look = (scope: Scope, path: string): unknown => {
+const look = (scope: Scope, given: string): unknown => {
+  // A path built from the row's key or the extras ("characteristics.{key}.now").
+  const path = scope.extra && given.includes("{") ? given.replace(/\{([^{}]+)\}/g, (whole, name: string) => (scope.extra && name in scope.extra ? String(scope.extra[name]) : whole)) : given;
   if (scope.extra && path in scope.extra) return scope.extra[path];
   if (scope.row) {
     const found = at(scope.row, path);
@@ -51,7 +60,7 @@ const present = (value: unknown) => value !== undefined && value !== null && val
 export const signed = (n: number) => (n >= 0 ? `+${n}` : `${n}`);
 const titledWord = (text: string) => (text ? text[0].toUpperCase() + text.slice(1) : text);
 // A placeholder's text: "{path}", "{path|signed}" (+2, -1), "{path|0}" (the value, or 0 when it has none).
-// Filters run in order: signed (a list: each), titled, lower, join:SEP (a list), sum:FIELD (a list's rows' FIELD
+// Filters run in order: signed (a list: each), titled, lower, upper, cut:N (the first N letters), join:SEP (a list), sum:FIELD (a list's rows' FIELD
 // added up), nz:X (X for 0 or none), anything else the value's default ("{size|medium|titled}").
 function valueText(scope: Scope, expression: string): string {
   const [path, ...filters] = expression.split("|");
@@ -61,6 +70,8 @@ function valueText(scope: Scope, expression: string): string {
     if (filter === "signed") value = Array.isArray(value) ? value.map((item) => signed(num(item))) : signed(num(value));
     else if (filter === "titled") value = titledWord(String(value ?? ""));
     else if (filter === "lower") value = String(value ?? "").toLowerCase();
+    else if (filter === "upper") value = String(value ?? "").toUpperCase();
+    else if (filter.startsWith("cut:")) value = String(value ?? "").slice(0, Number(filter.slice(4)));
     else if (filter.startsWith("join:")) value = Array.isArray(value) ? value.map(String).join(filter.slice(5)) : value;
     else if (filter.startsWith("sum:")) value = rows(value).reduce((sum, [, row]) => sum + num(row[filter.slice(4)]), 0);
     else if (filter.startsWith("nz:")) value = num(value) ? num(value) : filter.slice(3);
@@ -83,6 +94,7 @@ export function textOf(text: Text | undefined, scope: Scope, modifiers: Record<s
   if (text === undefined) return "";
   if (typeof text === "string") return fill(text, scope);
   if ("if" in text) return fill(holds(text.if, scope, { gm: false, editable: false }) ? text.then : text.else, scope);
+  if ("format" in text) return formatters[text.format]?.(scope.row ?? scope.data, scope.extra?.key === undefined ? undefined : String(scope.extra.key), scope.data) ?? "";
   const key = text.by.startsWith("modifier:") ? String(modifiers[text.by.slice(9)] ?? "") : String(look(scope, text.by) ?? "");
   return fill(text.map[key] ?? text.else, scope);
 }
@@ -104,6 +116,7 @@ export function holds(cond: Cond | undefined, scope: Scope, context: Pick<SheetC
     return value === null || value === undefined;
   }
   if ("below" in cond) return num(look(scope, cond.below.path)) < cond.below.value;
+  if ("less" in cond) return num(look(scope, cond.less.path)) < num(look(scope, cond.less.than));
   if ("zero" in cond) return num(look(scope, cond.zero.path)) + (cond.zero.plus ? num(look(scope, cond.zero.plus)) : 0) - num(look(scope, cond.zero.minus)) <= 0;
   if ("all" in cond) return cond.all.every((item) => holds(item, scope, context));
   if ("any" in cond) return cond.any.some((item) => holds(item, scope, context));

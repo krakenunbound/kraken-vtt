@@ -144,6 +144,16 @@ function checkSheet(where, manifest) {
   };
   for (const field of manifest.sheet.header.identity) if (field.kind && field.kind !== "readonly" && field.edit !== "never") editable.push(field.path);
   for (const field of manifest.sheet.header.identity) if (field.format) refs.push(field.format);
+  // Every formatter a text names ({ format: Ref }, a roll's label too) and a skills row's own words (more), anywhere in the sheet.
+  const deep = (node) => {
+    if (Array.isArray(node)) return node.forEach(deep);
+    if (!node || typeof node !== "object") return;
+    for (const [key, value] of Object.entries(node)) {
+      if ((key === "format" || key === "more") && typeof value === "string" && value.includes(".")) refs.push(value);
+      deep(value);
+    }
+  };
+  deep(manifest.sheet);
   walk(manifest.sheet.top ?? [], { rows: new Set(), actions: new Set() }, "top");
   for (const tab of manifest.sheet.tabs) walk(tab.parts, { rows: new Set(), actions: new Set() }, tab.id);
   // The whitelist: every editable path is allowed by the manifest's edit globs.

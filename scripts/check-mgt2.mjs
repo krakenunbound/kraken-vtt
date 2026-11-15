@@ -36,6 +36,18 @@ assert(wounded.characteristics.end.now === 0 && wounded.characteristics.str.now 
 const bad = m.buildFromSpec({ characteristics: { str: 1, dex: 7, end: 7, int: 7, edu: 7, soc: 7 }, career: "Pirate", skills: { Pilot: 5 } });
 assert(bad.problems.length === 3, `out of range, not a core career, above 4: ${bad.problems}`);
 
+// --- The sheet's edit whitelist: built from the manifest, the same as the hand-written lists it replaced ---------
+{
+  const { EDIT_PATHS } = require("../electron/mgt2.cjs");
+  const text = ["playername", "notes", "appearance", "gender", "species", "homeworld", "contacts", "allies", "enemies", "ship", "background"].map((key) => `^${key}$`);
+  const number = [/^characteristics\.(str|dex|end|int|edu|soc)\.score$/, /^skills\.[a-z0-9-]+\.level$/, /^hp\.wounds$/, /^age$/, /^ac\.misc$/, /^initiative\.misc$/, /^careers\.\d+\.(terms|rank)$/, /^coins\.id-\d+\.amount$/, /^inventorylist\.id-\d+\.(count|carried)$/].map((regex) => regex.source);
+  assert(EDIT_PATHS.text.map((regex) => regex.source).join(" ") === text.join(" "), `the text whitelist from the manifest is the old set: ${EDIT_PATHS.text.map((regex) => regex.source).join(" ")}`);
+  assert(EDIT_PATHS.number.map((regex) => regex.source).join(" ") === number.join(" "), `the number whitelist from the manifest is the old one: ${EDIT_PATHS.number.map((regex) => regex.source).join(" ")}`);
+  assert(EDIT_PATHS.remove.map((regex) => regex.source).join() === /^(inventorylist)\.id-\d+$/.source, `the rows the sheet may drop: ${EDIT_PATHS.remove.map((regex) => regex.source).join()}`);
+  assert(EDIT_PATHS.string.length === 0 && EDIT_PATHS.list.length === 0, "no string or list paths");
+  console.log("whitelist ok");
+}
+
 // --- A Traveller table ----------------------------------------------------------
 const server = createTableServer({ ruleset: "Traveller" });
 await server.listen({ port: 0, password: "" });

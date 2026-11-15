@@ -26,6 +26,7 @@ export default {
     "Fate Accelerated": {
       blurb: "Fate Accelerated Edition (Evil Hat, CC BY 3.0): Fate with six approaches (Careful, Clever, Flashy, Forceful, Quick, Sneaky) instead of skills, three stress boxes, a character in minutes. Its book, the Toolkit and Adversaries and a starter scenario come with Kraken.",
       records: { fateskill: { label: "Approaches" } },
+      features: ["fatePoints", "stressConsequences", "sceneAspects", "approaches"],
       party: { currency: [], xp: "milestone", groupCheck: { stats: APPROACHES } },
       tracker: { saves: { keys: APPROACHES, modLabel: "CL", modAria: "Save CL", button: "Roll save" }, initiative: ORDER, headerParts: HEADER },
     },
