@@ -26,6 +26,21 @@ function assert(condition, message) {
 }
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
+// --- The sheet's edit whitelist: built from the manifest, the same as the hand-written lists it replaced ---
+{
+  const { EDIT_PATHS } = require("../electron/adnd2e.cjs");
+  const before = {
+    text: ["playername", "alignment", "deity", "appearance", "notes", "background", "race", "gender", "age", "height", "weight", "languages"].map((key) => `^${key}$`),
+    number: [/^abilities\.(strength|dexterity|constitution|intelligence|wisdom|charisma)\.score$/, /^abilities\.strength\.percent$/, /^saves\.(paralyzation|rod|petrification|breath|spell)\.misc$/, /^thiefskills\.[a-z]+\.(points|misc)$/, /^hp\.(total|wounds|temp)$/, /^exp$/, /^ac\.misc$/, /^initiative\.misc$/, /^movement$/, /^stable$/, /^spellcasting\.\d\.used\.\d$/, /^coins\.id-\d+\.amount$/, /^inventorylist\.id-\d+\.(count|carried)$/].map((regex) => regex.source),
+    // The lists were "spells", "profs.weapon" and "profs.nonweapon" by name.
+    list: ["^spells$", /^profs\.(weapon|nonweapon)$/.source],
+  };
+  assert(EDIT_PATHS.remove.map((regex) => regex.source).join() === /^(inventorylist)\.id-\d+$/.source, `the rows the sheet may drop: ${EDIT_PATHS.remove.map((regex) => regex.source).join()}`);
+  for (const kind of ["text", "number", "list"]) assert(EDIT_PATHS[kind].map((regex) => regex.source).join(" ") === before[kind].join(" "), `the ${kind} whitelist from the manifest is the old one: ${EDIT_PATHS[kind].map((regex) => regex.source).join(" ")}`);
+  assert(EDIT_PATHS.string.length === 0, "no string paths");
+  console.log("whitelist ok");
+}
+
 // --- The rules ---------------------------------------------------------------
 assert(r2.strengthOf(17).hitadj === 1 && r2.strengthOf(17).dmgadj === 1 && r2.strengthOf(18, 0).dmgadj === 2, "Strength 17 and 18");
 assert(r2.strengthOf(18, 50).dmgadj === 3 && r2.strengthOf(18, 76).hitadj === 2 && r2.strengthOf(18, 76).dmgadj === 4 && r2.strengthOf(18, 100).hitadj === 3 && r2.strengthOf(18, 100).dmgadj === 6 && r2.strengthOf(18, 100).opendoors === "16(6)", "exceptional Strength: 18/50, 18/76, 18/00");

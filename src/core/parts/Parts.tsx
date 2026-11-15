@@ -1,7 +1,8 @@
-import type { ComponentType } from "react";
-import type { BoxSpec, Part, RollSpec, StepSpec } from "../../../shared/rulesets/types";
+import { Fragment, type ComponentType } from "react";
+import type { BoxSpec, Part, Path, RollSpec, StatBlockSpec, StepSpec } from "../../../shared/rulesets/types";
+import { Icon } from "../../ui/icons";
 import { Field } from "../fields/Field";
-import { at, fill, holds, num, rows, signed, textOf, useSheet, type Row, type Scope } from "../sheet/context";
+import { at, fill, holds, nodesOf, num, rows, signed, textOf, useSheet, type Row, type Scope } from "../sheet/context";
 import { FieldView, LabelledField } from "./FieldView";
 
 // The core parts a manifest arranges on a sheet's tabs (docs/core-ui-design.md
@@ -11,7 +12,7 @@ import { FieldView, LabelledField } from "./FieldView";
 // and cc-* styles every sheet uses) and the data-* hooks the manifest names.
 
 export type CustomPart = ComponentType<{ props?: Record<string, unknown> }>;
-export type Format = (row: Row) => string;
+export type Format = (row: Row, key?: string) => string;
 
 export function PartView({ spec, custom, formats }: { spec: Part; custom: Record<string, CustomPart>; formats: Record<string, Format> }) {
   const sheet = useSheet();
@@ -30,7 +31,20 @@ export function PartView({ spec, custom, formats }: { spec: Part; custom: Record
     case "statBlock":
       return <StatBlock spec={spec} />;
     case "derived":
-      return <Derived spec={spec} />;
+      return <Derived spec={spec} custom={custom} />;
+    case "strip":
+      return <Strip spec={spec} />;
+    case "tags": {
+      const words = spec.from.flatMap((path) => {
+        const value = at(sheet.data, path);
+        return Array.isArray(value) ? value.map(String) : typeof value === "string" ? [value] : [];
+      }).filter(Boolean);
+      return words.length ? (
+        <p className="five-list" data-list={spec.hook}>
+          <b>{spec.label}:</b> {words.join(", ")}
+        </p>
+      ) : null;
+    }
     case "list":
       return <List spec={spec} formats={formats} />;
     case "coins":
@@ -59,25 +73,28 @@ export function PartView({ spec, custom, formats }: { spec: Part; custom: Record
           ))}
         </p>
       );
-    case "heading":
+    case "heading": {
+      // A heading given as nodes is written exactly as they are (its own space before the hint).
+      const space = typeof spec.text === "string" ? " " : null;
       return (
         <h4>
-          {spec.text}
+          {typeof spec.text === "string" ? spec.text : nodesOf(spec.text, scope, sheet.modifiers)}
           {spec.targets ? (
             <>
-              {" "}
+              {space}
               {sheet.targets.length ? <small className="hint">at {sheet.targets.join(", ")}</small> : <small className="hint">Ctrl+click a token to target it</small>}
             </>
           ) : spec.hint ? (
             <>
-              {" "}
-              <small className="hint">{spec.hint}</small>
+              {space}
+              <small className="hint">{nodesOf(spec.hint, scope, sheet.modifiers)}</small>
             </>
           ) : null}
         </h4>
       );
+    }
     case "hint":
-      return <p className="hint">{textOf(spec.text, scope, sheet.modifiers)}</p>;
+      return <p className={spec.plain ? undefined : "hint"}>{nodesOf(spec.text, scope, sheet.modifiers)}</p>;
     case "skills":
       return <Skills spec={spec} />;
     case "track":
@@ -106,26 +123,36 @@ function RollButton({ roll, scope, className: base }: { roll: RollSpec; scope: S
   const className = roll.className ?? base;
   const sheet = useSheet();
   const key = String(scope.extra?.key ?? "");
+  // What goes as the roll's key: the row's key, or (send) a skill's name.
+  const sent = roll.send ? textOf(roll.send, scope, sheet.modifiers) : key;
+  const off = !sheet.editable || (roll.disabled ? holds(roll.disabled, scope, sheet) : false);
   return (
     <button
       type="button"
       className={className}
-      disabled={!sheet.editable}
+      disabled={off}
       title={roll.title ? textOf(roll.title, scope, sheet.modifiers) : undefined}
       aria-label={roll.aria ? textOf(roll.aria, scope, sheet.modifiers) : undefined}
       {...{ [`data-${roll.hook}`]: key }}
-      onClick={() => sheet.editable && sheet.act(roll.action, { key })}
+      onClick={() => sheet.editable && sheet.act(roll.action, { key: sent })}
     >
-      {textOf(roll.label, scope, sheet.modifiers)}
+      {nodesOf(roll.label, scope, sheet.modifiers)}
     </button>
   );
 }
 
 // Scores in rows (FG's ability block): a short name, a column per value, a roll.
-function StatBlock({ spec }: { spec: Extract<Part, { part: "statBlock" }> }) {
-  const sheet = useSheet();
+function StatBlock({ spec }: { spec: StatBlockSpec }) {
   return (
     <section className={`${spec.base ?? "cc-panel five-abilities"}${spec.className ? ` ${spec.className}` : ""}`} aria-label={spec.label}>
+      <StatRows spec={spec} />
+    </section>
+  );
+}
+function StatRows({ spec }: { spec: StatBlockSpec }) {
+  const sheet = useSheet();
+  return (
+    <>
       {spec.heading ? (
         <h4>
           {spec.heading.text}
@@ -137,7 +164,7 @@ function StatBlock({ spec }: { spec: Extract<Part, { part: "statBlock" }> }) {
           ) : null}
         </h4>
       ) : spec.head === false ? null : (
-        <div className="five-ability-head">
+        <div className={spec.headClass ?? "five-ability-head"}>
           <span />
           {spec.columns.map((column) => (
             <small key={column.label}>{column.label}</small>
@@ -150,13 +177,33 @@ function StatBlock({ spec }: { spec: Extract<Part, { part: "statBlock" }> }) {
         return (
           <div key={row.key} className={spec.rowClass ?? "five-ability"} {...{ [`data-${spec.hook}`]: row.key }} title={spec.rowTitle ? textOf(spec.rowTitle, scope, sheet.modifiers) : undefined}>
             {spec.plain ? <b>{row.short ?? row.label}</b> : <b title={row.label}>{row.short ?? row.label}</b>}
-            {spec.columns.map((column) => (
-              <FieldView key={column.label} spec={{ ...column.field, path: column.path.replace("{key}", row.key) }} scope={scope} />
-            ))}
+            {spec.columns.map((column) => {
+              if ("roll" in column) return <RollButton key={column.label} roll={column.roll} scope={scope} className="cc-bonus" />;
+              const field = <FieldView spec={{ ...column.field, path: column.path.replace("{key}", row.key) }} scope={scope} />;
+              if (!column.wrap) return <FieldView key={column.label} spec={{ ...column.field, path: column.path.replace("{key}", row.key) }} scope={scope} />;
+              // A field in a span, with a second one after it while its condition holds (2E's 18/76 Strength).
+              return (
+                <span key={column.label} className={column.wrap}>
+                  {field}
+                  {column.extra && holds(column.extra.when, scope, sheet) ? (
+                    <>
+                      {column.extra.before}
+                      <FieldView spec={column.extra.field} scope={scope} />
+                    </>
+                  ) : null}
+                </span>
+              );
+            })}
             {spec.roll ? <RollButton roll={spec.roll} scope={scope} className="cc-bonus" /> : null}
+            {spec.rowNote ? <small className={spec.rowNote.className}>{sheet.formats[spec.rowNote.format]?.((at(sheet.data, spec.rowNote.row.replace("{key}", row.key)) ?? {}) as Row, row.key)}</small> : null}
           </div>
         );
       })}
+      {spec.inner ? (
+        <div className={spec.inner.base} aria-label={spec.inner.label}>
+          <StatRows spec={spec.inner} />
+        </div>
+      ) : null}
       {spec.notes
         ? ((at(sheet.data, spec.notes) ?? []) as string[]).map((note) => (
             <p key={note} className="hint">
@@ -164,52 +211,85 @@ function StatBlock({ spec }: { spec: Extract<Part, { part: "statBlock" }> }) {
             </p>
           ))
         : null}
-    </section>
+    </>
   );
 }
 
 // A record's rows each with a field, a name and a roll (thief abilities): "{name}" and the others from the row.
+// Fixed rows (every skill of the game): each row's data at path.{key}, named by its label and note.
 function Skills({ spec }: { spec: Extract<Part, { part: "skills" }> }) {
   const sheet = useSheet();
-  return (
-    <div className={spec.className}>
-      {rows(at(sheet.data, spec.path)).map(([key, row]) => {
-        const scope: Scope = { row, extra: { key }, data: sheet.data };
+  const fixed = spec.rows;
+  const list: [string, Row, { label: string; note?: string } | null][] = fixed ? fixed.map((item) => [item.key, (at(sheet.data, `${spec.path}.${item.key}`) ?? {}) as Row, item]) : rows(at(sheet.data, spec.path)).map(([key, row]) => [key, row, null]);
+  const body = (
+    <>
+      {spec.head ? (
+        <div className={spec.head.className}>
+          {spec.head.labels.map((label) => (
+            <small key={label}>{label}</small>
+          ))}
+        </div>
+      ) : null}
+      {list.map(([key, row, named]) => {
+        const scope: Scope = { row, extra: named ? { key, label: named.label, note: named.note ?? "" } : { key }, data: sheet.data };
         return (
-          <div key={key} className="five-skill" {...{ [`data-${spec.hook}`]: key }} title={spec.rowTitle ? textOf(spec.rowTitle, scope, sheet.modifiers) : undefined}>
+          <div key={key} className={spec.rowClass ? textOf(spec.rowClass, scope, sheet.modifiers) : "five-skill"} {...{ [`data-${spec.hook}`]: key }} title={spec.rowTitle ? textOf(spec.rowTitle, scope, sheet.modifiers) : undefined}>
             <FieldView spec={spec.field} scope={scope} base={`${spec.path}.${key}`} />
-            <span>{String(at(row, spec.name) ?? "")}</span>
+            {named ? (
+              <span>
+                {spec.mark ? (holds(spec.mark.when, scope, sheet) ? spec.mark.text : "") : null}
+                {named.label} <small className="hint">{named.note}</small>
+              </span>
+            ) : (
+              <span>{String(at(row, spec.name ?? "name") ?? "")}</span>
+            )}
             <RollButton roll={spec.roll} scope={scope} className="cc-bonus" />
           </div>
         );
       })}
-    </div>
+    </>
   );
+  return spec.className ? <div className={spec.className}>{body}</div> : body;
 }
 
 // Boxes to tick off: a row for each count in max (a spell level's slots); a click ticks up to that box, or back to it.
+// each: one such block per row of a list (a 2E character's casting classes), its max and used in the row.
 function Track({ spec }: { spec: Extract<Part, { part: "track" }> }) {
   const sheet = useSheet();
-  const scope: Scope = { data: sheet.data };
-  const maxes = ((): number[] => {
-    const max = at(sheet.data, spec.max);
-    return Array.isArray(max) ? max.map(num) : [num(max)];
+  if (spec.each)
+    return (
+      <>
+        {rows(at(sheet.data, spec.each)).map(([key, row]) => (
+          <TrackBlock key={String(row.class ?? key)} spec={spec} scope={{ row, data: sheet.data }} node={row} base={`${spec.each}.${key}.${spec.used}`} />
+        ))}
+      </>
+    );
+  return <TrackBlock spec={spec} scope={{ data: sheet.data }} node={sheet.data} base={spec.used} />;
+}
+function TrackBlock({ spec, scope, node, base }: { spec: Extract<Part, { part: "track" }>; scope: Scope; node: Row; base: string }) {
+  const sheet = useSheet();
+  // A count of null shows no row; 0 shows none, or (zero) a row saying so.
+  const maxes = ((): (number | null)[] => {
+    const max = at(node, spec.max);
+    return Array.isArray(max) ? max.map((value) => (value === null ? null : num(value))) : [num(max)];
   })();
   const usedOf = (index: number) => {
-    const used = at(sheet.data, spec.used);
+    const used = at(node, spec.used);
     return num(Array.isArray(used) ? used[index] : used);
   };
+  const first = spec.first ?? 1;
   return (
     <div className={spec.className} {...(spec.attr ? { [`data-${spec.attr.name}`]: textOf(spec.attr.value, scope, sheet.modifiers) } : {})}>
-      {spec.intro ? <p className="hint">{textOf(spec.intro, scope, sheet.modifiers)}</p> : null}
+      {spec.intro ? <p className="hint">{nodesOf(spec.intro, scope, sheet.modifiers)}</p> : null}
       {maxes.map((max, index) =>
-        max > 0 ? (
-          <div key={index} className={spec.rowClass} {...{ [`data-${spec.rowHook}`]: index + 1 }}>
+        max !== null && (max > 0 || spec.zero) ? (
+          <div key={index} className={spec.rowClass} {...{ [`data-${spec.rowHook}`]: index + first }}>
             <b>{spec.labels[index]}</b>
             {Array.from({ length: max }, (_, slot) => {
               const used = usedOf(index);
-              return <button key={slot} type="button" className={slot < used ? "used" : ""} disabled={!sheet.editable} aria-label={textOf(spec.aria, { data: sheet.data, extra: { label: spec.labels[index], n: slot + 1 } }, sheet.modifiers)} onClick={() => sheet.change(`${spec.used}.${index}`, slot < used ? slot : slot + 1)} />;
+              return <button key={slot} type="button" className={slot < used ? "used" : ""} disabled={!sheet.editable} aria-label={textOf(spec.aria, { row: scope.row, data: sheet.data, extra: { label: spec.labels[index], n: slot + 1 } }, sheet.modifiers)} onClick={() => sheet.change(`${base}.${index}`, slot < used ? slot : slot + 1)} />;
             })}
+            {max === 0 ? <small className="hint">{spec.zero}</small> : null}
           </div>
         ) : null,
       )}
@@ -219,12 +299,21 @@ function Track({ spec }: { spec: Extract<Part, { part: "track" }> }) {
 }
 
 // Big derived boxes (HP, Armor, Fatigue): a number from the host's derive(), small fields beside it, + and -.
-function Derived({ spec }: { spec: Extract<Part, { part: "derived" }> }) {
+function Derived({ spec, custom }: { spec: Extract<Part, { part: "derived" }>; custom: Record<string, CustomPart> }) {
+  const sheet = useSheet();
+  const scope: Scope = { data: sheet.data };
   return (
     <section className={`cc-panel five-defence${spec.className ? ` ${spec.className}` : ""}`}>
-      {spec.boxes.map((box) => (
-        <DerivedBox key={box.label} box={box} />
-      ))}
+      {spec.boxes.map((box, index) => {
+        if (!holds(box.when, scope, sheet)) return null;
+        if ("custom" in box) {
+          // A game's own box (Descending Darkness's Dread, 5E's death saves).
+          const Custom = custom[box.custom];
+          return Custom ? <Custom key={box.custom} /> : null;
+        }
+        return <DerivedBox key={`${box.label}-${index}`} box={box} />;
+      })}
+      {spec.hint !== undefined ? <p className="hint">{textOf(spec.hint, scope, sheet.modifiers)}</p> : null}
     </section>
   );
 }
@@ -232,15 +321,24 @@ function DerivedBox({ box }: { box: BoxSpec }) {
   const sheet = useSheet();
   const scope: Scope = { data: sheet.data };
   const value = num(at(sheet.data, box.path));
-  const shown = box.show === "remaining" ? value - num(at(sheet.data, box.minus ?? "")) : value;
+  const shown = box.show === "remaining" ? value + (box.plus ? num(at(sheet.data, box.plus)) : 0) - num(at(sheet.data, box.minus ?? "")) : value;
   const warn = box.warn && (box.warn.atZero ? shown <= 0 : holds(box.warn.when, scope, sheet));
   const hook = box.hook ? { "data-stat": box.hook } : {};
+  // The first state the shown number is in (Dead, Dying, Stable, Disabled).
+  const state = box.states?.find((item) => (item.atMost === undefined || shown <= item.atMost) && (item.under === undefined || shown < item.under) && (item.equals === undefined || shown === item.equals) && holds(item.when, scope, sheet));
   return (
     <div className="five-big" title={box.title ? textOf(box.title, scope, sheet.modifiers) : undefined}>
       <small>{box.label}</small>
       {box.show === "shield" ? (
         <span className="cc-shield" {...hook}>
           {shown}
+        </span>
+      ) : box.show === "text" ? (
+        <span {...hook}>{fill(box.text ?? "", scope)}</span>
+      ) : box.show === "field" && box.field ? (
+        <span {...hook}>
+          <FieldView spec={box.field} scope={scope} />
+          {box.suffix}
         </span>
       ) : (
         <span {...hook} style={{ color: box.danger && shown <= 0 ? "#c0392b" : undefined }}>
@@ -266,6 +364,25 @@ function DerivedBox({ box }: { box: BoxSpec }) {
           {box.fields.map((field) => (
             <FieldWithWord key={field.path} field={field} scope={scope} />
           ))}
+        </span>
+      ) : null}
+      {(box.lines ?? []).map((line, index) => (
+        <span key={index} className="cc-inline">
+          {line.items.map((item, place) => (
+            <Fragment key={place}>
+              {`${place ? (line.sep ?? " ") : ""}${item.before} `}
+              {"field" in item ? (
+                <FieldView spec={item.field} scope={scope} />
+              ) : (
+                <b {...(item.hook ? { "data-stat": item.hook } : {})}>{num(at(sheet.data, item.value))}</b>
+              )}
+            </Fragment>
+          ))}
+        </span>
+      ))}
+      {state ? (
+        <span className="hint" data-status={state.status}>
+          {state.text}
         </span>
       ) : null}
       {box.warn && warn ? (
@@ -315,7 +432,12 @@ function List({ spec, formats }: { spec: Extract<Part, { part: "list" }>; format
             <>
               {spec.name.bold ? <b>{name}</b> : name}
               {/* A list with details always has their line (empty or not), as every list on the hand-made sheets did, unless hideEmpty. */}
-              {spec.details && spec.hideEmpty && !details.length ? (
+              {spec.small ? (
+                <>
+                  {" "}
+                  <small className="hint">{nodesOf(spec.small, own, modifiers)}</small>
+                </>
+              ) : spec.details && spec.hideEmpty && !details.length ? (
                 <> </>
               ) : spec.details ? (
                 <>
@@ -325,8 +447,17 @@ function List({ spec, formats }: { spec: Extract<Part, { part: "list" }>; format
               ) : null}
             </>
           );
+          // Small words after the name or after the buttons (2E's "(nonproficient)", 3.5E's critical range).
+          const smalls = (place: "name" | "end") =>
+            (spec.smalls ?? [])
+              .filter((item) => item.place === place && holds(item.when, scope, sheet))
+              .map((item, index) => (
+                <small key={`${place}-${index}`} className="hint" title={item.title} {...(item.attr ? { [`data-${item.attr.name}`]: item.attr.value } : {})}>
+                  {nodesOf(item.text, scope, modifiers)}
+                </small>
+              ));
           return (
-            <li key={key} {...{ [`data-${spec.hook}`]: key }}>
+            <li key={key} {...(spec.hook ? { [`data-${spec.hook}`]: key } : {})}>
               {spec.select ? <FieldView spec={spec.select} scope={scope} base={`${spec.path}.${key}`} /> : null}
               {(spec.fields ?? []).map((field) => (
                 <FieldView key={field.path} spec={field} scope={scope} base={`${spec.path}.${key}`} />
@@ -340,13 +471,15 @@ function List({ spec, formats }: { spec: Extract<Part, { part: "list" }>; format
               ) : (
                 <span title={title}>{words}</span>
               )}
+              {smalls("name")}
               {(spec.rowActions ?? [])
                 .filter((action) => holds(action.when, scope, sheet))
                 .map((action) => (
                   <button key={action.hook} type="button" className={action.className} data-action={action.hook} disabled={!editable} title={action.title ? textOf(action.title, scope, modifiers) : undefined} onClick={() => sheet.act(action.action, { key })}>
-                    {textOf(action.label, scope, modifiers)}
+                    {nodesOf(action.label, scope, modifiers)}
                   </button>
                 ))}
+              {smalls("end")}
               {editable && spec.remove ? (
                 <button type="button" className="ghost" title={spec.remove.title} aria-label={textOf(spec.remove.aria, scope, modifiers)} onClick={() => (spec.remove?.action ? sheet.act(spec.remove.action, { key }) : sheet.change(`${spec.path}.${key}`, null))}>
                   ×
@@ -397,6 +530,82 @@ function ModifierView({ spec }: { spec: NonNullable<Extract<Part, { part: "list"
         ))}
       </select>
     </label>
+  );
+}
+
+// The strip over every tab (FG's level and experience line): the level and its level-up (the owner once the
+// experience is there, the GM any time), a level per class, the experience, values, the next roll's DC or modifier.
+function Strip({ spec }: { spec: Extract<Part, { part: "strip" }> }) {
+  const sheet = useSheet();
+  const { data, editable, gm, session, record, modifiers } = sheet;
+  return (
+    <section className={spec.className ?? "cc-panel cc-row five-strip"}>
+      {spec.items.map((item, index) => {
+        const ready = (exp: Path, next: Path) => num(at(data, next)) > 0 && num(at(data, exp)) >= num(at(data, next));
+        switch (item.kind) {
+          case "level": {
+            const level = num(at(data, item.path));
+            return (
+              <span key={index} className="cc-inline">
+                <b>Level</b> <span className="cc-num" data-stat="level">{level}</span>
+                {editable && (ready(item.exp, item.next) || gm) && level < Number(item.max) ? (
+                  <button type="button" className="cc-levelup" data-action="level-up" title={item.title} onClick={() => session.levelUp(record.id)}>
+                    <Icon name="add" size={14} />
+                  </button>
+                ) : null}
+              </span>
+            );
+          }
+          case "levels":
+            return (
+              <Fragment key={index}>
+                {rows(at(data, item.path)).map(([, row]) => {
+                  const scope: Scope = { row, data: {} };
+                  const name = String(row.name);
+                  return (
+                    <span key={name} className="cc-inline" title={textOf(item.title, scope, modifiers)}>
+                      <b>{name}</b> <span className="cc-num" data-stat={`level-${sheet.formats[item.hook]?.(row) ?? ""}`}>{num(row.level)}</span>
+                      {editable && (ready(item.exp, item.next) || gm) && num(row.level) < item.max ? (
+                        <button type="button" className="cc-levelup" data-action="level-up" data-level-class={name} title={textOf(item.buttonTitle, scope, modifiers)} onClick={() => session.levelUp(record.id, name)}>
+                          <Icon name="add" size={14} />
+                        </button>
+                      ) : null}
+                    </span>
+                  );
+                })}
+              </Fragment>
+            );
+          case "xp":
+            return (
+              <span key={index} className="cc-inline">
+                <b>XP</b> <Field value={num(at(data, item.path))} number editable={editable} label={item.label} onSave={(value) => sheet.change(item.path, Number(value) || 0)} /> / <span className="cc-num">{num(at(data, item.next)) || "—"}</span>
+              </span>
+            );
+          case "value":
+            return (
+              <span key={index} className="cc-inline" title={item.title}>
+                <b>{item.label}</b> <span className="cc-num" data-stat={item.hook}>{item.format === "signed" ? signed(num(at(data, item.path))) : num(at(data, item.path))}</span>
+              </span>
+            );
+          case "modifier":
+            return (
+              <label key={index} className="cc-inline" title={item.title}>
+                <b>{item.label}</b> <input type="number" className="cc-field number" value={num(modifiers[item.key])} min={item.min} max={item.max} aria-label={item.aria} onChange={(event) => sheet.setModifier(item.key, Number(event.target.value) || 0)} />
+              </label>
+            );
+          case "choice":
+            return (
+              <select key={index} className="cc-field" aria-label={item.aria} value={String(modifiers[item.key] ?? "")} onChange={(event) => sheet.setModifier(item.key, event.target.value)}>
+                {item.options.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            );
+        }
+      })}
+    </section>
   );
 }
 
