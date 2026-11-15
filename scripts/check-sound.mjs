@@ -227,7 +227,7 @@ try {
   gm.send({ type: "roll", formula: "1d20", label: "Perception", mode: "gm" });
   await settle();
   const [mace, look] = gm.lines.slice(-2);
-  assert(folderOf(mace.sound) === "sfx/Weapons/Mace/Attack" && !look.sound, "a hidden attack sounds (combat only); a hidden check does not");
+  assert(folderOf(mace.sound) === "sfx/Weapons/Mace/Attack" && !look.sound, `a hidden attack sounds (combat only); a hidden check does not: ${JSON.stringify([mace, look].map((line) => [line.roll?.label, line.sound]))}`);
   agent.setOptions({ soundHidden: "off" });
   await wait();
   gm.send({ type: "roll", formula: "1d20", label: "[ATTACK] (M) Flail", mode: "gm" });

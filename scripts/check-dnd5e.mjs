@@ -24,7 +24,7 @@ function assert(condition, message) {
   const { EDIT_PATHS } = require("../electron/dnd5e.cjs");
   const before = {
     text: ["playername", "alignment", "appearance", "notes", "senses", "speed", "background", "species", "gender", "age", "height", "weight", "concentration"].map((key) => `^${key}$`),
-    number: [/^abilities\.(strength|dexterity|constitution|intelligence|wisdom|charisma)\.(score|saveprof)$/, /^skills\.[a-z]+\.prof$/, /^hp\.(wounds|temp)$/, /^exp$/, /^ac\.misc$/, /^initiative\.misc$/, /^slots\.l\d\.used$/, /^deathsaves\.(success|failure)$/, /^hitdice\.used$/, /^dread$/, /^coins\.id-\d+\.amount$/, /^inventorylist\.id-\d+\.(count|carried)$/].map((regex) => regex.source),
+    number: [/^abilities\.(strength|dexterity|constitution|intelligence|wisdom|charisma)\.(score|saveprof)$/, /^skills\.[a-z]+\.prof$/, /^hp\.(wounds|temp)$/, /^exp$/, /^ac\.misc$/, /^initiative\.misc$/, /^slots\.l\d\.used$/, /^deathsaves\.(success|failure)$/, /^inspiration$/, /^hitdice\.used$/, /^dread$/, /^coins\.id-\d+\.amount$/, /^inventorylist\.id-\d+\.(count|carried)$/].map((regex) => regex.source),
   };
   assert(EDIT_PATHS.remove.map((regex) => regex.source).join() === /^(inventorylist)\.id-\d+$/.source, `the rows the sheet may drop: ${EDIT_PATHS.remove.map((regex) => regex.source).join()}`);
   for (const kind of ["text", "number"]) assert(EDIT_PATHS[kind].map((regex) => regex.source).join(" ") === before[kind].join(" "), `the ${kind} whitelist from the manifest is the old one: ${EDIT_PATHS[kind].map((regex) => regex.source).join(" ")}`);
