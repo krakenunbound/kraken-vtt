@@ -66,8 +66,19 @@ function save(name: string, text: string, type: string) {
 export function ExportButton({ record }: { record: TableRecord }) {
   const [menu, setMenu] = useState(false);
   const box = useRef<HTMLSpanElement>(null);
+  const list = useRef<HTMLSpanElement>(null);
+  // The menu sits in the top layer beside the button (right of it, else left), so the card list's
+  // scrolling neither clips it nor puts it over the character's name.
   useEffect(() => {
     if (!menu) return;
+    const pop = list.current;
+    const at = box.current?.getBoundingClientRect();
+    if (pop && at) {
+      pop.showPopover?.();
+      const width = pop.offsetWidth;
+      pop.style.left = `${at.right + 4 + width <= window.innerWidth ? at.right + 4 : Math.max(4, at.left - 4 - width)}px`;
+      pop.style.top = `${Math.min(at.top, window.innerHeight - pop.offsetHeight - 4)}px`;
+    }
     const away = (event: PointerEvent) => {
       if (!box.current?.contains(event.target as Node)) setMenu(false);
     };
@@ -85,7 +96,7 @@ export function ExportButton({ record }: { record: TableRecord }) {
         <Icon name="export" size={16} />
       </button>
       {menu ? (
-        <span className="character-export-menu" role="menu">
+        <span className="character-export-menu" role="menu" popover="manual" ref={list}>
           <button
             type="button"
             role="menuitem"

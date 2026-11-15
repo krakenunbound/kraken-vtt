@@ -1505,7 +1505,7 @@ textarea.cc-field.tall { min-height: 220px; }
 .charselect-item { position: relative; display: flex; gap: 6px; align-items: center; }
 .charselect-item .charselect-card { flex: 1; min-width: 0; }
 .charselect-tools { display: flex; flex-direction: column; gap: 4px; position: relative; }
-.charselect-tools .character-export-menu { left: auto; right: 0; }
+.character-export-menu[popover] { position: fixed; inset: auto; margin: 0; color: inherit; }
 .charselect-cards > .empty-state { grid-column: 1 / -1; padding: 24px; text-align: center; }
 
 /* FG's identity list under the chat: who a player speaks and rolls as. */
