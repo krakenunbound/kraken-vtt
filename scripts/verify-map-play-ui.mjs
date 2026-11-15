@@ -149,6 +149,19 @@ try {
   await until(() => seat.locator(`${seatMap} [data-token="${orcToken.id}"]`).getAttribute("data-name").then((name) => name === "Hulking brute"), "the unidentified name");
   report.push("token options: a health bar on the orc for the player; names off sends none; the unidentified name instead of the real one");
 
+  // 2b. The GM speaks as the orc: a bubble over its token on the player's screen. Damage floats off it on the
+  // GM's screen; the player, shown a health bar and not numbers, gets no number.
+  await tool("kraken_chat_send", { text: "None shall pass!", as: "Orc Captain" });
+  await seat.waitForSelector(`${seatMap} .token-bubble[data-bubble="${orcToken.id}"]`, { timeout: 8000 });
+  assert((await seat.textContent(`${seatMap} .token-bubble[data-bubble="${orcToken.id}"]`)).includes("None shall pass!"), "the orc's words over its token");
+  await seat.screenshot({ path: path.join(SHOTS, "kraken-chat-bubble-player.png") });
+  await tool("kraken_combat", { action: "damage", id: orcEntry.id, amount: 2 });
+  await page.waitForSelector(`.token-float.hurt[data-float="${orcToken.id}"]`, { timeout: 8000 });
+  assert((await page.textContent(`.token-float.hurt[data-float="${orcToken.id}"]`)).trim() === "−2", "the GM sees -2 float off the orc");
+  await page.waitForTimeout(400);
+  assert((await seat.locator(`.token-float[data-float="${orcToken.id}"]`).count()) === 0, "the player, shown a bar, gets no number");
+  report.push("chat bubble over the speaking orc; its damage floats on the GM's screen, not the player's");
+
   // 3. Fog of war on the host: walls, line of sight; the player's explored areas come from the host.
   await tool("kraken_wall", { action: "add", points: [700, 200, 700, 1200], kind: "wall" }).catch(() => undefined);
   await tool("kraken_line_of_sight", { on: true });

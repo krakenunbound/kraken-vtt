@@ -628,7 +628,7 @@ export function App() {
           session={session}
           scene={
             scene ? (
-              <MapView scene={scene} gm={dm && !testing && !previewing} map={session.map} records={recordList} pings={session.pings} floats={session.floats} notice={session.notice} actions={mapActions} targeted={targeted} targeters={targeters} templateAsk={session.templateAsk} onTemplateDone={session.clearTemplateAsk} fxMode={session.options.tokenEffects ?? "full"} me={testing ? "@test" : myName} startEditing={dm && Boolean(prep) && !testing} gmSeat={dm} readAloud={session.readAloudNow} onReadAloudDone={session.dismissReadAloud} viewPull={session.viewPull} />
+              <MapView scene={scene} gm={dm && !testing && !previewing} map={session.map} records={recordList} pings={session.pings} floats={session.floats} bubbles={session.bubbles} notice={session.notice} actions={mapActions} targeted={targeted} targeters={targeters} templateAsk={session.templateAsk} onTemplateDone={session.clearTemplateAsk} fxMode={session.options.tokenEffects ?? "full"} me={testing ? "@test" : myName} startEditing={dm && Boolean(prep) && !testing} gmSeat={dm} readAloud={session.readAloudNow} onReadAloudDone={session.dismissReadAloud} viewPull={session.viewPull} />
             ) : null
           }
           sceneId={scene?.id ?? ""}

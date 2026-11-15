@@ -7,7 +7,7 @@ import { MARKER_SETS, markerShapes } from "../../shared/map/deathMarkers.mjs";
 import { backgroundRect, colorWithAlpha, gridStops, sceneFrame, type BackgroundFit, type SceneFrame } from "../foundry/geometry";
 import { type SceneLight, type SceneMarker, type SceneRegion, type SceneWall } from "../foundry/sceneObjects";
 import { diagonalRule, gridDistance, gridKind, pathDistance, gridOrigin, hexCorners, hexOf, LIGHT_PRESETS, snapCenter, withGrid } from "../../shared/map/geometry.mjs";
-import type { DecalItem, EditWall, MapDoor, MapTemplate, MapTile, MapToken, Ping, Float, PictureKind, SceneLightRecord, TableMap, TableRecord, TemplateAsk, WallKind } from "../session/useSession";
+import type { DecalItem, EditWall, MapDoor, MapTemplate, MapTile, MapToken, Ping, Float, Bubble, PictureKind, SceneLightRecord, TableMap, TableRecord, TemplateAsk, WallKind } from "../session/useSession";
 import { useBookWindows } from "../books/Books";
 import { MapEditor, kindColor, placePicture, type EditTab, type EditTool, type LabelStyle, type PaintStyle } from "./MapEditor";
 import { Lighting } from "./Lighting";
@@ -311,6 +311,7 @@ function MapViewInner({
   records = [],
   pings = [],
   floats = [],
+  bubbles = [],
   notice = null,
   actions,
   targeted = [],
@@ -341,6 +342,8 @@ function MapViewInner({
   pings?: Ping[];
   // Damage and healing floating off tokens (scrolling combat text).
   floats?: Float[];
+  // Words spoken as a character or creature, over its token.
+  bubbles?: Bubble[];
   notice?: string | null;
   actions: MapActions;
   // Tokens this seat's creatures have targeted (a reticle shows on them).
@@ -2226,6 +2229,16 @@ function MapViewInner({
           : null}
         {/* A ping: a bright dot in the person's colour, three rings going out from it and a
             beam of light, never smaller on screen than about 180 px however far out the map is. */}
+        {bubbles.map((item) => {
+          const token = tokens.find((candidate) => candidate.recordId === item.recordId);
+          if (!token) return null;
+          const span = token.squares * size;
+          return (
+            <div key={item.id} className={`token-bubble ${item.kind}`} data-bubble={token.id} style={{ left: token.x, top: token.y - span / 2, fontSize: Math.max(13, 14 / camera.scale) }}>
+              {item.kind === "emote" ? <em>{item.text}</em> : item.text}
+            </div>
+          );
+        })}
         {floats.map((item) => {
           const token = tokens.find((candidate) => candidate.id === item.tokenId);
           if (!token) return null;
