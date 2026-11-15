@@ -272,6 +272,12 @@ function savedOptions(value) {
     soundHidden: ["off", "combat", "all"].includes(options.soundHidden) ? options.soundHidden : "combat",
     // When a creature's targets clear: never (FG), after its spell or attack, or at the end of its turn.
     clearTargets: ["never", "action", "turn"].includes(options.clearTargets) ? options.clearTargets : "never",
+    // Conditions and effects on tokens: animated, icons only, or not drawn (every seat).
+    tokenEffects: ["full", "icons", "off"].includes(options.tokenEffects) ? options.tokenEffects : "full",
+    // What players may put on their own characters from the Effects list: nothing, lights, lights and conditions, or everything.
+    playerEffects: ["none", "lights", "conditions", "all"].includes(options.playerEffects) ? options.playerEffects : "conditions",
+    // Damage and healing land as the roll does (FG), or wait on the chat card's buttons (Foundry).
+    autoApply: options.autoApply !== false,
     // The same sound again only after this many seconds.
     soundRepeat: Math.min(30, Math.max(0, Number.isFinite(Number(options.soundRepeat)) ? Number(options.soundRepeat) : 1)),
     // How long landed dice lie on the table before they fade, in seconds (the GM's choice, for every seat).
@@ -641,6 +647,9 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       sendMaps();
     },
   });
+  // The Effects list's actions (electron/effects.cjs): made once the agent handle exists.
+  let effectsApi = null;
+  const effects = () => (effectsApi ??= require("./effects.cjs").createEffects(agentHandle));
   // A creature that dies on the tracker leaves a death marker where its token
   // stands (FG's Death Markers): its type's set, the default's else; a
   // character does not. Those dead already when the table opens are known.
@@ -2394,6 +2403,25 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         return;
       }
 
+      // The Effects list (FG's Effects window): an effect dropped on a token, a tracker
+      // row, a sheet or a party row; taken off, changed, put out or relit; the GM's own made or deleted.
+      if (msg.type === "effects") {
+        const seat = seatOf(client);
+        const api = effects();
+        api.ready
+          .then(() => {
+            if (msg.action === "apply") return api.apply({ to: msg.to, preset: msg.preset, effect: msg.effect, duration: msg.duration, gmOnly: msg.gmOnly }, seat);
+            if (msg.action === "remove") return api.remove({ to: msg.to, effectId: msg.effectId }, seat);
+            if (msg.action === "update") return api.update({ to: msg.to, effectId: msg.effectId, patch: msg.patch ?? {} }, seat);
+            if (msg.action === "snuff" || msg.action === "relight") return api.update({ to: msg.to, effectId: msg.effectId, patch: { paused: msg.action === "snuff" } }, seat);
+            if (msg.action === "save") return api.save(msg.effect ?? {}, seat);
+            if (msg.action === "delete") return api.delete(String(msg.id ?? ""), seat);
+            throw new Error("What should the effect do?");
+          })
+          .catch((error) => send(ws, { type: "error", reason: error instanceof Error ? error.message : "Not allowed." }));
+        return;
+      }
+
       // Area templates (circle, cone, line, square): anyone places one in their
       // colour; target: true makes the creatures inside the targets of the one
       // who places it (the selected creature's, a player's own, the GM's whose turn it is).
@@ -2709,6 +2737,10 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     activeBookId,
     requireActiveBook,
     seat: { role: "dm", name: "Agent" },
+    // The Effects list: put on, take off, change, put out and relight, the GM's own effects.
+    get effects() {
+      return effects();
+    },
     // A turn starts: the templates of instant spells come off the map.
     onTurn() {
       try {

@@ -1320,6 +1320,9 @@ const TOOLS = [
       towerStyle: { type: "string" },
       motd: { type: "object", properties: { text: { type: "string" }, links: { type: "array" } } },
       clearTargets: { type: "string", enum: ["never", "action", "turn"] },
+      tokenEffects: { type: "string", enum: ["full", "icons", "off"], description: "Conditions and effects on tokens: animated visuals (Zzz, flames, frost...), icons only, or not drawn" },
+      playerEffects: { type: "string", enum: ["none", "lights", "conditions", "all"], description: "What players may put on their own characters from the Effects list" },
+      autoApply: { type: "boolean", description: "Damage and healing land as the roll does (FG, true), or wait on the chat card's buttons (Foundry, false)" },
       diceHold: { type: "number" },
       wizard35: { type: "object", properties: { methods: { type: "array", items: { type: "number" } }, rollLock: { type: "boolean" }, lowReroll: { type: "boolean" }, vault: { type: "boolean" } } },
       wizard2e: { type: "object", properties: { rollLock: { type: "boolean" }, methods: { type: "array", items: { type: "number" } }, gold: { type: "string", enum: ["phb", "perlevel", "xlevel"] } } },
@@ -1857,6 +1860,37 @@ const TOOLS = [
         lockMovement: agent.map.lockedNow(),
         ...(view ? { player: args.player, sees: view.tokens.map((token) => token.name), doors: view.doors.map((door) => door.id), limited: Boolean(view.vision) } : {}),
       });
+    },
+  },
+  {
+    name: "kraken_effects",
+    description:
+      "The Effects list (the sidebar's Effects window, FG's Effects window): list (the game's conditions, buffs, lights with their burn time, and the GM's own effects); on {to} (the effects on a creature); apply {to, preset (a list id: prone, asleep, poisoned, bless, torch, lantern, light-spell, flashlight..., or custom:<record id>) or effect {label: 'Name; ATK: 1; AC: -2; LIGHT: 20/40 #ff9e3d flicker', duration (rounds), icon, gmOnly}, duration, gmOnly}: as dropping it on a token, a tracker row, a sheet or a party row; remove {to, effectId}; update {to, effectId, patch {label, duration, gmOnly, paused}}; snuff / relight {to, effectId} (a light put out keeps its time); save {effect {id?, label, kind condition|buff|debuff|light, icon, text, duration, burn (minutes), gmOnly}} the GM's own; delete {id}. to: {tokenId} | {entryId} | {recordId}. A creature on the tracker keeps the effect on its entry (rounds count down by initiative); a token out of the fight keeps it on the token; game time passing (kraken_calendar advance) burns lights and spells down.",
+    inputSchema: object({
+      action: { type: "string", enum: ["list", "on", "apply", "remove", "update", "snuff", "relight", "save", "delete"] },
+      to: { type: "object", properties: { tokenId: { type: "string" }, entryId: { type: "string" }, recordId: { type: "string" } }, description: "Whom: a token, a tracker entry or a character record" },
+      preset: string("apply: an Effects list id"),
+      effect: { type: "object", description: "apply: {label, duration, icon, gmOnly}; save: {id?, label, kind, icon, text, duration, burn, gmOnly}" },
+      duration: number("apply: rounds (instead of the preset's)"),
+      gmOnly: { type: "boolean", description: "apply: only the GM sees it" },
+      effectId: string("remove / update / snuff / relight: the effect's id"),
+      patch: { type: "object", description: "update: {label, duration, gmOnly, paused}" },
+      id: string("delete: the GM's effect record id"),
+    }),
+    async run(args, ctx) {
+      const agent = needTable(ctx);
+      const api = agent.effects;
+      await api.ready;
+      const action = args.action ?? "list";
+      if (action === "list") return out({ effects: api.list(agent.seat) });
+      if (action === "on") return out({ effects: api.on(args.to, agent.seat) });
+      if (action === "apply") return out(api.apply({ to: args.to, preset: args.preset, effect: args.effect, duration: args.duration, gmOnly: args.gmOnly }, agent.seat));
+      if (action === "remove") return out(api.remove({ to: args.to, effectId: args.effectId }, agent.seat));
+      if (action === "update") return out(api.update({ to: args.to, effectId: args.effectId, patch: args.patch ?? {} }, agent.seat));
+      if (action === "snuff" || action === "relight") return out(api.update({ to: args.to, effectId: args.effectId, patch: { paused: action === "snuff" } }, agent.seat));
+      if (action === "save") return out({ saved: api.save(args.effect ?? {}, agent.seat) });
+      if (action === "delete") return out({ deleted: api.delete(String(args.id ?? ""), agent.seat) });
+      throw new Error("Which action?");
     },
   },
   {

@@ -3040,6 +3040,37 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       entry.effects = entry.effects.filter((effect) => effect.id !== effectId);
       changed();
     },
+    // The Effects list's own hands (electron/effects.cjs checks who may): an effect
+    // put on, taken off or changed (put out, relit, its time or words), no GM check here.
+    putOn(id, input) {
+      const entry = find(id);
+      const active = state.entries.find((item) => item.id === state.active);
+      const effect = cleanEffect({ ...input, id: undefined, init: active ? active.initresult : entry.initresult });
+      if (!effect) throw new Error("What effect?");
+      entry.effects.push(effect);
+      changed();
+      return effect;
+    },
+    takeOff(id, effectId) {
+      const entry = find(id);
+      const gone = entry.effects.find((effect) => effect.id === effectId);
+      if (!gone) throw new Error("That effect is gone.");
+      entry.effects = entry.effects.filter((effect) => effect !== gone);
+      changed();
+      return gone;
+    },
+    changeEffect(id, effectId, patch) {
+      const entry = find(id);
+      const effect = entry.effects.find((item) => item.id === effectId);
+      if (!effect) throw new Error("That effect is gone.");
+      const next = cleanEffect({ ...effect, ...patch, id: effect.id });
+      if (!next) throw new Error("An effect needs words.");
+      Object.keys(effect).forEach((key) => delete effect[key]);
+      Object.assign(effect, next);
+      changed();
+      return effect;
+    },
+    owner: (entry) => owner(entry),
     async damage(id, amount, seat) {
       mustGM(seat);
       const { options: opts } = await options();
