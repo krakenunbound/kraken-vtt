@@ -1,0 +1,38 @@
+# The user wiki (docs/wiki) built by scripts/build-wiki.mjs and published on GitHub Pages
+# (https://krakenunbound.github.io/kraken-vtt/), whenever its pages change on main.
+name: Wiki
+on:
+  push:
+    branches: [main]
+    paths: ["docs/wiki/**", "docs/screenshots/**", "scripts/build-wiki.mjs"]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      # marked alone (not the app's dependencies), beside a copy of the build script.
+      - run: mkdir -p ../wikibuild && cd ../wikibuild && npm init -y >/dev/null && npm install --no-audit --no-fund marked@15 && cp "$GITHUB_WORKSPACE/scripts/build-wiki.mjs" .
+      - run: WIKI_ROOT="$GITHUB_WORKSPACE" node ../wikibuild/build-wiki.mjs site
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
