@@ -127,6 +127,7 @@ export function SettingsWindow({ session }: { session: Session }) {
               <option value="max">Maximum</option>
             </select>
           </SettingRow>
+          <Toggle label="Party portraits in initiative order" hint="During a fight the portraits along the top of every screen re-arrange into turn order, the first to act on the left. Off: they keep the party's order." checked={Boolean((session.options as { partyByInitiative?: boolean }).partyByInitiative)} onChange={(on) => session.setTableOptions({ partyByInitiative: on } as never)} setting="party-by-initiative" />
           <Toggle label="Roll initiative every round" hint="FG's house rule: at each new round everyone rolls initiative again and the order changes." checked={Boolean((session.options as { initEachRound?: boolean }).initEachRound)} onChange={(on) => session.setTableOptions({ initEachRound: on } as never)} setting="init-each-round" />
           <Toggle label="Stop at the start of each round" hint="FG's option: a new round waits for your next click before anyone acts, so you can handle what happens at the top of the round." checked={Boolean((session.options as { roundStop?: boolean }).roundStop)} onChange={(on) => session.setTableOptions({ roundStop: on } as never)} setting="round-stop" />
           <SettingRow label="Skip turns" hint="Whose turns the tracker passes over: dead and unconscious creatures (FG's), characters too, or no one.">

@@ -176,6 +176,11 @@ try {
   await seat.screenshot({ path: path.join(SHOTS, "kraken-range-line-player.png") });
   await tool("kraken_record_update", { id: hero.id, data: { inventorylist: { "id-bow": { properties: "Ammunition (Range 30/60; Arrow)" } } } });
   await until(async () => (await seat.getAttribute(rangeLine, "data-range")) === "near", "a 30/60 bow: within range");
+  // The hero's turn: its portrait along the top gets the spinning ring and the Turn ribbon.
+  await tool("kraken_combat", { action: "set-turn", id: heroEntry.id });
+  await seat.waitForSelector(`.portrait-chip.active[data-portrait="${hero.id}"] .chip-turn-ring`, { timeout: 8000 });
+  assert(await seat.isVisible(`.portrait-chip.active[data-portrait="${hero.id}"] [data-turn-badge]`), "the Turn ribbon on the hero's portrait");
+  await seat.screenshot({ path: path.join(SHOTS, "kraken-turn-portrait-player.png"), clip: { x: 0, y: 0, width: 900, height: 70 } });
   await tool("kraken_combat", { action: "target", id: heroEntry.id, targetId: orcEntry.id, on: false });
   await tool("kraken_combat", { action: "remove", id: heroEntry.id });
   report.push("range line: the hero's arrow to the orc says 20 ft, out of range for a 10/15 bow, within for 30/60");

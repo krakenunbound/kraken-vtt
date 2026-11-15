@@ -1,7 +1,7 @@
 import { ShipsWindow } from "../ships/ShipsWindow";
 import { SessionLogWindow } from "../notes/SessionLog";
 import { DelveWindow, OraclesWindow } from "../ironsworn/IronswornWindows";
-import { Fragment, lazy, Suspense, useEffect, useRef, useState, useSyncExternalStore, type MouseEvent as ReactMouseEvent, type ReactNode } from "react";
+import { Fragment, lazy, Suspense, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type MouseEvent as ReactMouseEvent, type ReactNode } from "react";
 import { BellAndHands, HandButton, InviteCard, PauseButton, PauseVeil, PlayerMenu, ReconnectBanner, SceneTitleCard, seatState, useIdle, usePlayerMenu } from "./SessionTools";
 import { Picture } from "../characters/ArtPicker";
 import { CharacterPanel } from "../characters/CharacterPanel";
@@ -291,7 +291,30 @@ export function Desktop({
     .sort((a, b) => a.name.localeCompare(b.name));
   // FG's character list along the top: every character at the table, for both sides.
   const me = session.players.find((seat) => seat.id === session.selfId)?.name ?? "";
-  const portraits = session.roster;
+  // The party along the top; in a fight, in initiative order when the GM chooses (the table option
+  // partyByInitiative): those on the tracker in turn order, the rest after them as they were.
+  const byInitiative = Boolean((session.options as { partyByInitiative?: boolean }).partyByInitiative) && session.combat.entries.length > 0;
+  const turnIndex = (id: string) => {
+    const at = session.combat.entries.findIndex((item) => item.recordId === id);
+    return at < 0 ? Number.MAX_SAFE_INTEGER : at;
+  };
+  const portraits = byInitiative ? [...session.roster].sort((a, b) => turnIndex(a.id) - turnIndex(b.id)) : session.roster;
+  // When their order changes the portraits slide to their new places (measured before and after), not jump.
+  const stripRef = useRef<HTMLDivElement>(null);
+  const chipPlaces = useRef(new Map<string, number>());
+  const portraitOrder = portraits.map((entry) => entry.id).join(",");
+  useLayoutEffect(() => {
+    const strip = stripRef.current;
+    if (!strip) return;
+    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    for (const chip of strip.querySelectorAll<HTMLElement>("[data-portrait]")) {
+      const id = chip.dataset.portrait ?? "";
+      const left = chip.getBoundingClientRect().left;
+      const before = chipPlaces.current.get(id);
+      chipPlaces.current.set(id, left);
+      if (before !== undefined && Math.abs(before - left) > 1 && !still) chip.animate([{ transform: `translateX(${before - left}px)` }, { transform: "none" }], { duration: 450, easing: "cubic-bezier(.2,.8,.2,1)" });
+    }
+  }, [portraitOrder]);
   // FG's sidebar: the tools along the top, then the categories. A list
   // (Items, NPCs, Classes, Races, Spells...) opens on its own window, every
   // active book's records under the book's name.
@@ -599,7 +622,7 @@ export function Desktop({
         <div className="brand">
           <Mark /> Kraken <span className="brand-version" title="Alpha test version">{__KRAKEN_VERSION__}</span>
         </div>
-        <div className={portraits.length > 3 ? "portrait-strip compact" : "portrait-strip"} aria-label={gm ? "The party" : "Your characters"}>
+        <div ref={stripRef} className={portraits.length > 3 ? "portrait-strip compact" : "portrait-strip"} aria-label={gm ? "The party" : "Your characters"}>
           {portraits.map((entry) => {
             const active = session.combat.entries.some((item) => item.recordId === entry.id && item.id === session.combat.active);
             // The GM opens any sheet; a player their own. Whose it is shows beneath, as FG's.
@@ -622,7 +645,15 @@ export function Desktop({
                 // FG's share with one: a record, a note, a story or a picture dropped on a player's portrait (the GM's).
                 {...(gm && entry.owner ? shareDrop(session, entry.owner) : {})}
               >
-                <span className="chip-face">{entry.portrait ? <Picture session={session} id={entry.portrait} alt="" still /> : entry.name.slice(0, 1)}</span>
+                <span className="chip-face">
+                  {entry.portrait ? <Picture session={session} id={entry.portrait} alt="" still /> : entry.name.slice(0, 1)}
+                  {active ? <i className="chip-turn-ring" aria-hidden="true" /> : null}
+                </span>
+                {active ? (
+                  <span className="chip-turn" data-turn-badge>
+                    Turn
+                  </span>
+                ) : null}
                 <span className="chip-name">{entry.name}</span>
                 <span className="chip-holder">{entry.owner || "Server"}</span>
                 {holder?.hand ? (
