@@ -25,7 +25,13 @@ export type KrakenHostInfo = {
   v6?: string[];
   externalV4?: string;
   externalV6?: string;
+  // The router's port opened by itself (UPnP or NAT-PMP), when asked; the invite links.
+  upnp?: KrakenUpnp | null;
+  invite?: KrakenInvite | null;
 };
+export type KrakenUpnp = { ok: boolean; method: string; external?: string; error?: string };
+// Links that seat a player: the table's password in the #fragment (never sent to the server).
+export type KrakenInvite = { internet: string; lan: string[]; local: string; upnp?: KrakenUpnp | null };
 
 export type KrakenAssistantApi = {
   status: () => Promise<{ busy: boolean; model: string; log: never[]; hasKey: boolean; keyFrom: string | null }>;
@@ -82,7 +88,10 @@ export type KrakenApi = {
   studioOpenImage?: (input: { sceneId: string; name: string; picture: Uint8Array }) => Promise<{ url: string }>;
   onStudioSaved?: (handler: (event: { sceneId: string; picture: boolean }) => void) => () => void;
   copy: (text: string) => Promise<boolean | void>;
-  startHost: (options: { port: number; password: string; lan: boolean; cloud: boolean; campaignId?: string }) => Promise<KrakenHostInfo>;
+  startHost: (options: { port: number; password: string; lan: boolean; cloud: boolean; upnp?: boolean; campaignId?: string }) => Promise<KrakenHostInfo>;
+  invite?: () => Promise<KrakenInvite | null>;
+  manageCampaign?: (input: { action: "rename" | "duplicate" | "export" | "delete" | "backups" | "backup" | "restore" | "folder"; id: string; name?: string; backup?: string }) => Promise<unknown>;
+  openLogs?: () => Promise<unknown>;
   stopHost: () => Promise<void>;
   setSceneImage: (bytes: ArrayBuffer, mime: string) => Promise<void>;
   setTokenArt: (list: { id: string; bytes: ArrayBuffer; mime: string }[]) => Promise<void>;
@@ -107,7 +116,7 @@ export type StudioSettings = { dungeondraftFolders: string[]; packFolders: strin
 export type UpdaterState = { status: "idle" | "off" | "checking" | "current" | "available" | "downloading" | "ready" | "installing" | "error"; current: string; version?: string; notes?: string; percent?: number; error?: string | null; reason?: string };
 
 export type KrakenAgentCommand =
-  | { kind: "host"; campaignId: string; port: number; password: string }
+  | { kind: "host"; campaignId: string; port: number; password: string; internet?: boolean; upnp?: boolean }
   | { kind: "leave" }
   | { kind: "open-adventure"; name: string; bytes: Uint8Array }
   | { kind: "scenes"; adventure?: string; scene?: string }

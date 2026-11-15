@@ -164,4 +164,153 @@ function writeBundle(file, id, bytes) {
   writeAtomic(path.join(folder(file, id), "bundle.zip"), bytes, { backup: false });
 }
 
-module.exports = { read, create, touch, setRuleset, exists, readState, writeState, readBundle, writeBundle };
+// --- Managing campaigns: rename, duplicate, export, delete, backups ---------------
+// Map Studio's pictures for a campaign's images live beside the campaigns, by id (backend.cjs studioPictureFile).
+function picturesFolder(file, id) {
+  return path.join(path.dirname(file), "studio", "pictures", String(id).replace(/[^\w.-]/g, "_"));
+}
+function find(campaigns, id) {
+  const found = campaigns.find((campaign) => campaign.id === String(id ?? ""));
+  if (!found) throw new Error("That campaign is missing.");
+  return found;
+}
+
+function rename(file, input) {
+  const campaigns = read(file);
+  const found = find(campaigns, input?.id);
+  const name = clean(input?.name, 80);
+  if (!name) throw new Error("Name the campaign.");
+  found.name = name;
+  write(file, campaigns);
+  return found;
+}
+
+// A folder copied, file by file (leaving out backups and half-written files).
+function copyFolder(from, to, skip = () => false) {
+  if (!fs.existsSync(from)) return;
+  fs.mkdirSync(to, { recursive: true });
+  for (const entry of fs.readdirSync(from, { withFileTypes: true })) {
+    if (skip(entry.name)) continue;
+    const source = path.join(from, entry.name);
+    const target = path.join(to, entry.name);
+    if (entry.isDirectory()) copyFolder(source, target, skip);
+    else if (entry.isFile()) fs.copyFileSync(source, target);
+  }
+}
+const scratch = (name) => name === "backups" || /\.(tmp|bak)$/.test(name);
+
+// A copy under a new name: its table, records, adventure and Map Studio pictures.
+function duplicate(file, input) {
+  const campaigns = read(file);
+  const found = find(campaigns, input?.id);
+  const copy = { ...found, id: crypto.randomBytes(8).toString("hex"), name: clean(input?.name, 80) || `${found.name} (copy)`.slice(0, 80), createdAt: Date.now(), playedAt: null };
+  copyFolder(folder(file, found.id), folder(file, copy.id), scratch);
+  copyFolder(picturesFolder(file, found.id), picturesFolder(file, copy.id));
+  campaigns.unshift(copy);
+  write(file, campaigns);
+  return copy;
+}
+
+// Out of the list; its folders are handed back for the recycle bin (the window's process puts them there).
+function remove(file, input) {
+  const campaigns = read(file);
+  const found = find(campaigns, input?.id);
+  write(file, campaigns.filter((campaign) => campaign.id !== found.id));
+  return { removed: found, folders: [folder(file, found.id), picturesFolder(file, found.id)].filter((dir) => fs.existsSync(dir)) };
+}
+
+// One .zip of the campaign: campaign.json (its card), its table, records, adventure and Map Studio pictures.
+function exportZip(file, input) {
+  const { zipSync } = require("fflate");
+  const found = find(read(file), input?.id);
+  const entries = { "campaign.json": Buffer.from(JSON.stringify({ kraken: "campaign", version: 1, ...found }, null, 1)) };
+  const add = (from, prefix) => {
+    if (!fs.existsSync(from)) return;
+    for (const entry of fs.readdirSync(from, { withFileTypes: true })) {
+      if (scratch(entry.name)) continue;
+      const source = path.join(from, entry.name);
+      if (entry.isDirectory()) add(source, `${prefix}${entry.name}/`);
+      else if (entry.isFile()) entries[`${prefix}${entry.name}`] = fs.readFileSync(source);
+    }
+  };
+  add(folder(file, found.id), "campaign/");
+  add(picturesFolder(file, found.id), "studio/");
+  const bytes = Buffer.from(zipSync(entries, { level: 6 }));
+  const target = String(input?.path ?? "");
+  if (!target) throw new Error("Where should the .zip go?");
+  fs.mkdirSync(path.dirname(target), { recursive: true });
+  fs.writeFileSync(target, bytes);
+  return { campaign: found.name, path: target, bytes: bytes.length };
+}
+
+// Rolling backups: a copy of the campaign's files (its adventure linked, not copied, while it is the same file),
+// in <campaign>/backups/<time>-<why>/; the newest ten are kept.
+const KEEP_BACKUPS = 10;
+const BACKUP_FILES = ["state.json", "records.json", "bundle.zip"];
+function backupsFolder(file, id) {
+  return path.join(folder(file, id), "backups");
+}
+function backups(file, input) {
+  const found = find(read(file), input?.id);
+  const dir = backupsFolder(file, found.id);
+  if (!fs.existsSync(dir)) return [];
+  return fs
+    .readdirSync(dir, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && /^\d{13}-[a-z-]+$/.test(entry.name))
+    .map((entry) => {
+      const [at, ...why] = entry.name.split("-");
+      const files = BACKUP_FILES.filter((name) => fs.existsSync(path.join(dir, entry.name, name)));
+      const bytes = files.reduce((sum, name) => sum + fs.statSync(path.join(dir, entry.name, name)).size, 0);
+      return { id: entry.name, at: Number(at), reason: why.join("-"), files, bytes };
+    })
+    .sort((a, b) => b.at - a.at);
+}
+function backup(file, input) {
+  const found = find(read(file), input?.id);
+  const source = folder(file, found.id);
+  const present = BACKUP_FILES.filter((name) => fs.existsSync(path.join(source, name)));
+  if (!present.length) return null;
+  const reason = String(input?.reason ?? "manual").toLowerCase().replace(/[^a-z-]/g, "").slice(0, 20) || "manual";
+  let at = Date.now();
+  while (fs.existsSync(path.join(backupsFolder(file, found.id), `${at}-${reason}`))) at += 1;
+  const dir = path.join(backupsFolder(file, found.id), `${at}-${reason}`);
+  fs.mkdirSync(dir, { recursive: true });
+  for (const name of present) {
+    const from = path.join(source, name);
+    const to = path.join(dir, name);
+    // The adventure is written whole each time (a new file), so a hard link keeps this one's bytes for free.
+    if (name === "bundle.zip") {
+      try {
+        fs.linkSync(from, to);
+        continue;
+      } catch {
+        /* another disk, or no links: copied */
+      }
+    }
+    fs.copyFileSync(from, to);
+  }
+  // The newest ten are kept; older ones are this feature's own folders, removed.
+  for (const old of backups(file, { id: found.id }).slice(KEEP_BACKUPS)) fs.rmSync(path.join(backupsFolder(file, found.id), old.id), { recursive: true, force: true });
+  return backups(file, { id: found.id }).find((item) => item.id === `${at}-${reason}`) ?? null;
+}
+// A backup put back: what is there now is backed up first ("before-restore"), so a restore can be undone.
+function restore(file, input) {
+  const found = find(read(file), input?.id);
+  const chosen = backups(file, { id: found.id }).find((item) => item.id === String(input?.backup ?? ""));
+  if (!chosen) throw new Error("No such backup.");
+  backup(file, { id: found.id, reason: "before-restore" });
+  const dir = path.join(backupsFolder(file, found.id), chosen.id);
+  const target = folder(file, found.id);
+  for (const name of BACKUP_FILES) {
+    const from = path.join(dir, name);
+    const to = path.join(target, name);
+    if (fs.existsSync(from)) {
+      const temp = `${to}.tmp`;
+      fs.copyFileSync(from, temp);
+      fs.renameSync(temp, to);
+    } else if (name === "bundle.zip") fs.rmSync(to, { force: true });
+  }
+  return { restored: chosen, campaign: found.name };
+}
+
+module.exports = { read, create, touch, setRuleset, exists, readState, writeState, readBundle, writeBundle, folder, picturesFolder, rename, duplicate, remove, exportZip, backups, backup, restore };

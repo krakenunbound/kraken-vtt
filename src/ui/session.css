@@ -1,0 +1,91 @@
+/* The session's own controls (SessionTools.tsx): reconnecting, the pause, the
+   bell and raised hands, the scene's title card, a player gone quiet, the GM's
+   menu for a player, and the invite (link and QR). */
+
+/* The connection dropped: the table dimmed under a banner while Kraken sits down again. */
+.reconnect-veil { position: fixed; inset: 0; z-index: 2000; display: grid; place-items: start center; padding-top: 72px; background: rgba(6, 8, 10, 0.45); backdrop-filter: grayscale(0.6); }
+.reconnect-banner { display: flex; align-items: center; gap: 12px; padding: 12px 18px; border: 1px solid var(--brass-dim); border-radius: 10px; background: var(--panel, #171a20); box-shadow: var(--shadow); color: var(--text); }
+.reconnect-banner strong { font-family: Cinzel, Georgia, serif; letter-spacing: 0.05em; color: var(--brass); }
+.reconnect-spinner { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--brass-dim); border-top-color: var(--brass); }
+@media (prefers-reduced-motion: no-preference) {
+  .reconnect-spinner { animation: session-spin 0.9s linear infinite; }
+}
+@keyframes session-spin { to { rotate: 360deg; } }
+
+/* The GM has paused the game: the players' veil; the GM's badge. */
+.pause-veil { position: absolute; inset: 0; z-index: 960; display: grid; place-items: center; pointer-events: none; background: radial-gradient(ellipse at center, rgba(8, 10, 14, 0.55), rgba(8, 10, 14, 0.82)); }
+/* Chat goes on while paused: it stays above the veil. */
+.desktop:has(> .pause-veil) > .chat-dock { z-index: 961; }
+.pause-card {display: grid; justify-items: center; gap: 8px; padding: 26px 40px; border-block: 2px solid var(--brass); background: rgba(18, 12, 6, 0.85); color: #fff3d6; text-align: center; }
+.pause-card strong { font-family: Cinzel, Georgia, serif; font-size: clamp(1.6rem, 3.4vw, 2.6rem); letter-spacing: 0.08em; text-shadow: 0 0 16px rgba(255, 196, 92, 0.6); }
+.pause-card .icon { color: var(--brass); }
+.pause-badge { position: absolute; top: 10px; left: 50%; translate: -50% 0; z-index: 960; display: flex; align-items: center; gap: 8px; padding: 6px 8px 6px 12px; border: 1px solid var(--brass); border-radius: 999px; background: rgba(18, 12, 6, 0.9); color: #fff3d6; box-shadow: var(--shadow); }
+.menubar .icon-button.on { border-color: var(--brass); color: var(--brass); background: var(--brass-soft); }
+
+/* A bell rung for a player; a hand raised, on the GM's screen. */
+.bell-flash { position: absolute; top: 22%; left: 50%; translate: -50% 0; z-index: 975; display: flex; align-items: center; gap: 14px; padding: 16px 28px; border: 2px solid var(--brass); border-radius: 14px; background: rgba(18, 12, 6, 0.92); color: #fff3d6; box-shadow: 0 0 40px rgba(255, 196, 92, 0.45), var(--shadow); cursor: pointer; }
+.bell-flash strong { font-family: Cinzel, Georgia, serif; font-size: 1.4rem; letter-spacing: 0.05em; }
+.bell-flash .icon { color: var(--brass); }
+.bell-flash::after { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none; background: rgba(255, 210, 130, 0.0); }
+@media (prefers-reduced-motion: no-preference) {
+  .bell-flash { animation: bell-in 3.2s ease-in-out forwards; }
+  .bell-flash .icon { animation: bell-swing 0.5s ease-in-out 3; transform-origin: 50% 10%; }
+  .bell-flash::after { animation: bell-wash 0.9s ease-out; }
+}
+@keyframes bell-in { 0% { opacity: 0; scale: 0.9; } 8%, 85% { opacity: 1; scale: 1; } 100% { opacity: 0; } }
+@keyframes bell-swing { 0%, 100% { rotate: 0deg; } 25% { rotate: 18deg; } 75% { rotate: -18deg; } }
+@keyframes bell-wash { 0% { background: rgba(255, 210, 130, 0.28); } 100% { background: rgba(255, 210, 130, 0); } }
+
+/* The GM shared a map: its name, a title card across the players' screens. */
+.scene-title-card { position: absolute; top: 16%; left: 0; right: 0; z-index: 965; display: flex; align-items: center; justify-content: center; gap: 18px; pointer-events: none; color: #fff3d6; }
+.scene-title-card strong { font-family: Cinzel, Georgia, serif; font-size: clamp(2rem, 4.4vw, 3.6rem); letter-spacing: 0.1em; text-shadow: 0 0 22px rgba(0, 0, 0, 0.9), 0 2px 0 #000; }
+.scene-title-rule { flex: 0 1 18vw; height: 2px; background: linear-gradient(90deg, transparent, var(--brass), transparent); }
+@media (prefers-reduced-motion: no-preference) {
+  .scene-title-card { animation: title-card 3.6s ease-in-out forwards; }
+}
+@keyframes title-card { 0% { opacity: 0; letter-spacing: 0.3em; } 15%, 75% { opacity: 1; } 100% { opacity: 0; } }
+
+/* A player gone quiet (away, idle, reconnecting): their row and portrait dim; a raised hand shows. */
+.portrait-chip { position: relative; }
+.portrait-chip.quiet { opacity: 0.5; filter: grayscale(0.7); }
+.portrait-chip .chip-hand { position: absolute; top: -4px; right: -4px; display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: var(--brass); color: #1a1208; }
+.players-window .roster-list li[data-state] > span:nth-child(2) { opacity: 0.6; }
+.players-window .seat-state { color: var(--muted); font-style: italic; }
+.players-window .seat-hand { color: var(--brass); display: inline-grid; }
+.players-window .seat-role { margin-left: auto; }
+.players-window .seat-actions { display: inline-flex; gap: 4px; }
+.players-window .seat-actions .icon-button { border: 1px solid var(--line); color: var(--text); }
+.players-window .seat-actions .icon-button:hover:not(:disabled) { border-color: var(--brass); color: var(--brass); }
+.invite-qr-box summary { cursor: pointer; color: var(--muted); }
+.invite-qr-box[open] summary { margin-bottom: 8px; }
+.players-window .roster-list li[data-role="player"] { cursor: context-menu; }
+.bans-panel li { display: flex; align-items: center; gap: 8px; }
+.bans-panel li > button { margin-left: auto; }
+
+/* The GM's menu for a player: at the pointer, over everything (the top layer). */
+.player-menu { position: fixed; inset: auto; margin: 0; min-width: 190px; padding: 4px; border: 1px solid var(--panel-edge, #3a3226); border-radius: 8px; background: var(--panel, #171a20); color: var(--text); box-shadow: var(--shadow); }
+.player-menu [role="menu"] { display: grid; gap: 1px; }
+.player-menu-name { margin: 2px 8px 4px; font-weight: 600; color: var(--brass); }
+.player-menu button { display: flex; align-items: center; gap: 8px; justify-content: flex-start; width: 100%; padding: 6px 10px; border: 0; border-radius: 5px; background: transparent; color: inherit; text-align: left; }
+.player-menu button:hover:not(:disabled), .player-menu button:focus-visible { background: var(--brass-soft); }
+.player-menu button:disabled { opacity: 0.45; }
+.player-menu button.danger { color: #f0a497; }
+.player-menu hr { width: 100%; margin: 3px 0; border: 0; border-top: 1px solid var(--line); }
+@media (prefers-reduced-motion: no-preference) {
+  .player-menu { opacity: 0; transition: opacity 0.1s, display 0.1s, overlay 0.1s; transition-behavior: allow-discrete; }
+  .player-menu:popover-open { opacity: 1; }
+  @starting-style { .player-menu:popover-open { opacity: 0; } }
+}
+
+/* A player pulled to a spot while dragging: told, with a button to look. */
+.pull-toast { pointer-events: auto; display: flex; align-items: center; gap: 6px; }
+
+/* The invite: the link (the password in its #fragment) and its QR code. */
+.invite-card { display: grid; gap: 8px; margin-top: 10px; padding: 10px; border: 1px solid var(--line); border-radius: 8px; background: rgba(0, 0, 0, 0.18); }
+.invite-row { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.invite-row .secret { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.invite-qr { justify-self: start; padding: 10px; border-radius: 6px; background: #fff; line-height: 0; }
+.invite-qr svg { width: 168px; height: 168px; }
+.upnp-line { display: flex; align-items: center; gap: 6px; }
+.upnp-line[data-upnp="mapped"] { color: #9fdca9; }
+.upnp-line[data-upnp="failed"] { color: var(--muted); }

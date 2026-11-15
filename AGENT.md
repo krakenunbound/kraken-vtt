@@ -57,8 +57,12 @@ doesn't get it (it could reach the tools withheld from the assistant).
 | Sidebar Assistant: ask, stop, new chat (its key is set in its window or ANTHROPIC_API_KEY, never by a tool) | `kraken_assistant`, `kraken_windows` kind assistant |
 | **Campaigns** | |
 | List campaigns, make one | `kraken_campaigns`, `kraken_campaign_create` |
-| Play (host) a campaign, leave | `kraken_host`, `kraken_leave` |
+| The start screen's campaign menu: Rename, Duplicate, Export .zip, Backups and restore (a backup at each Play and hourly while hosting, ten kept), Open folder, Delete (to the recycle bin) | `kraken_campaigns` action rename, duplicate, export, backups, backup, restore, folder, delete |
+| Settings > Open logs (the backend's and the window's rotating logs) | `kraken_logs` (open) |
+| Play (host) a campaign, leave; Internet with the router's port opened by itself (UPnP / NAT-PMP, closed on leave); the invite link (password in its #fragment), Copy, QR | `kraken_host` (internet, upnp; returns invite), `kraken_leave` |
 | See who is connected, what's going on | `kraken_status`, `kraken_players` |
+| The Players window's controls and the portraits' right-click: Ring bell, View as, Mark away, a raised hand lowered, the Ban list and Unban; a player's /afk, idle and raised hand (shown on their row and portrait); a dropped seat kept while it reconnects (lost) | `kraken_players` action ring, view-as, afk, lower, bans, unban |
+| Pause the game (the menubar's button, /pause): the players' veil, their moves and rolls refused | `kraken_table_options` paused |
 | **Maps** | |
 | Open map (a prepared map bundle, or a bare picture to build on) | `kraken_open_adventure` |
 | Adventure and scene menus | `kraken_scenes` |
@@ -76,7 +80,7 @@ doesn't get it (it could reach the tools withheld from the assistant).
 | Shapes on the map (line, arrow, square, circle, cone), resized | `kraken_draw` shape, resize |
 | The dice tower: its look for everyone (Kraken's six drawn, the tower pictures, a picture imported); on the GM's screen, lock it, fix it at x,y, move it, turn it on or off (its right-click menu) | `kraken_tower` |
 | Dice packs (Documents/Kraken VTT/Dice): list them with their sets and problems, check a pack being made, the folder; a pack's set by name | `kraken_dice_packs`; `kraken_dice_settings` preset |
-| Ping the map | `kraken_ping` |
+| Ping the map; Pull players to my view (the map's players button, Shift+ping) | `kraken_ping` (pull, squares) |
 | The ruler (right-drag, waypoints; seen by every seat on the map, in the measurer's colour), by the diagonal rule (campaign: `kraken_table_options` diagonal; a scene's own: `kraken_scene_settings` diagonal) | `kraken_ruler` (squares, show) |
 | Settings > Tokens and measuring: what players see of health (bar, dot, on hover, off) and names; a token's unidentified name, its senses line, its elevation (Alt+wheel) | `kraken_table_options` healthNpc, healthPc, names, diagonal; `kraken_token_update` unidentified, senses, elevation |
 | Fog of war (explored areas kept by the host per player and scene); Scene > Reset explored | `kraken_line_of_sight` (explored counts; resetExplored) |
@@ -123,7 +127,7 @@ doesn't get it (it could reach the tools withheld from the assistant).
 | Chat, `/r` rolls, the chat log | `kraken_chat_send`, `kraken_roll`, `kraken_chat_log` |
 | Chat commands: `/w` whispers, `/me` `/action` `/ooc` `/mood`, the GM's `/story` and `/id` | `kraken_chat_send` (`kind`, `to`, `as`, `mood`) |
 | `/gmroll`, `/blindroll` | `kraken_roll` with `secret` |
-| `/kick`, `/vote`, `/save` | `kraken_kick`, `kraken_vote`, `kraken_save` |
+| `/kick` (and the Players window's Kick, Ban), `/vote`, `/save` | `kraken_kick` (ban), `kraken_vote`, `kraken_save` |
 | **Sound** | |
 | The Sound window: one-shots and effects for the table, ambience loops, music, the chat's sound triggers, a scene's own sound | `kraken_sound` (list, play, stop, ambience, music, scene, triggers, scape) |
 | GM-only roll (the GM's dice tower) | `kraken_roll` with `secret` |

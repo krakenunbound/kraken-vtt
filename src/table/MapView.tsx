@@ -128,6 +128,8 @@ export type MapActions = {
   updateLight: (id: string, patch: Partial<SceneLightRecord>) => void;
   removeLight: (id: string) => void;
   ping: (x: number, y: number) => void;
+  // The GM pulls every player's map to a place (its centre and how much shows, map pixels).
+  pullView?: (view: { x: number; y: number; width: number; height: number }) => void;
   // This seat's ruler, shown to the table as it is drawn (none: let go).
   ruler?: (points: number[]) => void;
   // The GM's Reset explored (a player's name, "" everyone).
@@ -273,6 +275,8 @@ function TrayFace({ url, name }: { url: string; name: string }) {
 // pings, targets), not on every chat line or roll: the table's busiest parts
 // (walls, lighting, animated tokens) live here.
 export const MapView = memo(MapViewInner);
+// The GM's view pulls already followed (one per pull, whichever map window shows it).
+const pullsSeen = { last: 0 };
 
 // The image window's own choices, kept on this screen (not the table's).
 function readFlag(key: string, fallback: boolean) {
@@ -305,7 +309,10 @@ function MapViewInner({
   gmSeat = gm,
   readAloud = null,
   onReadAloudDone = () => undefined,
+  viewPull = null,
 }: {
+  // The GM pulled the players' maps here (a player's screen glides to it).
+  viewPull?: import("../session/useSession").ViewPull | null;
   // The GM's read-aloud, as a speech bubble over the map.
   readAloud?: import("../session/useSession").ReadAloud | null;
   onReadAloudDone?: () => void;
@@ -658,6 +665,53 @@ function MapViewInner({
       return { scale, x: rect.width / 2 - worldX * scale, y: rect.height / 2 - worldY * scale };
     });
   }
+
+  // Pull the players to the GM's view (the toolbar's button, or Shift+click with the ping tool): the centre (or the
+  // point clicked) and how much of the map shows here. Only the table's own map, shared, is pulled to.
+  const canPull = gm && gmSeat && Boolean(actions.pullView) && !map.prep && map.sceneId === scene.id && !map.sceneHidden;
+  function pullHere(point?: Point) {
+    const element = viewport.current;
+    if (!element || !canPull) return;
+    const rect = element.getBoundingClientRect();
+    const width = rect.width / camera.scale;
+    const height = rect.height / camera.scale;
+    const centre = point ?? { x: (rect.width / 2 - camera.x) / camera.scale, y: (rect.height / 2 - camera.y) / camera.scale };
+    actions.pullView?.({ x: Math.round(centre.x), y: Math.round(centre.y), width: Math.round(width), height: Math.round(height) });
+  }
+  // A player's map pulled by the GM: it glides there (at once with reduced motion), showing as much as the GM's did;
+  // mid-drag, it says so instead, with a button to look.
+  const [pullWaiting, setPullWaiting] = useState<import("../session/useSession").ViewPull | null>(null);
+  const busyRef = useRef(false);
+  busyRef.current = Boolean(drag) || panning;
+  function glideTo(pull: import("../session/useSession").ViewPull) {
+    const element = viewport.current;
+    if (!element) return;
+    const rect = element.getBoundingClientRect();
+    const scale = Math.max(0.02, Math.min(rect.width / pull.width, rect.height / pull.height));
+    const target = { x: rect.width / 2 - pull.x * scale, y: rect.height / 2 - pull.y * scale, scale };
+    const start = cameraRef.current;
+    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (still) return setCamera(target);
+    const began = performance.now();
+    const step = (now: number) => {
+      const t = Math.min(1, (now - began) / 600);
+      const ease = 1 - (1 - t) ** 3;
+      setCamera({ x: start.x + (target.x - start.x) * ease, y: start.y + (target.y - start.y) * ease, scale: start.scale + (target.scale - start.scale) * ease });
+      if (t < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+  useEffect(() => {
+    // Each pull once, and only while it is news (a map window opened later does not replay an old one).
+    if (!viewPull || gmSeat || viewPull.id <= pullsSeen.last || Date.now() - viewPull.at > 8000) return;
+    pullsSeen.last = viewPull.id;
+    if (busyRef.current) setPullWaiting(viewPull);
+    else {
+      setPullWaiting(null);
+      glideTo(viewPull);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [viewPull?.id]);
 
   // The navigation pad: a step of a fifth of the view.
   function panBy(dx: number, dy: number) {
@@ -1212,8 +1266,11 @@ function MapViewInner({
         if (tool !== "pan") {
           const point = worldAt(event.clientX, event.clientY);
           if (!point) return;
-          if (tool === "ping") actions.ping(point.x, point.y);
-          else if (tool === "area") {
+          if (tool === "ping") {
+            actions.ping(point.x, point.y);
+            // Shift+ping: the players' maps are pulled there too.
+            if (event.shiftKey) pullHere(point);
+          } else if (tool === "area") {
             // An area spell: everyone within the radius becomes the target of your creature (the GM's: the active one).
             const answer = window.prompt("Target everyone within how many feet of this point? (Sleep 15, a fireball 20)", "15");
             const radius = Number(answer);
@@ -2331,6 +2388,11 @@ function MapViewInner({
           <button type="button" className="tool find" data-action="find-token" onClick={findMine} aria-label={gm ? "Find the selected token" : "Find my token"} title={gm ? "Centre and zoom on the selected token" : "Where am I? Centre and zoom on my token"}>
             <Icon name="locate" />
           </button>
+          {canPull ? (
+            <button type="button" className="tool" data-action="pull-view" onClick={() => pullHere()} aria-label="Pull players to my view" title="Pull players to my view: every player's map glides to what you see now (Shift+click with the ping tool pulls them to that spot)">
+              <Icon name="players" />
+            </button>
+          ) : null}
         </div>
         <div className="tool-group" role="radiogroup" aria-label="What a drag does">
           {(
@@ -2489,6 +2551,17 @@ function MapViewInner({
       {notice ? (
         <p className="map-toast" role="status">
           {notice}
+        </p>
+      ) : null}
+      {pullWaiting ? (
+        <p className="map-toast pull-toast" role="status" data-pull-waiting={pullWaiting.from}>
+          {pullWaiting.from} is showing everyone a spot.{" "}
+          <button type="button" className="ghost" data-action="pull-look" onClick={() => { setPullWaiting(null); glideTo(pullWaiting); }}>
+            Look
+          </button>{" "}
+          <button type="button" className="ghost" aria-label="Not now" title="Not now" onClick={() => setPullWaiting(null)}>
+            ×
+          </button>
         </p>
       ) : null}
       <p className="map-hint">Drag to pan · wheel to zoom · right-drag to measure (left click or Space: a waypoint) · double-click (or the ping tool) to ping · Ctrl+click a token to target it{gm || mine.length > 0 ? " · arrows move the selected token" : ""}</p>

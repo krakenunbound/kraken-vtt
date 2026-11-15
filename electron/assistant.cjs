@@ -167,6 +167,8 @@ function createAssistant({ ctx, onEvent = () => {}, makeClient, key }) {
           emit({ kind: "tool", name: use.name, input: use.input });
           let result;
           if (WITHHELD.has(use.name)) result = { isError: true, content: [{ type: "text", text: `${use.name} is not available to the assistant.` }] };
+          // Nor does it delete a campaign or restore one over what is there (players' words reach it): the GM's own.
+          else if (use.name === "kraken_campaigns" && ["delete", "restore"].includes(use.input?.action)) result = { isError: true, content: [{ type: "text", text: "Deleting or restoring a campaign is the GM's own: use the campaign's menu on the start screen." }] };
           else if (touchesDisk(use.name, use.input)) result = { isError: true, content: [{ type: "text", text: "The assistant does not read or write files on this computer by a path: ask the GM to import or export it." }] };
           else
             try {

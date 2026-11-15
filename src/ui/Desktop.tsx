@@ -1,6 +1,7 @@
 import { ShipsWindow } from "../ships/ShipsWindow";
 import { DelveWindow, OraclesWindow } from "../ironsworn/IronswornWindows";
-import { Fragment, lazy, Suspense, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { Fragment, lazy, Suspense, useEffect, useRef, useState, useSyncExternalStore, type MouseEvent as ReactMouseEvent, type ReactNode } from "react";
+import { BellAndHands, HandButton, InviteCard, PauseButton, PauseVeil, PlayerMenu, ReconnectBanner, SceneTitleCard, seatState, useIdle, usePlayerMenu } from "./SessionTools";
 import { Picture } from "../characters/ArtPicker";
 import { CharacterPanel } from "../characters/CharacterPanel";
 import { CharacterSelect } from "../characters/CharacterSelect";
@@ -47,7 +48,7 @@ const DiceLayer = lazy(() => import("../dice/DiceLayer"));
 // launch: the button's data-launch when it is not the kind (the player's Characters button opening Character Selection).
 
 // Everyone at the table, and how players connect (the GM's).
-function PlayersWindow({ session }: { session: Session }) {
+function PlayersWindow({ session, onMenu }: { session: Session; onMenu?: (name: string, event: ReactMouseEvent) => void }) {
   const info = session.hostInfo;
   return (
     <div className="players-window">
@@ -81,21 +82,55 @@ function PlayersWindow({ session }: { session: Session }) {
             <dt>Password</dt>
             <dd>{info.publicGame ? <span className="hint">None: a public game, players leave it blank</span> : <span className="secret">{info.password}</span>}</dd>
           </dl>
+          <InviteCard session={session} />
         </div>
       ) : null}
       <h3>At the table</h3>
       <ul className="roster-list">
         {session.players.map((seat) => {
           const token = session.map.tokens.find((item) => item.owner === seat.name);
+          const state = seatState(seat);
+          const controls = session.role === "dm" && seat.role === "player";
           return (
-            <li key={seat.id} data-player={seat.id} data-role={seat.role}>
+            <li key={seat.id} data-player={seat.id} data-player-name={seat.name} data-role={seat.role} data-state={state || undefined} className={state ? `seat-${state}` : undefined} onContextMenu={controls && onMenu ? (event) => onMenu(seat.name, event) : undefined}>
               <span className="seat-dot" style={{ background: token?.color ?? "#888" }} />
               <span>{seat.name}</span>
+              {seat.hand ? <span className="seat-hand" title="Hand raised"><Icon name="raise" size={14} title="Hand raised" /></span> : null}
+              {state ? <small className="seat-state">{state === "reconnecting" ? "reconnecting…" : state}</small> : null}
               <span className="seat-role">{seat.role === "dm" ? "GM" : "Player"}</span>
+              {controls ? (
+                <span className="seat-actions">
+                  <button type="button" className="ghost icon-button" data-action="ring" aria-label={`Ring ${seat.name}'s bell`} title="Ring bell: a chime and a flash on their screen" disabled={seat.lost} onClick={() => session.ringPlayer(seat.name)}>
+                    <Icon name="bell" size={15} />
+                  </button>
+                  {onMenu ? (
+                    <button type="button" className="ghost icon-button" data-action="player-menu" aria-haspopup="menu" aria-label={`More for ${seat.name}`} title="More: View as, Mark away, Kick, Ban" onClick={(event) => onMenu(seat.name, event)}>
+                      <Icon name="more" size={15} />
+                    </button>
+                  ) : null}
+                </span>
+              ) : null}
             </li>
           );
         })}
       </ul>
+      {session.role === "dm" && session.bans.length ? (
+        <section className="bans-panel" data-panel="bans">
+          <h3>Banned</h3>
+          <ul className="accounts-list">
+            {session.bans.map((ban) => (
+              <li key={`${ban.name}|${ban.address}`} data-ban={ban.name}>
+                <Icon name="ban" size={14} />
+                <span className="account-name">{ban.name || "(no name)"}</span>
+                <small className="hint">{ban.address ? `from ${ban.address} · ` : ""}since {new Date(ban.at).toLocaleDateString()}</small>
+                <button type="button" className="ghost" data-action="unban" onClick={() => session.unbanPlayer(ban.name)}>
+                  Unban
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
       {session.role === "dm" ? <AccountsPanel session={session} /> : null}
     </div>
   );
@@ -245,6 +280,9 @@ export function Desktop({
 }) {
   const gm = session.role === "dm";
   const windows = useWindows();
+  // A player gone quiet dims (idle); the GM's menu for a player (Players' rows, the portraits).
+  useIdle(session);
+  const playerMenu = usePlayerMenu();
   const characters = Object.values(session.records)
     .filter((record) => record.type === "character")
     .sort((a, b) => a.name.localeCompare(b.name));
@@ -557,15 +595,20 @@ export function Desktop({
             const active = session.combat.entries.some((item) => item.recordId === entry.id && item.id === session.combat.active);
             // The GM opens any sheet; a player their own. Whose it is shows beneath, as FG's.
             const opens = gm || (Boolean(me) && entry.owner === me);
-            const classes = ["portrait-chip", active ? "active" : "", entry.owner && !entry.online ? "away" : "", opens ? "" : "theirs"].filter(Boolean).join(" ");
+            // Its holder away (/afk), idle or reconnecting: the portrait dims; a raised hand shows on it.
+            const holder = entry.owner ? session.players.find((seat) => seat.role === "player" && seat.name === entry.owner) : undefined;
+            const quiet = seatState(holder);
+            const classes = ["portrait-chip", active ? "active" : "", entry.owner && !entry.online ? "away" : "", quiet ? "quiet" : "", opens ? "" : "theirs"].filter(Boolean).join(" ");
             return (
               <button
                 key={entry.id}
                 type="button"
                 className={classes}
                 data-portrait={entry.id}
-                title={opens ? `${entry.name}: open the sheet` : entry.owner ? `${entry.name} (${entry.owner})` : `${entry.name}: no one holds it yet; take it in Character Selection`}
+                data-quiet={quiet || undefined}
+                title={(opens ? `${entry.name}: open the sheet` : entry.owner ? `${entry.name} (${entry.owner})` : `${entry.name}: no one holds it yet; take it in Character Selection`) + (quiet ? ` · ${entry.owner} is ${quiet}` : "") + (gm && holder ? " · right-click: Ring bell, View as, Kick, Ban" : "")}
                 onClick={() => (opens ? windows.open("sheet", entry.name, entry.id) : !entry.owner ? windows.open("charselect", "Character Selection") : undefined)}
+                onContextMenu={gm && entry.owner ? (event) => playerMenu.open(entry.owner, event) : undefined}
                 {...(opens ? slotDrag({ kind: "sheet", record: entry.id, label: entry.name }) : {})}
                 // FG's share with one: a record, a note, a story or a picture dropped on a player's portrait (the GM's).
                 {...(gm && entry.owner ? shareDrop(session, entry.owner) : {})}
@@ -573,12 +616,18 @@ export function Desktop({
                 <span className="chip-face">{entry.portrait ? <Picture session={session} id={entry.portrait} alt="" still /> : entry.name.slice(0, 1)}</span>
                 <span className="chip-name">{entry.name}</span>
                 <span className="chip-holder">{entry.owner || "Server"}</span>
+                {holder?.hand ? (
+                  <span className="chip-hand" aria-label={`${entry.owner} raised a hand`}>
+                    <Icon name="raise" size={14} />
+                  </span>
+                ) : null}
               </button>
             );
           })}
         </div>
         <div className="session-status">
           {myTurn ? <span className="turn-flag">Your turn</span> : null}
+          {gm ? <PauseButton session={session} /> : <HandButton session={session} />}
           <span className="where">{gm ? `Hosting · ${session.players.length - 1} player${session.players.length === 2 ? "" : "s"}` : `At ${session.remoteLabel}`}</span>
           {!gm && savedSignIn(session.remoteLabel) ? (
             <button type="button" className="ghost" data-action="sign-out" onClick={() => session.signOut()} title="Sign this browser out of your account at this table, and leave">
@@ -649,7 +698,7 @@ export function Desktop({
               {item.kind === "studio" && gm ? <StudioWindow project={item.payload} /> : null}
               {item.kind === "cards" ? <CardsWindow session={session} characterId={item.payload} /> : null}
               {item.kind === "combat" ? <CombatTracker session={session} /> : null}
-              {item.kind === "players" ? <PlayersWindow session={session} /> : null}
+              {item.kind === "players" ? <PlayersWindow session={session} onMenu={gm ? playerMenu.open : undefined} /> : null}
               {item.kind === "settings" ? <SettingsWindow session={session} /> : null}
               {item.kind === "dice" ? <DiceWindow session={session} /> : null}
               {item.kind === "assistant" && gm ? <AssistantWindow /> : null}
@@ -680,7 +729,12 @@ export function Desktop({
         {/* Above the windows, as FG's hotkey bar: always there to drop onto. */}
         <QuickSlots session={session} />
         {overlay}
+        <PauseVeil session={session} />
+        <SceneTitleCard session={session} />
+        <BellAndHands session={session} />
       </div>
+      {gm ? <PlayerMenu session={session} menu={playerMenu.state} onClose={playerMenu.close} /> : null}
+      <ReconnectBanner session={session} />
       {dice.show ? (
         <Suspense fallback={null}>
           <DiceLayer holdSeconds={session.options.diceHold} />

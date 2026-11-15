@@ -20,6 +20,8 @@ const { modulePicture, importModule, prepareModule } = require("./importers/fgMo
 const { fitsRuleset } = require("./books.cjs");
 
 const MAX_CLIENTS = 16;
+// What a player may not do while the GM has paused the game: move or change tokens, open doors, roll.
+const PAUSE_HOLDS = new Set(["token-place", "token-move", "token-update", "token-remove", "token-undo", "door", "roll", "siege-check", "ct", "cairn", "fate", "ironsworn", "forged", "party-group", "starship"]);
 
 
 // What a player may do with raw record changes (the GM and the agent may do
@@ -273,6 +275,8 @@ function savedOptions(value) {
   const options = value && typeof value === "object" ? value : {};
   const id = (text, fallback) => (typeof text === "string" && text.length <= 400 ? text : fallback);
   return {
+    // The GM has paused the game (Foundry's pause): players see a veil, and their moves and rolls wait.
+    paused: Boolean(options.paused),
     towerReveal: Boolean(options.towerReveal),
     // The dice tower on the table, apart from the chat (the GM's choice, for every seat); else docked in the chat's tray.
     towerExternal: Boolean(options.towerExternal),
@@ -429,6 +433,8 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
   const sceneHiddenNow = () => Boolean(scene && hiddenSceneId === scene.id);
   const emptyView = () => ({ sceneId: null, tokens: [], doors: [], vision: null, sight: false, locked: false, darkness: 0, lights: [], seeing: [], sceneLights: [], drawings: [], labels: [], tiles: [], fx: [], groups: [] });
   const clients = new Map();
+  // Players whose connection dropped, their seats kept for a reconnect (linger below), by name.
+  const lingering = new Map();
   const tokenArt = new Map();
   const chat = savedChat(saved.chat);
   // Books (FG's Library): the modules that fit the campaign's ruleset; those
@@ -538,7 +544,13 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
   const cleanSlots = (list) => Array.from({ length: SLOTS }, (_, index) => (Array.isArray(list) ? cleanSlot(list[index]) : null));
   const quickSlots = new Map(Object.entries(saved.quickSlots && typeof saved.quickSlots === "object" ? saved.quickSlots : {}).map(([key, list]) => [key, cleanSlots(list)]));
   const slotsFor = (client) => quickSlots.get(clearKey(client)) ?? cleanSlots([]);
-  let options = savedOptions(saved.options);
+  // A table always opens unpaused.
+  let options = savedOptions({ ...(saved.options && typeof saved.options === "object" ? saved.options : {}), paused: false });
+  // Who may not sit here (the GM's Ban, kept with the campaign): a name, and the address it came from (never this computer's).
+  const bans = (Array.isArray(saved.bans) ? saved.bans : [])
+    .filter((ban) => ban && (typeof ban.name === "string" || typeof ban.address === "string"))
+    .slice(0, 200)
+    .map((ban) => ({ name: text(ban.name, "").slice(0, 24), address: text(ban.address, "").slice(0, 60), at: num(ban.at, 0) }));
   // The chat's sound triggers, and what plays under the game (ambience loops
   // and music), for every seat; saved with the campaign.
   let soundTriggers = (saved.soundTriggersVersion === TRIGGERS_VERSION && cleanTriggers(saved.soundTriggers)) || defaultTriggers();
@@ -591,8 +603,10 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     if (next.gmIcon !== undefined && !(next.gmIcon === "" || (gmIcons && gmIcons.has(String(next.gmIcon))))) throw new Error(`No GM icon "${next.gmIcon}".`);
     if (next.towerStyle !== undefined && !(TOWER_STYLES.includes(String(next.towerStyle)) || (towers && towers.has(String(next.towerStyle))))) throw new Error(`No dice tower look "${next.towerStyle}" (${TOWER_STYLES.join(", ")}, or a picture in the towers folder).`);
     if (next.motd !== undefined) next.motd = { text: String(next.motd?.text ?? "").slice(0, 8000), links: (Array.isArray(next.motd?.links) ? next.motd.links : []).map(cleanSlot).filter(Boolean).slice(0, 40) };
+    const wasPaused = options.paused;
     options = savedOptions({ ...options, ...next, ...(next.wizard35 && typeof next.wizard35 === "object" ? { wizard35: { ...options.wizard35, ...next.wizard35 } } : {}), ...(next.wizard2e && typeof next.wizard2e === "object" ? { wizard2e: { ...options.wizard2e, ...next.wizard2e } } : {}) });
     broadcast({ type: "options", options });
+    if (options.paused !== wasPaused) addChat({ id: "table", from: "Table", text: options.paused ? "The GM has paused the game." : "The game goes on.", at: Date.now(), kind: "story" });
     onChange("table");
     // What tokens show (names, health) and how distance counts are in each seat's map.
     if (["diagonal", "healthNpc", "healthPc", "names"].some((key) => key in next)) sendMaps();
@@ -661,6 +675,9 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
   const PREVIEW_SEAT = { role: "player", name: "@preview", everyone: true };
   let testing = false;
   let previewing = false;
+  // View as: the preview through one player's eyes (their tokens alone), else every player's.
+  let previewAs = "";
+  const previewSeat = () => (previewAs ? { role: "player", name: previewAs } : PREVIEW_SEAT);
   const gmMap = () => (prep.scene() ? prep : map);
   const mapOf = (client) => (client.role === "dm" ? gmMap() : map);
 
@@ -811,10 +828,10 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
           continue;
         }
         const working = gmMap();
-        const view = working.viewFor(testing ? TEST_SEAT : previewing ? PREVIEW_SEAT : seatOf(client), client.assetToken);
-        send(ws, { type: "map", ...view, prep: working === prep ? working.scene()?.id ?? null : null, testing, previewing, sceneHidden: sceneHiddenNow() });
-        // The GM's player vision preview shows every player's explored areas together.
-        sendExplored(ws, client, working, previewing ? "*" : null);
+        const view = working.viewFor(testing ? TEST_SEAT : previewing ? previewSeat() : seatOf(client), client.assetToken);
+        send(ws, { type: "map", ...view, prep: working === prep ? working.scene()?.id ?? null : null, testing, previewing, previewAs: previewing ? previewAs : "", sceneHidden: sceneHiddenNow() });
+        // The GM's player vision preview shows every player's explored areas together (View as: that player's).
+        sendExplored(ws, client, working, previewing ? previewAs || "*" : null);
       }
       if (explored) onChange("table");
     });
@@ -1416,7 +1433,9 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
   }
 
   function playerList() {
-    return [...clients.values()].map((client) => ({ id: client.id, name: client.name, role: client.role }));
+    // away: gone quiet (/afk, or idle); hand: a raised hand for the GM; lost: the connection dropped, a reconnect is awaited.
+    const seat = (client, lost) => ({ id: client.id, name: client.name, role: client.role, ...(client.afk ? { afk: true } : {}), ...(client.idle ? { idle: true } : {}), ...(client.handUp ? { hand: true } : {}), ...(lost ? { lost: true } : {}) });
+    return [...[...clients.values()].map((client) => seat(client, false)), ...[...lingering.values()].map((held) => seat(held.client, true))];
   }
 
   // The GM's account controls, for the Players window and the agent.
@@ -1441,7 +1460,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
   // portrait, species, class and level, who holds it, and whether they are
   // seated. A character no one holds ("Server" in FG) a player may take.
   function rosterView() {
-    const seated = new Set([...clients.values()].filter((item) => item.joined && item.role === "player").map((item) => item.name));
+    const seated = new Set([...clients.values(), ...[...lingering.values()].map((held) => held.client)].filter((item) => item.joined && item.role === "player").map((item) => item.name));
     return records
       .list({ type: "character" })
       .map((record) => {
@@ -1515,6 +1534,69 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     if (client.role === "player") sendRoster();
   }
 
+  // A player whose connection dropped (not kicked, not gone on purpose) keeps
+  // their seat for a while, so a reconnect finds it and the portraits do not
+  // flicker; the GM sees them as reconnecting. After the grace they have left.
+  const GRACE_MS = Math.max(200, Number(process.env.KRAKEN_GRACE_MS) || 45000);
+  function linger(ws) {
+    const client = clients.get(ws);
+    if (!client) return;
+    clients.delete(ws);
+    const key = client.name.toLowerCase();
+    clearTimeout(lingering.get(key)?.timer);
+    const timer = setTimeout(() => {
+      if (lingering.get(key)?.client !== client) return;
+      lingering.delete(key);
+      broadcast({ type: "players", players: playerList() });
+      sendRoster();
+    }, GRACE_MS);
+    lingering.set(key, { client, timer });
+    broadcast({ type: "players", players: playerList() });
+  }
+  // A seat taken again (the same name rejoined): no longer waiting.
+  function unlinger(name) {
+    const key = String(name ?? "").toLowerCase();
+    const held = lingering.get(key);
+    if (!held) return null;
+    clearTimeout(held.timer);
+    lingering.delete(key);
+    return held.client;
+  }
+  // The GM's Ban list: by name, and by the address it came from (this computer's never counts: the GM's and test players' own).
+  const plainAddress = (address) => {
+    const raw = String(address || "").toLowerCase();
+    return raw.startsWith("::ffff:") ? raw.slice(7) : raw;
+  };
+  const bannedAs = (name, address) => bans.find((ban) => (ban.name && sameName(ban.name, name)) || (ban.address && !isLoopback(address) && ban.address === plainAddress(address))) ?? null;
+  function sendBans() {
+    for (const [ws, client] of clients) if (client.role === "dm") send(ws, { type: "bans", bans });
+  }
+  function unban(name) {
+    const before = bans.length;
+    for (let index = bans.length - 1; index >= 0; index--) if (sameName(bans[index].name, name)) bans.splice(index, 1);
+    if (bans.length === before) return null;
+    onChange("table");
+    sendBans();
+    return text(name, "");
+  }
+  // A dead connection (a laptop asleep, a network gone) is found by its missing pongs and closed.
+  const HEARTBEAT_MS = Math.max(200, Number(process.env.KRAKEN_HEARTBEAT_MS) || 15000);
+  const heartbeat = setInterval(() => {
+    for (const ws of clients.keys()) {
+      if (ws.krakenAlive === false) {
+        ws.terminate();
+        continue;
+      }
+      ws.krakenAlive = false;
+      try {
+        ws.ping();
+      } catch {
+        /* closing already */
+      }
+    }
+  }, HEARTBEAT_MS);
+  heartbeat.unref?.();
+
   // Wrong passwords (the table's or an account's), by address: after five
   // in a row, that address waits before it may try again, longer each time.
   const misses = new Map();
@@ -1550,7 +1632,12 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       role: "player",
       assetToken: "",
       joined: false,
+      address: plainAddress(remote),
     };
+    ws.krakenAlive = true;
+    ws.on("pong", () => {
+      ws.krakenAlive = true;
+    });
     const joinTimer = setTimeout(() => {
       if (!client.joined) ws.close();
     }, 10000);
@@ -1579,6 +1666,15 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
           ws.close();
           return;
         }
+        // The GM's own window (its host token, from this computer) is never refused, and takes back its seat.
+        const theHost = typeof msg.hostToken === "string" && msg.hostToken.length > 0 && msg.hostToken === hostToken && isLoopback(remote);
+        // Banned (the GM's Ban): before the password, so a banned player learns nothing more.
+        const ban = theHost ? null : bannedAs(text(msg.name, ""), remote);
+        if (ban) {
+          send(ws, { type: "no", reason: "The GM has banned you from this table.", banned: true });
+          ws.close();
+          return;
+        }
         const wait = waitFor(remote);
         if (wait > 0) {
           send(ws, { type: "no", reason: `Too many wrong passwords: try again in ${Math.ceil(wait / 1000)} seconds.` });
@@ -1595,6 +1691,15 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
           send(ws, { type: "no", reason: "This table is full." });
           ws.close();
           return;
+        }
+        // The GM's window rejoining after its connection dropped (it says so: rejoin), perhaps before the host has seen it go: it takes back its seat. (A second window with the token sits as a player.)
+        if (theHost && msg.rejoin === true) {
+          for (const [other, seat] of [...clients]) {
+            if (seat.role !== "dm") continue;
+            seat.leaving = true;
+            clients.delete(other);
+            other.terminate();
+          }
         }
         const dmSeated = [...clients.values()].some((seat) => seat.role === "dm");
         client.role = decideRole(remote, hostToken, msg.hostToken, dmSeated);
@@ -1613,7 +1718,8 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
             send(ws, { type: "no", reason, ...extra });
             ws.close();
           };
-          if (!accounts?.has(client.name) && [...clients.values()].some((seat) => seat.role === "player" && sameName(seat.name, client.name))) return refuse(`Someone named ${client.name} is already at the table.`);
+          // (retry: a reconnecting player's old connection may not have been seen to drop yet.)
+          if (!accounts?.has(client.name) && [...clients.values()].some((seat) => seat.role === "player" && sameName(seat.name, client.name))) return refuse(`Someone named ${client.name} is already at the table.`, { retry: true });
           const account = msg.account && typeof msg.account === "object" ? msg.account : {};
           const accountPassword = typeof account.password === "string" ? account.password : "";
           const accountToken = typeof account.token === "string" ? account.token.slice(0, 100) : "";
@@ -1633,6 +1739,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
             // Signed in again (a reload, another device): this seat takes the place of the old one.
             for (const [other, seat] of [...clients]) {
               if (seat.role !== "player" || !sameName(seat.name, client.name)) continue;
+              seat.leaving = true;
               send(other, { type: "kicked", reason: `${client.name} signed in somewhere else.` });
               other.close();
               removeClient(other);
@@ -1646,6 +1753,12 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
               return refuse(error.message, { account: "new" });
             }
           }
+        }
+        // A seat kept for this player after their connection dropped: theirs again (as /afk and a raised hand were).
+        const kept = client.role === "player" ? unlinger(client.name) : null;
+        if (kept) {
+          client.afk = kept.afk;
+          client.handUp = kept.handUp;
         }
         client.assetToken = crypto.randomBytes(18).toString("hex");
         client.joined = true;
@@ -1672,6 +1785,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
           records: records.list({ seat: seatOf(client) }).map((record) => viewFor(record, seatOf(client))),
           scene: client.role === "player" ? sceneFor(client) : null,
           roster: rosterView(),
+          ...(client.role === "dm" ? { bans } : {}),
         });
         broadcast({ type: "players", players: playerList() }, ws);
         if (client.role === "player") broadcast({ type: "roster", roster: rosterView() }, ws);
@@ -1679,6 +1793,15 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
           .partyView(agentHandle, client.role === "dm" ? null : PLAYER_VIEW)
           .then((view) => send(ws, { type: "party", party: view }))
           .catch(() => undefined);
+        return;
+      }
+
+      // The GM has paused the game: a player's moves and rolls wait (chat goes on).
+      if (options.paused && client.role !== "dm" && PAUSE_HOLDS.has(msg.type)) {
+        const reason = "The GM has paused the game.";
+        if (typeof msg.req === "number") send(ws, { type: "op-result", req: msg.req, ok: false, error: reason });
+        send(ws, { type: "notice", text: reason });
+        if (msg.type.startsWith("token-")) sendMaps();
         return;
       }
 
@@ -2318,8 +2441,42 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
           send(ws, { type: "error", reason: "Only the GM can kick." });
           return;
         }
-        const gone = kick(msg.name);
+        const gone = kick(msg.name, { ban: Boolean(msg.ban) });
         if (!gone) send(ws, { type: "error", reason: `Nobody called ${text(msg.name, "")} is at the table.` });
+        return;
+      }
+      // The GM's Ban list: read it, or let someone sit here again.
+      if (msg.type === "bans") {
+        if (client.role !== "dm") return;
+        if (msg.action === "unban" && !unban(msg.name)) send(ws, { type: "error", reason: `${text(msg.name, "")} is not banned.` });
+        else send(ws, { type: "bans", bans });
+        return;
+      }
+      // Away (/afk, idle) and a raised hand: a player's own; the GM's for a player (name).
+      if (msg.type === "presence") {
+        const change = { ...(msg.afk !== undefined ? { afk: msg.afk } : {}), ...(msg.idle !== undefined ? { idle: msg.idle } : {}), ...(msg.hand !== undefined ? { hand: msg.hand } : {}) };
+        if (client.role === "dm") {
+          const seat = presenceOf(msg.name);
+          if (!seat) send(ws, { type: "error", reason: `Nobody called ${text(msg.name, "")} is at the table.` });
+          else setPresence(seat, change);
+        } else setPresence(client, change);
+        return;
+      }
+      // The GM rings a player's bell.
+      if (msg.type === "ring") {
+        if (client.role !== "dm") return;
+        if (!ring(msg.name, client.name)) send(ws, { type: "error", reason: `Nobody called ${text(msg.name, "")} is at the table.` });
+        return;
+      }
+      // The GM pulls the players' maps to the GM's view.
+      if (msg.type === "view-pull") {
+        if (client.role !== "dm") return;
+        try {
+          const done = pullView(msg, client.name);
+          send(ws, { type: "notice", text: done.pulled ? `Pulled ${done.pulled} player${done.pulled === 1 ? "" : "s"} to your view.` : "No players to pull." });
+        } catch (error) {
+          send(ws, { type: "error", reason: error instanceof Error ? error.message : "Not allowed." });
+        }
         return;
       }
       // FG's /vote: a question everyone answers yes or no; the counts show to all.
@@ -2362,6 +2519,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
             // Player vision preview on or off (a play test ends first).
             if (testing) setPlaytest(false);
             previewing = Boolean(msg.preview);
+            previewAs = previewing ? text(msg.as, "").slice(0, 24) : "";
           } else {
             previewing = false;
             setPlaytest(Boolean(msg.on), msg.at);
@@ -2716,9 +2874,11 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       }
     });
 
-    ws.on("close", () => {
+    ws.on("close", (code) => {
       clearTimeout(joinTimer);
-      removeClient(ws);
+      // Dropped, not sent away and not left on purpose (the page's Leave closes with 4000): the seat waits for a reconnect.
+      if (client.joined && client.role === "player" && !client.leaving && code !== 4000 && clients.get(ws) === client) linger(ws);
+      else removeClient(ws);
     });
     ws.on("error", () => {
       clearTimeout(joinTimer);
@@ -2782,7 +2942,27 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       addChat({ id: "agent", from: text(from, "Agent").slice(0, 24), text: "", roll: { ...result, label: text(label, "").slice(0, 160), ...(extra ?? {}) }, at: Date.now(), ...(secret ? { secret: true } : {}) }),
     say: (line, from = "Agent", secret = false, extra = {}) =>
       addChat({ id: "agent", from: text(from, "Agent").slice(0, 24), text: text(line, "").slice(0, 500), at: Date.now(), ...(secret ? { secret: true } : {}), ...extra }),
-    kick: (name) => kick(name),
+    kick: (name, how = {}) => kick(name, how),
+    // The Players window's controls: the Ban list, Unban, Ring bell, a player away, a raised hand lowered, View as.
+    bans: () => bans.map((ban) => ({ ...ban })),
+    unban: (name) => unban(name),
+    ring: (name, from = "GM") => ring(name, from),
+    presence(name, change) {
+      const seat = presenceOf(name);
+      if (!seat) return null;
+      setPresence(seat, change);
+      return playerList().find((item) => item.id === seat.id) ?? null;
+    },
+    viewAs(name) {
+      const wanted = text(name, "");
+      if (wanted && !presenceOf(wanted) && !records.list({ type: "character", owner: wanted }).length) throw new Error(`No player called ${wanted} at this table.`);
+      if (testing) setPlaytest(false);
+      previewing = Boolean(wanted);
+      previewAs = wanted.slice(0, 24);
+      sendMaps();
+      return previewing ? { viewingAs: previewAs } : { viewingAs: null };
+    },
+    pullView: (view, from = "Agent") => pullView(view, from),
     vote: (question, by = "Agent") => startVote(text(question, "").slice(0, 200), { id: "agent", name: by }),
     votes: () => chat.filter((line) => line.vote).map((line) => line.vote),
     save: () => onChange("save"),
@@ -2890,6 +3070,8 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       broadcast({ type: "ping", x: at.x, y: at.y, from: text(from, "Agent").slice(0, 24), color: "#f4f1ea" });
       return at;
     },
+    // A square's centre and the size of one square, in map pixels (the view pull's place).
+    square: (col, row) => (scene ? { ...map.squareCenter(col, row, 1), size: map.squareSize() } : null),
   };
 
   function playSound(idOrGroup, volume) {
@@ -2932,14 +3114,72 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     return soundTriggers;
   }
 
-  function kick(name) {
+  // FG's /kick; ban: they may not sit here again (by name, and by the address they came from), until unbanned.
+  function kick(name, { ban = false } = {}) {
     const entry = [...clients.entries()].find(([, client]) => client.role !== "dm" && sameName(client.name, name));
-    if (!entry) return null;
-    const [ws, client] = entry;
-    send(ws, { type: "kicked", reason: "The GM has asked you to leave the table." });
-    setTimeout(() => ws.close(4001, "kicked"), 50);
+    // A player whose connection dropped can be banned too (their seat is waiting for them).
+    const held = entry ? null : [...lingering.values()].find((item) => sameName(item.client.name, name))?.client ?? null;
+    const client = entry ? entry[1] : held;
+    if (!client) {
+      if (!ban || !text(name, "")) return null;
+      // Not at the table: banned by name alone.
+      if (!bannedAs(name, "")) bans.push({ name: text(name, "").slice(0, 24), address: "", at: Date.now() });
+      onChange("table");
+      sendBans();
+      return text(name, "").slice(0, 24);
+    }
+    client.leaving = true;
+    if (held) {
+      unlinger(held.name);
+      broadcast({ type: "players", players: playerList() });
+      sendRoster();
+    }
+    if (ban) {
+      if (!bannedAs(client.name, client.address)) bans.push({ name: client.name, address: isLoopback(client.address) ? "" : client.address, at: Date.now() });
+      onChange("table");
+      sendBans();
+    }
+    if (entry) {
+      const [ws] = entry;
+      send(ws, { type: "kicked", reason: ban ? "The GM has banned you from this table." : "The GM has asked you to leave the table." });
+      setTimeout(() => ws.close(4001, "kicked"), 50);
+    }
     addChat({ id: "table", from: "Table", text: `${client.name} has left the table.`, at: Date.now(), kind: "story" });
     return client.name;
+  }
+  // The GM rings a player's bell (a chime and a flash on their screen alone).
+  function ring(name, from = "GM") {
+    const entry = [...clients.entries()].find(([, client]) => client.role !== "dm" && sameName(client.name, name));
+    if (!entry) return null;
+    send(entry[0], { type: "bell", from: text(from, "GM").slice(0, 24) });
+    return entry[1].name;
+  }
+  // Away (/afk, or idle at the keyboard) and a raised hand: a player's own, or set by the GM for a player.
+  function setPresence(client, change) {
+    const before = `${Boolean(client.afk)}${Boolean(client.idle)}${Boolean(client.handUp)}`;
+    if (change.afk !== undefined) client.afk = Boolean(change.afk);
+    if (change.idle !== undefined) client.idle = Boolean(change.idle);
+    if (change.hand !== undefined) client.handUp = Boolean(change.hand);
+    if (before === `${Boolean(client.afk)}${Boolean(client.idle)}${Boolean(client.handUp)}`) return false;
+    broadcast({ type: "players", players: playerList() });
+    if (change.hand === true) for (const [ws, seat] of clients) if (seat.role === "dm") send(ws, { type: "hand", name: client.name });
+    return true;
+  }
+  function presenceOf(name) {
+    return [...clients.values()].find((client) => client.role !== "dm" && sameName(client.name, name)) ?? null;
+  }
+  // The GM pulls every player's map to a place: its centre and how much of it shows (world pixels).
+  function pullView(view, from = "GM") {
+    const x = num(view?.x, NaN);
+    const y = num(view?.y, NaN);
+    const width = Math.max(50, Math.min(1e6, num(view?.width, 0) || 1200));
+    const height = Math.max(50, Math.min(1e6, num(view?.height, 0) || 800));
+    if (!Number.isFinite(x) || !Number.isFinite(y) || Math.abs(x) > 1e7 || Math.abs(y) > 1e7) throw new Error("Where to?");
+    if (!scene) throw new Error("No scene is on the table.");
+    if (sceneHiddenNow()) throw new Error("The map is not shared with the players.");
+    const message = { type: "view-pull", x, y, width, height, from: text(from, "GM").slice(0, 24) };
+    for (const [ws, client] of clients) if (client.role !== "dm") send(ws, message);
+    return { pulled: [...clients.values()].filter((client) => client.role !== "dm").length, x, y, width, height };
   }
   function startVote(question, client) {
     const id = crypto.randomBytes(6).toString("hex");
@@ -3051,6 +3291,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         quickSlots: Object.fromEntries(quickSlots),
         bookSounds: Object.fromEntries(bookSounds),
         sceneSounds: Object.fromEntries(sceneSounds),
+        bans,
       };
     },
     // What agents (the MCP server, the in-app assistant) use. They act as the GM.
@@ -3065,7 +3306,11 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       };
     },
     stop() {
-      for (const ws of clients.keys()) ws.close();
+      clearInterval(heartbeat);
+      for (const held of lingering.values()) clearTimeout(held.timer);
+      lingering.clear();
+      // 4003: the table closed (the GM left): players go back to the join screen, not into a reconnect.
+      for (const ws of clients.keys()) ws.close(4003, "closed");
       clients.clear();
       wss.close();
       return new Promise((resolve) => {
