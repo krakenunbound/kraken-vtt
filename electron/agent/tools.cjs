@@ -1483,6 +1483,8 @@ const TOOLS = [
         description: "Settings > Bookkeeping, each on unless switched off (a relaxed table's 'fun mode' hand-waves it): ammo (an attack spends its arrows, bolts, bullets, rounds; none left refuses it), consumables (potions, scrolls, charges used up), rations (food and water eaten each day and on a long rest, the game's penalty for going without), light (a torch or a lantern's oil out of the pack when lit), encumbrance (the load's level and its penalties on the creature; off, Basic Fantasy's movement and Cairn's full inventory count nothing), variant (5E's variant encumbrance, off by default). A partial object changes only what it names.",
         properties: { ammo: { type: "boolean" }, consumables: { type: "boolean" }, rations: { type: "boolean" }, light: { type: "boolean" }, encumbrance: { type: "boolean" }, variant: { type: "boolean" } },
       },
+      initEachRound: { type: "boolean", description: "FG's house rule: everyone rolls initiative again at each new round" },
+      roundStop: { type: "boolean", description: "FG's stop at round start: a new round waits for the GM's next click (next) before anyone acts" },
       initGroup: { type: "string", enum: ["each", "kind"], description: "The tracker's initiative: each creature its own roll, or by kind (one roll per kind of creature, its copies sharing it), for every game" },
       skipDead: { type: "string", enum: ["enemies", "all", "off"], description: "Whose turns the tracker skips: dead and unconscious creatures (enemies, FG's), characters too (all), or no one (off)" },
       npcNumbering: { type: "string", enum: ["append", "random", "off"], description: "NPC numbering when the same creature is added again: append (Goblin 1, Goblin 2), random (Goblin 14), off" },

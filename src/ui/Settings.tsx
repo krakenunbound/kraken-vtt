@@ -120,6 +120,8 @@ export function SettingsWindow({ session }: { session: Session }) {
               <option value="kind">By kind of creature</option>
             </select>
           </SettingRow>
+          <Toggle label="Roll initiative every round" hint="FG's house rule: at each new round everyone rolls initiative again and the order changes." checked={Boolean((session.options as { initEachRound?: boolean }).initEachRound)} onChange={(on) => session.setTableOptions({ initEachRound: on } as never)} setting="init-each-round" />
+          <Toggle label="Stop at the start of each round" hint="FG's option: a new round waits for your next click before anyone acts, so you can handle what happens at the top of the round." checked={Boolean((session.options as { roundStop?: boolean }).roundStop)} onChange={(on) => session.setTableOptions({ roundStop: on } as never)} setting="round-stop" />
           <SettingRow label="Skip turns" hint="Whose turns the tracker passes over: dead and unconscious creatures (FG's), characters too, or no one.">
             <select value={(session.options as { skipDead?: string }).skipDead ?? "enemies"} onChange={(event) => session.setTableOptions({ skipDead: event.target.value } as never)} aria-label="Skip turns" data-setting="skip-dead">
               <option value="enemies">The dead and unconscious creatures</option>

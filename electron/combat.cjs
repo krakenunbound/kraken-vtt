@@ -3153,7 +3153,14 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       state.resume = null;
       state.round += 1;
       table().say(`[ROUND ${state.round}]`, "Combat");
-      const first = list.find((entry) => !skips(entry, opts));
+      // FG's house rule: everyone rolls initiative again each round (the GM rolls for all).
+      if (table().options?.().initEachRound && state.round > 1) await this.rollInit("all", { role: "dm", name: "Combat" });
+      // FG's "stop at round start": the new round waits for the GM's next click before anyone acts.
+      if (table().options?.().roundStop && state.round > 1) {
+        changed();
+        return;
+      }
+      const first = sorted().find((entry) => !skips(entry, opts));
       if (first) {
         passInitiative(Infinity, rank(first.initresult));
         state.active = first.id;

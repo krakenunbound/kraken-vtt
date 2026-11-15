@@ -337,6 +337,10 @@ function savedOptions(value) {
     // (enemies: dead and unconscious creatures, FG's default; all: characters too; off: no one);
     // NPC numbering (append: the same name numbered, random: a random number, off).
     initGroup: options.initGroup === "kind" ? "kind" : "each",
+    // FG's house rule (everyone rolls initiative again each round) and "stop at round start" (a new
+    // round waits for the GM's next click).
+    ...(options.initEachRound ? { initEachRound: true } : {}),
+    ...(options.roundStop ? { roundStop: true } : {}),
     ...(["enemies", "all", "off"].includes(options.skipDead) ? { skipDead: options.skipDead } : {}),
     npcNumbering: ["append", "random", "off"].includes(options.npcNumbering) ? options.npcNumbering : "append",
   };
