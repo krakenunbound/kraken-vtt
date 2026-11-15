@@ -4,10 +4,9 @@ import type { RulesetManifest } from "../../shared/rulesets/types";
 import { rulesetFor, rulesetOfRecord } from "../../shared/rulesets/registry.mjs";
 import { CCSheet } from "../characters/CCSheet";
 import { Wizard } from "../characters/Wizard";
-import { Sheet5e, Wizard5e } from "../characters/Sheet5e";
-import { Sheet35 } from "../characters/Sheet35";
+import { Wizard5e } from "../characters/Wizard5e";
 import { Wizard35 } from "../characters/Wizard35";
-import { Sheet2e, Wizard2e } from "../characters/Sheet2e";
+import { Wizard2e } from "../characters/Wizard2e";
 import { WizardBf } from "../characters/WizardBf";
 import { SheetMgt2 } from "../characters/SheetMgt2";
 import { WizardMgt2 } from "../characters/WizardMgt2";
@@ -33,9 +32,6 @@ type SessionProps = { session: Session };
 
 export const SHEETS: Record<string, ComponentType<SheetProps>> = {
   "cnc.sheet": CCSheet,
-  "dnd5e.sheet": Sheet5e,
-  "dnd35.sheet": Sheet35,
-  "adnd2e.sheet": Sheet2e,
   "mgt2.sheet": SheetMgt2,
   "astra.sheet": SheetAstra,
   "fate.sheet": SheetFate,
@@ -69,7 +65,7 @@ const refOf = (spec: RulesetManifest["sheet"] | RulesetManifest["wizard"]) => (t
 function ManifestSheet({ record, session }: SheetProps) {
   const manifest = rulesetOfRecord(record.data.ruleset);
   if (typeof manifest.sheet === "string") return null;
-  return <SheetRenderer spec={manifest.sheet} record={record} session={session} ruleset={manifest.id} custom={CUSTOM_PARTS} formats={FORMATS} />;
+  return <SheetRenderer spec={manifest.sheet} record={record} session={session} ruleset={manifest.id} custom={CUSTOM_PARTS} formats={FORMATS} words={manifest.labels} features={manifest.features} />;
 }
 
 // The sheet for a character: its own game's (data.ruleset), C&C's when it has none.

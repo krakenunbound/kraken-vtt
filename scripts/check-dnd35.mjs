@@ -26,6 +26,21 @@ function assert(condition, message) {
 }
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
+// --- The sheet's edit whitelist: built from the manifest, the same as the hand-written lists it replaced ---
+{
+  const { EDIT_PATHS } = require("../electron/dnd35.cjs");
+  const before = {
+    text: ["playername", "alignment", "deity", "appearance", "notes", "senses", "background", "race", "gender", "age", "height", "weight", "languages"].map((key) => `^${key}$`),
+    number: [/^abilities\.(strength|dexterity|constitution|intelligence|wisdom|charisma)\.score$/, /^skills\.[a-z]+\.(ranks|misc)$/, /^saves\.(fortitude|reflex|will)\.misc$/, /^hp\.(total|wounds|nonlethal|temp)$/, /^exp$/, /^ac\.(natural|deflection|dodge|misc)$/, /^initiative\.misc$/, /^speed$/, /^stable$/, /^spellcasting\.used\.\d$/, /^coins\.id-\d+\.amount$/, /^inventorylist\.id-\d+\.(count|carried)$/].map((regex) => regex.source),
+    // The lists were "feats" and "spells" by name.
+    list: ["^feats$", "^spells$"],
+  };
+  assert(EDIT_PATHS.remove.map((regex) => regex.source).join() === /^(inventorylist)\.id-\d+$/.source, `the rows the sheet may drop: ${EDIT_PATHS.remove.map((regex) => regex.source).join()}`);
+  for (const kind of ["text", "number", "list"]) assert(EDIT_PATHS[kind].map((regex) => regex.source).join(" ") === before[kind].join(" "), `the ${kind} whitelist from the manifest is the old one: ${EDIT_PATHS[kind].map((regex) => regex.source).join(" ")}`);
+  assert(EDIT_PATHS.string.length === 0, "no string paths");
+  console.log("whitelist ok");
+}
+
 // --- The rules ---------------------------------------------------------------
 assert(r35.babFor("Fast", 11) === 11 && r35.babFor("Medium", 4) === 3 && r35.babFor("Slow", 7) === 3, "base attack by progression");
 assert(r35.saveFor("Good", 4) === 4 && r35.saveFor("Bad", 4) === 1 && r35.saveFor("Good", 1) === 2, "base saves good and poor");

@@ -70,22 +70,14 @@ async function levelUp35(table, record, from) {
   return { record: updated, gain, level: next.level, note: notes.join(", ") };
 }
 
-// What the 3.5E sheet may change, then every number worked out again.
-const TEXT = new Set(["playername", "alignment", "deity", "appearance", "notes", "senses", "background", "race", "gender", "age", "height", "weight", "languages"]);
-const NUMBERS = [
-  /^abilities\.(strength|dexterity|constitution|intelligence|wisdom|charisma)\.score$/,
-  /^skills\.[a-z]+\.(ranks|misc)$/,
-  /^saves\.(fortitude|reflex|will)\.misc$/,
-  /^hp\.(total|wounds|nonlethal|temp)$/,
-  /^exp$/,
-  /^ac\.(natural|deflection|dodge|misc)$/,
-  /^initiative\.misc$/,
-  /^speed$/,
-  /^stable$/,
-  /^spellcasting\.used\.\d$/,
-  /^coins\.id-\d+\.amount$/,
-  /^inventorylist\.id-\d+\.(count|carried)$/,
-];
+// What the 3.5E sheet may change (the manifest's edit globs: shared/rulesets/edit.mjs),
+// then every number worked out again.
+const { default: MANIFEST } = require("../shared/dnd35/manifest.mjs");
+const { editPaths } = require("../shared/rulesets/edit.mjs");
+const EDIT_PATHS = editPaths(MANIFEST.edit);
+const TEXT = EDIT_PATHS.text;
+const NUMBERS = EDIT_PATHS.number;
+const LISTS = EDIT_PATHS.list;
 function setPath(data, key, value) {
   const keys = key.split(".");
   let node = data;
@@ -105,18 +97,18 @@ async function edit35(table, record, changes, seat) {
     const key = String(change?.path ?? "");
     const value = change?.value;
     if (key === "name") name = String(value ?? "").trim().slice(0, 120) || record.name;
-    else if (TEXT.has(key)) data[key] = String(value ?? "").slice(0, 8000);
-    else if (key === "feats" || key === "spells") data[key] = (Array.isArray(value) ? value : String(value ?? "").split(/\n|,(?![^(]*\))/)).map((item) => String(item).trim()).filter(Boolean).slice(0, 200);
+    else if (TEXT.some((pattern) => pattern.test(key))) data[key] = String(value ?? "").slice(0, 8000);
+    else if (LISTS.some((pattern) => pattern.test(key))) data[key] = (Array.isArray(value) ? value : String(value ?? "").split(/\n|,(?![^(]*\))/)).map((item) => String(item).trim()).filter(Boolean).slice(0, 200);
     else if (NUMBERS.some((pattern) => pattern.test(key))) {
       const n = Number(value);
       if (!Number.isFinite(n) || Math.abs(n) > 1e7) throw new Error(`${key} needs a number.`);
       // Ranks may be halves (a cross-class skill); everything else whole, and counts never below 0.
       const whole = /\.ranks$/.test(key) ? Math.round(n * 2) / 2 : Math.round(n);
       setPath(data, key, /(^spellcasting\.used|\.ranks$|^hp\.(wounds|nonlethal|temp))/.test(key) ? Math.max(0, whole) : whole);
-    } else if (/^inventorylist\.id-\d+$/.test(key) && value === null) delete data.inventorylist?.[key.split(".")[1]];
+    } else if (EDIT_PATHS.remove.some((pattern) => pattern.test(key)) && value === null) delete data[key.split(".")[0]]?.[key.split(".")[1]];
     else throw new Error(`The sheet cannot change ${key}.`);
   }
   return table.records.update(record.id, { name, data: rules.derive(data) }, table.seat, { replace: true });
 }
 
-module.exports = { rules35, library35, build35, check35, levelUp35, edit35, is35, is35Ruleset, RULESET_NAME };
+module.exports = { rules35, library35, build35, check35, levelUp35, edit35, is35, is35Ruleset, RULESET_NAME, EDIT_PATHS };
