@@ -69,7 +69,13 @@ export function PartView({ spec, custom, formats }: { spec: Part; custom: Record
     case "load":
       return <Load spec={spec} />;
     case "notes":
-      return spec.className ? (
+      return spec.section ? (
+        <section className={spec.section.className} aria-label={spec.section.aria}>
+          {spec.fields.map((field) => (
+            <LabelledField key={field.path} spec={field} scope={scope} />
+          ))}
+        </section>
+      ) : spec.className ? (
         <div className={spec.className}>
           {spec.fields.map((field) => (
             <LabelledField key={field.path} spec={field} scope={scope} />

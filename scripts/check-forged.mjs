@@ -86,6 +86,20 @@ function assert(condition, message) {
 }
 console.log("rules ok");
 
+// --- The sheet's whitelist: from the manifest, exactly the hand-written lists it replaced, in their order -----
+{
+  const { EDIT_PATHS } = require("../electron/forged.cjs");
+  const sources = (list) => list.map((regex) => regex.source).join(" ");
+  const text = ["alias", "look", "heritage", "heritagedetail", "background", "backgrounddetail", "vice", "vicedetail", "purveyor", "notes", "playername"].map((key) => `^${key}$`).join(" ");
+  const numbers = [/^actions\.(hunt|study|survey|tinker|finesse|prowl|skirmish|wreck|attune|command|consort|sway)$/, /^stress$/, /^healing$/, /^stash$/, /^xp\.(playbook|insight|prowess|resolve)$/, /^armor\.(armor|heavy|special)$/, /^coins\.id-\d+\.amount$/, /^inventorylist\.id-\d+\.(carried|load)$/, /^projects\.id-\d+\.(filled|segments)$/];
+  const strings = [/^harm\.[123]\.[01]$/, /^inventorylist\.id-\d+\.(name|text)$/, /^projects\.id-\d+\.name$/, /^friends\.\d+\.bond$/];
+  assert(sources(EDIT_PATHS.text) === text, `the text whitelist is the old set: ${sources(EDIT_PATHS.text)}`);
+  assert(sources(EDIT_PATHS.number) === sources(numbers), `the number whitelist is the old one: ${sources(EDIT_PATHS.number)}`);
+  assert(sources(EDIT_PATHS.string) === sources(strings), `the string whitelist is the old one: ${sources(EDIT_PATHS.string)}`);
+  assert(sources(EDIT_PATHS.remove) === /^(inventorylist|projects)\.id-\d+$/.source, `the rows the sheet may drop: ${sources(EDIT_PATHS.remove)}`);
+  assert(EDIT_PATHS.list.length === 0, "no list typed one item a line");
+}
+
 // --- At the table ---------------------------------------------------------------
 const server = createTableServer({ ruleset: "Forged in the Dark" });
 await server.listen({ port: 0, password: "" });

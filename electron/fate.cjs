@@ -96,10 +96,14 @@ function mine(record, seat) {
   if (seat.role !== "dm" && record.owner !== seat.name) throw new Error("You can only change your own character.");
 }
 
-// What the sheet may change, then every number worked out again.
-const TEXT = new Set(["description", "notes", "playername", "extras"]);
-const NUMBERS = [/^skills\.[A-Za-z][\w' -]{0,39}$/, /^approaches\.(careful|clever|flashy|forceful|quick|sneaky)$/, /^fatepoints$/, /^refreshbase$/, /^skillpoints$/, /^stress\.(physical|mental|stress)\.\d$/, /^consequences\.(mild|moderate|severe|extreme|mild2|mild3)\.recovering$/];
-const STRINGS = [/^aspects\.(highconcept|trouble|a1|a2|a3)$/, /^phases\.p[123]\.(title|story|aspect|guest)$/, /^stunts\.id-\d+\.(name|text|skill)$/, /^consequences\.(mild|moderate|severe|extreme|mild2|mild3)\.text$/, /^milestones\.id-\d+\.text$/];
+// What the sheet may change, then every number worked out again: the manifest's edit globs
+// (shared/rulesets/edit.mjs), in the order the hand-written lists had; its name and "out" are this host's own.
+const { default: MANIFEST } = require("../shared/fate/manifest.mjs");
+const { editPaths } = require("../shared/rulesets/edit.mjs");
+const EDIT_PATHS = editPaths(MANIFEST.edit);
+const TEXT = EDIT_PATHS.text;
+const NUMBERS = EDIT_PATHS.number;
+const STRINGS = EDIT_PATHS.string;
 function setPath(data, key, value) {
   const keys = key.split(".");
   let node = data;
@@ -116,14 +120,14 @@ async function editFate(table, record, changes, seat) {
     const key = String(change?.path ?? "");
     const value = change?.value;
     if (key === "name") name = clean(value, 120) || record.name;
-    else if (TEXT.has(key)) data[key] = String(value ?? "").slice(0, 8000);
+    else if (TEXT.some((pattern) => pattern.test(key))) data[key] = String(value ?? "").slice(0, 8000);
     else if (key === "out") data.out = ["taken out", "conceded"].includes(value) ? value : "";
     else if (STRINGS.some((pattern) => pattern.test(key))) setPath(data, key, String(value ?? "").slice(0, 2000));
     else if (NUMBERS.some((pattern) => pattern.test(key))) {
       const n = Math.round(Number(value));
       if (!Number.isFinite(n) || Math.abs(n) > 100) throw new Error(`${key} needs a number.`);
       setPath(data, key, n);
-    } else if (/^(stunts|milestones)\.id-\d+$/.test(key) && value === null) delete data[key.split(".")[0]]?.[key.split(".")[1]];
+    } else if (EDIT_PATHS.remove.some((pattern) => pattern.test(key)) && value === null) delete data[key.split(".")[0]]?.[key.split(".")[1]];
     else throw new Error(`The sheet cannot change ${key}.`);
   }
   return table.records.update(record.id, { name, data: rules.derive(data) }, table.seat, { replace: true });
@@ -474,4 +478,4 @@ async function tableFate(table, action, args = {}, seat, from) {
   }
 }
 
-module.exports = { rulesFate, fateTable, sceneAspects, addAspect, findAspect, useFreeInvoke, buildFate, editFate, rollFate, invokeFate, actionFate, tableFate, fourDF, spendPoints, payInvokes, isFate, isFateRuleset, gameFor, RULESETS, TABLE_ID, RESULT };
+module.exports = { rulesFate, fateTable, sceneAspects, addAspect, findAspect, useFreeInvoke, buildFate, editFate, rollFate, invokeFate, actionFate, tableFate, fourDF, spendPoints, payInvokes, isFate, isFateRuleset, gameFor, RULESETS, TABLE_ID, RESULT, EDIT_PATHS };

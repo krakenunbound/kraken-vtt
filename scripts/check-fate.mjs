@@ -91,6 +91,20 @@ assert(rules.rollTotal({ dice: [1, 0, 0, -1], rating: 3, invokes: 2, bonus: 1 })
 }
 console.log("rules ok");
 
+// --- The sheet's whitelist: from the manifest, exactly the hand-written lists it replaced, in their order -----
+{
+  const { EDIT_PATHS } = require("../electron/fate.cjs");
+  const sources = (list) => list.map((regex) => regex.source).join(" ");
+  const text = ["description", "notes", "playername", "extras"].map((key) => `^${key}$`).join(" ");
+  const numbers = [/^skills\.[A-Za-z][\w' -]{0,39}$/, /^approaches\.(careful|clever|flashy|forceful|quick|sneaky)$/, /^fatepoints$/, /^refreshbase$/, /^skillpoints$/, /^stress\.(physical|mental|stress)\.\d$/, /^consequences\.(mild|moderate|severe|extreme|mild2|mild3)\.recovering$/];
+  const strings = [/^aspects\.(highconcept|trouble|a1|a2|a3)$/, /^phases\.p[123]\.(title|story|aspect|guest)$/, /^stunts\.id-\d+\.(name|text|skill)$/, /^consequences\.(mild|moderate|severe|extreme|mild2|mild3)\.text$/, /^milestones\.id-\d+\.text$/];
+  assert(sources(EDIT_PATHS.text) === text, `the text whitelist is the old set: ${sources(EDIT_PATHS.text)}`);
+  assert(sources(EDIT_PATHS.number) === sources(numbers), `the number whitelist is the old one: ${sources(EDIT_PATHS.number)}`);
+  assert(sources(EDIT_PATHS.string) === sources(strings), `the string whitelist is the old one: ${sources(EDIT_PATHS.string)}`);
+  assert(sources(EDIT_PATHS.remove) === /^(stunts|milestones)\.id-\d+$/.source, `the rows the sheet may drop: ${sources(EDIT_PATHS.remove)}`);
+  assert(EDIT_PATHS.list.length === 0, "no list typed one item a line");
+}
+
 // --- At a Fate Core table ------------------------------------------------------------------------
 async function table(ruleset) {
   const server = createTableServer({ ruleset });
