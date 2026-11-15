@@ -1,0 +1,1 @@
+{"width":2400,"height":1800,"grid":100,"walls":[{"points":[1100,1200,800,1200,800,600,1600,600,1600,1200,1300,1200]},{"points":[1100,1200,1300,1200],"door":true,"type":"door"}],"lights":[{"x":1660,"y":240,"bright":5,"dim":15,"color":"#bfe6ff","animation":"pulse"}]}
