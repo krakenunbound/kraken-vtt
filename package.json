@@ -75,6 +75,7 @@
     "decal": "node scripts/check-decal.mjs",
     "sight-parity": "node scripts/check-sight-parity.mjs",
     "session": "node scripts/check-session.mjs",
+    "session-tools": "node scripts/check-session-tools.mjs",
     "agent": "node scripts/check-agent.mjs",
     "assistant": "node scripts/check-assistant.mjs",
     "agent-ui": "node scripts/check-agent-ui.mjs",

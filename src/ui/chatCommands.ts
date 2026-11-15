@@ -189,6 +189,26 @@ export const COMMANDS: Command[] = [
   },
   { names: ["save"], args: "", help: "Save the campaign now", group: "GM", gm: true, run: (_rest, context) => context.session.tableCommand({ type: "save" }) },
   {
+    names: ["pause"],
+    args: "[on|off]",
+    help: "Pause the game (the players see a veil; their moves and rolls wait), or go on",
+    group: "GM",
+    gm: true,
+    run: (rest, context) => context.session.setPaused(onOff(rest.trim()) ?? !context.session.options.paused),
+  },
+  {
+    names: ["afk"],
+    args: "",
+    help: "Away from the keyboard: your portrait dims for everyone (again to come back)",
+    group: "Talk",
+    run: (_rest, context) => {
+      const me = context.session.players.find((seat) => seat.id === context.session.selfId);
+      if (context.session.role === "dm") return context.session.note("The GM is never away: /pause the game instead.");
+      context.session.setPresence({ afk: !me?.afk });
+      context.session.note(me?.afk ? "You are back." : "You are away (/afk again to come back).");
+    },
+  },
+  {
     names: ["option"],
     args: "[name] [value]",
     help: "Set a table option: /option towerreveal on|off",
