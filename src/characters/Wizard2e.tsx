@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useHostRolls as useSharedHostRolls } from "./hostRolls";
 import type { RollResult, Session } from "../session/useSession";
 import { ArtChoice } from "./ArtPicker";
+import { RailFrame, WizardPlate as Plate } from "../core/wizard/RailFrame";
 import { CLASSES, GROUPS, RACES, raceKey, signed, STATS } from "../../shared/adnd2e/rules.mjs";
 import * as W from "../../shared/adnd2e/wizard.mjs";
 
@@ -49,14 +50,6 @@ export function useHostRolls(session: Session) {
 }
 const diceOf = (roll: RollResult) => roll.terms.flatMap((term) => (term.kind === "dice" ? term.rolls : []));
 
-function Plate({ children, action }: { children: React.ReactNode; action?: React.ReactNode }) {
-  return (
-    <div className="ccw-plate">
-      {action}
-      <span>{children}</span>
-    </div>
-  );
-}
 
 // The extension's own words and picture for a race, class or alignment (its
 // bio_charwizard2e.lua, run by the host: electron/extLua.cjs), as FG's page
@@ -487,19 +480,15 @@ export function Wizard2e({ session, onDone }: { session: Session; onDone: (id: s
   const needClass = (what: string) => <p className="ccw-panel">Choose a class first - {what} depend on it.</p>;
 
   return (
-    <section className="ccw wizard-2e" data-wizard="adnd2e" data-page={page} aria-label="AD&D 2E character wizard">
-      <header className="ccw-head">
-        <h2>AD&amp;D 2E Character Wizard</h2>
-        <span className="ccw-head-buttons">
-          <button type="button" className="wizard-next" data-wizard-next disabled={Boolean(pregen) || page === pages.at(-1)} onClick={() => setPage(next)} title={`Next: ${PAGE_LABEL[next]}`}>
-            Next ›
-          </button>
-          <button type="button" onClick={() => onDone(null)}>
-            Cancel
-          </button>
-        </span>
-      </header>
-      {library.pregens.length ? (
+    <RailFrame
+      className="ccw wizard-2e"
+      attrs={{ "data-wizard": "adnd2e", "data-page": page }}
+      aria="AD&D 2E character wizard"
+      heading={<h2>AD&amp;D 2E Character Wizard</h2>}
+      next={{ label: "Next ›", title: `Next: ${PAGE_LABEL[next]}`, disabled: Boolean(pregen) || page === pages.at(-1), onClick: () => setPage(next) }}
+      onCancel={() => onDone(null)}
+      top={
+        library.pregens.length ? (
         <label className="wizard-2e-pregen ccw-row">
           A ready-made character from your books
           <select value={pregen} onChange={(event) => setPregen(event.target.value)} aria-label="Pregenerated character">
@@ -515,7 +504,15 @@ export function Wizard2e({ session, onDone }: { session: Session; onDone: (id: s
             })}
           </select>
         </label>
-      ) : null}
+        ) : null
+      }
+      // A ready-made character has no pages: its one page in place of the rail.
+      tabs={pregen ? null : pages.map((item) => ({ id: item, label: PAGE_LABEL[item], attrs: { "data-done": done[item] ? "1" : "0" }, badge: { done: Boolean(done[item]), todo: "!" } }))}
+      page={page}
+      onPage={(id) => setPage(id as typeof page)}
+      note={note}
+      onNote={() => setNote("")}
+    >
       {pregen ? (
         <div className="ccw-page">
           <Plate>Pregenerated Character</Plate>
@@ -533,22 +530,6 @@ export function Wizard2e({ session, onDone }: { session: Session; onDone: (id: s
         </div>
       ) : (
         <>
-          <nav className="ccw-tabs" role="tablist">
-            {pages.map((item) => (
-              <button key={item} type="button" role="tab" aria-selected={page === item} data-wizard-tab={item} data-done={done[item] ? "1" : "0"} onClick={() => setPage(item)}>
-                {PAGE_LABEL[item]}
-                <span className={done[item] ? "ccw-tab-badge done" : "ccw-tab-badge todo"}>{done[item] ? "✓" : "!"}</span>
-              </button>
-            ))}
-          </nav>
-          {note ? (
-            <p className="ccw-note" role="status">
-              {note}
-              <button type="button" aria-label="Dismiss" onClick={() => setNote("")}>
-                ×
-              </button>
-            </p>
-          ) : null}
           <div className="ccw-page" style={{ ["--ccw-art" as string]: PAGE_ART[page] ? `url(${session.wizardArtUrl(EXT, PAGE_ART[page])})` : "none" }}>
             <p className="hint">{LORE[page]}</p>
 
@@ -1215,6 +1196,6 @@ export function Wizard2e({ session, onDone }: { session: Session; onDone: (id: s
           </div>
         </>
       )}
-    </section>
+    </RailFrame>
   );
 }

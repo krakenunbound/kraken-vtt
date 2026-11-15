@@ -1,6 +1,6 @@
 import type { FieldSpec } from "../../../shared/rulesets/types";
 import { Field } from "../fields/Field";
-import { at, fill, num, textOf, useSheet, type Scope } from "../sheet/context";
+import { at, fill, num, rows, textOf, useSheet, type Scope } from "../sheet/context";
 
 // One field of a manifest (FG's stringfield / numberfield / combobox, bound to
 // a path): shown, typed into, picked or ticked. An edit goes to the host's
@@ -40,9 +40,16 @@ export function FieldView({ spec, scope, base = "" }: { spec: FieldSpec; scope: 
       const attrs: Record<string, string> = {};
       if (spec.hook) attrs["data-stat"] = spec.hook;
       if (spec.attr) attrs[spec.attr] = String(value ?? "");
+      const shown = spec.format
+        ? (sheet.formats[spec.format]?.(scope.data) ?? "")
+        : spec.join
+          ? rows(raw).map(([, row]) => fill(spec.join?.item ?? "", { row, data: {} })).join(spec.join.sep)
+          : spec.show
+            ? fill(spec.show, scope)
+            : fill(`{${spec.path}}`, scope) || String(value ?? "");
       return (
         <span className="cc-value" title={title} style={spec.color ? { color: spec.color } : undefined} {...attrs}>
-          {spec.show ? fill(spec.show, scope) : fill(`{${spec.path}}`, scope) || String(value ?? "")}
+          {shown}
         </span>
       );
     }

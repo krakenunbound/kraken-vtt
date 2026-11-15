@@ -63,22 +63,13 @@ async function levelUp5e(table, record, from) {
   return { record: updated, gain, level: data.level, note: "" };
 }
 
-// What the 5E sheet may change, then every number worked out again.
-const TEXT = new Set(["playername", "alignment", "appearance", "notes", "senses", "speed", "background", "species", "gender", "age", "height", "weight", "concentration"]);
-const NUMBERS = [
-  /^abilities\.(strength|dexterity|constitution|intelligence|wisdom|charisma)\.(score|saveprof)$/,
-  /^skills\.[a-z]+\.prof$/,
-  /^hp\.(wounds|temp)$/,
-  /^exp$/,
-  /^ac\.misc$/,
-  /^initiative\.misc$/,
-  /^slots\.l\d\.used$/,
-  /^deathsaves\.(success|failure)$/,
-  /^hitdice\.used$/,
-  /^dread$/,
-  /^coins\.id-\d+\.amount$/,
-  /^inventorylist\.id-\d+\.(count|carried)$/,
-];
+// What the 5E sheet may change (the manifest's edit globs: shared/rulesets/edit.mjs),
+// then every number worked out again.
+const { default: MANIFEST } = require("../shared/dnd5e/manifest.mjs");
+const { editPaths } = require("../shared/rulesets/edit.mjs");
+const EDIT_PATHS = editPaths(MANIFEST.edit);
+const TEXT = EDIT_PATHS.text;
+const NUMBERS = EDIT_PATHS.number;
 function setPath(data, key, value) {
   const keys = key.split(".");
   let node = data;
@@ -95,16 +86,16 @@ async function edit5e(table, record, changes, seat) {
     const key = String(change?.path ?? "");
     const value = change?.value;
     if (key === "name") name = String(value ?? "").trim().slice(0, 120) || record.name;
-    else if (TEXT.has(key)) data[key] = String(value ?? "").slice(0, 8000);
+    else if (TEXT.some((pattern) => pattern.test(key))) data[key] = String(value ?? "").slice(0, 8000);
     else if (NUMBERS.some((pattern) => pattern.test(key))) {
       const n = Math.round(Number(value));
       if (!Number.isFinite(n) || Math.abs(n) > 1e7) throw new Error(`${key} needs a number.`);
       // Counts of things used (slots, hit dice, death saves) never go below 0 (-5 used is not 5 extra casts).
       setPath(data, key, /(^slots\.l\d\.used|^hitdice\.used|^deathsaves\.)/.test(key) ? Math.max(0, n) : n);
-    } else if (/^inventorylist\.id-\d+$/.test(key) && value === null) delete data.inventorylist?.[key.split(".")[1]];
+    } else if (EDIT_PATHS.remove.some((pattern) => pattern.test(key)) && value === null) delete data[key.split(".")[0]]?.[key.split(".")[1]];
     else throw new Error(`The sheet cannot change ${key}.`);
   }
   return table.records.update(record.id, { name, data: rules.derive(data) }, table.seat, { replace: true });
 }
 
-module.exports = { rules5e, library5e, build5e, check5e, levelUp5e, edit5e, is5e, isD20Ruleset, D20, RULESET_NAME, TYPES_5E };
+module.exports = { rules5e, library5e, build5e, check5e, levelUp5e, edit5e, is5e, isD20Ruleset, D20, RULESET_NAME, TYPES_5E, EDIT_PATHS };
