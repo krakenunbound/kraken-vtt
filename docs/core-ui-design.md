@@ -1,6 +1,6 @@
 # Kraken VTT: one core UI that every ruleset slides into
 
-Research and design. Nothing in `F:/Kraken VTT Web` was changed.
+Research and design, then the plan of record. Section 7 says what has been built so far and where it differs from this design.
 
 Sources read for this:
 - Fantasy Grounds: `CoreRPG.pak`, `2E.pak` and `5E.pak` from `%APPDATA%/SmiteWorks/Fantasy Grounds/rulesets`, unzipped into `scratchpad/fg-study/`.
@@ -344,6 +344,8 @@ Each field kind has `editable: "owner" | "gm" | "never"`. Editing still goes thr
 
 ### 4.3 The manifest types (`shared/rulesets/types.d.ts`)
 
+As designed. The types as built (steps 1-2) are in `shared/rulesets/types.d.ts`; section 7.4 lists the differences.
+
 ```ts
 export type Who = "owner" | "gm" | "never";
 export type Path = string;                    // into record.data, "{key}" = the row's key
@@ -477,6 +479,7 @@ export interface RulesetManifest {
 ### 4.5 Three example manifests
 
 #### Cairn (simple)
+The draft below was the design. The manifest as built is `shared/cairn/manifest.mjs` (section 7.3); it is the one to read.
 The hooks, record paths and tracker calls below were checked against `SheetCairn.tsx`, `CombatTracker.tsx` (lines 237-246 and 529) and `electron/cairn.cjs`. The wizard's help lines are paraphrased. In this step they would be copied verbatim from `WizardCairn`.
 ```js
 // shared/cairn/manifest.mjs
@@ -856,3 +859,166 @@ The core "inherit" sheet (CoreRPG's category lists) is **not** in this plan, bec
 5. Castles & Crusades moves late, onto a core proven on simpler games first.
 6. The wizards move after the sheets.
 7. Advancement uses each game's own word (Growth, Milestones, Legacy, Marks); Worldbuilding moves to the generic core sheet.
+
+---
+
+## 7. Built: the first stage (steps 0, 1 and 2)
+
+On the `core-ui` worktree branch, as three commits, one per step. Nothing was released.
+
+### 7.1 Step 0: one sheet frame
+- `src/core/fields/Field.tsx`: `Field`, moved out of `CCSheet.tsx`. Every sheet and `ShipsWindow` import it from here.
+- `src/core/frame/SheetFrame.tsx` holds the frame every sheet used to copy by hand:
+  - `SheetFrame`: the article (`data-character`, `data-ruleset` and any other `attrs`), the portrait and token buttons with `ArtPicker` and `slotDrag`, the name, the identity boxes and the tab rail (`data-sheet-tab`, `role="tab"`).
+  - `NameField`, `IdentityBox`, and `canEdit` (owner or GM).
+  - A sheet that takes dropped records passes `onDropRecord`. C&C does: FG's sheet drop.
+- The 11 sheets now give only their identity boxes and their pages, and the frame does the rest. About 450 hand-copied lines are gone.
+- **Proof:** `scripts/shot-sheets.mjs` (`make`, `shoot`, `diff`).
+  - `make` builds a character in every game through the e2e plan's wizard (`scripts/e2e/rulesets.mjs`), in a profile of its own.
+  - `shoot` reopens a copy of each profile, so before and after show the same characters. It takes every tab at 2560x1440, for the GM (Kraken full screen) and for the player (Chrome). Each tab is shot twice: the whole screen, and the sheet alone.
+  - `diff` compares shots pixel by pixel against a before folder, and optionally against the same build shot a second time. That second shoot shows what moves by itself, such as an animated portrait or a dice trail.
+  - **Result:** all 16 games, GM and player, every tab: every sheet-only shot is identical to the build before.
+  - One real difference turned up along the way. Fate's "Name · Fate Accelerated" had become a single text node, and its kerning moved 20 pixels. It now renders as two nodes again.
+
+### 7.2 Step 1: the registry and the manifests
+- **Types.** `shared/rulesets/types.d.ts` holds the manifest types (4.3, as built: see 7.4).
+- **One manifest per game,** each `shared/<id>/manifest.mjs`:
+  - `cnc`, `dnd5e` (Descending Darkness as a variant with id `descending`), `dnd35`, `adnd2e`, `bfrpg`, `mgt2`, `astra`, `cairn`, `fate` (Fate Accelerated as a variant), `ironsworn` (Starforged as a variant), `forged` and `worldbuilding`.
+  - Each manifest is data only, `// @ts-check`ed against `RulesetManifest`.
+  - Each holds what was already true: its names, blurb, engine and host module, record-type words, coins, the save box, its kind of experience, its optional features, its windows and strips, its calendar, and a sheet and wizard as Refs.
+- **The registry.** `shared/rulesets/registry.mjs` exports:
+  - `MANIFESTS`
+  - `CAMPAIGN_RULESETS`, the campaign screen's order
+  - `FEATURES`
+  - `rulesetNamed(name)`: a campaign name, or null
+  - `rulesetOfRecord(id)`: a record's `data.ruleset`, with C&C as the default
+  - `rulesetFor(nameOrId)`
+  - `has(manifest, feature)`
+  - `campaignRulesets()`
+
+  A variant joins its base one level deep, the way FG's `merge="join"` does.
+- **Read by both sides.** The client imports the registry, and the host `require`s it. `shared/calendars.mjs` takes its calendars from the manifests, so `electron/calendar.cjs` now reads them too. `electron/cairn.cjs` reads Cairn's manifest (7.3).
+- **The React side.** `src/rulesets/index.tsx` maps every Ref to its component:
+  - `SHEETS`, `WIZARDS`, `PANELS` (the Score panel, the Fate strip, the 3.5E and 2E wizard settings)
+  - `sheetFor(record)`, `wizardFor(name)`, `manifestOf(name)`
+
+  `src/rulesets/statblocks.tsx` holds the record windows' stat blocks (Traveller's NPC block) and the record-type words. `src/rulesets/WizardSettings.tsx` holds the two wizard settings, moved out of `Settings.tsx`.
+- **What the manifest now answers:**
+  - CharacterPanel's two sheet-and-wizard ternaries and `canMakeBlank` (`blank`)
+  - the record-type labels and Traveller's NPC block in Records (`records.<type>.label` and `.statblock`)
+  - the party sheet's coins, its XP, Growth or Milestones tab, the crew tab, the group check's stats and Fate's ladder (`party`, `has(fatePoints)`)
+  - the tracker's save box (`tracker.saves`) and the Score panel replacing the tracker (`tracker.replace`)
+  - the sidebar's combat word (`combatLabel`), the game's windows (`windows`), clocks (`has(clocks)`) and the Fate strip (`strips`)
+  - the extra die in the dice tray (`dice.extraTray`)
+  - the Settings rows (`settings`)
+  - the campaign screen's list and blurbs
+  - the calendars
+- **Ruleset checks,** counted with the grep in 3.1:
+
+  | | Before | After |
+  |---|---:|---:|
+  | src | 126 | 24 |
+  | CharacterPanel | 50 | 0 |
+  | CombatTracker | 43 | 19 (the row actions and columns: step 4) |
+  | PartySheet | 12 | 0 |
+  | Desktop | 9 | 0 |
+  | Records | 4 | 0 |
+  | Settings | 2 | 0 |
+  | ChatDock | 1 | 0 |
+  | electron | 124 | 124 (step 12) |
+
+  Before, the calendars, the setup list and the record words were also per-game tables, which the grep does not count.
+- **`scripts/check-manifests.mjs`,** run by `npm run coverage` after `check-coverage.mjs`. It checks:
+  - names and ids are unique, and the campaign screen lists exactly the manifests' names
+  - every engine and host module exists
+  - every host message maps (in `check-coverage.mjs`) to the tool the manifest names
+  - every feature is a known FeatureId, and every calendar a known calendar
+  - every Ref (sheet, wizard, strips, `tracker.replace`, statblocks, settings, party tabs, custom parts, list formatters) is supplied in `src/rulesets`
+  - on a manifest-laid sheet: hooks are unique per tab, every field the sheet types into is allowed by the manifest's `edit`, and the host's `EDIT_PATHS` equal the manifest's
+
+  The FeatureId-folder rule (4.8) only prints for now. It becomes strict in step 13.
+- **One deliberate exception: Descending Darkness' save box.** It keeps its old aria-label "Save CL" beside its visible "DC", in its own `tracker.saves`, so that no test or agent selector changes.
+
+### 7.3 Step 2: the core parts, and Cairn on them
+- **`src/core/sheet/`:**
+  - `context.ts`: the part context, plus `fill` (templates: `{path}`, `{attributes.{key}.score}`, and `[...]` optional segments) and `textOf` (a text by a row value or a sheet modifier).
+  - `holds`: the sheet conditions (`is`, `positive`, `defined`, `has`, `editable`, `gm`, `all`, `any`, `not`).
+  - `SheetRenderer.tsx`: a SheetSpec in the core frame. `act` sends a ruleset message, a tracker call or a roll. Sheet modifiers live here.
+- **`src/core/parts/`:**
+  - `FieldView` and `LabelledField`: text, number, textarea, select, check, readonly, an edit or an action.
+  - `Parts.tsx`:
+    - `statBlock`, `derived` (boxes: value, remaining, shield, with small fields, a warning, and + and - steps)
+    - `list` (a select or check column, name and details, row actions with conditions, drop, an add line, a list-wide modifier such as Cairn's "In danger" or attack mode)
+    - `coins`, `load` (slots), `notes`, `advancement` (growth rolls), `heading` (with targets), `hint`, `row`, `custom`
+- **Cairn.**
+  - Its sheet is `shared/cairn/manifest.mjs`'s `sheet`: six tabs of core parts.
+  - Its one level-3 part is `cairn.restStrip` (`src/rulesets/cairn.tsx`), plus the formatter `cairn.itemSlots`.
+  - `SheetCairn.tsx` is gone. Its wizard moved, unchanged, to `src/characters/WizardCairn.tsx`.
+  - `electron/cairn.cjs` builds its edit whitelist (`EDIT_PATHS`, plus `edit.remove` for droppable rows) from the manifest. `check-cairn.mjs` asserts these are the exact regexes the hand-written lists had.
+- **Proof:**
+  - **Fresh character.** `shot-sheets.mjs` on Cairn: 10 of the 12 sheet shots are pixel-identical. The two others, the inventory's slot line and the GM's growth rolls, differ by 153-323 pixels of sub-pixel glyph placement: one text node where the old sheet had several. The crops look identical.
+  - **Every branch.** `scripts/verify-core-parts-ui.mjs` gives a character a spellbook, a scroll, a relic, a waterskin, a pending scar, growth and a milestone, and later puts them at dying. It then presses every control once and checks the record: the header's Age, the stat block fields, + and - Fatigue, Deprived, the item select, Cast in danger (with the WIL save), a relic's Use, a scroll used up, Use, drop, add, the attack mode, Bond, Recover, growth add and drop, the GM's growth roll, a milestone ticked, added and removed, Notes, the State box and Stabilize.
+    - It passes the same 34 checks on the hand-written sheet (a step-0 build) and on the manifest sheet.
+    - Its sheet-only shots match, except where a dice animation crossed the sheet.
+  - **Speed** (risk 3): the same script times the sheet opening and each tab switch, on both builds (7.5).
+
+### 7.4 Where the build differs from the design
+- **`Part`.** Its shapes are the ones Cairn needed, with the fields its sheet uses:
+  - `statBlock` has `hook`, `className`, and `roll: { action, label, title, aria, hook, column }`.
+  - `derived` has `boxes: BoxSpec[]`.
+  - `list` has `select`, `check`, `name`, `details`, `rowActions`, `remove`, `add` and `modifier`.
+  - `load` gained `mode: "slots"`, with `used`, `total` and a `text` template.
+  - `advancement` gained `mode: "growth"` with `rolls`.
+  - `heading` and `hint` are new.
+  - `track` and `clock` are **not built yet**. Cairn has no track (its Fatigue is a derived box with + and -), and building them untried would be guesswork. They come with the first game that has them (step 5 or 9).
+- **Calls.** An `ActionCall` (`{ message, action } | { ct } | { roll }`, plus `key`, `value`, `args` and `modifiers` argument names) replaces `RollSpec.via` and `TrackerCall`. A `Text` can depend on a row's value or on a sheet modifier.
+- **`FieldSpec`.**
+  - With no `kind`, a field is shown, not typed into.
+  - It gained `attr` (a `data-*` carrying the value, such as `data-cairn-status`), `color`, `note`, `bare`, `default`, `number` and `action`.
+  - Its `label` is the aria-label and may be a template (`"{key} now"`).
+- **`edit`** gained `remove`: the lists whose rows the sheet may drop.
+- **Variants** may carry their own `id`. `ids` is not used.
+- **Refs.** Besides the components in `src/rulesets/index.tsx`, `src/rulesets/parts.tsx` holds the custom parts (`CUSTOM_PARTS`) and the list formatters (`FORMATS`).
+- **The manifest sheet.** `sheet` is either a Ref (every game but Cairn, for now) or a SheetSpec, which `sheetFor` renders with `SheetRenderer`.
+
+### 7.5 Tests run for this stage
+- **Types, build and coverage.** `npx tsc --noEmit -p .`, `npm run build` and `npm run coverage` all pass, including `check-manifests`.
+  - Step 1's commit was also checked on its own in a separate export of the tree: tsc, build, coverage, `check-cairn` and `check-setup`.
+- **Host checks** (all pass): `check-cairn`, `check-bfrpg`, `check-adnd2e`, `check-dnd35`, `check-dnd5e`, `check-mgt2`, `check-astra`, `check-fate`, `check-ironsworn`, `check-forged`, `check-combat`, `check-party`, `check-character`, `check-wizard`, `check-setup`, `check-agent`, `check-agent-ui`, `check-starships`.
+- **UI tests** (all pass, before and after the Character Selection change): `verify-core-parts-ui`, `-cairn-ui`, `-settings-ui`, `-table-play-ui`, `-rulesets-ui`, `-sidebar-ui`, `-charselect-ui`, `-records-ui`, `-order-ui`, `-calendar-notes-ui`, `-mgt2-ui`, `-astra-ui`, `-fate-ui`, `-forged-ui`, `-ironsworn-ui`, `-descending-ui`, `-dnd5e-ui`, `-dnd35-ui`, `-adnd2e-ui`, `-bfrpg-ui`, `-combat-hand-ui`, `-accounts-ui`.
+  - `verify-starships-ui` fails, but it fails the same way on the step-0 build: the deck plan's map window covers a button. It is not from this stage.
+- **End to end:** `e2e-ruleset.mjs` with all 16 games, on the steps 0-2 build.
+  - 14 passed first time.
+  - Forged in the Dark failed to launch ("no agent.json") and D&D 3.5E's random wizard left skill points unspent. Both passed on a rerun.
+  - On the final build, with Character Selection: all 16 passed first time, 17 or 18 steps each, with no problems.
+- **Speed** (risk 3), with `verify-core-parts-ui` on the dressed Cairn character:
+
+  | Sheet | Opens | Slowest tab |
+  |---|---:|---:|
+  | Hand-written (step 0) | 14-16 ms | 27-29 ms |
+  | Manifest-laid | 14-17 ms | 28-29 ms |
+
+  No slower within the measurement.
+
+### 7.6 Character Selection, as FG's (the user's request during this stage)
+The user's words were: "why is there a new character icon built into character sheets?" The New character, blank, import and export buttons sat on the character window, above the sheet.
+- **What FG does** (CoreRPG `campaign/campaign_chars.xml`):
+  - The sidebar's Characters opens Character Selection: `charselect_host` for the GM (every character) and `charselect_client` for a player.
+  - Its list controls are edit (the pencil), + (a new character, or the wizard where one is installed) and import, plus a filter.
+  - Each character is a card (portrait, name, details, its owner) that opens the sheet. A card can also be dragged.
+  - In edit mode the host's cards show delete and export (`button_exportchar`). Its right-click menu clears the owner or takes ownership.
+  - The sheet (`charsheet`) carries no list actions.
+- **What Kraken does now:**
+  - The sidebar's Characters (`data-launch="characters"`) opens Character Selection (`src/characters/CharacterSelect.tsx`) for the GM and for every player. It never opens a sheet directly.
+  - Its controls are the pencil (`charselect-edit`), New character (`new-character`: the game's wizard, in a window of its own that becomes the new sheet), Create (`blank-character`, in a game whose manifest has `blank`), Import (`import-character`, `import-character-file`; a file dropped on the list also works) and the filter.
+  - Each card opens its sheet in a sheet window, and can be dragged as a link (onto the tracker, a quick slot).
+  - In edit mode, each card shows Export (`export-character`, Kraken JSON or FG XML) and, for the GM, Delete (`delete-character`). A player can export only their own cards.
+  - The GM's list stays open after a card is picked. A player's closes, as FG's client list does.
+- **The character window** (`CharacterPanel.tsx`) is now only a sheet or the wizard. The GM's old list-plus-sheet view, the player's character select on the sheet, and the import, export and blank buttons are gone from it.
+- **Not built:** FG's right-click "clear owner" and "take ownership" on a card. `kraken_characters` give and release do the same for an agent.
+- **Tests:** they now open a sheet the way a person does, through the sidebar's Characters and then a card. `openSheet` in `scripts/e2e/rulesets.mjs` does this, and `check-wizard`, `check-character`, `verify-sidebar-ui`, `verify-adnd2e-ui`, `verify-mgt2-ui`, `verify-forged-ui` and `verify-order-ui` were updated to match. `scripts/shot-sheets.mjs flow` shoots the way to a sheet, full screen, for the GM and the player.
+
+### 7.7 Next stage
+- **Step 3:** the wizard frame and Cairn's wizard on it, with the step kinds `roll-table`, `roll-stats`, `shop` and `text`.
+- **Step 4:** the combat tracker and party sheet from the manifests. CombatTracker's remaining 19 checks become manifest `columns`, `rowActions`, `initiative` and `headerActions`, for every game at once.
+- **Then step 5 (Basic Fantasy):** it brings `rollBar`, the saves stat block, spellbooks, thief skills, turn undead and `load(weight)`. It is also the first game with a `track`.

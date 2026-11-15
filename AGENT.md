@@ -8,6 +8,10 @@ Kraken VTT is built for an AI agent from the ground up, not with one added after
 2. **The tool goes through the same path as the click.** It uses the host's own functions, with the same permission checks and the same chat output, so the agent cannot do anything the GM couldn't, and the table can't tell the difference.
 3. **Names follow the interface.** A tool's description uses the words on the screen and on the GM's sheet (FG's words where FG has them).
 4. **`npm run coverage` enforces it.** It reads every message the table server answers and every combat tracker action, and fails if one has no tool. `npm run agent-ui` drives the interface tools against the real app.
+5. **A game is described by its manifest** (`shared/<id>/manifest.mjs`, docs/core-ui-design.md):
+   - Each manifest names the host message and the agent tool behind the game's buttons: `host.message` and `host.tool`.
+   - `npm run coverage` also runs `scripts/check-manifests.mjs`, which fails if a manifest names a message with no tool or a tool that does not exist.
+   - Where a sheet is laid out by its manifest (Cairn so far), the manifest lists every field and its record path, and every button's `data-action`. An agent can read the paths there, then change them with `kraken_character_edit`, or press the buttons through the game's tool (`kraken_cairn`). The tools and hooks did not change.
 
 ## Connecting an agent
 
@@ -80,11 +84,11 @@ doesn't get it (it could reach the tools withheld from the assistant).
 | **Characters and records** | |
 | Characters, NPCs, items, notes: list, read, make, edit, delete | `kraken_records_list`, `kraken_record_get`, `kraken_record_create`, `kraken_record_update`, `kraken_record_delete` |
 | Creation wizard (C&C's, or the 5E wizard in a D&D 5E campaign: species, class, background, scores, skills, gear, spells; the 3.5E wizard in a D&D 3.5E campaign: race, class, level, scores; the Traveller wizard in a Traveller campaign: characteristics, career and terms, skills and specialities, kit; the 2E wizard in an AD&D 2E campaign: race, class or multi-class, level, scores and 18/xx, or a book's pregen) | `kraken_build_character` |
-| Character Selection (a player takes a character no one holds), the portrait bar along the top | `kraken_characters` (roster, give, release) |
+| Character Selection, what the sidebar's Characters opens for the GM and every player (FG's charselect): a card opens its sheet (a player takes a character no one holds), New character (the wizard), Create (a blank one), Import, and in edit mode (the pencil) each card's Export and the GM's Delete; the portrait bar along the top | `kraken_windows` characters (or charselect), sheet; `kraken_characters` (roster, give, release); `kraken_character_import`, `kraken_character_export`, `kraken_record_delete` |
 | Players' accounts (the Players window): list, make one ahead, a new password, remove | `kraken_accounts` |
 | Lists (FG's campaign lists): share a record with the players or hide it (the sharing icon, FG's Share / Unshare); open the lists or a record | `kraken_record_update` visibility all / gm; `kraken_windows` records, record |
 | The sidebar (FG's dock): tools along the top; Library, Player, Campaign, Character categories that fold away; the arrow at the bottom collapses it to icons and opens it again; a button opens its list (Items, NPCs, Classes, Races, Spells...: every active book's records under the book's name; Encounters, Parcels, Tables: every active adventure's) | `kraken_sidebar` list / state / fold / press |
-| A blank character sheet (Character Selection's Create, the Characters window's blank sheet button), filled by hand | `kraken_record_create` type character |
+| A blank character sheet (Character Selection's Create), filled by hand | `kraken_record_create` type character |
 | A race, class, spell or item dragged from a list onto a character sheet (FG's sheet drop): the package at 1st level with its primes and hit points, a race replacing the old, the spell bound to its class, the item into the gear; a second class is refused (dual class or reclass) | `kraken_character_drop` |
 | Recalculate a sheet | `kraken_character_refresh` |
 | Level up | `kraken_level_up` |
