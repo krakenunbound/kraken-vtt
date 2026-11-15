@@ -1,3 +1,4 @@
+import { RestParty } from "../bookkeeping/RestParty";
 import { useState } from "react";
 import { has, rulesetFor } from "../../shared/rulesets/registry.mjs";
 import { PANELS } from "../rulesets";
@@ -586,6 +587,8 @@ function InitiativeTracker({ session }: { session: Session }) {
               Clear NPCs
             </button>
           </div>
+          {/* The fight is over: the party may rest (the calendar moves on). */}
+          {combat.round === 0 ? <RestParty session={session} className="ct-add ct-rest" /> : null}
         </footer>
       ) : null}
     </div>

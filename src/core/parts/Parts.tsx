@@ -5,6 +5,7 @@ import { Field } from "../fields/Field";
 import { at, fill, holds, nodesOf, num, rows, signed, textOf, useSheet, type Format, type Row, type Scope } from "../sheet/context";
 import { FieldView, LabelledField } from "./FieldView";
 import { ACTION_DRAG } from "../../effects/drops";
+import { Supplies } from "../../bookkeeping/Supplies";
 
 // An attack or damage button drags onto a creature (FG's drag of a sheet's action onto a
 // token or tracker row): there it is rolled against that creature alone (src/effects/drops.ts).
@@ -122,6 +123,8 @@ export function PartView({ spec, custom, formats }: { spec: Part; custom: Record
       const Custom = custom[spec.component];
       return Custom ? <Custom props={spec.props} /> : null;
     }
+    case "supplies":
+      return <Supplies />;
   }
 }
 

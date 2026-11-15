@@ -1,0 +1,23 @@
+/* Bookkeeping's Supplies on the sheet, the party's and the tracker's rest buttons. */
+.supplies { display: grid; gap: 6px; margin-top: 8px; }
+.supplies h4 { display: flex; align-items: center; gap: 6px; margin: 0; }
+.supplies .hint { color: var(--muted); }
+.supplies-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.supplies-row > .icon { color: var(--brass); flex: none; }
+.supplies-warn { color: var(--danger); }
+.supplies-load label { display: grid; grid-template-columns: auto minmax(80px, 1fr) auto; align-items: center; gap: 8px; }
+.supplies-load meter, .supplies-boxes meter { inline-size: 100%; block-size: 12px; }
+.supplies-load.bad b { color: var(--danger); }
+.supplies-load.warn b { color: var(--brass); }
+.supplies-boxes, .supplies-use { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.supplies-boxes li { display: grid; grid-template-columns: minmax(0, 12em) minmax(60px, 1fr) auto; align-items: center; gap: 8px; }
+.supplies-boxes .supplies-pack { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; }
+.supplies-use { grid-template-columns: repeat(auto-fill, minmax(13em, 1fr)); }
+.supplies-use li { display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 2px 6px; border: 1px solid var(--line); border-radius: 6px; cursor: grab; }
+.supplies-use li[draggable="false"] { cursor: default; }
+.supplies-act { padding: 2px 8px; font-size: 0.85rem; }
+.supplies-status:empty { display: none; }
+.supplies-status { margin: 0; color: var(--danger); font-size: 0.85rem; }
+.rest-dice { display: inline-flex; align-items: center; gap: 4px; }
+.rest-dice input { inline-size: 3.5rem; }
+.party-rest, .ct-rest { margin-top: 8px; }

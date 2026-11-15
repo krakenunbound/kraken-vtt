@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "reac
 import type { Session, TableRecord } from "../session/useSession";
 import { Icon } from "../ui/icons";
 import { cardsFor, restChanges, SCHOOLS } from "../../shared/cards/cards.mjs";
+import { rulesetOfRecord } from "../../shared/rulesets/registry.mjs";
 import { cardsStore } from "./cardsStore";
 import "./cards.css";
 
@@ -61,14 +62,16 @@ export function CardsWindow({ session, characterId }: { session: Session; charac
 
 function RestButton({ session, character }: { session: Session; character: TableRecord }) {
   const changes = restChanges(character.data);
+  // The game's own long rest where it has one (bookkeeping: hit points, Hit Dice, slots, a ration); else the slots alone.
+  const long = Boolean(rulesetOfRecord(character.data?.ruleset).bookkeeping?.rest && (rulesetOfRecord(character.data?.ruleset).bookkeeping?.rest as { long?: unknown }).long);
   return (
     <button
       type="button"
       className="ghost"
       data-action="cards-rest"
-      disabled={changes.length === 0}
-      title="Long rest: every spell slot back (and concentration ends)"
-      onClick={() => session.editCharacter(character.id, changes)}
+      disabled={!long && changes.length === 0}
+      title={long ? "Long rest: the game's long rest (hit points, spell slots, a ration; concentration ends)" : "Long rest: every spell slot back (and concentration ends)"}
+      onClick={() => (long ? void session.rest(character.id, "long").catch(() => undefined) : session.editCharacter(character.id, changes))}
     >
       <Icon name="sun" size={14} /> Long rest
     </button>

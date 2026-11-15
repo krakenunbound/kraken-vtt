@@ -28,7 +28,12 @@ const re = (pattern) => new RegExp(pattern, "i");
 const test = (pattern, text) => Boolean(pattern) && re(pattern).test(String(text ?? ""));
 const nameOf = (row) => String(row?.name ?? "").trim();
 // A row's words: its name, type, subtype and description (FG's formatted text, tags off).
-const wordsOf = (row) => `${row?.name ?? ""} ${row?.type ?? ""} ${row?.subtype ?? ""} ${String(row?.description ?? row?.notes ?? row?.text ?? "").replace(/<[^>]+>/g, " ")}`;
+// A description as text: FG's formatted text (a string), or Kraken's rich text ({ __rich: "<p>..." }).
+export const textOf = (value) => {
+  const raw = value && typeof value === "object" ? (value.__rich ?? value.text ?? "") : (value ?? "");
+  return String(raw).replace(/<[^>]+>/g, " ").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/\s+/g, " ").trim();
+};
+const wordsOf = (row) => `${row?.name ?? ""} ${row?.type ?? ""} ${row?.subtype ?? ""} ${textOf(row?.description ?? row?.notes ?? row?.text)}`;
 
 // --- The inventory -------------------------------------------------------------------------------
 export const rowsOf = (data) => Object.entries(data?.inventorylist ?? {}).filter((entry) => entry[1] && typeof entry[1] === "object");
@@ -203,6 +208,7 @@ export const CONSUMABLE_KINDS = [
   { kind: "charges", match: "\\bwands?\\b|\\bstaff of\\b|\\brod of\\b|\\bcharges?\\b", spend: "charges" },
 ];
 // What using a row spends: { kind, field: uses|charges|count, left, max, heal: {dice, bonus} | null }, or null.
+/** @param {any} decl @param {any} row @param {((data: any) => any) | null} [parseSpell] */
 export function consumableOf(decl, row, parseSpell = null) {
   if (!row || decl?.consumables === false) return null;
   const kinds = [...(decl?.consumables?.kinds ?? []), ...CONSUMABLE_KINDS];
@@ -230,6 +236,7 @@ export function consumableOf(decl, row, parseSpell = null) {
   return { kind: kind.kind, field, left, max, heal };
 }
 // One used: { ok, data, name, left, gone, info } (a potion drunk, a charge spent), or ok false.
+/** @param {any} decl @param {any} data @param {string} key @param {((data: any) => any) | null} [parseSpell] */
 export function useConsumable(decl, data, key, parseSpell = null) {
   const row = data?.inventorylist?.[key];
   if (!row) return { ok: false, reason: "That item is gone." };
@@ -522,8 +529,8 @@ export function autoEffects(decl, data, switches) {
 // Oil, 10 days of Rations, ..."): [{ name, count }].
 const SMALL = { a: 1, an: 1, one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, twelve: 12 };
 export function packContents(row) {
-  const text = String(row?.description ?? row?.notes ?? row?.text ?? "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
-  const list = /(?:includes|contains|consists of)\s*:?\s*(.+?)(?:\.\s|\.$|$)/i.exec(text)?.[1];
+  const text = textOf(row?.description ?? row?.notes ?? row?.text);
+  const list = /(?:includes|contains|consists of)\s*(?:the following(?: items)?)?\s*:?\s*(.+?)(?:\.\s|\.$|$)/i.exec(text)?.[1];
   if (!list) return [];
   return list
     .split(/,\s*(?:and\s+)?|\s+and\s+/)

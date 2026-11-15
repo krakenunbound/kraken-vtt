@@ -13,7 +13,12 @@ export const ACTION_DRAG = "application/x-kraken-action";
 export const EFFECT_DRAG = "application/x-kraken-effect";
 export const CREATURE_DROPS = [ROLL_DRAG, ACTION_DRAG, EFFECT_DRAG];
 
-export type ActionDrop = { kind: "attack" | "damage" | "cast"; recordId?: string; entryId?: string; weapon?: string; power?: string };
+export type ActionDrop = { kind: "attack" | "damage" | "cast" | "use"; recordId?: string; entryId?: string; weapon?: string; power?: string; item?: string };
+// An item used on the creature it is dropped on (a potion dragged from the sheet's Supplies: bookkeeping's use).
+let itemUser: ((recordId: string, item: string, to: DropTarget) => void) | null = null;
+export const setItemUser = (use: typeof itemUser) => {
+  itemUser = use;
+};
 export type EffectDrop = { preset?: string; effect?: { label: string; duration?: number; icon?: string } };
 // Where it lands: a tracker entry, a token or a character record.
 export type DropTarget = { entryId?: string; tokenId?: string; recordId?: string };
@@ -45,6 +50,10 @@ export function dropOnCreature(data: DataTransfer, to: DropTarget, send: Senders
     return true;
   }
   const action = read<ActionDrop>(ACTION_DRAG);
+  if (action?.kind === "use") {
+    if (action.recordId && action.item) itemUser?.(action.recordId, action.item, to);
+    return true;
+  }
   if (action) {
     // FG's drop of an action on a creature: that creature becomes the only target, then it is rolled.
     const source = action.entryId ?? (action.recordId ? send.entryOfRecord?.(action.recordId) : undefined);

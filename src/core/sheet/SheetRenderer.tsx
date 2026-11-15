@@ -35,12 +35,21 @@ function withWords<T>(value: T, words: Record<string, string>): T {
   return value;
 }
 
+// Bookkeeping's Supplies at the end of the tab that holds the inventory list, unless the manifest places it.
+const hasPart = (parts: Part[], test: (part: Part) => boolean): boolean => parts.some((part) => test(part) || (part.part === "row" && hasPart(part.parts, test)));
+function withSupplies(spec: SheetSpec): SheetSpec {
+  if (spec.tabs.some((tab) => hasPart(tab.parts, (part) => part.part === "supplies"))) return spec;
+  const at = spec.tabs.findIndex((tab) => hasPart(tab.parts, (part) => part.part === "list" && part.path === "inventorylist"));
+  if (at < 0) return spec;
+  return { ...spec, tabs: spec.tabs.map((tab, index) => (index === at ? { ...tab, parts: [...tab.parts, { part: "supplies" }] } : tab)) };
+}
+
 // The same objects every render when a game has no words or features, so the spec and the context stay memoised.
 const NO_WORDS: Record<string, string> = {};
 const NO_FEATURES: string[] = [];
 
 export function SheetRenderer({ spec: given, record, session, ruleset, custom, formats, words = NO_WORDS, features = NO_FEATURES }: { spec: SheetSpec; record: TableRecord; session: Session; ruleset: string; custom: Record<string, CustomPart>; formats: Record<string, Format>; words?: Record<string, string>; features?: string[] }) {
-  const spec = useMemo(() => withWords(given, words), [given, words]);
+  const spec = useMemo(() => withSupplies(withWords(given, words)), [given, words]);
   // The game's formatters, for a text that names one ({ format }).
   setFormatters(formats);
   const [tab, setTab] = useState(spec.tabs[0]?.id ?? "main");

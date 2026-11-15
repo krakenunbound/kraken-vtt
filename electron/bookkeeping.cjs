@@ -395,10 +395,10 @@ function createBookkeeping(table) {
     if (same) return;
     if (entry) {
       for (const effect of ours) table.combat.takeOff(entry.id, effect.id);
-      for (const want of wanted) table.combat.putOn(entry.id, { label: want.label, duration: 0, source: SOURCE, icon: want.tag === "exhaustion" ? "tired" : "weight" });
+      for (const want of wanted) table.combat.putOn(entry.id, { label: want.label, duration: 0, source: SOURCE, icon: want.tag === "exhaustion" ? "exhaustion" : "slow" });
     } else {
       const kept = have.filter((effect) => effect.source !== SOURCE);
-      mapOf().setTokenEffects(token.id, [...kept, ...wanted.map((want) => ({ label: want.label, duration: 0, source: SOURCE, icon: want.tag === "exhaustion" ? "tired" : "weight" }))]);
+      mapOf().setTokenEffects(token.id, [...kept, ...wanted.map((want) => ({ label: want.label, duration: 0, source: SOURCE, icon: want.tag === "exhaustion" ? "exhaustion" : "slow" }))]);
     }
   }
   let pending = new Set();

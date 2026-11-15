@@ -98,6 +98,13 @@ const PATHS: Record<string, string> = {
   folder: "M3.5 7.5V18a1 1 0 0 0 1 1h15a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1h-8l-2-2.5h-5a1 1 0 0 0-1 1Z",
   link: "M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1",
   away: "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 7v5l3 2",
+  // Bookkeeping: the load, exhaustion, ammunition, light, rest, rations.
+  weight: "M9 8a3 3 0 1 1 6 0M6.5 8h11l2 12h-15Z",
+  tired: "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM8 10h2.5M13.5 10H16M9 16h6",
+  arrow: "M4 20 18 6M13 5.5h5.5V11M4 20l2.5-.5M4 20l.5-2.5M6.5 17.5 5 16M8 15.5 6.5 14",
+  flame: "M12 21c-3.6 0-6-2.4-6-5.6 0-3.4 3-5.4 3.6-8.9 1.6 1 2.4 2.6 2.4 4.1.9-.8 1.5-2 1.6-3.4C16 8.8 18 11.6 18 15.4 18 18.6 15.6 21 12 21Z",
+  moon: "M19.5 14.5A7.5 7.5 0 0 1 9.5 4.5a7.5 7.5 0 1 0 10 10Z",
+  ration: "M5 9h14l-1.5 10.5h-11ZM8 9V6.5a4 4 0 0 1 8 0V9M9.5 13h5",
 };
 
 export function Icon({ name, size = 18, title }: { name: keyof typeof PATHS | string; size?: number; title?: string }) {

@@ -155,6 +155,10 @@ export type Part = (
   | ({ part: "button" } & StepSpec)
   | { part: "row"; parts: Part[]; className?: string }
   | { part: "custom"; component: Ref; props?: Record<string, unknown> }
+  // Bookkeeping's Supplies (src/bookkeeping/Supplies.tsx): the load meter and containers, ammunition,
+  // consumables, rations and water, light, exhaustion and the rests the game's bookkeeping declares.
+  // Placed by the core at the end of the tab holding the inventory list when a manifest does not place it.
+  | { part: "supplies" }
 ) & { when?: Cond; gm?: boolean };
 
 // A column is a field (wrap: a span around it; extra: a second field after it while when holds) or a roll;
