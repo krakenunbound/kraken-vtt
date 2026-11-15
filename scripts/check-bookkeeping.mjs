@@ -75,6 +75,14 @@ const settle = () => new Promise((resolve) => setTimeout(resolve, 30));
     if (s.ok) t = s.data;
   }
   assert(shots.join(",") === "1,0,1r,0,x", `a magazine of 2 and one spare: ${shots.join(",")}`);
+  // C&C's units: a quiver of 20 as one row; three fired across a unit's end come back as whole units.
+  const cnc = rulesetFor("Castles & Crusades").bookkeeping;
+  let quiver = { inventorylist: { q: { name: "Arrows", count: 2, ammoperunit: 20, ammoused: 18 } }, bookkeeping: { spent: { q: { name: "Arrows", n: 4 } } } };
+  quiver = bk.recoverAmmo(cnc, quiver).data;
+  assert(bk.quantity(quiver.inventorylist.q) === 24 && quiver.inventorylist.q.count === 2 && quiver.inventorylist.q.ammoused === 16, `C&C's quiver gets 2 back across units: ${JSON.stringify(quiver.inventorylist.q)}`);
+  // A Traveller medikit is a tool, not used up; a 5E healer's kit's ten uses are.
+  assert(bk.consumableOf(mg, { name: "Medikit", description: "Medical supplies: DM+2 to Medic checks." }) === null, "a medikit is not used up");
+  assert(bk.consumableOf(rulesetFor("D&D 5E").bookkeeping, { name: "Healer's Kit", description: "This kit has 10 uses." })?.left === 10, "a healer's kit has ten uses");
   const pack = bk.packContents({ name: "Explorer's Pack", description: "Includes a Backpack, a Bedroll, 2 Flasks of Oil, 10 days of Rations, a Rope, a Tinderbox, 10 Torches, and a Waterskin." });
   assert(pack.length === 8 && pack.some((item) => item.name === "Rations" && item.count === 10) && pack.some((item) => item.name === "Torch" && item.count === 10) && pack.some((item) => item.name === "Oil" && item.count === 2), `the pack's contents: ${JSON.stringify(pack)}`);
 }
@@ -255,6 +263,17 @@ try {
   await settle();
   assert(rations() === before, "rations off: the days pass, nothing eaten");
   await tool("kraken_table_options", { bookkeeping: { rations: true } });
+  // A party member whose food is still in an unopened Explorer's Pack: the pack is opened when the day ends.
+  const kip = agent.records.create({ type: "character", name: "Kip", owner: "", visibility: "gm", data: { ...base, inventorylist: { "id-00001": structuredClone(kit["id-00004"]) } } }, agent.seat);
+  agent.records.update("party", { data: { members: [ryn.id, ox.id, kip.id] } }, agent.seat);
+  await tool("kraken_calendar", { action: "advance", days: 1 });
+  await settle();
+  assert(find(kip, "Rations")?.[1].count === 9 && !find(kip, "Explorer's Pack") && data(kip).bookkeeping.thirsty === 0, `the pack opened for the day's food and water: ${JSON.stringify(find(kip, "Rations"))} ${JSON.stringify(data(kip).bookkeeping)}`);
+  agent.records.update("party", { data: { members: [ryn.id, ox.id] } }, agent.seat);
+  // An effect that lasts until a long rest comes off with it.
+  await tool("kraken_effects", { action: "apply", to: { tokenId: tokenOf(ryn).id }, effect: { label: "Aid; until a long rest" } });
+  await tool("kraken_rest", { id: ryn.id, kind: "long" });
+  assert(!(await tool("kraken_effects", { action: "on", to: { tokenId: tokenOf(ryn).id } })).effects.some((effect) => /^Aid/.test(effect.label)), "the long rest ends what lasts until a long rest");
 
   // --- Rests ---
   // Short rest: Hit Point Dice (d10 + 2 each).
@@ -283,6 +302,23 @@ try {
   agent.records.update(ox.id, { data: { hp: { wounds: 5 }, slots: { l1: { used: 1 } } } }, agent.seat);
   await tool("kraken_cards", { id: ox.id, action: "rest" }).catch(() => tool("kraken_cards", { character: ox.id, action: "rest" }));
   assert(data(ox).hp.wounds === 0 && data(ox).slots.l1.used === 0, `the cards' long rest heals too: ${JSON.stringify(data(ox).hp)}`);
+
+  // --- The penalties land on rolls: 5E Exhaustion 2 is -4 to the tracker's attack and save ---
+  agent.records.update(ryn.id, { data: { exhaustion: 0, inventorylist: { "id-00002": { count: 10 } } } }, agent.seat);
+  await settle();
+  const fight = async () => {
+    await tool("kraken_dice_force", { values: [10] });
+    const shot = await tool("kraken_combat", { action: "attack", recordId: ryn.id, weapon: "id-00001" });
+    await tool("kraken_dice_force", { values: [10] });
+    const saved = await tool("kraken_combat", { action: "save", id: rynEntry.id, attribute: "constitution", cl: 30 });
+    return [JSON.stringify(shot).match(/"total":(-?\d+)/)?.[1], JSON.stringify(saved).match(/"total":(-?\d+)/)?.[1]].map(Number);
+  };
+  const [atk0, save0] = await fight();
+  agent.records.update(ryn.id, { data: { exhaustion: 2 } }, agent.seat);
+  await settle();
+  const [atk2, save2] = await fight();
+  assert(atk0 - atk2 === 4 && save0 - save2 === 4, `Exhaustion 2 takes 4 off the attack and the save: attack ${atk0} -> ${atk2}, save ${save0} -> ${save2}`);
+  agent.records.update(ryn.id, { data: { exhaustion: 0 } }, agent.seat);
 
   // --- Paused: a player's bookkeeping waits ---
   await tool("kraken_table_options", { paused: true });
@@ -323,6 +359,11 @@ for (const [game, make, test] of [
     await settle();
     await settle();
     const off = test(agent.records.get(hero.id).data);
+    // A character made while the switch is off is not penalised either.
+    const late = agent.records.create({ type: "character", name: "Late", owner: "a test player", visibility: "owner", data: make }, agent.seat);
+    await settle();
+    await settle();
+    assert(test(agent.records.get(late.id).data) === off, `${game}: a character made while encumbrance is off is not penalised: ${test(agent.records.get(late.id).data)}`);
     await tool("kraken_table_options", { bookkeeping: { encumbrance: true } });
     await settle();
     await settle();

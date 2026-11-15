@@ -66,7 +66,9 @@ function createBookkeeping(table) {
     if (seat.role !== "dm" && record.owner !== seat.name) throw new Error("That is not your character.");
   };
   // The record's numbers worked out again by its game's rules (attacks, load, slots), then kept.
-  async function save(record, data) {
+  async function save(record, given) {
+    // The GM's encumbrance switch, for the games whose rules count the load themselves.
+    const data = declOf(record)?.encumbrance?.offFlag && lib.bk ? { ...given, encumbranceoff: switches().encumbrance ? 0 : 1 } : given;
     const engine = await engineFor(manifestOf(record));
     const derived = engine?.derive ? engine.derive(data) : data;
     return table.records.update(record.id, { data: derived }, table.seat, { replace: true });
@@ -190,10 +192,23 @@ function createBookkeeping(table) {
 
   // --- Rations and water -------------------------------------------------------------------------
   // One character's day: eaten and drunk for `day` (unless already), or its penalty. Returns the lines.
-  async function feed(record, day, { quiet = false } = {}) {
+  async function feed(given, day, { quiet = false } = {}) {
+    let record = given;
     const decl = declOf(record);
     const spec = decl?.rations;
     if (!spec) return [];
+    // Food or water still packed (an Explorer's Pack never opened): the pack is opened first.
+    const wants = (data) => {
+      const now = lib.bk.supplies(decl, data);
+      return now.food <= 0 || (spec.water && now.water <= 0 && now.skins === 0);
+    };
+    if (wants(record.data)) {
+      const packed = lib.bk.rowsOf(record.data).find(([, row]) => lib.bk.packContents(row).some((item) => new RegExp(spec.food.match, "i").test(item.name) || (spec.water && new RegExp(spec.water.match, "i").test(item.name))));
+      if (packed) {
+        await unpack(record, packed[0], table.seat);
+        record = table.records.get(record.id) ?? record;
+      }
+    }
     let data = structuredClone(record.data);
     const books = (data.bookkeeping = { ...(data.bookkeeping ?? {}) });
     const lines = [];
@@ -592,7 +607,15 @@ function createBookkeeping(table) {
 
   // Records changed: the load's effect follows the inventory.
   table.records.subscribe?.(({ kind, record }) => {
-    if (kind === "upsert" && record?.type === "character") sync(record.id);
+    if (kind !== "upsert" || record?.type !== "character") return;
+    sync(record.id);
+    // A character made (or changed) while the GM's encumbrance switch disagrees with its rules' flag: set it.
+    if (lib.bk && declOf(record)?.encumbrance?.offFlag && Boolean(num(record.data?.encumbranceoff, 0)) === switches().encumbrance) {
+      queueMicrotask(() => {
+        const now = table.records.get(record.id);
+        if (now) void save(now, now.data).catch(() => undefined);
+      });
+    }
   });
 
   // One character's bookkeeping action (the sheet's buttons, the message, the tool).

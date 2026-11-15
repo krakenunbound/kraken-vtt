@@ -190,7 +190,8 @@ export function Supplies() {
           ) : null}
         </div>
       ) : null}
-      {decl.rest && editable ? <RestButtons session={session} recordId={record.id} rests={decl.rest} hitDice={decl.rest.short?.hitDice ? Math.max(0, (Number(data.hitdice && (data.hitdice as Row).total) || 0) - (Number(data.hitdice && (data.hitdice as Row).used) || 0)) : null} onError={setStatus} /> : null}
+      {/* A game whose sheet has its own rest buttons (Cairn) keeps them; the others get these. */}
+      {decl.rest && editable && !decl.rest.long?.via && !decl.rest.short?.via ? <RestButtons session={session} recordId={record.id} rests={decl.rest} hitDice={decl.rest.short?.hitDice ? Math.max(0, (Number(data.hitdice && (data.hitdice as Row).total) || 0) - (Number(data.hitdice && (data.hitdice as Row).used) || 0)) : null} onError={setStatus} /> : null}
       <p className="supplies-status" role="status">
         {status}
       </p>

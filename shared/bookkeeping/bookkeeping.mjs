@@ -193,7 +193,13 @@ export function recoverAmmo(decl, data) {
   for (const item of back) {
     if (!item.back) continue;
     const row = list[item.key];
-    if (row) list[item.key] = num(row.ammoperunit, 0) > 1 ? { ...row, ammoused: Math.max(0, num(row.ammoused, 0) - item.back) } : { ...unbundle(row), count: quantity(unbundle(row)) + item.back };
+    const per = num(row?.ammoperunit, 0);
+    // C&C's units (a quiver of 20 as one row): the total back, then as whole units and what is used of the last.
+    if (row && per > 1) {
+      const total = quantity(row) + item.back;
+      const count = Math.ceil(total / per);
+      list[item.key] = { ...row, count, ammoused: count * per - total };
+    } else if (row) list[item.key] = row.uses !== undefined && row.uses !== "" ? { ...row, uses: quantity(row) + item.back } : { ...unbundle(row), count: quantity(unbundle(row)) + item.back };
     else list[nextKey(list)] = { name: item.name, count: item.back, carried: 1, type: "Adventuring Gear", subtype: "Ammunition" };
   }
   const { spent: _spent, ...rest } = data.bookkeeping ?? {};
@@ -213,13 +219,18 @@ export function consumableOf(decl, row, parseSpell = null) {
   if (!row || decl?.consumables === false) return null;
   const kinds = [...(decl?.consumables?.kinds ?? []), ...CONSUMABLE_KINDS];
   const words = wordsOf(row);
+  // Food, water, torches and oil are counted as rations and light, not as things to "use".
+  const supply = [decl?.rations?.food?.match, decl?.rations?.water?.match, ...Object.values(LIGHT_ITEMS).flatMap((item) => [item.item, item.fuel])].filter(Boolean);
+  if (supply.some((pattern) => test(pattern, nameOf(row)))) return null;
   const kind = kinds.find((item) => test(item.match, nameOf(row))) ?? (num(row.uses, 0) > 0 || num(row.charges, 0) > 0 ? { kind: "charges", spend: num(row.uses, 0) > 0 ? "uses" : "charges" } : null);
   if (!kind) return null;
   const text = words.replace(/\s+/g, " ");
   const stated = (word) => Number(new RegExp(`(\\d+)\\s+${word}`, "i").exec(text)?.[1] ?? 0);
   let field = kind.spend;
-  if (field === "uses" && row.uses === undefined && !stated("uses")) field = row.charges !== undefined || stated("charges") ? "charges" : "count";
-  if (field === "charges" && row.charges === undefined && !stated("charges")) field = row.uses !== undefined || stated("uses") ? "uses" : "count";
+  // A kit or a wand with no uses or charges written (Traveller's medikit, a tool) is not used up.
+  if (field === "uses" && row.uses === undefined && !stated("uses")) field = row.charges !== undefined || stated("charges") ? "charges" : "";
+  if (field === "charges" && row.charges === undefined && !stated("charges")) field = row.uses !== undefined || stated("uses") ? "uses" : "";
+  if (!field) return null;
   const max = field === "count" ? 0 : num(row[`max${field}`], stated(field) || num(row[field], 0));
   const left = field === "count" ? quantity(row) : num(row[field], max);
   let heal = null;

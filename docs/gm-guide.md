@@ -410,11 +410,13 @@ hand-wave any of it:
 - **Encumbrance and bag space.** Supplies shows the load as a meter (5E
   Strength x 15, the variant encumbrance as a separate switch; 3.5E's light,
   medium and heavy loads; 2E by Strength's weight allowance; Basic Fantasy's
-  and C&C's own numbers; Cairn's slots; Traveller STR + END kg) and each
+  and C&C's own numbers; Cairn's slots) and each
   container's capacity (a backpack, a bag of holding whose contents weigh
   nothing). Put an item away with **Put away…**. The level's penalty goes on
-  the creature as an effect (speed, check penalties, -1 to hit in 2E,
-  Exhaustion in 5E); switched off, nothing is penalised.
+  the creature as an effect: to-hit and save penalties (2E's -1 to hit, 5E
+  Exhaustion) count on the tracker's rolls; speed and check penalties are shown
+  on the sheet and the effect for you to apply. Switched off, nothing is
+  penalised (C&C keeps SiegeCore's own encumbrance setting).
 - **Packs.** An Explorer's Pack (or any pack whose text lists its contents)
   is **Unpacked** into its torches, rations, oil and the rest.
 - **Rest.** **Short rest** and **Long rest** on the sheet (5E: choose how many

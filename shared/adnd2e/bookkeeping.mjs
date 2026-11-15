@@ -2,8 +2,8 @@
 // AD&D 2E: what bookkeeping tracks (shared/bookkeeping). Encumbrance by Strength's weight
 // allowance (the abilities table): unencumbered to the allowance, then light, moderate, heavy
 // and severe each half an allowance more (movement 3/4, 1/2, 1/4, 1; -1, -2, -4 to hit from
-// moderate on), coins 50 to the pound. The PHB's encumbrance table is finer; this follows its
-// steps. Natural healing: 1 hit point a day of rest. Going without food or water is the DM's
+// moderate on), coins 50 to the pound. An approximation of the PHB's encumbrance table (its
+// steps, not its exact numbers). Natural healing: 1 hit point a day of rest. Going without food or water is the DM's
 // call in 2E: Kraken says so in chat.
 // Kept beside the manifest (the registry attaches it as manifest.bookkeeping).
 
