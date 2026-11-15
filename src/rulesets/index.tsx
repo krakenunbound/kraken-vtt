@@ -12,7 +12,6 @@ import { SheetBf, WizardBf } from "../characters/SheetBf";
 import { SheetMgt2 } from "../characters/SheetMgt2";
 import { WizardMgt2 } from "../characters/WizardMgt2";
 import { SheetAstra, WizardAstra } from "../characters/SheetAstra";
-import { WizardCairn } from "../characters/WizardCairn";
 import { SheetFate, WizardFate } from "../characters/SheetFate";
 import { SheetIronsworn, WizardIronsworn } from "../characters/SheetIronsworn";
 import { SheetForged, WizardForged } from "../characters/SheetForged";
@@ -20,7 +19,8 @@ import { ScorePanel } from "../combat/ScorePanel";
 import { FateStrip } from "../ui/FateStrip";
 import { Wizard2eSetting, Wizard35Setting } from "./WizardSettings";
 import { SheetRenderer } from "../core/sheet/SheetRenderer";
-import { CUSTOM_PARTS, FORMATS } from "./parts";
+import { WizardRenderer } from "../core/wizard/WizardRenderer";
+import { CUSTOM_PARTS, FORMATS, WIZARD_FUNCTIONS } from "./parts";
 
 // The React side of the manifests: every Ref a manifest names ("cairn.sheet")
 // and the component that is it (FG's windowclass by name; Foundry's
@@ -50,7 +50,6 @@ export const WIZARDS: Record<string, ComponentType<WizardProps>> = {
   "bfrpg.wizard": WizardBf,
   "mgt2.wizard": WizardMgt2,
   "astra.wizard": WizardAstra,
-  "cairn.wizard": WizardCairn,
   "fate.wizard": WizardFate,
   "ironsworn.wizard": WizardIronsworn,
   "forged.wizard": WizardForged,
@@ -80,7 +79,15 @@ export function sheetFor(record: TableRecord): ComponentType<SheetProps> {
 }
 // The character wizard of the campaign's game.
 export function wizardFor(ruleset: string): ComponentType<WizardProps> {
-  return WIZARDS[refOf(rulesetFor(ruleset).wizard)] ?? Wizard;
+  const spec = rulesetFor(ruleset).wizard;
+  if (spec && typeof spec !== "string") return ManifestWizard;
+  return WIZARDS[refOf(spec)] ?? Wizard;
+}
+// A wizard the manifest lays out (its wizard is a WizardSpec): the core's frame and parts.
+function ManifestWizard({ session, onDone }: WizardProps) {
+  const spec = rulesetFor(session.ruleset).wizard;
+  if (!spec || typeof spec === "string") return null;
+  return <WizardRenderer spec={spec} session={session} onDone={onDone} functions={WIZARD_FUNCTIONS} />;
 }
 // The campaign's game (C&C's manifest for a name with none).
 export const manifestOf = (ruleset: string) => rulesetFor(ruleset);

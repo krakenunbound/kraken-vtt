@@ -73,7 +73,7 @@ for (const name of CAMPAIGN_RULESETS) {
   const refs = [];
   if (typeof manifest.sheet === "string") refs.push(manifest.sheet);
   if (typeof manifest.wizard === "string") refs.push(manifest.wizard);
-  else if (manifest.wizard && typeof manifest.wizard.steps === "string") refs.push(manifest.wizard.steps);
+  else if (manifest.wizard) refs.push(...checkWizard(where, manifest.wizard));
   refs.push(...(manifest.strips ?? []));
   if (manifest.tracker?.replace) refs.push(manifest.tracker.replace);
   for (const record of Object.values(manifest.records ?? {})) {
@@ -139,6 +139,37 @@ function checkSheet(where, manifest) {
   }
   return refs;
 }
+// A manifest-laid-out wizard: its Refs (a roll's pick, a shop's bonus, the build), every button's data-action
+// once in the wizard, and every part's spec path written by one part only.
+function checkWizard(where, wizard) {
+  const refs = [wizard.finish?.build].filter(Boolean);
+  if (!wizard.hook) problem(where, "the wizard has no hook (data-wizard)");
+  if (!wizard.finish?.build) problem(where, "the wizard has no build Ref");
+  const actions = new Set();
+  const intos = new Set();
+  const once = (seen, value, what) => {
+    if (seen.has(value)) problem(where, `the wizard's ${what} ${value} is used twice`);
+    seen.add(value);
+  };
+  const walk = (parts) => {
+    for (const part of parts) {
+      if (part.kind === "row") {
+        walk(part.parts);
+        continue;
+      }
+      if (part.into) once(intos, part.into, "spec path");
+      for (const roll of [part.kind === "choose-record" ? part.roll : null, part.kind === "shop" ? part.gold : null, ["roll", "roll-table", "roll-stats", "record-tables"].includes(part.kind) ? part : null]) if (roll?.hook) once(actions, roll.hook, "data-action");
+      if (part.kind === "roll-stats" && part.swap) once(actions, part.swap.hook, "data-action");
+      if (part.kind === "shop" && part.gold.into) once(intos, part.gold.into, "spec path");
+      if (part.kind === "choose-record" && part.roll) refs.push(part.roll.pick);
+      if (part.kind === "shop" && part.gold.bonus) refs.push(part.gold.bonus);
+    }
+  };
+  for (const step of wizard.steps ?? []) walk(step.parts ?? []);
+  if (actions.has("wizard-finish")) problem(where, "a wizard part uses the frame's wizard-finish");
+  return refs;
+}
+
 // The manifest's edit glob as the host's regex: "*" = one id-n key.
 function globRegex(glob) {
   return new RegExp(`^${glob.replace(/\./g, "\\.").replace(/\*/g, "id-\\d+")}$`);

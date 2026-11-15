@@ -114,22 +114,52 @@ export interface SheetSpec {
   className?: string; // keeps a game's own look (decision 1)
 }
 
-export type StepKind = "choose-record" | "roll-stats" | "assign-points" | "roll-table" | "pick-list" | "shop" | "text" | "custom";
+// The character wizard (as built for Cairn, docs/core-ui-design.md 7.8): one page of numbered steps, each a list of
+// wizard parts that write into one spec. Every die is the host's (in chat, labelled with the wizard's `chat` word).
+// A part's `into` is its path in the spec; a roll button is disabled while a roll is out and once its `into` is set.
+export interface WizardRoll {
+  hook: Hook; // data-action
+  formula: string;
+  label: string; // the roll's label in chat; "{label}" = a row's label
+  button: string; // the button's words before the roll
+  done?: string; // its words after ("HP {value}")
+  title?: string;
+}
+export type WizardPart = (
+  // A record of a type, chosen in a select or rolled on a table (pick: the Ref that reads the table's result as one of them).
+  | { kind: "choose-record"; fromType: string; into: Path; aria: string; placeholder: string; resets?: Path[]; roll?: WizardRoll & { table: string; pick: Ref } }
+  // A text: chosen from a list on a chosen record, or typed.
+  | { kind: "text"; into: Path; label: string; aria: string; placeholder: string; options?: { record: Path; list: Path }; free?: { aria: string; placeholder: string } }
+  // The tables on a chosen record (a background's), each rolled on its own button; into: { [index]: roll }.
+  | { kind: "record-tables"; record: Path; path: Path; into: Path; formula: string; hook: string; label: string; done: string; button: string; className?: string; attr?: string }
+  // One roll: a number, or (table) the text of a roll table's row.
+  | ({ kind: "roll"; into: Path; table?: string; optional?: boolean } & WizardRoll)
+  // One roll per row, each on its own roll table ("{key}"), on one button; into: { [key]: text }.
+  | ({ kind: "roll-table"; into: Path; rows: { key: string; label: string }[]; table: string } & WizardRoll)
+  // Scores rolled in order on one button, shown as boxes; two may be swapped once.
+  | ({ kind: "roll-stats"; into: Path; stats: { key: string; label: string; short: string }[]; swap?: { hook: Hook; title: string; aria: [string, string]; start: [string, string]; button: string } } & WizardRoll)
+  | { kind: "check"; into: Path; label: string; title?: string }
+  // Money rolled, then bought with: the records of a type with a price; into: { [name]: count }.
+  | { kind: "shop"; into: Path; fromType: string; exclude?: { path: Path; values: string[] }; price: { path: Path; per: number; unit: string }; type?: Path; gold: WizardRoll & { into: Path; bonus?: Ref; bonusText?: string }; search: { aria: string; placeholder: string }; limit: number }
+  // A line of text: "{path}" from the spec, or from a chosen record (record); join: one line from a row each.
+  | { kind: "hint"; text?: string; record?: Path; join?: { path: Path; rows: { key: string; label: string }[]; text: string; sep: string }; attr?: string }
+  | { kind: "row"; parts: WizardPart[] }
+) & { when?: Cond };
 export interface WizardStep {
   id: string;
   title: string;
-  kind: StepKind;
-  help: string[];
-  fromType?: string;
-  into: Path;
-  roll?: { action: Hook; formula?: string };
-  count?: number | Path;
-  component?: Ref;
-  when?: Cond;
+  more?: { when: Cond; text: string }; // words added to the heading while `when` holds (", Omen")
+  parts: WizardPart[];
 }
 export interface WizardSpec {
-  hook: Hook;
-  steps: WizardStep[] | Ref;
+  hook: Hook; // data-wizard
+  title: string;
+  aria: string;
+  chat: string; // the rolls' chat prefix ("[CHARGEN] ")
+  tables?: { type: string; key: string }; // roll tables as records: the type, and the field that names a table
+  empty?: { type: string; text: string }; // shown instead while there is no record of this type
+  finish: { title: string; build: Ref }; // build: the Ref that turns the spec into build-character's
+  steps: WizardStep[];
 }
 
 export type Cond =
