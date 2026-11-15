@@ -19,6 +19,7 @@ import { TokenBadges } from "./TokenBadges";
 import { useExplored } from "./explored";
 import { TokenMenuExtras } from "./TokenMenuExtras";
 import { DarknessAreas } from "./DarknessAreas";
+import { MoveApprovals, MoveRequestGhosts, RegionShapes, TokenPaths } from "./MovePlay";
 // three.js only loads when a scene has weather.
 const Weather = lazy(() => import("./Weather").then((module) => ({ default: module.Weather })));
 
@@ -127,6 +128,9 @@ export type MapActions = {
   ruler?: (points: number[]) => void;
   // The GM's Reset explored (a player's name, "" everyone).
   resetExplored?: (player: string) => void;
+  // Undo a token's last move; the GM's approval of moves asked for while movement is locked.
+  undoMove?: (id: string) => void;
+  approveMoves?: (ids: string[] | "all", accept: boolean) => void;
   shareMap?: () => void;
   // The GM's player vision preview (the players' view of this map).
   visionPreview?: (on: boolean) => void;
@@ -405,6 +409,7 @@ function MapViewInner({
   const [box, setBox] = useState<{ pointerId: number; start: Point; at: Point } | null>(null);
   // Shift+wheel over a token turns it (FG's token orientation): set each render, read by the wheel handler.
   const turnRef = useRef<(tokenId: string, direction: number, fine: boolean) => boolean>(() => false);
+  const elevateRef = useRef<(tokenId: string, direction: number) => boolean>(() => false);
   const [menu, setMenu] = useState<Menu | null>(null);
   const [camera, setCamera] = useState<Camera>(() => views.get(sceneIn.id)?.camera ?? { x: 0, y: 0, scale: 0.1 });
   const cameraRef = useRef(camera);
@@ -547,6 +552,12 @@ function MapViewInner({
     if (!element) return;
     const onWheel = (event: WheelEvent) => {
       event.preventDefault();
+      // Alt+wheel over a token raises or lowers it (elevation), for the GM or its player.
+      if (event.altKey && !event.shiftKey) {
+        const over = (event.target as HTMLElement | null)?.closest?.("[data-token]")?.getAttribute("data-token");
+        const step = -Math.sign(event.deltaY || event.deltaX);
+        if (over && step && elevateRef.current(over, step)) return;
+      }
       if (event.shiftKey) {
         const over = (event.target as HTMLElement | null)?.closest?.("[data-token]")?.getAttribute("data-token");
         const turn = Math.sign(event.deltaY || event.deltaX);
@@ -583,6 +594,15 @@ function MapViewInner({
         setMenu(null);
         return;
       }
+      // Ctrl+Z (map editor closed): the selected token's last move back; a player's own token if none is selected.
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "z" && !editorOpen && actions.undoMove) {
+        const undoing = token && (gm || token.mine) ? token : gm ? null : mine.find((item) => item.undo);
+        if (undoing?.undo) {
+          event.preventDefault();
+          actions.undoMove(undoing.id);
+        }
+        return;
+      }
       if (!token || !(gm || token.mine)) return;
       const step = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[event.key];
       if (step) {
@@ -601,7 +621,7 @@ function MapViewInner({
     const view = viewport.current?.ownerDocument.defaultView ?? window;
     view.addEventListener("keydown", onKey);
     return () => view.removeEventListener("keydown", onKey);
-  }, [tokens, selected, picked, gm, size, actions]);
+  }, [tokens, selected, picked, gm, size, actions, editorOpen]);
 
   useEffect(() => {
     const onFocus = (event: Event) => {
@@ -690,6 +710,14 @@ function MapViewInner({
     return best?.id ?? null;
   }
 
+  // Alt+wheel over a token: up or down a grid unit (5 ft), for the GM or the token's player.
+  elevateRef.current = (tokenId, direction) => {
+    const token = tokens.find((item) => item.id === tokenId);
+    if (!token || !(gm || token.mine)) return false;
+    const unit = scene.grid.distance > 0 ? scene.grid.distance : 5;
+    actions.updateToken(token.id, { elevation: Math.round(((token.elevation ?? 0) + direction * unit) * 10) / 10 });
+    return true;
+  };
   // Shift+wheel over a token: a turn of 45 degrees (Ctrl or Alt: 15), for the GM or the token's player.
   turnRef.current = (tokenId, direction, fine) => {
     const token = tokens.find((item) => item.id === tokenId);
@@ -1000,6 +1028,12 @@ function MapViewInner({
     return entries.find((item) => item.tokenId === hit.id) ?? (hit.recordId ? entries.find((item) => item.recordId === hit.recordId) : undefined) ?? null;
   };
   const ghost = drag && dragTo && drag.moved ? (drag.snap ? snapCenter(scene, dragTo.x, dragTo.y, drag.squares) : dragTo) : null;
+  // A ruler from one token to another: how much higher the second stands.
+  const riseOf = (points: number[]) => {
+    const from = tokenAt({ x: points[0], y: points[1] });
+    const to = tokenAt({ x: points[points.length - 2], y: points[points.length - 1] });
+    return from && to && from !== to ? (to.elevation ?? 0) - (from.elevation ?? 0) : 0;
+  };
 
   // What a press on the map does now, shown by the pointer: the hand pans; a
   // crosshair draws, pings, aims an area or draws walls; the arrow picks.
@@ -1796,8 +1830,12 @@ function MapViewInner({
             })}
           </svg>
         ) : null}
+        {gm ? <RegionShapes regions={map.regions} width={frame.worldWidth} height={frame.worldHeight} scale={camera.scale} /> : null}
+        <TokenPaths tokens={tokens} scene={scene} diagonal={diagonal} units={units} terrain={map.terrain} width={frame.worldWidth} height={frame.worldHeight} scale={camera.scale} />
+        <MoveRequestGhosts requests={map.moveRequests} tokens={tokens} width={frame.worldWidth} height={frame.worldHeight} scale={camera.scale} />
         {tokens.map((token) => {
-          const canDrag = gm || (token.mine && !map.locked);
+          // Locked, a player still drags: the move goes to the GM to approve.
+          const canDrag = gm || token.mine;
           const span = token.squares * size;
           const isDragged = drag?.id === token.id && drag.moved;
           return (
@@ -1826,7 +1864,7 @@ function MapViewInner({
                   if (canDrag) setPicked((current) => (current.includes(token.id) ? current.filter((id) => id !== token.id) : [...current, token.id]));
                   return;
                 }
-                const group = picked.includes(token.id) ? tokens.filter((item) => item.id !== token.id && picked.includes(item.id) && (gm || (item.mine && !map.locked))) : [];
+                const group = picked.includes(token.id) ? tokens.filter((item) => item.id !== token.id && picked.includes(item.id) && (gm || item.mine)) : [];
                 if (!picked.includes(token.id)) setPicked([]);
                 if (event.button !== 0 || !canDrag) return;
                 const point = worldAt(event.clientX, event.clientY);
@@ -1900,8 +1938,8 @@ function MapViewInner({
             </span>
           </>
         ) : null}
-        {measure && measurePoints ? <RulerPath scene={scene} points={measurePoints} color={myColor} diagonal={diagonal} scale={camera.scale} units={units} width={frame.worldWidth} height={frame.worldHeight} terrain={map.terrain} /> : null}
-        <SharedRulers sceneId={scene.id} scene={scene} diagonal={diagonal} scale={camera.scale} units={units} width={frame.worldWidth} height={frame.worldHeight} terrain={map.terrain} />
+        {measure && measurePoints ? <RulerPath scene={scene} points={measurePoints} color={myColor} diagonal={diagonal} scale={camera.scale} units={units} width={frame.worldWidth} height={frame.worldHeight} terrain={map.terrain} riseOf={riseOf} /> : null}
+        <SharedRulers sceneId={scene.id} scene={scene} diagonal={diagonal} scale={camera.scale} units={units} width={frame.worldWidth} height={frame.worldHeight} terrain={map.terrain} riseOf={riseOf} />
         {(map.drawings?.length ?? 0) > 0 || stroke || resizing ? (
           <svg className="overlay drawings" width={frame.worldWidth} height={frame.worldHeight} viewBox={`0 0 ${frame.worldWidth} ${frame.worldHeight}`}>
             {(map.drawings ?? [])
@@ -2036,7 +2074,7 @@ function MapViewInner({
                     ft
                   </label>
                 ) : null}
-                <TokenMenuExtras token={token} gm={gm} recordSenses={String((records.find((record) => record.id === token.recordId)?.data as { senses?: unknown } | undefined)?.senses ?? "")} units={units} update={(patch) => actions.updateToken(token.id, patch)} />
+                <TokenMenuExtras token={token} gm={gm} recordSenses={String((records.find((record) => record.id === token.recordId)?.data as { senses?: unknown } | undefined)?.senses ?? "")} units={units} update={(patch) => actions.updateToken(token.id, patch)} undo={actions.undoMove ? () => actions.undoMove?.(token.id) : undefined} />
                 {gm ? (
                   <button
                     type="button"
@@ -2431,6 +2469,7 @@ function MapViewInner({
           summary={<SceneLegend walls={wallsShown} lights={scene.lights} tokens={scene.tokens} markers={scene.markers} regions={scene.regions} />}
         />
       ) : null}
+      {gm ? <MoveApprovals requests={map.moveRequests} approve={actions.approveMoves} /> : null}
       {notice ? (
         <p className="map-toast" role="status">
           {notice}

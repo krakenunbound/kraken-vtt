@@ -162,7 +162,7 @@ const sessions = new Map();
 // A project for the editor from the image's master: Map Studio's own when it
 // saved one (its walls, lights and weather the master's now), else made new.
 function projectFor({ view, pictureId, size, name }) {
-  const { scene, walls, lights, fx, studio } = view;
+  const { scene, walls, lights, fx, studio, regions = [] } = view;
   const origin = originOf(scene);
   const grid = Number(scene.grid?.size) || 70;
   const kept = studio?.project && typeof studio.project === "object" ? JSON.parse(JSON.stringify(studio.project)) : null;
@@ -186,6 +186,8 @@ function projectFor({ view, pictureId, size, name }) {
   // The master is the truth for what Kraken plays with.
   project.walls = studioWalls(walls, origin);
   project.lights = studioLights(lights, origin);
+  // The table's regions are the truth too (the GM may have changed one there).
+  project.regions = studioRegions(regions, origin);
   // Map Studio's own weather is richer (brush masks, FG's every setting): kept
   // while Kraken's FX are what it saved; else Kraken's FX as Map Studio's.
   if (!kept || JSON.stringify(krakenFx(kept.effects ?? [], origin).map(fxKey)) !== JSON.stringify(fx.map(fxKey))) project.effects = studioEffects(fx, origin);
@@ -193,10 +195,37 @@ function projectFor({ view, pictureId, size, name }) {
 }
 const fxKey = (layer) => `${layer.type}|${layer.mask?.use ? layer.mask.polygons?.length : 0}`;
 
-// Saved from the editor: the master's walls, lights and weather, and the project.
+// Saved from the editor: the master's walls, lights, weather and regions, and the project.
 function masterFrom(project, scene) {
   const origin = originOf(scene);
-  return { walls: krakenWalls(project.walls, origin), lights: krakenLights(project.lights, origin), fx: krakenFx(project.effects, origin) };
+  return { walls: krakenWalls(project.walls, origin), lights: krakenLights(project.lights, origin), fx: krakenFx(project.effects, origin), regions: krakenRegions(project.regions, origin) };
+}
+
+// --- regions ------------------------------------------------------------------
+// Map Studio's Traps & regions (trap, pit, difficult terrain, teleport), played at
+// the table (mapState.cjs): its points from the map's corner to the scene's.
+const shiftPoints = (points, dx, dy) => (points ?? []).map((value, index) => round(Number(value) + (index % 2 === 0 ? dx : dy)));
+function krakenRegions(regions, origin) {
+  return (Array.isArray(regions) ? regions : []).map((region) => ({
+    id: String(region.id ?? "").slice(0, 64),
+    kind: region.kind,
+    name: region.name,
+    note: region.note ?? "",
+    points: shiftPoints(region.points, origin.x, origin.y),
+    ...(region.kind === "difficult" ? { cost: region.cost } : {}),
+    ...(region.kind === "teleport" ? { to: region.to && typeof region.to === "object" ? { ...region.to, x: Number(region.to.x) + origin.x, y: Number(region.to.y) + origin.y } : region.to ?? "" } : {}),
+  }));
+}
+function studioRegions(regions, origin) {
+  return (regions ?? []).map((region) => ({
+    id: String(region.id).slice(0, 64),
+    kind: region.kind,
+    name: region.name,
+    note: region.note ?? "",
+    points: shiftPoints(region.points, -origin.x, -origin.y),
+    ...(region.kind === "difficult" ? { cost: region.cost } : {}),
+    ...(region.kind === "teleport" ? { to: region.to && typeof region.to === "object" ? { ...region.to, x: region.to.x - origin.x, y: region.to.y - origin.y } : region.to ?? "" } : {}),
+  }));
 }
 
 // Whether the project paints anything beyond the image's own picture (so its
@@ -214,4 +243,4 @@ function openSession(info) {
 }
 const session = (token) => sessions.get(String(token ?? "")) ?? null;
 
-module.exports = { openSession, session, projectFor, masterFrom, paintsArt, studioWalls, krakenWalls, studioLights, krakenLights, studioEffects, krakenFx, originOf };
+module.exports = { openSession, session, projectFor, masterFrom, paintsArt, studioWalls, krakenWalls, studioLights, krakenLights, studioEffects, krakenFx, krakenRegions, studioRegions, originOf };

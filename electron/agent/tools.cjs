@@ -1030,10 +1030,17 @@ const TOOLS = [
   {
     name: "kraken_token_move",
     description:
-      "Move a token to a square (col/row, its top-left square), or several together (a group dragged as one, as Foundry's multi-select): ids and dcol/drow, the squares across and down each moves. asPlayer: move them the way their owner would, stopped by walls and closed doors when line of sight is on; the answer says whether a wall stopped one.",
-    inputSchema: object({ id: string("Token id"), col: number("Square across"), row: number("Square down"), ids: { type: "array", items: { type: "string" }, description: "Several tokens moved together" }, dcol: number("Squares across each moves (with ids)"), drow: number("Squares down each moves (with ids)"), asPlayer: { type: "boolean" } }),
+      "Move a token to a square (col/row, its top-left square), or several together (a group dragged as one, as Foundry's multi-select): ids and dcol/drow, the squares across and down each moves. asPlayer: move them the way their owner would, stopped by walls and closed doors when line of sight is on, and springing traps (a player's token stops on a trap's first square, the GM is told its name and note, movement locks) and teleports; the answer says whether a wall stopped one. undo: true takes the token's (id) last move back, as Ctrl+Z or the token menu's Undo move (the GM any token's; a player only their own last move); path: true reads its moves (this turn's path on the combat tracker: it starts again when its turn begins). While movement is locked, players' moves wait as requests (FG's TokenMoveManager, the GM's approval strip on the map): requests: true lists them; approve: a token id, or all, with accept true (move it as its player would) or false (cancel).",
+    inputSchema: object({ id: string("Token id"), col: number("Square across"), row: number("Square down"), ids: { type: "array", items: { type: "string" }, description: "Several tokens moved together" }, dcol: number("Squares across each moves (with ids)"), drow: number("Squares down each moves (with ids)"), asPlayer: { type: "boolean" }, undo: { type: "boolean", description: "Undo the token's last move" }, path: { type: "boolean", description: "Read the token's moves" }, requests: { type: "boolean", description: "List the moves waiting for the GM" }, approve: string("A token id, or all: its waiting move"), accept: { type: "boolean", description: "With approve: true moves it, false cancels" } }),
     run(args, ctx) {
       const { map, seat } = needTable(ctx);
+      if (args.requests) return out(map.moveRequests());
+      if (args.approve) return out(map.approveMoves(args.approve === "all" ? "all" : [args.approve], args.accept !== false, seat));
+      if (args.undo) {
+        const done = map.undoMove(String(args.id ?? ""), seat);
+        return out({ id: done.token.id, ...map.squareOf(done.token), undone: true, left: done.undone - 1 });
+      }
+      if (args.path) return out({ id: args.id, moves: map.path(String(args.id ?? "")).map((move) => ({ from: move.from, to: move.to, by: move.by })), ...map.measure(map.path(String(args.id ?? "")).flatMap((move, index) => (index === 0 ? [move.from.x, move.from.y, move.to.x, move.to.y] : [move.to.x, move.to.y]))) });
       if (Array.isArray(args.ids)) {
         const step = map.squareSize();
         const moves = args.ids.map((id) => {
@@ -1048,8 +1055,9 @@ const TOOLS = [
       const token = map.tokens().find((item) => item.id === args.id);
       if (!token) throw new Error(`No token ${args.id}.`);
       const to = map.squareCenter(args.col, args.row, token.squares);
-      const moved = map.move(args.id, to, seat, { collide: args.asPlayer ? map.sightOn() : false });
-      return out({ id: moved.token.id, ...map.squareOf(moved.token), blocked: moved.blocked });
+      const token2 = map.tokens().find((item) => item.id === args.id);
+      const moved = map.move(args.id, to, args.asPlayer && token2?.owner ? { role: "player", name: token2.owner } : seat, { collide: args.asPlayer ? map.sightOn() : false });
+      return out({ id: moved.token.id, ...map.squareOf(moved.token), blocked: moved.blocked, ...(moved.requested ? { requested: true } : {}), ...(moved.sprang ? { sprang: moved.sprang.name } : {}) });
     },
   },
   {
@@ -1856,6 +1864,41 @@ const TOOLS = [
     run(args, ctx) {
       const at = needTable(ctx).ping(Number(args.col), Number(args.row));
       return out({ pinged: { col: args.col, row: args.row }, x: at.x, y: at.y });
+    },
+  },
+  {
+    name: "kraken_region",
+    description:
+      "Regions of the map (Map Studio's Traps & regions, a bundle's Foundry regions), played at the table: trap and pit (a player's token that steps in stops on its first square, the GM is told its name and note in a line only the GM sees, and movement locks until the GM unlocks it: kraken_line_of_sight lockMovement false), difficult (moving through costs more: cost 2 makes each square count double on the ruler), teleport (whoever steps in goes to its destination: to = another region's name, or {x, y} in scene pixels, or {sceneId, x, y} on a scene the table has opened). Players are never sent traps, pits, teleports or notes. action list (default); add (kind, name, note, points [x, y, ...] in scene pixels or rect {col, row, cols, rows} in squares, cost, to); update (id and any of those, on false to switch it off); remove (id).",
+    inputSchema: object({
+      action: { type: "string", enum: ["list", "add", "update", "remove"] },
+      id: string("Region id"),
+      kind: { type: "string", enum: ["trap", "pit", "difficult", "teleport"] },
+      name: string("Its name"),
+      note: string("The GM's note: what happens"),
+      points: { type: "array", items: { type: "number" }, description: "Corners x, y, x, y ... in scene pixels" },
+      rect: { type: "object", properties: { col: { type: "number" }, row: { type: "number" }, cols: { type: "number" }, rows: { type: "number" } }, description: "A box of squares" },
+      cost: number("Difficult terrain: what a square costs (1 to 5, default 2)"),
+      to: { description: "Teleport: a region's name, {x, y}, or {sceneId, x, y}" },
+      on: { type: "boolean" },
+    }),
+    run(args, ctx) {
+      const { map, seat } = needTable(ctx);
+      const { action = "list", id, rect, ...rest } = args;
+      if (rect) {
+        const a = map.squareCenter(Number(rect.col), Number(rect.row), 1);
+        const half = map.squareSize() / 2;
+        const x0 = a.x - half;
+        const y0 = a.y - half;
+        const x1 = x0 + Number(rect.cols || 1) * map.squareSize();
+        const y1 = y0 + Number(rect.rows || 1) * map.squareSize();
+        rest.points = [x0, y0, x1, y0, x1, y1, x0, y1];
+      }
+      if (action === "list") return out(map.regions());
+      if (action === "add") return out(map.addRegion(rest, seat));
+      if (action === "update") return out(map.updateRegion(String(id ?? ""), rest, seat));
+      map.removeRegion(String(id ?? ""), seat);
+      return out({ removed: id });
     },
   },
   {

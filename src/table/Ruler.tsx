@@ -1,5 +1,5 @@
 import { useEffect, useRef, useSyncExternalStore } from "react";
-import { diagonalRule, pathDistance, pointInPolygon, snapCenter } from "../../shared/map/geometry.mjs";
+import { diagonalRule, gridDistance3, pathDistance, pointInPolygon, snapCenter } from "../../shared/map/geometry.mjs";
 
 // The ruler (FG's right-drag pointer, Foundry's ruler): from where it starts,
 // through each waypoint, to the pointer; each leg's length and the whole by
@@ -130,9 +130,13 @@ export function useRulerKeys(viewport: { current: HTMLElement | null }, measurin
 
 // One ruler drawn on the map: its line, a dot at each waypoint, each leg's
 // length at its end and the whole by the pointer.
-export function RulerPath({ scene, points, color, diagonal, scale, units, width, height, name, terrain }: { scene: GridScene; points: number[]; color: string; diagonal: unknown; scale: number; units: string; width: number; height: number; name?: string; terrain?: TerrainArea[] }) {
+// riseOf: from one token to another, how much higher the second stands (elevation): the climb counts too.
+export function RulerPath({ scene, points, color, diagonal, scale, units, width, height, name, terrain, riseOf }: { scene: GridScene; points: number[]; color: string; diagonal: unknown; scale: number; units: string; width: number; height: number; name?: string; terrain?: TerrainArea[]; riseOf?: (points: number[]) => number }) {
   if (points.length < 4) return null;
-  const { legs, total } = pathDistance(scene, points, diagonalRule(diagonal), terrainCostAt(terrain));
+  const measured = pathDistance(scene, points, diagonalRule(diagonal), terrainCostAt(terrain));
+  const rise = points.length === 4 && riseOf ? riseOf(points) : 0;
+  const legs = rise ? [gridDistance3(scene, { x: points[0], y: points[1] }, { x: points[2], y: points[3] }, diagonalRule(diagonal), rise)] : measured.legs;
+  const total = rise ? legs[0] : measured.total;
   const count = points.length / 2;
   const end = { x: points[points.length - 2], y: points[points.length - 1] };
   return (
@@ -153,6 +157,7 @@ export function RulerPath({ scene, points, color, diagonal, scale, units, width,
         : null}
       <span className="measure-label ruler-total" style={{ left: end.x, top: end.y, fontSize: 15 / scale, borderColor: color }}>
         {legs.length > 1 ? `${legs[legs.length - 1]} · ${total} ${units}` : `${total} ${units}`}
+        {rise ? ` (${rise > 0 ? "up" : "down"} ${Math.abs(rise)})` : ""}
         {name ? <small>{name}</small> : null}
       </span>
     </>

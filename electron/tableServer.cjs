@@ -162,9 +162,23 @@ function sanitizeScene(input) {
       threshold: num(wall.threshold, 0) > 0 ? num(wall.threshold, 0) : null,
     });
   }
+  // A bundle's regions (traps, difficult terrain, teleports): the host keeps them (mapState.cjs), never a player.
+  const regions = (Array.isArray(input.regions) ? input.regions : [])
+    .filter((region) => region && typeof region === "object")
+    .slice(0, 300)
+    .map((region, index) => ({
+      id: text(region.id, `region-${index}`).slice(0, 60),
+      name: text(region.name, "Region").slice(0, 120),
+      trap: Boolean(region.trap),
+      kind: ["trap", "pit", "difficult", "teleport"].includes(region.kind) ? region.kind : null,
+      note: typeof region.note === "string" ? region.note.slice(0, 4000) : "",
+      cost: num(region.cost, 2),
+      polygons: (Array.isArray(region.polygons) ? region.polygons : []).filter((points) => Array.isArray(points) && points.length >= 6 && points.length <= 2000).slice(0, 20).map((points) => points.map((value) => num(value, 0))),
+    }));
   return {
     id: text(input.id, "scene").slice(0, 80),
     name: text(input.name, "Scene").slice(0, 80),
+    regions,
     width,
     height,
     padding: Math.min(2, Math.max(0, num(input.padding, 0))),
@@ -605,6 +619,9 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     activeRecord: () => combat.entries().find((item) => item.id === combat.active())?.recordId ?? null,
     colorOf: (name) => tokenColorOf(name),
     tableOptions: () => options,
+    onRegion: (event) => regionSprang(event, false),
+    // On the combat tracker (by its token, or a character's record): its path this turn is drawn.
+    onTracker: (token) => combat.entries().some((entry) => entry.tokenId === token.id || (token.recordId && !entry.tokenId && entry.recordId === token.recordId)),
   });
 
   // The GM's image window (FG's: any image opened from the Images list, a book
@@ -627,6 +644,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     activeRecord: () => null,
     colorOf: (name) => tokenColorOf(name),
     tableOptions: () => options,
+    onRegion: (event) => regionSprang(event, true),
   });
   // FG's play test: the GM sees the image as a player would, through a test
   // token's eyes ("@test" owns it), and moves it as a player moves.
@@ -699,7 +717,29 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     },
     say: (line, from, secret) => agentHandle.say(line, from, secret),
   });
+  // A token stepped into a trap, a pit or a teleport (mapState.cjs): the GM is
+  // told, by name and note, in a line only the GM sees, and on the map; a trap
+  // locks movement until the GM lets the table go on.
+  function regionSprang({ region, token, seat }, prepOnly) {
+    const what = region.kind === "teleport" ? "stepped into the teleport" : `sprang the ${region.kind}`;
+    const line = `${token.name} ${what} "${region.name}"${region.note ? `: ${region.note}` : ""}${region.kind === "trap" || region.kind === "pit" ? " (movement is locked: unlock it to go on)" : ""}`;
+    if (!prepOnly) agentHandle.say(line, "Map", true);
+    for (const [ws, client] of clients) if (client.role === "dm") send(ws, { type: "notice", text: line.slice(0, 300) });
+    if (seat.role !== "dm" && region.kind !== "teleport") for (const [ws, client] of clients) if (client.name === seat.name && client.role !== "dm") send(ws, { type: "notice", text: "Something happens. The GM has stopped the table." });
+  }
+  // A creature's turn begins on the tracker: its token's path (this turn's moves) starts again.
+  let turnOf = null;
+  function turnStarted() {
+    const now = combat.active?.() ?? null;
+    if (now === turnOf) return;
+    turnOf = now;
+    const entry = combat.entries().find((item) => item.id === now);
+    if (!entry) return;
+    const token = map.tokens().find((item) => item.id === entry.tokenId) ?? (entry.recordId ? map.tokens().find((item) => item.recordId === entry.recordId) : null);
+    if (token) map.clearPath(token.id);
+  }
   function sendCombat() {
+    turnStarted();
     if (combatPending) return;
     combatPending = true;
     setImmediate(() => {
@@ -1416,7 +1456,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     if (!scene) return null;
     // Not shared: a player is sent no map.
     if (client.role !== "dm" && sceneHiddenNow()) return null;
-    const { walls, tokens, lights, ...shown } = scene;
+    const { walls, tokens, lights, regions: _regions, ...shown } = scene;
     return {
       ...shown,
       image: image ? `/table/image?token=${client.assetToken}&v=${imageVersion}` : null,
@@ -2286,7 +2326,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
 
       // The map: tokens, doors, line of sight and pings (mapState.cjs decides
       // who may do what).
-      if (["token-place", "token-move", "token-remove", "token-update", "door", "sight", "lock", "scene-settings", "light-place", "light-update", "light-remove", "draw", "draw-update", "draw-erase", "draw-clear", "death-marker", "wall", "map-undo", "mask", "label", "map-group", "fx", "tile", "explored-reset"].includes(msg.type)) {
+      if (["token-place", "token-move", "token-remove", "token-update", "door", "sight", "lock", "scene-settings", "light-place", "light-update", "light-remove", "draw", "draw-update", "draw-erase", "draw-clear", "death-marker", "wall", "map-undo", "mask", "label", "map-group", "fx", "tile", "explored-reset", "token-undo", "move-approve"].includes(msg.type)) {
         const working = mapOf(client);
         // Testing: the GM's moves of the test token are a player's (walls, locks).
         const testToken = (id) => testing && client.role === "dm" && working.tokens().some((token) => token.id === id && token.owner === TEST_SEAT.name);
@@ -2297,12 +2337,22 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
           } else if (msg.type === "token-move" && Array.isArray(msg.moves)) {
             // A group dragged together.
             const moved = working.moveMany(msg.moves.slice(0, 400), seat, { snap: msg.snap !== false });
-            if (moved.some((item) => item.blocked)) send(ws, { type: "notice", text: "A wall is in the way." });
+            if (moved.some((item) => item.requested)) send(ws, { type: "notice", text: "The GM has locked token movement: your move waits for the GM." });
+            else if (moved.some((item) => item.blocked)) send(ws, { type: "notice", text: "A wall is in the way." });
           } else if (msg.type === "token-move") {
             const to = { x: num(msg.x, NaN), y: num(msg.y, NaN) };
             if (!Number.isFinite(to.x) || !Number.isFinite(to.y) || Math.abs(to.x) > 1e7 || Math.abs(to.y) > 1e7) throw new Error("Where to?");
-            const { blocked } = working.move(String(msg.id ?? ""), to, testToken(String(msg.id ?? "")) ? TEST_SEAT : seat, { snap: msg.snap !== false });
-            if (blocked) send(ws, { type: "notice", text: "A wall is in the way." });
+            const { blocked, requested } = working.move(String(msg.id ?? ""), to, testToken(String(msg.id ?? "")) ? TEST_SEAT : seat, { snap: msg.snap !== false });
+            // Locked: FG's TokenMoveManager, the move waits for the GM's yes.
+            if (requested) send(ws, { type: "notice", text: "The GM has locked token movement: your move waits for the GM." });
+            else if (blocked) send(ws, { type: "notice", text: "A wall is in the way." });
+          } else if (msg.type === "token-undo") {
+            // Undo a move: a player their own last move, the GM any.
+            working.undoMove(String(msg.id ?? ""), testToken(String(msg.id ?? "")) ? TEST_SEAT : seat);
+          } else if (msg.type === "move-approve") {
+            // The GM's approval strip: a player's locked move (or all of them) accepted or cancelled.
+            if (client.role !== "dm") throw new Error("Only the GM approves moves.");
+            working.approveMoves(msg.all ? "all" : Array.isArray(msg.ids) ? msg.ids.map(String).slice(0, 400) : [String(msg.id ?? "")], msg.accept !== false, seat);
           } else if (msg.type === "token-remove") {
             working.remove(String(msg.id ?? ""), seat);
           } else if (msg.type === "token-update") {

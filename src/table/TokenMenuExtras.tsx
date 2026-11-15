@@ -33,7 +33,7 @@ function CommitField({ label, value, placeholder, onCommit, width = "11rem" }: {
 
 // The token menu's own rows for the map's newer options: the name players see
 // until it is known (FG's unidentified name), the token's senses, its elevation.
-export function TokenMenuExtras({ token, gm, recordSenses, units, update }: { token: MapToken; gm: boolean; recordSenses: string; units: string; update: (patch: Patch) => void }) {
+export function TokenMenuExtras({ token, gm, recordSenses, units, update, undo }: { token: MapToken; gm: boolean; recordSenses: string; units: string; update: (patch: Patch) => void; undo?: () => void }) {
   const line = token.senses || recordSenses;
   const senses = parseSenses(line);
   const known = Object.entries(senses).filter(([, feet]) => feet > 0);
@@ -46,6 +46,11 @@ export function TokenMenuExtras({ token, gm, recordSenses, units, update }: { to
         <p className="token-menu-note" data-senses={known.map(([key, feet]) => `${key}:${feet}`).join(",")}>
           {known.map(([key, feet]) => `${names[key]} ${feet} ${units}`).join(" · ")}
         </p>
+      ) : null}
+      {token.undo && undo ? (
+        <button type="button" role="menuitem" data-action="undo-move" title="Its last move back (Ctrl+Z)" onClick={undo}>
+          Undo move
+        </button>
       ) : null}
       {gm || token.mine ? (
         <label className="token-menu-row">

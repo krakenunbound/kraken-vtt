@@ -207,6 +207,94 @@ try {
   await tool("kraken_token_update", { id: annToken.id, senses: "" });
   console.log("ok senses");
 
+  // 5. Undo a move, and this turn's path. Ann walks two squares, then takes one back; Bob cannot.
+  await tool("kraken_scene_settings", { darkness: 0 });
+  const at = () => server.agent.map.tokens().find((t) => t.id === annToken.id);
+  await tool("kraken_token_move", { id: annToken.id, col: 0, row: 4 });
+  const start = { x: at().x, y: at().y };
+  ann.send({ type: "token-move", id: annToken.id, x: 75, y: 225 });
+  await latest(ann, "map", (m) => m.tokens.some((t) => t.id === annToken.id && t.x === 75 && t.y === 225), "Ann's first step");
+  ann.send({ type: "token-move", id: annToken.id, x: 125, y: 225 });
+  const walked = await latest(ann, "map", (m) => m.tokens.some((t) => t.id === annToken.id && t.x === 125 && t.undo >= 3), "Ann's second step, moves to undo");
+  const undoable = walked.tokens.find((t) => t.id === annToken.id).undo;
+  assert(!walked.tokens.find((t) => t.id === annToken.id).path, "off the tracker: no path drawn");
+  assert(!server.agent.viewFor("Bob").tokens.find((t) => t.id === annToken.id)?.undo, "Bob is not sent her moves");
+  bob.send({ type: "token-undo", id: annToken.id });
+  await latest(bob, "error", (m) => /not your token/.test(m.reason), "Bob cannot undo her move");
+  ann.send({ type: "token-undo", id: annToken.id });
+  await latest(ann, "map", (m) => m.tokens.some((t) => t.id === annToken.id && t.x === 75 && t.undo === undoable - 1), "Ann's last step undone");
+  const path = await tool("kraken_token_move", { id: annToken.id, path: true });
+  assert(path.moves.length === undoable - 1 && path.moves.at(-1).to.x === 75, `her path: ${JSON.stringify(path)}`);
+  // On the tracker her path is drawn; when her turn begins it starts again.
+  const entry = (await tool("kraken_combat", { action: "add", recordId: annRecord.id })).entries?.find?.((item) => item.recordId === annRecord.id) ?? server.agent.combat.entries().find((item) => item.recordId === annRecord.id);
+  assert(entry, "Ann's character on the tracker");
+  const onTracker = server.agent.viewFor("Ann").tokens.find((t) => t.id === annToken.id);
+  assert(onTracker.path?.length === undoable * 2 && onTracker.path.at(-2) === 75, `her path on the tracker: ${JSON.stringify(onTracker.path)}`);
+  await tool("kraken_combat", { action: "set-turn", id: entry.id });
+  for (let tries = 0; tries < 50 && server.agent.map.path(annToken.id).length; tries += 1) await wait(20);
+  assert(server.agent.map.path(annToken.id).length === 0, "her turn begins: the path starts again");
+  await tool("kraken_combat", { action: "end" });
+  // The GM undoes anyone's move.
+  await tool("kraken_token_move", { id: gob.id, col: 0, row: 0 });
+  const back = await tool("kraken_token_move", { id: gob.id, undo: true });
+  assert(back.col === 2 && back.row === 1, `the GM's undo: ${JSON.stringify(back)}`);
+  console.log("ok undo and path");
+
+  // 6. Locked: a player's move waits for the GM, who accepts or cancels it (FG's TokenMoveManager).
+  await tool("kraken_line_of_sight", { lockMovement: true });
+  const before = { x: at().x, y: at().y };
+  ann.send({ type: "token-move", id: annToken.id, x: 175, y: 275 });
+  await latest(ann, "notice", (m) => /waits for the GM/.test(m.text), "Ann is told her move waits");
+  const asked = await latest(dm, "map", (m) => m.moveRequests?.length === 1, "the GM sees the move asked for");
+  assert(asked.moveRequests[0].by === "Ann" && asked.moveRequests[0].to.x === 175 && at().x === before.x, `the request: ${JSON.stringify(asked.moveRequests)}`);
+  assert(server.agent.viewFor("Ann").moveRequests.length === 1 && server.agent.viewFor("Bob").moveRequests.length === 0, "Ann sees her own request, Bob none");
+  dm.send({ type: "move-approve", ids: [annToken.id], accept: true });
+  await latest(ann, "map", (m) => m.tokens.some((t) => t.id === annToken.id && t.x === 175 && t.y === 275), "accepted: she moves");
+  ann.send({ type: "token-move", id: annToken.id, x: 25, y: 275 });
+  await latest(dm, "map", (m) => m.moveRequests?.length === 1, "another request");
+  const cancelled = await tool("kraken_token_move", { approve: "all", accept: false });
+  assert(cancelled.length === 1 && cancelled[0].accepted === false && at().x === 175, `cancelled: ${JSON.stringify(cancelled)}`);
+  await tool("kraken_line_of_sight", { lockMovement: false });
+  console.log("ok approvals");
+
+  // 7. Elevation: Ann flies her own token up; everyone gets it.
+  ann.send({ type: "token-update", id: annToken.id, patch: { elevation: 15 } });
+  await latest(bob, "map", (m) => m.tokens.some((t) => t.id === annToken.id && t.elevation === 15), "Bob sees her 15 ft up");
+  ann.send({ type: "token-update", id: annToken.id, patch: { elevation: 0 } });
+  console.log("ok elevation");
+
+  // 8. Regions: a trap stops a player's token on its first square, tells the GM alone and locks movement.
+  const trap = await tool("kraken_region", { action: "add", kind: "trap", name: "Pit of spikes", note: "DC 12 Dex or 2d6", rect: { col: 2, row: 5, cols: 1, rows: 1 } });
+  await tool("kraken_token_move", { id: annToken.id, col: 0, row: 5 });
+  ann.send({ type: "token-move", id: annToken.id, x: 225, y: 275 });
+  await latest(dm, "notice", (m) => /Pit of spikes/.test(m.text), "the GM is told");
+  const stopped = at();
+  assert(stopped.x === 125 && stopped.y === 275, `she stops on the trap: ${stopped.x},${stopped.y}`);
+  assert(server.agent.map.lockedNow(), "the trap locks movement");
+  const secret = server.agent.chatLog(5).find((line) => /Pit of spikes/.test(line.text));
+  assert(secret?.secret === true && /DC 12/.test(secret.text), "a line only the GM sees, with its note");
+  assert(!ann.inbox.some((m) => JSON.stringify(m).includes("DC 12")) && !("regions" in server.agent.viewFor("Ann")), "Ann never gets the trap or its note");
+  await tool("kraken_line_of_sight", { lockMovement: false });
+  await tool("kraken_region", { action: "update", id: trap.id, on: false });
+  // Difficult terrain: the ruler counts it; players get its shape for measuring.
+  await tool("kraken_region", { action: "add", kind: "difficult", cost: 2, rect: { col: 6, row: 0, cols: 2, rows: 1 } });
+  measured = await tool("kraken_ruler", { squares: [{ col: 5, row: 0 }, { col: 8, row: 0 }] });
+  assert(measured.total === 25, `two squares of difficult terrain: ${JSON.stringify(measured)}`);
+  assert(server.agent.viewFor("Ann").terrain.length === 1, "players get the terrain to measure by");
+  // A teleport sends her to the region it names.
+  await tool("kraken_region", { action: "add", kind: "teleport", name: "Gate", to: "Far side", rect: { col: 3, row: 5, cols: 1, rows: 1 } });
+  await tool("kraken_region", { action: "add", kind: "trap", name: "Far side", rect: { col: 8, row: 5, cols: 1, rows: 1 } });
+  await tool("kraken_region", { action: "update", id: server.agent.map.regions().find((r) => r.name === "Far side").id, on: false });
+  ann.send({ type: "token-move", id: annToken.id, x: 175, y: 275 });
+  await latest(ann, "map", (m) => m.tokens.some((t) => t.id === annToken.id && t.x === 425 && t.y === 275), "the teleport sends her to the far side");
+  // Map Studio's regions come to the table with its walls (krakenBridge masterFrom).
+  const bridge = require("../electron/studio/krakenBridge.cjs");
+  const master = bridge.masterFrom({ walls: [], lights: [], effects: [], regions: [{ id: "s1", kind: "pit", name: "Well", note: "10 ft down", points: [0, 0, 50, 0, 50, 50, 0, 50] }] }, server.agent.map.scene());
+  const counts = server.agent.map.fromStudio({ ...master, project: null });
+  assert(counts.regions === 1 && server.agent.map.regions()[0].kind === "pit", `Map Studio's regions: ${JSON.stringify(counts)}`);
+  assert(server.persisted().map.regions.crypt.length === 1, "regions are saved");
+  console.log("ok regions");
+
   console.log("MAP_PLAY_OK");
 } finally {
   for (const ws of sockets) ws.close();

@@ -542,6 +542,29 @@ select {
 .token-sensed .token-disc { filter: grayscale(1) brightness(0.35); outline: 2px dashed #9fb8d8; outline-offset: 2px; opacity: 0.75; }
 .overlay.darkness-areas { z-index: 2; pointer-events: none; }
 .token-menu-note { margin: 0.2em 0; font-size: 0.85em; color: #bcd; }
+/* This turn's path, a move waiting for the GM, the GM's regions, the approval strip (MovePlay.tsx). */
+.measure-label.path-total { color: #fff; border: 1px solid; opacity: 0.85; transform: translate(-50%, 40%); }
+.overlay.token-paths, .overlay.move-requests { z-index: 4; pointer-events: none; }
+.overlay.regions { z-index: 2; pointer-events: none; }
+.move-approvals {
+  position: absolute;
+  left: 50%;
+  bottom: 3.2rem;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.8rem;
+  max-width: min(90%, 52rem);
+  padding: 0.4rem 0.7rem;
+  border: 1px solid #ffd36b;
+  border-radius: 8px;
+  background: rgba(16, 18, 24, 0.92);
+  color: #f4f1ea;
+}
+.move-approval { display: inline-flex; align-items: center; gap: 0.25rem; }
+.move-approval small { color: #aab; }
 .token-elevation {
   position: absolute;
   top: 2%;

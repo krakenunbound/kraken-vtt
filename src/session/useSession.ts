@@ -40,7 +40,14 @@ export type MapToken = {
   senses?: string;
   // Felt by tremorsense alone (a player's view): its shape, not a sight of it.
   sensed?: boolean;
+  // The GM's and its owner's: moves that can be undone, and this turn's path ([x, y, ...]) on the tracker.
+  undo?: number;
+  path?: number[];
 };
+// A player's move waiting for the GM while movement is locked (FG's TokenMoveManager).
+export type MoveRequest = { id: string; name: string; by: string; from: { x: number; y: number }; to: { x: number; y: number }; at: number };
+// A region of the map, the GM's (Map Studio's Traps & regions, a bundle's Foundry regions).
+export type MapRegion = { id: string; kind: "trap" | "pit" | "difficult" | "teleport"; name: string; note: string; points: number[]; on: boolean; cost?: number; to?: string | { x: number; y: number; sceneId?: string } };
 // A light shining now, with its own line of sight (pixels).
 export type MapLight = { id: string; x: number; y: number; brightPx: number; dimPx: number; color: string; polygon: number[] | null; animation?: string; speed?: number };
 // A player's token seeing in the dark (darkvision), pixels.
@@ -97,6 +104,9 @@ export type TableMap = {
   tiles?: MapTile[];
   // Difficult terrain (Map Studio's regions): what measuring through it costs.
   terrain?: import("../table/Ruler").TerrainArea[];
+  // Moves waiting for the GM (a player: their own), and the GM's regions.
+  moveRequests?: MoveRequest[];
+  regions?: MapRegion[];
 };
 // An image layer (FG's image layers, Foundry's tiles): url is where this seat loads it.
 export type MapTile = { id: string; name: string; src: string; url: string; x: number; y: number; width: number; height: number; rotation: number; alpha: number; flipX: boolean; flipY: boolean; level: "below" | "above"; hidden: boolean; locked?: boolean; group: string };
@@ -1173,6 +1183,9 @@ export function useSession() {
   const ruler = useCallback((points: number[]) => send({ type: "ruler", points }), [send]);
   // The GM: forget what a player (or everyone: "") has explored of this scene.
   const resetExplored = useCallback((player: string) => send({ type: "explored-reset", player }), [send]);
+  // Undo a token's last move (Ctrl+Z); the GM's yes or no to moves asked for while movement is locked.
+  const undoMove = useCallback((id: string) => send({ type: "token-undo", id }), [send]);
+  const approveMoves = useCallback((ids: string[] | "all", accept: boolean) => send({ type: "move-approve", ...(ids === "all" ? { all: true } : { ids }), accept }), [send]);
   // The GM: the map opens on every player's screen.
   const shareMap = useCallback(() => send({ type: "map-share" }), [send]);
 
@@ -1232,6 +1245,8 @@ export function useSession() {
     pings,
     ruler,
     resetExplored,
+    undoMove,
+    approveMoves,
     mapShared,
     notice,
     chat,
