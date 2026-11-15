@@ -1,0 +1,53 @@
+/* The buff bar, its popovers, the Effects window and the chat's damage cards. */
+.buff-bar { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; min-height: 26px; }
+.buff-bar.compact { gap: 3px; min-height: 20px; }
+.buff { position: relative; display: inline-grid; place-items: center; width: 28px; height: 28px; padding: 0; border-radius: 6px; border: 1px solid var(--line, #3a3f48); background: #15181d; color: #d8dde6; cursor: pointer; }
+.buff-bar.compact .buff { width: 22px; height: 22px; border-radius: 5px; }
+.buff.tone-good { color: #8fe08a; border-color: #3d6b3a; box-shadow: inset 0 0 6px rgba(143, 224, 138, 0.25); }
+.buff.tone-bad { color: #ff8a7a; border-color: #7a3a33; box-shadow: inset 0 0 6px rgba(255, 138, 122, 0.25); }
+.buff.paused { opacity: 0.5; }
+.buff.add { font-weight: 800; font-size: 1rem; color: var(--muted, #9aa3b2); border-style: dashed; }
+.buff:focus-visible { outline: 2px solid var(--brass, #d2a15a); outline-offset: 1px; }
+.buff-rounds { position: absolute; right: -3px; bottom: -4px; min-width: 14px; padding: 0 2px; border-radius: 6px; background: #000; color: #fff; font-size: 0.62rem; line-height: 1.2; font-weight: 700; }
+.effect-pop { margin: 0; padding: 0; border: 1px solid var(--line, #3a3f48); border-radius: 8px; background: #1b1f26; color: var(--text, #e8e3d8); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5); max-width: 280px; position-area: block-end span-inline-end; position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline; inset: auto; }
+.effect-pop-body { display: grid; gap: 6px; padding: 10px; }
+.effect-pop-body p { margin: 0; font-size: 0.82rem; }
+.effect-pop-actions { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.effect-pop-actions input { width: 4.5rem; }
+.effect-pick { max-height: 320px; overflow: auto; }
+.effect-pick button { display: flex; gap: 6px; align-items: center; justify-content: flex-start; text-align: left; }
+@media (prefers-reduced-motion: no-preference) {
+  .effect-pop { opacity: 0; translate: 0 -4px; transition: opacity, translate, display, overlay; transition-duration: 0.12s; transition-behavior: allow-discrete; }
+  .effect-pop:popover-open { opacity: 1; translate: 0 0; transition-duration: 0.1s; }
+  @starting-style { .effect-pop:popover-open { opacity: 0; translate: 0 -4px; } }
+}
+.effects-window { display: grid; gap: 10px; padding: 10px; }
+.effects-head { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.effects-head input[type="search"] { flex: 1 1 160px; }
+.effects-group h3 { margin: 4px 0; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted, #9aa3b2); }
+.effects-group ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 4px; }
+.effects-item { display: flex; align-items: center; gap: 2px; border: 1px solid var(--line, #3a3f48); border-radius: 6px; background: #15181d; cursor: grab; }
+.effects-item.kind-condition { border-left: 3px solid #c05a4e; }
+.effects-item.kind-buff { border-left: 3px solid #5aa152; }
+.effects-item.kind-debuff { border-left: 3px solid #9b4fc0; }
+.effects-item.kind-light { border-left: 3px solid #e8a33c; }
+.effects-apply { flex: 1; display: flex; align-items: center; gap: 6px; background: none; border: 0; color: inherit; padding: 5px 6px; text-align: left; cursor: inherit; }
+.effects-apply small { margin-left: auto; color: var(--muted, #9aa3b2); font-size: 0.72rem; }
+.effects-edit { display: grid; gap: 6px; padding: 8px; border: 1px solid var(--brass-dim, #7a5d32); border-radius: 8px; }
+.effects-edit label { display: grid; gap: 2px; font-size: 0.82rem; }
+.effects-edit-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; }
+.effects-foot { font-size: 0.75rem; }
+/* The damage card under a damage or healing roll (Foundry's). */
+.damage-card { list-style: none; margin: 4px 0 0; padding: 4px 6px; display: grid; gap: 3px; border-radius: 6px; background: rgba(0, 0, 0, 0.25); font-size: 0.8rem; }
+.damage-card.waiting { outline: 1px dashed #d2a15a; }
+.damage-card li { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.damage-card-name { font-weight: 700; }
+.damage-card-save { padding: 0 5px; border-radius: 4px; background: #2a2f38; font-size: 0.72rem; }
+.damage-card-save.half { background: #2f4a5f; }
+.damage-card-save.failed { background: #5a2a26; }
+.damage-card-note { color: #9fc6ff; font-size: 0.72rem; }
+.damage-card-taken { margin-left: auto; color: #ff8a7a; }
+.damage-card-taken.heal { color: #8fe08a; }
+.damage-card-buttons { display: inline-flex; gap: 2px; }
+.damage-card-buttons button { min-width: 24px; padding: 0 4px; font-size: 0.75rem; line-height: 1.5; border-radius: 4px; }
+.damage-card-buttons button.on { background: var(--brass, #d2a15a); color: #1a1a1a; }

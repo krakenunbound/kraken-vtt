@@ -5,6 +5,8 @@ import { Picture } from "../characters/ArtPicker";
 import type { CombatEntry, Session } from "../session/useSession";
 import { Icon } from "../ui/icons";
 import { FateLine } from "./FateLine";
+import { BuffBar } from "../effects/BuffBar";
+import { carriesCreatureDrop, dropOnCreature } from "../effects/drops";
 import { TrackerButtons, wordsOf, textOfWords } from "../core/tracker/actions";
 import { ProgressBoxes } from "../characters/SheetIronsworn";
 import { RANK_NAMES, RANKS } from "../../shared/ironsworn/rules.mjs";
@@ -75,9 +77,17 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
       }}
       // A damage or healing roll from chat dropped here applies to this creature (FG's drop on the tracker).
       onDragOver={(event) => {
+        if (carriesCreatureDrop([...event.dataTransfer.types])) event.preventDefault();
         if (gm && [...event.dataTransfer.types].some((type) => type === "application/x-kraken-damage" || type === "application/x-kraken-turn")) event.preventDefault();
       }}
       onDrop={(event) => {
+        // An effect from the Effects list, a chat roll (by its type: damage, healing, an attack), a sheet's action.
+        if (carriesCreatureDrop([...event.dataTransfer.types])) {
+          event.preventDefault();
+          event.stopPropagation();
+          dropOnCreature(event.dataTransfer, { entryId: entry.id }, { ct: session.ct, effects: session.effects, entryOfRecord: (recordId) => session.combat.entries.find((item) => item.recordId === recordId)?.id }, gm);
+          return;
+        }
         // The turn arrow dropped here: their turn now.
         const turn = event.dataTransfer.getData("application/x-kraken-turn");
         if (gm && turn) {
@@ -160,6 +170,7 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
             {entry.hidden ? " · hidden" : ""}
           </small>
         </span>
+        <BuffBar session={session} at={{ entryId: entry.id }} compact />
         {entry.ac !== undefined && !entry.fate && !entry.iron ? (
           <span className="ct-stat" title="Armour class">
             <Icon name="shield" size={14} />

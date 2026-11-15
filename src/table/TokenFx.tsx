@@ -280,6 +280,15 @@ const BADGE: Record<string, ReactNode> = {
 
 type Badge = { icon: string; title: string; tone?: "good" | "bad" | "neutral"; rounds?: number };
 
+/** One effect's glyph (the badges' own), for the buff bar and the Effects list. */
+export function EffectGlyph({ icon, size = 18 }: { icon: string; size?: number }): JSX.Element {
+  return (
+    <svg className="effect-glyph" viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      {BADGE[icon] ?? BADGE.generic}
+    </svg>
+  );
+}
+
 /** Small condition chips around the lower rim: up to max icons, then "+n". */
 export function TokenBadges(props: { badges: Badge[]; span: number; max?: number }): JSX.Element | null {
   const { badges, span, max = 5 } = props;

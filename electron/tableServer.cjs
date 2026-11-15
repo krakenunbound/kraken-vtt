@@ -2586,6 +2586,18 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
               // Basic Fantasy: a monster's (or retainer's) 2d6 at or under its score (bonus: the GM's adjustment).
               // Cairn: a WIL save to stand, for one creature (id) or a side (faction).
               return combat.morale(String(msg.id ?? msg.faction ?? "foe"), Number(msg.bonus) || 0, seat);
+            case "apply-card": {
+              // A damage card's button (Foundry's): x0, x1/2, x1, x2 or heal, for a creature on it or the GM's chosen one.
+              const target = msg.targetId ? String(msg.targetId) : combat.entries().find((entry) => entry.tokenId === msg.tokenId || (msg.tokenId && entry.recordId && map.tokens().find((token) => token.id === msg.tokenId)?.recordId === entry.recordId))?.id;
+              if (!target) throw new Error("That creature is not on the combat tracker.");
+              return combat.applyCard(String(msg.card ?? ""), target, msg.mult === "heal" ? "heal" : Number(msg.mult), seat);
+            }
+            case "apply-roll": {
+              // A chat roll dropped on a creature (FG): its damage (by type), healing or attack against its AC.
+              const target = msg.targetId ? String(msg.targetId) : combat.entries().find((entry) => entry.tokenId === msg.tokenId || (msg.tokenId && entry.recordId && map.tokens().find((token) => token.id === msg.tokenId)?.recordId === entry.recordId))?.id;
+              if (!target) throw new Error("That creature is not on the combat tracker.");
+              return combat.dropRoll(target, msg.roll ?? {}, seat);
+            }
             case "clear-targets":
               // All of them, or only the friends' or the foes' (the map toolbar's two clears).
               return combat.clearTargets(targeterOf(msg.id, client, seat), seat, ["friend", "foe"].includes(msg.faction) ? msg.faction : null);
@@ -2737,6 +2749,19 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     activeBookId,
     requireActiveBook,
     seat: { role: "dm", name: "Agent" },
+    // A damage card changed (combat.cjs landOn, applyCard): its chat line keeps it and
+    // every seat that sees the line is told; players do not see hidden creatures on it.
+    cardUpdate(id, view) {
+      const line = [...chat].reverse().find((item) => item.roll?.card === id);
+      if (!line) return;
+      line.roll.apply = view;
+      for (const [ws, client] of clients) {
+        if (!seesLine(client, line)) continue;
+        const shown = client.role === "dm" ? view : { ...view, targets: view.targets.filter((row) => !row.hidden) };
+        send(ws, { type: "card", card: id, apply: shown });
+      }
+      onChange("table");
+    },
     // The Effects list: put on, take off, change, put out and relight, the GM's own effects.
     get effects() {
       return effects();

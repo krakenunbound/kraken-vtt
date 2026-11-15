@@ -4,6 +4,7 @@ import { Icon } from "../../ui/icons";
 import { hasLink, linkFrom, slotDrag } from "../../ui/QuickSlots";
 import { ArtPicker, Picture } from "../../characters/ArtPicker";
 import { Field } from "../fields/Field";
+import { BuffBar } from "../../effects/BuffBar";
 
 // The core's character sheet frame (FG CoreRPG's charsheet_base and its
 // overview header): the article with data-character / data-ruleset, the
@@ -114,6 +115,7 @@ export function SheetFrame({
           <div className="cc-identity">
             {name ?? <NameField record={record} session={session} editable={editable} />}
             <div className="cc-boxes">{boxes}</div>
+            <BuffBar session={session} at={{ recordId: record.id }} />
           </div>
           {picking ? (
             <ArtPicker

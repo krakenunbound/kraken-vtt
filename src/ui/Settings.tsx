@@ -107,6 +107,19 @@ export function SettingsWindow({ session }: { session: Session }) {
               <option value="turn">At the end of the creature's turn</option>
             </select>
           </SettingRow>
+          <SettingRow label="Token effects" hint="Conditions and effects on tokens (Zzz, flames, frost, a buff's glow): animated, icons only, or not drawn. Everyone's screen; motion stops anyway where the computer asks for reduced motion.">
+            <select value={session.options.tokenEffects ?? "full"} onChange={(event) => session.setTableOptions({ tokenEffects: event.target.value as "full" })} aria-label="Token effects" data-setting="token-effects">
+              <option value="full">Animated</option>
+              <option value="icons">Icons only</option>
+              <option value="off">Off</option>
+            </select>
+          </SettingRow>
+          <SettingRow label="Apply damage" hint="Damage and healing land as the roll does (FG), or wait on the chat card's buttons (Foundry). Either way the card's buttons change what a creature took.">
+            <select value={session.options.autoApply === false ? "card" : "auto"} onChange={(event) => session.setTableOptions({ autoApply: event.target.value === "auto" })} aria-label="Apply damage" data-setting="auto-apply">
+              <option value="auto">At once (FG)</option>
+              <option value="card">From the chat card (Foundry)</option>
+            </select>
+          </SettingRow>
         </SettingsSection>
       ) : null}
       {/* The rows the game adds (its manifest's settings), only in that game. */}

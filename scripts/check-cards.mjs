@@ -1,117 +1,116 @@
-// Ability cards (shared/cards/cards.mjs and kraken_cards), with Kraken's own
-// Descending Darkness, fixed dice: a character's spells and weapons as cards;
-// a spell card spent when no slot of its level or higher is left (a cantrip
-// never); a cast uses the card's slot; a concentration spell is held (one at a
-// time) and ends; a long rest stands every card up; a card used on a target
-// makes it the only target; the GM's Cards window and the player's toggle.
+// Chat damage cards (docs/targeting-actions-design.md 4.4, 4.5): a damage roll
+// keeps a card of the creatures it landed on, each with what it took after its
+// save and its resistance; the GM's buttons (x0, x1/2, x1, x2, heal) set what a
+// creature takes now and only the difference lands; with autoApply off nothing
+// lands until a button is pressed (Foundry's way); a chat roll dropped on a
+// creature applies there: damage by its type, healing, an attack against its AC.
 import "./loopback.mjs";
-import path from "node:path";
 import { createRequire } from "node:module";
-import { fileURLToPath } from "node:url";
-import { cardsFor, freeSlot, restChanges, weaponKind } from "../shared/cards/cards.mjs";
+import { WebSocket } from "ws";
+import { SPELLS } from "../games/srd-5e/spells.mjs";
 
 const require = createRequire(import.meta.url);
 const { createTableServer } = require("../electron/tableServer.cjs");
 const { callTool } = require("../electron/agent/tools.cjs");
-const { importModule } = require("../electron/importers/fgModule.cjs");
-const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 
+let passed = 0;
 function assert(condition, message) {
   if (!condition) throw new Error(message);
+  passed += 1;
 }
 
-// The model alone.
-assert(freeSlot({ l1: { max: 2, used: 2 }, l2: { max: 1, used: 0 } }, 1) === 2, "a 1st-level spell with no 1st-level slot uses a 2nd");
-assert(freeSlot({ l1: { max: 2, used: 2 } }, 1) === null && freeSlot({}, 0) === 0, "no slot: null; a cantrip: 0");
-const model = cardsFor(
-  { spells: ["Kindle", "Mystery"], slots: { l1: { max: 1, used: 1 } }, attacks: { a1: { name: "Staff", bonus: 2, damage: "1d6", type: "melee" } } },
-  [{ id: "s1", name: "Kindle", data: { level: 0, school: "Evocation", description: "<p>Light.</p>" } }],
-);
-assert(model.length === 3 && model[0].id === "spell:kindle" && !model[0].spent && model[1].known === false && model[2].kind === "weapon" && /\+2 to hit, 1d6/.test(model[2].text), `cards from a sheet: ${JSON.stringify(model)}`);
-assert(model[2].weaponKind === "staff" && weaponKind("Light Crossbow") === "crossbow" && weaponKind("Laser Pistol") === "firearm" && weaponKind("Odd Thing", "ranged") === "bow", "a weapon card's picture by its kind");
-assert(weaponKind("Blowgun", "ranged") === "sling" && weaponKind("Moonstone Dagger") === "blade" && weaponKind("Elbow Spike") !== "bow" && weaponKind("Longbow") === "bow" && weaponKind("Sling") === "sling" && weaponKind("Shotgun") === "firearm", `whole words: ${["Blowgun", "Moonstone Dagger", "Elbow Spike", "Longbow", "Sling", "Shotgun"].map((name) => weaponKind(name)).join(", ")}`);
-assert(restChanges({ slots: { l1: { max: 2, used: 2 }, l2: { max: 1, used: 0 } }, concentration: "Blessing" }).length === 2, "a rest: the used level and concentration");
-
-const server = createTableServer({ ruleset: "Descending Darkness" });
-await server.listen({ port: 0, password: "" });
-const ctx = { table: () => server };
-const tool = async (name, args = {}) => {
-  const result = await callTool(name, args, ctx);
-  if (result.isError) throw new Error(`${name}: ${result.content[0].text}`);
-  return JSON.parse(result.content[0].text);
-};
-const refused = async (name, args) => {
-  try {
-    const result = await callTool(name, args, ctx);
-    return result.isError ? result.content[0].text : null;
-  } catch (error) {
-    return error instanceof Error ? error.message : String(error);
-  }
-};
-const agent = server.agent;
-const force = (...values) => agent.dice.force(values);
-const done = [];
+const server = createTableServer({ ruleset: "D&D 5E" });
+const sockets = [];
 try {
-  for (const name of ["Descending Darkness Player's Handbook", "Descending Darkness Bestiary"]) importModule(agent.records, agent.seat, path.join(ROOT, "games", "modules", name));
-  const wizard = await tool("kraken_build_character", { owner: "Ann", spec: { name: "Ilse", species: "Human", class: "Wizard", level: 1, scores: { strength: 8, dexterity: 14, constitution: 13, intelligence: 17, wisdom: 12, charisma: 10 }, spells: ["Spark Lash", "Burning Fan", "Ember Ray"], gear: [["Dagger", 1]] } });
-  let cards = (await tool("kraken_cards", { action: "list", id: "Ilse" })).cards;
-  const byId = (id) => cards.find((card) => card.id === id);
-  assert(byId("spell:spark-lash")?.level === 0 && !byId("spell:spark-lash").spent, `a cantrip card, never spent: ${JSON.stringify(byId("spell:spark-lash"))}`);
-  assert(byId("spell:burning-fan")?.level === 1 && byId("spell:burning-fan").slot === 1 && byId("spell:burning-fan").pool.max === 2 && byId("spell:burning-fan").school === "evocation", `a 1st-level card with its slots: ${JSON.stringify(byId("spell:burning-fan"))}`);
-  assert(byId("spell:ember-ray")?.spent === true, "a 2nd-level spell at 1st level: no slot, spent");
-  assert(cards.some((card) => card.kind === "weapon" && card.name === "Dagger"), "the dagger is a weapon card");
-  done.push("cards from the sheet");
+  const info = await server.listen({ port: 0, password: "" });
+  const agent = server.agent;
+  const ctx = { table: () => server };
+  const tool = async (name, args) => JSON.parse((await callTool(name, args, ctx)).content[0].text);
+  const ct = (args) => tool("kraken_combat", args);
+  await agent.combat.ready;
+  for (const name of ["Fireball", "Cure Wounds"]) {
+    const { __category, ...data } = SPELLS.find((item) => item.name === name);
+    agent.records.create({ type: "spell", name, data }, agent.seat);
+  }
+  const abilities = Object.fromEntries(["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"].map((stat) => [stat, { score: 14, bonus: 2, save: 2 }]));
+  const hagar = agent.records.create({ type: "character", name: "Hagar", owner: "", visibility: "all", data: { level: 5, hp: { total: 40, wounds: 0 }, ac: { total: 12 }, abilities, spellcasting: { stat: "intelligence", dc: 14, attack: 6 }, slots: { l1: { max: 4, used: 0 }, l3: { max: 3, used: 0 } } } }, agent.seat);
+  const salamander = agent.records.create({ type: "npc", name: "Fire Imp", data: { hp: 60, ac: 14, damageresistances: "fire", abilities: { dexterity: { score: 10, bonus: 0 } } } }, agent.seat);
+  const ogre = agent.records.create({ type: "npc", name: "Ogre", data: { hp: 80, ac: 11, abilities: { dexterity: { score: 8, bonus: -1 } } } }, agent.seat);
+  await ct({ action: "add", recordId: hagar.id });
+  await ct({ action: "add", recordId: salamander.id });
+  await ct({ action: "add", recordId: ogre.id });
+  let view = await ct({ action: "view" });
+  const id = (name) => view.entries.find((entry) => entry.name === name).id;
+  const wounds = (name) => agent.combat.vitals(agent.combat.entries().find((entry) => entry.name === name)).wounds;
+  const dm = await new Promise((resolve, reject) => {
+    const ws = new WebSocket(`ws://127.0.0.1:${info.port}`);
+    const inbox = [];
+    ws.on("message", (data) => inbox.push(JSON.parse(data.toString())));
+    ws.on("error", reject);
+    ws.on("open", () => ws.send(JSON.stringify({ type: "join", name: "DM", password: "", hostToken: info.hostToken })));
+    setTimeout(() => resolve({ ws, inbox }), 300);
+  });
+  sockets.push(dm.ws);
 
-  // Two casts spend the two slots; then the card is spent and refused.
-  const sentinel = agent.records.list({ type: "npc" }).find((record) => record.name === "Bone Sentinel");
-  await tool("kraken_combat", { action: "add", recordId: wizard.id });
-  await tool("kraken_combat", { action: "add", recordId: sentinel.id });
-  const entries = (await tool("kraken_combat", { action: "view" })).entries;
-  const foe = entries.find((entry) => entry.name !== "Ilse");
-  force(1, 1, 1, 1, 1, 1, 1, 1);
-  await tool("kraken_cards", { action: "use", id: wizard.id, card: "spell:burning-fan", targetId: foe.id });
-  const ilseEntry = (await tool("kraken_combat", { action: "view" })).entries.find((entry) => entry.name === "Ilse");
-  assert(ilseEntry.targets.length === 1 && ilseEntry.targets[0] === foe.id, `used on a target: it is the only target: ${JSON.stringify(ilseEntry.targets)}`);
-  force(1, 1, 1, 1, 1, 1, 1, 1);
-  await tool("kraken_cards", { action: "use", id: wizard.id, card: "spell:burning-fan" });
-  cards = (await tool("kraken_cards", { action: "list", id: wizard.id })).cards;
-  assert(byId("spell:burning-fan").spent && agent.records.get(wizard.id).data.slots.l1.used === 2, `two casts: both slots used, the card spent: ${JSON.stringify(byId("spell:burning-fan"))}`);
-  const no = await refused("kraken_cards", { action: "use", id: wizard.id, card: "spell:burning-fan" });
-  assert(no && /no slot of level 1/.test(no), `a spent card cannot be used: ${no}`);
-  force(15, 3);
-  const struck = await tool("kraken_cards", { action: "use", id: wizard.id, card: "spell:spark-lash" });
-  assert(struck.used === "spell:spark-lash", "a cantrip card is still used with no slots left");
-  done.push("casting spends the card's slot; spent cards refuse");
+  // Fireball at both: one roll (forced 8 x 4 = 32), the imp resists fire; both fail their saves.
+  for (const name of ["Fire Imp", "Ogre"]) await ct({ action: "target", id: id("Hagar"), targetId: id(name) });
+  agent.dice.force([1, 4, 4, 4, 4, 4, 4, 4, 4, 1]);
+  await ct({ action: "cast", recordId: hagar.id, power: "Fireball" });
+  const line = [...agent.chatLog(30)].reverse().find((item) => item.roll?.card && /Fireball/.test(item.roll.label));
+  assert(line?.roll.apply?.targets.length === 2, `the damage roll keeps a card of its two creatures: ${JSON.stringify(line?.roll.apply)}`);
+  const card = line.roll.apply;
+  const imp = card.targets.find((row) => row.name === "Fire Imp");
+  const ogreRow = card.targets.find((row) => row.name === "Ogre");
+  assert(card.total === 32 && ogreRow.taken === 32 && imp.taken === 16 && /RESISTED fire/.test(imp.note), `32 on the ogre, 16 on the resistant imp: ${JSON.stringify(card)}`);
+  assert(wounds("Ogre") === 32 && wounds("Fire Imp") === 16, "the wounds are on the tracker");
+  await new Promise((resolve) => setTimeout(resolve, 300));
+  const sent = [...dm.inbox].reverse().find((m) => m.type === "card" && m.card === line.roll.card);
+  if (!sent) console.log([...new Set(dm.inbox.map((m) => m.type))], dm.inbox.find((m) => m.type === "ok")?.role, dm.inbox.length);
+  assert(sent && sent.apply.targets.length === 2, "the GM's screen is told");
 
-  // A long rest stands every card up.
-  await tool("kraken_cards", { action: "rest", id: wizard.id });
-  cards = (await tool("kraken_cards", { action: "list", id: wizard.id })).cards;
-  assert(!byId("spell:burning-fan").spent && agent.records.get(wizard.id).data.slots.l1.used === 0, "a long rest: slots back, the card stands up");
-  done.push("a long rest");
+  // The buttons: the ogre made its save after all (x1/2): 16 comes back; x2 on the imp: resisted, 32.
+  let after = (await ct({ action: "apply-card", card: line.roll.card, targetId: id("Ogre"), mult: 0.5 })).card;
+  assert(wounds("Ogre") === 16 && after.targets.find((row) => row.name === "Ogre").taken === 16, `half: 16 given back: ${wounds("Ogre")}`);
+  after = (await ct({ action: "apply-card", card: line.roll.card, targetId: id("Fire Imp"), mult: 2 })).card;
+  assert(wounds("Fire Imp") === 32, `double, then resisted: 32: ${wounds("Fire Imp")}`);
+  after = (await ct({ action: "apply-card", card: line.roll.card, targetId: id("Fire Imp"), mult: 0 })).card;
+  assert(wounds("Fire Imp") === 0, "x0 takes it all back");
+  // Hagar was not on it: the GM applies it to him too (he joins the card).
+  after = (await ct({ action: "apply-card", card: line.roll.card, targetId: id("Hagar"), mult: 1 })).card;
+  assert(wounds("Hagar") === 32 && after.targets.length === 3, "a creature not on the card joins it");
+  after = (await ct({ action: "apply-card", card: line.roll.card, targetId: id("Hagar"), mult: "heal" })).card;
+  assert(wounds("Hagar") === 0, `heal: the damage given back and healed (capped at his wounds): ${wounds("Hagar")}`);
 
-  // A weapon card: attack, then damage.
-  const dagger = cards.find((card) => card.kind === "weapon");
-  force(15);
-  const attacked = await tool("kraken_cards", { action: "use", id: wizard.id, card: dagger.id });
-  force(2);
-  const hurt = await tool("kraken_cards", { action: "damage", id: wizard.id, card: dagger.id });
-  assert(Array.isArray(attacked.result) && hurt.damage && hurt.damage.total >= 0, `a weapon card attacks and deals damage: ${JSON.stringify({ attacked, hurt })}`);
-  done.push("weapon cards");
+  // Foundry's way: with autoApply off, a roll waits for its buttons.
+  await tool("kraken_table_options", { autoApply: false });
+  await ct({ action: "clear-targets", id: id("Hagar") });
+  await ct({ action: "target", id: id("Hagar"), targetId: id("Ogre") });
+  const before = wounds("Ogre");
+  agent.dice.force([1, 3, 3, 3, 3, 3, 3, 3, 3]);
+  await ct({ action: "cast", recordId: hagar.id, power: "Fireball" });
+  assert(wounds("Ogre") === before, "nothing lands yet");
+  const waiting = [...agent.chatLog(30)].reverse().find((item) => item.roll?.card && /Fireball/.test(item.roll.label));
+  assert(waiting.roll.apply.auto === false && waiting.roll.apply.targets[0].mult === null, "the card waits");
+  await ct({ action: "apply-card", card: waiting.roll.card, targetId: id("Ogre"), mult: 1 });
+  assert(wounds("Ogre") === before + 24, `x1 lands 24: ${wounds("Ogre") - before}`);
+  await tool("kraken_table_options", { autoApply: true });
 
-  // Concentration: Blessing is held; a second concentration spell replaces it; it ends.
-  const cleric = await tool("kraken_build_character", { owner: "Bob", spec: { name: "Tomas", species: "Human", class: "Cleric", level: 1, scores: { strength: 12, dexterity: 10, constitution: 14, intelligence: 10, wisdom: 17, charisma: 13 }, spells: ["Blessing", "Ward of Faith"] } });
-  await tool("kraken_cards", { action: "use", id: cleric.id, card: "spell:blessing" });
-  cards = (await tool("kraken_cards", { action: "list", id: cleric.id })).cards;
-  assert(byId("spell:blessing").concentration && byId("spell:blessing").concentrating, `Blessing is held: ${JSON.stringify(byId("spell:blessing"))}`);
-  await tool("kraken_cards", { action: "use", id: cleric.id, card: "spell:ward-of-faith" });
-  cards = (await tool("kraken_cards", { action: "list", id: cleric.id })).cards;
-  assert(!byId("spell:blessing").concentrating && byId("spell:ward-of-faith").concentrating, "a second concentration spell ends the first");
-  await tool("kraken_cards", { action: "end-concentration", id: cleric.id });
-  cards = (await tool("kraken_cards", { action: "list", id: cleric.id })).cards;
-  assert(!cards.some((card) => card.concentrating), "concentration ends");
-  done.push("concentration");
+  // A chat roll dropped on a creature: 10 fire on the imp (resisted: 5), 7 healing on the ogre, an attack of 13 vs the ogre's AC 11.
+  const impBefore = wounds("Fire Imp");
+  await ct({ action: "apply-roll", targetId: id("Fire Imp"), rollDrop: { kind: "damage", total: 10, type: "fire", name: "Torch" } });
+  assert(wounds("Fire Imp") === impBefore + 5, "dropped fire damage is resisted");
+  const ogreBefore = wounds("Ogre");
+  await ct({ action: "apply-roll", targetId: id("Ogre"), rollDrop: { kind: "heal", total: 7, name: "Potion" } });
+  assert(wounds("Ogre") === ogreBefore - 7, "dropped healing heals");
+  const attack = (await ct({ action: "apply-roll", targetId: id("Ogre"), rollDrop: { kind: "attack", total: 13, natural: 9, name: "Longsword", by: "Hagar" } })).applied;
+  assert(attack.hit && attack.ac === 11, "a dropped attack is compared with the AC");
+  assert(agent.combat.entries().find((entry) => entry.name === "Hagar").hitOn?.[id("Ogre")] === "hit", "the attacker's next damage knows it hit");
+
+  console.log(`check-cards: ${passed} checks passed`);
+} catch (error) {
+  console.error(error);
+  process.exitCode = 1;
 } finally {
-  await server.close?.();
+  for (const ws of sockets) ws.close();
+  await server.stop();
 }
-console.log(`ok cards: ${done.join("; ")}`);
-process.exit(0);

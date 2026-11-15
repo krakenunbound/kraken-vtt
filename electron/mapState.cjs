@@ -752,6 +752,8 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
     const list = effectsOn(token).filter((effect) => seat.role === "dm" || !effect.gmOnly).filter((effect) => own || effectsLib.conditionsOf(effect.label).length > 0 || effectsLib.lightOf(effect.label));
     const tracked = combatFor(token.id);
     const out = effectsLib.visualOf(list.map((effect) => (own ? effect : { label: effect.label, paused: effect.paused, icon: effect.icon })), { concentrating: own ? tracked?.concentrating : undefined });
+    // Its owner and the GM get the effects themselves (the buff bar: remove, put out, relight).
+    if (own && list.length) out.list = list.map(({ id, label, duration, total, paused, icon, source, gmOnly }) => ({ id, label, duration, ...(total ? { total } : {}), ...(paused ? { paused } : {}), ...(icon ? { icon } : {}), ...(source ? { source } : {}), ...(gmOnly ? { gmOnly } : {}) }));
     return out.fx.length || out.badges.length ? out : null;
   }
 

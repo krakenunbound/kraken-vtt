@@ -16,6 +16,9 @@ import { SceneGraphics, SceneLegend, type OverlayToken } from "./SceneOverlay";
 import { SceneSettings, type SceneSettingsPatch } from "./SceneSettings";
 import { coveredSquares, outline, place as placeArea, toPixels } from "../../shared/actions/areas.mjs";
 import { TokenBadges, TokenFx, tokenFxClasses, type FxKey } from "./TokenFx";
+import { BuffBar } from "../effects/BuffBar";
+import { carriesCreatureDrop, dropOnCreature } from "../effects/drops";
+import type { Session } from "../session/useSession";
 // three.js only loads when a scene has weather.
 const Weather = lazy(() => import("./Weather").then((module) => ({ default: module.Weather })));
 
@@ -195,6 +198,8 @@ export type MapActions = {
   removeDeathMarker?: (id: string) => void;
   clearDeathMarkers?: () => void;
   ct: (action: string, payload?: Record<string, unknown>) => void;
+  // The Effects list's actions (useSession.effects): apply, remove, update, snuff, relight.
+  effects?: (action: string, payload?: Record<string, unknown>) => void;
   // Area templates by hand: place, move, remove, clear (useSession.template).
   template?: (action: string, payload?: Record<string, unknown>) => void;
   // The GM's map editor.
@@ -1562,7 +1567,7 @@ function MapViewInner({
           event.stopPropagation();
           return;
         }
-        if (["application/x-kraken-record", "application/x-kraken-ct", "application/x-kraken-damage", "application/x-kraken-card"].some((type) => [...event.dataTransfer.types].includes(type))) {
+        if (["application/x-kraken-record", "application/x-kraken-ct", "application/x-kraken-damage", "application/x-kraken-card"].some((type) => [...event.dataTransfer.types].includes(type)) || carriesCreatureDrop([...event.dataTransfer.types])) {
           event.preventDefault();
           event.stopPropagation();
         }
@@ -1583,6 +1588,18 @@ function MapViewInner({
           return;
         }
         // A damage or healing roll from chat dropped on a creature's token (the GM's, as in FG).
+        // An effect from the Effects list, a chat roll or a sheet's action, dropped on a creature's token.
+        if (carriesCreatureDrop([...event.dataTransfer.types])) {
+          event.preventDefault();
+          event.stopPropagation();
+          const hit = tokenAt(worldAt(event.clientX, event.clientY));
+          if (!hit) {
+            setHint("Drop it on a creature's token.");
+            return;
+          }
+          dropOnCreature(event.dataTransfer, { tokenId: hit.id }, { ct: actions.ct, effects: actions.effects, entryOfRecord: (recordId) => actions.combat?.entries.find((item) => item.recordId === recordId)?.id }, gm);
+          return;
+        }
         const damage = event.dataTransfer.getData("application/x-kraken-damage");
         if (damage && gm) {
           event.preventDefault();
@@ -2258,6 +2275,12 @@ function MapViewInner({
                 >
                   {targeted.includes(token.id) ? "Drop target" : "Target (Ctrl+click)"}
                 </button>
+                {gm || token.mine ? (
+                  // Its effects (the buff bar): put out a torch, take one off, + puts one on.
+                  <div className="token-menu-effects" role="group" aria-label={`${token.name}'s effects`}>
+                    <BuffBar session={actions as unknown as Session} at={{ tokenId: token.id }} />
+                  </div>
+                ) : null}
                 {gm ? (
                   <button type="button" role="menuitem" onClick={() => actions.updateToken(token.id, { hidden: !token.hidden })}>
                     {token.hidden ? "Show to players" : "Hide from players"}

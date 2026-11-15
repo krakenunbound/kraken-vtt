@@ -29,8 +29,11 @@ export type MapToken = {
   // Degrees clockwise from up; null: not turned.
   facing?: number | null;
   // What its effects show (shared/actions/effects.mjs visualOf): condition visuals and badges.
-  effects?: { fx: string[]; badges: { icon: string; title: string; tone: string; rounds?: number }[] };
+  effects?: { fx: string[]; badges: { icon: string; title: string; tone: string; rounds?: number }[]; list?: TrackedEffect[] };
 };
+// An effect on a creature as its owner and the GM see it (the tracker's, or a token's out of the fight):
+// its words, rounds left of `total`, put out for now (a light), its picture, who put it on.
+export type TrackedEffect = { id: string; label: string; duration: number; total?: number; paused?: boolean; icon?: string; source?: string; gmOnly?: boolean };
 // An area template on the map (a spell's sphere, cone, line or cube): world pixels for
 // its origin, feet for its size; angle: degrees clockwise from east.
 export type MapTemplate = { id: string; shape: "circle" | "cone" | "line" | "square"; x: number; y: number; size: number; width: number; angle: number; spread?: number; color: string; label: string; by: string; attach?: string; turn?: boolean; entryId?: string };
@@ -117,7 +120,10 @@ const EMPTY_MAP: TableMap = { sceneId: null, tokens: [], doors: [], vision: null
 export type RollTerm =
   | { kind: "number"; sign: number; value: number }
   | { kind: "dice"; sign: number; count: number; sides: number; rolls: number[]; kept: boolean[]; sum: number };
-export type RollResult = { formula: string; label: string; total: number; terms: RollTerm[]; tag?: string; result?: string; target?: string; against?: number; by?: string };
+export type RollResult = { formula: string; label: string; total: number; terms: RollTerm[]; tag?: string; result?: string; target?: string; against?: number; by?: string; card?: string; apply?: DamageCard };
+// A damage or healing roll's card (combat.cjs landOn): each creature it landed on, what it took
+// after its save and resistances, the multiplier the GM chose (null: waiting, autoApply off).
+export type DamageCard = { kind: "damage" | "heal"; type: string; name: string; total: number; auto: boolean; targets: { id: string; name: string; base?: number; taken: number; mult: number | "heal" | null; note?: string; save?: string; hidden?: boolean }[] };
 // kind: what the line is (FG's chat commands): said, an emote, an action, out of character, the GM's story, a mood.
 export type ChatKind = "say" | "emote" | "action" | "ooc" | "story" | "mood" | "readaloud";
 export type ChatVote = { id: string; question: string; yes: string[]; no: string[] };
@@ -210,7 +216,7 @@ export type CombatEntry = {
   wounds?: number;
   temp?: number;
   ac?: number;
-  effects: { id: string; label: string; duration: number }[];
+  effects: TrackedEffect[];
   targets: string[];
   attacks?: { key: string; name: string; bonus: number; bonuses?: number[]; thaco?: number; damage: string }[];
   /** AD&D 2E and Basic Fantasy: the level this character turns undead at. */
@@ -567,6 +573,10 @@ export function useSession() {
             const text = msg.text;
             setNotice(text);
             window.setTimeout(() => setNotice((current) => (current === text ? null : current)), 2500);
+          }
+          if (msg.type === "card" && typeof msg.card === "string") {
+            const card = msg.card;
+            setChat((current) => current.map((line) => (line.roll?.card === card ? { ...line, roll: { ...line.roll, apply: msg.apply as DamageCard } } : line)));
           }
           if (msg.type === "vote" && typeof msg.id === "string") {
             const id = msg.id;
@@ -1267,6 +1277,8 @@ export function useSession() {
     ct,
     // Area templates by hand (the map toolbar's Area template tool): place, move, remove, clear.
     template: (action: string, payload: Record<string, unknown> = {}) => send({ type: "template", action, ...payload }),
+    // The Effects list: apply, remove, update, snuff, relight; the GM's own: save, delete (electron/effects.cjs).
+    effects: (action: string, payload: Record<string, unknown> = {}) => send({ type: "effects", action, ...payload }),
     partyAwardXP,
     partyAward,
     partyDistribute,

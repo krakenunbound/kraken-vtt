@@ -2223,6 +2223,83 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     }
     return { amount: out, note: notes.map((note) => ` [${note}]`).join("") };
   }
+  // --- Damage cards (Foundry's chat damage card on FG's automatic results) ---
+  // A damage or healing roll keeps a card: each creature it landed on, what it
+  // took after its save, resistance, immunity or vulnerability, and the
+  // multiplier used. The GM's buttons on the card (x0, x1/2, x1, x2, heal) set
+  // what a creature takes now: only the difference is applied. With the table's
+  // autoApply off (Foundry's way), nothing lands until a button is pressed.
+  const cards = new Map();
+  function newCard(kind, type, name) {
+    const card = { id: newId("card"), kind, type: String(type ?? "").toLowerCase(), name, total: 0, auto: table().options?.().autoApply !== false, targets: [] };
+    cards.set(card.id, card);
+    if (cards.size > 60) cards.delete(cards.keys().next().value);
+    return card;
+  }
+  function cardView(card) {
+    return { kind: card.kind, type: card.type, name: card.name, total: card.total, auto: card.auto, targets: card.targets.map((row) => ({ ...row })) };
+  }
+  function publish(card) {
+    table().cardUpdate?.(card.id, cardView(card));
+  }
+  // Healing that the tracker's rules allow (the dead are not healed; at most the wounds).
+  async function healBy(entry, amount, why) {
+    if (health(entry).status === "Dead") return 0;
+    const { wounds } = vitals(entry);
+    const value = Math.min(Math.max(0, Math.round(amount)), wounds);
+    if (value > 0) await applyWounds(entry, -value, why, {});
+    return value;
+  }
+  // One creature's share of a card's roll: amount after its save (half, or the
+  // whole), then its resistances by type; applied now unless the card waits.
+  async function landOn(card, target, amount, why, opts = {}, { save } = {}) {
+    const dealt = card.kind === "heal" ? { amount: Math.max(0, amount), note: "" } : damageTaken(target, Math.max(0, amount), card.type);
+    const row = { id: target.id, name: target.name, base: Math.max(0, amount), taken: 0, mult: null, note: dealt.note.trim(), ...(save ? { save } : {}), ...(target.hidden ? { hidden: true } : {}) };
+    card.targets = [...card.targets.filter((item) => item.id !== target.id), row];
+    if (card.auto) {
+      if (card.kind === "heal") row.taken = -(await healBy(target, dealt.amount, why));
+      else if (dealt.amount > 0) {
+        await applyWounds(target, dealt.amount, `${why}${dealt.note}`, opts);
+        row.taken = dealt.amount;
+      } else table().say(`${why} -> ${target.name}: no damage${dealt.note}`, "Combat", Boolean(target.hidden));
+      row.mult = 1;
+    }
+    publish(card);
+    return card.kind === "heal" ? -row.taken : row.taken;
+  }
+  // A card's button: what this creature takes now (mult 0, 0.5, 1, 2; "heal": the
+  // roll heals it instead). A creature not on the card yet (the GM's chosen) joins it.
+  async function applyCard(cardId, targetId, mult) {
+    const card = cards.get(String(cardId));
+    if (!card) throw new Error("That roll is too old to apply from its card: drag it onto the creature instead.");
+    const target = find(targetId);
+    let row = card.targets.find((item) => item.id === target.id);
+    if (!row) {
+      row = { id: target.id, name: target.name, base: card.total, taken: 0, mult: null, note: "", ...(target.hidden ? { hidden: true } : {}) };
+      card.targets.push(row);
+    }
+    const heal = mult === "heal" || card.kind === "heal";
+    const times = mult === "heal" ? 1 : Math.max(0, Number(mult) || 0);
+    let want;
+    if (heal) want = -Math.round(row.base * (mult === "heal" ? 1 : times));
+    else {
+      const dealt = damageTaken(target, Math.floor(row.base * times), card.type);
+      want = dealt.amount;
+      row.note = dealt.note.trim();
+    }
+    const delta = want - row.taken;
+    if (delta > 0) await applyWounds(target, delta, `[DAMAGE] ${card.name} (from its card)`, {});
+    else if (delta < 0) {
+      // More healing (capped at its wounds), or damage taken back.
+      if (want < 0 && row.taken <= 0) want = row.taken - (await healBy(target, -delta, `[HEAL] ${card.name} (from its card)`));
+      else await applyWounds(target, delta, `[HEAL] ${card.name} (from its card)`, {});
+    }
+    row.taken = want;
+    row.mult = mult === "heal" ? "heal" : times;
+    publish(card);
+    changed();
+    return cardView(card);
+  }
   // Doubles every die in a formula (a critical hit): 1d8+3 -> 2d8+3.
   const doubled = (formula) => formula.replace(/(\d*)d(\d+)/g, (_, count, sides) => `${(Number(count) || 1) * 2}d${sides}`);
   // Damage after an attack lands only on the targets it hit (FG's attack-then-damage
@@ -2259,15 +2336,14 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     let anyCrit = false;
     for (const group of groups) {
       const formula = group.formula;
-      const roll = table().roll(formula, `[DAMAGE]${kind} ${plan.name}${group.crit ? " [CRITICAL]" : ""}${plan.dmgtype ? ` [TYPE: ${plan.dmgtype}]` : ""}`, from, false, { by: plan.actor });
+      const card = newCard("damage", plan.dmgtype, plan.name);
+      const roll = table().roll(formula, `[DAMAGE]${kind} ${plan.name}${group.crit ? " [CRITICAL]" : ""}${plan.dmgtype ? ` [TYPE: ${plan.dmgtype}]` : ""}`, from, false, { by: plan.actor, card: card.id });
       const amount = Math.max(0, roll.total);
+      card.total = amount;
       total = Math.max(total, amount);
       anyCrit ||= group.crit;
-      for (const target of group.targets) {
-        const dealt = damageTaken(target, amount, plan.dmgtype);
-        if (dealt.amount > 0) await applyWounds(target, dealt.amount, `[DAMAGE] ${plan.name}${dealt.note}`, { ...opts, critical: group.crit });
-        else table().say(`[DAMAGE] ${plan.name} -> ${target.name}: no damage${dealt.note}`, "Combat", Boolean(target.hidden));
-      }
+      for (const target of group.targets) await landOn(card, target, amount, `[DAMAGE] ${plan.name}`, { ...opts, critical: group.crit });
+      if (!group.targets.length) publish(card);
     }
     if (plan.entry && table().options?.().clearTargets === "action") plan.entry.targets = [];
     changed();
@@ -2397,9 +2473,11 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     const minutes = (row) => Math.round(num(row?.durmod, 0) * (row?.durunit === "hour" ? 600 : row?.durunit === "minute" ? 10 : 1));
     if (healRow) {
       const formula = diceOf(healRow.heallist, true);
-      const roll = table().roll(formula, `[HEAL] ${spell.name}`, say, false, { by: caster.name });
+      const card = newCard("heal", "", spell.name);
+      const roll = table().roll(formula, `[HEAL] ${spell.name}`, say, false, { by: caster.name, card: card.id });
+      card.total = Math.max(0, roll.total);
       for (const target of targets.length ? targets : casterEntry ? [casterEntry] : []) {
-        await this_heal(target, roll.total);
+        await landOn(card, target, roll.total, "[HEAL]");
         out.push({ target: target.name, heal: roll.total });
       }
     }
@@ -2408,13 +2486,15 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       const darts = num(castRow.targetingval, 3) + (castRow.targetscalestat === "upcast" || castRow.allowupcast ? Math.max(0, slotLevel - level) : 0);
       for (let dart = 0; dart < darts && targets.length; dart++) {
         const target = targets[dart % targets.length];
-        const roll = table().roll(diceOf(damageRow.damagelist), `[DAMAGE] ${spell.name} (dart ${dart + 1})`, say, Boolean(target.hidden), { by: caster.name });
-        const dealt = damageTaken(target, Math.max(0, roll.total), damageType);
-        if (dealt.amount > 0) await applyWounds(target, dealt.amount, `[DAMAGE] ${spell.name}${dealt.note}`, {});
-        out.push({ target: target.name, damage: dealt.amount });
+        const card = newCard("damage", damageType, `${spell.name} (dart ${dart + 1})`);
+        const roll = table().roll(diceOf(damageRow.damagelist), `[DAMAGE] ${spell.name} (dart ${dart + 1})`, say, Boolean(target.hidden), { by: caster.name, card: card.id });
+        card.total = Math.max(0, roll.total);
+        const taken = await landOn(card, target, roll.total, `[DAMAGE] ${spell.name}`);
+        out.push({ target: target.name, damage: taken });
       }
     } else {
       let shared = null;
+      let sharedCard = null;
       for (const target of targets) {
         let landed = true;
         let half = false;
@@ -2442,11 +2522,15 @@ function createCombat({ saved, table, onChange = () => undefined }) {
           // One damage roll for an area (as FG), each target its own when it was an attack.
           let formula = diceOf(damageRow.damagelist);
           if (crit) formula = doubled(formula);
-          const roll = attackRow || !shared ? table().roll(formula, `[DAMAGE] ${spell.name}${crit ? " [CRITICAL]" : ""} [TYPE: ${damageType}]`, say, false, { by: caster.name }) : shared;
-          if (!attackRow) shared = roll;
-          const dealt = damageTaken(target, half ? Math.floor(roll.total / 2) : Math.max(0, roll.total), damageType);
-          const amount = dealt.amount;
-          if (amount > 0) await applyWounds(target, amount, `[DAMAGE] ${spell.name}${half ? " (half)" : ""}${dealt.note}`, { critical: crit });
+          const fresh = attackRow || !shared;
+          const card = fresh ? newCard("damage", damageType, spell.name) : sharedCard;
+          const roll = fresh ? table().roll(formula, `[DAMAGE] ${spell.name}${crit ? " [CRITICAL]" : ""} [TYPE: ${damageType}]`, say, false, { by: caster.name, card: card.id }) : shared;
+          card.total = Math.max(0, roll.total);
+          if (!attackRow) {
+            shared = roll;
+            sharedCard = card;
+          }
+          const amount = await landOn(card, target, half ? Math.floor(roll.total / 2) : Math.max(0, roll.total), `[DAMAGE] ${spell.name}${half ? " (half)" : ""}`, { critical: crit }, { save: saveRow ? (half ? "half" : "failed") : undefined });
           out.push({ target: target.name, damage: amount, half });
         }
         const helps = effectRow && effectsLib.toneOf(String(effectRow.label ?? "")) === "good";
@@ -2579,7 +2663,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
             mine: seat.role === "player" && owner(entry) === seat.name,
             health: status,
             ...(numbers ? { hp, wounds, ac, ...(temp ? { temp } : {}) } : {}),
-            effects: entry.effects.filter((effect) => seat.role === "dm" || !effect.gmOnly).map(({ id, label, duration, targets }) => ({ id, label: targets?.length ? `${label} [-> ${targets.map((tid) => state.entries.find((item) => item.id === tid)?.name ?? "?").join(", ")}]` : label, duration })),
+            effects: entry.effects.filter((effect) => seat.role === "dm" || !effect.gmOnly).map(({ id, label, duration, targets, icon, source, total, paused, gmOnly }) => ({ id, label: targets?.length ? `${label} [-> ${targets.map((tid) => state.entries.find((item) => item.id === tid)?.name ?? "?").join(", ")}]` : label, duration, ...(icon ? { icon } : {}), ...(source ? { source } : {}), ...(total ? { total } : {}), ...(paused ? { paused } : {}), ...(gmOnly ? { gmOnly } : {}) })),
             targets: seat.role === "dm" || owner(entry) === seat.name ? entry.targets.filter((id) => shown.some((item) => item.id === id)) : [],
             ...(five() ? { deathsaves: record(entry)?.type === "character" || numbers ? deathSaves(entry) : undefined } : {}),
             // A ship: its weapons (and who mans them), Thrust, criticals.
@@ -3039,6 +3123,44 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       const entry = find(id);
       entry.effects = entry.effects.filter((effect) => effect.id !== effectId);
       changed();
+    },
+    // A damage card's button (the GM's): what that creature takes now.
+    async applyCard(cardId, targetId, mult, seat) {
+      mustGM(seat);
+      return applyCard(cardId, targetId, mult);
+    },
+    // A chat roll dropped on a creature (FG's drop of a chat result, the GM's):
+    // damage with its type (resistances count), healing, or an attack total
+    // against its AC (the effects' AC too); the roll's own result, no new roll.
+    async dropRoll(targetId, roll, seat) {
+      mustGM(seat);
+      const target = find(targetId);
+      const { options: opts } = await options();
+      const name = text(roll?.name, "Roll").slice(0, 80);
+      if (roll?.kind === "attack") {
+        const total = Math.round(num(roll.total, 0));
+        const die = Math.round(num(roll.natural, 0));
+        const ac = vitals(target).ac + effectBonus(target, "AC");
+        const crit = die === 20;
+        const hit = crit || (die !== 1 && total >= ac);
+        table().say(`[ATTACK] ${name} -> ${target.name}: ${crit ? "CRITICAL HIT" : hit ? "HIT" : "MISS"} (${total} vs AC ${ac})`, "Combat", Boolean(target.hidden));
+        // The attacker's next damage lands on this creature only if it hit (FG's attack-then-damage).
+        const source = roll.by ? state.entries.find((entry) => entry.name === roll.by) : null;
+        if (source) source.hitOn = { ...(source.hitOn ?? {}), [target.id]: crit ? "crit" : hit ? "hit" : "miss" };
+        changed();
+        return { hit, crit, ac, total };
+      }
+      const amount = Math.max(0, Math.round(num(roll?.total, 0)));
+      if (roll?.kind === "heal") {
+        const healed = await healBy(target, amount, `[HEAL] ${name}`);
+        changed();
+        return { healed };
+      }
+      const dealt = damageTaken(target, amount, roll?.type);
+      if (dealt.amount > 0) await applyWounds(target, dealt.amount, `[DAMAGE] ${name}${dealt.note}`, opts);
+      else table().say(`[DAMAGE] ${name} -> ${target.name}: no damage${dealt.note}`, "Combat", Boolean(target.hidden));
+      changed();
+      return { damage: dealt.amount, note: dealt.note.trim() };
     },
     // The Effects list's own hands (electron/effects.cjs checks who may): an effect
     // put on, taken off or changed (put out, relit, its time or words), no GM check here.
