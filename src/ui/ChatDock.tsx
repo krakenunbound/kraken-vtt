@@ -6,6 +6,7 @@ import { ladder } from "../../shared/fate/rules.mjs";
 import { commandsFor, runChat, type Command } from "./chatCommands";
 import { slotDrag } from "./QuickSlots";
 import { ModifierBox, ModifierKeys, NUMBER_DRAG } from "./ModifierBox";
+import { InlineRollText } from "./InlineRolls";
 import { chatRunner } from "./chatRunner";
 import { TowerArt, towerLook } from "./TowerArt";
 import { agentCommands } from "./agentCommands";
@@ -238,10 +239,12 @@ function Line({ line, gmIcon, session }: { line: ChatLine; gmIcon: string; sessi
         </span>
       ) : line.kind === "emote" ? (
         <span className="chat-text">
-          <b className="chat-from">{line.from}</b> {line.text}
+          <b className="chat-from">{line.from}</b> <InlineRollText text={line.text} />
         </span>
       ) : (
-        <span className="chat-text">{line.text}</span>
+        <span className="chat-text">
+          <InlineRollText text={line.text} />
+        </span>
       )}
       {line.vote ? (
         <span className="chat-vote">

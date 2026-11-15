@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { markInlineRolls } from "../ui/InlineRolls";
 import { createPortal } from "react-dom";
 import type { BookContents, BookInfo, BookPage, BookSoundRef, Session, ShownImage, SoundLibrary } from "../session/useSession";
 import { Icon } from "../ui/icons";
@@ -609,7 +610,8 @@ export function BookWindow({ session, book }: { session: Session; book: string }
               ) : (
                 <div className={block.frame ? `book-text framed ${block.frame}${READ_FRAMES.has(block.frame) ? " read-aloud-frame" : ""}` : "book-text"}>
                   {block.frame && READ_FRAMES.has(block.frame) ? <ReadAloudButton text={() => new DOMParser().parseFromString(block.html, "text/html").body.innerText || (new DOMParser().parseFromString(block.html, "text/html").body.textContent ?? "")} title={page.name} /> : null}
-                  <div dangerouslySetInnerHTML={{ __html: block.html }} />
+                  {/* The page's dice as roll chips (marked once, after React wrote the words). */}
+                  <div ref={(element) => markInlineRolls(element)} dangerouslySetInnerHTML={{ __html: block.html }} />
                 </div>
               )}
                 {inlineSounds(index)}

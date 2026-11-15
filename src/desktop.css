@@ -718,6 +718,13 @@ span.ct-init { display: inline-block; }
 /* What the stack added to a roll, on its card. */
 .roll-card .roll-mods { display: flex; flex-wrap: wrap; gap: 3px; flex-basis: 100%; }
 .roll-card .roll-mods span { padding: 0 6px; font-size: 0.7rem; border: 1px solid var(--brass-dim); border-radius: 999px; color: var(--brass); }
+/* An inline roll in text ([[1d20+3]], a book's 2d6 + 3): a click rolls it, a drag takes it to a quick slot. */
+.inline-roll { display: inline; padding: 0 5px; margin: 0 1px; font: inherit; font-weight: 700; line-height: inherit; color: var(--brass); background: rgba(210, 161, 90, 0.12); border: 1px solid var(--brass-dim); border-radius: 4px; cursor: pointer; white-space: nowrap; }
+.inline-roll::before { content: "\2684"; margin-right: 3px; font-weight: 400; opacity: 0.8; }
+.inline-roll:focus-visible { outline: 2px solid var(--brass); outline-offset: 1px; }
+@media (hover: hover) {
+  .inline-roll:hover { background: var(--brass-soft); border-color: var(--brass); }
+}
 /* A die in its owner's set (tray, pool, roll cards). */
 .die-shape.set polygon { stroke: rgba(255, 255, 255, 0.42); stroke-width: 1.1; stroke-linejoin: round; filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.55)); }
 .die-shape.set text { paint-order: stroke; stroke: rgba(0, 0, 0, 0.5); stroke-width: 1.5px; stroke-linejoin: round; }

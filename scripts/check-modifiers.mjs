@@ -49,6 +49,18 @@ assert(withDie("4d6!", "adv").applied === null, "an exploding die is left");
 assert(kindOf("[DAMAGE] Longsword") === "damage" && kindOf("[ATTACK] (M) Longsword") === "attack" && kindOf("Hagar: Fighter 2 hit points") === "none" && kindOf("[DAMAGE] Ongoing damage (Burning)") === "none" && kindOf("") === "roll", "kinds read from labels");
 done.push("formulas: ADV/DIS (cancelling), boon on 2d6, kinds from labels");
 
+// Inline rolls in words: [[...]] with a label, bare dice with a bonus, nothing that is not dice.
+{
+  const { splitInlineRolls } = await import("../shared/text/inlineRolls.mjs");
+  const rolls = (text) => splitInlineRolls(text).filter((piece) => "formula" in piece);
+  const one = rolls("Hit: 7 (2d6 + 3) slashing damage, or [[1d20+5 #Attack]] and [[/r 4d6kh3]].");
+  assert(one.length === 3 && one[0].formula === "2d6+3" && one[1].formula === "1d20+5" && one[1].label === "Attack" && one[2].formula === "4d6kh3", `inline rolls: ${JSON.stringify(one)}`);
+  assert(rolls("a d20 roll, 1d8−1 piercing").map((piece) => piece.formula).join(",") === "d20,1d8-1", "bare d20 and a minus sign");
+  assert(rolls("Room 2d, the 3rd day, 12dB of noise, odd6 and add20").length === 0, "words that are not dice stay words");
+  assert(splitInlineRolls("Roll 1d6 now").map((piece) => piece.text ?? piece.source).join("") === "Roll 1d6 now", "the words around a roll are kept as they were");
+  done.push("inline rolls read from words ([[...]] #label, bare dice), nothing else");
+}
+
 const server = createTableServer({ ruleset: "D&D 5E" });
 try {
   const { port, hostToken } = await server.listen({ port: 0, password: "" });
