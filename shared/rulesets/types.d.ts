@@ -275,4 +275,20 @@ export interface RulesetManifest {
   combatLabel?: string; // "Score"
   calendar?: string; // shared/calendars.mjs id
   edit?: { text: Path[]; number: Path[]; string?: Path[]; list?: Path[]; remove?: Path[] }; // list: a list typed one item a line; remove: lists whose rows may be dropped
+  actions?: ActionsSpec; // attached by the registry from shared/<id>/actions.mjs
+}
+
+// What a game declares for targeting, actions and effects (shared/<id>/actions.mjs,
+// docs/targeting-actions-design.md 4.1).
+export interface ActionsSpec {
+  spells: "fg5e" | "fg2e" | "text" | "powers" | "none"; // how its spells are read and cast
+  game?: "5e" | "35e" | "2e" | "bf" | "cnc"; // shared/actions/parse.mjs's game words
+  saves: { dc: "spell" | "cl" | "none" }; // a spell's DC (5E, 3.5E), the caster level (C&C), or a plain save (2E, BF)
+  damageTypes: boolean; // resistances, immunities and vulnerabilities by type
+  roundSeconds: number; // a round in game time (burn times, the calendar)
+  friendlyFire: boolean; // an area's damage hits allies inside it too
+  conditions?: string[]; // core condition ids it lists (absent: all)
+  buffs?: string[]; // core buff presets it lists
+  lights?: string[]; // core light presets it lists
+  burn?: Record<string, number | null>; // a light's burn time in minutes
 }

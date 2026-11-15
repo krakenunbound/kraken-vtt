@@ -122,6 +122,8 @@ const geometryReady = import(pathToFileURL(path.join(__dirname, "..", "shared", 
 });
 
 const FACTIONS = ["friend", "neutral", "foe"];
+// The side a creature faces: friends face foes and foes friends; a neutral's foes are the foes.
+const otherSide = (faction) => (faction === "foe" ? "friend" : "foe");
 
 function text(value, fallback) {
   const raw = typeof value === "string" ? value : value == null ? "" : String(value);
@@ -191,7 +193,7 @@ function cleanEntry(raw) {
     // An NPC's powers used today (FG's per-day uses on the tracker's copy).
     used: raw.used && typeof raw.used === "object" ? Object.fromEntries(Object.entries(raw.used).slice(0, 60).map(([key, value]) => [String(key).slice(0, 60), Math.max(0, Math.round(num(value, 0)))])) : {},
     // Who this creature has targeted (FG's targets on the tracker).
-    targets: (Array.isArray(raw.targets) ? raw.targets : []).map((id) => text(id, "")).filter(Boolean).slice(0, 20),
+    targets: (Array.isArray(raw.targets) ? raw.targets : []).map((id) => text(id, "")).filter(Boolean).slice(0, 100),
     // 5E: how its last attack went against each target ("hit", "crit" or "miss"),
     // until damage is rolled (FG's crit state per target, cleared at each attack); death saves for an NPC entry.
     hitOn: raw.hitOn && typeof raw.hitOn === "object" ? Object.fromEntries(Object.entries(raw.hitOn).slice(0, 20).filter(([, value]) => ["hit", "crit", "miss"].includes(value)).map(([key, value]) => [String(key).slice(0, 40), value])) : null,
@@ -2548,6 +2550,8 @@ function createCombat({ saved, table, onChange = () => undefined }) {
         if (ironOn() && source?.type !== "character") entry.iron = cleanEntry({ iron: { rank: input.rank ?? source?.data?.rank ?? "dangerous", ticks: 0 } }).iron;
         state.entries.push(entry);
         added.push(entry);
+        // A side given for a creature with a token: the token takes it too.
+        if (input.faction && entry.tokenId) table().syncTokenFaction?.(entry);
       }
       void engine;
       changed();
@@ -2556,11 +2560,14 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     update(id, patch, seat) {
       mustGM(seat);
       const entry = find(id);
+      const wasFaction = entry.faction;
       for (const key of ["name", "faction", "init", "initresult", "hp", "wounds", "ac", "hidden", "tokenId"]) {
         if (patch[key] === undefined) continue;
         const next = cleanEntry({ ...entry, [key]: patch[key] });
         entry[key] = next[key];
       }
+      // The tracker's faction and its token's are one (FG's friend/foe on both).
+      if (entry.faction !== wasFaction) table().syncTokenFaction?.(entry);
       changed();
       return entry;
     },
@@ -2957,11 +2964,40 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       changed();
       return inside.map((entry) => entry.name);
     },
-    clearTargets(sourceId, seat) {
+    // Clears the source's targets: all, or only its side's ("friend") or the other side's ("foe").
+    clearTargets(sourceId, seat, faction = null) {
       const source = find(sourceId);
       if (seat.role !== "dm" && owner(source) !== seat.name) throw new Error("You can clear only your own targets.");
-      source.targets = [];
+      if (faction === "friend" || faction === "foe") {
+        const want = faction === "friend" ? source.faction : otherSide(source.faction);
+        source.targets = source.targets.filter((id) => state.entries.find((entry) => entry.id === id)?.faction !== want);
+      } else source.targets = [];
       changed();
+      return source.targets;
+    },
+    // FG's target friendlies / target foes (the map toolbar): every creature of
+    // the source's side (itself too, so a blessing can take the caster), or of
+    // the other side (friends and foes face each other; neutrals are targeted
+    // by hand). The dead are left out, and for a player the hidden. onMap: only
+    // creatures with a token on the map the toolbar belongs to.
+    targetFaction(sourceId, faction, seat, onMap = () => true) {
+      const source = find(sourceId);
+      if (seat.role !== "dm" && owner(source) !== seat.name) throw new Error("You can target only with your own character.");
+      const want = faction === "friend" ? source.faction : otherSide(source.faction);
+      const picked = state.entries.filter((entry) => entry.faction === want && (faction === "friend" || entry.id !== source.id) && health(entry).status !== "Dead" && (seat.role === "dm" || !entry.hidden) && onMap(entry));
+      source.targets = [...source.targets.filter((id) => state.entries.find((entry) => entry.id === id)?.faction !== want), ...picked.map((entry) => entry.id)].slice(0, 100);
+      changed();
+      return picked.map((entry) => entry.name);
+    },
+    // Several creatures targeted at once (a box dragged in target mode, a
+    // template's area): they become the targets, or join them (add).
+    targetIds(sourceId, ids, seat, add = false) {
+      const source = find(sourceId);
+      if (seat.role !== "dm" && owner(source) !== seat.name) throw new Error("You can target only with your own character.");
+      const picked = ids.map((id) => state.entries.find((entry) => entry.id === id)).filter((entry) => entry && (seat.role === "dm" || !entry.hidden));
+      source.targets = [...new Set([...(add ? source.targets : []), ...picked.map((entry) => entry.id)])].slice(0, 100);
+      changed();
+      return picked.map((entry) => entry.name);
     },
     // An attack (SiegeCore ActionAttack): d20 + the attack's bonus + ATK effects,
     // one roll per target against its AC + AC effects; equal hits.

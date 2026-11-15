@@ -415,7 +415,7 @@ function presetLight(name, profiles = []) {
 // Walls an image may hold from Map Studio (FG maps run to many thousands of segments).
 const MAX_WALLS_STUDIO = 20000;
 
-function createMapState({ saved, records, onChange = () => undefined, hasArt = () => false, hasPicture = () => false, artFor = () => null, hasTile = () => true, combatFor = () => null, activeRecord = () => null, sharedWith = null, colorOf = playerColor }) {
+function createMapState({ saved, records, onChange = () => undefined, hasArt = () => false, hasPicture = () => false, artFor = () => null, hasTile = () => true, combatFor = () => null, activeRecord = () => null, sharedWith = null, colorOf = playerColor, onFaction = () => undefined }) {
   // One master per map: a second state (the GM's private image window) works on
   // the very same walls, lights, tokens, paint and effects as the table's.
   const state = sharedWith ? sharedWith.rawState() : savedMap(saved);
@@ -994,9 +994,12 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       if (patch.name !== undefined) token.name = text(patch.name, token.name).slice(0, 48);
       if (patch.hidden !== undefined) token.hidden = Boolean(patch.hidden);
       if (patch.squares !== undefined) token.squares = Math.min(10, Math.max(0.25, num(patch.squares, token.squares)));
+      const wasFaction = token.faction;
       if (patch.faction !== undefined && FACTIONS.includes(patch.faction)) token.faction = patch.faction;
       if (patch.owner !== undefined) token.owner = text(patch.owner, "").slice(0, 24);
       changed({ keepVision: true });
+      // Its tracker entry takes the same side (FG's friend/foe on both).
+      if (token.faction !== wasFaction && token.faction !== "none") onFaction(token);
       return token;
     },
     remove(id, seat) {

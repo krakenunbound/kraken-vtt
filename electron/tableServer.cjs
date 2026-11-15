@@ -592,6 +592,10 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     },
     activeRecord: () => combat.entries().find((item) => item.id === combat.active())?.recordId ?? null,
     colorOf: (name) => tokenColorOf(name),
+    // A token's side changed (its menu, a tool): its tracker entry follows.
+    onFaction: (token) => {
+      for (const entry of combat.entries()) if (entry.tokenId === token.id && entry.faction !== token.faction) combat.update(entry.id, { faction: token.faction }, { role: "dm", name: "GM" });
+    },
   });
 
   // The GM's image window (FG's: any image opened from the Images list, a book
@@ -2347,6 +2351,21 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
 
       // The combat tracker. Players may roll their own initiative and end their own turn.
       if (msg.type === "ct") {
+        // Who targets (FG's getSelectionHelper): the entry named (the selected token's,
+        // the GM's any, a player's own), else a player's own creature (the active one
+        // if several), else the GM's active one.
+        const targeterOf = (wanted, who, whoSeat) => {
+          const entries = combat.entries();
+          const mine = (entry) => combat.viewFor(whoSeat).entries.find((item) => item.id === entry.id)?.mine;
+          const named = wanted ? entries.find((entry) => entry.id === String(wanted)) : null;
+          if (named && (who.role === "dm" || mine(named))) return named.id;
+          const source = who.role === "dm" ? entries.find((entry) => entry.id === combat.active()) : (entries.find((entry) => entry.id === combat.active() && mine(entry)) ?? entries.find(mine));
+          if (!source) throw new Error(who.role === "dm" ? "Whose target? Select a creature's token or start combat." : "Your character is not in the fight.");
+          return source.id;
+        };
+        const tokenOfEntry = (entry) => map.tokens().find((token) => token.id === entry.tokenId) ?? map.tokens().find((token) => entry.recordId && token.recordId === entry.recordId) ?? null;
+        // A creature is on the table map when its token is (no map shown: everyone counts).
+        const onTableMap = (entry) => !map.scene() || Boolean(tokenOfEntry(entry));
         const seat = seatOf(client);
         const run = async () => {
           switch (msg.action) {
@@ -2402,20 +2421,27 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
             case "damage":
               return combat.damage(String(msg.id), msg.amount, seat);
             case "target": {
-              // A target by token: the source is the player's own entry (the active
-              // one if several), or the GM's chosen or active entry.
+              // A target by token or entry: the source is the player's own entry (the
+              // active one if several), or the GM's chosen or active entry.
               const entries = combat.entries();
               const target = msg.targetId ? entries.find((entry) => entry.id === msg.targetId) : entries.find((entry) => entry.tokenId === msg.tokenId || (msg.tokenId && entry.recordId && map.tokens().find((token) => token.id === msg.tokenId)?.recordId === entry.recordId));
               if (!target) throw new Error("Add that token to the combat tracker first.");
-              const source = msg.sourceId
-                ? entries.find((entry) => entry.id === msg.sourceId)
-                : client.role === "dm"
-                  ? entries.find((entry) => entry.id === combat.active())
-                  : entries.find((entry) => entry.id === combat.active() && combat.viewFor(seat).entries.find((item) => item.id === entry.id)?.mine) ??
-                    entries.find((entry) => combat.viewFor(seat).entries.find((item) => item.id === entry.id)?.mine);
-              if (!source) throw new Error(client.role === "dm" ? "Whose target? Start combat or pick a creature." : "Your character is not in the fight.");
+              const source = entries.find((entry) => entry.id === targeterOf(msg.sourceId, client, seat));
               const already = source.targets.includes(target.id);
               return combat.target(source.id, target.id, msg.on ?? !already, seat);
+            }
+            case "target-faction":
+              // FG's target friendlies / target foes: the source's side, or the other side, on this map.
+              return combat.targetFaction(targeterOf(msg.id, client, seat), msg.faction === "friend" ? "friend" : "foe", seat, onTableMap);
+            case "target-box": {
+              // Target mode's box: every creature whose token's centre is inside it.
+              const [x1, x2] = [num(msg.x1, 0), num(msg.x2, 0)].sort((a, b) => a - b);
+              const [y1, y2] = [num(msg.y1, 0), num(msg.y2, 0)].sort((a, b) => a - b);
+              const ids = combat.entries().filter((entry) => {
+                const token = tokenOfEntry(entry);
+                return token && token.x >= x1 && token.x <= x2 && token.y >= y1 && token.y <= y2;
+              }).map((entry) => entry.id);
+              return combat.targetIds(targeterOf(msg.id, client, seat), ids, seat, Boolean(msg.add));
             }
             case "save": {
               // The GM asks any creature for a save; a player rolls their own.
@@ -2443,7 +2469,8 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
               // Cairn: a WIL save to stand, for one creature (id) or a side (faction).
               return combat.morale(String(msg.id ?? msg.faction ?? "foe"), Number(msg.bonus) || 0, seat);
             case "clear-targets":
-              return combat.clearTargets(String(msg.id), seat);
+              // All of them, or only the friends' or the foes' (the map toolbar's two clears).
+              return combat.clearTargets(targeterOf(msg.id, client, seat), seat, ["friend", "foe"].includes(msg.faction) ? msg.faction : null);
             case "target-area": {
               // Feet to scene pixels; each entry's token, by its own or its record's.
               const per = map.units() > 0 ? (map.squareCenter(1, 0, 1).x - map.squareCenter(0, 0, 1).x) / map.units() : 10;
@@ -2592,6 +2619,11 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     activeBookId,
     requireActiveBook,
     seat: { role: "dm", name: "Agent" },
+    // An entry's side changed on the tracker: its token follows (map.update tells the tracker back, which already agrees).
+    syncTokenFaction(entry) {
+      const token = entry.tokenId ? map.tokens().find((item) => item.id === entry.tokenId) : null;
+      if (token && token.faction !== entry.faction) map.update(token.id, { faction: entry.faction }, { role: "dm", name: "GM" });
+    },
     // The campaign's ruleset ("Castles & Crusades", "D&D 5E", "Worldbuilding").
     ruleset: () => ruleset,
     // FG's character list: every character's face, who holds it, who is seated.

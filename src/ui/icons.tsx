@@ -78,6 +78,14 @@ const PATHS: Record<string, string> = {
   shield: "M12 3l7.5 3v5.5c0 4.6-3.2 8.2-7.5 9.5-4.3-1.3-7.5-4.9-7.5-9.5V6Z",
   sparkle: "M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6",
   target: "M12 19a7 7 0 1 0 0-14 7 7 0 0 0 0 14Zm0-4a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM12 2v3M12 19v3M2 12h3M19 12h3",
+  // The map toolbar's targeting (FG's): a reticle with a shield (friends), crossed swords (foes), struck through (clear).
+  "target-friend": "M10 16a6 6 0 1 0 0-12 6 6 0 0 0 0 12ZM10 1.5v2.5M10 16v2.5M1.5 10H4M16 10h2.5M18.5 13l3.5 1.4v2.8c0 2.2-1.6 3.6-3.5 4.3-1.9-.7-3.5-2.1-3.5-4.3v-2.8Z",
+  "target-foe": "M10 16a6 6 0 1 0 0-12 6 6 0 0 0 0 12ZM10 1.5v2.5M10 16v2.5M1.5 10H4M16 10h2.5M14.5 14.5l7 7M21.5 14.5l-7 7M14 19.8l2.2 2.2M22 19.8 19.8 22",
+  "target-clear": "M12 19a7 7 0 1 0 0-14 7 7 0 0 0 0 14ZM12 2v3M12 19v3M2 12h3M19 12h3M4 4l16 16",
+  "target-clear-friend": "M12 3l7 2.6v5.2c0 4.2-3 6.8-7 8.2-4-1.4-7-4-7-8.2V5.6ZM4 4l16 16",
+  "target-clear-foe": "M6 6l12 12M18 6 6 18M4.5 15.5l4 4M19.5 15.5l-4 4M12 21.5a9.5 9.5 0 1 0 0-19 9.5 9.5 0 0 0 0 19ZM5.3 5.3l13.4 13.4",
+  // An area template: a cone and a sphere.
+  template: "M3 20 11 5l8 15ZM18 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z",
 };
 
 export function Icon({ name, size = 18, title }: { name: keyof typeof PATHS | string; size?: number; title?: string }) {

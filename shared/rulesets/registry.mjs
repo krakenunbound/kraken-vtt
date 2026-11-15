@@ -16,12 +16,28 @@ import forged from "../forged/manifest.mjs";
 import ironsworn from "../ironsworn/manifest.mjs";
 import mgt2 from "../mgt2/manifest.mjs";
 import worldbuilding from "../worldbuilding/manifest.mjs";
+// Each game's targeting, actions and effects, kept beside its manifest (shared/<id>/actions.mjs).
+import adnd2eActions from "../adnd2e/actions.mjs";
+import astraActions from "../astra/actions.mjs";
+import bfrpgActions from "../bfrpg/actions.mjs";
+import cairnActions from "../cairn/actions.mjs";
+import cncActions from "../cnc/actions.mjs";
+import dnd35Actions from "../dnd35/actions.mjs";
+import dnd5eActions from "../dnd5e/actions.mjs";
+import fateActions from "../fate/actions.mjs";
+import forgedActions from "../forged/actions.mjs";
+import ironswornActions from "../ironsworn/actions.mjs";
+import mgt2Actions from "../mgt2/actions.mjs";
+import worldbuildingActions from "../worldbuilding/actions.mjs";
 
 /** @typedef {import("./types").RulesetManifest} RulesetManifest */
 /** @typedef {import("./types").FeatureId} FeatureId */
 
 /** @type {RulesetManifest[]} */
 export const MANIFESTS = [cnc, dnd5e, dnd35, adnd2e, mgt2, astra, ironsworn, cairn, bfrpg, fate, forged, worldbuilding];
+/** @type {Record<string, import("./types").ActionsSpec>} */
+const ACTIONS = { adnd2e: adnd2eActions, astra: astraActions, bfrpg: bfrpgActions, cairn: cairnActions, cnc: cncActions, dnd35: dnd35Actions, dnd5e: dnd5eActions, fate: fateActions, forged: forgedActions, ironsworn: ironswornActions, mgt2: mgt2Actions, worldbuilding: worldbuildingActions };
+for (const manifest of MANIFESTS) manifest.actions = ACTIONS[manifest.id] ?? manifest.actions;
 
 // The games a campaign can be made with, in the campaign screen's order.
 export const CAMPAIGN_RULESETS = ["Castles & Crusades", "D&D 5E", "D&D 3.5E", "AD&D 2E", "Traveller", "Descending Darkness", "Apeira Astra", "Ironsworn", "Starforged", "Cairn", "Basic Fantasy", "Fate Core", "Fate Accelerated", "Forged in the Dark", "Worldbuilding"];

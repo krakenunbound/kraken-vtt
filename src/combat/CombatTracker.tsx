@@ -44,6 +44,10 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
   const scope = { session, gm, myCharacterId, entry };
   const portrait = typeof record?.data?.portrait === "string" ? (record.data.portrait as string) : null;
   const tokenArt = session.map.tokens.find((token) => token.id === entry.tokenId || (entry.recordId && token.recordId === entry.recordId))?.art;
+  // Who aims at this creature (the GM sees everyone's; a player their own creatures'), each in its token's colour.
+  const aimers = session.combat.entries
+    .filter((item) => item.targets?.includes(entry.id))
+    .map((item) => ({ id: item.id, name: item.name, color: session.map.tokens.find((token) => token.id === item.tokenId || (item.recordId && token.recordId === item.recordId))?.color || "#ff5a4d" }));
   const apply = (kind: "damage" | "heal") => {
     const value = Number(amount);
     if (value > 0) session.ct(kind, { id: entry.id, amount: value });
@@ -52,8 +56,16 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
 
   return (
     <li
-      className={["ct-row", `faction-${entry.faction}`, active ? "active" : "", entry.hidden ? "hidden-entry" : ""].filter(Boolean).join(" ")}
+      className={["ct-row", `faction-${entry.faction}`, active ? "active" : "", entry.hidden ? "hidden-entry" : "", aimers.length ? "targeted" : ""].filter(Boolean).join(" ")}
       data-ct={entry.id}
+      data-targeted={aimers.length || undefined}
+      // Ctrl+click a row targets that creature (or drops it), as on its token (FG's tracker targeting).
+      onClickCapture={(event) => {
+        if (!(event.ctrlKey || event.metaKey) || (event.target as HTMLElement).closest("input, select, textarea")) return;
+        event.preventDefault();
+        event.stopPropagation();
+        session.ct("target", { targetId: entry.id });
+      }}
       // The GM drags a creature onto the map: its token goes where it falls (FG's tracker to the map).
       draggable={gm}
       onDragStart={(event) => {
@@ -133,7 +145,16 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
           )}
         </button>
         <span className="ct-name">
-          <b>{entry.name}</b>
+          <b>
+            {entry.name}
+            {aimers.length ? (
+              <span className="ct-targeted" title={`Targeted by ${aimers.map((aimer) => aimer.name).join(", ")}`} aria-label={`Targeted by ${aimers.map((aimer) => aimer.name).join(", ")}`}>
+                {aimers.slice(0, 4).map((aimer) => (
+                  <i key={aimer.id} style={{ color: aimer.color }} />
+                ))}
+              </span>
+            ) : null}
+          </b>
           <small>
             {FACTION_LABEL[entry.faction]}
             {entry.hidden ? " · hidden" : ""}
