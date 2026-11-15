@@ -142,6 +142,13 @@ try {
   // The Cleric in a fight, on its turn (Turn undead on the sheet and the tracker).
   await tool("kraken_combat", { action: "add", recordId: ids["Sister Ada"] });
   await tool("kraken_combat", { action: "next" });
+  // An undead foe for Turn undead to work on (the Game Master's Guide's Skeleton), the Cleric's turn kept.
+  const npcs = await tool("kraken_records_list", { type: "npc", name: "skeleton" });
+  const skeleton = (npcs.records ?? npcs).find((item) => /skeleton/i.test(item.name));
+  assert(skeleton, "a Skeleton among the monsters");
+  await tool("kraken_combat", { action: "add", recordId: skeleton.id });
+  const fight = await tool("kraken_combat", { action: "view" });
+  await tool("kraken_combat", { action: "set-turn", id: fight.entries.find((entry) => entry.recordId === ids["Sister Ada"]).id });
 
   // A character's sheet among the open ones (marked by its name field, which is a property, not an attribute).
   const sheetOf = async (where, name) => {
@@ -192,12 +199,14 @@ try {
   }
 
   // Every control, pressed once by the player (the GM's own where only the GM may).
-  const press = async (what, act, read) => {
+  // raw: keep the numbers in what was posted (a roll whose dice were fixed first).
+  const press = async (what, act, read, raw = false) => {
     const before = await chatCount();
     await act();
     await settle(1200);
     const result = read ? await read() : null;
-    presses.push({ what, result, posted: await chatSince(before) });
+    const lines = await tool("kraken_chat_log", { count: 400 });
+    presses.push({ what, result, posted: raw ? (Array.isArray(lines) ? lines.slice(before) : []).map((line) => `${line.text ?? ""} ${line.roll?.label ?? ""} ${line.roll?.total ?? ""}`.trim()) : await chatSince(before) });
   };
   const tab = async (sheet, id) => {
     await sheet.locator(`[data-sheet-tab="${id}"]`).click();
@@ -215,10 +224,11 @@ try {
   await tab(sheet, "main");
   await press("strength score", () => type(sheet.locator('[aria-label="strength score"]'), 13), async () => (await dataOf(ada)).abilities.strength);
   await press("strength roll", () => sheet.locator('[data-roll-check="strength"]').click());
-  await press("roll modifier then a wisdom roll", async () => {
+  await press("roll modifier then a wisdom roll (a 10 fixed)", async () => {
+    await tool("kraken_dice_force", { values: [10] });
     await sheet.locator('[aria-label="Roll modifier"]').fill("2");
     await sheet.locator('[data-roll-check="wisdom"]').click();
-  });
+  }, null, true);
   await sheet.locator('[aria-label="Roll modifier"]').fill("0");
   await press("AC misc", () => type(sheet.locator('[aria-label="AC misc"]'), 1), async () => (await dataOf(ada)).ac);
   await press("damage taken", () => type(sheet.locator('[aria-label="Damage taken"]'), 2), async () => (await dataOf(ada)).hp);
@@ -241,6 +251,7 @@ try {
   const itemName = await first.locator("span").first().textContent();
   await press("carried", () => first.locator("select").selectOption("1"), async () => Object.values((await dataOf(ada)).inventorylist).map((item) => [item.name, item.carried]));
   await press("count", () => type(first.locator('input[aria-label$=" count"]'), 2), async () => Object.values((await dataOf(ada)).inventorylist).map((item) => [item.name, item.count]));
+  await press("count 0", () => type(first.locator('input[aria-label$=" count"]'), 0), async () => first.locator('input[aria-label$=" count"]').inputValue());
   await press("a coin", () => type(sheet.locator('.five-coins input').first(), 7), async () => Object.values((await dataOf(ada)).coins).map((coin) => [coin.name, coin.amount]));
   await press("drop an item", () => sheet.locator(`[aria-label="Drop ${itemName?.split(" ")[0]}"], [data-item] button.ghost`).first().click(), async () => Object.values((await dataOf(ada)).inventorylist).map((item) => item.name).sort());
   await tab(sheet, "notes");
@@ -262,6 +273,13 @@ try {
   const skill = await sheet.locator("[data-skill]").first().getAttribute("data-skill");
   await press("thief misc", () => type(sheet.locator(`[data-skill="${skill}"] input`), 5), async () => (await dataOf(ids["Pip Underbough"])).thiefskills[skill]);
   await press("thief roll", () => sheet.locator(`[data-roll-skill="${skill}"]`).click());
+  await tab(sheet, "combat");
+  await press("attack (not in a fight)", () => sheet.locator('[data-attack] [data-action="attack"]').first().click());
+  await press("damage", () => sheet.locator('[data-attack] [data-action="damage"]').first().click());
+  // At 0 hit points: the main tab's warning.
+  await tab(sheet, "main");
+  const pip = await dataOf(ids["Pip Underbough"]);
+  await press("damage to 0 hit points", () => type(sheet.locator('[aria-label="Damage taken"]'), pip.hp.total), async () => [await sheet.locator('[data-status="Dead"]').count(), await sheet.locator('[data-stat="hp"]').textContent()]);
 
   // The GM: the experience, a level up, the loyalty.
   await tool("kraken_windows", { action: "open", kind: "sheet", record: ids["Pip Underbough"] });

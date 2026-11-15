@@ -10,7 +10,7 @@ export function FieldView({ spec, scope, base = "" }: { spec: FieldSpec; scope: 
   const { editable, change, act, modifiers } = sheet;
   const path = base ? `${base}.${spec.path}` : spec.path;
   const raw = at(scope.row ?? scope.data, spec.path);
-  const value = raw === undefined || raw === null || raw === "" ? spec.default : raw;
+  const value = raw === undefined || raw === null || raw === "" || (spec.zeroIsEmpty && num(raw) === 0) ? spec.default : raw;
   const label = textOf(spec.label, scope, modifiers);
   const title = spec.title ? textOf(spec.title, scope, modifiers) : undefined;
   // Who types: the owner and the GM, the GM only (edit: "gm"), or no one.

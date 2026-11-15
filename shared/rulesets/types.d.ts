@@ -42,6 +42,7 @@ export interface FieldSpec {
   when?: Cond;
   show?: string; // shown: this template instead of the path's value ("{className} {level}")
   lines?: boolean; // a textarea of a list: one item a line
+  zeroIsEmpty?: boolean; // 0 shows the default too (a count of 0 shows 1, as the hand-made sheets did)
 }
 
 export interface RollSpec {
