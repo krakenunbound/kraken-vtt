@@ -1680,6 +1680,8 @@ textarea.cc-field.tall { min-height: 220px; }
 .forged-roll { flex: 1; text-align: left; }
 .forged-advance button { margin: 2px; }
 .forged-condition { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 8px; }
+.forged-condition .cc-inline { display: flex; flex-wrap: wrap; }
+.forged-condition .cc-inline select { min-width: 0; max-width: 100%; }
 .forged-traumas span { display: inline-block; margin: 2px 4px 2px 0; padding: 1px 6px; border-radius: 8px; background: rgba(192, 57, 43, 0.25); }
 .forged-harm-row { display: grid; grid-template-columns: 1.2rem 1fr 1fr 5rem; gap: 4px; align-items: center; margin: 3px 0; }
 .forged-harm-row[data-harm-level="3"] { grid-template-columns: 1.2rem 2fr 5rem; }
