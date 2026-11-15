@@ -149,6 +149,16 @@ try {
   await tool("kraken_token_update", { id: gob.id, unidentified: "Small shape" });
   view = server.agent.viewFor("Ann");
   assert(goblinOf(view).name === "Small shape" && !JSON.stringify(view).includes("Goblin") && !("unidentified" in goblinOf(view)), "the unidentified name, never the real one");
+  // The tracker and chat call it what the players call it too.
+  const since = ann.inbox.length;
+  await tool("kraken_combat", { action: "add", entry: { name: "Goblin", tokenId: gob.id, faction: "foe" } });
+  await tool("kraken_chat_send", { text: "The Goblin snarls at Ann." });
+  const snarl = await latest(ann, "chat", (m) => /snarls/.test(m.text), "the line about the goblin");
+  const tracked = await latest(ann, "combat", (m) => m.combat.entries.some((entry) => entry.tokenId === gob.id), "the goblin on Ann's tracker");
+  assert(snarl.text === "The Small shape snarls at Ann." && tracked.combat.entries.find((entry) => entry.tokenId === gob.id).name === "Small shape", `tracker and chat use the unidentified name: ${snarl.text}`);
+  assert(!ann.inbox.slice(since).some((m) => (m.type === "chat" || m.type === "combat") && JSON.stringify(m).includes("Goblin")), "no tracker or chat frame names the goblin to Ann");
+  assert(server.agent.combat.entries().some((entry) => entry.name === "Goblin"), "the GM's tracker keeps its real name");
+  await tool("kraken_combat", { action: "end" });
   assert(view.tokens.find((t) => t.id === annToken.id).healthShow === "bar", "a health bar");
   assert(server.agent.map.viewFor({ role: "dm", name: "GM" }, "").tokens.find((t) => t.id === gob.id).unidentified === "Small shape", "the GM sees what players call it");
   await tool("kraken_table_options", { healthPc: "dot", names: "hover" });

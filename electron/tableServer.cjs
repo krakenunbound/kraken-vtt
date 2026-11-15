@@ -839,8 +839,17 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
   });
   // What a player is sent with every unidentified item called by its unidentified name (a weapon's
   // attack on the tracker, a line in chat): the GM's seat gets it as it is (records.cjs hideNames).
+  // A creature whose token has a "players call it" name (FG's unidentified name) is called that too, in
+  // the tracker and chat, unless another token of the same name is known by it.
   function forPlayer(client, value) {
-    return client.role === "dm" ? value : hideNames(value, records.hiddenNames());
+    if (client.role === "dm") return value;
+    const tokens = map.tokens();
+    const creatures = tokens.filter((token) => token.unidentified && token.name && token.name.trim().length >= 3 && token.unidentified !== token.name);
+    if (!creatures.length) return hideNames(value, records.hiddenNames());
+    const names = new Map(records.hiddenNames());
+    const known = new Set(tokens.filter((token) => !token.unidentified).map((token) => token.name));
+    for (const token of creatures) if (!known.has(token.name)) names.set(token.name.trim(), token.unidentified);
+    return hideNames(value, names);
   }
   // A token stepped into a trap, a pit or a teleport (mapState.cjs): the GM is
   // told, by name and note, in a line only the GM sees, and on the map; a trap
