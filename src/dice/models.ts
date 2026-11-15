@@ -150,10 +150,15 @@ function engravedTexture(value: string, color: string, font: DiceFont = "classic
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.font = (FONT_FACES[font] ?? FONT_FACES.classic)(value.length > 1 ? (font === "bold" ? 116 : 132) : font === "bold" ? 148 : 162);
-  ctx.fillStyle = "rgba(0,0,0,.6)";
-  ctx.fillText(value, 132, 136);
-  ctx.fillStyle = color;
-  ctx.fillText(value, 128, 128);
+  // Fate's plus and minus are short, fat bars, so a minus turned on its side still reads as a minus, not "|".
+  const bars = value === "+" ? [[56, 104, 144, 48], [104, 56, 48, 144]] : value === "−" ? [[56, 104, 144, 48]] : null;
+  const draw = (dx: number, fill: string) => {
+    ctx.fillStyle = fill;
+    if (bars) for (const [x, y, w, h] of bars) ctx.fillRect(x + dx, y + dx, w, h);
+    else ctx.fillText(value, 128 + dx, 128 + dx);
+  };
+  draw(4, "rgba(0,0,0,.6)");
+  draw(0, color);
   if (value === "6" || value === "9") ctx.fillRect(91, 204, 74, 8);
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
