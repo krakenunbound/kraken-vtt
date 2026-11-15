@@ -66,6 +66,10 @@ export type SceneRegion = {
   name: string;
   trap: boolean;
   polygons: number[][];
+  // What it does at the table (Foundry's behaviours): a trap (Pause Game), a pit,
+  // difficult terrain (Modify Movement Cost) or a teleport (Teleport Token).
+  kind?: "trap" | "pit" | "difficult" | "teleport" | null;
+  cost?: number;
 };
 
 export const CATEGORY_COLOR: Record<WallCategory, string> = {
@@ -338,9 +342,19 @@ export function readRegions(value: unknown): SceneRegion[] {
         const record = asRecord(shape);
         const points = Array.isArray(record?.points) ? record.points.filter((item) => typeof item === "number") : [];
         if (points.length >= 6) polygons.push(points);
+        else if (record?.type === "rectangle") {
+          const x = asNumber(record.x, 0);
+          const y = asNumber(record.y, 0);
+          const width = asNumber(record.width, 0);
+          const height = asNumber(record.height, 0);
+          if (width > 0 && height > 0) polygons.push([x, y, x + width, y, x + width, y + height, x, y + height]);
+        }
       }
     }
-    return [{ id: asString(region._id, `region-${index}`), name, trap: isTrap(name), polygons }];
+    // Its behaviours say what it does; else its name.
+    const types = (Array.isArray(region.behaviors) ? region.behaviors : []).map((behavior) => asString(asRecord(behavior)?.type, "")).filter(Boolean);
+    const kind = types.includes("teleportToken") ? "teleport" : types.includes("pauseGame") ? (/pit/i.test(name) ? "pit" : "trap") : types.includes("modifyMovementCost") || /difficult/i.test(name) ? "difficult" : /pit/i.test(name) ? "pit" : isTrap(name) ? "trap" : null;
+    return [{ id: asString(region._id, `region-${index}`), name, trap: kind === "trap" || kind === "pit" || isTrap(name), polygons, kind }];
   });
 }
 

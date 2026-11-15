@@ -287,6 +287,55 @@ weather with masks, mark traps and regions, generate a dungeon, and play test.
   Share) opens the map on every player's screen, even where a player closed
   it.
 
+**At play on the map.**
+
+- **Measuring:** right-drag. While it is held, a left click (or Space) drops a
+  waypoint and Backspace takes the last one back; each leg's length shows at
+  its end and the whole by the pointer. Everyone on the map sees your ruler as
+  you draw it, in your colour. How a diagonal counts is **Settings > Tokens and
+  measuring > Diagonals** (every square one, 5-10-5, or a straight line); a
+  scene may set its own in its **Scene** settings (Grid). From one token to
+  another the ruler counts their difference in height too.
+- **What players see on tokens** (Settings > Tokens and measuring, as FG's
+  options): the health of your creatures and of the characters as a bar, a
+  bar on hover, a dot, a dot on hover, or off; names on hover, always, or off.
+  What is off is never sent to a player's browser. A token's right-click menu
+  has **Players call it**: the name players see until they know better ("a
+  hooded figure").
+- **Fog of war:** what each player has seen of a map stays dimly shown after
+  their tokens move on. Kraken keeps it, per player and map, saved with the
+  campaign, on any browser they join from. **Scene > Reset explored** forgets
+  it for one player or everyone; the eye (player vision preview) shows it.
+- **Senses:** a token's menu shows its senses (from its character's senses
+  line, or its own **Senses** line you type: "Darkvision 60 ft, Blindsight 10
+  ft"). Blindsight perceives what is near even in the dark; tremorsense feels
+  creatures on the ground, through walls; truesight and Devil's Sight see in
+  magical darkness. A light's right-click menu (map editor, Lights) turns it
+  into **magical darkness**: black for players, whatever else lights it.
+- **Undo a move:** Ctrl+Z (or the token menu's Undo move) takes a token's last
+  move back: a player their own, you any. On the combat tracker a token's moves
+  this turn are drawn faintly with how far that was; the path starts again
+  when its turn begins.
+- **Locked movement:** with movement locked, a player can still drag their
+  token: the move waits on your screen (a dashed line to where they want to
+  go) and in the **Moves waiting** strip, with Accept and Cancel for each and
+  for all.
+- **Dragging a token** shows how far, green within its speed (the sheet's Speed), amber within a dash, red past both. It warns; it never stops the move.
+- **Elevation:** Alt+wheel over a token raises or lowers it a square's
+  distance (or the token menu's Elevation); a badge shows its height to everyone.
+- **Traps and regions** from Map Studio (and a Foundry bundle's regions) play
+  at the table. A trap or pit stops a player's token on its first square, tells
+  you its name and note in a line only you see, and locks movement until you
+  unlock it. Difficult terrain costs more on the ruler. A teleport sends whoever
+  steps in to the region it names. You see them as faint outlines; players never
+  get them.
+- **Animated maps:** a map whose picture is a video (.webm, .mp4, as Foundry's
+  animated scenes) plays as the map for everyone.
+- **Sounds on a map:** **Scene > Sounds on this map** places a sound from your
+  library in the middle of the view. Each player hears it when their tokens are
+  near, louder nearer, muffled through walls. You hear what they hear with the
+  eye (player vision preview).
+
 ## Combat
 
 - Add creatures and characters to the **combat tracker** by dragging them in,

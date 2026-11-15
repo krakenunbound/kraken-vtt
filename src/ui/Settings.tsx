@@ -9,6 +9,7 @@ import { Emblem } from "./Emblem";
 import { useWindows } from "./Windows";
 import { SettingRow, SettingsSection, Toggle } from "./SettingsParts";
 import { manifestOf, PANELS } from "../rulesets";
+import { TokenOptionsSection } from "../table/TokenOptions";
 
 // Settings, as FG's settings cog: a button for each thing to set. Everyone
 // sets their own dice; the GM also sets what the whole table sees.
@@ -114,6 +115,7 @@ export function SettingsWindow({ session }: { session: Session }) {
           </SettingRow>
         </SettingsSection>
       ) : null}
+      {gm ? <TokenOptionsSection session={session} /> : null}
       {/* The rows the game adds (its manifest's settings), only in that game. */}
       {(manifestOf(session.ruleset).settings ?? []).map((item) => {
         const ref = "component" in item && (!item.gm || gm) ? item.component : "";

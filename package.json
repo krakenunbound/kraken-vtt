@@ -14,6 +14,8 @@
     "check": "tsx scripts/check-morning.ts && tsx scripts/check-foundry-parity.ts",
     "shot": "node scripts/shot-scene.mjs",
     "map": "node scripts/check-map.mjs",
+    "map-play": "node scripts/check-map-play.mjs",
+    "map-play-ui": "node scripts/verify-map-play-ui.mjs",
     "party": "node scripts/check-party.mjs",
     "combat": "node scripts/check-combat.mjs",
     "attack": "node scripts/check-attack.mjs",
