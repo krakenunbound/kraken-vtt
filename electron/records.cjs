@@ -166,6 +166,13 @@ function hideNames(value, names, depth = 0) {
 // The real name of every unidentified item in these records (items, gear, parcels), with its unidentified name.
 function collectHiddenNames(list) {
   const names = new Map();
+  // Names of identified items the players hold (a character's gear, the party's parcel): known to them,
+  // so a second, unidentified copy of the same name doesn't hide the first one's name in tracker and chat lines.
+  // Only rows of a gear list count (not a sheet's attacks, which copy an unidentified weapon's real name).
+  const known = new Set();
+  const learn = (rows) => {
+    for (const row of Object.values(rows && typeof rows === "object" ? rows : {})) if (row && typeof row.name === "string" && !unidentified(row) && row.name.trim().length >= 3) known.add(row.name.trim());
+  };
   const walk = (value, depth = 0) => {
     if (!value || typeof value !== "object" || depth > 8) return;
     if (unidentified(value) && typeof value.name === "string" && value.name.trim().length >= 3) names.set(value.name.trim(), clean(value.nonid_name, 120) || "Unidentified item");
@@ -175,7 +182,10 @@ function collectHiddenNames(list) {
     if (record.source || !MAY_HOLD_ITEMS.has(record.type)) continue;
     if (record.type === "item" && unidentified(record.data) && record.name.length >= 3) names.set(record.name, clean(record.data.nonid_name, 120) || "Unidentified item");
     walk(record.data);
+    if (record.type === "character") learn(record.data?.inventorylist);
+    if (record.type === "party") learn(record.data?.parcel?.items);
   }
+  for (const name of known) names.delete(name);
   return names;
 }
 // An item's name as the players are told it (a chat line about it).

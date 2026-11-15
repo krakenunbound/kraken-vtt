@@ -227,6 +227,13 @@ try {
   await latest(ann, (m) => m.type === "record" && m.record.id === hero.id && Object.values(m.record.data.inventorylist ?? {}).some((item) => item.name === "Ring of Sunfire"), "the ring identified on the sheet");
   // A player may not identify it themselves.
   assert((await ask(ann, { type: "op", op: "update", id: hero.id, patch: { data: { inventorylist: { [heroRow]: { isidentified: 0 } } } } })).ok === false, "a player cannot change an item's identification");
+  // The ring record is still unidentified, but the copy on Aldric's sheet is known now: a line naming
+  // the real ring reaches the player as written (the same name, one known and one not).
+  assert(agent.records.get(ring.id).data.isidentified === 0, "the ring record itself is still unidentified");
+  ann.raw.length = 0;
+  await tool("kraken_chat_send", { text: "Aldric raises the Ring of Sunfire." });
+  await latest(ann, (m) => m.type === "chat" && /raises the/.test(JSON.stringify(m)), "the line about the known ring");
+  assert(ann.raw.some((frame) => frame.includes("raises the Ring of Sunfire")), `a known item's name is not swapped for its unidentified twin's: ${ann.raw.join("\n").match(/.{40}raises the.{40}/)?.[0]}`);
   // What a sheet works out from an unidentified weapon and armour (5E's attacks, the armour worn), the
   // tracker's view of the character and a chat line about it: none names the real items to the player.
   ann.raw.length = 0;
