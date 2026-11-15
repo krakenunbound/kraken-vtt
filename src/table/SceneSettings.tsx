@@ -5,6 +5,7 @@ export type SceneSettingsPatch = {
   darkness?: number | null;
   grid?: { show?: boolean; alpha?: number | null; color?: string | null; type?: "square" | "hexrow" | "hexcol" | "none" | null; size?: number | null; offsetX?: number | null; offsetY?: number | null; distance?: number | null; units?: string | null; style?: string; thickness?: number };
   weather?: { type?: WeatherType; intensity?: number; direction?: number };
+  diagonal?: string | null;
 };
 
 // FG's lighting presets for an image, as darkness levels.
@@ -22,16 +23,22 @@ export function SceneSettings({
   onSettings,
   onSight,
   onLocked,
+  onResetExplored,
   onClose,
+  children,
 }: {
+  children?: import("react").ReactNode;
   map: TableMap;
   gridDefaults: { alpha: number; color: string };
   onSettings: (patch: SceneSettingsPatch) => void;
   onSight: (on: boolean) => void;
   onLocked: (on: boolean) => void;
+  onResetExplored?: (player: string) => void;
   onClose: () => void;
 }) {
   const grid = map.settings.grid;
+  // The players with tokens here, whose explored areas (fog of war) can be forgotten.
+  const players = [...new Set(map.tokens.map((token) => token.owner).filter((owner) => owner && !owner.startsWith("@")))];
   const weather = map.settings.weather;
   return (
     <aside className="scene-settings" aria-label="Scene settings" onPointerDown={(event) => event.stopPropagation()}>
@@ -73,6 +80,29 @@ export function SceneSettings({
           <input type="checkbox" checked={!map.locked} onChange={(event) => onLocked(!event.target.checked)} />
           Players move their tokens at will
         </label>
+        {onResetExplored ? (
+          <label>
+            Reset explored
+            <select
+              aria-label="Reset explored"
+              data-setting="reset-explored"
+              value="-"
+              title="Forget what a player has explored of this map (the dim areas they have seen), or everyone"
+              onChange={(event) => {
+                const who = event.target.value;
+                if (who !== "-" && window.confirm(who ? `Forget what ${who} has explored of this map?` : "Forget what every player has explored of this map?")) onResetExplored(who);
+              }}
+            >
+              <option value="-">Choose…</option>
+              <option value="">Every player</option>
+              {players.map((name) => (
+                <option key={name} value={name}>
+                  {name}
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : null}
       </fieldset>
 
       <fieldset>
@@ -88,6 +118,15 @@ export function SceneSettings({
         <label>
           Colour
           <input type="color" value={(grid.color ?? gridDefaults.color).slice(0, 7)} onChange={(event) => onSettings({ grid: { color: event.target.value } })} />
+        </label>
+        <label>
+          Diagonals
+          <select aria-label="Diagonals" data-setting="scene-diagonal" value={map.settings.diagonal ?? ""} onChange={(event) => onSettings({ diagonal: event.target.value || null })}>
+            <option value="">The campaign's (Settings)</option>
+            <option value="1">Every square counts one</option>
+            <option value="1.5">5-10-5</option>
+            <option value="raw">Straight line</option>
+          </select>
         </label>
       </fieldset>
 
@@ -109,6 +148,7 @@ export function SceneSettings({
           <input type="range" min={0} max={359} step={5} value={weather.direction} onChange={(event) => onSettings({ weather: { direction: Number(event.target.value) } })} />
         </label>
       </fieldset>
+      {children}
     </aside>
   );
 }

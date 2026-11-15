@@ -95,6 +95,8 @@ function toTable(loaded: LoadedAdventure, urls: string[]): TableAdventure {
         backgroundColor: scene.backgroundColor,
         grid: scene.grid,
         imageUrl,
+        // An animated map: the video loops as the map (MapVideo.tsx).
+        video: /\.(webm|mp4|m4v)$/i.test(scene.backgroundSrc ?? ""),
         offsetX: scene.offsetX,
         offsetY: scene.offsetY,
         scaleX: scene.scaleX,

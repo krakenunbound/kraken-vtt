@@ -299,9 +299,9 @@ window.KrakenStudioAgent = (() => {
       done();
       return {effect: now.id, type, name: now.name};
     },
-    region({kind = 'trap', points, rect, name, note, cost}) {
+    region({kind = 'trap', points, rect, name, note, cost, to}) {
       const outline = rect ? rectPts(rect) : pts(points);
-      const r = window.KrakenRegions.add(outline.flatMap(v => [v.x, v.y]), {kind, name, note, cost});
+      const r = window.KrakenRegions.add(outline.flatMap(v => [v.x, v.y]), {kind, name, note, cost, to});
       return {region: r.id, kind: r.kind, name: r.name};
     },
     // Change anything by id: art (at, size, rotation, opacity, layer, name, hidden), a light's settings,

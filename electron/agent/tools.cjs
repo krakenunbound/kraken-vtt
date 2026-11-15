@@ -1030,10 +1030,17 @@ const TOOLS = [
   {
     name: "kraken_token_move",
     description:
-      "Move a token to a square (col/row, its top-left square), or several together (a group dragged as one, as Foundry's multi-select): ids and dcol/drow, the squares across and down each moves. asPlayer: move them the way their owner would, stopped by walls and closed doors when line of sight is on; the answer says whether a wall stopped one.",
-    inputSchema: object({ id: string("Token id"), col: number("Square across"), row: number("Square down"), ids: { type: "array", items: { type: "string" }, description: "Several tokens moved together" }, dcol: number("Squares across each moves (with ids)"), drow: number("Squares down each moves (with ids)"), asPlayer: { type: "boolean" } }),
+      "Move a token to a square (col/row, its top-left square), or several together (a group dragged as one, as Foundry's multi-select): ids and dcol/drow, the squares across and down each moves. asPlayer: move them the way their owner would, stopped by walls and closed doors when line of sight is on, and springing traps (a player's token stops on a trap's first square, the GM is told its name and note, movement locks) and teleports; the answer says whether a wall stopped one. undo: true takes the token's (id) last move back, as Ctrl+Z or the token menu's Undo move (the GM any token's; a player only their own last move); path: true reads its moves (this turn's path on the combat tracker: it starts again when its turn begins). While movement is locked, players' moves wait as requests (FG's TokenMoveManager, the GM's approval strip on the map): requests: true lists them; approve: a token id, or all, with accept true (move it as its player would) or false (cancel).",
+    inputSchema: object({ id: string("Token id"), col: number("Square across"), row: number("Square down"), ids: { type: "array", items: { type: "string" }, description: "Several tokens moved together" }, dcol: number("Squares across each moves (with ids)"), drow: number("Squares down each moves (with ids)"), asPlayer: { type: "boolean" }, undo: { type: "boolean", description: "Undo the token's last move" }, path: { type: "boolean", description: "Read the token's moves" }, requests: { type: "boolean", description: "List the moves waiting for the GM" }, approve: string("A token id, or all: its waiting move"), accept: { type: "boolean", description: "With approve: true moves it, false cancels" } }),
     run(args, ctx) {
       const { map, seat } = needTable(ctx);
+      if (args.requests) return out(map.moveRequests());
+      if (args.approve) return out(map.approveMoves(args.approve === "all" ? "all" : [args.approve], args.accept !== false, seat));
+      if (args.undo) {
+        const done = map.undoMove(String(args.id ?? ""), seat);
+        return out({ id: done.token.id, ...map.squareOf(done.token), undone: true, left: done.undone - 1 });
+      }
+      if (args.path) return out({ id: args.id, moves: map.path(String(args.id ?? "")).map((move) => ({ from: move.from, to: move.to, by: move.by })), ...map.measure(map.path(String(args.id ?? "")).flatMap((move, index) => (index === 0 ? [move.from.x, move.from.y, move.to.x, move.to.y] : [move.to.x, move.to.y]))) });
       if (Array.isArray(args.ids)) {
         const step = map.squareSize();
         const moves = args.ids.map((id) => {
@@ -1048,14 +1055,15 @@ const TOOLS = [
       const token = map.tokens().find((item) => item.id === args.id);
       if (!token) throw new Error(`No token ${args.id}.`);
       const to = map.squareCenter(args.col, args.row, token.squares);
-      const moved = map.move(args.id, to, seat, { collide: args.asPlayer ? map.sightOn() : false });
-      return out({ id: moved.token.id, ...map.squareOf(moved.token), blocked: moved.blocked });
+      const token2 = map.tokens().find((item) => item.id === args.id);
+      const moved = map.move(args.id, to, args.asPlayer && token2?.owner ? { role: "player", name: token2.owner } : seat, { collide: args.asPlayer ? map.sightOn() : false });
+      return out({ id: moved.token.id, ...map.squareOf(moved.token), blocked: moved.blocked, ...(moved.requested ? { requested: true } : {}), ...(moved.sprang ? { sprang: moved.sprang.name } : {}) });
     },
   },
   {
     name: "kraken_token_update",
     description:
-      "Change a token: name, hidden from players, size in squares, faction, owner (player name), facing (degrees clockwise from up, as FG's token orientation; null: not turned), a carried light (a preset: candle, lamp, torch, lantern, light, a game light profile name such as Torch, none; or {bright, dim, color} in feet), and its sight in the dark in feet (vision; null goes back to the character's senses).",
+      "Change a token: name, hidden from players, size in squares, faction, owner (player name), facing (degrees clockwise from up, as FG's token orientation; null: not turned), a carried light (a preset: candle, lamp, torch, lantern, light, a game light profile name such as Torch, none; or {bright, dim, color} in feet), and its sight in the dark in feet (vision; null goes back to the character's senses); unidentified, the name players see instead of its real one; elevation in feet (a badge on the token, and height counts when measuring to it; a player may change their own token's); senses, its own senses line over its character's (darkvision, blindsight, tremorsense, truesight, Devil's Sight).",
     inputSchema: object({
       id: string("Token id"),
       light: { description: "Preset name, or {bright, dim, color} in feet, or none" },
@@ -1066,6 +1074,9 @@ const TOOLS = [
       faction: { type: "string", enum: ["friend", "neutral", "foe", "none"] },
       owner: string("Player who may move it"),
       facing: { type: ["number", "null"], description: "Degrees clockwise from up" },
+      unidentified: string("The name players see instead of its real one until it is known (FG's unidentified name; \"\" for its own)"),
+      elevation: number("How high it is, in the scene's units (feet): flying, on a ledge; negative below"),
+      senses: string("Its own senses line, over its character's: Darkvision 60 ft, Blindsight 10 ft, Tremorsense 30 ft, Truesight 120 ft, Devil's Sight (\"\": the record's)"),
     }, ["id"]),
     run(args, ctx) {
       const { map, seat } = needTable(ctx);
@@ -1261,7 +1272,7 @@ const TOOLS = [
   {
     name: "kraken_scene_settings",
     description:
-      "The scene's map settings: darkness (0 day .. 1 pitch black; from 0.5 players see only lit places and their darkvision; null returns to the adventure's own), the grid (the map editor's Grid tab: show, alpha, color, type square/hexrow/hexcol/none, size in pixels, offsetX and offsetY in pixels, distance per square and units, style solid/dashed/dotted, thickness; null for a field goes back to the scene's own), and weather (type: none, rain, storm, snow, blizzard, fog, clouds, sandstorm, embers, ash, leaves, water; intensity 0..1; direction in degrees the wind blows toward). Call with nothing to read them.",
+      "The scene's map settings: darkness (0 day .. 1 pitch black; from 0.5 players see only lit places and their darkvision; null returns to the adventure's own), the grid (the map editor's Grid tab: show, alpha, color, type square/hexrow/hexcol/none, size in pixels, offsetX and offsetY in pixels, distance per square and units, style solid/dashed/dotted, thickness; null for a field goes back to the scene's own), and weather (type: none, rain, storm, snow, blizzard, fog, clouds, sandstorm, embers, ash, leaves, water; intensity 0..1; direction in degrees the wind blows toward), and diagonal: how a diagonal square counts when measuring on this scene (1, 1.5 the 5-10-5 count, raw a straight line; null: the campaign's, kraken_table_options diagonal). Call with nothing to read them.",
     inputSchema: object({
       darkness: { type: ["number", "null"] },
       grid: {
@@ -1282,6 +1293,7 @@ const TOOLS = [
         additionalProperties: false,
       },
       weather: { type: "object", properties: { type: { type: "string" }, intensity: { type: "number" }, direction: { type: "number" } }, additionalProperties: false },
+      diagonal: { type: ["string", "null"], enum: ["1", "1.5", "raw", null] },
     }),
     run(args, ctx) {
       const { map, seat } = needTable(ctx);
@@ -1292,7 +1304,7 @@ const TOOLS = [
   {
     name: "kraken_table_options",
     description:
-      "The table's own options. towerReveal: a roll a player drops in the dice tower is shown to that player too (as FG, it is otherwise the GM's alone; the player sees only what went in). towerExternal: the dice tower stands on the table apart from the chat (every seat; each places it where they like), else it is docked in the chat's dice tray. towerStyle: how the tower looks for every seat (kraken_tower lists the looks). motd: the message of the day (FG's), shown to each player as they join: { text, links: quick-slot links (a map: {kind: picture, book, file, label}, a record: {kind: record, record, label}, a book page, a note) }; text \"\" for none. decal: the background decal (kraken_decal chooses one). clearTargets: when a creature's targets clear: never (FG), action (after its spell, or its attack's damage), turn (at the end of its turn). diceHold: how long landed 3D dice lie on the table before they fade, in seconds (0.5 to 60, default 2.6), for every seat. wizard35: the D&D 3.5E character wizard's options (FG's KrakenCharWizard35E options): methods, the ability score methods players may pick (1 4d6 drop lowest arranged, 2 3d6 in order, 3 the standard array 15,14,13,12,10,8, 4 typed by hand; default all four); rollLock: the scores cannot be rolled again; lowReroll: a 4d6 score under 8 may be rerolled once with 3d6, the result stands; vault: the Vault of the Kraken's poor or secondhand gear is free in the wizard's shop. wizard2e: the AD&D 2E character wizard's options, as the FG extension's: rollLock (abilities rolled once only, no re-rolls), methods (the PHB ability methods players may pick: 1 = 3d6 in order, 2 = 3d6 twice keep higher, 3 = 3d6 x6 arrange, 4 = 3d6 x12 keep best 6, 5 = 4d6 drop lowest, 6 = all 8s then place 7d6; none: Method V), gold (starting gold above 1st level: phb one roll, perlevel one roll a level, xlevel one roll times the level). A partial wizard35 or wizard2e changes only what it names. Call with nothing to read them.",
+      "The table's own options. towerReveal: a roll a player drops in the dice tower is shown to that player too (as FG, it is otherwise the GM's alone; the player sees only what went in). towerExternal: the dice tower stands on the table apart from the chat (every seat; each places it where they like), else it is docked in the chat's dice tray. towerStyle: how the tower looks for every seat (kraken_tower lists the looks). motd: the message of the day (FG's), shown to each player as they join: { text, links: quick-slot links (a map: {kind: picture, book, file, label}, a record: {kind: record, record, label}, a book page, a note) }; text \"\" for none. decal: the background decal (kraken_decal chooses one). clearTargets: when a creature's targets clear: never (FG), action (after its spell, or its attack's damage), turn (at the end of its turn). diceHold: how long landed 3D dice lie on the table before they fade, in seconds (0.5 to 60, default 2.6), for every seat. wizard35: the D&D 3.5E character wizard's options (FG's KrakenCharWizard35E options): methods, the ability score methods players may pick (1 4d6 drop lowest arranged, 2 3d6 in order, 3 the standard array 15,14,13,12,10,8, 4 typed by hand; default all four); rollLock: the scores cannot be rolled again; lowReroll: a 4d6 score under 8 may be rerolled once with 3d6, the result stands; vault: the Vault of the Kraken's poor or secondhand gear is free in the wizard's shop. wizard2e: the AD&D 2E character wizard's options, as the FG extension's: rollLock (abilities rolled once only, no re-rolls), methods (the PHB ability methods players may pick: 1 = 3d6 in order, 2 = 3d6 twice keep higher, 3 = 3d6 x6 arrange, 4 = 3d6 x12 keep best 6, 5 = 4d6 drop lowest, 6 = all 8s then place 7d6; none: Method V), gold (starting gold above 1st level: phb one roll, perlevel one roll a level, xlevel one roll times the level). A partial wizard35 or wizard2e changes only what it names. diagonal: how a diagonal square counts when measuring (FG's diagonal option: 1 every square one, default; 1.5 the 5-10-5 count carried across a path's legs; raw a straight line); a scene may set its own (kraken_scene_settings diagonal). healthNpc and healthPc: what players see of the health of the GM's creatures and of the characters on their tokens (FG's token health options: bar, barhover = the bar while the pointer is over the token, dot (default), dothover, off: players are not sent it at all); the GM always sees it. names: token names for players and the GM's screen (off: players are not sent them, but their own; hover, default, as FG; always); a token's unidentified name (kraken_token_update unidentified) is what players get instead of its real one. Call with nothing to read them.",
     inputSchema: object({
       towerReveal: { type: "boolean" },
       towerExternal: { type: "boolean" },
@@ -1302,6 +1314,10 @@ const TOOLS = [
       diceHold: { type: "number" },
       wizard35: { type: "object", properties: { methods: { type: "array", items: { type: "number" } }, rollLock: { type: "boolean" }, lowReroll: { type: "boolean" }, vault: { type: "boolean" } } },
       wizard2e: { type: "object", properties: { rollLock: { type: "boolean" }, methods: { type: "array", items: { type: "number" } }, gold: { type: "string", enum: ["phb", "perlevel", "xlevel"] } } },
+      diagonal: { type: "string", enum: ["1", "1.5", "raw"] },
+      healthNpc: { type: "string", enum: ["bar", "barhover", "dot", "dothover", "off"] },
+      healthPc: { type: "string", enum: ["bar", "barhover", "dot", "dothover", "off"] },
+      names: { type: "string", enum: ["off", "hover", "always"] },
     }),
     run(args, ctx) {
       const agent = needTable(ctx);
@@ -1484,7 +1500,7 @@ const TOOLS = [
   {
     name: "kraken_light",
     description:
-      "Lights on the scene. action list; place (x, y in scene pixels or col/row, bright and dim in feet, color, or a preset: candle, lamp, torch, lantern, light; angle 1-360 and rotation 0-359 degrees for a beam (FG's lantern bullseye: 60); animation none, flicker, pulse, flash or torch, and speed 0..1); update (id and any of those, on, hidden); remove (id).",
+      "Lights on the scene. action list; place (x, y in scene pixels or col/row, bright and dim in feet, color, or a preset: candle, lamp, torch, lantern, light; angle 1-360 and rotation 0-359 degrees for a beam (FG's lantern bullseye: 60); animation none, flicker, pulse, flash or torch, and speed 0..1; darkness true: magical darkness instead of light (the Darkness spell: nothing in its dim radius is lit or seen by darkvision; only truesight, Devil's Sight and blindsight see in it)); update (id and any of those, on, hidden); remove (id).",
     inputSchema: object({
       action: { type: "string", enum: ["list", "place", "update", "remove"] },
       id: string("Light id"),
@@ -1502,6 +1518,7 @@ const TOOLS = [
       rotation: number("Degrees the beam points (0: east, 90: south)"),
       animation: { type: "string", enum: ["none", "flicker", "pulse", "flash", "torch"] },
       speed: number("Animation speed 0..1"),
+      darkness: { type: "boolean", description: "Magical darkness instead of light" },
     }, ["action"]),
     run(args, ctx) {
       const { map, seat } = needTable(ctx);
@@ -1823,18 +1840,20 @@ const TOOLS = [
   {
     name: "kraken_line_of_sight",
     description:
-      "Turn line of sight on or off for the scene (on: players see only what their tokens see, and walls stop their tokens), lock or unlock player token movement, and report what a player sees now: the tokens and doors shown to them.",
-    inputSchema: object({ on: { type: "boolean" }, lockMovement: { type: "boolean", description: "Stop players moving their tokens (FG's token lock)" }, player: string("Player name to look through") }),
+      "Turn line of sight on or off for the scene (on: players see only what their tokens see, and walls stop their tokens), lock or unlock player token movement, and report what a player sees now: the tokens and doors shown to them, and how much of the scene they have explored (fog of war: what they have seen stays dimly shown; the host keeps it per player and scene, saved with the campaign). resetExplored: forget what a player has explored of this scene (their name), or everyone (\"*\"), as the Scene settings' Reset explored.",
+    inputSchema: object({ on: { type: "boolean" }, lockMovement: { type: "boolean", description: "Stop players moving their tokens (FG's token lock)" }, player: string("Player name to look through"), resetExplored: string("A player's name, or * for everyone") }),
     run(args, ctx) {
       const agent = needTable(ctx);
       if (args.on !== undefined) agent.map.setSight(args.on);
       if (args.lockMovement !== undefined) agent.map.setLocked(args.lockMovement);
+      if (args.resetExplored) agent.map.resetExplored(args.resetExplored === "*" ? "" : args.resetExplored, agent.seat);
       const view = args.player ? agent.viewFor(args.player) : null;
       if (view) view.dark = view.darkness;
       return out({
         sight: agent.map.sightOn(),
         lockMovement: agent.map.lockedNow(),
-        ...(view ? { player: args.player, sees: view.tokens.map((token) => token.name), doors: view.doors.map((door) => door.id), limited: Boolean(view.vision) } : {}),
+        ...(view ? { player: args.player, sees: view.tokens.map((token) => token.name), doors: view.doors.map((door) => door.id), limited: Boolean(view.vision), explored: agent.map.exploredFor(args.player).length } : {}),
+        exploredBy: Object.fromEntries(agent.map.exploredPlayers().map((name) => [name, agent.map.exploredFor(name).length])),
       });
     },
   },
@@ -1845,6 +1864,101 @@ const TOOLS = [
     run(args, ctx) {
       const at = needTable(ctx).ping(Number(args.col), Number(args.row));
       return out({ pinged: { col: args.col, row: args.row }, x: at.x, y: at.y });
+    },
+  },
+  {
+    name: "kraken_map_sound",
+    description:
+      "Sounds placed on the map (Foundry's ambient sounds; the map's Scene settings, Sounds on this map): a sound from the library (kraken_sound list: its id) loops at a point; each player hears it while one of their tokens is within its radius (feet), louder nearer, quieter and muffled through walls that stop sound (an open door lets it through). Each player's browser plays it; the GM hears them in the player vision preview. action list (default; player: what that player hears now); add (sound, x, y in scene pixels or col/row, radius, volume 0..1, name); update (id and any of those, on); remove (id).",
+    inputSchema: object({
+      action: { type: "string", enum: ["list", "add", "update", "remove"] },
+      id: string("A placed sound's id"),
+      sound: string("The library sound's id"),
+      name: string("Its name"),
+      x: number("Scene pixels across"),
+      y: number("Scene pixels down"),
+      col: number("Square across"),
+      row: number("Square down"),
+      radius: number("How far it carries, feet (default 30)"),
+      volume: number("0..1 (default 0.8)"),
+      on: { type: "boolean" },
+      player: string("list: what this player hears now"),
+    }),
+    run(args, ctx) {
+      const { map, seat } = needTable(ctx);
+      const { action = "list", id, col, row, player, ...rest } = args;
+      if (Number.isFinite(col) && Number.isFinite(row)) Object.assign(rest, map.squareCenter(col, row, 1));
+      if (action === "list") return out(player ? map.soundsFor(player) : map.mapSounds());
+      if (action === "add") {
+        if (!ctx.table().agent.sounds()?.pick?.(rest.sound)) throw new Error(`No sound "${rest.sound}" in the library (kraken_sound list).`);
+        return out(map.addMapSound(rest, seat));
+      }
+      if (action === "update") return out(map.updateMapSound(String(id ?? ""), rest, seat));
+      map.removeMapSound(String(id ?? ""), seat);
+      return out({ removed: id });
+    },
+  },
+  {
+    name: "kraken_region",
+    description:
+      "Regions of the map (Map Studio's Traps & regions, a bundle's Foundry regions), played at the table: trap and pit (a player's token that steps in stops on its first square, the GM is told its name and note in a line only the GM sees, and movement locks until the GM unlocks it: kraken_line_of_sight lockMovement false), difficult (moving through costs more: cost 2 makes each square count double on the ruler), teleport (whoever steps in goes to its destination: to = another region's name, or {x, y} in scene pixels, or {sceneId, x, y} on a scene the table has opened). Players are never sent traps, pits, teleports or notes. action list (default); add (kind, name, note, points [x, y, ...] in scene pixels or rect {col, row, cols, rows} in squares, cost, to); update (id and any of those, on false to switch it off); remove (id).",
+    inputSchema: object({
+      action: { type: "string", enum: ["list", "add", "update", "remove"] },
+      id: string("Region id"),
+      kind: { type: "string", enum: ["trap", "pit", "difficult", "teleport"] },
+      name: string("Its name"),
+      note: string("The GM's note: what happens"),
+      points: { type: "array", items: { type: "number" }, description: "Corners x, y, x, y ... in scene pixels" },
+      rect: { type: "object", properties: { col: { type: "number" }, row: { type: "number" }, cols: { type: "number" }, rows: { type: "number" } }, description: "A box of squares" },
+      cost: number("Difficult terrain: what a square costs (1 to 5, default 2)"),
+      to: { description: "Teleport: a region's name, {x, y}, or {sceneId, x, y}" },
+      on: { type: "boolean" },
+    }),
+    run(args, ctx) {
+      const { map, seat } = needTable(ctx);
+      const { action = "list", id, rect, ...rest } = args;
+      if (rect) {
+        const a = map.squareCenter(Number(rect.col), Number(rect.row), 1);
+        const half = map.squareSize() / 2;
+        const x0 = a.x - half;
+        const y0 = a.y - half;
+        const x1 = x0 + Number(rect.cols || 1) * map.squareSize();
+        const y1 = y0 + Number(rect.rows || 1) * map.squareSize();
+        rest.points = [x0, y0, x1, y0, x1, y1, x0, y1];
+      }
+      if (action === "list") return out(map.regions());
+      if (action === "add") return out(map.addRegion(rest, seat));
+      if (action === "update") return out(map.updateRegion(String(id ?? ""), rest, seat));
+      map.removeRegion(String(id ?? ""), seat);
+      return out({ removed: id });
+    },
+  },
+  {
+    name: "kraken_ruler",
+    description:
+      "Measure on the map, as a right-drag does (FG's pointer, Foundry's ruler): from the first square through each waypoint to the last, leg by leg and in all, by the table's diagonal rule (the scene's own, else the campaign's: 1 every square one, 1.5 the 5-10-5 count carried across the legs, raw a straight line; kraken_scene_settings diagonal, kraken_table_options diagonal). Difficult terrain regions count their cost. show: everyone at the table sees the ruler for a few seconds, in the measurer's colour, as a person's ruler is shown to every seat as they measure.",
+    inputSchema: object({ squares: { type: "array", items: { type: "object", properties: { col: { type: "number" }, row: { type: "number" } } }, description: "The squares, in order: start, waypoints, end" }, show: { type: "boolean" }, seconds: number("How long it is shown (default 3)") }, ["squares"]),
+    async run(args, ctx) {
+      const agent = needTable(ctx);
+      const map = agent.map;
+      const list = Array.isArray(args.squares) ? args.squares.slice(0, 32) : [];
+      if (list.length < 2) throw new Error("Give two squares or more.");
+      const points = list.flatMap((square) => {
+        const at = map.squareCenter(Number(square.col), Number(square.row), 1);
+        return [at.x, at.y];
+      });
+      const measured = map.measure(points);
+      if (args.show) {
+        agent.ruler(points);
+        setTimeout(() => {
+          try {
+            agent.ruler([]);
+          } catch {
+            /* the table closed */
+          }
+        }, Math.min(30, Math.max(0.5, Number(args.seconds) || 3)) * 1000);
+      }
+      return out({ ...measured, units: map.scene()?.grid?.units ?? "ft", diagonal: map.diagonalNow() });
     },
   },
   {
