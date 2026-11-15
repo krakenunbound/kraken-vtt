@@ -24,6 +24,25 @@ props cut out with rembg (u2net), tiles made seamless by a half-offset blend.
 Still missing (tried twice, rejected: no sparks, not tileable, or a fence H3
 draws from the side): sparking cable, canal water, ironwork fence.
 
+Also missing, found building the Map Studio candidates for the shipped books'
+maps (`scripts/studio-map-*.mjs`), each stood in for as noted:
+
+- **Sci-fi:** lift shaft or ladder well (grating and pipes as rails), work
+  lamp or floodlight mast (a lit console), small sealed metal case (a small
+  cargo container), bare asteroid boulders (the mossy fantasy boulders).
+- **Fantasy:** water wheel and millstone (a ritual platform for the
+  millstone, logs for the wheel), hand cart, beacon basket (a cold campfire),
+  a cold (unlit) brazier, a fresh corpse (a blood stain), an alarm bell,
+  a heavy stone slab door (an iron door).
+- **Stand-ins that mislead:** `Reactor core` is the only reactor or ring
+  art, and it always reads as live and glowing (a crated spare in a hold, a
+  dead skein ring); the open cryo pod is a different shape from the closed
+  ones.
+- **Art that does not read right:** `Blast door` and `Iron bridge` look
+  side-on, `Trapdoor` is painted at an angle, `Puddle` reads as a gold plate,
+  `Ash and soot` reads as flagstones, `Chest` and `Chest, iron` are side
+  views; Texture-brush strokes of `Dry grass` show as pale pills.
+
 ## How to make them so they fit the packs
 
 - **Look:** top-down (straight down, no perspective), hand-painted digital
