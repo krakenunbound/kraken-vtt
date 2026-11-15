@@ -15,7 +15,8 @@ import "./cards.css";
 export type Card = ReturnType<typeof cardsFor>[number];
 export const CARD_DRAG = "application/x-kraken-card";
 const SPARK_COUNT = 14;
-// A weapon card's picture, by its kind (shared/cards weaponKind).
+// The cards' pictures: a weapon's by its kind (shared/cards weaponKind), a spell's by its school
+// (school-<school>), the rest by their artKey (potion, feature-divine, asset-companion...).
 const WEAPON_ART = Object.fromEntries(
   Object.entries(import.meta.glob("../assets/cards/*.webp", { eager: true, query: "?url", import: "default" }) as Record<string, string>).map(([file, url]) => [file.replace(/^.*\/|\.webp$/g, ""), url]),
 );
@@ -92,10 +93,10 @@ function Hand({ session, character }: { session: Session; character: TableRecord
     const timer = window.setTimeout(() => setRestored([]), 600 + back.length * 90);
     return () => window.clearTimeout(timer);
   }, [cards]);
-  if (cards.length === 0) return <p className="hint cards-empty">{character.name} has no spells or weapons to lay out.</p>;
+  if (cards.length === 0) return <p className="hint cards-empty">{character.name} has nothing to lay out as cards yet.</p>;
   const groups = new Map<string, Card[]>();
   for (const card of cards) {
-    const group = card.kind === "weapon" ? "Weapons" : card.level === 0 ? "Cantrips" : `Level ${card.level}`;
+    const group = "group" in card && card.group ? String(card.group) : card.kind === "weapon" ? "Weapons" : card.level === 0 ? "Cantrips" : `Level ${card.level}`;
     groups.set(group, [...(groups.get(group) ?? []), card]);
   }
   return (
@@ -136,7 +137,10 @@ export function AbilityCard({ session, character, card, index, restoredAt = -1 }
   const face = useRef<HTMLDivElement | null>(null);
   const video = useRef<HTMLVideoElement | null>(null);
   const school = SCHOOLS[card.school as keyof typeof SCHOOLS] ?? SCHOOLS.evocation;
-  const still = card.kind === "weapon" ? (WEAPON_ART[card.weaponKind ?? ""] ?? "") : card.art && card.recordId ? session.recordArtUrl(card.recordId, "portrait") : "";
+  const artKey = "artKey" in card ? String(card.artKey ?? "") : "";
+  const still = card.kind === "weapon" ? (WEAPON_ART[card.weaponKind ?? ""] ?? "") : card.art && card.recordId ? session.recordArtUrl(card.recordId, "portrait") : (WEAPON_ART[artKey || `school-${card.school}`] ?? "");
+  // Spells and weapons are cast and attacked with; an item is used; the rest are read (and dragged).
+  const acts = card.kind === "spell" || card.kind === "weapon";
   const moving = card.art && card.recordId ? session.recordArtUrl(card.recordId, "card") : "";
 
   useEffect(() => {
@@ -222,8 +226,8 @@ export function AbilityCard({ session, character, card, index, restoredAt = -1 }
               <Icon name={school.glyph} size={56} />
             </span>
           </div>
-          <span className="kcard-level" title={card.kind === "weapon" ? "Weapon" : card.level ? `Level ${card.level}` : "Cantrip"}>
-            {card.kind === "weapon" ? <Icon name="combat" size={14} /> : card.level || "∞"}
+          <span className="kcard-level" title={card.kind === "weapon" ? "Weapon" : card.kind !== "spell" ? school === SCHOOLS.evocation ? "" : card.kind : card.level ? `Level ${card.level}` : "Cantrip"}>
+            {card.kind === "weapon" ? <Icon name="combat" size={14} /> : card.kind !== "spell" ? <Icon name={school.glyph} size={14} /> : card.level || "∞"}
           </span>
           {card.concentration ? (
             <span className="kcard-conc" title="Concentration">
@@ -232,7 +236,7 @@ export function AbilityCard({ session, character, card, index, restoredAt = -1 }
           ) : null}
           <div className="kcard-title">
             <b>{card.name}</b>
-            <small>{card.kind === "weapon" ? card.range : `${card.school[0].toUpperCase()}${card.school.slice(1)} · ${card.castingtime || "Action"}`}</small>
+            <small>{card.kind === "weapon" ? card.range : card.kind !== "spell" ? card.castingtime || ("group" in card ? String(card.group ?? "") : "") : `${card.school[0].toUpperCase()}${card.school.slice(1)} · ${card.castingtime || "Action"}`}</small>
           </div>
           <div className="kcard-foil" />
         </div>
@@ -260,7 +264,20 @@ export function AbilityCard({ session, character, card, index, restoredAt = -1 }
           </dl>
           <p className="kcard-text">{card.text || "No description in the books."}</p>
           <div className="kcard-actions">
-            {card.kind === "spell" ? (
+            {"use" in card && card.use ? (
+              <button
+                type="button"
+                data-action="card-use"
+                title="Use one (the Supplies count it)"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setCasting(Date.now());
+                  void session.bookkeeping(character.id, "use", { item: "item" in card ? card.item : "" }).catch(() => undefined);
+                }}
+              >
+                Use
+              </button>
+            ) : !acts ? null : card.kind === "spell" ? (
               <button type="button" data-action="card-cast" disabled={card.spent} title={card.spent ? "No slot of this level left" : card.slot && card.slot > card.level ? `Cast with a level ${card.slot} slot` : "Cast it"} onClick={use}>
                 Cast
               </button>
