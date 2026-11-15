@@ -15,6 +15,8 @@ import { agentCommands } from "./agentCommands";
 // entry. A right-click opens the slot's menu: use it, rename it, or clear it.
 // The host keeps each seat's own, with the campaign.
 export const SLOT_DRAG = "text/kraken-slot";
+// A random table's result dragged from its window (into the chat's entry, its words).
+export const TABLE_RESULT_DRAG = "application/x-kraken-table-result";
 
 // What a thing gives a drag, so it can be dropped on a quick slot, into a
 // note or a story: the same link everywhere.

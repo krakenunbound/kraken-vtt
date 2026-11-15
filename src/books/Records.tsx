@@ -2,7 +2,7 @@ import { Fragment, useEffect, useMemo, useState, type ReactNode } from "react";
 import { inlineRollNodes } from "../ui/InlineRolls";
 import type { QuickSlot, Session, TableRecord } from "../session/useSession";
 import { Icon } from "../ui/icons";
-import { slotDrag, useOpenLink } from "../ui/QuickSlots";
+import { slotDrag, TABLE_RESULT_DRAG, useOpenLink } from "../ui/QuickSlots";
 import { recordLabel, statblockFor } from "../rulesets/statblocks";
 import { useBookWindows } from "./Books";
 import { ReadAloudButton } from "./readAloud";
@@ -480,7 +480,19 @@ export function RecordWindow({ session, id, record: given, book }: { session: Se
           </thead>
           <tbody>
             {table.rows.map((row, index) => (
-              <tr key={index}>
+              <tr
+                key={index}
+                draggable
+                data-table-row={index}
+                title="Drag this result into chat"
+                onDragStart={(event) => {
+                  // A result dragged into the chat's entry goes into the line being typed.
+                  const said = row.results.filter(Boolean).join(" · ");
+                  event.dataTransfer.setData(TABLE_RESULT_DRAG, said);
+                  event.dataTransfer.setData("text/plain", said);
+                  event.dataTransfer.effectAllowed = "copy";
+                }}
+              >
                 {table.dice ? <td className="record-table-roll">{row.from === row.to ? row.from : `${row.from}-${row.to}`}</td> : null}
                 {row.results.map((result, column) => (
                   <td key={column}>{result}</td>

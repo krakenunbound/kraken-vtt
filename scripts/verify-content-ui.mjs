@@ -277,6 +277,16 @@ try {
   await seat.fill("form.chat-entry input", "/rollon Lake Rumours");
   await seat.press("form.chat-entry input", "Enter");
   await until(async () => (await tool("kraken_chat_log", { count: 20 })).some((line) => line.roll?.label === "[TABLE] Lake Rumours = 1: The mill grinds bones" && line.from === "A test player"), "the player's /rollon");
+  // A result dragged from the table's window into the chat's entry goes into the line being typed.
+  await seat.click('.sidebar [data-launch="adventure:table"]');
+  await seat.click('[data-campaign-list="table"] >> text=Lake Rumours');
+  await seat.waitForSelector(`.record-window[data-record="${rumours.id}"] tr[data-table-row="1"]`);
+  await seat.fill("form.chat-entry input", "Rumour:");
+  await seat.dragAndDrop(`.record-window[data-record="${rumours.id}"] tr[data-table-row="1"]`, "form.chat-entry input");
+  await seat.waitForFunction(() => document.querySelector("form.chat-entry input")?.value === "Rumour: The ferryman counts twice", null, { timeout: 5000 }).catch(async () => {
+    throw new Error(`the dragged result in the chat entry: ${await seat.inputValue("form.chat-entry input")}`);
+  });
+  await seat.fill("form.chat-entry input", "");
 
   // A note's plain words as written (an old note, or a chat line dropped on Notes): "->" and "&" read as
   // themselves, and stay so through the editor.
