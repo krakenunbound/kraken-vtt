@@ -285,10 +285,10 @@ function nodes(parent: Node, key = "n", onLink?: OnLink, onOpen?: OnOpen): React
       return void out.push(
         onLink ? (
           <a key={id} href="#" className="record-link" onClick={(event) => (event.preventDefault(), onLink(element.getAttribute("class") ?? "", element.getAttribute("recordname") ?? "", words))}>
-            {inner.length ? inner : "Link"}
+            {words}
           </a>
         ) : (
-          <span key={id} className="record-link">{inner.length ? inner : "Link"}</span>
+          <span key={id} className="record-link">{words}</span>
         ),
       );
     }

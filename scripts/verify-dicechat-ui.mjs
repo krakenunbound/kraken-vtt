@@ -116,6 +116,11 @@ try {
   const goblin = await tool("kraken_record_create", { type: "npc", name: "Goblin", data: { hp: 7, ac: 13, text: "<p>A small, vicious raider. Scimitar: [[1d20+4 #Scimitar]], 1d6 + 2 slashing.</p>" } });
   const relic = await tool("kraken_record_create", { type: "item", name: "Moon Amulet", visibility: "all", data: { description: "<p>A silver amulet that glows at night.</p>" } });
   await tool("kraken_party_edit", { members: [hero.id] });
+  // A portrait from the art library, for the speaker's picture in chat.
+  const portraits = await tool("kraken_art", { kind: "portrait", limit: 5 });
+  const portrait = (Array.isArray(portraits) ? portraits : portraits.art ?? portraits.items ?? [])[0]?.id;
+  if (portrait) await tool("kraken_record_update", { id: hero.id, data: { portrait } });
+  const note = await tool("kraken_record_create", { type: "note", name: "Torches", owner: "A test player", visibility: "owner", data: { text: "<p>Each torch burns [[1d6]] hours.</p>" } });
 
   browser = await chromium.launch({ args: ["--mute-audio"], executablePath: CHROME, headless: true });
   const seat = await (await browser.newContext({ viewport: { width: 2560, height: 1440 } })).newPage();
@@ -131,6 +136,12 @@ try {
   await say(seat, "/mod 2 Flanking");
   await drop(seat, ".modifier-box", { "application/x-kraken-number": JSON.stringify({ value: 1, label: "Bless" }) });
   await drop(seat, ".modifier-box", { "text/plain": "-3 Rain" });
+  // An Effects-window entry dropped on the box: its number.
+  await drop(seat, ".modifier-box", { "application/x-kraken-effect": JSON.stringify({ preset: "x" }), "text/plain": "Inspired; ATK: 2" });
+  await seat.waitForSelector('.modifier-slots li[data-modifier-slot="3"]');
+  assert((await seat.textContent('.modifier-slots li[data-modifier-slot="3"]')).includes("Inspired"), "an effect's number dropped on the box");
+  await seat.click('.modifier-slots li[data-modifier-slot="3"]', { button: "right" });
+  await until(async () => (await seat.$$(".modifier-slots li")).length === 3, "the effect's slot taken off");
   await seat.waitForSelector('.modifier-slots li[data-modifier-slot="2"]');
   await seat.click('.modifier-slots li[data-modifier-slot="2"]', { button: "right" });
   await until(async () => (await seat.$$(".modifier-slots li")).length === 2, "a slot taken off");
@@ -153,6 +164,13 @@ try {
   const sneak = (await tool("kraken_chat_log", { count: 3 })).reverse().find((line) => line.roll?.label === "Sneak");
   assert(sneak?.secret && sneak.shownTo === "A test player", "GM and me");
   await seat.selectOption('select[aria-label="Roll mode"]', "public");
+
+  // The speaker's portrait: the player speaks as Hagar.
+  await say(seat, "I climb the wall.");
+  if (portrait) {
+    await page.waitForSelector(`.chat-portrait[data-chat-portrait="${hero.id}"]`);
+    assert(await page.isVisible(`.chat-portrait[data-chat-portrait="${hero.id}"]`), "Hagar's portrait on his line");
+  }
 
   // 3. The GM drops a record into the chat's entry and shares it.
   await drop(page, ".chat-entry", { "text/kraken-slot": JSON.stringify({ kind: "record", record: relic.id, label: "Moon Amulet" }) });
@@ -177,6 +195,26 @@ try {
   }, "the inline roll");
   assert(attack.total === 14, `the inline roll: ${JSON.stringify(attack)}`);
   await seat.screenshot({ path: path.join(shots, "4-player-inline-roll.png") });
+  // In a record's text (the GM's Goblin) and in a note being edited (kept as typed).
+  await tool("kraken_windows", { action: "open", kind: "record", record: goblin.id });
+  await page.waitForSelector('.record-window .inline-roll[data-inline-roll="1d20+4"]');
+  await tool("kraken_dice_force", { values: [12] });
+  await page.click('.record-window .inline-roll[data-inline-roll="1d20+4"]');
+  const scimitar = await until(async () => ((await lastRoll())?.label === "Scimitar" ? lastRoll() : null), "the record's inline roll");
+  assert((await scimitar).total === 16, "the record's chip rolls");
+  assert(await page.isVisible('.record-window .inline-roll[data-inline-roll="1d6+2"]'), "the bare dice in the record's words");
+  await page.screenshot({ path: path.join(shots, "4-gm-record-inline-roll.png") });
+
+  await seat.click('.sidebar [data-launch="notes"]');
+  await seat.click(`text=Torches`).catch(() => undefined);
+  const noteChip = await seat.waitForSelector('.note-window .inline-roll[data-inline-roll="1d6"]', { timeout: 10000 }).catch(() => null);
+  if (noteChip) {
+    await seat.click(".note-window .rt-body");
+    await seat.click(".note-window .note-title");
+    await settle(600);
+    const kept = (await tool("kraken_record_get", { id: note.id })).data.text;
+    assert(kept === "<p>Each torch burns [[1d6]] hours.</p>", `the note keeps its words: ${kept}`);
+  }
 
   // 5. The party's group roll asked of the players.
   await page.click('.sidebar [data-launch="party"]');
@@ -216,6 +254,19 @@ try {
   await seat.click('.sidebar [data-launch="combat"]');
   await seat.waitForSelector(".ct-bar");
   await seat.screenshot({ path: path.join(shots, "6-player-tracker-bars.png") });
+
+  // The GM's tray: a d20 thrown with ADV on and the 3D dice on.
+  await page.click('[data-modifier-key="adv"]');
+  await tool("kraken_dice_force", { values: [5, 17] });
+  await page.click('.dice-tray .tray-die[aria-label="d20"]');
+  await page.click('.dice-pool .play-button');
+  const thrown = await until(async () => {
+    const roll = await lastRoll();
+    return roll?.formula === "2d20kh1" ? roll : null;
+  }, "the tray's d20 with ADV");
+  assert(thrown.total === 17, "two d20s, the higher kept");
+  await settle(2500);
+  await page.screenshot({ path: path.join(shots, "6-gm-tray-adv.png") });
 
   // 7. The Session Log, and the chat's export button.
   await page.click('.sidebar [data-launch="sessionlog"]');

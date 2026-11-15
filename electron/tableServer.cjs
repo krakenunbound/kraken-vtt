@@ -1204,10 +1204,12 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
   // secret: the GM's only, or shown to that one seat too (a name).
   function rollDice(formula, label, from, id, tag, secret = false, extra = null) {
     // The seat's modifier stack, by what the label says the roll is (none for hit points, ongoing damage...).
-    const result = actRoll(formula, extra?.mods === false ? "none" : modifierKind(label), String(label ?? ""));
-    if (extra?.mods === false) {
+    // modKind: a plain roll (the tray, /roll) says so, whatever its label's words.
+    const result = actRoll(formula, extra?.mods === false ? "none" : extra?.modKind ?? modifierKind(label), String(label ?? ""));
+    if (extra && ("mods" in extra || "modKind" in extra)) {
       extra = { ...extra };
       delete extra.mods;
+      delete extra.modKind;
     }
     const roll = { ...result, label: text(label, "").slice(0, 160), ...(tag ? { tag: text(tag, "").slice(0, 80) } : {}), ...(extra ?? {}) };
     addChat({ id, from, text: "", roll, at: Date.now(), ...(secret ? { secret: true } : {}), ...(typeof secret === "string" ? { shownTo: secret } : {}) });
@@ -2191,6 +2193,8 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
       }
 
       if (msg.type === "roll") {
+        // The tray's and /roll's: a plain roll for the modifier box, whatever its label says.
+        const PLAIN = { modKind: "roll" };
         try {
           // The dice tower, as FG's: the GM's roll, marked [TOWER]. Its roller sees
           // what went in (FG's line with the dice, no result) unless the GM
@@ -2198,22 +2202,22 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
           if (msg.tower) {
             const label = `[TOWER] ${text(msg.label, "")}`.trim();
             const reveal = client.role !== "dm" && options.towerReveal;
-            const roll = rollDice(msg.formula, label, client.name, client.id, msg.tag, reveal ? client.name : true);
+            const roll = rollDice(msg.formula, label, client.name, client.id, msg.tag, reveal ? client.name : true, PLAIN);
             if (client.role !== "dm" && !reveal) {
               send(ws, { type: "chat", id: client.id, from: client.name, text: `${label} [${roll.formula}]`, at: Date.now(), tower: true });
             }
           } else if (msg.mode === "blind") {
             // Foundry's /blindroll: the GM sees it, the roller sees only that it was rolled.
-            const roll = rollDice(msg.formula, `[BLIND] ${text(msg.label, "")}`.trim(), client.name, client.id, msg.tag, true);
+            const roll = rollDice(msg.formula, `[BLIND] ${text(msg.label, "")}`.trim(), client.name, client.id, msg.tag, true, PLAIN);
             if (client.role !== "dm") send(ws, { type: "chat", id: client.id, from: client.name, text: `[BLIND] ${text(msg.label, "")} [${roll.formula}]`.replace(/\s+/g, " "), at: Date.now(), tower: true });
           } else if (msg.mode === "gm") {
             // Foundry's /gmroll: the GM and the roller.
-            rollDice(msg.formula, msg.label, client.name, client.id, msg.tag, client.role === "dm" ? true : client.name);
+            rollDice(msg.formula, msg.label, client.name, client.id, msg.tag, client.role === "dm" ? true : client.name, PLAIN);
           } else if (msg.mode === "self") {
             // Foundry's /selfroll: the roller alone.
             const result = actRoll(msg.formula, "roll", text(msg.label, ""));
             addChat({ id: client.id, from: client.name, text: "", roll: { ...result, label: text(msg.label, "").slice(0, 160) }, at: Date.now(), self: true });
-          } else rollDice(msg.formula, msg.label, client.role === "dm" ? (msg.as ? text(msg.as, "").slice(0, 24) : client.name) : speaksAs(client, msg.as) || client.name, client.id, msg.tag);
+          } else rollDice(msg.formula, msg.label, client.role === "dm" ? (msg.as ? text(msg.as, "").slice(0, 24) : client.name) : speaksAs(client, msg.as) || client.name, client.id, msg.tag, false, PLAIN);
         } catch (error) {
           send(ws, { type: "error", reason: error instanceof Error ? error.message : "Could not roll that." });
         }
@@ -3617,7 +3621,8 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
   function linesOf(session) {
     const index = sessions.indexOf(session);
     const end = session.ended ?? sessions[index + 1]?.started ?? Infinity;
-    const live = chat.filter((line) => (line.at ?? 0) >= session.started && (line.at ?? 0) <= end);
+    // What the GM saw: a player's self roll is theirs alone, never in the GM's log.
+    const live = chat.filter((line) => (line.at ?? 0) >= session.started && (line.at ?? 0) <= end && (!line.self || line.gm));
     if (session === thisSession) return live;
     const kept = sessionStore.read(session.id);
     return Array.isArray(kept) && kept.length >= live.length ? kept : live;

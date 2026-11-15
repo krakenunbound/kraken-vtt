@@ -148,7 +148,7 @@ export function BuffBar({ session, at, compact = false }: { session: Session; at
                 role="listitem"
                 data-preset={item.id}
                 draggable
-                onDragStart={(event) => event.dataTransfer.setData(EFFECT_DRAG, JSON.stringify({ preset: item.id }))}
+                onDragStart={(event) => (event.dataTransfer.setData(EFFECT_DRAG, JSON.stringify({ preset: item.id })), event.dataTransfer.setData("text/plain", item.label))}
                 title={item.text}
                 onClick={() => session.effects("apply", { to, preset: item.id })}
               >

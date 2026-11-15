@@ -67,8 +67,11 @@ async function siegeCheck(table, record, { attribute, cl = 0, bonus = 0, addLeve
   const formula = `1d20${modifier >= 0 ? "+" : ""}${modifier}`;
   const name = label || `${attribute[0].toUpperCase()}${attribute.slice(1)} check`;
   const roll = table.roll(formula, `${record.name}: ${name}`, from || record.name);
-  const d20 = roll.terms[0].rolls[0];
-  const result = engine.check({ d20, score: row.score, prime, level, addLevel: add, cl: Number(cl) || 0, bonus: Number(bonus) || 0 }, game);
+  // The kept die, and the modifier box's numbers in the verdict as on the card.
+  const term = roll.terms[0];
+  const d20 = term.kept ? term.rolls.find((_, i) => term.kept[i]) : term.rolls[0];
+  const added = (roll.mods ?? []).reduce((sum, mod) => sum + (Number(mod.value) || 0), 0);
+  const result = engine.check({ d20, score: row.score, prime, level, addLevel: add, cl: Number(cl) || 0, bonus: (Number(bonus) || 0) + added }, game);
   table.say(`${name}: ${result.total} vs CC ${result.cc} (${prime ? "prime" : "secondary"} ${result.cb} + CL ${Number(cl) || 0}) — ${result.success ? "SUCCESS" : "FAILURE"}`, from || record.name);
   return { d20, ...result };
 }

@@ -193,6 +193,15 @@ try {
   await ct({ action: "next" });
   view = await ct({ action: "view" });
   assert(view.active !== acting && view.active !== goblins[1].id, `after it, the order goes on past the one it cut in after (${view.entries.find((entry) => entry.id === view.active)?.name})`);
+  // Back undoes Act now (delaying again, the turn back) and then Delay (its turn again, not delaying).
+  await ct({ action: "prev" });
+  view = await ct({ action: "view" });
+  await ct({ action: "prev" });
+  view = await ct({ action: "view" });
+  assert(view.active === acting && view.entries.find((entry) => entry.id === goblins[1].id).delayed && view.entries.find((entry) => entry.id === goblins[1].id).initresult === goblins[1].initresult, `Back past Act now: delaying again, its old initiative (${JSON.stringify(view.entries.find((entry) => entry.id === goblins[1].id))})`);
+  await ct({ action: "prev" });
+  view = await ct({ action: "view" });
+  assert(view.active === goblins[1].id && !view.entries.find((entry) => entry.id === goblins[1].id).delayed, "Back past Delay: its turn again, not delaying");
   // Skip turns: off keeps a dead goblin's turn.
   await ct({ action: "damage", id: goblins[2].id, amount: 50 });
   await tool("kraken_table_options", { skipDead: "off" });

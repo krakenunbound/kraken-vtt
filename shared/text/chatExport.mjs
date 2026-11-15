@@ -24,6 +24,9 @@ export function lineWords(line) {
   }
   if (line.kind === "emote" && who) said = `${who} ${said}`;
   if (line.to?.length) said = `(to ${line.to.join(", ")}) ${said}`;
+  // Who it was for: the GM's eyes (and the roller's), or the roller alone (the file may go to players).
+  if (line.secret) said = `(GM only) ${said}`;
+  else if (line.self) said = `(self) ${said}`;
   if (line.link?.label && !said.includes(line.link.label)) said = `${said} [${line.link.label}]`.trim();
   if (line.share?.name) said = `${said} (shared: ${line.share.name})`.trim();
   return { who: line.kind === "emote" ? "" : who, said };

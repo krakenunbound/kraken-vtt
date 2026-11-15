@@ -168,6 +168,17 @@ try {
   assert(roll.formula.startsWith("2d20kl1") && roll.formula.endsWith("+3") && roll.terms[0].rolls.length === 2 && roll.mods.length === 2, `a sheet check reads the player's stack: ${JSON.stringify(roll)}`);
   done.push("Max, Half, the GM's stack read by the agent's rolls; a sheet check with DIS and a slot");
 
+  // The verdict moves with the box: a 5E sheet check that fails at DC 15 without it passes with +2.
+  agent.records.update(hero.id, { data: { ruleset: "dnd5e" } }, agent.seat);
+  agent.dice.force([10]);
+  let verdict = await tool("kraken_siege_check", { id: hero.id, kind: "check", attribute: "strength", dc: 15 });
+  assert(verdict.success === false && verdict.total === 13, `without the box: ${JSON.stringify(verdict)}`);
+  await tool("kraken_modifiers", { action: "add", value: 2, label: "Help" });
+  agent.dice.force([10]);
+  verdict = await tool("kraken_siege_check", { id: hero.id, kind: "check", attribute: "strength", dc: 15 });
+  assert(verdict.success === true && verdict.total === 15, `with +2 it succeeds: ${JSON.stringify(verdict)}`);
+  done.push("the verdict moves with the box (a 5E check against its DC)");
+
   // Hit points and ongoing damage never read it.
   await tool("kraken_modifiers", { action: "add", value: 5 });
   agent.roll("1d8", "Hagar: Fighter 4 hit points", "Hagar");
@@ -215,6 +226,25 @@ try {
   await tool("kraken_modifiers", { action: "mode", mode: "public" });
   bob.ws.close();
   done.push("roll modes: GM and me, blind, self; the tracker's rolls too; the agent's ignore it");
+  // Games whose own rolls do not read the box (Ironsworn, Forged in the Dark) still add it to the tray's and /roll's.
+  for (const ruleset of ["Ironsworn", "Forged in the Dark", "Cairn"]) {
+    const other = createTableServer({ ruleset });
+    try {
+      const at = await other.listen({ port: 0, password: "" });
+      const seat = await connect(at.port, { name: "a test player" });
+      seat.send({ type: "modifiers", action: "add", value: 1, label: "Bond" });
+      await settle();
+      other.agent.dice.force([4]);
+      seat.send({ type: "roll", formula: "1d6", label: "Strength check" });
+      await settle();
+      const plain = lastRoll(seat);
+      assert(plain.total === 5 && plain.mods?.[0]?.label === "Bond", `${ruleset}: the tray's roll reads the box: ${JSON.stringify(plain)}`);
+      seat.ws.close();
+    } finally {
+      await other.stop();
+    }
+  }
+  done.push("Ironsworn, Forged in the Dark and Cairn: the tray's rolls read the box");
   console.log(`check-modifiers: ${done.length} groups passed`);
   for (const line of done) console.log(`  ok ${line}`);
   for (const seat of [gm, ann]) seat.ws.close();

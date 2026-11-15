@@ -325,7 +325,9 @@ function partyRollLabel(spec) {
 async function rollForMember(table, member, spec, from) {
   const kind = ["check", "save", "skill"].includes(spec.kind) ? spec.kind : "check";
   const dc = Math.round(Number(spec.dc) || 0);
-  const tag = `[GROUP ${kind.toUpperCase()}]`;
+  // C&C's SiegeCore roll takes the label as its whole name ("[GROUP SAVE] Strength save"); the others put it before their own.
+  const what = String(spec.attribute ?? "");
+  const tag = member.data?.ruleset ? `[GROUP ${kind.toUpperCase()}]` : `[GROUP ${kind.toUpperCase()}] ${what ? `${what[0].toUpperCase()}${what.slice(1)} ` : ""}${kind === "save" ? "save" : "check"}`;
   const result = await siegeCheck(table, member, { kind, attribute: spec.attribute, skill: kind === "skill" ? spec.skill : undefined, dc, cl: dc, label: tag }, from || member.name);
   const total = Number(result?.total ?? result?.score ?? result?.d20 ?? 0);
   return { total: Number.isFinite(total) ? total : 0, success: typeof result?.success === "boolean" ? result.success : null };

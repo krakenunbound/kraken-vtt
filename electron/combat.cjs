@@ -792,7 +792,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       entries: Object.fromEntries(
         state.entries.map((entry) => {
           const life = vitals(entry);
-          return [entry.id, { wounds: life.wounds, temp: life.temp, saves: { ...(deathSaves(entry) ?? { success: 0, failure: 0 }) }, stabilized: Boolean(entry.stabilized), bleedRound: entry.bleedRound ?? -1, targets: [...(entry.targets ?? [])], effects: entry.effects.map((effect) => ({ ...effect })) }];
+          return [entry.id, { wounds: life.wounds, temp: life.temp, saves: { ...(deathSaves(entry) ?? { success: 0, failure: 0 }) }, stabilized: Boolean(entry.stabilized), bleedRound: entry.bleedRound ?? -1, targets: [...(entry.targets ?? [])], effects: entry.effects.map((effect) => ({ ...effect })), delayed: Boolean(entry.delayed), initresult: entry.initresult, actingNow: entry.actingNow ?? null }];
         }),
       ),
     };
@@ -837,6 +837,12 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       }
       if (Boolean(entry.stabilized) === then.stabilized) entry.stabilized = was.stabilized;
       if ((entry.bleedRound ?? -1) === then.bleedRound) entry.bleedRound = was.bleedRound;
+      // Delay and Act now: back as they were.
+      if (Boolean(entry.delayed) === then.delayed) entry.delayed = was.delayed || undefined;
+      if (entry.initresult === then.initresult) entry.initresult = was.initresult;
+      if ((entry.actingNow ?? null) === then.actingNow) entry.actingNow = was.actingNow ?? undefined;
+      if (!entry.delayed) delete entry.delayed;
+      if (!entry.actingNow) delete entry.actingNow;
       if (same(entry.targets ?? [], then.targets) && !same(was.targets, then.targets)) entry.targets = [...was.targets];
       // Effects: those the step ended come back; durations it counted down go back up; any it added go.
       for (const effect of was.effects) {
@@ -3203,9 +3209,12 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       const entry = find(id);
       if (seat.role !== "dm" && owner(entry) !== seat.name) throw new Error("That is not yours to delay.");
       if (state.active !== entry.id) throw new Error(`${entry.name} can delay only on its own turn.`);
-      entry.delayed = true;
-      table().say(`[DELAY] ${entry.name} waits.`, "Combat", Boolean(entry.hidden));
-      await this.next({ role: "dm", name: "Combat" });
+      // One step (Back undoes it whole): it waits, and the turn passes on.
+      await asStep("delay", async () => {
+        entry.delayed = true;
+        table().say(`[DELAY] ${entry.name} waits.`, "Combat", Boolean(entry.hidden));
+        await this.nextStep({ role: "dm", name: "Combat" });
+      });
       return entry;
     },
     // Act now: a delayed creature takes its turn at once, after the one acting now; its initiative becomes theirs.
@@ -3213,18 +3222,20 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       const entry = find(id);
       if (seat.role !== "dm" && owner(entry) !== seat.name) throw new Error("That is not yours.");
       if (!entry.delayed) throw new Error(`${entry.name} is not delaying.`);
-      const now = state.entries.find((item) => item.id === state.active) ?? null;
-      entry.delayed = false;
-      if (now) {
-        entry.initresult = now.initresult;
-        entry.actingNow = now.id;
-      }
-      state.active = entry.id;
-      state.resume = null;
-      if (state.round === 0) state.round = 1;
-      table().say(`[ACT NOW] ${entry.name}`, "Combat", Boolean(entry.hidden));
-      const { options: opts } = await options();
-      await startTurn(entry, opts);
+      await asStep("act now", async () => {
+        const now = state.entries.find((item) => item.id === state.active) ?? null;
+        delete entry.delayed;
+        if (now) {
+          entry.initresult = now.initresult;
+          entry.actingNow = now.id;
+        }
+        state.active = entry.id;
+        state.resume = null;
+        if (state.round === 0) state.round = 1;
+        table().say(`[ACT NOW] ${entry.name}`, "Combat", Boolean(entry.hidden));
+        const { options: opts } = await options();
+        await startTurn(entry, opts);
+      });
       changed();
       return entry;
     },
@@ -3673,7 +3684,9 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       const addLevel = String(opts.SIEGE_ADD_LEVEL ?? "on").toLowerCase() === "on";
       const modifier = engine.abilityBonus(score, game) + (addLevel ? level : 0) + bonus;
       const rolled = table().act(`1d20${modifier >= 0 ? "+" : ""}${modifier}`, castName ? "none" : "save");
-      const result = engine.check({ d20: rolled.terms[0].rolls[0], score, prime, level, addLevel, cl: Math.round(num(cl, 0)), bonus }, game);
+      // The modifier box's numbers count in the verdict as on the card.
+      const added = (rolled.mods ?? []).reduce((sum, mod) => sum + (Number(mod.value) || 0), 0);
+      const result = engine.check({ d20: natural(rolled), score, prime, level, addLevel, cl: Math.round(num(cl, 0)), bonus: bonus + added }, game);
       const label = `[SAVE] ${castName ? `${castName} (${stat[0].toUpperCase()}${stat.slice(1)})` : `${stat[0].toUpperCase()}${stat.slice(1)}`} (${prime ? "Prime" : "Secondary"}) [CB ${result.cb} CL ${Math.round(num(cl, 0))} CC ${result.cc}]${bonus ? ` [EFFECT ${bonus > 0 ? "+" : ""}${bonus}]` : ""} [${result.success ? "SUCCESS" : "FAILURE"} ${result.total} vs ${result.cc}]`;
       table().postRoll(rolled, label, from ?? entry.name, Boolean(entry.hidden), { result: result.success ? "SAVED" : "FAILED", by: entry.name });
       return { name: entry.name, success: result.success, total: result.total, cc: result.cc };
