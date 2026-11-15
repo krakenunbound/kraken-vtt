@@ -43,10 +43,26 @@ const WINDOWS: Record<string, { kind: WindowKind; title: string }> = {
   gmicon: { kind: "gmicons", title: "GM Icon" },
 };
 
-// "/roll 4d6d1 Strength": the dice (one word) and what the roll is for.
+// "/roll 4d6d1 Strength", "/r 1d20 + 5 Climb" or "/r 2d6 + 3 #Damage": the
+// dice (spaces allowed between their parts) and what the roll is for (after #,
+// or the words after the dice).
+const DICE_WORD = /^([+-]|[+-]?(\d*d(\d+|%|f)[a-z0-9<>=!]*|\d+)([+-](\d*d(\d+|%|f)[a-z0-9<>=!]*|\d+))*[+-]?)$/i;
+export function splitRoll(rest: string): { formula: string; label: string } {
+  const text = rest.trim();
+  const hash = text.indexOf("#");
+  if (hash >= 0) return { formula: text.slice(0, hash).replace(/\s+/g, ""), label: text.slice(hash + 1).trim() };
+  const words = text.split(/\s+/).filter(Boolean);
+  let at = 0;
+  while (at < words.length && DICE_WORD.test(words[at])) at += 1;
+  // A sign left hanging at the end belongs to the label ("-" alone is not dice).
+  while (at > 0 && /^[+-]$/.test(words[at - 1])) at -= 1;
+  return { formula: words.slice(0, at).join(""), label: words.slice(at).join(" ") };
+}
+
 function rollWith(mode: RollMode) {
   return (rest: string, context: CommandContext) => {
-    const [formula = "", ...label] = rest.trim().split(/\s+/);
+    const { formula, label: said } = splitRoll(rest);
+    const label = said ? [said] : [];
     if (!formula) return context.session.note("Give the dice, like /roll 1d20+3 Strength. 4d6d1 drops the lowest, 4d6k3 keeps the highest three, 3d6! explodes.");
     // The host adds the modifier box (and its keys) to the roll.
     context.session.roll(formula, label.join(" "), "", mode === "public" && context.tower, mode, context.speakAs);
@@ -81,7 +97,7 @@ function percent(rest: string, low: number, high: number) {
 
 export const COMMANDS: Command[] = [
   // --- Dice ---------------------------------------------------------------
-  { names: ["roll", "r", "die"], args: "[dice] <for>", help: "Roll for everyone: 1d20+3, 4d6d1 (drop lowest), 4d6k3 (keep highest 3), 2d20kh1, 3d6! (explode), 4d6r1 (reroll 1s), 6d10cs>=7 (successes), 4dF, d%", group: "Dice", run: rollWith("public") },
+  { names: ["roll", "r", "die"], args: "[dice] <for>", help: "Roll for everyone: 1d20+3 (spaces allowed: 1d20 + 3; #label: /r 2d6 + 3 #Damage), 4d6d1 (drop lowest), 4d6k3 (keep highest 3), 2d20kh1, 3d6! (explode), 3d6xo (once), 4d6r1 (reroll 1s once), 4d6rr1 (until not 1), 4d6min2, 4d6max5, 6d10cs>=7 (successes), 6d10cf<3 (failures), 1d20ms>=15 (margin), 4dF, d%. The modifier box and its keys are added by the host", group: "Dice", run: rollWith("public") },
   { names: ["gmroll", "gr"], args: "[dice] <for>", help: "Roll so only the GM and you see it", group: "Dice", run: rollWith("gm") },
   { names: ["blindroll", "br", "tower"], args: "[dice] <for>", help: "Roll for the GM's eyes only (the dice tower): you see only that you rolled", group: "Dice", run: rollWith("blind") },
   { names: ["selfroll", "sr"], args: "[dice] <for>", help: "Roll so only you see it", group: "Dice", run: rollWith("self") },
@@ -136,6 +152,14 @@ export const COMMANDS: Command[] = [
       if (names.length === 0 || !text) return context.session.note("As /w Ann Meet me by the well.  or  /w GM I search the chest.");
       context.session.sendChat(text, { to: names, as: context.speakAs });
     },
+  },
+  {
+    // Foundry's /gm: a whisper to the GM.
+    names: ["gm"],
+    args: "[message]",
+    help: "Whisper to the GM (as /w GM)",
+    group: "Talk",
+    run: (rest, context) => (rest.trim() ? context.session.sendChat(rest.trim(), { to: ["GM"], as: context.speakAs }) : context.session.note("As /gm I pick the lock quietly.")),
   },
   {
     names: ["reply"],
@@ -240,7 +264,7 @@ export const COMMANDS: Command[] = [
   },
   // --- This screen -------------------------------------------------------------
   { names: ["clear"], args: "", help: "Clear the chat on this screen", group: "Screen", run: (_rest, context) => context.session.clearChat() },
-  { names: ["help", "?", "commands"], args: "", help: "Every command", group: "Screen", run: (_rest, context) => context.showHelp() },
+  { names: ["help", "?", "commands"], args: "", help: "Every command (/r rolls dice: /r 1d20+3 Climb)", group: "Screen", run: (_rest, context) => context.showHelp() },
   { names: ["dice"], args: "", help: "Your dice: sets, colours, effects", group: "Screen", run: (_rest, context) => context.openWindow("dice", "Dice") },
   { names: ["settings"], args: "", help: "Settings", group: "Screen", run: (_rest, context) => context.openWindow("settings", "Settings") },
   { names: ["sound", "sounds"], args: "", help: "Sound: your volumes (and the GM's one-shots, ambience, music and triggers)", group: "Screen", run: (_rest, context) => context.openWindow("sound", "Sound") },

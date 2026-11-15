@@ -165,7 +165,8 @@ export type RollTerm =
 export type RollMod = { label: string; value?: number; key?: string };
 export type RollResult = { formula: string; label: string; total: number; terms: RollTerm[]; tag?: string; result?: string; target?: string; against?: number; by?: string; card?: string; apply?: DamageCard; mods?: RollMod[] };
 // The seat's modifier stack (FG's modifier box): up to six labelled numbers, their total, and the keys on (ADV, Cover...).
-export type ModifierStack = { slots: { label: string; value: number }[]; keys: string[]; total: number };
+// mode: who sees this seat's rolls (the chat bar's roll mode, kept by the host).
+export type ModifierStack = { slots: { label: string; value: number }[]; keys: string[]; total: number; mode?: RollMode };
 // A damage or healing roll's card (combat.cjs landOn): each creature it landed on, what it took
 // after its save and resistances, the multiplier the GM chose (null: waiting, autoApply off).
 export type DamageCard = { kind: "damage" | "heal"; type: string; name: string; total: number; auto: boolean; targets: { id: string; name: string; base?: number; taken: number; mult: number | "heal" | null; note?: string; save?: string; hidden?: boolean }[] };
@@ -1508,7 +1509,7 @@ export function useSession() {
     setBookSound: (change: { book: string; page: string; action: "bind" | "unbind" | "add" | "remove"; key?: string; block?: number; id?: string; sound?: string; kind?: string; label?: string }) => send({ type: "book-sound", ...change }),
     // The modifier box beside the tray (the host keeps it, every roll this seat starts reads it).
     modifiers,
-    modify: (change: { action: "add" | "remove" | "set" | "clear" | "key"; value?: number; label?: string; index?: number; key?: string; on?: boolean }) => send({ type: "modifiers", ...change }),
+    modify: (change: { action: "add" | "remove" | "set" | "clear" | "key" | "mode"; value?: number; label?: string; index?: number; key?: string; on?: boolean; mode?: RollMode }) => send({ type: "modifiers", ...change }),
     quickSlots,
     setQuickSlots: (slots: (QuickSlot | null)[]) => {
       setQuickSlotsState(slots);

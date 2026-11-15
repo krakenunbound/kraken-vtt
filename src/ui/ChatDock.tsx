@@ -1009,6 +1009,19 @@ export function ChatDock({ session }: { session: Session }) {
           <option value="">{me || "Yourself"} (out of character)</option>
         </select>
       ) : null}
+      <select
+        className="chat-roll-mode"
+        aria-label="Roll mode"
+        data-roll-mode={session.modifiers.mode ?? "public"}
+        value={session.modifiers.mode ?? "public"}
+        title="Who sees your rolls (Foundry's roll mode): every roll you make, from the tray, a sheet or the tracker, until you change it"
+        onChange={(event) => session.modify({ action: "mode", mode: event.target.value as "public" | "gm" | "blind" | "self" })}
+      >
+        <option value="public">Public roll</option>
+        <option value="gm">{session.role === "dm" ? "Private GM roll" : "GM and me"}</option>
+        {session.role === "dm" ? null : <option value="blind">Blind (GM only)</option>}
+        <option value="self">Self roll (only me)</option>
+      </select>
       {helpOpen || suggestions.length > 0 ? (
         <div className="chat-commands" role="listbox" aria-label="Chat commands">
           {helpOpen ? (

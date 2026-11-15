@@ -987,6 +987,21 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
   }
 
   function addChat(entry) {
+    // The roller's roll mode (the chat bar's): the GM and them, the GM alone, or them alone.
+    const asked = entry.roll && !entry.secret && !entry.self && !entry.to && !entry.tower ? modifiers.modeNow() : null;
+    if (asked) {
+      const { mode, seat } = asked;
+      if (mode === "self") Object.assign(entry, { self: true, id: seat.id });
+      else if (mode === "gm") Object.assign(entry, { secret: true, ...(seat.gm ? {} : { shownTo: seat.name }) });
+      else if (mode === "blind") {
+        entry.secret = true;
+        // The roller sees only that it was rolled (Foundry's blind roll).
+        if (!seat.gm) {
+          const ws = [...clients.entries()].find(([, client]) => client.id === seat.id)?.[0];
+          if (ws) send(ws, { type: "chat", id: seat.id, from: entry.from, text: `[BLIND] ${String(entry.roll.label ?? "").slice(0, 120)} [${entry.roll.formula}]`.replace(/\s+/g, " "), at: Date.now(), tower: true });
+        }
+      }
+    }
     // A roll goes out with the throw its roller just made, for the 3D dice.
     // (A tracker's roll is the agent's: it is thrown by the seat that just asked for it.)
     if (entry.roll) {
@@ -2063,7 +2078,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
       // The seat's modifier stack (FG's modifier box and keys): add, remove, set, clear, key.
       if (msg.type === "modifiers") {
         try {
-          modifiers.act(clearKey(client), { action: msg.action, value: msg.value, label: msg.label, index: msg.index, key: msg.key, on: msg.on, keys: msg.keys });
+          modifiers.act(clearKey(client), { action: msg.action, value: msg.value, label: msg.label, index: msg.index, key: msg.key, on: msg.on, keys: msg.keys, mode: msg.mode });
         } catch (error) {
           send(ws, { type: "error", reason: error instanceof Error ? error.message : "The modifier box could not change." });
         }
@@ -3088,7 +3103,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
         sendMaps();
       }
     };
-    ws.on("message", (raw) => modifierScope(client.joined ? clearKey(client) : "", () => onMessage(raw)));
+    ws.on("message", (raw) => modifierScope(client.joined ? clearKey(client) : "", () => onMessage(raw), client.joined ? { id: client.id, name: client.name, gm: client.role === "dm" } : null));
 
     ws.on("close", (code) => {
       clearTimeout(joinTimer);

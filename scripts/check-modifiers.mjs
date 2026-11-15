@@ -163,8 +163,46 @@ try {
   assert(!roll.mods && (await tool("kraken_modifiers", {})).total === 5, "a hit point roll does not read the stack");
   await tool("kraken_modifiers", { action: "clear" });
 
-  // A game without the stack (Forged in the Dark): nothing applies.
   done.push("hit points left alone");
+
+  // The chat bar's roll mode: every roll the seat makes, the tracker's too; the agent's own rolls ignore it.
+  const bob = await connect(port, { name: "Bob" });
+  const seen = () => ({ ann: ann.lines.length, bob: bob.lines.length, gm: gm.lines.length });
+  ann.send({ type: "modifiers", action: "mode", mode: "gm" });
+  await settle();
+  assert(ann.stacks.at(-1).mode === "gm", "the mode is kept with the seat's stack");
+  let before = seen();
+  ann.send({ type: "roll", formula: "1d20", label: "Sneak" });
+  await settle();
+  assert(ann.lines.length === before.ann + 1 && gm.lines.length === before.gm + 1 && bob.lines.length === before.bob && ann.lines.at(-1).secret && ann.lines.at(-1).shownTo === "a test player", "GM and me: the GM and the roller see it, Bob does not");
+  before = seen();
+  ann.send({ type: "ct", action: "attack", recordId: hero.id, weapon: "w1" });
+  await settle();
+  assert(bob.lines.length === before.bob && ann.lines.length > before.ann, "a tracker attack in that mode too");
+  ann.send({ type: "modifiers", action: "mode", mode: "blind" });
+  await settle();
+  before = seen();
+  ann.send({ type: "roll", formula: "1d20", label: "Perception" });
+  await settle();
+  assert(gm.lines.at(-1).roll && ann.lines.at(-1).tower && !ann.lines.at(-1).roll && bob.lines.length === before.bob, "blind: the GM sees it, the roller only that they rolled");
+  ann.send({ type: "modifiers", action: "mode", mode: "self" });
+  await settle();
+  before = seen();
+  ann.send({ type: "roll", formula: "1d20", label: "Mine" });
+  await settle();
+  assert(ann.lines.at(-1).roll && gm.lines.length === before.gm && bob.lines.length === before.bob, "self: the roller alone");
+  ann.send({ type: "modifiers", action: "mode", mode: "public" });
+  await tool("kraken_modifiers", { action: "mode", mode: "gm" });
+  before = seen();
+  agent.roll("1d6", "The agent's roll", "Agent");
+  await settle();
+  assert(bob.lines.length === before.bob + 1, "the agent's own rolls ignore the GM's mode");
+  gm.send({ type: "roll", formula: "1d6", label: "GM private" });
+  await settle();
+  assert(bob.lines.length === before.bob + 1 && gm.lines.at(-1).secret, "the GM's private roll");
+  await tool("kraken_modifiers", { action: "mode", mode: "public" });
+  bob.ws.close();
+  done.push("roll modes: GM and me, blind, self; the tracker's rolls too; the agent's ignore it");
   console.log(`check-modifiers: ${done.length} groups passed`);
   for (const line of done) console.log(`  ok ${line}`);
   for (const seat of [gm, ann]) seat.ws.close();

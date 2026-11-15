@@ -34,9 +34,12 @@ const cleanSlot = (slot) => {
   if (!Number.isFinite(value) || Math.abs(value) > 999) return null;
   return { label: String(slot?.label ?? "").replace(/\s+/g, " ").trim().slice(0, 40), value };
 };
+// mode: who sees this seat's rolls (the chat bar's roll mode, Foundry's): public, gm (the GM and you), blind (the GM alone), self (you alone).
+const MODES = ["public", "gm", "blind", "self"];
 const cleanStack = (stack) => ({
   slots: (Array.isArray(stack?.slots) ? stack.slots : []).map(cleanSlot).filter(Boolean).slice(0, MAX_SLOTS),
   keys: [...new Set((Array.isArray(stack?.keys) ? stack.keys : []).map((key) => String(key).slice(0, 24)))].slice(0, 16),
+  ...(MODES.includes(stack?.mode) && stack.mode !== "public" ? { mode: stack.mode } : {}),
 });
 const total = (stack) => stack.slots.reduce((sum, slot) => sum + slot.value, 0);
 
@@ -65,11 +68,11 @@ function createModifiers({ saved, keysFor, kindsFor, onChange }) {
   const stacks = new Map(Object.entries(saved && typeof saved === "object" ? saved : {}).map(([key, stack]) => [key, cleanStack(stack)]));
   const view = (key) => {
     const stack = stacks.get(key) ?? { slots: [], keys: [] };
-    return { slots: stack.slots.map((slot) => ({ ...slot })), keys: [...stack.keys], total: total(stack) };
+    return { slots: stack.slots.map((slot) => ({ ...slot })), keys: [...stack.keys], total: total(stack), mode: stack.mode ?? "public" };
   };
   const put = (key, stack) => {
     const clean = cleanStack(stack);
-    if (!clean.slots.length && !clean.keys.length) stacks.delete(key);
+    if (!clean.slots.length && !clean.keys.length && !clean.mode) stacks.delete(key);
     else stacks.set(key, clean);
     onChange?.(key, view(key));
     return view(key);
@@ -98,7 +101,11 @@ function createModifiers({ saved, keysFor, kindsFor, onChange }) {
       const named = stack.slots.filter((slot) => slot.label);
       return put(key, { ...stack, slots: value ? [...named, { label: "", value }].slice(-MAX_SLOTS) : named });
     }
-    if (action === "clear") return put(key, { slots: [], keys: args.keys === false ? stack.keys : [] });
+    if (action === "clear") return put(key, { slots: [], keys: args.keys === false ? stack.keys : [], mode: stack.mode });
+    if (action === "mode") {
+      if (!MODES.includes(args.mode)) throw new Error(`A roll mode: ${MODES.join(", ")}.`);
+      return put(key, { ...stack, mode: args.mode });
+    }
     if (action === "key") {
       const known = keysFor();
       const found = known.find((item) => item.id === String(args.key ?? ""));
@@ -109,7 +116,7 @@ function createModifiers({ saved, keysFor, kindsFor, onChange }) {
       const keys = stack.keys.filter((id) => id !== found.id && (!on || !others.has(id)));
       return put(key, { ...stack, keys: on ? [...keys, found.id] : keys });
     }
-    throw new Error("view, add, remove, set, clear or key?");
+    throw new Error("view, add, remove, set, clear, key or mode?");
   }
 
   // What the stack does to a roll of this kind, from the seat whose request
@@ -161,7 +168,7 @@ function createModifiers({ saved, keysFor, kindsFor, onChange }) {
     if (signed) next = `${next}${signed > 0 ? "+" : ""}${signed}`;
     // What was used goes from the seat's stack now (a later roll of this request keeps reading the snapshot).
     const stack = live(here.key);
-    put(here.key, { slots: here.used.slots ? [] : stack.slots, keys: stack.keys.filter((id) => !here.used.keys.has(id)) });
+    put(here.key, { ...stack, slots: here.used.slots ? [] : stack.slots, keys: stack.keys.filter((id) => !here.used.keys.has(id)) });
     return {
       formula: next,
       finish(result) {
@@ -191,10 +198,19 @@ function createModifiers({ saved, keysFor, kindsFor, onChange }) {
     return planned.finish(dice.roll(planned.formula));
   }
 
-  return { act, view, plan, roll, toJSON: () => Object.fromEntries(stacks) };
+  // The roll mode of the seat whose request this is (a table message's seat; never the agent's).
+  function modeNow() {
+    const here = scope.getStore();
+    if (!here?.seat) return null;
+    const mode = live(here.key).mode ?? "public";
+    return mode === "public" ? null : { mode, seat: here.seat };
+  }
+
+  return { act, view, plan, roll, modeNow, toJSON: () => Object.fromEntries(stacks) };
 }
 
-// Runs fn as a request from the seat `key` ("@gm" for the GM and the agent).
-const run = (key, fn) => scope.run({ key, snapshot: null, used: null }, fn);
+// Runs fn as a request from the seat `key` ("@gm" for the GM and the agent);
+// seat: a table seat's { id, name, gm } (its roll mode applies), none for the agent.
+const run = (key, fn, seat = null) => scope.run({ key, seat, snapshot: null, used: null }, fn);
 
 module.exports = { createModifiers, kindOf, withDie, run, scope, MAX_SLOTS };

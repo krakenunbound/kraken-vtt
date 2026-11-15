@@ -1462,6 +1462,8 @@ textarea.cc-field.tall { min-height: 220px; }
 
 /* FG's identity list under the chat: who a player speaks and rolls as. */
 .chat-identity { margin: 0 8px 6px; font-size: 0.8rem; max-width: calc(100% - 16px); }
+.chat-roll-mode { margin: 0 8px 6px; font-size: 0.78rem; max-width: calc(100% - 16px); }
+.chat-roll-mode:not([data-roll-mode="public"]) { border-color: var(--brass); color: var(--brass); }
 
 /* FG's campaign lists: the lists down the side, a list grouped by category, the sharing icon. */
 .records-window { display: grid; grid-template-columns: 150px 1fr; height: 100%; min-height: 0; }
