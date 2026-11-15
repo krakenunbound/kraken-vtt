@@ -490,7 +490,7 @@ function createBookkeeping(table) {
         amount = Math.max(1, table.roll(`${spec.hp.dice}${mod ? (mod > 0 ? `+${mod}` : `${mod}`) : ""}`, `[REST] ${record.name} heals`, from).total);
       }
       const healed = healBy(amount);
-      words.push(spec.hp === "full" ? "every hit point back" : `${healed} HP back`);
+      words.push(!healed ? "no wounds to heal" : spec.hp === "full" ? "every hit point back" : `${healed} HP back`);
     }
     if (spec.temp && at(data, "hp.temp") !== undefined) setAt(data, "hp.temp", 0);
     if (spec.hitDice && kind === "long") {
