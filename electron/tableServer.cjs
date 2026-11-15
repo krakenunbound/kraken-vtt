@@ -21,8 +21,8 @@ const { modulePicture, importModule, prepareModule } = require("./importers/fgMo
 const { fitsRuleset } = require("./books.cjs");
 
 const MAX_CLIENTS = 16;
-// What a player may not do while the GM has paused the game: move or change tokens, open doors, roll.
-const PAUSE_HOLDS = new Set(["token-place", "token-move", "token-update", "token-remove", "token-undo", "door", "roll", "siege-check", "ct", "template", "effects", "cairn", "fate", "ironsworn", "forged", "party-group", "party-prompt-roll", "starship", "bookkeeping", "rest"]);
+// What a player may not do while the GM has paused the game: move or change tokens, open doors, roll, finish a character wizard or improve a character.
+const PAUSE_HOLDS = new Set(["token-place", "token-move", "token-update", "token-remove", "token-undo", "door", "roll", "siege-check", "ct", "template", "effects", "cairn", "fate", "ironsworn", "forged", "party-group", "party-prompt-roll", "starship", "bookkeeping", "rest", "build-character", "level-up"]);
 
 
 // What a player may do with raw record changes (the GM and the agent may do
