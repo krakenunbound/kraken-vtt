@@ -4,6 +4,7 @@
 // years. A date is a year and a day of that year (0 is its first day), plus
 // an hour and a minute. Shared by the table server (which keeps the date and
 // the notes) and the Calendar window (which draws the year).
+import { rulesetNamed } from "./rulesets/registry.mjs";
 
 const GREYHAWK_WEEK = ["Starday", "Sunday", "Moonday", "Godsday", "Waterday", "Earthday", "Freeday"];
 const month = (name, days, extra = {}) => ({ name, days, ...extra });
@@ -129,9 +130,10 @@ export const CALENDARS = [
   },
 ];
 
-// Each game's own calendar (the GM may choose any).
-const BY_RULESET = { "D&D 5E": "harptos", "D&D 3.5E": "greyhawk", "AD&D 2E": "greyhawk", "Castles & Crusades": "greyhawk", "Pathfinder 1E": "golarion", "Pathfinder 2E": "golarion", Traveller: "imperial", "Descending Darkness": "waning", "Apeira Astra": "astra", "Basic Fantasy": "gregorian" };
-export const calendarFor = (ruleset = "") => BY_RULESET[ruleset] ?? "gregorian";
+// Each game's own calendar (its manifest's calendar; the GM may choose any).
+// Games with no manifest yet keep theirs here.
+const WITHOUT_MANIFEST = { "Pathfinder 1E": "golarion", "Pathfinder 2E": "golarion" };
+export const calendarFor = (ruleset = "") => rulesetNamed(ruleset)?.calendar ?? WITHOUT_MANIFEST[ruleset] ?? "gregorian";
 export const calendarOf = (id) => CALENDARS.find((item) => item.id === id) ?? CALENDARS[0];
 
 // The months of a year (a leap year's extra days added).

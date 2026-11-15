@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { ScorePanel } from "./ScorePanel";
+import { rulesetFor } from "../../shared/rulesets/registry.mjs";
+import { PANELS } from "../rulesets";
 import { Picture } from "../characters/ArtPicker";
 import type { CombatEntry, Session } from "../session/useSession";
 import { Icon } from "../ui/icons";
@@ -7,6 +8,9 @@ import { FateLine } from "./FateLine";
 import { fateTableOf } from "../characters/SheetFate";
 import { ProgressBoxes } from "../characters/SheetIronsworn";
 import { RANK_NAMES, RANKS } from "../../shared/ironsworn/rules.mjs";
+
+// The save box of a game whose manifest names none (C&C's six attributes against a CL).
+const CORE_SAVES = { keys: ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"], modLabel: "CL", modAria: "Save CL", button: "Roll save" };
 
 const FACTION_LABEL = { friend: "Friend", neutral: "Neutral", foe: "Foe" } as const;
 // AD&D 2E's five saving throws.
@@ -25,7 +29,9 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
   const [rounds, setRounds] = useState("");
   const [open, setOpen] = useState(false);
   const [saveStat, setSaveStat] = useState("wisdom");
-  const saveChoices = session.ruleset === "D&D 3.5E" ? ["fortitude", "reflex", "will"] : session.ruleset === "Basic Fantasy" ? ["death", "wands", "paralysis", "breath", "spells"] : session.ruleset === "AD&D 2E" ? ["paralyzation", "rod", "petrification", "breath", "spell"] : session.ruleset === "Traveller" ? ["str", "dex", "end", "int", "edu", "soc"] : session.ruleset === "Apeira Astra" ? ["brawn", "reflex", "grit", "intellect", "training", "presence"] : session.ruleset === "Cairn" ? ["str", "dex", "wil"] : session.ruleset === "Fate Accelerated" ? ["careful", "clever", "flashy", "forceful", "quick", "sneaky"] : session.ruleset === "Fate Core" ? ["Athletics", "Fight", "Notice", "Physique", "Provoke", "Shoot", "Stealth", "Will"] : ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"];
+  // The GM's save box: the stats the game saves with, the modifier's word, the button (its manifest's tracker.saves).
+  const saves = rulesetFor(session.ruleset).tracker?.saves ?? CORE_SAVES;
+  const saveChoices = saves.keys;
   const saveChoice = saveChoices.includes(saveStat) ? saveStat : saveChoices[saveChoices.length - 1];
   const [saveCl, setSaveCl] = useState("0");
   const record = entry.recordId ? session.records[entry.recordId] : null;
@@ -413,11 +419,11 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
               ))}
             </select>
             <label>
-              {session.ruleset === "AD&D 2E" || session.ruleset === "Basic Fantasy" ? "Mod" : session.ruleset === "Traveller" || session.ruleset === "Apeira Astra" ? "DM" : session.ruleset === "D&D 5E" || session.ruleset === "Descending Darkness" || session.ruleset === "D&D 3.5E" ? "DC" : "CL"}
-              <input type="number" value={saveCl} onChange={(event) => setSaveCl(event.target.value)} style={{ width: "3.6rem" }} aria-label={session.ruleset === "AD&D 2E" || session.ruleset === "Basic Fantasy" ? "Save modifier" : session.ruleset === "Traveller" || session.ruleset === "Apeira Astra" ? "Check DM" : session.ruleset === "D&D 5E" || session.ruleset === "D&D 3.5E" ? "Save DC" : "Save CL"} />
+              {saves.modLabel}
+              <input type="number" value={saveCl} onChange={(event) => setSaveCl(event.target.value)} style={{ width: "3.6rem" }} aria-label={saves.modAria} />
             </label>
             <button type="button" onClick={() => session.ct("save", { id: entry.id, attribute: saveChoice, cl: Number(saveCl) || 0 })}>
-              {session.ruleset === "Traveller" || session.ruleset === "Apeira Astra" ? "Roll check" : "Roll save"}
+              {saves.button}
             </button>
           </div>
           <div className="ct-adjust">
@@ -458,8 +464,9 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
 // FG's combat tracker: the round, everyone in initiative order with the
 // active one marked, and the GM's controls along the bottom.
 export function CombatTracker({ session }: { session: Session }) {
-  // Forged in the Dark has no initiative: its Combat window is the Score panel.
-  if (session.ruleset === "Forged in the Dark") return <ScorePanel session={session} />;
+  // A game may replace the tracker with a window of its own, as FG 2E's CTA (Forged in the Dark has no initiative: its Score panel).
+  const Replaced = PANELS[rulesetFor(session.ruleset).tracker?.replace ?? ""];
+  if (Replaced) return <Replaced session={session} />;
   return <InitiativeTracker session={session} />;
 }
 function InitiativeTracker({ session }: { session: Session }) {

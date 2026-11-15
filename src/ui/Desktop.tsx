@@ -11,7 +11,8 @@ import { savedSignIn, type Session } from "../session/useSession";
 import { diceStore } from "../dice/diceStore";
 import { agentCommands } from "./agentCommands";
 import { ChatDock } from "./ChatDock";
-import { FateStrip } from "./FateStrip";
+import { manifestOf, PANELS } from "../rulesets";
+import { has } from "../../shared/rulesets/registry.mjs";
 import { Mark } from "./Emblem";
 import { DecalPicker, SettingsWindow, TableDecal } from "./Settings";
 import { DiceWindow } from "../dice/DiceWindow";
@@ -263,9 +264,15 @@ export function Desktop({
   // opens maps from Images, the Library or a book, and the map window comes to
   // the front by itself: no button for it).
   const mapTool: SidebarEntry[] = scene ? [{ kind: "map", label: "Map", icon: "map", title: sceneName || "Map" }] : [];
+  // The campaign's game: what its manifest switches on (docs/core-ui-design.md, 4.6).
+  const game = manifestOf(session.ruleset);
+  // The combat window, under the game's own word (Forged in the Dark: its Score panel).
+  const combatTool: SidebarEntry = game.combatLabel ? { kind: "combat", label: game.combatLabel, icon: "combat", title: game.combatLabel } : { kind: "combat", label: "Combat", icon: "combat", title: "Combat Tracker", badge: combatBadge };
+  // The game's own windows (starships, oracles, Delve's sites), each only where its feature is on.
+  const gameWindows: SidebarEntry[] = (game.windows ?? []).filter((item) => (!item.gm || gm) && (!item.feature || has(game, item.feature))).map((item) => ({ kind: item.kind as SidebarEntry["kind"], label: item.label, icon: item.icon, title: item.title ?? item.label }));
   const tools: SidebarEntry[] = gm
     ? [
-        session.ruleset === "Forged in the Dark" ? { kind: "combat", label: "Score", icon: "combat", title: "Score" } : { kind: "combat", label: "Combat", icon: "combat", title: "Combat Tracker", badge: combatBadge },
+        combatTool,
         { kind: "assistant", label: "Assistant", icon: "sparkle", title: "DM Assistant" },
         { kind: "studio", label: "Map Studio", icon: "pen", title: "Map Studio" },
         { kind: "players", label: "Players", icon: "players", title: "Players" },
@@ -273,7 +280,7 @@ export function Desktop({
       ]
     : [
         ...mapTool,
-        session.ruleset === "Forged in the Dark" ? { kind: "combat", label: "Score", icon: "combat", title: "Score" } : { kind: "combat", label: "Combat", icon: "combat", title: "Combat Tracker", badge: combatBadge },
+        combatTool,
         { kind: "settings", label: "Settings", icon: "settings", title: "Settings" },
       ];
   const charactersEntry: SidebarEntry = gm
@@ -303,15 +310,12 @@ export function Desktop({
         // Ability cards, for whoever turned them on in Settings (this browser's choice).
         ...(cardsOn ? [{ kind: "cards" as const, label: "Cards", icon: "wand", title: "Cards" }] : []),
         { kind: "party", label: "Party", icon: "party", title: "Party Sheet" },
-        // Starships, in the 2d6 games (Traveller, Apeira Astra).
-        ...(session.ruleset === "Traveller" || session.ruleset === "Apeira Astra" ? [{ kind: "ships" as const, label: "Starships", icon: "ship", title: "Starships" }] : []),
-        // Ironsworn and Starforged: the oracles, for everyone (often played without a GM); Delve's sites, the GM's.
-        ...(session.ruleset === "Ironsworn" || session.ruleset === "Starforged" ? [{ kind: "oracles" as const, label: "Oracles", icon: "sparkle", title: "Oracles" }] : []),
-        ...(session.ruleset === "Ironsworn" && gm ? [{ kind: "delve" as const, label: "Delve Sites", icon: "map", title: "Delve Sites" }] : []),
+        // The game's own windows: starships in the 2d6 games, Ironsworn's oracles and Delve's sites.
+        ...gameWindows,
         { kind: "notes", label: gm ? "Notes" : "Player Notes", icon: "chat", title: gm ? "Notes" : "Player Notes" },
         { kind: "calendar", label: "Calendar", icon: "calendar", title: "Calendar" },
-        // Progress clocks: Forged in the Dark's (shown in any game that has some).
-        ...(session.ruleset === "Forged in the Dark" || session.clocks.clocks.length ? [{ kind: "clocks" as const, label: "Clocks", icon: "hourglass", title: "Clocks" }] : []),
+        // Progress clocks: a game with the clocks feature (Forged in the Dark), or any game that has some.
+        ...(has(game, "clocks") || session.clocks.clocks.length ? [{ kind: "clocks" as const, label: "Clocks", icon: "hourglass", title: "Clocks" }] : []),
         ...(gm || session.options.motd?.text || session.options.motd?.links?.length ? [{ kind: "motd" as const, label: "Message", icon: "flag", title: "Message of the Day" }] : []),
       ],
     },
@@ -573,8 +577,11 @@ export function Desktop({
           </button>
         </div>
       </header>
-      {/* Fate: the scene's aspects and the GM's pool, over the table for everyone. */}
-      {/^Fate /.test(session.ruleset) ? <FateStrip session={session} /> : null}
+      {/* The game's strips over the table for everyone (Fate: the scene's aspects and the GM's pool). */}
+      {(manifestOf(session.ruleset).strips ?? []).map((ref) => {
+        const Strip = PANELS[ref];
+        return Strip ? <Strip key={ref} session={session} /> : null;
+      })}
       {/* The GM's read-aloud with no map up: over the table. */}
       {!anyMapShown ? <ReadAloudBubble now={session.readAloudNow} onDone={session.dismissReadAloud} floating /> : null}
       {banner ? (

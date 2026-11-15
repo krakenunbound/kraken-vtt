@@ -10,6 +10,7 @@ import { TowerArt, towerLook } from "./TowerArt";
 import { agentCommands } from "./agentCommands";
 import { DieShape, Icon } from "./icons";
 import { useWindows } from "./Windows";
+import { rulesetFor } from "../../shared/rulesets/registry.mjs";
 import { openPopOut, PopOutWindow, screenOffset, type ScreenPlace } from "./PopOut";
 
 // Where chat last was in a window of its own (in this browser).
@@ -967,7 +968,7 @@ export function ChatDock({ session }: { session: Session }) {
         </div>
       ) : null}
       <div className="dice-tray" aria-label="Dice tray" style={{ ["--tray-glow" as string]: mine.accent ?? mine.body }}>
-        {(/^Fate /.test(session.ruleset) ? [FATE_SIDES, ...TRAY] : TRAY).map((sides) => (
+        {(rulesetFor(session.ruleset).dice?.extraTray?.includes("dF") ? [FATE_SIDES, ...TRAY] : TRAY).map((sides) => (
           <button
             key={sides}
             type="button"

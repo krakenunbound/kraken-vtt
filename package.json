@@ -74,7 +74,7 @@
     "agent": "node scripts/check-agent.mjs",
     "assistant": "node scripts/check-assistant.mjs",
     "agent-ui": "node scripts/check-agent-ui.mjs",
-    "coverage": "node scripts/check-coverage.mjs",
+    "coverage": "node scripts/check-coverage.mjs && node scripts/check-manifests.mjs",
     "import-check": "node scripts/check-import.mjs",
     "pregens": "node scripts/check-pregens.mjs",
     "character": "node scripts/check-character.mjs",

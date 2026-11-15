@@ -1,0 +1,153 @@
+// The ruleset manifests (shared/<id>/manifest.mjs, docs/core-ui-design.md
+// 4.8): each is checked against the code it names, so a manifest never
+// points at something that is not there. Run by npm run coverage.
+//   - names and ids unique; the campaign screen's list is exactly the manifests' names
+//   - the engine and host module exist; the host message maps to the agent tool named
+//   - every feature is a known FeatureId; every calendar a known calendar
+//   - every Ref (sheet, wizard, strips, tracker.replace, statblocks, settings, party
+//     tabs, custom parts) is a component src/rulesets supplies
+//   - a sheet laid out by the manifest: hooks unique per tab, every field the sheet
+//     lets a player type into matched by the manifest's edit whitelist, and that
+//     whitelist the same as the host's (electron/<id>.cjs builds its regexes from it)
+import { existsSync, readFileSync } from "node:fs";
+import { createRequire } from "node:module";
+import { CALENDARS } from "../shared/calendars.mjs";
+import { CAMPAIGN_RULESETS, FEATURES, MANIFESTS, rulesetNamed } from "../shared/rulesets/registry.mjs";
+
+const require = createRequire(import.meta.url);
+const { listTools } = require("../electron/agent/tools.cjs");
+const tools = new Set(listTools().map((tool) => tool.name));
+const coverage = readFileSync(new URL("./check-coverage.mjs", import.meta.url), "utf8");
+const messageTool = (message) => new RegExp(`^\\s*"?${message.replace(/[-]/g, "\\-")}"?: "(kraken_\\w+)"`, "m").exec(coverage)?.[1];
+// The components src/rulesets supplies, by Ref.
+const supplied = new Set(
+  ["../src/rulesets/index.tsx", "../src/rulesets/statblocks.tsx", "../src/rulesets/parts.tsx"]
+    .map((file) => new URL(file, import.meta.url))
+    .filter((url) => existsSync(url))
+    .flatMap((url) => [...readFileSync(url, "utf8").matchAll(/^\s*"([a-z0-9]+\.[A-Za-z0-9]+)":/gm)].map((match) => match[1])),
+);
+const calendars = new Set(CALENDARS.map((item) => item.id));
+const problems = [];
+const problem = (manifest, text) => problems.push(`${manifest.id}: ${text}`);
+const exists = (file) => existsSync(new URL(`../${file}`, import.meta.url));
+
+// Names and ids.
+const seenNames = new Map();
+const seenIds = new Map();
+for (const manifest of MANIFESTS) {
+  if (!manifest.id || !/^[a-z0-9]+$/.test(manifest.id)) problem(manifest, `the id "${manifest.id}" is not a plain lower-case word`);
+  for (const id of [manifest.id, ...Object.values(manifest.variants ?? {}).map((variant) => variant.id).filter(Boolean)]) {
+    if (seenIds.has(id)) problem(manifest, `the id ${id} is also ${seenIds.get(id)}'s`);
+    seenIds.set(id, manifest.id);
+  }
+  if (!manifest.names?.length) problem(manifest, "no campaign names");
+  for (const name of manifest.names ?? []) {
+    if (seenNames.has(name)) problem(manifest, `the name ${name} is also ${seenNames.get(name)}'s`);
+    seenNames.set(name, manifest.id);
+    if (!CAMPAIGN_RULESETS.includes(name)) problem(manifest, `${name} is not on the campaign screen (CAMPAIGN_RULESETS)`);
+  }
+  for (const name of Object.keys(manifest.variants ?? {})) if (!manifest.names.includes(name)) problem(manifest, `the variant ${name} is not one of its names`);
+}
+for (const name of CAMPAIGN_RULESETS) if (!seenNames.has(name)) problems.push(`the campaign screen lists ${name}, which no manifest names`);
+
+// Each game as it is played: the manifest with its variant applied.
+for (const name of CAMPAIGN_RULESETS) {
+  const manifest = rulesetNamed(name);
+  if (!manifest) continue;
+  const where = { id: `${manifest.id} (${name})` };
+  if (!manifest.blurb?.trim()) problem(where, "no blurb");
+  if (manifest.engine && !exists(manifest.engine)) problem(where, `the engine ${manifest.engine} does not exist`);
+  if (manifest.host?.module && !exists(manifest.host.module)) problem(where, `the host module ${manifest.host.module} does not exist`);
+  if (manifest.host?.tool && !tools.has(manifest.host.tool)) problem(where, `the tool ${manifest.host.tool} does not exist`);
+  if (manifest.host?.message) {
+    const tool = messageTool(manifest.host.message);
+    if (!tool) problem(where, `the message ${manifest.host.message} has no tool in check-coverage.mjs`);
+    else if (manifest.host.tool && tool !== manifest.host.tool) problem(where, `the message ${manifest.host.message} is ${tool}'s, not ${manifest.host.tool}'s`);
+  }
+  for (const feature of manifest.features ?? []) if (!FEATURES.includes(feature)) problem(where, `unknown feature ${feature}`);
+  // A window or tab hangs off a feature (off in a variant: absent there, as Delve in Starforged).
+  for (const item of [...(manifest.windows ?? []), ...(manifest.party?.tabs ?? [])]) if (item.feature && !FEATURES.includes(item.feature)) problem(where, `${item.label} hangs off an unknown feature ${item.feature}`);
+  if (manifest.calendar && !calendars.has(manifest.calendar)) problem(where, `unknown calendar ${manifest.calendar}`);
+  if (!Array.isArray(manifest.party?.currency)) problem(where, "no party.currency");
+  // Every Ref names a component.
+  const refs = [];
+  if (typeof manifest.sheet === "string") refs.push(manifest.sheet);
+  if (typeof manifest.wizard === "string") refs.push(manifest.wizard);
+  else if (manifest.wizard && typeof manifest.wizard.steps === "string") refs.push(manifest.wizard.steps);
+  refs.push(...(manifest.strips ?? []));
+  if (manifest.tracker?.replace) refs.push(manifest.tracker.replace);
+  for (const record of Object.values(manifest.records ?? {})) {
+    if (record.statblock) refs.push(record.statblock);
+    if (record.sheet && record.sheet !== "core") refs.push(record.sheet);
+  }
+  for (const item of manifest.settings ?? []) if ("component" in item) refs.push(item.component);
+  for (const tab of manifest.party?.tabs ?? []) if (tab.component) refs.push(tab.component);
+  if (manifest.sheet && typeof manifest.sheet === "object") refs.push(...checkSheet(where, manifest));
+  for (const ref of refs) if (!supplied.has(ref)) problem(where, `${ref} is not a component in src/rulesets`);
+}
+
+// A manifest-laid-out sheet: its parts' hooks, Refs and edit paths.
+function checkSheet(where, manifest) {
+  const refs = [];
+  const editable = [];
+  // Two kinds of hook a tab must not repeat: a row's data-* name, and a button's data-action.
+  const once = (seen, hook, tab, what) => {
+    if (seen.has(hook)) problem(where, `the ${what} ${hook} is used twice on the ${tab} tab`);
+    seen.add(hook);
+  };
+  const walk = (parts, seen, tab) => {
+    for (const part of parts) {
+      if (part.part === "custom") refs.push(part.component);
+      if (part.part === "row") walk(part.parts, seen, tab);
+      const fields =
+        part.part === "derived" ? part.boxes.flatMap((box) => box.fields ?? [])
+        : part.part === "notes" ? part.fields
+        : part.part === "list" ? [part.select, part.check].filter(Boolean).map((field) => ({ ...field, path: `${part.path}.*.${field.path}` }))
+        : part.part === "statBlock" ? part.rows.flatMap((row) => part.columns.map((column) => ({ ...column.field, path: column.path.replace("{key}", row.key) })))
+        : [];
+      // A field is typed into when it has an input kind (no kind: shown only) and is not edit: "never" or sent as an action.
+      for (const field of fields) if (field.kind && field.kind !== "readonly" && field.edit !== "never" && !field.action) editable.push(field.path);
+      if (part.part === "coins") editable.push(`${part.path}.*.amount`);
+      if (part.part === "list") {
+        editable.push(...(part.remove && !part.remove.action ? [`${part.path}.*`] : []));
+        for (const detail of part.details ?? []) if (detail.format) refs.push(detail.format);
+        for (const action of part.rowActions ?? []) once(seen.actions, action.hook, tab, "data-action");
+      }
+      for (const step of part.part === "derived" ? part.boxes.flatMap((box) => box.steps ?? []) : part.part === "advancement" ? part.rolls : []) once(seen.actions, step.hook, tab, "data-action");
+      if (part.hook && part.part !== "load") once(seen.rows, part.hook, tab, "row hook");
+    }
+  };
+  for (const field of manifest.sheet.header.identity) if (field.kind && field.kind !== "readonly" && field.edit !== "never") editable.push(field.path);
+  for (const tab of manifest.sheet.tabs) walk(tab.parts, { rows: new Set(), actions: new Set() }, tab.id);
+  // The whitelist: every editable path is allowed by the manifest's edit globs.
+  // Rows a list may drop: "inventorylist" -> inventorylist.<id>.
+  const removable = (manifest.edit?.remove ?? []).length ? [`(${manifest.edit.remove.join("|")}).*`] : [];
+  const globs = [...(manifest.edit?.text ?? []), ...(manifest.edit?.number ?? []), ...(manifest.edit?.string ?? []), ...removable];
+  const compiled = globs.map((glob) => globRegex(glob));
+  for (const path of editable) {
+    const sample = path.replace(/\*/g, "id-00001");
+    if (!compiled.some((regex) => regex.test(sample))) problem(where, `the sheet edits ${path}, which the manifest's edit whitelist does not allow`);
+  }
+  // The host builds its whitelist from the manifest: the same regexes.
+  if (manifest.host?.module && manifest.edit) {
+    const host = require(`../${manifest.host.module}`);
+    if (host.EDIT_PATHS) {
+      const mine = ["text", "number", "string"].map((kind) => (manifest.edit[kind] ?? []).map((glob) => globRegex(glob).source).join("|")).concat(removable.map((glob) => globRegex(glob).source));
+      const theirs = ["text", "number", "string"].map((kind) => (host.EDIT_PATHS[kind] ?? []).map((regex) => regex.source).join("|")).concat((host.EDIT_PATHS.remove ?? []).map((regex) => regex.source));
+      if (mine.join("\n") !== theirs.join("\n")) problem(where, `${manifest.host.module}'s EDIT_PATHS are not the manifest's edit globs`);
+    }
+  }
+  return refs;
+}
+// The manifest's edit glob as the host's regex: "*" = one id-n key.
+function globRegex(glob) {
+  return new RegExp(`^${glob.replace(/\./g, "\\.").replace(/\*/g, "id-\\d+")}$`);
+}
+
+const strictLater = FEATURES.filter((feature) => !existsSync(new URL(`../src/core/features/${feature}`, import.meta.url)));
+console.log(`(Not yet strict, docs/core-ui-design.md step 13: ${strictLater.length} features have no src/core/features folder yet.)`);
+if (problems.length) {
+  console.error(problems.join("\n"));
+  process.exit(1);
+}
+console.log(`MANIFESTS_OK ${MANIFESTS.length} manifests, ${CAMPAIGN_RULESETS.length} campaign rulesets, ${supplied.size} components`);
