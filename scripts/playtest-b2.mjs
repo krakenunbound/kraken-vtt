@@ -393,6 +393,7 @@ try {
   await page.screenshot({ path: path.join(tmpdir(), "kraken-playtest-gm.png") });
   // The player's sheet: their character, with its numbers.
   await seat.click('[data-launch="characters"]').catch(() => problem("player", "the player has no Characters button"));
+  await seat.click(".charselect-card.mine").catch(() => problem("player", "Character Selection has no card of theirs"));
   await settle(1000);
   check(await seat.$('[data-character]'), "player", "the player's sheet did not open");
   for (const text of seatErrors) problem("player", "a page error in the player's browser", text);

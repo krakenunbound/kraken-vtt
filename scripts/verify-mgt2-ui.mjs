@@ -158,8 +158,10 @@ try {
   // Ilsa Varn (the agent's build) for the rest: her sheet from the list.
   const built = await tool("kraken_build_character", { owner: "A test player", spec: { name: "Ilsa Varn", homeworld: "Regina", characteristics: { str: 7, dex: 10, end: 8, int: 11, edu: 9, soc: 6 }, career: "Scout", terms: 2, skills: { "Pilot (Small Craft)": 2, "Gun Combat (Slug)": 1, "Vacc Suit": 0 }, gear: ["Autopistol", "Cloth"] } });
   const row = { id: built.id };
-  await seat.waitForFunction((id) => [...document.querySelectorAll('select[aria-label="Character"] option')].some((option) => option.value === id), built.id);
-  await seat.selectOption('select[aria-label="Character"]', built.id);
+  // (As FG: Mira's window closed, then Ilsa's card in Character Selection opens her sheet.)
+  for (const close of await seat.$$('.window:has([data-character]) button[aria-label^="Close"]')) await close.click().catch(() => undefined);
+  await seat.click('.sidebar [data-launch="characters"]');
+  await seat.click(`[data-charselect="${built.id}"]`);
   await seat.waitForFunction(() => document.querySelector('.sheet-mgt2 [data-stat="upp"]')?.textContent.trim() === "7A8B96");
   // A Difficult Pilot (Small Craft) task from the sheet: 2 + DEX 1 = +3; 4 + 3 = 7 against 10.
   await seat.selectOption('[aria-label="Difficulty"]', "10");

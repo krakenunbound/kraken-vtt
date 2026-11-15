@@ -69,6 +69,7 @@ try {
   const view = (await tool("kraken_combat", { action: "view" })).entries;
   console.log(`  tracker: ${view.map((entry) => `${entry.name} init ${entry.initresult} hp ${entry.hp} ac ${entry.ac}${entry.attacks ? ` [${entry.attacks.map((attack) => `${attack.name} ${attack.bonuses?.join("/")} ${attack.damage}`).join("; ")}]` : ""}`).join(" | ")}`);
   await page.click('.sidebar [data-launch="characters"]');
+  await page.click(".charselect-card").catch(() => undefined);
   await page.waitForSelector('.sheet-35 [data-stat="ac"]', { timeout: 15000 }).catch(() => undefined);
   await shot("sheet");
   await page.click('.sidebar [data-launch="books"]');

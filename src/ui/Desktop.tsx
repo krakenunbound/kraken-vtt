@@ -283,12 +283,9 @@ export function Desktop({
         combatTool,
         { kind: "settings", label: "Settings", icon: "settings", title: "Settings" },
       ];
-  const charactersEntry: SidebarEntry = gm
-    ? { kind: "characters", label: "Characters", icon: "character", title: "Characters" }
-    : // With no character yet, FG's Characters button opens Character Selection.
-      characters.length === 0
-      ? { kind: "charselect", label: "Characters", icon: "character", title: "Character Selection", launch: "characters", openOnly: true }
-      : { kind: "characters", label: characters.length === 1 ? "Character" : "Characters", icon: "character", title: characters.length === 1 ? characters[0].name : "My characters" };
+  // FG's Characters button opens Character Selection, for the GM (every character) and a player alike;
+  // a card there opens its sheet in a window of its own (as does a portrait at the top).
+  const charactersEntry: SidebarEntry = { kind: "charselect", label: "Characters", icon: "character", title: "Character Selection", launch: "characters", openOnly: true };
   const cardsOn = useSyncExternalStore(cardsStore.subscribe, cardsStore.settings).on;
   const groups: SidebarGroup[] = [
     {
@@ -340,7 +337,13 @@ export function Desktop({
   const launchers = [...tools, ...groups.flatMap((group) => group.entries)];
   const entryOpen = (entry: SidebarEntry) => windows.windows.some((item) => item.key === (entry.payload ? `${entry.kind}:${entry.payload}` : entry.kind));
   const launch = (entry: SidebarEntry) => (entry.openOnly ? windows.open(entry.kind, entry.title, entry.payload) : windows.toggle(entry.kind, entry.title, entry.payload));
-  const dice = useSyncExternalStore(diceStore.subscribe, diceStore.settings);
+  // The Character Wizard, a new one each time, in a window of its own (which shows the new sheet when it
+  // is done); one still open closes first.
+  const openWizard = () => {
+    for (const item of windows.windows) if (item.kind === "characters" && String(item.payload ?? "").startsWith("new")) windows.close(item.key);
+    windows.open("characters", "Character Wizard", `new-${Date.now()}`);
+  };
+  const dice =useSyncExternalStore(diceStore.subscribe, diceStore.settings);
   // A sheet whose character this seat may no longer see (the GM took it back) closes.
   useEffect(() => {
     for (const item of windows.windows) if (item.kind === "sheet" && item.payload && !session.records[item.payload]) windows.close(item.key);
@@ -480,7 +483,9 @@ export function Desktop({
                   : kinds.find((item) => entryId(item) === command.window || (item.kind === command.window && !item.payload)) ?? kinds.find((item) => item.kind === command.window);
           if (!launcher) throw new Error(`No window "${command.window ?? ""}". Kinds: ${kinds.map((item) => entryId(item)).join(", ")}, sheet.`);
           if (command.action === "open") manager.open(launcher.kind, launcher.title, "payload" in launcher ? launcher.payload : undefined);
+          // (The window's own key: "characters" is the sidebar's Characters, Character Selection's window.)
           if ("payload" in launcher && launcher.payload) key = `${launcher.kind}:${launcher.payload}`;
+          else key = launcher.kind;
         }
         if (command.action === "open") return { opened: key };
         if (!manager.windows.some((item) => item.key === key)) throw new Error(`${key} is not open.`);
@@ -621,14 +626,14 @@ export function Desktop({
               </FloatingWindow>
             ) : (
             <FloatingWindow key={item.key} item={item}>
-              {item.kind === "characters" ? <CharacterPanel session={session} dock={!gm} create={item.payload === "new"} /> : null}
+              {item.kind === "characters" ? <CharacterPanel session={session} create={String(item.payload ?? "").startsWith("new")} /> : null}
               {item.kind === "records" ? <RecordsWindow session={session} only={item.payload} onOpen={(record) => windows.open("record", record.name, record.id)} /> : null}
               {item.kind === "adventure" && item.payload && gm ? <AdventureList session={session} kind={item.payload as AdventureKind} onStory={(path, name) => windows.open("story", name, path)} /> : null}
               {item.kind === "story" && item.payload && gm ? <StoryWindow session={session} path={item.payload} /> : null}
               {item.kind === "record" && item.payload ? <RecordWindow session={session} id={item.payload} /> : null}
               {item.kind === "bookrecord" && item.payload ? <BookRecordWindow session={session} book={item.payload.split("|")[0]} path={item.payload.split("|").slice(1).join("|")} /> : null}
-              {item.kind === "charselect" ? <CharacterSelect session={session} onSheet={(id, name) => windows.open("sheet", name, id)} onWizard={() => windows.open("characters", "Character Wizard", "new")} onClose={() => windows.close(item.key)} /> : null}
-              {item.kind === "sheet" ? <CharacterPanel session={session} dock selected={item.payload ?? null} /> : null}
+              {item.kind === "charselect" ? <CharacterSelect session={session} onSheet={(id, name) => windows.open("sheet", name, id)} onWizard={openWizard} onClose={() => windows.close(item.key)} /> : null}
+              {item.kind === "sheet" ? <CharacterPanel session={session} selected={item.payload ?? null} /> : null}
               {item.kind === "party" ? <PartySheet session={session} /> : null}
               {item.kind === "imagelist" && gm ? <ImagesList session={session} /> : null}
               {item.kind === "assets" && gm ? <AssetsWindow session={session} /> : null}

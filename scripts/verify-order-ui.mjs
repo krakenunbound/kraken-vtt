@@ -105,8 +105,8 @@ try {
   await page.mouse.down();
   await page.mouse.move(title.x + 700, title.y + 200, { steps: 8 });
   await page.mouse.up();
-  await page.click('.window-title:has-text("Characters")');
-  await page.dragAndDrop('.character-list li button:has-text("Borin")', ".combat-tracker");
+  await page.click('.window-title:has-text("Character Selection")');
+  await page.dragAndDrop('.charselect-card:has-text("Borin")', ".combat-tracker");
   await page.waitForFunction(() => document.querySelector(".combat-tracker")?.textContent?.includes("Borin"), null, { timeout: 8000 });
   const fight = await tool("kraken_combat", {});
   assert(JSON.stringify(fight).includes("Borin"), "the host has the dropped character in the fight");

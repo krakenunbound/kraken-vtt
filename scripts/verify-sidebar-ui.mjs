@@ -251,11 +251,14 @@ try {
   await seat.waitForSelector('[data-records-only="siegepackage:race"] .records-name:text-is("Elf")');
   const elf = await byName("Elf", "race");
   await seat.keyboard.press("Escape");
+  // Characters opens Character Selection (FG's); the player's card opens their sheet.
   await seat.evaluate(() => document.querySelector('.sidebar [data-launch="characters"]')?.click());
+  await seat.click(`[data-charselect="${mine.id}"]`);
   await seat.waitForSelector(`.cc-sheet[data-character="${mine.id}"]`, { timeout: 15000 });
   await dropLink(seat, `.cc-sheet[data-character="${mine.id}"] .cc-body`, { kind: "record", record: elf.id, label: "Elf" });
   await until("the player's Elf", async () => (await tool("kraken_record_get", { id: mine.id })).data.race === "Elf");
-  // A blank sheet (FG's Create), the player's own, to fill by hand.
+  // A blank sheet (FG's Create, in Character Selection), the player's own, to fill by hand.
+  await seat.evaluate(() => document.querySelector('.sidebar [data-launch="characters"]')?.click());
   await seat.click('[data-action="blank-character"]');
   const blank = await until("the player's blank character", async () =>
     listOf(await tool("kraken_records_list", { type: "character", owner: "A test player" })).find((item) => item.name === "New character"),

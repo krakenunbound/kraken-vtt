@@ -114,8 +114,9 @@ try {
   assert(Object.values(after.packages).some((pkg) => pkg.name === "Divine Knight" && pkg.hplog.l4 === 8), "hit points logged for level 4");
   assert((await tool("kraken_chat_log", { count: 5 })).some((line) => line.text?.startsWith("[LEVEL UP] Sir Aldric Fane is now Divine Knight 4")), "level up in chat");
 
-  // The sheet in the GM's window, and its Check button.
+  // The sheet in the GM's window (Characters opens Character Selection; the card opens the sheet), and its Check button.
   await page.click('[data-launch="characters"]');
+  await page.click(`[data-charselect="${built.id}"]`);
   await page.waitForSelector(`[data-character="${built.id}"]`);
   assert((await page.locator('[data-stat="ac"]').textContent()) === String(after.ac.total), "sheet AC");
   assert((await page.locator('[data-stat="melee"]').textContent()) === `+${after.attack.melee.total}`, "sheet melee");

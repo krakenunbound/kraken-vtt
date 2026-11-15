@@ -39,6 +39,7 @@ try {
   const built = await tool("kraken_build_character", { spec: { name: "Halvar Runecarver", race: "Dwarf", class: "Fighter", level: 1, scores: { strength: 16, dexterity: 10, constitution: 15, intelligence: 12, wisdom: 12, charisma: 9 }, primes: ["constitution"], gold: 120, gear: [["Hammer, War", 1], ["Studded Leather", 1], ["Backpack", 1], ["Rations (1 day)", 2], ["Torch", 1]], worn: ["Hammer, War", "Studded Leather"], packed: ["Rations (1 day)", "Torch"], container: "Backpack", alignment: "Lawful Neutral", deity: "Moradin", appearance: "An elderly dwarf with a white beard woven with copper wire." } });
   console.log("built", JSON.stringify(built).slice(0, 160));
   await page.click('.sidebar [data-launch="characters"]');
+  await page.click(`[data-charselect="${built.id ?? built.record?.id}"]`);
   await page.waitForSelector(".cc-sheet", { timeout: 15000 });
   for (const tab of ["main", "combat", "abilities", "inventory", "spells", "notes"]) {
     await page.click(`[data-sheet-tab="${tab}"]`);

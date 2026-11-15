@@ -103,6 +103,7 @@ try {
   while ((await tool("kraken_combat", { action: "view" })).active !== view.find((entry) => entry.recordId === priest.id).id) await tool("kraken_combat", { action: "next" });
   console.log(`  turn undead: ${JSON.stringify((await tool("kraken_combat", { action: "turn-undead", recordId: priest.id })).turn)}`);
   await page.click('.sidebar [data-launch="characters"]');
+  await page.click(".charselect-card").catch(() => undefined);
   await page.waitForSelector(".sheet-2e", { timeout: 15000 }).catch(() => undefined);
   await page.screenshot({ path: path.join(tmpdir(), "kraken-2e-real-sheet.png") });
   await tool("kraken_stop_host").catch(() => undefined);

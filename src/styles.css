@@ -147,8 +147,6 @@ select {
 .dock > .chat-pane { flex: 1; padding: 0.75rem; }
 .dock-characters { display: flex; flex-direction: column; gap: 10px; padding: 10px; overflow: auto; flex: 1; }
 .dock-characters .sheet { font-size: 0.92rem; }
-.dock-picker { display: flex; gap: 6px; }
-.dock-picker select { flex: 1; }
 .dock-party { padding: 0.75rem 1rem; overflow: auto; }
 .dock-party h2 { margin: 0; font-size: 1rem; color: var(--muted); font-weight: 600; }
 
@@ -767,9 +765,6 @@ select {
 .roll-total { font-size: 1.15em; color: #f4f1ea; }
 
 .characters { display: grid; grid-template-columns: 240px 1fr; gap: 16px; padding: 16px; min-height: 0; overflow: auto; }
-.character-list ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 4px; }
-.character-list button { width: 100%; display: flex; justify-content: space-between; text-align: left; }
-.character-list button.selected { border-color: #d2a15a; background: rgba(210, 161, 90, 0.12); }
 .sheet { display: grid; gap: 16px; align-content: start; }
 .sheet-head { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; align-items: flex-end; border-bottom: 1px solid rgba(210, 161, 90, 0.4); padding-bottom: 8px; }
 .sheet-head h2 { margin: 0; color: #d2a15a; font-family: Georgia, serif; }

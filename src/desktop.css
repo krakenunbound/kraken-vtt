@@ -465,15 +465,7 @@ span.ct-init { display: inline-block; }
 .tray-die .die-shape { width: 26px; height: 26px; }
 
 /* --- Character sheet --------------------------------------------------------- */
-.window-body > .characters:not(.dock-characters) { display: grid; grid-template-columns: 210px 1fr; gap: 14px; }
 .window-body > .dock-characters { display: flex; flex-direction: column; }
-.dock-picker { justify-content: flex-end; }
-.dock-picker button { padding: 0.3rem 0.7rem; font-size: 0.85rem; }
-.character-list { display: flex; flex-direction: column; gap: 8px; min-height: 0; }
-.character-list ul { overflow: auto; }
-.character-list button { align-items: center; gap: 8px; padding: 6px 8px; background: transparent; }
-.character-list button.selected { background: var(--brass-soft); }
-.character-list .chip-face { width: 30px; height: 30px; flex: none; }
 .list-name { flex: 1; min-width: 0; display: flex; flex-direction: column; text-align: left; }
 .list-name small { font-size: 0.72rem; }
 
@@ -868,9 +860,6 @@ span.ct-init { display: inline-block; }
 .books-ticks label { display: inline-flex; align-items: center; gap: 4px; }
 .books-gm-only { min-width: 62px; font-size: 0.74rem; color: #d9a35c; }
 .books-players { flex: none; padding: 1px 8px; border: 1px solid var(--brass-dim); border-radius: 999px; font-size: 0.72rem; color: #f3dfb3; background: rgba(210, 161, 90, 0.16); }
-.new-character-button { width: 42px; height: 42px; padding: 0; border-radius: 50%; display: grid; place-items: center; color: var(--brass); background: var(--brass-soft); border: 1px solid var(--brass-dim); flex: none; }
-.new-character-button:hover { color: #1a1408; background: var(--brass); border-color: var(--brass); }
-.character-list .new-character-button, .dock-picker .new-character-button { width: 42px; padding: 0; justify-content: center; }
 
 /* The party's Order tab: watch order and formation (FG's) */
 .party-order-grid { display: grid; grid-template-columns: minmax(200px, 260px) minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); gap: 10px; min-height: 0; }
@@ -1189,7 +1178,6 @@ textarea.cc-field.tall { min-height: 220px; }
 .ccw35-summary p { margin: 3px 0; }
 
 /* Characters in and out: import and export beside the new character button. */
-.character-list-buttons { display: flex; align-items: center; gap: 6px; }
 .character-files { position: relative; display: inline-flex; gap: 4px; }
 .character-file-button { width: 34px; height: 34px; padding: 0; border-radius: 50%; display: grid; place-items: center; color: var(--brass); background: transparent; border: 1px solid var(--brass-dim); }
 .character-file-button:hover:not(:disabled) { color: #1a1408; background: var(--brass); border-color: var(--brass); }
@@ -1206,7 +1194,6 @@ textarea.cc-field.tall { min-height: 220px; }
 .window:not(.popped):has(> .window-body .cc-sheet) { overflow: visible; }
 .window:not(.popped) > .window-body:has(.cc-sheet) { overflow: visible; border-radius: 0 0 10px 10px; }
 .window:not(.popped) .characters:has(.cc-sheet) { height: 100%; min-height: 0; box-sizing: border-box; overflow: visible; }
-.window:not(.popped) .characters .character-list { min-height: 0; overflow: auto; }
 
 /* The token: a small round badge on the portrait's bottom-right corner, as before. */
 .cc-portrait-frame { position: relative; width: 150px; height: 150px; }
@@ -1427,7 +1414,15 @@ textarea.cc-field.tall { min-height: 220px; }
 .charselect-text b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .charselect-text small { color: var(--muted); font-size: 0.75rem; }
 .charselect-holder { font-size: 0.78rem; }
-.charselect-filter { width: 100%; box-sizing: border-box; }
+.charselect-buttons .charselect-filter { flex: 1; min-width: 120px; width: auto; }
+.charselect-buttons .charselect-wizard { display: inline-flex; align-items: center; gap: 6px; }
+.charselect-buttons .ghost { display: inline-flex; align-items: center; gap: 6px; }
+.character-file-button.on { color: #1a1408; background: var(--brass); border-color: var(--brass); }
+.charselect-item { position: relative; display: flex; gap: 6px; align-items: center; }
+.charselect-item .charselect-card { flex: 1; min-width: 0; }
+.charselect-tools { display: flex; flex-direction: column; gap: 4px; position: relative; }
+.charselect-tools .character-export-menu { left: auto; right: 0; }
+.charselect-cards > .empty-state { grid-column: 1 / -1; padding: 24px; text-align: center; }
 
 /* FG's identity list under the chat: who a player speaks and rolls as. */
 .chat-identity { margin: 0 8px 6px; font-size: 0.8rem; max-width: calc(100% - 16px); }

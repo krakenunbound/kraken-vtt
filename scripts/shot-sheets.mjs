@@ -11,6 +11,10 @@
 //                                                       the shots compared pixel by pixel (the sheet-only shots must
 //                                                       match exactly; full-screen ones report the pixels that differ)
 //
+//   node scripts/shot-sheets.mjs flow  <root> <out> [games]
+//                                                       the way to a sheet, full screen, GM and player: the table,
+//                                                       the sidebar's Characters, then a card in Character Selection
+//
 // Make once with one build, then shoot with the build before the change and
 // again with the build after it: the same characters in both. games is a
 // comma-separated list of scripts/e2e/rulesets.mjs names (default all).
@@ -71,13 +75,13 @@ if (mode === "diff") {
   process.exit(bad ? 1 : 0);
 }
 
-if (mode !== "make" && mode !== "shoot") {
-  console.log("node scripts/shot-sheets.mjs make <root> [games] | shoot <root> <out> [games] | diff <before> <after>");
+if (mode !== "make" && mode !== "shoot" && mode !== "flow") {
+  console.log("node scripts/shot-sheets.mjs make <root> [games] | shoot <root> <out> [games] | flow <root> <out> [games] | diff <before> <after> [<before again>]");
   process.exit(2);
 }
 const root = rest[0];
-const out = mode === "shoot" ? rest[1] : null;
-const games = gamesFrom(mode === "shoot" ? rest[2] : rest[1]);
+const out = mode === "make" ? null : rest[1];
+const games = gamesFrom(mode === "make" ? rest[1] : rest[2]);
 mkdirSync(root, { recursive: true });
 if (out) mkdirSync(out, { recursive: true });
 const notes = [];
@@ -235,9 +239,57 @@ async function shoot(game) {
     // The player, in Chrome: their characters window.
     browser = await chromium.launch({ executablePath: CHROME, headless: true, args: ["--mute-audio"] });
     const seat = await join(browser, port);
+    // Characters: their sheet (an older build), or Character Selection, where their card opens it (FG's way).
     await seat.click('.sidebar [data-launch="characters"]');
+    await seat.waitForSelector(".cc-sheet, .charselect-card.mine", { timeout: 20000 });
+    if (await seat.$(".charselect-card.mine")) await seat.click(".charselect-card.mine");
     await everyTab(seat, "player", ".cc-sheet");
     console.log(`${game}: shot`);
+  } finally {
+    await browser?.close().catch(() => undefined);
+    child.kill();
+    await app.close().catch(() => undefined);
+  }
+}
+
+// The way to a sheet, full screen, for the GM and the player: the table, then the sidebar's
+// Characters, then (where Characters is Character Selection) a card, which opens the sheet.
+async function flow(game) {
+  const plan = RULESETS[game];
+  if (!existsSync(path.join(root, slugOf(game), "made.json"))) return note(`${game}: not made`);
+  const slug = slugOf(game.replace(/\s*\(SRD\)/, "-srd"));
+  const profile = mkdtempSync(path.join(tmpdir(), "kraken-sheets-"));
+  cpSync(path.join(root, slugOf(game)), profile, { recursive: true });
+  const port = 47800 + Math.floor(Math.random() * 150);
+  const { app, page, child, tool } = await launch(profile, plan);
+  let browser = null;
+  const shot = async (where, file) => {
+    await where.mouse.move(2, 2);
+    await settle(900);
+    await where.screenshot({ path: path.join(out, `${slug}-${file}.png`), animations: "disabled", caret: "hide" }).catch((error) => note(`${file}: ${error.message.split("\n")[0]}`));
+  };
+  const walk = async (where, who, card) => {
+    await shot(where, `${who}-flow-1-table`);
+    await where.click('.sidebar [data-launch="characters"]');
+    await settle(800);
+    await shot(where, `${who}-flow-2-characters`);
+    if (await where.$(card)) {
+      await where.click(card);
+      await where.waitForSelector(".cc-sheet", { timeout: 15000 });
+      await shot(where, `${who}-flow-3-sheet`);
+    }
+  };
+  try {
+    const campaigns = await tool("kraken_campaigns");
+    await tool("kraken_host", { campaignId: (Array.isArray(campaigns) ? campaigns : campaigns.campaigns ?? [])[0].id, port, password: PASSWORD });
+    await page.waitForSelector("text=Hosting", { timeout: 30000 });
+    await settle(2500);
+    await walk(page, "gm", ".charselect-card");
+    browser = await chromium.launch({ executablePath: CHROME, headless: true, args: ["--mute-audio"] });
+    const seat = await join(browser, port);
+    // (A player's Character Selection opens by itself only when they have no character; this one has one.)
+    await walk(seat, "player", ".charselect-card.mine");
+    console.log(`${game}: flow shot`);
   } finally {
     await browser?.close().catch(() => undefined);
     child.kill();
@@ -251,7 +303,7 @@ for (const game of games) {
     continue;
   }
   try {
-    await (mode === "make" ? make(game) : shoot(game));
+    await (mode === "make" ? make(game) : mode === "flow" ? flow(game) : shoot(game));
   } catch (error) {
     note(`${game}: stopped: ${error.message.split("\n")[0]}`);
   }

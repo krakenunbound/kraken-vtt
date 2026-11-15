@@ -18,7 +18,7 @@ import path from "node:path";
 import readline from "node:readline";
 import { _electron as electron, chromium } from "playwright-core";
 import { CHROME } from "./lib/chrome.mjs";
-import { RULESETS } from "./e2e/rulesets.mjs";
+import { openSheet, RULESETS } from "./e2e/rulesets.mjs";
 
 const AT = (process.env.KRAKEN_WINDOW_AT ?? "-2500,40").split(",").map(Number);
 const wanted = process.argv[2] ?? "all";
@@ -374,7 +374,7 @@ async function runRuleset(ruleset, plan) {
       if (plan.xp !== null) check(Number(after.data.exp ?? 0) >= expBefore + (plan.xp ?? 100), "the experience reached the character", `${expBefore} -> ${after.data.exp}`);
       // The player's sheet shows the experience.
       await seat.bringToFront();
-      await openSide(seat, "characters").catch(() => undefined);
+      await openSheet(seat).catch(() => undefined);
       if (plan.xp !== null) {
         const shown = await seat.evaluate((value) => document.body.innerText.includes(String(value)), after.data.exp);
         check(shown, "the player's sheet shows the experience", String(after.data.exp));
@@ -479,7 +479,7 @@ async function fight(ctx) {
     return { foe: foe && !["Dead", "Destroyed", "Dying", "Down", "Unconscious", "Routed", "Fleeing", "Taken Out", "Conceded"].includes(foe.health?.status), pc: pc && !["Dead", "Dying", "Down", "Unconscious", "Stable", "Taken Out", "Conceded"].includes(pc.health?.status), view };
   };
   await seat.bringToFront();
-  await openSide(seat, "characters").catch(() => undefined);
+  await openSheet(seat).catch(() => undefined);
   while (rounds < 12) {
     rounds += 1;
     const state = await alive();
