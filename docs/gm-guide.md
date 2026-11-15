@@ -377,6 +377,51 @@ weather with masks, mark traps and regions, generate a dungeon, and play test.
 - **Attacks and damage** roll from the sheet or the tracker against the
   targeted token and apply to it. Saves, healing and conditions work the same
   way, by each game's rules.
+- **After the fight**, the tracker shows **Short rest** and **Long rest** for
+  the whole party (the clock moves on), and anyone who shot arrows is offered
+  **Recover** on their sheet for what can be picked up (half, in 5E).
+
+## Bookkeeping: arrows, potions, rations, torches, the load
+
+Kraken counts what the characters carry and spend, by each game's rules. Every
+part has its own switch in **Settings > Bookkeeping**, so a relaxed table can
+hand-wave any of it:
+
+- **Ammunition.** An attack with a bow, crossbow, sling or firearm spends an
+  arrow, bolt, bullet or round from the character's stack (a full attack one a
+  swing). With none left the attack is refused and chat says why; chat warns
+  when a stack runs low. Traveller's guns count their magazine and load a
+  spare when it runs dry. NPCs are never counted.
+- **Consumables.** Potions, scrolls, a wand's charges and a kit's uses are
+  used from the sheet's **Supplies** (on the Inventory tab), or by dragging the
+  item onto a creature (a token, a tracker row, a party row): a healing
+  potion heals whoever it lands on.
+- **Rations and water.** Each day that ends on the calendar, and each long
+  rest, every party member eats a ration and drinks a day's water (never twice
+  for one day). Going without brings the game's penalty: 5E Exhaustion (from
+  the fifth day without food, the first without water), 3.5E a Constitution
+  check or nonlethal damage, Basic Fantasy hit points, Cairn Deprived and then
+  Fatigue; 2E and C&C leave it to you, and chat says so. **Refill** fills the
+  waterskins at a stream.
+- **Light.** Lighting a torch (from the Effects window, or **Light a torch** in
+  Supplies) takes a torch from the pack; a lantern burns a flask of oil. A
+  player with none cannot light it; your own drop lights it anyway, said so in
+  chat.
+- **Encumbrance and bag space.** Supplies shows the load as a meter (5E
+  Strength x 15, the variant encumbrance as a separate switch; 3.5E's light,
+  medium and heavy loads; 2E by Strength's weight allowance; Basic Fantasy's
+  and C&C's own numbers; Cairn's slots; Traveller STR + END kg) and each
+  container's capacity (a backpack, a bag of holding whose contents weigh
+  nothing). Put an item away with **Put away…**. The level's penalty goes on
+  the creature as an effect (speed, check penalties, -1 to hit in 2E,
+  Exhaustion in 5E); switched off, nothing is penalised.
+- **Packs.** An Explorer's Pack (or any pack whose text lists its contents)
+  is **Unpacked** into its torches, rations, oil and the rest.
+- **Rest.** **Short rest** and **Long rest** on the sheet (5E: choose how many
+  Hit Point Dice to spend), the party sheet's **Rest the party** and the
+  tracker's rest buttons, by each game's rules: 5E's Hit Point Dice, hit
+  points, spell slots, death saves and Exhaustion; natural healing in 3.5E,
+  2E, Basic Fantasy and C&C; Cairn's own rest and sleep.
 
 ## Characters
 

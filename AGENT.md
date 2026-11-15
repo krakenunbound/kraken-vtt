@@ -121,6 +121,9 @@ doesn't get it (it could reach the tools withheld from the assistant).
 | Check, save or skill from the sheet (5E: `kind`, `skill`, `dc`, `advantage`) | `kraken_siege_check` |
 | Portrait and token pickers | `kraken_art` (then `kraken_record_update`) |
 | Import FG modules | `kraken_fg_modules`, `kraken_import_fg_module` |
+| Bookkeeping (the sheet's Supplies on the Inventory tab; `electron/bookkeeping.cjs` on `shared/bookkeeping/bookkeeping.mjs`, each game's `shared/<id>/bookkeeping.mjs` attached as `manifest.bookkeeping`): the load and containers, ammunition and Recover after a fight, consumables used (or dragged onto a creature: `application/x-kraken-action` kind `use`), rations and water, Refill, Unpack, Put away, Light a torch, exhaustion. Ammunition is spent by `kraken_combat attack` itself; rations as the calendar passes midnight and on a long rest; a torch or oil when a light goes on through `kraken_effects apply` | `kraken_bookkeeping` (view, recover, use, eat, refill, unpack, pack, exhaustion, light) |
+| Short rest, Long rest (the sheet's Supplies, the Cards window's Long rest), Rest the party (the party sheet, the tracker after End combat; the calendar moves on) | `kraken_rest` (id or party, kind, hitDice) |
+| Settings > Bookkeeping: ammunition, consumables, rations and water, light from the pack, encumbrance, 5E variant encumbrance | `kraken_table_options` bookkeeping |
 | **Party sheet** | |
 | Members, coin, items | `kraken_party`, `kraken_party_edit` |
 | Award XP, quests, encounters | `kraken_party_award` |

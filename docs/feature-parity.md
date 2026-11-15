@@ -17,16 +17,16 @@ Status of the work (2026-11-15):
 | Maps and tokens | M1-M10 | M11-M13 |
 | Records and content | R1-R7, R9 (R4 = S3) | R8 (= S8), R10 |
 | Dice, chat and combat | | D1-D10, after targeting merges (they share the roll paths and chat) |
-| Resource tracking (GM's ask) | | ammunition, consumables, rations and water, light burn-down, encumbrance and bag space, each with a GM off switch; with D5 rest; after targeting and core UI stage 3 merge |
+| Resource tracking (GM's ask) | Done (unreleased): bookkeeping (ammunition, consumables, rations and water, light from the pack, encumbrance and bag space, each with a GM switch) and D5 rest | |
 
-## Asked by the GM (2026-11-15), queued
-- Resource tracking, each with a GM option to turn it off ("fun mode"):
-  - ammunition spent per attack (arrows, bolts, bullets, sling stones), recovery after a fight per ruleset, low warning
-  - consumables used: potions, scrolls, charges
-  - rations and water per long rest / day of travel, the ruleset's penalty for going without
-  - light sources burning down (torch, lantern oil) - tie to the light effects
-  - encumbrance and bag space per ruleset (weight, slots, coin weight), container capacity, the ruleset's penalties
-  - Start after: targeting/actions agent and core UI stage 3 merge (attacks and sheets).
+## Asked by the GM (2026-11-15): Done (unreleased)
+- Resource tracking, each with a GM option to turn it off ("fun mode", Settings > Bookkeeping, `kraken_table_options bookkeeping`):
+  - ammunition spent per attack (arrows, bolts, bullets, sling stones, a firearm's magazine), refused when out, low warning, recovery after a fight per ruleset (5E half; Traveller none) offered on the sheet
+  - consumables used: potions, scrolls, charges, kits; from the sheet or dragged onto a creature (healing lands on it)
+  - rations and water per day on the calendar and per long rest (never twice for a day), the ruleset's penalty for going without (5E Exhaustion, 3.5E Con check or nonlethal, BF hit points, Cairn Deprived then Fatigue; 2E, C&C and Worldbuilding: a note to the GM)
+  - light sources from the pack (a torch, a lantern's flask of oil, Cairn's uses) when lit; the existing light effects burn them down
+  - encumbrance and bag space per ruleset (weight with coin weight, slots, the rules' own numbers), containers with capacity (bag of holding weightless), the penalty as an effect on the creature; BF's movement and Cairn's full inventory switch off with it
+  - Not yet: the 5E variant's disadvantage and the exhaustion's d20 penalty are written as effect components (DISATK, DISCHK, DISSAV; ATK, SAVE, CHECK); the attack, save and check paths read ATK/SAVE today, the DIS components wait on D2's roll stack. A lantern burnt out is lit again by hand (another flask). The C&C, Fate, Forged and Worldbuilding sheets get Supplies once core UI stage 5 puts them on the core parts (the tools work now).
 
 ## Maps, scenes and tokens
 
@@ -81,7 +81,7 @@ Kraken already at or ahead: seeded host dice engine, 3D dice, tray with right-cl
 | D2 | ADV / DIS / +2 / -2 and ruleset presets | 5E sheet select only | toggle chips beside the modifier box, each used once; presets per manifest (5E cover, crit, max, half) | High |
 | D3 | Links in chat | none | link {kind,id,name} on chat lines; drop any record or picture into chat; click opens, drag carries | High |
 | D4 | Speaker portraits in chat | GM icon only | stamp recordId when speaking as a character/NPC, draw its portrait, drag opens the sheet | High |
-| D5 | Rest per ruleset | Cairn only; 5E card rest resets slots only | short/long rest hooks per ruleset (hit dice, HP, slots, effects ending), on sheet, party sheet and tracker | High |
+| D5 | Rest per ruleset | Done (unreleased): `kraken_rest`, each game's `bookkeeping.mjs` rest (5E Hit Point Dice, HP, half the dice back, slots, death saves, Exhaustion, concentration, effects that end on a rest, a ration; 3.5E/2E/BF/C&C natural healing and spells; Traveller 1D + END; Cairn's rest and sleep), on the sheet, the party sheet, the tracker after End and the Cards window | short/long rest hooks per ruleset (hit dice, HP, slots, effects ending), on sheet, party sheet and tracker | High |
 | D6 | Party rolls with skills, ask the players | attributes only, host rolls | checks/saves/skills; "roll for them" or "ask the players" prompt cards; summary line | High |
 | D7 | Group initiative | each entry rolls | option each / by kind: one roll per NPC kind | High |
 | D8 | Roll tables to chat, /rollon | adventure tables, always GM-only | /rollon with visibility, nested tables, campaign and pack tables, roll button | Medium |
