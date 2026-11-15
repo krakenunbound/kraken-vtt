@@ -2124,7 +2124,7 @@ span.flip { display: inline-flex; transform: scaleX(-1); }
 .ct-con.taken { border-style: solid; opacity: 1; color: #f0b060; }
 .ct-fate-hit { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; width: 100%; padding: 4px; border: 1px solid #e06000; border-radius: 6px; background: rgba(224, 96, 0, 0.12); }
 .ct-fate-hit input { width: 11rem; }
-.fate-strip { position: fixed; top: 46px; left: 50%; transform: translateX(-50%); z-index: 960; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px; max-width: min(92vw, 1100px); padding: 4px 10px; border: 1px solid rgba(210, 161, 90, 0.5); border-radius: 10px; background: rgba(18, 14, 10, 0.86); color: #f2e6cf; font-size: 0.85rem; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4); }
+.fate-strip { position: fixed; top: 46px; left: 50%; transform: translateX(-50%); z-index: 20; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px; max-width: min(92vw, 1100px); padding: 4px 10px; border: 1px solid rgba(210, 161, 90, 0.5); border-radius: 10px; background: rgba(18, 14, 10, 0.86); color: #f2e6cf; font-size: 0.85rem; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4); }
 .fate-strip-aspects { display: flex; flex-wrap: wrap; gap: 4px; margin: 0; padding: 0; list-style: none; }
 .fate-aspect-chip { display: inline-flex; align-items: center; gap: 3px; padding: 2px 8px; border-radius: 12px; border: 1px solid rgba(210, 161, 90, 0.6); background: rgba(210, 161, 90, 0.12); }
 .fate-aspect-chip.kind-boost { border-style: dashed; }
