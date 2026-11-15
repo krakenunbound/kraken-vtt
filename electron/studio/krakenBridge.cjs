@@ -186,8 +186,9 @@ function projectFor({ view, pictureId, size, name }) {
   // The master is the truth for what Kraken plays with.
   project.walls = studioWalls(walls, origin);
   project.lights = studioLights(lights, origin);
-  // The table's regions are the truth too (the GM may have changed one there).
-  project.regions = studioRegions(regions, origin);
+  // The table's regions are the truth too (the GM may have changed one there);
+  // a project saved before the table kept regions keeps its own.
+  if (regions.length || !kept) project.regions = studioRegions(regions, origin);
   // Map Studio's own weather is richer (brush masks, FG's every setting): kept
   // while Kraken's FX are what it saved; else Kraken's FX as Map Studio's.
   if (!kept || JSON.stringify(krakenFx(kept.effects ?? [], origin).map(fxKey)) !== JSON.stringify(fx.map(fxKey))) project.effects = studioEffects(fx, origin);

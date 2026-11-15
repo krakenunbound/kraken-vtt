@@ -17,6 +17,10 @@ export function DarknessAreas({ areas, through, gm, width, height }: { areas: Ma
   return (
     <svg className="overlay darkness-areas" width={width} height={height} viewBox={`0 0 ${width} ${height}`} aria-hidden="true" data-darkness={areas.length}>
       <defs>
+        {/* Its edge fades over a few feet, as a light's does, never a hard line. */}
+        <filter id="darkness-soft" filterUnits="userSpaceOnUse" x={0} y={0} width={width} height={height}>
+          <feGaussianBlur stdDeviation={Math.max(6, (areas[0]?.radiusPx ?? 100) * 0.06)} />
+        </filter>
         {areas.map((area, index) => (
           <clipPath key={`c${index}`} id={`darkness-reach-${index}`}>
             {area.polygon ? <polygon points={points(area.polygon)} /> : <rect width={width} height={height} />}
@@ -34,7 +38,7 @@ export function DarknessAreas({ areas, through, gm, width, height }: { areas: Ma
           ))}
         </mask>
       </defs>
-      <g mask={holes.length ? "url(#darkness-seen-through)" : undefined}>
+      <g mask={holes.length ? "url(#darkness-seen-through)" : undefined} filter="url(#darkness-soft)">
         {areas.map((area, index) => (
           <circle key={index} cx={area.x} cy={area.y} r={area.radiusPx} fill={gm ? "#1a0826" : "#000"} fillOpacity={gm ? 0.55 : 1} clipPath={`url(#darkness-reach-${index})`} />
         ))}

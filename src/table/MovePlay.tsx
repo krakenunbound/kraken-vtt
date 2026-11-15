@@ -62,7 +62,7 @@ export function MoveApprovals({ requests, approve }: { requests: MoveRequest[] |
         <span key={request.id} className="move-approval" data-move-approval={request.id}>
           {request.name} <small>({request.by})</small>
           <button type="button" className="tool" aria-label={`Accept ${request.name}'s move`} title={`Accept: ${request.name} moves as ${request.by} asked`} onClick={() => approve([request.id], true)}>
-            <Icon name="check" size={16} />
+            <Icon name="accept" size={16} />
           </button>
           <button type="button" className="tool" aria-label={`Cancel ${request.name}'s move`} title="Cancel: it stays where it is" onClick={() => approve([request.id], false)}>
             <Icon name="close" size={16} />
@@ -72,7 +72,7 @@ export function MoveApprovals({ requests, approve }: { requests: MoveRequest[] |
       {requests.length > 1 ? (
         <>
           <button type="button" className="tool" data-action="approve-all" aria-label="Accept every move" title="Accept every move" onClick={() => approve("all", true)}>
-            <Icon name="check" size={16} /> all
+            <Icon name="accept" size={16} /> all
           </button>
           <button type="button" className="tool" data-action="cancel-all" aria-label="Cancel every move" title="Cancel every move" onClick={() => approve("all", false)}>
             <Icon name="close" size={16} /> all
