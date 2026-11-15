@@ -93,7 +93,7 @@ export function jobs() {
       }
     }
     for (const cover of settings.covers ?? []) {
-      out.push({ out: `games/${game}/art/${cover.file}`, w: 896, h: 1200, size: [768, 1024], quality: 85, token: false, model: "qwen", seed: cover.seed, prompt: `${cover.prompt}, ${spec.styles[cover.style ?? game].cover}` });
+      out.push({ out: `games/${game}/art/${cover.file}`, w: 896, h: 1200, size: [768, 1024], quality: 85, token: false, model: cover.model ?? "qwen", seed: cover.seed, prompt: `${cover.prompt}, ${spec.styles[cover.style ?? game].cover}` });
     }
   }
   return out;

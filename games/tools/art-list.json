@@ -964,7 +964,8 @@
         },
         {
           "file": "cover-gm-guide.webp",
-          "prompt": "book cover painting, portrait orientation: a torchlit dungeon chamber with stone pillars, a hulking ogre and goblins guarding a heap of treasure, a translucent jelly cube creeping from a side passage"
+          "prompt": "book cover painting, portrait orientation: a torchlit dungeon chamber with stone pillars, a hulking ogre and goblins guarding a heap of treasure, a translucent jelly cube creeping from a side passage",
+          "model": "h3"
         },
         {
           "file": "cover-mill-at-hobs-ford.webp",
@@ -1080,7 +1081,8 @@
       "covers": [
         {
           "file": "cover-players-guide.webp",
-          "prompt": "book cover painting, portrait orientation: a small band of travellers with packs, a lantern and walking staffs on a narrow path through an ancient misty forest of huge gnarled trees, mossy standing stones"
+          "prompt": "book cover painting, portrait orientation: a small band of travellers with packs, a lantern and walking staffs on a narrow path through an ancient misty forest of huge gnarled trees, mossy standing stones",
+          "model": "h3"
         },
         {
           "file": "cover-wardens-guide.webp",
@@ -1207,7 +1209,7 @@
       },
       "models": {
         "harpy": "h3",
-        "centaur": "qwen",
+        "centaur": "h3",
         "naga": "h3",
         "sphinx": "h3",
         "lamia": "h3",
@@ -1301,12 +1303,14 @@
         {
           "file": "cover-ironsworn-reference.webp",
           "style": "ironsworn",
-          "prompt": "book cover painting, portrait orientation: a lone warrior in furs and iron mail kneeling to swear an oath with a hand on a sword before a weathered standing stone, snowy northern highlands, grey sky"
+          "prompt": "book cover painting, portrait orientation: a lone warrior in furs and iron mail kneeling to swear an oath with a hand on a sword before a weathered standing stone, snowy northern highlands, grey sky",
+          "model": "h3"
         },
         {
           "file": "cover-ironsworn-foes.webp",
           "style": "ironsworn",
-          "prompt": "book cover painting, portrait orientation: a huge white frost wyrm coiled over a frozen fjord, a raider longship below, wolves on the ice"
+          "prompt": "book cover painting, portrait orientation: a huge white frost wyrm coiled over a frozen fjord, a raider longship below, wolves on the ice",
+          "model": "h3"
         },
         {
           "file": "cover-cinder-barrow.webp",
@@ -1316,7 +1320,8 @@
         {
           "file": "cover-starforged-reference.webp",
           "style": "starforged",
-          "prompt": "book cover painting, portrait orientation: a battered starship leaving a frontier space station above a ringed planet, a glowing nebula behind, a lone pilot silhouetted in the cockpit"
+          "prompt": "book cover painting, portrait orientation: a battered starship leaving a frontier space station above a ringed planet, a glowing nebula behind, a lone pilot silhouetted in the cockpit",
+          "model": "h3"
         },
         {
           "file": "cover-starforged-foes.webp",
@@ -1414,7 +1419,8 @@
         {
           "file": "cover-fate-accelerated.webp",
           "style": "fate",
-          "prompt": "book cover painting, portrait orientation: dynamic heroes leaping across the rooftops of a fantastical city at sunset, a sky-ship and a strange tower behind"
+          "prompt": "book cover painting, portrait orientation: dynamic heroes leaping across the rooftops of a fantastical city at sunset, a sky-ship and a strange tower behind",
+          "model": "h3"
         },
         {
           "file": "cover-toolkit.webp",
@@ -1483,7 +1489,8 @@
       "covers": [
         {
           "file": "cover-scoundrels-handbook.webp",
-          "prompt": "book cover painting, portrait orientation: a crew of scoundrels in long coats and caps on a gaslit canal bridge at night, a lantern, rain, lamplight on the black water"
+          "prompt": "book cover painting, portrait orientation: a crew of scoundrels in long coats and caps on a gaslit canal bridge at night, a lantern, rain, lamplight on the black water",
+          "model": "h3"
         },
         {
           "file": "cover-gm-guide.webp",
@@ -1491,7 +1498,8 @@
         },
         {
           "file": "cover-brine-street.webp",
-          "prompt": "book cover painting, portrait orientation: a counting house on a canal street at night, a thief climbing to a lit upper window, night guards with lanterns below"
+          "prompt": "book cover painting, portrait orientation: a counting house on a canal street at night, a thief climbing to a lit upper window, night guards with lanterns below",
+          "model": "h3"
         }
       ],
       "people": [
