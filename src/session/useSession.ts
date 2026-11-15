@@ -44,6 +44,8 @@ export type MapToken = {
   undo?: number;
   path?: number[];
 };
+// A sound placed on the map (radius in feet).
+export type MapSound = { id: string; name: string; sound: string; x: number; y: number; radius: number; volume: number; on: boolean };
 // A player's move waiting for the GM while movement is locked (FG's TokenMoveManager).
 export type MoveRequest = { id: string; name: string; by: string; from: { x: number; y: number }; to: { x: number; y: number }; at: number };
 // A region of the map, the GM's (Map Studio's Traps & regions, a bundle's Foundry regions).
@@ -107,6 +109,8 @@ export type TableMap = {
   // Moves waiting for the GM (a player: their own), and the GM's regions.
   moveRequests?: MoveRequest[];
   regions?: MapRegion[];
+  // The GM's sounds placed on the map.
+  mapSounds?: MapSound[];
 };
 // An image layer (FG's image layers, Foundry's tiles): url is where this seat loads it.
 export type MapTile = { id: string; name: string; src: string; url: string; x: number; y: number; width: number; height: number; rotation: number; alpha: number; flipX: boolean; flipY: boolean; level: "below" | "above"; hidden: boolean; locked?: boolean; group: string };
@@ -303,6 +307,7 @@ type NetScene = {
   fit?: MapScene["fit"];
   lights: MapScene["lights"];
   image: string | null;
+  video?: boolean;
 };
 
 // account: the player's account at that table (its password, or the token this browser kept).
@@ -359,6 +364,7 @@ function toPlayerScene(payload: NetScene, origin: string): MapScene {
     backgroundColor: payload.backgroundColor,
     grid: payload.grid,
     imageUrl: payload.image ? `${origin}${payload.image}` : null,
+    video: Boolean(payload.video),
     offsetX: payload.offsetX,
     offsetY: payload.offsetY,
     scaleX: payload.scaleX,
@@ -566,6 +572,8 @@ export function useSession() {
           if (msg.type === "roster" && Array.isArray(msg.roster)) setRoster(msg.roster as RosterEntry[]);
           if (msg.type === "accounts") setAccounts({ list: Array.isArray(msg.accounts) ? (msg.accounts as PlayerAccount[]) : [], note: typeof msg.done === "string" ? msg.done : "", error: typeof msg.error === "string" ? msg.error : "" });
           if (msg.type === "map") applyMap(msg as unknown as TableMap);
+          // The sounds placed on the map this seat hears now (the host decides how loud).
+          if (msg.type === "map") sound.setPlaced(Array.isArray(msg.sounds) ? (msg.sounds as { id: string; sound: string; gain: number; muffled?: boolean }[]) : []);
           if (msg.type === "library" && Array.isArray(msg.items)) setLibrary((current) => ({ ...current, [`${msg.module}|${msg.kind}`]: msg.items as LibraryItem[] }));
           if (msg.type === "krits" && msg.settings) setKrits(msg.settings as Record<string, string>);
           if (msg.type === "party" && msg.party) setParty(msg.party as import("../party/PartySheet").PartyView);
@@ -1185,6 +1193,8 @@ export function useSession() {
   const resetExplored = useCallback((player: string) => send({ type: "explored-reset", player }), [send]);
   // Undo a token's last move (Ctrl+Z); the GM's yes or no to moves asked for while movement is locked.
   const undoMove = useCallback((id: string) => send({ type: "token-undo", id }), [send]);
+  // The GM's sounds placed on the map (add, update, remove).
+  const mapSound = useCallback((action: string, payload: Record<string, unknown> = {}) => send({ type: "map-sound", action, ...payload }), [send]);
   const approveMoves = useCallback((ids: string[] | "all", accept: boolean) => send({ type: "move-approve", ...(ids === "all" ? { all: true } : { ids }), accept }), [send]);
   // The GM: the map opens on every player's screen.
   const shareMap = useCallback(() => send({ type: "map-share" }), [send]);
@@ -1247,6 +1257,7 @@ export function useSession() {
     resetExplored,
     undoMove,
     approveMoves,
+    mapSound,
     mapShared,
     notice,
     chat,

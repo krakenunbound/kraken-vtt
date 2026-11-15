@@ -377,7 +377,9 @@ function savedMap(value) {
   // explored areas): kept by the host, saved with the campaign, sent to that player alone.
   const explored = {};
   const regions = {};
-  if (!value || typeof value !== "object") return { tokens, doors, sight, locked, settings, lights, drawings, deathMarkers, walls, masks, labels, groups, fx, tiles, frames, entered, studio, explored, regions };
+  const sounds = {};
+  if (!value || typeof value !== "object") return { tokens, doors, sight, locked, settings, lights, drawings, deathMarkers, walls, masks, labels, groups, fx, tiles, frames, entered, studio, explored, regions, sounds };
+  for (const [sceneId, list] of Object.entries(value.sounds ?? {}).slice(0, 500)) if (Array.isArray(list)) sounds[sceneId.slice(0, 80)] = list.map(cleanMapSound).filter(Boolean).slice(0, MAX_MAP_SOUNDS);
   for (const [sceneId, list] of Object.entries(value.regions ?? {}).slice(0, 500)) if (Array.isArray(list)) regions[sceneId.slice(0, 80)] = list.map(cleanRegion).filter(Boolean).slice(0, MAX_REGIONS);
   for (const [sceneId, row] of Object.entries(value.explored ?? {}).slice(0, 500)) {
     if (!row || typeof row !== "object") continue;
@@ -421,7 +423,7 @@ function savedMap(value) {
   for (const [sceneId, list] of Object.entries(value.drawings ?? {}).slice(0, 500)) {
     if (Array.isArray(list)) drawings[sceneId.slice(0, 80)] = list.map(cleanDrawing).filter(Boolean).slice(-MAX_DRAWINGS);
   }
-  return { tokens, doors, sight, locked, settings, lights, drawings, deathMarkers, walls, masks, labels, groups, fx, tiles, frames, entered, studio, explored, regions };
+  return { tokens, doors, sight, locked, settings, lights, drawings, deathMarkers, walls, masks, labels, groups, fx, tiles, frames, entered, studio, explored, regions, sounds };
 }
 // Explored areas kept per player and scene (geometry.mjs EXPLORED_CAP).
 const EXPLORED_KEPT = 400;
@@ -459,6 +461,28 @@ function cleanRegion(raw) {
   };
 }
 const MAX_REGIONS = 300;
+
+// A sound placed on the map (Foundry's ambient sound): a library sound that
+// loops at a point, heard by players whose tokens are within its radius
+// (feet), louder nearer, muffled by walls that stop sound.
+function cleanMapSound(raw) {
+  if (!raw || typeof raw !== "object") return null;
+  const x = num(raw.x, NaN);
+  const y = num(raw.y, NaN);
+  const sound = text(raw.sound, "").slice(0, 300);
+  if (!Number.isFinite(x) || !Number.isFinite(y) || !sound) return null;
+  return {
+    id: text(raw.id, "").slice(0, 64) || `s-${crypto.randomBytes(5).toString("hex")}`,
+    name: text(raw.name, sound.split("/").pop() ?? "Sound").slice(0, 80),
+    sound,
+    x: Math.round(x),
+    y: Math.round(y),
+    radius: Math.min(1000, Math.max(5, num(raw.radius, 30))),
+    volume: Math.min(1, Math.max(0, num(raw.volume, 0.8))),
+    on: raw.on !== false,
+  };
+}
+const MAX_MAP_SOUNDS = 60;
 const MAX_DRAWINGS = 400;
 const MAX_PLAYER_DRAWINGS = 60;
 
@@ -486,6 +510,32 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
   // The last views merged for each player, so the same view is not merged again.
   const lastMerged = new Map();
   state.regions = state.regions ?? {};
+  state.sounds = state.sounds ?? {};
+  function soundsHere() {
+    if (!scene) return [];
+    state.sounds[scene.id] = state.sounds[scene.id] ?? [];
+    return state.sounds[scene.id];
+  }
+  // What a player hears of the placed sounds: by their nearest token in reach,
+  // fading to nothing at the edge; through walls that stop sound, quieter and muffled.
+  function soundsHeard(listeners) {
+    const per = pixelsPerUnit();
+    const out = [];
+    for (const placed of soundsHere()) {
+      if (!placed.on) continue;
+      let best = null;
+      for (const token of listeners) {
+        const reach = placed.radius * per;
+        const distance = Math.hypot(token.x - placed.x, token.y - placed.y);
+        if (distance > reach) continue;
+        const walls = geometry.soundWalls(wallsHere(), doorsHere(), token, placed);
+        const gain = placed.volume * (1 - distance / reach) * (walls ? 0.45 / walls : 1);
+        if (!best || gain > best.gain) best = { gain, muffled: walls > 0 };
+      }
+      if (best && best.gain > 0.01) out.push({ id: placed.id, sound: placed.sound, gain: Math.round(best.gain * 100) / 100, ...(best.muffled ? { muffled: true } : {}) });
+    }
+    return out;
+  }
   // Each token's moves, to undo and to draw this turn's path (not saved), and
   // the moves players asked for while movement is locked (FG's TokenMoveManager).
   if (!("moveLog" in state)) Object.defineProperty(state, "moveLog", { value: new Map(), enumerable: false });
@@ -989,6 +1039,9 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
         doors: doorList,
         vision: null,
         lights: lightOut(sources),
+        // The sounds placed on the map (the GM hears them through the player vision preview).
+        mapSounds: soundsHere(),
+        sounds: [],
         // Moves players asked for while movement is locked, for the GM's approval strip.
         moveRequests: requestsHere(),
         // Every region (traps and their notes too), and the difficult terrain the ruler counts.
@@ -1057,6 +1110,8 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       // A token felt by tremorsense alone is marked so (a shape, not a sight of it).
       tokens: tokens.map((token) => (sensedOnly.has(token.id) ? { ...publicToken(token, seat, assetToken), sensed: true } : publicToken(token, seat, assetToken))),
       ...shared,
+      // The placed sounds they hear now, and how loud (never where they are).
+      sounds: soundsHeard(mine),
       // Their own moves waiting for the GM, and the difficult terrain (no traps, no notes) the ruler counts.
       moveRequests: requestsHere().filter((request) => request.by === seat.name),
       terrain: terrainOut(),
@@ -1299,6 +1354,38 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       return out;
     },
     moveRequests: () => requestsHere(),
+    // Sounds placed on the map (Foundry's ambient sounds): the GM's list, place, change, remove.
+    mapSounds: () => soundsHere(),
+    addMapSound(input, seat) {
+      if (seat.role !== "dm") throw new Error("Only the GM places sounds.");
+      if (!scene) throw new Error("No scene is open.");
+      const placed = cleanMapSound({ ...input, id: undefined });
+      if (!placed) throw new Error("Give a sound and where (x, y).");
+      if (soundsHere().length >= MAX_MAP_SOUNDS) throw new Error("This scene has too many sounds.");
+      soundsHere().push(placed);
+      changed({ keepVision: true });
+      return placed;
+    },
+    updateMapSound(id, patch, seat) {
+      if (seat.role !== "dm") throw new Error("Only the GM changes sounds.");
+      const list = soundsHere();
+      const index = list.findIndex((item) => item.id === id);
+      if (index < 0) throw new Error(`No sound ${id} on this map.`);
+      const next = cleanMapSound({ ...list[index], ...patch, id });
+      if (!next) throw new Error("That is not a sound.");
+      list[index] = next;
+      changed({ keepVision: true });
+      return next;
+    },
+    removeMapSound(id, seat) {
+      if (seat.role !== "dm") throw new Error("Only the GM removes sounds.");
+      const list = soundsHere();
+      const index = list.findIndex((item) => item.id === id);
+      if (index < 0) throw new Error(`No sound ${id} on this map.`);
+      list.splice(index, 1);
+      changed({ keepVision: true });
+    },
+    soundsFor: (player) => soundsHeard(tokensHere().filter((token) => !token.hidden && token.owner === player)),
     // Regions (Map Studio's Traps & regions, Foundry's): the GM's list, add, change, remove.
     regions: () => regionsHere(),
     addRegion(input, seat) {

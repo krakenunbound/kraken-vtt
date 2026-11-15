@@ -71,6 +71,7 @@ const MESSAGES = {
   "explored-reset": "kraken_line_of_sight",
   "token-undo": "kraken_token_move",
   "move-approve": "kraken_token_move",
+  "map-sound": "kraken_map_sound",
   "map-share": "kraken_map",
   "scene-share": "kraken_map",
   "prep-close": "kraken_image",

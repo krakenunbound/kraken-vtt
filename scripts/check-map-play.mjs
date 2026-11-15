@@ -290,10 +290,30 @@ try {
   // Map Studio's regions come to the table with its walls (krakenBridge masterFrom).
   const bridge = require("../electron/studio/krakenBridge.cjs");
   const master = bridge.masterFrom({ walls: [], lights: [], effects: [], regions: [{ id: "s1", kind: "pit", name: "Well", note: "10 ft down", points: [0, 0, 50, 0, 50, 50, 0, 50] }] }, server.agent.map.scene());
-  const counts = server.agent.map.fromStudio({ ...master, project: null });
+  const counts = server.agent.map.fromStudio({ ...master, walls: server.agent.map.walls().map((wall) => ({ ...wall })), project: null });
   assert(counts.regions === 1 && server.agent.map.regions()[0].kind === "pit", `Map Studio's regions: ${JSON.stringify(counts)}`);
   assert(server.persisted().map.regions.crypt.length === 1, "regions are saved");
   console.log("ok regions");
+
+  // 9. Sounds placed on the map: heard near her token, louder nearer, muffled through the wall; never where they are.
+  await tool("kraken_token_move", { id: annToken.id, col: 3, row: 2 });
+  dm.send({ type: "map-sound", action: "add", sound: { sound: "ambience/Cave/drips.ogg", name: "Drips", x: 225, y: 125, radius: 20 } });
+  const heard = await latest(ann, "map", (m) => m.sounds?.length === 1, "Ann hears the drips");
+  assert(heard.sounds[0].gain > 0.3 && !heard.sounds[0].muffled && !("x" in heard.sounds[0]), `near and clear: ${JSON.stringify(heard.sounds)}`);
+  assert(server.agent.viewFor("Bob").sounds.length === 0, "Bob has no token here: he hears nothing");
+  const drips = (await tool("kraken_map_sound", {}))[0];
+  await tool("kraken_map_sound", { action: "update", id: drips.id, x: 275, y: 125 });
+  const through = (await tool("kraken_map_sound", { player: "Ann" }))[0];
+  assert(through?.muffled === true && through.gain < heard.sounds[0].gain, `through the wall: ${JSON.stringify(through)}`);
+  await tool("kraken_map_sound", { action: "remove", id: drips.id });
+  assert(server.persisted().map.sounds.crypt.length === 0, "sounds are kept with the scene");
+  // An animated map: a video background reaches players as a video.
+  server.setImage(Buffer.from("webm-bytes"), "video/webm");
+  dm.send({ type: "scene", scene });
+  const videoScene = await latest(ann, "scene", (m) => m.scene?.video === true, "the animated map reaches Ann as a video");
+  const served = await fetch(`http://127.0.0.1:${info.port}${videoScene.scene.image}`);
+  assert(served.headers.get("content-type") === "video/webm", "served as a video");
+  console.log("ok sounds and animated maps");
 
   console.log("MAP_PLAY_OK");
 } finally {

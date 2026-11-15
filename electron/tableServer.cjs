@@ -1460,6 +1460,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     return {
       ...shown,
       image: image ? `/table/image?token=${client.assetToken}&v=${imageVersion}` : null,
+      video: Boolean(image && image.mime.startsWith("video/")),
     };
   }
 
@@ -2326,7 +2327,7 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
 
       // The map: tokens, doors, line of sight and pings (mapState.cjs decides
       // who may do what).
-      if (["token-place", "token-move", "token-remove", "token-update", "door", "sight", "lock", "scene-settings", "light-place", "light-update", "light-remove", "draw", "draw-update", "draw-erase", "draw-clear", "death-marker", "wall", "map-undo", "mask", "label", "map-group", "fx", "tile", "explored-reset", "token-undo", "move-approve"].includes(msg.type)) {
+      if (["token-place", "token-move", "token-remove", "token-update", "door", "sight", "lock", "scene-settings", "light-place", "light-update", "light-remove", "draw", "draw-update", "draw-erase", "draw-clear", "death-marker", "wall", "map-undo", "mask", "label", "map-group", "fx", "tile", "explored-reset", "token-undo", "move-approve", "map-sound"].includes(msg.type)) {
         const working = mapOf(client);
         // Testing: the GM's moves of the test token are a player's (walls, locks).
         const testToken = (id) => testing && client.role === "dm" && working.tokens().some((token) => token.id === id && token.owner === TEST_SEAT.name);
@@ -2349,6 +2350,12 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
           } else if (msg.type === "token-undo") {
             // Undo a move: a player their own last move, the GM any.
             working.undoMove(String(msg.id ?? ""), testToken(String(msg.id ?? "")) ? TEST_SEAT : seat);
+          } else if (msg.type === "map-sound") {
+            // The GM's sounds placed on the map (Scene settings): placed, changed, removed.
+            if (msg.action === "add") working.addMapSound(msg.sound ?? {}, seat);
+            else if (msg.action === "update") working.updateMapSound(String(msg.id ?? ""), msg.patch ?? {}, seat);
+            else if (msg.action === "remove") working.removeMapSound(String(msg.id ?? ""), seat);
+            else throw new Error("What should the sound do?");
           } else if (msg.type === "move-approve") {
             // The GM's approval strip: a player's locked move (or all of them) accepted or cancelled.
             if (client.role !== "dm") throw new Error("Only the GM approves moves.");
@@ -2954,7 +2961,8 @@ function createTableServer({ saved = {}, onChange = () => undefined, webRoot = W
     setImage(bytes, mime) {
       if (!bytes || bytes.length === 0) image = null;
       else {
-        const type = typeof mime === "string" && mime.startsWith("image/") ? mime : "application/octet-stream";
+        // A picture, or an animated map (a .webm or .mp4 video).
+        const type = typeof mime === "string" && (mime.startsWith("image/") || mime === "video/webm" || mime === "video/mp4") ? mime : "application/octet-stream";
         image = { bytes: Buffer.from(bytes), mime: type };
       }
       imageVersion += 1;

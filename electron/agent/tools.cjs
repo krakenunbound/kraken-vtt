@@ -1867,6 +1867,38 @@ const TOOLS = [
     },
   },
   {
+    name: "kraken_map_sound",
+    description:
+      "Sounds placed on the map (Foundry's ambient sounds; the map's Scene settings, Sounds on this map): a sound from the library (kraken_sound list: its id) loops at a point; each player hears it while one of their tokens is within its radius (feet), louder nearer, quieter and muffled through walls that stop sound (an open door lets it through). Each player's browser plays it; the GM hears them in the player vision preview. action list (default; player: what that player hears now); add (sound, x, y in scene pixels or col/row, radius, volume 0..1, name); update (id and any of those, on); remove (id).",
+    inputSchema: object({
+      action: { type: "string", enum: ["list", "add", "update", "remove"] },
+      id: string("A placed sound's id"),
+      sound: string("The library sound's id"),
+      name: string("Its name"),
+      x: number("Scene pixels across"),
+      y: number("Scene pixels down"),
+      col: number("Square across"),
+      row: number("Square down"),
+      radius: number("How far it carries, feet (default 30)"),
+      volume: number("0..1 (default 0.8)"),
+      on: { type: "boolean" },
+      player: string("list: what this player hears now"),
+    }),
+    run(args, ctx) {
+      const { map, seat } = needTable(ctx);
+      const { action = "list", id, col, row, player, ...rest } = args;
+      if (Number.isFinite(col) && Number.isFinite(row)) Object.assign(rest, map.squareCenter(col, row, 1));
+      if (action === "list") return out(player ? map.soundsFor(player) : map.mapSounds());
+      if (action === "add") {
+        if (!ctx.table().agent.sounds()?.pick?.(rest.sound)) throw new Error(`No sound "${rest.sound}" in the library (kraken_sound list).`);
+        return out(map.addMapSound(rest, seat));
+      }
+      if (action === "update") return out(map.updateMapSound(String(id ?? ""), rest, seat));
+      map.removeMapSound(String(id ?? ""), seat);
+      return out({ removed: id });
+    },
+  },
+  {
     name: "kraken_region",
     description:
       "Regions of the map (Map Studio's Traps & regions, a bundle's Foundry regions), played at the table: trap and pit (a player's token that steps in stops on its first square, the GM is told its name and note in a line only the GM sees, and movement locks until the GM unlocks it: kraken_line_of_sight lockMovement false), difficult (moving through costs more: cost 2 makes each square count double on the ruler), teleport (whoever steps in goes to its destination: to = another region's name, or {x, y} in scene pixels, or {sceneId, x, y} on a scene the table has opened). Players are never sent traps, pits, teleports or notes. action list (default); add (kind, name, note, points [x, y, ...] in scene pixels or rect {col, row, cols, rows} in squares, cost, to); update (id and any of those, on false to switch it off); remove (id).",

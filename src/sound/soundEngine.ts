@@ -97,6 +97,36 @@ function buffer(id: string) {
   return pending;
 }
 
+// Sounds placed on the map (the host says which this seat hears and how loud):
+// each loops on the ambience bus, its gain eased as tokens move, a low-pass
+// filter closing when walls stand between (muffled).
+const placed = new Map<string, { sound: string; source: AudioBufferSourceNode; gain: GainNode; filter: BiquadFilterNode }>();
+let placedWanted = new Map<string, { sound: string; gain: number; muffled: boolean }>();
+async function startPlaced(id: string) {
+  const ctx = graph();
+  const want = placedWanted.get(id);
+  if (!ctx || !want || placed.has(id)) return;
+  try {
+    const data = await buffer(want.sound);
+    const now = placedWanted.get(id);
+    if (!now || placed.has(id)) return;
+    const source = ctx.createBufferSource();
+    source.buffer = data;
+    source.loop = true;
+    const filter = ctx.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.value = now.muffled ? 700 : 20000;
+    const gain = ctx.createGain();
+    gain.gain.value = 0;
+    source.connect(filter).connect(gain).connect(buses.get("ambience")!);
+    source.start();
+    gain.gain.setTargetAtTime(now.gain, ctx.currentTime, 0.5);
+    placed.set(id, { sound: now.sound, source, gain, filter });
+  } catch {
+    /* a missing sound is quiet */
+  }
+}
+
 // When each triggered sound's folder last played (a burst plays once).
 const recentlyPlayed = new Map<string, number>();
 
@@ -252,6 +282,32 @@ export const sound = {
     void element.play().catch(() => undefined);
     gain.gain.setTargetAtTime(track.volume, ctx.currentTime, 0.8);
   },
+  // The map's placed sounds this seat hears now ({id, sound, gain, muffled}); the rest fade out.
+  setPlaced(list: { id: string; sound: string; gain: number; muffled?: boolean }[]) {
+    placedWanted = new Map(list.filter((item) => item && typeof item.id === "string" && typeof item.sound === "string").map((item) => [item.id, { sound: item.sound, gain: Math.min(1, Math.max(0, Number(item.gain) || 0)), muffled: Boolean(item.muffled) }]));
+    const ctx = context;
+    for (const [id, loop] of placed) {
+      const want = placedWanted.get(id);
+      if (want && want.sound === loop.sound) {
+        if (ctx) {
+          loop.gain.gain.setTargetAtTime(want.gain, ctx.currentTime, 0.4);
+          loop.filter.frequency.setTargetAtTime(want.muffled ? 700 : 20000, ctx.currentTime, 0.3);
+        }
+        continue;
+      }
+      if (ctx) loop.gain.gain.setTargetAtTime(0, ctx.currentTime, 0.5);
+      placed.delete(id);
+      setTimeout(() => {
+        try {
+          loop.source.stop();
+        } catch {
+          /* gone */
+        }
+      }, 2500);
+    }
+    for (const id of placedWanted.keys()) if (!placed.has(id)) void startPlaced(id);
+  },
+  placedNow: () => [...placed.keys()],
   // When a folder's track ends (the GM's screen asks the host for the next).
   onMusicEnded(fn: (() => void) | null) {
     musicDone = fn;

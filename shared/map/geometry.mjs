@@ -321,6 +321,18 @@ export function firstBlock(walls, doors, from, to) {
   return best;
 }
 
+// How many walls that stop sound stand between two points (Foundry's sound
+// sense; an open door stops nothing): a placed sound is muffled through them.
+export function soundWalls(walls, doors, from, to) {
+  let count = 0;
+  for (const wall of walls) {
+    if (!blocksSight(wall, doors, "sound")) continue;
+    const t = crossing(from.x, from.y, to.x, to.y, wall.x1, wall.y1, wall.x2, wall.y2);
+    if (t !== null && t > 1e-6 && t < 1 - 1e-6) count += 1;
+  }
+  return count;
+}
+
 // Where a dragged token ends up: its snapped drop point, or, when a wall is in
 // the way, the last square before the wall along its path (its start when
 // none is free). snap false keeps the exact point (Alt held).

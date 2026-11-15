@@ -20,6 +20,8 @@ import { useExplored } from "./explored";
 import { TokenMenuExtras } from "./TokenMenuExtras";
 import { DarknessAreas } from "./DarknessAreas";
 import { MoveApprovals, MoveRequestGhosts, RegionShapes, TokenPaths } from "./MovePlay";
+import { MapSoundMarkers, MapSoundsPanel } from "./MapSounds";
+import { MapVideo, isVideoScene } from "./MapVideo";
 // three.js only loads when a scene has weather.
 const Weather = lazy(() => import("./Weather").then((module) => ({ default: module.Weather })));
 
@@ -43,6 +45,8 @@ export type MapScene = {
   // The scene's own grid, under the GM's settings.
   baseGrid?: MapScene["grid"];
   imageUrl: string | null;
+  // The picture is a video (an animated map, .webm or .mp4).
+  video?: boolean;
   offsetX: number;
   offsetY: number;
   scaleX: number;
@@ -131,6 +135,9 @@ export type MapActions = {
   // Undo a token's last move; the GM's approval of moves asked for while movement is locked.
   undoMove?: (id: string) => void;
   approveMoves?: (ids: string[] | "all", accept: boolean) => void;
+  // The GM's sounds placed on the map, and the sound library to pick from.
+  mapSound?: (action: string, payload?: Record<string, unknown>) => void;
+  soundList?: () => Promise<import("../session/useSession").SoundLibrary>;
   shareMap?: () => void;
   // The GM's player vision preview (the players' view of this map).
   visionPreview?: (on: boolean) => void;
@@ -513,14 +520,17 @@ function MapViewInner({
   // needs (decoding a 4600x6400 picture on the window's thread stood it still
   // ~300 ms at every scene change). A small picture is drawn as it is.
   const [tileSet, setTileSet] = useState<TileSet | null>(null);
+  // An animated map: a video, not tiles; its first frame the still (MapVideo.tsx).
+  const videoMap = isVideoScene(scene);
+  const [videoStill, setVideoStill] = useState<string | null>(null);
   useEffect(() => {
     setTileSet(null);
-    if (!scene.imageUrl) return;
+    if (!scene.imageUrl || videoMap) return;
     return watchTiles(scene.imageUrl, (set) => {
       setTileSet(set);
       if (set.width > 0) setNatural({ width: set.width, height: set.height });
     });
-  }, [scene.imageUrl]);
+  }, [scene.imageUrl, videoMap]);
   const framedFor = useRef(views.get(sceneIn.id)?.framed ?? "");
   // The view kept as it changes, for when the map moves to another window.
   useEffect(() => {
@@ -1578,6 +1588,7 @@ function MapViewInner({
             onError={() => setImageFailed(true)}
           />
         ) : null}
+        {videoMap && scene.imageUrl && !imageFailed ? <MapVideo url={scene.imageUrl} name={scene.name} rect={backdrop} onNatural={setNatural} onStill={setVideoStill} onFailed={() => setImageFailed(true)} /> : null}
         {tileLayer("below")}
         {drawSquare ? (
           <svg
@@ -1630,7 +1641,7 @@ function MapViewInner({
             seeing={gm ? [] : map.seeing}
             gm={gm}
             twilight={!gm && Boolean(map.twilight)}
-            image={scene.imageUrl && !imageFailed ? { url: scene.imageUrl, ...backdrop } : null}
+            image={scene.imageUrl && !imageFailed && (!videoMap || videoStill) ? { url: videoMap ? (videoStill as string) : scene.imageUrl, ...backdrop } : null}
           />
         ) : null}
         {map.sceneId === scene.id ? <DarknessAreas areas={map.darkAreas} through={map.trueSeeing} gm={gm} width={frame.worldWidth} height={frame.worldHeight} /> : null}
@@ -1831,6 +1842,7 @@ function MapViewInner({
           </svg>
         ) : null}
         {gm ? <RegionShapes regions={map.regions} width={frame.worldWidth} height={frame.worldHeight} scale={camera.scale} /> : null}
+        {gm && (settingsOpen || (editorOpen && editTab === "lights")) ? <MapSoundMarkers sounds={map.mapSounds} perFoot={size / (scene.grid.distance > 0 ? scene.grid.distance : 5)} width={frame.worldWidth} height={frame.worldHeight} scale={camera.scale} /> : null}
         <TokenPaths tokens={tokens} scene={scene} diagonal={diagonal} units={units} terrain={map.terrain} width={frame.worldWidth} height={frame.worldHeight} scale={camera.scale} />
         <MoveRequestGhosts requests={map.moveRequests} tokens={tokens} width={frame.worldWidth} height={frame.worldHeight} scale={camera.scale} />
         {tokens.map((token) => {
@@ -2193,7 +2205,9 @@ function MapViewInner({
           onLocked={actions.setLocked}
           onResetExplored={actions.resetExplored}
           onClose={() => setSettingsOpen(false)}
-        />
+        >
+          <MapSoundsPanel sounds={map.mapSounds ?? []} units={units} list={actions.soundList} act={actions.mapSound} viewCenter={viewCenter} />
+        </SceneSettings>
       ) : null}
 
       {placeable.length > 0 || mine.length > 0 ? (

@@ -564,6 +564,12 @@ select {
   color: #f4f1ea;
 }
 .move-approval { display: inline-flex; align-items: center; gap: 0.25rem; }
+/* The GM's placed sounds (MapSounds.tsx). */
+.overlay.map-sound-markers { z-index: 4; pointer-events: none; }
+.map-sound-add, .map-sound-row { display: flex; align-items: center; gap: 0.35rem; }
+.map-sound-add select { flex: 1; min-width: 0; }
+.map-sound-row .map-sound-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.map-sound-row input[type="range"] { width: 4.5rem; }
 .move-approval small { color: #aab; }
 .token-elevation {
   position: absolute;

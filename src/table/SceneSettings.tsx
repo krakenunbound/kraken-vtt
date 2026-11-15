@@ -25,7 +25,9 @@ export function SceneSettings({
   onLocked,
   onResetExplored,
   onClose,
+  children,
 }: {
+  children?: import("react").ReactNode;
   map: TableMap;
   gridDefaults: { alpha: number; color: string };
   onSettings: (patch: SceneSettingsPatch) => void;
@@ -146,6 +148,7 @@ export function SceneSettings({
           <input type="range" min={0} max={359} step={5} value={weather.direction} onChange={(event) => onSettings({ weather: { direction: Number(event.target.value) } })} />
         </label>
       </fieldset>
+      {children}
     </aside>
   );
 }
