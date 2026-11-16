@@ -20,7 +20,17 @@ The combat tracker runs a fight by the campaign's game rules. It rolls initiativ
 2. Step through the turns with **Next turn**, and **Next round** to move the round on. Effects tick at each turn, and durations count down.
 3. On a creature's turn, roll its attacks and damage from its sheet or its tracker row against the targeted token. Saves, healing and conditions work the same way, by each game's rules.
 
-When a player's turn comes round, they get a banner and a soft chime (each can be turned off in their Settings).
+When a player's turn comes round, they get a banner and a soft chime (each can be turned off in their Settings). On every turn, everyone sees a card at the top of the screen with the portrait of whoever acts and, as a round begins, the round (Settings > Whose turn it is).
+
+### Sides, hiding and cleaning up
+
+- Click a creature's side under its name (Foe, Neutral, Friend, No side) to move it on to the next.
+- The **eye** hides a creature from the players, and its token with it. Hide the monsters before the party walks in; press the eye again when they are seen, and they appear in the tracker and on the map together.
+- **Remove**, **Clear NPCs**, **Delete foes**, **Delete non-friendly** and **Clear effects** each ask once, with a **Cancel** beside the question.
+
+### A creature's details
+
+**More** on a creature's row shows its space and reach, its offense (speed, senses, skills, languages, CR) and defense (AC, hit points, saves, resistances and immunities), and each of its traits, actions, reactions and legendary actions as a name: click one to read it there. **Record** opens its whole stat block.
 
 ### Delay and Act now
 
@@ -30,6 +40,7 @@ When a player's turn comes round, they get a banner and a soft chime (each can b
 
 - **Back** returns to the turn before.
 - **‹ ›** beside the round moves it back or on.
+- Type a number in the round box to put the counter right (back or forward). Nothing is undone or counted down: it is the number alone.
 - Click a row's arrow space (or drag the arrow there) to make it that creature's turn.
 
 **Next turn** and **Next round** run the rules (durations, ongoing damage). **Back** and **Round back** undo those turn changes: effects that ran out come back and ongoing damage is healed, while what happened during the turn stays.

@@ -4,6 +4,22 @@ What changed in each release of Kraken VTT. Downloads are on the
 [Releases](https://github.com/krakenunbound/kraken-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
+## 0.1.0-alpha.92: The GM's walkthrough of Fantasy Grounds
+
+**From the GM's own walkthrough of Fantasy Grounds 5E, screen by screen: what FG does that Kraken lacked, done better where FG is awkward.**
+
+- **Chat languages.** Under the chat entry, speak in a language your character knows: those whose characters know it read your words, everyone else hears only its sounds. The GM sees the words and an *Understood by:* line, speaks any language, and adds the setting's own in Settings. The agent's chat tool speaks them too.
+- **Combat tracker.** A creature's side is one click to change (foe, neutral, friend, and now no side). The round is typed in, back or forward. The eye that hides a creature hides or reveals its token too (reveal the kobolds as the party walks in). Delete foes, delete everyone not friendly, clear every effect: each asks once and has a Cancel, as does Remove. A creature's More shows its space and reach, offense, defense, and each trait and action opened in place, with its record a click away.
+- **Whose turn it is, on every screen.** The portrait of whoever acts next and the round as it begins, for a moment, at the top of the screen (a player's own turn keeps its banner).
+- **Start screen.** The help row in Kraken's own colours with an icon on each button, a new Tutorials page in the wiki, and release notes read here from GitHub.
+- **Party sheet.** HP and Hit Dice bars, the six abilities with their bonuses, passive Perception and senses; coins drawn as coins.
+- **5E characters.** The wizard charges for the gear you buy (spent and left shown; a return refunds). A versatile weapon is held in one hand or two on the sheet; a thrown melee weapon has its own thrown line. Feats and spells dropped on the sheet are added.
+- **Inventory containers.** Drag an item onto a backpack (sack, pouch, bag of holding) to put it in; Drop or Pick up the container in one click, its contents with it (5E, 3.5E, 2E, Basic Fantasy). The carried menu shows Not carried again.
+- **Treasure parcels** dropped on a character's sheet fill its gear and purse.
+- **Encounters.** FG's identified magnifier per creature: what the players call it until they know it, carried by its tokens.
+- **Vehicles and Locations**, FG's two missing lists, each starting with FG's fields.
+- **The GM's own** coins (Currency), named modifiers beside every modifier box, and a theme for the whole table (Kraken, Abyss, Ember, Arcane, Iron), all in Settings and the agent's table options.
+
 ## 0.1.0-alpha.91: Game night ready: the audit of Fantasy Grounds and Foundry
 
 **From a hands-on audit of Fantasy Grounds and Foundry: what a game night trips over.**

@@ -36,6 +36,7 @@ The modifier box beside the dice holds up to six numbers for your next roll, eac
 - Type `/mod 2 Flanking`, or drop a number, a chat roll or an effect on the box.
 - Right-click one to take it off.
 - **The keys** under the tray are the game's own chips: ADV, DIS, +2, -2, and in D&D 5E cover, superior cover, opportunity, and Crit, Max and Half for damage; Traveller and Apeira Astra have Boon and Bane.
+- **The GM's own modifiers** (FG's Modifiers window) sit after them with a dashed edge, such as *Higher ground +1*: a click puts the number in the box. The GM sets them in **Settings > Modifiers**, one a line.
 
 Whatever you roll next, from the tray, `/roll`, a sheet or the combat tracker, reads them and lists them on its card; then they clear. In 5E, ADV and DIS tag the roll **[ADVANTAGE]** or **[DISADVANTAGE]**. Every player has their own box.
 
@@ -79,6 +80,15 @@ Drop a dice pack (a folder or `.zip` with `dice.json`) in `Documents/Kraken VTT/
 - Words spoken or emoted as a character or creature show over its token for a moment, in a parchment bubble (emotes in italics). Never a whisper or a secret line.
 - Lines spoken as a character or an NPC show its portrait.
 - The **GM Icon** (Settings > GM Icon) is the picture beside what the GM says.
+
+### Languages
+
+The **Language** menu under the chat entry speaks in a language (FG's chat language menu). A player sees only the languages the character they speak as knows; the GM sees the game's own, the characters', and the GM's own list (**Settings > Chat languages**).
+
+- Players whose characters know the language read the words, tagged with its name.
+- Everyone else sees only its sounds: made-up words of the same length, the same word always the same sounds.
+- The GM reads every line and an **Understood by:** line naming the characters who understood it.
+- **No language** is plain speech, understood by everyone.
 
 ## Links and inline rolls
 

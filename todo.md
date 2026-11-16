@@ -82,7 +82,8 @@ the core UI plan in [docs/core-ui-design.md](docs/core-ui-design.md).
 - [x] Clicking an inline-roll chip inside the note editor rolls it publicly.
 - [x] Confirm a note keeps its `[[1d6]]` text after editing (the UI test can
       skip that step silently).
-- [ ] Lower: chat languages, quick-slot pages, a turn timer.
+- [x] Chat languages (alpha.92).
+- [ ] Lower: quick-slot pages, a turn timer.
 
 ## Bookkeeping and rest
 
@@ -148,6 +149,16 @@ the core UI plan in [docs/core-ui-design.md](docs/core-ui-design.md).
 - [ ] Tests open windows on the left monitor and take focus; a mode that runs
       them without stealing the GM's mouse and keyboard would let them run
       while the GM uses the computer.
+
+## From the GM's FG walkthrough (FG Example1, 2026-11-15), not done yet
+
+- [ ] FG character import and export in FG's own XML for 5E (now: FG sheets come in mapped to C&C; export writes C&C only).
+- [ ] Dropping a background, class or species on a 5E sheet with FG's choice prompts (pick 4 skills, +2 / +1, subrace). The wizard does it today.
+- [ ] A campaign assets folder in the Assets window (tokens, portraits, images filters; drop a file onto its folder icon). A picture dropped on Kraken's window already opens as a map to share.
+- [ ] A Lights list to drag onto tokens (FG's token lights); the presets are in the token's light menu now.
+- [ ] Moon phases on the calendar (each world's moons and their cycles, from its books).
+- [ ] A table's result dragged onto a sheet field (it drags into notes and chat as text today).
+- [ ] **Last: S-tier dice.** FG's dice look better than Kraken's. Make Kraken's own to that standard (not copies of FG's paid dice): materials, numbers, the roll's weight and bounce.
 
 ## Housekeeping
 

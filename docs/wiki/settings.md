@@ -33,6 +33,13 @@ Opens the **Dice** window: your dice sets, colours, design, material, lettering,
 | **Kraken VTT Folder** | Opens `Documents/Kraken VTT`. |
 | **Open logs** | Kraken's logs, for a bug report. |
 
+### Look, chat languages, currency and modifiers
+
+- **Look**: the table's theme on every screen, changed at once: Kraken (brass), Abyss (sea), Ember, Arcane (violet), Iron (steel).
+- **Chat languages**: your setting's own languages, beside the game's and those the characters know.
+- **Currency**: your world's coins, most valuable first, for the party sheet and treasure parcels. Empty: the game's own.
+- **Modifiers**: named numbers beside every player's modifier box, one a line (*Higher ground +1*).
+
 Decals, wallpapers and GM icons each offer Kraken's own, a set for each game, **Browse…** to import a picture of your own, or none.
 
 ![The hex grid wallpaper, the Kraken decal and the dice tower](../screenshots/desktop-hex.jpg)
