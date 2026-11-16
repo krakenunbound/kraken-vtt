@@ -2435,3 +2435,11 @@ label.set-row { cursor: pointer; }
 .rt-chip { display: inline-flex; align-items: center; border-radius: 999px; border: 1px solid var(--brass-dim); background: rgba(255, 255, 255, 0.05); padding: 0 8px; margin: 0 1px; font-size: 0.88em; cursor: pointer; user-select: none; }
 .rt-chip button { border: none; background: transparent; padding: 1px 0; display: inline-flex; align-items: center; gap: 4px; font: inherit; color: inherit; }
 .encounter-identity { display: flex; align-items: center; gap: 6px; }
+.five-items li.is-container { border-left: 2px solid var(--brass-dim); padding-left: 4px; }
+.five-items li.drop-over { outline: 2px dashed var(--brass); outline-offset: 2px; background: var(--brass-soft); }
+.five-items li.in-container { padding-left: 14px; }
+.five-items li[draggable="true"] { cursor: grab; }
+.in-bag { display: inline-flex; align-items: center; gap: 2px; padding: 0 6px; border-radius: 999px; background: var(--brass-soft); color: var(--brass); font-size: 0.72rem; }
+.in-bag button { padding: 0 3px; line-height: 1; }
+.bag-toggle { display: inline-flex; align-items: center; gap: 3px; font-size: 0.75rem; }
+.in-bag { flex: none; margin-left: auto; }

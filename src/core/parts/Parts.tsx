@@ -6,6 +6,8 @@ import { at, fill, holds, nodesOf, num, rows, signed, textOf, useSheet, type For
 import { FieldView, LabelledField } from "./FieldView";
 import { ACTION_DRAG } from "../../effects/drops";
 import { Supplies } from "../../bookkeeping/Supplies";
+import { CONTAINERS } from "../../../shared/bookkeeping/bookkeeping.mjs";
+import { useState } from "react";
 
 // An attack or damage button drags onto a creature (FG's drag of a sheet's action onto a
 // token or tracker row): there it is rolled against that creature alone (src/effects/drops.ts).
@@ -468,10 +470,18 @@ function FieldWithWord({ field, scope }: { field: NonNullable<BoxSpec["fields"]>
 
 // A list of the record's id-* rows (FG's windowlist): a leading select or check, the name and
 // its details, the row's buttons, drop it; a line to add one; a sheet-wide choice its buttons read.
+// Containers on the inventory (the GM asked for better than FG's typed location): a backpack, sack or
+// bag of holding takes an item dragged onto it; an item in one says so (x takes it out); a container is
+// dropped or picked up in one click, its contents with it (their weight follows, bookkeeping.mjs).
+const INVENTORY_DRAG = "application/x-kraken-inventory";
+const containerOf = (item: Row) => Number(item.capacity) > 0 || CONTAINERS.some((kind: { match: string }) => new RegExp(kind.match, "i").test(String(item.name ?? "")));
+
 function List({ spec, formats }: { spec: Extract<Part, { part: "list" }>; formats: Record<string, Format> }) {
   const sheet = useSheet();
   const { editable, modifiers } = sheet;
   const items = rows(at(sheet.data, spec.path));
+  const packs = spec.path === "inventorylist";
+  const [over, setOver] = useState("");
   const modifier = spec.modifier ? <ModifierView spec={spec.modifier} /> : null;
   return (
     <>
@@ -514,8 +524,40 @@ function List({ spec, formats }: { spec: Extract<Part, { part: "list" }>; format
                   {nodesOf(item.text, scope, modifiers)}
                 </small>
               ));
+          const container = packs && containerOf(item);
+          const inside = packs ? String(item.location ?? "").trim() : "";
+          // Carried unless it says otherwise (FG's carried: 0 not carried, 1 carried, 2 equipped).
+          const held = item.carried === undefined || item.carried === "" ? 1 : num(item.carried);
+          const bag = packs && editable
+            ? {
+                draggable: true,
+                onDragStart: (event: React.DragEvent) => {
+                  if ((event.target as HTMLElement).closest?.("button, input, select")) return;
+                  event.dataTransfer.setData(INVENTORY_DRAG, `${sheet.record.id}|${key}`);
+                  event.dataTransfer.effectAllowed = "move";
+                },
+                ...(container
+                  ? {
+                      onDragOver: (event: React.DragEvent) => {
+                        if (!event.dataTransfer.types.includes(INVENTORY_DRAG)) return;
+                        event.preventDefault();
+                        setOver(key);
+                      },
+                      onDragLeave: () => setOver(""),
+                      onDrop: (event: React.DragEvent) => {
+                        setOver("");
+                        const [record, moved] = event.dataTransfer.getData(INVENTORY_DRAG).split("|");
+                        if (record !== sheet.record.id || !moved || moved === key) return;
+                        event.preventDefault();
+                        event.stopPropagation();
+                        sheet.change(`${spec.path}.${moved}.location`, name);
+                      },
+                    }
+                  : {}),
+              }
+            : {};
           return (
-            <li key={key} {...(spec.hook ? { [`data-${spec.hook}`]: key } : {})}>
+            <li key={key} {...(spec.hook ? { [`data-${spec.hook}`]: key } : {})} {...bag} className={[container ? "is-container" : "", over === key ? "drop-over" : "", inside ? "in-container" : ""].filter(Boolean).join(" ") || undefined} {...(container ? { "data-container": name } : {})}>
               {spec.select ? <FieldView spec={spec.select} scope={scope} base={`${spec.path}.${key}`} /> : null}
               {(spec.fields ?? []).map((field) => (
                 <FieldView key={field.path} spec={field} scope={scope} base={`${spec.path}.${key}`} />
@@ -538,6 +580,21 @@ function List({ spec, formats }: { spec: Extract<Part, { part: "list" }>; format
                   </button>
                 ))}
               {smalls("end")}
+              {inside ? (
+                <span className="in-bag" data-in-container={inside} title={`In the ${inside}`}>
+                  in {inside}
+                  {editable ? (
+                    <button type="button" className="ghost" aria-label={`Take ${name} out of the ${inside}`} onClick={() => sheet.change(`${spec.path}.${key}.location`, "")}>
+                      ×
+                    </button>
+                  ) : null}
+                </span>
+              ) : null}
+              {container && editable ? (
+                <button type="button" className="ghost bag-toggle" data-action={held > 0 ? "container-drop" : "container-pickup"} title={held > 0 ? `Drop the ${name} (what is in it stays in it, and its weight comes off)` : `Pick the ${name} up again`} onClick={() => sheet.change(`${spec.path}.${key}.carried`, held > 0 ? 0 : 1)}>
+                  <Icon name={held > 0 ? "leave" : "hand"} size={13} /> {held > 0 ? "Drop" : "Pick up"}
+                </button>
+              ) : null}
               {editable && spec.remove ? (
                 <button type="button" className="ghost" title={spec.remove.title} aria-label={textOf(spec.remove.aria, scope, modifiers)} onClick={() => (spec.remove?.action ? sheet.act(spec.remove.action, { key }) : sheet.change(`${spec.path}.${key}`, null))}>
                   ×

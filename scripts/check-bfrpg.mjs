@@ -42,7 +42,7 @@ const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
   };
   assert(EDIT_PATHS.remove.map((regex) => regex.source).join() === /^(inventorylist)\.id-\d+$/.source, `the rows the sheet may drop: ${EDIT_PATHS.remove.map((regex) => regex.source).join()}`);
   for (const kind of ["text", "number", "list"]) assert(EDIT_PATHS[kind].map((regex) => regex.source).join(" ") === before[kind].join(" "), `the ${kind} whitelist from the manifest is the old one: ${EDIT_PATHS[kind].map((regex) => regex.source).join(" ")}`);
-  assert(EDIT_PATHS.string.length === 0, "no string paths");
+  assert(EDIT_PATHS.string.length === 1 && EDIT_PATHS.string[0].test("inventorylist.id-00001.location"), "one string path: an item's container (its location)");
   console.log("whitelist ok");
 }
 

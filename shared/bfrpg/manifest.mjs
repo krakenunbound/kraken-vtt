@@ -239,6 +239,8 @@ export default {
       "coins.*.amount",
       "inventorylist.*.(count|carried)",
     ],
+    // The container an item is in (FG's location), set by dragging it onto a backpack on the sheet.
+    string: ["inventorylist.*.location"],
     list: ["spellbook", "prepared"],
     remove: ["inventorylist"],
   },

@@ -170,6 +170,23 @@ try {
   assert(hero.data.abilities.strength.score === 16 && hero.data.abilities.constitution.score === 15 && hero.data.skills.perception.prof === 1 && hero.data.skills.athletics.prof === 1 && hero.data.feats.includes("Savage Attacker") && hero.data.feats.includes("Defense") && hero.data.languages.join() === "Common,Elvish,Dwarvish", `scores, skills, feats, languages: ${JSON.stringify({ feats: hero.data.feats, languages: hero.data.languages })}`);
   assert((await seat.textContent('.sheet-5e [data-stat="ac"]')).trim() === "16", "the sheet shows AC 16");
 
+  // Containers (better than FG's typed location): the rope dragged onto a backpack goes in it; the
+  // backpack dropped in one click, picked up again.
+  await tool("kraken_character_drop", { id: row.id, record: "Backpack", type: "item" });
+  await seat.click('[data-sheet-tab="inventory"]');
+  await seat.waitForSelector('.sheet-5e li[data-container="Backpack"]');
+  const ropeRow = seat.locator('.sheet-5e li[draggable="true"]', { hasText: "Rope" }).first();
+  await ropeRow.dragTo(seat.locator('.sheet-5e li[data-container="Backpack"]'));
+  await seat.waitForSelector('.sheet-5e [data-in-container="Backpack"]', { timeout: 10000 });
+  const packed = await tool("kraken_record_get", { id: row.id });
+  assert(Object.values(packed.data.inventorylist).some((item) => item.name === "Rope" && item.location === "Backpack"), "the rope is in the backpack");
+  await seat.click('.sheet-5e li[data-container="Backpack"] [data-action="container-drop"]');
+  await seat.waitForSelector('.sheet-5e li[data-container="Backpack"] [data-action="container-pickup"]');
+  assert((await seat.locator('.sheet-5e li[data-container="Backpack"] select').inputValue()) === "0", "the dropped backpack reads Not carried");
+  await seat.screenshot({ path: path.join(tmpdir(), "kraken-dnd5e-backpack.png") });
+  await seat.click('.sheet-5e li[data-container="Backpack"] [data-action="container-pickup"]');
+  await seat.click('[data-sheet-tab="main"]');
+
   // A skill and a save from the sheet, both in the GM's chat.
   await seat.click('[data-sheet-tab="skills"]');
   await seat.click('[data-roll-skill="athletics"]');

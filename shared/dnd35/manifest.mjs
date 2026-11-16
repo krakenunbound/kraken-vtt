@@ -237,7 +237,7 @@ export default {
             path: "inventorylist",
             hook: "item",
             // A count or carried of 0 shows as 1, as the hand-made sheet did.
-            select: { path: "carried", kind: "select", number: true, label: "{name} carried", title: "Equipped, carried or not carried", options: [{ value: "2", label: "Equipped" }, { value: "1", label: "Carried" }, { value: "0", label: "Not carried" }], default: 1, zeroIsEmpty: true },
+            select: { path: "carried", kind: "select", number: true, label: "{name} carried", title: "Equipped, carried or not carried", options: [{ value: "2", label: "Equipped" }, { value: "1", label: "Carried" }, { value: "0", label: "Not carried" }], default: 1 },
             fields: [{ path: "count", kind: "number", label: "{name} count", default: 1, zeroIsEmpty: true }],
             name: { path: "name" },
             details: [{ text: "{subtype}", when: { not: { isNull: "subtype" } } }, { text: "{type}", when: { isNull: "subtype" } }],
@@ -274,6 +274,8 @@ export default {
       "coins.*.amount",
       "inventorylist.*.(count|carried)",
     ],
+    // The container an item is in (FG's location), set by dragging it onto a backpack on the sheet.
+    string: ["inventorylist.*.location"],
     list: ["feats", "spells"],
     remove: ["inventorylist"],
   },
