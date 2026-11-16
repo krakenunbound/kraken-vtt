@@ -286,6 +286,10 @@ try {
   await page.screenshot({ path: path.join(shots, "6-gm-tracker-delay.png") });
   await page.click('[data-action="act-now"]');
   await until(async () => (await tool("kraken_combat", { action: "view" })).active === waiting.id, "act now");
+  // Whose turn it is, on every screen: the actor's portrait card (the player sees the goblin's too).
+  await page.waitForSelector(`.turn-card[data-turn-card="${waiting.name}"]`, { timeout: 3000 });
+  await seat.waitForSelector(`.turn-card[data-turn-card="${waiting.name}"]`, { timeout: 3000 });
+  await page.screenshot({ path: path.join(shots, "6-gm-turn-card.png") });
   await seat.click('.sidebar [data-launch="combat"]');
   await seat.waitForSelector(".ct-bar");
   await seat.screenshot({ path: path.join(shots, "6-player-tracker-bars.png") });

@@ -44,6 +44,7 @@ import { AssistantWindow } from "./AssistantWindow";
 import { CardsWindow } from "../cards/CardsWindow";
 import { cardsStore } from "../cards/cardsStore";
 import { entryId, Sidebar, type SidebarEntry, type SidebarGroup } from "./Sidebar";
+import { TurnCard } from "../combat/TurnCard";
 
 // The 3D dice (three.js and cannon) load when the table first shows them.
 const DiceLayer = lazy(() => import("../dice/DiceLayer"));
@@ -686,6 +687,7 @@ export function Desktop({
       })}
       {/* The GM's read-aloud with no map up: over the table. */}
       {!anyMapShown ? <ReadAloudBubble now={session.readAloudNow} onDone={session.dismissReadAloud} floating /> : null}
+      <TurnCard session={session} />
       {banner ? (
         <div key={banner.key} className="turn-banner" role="alert" data-turn-banner={banner.name} onClick={() => setBanner(null)}>
           <span className="turn-banner-glow" aria-hidden="true" />

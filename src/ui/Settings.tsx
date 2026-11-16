@@ -42,6 +42,7 @@ function YouAtTheTable() {
       </div>
       <Toggle label="Chime on your turn" hint="A soft chime when your turn comes round in combat." setting="turn-sound" checked={settings.turnSound !== false} onChange={(on) => diceStore.update({ turnSound: on })} />
       <Toggle label="Banner on your turn" hint="Your name across the screen when it is your turn." setting="turn-banner" checked={settings.turnBanner !== false} onChange={(on) => diceStore.update({ turnBanner: on })} />
+      <Toggle label="Whose turn it is" hint="The portrait of whoever acts next, and the round as it begins, for a moment on every turn." setting="turn-card" checked={settings.turnCard !== false} onChange={(on) => diceStore.update({ turnCard: on })} />
     </SettingsSection>
   );
 }
