@@ -19,6 +19,7 @@ const party = require("./party.cjs");
 const { createCombat } = require("./combat.cjs");
 const { modulePicture, importModule, prepareModule } = require("./importers/fgModule.cjs");
 const { fitsRuleset } = require("./books.cjs");
+const languages = require("../shared/text/languages.mjs");
 
 const MAX_CLIENTS = 16;
 // What a player may not do while the GM has paused the game: move or change tokens, open doors, roll, finish a character wizard or improve a character.
@@ -347,6 +348,8 @@ function savedOptions(value) {
     ...(["roll", "max"].includes(options.npcHp) ? { npcHp: options.npcHp } : {}),
     ...(["enemies", "all", "off"].includes(options.skipDead) ? { skipDead: options.skipDead } : {}),
     npcNumbering: ["append", "random", "off"].includes(options.npcNumbering) ? options.npcNumbering : "append",
+    // The GM's own chat languages (FG's Languages list), beside the game's and those its characters know.
+    ...(Array.isArray(options.languages) && options.languages.length ? { languages: [...new Set(options.languages.map((name) => String(name ?? "").trim().slice(0, 40)).filter(Boolean))].slice(0, 60) } : {}),
   };
 }
 function bookkeepingOptions(value) {
@@ -849,6 +852,23 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
   // attack on the tracker, a line in chat): the GM's seat gets it as it is (records.cjs hideNames).
   // A creature whose token has a "players call it" name (FG's unidentified name) is called that too, in
   // the tracker and chat, unless another token of the same name is known by it.
+  // Chat languages: the characters who understand a line spoken in one, and what each seat reads of it
+  // (its words if one of their characters knows the language or they said it, its sounds if not).
+  function understoodBy(lang) {
+    return records
+      .list({ type: "character" })
+      .filter((record) => languages.knows(record.data, lang))
+      .map((record) => record.name)
+      .slice(0, 24);
+  }
+  function heard(client, line) {
+    if (!line.lang || client.role === "dm") return line;
+    const { understood, ...rest } = line;
+    if (line.id === client.id) return rest;
+    const mine = records.list({ type: "character", owner: client.name }).map((record) => record.name);
+    if (mine.some((name) => (understood ?? []).includes(name))) return rest;
+    return { ...rest, text: languages.garble(line.text, line.lang), garbled: true };
+  }
   function forPlayer(client, value) {
     if (client.role === "dm") return value;
     const tokens = map.tokens();
@@ -1153,7 +1173,7 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
     }
     chat.push(entry);
     if (chat.length > MAX_CHAT) chat.shift();
-    for (const [ws, client] of clients) if (seesLine(client, entry)) send(ws, forPlayer(client, { type: "chat", ...entry }));
+    for (const [ws, client] of clients) if (seesLine(client, entry)) send(ws, forPlayer(client, heard(client, { type: "chat", ...entry })));
     onChange("table");
     return entry;
   }
@@ -1270,7 +1290,10 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
 
   function chatFor(client) {
     const since = chatCleared.get(clearKey(client)) ?? 0;
-    return chat.filter((line) => (line.at ?? 0) > since && seesLine(client, line)).slice(-JOIN_CHAT);
+    return chat
+      .filter((line) => (line.at ?? 0) > since && seesLine(client, line))
+      .slice(-JOIN_CHAT)
+      .map((line) => heard(client, line));
   }
 
   // label: what the roll is for ("Strength check"). from: who rolled.
@@ -2244,6 +2267,15 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
         }
         const as = client.role === "dm" ? text(msg.as, "").slice(0, 24) : speaksAs(client, msg.as);
         const to = Array.isArray(msg.to) ? msg.to.map((name) => text(name, "").slice(0, 24)).filter(Boolean).slice(0, 12) : null;
+        // Spoken in a language (FG's chat language): a player only in one their character knows.
+        const lang = ["say", "mood"].includes(kind) ? text(msg.lang, "").slice(0, 40) : "";
+        if (lang && client.role !== "dm") {
+          const own = records.list({ type: "character", owner: client.name }).find((record) => record.name === as);
+          if (!own || !languages.knows(own.data, lang)) {
+            send(ws, { type: "error", reason: `${as || "You"} does not speak ${lang}.` });
+            return;
+          }
+        }
         addChat({
           id: client.id,
           from: as || client.name,
@@ -2254,6 +2286,7 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
           ...(to && to.length ? { to } : {}),
           ...(link ? { link } : {}),
           ...(share ? { share } : {}),
+          ...(lang ? { lang, understood: understoodBy(lang) } : {}),
         });
         return;
       }
@@ -3436,7 +3469,7 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
       return addChat({ id: "agent", from: text(from, "Agent").slice(0, 24), text: text(line, "").slice(0, 500) || clean.label, at: Date.now(), link: clean, ...(shared ? { share: shared } : {}), ...(secret ? { secret: true } : {}) });
     },
     say: (line, from = "Agent", secret = false, extra = {}) =>
-      addChat({ id: "agent", from: text(from, "Agent").slice(0, 24), text: text(line, "").slice(0, 500), at: Date.now(), ...(secret ? { secret: true } : {}), ...extra }),
+      addChat({ id: "agent", from: text(from, "Agent").slice(0, 24), text: text(line, "").slice(0, 500), at: Date.now(), ...(secret ? { secret: true } : {}), ...extra, ...(extra.lang ? { understood: understoodBy(extra.lang) } : {}) }),
     kick: (name, how = {}) => kick(name, how),
     // The Players window's controls: the Ban list, Unban, Ring bell, a player away, a raised hand lowered, View as.
     bans: () => bans.map((ban) => ({ ...ban })),

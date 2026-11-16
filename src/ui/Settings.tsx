@@ -11,6 +11,8 @@ import { SettingRow, SettingsSection, Toggle } from "./SettingsParts";
 import { manifestOf, PANELS } from "../rulesets";
 import { TokenOptionsSection } from "../table/TokenOptions";
 import { BookkeepingSettings } from "../bookkeeping/BookkeepingSettings";
+import { rulesetFor } from "../../shared/rulesets/registry.mjs";
+import { gameLanguages } from "../../shared/text/languages.mjs";
 
 // Settings, as FG's settings cog: a button for each thing to set. Everyone
 // sets their own dice; the GM also sets what the whole table sees.
@@ -159,6 +161,7 @@ export function SettingsWindow({ session }: { session: Session }) {
           </SettingRow>
         </SettingsSection>
       ) : null}
+      {gm ? <LanguagesSetting session={session} /> : null}
       {gm ? <BookkeepingSettings session={session} /> : null}
       {gm ? <TokenOptionsSection session={session} /> : null}
       {/* The rows the game adds (its manifest's settings), only in that game. */}
@@ -169,6 +172,25 @@ export function SettingsWindow({ session }: { session: Session }) {
       })}
       {gm ? <StudioFoldersSetting /> : null}
     </div>
+  );
+}
+
+// The GM's own chat languages (FG's Languages list): offered in the chat's language menu beside the
+// game's own and those its characters know. One per line or comma between.
+function LanguagesSetting({ session }: { session: Session }) {
+  const saved = (session.options.languages ?? []).join(", ");
+  const [draft, setDraft] = useState(saved);
+  useEffect(() => setDraft(saved), [saved]);
+  const send = (value: string) => {
+    const list = value.split(/[,\n]/).map((name) => name.trim()).filter(Boolean);
+    if (list.join(", ") !== saved) session.setTableOptions({ languages: list });
+  };
+  return (
+    <SettingsSection title="Chat languages" setting="languages">
+      <SettingRow className="set-row-wide" label="Your languages" hint={`Spoken in chat from the language menu: those whose characters know one read the words, the others hear only its sounds, and you see who understood. The game's own (${gameLanguages(rulesetFor(session.ruleset ?? "").id).slice(0, 6).join(", ") || "none"}...) and the characters' are offered anyway.`}>
+        <textarea className="set-textarea" rows={2} value={draft} placeholder="Thieves' Cant, Old Imperial" aria-label="Your languages" data-setting="languages-list" onChange={(event) => setDraft(event.target.value)} onBlur={(event) => send(event.target.value)} />
+      </SettingRow>
+    </SettingsSection>
   );
 }
 

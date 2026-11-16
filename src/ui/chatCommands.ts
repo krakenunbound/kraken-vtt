@@ -19,6 +19,8 @@ export type CommandContext = {
   tower: boolean;
   // Who the GM speaks as (/id, /gmid).
   speakAs: string;
+  // The language the chat bar speaks in (FG's chat language menu), "" for none.
+  lang?: string;
   setSpeakAs: (name: string) => void;
   setGmName: (name: string) => void;
   lastWhisperFrom: string | null;
@@ -150,7 +152,7 @@ export const COMMANDS: Command[] = [
   { names: ["emote", "em", "me"], args: "[what you do]", help: "Say what you do: /me draws her sword", group: "Talk", run: (rest, context) => context.session.sendChat(rest, { kind: "emote", as: context.speakAs }) },
   { names: ["action", "act"], args: "[action]", help: "An action, set apart from speech", group: "Talk", run: (rest, context) => context.session.sendChat(rest, { kind: "action", as: context.speakAs }) },
   { names: ["ooc"], args: "[message]", help: "Out of character", group: "Talk", run: (rest, context) => context.session.sendChat(rest, { kind: "ooc" }) },
-  { names: ["ic", "say"], args: "[message]", help: "In character (as a plain message)", group: "Talk", run: (rest, context) => context.session.sendChat(rest, { as: context.speakAs }) },
+  { names: ["ic", "say"], args: "[message]", help: "In character (as a plain message)", group: "Talk", run: (rest, context) => context.session.sendChat(rest, { as: context.speakAs, ...(context.lang ? { lang: context.lang } : {}) }) },
   {
     names: ["mood"],
     args: "[mood] [message]",
@@ -461,7 +463,7 @@ export function runChat(draft: string, context: CommandContext) {
   const text = draft.trim();
   const command = /^\/(\S+)\s*([\s\S]*)$/.exec(text);
   if (!command) {
-    context.session.sendChat(text, context.speakAs ? { as: context.speakAs } : {});
+    context.session.sendChat(text, { ...(context.speakAs ? { as: context.speakAs } : {}), ...(context.lang ? { lang: context.lang } : {}) });
     return true;
   }
   const found = findCommand(command[1]);

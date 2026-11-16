@@ -112,7 +112,7 @@ try {
   await page.waitForSelector("text=Hosting");
   await tool("kraken_dice_settings", { show: false }).catch(() => undefined);
   const abilities = Object.fromEntries(["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"].map((stat) => [stat, { score: 14, bonus: 2, save: 2 }]));
-  const hero = await tool("kraken_record_create", { type: "character", name: "Hagar", owner: "A test player", visibility: "owner", data: { ruleset: "dnd5e", level: 3, prof: 2, hp: { total: 24, wounds: 0 }, abilities, skills: { stealth: { name: "Stealth", total: 4 } } } });
+  const hero = await tool("kraken_record_create", { type: "character", name: "Hagar", owner: "A test player", visibility: "owner", data: { ruleset: "dnd5e", level: 3, prof: 2, languages: ["Common", "Orc"], hp: { total: 24, wounds: 0 }, abilities, skills: { stealth: { name: "Stealth", total: 4 } } } });
   const goblin = await tool("kraken_record_create", { type: "npc", name: "Goblin", data: { hp: 7, ac: 13, text: "<p>A small, vicious raider. Scimitar: [[1d20+4 #Scimitar]], 1d6 + 2 slashing.</p>" } });
   const relic = await tool("kraken_record_create", { type: "item", name: "Moon Amulet", visibility: "all", data: { description: "<p>A silver amulet that glows at night.</p>" } });
   await tool("kraken_party_edit", { members: [hero.id] });
@@ -171,6 +171,21 @@ try {
     await page.waitForSelector(`.chat-portrait[data-chat-portrait="${hero.id}"]`);
     assert(await page.isVisible(`.chat-portrait[data-chat-portrait="${hero.id}"]`), "Hagar's portrait on his line");
   }
+
+  // 2b. Chat languages (FG's chat language menu): Hagar speaks Orc; the GM reads it and who understood.
+  // The GM's Elvish reaches the player as sounds only.
+  await seat.selectOption('select[aria-label="Language"]', "Orc");
+  await say(seat, "Grukk smash the door");
+  await page.waitForSelector('.chat-line[data-from="Hagar"] .chat-understood');
+  assert((await page.textContent('.chat-line[data-from="Hagar"] .chat-understood')).includes("Hagar"), "the GM sees Hagar understood");
+  assert((await tool("kraken_chat_log", { count: 2 })).some((line) => line.lang === "Orc" && line.text === "Grukk smash the door"), "the line kept its language");
+  await seat.selectOption('select[aria-label="Language"]', "");
+  await page.selectOption('select[aria-label="Language"]', "Elvish");
+  await say(page, "The door is warded");
+  await seat.waitForSelector(".chat-line .chat-garbled");
+  assert(!(await seat.textContent(".chat-log")).includes("The door is warded"), "the player hears only Elvish sounds");
+  await seat.screenshot({ path: path.join(shots, "2b-player-language.png") });
+  await page.selectOption('select[aria-label="Language"]', "");
 
   // 3. The GM drops a record into the chat's entry and shares it.
   await drop(page, ".chat-entry", { "text/kraken-slot": JSON.stringify({ kind: "record", record: relic.id, label: "Moon Amulet" }) });

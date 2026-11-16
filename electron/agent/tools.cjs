@@ -691,7 +691,7 @@ const TOOLS = [
   {
     name: "kraken_chat_send",
     description:
-      "Post a chat message to the table, as FG's chat commands do: kind say (default), emote (/emote: \"Agent nods\"), action (/action), ooc (/ooc), story (/story: the GM's narration, no name) or mood (/mood, with mood); to: whisper it to these players only (the GM sees every whisper, as FG's); as: the name shown (/id: an NPC speaking; a character's or NPC's name puts its portrait on the line). link: a link on the line, as anything dropped into the chat's entry (a record, a sheet, a note, a book page, a picture; each player may open it only if they may see it); share with a record link: FG's Share, the record's text posted as the players know it (an unidentified item as unidentified).",
+      "Post a chat message to the table, as FG's chat commands do (lang: in a language, FG's chat language menu): kind say (default), emote (/emote: \"Agent nods\"), action (/action), ooc (/ooc), story (/story: the GM's narration, no name) or mood (/mood, with mood); to: whisper it to these players only (the GM sees every whisper, as FG's); as: the name shown (/id: an NPC speaking; a character's or NPC's name puts its portrait on the line). link: a link on the line, as anything dropped into the chat's entry (a record, a sheet, a note, a book page, a picture; each player may open it only if they may see it); share with a record link: FG's Share, the record's text posted as the players know it (an unidentified item as unidentified).",
     inputSchema: object(
       {
         text: string("Message"),
@@ -701,6 +701,7 @@ const TOOLS = [
         to: { type: "array", items: { type: "string" }, description: "Player names to whisper to" },
         link: { type: "object", description: "A link on the line: { kind: record|sheet|note, record: id, label } | { kind: book, book, page, label } | { kind: picture, book, file, label }" },
         share: { type: "boolean", description: "With a record link: post the record's text (FG's Share)" },
+        lang: string("Spoken in this language (FG's chat language): players whose characters know it read the words, the others hear only its sounds; the GM sees who understood"),
       },
       ["text"],
     ),
@@ -712,6 +713,7 @@ const TOOLS = [
           ...(args.kind && args.kind !== "say" ? { kind: args.kind } : {}),
           ...(args.kind === "mood" && args.mood ? { mood: String(args.mood).slice(0, 24) } : {}),
           ...(Array.isArray(args.to) && args.to.length ? { to: args.to.map((name) => String(name).slice(0, 24)).slice(0, 12) } : {}),
+          ...(args.lang ? { lang: String(args.lang).slice(0, 40) } : {}),
         }),
       ),
   },
@@ -1490,6 +1492,7 @@ const TOOLS = [
       initGroup: { type: "string", enum: ["each", "kind"], description: "The tracker's initiative: each creature its own roll, or by kind (one roll per kind of creature, its copies sharing it), for every game" },
       skipDead: { type: "string", enum: ["enemies", "all", "off"], description: "Whose turns the tracker skips: dead and unconscious creatures (enemies, FG's), characters too (all), or no one (off)" },
       npcNumbering: { type: "string", enum: ["append", "random", "off"], description: "NPC numbering when the same creature is added again: append (Goblin 1, Goblin 2), random (Goblin 14), off" },
+      languages: { type: "array", items: { type: "string" }, description: "The GM's own chat languages (FG's Languages list), offered beside the game's and those its characters know" },
     }),
     run(args, ctx) {
       const agent = needTable(ctx);

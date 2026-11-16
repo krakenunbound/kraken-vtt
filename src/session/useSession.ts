@@ -192,6 +192,10 @@ export type ChatLine = {
   mood?: string;
   to?: string[];
   self?: boolean;
+  // Spoken in a language (FG's chat language): its sounds for a seat whose characters do not know it, and (the GM's) who understood.
+  lang?: string;
+  garbled?: boolean;
+  understood?: string[];
   vote?: ChatVote;
   // Shown on this screen only (/help, /info): never sent.
   local?: boolean;
@@ -212,7 +216,7 @@ export type ChatPrompt = { id: string; kind: string; attribute?: string; skill?:
 export type ReadAloud = { text: string; title: string; at: number };
 // Who sees a roll (Foundry's roll modes): everyone, the GM and you, the GM alone, you alone.
 export type RollMode = "public" | "gm" | "blind" | "self";
-export type ChatSend = { kind?: ChatKind; mood?: string; to?: string[]; as?: string; link?: QuickSlot; share?: boolean };
+export type ChatSend = { kind?: ChatKind; mood?: string; to?: string[]; as?: string; link?: QuickSlot; share?: boolean; lang?: string };
 // The table's own options, set by the GM (electron/tableServer.cjs savedOptions).
 export type SoundTrigger = { id: string; name: string; on: string; match: string; result: string; sound: string; enabled: boolean };
 // Books (FG's Library): what the GM has shared, and the pictures shown to the players.
@@ -248,7 +252,7 @@ export type SoundItem = { id: string; kind: string; group: string; name: string 
 export type SoundLibrary = { sounds: SoundItem[]; groups: { id: string; count: number }[]; folder: string; triggers?: SoundTrigger[] };
 // Bookkeeping, each part the GM may switch off (electron/bookkeeping.cjs); variant: 5E variant encumbrance.
 export type BookkeepingOptions = { ammo: boolean; consumables: boolean; rations: boolean; light: boolean; encumbrance: boolean; variant: boolean };
-export type TableOptions = { paused?: boolean; towerReveal: boolean; towerExternal?: boolean; towerStyle?: string; deathMarkers?: { on: boolean; default: string; byType: Record<string, string> }; motd?: { text: string; links: QuickSlot[] }; decal: string; wallpaper: string; gmIcon: string; soundHidden: "off" | "combat" | "all"; soundRepeat: number; diceHold?: number; tokenEffects?: "full" | "icons" | "off"; playerEffects?: "none" | "lights" | "conditions" | "all"; autoApply?: boolean; bookkeeping?: BookkeepingOptions; wizard35?: Wizard35Options; wizard2e?: Wizard2eOptions };
+export type TableOptions = { paused?: boolean; towerReveal: boolean; towerExternal?: boolean; towerStyle?: string; deathMarkers?: { on: boolean; default: string; byType: Record<string, string> }; motd?: { text: string; links: QuickSlot[] }; decal: string; wallpaper: string; gmIcon: string; soundHidden: "off" | "combat" | "all"; soundRepeat: number; diceHold?: number; tokenEffects?: "full" | "icons" | "off"; playerEffects?: "none" | "lights" | "conditions" | "all"; autoApply?: boolean; languages?: string[]; bookkeeping?: BookkeepingOptions; wizard35?: Wizard35Options; wizard2e?: Wizard2eOptions };
 // The D&D 3.5E character wizard's options (the GM's, as FG's KrakenCharWizard35E).
 export type Wizard35Options = { methods: number[]; rollLock: boolean; lowReroll: boolean; vault: boolean };
 // The AD&D 2E character wizard's options (the GM's): ability rolls once only, the PHB methods allowed, gold above 1st level.

@@ -17,6 +17,7 @@ import { agentCommands } from "./agentCommands";
 import { DieShape, Icon } from "./icons";
 import { useWindows } from "./Windows";
 import { rulesetFor } from "../../shared/rulesets/registry.mjs";
+import { gameLanguages, knownLanguages, sameLanguage } from "../../shared/text/languages.mjs";
 import { openPopOut, PopOutWindow, screenOffset, type ScreenPlace } from "./PopOut";
 import "../effects/effects.css";
 
@@ -228,6 +229,7 @@ function Line({ line, gmIcon, session }: { line: ChatLine; gmIcon: string; sessi
       {!system && !story && line.kind !== "emote" ? <b className="chat-from">{line.from}{line.kind === "mood" && line.mood ? <i className="chat-mood"> ({line.mood})</i> : null}</b> : null}
       {line.to ? <span className="chat-tag whisper-tag">to {line.to.join(", ")}</span> : null}
       {line.kind === "ooc" ? <span className="chat-tag">OOC</span> : null}
+      {line.lang ? <span className={`chat-tag chat-lang${line.garbled ? " unknown" : ""}`} title={line.garbled ? `Spoken in ${line.lang}, which none of your characters know` : `Spoken in ${line.lang}`}>{line.lang}</span> : null}
       {line.secret ? <span className="chat-tag">{line.shownTo ? "GM and you" : "GM only"}</span> : null}
       {line.self ? <span className="chat-tag">Only you</span> : null}
       {line.tower ? <span className="chat-tag">To the GM</span> : null}
@@ -254,11 +256,14 @@ function Line({ line, gmIcon, session }: { line: ChatLine; gmIcon: string; sessi
         <span className="chat-text">
           <b className="chat-from">{line.from}</b> <InlineRollText text={line.text} />
         </span>
+      ) : line.garbled ? (
+        <span className="chat-text chat-garbled">{line.text}</span>
       ) : (
         <span className="chat-text">
           <InlineRollText text={line.text} />
         </span>
       )}
+      {line.understood && session.role === "dm" ? <small className="chat-understood">Understood by: {line.understood.length ? line.understood.join(", ") : "no one"}</small> : null}
       {line.link ? <ChatLinkChip link={line.link} session={session} /> : null}
       {line.share ? <SharedRecord share={line.share} session={session} /> : null}
       {line.prompt ? <PromptCard line={line} session={session} /> : null}
@@ -575,6 +580,19 @@ export function ChatDock({ session }: { session: Session }) {
   // Speaking as one of my characters: its own dice (the character tier), if it has them.
   const speaking = speakAs && session.role !== "dm" ? Object.values(session.records).find((record) => record.type === "character" && record.owner === me && record.name === speakAs) : undefined;
   const mine = characterDice(speaking)?.look ?? diceSettings.look;
+  // The language spoken in (FG's chat language menu): a player any their character knows; the GM
+  // the game's, the GM's own list and every one the characters know.
+  const [lang, setLang] = useState("");
+  const tongues = (() => {
+    const names =
+      session.role === "dm"
+        ? [...gameLanguages(rulesetFor(session.ruleset ?? "").id), ...(session.options.languages ?? []), ...Object.values(session.records).filter((record) => record.type === "character").flatMap((record) => knownLanguages(record.data))]
+        : knownLanguages(speaking?.data);
+    return names.filter((name, index) => names.findIndex((other) => sameLanguage(other, name)) === index);
+  })();
+  useEffect(() => {
+    if (lang && !tongues.some((name) => sameLanguage(name, lang))) setLang("");
+  }, [tongues.join("|"), lang]);
   const mineCommands = commandsFor(session.role === "dm");
   const typedCommand = /^\/(\S*)$/.exec(draft);
   const suggestions: Command[] = typedCommand ? mineCommands.filter((command) => command.names.some((name) => name.startsWith(typedCommand[1].toLowerCase()))) : [];
@@ -694,6 +712,7 @@ export function ChatDock({ session }: { session: Session }) {
       addModifier: (value, label) => session.modify({ action: "add", value, label }),
       tower,
       speakAs: speakAs || (session.role === "dm" ? gmName : ""),
+      lang,
       setSpeakAs,
       setGmName,
       lastWhisperFrom,
@@ -998,7 +1017,7 @@ export function ChatDock({ session }: { session: Session }) {
             return;
           }
           if (attached && !draft.trim().startsWith("/")) {
-            session.sendChat(draft.trim(), { link: attached, ...(share ? { share: true } : {}), ...(speakAs || (session.role === "dm" && gmName) ? { as: speakAs || gmName } : {}) });
+            session.sendChat(draft.trim(), { link: attached, ...(share ? { share: true } : {}), ...(lang ? { lang } : {}), ...(speakAs || (session.role === "dm" && gmName) ? { as: speakAs || gmName } : {}) });
             setAttached(null);
             setShare(false);
             setDraft("");
@@ -1089,6 +1108,16 @@ export function ChatDock({ session }: { session: Session }) {
             </option>
           ))}
           <option value="">{me || "Yourself"} (out of character)</option>
+        </select>
+      ) : null}
+      {tongues.length > 0 ? (
+        <select className="chat-language" aria-label="Language" data-language={lang} value={lang} onChange={(event) => setLang(event.target.value)} title="The language you speak in: those whose characters know it read your words, the others hear only its sounds">
+          <option value="">No language</option>
+          {tongues.map((name) => (
+            <option key={name} value={name}>
+              {name}
+            </option>
+          ))}
         </select>
       ) : null}
       <select
