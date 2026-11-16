@@ -165,6 +165,13 @@ try {
   const swapped = await tool("kraken_party_order", { action: "place", character: "Borin", x: annAt.x, y: annAt.y });
   assert(swapped.formation.slots.find((slot) => slot.id === ann.id).x === bobAt.x && swapped.marching[0] === bob.id, "a drop on a taken slot swaps the two");
   assert((await tool("kraken_party_order", { action: "clear" })).formation.slots.length === 0 && partyOrder().watches["watch-2"].members.includes(ann.id), "clear empties the formation, not the watches");
+  // FG's party sheet: each member's abilities with bonuses, Hit Dice left, passive Perception and senses.
+  const elf = agent.records.create({ type: "character", name: "Liriel", owner: "Ann", data: { ruleset: "dnd5e", species: "Elf", class: "Wizard", level: 3, hp: { total: 16, wounds: 4 }, ac: { total: 12 }, abilities: { strength: { score: 8, bonus: -1 }, dexterity: { score: 15, bonus: 2 }, constitution: { score: 13, bonus: 1 }, intelligence: { score: 17, bonus: 3 }, wisdom: { score: 12, bonus: 1 }, charisma: { score: 10, bonus: 0 } }, hitdice: { die: "d6", total: 3, used: 1 }, passive: 13, senses: "Darkvision 60 ft" } }, agent.seat);
+  await tool("kraken_party_edit", { members: [...(await tool("kraken_party", {})).members.map((member) => member.id), elf.id] });
+  const liriel = (await tool("kraken_party", {})).members.find((member) => member.id === elf.id);
+  assert(liriel.abilities.map((a) => `${a.key}${a.score}${a.bonus}`).join() === "STR8-1,DEX152,CON131,INT173,WIS121,CHA100", `the abilities: ${JSON.stringify(liriel.abilities)}`);
+  assert(liriel.hitdice.total === 3 && liriel.hitdice.used === 1 && liriel.passive === 13 && liriel.senses.join() === "Darkvision 60 ft", `Hit Dice and senses: ${JSON.stringify(liriel)}`);
+  assert(liriel.race === "Elf" && liriel.classes === "Wizard 3", `a 5E species and class: ${liriel.race} ${liriel.classes}`);
   console.log("PARTY_OK");
 } finally {
   for (const ws of sockets) ws.close();

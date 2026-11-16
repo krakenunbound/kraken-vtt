@@ -21,6 +21,11 @@ export type PartyMember = {
   ac: number;
   exp: number;
   expnext: number;
+  /** FG's party sheet: abilities with their bonuses, Hit Dice left, passive Perception and senses (the games that have them). */
+  abilities?: { key: string; score: number; bonus: number }[];
+  hitdice?: { die: string; total: number; used: number };
+  passive?: number;
+  senses?: string[];
   /** Cairn: its attributes, slots, Fatigue, state, Scars and Growth (no experience). */
   cairn?: { str: number; dex: number; wil: number; fatigue: number; slots: number; status: string; scars: string[]; growth: string[] };
   /** Fate: fate points and refresh, the high concept and trouble, consequences, milestones (no experience or coin). */
@@ -30,6 +35,19 @@ export type PartyMember = {
   forged?: { playbook: string; alias: string; stress: number; stressmax: number; traumas: string[]; harm: string[]; xp: Record<string, number>; stash: number; status: string };
 };
 type Entry = { name: string; xp: number; awarded?: number };
+// A bar with its numbers on it (FG's HP and HD bars): green to red as it empties.
+function Meter({ label, value, max, kind }: { label: string; value: number; max: number; kind: "hp" | "hd" }) {
+  const share = max > 0 ? Math.max(0, Math.min(1, value / max)) : 0;
+  return (
+    <span className={`party-meter meter-${kind}${kind === "hp" && share <= 0.25 ? " low" : kind === "hp" && share <= 0.5 ? " mid" : ""}`} role="meter" aria-label={label} aria-valuemin={0} aria-valuemax={max} aria-valuenow={value} title={`${label}: ${value} of ${max}`}>
+      <i style={{ inlineSize: `${share * 100}%` }} />
+      <b>
+        {label} {value}/{max}
+      </b>
+    </span>
+  );
+}
+
 export type PartyView = {
   members: PartyMember[];
   inventory: { name: string; count: number; carriedBy: Record<string, number> }[];
@@ -136,10 +154,31 @@ export function PartySheet({ session, compact = false }: { session: Session; com
                   <span className="party-who">
                     <b>{member.name}</b>
                     <small>
-                      {member.race} {member.classes}
-                      {member.owner ? ` · ${member.owner}` : ""}
+                      {[[member.race, member.classes].filter(Boolean).join(" "), member.owner].filter(Boolean).join(" · ")}
                     </small>
+                    {member.abilities?.length ? (
+                      <span className="party-abilities" data-party-abilities={member.id}>
+                        {member.abilities.map((ability) => (
+                          <span key={ability.key} className="party-ability" title={`${ability.key} ${ability.score}`}>
+                            <small>{ability.key}</small>
+                            {ability.score}
+                            <i className={ability.bonus > 0 ? "up" : ability.bonus < 0 ? "down" : ""}>{ability.bonus >= 0 ? `+${ability.bonus}` : ability.bonus}</i>
+                          </span>
+                        ))}
+                      </span>
+                    ) : null}
+                    {member.passive || member.senses?.length ? (
+                      <small className="party-senses">
+                        <Icon name="eye" size={12} /> {[member.passive ? `Passive Perception ${member.passive}` : "", ...(member.senses ?? [])].filter(Boolean).join(" · ")}
+                      </small>
+                    ) : null}
                   </span>
+                  {!member.fate && member.hp > 0 ? (
+                    <span className="party-bars">
+                      <Meter label="HP" value={current} max={member.hp} kind="hp" />
+                      {member.hitdice ? <Meter label={`HD${member.hitdice.die ? ` ${member.hitdice.die}` : ""}`} value={member.hitdice.total - member.hitdice.used} max={member.hitdice.total} kind="hd" /> : null}
+                    </span>
+                  ) : null}
                   {member.fate ? (
                     // Fate: no hit points, armour or experience: fate points and refresh, the high concept, milestones.
                     <>
@@ -154,10 +193,6 @@ export function PartySheet({ session, compact = false }: { session: Session; com
                     </>
                   ) : (
                     <>
-                      <span className="party-stat" title="Hit points">
-                        <small>HP</small>
-                        {current}/{member.hp}
-                      </span>
                       <span className="party-stat" title="Armour class">
                         <small>AC</small>
                         {member.ac}

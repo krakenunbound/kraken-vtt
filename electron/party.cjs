@@ -35,6 +35,16 @@ function memberRecords(table) {
   return ids.map((id) => table.records.get(id)).filter((record) => record && record.type === "character");
 }
 
+const ABILITIES = ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"];
+// The six scores (5E, 3.5E, 2E's abilities; C&C's attributes), each with its bonus as the sheet keeps it.
+function abilitiesOf(data) {
+  const stats = data.abilities && typeof data.abilities === "object" ? data.abilities : data.attributes && typeof data.attributes === "object" ? data.attributes : {};
+  return ABILITIES.filter((stat) => stats[stat] && Number.isFinite(Number(stats[stat].score)) && Number(stats[stat].score) > 0).map((stat) => {
+    const score = Number(stats[stat].score);
+    const bonus = Number(stats[stat].bonus);
+    return { key: stat.slice(0, 3).toUpperCase(), score, bonus: Number.isFinite(bonus) ? bonus : Math.floor((score - 10) / 2) };
+  });
+}
 function summary(record) {
   const data = record.data ?? {};
   const classes = rows(data.packages)
@@ -46,8 +56,13 @@ function summary(record) {
     name: record.name,
     owner: record.owner,
     portrait: typeof data.portrait === "string" ? data.portrait : null,
-    race: String(data.race ?? ""),
-    classes: classes.join(" / "),
+    race: String(data.race ?? data.species ?? ""),
+    classes: classes.join(" / ") || (data.class ? `${data.class} ${Number(data.level) || 1}` : ""),
+    // FG's party sheet: each ability with its bonus, the Hit Dice left, passive Perception and senses.
+    abilities: abilitiesOf(data),
+    ...(data.hitdice && Number(data.hitdice.total) > 0 ? { hitdice: { die: String(data.hitdice.die ?? ""), total: Number(data.hitdice.total) || 0, used: Number(data.hitdice.used) || 0 } } : {}),
+    ...(Number(data.passive) > 0 ? { passive: Number(data.passive) } : {}),
+    ...(data.senses ? { senses: (Array.isArray(data.senses) ? data.senses.map(String) : String(data.senses).split(/,\s*/)).filter(Boolean).slice(0, 4) } : {}),
     level: Number(data.level) || 0,
     hp: Number(data.hp?.total) || 0,
     wounds: Number(data.hp?.wounds) || 0,

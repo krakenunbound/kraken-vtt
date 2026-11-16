@@ -238,6 +238,10 @@ try {
   // 5. The party's group roll asked of the players.
   await page.click('.sidebar [data-launch="party"]');
   await page.waitForSelector(".party-group");
+  // FG's party sheet main tab: the HP bar and each ability with its bonus.
+  await page.waitForSelector(`[data-member="${hero.id}"] .party-meter.meter-hp[aria-valuenow="24"]`);
+  assert((await page.$$(`[data-party-abilities="${hero.id}"] .party-ability`)).length === 6, "Hagar's six abilities on the party sheet");
+  await page.screenshot({ path: path.join(shots, "5-gm-party-main.png") });
   await page.selectOption('.party-group select[aria-label="Roll kind"]', "skill");
   await page.selectOption('.party-group select[aria-label="What they roll"]', "stealth");
   await page.fill(".party-group input[type=number]", "12");

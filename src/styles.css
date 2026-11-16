@@ -1113,6 +1113,21 @@ button.link { background: none; border: none; color: var(--brass); padding: 0; t
 .party-who { display: flex; flex-direction: column; flex: 1; min-width: 0; }
 .party-who small { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .party-stat { display: flex; flex-direction: column; align-items: center; min-width: 3.2rem; font-variant-numeric: tabular-nums; }
+.party-abilities { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 3px; }
+.party-ability { display: inline-flex; align-items: baseline; gap: 3px; padding: 0 5px; border: 1px solid var(--panel-edge); border-radius: 4px; background: rgba(0, 0, 0, 0.25); font-size: 0.78rem; font-variant-numeric: tabular-nums; }
+.party-ability small { color: var(--brass); font-size: 0.66rem; letter-spacing: 0.05em; }
+.party-ability i { font-style: normal; color: var(--muted); font-size: 0.72rem; }
+.party-ability i.up { color: #7fcf6a; }
+.party-ability i.down { color: #e07a6e; }
+.party-who .party-senses { display: inline-flex; align-items: center; gap: 4px; margin-top: 2px; }
+.party-bars { display: flex; flex-direction: column; gap: 4px; inline-size: 9.5rem; flex: none; }
+.party-meter { position: relative; display: block; block-size: 18px; overflow: hidden; border: 1px solid rgba(0, 0, 0, 0.6); border-radius: 4px; background: rgba(255, 255, 255, 0.06); }
+.party-meter > i { position: absolute; inset: 0 auto 0 0; background: linear-gradient(180deg, #5fbf4a, #3b8f2c); transition: inline-size 0.3s ease; }
+.party-meter.mid > i { background: linear-gradient(180deg, #e0b23e, #b5841d); }
+.party-meter.low > i { background: linear-gradient(180deg, #e05a4e, #a82e25); }
+.party-meter.meter-hd > i { background: linear-gradient(180deg, #5d8fe0, #2f5fb0); }
+.party-meter > b { position: relative; display: block; padding-inline: 6px; font-size: 0.72rem; line-height: 16px; color: #fff; text-shadow: 0 1px 1px #000; font-variant-numeric: tabular-nums; white-space: nowrap; }
+@media (prefers-reduced-motion: reduce) { .party-meter > i { transition: none; } }
 .party-stat small { color: var(--muted); font-size: 0.68rem; letter-spacing: 0.08em; }
 .party-remove { padding: 2px 8px; }
 .party-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 8px; }
