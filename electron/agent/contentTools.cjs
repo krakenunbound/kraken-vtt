@@ -84,7 +84,7 @@ const TOOLS = [
   {
     name: "kraken_encounter",
     description:
-      "The campaign's encounters (FG's battle records), as the encounter window: action create (name); add-npc (id, npc: an NPC record, count: a number or dice rolled when it is added (a random encounter: 1d4+1), faction friend|neutral|foe; as an NPC dropped on it); set-npc (id, row, count, faction); remove-npc (id, row); xp (the total from its creatures, the game's own field); place (Place on this map: the open map's tokens of its creatures, where they stand now, kept as its spots on that map; spots { row: [{ x, y }] } to give them); run (Add to tracker: its NPCs onto the combat tracker, counts rolled, tokens hidden at its spots when this map has them; place false: tracker only); end (End encounter: its XP onto the party sheet's Encounters to award; xp to give another total).",
+      "The campaign's encounters (FG's battle records), as the encounter window: action create (name); add-npc (id, npc: an NPC record, count: a number or dice rolled when it is added (a random encounter: 1d4+1), faction friend|neutral|foe; as an NPC dropped on it); set-npc (id, row, count, faction, unidentified: FG's identified magnifier, what the players call the creature until they know it, empty for identified; its tokens carry that name); remove-npc (id, row); xp (the total from its creatures, the game's own field); place (Place on this map: the open map's tokens of its creatures, where they stand now, kept as its spots on that map; spots { row: [{ x, y }] } to give them); run (Add to tracker: its NPCs onto the combat tracker, counts rolled, tokens hidden at its spots when this map has them; place false: tracker only); end (End encounter: its XP onto the party sheet's Encounters to award; xp to give another total).",
     inputSchema: object(
       {
         action: { type: "string", enum: ["create", "add-npc", "set-npc", "remove-npc", "xp", "place", "run", "end"] },
@@ -94,6 +94,7 @@ const TOOLS = [
         count: string("A number or dice"),
         faction: { type: "string", enum: ["friend", "neutral", "foe"] },
         row: string("The NPC's row key"),
+        unidentified: string("set-npc: what the players call it until they know it (\"\": identified)"),
         spots: { type: "object", description: "place: { row: [{ x, y }] } (map pixels)" },
         place: { type: "boolean" },
         xp: number("end: the XP to give, instead of its total"),

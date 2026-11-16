@@ -295,8 +295,12 @@ try {
   assert(placed.placed >= 1, `spots kept: ${JSON.stringify(placed)}`);
   for (const token of agent.map.tokens()) agent.map.remove?.(token.id, agent.seat);
   for (const token of agent.map.tokens()) await tool("kraken_token_remove", { id: token.id }).catch(() => undefined);
+  // FG's identified magnifier: the troll's row unidentified; its tokens carry what the players call it.
+  const soloRow = Object.keys(agent.records.get(solo.id).data.npclist)[0];
+  await tool("kraken_encounter", { action: "set-npc", id: solo.id, row: soloRow, unidentified: "Hulking shape" });
   await tool("kraken_encounter", { action: "run", id: solo.id });
   const put = agent.map.tokens().filter((token) => token.recordId === goblin.id);
+  assert(put.length >= 1 && put.every((token) => token.unidentified === "Hulking shape"), `the unidentified creature's tokens: ${JSON.stringify(put.map((token) => token.unidentified))}`);
   assert(put.length >= 1 && put.every((token) => token.hidden) && put.some((token) => Math.abs(token.x - 425) < 30 && Math.abs(token.y - 275) < 30), `a hidden token at the kept spot: ${JSON.stringify(put.map((token) => [token.x, token.y, token.hidden]))}`);
   const ended = await tool("kraken_encounter", { action: "end", id: battle.id });
   assert(ended.xp === 150 && agent.records.get("party").data.encounters[battle.id].xp === 150, "the encounter's XP on the party sheet");

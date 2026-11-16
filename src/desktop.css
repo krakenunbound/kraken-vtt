@@ -2411,3 +2411,4 @@ label.set-row { cursor: pointer; }
 .note-window .rich-text.note-text.read { padding: 10px; border: 1px solid var(--line); border-radius: 8px; }
 .rt-chip { display: inline-flex; align-items: center; border-radius: 999px; border: 1px solid var(--brass-dim); background: rgba(255, 255, 255, 0.05); padding: 0 8px; margin: 0 1px; font-size: 0.88em; cursor: pointer; user-select: none; }
 .rt-chip button { border: none; background: transparent; padding: 1px 0; display: inline-flex; align-items: center; gap: 4px; font: inherit; color: inherit; }
+.encounter-identity { display: flex; align-items: center; gap: 6px; }

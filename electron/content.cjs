@@ -293,6 +293,8 @@ async function encounterAction(table, args, from = "GM") {
     const patch = {};
     if (args.count !== undefined) patch.count = String(args.count).slice(0, 20);
     if (args.faction !== undefined) patch.faction = ["friend", "neutral", "foe"].includes(args.faction) ? args.faction : "foe";
+    // FG's identified magnifier: "" identified, else what the players call it until they know.
+    if (args.unidentified !== undefined) patch.unidentified = text(args.unidentified, 48);
     return table.records.update(battle.id, { data: { npclist: { [String(args.row)]: patch } } }, table.seat);
   }
   // Place: where the encounter's creatures stand on the map that is open now, read from their tokens

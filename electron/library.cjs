@@ -97,7 +97,8 @@ async function addBattle(table, fgPath, { place = true } = {}) {
       // FG's map position: from the picture's centre, y up; Kraken's: the map's own.
       const x = own.length ? Number(spot.x) : frame.width / 2 + Number(spot.imagex);
       const y = own.length ? Number(spot.y) : frame.height / 2 - Number(spot.imagey);
-      const token = table.map.place({ recordId: record.id, name: entry.name, x, y, hidden: true, faction: row.faction === "friend" ? "friend" : row.faction === "neutral" ? "neutral" : "foe", allowSecond: true }, table.seat);
+      const unknown = String(row.unidentified ?? "").trim() || (Number(record.data?.isidentified) === 0 && record.data?.nonid_name ? String(record.data.nonid_name) : "");
+      const token = table.map.place({ recordId: record.id, name: entry.name, x, y, hidden: true, ...(unknown ? { unidentified: unknown } : {}), faction: row.faction === "friend" ? "friend" : row.faction === "neutral" ? "neutral" : "foe", allowSecond: true }, table.seat);
       table.combat.update(entry.id, { tokenId: token.id }, table.seat);
     });
     added.push(...list.map((entry) => entry.name));

@@ -632,7 +632,7 @@ export function StoryView({ session, record, editable }: { session: Session; rec
 
 // --- Encounters -----------------------------------------------------------------------
 
-type NpcRow = { name?: string; count?: string | number; faction?: string; link?: { recordname?: string } };
+type NpcRow = { name?: string; count?: string | number; faction?: string; unidentified?: string; link?: { recordname?: string } };
 export function EncounterView({ session, record, editable }: { session: Session; record: TableRecord; editable: boolean }) {
   const [status, setStatus] = useState("");
   const [xp, setXp] = useState<number | null>(null);
@@ -657,6 +657,7 @@ export function EncounterView({ session, record, editable }: { session: Session;
             <th>Count</th>
             <th>Creature</th>
             <th>Faction</th>
+            <th title="FG's identified magnifier: blank, the players know what it is; else what they call it until they find out">Players see</th>
             {editable ? <th /> : null}
           </tr>
         </thead>
@@ -677,6 +678,10 @@ export function EncounterView({ session, record, editable }: { session: Session;
                 ) : (
                   row.faction ?? "foe"
                 )}
+              </td>
+              <td className="encounter-identity">
+                <Icon name={row.unidentified ? "eye" : "accept"} size={13} title={row.unidentified ? "Unidentified" : "Identified"} />
+                {editable ? <Field value={row.unidentified ?? ""} editable label={`${row.name} players see`} onSave={(value) => void act("set-npc", { row: key, unidentified: value })} /> : row.unidentified || "Its name"}
               </td>
               {editable ? (
                 <td>

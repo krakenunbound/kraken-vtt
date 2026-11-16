@@ -1452,6 +1452,8 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
         owner: pc ? record.owner : seat.role === "dm" ? text(input.owner, "") : seat.name,
         faction: input.faction ?? (pc ? "friend" : "foe"),
         hidden: seat.role === "dm" && Boolean(input.hidden),
+        // What players call it until it is known (an encounter's unidentified creature).
+        ...(seat.role === "dm" && input.unidentified ? { unidentified: text(input.unidentified, "") } : {}),
       });
       tokensHere().push(token);
       if (pc) markEntered(record.id);
