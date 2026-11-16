@@ -27,7 +27,7 @@ const pages = new Map(
 );
 // The sidebar, in reading order: getting started, the GM's table, play, the rest; then any page not named here.
 const ORDER = [
-  "index.md", "quickstart.md", "installing-and-updates.md", "players-joining.md", "hosting-and-inviting.md", "campaigns-and-backups.md",
+  "index.md", "quickstart.md", "tutorials.md", "installing-and-updates.md", "players-joining.md", "hosting-and-inviting.md", "campaigns-and-backups.md",
   "maps-and-scenes.md", "map-studio.md", "tokens-vision-and-lighting.md", "combat-tracker.md", "targeting-and-effects.md", "dice-and-chat.md",
   "character-sheets-and-wizards.md", "games.md", "records-books-and-packs.md", "story-notes-and-handouts.md", "bookkeeping-and-rest.md",
   "sound-and-music.md", "settings.md", "keyboard-and-mouse.md", "ai-agent-tools.md", "troubleshooting-and-faq.md", "release-notes.md",

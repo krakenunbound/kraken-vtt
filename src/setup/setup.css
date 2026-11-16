@@ -455,13 +455,34 @@
 .home-stage { position: relative; z-index: 1; min-height: calc(100vh - 90px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 36px; padding: 24px; }
 .home-hero { display: flex; align-items: center; gap: 22px; }
 .home-cards { display: grid; grid-template-columns: repeat(2, minmax(280px, 420px)); gap: 28px; width: 100%; justify-content: center; }
-/* Help under the cards (FG's launcher row): slim sea-teal buttons, three across, two down. */
-.help-links { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 12px; width: 100%; max-width: 868px; margin-top: 26px; }
-.help-link { display: flex; align-items: center; justify-content: center; min-height: 34px; padding: 6px 12px; border: 1px solid rgba(64, 200, 196, 0.55); border-radius: 6px; background: linear-gradient(180deg, rgba(10, 118, 122, 0.92), rgba(6, 88, 94, 0.92)); color: #e9fbfa; font-size: 0.76rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; text-decoration: none; text-align: center; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 2px 8px rgba(0, 0, 0, 0.35); transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease; }
-.help-link:hover { background: linear-gradient(180deg, rgba(16, 140, 144, 0.95), rgba(8, 104, 110, 0.95)); border-color: rgba(214, 170, 92, 0.75); transform: translateY(-1px); }
-.help-link:focus-visible { outline: 2px solid #d6aa5c; outline-offset: 2px; }
-@media (max-width: 640px) { .help-links { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+/* Help under the cards (as FG's launcher row has, in Kraken's own ink): dark glass, an icon in its colour. */
+.help-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px 12px; width: 100%; max-width: 868px; margin-top: 26px; }
+.help-link { --tone: #3fc4bd; display: flex; align-items: center; gap: 10px; min-height: 38px; padding: 6px 14px 6px 6px; border: 1px solid color-mix(in srgb, var(--tone) 45%, transparent); border-radius: 999px; background: linear-gradient(180deg, rgba(22, 20, 30, 0.92), rgba(12, 12, 18, 0.92)); color: #efe6d4; font: inherit; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; text-decoration: none; cursor: pointer; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 2px 10px rgba(0, 0, 0, 0.4); transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease; }
+.help-link.tone-violet { --tone: #a65bf0; }
+.help-link.tone-ember { --tone: #f08a3a; }
+.help-link.tone-sea { --tone: #3fc4bd; }
+.help-icon { display: grid; place-items: center; width: 26px; height: 26px; flex: none; border-radius: 50%; color: #0d0b10; background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--tone) 70%, white), var(--tone)); box-shadow: 0 0 10px color-mix(in srgb, var(--tone) 55%, transparent); }
+.help-link:hover { border-color: var(--tone); transform: translateY(-1px); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 4px 16px color-mix(in srgb, var(--tone) 30%, transparent); }
+.help-link:focus-visible { outline: 2px solid var(--tone); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { .help-link { transition: none; } .help-link:hover { transform: none; } }
+/* The release notes, read from GitHub. */
+.release-notes { width: min(760px, calc(100vw - 32px)); max-height: min(80vh, 900px); padding: 0; color: #e8e2d4; background: #12131a; border: 1px solid rgba(214, 170, 92, 0.45); border-radius: 14px; }
+.release-notes[open] { display: flex; flex-direction: column; }
+.release-notes:modal { overscroll-behavior: contain; }
+.release-notes::backdrop { background: rgba(0, 0, 0, 0.6); overflow: hidden; overscroll-behavior: contain; }
+.release-notes header { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid rgba(214, 170, 92, 0.2); }
+.release-notes h2 { margin: 0; font-family: "Cinzel", serif; font-size: 1.3rem; letter-spacing: 0.08em; color: #e7c07a; }
+.release-notes header button { font-size: 1.4rem; line-height: 1; padding: 2px 10px; }
+.release-notes-list { overflow: auto; padding: 8px 18px 14px; }
+.release { border-bottom: 1px solid rgba(255, 255, 255, 0.06); padding: 8px 0; }
+.release summary { display: flex; justify-content: space-between; gap: 12px; cursor: pointer; color: #e7c07a; }
+.release summary time { color: rgba(232, 226, 212, 0.6); font-size: 0.85rem; }
+.release h4 { margin: 12px 0 4px; color: #9fe5df; }
+.release p, .release li { line-height: 1.5; }
+.release ul { margin: 4px 0; padding-left: 20px; }
+.release code { padding: 0 4px; border-radius: 3px; background: rgba(255, 255, 255, 0.08); }
+.release-notes footer { padding: 10px 18px; border-top: 1px solid rgba(214, 170, 92, 0.2); }
+.release-notes a { color: #9fe5df; }
 .home-card { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; padding: 28px 30px; min-height: 280px; text-align: left; cursor: pointer; border: 1px solid rgba(214, 170, 92, 0.35); border-radius: 18px; color: inherit; font: inherit; transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease; }
 .home-card:hover, .home-card:focus-visible { transform: translateY(-3px); border-color: rgba(231, 192, 122, 0.9); box-shadow: 0 18px 44px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(231, 192, 122, 0.35); outline: none; }
 .home-card h2 { margin: 4px 0 0; font-family: "Cinzel", serif; font-size: 1.6rem; letter-spacing: 0.08em; color: #e7c07a; }

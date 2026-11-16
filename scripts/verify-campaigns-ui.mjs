@@ -118,10 +118,18 @@ try {
   // The start screen's help row: the wiki's quickstart and pages, release notes, a bug report, the community.
   await page.waitForSelector(".help-links .help-link");
   const help = await page.$$eval(".help-links .help-link", (links) => links.map((link) => [link.textContent.trim(), link.getAttribute("href"), link.getAttribute("target")]));
-  assert(help.length === 6 && help.every(([, href, target]) => /^https:\/\//.test(href) && target === "_blank"), `six help links to the web: ${JSON.stringify(help)}`);
-  assert(help.some(([label, href]) => /quickstart/i.test(label) && /quickstart\.html$/.test(href)) && help.some(([label, href]) => /release/i.test(label) && /\/releases$/.test(href)), "Quickstart and Release notes go where they say");
+  const web = help.filter(([label]) => label !== "Release notes");
+  assert(help.length === 7 && web.length === 6 && web.every(([, href, target]) => /^https:\/\//.test(href) && target === "_blank"), `seven help links, six to the web: ${JSON.stringify(help)}`);
+  assert(help.some(([label, href]) => /quickstart/i.test(label) && /quickstart\.html$/.test(href)) && help.some(([label, href]) => label === "Tutorials" && /tutorials\.html$/.test(href)), "Quickstart and Tutorials go where they say");
+  assert((await page.$$(".help-link .help-icon svg")).length === 7, "an icon on each");
   await shoot("start-help-links");
-  results.push("start screen: six help links (quickstart, wiki, game guides, release notes, report a bug, community)");
+  // Release notes open here, read from GitHub's releases (offline: a line saying so, with the link).
+  await page.click('[data-help-link="Release notes"]');
+  await page.waitForSelector('dialog[data-dialog="release-notes"][open] :is(.release, .release-notes-error)', { timeout: 20000 });
+  await shoot("start-release-notes");
+  await page.keyboard.press("Escape");
+  await page.waitForSelector('dialog[data-dialog="release-notes"][open]', { state: "detached", timeout: 5000 }).catch(async () => assert(!(await page.$('dialog[data-dialog="release-notes"][open]')), "the notes close with Esc"));
+  results.push("start screen: seven help links with icons (quickstart, tutorials, wiki, game guides, release notes read here, report a bug, community)");
 
   // The start screen's menu: Rename.
   await page.reload();

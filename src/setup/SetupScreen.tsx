@@ -11,6 +11,8 @@ import { Backdrop, BackdropDots, randomTheme } from "./Backdrop";
 import { forgetSignIn, savedSignIn } from "../session/useSession";
 import { campaignRulesets } from "../../shared/rulesets/registry.mjs";
 import "./setup.css";
+import { Icon } from "../ui/icons";
+import { ReleaseNotes } from "./ReleaseNotes";
 
 type HostInput = { name: string; port: number; password: string; lan: boolean; cloud: boolean; upnp?: boolean; campaignId: string };
 // accountPassword: the player's own password (their account at that table).
@@ -116,22 +118,38 @@ async function copyText(text: string) {
 // notes, a bug report and the community, in the system's browser (a player's: a new tab).
 const WIKI = "https://krakenunbound.github.io/kraken-vtt/";
 const REPO = "https://github.com/krakenunbound/kraken-vtt";
+// Each its own icon and colour (Kraken's ink: violet, ember, sea), none of FG's.
 const HELP_LINKS = [
-  { label: "Quickstart guide", href: `${WIKI}quickstart.html`, title: "From a new campaign to the first fight, in ten steps" },
-  { label: "Wiki", href: WIKI, title: "Every part of Kraken, for GMs and players" },
-  { label: "Game guides", href: `${WIKI}games.html`, title: "The games Kraken plays, and their sheets and rules" },
-  { label: "Release notes", href: `${REPO}/releases`, title: "What each version brought" },
-  { label: "Report a bug", href: `${REPO}/issues/new`, title: "Tell us what went wrong (a GitHub account is needed)" },
-  { label: "Community", href: `${REPO}/discussions`, title: "Questions, ideas and tables looking for players" },
+  { label: "Quickstart guide", href: `${WIKI}quickstart.html`, title: "From a new campaign to the first fight, in ten steps", icon: "play", tone: "sea" },
+  { label: "Tutorials", href: `${WIKI}tutorials.html`, title: "Short walkthroughs: revealing monsters, running a fight, range, languages, treasure, group saves", icon: "levelup", tone: "violet" },
+  { label: "Wiki", href: WIKI, title: "Every part of Kraken, for GMs and players", icon: "book", tone: "ember" },
+  { label: "Game guides", href: `${WIKI}games.html`, title: "The games Kraken plays, and their sheets and rules", icon: "d20", tone: "sea" },
+  { label: "Release notes", href: `${REPO}/releases`, title: "What each version brought, read here", icon: "bell", tone: "violet", notes: true },
+  { label: "Report a bug", href: `${REPO}/issues/new`, title: "Tell us what went wrong (a GitHub account is needed)", icon: "warning", tone: "ember" },
+  { label: "Community", href: `${REPO}/discussions`, title: "Questions, ideas and tables looking for players", icon: "players", tone: "sea" },
 ];
 function HelpLinks() {
+  const [notes, setNotes] = useState(false);
   return (
     <nav className="help-links rise" aria-label="Help">
-      {HELP_LINKS.map((link) => (
-        <a key={link.label} className="help-link" href={link.href} target="_blank" rel="noopener noreferrer" title={link.title} data-help-link={link.label}>
-          {link.label}
-        </a>
-      ))}
+      {HELP_LINKS.map((link) =>
+        link.notes ? (
+          <button key={link.label} type="button" className={`help-link tone-${link.tone}`} title={link.title} data-help-link={link.label} onClick={() => setNotes(true)}>
+            <span className="help-icon" aria-hidden="true">
+              <Icon name={link.icon} size={15} />
+            </span>
+            {link.label}
+          </button>
+        ) : (
+          <a key={link.label} className={`help-link tone-${link.tone}`} href={link.href} target="_blank" rel="noopener noreferrer" title={link.title} data-help-link={link.label}>
+            <span className="help-icon" aria-hidden="true">
+              <Icon name={link.icon} size={15} />
+            </span>
+            {link.label}
+          </a>
+        ),
+      )}
+      <ReleaseNotes open={notes} onClose={() => setNotes(false)} allUrl={`${REPO}/releases`} />
     </nav>
   );
 }

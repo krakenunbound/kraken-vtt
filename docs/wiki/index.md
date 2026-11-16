@@ -35,6 +35,7 @@ D&D 5E is in both columns: it plays from the SRD with nothing else installed, an
 ## Where to start
 
 - **New GM?** Read the [Quickstart](quickstart.md). It takes you from install to your first fight in ten steps.
+- **Learning the ropes?** The [Tutorials](tutorials.md) walk through revealing monsters, running a fight, range, languages, treasure and group saves.
 - **A player?** Read [Joining a table](players-joining.md). All you need is Chrome and the address your GM sends you.
 - **Coming from Fantasy Grounds?** Kraken uses FG's words wherever it can: the sidebar, the lock on record windows, the modifier box, quick slots, `/rollon`. Start with [Records, books and packs](records-books-and-packs.md).
 
