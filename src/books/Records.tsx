@@ -62,8 +62,10 @@ const NOT_LISTED = new Set(["character", "party", "note", "siegegame", "fatetabl
 // A new record for a list: its type, and for C&C's Classes and Races the package's kind.
 // A new vehicle or location starts with FG's fields, to fill in.
 const STARTER: Record<string, Record<string, string | number>> = {
-  vehicle: { type: "", size: "", speed: "", ac: 0, hp: 0, damagethreshold: 0, crew: "", passengers: "", cargo: "", cost: "", text: "" },
-  location: { type: "", parent: "", region: "", population: "", ruler: "", text: "" },
+  // FG 5E's vehicle record (record_vehicle.xml): type, size, cost, crew, cargo; AC and its words, hit points, the damage and mishap thresholds, speed; resistances and immunities.
+  vehicle: { type: "", size: "", cost: "", crew: "", cargo: "", ac: 0, actext: "", hp: 0, damagethreshold: 0, mishapthreshold: 0, speed: "", damageresistances: "", damageimmunities: "", conditionimmunities: "", text: "" },
+  // FG's location (CoreRPG record_location.xml): a place, its type, its words and the GM's notes; the places inside it are links in its text.
+  location: { type: "", text: "", gmnotes: "" },
 };
 function recordFor(list: string, name: string) {
   const [type, kind] = list.split(":");
