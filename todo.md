@@ -134,6 +134,9 @@ the core UI plan in [docs/core-ui-design.md](docs/core-ui-design.md).
 
 ## Known bugs and rough edges
 
+- [ ] verify-table-play-ui fails since alpha.91 or earlier: a player's drawn circle does not resize by its handle (the handle is under the pointer and receives it; the update does not reach the host), and at alpha.91 a right-click on a drawing did not remove it. Find the cause in MapView's pointer handlers.
+- [ ] e2e: Worldbuilding stops at "launch the GM's app" (no agent.json) and its parcel step calls ctx.shot before it is set.
+
 - [x] Forged sheet: the Harm panel covers the trauma "Mark" button while a
       trauma is pending.
 - [ ] C&C e2e once lost the inventory "Where" field on save (passed on
