@@ -289,6 +289,22 @@ try {
   await seat.click('.sidebar [data-launch="combat"]');
   await seat.waitForSelector(".ct-bar");
   await seat.screenshot({ path: path.join(shots, "6-player-tracker-bars.png") });
+  // FG's tracker controls: a goblin's side clicked round to none, the round typed, the foes deleted after Cancel then Yes.
+  const g3 = view.entries.find((entry) => entry.name === "Goblin 3").id;
+  await page.click(`.ct-row:has-text("Goblin 3") [data-action="faction-cycle"]`);
+  await until(async () => (await tool("kraken_combat", { action: "view" })).entries.find((entry) => entry.id === g3).faction === "neutral", "a click: foe to neutral");
+  for (let i = 0; i < 2; i += 1) await page.click(`.ct-row:has-text("Goblin 3") [data-action="faction-cycle"]`), await settle(300);
+  await until(async () => (await tool("kraken_combat", { action: "view" })).entries.find((entry) => entry.id === g3).faction === "none", "two more: no side");
+  await page.fill('input[data-action="set-round"]', "4");
+  await page.press('input[data-action="set-round"]', "Enter");
+  await until(async () => (await tool("kraken_combat", { action: "view" })).round === 4, "the round typed in");
+  await page.click('[data-action="remove-foes"]');
+  await page.click('[data-action="remove-foes-no"]');
+  assert((await tool("kraken_combat", { action: "view" })).entries.length === 4, "Cancel deletes nothing");
+  await page.click('[data-action="remove-foes"]');
+  await page.screenshot({ path: path.join(shots, "6-gm-tracker-confirm.png") });
+  await page.click('[data-action="remove-foes-yes"]');
+  await until(async () => (await tool("kraken_combat", { action: "view" })).entries.map((entry) => entry.name).sort().join() === "Goblin 3,Hagar", "the foes deleted, the goblin with no side kept");
 
   // The GM's tray: a d20 thrown with ADV on and the 3D dice on.
   await page.click('[data-modifier-key="adv"]');

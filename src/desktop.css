@@ -2055,6 +2055,18 @@ button.ct-turn:not(.on):hover { border-color: var(--brass-dim); background: rgba
 button.ct-turn.on { cursor: grab; }
 .ct-round { display: inline-flex; align-items: center; gap: 4px; }
 .ct-round-step { padding: 0 6px; font-size: 1.1rem; line-height: 1.2; }
+.ct-round-box { display: inline-flex; align-items: center; gap: 4px; }
+.ct-round-box input { width: 3.4em; padding: 0 4px; font: inherit; color: inherit; background: transparent; border: 1px solid transparent; border-radius: 4px; text-align: center; }
+.ct-round-box input:hover, .ct-round-box input:focus { border-color: var(--brass-dim); background: rgba(0, 0, 0, 0.25); }
+/* FG's faction button and its colours; a second click to delete, with Cancel. */
+.ct-faction { display: inline-flex; align-items: center; gap: 4px; padding: 0 4px; border: 0; background: transparent; color: inherit; font: inherit; cursor: pointer; border-radius: 3px; }
+.ct-faction:hover { background: rgba(255, 255, 255, 0.08); }
+.ct-faction i { width: 9px; height: 9px; border-radius: 2px; border: 1px solid rgba(255, 255, 255, 0.6); }
+.ct-faction.faction-foe i { background: #c23741; }
+.ct-faction.faction-friend i { background: #56b33f; }
+.ct-faction.faction-neutral i { background: #a6a6a6; }
+.ct-faction.faction-none i { background: transparent; }
+.ct-confirm { display: inline-flex; gap: 4px; }
 span.flip { display: inline-flex; transform: scaleX(-1); }
 
 /* Death markers: under the tokens; the GM right-clicks one to remove it. */

@@ -132,7 +132,7 @@ const geometryReady = import(pathToFileURL(path.join(__dirname, "..", "shared", 
   geometry = module;
 });
 
-const FACTIONS = ["friend", "neutral", "foe"];
+const FACTIONS = ["friend", "neutral", "foe", "none"];
 // The side a creature faces: friends face foes and foes friends; a neutral's foes are the foes.
 const otherSide = (faction) => (faction === "foe" ? "friend" : "foe");
 
@@ -2945,6 +2945,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       mustGM(seat);
       const entry = find(id);
       const wasFaction = entry.faction;
+      const wasHidden = entry.hidden;
       for (const key of ["name", "faction", "init", "initresult", "hp", "wounds", "ac", "hidden", "tokenId"]) {
         if (patch[key] === undefined) continue;
         const next = cleanEntry({ ...entry, [key]: patch[key] });
@@ -2952,6 +2953,8 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       }
       // The tracker's faction and its token's are one (FG's friend/foe on both).
       if (entry.faction !== wasFaction) table().syncTokenFaction?.(entry);
+      // FG's reveal: the tracker's eye shows (or hides) its token on the map too.
+      if (entry.hidden !== wasHidden) table().syncTokenHidden?.(entry);
       changed();
       return entry;
     },
@@ -3208,6 +3211,35 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       table().say(`[TURN] ${entry.name} (back)`, "Combat", entry.hidden);
       changed();
       return { round: state.round, active: state.active };
+    },
+    // FG's round counter typed in: the number alone (a slip put right), forwards or back; nothing is counted down or undone.
+    setRound(round, seat) {
+      mustGM(seat);
+      if (state.round === 0) throw new Error("The fight has not started.");
+      const next = Math.round(Number(round));
+      if (!Number.isFinite(next) || next < 1 || next > 9999) throw new Error("A round is a number from 1.");
+      state.round = next;
+      table().say(`[ROUND] Round ${next} (set by the GM)`, "Combat", false);
+      changed();
+      return { round: state.round };
+    },
+    // FG's menu: delete the foes (faction foe) or everyone not friendly (foes, neutrals and those without a side).
+    removeFaction(which, seat) {
+      mustGM(seat);
+      const gone = state.entries.filter((entry) => (which === "nonfriend" ? entry.faction !== "friend" : entry.faction === which)).map((entry) => entry.id);
+      for (const id of gone) api.remove(id, seat);
+      return { removed: gone.length };
+    },
+    // FG's menu: clear every effect on the tracker (the GM's own too).
+    clearEffects(seat) {
+      mustGM(seat);
+      let cleared = 0;
+      for (const entry of state.entries) {
+        cleared += entry.effects.length;
+        entry.effects = [];
+      }
+      changed();
+      return { cleared };
     },
     roundBack(seat) {
       mustGM(seat);

@@ -1,5 +1,5 @@
 import { RestParty } from "../bookkeeping/RestParty";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { has, rulesetFor } from "../../shared/rulesets/registry.mjs";
 import { PANELS } from "../rulesets";
 import { Picture } from "../characters/ArtPicker";
@@ -15,7 +15,38 @@ import { RANK_NAMES, RANKS } from "../../shared/ironsworn/rules.mjs";
 // The save box of a game whose manifest names none (C&C's six attributes against a CL).
 const CORE_SAVES = { keys: ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"], modLabel: "CL", modAria: "Save CL", button: "Roll save" };
 
-const FACTION_LABEL = { friend: "Friend", neutral: "Neutral", foe: "Foe" } as const;
+const FACTION_LABEL = { friend: "Friend", neutral: "Neutral", foe: "Foe", none: "No side" } as const;
+// FG's faction button: a click moves it on, foe to neutral to friend to none.
+const FACTION_NEXT = { foe: "neutral", neutral: "friend", friend: "none", none: "foe" } as const;
+
+// A button that asks once before it acts (FG's second click), with a Cancel to change your mind.
+function ConfirmButton({ label, ask, onConfirm, className = "", disabled = false, action }: { label: ReactNode; ask: string; onConfirm: () => void; className?: string; disabled?: boolean; action?: string }) {
+  const [asking, setAsking] = useState(false);
+  if (!asking)
+    return (
+      <button type="button" className={className} disabled={disabled} data-action={action} onClick={() => setAsking(true)}>
+        {label}
+      </button>
+    );
+  return (
+    <span className="ct-confirm" role="group" aria-label={ask}>
+      <button
+        type="button"
+        className="danger"
+        data-action={action ? `${action}-yes` : undefined}
+        onClick={() => {
+          setAsking(false);
+          onConfirm();
+        }}
+      >
+        {ask}
+      </button>
+      <button type="button" className="ghost" data-action={action ? `${action}-no` : undefined} onClick={() => setAsking(false)}>
+        Cancel
+      </button>
+    </span>
+  );
+}
 // AD&D 2E's five saving throws.
 const SAVE_LABELS: Record<string, string> = { death: "Death Ray or Poison", wands: "Magic Wands", paralysis: "Paralysis or Petrify", spells: "Spells",paralyzation:"Paralyzation, Poison, Death", rod: "Rod, Staff, Wand", petrification: "Petrification, Polymorph", breath: "Breath Weapon", spell: "Spell", str: "STR check", dex: "DEX check", end: "END check", int: "INT check", edu: "EDU check", soc: "SOC check", brawn: "Brawn check", reflex: "Reflex check", grit: "Grit check", intellect: "Intellect check", training: "Training check", presence: "Presence check" };
 
@@ -167,7 +198,14 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
             ) : null}
           </b>
           <small>
-            {FACTION_LABEL[entry.faction]}
+            {gm ? (
+              <button type="button" className={`ct-faction faction-${entry.faction}`} data-action="faction-cycle" title="Click to change its side: foe, neutral, friend, none" aria-label={`${FACTION_LABEL[entry.faction]}: change side`} onClick={() => session.ct("update", { id: entry.id, patch: { faction: FACTION_NEXT[entry.faction] } })}>
+                <i aria-hidden="true" />
+                {FACTION_LABEL[entry.faction]}
+              </button>
+            ) : (
+              FACTION_LABEL[entry.faction]
+            )}
             {entry.hidden ? " · hidden" : ""}
           </small>
         </span>
@@ -464,13 +502,12 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
               <option value="friend">Friend</option>
               <option value="neutral">Neutral</option>
               <option value="foe">Foe</option>
+              <option value="none">No side</option>
             </select>
             <button type="button" onClick={() => session.ct("init", { which: entry.id })}>
               Roll init
             </button>
-            <button type="button" className="danger" onClick={() => session.ct("remove", { id: entry.id })}>
-              <Icon name="trash" size={14} /> Remove
-            </button>
+            <ConfirmButton className="danger" action="remove-entry" label={<><Icon name="trash" size={14} /> Remove</>} ask={`Remove ${entry.name}`} onConfirm={() => session.ct("remove", { id: entry.id })} />
           </div>
         </div>
       ) : null}
@@ -480,6 +517,27 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
 
 // FG's combat tracker: the round, everyone in initiative order with the
 // active one marked, and the GM's controls along the bottom.
+// FG's round counter: typed in (Enter or leaving the box), forwards or back.
+function RoundBox({ round, onSet }: { round: number; onSet: (round: number) => void }) {
+  const [draft, setDraft] = useState(String(round));
+  const [was, setWas] = useState(round);
+  if (was !== round) {
+    setWas(round);
+    setDraft(String(round));
+  }
+  const commit = () => {
+    const next = Math.round(Number(draft));
+    if (Number.isFinite(next) && next >= 1 && next !== round) onSet(next);
+    else setDraft(String(round));
+  };
+  return (
+    <label className="ct-round-box">
+      Round{" "}
+      <input type="number" min={1} value={draft} aria-label="Round" data-action="set-round" title="Type a round to put the counter right (nothing is undone)" onChange={(event) => setDraft(event.target.value)} onBlur={commit} onKeyDown={(event) => event.key === "Enter" && !event.nativeEvent.isComposing && commit()} />
+    </label>
+  );
+}
+
 export function CombatTracker({ session }: { session: Session }) {
   // A game may replace the tracker with a window of its own, as FG 2E's CTA (Forged in the Dark has no initiative: its Score panel).
   const Replaced = PANELS[rulesetFor(session.ruleset).tracker?.replace ?? ""];
@@ -529,7 +587,7 @@ function InitiativeTracker({ session }: { session: Session }) {
               ‹
             </button>
           ) : null}
-          <Icon name="flag" size={16} /> {combat.round > 0 ? `Round ${combat.round}` : "Not started"}
+          <Icon name="flag" size={16} /> {gm && combat.round > 0 ? <RoundBox round={combat.round} onSet={(round) => session.ct("set-round", { round })} /> : combat.round > 0 ? `Round ${combat.round}` : "Not started"}
           {gm && combat.round > 0 ? (
             <button type="button" className="ghost ct-round-step" data-action="round-next" title="Next round: the rest of this round passes, and the first in the order starts" aria-label="Next round" onClick={() => session.ct("round")}>
               ›
@@ -605,9 +663,10 @@ function InitiativeTracker({ session }: { session: Session }) {
             <button type="button" onClick={() => session.ct("end", { removeNpcs: false })} disabled={combat.round === 0}>
               End combat
             </button>
-            <button type="button" className="danger" onClick={() => session.ct("end", { removeNpcs: true })} disabled={combat.entries.length === 0}>
-              Clear NPCs
-            </button>
+            <ConfirmButton className="danger" action="clear-npcs" label="Clear NPCs" ask="End and remove every NPC" disabled={combat.entries.length === 0} onConfirm={() => session.ct("end", { removeNpcs: true })} />
+            <ConfirmButton action="remove-foes" label="Delete foes" ask="Delete every foe" disabled={!combat.entries.some((entry) => entry.faction === "foe")} onConfirm={() => session.ct("remove-faction", { faction: "foe" })} />
+            <ConfirmButton action="remove-nonfriend" label="Delete non-friendly" ask="Delete all but friends" disabled={!combat.entries.some((entry) => entry.faction !== "friend")} onConfirm={() => session.ct("remove-faction", { faction: "nonfriend" })} />
+            <ConfirmButton action="clear-effects" label="Clear effects" ask="Take off every effect" disabled={!combat.entries.some((entry) => entry.effects.length > 0)} onConfirm={() => session.ct("clear-effects")} />
           </div>
           {/* The fight is over: the party may rest (the calendar moves on). */}
           {combat.round === 0 ? <RestParty session={session} className="ct-add ct-rest" /> : null}

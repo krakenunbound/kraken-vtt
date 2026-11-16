@@ -415,5 +415,47 @@ const done = [];
   }
 }
 
+// 9. FG's tracker controls: no side, the round typed in (back or forward), the eye showing the token,
+// delete the foes or everyone not friendly, clear every effect.
+{
+  const t = await table(null, []);
+  const { ct, agent, raw, view } = t;
+  try {
+    agent.map.setScene({ id: "hall", name: "Hall", width: 500, height: 300, padding: 0, backgroundColor: "#000", grid: { size: 50, type: 1, color: "#000", alpha: 0.2, distance: 5, units: "ft" }, lights: [], tokens: [], walls: [] });
+    await ct({ action: "add", entry: { name: "Ally", faction: "friend", hp: 9, ac: 12 } });
+    await ct({ action: "add", entry: { name: "Orc", faction: "foe", hp: 9, ac: 12, hidden: true } });
+    await ct({ action: "add", entry: { name: "Ghost", faction: "neutral", hp: 9, ac: 12 } });
+    const ids = (await view()).entries.map((item) => item.id);
+    const byName = async (name) => (await view()).entries.find((item) => item.name === name).id;
+    const orcId = await byName("Orc");
+    const ghostId = await byName("Ghost");
+    await ct({ action: "update", id: ghostId, patch: { faction: "none" } });
+    assert(raw(ghostId).faction === "none", "a creature with no side");
+    await ct({ action: "place-token", id: orcId, x: 100, y: 100 }).catch(async () => {
+      const token = agent.map.place({ name: "Orc", x: 100, y: 100, hidden: true, faction: "foe", allowSecond: true }, { role: "dm", name: "GM" });
+      await ct({ action: "update", id: orcId, patch: { tokenId: token.id } });
+    });
+    const tokenOf = () => agent.map.tokens().find((token) => token.id === raw(orcId).tokenId);
+    assert(tokenOf()?.hidden === true, "the hidden orc's token is hidden");
+    await ct({ action: "update", id: orcId, patch: { hidden: false } });
+    assert(tokenOf().hidden === false, "the tracker's eye reveals its token (FG's reveal)");
+    await ct({ action: "next" });
+    await ct({ action: "set-round", round: 7 });
+    assert((await view()).round === 7, "the round typed in");
+    await ct({ action: "set-round", round: 5 });
+    assert((await view()).round === 5, "and typed back");
+    for (const id of ids) await ct({ action: "effect", id, effect: { label: "Blessed", duration: 3 } });
+    await ct({ action: "clear-effects" });
+    assert((await view()).entries.every((item) => item.effects.length === 0), "every effect cleared");
+    await ct({ action: "remove-faction", faction: "foe" });
+    assert((await view()).entries.map((item) => item.name).join() === "Ally,Ghost", "the foes deleted");
+    await ct({ action: "remove-faction", faction: "nonfriend" });
+    assert((await view()).entries.map((item) => item.name).join() === "Ally", "everyone not friendly deleted");
+    done.push("9 no side, the round typed in, the eye reveals the token, delete foes / non-friendly, clear effects");
+  } finally {
+    await t.server.close?.();
+  }
+}
+
 console.log(`ok combat-fixes: ${done.join("; ")}`);
 process.exit(0);

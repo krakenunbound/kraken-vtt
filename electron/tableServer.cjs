@@ -3105,6 +3105,12 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
               return combat.previous(seat);
             case "round-back":
               return combat.roundBack(seat);
+            case "set-round":
+              return combat.setRound(msg.round, seat);
+            case "remove-faction":
+              return combat.removeFaction(msg.faction === "nonfriend" ? "nonfriend" : "foe", seat);
+            case "clear-effects":
+              return combat.clearEffects(seat);
             case "set-turn":
               return combat.setTurn(String(msg.id ?? ""), seat);
             // A tracker row's Delay and Act now (its owner, or the GM).
@@ -3416,6 +3422,10 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
     syncTokenFaction(entry) {
       const token = entry.tokenId ? map.tokens().find((item) => item.id === entry.tokenId) : null;
       if (token && token.faction !== entry.faction) map.update(token.id, { faction: entry.faction }, { role: "dm", name: "GM" });
+    },
+    syncTokenHidden(entry) {
+      const token = entry.tokenId ? map.tokens().find((item) => item.id === entry.tokenId) : null;
+      if (token && Boolean(token.hidden) !== Boolean(entry.hidden)) map.update(token.id, { hidden: Boolean(entry.hidden) }, { role: "dm", name: "GM" });
     },
     // The campaign's ruleset ("Castles & Crusades", "D&D 5E", "Worldbuilding").
     ruleset: () => ruleset,

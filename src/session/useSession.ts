@@ -272,7 +272,7 @@ export type CombatEntry = {
   recordId: string | null;
   tokenId: string | null;
   name: string;
-  faction: "friend" | "neutral" | "foe";
+  faction: "friend" | "neutral" | "foe" | "none";
   initresult: number;
   init?: number;
   hidden: boolean;
