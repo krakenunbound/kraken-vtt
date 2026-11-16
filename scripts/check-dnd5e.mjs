@@ -98,6 +98,16 @@ try {
   const purse = agent.records.get(wealthy.id).data;
   const classC = fighter4.kits[2].wealth;
   assert(Object.keys(purse.inventorylist).length === 0 && Object.values(purse.coins).find((item) => item.name === "GP")?.amount === classC + 50, `kits C and B: only coin, ${classC} + 50 GP: ${JSON.stringify(purse.coins)}`);
+  // The wizard's payGear: items bought are paid from that coin at the books' prices (FG gives them free).
+  const shopping = [["Longsword", 1], ["Dagger", 2]];
+  const cost = wiz.gearCost(shopping, agent.records.list({ type: "item" }));
+  assert(cost > 0, "the books price a longsword and daggers");
+  const buyer = await tool("kraken_build_character", { owner: "Dee", spec: { name: "Buyer", species: "Dwarf", class: "Fighter", background: "Soldier", scores: { strength: 15, dexterity: 14, constitution: 13, intelligence: 12, wisdom: 10, charisma: 8 }, kits: { class: "C", background: "B" }, gear: shopping, payGear: true } });
+  const paid = agent.records.get(buyer.id).data;
+  const value = Object.values(paid.coins).reduce((sum, coin) => sum + ({ PP: 1000, GP: 100, EP: 50, SP: 10, CP: 1 }[coin.name] ?? 0) * coin.amount, 0);
+  assert(value === (classC + 50) * 100 - cost && Object.values(paid.inventorylist).some((item) => item.name === "Longsword"), `bought gear is paid for: ${JSON.stringify(paid.coins)} after ${cost} cp`);
+  const broke = await tool("kraken_build_character", { owner: "Dee", spec: { name: "Broke", species: "Dwarf", class: "Fighter", background: "Soldier", scores: { strength: 15, dexterity: 14, constitution: 13, intelligence: 12, wisdom: 10, charisma: 8 }, coins: { GP: 1 }, wealth: 1, gear: shopping, payGear: true } });
+  assert((broke.problems ?? []).some((text) => /Not enough coin/.test(text)) || /Not enough coin/.test(JSON.stringify(broke)), `too little coin is a problem: ${JSON.stringify(broke).slice(0, 300)}`);
 
   // The tracker: two goblins and the party; initiative d20 + DEX.
   const goblin = agent.records.list({ type: "npc" }).find((record) => record.name === "Goblin Warrior");

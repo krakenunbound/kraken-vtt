@@ -17,7 +17,7 @@
 //   spellcasting {stat, dc, attack}, slots {l1: {max, used}}, spells [names],
 //   deathsaves {success, failure}, hitdice {die, total, used}.
 
-import { backgroundInfo, classInfo, currenciesOf, mainCurrency, speciesInfo, totalWealth } from "./wizard.mjs";
+import { backgroundInfo, classInfo, currenciesOf, gearCost, mainCurrency, payFrom, speciesInfo, totalWealth } from "./wizard.mjs";
 
 export const RULESET = "dnd5e";
 export const RULESET_NAME = "D&D 5E";
@@ -469,8 +469,14 @@ export function buildFromSpec(spec, lib, rulesetId = RULESET) {
   for (const [name, amount] of Object.entries(custom)) customByCoin[coinKey(name)] = (customByCoin[coinKey(name)] ?? 0) + num(amount, 0);
   customByCoin[main] = (customByCoin[main] ?? 0) + Math.max(0, num(spec.gold, 0));
   const backgroundGold = processKits ? (backgroundKit?.wealth ?? 0) + (bg && !bg.kits.length ? bg.gold : 0) : 0;
-  const totals = totalWealth({ custom: customByCoin, rolled, classGold: classKit?.wealth ?? 0, backgroundGold, profileId: profile.id });
+  let totals = totalWealth({ custom: customByCoin, rolled, classGold: classKit?.wealth ?? 0, backgroundGold, profileId: profile.id });
   for (const [name, amount] of Object.entries(customByCoin)) if (!(name in totals)) totals[name] = amount;
+  // payGear (the wizard's): the items bought are paid from the purse, as a shop would.
+  if (spec.payGear) {
+    const paid = payFrom(totals, gearCost(spec.gear, lib.items), profile.id);
+    if (paid) totals = paid;
+    else problems.push("Not enough coin for the items bought.");
+  }
   const coins = {};
   let c = 1;
   for (const [name, amount] of Object.entries(totals)) if (Math.round(amount) > 0) coins[`id-${String(c++).padStart(5, "0")}`] = { name, amount: Math.round(amount) };

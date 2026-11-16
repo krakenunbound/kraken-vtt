@@ -147,6 +147,11 @@ try {
   await seat.fill(`${wizard} input[aria-label="Item name filter"]`, "Rope");
   await seat.click(`${wizard} [data-add-item="Rope"]`);
   assert((await seat.textContent(`${wizard} [data-total-coin="GP"] b`)) === "18", "4 GP (class kit A) + 14 GP (background kit A)");
+  // The rope is bought, not free: the wizard shows what it cost and what is left.
+  await seat.waitForSelector(`${wizard} [data-wealth="spent"]`);
+  const leftGp = Number(await seat.textContent(`${wizard} [data-left-coin="GP"] b`));
+  const leftSp = Number(await seat.textContent(`${wizard} [data-left-coin="SP"] b`));
+  assert(leftGp * 10 + leftSp < 180 && leftGp >= 16, `the rope paid from the 18 GP: ${leftGp} GP ${leftSp} SP left`);
   assert((await badge("equipment")) === "done" && (await badge("background")) === "done", "equipment and background done");
   await seat.screenshot({ path: path.join(tmpdir(), "kraken-dnd5e-wizard-equipment.png") });
   // Commit: no warnings left, the name, Save.
@@ -161,7 +166,7 @@ try {
   const carried = Object.values(hero.data.inventorylist).map((item) => item.name);
   const gp = Object.values(hero.data.coins).find((item) => item.name === "GP")?.amount;
   assert(hero.owner === "A test player" && hero.data.ruleset === "dnd5e" && hero.data.hp.total === 13 && hero.data.ac.total === 16, `the wizard built Brundar (13 HP; chain mail AC 16): ${JSON.stringify({ owner: hero.owner, hp: hero.data.hp, ac: hero.data.ac })}`);
-  assert(["Chain Mail", "Greatsword", "Spear", "Rope"].every((item) => carried.includes(item)) && gp === 18, `kits and coin on the sheet: ${JSON.stringify({ carried, coins: hero.data.coins })}`);
+  assert(["Chain Mail", "Greatsword", "Spear", "Rope"].every((item) => carried.includes(item)) && gp === leftGp, `kits and the coin left after the rope on the sheet: ${JSON.stringify({ carried, coins: hero.data.coins })}`);
   assert(hero.data.abilities.strength.score === 16 && hero.data.abilities.constitution.score === 15 && hero.data.skills.perception.prof === 1 && hero.data.skills.athletics.prof === 1 && hero.data.feats.includes("Savage Attacker") && hero.data.feats.includes("Defense") && hero.data.languages.join() === "Common,Elvish,Dwarvish", `scores, skills, feats, languages: ${JSON.stringify({ feats: hero.data.feats, languages: hero.data.languages })}`);
   assert((await seat.textContent('.sheet-5e [data-stat="ac"]')).trim() === "16", "the sheet shows AC 16");
 
@@ -201,7 +206,7 @@ try {
   await seat.screenshot({ path: path.join(tmpdir(), "kraken-dnd5e-player.png") });
   await page.screenshot({ path: path.join(tmpdir(), "kraken-dnd5e-gm.png") });
   assert(failures.length === 0, `page errors: ${failures.join(" | ")}`);
-  console.log(`ok dnd5e ui: a D&D 5E campaign's shelf holds the SRD books (no C&C); a test player makes Brundar tab by tab in the 5E wizard (Class, Species, Abilities rolled 4d6 drop lowest by the host, Background +2/+1, kits A and 18 GP; 13 HP, AC 16), rolls Athletics and a Constitution save from the sheet, and hits a goblin warrior with the ${weapon} from the sheet's Combat tab (${hurt.wounds} damage). ${path.join(tmpdir(), "kraken-dnd5e-player.png")}`);
+  console.log(`ok dnd5e ui: a D&D 5E campaign's shelf holds the SRD books (no C&C); a test player makes Brundar tab by tab in the 5E wizard (Class, Species, Abilities rolled 4d6 drop lowest by the host, Background +2/+1, kits A and 18 GP, a rope bought from it; 13 HP, AC 16), rolls Athletics and a Constitution save from the sheet, and hits a goblin warrior with the ${weapon} from the sheet's Combat tab (${hurt.wounds} damage). ${path.join(tmpdir(), "kraken-dnd5e-player.png")}`);
 } finally {
   await browser?.close();
   child.kill();

@@ -14,11 +14,13 @@ import {
   classInfo,
   classSpells,
   currenciesOf,
+  gearCost,
   GEN_ROLL,
   itemKind,
   kitText,
   mainCurrency,
   METHODS,
+  payFrom,
   plain,
   POINT_BUY_MAX,
   pointCost,
@@ -69,7 +71,7 @@ const STEPS: Record<Tab, string[]> = {
   class: ["Review the available Class options by clicking on their names.", "Click the Add button next to the Class option you want.", "Review available Class Proficiencies and Features; and resolve any outstanding choices using drop-down selection boxes.", "If you want to make a character higher than level 1, use the arrows next to the Class level."],
   abilities: ["Choose an Ability Score generation method from the Method drop-down.", "For Dice Roll, click the roll button: the host rolls 4d6, dropping the lowest, for each ability.", "For Point Buy, click the up/down buttons in the Base column to spend the points.", "For Standard Array, use the arrows to swap Base scores between abilities."],
   background: ["Review the available Background options by clicking on their names.", "Click the Add button next to the Background option you want.", "Review available Background Proficiencies and Features; and resolve any outstanding choices using drop-down selection boxes."],
-  equipment: ["Once your Class and Background are selected, choose from the available Starting Kit options for both to set your Starting Equipment and Currency.", "If you are making a D&D (Legacy) character, you can make a Starting Wealth roll instead of selecting Starting Kits.", "Add any other items you need; they cost nothing here."],
+  equipment: ["Once your Class and Background are selected, choose from the available Starting Kit options for both to set your Starting Equipment and Currency.", "If you are making a D&D (Legacy) character, you can make a Starting Wealth roll instead of selecting Starting Kits.", "Add any other items you need: each is paid from your starting coin at its price, and taking one back refunds it."],
   commit: ["Review warnings (if any) and return to previous sections to resolve.", "Enter your character name.", "Review character to make sure everything looks right.", "Click the Save button to finalize and create the Character record."],
 };
 
@@ -294,6 +296,10 @@ export function Wizard5e({ session, onDone }: { session: Session; onDone: (id: s
   };
   if (processKits) for (const item of [...(kitClass?.items ?? []), ...(kitBackground?.items ?? [])]) addTo(item.name, item.count);
   for (const [itemName, count] of extra) addTo(itemName, count);
+  // The items bought are paid for (FG gives them free): spent, what is left, and whether one more fits the purse.
+  const gearSpent = gearCost(extra, items) as number;
+  const left = (payFrom(totals, gearSpent, profile.id) as Record<string, number> | null) ?? totals;
+  const affords = (item: TableRecord) => payFrom(totals, gearSpent + (gearCost([[item.name, 1]], [item]) as number), profile.id) !== null;
   const addable = items.filter((item) => addableItem(item) && (!itemFilter.kind || itemKind(item) === itemFilter.kind) && item.name.toLowerCase().includes(itemFilter.name.toLowerCase()));
 
   // The badges (updateAlerts) and the warnings Commit lists (and the sheet's notes keep).
@@ -393,6 +399,7 @@ export function Wizard5e({ session, onDone }: { session: Session; onDone: (id: s
         feats: chosen("feat"),
         kits: processKits ? { ...(kits.class ? { class: kits.class } : {}), ...(kits.background ? { background: kits.background } : {}) } : {},
         gear: extra,
+        payGear: true,
         coins: custom,
         ...(showRolled && rolled > 0 ? { wealth: rolled } : {}),
         spells,
@@ -764,6 +771,21 @@ export function Wizard5e({ session, onDone }: { session: Session; onDone: (id: s
                   </span>
                 ))}
               </div>
+              {gearSpent > 0 ? (
+                <>
+                  <div className="ccw-row">
+                    <b>Spent</b> <span data-wealth="spent">{gearSpent >= 100 ? `${gearSpent / 100} ${main}` : gearSpent >= 10 ? `${gearSpent / 10} SP` : `${gearSpent} CP`}</span>
+                  </div>
+                  <div className="ccw-row">
+                    <b>Left</b>
+                    {coins.map((coin) => (
+                      <span key={coin} className="w5-coin" data-left-coin={coin}>
+                        <b>{left[coin] ?? 0}</b> {coin}
+                      </span>
+                    ))}
+                  </div>
+                </>
+              ) : null}
             </div>
             {processKits ? (
               <div className="ccw-panel w5-kits">
@@ -837,7 +859,7 @@ export function Wizard5e({ session, onDone }: { session: Session; onDone: (id: s
               <div className="w5-item-list">
                 {addable.slice(0, 200).map((item) => (
                   <div key={item.id} className="ccw-pick">
-                    <button type="button" className="ccw-add" aria-label={`Add ${item.name}`} data-add-item={item.name} onClick={() => setExtra(extra.some(([existing]) => existing === item.name) ? extra.map(([existing, count]) => [existing, existing === item.name ? count + 1 : count] as [string, number]) : [...extra, [item.name, 1]])}>
+                    <button type="button" className="ccw-add" aria-label={`Add ${item.name}`} data-add-item={item.name} disabled={!affords(item)} title={affords(item) ? `Buy for ${String(item.data.cost ?? "nothing")}` : "Not enough coin left"} onClick={() => setExtra(extra.some(([existing]) => existing === item.name) ? extra.map(([existing, count]) => [existing, existing === item.name ? count + 1 : count] as [string, number]) : [...extra, [item.name, 1]])}>
                       +
                     </button>
                     <span>{item.name}</span>

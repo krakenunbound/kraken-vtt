@@ -362,6 +362,46 @@ export function totalWealth({ custom = {}, rolled = 0, classGold = 0, background
   const main = mainCurrency(profileId);
   return Object.fromEntries(currenciesOf(profileId).map((coin) => [coin, num(custom[coin], 0) + (coin === main ? (rolled > 0 ? rolled : classGold + backgroundGold) : 0)]));
 }
+// Items bought in the wizard are paid for (FG gives them free): the purse in copper, the price
+// taken off, what is left as the same coins where they still fit and the rest as GP, SP and CP.
+// null when the purse is too thin. Descending Darkness's crowns count as gold.
+const WORTH = { PP: 1000, GP: 100, GC: 100, EP: 50, SP: 10, CP: 1 };
+export function purseValue(totals) {
+  return Object.entries(totals ?? {}).reduce((sum, [coin, amount]) => sum + (WORTH[coin.toUpperCase()] ?? 0) * Math.max(0, num(amount, 0)), 0);
+}
+export function payFrom(totals, cost, profileId = "dnd5e") {
+  const value = purseValue(totals);
+  const price = Math.max(0, Math.round(num(cost, 0)));
+  if (price > value) return null;
+  let left = value - price;
+  const out = Object.fromEntries(currenciesOf(profileId).map((coin) => [coin, 0]));
+  const gold = mainCurrency(profileId);
+  // Platinum stays platinum while it is not needed; electrum is changed.
+  if ("PP" in out) {
+    out.PP = Math.min(Math.max(0, num(totals?.PP, 0)), Math.floor(left / 1000));
+    left -= out.PP * 1000;
+  }
+  out[gold] = Math.floor(left / 100);
+  left -= out[gold] * 100;
+  if ("SP" in out) {
+    out.SP = Math.floor(left / 10);
+    left -= out.SP * 10;
+  }
+  if ("CP" in out) out.CP = left;
+  else out[gold] += left / 100;
+  return out;
+}
+// What the items bought cost, in copper; an item without a price is free.
+export function gearCost(gear, items) {
+  let total = 0;
+  for (const [name, count = 1] of gear ?? []) {
+    const item = (items ?? []).find((entry) => String(entry.name).toLowerCase() === String(name).toLowerCase());
+    const match = /([\d.,]+)\s*(pp|gp|gc|ep|sp|cp)\b/i.exec(String(item?.data?.cost ?? ""));
+    if (match) total += Math.round(Number(match[1].replace(/,/g, "")) * WORTH[match[2].toUpperCase()]) * Math.max(1, num(count, 1));
+  }
+  return total;
+}
+
 // Extra items (equipment_sub_additems.lua): every item but treasure, wondrous items and magic.
 export const addableItem = (item) => !/^(treasure|wondrous item|woundrous item)$/i.test(String(item?.data?.type ?? "").trim()) && !/magic/i.test(String(item?.data?.properties ?? ""));
 export const itemKind = (item) => (/^weapon$/i.test(String(item?.data?.type ?? "")) ? "weapon" : /^armor$/i.test(String(item?.data?.type ?? "")) ? "armor" : "gear");
