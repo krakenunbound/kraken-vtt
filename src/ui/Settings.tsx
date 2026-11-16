@@ -164,6 +164,7 @@ export function SettingsWindow({ session }: { session: Session }) {
       ) : null}
       {gm ? <LanguagesSetting session={session} /> : null}
       {gm ? <CurrencySetting session={session} /> : null}
+      {gm ? <ModifierPresetsSetting session={session} /> : null}
       {gm ? <BookkeepingSettings session={session} /> : null}
       {gm ? <TokenOptionsSection session={session} /> : null}
       {/* The rows the game adds (its manifest's settings), only in that game. */}
@@ -174,6 +175,28 @@ export function SettingsWindow({ session }: { session: Session }) {
       })}
       {gm ? <StudioFoldersSetting /> : null}
     </div>
+  );
+}
+
+// The GM's own modifiers (FG's Modifiers window, which the GM may add to): one a line, "Higher ground +1".
+function ModifierPresetsSetting({ session }: { session: Session }) {
+  const saved = (session.options.modifierPresets ?? []).map((item) => `${item.label} ${item.value >= 0 ? "+" : ""}${item.value}`).join("\n");
+  const [draft, setDraft] = useState(saved);
+  useEffect(() => setDraft(saved), [saved]);
+  const send = (value: string) => {
+    const list = value
+      .split("\n")
+      .map((line) => /^(.*?)\s*([+-]?\d+)\s*$/.exec(line.trim()))
+      .filter((match): match is RegExpExecArray => Boolean(match && match[1].trim()))
+      .map((match) => ({ label: match[1].trim(), value: Number(match[2]) }));
+    if (JSON.stringify(list) !== JSON.stringify(session.options.modifierPresets ?? [])) session.setTableOptions({ modifierPresets: list });
+  };
+  return (
+    <SettingsSection title="Modifiers" setting="modifier-presets">
+      <SettingRow className="set-row-wide" label="Your modifiers" hint="Named numbers beside every player's modifier box, one a line: a click puts it in the box for the next roll. Higher ground +1, Bless +2, Fog -2.">
+        <textarea className="set-textarea" rows={3} value={draft} placeholder={"Higher ground +1\nPartial cover +2"} aria-label="Your modifiers" data-setting="modifier-presets" onChange={(event) => setDraft(event.target.value)} onBlur={(event) => send(event.target.value)} />
+      </SettingRow>
+    </SettingsSection>
   );
 }
 

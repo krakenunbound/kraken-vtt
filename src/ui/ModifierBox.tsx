@@ -107,7 +107,9 @@ export function ModifierBox({ session, onMenu }: { session: Session; onMenu: (x:
 // cover and damage keys), each on until the next roll that reads it.
 export function ModifierKeys({ session }: { session: Session }) {
   const keys = keysFor(rulesetFor(session.ruleset));
-  if (!keys.length) return null;
+  // The GM's own modifiers (FG's Modifiers window): a click puts its number in the box.
+  const presets = session.options.modifierPresets ?? [];
+  if (!keys.length && !presets.length) return null;
   return (
     <div className="modifier-keys" role="group" aria-label="Modifier keys for the next roll">
       {keys.map((key) => {
@@ -118,6 +120,12 @@ export function ModifierKeys({ session }: { session: Session }) {
           </button>
         );
       })}
+      {presets.map((preset) => (
+        <button key={preset.label} type="button" className="modifier-preset" data-modifier-preset={preset.label} title={`${preset.label}: ${preset.value >= 0 ? "+" : ""}${preset.value} into the modifier box`} onClick={() => session.modify({ action: "add", value: preset.value, label: preset.label })}>
+          {preset.label} {preset.value >= 0 ? "+" : ""}
+          {preset.value}
+        </button>
+      ))}
     </div>
   );
 }

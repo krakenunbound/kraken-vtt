@@ -156,6 +156,12 @@ try {
   await until(async () => (await seat.$$(".modifier-slots li")).length === 0 && (await seat.getAttribute('[data-modifier-key="adv"]', "aria-pressed")) === "false", "the box and the key clear");
   await seat.waitForSelector(".chat-line .roll-mods");
   await seat.screenshot({ path: path.join(shots, "1-player-roll-card.png") });
+  // The GM's own modifiers (FG's Modifiers window): a chip beside the box puts its number in it.
+  await tool("kraken_table_options", { modifierPresets: [{ label: "Higher ground", value: 1 }] });
+  await seat.click('[data-modifier-preset="Higher ground"]');
+  await until(async () => (await seat.getAttribute(".modifier-box", "data-modifier-total")) === "1", "the preset in the box");
+  await seat.click('.modifier-slots li[data-modifier-slot="0"]', { button: "right" });
+  await until(async () => (await seat.getAttribute(".modifier-box", "data-modifier-total")) === "0", "and taken off");
 
   // 2. The roll mode: GM and me.
   await seat.selectOption('select[aria-label="Roll mode"]', "gm");

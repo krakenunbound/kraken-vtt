@@ -749,6 +749,7 @@ span.ct-init { display: inline-block; }
 .modifier-keys { display: flex; flex-wrap: wrap; gap: 3px; padding: 0 6px 6px; }
 .modifier-keys button { min-inline-size: 24px; min-block-size: 24px; padding: 1px 7px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em; border: 1px solid var(--line); border-radius: 999px; background: #1a1d23; color: var(--muted); }
 .modifier-keys button[aria-pressed="true"] { border-color: var(--brass); background: var(--brass); color: #1a1408; box-shadow: 0 0 8px rgba(210, 161, 90, 0.45); }
+.modifier-keys button.modifier-preset { border-style: dashed; border-color: var(--brass-dim); color: var(--brass); }
 .modifier-keys button:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
 @media (forced-colors: active) {
   .modifier-keys button[aria-pressed="true"] { background: Highlight; color: HighlightText; }
