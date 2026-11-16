@@ -113,7 +113,7 @@ try {
   await tool("kraken_dice_settings", { show: false }).catch(() => undefined);
   const abilities = Object.fromEntries(["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"].map((stat) => [stat, { score: 14, bonus: 2, save: 2 }]));
   const hero = await tool("kraken_record_create", { type: "character", name: "Hagar", owner: "A test player", visibility: "owner", data: { ruleset: "dnd5e", level: 3, prof: 2, languages: ["Common", "Orc"], hp: { total: 24, wounds: 0 }, abilities, skills: { stealth: { name: "Stealth", total: 4 } } } });
-  const goblin = await tool("kraken_record_create", { type: "npc", name: "Goblin", data: { hp: 7, ac: 13, text: "<p>A small, vicious raider. Scimitar: [[1d20+4 #Scimitar]], 1d6 + 2 slashing.</p>" } });
+  const goblin = await tool("kraken_record_create", { type: "npc", name: "Goblin", data: { hp: 7, ac: 13, size: "Small", speed: "30 ft.", senses: "darkvision 60 ft., passive Perception 9", traits: { "id-00001": { name: "Nimble Escape", desc: "The goblin can take the Disengage or Hide action as a bonus action on each of its turns." } }, actions: { "id-00001": { name: "Scimitar", desc: "Melee Weapon Attack: +4 to hit, reach 5 ft., one target." } }, text: "<p>A small, vicious raider. Scimitar: [[1d20+4 #Scimitar]], 1d6 + 2 slashing.</p>" } });
   const relic = await tool("kraken_record_create", { type: "item", name: "Moon Amulet", visibility: "all", data: { description: "<p>A silver amulet that glows at night.</p>" } });
   await tool("kraken_party_edit", { members: [hero.id] });
   // A portrait from the art library, for the speaker's picture in chat.
@@ -311,6 +311,16 @@ try {
   assert((await tool("kraken_combat", { action: "view" })).entries.length === 4, "Cancel deletes nothing");
   await page.click('[data-action="remove-foes"]');
   await page.screenshot({ path: path.join(shots, "6-gm-tracker-confirm.png") });
+  // FG's creature sections: Goblin 3's More shows its space and reach, offense, and Nimble Escape's text in place.
+  await page.click('[data-action="remove-foes-no"]');
+  await page.click(`.ct-row:has-text("Goblin 3") button[title="More"]`);
+  await page.waitForSelector('[data-creature-details] .ct-creature-chip');
+  assert((await page.textContent("[data-creature-details] .ct-creature-chip")).includes("reach 5 ft"), "space and reach");
+  await page.click('[data-creature-details] [data-trait="Nimble Escape"] summary');
+  assert(await page.isVisible('[data-creature-details] [data-trait="Nimble Escape"] p'), "a trait's text opens in place");
+  await page.screenshot({ path: path.join(shots, "6-gm-tracker-creature.png") });
+  await page.click(`.ct-row:has-text("Goblin 3") button[title="More"]`);
+  await page.click('[data-action="remove-foes"]');
   await page.click('[data-action="remove-foes-yes"]');
   await until(async () => (await tool("kraken_combat", { action: "view" })).entries.map((entry) => entry.name).sort().join() === "Goblin 3,Hagar", "the foes deleted, the goblin with no side kept");
 

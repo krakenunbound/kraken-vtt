@@ -2079,6 +2079,20 @@ button.ct-turn.on { cursor: grab; }
 .ct-faction.faction-neutral i { background: #a6a6a6; }
 .ct-faction.faction-none i { background: transparent; }
 .ct-confirm { display: inline-flex; gap: 4px; }
+/* FG's creature sections in the tracker: space and reach, offense, defense, traits and actions opened in place. */
+.ct-creature { display: grid; gap: 6px; padding: 6px 0 8px; border-bottom: 1px solid var(--panel-edge); }
+.ct-creature-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.ct-creature-chip { display: inline-flex; align-items: center; gap: 5px; padding: 1px 8px; border-radius: 999px; background: var(--brass-soft); color: var(--brass); font-size: 0.78rem; }
+.ct-creature-part { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; margin: 0; font-size: 0.82rem; }
+.ct-creature-part dd { margin: 0; }
+.ct-creature-part dd b { color: var(--muted); font-weight: 600; }
+.ct-creature-title { display: inline-flex; align-items: center; gap: 4px; flex-basis: 100%; color: var(--brass); font-family: var(--serif); font-size: 0.8rem; letter-spacing: 0.06em; text-transform: uppercase; }
+.ct-trait { display: inline-block; max-inline-size: 100%; }
+.ct-trait summary { cursor: pointer; padding: 1px 8px; border: 1px solid var(--panel-edge); border-radius: 4px; background: rgba(0, 0, 0, 0.25); list-style: none; }
+.ct-trait summary::-webkit-details-marker { display: none; }
+.ct-trait[open] { display: block; flex-basis: 100%; }
+.ct-trait[open] summary { border-color: var(--brass-dim); color: var(--brass); }
+.ct-trait p { margin: 4px 0 2px; line-height: 1.4; color: var(--text); }
 span.flip { display: inline-flex; transform: scaleX(-1); }
 
 /* Death markers: under the tokens; the GM right-clicks one to remove it. */

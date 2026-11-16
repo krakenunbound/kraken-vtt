@@ -6,6 +6,7 @@ import { Picture } from "../characters/ArtPicker";
 import type { CombatEntry, Session } from "../session/useSession";
 import { Icon } from "../ui/icons";
 import { FateLine } from "./FateLine";
+import { CreatureDetails } from "./CreatureDetails";
 import { BuffBar } from "../effects/BuffBar";
 import { carriesCreatureDrop, dropOnCreature } from "../effects/drops";
 import { TrackerButtons, wordsOf, textOfWords } from "../core/tracker/actions";
@@ -436,6 +437,7 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
       ) : null}
       {gm && open ? (
         <div className="ct-more">
+          {record?.type === "npc" ? <CreatureDetails session={session} recordId={record.id} name={entry.name} /> : null}
           <form
             className="ct-adjust"
             onSubmit={(event) => {
