@@ -1503,6 +1503,7 @@ const TOOLS = [
       initGroup: { type: "string", enum: ["each", "kind"], description: "The tracker's initiative: each creature its own roll, or by kind (one roll per kind of creature, its copies sharing it), for every game" },
       skipDead: { type: "string", enum: ["enemies", "all", "off"], description: "Whose turns the tracker skips: dead and unconscious creatures (enemies, FG's), characters too (all), or no one (off)" },
       npcNumbering: { type: "string", enum: ["append", "random", "off"], description: "NPC numbering when the same creature is added again: append (Goblin 1, Goblin 2), random (Goblin 14), off" },
+      currencies: { type: "array", items: { type: "string" }, description: "The GM's own coins (FG's Currency list), most valuable first: the party sheet's and parcels' coins instead of the game's (an empty list: the game's again)" },
       languages: { type: "array", items: { type: "string" }, description: "The GM's own chat languages (FG's Languages list), offered beside the game's and those its characters know" },
     }),
     run(args, ctx) {

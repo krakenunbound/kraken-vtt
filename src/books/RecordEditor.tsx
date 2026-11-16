@@ -720,7 +720,7 @@ export function EncounterView({ session, record, editable }: { session: Session;
 
 export function ParcelView({ session, record, editable }: { session: Session; record: TableRecord; editable: boolean }) {
   const [status, setStatus] = useState("");
-  const currency = manifestOf(session.ruleset).party?.currency ?? ["GP"];
+  const currency = session.options.currencies?.length ? session.options.currencies : (manifestOf(session.ruleset).party?.currency ?? ["GP"]);
   const [coin, setCoin] = useState(currency[0] ?? "GP");
   const [amount, setAmount] = useState("");
   const [to, setTo] = useState("");

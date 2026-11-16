@@ -172,6 +172,10 @@ try {
   assert(liriel.abilities.map((a) => `${a.key}${a.score}${a.bonus}`).join() === "STR8-1,DEX152,CON131,INT173,WIS121,CHA100", `the abilities: ${JSON.stringify(liriel.abilities)}`);
   assert(liriel.hitdice.total === 3 && liriel.hitdice.used === 1 && liriel.passive === 13 && liriel.senses.join() === "Darkvision 60 ft", `Hit Dice and senses: ${JSON.stringify(liriel)}`);
   assert(liriel.race === "Elf" && liriel.classes === "Wizard 3", `a 5E species and class: ${liriel.race} ${liriel.classes}`);
+  // The GM's own coins (FG's Currency list) in place of the game's; an empty list gives the game's back.
+  const coined = await tool("kraken_table_options", { currencies: ["Crowns", " Shields ", ""] });
+  assert(coined.currencies?.join() === "Crowns,Shields", `the GM's coins: ${JSON.stringify(coined.currencies)}`);
+  assert(!("currencies" in (await tool("kraken_table_options", { currencies: [] }))), "an empty list: the game's coins again");
   console.log("PARTY_OK");
 } finally {
   for (const ws of sockets) ws.close();

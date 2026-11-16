@@ -163,6 +163,7 @@ export function SettingsWindow({ session }: { session: Session }) {
         </SettingsSection>
       ) : null}
       {gm ? <LanguagesSetting session={session} /> : null}
+      {gm ? <CurrencySetting session={session} /> : null}
       {gm ? <BookkeepingSettings session={session} /> : null}
       {gm ? <TokenOptionsSection session={session} /> : null}
       {/* The rows the game adds (its manifest's settings), only in that game. */}
@@ -173,6 +174,25 @@ export function SettingsWindow({ session }: { session: Session }) {
       })}
       {gm ? <StudioFoldersSetting /> : null}
     </div>
+  );
+}
+
+// The GM's own coins (FG's Currency list): the party sheet's and parcels' coins instead of the game's.
+function CurrencySetting({ session }: { session: Session }) {
+  const game = (manifestOf(session.ruleset).party?.currency ?? []).join(", ");
+  const saved = (session.options.currencies ?? []).join(", ");
+  const [draft, setDraft] = useState(saved);
+  useEffect(() => setDraft(saved), [saved]);
+  const send = (value: string) => {
+    const list = value.split(",").map((name) => name.trim()).filter(Boolean);
+    if (list.join(", ") !== saved) session.setTableOptions({ currencies: list });
+  };
+  return (
+    <SettingsSection title="Currency" setting="currency">
+      <SettingRow className="set-row-wide" label="Your coins" hint={`The money of your world, most valuable first, comma between: the party sheet's and treasure parcels' coins. Empty: the game's own (${game || "none"}).`}>
+        <input className="set-textarea" value={draft} placeholder={game || "Crowns, Shields, Pennies"} aria-label="Your coins" data-setting="currency-list" onChange={(event) => setDraft(event.target.value)} onBlur={(event) => send(event.target.value)} onKeyDown={(event) => event.key === "Enter" && !event.nativeEvent.isComposing && send((event.target as HTMLInputElement).value)} />
+      </SettingRow>
+    </SettingsSection>
   );
 }
 

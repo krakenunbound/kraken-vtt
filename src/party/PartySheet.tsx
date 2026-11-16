@@ -304,7 +304,7 @@ export function PartySheet({ session, compact = false }: { session: Session; com
             >
               <h3>Parcel to hand out</h3>
               <div className="parcel-coins">
-                {[...new Set([...game.party.currency, ...Object.keys(party.parcel.coins ?? {}).filter((coin) => Number(party.parcel.coins?.[coin]) > 0)])].map((coin) => (
+                {[...new Set([...(session.options.currencies?.length ? session.options.currencies : game.party.currency), ...Object.keys(party.parcel.coins ?? {}).filter((coin) => Number(party.parcel.coins?.[coin]) > 0)])].map((coin) => (
                   <label key={coin}>
                     {coin}
                     <input type="number" min={0} data-parcel-coin={coin} aria-label={`Parcel ${coin}`} value={party.parcel.coins?.[coin] ?? 0} onChange={(event) => patch({ parcel: { coins: { [coin]: Math.max(0, Number(event.target.value) || 0) } } })} />
