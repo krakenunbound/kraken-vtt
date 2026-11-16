@@ -2661,6 +2661,17 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
           send(ws, { type: "error", reason: "You cannot change that character." });
           return;
         }
+        // A treasure parcel dropped on a sheet (FG's, the GM's): its items into the gear, its coins into the purse.
+        if (source?.type === "treasureparcel") {
+          if (client.role !== "dm") {
+            send(ws, { type: "error", reason: "The GM hands out parcels." });
+            return;
+          }
+          require("./content.cjs")
+            .parcelAction(agentHandle, { action: "character", id: source.id, character: record.id }, "GM")
+            .catch((error) => send(ws, { type: "error", reason: error instanceof Error ? error.message : "Could not give the parcel." }));
+          return;
+        }
         dropOnCharacter(agentHandle, record, source, client.name).catch((error) =>
           send(ws, { type: "error", reason: error instanceof Error ? error.message : "That does not go on the sheet." }),
         );

@@ -377,7 +377,16 @@ async function dropOnCharacter(table, record, source, from) {
     return { record: updated, added };
   }
   if (dnd5e.is5e(record)) {
-    if (source.type !== "item") throw new Error("A 5E sheet takes items; classes, species and spells come with the Character Wizard and level up.");
+    // A feat or a spell dropped on the sheet (FG's): onto its list by name.
+    if (source.type === "feat" || source.type === "spell") {
+      const data = structuredClone(record.data);
+      const key = source.type === "feat" ? "feats" : "spells";
+      data[key] = [...new Set([...(Array.isArray(data[key]) ? data[key] : []), source.name])];
+      const updated = table.records.update(record.id, { data: (await dnd5e.rules5e()).derive(data) }, table.seat, { replace: true });
+      table.say(`${record.name} gets ${source.name}.`, who, record.visibility === "gm");
+      return { record: updated, added: source.type };
+    }
+    if (source.type !== "item") throw new Error("A 5E sheet takes items, feats and spells; class, species and background come with the Character Wizard and level up.");
     const data = structuredClone(record.data);
     const list = (data.inventorylist = data.inventorylist ?? {});
     const { engine } = await siege();

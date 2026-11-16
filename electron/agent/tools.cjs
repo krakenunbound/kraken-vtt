@@ -945,8 +945,8 @@ const TOOLS = [
   {
     name: "kraken_character_drop",
     description:
-      "Drop a record on a character sheet, as dragging it from a list (Classes, Races, Spells, Items) onto the sheet in FG: a race or class package goes into the packages at 1st level (its primes set; a class gives 1st level's hit points; a race replaces the old race), a spell or power into the powers (bound to the one class that casts it), an item into the gear (equipped when it is worn or a weapon). Chat says what was added. A second class is refused (that is dual class or reclass at a level up: kraken_class_change). A 5E sheet takes items only. record: the record's id, or its name (with type to tell same-named records apart).",
-    inputSchema: object({ id: string("The character's record id"), record: string("The record to drop: its id or name"), type: { type: "string", enum: ["siegepackage", "siegepower", "item"] } }, ["id", "record"]),
+      "Drop a record on a character sheet, as dragging it from a list (Classes, Races, Spells, Items, Parcels) onto the sheet in FG (a treasure parcel: its items into the gear and its coins into the purse; a 5E sheet takes items, feats and spells): a race or class package goes into the packages at 1st level (its primes set; a class gives 1st level's hit points; a race replaces the old race), a spell or power into the powers (bound to the one class that casts it), an item into the gear (equipped when it is worn or a weapon). Chat says what was added. A second class is refused (that is dual class or reclass at a level up: kraken_class_change). A 5E sheet takes items only. record: the record's id, or its name (with type to tell same-named records apart).",
+    inputSchema: object({ id: string("The character's record id"), record: string("The record to drop: its id or name"), type: { type: "string", enum: ["siegepackage", "siegepower", "item", "feat", "spell", "treasureparcel"] } }, ["id", "record"]),
     async run(args, ctx) {
       const table = needTable(ctx);
       const character = table.records.get(args.id);
@@ -956,6 +956,12 @@ const TOOLS = [
         table.records.get(args.record) ??
         table.records.list(args.type ? { type: args.type } : {}).find((item) => item.type !== "character" && item.name.toLowerCase() === wanted);
       if (!source) throw new Error(`No record "${args.record}".`);
+      // A treasure parcel (FG's drop on a sheet): its items into the gear, its coins into the purse.
+      if (source.type === "treasureparcel") {
+        await require("../content.cjs").parcelAction(table, { action: "character", id: source.id, character: character.id }, "Agent");
+        const given = table.records.get(character.id);
+        return out({ added: "parcel", gear: Object.values(given.data.inventorylist ?? {}).map((item) => `${item.name} x${item.count ?? 1}`), coins: given.data.coins });
+      }
       const { record: updated, added, summary } = await dropOnCharacter(table, character, source, "Agent");
       return out({ added, summary, race: updated.data.race, level: updated.data.level, hp: updated.data.hp, packages: Object.values(updated.data.packages ?? {}).map((pkg) => ({ name: pkg.name, type: pkg.packagetype, level: pkg.level })), powers: Object.values(updated.data.powers ?? {}).map((power) => power.name), gear: Object.values(updated.data.inventorylist ?? {}).map((item) => `${item.name} x${item.count}${Number(item.carried) === 2 ? " (equipped)" : ""}`) });
     },

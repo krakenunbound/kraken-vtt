@@ -126,6 +126,7 @@ export function SheetRenderer({ spec: given, record, session, ruleset, custom, f
         tabs={shownTabs.map((item) => (item.label ? { id: item.id, label: item.label } : item.id))}
         tab={page?.id ?? ""}
         onTab={setTab}
+        onDropRecord={editable ? (id) => session.dropOnCharacter(record.id, id) : undefined}
         name={nameOf(spec, <NameField record={record} session={session} editable={editable} note={spec.header.note === undefined ? undefined : nodesOf(spec.header.note, scope, modifiers)} />, scope)}
         boxes={[
           ...spec.header.identity

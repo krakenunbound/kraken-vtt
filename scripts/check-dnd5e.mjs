@@ -106,6 +106,17 @@ try {
   const paid = agent.records.get(buyer.id).data;
   const value = Object.values(paid.coins).reduce((sum, coin) => sum + ({ PP: 1000, GP: 100, EP: 50, SP: 10, CP: 1 }[coin.name] ?? 0) * coin.amount, 0);
   assert(value === (classC + 50) * 100 - cost && Object.values(paid.inventorylist).some((item) => item.name === "Longsword"), `bought gear is paid for: ${JSON.stringify(paid.coins)} after ${cost} cp`);
+  // Drops on a 5E sheet (FG's): a feat and a spell onto their lists, a treasure parcel into the gear and purse.
+  await tool("kraken_character_drop", { id: buyer.id, record: "Alert", type: "feat" });
+  await tool("kraken_character_drop", { id: buyer.id, record: "Fire Bolt", type: "spell" });
+  const loot = await tool("kraken_parcel", { action: "create", name: "Goblin purse" });
+  await tool("kraken_parcel", { action: "add", id: loot.id, coin: "GP", amount: 12 });
+  await tool("kraken_parcel", { action: "add", id: loot.id, item: agent.records.list({ type: "item" }).find((item) => item.name === "Dagger").id });
+  await tool("kraken_character_drop", { id: buyer.id, record: loot.id });
+  const dropped = agent.records.get(buyer.id).data;
+  const after = Object.values(dropped.coins).reduce((sum, coin) => sum + ({ PP: 1000, GP: 100, EP: 50, SP: 10, CP: 1 }[coin.name] ?? 0) * coin.amount, 0);
+  assert(dropped.feats.includes("Alert") && dropped.spells.includes("Fire Bolt"), `a feat and a spell dropped: ${JSON.stringify({ feats: dropped.feats, spells: dropped.spells })}`);
+  assert(after === value + 1200 && Object.values(dropped.inventorylist).filter((item) => item.name === "Dagger").reduce((sum, item) => sum + (Number(item.count) || 1), 0) >= 3, `the parcel's coin and dagger: ${JSON.stringify(dropped.coins)}`);
   const broke = await tool("kraken_build_character", { owner: "Dee", spec: { name: "Broke", species: "Dwarf", class: "Fighter", background: "Soldier", scores: { strength: 15, dexterity: 14, constitution: 13, intelligence: 12, wisdom: 10, charisma: 8 }, coins: { GP: 1 }, wealth: 1, gear: shopping, payGear: true } });
   assert((broke.problems ?? []).some((text) => /Not enough coin/.test(text)) || /Not enough coin/.test(JSON.stringify(broke)), `too little coin is a problem: ${JSON.stringify(broke).slice(0, 300)}`);
 
