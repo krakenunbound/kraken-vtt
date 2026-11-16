@@ -28,7 +28,7 @@ function assert(condition, message) {
   };
   assert(EDIT_PATHS.remove.map((regex) => regex.source).join() === /^(inventorylist)\.id-\d+$/.source, `the rows the sheet may drop: ${EDIT_PATHS.remove.map((regex) => regex.source).join()}`);
   for (const kind of ["text", "number"]) assert(EDIT_PATHS[kind].map((regex) => regex.source).join(" ") === before[kind].join(" "), `the ${kind} whitelist from the manifest is the old one: ${EDIT_PATHS[kind].map((regex) => regex.source).join(" ")}`);
-  assert(EDIT_PATHS.string.length === 0 && EDIT_PATHS.list.length === 0, "no string or list paths");
+  assert(EDIT_PATHS.string.length === 1 && EDIT_PATHS.string[0].test("inventorylist.id-00001.location") && EDIT_PATHS.list.length === 0, "one string path (an item's container), no list paths");
   console.log("whitelist ok");
 }
 const have = (name) => listModules().some((item) => (item.name ?? item) === name);
@@ -97,6 +97,8 @@ try {
   const kit = agent.records.get(kitted.id).data;
   const has = (name) => Object.values(kit.inventorylist).find((item) => item.name === name);
   const coin = (name) => Object.values(kit.coins).find((item) => item.name === name)?.amount ?? 0;
+  // The kit's Dungeoneer's Pack is opened into what it holds (FG's), each in its backpack.
+  assert(!has("Dungeoneer's Pack") && has("Backpack") && has("Crowbar")?.location === "Backpack" && has("Tinderbox")?.location === "Backpack", `the pack opened into the backpack: ${JSON.stringify(Object.values(kit.inventorylist).map((item) => `${item.count} ${item.name}${item.location ? ` in ${item.location}` : ""}`))}`);
   assert(kitted.problems.length === 0 && has("Chain Mail") && has("Javelin")?.count === 8 && has("Spear") && has("Rope") && kit.ac.total === 16, `kits A: the class's chain mail and 8 javelins, the background's spear, a rope added: ${JSON.stringify({ problems: kitted.problems, items: Object.values(kit.inventorylist).map((item) => `${item.count} ${item.name}`) })}`);
   assert(coin("GP") === 18 && coin("SP") === 7, `4 GP (class) + 14 GP (background) and 7 SP typed: ${JSON.stringify(kit.coins)}`);
   assert(kit.abilities.strength.score === 17 && kit.abilities.constitution.score === 14 && kit.skills.stealth.prof === 1 && kit.skills.athletics.prof === 1 && kit.size === "Small", "the +2/+1, the species' skill, the background's skills, the size");
@@ -162,6 +164,19 @@ try {
   const hit = (await tool("kraken_combat", { action: "damage-roll", recordId: fighter.id, weapon: sword[0] })).damage;
   const damageLine = last(/^\[DAMAGE\]/).roll;
   assert(damageLine.formula === "2d8+3" && hit.total === 6 && /CRITICAL/.test(damageLine.label), `the critical's damage doubles the dice, not the bonus: ${damageLine.formula} = ${hit.total}`);
+  // A javelin's thrown line rolls through the tracker as a ranged attack, and its damage.
+  await tool("kraken_character_drop", { id: fighter.id, record: "Javelin", type: "item" });
+  const javelin = Object.entries(agent.records.get(fighter.id).data.attacks).find(([, attack]) => attack.thrown);
+  assert(javelin, "the javelin's thrown line");
+  force(12);
+  const throwAt = (await tool("kraken_combat", { action: "attack", recordId: fighter.id, weapon: javelin[0] })).results[0];
+  assert(throwAt && /Javelin \(thrown\)/.test(last(/^\[ATTACK\]/).roll.label), `the thrown attack: ${last(/^\[ATTACK\]/).roll.label}`);
+  // Its damage rolled with no one targeted (the goblin is left as it was for the checks after).
+  await tool("kraken_combat", { action: "clear-targets", id: bru.id });
+  force(3);
+  await tool("kraken_combat", { action: "damage-roll", recordId: fighter.id, weapon: javelin[0] });
+  assert(/Javelin \(thrown\)/.test(last(/^\[DAMAGE\]/).roll.label), "its damage");
+  await tool("kraken_combat", { action: "target", id: bru.id, targetId: g1.id, on: true });
   view = (await tool("kraken_combat", { action: "view" })).entries;
   assert(view.find((entry) => entry.id === g1.id).health.status === "Heavy", "the goblin is badly hurt");
   force(6);

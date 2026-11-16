@@ -373,6 +373,8 @@ export function payFrom(totals, cost, profileId = "dnd5e") {
   const value = purseValue(totals);
   const price = Math.max(0, Math.round(num(cost, 0)));
   if (price > value) return null;
+  // Nothing bought: the purse as it was (its electrum and all).
+  if (price === 0) return { ...totals };
   let left = value - price;
   const out = Object.fromEntries(currenciesOf(profileId).map((coin) => [coin, 0]));
   const gold = mainCurrency(profileId);
@@ -387,8 +389,8 @@ export function payFrom(totals, cost, profileId = "dnd5e") {
     out.SP = Math.floor(left / 10);
     left -= out.SP * 10;
   }
+  // A game whose only coin is gold (Descending Darkness's crowns): what is left under a crown is the change the shop keeps.
   if ("CP" in out) out.CP = left;
-  else out[gold] += left / 100;
   return out;
 }
 // What the items bought cost, in copper; an item without a price is free.

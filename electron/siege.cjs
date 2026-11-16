@@ -390,7 +390,13 @@ async function dropOnCharacter(table, record, source, from) {
     const data = structuredClone(record.data);
     const list = (data.inventorylist = data.inventorylist ?? {});
     const { engine } = await siege();
-    list[engine.nextId(list)] = { ...structuredClone(source.data), name: source.name, count: 1, carried: 1 };
+    const rules = await dnd5e.rules5e();
+    // An equipment pack dropped on the sheet is opened into what it holds (FG's), into its backpack.
+    const opened = rules.packContents({ ...source.data, name: source.name }, table.records.list({ type: "item" }));
+    for (const row of opened ?? [{ name: source.name, count: 1, data: source.data }]) {
+      const { fgPath, count, ...rest } = structuredClone(row.data ?? {});
+      list[engine.nextId(list)] = { ...rest, name: row.name, count: row.count, carried: 1, ...(row.location ? { location: row.location } : {}) };
+    }
     const updated = table.records.update(record.id, { data: (await dnd5e.rules5e()).derive(data) }, table.seat, { replace: true });
     table.say(`${record.name} gets ${source.name}.`, who, record.visibility === "gm");
     return { record: updated, added: "item" };

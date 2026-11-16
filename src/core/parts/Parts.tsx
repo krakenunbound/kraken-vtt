@@ -7,6 +7,7 @@ import { FieldView, LabelledField } from "./FieldView";
 import { ACTION_DRAG } from "../../effects/drops";
 import { Supplies } from "../../bookkeeping/Supplies";
 import { CONTAINERS } from "../../../shared/bookkeeping/bookkeeping.mjs";
+import { rulesetFor } from "../../../shared/rulesets/registry.mjs";
 import { useState } from "react";
 
 // An attack or damage button drags onto a creature (FG's drag of a sheet's action onto a
@@ -480,7 +481,8 @@ function List({ spec, formats }: { spec: Extract<Part, { part: "list" }>; format
   const sheet = useSheet();
   const { editable, modifiers } = sheet;
   const items = rows(at(sheet.data, spec.path));
-  const packs = spec.path === "inventorylist";
+  // Only where the game's host takes an item's location (its manifest's edit whitelist).
+  const packs = spec.path === "inventorylist" && (rulesetFor(sheet.session.ruleset ?? "").edit?.string ?? []).includes("inventorylist.*.location");
   const [over, setOver] = useState("");
   const modifier = spec.modifier ? <ModifierView spec={spec.modifier} /> : null;
   return (

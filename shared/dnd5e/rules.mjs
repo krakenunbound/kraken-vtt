@@ -202,6 +202,45 @@ export function armorClass(data) {
   return { total: base + shield + num(data.ac?.misc, 0), armor: wearing, shield };
 }
 
+// An equipment pack opened into what it holds (FG adds a pack's included items): FG's subitems list,
+// else the SRD's own words ("contains the following items: Backpack, Caltrops, 2 flasks of Oil,
+// 10 days of Rations, ..."). Each found in the item library by name; one not found is a plain item.
+// Its contents go into the pack's own backpack (or sack) when it has one. null: not a pack.
+const MEASURES = /^(?:flasks?|days?|pieces?|sheets?|sticks?|pints?|vials?|bags?|bundles?|bottles?|feet|pouches?|blocks?|cases?|bars?)\s+of\s+/i;
+export function packContents(item, library = []) {
+  if (!/equipment pack/i.test(`${item?.subtype ?? ""} ${item?.type ?? ""}`)) return null;
+  const byName = (name) => {
+    const want = String(name).trim().toLowerCase();
+    const plain = (text) => String(text).toLowerCase();
+    return library.find((entry) => plain(entry.name) === want) ?? library.find((entry) => plain(entry.name) === want.replace(/e?s$/, "")) ?? library.find((entry) => plain(entry.name).startsWith(want.replace(/e?s$/, ""))) ?? null;
+  };
+  let listed = [];
+  const sub = item?.subitems && typeof item.subitems === "object" ? Object.values(item.subitems) : [];
+  if (sub.length) listed = sub.map((row) => ({ name: String(row?.name ?? row?.link?.recordname ?? ""), count: Math.max(1, num(row?.count, 1)) })).filter((row) => row.name);
+  else {
+    const words = String(item?.description ?? item?.text ?? "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
+    const found = /contains? the following items?:\s*(.+?)(?:\.\s|\.$|$)/i.exec(words);
+    if (!found) return null;
+    listed = found[1]
+      .split(/,\s*(?:and\s+)?|\s+and\s+/)
+      .map((part) => part.trim())
+      .filter(Boolean)
+      .map((part) => {
+        const counted = /^(\d+)\s+(.+)$/.exec(part);
+        const count = counted ? Number(counted[1]) : 1;
+        const name = (counted ? counted[2] : part).replace(MEASURES, "").trim();
+        return { name, count };
+      });
+  }
+  if (!listed.length) return null;
+  const rows = listed.map(({ name, count }) => {
+    const known = byName(name);
+    return { name: known?.name ?? name.replace(/^./, (letter) => letter.toUpperCase()), count, data: known?.data ?? { name } };
+  });
+  const bag = rows.find((row) => /\b(backpack|sack)\b/i.test(row.name));
+  return rows.map((row) => (bag && row !== bag ? { ...row, location: bag.name } : row));
+}
+
 // A character's weapon attack: proficiency (with its weapon kind), STR for
 // melee, DEX for ranged, the better for finesse; damage the weapon's dice + that modifier.
 export function weaponAttack(data, item, { hands = 1, thrown = false } = {}) {
@@ -443,7 +482,13 @@ export function buildFromSpec(spec, lib, rulesetId = RULESET) {
   // items added. Armor and shields worn, weapons in hand.
   const inventorylist = {};
   let n = 1;
-  const add = (name, count, data) => {
+  const add = (name, count, data, location = "") => {
+    // An equipment pack is opened into what it holds (FG's), each into the pack's backpack.
+    const opened = packContents({ ...data, name }, lib.items ?? []);
+    if (opened) {
+      for (let times = 0; times < Math.max(1, Math.round(num(count, 1))); times += 1) for (const row of opened) add(row.name, row.count, row.data, row.location ?? "");
+      return;
+    }
     const existing = Object.values(inventorylist).find((item) => String(item.name).toLowerCase() === String(name).toLowerCase());
     if (existing) {
       existing.count += Math.max(1, Math.round(num(count, 1)));
@@ -452,7 +497,7 @@ export function buildFromSpec(spec, lib, rulesetId = RULESET) {
     const copy = { ...data };
     delete copy.fgPath;
     delete copy.count;
-    inventorylist[`id-${String(n++).padStart(5, "0")}`] = { ...copy, name: copy.name ?? String(name), count: Math.max(1, Math.round(num(count, 1))), carried: isArmor(copy) || isWeapon(copy) ? 2 : 1 };
+    inventorylist[`id-${String(n++).padStart(5, "0")}`] = { ...copy, name: copy.name ?? String(name), count: Math.max(1, Math.round(num(count, 1))), carried: isArmor(copy) || isWeapon(copy) ? 2 : 1, ...(location ? { location } : {}) };
   };
   const rolled = Math.max(0, Math.round(num(spec.wealth, 0)));
   const processKits = klass.kits.length > 0 || rolled === 0;

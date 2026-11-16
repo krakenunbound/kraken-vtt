@@ -302,6 +302,11 @@ try {
   const put = agent.map.tokens().filter((token) => token.recordId === goblin.id);
   assert(put.length >= 1 && put.every((token) => token.unidentified === "Hulking shape"), `the unidentified creature's tokens: ${JSON.stringify(put.map((token) => token.unidentified))}`);
   assert(put.length >= 1 && put.every((token) => token.hidden) && put.some((token) => Math.abs(token.x - 425) < 30 && Math.abs(token.y - 275) < 30), `a hidden token at the kept spot: ${JSON.stringify(put.map((token) => [token.x, token.y, token.hidden]))}`);
+  // Hidden on the map is hidden on the tracker too; the tracker's eye reveals both.
+  const placedEntry = agent.combat.entries().find((entry) => entry.tokenId === put[0].id);
+  assert(placedEntry?.hidden === true, "the placed creature is hidden on the tracker (players do not see it before the reveal)");
+  await tool("kraken_combat", { action: "update", id: placedEntry.id, patch: { hidden: false } });
+  assert(agent.map.tokens().find((token) => token.id === put[0].id).hidden === false, "the eye reveals its token");
   const ended = await tool("kraken_encounter", { action: "end", id: battle.id });
   assert(ended.xp === 150 && agent.records.get("party").data.encounters[battle.id].xp === 150, "the encounter's XP on the party sheet");
   // --- A quest onto the party sheet's XP tab.

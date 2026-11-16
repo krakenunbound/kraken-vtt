@@ -99,7 +99,8 @@ async function addBattle(table, fgPath, { place = true } = {}) {
       const y = own.length ? Number(spot.y) : frame.height / 2 - Number(spot.imagey);
       const unknown = String(row.unidentified ?? "").trim() || (Number(record.data?.isidentified) === 0 && record.data?.nonid_name ? String(record.data.nonid_name) : "");
       const token = table.map.place({ recordId: record.id, name: entry.name, x, y, hidden: true, ...(unknown ? { unidentified: unknown } : {}), faction: row.faction === "friend" ? "friend" : row.faction === "neutral" ? "neutral" : "foe", allowSecond: true }, table.seat);
-      table.combat.update(entry.id, { tokenId: token.id }, table.seat);
+      // Hidden on the map is hidden in the tracker too (and from the turn card): the eye reveals both together.
+      table.combat.update(entry.id, { tokenId: token.id, hidden: true }, table.seat);
     });
     added.push(...list.map((entry) => entry.name));
   }

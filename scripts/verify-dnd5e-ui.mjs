@@ -208,6 +208,11 @@ try {
   await tool("kraken_dice_force", { values: [17] });
   await seat.click('[data-sheet-tab="combat"]');
   await seat.waitForSelector('[data-action="attack"]');
+  // FG's hands: only a versatile weapon (the spear) has the one-or-two-hands menu; the spear and the javelins have thrown lines.
+  const handed = await seat.$$eval(".five-attacks li", (rows) => rows.filter((row) => row.querySelector('select[aria-label$="hands"]')).map((row) => row.querySelector("b")?.textContent?.trim()));
+  assert(handed.length === 1 && /Spear/.test(handed[0]), `the hands menu on the spear alone: ${JSON.stringify(handed)}`);
+  assert((await seat.locator(".five-attacks li b", { hasText: "(thrown)" }).count()) >= 2, "thrown lines for the spear and the javelins");
+  await seat.screenshot({ path: path.join(tmpdir(), "kraken-dnd5e-attacks.png") });
   const weapon = (await seat.textContent(".five-attacks li b")).trim();
   await seat.click('.five-attacks li:first-child [data-action="attack"]');
   await page.waitForFunction((name) => document.body.textContent.includes(`${name} [AC 15] [HIT`), weapon, { timeout: 10000 });
