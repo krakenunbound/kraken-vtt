@@ -24,7 +24,7 @@ function assert(condition, message) {
   const { EDIT_PATHS } = require("../electron/dnd5e.cjs");
   const before = {
     text: ["playername", "alignment", "appearance", "notes", "senses", "speed", "background", "species", "gender", "age", "height", "weight", "concentration"].map((key) => `^${key}$`),
-    number: [/^abilities\.(strength|dexterity|constitution|intelligence|wisdom|charisma)\.(score|saveprof)$/, /^skills\.[a-z]+\.prof$/, /^hp\.(wounds|temp)$/, /^exp$/, /^ac\.misc$/, /^initiative\.misc$/, /^slots\.l\d\.used$/, /^deathsaves\.(success|failure)$/, /^inspiration$/, /^hitdice\.used$/, /^dread$/, /^coins\.id-\d+\.amount$/, /^inventorylist\.id-\d+\.(count|carried)$/].map((regex) => regex.source),
+    number: [/^abilities\.(strength|dexterity|constitution|intelligence|wisdom|charisma)\.(score|saveprof)$/, /^skills\.[a-z]+\.prof$/, /^hp\.(wounds|temp)$/, /^exp$/, /^ac\.misc$/, /^initiative\.misc$/, /^slots\.l\d\.used$/, /^deathsaves\.(success|failure)$/, /^inspiration$/, /^hitdice\.used$/, /^dread$/, /^coins\.id-\d+\.amount$/, /^inventorylist\.id-\d+\.(count|carried)$/, /^attacks\.id-\d+\.hands$/].map((regex) => regex.source),
   };
   assert(EDIT_PATHS.remove.map((regex) => regex.source).join() === /^(inventorylist)\.id-\d+$/.source, `the rows the sheet may drop: ${EDIT_PATHS.remove.map((regex) => regex.source).join()}`);
   for (const kind of ["text", "number"]) assert(EDIT_PATHS[kind].map((regex) => regex.source).join(" ") === before[kind].join(" "), `the ${kind} whitelist from the manifest is the old one: ${EDIT_PATHS[kind].map((regex) => regex.source).join(" ")}`);
@@ -63,6 +63,13 @@ try {
   const bruenor = agent.records.get(fighter.id).data;
   const sword = Object.entries(bruenor.attacks).find(([, attack]) => attack.name === "Longsword");
   assert(sword && sword[1].bonus === 5 && sword[1].damage === "1d8+3", `longsword +5 (STR 3 + proficiency 2), 1d8+3: ${JSON.stringify(sword)}`);
+  // FG's hands button: the versatile longsword in two hands rolls 1d10, and keeps it when the sheet is worked out again.
+  assert(sword[1].versatile === "1d10" && sword[1].hands === 1, `the longsword is versatile: ${JSON.stringify(sword[1])}`);
+  await tool("kraken_character_edit", { id: fighter.id, changes: [{ path: `attacks.${sword[0]}.hands`, value: 2 }] });
+  assert(agent.records.get(fighter.id).data.attacks[sword[0]].damage === "1d10+3", `two hands: ${JSON.stringify(agent.records.get(fighter.id).data.attacks[sword[0]])}`);
+  await tool("kraken_character_edit", { id: fighter.id, changes: [{ path: "hp.wounds", value: 1 }] });
+  assert(agent.records.get(fighter.id).data.attacks[sword[0]].hands === 2, "the hands kept when the sheet changes");
+  await tool("kraken_character_edit", { id: fighter.id, changes: [{ path: `attacks.${sword[0]}.hands`, value: 1 }, { path: "hp.wounds", value: 0 }] });
   assert(bruenor.abilities.strength.save === 5 && bruenor.abilities.dexterity.save === 1 && bruenor.skills.athletics.total === 5 && bruenor.skills.intimidation.prof === 1 && bruenor.passive === 13, "saves (STR and CON proficient), the Soldier's Athletics and Intimidation, passive Perception 13");
   const wizard = await tool("kraken_build_character", { owner: "Bob", spec: { name: "Ilse", species: "Elf", class: "Wizard", level: 5, scores: { strength: 8, dexterity: 14, constitution: 13, intelligence: 16, wisdom: 12, charisma: 10 }, spells: ["Magic Missile", "Fireball", "Fire Bolt"] } });
   const ilse = agent.records.get(wizard.id).data;
@@ -106,6 +113,9 @@ try {
   const paid = agent.records.get(buyer.id).data;
   const value = Object.values(paid.coins).reduce((sum, coin) => sum + ({ PP: 1000, GP: 100, EP: 50, SP: 10, CP: 1 }[coin.name] ?? 0) * coin.amount, 0);
   assert(value === (classC + 50) * 100 - cost && Object.values(paid.inventorylist).some((item) => item.name === "Longsword"), `bought gear is paid for: ${JSON.stringify(paid.coins)} after ${cost} cp`);
+  // A thrown melee weapon has its own thrown line (FG's two lines for a dagger).
+  const thrownLine = Object.entries(paid.attacks).find(([, attack]) => attack.thrown);
+  assert(thrownLine && /Dagger \(thrown\)/.test(thrownLine[1].name) && thrownLine[1].type === "ranged" && thrownLine[0].endsWith("-thrown"), `the dagger's thrown line: ${JSON.stringify(Object.values(paid.attacks).map((attack) => attack.name))}`);
   // Drops on a 5E sheet (FG's): a feat and a spell onto their lists, a treasure parcel into the gear and purse.
   await tool("kraken_character_drop", { id: buyer.id, record: "Alert", type: "feat" });
   await tool("kraken_character_drop", { id: buyer.id, record: "Fire Bolt", type: "spell" });

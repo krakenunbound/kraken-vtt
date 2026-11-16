@@ -204,9 +204,12 @@ export function armorClass(data) {
 
 // A character's weapon attack: proficiency (with its weapon kind), STR for
 // melee, DEX for ranged, the better for finesse; damage the weapon's dice + that modifier.
-export function weaponAttack(data, item) {
+export function weaponAttack(data, item, { hands = 1, thrown = false } = {}) {
   const info = weaponInfo(item);
   if (!info.damage) return null;
+  // FG's hands: a versatile weapon in two hands rolls its larger die.
+  const twoHanded = Boolean(info.versatile) && !thrown && num(hands, 1) === 2;
+  const dice = twoHanded ? info.versatile : info.damage.dice;
   const str = mod(data.abilities?.strength?.score ?? 10);
   const dex = mod(data.abilities?.dexterity?.score ?? 10);
   const ability = info.ranged ? dex : info.finesse ? Math.max(str, dex) : str;
@@ -214,13 +217,15 @@ export function weaponAttack(data, item) {
   const bonus = ability + (proficient ? num(data.prof, 2) : 0) + num(item.bonus, 0);
   const dmg = ability + num(item.bonus, 0);
   return {
-    name: String(item.name ?? "Weapon"),
+    name: `${String(item.name ?? "Weapon")}${thrown ? " (thrown)" : ""}`,
     bonus,
-    damage: `${info.damage.dice}${dmg ? signed(dmg) : ""}`,
-    dice: info.damage.dice,
+    damage: `${dice}${dmg ? signed(dmg) : ""}`,
+    dice,
     damageBonus: dmg,
     dmgtype: info.damage.type,
-    type: info.ranged ? "ranged" : "melee",
+    type: info.ranged || thrown ? "ranged" : "melee",
+    ...(info.versatile && !thrown ? { versatile: info.versatile, hands: twoHanded ? 2 : 1 } : {}),
+    ...(thrown ? { thrown: true } : {}),
   };
 }
 
@@ -319,11 +324,15 @@ export function derive(input) {
   data.ac = { ...armorClass(data), misc: num(data.ac?.misc, 0) };
   data.initiative = { misc: num(data.initiative?.misc, 0), total: data.abilities.dexterity.bonus + num(data.initiative?.misc, 0) };
   data.passive = 10 + data.skills.perception.total;
+  // The hands chosen on the sheet are kept (FG's hands button); a melee weapon with Thrown gets its own thrown line.
+  const handsWas = Object.fromEntries(rows(data.attacks).map(([key, attack]) => [key, num(attack?.hands, 1)]));
   data.attacks = {};
   for (const [key, item] of rows(data.inventorylist)) {
     if (!isWeapon(item) || num(item.carried, 1) === 0) continue;
-    const attack = weaponAttack(data, item);
+    const attack = weaponAttack(data, item, { hands: handsWas[key] ?? 1 });
     if (attack) data.attacks[key] = attack;
+    const info = weaponInfo(item);
+    if (attack && info.thrown && !info.ranged) data.attacks[`${key}-thrown`] = weaponAttack(data, item, { thrown: true });
   }
   const className = rows(data.packages).find(([, pkg]) => String(pkg.packagetype).toLowerCase() === "class")?.[1]?.name ?? "";
   const caster = CASTERS[skillKey(className)];

@@ -132,6 +132,8 @@ export default {
             hook: "attack",
             className: "five-attacks",
             name: { path: "name", bold: true, flat: true },
+            // FG's hands button: a versatile weapon in one hand or two (its larger die).
+            fields: [{ path: "hands", kind: "select", number: true, label: "{name} hands", title: "One hand or two: two rolls the versatile die", options: [{ value: "1", label: "1 hand" }, { value: "2", label: "2 hands" }], when: { not: { isNull: "versatile" } } }],
             rowActions: [
               { hook: "attack", label: "{bonus|signed}", title: "Attack roll", action: { ct: "attack", key: "weapon" } },
               { hook: "damage", label: ["{damage}", " ", "{dmgtype}"], title: "Damage roll", action: { ct: "damage-roll", key: "weapon" } },
@@ -192,6 +194,7 @@ export default {
       "dread",
       "coins.*.amount",
       "inventorylist.*.(count|carried)",
+      "attacks.*.hands",
     ],
     remove: ["inventorylist"],
   },
