@@ -35,6 +35,27 @@ export type PartyMember = {
   forged?: { playbook: string; alias: string; stress: number; stressmax: number; traumas: string[]; harm: string[]; xp: Record<string, number>; stash: number; status: string };
 };
 type Entry = { name: string; xp: number; awarded?: number };
+// A coin as a coin (the GM asked for better than FG's lists): platinum, gold, electrum, silver,
+// copper, a credit chip, a gem; another game's money a bronze coin with its name.
+const METAL: [RegExp, string][] = [
+  [/^pp$|plat/i, "platinum"],
+  [/^(gp|gc)$|gold|crown/i, "gold"],
+  [/^ep$|electrum/i, "electrum"],
+  [/^sp$|silver|shield/i, "silver"],
+  [/^cp$|copper|penn/i, "copper"],
+  [/^(cr|mcr|kcr)$|credit/i, "credit"],
+  [/gem|jewel/i, "gem"],
+];
+export function Coin({ name, amount }: { name: string; amount?: number }) {
+  const metal = METAL.find(([test]) => test.test(name.trim()))?.[1] ?? "bronze";
+  return (
+    <span className={`coin coin-${metal}`} title={amount === undefined ? name : `${amount} ${name}`}>
+      <i aria-hidden="true">{metal === "gem" ? "" : name.slice(0, 2).toUpperCase()}</i>
+      {amount === undefined ? null : <b>{amount.toLocaleString()}</b>}
+    </span>
+  );
+}
+
 // A bar with its numbers on it (FG's HP and HD bars): green to red as it empties.
 function Meter({ label, value, max, kind }: { label: string; value: number; max: number; kind: "hp" | "hd" }) {
   const share = max > 0 ? Math.max(0, Math.min(1, value / max)) : 0;
@@ -306,7 +327,7 @@ export function PartySheet({ session, compact = false }: { session: Session; com
               <div className="parcel-coins">
                 {[...new Set([...(session.options.currencies?.length ? session.options.currencies : game.party.currency), ...Object.keys(party.parcel.coins ?? {}).filter((coin) => Number(party.parcel.coins?.[coin]) > 0)])].map((coin) => (
                   <label key={coin}>
-                    {coin}
+                    <Coin name={coin} />
                     <input type="number" min={0} data-parcel-coin={coin} aria-label={`Parcel ${coin}`} value={party.parcel.coins?.[coin] ?? 0} onChange={(event) => patch({ parcel: { coins: { [coin]: Math.max(0, Number(event.target.value) || 0) } } })} />
                   </label>
                 ))}
@@ -378,7 +399,9 @@ export function PartySheet({ session, compact = false }: { session: Session; com
             {party.members.map((member) => (
               <li key={member.id}>
                 <span>{member.name}</span>
-                <small>{member.coins.map((coin) => `${coin.amount} ${coin.name}`).join(", ") || "—"}</small>
+                <span className="coin-row" data-member-coins={member.id}>
+                  {member.coins.length ? member.coins.map((coin) => <Coin key={coin.name} name={coin.name} amount={coin.amount} />) : "—"}
+                </span>
               </li>
             ))}
           </ul>

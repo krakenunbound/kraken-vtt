@@ -112,7 +112,7 @@ try {
   await page.waitForSelector("text=Hosting");
   await tool("kraken_dice_settings", { show: false }).catch(() => undefined);
   const abilities = Object.fromEntries(["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"].map((stat) => [stat, { score: 14, bonus: 2, save: 2 }]));
-  const hero = await tool("kraken_record_create", { type: "character", name: "Hagar", owner: "A test player", visibility: "owner", data: { ruleset: "dnd5e", level: 3, prof: 2, languages: ["Common", "Orc"], hp: { total: 24, wounds: 0 }, abilities, skills: { stealth: { name: "Stealth", total: 4 } } } });
+  const hero = await tool("kraken_record_create", { type: "character", name: "Hagar", owner: "A test player", visibility: "owner", data: { ruleset: "dnd5e", level: 3, prof: 2, languages: ["Common", "Orc"], coins: { "id-00001": { name: "PP", amount: 2 }, "id-00002": { name: "GP", amount: 37 }, "id-00003": { name: "SP", amount: 8 }, "id-00004": { name: "CP", amount: 14 } }, hp: { total: 24, wounds: 0 }, abilities, skills: { stealth: { name: "Stealth", total: 4 } } } });
   const goblin = await tool("kraken_record_create", { type: "npc", name: "Goblin", data: { hp: 7, ac: 13, size: "Small", speed: "30 ft.", senses: "darkvision 60 ft., passive Perception 9", traits: { "id-00001": { name: "Nimble Escape", desc: "The goblin can take the Disengage or Hide action as a bonus action on each of its turns." } }, actions: { "id-00001": { name: "Scimitar", desc: "Melee Weapon Attack: +4 to hit, reach 5 ft., one target." } }, text: "<p>A small, vicious raider. Scimitar: [[1d20+4 #Scimitar]], 1d6 + 2 slashing.</p>" } });
   const relic = await tool("kraken_record_create", { type: "item", name: "Moon Amulet", visibility: "all", data: { description: "<p>A silver amulet that glows at night.</p>" } });
   await tool("kraken_party_edit", { members: [hero.id] });
@@ -248,6 +248,12 @@ try {
   await page.waitForSelector(`[data-member="${hero.id}"] .party-meter.meter-hp[aria-valuenow="24"]`);
   assert((await page.$$(`[data-party-abilities="${hero.id}"] .party-ability`)).length === 6, "Hagar's six abilities on the party sheet");
   await page.screenshot({ path: path.join(shots, "5-gm-party-main.png") });
+  // The party's coins drawn as coins (platinum, gold, silver, copper).
+  await page.click('.window[data-window="party"] [role="tab"]:has-text("Inventory")');
+  await page.waitForSelector(`[data-member-coins="${hero.id}"] .coin-gold`);
+  assert((await page.$$(`[data-member-coins="${hero.id}"] .coin`)).length === 4, "Hagar's four coins");
+  await page.screenshot({ path: path.join(shots, "5-gm-party-coins.png") });
+  await page.click('.window[data-window="party"] [role="tab"]:has-text("Main")');
   await page.selectOption('.party-group select[aria-label="Roll kind"]', "skill");
   await page.selectOption('.party-group select[aria-label="What they roll"]', "stealth");
   await page.fill(".party-group input[type=number]", "12");

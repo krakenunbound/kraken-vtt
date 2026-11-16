@@ -1162,3 +1162,17 @@ button.link { background: none; border: none; color: var(--brass); padding: 0; t
 .overlay.doors .player-door:hover .door-shape.line { fill: none; stroke: rgba(70, 90, 255, 0.5); }
 .overlay.doors .player-door.locked:hover .door-shape { fill: rgba(224, 90, 80, 0.45); }
 .overlay.doors .player-door.secret:hover .door-shape { fill: rgba(166, 18, 212, 0.4); }
+
+/* Coins as coins (the party sheet): a metal disc with its letters, the amount beside it. */
+.coin-row { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+.coin { display: inline-flex; align-items: center; gap: 4px; font-variant-numeric: tabular-nums; }
+.coin i { display: inline-grid; place-items: center; inline-size: 22px; block-size: 22px; border-radius: 50%; font-style: normal; font-size: 0.55rem; font-weight: 800; letter-spacing: 0.02em; color: rgba(0, 0, 0, 0.65); box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 1px 2px rgba(0, 0, 0, 0.6); }
+.coin-platinum i { background: radial-gradient(circle at 35% 30%, #ffffff, #c9d3dc 45%, #8c99a6); }
+.coin-gold i { background: radial-gradient(circle at 35% 30%, #fff1b0, #e2b13c 45%, #a8731a); }
+.coin-electrum i { background: radial-gradient(circle at 35% 30%, #fbf6d0, #cfc27a 45%, #8f8443); }
+.coin-silver i { background: radial-gradient(circle at 35% 30%, #ffffff, #b9bec4 45%, #7a8088); }
+.coin-copper i { background: radial-gradient(circle at 35% 30%, #ffd0a8, #c56d3a 45%, #7f3d1b); }
+.coin-bronze i { background: radial-gradient(circle at 35% 30%, #f2d6a0, #a07a3c 45%, #5f4520); }
+.coin-credit i { border-radius: 5px; color: #e8f6ff; background: linear-gradient(135deg, #3aa0e0, #1b4f86); }
+.coin-gem i { border-radius: 3px; rotate: 45deg; inline-size: 16px; block-size: 16px; background: linear-gradient(135deg, #b7f0ff, #4fd1c5 40%, #6f4fb0); }
+.parcel-coins label { display: inline-flex; align-items: center; gap: 4px; }
