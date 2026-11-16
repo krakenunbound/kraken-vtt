@@ -122,6 +122,10 @@ type Manager = {
 };
 
 const WindowContext = createContext<Manager | null>(null);
+// A window's title bar has room for its content's own tools (the map's toolbars), so they sit on
+// the window's edge, not over what it shows. null: no title bar (the map behind every window).
+const WindowSlot = createContext<HTMLElement | null>(null);
+export const useWindowSlot = () => useContext(WindowSlot);
 
 export function useWindows(): Manager {
   const manager = useContext(WindowContext);
@@ -301,6 +305,8 @@ export function FloatingWindow({ item, children }: { item: OpenWindow; children:
 
   // A window that shows all it holds: grown on opening until nothing is cut off (as far as the screen allows).
   const body = useRef<HTMLDivElement | null>(null);
+  // The title bar's room for the content's own tools (useWindowSlot).
+  const [slot, setSlot] = useState<HTMLElement | null>(null);
   useLayoutEffect(() => {
     if (item.popped || !FIT_CONTENT.includes(item.kind) || !body.current) return;
     const element = body.current;
@@ -399,11 +405,14 @@ export function FloatingWindow({ item, children }: { item: OpenWindow; children:
         <section className="window popped" data-window={item.kind} aria-label={item.title}>
           <header className="popout-bar">
             <span>{item.title}</span>
+            <div className="window-tools" ref={setSlot} />
             <button type="button" className="window-close" title="Back into the main window" aria-label={`Put ${item.title} back in the main window`} onClick={() => dockBack(item.key)}>
               <Icon name="dock" size={16} />
             </button>
           </header>
-          <div className="window-body">{children}</div>
+          <div className="window-body">
+            <WindowSlot.Provider value={slot}>{children}</WindowSlot.Provider>
+          </div>
         </section>
       </PopOutWindow>
     );
@@ -420,6 +429,7 @@ export function FloatingWindow({ item, children }: { item: OpenWindow; children:
     >
       <header className="window-title" onPointerDown={begin("move")} onDoubleClick={() => move(item.key, fitToScreen(firstPlace(item.kind)))}>
         <span>{item.title}</span>
+        <div className="window-tools" ref={setSlot} onPointerDown={(event) => event.stopPropagation()} onDoubleClick={(event) => event.stopPropagation()} />
         {item.kind === "map" ? (
           <button type="button" className="window-close" data-action="map-backdrop" title="Behind every window: the map fills the table (FG's background panel)" aria-label={`${item.title}: behind every window`} onClick={() => setBack(true)}>
             <Icon name="map" size={16} />
@@ -435,7 +445,7 @@ export function FloatingWindow({ item, children }: { item: OpenWindow; children:
         </button>
       </header>
       <div className="window-body" ref={body}>
-        {children}
+        <WindowSlot.Provider value={slot}>{children}</WindowSlot.Provider>
       </div>
       <div className="window-resize" onPointerDown={begin("size")} aria-hidden="true" />
     </section>

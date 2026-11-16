@@ -10,6 +10,8 @@ import { rangeBand } from "../../shared/map/ranges.mjs";
 import { diagonalRule, gridDistance, gridDistance3, gridKind, pathDistance, gridOrigin, hexCorners, hexOf, LIGHT_PRESETS, snapCenter, withGrid } from "../../shared/map/geometry.mjs";
 import type { DecalItem, EditWall, MapDoor, MapTemplate, MapTile, MapToken, Ping, Float, Bubble, PictureKind, SceneLightRecord, TableMap, TableRecord, TemplateAsk, WallKind } from "../session/useSession";
 import { useBookWindows } from "../books/Books";
+import { createPortal } from "react-dom";
+import { useWindowSlot } from "../ui/Windows";
 import { MapEditor, kindColor, placePicture, type EditTab, type EditTool, type LabelStyle, type PaintStyle } from "./MapEditor";
 import { Lighting } from "./Lighting";
 import { fxMaskImage, fxMaskStyle } from "./fxMask";
@@ -286,6 +288,11 @@ function TrayFace({ url, name }: { url: string; name: string }) {
 // Drawn again only when what it shows changes (its scene, the map, the records,
 // pings, targets), not on every chat line or roll: the table's busiest parts
 // (walls, lighting, animated tokens) live here.
+// The map's toolbars: in the window's title bar when it has one, else over the map as before.
+function HeadTools({ slot, children }: { slot: HTMLElement | null; children: React.ReactNode }) {
+  return slot ? createPortal(children, slot) : <>{children}</>;
+}
+
 export const MapView = memo(MapViewInner);
 // The GM's view pulls already followed (one per pull, whichever map window shows it).
 const pullsSeen = { last: 0 };
@@ -501,6 +508,8 @@ function MapViewInner({
   // The image window's own controls (FG's): the tool strip shown or not (kept
   // on this screen; locked with it hidden, the picture alone), the navigation
   // pad (pan and zoom by buttons), and the map's pins shown or hidden.
+  // In a window, the map's toolbars sit in its title bar (useWindowSlot), not over the map.
+  const headSlot = useWindowSlot();
   const [stripOpen, setStripOpenState] = useState(() => readFlag("kraken-map-strip", true));
   const setStripOpen = (on: boolean) => {
     setStripOpenState(on);
@@ -2646,6 +2655,7 @@ function MapViewInner({
       ) : null}
 
       <ReadAloudBubble now={readAloud} onDone={onReadAloudDone} />
+      <HeadTools slot={headSlot}>
         <div className="map-corner" role="toolbar" aria-label="Image">
         {gm ? (
           <button type="button" className={editorOpen ? "tool on" : "tool"} data-action="map-editor" aria-pressed={editorOpen} aria-label={editorOpen ? "Unlocked: editing. Lock it" : "Locked. Unlock to edit"} title={editorOpen ? "Unlocked: editing (line of sight, doors, windows, lights, masks, paint, text, grid, weather). Lock it to play." : "Locked: playing. Unlock to edit it: walls, doors, lights, paint and more, the same image wherever it is opened."} onClick={() => setEditorOpen(!editorOpen)}>
@@ -2669,6 +2679,7 @@ function MapViewInner({
           <Icon name="settings" />
         </button>
       </div>
+      </HeadTools>
       {navOpen ? (
         <div className="map-nav" role="group" aria-label="Navigation">
           <button type="button" className="tool" aria-label="Zoom in" onClick={() => zoomAboutCenter(1.25)}>
@@ -2691,6 +2702,7 @@ function MapViewInner({
           </button>
         </div>
       ) : null}
+      <HeadTools slot={headSlot}>
       {stripOpen ? (
       <div className="map-controls map-toolbar" role="toolbar" aria-label="Map tools">
         <div className="tool-group">
@@ -2853,6 +2865,7 @@ function MapViewInner({
         ) : null}
       </div>
       ) : null}
+      </HeadTools>
       {templateAsk ? (
         <p className="map-toast template-ask" role="status" data-template-ask={templateAsk.name}>
           {`${templateAsk.name}: click where its ${templateAsk.area.label ? templateAsk.area.label.toLowerCase() : "area"} goes (it points from your token where it starts from you). Everyone inside is its target. Escape or right-click: put it away.`}
