@@ -53,6 +53,15 @@ export function TurnCard({ session }: { session: Session }) {
         {entry.name}
         <small>{entry.mine ? "your turn" : "takes their turn"}</small>
       </span>
+      {/* FG's "show effects on notice": what is on the creature as its turn starts. */}
+      {entry.effects.length ? (
+        <span className="turn-card-effects" data-turn-effects>
+          {entry.effects.slice(0, 4).map((effect) => (
+            <i key={effect.id}>{effect.label.replace(/;.*$/, "")}</i>
+          ))}
+          {entry.effects.length > 4 ? <i>+{entry.effects.length - 4}</i> : null}
+        </span>
+      ) : null}
     </div>
   );
 }

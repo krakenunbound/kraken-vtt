@@ -2072,6 +2072,8 @@ textarea.cc-field.tall { min-height: 220px; }
 .turn-card-name { display: grid; font-family: Cinzel, Georgia, serif; font-size: 1.2rem; letter-spacing: 0.06em; text-shadow: 0 2px 0 #000; }
 .turn-card-name small { font-family: inherit; font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--brass); }
 @keyframes turn-card-in { 0% { opacity: 0; transform: translateY(-16px) scale(0.92); } 10% { opacity: 1; transform: none; } 85% { opacity: 1; } 100% { opacity: 0; transform: translateY(-8px); } }
+.turn-card-effects { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; max-inline-size: 260px; }
+.turn-card-effects i { padding: 0 7px; border-radius: 999px; background: rgba(0, 0, 0, 0.45); border: 1px solid var(--brass-dim); font-style: normal; font-size: 0.72rem; color: var(--text); }
 @media (prefers-reduced-motion: reduce) { .turn-card { animation: none; } }
 
 /* Settings: you at the table (your colour, your turn). */
