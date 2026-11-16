@@ -88,6 +88,7 @@ export function SettingsWindow({ session }: { session: Session }) {
       </div>
       <YouAtTheTable />
       <CardsSetting />
+      {gm ? <ThemeSetting session={session} /> : null}
       {gm ? (
         <SettingsSection title="Dice and the dice tower" setting="dice-table">
           <Toggle label="Players see their own tower rolls" hint="Off: only you see what goes into the dice tower, as in Fantasy Grounds." checked={Boolean(session.options.towerReveal)} onChange={(on) => session.setTableOptions({ towerReveal: on })} setting="tower-reveal" />
@@ -175,6 +176,32 @@ export function SettingsWindow({ session }: { session: Session }) {
       })}
       {gm ? <StudioFoldersSetting /> : null}
     </div>
+  );
+}
+
+// The table's theme (the GM's, every screen, live): Kraken's brass, or the sea, the ember, the violet, steel.
+const THEMES = [
+  { id: "", label: "Kraken", accent: "#d2a15a", panel: "#171a20" },
+  { id: "abyss", label: "Abyss", accent: "#4fd1c5", panel: "#0f1c23" },
+  { id: "ember", label: "Ember", accent: "#f08a3a", panel: "#1c1310" },
+  { id: "arcane", label: "Arcane", accent: "#b58cf5", panel: "#17121f" },
+  { id: "iron", label: "Iron", accent: "#c9d1d9", panel: "#16191c" },
+];
+function ThemeSetting({ session }: { session: Session }) {
+  const now = session.options.theme ?? "";
+  return (
+    <SettingsSection title="Look" setting="theme">
+      <SettingRow className="set-row-wide" label="Theme" hint="The table's colours on every screen, changed at once (the wallpaper and decal stay as they are).">
+        <div className="theme-swatches" role="radiogroup" aria-label="Theme">
+          {THEMES.map((theme) => (
+            <button key={theme.id || "kraken"} type="button" role="radio" aria-checked={now === theme.id} className="theme-swatch" data-theme-pick={theme.id || "kraken"} style={{ "--swatch-accent": theme.accent, "--swatch-panel": theme.panel } as React.CSSProperties} onClick={() => session.setTableOptions({ theme: theme.id })}>
+              <i aria-hidden="true" />
+              {theme.label}
+            </button>
+          ))}
+        </div>
+      </SettingRow>
+    </SettingsSection>
   );
 }
 

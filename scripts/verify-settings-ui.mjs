@@ -124,6 +124,23 @@ try {
   assert((await seat.locator('[data-setting="turn-sound"]').isChecked()) === false, "the player's chime switch turns off");
   report.push("a player's Settings: their own sections only; the chime switch turns off");
 
+  // The GM's theme (Settings > Look): every screen's colours change at once, and back.
+  await page.click('[data-theme-pick="abyss"]');
+  const themed = async (where, want) => {
+    for (let i = 0; i < 40; i += 1) {
+      if ((await where.evaluate(() => document.documentElement.dataset.theme ?? "")) === want) return true;
+      await settle(100);
+    }
+    return false;
+  };
+  assert((await themed(page, "abyss")) && (await themed(seat, "abyss")), "the Abyss theme on the GM's and the player's screens");
+  const accent = await seat.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--brass").trim());
+  assert(accent === "#4fd1c5", `the player's accent is the sea's: ${accent}`);
+  await page.screenshot({ path: path.join(SHOTS, "kraken-settings-theme.png") });
+  await page.click('[data-theme-pick="kraken"]');
+  assert((await themed(seat, "")) && (await tool("kraken_table_options")).theme === undefined, "back to Kraken's brass");
+  report.push("the GM's theme: Abyss on every screen at once, and back to Kraken's");
+
   assert(failures.length === 0, `page errors: ${failures.join(" | ")}`);
   console.log(`ok settings ui${process.env.KRAKEN_APP ? " (the built app)" : ""}:\n  ${report.join("\n  ")}\n  screenshots: ${path.join(SHOTS, "kraken-settings-gm.png")}, ${path.join(SHOTS, "kraken-settings-player.png")}`);
 } finally {

@@ -12,6 +12,24 @@
   --serif: Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif;
   --sidebar: 76px;
 }
+/* The GM's theme for the whole table (Settings > Look), changed live on every screen: the accent
+   (Kraken's brass by default) and the panels. Kraken's own ink: the abyss's sea, the ember, the arcane violet. */
+:root[data-theme="abyss"] {
+  --bg: #0d151a; --bar: #11202a; --line: #24404d; --panel: #0f1c23; --panel-2: #15262f; --panel-edge: #1f4a52; --field: #0a1318;
+  --brass: #4fd1c5; --brass-dim: #2a7f78; --brass-soft: rgba(79, 209, 197, 0.14); --text: #e3f1f0; --muted: #8fb0b0;
+}
+:root[data-theme="ember"] {
+  --bg: #150f0d; --bar: #21160f; --line: #45302a; --panel: #1c1310; --panel-2: #271a14; --panel-edge: #5a3220; --field: #120c0a;
+  --brass: #f08a3a; --brass-dim: #a0521e; --brass-soft: rgba(240, 138, 58, 0.15); --text: #f3e6dc; --muted: #b39a8a;
+}
+:root[data-theme="arcane"] {
+  --bg: #120f18; --bar: #1b1626; --line: #3a3150; --panel: #17121f; --panel-2: #211a2d; --panel-edge: #4a3570; --field: #0e0b14;
+  --brass: #b58cf5; --brass-dim: #6f4fb0; --brass-soft: rgba(181, 140, 245, 0.15); --text: #ece6f6; --muted: #a49bb8;
+}
+:root[data-theme="iron"] {
+  --bg: #111315; --bar: #1a1d20; --line: #3a3f45; --panel: #16191c; --panel-2: #1f2327; --panel-edge: #4a5058; --field: #0d0f11;
+  --brass: #c9d1d9; --brass-dim: #7d8791; --brass-soft: rgba(201, 209, 217, 0.12); --text: #eef1f4; --muted: #9aa3ac;
+}
 
 input,
 textarea {
@@ -2239,6 +2257,10 @@ label.set-row { cursor: pointer; }
 .set-row.set-row-wide { grid-template-columns: 1fr; }
 .set-row-wide .set-control { justify-self: stretch; }
 .set-textarea { width: 100%; resize: vertical; font: inherit; }
+.theme-swatches { display: flex; flex-wrap: wrap; gap: 8px; }
+.theme-swatch { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px 4px 4px; border-radius: 999px; }
+.theme-swatch i { inline-size: 22px; block-size: 22px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, var(--swatch-accent) 0 45%, var(--swatch-panel) 47%); border: 1px solid var(--swatch-accent); }
+.theme-swatch[aria-checked="true"] { border-color: var(--brass); color: var(--brass); box-shadow: 0 0 0 1px var(--brass) inset; }
 /* A switch: the native one where a browser has <input switch>, this drawing everywhere. */
 .set-switch { appearance: none; position: relative; flex: none; width: 2.5rem; height: 1.4rem; margin: 0; border-radius: 999px; border: 1px solid var(--brass-dim); background: #2a2f38; cursor: pointer; transition: background 0.15s, border-color 0.15s; }
 .set-switch::before { content: ""; position: absolute; top: 2px; left: 2px; width: calc(1.4rem - 6px); height: calc(1.4rem - 6px); border-radius: 50%; background: var(--muted); transition: transform 0.15s, background 0.15s; }

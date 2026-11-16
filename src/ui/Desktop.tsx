@@ -582,6 +582,16 @@ export function Desktop({
   const alerts = useSyncExternalStore(diceStore.subscribe, diceStore.settings);
   const anyMapShown = useAnyMapShown();
   const wallpaperStyle = useWallpaperStyle(session);
+  // The GM's theme for the table (Settings > Look): the page's colours, live on every screen; gone with the table.
+  const theme = session.options.theme ?? "";
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme) root.dataset.theme = theme;
+    else delete root.dataset.theme;
+    return () => {
+      delete root.dataset.theme;
+    };
+  }, [theme]);
   const turnRang = useRef("");
   // FG's Message of the Day: it opens on a player's screen as they join (once a sitting).
   const motdShown = useRef(false);

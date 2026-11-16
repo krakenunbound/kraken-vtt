@@ -349,6 +349,8 @@ function savedOptions(value) {
     ...(["enemies", "all", "off"].includes(options.skipDead) ? { skipDead: options.skipDead } : {}),
     npcNumbering: ["append", "random", "off"].includes(options.npcNumbering) ? options.npcNumbering : "append",
     // The GM's own chat languages (FG's Languages list), beside the game's and those its characters know.
+    // The GM's theme for the whole table (Settings > Look): Kraken's brass by default.
+    ...(THEMES.includes(options.theme) ? { theme: options.theme } : {}),
     // The GM's own modifiers (FG's Modifiers window): named numbers beside every seat's modifier box.
     ...(Array.isArray(options.modifierPresets) && options.modifierPresets.length ? { modifierPresets: options.modifierPresets.map((item) => ({ label: String(item?.label ?? "").trim().slice(0, 24), value: Math.max(-99, Math.min(99, Math.round(Number(item?.value) || 0))) })).filter((item) => item.label && item.value).slice(0, 16) } : {}),
     // The GM's own coins (FG's Currency list), in place of the game's on the party sheet and parcels.
@@ -356,6 +358,7 @@ function savedOptions(value) {
     ...(Array.isArray(options.languages) && options.languages.length ? { languages: [...new Set(options.languages.map((name) => String(name ?? "").trim().slice(0, 40)).filter(Boolean))].slice(0, 60) } : {}),
   };
 }
+const THEMES = ["abyss", "ember", "arcane", "iron"];
 function bookkeepingOptions(value) {
   const raw = value && typeof value === "object" ? value : {};
   return { ammo: raw.ammo !== false, consumables: raw.consumables !== false, rations: raw.rations !== false, light: raw.light !== false, encumbrance: raw.encumbrance !== false, variant: raw.variant === true };
