@@ -244,3 +244,25 @@ Has 37, Partial 40, Missing 41.
 | 116 | Stop at round start | Missing | None found |
 | 117 | Fumble/crit tables | Has | KrakenKrits (combat.cjs:21,75) |
 | 118 | Remove effect on miss | Missing | No such option |
+
+## The GM's FG walkthrough, against Foundry (alpha.92)
+
+The GM's own tour of FG 5E (FG Example1) named what Kraken lacked. Before building, each was set
+beside Foundry v14 and its dnd5e system (read through the bridge's source search; the wording below
+cites Foundry's own strings where they settle it):
+
+| Feature | FG | Foundry | Kraken now |
+|---|---|---|---|
+| Chat languages | Built in: a language menu, others see a script font, "Understood by" | Not in core or dnd5e (the Polyglot module does it) | FG's way, the sounds made up per language and word; the GM's own list |
+| Factions | Four (incl. none), a cycling button and drag icons | Dispositions on tokens (friendly, neutral, hostile, secret) | Four, a click cycles them |
+| Typing the round | Typed, but going back does nothing | "Round {round}" with previous and next round buttons, not typed | Typed, back or forward; ‹ › still undo |
+| Reveal hidden creatures | The tracker's eye | Toggle visibility on the tracker row | The tracker's eye reveals the token too |
+| Turn and round notices | Plain text overlays | None by default (modules) | A portrait card for every screen, the round's badge |
+| Creature details in the tracker | Space/reach, offense, defense, a window per trait | The actor sheet | The sections in the row, traits opened in place |
+| Containers | A typed "location" | Real container items, nested (dnd5e: "Containers cannot be nested more than {depth} levels deep") | Drag onto a backpack, Drop / Pick up; Foundry's nesting is better and is noted for later |
+| Equipment packs | Opened into the inventory | Packs are containers with their contents | Opened into the pack's backpack |
+| Vehicles | A record list | A vehicle actor type with its own sheet | A record list with FG's fields; a sheet of its own is later |
+| Themes | Theme extensions, loaded at start | Each user's colour scheme (Light, Dark, Browser Default; applications and interface apart) | The GM's theme for the table, live; a per-player light mode is later |
+
+Better than both: languages and the turn card for every seat; the round typed back or forward; the
+gear paid for in the 5E wizard (FG and Foundry give it away).

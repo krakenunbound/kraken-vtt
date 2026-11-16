@@ -158,6 +158,11 @@ the core UI plan in [docs/core-ui-design.md](docs/core-ui-design.md).
 - [ ] A Lights list to drag onto tokens (FG's token lights); the presets are in the token's light menu now.
 - [ ] Moon phases on the calendar (each world's moons and their cycles, from its books).
 - [ ] A table's result dragged onto a sheet field (it drags into notes and chat as text today).
+- [ ] A Discord link on the start screen (the GM's server's invite URL is needed; Community points at GitHub Discussions for now).
+- [ ] FG's encounter **Random** (an encounter rolled up) and **Quick Map** (a picture, the encounter, the party's and the enemies' spots on a 3x3 grid, made into a map).
+- [ ] Faction icons to drag onto creatures (FG's tracker menu); a click on the side cycles it now.
+- [ ] Portraits and tokens for the bundled adventures' creatures (Cinder Barrow, Empty Watchtower, Mill at Hob's Ford, Silent Hulk, Salvage Rights, Lamp in the Rock).
+- [ ] Containers nested inside containers (Foundry's dnd5e has them); a vehicle sheet of its own (Foundry's vehicle actor); a per-player light mode (Foundry's colour scheme).
 - [ ] **Last: S-tier dice.** FG's dice look better than Kraken's. Make Kraken's own to that standard (not copies of FG's paid dice): materials, numbers, the roll's weight and bounce.
 
 ## Housekeeping
