@@ -561,9 +561,12 @@ function List({ spec, formats }: { spec: Extract<Part, { part: "list" }>; format
           return (
             <li key={key} {...(spec.hook ? { [`data-${spec.hook}`]: key } : {})} {...bag} className={[container ? "is-container" : "", over === key ? "drop-over" : "", inside ? "in-container" : ""].filter(Boolean).join(" ") || undefined} {...(container ? { "data-container": name } : {})}>
               {spec.select ? <FieldView spec={spec.select} scope={scope} base={`${spec.path}.${key}`} /> : null}
-              {(spec.fields ?? []).map((field) => (
-                <FieldView key={field.path} spec={field} scope={scope} base={`${spec.path}.${key}`} />
-              ))}
+              {spec.path === "inventorylist" && typeof item.picture === "string" && item.picture ? <img className="item-thumb" src={sheet.session.recordArtUrl(sheet.record.id, "portrait", key)} alt="" loading="lazy" draggable={false} onError={(event) => (event.currentTarget.style.display = "none")} /> : null}
+              {(spec.fields ?? [])
+                .filter((field) => holds(field.when, own, sheet))
+                .map((field) => (
+                  <FieldView key={field.path} spec={field} scope={scope} base={`${spec.path}.${key}`} />
+                ))}
               {spec.check ? (
                 <label className="cc-inline">
                   <FieldView spec={spec.check} scope={scope} base={`${spec.path}.${key}`} /> {words}

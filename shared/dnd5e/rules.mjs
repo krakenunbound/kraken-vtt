@@ -497,6 +497,11 @@ export function buildFromSpec(spec, lib, rulesetId = RULESET) {
     const copy = { ...data };
     delete copy.fgPath;
     delete copy.count;
+    // A kit's copy of an item has no picture: the library's item of that name brings its own.
+    if (!copy.picture) {
+      const known = (lib.items ?? []).find((entry) => String(entry.name).toLowerCase() === String(name).toLowerCase());
+      if (typeof known?.data?.picture === "string") copy.picture = known.data.picture;
+    }
     inventorylist[`id-${String(n++).padStart(5, "0")}`] = { ...copy, name: copy.name ?? String(name), count: Math.max(1, Math.round(num(count, 1))), carried: isArmor(copy) || isWeapon(copy) ? 2 : 1, ...(location ? { location } : {}) };
   };
   const rolled = Math.max(0, Math.round(num(spec.wealth, 0)));

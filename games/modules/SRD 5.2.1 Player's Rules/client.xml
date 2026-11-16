@@ -3805,6 +3805,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Simple Melee Weapon.</i> <b>Damage</b> 1d4 Bludgeoning. <b>Properties</b> Light. <b>Mastery</b> Slow.</p><p>When you take the Attack action on your turn and attack with a Light weapon, you can make one extra attack as a Bonus Action later on the same turn. That extra attack must be made with a different Light weapon, and you don't add your ability modifier to the extra attack's damage unless that modifier is negative. For example, you can attack with a Shortsword in one hand and a Dagger in the other using the Attack action and a Bonus Action, but you don't add your Strength or Dexterity modifier to the damage roll of the Bonus Action unless that modifier is negative.</p><p><b><i>Slow (Mastery).</i></b> If you hit a creature with this weapon and deal damage to it, you can reduce its Speed by 10 feet until the start of your next turn. If the creature is hit more than once by weapons that have this property, the Speed reduction doesn't exceed 10 feet.</p></description>
+				<picture type="string">images/item/club.webp@SRD 5.2.1 Player's Rules</picture>
 			</club>
 			<dagger>
 				<name type="string">Dagger</name>
@@ -3818,6 +3819,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Simple Melee Weapon.</i> <b>Damage</b> 1d4 Piercing. <b>Properties</b> Finesse, Light, Thrown (Range 20/60). <b>Mastery</b> Nick.</p><p>When making an attack with a Finesse weapon, use your choice of your Strength or Dexterity modifier for the attack and damage rolls. You must use the same modifier for both rolls.</p><p>When you take the Attack action on your turn and attack with a Light weapon, you can make one extra attack as a Bonus Action later on the same turn. That extra attack must be made with a different Light weapon, and you don't add your ability modifier to the extra attack's damage unless that modifier is negative. For example, you can attack with a Shortsword in one hand and a Dagger in the other using the Attack action and a Bonus Action, but you don't add your Strength or Dexterity modifier to the damage roll of the Bonus Action unless that modifier is negative.</p><p>If a weapon has the Thrown property, you can throw the weapon to make a ranged attack, and you can draw that weapon as part of the attack. If the weapon is a Melee weapon, use the same ability modifier for the attack and damage rolls that you use for a melee attack with that weapon.</p><p><b><i>Nick (Mastery).</i></b> When you make the extra attack of the Light property, you can make it as part of the Attack action instead of as a Bonus Action. You can make this extra attack only once per turn.</p></description>
+				<picture type="string">images/item/dagger.webp@SRD 5.2.1 Player's Rules</picture>
 			</dagger>
 			<greatclub>
 				<name type="string">Greatclub</name>
@@ -3831,6 +3833,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Simple Melee Weapon.</i> <b>Damage</b> 1d8 Bludgeoning. <b>Properties</b> Two-Handed. <b>Mastery</b> Push.</p><p>A Two-Handed weapon requires two hands when you attack with it.</p><p><b><i>Push (Mastery).</i></b> If you hit a creature with this weapon, you can push the creature up to 10 feet straight away from yourself if it is Large or smaller.</p></description>
+				<picture type="string">images/item/greatclub.webp@SRD 5.2.1 Player's Rules</picture>
 			</greatclub>
 			<handaxe>
 				<name type="string">Handaxe</name>
@@ -3844,6 +3847,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Simple Melee Weapon.</i> <b>Damage</b> 1d6 Slashing. <b>Properties</b> Light, Thrown (Range 20/60). <b>Mastery</b> Vex.</p><p>When you take the Attack action on your turn and attack with a Light weapon, you can make one extra attack as a Bonus Action later on the same turn. That extra attack must be made with a different Light weapon, and you don't add your ability modifier to the extra attack's damage unless that modifier is negative. For example, you can attack with a Shortsword in one hand and a Dagger in the other using the Attack action and a Bonus Action, but you don't add your Strength or Dexterity modifier to the damage roll of the Bonus Action unless that modifier is negative.</p><p>If a weapon has the Thrown property, you can throw the weapon to make a ranged attack, and you can draw that weapon as part of the attack. If the weapon is a Melee weapon, use the same ability modifier for the attack and damage rolls that you use for a melee attack with that weapon.</p><p><b><i>Vex (Mastery).</i></b> If you hit a creature with this weapon and deal damage to the creature, you have Advantage on your next attack roll against that creature before the end of your next turn.</p></description>
+				<picture type="string">images/item/handaxe.webp@SRD 5.2.1 Player's Rules</picture>
 			</handaxe>
 			<javelin>
 				<name type="string">Javelin</name>
@@ -3857,6 +3861,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Simple Melee Weapon.</i> <b>Damage</b> 1d6 Piercing. <b>Properties</b> Thrown (Range 30/120). <b>Mastery</b> Slow.</p><p>If a weapon has the Thrown property, you can throw the weapon to make a ranged attack, and you can draw that weapon as part of the attack. If the weapon is a Melee weapon, use the same ability modifier for the attack and damage rolls that you use for a melee attack with that weapon.</p><p><b><i>Slow (Mastery).</i></b> If you hit a creature with this weapon and deal damage to it, you can reduce its Speed by 10 feet until the start of your next turn. If the creature is hit more than once by weapons that have this property, the Speed reduction doesn't exceed 10 feet.</p></description>
+				<picture type="string">images/item/javelin.webp@SRD 5.2.1 Player's Rules</picture>
 			</javelin>
 			<lighthammer>
 				<name type="string">Light Hammer</name>
@@ -3870,6 +3875,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Simple Melee Weapon.</i> <b>Damage</b> 1d4 Bludgeoning. <b>Properties</b> Light, Thrown (Range 20/60). <b>Mastery</b> Nick.</p><p>When you take the Attack action on your turn and attack with a Light weapon, you can make one extra attack as a Bonus Action later on the same turn. That extra attack must be made with a different Light weapon, and you don't add your ability modifier to the extra attack's damage unless that modifier is negative. For example, you can attack with a Shortsword in one hand and a Dagger in the other using the Attack action and a Bonus Action, but you don't add your Strength or Dexterity modifier to the damage roll of the Bonus Action unless that modifier is negative.</p><p>If a weapon has the Thrown property, you can throw the weapon to make a ranged attack, and you can draw that weapon as part of the attack. If the weapon is a Melee weapon, use the same ability modifier for the attack and damage rolls that you use for a melee attack with that weapon.</p><p><b><i>Nick (Mastery).</i></b> When you make the extra attack of the Light property, you can make it as part of the Attack action instead of as a Bonus Action. You can make this extra attack only once per turn.</p></description>
+				<picture type="string">images/item/lighthammer.webp@SRD 5.2.1 Player's Rules</picture>
 			</lighthammer>
 			<mace>
 				<name type="string">Mace</name>
@@ -3883,6 +3889,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Simple Melee Weapon.</i> <b>Damage</b> 1d6 Bludgeoning. <b>Properties</b> —. <b>Mastery</b> Sap.</p><p><b><i>Sap (Mastery).</i></b> If you hit a creature with this weapon, that creature has Disadvantage on its next attack roll before the start of your next turn.</p></description>
+				<picture type="string">images/item/mace.webp@SRD 5.2.1 Player's Rules</picture>
 			</mace>
 			<quarterstaff>
 				<name type="string">Quarterstaff</name>
@@ -3896,6 +3903,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Simple Melee Weapon.</i> <b>Damage</b> 1d6 Bludgeoning. <b>Properties</b> Versatile (1d8). <b>Mastery</b> Topple.</p><p>A Versatile weapon can be used with one or two hands. A damage value in parentheses appears with the property. The weapon deals that damage when used with two hands to make a melee attack.</p><p><b><i>Topple (Mastery).</i></b> If you hit a creature with this weapon, you can force the creature to make a Constitution saving throw (DC 8 plus the ability modifier used to make the attack roll and your Proficiency Bonus). On a failed save, the creature has the Prone condition.</p></description>
+				<picture type="string">images/item/quarterstaff.webp@SRD 5.2.1 Player's Rules</picture>
 			</quarterstaff>
 			<sickle>
 				<name type="string">Sickle</name>
@@ -3909,6 +3917,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Simple Melee Weapon.</i> <b>Damage</b> 1d4 Slashing. <b>Properties</b> Light. <b>Mastery</b> Nick.</p><p>When you take the Attack action on your turn and attack with a Light weapon, you can make one extra attack as a Bonus Action later on the same turn. That extra attack must be made with a different Light weapon, and you don't add your ability modifier to the extra attack's damage unless that modifier is negative. For example, you can attack with a Shortsword in one hand and a Dagger in the other using the Attack action and a Bonus Action, but you don't add your Strength or Dexterity modifier to the damage roll of the Bonus Action unless that modifier is negative.</p><p><b><i>Nick (Mastery).</i></b> When you make the extra attack of the Light property, you can make it as part of the Attack action instead of as a Bonus Action. You can make this extra attack only once per turn.</p></description>
+				<picture type="string">images/item/sickle.webp@SRD 5.2.1 Player's Rules</picture>
 			</sickle>
 			<spear>
 				<name type="string">Spear</name>
@@ -3922,6 +3931,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Simple Melee Weapon.</i> <b>Damage</b> 1d6 Piercing. <b>Properties</b> Thrown (Range 20/60), Versatile (1d8). <b>Mastery</b> Sap.</p><p>If a weapon has the Thrown property, you can throw the weapon to make a ranged attack, and you can draw that weapon as part of the attack. If the weapon is a Melee weapon, use the same ability modifier for the attack and damage rolls that you use for a melee attack with that weapon.</p><p>A Versatile weapon can be used with one or two hands. A damage value in parentheses appears with the property. The weapon deals that damage when used with two hands to make a melee attack.</p><p><b><i>Sap (Mastery).</i></b> If you hit a creature with this weapon, that creature has Disadvantage on its next attack roll before the start of your next turn.</p></description>
+				<picture type="string">images/item/spear.webp@SRD 5.2.1 Player's Rules</picture>
 			</spear>
 			<dart>
 				<name type="string">Dart</name>
@@ -3935,6 +3945,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Simple Ranged Weapon.</i> <b>Damage</b> 1d4 Piercing. <b>Properties</b> Finesse, Thrown (Range 20/60). <b>Mastery</b> Vex.</p><p>When making an attack with a Finesse weapon, use your choice of your Strength or Dexterity modifier for the attack and damage rolls. You must use the same modifier for both rolls.</p><p>If a weapon has the Thrown property, you can throw the weapon to make a ranged attack, and you can draw that weapon as part of the attack. If the weapon is a Melee weapon, use the same ability modifier for the attack and damage rolls that you use for a melee attack with that weapon.</p><p><b><i>Vex (Mastery).</i></b> If you hit a creature with this weapon and deal damage to the creature, you have Advantage on your next attack roll against that creature before the end of your next turn.</p></description>
+				<picture type="string">images/item/dart.webp@SRD 5.2.1 Player's Rules</picture>
 			</dart>
 			<lightcrossbow>
 				<name type="string">Light Crossbow</name>
@@ -3948,6 +3959,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Simple Ranged Weapon.</i> <b>Damage</b> 1d8 Piercing. <b>Properties</b> Ammunition (Range 80/320; Bolt), Loading, Two-Handed. <b>Mastery</b> Slow.</p><p>You can use a weapon that has the Ammunition property to make a ranged attack only if you have ammunition to fire from it. The type of ammunition required is specified with the weapon's range. Each attack expends one piece of ammunition. Drawing the ammunition is part of the attack (you need a free hand to load a one-handed weapon). After a fight, you can spend 1 minute to recover half the ammunition (round down) you used in the fight; the rest is lost.</p><p>You can fire only one piece of ammunition from a Loading weapon when you use an action, a Bonus Action, or a Reaction to fire it, regardless of the number of attacks you can normally make.</p><p>A Two-Handed weapon requires two hands when you attack with it.</p><p><b><i>Slow (Mastery).</i></b> If you hit a creature with this weapon and deal damage to it, you can reduce its Speed by 10 feet until the start of your next turn. If the creature is hit more than once by weapons that have this property, the Speed reduction doesn't exceed 10 feet.</p></description>
+				<picture type="string">images/item/lightcrossbow.webp@SRD 5.2.1 Player's Rules</picture>
 			</lightcrossbow>
 			<shortbow>
 				<name type="string">Shortbow</name>
@@ -3961,6 +3973,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Simple Ranged Weapon.</i> <b>Damage</b> 1d6 Piercing. <b>Properties</b> Ammunition (Range 80/320; Arrow), Two-Handed. <b>Mastery</b> Vex.</p><p>You can use a weapon that has the Ammunition property to make a ranged attack only if you have ammunition to fire from it. The type of ammunition required is specified with the weapon's range. Each attack expends one piece of ammunition. Drawing the ammunition is part of the attack (you need a free hand to load a one-handed weapon). After a fight, you can spend 1 minute to recover half the ammunition (round down) you used in the fight; the rest is lost.</p><p>A Two-Handed weapon requires two hands when you attack with it.</p><p><b><i>Vex (Mastery).</i></b> If you hit a creature with this weapon and deal damage to the creature, you have Advantage on your next attack roll against that creature before the end of your next turn.</p></description>
+				<picture type="string">images/item/shortbow.webp@SRD 5.2.1 Player's Rules</picture>
 			</shortbow>
 			<sling>
 				<name type="string">Sling</name>
@@ -3974,6 +3987,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Simple Ranged Weapon.</i> <b>Damage</b> 1d4 Bludgeoning. <b>Properties</b> Ammunition (Range 30/120; Bullet). <b>Mastery</b> Slow.</p><p>You can use a weapon that has the Ammunition property to make a ranged attack only if you have ammunition to fire from it. The type of ammunition required is specified with the weapon's range. Each attack expends one piece of ammunition. Drawing the ammunition is part of the attack (you need a free hand to load a one-handed weapon). After a fight, you can spend 1 minute to recover half the ammunition (round down) you used in the fight; the rest is lost.</p><p><b><i>Slow (Mastery).</i></b> If you hit a creature with this weapon and deal damage to it, you can reduce its Speed by 10 feet until the start of your next turn. If the creature is hit more than once by weapons that have this property, the Speed reduction doesn't exceed 10 feet.</p></description>
+				<picture type="string">images/item/sling.webp@SRD 5.2.1 Player's Rules</picture>
 			</sling>
 			<battleaxe>
 				<name type="string">Battleaxe</name>
@@ -3987,6 +4001,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Martial Melee Weapon.</i> <b>Damage</b> 1d8 Slashing. <b>Properties</b> Versatile (1d10). <b>Mastery</b> Topple.</p><p>A Versatile weapon can be used with one or two hands. A damage value in parentheses appears with the property. The weapon deals that damage when used with two hands to make a melee attack.</p><p><b><i>Topple (Mastery).</i></b> If you hit a creature with this weapon, you can force the creature to make a Constitution saving throw (DC 8 plus the ability modifier used to make the attack roll and your Proficiency Bonus). On a failed save, the creature has the Prone condition.</p></description>
+				<picture type="string">images/item/battleaxe.webp@SRD 5.2.1 Player's Rules</picture>
 			</battleaxe>
 			<flail>
 				<name type="string">Flail</name>
@@ -4000,6 +4015,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Martial Melee Weapon.</i> <b>Damage</b> 1d8 Bludgeoning. <b>Properties</b> —. <b>Mastery</b> Sap.</p><p><b><i>Sap (Mastery).</i></b> If you hit a creature with this weapon, that creature has Disadvantage on its next attack roll before the start of your next turn.</p></description>
+				<picture type="string">images/item/flail.webp@SRD 5.2.1 Player's Rules</picture>
 			</flail>
 			<glaive>
 				<name type="string">Glaive</name>
@@ -4013,6 +4029,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Martial Melee Weapon.</i> <b>Damage</b> 1d10 Slashing. <b>Properties</b> Heavy, Reach, Two-Handed. <b>Mastery</b> Graze.</p><p>You have Disadvantage on attack rolls with a Heavy weapon if it's a Melee weapon and your Strength score isn't at least 13 or if it's a Ranged weapon and your Dexterity score isn't at least 13.</p><p>A Reach weapon adds 5 feet to your reach when you attack with it, as well as when determining your reach for Opportunity Attacks with it.</p><p>A Two-Handed weapon requires two hands when you attack with it.</p><p><b><i>Graze (Mastery).</i></b> If your attack roll with this weapon misses a creature, you can deal damage to that creature equal to the ability modifier you used to make the attack roll. This damage is the same type dealt by the weapon, and the damage can be increased only by increasing the ability modifier.</p></description>
+				<picture type="string">images/item/glaive.webp@SRD 5.2.1 Player's Rules</picture>
 			</glaive>
 			<greataxe>
 				<name type="string">Greataxe</name>
@@ -4026,6 +4043,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Martial Melee Weapon.</i> <b>Damage</b> 1d12 Slashing. <b>Properties</b> Heavy, Two-Handed. <b>Mastery</b> Cleave.</p><p>You have Disadvantage on attack rolls with a Heavy weapon if it's a Melee weapon and your Strength score isn't at least 13 or if it's a Ranged weapon and your Dexterity score isn't at least 13.</p><p>A Two-Handed weapon requires two hands when you attack with it.</p><p><b><i>Cleave (Mastery).</i></b> If you hit a creature with a melee attack roll using this weapon, you can make a melee attack roll with the weapon against a second creature within 5 feet of the first that is also within your reach. On a hit, the second creature takes the weapon's damage, but don't add your ability modifier to that damage unless that modifier is negative. You can make this extra attack only once per turn.</p></description>
+				<picture type="string">images/item/greataxe.webp@SRD 5.2.1 Player's Rules</picture>
 			</greataxe>
 			<greatsword>
 				<name type="string">Greatsword</name>
@@ -4039,6 +4057,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Martial Melee Weapon.</i> <b>Damage</b> 2d6 Slashing. <b>Properties</b> Heavy, Two-Handed. <b>Mastery</b> Graze.</p><p>You have Disadvantage on attack rolls with a Heavy weapon if it's a Melee weapon and your Strength score isn't at least 13 or if it's a Ranged weapon and your Dexterity score isn't at least 13.</p><p>A Two-Handed weapon requires two hands when you attack with it.</p><p><b><i>Graze (Mastery).</i></b> If your attack roll with this weapon misses a creature, you can deal damage to that creature equal to the ability modifier you used to make the attack roll. This damage is the same type dealt by the weapon, and the damage can be increased only by increasing the ability modifier.</p></description>
+				<picture type="string">images/item/greatsword.webp@SRD 5.2.1 Player's Rules</picture>
 			</greatsword>
 			<halberd>
 				<name type="string">Halberd</name>
@@ -4052,6 +4071,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Martial Melee Weapon.</i> <b>Damage</b> 1d10 Slashing. <b>Properties</b> Heavy, Reach, Two-Handed. <b>Mastery</b> Cleave.</p><p>You have Disadvantage on attack rolls with a Heavy weapon if it's a Melee weapon and your Strength score isn't at least 13 or if it's a Ranged weapon and your Dexterity score isn't at least 13.</p><p>A Reach weapon adds 5 feet to your reach when you attack with it, as well as when determining your reach for Opportunity Attacks with it.</p><p>A Two-Handed weapon requires two hands when you attack with it.</p><p><b><i>Cleave (Mastery).</i></b> If you hit a creature with a melee attack roll using this weapon, you can make a melee attack roll with the weapon against a second creature within 5 feet of the first that is also within your reach. On a hit, the second creature takes the weapon's damage, but don't add your ability modifier to that damage unless that modifier is negative. You can make this extra attack only once per turn.</p></description>
+				<picture type="string">images/item/halberd.webp@SRD 5.2.1 Player's Rules</picture>
 			</halberd>
 			<lance>
 				<name type="string">Lance</name>
@@ -4065,6 +4085,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Martial Melee Weapon.</i> <b>Damage</b> 1d10 Piercing. <b>Properties</b> Heavy, Reach, Two-Handed (unless mounted). <b>Mastery</b> Topple.</p><p>You have Disadvantage on attack rolls with a Heavy weapon if it's a Melee weapon and your Strength score isn't at least 13 or if it's a Ranged weapon and your Dexterity score isn't at least 13.</p><p>A Reach weapon adds 5 feet to your reach when you attack with it, as well as when determining your reach for Opportunity Attacks with it.</p><p>A Two-Handed weapon requires two hands when you attack with it.</p><p><b><i>Topple (Mastery).</i></b> If you hit a creature with this weapon, you can force the creature to make a Constitution saving throw (DC 8 plus the ability modifier used to make the attack roll and your Proficiency Bonus). On a failed save, the creature has the Prone condition.</p></description>
+				<picture type="string">images/item/lance.webp@SRD 5.2.1 Player's Rules</picture>
 			</lance>
 			<longsword>
 				<name type="string">Longsword</name>
@@ -4078,6 +4099,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Martial Melee Weapon.</i> <b>Damage</b> 1d8 Slashing. <b>Properties</b> Versatile (1d10). <b>Mastery</b> Sap.</p><p>A Versatile weapon can be used with one or two hands. A damage value in parentheses appears with the property. The weapon deals that damage when used with two hands to make a melee attack.</p><p><b><i>Sap (Mastery).</i></b> If you hit a creature with this weapon, that creature has Disadvantage on its next attack roll before the start of your next turn.</p></description>
+				<picture type="string">images/item/longsword.webp@SRD 5.2.1 Player's Rules</picture>
 			</longsword>
 			<maul>
 				<name type="string">Maul</name>
@@ -4091,6 +4113,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Martial Melee Weapon.</i> <b>Damage</b> 2d6 Bludgeoning. <b>Properties</b> Heavy, Two-Handed. <b>Mastery</b> Topple.</p><p>You have Disadvantage on attack rolls with a Heavy weapon if it's a Melee weapon and your Strength score isn't at least 13 or if it's a Ranged weapon and your Dexterity score isn't at least 13.</p><p>A Two-Handed weapon requires two hands when you attack with it.</p><p><b><i>Topple (Mastery).</i></b> If you hit a creature with this weapon, you can force the creature to make a Constitution saving throw (DC 8 plus the ability modifier used to make the attack roll and your Proficiency Bonus). On a failed save, the creature has the Prone condition.</p></description>
+				<picture type="string">images/item/maul.webp@SRD 5.2.1 Player's Rules</picture>
 			</maul>
 			<morningstar>
 				<name type="string">Morningstar</name>
@@ -4104,6 +4127,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Martial Melee Weapon.</i> <b>Damage</b> 1d8 Piercing. <b>Properties</b> —. <b>Mastery</b> Sap.</p><p><b><i>Sap (Mastery).</i></b> If you hit a creature with this weapon, that creature has Disadvantage on its next attack roll before the start of your next turn.</p></description>
+				<picture type="string">images/item/morningstar.webp@SRD 5.2.1 Player's Rules</picture>
 			</morningstar>
 			<pike>
 				<name type="string">Pike</name>
@@ -4117,6 +4141,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Martial Melee Weapon.</i> <b>Damage</b> 1d10 Piercing. <b>Properties</b> Heavy, Reach, Two-Handed. <b>Mastery</b> Push.</p><p>You have Disadvantage on attack rolls with a Heavy weapon if it's a Melee weapon and your Strength score isn't at least 13 or if it's a Ranged weapon and your Dexterity score isn't at least 13.</p><p>A Reach weapon adds 5 feet to your reach when you attack with it, as well as when determining your reach for Opportunity Attacks with it.</p><p>A Two-Handed weapon requires two hands when you attack with it.</p><p><b><i>Push (Mastery).</i></b> If you hit a creature with this weapon, you can push the creature up to 10 feet straight away from yourself if it is Large or smaller.</p></description>
+				<picture type="string">images/item/pike.webp@SRD 5.2.1 Player's Rules</picture>
 			</pike>
 			<rapier>
 				<name type="string">Rapier</name>
@@ -4130,6 +4155,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Martial Melee Weapon.</i> <b>Damage</b> 1d8 Piercing. <b>Properties</b> Finesse. <b>Mastery</b> Vex.</p><p>When making an attack with a Finesse weapon, use your choice of your Strength or Dexterity modifier for the attack and damage rolls. You must use the same modifier for both rolls.</p><p><b><i>Vex (Mastery).</i></b> If you hit a creature with this weapon and deal damage to the creature, you have Advantage on your next attack roll against that creature before the end of your next turn.</p></description>
+				<picture type="string">images/item/rapier.webp@SRD 5.2.1 Player's Rules</picture>
 			</rapier>
 			<scimitar>
 				<name type="string">Scimitar</name>
@@ -4143,6 +4169,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Martial Melee Weapon.</i> <b>Damage</b> 1d6 Slashing. <b>Properties</b> Finesse, Light. <b>Mastery</b> Nick.</p><p>When making an attack with a Finesse weapon, use your choice of your Strength or Dexterity modifier for the attack and damage rolls. You must use the same modifier for both rolls.</p><p>When you take the Attack action on your turn and attack with a Light weapon, you can make one extra attack as a Bonus Action later on the same turn. That extra attack must be made with a different Light weapon, and you don't add your ability modifier to the extra attack's damage unless that modifier is negative. For example, you can attack with a Shortsword in one hand and a Dagger in the other using the Attack action and a Bonus Action, but you don't add your Strength or Dexterity modifier to the damage roll of the Bonus Action unless that modifier is negative.</p><p><b><i>Nick (Mastery).</i></b> When you make the extra attack of the Light property, you can make it as part of the Attack action instead of as a Bonus Action. You can make this extra attack only once per turn.</p></description>
+				<picture type="string">images/item/scimitar.webp@SRD 5.2.1 Player's Rules</picture>
 			</scimitar>
 			<shortsword>
 				<name type="string">Shortsword</name>
@@ -4156,6 +4183,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Martial Melee Weapon.</i> <b>Damage</b> 1d6 Piercing. <b>Properties</b> Finesse, Light. <b>Mastery</b> Vex.</p><p>When making an attack with a Finesse weapon, use your choice of your Strength or Dexterity modifier for the attack and damage rolls. You must use the same modifier for both rolls.</p><p>When you take the Attack action on your turn and attack with a Light weapon, you can make one extra attack as a Bonus Action later on the same turn. That extra attack must be made with a different Light weapon, and you don't add your ability modifier to the extra attack's damage unless that modifier is negative. For example, you can attack with a Shortsword in one hand and a Dagger in the other using the Attack action and a Bonus Action, but you don't add your Strength or Dexterity modifier to the damage roll of the Bonus Action unless that modifier is negative.</p><p><b><i>Vex (Mastery).</i></b> If you hit a creature with this weapon and deal damage to the creature, you have Advantage on your next attack roll against that creature before the end of your next turn.</p></description>
+				<picture type="string">images/item/shortsword.webp@SRD 5.2.1 Player's Rules</picture>
 			</shortsword>
 			<trident>
 				<name type="string">Trident</name>
@@ -4169,6 +4197,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Martial Melee Weapon.</i> <b>Damage</b> 1d8 Piercing. <b>Properties</b> Thrown (Range 20/60), Versatile (1d10). <b>Mastery</b> Topple.</p><p>If a weapon has the Thrown property, you can throw the weapon to make a ranged attack, and you can draw that weapon as part of the attack. If the weapon is a Melee weapon, use the same ability modifier for the attack and damage rolls that you use for a melee attack with that weapon.</p><p>A Versatile weapon can be used with one or two hands. A damage value in parentheses appears with the property. The weapon deals that damage when used with two hands to make a melee attack.</p><p><b><i>Topple (Mastery).</i></b> If you hit a creature with this weapon, you can force the creature to make a Constitution saving throw (DC 8 plus the ability modifier used to make the attack roll and your Proficiency Bonus). On a failed save, the creature has the Prone condition.</p></description>
+				<picture type="string">images/item/trident.webp@SRD 5.2.1 Player's Rules</picture>
 			</trident>
 			<warhammer>
 				<name type="string">Warhammer</name>
@@ -4182,6 +4211,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Martial Melee Weapon.</i> <b>Damage</b> 1d8 Bludgeoning. <b>Properties</b> Versatile (1d10). <b>Mastery</b> Push.</p><p>A Versatile weapon can be used with one or two hands. A damage value in parentheses appears with the property. The weapon deals that damage when used with two hands to make a melee attack.</p><p><b><i>Push (Mastery).</i></b> If you hit a creature with this weapon, you can push the creature up to 10 feet straight away from yourself if it is Large or smaller.</p></description>
+				<picture type="string">images/item/warhammer.webp@SRD 5.2.1 Player's Rules</picture>
 			</warhammer>
 			<warpick>
 				<name type="string">War Pick</name>
@@ -4195,6 +4225,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Martial Melee Weapon.</i> <b>Damage</b> 1d8 Piercing. <b>Properties</b> Versatile (1d10). <b>Mastery</b> Sap.</p><p>A Versatile weapon can be used with one or two hands. A damage value in parentheses appears with the property. The weapon deals that damage when used with two hands to make a melee attack.</p><p><b><i>Sap (Mastery).</i></b> If you hit a creature with this weapon, that creature has Disadvantage on its next attack roll before the start of your next turn.</p></description>
+				<picture type="string">images/item/warpick.webp@SRD 5.2.1 Player's Rules</picture>
 			</warpick>
 			<whip>
 				<name type="string">Whip</name>
@@ -4208,6 +4239,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Martial Melee Weapon.</i> <b>Damage</b> 1d4 Slashing. <b>Properties</b> Finesse, Reach. <b>Mastery</b> Slow.</p><p>When making an attack with a Finesse weapon, use your choice of your Strength or Dexterity modifier for the attack and damage rolls. You must use the same modifier for both rolls.</p><p>A Reach weapon adds 5 feet to your reach when you attack with it, as well as when determining your reach for Opportunity Attacks with it.</p><p><b><i>Slow (Mastery).</i></b> If you hit a creature with this weapon and deal damage to it, you can reduce its Speed by 10 feet until the start of your next turn. If the creature is hit more than once by weapons that have this property, the Speed reduction doesn't exceed 10 feet.</p></description>
+				<picture type="string">images/item/whip.webp@SRD 5.2.1 Player's Rules</picture>
 			</whip>
 			<blowgun>
 				<name type="string">Blowgun</name>
@@ -4221,6 +4253,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Martial Ranged Weapon.</i> <b>Damage</b> 1 Piercing. <b>Properties</b> Ammunition (Range 25/100; Needle), Loading. <b>Mastery</b> Vex.</p><p>You can use a weapon that has the Ammunition property to make a ranged attack only if you have ammunition to fire from it. The type of ammunition required is specified with the weapon's range. Each attack expends one piece of ammunition. Drawing the ammunition is part of the attack (you need a free hand to load a one-handed weapon). After a fight, you can spend 1 minute to recover half the ammunition (round down) you used in the fight; the rest is lost.</p><p>You can fire only one piece of ammunition from a Loading weapon when you use an action, a Bonus Action, or a Reaction to fire it, regardless of the number of attacks you can normally make.</p><p><b><i>Vex (Mastery).</i></b> If you hit a creature with this weapon and deal damage to the creature, you have Advantage on your next attack roll against that creature before the end of your next turn.</p></description>
+				<picture type="string">images/item/blowgun.webp@SRD 5.2.1 Player's Rules</picture>
 			</blowgun>
 			<handcrossbow>
 				<name type="string">Hand Crossbow</name>
@@ -4234,6 +4267,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Martial Ranged Weapon.</i> <b>Damage</b> 1d6 Piercing. <b>Properties</b> Ammunition (Range 30/120; Bolt), Light, Loading. <b>Mastery</b> Vex.</p><p>You can use a weapon that has the Ammunition property to make a ranged attack only if you have ammunition to fire from it. The type of ammunition required is specified with the weapon's range. Each attack expends one piece of ammunition. Drawing the ammunition is part of the attack (you need a free hand to load a one-handed weapon). After a fight, you can spend 1 minute to recover half the ammunition (round down) you used in the fight; the rest is lost.</p><p>When you take the Attack action on your turn and attack with a Light weapon, you can make one extra attack as a Bonus Action later on the same turn. That extra attack must be made with a different Light weapon, and you don't add your ability modifier to the extra attack's damage unless that modifier is negative. For example, you can attack with a Shortsword in one hand and a Dagger in the other using the Attack action and a Bonus Action, but you don't add your Strength or Dexterity modifier to the damage roll of the Bonus Action unless that modifier is negative.</p><p>You can fire only one piece of ammunition from a Loading weapon when you use an action, a Bonus Action, or a Reaction to fire it, regardless of the number of attacks you can normally make.</p><p><b><i>Vex (Mastery).</i></b> If you hit a creature with this weapon and deal damage to the creature, you have Advantage on your next attack roll against that creature before the end of your next turn.</p></description>
+				<picture type="string">images/item/handcrossbow.webp@SRD 5.2.1 Player's Rules</picture>
 			</handcrossbow>
 			<heavycrossbow>
 				<name type="string">Heavy Crossbow</name>
@@ -4247,6 +4281,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Martial Ranged Weapon.</i> <b>Damage</b> 1d10 Piercing. <b>Properties</b> Ammunition (Range 100/400; Bolt), Heavy, Loading, Two-Handed. <b>Mastery</b> Push.</p><p>You can use a weapon that has the Ammunition property to make a ranged attack only if you have ammunition to fire from it. The type of ammunition required is specified with the weapon's range. Each attack expends one piece of ammunition. Drawing the ammunition is part of the attack (you need a free hand to load a one-handed weapon). After a fight, you can spend 1 minute to recover half the ammunition (round down) you used in the fight; the rest is lost.</p><p>You have Disadvantage on attack rolls with a Heavy weapon if it's a Melee weapon and your Strength score isn't at least 13 or if it's a Ranged weapon and your Dexterity score isn't at least 13.</p><p>You can fire only one piece of ammunition from a Loading weapon when you use an action, a Bonus Action, or a Reaction to fire it, regardless of the number of attacks you can normally make.</p><p>A Two-Handed weapon requires two hands when you attack with it.</p><p><b><i>Push (Mastery).</i></b> If you hit a creature with this weapon, you can push the creature up to 10 feet straight away from yourself if it is Large or smaller.</p></description>
+				<picture type="string">images/item/heavycrossbow.webp@SRD 5.2.1 Player's Rules</picture>
 			</heavycrossbow>
 			<longbow>
 				<name type="string">Longbow</name>
@@ -4260,6 +4295,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Martial Ranged Weapon.</i> <b>Damage</b> 1d8 Piercing. <b>Properties</b> Ammunition (Range 150/600; Arrow), Heavy, Two-Handed. <b>Mastery</b> Slow.</p><p>You can use a weapon that has the Ammunition property to make a ranged attack only if you have ammunition to fire from it. The type of ammunition required is specified with the weapon's range. Each attack expends one piece of ammunition. Drawing the ammunition is part of the attack (you need a free hand to load a one-handed weapon). After a fight, you can spend 1 minute to recover half the ammunition (round down) you used in the fight; the rest is lost.</p><p>You have Disadvantage on attack rolls with a Heavy weapon if it's a Melee weapon and your Strength score isn't at least 13 or if it's a Ranged weapon and your Dexterity score isn't at least 13.</p><p>A Two-Handed weapon requires two hands when you attack with it.</p><p><b><i>Slow (Mastery).</i></b> If you hit a creature with this weapon and deal damage to it, you can reduce its Speed by 10 feet until the start of your next turn. If the creature is hit more than once by weapons that have this property, the Speed reduction doesn't exceed 10 feet.</p></description>
+				<picture type="string">images/item/longbow.webp@SRD 5.2.1 Player's Rules</picture>
 			</longbow>
 			<musket>
 				<name type="string">Musket</name>
@@ -4273,6 +4309,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Martial Ranged Weapon.</i> <b>Damage</b> 1d12 Piercing. <b>Properties</b> Ammunition (Range 40/120; Bullet), Loading, Two-Handed. <b>Mastery</b> Slow.</p><p>You can use a weapon that has the Ammunition property to make a ranged attack only if you have ammunition to fire from it. The type of ammunition required is specified with the weapon's range. Each attack expends one piece of ammunition. Drawing the ammunition is part of the attack (you need a free hand to load a one-handed weapon). After a fight, you can spend 1 minute to recover half the ammunition (round down) you used in the fight; the rest is lost.</p><p>You can fire only one piece of ammunition from a Loading weapon when you use an action, a Bonus Action, or a Reaction to fire it, regardless of the number of attacks you can normally make.</p><p>A Two-Handed weapon requires two hands when you attack with it.</p><p><b><i>Slow (Mastery).</i></b> If you hit a creature with this weapon and deal damage to it, you can reduce its Speed by 10 feet until the start of your next turn. If the creature is hit more than once by weapons that have this property, the Speed reduction doesn't exceed 10 feet.</p></description>
+				<picture type="string">images/item/musket.webp@SRD 5.2.1 Player's Rules</picture>
 			</musket>
 			<pistol>
 				<name type="string">Pistol</name>
@@ -4286,6 +4323,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Martial Ranged Weapon.</i> <b>Damage</b> 1d10 Piercing. <b>Properties</b> Ammunition (Range 30/90; Bullet), Loading. <b>Mastery</b> Vex.</p><p>You can use a weapon that has the Ammunition property to make a ranged attack only if you have ammunition to fire from it. The type of ammunition required is specified with the weapon's range. Each attack expends one piece of ammunition. Drawing the ammunition is part of the attack (you need a free hand to load a one-handed weapon). After a fight, you can spend 1 minute to recover half the ammunition (round down) you used in the fight; the rest is lost.</p><p>You can fire only one piece of ammunition from a Loading weapon when you use an action, a Bonus Action, or a Reaction to fire it, regardless of the number of attacks you can normally make.</p><p><b><i>Vex (Mastery).</i></b> If you hit a creature with this weapon and deal damage to the creature, you have Advantage on your next attack roll against that creature before the end of your next turn.</p></description>
+				<picture type="string">images/item/pistol.webp@SRD 5.2.1 Player's Rules</picture>
 			</pistol>
 		</category>
 		<category name="Armor">
@@ -4302,6 +4340,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Light Armor</i> (1 Minute to Don or Doff). <b>Armor Class (AC)</b> 11 + Dex modifier. <b>Strength</b> —. <b>Stealth</b> Disadvantage.</p></description>
+				<picture type="string">images/item/paddedarmor.webp@SRD 5.2.1 Player's Rules</picture>
 			</paddedarmor>
 			<leatherarmor>
 				<name type="string">Leather Armor</name>
@@ -4316,6 +4355,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Light Armor</i> (1 Minute to Don or Doff). <b>Armor Class (AC)</b> 11 + Dex modifier. <b>Strength</b> —. <b>Stealth</b> —.</p></description>
+				<picture type="string">images/item/leatherarmor.webp@SRD 5.2.1 Player's Rules</picture>
 			</leatherarmor>
 			<studdedleatherarmor>
 				<name type="string">Studded Leather Armor</name>
@@ -4330,6 +4370,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Light Armor</i> (1 Minute to Don or Doff). <b>Armor Class (AC)</b> 12 + Dex modifier. <b>Strength</b> —. <b>Stealth</b> —.</p></description>
+				<picture type="string">images/item/studdedleatherarmor.webp@SRD 5.2.1 Player's Rules</picture>
 			</studdedleatherarmor>
 			<hidearmor>
 				<name type="string">Hide Armor</name>
@@ -4344,6 +4385,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Medium Armor</i> (5 Minutes to Don and 1 Minute to Doff). <b>Armor Class (AC)</b> 12 + Dex modifier (max 2). <b>Strength</b> —. <b>Stealth</b> —.</p></description>
+				<picture type="string">images/item/hidearmor.webp@SRD 5.2.1 Player's Rules</picture>
 			</hidearmor>
 			<chainshirt>
 				<name type="string">Chain Shirt</name>
@@ -4358,6 +4400,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Medium Armor</i> (5 Minutes to Don and 1 Minute to Doff). <b>Armor Class (AC)</b> 13 + Dex modifier (max 2). <b>Strength</b> —. <b>Stealth</b> —.</p></description>
+				<picture type="string">images/item/chainshirt.webp@SRD 5.2.1 Player's Rules</picture>
 			</chainshirt>
 			<scalemail>
 				<name type="string">Scale Mail</name>
@@ -4372,6 +4415,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Medium Armor</i> (5 Minutes to Don and 1 Minute to Doff). <b>Armor Class (AC)</b> 14 + Dex modifier (max 2). <b>Strength</b> —. <b>Stealth</b> Disadvantage.</p></description>
+				<picture type="string">images/item/scalemail.webp@SRD 5.2.1 Player's Rules</picture>
 			</scalemail>
 			<breastplate>
 				<name type="string">Breastplate</name>
@@ -4386,6 +4430,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Medium Armor</i> (5 Minutes to Don and 1 Minute to Doff). <b>Armor Class (AC)</b> 14 + Dex modifier (max 2). <b>Strength</b> —. <b>Stealth</b> —.</p></description>
+				<picture type="string">images/item/breastplate.webp@SRD 5.2.1 Player's Rules</picture>
 			</breastplate>
 			<halfplatearmor>
 				<name type="string">Half Plate Armor</name>
@@ -4400,6 +4445,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Medium Armor</i> (5 Minutes to Don and 1 Minute to Doff). <b>Armor Class (AC)</b> 15 + Dex modifier (max 2). <b>Strength</b> —. <b>Stealth</b> Disadvantage.</p></description>
+				<picture type="string">images/item/halfplatearmor.webp@SRD 5.2.1 Player's Rules</picture>
 			</halfplatearmor>
 			<ringmail>
 				<name type="string">Ring Mail</name>
@@ -4414,6 +4460,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Heavy Armor</i> (10 Minutes to Don and 5 Minutes to Doff). <b>Armor Class (AC)</b> 14. <b>Strength</b> —. <b>Stealth</b> Disadvantage.</p></description>
+				<picture type="string">images/item/ringmail.webp@SRD 5.2.1 Player's Rules</picture>
 			</ringmail>
 			<chainmail>
 				<name type="string">Chain Mail</name>
@@ -4428,6 +4475,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Heavy Armor</i> (10 Minutes to Don and 5 Minutes to Doff). <b>Armor Class (AC)</b> 16. <b>Strength</b> Str 13. <b>Stealth</b> Disadvantage.</p></description>
+				<picture type="string">images/item/chainmail.webp@SRD 5.2.1 Player's Rules</picture>
 			</chainmail>
 			<splintarmor>
 				<name type="string">Splint Armor</name>
@@ -4442,6 +4490,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Heavy Armor</i> (10 Minutes to Don and 5 Minutes to Doff). <b>Armor Class (AC)</b> 17. <b>Strength</b> Str 15. <b>Stealth</b> Disadvantage.</p></description>
+				<picture type="string">images/item/splintarmor.webp@SRD 5.2.1 Player's Rules</picture>
 			</splintarmor>
 			<platearmor>
 				<name type="string">Plate Armor</name>
@@ -4456,6 +4505,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Heavy Armor</i> (10 Minutes to Don and 5 Minutes to Doff). <b>Armor Class (AC)</b> 18. <b>Strength</b> Str 15. <b>Stealth</b> Disadvantage.</p></description>
+				<picture type="string">images/item/platearmor.webp@SRD 5.2.1 Player's Rules</picture>
 			</platearmor>
 			<shield>
 				<name type="string">Shield</name>
@@ -4470,6 +4520,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Shield</i> (Utilize Action to Don or Doff). <b>Armor Class (AC)</b> +2. <b>Strength</b> —. <b>Stealth</b> —.</p></description>
+				<picture type="string">images/item/shield.webp@SRD 5.2.1 Player's Rules</picture>
 			</shield>
 		</category>
 		<category name="Tools">
@@ -4481,6 +4532,7 @@
 				<weight type="number">8</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><b>Ability:</b> Intelligence</p><p><b>Weight:</b> 8 lb.</p><p><b>Utilize:</b> Identify a substance (DC 15), or start a fire (DC 15)</p><p><b>Craft:</b> Acid, Alchemist's Fire, Component Pouch, Oil, Paper, Perfume</p></description>
+				<picture type="string">images/item/alchemistssupplie.webp@SRD 5.2.1 Player's Rules</picture>
 			</alchemistssupplies>
 			<brewerssupplies>
 				<name type="string">Brewer's Supplies</name>
@@ -4490,6 +4542,7 @@
 				<weight type="number">9</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><b>Ability:</b> Intelligence</p><p><b>Weight:</b> 9 lb.</p><p><b>Utilize:</b> Detect poisoned drink (DC 15), or identify alcohol (DC 10)</p><p><b>Craft:</b> Antitoxin</p></description>
+				<picture type="string">images/item/brewerssupplie.webp@SRD 5.2.1 Player's Rules</picture>
 			</brewerssupplies>
 			<calligrapherssupplies>
 				<name type="string">Calligrapher's Supplies</name>
@@ -4499,6 +4552,7 @@
 				<weight type="number">5</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><b>Ability:</b> Dexterity</p><p><b>Weight:</b> 5 lb.</p><p><b>Utilize:</b> Write text with impressive flourishes that guard against forgery (DC 15)</p><p><b>Craft:</b> Ink, Spell Scroll</p></description>
+				<picture type="string">images/item/calligrapherssupplie.webp@SRD 5.2.1 Player's Rules</picture>
 			</calligrapherssupplies>
 			<carpenterstools>
 				<name type="string">Carpenter's Tools</name>
@@ -4508,6 +4562,7 @@
 				<weight type="number">6</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><b>Ability:</b> Strength</p><p><b>Weight:</b> 6 lb.</p><p><b>Utilize:</b> Seal or pry open a door or container (DC 20)</p><p><b>Craft:</b> Club, Greatclub, Quarterstaff, Barrel, Chest, Ladder, Pole, Portable Ram, Torch</p></description>
+				<picture type="string">images/item/carpenterstool.webp@SRD 5.2.1 Player's Rules</picture>
 			</carpenterstools>
 			<cartographerstools>
 				<name type="string">Cartographer's Tools</name>
@@ -4517,6 +4572,7 @@
 				<weight type="number">6</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><b>Ability:</b> Wisdom</p><p><b>Weight:</b> 6 lb.</p><p><b>Utilize:</b> Draft a map of a small area (DC 15)</p><p><b>Craft:</b> Map</p></description>
+				<picture type="string">images/item/cartographerstool.webp@SRD 5.2.1 Player's Rules</picture>
 			</cartographerstools>
 			<cobblerstools>
 				<name type="string">Cobbler's Tools</name>
@@ -4526,6 +4582,7 @@
 				<weight type="number">5</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><b>Ability:</b> Dexterity</p><p><b>Weight:</b> 5 lb.</p><p><b>Utilize:</b> Modify footwear to give Advantage on the wearer's next Dexterity (Acrobatics) check (DC 10)</p><p><b>Craft:</b> Climber's Kit</p></description>
+				<picture type="string">images/item/cobblerstool.webp@SRD 5.2.1 Player's Rules</picture>
 			</cobblerstools>
 			<cooksutensils>
 				<name type="string">Cook's Utensils</name>
@@ -4535,6 +4592,7 @@
 				<weight type="number">8</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><b>Ability:</b> Wisdom</p><p><b>Weight:</b> 8 lb.</p><p><b>Utilize:</b> Improve food's flavor (DC 10), or detect spoiled or poisoned food (DC 15)</p><p><b>Craft:</b> Rations</p></description>
+				<picture type="string">images/item/cooksutensil.webp@SRD 5.2.1 Player's Rules</picture>
 			</cooksutensils>
 			<glassblowerstools>
 				<name type="string">Glassblower's Tools</name>
@@ -4544,6 +4602,7 @@
 				<weight type="number">5</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><b>Ability:</b> Intelligence</p><p><b>Weight:</b> 5 lb.</p><p><b>Utilize:</b> Discern what a glass object held in the past 24 hours (DC 15)</p><p><b>Craft:</b> Glass Bottle, Magnifying Glass, Spyglass, Vial</p></description>
+				<picture type="string">images/item/glassblowerstool.webp@SRD 5.2.1 Player's Rules</picture>
 			</glassblowerstools>
 			<jewelerstools>
 				<name type="string">Jeweler's Tools</name>
@@ -4553,6 +4612,7 @@
 				<weight type="number">2</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><b>Ability:</b> Intelligence</p><p><b>Weight:</b> 2 lb.</p><p><b>Utilize:</b> Discern a gem's value (DC 15)</p><p><b>Craft:</b> Arcane Focus, Holy Symbol</p></description>
+				<picture type="string">images/item/jewelerstool.webp@SRD 5.2.1 Player's Rules</picture>
 			</jewelerstools>
 			<leatherworkerstools>
 				<name type="string">Leatherworker's Tools</name>
@@ -4562,6 +4622,7 @@
 				<weight type="number">5</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><b>Ability:</b> Dexterity</p><p><b>Weight:</b> 5 lb.</p><p><b>Utilize:</b> Add a design to a leather item (DC 10)</p><p><b>Craft:</b> Sling, Whip, Hide Armor, Leather Armor, Studded Leather Armor, Backpack, Crossbow Bolt Case, Map or Scroll Case, Parchment, Pouch, Quiver, Waterskin</p></description>
+				<picture type="string">images/item/leatherworkerstool.webp@SRD 5.2.1 Player's Rules</picture>
 			</leatherworkerstools>
 			<masonstools>
 				<name type="string">Mason's Tools</name>
@@ -4571,6 +4632,7 @@
 				<weight type="number">8</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><b>Ability:</b> Strength</p><p><b>Weight:</b> 8 lb.</p><p><b>Utilize:</b> Chisel a symbol or hole in stone (DC 10)</p><p><b>Craft:</b> Block and Tackle</p></description>
+				<picture type="string">images/item/masonstool.webp@SRD 5.2.1 Player's Rules</picture>
 			</masonstools>
 			<painterssupplies>
 				<name type="string">Painter's Supplies</name>
@@ -4580,6 +4642,7 @@
 				<weight type="number">5</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><b>Ability:</b> Wisdom</p><p><b>Weight:</b> 5 lb.</p><p><b>Utilize:</b> Paint a recognizable image of something you've seen (DC 10)</p><p><b>Craft:</b> Druidic Focus, Holy Symbol</p></description>
+				<picture type="string">images/item/painterssupplie.webp@SRD 5.2.1 Player's Rules</picture>
 			</painterssupplies>
 			<potterstools>
 				<name type="string">Potter's Tools</name>
@@ -4589,6 +4652,7 @@
 				<weight type="number">3</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><b>Ability:</b> Intelligence</p><p><b>Weight:</b> 3 lb.</p><p><b>Utilize:</b> Discern what a ceramic object held in the past 24 hours (DC 15)</p><p><b>Craft:</b> Jug, Lamp</p></description>
+				<picture type="string">images/item/potterstool.webp@SRD 5.2.1 Player's Rules</picture>
 			</potterstools>
 			<smithstools>
 				<name type="string">Smith's Tools</name>
@@ -4598,6 +4662,7 @@
 				<weight type="number">8</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><b>Ability:</b> Strength</p><p><b>Weight:</b> 8 lb.</p><p><b>Utilize:</b> Pry open a door or container (DC 20)</p><p><b>Craft:</b> Any Melee weapon (except Club, Greatclub, Quarterstaff, and Whip), Medium armor (except Hide), Heavy armor, Ball Bearings, Bucket, Caltrops, Chain, Crowbar, Firearm Bullets, Grappling Hook, Iron Pot, Iron Spikes, Sling Bullets</p></description>
+				<picture type="string">images/item/smithstool.webp@SRD 5.2.1 Player's Rules</picture>
 			</smithstools>
 			<tinkerstools>
 				<name type="string">Tinker's Tools</name>
@@ -4607,6 +4672,7 @@
 				<weight type="number">10</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><b>Ability:</b> Dexterity</p><p><b>Weight:</b> 10 lb.</p><p><b>Utilize:</b> Assemble a Tiny item composed of scrap, which falls apart in 1 minute (DC 20)</p><p><b>Craft:</b> Musket, Pistol, Bell, Bullseye Lantern, Flask, Hooded Lantern, Hunting Trap, Lock, Manacles, Mirror, Shovel, Signal Whistle, Tinderbox</p></description>
+				<picture type="string">images/item/tinkerstool.webp@SRD 5.2.1 Player's Rules</picture>
 			</tinkerstools>
 			<weaverstools>
 				<name type="string">Weaver's Tools</name>
@@ -4616,6 +4682,7 @@
 				<weight type="number">5</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><b>Ability:</b> Dexterity</p><p><b>Weight:</b> 5 lb.</p><p><b>Utilize:</b> Mend a tear in clothing (DC 10), or sew a Tiny design (DC 10)</p><p><b>Craft:</b> Padded Armor, Basket, Bedroll, Blanket, Fine Clothes, Net, Robe, Rope, Sack, String, Tent, Traveler's Clothes</p></description>
+				<picture type="string">images/item/weaverstool.webp@SRD 5.2.1 Player's Rules</picture>
 			</weaverstools>
 			<woodcarverstools>
 				<name type="string">Woodcarver's Tools</name>
@@ -4625,6 +4692,7 @@
 				<weight type="number">5</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><b>Ability:</b> Dexterity</p><p><b>Weight:</b> 5 lb.</p><p><b>Utilize:</b> Carve a pattern in wood (DC 10)</p><p><b>Craft:</b> Club, Greatclub, Quarterstaff, Ranged weapons (except Pistol, Musket, and Sling), Arcane Focus, Arrows, Bolts, Druidic Focus, Ink Pen, Needles</p></description>
+				<picture type="string">images/item/woodcarverstool.webp@SRD 5.2.1 Player's Rules</picture>
 			</woodcarverstools>
 			<disguisekit>
 				<name type="string">Disguise Kit</name>
@@ -4634,6 +4702,7 @@
 				<weight type="number">3</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><b>Ability:</b> Charisma</p><p><b>Weight:</b> 3 lb.</p><p><b>Utilize:</b> Apply makeup (DC 10)</p><p><b>Craft:</b> Costume</p></description>
+				<picture type="string">images/item/disguisekit.webp@SRD 5.2.1 Player's Rules</picture>
 			</disguisekit>
 			<forgerykit>
 				<name type="string">Forgery Kit</name>
@@ -4643,6 +4712,7 @@
 				<weight type="number">5</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><b>Ability:</b> Dexterity</p><p><b>Weight:</b> 5 lb.</p><p><b>Utilize:</b> Mimic 10 or fewer words of someone else's handwriting (DC 15), or duplicate a wax seal (DC 20)</p></description>
+				<picture type="string">images/item/forgerykit.webp@SRD 5.2.1 Player's Rules</picture>
 			</forgerykit>
 			<diceset>
 				<name type="string">Dice Set</name>
@@ -4652,6 +4722,7 @@
 				<weight type="number">0</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Gaming Set (Dice).</i></p><p><b>Ability:</b> Wisdom</p><p><b>Weight:</b> —</p><p><b>Utilize:</b> Discern whether someone is cheating (DC 10), or win the game (DC 20)</p></description>
+				<picture type="string">images/item/diceset.webp@SRD 5.2.1 Player's Rules</picture>
 			</diceset>
 			<dragonchessset>
 				<name type="string">Dragonchess Set</name>
@@ -4661,6 +4732,7 @@
 				<weight type="number">0</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Gaming Set (dragonchess).</i></p><p><b>Ability:</b> Wisdom</p><p><b>Weight:</b> —</p><p><b>Utilize:</b> Discern whether someone is cheating (DC 10), or win the game (DC 20)</p></description>
+				<picture type="string">images/item/dragonchessset.webp@SRD 5.2.1 Player's Rules</picture>
 			</dragonchessset>
 			<playingcards>
 				<name type="string">Playing Cards</name>
@@ -4670,6 +4742,7 @@
 				<weight type="number">0</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Gaming Set (playing cards).</i></p><p><b>Ability:</b> Wisdom</p><p><b>Weight:</b> —</p><p><b>Utilize:</b> Discern whether someone is cheating (DC 10), or win the game (DC 20)</p></description>
+				<picture type="string">images/item/playingcard.webp@SRD 5.2.1 Player's Rules</picture>
 			</playingcards>
 			<threedragonanteset>
 				<name type="string">Three-Dragon Ante Set</name>
@@ -4679,6 +4752,7 @@
 				<weight type="number">0</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Gaming Set (three-dragon ante).</i></p><p><b>Ability:</b> Wisdom</p><p><b>Weight:</b> —</p><p><b>Utilize:</b> Discern whether someone is cheating (DC 10), or win the game (DC 20)</p></description>
+				<picture type="string">images/item/threedragonanteset.webp@SRD 5.2.1 Player's Rules</picture>
 			</threedragonanteset>
 			<herbalismkit>
 				<name type="string">Herbalism Kit</name>
@@ -4688,6 +4762,7 @@
 				<weight type="number">3</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><b>Ability:</b> Intelligence</p><p><b>Weight:</b> 3 lb.</p><p><b>Utilize:</b> Identify a plant (DC 10)</p><p><b>Craft:</b> Antitoxin, Candle, Healer's Kit, Potion of Healing</p></description>
+				<picture type="string">images/item/herbalismkit.webp@SRD 5.2.1 Player's Rules</picture>
 			</herbalismkit>
 			<bagpipes>
 				<name type="string">Bagpipes</name>
@@ -4697,6 +4772,7 @@
 				<weight type="number">6</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Musical Instrument (Bagpipes).</i></p><p><b>Ability:</b> Charisma</p><p><b>Weight:</b> Varies</p><p><b>Utilize:</b> Play a known tune (DC 10), or improvise a song (DC 15)</p></description>
+				<picture type="string">images/item/bagpipe.webp@SRD 5.2.1 Player's Rules</picture>
 			</bagpipes>
 			<drum>
 				<name type="string">Drum</name>
@@ -4706,6 +4782,7 @@
 				<weight type="number">3</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Musical Instrument (drum).</i></p><p><b>Ability:</b> Charisma</p><p><b>Weight:</b> Varies</p><p><b>Utilize:</b> Play a known tune (DC 10), or improvise a song (DC 15)</p></description>
+				<picture type="string">images/item/drum.webp@SRD 5.2.1 Player's Rules</picture>
 			</drum>
 			<dulcimer>
 				<name type="string">Dulcimer</name>
@@ -4715,6 +4792,7 @@
 				<weight type="number">10</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Musical Instrument (dulcimer).</i></p><p><b>Ability:</b> Charisma</p><p><b>Weight:</b> Varies</p><p><b>Utilize:</b> Play a known tune (DC 10), or improvise a song (DC 15)</p></description>
+				<picture type="string">images/item/dulcimer.webp@SRD 5.2.1 Player's Rules</picture>
 			</dulcimer>
 			<flute>
 				<name type="string">Flute</name>
@@ -4724,6 +4802,7 @@
 				<weight type="number">1</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Musical Instrument (flute).</i></p><p><b>Ability:</b> Charisma</p><p><b>Weight:</b> Varies</p><p><b>Utilize:</b> Play a known tune (DC 10), or improvise a song (DC 15)</p></description>
+				<picture type="string">images/item/flute.webp@SRD 5.2.1 Player's Rules</picture>
 			</flute>
 			<horn>
 				<name type="string">Horn</name>
@@ -4733,6 +4812,7 @@
 				<weight type="number">2</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Musical Instrument (horn).</i></p><p><b>Ability:</b> Charisma</p><p><b>Weight:</b> Varies</p><p><b>Utilize:</b> Play a known tune (DC 10), or improvise a song (DC 15)</p></description>
+				<picture type="string">images/item/horn.webp@SRD 5.2.1 Player's Rules</picture>
 			</horn>
 			<lute>
 				<name type="string">Lute</name>
@@ -4742,6 +4822,7 @@
 				<weight type="number">2</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Musical Instrument (lute).</i></p><p><b>Ability:</b> Charisma</p><p><b>Weight:</b> Varies</p><p><b>Utilize:</b> Play a known tune (DC 10), or improvise a song (DC 15)</p></description>
+				<picture type="string">images/item/lute.webp@SRD 5.2.1 Player's Rules</picture>
 			</lute>
 			<lyre>
 				<name type="string">Lyre</name>
@@ -4751,6 +4832,7 @@
 				<weight type="number">2</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Musical Instrument (lyre).</i></p><p><b>Ability:</b> Charisma</p><p><b>Weight:</b> Varies</p><p><b>Utilize:</b> Play a known tune (DC 10), or improvise a song (DC 15)</p></description>
+				<picture type="string">images/item/lyre.webp@SRD 5.2.1 Player's Rules</picture>
 			</lyre>
 			<panflute>
 				<name type="string">Pan Flute</name>
@@ -4760,6 +4842,7 @@
 				<weight type="number">2</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Musical Instrument (pan flute).</i></p><p><b>Ability:</b> Charisma</p><p><b>Weight:</b> Varies</p><p><b>Utilize:</b> Play a known tune (DC 10), or improvise a song (DC 15)</p></description>
+				<picture type="string">images/item/panflute.webp@SRD 5.2.1 Player's Rules</picture>
 			</panflute>
 			<shawm>
 				<name type="string">Shawm</name>
@@ -4769,6 +4852,7 @@
 				<weight type="number">1</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Musical Instrument (shawm).</i></p><p><b>Ability:</b> Charisma</p><p><b>Weight:</b> Varies</p><p><b>Utilize:</b> Play a known tune (DC 10), or improvise a song (DC 15)</p></description>
+				<picture type="string">images/item/shawm.webp@SRD 5.2.1 Player's Rules</picture>
 			</shawm>
 			<viol>
 				<name type="string">Viol</name>
@@ -4778,6 +4862,7 @@
 				<weight type="number">1</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><i>Musical Instrument (viol).</i></p><p><b>Ability:</b> Charisma</p><p><b>Weight:</b> Varies</p><p><b>Utilize:</b> Play a known tune (DC 10), or improvise a song (DC 15)</p></description>
+				<picture type="string">images/item/viol.webp@SRD 5.2.1 Player's Rules</picture>
 			</viol>
 			<navigatorstools>
 				<name type="string">Navigator's Tools</name>
@@ -4787,6 +4872,7 @@
 				<weight type="number">2</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><b>Ability:</b> Wisdom</p><p><b>Weight:</b> 2 lb.</p><p><b>Utilize:</b> Plot a course (DC 10), or determine position by stargazing (DC 15)</p></description>
+				<picture type="string">images/item/navigatorstool.webp@SRD 5.2.1 Player's Rules</picture>
 			</navigatorstools>
 			<poisonerskit>
 				<name type="string">Poisoner's Kit</name>
@@ -4796,6 +4882,7 @@
 				<weight type="number">2</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><b>Ability:</b> Intelligence</p><p><b>Weight:</b> 2 lb.</p><p><b>Utilize:</b> Detect a poisoned object (DC 10)</p><p><b>Craft:</b> Basic Poison</p></description>
+				<picture type="string">images/item/poisonerskit.webp@SRD 5.2.1 Player's Rules</picture>
 			</poisonerskit>
 			<thievestools>
 				<name type="string">Thieves' Tools</name>
@@ -4805,6 +4892,7 @@
 				<weight type="number">1</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><b>Ability:</b> Dexterity</p><p><b>Weight:</b> 1 lb.</p><p><b>Utilize:</b> Pick a lock (DC 15), or disarm a trap (DC 15)</p></description>
+				<picture type="string">images/item/thievestool.webp@SRD 5.2.1 Player's Rules</picture>
 			</thievestools>
 		</category>
 		<category name="Adventuring Gear">
@@ -4816,6 +4904,7 @@
 				<weight type="number">1</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>When you take the Attack action, you can replace one of your attacks with throwing a vial of Acid. Target one creature or object you can see within 20 feet of yourself. The target must succeed on a Dexterity saving throw (DC 8 plus your Dexterity modifier and Proficiency Bonus) or take 2d6 Acid damage.</p></description>
+				<picture type="string">images/item/acid.webp@SRD 5.2.1 Player's Rules</picture>
 			</acid>
 			<alchemistsfire>
 				<name type="string">Alchemist's Fire</name>
@@ -4825,6 +4914,7 @@
 				<weight type="number">1</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>When you take the Attack action, you can replace one of your attacks with throwing a flask of Alchemist's Fire. Target one creature or object you can see within 20 feet of yourself. The target must succeed on a Dexterity saving throw (DC 8 plus your Dexterity modifier and Proficiency Bonus) or take 1d4 Fire damage and start burning (see &quot;Rules Glossary&quot;).</p></description>
+				<picture type="string">images/item/alchemistsfire.webp@SRD 5.2.1 Player's Rules</picture>
 			</alchemistsfire>
 			<antitoxin>
 				<name type="string">Antitoxin</name>
@@ -4834,6 +4924,7 @@
 				<weight type="number">0</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>As a Bonus Action, you can drink a vial of Antitoxin to gain Advantage on saving throws to avoid or end the Poisoned condition for 1 hour.</p></description>
+				<picture type="string">images/item/antitoxin.webp@SRD 5.2.1 Player's Rules</picture>
 			</antitoxin>
 			<arcanefocus>
 				<name type="string">Arcane Focus</name>
@@ -4843,6 +4934,7 @@
 				<weight type="number">0</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>An Arcane Focus takes one of the forms in the Arcane Focuses table and is bejeweled or carved to channel arcane magic. A Sorcerer, Warlock, or Wizard can use such an item as a Spellcasting Focus.</p><h>Arcane Focuses</h><table><tr decoration="underline"><td><b>Focus</b></td><td><b>Weight</b></td><td><b>Cost</b></td></tr><tr><td>Crystal</td><td>1 lb.</td><td>10 GP</td></tr><tr><td>Orb</td><td>3 lb.</td><td>20 GP</td></tr><tr><td>Rod</td><td>2 lb.</td><td>10 GP</td></tr><tr><td>Staff (also a Quarterstaff)</td><td>4 lb.</td><td>5 GP</td></tr><tr><td>Wand</td><td>1 lb.</td><td>10 GP</td></tr></table></description>
+				<picture type="string">images/item/arcanefocu.webp@SRD 5.2.1 Player's Rules</picture>
 			</arcanefocus>
 			<backpack>
 				<name type="string">Backpack</name>
@@ -4852,6 +4944,7 @@
 				<weight type="number">5</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>A Backpack holds up to 30 pounds within 1 cubic foot. It can also serve as a saddlebag.</p></description>
+				<picture type="string">images/item/backpack.webp@SRD 5.2.1 Player's Rules</picture>
 			</backpack>
 			<ballbearings>
 				<name type="string">Ball Bearings</name>
@@ -4861,6 +4954,7 @@
 				<weight type="number">2</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>As a Utilize action, you can spill Ball Bearings from their pouch. They spread to cover a level, 10-foot-square area within 10 feet of yourself. A creature that enters this area for the first time on a turn must succeed on a DC 10 Dexterity saving throw or have the Prone condition. It takes 10 minutes to recover the Ball Bearings.</p></description>
+				<picture type="string">images/item/ballbearing.webp@SRD 5.2.1 Player's Rules</picture>
 			</ballbearings>
 			<barrel>
 				<name type="string">Barrel</name>
@@ -4870,6 +4964,7 @@
 				<weight type="number">70</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>A Barrel holds up to 40 gallons of liquid or up to 4 cubic feet of dry goods.</p></description>
+				<picture type="string">images/item/barrel.webp@SRD 5.2.1 Player's Rules</picture>
 			</barrel>
 			<basket>
 				<name type="string">Basket</name>
@@ -4879,6 +4974,7 @@
 				<weight type="number">2</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>A Basket holds up to 40 pounds within 2 cubic feet.</p></description>
+				<picture type="string">images/item/basket.webp@SRD 5.2.1 Player's Rules</picture>
 			</basket>
 			<bedroll>
 				<name type="string">Bedroll</name>
@@ -4888,6 +4984,7 @@
 				<weight type="number">7</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>A Bedroll sleeps one Small or Medium creature. While in a Bedroll, you automatically succeed on saving throws against extreme cold (see &quot;Gameplay Toolbox&quot;).</p></description>
+				<picture type="string">images/item/bedroll.webp@SRD 5.2.1 Player's Rules</picture>
 			</bedroll>
 			<bell>
 				<name type="string">Bell</name>
@@ -4897,6 +4994,7 @@
 				<weight type="number">0</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>When rung as a Utilize action, a Bell produces a sound that can be heard up to 60 feet away.</p></description>
+				<picture type="string">images/item/bell.webp@SRD 5.2.1 Player's Rules</picture>
 			</bell>
 			<blanket>
 				<name type="string">Blanket</name>
@@ -4906,6 +5004,7 @@
 				<weight type="number">3</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>While wrapped in a blanket, you have Advantage on saving throws against extreme cold (see &quot;Gameplay Toolbox&quot;).</p></description>
+				<picture type="string">images/item/blanket.webp@SRD 5.2.1 Player's Rules</picture>
 			</blanket>
 			<blockandtackle>
 				<name type="string">Block and Tackle</name>
@@ -4915,6 +5014,7 @@
 				<weight type="number">5</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>A Block and Tackle allows you to hoist up to four times the weight you can normally lift.</p></description>
+				<picture type="string">images/item/blockandtackle.webp@SRD 5.2.1 Player's Rules</picture>
 			</blockandtackle>
 			<book>
 				<name type="string">Book</name>
@@ -4924,6 +5024,7 @@
 				<weight type="number">5</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>A Book contains fiction or nonfiction. If you consult an accurate nonfiction Book about its topic, you gain a +5 bonus to Intelligence (Arcana, History, Nature, or Religion) checks you make about that topic.</p></description>
+				<picture type="string">images/item/book.webp@SRD 5.2.1 Player's Rules</picture>
 			</book>
 			<bottleglass>
 				<name type="string">Bottle, Glass</name>
@@ -4933,6 +5034,7 @@
 				<weight type="number">2</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>A Glass Bottle holds up to 11/2 pints.</p></description>
+				<picture type="string">images/item/glassbottle.webp@SRD 5.2.1 Player's Rules</picture>
 			</bottleglass>
 			<bucket>
 				<name type="string">Bucket</name>
@@ -4942,6 +5044,7 @@
 				<weight type="number">2</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>A Bucket holds up to half a cubic foot of contents.</p></description>
+				<picture type="string">images/item/bucket.webp@SRD 5.2.1 Player's Rules</picture>
 			</bucket>
 			<burglarspack>
 				<name type="string">Burglar's Pack</name>
@@ -4951,6 +5054,7 @@
 				<weight type="number">42</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>A Burglar's Pack contains the following items: Backpack, Ball Bearings, Bell, 10 Candles, Crowbar, Hooded Lantern, 7 flasks of Oil, 5 days of Rations, Rope, Tinderbox, and Waterskin.</p></description>
+				<picture type="string">images/item/burglarspack.webp@SRD 5.2.1 Player's Rules</picture>
 			</burglarspack>
 			<caltrops>
 				<name type="string">Caltrops</name>
@@ -4960,6 +5064,7 @@
 				<weight type="number">2</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>As a Utilize action, you can spread Caltrops from their bag to cover a 5-foot-square area within 5 feet of yourself. A creature that enters this area for the first time on a turn must succeed on a DC 15 Dexterity saving throw or take 1 Piercing damage and have its Speed reduced to 0 until the start of its next turn. It takes 10 minutes to recover the Caltrops.</p></description>
+				<picture type="string">images/item/caltrop.webp@SRD 5.2.1 Player's Rules</picture>
 			</caltrops>
 			<candle>
 				<name type="string">Candle</name>
@@ -4969,6 +5074,7 @@
 				<weight type="number">0</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>For 1 hour, a lit Candle sheds Bright Light in a 5-foot radius and Dim Light for an additional 5 feet.</p></description>
+				<picture type="string">images/item/candle.webp@SRD 5.2.1 Player's Rules</picture>
 			</candle>
 			<casecrossbowbolt>
 				<name type="string">Case, Crossbow Bolt</name>
@@ -4978,6 +5084,7 @@
 				<weight type="number">1</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>A Crossbow Bolt Case holds up to 20 Bolts.</p></description>
+				<picture type="string">images/item/crossbowboltcase.webp@SRD 5.2.1 Player's Rules</picture>
 			</casecrossbowbolt>
 			<casemaporscroll>
 				<name type="string">Case, Map or Scroll</name>
@@ -4987,6 +5094,7 @@
 				<weight type="number">1</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>A Map or Scroll Case holds up to 10 sheets of paper or 5 sheets of parchment.</p></description>
+				<picture type="string">images/item/maporscrollcase.webp@SRD 5.2.1 Player's Rules</picture>
 			</casemaporscroll>
 			<chain>
 				<name type="string">Chain</name>
@@ -4996,6 +5104,7 @@
 				<weight type="number">10</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>As a Utilize action, you can wrap a Chain around an unwilling creature within 5 feet of yourself that has the Grappled, Incapacitated, or Restrained condition if you succeed on a DC 13 Strength (Athletics) check. If the creature's legs are bound, the creature has the Restrained condition until it escapes. Escaping the Chain requires the creature to make a successful DC 18 Dexterity (Acrobatics) check as an action. Bursting the Chain requires a successful DC 20 Strength (Athletics) check as an action.</p></description>
+				<picture type="string">images/item/chain.webp@SRD 5.2.1 Player's Rules</picture>
 			</chain>
 			<chest>
 				<name type="string">Chest</name>
@@ -5005,6 +5114,7 @@
 				<weight type="number">25</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>A Chest holds up to 12 cubic feet of contents.</p></description>
+				<picture type="string">images/item/chest.webp@SRD 5.2.1 Player's Rules</picture>
 			</chest>
 			<climberskit>
 				<name type="string">Climber's Kit</name>
@@ -5014,6 +5124,7 @@
 				<weight type="number">12</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>A Climber's Kit includes boot tips, gloves, pitons, and a harness. As a Utilize action, you can use the Climber's Kit to anchor yourself; when you do, you can't fall more than 25 feet from the anchor point, and you can't move more than 25 feet from there without undoing the anchor as a Bonus Action.</p></description>
+				<picture type="string">images/item/climberskit.webp@SRD 5.2.1 Player's Rules</picture>
 			</climberskit>
 			<clothesfine>
 				<name type="string">Clothes, Fine</name>
@@ -5023,6 +5134,7 @@
 				<weight type="number">6</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>Fine Clothes are made of expensive fabrics and adorned with expertly crafted details. Some events and locations admit only people wearing these clothes.</p></description>
+				<picture type="string">images/item/fineclothe.webp@SRD 5.2.1 Player's Rules</picture>
 			</clothesfine>
 			<clothestravelers>
 				<name type="string">Clothes, Traveler's</name>
@@ -5032,6 +5144,7 @@
 				<weight type="number">4</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>Traveler's Clothes are resilient garments designed for travel in various environments.</p></description>
+				<picture type="string">images/item/travelersclothe.webp@SRD 5.2.1 Player's Rules</picture>
 			</clothestravelers>
 			<componentpouch>
 				<name type="string">Component Pouch</name>
@@ -5041,6 +5154,7 @@
 				<weight type="number">2</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>A Component Pouch is watertight and filled with compartments that hold all the free Material components of your spells.</p></description>
+				<picture type="string">images/item/componentpouch.webp@SRD 5.2.1 Player's Rules</picture>
 			</componentpouch>
 			<costume>
 				<name type="string">Costume</name>
@@ -5050,6 +5164,7 @@
 				<weight type="number">4</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>While wearing a Costume, you have Advantage on any ability check you make to impersonate the person or type of person it represents.</p></description>
+				<picture type="string">images/item/costume.webp@SRD 5.2.1 Player's Rules</picture>
 			</costume>
 			<crowbar>
 				<name type="string">Crowbar</name>
@@ -5059,6 +5174,7 @@
 				<weight type="number">5</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>Using a Crowbar gives you Advantage on Strength checks where the Crowbar's leverage can be applied.</p></description>
+				<picture type="string">images/item/crowbar.webp@SRD 5.2.1 Player's Rules</picture>
 			</crowbar>
 			<diplomatspack>
 				<name type="string">Diplomat's Pack</name>
@@ -5068,6 +5184,7 @@
 				<weight type="number">39</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>A Diplomat's Pack contains the following items: Chest, Fine Clothes, Ink, 5 Ink Pens, Lamp, 2 Map or Scroll Cases, 4 flasks of Oil, 5 sheets of Paper, 5 sheets of Parchment, Perfume, and Tinderbox.</p></description>
+				<picture type="string">images/item/diplomatspack.webp@SRD 5.2.1 Player's Rules</picture>
 			</diplomatspack>
 			<druidicfocus>
 				<name type="string">Druidic Focus</name>
@@ -5077,6 +5194,7 @@
 				<weight type="number">0</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>A Druidic Focus takes one of the forms in the Druidic Focuses table and is carved, tied with ribbon, or painted to channel primal magic. A Druid or Ranger can use such an object as a Spellcasting Focus.</p><h>Druidic Focuses</h><table><tr decoration="underline"><td><b>Focus</b></td><td><b>Weight</b></td><td><b>Cost</b></td></tr><tr><td>Sprig of mistletoe</td><td>—</td><td>1 GP</td></tr><tr><td>Wooden staff (also a Quarterstaff)</td><td>4 lb.</td><td>5 GP</td></tr><tr><td>Yew wand</td><td>1 lb.</td><td>10 GP</td></tr></table></description>
+				<picture type="string">images/item/druidicfocu.webp@SRD 5.2.1 Player's Rules</picture>
 			</druidicfocus>
 			<dungeoneerspack>
 				<name type="string">Dungeoneer's Pack</name>
@@ -5086,6 +5204,7 @@
 				<weight type="number">55</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>A Dungeoneer's Pack contains the following items: Backpack, Caltrops, Crowbar, 2 flasks of Oil, 10 days of Rations, Rope, Tinderbox, 10 Torches, and Waterskin.</p></description>
+				<picture type="string">images/item/dungeoneerspack.webp@SRD 5.2.1 Player's Rules</picture>
 			</dungeoneerspack>
 			<entertainerspack>
 				<name type="string">Entertainer's Pack</name>
@@ -5095,6 +5214,7 @@
 				<weight type="number">58.5</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>An Entertainer's Pack contains the following items: Backpack, Bedroll, Bell, Bullseye Lantern, 3 Costumes, Mirror, 8 flasks of Oil, 9 days of Rations, Tinderbox, and Waterskin.</p></description>
+				<picture type="string">images/item/entertainerspack.webp@SRD 5.2.1 Player's Rules</picture>
 			</entertainerspack>
 			<explorerspack>
 				<name type="string">Explorer's Pack</name>
@@ -5104,6 +5224,7 @@
 				<weight type="number">55</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>An Explorer's Pack contains the following items: Backpack, Bedroll, 2 flasks of Oil, 10 days of Rations, Rope, Tinderbox, 10 Torches, and Waterskin.</p></description>
+				<picture type="string">images/item/explorerspack.webp@SRD 5.2.1 Player's Rules</picture>
 			</explorerspack>
 			<flask>
 				<name type="string">Flask</name>
@@ -5113,6 +5234,7 @@
 				<weight type="number">1</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>A Flask holds up to 1 pint.</p></description>
+				<picture type="string">images/item/flask.webp@SRD 5.2.1 Player's Rules</picture>
 			</flask>
 			<grapplinghook>
 				<name type="string">Grappling Hook</name>
@@ -5122,6 +5244,7 @@
 				<weight type="number">4</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>As a Utilize action, you can throw the Grappling Hook at a railing, a ledge, or another catch within 50 feet of yourself, and the hook catches on if you succeed on a DC 13 Dexterity (Acrobatics) check. If you tied a Rope to the hook, you can then climb it.</p></description>
+				<picture type="string">images/item/grapplinghook.webp@SRD 5.2.1 Player's Rules</picture>
 			</grapplinghook>
 			<healerskit>
 				<name type="string">Healer's Kit</name>
@@ -5131,6 +5254,7 @@
 				<weight type="number">3</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>A Healer's Kit has ten uses. As a Utilize action, you can expend one of its uses to stabilize an Unconscious creature that has 0 Hit Points without needing to make a Wisdom (Medicine) check.</p></description>
+				<picture type="string">images/item/healerskit.webp@SRD 5.2.1 Player's Rules</picture>
 			</healerskit>
 			<holysymbol>
 				<name type="string">Holy Symbol</name>
@@ -5140,6 +5264,7 @@
 				<weight type="number">0</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>A Holy Symbol takes one of the forms in the Holy Symbol table and is bejeweled or painted to channel divine magic. A Cleric or Paladin can use a Holy Symbol as a Spellcasting Focus.</p><p>The table indicates whether a Holy Symbol needs to be held, worn, or borne on fabric (such as a tabard or banner) or a Shield.</p><h>Holy Symbols</h><table><tr decoration="underline"><td><b>Symbol</b></td><td><b>Weight</b></td><td><b>Cost</b></td></tr><tr><td>Amulet (worn or held)</td><td>1 lb.</td><td>5 GP</td></tr><tr><td>Emblem (borne on fabric or a Shield)</td><td>—</td><td>5 GP</td></tr><tr><td>Reliquary (held)</td><td>2 lb.</td><td>5 GP</td></tr></table></description>
+				<picture type="string">images/item/holysymbol.webp@SRD 5.2.1 Player's Rules</picture>
 			</holysymbol>
 			<holywater>
 				<name type="string">Holy Water</name>
@@ -5149,6 +5274,7 @@
 				<weight type="number">1</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>When you take the Attack action, you can replace one of your attacks with throwing a flask of Holy Water. Target one creature you can see within 20 feet of yourself. The target must succeed on a Dexterity saving throw (DC 8 plus your Dexterity modifier and Proficiency Bonus) or take 2d8 Radiant damage if it is a Fiend or an Undead.</p></description>
+				<picture type="string">images/item/holywater.webp@SRD 5.2.1 Player's Rules</picture>
 			</holywater>
 			<huntingtrap>
 				<name type="string">Hunting Trap</name>
@@ -5158,6 +5284,7 @@
 				<weight type="number">25</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>As a Utilize action, you can set a Hunting Trap, which is a sawtooth steel ring that snaps shut when a creature steps on a pressure plate in the center. The trap is affixed by a heavy chain to an immobile object, such as a tree or a spike driven into the ground. A creature that steps on the plate must succeed on a DC 13 Dexterity saving throw or take 1d4 Piercing damage and have its Speed reduced to 0 until the start of its next turn. Thereafter, until the creature breaks free of the trap, its movement is limited by the length of the chain (typically 3 feet). A creature can use its action to make a DC 13 Strength (Athletics) check, freeing itself or another creature within its reach on a success. Each failed check deals 1 Piercing damage to the trapped creature.</p></description>
+				<picture type="string">images/item/huntingtrap.webp@SRD 5.2.1 Player's Rules</picture>
 			</huntingtrap>
 			<ink>
 				<name type="string">Ink</name>
@@ -5167,6 +5294,7 @@
 				<weight type="number">0</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>Ink comes in a 1-ounce bottle, which provides enough ink to write about 500 pages.</p></description>
+				<picture type="string">images/item/ink.webp@SRD 5.2.1 Player's Rules</picture>
 			</ink>
 			<inkpen>
 				<name type="string">Ink Pen</name>
@@ -5176,6 +5304,7 @@
 				<weight type="number">0</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>Using Ink, an Ink Pen is used to write or draw.</p></description>
+				<picture type="string">images/item/inkpen.webp@SRD 5.2.1 Player's Rules</picture>
 			</inkpen>
 			<jug>
 				<name type="string">Jug</name>
@@ -5185,6 +5314,7 @@
 				<weight type="number">4</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>A Jug holds up to 1 gallon.</p></description>
+				<picture type="string">images/item/jug.webp@SRD 5.2.1 Player's Rules</picture>
 			</jug>
 			<ladder>
 				<name type="string">Ladder</name>
@@ -5194,6 +5324,7 @@
 				<weight type="number">25</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>A Ladder is 10 feet tall. You must climb to move up or down it.</p></description>
+				<picture type="string">images/item/ladder.webp@SRD 5.2.1 Player's Rules</picture>
 			</ladder>
 			<lamp>
 				<name type="string">Lamp</name>
@@ -5203,6 +5334,7 @@
 				<weight type="number">1</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>A Lamp burns Oil as fuel to cast Bright Light in a 15-foot radius and Dim Light for an additional 30 feet.</p></description>
+				<picture type="string">images/item/lamp.webp@SRD 5.2.1 Player's Rules</picture>
 			</lamp>
 			<lanternbullseye>
 				<name type="string">Lantern, Bullseye</name>
@@ -5212,6 +5344,7 @@
 				<weight type="number">2</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>A Bullseye Lantern burns Oil as fuel to cast Bright Light in a 60-foot Cone and Dim Light for an additional 60 feet.</p></description>
+				<picture type="string">images/item/bullseyelantern.webp@SRD 5.2.1 Player's Rules</picture>
 			</lanternbullseye>
 			<lanternhooded>
 				<name type="string">Lantern, Hooded</name>
@@ -5221,6 +5354,7 @@
 				<weight type="number">2</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>A Hooded Lantern burns Oil as fuel to cast Bright Light in a 30-foot radius and Dim Light for an additional 30 feet. As a Bonus Action, you can lower the hood, reducing the light to Dim Light in a 5-foot radius, or raise it again.</p></description>
+				<picture type="string">images/item/hoodedlantern.webp@SRD 5.2.1 Player's Rules</picture>
 			</lanternhooded>
 			<lock>
 				<name type="string">Lock</name>
@@ -5230,6 +5364,7 @@
 				<weight type="number">1</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>A Lock comes with a key. Without the key, a creature can use Thieves' Tools to pick this Lock with a successful DC 15 Dexterity (Sleight of Hand) check.</p></description>
+				<picture type="string">images/item/lock.webp@SRD 5.2.1 Player's Rules</picture>
 			</lock>
 			<magnifyingglass>
 				<name type="string">Magnifying Glass</name>
@@ -5239,6 +5374,7 @@
 				<weight type="number">0</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>A Magnifying Glass grants Advantage on any ability check made to appraise or inspect a highly detailed item. Lighting a fire with a Magnifying Glass requires light as bright as sunlight to focus, tinder to ignite, and about 5 minutes for the fire to ignite.</p></description>
+				<picture type="string">images/item/magnifyingglass.webp@SRD 5.2.1 Player's Rules</picture>
 			</magnifyingglass>
 			<manacles>
 				<name type="string">Manacles</name>
@@ -5248,6 +5384,7 @@
 				<weight type="number">6</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>As a Utilize action, you can use Manacles to bind an unwilling Small or Medium creature within 5 feet of yourself that has the Grappled, Incapacitated, or Restrained condition if you succeed on a DC 13 Dexterity (Sleight of Hand) check. While bound, a creature has Disadvantage on attack rolls, and the creature is Restrained if the Manacles are attached to a chain or hook that is fixed in place. Escaping the Manacles requires a successful DC 20 Dexterity (Sleight of Hand) check as an action. Bursting them requires a successful DC 25 Strength (Athletics) check as an action.</p><p>Each set of Manacles comes with a key. Without the key, a creature can use Thieves' Tools to pick the Manacles' lock with a successful DC 15 Dexterity (Sleight of Hand) check.</p></description>
+				<picture type="string">images/item/manacle.webp@SRD 5.2.1 Player's Rules</picture>
 			</manacles>
 			<map>
 				<name type="string">Map</name>
@@ -5257,6 +5394,7 @@
 				<weight type="number">0</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>If you consult an accurate Map, you gain a +5 bonus to Wisdom (Survival) checks you make to find your way in the place represented on it.</p></description>
+				<picture type="string">images/item/map.webp@SRD 5.2.1 Player's Rules</picture>
 			</map>
 			<mirror>
 				<name type="string">Mirror</name>
@@ -5266,6 +5404,7 @@
 				<weight type="number">0.5</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>A handheld steel Mirror is useful for personal cosmetics but also for peeking around corners and reflecting light as a signal.</p></description>
+				<picture type="string">images/item/mirror.webp@SRD 5.2.1 Player's Rules</picture>
 			</mirror>
 			<net>
 				<name type="string">Net</name>
@@ -5275,6 +5414,7 @@
 				<weight type="number">3</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>When you take the Attack action, you can replace one of your attacks with throwing a Net. Target a creature you can see within 15 feet of yourself. The target must succeed on a Dexterity saving throw (DC 8 plus your Dexterity modifier and Proficiency Bonus) or have the Restrained condition until it escapes. The target succeeds automatically if it is Huge or larger.</p><p>To escape, the target or a creature within 5 feet of it must take an action to make a DC 10 Strength (Athletics) check, freeing the Restrained creature on a success. Destroying the Net (AC 10; 5 HP; Immunity to Bludgeoning, Poison, and Psychic damage) also frees the target, ending the effect.</p></description>
+				<picture type="string">images/item/net.webp@SRD 5.2.1 Player's Rules</picture>
 			</net>
 			<oil>
 				<name type="string">Oil</name>
@@ -5284,6 +5424,7 @@
 				<weight type="number">1</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>You can douse a creature, object, or space with Oil or use it as fuel, as detailed below.</p><p><b><i>Dousing a Creature or an Object.</i></b> When you take the Attack action, you can replace one of your attacks with throwing an Oil flask. Target one creature or object within 20 feet of yourself. The target must succeed on a Dexterity saving throw (DC 8 plus your Dexterity modifier and Proficiency Bonus) or be covered in oil. If the target takes Fire damage before the oil dries (after 1 minute), the target takes an extra 5 Fire damage from burning oil.</p><p><b><i>Dousing a Space.</i></b> You can take the Utilize action to pour an Oil flask on level ground to cover a 5-foot-square area within 5 feet of yourself. If lit, the oil burns until the end of the turn 2 rounds from when the oil was lit (or 12 seconds) and deals 5 Fire damage to any creature that enters the area or ends its turn there. A creature can take this damage only once per turn.</p><p><b><i>Fuel.</i></b> Oil serves as fuel for Lamps and Lanterns. Once lit, a flask of Oil burns for 6 hours in a Lamp or Lantern. That duration doesn't need to be consecutive; you can extinguish the burning Oil (as a Utilize action) and rekindle it again until it has burned for a total of 6 hours.</p></description>
+				<picture type="string">images/item/oil.webp@SRD 5.2.1 Player's Rules</picture>
 			</oil>
 			<paper>
 				<name type="string">Paper</name>
@@ -5293,6 +5434,7 @@
 				<weight type="number">0</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>One sheet of Paper can hold about 250 handwritten words.</p></description>
+				<picture type="string">images/item/paper.webp@SRD 5.2.1 Player's Rules</picture>
 			</paper>
 			<parchment>
 				<name type="string">Parchment</name>
@@ -5302,6 +5444,7 @@
 				<weight type="number">0</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>One sheet of Parchment can hold about 250 handwritten words.</p></description>
+				<picture type="string">images/item/parchment.webp@SRD 5.2.1 Player's Rules</picture>
 			</parchment>
 			<perfume>
 				<name type="string">Perfume</name>
@@ -5311,6 +5454,7 @@
 				<weight type="number">0</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>Perfume comes in a 4-ounce vial. For 1 hour after applying Perfume to yourself, you have Advantage on Charisma (Persuasion) checks made to influence an Indifferent Humanoid within 5 feet of yourself.</p></description>
+				<picture type="string">images/item/perfume.webp@SRD 5.2.1 Player's Rules</picture>
 			</perfume>
 			<poisonbasic>
 				<name type="string">Poison, Basic</name>
@@ -5320,6 +5464,7 @@
 				<weight type="number">0</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>As a Bonus Action, you can use a vial of Basic Poison to coat one weapon or up to three pieces of ammunition. A creature that takes Piercing or Slashing damage from the poisoned weapon or ammunition takes an extra 1d4 Poison damage. Once applied, the poison retains potency for 1 minute or until its damage is dealt, whichever comes first.</p></description>
+				<picture type="string">images/item/basicpoison.webp@SRD 5.2.1 Player's Rules</picture>
 			</poisonbasic>
 			<pole>
 				<name type="string">Pole</name>
@@ -5329,6 +5474,7 @@
 				<weight type="number">7</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>A Pole is 10 feet long. You can use it to touch something up to 10 feet away. If you must make a Strength (Athletics) check as part of a High or Long Jump, you can use the Pole to vault, giving yourself Advantage on the check.</p></description>
+				<picture type="string">images/item/pole.webp@SRD 5.2.1 Player's Rules</picture>
 			</pole>
 			<potiron>
 				<name type="string">Pot, Iron</name>
@@ -5338,6 +5484,7 @@
 				<weight type="number">10</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>An Iron Pot holds up to 1 gallon.</p></description>
+				<picture type="string">images/item/ironpot.webp@SRD 5.2.1 Player's Rules</picture>
 			</potiron>
 			<potionofhealing>
 				<name type="string">Potion of Healing</name>
@@ -5347,6 +5494,7 @@
 				<weight type="number">0.5</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>This potion is a magic item. As a Bonus Action, you can drink it or administer it to another creature within 5 feet of yourself. The creature that drinks the magical red fluid in this vial regains 2d4 + 2 Hit Points.</p></description>
+				<picture type="string">images/item/potionofhealing.webp@SRD 5.2.1 Player's Rules</picture>
 			</potionofhealing>
 			<pouch>
 				<name type="string">Pouch</name>
@@ -5356,6 +5504,7 @@
 				<weight type="number">1</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>A Pouch holds up to 6 pounds within one-fifth of a cubic foot.</p></description>
+				<picture type="string">images/item/pouch.webp@SRD 5.2.1 Player's Rules</picture>
 			</pouch>
 			<priestspack>
 				<name type="string">Priest's Pack</name>
@@ -5365,6 +5514,7 @@
 				<weight type="number">29</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>A Priest's Pack contains the following items: Backpack, Blanket, Holy Water, Lamp, 7 days of Rations, Robe, and Tinderbox.</p></description>
+				<picture type="string">images/item/priestspack.webp@SRD 5.2.1 Player's Rules</picture>
 			</priestspack>
 			<quiver>
 				<name type="string">Quiver</name>
@@ -5374,6 +5524,7 @@
 				<weight type="number">1</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>A Quiver holds up to 20 Arrows.</p></description>
+				<picture type="string">images/item/quiver.webp@SRD 5.2.1 Player's Rules</picture>
 			</quiver>
 			<ramportable>
 				<name type="string">Ram, Portable</name>
@@ -5383,6 +5534,7 @@
 				<weight type="number">35</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>You can use a Portable Ram to break down doors. When doing so, you gain a +4 bonus to the Strength check. One other character can help you use the ram, giving you Advantage on this check.</p></description>
+				<picture type="string">images/item/portableram.webp@SRD 5.2.1 Player's Rules</picture>
 			</ramportable>
 			<rations>
 				<name type="string">Rations</name>
@@ -5392,6 +5544,7 @@
 				<weight type="number">2</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>Rations consist of travel-ready food, including jerky, dried fruit, hardtack, and nuts. See &quot;Malnutrition&quot; in &quot;Rules Glossary&quot; for the risks of not eating.</p></description>
+				<picture type="string">images/item/ration.webp@SRD 5.2.1 Player's Rules</picture>
 			</rations>
 			<robe>
 				<name type="string">Robe</name>
@@ -5401,6 +5554,7 @@
 				<weight type="number">4</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>A Robe has vocational or ceremonial significance. Some events and locations admit only people wearing a Robe bearing certain colors or symbols.</p></description>
+				<picture type="string">images/item/robe.webp@SRD 5.2.1 Player's Rules</picture>
 			</robe>
 			<rope>
 				<name type="string">Rope</name>
@@ -5410,6 +5564,7 @@
 				<weight type="number">5</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>As a Utilize action, you can tie a knot with Rope if you succeed on a DC 10 Dexterity (Sleight of Hand) check. The Rope can be burst with a successful DC 20 Strength (Athletics) check.</p><p>You can bind an unwilling creature with the Rope only if the creature has the Grappled, Incapacitated, or Restrained condition. If the creature's legs are bound, the creature has the Restrained condition until it escapes. Escaping the Rope requires the creature to make a successful DC 15 Dexterity (Acrobatics) check as an action.</p></description>
+				<picture type="string">images/item/rope.webp@SRD 5.2.1 Player's Rules</picture>
 			</rope>
 			<sack>
 				<name type="string">Sack</name>
@@ -5419,6 +5574,7 @@
 				<weight type="number">0.5</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>A Sack holds up to 30 pounds within 1 cubic foot.</p></description>
+				<picture type="string">images/item/sack.webp@SRD 5.2.1 Player's Rules</picture>
 			</sack>
 			<scholarspack>
 				<name type="string">Scholar's Pack</name>
@@ -5428,6 +5584,7 @@
 				<weight type="number">22</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>A Scholar's Pack contains the following items: Backpack, Book, Ink, Ink Pen, Lamp, 10 flasks of Oil, 10 sheets of Parchment, and Tinderbox.</p></description>
+				<picture type="string">images/item/scholarspack.webp@SRD 5.2.1 Player's Rules</picture>
 			</scholarspack>
 			<shovel>
 				<name type="string">Shovel</name>
@@ -5437,6 +5594,7 @@
 				<weight type="number">5</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>Working for 1 hour, you can use a Shovel to dig a hole that is 5 feet on each side in soil or similar material.</p></description>
+				<picture type="string">images/item/shovel.webp@SRD 5.2.1 Player's Rules</picture>
 			</shovel>
 			<signalwhistle>
 				<name type="string">Signal Whistle</name>
@@ -5446,6 +5604,7 @@
 				<weight type="number">0</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>When blown as a Utilize action, a Signal Whistle produces a sound that can be heard up to 600 feet away.</p></description>
+				<picture type="string">images/item/signalwhistle.webp@SRD 5.2.1 Player's Rules</picture>
 			</signalwhistle>
 			<spikesiron>
 				<name type="string">Spikes, Iron</name>
@@ -5455,6 +5614,7 @@
 				<weight type="number">5</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>Iron Spikes come in bundles of ten. As a Utilize action, you can use a blunt object, such as a Light Hammer, to hammer a spike into wood, earth, or a similar material. You can do so to jam a door shut or to then tie a Rope or Chain to the Spike.</p></description>
+				<picture type="string">images/item/ironspike.webp@SRD 5.2.1 Player's Rules</picture>
 			</spikesiron>
 			<spyglass>
 				<name type="string">Spyglass</name>
@@ -5464,6 +5624,7 @@
 				<weight type="number">1</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>Objects viewed through a Spyglass are magnified to twice their size.</p></description>
+				<picture type="string">images/item/spyglass.webp@SRD 5.2.1 Player's Rules</picture>
 			</spyglass>
 			<string>
 				<name type="string">String</name>
@@ -5473,6 +5634,7 @@
 				<weight type="number">0</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>String is 10 feet long. You can tie a knot in it as a Utilize action.</p></description>
+				<picture type="string">images/item/string.webp@SRD 5.2.1 Player's Rules</picture>
 			</string>
 			<tent>
 				<name type="string">Tent</name>
@@ -5482,6 +5644,7 @@
 				<weight type="number">20</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>A Tent sleeps up to two Small or Medium creatures.</p></description>
+				<picture type="string">images/item/tent.webp@SRD 5.2.1 Player's Rules</picture>
 			</tent>
 			<tinderbox>
 				<name type="string">Tinderbox</name>
@@ -5491,6 +5654,7 @@
 				<weight type="number">1</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>A Tinderbox is a small container holding flint, fire steel, and tinder (usually dry cloth soaked in light oil) used to kindle a fire. Using it to light a Candle, Lamp, Lantern, or Torch—or anything else with exposed fuel—takes a Bonus Action. Lighting any other fire takes 1 minute.</p></description>
+				<picture type="string">images/item/tinderbox.webp@SRD 5.2.1 Player's Rules</picture>
 			</tinderbox>
 			<torch>
 				<name type="string">Torch</name>
@@ -5500,6 +5664,7 @@
 				<weight type="number">1</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>A Torch burns for 1 hour, casting Bright Light in a 20-foot radius and Dim Light for an additional 20 feet. When you take the Attack action, you can attack with the Torch, using it as a Simple Melee weapon. On a hit, the target takes 1 Fire damage.</p></description>
+				<picture type="string">images/item/torch.webp@SRD 5.2.1 Player's Rules</picture>
 			</torch>
 			<vial>
 				<name type="string">Vial</name>
@@ -5509,6 +5674,7 @@
 				<weight type="number">0</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>A Vial holds up to 4 ounces.</p></description>
+				<picture type="string">images/item/vial.webp@SRD 5.2.1 Player's Rules</picture>
 			</vial>
 			<waterskin>
 				<name type="string">Waterskin</name>
@@ -5518,6 +5684,7 @@
 				<weight type="number">5</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>A Waterskin holds up to 4 pints. If you don't drink sufficient water, you risk dehydration (see &quot;Rules Glossary&quot;).</p></description>
+				<picture type="string">images/item/waterskin.webp@SRD 5.2.1 Player's Rules</picture>
 			</waterskin>
 			<arrows20>
 				<name type="string">Arrows (20)</name>
@@ -5527,6 +5694,7 @@
 				<weight type="number">1</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>20 arrows, kept in a Quiver.</p><p>Ammunition is required by a weapon that has the Ammunition property. A weapon's description specifies the type of ammunition used by the weapon. The Ammunition table lists the different types and the amount you get when you buy them. The table also lists the item that is typically used to store each type; storage must be bought separately.</p></description>
+				<picture type="string">images/item/arrow.webp@SRD 5.2.1 Player's Rules</picture>
 			</arrows20>
 			<bolts20>
 				<name type="string">Bolts (20)</name>
@@ -5536,6 +5704,7 @@
 				<weight type="number">1.5</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>20 bolts, kept in a Case.</p><p>Ammunition is required by a weapon that has the Ammunition property. A weapon's description specifies the type of ammunition used by the weapon. The Ammunition table lists the different types and the amount you get when you buy them. The table also lists the item that is typically used to store each type; storage must be bought separately.</p></description>
+				<picture type="string">images/item/bolt.webp@SRD 5.2.1 Player's Rules</picture>
 			</bolts20>
 			<bulletsfirearm10>
 				<name type="string">Bullets, Firearm (10)</name>
@@ -5545,6 +5714,7 @@
 				<weight type="number">2</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>10 bullets, firearm, kept in a Pouch.</p><p>Ammunition is required by a weapon that has the Ammunition property. A weapon's description specifies the type of ammunition used by the weapon. The Ammunition table lists the different types and the amount you get when you buy them. The table also lists the item that is typically used to store each type; storage must be bought separately.</p></description>
+				<picture type="string">images/item/firearmbullet.webp@SRD 5.2.1 Player's Rules</picture>
 			</bulletsfirearm10>
 			<bulletssling20>
 				<name type="string">Bullets, Sling (20)</name>
@@ -5554,6 +5724,7 @@
 				<weight type="number">1.5</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>20 bullets, sling, kept in a Pouch.</p><p>Ammunition is required by a weapon that has the Ammunition property. A weapon's description specifies the type of ammunition used by the weapon. The Ammunition table lists the different types and the amount you get when you buy them. The table also lists the item that is typically used to store each type; storage must be bought separately.</p></description>
+				<picture type="string">images/item/slingbullet.webp@SRD 5.2.1 Player's Rules</picture>
 			</bulletssling20>
 			<needles50>
 				<name type="string">Needles (50)</name>
@@ -5563,6 +5734,7 @@
 				<weight type="number">1</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>50 needles, kept in a Pouch.</p><p>Ammunition is required by a weapon that has the Ammunition property. A weapon's description specifies the type of ammunition used by the weapon. The Ammunition table lists the different types and the amount you get when you buy them. The table also lists the item that is typically used to store each type; storage must be bought separately.</p></description>
+				<picture type="string">images/item/needle.webp@SRD 5.2.1 Player's Rules</picture>
 			</needles50>
 			<arcanefocuscrystal>
 				<name type="string">Arcane Focus (Crystal)</name>
@@ -5572,6 +5744,7 @@
 				<weight type="number">1</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>Crystal.</p><p>An Arcane Focus takes one of the forms in the Arcane Focuses table and is bejeweled or carved to channel arcane magic. A Sorcerer, Warlock, or Wizard can use such an item as a Spellcasting Focus.</p></description>
+				<picture type="string">images/item/arcanefocu.webp@SRD 5.2.1 Player's Rules</picture>
 			</arcanefocuscrystal>
 			<arcanefocusorb>
 				<name type="string">Arcane Focus (Orb)</name>
@@ -5581,6 +5754,7 @@
 				<weight type="number">3</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>Orb.</p><p>An Arcane Focus takes one of the forms in the Arcane Focuses table and is bejeweled or carved to channel arcane magic. A Sorcerer, Warlock, or Wizard can use such an item as a Spellcasting Focus.</p></description>
+				<picture type="string">images/item/arcanefocu.webp@SRD 5.2.1 Player's Rules</picture>
 			</arcanefocusorb>
 			<arcanefocusrod>
 				<name type="string">Arcane Focus (Rod)</name>
@@ -5590,6 +5764,7 @@
 				<weight type="number">2</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>Rod.</p><p>An Arcane Focus takes one of the forms in the Arcane Focuses table and is bejeweled or carved to channel arcane magic. A Sorcerer, Warlock, or Wizard can use such an item as a Spellcasting Focus.</p></description>
+				<picture type="string">images/item/arcanefocu.webp@SRD 5.2.1 Player's Rules</picture>
 			</arcanefocusrod>
 			<arcanefocusstaff>
 				<name type="string">Arcane Focus (Staff)</name>
@@ -5599,6 +5774,7 @@
 				<weight type="number">4</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>Staff (also a Quarterstaff).</p><p>An Arcane Focus takes one of the forms in the Arcane Focuses table and is bejeweled or carved to channel arcane magic. A Sorcerer, Warlock, or Wizard can use such an item as a Spellcasting Focus.</p></description>
+				<picture type="string">images/item/arcanefocu.webp@SRD 5.2.1 Player's Rules</picture>
 			</arcanefocusstaff>
 			<arcanefocuswand>
 				<name type="string">Arcane Focus (Wand)</name>
@@ -5608,6 +5784,7 @@
 				<weight type="number">1</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>Wand.</p><p>An Arcane Focus takes one of the forms in the Arcane Focuses table and is bejeweled or carved to channel arcane magic. A Sorcerer, Warlock, or Wizard can use such an item as a Spellcasting Focus.</p></description>
+				<picture type="string">images/item/arcanefocu.webp@SRD 5.2.1 Player's Rules</picture>
 			</arcanefocuswand>
 			<druidicfocussprigofmistletoe>
 				<name type="string">Druidic Focus (Sprig of Mistletoe)</name>
@@ -5617,6 +5794,7 @@
 				<weight type="number">0</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>Sprig of mistletoe.</p><p>A Druidic Focus takes one of the forms in the Druidic Focuses table and is carved, tied with ribbon, or painted to channel primal magic. A Druid or Ranger can use such an object as a Spellcasting Focus.</p></description>
+				<picture type="string">images/item/druidicfocu.webp@SRD 5.2.1 Player's Rules</picture>
 			</druidicfocussprigofmistletoe>
 			<druidicfocuswoodenstaff>
 				<name type="string">Druidic Focus (Wooden Staff)</name>
@@ -5626,6 +5804,7 @@
 				<weight type="number">4</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>Wooden staff (also a Quarterstaff).</p><p>A Druidic Focus takes one of the forms in the Druidic Focuses table and is carved, tied with ribbon, or painted to channel primal magic. A Druid or Ranger can use such an object as a Spellcasting Focus.</p></description>
+				<picture type="string">images/item/druidicfocu.webp@SRD 5.2.1 Player's Rules</picture>
 			</druidicfocuswoodenstaff>
 			<druidicfocusyewwand>
 				<name type="string">Druidic Focus (Yew Wand)</name>
@@ -5635,6 +5814,7 @@
 				<weight type="number">1</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>Yew wand.</p><p>A Druidic Focus takes one of the forms in the Druidic Focuses table and is carved, tied with ribbon, or painted to channel primal magic. A Druid or Ranger can use such an object as a Spellcasting Focus.</p></description>
+				<picture type="string">images/item/druidicfocu.webp@SRD 5.2.1 Player's Rules</picture>
 			</druidicfocusyewwand>
 			<holysymbolamulet>
 				<name type="string">Holy Symbol (Amulet)</name>
@@ -5644,6 +5824,7 @@
 				<weight type="number">1</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>Amulet (worn or held).</p><p>A Holy Symbol takes one of the forms in the Holy Symbol table and is bejeweled or painted to channel divine magic. A Cleric or Paladin can use a Holy Symbol as a Spellcasting Focus.</p></description>
+				<picture type="string">images/item/holysymbol.webp@SRD 5.2.1 Player's Rules</picture>
 			</holysymbolamulet>
 			<holysymbolemblem>
 				<name type="string">Holy Symbol (Emblem)</name>
@@ -5653,6 +5834,7 @@
 				<weight type="number">0</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>Emblem (borne on fabric or a Shield).</p><p>A Holy Symbol takes one of the forms in the Holy Symbol table and is bejeweled or painted to channel divine magic. A Cleric or Paladin can use a Holy Symbol as a Spellcasting Focus.</p></description>
+				<picture type="string">images/item/holysymbol.webp@SRD 5.2.1 Player's Rules</picture>
 			</holysymbolemblem>
 			<holysymbolreliquary>
 				<name type="string">Holy Symbol (Reliquary)</name>
@@ -5662,6 +5844,7 @@
 				<weight type="number">2</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>Reliquary (held).</p><p>A Holy Symbol takes one of the forms in the Holy Symbol table and is bejeweled or painted to channel divine magic. A Cleric or Paladin can use a Holy Symbol as a Spellcasting Focus.</p></description>
+				<picture type="string">images/item/holysymbol.webp@SRD 5.2.1 Player's Rules</picture>
 			</holysymbolreliquary>
 			<spellscrollcantrip>
 				<name type="string">Spell Scroll (Cantrip)</name>
@@ -5671,6 +5854,7 @@
 				<weight type="number">0</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>A <i>Spell Scroll</i> (Cantrip) or <i>Spell Scroll</i> (Level 1) is a magic item that bears the words of a cantrip or level 1 spell, respectively, determined by the scroll's creator. If the spell is on your class's spell list, you can read the scroll and cast the spell using its normal casting time and without providing any Material components.</p><p>If the spell requires a saving throw or an attack roll, the spell save DC is 13, and the attack bonus is +5. The scroll disintegrates when the casting is completed.</p></description>
+				<picture type="string">images/item/spellscroll.webp@SRD 5.2.1 Player's Rules</picture>
 			</spellscrollcantrip>
 			<spellscrolllevel1>
 				<name type="string">Spell Scroll (Level 1)</name>
@@ -5680,6 +5864,7 @@
 				<weight type="number">0</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p>A <i>Spell Scroll</i> (Cantrip) or <i>Spell Scroll</i> (Level 1) is a magic item that bears the words of a cantrip or level 1 spell, respectively, determined by the scroll's creator. If the spell is on your class's spell list, you can read the scroll and cast the spell using its normal casting time and without providing any Material components.</p><p>If the spell requires a saving throw or an attack roll, the spell save DC is 13, and the attack bonus is +5. The scroll disintegrates when the casting is completed.</p></description>
+				<picture type="string">images/item/spellscroll.webp@SRD 5.2.1 Player's Rules</picture>
 			</spellscrolllevel1>
 		</category>
 		<category name="Mounts and Vehicles">
@@ -5690,6 +5875,7 @@
 				<cost type="string">50 GP</cost>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><b>Item:</b> Camel <b>Carrying Capacity:</b> 450 lb. <b>Cost:</b> 50 GP</p></description>
+				<picture type="string">images/item/camel.webp@SRD 5.2.1 Player's Rules</picture>
 			</camel>
 			<elephant>
 				<name type="string">Elephant</name>
@@ -5698,6 +5884,7 @@
 				<cost type="string">200 GP</cost>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><b>Item:</b> Elephant <b>Carrying Capacity:</b> 1,320 lb. <b>Cost:</b> 200 GP</p></description>
+				<picture type="string">images/item/elephant.webp@SRD 5.2.1 Player's Rules</picture>
 			</elephant>
 			<horsedraft>
 				<name type="string">Horse, Draft</name>
@@ -5706,6 +5893,7 @@
 				<cost type="string">50 GP</cost>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><b>Item:</b> Horse, Draft <b>Carrying Capacity:</b> 540 lb. <b>Cost:</b> 50 GP</p></description>
+				<picture type="string">images/item/drafthorse.webp@SRD 5.2.1 Player's Rules</picture>
 			</horsedraft>
 			<horseriding>
 				<name type="string">Horse, Riding</name>
@@ -5714,6 +5902,7 @@
 				<cost type="string">75 GP</cost>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><b>Item:</b> Horse, Riding <b>Carrying Capacity:</b> 480 lb. <b>Cost:</b> 75 GP</p></description>
+				<picture type="string">images/item/ridinghorse.webp@SRD 5.2.1 Player's Rules</picture>
 			</horseriding>
 			<mastiff>
 				<name type="string">Mastiff</name>
@@ -5722,6 +5911,7 @@
 				<cost type="string">25 GP</cost>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><b>Item:</b> Mastiff <b>Carrying Capacity:</b> 195 lb. <b>Cost:</b> 25 GP</p></description>
+				<picture type="string">images/item/mastiff.webp@SRD 5.2.1 Player's Rules</picture>
 			</mastiff>
 			<mule>
 				<name type="string">Mule</name>
@@ -5730,6 +5920,7 @@
 				<cost type="string">8 GP</cost>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><b>Item:</b> Mule <b>Carrying Capacity:</b> 420 lb. <b>Cost:</b> 8 GP</p></description>
+				<picture type="string">images/item/mule.webp@SRD 5.2.1 Player's Rules</picture>
 			</mule>
 			<pony>
 				<name type="string">Pony</name>
@@ -5738,6 +5929,7 @@
 				<cost type="string">30 GP</cost>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><b>Item:</b> Pony <b>Carrying Capacity:</b> 225 lb. <b>Cost:</b> 30 GP</p></description>
+				<picture type="string">images/item/pony.webp@SRD 5.2.1 Player's Rules</picture>
 			</pony>
 			<warhorse>
 				<name type="string">Warhorse</name>
@@ -5746,6 +5938,7 @@
 				<cost type="string">400 GP</cost>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><b>Item:</b> Warhorse <b>Carrying Capacity:</b> 540 lb. <b>Cost:</b> 400 GP</p></description>
+				<picture type="string">images/item/warhorse.webp@SRD 5.2.1 Player's Rules</picture>
 			</warhorse>
 			<carriage>
 				<name type="string">Carriage</name>
@@ -5755,6 +5948,7 @@
 				<weight type="number">600</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><b>Item:</b> Carriage <b>Weight:</b> 600 lb. <b>Cost:</b> 100 GP</p></description>
+				<picture type="string">images/item/carriage.webp@SRD 5.2.1 Player's Rules</picture>
 			</carriage>
 			<cart>
 				<name type="string">Cart</name>
@@ -5764,6 +5958,7 @@
 				<weight type="number">200</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><b>Item:</b> Cart <b>Weight:</b> 200 lb. <b>Cost:</b> 15 GP</p></description>
+				<picture type="string">images/item/cart.webp@SRD 5.2.1 Player's Rules</picture>
 			</cart>
 			<chariot>
 				<name type="string">Chariot</name>
@@ -5773,6 +5968,7 @@
 				<weight type="number">100</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><b>Item:</b> Chariot <b>Weight:</b> 100 lb. <b>Cost:</b> 250 GP</p></description>
+				<picture type="string">images/item/chariot.webp@SRD 5.2.1 Player's Rules</picture>
 			</chariot>
 			<feedperday>
 				<name type="string">Feed per day</name>
@@ -5782,6 +5978,7 @@
 				<weight type="number">10</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><b>Item:</b> Feed per day <b>Weight:</b> 10 lb. <b>Cost:</b> 5 CP</p></description>
+				<picture type="string">images/item/feedperday.webp@SRD 5.2.1 Player's Rules</picture>
 			</feedperday>
 			<exotic>
 				<name type="string">Exotic</name>
@@ -5791,6 +5988,7 @@
 				<weight type="number">40</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><b>Item:</b> Exotic <b>Weight:</b> 40 lb. <b>Cost:</b> 60 GP</p></description>
+				<picture type="string">images/item/exotic.webp@SRD 5.2.1 Player's Rules</picture>
 			</exotic>
 			<military>
 				<name type="string">Military</name>
@@ -5800,6 +5998,7 @@
 				<weight type="number">30</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><b>Item:</b> Military <b>Weight:</b> 30 lb. <b>Cost:</b> 20 GP</p></description>
+				<picture type="string">images/item/military.webp@SRD 5.2.1 Player's Rules</picture>
 			</military>
 			<riding>
 				<name type="string">Riding</name>
@@ -5809,6 +6008,7 @@
 				<weight type="number">25</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><b>Item:</b> Riding <b>Weight:</b> 25 lb. <b>Cost:</b> 10 GP</p></description>
+				<picture type="string">images/item/riding.webp@SRD 5.2.1 Player's Rules</picture>
 			</riding>
 			<sled>
 				<name type="string">Sled</name>
@@ -5818,6 +6018,7 @@
 				<weight type="number">300</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><b>Item:</b> Sled <b>Weight:</b> 300 lb. <b>Cost:</b> 20 GP</p></description>
+				<picture type="string">images/item/sled.webp@SRD 5.2.1 Player's Rules</picture>
 			</sled>
 			<stablingperday>
 				<name type="string">Stabling per day</name>
@@ -5827,6 +6028,7 @@
 				<weight type="number">0</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><b>Item:</b> Stabling per day <b>Weight:</b> — <b>Cost:</b> 5 SP</p></description>
+				<picture type="string">images/item/stablingperday.webp@SRD 5.2.1 Player's Rules</picture>
 			</stablingperday>
 			<wagon>
 				<name type="string">Wagon</name>
@@ -5836,6 +6038,7 @@
 				<weight type="number">400</weight>
 				<rarity type="string">Common</rarity>
 				<description type="formattedtext"><p><b>Item:</b> Wagon <b>Weight:</b> 400 lb. <b>Cost:</b> 35 GP</p></description>
+				<picture type="string">images/item/wagon.webp@SRD 5.2.1 Player's Rules</picture>
 			</wagon>
 		</category>
 	</item>

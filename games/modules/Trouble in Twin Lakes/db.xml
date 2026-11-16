@@ -385,6 +385,7 @@
 				<type type="string">Relic</type>
 				<description type="formattedtext"><p>A heavy iron medallion strung on a fine silver chain. No Suraru will ever attack someone wearing this amulet.</p><list><li>A WIL save is required every time the amulet is put on. On a fail, the wearer becomes more ruthless, more cruel, and more reptilian each time. </li><li>Wearing it increases STR and DEX by 1d4 points each. Additionally, the wearer’s sense of smell and vision is enhanced.</li><li>Once per month, the wearer can fully recover STR by shedding their skin. </li><li>The effects wear off if the amulet is taken off for longer than a few days.</li></list></description>
 				<kind type="string">relic</kind>
+				<picture type="string">images/item/theeyeofvuk.webp@Trouble in Twin Lakes</picture>
 			</theeyeofvuk>
 			<fletchersire>
 				<name type="string">Fletcher’s Ire</name>
@@ -393,6 +394,7 @@
 				<bulky type="number">1</bulky>
 				<charges type="number">3</charges>
 				<kind type="string">relic</kind>
+				<picture type="string">images/item/fletchersire.webp@Trouble in Twin Lakes</picture>
 			</fletchersire>
 			<echospark>
 				<name type="string">Echo Spark</name>
@@ -400,6 +402,7 @@
 				<description type="formattedtext"><p>A Relic that activates only when someone dies in its presence, pulling them back through time to approximately 30 seconds before their death. They do not retain any memories of their death but are otherwise unchanged. One charge.</p><list><li><b>Recharge</b>: Crush with the weight of an elephant.</li></list></description>
 				<charges type="number">1</charges>
 				<kind type="string">relic</kind>
+				<picture type="string">images/item/echospark.webp@Trouble in Twin Lakes</picture>
 			</echospark>
 			<mooncloth>
 				<name type="string">Moon Cloth</name>
@@ -407,6 +410,7 @@
 				<description type="formattedtext"><p>Very warm and highly weather resistant. When held in moonlight, it can be woven into any shape, growing by a foot per hour. Petty.</p></description>
 				<petty type="number">1</petty>
 				<kind type="string">relic</kind>
+				<picture type="string">images/item/mooncloth.webp@Trouble in Twin Lakes</picture>
 			</mooncloth>
 			<curveddagger>
 				<name type="string">Curved Dagger</name>
@@ -414,6 +418,7 @@
 				<type type="string">Weapon</type>
 				<description type="formattedtext"><p>Used by overseers to control their unruly “pets.” When used against a <b>Suraru Imperator</b>, its damage is enhanced. Acts as a key to open the door at <b>T10a</b>.</p></description>
 				<kind type="string">relic</kind>
+				<picture type="string">images/item/curveddagger.webp@Trouble in Twin Lakes</picture>
 			</curveddagger>
 		</category>
 	</item>

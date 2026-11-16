@@ -3,7 +3,7 @@
 // any FG module. Run: node scripts/build-content.mjs
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { writeModule } from "../games/lib/fg.mjs";
+import { gameOfBook, withItemArt, writeModule } from "../games/lib/fg.mjs";
 import { PLAYERS_HANDBOOK } from "../games/descending-darkness/players-handbook.mjs";
 import { BESTIARY } from "../games/descending-darkness/bestiary.mjs";
 import { EMPTY_WATCHTOWER } from "../games/descending-darkness/empty-watchtower.mjs";
@@ -38,7 +38,14 @@ import { BRINE_STREET } from "../games/forged-dark/brine-street.mjs";
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 const out = path.join(root, "games", "modules");
 const modules = [PLAYERS_HANDBOOK, BESTIARY, EMPTY_WATCHTOWER, CREW_HANDBOOK, DOSSIER, SALVAGE_RIGHTS, LAMP_IN_THE_ROCK, PLAYERS_RULES, CREATURES_SPEC, MAGIC_ITEMS_SPEC, CAIRN_PLAYERS_GUIDE, CAIRN_WARDENS_GUIDE, TROUBLE_IN_TWIN_LAKES, BF_PLAYERS, BF_GM, MILL_AT_HOBS_FORD, FATE_CORE, FATE_ACCELERATED, FATE_TOOLKIT, GULLS_END, ...IRONSWORN_BOOKS, ...STARFORGED_BOOKS, FORGED_PLAYERS, FORGED_GM, BRINE_STREET];
-for (const spec of modules) {
+// Each game's own item pictures (games/<game>/art/item, made by games/tools/item-art.mjs),
+// carried inside each of that game's books.
+const itemArtOf = (spec) => {
+  const game = gameOfBook(spec.name);
+  return game ? path.join(root, "games", game, "art") : "";
+};
+for (const plain of modules) {
+  const spec = withItemArt(plain, itemArtOf(plain));
   const folder = writeModule(out, spec);
   console.log(`built ${path.relative(root, folder)}`);
 }

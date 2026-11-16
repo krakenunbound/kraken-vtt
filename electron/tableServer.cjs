@@ -1664,7 +1664,9 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
       }
       // A player's own record (a note, their character) may show a picture from
       // the module it came from or a book shared with them, never from the GM's other modules.
-      const reference = record?.data?.[kind] || record?.data?.picture || record?.data?.token;
+      // An item in a character's gear (row: its inventory key): the picture its item brought from its book.
+      const row = url.searchParams.get("row");
+      const reference = row ? record?.data?.inventorylist?.[row]?.picture : record?.data?.[kind] || record?.data?.picture || record?.data?.token;
       const named = String(reference ?? "").split("@")[1]?.trim() ?? "";
       const reaches = !named || client?.role === "dm" || !record.owner || named === record.source || canRead(client, named);
       const picture = allowed && reaches ? modulePicture(reference, record.source) : null;

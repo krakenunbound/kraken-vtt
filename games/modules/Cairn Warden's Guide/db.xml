@@ -2150,6 +2150,7 @@
 				<oddity type="string">Adjacent objects stick to the book with great force.</oddity>
 				<text type="string">An object is covered in extremely sticky slime. Adjacent objects stick to the book with great force.</text>
 				<description type="formattedtext"><p><b>Adhere</b>: An object is covered in extremely sticky slime. <i>Adjacent objects stick to the book with great force.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookadhere.webp@Cairn Warden's Guide</picture>
 			</spellbookadhere>
 			<spellbookanchor>
 				<name type="string">Spellbook: Anchor</name>
@@ -2161,6 +2162,7 @@
 				<oddity type="string">If a rope is pulled through the iron loop on its spine, it becomes as heavy as an elephant.</oddity>
 				<text type="string">A strong wire sprouts from your arms, affixing itself to two points within 50ft on each side. If a rope is pulled through the iron loop on its spine, it becomes as heavy as an elephant.</text>
 				<description type="formattedtext"><p><b>Anchor</b>: A strong wire sprouts from your arms, affixing itself to two points within 50ft on each side. <i>If a rope is pulled through the iron loop on its spine, it becomes as heavy as an elephant.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookanchor.webp@Cairn Warden's Guide</picture>
 			</spellbookanchor>
 			<spellbookanimateobject>
 				<name type="string">Spellbook: Animate Object</name>
@@ -2172,6 +2174,7 @@
 				<oddity type="string">Moldable like clay. Childish laughter sprouts from its pages.</oddity>
 				<text type="string">An object obeys your commands as best it can. Moldable like clay. Childish laughter sprouts from its pages.</text>
 				<description type="formattedtext"><p><b>Animate Object</b>: An object obeys your commands as best it can. <i>Moldable like clay. Childish laughter sprouts from its pages.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookanimateobject.webp@Cairn Warden's Guide</picture>
 			</spellbookanimateobject>
 			<spellbookanthropomorphize>
 				<name type="string">Spellbook: Anthropomorphize</name>
@@ -2183,6 +2186,7 @@
 				<oddity type="string">Whimpers, purrs and growls depending on its treatment.</oddity>
 				<text type="string">An animal either gains human intelligence or human appearance for one day. Whimpers, purrs and growls depending on its treatment.</text>
 				<description type="formattedtext"><p><b>Anthropomorphize</b>: An animal either gains human intelligence or human appearance for one day. <i>Whimpers, purrs and growls depending on its treatment.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookanthropomorphize.webp@Cairn Warden's Guide</picture>
 			</spellbookanthropomorphize>
 			<spellbookarcaneeye>
 				<name type="string">Spellbook: Arcane Eye</name>
@@ -2194,6 +2198,7 @@
 				<oddity type="string">Needs a spritz of water to open.</oddity>
 				<text type="string">You can see through a magical floating eyeball that flies around at your command. Needs a spritz of water to open.</text>
 				<description type="formattedtext"><p><b>Arcane Eye</b>: You can see through a magical floating eyeball that flies around at your command. <i>Needs a spritz of water to open.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookarcaneeye.webp@Cairn Warden's Guide</picture>
 			</spellbookarcaneeye>
 			<spellbookastralprison>
 				<name type="string">Spellbook: Astral Prison</name>
@@ -2205,6 +2210,7 @@
 				<oddity type="string">Silent, abstract, faces scream in anguish within.</oddity>
 				<text type="string">An object is frozen in time and space within an invulnerable crystal shell. Silent, abstract, faces scream in anguish within.</text>
 				<description type="formattedtext"><p><b>Astral Prison</b>: An object is frozen in time and space within an invulnerable crystal shell. <i>Silent, abstract, faces scream in anguish within.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookastralprison.webp@Cairn Warden's Guide</picture>
 			</spellbookastralprison>
 			<spellbookattract>
 				<name type="string">Spellbook: Attract</name>
@@ -2216,6 +2222,7 @@
 				<oddity type="string">Nearby compasses spin uselessly.</oddity>
 				<text type="string">Two objects are strongly magnetically attracted to each other if they come within 10 feet. Nearby compasses spin uselessly.</text>
 				<description type="formattedtext"><p><b>Attract</b>: Two objects are strongly magnetically attracted to each other if they come within 10 feet. <i>Nearby compasses spin uselessly.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookattract.webp@Cairn Warden's Guide</picture>
 			</spellbookattract>
 			<spellbookauditoryillusion>
 				<name type="string">Spellbook: Auditory Illusion</name>
@@ -2227,6 +2234,7 @@
 				<oddity type="string"></oddity>
 				<text type="string">You create illusory sounds that seem to come from a direction of your choice. Produces random and occasionally inopportune sounds throughout the day.</text>
 				<description type="formattedtext"><p><b>Auditory Illusion</b>: You create illusory sounds that seem to come from a direction of your choice. <i>Produces random and occasionally inopportune sounds throughout the day</i>.</p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookauditoryillusion.webp@Cairn Warden's Guide</picture>
 			</spellbookauditoryillusion>
 			<spellbookbabble>
 				<name type="string">Spellbook: Babble</name>
@@ -2238,6 +2246,7 @@
 				<oddity type="string">When the text is read aloud, the words of others become unintelligible.</oddity>
 				<text type="string">A creature must loudly and clearly repeat everything you think. It is otherwise mute. When the text is read aloud, the words of others become unintelligible.</text>
 				<description type="formattedtext"><p><b>Babble</b>: A creature must loudly and clearly repeat everything you think. It is otherwise mute. <i>When the text is read aloud, the words of others become unintelligible.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookbabble.webp@Cairn Warden's Guide</picture>
 			</spellbookbabble>
 			<spellbookbaitflower>
 				<name type="string">Spellbook: Bait Flower</name>
@@ -2249,6 +2258,7 @@
 				<oddity type="string">Attracts flies.</oddity>
 				<text type="string">A plant sprouts from the ground that emanates the smell of decaying flesh. Attracts flies.</text>
 				<description type="formattedtext"><p><b>Bait Flower</b>: A plant sprouts from the ground that emanates the smell of decaying flesh. <i>Attracts flies.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookbaitflower.webp@Cairn Warden's Guide</picture>
 			</spellbookbaitflower>
 			<spellbookbeastform>
 				<name type="string">Spellbook: Beast Form</name>
@@ -2260,6 +2270,7 @@
 				<oddity type="string">Covered in thick fur, its edges lined with small teeth.</oddity>
 				<text type="string">You and your possessions transform into a mundane animal. Covered in thick fur, its edges lined with small teeth.</text>
 				<description type="formattedtext"><p><b>Beast Form</b>: You and your possessions transform into a mundane animal. <i>Covered in thick fur, its edges lined with small teeth.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookbeastform.webp@Cairn Warden's Guide</picture>
 			</spellbookbeastform>
 			<spellbookbefuddle>
 				<name type="string">Spellbook: Befuddle</name>
@@ -2271,6 +2282,7 @@
 				<oddity type="string">Its contents shift and change each time it is opened.</oddity>
 				<text type="string">A creature of your choice is unable to form new short-term memories for the duration of the spell. Its contents shift and change each time it is opened.</text>
 				<description type="formattedtext"><p><b>Befuddle</b>: A creature of your choice is unable to form new short-term memories for the duration of the spell. <i>Its contents shift and change each time it is opened.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookbefuddle.webp@Cairn Warden's Guide</picture>
 			</spellbookbefuddle>
 			<spellbookbodyswap>
 				<name type="string">Spellbook: Body Swap</name>
@@ -2282,6 +2294,7 @@
 				<oddity type="string">The front cover shows an image of the last creature to read it.</oddity>
 				<text type="string">You switch bodies with a creature you touch. If one body dies, the other dies as well. The front cover shows an image of the last creature to read it.</text>
 				<description type="formattedtext"><p><b>Body Swap</b>: You switch bodies with a creature you touch. If one body dies, the other dies as well. <i>The front cover shows an image of the last creature to read it.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookbodyswap.webp@Cairn Warden's Guide</picture>
 			</spellbookbodyswap>
 			<spellbookcharm>
 				<name type="string">Spellbook: Charm</name>
@@ -2293,6 +2306,7 @@
 				<oddity type="string">Warm to the touch, and smells of roses.</oddity>
 				<text type="string">A creature you can see treats you as a friend. Warm to the touch, and smells of roses.</text>
 				<description type="formattedtext"><p><b>Charm</b>: A creature you can see treats you as a friend. <i>Warm to the touch, and smells of roses.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookcharm.webp@Cairn Warden's Guide</picture>
 			</spellbookcharm>
 			<spellbookcommand>
 				<name type="string">Spellbook: Command</name>
@@ -2304,6 +2318,7 @@
 				<oddity type="string">Grows thinner over time, until finally disappearing forever.</oddity>
 				<text type="string">A target obeys a single three-word command that does not cause it harm. Grows thinner over time, until finally disappearing forever.</text>
 				<description type="formattedtext"><p><b>Command</b>: A target obeys a single three-word command that does not cause it harm. <i>Grows thinner over time, until finally disappearing forever.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookcommand.webp@Cairn Warden's Guide</picture>
 			</spellbookcommand>
 			<spellbookcomprehend>
 				<name type="string">Spellbook: Comprehend</name>
@@ -2315,6 +2330,7 @@
 				<oddity type="string">Drips letters, staining whatever it touches.</oddity>
 				<text type="string">You become fluent in all languages for a short while. Drips letters, staining whatever it touches.</text>
 				<description type="formattedtext"><p><b>Comprehend</b>: You become fluent in all languages for a short while. <i>Drips letters, staining whatever it touches.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookcomprehend.webp@Cairn Warden's Guide</picture>
 			</spellbookcomprehend>
 			<spellbookconeoffoam>
 				<name type="string">Spellbook: Cone of Foam</name>
@@ -2326,6 +2342,7 @@
 				<oddity type="string">Spongy and moist with a soapy residue.</oddity>
 				<text type="string">Dense foam sprays from your hand, coating the target. Spongy and moist with a soapy residue.</text>
 				<description type="formattedtext"><p><b>Cone of Foam</b>: Dense foam sprays from your hand, coating the target. <i>Spongy and moist with a soapy residue.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookconeoffoam.webp@Cairn Warden's Guide</picture>
 			</spellbookconeoffoam>
 			<spellbookcontrolplants>
 				<name type="string">Spellbook: Control Plants</name>
@@ -2337,6 +2354,7 @@
 				<oddity type="string">Leaves grow along the spine, and it smells faintly of decay.</oddity>
 				<text type="string">Nearby plants and trees obey you and gain the ability to move at a slow pace. Leaves grow along the spine, and it smells faintly of decay.</text>
 				<description type="formattedtext"><p><b>Control Plants</b>: Nearby plants and trees obey you and gain the ability to move at a slow pace. <i>Leaves grow along the spine, and it smells faintly of decay.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookcontrolplant.webp@Cairn Warden's Guide</picture>
 			</spellbookcontrolplants>
 			<spellbookcontrolweather>
 				<name type="string">Spellbook: Control Weather</name>
@@ -2348,6 +2366,7 @@
 				<oddity type="string">Highly resistant to fire and water damage.</oddity>
 				<text type="string">You may alter the type of weather at will, but you do not otherwise control it. Highly resistant to fire and water damage.</text>
 				<description type="formattedtext"><p><b>Control Weather</b>: You may alter the type of weather at will, but you do not otherwise control it. <i>Highly resistant to fire and water damage.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookcontrolweather.webp@Cairn Warden's Guide</picture>
 			</spellbookcontrolweather>
 			<spellbookcurewounds>
 				<name type="string">Spellbook: Cure Wounds</name>
@@ -2359,6 +2378,7 @@
 				<oddity type="string">Smells of vinegar and thyme. Turns red after use.</oddity>
 				<text type="string">Restore 1d4 STR per day to a creature you can touch. Smells of vinegar and thyme. Turns red after use.</text>
 				<description type="formattedtext"><p><b>Cure Wounds</b>: Restore 1d4 STR per day to a creature you can touch. <i>Smells of vinegar and thyme. Turns red after use.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookcurewound.webp@Cairn Warden's Guide</picture>
 			</spellbookcurewounds>
 			<spellbookdeafen>
 				<name type="string">Spellbook: Deafen</name>
@@ -2370,6 +2390,7 @@
 				<oddity type="string">Nearby instruments occasionally sound off, as if in protest.</oddity>
 				<text type="string">All nearby creatures are deafened. Nearby instruments occasionally sound off, as if in protest.</text>
 				<description type="formattedtext"><p><b>Deafen</b>: All nearby creatures are deafened. <i>Nearby instruments occasionally sound off, as if in protest.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookdeafen.webp@Cairn Warden's Guide</picture>
 			</spellbookdeafen>
 			<spellbookdetectmagic>
 				<name type="string">Spellbook: Detect Magic</name>
@@ -2381,6 +2402,7 @@
 				<oddity type="string">Becomes warm to the touch if magic is used nearby.</oddity>
 				<text type="string">You can see or hear nearby magical auras. Becomes warm to the touch if magic is used nearby.</text>
 				<description type="formattedtext"><p><b>Detect Magic</b>: You can see or hear nearby magical auras. <i>Becomes warm to the touch if magic is used nearby.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookdetectmagic.webp@Cairn Warden's Guide</picture>
 			</spellbookdetectmagic>
 			<spellbookdisassemble>
 				<name type="string">Spellbook: Disassemble</name>
@@ -2392,6 +2414,7 @@
 				<oddity type="string">Regenerates any torn or defaced pages.</oddity>
 				<text type="string">Any of your body parts may be detached and reattached at will, without causing pain or damage. You can still control them. Regenerates any torn or defaced pages.</text>
 				<description type="formattedtext"><p><b>Disassemble</b>: Any of your body parts may be detached and reattached at will, without causing pain or damage. You can still control them. <i>Regenerates any torn or defaced pages.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookdisassemble.webp@Cairn Warden's Guide</picture>
 			</spellbookdisassemble>
 			<spellbookdisguise>
 				<name type="string">Spellbook: Disguise</name>
@@ -2403,6 +2426,7 @@
 				<oddity type="string">The surface makes a perfect mirror.</oddity>
 				<text type="string">You may alter the appearance of one character at will as long as they remain humanoid. Attempts to duplicate other characters will seem uncanny. The surface makes a perfect mirror.</text>
 				<description type="formattedtext"><p><b>Disguise</b>: You may alter the appearance of one character at will as long as they remain humanoid. Attempts to duplicate other characters will seem uncanny. <i>The surface makes a perfect mirror.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookdisguise.webp@Cairn Warden's Guide</picture>
 			</spellbookdisguise>
 			<spellbookdisplace>
 				<name type="string">Spellbook: Displace</name>
@@ -2414,6 +2438,7 @@
 				<oddity type="string">Bits of string, clothing, and leaves are sometimes stuffed inside.</oddity>
 				<text type="string">An object appears to be up to 15ft from its actual position. Bits of string, clothing, and leaves are sometimes stuffed inside.</text>
 				<description type="formattedtext"><p><b>Displace</b>: An object appears to be up to 15ft from its actual position. <i>Bits of string, clothing, and leaves are sometimes stuffed inside.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookdisplace.webp@Cairn Warden's Guide</picture>
 			</spellbookdisplace>
 			<spellbookearthquake>
 				<name type="string">Spellbook: Earthquake</name>
@@ -2425,6 +2450,7 @@
 				<oddity type="string">Sand dribbles from the corners, seemingly without stop.</oddity>
 				<text type="string">The ground begins shaking violently. Structures may be damaged or collapse. Sand dribbles from the corners, seemingly without stop.</text>
 				<description type="formattedtext"><p><b>Earthquake</b>: The ground begins shaking violently. Structures may be damaged or collapse. <i>Sand dribbles from the corners, seemingly without stop.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookearthquake.webp@Cairn Warden's Guide</picture>
 			</spellbookearthquake>
 			<spellbookelasticity>
 				<name type="string">Spellbook: Elasticity</name>
@@ -2436,6 +2462,7 @@
 				<oddity type="string">Smells of taffy, and is very flexible.</oddity>
 				<text type="string">Your body can stretch up to 10ft. Smells of taffy, and is very flexible.</text>
 				<description type="formattedtext"><p><b>Elasticity</b>: Your body can stretch up to 10ft. <i>Smells of taffy, and is very flexible.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookelasticity.webp@Cairn Warden's Guide</picture>
 			</spellbookelasticity>
 			<spellbookelementalwall>
 				<name type="string">Spellbook: Elemental Wall</name>
@@ -2447,6 +2474,7 @@
 				<oddity type="string">Skin and warmer substances stick to it after use.</oddity>
 				<text type="string">A straight wall of ice or fire 50ft long and 10ft high rises from the ground. Skin and warmer substances stick to it after use.</text>
 				<description type="formattedtext"><p><b>Elemental Wall</b>: A straight wall of ice or fire 50ft long and 10ft high rises from the ground. <i>Skin and warmer substances stick to it after use.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookelementalwall.webp@Cairn Warden's Guide</picture>
 			</spellbookelementalwall>
 			<spellbookfilch>
 				<name type="string">Spellbook: Filch</name>
@@ -2458,6 +2486,7 @@
 				<oddity type="string"></oddity>
 				<text type="string">A visible item teleports to your hands. An ally's prized possession may occasionally be found tucked between its covers.</text>
 				<description type="formattedtext"><p><b>Filch</b>: A visible item teleports to your hands. <i>An ally's prized possession may occasionally be found tucked between its covers</i>.</p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookfilch.webp@Cairn Warden's Guide</picture>
 			</spellbookfilch>
 			<spellbookfishlung>
 				<name type="string">Spellbook: Fish Lung</name>
@@ -2469,6 +2498,7 @@
 				<oddity type="string">Smells strongly of the sea. Attracts wild animals.</oddity>
 				<text type="string">A target can breathe underwater until they surface again. Smells strongly of the sea. Attracts wild animals.</text>
 				<description type="formattedtext"><p><b>Fish Lung</b>: A target can breathe underwater until they surface again. <i>Smells strongly of the sea. Attracts wild animals.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookfishlung.webp@Cairn Warden's Guide</picture>
 			</spellbookfishlung>
 			<spellbookflare>
 				<name type="string">Spellbook: Flare</name>
@@ -2480,6 +2510,7 @@
 				<oddity type="string"></oddity>
 				<text type="string">A bright ball of energy fires a trail of light into the sky, revealing your location to friend or foe. Faintly glows in complete darkness.</text>
 				<description type="formattedtext"><p><b>Flare</b>: A bright ball of energy fires a trail of light into the sky, revealing your location to friend or foe. <i>Faintly glows in complete darkness</i>.</p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookflare.webp@Cairn Warden's Guide</picture>
 			</spellbookflare>
 			<spellbookfogcloud>
 				<name type="string">Spellbook: Fog Cloud</name>
@@ -2491,6 +2522,7 @@
 				<oddity type="string">When submersed in water, the book eventually turns all the liquid to vapor.</oddity>
 				<text type="string">A dense fog spreads out from you. When submersed in water, the book eventually turns all the liquid to vapor.</text>
 				<description type="formattedtext"><p><b>Fog Cloud</b>: A dense fog spreads out from you. <i>When submersed in water, the book eventually turns all the liquid to vapor.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookfogcloud.webp@Cairn Warden's Guide</picture>
 			</spellbookfogcloud>
 			<spellbookfrenzy>
 				<name type="string">Spellbook: Frenzy</name>
@@ -2502,6 +2534,7 @@
 				<oddity type="string">Rough, sandpaper cover that destroys any book it touches.</oddity>
 				<text type="string">A nearby creature erupts in a frenzy of violence. Rough, sandpaper cover that destroys any book it touches.</text>
 				<description type="formattedtext"><p><b>Frenzy</b>: A nearby creature erupts in a frenzy of violence. <i>Rough, sandpaper cover that destroys any book it touches.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookfrenzy.webp@Cairn Warden's Guide</picture>
 			</spellbookfrenzy>
 			<spellbookgate>
 				<name type="string">Spellbook: Gate</name>
@@ -2513,6 +2546,7 @@
 				<oddity type="string"></oddity>
 				<text type="string">A portal to a random plane opens. A large hole is carved into the center, ending in a void. Items dropped within are never seen again.</text>
 				<description type="formattedtext"><p><b>Gate</b>: A portal to a random plane opens. <i>A large hole is carved into the center, ending in a void. Items dropped within are never seen again</i>.</p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookgate.webp@Cairn Warden's Guide</picture>
 			</spellbookgate>
 			<spellbookgravityshift>
 				<name type="string">Spellbook: Gravity Shift</name>
@@ -2524,6 +2558,7 @@
 				<oddity type="string">Attaches itself to the largest object nearby.</oddity>
 				<text type="string">You can change the direction of gravity, but only for yourself. Attaches itself to the largest object nearby.</text>
 				<description type="formattedtext"><p><b>Gravity Shift</b>: You can change the direction of gravity, but only for yourself. <i>Attaches itself to the largest object nearby.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookgravityshift.webp@Cairn Warden's Guide</picture>
 			</spellbookgravityshift>
 			<spellbookgreed>
 				<name type="string">Spellbook: Greed</name>
@@ -2535,6 +2570,7 @@
 				<oddity type="string">The cover changes depending on the owner, subtly hinting at their deepest desires.</oddity>
 				<text type="string">A creature develops the overwhelming urge to possess a visible item of your choice. The cover changes depending on the owner, subtly hinting at their deepest desires.</text>
 				<description type="formattedtext"><p><b>Greed</b>: A creature develops the overwhelming urge to possess a visible item of your choice. <i>The cover changes depending on the owner, subtly hinting at their deepest desires.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookgreed.webp@Cairn Warden's Guide</picture>
 			</spellbookgreed>
 			<spellbookhaste>
 				<name type="string">Spellbook: Haste</name>
@@ -2546,6 +2582,7 @@
 				<oddity type="string">Pages flip wildly while open. Can cause paper cuts.</oddity>
 				<text type="string">Your movement speed is tripled. Pages flip wildly while open. Can cause paper cuts.</text>
 				<description type="formattedtext"><p><b>Haste</b>: Your movement speed is tripled. <i>Pages flip wildly while open. Can cause paper cuts.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookhaste.webp@Cairn Warden's Guide</picture>
 			</spellbookhaste>
 			<spellbookhatred>
 				<name type="string">Spellbook: Hatred</name>
@@ -2557,6 +2594,7 @@
 				<oddity type="string">Long term exposure to the book can cause suspicion, paranoia and distrust of others.</oddity>
 				<text type="string">A creature develops a deep hatred of another creature or group and wishes to destroy them. Long term exposure to the book can cause suspicion, paranoia and distrust of others.</text>
 				<description type="formattedtext"><p><b>Hatred</b>: A creature develops a deep hatred of another creature or group and wishes to destroy them. <i>Long term exposure to the book can cause suspicion, paranoia and distrust of others.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookhatred.webp@Cairn Warden's Guide</picture>
 			</spellbookhatred>
 			<spellbookhearwhispers>
 				<name type="string">Spellbook: Hear Whispers</name>
@@ -2568,6 +2606,7 @@
 				<oddity type="string">The reader's voice is amplified for a short period of time afterwards.</oddity>
 				<text type="string">You can hear faint sounds clearly. The reader's voice is amplified for a short period of time afterwards.</text>
 				<description type="formattedtext"><p><b>Hear Whispers</b>: You can hear faint sounds clearly. <i>The reader's voice is amplified for a short period of time afterwards.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookhearwhisper.webp@Cairn Warden's Guide</picture>
 			</spellbookhearwhispers>
 			<spellbookhover>
 				<name type="string">Spellbook: Hover</name>
@@ -2579,6 +2618,7 @@
 				<oddity type="string">Floats if dropped.</oddity>
 				<text type="string">An object hovers, frictionless, 2ft above the ground. It can hold up to one humanoid. Floats if dropped.</text>
 				<description type="formattedtext"><p><b>Hover</b>: An object hovers, frictionless, 2ft above the ground. It can hold up to one humanoid. <i>Floats if dropped.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookhover.webp@Cairn Warden's Guide</picture>
 			</spellbookhover>
 			<spellbookhypnotize>
 				<name type="string">Spellbook: Hypnotize</name>
@@ -2590,6 +2630,7 @@
 				<oddity type="string">Eye-catching, swirling spirals don its covers.</oddity>
 				<text type="string">A creature enters a trance and will truthfully answer one yes or no question you ask it. Eye-catching, swirling spirals don its covers.</text>
 				<description type="formattedtext"><p><b>Hypnotize</b>: A creature enters a trance and will truthfully answer one yes or no question you ask it. <i>Eye-catching, swirling spirals don its covers.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookhypnotize.webp@Cairn Warden's Guide</picture>
 			</spellbookhypnotize>
 			<spellbookicytouch>
 				<name type="string">Spellbook: Icy Touch</name>
@@ -2601,6 +2642,7 @@
 				<oddity type="string"></oddity>
 				<text type="string">A thick ice layer spreads across a touched surface, up to 10ft in radius. Gloves required. Nonflammable.</text>
 				<description type="formattedtext"><p><b>Icy Touch</b>: A thick ice layer spreads across a touched surface, up to 10ft in radius. <i>Gloves required. Nonflammable</i>.</p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookicytouch.webp@Cairn Warden's Guide</picture>
 			</spellbookicytouch>
 			<spellbookidentifyowner>
 				<name type="string">Spellbook: Identify Owner</name>
@@ -2612,6 +2654,7 @@
 				<oddity type="string">The book's interior lists the name of its previous owner.</oddity>
 				<text type="string">Letters appear over the object you touch, spelling out the name of the object’s owners, if there are any. The book's interior lists the name of its previous owner.</text>
 				<description type="formattedtext"><p><b>Identify Owner</b>: Letters appear over the object you touch, spelling out the name of the object’s owners, if there are any. <i>The book's interior lists the name of its previous owner.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookidentifyowner.webp@Cairn Warden's Guide</picture>
 			</spellbookidentifyowner>
 			<spellbookilluminate>
 				<name type="string">Spellbook: Illuminate</name>
@@ -2623,6 +2666,7 @@
 				<oddity type="string">When held in light, the pages become a prism of vibrant rainbows.</oddity>
 				<text type="string">A floating light moves as you command. When held in light, the pages become a prism of vibrant rainbows.</text>
 				<description type="formattedtext"><p><b>Illuminate</b>: A floating light moves as you command. <i>When held in light, the pages become a prism of vibrant rainbows.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookilluminate.webp@Cairn Warden's Guide</picture>
 			</spellbookilluminate>
 			<spellbookinvisibletether>
 				<name type="string">Spellbook: Invisible Tether</name>
@@ -2634,6 +2678,7 @@
 				<oddity type="string">Its pages are not attached by glue or thread, yet stay together nonetheless.</oddity>
 				<text type="string">Two objects within 10ft of each other cannot be moved more than 10ft apart. Its pages are not attached by glue or thread, yet stay together nonetheless.</text>
 				<description type="formattedtext"><p><b>Invisible Tether</b>: Two objects within 10ft of each other cannot be moved more than 10ft apart. <i>Its pages are not attached by glue or thread, yet stay together nonetheless.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookinvisibletether.webp@Cairn Warden's Guide</picture>
 			</spellbookinvisibletether>
 			<spellbookknock>
 				<name type="string">Spellbook: Knock</name>
@@ -2645,6 +2690,7 @@
 				<oddity type="string">Locked. A new owner &quot;produces&quot; the key after their next meal.</oddity>
 				<text type="string">A nearby mundane or magical lock unlocks loudly. Locked. A new owner &quot;produces&quot; the key after their next meal.</text>
 				<description type="formattedtext"><p><b>Knock</b>: A nearby mundane or magical lock unlocks loudly. <i>Locked. A new owner "produces" the key after their next meal.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookknock.webp@Cairn Warden's Guide</picture>
 			</spellbookknock>
 			<spellbookleap>
 				<name type="string">Spellbook: Leap</name>
@@ -2656,6 +2702,7 @@
 				<oddity type="string">When thrown, it just keeps going.</oddity>
 				<text type="string">You jump up to 10ft high, once. When thrown, it just keeps going.</text>
 				<description type="formattedtext"><p><b>Leap</b>: You jump up to 10ft high, once. <i>When thrown, it just keeps going.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookleap.webp@Cairn Warden's Guide</picture>
 			</spellbookleap>
 			<spellbookliquidair>
 				<name type="string">Spellbook: Liquid Air</name>
@@ -2667,6 +2714,7 @@
 				<oddity type="string">Floats of its own volition, bouncing off of whatever it touches.</oddity>
 				<text type="string">The air around you becomes swimmable. Floats of its own volition, bouncing off of whatever it touches.</text>
 				<description type="formattedtext"><p><b>Liquid Air</b>: The air around you becomes swimmable. <i>Floats of its own volition, bouncing off of whatever it touches.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookliquidair.webp@Cairn Warden's Guide</picture>
 			</spellbookliquidair>
 			<spellbookmagicdampener>
 				<name type="string">Spellbook: Magic Dampener</name>
@@ -2678,6 +2726,7 @@
 				<oddity type="string">Relics within 100ft of the spellbook cannot be recharged.</oddity>
 				<text type="string">All nearby magical effects have their effectiveness halved. Relics within 100ft of the spellbook cannot be recharged.</text>
 				<description type="formattedtext"><p><b>Magic Dampener</b>: All nearby magical effects have their effectiveness halved. <i>Relics within 100ft of the spellbook cannot be recharged.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookmagicdampener.webp@Cairn Warden's Guide</picture>
 			</spellbookmagicdampener>
 			<spellbookmanse>
 				<name type="string">Spellbook: Manse</name>
@@ -2689,6 +2738,7 @@
 				<oddity type="string">If left inside, both the book and the cottage vanish forever.</oddity>
 				<text type="string">A sturdy, furnished cottage appears for hours. You can permit and forbid entry to it at will. If left inside, both the book and the cottage vanish forever.</text>
 				<description type="formattedtext"><p><b>Manse</b>: A sturdy, furnished cottage appears for hours. You can permit and forbid entry to it at will. <i>If left inside, both the book and the cottage vanish forever.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookmanse.webp@Cairn Warden's Guide</picture>
 			</spellbookmanse>
 			<spellbookmarblecraze>
 				<name type="string">Spellbook: Marble Craze</name>
@@ -2700,6 +2750,7 @@
 				<oddity type="string">When jostled, makes a playful rattling sound.</oddity>
 				<text type="string">Your pockets are full of marbles and will refill every 30 seconds. When jostled, makes a playful rattling sound.</text>
 				<description type="formattedtext"><p><b>Marble Craze</b>: Your pockets are full of marbles and will refill every 30 seconds. <i>When jostled, makes a playful rattling sound.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookmarblecraze.webp@Cairn Warden's Guide</picture>
 			</spellbookmarblecraze>
 			<spellbookmasquerade>
 				<name type="string">Spellbook: Masquerade</name>
@@ -2711,6 +2762,7 @@
 				<oddity type="string">Extended use causes the owner to develop unconscious yet noticeable tics.</oddity>
 				<text type="string">A character's appearance and voice becomes identical to those of a character you touch. Extended use causes the owner to develop unconscious yet noticeable tics.</text>
 				<description type="formattedtext"><p><b>Masquerade</b>: A character's appearance and voice becomes identical to those of a character you touch. <i>Extended use causes the owner to develop unconscious yet noticeable tics.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookmasquerade.webp@Cairn Warden's Guide</picture>
 			</spellbookmasquerade>
 			<spellbookminiaturize>
 				<name type="string">Spellbook: Miniaturize</name>
@@ -2722,6 +2774,7 @@
 				<oddity type="string">The text is ludicrously, comically large.</oddity>
 				<text type="string">A creature you touch is shrunk down to the size of a mouse. The text is ludicrously, comically large.</text>
 				<description type="formattedtext"><p><b>Miniaturize</b>: A creature you touch is shrunk down to the size of a mouse. <i>The text is ludicrously, comically large.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookminiaturize.webp@Cairn Warden's Guide</picture>
 			</spellbookminiaturize>
 			<spellbookmirrorimage>
 				<name type="string">Spellbook: Mirror Image</name>
@@ -2733,6 +2786,7 @@
 				<oddity type="string">Over time, the owner begins to question who is the original, and who is the duplicate.</oddity>
 				<text type="string">An illusory duplicate of yourself appears and is under your control. Over time, the owner begins to question who is the original, and who is the duplicate.</text>
 				<description type="formattedtext"><p><b>Mirror Image</b>: An illusory duplicate of yourself appears and is under your control. <i>Over time, the owner begins to question who is the original, and who is the duplicate.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookmirrorimage.webp@Cairn Warden's Guide</picture>
 			</spellbookmirrorimage>
 			<spellbookmirrorwalk>
 				<name type="string">Spellbook: Mirrorwalk</name>
@@ -2744,6 +2798,7 @@
 				<oddity type="string">Will not open unless the owner politely knocks on the cover.</oddity>
 				<text type="string">A mirror becomes a gateway to another mirror that you looked into today. Will not open unless the owner politely knocks on the cover.</text>
 				<description type="formattedtext"><p><b>Mirrorwalk</b>: A mirror becomes a gateway to another mirror that you looked into today. <i>Will not open unless the owner politely knocks on the cover.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookmirrorwalk.webp@Cairn Warden's Guide</picture>
 			</spellbookmirrorwalk>
 			<spellbookmultiarm>
 				<name type="string">Spellbook: Multiarm</name>
@@ -2755,6 +2810,7 @@
 				<oddity type="string">After use, the caster is wracked with phantom limb syndrome for a day.</oddity>
 				<text type="string">You temporarily gain an extra arm. After use, the caster is wracked with phantom limb syndrome for a day.</text>
 				<description type="formattedtext"><p><b>Multiarm</b>: You temporarily gain an extra arm. <i>After use, the caster is wracked with phantom limb syndrome for a day.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookmultiarm.webp@Cairn Warden's Guide</picture>
 			</spellbookmultiarm>
 			<spellbooknightsphere>
 				<name type="string">Spellbook: Night Sphere</name>
@@ -2766,6 +2822,7 @@
 				<oddity type="string"></oddity>
 				<text type="string">A 50ft-wide sphere of darkness displaying the night sky appears before you. Displays a prominent constellation on its cover.</text>
 				<description type="formattedtext"><p><b>Night Sphere</b>: A 50ft-wide sphere of darkness displaying the night sky appears before you. <i>Displays a prominent constellation on its cover</i>.</p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbooknightsphere.webp@Cairn Warden's Guide</picture>
 			</spellbooknightsphere>
 			<spellbookobjectify>
 				<name type="string">Spellbook: Objectify</name>
@@ -2777,6 +2834,7 @@
 				<oddity type="string">The owner experiences intense pareidolia for days after use.</oddity>
 				<text type="string">You become any inanimate object between the size of a grand piano and an apple. The owner experiences intense pareidolia for days after use.</text>
 				<description type="formattedtext"><p><b>Objectify</b>: You become any inanimate object between the size of a grand piano and an apple. <i>The owner experiences intense pareidolia for days after use.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookobjectify.webp@Cairn Warden's Guide</picture>
 			</spellbookobjectify>
 			<spellbookoozeform>
 				<name type="string">Spellbook: Ooze Form</name>
@@ -2788,6 +2846,7 @@
 				<oddity type="string">Slowly drips an acid that eventually eats away anything it touches.</oddity>
 				<text type="string">You become a living jelly. Slowly drips an acid that eventually eats away anything it touches.</text>
 				<description type="formattedtext"><p><b>Ooze Form</b>: You become a living jelly. <i>Slowly drips an acid that eventually eats away anything it touches.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookoozeform.webp@Cairn Warden's Guide</picture>
 			</spellbookoozeform>
 			<spellbookpacify>
 				<name type="string">Spellbook: Pacify</name>
@@ -2799,6 +2858,7 @@
 				<oddity type="string">Smells of jasmine and incense. Attracts children.</oddity>
 				<text type="string">A creature near you has an aversion to violence. Smells of jasmine and incense. Attracts children.</text>
 				<description type="formattedtext"><p><b>Pacify</b>: A creature near you has an aversion to violence. <i>Smells of jasmine and incense. Attracts children.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookpacify.webp@Cairn Warden's Guide</picture>
 			</spellbookpacify>
 			<spellbookpassage>
 				<name type="string">Spellbook: Passage</name>
@@ -2810,6 +2870,7 @@
 				<oddity type="string">An object dropped on top of the book inevitably falls through the other side.</oddity>
 				<text type="string">Creates a temporary path through wood, stone or brick. An object dropped on top of the book inevitably falls through the other side.</text>
 				<description type="formattedtext"><p><b>Passage</b>: Creates a temporary path through wood, stone or brick. <i>An object dropped on top of the book inevitably falls through the other side.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookpassage.webp@Cairn Warden's Guide</picture>
 			</spellbookpassage>
 			<spellbookphobia>
 				<name type="string">Spellbook: Phobia</name>
@@ -2821,6 +2882,7 @@
 				<oddity type="string">Over time, haunting, abstract art begins to fill its pages.</oddity>
 				<text type="string">A nearby creature becomes terrified of an object of your choice. Over time, haunting, abstract art begins to fill its pages.</text>
 				<description type="formattedtext"><p><b>Phobia</b>: A nearby creature becomes terrified of an object of your choice. <i>Over time, haunting, abstract art begins to fill its pages.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookphobia.webp@Cairn Warden's Guide</picture>
 			</spellbookphobia>
 			<spellbookpit>
 				<name type="string">Spellbook: Pit</name>
@@ -2832,6 +2894,7 @@
 				<oddity type="string"></oddity>
 				<text type="string">A pit 10ft wide and 10ft deep opens in the ground. A standard piton can be safely stored in its spine.</text>
 				<description type="formattedtext"><p><b>Pit</b>: A pit 10ft wide and 10ft deep opens in the ground. <i>A standard piton can be safely stored in its spine</i>.</p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookpit.webp@Cairn Warden's Guide</picture>
 			</spellbookpit>
 			<spellbookprimalsurge>
 				<name type="string">Spellbook: Primal Surge</name>
@@ -2843,6 +2906,7 @@
 				<oddity type="string">The owner is haunted by strange visions of their own ancestors.</oddity>
 				<text type="string">A creature rapidly evolves into a future version of its species. The owner is haunted by strange visions of their own ancestors.</text>
 				<description type="formattedtext"><p><b>Primal Surge</b>: A creature rapidly evolves into a future version of its species. <i>The owner is haunted by strange visions of their own ancestors.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookprimalsurge.webp@Cairn Warden's Guide</picture>
 			</spellbookprimalsurge>
 			<spellbookpushpull>
 				<name type="string">Spellbook: Push/Pull</name>
@@ -2854,6 +2918,7 @@
 				<oddity type="string">Any force against the book is comically amplified.</oddity>
 				<text type="string">An object of any size is pulled directly towards you or pushed directly away from you with the strength of one man. Any force against the book is comically amplified.</text>
 				<description type="formattedtext"><p><b>Push/Pull</b>: An object of any size is pulled directly towards you or pushed directly away from you with the strength of one man. <i>Any force against the book is comically amplified.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookpushpull.webp@Cairn Warden's Guide</picture>
 			</spellbookpushpull>
 			<spellbookraisedead>
 				<name type="string">Spellbook: Raise Dead</name>
@@ -2865,6 +2930,7 @@
 				<oddity type="string">The owner becomes more and more fascinated with bones after each use.</oddity>
 				<text type="string">A skeleton rises from the ground to serve you. They are incredibly stupid and can only obey simple orders. The owner becomes more and more fascinated with bones after each use.</text>
 				<description type="formattedtext"><p><b>Raise Dead</b>: A skeleton rises from the ground to serve you. They are incredibly stupid and can only obey simple orders. <i>The owner becomes more and more fascinated with bones after each use.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookraisedead.webp@Cairn Warden's Guide</picture>
 			</spellbookraisedead>
 			<spellbookraisespirit>
 				<name type="string">Spellbook: Raise Spirit</name>
@@ -2876,6 +2942,7 @@
 				<oddity type="string">The answers (but not their questions) are forever inscribed in its pages.</oddity>
 				<text type="string">The spirit of a nearby corpse manifests and will answer 1 question. The answers (but not their questions) are forever inscribed in its pages.</text>
 				<description type="formattedtext"><p><b>Raise Spirit</b>: The spirit of a nearby corpse manifests and will answer 1 question. <i>The answers (but not their questions) are forever inscribed in its pages.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookraisespirit.webp@Cairn Warden's Guide</picture>
 			</spellbookraisespirit>
 			<spellbookreadmind>
 				<name type="string">Spellbook: Read Mind</name>
@@ -2887,6 +2954,7 @@
 				<oddity type="string">Long-term possession can cause the reader to mistake the thoughts of others as their own.</oddity>
 				<text type="string">You can hear the surface thoughts of nearby creatures. Long-term possession can cause the reader to mistake the thoughts of others as their own.</text>
 				<description type="formattedtext"><p><b>Read Mind</b>: You can hear the surface thoughts of nearby creatures. <i>Long-term possession can cause the reader to mistake the thoughts of others as their own.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookreadmind.webp@Cairn Warden's Guide</picture>
 			</spellbookreadmind>
 			<spellbookrepel>
 				<name type="string">Spellbook: Repel</name>
@@ -2898,6 +2966,7 @@
 				<oddity type="string">Closed by two powerful straps that spring open at inopportune times.</oddity>
 				<text type="string">Two objects are strongly magnetically repelled from each other within 10 feet. Closed by two powerful straps that spring open at inopportune times.</text>
 				<description type="formattedtext"><p><b>Repel</b>: Two objects are strongly magnetically repelled from each other within 10 feet. <i>Closed by two powerful straps that spring open at inopportune times.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookrepel.webp@Cairn Warden's Guide</picture>
 			</spellbookrepel>
 			<spellbookscry>
 				<name type="string">Spellbook: Scry</name>
@@ -2909,6 +2978,7 @@
 				<oddity type="string">The owner's eyes turn milky-white for an hour after use.</oddity>
 				<text type="string">You can see through the eyes of a creature you touched earlier today. The owner's eyes turn milky-white for an hour after use.</text>
 				<description type="formattedtext"><p><b>Scry</b>: You can see through the eyes of a creature you touched earlier today. <i>The owner's eyes turn milky-white for an hour after use.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookscry.webp@Cairn Warden's Guide</picture>
 			</spellbookscry>
 			<spellbooksculptelements>
 				<name type="string">Spellbook: Sculpt Elements</name>
@@ -2920,6 +2990,7 @@
 				<oddity type="string">Slowly decays on contact with wood or cloth. Bury in dirt or submerge in water to refresh.</oddity>
 				<text type="string">Inanimate material behaves like clay in your hands. Slowly decays on contact with wood or cloth. Bury in dirt or submerge in water to refresh.</text>
 				<description type="formattedtext"><p><b>Sculpt Elements</b>: Inanimate material behaves like clay in your hands. <i>Slowly decays on contact with wood or cloth. Bury in dirt or submerge in water to refresh.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbooksculptelement.webp@Cairn Warden's Guide</picture>
 			</spellbooksculptelements>
 			<spellbooksense>
 				<name type="string">Spellbook: Sense</name>
@@ -2931,6 +3002,7 @@
 				<oddity type="string">The book's previous owner is always aware of the book's current location.</oddity>
 				<text type="string">Choose one kind of object (key, gold, arrow, jug, etc). You can sense the nearest example. The book's previous owner is always aware of the book's current location.</text>
 				<description type="formattedtext"><p><b>Sense</b>: Choose one kind of object (key, gold, arrow, jug, etc). You can sense the nearest example. <i>The book's previous owner is always aware of the book's current location.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbooksense.webp@Cairn Warden's Guide</picture>
 			</spellbooksense>
 			<spellbookshield>
 				<name type="string">Spellbook: Shield</name>
@@ -2942,6 +3014,7 @@
 				<oddity type="string">Bound in rusty ring-mail and is quite heavy. If held, provides +1 Armor.</oddity>
 				<text type="string">A creature you touch is protected from mundane attacks for one minute. Bound in rusty ring-mail and is quite heavy. If held, provides +1 Armor.</text>
 				<description type="formattedtext"><p><b>Shield</b>: A creature you touch is protected from mundane attacks for one minute. <i>Bound in rusty ring-mail and is quite heavy. If held, provides +1 Armor.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookshield.webp@Cairn Warden's Guide</picture>
 			</spellbookshield>
 			<spellbookshroud>
 				<name type="string">Spellbook: Shroud</name>
@@ -2953,6 +3026,7 @@
 				<oddity type="string">Invisible to any but the book's current owner.</oddity>
 				<text type="string">A creature you touch is invisible until they move. Invisible to any but the book's current owner.</text>
 				<description type="formattedtext"><p><b>Shroud</b>: A creature you touch is invisible until they move. <i>Invisible to any but the book's current owner.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookshroud.webp@Cairn Warden's Guide</picture>
 			</spellbookshroud>
 			<spellbookshuffle>
 				<name type="string">Spellbook: Shuffle</name>
@@ -2964,6 +3038,7 @@
 				<oddity type="string">If stolen but not yet read, it reappears wherever its owner last left it.</oddity>
 				<text type="string">Two creatures you can see instantly switch places. If stolen but not yet read, it reappears wherever its owner last left it.</text>
 				<description type="formattedtext"><p><b>Shuffle</b>: Two creatures you can see instantly switch places. <i>If stolen but not yet read, it reappears wherever its owner last left it.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookshuffle.webp@Cairn Warden's Guide</picture>
 			</spellbookshuffle>
 			<spellbookskillfulrepair>
 				<name type="string">Spellbook: Skillful Repair</name>
@@ -2975,6 +3050,7 @@
 				<oddity type="string">Sewn from the vellum of one hundred books, no two pages are alike.</oddity>
 				<text type="string">You make minor repairs to a nonliving object. Sewn from the vellum of one hundred books, no two pages are alike.</text>
 				<description type="formattedtext"><p><b>Skillful Repair</b>: You make minor repairs to a nonliving object. <i>Sewn from the vellum of one hundred books, no two pages are alike.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookskillfulrepair.webp@Cairn Warden's Guide</picture>
 			</spellbookskillfulrepair>
 			<spellbooksleep>
 				<name type="string">Spellbook: Sleep</name>
@@ -2986,6 +3062,7 @@
 				<oddity type="string">Soft as a pillow, but yields only fitful sleep.</oddity>
 				<text type="string">A creature you can see falls into a light sleep. Soft as a pillow, but yields only fitful sleep.</text>
 				<description type="formattedtext"><p><b>Sleep</b>: A creature you can see falls into a light sleep. <i>Soft as a pillow, but yields only fitful sleep.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbooksleep.webp@Cairn Warden's Guide</picture>
 			</spellbooksleep>
 			<spellbookslick>
 				<name type="string">Spellbook: Slick</name>
@@ -2997,6 +3074,7 @@
 				<oddity type="string">Gloves are required for handling, lest the book is dropped in a most comical fashion.</oddity>
 				<text type="string">Every surface in a 30ft radius becomes extremely slippery. Gloves are required for handling, lest the book is dropped in a most comical fashion.</text>
 				<description type="formattedtext"><p><b>Slick</b>: Every surface in a 30ft radius becomes extremely slippery. <i>Gloves are required for handling, lest the book is dropped in a most comical fashion.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookslick.webp@Cairn Warden's Guide</picture>
 			</spellbookslick>
 			<spellbooksmokeform>
 				<name type="string">Spellbook: Smoke Form</name>
@@ -3008,6 +3086,7 @@
 				<oddity type="string">Smells of campfire. The pages cannot be burnt, but are very sensitive to moisture.</oddity>
 				<text type="string">Your body becomes a living smoke that you can control. Smells of campfire. The pages cannot be burnt, but are very sensitive to moisture.</text>
 				<description type="formattedtext"><p><b>Smoke Form</b>: Your body becomes a living smoke that you can control. <i>Smells of campfire. The pages cannot be burnt, but are very sensitive to moisture.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbooksmokeform.webp@Cairn Warden's Guide</picture>
 			</spellbooksmokeform>
 			<spellbooksniff>
 				<name type="string">Spellbook: Sniff</name>
@@ -3019,6 +3098,7 @@
 				<oddity type="string">Expresses a strong odor detectable only by its owner.</oddity>
 				<text type="string">You can smell even the faintest traces of scents. Expresses a strong odor detectable only by its owner.</text>
 				<description type="formattedtext"><p><b>Sniff</b>: You can smell even the faintest traces of scents. <i>Expresses a strong odor detectable only by its owner.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbooksniff.webp@Cairn Warden's Guide</picture>
 			</spellbooksniff>
 			<spellbooksnuff>
 				<name type="string">Spellbook: Snuff</name>
@@ -3030,6 +3110,7 @@
 				<oddity type="string">If left in one place for long periods, nearby light sources eventually dim, then finally go out.</oddity>
 				<text type="string">The source of any mundane light you can see is instantly snuffed out. If left in one place for long periods, nearby light sources eventually dim, then finally go out.</text>
 				<description type="formattedtext"><p><b>Snuff</b>: The source of any mundane light you can see is instantly snuffed out. <i>If left in one place for long periods, nearby light sources eventually dim, then finally go out.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbooksnuff.webp@Cairn Warden's Guide</picture>
 			</spellbooksnuff>
 			<spellbooksort>
 				<name type="string">Spellbook: Sort</name>
@@ -3041,6 +3122,7 @@
 				<oddity type="string">Rights itself when dropped or thrown.</oddity>
 				<text type="string">Inanimate items sort themselves according to categories you set. Rights itself when dropped or thrown.</text>
 				<description type="formattedtext"><p><b>Sort</b>: Inanimate items sort themselves according to categories you set. <i>Rights itself when dropped or thrown.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbooksort.webp@Cairn Warden's Guide</picture>
 			</spellbooksort>
 			<spellbookspellsaw>
 				<name type="string">Spellbook: Spellsaw</name>
@@ -3052,6 +3134,7 @@
 				<oddity type="string"></oddity>
 				<text type="string">A whirling blade flies from your chest, clearing any plant material in its way. It is otherwise harmless. Wrapped in stained leather, it should be oiled at least once a month.</text>
 				<description type="formattedtext"><p><b>Spellsaw</b>: A whirling blade flies from your chest, clearing any plant material in its way. It is otherwise harmless. <i>Wrapped in stained leather, it should be oiled at least once a month</i>.</p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookspellsaw.webp@Cairn Warden's Guide</picture>
 			</spellbookspellsaw>
 			<spellbookspiderclimb>
 				<name type="string">Spellbook: Spider Climb</name>
@@ -3063,6 +3146,7 @@
 				<oddity type="string">New cobwebs must be pushed aside prior to each use. They are hard to remove.</oddity>
 				<text type="string">You can climb surfaces like a spider. New cobwebs must be pushed aside prior to each use. They are hard to remove.</text>
 				<description type="formattedtext"><p><b>Spider Climb</b>: You can climb surfaces like a spider. <i>New cobwebs must be pushed aside prior to each use. They are hard to remove.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookspiderclimb.webp@Cairn Warden's Guide</picture>
 			</spellbookspiderclimb>
 			<spellbookswarm>
 				<name type="string">Spellbook: Swarm</name>
@@ -3074,6 +3158,7 @@
 				<oddity type="string">Easily broken into a dozen distinct parts that slowly move towards one another over time.</oddity>
 				<text type="string">You become a swarm of crows, rats, or piranhas. You can only be harmed by blast attacks. Easily broken into a dozen distinct parts that slowly move towards one another over time.</text>
 				<description type="formattedtext"><p><b>Swarm</b>: You become a swarm of crows, rats, or piranhas. You can only be harmed by <i>blast</i> attacks. <i>Easily broken into a dozen distinct parts that slowly move towards one another over time.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookswarm.webp@Cairn Warden's Guide</picture>
 			</spellbookswarm>
 			<spellbooktargetlure>
 				<name type="string">Spellbook: Target Lure</name>
@@ -3085,6 +3170,7 @@
 				<oddity type="string">Attracts all manner of magical creatures, spell leaks, and scrying.</oddity>
 				<text type="string">An object you touch becomes the target of any nearby spell. Attracts all manner of magical creatures, spell leaks, and scrying.</text>
 				<description type="formattedtext"><p><b>Target Lure</b>: An object you touch becomes the target of any nearby spell. <i>Attracts all manner of magical creatures, spell leaks, and scrying.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbooktargetlure.webp@Cairn Warden's Guide</picture>
 			</spellbooktargetlure>
 			<spellbooktelekinesis>
 				<name type="string">Spellbook: Telekinesis</name>
@@ -3096,6 +3182,7 @@
 				<oddity type="string">The owner can summon the book through mental command alone (WIL save or become deprived afterwards).</oddity>
 				<text type="string">You may mentally 1 move item under 60lbs. The owner can summon the book through mental command alone (WIL save or become deprived afterwards).</text>
 				<description type="formattedtext"><p><b>Telekinesis</b>: You may mentally 1 move item under 60lbs. <i>The owner can summon the book through mental command alone (WIL save or become deprived afterwards).</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbooktelekinesi.webp@Cairn Warden's Guide</picture>
 			</spellbooktelekinesis>
 			<spellbooktelepathy>
 				<name type="string">Spellbook: Telepathy</name>
@@ -3107,6 +3194,7 @@
 				<oddity type="string">The holder can hear (but not respond) to the thoughts of whoever last possessed it, and vice versa.</oddity>
 				<text type="string">Two creatures can hear each other’s thoughts, no matter how far apart. The holder can hear (but not respond) to the thoughts of whoever last possessed it, and vice versa.</text>
 				<description type="formattedtext"><p><b>Telepathy</b>: Two creatures can hear each other’s thoughts, no matter how far apart. <i>The holder can hear (but not respond) to the thoughts of whoever last possessed it, and vice versa.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbooktelepathy.webp@Cairn Warden's Guide</picture>
 			</spellbooktelepathy>
 			<spellbookteleport>
 				<name type="string">Spellbook: Teleport</name>
@@ -3118,6 +3206,7 @@
 				<oddity type="string">Can be destroyed to create a portal to another dimension.</oddity>
 				<text type="string">An object or person you can see is transported from one place to another in a 50ft radius. Can be destroyed to create a portal to another dimension.</text>
 				<description type="formattedtext"><p><b>Teleport</b>: An object or person you can see is transported from one place to another in a 50ft radius. <i>Can be destroyed to create a portal to another dimension.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookteleport.webp@Cairn Warden's Guide</picture>
 			</spellbookteleport>
 			<spellbookthicket>
 				<name type="string">Spellbook: Thicket</name>
@@ -3129,6 +3218,7 @@
 				<oddity type="string">Wrapped in vines that must be destroyed again with each use.</oddity>
 				<text type="string">A thicket of trees and dense brush up to 50ft wide suddenly sprouts up. Wrapped in vines that must be destroyed again with each use.</text>
 				<description type="formattedtext"><p><b>Thicket</b>: A thicket of trees and dense brush up to 50ft wide suddenly sprouts up. <i>Wrapped in vines that must be destroyed again with each use.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookthicket.webp@Cairn Warden's Guide</picture>
 			</spellbookthicket>
 			<spellbooktimecontrol>
 				<name type="string">Spellbook: Time Control</name>
@@ -3140,6 +3230,7 @@
 				<oddity type="string">Alternates its appearance as either impossibly old or freshly written.</oddity>
 				<text type="string">Time in a 50ft bubble slows down or increases by 10% for 30 seconds. Alternates its appearance as either impossibly old or freshly written.</text>
 				<description type="formattedtext"><p><b>Time Control</b>: Time in a 50ft bubble slows down or increases by 10% for 30 seconds. <i>Alternates its appearance as either impossibly old or freshly written.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbooktimecontrol.webp@Cairn Warden's Guide</picture>
 			</spellbooktimecontrol>
 			<spellbooktruesight>
 				<name type="string">Spellbook: True Sight</name>
@@ -3151,6 +3242,7 @@
 				<oddity type="string">Cannot be concealed by magic, and sticks out like a sore thumb.</oddity>
 				<text type="string">You see through all nearby illusions. Cannot be concealed by magic, and sticks out like a sore thumb.</text>
 				<description type="formattedtext"><p><b>True Sight</b>: You see through all nearby illusions. <i>Cannot be concealed by magic, and sticks out like a sore thumb.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbooktruesight.webp@Cairn Warden's Guide</picture>
 			</spellbooktruesight>
 			<spellbookupwell>
 				<name type="string">Spellbook: Upwell</name>
@@ -3162,6 +3254,7 @@
 				<oddity type="string">Hardened leather bindings caked in salt and living barnacles.</oddity>
 				<text type="string">A spring of seawater appears. Hardened leather bindings caked in salt and living barnacles.</text>
 				<description type="formattedtext"><p><b>Upwell</b>: A spring of seawater appears. <i>Hardened leather bindings caked in salt and living barnacles.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookupwell.webp@Cairn Warden's Guide</picture>
 			</spellbookupwell>
 			<spellbookvision>
 				<name type="string">Spellbook: Vision</name>
@@ -3173,6 +3266,7 @@
 				<oddity type="string">An unnerving, lidless eye graces the front cover.</oddity>
 				<text type="string">You completely control what a creature sees. An unnerving, lidless eye graces the front cover.</text>
 				<description type="formattedtext"><p><b>Vision</b>: You completely control what a creature sees. <i>An unnerving, lidless eye graces the front cover.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookvision.webp@Cairn Warden's Guide</picture>
 			</spellbookvision>
 			<spellbookvisualillusion>
 				<name type="string">Spellbook: Visual Illusion</name>
@@ -3184,6 +3278,7 @@
 				<oddity type="string">Filled with rich, colorful pages very much like a children's bedtime story.</oddity>
 				<text type="string">A silent, immobile, room-sized illusion of your choice appears. Filled with rich, colorful pages very much like a children's bedtime story.</text>
 				<description type="formattedtext"><p><b>Visual Illusion</b>: A silent, immobile, room-sized illusion of your choice appears. <i>Filled with rich, colorful pages very much like a children's bedtime story.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookvisualillusion.webp@Cairn Warden's Guide</picture>
 			</spellbookvisualillusion>
 			<spellbookward>
 				<name type="string">Spellbook: Ward</name>
@@ -3195,6 +3290,7 @@
 				<oddity type="string">The covers are decorated with bizarre, otherworldly creatures with thousands of eyes.</oddity>
 				<text type="string">A silver circle 50ft across appears on the ground. Choose one species that cannot cross it. The covers are decorated with bizarre, otherworldly creatures with thousands of eyes.</text>
 				<description type="formattedtext"><p><b>Ward</b>: A silver circle 50ft across appears on the ground. Choose one species that cannot cross it. <i>The covers are decorated with bizarre, otherworldly creatures with thousands of eyes.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookward.webp@Cairn Warden's Guide</picture>
 			</spellbookward>
 			<spellbookweb>
 				<name type="string">Spellbook: Web</name>
@@ -3206,6 +3302,7 @@
 				<oddity type="string">The text is alien, yet somehow intelligible, for it is the language of dreams.</oddity>
 				<text type="string">Your wrists shoot thick webbing. The text is alien, yet somehow intelligible, for it is the language of dreams.</text>
 				<description type="formattedtext"><p><b>Web</b>: Your wrists shoot thick webbing. <i>The text is alien, yet somehow intelligible, for it is the language of dreams.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookweb.webp@Cairn Warden's Guide</picture>
 			</spellbookweb>
 			<spellbookwidget>
 				<name type="string">Spellbook: Widget</name>
@@ -3217,6 +3314,7 @@
 				<oddity type="string">Smells of iron and rust, sweat and effort. Faint sounds of harsh labor emanate from deep within its pages.</oddity>
 				<text type="string">A primitive version of a drawn tool or item appears before you and disappears after a short time. Smells of iron and rust, sweat and effort. Faint sounds of harsh labor emanate from deep within its pages.</text>
 				<description type="formattedtext"><p><b>Widget</b>: A primitive version of a drawn tool or item appears before you and disappears after a short time. <i>Smells of iron and rust, sweat and effort. Faint sounds of harsh labor emanate from deep within its pages.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookwidget.webp@Cairn Warden's Guide</picture>
 			</spellbookwidget>
 			<spellbookwizardmark>
 				<name type="string">Spellbook: Wizard Mark</name>
@@ -3228,6 +3326,7 @@
 				<oddity type="string">Inside the front cover is a small pocket containing a thin pad of paper, listing the name and date of death of all previous owners.</oddity>
 				<text type="string">Your finger can shoot a stream of ulfire-colored paint. This paint is only visible to you and can be seen at any distance, even through solid objects. Inside the front cover is a small pocket containing a thin pad of paper, listing the name and date of death of all previous owners.</text>
 				<description type="formattedtext"><p><b>Wizard Mark</b>: Your finger can shoot a stream of ulfire-colored paint. This paint is only visible to you and can be seen at any distance, even through solid objects. <i>Inside the front cover is a small pocket containing a thin pad of paper, listing the name and date of death of all previous owners.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookwizardmark.webp@Cairn Warden's Guide</picture>
 			</spellbookwizardmark>
 			<spellbookxrayvision>
 				<name type="string">Spellbook: X-Ray Vision</name>
@@ -3239,6 +3338,7 @@
 				<oddity type="string">Long-term exposure can cause hair loss, blurry vision, and fatigue.</oddity>
 				<text type="string">You can see through walls, dirt, clothing, etc. Long-term exposure can cause hair loss, blurry vision, and fatigue.</text>
 				<description type="formattedtext"><p><b>X-Ray Vision</b>: You can see through walls, dirt, clothing, etc. <i>Long-term exposure can cause hair loss, blurry vision, and fatigue.</i></p><p>A Spellbook holds one spell and takes a slot. Hold it in both hands and read it aloud to cast it, then add a <b>Fatigue</b>. Deprived or in danger, the Warden may call for a WIL save to avoid ill effects.</p></description>
+				<picture type="string">images/item/spellbookxrayvision.webp@Cairn Warden's Guide</picture>
 			</spellbookxrayvision>
 		</category>
 		<category name="Relics">
@@ -3250,6 +3350,7 @@
 				<recharge type="string"></recharge>
 				<text type="string">A thin, curved sword that glows with faint light, visible only in total darkness. When bathed in heavy sunlight, its first attack is Enhanced.</text>
 				<description type="formattedtext"><list><li>A thin, curved sword that glows with faint light, visible only in total darkness. When bathed in heavy sunlight, its first attack is <i>Enhanced</i>.</li></list></description>
+				<picture type="string">images/item/abladecalledhope.webp@Cairn Warden's Guide</picture>
 			</abladecalledhope>
 			<assassinsgoblets>
 				<name type="string">Assassin's Goblets</name>
@@ -3258,6 +3359,7 @@
 				<recharge type="string"></recharge>
 				<text type="string">A pair of fragile wine flutes. Any liquid poured into one is swapped with the other.</text>
 				<description type="formattedtext"><list><li>A pair of fragile wine flutes. Any liquid poured into one is swapped with the other.</li></list></description>
+				<picture type="string">images/item/assassinsgoblet.webp@Cairn Warden's Guide</picture>
 			</assassinsgoblets>
 			<babbleflask>
 				<name type="string">Babbleflask</name>
@@ -3267,6 +3369,7 @@
 				<recharge type="string"></recharge>
 				<text type="string">A foreign language is automatically understood and can be spoken back with fluency, so long as the drinker's native tongue is neither spoken nor heard.</text>
 				<description type="formattedtext"><list><li>A foreign language is automatically understood and can be spoken back with fluency, so long as the drinker's native tongue is neither spoken nor heard.</li></list></description>
+				<picture type="string">images/item/babbleflask.webp@Cairn Warden's Guide</picture>
 			</babbleflask>
 			<barbedepaulets>
 				<name type="string">Barbed Epaulets</name>
@@ -3277,6 +3380,7 @@
 				<recharge type="string"></recharge>
 				<text type="string">Spiked shoulder pads that poison anyone that touches them (STR save or lose consciousness).</text>
 				<description type="formattedtext"><list><li>Spiked shoulder pads that poison anyone that touches them (STR save or lose consciousness).</li></list></description>
+				<picture type="string">images/item/barbedepaulet.webp@Cairn Warden's Guide</picture>
 			</barbedepaulets>
 			<betterwand>
 				<name type="string">Betterwand</name>
@@ -3286,6 +3390,7 @@
 				<recharge type="string">Willingly accept a poor deal or trade while in possession of the wand.</recharge>
 				<text type="string">Vibrates with increased intensity when pointed at the best of a series of objects. Recharge: Willingly accept a poor deal or trade while in possession of the wand.</text>
 				<description type="formattedtext"><list><li>Vibrates with increased intensity when pointed at the best of a series of objects.</li><li>— <b>Recharge</b>: Willingly accept a poor deal or trade while in possession of the wand.</li></list></description>
+				<picture type="string">images/item/betterwand.webp@Cairn Warden's Guide</picture>
 			</betterwand>
 			<bloodmap>
 				<name type="string">Bloodmap</name>
@@ -3295,6 +3400,7 @@
 				<recharge type="string">Pour a pint of your own life essence onto the map, blood for blood. You are deprived until you can rest and eat a Ration.</recharge>
 				<text type="string">A blank leather parchment that absorbs any blood spilled on its surface before rolling into a tight scroll. Unroll to see a rough map revealing the current location of any remaining blood. The image disappears after a few minutes. Recharge: Pour a pint of your own life essence onto the map, blood for blood. You are deprived until you can rest and eat a Ration.</text>
 				<description type="formattedtext"><list><li>A blank leather parchment that absorbs any blood spilled on its surface before rolling into a tight scroll. Unroll to see a rough map revealing the current location of any remaining blood. The image disappears after a few minutes.</li><li>— <b>Recharge</b>: Pour a pint of your own life essence onto the map, blood for blood. You are <i>deprived</i> until you can rest and eat a Ration.</li></list></description>
+				<picture type="string">images/item/bloodmap.webp@Cairn Warden's Guide</picture>
 			</bloodmap>
 			<coinofthefather>
 				<name type="string">Coin of the Father</name>
@@ -3305,6 +3411,7 @@
 				<recharge type="string">Carry the coin for three days without spending or earning any money.</recharge>
 				<text type="string">Flip this worthless-looking hunk of flat metal in the air, and it will transform into d100 gold coins. The illusory coins disappear after one hour. Recharge: Carry the coin for three days without spending or earning any money.</text>
 				<description type="formattedtext"><list><li>Flip this worthless-looking hunk of flat metal in the air, and it will transform into d100 gold coins. The illusory coins disappear after one hour.</li><li>— <b>Recharge</b>: Carry the coin for three days without spending or earning any money.</li></list></description>
+				<picture type="string">images/item/coinofthefather.webp@Cairn Warden's Guide</picture>
 			</coinofthefather>
 			<dryadstear>
 				<name type="string">Dryad's Tear</name>
@@ -3314,6 +3421,7 @@
 				<recharge type="string"></recharge>
 				<text type="string">Shatter this crystal to merge with a tree you can touch. You can perceive the goings-on within whatever forest that tree belongs to.</text>
 				<description type="formattedtext"><list><li>Shatter this crystal to merge with a tree you can touch. You can perceive the goings-on within whatever forest that tree belongs to.</li></list></description>
+				<picture type="string">images/item/dryadstear.webp@Cairn Warden's Guide</picture>
 			</dryadstear>
 			<empathyrod>
 				<name type="string">Empathy Rod</name>
@@ -3323,6 +3431,7 @@
 				<recharge type="string">Give the rod to a former enemy as a gift. This is a one-way transaction.</recharge>
 				<text type="string">When two creatures touch this wooden pole at the same time, their physical and emotional states become fully intertwined until they let go. Recharge: Give the rod to a former enemy as a gift. This is a one-way transaction.</text>
 				<description type="formattedtext"><list><li>When two creatures touch this wooden pole at the same time, their physical and emotional states become fully intertwined until they let go.</li><li>— <b>Recharge</b>: Give the rod to a former enemy as a gift. This is a one-way transaction.</li></list></description>
+				<picture type="string">images/item/empathyrod.webp@Cairn Warden's Guide</picture>
 			</empathyrod>
 			<eyestone>
 				<name type="string">Eyestone</name>
@@ -3332,6 +3441,7 @@
 				<recharge type="string">Place in a bucket of rainwater overnight.</recharge>
 				<text type="string">Choose an object created by living creatures. You can sense the nearest example. Recharge: Place in a bucket of rainwater overnight.</text>
 				<description type="formattedtext"><list><li>Choose an object created by living creatures. You can sense the nearest example.</li><li>— <b>Recharge</b>: Place in a bucket of rainwater overnight.</li></list></description>
+				<picture type="string">images/item/eyestone.webp@Cairn Warden's Guide</picture>
 			</eyestone>
 			<falconstone>
 				<name type="string">Falconstone</name>
@@ -3341,6 +3451,7 @@
 				<recharge type="string">Kill and eat a common quarry, cooking the meat alongside the stone.</recharge>
 				<text type="string">Perceive the world through the eyes and ears of a nearby bird of prey. You feel whatever it feels but have no control over it. Recharge: Kill and eat a common quarry, cooking the meat alongside the stone.</text>
 				<description type="formattedtext"><list><li>Perceive the world through the eyes and ears of a nearby bird of prey. You feel whatever it feels but have no control over it.</li><li>— <b>Recharge</b>: Kill and eat a common quarry, cooking the meat alongside the stone.</li></list></description>
+				<picture type="string">images/item/falconstone.webp@Cairn Warden's Guide</picture>
 			</falconstone>
 			<footpadsfriend>
 				<name type="string">Footpad's Friend</name>
@@ -3349,6 +3460,7 @@
 				<recharge type="string"></recharge>
 				<text type="string">Soft leather shoes that adapt to fit any foot size. Leave behind footprints that scatter and turn in a confusing manner, making tracking nigh-impossible.</text>
 				<description type="formattedtext"><list><li>Soft leather shoes that adapt to fit any foot size. Leave behind footprints that scatter and turn in a confusing manner, making tracking nigh-impossible.</li></list></description>
+				<picture type="string">images/item/footpadsfriend.webp@Cairn Warden's Guide</picture>
 			</footpadsfriend>
 			<gatechalk>
 				<name type="string">Gate Chalk</name>
@@ -3359,6 +3471,7 @@
 				<recharge type="string"></recharge>
 				<text type="string">Draw a doorway on any flat surface to open a one-way passage to the Roots. Good luck.</text>
 				<description type="formattedtext"><list><li>Draw a doorway on any flat surface to open a one-way passage to the Roots. Good luck.</li></list></description>
+				<picture type="string">images/item/gatechalk.webp@Cairn Warden's Guide</picture>
 			</gatechalk>
 			<goldenwheatpaste>
 				<name type="string">Golden Wheat Paste</name>
@@ -3368,6 +3481,7 @@
 				<recharge type="string"></recharge>
 				<text type="string">When mixed with water, this substance chemically bonds any two objects.</text>
 				<description type="formattedtext"><list><li>When mixed with water, this substance chemically bonds any two objects.</li></list></description>
+				<picture type="string">images/item/goldenwheatpaste.webp@Cairn Warden's Guide</picture>
 			</goldenwheatpaste>
 			<gossipbox>
 				<name type="string">Gossip Box</name>
@@ -3377,6 +3491,7 @@
 				<recharge type="string">Successfully spread one falsehood in the presence of the box.</recharge>
 				<text type="string">Wind the crank to replay any sound made in the past day in your current location. Each crank goes back one hour. Recharge: Successfully spread one falsehood in the presence of the box.</text>
 				<description type="formattedtext"><list><li>Wind the crank to replay any sound made in the past day in your current location. Each crank goes back one hour.</li><li>— <b>Recharge</b>: Successfully spread one falsehood in the presence of the box.</li></list></description>
+				<picture type="string">images/item/gossipbox.webp@Cairn Warden's Guide</picture>
 			</gossipbox>
 			<harbingersbell>
 				<name type="string">Harbinger's Bell</name>
@@ -3386,6 +3501,7 @@
 				<recharge type="string">Melt and reforge. Each time, roll a d6. On a 1-2, it breaks forever.</recharge>
 				<text type="string">Hang at chest height to ring when danger is imminent. Recharge: Melt and reforge. Each time, roll a d6. On a 1-2, it breaks forever.</text>
 				<description type="formattedtext"><list><li>Hang at chest height to ring when danger is imminent.</li><li>— <b>Recharge</b>: Melt and reforge. Each time, roll a d6. On a 1-2, it breaks forever.</li></list></description>
+				<picture type="string">images/item/harbingersbell.webp@Cairn Warden's Guide</picture>
 			</harbingersbell>
 			<homunculusnail>
 				<name type="string">Homunculus Nail</name>
@@ -3396,6 +3512,7 @@
 				<recharge type="string"></recharge>
 				<text type="string">Prick a finger with the pointy end and hammer into any small object to form a loyal servant [3 HP, 4 STR, 13 DEX, 5 WIL] completely devoted to you. If not destroyed, it will outlive you.</text>
 				<description type="formattedtext"><list><li>Prick a finger with the pointy end and hammer into any small object to form a loyal servant [3 HP, 4 STR, 13 DEX, 5 WIL] completely devoted to you. If not destroyed, it will outlive you.</li></list></description>
+				<picture type="string">images/item/homunculusnail.webp@Cairn Warden's Guide</picture>
 			</homunculusnail>
 			<honestearworm>
 				<name type="string">Honest Earworm</name>
@@ -3405,6 +3522,7 @@
 				<recharge type="string"></recharge>
 				<text type="string">A foul-smelling, pinky-sized worm that feeds on earwax by crawling into the ear canal of a sleeping person. The victim then loses the ability to lie for 1d4 hours.</text>
 				<description type="formattedtext"><list><li>A foul-smelling, pinky-sized worm that feeds on earwax by crawling into the ear canal of a sleeping person. The victim then loses the ability to lie for 1d4 hours.</li></list></description>
+				<picture type="string">images/item/honestearworm.webp@Cairn Warden's Guide</picture>
 			</honestearworm>
 			<jarofants>
 				<name type="string">Jar of Ants</name>
@@ -3413,6 +3531,7 @@
 				<recharge type="string"></recharge>
 				<text type="string">Break to release a colony of fire ants [6 HP, 2 STR, 10 DEX, 1 WIL, bite (d10), detachment]. Consumes a ration every two days.</text>
 				<description type="formattedtext"><list><li>Break to release a colony of fire ants [6 HP, 2 STR, 10 DEX, 1 WIL, bite (d10), <i>detachment</i>]. Consumes a ration every two days.</li></list></description>
+				<picture type="string">images/item/jarofant.webp@Cairn Warden's Guide</picture>
 			</jarofants>
 			<lastbreath>
 				<name type="string">Last Breath</name>
@@ -3423,6 +3542,7 @@
 				<recharge type="string">Deliver a killing blow with the sword, absorbing the dying victim's soul into the blade. There is a cunning intelligence within that speaks to the wielder, forever asking for more souls, more!</recharge>
 				<text type="string">A chipped short sword of dubious quality. Drive into the earth to form a crystal dome that encircles and immobilizes the wielder. The dome is impenetrable by mundane means, and shatters once the sword is lifted again. Recharge: Deliver a killing blow with the sword, absorbing the dying victim's soul into the blade. There is a cunning intelligence within that speaks to the wielder, forever asking for more souls, more!</text>
 				<description type="formattedtext"><list><li>A chipped short sword of dubious quality. Drive into the earth to form a crystal dome that encircles and immobilizes the wielder. The dome is impenetrable by mundane means, and shatters once the sword is lifted again.</li><li>— <b>Recharge</b>: Deliver a killing blow with the sword, absorbing the dying victim's soul into the blade. There is a cunning intelligence within that speaks to the wielder, forever asking for more souls, more!</li></list></description>
+				<picture type="string">images/item/lastbreath.webp@Cairn Warden's Guide</picture>
 			</lastbreath>
 			<lightsuckercandle>
 				<name type="string">Lightsucker Candle</name>
@@ -3432,6 +3552,7 @@
 				<recharge type="string"></recharge>
 				<text type="string">Once lit, this black tallow wax sheds darkness rather than light, even in the brightest of days.</text>
 				<description type="formattedtext"><list><li>Once lit, this black tallow wax sheds darkness rather than light, even in the brightest of days.</li></list></description>
+				<picture type="string">images/item/lightsuckercandle.webp@Cairn Warden's Guide</picture>
 			</lightsuckercandle>
 			<loverscovenant>
 				<name type="string">Lover's Covenant</name>
@@ -3441,6 +3562,7 @@
 				<recharge type="string"></recharge>
 				<text type="string">A bottle of red-tinted ink, a broken heart emblazoned on the front. Write up a contract of any length. Any who sign are bound to obey by penalty of death.</text>
 				<description type="formattedtext"><list><li>A bottle of red-tinted ink, a broken heart emblazoned on the front. Write up a contract of any length. Any who sign are bound to obey by penalty of death.</li></list></description>
+				<picture type="string">images/item/loverscovenant.webp@Cairn Warden's Guide</picture>
 			</loverscovenant>
 			<maceofthekingslayer>
 				<name type="string">Mace of the Kingslayer</name>
@@ -3451,6 +3573,7 @@
 				<recharge type="string">Deliver a fatal blow to the leader of a group or faction.</recharge>
 				<text type="string">Hold the weapon aloft and shout an order or declaration. Any who fail a WIL save must obey, against their better judgment. Recharge: Deliver a fatal blow to the leader of a group or faction.</text>
 				<description type="formattedtext"><list><li>Hold the weapon aloft and shout an order or declaration. Any who fail a WIL save must obey, against their better judgment.</li><li>— <b>Recharge</b>: Deliver a fatal blow to the leader of a group or faction.</li></list></description>
+				<picture type="string">images/item/maceofthekingslayer.webp@Cairn Warden's Guide</picture>
 			</maceofthekingslayer>
 			<mothmirror>
 				<name type="string">Moth Mirror</name>
@@ -3460,6 +3583,7 @@
 				<recharge type="string"></recharge>
 				<text type="string">A full-length, double-sided glass mirror. Step into the mirror to be transported to another mirror you know. You come out of the other side as an enormous swarm of buzzing moths, striking those around you with paralysis (WIL save to avoid) as they gaze upon you in horror. You can revert to your normal form at will. The mirror only operates in one direction.</text>
 				<description type="formattedtext"><list><li>A full-length, double-sided glass mirror. Step into the mirror to be transported to another mirror you know. You come out of the other side as an enormous swarm of buzzing moths, striking those around you with paralysis (WIL save to avoid) as they gaze upon you in horror. You can revert to your normal form at will. The mirror only operates in one direction.</li></list></description>
+				<picture type="string">images/item/mothmirror.webp@Cairn Warden's Guide</picture>
 			</mothmirror>
 			<muffledust>
 				<name type="string">Muffle Dust</name>
@@ -3469,6 +3593,7 @@
 				<recharge type="string"></recharge>
 				<text type="string">A pouch of fine dust that muffles all sound in a 40ft radius when scattered.</text>
 				<description type="formattedtext"><list><li>A pouch of fine dust that muffles all sound in a 40ft radius when scattered.</li></list></description>
+				<picture type="string">images/item/muffledust.webp@Cairn Warden's Guide</picture>
 			</muffledust>
 			<nightstone>
 				<name type="string">Nightstone</name>
@@ -3478,6 +3603,7 @@
 				<recharge type="string"></recharge>
 				<text type="string">Rare moon-shaped stones dredged from underwater caves and jungle dolines. Swallow whole to relieve all fatigue and deprivation as if you had a good night's sleep and a good meal. The stone will eventually pass through your system. It isn't fun.</text>
 				<description type="formattedtext"><list><li>Rare moon-shaped stones dredged from underwater caves and jungle dolines. Swallow whole to relieve all fatigue and deprivation as if you had a good night's sleep and a good meal. The stone will eventually pass through your system. It isn't fun.</li></list></description>
+				<picture type="string">images/item/nightstone.webp@Cairn Warden's Guide</picture>
 			</nightstone>
 			<obliterationscroll>
 				<name type="string">Obliteration Scroll</name>
@@ -3488,6 +3614,7 @@
 				<recharge type="string"></recharge>
 				<text type="string">A single-page document filled with gibberish. Sign anywhere on the page to remove any knowledge of your existence from this plane of reality. No one will know or remember you, and any references to your name or lineage will vanish. The scroll disappears in a puff of smoke that smells faintly of sulfur.</text>
 				<description type="formattedtext"><list><li>A single-page document filled with gibberish. Sign anywhere on the page to remove any knowledge of your existence from this plane of reality. No one will know or remember you, and any references to your name or lineage will vanish. The scroll disappears in a puff of smoke that smells faintly of sulfur.</li></list></description>
+				<picture type="string">images/item/obliterationscroll.webp@Cairn Warden's Guide</picture>
 			</obliterationscroll>
 			<parliamentspromise>
 				<name type="string">Parliament's Promise</name>
@@ -3498,6 +3625,7 @@
 				<recharge type="string"></recharge>
 				<text type="string">A helmet in the form of an owl's head. Its wearer can twist their head around like an owl and can see in darkness with perfect clarity. While wearing the helm, the wearer loses the ability to speak, uttering only the simplest of cooing noises.</text>
 				<description type="formattedtext"><list><li>A helmet in the form of an owl's head. Its wearer can twist their head around like an owl and can see in darkness with perfect clarity. While wearing the helm, the wearer loses the ability to speak, uttering only the simplest of cooing noises.</li></list></description>
+				<picture type="string">images/item/parliamentspromise.webp@Cairn Warden's Guide</picture>
 			</parliamentspromise>
 			<phoenixash>
 				<name type="string">Phoenix Ash</name>
@@ -3507,6 +3635,7 @@
 				<recharge type="string"></recharge>
 				<text type="string">Sprinkle over a corpse to resurrect the deceased. They return with full health but no memory of their past life.</text>
 				<description type="formattedtext"><list><li>Sprinkle over a corpse to resurrect the deceased. They return with full health but no memory of their past life.</li></list></description>
+				<picture type="string">images/item/phoenixash.webp@Cairn Warden's Guide</picture>
 			</phoenixash>
 			<ringofthesnake>
 				<name type="string">Ring of the Snake</name>
@@ -3517,6 +3646,7 @@
 				<recharge type="string">Bury the ring with a corpse. A month later, exhume the corpse and retrieve it.</recharge>
 				<text type="string">A wrought-iron serpent ring. Place it on your finger and fall into a sleep so deep that most will think you are dead. If the ring is removed, you will awaken feeling refreshed. Otherwise, the effect will wear off after one month. Recharge: Bury the ring with a corpse. A month later, exhume the corpse and retrieve it.</text>
 				<description type="formattedtext"><list><li>A wrought-iron serpent ring. Place it on your finger and fall into a sleep so deep that most will think you are dead. If the ring is removed, you will awaken feeling refreshed. Otherwise, the effect will wear off after one month.</li><li>— <b>Recharge</b>: Bury the ring with a corpse. A month later, exhume the corpse and retrieve it.</li></list></description>
+				<picture type="string">images/item/ringofthesnake.webp@Cairn Warden's Guide</picture>
 			</ringofthesnake>
 			<rocfeather>
 				<name type="string">Roc Feather</name>
@@ -3526,6 +3656,7 @@
 				<recharge type="string"></recharge>
 				<text type="string">Hold while falling to float safely to the ground from any height.</text>
 				<description type="formattedtext"><list><li>Hold while falling to float safely to the ground from any height.</li></list></description>
+				<picture type="string">images/item/rocfeather.webp@Cairn Warden's Guide</picture>
 			</rocfeather>
 			<skullwhistle>
 				<name type="string">Skull Whistle</name>
@@ -3535,6 +3666,7 @@
 				<recharge type="string">Feed the instrument a clump of human hair pulled from a living skull.</recharge>
 				<text type="string">Produces a chilling scream that forces any who hear it (including the blower) to make a WIL save or become temporarily incapacitated. Recharge: Feed the instrument a clump of human hair pulled from a living skull.</text>
 				<description type="formattedtext"><list><li>Produces a chilling scream that forces any who hear it (including the blower) to make a WIL save or become temporarily incapacitated.</li><li>— <b>Recharge</b>: Feed the instrument a clump of human hair pulled from a living skull.</li></list></description>
+				<picture type="string">images/item/skullwhistle.webp@Cairn Warden's Guide</picture>
 			</skullwhistle>
 			<soulclump>
 				<name type="string">Soul Clump</name>
@@ -3543,6 +3675,7 @@
 				<recharge type="string"></recharge>
 				<text type="string">A hard, fist-sized ball covered in small bumps. When rolled on a flat surface, it collects any objects smaller than its current mass, which subsequently increases as more items are attached to its surface. Only living creatures are immune.</text>
 				<description type="formattedtext"><list><li>A hard, fist-sized ball covered in small bumps. When rolled on a flat surface, it collects any objects smaller than its current mass, which subsequently increases as more items are attached to its surface. Only living creatures are immune.</li></list></description>
+				<picture type="string">images/item/soulclump.webp@Cairn Warden's Guide</picture>
 			</soulclump>
 			<spystone>
 				<name type="string">Spystone</name>
@@ -3552,6 +3685,7 @@
 				<recharge type="string">To record a new sound, skip the rock at least three times on a body of water and recover it.</recharge>
 				<text type="string">A smooth, flat stone that is slightly warm to the touch. Squeeze to record audio in a 40ft radius. Squeeze again to play it back, as many times as you like. Recharge: To record a new sound, skip the rock at least three times on a body of water and recover it.</text>
 				<description type="formattedtext"><list><li>A smooth, flat stone that is slightly warm to the touch. Squeeze to record audio in a 40ft radius. Squeeze again to play it back, as many times as you like.</li><li>— <b>Recharge</b>: To record a new sound, skip the rock at least three times on a body of water and recover it.</li></list></description>
+				<picture type="string">images/item/spystone.webp@Cairn Warden's Guide</picture>
 			</spystone>
 			<stickyrope>
 				<name type="string">Sticky Rope</name>
@@ -3561,6 +3695,7 @@
 				<recharge type="string">Cut off 10ft of rope, which then withers away.</recharge>
 				<text type="string">A 100ft rope that can stick to any surface. Recharge: Cut off 10ft of rope, which then withers away.</text>
 				<description type="formattedtext"><list><li>A 100ft rope that can stick to any surface.</li><li>— <b>Recharge</b>: Cut off 10ft of rope, which then withers away.</li></list></description>
+				<picture type="string">images/item/stickyrope.webp@Cairn Warden's Guide</picture>
 			</stickyrope>
 			<stoneeater>
 				<name type="string">Stone Eater</name>
@@ -3570,6 +3705,7 @@
 				<recharge type="string"></recharge>
 				<text type="string">A rodent-sized centipede that consumes and digests stone, capable of cutting a small tunnel in under an hour. It can be used more than once, but only if you can catch it (DEX 18).</text>
 				<description type="formattedtext"><list><li>A rodent-sized centipede that consumes and digests stone, capable of cutting a small tunnel in under an hour. It can be used more than once, but only if you can catch it (DEX 18).</li></list></description>
+				<picture type="string">images/item/stoneeater.webp@Cairn Warden's Guide</picture>
 			</stoneeater>
 			<stonewaxgum>
 				<name type="string">Stonewax Gum</name>
@@ -3580,6 +3716,7 @@
 				<recharge type="string"></recharge>
 				<text type="string">Chew, then spit. The gum will harden and stretch, making a perfect, unbreakable seal.</text>
 				<description type="formattedtext"><list><li>Chew, then spit. The gum will harden and stretch, making a perfect, unbreakable seal.</li></list></description>
+				<picture type="string">images/item/stonewaxgum.webp@Cairn Warden's Guide</picture>
 			</stonewaxgum>
 			<spongearmy>
 				<name type="string">Sponge Army</name>
@@ -3589,6 +3726,7 @@
 				<recharge type="string"></recharge>
 				<text type="string">A dozen miniature soldiers made of carved sea sponges. When splashed with water, they grow to full size [8 HP, 6 STR, 13 DEX, 5 WIL, hardened sponge (d6), detachment] and follow the orders of the person they see until they are destroyed or dry out completely (about 10 minutes).</text>
 				<description type="formattedtext"><list><li>A dozen miniature soldiers made of carved sea sponges. When splashed with water, they grow to full size [8 HP, 6 STR, 13 DEX, 5 WIL, hardened sponge (d6), <i>detachment</i>] and follow the orders of the person they see until they are destroyed or dry out completely (about 10 minutes).</li></list></description>
+				<picture type="string">images/item/spongearmy.webp@Cairn Warden's Guide</picture>
 			</spongearmy>
 			<tupsheadcrown>
 				<name type="string">Tupshead Crown</name>
@@ -3600,6 +3738,7 @@
 				<recharge type="string"></recharge>
 				<text type="string">A beautifully rendered ram's head helm wrought from tough alpine oak. The horns can be used as weapons (d6+d6).</text>
 				<description type="formattedtext"><list><li>A beautifully rendered ram's head helm wrought from tough alpine oak. The horns can be used as weapons (d6+d6).</li></list></description>
+				<picture type="string">images/item/tupsheadcrown.webp@Cairn Warden's Guide</picture>
 			</tupsheadcrown>
 			<veilsilkgrip>
 				<name type="string">Veilsilk Grip</name>
@@ -3610,6 +3749,7 @@
 				<recharge type="string">Snip off one of the fingers.</recharge>
 				<text type="string">A hand wearing this glove can phase through solid objects. Recharge: Snip off one of the fingers.</text>
 				<description type="formattedtext"><list><li>A hand wearing this glove can phase through solid objects.</li><li>— <b>Recharge</b>: Snip off one of the fingers.</li></list></description>
+				<picture type="string">images/item/veilsilkgrip.webp@Cairn Warden's Guide</picture>
 			</veilsilkgrip>
 			<voiceofthemountain>
 				<name type="string">Voice of the Mountain</name>
@@ -3619,6 +3759,7 @@
 				<recharge type="string"></recharge>
 				<text type="string">A rough pebble imbued with the essence of a mountain spirit. Crush to call forth an earthquake or similar natural disaster. Do not expect to be spared.</text>
 				<description type="formattedtext"><list><li>A rough pebble imbued with the essence of a mountain spirit. Crush to call forth an earthquake or similar natural disaster. Do not expect to be spared.</li></list></description>
+				<picture type="string">images/item/voiceofthemountain.webp@Cairn Warden's Guide</picture>
 			</voiceofthemountain>
 			<wardstone>
 				<name type="string">Ward Stone</name>
@@ -3628,6 +3769,7 @@
 				<recharge type="string"></recharge>
 				<text type="string">A flat, unassuming river stone notched with faded symbols. Smash to release a silvery powder in a 20ft radius that pacifies anyone who breathes it.</text>
 				<description type="formattedtext"><list><li>A flat, unassuming river stone notched with faded symbols. Smash to release a silvery powder in a 20ft radius that pacifies anyone who breathes it.</li></list></description>
+				<picture type="string">images/item/wardstone.webp@Cairn Warden's Guide</picture>
 			</wardstone>
 			<whispergale>
 				<name type="string">Whispergale</name>
@@ -3637,6 +3779,7 @@
 				<recharge type="string"></recharge>
 				<text type="string">A balloon-shaped plant that captures a spoken message and delivers it to a location within a day's walk.</text>
 				<description type="formattedtext"><list><li>A balloon-shaped plant that captures a spoken message and delivers it to a location within a day's walk.</li></list></description>
+				<picture type="string">images/item/whispergale.webp@Cairn Warden's Guide</picture>
 			</whispergale>
 			<whistlerope>
 				<name type="string">Whistle-Rope</name>
@@ -3645,6 +3788,7 @@
 				<recharge type="string"></recharge>
 				<text type="string">15ft of highly flexible leather. Swirl in the air to generate a powerful subsonic effect that drives away wildlife. Also works underwater.</text>
 				<description type="formattedtext"><list><li>15ft of highly flexible leather. Swirl in the air to generate a powerful subsonic effect that drives away wildlife. Also works underwater.</li></list></description>
+				<picture type="string">images/item/whistlerope.webp@Cairn Warden's Guide</picture>
 			</whistlerope>
 			<wonderbar>
 				<name type="string">Wonder Bar</name>
@@ -3654,6 +3798,7 @@
 				<recharge type="string">Hold the bar with both hands without letting go for one continuous hour (WIL save to succeed). You can make only one attempt each day.</recharge>
 				<text type="string">Pressing the switch on the side of this iron bar freezes it in place, even in midair. Once frozen, it cannot be moved by any force until the switch is depressed. Recharge: Hold the bar with both hands without letting go for one continuous hour (WIL save to succeed). You can make only one attempt each day.</text>
 				<description type="formattedtext"><list><li>Pressing the switch on the side of this iron bar freezes it in place, even in midair. Once frozen, it cannot be moved by any force until the switch is depressed.</li><li>— <b>Recharge</b>: Hold the bar with both hands without letting go for one continuous hour (WIL save to succeed). You can make only one attempt each day.</li></list></description>
+				<picture type="string">images/item/wonderbar.webp@Cairn Warden's Guide</picture>
 			</wonderbar>
 			<wraithlantern>
 				<name type="string">Wraith Lantern</name>
@@ -3663,6 +3808,7 @@
 				<recharge type="string">Kill the last person found with the help of the lantern, trapping their spirit inside. The lantern must be nearby when they are killed.</recharge>
 				<text type="string">Write someone's name onto its glass, and the name will disappear. The lantern reveals a path to their current location, visible only to the holder (day or night). Recharge: Kill the last person found with the help of the lantern, trapping their spirit inside. The lantern must be nearby when they are killed.</text>
 				<description type="formattedtext"><list><li>Write someone's name onto its glass, and the name will disappear. The lantern reveals a path to their current location, visible only to the holder (day or night).</li><li>— <b>Recharge</b>: Kill the last person found with the help of the lantern, trapping their spirit inside. The lantern must be nearby when they are killed.</li></list></description>
+				<picture type="string">images/item/wraithlantern.webp@Cairn Warden's Guide</picture>
 			</wraithlantern>
 		</category>
 	</item>

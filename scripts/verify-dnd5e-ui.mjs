@@ -172,19 +172,22 @@ try {
 
   // Containers (better than FG's typed location): the rope dragged onto a backpack goes in it; the
   // backpack dropped in one click, picked up again.
-  await tool("kraken_character_drop", { id: row.id, record: "Backpack", type: "item" });
+  // Brundar's backpack came out of his kit's Dungeoneer's Pack.
   await seat.click('[data-sheet-tab="inventory"]');
-  await seat.waitForSelector('.sheet-5e li[data-container="Backpack"]');
+  await seat.waitForSelector('.sheet-5e li[data-container="Backpack"] >> nth=0');
+  // Each item's own picture beside it, from its book (the SRD's items are painted).
+  await seat.waitForFunction(() => [...document.querySelectorAll(".sheet-5e .item-thumb")].filter((img) => img.complete && img.naturalWidth > 0).length >= 5, null, { timeout: 15000 });
+  assert(await seat.isVisible('.sheet-5e li:has-text("Chain Mail") .item-thumb'), "the chain mail's picture in the inventory");
   const ropeRow = seat.locator('.sheet-5e li[draggable="true"]', { hasText: "Rope" }).first();
-  await ropeRow.dragTo(seat.locator('.sheet-5e li[data-container="Backpack"]'));
+  await ropeRow.dragTo(seat.locator('.sheet-5e li[data-container="Backpack"]').first());
   await seat.waitForSelector('.sheet-5e [data-in-container="Backpack"]', { timeout: 10000 });
   const packed = await tool("kraken_record_get", { id: row.id });
-  assert(Object.values(packed.data.inventorylist).some((item) => item.name === "Rope" && item.location === "Backpack"), "the rope is in the backpack");
-  await seat.click('.sheet-5e li[data-container="Backpack"] [data-action="container-drop"]');
-  await seat.waitForSelector('.sheet-5e li[data-container="Backpack"] [data-action="container-pickup"]');
-  assert((await seat.locator('.sheet-5e li[data-container="Backpack"] select').inputValue()) === "0", "the dropped backpack reads Not carried");
+  assert(Object.values(packed.data.inventorylist).filter((item) => item.name === "Rope").some((item) => item.location === "Backpack"), "the rope is in the backpack");
+  await seat.click('.sheet-5e li[data-container="Backpack"] >> nth=0 >> [data-action="container-drop"]');
+  await seat.waitForSelector('.sheet-5e li[data-container="Backpack"] >> nth=0 >> [data-action="container-pickup"]');
+  assert((await seat.locator('.sheet-5e li[data-container="Backpack"]').first().locator("select").inputValue()) === "0", "the dropped backpack reads Not carried");
   await seat.screenshot({ path: path.join(tmpdir(), "kraken-dnd5e-backpack.png") });
-  await seat.click('.sheet-5e li[data-container="Backpack"] [data-action="container-pickup"]');
+  await seat.click('.sheet-5e li[data-container="Backpack"] >> nth=0 >> [data-action="container-pickup"]');
   await seat.click('[data-sheet-tab="main"]');
 
   // A skill and a save from the sheet, both in the GM's chat.

@@ -4056,6 +4056,7 @@
 				<cost type="string">2 gp</cost>
 				<size type="string">S</size>
 				<description type="formattedtext"><p>A magic weapon: its bonus is added to all attack and damage rolls made with it.</p></description>
+				<picture type="string">images/item/dagger.webp@Basic Fantasy Game Master's Guide</picture>
 			</dagger1>
 			<shortsword1>
 				<name type="string">Shortsword +1</name>
@@ -4065,6 +4066,7 @@
 				<cost type="string">6 gp</cost>
 				<size type="string">S</size>
 				<description type="formattedtext"><p>A magic weapon: its bonus is added to all attack and damage rolls made with it.</p></description>
+				<picture type="string">images/item/shortsword.webp@Basic Fantasy Game Master's Guide</picture>
 			</shortsword1>
 			<longsword1>
 				<name type="string">Longsword +1</name>
@@ -4074,6 +4076,7 @@
 				<cost type="string">10 gp</cost>
 				<size type="string">M</size>
 				<description type="formattedtext"><p>A magic weapon: its bonus is added to all attack and damage rolls made with it.</p></description>
+				<picture type="string">images/item/longsword.webp@Basic Fantasy Game Master's Guide</picture>
 			</longsword1>
 			<longsword2>
 				<name type="string">Longsword +2</name>
@@ -4083,6 +4086,7 @@
 				<cost type="string">10 gp</cost>
 				<size type="string">M</size>
 				<description type="formattedtext"><p>A magic weapon: its bonus is added to all attack and damage rolls made with it.</p></description>
+				<picture type="string">images/item/longsword.webp@Basic Fantasy Game Master's Guide</picture>
 			</longsword2>
 			<mace1>
 				<name type="string">Mace +1</name>
@@ -4092,6 +4096,7 @@
 				<cost type="string">6 gp</cost>
 				<size type="string">M</size>
 				<description type="formattedtext"><p>A magic weapon: its bonus is added to all attack and damage rolls made with it.</p></description>
+				<picture type="string">images/item/mace.webp@Basic Fantasy Game Master's Guide</picture>
 			</mace1>
 			<warhammer1>
 				<name type="string">Warhammer +1</name>
@@ -4101,6 +4106,7 @@
 				<cost type="string">4 gp</cost>
 				<size type="string">S</size>
 				<description type="formattedtext"><p>A magic weapon: its bonus is added to all attack and damage rolls made with it.</p></description>
+				<picture type="string">images/item/warhammer.webp@Basic Fantasy Game Master's Guide</picture>
 			</warhammer1>
 			<battleaxe1>
 				<name type="string">Battle Axe +1</name>
@@ -4110,6 +4116,7 @@
 				<cost type="string">7 gp</cost>
 				<size type="string">M</size>
 				<description type="formattedtext"><p>A magic weapon: its bonus is added to all attack and damage rolls made with it.</p></description>
+				<picture type="string">images/item/battleaxe.webp@Basic Fantasy Game Master's Guide</picture>
 			</battleaxe1>
 			<leatherarmor1>
 				<name type="string">Leather Armor +1</name>
@@ -4119,6 +4126,7 @@
 				<cost type="string">20 gp</cost>
 				<weight type="string">15</weight>
 				<description type="formattedtext"><p>Magic armor: its bonus is added to the Armor Class. Magic leather counts as no armor for movement.</p></description>
+				<picture type="string">images/item/leatherarmor.webp@Basic Fantasy Game Master's Guide</picture>
 			</leatherarmor1>
 			<chainmail1>
 				<name type="string">Chain Mail +1</name>
@@ -4128,6 +4136,7 @@
 				<cost type="string">60 gp</cost>
 				<weight type="string">40</weight>
 				<description type="formattedtext"><p>Magic armor: its bonus is added to the Armor Class. Magic metal armor moves as leather.</p></description>
+				<picture type="string">images/item/chainmail.webp@Basic Fantasy Game Master's Guide</picture>
 			</chainmail1>
 			<shield1>
 				<name type="string">Shield +1</name>
@@ -4137,6 +4146,7 @@
 				<cost type="string">7 gp</cost>
 				<weight type="string">5</weight>
 				<description type="formattedtext"><p>A magic shield: its bonus is added to the shield's +1 to Armor Class.</p></description>
+				<picture type="string">images/item/shield.webp@Basic Fantasy Game Master's Guide</picture>
 			</shield1>
 		</category>
 		<category name="Magic Weapons">
@@ -4145,60 +4155,70 @@
 				<type type="string">Magic Item</type>
 				<subtype type="string">Magic Weapons</subtype>
 				<description type="formattedtext"><p><b>Casts Light on Command:</b> By drawing the weapon and uttering a command word, the wielder may cause it to glow; it will then shed light with the same radius as a <b>light</b> spell. Sheathing or laying down the weapon, or speaking the command word again, dispels the effect. This power may be used as often as desired.</p></description>
+				<picture type="string">images/item/magicweaponpowercastslightoncommand.webp@Basic Fantasy Game Master's Guide</picture>
 			</magicweaponpowercastslightoncommand>
 			<magicweaponpowercharmperson>
 				<name type="string">Magic weapon power: Charm Person</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Magic Weapons</subtype>
 				<description type="formattedtext"><p><b>Charm Person:</b> This power allows the wielder to cast <b>charm person</b> once per day, as if by an 8th level Magic-User, by brandishing the weapon, speaking a command word and gazing at the target creature. (The wielder's gaze does not have to be met for the spell to be cast.) The target creature is allowed saving throws just as described in the spell description.</p></description>
+				<picture type="string">images/item/magicweaponpowercharmperson.webp@Basic Fantasy Game Master's Guide</picture>
 			</magicweaponpowercharmperson>
 			<magicweaponpowerdrainsenergy>
 				<name type="string">Magic weapon power: Drains Energy</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Magic Weapons</subtype>
 				<description type="formattedtext"><p><b>Drains Energy:</b> A weapon with this power drains one life energy level on a hit, as described under <b>Energy Drain</b> in the <b>Encounter</b> section; up to 2d4 levels can be drained by a weapon with this power, after which time the weapon loses this power but retains any other magical effects or bonuses.</p></description>
+				<picture type="string">images/item/magicweaponpowerdrainsenergy.webp@Basic Fantasy Game Master's Guide</picture>
 			</magicweaponpowerdrainsenergy>
 			<magicweaponpowerflamesoncommand>
 				<name type="string">Magic weapon power: Flames on Command</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Magic Weapons</subtype>
 				<description type="formattedtext"><p><b>Flames on Command:</b> Upon command, the weapon will be sheathed in fire. The fire does not harm the wielder. The effect remains until the command is given again, or until the weapon is dropped or sheathed. While it flames, all damage done by the weapon is treated as fire damage, and an additional +1 bonus (in addition to the weapon's normal bonus) is added to damage when fighting trolls, treants, and other creatures especially vulnerable to fire. It casts light and burns just as if it were a torch.</p></description>
+				<picture type="string">images/item/magicweaponpowerflamesoncommand.webp@Basic Fantasy Game Master's Guide</picture>
 			</magicweaponpowerflamesoncommand>
 			<magicweaponpowerlocateobjects>
 				<name type="string">Magic weapon power: Locate Objects</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Magic Weapons</subtype>
 				<description type="formattedtext"><p><b>Locate Objects:</b> This power allows the wielder to cast the spell <b>locate object</b> once per day, as if by an 8th level Magic-User.</p></description>
+				<picture type="string">images/item/magicweaponpowerlocateobject.webp@Basic Fantasy Game Master's Guide</picture>
 			</magicweaponpowerlocateobjects>
 			<magicweaponpowerspecialenemy>
 				<name type="string">Magic weapon power: Special Enemy</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Magic Weapons</subtype>
 				<description type="formattedtext"><p><b>Special Enemy:</b> These weapons are created to combat a specific sort of creature, as rolled on the Special Ability table. When used against that specific enemy, the second listed bonus applies instead of the first; so a sword +1, +3 vs. Undead would provide +1 attack and damage against giant rats, but +3 attack and damage rolls against zombies.</p></description>
+				<picture type="string">images/item/magicweaponpowerspecialenemy.webp@Basic Fantasy Game Master's Guide</picture>
 			</magicweaponpowerspecialenemy>
 			<magicweaponpowerwishes>
 				<name type="string">Magic weapon power: Wishes</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Magic Weapons</subtype>
 				<description type="formattedtext"><p><b>Wishes:</b> Weapons with this power have the ability to grant 1d4 wishes. The GM must adjudicate all wishes, and instructions are given in the <b>Game Master</b> section regarding this. After these wishes have been made, the weapon loses this power, but retains any other bonuses and powers.</p></description>
+				<picture type="string">images/item/magicweaponpowerwishe.webp@Basic Fantasy Game Master's Guide</picture>
 			</magicweaponpowerwishes>
 			<magicweaponpowercursedweapons>
 				<name type="string">Magic weapon power: Cursed Weapons</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Magic Weapons</subtype>
 				<description type="formattedtext"><p><b>Cursed Weapons</b> inflict a penalty to the wielder's attack rolls, as rolled on the Weapon Bonus table. The curse causes the afflicted character to be unable to get rid of the weapon. There are two possible forms the curse may take: Obsession and Affliction. The GM may decide which to use at his or her option.</p></description>
+				<picture type="string">images/item/magicweaponpowercursedweapon.webp@Basic Fantasy Game Master's Guide</picture>
 			</magicweaponpowercursedweapons>
 			<magicweaponpowerobsession>
 				<name type="string">Magic weapon power: Obsession</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Magic Weapons</subtype>
 				<description type="formattedtext"><p><b>Obsession:</b> Regardless of how severe the penalty is, the character wielding the weapon will believe it is a bonus and refuse to use any other weapon in combat. A <b>remove curse</b> spell is the only way to rid a character of such a weapon; but as he or she will believe the weapon is the best magical weapon ever, the character receives a saving throw vs. Spells to resist.</p></description>
+				<picture type="string">images/item/magicweaponpowerobsession.webp@Basic Fantasy Game Master's Guide</picture>
 			</magicweaponpowerobsession>
 			<magicweaponpoweraffliction>
 				<name type="string">Magic weapon power: Affliction</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Magic Weapons</subtype>
 				<description type="formattedtext"><p><b>Affliction:</b> The character knows the weapon is cursed as soon as he or she uses it in combat; however, any attempt to throw it away fails, as the weapon magically appears back in the character's hand whenever he or she tries to draw any other weapon. In this case, the <b>remove curse</b> spell needed to rid the character of the weapon will be unopposed (i.e. no saving throw).</p></description>
+				<picture type="string">images/item/magicweaponpoweraffliction.webp@Basic Fantasy Game Master's Guide</picture>
 			</magicweaponpoweraffliction>
 		</category>
 		<category name="Potions">
@@ -4207,162 +4227,189 @@
 				<type type="string">Magic Item</type>
 				<subtype type="string">Potions</subtype>
 				<description type="formattedtext"><p><b>Clairaudience:</b> This potion enables the drinker to hear sounds in another area through the ears of a living creature in that area, up to a maximum 60' away. This effect otherwise functions just as the spell <b>clairvoyance</b>.</p></description>
+				<picture type="string">images/item/potionofclairaudience.webp@Basic Fantasy Game Master's Guide</picture>
 			</potionofclairaudience>
 			<potionofclairvoyance>
 				<name type="string">Potion of Clairvoyance</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Potions</subtype>
 				<description type="formattedtext"><p><b>Clairvoyance:</b> This potion grants the imbiber the effect of the ∗∗clairvoyance∗∗spell.</p></description>
+				<picture type="string">images/item/potionofclairvoyance.webp@Basic Fantasy Game Master's Guide</picture>
 			</potionofclairvoyance>
 			<potionofcoldresistance>
 				<name type="string">Potion of Cold Resistance</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Potions</subtype>
 				<description type="formattedtext"><p><b>Cold Resistance:</b> This potion grants the imbiber the power of the spell <b>resist cold</b>.</p></description>
+				<picture type="string">images/item/potionofcoldresistance.webp@Basic Fantasy Game Master's Guide</picture>
 			</potionofcoldresistance>
 			<potionofcontrolanimal>
 				<name type="string">Potion of Control Animal</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Potions</subtype>
 				<description type="formattedtext"><p><b>Control Animal:</b> This potion functions like a <b>control human</b> potion, but affects only normal, non-magical animals.</p></description>
+				<picture type="string">images/item/potionofcontrolanimal.webp@Basic Fantasy Game Master's Guide</picture>
 			</potionofcontrolanimal>
 			<potionofcontroldragon>
 				<name type="string">Potion of Control Dragon</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Potions</subtype>
 				<description type="formattedtext"><p><b>Control Dragon:</b> This potion functions like a <b>control human</b> potion, but affects only dragons.</p></description>
+				<picture type="string">images/item/potionofcontroldragon.webp@Basic Fantasy Game Master's Guide</picture>
 			</potionofcontroldragon>
 			<potionofcontrolgiant>
 				<name type="string">Potion of Control Giant</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Potions</subtype>
 				<description type="formattedtext"><p><b>Control Giant:</b> This potion functions like a <b>control human</b> potion, but affects only giants.</p></description>
+				<picture type="string">images/item/potionofcontrolgiant.webp@Basic Fantasy Game Master's Guide</picture>
 			</potionofcontrolgiant>
 			<potionofcontrolhuman>
 				<name type="string">Potion of Control Human</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Potions</subtype>
 				<description type="formattedtext"><p><b>Control Human:</b> This potion allows the drinker to charm a human, demi-human, or humanoid by gazing at them. The effect functions like the <b>charm person</b> spell. If the charm is resisted, the drinker can attempt to charm up to two more targets before the potion's benefit is exhausted.</p></description>
+				<picture type="string">images/item/potionofcontrolhuman.webp@Basic Fantasy Game Master's Guide</picture>
 			</potionofcontrolhuman>
 			<potionofcontrolplant>
 				<name type="string">Potion of Control Plant</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Potions</subtype>
 				<description type="formattedtext"><p><b>Control Plant:</b> This potion grants the drinker control over one or more plants or plant creatures within a 10' square area up to 50' away. Normal plants become animated, having a movement rate of 10', and obey the drinker's commands. If ordered to attack, only the largest plants can do any real harm, attacking with a +0 attack bonus and inflicting 1d4 points of damage per hit. Affected plant creatures (who fail to save vs. Spells) can understand the drinker, and behave as if under a <b>charm monster</b> spell.</p></description>
+				<picture type="string">images/item/potionofcontrolplant.webp@Basic Fantasy Game Master's Guide</picture>
 			</potionofcontrolplant>
 			<potionofcontrolundead>
 				<name type="string">Potion of Control Undead</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Potions</subtype>
 				<description type="formattedtext"><p><b>Control Undead:</b> This potion grants the drinker command of 3d6 hit dice of undead monsters. A save vs. Spells is allowed to resist the effect. Mindless undead follow the drinker's commands exactly; free-willed undead act as if under a <b>charm person</b> spell.</p></description>
+				<picture type="string">images/item/potionofcontrolundead.webp@Basic Fantasy Game Master's Guide</picture>
 			</potionofcontrolundead>
 			<potionofdelusion>
 				<name type="string">Potion of Delusion</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Potions</subtype>
 				<description type="formattedtext"><p><b>Delusion:</b> This cursed potion will appear, if tested or analyzed, to be one of the other potions (other than poison). When imbibed, the drinker will briefly believe he has received the benefits of the &quot;other&quot; potion, but the illusion will be swiftly exposed...</p></description>
+				<picture type="string">images/item/potionofdelusion.webp@Basic Fantasy Game Master's Guide</picture>
 			</potionofdelusion>
 			<potionofdiminution>
 				<name type="string">Potion of Diminution</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Potions</subtype>
 				<description type="formattedtext"><p><b>Diminution:</b> This potion reduces the drinker and all items worn or carried to one-twelfth of his or her original height (so that a 6' tall character becomes 6&quot; tall). The drinker's weight is divided by 1,728; this makes an armed warrior weigh less than 2.5 ounces. The affected creature cannot make an effective attack against any creature bigger than a house cat, but may be able to slip under doors or into cracks and has a 90% chance of moving about undetected (both in terms of sound and vision).</p></description>
+				<picture type="string">images/item/potionofdiminution.webp@Basic Fantasy Game Master's Guide</picture>
 			</potionofdiminution>
 			<potionoffireresistance>
 				<name type="string">Potion of Fire Resistance</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Potions</subtype>
 				<description type="formattedtext"><p><b>Fire Resistance:</b> This potion grants the imbiber the power of the spell <b>resist fire</b>.</p></description>
+				<picture type="string">images/item/potionoffireresistance.webp@Basic Fantasy Game Master's Guide</picture>
 			</potionoffireresistance>
 			<potionofflying>
 				<name type="string">Potion of Flying</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Potions</subtype>
 				<description type="formattedtext"><p><b>Flying:</b> This spell grants the power of the spell <b>fly</b>.</p></description>
+				<picture type="string">images/item/potionofflying.webp@Basic Fantasy Game Master's Guide</picture>
 			</potionofflying>
 			<potionofgaseousform>
 				<name type="string">Potion of Gaseous Form</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Potions</subtype>
 				<description type="formattedtext"><p><b>Gaseous Form:</b> The drinker and all of his or her gear become insubstantial, misty, and translucent. He or she becomes immune to non-magical weapons, and has an Armor Class of 22 vs. magical weapons. The imbiber can't attack or cast spells while in gaseous form. The drinker also loses supernatural abilities while in gaseous form. A gaseous creature can fly at a speed of 10', and can pass through small holes or narrow openings, even mere cracks, as long as the potion persists. The gaseous creature is subject to the effects of wind, and can't enter water or other liquid. Objects cannot be manipulated in this form, even those brought along when the potion was imbibed. The drinker cannot resume material form at will, but must wait for the potion to expire; however, the potion may be quaffed in thirds, in which case each drink lasts 1d4+1 turns.</p></description>
+				<picture type="string">images/item/potionofgaseousform.webp@Basic Fantasy Game Master's Guide</picture>
 			</potionofgaseousform>
 			<potionofgiantstrength>
 				<name type="string">Potion of Giant Strength</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Potions</subtype>
 				<description type="formattedtext"><p><b>Giant Strength:</b> This potion grants the imbiber the Strength of a giant. For the duration, the drinker gains a bonus of +5 on attack and damage rolls with melee or thrown weapons, and can throw large stones just as a stone giant can.</p></description>
+				<picture type="string">images/item/potionofgiantstrength.webp@Basic Fantasy Game Master's Guide</picture>
 			</potionofgiantstrength>
 			<potionofgrowth>
 				<name type="string">Potion of Growth</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Potions</subtype>
 				<description type="formattedtext"><p><b>Growth:</b> The drinker of this potion (with all equipment worn or carried) becomes twice normal height and eight times normal weight. The enlarged character is treated as having the Strength of a Stone Giant (but without the rock-throwing ability), gaining +5 on attack and damage rolls.</p></description>
+				<picture type="string">images/item/potionofgrowth.webp@Basic Fantasy Game Master's Guide</picture>
 			</potionofgrowth>
 			<potionofhealing>
 				<name type="string">Potion of Healing</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Potions</subtype>
 				<description type="formattedtext"><p><b>Healing:</b> The imbiber of this potion receives 1d6+1 hit points of healing (as the spell <b>cure light wounds</b>).</p></description>
+				<picture type="string">images/item/potionofhealing.webp@Basic Fantasy Game Master's Guide</picture>
 			</potionofhealing>
 			<potionofheroism>
 				<name type="string">Potion of Heroism</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Potions</subtype>
 				<description type="formattedtext"><p><b>Heroism:</b> This potion improves the fighting ability of the drinker. Fighters of less than 3rd level gain +3 to attack bonus as well as gaining 3 hit dice. Fighters of 4th to 5th level gain +2 to attack bonus and 2 hit dice. Fighters of 6th or 7th level gain +1 to attack bonus and 1 hit die. Fighters of 8th level or higher, as well as non-Fighter class characters, gain no hit dice, but still receive +1 to attack bonus. Hit dice gained are only temporary, and damage received is deducted from those hit dice first; any that remain when the potion expires are simply lost.</p></description>
+				<picture type="string">images/item/potionofheroism.webp@Basic Fantasy Game Master's Guide</picture>
 			</potionofheroism>
 			<potionofinvisibility>
 				<name type="string">Potion of Invisibility</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Potions</subtype>
 				<description type="formattedtext"><p><b>Invisibility:</b> This potion makes the imbiber invisible (as the spell). This potion may be quaffed in thirds, in which case each drink lasts 1d4+1 turns.</p></description>
+				<picture type="string">images/item/potionofinvisibility.webp@Basic Fantasy Game Master's Guide</picture>
 			</potionofinvisibility>
 			<potionofinvulnerability>
 				<name type="string">Potion of Invulnerability</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Potions</subtype>
 				<description type="formattedtext"><p><b>Invulnerability:</b> This potion grants a bonus of +2 to Armor Class.</p></description>
+				<picture type="string">images/item/potionofinvulnerability.webp@Basic Fantasy Game Master's Guide</picture>
 			</potionofinvulnerability>
 			<potionoflevitation>
 				<name type="string">Potion of Levitation</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Potions</subtype>
 				<description type="formattedtext"><p><b>Levitation:</b> This potion grants the power of the spell <b>levitate</b>.</p></description>
+				<picture type="string">images/item/potionoflevitation.webp@Basic Fantasy Game Master's Guide</picture>
 			</potionoflevitation>
 			<potionoflongevity>
 				<name type="string">Potion of Longevity</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Potions</subtype>
 				<description type="formattedtext"><p><b>Longevity:</b> The drinker of this potion becomes younger by 1d10 years.</p></description>
+				<picture type="string">images/item/potionoflongevity.webp@Basic Fantasy Game Master's Guide</picture>
 			</potionoflongevity>
 			<potionofmindreading>
 				<name type="string">Potion of Mind Reading</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Potions</subtype>
 				<description type="formattedtext"><p><b>Mind Reading</b>: This potion grants the power of the spell of the same name.</p></description>
+				<picture type="string">images/item/potionofmindreading.webp@Basic Fantasy Game Master's Guide</picture>
 			</potionofmindreading>
 			<potionofpoison>
 				<name type="string">Potion of Poison</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Potions</subtype>
 				<description type="formattedtext"><p><b>Poison:</b> This isn't a potion at all, it's a trap. The drinker must save vs. Poison or die, even if only a sip was imbibed.</p></description>
+				<picture type="string">images/item/potionofpoison.webp@Basic Fantasy Game Master's Guide</picture>
 			</potionofpoison>
 			<potionofpolymorphself>
 				<name type="string">Potion of Polymorph Self</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Potions</subtype>
 				<description type="formattedtext"><p><b>Polymorph Self:</b> This potion grants the power of the spell of the same name.</p></description>
+				<picture type="string">images/item/potionofpolymorphself.webp@Basic Fantasy Game Master's Guide</picture>
 			</potionofpolymorphself>
 			<potionofspeed>
 				<name type="string">Potion of Speed</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Potions</subtype>
 				<description type="formattedtext"><p><b>Speed:</b> This potion gives the drinker the benefits of the spell <b>haste</b>.</p></description>
+				<picture type="string">images/item/potionofspeed.webp@Basic Fantasy Game Master's Guide</picture>
 			</potionofspeed>
 			<potionoftreasurefinding>
 				<name type="string">Potion of Treasure Finding</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Potions</subtype>
 				<description type="formattedtext"><p><b>Treasure Finding:</b> The imbiber of this potion will immediately know the direction and approximate distance to the largest treasure hoard in a 300' spherical radius. This potion specifically detects platinum, gold, electrum, silver, and copper; gemstones and magic items are not detected.</p></description>
+				<picture type="string">images/item/potionoftreasurefinding.webp@Basic Fantasy Game Master's Guide</picture>
 			</potionoftreasurefinding>
 		</category>
 		<category name="Scrolls">
@@ -4371,6 +4418,7 @@
 				<type type="string">Magic Item</type>
 				<subtype type="string">Scrolls</subtype>
 				<description type="formattedtext"><p><b>Spell Scrolls</b> are enchanted with one or more Cleric or Magic-User spells (never both sorts on the same scroll). Each spell can be used just once, though of course the same spell may appear multiple times on a single scroll. Use the table below to determine the spell level of each spell on a scroll. Only a Cleric can use a Clerical scroll, and only a Magic-User can use a Magic-User scroll.</p><p>Magic-Users must cast <b>read magic</b> on a spell scroll before being able to use it; each scroll needs to be treated in this way just once, and the effect lasts indefinitely thereafter. If a Magic-User attempts to cast a spell from a scroll, and he or she does not know that spell, there is a 10% chance the spell will fail. If a spell on a scroll is of higher level than the highest level spell the Magic-User can cast, for each spell level of difference, add 10% to the chance of failure. For example, Aura the 3rd level Magic-User attempts to cast <b>polymorph self</b> from a scroll. Aura is able to cast, at most, 2nd level spells. <b>Polymorph self</b> is a 4th level spell, so Aura has a chance of failure of 10% (she doesn't know the spell) plus 20% (2nd level maximum vs. 4th level spell), for a total of 30%.</p><p>Clerical scrolls are written in a normal language (being just specially enchanted prayers), so the Cleric merely needs to know the language in which the scroll is written in order to use it. Clerics suffer the same chance of failure as do Magic-Users, save that the 10% penalty assigned for not knowing the spell does not apply.</p></description>
+				<picture type="string">images/item/spellscroll.webp@Basic Fantasy Game Master's Guide</picture>
 			</spellscrolls>
 		</category>
 		<category name="Spell Scrolls">
@@ -4379,18 +4427,21 @@
 				<type type="string">Magic Item</type>
 				<subtype type="string">Spell Scrolls</subtype>
 				<description type="formattedtext"><p><b>Protection Scrolls</b> can be read by any character class, assuming the character can read the language the scroll is written in (see the notes under <b>Language</b> in the <b>Character</b> section for details). When read, a protection scroll creates a 10' radius protective circle around the reader; preventing the warded creatures from entering. The circle moves with the reader. Any creature other than the sort the scroll wards may enter, including of course the allies of the scroll-reader, who are themselves protected so long as they remain entirely within the circle. If any creature within the circle performs a melee attack against any of the warded creatures, the circle is broken and the warded creatures may freely attack. Normal protection scrolls last for 2 turns after being read.</p></description>
+				<picture type="string">images/item/protectionscroll.webp@Basic Fantasy Game Master's Guide</picture>
 			</protectionscrolls>
 			<protectionfrommagic>
 				<name type="string">Protection from Magic</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Spell Scrolls</subtype>
 				<description type="formattedtext"><p><b>Protection from Magic</b> scrolls are special, as they protect against magic spells and items rather than creatures. No magical effect can cross the 10' circle of protection in either direction for 1d4 turns. As with the other protection scrolls, the circle created by this scroll moves with the reader.</p></description>
+				<picture type="string">images/item/protectionfrommagic.webp@Basic Fantasy Game Master's Guide</picture>
 			</protectionfrommagic>
 			<treasuremaps>
 				<name type="string">Treasure Maps</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Spell Scrolls</subtype>
 				<description type="formattedtext"><p><b>Treasure Maps</b> are generally non-magical. They must be created by the GM, although he or she may delay creating the map until the characters can actually use it. The treasure indicated on the map will normally be guarded by some sort of monster, determined by the GM as desired.</p></description>
+				<picture type="string">images/item/treasuremap.webp@Basic Fantasy Game Master's Guide</picture>
 			</treasuremaps>
 		</category>
 		<category name="Rings">
@@ -4399,96 +4450,112 @@
 				<type type="string">Magic Item</type>
 				<subtype type="string">Rings</subtype>
 				<description type="formattedtext"><p><b>Control Animal:</b> The wearer of this ring can charm up to 6 hit dice of animals. The effect works much like a <b>charm person</b> spell, but only affects animals (including giant-sized animals, but excluding fantastic creatures as well as anything more intelligent than a dog or cat). The wearer can activate the power at will, targeting any animal within 60' that he or she can see. The wearer may choose to end the effect for one or more controlled creatures at any time, in order to &quot;free&quot; enough hit dice to control a new target.</p></description>
+				<picture type="string">images/item/ringofcontrolanimal.webp@Basic Fantasy Game Master's Guide</picture>
 			</ringofcontrolanimal>
 			<ringofcontrolhuman>
 				<name type="string">Ring of Control Human</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Rings</subtype>
 				<description type="formattedtext"><p><b>Control Human:</b> The wearer of this ring may cast the spell <b>charm person</b> at any target he or she can see within 60'. The wearer can use this power once per round, at will, but cannot control more than 6 hit dice of creatures at a time; however, the wearer may choose to end the effect for one or more controlled creatures at any time, in order to &quot;free&quot; enough hit dice to control a new target.</p></description>
+				<picture type="string">images/item/ringofcontrolhuman.webp@Basic Fantasy Game Master's Guide</picture>
 			</ringofcontrolhuman>
 			<ringofcontrolplant>
 				<name type="string">Ring of Control Plant</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Rings</subtype>
 				<description type="formattedtext"><p><b>Control Plant:</b> The wearer of this ring may create an effect equivalent to a <b>potion of plant control</b> at will, affecting plants or plant creatures within 60' that he or she can see. The effect lasts as long as the wearer remains within 60' of the plants or plant creatures. A saving throw is allowed just as for the potion.</p></description>
+				<picture type="string">images/item/ringofcontrolplant.webp@Basic Fantasy Game Master's Guide</picture>
 			</ringofcontrolplant>
 			<ringofdelusion>
 				<name type="string">Ring of Delusion</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Rings</subtype>
 				<description type="formattedtext"><p><b>Delusion:</b> This ring appears to be some other sort of ring (roll again on the rings table to determine what sort). Whoever wears it believes it is working, and behaves thus (so a character who believes he is wearing a <b>ring of invisibility</b> will believe himself to actually be invisible). Unlike the potion of the same name, the ring's effect is not dispelled by the wearer taking damage; in fact, the only way to rid a character of this cursed item is with the spell <b>remove curse</b>.</p></description>
+				<picture type="string">images/item/ringofdelusion.webp@Basic Fantasy Game Master's Guide</picture>
 			</ringofdelusion>
 			<ringofdjinnisummoning>
 				<name type="string">Ring of Djinni Summoning</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Rings</subtype>
 				<description type="formattedtext"><p><b>Djinni Summoning:</b> This ring serves as a special gate by means of which a specific djinni can be called from the Elemental Plane of Air. When the ring is rubbed, the djinni appears on the next round. The djinni faithfully obeys and serves the wearer of the ring, but never for more than 1 hour per day. If the djinni of the ring is ever killed, the ring becomes non-magical and worthless.</p></description>
+				<picture type="string">images/item/ringofdjinnisummoning.webp@Basic Fantasy Game Master's Guide</picture>
 			</ringofdjinnisummoning>
 			<ringoffireresistance>
 				<name type="string">Ring of Fire Resistance</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Rings</subtype>
 				<description type="formattedtext"><p><b>Fire Resistance:</b> The wearer of this ring receives protection as the spell <b>resist fire</b>, but the protection works continually.</p></description>
+				<picture type="string">images/item/ringoffireresistance.webp@Basic Fantasy Game Master's Guide</picture>
 			</ringoffireresistance>
 			<ringofinvisibility>
 				<name type="string">Ring of Invisibility</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Rings</subtype>
 				<description type="formattedtext"><p><b>Invisibility:</b> By activating this simple silver ring, the wearer can benefit from <b>invisibility</b>, as the spell. If the invisibility is dispelled (as described for the spell), the ring may not be reactivated for one full turn. The invisibility effect otherwise lasts for 24 hours.</p></description>
+				<picture type="string">images/item/ringofinvisibility.webp@Basic Fantasy Game Master's Guide</picture>
 			</ringofinvisibility>
 			<ringofprotection>
 				<name type="string">Ring of Protection</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Rings</subtype>
 				<description type="formattedtext"><p><b>Protection:</b> This ring offers continual magical protection in the form of a bonus to the Armor Class of the wearer (varying from +1 to +3 as shown on the table). This bonus is also applied to the wearer's saving throw die rolls.</p></description>
+				<picture type="string">images/item/ringofprotection.webp@Basic Fantasy Game Master's Guide</picture>
 			</ringofprotection>
 			<ringofregeneration>
 				<name type="string">Ring of Regeneration</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Rings</subtype>
 				<description type="formattedtext"><p><b>Regeneration:</b> This ring grants the wearer the power of regeneration, exactly as described in the description of the troll, including the weakness with respect to acid and fire damage. However, only damage taken while wearing the ring is regenerated.</p></description>
+				<picture type="string">images/item/ringofregeneration.webp@Basic Fantasy Game Master's Guide</picture>
 			</ringofregeneration>
 			<ringofspellstoring>
 				<name type="string">Ring of Spell Storing</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Rings</subtype>
 				<description type="formattedtext"><p><b>Spell Storing:</b> A ring of spell storing contains a number of Magic-User spells that the wearer can cast. Each spell has a caster level equal to the minimum level needed to cast that spell. Any class may wear and use this ring, but it can only be recharged by a Magic-User casting the appropriate spell into it. A table is provided below to determine how many spells, and what levels they are. A ring of spell storing must be recharged with the same spells that were placed into it when it was made; so a ring of two spell storing containing <b>fireball</b> and <b>fly</b> can only be recharged with those two spells. The ring magically imparts to the wearer the names of all spells stored within it. A ring found in a treasure hoard may be completely charged, or discharged, or partially charged, at the GM's option.</p><table><tr decoration="underline"><td><b><b>d%</b></b></td><td><b><b># of Spells</b></b></td><td><b><b>d%</b></b></td><td><b><b>Level of Spell</b></b></td></tr><tr><td>01-24</td><td>1</td><td>01-30</td><td>1st</td></tr><tr><td>25-48</td><td>2</td><td>31-55</td><td>2nd</td></tr><tr><td>49-67</td><td>3</td><td>56-75</td><td>3rd</td></tr><tr><td>68-81</td><td>4</td><td>76-85</td><td>4th</td></tr><tr><td>82-91</td><td>5</td><td>86-97</td><td>5th</td></tr><tr><td>92-96</td><td>6</td><td>98-00</td><td>6th</td></tr><tr><td>97-00</td><td>7</td><td></td><td></td></tr></table></description>
+				<picture type="string">images/item/ringofspellstoring.webp@Basic Fantasy Game Master's Guide</picture>
 			</ringofspellstoring>
 			<ringofspellturning>
 				<name type="string">Ring of Spell Turning</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Rings</subtype>
 				<description type="formattedtext"><p><b>Spell Turning:</b> This ring reflects spells cast directly at the wearer, but not area effect spells, back at the caster; so a <b>hold person</b> spell would be reflected, but not a <b>fireball</b>. It will reflect up to 2d6 spells before its power is exhausted.</p></description>
+				<picture type="string">images/item/ringofspellturning.webp@Basic Fantasy Game Master's Guide</picture>
 			</ringofspellturning>
 			<ringoftelekinesis>
 				<name type="string">Ring of Telekinesis</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Rings</subtype>
 				<description type="formattedtext"><p><b>Telekinesis:</b> The wearer of this ring can use the power of the spell <b>telekinesis</b>, as if cast by a 12th level Magic-User. The effect may be used as many times per day as the wearer wishes, but lasts only as long as the wearer concentrates on it.</p></description>
+				<picture type="string">images/item/ringoftelekinesi.webp@Basic Fantasy Game Master's Guide</picture>
 			</ringoftelekinesis>
 			<ringofwaterwalking>
 				<name type="string">Ring of Water Walking</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Rings</subtype>
 				<description type="formattedtext"><p><b>Water Walking:</b> This ring allows the wearer to walk on any liquid as if it were firm ground. Mud, oil, snow, quicksand, running water, ice, and even lava can be traversed easily, since the wearer's feet hover an inch or two above the surface. Molten lava will still cause the wearer damage from the heat since he or she is still near it. The wearer can walk, run, or otherwise move across the surface as if it were normal ground.</p></description>
+				<picture type="string">images/item/ringofwaterwalking.webp@Basic Fantasy Game Master's Guide</picture>
 			</ringofwaterwalking>
 			<ringofweakness>
 				<name type="string">Ring of Weakness</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Rings</subtype>
 				<description type="formattedtext"><p><b>Weakness:</b> Whoever puts this ring on is cursed; his or her Strength score is reduced immediately to 3. The ring can only be removed with <b>remove curse</b>.</p></description>
+				<picture type="string">images/item/ringofweakness.webp@Basic Fantasy Game Master's Guide</picture>
 			</ringofweakness>
 			<ringofwishes>
 				<name type="string">Ring of Wishes</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Rings</subtype>
 				<description type="formattedtext"><p><b>Wishes:</b> A ring of wishes contains the power to grant wishes to the wearer. 1d4 wishes will remain within the ring when it is found. The GM must adjudicate all wishes, and instructions are given in the <b>Game Master</b> section regarding this.</p></description>
+				<picture type="string">images/item/ringofwishe.webp@Basic Fantasy Game Master's Guide</picture>
 			</ringofwishes>
 			<ringofxrayvision>
 				<name type="string">Ring of X-Ray Vision</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Rings</subtype>
 				<description type="formattedtext"><p><b>X-Ray Vision:</b> On command, this ring gives its possessor the ability to see into and through solid matter. Vision range is 20 feet, with the viewer seeing as if he were looking at something in normal light even if there is no illumination. X-ray vision can penetrate 1 foot of stone, 1 inch of common metal, or up to 3 feet of wood or dirt. Thicker substances or a thin sheet of lead or gold blocks the vision. The ring may be used three times per day, and each use lasts at most one turn (or until the wearer ceases to concentrate upon it).</p></description>
+				<picture type="string">images/item/ringofxrayvision.webp@Basic Fantasy Game Master's Guide</picture>
 			</ringofxrayvision>
 		</category>
 		<category name="Wands, Staves and Rods">
@@ -4497,108 +4564,126 @@
 				<type type="string">Magic Item</type>
 				<subtype type="string">Wands, Staves and Rods</subtype>
 				<description type="formattedtext"><p><b>Rod of Cancellation:</b> This dreaded rod is a bane to magic items, for its touch drains an item of all magical properties. If the item is held by a creature, an attack roll is needed to touch it. Upon draining an item, the rod itself becomes brittle and cannot be used again. Drained items are only restorable by a <b>wish</b>.</p></description>
+				<picture type="string">images/item/rodofcancellation.webp@Basic Fantasy Game Master's Guide</picture>
 			</rodofcancellation>
 			<snakestaff>
 				<name type="string">Snake Staff</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Wands, Staves and Rods</subtype>
 				<description type="formattedtext"><p><b>Snake Staff:</b> This item is a walking staff +1. When used by a Cleric, the user may command the staff to transform into a constrictor snake (instead of causing damage) on a successful hit. The snake will wrap around a target up to man sized and hold him or her fast for 1d4 turns, unless a save vs. Spells is made. The snake does not attack in any other way, nor cause any damage. The snake may be recalled by the user at any point, in which case it returns to his or her hand and returns to staff form. It also returns in this way when the duration expires, or if the save is made. The snake has Armor Class 15, moves 20' per round and has 20 hit points; any hit points of damage taken are healed completely when the snake returns to staff form; if killed in snake form, the magic is destroyed and it turns into a broken stick. The staff may be used any number of times per day, and neither has nor uses charges.</p></description>
+				<picture type="string">images/item/snakestaff.webp@Basic Fantasy Game Master's Guide</picture>
 			</snakestaff>
 			<staffofcommanding>
 				<name type="string">Staff of Commanding</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Wands, Staves and Rods</subtype>
 				<description type="formattedtext"><p><b>Staff of Commanding:</b> This staff can cast <b>charm person</b> and <b>charm monster</b> spells, and can grant a power equivalent to a <b>potion of plant control</b>. Each function uses one charge.</p></description>
+				<picture type="string">images/item/staffofcommanding.webp@Basic Fantasy Game Master's Guide</picture>
 			</staffofcommanding>
 			<staffofhealing>
 				<name type="string">Staff of Healing</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Wands, Staves and Rods</subtype>
 				<description type="formattedtext"><p><b>Staff of Healing:</b> This staff can heal 1d6+1 hit points per charge expended, as the spell <b>cure light wounds</b>. Alternately, with an expenditure of two charges, the staff can cast <b>cure disease</b>. This staff is only usable by a Cleric.</p></description>
+				<picture type="string">images/item/staffofhealing.webp@Basic Fantasy Game Master's Guide</picture>
 			</staffofhealing>
 			<staffofpower>
 				<name type="string">Staff of Power</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Wands, Staves and Rods</subtype>
 				<description type="formattedtext"><p><b>Staff of Power:</b> This is a very potent magic item, with offensive and defensive abilities. It is usually topped with a glistening gem, its shaft straight and smooth. It has the following powers costing one charge per use: <b>lightning bolt</b>(6d6 damage), <b>fireball</b> (6d6 damage), <b>cone of cold</b> (as the wand, for 6d6 damage), <b>continual light</b>, and <b>telekinesis</b> (as the ring, lasting at most 1d6 turns). The staff is also a +2 walking staff, and can be used exactly as a <b>staff of striking</b>. A staff of power can be used for a retributive strike, requiring it to be broken by its wielder. All charges currently in the staff are instantly released in a 30' radius, doing 1d6 damage per charge remaining (save vs. Spells for half damage). All within the area, including the wielder, are affected by this.</p><p>After all charges are used up from the staff, it remains a +2 walking staff. Once empty of charges, it cannot be used for a retributive strike.</p></description>
+				<picture type="string">images/item/staffofpower.webp@Basic Fantasy Game Master's Guide</picture>
 			</staffofpower>
 			<staffofstriking>
 				<name type="string">Staff of Striking</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Wands, Staves and Rods</subtype>
 				<description type="formattedtext"><p><b>Staff of Striking:</b> This staff has no attack bonus, but is treated as a +1 weapon with respect to what sorts of monsters it can hit (and is usable by any class in that mode). This staff's primary power may only be used if wielded by a Cleric: By uttering a command word, the Cleric may create an effect similar to the spell <b>striking</b>. Expenditure of one charge adds 1d6 damage to the weapon's next strike; expenditure of two charges adds 2d6, and expenditure of three charges adds 3d6 damage. If the weapon is not successfully used after the command word has been spoken, the effect dissipates after one turn.</p></description>
+				<picture type="string">images/item/staffofstriking.webp@Basic Fantasy Game Master's Guide</picture>
 			</staffofstriking>
 			<staffofwizardry>
 				<name type="string">Staff of Wizardry</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Wands, Staves and Rods</subtype>
 				<description type="formattedtext"><p><b>Staff of Wizardry:</b> This staff is equivalent to the∗∗ staff of power∗∗, above, and has the following powers as well: <b>invisibility</b>, <b>passwall</b>, <b>web</b>, and <b>conjure elementals</b> (as the spell, but conjuring staff elementals as described in the <b>Monsters</b> section). These powers each use one charge when activated.</p></description>
+				<picture type="string">images/item/staffofwizardry.webp@Basic Fantasy Game Master's Guide</picture>
 			</staffofwizardry>
 			<wandofcold>
 				<name type="string">Wand of Cold</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Wands, Staves and Rods</subtype>
 				<description type="formattedtext"><p><b>Wand of Cold:</b> This wand generates a conical blast of cold doing 6d8 damage (save vs. Magic Wands for half damage). The cone spreads from the tip of the wand to a width of 30' at a distance of 40' away.</p></description>
+				<picture type="string">images/item/wandofcold.webp@Basic Fantasy Game Master's Guide</picture>
 			</wandofcold>
 			<wandofenemydetection>
 				<name type="string">Wand of Enemy Detection</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Wands, Staves and Rods</subtype>
 				<description type="formattedtext"><p><b>Wand of Enemy Detection:</b> The effect of this wand is to make all enemies of the user within 60' glow with a greenish white light for one round. Even hidden or invisible enemies glow in this way, revealing them, but enemies completely out of sight (such as behind a wall) may not be seen by the user. An &quot;enemy&quot; is any creature which is thinking of or otherwise intending to harm the user; also, all undead monsters and animated constructs within range will glow in this way regardless of intent or thoughts (or lack thereof).</p></description>
+				<picture type="string">images/item/wandofenemydetection.webp@Basic Fantasy Game Master's Guide</picture>
 			</wandofenemydetection>
 			<wandoffear>
 				<name type="string">Wand of Fear</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Wands, Staves and Rods</subtype>
 				<description type="formattedtext"><p><b>Wand of Fear:</b> This wand generates the effect of the spell <b>cause fear</b> (the reverse of the spell <b>remove fear</b>).</p></description>
+				<picture type="string">images/item/wandoffear.webp@Basic Fantasy Game Master's Guide</picture>
 			</wandoffear>
 			<wandoffireballs>
 				<name type="string">Wand of Fireballs</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Wands, Staves and Rods</subtype>
 				<description type="formattedtext"><p><b>Wand of Fireballs:</b> This wand generates ∗∗fireball∗∗s, exactly as the spell, doing 6d6 damage.</p></description>
+				<picture type="string">images/item/wandoffireball.webp@Basic Fantasy Game Master's Guide</picture>
 			</wandoffireballs>
 			<wandofillusion>
 				<name type="string">Wand of Illusion</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Wands, Staves and Rods</subtype>
 				<description type="formattedtext"><p><b>Wand of Illusion:</b> This wand allows the user to create illusions equivalent to the spell <b>phantasmal force</b>.</p></description>
+				<picture type="string">images/item/wandofillusion.webp@Basic Fantasy Game Master's Guide</picture>
 			</wandofillusion>
 			<wandoflightningbolts>
 				<name type="string">Wand of Lightning Bolts</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Wands, Staves and Rods</subtype>
 				<description type="formattedtext"><p><b>Wand of Lightning Bolts:</b> This wand generates <b>lightning bolts</b>, exactly as the spell, doing 6d6 damage.</p></description>
+				<picture type="string">images/item/wandoflightningbolt.webp@Basic Fantasy Game Master's Guide</picture>
 			</wandoflightningbolts>
 			<wandofmagicdetection>
 				<name type="string">Wand of Magic Detection</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Wands, Staves and Rods</subtype>
 				<description type="formattedtext"><p><b>Wand of Magic Detection:</b> This wand grants the user a power equivalent to the spell <b>detect magic</b>.</p></description>
+				<picture type="string">images/item/wandofmagicdetection.webp@Basic Fantasy Game Master's Guide</picture>
 			</wandofmagicdetection>
 			<wandofparalyzation>
 				<name type="string">Wand of Paralyzation</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Wands, Staves and Rods</subtype>
 				<description type="formattedtext"><p><b>Wand of Paralyzation:</b> This wand creates the effect of the spell <b>hold person</b>.</p></description>
+				<picture type="string">images/item/wandofparalyzation.webp@Basic Fantasy Game Master's Guide</picture>
 			</wandofparalyzation>
 			<wandofpolymorph>
 				<name type="string">Wand of Polymorph</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Wands, Staves and Rods</subtype>
 				<description type="formattedtext"><p><b>Wand of Polymorph:</b> This wand can be used to cast either <b>polymorph self</b> or <b>polymorph other</b>.</p></description>
+				<picture type="string">images/item/wandofpolymorph.webp@Basic Fantasy Game Master's Guide</picture>
 			</wandofpolymorph>
 			<wandofsecretdoordetection>
 				<name type="string">Wand of Secret Door Detection</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Wands, Staves and Rods</subtype>
 				<description type="formattedtext"><p><b>Wand of Secret Door Detection:</b> This wand grants the user a power similar to the spell <b>find traps</b>, but which reveals secret doors rather than traps.</p></description>
+				<picture type="string">images/item/wandofsecretdoordetection.webp@Basic Fantasy Game Master's Guide</picture>
 			</wandofsecretdoordetection>
 			<wandoftrapdetection>
 				<name type="string">Wand of Trap Detection</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Wands, Staves and Rods</subtype>
 				<description type="formattedtext"><p><b>Wand of Trap Detection:</b> This wand grants the user a power equivalent to the spell <b>find traps</b>.</p></description>
+				<picture type="string">images/item/wandoftrapdetection.webp@Basic Fantasy Game Master's Guide</picture>
 			</wandoftrapdetection>
 		</category>
 		<category name="Miscellaneous">
@@ -4607,192 +4692,224 @@
 				<type type="string">Magic Item</type>
 				<subtype type="string">Miscellaneous</subtype>
 				<description type="formattedtext"><p><b>Blasting</b>: When this device is played (as appropriate for its form), it creates a powerful blast of sound filling a cone 10’ long and 2’ wide at the base. Those within the area of effect suffer 2d6 points of damage and are deafened for 1 full turn. A successful saving throw vs. Death Ray reduces damage by half and reduces the period of deafness to a single round.</p><p>The device can also be used to damage or destroy buildings, fortifications, etc. Double the damage listed above when this item is used against a structure. The Stronghold rules in the Game Master section contains further guidance on this.</p></description>
+				<picture type="string">images/item/miscellaneousitemeffectblasting.webp@Basic Fantasy Game Master's Guide</picture>
 			</miscellaneousitemeffectblasting>
 			<miscellaneousitemeffectblending>
 				<name type="string">Miscellaneous item effect: Blending</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Miscellaneous</subtype>
 				<description type="formattedtext"><p><b>Blending</b>: The wearer of this item becomes nearly invisible, granting an 80% chance that the wearer can move about unnoticed. If detected by onlookers, the wearer can be attacked without significant penalty.</p></description>
+				<picture type="string">images/item/miscellaneousitemeffectblending.webp@Basic Fantasy Game Master's Guide</picture>
 			</miscellaneousitemeffectblending>
 			<miscellaneousitemeffectcoldresistance>
 				<name type="string">Miscellaneous item effect: Cold Resistance</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Miscellaneous</subtype>
 				<description type="formattedtext"><p><b>Cold Resistance</b>: The wearer of this device receives protection as the spell resist cold, but the protection works continually.</p></description>
+				<picture type="string">images/item/miscellaneousitemeffectcoldresistance.webp@Basic Fantasy Game Master's Guide</picture>
 			</miscellaneousitemeffectcoldresistance>
 			<miscellaneousitemeffectcomprehension>
 				<name type="string">Miscellaneous item effect: Comprehension</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Miscellaneous</subtype>
 				<description type="formattedtext"><p><b>Comprehension</b>: The wearer of this device is granted the ability to read any language, including any form of magical script. Being able to read magic does not confer magical abilities upon the wearer, but if worn by a magic-user it grants the effects of <b>read magic</b> constantly. Note that when reading non-magical texts, the limitations described under the spell <b>read languages</b> apply to this device also.</p></description>
+				<picture type="string">images/item/miscellaneousitemeffectcomprehension.webp@Basic Fantasy Game Master's Guide</picture>
 			</miscellaneousitemeffectcomprehension>
 			<miscellaneousitemeffectcontrolanimal>
 				<name type="string">Miscellaneous item effect: Control Animal</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Miscellaneous</subtype>
 				<description type="formattedtext"><p><b>Control Animal</b>: The wearer of this device can charm up to 6 hit dice of animals. The effect works much like a charm person spell, but only affects animals (including giant-sized animals, but excluding fantastic creatures as well as anything more intelligent than a dog or cat). The wearer can activate the power at will, targeting any animal within 60' that they can see. The wearer may choose to end the effect for one or more controlled creatures at any time, in order to &quot;free&quot; enough hit dice to control a new target.</p></description>
+				<picture type="string">images/item/miscellaneousitemeffectcontrolanimal.webp@Basic Fantasy Game Master's Guide</picture>
 			</miscellaneousitemeffectcontrolanimal>
 			<miscellaneousitemeffectcontrolhuman>
 				<name type="string">Miscellaneous item effect: Control Human</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Miscellaneous</subtype>
 				<description type="formattedtext"><p><b>Control Human</b>: The wearer of this device may cast the spell charm person at any target they can see within 60'. The wearer can use this power once per round, at will. If more than one humanoid is to be affected, the wearer cannot control more than 6 hit dice or levels of humanoids at a time; however, the wearer may choose to end the effect for one or more controlled creatures at any time, in order to &quot;free&quot; enough hit dice or levels to control a new target.</p></description>
+				<picture type="string">images/item/miscellaneousitemeffectcontrolhuman.webp@Basic Fantasy Game Master's Guide</picture>
 			</miscellaneousitemeffectcontrolhuman>
 			<miscellaneousitemeffectcontrolplant>
 				<name type="string">Miscellaneous item effect: Control Plant</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Miscellaneous</subtype>
 				<description type="formattedtext"><p><b>Control Plant</b>: The wearer of this device may create an effect equivalent to a <b>Potion of Plant Control</b> at will, affecting plants or plant creatures within 60' that they can see. The effect lasts as long as the wearer remains within 60' of the plants or plant creatures. A saving throw is allowed just as for the potion.</p></description>
+				<picture type="string">images/item/miscellaneousitemeffectcontrolplant.webp@Basic Fantasy Game Master's Guide</picture>
 			</miscellaneousitemeffectcontrolplant>
 			<miscellaneousitemeffectcourage>
 				<name type="string">Miscellaneous item effect: Courage</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Miscellaneous</subtype>
 				<description type="formattedtext"><p><b>Courage</b>: When this device is played, all characters and creatures friendly to the user within 60 feet are affected as by the spell remove fear.</p><p>Deception: This device grants to the wearer the power of the Deceiver (as described on page 75). Any attacker will believe the wearer is 3 feet from their true location, and the attacker's first strike will always miss. Thereafter, the attacker suffers a penalty of -2 on all attack rolls. This ring does not affect mindless creatures, constructs such as golems or living statues, or any sort of undead. Living creatures which are not mindless will be affected even if they do not use sight to target the wearer.</p><p>Delusion: Whoever wears this device believes it is some other form of useful magical device, and behaves thus (so for example, if Darion believes he is wearing a <b>Ring of Invisibility</b> he will believe himself to actually be invisible). Unlike the potion of the same name, the device's effect is not dispelled by the wearer suffering damage; in fact, the only way to rid a character of this cursed item is with the spell remove curse.</p></description>
+				<picture type="string">images/item/miscellaneousitemeffectcourage.webp@Basic Fantasy Game Master's Guide</picture>
 			</miscellaneousitemeffectcourage>
 			<miscellaneousitemeffectdjinnisummoning>
 				<name type="string">Miscellaneous item effect: Djinni Summoning</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Miscellaneous</subtype>
 				<description type="formattedtext"><p><b>Djinni Summoning</b>: Each device of this type has a specific djinni bound to it, which will be summoned to the wearer's location when they rub the device while wearing it. The djinni appears in the next round and protects, serves, and obeys the wearer. The djinni will serve at most 1 hour per day, and can be summoned at most once per day. If the djinni bound to a device is ever slain, the ring loses all magical properties.</p></description>
+				<picture type="string">images/item/miscellaneousitemeffectdjinnisummoning.webp@Basic Fantasy Game Master's Guide</picture>
 			</miscellaneousitemeffectdjinnisummoning>
 			<miscellaneousitemeffectdoom>
 				<name type="string">Miscellaneous item effect: Doom</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Miscellaneous</subtype>
 				<description type="formattedtext"><p><b>Doom</b>: When this device is played (as appropriate for its form), this device will create animated skeletons or zombies as if by the spell animate dead. Up to 3d6 hit dice of undead monsters will be so created from remains within a 60' radius of the character who activated the device. If both skeletal and fleshy remains are available in the area of effect, skeletons will be animated in preference over zombies. If the user is a magic-user or cleric, the created undead may be controlled so long as that character retains the device. If played by a fighter or thief, the undead created will be uncontrolled, and will attack any living creatures nearby. The device may be used once per day, but no more than 18 hit dice of undead created by it may exist at any one time.</p></description>
+				<picture type="string">images/item/miscellaneousitemeffectdoom.webp@Basic Fantasy Game Master's Guide</picture>
 			</miscellaneousitemeffectdoom>
 			<miscellaneousitemeffectfireresistance>
 				<name type="string">Miscellaneous item effect: Fire Resistance</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Miscellaneous</subtype>
 				<description type="formattedtext"><p><b>Fire Resistance</b>: The wearer of this device receives protection as the spell resist fire, but the protection works continually.</p></description>
+				<picture type="string">images/item/miscellaneousitemeffectfireresistance.webp@Basic Fantasy Game Master's Guide</picture>
 			</miscellaneousitemeffectfireresistance>
 			<miscellaneousitemeffectinvisibility>
 				<name type="string">Miscellaneous item effect: Invisibility</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Miscellaneous</subtype>
 				<description type="formattedtext"><p><b>Invisibility</b>: The wearer of this device can become invisible (as the spell invisibility) on command. If the invisibility is dispelled (as described for the spell), the device may not be reactivated for one full turn. The invisibility effect otherwise lasts for 24 hours. Levitation: The wearer of this device may levitate (as the spell) at will by concentrating. There is no limit to how long this device may be used.</p></description>
+				<picture type="string">images/item/miscellaneousitemeffectinvisibility.webp@Basic Fantasy Game Master's Guide</picture>
 			</miscellaneousitemeffectinvisibility>
 			<miscellaneousitemeffectmindreading>
 				<name type="string">Miscellaneous item effect: Mind Reading</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Miscellaneous</subtype>
 				<description type="formattedtext"><p><b>Mind Reading</b>: Whoever wears this device has access to a permanent form of the spell mind reading; it is always available but only activates when the wearer spends a full round concentrating upon it, and persists until the wearer ceases to use it. The effect can be activated as many times per day as the wearer wants.</p></description>
+				<picture type="string">images/item/miscellaneousitemeffectmindreading.webp@Basic Fantasy Game Master's Guide</picture>
 			</miscellaneousitemeffectmindreading>
 			<miscellaneousitemeffectpanic>
 				<name type="string">Miscellaneous item effect: Panic</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Miscellaneous</subtype>
 				<description type="formattedtext"><p><b>Panic</b>: When this device is played (as appropriate for its form), all creatures more than 20 feet from the user but not over 120 feet away must save vs. Spells or be affected as by the spell cause fear.</p></description>
+				<picture type="string">images/item/miscellaneousitemeffectpanic.webp@Basic Fantasy Game Master's Guide</picture>
 			</miscellaneousitemeffectpanic>
 			<miscellaneousitemeffectpenetratingvision>
 				<name type="string">Miscellaneous item effect: Penetrating Vision</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Miscellaneous</subtype>
 				<description type="formattedtext"><p><b>Penetrating Vision</b>: On command, and for so long thereafter that the wearer concentrates on it, this device confers the power to see through solid matter as if it were transparent as glass. The effect extends at most 20 feet, and the wearer sees as if in normal light even if they are in fact in total darkness.</p><p>This effect is blocked by certain materials; the wearer can see through at most 3 feet of wood or soil, 1 foot of stone, or 1 inch of most metals. Gold or lead no thicker than foil will completely block the effect.</p><p>The device may be used three times per day, and each use lasts at most one turn.</p></description>
+				<picture type="string">images/item/miscellaneousitemeffectpenetratingvision.webp@Basic Fantasy Game Master's Guide</picture>
 			</miscellaneousitemeffectpenetratingvision>
 			<miscellaneousitemeffectprotection>
 				<name type="string">Miscellaneous item effect: Protection</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Miscellaneous</subtype>
 				<description type="formattedtext"><p><b>Protection</b>: The wearer of an item with this power receives the listed benefit (from +1 to +3) to their Armor Class for so long as the ring is worn. This bonus is also applied to the wearer's saving throw die rolls.</p></description>
+				<picture type="string">images/item/miscellaneousitemeffectprotection.webp@Basic Fantasy Game Master's Guide</picture>
 			</miscellaneousitemeffectprotection>
 			<miscellaneousitemeffectprotectionfromene>
 				<name type="string">Miscellaneous item effect: Protection from Energy Drain</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Miscellaneous</subtype>
 				<description type="formattedtext"><p><b>Protection from Energy Drain</b>: This device has the power to absorb and neutralize energy-draining attacks, death spells or effects (such as slay living), and curses that would otherwise affect the wearer. The device has 2d6 charges when found, and each negative level, curse, or spell absorbed consumes one charge. When the device's charges are exhausted it disintegrates into golden sparkles and disappears.</p></description>
+				<picture type="string">images/item/miscellaneousitemeffectprotectionfromenergydrain.webp@Basic Fantasy Game Master's Guide</picture>
 			</miscellaneousitemeffectprotectionfromene>
 			<miscellaneousitemeffectprotectionfromscr>
 				<name type="string">Miscellaneous item effect: Protection from Scrying</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Miscellaneous</subtype>
 				<description type="formattedtext"><p><b>Protection from Scrying</b>: The wearer of this item is immune to all forms of scrying (including crystal balls, clairvoyance, clairaudience, and any other means of location or spying at a distance) as well as any form of mind reading. Other characters who are within 30' of the wearer are also immune to scrying, but not to mind reading</p></description>
+				<picture type="string">images/item/miscellaneousitemeffectprotectionfromscrying.webp@Basic Fantasy Game Master's Guide</picture>
 			</miscellaneousitemeffectprotectionfromscr>
 			<miscellaneousitemeffectregeneration>
 				<name type="string">Miscellaneous item effect: Regeneration</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Miscellaneous</subtype>
 				<description type="formattedtext"><p><b>Regeneration</b>: This device grants the wearer the power of regeneration, exactly as described in the description of the Troll on page 151, including the weakness with respect to acid and fire damage. Note that this device will only heal damage suffered while it is worn; pre-existing damage is not healed by putting on the device.</p></description>
+				<picture type="string">images/item/miscellaneousitemeffectregeneration.webp@Basic Fantasy Game Master's Guide</picture>
 			</miscellaneousitemeffectregeneration>
 			<miscellaneousitemeffectscrying>
 				<name type="string">Miscellaneous item effect: Scrying</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Miscellaneous</subtype>
 				<description type="formattedtext"><p><b>Scrying</b>: This device can be used to spy upon other people or locations, regardless of distance. A scrying device may only be used by Magic-Users. It can be used three times per day, for up to a turn each time. The chance of success when using a scrying device is as shown below. Total chances equal to or greater than 100% do not require a roll.</p><table><tr decoration="underline"><td><b><b>Knowledge and Connection</b></b></td><td><b><b>Chance</b></b></td></tr><tr><td>Secondhand Knowledge (heard of)</td><td>25%</td></tr><tr><td>Firsthand Knowledge (seen briefly)</td><td>55%</td></tr><tr><td>Familiar (known well)</td><td>95%</td></tr><tr><td>Possession or garment</td><td>+25%</td></tr><tr><td>Body part, lock of hair, bit of nail, etc.</td><td>+50%</td></tr></table><p>The user of the device is the only one who will see the image. No sound will be heard normally. <b>Detect magic, detect evil, and mind reading</b> have a 3% chance per level of the caster of operating correctly if used with a scrying device.</p></description>
+				<picture type="string">images/item/miscellaneousitemeffectscrying.webp@Basic Fantasy Game Master's Guide</picture>
 			</miscellaneousitemeffectscrying>
 			<miscellaneousitemeffectscryingsuperior>
 				<name type="string">Miscellaneous item effect: Scrying, Superior</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Miscellaneous</subtype>
 				<description type="formattedtext"><p><b>Scrying, Superior</b>: This item works exactly like a standard scrying device, as described above, but also allows the user to hear any sounds in the location viewed as if they were there.</p></description>
+				<picture type="string">images/item/superiormiscellaneousitemeffectscrying.webp@Basic Fantasy Game Master's Guide</picture>
 			</miscellaneousitemeffectscryingsuperior>
 			<miscellaneousitemeffectspeed>
 				<name type="string">Miscellaneous item effect: Speed</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Miscellaneous</subtype>
 				<description type="formattedtext"><p><b>Speed</b>: The wearer of this device can activate it with a command word (or by clicking their heels together, if the item takes the form of boots) and gain the effect of a haste spell, and can end the effect the same way. The effect can be used for a total of 10 rounds each day.</p></description>
+				<picture type="string">images/item/miscellaneousitemeffectspeed.webp@Basic Fantasy Game Master's Guide</picture>
 			</miscellaneousitemeffectspeed>
 			<miscellaneousitemeffectspellstoring>
 				<name type="string">Miscellaneous item effect: Spell Storing</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Miscellaneous</subtype>
 				<description type="formattedtext"><p><b>Spell Storing</b>: These much sought-after devices each contain a number of spells which can be cast by the wearer. Most of them contain Magic-User spells, but 1 in 10 contains Clerical spells instead. <i>No device may contain spells of both types</i>! Each spell stored in the device is cast as if by the lowest-level character who could normally cast the spell, but not less than 6th level in any case.</p><p>Any class may wear and use this device, but it can only be recharged by casting the appropriate spell into it. A table is provided below to determine how many spells, and what levels they are. A spell storing device must be recharged with the same spells that were placed into it when it was made; so a <b>Pendant of Two Spell Storing</b> containing fireball and fly can only be recharged with those two spells.</p><p>The wearer of one of these devices automatically knows the names of the spells stored within it, but is not granted detailed knowledge of how each spell works. If the wearer is not a magic-user and no such character is available to advise the wearer, there may be some difficulty in using it successfully (and safely).</p><p>A device of this type found in a treasure hoard may be completely charged, or discharged, or partially charged, at the GM's option.</p><table><tr decoration="underline"><td><b>d%</b></td><td><b>no of Spells</b></td><td><b>d%</b></td><td><b>Level of Spell</b></td></tr><tr><td>01-24</td><td>1</td><td>01-30</td><td>1st</td></tr><tr><td>25-48</td><td>2</td><td>31-55</td><td>2nd</td></tr><tr><td>49-67</td><td>3</td><td>56-75</td><td>3rd</td></tr><tr><td>68-81</td><td>4</td><td>76-85</td><td>4th</td></tr><tr><td>82-91</td><td>5</td><td>86-97</td><td>5th</td></tr><tr><td>92-96</td><td>6</td><td>98-00</td><td>6th</td></tr><tr><td>97-00</td><td>7</td><td></td><td></td></tr></table></description>
+				<picture type="string">images/item/miscellaneousitemeffectspellstoring.webp@Basic Fantasy Game Master's Guide</picture>
 			</miscellaneousitemeffectspellstoring>
 			<miscellaneousitemeffectspellturning>
 				<name type="string">Miscellaneous item effect: Spell Turning</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Miscellaneous</subtype>
 				<description type="formattedtext"><p><b>Spell Turning</b>: This device reflects spells cast directly at the wearer, but not area effect spells, back at the caster; so a hold person spell would be reflected, but not a fireball. It will reflect up to 2d6 spells before its power is exhausted.</p></description>
+				<picture type="string">images/item/miscellaneousitemeffectspellturning.webp@Basic Fantasy Game Master's Guide</picture>
 			</miscellaneousitemeffectspellturning>
 			<miscellaneousitemeffectstealth>
 				<name type="string">Miscellaneous item effect: Stealth</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Miscellaneous</subtype>
 				<description type="formattedtext"><p><b>Stealth</b>: The wearer of this device can move quietly in virtually any surroundings, granting a 90% chance of success when moving silently (as the Thief ability of the same name).</p></description>
+				<picture type="string">images/item/miscellaneousitemeffectstealth.webp@Basic Fantasy Game Master's Guide</picture>
 			</miscellaneousitemeffectstealth>
 			<miscellaneousitemeffecttelekinesis>
 				<name type="string">Miscellaneous item effect: Telekinesis</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Miscellaneous</subtype>
 				<description type="formattedtext"><p><b>Telekinesis</b>: The wearer of this device can use the power of the spell telekinesis, as if cast by a 12th level Magic-User. The effect may be used as many times per day as the wearer wishes, but lasts only as long as the wearer concentrates on it.</p></description>
+				<picture type="string">images/item/miscellaneousitemeffecttelekinesi.webp@Basic Fantasy Game Master's Guide</picture>
 			</miscellaneousitemeffecttelekinesis>
 			<miscellaneousitemeffecttelepathy>
 				<name type="string">Miscellaneous item effect: Telepathy</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Miscellaneous</subtype>
 				<description type="formattedtext"><p><b>Telepathy</b>: Three times per day this item can be activated by use of its command word, at which point it will grant the wearer the power of a special version of the mind reading spell which has a range of 90 feet and lasts for 1 turn. During this time the wearer can send thoughts to the mind of any creature whose thoughts the wearer is already reading, allowing communication.</p></description>
+				<picture type="string">images/item/miscellaneousitemeffecttelepathy.webp@Basic Fantasy Game Master's Guide</picture>
 			</miscellaneousitemeffecttelepathy>
 			<miscellaneousitemeffectteleportation>
 				<name type="string">Miscellaneous item effect: Teleportation</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Miscellaneous</subtype>
 				<description type="formattedtext"><p><b>Teleportation</b>: Upon command the wearer of this item may cast the spell teleportation as if by a wizard of the 12th level of ability. This power can be used up to 3 times per day.</p></description>
+				<picture type="string">images/item/miscellaneousitemeffectteleportation.webp@Basic Fantasy Game Master's Guide</picture>
 			</miscellaneousitemeffectteleportation>
 			<miscellaneousitemeffecttrueseeing>
 				<name type="string">Miscellaneous item effect: True Seeing</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Miscellaneous</subtype>
 				<description type="formattedtext"><p><b>True Seeing</b>: Three times per day this device can grant the user the power of the spell true seeing. Each use lasts at most one turn.</p></description>
+				<picture type="string">images/item/miscellaneousitemeffecttrueseeing.webp@Basic Fantasy Game Master's Guide</picture>
 			</miscellaneousitemeffecttrueseeing>
 			<miscellaneousitemeffectwaterwalking>
 				<name type="string">Miscellaneous item effect: Water Walking</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Miscellaneous</subtype>
 				<description type="formattedtext"><p><b>Water Walking</b>: This device allows the wearer to walk on any liquid as if it were firm ground. Mud, oil, snow, quicksand, running water, ice, and even lava can be traversed easily, since the wearer’s feet hover an inch or two above the surface. Molten lava will still cause the wearer damage from the heat since they are still near it. The wearer can walk, run, or otherwise move across the surface as if it were normal ground.</p></description>
+				<picture type="string">images/item/miscellaneousitemeffectwaterwalking.webp@Basic Fantasy Game Master's Guide</picture>
 			</miscellaneousitemeffectwaterwalking>
 			<miscellaneousitemeffectweakness>
 				<name type="string">Miscellaneous item effect: Weakness</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Miscellaneous</subtype>
 				<description type="formattedtext"><p><b>Weakness</b>: Whoever puts this device on is cursed; their Strength score is reduced immediately to 3. The device can only be removed with remove curse.</p></description>
+				<picture type="string">images/item/miscellaneousitemeffectweakness.webp@Basic Fantasy Game Master's Guide</picture>
 			</miscellaneousitemeffectweakness>
 			<miscellaneousitemeffectwishes>
 				<name type="string">Miscellaneous item effect: Wishes</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Miscellaneous</subtype>
 				<description type="formattedtext"><p><b>Wishes</b>: This device contains the power to grant wishes to the wearer. 1d4 wishes will remain within the ring when it is found. The GM must adjudicate all wishes, and instructions are given in the <b>Game Master</b> section regarding this.</p></description>
+				<picture type="string">images/item/miscellaneousitemeffectwishe.webp@Basic Fantasy Game Master's Guide</picture>
 			</miscellaneousitemeffectwishes>
 		</category>
 		<category name="Rare Items">
@@ -4801,60 +4918,70 @@
 				<type type="string">Magic Item</type>
 				<subtype type="string">Rare Items</subtype>
 				<description type="formattedtext"><p><b>Bag of Devouring</b>: This device appears, to all tests, to be a normal <b>Bag of Holding</b>, and in fact it performs exactly like one at first. However, all items placed within disappear forever 1d6+6 turns later. The bag continues to weigh whatever it did after the items were placed within it (that is, one-tenth the total weight of the items), until it is opened and discovered to be empty.</p></description>
+				<picture type="string">images/item/bagofdevouring.webp@Basic Fantasy Game Master's Guide</picture>
 			</bagofdevouring>
 			<bagofholding>
 				<name type="string">Bag of Holding</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Rare Items</subtype>
 				<description type="formattedtext"><p><b>Bag of Holding</b>: This device is a bag which appears to be about 2 feet wide and 4 feet deep. It opens into an extradimensional space, and is able to hold more than should be possible: up to 500 pounds of weight, and up to 70 cubic feet of volume. The bag weighs one-tenth as much as the total of the objects held within. Any object to be stored in the bag must fit through the opening, which has a circumference of 4 feet.</p><p>Puncturing or tearing the bag will destroy its magic and cause all contents to be lost forever. If this item is turned inside out all contents are dumped. The bag is unharmed, but it will no longer work until it is turned right side out again. If living creatures are placed inside they will suffocate within a turn (with exceptions for creatures resistant to suffocation as determined by the GM). The bag's volume cannot be overfilled (as excess items simply cannot be put inside), but if overloaded above 500 pounds and then lifted it will be torn.</p><p>Getting any particular item from the bag requires the bearer to spend a round searching during which no movement may be made.</p></description>
+				<picture type="string">images/item/bagofholding.webp@Basic Fantasy Game Master's Guide</picture>
 			</bagofholding>
 			<bootsoftravelingandleaping>
 				<name type="string">Boots of Traveling and Leaping</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Rare Items</subtype>
 				<description type="formattedtext"><p><b>Boots of Traveling and Leaping</b>: These boots allow the wearer to make great leaps, jumping up to 10' high and/or 30' across. They improve the wearer's movement so greatly that they also increase their movement rate on land by an additional 10' per round.</p></description>
+				<picture type="string">images/item/bootsoftravelingandleaping.webp@Basic Fantasy Game Master's Guide</picture>
 			</bootsoftravelingandleaping>
 			<broomofflying>
 				<name type="string">Broom of Flying</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Rare Items</subtype>
 				<description type="formattedtext"><p><b>Broom of Flying</b>: This broom is able to fly through the air for up to 9 hours per day (split up as its owner desires). The broom can carry 200 pounds and fly at a speed of 40 feet, or up to 400 pounds at a speed at 30 feet. In addition, the broom can travel alone to any destination named by the owner as long as they have a good idea of the location and layout of that destination. It comes to its owner from as far away as 300 yards when the command word is spoken.</p></description>
+				<picture type="string">images/item/broomofflying.webp@Basic Fantasy Game Master's Guide</picture>
 			</broomofflying>
 			<efreetibottle>
 				<name type="string">Efreeti Bottle</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Rare Items</subtype>
 				<description type="formattedtext"><p><b>Efreeti Bottle</b>: This item may appear as an ornate bottle, or sometimes as a magic lamp. It can be activated once per day, by opening it if it takes the form of a bottle or by rubbing it if it takes the form of a lamp. When activated, smoke pours out and forms into an efreeti.</p><p>The efreeti released was trapped in the bottle and forced to serve whoever activates it. However, an efreeti who has spent too long in a bottle may have lost its mind, and if this happens the efreeti will begin a frenzied attack upon whoever activated the bottle, disappearing when either the user of the bottle or the efreeti is dead. There is, fortunately, only a 1 in 10 chance this will happen.</p><p>On the other hand, there is also a 1 in 10 chance that the efreeti of the bottle is able to grant three wishes to the user. If this is the case, the efreeti will perform no other service, and cannot return to the bottle after it is activated until the user makes a wish. Subsequent wishes require additional activations, and upon the final wish being granted the efreeti disappears for good.</p><p>Roll 1d10 when the bottle is first activated; on a roll of 1, the efreeti is insane, while on a roll of 0 the efreeti has three wishes to grant. If neither of these results is rolled, the efreeti will serve the user for up to one hour per day for 101 days, after which time it is freed and will disappear. Note that after the first activation, every day that passes is counted toward the 101 days whether or not the user activates the bottle.</p></description>
+				<picture type="string">images/item/efreetibottle.webp@Basic Fantasy Game Master's Guide</picture>
 			</efreetibottle>
 			<flyingcarpet>
 				<name type="string">Flying Carpet</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Rare Items</subtype>
 				<description type="formattedtext"><p><b>Flying Carpet</b>: This item appears to be a fancy rug of the sort found in the castle of a king. It has the power to fly, carrying those upon it as if they stand upon a solid surface. A flying carpet is typically 5' x 8' in size and can carry up to 500 pounds at a movement rate of 100' per round, or up to 1,000 pounds (its maximum capacity) at a rate of 50' per round. A flying carpet can fly at any speed up to its maximum, and can hover on command.</p></description>
+				<picture type="string">images/item/flyingcarpet.webp@Basic Fantasy Game Master's Guide</picture>
 			</flyingcarpet>
 			<gauntletsofogrepower>
 				<name type="string">Gauntlets of Ogre Power</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Rare Items</subtype>
 				<description type="formattedtext"><p><b>Gauntlets of Ogre Power</b>: These thick leather gloves grant the wearer a Strength bonus of +4 (instead of their own Strength bonus). Both gauntlets must be worn for the magic to be effective.</p></description>
+				<picture type="string">images/item/gauntletsofogrepower.webp@Basic Fantasy Game Master's Guide</picture>
 			</gauntletsofogrepower>
 			<girdleofgiantstrength>
 				<name type="string">Girdle of Giant Strength</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Rare Items</subtype>
 				<description type="formattedtext"><p><b>Girdle of Giant Strength</b>: This broad leather belt grants the wearer the strength of a giant. For so long as it is worn, the wearer gains a Strength bonus of +5 (instead of their own Strength bonus), and can throw large stones just as a stone giant does.</p></description>
+				<picture type="string">images/item/girdleofgiantstrength.webp@Basic Fantasy Game Master's Guide</picture>
 			</girdleofgiantstrength>
 			<mirrorofimprisonment>
 				<name type="string">Mirror of Imprisonment</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Rare Items</subtype>
 				<description type="formattedtext"><p><b>Mirror of Imprisonment</b>: This item can appear as any style of full-length or larger mirror. It is a form of magical trap, which can be set or deactivated by speaking a command word followed by &quot;activate&quot; or &quot;deactivate.&quot;</p><p>When in its active state, any character or creature who stands within 30 feet of the mirror and sees its reflection must save vs. Spells or be drawn bodily into the mirror, including all items worn or carried. The victim is placed within one of 20 metaphysical cells inside the mirror. Those trapped in the mirror are mere reflections and are unable to take any action. The last character who spoke the command word to the mirror is immune to its power, as are undead, constructs, and any creature that lacks eyes.</p><p>A character who speaks the command word and then calls the number of a cell will cause the reflection of the occupant of that cell to appear in the mirror. The trapped creature can move and speak, but cannot cast spells or take any other real action. The controlling character may interrogate the trapped victim if desired, though the mirror does not compel the victim to respond or to be truthful. The controller may at any time speak the command word again and say &quot;return&quot; and the victim will be returned to its cell; or, the controller can say the command word followed by &quot;come out&quot; to free the victim, who appears standing beside the controller.</p><p>Should all cells be full when a creature is drawn inside, one cell chosen at random will be emptied with the freed creature appearing where the trapped one had been standing. The freed creature is safe from the mirror for one turn thereafter before it can again be trapped. All victims will be freed instantly if the mirror is broken.</p></description>
+				<picture type="string">images/item/mirrorofimprisonment.webp@Basic Fantasy Game Master's Guide</picture>
 			</mirrorofimprisonment>
 			<ropeofclimbing>
 				<name type="string">Rope of Climbing</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Rare Items</subtype>
 				<description type="formattedtext"><p><b>Rope of Climbing</b>: This 50 foot long rope is about ½ inch in diameter, but is capable of supporting up to 3,000 pounds if tied to a secure anchor point. When the user holds one end of the rope and speaks the command word, the rope animates, moving like a snake at a rate of 10' per round in whatever direction the user commands. The rope is even able to move into a completely vertical position if so ordered. It can be commanded to tie itself to any anchor point within reach (since the user must continue holding one end of the rope, it can reach no more than 50 feet from that point). The rope has no real strength and thus cannot lift or support any weight if not tied to an anchor point.</p></description>
+				<picture type="string">images/item/ropeofclimbing.webp@Basic Fantasy Game Master's Guide</picture>
 			</ropeofclimbing>
 		</category>
 		<category name="Devices for Summoning Elementals">
@@ -4863,48 +4990,56 @@
 				<type type="string">Magic Item</type>
 				<subtype type="string">Devices for Summoning Elementals</subtype>
 				<description type="formattedtext"><p><b>Bowl of Summoning Water Elementals</b>: This device is about the size of a punch bowl, and will be made of precious metals set with jewels. To activate this device, it must be filled with fresh water (at least a quart) and the command words inscribed around its rim must be spoken, which requires a full round to complete.</p></description>
+				<picture type="string">images/item/bowlofsummoningwaterelemental.webp@Basic Fantasy Game Master's Guide</picture>
 			</bowlofsummoningwaterelementals>
 			<brazierofsummoningfireelementals>
 				<name type="string">Brazier of Summoning Fire Elementals</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Devices for Summoning Elementals</subtype>
 				<description type="formattedtext"><p><b>Brazier of Summoning Fire Elementals</b>: This device appears to be a small brazier, a metal bowl with legs and cage-like sides which stands about a 1½ feet tall. Braziers are meant to hold fire. To activate this device, a fire must be built in this brazier and the command words inscribed around its rim-band must be spoken, which requires a full round to complete.</p></description>
+				<picture type="string">images/item/brazierofsummoningfireelemental.webp@Basic Fantasy Game Master's Guide</picture>
 			</brazierofsummoningfireelementals>
 			<censerofsummoningairelementals>
 				<name type="string">Censer of Summoning Air Elementals</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Devices for Summoning Elementals</subtype>
 				<description type="formattedtext"><p><b>Censer of Summoning Air Elementals</b>: This device appears to be an ornate but ordinary censer, a kind of bowl with a perforated lid and a chain which is used to lift and swing the device. These are normally used in worship, but this device is made for a different purpose. To activate this device, incense must be placed in the bowl, lit, and covered, and the command words inscribed around the edge of the lid must be spoken, which requires a full round to complete.</p></description>
+				<picture type="string">images/item/censerofsummoningairelemental.webp@Basic Fantasy Game Master's Guide</picture>
 			</censerofsummoningairelementals>
 			<crucibleofsummoningmetalelementals>
 				<name type="string">Crucible of Summoning Metal Elementals</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Devices for Summoning Elementals</subtype>
 				<description type="formattedtext"><p><b>Crucible of Summoning Metal Elementals</b>: This device appears to be a small crucible, an open-topped vessel used for melting metal. To activate this device, it must be placed on a solid, adequately heat-resistant surface and the command words inscribed around the edge of the lid must be spoken, which requires a full round to complete.</p><p>The crucible becomes very hot while the metal elemental is present, causing 2d8 points of damage to any character who dares to touch it barehanded and 2d6 points even if wearing armor or ordinary fabric or leather gloves. The crucible requires a full turn to cool after use.</p></description>
+				<picture type="string">images/item/crucibleofsummoningmetalelemental.webp@Basic Fantasy Game Master's Guide</picture>
 			</crucibleofsummoningmetalelementals>
 			<malletofsummoningwoodelementals>
 				<name type="string">Mallet of Summoning Wood Elementals</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Devices for Summoning Elementals</subtype>
 				<description type="formattedtext"><p><b>Mallet of Summoning Wood Elementals</b>: This is a wooden mallet of the sort used by builders to drive in pegs; though it could be used as a weapon, it is a poor excuse for one as it does just 1d4 points of damage on a hit and is not treated as a magic weapon. To activate this device, it must be held in the hand and the command words inscribed on one side of the hammer- head must then be spoken, which requires a full round to complete.</p></description>
+				<picture type="string">images/item/malletofsummoningwoodelemental.webp@Basic Fantasy Game Master's Guide</picture>
 			</malletofsummoningwoodelementals>
 			<marbleplateofsummoningcoldelementals>
 				<name type="string">Marble Plate of Summoning Cold Elementals</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Devices for Summoning Elementals</subtype>
 				<description type="formattedtext"><p><b>Marble Plate of Summoning Cold Elementals</b>: This device is a circular plate of marble about 9 inches in diameter and about ¾ of an inch thick. To activate this device, it must be placed level on a solid, stable surface and a full skin of fresh water must be poured upon it; as the water touches the base it magically freezes into a small sculpture of a cold elemental. The command words inscribed around the rim of the plate must then be spoken, which requires a full round to complete.</p></description>
+				<picture type="string">images/item/marbleplateofsummoningcoldelemental.webp@Basic Fantasy Game Master's Guide</picture>
 			</marbleplateofsummoningcoldelementals>
 			<rodofsummoninglightningelementals>
 				<name type="string">Rod of Summoning Lightning Elementals</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Devices for Summoning Elementals</subtype>
 				<description type="formattedtext"><p><b>Rod of Summoning Lightning Elementals</b>: This device appears as a copper rod about ¾ inch thick and 2 feet long, tipped with a polished ball of amber. The rod will have a smooth, polished green surface (a thin coating of verdigris) but will not be pitted or damaged by the corrosion. To activate this device it must be held in the hand and the command words inscribed on the length of the rod must then be spoken, which requires a full round to complete.</p></description>
+				<picture type="string">images/item/rodofsummoninglightningelemental.webp@Basic Fantasy Game Master's Guide</picture>
 			</rodofsummoninglightningelementals>
 			<stoneofsummoningearthelementals>
 				<name type="string">Stone of Summoning Earth Elementals</name>
 				<type type="string">Magic Item</type>
 				<subtype type="string">Devices for Summoning Elementals</subtype>
 				<description type="formattedtext"><p><b>Stone of Summoning Earth Elementals</b>: This device is a roughly-cut but highly-polished stone in which a vein or cluster of precious or semi-precious stones is visible. To activate this device, it must be held in the user's hands and the command words inscribed on the smoothest area of the stone must be spoken, which requires a full round to complete.</p></description>
+				<picture type="string">images/item/stoneofsummoningearthelemental.webp@Basic Fantasy Game Master's Guide</picture>
 			</stoneofsummoningearthelementals>
 		</category>
 	</item>

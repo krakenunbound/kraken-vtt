@@ -979,18 +979,21 @@
 				<cost type="string">4 gp</cost>
 				<weight type="string">*</weight>
 				<description type="formattedtext"><p>A <b>Backpack</b> will hold a maximum 40 pounds or 3 cubic feet of goods. Some items may be lashed to the outside, and thus count toward the weight limit but not the volume limit. A Halfling's backpack holds at most 30 pounds and/or 1½ cubic feet, but costs the same as a full-sized item.</p></description>
+				<picture type="string">images/item/backpack.webp@Basic Fantasy Player's Handbook</picture>
 			</backpack>
 			<beltpouch>
 				<name type="string">Belt Pouch</name>
 				<type type="string">Adventuring Gear</type>
 				<cost type="string">1 gp</cost>
 				<weight type="string">*</weight>
+				<picture type="string">images/item/beltpouch.webp@Basic Fantasy Player's Handbook</picture>
 			</beltpouch>
 			<bitandbridle>
 				<name type="string">Bit and bridle</name>
 				<type type="string">Adventuring Gear</type>
 				<cost type="string">15 sp</cost>
 				<weight type="string">3</weight>
+				<picture type="string">images/item/bitandbridle.webp@Basic Fantasy Player's Handbook</picture>
 			</bitandbridle>
 			<candles12>
 				<name type="string">Candles, 12</name>
@@ -998,6 +1001,7 @@
 				<cost type="string">1 gp</cost>
 				<weight type="string">*</weight>
 				<description type="formattedtext"><p>A <b>Candle</b> will shed light over a 5' radius, with dim light extending 5' further. A normal candle will burn about 3 turns per inch of height.</p></description>
+				<picture type="string">images/item/12candle.webp@Basic Fantasy Player's Handbook</picture>
 			</candles12>
 			<chalksmallbagofpieces>
 				<name type="string">Chalk, small bag of pieces</name>
@@ -1005,30 +1009,35 @@
 				<cost type="string">2 gp</cost>
 				<weight type="string">*</weight>
 				<description type="formattedtext"><p><b>Chalk</b> is useful for &quot;blazing a trail&quot; through a dungeon or ruin.</p></description>
+				<picture type="string">images/item/smallbagofpieceschalk.webp@Basic Fantasy Player's Handbook</picture>
 			</chalksmallbagofpieces>
 			<cloak>
 				<name type="string">Cloak</name>
 				<type type="string">Adventuring Gear</type>
 				<cost type="string">2 gp</cost>
 				<weight type="string">1</weight>
+				<picture type="string">images/item/cloak.webp@Basic Fantasy Player's Handbook</picture>
 			</cloak>
 			<clothingcommonoutfit>
 				<name type="string">Clothing, common outfit</name>
 				<type type="string">Adventuring Gear</type>
 				<cost type="string">4 gp</cost>
 				<weight type="string">1</weight>
+				<picture type="string">images/item/commonoutfitclothing.webp@Basic Fantasy Player's Handbook</picture>
 			</clothingcommonoutfit>
 			<glassbottleorvial>
 				<name type="string">Glass bottle or vial</name>
 				<type type="string">Adventuring Gear</type>
 				<cost type="string">1 gp</cost>
 				<weight type="string">*</weight>
+				<picture type="string">images/item/glassbottleorvial.webp@Basic Fantasy Player's Handbook</picture>
 			</glassbottleorvial>
 			<grapplinghook>
 				<name type="string">Grappling Hook</name>
 				<type type="string">Adventuring Gear</type>
 				<cost type="string">2 gp</cost>
 				<weight type="string">4</weight>
+				<picture type="string">images/item/grapplinghook.webp@Basic Fantasy Player's Handbook</picture>
 			</grapplinghook>
 			<holysymbol>
 				<name type="string">Holy Symbol</name>
@@ -1036,6 +1045,7 @@
 				<cost type="string">25 gp</cost>
 				<weight type="string">*</weight>
 				<description type="formattedtext"><p><b>Holy Water</b> is explained in the Encounter section.</p></description>
+				<picture type="string">images/item/holysymbol.webp@Basic Fantasy Player's Handbook</picture>
 			</holysymbol>
 			<holywaterpervial>
 				<name type="string">Holy Water, per vial</name>
@@ -1043,18 +1053,21 @@
 				<cost type="string">10 gp</cost>
 				<weight type="string">*</weight>
 				<description type="formattedtext"><p><b>Holy Water</b> is explained in the Encounter section.</p></description>
+				<picture type="string">images/item/pervialholywater.webp@Basic Fantasy Player's Handbook</picture>
 			</holywaterpervial>
 			<horseshoesshoeing>
 				<name type="string">Horseshoes &amp; shoeing</name>
 				<type type="string">Adventuring Gear</type>
 				<cost type="string">1 gp</cost>
 				<weight type="string">10</weight>
+				<picture type="string">images/item/horseshoesshoeing.webp@Basic Fantasy Player's Handbook</picture>
 			</horseshoesshoeing>
 			<inkperjar>
 				<name type="string">Ink, per jar</name>
 				<type type="string">Adventuring Gear</type>
 				<cost type="string">8 gp</cost>
 				<weight type="string">½</weight>
+				<picture type="string">images/item/perjarink.webp@Basic Fantasy Player's Handbook</picture>
 			</inkperjar>
 			<ironspikes12>
 				<name type="string">Iron Spikes, 12</name>
@@ -1062,12 +1075,14 @@
 				<cost type="string">1 gp</cost>
 				<weight type="string">1</weight>
 				<description type="formattedtext"><p><b>Iron Spikes</b> are useful for spiking doors closed (or spiking them open) and may be used as crude pitons in appropriate situations.</p></description>
+				<picture type="string">images/item/12ironspike.webp@Basic Fantasy Player's Handbook</picture>
 			</ironspikes12>
 			<ladder10ft>
 				<name type="string">Ladder, 10 ft.</name>
 				<type type="string">Adventuring Gear</type>
 				<cost type="string">1 gp</cost>
 				<weight type="string">20</weight>
+				<picture type="string">images/item/10ftladder.webp@Basic Fantasy Player's Handbook</picture>
 			</ladder10ft>
 			<lantern>
 				<name type="string">Lantern</name>
@@ -1075,6 +1090,7 @@
 				<cost type="string">5 gp</cost>
 				<weight type="string">2</weight>
 				<description type="formattedtext"><p>A <b>Lantern</b> will provide light covering a 30' radius; dim light will extend about 20' further. A lantern will consume a flask of oil in 18+1d6 turns. A <b>Hooded Lantern</b> allows the light to be hidden or revealed as the user pleases; in all other ways it performs as an ordinary lantern. A <b>Bullseye Lantern</b> projects a cone of light 30' long and 30' wide at the widest point, with dim light extending an additional 20' beyond that point. This type of lantern is generally hooded.</p></description>
+				<picture type="string">images/item/lantern.webp@Basic Fantasy Player's Handbook</picture>
 			</lantern>
 			<lanternbullseye>
 				<name type="string">Lantern, Bullseye</name>
@@ -1082,6 +1098,7 @@
 				<cost type="string">14 gp</cost>
 				<weight type="string">3</weight>
 				<description type="formattedtext"><p>A <b>Lantern</b> will provide light covering a 30' radius; dim light will extend about 20' further. A lantern will consume a flask of oil in 18+1d6 turns. A <b>Hooded Lantern</b> allows the light to be hidden or revealed as the user pleases; in all other ways it performs as an ordinary lantern. A <b>Bullseye Lantern</b> projects a cone of light 30' long and 30' wide at the widest point, with dim light extending an additional 20' beyond that point. This type of lantern is generally hooded.</p></description>
+				<picture type="string">images/item/bullseyelantern.webp@Basic Fantasy Player's Handbook</picture>
 			</lanternbullseye>
 			<lanternhooded>
 				<name type="string">Lantern, Hooded</name>
@@ -1089,12 +1106,14 @@
 				<cost type="string">8 gp</cost>
 				<weight type="string">2</weight>
 				<description type="formattedtext"><p>A <b>Lantern</b> will provide light covering a 30' radius; dim light will extend about 20' further. A lantern will consume a flask of oil in 18+1d6 turns. A <b>Hooded Lantern</b> allows the light to be hidden or revealed as the user pleases; in all other ways it performs as an ordinary lantern. A <b>Bullseye Lantern</b> projects a cone of light 30' long and 30' wide at the widest point, with dim light extending an additional 20' beyond that point. This type of lantern is generally hooded.</p></description>
+				<picture type="string">images/item/hoodedlantern.webp@Basic Fantasy Player's Handbook</picture>
 			</lanternhooded>
 			<manacleswithoutpadlock>
 				<name type="string">Manacles (without padlock)</name>
 				<type type="string">Adventuring Gear</type>
 				<cost type="string">6 gp</cost>
 				<weight type="string">4</weight>
+				<picture type="string">images/item/manacle.webp@Basic Fantasy Player's Handbook</picture>
 			</manacleswithoutpadlock>
 			<maporscrollcase>
 				<name type="string">Map or scroll case</name>
@@ -1102,6 +1121,7 @@
 				<cost type="string">1 gp</cost>
 				<weight type="string">½</weight>
 				<description type="formattedtext"><p>A <b>Map or Scroll Case</b> is a tubular oiled leather case used to carry maps, scrolls, or other paper items. The case will have a water-resistant (but not waterproof) cap which slides over the end, and a loop to allow the case to be hung from a belt or bandolier. A standard scroll case can hold up to 10 sheets of paper, or a single scroll of up to seven spells.</p></description>
+				<picture type="string">images/item/maporscrollcase.webp@Basic Fantasy Player's Handbook</picture>
 			</maporscrollcase>
 			<mirrorsmallmetal>
 				<name type="string">Mirror, small metal</name>
@@ -1109,42 +1129,49 @@
 				<cost type="string">7 gp</cost>
 				<weight type="string">*</weight>
 				<description type="formattedtext"><p>A <b>Mirror</b> is useful in a dungeon environment for many reasons; for instance, it is the only way to look at a Medusa without being turned to stone. Mirrors are also useful for looking around corners, and can be used outdoors to send signals using reflected sunlight.</p></description>
+				<picture type="string">images/item/smallmetalmirror.webp@Basic Fantasy Player's Handbook</picture>
 			</mirrorsmallmetal>
 			<oilperflask>
 				<name type="string">Oil (per flask)</name>
 				<type type="string">Adventuring Gear</type>
 				<cost type="string">1 gp</cost>
 				<weight type="string">1</weight>
+				<picture type="string">images/item/oil.webp@Basic Fantasy Player's Handbook</picture>
 			</oilperflask>
 			<padlockwith2keys>
 				<name type="string">Padlock (with 2 keys)</name>
 				<type type="string">Adventuring Gear</type>
 				<cost type="string">12 gp</cost>
 				<weight type="string">1</weight>
+				<picture type="string">images/item/padlock.webp@Basic Fantasy Player's Handbook</picture>
 			</padlockwith2keys>
 			<paperpersheet>
 				<name type="string">Paper (per sheet)</name>
 				<type type="string">Adventuring Gear</type>
 				<cost type="string">1 gp</cost>
 				<weight type="string">**</weight>
+				<picture type="string">images/item/paper.webp@Basic Fantasy Player's Handbook</picture>
 			</paperpersheet>
 			<pole10wooden>
 				<name type="string">Pole, 10’ wooden</name>
 				<type type="string">Adventuring Gear</type>
 				<cost type="string">1 gp</cost>
 				<weight type="string">10</weight>
+				<picture type="string">images/item/10woodenpole.webp@Basic Fantasy Player's Handbook</picture>
 			</pole10wooden>
 			<quill>
 				<name type="string">Quill</name>
 				<type type="string">Adventuring Gear</type>
 				<cost type="string">1 sp</cost>
 				<weight type="string">**</weight>
+				<picture type="string">images/item/quill.webp@Basic Fantasy Player's Handbook</picture>
 			</quill>
 			<quillknife>
 				<name type="string">Quill Knife</name>
 				<type type="string">Adventuring Gear</type>
 				<cost type="string">1 gp</cost>
 				<weight type="string">*</weight>
+				<picture type="string">images/item/quillknife.webp@Basic Fantasy Player's Handbook</picture>
 			</quillknife>
 			<quiverorboltcase>
 				<name type="string">Quiver or Bolt case</name>
@@ -1152,36 +1179,42 @@
 				<cost type="string">1 gp</cost>
 				<weight type="string">1</weight>
 				<description type="formattedtext"><p>A <b>Quiver</b> is an open container used to hold arrows. A <b>Bolt Case</b> is a similar sort of container for crossbow bolts. In either case, the standard capacity is 20 missiles. The length of a quiver or bolt case must match the length of the ammunition for it to be useful; therefore, there are longbow and shortbow quivers and light and heavy crossbow bolt cases. The price is the same for all types.</p></description>
+				<picture type="string">images/item/quiverorboltcase.webp@Basic Fantasy Player's Handbook</picture>
 			</quiverorboltcase>
 			<rationsdryoneweek>
 				<name type="string">Rations, Dry, one week</name>
 				<type type="string">Adventuring Gear</type>
 				<cost type="string">10 gp</cost>
 				<weight type="string">14</weight>
+				<picture type="string">images/item/rationsdryoneweek.webp@Basic Fantasy Player's Handbook</picture>
 			</rationsdryoneweek>
 			<ropehempper50ft>
 				<name type="string">Rope, Hemp (per 50 ft.)</name>
 				<type type="string">Adventuring Gear</type>
 				<cost type="string">1 gp</cost>
 				<weight type="string">5</weight>
+				<picture type="string">images/item/hemprope.webp@Basic Fantasy Player's Handbook</picture>
 			</ropehempper50ft>
 			<ropesilkper50ft>
 				<name type="string">Rope, Silk (per 50 ft.)</name>
 				<type type="string">Adventuring Gear</type>
 				<cost type="string">10 gp</cost>
 				<weight type="string">2</weight>
+				<picture type="string">images/item/silkrope.webp@Basic Fantasy Player's Handbook</picture>
 			</ropesilkper50ft>
 			<sacklarge>
 				<name type="string">Sack, Large</name>
 				<type type="string">Adventuring Gear</type>
 				<cost type="string">1 gp</cost>
 				<weight type="string">*</weight>
+				<picture type="string">images/item/largesack.webp@Basic Fantasy Player's Handbook</picture>
 			</sacklarge>
 			<sacksmall>
 				<name type="string">Sack, Small</name>
 				<type type="string">Adventuring Gear</type>
 				<cost type="string">5 sp</cost>
 				<weight type="string">*</weight>
+				<picture type="string">images/item/smallsack.webp@Basic Fantasy Player's Handbook</picture>
 			</sacksmall>
 			<saddlepack>
 				<name type="string">Saddle, Pack</name>
@@ -1189,6 +1222,7 @@
 				<cost type="string">5 gp</cost>
 				<weight type="string">15</weight>
 				<description type="formattedtext"><p>A pair of <b>Saddlebags</b> will hold at most 10 pounds or 1 cubic foot of goods (divided evenly between both bags).</p></description>
+				<picture type="string">images/item/packsaddle.webp@Basic Fantasy Player's Handbook</picture>
 			</saddlepack>
 			<saddleriding>
 				<name type="string">Saddle, Riding</name>
@@ -1196,6 +1230,7 @@
 				<cost type="string">10 gp</cost>
 				<weight type="string">35</weight>
 				<description type="formattedtext"><p>A pair of <b>Saddlebags</b> will hold at most 10 pounds or 1 cubic foot of goods (divided evenly between both bags).</p></description>
+				<picture type="string">images/item/ridingsaddle.webp@Basic Fantasy Player's Handbook</picture>
 			</saddleriding>
 			<saddlebagspair>
 				<name type="string">Saddlebags, pair</name>
@@ -1203,30 +1238,35 @@
 				<cost type="string">4 gp</cost>
 				<weight type="string">7</weight>
 				<description type="formattedtext"><p>A pair of <b>Saddlebags</b> will hold at most 10 pounds or 1 cubic foot of goods (divided evenly between both bags).</p></description>
+				<picture type="string">images/item/pairsaddlebag.webp@Basic Fantasy Player's Handbook</picture>
 			</saddlebagspair>
 			<spellbook128pages>
 				<name type="string">Spellbook (128 pages)</name>
 				<type type="string">Adventuring Gear</type>
 				<cost type="string">25 gp</cost>
 				<weight type="string">1</weight>
+				<picture type="string">images/item/spellbook.webp@Basic Fantasy Player's Handbook</picture>
 			</spellbook128pages>
 			<tentlargetenmen>
 				<name type="string">Tent, Large (ten men)</name>
 				<type type="string">Adventuring Gear</type>
 				<cost type="string">25 gp</cost>
 				<weight type="string">20</weight>
+				<picture type="string">images/item/largetent.webp@Basic Fantasy Player's Handbook</picture>
 			</tentlargetenmen>
 			<tentsmalloneman>
 				<name type="string">Tent, Small (one man)</name>
 				<type type="string">Adventuring Gear</type>
 				<cost type="string">5 gp</cost>
 				<weight type="string">10</weight>
+				<picture type="string">images/item/smalltent.webp@Basic Fantasy Player's Handbook</picture>
 			</tentsmalloneman>
 			<thievespicksandtools>
 				<name type="string">Thieves’ picks and tools</name>
 				<type type="string">Adventuring Gear</type>
 				<cost type="string">25 gp</cost>
 				<weight type="string">1</weight>
+				<picture type="string">images/item/thievespicksandtool.webp@Basic Fantasy Player's Handbook</picture>
 			</thievespicksandtools>
 			<tinderboxflintandsteel>
 				<name type="string">Tinderbox, flint and steel</name>
@@ -1234,6 +1274,7 @@
 				<cost type="string">3 gp</cost>
 				<weight type="string">1</weight>
 				<description type="formattedtext"><p>A <b>Tinderbox</b> is generally purchased with a <b>flint and steel</b>; the flint, a piece of hard rock, is struck vigorously against a C-shaped piece of high-carbon steel. When done correctly, hot sparks will fly from the flint and steel into the tinder, hopefully starting a fire. The best tinder is a dried piece of prepared tinder fungus, carried in the tinderbox to keep it dry; char cloth, hemp rope, or even very dry grass can substitute if prepared tinder fungus is not available. The time required to start a fire should be determined by the GM according to the prevailing conditions; under ideal conditions, starting a fire with a flint, steel and tinder takes about a turn.</p></description>
+				<picture type="string">images/item/flintandsteeltinderbox.webp@Basic Fantasy Player's Handbook</picture>
 			</tinderboxflintandsteel>
 			<torches6>
 				<name type="string">Torches, 6</name>
@@ -1241,6 +1282,7 @@
 				<cost type="string">1 gp</cost>
 				<weight type="string">1</weight>
 				<description type="formattedtext"><p>A <b>Torch</b> sheds light over a 30' radius, with dim light extending about 20' further, and burns for 1d4+4 turns. Of course, a torch is also useful for setting flammable materials (such as cobwebs or oil) alight.</p></description>
+				<picture type="string">images/item/6torche.webp@Basic Fantasy Player's Handbook</picture>
 			</torches6>
 			<whetstone>
 				<name type="string">Whetstone</name>
@@ -1248,12 +1290,14 @@
 				<cost type="string">1 gp</cost>
 				<weight type="string">1</weight>
 				<description type="formattedtext"><p>A <b>Whetstone</b> is used to sharpen and maintain edged weapons such as swords, daggers, and axes.</p></description>
+				<picture type="string">images/item/whetstone.webp@Basic Fantasy Player's Handbook</picture>
 			</whetstone>
 			<whistle>
 				<name type="string">Whistle</name>
 				<type type="string">Adventuring Gear</type>
 				<cost type="string">1 gp</cost>
 				<weight type="string">**</weight>
+				<picture type="string">images/item/whistle.webp@Basic Fantasy Player's Handbook</picture>
 			</whistle>
 			<wineskinwaterskin>
 				<name type="string">Wineskin/Waterskin</name>
@@ -1261,12 +1305,14 @@
 				<cost type="string">1 gp</cost>
 				<weight type="string">2</weight>
 				<description type="formattedtext"><p><b>Wineskin/Waterskin</b> is a container for drinking water or wine; though generally water is taken into a dungeon or wilderness environment. The standard waterskin holds one quart of liquid, which is the minimum amount required by a normal character in a single day. If adventuring in the desert or other hot, dry areas, a character may need as much as ten times this amount. Note that the given 2 pound weight is for a full skin; an empty skin has negligible weight.</p></description>
+				<picture type="string">images/item/wineskinwaterskin.webp@Basic Fantasy Player's Handbook</picture>
 			</wineskinwaterskin>
 			<winterblanket>
 				<name type="string">Winter blanket</name>
 				<type type="string">Adventuring Gear</type>
 				<cost type="string">1 gp</cost>
 				<weight type="string">3</weight>
+				<picture type="string">images/item/winterblanket.webp@Basic Fantasy Player's Handbook</picture>
 			</winterblanket>
 		</category>
 		<category name="Weapons">
@@ -1279,6 +1325,7 @@
 				<damage type="string">1d6</damage>
 				<range type="string">10/20/30</range>
 				<thrown type="number">1</thrown>
+				<picture type="string">images/item/handaxe.webp@Basic Fantasy Player's Handbook</picture>
 			</handaxe>
 			<battleaxe>
 				<name type="string">Battle Axe</name>
@@ -1287,6 +1334,7 @@
 				<weight type="string">7</weight>
 				<size type="string">M</size>
 				<damage type="string">1d8</damage>
+				<picture type="string">images/item/battleaxe.webp@Basic Fantasy Player's Handbook</picture>
 			</battleaxe>
 			<greataxe>
 				<name type="string">Great Axe</name>
@@ -1295,6 +1343,7 @@
 				<weight type="string">15</weight>
 				<size type="string">L</size>
 				<damage type="string">1d10</damage>
+				<picture type="string">images/item/greataxe.webp@Basic Fantasy Player's Handbook</picture>
 			</greataxe>
 			<shortbow>
 				<name type="string">Shortbow</name>
@@ -1305,6 +1354,7 @@
 				<damage type="string">1d6</damage>
 				<range type="string">50/100/150</range>
 				<missile type="number">1</missile>
+				<picture type="string">images/item/shortbow.webp@Basic Fantasy Player's Handbook</picture>
 			</shortbow>
 			<shortbowarrow>
 				<name type="string">Shortbow Arrow</name>
@@ -1312,6 +1362,7 @@
 				<cost type="string">1 sp</cost>
 				<weight type="string">*</weight>
 				<damage type="string">1d6</damage>
+				<picture type="string">images/item/shortbowarrow.webp@Basic Fantasy Player's Handbook</picture>
 			</shortbowarrow>
 			<silvershortbowarrow>
 				<name type="string">Silver Shortbow Arrow</name>
@@ -1319,6 +1370,7 @@
 				<cost type="string">2 gp</cost>
 				<weight type="string">*</weight>
 				<damage type="string">1d6</damage>
+				<picture type="string">images/item/silvershortbowarrow.webp@Basic Fantasy Player's Handbook</picture>
 			</silvershortbowarrow>
 			<longbow>
 				<name type="string">Longbow</name>
@@ -1329,6 +1381,7 @@
 				<damage type="string">1d8</damage>
 				<range type="string">70/140/210</range>
 				<missile type="number">1</missile>
+				<picture type="string">images/item/longbow.webp@Basic Fantasy Player's Handbook</picture>
 			</longbow>
 			<longbowarrow>
 				<name type="string">Longbow Arrow</name>
@@ -1336,6 +1389,7 @@
 				<cost type="string">2 sp</cost>
 				<weight type="string">*</weight>
 				<damage type="string">1d8</damage>
+				<picture type="string">images/item/longbowarrow.webp@Basic Fantasy Player's Handbook</picture>
 			</longbowarrow>
 			<silverlongbowarrow>
 				<name type="string">Silver Longbow Arrow</name>
@@ -1343,6 +1397,7 @@
 				<cost type="string">4 gp</cost>
 				<weight type="string">*</weight>
 				<damage type="string">1d8</damage>
+				<picture type="string">images/item/silverlongbowarrow.webp@Basic Fantasy Player's Handbook</picture>
 			</silverlongbowarrow>
 			<lightcrossbow>
 				<name type="string">Light Crossbow</name>
@@ -1353,6 +1408,7 @@
 				<damage type="string">1d6</damage>
 				<range type="string">60/120/180</range>
 				<missile type="number">1</missile>
+				<picture type="string">images/item/lightcrossbow.webp@Basic Fantasy Player's Handbook</picture>
 			</lightcrossbow>
 			<lightquarrel>
 				<name type="string">Light Quarrel</name>
@@ -1360,6 +1416,7 @@
 				<cost type="string">2 sp</cost>
 				<weight type="string">*</weight>
 				<damage type="string">1d6</damage>
+				<picture type="string">images/item/lightquarrel.webp@Basic Fantasy Player's Handbook</picture>
 			</lightquarrel>
 			<silverlightquarrel>
 				<name type="string">Silver Light Quarrel</name>
@@ -1367,6 +1424,7 @@
 				<cost type="string">5 gp</cost>
 				<weight type="string">*</weight>
 				<damage type="string">1d6</damage>
+				<picture type="string">images/item/silverlightquarrel.webp@Basic Fantasy Player's Handbook</picture>
 			</silverlightquarrel>
 			<heavycrossbow>
 				<name type="string">Heavy Crossbow</name>
@@ -1377,6 +1435,7 @@
 				<damage type="string">1d8</damage>
 				<range type="string">80/160/240</range>
 				<missile type="number">1</missile>
+				<picture type="string">images/item/heavycrossbow.webp@Basic Fantasy Player's Handbook</picture>
 			</heavycrossbow>
 			<heavyquarrel>
 				<name type="string">Heavy Quarrel</name>
@@ -1384,6 +1443,7 @@
 				<cost type="string">4 sp</cost>
 				<weight type="string">*</weight>
 				<damage type="string">1d8</damage>
+				<picture type="string">images/item/heavyquarrel.webp@Basic Fantasy Player's Handbook</picture>
 			</heavyquarrel>
 			<silverheavyquarrel>
 				<name type="string">Silver Heavy Quarrel</name>
@@ -1391,6 +1451,7 @@
 				<cost type="string">10 gp</cost>
 				<weight type="string">*</weight>
 				<damage type="string">1d8</damage>
+				<picture type="string">images/item/silverheavyquarrel.webp@Basic Fantasy Player's Handbook</picture>
 			</silverheavyquarrel>
 			<dagger>
 				<name type="string">Dagger</name>
@@ -1401,6 +1462,7 @@
 				<damage type="string">1d4</damage>
 				<range type="string">10/20/30</range>
 				<thrown type="number">1</thrown>
+				<picture type="string">images/item/dagger.webp@Basic Fantasy Player's Handbook</picture>
 			</dagger>
 			<silverdagger>
 				<name type="string">Silver Dagger</name>
@@ -1410,6 +1472,7 @@
 				<size type="string">S</size>
 				<damage type="string">1d4</damage>
 				<thrown type="number">1</thrown>
+				<picture type="string">images/item/silverdagger.webp@Basic Fantasy Player's Handbook</picture>
 			</silverdagger>
 			<shortsword>
 				<name type="string">Shortsword</name>
@@ -1418,6 +1481,7 @@
 				<weight type="string">3</weight>
 				<size type="string">S</size>
 				<damage type="string">1d6</damage>
+				<picture type="string">images/item/shortsword.webp@Basic Fantasy Player's Handbook</picture>
 			</shortsword>
 			<longswordscimitar>
 				<name type="string">Longsword/Scimitar</name>
@@ -1426,6 +1490,7 @@
 				<weight type="string">4</weight>
 				<size type="string">M</size>
 				<damage type="string">1d8</damage>
+				<picture type="string">images/item/longswordscimitar.webp@Basic Fantasy Player's Handbook</picture>
 			</longswordscimitar>
 			<twohandedsword>
 				<name type="string">Two-Handed Sword</name>
@@ -1434,6 +1499,7 @@
 				<weight type="string">10</weight>
 				<size type="string">L</size>
 				<damage type="string">1d10</damage>
+				<picture type="string">images/item/twohandedsword.webp@Basic Fantasy Player's Handbook</picture>
 			</twohandedsword>
 			<warhammer>
 				<name type="string">Warhammer</name>
@@ -1444,6 +1510,7 @@
 				<damage type="string">1d6</damage>
 				<range type="string">10/20/30</range>
 				<thrown type="number">1</thrown>
+				<picture type="string">images/item/warhammer.webp@Basic Fantasy Player's Handbook</picture>
 			</warhammer>
 			<mace>
 				<name type="string">Mace</name>
@@ -1452,6 +1519,7 @@
 				<weight type="string">10</weight>
 				<size type="string">M</size>
 				<damage type="string">1d8</damage>
+				<picture type="string">images/item/mace.webp@Basic Fantasy Player's Handbook</picture>
 			</mace>
 			<maul>
 				<name type="string">Maul</name>
@@ -1460,6 +1528,7 @@
 				<weight type="string">16</weight>
 				<size type="string">L</size>
 				<damage type="string">1d10</damage>
+				<picture type="string">images/item/maul.webp@Basic Fantasy Player's Handbook</picture>
 			</maul>
 			<clubcudgelwalkingstaff>
 				<name type="string">Club/Cudgel/Walking Staff</name>
@@ -1468,6 +1537,7 @@
 				<weight type="string">1</weight>
 				<size type="string">M</size>
 				<damage type="string">1d4</damage>
+				<picture type="string">images/item/clubcudgelwalkingstaff.webp@Basic Fantasy Player's Handbook</picture>
 			</clubcudgelwalkingstaff>
 			<quarterstaff>
 				<name type="string">Quarterstaff</name>
@@ -1476,6 +1546,7 @@
 				<weight type="string">4</weight>
 				<size type="string">L</size>
 				<damage type="string">1d6</damage>
+				<picture type="string">images/item/quarterstaff.webp@Basic Fantasy Player's Handbook</picture>
 			</quarterstaff>
 			<polearm>
 				<name type="string">Pole Arm</name>
@@ -1484,6 +1555,7 @@
 				<weight type="string">15</weight>
 				<size type="string">L</size>
 				<damage type="string">1d10</damage>
+				<picture type="string">images/item/polearm.webp@Basic Fantasy Player's Handbook</picture>
 			</polearm>
 			<sling>
 				<name type="string">Sling</name>
@@ -1494,6 +1566,7 @@
 				<damage type="string">1d4</damage>
 				<range type="string">30/60/90</range>
 				<missile type="number">1</missile>
+				<picture type="string">images/item/sling.webp@Basic Fantasy Player's Handbook</picture>
 			</sling>
 			<bullet>
 				<name type="string">Bullet</name>
@@ -1501,6 +1574,7 @@
 				<cost type="string">1 sp</cost>
 				<weight type="string">*</weight>
 				<damage type="string">1d4</damage>
+				<picture type="string">images/item/bullet.webp@Basic Fantasy Player's Handbook</picture>
 			</bullet>
 			<stone>
 				<name type="string">Stone</name>
@@ -1508,6 +1582,7 @@
 				<cost type="string">0 gp</cost>
 				<weight type="string">*</weight>
 				<damage type="string">1d3</damage>
+				<picture type="string">images/item/stone.webp@Basic Fantasy Player's Handbook</picture>
 			</stone>
 			<spear>
 				<name type="string">Spear</name>
@@ -1519,6 +1594,7 @@
 				<range type="string">10/20/30</range>
 				<thrown type="number">1</thrown>
 				<description type="formattedtext"><p>A spear does 1d6 thrown or in one hand, 1d8 in two hands.</p></description>
+				<picture type="string">images/item/spear.webp@Basic Fantasy Player's Handbook</picture>
 			</spear>
 		</category>
 		<category name="Armor and Shields">
@@ -1529,6 +1605,7 @@
 				<cost type="string">20 gp</cost>
 				<weight type="string">15</weight>
 				<ac type="number">13</ac>
+				<picture type="string">images/item/leatherarmor.webp@Basic Fantasy Player's Handbook</picture>
 			</leatherarmor>
 			<chainmail>
 				<name type="string">Chain Mail</name>
@@ -1537,6 +1614,7 @@
 				<cost type="string">60 gp</cost>
 				<weight type="string">40</weight>
 				<ac type="number">15</ac>
+				<picture type="string">images/item/chainmail.webp@Basic Fantasy Player's Handbook</picture>
 			</chainmail>
 			<platemail>
 				<name type="string">Plate Mail</name>
@@ -1545,6 +1623,7 @@
 				<cost type="string">300 gp</cost>
 				<weight type="string">50</weight>
 				<ac type="number">17</ac>
+				<picture type="string">images/item/platemail.webp@Basic Fantasy Player's Handbook</picture>
 			</platemail>
 			<shield>
 				<name type="string">Shield</name>
@@ -1553,6 +1632,7 @@
 				<cost type="string">7 gp</cost>
 				<weight type="string">5</weight>
 				<acbonus type="number">1</acbonus>
+				<picture type="string">images/item/shield.webp@Basic Fantasy Player's Handbook</picture>
 			</shield>
 		</category>
 		<category name="Beasts of Burden">
@@ -1560,28 +1640,33 @@
 				<name type="string">Horse, Draft</name>
 				<type type="string">Animal</type>
 				<cost type="string">120 gp</cost>
+				<picture type="string">images/item/drafthorse.webp@Basic Fantasy Player's Handbook</picture>
 			</horsedraft>
 			<horsewar>
 				<name type="string">Horse, War</name>
 				<type type="string">Animal</type>
 				<cost type="string">200 gp</cost>
+				<picture type="string">images/item/warhorse.webp@Basic Fantasy Player's Handbook</picture>
 			</horsewar>
 			<horseriding>
 				<name type="string">Horse, Riding</name>
 				<type type="string">Animal</type>
 				<cost type="string">75 gp</cost>
+				<picture type="string">images/item/ridinghorse.webp@Basic Fantasy Player's Handbook</picture>
 			</horseriding>
 			<pony>
 				<name type="string">Pony</name>
 				<type type="string">Animal</type>
 				<cost type="string">40 gp</cost>
 				<description type="formattedtext"><p>Dwarves and Halflings generally ride ponies rather than horses.</p></description>
+				<picture type="string">images/item/pony.webp@Basic Fantasy Player's Handbook</picture>
 			</pony>
 			<ponywar>
 				<name type="string">Pony, War</name>
 				<type type="string">Animal</type>
 				<cost type="string">80 gp</cost>
 				<description type="formattedtext"><p>Dwarves and Halflings generally ride ponies rather than horses.</p></description>
+				<picture type="string">images/item/warpony.webp@Basic Fantasy Player's Handbook</picture>
 			</ponywar>
 		</category>
 	</item>

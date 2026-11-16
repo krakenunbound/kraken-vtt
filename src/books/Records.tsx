@@ -390,7 +390,9 @@ export function RecordWindow({ session, id, record: given, book }: { session: Se
   const Block = gm && npc ? statblockFor(session.ruleset, "npc") : null;
   // The campaign's own record's text (its editor's Description) too.
   if ((npc || (!record.source && !given)) && typeof data.text === "string" && data.text.trim()) texts.unshift(["description", data.text]);
-  const portrait = npc && (data.picture || data.token) ? session.recordArtUrl(record.id, "portrait") : "";
+  // A creature's portrait, an item's or a vehicle's picture (each from its own book).
+  const pictured = npc || record.type === "item" || record.type === "vehicle";
+  const portrait = pictured && (data.picture || data.token) ? session.recordArtUrl(record.id, "portrait") : "";
   const table = tableOf(data);
   const grouped = groupsOf(data);
   const abilities = data.abilities && typeof data.abilities === "object" ? (data.abilities as Record<string, { score?: number; bonus?: number } | undefined>) : null;

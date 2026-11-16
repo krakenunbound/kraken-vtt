@@ -573,6 +573,7 @@
 				<skill type="string">Melee</skill>
 				<range type="string">Melee</range>
 				<description type="formattedtext"><p>A utility blade. Everyone carries one; few admit they have used it.</p></description>
+				<picture type="string">images/item/knife.webp@Apeira Astra Crew Handbook</picture>
 			</knife>
 			<shockbaton>
 				<name type="string">Shock Baton</name>
@@ -583,6 +584,7 @@
 				<skill type="string">Melee</skill>
 				<range type="string">Melee</range>
 				<description type="formattedtext"><p>A security officer's stun stick. A target hit makes a Grit check (Standard) or loses its next turn.</p></description>
+				<picture type="string">images/item/shockbaton.webp@Apeira Astra Crew Handbook</picture>
 			</shockbaton>
 			<cutlass>
 				<name type="string">Cutlass</name>
@@ -593,6 +595,7 @@
 				<skill type="string">Melee</skill>
 				<range type="string">Melee</range>
 				<description type="formattedtext"><p>The boarding blade of the old navies: no ricochets inside a hull.</p></description>
+				<picture type="string">images/item/cutlass.webp@Apeira Astra Crew Handbook</picture>
 			</cutlass>
 			<snubpistol>
 				<name type="string">Snub Pistol</name>
@@ -603,6 +606,7 @@
 				<skill type="string">Firearms</skill>
 				<range type="string">10 m</range>
 				<description type="formattedtext"><p>Low-velocity rounds that will not hole a hull. The spacer's sidearm.</p></description>
+				<picture type="string">images/item/snubpistol.webp@Apeira Astra Crew Handbook</picture>
 			</snubpistol>
 			<servicepistol>
 				<name type="string">Service Pistol</name>
@@ -613,6 +617,7 @@
 				<skill type="string">Firearms</skill>
 				<range type="string">20 m</range>
 				<description type="formattedtext"><p>A reliable slug-thrower. Do not fire it at the windows.</p></description>
+				<picture type="string">images/item/servicepistol.webp@Apeira Astra Crew Handbook</picture>
 			</servicepistol>
 			<laserpistol>
 				<name type="string">Laser Pistol</name>
@@ -623,6 +628,7 @@
 				<skill type="string">Firearms</skill>
 				<range type="string">30 m</range>
 				<description type="formattedtext"><p>A focused beam from a palm-sized power pack (20 shots).</p></description>
+				<picture type="string">images/item/laserpistol.webp@Apeira Astra Crew Handbook</picture>
 			</laserpistol>
 			<scattergun>
 				<name type="string">Scattergun</name>
@@ -633,6 +639,7 @@
 				<skill type="string">Firearms</skill>
 				<range type="string">10 m</range>
 				<description type="formattedtext"><p>A short shotgun for close corridors. Past 10 m, halve the damage.</p></description>
+				<picture type="string">images/item/scattergun.webp@Apeira Astra Crew Handbook</picture>
 			</scattergun>
 			<carbine>
 				<name type="string">Carbine</name>
@@ -643,6 +650,7 @@
 				<skill type="string">Firearms</skill>
 				<range type="string">100 m</range>
 				<description type="formattedtext"><p>A short rifle that fits through a hatch.</p></description>
+				<picture type="string">images/item/carbine.webp@Apeira Astra Crew Handbook</picture>
 			</carbine>
 			<rifle>
 				<name type="string">Rifle</name>
@@ -653,6 +661,7 @@
 				<skill type="string">Firearms</skill>
 				<range type="string">300 m</range>
 				<description type="formattedtext"><p>A frontier rifle: long range, heavy recoil, too much gun for a ship.</p></description>
+				<picture type="string">images/item/rifle.webp@Apeira Astra Crew Handbook</picture>
 			</rifle>
 			<laserrifle>
 				<name type="string">Laser Rifle</name>
@@ -663,6 +672,7 @@
 				<skill type="string">Firearms</skill>
 				<range type="string">500 m</range>
 				<description type="formattedtext"><p>Silent, recoilless, and expensive to power.</p></description>
+				<picture type="string">images/item/laserrifle.webp@Apeira Astra Crew Handbook</picture>
 			</laserrifle>
 			<rotarycannon>
 				<name type="string">Rotary Cannon</name>
@@ -673,6 +683,7 @@
 				<skill type="string">Heavy Weapons</skill>
 				<range type="string">400 m</range>
 				<description type="formattedtext"><p>A spinning-barrel heavy gun. Needs a Brawn of 9, or a mount.</p></description>
+				<picture type="string">images/item/rotarycannon.webp@Apeira Astra Crew Handbook</picture>
 			</rotarycannon>
 			<cuttinglaser>
 				<name type="string">Cutting Laser</name>
@@ -683,6 +694,7 @@
 				<skill type="string">Melee</skill>
 				<range type="string">Melee</range>
 				<description type="formattedtext"><p>A hull-cutting tool. As a weapon it is clumsy; through a bulkhead it is a door.</p></description>
+				<picture type="string">images/item/cuttinglaser.webp@Apeira Astra Crew Handbook</picture>
 			</cuttinglaser>
 		</category>
 		<category name="Armour">
@@ -693,6 +705,7 @@
 				<cost type="string">100 cr</cost>
 				<protection type="number">1</protection>
 				<description type="formattedtext"><p>Padded and lined: a little protection, a lot of pockets.</p></description>
+				<picture type="string">images/item/flightjacket.webp@Apeira Astra Crew Handbook</picture>
 			</flightjacket>
 			<meshundersuit>
 				<name type="string">Mesh Undersuit</name>
@@ -701,6 +714,7 @@
 				<cost type="string">500 cr</cost>
 				<protection type="number">3</protection>
 				<description type="formattedtext"><p>Woven ballistic fibre, worn under clothing.</p></description>
+				<picture type="string">images/item/meshundersuit.webp@Apeira Astra Crew Handbook</picture>
 			</meshundersuit>
 			<flakvest>
 				<name type="string">Flak Vest</name>
@@ -709,6 +723,7 @@
 				<cost type="string">400 cr</cost>
 				<protection type="number">5</protection>
 				<description type="formattedtext"><p>Heavy plates front and back. Obvious.</p></description>
+				<picture type="string">images/item/flakvest.webp@Apeira Astra Crew Handbook</picture>
 			</flakvest>
 			<vacsuit>
 				<name type="string">Vac Suit</name>
@@ -717,6 +732,7 @@
 				<cost type="string">1500 cr</cost>
 				<protection type="number">4</protection>
 				<description type="formattedtext"><p>A sealed suit with 6 hours of air. In vacuum without one: 1d6 damage a turn.</p></description>
+				<picture type="string">images/item/vacsuit.webp@Apeira Astra Crew Handbook</picture>
 			</vacsuit>
 			<combatarmour>
 				<name type="string">Combat Armour</name>
@@ -725,6 +741,7 @@
 				<cost type="string">15000 cr</cost>
 				<protection type="number">10</protection>
 				<description type="formattedtext"><p>Military plate with a sealed helmet and 6 hours of air. Not sold to just anyone.</p></description>
+				<picture type="string">images/item/combatarmour.webp@Apeira Astra Crew Handbook</picture>
 			</combatarmour>
 		</category>
 		<category name="Gear">
@@ -734,6 +751,7 @@
 				<subtype type="string">Equipment</subtype>
 				<cost type="string">300 cr</cost>
 				<description type="formattedtext"><p>Dressings, stims and a diagnostic cuff: +2 to Medicine tasks. A Medicine task (Standard) with it restores 1d6 Stamina plus the Effect, once per wound.</p></description>
+				<picture type="string">images/item/medkit.webp@Apeira Astra Crew Handbook</picture>
 			</medkit>
 			<toolkit>
 				<name type="string">Toolkit</name>
@@ -741,6 +759,7 @@
 				<subtype type="string">Equipment</subtype>
 				<cost type="string">400 cr</cost>
 				<description type="formattedtext"><p>Spanners, drivers, a multimeter and a cutting torch: needed for most Mechanics and Engineering tasks.</p></description>
+				<picture type="string">images/item/toolkit.webp@Apeira Astra Crew Handbook</picture>
 			</toolkit>
 			<handscanner>
 				<name type="string">Hand Scanner</name>
@@ -748,6 +767,7 @@
 				<subtype type="string">Equipment</subtype>
 				<cost type="string">900 cr</cost>
 				<description type="formattedtext"><p>Reads radiation, atmosphere, life signs and power within 50 m: +2 to Recon in the dark or behind bulkheads.</p></description>
+				<picture type="string">images/item/handscanner.webp@Apeira Astra Crew Handbook</picture>
 			</handscanner>
 			<commbead>
 				<name type="string">Comm Bead</name>
@@ -755,6 +775,7 @@
 				<subtype type="string">Equipment</subtype>
 				<cost type="string">150 cr</cost>
 				<description type="formattedtext"><p>An earpiece radio with a 10 km range, or ship-to-crew anywhere within a ship.</p></description>
+				<picture type="string">images/item/commbead.webp@Apeira Astra Crew Handbook</picture>
 			</commbead>
 			<dataslate>
 				<name type="string">Data Slate</name>
@@ -762,6 +783,7 @@
 				<subtype type="string">Equipment</subtype>
 				<cost type="string">200 cr</cost>
 				<description type="formattedtext"><p>A tablet for maps, records and hacking tools: needed for Electronics tasks on a system.</p></description>
+				<picture type="string">images/item/dataslate.webp@Apeira Astra Crew Handbook</picture>
 			</dataslate>
 			<breathermask>
 				<name type="string">Breather Mask</name>
@@ -769,6 +791,7 @@
 				<subtype type="string">Equipment</subtype>
 				<cost type="string">100 cr</cost>
 				<description type="formattedtext"><p>Filters a thin or tainted atmosphere for 12 hours.</p></description>
+				<picture type="string">images/item/breathermask.webp@Apeira Astra Crew Handbook</picture>
 			</breathermask>
 			<magboots>
 				<name type="string">Mag Boots</name>
@@ -776,6 +799,7 @@
 				<subtype type="string">Equipment</subtype>
 				<cost type="string">250 cr</cost>
 				<description type="formattedtext"><p>Keep your feet on the deck in zero gravity: no Zero-G task to stand, fight or walk.</p></description>
+				<picture type="string">images/item/magboot.webp@Apeira Astra Crew Handbook</picture>
 			</magboots>
 			<flashlight>
 				<name type="string">Flashlight</name>
@@ -783,6 +807,7 @@
 				<subtype type="string">Equipment</subtype>
 				<cost type="string">20 cr</cost>
 				<description type="formattedtext"><p>A bright beam 30 m long. Dark ships are very dark.</p></description>
+				<picture type="string">images/item/flashlight.webp@Apeira Astra Crew Handbook</picture>
 			</flashlight>
 			<emergencybeacon>
 				<name type="string">Emergency Beacon</name>
@@ -790,6 +815,7 @@
 				<subtype type="string">Equipment</subtype>
 				<cost type="string">300 cr</cost>
 				<description type="formattedtext"><p>Broadcasts a distress call on every band for 30 days.</p></description>
+				<picture type="string">images/item/emergencybeacon.webp@Apeira Astra Crew Handbook</picture>
 			</emergencybeacon>
 			<rationpacks5>
 				<name type="string">Ration Packs (5)</name>
@@ -797,6 +823,7 @@
 				<subtype type="string">Equipment</subtype>
 				<cost type="string">25 cr</cost>
 				<description type="formattedtext"><p>Five days of food that tastes of the packet.</p></description>
+				<picture type="string">images/item/rationpack.webp@Apeira Astra Crew Handbook</picture>
 			</rationpacks5>
 			<grappleline>
 				<name type="string">Grapple Line</name>
@@ -804,6 +831,7 @@
 				<subtype type="string">Equipment</subtype>
 				<cost type="string">80 cr</cost>
 				<description type="formattedtext"><p>50 m of line and a magnetic grapple, rated for zero-g work.</p></description>
+				<picture type="string">images/item/grappleline.webp@Apeira Astra Crew Handbook</picture>
 			</grappleline>
 			<stimpatch>
 				<name type="string">Stim Patch</name>
@@ -811,6 +839,7 @@
 				<subtype type="string">Equipment</subtype>
 				<cost type="string">60 cr</cost>
 				<description type="formattedtext"><p>Shrugs off pain: ignore being Down for 3 turns, then take 1d6 damage. One use.</p></description>
+				<picture type="string">images/item/stimpatch.webp@Apeira Astra Crew Handbook</picture>
 			</stimpatch>
 			<hulltape>
 				<name type="string">Hull Tape</name>
@@ -818,6 +847,7 @@
 				<subtype type="string">Equipment</subtype>
 				<cost type="string">40 cr</cost>
 				<description type="formattedtext"><p>A palm-sized reel of sealing tape. It holds a suit puncture or a hairline hull crack for one hour, or until someone leans on it.</p></description>
+				<picture type="string">images/item/hulltape.webp@Apeira Astra Crew Handbook</picture>
 			</hulltape>
 			<patchfoam>
 				<name type="string">Patch Foam</name>
@@ -825,6 +855,7 @@
 				<subtype type="string">Equipment</subtype>
 				<cost type="string">150 cr</cost>
 				<description type="formattedtext"><p>One use. Sprayed into a vac-suit leak, it sets in one turn and the suit holds. It will not seal a hatch.</p></description>
+				<picture type="string">images/item/patchfoam.webp@Apeira Astra Crew Handbook</picture>
 			</patchfoam>
 			<shoulderlamp>
 				<name type="string">Shoulder Lamp</name>
@@ -832,6 +863,7 @@
 				<subtype type="string">Equipment</subtype>
 				<cost type="string">50 cr</cost>
 				<description type="formattedtext"><p>A lamp on a strap, both hands free. Thirty metres of hard light, and everyone can see who is wearing it.</p></description>
+				<picture type="string">images/item/shoulderlamp.webp@Apeira Astra Crew Handbook</picture>
 			</shoulderlamp>
 			<linegun>
 				<name type="string">Line Gun</name>
@@ -839,6 +871,7 @@
 				<subtype type="string">Equipment</subtype>
 				<cost type="string">350 cr</cost>
 				<description type="formattedtext"><p>Fires a magnetic grapple and 30 m of line. A Zero-G or Athletics task (Standard) to hit a hull, a hatch, or a person.</p></description>
+				<picture type="string">images/item/linegun.webp@Apeira Astra Crew Handbook</picture>
 			</linegun>
 			<shocknet>
 				<name type="string">Shock Net</name>
@@ -846,6 +879,7 @@
 				<subtype type="string">Equipment</subtype>
 				<cost type="string">450 cr</cost>
 				<description type="formattedtext"><p>A folded net. Thrown with Athletics (Standard) out to 10 m: the target makes a Brawn check (Hard) or loses its next turn. Folding it to throw again takes one action.</p></description>
+				<picture type="string">images/item/shocknet.webp@Apeira Astra Crew Handbook</picture>
 			</shocknet>
 			<quietrounds>
 				<name type="string">Quiet Rounds</name>
@@ -853,6 +887,7 @@
 				<subtype type="string">Equipment</subtype>
 				<cost type="string">100 cr</cost>
 				<description type="formattedtext"><p>Ten low-velocity rounds for a snub pistol or a service pistol. They will not hole a hull. Damage dice of that gun are one step smaller (a 3d6 gun does 2d6) while they are loaded.</p></description>
+				<picture type="string">images/item/quietround.webp@Apeira Astra Crew Handbook</picture>
 			</quietrounds>
 			<boardingcharge>
 				<name type="string">Boarding Charge</name>
@@ -860,6 +895,7 @@
 				<subtype type="string">Equipment</subtype>
 				<cost type="string">1200 cr</cost>
 				<description type="formattedtext"><p>A shaped charge for a hatch, not a person. It opens an ordinary interior hatch in one action and is loud in every compartment next door. Anyone in the square beyond the hatch when it goes takes 4d6, armour applies. One use.</p></description>
+				<picture type="string">images/item/boardingcharge.webp@Apeira Astra Crew Handbook</picture>
 			</boardingcharge>
 			<claimbeacon>
 				<name type="string">Claim Beacon</name>
@@ -867,6 +903,7 @@
 				<subtype type="string">Equipment</subtype>
 				<cost type="string">500 cr</cost>
 				<description type="formattedtext"><p>A fist-sized Accord beacon. Set it on a hull and it shouts your filing on the salvage band. Spoofing or silencing one is an Electronics task (Hard).</p></description>
+				<picture type="string">images/item/claimbeacon.webp@Apeira Astra Crew Handbook</picture>
 			</claimbeacon>
 			<registrystylus>
 				<name type="string">Registry Stylus</name>
@@ -874,6 +911,7 @@
 				<subtype type="string">Equipment</subtype>
 				<cost type="string">300 cr</cost>
 				<description type="formattedtext"><p>Files a claim or a rescue to the nearest Accord desk, if any band can hear you. The desk still has to stamp it.</p></description>
+				<picture type="string">images/item/registrystylu.webp@Apeira Astra Crew Handbook</picture>
 			</registrystylus>
 			<surveybuoy>
 				<name type="string">Survey Buoy</name>
@@ -881,6 +919,7 @@
 				<subtype type="string">Equipment</subtype>
 				<cost type="string">700 cr</cost>
 				<description type="formattedtext"><p>Drop it in a belt, a wreck, or a dark corridor. For one day, while the buoy lives, Recon tasks in that place and a ship's sensor sweeps of it (Electronics) have a Boon.</p></description>
+				<picture type="string">images/item/surveybuoy.webp@Apeira Astra Crew Handbook</picture>
 			</surveybuoy>
 			<skeinchart>
 				<name type="string">Skein Chart</name>
@@ -888,6 +927,7 @@
 				<subtype type="string">Equipment</subtype>
 				<cost type="string">600 cr</cost>
 				<description type="formattedtext"><p>A local chart, bought not stolen. One Boon on a single Astrogation task in the sector named on the slip. Then it is ordinary paper.</p></description>
+				<picture type="string">images/item/skeinchart.webp@Apeira Astra Crew Handbook</picture>
 			</skeinchart>
 			<tradeseal>
 				<name type="string">Trade Seal</name>
@@ -895,6 +935,7 @@
 				<subtype type="string">Equipment</subtype>
 				<cost type="string">80 cr</cost>
 				<description type="formattedtext"><p>A tamper-evident seal for a crate. Breaking it is obvious. Forging one is an Electronics or Deceive task (Hard), and the yard keeps a list.</p></description>
+				<picture type="string">images/item/tradeseal.webp@Apeira Astra Crew Handbook</picture>
 			</tradeseal>
 			<coldpack>
 				<name type="string">Cold Pack</name>
@@ -902,6 +943,7 @@
 				<subtype type="string">Equipment</subtype>
 				<cost type="string">40 cr</cost>
 				<description type="formattedtext"><p>One use. Takes the edge off a burn, a radiation flush, or the crash after a stim. The next damage of that kind in the scene is 2 less, to a minimum of 0.</p></description>
+				<picture type="string">images/item/coldpack.webp@Apeira Astra Crew Handbook</picture>
 			</coldpack>
 			<docbox>
 				<name type="string">Doc Box</name>
@@ -909,6 +951,7 @@
 				<subtype type="string">Equipment</subtype>
 				<cost type="string">2200 cr</cost>
 				<description type="formattedtext"><p>A crate-sized automedic. Once a day, a person with no Medicine may attempt one Medicine task with no untrained penalty. A medic using it has a Boon. Refill: 200 credits, at any clinic.</p></description>
+				<picture type="string">images/item/docbox.webp@Apeira Astra Crew Handbook</picture>
 			</docbox>
 			<magclamp>
 				<name type="string">Mag Clamp</name>
@@ -916,6 +959,7 @@
 				<subtype type="string">Equipment</subtype>
 				<cost type="string">200 cr</cost>
 				<description type="formattedtext"><p>A plate and a strap. It holds a crate, a door-wheel, or a willing person to a hull in zero-g. An unwilling person gets a Brawn check (Hard) to twist free.</p></description>
+				<picture type="string">images/item/magclamp.webp@Apeira Astra Crew Handbook</picture>
 			</magclamp>
 		</category>
 	</item>

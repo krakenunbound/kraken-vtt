@@ -1566,6 +1566,7 @@
 				<load type="number">1</load>
 				<text type="string">A knife, a short sword, a cutlass: whatever fits your style.</text>
 				<description type="formattedtext"><p>A knife, a short sword, a cutlass: whatever fits your style.</p><p><i>Load 1.</i></p></description>
+				<picture type="string">images/item/abladeortwo.webp@Forged in the Dark Scoundrel's Handbook</picture>
 			</abladeortwo>
 			<throwingknives>
 				<name type="string">Throwing knives</name>
@@ -1574,6 +1575,7 @@
 				<load type="number">1</load>
 				<text type="string">A bandolier or a wrist sheath of small, balanced blades.</text>
 				<description type="formattedtext"><p>A bandolier or a wrist sheath of small, balanced blades.</p><p><i>Load 1.</i></p></description>
+				<picture type="string">images/item/throwingknive.webp@Forged in the Dark Scoundrel's Handbook</picture>
 			</throwingknives>
 			<apistol>
 				<name type="string">A pistol</name>
@@ -1582,6 +1584,7 @@
 				<load type="number">1</load>
 				<text type="string">A single-shot flintlock: loud, slow to reload, deadly up close.</text>
 				<description type="formattedtext"><p>A single-shot flintlock: loud, slow to reload, deadly up close.</p><p><i>Load 1.</i></p></description>
+				<picture type="string">images/item/apistol.webp@Forged in the Dark Scoundrel's Handbook</picture>
 			</apistol>
 			<asecondpistol>
 				<name type="string">A second pistol</name>
@@ -1590,6 +1593,7 @@
 				<load type="number">1</load>
 				<text type="string">Because the first one is already empty.</text>
 				<description type="formattedtext"><p>Because the first one is already empty.</p><p><i>Load 1.</i></p></description>
+				<picture type="string">images/item/asecondpistol.webp@Forged in the Dark Scoundrel's Handbook</picture>
 			</asecondpistol>
 			<alargeweapon>
 				<name type="string">A large weapon</name>
@@ -1598,6 +1602,7 @@
 				<load type="number">2</load>
 				<text type="string">A musket, a hammer, a two-handed sword, a boarding axe.</text>
 				<description type="formattedtext"><p>A musket, a hammer, a two-handed sword, a boarding axe.</p><p><i>Load 2.</i></p></description>
+				<picture type="string">images/item/alargeweapon.webp@Forged in the Dark Scoundrel's Handbook</picture>
 			</alargeweapon>
 			<anunusualweapon>
 				<name type="string">An unusual weapon</name>
@@ -1606,6 +1611,7 @@
 				<load type="number">1</load>
 				<text type="string">A garrote, a whip, a hook-chain, a sword-cane.</text>
 				<description type="formattedtext"><p>A garrote, a whip, a hook-chain, a sword-cane.</p><p><i>Load 1.</i></p></description>
+				<picture type="string">images/item/anunusualweapon.webp@Forged in the Dark Scoundrel's Handbook</picture>
 			</anunusualweapon>
 			<armor>
 				<name type="string">Armor</name>
@@ -1615,6 +1621,7 @@
 				<armor type="string">armor</armor>
 				<text type="string">A thick coat, a leather jerkin, a mail shirt under the cloak. Mark its box to reduce or avoid a consequence.</text>
 				<description type="formattedtext"><p>A thick coat, a leather jerkin, a mail shirt under the cloak. Mark its box to reduce or avoid a consequence.</p><p><i>Load 2.</i></p></description>
+				<picture type="string">images/item/armor.webp@Forged in the Dark Scoundrel's Handbook</picture>
 			</armor>
 			<heavyarmor>
 				<name type="string">Heavy armor</name>
@@ -1624,6 +1631,7 @@
 				<armor type="string">heavy</armor>
 				<text type="string">Plates and padding over Armor: a second box. You look like you mean trouble.</text>
 				<description type="formattedtext"><p>Plates and padding over Armor: a second box. You look like you mean trouble.</p><p><i>Load 2.</i></p></description>
+				<picture type="string">images/item/heavyarmor.webp@Forged in the Dark Scoundrel's Handbook</picture>
 			</heavyarmor>
 			<burglarygear>
 				<name type="string">Burglary gear</name>
@@ -1632,6 +1640,7 @@
 				<load type="number">1</load>
 				<text type="string">Lock picks, a small pry bar, a dark lantern, a glass cutter.</text>
 				<description type="formattedtext"><p>Lock picks, a small pry bar, a dark lantern, a glass cutter.</p><p><i>Load 1.</i></p></description>
+				<picture type="string">images/item/burglarygear.webp@Forged in the Dark Scoundrel's Handbook</picture>
 			</burglarygear>
 			<climbinggear>
 				<name type="string">Climbing gear</name>
@@ -1640,6 +1649,7 @@
 				<load type="number">2</load>
 				<text type="string">Rope, a grapnel, pitons, a harness.</text>
 				<description type="formattedtext"><p>Rope, a grapnel, pitons, a harness.</p><p><i>Load 2.</i></p></description>
+				<picture type="string">images/item/climbinggear.webp@Forged in the Dark Scoundrel's Handbook</picture>
 			</climbinggear>
 			<arcaneimplements>
 				<name type="string">Arcane implements</name>
@@ -1648,6 +1658,7 @@
 				<load type="number">1</load>
 				<text type="string">Chalk, salt, bells, a bone charm, a vial of something that glows.</text>
 				<description type="formattedtext"><p>Chalk, salt, bells, a bone charm, a vial of something that glows.</p><p><i>Load 1.</i></p></description>
+				<picture type="string">images/item/arcaneimplement.webp@Forged in the Dark Scoundrel's Handbook</picture>
 			</arcaneimplements>
 			<documents>
 				<name type="string">Documents</name>
@@ -1656,6 +1667,7 @@
 				<load type="number">1</load>
 				<text type="string">Forged papers, a map, a letter of introduction, a ledger page.</text>
 				<description type="formattedtext"><p>Forged papers, a map, a letter of introduction, a ledger page.</p><p><i>Load 1.</i></p></description>
+				<picture type="string">images/item/document.webp@Forged in the Dark Scoundrel's Handbook</picture>
 			</documents>
 			<subterfugesupplies>
 				<name type="string">Subterfuge supplies</name>
@@ -1664,6 +1676,7 @@
 				<load type="number">1</load>
 				<text type="string">A disguise, face paint, a uniform, a forged seal.</text>
 				<description type="formattedtext"><p>A disguise, face paint, a uniform, a forged seal.</p><p><i>Load 1.</i></p></description>
+				<picture type="string">images/item/subterfugesupplie.webp@Forged in the Dark Scoundrel's Handbook</picture>
 			</subterfugesupplies>
 			<demolitiontools>
 				<name type="string">Demolition tools</name>
@@ -1672,6 +1685,7 @@
 				<load type="number">2</load>
 				<text type="string">A sledge, a crowbar, a keg of black powder, fuses.</text>
 				<description type="formattedtext"><p>A sledge, a crowbar, a keg of black powder, fuses.</p><p><i>Load 2.</i></p></description>
+				<picture type="string">images/item/demolitiontool.webp@Forged in the Dark Scoundrel's Handbook</picture>
 			</demolitiontools>
 			<tinkeringtools>
 				<name type="string">Tinkering tools</name>
@@ -1680,6 +1694,7 @@
 				<load type="number">1</load>
 				<text type="string">A roll of fine tools, wire, oil, springs, a jeweler's loupe.</text>
 				<description type="formattedtext"><p>A roll of fine tools, wire, oil, springs, a jeweler's loupe.</p><p><i>Load 1.</i></p></description>
+				<picture type="string">images/item/tinkeringtool.webp@Forged in the Dark Scoundrel's Handbook</picture>
 			</tinkeringtools>
 			<lantern>
 				<name type="string">Lantern</name>
@@ -1688,6 +1703,7 @@
 				<load type="number">1</load>
 				<text type="string">A hooded lantern and oil for a long night.</text>
 				<description type="formattedtext"><p>A hooded lantern and oil for a long night.</p><p><i>Load 1.</i></p></description>
+				<picture type="string">images/item/lantern.webp@Forged in the Dark Scoundrel's Handbook</picture>
 			</lantern>
 		</category>
 	</item>

@@ -2818,6 +2818,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>A long knife, the last weapon anyone gives up.</p></description>
+				<picture type="string">images/item/dagger.webp@Descending Darkness Player's Handbook</picture>
 			</dagger>
 			<club>
 				<name type="string">Club</name>
@@ -2830,6 +2831,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>A club. Properties: Light.</p></description>
+				<picture type="string">images/item/club.webp@Descending Darkness Player's Handbook</picture>
 			</club>
 			<cudgel>
 				<name type="string">Cudgel</name>
@@ -2842,6 +2844,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>A heavy length of oak bound in iron at one end.</p></description>
+				<picture type="string">images/item/cudgel.webp@Descending Darkness Player's Handbook</picture>
 			</cudgel>
 			<handaxe>
 				<name type="string">Handaxe</name>
@@ -2854,6 +2857,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>A handaxe. Properties: Light, Thrown (Range 20/60).</p></description>
+				<picture type="string">images/item/handaxe.webp@Descending Darkness Player's Handbook</picture>
 			</handaxe>
 			<mace>
 				<name type="string">Mace</name>
@@ -2866,6 +2870,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>A mace.</p></description>
+				<picture type="string">images/item/mace.webp@Descending Darkness Player's Handbook</picture>
 			</mace>
 			<spear>
 				<name type="string">Spear</name>
@@ -2878,6 +2883,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>A spear. Properties: Thrown (Range 20/60), Versatile (1d8).</p></description>
+				<picture type="string">images/item/spear.webp@Descending Darkness Player's Handbook</picture>
 			</spear>
 			<quarterstaff>
 				<name type="string">Quarterstaff</name>
@@ -2890,6 +2896,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>A quarterstaff. Properties: Versatile (1d8).</p></description>
+				<picture type="string">images/item/quarterstaff.webp@Descending Darkness Player's Handbook</picture>
 			</quarterstaff>
 			<sickle>
 				<name type="string">Sickle</name>
@@ -2902,6 +2909,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>A sickle. Properties: Light.</p></description>
+				<picture type="string">images/item/sickle.webp@Descending Darkness Player's Handbook</picture>
 			</sickle>
 			<sling>
 				<name type="string">Sling</name>
@@ -2914,6 +2922,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>A sling. Properties: Ammunition (Range 30/120).</p></description>
+				<picture type="string">images/item/sling.webp@Descending Darkness Player's Handbook</picture>
 			</sling>
 			<shortbow>
 				<name type="string">Shortbow</name>
@@ -2926,6 +2935,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>A shortbow. Properties: Ammunition (Range 80/320), Two-Handed.</p></description>
+				<picture type="string">images/item/shortbow.webp@Descending Darkness Player's Handbook</picture>
 			</shortbow>
 			<lightcrossbow>
 				<name type="string">Light Crossbow</name>
@@ -2938,6 +2948,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>A light crossbow. Properties: Ammunition (Range 80/320), Loading, Two-Handed.</p></description>
+				<picture type="string">images/item/lightcrossbow.webp@Descending Darkness Player's Handbook</picture>
 			</lightcrossbow>
 			<shortsword>
 				<name type="string">Shortsword</name>
@@ -2950,6 +2961,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>A shortsword. Properties: Finesse, Light.</p></description>
+				<picture type="string">images/item/shortsword.webp@Descending Darkness Player's Handbook</picture>
 			</shortsword>
 			<longsword>
 				<name type="string">Longsword</name>
@@ -2962,6 +2974,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>The knight's blade: long enough to keep death an arm away.</p></description>
+				<picture type="string">images/item/longsword.webp@Descending Darkness Player's Handbook</picture>
 			</longsword>
 			<rapier>
 				<name type="string">Rapier</name>
@@ -2974,6 +2987,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>A rapier. Properties: Finesse.</p></description>
+				<picture type="string">images/item/rapier.webp@Descending Darkness Player's Handbook</picture>
 			</rapier>
 			<battleaxe>
 				<name type="string">Battleaxe</name>
@@ -2986,6 +3000,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>A battleaxe. Properties: Versatile (1d10).</p></description>
+				<picture type="string">images/item/battleaxe.webp@Descending Darkness Player's Handbook</picture>
 			</battleaxe>
 			<warhammer>
 				<name type="string">Warhammer</name>
@@ -2998,6 +3013,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>A warhammer. Properties: Versatile (1d10).</p></description>
+				<picture type="string">images/item/warhammer.webp@Descending Darkness Player's Handbook</picture>
 			</warhammer>
 			<flail>
 				<name type="string">Flail</name>
@@ -3010,6 +3026,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>A flail.</p></description>
+				<picture type="string">images/item/flail.webp@Descending Darkness Player's Handbook</picture>
 			</flail>
 			<morningstar>
 				<name type="string">Morningstar</name>
@@ -3022,6 +3039,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>A morningstar.</p></description>
+				<picture type="string">images/item/morningstar.webp@Descending Darkness Player's Handbook</picture>
 			</morningstar>
 			<greatsword>
 				<name type="string">Greatsword</name>
@@ -3034,6 +3052,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>A greatsword. Properties: Heavy, Two-Handed.</p></description>
+				<picture type="string">images/item/greatsword.webp@Descending Darkness Player's Handbook</picture>
 			</greatsword>
 			<greataxe>
 				<name type="string">Greataxe</name>
@@ -3046,6 +3065,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>A greataxe. Properties: Heavy, Two-Handed.</p></description>
+				<picture type="string">images/item/greataxe.webp@Descending Darkness Player's Handbook</picture>
 			</greataxe>
 			<halberd>
 				<name type="string">Halberd</name>
@@ -3058,6 +3078,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>A halberd. Properties: Heavy, Reach, Two-Handed.</p></description>
+				<picture type="string">images/item/halberd.webp@Descending Darkness Player's Handbook</picture>
 			</halberd>
 			<longbow>
 				<name type="string">Longbow</name>
@@ -3070,6 +3091,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>A longbow. Properties: Ammunition (Range 150/600), Heavy, Two-Handed.</p></description>
+				<picture type="string">images/item/longbow.webp@Descending Darkness Player's Handbook</picture>
 			</longbow>
 			<handcrossbow>
 				<name type="string">Hand Crossbow</name>
@@ -3082,6 +3104,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>A hand crossbow. Properties: Ammunition (Range 30/120), Light, Loading.</p></description>
+				<picture type="string">images/item/handcrossbow.webp@Descending Darkness Player's Handbook</picture>
 			</handcrossbow>
 			<heavycrossbow>
 				<name type="string">Heavy Crossbow</name>
@@ -3094,6 +3117,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>A heavy crossbow. Properties: Ammunition (Range 100/400), Heavy, Loading, Two-Handed.</p></description>
+				<picture type="string">images/item/heavycrossbow.webp@Descending Darkness Player's Handbook</picture>
 			</heavycrossbow>
 		</category>
 		<category name="Armour">
@@ -3109,6 +3133,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>Layers of stitched cloth. Better than nothing, and warm.</p></description>
+				<picture type="string">images/item/quiltedcoat.webp@Descending Darkness Player's Handbook</picture>
 			</quiltedcoat>
 			<leatherjerkin>
 				<name type="string">Leather Jerkin</name>
@@ -3122,6 +3147,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>Boiled and oiled leather over the chest and shoulders.</p></description>
+				<picture type="string">images/item/leatherjerkin.webp@Descending Darkness Player's Handbook</picture>
 			</leatherjerkin>
 			<ringedleather>
 				<name type="string">Ringed Leather</name>
@@ -3135,6 +3161,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>Leather sewn with iron rings, quiet enough for thieves.</p></description>
+				<picture type="string">images/item/ringedleather.webp@Descending Darkness Player's Handbook</picture>
 			</ringedleather>
 			<hidecoat>
 				<name type="string">Hide Coat</name>
@@ -3148,6 +3175,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>Thick furs and hides, the hunter's armour.</p></description>
+				<picture type="string">images/item/hidecoat.webp@Descending Darkness Player's Handbook</picture>
 			</hidecoat>
 			<mailshirt>
 				<name type="string">Mail Shirt</name>
@@ -3161,6 +3189,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>A shirt of interlocking rings under a tunic.</p></description>
+				<picture type="string">images/item/mailshirt.webp@Descending Darkness Player's Handbook</picture>
 			</mailshirt>
 			<scalehauberk>
 				<name type="string">Scale Hauberk</name>
@@ -3174,6 +3203,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>Overlapping plates of steel on a leather coat.</p></description>
+				<picture type="string">images/item/scalehauberk.webp@Descending Darkness Player's Handbook</picture>
 			</scalehauberk>
 			<cuirass>
 				<name type="string">Cuirass</name>
@@ -3187,6 +3217,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>A fitted steel breast and back.</p></description>
+				<picture type="string">images/item/cuirass.webp@Descending Darkness Player's Handbook</picture>
 			</cuirass>
 			<ringmail>
 				<name type="string">Ring Mail</name>
@@ -3200,6 +3231,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>Heavy leather with iron rings sewn close.</p></description>
+				<picture type="string">images/item/ringmail.webp@Descending Darkness Player's Handbook</picture>
 			</ringmail>
 			<chainhauberk>
 				<name type="string">Chain Hauberk</name>
@@ -3213,6 +3245,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>Mail from neck to knee over a padded coat. Strength 13.</p></description>
+				<picture type="string">images/item/chainhauberk.webp@Descending Darkness Player's Handbook</picture>
 			</chainhauberk>
 			<plateharness>
 				<name type="string">Plate Harness</name>
@@ -3226,6 +3259,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>Shaped steel plates over every part of the body. Strength 15.</p></description>
+				<picture type="string">images/item/plateharness.webp@Descending Darkness Player's Handbook</picture>
 			</plateharness>
 			<shield>
 				<name type="string">Shield</name>
@@ -3239,6 +3273,7 @@
 				<bonus type="number">0</bonus>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>Wood or metal on the arm: +2 Defense.</p></description>
+				<picture type="string">images/item/shield.webp@Descending Darkness Player's Handbook</picture>
 			</shield>
 		</category>
 		<category name="Gear">
@@ -3250,6 +3285,7 @@
 				<weight type="number">1</weight>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>A torch burns for <b>six exploration turns</b> (an hour). It sheds bright light 20 feet and dim light 20 feet beyond. Lit, it shows everyone where you are.</p></description>
+				<picture type="string">images/item/torch.webp@Descending Darkness Player's Handbook</picture>
 			</torch>
 			<lanternhooded>
 				<name type="string">Lantern, Hooded</name>
@@ -3259,6 +3295,7 @@
 				<weight type="number">2</weight>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>Burns a flask of oil for <b>24 turns</b> (four hours): bright light 30 feet, dim 30 beyond. Hooded, it gives only dim light 5 feet.</p></description>
+				<picture type="string">images/item/hoodedlantern.webp@Descending Darkness Player's Handbook</picture>
 			</lanternhooded>
 			<lanternbullseye>
 				<name type="string">Lantern, Bullseye</name>
@@ -3268,6 +3305,7 @@
 				<weight type="number">2</weight>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>Burns a flask of oil for 24 turns: a 60-foot cone of bright light and 60 feet of dim beyond. The cone must point somewhere.</p></description>
+				<picture type="string">images/item/bullseyelantern.webp@Descending Darkness Player's Handbook</picture>
 			</lanternbullseye>
 			<oilflask>
 				<name type="string">Oil, Flask</name>
@@ -3277,6 +3315,7 @@
 				<weight type="number">1</weight>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>Fuel for a lantern (24 turns). Thrown and set alight, it burns a creature for 1d4 fire a turn for two turns.</p></description>
+				<picture type="string">images/item/flaskoil.webp@Descending Darkness Player's Handbook</picture>
 			</oilflask>
 			<candle>
 				<name type="string">Candle</name>
@@ -3286,6 +3325,7 @@
 				<weight type="number">0</weight>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>Burns for six turns: dim light 5 feet. Enough to read by, not enough to fight by.</p></description>
+				<picture type="string">images/item/candle.webp@Descending Darkness Player's Handbook</picture>
 			</candle>
 			<tinderbox>
 				<name type="string">Tinderbox</name>
@@ -3295,6 +3335,7 @@
 				<weight type="number">1</weight>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>Flint, steel and tinder. Lighting a torch takes an action; in the wind or wet, a Dexterity check (DC 12).</p></description>
+				<picture type="string">images/item/tinderbox.webp@Descending Darkness Player's Handbook</picture>
 			</tinderbox>
 			<ropehempen50feet>
 				<name type="string">Rope, Hempen (50 feet)</name>
@@ -3304,6 +3345,7 @@
 				<weight type="number">10</weight>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>Strong enough for two climbers. A Strength check (DC 18) breaks it.</p></description>
+				<picture type="string">images/item/hempenrope.webp@Descending Darkness Player's Handbook</picture>
 			</ropehempen50feet>
 			<grapplinghook>
 				<name type="string">Grappling Hook</name>
@@ -3313,6 +3355,7 @@
 				<weight type="number">4</weight>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>An iron hook for a rope's end.</p></description>
+				<picture type="string">images/item/grapplinghook.webp@Descending Darkness Player's Handbook</picture>
 			</grapplinghook>
 			<crowbar>
 				<name type="string">Crowbar</name>
@@ -3322,6 +3365,7 @@
 				<weight type="number">5</weight>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>Advantage on Strength checks where leverage helps: a jammed door, a coffin lid.</p></description>
+				<picture type="string">images/item/crowbar.webp@Descending Darkness Player's Handbook</picture>
 			</crowbar>
 			<ironspikes10>
 				<name type="string">Iron Spikes (10)</name>
@@ -3331,6 +3375,7 @@
 				<weight type="number">5</weight>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>For wedging doors shut, or open.</p></description>
+				<picture type="string">images/item/ironspike.webp@Descending Darkness Player's Handbook</picture>
 			</ironspikes10>
 			<chalk5sticks>
 				<name type="string">Chalk (5 sticks)</name>
@@ -3340,6 +3385,7 @@
 				<weight type="number">0</weight>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>For marking the way back. Every dungeon has someone who forgot to.</p></description>
+				<picture type="string">images/item/chalk.webp@Descending Darkness Player's Handbook</picture>
 			</chalk5sticks>
 			<pole10feet>
 				<name type="string">Pole (10 feet)</name>
@@ -3349,6 +3395,7 @@
 				<weight type="number">7</weight>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>For prodding what you would rather not step on.</p></description>
+				<picture type="string">images/item/pole.webp@Descending Darkness Player's Handbook</picture>
 			</pole10feet>
 			<caltropsbagof20>
 				<name type="string">Caltrops (bag of 20)</name>
@@ -3358,6 +3405,7 @@
 				<weight type="number">2</weight>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>Scattered over a 5-foot square: whoever enters stops and makes a Dexterity save (DC 15) or takes 1 piercing damage and moves at half speed until healed.</p></description>
+				<picture type="string">images/item/caltrop.webp@Descending Darkness Player's Handbook</picture>
 			</caltropsbagof20>
 			<bedroll>
 				<name type="string">Bedroll</name>
@@ -3367,6 +3415,7 @@
 				<weight type="number">7</weight>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>A safe rest needs one (or a bed).</p></description>
+				<picture type="string">images/item/bedroll.webp@Descending Darkness Player's Handbook</picture>
 			</bedroll>
 			<rations1day>
 				<name type="string">Rations (1 day)</name>
@@ -3376,6 +3425,7 @@
 				<weight type="number">2</weight>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>Dried meat, hard bread, an onion. A safe rest needs food and water.</p></description>
+				<picture type="string">images/item/ration.webp@Descending Darkness Player's Handbook</picture>
 			</rations1day>
 			<waterskin>
 				<name type="string">Waterskin</name>
@@ -3385,6 +3435,7 @@
 				<weight type="number">5</weight>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>Holds a day's water.</p></description>
+				<picture type="string">images/item/waterskin.webp@Descending Darkness Player's Handbook</picture>
 			</waterskin>
 			<backpack>
 				<name type="string">Backpack</name>
@@ -3394,6 +3445,7 @@
 				<weight type="number">5</weight>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>Holds 30 pounds of gear.</p></description>
+				<picture type="string">images/item/backpack.webp@Descending Darkness Player's Handbook</picture>
 			</backpack>
 			<healerssatchel>
 				<name type="string">Healer's Satchel</name>
@@ -3403,6 +3455,7 @@
 				<weight type="number">3</weight>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>Bandages, salves and splints for ten uses. An action and a use steadies a dying creature without a check, or lets a creature spend one Recovery Die outside a rest.</p></description>
+				<picture type="string">images/item/healerssatchel.webp@Descending Darkness Player's Handbook</picture>
 			</healerssatchel>
 			<holysymbol>
 				<name type="string">Holy Symbol</name>
@@ -3412,6 +3465,7 @@
 				<weight type="number">1</weight>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>A cleric's or paladin's focus: an amulet, a reliquary, a sigil painted on a shield.</p></description>
+				<picture type="string">images/item/holysymbol.webp@Descending Darkness Player's Handbook</picture>
 			</holysymbol>
 			<arcanefocus>
 				<name type="string">Arcane Focus</name>
@@ -3421,6 +3475,7 @@
 				<weight type="number">1</weight>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>A wizard's or bard's focus: a wand, a crystal, a worn instrument.</p></description>
+				<picture type="string">images/item/arcanefocu.webp@Descending Darkness Player's Handbook</picture>
 			</arcanefocus>
 			<spellbook>
 				<name type="string">Spellbook</name>
@@ -3430,6 +3485,7 @@
 				<weight type="number">3</weight>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>A wizard's book of spells: 100 vellum pages, a lock, and the smell of old candle smoke.</p></description>
+				<picture type="string">images/item/spellbook.webp@Descending Darkness Player's Handbook</picture>
 			</spellbook>
 			<thievestools>
 				<name type="string">Thieves' Tools</name>
@@ -3439,6 +3495,7 @@
 				<weight type="number">1</weight>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>Picks, a small file, a mirror on a stick and a pair of narrow pliers. Needed to pick locks and disarm traps.</p></description>
+				<picture type="string">images/item/thievestool.webp@Descending Darkness Player's Handbook</picture>
 			</thievestools>
 			<mirrorsteel>
 				<name type="string">Mirror, Steel</name>
@@ -3448,6 +3505,7 @@
 				<weight type="number">0.5</weight>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>For looking round corners, and at what you should not look at directly.</p></description>
+				<picture type="string">images/item/steelmirror.webp@Descending Darkness Player's Handbook</picture>
 			</mirrorsteel>
 			<manacles>
 				<name type="string">Manacles</name>
@@ -3457,6 +3515,7 @@
 				<weight type="number">6</weight>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>Iron cuffs. Escaping them: Dexterity (DC 18); breaking them: Strength (DC 20).</p></description>
+				<picture type="string">images/item/manacle.webp@Descending Darkness Player's Handbook</picture>
 			</manacles>
 			<shovel>
 				<name type="string">Shovel</name>
@@ -3466,6 +3525,7 @@
 				<weight type="number">5</weight>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>For graves, latrines, and digging out what the earth took back.</p></description>
+				<picture type="string">images/item/shovel.webp@Descending Darkness Player's Handbook</picture>
 			</shovel>
 			<huntingtrap>
 				<name type="string">Hunting Trap</name>
@@ -3475,6 +3535,7 @@
 				<weight type="number">25</weight>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>Iron jaws on a chain. A creature that steps in makes a Dexterity save (DC 13) or takes 1d4 piercing damage and is held until it or someone else breaks free (Strength, DC 13).</p></description>
+				<picture type="string">images/item/huntingtrap.webp@Descending Darkness Player's Handbook</picture>
 			</huntingtrap>
 			<inkandquill>
 				<name type="string">Ink and Quill</name>
@@ -3484,6 +3545,7 @@
 				<weight type="number">0</weight>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>A small bottle of ink and a quill: enough for a map, a letter, or a copied page.</p></description>
+				<picture type="string">images/item/inkandquill.webp@Descending Darkness Player's Handbook</picture>
 			</inkandquill>
 			<luckycharm>
 				<name type="string">Lucky Charm</name>
@@ -3493,6 +3555,7 @@
 				<weight type="number">0</weight>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>A rabbit's foot, a saint's bone, a coin with a hole in it. Once per safe rest, when you gain Dread, you may ignore one point of it.</p></description>
+				<picture type="string">images/item/luckycharm.webp@Descending Darkness Player's Handbook</picture>
 			</luckycharm>
 			<arrows20>
 				<name type="string">Arrows (20)</name>
@@ -3502,6 +3565,7 @@
 				<weight type="number">1</weight>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>Ammunition for bows.</p></description>
+				<picture type="string">images/item/arrow.webp@Descending Darkness Player's Handbook</picture>
 			</arrows20>
 			<bolts20>
 				<name type="string">Bolts (20)</name>
@@ -3511,6 +3575,7 @@
 				<weight type="number">1.5</weight>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>Ammunition for crossbows.</p></description>
+				<picture type="string">images/item/bolt.webp@Descending Darkness Player's Handbook</picture>
 			</bolts20>
 			<slingbullets20>
 				<name type="string">Sling Bullets (20)</name>
@@ -3520,6 +3585,7 @@
 				<weight type="number">1.5</weight>
 				<rarity type="string">common</rarity>
 				<description type="formattedtext"><p>Ammunition for slings.</p></description>
+				<picture type="string">images/item/slingbullet.webp@Descending Darkness Player's Handbook</picture>
 			</slingbullets20>
 		</category>
 	</item>

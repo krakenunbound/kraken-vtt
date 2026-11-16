@@ -4423,6 +4423,7 @@
 				<type type="string">Armor</type>
 				<cost type="string">10 gp</cost>
 				<description type="formattedtext"><p>Shield (+1 Armor)</p><p><i>+1 Armor</i></p></description>
+				<picture type="string">images/item/shield.webp@Cairn Player's Guide</picture>
 			</shield>
 			<helmet>
 				<name type="string">Helmet</name>
@@ -4431,6 +4432,7 @@
 				<type type="string">Armor</type>
 				<cost type="string">10 gp</cost>
 				<description type="formattedtext"><p>Helmet (+1 Armor)</p><p><i>+1 Armor</i></p></description>
+				<picture type="string">images/item/helmet.webp@Cairn Player's Guide</picture>
 			</helmet>
 			<gambeson>
 				<name type="string">Gambeson</name>
@@ -4439,6 +4441,7 @@
 				<type type="string">Armor</type>
 				<cost type="string">15 gp</cost>
 				<description type="formattedtext"><p>Gambeson (+1 Armor)</p><p><i>+1 Armor</i></p></description>
+				<picture type="string">images/item/gambeson.webp@Cairn Player's Guide</picture>
 			</gambeson>
 			<brigandine>
 				<name type="string">Brigandine</name>
@@ -4447,6 +4450,7 @@
 				<type type="string">Armor</type>
 				<cost type="string">20 gp</cost>
 				<description type="formattedtext"><p>Brigandine (1 Armor, bulky)</p><p><i>1 Armor, bulky</i></p></description>
+				<picture type="string">images/item/brigandine.webp@Cairn Player's Guide</picture>
 			</brigandine>
 			<chainmail>
 				<name type="string">Chainmail</name>
@@ -4455,6 +4459,7 @@
 				<type type="string">Armor</type>
 				<cost type="string">40 gp</cost>
 				<description type="formattedtext"><p>Chainmail (2 Armor, bulky)</p><p><i>2 Armor, bulky</i></p></description>
+				<picture type="string">images/item/chainmail.webp@Cairn Player's Guide</picture>
 			</chainmail>
 			<plate>
 				<name type="string">Plate</name>
@@ -4463,6 +4468,7 @@
 				<type type="string">Armor</type>
 				<cost type="string">60 gp</cost>
 				<description type="formattedtext"><p>Plate (3 Armor, bulky)</p><p><i>3 Armor, bulky</i></p></description>
+				<picture type="string">images/item/plate.webp@Cairn Player's Guide</picture>
 			</plate>
 		</category>
 		<category name="Weapons">
@@ -4472,6 +4478,7 @@
 				<type type="string">Weapon</type>
 				<cost type="string">5 gp</cost>
 				<description type="formattedtext"><p>Dagger: d6 damage.</p><p><i>d6 damage</i></p></description>
+				<picture type="string">images/item/dagger.webp@Cairn Player's Guide</picture>
 			</dagger>
 			<cudgel>
 				<name type="string">Cudgel</name>
@@ -4479,6 +4486,7 @@
 				<type type="string">Weapon</type>
 				<cost type="string">5 gp</cost>
 				<description type="formattedtext"><p>Cudgel: d6 damage.</p><p><i>d6 damage</i></p></description>
+				<picture type="string">images/item/cudgel.webp@Cairn Player's Guide</picture>
 			</cudgel>
 			<sickle>
 				<name type="string">Sickle</name>
@@ -4486,6 +4494,7 @@
 				<type type="string">Weapon</type>
 				<cost type="string">5 gp</cost>
 				<description type="formattedtext"><p>Sickle: d6 damage.</p><p><i>d6 damage</i></p></description>
+				<picture type="string">images/item/sickle.webp@Cairn Player's Guide</picture>
 			</sickle>
 			<staff>
 				<name type="string">Staff</name>
@@ -4493,6 +4502,7 @@
 				<type type="string">Weapon</type>
 				<cost type="string">5 gp</cost>
 				<description type="formattedtext"><p>Staff: d6 damage.</p><p><i>d6 damage</i></p></description>
+				<picture type="string">images/item/staff.webp@Cairn Player's Guide</picture>
 			</staff>
 			<spear>
 				<name type="string">Spear</name>
@@ -4500,6 +4510,7 @@
 				<type type="string">Weapon</type>
 				<cost type="string">10 gp</cost>
 				<description type="formattedtext"><p>Spear: d8 damage.</p><p><i>d8 damage</i></p></description>
+				<picture type="string">images/item/spear.webp@Cairn Player's Guide</picture>
 			</spear>
 			<sword>
 				<name type="string">Sword</name>
@@ -4507,6 +4518,7 @@
 				<type type="string">Weapon</type>
 				<cost type="string">10 gp</cost>
 				<description type="formattedtext"><p>Sword: d8 damage.</p><p><i>d8 damage</i></p></description>
+				<picture type="string">images/item/sword.webp@Cairn Player's Guide</picture>
 			</sword>
 			<mace>
 				<name type="string">Mace</name>
@@ -4514,6 +4526,7 @@
 				<type type="string">Weapon</type>
 				<cost type="string">10 gp</cost>
 				<description type="formattedtext"><p>Mace: d8 damage.</p><p><i>d8 damage</i></p></description>
+				<picture type="string">images/item/mace.webp@Cairn Player's Guide</picture>
 			</mace>
 			<axe>
 				<name type="string">Axe</name>
@@ -4521,6 +4534,7 @@
 				<type type="string">Weapon</type>
 				<cost type="string">10 gp</cost>
 				<description type="formattedtext"><p>Axe: d8 damage.</p><p><i>d8 damage</i></p></description>
+				<picture type="string">images/item/axe.webp@Cairn Player's Guide</picture>
 			</axe>
 			<flail>
 				<name type="string">Flail</name>
@@ -4528,6 +4542,7 @@
 				<type type="string">Weapon</type>
 				<cost type="string">10 gp</cost>
 				<description type="formattedtext"><p>Flail: d8 damage.</p><p><i>d8 damage</i></p></description>
+				<picture type="string">images/item/flail.webp@Cairn Player's Guide</picture>
 			</flail>
 			<halberd>
 				<name type="string">Halberd</name>
@@ -4536,6 +4551,7 @@
 				<type type="string">Weapon</type>
 				<cost type="string">20 gp</cost>
 				<description type="formattedtext"><p>Halberd: d10 damage, bulky.</p><p><i>d10 damage, bulky</i></p></description>
+				<picture type="string">images/item/halberd.webp@Cairn Player's Guide</picture>
 			</halberd>
 			<warhammer>
 				<name type="string">War Hammer</name>
@@ -4544,6 +4560,7 @@
 				<type type="string">Weapon</type>
 				<cost type="string">20 gp</cost>
 				<description type="formattedtext"><p>War Hammer: d10 damage, bulky.</p><p><i>d10 damage, bulky</i></p></description>
+				<picture type="string">images/item/warhammer.webp@Cairn Player's Guide</picture>
 			</warhammer>
 			<longsword>
 				<name type="string">Long Sword</name>
@@ -4552,6 +4569,7 @@
 				<type type="string">Weapon</type>
 				<cost type="string">20 gp</cost>
 				<description type="formattedtext"><p>Long Sword: d10 damage, bulky.</p><p><i>d10 damage, bulky</i></p></description>
+				<picture type="string">images/item/longsword.webp@Cairn Player's Guide</picture>
 			</longsword>
 			<sling>
 				<name type="string">Sling</name>
@@ -4559,6 +4577,7 @@
 				<type type="string">Weapon</type>
 				<cost type="string">5 gp</cost>
 				<description type="formattedtext"><p>Sling: d6 damage.</p><p><i>d6 damage</i></p></description>
+				<picture type="string">images/item/sling.webp@Cairn Player's Guide</picture>
 			</sling>
 			<bow>
 				<name type="string">Bow</name>
@@ -4567,6 +4586,7 @@
 				<type type="string">Weapon</type>
 				<cost type="string">20 gp</cost>
 				<description type="formattedtext"><p>Bow: d6 damage, bulky.</p><p><i>d6 damage, bulky</i></p></description>
+				<picture type="string">images/item/bow.webp@Cairn Player's Guide</picture>
 			</bow>
 			<crossbow>
 				<name type="string">Crossbow</name>
@@ -4575,6 +4595,7 @@
 				<type type="string">Weapon</type>
 				<cost type="string">30 gp</cost>
 				<description type="formattedtext"><p>Crossbow: d8 damage, bulky.</p><p><i>d8 damage, bulky</i></p></description>
+				<picture type="string">images/item/crossbow.webp@Cairn Player's Guide</picture>
 			</crossbow>
 		</category>
 		<category name="Transport">
@@ -4585,6 +4606,7 @@
 				<type type="string">Transport</type>
 				<cost type="string">30 gp</cost>
 				<description type="formattedtext"><p>Cart (+4 slots, bulky)</p><p><i>bulky</i></p></description>
+				<picture type="string">images/item/cart.webp@Cairn Player's Guide</picture>
 			</cart>
 			<wagon>
 				<name type="string">Wagon</name>
@@ -4593,6 +4615,7 @@
 				<type type="string">Transport</type>
 				<cost type="string">200 gp</cost>
 				<description type="formattedtext"><p>Wagon (+8 slots, slow)</p></description>
+				<picture type="string">images/item/wagon.webp@Cairn Player's Guide</picture>
 			</wagon>
 			<horse>
 				<name type="string">Horse</name>
@@ -4600,6 +4623,7 @@
 				<type type="string">Transport</type>
 				<cost type="string">75 gp</cost>
 				<description type="formattedtext"><p>Horse (+4 slots)</p></description>
+				<picture type="string">images/item/horse.webp@Cairn Player's Guide</picture>
 			</horse>
 			<mule>
 				<name type="string">Mule</name>
@@ -4608,18 +4632,21 @@
 				<type type="string">Transport</type>
 				<cost type="string">30 gp</cost>
 				<description type="formattedtext"><p>Mule (+6 slots, slow)</p></description>
+				<picture type="string">images/item/mule.webp@Cairn Player's Guide</picture>
 			</mule>
 			<carriageseat>
 				<name type="string">Carriage Seat</name>
 				<type type="string">Transport</type>
 				<cost type="string">5 gp</cost>
 				<description type="formattedtext"><p>Carriage Seat</p></description>
+				<picture type="string">images/item/carriageseat.webp@Cairn Player's Guide</picture>
 			</carriageseat>
 			<shipspassage>
 				<name type="string">Ship's Passage</name>
 				<type type="string">Transport</type>
 				<cost type="string">10 gp</cost>
 				<description type="formattedtext"><p>Ship's Passage</p></description>
+				<picture type="string">images/item/shipspassage.webp@Cairn Player's Guide</picture>
 			</shipspassage>
 		</category>
 		<category name="Upkeep and Recovery">
@@ -4629,6 +4656,7 @@
 				<type type="string">Service</type>
 				<cost type="string">10 gp</cost>
 				<description type="formattedtext"><p>Room &amp; Board (per night)</p></description>
+				<picture type="string">images/item/roomboard.webp@Cairn Player's Guide</picture>
 			</roomboard>
 			<privateroomboard>
 				<name type="string">Private Room &amp; Board</name>
@@ -4636,12 +4664,14 @@
 				<type type="string">Service</type>
 				<cost type="string">35 gp</cost>
 				<description type="formattedtext"><p>Private Room &amp; Board (fits 4)</p></description>
+				<picture type="string">images/item/privateroomboard.webp@Cairn Player's Guide</picture>
 			</privateroomboard>
 			<medicalhealing>
 				<name type="string">Medical Healing</name>
 				<type type="string">Service</type>
 				<cost type="string">50 gp</cost>
 				<description type="formattedtext"><p>Medical Healing</p></description>
+				<picture type="string">images/item/medicalhealing.webp@Cairn Player's Guide</picture>
 			</medicalhealing>
 		</category>
 		<category name="Gear">
@@ -4651,6 +4681,7 @@
 				<type type="string">Gear</type>
 				<cost type="string">5 gp</cost>
 				<description type="formattedtext"><p>Stable &amp; Feed (per night)</p></description>
+				<picture type="string">images/item/stablefeed.webp@Cairn Player's Guide</picture>
 			</stablefeed>
 			<rations>
 				<name type="string">Rations</name>
@@ -4658,6 +4689,7 @@
 				<type type="string">Gear</type>
 				<cost type="string">10 gp</cost>
 				<description type="formattedtext"><p>Rations (3 uses)</p><p><i>3 uses</i></p></description>
+				<picture type="string">images/item/ration.webp@Cairn Player's Guide</picture>
 			</rations>
 			<animalfeed>
 				<name type="string">Animal Feed</name>
@@ -4666,18 +4698,21 @@
 				<type type="string">Gear</type>
 				<cost type="string">5 gp</cost>
 				<description type="formattedtext"><p>Animal Feed (3 uses, bulky)</p><p><i>bulky, 3 uses</i></p></description>
+				<picture type="string">images/item/animalfeed.webp@Cairn Player's Guide</picture>
 			</animalfeed>
 			<airbladder>
 				<name type="string">Air Bladder</name>
 				<type type="string">Gear</type>
 				<cost type="string">5 gp</cost>
 				<description type="formattedtext"><p>Air Bladder</p></description>
+				<picture type="string">images/item/airbladder.webp@Cairn Player's Guide</picture>
 			</airbladder>
 			<antitoxin>
 				<name type="string">Antitoxin</name>
 				<type type="string">Gear</type>
 				<cost type="string">20 gp</cost>
 				<description type="formattedtext"><p>Antitoxin</p></description>
+				<picture type="string">images/item/antitoxin.webp@Cairn Player's Guide</picture>
 			</antitoxin>
 			<bandages>
 				<name type="string">Bandages</name>
@@ -4685,6 +4720,7 @@
 				<type type="string">Gear</type>
 				<cost type="string">30 gp</cost>
 				<description type="formattedtext"><p>Bandages (3 uses)</p><p><i>3 uses</i></p></description>
+				<picture type="string">images/item/bandage.webp@Cairn Player's Guide</picture>
 			</bandages>
 			<bathinggoods>
 				<name type="string">Bathing Goods</name>
@@ -4692,24 +4728,28 @@
 				<type type="string">Gear</type>
 				<cost type="string">5 gp</cost>
 				<description type="formattedtext"><p>Bathing Goods (Soap, Perfume, etc.)</p></description>
+				<picture type="string">images/item/bathinggood.webp@Cairn Player's Guide</picture>
 			</bathinggoods>
 			<book>
 				<name type="string">Book</name>
 				<type type="string">Gear</type>
 				<cost type="string">50 gp</cost>
 				<description type="formattedtext"><p>Book</p></description>
+				<picture type="string">images/item/book.webp@Cairn Player's Guide</picture>
 			</book>
 			<caltrops>
 				<name type="string">Caltrops</name>
 				<type type="string">Gear</type>
 				<cost type="string">10 gp</cost>
 				<description type="formattedtext"><p>Caltrops</p></description>
+				<picture type="string">images/item/caltrop.webp@Cairn Player's Guide</picture>
 			</caltrops>
 			<carddeck>
 				<name type="string">Card Deck</name>
 				<type type="string">Gear</type>
 				<cost type="string">5 gp</cost>
 				<description type="formattedtext"><p>Card Deck</p></description>
+				<picture type="string">images/item/carddeck.webp@Cairn Player's Guide</picture>
 			</carddeck>
 			<chain>
 				<name type="string">Chain</name>
@@ -4717,6 +4757,7 @@
 				<type type="string">Gear</type>
 				<cost type="string">10 gp</cost>
 				<description type="formattedtext"><p>Chain (10ft)</p></description>
+				<picture type="string">images/item/chain.webp@Cairn Player's Guide</picture>
 			</chain>
 			<chalk>
 				<name type="string">Chalk</name>
@@ -4724,18 +4765,21 @@
 				<type type="string">Gear</type>
 				<cost type="string">1 gp</cost>
 				<description type="formattedtext"><p>Chalk (petty)</p><p><i>petty</i></p></description>
+				<picture type="string">images/item/chalk.webp@Cairn Player's Guide</picture>
 			</chalk>
 			<chest>
 				<name type="string">Chest</name>
 				<type type="string">Gear</type>
 				<cost type="string">25 gp</cost>
 				<description type="formattedtext"><p>Chest</p></description>
+				<picture type="string">images/item/chest.webp@Cairn Player's Guide</picture>
 			</chest>
 			<chisel>
 				<name type="string">Chisel</name>
 				<type type="string">Gear</type>
 				<cost type="string">5 gp</cost>
 				<description type="formattedtext"><p>Chisel</p></description>
+				<picture type="string">images/item/chisel.webp@Cairn Player's Guide</picture>
 			</chisel>
 			<commonagents>
 				<name type="string">Common Agents</name>
@@ -4743,6 +4787,7 @@
 				<type type="string">Gear</type>
 				<cost type="string">10 gp</cost>
 				<description type="formattedtext"><p>Common Agents (Glue, Grease, etc.)</p></description>
+				<picture type="string">images/item/commonagent.webp@Cairn Player's Guide</picture>
 			</commonagents>
 			<commontools>
 				<name type="string">Common Tools</name>
@@ -4750,12 +4795,14 @@
 				<type type="string">Gear</type>
 				<cost type="string">10 gp</cost>
 				<description type="formattedtext"><p>Common Tools (Hammer, Shovel, etc.)</p></description>
+				<picture type="string">images/item/commontool.webp@Cairn Player's Guide</picture>
 			</commontools>
 			<compass>
 				<name type="string">Compass</name>
 				<type type="string">Gear</type>
 				<cost type="string">75 gp</cost>
 				<description type="formattedtext"><p>Compass</p></description>
+				<picture type="string">images/item/compass.webp@Cairn Player's Guide</picture>
 			</compass>
 			<complexinstruments>
 				<name type="string">Complex Instruments</name>
@@ -4763,6 +4810,7 @@
 				<type type="string">Gear</type>
 				<cost type="string">50 gp</cost>
 				<description type="formattedtext"><p>Complex Instruments (Bagpipes, Fiddle, etc.)</p></description>
+				<picture type="string">images/item/complexinstrument.webp@Cairn Player's Guide</picture>
 			</complexinstruments>
 			<containers>
 				<name type="string">Containers</name>
@@ -4770,6 +4818,7 @@
 				<type type="string">Gear</type>
 				<cost type="string">10 gp</cost>
 				<description type="formattedtext"><p>Containers (Sack, Waterskin, etc.)</p></description>
+				<picture type="string">images/item/container.webp@Cairn Player's Guide</picture>
 			</containers>
 			<cookinggear>
 				<name type="string">Cooking Gear</name>
@@ -4777,6 +4826,7 @@
 				<type type="string">Gear</type>
 				<cost type="string">10 gp</cost>
 				<description type="formattedtext"><p>Cooking Gear (Pots, Utensils, etc.)</p></description>
+				<picture type="string">images/item/cookinggear.webp@Cairn Player's Guide</picture>
 			</cookinggear>
 			<costumegear>
 				<name type="string">Costume Gear</name>
@@ -4784,12 +4834,14 @@
 				<type type="string">Gear</type>
 				<cost type="string">15 gp</cost>
 				<description type="formattedtext"><p>Costume Gear (Face Paint, Disguise)</p></description>
+				<picture type="string">images/item/costumegear.webp@Cairn Player's Guide</picture>
 			</costumegear>
 			<dowsingrod>
 				<name type="string">Dowsing Rod</name>
 				<type type="string">Gear</type>
 				<cost type="string">15 gp</cost>
 				<description type="formattedtext"><p>Dowsing Rod</p></description>
+				<picture type="string">images/item/dowsingrod.webp@Cairn Player's Guide</picture>
 			</dowsingrod>
 			<expeditionarygear>
 				<name type="string">Expeditionary Gear</name>
@@ -4797,18 +4849,21 @@
 				<type type="string">Gear</type>
 				<cost type="string">10 gp</cost>
 				<description type="formattedtext"><p>Expeditionary Gear (Climbing Spikes, Pulley, etc.)</p></description>
+				<picture type="string">images/item/expeditionarygear.webp@Cairn Player's Guide</picture>
 			</expeditionarygear>
 			<fireoil>
 				<name type="string">Fire Oil</name>
 				<type type="string">Gear</type>
 				<cost type="string">10 gp</cost>
 				<description type="formattedtext"><p>Fire Oil</p></description>
+				<picture type="string">images/item/fireoil.webp@Cairn Player's Guide</picture>
 			</fireoil>
 			<fishingrod>
 				<name type="string">Fishing Rod</name>
 				<type type="string">Gear</type>
 				<cost type="string">10 gp</cost>
 				<description type="formattedtext"><p>Fishing Rod</p></description>
+				<picture type="string">images/item/fishingrod.webp@Cairn Player's Guide</picture>
 			</fishingrod>
 			<games>
 				<name type="string">Games</name>
@@ -4816,6 +4871,7 @@
 				<type type="string">Gear</type>
 				<cost type="string">10 gp</cost>
 				<description type="formattedtext"><p>Games (Cards, Dice, etc.)</p></description>
+				<picture type="string">images/item/game.webp@Cairn Player's Guide</picture>
 			</games>
 			<gloves>
 				<name type="string">Gloves</name>
@@ -4823,30 +4879,35 @@
 				<type type="string">Gear</type>
 				<cost type="string">20 gp</cost>
 				<description type="formattedtext"><p>Gloves (petty)</p><p><i>petty</i></p></description>
+				<picture type="string">images/item/glove.webp@Cairn Player's Guide</picture>
 			</gloves>
 			<grapplinghook>
 				<name type="string">Grappling Hook</name>
 				<type type="string">Gear</type>
 				<cost type="string">25 gp</cost>
 				<description type="formattedtext"><p>Grappling Hook</p></description>
+				<picture type="string">images/item/grapplinghook.webp@Cairn Player's Guide</picture>
 			</grapplinghook>
 			<lantern>
 				<name type="string">Lantern</name>
 				<type type="string">Gear</type>
 				<cost type="string">10 gp</cost>
 				<description type="formattedtext"><p>Lantern</p></description>
+				<picture type="string">images/item/lantern.webp@Cairn Player's Guide</picture>
 			</lantern>
 			<mirror>
 				<name type="string">Mirror</name>
 				<type type="string">Gear</type>
 				<cost type="string">5 gp</cost>
 				<description type="formattedtext"><p>Mirror</p></description>
+				<picture type="string">images/item/mirror.webp@Cairn Player's Guide</picture>
 			</mirror>
 			<net>
 				<name type="string">Net</name>
 				<type type="string">Gear</type>
 				<cost type="string">10 gp</cost>
 				<description type="formattedtext"><p>Net</p></description>
+				<picture type="string">images/item/net.webp@Cairn Player's Guide</picture>
 			</net>
 			<oilcan>
 				<name type="string">Oil Can</name>
@@ -4854,6 +4915,7 @@
 				<type type="string">Gear</type>
 				<cost type="string">10 gp</cost>
 				<description type="formattedtext"><p>Oil Can (6 uses)</p><p><i>6 uses</i></p></description>
+				<picture type="string">images/item/oilcan.webp@Cairn Player's Guide</picture>
 			</oilcan>
 			<outdoorcomfort>
 				<name type="string">Outdoor Comfort</name>
@@ -4861,6 +4923,7 @@
 				<type type="string">Gear</type>
 				<cost type="string">10 gp</cost>
 				<description type="formattedtext"><p>Outdoor Comfort (Blanket, Hammock, etc.)</p></description>
+				<picture type="string">images/item/outdoorcomfort.webp@Cairn Player's Guide</picture>
 			</outdoorcomfort>
 			<parchment>
 				<name type="string">Parchment</name>
@@ -4868,6 +4931,7 @@
 				<type type="string">Gear</type>
 				<cost type="string">10 gp</cost>
 				<description type="formattedtext"><p>Parchment (3 uses)</p><p><i>3 uses</i></p></description>
+				<picture type="string">images/item/parchment.webp@Cairn Player's Guide</picture>
 			</parchment>
 			<pole>
 				<name type="string">Pole</name>
@@ -4875,6 +4939,7 @@
 				<type type="string">Gear</type>
 				<cost type="string">5 gp</cost>
 				<description type="formattedtext"><p>Pole (10ft)</p></description>
+				<picture type="string">images/item/pole.webp@Cairn Player's Guide</picture>
 			</pole>
 			<repellent>
 				<name type="string">Repellent</name>
@@ -4882,6 +4947,7 @@
 				<type type="string">Gear</type>
 				<cost type="string">10 gp</cost>
 				<description type="formattedtext"><p>Repellent (Wolfsbane, Mugwort, etc.)</p></description>
+				<picture type="string">images/item/repellent.webp@Cairn Player's Guide</picture>
 			</repellent>
 			<rope>
 				<name type="string">Rope</name>
@@ -4889,18 +4955,21 @@
 				<type type="string">Gear</type>
 				<cost type="string">5 gp</cost>
 				<description type="formattedtext"><p>Rope (25ft)</p></description>
+				<picture type="string">images/item/rope.webp@Cairn Player's Guide</picture>
 			</rope>
 			<sedative>
 				<name type="string">Sedative</name>
 				<type type="string">Gear</type>
 				<cost type="string">30 gp</cost>
 				<description type="formattedtext"><p>Sedative</p></description>
+				<picture type="string">images/item/sedative.webp@Cairn Player's Guide</picture>
 			</sedative>
 			<sewingkit>
 				<name type="string">Sewing Kit</name>
 				<type type="string">Gear</type>
 				<cost type="string">20 gp</cost>
 				<description type="formattedtext"><p>Sewing Kit</p></description>
+				<picture type="string">images/item/sewingkit.webp@Cairn Player's Guide</picture>
 			</sewingkit>
 			<simpleinstruments>
 				<name type="string">Simple Instruments</name>
@@ -4908,6 +4977,7 @@
 				<type type="string">Gear</type>
 				<cost type="string">10 gp</cost>
 				<description type="formattedtext"><p>Simple Instruments (Pipes, Lute, etc.)</p></description>
+				<picture type="string">images/item/simpleinstrument.webp@Cairn Player's Guide</picture>
 			</simpleinstruments>
 			<smokingpipe>
 				<name type="string">Smoking Pipe</name>
@@ -4915,6 +4985,7 @@
 				<type type="string">Gear</type>
 				<cost type="string">15 gp</cost>
 				<description type="formattedtext"><p>Smoking Pipe (petty)</p><p><i>petty</i></p></description>
+				<picture type="string">images/item/smokingpipe.webp@Cairn Player's Guide</picture>
 			</smokingpipe>
 			<specializedtools>
 				<name type="string">Specialized Tools</name>
@@ -4922,18 +4993,21 @@
 				<type type="string">Gear</type>
 				<cost type="string">20 gp</cost>
 				<description type="formattedtext"><p>Specialized Tools (Ink, etc.)</p></description>
+				<picture type="string">images/item/specializedtool.webp@Cairn Player's Guide</picture>
 			</specializedtools>
 			<spikedboots>
 				<name type="string">Spiked Boots</name>
 				<type type="string">Gear</type>
 				<cost type="string">15 gp</cost>
 				<description type="formattedtext"><p>Spiked Boots</p></description>
+				<picture type="string">images/item/spikedboot.webp@Cairn Player's Guide</picture>
 			</spikedboots>
 			<spyglass>
 				<name type="string">Spyglass</name>
 				<type type="string">Gear</type>
 				<cost type="string">40 gp</cost>
 				<description type="formattedtext"><p>Spyglass</p></description>
+				<picture type="string">images/item/spyglass.webp@Cairn Player's Guide</picture>
 			</spyglass>
 			<tent>
 				<name type="string">Tent</name>
@@ -4942,6 +5016,7 @@
 				<type type="string">Gear</type>
 				<cost type="string">20 gp</cost>
 				<description type="formattedtext"><p>Tent (fits 2, bulky)</p><p><i>bulky</i></p></description>
+				<picture type="string">images/item/tent.webp@Cairn Player's Guide</picture>
 			</tent>
 			<thievingtools>
 				<name type="string">Thieving Tools</name>
@@ -4949,6 +5024,7 @@
 				<type type="string">Gear</type>
 				<cost type="string">25 gp</cost>
 				<description type="formattedtext"><p>Thieving Tools (Lockpick, Metal File, etc.)</p></description>
+				<picture type="string">images/item/thievingtool.webp@Cairn Player's Guide</picture>
 			</thievingtools>
 			<torch>
 				<name type="string">Torch</name>
@@ -4956,6 +5032,7 @@
 				<type type="string">Gear</type>
 				<cost type="string">5 gp</cost>
 				<description type="formattedtext"><p>Torch (3 uses)</p><p><i>3 uses</i></p></description>
+				<picture type="string">images/item/torch.webp@Cairn Player's Guide</picture>
 			</torch>
 			<trap>
 				<name type="string">Trap</name>
@@ -4963,6 +5040,7 @@
 				<type type="string">Gear</type>
 				<cost type="string">35 gp</cost>
 				<description type="formattedtext"><p>Trap (d6 STR damage)</p></description>
+				<picture type="string">images/item/trap.webp@Cairn Player's Guide</picture>
 			</trap>
 			<whistle>
 				<name type="string">Whistle</name>
@@ -4970,6 +5048,7 @@
 				<type type="string">Gear</type>
 				<cost type="string">15 gp</cost>
 				<description type="formattedtext"><p>Whistle (petty)</p><p><i>petty</i></p></description>
+				<picture type="string">images/item/whistle.webp@Cairn Player's Guide</picture>
 			</whistle>
 			<wildernessclothes>
 				<name type="string">Wilderness Clothes</name>
@@ -4977,6 +5056,7 @@
 				<type type="string">Gear</type>
 				<cost type="string">15 gp</cost>
 				<description type="formattedtext"><p>Wilderness Clothes (Poncho, Cloak, etc.) (petty)</p></description>
+				<picture type="string">images/item/wildernessclothe.webp@Cairn Player's Guide</picture>
 			</wildernessclothes>
 		</category>
 		<category name="Hirelings">
@@ -4986,6 +5066,7 @@
 				<cost type="string">30 gp</cost>
 				<perday type="number">1</perday>
 				<description type="formattedtext"><p>A hireling's day: 30 gp. Roll 3d6 for each attribute and 1d6 for HP; give them equipment fit for their station.</p></description>
+				<picture type="string">images/item/alchemist.webp@Cairn Player's Guide</picture>
 			</alchemist>
 			<animalhandler>
 				<name type="string">Animal Handler</name>
@@ -4993,6 +5074,7 @@
 				<cost type="string">5 gp</cost>
 				<perday type="number">1</perday>
 				<description type="formattedtext"><p>A hireling's day: 5 gp. Roll 3d6 for each attribute and 1d6 for HP; give them equipment fit for their station.</p></description>
+				<picture type="string">images/item/animalhandler.webp@Cairn Player's Guide</picture>
 			</animalhandler>
 			<blacksmith>
 				<name type="string">Blacksmith</name>
@@ -5000,6 +5082,7 @@
 				<cost type="string">15 gp</cost>
 				<perday type="number">1</perday>
 				<description type="formattedtext"><p>A hireling's day: 15 gp. Roll 3d6 for each attribute and 1d6 for HP; give them equipment fit for their station.</p></description>
+				<picture type="string">images/item/blacksmith.webp@Cairn Player's Guide</picture>
 			</blacksmith>
 			<bodyguard>
 				<name type="string">Bodyguard</name>
@@ -5007,6 +5090,7 @@
 				<cost type="string">10 gp</cost>
 				<perday type="number">1</perday>
 				<description type="formattedtext"><p>A hireling's day: 10 gp. Roll 3d6 for each attribute and 1d6 for HP; give them equipment fit for their station.</p></description>
+				<picture type="string">images/item/bodyguard.webp@Cairn Player's Guide</picture>
 			</bodyguard>
 			<localguide>
 				<name type="string">Local Guide</name>
@@ -5014,6 +5098,7 @@
 				<cost type="string">5 gp</cost>
 				<perday type="number">1</perday>
 				<description type="formattedtext"><p>A hireling's day: 5 gp. Roll 3d6 for each attribute and 1d6 for HP; give them equipment fit for their station.</p></description>
+				<picture type="string">images/item/localguide.webp@Cairn Player's Guide</picture>
 			</localguide>
 			<lockpick>
 				<name type="string">Lockpick</name>
@@ -5021,6 +5106,7 @@
 				<cost type="string">10 gp</cost>
 				<perday type="number">1</perday>
 				<description type="formattedtext"><p>A hireling's day: 10 gp. Roll 3d6 for each attribute and 1d6 for HP; give them equipment fit for their station.</p></description>
+				<picture type="string">images/item/lockpick.webp@Cairn Player's Guide</picture>
 			</lockpick>
 			<navigator>
 				<name type="string">Navigator</name>
@@ -5028,6 +5114,7 @@
 				<cost type="string">10 gp</cost>
 				<perday type="number">1</perday>
 				<description type="formattedtext"><p>A hireling's day: 10 gp. Roll 3d6 for each attribute and 1d6 for HP; give them equipment fit for their station.</p></description>
+				<picture type="string">images/item/navigator.webp@Cairn Player's Guide</picture>
 			</navigator>
 			<sailor>
 				<name type="string">Sailor</name>
@@ -5035,6 +5122,7 @@
 				<cost type="string">5 gp</cost>
 				<perday type="number">1</perday>
 				<description type="formattedtext"><p>A hireling's day: 5 gp. Roll 3d6 for each attribute and 1d6 for HP; give them equipment fit for their station.</p></description>
+				<picture type="string">images/item/sailor.webp@Cairn Player's Guide</picture>
 			</sailor>
 			<scholar>
 				<name type="string">Scholar</name>
@@ -5042,6 +5130,7 @@
 				<cost type="string">20 gp</cost>
 				<perday type="number">1</perday>
 				<description type="formattedtext"><p>A hireling's day: 20 gp. Roll 3d6 for each attribute and 1d6 for HP; give them equipment fit for their station.</p></description>
+				<picture type="string">images/item/scholar.webp@Cairn Player's Guide</picture>
 			</scholar>
 			<tracker>
 				<name type="string">Tracker</name>
@@ -5049,6 +5138,7 @@
 				<cost type="string">5 gp</cost>
 				<perday type="number">1</perday>
 				<description type="formattedtext"><p>A hireling's day: 5 gp. Roll 3d6 for each attribute and 1d6 for HP; give them equipment fit for their station.</p></description>
+				<picture type="string">images/item/tracker.webp@Cairn Player's Guide</picture>
 			</tracker>
 			<trapper>
 				<name type="string">Trapper</name>
@@ -5056,6 +5146,7 @@
 				<cost type="string">5 gp</cost>
 				<perday type="number">1</perday>
 				<description type="formattedtext"><p>A hireling's day: 5 gp. Roll 3d6 for each attribute and 1d6 for HP; give them equipment fit for their station.</p></description>
+				<picture type="string">images/item/trapper.webp@Cairn Player's Guide</picture>
 			</trapper>
 			<veteranbodyguard>
 				<name type="string">Veteran Bodyguard</name>
@@ -5063,6 +5154,7 @@
 				<cost type="string">20 gp</cost>
 				<perday type="number">1</perday>
 				<description type="formattedtext"><p>A hireling's day: 20 gp. Roll 3d6 for each attribute and 1d6 for HP; give them equipment fit for their station.</p></description>
+				<picture type="string">images/item/veteranbodyguard.webp@Cairn Player's Guide</picture>
 			</veteranbodyguard>
 		</category>
 	</item>

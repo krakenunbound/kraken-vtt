@@ -4,6 +4,11 @@ What changed in each release of Kraken VTT. Downloads are on the
 [Releases](https://github.com/krakenunbound/kraken-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
+## Next
+
+- **A picture for every item.** Every weapon, armour, potion, ring, tool and trinket in the open games' books has its own painting (MiniMax H3 Image), shown on its record and beside it in a character's inventory. One painting is made for each kind of item and every game that has it keeps its own copy inside its own books, so each game's packs still stand alone. The GM's own packs get theirs on the GM's computer (scripts/pack-item-art.mjs), never in the repository.
+- **Map toolbars in the title bar.** A map window's tools sit along its top edge instead of floating over the map.
+
 ## 0.1.0-alpha.92: The GM's walkthrough of Fantasy Grounds
 
 **From the GM's own walkthrough of Fantasy Grounds 5E, screen by screen: what FG does that Kraken lacked, done better where FG is awkward.**

@@ -171,6 +171,49 @@ export function illustrated(spec, artFolder, cover = "", types = ["npc", "pregen
   if (hasCover) pictures[`images/${cover}`] = coverFile;
   return { ...spec, gm: dress(spec.gm), players: dress(spec.players), pictures, ...(hasCover ? { thumbnail: coverFile } : {}) };
 }
+// An item's picture (games/tools/item-art.mjs paints them): the same kind of
+// thing has the same key in every game ("Long sword", "Sword, Long",
+// "Longsword +1" and "Longswords" are one longsword; "(20)" counts and "+N"
+// bonuses are left out), so one painting is made once and each game keeps
+// its own copy in its own art/item folder. Every book carries the pictures
+// of its own items inside itself (images/item/<key>.webp@Book): a book never
+// reads another's, so any game's packs can be removed or added on their own.
+export const itemKey = (name) => {
+  let words = String(name).toLowerCase().replace(/\([^)]*\)/g, " ").replace(/\s*[+-]\d+\s*$/, " ").trim();
+  const parts = words.split(/,\s*/);
+  if (parts.length === 2 && !/\bof\b/.test(parts[0])) words = `${parts[1]} ${parts[0]}`;
+  return words.replace(/[^a-z0-9]+/g, "").replace(/(?<!s)s$/, "");
+};
+// Which game's folder a built book belongs to (its own art folder, games/<game>/art).
+export const GAME_OF_BOOK = [
+  [/^SRD 5\.2\.1/, "srd-5e"],
+  [/^Basic Fantasy|^The Mill at Hob/, "basic-fantasy"],
+  [/^Cairn|^Trouble in Twin Lakes/, "cairn"],
+  [/^Descending Darkness|^The Empty Watchtower/, "descending-darkness"],
+  [/^Apeira Astra|^Salvage Rights|^A Lamp in the Rock/, "apeira-astra"],
+  [/^Forged in the Dark|^Brine Street/, "forged-dark"],
+  [/^Ironsworn|^Starforged/, "ironsworn"],
+  [/^Fate|^Gull/, "fate"],
+];
+export const gameOfBook = (name) => GAME_OF_BOOK.find(([test]) => test.test(String(name)))?.[1] ?? "";
+export function withItemArt(spec, artFolder) {
+  if (!artFolder) return spec;
+  const pictures = { ...(spec.pictures ?? {}) };
+  let added = 0;
+  const dress = (side) =>
+    side && Object.fromEntries(Object.entries(side).map(([type, list]) => [type, type !== "item" || !Array.isArray(list) ? list : list.map((record) => {
+      if (record.picture) return record;
+      const key = itemKey(record.name);
+      const file = path.join(artFolder, "item", `${key}.webp`);
+      if (!key || !fs.existsSync(file)) return record;
+      pictures[`images/item/${key}.webp`] = file;
+      added += 1;
+      return { ...record, picture: `images/item/${key}.webp@${spec.name}` };
+    })]));
+  const dressed = { ...spec, gm: dress(spec.gm), players: dress(spec.players), pictures };
+  return added ? dressed : spec;
+}
+
 // A page with pictures above its text (FG's image blocks, then a text block):
 // files are paths inside the module ("images/npc/grave-hound.webp"), caption
 // under each. Several pictures sit side by side.
