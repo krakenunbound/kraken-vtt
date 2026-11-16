@@ -57,7 +57,7 @@ const sameName = (a, b) => String(a ?? "").toLowerCase() === String(b ?? "").toL
 
 // The formatted texts a record keeps (a story's, a note's, a quest's): only
 // FG's tags, whoever writes them (shared/text/formatted.mjs).
-const FORMATTED_TYPES = new Set(["note", "story", "quest"]);
+const FORMATTED_TYPES = new Set(["note", "story", "quest", "vehicle", "location"]);
 function cleanFormatted(type, data) {
   if (!FORMATTED_TYPES.has(type) || !data || typeof data !== "object") return data;
   if (typeof data.text === "string") data.text = sanitizeFormatted(data.text);

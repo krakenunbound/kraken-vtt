@@ -52,14 +52,22 @@ const LISTS: { id: string; label: string; group: string }[] = [
   { id: "quest", label: "Quests", group: "Campaign" },
   { id: "battle", label: "Encounters", group: "Campaign" },
   { id: "treasureparcel", label: "Parcels", group: "Campaign" },
+  // FG's Vehicles (ships and wagons, starships and tanks) and Locations (places, with what is in them).
+  { id: "vehicle", label: "Vehicles", group: "Campaign" },
+  { id: "location", label: "Locations", group: "World" },
 ];
 // Not lists: what has its own window (characters, the party, notes) or is the game's own setup.
 const NOT_LISTED = new Set(["character", "party", "note", "siegegame", "fatetable"]);
 
 // A new record for a list: its type, and for C&C's Classes and Races the package's kind.
+// A new vehicle or location starts with FG's fields, to fill in.
+const STARTER: Record<string, Record<string, string | number>> = {
+  vehicle: { type: "", size: "", speed: "", ac: 0, hp: 0, damagethreshold: 0, crew: "", passengers: "", cargo: "", cost: "", text: "" },
+  location: { type: "", parent: "", region: "", population: "", ruler: "", text: "" },
+};
 function recordFor(list: string, name: string) {
   const [type, kind] = list.split(":");
-  return { type, name, visibility: "gm" as const, data: kind ? { packagetype: kind[0].toUpperCase() + kind.slice(1) } : {} };
+  return { type, name, visibility: "gm" as const, data: kind ? { packagetype: kind[0].toUpperCase() + kind.slice(1) } : { ...(STARTER[type] ?? {}) } };
 }
 // A record a book's page links to (FG opens it from the book): the campaign's
 // copy when the book is active (its live record), else the book's own.

@@ -403,10 +403,11 @@ export function Desktop({
             { kind: "adventure", payload: "parcel", label: "Parcels", icon: "coins", title: "Parcels", hint: "Every active adventure's treasure parcels" },
             { kind: "adventure", payload: "table", label: "Tables", icon: "table", title: "Tables", hint: "The campaign's random tables and every active adventure's" },
             listEntry("quest", "Quests", "flag"),
+            listEntry("vehicle", "Vehicles", "ship"),
           ]
         : [listEntry("item", "Items", "bag"), listEntry("npc", "NPCs", "skull"), ...sharedLists],
     },
-    ...(gm ? [{ id: "world", label: "World", entries: [{ kind: "adventure" as const, payload: "story", label: "Story", icon: "scroll", title: "Story", hint: "Every active adventure's story entries" }] }] : []),
+    ...(gm ? [{ id: "world", label: "World", entries: [listEntry("location", "Locations", "map"), { kind: "adventure" as const, payload: "story", label: "Story", icon: "scroll", title: "Story", hint: "Every active adventure's story entries" }] }] : []),
     { id: "character", label: "Character", entries: characterLists },
   ];
   const launchers = [...tools, ...groups.flatMap((group) => group.entries)];

@@ -170,6 +170,23 @@ try {
   await page.click(`.record-window[data-record="${hag.id}"] [data-action="record-lock"]`);
   await page.waitForSelector(`.record-window[data-record="${hag.id}"] .read-aloud-frame`);
   assert(await page.isVisible(`.record-window[data-record="${hag.id}"] .formatted-text b`), "locked, it reads: bold and boxed text with its read-aloud button");
+  // 1b. FG's Vehicles (Campaign) and Locations (World): a new one starts with FG's fields to fill in.
+  await page.click('.sidebar [data-launch="records:vehicle"]');
+  await page.fill('[aria-label="New Vehicle name"]', "Supply wagon");
+  await page.click('form:has([aria-label="New Vehicle name"]) [data-action="record-new"]');
+  const wagon = await until(async () => (await records("vehicle")).find((item) => item.name === "Supply wagon"), "the new vehicle");
+  await page.waitForSelector(`[data-record-editor="${wagon.id}"] dl.record-fields dt`);
+  const wagonFields = await page.locator(`[data-record-editor="${wagon.id}"] dl.record-fields dt`).allTextContents();
+  assert(["Speed", "Crew", "Cargo"].every((label) => wagonFields.includes(label)), `a vehicle's fields: ${wagonFields.join(", ")}`);
+  await page.click('.sidebar [data-launch="records:location"]');
+  await page.fill('[aria-label="New Location name"]', "Saltmarsh");
+  await page.click('form:has([aria-label="New Location name"]) [data-action="record-new"]');
+  await until(async () => (await records("location")).some((item) => item.name === "Saltmarsh"), "the new location");
+  await page.screenshot({ path: path.join(shots, "1b-vehicle-location.png") });
+  // Their windows closed again (the sidebar toggles a list), for the steps after.
+  await closeRecords();
+  for (const title of ["Locations", "Vehicles"]) await page.click(`.window[aria-label="${title}"] button[aria-label^="Close"]`);
+  await page.waitForSelector('[aria-label="New Vehicle name"]', { state: "detached" });
 
   // 2. Duplicate and Delete with Undo; Copy to campaign for the bestiary's creature.
   await closeRecords();
