@@ -30,7 +30,7 @@ jobs:
             embeds: [{
               title: ("Maelstrom VTT " + (.name // .tag_name)),
               url: .html_url,
-              description: (((.body // "") | if length > 3800 then .[0:3800] + "…" else . end) + "\n\n**Install:** restart Maelstrom and use the update on the start screen, or download it from the release page."),
+              description: ((.body // "") | if length > 3800 then .[0:3800] + "…" else . end),
               color: 3381196
             }]
           }' > payload.json
