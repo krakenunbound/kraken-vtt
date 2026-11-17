@@ -1,10 +1,9 @@
-import logo from "../assets/kraken-logo-512.webp";
-import mark from "../assets/kraken-mark.webp";
 import maelstrom from "../assets/maelstrom-emblem.webp";
+import mark from "../assets/maelstrom-mark.webp";
 
-// The Kraken logo: on an empty desktop (FG's desktop decal) and the join screen.
+// The Maelstrom logo: on an empty desktop (FG's desktop decal) and the join screen.
 export function Emblem({ className = "emblem" }: { className?: string }) {
-  return <img className={className} src={logo} alt="" draggable={false} />;
+  return <img className={className} src={maelstrom} alt="" draggable={false} />;
 }
 
 // The small mark beside the name in the menu bar.
