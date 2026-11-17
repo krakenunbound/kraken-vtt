@@ -13,11 +13,12 @@ window.KrakenWallArt = (() => {
   // Dungeondraft pack walls, Kraken Map Art walls and paths (roads, rivers, shorelines), and
   // Shockbolt-style wall brushes, are strips meant to repeat.
   const OWN = 'Kraken Map Art';
-  const isPath = a => a?.sourcePack === OWN && /\/Paths$/.test(a.category || '');
+  // Paths: Kraken Map Art's and a Dungeondraft pack's (roads, rivers, carpet runners): drawn along a line, no line of sight.
+  const isPath = a => (a?.sourcePack === OWN && /\/Paths$/.test(a.category || '')) || (a?.sourcePack === 'Dungeondraft' && (a.tags || []).some(t => String(t).toLowerCase() === 'paths'));
   function isWallArt(a) {
     if (!a) return false;
     const tags = (a.tags || []).map(t => String(t).toLowerCase());
-    if (a.sourcePack === 'Dungeondraft') return tags.includes('walls') && !/_end$/i.test(a.name);
+    if (a.sourcePack === 'Dungeondraft') return (tags.includes('walls') && !/_end$/i.test(a.name)) || tags.includes('paths');
     if (a.sourcePack === OWN) return (/\/Walls$/.test(a.category || '') && !/_end$/i.test(a.name)) || isPath(a);
     return /wall/i.test(a.name) && /brush/i.test(a.name);
   }

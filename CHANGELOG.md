@@ -7,6 +7,7 @@ full log of the work is in [PLAN.md](PLAN.md).
 ## Next
 
 - **Map Studio opens big Dungeondraft packs in seconds.** A Forgotten Adventures pack of 9,000 pictures used to stall the editor; it now opens in a few seconds (each picture's size is read from its first bytes, the library is drawn once per pack, and the art list shows its first 600 matches: search or pick a kind to narrow it).
+- **Dungeondraft paths draw along a line** with the Wall tool, as Map Studio's own roads and rivers do: carpet runners, roads and streams from your packs, with no line-of-sight wall.
 - **Agents use your Dungeondraft packs in Map Studio** (`kraken_map_studio` `ddpacks` and `ddpack`), as the editor's Dungeondraft packs list does.
 
 ## 0.1.0-alpha.93: Maelstrom VTT
