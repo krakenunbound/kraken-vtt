@@ -21,7 +21,7 @@ const settle = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const profile = mkdtempSync(path.join(tmpdir(), "kraken-studio-ui-"));
 const env = { ...process.env, KRAKEN_AGENT_FILE: path.join(profile, "agent.json"), KRAKEN_AGENT_PORT: "0", KRAKEN_BOOKS: path.join(profile, "no-fg-modules"), KRAKEN_PACKS: path.join(profile, "packs") };
-// KRAKEN_APP: the built app (release/win-unpacked/Kraken VTT.exe), so Map Studio is checked as it ships.
+// KRAKEN_APP: the built app (release/win-unpacked/Maelstrom VTT.exe), so Map Studio is checked as it ships.
 const app = process.env.KRAKEN_APP
   ? await electron.launch({ executablePath: process.env.KRAKEN_APP, args: ["--mute-audio", `--user-data-dir=${profile}`], env })
   : await electron.launch({ args: [".", "--mute-audio", `--user-data-dir=${profile}`], cwd: process.cwd(), env });

@@ -8,7 +8,7 @@
 //  - downloading is refused while a campaign is hosted, and on the start
 //    screen it fetches the installer and checks it (then "Restart and install"
 //    is offered; this test does not install).
-// KRAKEN_APP: the built app (release/win-unpacked/Kraken VTT.exe).
+// KRAKEN_APP: the built app (release/win-unpacked/Maelstrom VTT.exe).
 import "./loopback.mjs";
 import { spawn } from "node:child_process";
 import { createHash, randomBytes } from "node:crypto";
@@ -30,10 +30,10 @@ const sha512 = createHash("sha512").update(installer).digest("base64");
 const latest = [
   "version: 99.0.0",
   "files:",
-  "  - url: Kraken-VTT-Setup.exe",
+  "  - url: Maelstrom-VTT-Setup.exe",
   `    sha512: ${sha512}`,
   `    size: ${installer.length}`,
-  "path: Kraken-VTT-Setup.exe",
+  "path: Maelstrom-VTT-Setup.exe",
   `sha512: ${sha512}`,
   "releaseDate: '2026-11-14T00:00:00.000Z'",
   "releaseNotes: 'The test release: the updater found it.'",
@@ -47,7 +47,7 @@ const server = createServer((req, res) => {
     res.writeHead(200, { "Content-Type": "text/yaml" });
     return res.end(latest);
   }
-  if (url.pathname.endsWith("/Kraken-VTT-Setup.exe")) {
+  if (url.pathname.endsWith("/Maelstrom-VTT-Setup.exe")) {
     asked.installer += 1;
     res.writeHead(200, { "Content-Type": "application/octet-stream", "Content-Length": installer.length });
     return res.end(installer);

@@ -204,7 +204,7 @@ Six start screens, fantasy, science fiction and horror, one at random each time.
 
 ## Getting started
 
-1. **Install.** From [Releases](https://github.com/krakenunbound/kraken-vtt/releases):
+1. **Install.** From [Releases](https://github.com/krakenunbound/maelstrom-vtt/releases):
    - **Windows:** download `Kraken.VTT.Setup.exe` and run it (it is not
      code-signed: if Windows SmartScreen stops it, choose *More info*, then
      *Run anyway*).
@@ -241,7 +241,7 @@ The full guides:
 You need Windows or Linux, [Node.js](https://nodejs.org) 22 or newer, and Git.
 
 ```
-git clone https://github.com/krakenunbound/kraken-vtt.git
+git clone https://github.com/krakenunbound/maelstrom-vtt.git
 cd kraken-vtt
 npm install
 npm run build

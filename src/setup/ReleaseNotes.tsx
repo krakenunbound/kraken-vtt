@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 
 // What each version brought, read from GitHub's releases (the same ones the
 // updater installs from) and shown here, not in a browser.
-const API = "https://api.github.com/repos/krakenunbound/kraken-vtt/releases?per_page=8";
+const API = "https://api.github.com/repos/krakenunbound/maelstrom-vtt/releases?per_page=8";
 type Release = { tag_name: string; name: string | null; published_at: string; body: string | null; html_url: string };
 
 // The notes' Markdown, the little of it releases use: headings, lists, **bold**, `code`, [links](...) as their words.

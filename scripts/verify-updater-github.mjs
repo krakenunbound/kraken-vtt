@@ -1,5 +1,5 @@
 // Kraken's updater against the real GitHub releases: an older built Kraken
-// (KRAKEN_APP, its app-update.yml naming krakenunbound/kraken-vtt) finds the
+// (KRAKEN_APP, its app-update.yml naming krakenunbound/maelstrom-vtt) finds the
 // newest release on its start screen, downloads its installer and checks it
 // (it does not install). Run after a release is published, with an older
 // build; skipped without one.

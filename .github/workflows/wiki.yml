@@ -1,5 +1,5 @@
 # The user wiki (docs/wiki) built by scripts/build-wiki.mjs and published on GitHub Pages
-# (https://krakenunbound.github.io/kraken-vtt/), whenever its pages change on main.
+# (https://krakenunbound.github.io/maelstrom-vtt/), whenever its pages change on main.
 name: Wiki
 on:
   push:

@@ -2,7 +2,7 @@
 
 **All eleven are fixed in 0.1.0-alpha.58** (see [CHANGELOG.md](CHANGELOG.md)), each checked by `npm run audit` (`scripts/check-audit.mjs`). Two fixes differ from the suggestion here: for 1, damage with no attack since the last damage still lands on every target (Fantasy Grounds' Damage button does the same); for 10, the untrained −3 is the rule and the Crew Handbook says so.
 
-Reviewed on 2026-11-06 against commit [`41617678`](https://github.com/krakenunbound/kraken-vtt/commit/41617678e903a2cc758a67045bb23ada8e85982d) (`main`). This is a reading of the host, combat, the two included games, accounts, and the sheet paths. It is not a live Windows playtest, so installer, multi-monitor, and GPU bugs are out of scope.
+Reviewed on 2026-11-06 against commit [`41617678`](https://github.com/krakenunbound/maelstrom-vtt/commit/41617678e903a2cc758a67045bb23ada8e85982d) (`main`). This is a reading of the host, combat, the two included games, accounts, and the sheet paths. It is not a live Windows playtest, so installer, multi-monitor, and GPU bugs are out of scope.
 
 [`BUGLIST.md`](BUGLIST.md) is the older playtest list. Every item there is marked fixed by alpha.28. This file is the later pass. There were no open GitHub issues at the time of the audit.
 

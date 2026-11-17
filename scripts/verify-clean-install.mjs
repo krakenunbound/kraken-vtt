@@ -4,7 +4,7 @@
 // .kpack files copied in. Each is listed for its campaign's game, made active,
 // read page by page, and an adventure's map goes on the table with its walls.
 //
-//   KRAKEN_APP     the built app to run (release/win-unpacked/Kraken VTT.exe);
+//   KRAKEN_APP     the built app to run (release/win-unpacked/Maelstrom VTT.exe);
 //                  without it, this checkout (after npm run build-packs, so
 //                  its games/packs are newer than games/modules and are read)
 //   KRAKEN_TEST_PACKS  .kpack files to copy in, separated by ";" (else a pack

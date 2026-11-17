@@ -1,7 +1,7 @@
 # Changelog
 
 What changed in each release of Maelstrom VTT (called Kraken VTT until alpha.92). Downloads are on the
-[Releases](https://github.com/krakenunbound/kraken-vtt/releases) page. The
+[Releases](https://github.com/krakenunbound/maelstrom-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
 ## Next
@@ -37,7 +37,7 @@ full log of the work is in [PLAN.md](PLAN.md).
 - **Cards for every game**: potions, scrolls, wands, kits and class features; Cairn's spellbooks and relics; Ironsworn's and Starforged's assets; Fate's aspects and stunts; Forged's special abilities; new pictures for all of them, the spell schools and sci-fi weapons.
 - **Combat options**: initiative rolled every round, stop at the start of each round, creatures' hit points as listed, rolled or maximum. 5E: an Inspiration box.
 - **Map keys**: the GM's Ctrl+A, Ctrl+C / Ctrl+V of tokens; + and - zoom; arrows pan; the number pad moves diagonally.
-- **Help on the start screen**: the quickstart, the new wiki (krakenunbound.github.io/kraken-vtt), game guides, release notes, bug reports and the community.
+- **Help on the start screen**: the quickstart, the new wiki (krakenunbound.github.io/maelstrom-vtt), game guides, release notes, bug reports and the community.
 
 **Rough edges smoothed.**
 

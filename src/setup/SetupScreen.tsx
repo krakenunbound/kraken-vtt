@@ -117,8 +117,8 @@ async function copyText(text: string) {
 
 // Help on the start screen (as FG's launcher has): the wiki's quickstart and pages, the release
 // notes, a bug report and the community, in the system's browser (a player's: a new tab).
-const WIKI = "https://krakenunbound.github.io/kraken-vtt/";
-const REPO = "https://github.com/krakenunbound/kraken-vtt";
+const WIKI = "https://krakenunbound.github.io/maelstrom-vtt/";
+const REPO = "https://github.com/krakenunbound/maelstrom-vtt";
 // Each its own icon and colour (Kraken's ink: violet, ember, sea), none of FG's.
 const HELP_LINKS = [
   { label: "Quickstart guide", href: `${WIKI}quickstart.html`, title: "From a new campaign to the first fight, in ten steps", icon: "play", tone: "sea" },

@@ -12,7 +12,7 @@ const root = path.resolve(process.env.WIKI_ROOT ?? path.join(path.dirname(fileUR
 const source = path.join(root, "docs", "wiki");
 const out = path.resolve(root, process.argv[2] ?? "site");
 const version = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8")).version;
-const REPO = "https://github.com/krakenunbound/kraken-vtt";
+const REPO = "https://github.com/krakenunbound/maelstrom-vtt";
 
 const escape = (text) => String(text).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 const slug = (text) => String(text).toLowerCase().replace(/<[^>]+>/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");

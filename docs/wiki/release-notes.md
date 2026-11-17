@@ -1,6 +1,6 @@
 # Release notes
 
-Maelstrom's releases, with their downloads, are on [GitHub Releases](https://github.com/krakenunbound/kraken-vtt/releases), and the full list of changes is in the [changelog](../../CHANGELOG.md). New builds reach the GM through the start screen's update (see [Installing and updates](installing-and-updates.md)). This page sums up what is coming in the next release.
+Maelstrom's releases, with their downloads, are on [GitHub Releases](https://github.com/krakenunbound/maelstrom-vtt/releases), and the full list of changes is in the [changelog](../../CHANGELOG.md). New builds reach the GM through the start screen's update (see [Installing and updates](installing-and-updates.md)). This page sums up what is coming in the next release.
 
 ## Coming next (unreleased)
 

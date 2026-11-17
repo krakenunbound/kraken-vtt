@@ -4,7 +4,7 @@ Maelstrom runs on the GM's Windows or Linux PC; players install nothing. This pa
 
 ## Windows
 
-1. Download `Kraken.VTT.Setup.exe` from [Releases](https://github.com/krakenunbound/kraken-vtt/releases).
+1. Download `Kraken.VTT.Setup.exe` from [Releases](https://github.com/krakenunbound/maelstrom-vtt/releases).
 2. Run it. Maelstrom is not code-signed, so Windows SmartScreen may stop it: choose **More info**, then **Run anyway**.
 3. The installer adds the Windows firewall rule for the table's port for you.
 
@@ -30,7 +30,7 @@ Maelstrom runs on the GM's Windows or Linux PC; players install nothing. This pa
 You need Windows or Linux, Node.js 22 or newer, and Git.
 
 ```
-git clone https://github.com/krakenunbound/kraken-vtt.git
+git clone https://github.com/krakenunbound/maelstrom-vtt.git
 cd kraken-vtt
 npm install
 npm run build

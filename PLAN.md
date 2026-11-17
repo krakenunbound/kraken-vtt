@@ -2,7 +2,7 @@
 
 A free, source-available virtual tabletop (PolyForm Shield License 1.0.0) that runs in the web browser. It aims for Foundry-level presentation with Fantasy Grounds-level ease of use, and a rules engine that matches FG's behavior.
 
-Status: alpha test (see `package.json` for the version; `npm run bump` moves it on, one step per pushed build, tagged `v<version>`). Backed up at https://github.com/krakenunbound/kraken-vtt (private).
+Status: alpha test (see `package.json` for the version; `npm run bump` moves it on, one step per pushed build, tagged `v<version>`). Backed up at https://github.com/krakenunbound/maelstrom-vtt (private).
 
 ---
 

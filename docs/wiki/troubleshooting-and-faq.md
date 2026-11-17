@@ -73,7 +73,7 @@ Not yet. Maelstrom runs on Windows and Linux (x64).
 
 ## Reporting problems
 
-Open an issue on [GitHub](https://github.com/krakenunbound/kraken-vtt/issues) with:
+Open an issue on [GitHub](https://github.com/krakenunbound/maelstrom-vtt/issues) with:
 
 - what you did, what you expected, and what happened;
 - a screenshot if you can;

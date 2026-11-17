@@ -4,7 +4,7 @@
   "license": "PolyForm-Shield-1.0.0",
   "version": "0.1.0-alpha.92",
   "description": "A free virtual tabletop: the GM hosts, players join from a browser.",
-  "author": "Kraken VTT",
+  "author": "Maelstrom VTT",
   "type": "module",
   "main": "electron/main.cjs",
   "scripts": {
@@ -182,7 +182,7 @@
   },
   "build": {
     "appId": "vtt.kraken",
-    "productName": "Kraken VTT",
+    "productName": "Maelstrom VTT",
     "directories": {
       "output": "release"
     },
@@ -230,7 +230,7 @@
       {
         "provider": "github",
         "owner": "krakenunbound",
-        "repo": "kraken-vtt",
+        "repo": "maelstrom-vtt",
         "releaseType": "prerelease"
       }
     ],
@@ -246,8 +246,8 @@
       "oneClick": true,
       "perMachine": true,
       "include": "build/installer.nsh",
-      "artifactName": "Kraken-VTT-Setup.exe",
-      "shortcutName": "Kraken VTT",
+      "artifactName": "Maelstrom-VTT-Setup.exe",
+      "shortcutName": "Maelstrom VTT",
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "runAfterFinish": true,
@@ -264,18 +264,18 @@
       "synopsis": "A virtual tabletop: the GM hosts, players join from a browser",
       "maintainer": "The Kraken <krakenunbound@users.noreply.github.com>",
       "executableName": "kraken-vtt",
-      "artifactName": "Kraken-VTT-${version}-${arch}.${ext}",
+      "artifactName": "Maelstrom-VTT-${version}-${arch}.${ext}",
       "desktop": {
         "entry": {
-          "Name": "Kraken VTT"
+          "Name": "Maelstrom VTT"
         }
       },
       "syncDesktopName": true
     },
     "deb": {
-      "artifactName": "kraken-vtt_${version}_${arch}.${ext}"
+      "artifactName": "maelstrom-vtt_${version}_${arch}.${ext}"
     }
   },
-  "homepage": "https://github.com/krakenunbound/kraken-vtt",
+  "homepage": "https://github.com/krakenunbound/maelstrom-vtt",
   "desktopName": "kraken-vtt.desktop"
 }
