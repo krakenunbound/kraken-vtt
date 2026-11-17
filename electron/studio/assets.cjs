@@ -133,6 +133,20 @@ async function imageSize(data) {
   return [meta.width, meta.height, meta.format];
 }
 
+// A PNG's or WebP's size from its first 32 bytes, without decoding it (null: another kind, or unsure).
+function headerSize(b) {
+  if (b.length >= 24 && b.readUInt32BE(0) === 0x89504e47 && b.toString("latin1", 12, 16) === "IHDR") return [b.readUInt32BE(16), b.readUInt32BE(20)];
+  if (b.length < 30 || b.toString("latin1", 0, 4) !== "RIFF" || b.toString("latin1", 8, 12) !== "WEBP") return null;
+  const chunk = b.toString("latin1", 12, 16);
+  if (chunk === "VP8 " && b[23] === 0x9d && b[24] === 0x01 && b[25] === 0x2a) return [b.readUInt16LE(26) & 0x3fff, b.readUInt16LE(28) & 0x3fff];
+  if (chunk === "VP8L" && b[20] === 0x2f) {
+    const bits = b.readUInt32LE(21);
+    return [(bits & 0x3fff) + 1, ((bits >> 14) & 0x3fff) + 1];
+  }
+  if (chunk === "VP8X") return [b.readUIntLE(24, 3) + 1, b.readUIntLE(27, 3) + 1];
+  return null;
+}
+
 // Runs fn over items, a few at a time, so a big pack does not decode every picture at once.
 async function eachLimited(items, limit, fn) {
   let next = 0;
@@ -749,6 +763,13 @@ async function registerDdPack(key) {
   const [, assets] = await ddScan().packAssets(key);
   const fresh = assets.filter((a) => !ASSETS.has(a.id));
   await eachLimited(fresh, 6, async (a) => {
+    // Most packs' pictures (PNG, WebP) say their size in their first bytes: a 4,000-picture pack opens in seconds.
+    const quick = a.ddSize >= 32 ? headerSize(await ddPacks.readSlice(a.ddPack, a.ddOffset, 32)) : null;
+    if (quick && quick[0] > 0 && quick[1] > 0) {
+      [a.width, a.height] = quick;
+      a.skip = false;
+      return;
+    }
     // The first 64 KB is enough for a PNG's size; a WebP is read whole when that fails.
     for (const size of [...new Set([Math.min(a.ddSize, 65536), a.ddSize])]) {
       try {

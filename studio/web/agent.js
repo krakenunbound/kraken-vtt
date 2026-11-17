@@ -170,8 +170,7 @@ window.KrakenStudioAgent = (() => {
       }
       const r = await fetch('/api/dd/pack?key=' + encodeURIComponent(key)), data = await r.json();
       if (!r.ok) throw Error(data.error);
-      data.assets.forEach(a => S().addAsset(a));
-      if (data.assets.length) S().showAssets();
+      S().addAssets(data.assets);
       return {key, name, art: data.assets.length, pack: data.assets[0] ? (data.assets[0].sourcePack || sourceOf(data.assets[0])) : null};
     },
     new({name = 'New map', width = 30, height = 20, grid = 100, background = '#1b1a18'}) {

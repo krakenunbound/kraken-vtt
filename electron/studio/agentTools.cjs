@@ -261,6 +261,8 @@ async function run(args, ctx) {
     } else project = JSON.parse(fs.readFileSync(file, "utf8"));
     return out(await page("open", { project: project.project ?? project }));
   }
+  // A big pack (Forgotten Adventures' have 4,000 to 11,000 pictures) takes minutes: each picture's size is read.
+  if (action === "ddpack") return out(await ctx.studio.page(action, rest, 1200000));
   return out(await page(action));
 }
 

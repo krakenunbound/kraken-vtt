@@ -44,7 +44,8 @@ export async function startKraken({ name = "Map Studio tools", ruleset = "Ironsw
   };
   // A tool's answer: its JSON parsed (the first text part), with any picture as .image.
   async function tool(toolName, args = {}) {
-    const result = await rpc("tools/call", { name: toolName, arguments: args });
+    // Opening a big Dungeondraft pack (ddpack) may take minutes.
+    const result = await rpc("tools/call", { name: toolName, arguments: args }, args.action === "ddpack" ? 1260000 : 300000);
     const text = result.content?.find((part) => part.type === "text")?.text ?? "";
     if (result.isError) throw new Error(`${toolName} ${args.action ?? ""}: ${text}`);
     let value;

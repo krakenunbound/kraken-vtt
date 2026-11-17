@@ -575,7 +575,10 @@
         (cat === "All" || L.kindOf(v) === cat) &&
         (v.name+" "+(v.tags||[]).join(" ")).toLowerCase().includes(q),
     ).sort(L.byName);
-    $("#assetStatus").textContent = a.length === assets.length ? `${assets.length} assets available` : `${a.length} of ${assets.length} assets shown`;
+    // A big library (a GM's Dungeondraft packs run to tens of thousands) draws its first few hundred: search or a kind narrows it.
+    const SHOWN = 600, more = a.length > SHOWN;
+    $("#assetStatus").textContent = more ? `${SHOWN} of ${a.length} shown (search or pick a kind to narrow)` : a.length === assets.length ? `${assets.length} assets available` : `${a.length} of ${assets.length} assets shown`;
+    if (more) a = a.slice(0, SHOWN);
     $("#assetGrid").innerHTML = a
       .map(
         (v) =>
@@ -898,6 +901,8 @@
     get asset(){return asset},set asset(value){asset=value},get tool(){return tool},get zoom(){return z},get mode(){return mode},
     snapshot:snap,save:store,draw,fit,point:pt,snap:grid,image:im,toast,active,switchMode,refreshAssets:getAssets,
     addAsset(value){if(!assets.some(a=>a.id===value.id))assets.push(value);showAssets()},
+    // Many at once (a Dungeondraft pack's thousands): one look-up set, one redraw of the library.
+    addAssets(list){const have=new Set(assets.map(a=>a.id));for(const value of list)if(!have.has(value.id)){have.add(value.id);assets.push(value)}showAssets()},
     showAssets,flat,validate:validProject,
     // The map as the editor draws it, at full size (walls, lights, grid as asked), once every picture has loaded.
     async capture(options={}){await loaded();sel=null;look={grid:options.grid!==false,walls:options.walls!==false,regions:options.walls!==false,lighting:!!options.lighting};try{draw();return c.toDataURL("image/png")}finally{look=null;draw()}},

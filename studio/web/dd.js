@@ -32,7 +32,7 @@
     try {
       const r = await fetch('/api/dd/pack?key=' + encodeURIComponent(select.value)), data = await r.json();
       if (!r.ok) throw Error(data.error);
-      data.assets.forEach(a => S.addAsset(a));
+      S.addAssets(data.assets);
       if (data.assets.length) {  // show the pack, keeping the kind of art already picked
         $('#categories').dataset.source = window.KrakenLibrarySort.sourceOf(data.assets[0]);
         S.showAssets();

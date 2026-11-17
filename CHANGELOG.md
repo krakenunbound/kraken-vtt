@@ -4,6 +4,11 @@ What changed in each release of Maelstrom VTT (called Kraken VTT until alpha.92)
 [Releases](https://github.com/krakenunbound/maelstrom-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
+## Next
+
+- **Map Studio opens big Dungeondraft packs in seconds.** A Forgotten Adventures pack of 9,000 pictures used to stall the editor; it now opens in a few seconds (each picture's size is read from its first bytes, the library is drawn once per pack, and the art list shows its first 600 matches: search or pick a kind to narrow it).
+- **Agents use your Dungeondraft packs in Map Studio** (`kraken_map_studio` `ddpacks` and `ddpack`), as the editor's Dungeondraft packs list does.
+
 ## 0.1.0-alpha.93: Maelstrom VTT
 
 **Kraken VTT is now Maelstrom VTT.** Same app, same campaigns, a lasting name. This update installs over Kraken VTT like any other: nothing of yours moves.
