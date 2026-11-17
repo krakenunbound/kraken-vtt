@@ -149,6 +149,31 @@ window.KrakenStudioAgent = (() => {
             ...(window.KrakenWallArt.isWallArt(a) ? {wallArt: true} : {}), ...(window.KrakenWallArt.isPath(a) ? {path: true} : {}), ...(/Floors|Ground|Backgrounds/i.test(a.category || '') ? {tiles: true} : {})};
         })};
     },
+    // The GM's Dungeondraft packs (the "Dungeondraft packs..." list): their names, and one opened into the library.
+    async ddpacks({search = ''}) {
+      let data;
+      for (let wait = 0; wait < 240; wait++) {
+        const r = await fetch('/api/dd/packs'); data = await r.json();
+        if (!r.ok) throw Error(data.error);
+        if (!data.scanning) break;
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+      const q = String(search).toLowerCase();
+      return {folders: data.folders, packs: data.packs.filter(p => p.name.toLowerCase().includes(q)).map(p => ({key: p.key, name: p.name, images: p.images}))};
+    },
+    async ddpack({key = '', name = ''}) {
+      if (!key) {
+        const {packs} = await ACTIONS.ddpacks({});
+        const want = String(name).toLowerCase(), found = packs.find(p => p.name.toLowerCase() === want) || packs.find(p => p.name.toLowerCase().includes(want));
+        if (!want || !found) throw Error(`No Dungeondraft pack named ${name || '(none given)'}: ddpacks lists them.`);
+        key = found.key; name = found.name;
+      }
+      const r = await fetch('/api/dd/pack?key=' + encodeURIComponent(key)), data = await r.json();
+      if (!r.ok) throw Error(data.error);
+      data.assets.forEach(a => S().addAsset(a));
+      if (data.assets.length) S().showAssets();
+      return {key, name, art: data.assets.length, pack: data.assets[0] ? (data.assets[0].sourcePack || sourceOf(data.assets[0])) : null};
+    },
     new({name = 'New map', width = 30, height = 20, grid = 100, background = '#1b1a18'}) {
       const G = Math.round(num(grid, 'grid')), w = Math.round(num(width, 'width') * G), h = Math.round(num(height, 'height') * G);
       window.KrakenShell?.newBlank();

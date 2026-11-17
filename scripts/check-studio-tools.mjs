@@ -5,7 +5,7 @@
 // its layers panel, its canvas) to prove it shows what the tools made, and Save
 // to Kraken is proved in the campaign (kraken_wall, kraken_light).
 // npm run studio-tools
-import { existsSync, mkdtempSync, readFileSync, statSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { createRequire } from "node:module";
@@ -17,6 +17,30 @@ const { ACTIONS } = require("../electron/studio/agentTools.cjs");
 function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
+// A Dungeondraft pack (Godot's .pck) with the given files, as check-studio-server makes one.
+function pck(files) {
+  const header = Buffer.alloc(20 + 64 + 4);
+  header.write("GDPC", 0, "latin1");
+  header.writeUInt32LE(1, 4);
+  header.writeUInt32LE(3, 8);
+  header.writeUInt32LE(2, 12);
+  header.writeUInt32LE(1, 16);
+  header.writeUInt32LE(Object.keys(files).length, 84);
+  let offset = header.length + Object.keys(files).reduce((n, p) => n + 4 + Buffer.byteLength(p) + 32, 0);
+  const table = [];
+  for (const [p, data] of Object.entries(files)) {
+    const name = Buffer.from(p);
+    const row = Buffer.alloc(4 + name.length + 32);
+    row.writeUInt32LE(name.length, 0);
+    name.copy(row, 4);
+    row.writeBigUInt64LE(BigInt(offset), 4 + name.length);
+    row.writeBigUInt64LE(BigInt(data.length), 12 + name.length);
+    table.push(row);
+    offset += data.length;
+  }
+  return Buffer.concat([header, ...table, ...Object.values(files)]);
+}
+
 const out = mkdtempSync(path.join(tmpdir(), "kraken-studio-tools-out-"));
 const done = new Set();
 const report = [];
@@ -34,6 +58,25 @@ try {
   const brazier = (await studio("library", { search: "brazier" })).art.find((a) => a.name === "Brazier");
   assert(brazier && brazier.squares[0] > 0.8 && brazier.squares[0] < 1.2, `library: a brazier is about a square (${brazier?.squares})`);
   report.push(`library: ${all.total} assets, ${Object.keys(all.kinds).length} kinds`);
+
+  // ddpacks, ddpack: the GM's Dungeondraft packs, one opened into the library.
+  const ddFolder = path.join(out, "dd");
+  mkdirSync(ddFolder, { recursive: true });
+  const tile = await sharp({ create: { width: 256, height: 256, channels: 4, background: "#7a5a30" } }).webp().toBuffer();
+  writeFileSync(path.join(ddFolder, "Agent Test.dungeondraft_pack"), pck({
+    "res://packs/agt1/pack.json": Buffer.from('{"name": "Agent Test Pack", "id": "agt1"}'),
+    "res://packs/agt1/textures/objects/crate (1x1).webp": tile,
+    "res://packs/agt1/data/default.dungeondraft_tags": Buffer.from("{}"),
+  }));
+  await k.tool("kraken_studio", { action: "settings", dungeondraftFolders: [ddFolder] });
+  const ddList = await studio("ddpacks", {});
+  const ddEntry = ddList.packs.find((p) => p.name === "Agent Test Pack");
+  assert(ddEntry && ddEntry.images >= 1, `ddpacks lists the pack (${JSON.stringify(ddList).slice(0, 300)})`);
+  const opened = await studio("ddpack", { name: "agent test" });
+  assert(opened.art >= 1 && opened.key === ddEntry.key, `ddpack opens it (${JSON.stringify(opened)})`);
+  const fromPack = await studio("library", { pack: opened.pack, search: "crate" });
+  assert(fromPack.total >= 1 && !fromPack.art[0].shipped, `library finds the pack's art (${JSON.stringify(fromPack).slice(0, 300)})`);
+  report.push(`ddpacks/ddpack: ${opened.name} opened, ${opened.art} picture(s) in the library`);
 
   // new, floor, paint, scatter, place (with its light), wall (art and plain), door, light, ambient, weather, region.
   const made = await studio("new", { name: "Tool Test", width: 12, height: 10, grid: 80 });

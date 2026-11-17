@@ -47,6 +47,16 @@ Dungeondraft packs and Fantasy Grounds art packs are licensed to the GM: use
 them for the GM's own campaign maps only. `check` reports any art outside the
 shipped packs (`art.outside`).
 
+The GM's Dungeondraft packs come into the library one at a time, as in the
+editor's "Dungeondraft packs..." list: `ddpacks` lists them (from the folders
+set with `kraken_studio` `settings`), `ddpack` with a `name` or `key` opens
+one, and `library` with its `pack` then finds its art.
+
+```json
+{"action": "ddpacks", "search": "FA_Assets"}
+{"action": "ddpack", "name": "FA_Assets_B"}
+```
+
 ## The workflow
 
 ### 1. Plan from the text

@@ -12,7 +12,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const ACTIONS = ["library", "new", "generate", "floor", "paint", "scatter", "place", "wall", "door", "light", "ambient", "weather", "region", "update", "remove", "undo", "redo", "map", "check", "render", "save", "projects", "open", "tabs", "grid", "layer", "export", "kraken"];
+const ACTIONS = ["library", "ddpacks", "ddpack", "new", "generate", "floor", "paint", "scatter", "place", "wall", "door", "light", "ambient", "weather", "region", "update", "remove", "undo", "redo", "map", "check", "render", "save", "projects", "open", "tabs", "grid", "layer", "export", "kraken"];
 
 const point = { type: "array", items: { type: "number" }, minItems: 2, maxItems: 2, description: "[x, y] in squares" };
 const points = (description) => ({ type: "array", items: point, description });
@@ -22,6 +22,7 @@ const DESCRIPTION = [
   "Map Studio (Kraken's map maker) for agents: build a battle map with the editor's own tools and its art packs, in the GM's Map Studio window (it opens if closed; the work is in its active tab). Read skills/kraken-map-studio/SKILL.md first. Units: squares (x right, y down from the map's top-left corner; the centre of the square in column 3, row 4 is [3.5, 4.5]); light radii in feet. Needs a hosted campaign.",
   "Actions:",
   "library (search, kind (Floors, Ground, Walls, Doors & windows, Furniture, Lights, Plants, Terrain...), pack, shippedOnly: art with id, name, kind, pack, shipped (Kraken Map Art and Battle Map Forge are the only art for maps that ship publicly), squares (its size on the grid), wallArt, tiles);",
+  "ddpacks (search: the GM's Dungeondraft packs, from the folders in Settings > Map Studio art (kraken_studio settings), with key, name and how many pictures each has); ddpack (key or name: open one into the library, as picking it in the editor's Dungeondraft packs list does; its art is then found with library pack). Dungeondraft packs are the GM's own licensed art: never in a map that ships with Kraken;",
   "new (name, width, height in squares, grid px per square (default 100), background #rrggbb: a blank map in a new tab);",
   "generate (setting, seed, rooms 4-12, composition compact|sprawling, loops, deadEnds, roomFloor, corridorFloor, stairArt (art: always give them, else it falls back on starter-kit names that may be licensed art), doorsOpen, stairs, grid: the dungeon generator, a new map with floors, walls and doors);",
   "floor (art: a floor or ground; rect, polygon or polygons (holes even-odd); feather in squares (soft edge that blends into what is under it); name; room true marks a room for check; layer, default map: tiled from the map's corner, so floors join without seams);",
@@ -54,6 +55,7 @@ const inputSchema = {
     kind: { type: "string", description: "library: kind of art; door: door, secret or window; region: trap, pit, difficult or teleport" },
     pack: { type: "string" },
     shippedOnly: { type: "boolean" },
+    key: { type: "string", description: "ddpack: a Dungeondraft pack's key from ddpacks" },
     limit: { type: "number" },
     name: { type: "string" },
     width: { type: "number", description: "Squares" },
