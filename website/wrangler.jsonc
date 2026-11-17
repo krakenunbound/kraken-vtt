@@ -1,0 +1,10 @@
+// maelstromvtt.com: a static site on Cloudflare Workers. Deploy with `npx wrangler deploy` from this folder.
+{
+  "name": "maelstromvtt-web",
+  "compatibility_date": "2026-08-20",
+  "assets": { "directory": "./public" },
+  "routes": [
+    { "pattern": "maelstromvtt.com", "custom_domain": true },
+    { "pattern": "www.maelstromvtt.com", "custom_domain": true }
+  ]
+}

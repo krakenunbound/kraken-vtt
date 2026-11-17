@@ -6,6 +6,7 @@ full log of the work is in [PLAN.md](PLAN.md).
 
 ## Next
 
+- **A website: [maelstromvtt.com](https://maelstromvtt.com).** What Maelstrom is, the games, screenshots, downloads of the newest release, and links to the Discord and the wiki (the source is in `website/`, deployed to Cloudflare with `npx wrangler deploy`).
 - **A Discord server** for questions, help and finding a table: a Discord button on the start screen, and a link in the wiki's header and the README.
 
 ## 0.1.0-alpha.94: A new emblem

@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maelstrom VTT: a free virtual tabletop</title>
+<meta name="description" content="A free virtual tabletop. The GM runs Maelstrom on a Windows or Linux PC and hosts the table; players join from their browser and install nothing. Ten games included.">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#07090d">
+<meta property="og:title" content="Maelstrom VTT">
+<meta property="og:description" content="A free virtual tabletop. Host from your PC; players join from a browser. Ten games included.">
+<meta property="og:image" content="https://maelstromvtt.com/img/og.jpg">
+<meta property="og:url" content="https://maelstromvtt.com/">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="/style.css">
+<script src="/site.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to the page</a>
+
+<header class="top">
+  <a class="brand" href="/"><img src="/favicon.png" alt="" width="32" height="32"> Maelstrom <span>VTT</span></a>
+  <nav aria-label="Site">
+    <a href="#features">Features</a>
+    <a href="#games">Games</a>
+    <a href="#screenshots">Screenshots</a>
+    <a href="https://krakenunbound.github.io/maelstrom-vtt/">Wiki</a>
+    <a href="https://discord.gg/8jj4v8UdXr">Discord</a>
+    <a class="btn small" href="#download">Download</a>
+  </nav>
+</header>
+
+<main id="main">
+  <section class="hero">
+    <div class="emblem" aria-hidden="true">
+      <svg class="rings" viewBox="0 0 200 200">
+        <defs>
+          <path id="rune-path" d="M100,100 m-86,0 a86,86 0 1,1 172,0 a86,86 0 1,1 -172,0"/>
+          <linearGradient id="ring-gold" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#f3d08d"/><stop offset="0.5" stop-color="#a8783a"/><stop offset="1" stop-color="#f3d08d"/>
+          </linearGradient>
+        </defs>
+        <g class="ring-outer">
+          <circle cx="100" cy="100" r="95" fill="none" stroke="url(#ring-gold)" stroke-width="0.8" stroke-dasharray="1 3.2"/>
+          <text class="runes"><textPath href="#rune-path" textLength="536" lengthAdjust="spacing">ᛗᚨᛖᛚᛋᛏᚱᛟᛗ · ᚹᛁᚱᛏᚢᚨᛚ · ᛏᚨᛒᛚᛖᛏᛟᛈ · ᛗᚨᛖᛚᛋᛏᚱᛟᛗ · ᚹᛁᚱᛏᚢᚨᛚ · ᛏᚨᛒᛚᛖᛏᛟᛈ · </textPath></text>
+        </g>
+        <g class="ring-inner">
+          <circle cx="100" cy="100" r="78" fill="none" stroke="url(#ring-gold)" stroke-width="0.6" opacity="0.7"/>
+          <path d="M100,18 l2.2,4 l-2.2,4 l-2.2,-4 z" fill="#e9c27e" opacity="0.8"/>
+          <path d="M100,18 l2.2,4 l-2.2,4 l-2.2,-4 z" fill="#e9c27e" opacity="0.8" transform="rotate(30 100 100)"/>
+          <path d="M100,18 l2.2,4 l-2.2,4 l-2.2,-4 z" fill="#e9c27e" opacity="0.8" transform="rotate(60 100 100)"/>
+          <path d="M100,18 l2.2,4 l-2.2,4 l-2.2,-4 z" fill="#e9c27e" opacity="0.8" transform="rotate(90 100 100)"/>
+          <path d="M100,18 l2.2,4 l-2.2,4 l-2.2,-4 z" fill="#e9c27e" opacity="0.8" transform="rotate(120 100 100)"/>
+          <path d="M100,18 l2.2,4 l-2.2,4 l-2.2,-4 z" fill="#e9c27e" opacity="0.8" transform="rotate(150 100 100)"/>
+          <path d="M100,18 l2.2,4 l-2.2,4 l-2.2,-4 z" fill="#e9c27e" opacity="0.8" transform="rotate(180 100 100)"/>
+          <path d="M100,18 l2.2,4 l-2.2,4 l-2.2,-4 z" fill="#e9c27e" opacity="0.8" transform="rotate(210 100 100)"/>
+          <path d="M100,18 l2.2,4 l-2.2,4 l-2.2,-4 z" fill="#e9c27e" opacity="0.8" transform="rotate(240 100 100)"/>
+          <path d="M100,18 l2.2,4 l-2.2,4 l-2.2,-4 z" fill="#e9c27e" opacity="0.8" transform="rotate(270 100 100)"/>
+          <path d="M100,18 l2.2,4 l-2.2,4 l-2.2,-4 z" fill="#e9c27e" opacity="0.8" transform="rotate(300 100 100)"/>
+          <path d="M100,18 l2.2,4 l-2.2,4 l-2.2,-4 z" fill="#e9c27e" opacity="0.8" transform="rotate(330 100 100)"/>
+        </g>
+      </svg>
+      <div class="aura"></div>
+      <img class="art" src="/img/emblem.webp" alt="" width="512" height="512" fetchpriority="high">
+      <span class="core"></span>
+    </div>
+    <div class="hero-text">
+      <p class="eyebrow">Free · Windows and Linux · Alpha</p>
+      <h1>Maelstrom <span>VTT</span></h1>
+      <p class="lede">A free virtual tabletop. The GM runs Maelstrom on their own PC and hosts the table. Players join from Chrome and install nothing.</p>
+      <div class="actions">
+        <a class="btn" href="#download">Download</a>
+        <a class="btn ghost" href="https://discord.gg/8jj4v8UdXr">Join the Discord</a>
+      </div>
+      <p class="version" data-version>Latest release on <a href="https://github.com/krakenunbound/maelstrom-vtt/releases">GitHub</a></p>
+    </div>
+  </section>
+
+  <figure class="showcase">
+    <img src="/img/gm-crypt.webp" srcset="/img/gm-crypt-sm.webp 720w, /img/gm-crypt.webp 1600w" sizes="(max-width: 1100px) 100vw, 1100px" alt="The GM's table: a crypt in torchlight with the party, undead foes, a blue lantern and drifting ash" width="1600" height="900">
+    <figcaption>The GM's table: <em>The Empty Watchtower</em>'s crypt in torchlight.</figcaption>
+  </figure>
+
+  <section id="features" class="band">
+    <h2>Everything the table needs</h2>
+    <div class="cards">
+      <article><h3>Host from your PC</h3><p>Create a campaign, press Play and give your players the address. They see only what you let them see: hidden tokens, GM notes and secret doors never reach them.</p></article>
+      <article><h3>Ten games included</h3><p>Each with its rules, a character wizard, its sheet, its books and a first adventure with maps. Nothing else to buy or install.</p></article>
+      <article><h3>Maps that play</h3><p>Square and hex grids, walls and doors, line of sight and fog, lights and darkness, weather, drawing, and animated tokens.</p></article>
+      <article><h3>Map Studio</h3><p>A built-in map maker: paint from art packs, draw walls and doors with art, add lights, weather, traps and regions, then play-test.</p></article>
+      <article><h3>Sheets, combat and dice</h3><p>Character sheets and wizards, a combat tracker that rolls and applies attacks, damage and saves, effects, treasure parcels and 3D dice.</p></article>
+      <article><h3>Your Fantasy Grounds library</h3><p>Own Fantasy Grounds modules? Maelstrom reads them in place: books, story, encounters, NPCs, items, and maps with their walls and lights.</p></article>
+      <article><h3>Sound and atmosphere</h3><p>One-shots, chat-triggered effects, ambience and music, each with its own volume for every player.</p></article>
+      <article><h3>AI-first</h3><p>Every GM action is also a tool for an AI agent, so an assistant can build characters, run combat or set up a map.</p></article>
+    </div>
+  </section>
+
+  <section id="games" class="band alt">
+    <h2>Games you can play today</h2>
+    <ul class="games">
+      <li><strong>Descending Darkness</strong><span>Maelstrom's own dark fantasy on the d20: fragile heroes, light that runs out, dread that builds.</span></li>
+      <li><strong>Apeira Astra</strong><span>Maelstrom's own science fiction on 2d6: crews made in minutes and armour that soaks.</span></li>
+      <li><strong>D&amp;D 5E (SRD 5.2.1)</strong><span>12 classes to level 20, 339 spells, 330 creatures, 258 magic items.</span></li>
+      <li><strong>Basic Fantasy RPG</strong><span>Old-school play: 3d6 in order, five saving throws, turning the undead.</span></li>
+      <li><strong>Cairn</strong><span>Saves under a d20, attacks that always hit, Scars and ten inventory slots.</span></li>
+      <li><strong>Ironsworn and Starforged</strong><span>Vows, moves, momentum and oracles, with or without a GM.</span></li>
+      <li><strong>Fate Core and Accelerated</strong><span>Fate dice on the ladder, aspects and fate points.</span></li>
+      <li><strong>Forged in the Dark</strong><span>d6 pools, position and effect, stress and clocks everyone sees.</span></li>
+    </ul>
+    <p class="note">With your own books it also plays <strong>Castles &amp; Crusades</strong>, <strong>D&amp;D 3.5E</strong>, <strong>AD&amp;D 2E</strong>, <strong>Traveller</strong> and a rules-free Worldbuilding mode for any system.</p>
+  </section>
+
+  <section id="screenshots" class="band">
+    <h2>See it at the table</h2>
+    <div class="gallery">
+      <button type="button" data-full="/img/player-crypt.webp" data-caption="What a player sees, in Chrome: only what their character can see."><img src="/img/player-crypt-sm.webp" alt="A player's view of the crypt in Chrome" loading="lazy" width="720" height="405"></button>
+      <button type="button" data-full="/img/combat.webp" data-caption="Combat: the tracker rolls attacks, damage and saves and applies them."><img src="/img/combat-sm.webp" alt="Combat on the table with the combat tracker" loading="lazy" width="720" height="405"></button>
+      <button type="button" data-full="/img/map-studio.webp" data-caption="Map Studio, Maelstrom's built-in map maker."><img src="/img/map-studio-sm.webp" alt="Map Studio editing a dungeon map" loading="lazy" width="720" height="405"></button>
+      <button type="button" data-full="/img/dice-tower.webp" data-caption="The dice tower and 3D dice."><img src="/img/dice-tower-sm.webp" alt="The dice tower with 3D dice" loading="lazy" width="720" height="405"></button>
+      <button type="button" data-full="/img/sheet-descending.webp" data-caption="A Descending Darkness character sheet."><img src="/img/sheet-descending-sm.webp" alt="A Descending Darkness character sheet" loading="lazy" width="720" height="405"></button>
+      <button type="button" data-full="/img/gm-kestrel.webp" data-caption="Apeira Astra: a starship deck plan on the table."><img src="/img/gm-kestrel-sm.webp" alt="A starship deck plan on the GM's table" loading="lazy" width="720" height="405"></button>
+      <button type="button" data-full="/img/books.webp" data-caption="Books: rules, story and adventures, linked to the table."><img src="/img/books-sm.webp" alt="The books window" loading="lazy" width="720" height="405"></button>
+      <button type="button" data-full="/img/player-read-aloud.webp" data-caption="Read-aloud boxes, shared with the players."><img src="/img/player-read-aloud-sm.webp" alt="A read-aloud box shown to players" loading="lazy" width="720" height="405"></button>
+      <button type="button" data-full="/img/calendar.webp" data-caption="The Calendar, with notes for each game."><img src="/img/calendar-sm.webp" alt="The campaign calendar" loading="lazy" width="720" height="405"></button>
+    </div>
+  </section>
+
+  <section id="download" class="band alt">
+    <h2>Download</h2>
+    <p class="center">Free to use. Maelstrom updates itself from its start screen.</p>
+    <div class="downloads">
+      <a class="dl" data-asset="Setup.exe" href="https://github.com/krakenunbound/maelstrom-vtt/releases"><strong>Windows</strong><span>Installer (.exe)</span></a>
+      <a class="dl" data-asset=".AppImage" href="https://github.com/krakenunbound/maelstrom-vtt/releases"><strong>Linux</strong><span>AppImage, any x64 distribution</span></a>
+      <a class="dl" data-asset=".deb" href="https://github.com/krakenunbound/maelstrom-vtt/releases"><strong>Debian / Ubuntu</strong><span>.deb package</span></a>
+    </div>
+    <p class="note center">The Windows installer isn't code-signed yet: if SmartScreen stops it, choose <em>More info</em>, then <em>Run anyway</em>.</p>
+    <ol class="steps">
+      <li><strong>Make a campaign.</strong> Choose My Campaigns, name it and pick its game.</li>
+      <li><strong>Host.</strong> Choose LAN, Internet or both, set a password if you like, and press Play.</li>
+      <li><strong>Players join.</strong> They open the address in Chrome, type their name and make a character.</li>
+    </ol>
+  </section>
+
+  <section class="band community">
+    <h2>Find a table</h2>
+    <p>Questions, help, screenshots, and GMs and players looking for each other. Anyone can post a game on the server's calendar.</p>
+    <div class="actions center">
+      <a class="btn" href="https://discord.gg/8jj4v8UdXr">Join the Discord</a>
+      <a class="btn ghost" href="https://krakenunbound.github.io/maelstrom-vtt/">Read the wiki</a>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <p><a href="https://github.com/krakenunbound/maelstrom-vtt">Source on GitHub</a> · <a href="https://github.com/krakenunbound/maelstrom-vtt/issues/new">Report a bug</a> · <a href="https://github.com/krakenunbound/maelstrom-vtt/blob/main/CHANGELOG.md">Changelog</a></p>
+  <p>Maelstrom VTT is free to use, under the <a href="https://github.com/krakenunbound/maelstrom-vtt/blob/main/LICENSE">PolyForm Shield License 1.0.0</a>. The open games keep their own licences and credits.</p>
+</footer>
+
+<dialog class="lightbox" closedby="any" aria-label="Screenshot">
+  <form method="dialog"><button class="close" aria-label="Close">×</button></form>
+  <img alt="">
+  <p></p>
+</dialog>
+</body>
+</html>
