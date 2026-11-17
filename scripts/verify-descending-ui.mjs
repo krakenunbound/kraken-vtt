@@ -140,7 +140,7 @@ try {
     map = await tool("kraken_map", {});
   }
   const walls = await tool("kraken_wall", { action: "list" });
-  assert(walls.total > 30, `the yard's walls: ${walls.total}`);
+  assert(walls.total > 10, `the yard's walls (Map Studio's: long wall paths): ${walls.total}`);
   assert((map.doors ?? []).length >= 3, `the yard's doors: ${(map.doors ?? []).length}`);
   await settle(1200);
   await page.screenshot({ path: path.join(tmpdir(), "kraken-descending-map.png") });

@@ -208,12 +208,12 @@ Six start screens, fantasy, science fiction and horror, one at random each time.
 ## Getting started
 
 1. **Install.** From [Releases](https://github.com/krakenunbound/maelstrom-vtt/releases):
-   - **Windows:** download `Kraken.VTT.Setup.exe` and run it (it is not
+   - **Windows:** download `Maelstrom-VTT-Setup.exe` and run it (it is not
      code-signed: if Windows SmartScreen stops it, choose *More info*, then
      *Run anyway*).
    - **Linux (x64):** download the `.AppImage`, make it executable
-     (`chmod +x Kraken-VTT-*.AppImage`) and run it; or on Debian and Ubuntu
-     install the `.deb` (`sudo apt install ./kraken-vtt_*_amd64.deb`). If
+     (`chmod +x Maelstrom-VTT-*.AppImage`) and run it; or on Debian and Ubuntu
+     install the `.deb` (`sudo apt install ./maelstrom-vtt_*_amd64.deb`). If
      your firewall is on, allow the port your table uses (for example
      `sudo ufw allow 47300/tcp`).
 
@@ -223,9 +223,9 @@ Six start screens, fantasy, science fiction and horror, one at random each time.
    Maelstrom with no other content.
 3. **Host.** Choose LAN, Internet or both, set a password if you like, and press
    **Play**. *Addresses to give your players* lists the addresses.
-4. **Players join.** They open the address in Chrome, type their name and a
-   password of their own (Chrome remembers it), plus the table's password if
-   you set one, and make a character.
+4. **Players join.** They open the address in Chrome, or join from the
+   Maelstrom app, type their name and a password of their own, plus the table's
+   password if you set one, and make a character.
 
 The full guides:
 

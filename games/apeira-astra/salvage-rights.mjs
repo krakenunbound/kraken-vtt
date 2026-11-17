@@ -11,8 +11,10 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const DOSSIER = "Apeira Astra Threat Dossier";
 const battle = (name, foes) => ({ name, npclist: ids(foes.map(([creature, count]) => ({ name: creature, count, faction: "foe", isidentified: 1, link: link("npc", `npc.${slug(creature)}@${DOSSIER}`) }))), __category: "Encounters" });
 const story = (name, text) => ({ name, text: md(text), __category: "Salvage Rights" });
+// The maps are Map Studio's (maps/*-studio): walls and doors from their walls.json.
+const MAPS = new Set(["kestrel-deck1", "kestrel-deck2"]);
 const map = (name, file) => {
-  const walls = JSON.parse(fs.readFileSync(path.join(here, "maps", `${file}.walls.json`), "utf8"));
+  const walls = JSON.parse(fs.readFileSync(path.join(here, "maps", `${file}-studio.walls.json`), "utf8"));
   return imageRecord({ name, file: `images/${file}.webp`, width: walls.width, height: walls.height, grid: walls.grid, walls: walls.walls, category: "Maps" });
 };
 
@@ -105,5 +107,5 @@ export const SALVAGE_RIGHTS = {
     image: [map("Kestrel's Due, Deck 1", "kestrel-deck1"), map("Kestrel's Due, Deck 2", "kestrel-deck2"), handout("The Lamp, Tessaly Station", "handout-lamp"), handout("Kestrel's Due, Adrift", "handout-kestrel"), handout("The Cryo Bay", "handout-cryo"), handout("The Reactor", "handout-reactor")],
   },
   thumbnail: path.join(here, "art", "cover-salvage.webp"),
-  pictures: Object.fromEntries(["kestrel-deck1", "kestrel-deck2", "handout-lamp", "handout-kestrel", "handout-cryo", "handout-reactor"].map((file) => [`images/${file}.webp`, path.join(here, "art", `${file}.webp`)])),
+  pictures: Object.fromEntries(["kestrel-deck1", "kestrel-deck2", "handout-lamp", "handout-kestrel", "handout-cryo", "handout-reactor"].map((file) => [`images/${file}.webp`, MAPS.has(file) ? path.join(here, "maps", `${file}-studio.webp`) : path.join(here, "art", `${file}.webp`)])),
 };

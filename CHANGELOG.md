@@ -6,6 +6,8 @@ full log of the work is in [PLAN.md](PLAN.md).
 
 ## Next
 
+- **New maps for The Empty Watchtower and Salvage Rights.** The yard, upper floor and crypt of the Watchtower and both decks of the *Kestrel's Due* are now the Map Studio maps, made from shipped art with their walls and doors (the old hand-drawn pictures are gone from the books).
+- **New screenshots** in the README, the wiki and on maelstromvtt.com, with the Maelstrom name and the new maps.
 - **A website: [maelstromvtt.com](https://maelstromvtt.com).** What Maelstrom is, the games, screenshots, downloads of the newest release, and links to the Discord and the wiki (the source is in `website/`, deployed to Cloudflare with `npx wrangler deploy`).
 - **A Discord server** for questions, help and finding a table: a Discord button on the start screen, and a link in the wiki's header and the README.
 

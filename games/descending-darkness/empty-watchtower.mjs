@@ -18,8 +18,10 @@ const battle = (name, foes, category = "Encounters") => ({
   __category: category,
 });
 const story = (name, text) => ({ name, text: md(text), __category: "The Empty Watchtower" });
+// The maps are Map Studio's (maps/*-studio): walls and doors from their walls.json.
+const MAPS = new Set(["watchtower-yard", "watchtower-upper", "watchtower-crypt"]);
 const map = (name, file) => {
-  const walls = JSON.parse(fs.readFileSync(path.join(here, "maps", `${file}.walls.json`), "utf8"));
+  const walls = JSON.parse(fs.readFileSync(path.join(here, "maps", `${file}-studio.walls.json`), "utf8"));
   return imageRecord({ name, file: `images/${file}.webp`, width: walls.width, height: walls.height, grid: walls.grid, walls: walls.walls, category: "Maps" });
 };
 
@@ -131,5 +133,5 @@ export const EMPTY_WATCHTOWER = {
     image: [map("The Watchtower Yard", "watchtower-yard"), map("The Watchtower Upper Floor", "watchtower-upper"), map("The Crypt of the Watch", "watchtower-crypt"), handout("Hollowmere and the Ridge", "handout-hollowmere"), handout("Aldous's Journal", "handout-journal"), handout("Warden Saranth", "handout-warden")],
   },
   thumbnail: path.join(here, "art", "cover-watchtower.webp"),
-  pictures: Object.fromEntries(["watchtower-yard", "watchtower-upper", "watchtower-crypt", "handout-hollowmere", "handout-journal", "handout-warden"].map((file) => [`images/${file}.webp`, path.join(here, "art", `${file}.webp`)])),
+  pictures: Object.fromEntries(["watchtower-yard", "watchtower-upper", "watchtower-crypt", "handout-hollowmere", "handout-journal", "handout-warden"].map((file) => [`images/${file}.webp`, MAPS.has(file) ? path.join(here, "maps", `${file}-studio.webp`) : path.join(here, "art", `${file}.webp`)])),
 };

@@ -140,17 +140,18 @@ try {
   await tool("kraken_scene_settings", { darkness: 0.75, weather: { type: "ash", intensity: 0.25 } });
   const midC = Math.floor(cols / 2);
   const midR = Math.floor(rows / 2);
-  await tool("kraken_token_place", { recordId: brennaId, col: 6, row: 9 });
-  const tomasToken = await tool("kraken_token_place", { recordId: tomasId, col: 4, row: 8 });
+  // The Map Studio crypt (24 x 18): the party in the hall of tombs, the Warden before his coffin.
+  await tool("kraken_token_place", { recordId: brennaId, col: 11, row: 9 });
+  const tomasToken = await tool("kraken_token_place", { recordId: tomasId, col: 9, row: 8 });
   await tool("kraken_token_update", { id: tomasToken.id ?? tomasToken.token?.id, light: "torch" });
   const sentinel = await npcId("Bone Sentinel");
   const warden = await npcId("Warden Saranth");
-  for (const [recordId, col, row] of [[warden, 15, 6], [sentinel, 10, 7], [sentinel, 12, 8]]) {
+  for (const [recordId, col, row] of [[warden, 19, 11], [sentinel, 14, 9], [sentinel, 15, 8]]) {
     const placed = await tool("kraken_token_place", { recordId, col, row });
     const tokenId = placed.id ?? placed.token?.id;
     if (tokenId) await tool("kraken_token_update", { id: tokenId, hidden: false });
   }
-  await tool("kraken_light", { action: "place", col: 15, row: 5, preset: "lantern", color: "#6fa8ff", animation: "pulse" });
+  await tool("kraken_light", { action: "place", col: 20, row: 13, preset: "lantern", color: "#6fa8ff", animation: "pulse" });
   for (const id of [brennaId, tomasId, warden, sentinel]) await tool("kraken_combat", { action: "add", recordId: id });
   await tool("kraken_combat", { action: "init", which: "all" });
   await tool("kraken_combat", { action: "next" });
@@ -430,8 +431,9 @@ try {
   const dc = Math.floor((deck.width ?? 1400) / (deck.grid ?? 70));
   const dr = Math.floor((deck.height ?? 1050) / (deck.grid ?? 70));
   console.log("deck", dc, dr);
-  await tool("kraken_token_place", { recordId: rookId, col: 4, row: 8 });
-  for (const [name, col, row] of [["Mags Orrin", 13, 7], ["Gull Crewman", 12, 9], ["Salvage Drone", 8, 4]]) {
+  // The Map Studio deck (30 x 18): Rook through the airlock, the claim-jumpers in the cargo hold.
+  await tool("kraken_token_place", { recordId: rookId, col: 5, row: 8 });
+  for (const [name, col, row] of [["Mags Orrin", 14, 9], ["Gull Crewman", 12, 10], ["Salvage Drone", 10, 7]]) {
     const placed = await tool("kraken_token_place", { recordId: await npcId(name), col, row });
     const tokenId = placed.id ?? placed.token?.id;
     if (tokenId) await tool("kraken_token_update", { id: tokenId, hidden: false });

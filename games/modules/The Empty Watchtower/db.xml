@@ -130,7 +130,7 @@
 				<name type="string">The Watchtower Yard</name>
 				<image>
 					<grid type="string">on</grid>
-					<gridsize type="string">70,70</gridsize>
+					<gridsize type="string">100,100</gridsize>
 					<gridoffset type="string">0,0</gridoffset>
 					<layers>
 						<layer>
@@ -143,198 +143,54 @@
 							<occluders>
 								<occluder>
 									<id type="string">0</id>
-									<points type="string">-770,630,-280,630</points>
+									<points type="string">100,-500,-300,-500,-300,600,600,600,600,-500,200,-500</points>
 								</occluder>
 								<occluder>
 									<id type="string">1</id>
-									<points type="string">560,630,770,630</points>
+									<points type="string">100,100,-300,100</points>
 								</occluder>
 								<occluder>
 									<id type="string">2</id>
-									<points type="string">-700,560,-280,560</points>
+									<points type="string">600,100,200,100</points>
 								</occluder>
 								<occluder>
 									<id type="string">3</id>
-									<points type="string">560,560,700,560</points>
+									<points type="string">100,100,100,-200</points>
 								</occluder>
 								<occluder>
 									<id type="string">4</id>
-									<points type="string">-280,490,490,490</points>
+									<points type="string">100,-300,100,-500</points>
 								</occluder>
 								<occluder>
 									<id type="string">5</id>
-									<points type="string">-210,420,420,420</points>
+									<points type="string">100,100,200,100</points>
+									<toggleable type="number">1</toggleable>
 								</occluder>
 								<occluder>
 									<id type="string">6</id>
-									<points type="string">-770,210,-700,210</points>
+									<points type="string">100,-200,100,-300</points>
+									<toggleable type="number">1</toggleable>
 								</occluder>
 								<occluder>
 									<id type="string">7</id>
-									<points type="string">700,210,770,210</points>
+									<points type="string">100,-500,200,-500</points>
+									<toggleable type="number">1</toggleable>
 								</occluder>
 								<occluder>
 									<id type="string">8</id>
-									<points type="string">-210,70,70,70</points>
+									<points type="string">-1050,300,-1050,850,-350,850</points>
 								</occluder>
 								<occluder>
 									<id type="string">9</id>
-									<points type="string">140,70,420,70</points>
+									<points type="string">800,850,1050,850,1050,300</points>
 								</occluder>
 								<occluder>
 									<id type="string">10</id>
-									<points type="string">-770,0,-700,0</points>
+									<points type="string">-1050,0,-1050,-850,-600,-850</points>
 								</occluder>
 								<occluder>
 									<id type="string">11</id>
-									<points type="string">-210,0,420,0</points>
-								</occluder>
-								<occluder>
-									<id type="string">12</id>
-									<points type="string">70,-140,140,-140</points>
-								</occluder>
-								<occluder>
-									<id type="string">13</id>
-									<points type="string">700,-140,770,-140</points>
-								</occluder>
-								<occluder>
-									<id type="string">14</id>
-									<points type="string">70,-210,140,-210</points>
-								</occluder>
-								<occluder>
-									<id type="string">15</id>
-									<points type="string">-210,-350,70,-350</points>
-								</occluder>
-								<occluder>
-									<id type="string">16</id>
-									<points type="string">140,-350,420,-350</points>
-								</occluder>
-								<occluder>
-									<id type="string">17</id>
-									<points type="string">-280,-420,70,-420</points>
-								</occluder>
-								<occluder>
-									<id type="string">18</id>
-									<points type="string">140,-420,490,-420</points>
-								</occluder>
-								<occluder>
-									<id type="string">19</id>
-									<points type="string">-770,-560,-420,-560</points>
-								</occluder>
-								<occluder>
-									<id type="string">20</id>
-									<points type="string">420,-560,700,-560</points>
-								</occluder>
-								<occluder>
-									<id type="string">21</id>
-									<points type="string">-700,-630,-420,-630</points>
-								</occluder>
-								<occluder>
-									<id type="string">22</id>
-									<points type="string">420,-630,770,-630</points>
-								</occluder>
-								<occluder>
-									<id type="string">23</id>
-									<points type="string">-770,630,-770,210</points>
-								</occluder>
-								<occluder>
-									<id type="string">24</id>
-									<points type="string">-770,0,-770,-560</points>
-								</occluder>
-								<occluder>
-									<id type="string">25</id>
-									<points type="string">-700,560,-700,210</points>
-								</occluder>
-								<occluder>
-									<id type="string">26</id>
-									<points type="string">-700,0,-700,-630</points>
-								</occluder>
-								<occluder>
-									<id type="string">27</id>
-									<points type="string">-420,-560,-420,-630</points>
-								</occluder>
-								<occluder>
-									<id type="string">28</id>
-									<points type="string">-280,630,-280,560</points>
-								</occluder>
-								<occluder>
-									<id type="string">29</id>
-									<points type="string">-280,490,-280,-420</points>
-								</occluder>
-								<occluder>
-									<id type="string">30</id>
-									<points type="string">-210,420,-210,70</points>
-								</occluder>
-								<occluder>
-									<id type="string">31</id>
-									<points type="string">-210,0,-210,-350</points>
-								</occluder>
-								<occluder>
-									<id type="string">32</id>
-									<points type="string">70,70,70,-140</points>
-								</occluder>
-								<occluder>
-									<id type="string">33</id>
-									<points type="string">70,-210,70,-420</points>
-								</occluder>
-								<occluder>
-									<id type="string">34</id>
-									<points type="string">140,70,140,-140</points>
-								</occluder>
-								<occluder>
-									<id type="string">35</id>
-									<points type="string">140,-210,140,-420</points>
-								</occluder>
-								<occluder>
-									<id type="string">36</id>
-									<points type="string">420,420,420,70</points>
-								</occluder>
-								<occluder>
-									<id type="string">37</id>
-									<points type="string">420,0,420,-350</points>
-								</occluder>
-								<occluder>
-									<id type="string">38</id>
-									<points type="string">420,-560,420,-630</points>
-								</occluder>
-								<occluder>
-									<id type="string">39</id>
-									<points type="string">490,490,490,-420</points>
-								</occluder>
-								<occluder>
-									<id type="string">40</id>
-									<points type="string">560,630,560,560</points>
-								</occluder>
-								<occluder>
-									<id type="string">41</id>
-									<points type="string">700,560,700,210</points>
-								</occluder>
-								<occluder>
-									<id type="string">42</id>
-									<points type="string">700,-140,700,-560</points>
-								</occluder>
-								<occluder>
-									<id type="string">43</id>
-									<points type="string">770,630,770,210</points>
-								</occluder>
-								<occluder>
-									<id type="string">44</id>
-									<points type="string">770,-140,770,-630</points>
-								</occluder>
-								<occluder>
-									<id type="string">45</id>
-									<points type="string">70,-350,140,-350</points>
-									<toggleable type="number">1</toggleable>
-								</occluder>
-								<occluder>
-									<id type="string">46</id>
-									<points type="string">70,70,140,70</points>
-									<toggleable type="number">1</toggleable>
-								</occluder>
-								<occluder>
-									<id type="string">47</id>
-									<points type="string">70,-140,70,-210</points>
-									<toggleable type="number">1</toggleable>
+									<points type="string">600,-850,1050,-850,1050,-200</points>
 								</occluder>
 							</occluders>
 						</layer>
@@ -345,7 +201,7 @@
 				<name type="string">The Watchtower Upper Floor</name>
 				<image>
 					<grid type="string">on</grid>
-					<gridsize type="string">70,70</gridsize>
+					<gridsize type="string">100,100</gridsize>
 					<gridoffset type="string">0,0</gridoffset>
 					<layers>
 						<layer>
@@ -358,55 +214,15 @@
 							<occluders>
 								<occluder>
 									<id type="string">0</id>
-									<points type="string">-490,350,-70,350</points>
+									<points type="string">100,0,-100,0,-100,-500,-700,-500,-700,500,-100,500,-100,100,100,100</points>
 								</occluder>
 								<occluder>
 									<id type="string">1</id>
-									<points type="string">70,350,490,350</points>
+									<points type="string">100,100,100,500,700,500,700,-500,100,-500,100,0</points>
 								</occluder>
 								<occluder>
 									<id type="string">2</id>
-									<points type="string">0,70,70,70</points>
-								</occluder>
-								<occluder>
-									<id type="string">3</id>
-									<points type="string">0,0,70,0</points>
-								</occluder>
-								<occluder>
-									<id type="string">4</id>
-									<points type="string">-490,-350,-70,-350</points>
-								</occluder>
-								<occluder>
-									<id type="string">5</id>
-									<points type="string">70,-350,490,-350</points>
-								</occluder>
-								<occluder>
-									<id type="string">6</id>
-									<points type="string">-490,350,-490,-350</points>
-								</occluder>
-								<occluder>
-									<id type="string">7</id>
-									<points type="string">-70,350,-70,-350</points>
-								</occluder>
-								<occluder>
-									<id type="string">8</id>
-									<points type="string">0,70,0,0</points>
-								</occluder>
-								<occluder>
-									<id type="string">9</id>
-									<points type="string">70,350,70,70</points>
-								</occluder>
-								<occluder>
-									<id type="string">10</id>
-									<points type="string">70,0,70,-350</points>
-								</occluder>
-								<occluder>
-									<id type="string">11</id>
-									<points type="string">490,350,490,-350</points>
-								</occluder>
-								<occluder>
-									<id type="string">12</id>
-									<points type="string">70,70,70,0</points>
+									<points type="string">100,100,100,0</points>
 									<toggleable type="number">1</toggleable>
 								</occluder>
 							</occluders>
@@ -418,7 +234,7 @@
 				<name type="string">The Crypt of the Watch</name>
 				<image>
 					<grid type="string">on</grid>
-					<gridsize type="string">70,70</gridsize>
+					<gridsize type="string">100,100</gridsize>
 					<gridoffset type="string">0,0</gridoffset>
 					<layers>
 						<layer>
@@ -431,205 +247,89 @@
 							<occluders>
 								<occluder>
 									<id type="string">0</id>
-									<points type="string">-700,490,-420,490</points>
+									<points type="string">-600,-200,-900,-200,-900,300,-1000,300,-1000,700,-600,700,-600,300,-700,300,-700,100,-600,100</points>
 								</occluder>
 								<occluder>
 									<id type="string">1</id>
-									<points type="string">350,350,700,350</points>
+									<points type="string">-500,100,-300,100</points>
 								</occluder>
 								<occluder>
 									<id type="string">2</id>
-									<points type="string">-700,210,-630,210</points>
+									<points type="string">-300,-200,-500,-200</points>
 								</occluder>
 								<occluder>
 									<id type="string">3</id>
-									<points type="string">-490,210,-350,210</points>
+									<points type="string">-200,100,0,100</points>
 								</occluder>
 								<occluder>
 									<id type="string">4</id>
-									<points type="string">-210,210,-140,210</points>
+									<points type="string">0,-200,-200,-200</points>
 								</occluder>
 								<occluder>
 									<id type="string">5</id>
-									<points type="string">0,210,70,210</points>
+									<points type="string">100,100,400,100,400,0,500,0,500,500,1000,500,1000,-600,800,-600</points>
 								</occluder>
 								<occluder>
 									<id type="string">6</id>
-									<points type="string">-490,70,-420,70</points>
+									<points type="string">700,-600,500,-600,500,-100,400,-100,400,-200,100,-200</points>
 								</occluder>
 								<occluder>
 									<id type="string">7</id>
-									<points type="string">-350,70,-210,70</points>
+									<points type="string">-600,100,-600,300,-500,300,-500,100</points>
 								</occluder>
 								<occluder>
 									<id type="string">8</id>
-									<points type="string">-140,70,0,70</points>
+									<points type="string">-500,-200,-500,-400,-600,-400,-600,-200</points>
 								</occluder>
 								<occluder>
 									<id type="string">9</id>
-									<points type="string">70,70,280,70</points>
+									<points type="string">-300,100,-300,300,-200,300,-200,100</points>
 								</occluder>
 								<occluder>
 									<id type="string">10</id>
-									<points type="string">280,0,350,0</points>
+									<points type="string">-200,-200,-200,-400,-300,-400,-300,-200</points>
 								</occluder>
 								<occluder>
 									<id type="string">11</id>
-									<points type="string">280,-70,350,-70</points>
+									<points type="string">0,100,0,300,100,300,100,100</points>
 								</occluder>
 								<occluder>
 									<id type="string">12</id>
-									<points type="string">-630,-140,-420,-140</points>
+									<points type="string">100,-200,100,-400,0,-400,0,-200</points>
 								</occluder>
 								<occluder>
 									<id type="string">13</id>
-									<points type="string">-350,-140,-210,-140</points>
+									<points type="string">800,-600,800,-700,900,-700,900,-800,600,-800,600,-700,700,-700,700,-600</points>
 								</occluder>
 								<occluder>
 									<id type="string">14</id>
-									<points type="string">-140,-140,0,-140</points>
+									<points type="string">500,0,500,-100</points>
+									<toggleable type="number">1</toggleable>
 								</occluder>
 								<occluder>
 									<id type="string">15</id>
-									<points type="string">70,-140,280,-140</points>
+									<points type="string">700,-600,800,-600</points>
+									<toggleable type="number">1</toggleable>
 								</occluder>
 								<occluder>
 									<id type="string">16</id>
-									<points type="string">-420,-280,-350,-280</points>
+									<points type="string">500,400,600,400,600,300,500,300</points>
+									<closed type="number">1</closed>
 								</occluder>
 								<occluder>
 									<id type="string">17</id>
-									<points type="string">-210,-280,-140,-280</points>
+									<points type="string">900,400,1000,400,1000,300,900,300</points>
+									<closed type="number">1</closed>
 								</occluder>
 								<occluder>
 									<id type="string">18</id>
-									<points type="string">0,-280,70,-280</points>
+									<points type="string">500,-400,600,-400,600,-500,500,-500</points>
+									<closed type="number">1</closed>
 								</occluder>
 								<occluder>
 									<id type="string">19</id>
-									<points type="string">350,-420,490,-420</points>
-								</occluder>
-								<occluder>
-									<id type="string">20</id>
-									<points type="string">560,-420,700,-420</points>
-								</occluder>
-								<occluder>
-									<id type="string">21</id>
-									<points type="string">420,-490,490,-490</points>
-								</occluder>
-								<occluder>
-									<id type="string">22</id>
-									<points type="string">560,-490,630,-490</points>
-								</occluder>
-								<occluder>
-									<id type="string">23</id>
-									<points type="string">420,-560,630,-560</points>
-								</occluder>
-								<occluder>
-									<id type="string">24</id>
-									<points type="string">-700,490,-700,210</points>
-								</occluder>
-								<occluder>
-									<id type="string">25</id>
-									<points type="string">-630,210,-630,-140</points>
-								</occluder>
-								<occluder>
-									<id type="string">26</id>
-									<points type="string">-490,210,-490,70</points>
-								</occluder>
-								<occluder>
-									<id type="string">27</id>
-									<points type="string">-420,490,-420,70</points>
-								</occluder>
-								<occluder>
-									<id type="string">28</id>
-									<points type="string">-420,-140,-420,-280</points>
-								</occluder>
-								<occluder>
-									<id type="string">29</id>
-									<points type="string">-350,210,-350,70</points>
-								</occluder>
-								<occluder>
-									<id type="string">30</id>
-									<points type="string">-350,-140,-350,-280</points>
-								</occluder>
-								<occluder>
-									<id type="string">31</id>
-									<points type="string">-210,210,-210,70</points>
-								</occluder>
-								<occluder>
-									<id type="string">32</id>
-									<points type="string">-210,-140,-210,-280</points>
-								</occluder>
-								<occluder>
-									<id type="string">33</id>
-									<points type="string">-140,210,-140,70</points>
-								</occluder>
-								<occluder>
-									<id type="string">34</id>
-									<points type="string">-140,-140,-140,-280</points>
-								</occluder>
-								<occluder>
-									<id type="string">35</id>
-									<points type="string">0,210,0,70</points>
-								</occluder>
-								<occluder>
-									<id type="string">36</id>
-									<points type="string">0,-140,0,-280</points>
-								</occluder>
-								<occluder>
-									<id type="string">37</id>
-									<points type="string">70,210,70,70</points>
-								</occluder>
-								<occluder>
-									<id type="string">38</id>
-									<points type="string">70,-140,70,-280</points>
-								</occluder>
-								<occluder>
-									<id type="string">39</id>
-									<points type="string">280,70,280,0</points>
-								</occluder>
-								<occluder>
-									<id type="string">40</id>
-									<points type="string">280,-70,280,-140</points>
-								</occluder>
-								<occluder>
-									<id type="string">41</id>
-									<points type="string">350,350,350,0</points>
-								</occluder>
-								<occluder>
-									<id type="string">42</id>
-									<points type="string">350,-70,350,-420</points>
-								</occluder>
-								<occluder>
-									<id type="string">43</id>
-									<points type="string">420,-490,420,-560</points>
-								</occluder>
-								<occluder>
-									<id type="string">44</id>
-									<points type="string">490,-420,490,-490</points>
-								</occluder>
-								<occluder>
-									<id type="string">45</id>
-									<points type="string">560,-420,560,-490</points>
-								</occluder>
-								<occluder>
-									<id type="string">46</id>
-									<points type="string">630,-490,630,-560</points>
-								</occluder>
-								<occluder>
-									<id type="string">47</id>
-									<points type="string">700,350,700,-420</points>
-								</occluder>
-								<occluder>
-									<id type="string">48</id>
-									<points type="string">350,0,350,-70</points>
-									<toggleable type="number">1</toggleable>
-								</occluder>
-								<occluder>
-									<id type="string">49</id>
-									<points type="string">490,-420,560,-420</points>
-									<toggleable type="number">1</toggleable>
+									<points type="string">900,-400,1000,-400,1000,-500,900,-500</points>
+									<closed type="number">1</closed>
 								</occluder>
 							</occluders>
 						</layer>

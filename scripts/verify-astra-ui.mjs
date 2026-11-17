@@ -172,7 +172,7 @@ try {
     map = await tool("kraken_map", {});
   }
   const walls = await tool("kraken_wall", { action: "list" });
-  assert(walls.total > 40 && (map.doors ?? []).length >= 8, `deck 1's walls and hatches: ${walls.total}, ${(map.doors ?? []).length}`);
+  assert(walls.total > 8 && (map.doors ?? []).length >= 7, `deck 1's walls and hatches: ${walls.total}, ${(map.doors ?? []).length}`);
   await settle(1200);
   await page.screenshot({ path: path.join(tmpdir(), "kraken-astra-map.png") });
 
