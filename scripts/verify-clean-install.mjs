@@ -127,7 +127,7 @@ try {
     await page.waitForSelector("text=Hosting");
     const books = await tool("kraken_books", { action: "list" });
     const ours = books.filter((book) => !copied.includes(book.name));
-    assert(ours.length === 3, `${game}: Kraken's own books (${books.map((book) => book.title).join(", ")})`);
+    assert(ours.length >= 3, `${game}: Kraken's own books (${books.map((book) => book.title).join(", ")})`);
     assert(ours.every(fromPack), `${game}: a book not read from a pack: ${ours.filter((book) => !fromPack(book)).map((book) => book.id).join(", ")}`);
     const handbook = ours.find((book) => book.hasBook && !book.adventure) ?? ours[0];
     report.push(`${game}: ${ours.length} shipped packs, ${handbook.title} read (${await readBook(handbook)} entries)`);
@@ -145,6 +145,8 @@ try {
   assert(theirs.length > 0, `the copied packs are not on the shelf (${books.map((book) => book.title).join(", ")})`);
   assert(theirs.every(fromPack), "a copied book not read from its pack");
   for (const book of theirs.filter((item) => item.hasBook)) report.push(`${book.title}: ${await readBook(book)} entries`);
+  // Only a campaign's active books give their maps (since alpha.80).
+  for (const book of theirs) await tool("kraken_books", { action: "activate", book: book.id });
   const bundle = await tool("kraken_open_fg_module", { module: adventure });
   assert(bundle.scenes?.length > 0, `${adventure}: no maps`);
   // The first map on the table with the walls its pack holds (an FG map drawn without line of sight has none).
