@@ -1,7 +1,8 @@
 # The players' guide
 
 You need only a web browser on a desktop or laptop computer: Chrome, Edge,
-Brave or Firefox (Safari is untested), or the Maelstrom app. Phones are not
+Brave or Firefox (Safari is untested), or Maelstrom itself on a Windows or Linux
+PC. Phones are not
 supported.
 
 ## Joining a table

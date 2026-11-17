@@ -1,6 +1,6 @@
 # Maelstrom VTT Wiki
 
-Maelstrom VTT is a free virtual tabletop. The game master (GM) runs Maelstrom on a Windows or Linux PC and hosts the table. Players join from their browser (Chrome, Edge, Brave or Firefox) with nothing to install, or from the Maelstrom app. Maelstrom keeps the campaign, decides what each player may see, and serves every player's browser. This wiki explains how to use it, from your first campaign to the tools for experienced GMs.
+Maelstrom VTT is a free virtual tabletop. The game master (GM) runs Maelstrom on a Windows or Linux PC and hosts the table. Players join from their browser (Chrome, Edge, Brave or Firefox) with nothing to install, or from Maelstrom on their own Windows or Linux PC. Maelstrom keeps the campaign, decides what each player may see, and serves every player's browser. This wiki explains how to use it, from your first campaign to the tools for experienced GMs.
 
 ![The GM's table: the crypt of The Empty Watchtower in torchlight](../screenshots/gm-crypt.jpg)
 

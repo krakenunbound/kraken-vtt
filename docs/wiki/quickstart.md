@@ -19,7 +19,7 @@ That is a whole session's loop. Next, read [Maps and scenes](maps-and-scenes.md)
 
 ## For players, in 4 steps
 
-You need Chrome, Edge, Brave or Firefox on a desktop or laptop computer (Safari is untested), or the Maelstrom app. Phones are not supported.
+You need Chrome, Edge, Brave or Firefox on a desktop or laptop computer (Safari is untested), or Maelstrom itself on a Windows or Linux PC. Phones are not supported.
 
 1. **Open the link** your GM sent you, or the address, such as `http://203.0.113.5:47300`.
 2. **Type your name and choose your password.** The first time at a table you choose it. It keeps your seat and your characters yours, and the browser remembers you next time. If the GM gave you a plain address and the table has a password, type that too.
