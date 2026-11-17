@@ -50,7 +50,7 @@ const NPCS = [
   { ...npc("Grey Lanterns Toughs", "The Grey Lanterns", 1, "Three young toughs with knives and lanterns, led by a girl called Wick. A small gang: quality 1, scale 1."), kind: "gang", scale: 1 },
 ];
 const table = (name, group, rows) => ({ name, group, rows: ids(rows), __category: "Tables" });
-const walls = JSON.parse(fs.readFileSync(path.join(here, "maps", "counting-house.walls.json"), "utf8"));
+const walls = JSON.parse(fs.readFileSync(path.join(here, "maps", "counting-house-studio.walls.json"), "utf8"));
 const parcel = (name, coin) => ({ name, coinlist: ids([{ description: "Coin", amount: coin }]), itemlist: ids([]), __category: "Payoff" });
 
 export const BRINE_STREET = illustrated({
@@ -66,6 +66,6 @@ export const BRINE_STREET = illustrated({
     treasureparcels: [parcel("Mother Corvane's Payment", 6), parcel("The Strongbox in the Counting Room", 4)],
     image: [imageRecord({ name: "Brine Street Counting-house", file: "images/brine-street-counting-house.webp", width: walls.width, height: walls.height, grid: walls.grid, walls: walls.walls, category: "Maps" })],
   },
-  pictures: { "images/brine-street-counting-house.webp": path.join(here, "art", "brine-street-counting-house.webp") },
+  pictures: { "images/brine-street-counting-house.webp": path.join(here, "maps", "counting-house-studio.webp") },
 }, path.join(path.dirname(fileURLToPath(import.meta.url)), "art"), "cover-brine-street.webp");
 export const SCORE_COUNTS = () => ({ story: STORY.length, npcs: NPCS.length, factions: FACTIONS.length, clocks: CLOCKS.length });

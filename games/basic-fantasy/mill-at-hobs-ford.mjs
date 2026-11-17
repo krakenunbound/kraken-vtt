@@ -14,8 +14,9 @@ import { MODULE as GM_GUIDE } from "./gm-guide.mjs";
 export const MODULE = "The Mill at Hob's Ford";
 const battle = (name, foes) => ({ name, npclist: ids(foes.map(([creature, count]) => ({ name: creature, count, faction: "foe", isidentified: 1, link: link("npc", `npc.${slug(creature)}@${GM_GUIDE}`) }))), __category: "Encounters" });
 const story = (name, text) => ({ name, text: md(text), __category: MODULE });
+// The maps are Map Studio's (maps/*-studio): walls and doors from their walls.json.
 const map = (name, file) => {
-  const walls = JSON.parse(fs.readFileSync(path.join(here, "maps", `${file}.walls.json`), "utf8"));
+  const walls = JSON.parse(fs.readFileSync(path.join(here, "maps", `${file}-studio.walls.json`), "utf8"));
   return imageRecord({ name, file: `images/${file}.webp`, width: walls.width, height: walls.height, grid: walls.grid, walls: walls.walls, category: "Maps" });
 };
 const parcel = (name, coins, items) => ({ name, coinlist: ids(Object.entries(coins).map(([coin, amount]) => ({ description: coin, amount }))), itemlist: ids(items.map(([item, count]) => ({ name: item, count }))), __category: "Treasure" });
@@ -111,5 +112,5 @@ export const MILL_AT_HOBS_FORD = illustrated({
     treasureparcels: [parcel("Goblin Den Loot", { SP: 140, CP: 300, GP: 12 }, [["Dagger", 1]]), parcel("The Miller's Strongbox", { GP: 60, EP: 20, PP: 2 }, [["Potion of Healing", 1], ["Holy Water, per vial", 1]]), parcel("The Shrine's Altar", {},[["Holy Symbol", 1], ["Holy Water, per vial", 1]])],
     image: [map("The Mill at Hob's Ford", "hobs-ford-mill"), map("The Cellars under the Mill", "hobs-ford-cellars")],
   },
-  pictures: Object.fromEntries(["hobs-ford-mill", "hobs-ford-cellars"].map((file) => [`images/${file}.webp`, path.join(here, "art", `${file}.webp`)])),
+  pictures: Object.fromEntries(["hobs-ford-mill", "hobs-ford-cellars"].map((file) => [`images/${file}.webp`, path.join(here, "maps", `${file}-studio.webp`)])),
 }, path.join(path.dirname(fileURLToPath(import.meta.url)), "art"), "cover-mill-at-hobs-ford.webp");

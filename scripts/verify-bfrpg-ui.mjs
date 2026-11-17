@@ -176,7 +176,7 @@ try {
     map = await tool("kraken_map", {});
   }
   const walls = await tool("kraken_wall", { action: "list" });
-  assert(walls.total >= 15 && (map.doors ?? []).length >= 2, `the mill's walls and doors: ${walls.total}, ${(map.doors ?? []).length}`);
+  assert(walls.total >= 6 && (map.doors ?? []).length >= 2, `the mill's walls and doors: ${walls.total}, ${(map.doors ?? []).length}`);
   await settle(800);
   await page.screenshot({ path: path.join(shots, "map.png") });
 

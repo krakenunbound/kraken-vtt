@@ -75,8 +75,9 @@ const BATTLES = [battle("Night Cats in the Stone Forest", [["Night Cat", 3]]), b
 for (const item of BATTLES) for (const [, foe] of Object.entries(item.npclist)) if (!CREATURES.some((record) => record.name === foe.name)) throw new Error(`${item.name}: no creature ${foe.name} in the adventure.`);
 const parcel = (name, gp, items) => ({ name, coinlist: ids([{ description: "GP", amount: gp }]), itemlist: ids(items.map(([item, count = 1]) => ({ name: item, count }))), __category: "Treasure" });
 const PARCELS = [parcel("Jandy's Satchel (Deadmill)", 23, [["Dagger"], ["Rations"], ["Torch"]]), parcel("Box in the Stove (Fasha's Farm)", 130, [["Tideborn Pendant (25gp)"]]), parcel("The Shine's Belt (White Tower)", 82, [["Chainmail"], ["Torn Silk Rope (42ft)"]]), parcel("Statues of the Antechamber (T1)", 0, [["Temple Statue (50gp)", 3]])];
+// The maps are Map Studio's (maps/*-studio): walls and doors from their walls.json.
 const map = (name, file, walls) => {
-  const data = JSON.parse(fs.readFileSync(path.join(here, "maps", `${walls}.walls.json`), "utf8"));
+  const data = JSON.parse(fs.readFileSync(path.join(here, "maps", `${walls}-studio.walls.json`), "utf8"));
   return imageRecord({ name, file: `images/${file}.webp`, width: data.width, height: data.height, grid: data.grid, walls: data.walls, category: "Maps" });
 };
 
@@ -94,6 +95,6 @@ export const TROUBLE_IN_TWIN_LAKES = illustrated({
     treasureparcels: PARCELS,
     image: [map("Temple of the Fungal Lizards", "temple-of-the-fungal-lizards", "temple"), map("Deadmill", "deadmill", "deadmill")],
   },
-  pictures: Object.fromEntries(["temple-of-the-fungal-lizards", "deadmill"].map((file) => [`images/${file}.webp`, path.join(here, "art", `${file}.webp`)])),
+  pictures: { "images/temple-of-the-fungal-lizards.webp": path.join(here, "maps", "temple-studio.webp"), "images/deadmill.webp": path.join(here, "maps", "deadmill-studio.webp") },
 }, path.join(path.dirname(fileURLToPath(import.meta.url)), "art"), "cover-trouble-in-twin-lakes.webp");
 export const ADVENTURE_COUNTS = () => ({ story: STORY.length, npcs: CREATURES.map((item) => item.name), relics: RELICS.length });

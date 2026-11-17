@@ -138,8 +138,9 @@ const PREGENS = [
   pregen("Corin Gale", "fae", { aspects: CORIN, description: "A smiling sailor with a hidden pocket for everything, who sailed for Mercy Sloane until he could not stomach it.", approaches: { careful: 1, clever: 2, flashy: 1, forceful: 0, quick: 2, sneaky: 3 }, stunts: [["Into the Dark", "Because I Know Every Cove, I get a +2 when I Sneakily overcome obstacles in darkness or fog."], ["Old Friends in Every Port", "Because I have Old Friends in Every Port, once per game session I can find a sailor who owes me a favour."]] }),
 ];
 
+// The maps are Map Studio's (maps/*-studio): walls and doors from their walls.json.
 const map = (name, file) => {
-  const data = JSON.parse(fs.readFileSync(path.join(here, "maps", `${file}.walls.json`), "utf8"));
+  const data = JSON.parse(fs.readFileSync(path.join(here, "maps", `${file}-studio.walls.json`), "utf8"));
   return imageRecord({ name, file: `images/${file}.webp`, width: data.width, height: data.height, grid: data.grid, walls: data.walls, category: "Maps" });
 };
 
@@ -157,6 +158,6 @@ export const GULLS_END = illustrated({
   },
   // The pregenerated characters are the players' (client.xml): the wizard shows them.
   players: { pregencharsheet: PREGENS },
-  pictures: Object.fromEntries(["strand", "lighthouse"].map((file) => [`images/${file}.webp`, path.join(here, "art", `${file}.webp`)])),
+  pictures: Object.fromEntries(["strand", "lighthouse"].map((file) => [`images/${file}.webp`, path.join(here, "maps", `${file}-studio.webp`)])),
 }, path.join(path.dirname(fileURLToPath(import.meta.url)), "art"), "cover-gulls-end.webp");
 export const GULLS_COUNTS = () => ({ story: STORY.length, npcs: NPCS.length, battles: BATTLES.length, pregens: PREGENS.length });

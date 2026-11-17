@@ -10,8 +10,10 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const DOSSIER = "Apeira Astra Threat Dossier";
 const battle = (name, foes) => ({ name, npclist: ids(foes.map(([creature, count, faction = "foe"]) => ({ name: creature, count, faction, isidentified: 1, link: link("npc", `npc.${slug(creature)}@${DOSSIER}`) }))), __category: "Encounters" });
 const story = (name, text) => ({ name, text: md(text), __category: "A Lamp in the Rock" });
+// The maps are Map Studio's (maps/*-studio): walls and doors from their walls.json.
+const MAPS = new Set(["harrow-cut", "harrow-midships"]);
 const map = (name, file) => {
-  const walls = JSON.parse(fs.readFileSync(path.join(here, "maps", `${file}.walls.json`), "utf8"));
+  const walls = JSON.parse(fs.readFileSync(path.join(here, "maps", `${file}-studio.walls.json`), "utf8"));
   return imageRecord({ name, file: `images/${file}.webp`, width: walls.width, height: walls.height, grid: walls.grid, walls: walls.walls, category: "Maps" });
 };
 
@@ -126,5 +128,5 @@ export const LAMP_IN_THE_ROCK = {
     ],
   },
   thumbnail: path.join(here, "art", "cover-lamp.webp"),
-  pictures: Object.fromEntries(PICTURES.map((file) => [`images/${file}.webp`, path.join(here, "art", `${file}.webp`)])),
+  pictures: Object.fromEntries(PICTURES.map((file) => [`images/${file}.webp`, MAPS.has(file) ? path.join(here, "maps", `${file}-studio.webp`) : path.join(here, "art", `${file}.webp`)])),
 };

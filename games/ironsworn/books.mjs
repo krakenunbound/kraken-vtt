@@ -13,8 +13,9 @@ import { assetRecords, clean, datasets, moveRecords, oracleRecords, siteRecords,
 import { ATTRIBUTION, frontPage, GM_PAGES, rulesChapter, UNOFFICIAL } from "./rules-text.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
+// The maps are Map Studio's (maps/*-studio): walls and doors from their walls.json.
 const map = (name, file) => {
-  const walls = JSON.parse(fs.readFileSync(path.join(here, "maps", `${file}.walls.json`), "utf8"));
+  const walls = JSON.parse(fs.readFileSync(path.join(here, "maps", `${file}-studio.walls.json`), "utf8"));
   return imageRecord({ name, file: `images/${file}.webp`, width: walls.width, height: walls.height, grid: walls.grid, walls: walls.walls, category: "Maps" });
 };
 const notice = `${ATTRIBUTION}\n\n${UNOFFICIAL}`;
@@ -134,7 +135,7 @@ He can be fought (End the Fight), or bargained with (Compel, +heart): he wants h
     battle: [battle(BARROW, "Ironsworn Foes and Sites", "Hounds in the Dusk", [["Cinder Hound", 1]]), battle(BARROW, "Ironsworn Foes and Sites", "The Oath-Sworn", [["Barrow Dead", 2]]), battle(BARROW, "Ironsworn Foes and Sites", "The Ash-Crowned Warden", [["The Ash-Crowned Warden", 1], ["Cinder Hound", 2]])],
     image: [map("The Cinder Barrow", "cinder-barrow")],
   },
-  pictures: { "images/cinder-barrow.webp": path.join(here, "art", "cinder-barrow.webp") },
+  pictures: { "images/cinder-barrow.webp": path.join(here, "maps", "cinder-barrow-studio.webp") },
 };
 
 const HULK = "The Silent Hulk";
@@ -169,7 +170,7 @@ Use the **Derelict** oracles (Starforged Reference: Derelict: Zone, Feature, Per
     battle: [battle(HULK, "Starforged Foes", "Pirate Boarding Party", [["Pirate boarding party", 1]])],
     image: [map("The Meridian Vow", "silent-hulk")],
   },
-  pictures: { "images/silent-hulk.webp": path.join(here, "art", "silent-hulk.webp") },
+  pictures: { "images/silent-hulk.webp": path.join(here, "maps", "silent-hulk-studio.webp") },
 };
 
 // --- The GM's books ----------------------------------------------------------------

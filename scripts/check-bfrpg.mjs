@@ -107,7 +107,7 @@ for (const [name, book] of Object.entries(books)) {
 }
 const millMaps = mill.records.filter((record) => record.type === "image");
 const occluders = (record) => [].concat(record.data.image?.layers?.layer ?? []).flatMap((layer) => [].concat(layer?.occluders?.occluder ?? []));
-assert(millMaps.every((record) => occluders(record).length > 10 && occluders(record).some((wall) => wall.toggleable)), `the adventure's maps have their walls and doors: ${millMaps.map((record) => occluders(record).length)}`);
+assert(millMaps.every((record) => occluders(record).length > 5 && occluders(record).some((wall) => wall.toggleable)), `the adventure's maps have their walls and doors: ${millMaps.map((record) => occluders(record).length)}`);
 assert(fs.existsSync("games/basic-fantasy/LICENSE.md") && /what the share-alike covers/i.test(fs.readFileSync("games/basic-fantasy/LICENSE.md", "utf8")), "LICENSE.md: CC BY-SA, what it covers");
 assert(fitsRuleset({ ruleset: "Basic Fantasy" }, "Basic Fantasy") && !fitsRuleset({ ruleset: "Basic Fantasy" }, "AD&D 2E") && !fitsRuleset({ ruleset: "2E" }, "Basic Fantasy") && !fitsRuleset({ kraken: "Basic Fantasy", ruleset: "Basic Fantasy" }, "Worldbuilding"), "Basic Fantasy books on a Basic Fantasy shelf only");
 

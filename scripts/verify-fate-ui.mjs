@@ -200,7 +200,7 @@ try {
   await page.waitForSelector('.window[data-window="map"] .viewport', { timeout: 30000 });
   const walls = await waitFor(async () => {
     const list = await tool("kraken_wall", { action: "list" });
-    return list.total > 10 ? list : null;
+    return list.total > 0 ? list : null;
   }, "the map's walls");
   await settle(800);
   await page.screenshot({ path: path.join(shots, "map.png") });

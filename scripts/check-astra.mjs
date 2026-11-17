@@ -215,9 +215,9 @@ const { default: sharp } = await import("sharp");
 for (const map of LAMP_IN_THE_ROCK.gm.image.filter((image) => image.__category === "Maps")) {
   const layer = map.image.layers.layer[0];
   const occluders = layer.occluders?.occluder ?? [];
-  assert(occluders.length > 10 && occluders.some((wall) => wall.toggleable), `${map.name}: walls and hatches (${occluders.length})`);
+  assert(occluders.length > 5 && occluders.some((wall) => wall.toggleable), `${map.name}: walls and hatches (${occluders.length})`);
   const file = LAMP_IN_THE_ROCK.pictures[layer.bitmap];
-  const walls = JSON.parse(readFileSync(path.join("games", "apeira-astra", "maps", `${path.basename(layer.bitmap, ".webp")}.walls.json`), "utf8"));
+  const walls = JSON.parse(readFileSync(path.join("games", "apeira-astra", "maps", `${path.basename(layer.bitmap, ".webp")}-studio.walls.json`), "utf8"));
   {
     const meta = await sharp(file).metadata();
     assert(meta.width === walls.width && meta.height === walls.height, `${map.name}: the walls fit the picture (${meta.width}x${meta.height} vs ${walls.width}x${walls.height})`);
