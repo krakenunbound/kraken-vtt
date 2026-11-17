@@ -12,6 +12,7 @@
 //   open(edge): true for an edge to the outside (no floor, or a zone with no wall
 //     art) left open: a mouth, a yard gate, a shore.
 // Returns [{ art, closed, points }], each wall line as one path (corners only).
+import { readFileSync } from "node:fs";
 import path from "node:path";
 
 const S = 2; // half squares
@@ -82,10 +83,46 @@ function chains(list) {
   return out;
 }
 
+// A GM's own remake (KRAKEN_STUDIO_ART_MAP: a JSON file on the GM's computer, never in this
+// repository): the same build with other art, such as the GM's Dungeondraft packs.
+//   { "dungeondraftFolders": [...], "packs": ["pack name", ...],
+//     "art": { "shipped art name": { "id": "art id", "scale": 1, "keepWidth": false }, ... } }
+// Each shipped name in the table is swapped for its art: at its own size (times scale), or at
+// the script's width with keepWidth. Names not in the table keep the shipped art.
+const artMapFile = process.env.KRAKEN_STUDIO_ART_MAP;
+const artMap = artMapFile ? JSON.parse(readFileSync(artMapFile, "utf8")) : null;
+function swapArt(args) {
+  if (!artMap || !args || typeof args !== "object") return args;
+  const one = (item) => {
+    const entry = typeof item.art === "string" ? artMap.art[item.art] : null;
+    if (!entry) return item;
+    const out = { ...item, art: entry.id };
+    if (!entry.keepWidth && "at" in out) {
+      delete out.width;
+      delete out.height;
+      out.scale = (item.scale ?? 1) * (entry.scale ?? 1);
+    }
+    return out;
+  };
+  const out = one(args);
+  if (Array.isArray(out.items)) out.items = out.items.map(one);
+  for (const key of ["roomFloor", "corridorFloor", "stairArt"]) if (artMap.art[out[key]]) out[key] = artMap.art[out[key]].id;
+  return out;
+}
+const opened = new WeakSet();
+async function openPacks(k) {
+  if (!artMap || opened.has(k)) return;
+  opened.add(k);
+  if (artMap.dungeondraftFolders) await k.tool("kraken_studio", { action: "settings", dungeondraftFolders: artMap.dungeondraftFolders });
+  await k.studio("new", { name: "Opening packs", width: 4, height: 4 });
+  for (const name of artMap.packs ?? []) await k.studio("ddpack", { name });
+}
+
 // A build step with its label in any error.
 export const stepper = (k) => async (label, action, args) => {
   try {
-    return await k.studio(action, args);
+    await openPacks(k);
+    return await k.studio(action, swapArt(args));
   } catch (error) {
     throw new Error(`${label}: ${error.message}`);
   }
@@ -97,7 +134,8 @@ export const stepper = (k) => async (label, action, args) => {
 export async function finish(step, { name, out, renders, plays = [] }) {
   const check = await step("check", "check", {});
   console.log("check:", JSON.stringify(check, null, 1));
-  if (check.art?.outside?.length) throw new Error(`art outside the shipped packs: ${check.art.outside.join(", ")}`);
+  if (artMap && path.resolve(out).startsWith(path.resolve("games"))) throw new Error("A remake with the GM's own art never goes into games/: give an out folder outside the repository.");
+  if (check.art?.outside?.length && !artMap) throw new Error(`art outside the shipped packs: ${check.art.outside.join(", ")}`);
   const views = [["picture", {}], ["editor", { lighting: true }], ...plays.map((p) => ["play", { token: p.token, light: p.light ?? "none", vision: p.vision ?? "normal", file: path.join(renders, `play-${p.name}.png`) }])];
   for (const [view, extra] of views) {
     const made = await step(`render ${view}`, "render", { view, file: extra.file ?? path.join(renders, `${view}.png`), ...extra });
