@@ -1,5 +1,6 @@
 import logo from "../assets/kraken-logo-512.webp";
 import mark from "../assets/kraken-mark.webp";
+import maelstrom from "../assets/maelstrom-emblem.webp";
 
 // The Kraken logo: on an empty desktop (FG's desktop decal) and the join screen.
 export function Emblem({ className = "emblem" }: { className?: string }) {
@@ -14,8 +15,8 @@ export function Mark({ className = "brand-mark" }: { className?: string }) {
 // Runes for the ring: the Elder Futhark, read as KRAKEN VIRTUAL TABLETOP.
 const RUNES = "ᚲᚱᚨᚲᛖᚾ · ᚹᛁᚱᛏᚢᚨᛚ · ᛏᚨᛒᛚᛖᛏᛟᛈ · ";
 
-// The logo come to life, for the front screens: it floats on the swell, its
-// light breathes, its eyes glow, and two rings of runes turn around it.
+// The logo come to life, for the front screens: the clockwork die floats on the
+// swell, its light breathes, its core glows, and two rings of runes turn around it.
 export function LivingEmblem({ size = 260 }: { size?: number }) {
   return (
     <div className="living-emblem" style={{ width: size, height: size }} aria-hidden="true">
@@ -42,9 +43,8 @@ export function LivingEmblem({ size = 260 }: { size?: number }) {
         </g>
       </svg>
       <div className="emblem-aura" />
-      <img className="emblem-art" src={logo} alt="" draggable={false} />
-      <span className="emblem-eye left" />
-      <span className="emblem-eye right" />
+      <img className="emblem-art" src={maelstrom} alt="" draggable={false} />
+      <span className="emblem-core" />
     </div>
   );
 }

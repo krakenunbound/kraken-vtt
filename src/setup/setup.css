@@ -236,9 +236,9 @@
 .ring-runes { font-family: "Segoe UI Historic", "Noto Sans Runic", "Segoe UI Symbol", serif; font-size: 8px; fill: #e9c788; opacity: 0.8; }
 .emblem-aura {
   position: absolute;
-  inset: 12%;
+  inset: 10%;
   border-radius: 50%;
-  background: radial-gradient(circle at 38% 38%, rgba(150, 90, 220, 0.55), transparent 55%), radial-gradient(circle at 64% 36%, rgba(255, 150, 60, 0.5), transparent 55%), radial-gradient(circle at 50% 66%, rgba(60, 210, 200, 0.55), transparent 60%);
+  background: radial-gradient(circle at 30% 40%, rgba(60, 200, 255, 0.55), transparent 55%), radial-gradient(circle at 70% 60%, rgba(60, 200, 255, 0.5), transparent 55%), radial-gradient(circle at 50% 50%, rgba(255, 190, 90, 0.45), transparent 65%);
   filter: blur(16px);
   animation: aura 6s ease-in-out infinite;
 }
@@ -247,24 +247,20 @@
   inset: 13%;
   width: 74%;
   height: 74%;
-  mix-blend-mode: screen;
-  -webkit-mask: radial-gradient(circle, #000 56%, transparent 70%);
-  mask: radial-gradient(circle, #000 56%, transparent 70%);
-  filter: saturate(1.15) contrast(1.05);
 }
-.emblem-eye {
+/* The light in the die's heart: it brightens and swells now and then, as the kraken's eyes did. */
+.emblem-core {
   position: absolute;
-  top: 43.6%;
-  width: 7%;
+  top: 50.4%;
+  left: 50.1%;
+  width: 12%;
   aspect-ratio: 1;
   transform: translate(-50%, -50%);
   border-radius: 50%;
   mix-blend-mode: screen;
-  background: radial-gradient(circle, rgba(240, 255, 255, 0.95), rgba(120, 235, 255, 0.5) 35%, transparent 70%);
+  background: radial-gradient(circle, rgba(255, 250, 220, 0.95), rgba(255, 200, 90, 0.55) 35%, transparent 70%);
   animation: eyes 7s ease-in-out infinite;
 }
-.emblem-eye.left { left: 45.3%; }
-.emblem-eye.right { left: 54.8%; }
 @keyframes spin { to { rotate: 360deg; } }
 @keyframes emblem-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
 @keyframes aura { 0%, 100% { opacity: 0.55; transform: scale(0.95); } 50% { opacity: 0.95; transform: scale(1.06); } }
