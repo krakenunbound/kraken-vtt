@@ -4,6 +4,10 @@ What changed in each release of Maelstrom VTT (called Kraken VTT until alpha.92)
 [Releases](https://github.com/krakenunbound/maelstrom-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
+## Next
+
+- **Firefox and Brave work for players**, tested: joining, the map, the 3D dice and chat from Firefox, and the player tests run in Brave. The guides now list Chrome, Edge, Brave and Firefox (Safari is untested).
+
 ## 0.1.0-alpha.95: New maps and a home on the web
 
 - **New maps for every included adventure.** The Empty Watchtower, Salvage Rights, A Lamp in the Rock, The Mill at Hob's Ford, Trouble in Twin Lakes, The Lighthouse at Gull's End, The Brine Street Job, The Cinder Barrow and The Silent Hulk now open Map Studio's maps, made from Maelstrom's own art with their walls and doors.

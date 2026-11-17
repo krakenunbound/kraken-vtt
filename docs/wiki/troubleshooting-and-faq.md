@@ -20,7 +20,7 @@ In the Players window, set a new password for their account, or remove the accou
 
 ## Which browsers work?
 
-Chrome, or another Chromium browser such as Edge, on a desktop or laptop computer. Phones are not supported yet.
+Chrome, Edge, Brave or Firefox on a desktop or laptop computer (Safari is untested), or the Maelstrom app. Phones are not supported yet.
 
 ## Windows says the installer is unsafe
 

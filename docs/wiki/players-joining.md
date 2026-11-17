@@ -1,6 +1,6 @@
 # Joining a table (players)
 
-This page is for players. You need only a web browser: Chrome, or another Chromium browser such as Edge, on a desktop or laptop computer. Phones are not supported. You install nothing; your GM's copy of Maelstrom serves the whole table.
+This page is for players. You need only a web browser on a desktop or laptop computer: Chrome, Edge, Brave or Firefox (Safari is untested), or the Maelstrom app. Phones are not supported. You install nothing; your GM's copy of Maelstrom serves the whole table.
 
 ![A player's view in Chrome](../screenshots/player-crypt.jpg)
 
