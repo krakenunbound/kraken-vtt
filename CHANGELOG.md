@@ -4,8 +4,11 @@ What changed in each release of Maelstrom VTT (called Kraken VTT until alpha.92)
 [Releases](https://github.com/krakenunbound/maelstrom-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
-## Next
+## 0.1.0-alpha.93: Maelstrom VTT
 
+**Kraken VTT is now Maelstrom VTT.** Same app, same campaigns, a lasting name. This update installs over Kraken VTT like any other: nothing of yours moves.
+
+- **The new name** everywhere you read it: the window, the start screen and title bar, the installer and shortcut, the wiki (now at https://krakenunbound.github.io/maelstrom-vtt/) and the source on GitHub (krakenunbound/maelstrom-vtt; the old address forwards). Your folders keep their old names for now (`Documents/Kraken VTT`, the app data folder).
 - **A picture for every item.** Every weapon, armour, potion, ring, tool and trinket in the open games' books has its own painting (MiniMax H3 Image), shown on its record and beside it in a character's inventory. One painting is made for each kind of item and every game that has it keeps its own copy inside its own books, so each game's packs still stand alone. The GM's own packs get theirs on the GM's computer (scripts/pack-item-art.mjs), never in the repository.
 - **Map toolbars in the title bar.** A map window's tools sit along its top edge instead of floating over the map.
 
