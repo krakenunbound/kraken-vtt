@@ -119,9 +119,10 @@ try {
   await page.waitForSelector(".help-links .help-link");
   const help = await page.$$eval(".help-links .help-link", (links) => links.map((link) => [link.textContent.trim(), link.getAttribute("href"), link.getAttribute("target")]));
   const web = help.filter(([label]) => label !== "Release notes");
-  assert(help.length === 7 && web.length === 6 && web.every(([, href, target]) => /^https:\/\//.test(href) && target === "_blank"), `seven help links, six to the web: ${JSON.stringify(help)}`);
+  assert(help.length === 8 && web.length === 7 && web.every(([, href, target]) => /^https:\/\//.test(href) && target === "_blank"), `eight help links, seven to the web: ${JSON.stringify(help)}`);
+  assert(help.some(([label, href]) => label === "Discord" && /^https:\/\/discord\.gg\//.test(href)), "Discord goes to the server's invite");
   assert(help.some(([label, href]) => /quickstart/i.test(label) && /quickstart\.html$/.test(href)) && help.some(([label, href]) => label === "Tutorials" && /tutorials\.html$/.test(href)), "Quickstart and Tutorials go where they say");
-  assert((await page.$$(".help-link .help-icon svg")).length === 7, "an icon on each");
+  assert((await page.$$(".help-link .help-icon svg")).length === 8, "an icon on each");
   await shoot("start-help-links");
   // Release notes open here, read from GitHub's releases (offline: a line saying so, with the link).
   await page.click('[data-help-link="Release notes"]');
@@ -129,7 +130,7 @@ try {
   await shoot("start-release-notes");
   await page.keyboard.press("Escape");
   await page.waitForSelector('dialog[data-dialog="release-notes"][open]', { state: "detached", timeout: 5000 }).catch(async () => assert(!(await page.$('dialog[data-dialog="release-notes"][open]')), "the notes close with Esc"));
-  results.push("start screen: seven help links with icons (quickstart, tutorials, wiki, game guides, release notes read here, report a bug, community)");
+  results.push("start screen: eight help links with icons (quickstart, tutorials, wiki, game guides, release notes read here, report a bug, community, Discord)");
 
   // The start screen's menu: Rename.
   await page.reload();

@@ -7,7 +7,8 @@ of use, and a built-in AI agent that can do anything the GM can.
 
 > **Alpha test.** Maelstrom is in alpha (see the version in the app's title bar).
 > Expect rough edges, and please report what you find (see
-> [Reporting problems](#reporting-problems)).
+> [Reporting problems](#reporting-problems)). Questions, help and tables looking
+> for players: the [Maelstrom VTT Discord](https://discord.gg/8jj4v8UdXr).
 
 ![The start screen](docs/screenshots/start-keep.jpg)
 

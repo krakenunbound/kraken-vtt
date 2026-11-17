@@ -116,9 +116,10 @@ async function copyText(text: string) {
 }
 
 // Help on the start screen (as FG's launcher has): the wiki's quickstart and pages, the release
-// notes, a bug report and the community, in the system's browser (a player's: a new tab).
+// notes, a bug report, the community and the Discord server, in the system's browser (a player's: a new tab).
 const WIKI = "https://krakenunbound.github.io/maelstrom-vtt/";
 const REPO = "https://github.com/krakenunbound/maelstrom-vtt";
+const DISCORD = "https://discord.gg/8jj4v8UdXr";
 // Each its own icon and colour (Kraken's ink: violet, ember, sea), none of FG's.
 const HELP_LINKS = [
   { label: "Quickstart guide", href: `${WIKI}quickstart.html`, title: "From a new campaign to the first fight, in ten steps", icon: "play", tone: "sea" },
@@ -128,6 +129,7 @@ const HELP_LINKS = [
   { label: "Release notes", href: `${REPO}/releases`, title: "What each version brought, read here", icon: "bell", tone: "violet", notes: true },
   { label: "Report a bug", href: `${REPO}/issues/new`, title: "Tell us what went wrong (a GitHub account is needed)", icon: "warning", tone: "ember" },
   { label: "Community", href: `${REPO}/discussions`, title: "Questions, ideas and tables looking for players", icon: "players", tone: "sea" },
+  { label: "Discord", href: DISCORD, title: "Chat with other GMs and players, get help, find a table", icon: "chat", tone: "violet" },
 ];
 function HelpLinks() {
   const [notes, setNotes] = useState(false);

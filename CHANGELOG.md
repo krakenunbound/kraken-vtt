@@ -4,6 +4,10 @@ What changed in each release of Maelstrom VTT (called Kraken VTT until alpha.92)
 [Releases](https://github.com/krakenunbound/maelstrom-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
+## Next
+
+- **A Discord server** for questions, help and finding a table: a Discord button on the start screen, and a link in the wiki's header and the README.
+
 ## 0.1.0-alpha.94: A new emblem
 
 - **A new emblem on the start screens:** a clockwork die in a ring of brass gears and blue light, inside the same turning rune rings, with a glowing heart in place of the kraken's eyes. The same die is the menu bar's mark, the logo on an empty table, the browser tab's icon and the app's icon.
